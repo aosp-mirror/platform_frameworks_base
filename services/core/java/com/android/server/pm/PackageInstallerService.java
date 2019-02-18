@@ -130,6 +130,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
 
     private final Context mContext;
     private final PackageManagerService mPm;
+    private final ApexManager mApexManager;
     private final StagingManager mStagingManager;
     private final PermissionManagerServiceInternal mPermissionManager;
 
@@ -204,6 +205,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         mSessionsDir = new File(Environment.getDataSystemDirectory(), "install_sessions");
         mSessionsDir.mkdirs();
 
+        mApexManager = am;
         mStagingManager = new StagingManager(pm, this, am);
     }
 
@@ -483,6 +485,17 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
 
         if (params.isStaged) {
             mContext.enforceCallingOrSelfPermission(Manifest.permission.INSTALL_PACKAGES, TAG);
+        }
+
+        if ((params.installFlags & PackageManager.INSTALL_APEX) != 0) {
+            if (!mApexManager.isApexSupported()) {
+                throw new IllegalArgumentException(
+                    "This device doesn't support the installation of APEX files");
+            }
+            if (!params.isStaged) {
+                throw new IllegalArgumentException(
+                    "APEX files can only be installed as part of a staged session.");
+            }
         }
 
         if (!params.isMultiPackage) {
