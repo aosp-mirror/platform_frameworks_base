@@ -227,8 +227,6 @@ class ApexManager {
                     ipw.println("State: STAGED");
                 } else if (si.isActivated) {
                     ipw.println("State: ACTIVATED");
-                } else if (si.isActivationPendingRetry) {
-                    ipw.println("State: ACTIVATION PENDING RETRY");
                 } else if (si.isActivationFailed) {
                     ipw.println("State: ACTIVATION FAILED");
                 }
