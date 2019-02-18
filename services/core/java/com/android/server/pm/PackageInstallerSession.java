@@ -1869,7 +1869,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     }
 
     @Override
-    public void addChildSessionId(int childSessionId) {
+    public void addChildSessionId(int childSessionId) throws RemoteException {
         final PackageInstallerSession childSession = mSessionProvider.getSession(childSessionId);
         if (childSession == null) {
             throw new RemoteException("Unable to add child.",
@@ -1884,7 +1884,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     new PackageManagerException("Child session " + childSessionId
                             + " and parent session " + this.sessionId + " do not have consistent"
                             + " staging session settings."),
-                    false, true).rethrowAsRuntimeException();
+                    false, true);
         }
         synchronized (mLock) {
             final int indexOfSession = mChildSessionIds.indexOfKey(childSessionId);
