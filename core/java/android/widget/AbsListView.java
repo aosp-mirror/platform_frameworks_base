@@ -7700,6 +7700,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 mLastSeenPos = firstPos;
 
                 final int childCount = getChildCount();
+
+                if (childCount <= 0) {
+                    return;
+                }
+
                 final int position = mTargetPos;
                 final int lastPos = firstPos + childCount - 1;
 
