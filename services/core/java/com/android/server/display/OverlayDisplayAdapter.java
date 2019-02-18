@@ -308,7 +308,7 @@ final class OverlayDisplayAdapter extends DisplayAdapter {
                     mInfo.flags |= DisplayDeviceInfo.FLAG_SECURE;
                 }
                 mInfo.type = Display.TYPE_OVERLAY;
-                mInfo.touch = DisplayDeviceInfo.TOUCH_NONE;
+                mInfo.touch = DisplayDeviceInfo.TOUCH_VIRTUAL;
                 mInfo.state = mState;
             }
             return mInfo;
