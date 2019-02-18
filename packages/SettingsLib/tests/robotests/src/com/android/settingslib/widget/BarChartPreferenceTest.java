@@ -20,6 +20,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.TextView;
 
@@ -46,6 +47,7 @@ public class BarChartPreferenceTest {
     private BarView mBarView2;
     private BarView mBarView3;
     private BarView mBarView4;
+    private TextView mTitleView;
     private TextView mDetailsView;
     private PreferenceViewHolder mHolder;
     private BarChartPreference mPreference;
@@ -63,6 +65,7 @@ public class BarChartPreferenceTest {
         mBarView2 = mBarChartView.findViewById(R.id.bar_view2);
         mBarView3 = mBarChartView.findViewById(R.id.bar_view3);
         mBarView4 = mBarChartView.findViewById(R.id.bar_view4);
+        mTitleView = mBarChartView.findViewById(R.id.bar_chart_title);
         mDetailsView = mBarChartView.findViewById(R.id.bar_chart_details);
 
         mBarChartInfo = new BarChartInfo.Builder()
@@ -76,7 +79,6 @@ public class BarChartPreferenceTest {
 
     @Test
     public void initializeBarChart_titleSet_shouldSetTitleInChartView() {
-        final TextView titleView = mBarChartView.findViewById(R.id.bar_chart_title);
         final BarChartInfo barChartInfo = new BarChartInfo.Builder()
                 .setTitle(R.string.debug_app)
                 .build();
@@ -84,8 +86,8 @@ public class BarChartPreferenceTest {
         mPreference.initializeBarChart(barChartInfo);
         mPreference.onBindViewHolder(mHolder);
 
-        assertThat(titleView.getVisibility()).isEqualTo(View.VISIBLE);
-        assertThat(titleView.getText()).isEqualTo(mContext.getText(R.string.debug_app));
+        assertThat(mTitleView.getVisibility()).isEqualTo(View.VISIBLE);
+        assertThat(mTitleView.getText()).isEqualTo(mContext.getText(R.string.debug_app));
     }
 
     @Test
@@ -99,8 +101,7 @@ public class BarChartPreferenceTest {
         // We don't add any bar view yet.
         mPreference.onBindViewHolder(mHolder);
 
-        assertThat(mBarChartView.findViewById(R.id.bar_chart_title).getVisibility())
-                .isEqualTo(View.VISIBLE);
+        assertThat(mTitleView.getVisibility()).isEqualTo(View.VISIBLE);
         assertThat(mBarChartView.findViewById(R.id.empty_view).getVisibility())
                 .isEqualTo(View.VISIBLE);
         assertThat(mBarChartView.findViewById(R.id.bar_views_container).getVisibility())
@@ -301,5 +302,39 @@ public class BarChartPreferenceTest {
 
         assertThat(mBarView1.getVisibility()).isEqualTo(View.VISIBLE);
         assertThat(mBarView1.hasOnClickListeners()).isTrue();
+    }
+
+    @Test
+    public void onBindViewHolder_loadingStateIsTrue_shouldNotInitAnyView() {
+        final BarViewInfo viewInfo = new BarViewInfo(mIcon, 30 /* barNumber */, R.string.debug_app);
+        viewInfo.setClickListener(v -> {
+        });
+        final BarViewInfo[] barViewsInfo = new BarViewInfo[]{viewInfo};
+
+        mPreference.initializeBarChart(mBarChartInfo);
+        mPreference.setBarViewInfos(barViewsInfo);
+        mPreference.updateLoadingState(true /* isLoading */);
+
+        mPreference.onBindViewHolder(mHolder);
+
+        assertThat(TextUtils.isEmpty(mTitleView.getText())).isTrue();
+        assertThat(TextUtils.isEmpty(mDetailsView.getText())).isTrue();
+    }
+
+    @Test
+    public void onBindViewHolder_loadingStateIsFalse_shouldInitAnyView() {
+        final BarViewInfo viewInfo = new BarViewInfo(mIcon, 30 /* barNumber */, R.string.debug_app);
+        viewInfo.setClickListener(v -> {
+        });
+        final BarViewInfo[] barViewsInfo = new BarViewInfo[]{viewInfo};
+
+        mPreference.initializeBarChart(mBarChartInfo);
+        mPreference.setBarViewInfos(barViewsInfo);
+        mPreference.updateLoadingState(false /* isLoading */);
+
+        mPreference.onBindViewHolder(mHolder);
+
+        assertThat(TextUtils.isEmpty(mTitleView.getText())).isFalse();
+        assertThat(TextUtils.isEmpty(mDetailsView.getText())).isFalse();
     }
 }

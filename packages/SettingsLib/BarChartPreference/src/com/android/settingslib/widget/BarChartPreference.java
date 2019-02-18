@@ -87,6 +87,7 @@ public class BarChartPreference extends Preference {
     };
 
     private int mMaxBarHeight;
+    private boolean mIsLoading;
     private BarChartInfo mBarChartInfo;
 
     public BarChartPreference(Context context) {
@@ -134,12 +135,33 @@ public class BarChartPreference extends Preference {
         notifyChanged();
     }
 
+    /**
+     * Set loading state for {@link BarChartPreference}.
+     *
+     * By default, {@link BarChartPreference} doesn't care about it.
+     *
+     * But if user sets loading state to true explicitly, it means {@link BarChartPreference}
+     * needs to take some time to load data. So we won't initialize any view now.
+     *
+     * Once the state is updated to false, we will start to initialize view again.
+     *
+     * @param isLoading whether or not {@link BarChartPreference} is in loading state.
+     */
+    public void updateLoadingState(boolean isLoading) {
+        mIsLoading = isLoading;
+        notifyChanged();
+    }
+
     @Override
     public void onBindViewHolder(PreferenceViewHolder holder) {
         super.onBindViewHolder(holder);
         holder.setDividerAllowedAbove(true);
         holder.setDividerAllowedBelow(true);
 
+        // If the state is loading, we just show a blank view.
+        if (mIsLoading) {
+            return;
+        }
         // We must show title of bar chart.
         bindChartTitleView(holder);
 
