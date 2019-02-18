@@ -200,7 +200,7 @@ applications that come with the platform
         <permission name="android.permission.USE_RESERVED_DISK"/>
     </privapp-permissions>
 
-    <privapp-permissions package="com.android.mainline.networkstack">
+    <privapp-permissions package="com.android.networkstack">
         <permission name="android.permission.ACCESS_NETWORK_CONDITIONS"/>
         <permission name="android.permission.CONNECTIVITY_INTERNAL"/>
         <permission name="android.permission.CONNECTIVITY_USE_RESTRICTED_NETWORKS"/>
