@@ -1013,23 +1013,23 @@
     <string name="inputMethod" msgid="1653630062304567879">"ଇନପୁଟ୍ ପଦ୍ଧତି"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"ଟେକ୍ସଟ୍‌ କାର୍ଯ୍ୟ"</string>
     <string name="email" msgid="4560673117055050403">"ଇମେଲ୍"</string>
-    <string name="email_desc" msgid="3638665569546416795">"ବାଛି ନେଇଥିବା ଠିକଣାରେ ଇମେଲ୍‌ ପଠାନ୍ତୁ"</string>
-    <string name="dial" msgid="1253998302767701559">"କଲ୍ କରନ୍ତୁ"</string>
-    <string name="dial_desc" msgid="6573723404985517250">"ବାଛି ନେଇଥିବା ଫୋନ୍‌ ନମ୍ବର୍‌ରେ କଲ୍‌ କରନ୍ତୁ"</string>
-    <string name="map" msgid="5441053548030107189">"ମାନଚିତ୍ର"</string>
-    <string name="map_desc" msgid="1836995341943772348">"ଚୟନିତ ଠିକଣାକୁ ଖୋଜନ୍ତୁ"</string>
+    <string name="email_desc" msgid="3638665569546416795">"ଚୟନିତ ଠିକଣାକୁ ଇମେଲ୍‍ ପଠାନ୍ତୁ"</string>
+    <string name="dial" msgid="1253998302767701559">"କଲ୍"</string>
+    <string name="dial_desc" msgid="6573723404985517250">"ଚୟନିତ ଫୋନ୍‍ ନମ୍ବର୍‍କୁ କଲ୍‍ କରନ୍ତୁ"</string>
+    <string name="map" msgid="5441053548030107189">"ମ୍ୟାପ୍‍"</string>
+    <string name="map_desc" msgid="1836995341943772348">"ଚୟନିତ ଠିକଣା ଖୋଜନ୍ତୁ"</string>
     <string name="browse" msgid="1245903488306147205">"ଖୋଲନ୍ତୁ"</string>
-    <string name="browse_desc" msgid="8220976549618935044">"ବାଛି ନେଇଥିବା URL ଖୋଲନ୍ତୁ"</string>
+    <string name="browse_desc" msgid="8220976549618935044">"ଚୟନିତ URL ଖୋଲନ୍ତୁ"</string>
     <string name="sms" msgid="4560537514610063430">"ମେସେଜ୍‌"</string>
-    <string name="sms_desc" msgid="7526588350969638809">"ବାଛି ନେଇଥିବା ଫୋନ୍‌ ନମ୍ବର୍‌ରେ ମେସେଜ୍‌ ପଠାନ୍ତୁ"</string>
-    <string name="add_contact" msgid="7867066569670597203">"ଯୋଡ଼ନ୍ତୁ"</string>
-    <string name="add_contact_desc" msgid="4830217847004590345">"ଯୋଗାଯୋଗରେ ଯୋଡ଼ନ୍ତୁ"</string>
+    <string name="sms_desc" msgid="7526588350969638809">"ଚୟନିତ ଫୋନ୍‌ ନମ୍ବର୍‌କୁ ମେସେଜ୍‌ ପଠାନ୍ତୁ"</string>
+    <string name="add_contact" msgid="7867066569670597203">"ଯୋଗ କରନ୍ତୁ"</string>
+    <string name="add_contact_desc" msgid="4830217847004590345">"ଯୋଗାଯୋଗରେ ଯୋଗ କରନ୍ତୁ"</string>
     <string name="view_calendar" msgid="979609872939597838">"ଦେଖନ୍ତୁ"</string>
-    <string name="view_calendar_desc" msgid="5828320291870344584">"ବାଛି ନେଇଥିବା ସମୟକୁ କ୍ୟାଲେଣ୍ଡର୍‌ରେ ଦେଖନ୍ତୁ"</string>
-    <string name="add_calendar_event" msgid="1953664627192056206">"ନିର୍ଦ୍ଧାରିତ କରନ୍ତୁ"</string>
-    <string name="add_calendar_event_desc" msgid="4326891793260687388">"ବାଛି ନେଇଥିବା ସମୟଟିରେ ଇଭେଣ୍ଟ ସେଟ୍‌ କରନ୍ତୁ"</string>
+    <string name="view_calendar_desc" msgid="5828320291870344584">"କ୍ୟାଲେଣ୍ଡର୍‌ରେ ଚୟନିତ ସମୟ ଦେଖନ୍ତୁ"</string>
+    <string name="add_calendar_event" msgid="1953664627192056206">"ସୂଚୀ"</string>
+    <string name="add_calendar_event_desc" msgid="4326891793260687388">"ଚୟନିତ ସମୟ ପାଇଁ ଇଭେଣ୍ଟ ସୂଚୀବଦ୍ଧ କରନ୍ତୁ"</string>
     <string name="view_flight" msgid="7691640491425680214">"ଟ୍ରାକ୍‌ କରନ୍ତୁ"</string>
-    <string name="view_flight_desc" msgid="3876322502674253506">"ବାଛି ନେଇଥିବା ଫ୍ଲାଇଟ୍‌କୁ ଟ୍ରାକ୍‌ କରନ୍ତୁ"</string>
+    <string name="view_flight_desc" msgid="3876322502674253506">"ଚୟନିତ ଫ୍ଲାଇଟ୍‍କୁ ଟ୍ରାକ କରନ୍ତୁ"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"ଷ୍ଟୋରେଜ୍‌ ସ୍ପେସ୍‌ ଶେଷ ହେବାରେ ଲାଗିଛି"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"କିଛି ସିଷ୍ଟମ ଫଙ୍କଶନ୍‍ କାମ କରିନପାରେ"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"ସିଷ୍ଟମ୍ ପାଇଁ ପ୍ରର୍ଯ୍ୟାପ୍ତ ଷ୍ଟୋରେଜ୍‌ ନାହିଁ। ସୁନିଶ୍ଚିତ କରନ୍ତୁ ଯେ, ଆପଣଙ୍କ ପାଖରେ 250MB ଖାଲି ଜାଗା ଅଛି ଏବଂ ପୁନଃ ଆରମ୍ଭ କରନ୍ତୁ।"</string>

@@ -1437,7 +1437,7 @@
     <string name="content_description_sliding_handle" msgid="415975056159262248">"Llisca el dit. Mantén premut."</string>
     <string name="description_target_unlock_tablet" msgid="3833195335629795055">"Llisca per desbloquejar."</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"Torna a la pàgina d\'inici"</string>
-    <string name="action_bar_up_description" msgid="2237496562952152589">"Mou cap a dalt"</string>
+    <string name="action_bar_up_description" msgid="2237496562952152589">"Navega cap amunt"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Més opcions"</string>
     <string name="action_bar_home_description_format" msgid="7965984360903693903">"%1$s, %2$s"</string>
     <string name="action_bar_home_subtitle_description_format" msgid="6985546530471780727">"%1$s, %2$s, %3$s"</string>

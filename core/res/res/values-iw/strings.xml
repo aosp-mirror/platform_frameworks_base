@@ -212,7 +212,7 @@
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"הטלפון שלך יכובה."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"האם ברצונך לבצע כיבוי?"</string>
     <string name="reboot_safemode_title" msgid="7054509914500140361">"אתחל למצב בטוח"</string>
-    <string name="reboot_safemode_confirm" msgid="55293944502784668">"האם אתה רוצה לאתחל למצב בטוח? פעולה זו תשבית את כל יישומי צד שלישי שהתקנת. הם ישוחזרו לאחר שתאתחל שוב."</string>
+    <string name="reboot_safemode_confirm" msgid="55293944502784668">"האם ברצונך לאתחל ולעבור למצב בטוח? פעולה זו תשבית את כל יישומי צד שלישי שהתקנת. הם ישוחזרו לאחר הפעלה מחדש של המכשיר."</string>
     <string name="recent_tasks_title" msgid="3691764623638127888">"נוצרו לאחרונה"</string>
     <string name="no_recent_tasks" msgid="8794906658732193473">"אין אפליקציות אחרונות"</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"אפשרויות טאבלט"</string>
@@ -1453,7 +1453,7 @@
     <string name="add_account_button_label" msgid="3611982894853435874">"הוספת חשבון"</string>
     <string name="number_picker_increment_button" msgid="2412072272832284313">"הוסף"</string>
     <string name="number_picker_decrement_button" msgid="476050778386779067">"הפחת"</string>
-    <string name="number_picker_increment_scroll_mode" msgid="5259126567490114216">"<xliff:g id="VALUE">%s</xliff:g> גע והחזק."</string>
+    <string name="number_picker_increment_scroll_mode" msgid="5259126567490114216">"<xliff:g id="VALUE">%s</xliff:g> לחיצה ארוכה."</string>
     <string name="number_picker_increment_scroll_action" msgid="9101473045891835490">"הסט למעלה כדי להוסיף ולמטה כדי להפחית."</string>
     <string name="time_picker_increment_minute_button" msgid="8865885114028614321">"הוספת דקה"</string>
     <string name="time_picker_decrement_minute_button" msgid="6246834937080684791">"הפחת דקה"</string>
@@ -1480,7 +1480,7 @@
     <string name="activitychooserview_choose_application_error" msgid="8624618365481126668">"לא ניתן היה להפעיל את <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="shareactionprovider_share_with" msgid="806688056141131819">"שתף עם"</string>
     <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"שתף עם <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
-    <string name="content_description_sliding_handle" msgid="415975056159262248">"ידית להחלקה. גע והחזק."</string>
+    <string name="content_description_sliding_handle" msgid="415975056159262248">"ידית להחלקה. לחיצה ארוכה."</string>
     <string name="description_target_unlock_tablet" msgid="3833195335629795055">"החלק לביטול נעילה."</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"נווט לדף הבית"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"נווט למעלה"</string>
@@ -1611,7 +1611,7 @@
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> הופעל על-ידי קיצור הדרך לנגישות"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> הושבת על-ידי קיצור הדרך לנגישות"</string>
     <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"בחר תכונה שתופעל כשתלחץ על הלחצן \'נגישות\':"</string>
-    <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"כדי להחליף תכונה, גע בלחצן \'נגישות\' והחזק אותו."</string>
+    <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"כדי להחליף תכונה, יש ללחוץ לחיצה ארוכה על הלחצן \'נגישות\'."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"הגדלה"</string>
     <string name="user_switched" msgid="3768006783166984410">"המשתמש הנוכחי <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="2871009331809089783">"עובר אל <xliff:g id="NAME">%1$s</xliff:g>…"</string>
@@ -1856,7 +1856,7 @@
     <string name="app_suspended_default_message" msgid="123166680425711887">"האפליקציה <xliff:g id="APP_NAME_0">%1$s</xliff:g> לא זמינה כרגע. את הזמינות שלה אפשר לנהל באפליקציה <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="1131804827776778187">"מידע נוסף"</string>
     <string name="work_mode_off_title" msgid="1118691887588435530">"להפעיל את פרופיל העבודה?"</string>
-    <string name="work_mode_off_message" msgid="5130856710614337649">"אפליקציות העבודה, הודעות, נתונים ותכונות נוספות של פרופיל העבודה יופעלו"</string>
+    <string name="work_mode_off_message" msgid="5130856710614337649">"אפליקציות העבודה, התראות, נתונים ותכונות נוספות של פרופיל העבודה יופעלו"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"הפעל"</string>
     <string name="deprecated_target_sdk_message" msgid="1449696506742572767">"‏האפליקציה הזו עוצבה לגרסה ישנה יותר של Android וייתכן שלא תפעל כראוי. ניתן לבדוק אם יש עדכונים או ליצור קשר עם המפתח."</string>
     <string name="deprecated_target_sdk_app_store" msgid="5032340500368495077">"האם יש עדכון חדש?"</string>
@@ -1943,10 +1943,10 @@
     <string name="slices_permission_request" msgid="8484943441501672932">"<xliff:g id="APP_0">%1$s</xliff:g> רוצה להציג חלקים מ-<xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7867478911006447565">"עריכה"</string>
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="8902050240801159042">"שיחות והודעות ירטטו"</string>
-    <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"שיחות והודעות יושתקו"</string>
+    <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"שיחות והתראות יושתקו"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"שינויי מערכת"</string>
     <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"נא לא להפריע"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="3288313883409759733">"חדש: מצב \'נא לא להפריע\' מסתיר הודעות"</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="3288313883409759733">"חדש: מצב \'נא לא להפריע\' מסתיר התראות"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="5533674060311631165">"ניתן להקיש כדי לקבל מידע נוסף ולשנות."</string>
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"ההגדרה \'נא לא להפריע\' השתנתה"</string>
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"יש להקיש כדי לבדוק מה חסום."</string>
