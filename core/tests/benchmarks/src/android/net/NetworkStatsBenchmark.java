@@ -19,13 +19,22 @@ package android.net;
 import com.google.caliper.BeforeExperiment;
 import com.google.caliper.Param;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 public class NetworkStatsBenchmark {
-    private static final String UNDERLYING_IFACE = "wlan0";
+    private static final String[] UNDERLYING_IFACES = {"wlan0", "rmnet0"};
     private static final String TUN_IFACE = "tun0";
     private static final int TUN_UID = 999999999;
 
     @Param({"100", "1000"})
     private int mSize;
+    /**
+     * Should not be more than the length of {@link #UNDERLYING_IFACES}.
+     */
+    @Param({"1", "2"})
+    private int mNumUnderlyingIfaces;
     private NetworkStats mNetworkStats;
 
     @BeforeExperiment
@@ -33,8 +42,10 @@ public class NetworkStatsBenchmark {
         mNetworkStats = new NetworkStats(0, mSize + 2);
         int uid = 0;
         NetworkStats.Entry recycle = new NetworkStats.Entry();
+        final List<String> allIfaces = getAllIfacesForBenchmark(); // also contains TUN_IFACE.
+        final int totalIfaces = allIfaces.size();
         for (int i = 0; i < mSize; i++) {
-            recycle.iface = (i < mSize / 2) ? TUN_IFACE : UNDERLYING_IFACE;
+            recycle.iface = allIfaces.get(i % totalIfaces);
             recycle.uid = uid;
             recycle.set = i % 2;
             recycle.tag = NetworkStats.TAG_NONE;
@@ -48,22 +59,39 @@ public class NetworkStatsBenchmark {
                 uid++;
             }
         }
-        recycle.iface = UNDERLYING_IFACE;
-        recycle.uid = TUN_UID;
-        recycle.set = NetworkStats.SET_FOREGROUND;
-        recycle.tag = NetworkStats.TAG_NONE;
-        recycle.rxBytes = 90000 * mSize;
-        recycle.rxPackets = 40 * mSize;
-        recycle.txBytes = 180000 * mSize;
-        recycle.txPackets = 1200 * mSize;
-        recycle.operations = 0;
-        mNetworkStats.addValues(recycle);
+
+        for (int i = 0; i < mNumUnderlyingIfaces; i++) {
+            recycle.iface = UNDERLYING_IFACES[i];
+            recycle.uid = TUN_UID;
+            recycle.set = NetworkStats.SET_FOREGROUND;
+            recycle.tag = NetworkStats.TAG_NONE;
+            recycle.rxBytes = 90000 * mSize;
+            recycle.rxPackets = 40 * mSize;
+            recycle.txBytes = 180000 * mSize;
+            recycle.txPackets = 1200 * mSize;
+            recycle.operations = 0;
+            mNetworkStats.addValues(recycle);
+        }
+    }
+
+    private String[] getVpnUnderlyingIfaces() {
+        return Arrays.copyOf(UNDERLYING_IFACES, mNumUnderlyingIfaces);
+    }
+
+    /**
+     * Same as {@link #getVpnUnderlyingIfaces}, but also contains {@link #TUN_IFACE}.
+     */
+    private List<String> getAllIfacesForBenchmark() {
+        List<String> ifaces = new ArrayList<>();
+        ifaces.add(TUN_IFACE);
+        ifaces.addAll(Arrays.asList(getVpnUnderlyingIfaces()));
+        return ifaces;
     }
 
     public void timeMigrateTun(int reps) {
         for (int i = 0; i < reps; i++) {
             NetworkStats stats = mNetworkStats.clone();
-            stats.migrateTun(TUN_UID, TUN_IFACE, UNDERLYING_IFACE);
+            stats.migrateTun(TUN_UID, TUN_IFACE, getVpnUnderlyingIfaces());
         }
     }
 
