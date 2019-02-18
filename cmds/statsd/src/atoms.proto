@@ -4821,6 +4821,12 @@ message AppCompacted {
 
   // The process state at the time of compaction.
   optional android.app.ProcessStateEnum process_state = 16 [default = PROCESS_STATE_UNKNOWN];
+
+  // Free ZRAM in kilobytes before compaction.
+  optional int64 before_zram_free_kilobytes = 17;
+
+  // Free ZRAM in kilobytes after compaction.
+  optional int64 after_zram_free_kilobytes = 18;
 }
 
 /**

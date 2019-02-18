@@ -2439,4 +2439,11 @@ public final class Debug
             VMDebug.attachAgent(library + "=" + options, classLoader);
         }
     }
+
+    /**
+     * Return the current free ZRAM usage in kilobytes.
+     *
+     * @hide
+     */
+    public static native long getZramFreeKb();
 }
