@@ -2373,6 +2373,9 @@
     <!-- What to show on the ambient display player when song doesn't have a title. [CHAR LIMIT=20] -->
     <string name="music_controls_no_title">No title</string>
 
+    <!-- Description of the restart button in the hint of size compatibility mode. [CHAR LIMIT=NONE] -->
+    <string name="restart_button_description">Tap to restart this app and go full screen.</string>
+
     <!-- Text used for content description of deep link button in the header of expanded bubble
          view. [CHAR_LIMIT=NONE] -->
     <string name="bubbles_deep_link_button_description">Open <xliff:g id="app_name" example="YouTube">%1$s</xliff:g></string>

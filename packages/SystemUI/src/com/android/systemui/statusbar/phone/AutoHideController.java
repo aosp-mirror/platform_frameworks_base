@@ -75,6 +75,13 @@ public class AutoHideController implements CommandQueue.Callbacks {
         mDisplayId = context.getDisplayId();
     }
 
+    @Override
+    public void onDisplayRemoved(int displayId) {
+        if (displayId == mDisplayId) {
+            mCommandQueue.removeCallback(this);
+        }
+    }
+
     void setStatusBar(StatusBar statusBar) {
         mStatusBar = statusBar;
     }
