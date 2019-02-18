@@ -1295,11 +1295,11 @@ package android.bluetooth.le {
 
 package android.content {
 
-  public class ContentProviderClient implements java.lang.AutoCloseable android.content.ContentInterface {
+  public class ContentProviderClient implements java.lang.AutoCloseable {
     method @RequiresPermission(android.Manifest.permission.REMOVE_TASKS) public void setDetectNotResponding(long);
   }
 
-  public abstract class ContentResolver implements android.content.ContentInterface {
+  public abstract class ContentResolver {
     method public android.os.Bundle getCache(android.net.Uri);
     method public android.graphics.drawable.Drawable getTypeDrawable(String);
     method public void putCache(android.net.Uri, android.os.Bundle);

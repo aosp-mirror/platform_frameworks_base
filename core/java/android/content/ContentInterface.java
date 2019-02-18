@@ -36,6 +36,8 @@ import java.util.ArrayList;
  * These methods have been extracted into a general interface so that APIs can
  * be flexible in accepting either a {@link ContentProvider}, a
  * {@link ContentResolver}, or a {@link ContentProviderClient}.
+ *
+ * @hide
  */
 public interface ContentInterface {
     public @Nullable Cursor query(@NonNull Uri uri, @Nullable String[] projection,
