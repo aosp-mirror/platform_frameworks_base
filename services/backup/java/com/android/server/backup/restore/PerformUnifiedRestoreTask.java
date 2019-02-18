@@ -660,7 +660,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
             ++mCount;
         } catch (Exception e) {
             Slog.e(TAG, "Error when attempting restore: " + e.toString());
-            keyValueAgentErrorCleanup();
+            keyValueAgentErrorCleanup(false);
             executeNextState(UnifiedRestoreState.RUNNING_QUEUE);
         }
     }
@@ -686,6 +686,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
         boolean staging = !packageName.equals("android");
         ParcelFileDescriptor stage;
         File downloadFile = (staging) ? mStageName : mBackupDataName;
+        boolean startedAgentRestore = false;
 
         try {
             IBackupTransport transport =
@@ -766,13 +767,15 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
             long restoreAgentTimeoutMillis = mAgentTimeoutParameters.getRestoreAgentTimeoutMillis();
             backupManagerService.prepareOperationTimeout(
                     mEphemeralOpToken, restoreAgentTimeoutMillis, this, OP_TYPE_RESTORE_WAIT);
+            startedAgentRestore = true;
             mAgent.doRestore(mBackupData, appVersionCode, mNewState,
                     mEphemeralOpToken, backupManagerService.getBackupManagerBinder());
         } catch (Exception e) {
             Slog.e(TAG, "Unable to call app for restore: " + packageName, e);
             EventLog.writeEvent(EventLogTags.RESTORE_AGENT_FAILURE,
                     packageName, e.toString());
-            keyValueAgentErrorCleanup();    // clears any pending timeout messages as well
+            // Clears any pending timeout messages as well.
+            keyValueAgentErrorCleanup(startedAgentRestore);
 
             // After a restore failure we go back to running the queue.  If there
             // are no more packages to be restored that will be handled by the
@@ -832,7 +835,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
             Slog.e(TAG, "Unable to finalize restore of " + packageName);
             EventLog.writeEvent(EventLogTags.RESTORE_AGENT_FAILURE,
                     packageName, e.toString());
-            keyValueAgentErrorCleanup();
+            keyValueAgentErrorCleanup(true);
             executeNextState(UnifiedRestoreState.RUNNING_QUEUE);
         }
     }
@@ -1110,11 +1113,18 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
         mListener.onFinished(callerLogString);
     }
 
-    void keyValueAgentErrorCleanup() {
-        // If the agent fails restore, it might have put the app's data
-        // into an incoherent state.  For consistency we wipe its data
-        // again in this case before continuing with normal teardown
-        backupManagerService.clearApplicationDataAfterRestoreFailure(mCurrentPackage.packageName);
+    /**
+     * @param clearAppData - set to {@code true} if the backup agent had already been invoked when
+     *     restore faied. So the app data may be in corrupted state and has to be cleared.
+     */
+    void keyValueAgentErrorCleanup(boolean clearAppData) {
+        if (clearAppData) {
+            // If the agent fails restore, it might have put the app's data
+            // into an incoherent state.  For consistency we wipe its data
+            // again in this case before continuing with normal teardown
+            backupManagerService.clearApplicationDataAfterRestoreFailure(
+                    mCurrentPackage.packageName);
+        }
         keyValueAgentCleanup();
     }
 
@@ -1251,7 +1261,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
                 // Some kind of horrible semantic error; we're in an unexpected state.
                 // Back off hard and wind up.
                 Slog.e(TAG, "Unexpected restore callback into state " + mState);
-                keyValueAgentErrorCleanup();
+                keyValueAgentErrorCleanup(true);
                 nextState = UnifiedRestoreState.FINAL;
                 break;
             }
@@ -1271,7 +1281,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
         EventLog.writeEvent(EventLogTags.RESTORE_AGENT_FAILURE,
                 mCurrentPackage.packageName, "restore timeout");
         // Handle like an agent that threw on invocation: wipe it and go on to the next
-        keyValueAgentErrorCleanup();
+        keyValueAgentErrorCleanup(true);
         executeNextState(UnifiedRestoreState.RUNNING_QUEUE);
     }
 
