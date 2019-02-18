@@ -71,7 +71,7 @@ ROLLBACK_TEST_APP_BV2 := $(LOCAL_INSTALLED_MODULE)
 
 # RollbackTest
 include $(CLEAR_VARS)
-LOCAL_SRC_FILES := $(call all-java-files-under, src)
+LOCAL_SRC_FILES := $(call all-java-files-under, RollbackTest/src)
 LOCAL_PACKAGE_NAME := RollbackTest
 LOCAL_MODULE_TAGS := tests
 LOCAL_STATIC_JAVA_LIBRARIES := android-support-test
@@ -84,9 +84,20 @@ LOCAL_JAVA_RESOURCE_FILES := \
   $(ROLLBACK_TEST_APP_BV1) \
   $(ROLLBACK_TEST_APP_BV2) \
   $(ROLLBACK_TEST_APEX_V2)
+LOCAL_MANIFEST_FILE := RollbackTest/AndroidManifest.xml
 LOCAL_SDK_VERSION := system_current
 LOCAL_TEST_CONFIG := RollbackTest.xml
 include $(BUILD_PACKAGE)
+
+# StagedRollbackTest
+include $(CLEAR_VARS)
+LOCAL_SRC_FILES := $(call all-java-files-under, StagedRollbackTest/src)
+LOCAL_MODULE := StagedRollbackTest
+LOCAL_MODULE_TAGS := tests
+LOCAL_JAVA_LIBRARIES := tradefed
+LOCAL_COMPATIBILITY_SUITE := general-tests
+LOCAL_TEST_CONFIG := StagedRollbackTest.xml
+include $(BUILD_HOST_JAVA_LIBRARY)
 
 # Clean up local variables
 ROLLBACK_TEST_APP_AV1 :=

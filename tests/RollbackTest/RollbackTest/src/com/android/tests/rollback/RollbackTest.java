@@ -16,6 +16,10 @@
 
 package com.android.tests.rollback;
 
+import static com.android.tests.rollback.RollbackTestUtils.assertPackageRollbackInfoEquals;
+import static com.android.tests.rollback.RollbackTestUtils.assertRollbackInfoEquals;
+import static com.android.tests.rollback.RollbackTestUtils.getUniqueRollbackInfoForPackage;
+
 import android.Manifest;
 import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
@@ -24,7 +28,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.VersionedPackage;
-import android.content.rollback.PackageRollbackInfo;
 import android.content.rollback.RollbackInfo;
 import android.content.rollback.RollbackManager;
 import android.os.Handler;
@@ -42,7 +45,6 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 import java.util.Collections;
-import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.SynchronousQueue;
@@ -617,17 +619,6 @@ public class RollbackTest {
         }
     }
 
-    // Helper function to test the value of a PackageRollbackInfo
-    private void assertPackageRollbackInfoEquals(String packageName,
-            long versionRolledBackFrom, long versionRolledBackTo,
-            PackageRollbackInfo info) {
-        assertEquals(packageName, info.getPackageName());
-        assertEquals(packageName, info.getVersionRolledBackFrom().getPackageName());
-        assertEquals(versionRolledBackFrom, info.getVersionRolledBackFrom().getLongVersionCode());
-        assertEquals(packageName, info.getVersionRolledBackTo().getPackageName());
-        assertEquals(versionRolledBackTo, info.getVersionRolledBackTo().getLongVersionCode());
-    }
-
     /**
      * Test bad update automatic rollback.
      */
@@ -713,23 +704,6 @@ public class RollbackTest {
         }
     }
 
-    // Helper function to test the value of a RollbackInfo with single package
-    private void assertRollbackInfoEquals(String packageName,
-            long versionRolledBackFrom, long versionRolledBackTo,
-            RollbackInfo info, VersionedPackage... causePackages) {
-        assertNotNull(info);
-        assertEquals(1, info.getPackages().size());
-        assertPackageRollbackInfoEquals(packageName, versionRolledBackFrom, versionRolledBackTo,
-                info.getPackages().get(0));
-        assertEquals(causePackages.length, info.getCausePackages().size());
-        for (int i = 0; i < causePackages.length; ++i) {
-            assertEquals(causePackages[i].getPackageName(),
-                    info.getCausePackages().get(i).getPackageName());
-            assertEquals(causePackages[i].getLongVersionCode(),
-                    info.getCausePackages().get(i).getLongVersionCode());
-        }
-    }
-
     // Helper function to test that the given rollback info is a rollback for
     // the atomic set {A2, B2} -> {A1, B1}.
     private void assertRollbackInfoForAandB(RollbackInfo rollback) {
@@ -742,24 +716,5 @@ public class RollbackTest {
             assertPackageRollbackInfoEquals(TEST_APP_B, 2, 1, rollback.getPackages().get(0));
             assertPackageRollbackInfoEquals(TEST_APP_A, 2, 1, rollback.getPackages().get(1));
         }
-    }
-
-    // Helper function to return the RollbackInfo with a given package in the
-    // list of rollbacks. Throws an assertion failure if there is more than
-    // one such rollback info. Returns null if there are no such rollback
-    // infos.
-    private RollbackInfo getUniqueRollbackInfoForPackage(List<RollbackInfo> rollbacks,
-            String packageName) {
-        RollbackInfo found = null;
-        for (RollbackInfo rollback : rollbacks) {
-            for (PackageRollbackInfo info : rollback.getPackages()) {
-                if (packageName.equals(info.getPackageName())) {
-                    assertNull(found);
-                    found = rollback;
-                    break;
-                }
-            }
-        }
-        return found;
     }
 }
