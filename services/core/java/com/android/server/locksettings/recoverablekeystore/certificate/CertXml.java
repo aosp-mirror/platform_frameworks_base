@@ -20,6 +20,8 @@ import android.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
 
+import org.w3c.dom.Element;
+
 import java.security.SecureRandom;
 import java.security.cert.CertPath;
 import java.security.cert.X509Certificate;
@@ -27,8 +29,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-
-import org.w3c.dom.Element;
 
 /**
  * Parses and holds the XML file containing the list of THM public-key certificates and related
@@ -38,24 +38,20 @@ public final class CertXml {
 
     private static final String METADATA_NODE_TAG = "metadata";
     private static final String METADATA_SERIAL_NODE_TAG = "serial";
-    private static final String METADATA_REFRESH_INTERVAL_NODE_TAG = "refresh-interval";
     private static final String ENDPOINT_CERT_LIST_TAG = "endpoints";
     private static final String ENDPOINT_CERT_ITEM_TAG = "cert";
     private static final String INTERMEDIATE_CERT_LIST_TAG = "intermediates";
     private static final String INTERMEDIATE_CERT_ITEM_TAG = "cert";
 
     private final long serial;
-    private final long refreshInterval;
     private final List<X509Certificate> intermediateCerts;
     private final List<X509Certificate> endpointCerts;
 
     private CertXml(
             long serial,
-            long refreshInterval,
             List<X509Certificate> intermediateCerts,
             List<X509Certificate> endpointCerts) {
         this.serial = serial;
-        this.refreshInterval = refreshInterval;
         this.intermediateCerts = intermediateCerts;
         this.endpointCerts = endpointCerts;
     }
@@ -63,15 +59,6 @@ public final class CertXml {
     /** Gets the serial number of the XML file containing public-key certificates. */
     public long getSerial() {
         return serial;
-    }
-
-    /**
-     * Gets the refresh interval in the XML file containing public-key certificates. The refresh
-     * interval denotes the number of seconds that the client should follow to contact the server to
-     * refresh the XML file.
-     */
-    public long getRefreshInterval() {
-        return refreshInterval;
     }
 
     @VisibleForTesting
@@ -121,7 +108,6 @@ public final class CertXml {
         Element rootNode = CertUtils.getXmlRootNode(bytes);
         return new CertXml(
                 parseSerial(rootNode),
-                parseRefreshInterval(rootNode),
                 parseIntermediateCerts(rootNode),
                 parseEndpointCerts(rootNode));
     }
@@ -133,16 +119,6 @@ public final class CertXml {
                         rootNode,
                         METADATA_NODE_TAG,
                         METADATA_SERIAL_NODE_TAG);
-        return Long.parseLong(contents.get(0));
-    }
-
-    private static long parseRefreshInterval(Element rootNode) throws CertParsingException {
-        List<String> contents =
-                CertUtils.getXmlNodeContents(
-                        CertUtils.MUST_EXIST_EXACTLY_ONE,
-                        rootNode,
-                        METADATA_NODE_TAG,
-                        METADATA_REFRESH_INTERVAL_NODE_TAG);
         return Long.parseLong(contents.get(0));
     }
 
