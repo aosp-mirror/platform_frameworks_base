@@ -100,27 +100,12 @@ public final class DeviceConfig {
     public static final String NAMESPACE_NETD_NATIVE = "netd_native";
 
     /**
-     * Namespace for features related to the ExtServices Notification Assistant.
-     * These features are applied immediately.
+     * Namespace for System UI related features.
      *
      * @hide
      */
     @SystemApi
-    public interface NotificationAssistant {
-        String NAMESPACE = "notification_assistant";
-        /**
-         * Whether the Notification Assistant should generate replies for notifications.
-         */
-        String GENERATE_REPLIES = "generate_replies";
-        /**
-         * Whether the Notification Assistant should generate contextual actions for notifications.
-         */
-        String GENERATE_ACTIONS = "generate_actions";
-
-        String MAX_MESSAGES_TO_EXTRACT = "max_messages_to_extract";
-
-        String MAX_SUGGESTIONS = "max_suggestions";
-    }
+    public static final String NAMESPACE_SYSTEMUI = "systemui";
 
     /**
      * Namespace for all runtime related features.

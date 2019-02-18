@@ -26,6 +26,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 
 /**
  * Observes the settings for {@link Assistant}.
@@ -103,7 +104,7 @@ final class AssistantSettings extends ContentObserver {
 
     private void registerDeviceConfigs() {
         DeviceConfig.addOnPropertyChangedListener(
-                DeviceConfig.NotificationAssistant.NAMESPACE,
+                DeviceConfig.NAMESPACE_SYSTEMUI,
                 this::postToHandler,
                 this::onDeviceConfigPropertyChanged);
 
@@ -117,7 +118,7 @@ final class AssistantSettings extends ContentObserver {
 
     @VisibleForTesting
     void onDeviceConfigPropertyChanged(String namespace, String name, String value) {
-        if (!DeviceConfig.NotificationAssistant.NAMESPACE.equals(namespace)) {
+        if (!DeviceConfig.NAMESPACE_SYSTEMUI.equals(namespace)) {
             Log.e(LOG_TAG, "Received update from DeviceConfig for unrelated namespace: "
                     + namespace + " " + name + "=" + value);
             return;
@@ -128,17 +129,17 @@ final class AssistantSettings extends ContentObserver {
 
     private void updateFromDeviceConfigFlags() {
         mGenerateReplies = DeviceConfigHelper.getBoolean(
-                DeviceConfig.NotificationAssistant.GENERATE_REPLIES, DEFAULT_GENERATE_REPLIES);
+                SystemUiDeviceConfigFlags.NAS_GENERATE_REPLIES, DEFAULT_GENERATE_REPLIES);
 
         mGenerateActions = DeviceConfigHelper.getBoolean(
-                DeviceConfig.NotificationAssistant.GENERATE_ACTIONS, DEFAULT_GENERATE_ACTIONS);
+                SystemUiDeviceConfigFlags.NAS_GENERATE_ACTIONS, DEFAULT_GENERATE_ACTIONS);
 
         mMaxMessagesToExtract = DeviceConfigHelper.getInteger(
-                DeviceConfig.NotificationAssistant.MAX_MESSAGES_TO_EXTRACT,
+                SystemUiDeviceConfigFlags.NAS_MAX_MESSAGES_TO_EXTRACT,
                 DEFAULT_MAX_MESSAGES_TO_EXTRACT);
 
         mMaxSuggestions = DeviceConfigHelper.getInteger(
-                DeviceConfig.NotificationAssistant.MAX_SUGGESTIONS, DEFAULT_MAX_SUGGESTIONS);
+                SystemUiDeviceConfigFlags.NAS_MAX_SUGGESTIONS, DEFAULT_MAX_SUGGESTIONS);
 
         mOnUpdateRunnable.run();
     }
@@ -193,8 +194,7 @@ final class AssistantSettings extends ContentObserver {
 
         private static String getValue(String key) {
             return DeviceConfig.getProperty(
-                    DeviceConfig.NotificationAssistant.NAMESPACE,
-                    key);
+                    DeviceConfig.NAMESPACE_SYSTEMUI, key);
         }
     }
 
