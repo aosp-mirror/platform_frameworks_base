@@ -569,7 +569,7 @@ public class NetworkStatsTest {
             .addValues(underlyingIface, tunUid, SET_FOREGROUND, TAG_NONE, METERED_NO, ROAMING_NO,
                     DEFAULT_NETWORK_NO, 0L, 0L, 0L, 0L, 0L);
 
-        assertTrue(delta.toString(), delta.migrateTun(tunUid, tunIface, underlyingIface));
+        delta.migrateTun(tunUid, tunIface, new String[] {underlyingIface});
         assertEquals(20, delta.size());
 
         // tunIface and TEST_IFACE entries are not changed.
@@ -650,7 +650,7 @@ public class NetworkStatsTest {
             .addValues(underlyingIface, tunUid, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO,
                     DEFAULT_NETWORK_NO,  75500L, 37L, 130000L, 70L, 0L);
 
-        assertTrue(delta.migrateTun(tunUid, tunIface, underlyingIface));
+        delta.migrateTun(tunUid, tunIface, new String[]{underlyingIface});
         assertEquals(9, delta.size());
 
         // tunIface entries should not be changed.
