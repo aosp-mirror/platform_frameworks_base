@@ -515,8 +515,8 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Umožňuje aplikácii komunikovať so značkami, kartami a čítačkami s podporou technológie NFC."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"deaktivácia zámky obrazovky"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Umožňuje aplikácii zakázať uzamknutie klávesnice a akékoľvek súvisiace zabezpečenie heslom. Príkladom je zakázanie uzamknutia klávesnice pri prichádzajúcom telefonickom hovore a jeho opätovné povolenie po skončení hovoru."</string>
-    <string name="permlab_getAndRequestScreenLockComplexity" msgid="3911592334192005424">"získavať a vyžadovať zložitosť zámky obrazovky"</string>
-    <string name="permdesc_getAndRequestScreenLockComplexity" msgid="9045202063228854873">"Umožňuje aplikácii zapamätať si úroveň zložitosti zámky obrazovky (vysoká, stredná, nízka alebo žiadna), ktorá udáva pravdepodobný rozsah dĺžky a typu zámky obrazovky. Aplikácia tiež navrhuje používateľom aktualizáciu zámky obrazovky na určitú úroveň, používatelia sa však môžu na základe vlastného uváženia rozhodnúť tento návrh ignorovať a prejsť inam. Upozorňujeme, že zámka obrazovky nie je uložená vo forme obyčajného textu, takže aplikácia nepozná presné heslo."</string>
+    <string name="permlab_requestScreenLockComplexity" msgid="7028982116060987169">"požadovať zložitosť zámky obrazovky"</string>
+    <string name="permdesc_requestScreenLockComplexity" msgid="2806396846128185677">"Umožňuje aplikácii zapamätať si úroveň zložitosti zámky obrazovky (vysoká, stredná, nízka alebo žiadna), ktorá udáva pravdepodobný rozsah dĺžky a typu zámky obrazovky. Aplikácia tiež navrhuje používateľom aktualizáciu zámky obrazovky na určitú úroveň, používatelia sa však môžu na základe vlastného uváženia rozhodnúť tento návrh ignorovať a prejsť inam. Upozorňujeme, že zámka obrazovky nie je uložená vo forme obyčajného textu, takže aplikácia nepozná presné heslo."</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"používať biometrický hardvér"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"Umožňuje aplikácii používať na overenie totožnosti biometrický hardvér"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"spravovať hardvér na snímanie odtlačkov prstov"</string>
@@ -542,6 +542,7 @@
     <string name="biometric_error_user_canceled" msgid="2260175018114348727">"Overenie bolo zrušené"</string>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"Nerozpoznané"</string>
     <string name="biometric_error_canceled" msgid="349665227864885880">"Overenie bolo zrušené"</string>
+    <string name="biometric_error_device_not_secured" msgid="6583143098363528349">"Nie je nastavený PIN, vzor ani heslo"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Podarilo sa rozpoznať iba časť odtlačku prsta. Skúste to znova."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Odtlačok prsta sa nepodarilo spracovať. Skúste to znova."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Snímač odtlačkov je špinavý. Vyčistite ho a skúste to znova."</string>
@@ -561,7 +562,7 @@
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"Príliš veľa pokusov. Senzor odtlačkov prstov bol deaktivovaný."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Skúste to znova"</string>
     <string name="fingerprint_error_no_fingerprints" msgid="7654382120628334248">"Neregistrovali ste žiadne odtlačky prstov."</string>
-    <string name="fingerprint_error_hw_not_present" msgid="5729436878065119329">"Toto zariadenie nemá senzor odtlačkov prstov"</string>
+    <string name="fingerprint_error_hw_not_present" msgid="409523969613176352">"Toto zariadenie nemá senzor odtlačkov prstov."</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"Prst: <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -581,7 +582,14 @@
     <string name="face_acquired_too_left" msgid="2712489669456176505">"Pohnite senzor doľava."</string>
     <string name="face_acquired_poor_gaze" msgid="8344973502980415859">"Pozerajte sa na senzor."</string>
     <string name="face_acquired_not_detected" msgid="5707782294589511391">"Nebola rozpoznaná žiadna tvár."</string>
-    <string name="face_acquired_not_steady" msgid="3722829465011040042">"Udržte tvár nehybne oproti zariadeniu."</string>
+    <string name="face_acquired_too_much_motion" msgid="470381210701463822">"Priveľa pohybu."</string>
+    <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Znova zaregistrujte svoju tvár."</string>
+    <string name="face_acquired_too_different" msgid="5553210341111255124">"Bola rozpoznaná iná tvár."</string>
+    <string name="face_acquired_too_similar" msgid="1508776858407646460">"Príliš rovnaké, zmeňte postoj."</string>
+    <string name="face_acquired_pan_too_extreme" msgid="8203001424525231680">"Pozrite sa priamejšie do fotoaparátu."</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="7641326344460439970">"Pozrite sa priamejšie do fotoaparátu."</string>
+    <string name="face_acquired_roll_too_extreme" msgid="1444829237745898619">"Zvisle vyrovnajte hlavu."</string>
+    <string name="face_acquired_obscured" msgid="3055077697850272097">"Odkryte svoju tvár."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="6255891785768984615">"Hardvér na snímanie tváre nie je k dispozícii"</string>
@@ -593,7 +601,7 @@
     <string name="face_error_lockout_permanent" msgid="8198354656746088890">"Príliš veľa pokusov. Overenie tváre je zakázané."</string>
     <string name="face_error_unable_to_process" msgid="238761109287767270">"Skúste to znova."</string>
     <string name="face_error_not_enrolled" msgid="9166792142679691323">"Nemáte zaregistrovanú žiadnu tvár."</string>
-    <string name="face_error_hw_not_present" msgid="4737289254517095671">"Toto zariadenie nemá senzor na overenie tváre."</string>
+    <string name="face_error_hw_not_present" msgid="916085883581450331">"Toto zariadenie nemá senzor na overenie tváre."</string>
     <string name="face_name_template" msgid="7004562145809595384">"Tvár <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -953,8 +961,7 @@
     <string name="save_password_never" msgid="8274330296785855105">"Nikdy"</string>
     <string name="open_permission_deny" msgid="7374036708316629800">"Nemáte povolenie na otvorenie tejto stránky."</string>
     <string name="text_copied" msgid="4985729524670131385">"Text bol skopírovaný do schránky."</string>
-    <!-- no translation found for copied (8564151838171791598) -->
-    <skip />
+    <string name="copied" msgid="8564151838171791598">"Skopírované"</string>
     <string name="more_item_label" msgid="4650918923083320495">"Viac"</string>
     <string name="prepend_shortcut_label" msgid="2572214461676015642">"Menu+"</string>
     <string name="menu_meta_shortcut_label" msgid="4647153495550313570">"Meta+"</string>
@@ -1433,7 +1440,7 @@
     <string name="ext_media_init_action" msgid="7952885510091978278">"Nastaviť"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Odpojiť"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"Preskúmať"</string>
-    <!-- no translation found for ext_media_seamless_action (5356508985817068711) -->
+    <!-- no translation found for ext_media_seamless_action (6575980560886881233) -->
     <skip />
     <string name="ext_media_missing_title" msgid="620980315821543904">"Chýba: <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_missing_message" msgid="4012389235250987930">"Zariadenie vložte znova"</string>
@@ -2060,4 +2067,10 @@
     <string name="dynamic_mode_notification_title" msgid="508815255807182035">"Batéria sa môže vybiť pred obvyklým nabitím"</string>
     <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"Bol aktivovaný šetrič batérie na predĺženie výdrže batérie"</string>
     <string name="car_loading_profile" msgid="3545132581795684027">"Načítava sa"</string>
+    <plurals name="file_count" formatted="false" msgid="1628600959752419449">
+      <item quantity="few"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> súbory</item>
+      <item quantity="many"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> files</item>
+      <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> súborov</item>
+      <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> + <xliff:g id="COUNT_1">%d</xliff:g> súbor</item>
+    </plurals>
 </resources>

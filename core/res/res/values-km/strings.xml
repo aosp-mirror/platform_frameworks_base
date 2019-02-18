@@ -509,8 +509,8 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"ឲ្យ​កម្មវិធី​ទាក់ទង​ជា​មួយ​ស្លាក (NFC) កាត និង​កម្មវិធី​អាន។"</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"បិទ​ការ​ចាក់​សោ​អេក្រង់​របស់​អ្នក"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"ឲ្យ​កម្មវិធី​បិទ​ការ​ចាក់សោ​សុវត្ថិភាព​ពាក្យ​សម្ងាត់​ដែល​បាន​ភ្ជាប់​ណា​មួយ។ ​ឧទាហរណ៍​ត្រឹមត្រូវ​​​នៃ​ការ​បិទ​ទូរស័ព្ទ​ពេល​ទទួលការ​ហៅ​ចូល បន្ទាប់​ម​បើក​សោ​ពេល​ការ​ហៅ​បាន​បញ្ចប់។"</string>
-    <string name="permlab_getAndRequestScreenLockComplexity" msgid="3911592334192005424">"ទទួល និងស្នើ​សុំភាព​ស្មុគស្មាញ​នៃការចាក់សោអេក្រង់"</string>
-    <string name="permdesc_getAndRequestScreenLockComplexity" msgid="9045202063228854873">"អនុញ្ញាតឱ្យ​កម្មវិធី​រៀនអំពី​កម្រិតស្មុគស្មាញ​ការនៃការចាក់សោអេក្រង់ (ខ្ពស់ មធ្យម​ ទាប ឬគ្មាន) ដែល​បញ្ជាក់អំពី​​ប្រវែង និងប្រភេទ​នៃការចាក់សោអេក្រង់។ កម្មវិធី​នេះ​ក៏​អាច​ណែនាំឱ្យ​អ្នកប្រើប្រាស់​ធ្វើបច្ចុប្បន្នភាព​ការចាក់សោ​អេក្រង់​ទៅកម្រិតជាក់លាក់​ផងដែរ ប៉ុន្តែ​អ្នកប្រើប្រាស់​អាច​មិនអើពើនឹង​ការណែនាំនេះ​ដោយសេរី។ សូម​ចំណាំថា ការចាក់សោអេក្រង់​មិន​ត្រូវបាន​រក្សាទុក​ជាអត្ថបទ​ធម្មតាទេ ដូច្នេះ​កម្មវិធីនេះ​មិន​ស្គាល់​ពាក្យសម្ងាត់​ពិតប្រាកដ​ឡើយ។"</string>
+    <string name="permlab_requestScreenLockComplexity" msgid="7028982116060987169">"ស្នើ​សុំកម្រិត​​ស្មុគស្មាញ​នៃការចាក់សោអេក្រង់"</string>
+    <string name="permdesc_requestScreenLockComplexity" msgid="2806396846128185677">"អនុញ្ញាតឱ្យ​កម្មវិធី​រៀនអំពី​កម្រិតស្មុគស្មាញ​ការនៃការចាក់សោអេក្រង់ (ខ្ពស់ មធ្យម​ ទាប ឬគ្មាន) ដែល​បញ្ជាក់អំពី​​ប្រវែង និងប្រភេទ​នៃការចាក់សោអេក្រង់។ កម្មវិធី​នេះ​ក៏​អាច​ណែនាំឱ្យ​អ្នកប្រើប្រាស់​ធ្វើបច្ចុប្បន្នភាព​ការចាក់សោ​អេក្រង់​ទៅកម្រិតជាក់លាក់​ផងដែរ ប៉ុន្តែ​អ្នកប្រើប្រាស់​អាច​មិនអើពើនឹង​ការណែនាំនេះ​ដោយសេរី។ សូម​ចំណាំថា ការចាក់សោអេក្រង់​មិន​ត្រូវបាន​រក្សាទុក​ជាអត្ថបទ​ធម្មតាទេ ដូច្នេះ​កម្មវិធីនេះ​មិន​ស្គាល់​ពាក្យសម្ងាត់​ពិតប្រាកដ​ឡើយ។"</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"ប្រើ​ឧបករណ៍​ស្កេន​ស្នាមម្រាមដៃ"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"អនុញ្ញាត​ឱ្យ​កម្មវិធី​ប្រើ​ឧបករណ៍​ស្កេន​ស្នាមម្រាមដៃ​សម្រាប់​ការផ្ទៀងផ្ទាត់"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"គ្រប់គ្រងផ្នែករឹងស្នាមម្រាមដៃ"</string>
@@ -536,6 +536,7 @@
     <string name="biometric_error_user_canceled" msgid="2260175018114348727">"បាន​បោះបង់​ការ​ផ្ទៀងផ្ទាត់"</string>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"មិនអាចសម្គាល់បានទេ"</string>
     <string name="biometric_error_canceled" msgid="349665227864885880">"បាន​បោះបង់​ការ​ផ្ទៀងផ្ទាត់"</string>
+    <string name="biometric_error_device_not_secured" msgid="6583143098363528349">"គ្មាន​ការកំណត់​កូដ pin លំនាំ ឬពាក្យសម្ងាត់​ទេ"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"បានផ្តិតយកស្នាមម្រាមដៃមិនពេញលក្ខណៈ។ សូមព្យាយាមម្តងទៀត។"</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"មិនអាចដំណើរការស្នាមម្រាមដៃបានទេ។ សូមព្យាយាមម្តងទៀត។"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"ឧបករណ៍ផ្តិតម្រាមដៃប្រលាក់ហើយ។ សូមសម្អាត ហើយព្យាយាមម្តងទៀត។"</string>
@@ -555,7 +556,7 @@
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"ព្យាយាមចូលច្រើនដងពេកហើយ។ ឧបករណ៍ចាប់ស្នាមម្រាមដៃត្រូវ​បានបិទ។"</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"ព្យាយាមម្ដងទៀត។"</string>
     <string name="fingerprint_error_no_fingerprints" msgid="7654382120628334248">"មិន​មាន​ការ​ចុះឈ្មោះស្នាម​ម្រាមដៃទេ។"</string>
-    <string name="fingerprint_error_hw_not_present" msgid="5729436878065119329">"ឧបករណ៍នេះ​មិនមាន​ឧបករណ៍ចាប់​ស្នាមម្រាមដៃទេ"</string>
+    <string name="fingerprint_error_hw_not_present" msgid="409523969613176352">"ឧបករណ៍នេះ​មិនមាន​ឧបករណ៍ចាប់​ស្នាមម្រាមដៃទេ។"</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"ម្រាមដៃ <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -575,7 +576,14 @@
     <string name="face_acquired_too_left" msgid="2712489669456176505">"សូម​ផ្លាស់ទី​ឧបករណ៍ចាប់សញ្ញា​ទៅឆ្វេង។"</string>
     <string name="face_acquired_poor_gaze" msgid="8344973502980415859">"សូម​មើល​ទៅ​ឧបករណ៍​ចាប់សញ្ញា។"</string>
     <string name="face_acquired_not_detected" msgid="5707782294589511391">"រកមិន​ឃើញ​មុខទេ។"</string>
-    <string name="face_acquired_not_steady" msgid="3722829465011040042">"រក្សាមុខ​របស់អ្នក​ឱ្យ​នឹង​នៅមុខ​ឧបករណ៍​។"</string>
+    <string name="face_acquired_too_much_motion" msgid="470381210701463822">"មាន​ចលនា​ខ្លាំងពេក។"</string>
+    <string name="face_acquired_recalibrate" msgid="8077949502893707539">"សូម​​ស្កេន​បញ្ចូល​មុខរបស់អ្នក​ម្ដងទៀត។"</string>
+    <string name="face_acquired_too_different" msgid="5553210341111255124">"បាន​រកឃើញ​មុខផ្សេង។"</string>
+    <string name="face_acquired_too_similar" msgid="1508776858407646460">"ស្រដៀងគ្នា​ពេក សូមផ្លាស់ប្ដូរ​កាយវិការ​របស់អ្នក។"</string>
+    <string name="face_acquired_pan_too_extreme" msgid="8203001424525231680">"សូម​មើល​ឱ្យចំកាមេរ៉ា​ជាងមុន។"</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="7641326344460439970">"សូម​មើល​ឱ្យចំកាមេរ៉ា​ជាងមុន។"</string>
+    <string name="face_acquired_roll_too_extreme" msgid="1444829237745898619">"សូម​ងើយ​ក្បាល​របស់អ្នកឱ្យត្រង់។"</string>
+    <string name="face_acquired_obscured" msgid="3055077697850272097">"សូម​កុំបាំងមុខ​របស់អ្នក។"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="6255891785768984615">"មិន​អាច​ប្រើ​ផ្នែករឹង​ចាប់ផ្ទៃ​មុខ​បានទេ។"</string>
@@ -587,7 +595,7 @@
     <string name="face_error_lockout_permanent" msgid="8198354656746088890">"ព្យាយាមចូលច្រើនពេកហើយ។ បាន​បិទការផ្ទៀងផ្ទាត់​ផ្ទៃ​មុខ។"</string>
     <string name="face_error_unable_to_process" msgid="238761109287767270">"សូមព្យាយាម​ម្ដងទៀត។"</string>
     <string name="face_error_not_enrolled" msgid="9166792142679691323">"មិន​អាច​ថត​បញ្ចូលផ្ទៃ​មុខ​បានទេ។"</string>
-    <string name="face_error_hw_not_present" msgid="4737289254517095671">"ឧបករណ៍​នេះ​មិន​មាន​ឧបករណ៍​ផ្ទៀងផ្ទាត់​ផ្ទៃមុខ​នោះទេ"</string>
+    <string name="face_error_hw_not_present" msgid="916085883581450331">"ឧបករណ៍​នេះ​មិន​មាន​ឧបករណ៍​ផ្ទៀងផ្ទាត់​មុខ​ទេ។"</string>
     <string name="face_name_template" msgid="7004562145809595384">"ផ្ទៃមុខទី <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -947,8 +955,7 @@
     <string name="save_password_never" msgid="8274330296785855105">"កុំ"</string>
     <string name="open_permission_deny" msgid="7374036708316629800">"អ្នក​មិន​មាន​សិទ្ធិ ដើម្បី​បើក​ទំព័រ​នេះ។"</string>
     <string name="text_copied" msgid="4985729524670131385">"បាន​ចម្លង​អត្ថបទ​ទៅ​ក្ដារ​តម្បៀត​ខ្ទាស់។"</string>
-    <!-- no translation found for copied (8564151838171791598) -->
-    <skip />
+    <string name="copied" msgid="8564151838171791598">"បា​នចម្លង"</string>
     <string name="more_item_label" msgid="4650918923083320495">"ច្រើន​ទៀត"</string>
     <string name="prepend_shortcut_label" msgid="2572214461676015642">"ម៉ឺនុយ +"</string>
     <string name="menu_meta_shortcut_label" msgid="4647153495550313570">"Meta+"</string>
@@ -1391,7 +1398,7 @@
     <string name="ext_media_init_action" msgid="7952885510091978278">"ដំឡើង"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"ដកចេញ"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"រុករក"</string>
-    <!-- no translation found for ext_media_seamless_action (5356508985817068711) -->
+    <!-- no translation found for ext_media_seamless_action (6575980560886881233) -->
     <skip />
     <string name="ext_media_missing_title" msgid="620980315821543904">"បាត់ <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_missing_message" msgid="4012389235250987930">"បញ្ចូល​ឧបករណ៍​ម្តងទៀត"</string>
@@ -1992,4 +1999,8 @@
     <string name="dynamic_mode_notification_title" msgid="508815255807182035">"ថ្ម​អាច​នឹង​អស់ មុនពេល​សាកថ្មធម្មតា"</string>
     <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"បាន​បើក​ដំណើរការកម្មវិធី​សន្សំ​ថ្ម ដើម្បីបង្កើនកម្រិត​ថាមពល​​ថ្ម"</string>
     <string name="car_loading_profile" msgid="3545132581795684027">"កំពុងផ្ទុក"</string>
+    <plurals name="file_count" formatted="false" msgid="1628600959752419449">
+      <item quantity="other">ឯកសារ <xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g></item>
+      <item quantity="one">ឯកសារ​ <xliff:g id="FILE_NAME_0">%s</xliff:g> + <xliff:g id="COUNT_1">%d</xliff:g></item>
+    </plurals>
 </resources>

@@ -509,8 +509,8 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"సమీప ఫీల్డ్ కమ్యూనికేషన్ (NFC) ట్యాగ్‌లు, కార్డులు మరియు రీడర్‌లతో కమ్యూనికేట్ చేయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"మీ స్క్రీన్ లాక్‌ను నిలిపివేయడం"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"కీలాక్ మరియు ఏదైనా అనుబంధించబడిన పాస్‌వర్డ్ భద్రతను నిలిపివేయడానికి యాప్‌ను అనుమతిస్తుంది. ఉదాహరణకు, ఇన్‌కమింగ్ ఫోన్ కాల్ వస్తున్నప్పుడు ఫోన్ కీలాక్‌ను నిలిపివేస్తుంది, ఆపై కాల్ ముగిసిన తర్వాత కీలాక్‌ను మళ్లీ ప్రారంభిస్తుంది."</string>
-    <string name="permlab_getAndRequestScreenLockComplexity" msgid="3911592334192005424">"స్క్రీన్ లాక్ పాస్‌వర్డ్ బల స్థాయిని పొందడం మరియు అభ్యర్ధించడం"</string>
-    <string name="permdesc_getAndRequestScreenLockComplexity" msgid="9045202063228854873">"ఇది మీ స్క్రీన్ లాక్ పాస్‌వర్డ్‌ బల స్థాయి (తీవ్రంగా ఉండాలా లేదా ఓ మోస్తరుగా ఉండాలా లేదా తక్కువ తీవ్రంగా గానీ అసలు ఏదీ కాకుండా ఉండాలా) అనే విషయాన్ని గుర్తుంచుకోవడానికి యాప్‌కి అనుమతిస్తుంది, అలాగే పాస్‌‌వర్డ్ పొడుగు ఎంత ఉండాలీ, ఏ రకమైన స్క్రీన్ లాక్ పధ్ధతి అనుసరించాలో సూచిస్తుంది. యాప్ ఇంకా స్క్రీన్ లాక్‌ పాస్‌వర్డ్‌ బల స్థాయిని ఏ స్థాయిలో సెట్ చేసుకుంటే బాగుంటుందో వినియోగదారులకు తెలపగలదు కానీ వినియోగదారులు దాని సూచనలను పట్టించుకోకుండా వారి ఇష్టం మేరకు చక్కగా సెట్ చేసుకోవచ్చు. మీకో ముఖ్యమైన మాట స్క్రీన్ లాక్‌ పాస్‌వర్డ్‌ అనేది సాదా వచన రూపంలో నిల్వ చేయబడదు, కనుక అసలు మీరు పాస్‌వర్డ్‌ ఏం పెట్టారనే విషయం యాప్‌కి తెలియదు."</string>
+    <string name="permlab_requestScreenLockComplexity" msgid="7028982116060987169">"స్క్రీన్ లాక్ సంక్లిష్టత అభ్యర్థన"</string>
+    <string name="permdesc_requestScreenLockComplexity" msgid="2806396846128185677">"ఇది మీ స్క్రీన్ లాక్ పాస్‌వర్డ్‌ బల స్థాయి (తీవ్రంగా ఉండాలా లేదా ఓ మోస్తరుగా ఉండాలా లేదా తక్కువ తీవ్రంగా గానీ అసలు ఏదీ కాకుండా ఉండాలా) అనే విషయాన్ని గుర్తుంచుకోవడానికి యాప్‌కి అనుమతిస్తుంది, అలాగే పాస్‌‌వర్డ్ పొడుగు ఎంత ఉండాలీ, ఏ రకమైన స్క్రీన్ లాక్ పధ్ధతి అనుసరించాలో సూచిస్తుంది. యాప్ ఇంకా స్క్రీన్ లాక్‌ పాస్‌వర్డ్‌ బల స్థాయిని ఏ స్థాయిలో సెట్ చేసుకుంటే బాగుంటుందో వినియోగదారులకు తెలపగలదు కానీ వినియోగదారులు దాని సూచనలను పట్టించుకోకుండా వారి ఇష్టం మేరకు చక్కగా సెట్ చేసుకోవచ్చు. మీకో ముఖ్యమైన మాట స్క్రీన్ లాక్‌ పాస్‌వర్డ్‌ అనేది సాదా వచన రూపంలో నిల్వ చేయబడదు, కనుక అసలు మీరు పాస్‌వర్డ్‌ ఏం పెట్టారనే విషయం యాప్‌కి తెలియదు."</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"బయోమెట్రిక్ హార్డ్‌వేర్‌ని ఉపయోగించు"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"ప్రమాణీకరణ కోసం బయోమెట్రిక్ హార్డ్‌వేర్‌ను ఉపయోగించడానికి యాప్‌ని అనుమతిస్తుంది"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"వేలిముద్ర హార్డ్‌వేర్‌ని నిర్వహించడానికి అనుమతి"</string>
@@ -536,6 +536,7 @@
     <string name="biometric_error_user_canceled" msgid="2260175018114348727">"ప్రమాణీకరణ రద్దు చేయబడింది"</string>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"గుర్తించలేదు"</string>
     <string name="biometric_error_canceled" msgid="349665227864885880">"ప్రమాణీకరణ రద్దు చేయబడింది"</string>
+    <string name="biometric_error_device_not_secured" msgid="6583143098363528349">"పిన్, ఆకృతి లేదా పాస్‌వర్డ్‌ సెట్ చేయబడలేదు"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"పాక్షిక వేలిముద్ర గుర్తించబడింది. దయచేసి మళ్లీ ప్రయత్నించండి."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"వేలిముద్రను ప్రాసెస్ చేయడం సాధ్యపడలేదు. దయచేసి మళ్లీ ప్రయత్నించండి."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"వేలిముద్ర సెన్సార్ మురికిగా ఉంది. దయచేసి శుభ్రపరిచి, మళ్లీ ప్రయత్నించండి."</string>
@@ -555,7 +556,7 @@
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"అనేకసార్లు ప్రయత్నించారు. వేలిముద్ర సెన్సార్ నిలిపివేయబడింది."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"మళ్లీ ప్రయత్నించండి."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="7654382120628334248">"వేలిముద్రలు నమోదు చేయబడలేదు."</string>
-    <string name="fingerprint_error_hw_not_present" msgid="5729436878065119329">"ఈ పరికరంలో వేలిముద్ర సెన్సార్ లేదు"</string>
+    <string name="fingerprint_error_hw_not_present" msgid="409523969613176352">"ఈ పరికరంలో వేలిముద్ర సెన్సార్ ఎంపిక లేదు."</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"వేలు <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -575,7 +576,14 @@
     <string name="face_acquired_too_left" msgid="2712489669456176505">"దయచేసి సెన్సార్‌ను ఎడమవైపుకు జరపండి."</string>
     <string name="face_acquired_poor_gaze" msgid="8344973502980415859">"దయచేసి సెన్సార్‌ను చూడండి."</string>
     <string name="face_acquired_not_detected" msgid="5707782294589511391">"ఎలాంటి ముఖం గుర్తించబడలేదు."</string>
-    <string name="face_acquired_not_steady" msgid="3722829465011040042">"పరికరానికి నేరుగా ముఖాన్ని స్థిరంగా ఉంచండి."</string>
+    <string name="face_acquired_too_much_motion" msgid="470381210701463822">"చలనం ఎక్కువగా ఉంది."</string>
+    <string name="face_acquired_recalibrate" msgid="8077949502893707539">"దయచేసి మీ ముఖాన్ని మళ్లీ నమోదు చేయండి."</string>
+    <string name="face_acquired_too_different" msgid="5553210341111255124">"వేరొక ముఖం గుర్తించబడింది."</string>
+    <string name="face_acquired_too_similar" msgid="1508776858407646460">"ఒకే మాదిరిగా ఉంది, దయచేసి భంగిమను మార్చండి."</string>
+    <string name="face_acquired_pan_too_extreme" msgid="8203001424525231680">"దయచేసి కెమెరా వైపు మరింత సూటిగా చూడండి."</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="7641326344460439970">"దయచేసి కెమెరా వైపు మరింత సూటిగా చూడండి."</string>
+    <string name="face_acquired_roll_too_extreme" msgid="1444829237745898619">"దయచేసి మీ తలను నిలువుగా, నిటారుగా ఉంచండి."</string>
+    <string name="face_acquired_obscured" msgid="3055077697850272097">"దయచేసి మీ ముఖంపై చీకటి లేకుండా చూడండి."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="6255891785768984615">"ముఖ హార్డ్‌వేర్ అందుబాటులో లేదు."</string>
@@ -587,7 +595,7 @@
     <string name="face_error_lockout_permanent" msgid="8198354656746088890">"చాలా ఎక్కువ ప్రయత్నాలు చేసారు. ముఖ ప్రమాణీకరణ నిలిపివేయబడింది."</string>
     <string name="face_error_unable_to_process" msgid="238761109287767270">"మళ్లీ ప్రయత్నించండి."</string>
     <string name="face_error_not_enrolled" msgid="9166792142679691323">"ముఖం నమోదు చేయబడలేదు."</string>
-    <string name="face_error_hw_not_present" msgid="4737289254517095671">"ఈ పరికరంలో ముఖ ప్రామాణీకరణ సెన్సార్ లేదు"</string>
+    <string name="face_error_hw_not_present" msgid="916085883581450331">"ముఖాన్ని ప్రమాణీకరణ చేసే సెన్సార్ ఈ పరికరం కలిగిలేదు."</string>
     <string name="face_name_template" msgid="7004562145809595384">"ముఖ <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -947,8 +955,7 @@
     <string name="save_password_never" msgid="8274330296785855105">"ఎప్పుడూ వద్దు"</string>
     <string name="open_permission_deny" msgid="7374036708316629800">"ఈ పేజీని తెరవడానికి మీకు అనుమతి లేదు."</string>
     <string name="text_copied" msgid="4985729524670131385">"వచనం క్లిప్‌బోర్డ్‌కు కాపీ చేయబడింది."</string>
-    <!-- no translation found for copied (8564151838171791598) -->
-    <skip />
+    <string name="copied" msgid="8564151838171791598">"కాపీ చేయబడింది"</string>
     <string name="more_item_label" msgid="4650918923083320495">"ఎక్కువ"</string>
     <string name="prepend_shortcut_label" msgid="2572214461676015642">"మెను+"</string>
     <string name="menu_meta_shortcut_label" msgid="4647153495550313570">"Meta+"</string>
@@ -1390,7 +1397,7 @@
     <string name="ext_media_init_action" msgid="7952885510091978278">"సెటప్ చేయండి"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"తొలగించు"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"విశ్లేషించు"</string>
-    <!-- no translation found for ext_media_seamless_action (5356508985817068711) -->
+    <!-- no translation found for ext_media_seamless_action (6575980560886881233) -->
     <skip />
     <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> కనుగొనబడటం లేదు"</string>
     <string name="ext_media_missing_message" msgid="4012389235250987930">"పరికరాన్ని మళ్లీ చొప్పించండి"</string>
@@ -1991,4 +1998,8 @@
     <string name="dynamic_mode_notification_title" msgid="508815255807182035">"మామూలుగా ఛార్జ్ చేసేలోపు బ్యాటరీ ఖాళీ కావచ్చు"</string>
     <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"బ్యాటరీ జీవితకాలాన్ని పెంచడానికి బ్యాటరీ సేవర్ యాక్టివేట్ చేయబడింది"</string>
     <string name="car_loading_profile" msgid="3545132581795684027">"లోడవుతోంది"</string>
+    <plurals name="file_count" formatted="false" msgid="1628600959752419449">
+      <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> ఫైల్‌లు</item>
+      <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> + <xliff:g id="COUNT_1">%d</xliff:g> ఫైల్</item>
+    </plurals>
 </resources>

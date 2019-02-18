@@ -509,8 +509,8 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Lar appen kommunisere med etiketter, kort og lesere som benytter NFC-teknologi."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"deaktivere skjermlåsen"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Lar appen deaktivere tastelåsen og eventuell tilknyttet passordsikkerhet. Et eksempel er at telefonen deaktiverer tastelåsen når du mottar et innkommende anrop, og deretter aktiverer tastelåsen igjen når samtalen er ferdig."</string>
-    <string name="permlab_getAndRequestScreenLockComplexity" msgid="3911592334192005424">"hente og be om kompleksitet for skjermlås"</string>
-    <string name="permdesc_getAndRequestScreenLockComplexity" msgid="9045202063228854873">"Lar appen lære skjermlåsens kompleksitetsnivå (høy, middels, lav eller ingen), som indikerer det mulige området for lengde og type skjermlås. Appen kan foreslå at brukeren oppdaterer skjermlåsen til et bestemt nivå, men brukere kan velge å ignorere dette og navigere bort. Vær oppmerksom på at skjermlåsen ikke er lagret klartekst, så appen kan ikke se det nøyaktige passordet."</string>
+    <string name="permlab_requestScreenLockComplexity" msgid="7028982116060987169">"be om skjermlåsens kompleksitet"</string>
+    <string name="permdesc_requestScreenLockComplexity" msgid="2806396846128185677">"Lar appen lære skjermlåsens kompleksitetsnivå (høy, middels, lav eller ingen), som indikerer det mulige området for lengde og type skjermlås. Appen kan foreslå at brukeren oppdaterer skjermlåsen til et bestemt nivå, men brukere kan velge å ignorere dette og navigere bort. Vær oppmerksom på at skjermlåsen ikke er lagret i klartekst, så appen kan ikke se det nøyaktige passordet."</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"bruke biometrisk maskinvare"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"Lar appen bruke biometrisk maskinvare til godkjenning"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"administrere fingeravtrykkmaskinvare"</string>
@@ -536,6 +536,7 @@
     <string name="biometric_error_user_canceled" msgid="2260175018114348727">"Autentiseringen er avbrutt"</string>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"Ikke gjenkjent"</string>
     <string name="biometric_error_canceled" msgid="349665227864885880">"Autentiseringen er avbrutt"</string>
+    <string name="biometric_error_device_not_secured" msgid="6583143098363528349">"PIN-kode, mønster eller passord er ikke angitt"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Deler av fingeravtrykket er registrert. Prøv på nytt."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Kunne ikke registrere fingeravtrykket. Prøv på nytt."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Fingeravtrykksensoren er skitten. Rengjør den og prøv på nytt."</string>
@@ -555,7 +556,7 @@
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"For mange forsøk. Fingeravtrykkssensoren er slått av."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Prøv igjen."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="7654382120628334248">"Ingen fingeravtrykk er registrert."</string>
-    <string name="fingerprint_error_hw_not_present" msgid="5729436878065119329">"Denne enheten har ikke fingeravtrykkssensor"</string>
+    <string name="fingerprint_error_hw_not_present" msgid="409523969613176352">"Denne enheten har ikke fingeravtrykkssensor."</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"Finger <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -575,7 +576,14 @@
     <string name="face_acquired_too_left" msgid="2712489669456176505">"Flytt sensoren til venstre."</string>
     <string name="face_acquired_poor_gaze" msgid="8344973502980415859">"Se på sensoren."</string>
     <string name="face_acquired_not_detected" msgid="5707782294589511391">"Ingen ansikter er oppdaget."</string>
-    <string name="face_acquired_not_steady" msgid="3722829465011040042">"Hold ansiktet stødig foran enheten."</string>
+    <string name="face_acquired_too_much_motion" msgid="470381210701463822">"For mye bevegelse."</string>
+    <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Registrer ansiktet ditt på nytt."</string>
+    <string name="face_acquired_too_different" msgid="5553210341111255124">"Et annet ansikt er gjenkjent."</string>
+    <string name="face_acquired_too_similar" msgid="1508776858407646460">"For likt – endre posituren din."</string>
+    <string name="face_acquired_pan_too_extreme" msgid="8203001424525231680">"Se mer direkte mot kameraet."</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="7641326344460439970">"Se mer direkte mot kameraet."</string>
+    <string name="face_acquired_roll_too_extreme" msgid="1444829237745898619">"Rett hodet ditt vertikalt."</string>
+    <string name="face_acquired_obscured" msgid="3055077697850272097">"Ikke skjul ansiktet ditt."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="6255891785768984615">"Maskinvare for ansikt er ikke tilgjengelig."</string>
@@ -587,7 +595,7 @@
     <string name="face_error_lockout_permanent" msgid="8198354656746088890">"For mange forsøk. Ansiktsautentisering er slått av."</string>
     <string name="face_error_unable_to_process" msgid="238761109287767270">"Prøv igjen."</string>
     <string name="face_error_not_enrolled" msgid="9166792142679691323">"Ingen ansikt er registrert."</string>
-    <string name="face_error_hw_not_present" msgid="4737289254517095671">"Denne enheten har ikke sensor for ansiktsautentisering"</string>
+    <string name="face_error_hw_not_present" msgid="916085883581450331">"Denne enheten har ikke sensor for ansiktsautentisering."</string>
     <string name="face_name_template" msgid="7004562145809595384">"Ansikt <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -947,8 +955,7 @@
     <string name="save_password_never" msgid="8274330296785855105">"Aldri"</string>
     <string name="open_permission_deny" msgid="7374036708316629800">"Du har ikke tillatelse til å åpne denne siden."</string>
     <string name="text_copied" msgid="4985729524670131385">"Kopierte tekst til utklippstavlen."</string>
-    <!-- no translation found for copied (8564151838171791598) -->
-    <skip />
+    <string name="copied" msgid="8564151838171791598">"Kopiert"</string>
     <string name="more_item_label" msgid="4650918923083320495">"Mer"</string>
     <string name="prepend_shortcut_label" msgid="2572214461676015642">"menyknapp+"</string>
     <string name="menu_meta_shortcut_label" msgid="4647153495550313570">"Meta+"</string>
@@ -1389,7 +1396,7 @@
     <string name="ext_media_init_action" msgid="7952885510091978278">"Konfigurer"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Løs ut"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"Utforsk"</string>
-    <!-- no translation found for ext_media_seamless_action (5356508985817068711) -->
+    <!-- no translation found for ext_media_seamless_action (6575980560886881233) -->
     <skip />
     <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> mangler"</string>
     <string name="ext_media_missing_message" msgid="4012389235250987930">"Sett inn enheten på nytt"</string>
@@ -1835,7 +1842,7 @@
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Skjul"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"«Ikke forstyrr»"</string>
-    <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"Nedetid"</string>
+    <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"Pause"</string>
     <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"Hverdagskveld"</string>
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"Helg"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"Aktivitet"</string>
@@ -1990,4 +1997,8 @@
     <string name="dynamic_mode_notification_title" msgid="508815255807182035">"Batteriet kan gå tomt før den vanlige ladingen"</string>
     <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"Batterisparing er aktivert for å forlenge batterilevetiden"</string>
     <string name="car_loading_profile" msgid="3545132581795684027">"Laster inn"</string>
+    <plurals name="file_count" formatted="false" msgid="1628600959752419449">
+      <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> filer</item>
+      <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> + <xliff:g id="COUNT_1">%d</xliff:g> fil</item>
+    </plurals>
 </resources>

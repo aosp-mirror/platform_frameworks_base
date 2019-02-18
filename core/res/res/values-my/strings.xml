@@ -509,8 +509,8 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"အက်ပ်အား တာတို စက်ကွင်း ဆက်သွယ်ရေး (NFC) တဲဂ်များ၊ ကဒ်များ နှင့် ဖတ်ကြသူတို့နှင့် ဆက်သွယ်ပြောဆိုခွင့် ပြုသည်။"</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"ဖန်သားပြင် သော့ချခြင်းအား မလုပ်နိုင်အောင် ပိတ်ရန်"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"အပလီကေးရှင်းအား သော့ချခြင်းနှင့် သက်ဆိုင်ရာ စကားဝှက်သတ်မှတ်ခြင်းများအား မသုံးနိုင်အောင် ပိတ်ခြင်းကို ခွင့်ပြုရန်။ ဥပမာ ဖုန်းလာလျှင် သော့ပိတ်ခြင်း ပယ်ဖျက်ခြင်း၊ ဖုန်းပြောပြီးလျှင် သော့ကို အလိုအလျောက် ပြန်ပိတ်ခြင်း"</string>
-    <string name="permlab_getAndRequestScreenLockComplexity" msgid="3911592334192005424">"ဖုန်းမျက်နှာပြင်လော့ခ် ရှုပ်ထွေးမှုကို ရယူခြင်းနှင့် တောင်းခံခြင်း"</string>
-    <string name="permdesc_getAndRequestScreenLockComplexity" msgid="9045202063228854873">"ဖုန်းမျက်နှာပြင်လော့ခ်၏ ရှုပ်ထွေးမှုအဆင့် (မြင့်၊ အလယ်အလတ်၊ နိမ့် သို့မဟုတ် မရှိ) အား လေ့လာရန် အက်ပ်ကို ခွင့်ပြုသည်။ ၎င်းက သတ်မှတ်ထားနိုင်သော ဖုန်းမျက်နှာပြင်လော့ခ်၏ စာလုံးရေနှင့် အမျိုးအစားကို ညွှန်ပြပေးသည်။ အသုံးပြုသူများအနေနှင့် ဖုန်းမျက်နှာပြင်လော့ခ်ကို အတိုင်းအတာတစ်ခုအထိ အဆင့်မြှင့်ရန် အက်ပ်က အကြံပြုနိုင်သည်။ သို့သော်လည်း အသုံးပြုသူများက ၎င်းကို ဂရုပြုမနေဘဲ လွတ်လပ်စွာ ကြည့်ရှုနိုင်ပါသည်။ ဖုန်းမျက်နှာပြင်လော့ခ်ကို စာသားအတိုင်း သိမ်းမထားသဖြင့် အက်ပ်သည် စကားဝှက်အစစ်ကို မသိနိုင်ကြောင်း သတိပြုပါ။"</string>
+    <string name="permlab_requestScreenLockComplexity" msgid="7028982116060987169">"ဖုန်းမျက်နှာပြင် လော့ခ်ချရန် ရှုပ်ထွေးမှုအဆင့် တောင်းခံခြင်း"</string>
+    <string name="permdesc_requestScreenLockComplexity" msgid="2806396846128185677">"ဖုန်းမျက်နှာပြင်လော့ခ်၏ ရှုပ်ထွေးမှုအဆင့် (မြင့်၊ အလယ်အလတ်၊ နိမ့် သို့မဟုတ် မရှိ) အား လေ့လာရန် အက်ပ်ကို ခွင့်ပြုသည်။ ၎င်းက သတ်မှတ်ထားနိုင်သော ဖုန်းမျက်နှာပြင်လော့ခ်၏ စာလုံးရေနှင့် အမျိုးအစားကို ညွှန်ပြပေးသည်။ အသုံးပြုသူများအနေနှင့် ဖုန်းမျက်နှာပြင်လော့ခ်ကို အတိုင်းအတာတစ်ခုအထိ အဆင့်မြှင့်ရန် အက်ပ်က အကြံပြုနိုင်သည်။ သို့သော်လည်း အသုံးပြုသူများက ၎င်းကို ဂရုပြုမနေဘဲ လွတ်လပ်စွာ ကြည့်ရှုနိုင်ပါသည်။ ဖုန်းမျက်နှာပြင်လော့ခ်ကို စာသားအတိုင်း သိမ်းမထားသဖြင့် အက်ပ်သည် စကားဝှက်အစစ်ကို မသိနိုင်ကြောင်း သတိပြုပါ။"</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"ဇီဝဗေဒဆိုင်ရာ အချက်အလက်သုံး ကွန်ပျူတာဆိုင်ရာ စက်ပစ္စည်းကို အသုံးပြုရန်"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"အထောက်အထားစိစစ်ခြင်းအတွက် ဇီဝဗေဒဆိုင်ရာ သတင်းအချက်အလက်များသုံးသည့် ကွန်ပျူတာဆိုင်ရာ စက်ပစ္စည်းကို အသုံးပြုရန် အက်ပ်ကို ခွင့်ပြုသည်"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"လက်ဗွေရာပစ္စည်းကို စီမံမည်"</string>
@@ -536,6 +536,7 @@
     <string name="biometric_error_user_canceled" msgid="2260175018114348727">"အထောက်အထားစိစစ်ခြင်းကို ပယ်ဖျက်လိုက်သည်"</string>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"မသိပါ"</string>
     <string name="biometric_error_canceled" msgid="349665227864885880">"အထောက်အထားစိစစ်ခြင်းကို ပယ်ဖျက်လိုက်သည်"</string>
+    <string name="biometric_error_device_not_secured" msgid="6583143098363528349">"ပင်နံပါတ်၊ လော့ခ်ပုံစံ သို့မဟုတ် စကားဝှက် သတ်မှတ်မထားပါ"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"လက်ဗွေရဦ တစ်ပိုင်းတစ်စ တွေ့ရှိသည်။ ကျေးဇူးပြု၍ ထပ်မံကြိုးစားပါ။"</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"လက်ဗွေရာယူခြင်း မဆောင်ရွက်နိုင်ပါ။ ထပ်မံကြိုးစားပါ။"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"လက်ဗွေရာဖတ်ကိရိယာ ညစ်ပေနေသည်။ ကျေးဇူးပြု၍ ရှင်းလင်းကာ ထပ်မံကြိုးစားပါ။"</string>
@@ -555,7 +556,7 @@
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"အကြိမ်အရေအတွက် အလွန်များနေပါပြီ။ လက်ဗွေဖတ်စနစ်ကို ပိတ်ထားပါသည်။"</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"ပြန်ကြိုးစားပါ"</string>
     <string name="fingerprint_error_no_fingerprints" msgid="7654382120628334248">"မည်သည့် လက်ဗွေကိုမျှ ထည့်သွင်းမထားပါ။"</string>
-    <string name="fingerprint_error_hw_not_present" msgid="5729436878065119329">"ဤစက်ပစ္စည်းတွင် လက်ဗွေအာရုံခံကိရိယာ မရှိပါ"</string>
+    <string name="fingerprint_error_hw_not_present" msgid="409523969613176352">"ဤစက်တွင် လက်ဗွေအာရုံခံကိရိယာ မရှိပါ။"</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"လက်ချောင်း <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -575,7 +576,14 @@
     <string name="face_acquired_too_left" msgid="2712489669456176505">"အာရုံခံကိရိယာကို ဘယ်ဘက်သို့ ရွှေ့ပါ။"</string>
     <string name="face_acquired_poor_gaze" msgid="8344973502980415859">"အာရုံခံကိရိယာကို ကြည့်ပါ။"</string>
     <string name="face_acquired_not_detected" msgid="5707782294589511391">"မျက်နှာတစ်ခုမျှ မတွေ့ပါ။"</string>
-    <string name="face_acquired_not_steady" msgid="3722829465011040042">"မျက်နှာကို စက်၏ရှေ့တွင် အဆင်သင့်ထားပါ။"</string>
+    <string name="face_acquired_too_much_motion" msgid="470381210701463822">"လှုပ်ရှားမှု အလွန်များနေသည်။"</string>
+    <string name="face_acquired_recalibrate" msgid="8077949502893707539">"သင့်မျက်နှာကို ပြန်စာရင်းသွင်းပါ။"</string>
+    <string name="face_acquired_too_different" msgid="5553210341111255124">"မတူသည့် မျက်နှာ တွေ့ရှိထားသည်။"</string>
+    <string name="face_acquired_too_similar" msgid="1508776858407646460">"ဆင်တူနေသည်၊ အမူအရာ ပြောင်းပါ။"</string>
+    <string name="face_acquired_pan_too_extreme" msgid="8203001424525231680">"ကင်မရာကို တည့်တည့်ကြည့်ပါ။"</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="7641326344460439970">"ကင်မရာကို တည့်တည့်ကြည့်ပါ။"</string>
+    <string name="face_acquired_roll_too_extreme" msgid="1444829237745898619">"ခေါင်းမတ်မတ်ထားပါ။"</string>
+    <string name="face_acquired_obscured" msgid="3055077697850272097">"မျက်နှာ ဖော်ထားပါ။"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="6255891785768984615">"မျက်နှာ စက်ပစ္စည်း မရနိုင်ပါ။"</string>
@@ -587,7 +595,7 @@
     <string name="face_error_lockout_permanent" msgid="8198354656746088890">"အကြိမ်များစွာ စမ်းပြီးပါပြီ။ ပိတ်လိုက်ပါပြီ။"</string>
     <string name="face_error_unable_to_process" msgid="238761109287767270">"ထပ်စမ်းကြည့်ပါ။"</string>
     <string name="face_error_not_enrolled" msgid="9166792142679691323">"စာရင်းသွင်းထားသည့် မျက်နှာတစ်ခုမျှ မရှိပါ။"</string>
-    <string name="face_error_hw_not_present" msgid="4737289254517095671">"ဤစက်တွင် မျက်နှာအထောက်အထားစိစစ်ခြင်း အာရုံခံကိရိယာမရှိပါ"</string>
+    <string name="face_error_hw_not_present" msgid="916085883581450331">"ဤစက်တွင် မျက်နှာအထောက်အထားစိစစ်ခြင်း အာရုံခံကိရိယာမရှိပါ။"</string>
     <string name="face_name_template" msgid="7004562145809595384">"မျက်နှာ <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -947,8 +955,7 @@
     <string name="save_password_never" msgid="8274330296785855105">"လုံးဝ မလုပ်ပါ"</string>
     <string name="open_permission_deny" msgid="7374036708316629800">"သင့်ဆီမှာ ဒီစာမျက်နှာကို ဖွင့်ရန် ခွင့်ပြုချက် မရှိပါ။"</string>
     <string name="text_copied" msgid="4985729524670131385">"clipboardထံ စာသားအားကူးယူမည်"</string>
-    <!-- no translation found for copied (8564151838171791598) -->
-    <skip />
+    <string name="copied" msgid="8564151838171791598">"မိတ္တူကူးပြီးပါပြီ"</string>
     <string name="more_item_label" msgid="4650918923083320495">"နောက်ထပ်"</string>
     <string name="prepend_shortcut_label" msgid="2572214461676015642">"Menu+"</string>
     <string name="menu_meta_shortcut_label" msgid="4647153495550313570">"Meta+"</string>
@@ -1390,7 +1397,7 @@
     <string name="ext_media_init_action" msgid="7952885510091978278">"စဖွင့်သတ်မှတ်"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"ထုတ်မည်"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"စူးစမ်းရန်"</string>
-    <!-- no translation found for ext_media_seamless_action (5356508985817068711) -->
+    <!-- no translation found for ext_media_seamless_action (6575980560886881233) -->
     <skip />
     <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> ပျောက်နေသည်"</string>
     <string name="ext_media_missing_message" msgid="4012389235250987930">"စက်ပစ္စည်းကို ထပ်မံထည့်သွင်းပါ"</string>
@@ -1991,4 +1998,8 @@
     <string name="dynamic_mode_notification_title" msgid="508815255807182035">"ပုံမှန်အားသွင်းမှုမပြုလုပ်မီ ဘက်ထရီကုန်သွားနိုင်သည်"</string>
     <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"ဘက်ထရီသက်တမ်းကို တိုးမြှင့်ရန် \'ဘက်ထရီအားထိန်း\' စတင်ပြီးပါပြီ"</string>
     <string name="car_loading_profile" msgid="3545132581795684027">"တင်နေသည်"</string>
+    <plurals name="file_count" formatted="false" msgid="1628600959752419449">
+      <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> ဖိုင်</item>
+      <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> + <xliff:g id="COUNT_1">%d</xliff:g> ဖိုင်</item>
+    </plurals>
 </resources>

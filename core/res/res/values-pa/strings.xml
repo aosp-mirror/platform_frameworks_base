@@ -509,8 +509,8 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"ਐਪ ਨੂੰ ਨਜ਼ਦੀਕੀ ਖੇਤਰ ਸੰਚਾਰ (NFC) ਟੈਗਾਂ, ਕਾਰਡਾਂ ਅਤੇ ਰੀਡਰਾਂ ਨਾਲ ਸੰਚਾਰ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"ਆਪਣਾ ਸਕ੍ਰੀਨ  ਲਾਕ  ਅਸਮਰੱਥ ਬਣਾਓ"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"ਐਪ ਨੂੰ ਕੀਲਾਕ ਅਤੇ ਕਿਸੇ ਵੀ ਸੰਬੰਧਿਤ ਪਾਸਵਰਡ ਸੁਰੱਖਿਆ ਨੂੰ ਬੰਦ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਉਦਾਹਰਨ ਲਈ, ਫ਼ੋਨ ਇੱਕ ਇਨਕਮਿੰਗ ਫ਼ੋਨ ਕਾਲ ਪ੍ਰਾਪਤ ਕਰਨ ਵੇਲੇ ਬੰਦ ਕਰਦਾ ਹੈ, ਫਿਰ ਜਦੋਂ ਕਾਲ ਖਤਮ ਹੁੰਦੀ ਹੈ ਤਾਂ ਕੀਲਾਕ ਨੂੰ ਮੁੜ-ਚਾਲੂ ਕਰਦਾ ਹੈ।"</string>
-    <string name="permlab_getAndRequestScreenLockComplexity" msgid="3911592334192005424">"ਸਕ੍ਰੀਨ ਲਾਕ ਦੀ ਜਟਿਲਤਾ ਪ੍ਰਾਪਤ ਕਰੋ ਅਤੇ ਬੇਨਤੀ ਕਰੋ"</string>
-    <string name="permdesc_getAndRequestScreenLockComplexity" msgid="9045202063228854873">"ਐਪ ਨੂੰ ਸਕ੍ਰੀਨ ਲਾਕ ਦੀ ਜਟਿਲਤਾ ਦੇ ਪੱਧਰ ਬਾਰੇ ਜਾਣਨ ਦਿਓ (ਉੱਚ, ਮੱਧਮ, ਘੱਟ ਜਾਂ ਕੋਈ ਨਹੀਂ), ਜੋ ਲੰਬਾਈ ਦੀ ਸੰਭਵ ਰੇਂਜ ਅਤੇ ਸਕ੍ਰੀਨ ਲਾਕ ਦੀ ਕਿਸਮ ਦਾ ਸੰਕੇਤ ਦਿੰਦਾ ਹੈ। ਐਪ ਵਰਤੋਂਕਾਰਾਂ ਨੂੰ ਇੱਕ ਖਾਸ ਪੱਧਰ ਤੱਕ ਸਕ੍ਰੀਨ ਲਾਕ ਅੱਪਡੇਟ ਕਰਨ ਲਈ ਸੁਝਾਅ ਵੀ ਦੇ ਸਕਦੀ ਹੈ ਪਰ ਵਰਤੋਂਕਾਰ ਇਸਨੂੰ ਅਣਡਿੱਠ ਕਰ ਸਕਦੇ ਹਨ। ਨੋਟ ਕਰੋ ਕਿ ਸਕ੍ਰੀਨ ਲਾਕ ਸਧਾਰਨ ਲਿਖਤ ਵਿੱਚ ਸਟੋਰ ਨਹੀਂ ਕੀਤਾ ਜਾਂਦਾ ਹੈ ਇਸ ਲਈ ਐਪ ਸਹੀ ਪਾਸਵਰਡ ਬਾਰੇ ਨਹੀਂ ਜਾਣਦੀ ਹੈ।"</string>
+    <string name="permlab_requestScreenLockComplexity" msgid="7028982116060987169">"ਸਕ੍ਰੀਨ ਲਾਕ ਦੀ ਜਟਿਲਤਾ ਲਈ ਬੇਨਤੀ ਕਰੋ"</string>
+    <string name="permdesc_requestScreenLockComplexity" msgid="2806396846128185677">"ਐਪ ਨੂੰ ਸਕ੍ਰੀਨ ਲਾਕ ਦੀ ਜਟਿਲਤਾ ਦੇ ਪੱਧਰ ਬਾਰੇ ਜਾਣਨ ਦਿਓ (ਉੱਚ, ਮੱਧਮ, ਘੱਟ ਜਾਂ ਕੋਈ ਨਹੀਂ), ਜੋ ਲੰਬਾਈ ਦੀ ਸੰਭਵ ਰੇਂਜ ਅਤੇ ਸਕ੍ਰੀਨ ਲਾਕ ਦੀ ਕਿਸਮ ਦਾ ਸੰਕੇਤ ਦਿੰਦਾ ਹੈ। ਐਪ ਵਰਤੋਂਕਾਰਾਂ ਨੂੰ ਇੱਕ ਖਾਸ ਪੱਧਰ ਤੱਕ ਸਕ੍ਰੀਨ ਲਾਕ ਅੱਪਡੇਟ ਕਰਨ ਲਈ ਸੁਝਾਅ ਵੀ ਦੇ ਸਕਦੀ ਹੈ ਪਰ ਵਰਤੋਂਕਾਰ ਇਸਨੂੰ ਅਣਡਿੱਠ ਕਰ ਸਕਦੇ ਹਨ। ਨੋਟ ਕਰੋ ਕਿ ਸਕ੍ਰੀਨ ਲਾਕ ਸਧਾਰਨ ਲਿਖਤ ਵਿੱਚ ਸਟੋਰ ਨਹੀਂ ਕੀਤਾ ਜਾਂਦਾ ਹੈ ਇਸ ਲਈ ਐਪ ਸਹੀ ਪਾਸਵਰਡ ਬਾਰੇ ਨਹੀਂ ਜਾਣਦੀ ਹੈ।"</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"ਬਾਇਓਮੈਟ੍ਰਿਕ ਹਾਰਡਵੇਅਰ ਵਰਤੋ"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"ਐਪ ਨੂੰ ਪ੍ਰਮਾਣੀਕਰਨ ਲਈ ਬਾਇਓਮੈਟ੍ਰਿਕ ਹਾਰਡਵੇਅਰ ਵਰਤਣ ਦਿੰਦਾ ਹੈ"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"ਫਿੰਗਰਪ੍ਰਿੰਟ ਹਾਰਡਵੇਅਰ ਵਿਵਸਥਿਤ ਕਰੋ"</string>
@@ -536,6 +536,7 @@
     <string name="biometric_error_user_canceled" msgid="2260175018114348727">"ਪ੍ਰਮਾਣੀਕਰਨ ਰੱਦ ਕੀਤਾ ਗਿਆ"</string>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"ਪਛਾਣ ਨਹੀਂ ਹੋਈ"</string>
     <string name="biometric_error_canceled" msgid="349665227864885880">"ਪ੍ਰਮਾਣੀਕਰਨ ਰੱਦ ਕੀਤਾ ਗਿਆ"</string>
+    <string name="biometric_error_device_not_secured" msgid="6583143098363528349">"ਕੋਈ ਪਿੰਨ, ਪੈਟਰਨ ਜਾਂ ਪਾਸਵਰਡ ਸੈੱਟ ਨਹੀਂ ਕੀਤਾ ਗਿਆ"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"ਅਧੂਰਾ ਫਿੰਗਰਪ੍ਰਿਟ ਮਿਲਿਆ। ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"ਫਿੰਗਰਪ੍ਰਿੰਟ ਦੀ ਪ੍ਰਕਿਰਿਆ ਨਹੀਂ ਕਰ ਸਕਿਆ। ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"ਫਿੰਗਰਪ੍ਰਿੰਟ ਸੰਵੇਦਕ ਗੰਦਾ ਹੈ। ਕਿਰਪਾ ਕਰਕੇ ਇਸਨੂੰ ਸਾਫ਼ ਕਰੋ ਅਤੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
@@ -555,7 +556,7 @@
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"ਹੱਦੋਂ ਵੱਧ ਕੋਸ਼ਿਸ਼ਾਂ। ਫਿੰਗਰਪ੍ਰਿੰਟ ਸੈਂਸਰ ਅਯੋਗ ਬਣਾਇਆ ਗਿਆ।"</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="7654382120628334248">"ਕੋਈ ਫਿੰਗਰਪ੍ਰਿੰਟ ਦਰਜ ਨਹੀਂ ਕੀਤੇ ਗਏ।"</string>
-    <string name="fingerprint_error_hw_not_present" msgid="5729436878065119329">"ਇਸ ਡੀਵਾਈਸ ਵਿੱਚ ਫਿੰਗਰਪ੍ਰਿੰਟ ਸੈਂਸਰ ਨਹੀਂ ਹੈ"</string>
+    <string name="fingerprint_error_hw_not_present" msgid="409523969613176352">"ਇਸ ਡੀਵਾਈਸ ਵਿੱਚ ਫਿੰਗਰਪ੍ਰਿੰਟ ਸੈਂਸਰ ਨਹੀਂ ਹੈ।"</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"ਉਂਗਲ <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -575,7 +576,14 @@
     <string name="face_acquired_too_left" msgid="2712489669456176505">"ਸੈਂਸਰ ਨੂੰ ਖੱਬੇ ਪਾਸੇ ਲਿਜਾਓ।"</string>
     <string name="face_acquired_poor_gaze" msgid="8344973502980415859">"ਕਿਰਪਾ ਕਰਕੇ ਸੈਂਸਰ ਵੱਲ ਦੇਖੋ।"</string>
     <string name="face_acquired_not_detected" msgid="5707782294589511391">"ਕੋਈ ਚਿਹਰਾ ਨਹੀਂ ਦਿਸਿਆ।"</string>
-    <string name="face_acquired_not_steady" msgid="3722829465011040042">"ਚਿਹਰੇ ਨੂੰ ਡੀਵਾਈਸ ਦੇ ਸਾਹਮਣੇ ਸਥਿਰ ਰੱਖੋ।"</string>
+    <string name="face_acquired_too_much_motion" msgid="470381210701463822">"ਬਹੁਤ ਜ਼ਿਆਦਾ ਹਿਲਜੁਲ।"</string>
+    <string name="face_acquired_recalibrate" msgid="8077949502893707539">"ਕਿਰਪਾ ਕਰਕੇ ਆਪਣਾ ਚਿਹਰਾ ਦੁਬਾਰਾ ਦਰਜ ਕਰੋ।"</string>
+    <string name="face_acquired_too_different" msgid="5553210341111255124">"ਵੱਖਰੇ ਚਿਹਰੇ ਦੀ ਪਛਾਣ ਕੀਤੀ ਗਈ।"</string>
+    <string name="face_acquired_too_similar" msgid="1508776858407646460">"ਬਹੁਤ ਮਿਲਦਾ-ਜੁਲਦਾ ਹੈ, ਕਿਰਪਾ ਕਰਕੇ ਆਪਣਾ ਅੰਦਾਜ਼ ਬਦਲੋ।"</string>
+    <string name="face_acquired_pan_too_extreme" msgid="8203001424525231680">"ਕਿਰਪਾ ਕਰਕੇ ਸਿੱਧਾ ਕੈਮਰੇ ਵੱਲ ਦੇਖੋ।"</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="7641326344460439970">"ਕਿਰਪਾ ਕਰਕੇ ਸਿੱਧਾ ਕੈਮਰੇ ਵੱਲ ਦੇਖੋ।"</string>
+    <string name="face_acquired_roll_too_extreme" msgid="1444829237745898619">"ਕਿਰਪਾ ਕਰਕੇ ਆਪਣੇ ਸਿਰ ਨੂੰ ਸਿੱਧਾ ਖੜ੍ਹਵਾਂ ਰੱਖੋ।"</string>
+    <string name="face_acquired_obscured" msgid="3055077697850272097">"ਕਿਰਪਾ ਕਰਕੇ ਆਪਣਾ ਚਿਹਰਾ ਦਿਖਾਓ।"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="6255891785768984615">"ਚਿਹਰਾ ਹਾਰਡਵੇਅਰ ਉਪਲਬਧ ਨਹੀਂ ਹੈ।"</string>
@@ -587,7 +595,7 @@
     <string name="face_error_lockout_permanent" msgid="8198354656746088890">"ਹੱਦੋਂ ਵੱਧ ਕੋਸ਼ਿਸ਼ਾਂ। ਚਿਹਰਾ ਪ੍ਰਮਾਣੀਕਰਨ ਬੰਦ ਹੈ।"</string>
     <string name="face_error_unable_to_process" msgid="238761109287767270">"ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
     <string name="face_error_not_enrolled" msgid="9166792142679691323">"ਕੋਈ ਚਿਹਰਾ ਜਾਣਕਾਰੀ ਦਰਜ ਨਹੀਂ ਕੀਤੀ ਗਈ।"</string>
-    <string name="face_error_hw_not_present" msgid="4737289254517095671">"ਇਸ ਡੀਵਾਈਸ ਵਿੱਚ ਕੋਈ ਚਿਹਰਾ ਪ੍ਰਮਾਣੀਕਰਨ ਸੈਂਸਰ ਨਹੀਂ ਹੈ"</string>
+    <string name="face_error_hw_not_present" msgid="916085883581450331">"ਇਸ ਡੀਵਾਈਸ ਵਿੱਚ ਕੋਈ ਚਿਹਰਾ ਪ੍ਰਮਾਣੀਕਰਨ ਸੈਂਸਰ ਨਹੀਂ ਹੈ।"</string>
     <string name="face_name_template" msgid="7004562145809595384">"ਚਿਹਰਾ <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -947,8 +955,7 @@
     <string name="save_password_never" msgid="8274330296785855105">"ਕਦੇ ਵੀ ਨਹੀਂ"</string>
     <string name="open_permission_deny" msgid="7374036708316629800">"ਤੁਹਾਨੂੰ ਇਸ ਸਫ਼ੇ ਨੂੰ ਖੋਲ੍ਹਣ ਦੀ ਅਨੁਮਤੀ ਨਹੀਂ ਹੈ।"</string>
     <string name="text_copied" msgid="4985729524670131385">"ਟੈਕਸਟ ਕਲਿਪਬੋਰਡ ਤੇ ਕਾਪੀ ਕੀਤਾ।"</string>
-    <!-- no translation found for copied (8564151838171791598) -->
-    <skip />
+    <string name="copied" msgid="8564151838171791598">"ਕਾਪੀ ਕੀਤੀ ਗਈ"</string>
     <string name="more_item_label" msgid="4650918923083320495">"ਹੋਰ"</string>
     <string name="prepend_shortcut_label" msgid="2572214461676015642">"ਮੀਨੂ+"</string>
     <string name="menu_meta_shortcut_label" msgid="4647153495550313570">"Meta+"</string>
@@ -1134,8 +1141,7 @@
     <string name="whichEditApplication" msgid="144727838241402655">"ਇਸ ਨਾਲ ਸੰਪਾਦਨ ਕਰੋ"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"%1$s ਨਾਲ ਸੰਪਾਦਨ ਕਰੋ"</string>
     <string name="whichEditApplicationLabel" msgid="7183524181625290300">"ਸੰਪਾਦਨ ਕਰੋ"</string>
-    <!-- no translation found for whichSendApplication (5803792421724377602) -->
-    <skip />
+    <string name="whichSendApplication" msgid="5803792421724377602">"ਸਾਂਝਾ ਕਰੋ"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"%1$s ਨਾਲ ਸਾਂਝਾ ਕਰੋ"</string>
     <string name="whichSendApplicationLabel" msgid="4579076294675975354">"ਸਾਂਝਾ ਕਰੋ"</string>
     <string name="whichSendToApplication" msgid="8272422260066642057">"ਇਸ ਦੀ ਵਰਤੋਂ ਨਾਲ ਭੇਜੋ"</string>
@@ -1391,7 +1397,7 @@
     <string name="ext_media_init_action" msgid="7952885510091978278">"ਸਥਾਪਤ ਕਰੋ"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"ਬਾਹਰ ਕੱਢੋ"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"ਐਕਸਪਲੋਰ ਕਰੋ"</string>
-    <!-- no translation found for ext_media_seamless_action (5356508985817068711) -->
+    <!-- no translation found for ext_media_seamless_action (6575980560886881233) -->
     <skip />
     <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> ਲਾਪਤਾ"</string>
     <string name="ext_media_missing_message" msgid="4012389235250987930">"ਦੁਬਾਰਾ ਡੀਵਾਈਸ ਸ਼ਾਮਲ ਕਰੋ"</string>
@@ -1992,4 +1998,8 @@
     <string name="dynamic_mode_notification_title" msgid="508815255807182035">"ਬੈਟਰੀ ਚਾਰਜ ਕਰਨ ਦੇ ਮਿੱਥੇ ਸਮੇਂ ਤੋਂ ਪਹਿਲਾਂ ਸ਼ਾਇਦ ਬੈਟਰੀ ਖਤਮ ਹੋ ਜਾਵੇ"</string>
     <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"ਬੈਟਰੀ ਲਾਈਫ਼ ਵਧਾਉਣ ਲਈ ਬੈਟਰੀ ਸੇਵਰ ਚਾਲੂ ਕੀਤਾ ਗਿਆ"</string>
     <string name="car_loading_profile" msgid="3545132581795684027">"ਲੋਡ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ"</string>
+    <plurals name="file_count" formatted="false" msgid="1628600959752419449">
+      <item quantity="one"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> ਫ਼ਾਈਲ</item>
+      <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> ਫ਼ਾਈਲਾਂ</item>
+    </plurals>
 </resources>
