@@ -46,6 +46,8 @@ import android.util.ArrayMap;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
+
+import com.android.internal.annotations.Immutable;
 import com.android.internal.app.IAppOpsActiveCallback;
 import com.android.internal.app.IAppOpsCallback;
 import com.android.internal.app.IAppOpsNotedCallback;
@@ -2210,6 +2212,115 @@ public class AppOpsManager {
     }
 
     /**
+     * Request for getting historical app op usage. The request acts
+     * as a filtering criteria when querying historical op usage.
+     *
+     * @hide
+     */
+    @Immutable
+    @TestApi
+    @SystemApi
+    public static final class HistoricalOpsRequest {
+        private final int mUid;
+        private final @Nullable String mPackageName;
+        private final @Nullable List<String> mOpNames;
+        private final long mBeginTimeMillis;
+        private final long mEndTimeMillis;
+
+        private HistoricalOpsRequest(int uid, @Nullable String packageName,
+                @Nullable List<String> opNames, long beginTimeMillis, long endTimeMillis) {
+            mUid = uid;
+            mPackageName = packageName;
+            mOpNames = opNames;
+            mBeginTimeMillis = beginTimeMillis;
+            mEndTimeMillis = endTimeMillis;
+        }
+
+        /**
+         * Builder for creating a {@link HistoricalOpsRequest}.
+         *
+         * @hide
+         */
+        @TestApi
+        @SystemApi
+        public static final class Builder {
+            private int mUid = Process.INVALID_UID;
+            private @Nullable String mPackageName;
+            private @Nullable List<String> mOpNames;
+            private final long mBeginTimeMillis;
+            private final long mEndTimeMillis;
+
+            /**
+             * Creates a new builder.
+             *
+             * @param beginTimeMillis The beginning of the interval in milliseconds since
+             *     epoch start (January 1, 1970 00:00:00.000 GMT - Gregorian). Must be non
+             *     negative.
+             * @param endTimeMillis The end of the interval in milliseconds since
+             *     epoch start (January 1, 1970 00:00:00.000 GMT - Gregorian). Must be after
+             *     {@code beginTimeMillis}. Pass {@link Long#MAX_VALUE} to get the most recent
+             *     history including ops that happen while this call is in flight.
+             */
+            public Builder(long beginTimeMillis, long endTimeMillis) {
+                Preconditions.checkArgument(beginTimeMillis >= 0 && beginTimeMillis < endTimeMillis,
+                        "beginTimeMillis must be non negative and lesser than endTimeMillis");
+                mBeginTimeMillis = beginTimeMillis;
+                mEndTimeMillis = endTimeMillis;
+            }
+
+            /**
+             * Sets the UID to query for.
+             *
+             * @param uid The uid. Pass {@link android.os.Process#INVALID_UID} for any uid.
+             * @return This builder.
+             */
+            public @NonNull Builder setUid(int uid) {
+                Preconditions.checkArgument(uid == Process.INVALID_UID || uid >= 0,
+                        "uid must be " + Process.INVALID_UID + " or non negative");
+                mUid = uid;
+                return this;
+            }
+
+            /**
+             * Sets the package to query for.
+             *
+             * @param packageName The package name. <code>Null</code> for any package.
+             * @return This builder.
+             */
+            public @NonNull Builder setPackageName(@Nullable String packageName) {
+                mPackageName = packageName;
+                return this;
+            }
+
+            /**
+             * Sets the op names to query for.
+             *
+             * @param opNames The op names. <code>Null</code> for any op.
+             * @return This builder.
+             */
+            public @NonNull Builder setOpNames(@Nullable List<String> opNames) {
+                if (opNames != null) {
+                    final int opCount = opNames.size();
+                    for (int i = 0; i < opCount; i++) {
+                        Preconditions.checkArgument(AppOpsManager.strOpToOp(
+                                opNames.get(i)) != AppOpsManager.OP_NONE);
+                    }
+                }
+                mOpNames = opNames;
+                return this;
+            }
+
+            /**
+             * @return a new {@link HistoricalOpsRequest}.
+             */
+            public @NonNull HistoricalOpsRequest build() {
+                return new HistoricalOpsRequest(mUid, mPackageName, mOpNames,
+                        mBeginTimeMillis, mEndTimeMillis);
+            }
+        }
+    }
+
+    /**
      * This class represents historical app op state of all UIDs for a given time interval.
      *
      * @hide
@@ -3671,26 +3782,7 @@ public class AppOpsManager {
     /**
      * Retrieve historical app op stats for a period.
      *
-     * <p>Historical data can be obtained
-     * for a specific package by specifying the <code>packageName</code> argument,
-     * for a specific UID if specifying the <code>uid</code> argument, for a
-     * specific package in a UID by specifying the <code>packageName</code>
-     * and the <code>uid</code> arguments, for all packages by passing
-     * {@link android.os.Process#INVALID_UID} and <code>null</code> for the
-     *  <code>uid</code> and <code>packageName</code> arguments, respectively.
-     *  Similarly, you can specify the <code>opNames</code> argument to get
-     *  data only for these ops or <code>null</code> for all ops.
-     *
-     * @param uid The UID to query for.
-     * @param packageName The package to query for.
-     * @param beginTimeMillis The beginning of the interval in milliseconds since
-     *     epoch start (January 1, 1970 00:00:00.000 GMT - Gregorian). Must be non
-     *     negative.
-     * @param endTimeMillis The end of the interval in milliseconds since
-     *     epoch start (January 1, 1970 00:00:00.000 GMT - Gregorian). Must be after
-     *     {@code beginTimeMillis}. Pass {@link Long#MAX_VALUE} to get the most recent
-     *     history including ops that happen while this call is in flight.
-     * @param opNames The ops to query for. Pass {@code null} for all ops.
+     * @param request A request object describing the data being queried for.
      * @param executor Executor on which to run the callback. If <code>null</code>
      *     the callback is executed on the default executor running on the main thread.
      * @param callback Callback on which to deliver the result.
@@ -3702,13 +3794,13 @@ public class AppOpsManager {
     @TestApi
     @SystemApi
     @RequiresPermission(android.Manifest.permission.GET_APP_OPS_STATS)
-    public void getHistoricalOps(int uid, @Nullable String packageName,
-            @Nullable String[] opNames, long beginTimeMillis, long endTimeMillis,
+    public void getHistoricalOps(@NonNull HistoricalOpsRequest request,
             @NonNull Executor executor, @NonNull Consumer<HistoricalOps> callback) {
         Preconditions.checkNotNull(executor, "executor cannot be null");
         Preconditions.checkNotNull(callback, "callback cannot be null");
         try {
-            mService.getHistoricalOps(uid, packageName, opNames, beginTimeMillis, endTimeMillis,
+            mService.getHistoricalOps(request.mUid, request.mPackageName, request.mOpNames,
+                    request.mBeginTimeMillis, request.mEndTimeMillis,
                     new RemoteCallback((result) -> {
                 final HistoricalOps ops = result.getParcelable(KEY_HISTORICAL_OPS);
                 final long identity = Binder.clearCallingIdentity();
@@ -3725,29 +3817,12 @@ public class AppOpsManager {
 
     /**
      * Retrieve historical app op stats for a period.
-     *
-     * <p>Historical data can be obtained
-     * for a specific package by specifying the <code>packageName</code> argument,
-     * for a specific UID if specifying the <code>uid</code> argument, for a
-     * specific package in a UID by specifying the <code>packageName</code>
-     * and the <code>uid</code> arguments, for all packages by passing
-     * {@link android.os.Process#INVALID_UID} and <code>null</code> for the
-     *  <code>uid</code> and <code>packageName</code> arguments, respectively.
-     *  Similarly, you can specify the <code>opNames</code> argument to get
-     *  data only for these ops or <code>null</code> for all ops.
      *  <p>
      *  This method queries only the on disk state and the returned ops are raw,
      *  which is their times are relative to the history start as opposed to the
      *  epoch start.
      *
-     * @param uid The UID to query for.
-     * @param packageName The package to query for.
-     * @param beginTimeMillis The beginning of the interval in milliseconds since
-     *      history start. History time grows as one goes into the past.
-     * @param endTimeMillis The end of the interval in milliseconds since
-     *      history start. History time grows as one goes into the past. Must be after
-     *     {@code beginTimeMillis}.
-     * @param opNames The ops to query for. Pass {@code null} for all ops.
+     * @param request A request object describing the data being queried for.
      * @param executor Executor on which to run the callback. If <code>null</code>
      *     the callback is executed on the default executor running on the main thread.
      * @param callback Callback on which to deliver the result.
@@ -3758,15 +3833,15 @@ public class AppOpsManager {
      */
     @TestApi
     @RequiresPermission(android.Manifest.permission.GET_APP_OPS_STATS)
-    public void getHistoricalOpsFromDiskRaw(int uid, @Nullable String packageName,
-            @Nullable String[] opNames, long beginTimeMillis, long endTimeMillis,
+    public void getHistoricalOpsFromDiskRaw(@NonNull HistoricalOpsRequest request,
             @Nullable Executor executor, @NonNull Consumer<HistoricalOps> callback) {
         Preconditions.checkNotNull(executor, "executor cannot be null");
         Preconditions.checkNotNull(callback, "callback cannot be null");
         try {
-            mService.getHistoricalOpsFromDiskRaw(uid, packageName, opNames, beginTimeMillis,
-                    endTimeMillis, new RemoteCallback((result) -> {
-               final HistoricalOps ops = result.getParcelable(KEY_HISTORICAL_OPS);
+            mService.getHistoricalOpsFromDiskRaw(request.mUid, request.mPackageName,
+                    request.mOpNames, request.mBeginTimeMillis, request.mEndTimeMillis,
+                    new RemoteCallback((result) -> {
+                final HistoricalOps ops = result.getParcelable(KEY_HISTORICAL_OPS);
                 final long identity = Binder.clearCallingIdentity();
                 try {
                     executor.execute(() -> callback.accept(ops));
