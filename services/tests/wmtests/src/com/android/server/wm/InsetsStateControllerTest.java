@@ -19,6 +19,7 @@ package com.android.server.wm;
 import static android.view.InsetsState.TYPE_IME;
 import static android.view.InsetsState.TYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.TYPE_TOP_BAR;
+import static android.view.ViewRootImpl.NEW_INSETS_MODE_FULL;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 
 import static org.junit.Assert.assertEquals;
@@ -28,15 +29,33 @@ import static org.junit.Assert.assertNull;
 import android.platform.test.annotations.Presubmit;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
+import android.view.ViewRootImpl;
 
 import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 @SmallTest
 @Presubmit
 public class InsetsStateControllerTest extends WindowTestsBase {
+    private static int sPreviousNewInsetsMode;
+
+    @BeforeClass
+    public static void setUpOnce() {
+        // TODO: Make use of SettingsSession when it becomes feasible for this.
+        sPreviousNewInsetsMode = ViewRootImpl.sNewInsetsMode;
+        // To let the insets provider control the insets visibility, the insets mode has to be
+        // NEW_INSETS_MODE_FULL.
+        ViewRootImpl.sNewInsetsMode = NEW_INSETS_MODE_FULL;
+    }
+
+    @AfterClass
+    public static void tearDownOnce() {
+        ViewRootImpl.sNewInsetsMode = sPreviousNewInsetsMode;
+    }
 
     @Test
     public void testStripForDispatch_notOwn() {
@@ -47,7 +66,7 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         assertNotNull(getController().getInsetsForDispatch(app).getSource(TYPE_TOP_BAR));
     }
 
-    @FlakyTest(bugId = 69229402)
+    @FlakyTest(detail = "Promote to pre-submit once confirmed stable.")
     @Test
     public void testStripForDispatch_own() {
         final WindowState topBar = createWindow(null, TYPE_APPLICATION, "parentWindow");
@@ -57,7 +76,7 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         assertEquals(new InsetsState(), getController().getInsetsForDispatch(topBar));
     }
 
-    @FlakyTest(bugId = 124088319)
+    @FlakyTest(detail = "Promote to pre-submit once confirmed stable.")
     @Test
     public void testStripForDispatch_navBar() {
         final WindowState navBar = createWindow(null, TYPE_APPLICATION, "parentWindow");
@@ -69,7 +88,7 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         assertEquals(new InsetsState(), getController().getInsetsForDispatch(navBar));
     }
 
-    @FlakyTest(bugId = 124088319)
+    @FlakyTest(detail = "Promote to pre-submit once confirmed stable.")
     @Test
     public void testBarControllingWinChanged() {
         final WindowState navBar = createWindow(null, TYPE_APPLICATION, "parentWindow");
@@ -82,7 +101,7 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         assertEquals(2, controls.length);
     }
 
-    @FlakyTest(bugId = 124088319)
+    @FlakyTest(detail = "Promote to pre-submit once confirmed stable.")
     @Test
     public void testControlRevoked() {
         final WindowState topBar = createWindow(null, TYPE_APPLICATION, "parentWindow");
