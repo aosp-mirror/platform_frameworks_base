@@ -245,6 +245,7 @@ message Atom {
         AssistGestureStageReported assist_gesture_stage_reported = 174;
         AssistGestureFeedbackReported assist_gesture_feedback_reported = 175;
         AssistGestureProgressReported assist_gesture_progress_reported = 176;
+        TouchGestureClassified touch_gesture_classified = 177;
     }
 
     // Pulled events will start at field 10000.
@@ -2406,6 +2407,37 @@ message TouchEventReported {
     optional float latency_mean_micros = 3;
     // Standard deviation
     optional float latency_stdev_micros = 4;
+}
+
+/**
+ * Logs gesture classification and timing information for touch events.
+ *
+ * Logged from:
+ *   frameworks/base/core/java/android/view/GestureDetector.java
+ *   frameworks/base/core/java/android/view/View.java
+ */
+message TouchGestureClassified {
+    // The source of the classification (e.g. Java class name).
+    optional string source = 1;
+
+    enum Classification {
+        UNKNOWN_CLASSIFICATION = 0;
+        SINGLE_TAP = 1;
+        DOUBLE_TAP = 2;
+        LONG_PRESS = 3;
+        DEEP_PRESS = 4;
+        SCROLL = 5;
+    }
+    // The classification of the gesture.
+    optional Classification classification = 2;
+
+    // The interval from the start of a touch event stream until the
+    // classification was made.
+    optional int32 latency_millis = 3;
+
+    // The distance from the location of the first touch event to the
+    // location of the touch event when the classification was made.
+    optional float displacement_px = 4;
 }
 
 /**
