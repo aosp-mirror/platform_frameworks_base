@@ -366,17 +366,22 @@ public class TrustManagerService extends SystemService {
         } catch (RemoteException e) {
         }
 
-        if (mSettingsObserver.getTrustAgentsExtendUnlock()) {
-            trusted = trusted && (!showingKeyguard || isFromUnlock) && userId == mCurrentUser;
-            if (DEBUG) {
-                Slog.d(TAG, "Extend unlock setting trusted as " + Boolean.toString(trusted)
-                        + " && " + Boolean.toString(!showingKeyguard)
-                        + " && " + Boolean.toString(userId == mCurrentUser));
-            }
-        }
-
         boolean changed;
         synchronized (mUserIsTrusted) {
+            if (mSettingsObserver.getTrustAgentsExtendUnlock()) {
+                // In extend unlock trust agents can only set the device to trusted if it already
+                // trusted or the device is unlocked. Attempting to set the device as trusted
+                // when the device is locked will be ignored.
+                changed = mUserIsTrusted.get(userId) != trusted;
+                trusted = trusted
+                        && (!showingKeyguard || isFromUnlock || !changed)
+                        && userId == mCurrentUser;
+                if (DEBUG) {
+                    Slog.d(TAG, "Extend unlock setting trusted as " + Boolean.toString(trusted)
+                            + " && " + Boolean.toString(!showingKeyguard)
+                            + " && " + Boolean.toString(userId == mCurrentUser));
+                }
+            }
             changed = mUserIsTrusted.get(userId) != trusted;
             mUserIsTrusted.put(userId, trusted);
         }
