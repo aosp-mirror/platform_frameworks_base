@@ -396,6 +396,10 @@ public class DockedStackDividerController {
         if (mAdjustedForIme != adjustedForIme || (adjustedForIme && mImeHeight != imeHeight)
                 || mAdjustedForDivider != adjustedForDivider) {
             if (animate && !mAnimatingForMinimizedDockedStack) {
+                // Notify SystemUI to set the target docked stack size according current docked
+                // state without animation when calling startImeAdjustAnimation.
+                notifyDockedStackMinimizedChanged(mMinimizedDock, false /* animate */,
+                        isHomeStackResizable());
                 startImeAdjustAnimation(adjustedForIme, adjustedForDivider, imeWin);
             } else {
                 // Animation might be delayed, so only notify if we don't run an animation.
@@ -889,7 +893,10 @@ public class DockedStackDividerController {
         }
         if (mAnimatingForMinimizedDockedStack) {
             return animateForMinimizedDockedStack(now);
-        } else if (mAnimatingForIme) {
+        } else if (mAnimatingForIme && !mDisplayContent.mAppTransition.isRunning()) {
+            // To prevent task stack resize animation may flicking when playing app transition
+            // animation & IME window enter animation in parallel, make sure app transition is done
+            // and then start to animate for IME.
             return animateForIme(now);
         }
         return false;
