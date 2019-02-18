@@ -352,7 +352,7 @@ public class FullRestoreEngine extends RestoreEngine {
                                         Slog.d(TAG,
                                                 "Clearing app data preparatory to full restore");
                                     }
-                                    mBackupManagerService.clearApplicationDataSynchronous(pkg, true);
+                                    mBackupManagerService.clearApplicationDataBeforeRestore(pkg);
                                 } else {
                                     if (MORE_DEBUG) {
                                         Slog.d(TAG, "backup agent ("
