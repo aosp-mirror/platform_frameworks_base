@@ -27,6 +27,7 @@ import android.content.Context;
 import android.content.IIntentReceiver;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -108,7 +109,7 @@ public abstract class PreBootBroadcaster extends IIntentReceiver.Stub {
         mIntent.setComponent(componentName);
         mService.broadcastIntentLocked(null, null, mIntent, null, this, 0, null, null, null,
                 AppOpsManager.OP_NONE, null, true, false, ActivityManagerService.MY_PID,
-                Process.SYSTEM_UID, mUserId);
+                Process.SYSTEM_UID, Binder.getCallingUid(), Binder.getCallingPid(), mUserId);
     }
 
     @Override

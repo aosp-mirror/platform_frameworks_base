@@ -423,9 +423,9 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
                         // If a completion callback has been requested, require
                         // that the broadcast be delivered synchronously
                         int sent = controller.mAmInternal.broadcastIntentInPackage(key.packageName,
-                                uid, finalIntent, resolvedType, finishedReceiver, code, null, null,
-                                requiredPermission, options, (finishedReceiver != null),
-                                false, userId,
+                                uid, callingUid, callingPid, finalIntent, resolvedType,
+                                finishedReceiver, code, null, null, requiredPermission, options,
+                                (finishedReceiver != null), false, userId,
                                 mAllowBgActivityStartsForBroadcastSender.contains(whitelistToken)
                                 || allowTrampoline);
                         if (sent == ActivityManager.BROADCAST_SUCCESS) {
