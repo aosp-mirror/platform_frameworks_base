@@ -253,6 +253,11 @@ public class ZygoteProcess {
     private int mHiddenApiAccessLogSampleRate;
 
     /**
+     * Proportion of hidden API accesses that should be logged to statslog; 0 - 0x10000.
+     */
+    private int mHiddenApiAccessStatslogSampleRate;
+
+    /**
      * The state of the connection to the primary zygote.
      */
     private ZygoteState primaryZygoteState;
@@ -487,6 +492,7 @@ public class ZygoteProcess {
         "--start-child-zygote",
         "--set-api-blacklist-exemptions",
         "--hidden-api-log-sampling-rate",
+        "--hidden-api-statslog-sampling-rate",
         "--invoke-with"
     };
 
@@ -776,6 +782,21 @@ public class ZygoteProcess {
         }
     }
 
+    /**
+     * Set the precentage of detected hidden API accesses that are logged to the new event log.
+     *
+     * <p>This rate will take affect for all new processes forked from the zygote after this call.
+     *
+     * @param rate An integer between 0 and 0x10000 inclusive. 0 means no event logging.
+     */
+    public void setHiddenApiAccessStatslogSampleRate(int rate) {
+        synchronized (mLock) {
+            mHiddenApiAccessStatslogSampleRate = rate;
+            maybeSetHiddenApiAccessStatslogSampleRate(primaryZygoteState);
+            maybeSetHiddenApiAccessStatslogSampleRate(secondaryZygoteState);
+        }
+    }
+
     @GuardedBy("mLock")
     private boolean maybeSetApiBlacklistExemptions(ZygoteState state, boolean sendIfEmpty) {
         if (state == null || state.isClosed()) {
@@ -827,6 +848,30 @@ public class ZygoteProcess {
             }
         } catch (IOException ioe) {
             Slog.e(LOG_TAG, "Failed to set hidden API log sampling rate", ioe);
+        }
+    }
+
+    private void maybeSetHiddenApiAccessStatslogSampleRate(ZygoteState state) {
+        if (state == null || state.isClosed()) {
+            return;
+        }
+        if (mHiddenApiAccessStatslogSampleRate == -1) {
+            return;
+        }
+        try {
+            state.mZygoteOutputWriter.write(Integer.toString(1));
+            state.mZygoteOutputWriter.newLine();
+            state.mZygoteOutputWriter.write("--hidden-api-statslog-sampling-rate="
+                    + Integer.toString(mHiddenApiAccessStatslogSampleRate));
+            state.mZygoteOutputWriter.newLine();
+            state.mZygoteOutputWriter.flush();
+            int status = state.mZygoteInputStream.readInt();
+            if (status != 0) {
+                Slog.e(LOG_TAG, "Failed to set hidden API statslog sampling rate; status "
+                        + status);
+            }
+        } catch (IOException ioe) {
+            Slog.e(LOG_TAG, "Failed to set hidden API statslog sampling rate", ioe);
         }
     }
 
