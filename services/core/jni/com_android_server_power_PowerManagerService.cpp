@@ -295,6 +295,12 @@ static void nativeSetFeature(JNIEnv* /* env */, jclass /* clazz */, jint feature
     }
 }
 
+static bool nativeForceSuspend(JNIEnv* /* env */, jclass /* clazz */) {
+    bool retval = false;
+    getSuspendControl()->forceSuspend(&retval);
+    return retval;
+}
+
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod gPowerManagerServiceMethods[] = {
@@ -303,6 +309,8 @@ static const JNINativeMethod gPowerManagerServiceMethods[] = {
             (void*) nativeInit },
     { "nativeAcquireSuspendBlocker", "(Ljava/lang/String;)V",
             (void*) nativeAcquireSuspendBlocker },
+    { "nativeForceSuspend", "()Z",
+            (void*) nativeForceSuspend },
     { "nativeReleaseSuspendBlocker", "(Ljava/lang/String;)V",
             (void*) nativeReleaseSuspendBlocker },
     { "nativeSetInteractive", "(Z)V",
