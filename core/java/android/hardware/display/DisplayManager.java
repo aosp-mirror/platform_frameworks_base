@@ -563,7 +563,8 @@ public final class DisplayManager {
      * 0 produces a grayscale image, 1 is normal.
      *
      * @hide
-     * @deprecated use {@link ColorDisplayManager#setSaturationLevel(int)}.
+     * @deprecated use {@link ColorDisplayManager#setSaturationLevel(int)} instead. The level passed
+     * as a parameter here will be rounded to the nearest hundredth.
      */
     @SystemApi
     @RequiresPermission(Manifest.permission.CONTROL_DISPLAY_SATURATION)

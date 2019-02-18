@@ -65,7 +65,8 @@ public final class ColorDisplayManager {
     @SystemApi
     public static final int CAPABILITY_NONE = 0x0;
     /**
-     * The device can properly apply transforms over protected content.
+     * The device can use GPU composition on protected content (layers whose buffers are protected
+     * in the trusted memory zone).
      *
      * @hide
      */
