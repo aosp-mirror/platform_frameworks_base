@@ -7036,9 +7036,9 @@ public class DevicePolicyManager {
      }
 
     /**
-     * Called by a profile or device owner to set the permitted input methods services. When set by
-     * a device owner or profile owner the restriction applies to all profiles of the user the
-     * device owner or profile owner is an admin for. By default, the user can use any input method.
+     * Called by a profile or device owner to set the permitted input methods services for this
+     * user. By default, the user can use any input method.
+     * <p>
      * When zero or more packages have been added, input method that are not in the list and not
      * part of the system can not be enabled by the user. This method will fail if it is called for
      * a admin that is not for the foreground user or a profile of the foreground user. Any
@@ -7047,7 +7047,7 @@ public class DevicePolicyManager {
      * Calling with a null value for the list disables the restriction so that all input methods can
      * be used, calling with an empty list disables all but the system's own input methods.
      * <p>
-     * System input methods are always available to the user this method can't modify this.
+     * System input methods are always available to the user - this method can't modify this.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param packageNames List of input method package names.
