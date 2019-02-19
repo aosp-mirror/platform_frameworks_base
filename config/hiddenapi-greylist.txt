@@ -170,7 +170,6 @@ Landroid/app/IAppTask;->getTaskInfo()Landroid/app/ActivityManager$RecentTaskInfo
 Landroid/app/IAssistDataReceiver$Stub;-><init>()V
 Landroid/app/IAssistDataReceiver;->onHandleAssistData(Landroid/os/Bundle;)V
 Landroid/app/IAssistDataReceiver;->onHandleAssistScreenshot(Landroid/graphics/Bitmap;)V
-Landroid/app/IInputForwarder;->forwardEvent(Landroid/view/InputEvent;)Z
 Landroid/app/IInstrumentationWatcher$Stub;-><init>()V
 Landroid/app/IInstrumentationWatcher;->instrumentationStatus(Landroid/content/ComponentName;ILandroid/os/Bundle;)V
 Landroid/app/INotificationManager$Stub$Proxy;-><init>(Landroid/os/IBinder;)V

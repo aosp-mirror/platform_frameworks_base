@@ -21,7 +21,6 @@ import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemService;
 import android.annotation.UnsupportedAppUsage;
-import android.app.IInputForwarder;
 import android.content.Context;
 import android.media.AudioAttributes;
 import android.os.Binder;
@@ -929,26 +928,6 @@ public final class InputManager {
     public void requestPointerCapture(IBinder windowToken, boolean enable) {
         try {
             mIm.requestPointerCapture(windowToken, enable);
-        } catch (RemoteException ex) {
-            throw ex.rethrowFromSystemServer();
-        }
-    }
-
-
-    /**
-     * Create an {@link IInputForwarder} targeted to provided display.
-     * {@link android.Manifest.permission.INJECT_EVENTS} permission is required to call this method.
-     *
-     * @param displayId Id of the target display where input events should be forwarded.
-     *                  Display must exist and must be owned by the caller.
-     * @return The forwarder instance.
-     *
-     * @hide
-     */
-    @UnsupportedAppUsage
-    public IInputForwarder createInputForwarder(int displayId) {
-        try {
-            return mIm.createInputForwarder(displayId);
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }
