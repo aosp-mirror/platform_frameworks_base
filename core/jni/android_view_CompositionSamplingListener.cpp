@@ -28,6 +28,7 @@
 
 #include <gui/IRegionSamplingListener.h>
 #include <gui/ISurfaceComposer.h>
+#include <gui/SurfaceComposerClient.h>
 #include <ui/Rect.h>
 
 namespace android {
@@ -83,28 +84,22 @@ void nativeRegister(JNIEnv* env, jclass clazz, jlong ptr, jobject stopLayerToken
     sp<CompositionSamplingListener> listener = reinterpret_cast<CompositionSamplingListener*>(ptr);
     sp<IBinder> stopLayerHandle = ibinderForJavaObject(env, stopLayerTokenObj);
 
-    // TODO: Use SurfaceComposerClient once it has addRegionSamplingListener.
-    sp<ISurfaceComposer> composer;
-    if (getService(String16("SurfaceFlinger"), &composer) != NO_ERROR) {
-        jniThrowRuntimeException(env, "Couldn't retrieve SurfaceFlinger");
-        return;
+    if (SurfaceComposerClient::addRegionSamplingListener(
+            Rect(left, top, right, bottom), stopLayerHandle, listener) != OK) {
+        constexpr auto error_msg = "Couldn't addRegionSamplingListener";
+        ALOGE(error_msg);
+        jniThrowRuntimeException(env, error_msg);
     }
-
-    composer->addRegionSamplingListener(
-            Rect(left, top, right, bottom), stopLayerHandle, listener);
 }
 
 void nativeUnregister(JNIEnv* env, jclass clazz, jlong ptr) {
     sp<CompositionSamplingListener> listener = reinterpret_cast<CompositionSamplingListener*>(ptr);
 
-    // TODO: Use SurfaceComposerClient once it has addRegionSamplingListener.
-    sp<ISurfaceComposer> composer;
-    if (getService(String16("SurfaceFlinger"), &composer) != NO_ERROR) {
-        jniThrowRuntimeException(env, "Couldn't retrieve SurfaceFlinger");
-        return;
+    if (SurfaceComposerClient::removeRegionSamplingListener(listener) != OK) {
+        constexpr auto error_msg = "Couldn't removeRegionSamplingListener";
+        ALOGE(error_msg);
+        jniThrowRuntimeException(env, error_msg);
     }
-
-    composer->removeRegionSamplingListener(listener);
 }
 
 const JNINativeMethod gMethods[] = {
