@@ -665,7 +665,7 @@ static void CreateSubDirs(int dirfd, const std::string& parentDirPath,
             fail_fn(CREATE_ERROR("Failed to fstatat on %s/%s: %s",
                     parentDirPath.c_str(), dirName.c_str(), strerror(errno)));
         }
-        if (TEMP_FAILURE_RETRY(mkdirat(dirfd, dirName.c_str(), 0700)) == -1) {
+        if (TEMP_FAILURE_RETRY(mkdirat(dirfd, dirName.c_str(), 0700)) == -1 && errno != EEXIST) {
             fail_fn(CREATE_ERROR("Failed to mkdirat on %s/%s: %s",
                     parentDirPath.c_str(), dirName.c_str(), strerror(errno)));
         }
@@ -685,7 +685,8 @@ static void EnsurePkgSpecificDirs(const std::string& path,
                 fail_fn(CREATE_ERROR("Failed to unlink %s: %s",
                         androidDir.c_str(), strerror(errno)));
             }
-            if (TEMP_FAILURE_RETRY(mkdir(androidDir.c_str(), 0700)) == -1) {
+            if (TEMP_FAILURE_RETRY(mkdir(androidDir.c_str(), 0700)) == -1
+                    && errno != EEXIST) {
                 fail_fn(CREATE_ERROR("Failed to mkdir %s: %s",
                         androidDir.c_str(), strerror(errno)));
             }
@@ -731,7 +732,7 @@ static void CreatePkgSandboxSource(const std::string& sandboxSource, fail_fn_t f
         fail_fn(CREATE_ERROR("Failed to stat %s: %s",
                 sandboxSource.c_str(), strerror(errno)));
     }
-    if (TEMP_FAILURE_RETRY(mkdir(sandboxSource.c_str(), 0700)) == -1) {
+    if (TEMP_FAILURE_RETRY(mkdir(sandboxSource.c_str(), 0700)) == -1 && errno != EEXIST) {
         fail_fn(CREATE_ERROR("Failed to mkdir %s: %s",
                 sandboxSource.c_str(), strerror(errno)));
     }
