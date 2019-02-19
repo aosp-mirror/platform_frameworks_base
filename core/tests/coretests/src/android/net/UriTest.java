@@ -182,8 +182,7 @@ public class UriTest extends TestCase {
 
         uri = Uri.parse("http://bob%40lee%3ajr@local%68ost:4%32");
         assertEquals("bob@lee:jr", uri.getUserInfo());
-        assertEquals("localhost", uri.getHost());
-        assertEquals(42, uri.getPort());
+        assertEquals("localhost:42", uri.getHost());
 
         uri = Uri.parse("http://localhost");
         assertEquals("localhost", uri.getHost());
