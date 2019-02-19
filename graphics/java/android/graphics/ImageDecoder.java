@@ -1641,12 +1641,17 @@ public final class ImageDecoder implements AutoCloseable {
     @NonNull
     private Bitmap decodeBitmapInternal() throws IOException {
         checkState();
-        long colorSpacePtr = mDesiredColorSpace == null ? 0 :
-                mDesiredColorSpace.getNativeInstance();
+        long colorSpacePtr = 0;
+        boolean extended = false;
+        if (mDesiredColorSpace != null) {
+            colorSpacePtr = mDesiredColorSpace.getNativeInstance();
+            extended = mDesiredColorSpace == ColorSpace.get(ColorSpace.Named.EXTENDED_SRGB)
+                || mDesiredColorSpace == ColorSpace.get(ColorSpace.Named.LINEAR_EXTENDED_SRGB);
+        }
         return nDecodeBitmap(mNativePtr, this, mPostProcessor != null,
                 mDesiredWidth, mDesiredHeight, mCropRect,
                 mMutable, mAllocator, mUnpremultipliedRequired,
-                mConserveMemory, mDecodeAsAlphaMask, colorSpacePtr);
+                mConserveMemory, mDecodeAsAlphaMask, colorSpacePtr, extended);
     }
 
     private void callHeaderDecoded(@Nullable OnHeaderDecodedListener listener,
@@ -1934,7 +1939,7 @@ public final class ImageDecoder implements AutoCloseable {
             @Nullable Rect cropRect, boolean mutable,
             int allocator, boolean unpremulRequired,
             boolean conserveMemory, boolean decodeAsAlphaMask,
-            long desiredColorSpace)
+            long desiredColorSpace, boolean extended)
         throws IOException;
     private static native Size nGetSampledSize(long nativePtr,
                                                int sampleSize);
