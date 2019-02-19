@@ -20,9 +20,17 @@ import android.app.Notification;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.UserHandle;
 
 /**
  * Ranking updates from the Assistant.
+ *
+ * The updates are provides as a {@link Bundle} of signals, using the keys provided in this
+ * class.
+ * Each {@code KEY} specifies what type of data it supports and what kind of Adjustment it
+ * realizes on the notification rankings.
+ *
+ * Notifications affected by the Adjustment will be re-ranked if necessary.
  */
 public final class Adjustment implements Parcelable {
     private final String mPackage;
@@ -103,13 +111,34 @@ public final class Adjustment implements Parcelable {
      * @param signals A bundle of signals that should inform notification display, ordering, and
      *                interruptiveness.
      * @param explanation A human-readable justification for the adjustment.
+     * @hide
      */
+    @SystemApi
     public Adjustment(String pkg, String key, Bundle signals, CharSequence explanation, int user) {
         mPackage = pkg;
         mKey = key;
         mSignals = signals;
         mExplanation = explanation;
         mUser = user;
+    }
+
+    /**
+     * Create a notification adjustment.
+     *
+     * @param pkg The package of the notification.
+     * @param key The notification key.
+     * @param signals A bundle of signals that should inform notification display, ordering, and
+     *                interruptiveness.
+     * @param explanation A human-readable justification for the adjustment.
+     * @param userHandle User handle for for whose the adjustments will be applied.
+     */
+    public Adjustment(String pkg, String key, Bundle signals, CharSequence explanation,
+            UserHandle userHandle) {
+        mPackage = pkg;
+        mKey = key;
+        mSignals = signals;
+        mExplanation = explanation;
+        mUser = userHandle.getIdentifier();
     }
 
     /**
@@ -164,8 +193,14 @@ public final class Adjustment implements Parcelable {
         return mSignals;
     }
 
+    /** @hide */
+    @SystemApi
     public int getUser() {
         return mUser;
+    }
+
+    public UserHandle getUserHandle() {
+        return UserHandle.of(mUser);
     }
 
     @Override
