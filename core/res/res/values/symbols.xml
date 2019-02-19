@@ -3661,4 +3661,24 @@
   <java-symbol type="array" name="config_displayWhiteBalanceAmbientColorTemperatures" />
   <java-symbol type="array" name="config_displayWhiteBalanceDisplayColorTemperatures" />
   <java-symbol type="drawable" name="ic_action_open" />
+
+  <!-- MIME types -->
+  <java-symbol type="string" name="mime_type_folder" />
+  <java-symbol type="string" name="mime_type_apk" />
+  <java-symbol type="string" name="mime_type_generic" />
+  <java-symbol type="string" name="mime_type_generic_ext" />
+  <java-symbol type="string" name="mime_type_audio" />
+  <java-symbol type="string" name="mime_type_audio_ext" />
+  <java-symbol type="string" name="mime_type_video" />
+  <java-symbol type="string" name="mime_type_video_ext" />
+  <java-symbol type="string" name="mime_type_image" />
+  <java-symbol type="string" name="mime_type_image_ext" />
+  <java-symbol type="string" name="mime_type_compressed" />
+  <java-symbol type="string" name="mime_type_compressed_ext" />
+  <java-symbol type="string" name="mime_type_document" />
+  <java-symbol type="string" name="mime_type_document_ext" />
+  <java-symbol type="string" name="mime_type_spreadsheet" />
+  <java-symbol type="string" name="mime_type_spreadsheet_ext" />
+  <java-symbol type="string" name="mime_type_presentation" />
+  <java-symbol type="string" name="mime_type_presentation_ext" />
 </resources>
