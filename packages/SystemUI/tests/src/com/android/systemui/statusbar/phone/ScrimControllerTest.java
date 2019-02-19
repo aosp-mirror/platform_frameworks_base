@@ -23,6 +23,7 @@ import static com.android.systemui.statusbar.phone.ScrimController.VISIBILITY_SE
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
@@ -441,10 +442,10 @@ public class ScrimControllerTest extends SysuiTestCase {
     @Test
     public void testHoldsWakeLock_whenAOD() {
         mScrimController.transitionTo(ScrimState.AOD);
-        verify(mWakeLock).acquire();
-        verify(mWakeLock, never()).release();
+        verify(mWakeLock).acquire(anyString());
+        verify(mWakeLock, never()).release(anyString());
         mScrimController.finishAnimationsImmediately();
-        verify(mWakeLock).release();
+        verify(mWakeLock).release(anyString());
     }
 
     @Test
@@ -471,10 +472,10 @@ public class ScrimControllerTest extends SysuiTestCase {
         reset(mWakeLock);
 
         mScrimController.onHideWallpaperTimeout();
-        verify(mWakeLock).acquire();
-        verify(mWakeLock, never()).release();
+        verify(mWakeLock).acquire(anyString());
+        verify(mWakeLock, never()).release(anyString());
         mScrimController.finishAnimationsImmediately();
-        verify(mWakeLock).release();
+        verify(mWakeLock).release(anyString());
     }
 
     @Test
@@ -486,10 +487,10 @@ public class ScrimControllerTest extends SysuiTestCase {
         reset(mWakeLock);
 
         mScrimController.onHideWallpaperTimeout();
-        verify(mWakeLock).acquire();
-        verify(mWakeLock, never()).release();
+        verify(mWakeLock).acquire(anyString());
+        verify(mWakeLock, never()).release(anyString());
         mScrimController.finishAnimationsImmediately();
-        verify(mWakeLock).release();
+        verify(mWakeLock).release(anyString());
     }
 
     @Test

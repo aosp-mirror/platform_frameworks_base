@@ -19,9 +19,7 @@ package com.android.systemui.util.wakelock;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import android.content.Context;
 import android.os.PowerManager;
-import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
@@ -36,6 +34,7 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 public class WakeLockTest extends SysuiTestCase {
 
+    private static final String WHY = "test";
     WakeLock mWakeLock;
     PowerManager.WakeLock mInner;
 
@@ -58,22 +57,22 @@ public class WakeLockTest extends SysuiTestCase {
 
     @Test
     public void wakeLock_acquire() {
-        mWakeLock.acquire();
+        mWakeLock.acquire(WHY);
         assertTrue(mInner.isHeld());
     }
 
     @Test
     public void wakeLock_release() {
-        mWakeLock.acquire();
-        mWakeLock.release();
+        mWakeLock.acquire(WHY);
+        mWakeLock.release(WHY);
         assertFalse(mInner.isHeld());
     }
 
     @Test
     public void wakeLock_refCounted() {
-        mWakeLock.acquire();
-        mWakeLock.acquire();
-        mWakeLock.release();
+        mWakeLock.acquire(WHY);
+        mWakeLock.acquire(WHY);
+        mWakeLock.release(WHY);
         assertTrue(mInner.isHeld());
     }
 

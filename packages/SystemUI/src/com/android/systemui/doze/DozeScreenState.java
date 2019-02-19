@@ -57,7 +57,7 @@ public class DozeScreenState implements DozeMachine.Part {
         mDozeService = service;
         mHandler = handler;
         mParameters = parameters;
-        mWakeLock = new SettableWakeLock(wakeLock);
+        mWakeLock = new SettableWakeLock(wakeLock, TAG);
     }
 
     @Override

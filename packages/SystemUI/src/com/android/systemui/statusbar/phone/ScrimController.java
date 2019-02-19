@@ -340,7 +340,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
         if (!mWakeLockHeld) {
             if (mWakeLock != null) {
                 mWakeLockHeld = true;
-                mWakeLock.acquire();
+                mWakeLock.acquire(TAG);
             } else {
                 Log.w(TAG, "Cannot hold wake lock, it has not been set yet");
             }
@@ -654,7 +654,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
 
     private void onFinished(Callback callback) {
         if (mWakeLockHeld) {
-            mWakeLock.release();
+            mWakeLock.release(TAG);
             mWakeLockHeld = false;
         }
 

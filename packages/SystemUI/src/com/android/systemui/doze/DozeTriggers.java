@@ -348,7 +348,7 @@ public class DozeTriggers implements DozeMachine.Part {
             mSensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_NORMAL, 0,
                     mHandler);
             mHandler.postDelayed(this, TIMEOUT_DELAY_MS);
-            mWakeLock.acquire();
+            mWakeLock.acquire(TAG);
             mRegistered = true;
         }
 
@@ -383,7 +383,7 @@ public class DozeTriggers implements DozeMachine.Part {
             }
             onProximityResult(result);
             if (wasRegistered) {
-                mWakeLock.release();
+                mWakeLock.release(TAG);
             }
             mFinished = true;
         }
