@@ -371,7 +371,8 @@ class UserController implements Handler.Callback {
                     | Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
             mInjector.broadcastIntent(intent, null, resultTo, 0, null, null,
                     new String[]{android.Manifest.permission.RECEIVE_BOOT_COMPLETED},
-                    AppOpsManager.OP_NONE, null, true, false, MY_PID, SYSTEM_UID, userId);
+                    AppOpsManager.OP_NONE, null, true, false, MY_PID, SYSTEM_UID,
+                    Binder.getCallingUid(), Binder.getCallingPid(), userId);
         }
 
         // We need to delay unlocking managed profiles until the parent user
@@ -471,7 +472,7 @@ class UserController implements Handler.Callback {
                 Intent.FLAG_RECEIVER_REGISTERED_ONLY | Intent.FLAG_RECEIVER_FOREGROUND);
         mInjector.broadcastIntent(unlockedIntent, null, null, 0, null,
                 null, null, AppOpsManager.OP_NONE, null, false, false, MY_PID, SYSTEM_UID,
-                userId);
+                Binder.getCallingUid(), Binder.getCallingPid(), userId);
 
         if (getUserInfo(userId).isManagedProfile()) {
             UserInfo parent = mInjector.getUserManager().getProfileParent(userId);
@@ -484,8 +485,8 @@ class UserController implements Handler.Callback {
                                 | Intent.FLAG_RECEIVER_FOREGROUND);
                 mInjector.broadcastIntent(profileUnlockedIntent,
                         null, null, 0, null, null, null, AppOpsManager.OP_NONE,
-                        null, false, false, MY_PID, SYSTEM_UID,
-                        parent.id);
+                        null, false, false, MY_PID, SYSTEM_UID, Binder.getCallingUid(),
+                        Binder.getCallingPid(), parent.id);
             }
         }
 
@@ -543,7 +544,8 @@ class UserController implements Handler.Callback {
                                 mInjector.getUserManager().makeInitialized(userInfo.id);
                             }
                         }, 0, null, null, null, AppOpsManager.OP_NONE,
-                        null, true, false, MY_PID, SYSTEM_UID, userId);
+                        null, true, false, MY_PID, SYSTEM_UID, Binder.getCallingUid(),
+                        Binder.getCallingPid(), userId);
             }
         }
 
@@ -573,7 +575,8 @@ class UserController implements Handler.Callback {
                     }
                 }, 0, null, null,
                 new String[]{android.Manifest.permission.RECEIVE_BOOT_COMPLETED},
-                AppOpsManager.OP_NONE, null, true, false, MY_PID, SYSTEM_UID, userId);
+                AppOpsManager.OP_NONE, null, true, false, MY_PID, SYSTEM_UID,
+                Binder.getCallingUid(), Binder.getCallingPid(), userId);
     }
 
     int restartUser(final int userId, final boolean foreground) {
@@ -696,7 +699,8 @@ class UserController implements Handler.Callback {
                 mInjector.broadcastIntent(stoppingIntent,
                         null, stoppingReceiver, 0, null, null,
                         new String[]{INTERACT_ACROSS_USERS}, AppOpsManager.OP_NONE,
-                        null, true, false, MY_PID, SYSTEM_UID, UserHandle.USER_ALL);
+                        null, true, false, MY_PID, SYSTEM_UID, Binder.getCallingUid(),
+                        Binder.getCallingPid(), UserHandle.USER_ALL);
             });
         }
     }
@@ -735,7 +739,8 @@ class UserController implements Handler.Callback {
         mInjector.broadcastIntent(shutdownIntent,
                 null, shutdownReceiver, 0, null, null, null,
                 AppOpsManager.OP_NONE,
-                null, true, false, MY_PID, SYSTEM_UID, userId);
+                null, true, false, MY_PID, SYSTEM_UID, Binder.getCallingUid(),
+                Binder.getCallingPid(), userId);
     }
 
     void finishUserStopped(UserState uss) {
@@ -834,7 +839,8 @@ class UserController implements Handler.Callback {
         intent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
         mInjector.broadcastIntent(intent,
                 null, null, 0, null, null, null, AppOpsManager.OP_NONE,
-                null, false, false, MY_PID, SYSTEM_UID, UserHandle.USER_ALL);
+                null, false, false, MY_PID, SYSTEM_UID, Binder.getCallingUid(),
+                Binder.getCallingPid(), UserHandle.USER_ALL);
     }
 
     /**
@@ -950,6 +956,8 @@ class UserController implements Handler.Callback {
 
         Slog.i(TAG, "Starting userid:" + userId + " fg:" + foreground);
 
+        final int callingUid = Binder.getCallingUid();
+        final int callingPid = Binder.getCallingPid();
         final long ident = Binder.clearCallingIdentity();
         try {
             final int oldUserId = getCurrentUserId();
@@ -1088,7 +1096,7 @@ class UserController implements Handler.Callback {
                 intent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
                 mInjector.broadcastIntent(intent,
                         null, null, 0, null, null, null, AppOpsManager.OP_NONE,
-                        null, false, false, MY_PID, SYSTEM_UID, userId);
+                        null, false, false, MY_PID, SYSTEM_UID, callingUid, callingPid, userId);
             }
 
             if (foreground) {
@@ -1111,7 +1119,8 @@ class UserController implements Handler.Callback {
                             }
                         }, 0, null, null,
                         new String[]{INTERACT_ACROSS_USERS}, AppOpsManager.OP_NONE,
-                        null, true, false, MY_PID, SYSTEM_UID, UserHandle.USER_ALL);
+                        null, true, false, MY_PID, SYSTEM_UID, callingUid, callingPid,
+                        UserHandle.USER_ALL);
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
@@ -1427,6 +1436,8 @@ class UserController implements Handler.Callback {
     }
 
     void sendUserSwitchBroadcasts(int oldUserId, int newUserId) {
+        final int callingUid = Binder.getCallingUid();
+        final int callingPid = Binder.getCallingPid();
         long ident = Binder.clearCallingIdentity();
         try {
             Intent intent;
@@ -1442,7 +1453,8 @@ class UserController implements Handler.Callback {
                     intent.putExtra(Intent.EXTRA_USER_HANDLE, profileUserId);
                     mInjector.broadcastIntent(intent,
                             null, null, 0, null, null, null, AppOpsManager.OP_NONE,
-                            null, false, false, MY_PID, SYSTEM_UID, profileUserId);
+                            null, false, false, MY_PID, SYSTEM_UID, callingUid, callingPid,
+                            profileUserId);
                 }
             }
             if (newUserId >= 0) {
@@ -1457,7 +1469,8 @@ class UserController implements Handler.Callback {
                     intent.putExtra(Intent.EXTRA_USER_HANDLE, profileUserId);
                     mInjector.broadcastIntent(intent,
                             null, null, 0, null, null, null, AppOpsManager.OP_NONE,
-                            null, false, false, MY_PID, SYSTEM_UID, profileUserId);
+                            null, false, false, MY_PID, SYSTEM_UID, callingUid, callingPid,
+                            profileUserId);
                 }
                 intent = new Intent(Intent.ACTION_USER_SWITCHED);
                 intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY
@@ -1466,8 +1479,8 @@ class UserController implements Handler.Callback {
                 mInjector.broadcastIntent(intent,
                         null, null, 0, null, null,
                         new String[] {android.Manifest.permission.MANAGE_USERS},
-                        AppOpsManager.OP_NONE, null, false, false, MY_PID, SYSTEM_UID,
-                        UserHandle.USER_ALL);
+                        AppOpsManager.OP_NONE, null, false, false, MY_PID, SYSTEM_UID, callingUid,
+                        callingPid, UserHandle.USER_ALL);
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
@@ -2107,12 +2120,14 @@ class UserController implements Handler.Callback {
         protected int broadcastIntent(Intent intent, String resolvedType,
                 IIntentReceiver resultTo, int resultCode, String resultData,
                 Bundle resultExtras, String[] requiredPermissions, int appOp, Bundle bOptions,
-                boolean ordered, boolean sticky, int callingPid, int callingUid, int userId) {
+                boolean ordered, boolean sticky, int callingPid, int callingUid, int realCallingUid,
+                int realCallingPid, int userId) {
             // TODO b/64165549 Verify that mLock is not held before calling AMS methods
             synchronized (mService) {
                 return mService.broadcastIntentLocked(null, null, intent, resolvedType, resultTo,
                         resultCode, resultData, resultExtras, requiredPermissions, appOp, bOptions,
-                        ordered, sticky, callingPid, callingUid, userId);
+                        ordered, sticky, callingPid, callingUid, realCallingUid, realCallingPid,
+                        userId);
             }
         }
 

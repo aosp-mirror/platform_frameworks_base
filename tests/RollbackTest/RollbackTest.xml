@@ -21,5 +21,9 @@
     <test class="com.android.tradefed.testtype.AndroidJUnitTest" >
         <option name="package" value="com.android.tests.rollback" />
         <option name="runner" value="android.support.test.runner.AndroidJUnitRunner" />
+
+        <!-- Exclude the StagedRollbackTest tests, which needs to be specially
+             driven from the StagedRollbackTest host test -->
+        <option name="exclude-filter" value="com.android.tests.rollback.StagedRollbackTest" />
     </test>
 </configuration>

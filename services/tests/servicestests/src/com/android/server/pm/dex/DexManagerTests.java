@@ -568,7 +568,8 @@ public class DexManagerTests {
     }
 
     private PackageDynamicCode getPackageDynamicCodeInfo(TestData testData) {
-        return mDexManager.getDexLogger().getPackageDynamicCodeInfo(testData.getPackageName());
+        return mDexManager.getDynamicCodeLogger()
+                .getPackageDynamicCodeInfo(testData.getPackageName());
     }
 
     private void assertNoUseInfo(TestData testData) {

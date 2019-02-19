@@ -28,6 +28,7 @@ import static android.provider.DeviceConfig.ActivityManager.KEY_USE_COMPACTION;
 
 import android.app.ActivityManager;
 import android.app.ActivityThread;
+import android.os.Debug;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Process;
@@ -410,6 +411,7 @@ public final class AppCompactor {
                         Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "Compact "
                                 + ((pendingAction == COMPACT_PROCESS_SOME) ? "some" : "full")
                                 + ": " + name);
+                        long zramFreeKbBefore = Debug.getZramFreeKb();
                         long[] rssBefore = Process.getRss(pid);
                         FileOutputStream fos = new FileOutputStream("/proc/" + pid + "/reclaim");
                         fos.write(action.getBytes());
@@ -417,10 +419,12 @@ public final class AppCompactor {
                         long[] rssAfter = Process.getRss(pid);
                         long end = SystemClock.uptimeMillis();
                         long time = end - start;
+                        long zramFreeKbAfter = Debug.getZramFreeKb();
                         EventLog.writeEvent(EventLogTags.AM_COMPACT, pid, name, action,
                                 rssBefore[0], rssBefore[1], rssBefore[2], rssBefore[3],
                                 rssAfter[0], rssAfter[1], rssAfter[2], rssAfter[3], time,
-                                lastCompactAction, lastCompactTime, msg.arg1, msg.arg2);
+                                lastCompactAction, lastCompactTime, msg.arg1, msg.arg2,
+                                zramFreeKbBefore, zramFreeKbAfter);
                         // Note that as above not taking mPhenoTypeFlagLock here to avoid locking
                         // on every single compaction for a flag that will seldom change and the
                         // impact of reading the wrong value here is low.
@@ -429,7 +433,8 @@ public final class AppCompactor {
                                     rssBefore[0], rssBefore[1], rssBefore[2], rssBefore[3],
                                     rssAfter[0], rssAfter[1], rssAfter[2], rssAfter[3], time,
                                     lastCompactAction, lastCompactTime, msg.arg1,
-                                    ActivityManager.processStateAmToProto(msg.arg2));
+                                    ActivityManager.processStateAmToProto(msg.arg2),
+                                    zramFreeKbBefore, zramFreeKbAfter);
                         }
                         synchronized (mAm) {
                             proc.lastCompactTime = end;

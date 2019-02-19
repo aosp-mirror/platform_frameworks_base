@@ -291,6 +291,9 @@ public class ActivityView extends ViewGroup {
 
     /** Send current location and size to the WM to set tap exclude region for this view. */
     private void updateLocation() {
+        if (!isAttachedToWindow()) {
+            return;
+        }
         try {
             getLocationInWindow(mLocationInWindow);
             WindowManagerGlobal.getWindowSession().updateTapExcludeRegion(getWindow(), hashCode(),
@@ -429,6 +432,9 @@ public class ActivityView extends ViewGroup {
 
     /** Report to server that tap exclude region on hosting display should be cleared. */
     private void cleanTapExcludeRegion() {
+        if (!isAttachedToWindow()) {
+            return;
+        }
         // Update tap exclude region with an empty rect to clean the state on server.
         try {
             WindowManagerGlobal.getWindowSession().updateTapExcludeRegion(getWindow(), hashCode(),

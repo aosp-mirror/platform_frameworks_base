@@ -40,9 +40,7 @@ import static org.mockito.Mockito.verify;
 import android.content.Context;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
-import android.net.SocketKeepalive;
-import android.net.TcpKeepalivePacketData;
-import android.net.TcpKeepalivePacketData.TcpSocketInfo;
+import android.net.TcpKeepalivePacketDataParcelable;
 import android.net.apf.ApfFilter.ApfConfiguration;
 import android.net.apf.ApfGenerator.IllegalInstructionException;
 import android.net.apf.ApfGenerator.Register;
@@ -1546,12 +1544,15 @@ public class ApfTest {
         InetAddress srcAddr = InetAddress.getByAddress(IPV4_KEEPALIVE_SRC_ADDR);
         InetAddress dstAddr = InetAddress.getByAddress(IPV4_KEEPALIVE_DST_ADDR);
 
-        final TcpSocketInfo v4Tsi = new TcpSocketInfo(
-                srcAddr, srcPort, dstAddr, dstPort, seqNum, ackNum, window, windowScale);
-        final TcpKeepalivePacketData ipv4TcpKeepalivePacket =
-                TcpKeepalivePacketData.tcpKeepalivePacket(v4Tsi);
+        final TcpKeepalivePacketDataParcelable parcel = new TcpKeepalivePacketDataParcelable();
+        parcel.srcAddress = srcAddr.getAddress();
+        parcel.srcPort = srcPort;
+        parcel.dstAddress = dstAddr.getAddress();
+        parcel.dstPort = dstPort;
+        parcel.seq = seqNum;
+        parcel.ack = ackNum;
 
-        apfFilter.addKeepalivePacketFilter(slot1, ipv4TcpKeepalivePacket.toStableParcelable());
+        apfFilter.addKeepalivePacketFilter(slot1, parcel);
         program = cb.getApfProgram();
 
         // Verify IPv4 keepalive ack packet is dropped
@@ -1580,11 +1581,17 @@ public class ApfTest {
             // dst: 2404:0:0:0:0:0:faf2, port: 54321
             srcAddr = InetAddress.getByAddress(IPV6_KEEPALIVE_SRC_ADDR);
             dstAddr = InetAddress.getByAddress(IPV6_KEEPALIVE_DST_ADDR);
-            final TcpSocketInfo v6Tsi = new TcpSocketInfo(
-                    srcAddr, srcPort, dstAddr, dstPort, seqNum, ackNum, window, windowScale);
-            final TcpKeepalivePacketData ipv6TcpKeepalivePacket =
-                    TcpKeepalivePacketData.tcpKeepalivePacket(v6Tsi);
-            apfFilter.addKeepalivePacketFilter(slot1, ipv6TcpKeepalivePacket.toStableParcelable());
+
+            final TcpKeepalivePacketDataParcelable ipv6Parcel =
+                    new TcpKeepalivePacketDataParcelable();
+            ipv6Parcel.srcAddress = srcAddr.getAddress();
+            ipv6Parcel.srcPort = srcPort;
+            ipv6Parcel.dstAddress = dstAddr.getAddress();
+            ipv6Parcel.dstPort = dstPort;
+            ipv6Parcel.seq = seqNum;
+            ipv6Parcel.ack = ackNum;
+
+            apfFilter.addKeepalivePacketFilter(slot1, ipv6Parcel);
             program = cb.getApfProgram();
 
             // Verify IPv6 keepalive ack packet is dropped
@@ -1606,8 +1613,8 @@ public class ApfTest {
             apfFilter.removeKeepalivePacketFilter(slot1);
 
             // Verify multiple filters
-            apfFilter.addKeepalivePacketFilter(slot1, ipv4TcpKeepalivePacket.toStableParcelable());
-            apfFilter.addKeepalivePacketFilter(slot2, ipv6TcpKeepalivePacket.toStableParcelable());
+            apfFilter.addKeepalivePacketFilter(slot1, parcel);
+            apfFilter.addKeepalivePacketFilter(slot2, ipv6Parcel);
             program = cb.getApfProgram();
 
             // Verify IPv4 keepalive ack packet is dropped
@@ -1643,7 +1650,7 @@ public class ApfTest {
             // Remove keepalive filters
             apfFilter.removeKeepalivePacketFilter(slot1);
             apfFilter.removeKeepalivePacketFilter(slot2);
-        } catch (SocketKeepalive.InvalidPacketException e) {
+        } catch (UnsupportedOperationException e) {
             // TODO: support V6 packets
         }
 

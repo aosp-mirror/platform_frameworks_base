@@ -363,10 +363,15 @@ public final class PowerManager {
     public static final int USER_ACTIVITY_FLAG_INDIRECT = 1 << 1;
 
     /**
+     * @hide
+     */
+    public static final int GO_TO_SLEEP_REASON_MIN = 0;
+
+    /**
      * Go to sleep reason code: Going to sleep due by application request.
      * @hide
      */
-    public static final int GO_TO_SLEEP_REASON_APPLICATION = 0;
+    public static final int GO_TO_SLEEP_REASON_APPLICATION = GO_TO_SLEEP_REASON_MIN;
 
     /**
      * Go to sleep reason code: Going to sleep due by request of the
@@ -412,6 +417,17 @@ public final class PowerManager {
     public static final int GO_TO_SLEEP_REASON_ACCESSIBILITY = 7;
 
     /**
+     * Go to sleep reason code: Going to sleep due to force-suspend.
+     * @hide
+     */
+    public static final int GO_TO_SLEEP_REASON_FORCE_SUSPEND = 8;
+
+    /**
+     * @hide
+     */
+    public static final int GO_TO_SLEEP_REASON_MAX = GO_TO_SLEEP_REASON_FORCE_SUSPEND;
+
+    /**
      * @hide
      */
     public static String sleepReasonToString(int sleepReason) {
@@ -424,6 +440,7 @@ public final class PowerManager {
             case GO_TO_SLEEP_REASON_HDMI: return "hdmi";
             case GO_TO_SLEEP_REASON_SLEEP_BUTTON: return "sleep_button";
             case GO_TO_SLEEP_REASON_ACCESSIBILITY: return "accessibility";
+            case GO_TO_SLEEP_REASON_FORCE_SUSPEND: return "force_suspend";
             default: return Integer.toString(sleepReason);
         }
     }
@@ -1847,6 +1864,32 @@ public final class PowerManager {
     public int getLastSleepReason() {
         try {
             return mService.getLastSleepReason();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Forces the device to go to suspend, even if there are currently wakelocks being held.
+     * <b>Caution</b>
+     * This is a very dangerous command as it puts the device to sleep immediately. Apps and parts
+     * of the system will not be notified and will not have an opportunity to save state prior to
+     * the device going to suspend.
+     * This method should only be used in very rare circumstances where the device is intended
+     * to appear as completely off to the user and they have a well understood, reliable way of
+     * re-enabling it.
+     * </p><p>
+     * Requires the {@link android.Manifest.permission#DEVICE_POWER} permission.
+     * </p>
+     *
+     * @return true on success, false otherwise.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.DEVICE_POWER)
+    public boolean forceSuspend() {
+        try {
+            return mService.forceSuspend();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

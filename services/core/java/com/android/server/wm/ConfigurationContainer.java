@@ -568,7 +568,7 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
 
         final long token = proto.start(fieldId);
         mRequestedOverrideConfiguration.writeToProto(proto, OVERRIDE_CONFIGURATION,
-                logLevel != WindowTraceLogLevel.CRITICAL);
+                logLevel == WindowTraceLogLevel.CRITICAL);
         if (logLevel == WindowTraceLogLevel.ALL) {
             mFullConfiguration.writeToProto(proto, FULL_CONFIGURATION, false /* critical */);
             mMergedOverrideConfiguration.writeToProto(proto, MERGED_OVERRIDE_CONFIGURATION,

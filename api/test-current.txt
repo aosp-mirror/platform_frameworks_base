@@ -101,8 +101,8 @@ package android.app {
   public class AppOpsManager {
     method @RequiresPermission("android.permission.MANAGE_APPOPS") public void addHistoricalOps(@NonNull android.app.AppOpsManager.HistoricalOps);
     method @RequiresPermission("android.permission.MANAGE_APPOPS") public void clearHistory();
-    method @RequiresPermission("android.permission.GET_APP_OPS_STATS") public void getHistoricalOps(int, @Nullable String, @Nullable String[], long, long, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<android.app.AppOpsManager.HistoricalOps>);
-    method @RequiresPermission("android.permission.GET_APP_OPS_STATS") public void getHistoricalOpsFromDiskRaw(int, @Nullable String, @Nullable String[], long, long, @Nullable java.util.concurrent.Executor, @NonNull java.util.function.Consumer<android.app.AppOpsManager.HistoricalOps>);
+    method @RequiresPermission("android.permission.GET_APP_OPS_STATS") public void getHistoricalOps(@NonNull android.app.AppOpsManager.HistoricalOpsRequest, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<android.app.AppOpsManager.HistoricalOps>);
+    method @RequiresPermission("android.permission.GET_APP_OPS_STATS") public void getHistoricalOpsFromDiskRaw(@NonNull android.app.AppOpsManager.HistoricalOpsRequest, @Nullable java.util.concurrent.Executor, @NonNull java.util.function.Consumer<android.app.AppOpsManager.HistoricalOps>);
     method public static int getNumOps();
     method public static String[] getOpStrs();
     method public boolean isOperationActive(int, int, String);
@@ -204,6 +204,17 @@ package android.app {
     method public void offsetBeginAndEndTime(long);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.app.AppOpsManager.HistoricalOps> CREATOR;
+  }
+
+  public static final class AppOpsManager.HistoricalOpsRequest {
+  }
+
+  public static final class AppOpsManager.HistoricalOpsRequest.Builder {
+    ctor public AppOpsManager.HistoricalOpsRequest.Builder(long, long);
+    method @NonNull public android.app.AppOpsManager.HistoricalOpsRequest build();
+    method @NonNull public android.app.AppOpsManager.HistoricalOpsRequest.Builder setOpNames(@Nullable java.util.List<java.lang.String>);
+    method @NonNull public android.app.AppOpsManager.HistoricalOpsRequest.Builder setPackageName(@Nullable String);
+    method @NonNull public android.app.AppOpsManager.HistoricalOpsRequest.Builder setUid(int);
   }
 
   public static final class AppOpsManager.HistoricalPackageOps implements android.os.Parcelable {
@@ -472,11 +483,11 @@ package android.bluetooth {
 
 package android.content {
 
-  public class ContentProviderClient implements java.lang.AutoCloseable android.content.ContentInterface {
+  public class ContentProviderClient implements java.lang.AutoCloseable {
     method @RequiresPermission(android.Manifest.permission.REMOVE_TASKS) public void setDetectNotResponding(long);
   }
 
-  public abstract class ContentResolver implements android.content.ContentInterface {
+  public abstract class ContentResolver {
     method public static String[] getSyncAdapterPackagesForAuthorityAsUser(String, int);
   }
 

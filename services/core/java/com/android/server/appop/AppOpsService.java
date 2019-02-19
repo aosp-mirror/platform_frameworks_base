@@ -38,6 +38,7 @@ import android.app.ActivityThread;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
 import android.app.AppOpsManager.HistoricalOps;
+import android.app.AppOpsManager.HistoricalOpsRequest;
 import android.app.AppOpsManagerInternal;
 import android.app.AppOpsManagerInternal.CheckOpsDelegate;
 import android.content.BroadcastReceiver;
@@ -1024,25 +1025,29 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     @Override
     public void getHistoricalOps(int uid, @NonNull String packageName,
-            @Nullable String[] opNames, long beginTimeMillis, long endTimeMillis,
+            @Nullable List<String> opNames, long beginTimeMillis, long endTimeMillis,
             @NonNull RemoteCallback callback) {
-        Preconditions.checkArgument(uid == Process.INVALID_UID || uid >= 0,
-                "uid must be " + Process.INVALID_UID + " or non negative");
-        Preconditions.checkArgument(beginTimeMillis >= 0 && beginTimeMillis < endTimeMillis,
-                "beginTimeMillis must be non negative and lesser than endTimeMillis");
+        // Use the builder to validate arguments.
+        final HistoricalOpsRequest request = new HistoricalOpsRequest.Builder(
+                beginTimeMillis, endTimeMillis)
+                .setUid(uid)
+                .setPackageName(packageName)
+                .setOpNames(opNames)
+                .build();
         Preconditions.checkNotNull(callback, "callback cannot be null");
-        checkValidOpsOrNull(opNames);
 
         mContext.enforcePermission(android.Manifest.permission.GET_APP_OPS_STATS,
                 Binder.getCallingPid(), Binder.getCallingUid(), "getHistoricalOps");
 
+        final String[] opNamesArray = (opNames != null)
+                ? opNames.toArray(new String[opNames.size()]) : null;
         if (mHistoricalRegistry.getMode() == AppOpsManager.HISTORICAL_MODE_DISABLED) {
             // TODO (bug:122218838): Remove once the feature fully enabled.
-            getHistoricalPackagesOpsCompat(uid, packageName, opNames, beginTimeMillis,
+            getHistoricalPackagesOpsCompat(uid, packageName, opNamesArray, beginTimeMillis,
                     endTimeMillis, callback);
         } else {
             // Must not hold the appops lock
-            mHistoricalRegistry.getHistoricalOps(uid, packageName, opNames,
+            mHistoricalRegistry.getHistoricalOps(uid, packageName, opNamesArray,
                     beginTimeMillis, endTimeMillis, callback);
         }
     }
@@ -1101,20 +1106,25 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     @Override
     public void getHistoricalOpsFromDiskRaw(int uid, @NonNull String packageName,
-            @Nullable String[] opNames, long beginTimeMillis, long endTimeMillis,
+            @Nullable List<String> opNames, long beginTimeMillis, long endTimeMillis,
             @NonNull RemoteCallback callback) {
-        Preconditions.checkArgument(uid == Process.INVALID_UID || uid >= 0,
-                "uid must be " + Process.INVALID_UID + " or non negative");
-        Preconditions.checkArgument(beginTimeMillis >= 0 && beginTimeMillis < endTimeMillis,
-                "beginTimeMillis must be non negative and lesser than endTimeMillis");
+        // Use the builder to validate arguments.
+        final HistoricalOpsRequest request = new HistoricalOpsRequest.Builder(
+                beginTimeMillis, endTimeMillis)
+                .setUid(uid)
+                .setPackageName(packageName)
+                .setOpNames(opNames)
+                .build();
         Preconditions.checkNotNull(callback, "callback cannot be null");
-        checkValidOpsOrNull(opNames);
 
         mContext.enforcePermission(android.Manifest.permission.GET_APP_OPS_STATS,
                 Binder.getCallingPid(), Binder.getCallingUid(), "getHistoricalOps");
 
+        final String[] opNamesArray = (opNames != null)
+                ? opNames.toArray(new String[opNames.size()]) : null;
+
         // Must not hold the appops lock
-        mHistoricalRegistry.getHistoricalOpsFromDiskRaw(uid, packageName, opNames,
+        mHistoricalRegistry.getHistoricalOpsFromDiskRaw(uid, packageName, opNamesArray,
                 beginTimeMillis, endTimeMillis, callback);
     }
 
@@ -4264,16 +4274,6 @@ public class AppOpsService extends IAppOpsService.Stub {
             return EmptyArray.STRING;
         }
         return packageNames;
-    }
-
-    private static void checkValidOpsOrNull(String[] opNames) {
-        if (opNames != null) {
-            for (String opName : opNames) {
-                if (AppOpsManager.strOpToOp(opName) == AppOpsManager.OP_NONE) {
-                    throw new IllegalArgumentException("Unknown op: " + opName);
-                }
-            }
-        }
     }
 
     private final class ClientRestrictionState implements DeathRecipient {

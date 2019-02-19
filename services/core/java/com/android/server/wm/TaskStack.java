@@ -1163,6 +1163,14 @@ public class TaskStack extends WindowContainer<Task> implements
     }
 
     private boolean adjustForIME(final WindowState imeWin) {
+        // To prevent task stack resize animation may flicking when playing app transition
+        // animation & IME window enter animation in parallel, we need to make sure app
+        // transition is done and then adjust task size for IME, skip the new adjusted frame when
+        // app transition is still running.
+        if (getDisplayContent().mAppTransition.isRunning()) {
+            return false;
+        }
+
         final int dockedSide = getDockSide();
         final boolean dockedTopOrBottom = dockedSide == DOCKED_TOP || dockedSide == DOCKED_BOTTOM;
         if (imeWin == null || !dockedTopOrBottom) {

@@ -16,19 +16,31 @@
 
 package com.android.tests.rollback;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.VersionedPackage;
+import android.content.rollback.PackageRollbackInfo;
+import android.content.rollback.RollbackInfo;
 import android.content.rollback.RollbackManager;
 import android.support.test.InstrumentationRegistry;
+import android.util.Log;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * Utilities to facilitate testing rollbacks.
@@ -157,20 +169,28 @@ class RollbackTestUtils {
 
     /**
      * Installs the apks with the given resource names as an atomic set.
+     * <p>
+     * In case of staged installs, this function will return succesfully after
+     * the staged install has been committed and is ready for the device to
+     * reboot.
      *
+     * @param staged if the rollback should be staged.
      * @param enableRollback if rollback should be enabled.
      * @param resourceNames names of the class loader resource for the apks to
      *        install.
      * @throws AssertionError if the installation fails.
      */
-    static void installMultiPackage(boolean enableRollback, String... resourceNames)
-            throws InterruptedException, IOException {
+    private static void install(boolean staged, boolean enableRollback,
+            String... resourceNames) throws InterruptedException, IOException {
         Context context = InstrumentationRegistry.getContext();
         PackageInstaller packageInstaller = context.getPackageManager().getPackageInstaller();
 
         PackageInstaller.SessionParams multiPackageParams = new PackageInstaller.SessionParams(
                 PackageInstaller.SessionParams.MODE_FULL_INSTALL);
         multiPackageParams.setMultiPackage();
+        if (staged) {
+            multiPackageParams.setStaged();
+        }
         if (enableRollback) {
             // TODO: Do we set this on the parent params, the child params, or
             // both?
@@ -183,6 +203,9 @@ class RollbackTestUtils {
             PackageInstaller.Session session = null;
             PackageInstaller.SessionParams params = new PackageInstaller.SessionParams(
                     PackageInstaller.SessionParams.MODE_FULL_INSTALL);
+            if (staged) {
+                params.setStaged();
+            }
             if (enableRollback) {
                 params.setEnableRollback();
             }
@@ -204,6 +227,36 @@ class RollbackTestUtils {
         // Commit the session (this will start the installation workflow).
         multiPackage.commit(LocalIntentSender.getIntentSender());
         assertStatusSuccess(LocalIntentSender.getIntentSenderResult());
+
+        if (staged) {
+            waitForSessionReady(multiPackageId);
+        }
+    }
+
+    /**
+     * Installs the apks with the given resource names as an atomic set.
+     *
+     * @param enableRollback if rollback should be enabled.
+     * @param resourceNames names of the class loader resource for the apks to
+     *        install.
+     * @throws AssertionError if the installation fails.
+     */
+    static void installMultiPackage(boolean enableRollback, String... resourceNames)
+            throws InterruptedException, IOException {
+        install(false, enableRollback, resourceNames);
+    }
+
+    /**
+     * Installs the apks with the given resource names as a staged atomic set.
+     *
+     * @param enableRollback if rollback should be enabled.
+     * @param resourceNames names of the class loader resource for the apks to
+     *        install.
+     * @throws AssertionError if the installation fails.
+     */
+    static void installStaged(boolean enableRollback, String... resourceNames)
+            throws InterruptedException, IOException {
+        install(true, enableRollback, resourceNames);
     }
 
     static void adoptShellPermissionIdentity(String... permissions) {
@@ -218,5 +271,105 @@ class RollbackTestUtils {
             .getInstrumentation()
             .getUiAutomation()
             .dropShellPermissionIdentity();
+    }
+
+    /**
+     * Returns the RollbackInfo with a given package in the list of rollbacks.
+     * Throws an assertion failure if there is more than one such rollback
+     * info. Returns null if there are no such rollback infos.
+     */
+    static RollbackInfo getUniqueRollbackInfoForPackage(List<RollbackInfo> rollbacks,
+            String packageName) {
+        RollbackInfo found = null;
+        for (RollbackInfo rollback : rollbacks) {
+            for (PackageRollbackInfo info : rollback.getPackages()) {
+                if (packageName.equals(info.getPackageName())) {
+                    assertNull(found);
+                    found = rollback;
+                    break;
+                }
+            }
+        }
+        return found;
+    }
+
+    /**
+     * Asserts that the given PackageRollbackInfo has the expected package
+     * name and versions.
+     */
+    static void assertPackageRollbackInfoEquals(String packageName,
+            long versionRolledBackFrom, long versionRolledBackTo,
+            PackageRollbackInfo info) {
+        assertEquals(packageName, info.getPackageName());
+        assertEquals(packageName, info.getVersionRolledBackFrom().getPackageName());
+        assertEquals(versionRolledBackFrom, info.getVersionRolledBackFrom().getLongVersionCode());
+        assertEquals(packageName, info.getVersionRolledBackTo().getPackageName());
+        assertEquals(versionRolledBackTo, info.getVersionRolledBackTo().getLongVersionCode());
+    }
+
+    /**
+     * Asserts that the given RollbackInfo has a single package with expected
+     * package name and versions.
+     */
+    static void assertRollbackInfoEquals(String packageName,
+            long versionRolledBackFrom, long versionRolledBackTo,
+            RollbackInfo info, VersionedPackage... causePackages) {
+        assertNotNull(info);
+        assertEquals(1, info.getPackages().size());
+        assertPackageRollbackInfoEquals(packageName, versionRolledBackFrom, versionRolledBackTo,
+                info.getPackages().get(0));
+        assertEquals(causePackages.length, info.getCausePackages().size());
+        for (int i = 0; i < causePackages.length; ++i) {
+            assertEquals(causePackages[i].getPackageName(),
+                    info.getCausePackages().get(i).getPackageName());
+            assertEquals(causePackages[i].getLongVersionCode(),
+                    info.getCausePackages().get(i).getLongVersionCode());
+        }
+    }
+
+    /**
+     * Waits for the given session to be marked as ready.
+     * Throws an assertion if the session fails.
+     */
+    static void waitForSessionReady(int sessionId) {
+        BlockingQueue<PackageInstaller.SessionInfo> sessionStatus = new LinkedBlockingQueue<>();
+        BroadcastReceiver sessionUpdatedReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                PackageInstaller.SessionInfo info =
+                        intent.getParcelableExtra(PackageInstaller.EXTRA_SESSION);
+                if (info != null && info.getSessionId() == sessionId) {
+                    if (info.isSessionReady() || info.isSessionFailed()) {
+                        try {
+                            sessionStatus.put(info);
+                        } catch (InterruptedException e) {
+                            Log.e(TAG, "Failed to put session info.", e);
+                        }
+                    }
+                }
+            }
+        };
+        IntentFilter sessionUpdatedFilter =
+                new IntentFilter(PackageInstaller.ACTION_SESSION_UPDATED);
+
+        Context context = InstrumentationRegistry.getContext();
+        context.registerReceiver(sessionUpdatedReceiver, sessionUpdatedFilter);
+
+        PackageInstaller installer = context.getPackageManager().getPackageInstaller();
+        PackageInstaller.SessionInfo info = installer.getSessionInfo(sessionId);
+
+        try {
+            if (info.isSessionReady() || info.isSessionFailed()) {
+                sessionStatus.put(info);
+            }
+
+            info = sessionStatus.take();
+            context.unregisterReceiver(sessionUpdatedReceiver);
+            if (info.isSessionFailed()) {
+                throw new AssertionError(info.getStagedSessionErrorMessage());
+            }
+        } catch (InterruptedException e) {
+            throw new AssertionError(e);
+        }
     }
 }

@@ -737,6 +737,25 @@ static jstring android_os_Debug_getUnreachableMemory(JNIEnv* env, jobject clazz,
     return env->NewStringUTF(s.c_str());
 }
 
+static jlong android_os_Debug_getFreeZramKb(JNIEnv* env, jobject clazz) {
+
+    jlong zramFreeKb = 0;
+
+    std::string status_path = android::base::StringPrintf("/proc/meminfo");
+    UniqueFile file = MakeUniqueFile(status_path.c_str(), "re");
+
+    char line[256];
+    while (file != nullptr && fgets(line, sizeof(line), file.get())) {
+        jlong v;
+        if (sscanf(line, "SwapFree: %" SCNd64 " kB", &v) == 1) {
+            zramFreeKb = v;
+            break;
+        }
+    }
+
+    return zramFreeKb;
+}
+
 /*
  * JNI registration.
  */
@@ -778,6 +797,8 @@ static const JNINativeMethod gMethods[] = {
             (void*)android_os_Debug_dumpNativeBacktraceToFileTimeout },
     { "getUnreachableMemory", "(IZ)Ljava/lang/String;",
             (void*)android_os_Debug_getUnreachableMemory },
+    { "getZramFreeKb", "()J",
+            (void*)android_os_Debug_getFreeZramKb },
 };
 
 int register_android_os_Debug(JNIEnv *env)

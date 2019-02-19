@@ -28,7 +28,7 @@ import android.util.ByteStringUtils;
 import android.util.EventLog;
 import android.util.Log;
 
-import com.android.server.pm.dex.DexLogger;
+import com.android.server.pm.dex.DynamicCodeLogger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,9 +38,10 @@ import java.util.regex.Pattern;
 
 /**
  * Scheduled jobs related to logging of app dynamic code loading. The idle logging job runs daily
- * while idle and charging  and calls {@link DexLogger} to write dynamic code information to the
- * event log. The audit watching job scans the event log periodically while idle to find AVC audit
- * messages indicating use of dynamic native code and adds the information to {@link DexLogger}.
+ * while idle and charging  and calls {@link DynamicCodeLogger} to write dynamic code information
+ * to the event log. The audit watching job scans the event log periodically while idle to find AVC
+ * audit messages indicating use of dynamic native code and adds the information to
+ * {@link DynamicCodeLogger}.
  * {@hide}
  */
 public class DynamicCodeLoggingService extends JobService {
@@ -130,9 +131,9 @@ public class DynamicCodeLoggingService extends JobService {
         }
     }
 
-    private static DexLogger getDexLogger() {
+    private static DynamicCodeLogger getDynamicCodeLogger() {
         PackageManagerService pm = (PackageManagerService) ServiceManager.getService("package");
-        return pm.getDexManager().getDexLogger();
+        return pm.getDexManager().getDynamicCodeLogger();
     }
 
     private class IdleLoggingThread extends Thread {
@@ -149,14 +150,14 @@ public class DynamicCodeLoggingService extends JobService {
                 Log.d(TAG, "Starting IdleLoggingJob run");
             }
 
-            DexLogger dexLogger = getDexLogger();
-            for (String packageName : dexLogger.getAllPackagesWithDynamicCodeLoading()) {
+            DynamicCodeLogger dynamicCodeLogger = getDynamicCodeLogger();
+            for (String packageName : dynamicCodeLogger.getAllPackagesWithDynamicCodeLoading()) {
                 if (mIdleLoggingStopRequested) {
                     Log.w(TAG, "Stopping IdleLoggingJob run at scheduler request");
                     return;
                 }
 
-                dexLogger.logDynamicCodeLoading(packageName);
+                dynamicCodeLogger.logDynamicCodeLoading(packageName);
             }
 
             jobFinished(mParams, /* reschedule */ false);
@@ -191,7 +192,7 @@ public class DynamicCodeLoggingService extends JobService {
         private boolean processAuditEvents() {
             // Scan the event log for SELinux (avc) audit messages indicating when an
             // (untrusted) app has executed native code from an app data
-            // file. Matches are recorded in DexLogger.
+            // file. Matches are recorded in DynamicCodeLogger.
             //
             // These messages come from the kernel audit system via logd. (Note that
             // some devices may not generate these messages at all, or the format may
@@ -213,7 +214,7 @@ public class DynamicCodeLoggingService extends JobService {
             // On each run we process all the matching events in the log. This may
             // mean re-processing events we have already seen, and in any case there
             // may be duplicate events for the same app+file. These are de-duplicated
-            // by DexLogger.
+            // by DynamicCodeLogger.
             //
             // Note that any app can write a message to the event log, including one
             // that looks exactly like an AVC audit message, so the information may
@@ -228,7 +229,7 @@ public class DynamicCodeLoggingService extends JobService {
                     return true;
                 }
 
-                DexLogger dexLogger = getDexLogger();
+                DynamicCodeLogger dynamicCodeLogger = getDynamicCodeLogger();
 
                 List<EventLog.Event> events = new ArrayList<>();
                 EventLog.readEvents(tags, events);
@@ -267,7 +268,7 @@ public class DynamicCodeLoggingService extends JobService {
                         // hex-encodes the bytes; we need to undo that.
                         path = unhex(matcher.group(2));
                     }
-                    dexLogger.recordNative(uid, path);
+                    dynamicCodeLogger.recordNative(uid, path);
                 }
 
                 return true;

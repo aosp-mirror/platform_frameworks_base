@@ -137,6 +137,7 @@ android_app {
     static_libs: [
         "SystemUI-core",
     ],
+    resource_dirs: [],
 
     platform_apis: true,
     product_specific: true,

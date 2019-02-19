@@ -247,7 +247,8 @@ public class StagingManager {
     }
 
     private void resumeSession(@NonNull PackageInstallerSession session) {
-        if (sessionContainsApex(session)) {
+        boolean hasApex = sessionContainsApex(session);
+        if (hasApex) {
             // Check with apexservice whether the apex packages have been activated.
             ApexSessionInfo apexSessionInfo = mApexManager.getStagedSessionInfo(session.sessionId);
             if (apexSessionInfo == null) {
@@ -271,7 +272,7 @@ public class StagingManager {
                 mBgHandler.post(() -> preRebootVerification(session));
                 return;
             }
-            if (!apexSessionInfo.isActivated) {
+            if (!apexSessionInfo.isActivated && !apexSessionInfo.isSuccess) {
                 // In all the remaining cases apexd will try to apply the session again at next
                 // boot. Nothing to do here for now.
                 Slog.w(TAG, "Staged session " + session.sessionId + " scheduled to be applied "
@@ -287,7 +288,11 @@ public class StagingManager {
                         + "more information.");
             return;
         }
+
         session.setStagedSessionApplied();
+        if (hasApex) {
+            mApexManager.markStagedSessionSuccessful(session.sessionId);
+        }
     }
 
     private String findFirstAPKInDir(File stageDir) {
