@@ -12775,13 +12775,11 @@ public class BatteryStatsImpl extends BatteryStats {
                     // charging even if it happens to go down a level.
                     changed |= setChargingLocked(true);
                     mLastChargeStepLevel = level;
-                }
-                if (!mCharging) {
+                } else if (!mCharging) {
                     if (mLastChargeStepLevel < level) {
                         // We have not reported that we are charging, but the level has gone up,
                         // but we would like to not have tons of activity from charging-constraint
                         // jobs, so instead of reporting ACTION_CHARGING immediately, we defer it.
-                        mLastChargeStepLevel = level;
                         if (!mHandler.hasCallbacks(mDeferSetCharging)) {
                             mHandler.postDelayed(
                                     mDeferSetCharging,
@@ -12800,9 +12798,9 @@ public class BatteryStatsImpl extends BatteryStats {
                         // power supplied isn't enough, so consider the device to now be
                         // discharging.
                         changed |= setChargingLocked(false);
-                        mLastChargeStepLevel = level;
                     }
                 }
+                mLastChargeStepLevel = level;
                 if (mLastChargeStepLevel != level && mMaxChargeStepLevel < level) {
                     mChargeStepTracker.addLevelSteps(level - mLastChargeStepLevel,
                             modeBits, elapsedRealtime);
