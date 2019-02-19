@@ -388,7 +388,7 @@ public class Environment {
 
     /** {@hide} */
     public static File getDataStagingDirectory(String volumeUuid) {
-        return new File(getDataDirectory(volumeUuid), "staging");
+        return new File(getDataDirectory(volumeUuid), "pkg_staging");
     }
 
     /** {@hide} */
