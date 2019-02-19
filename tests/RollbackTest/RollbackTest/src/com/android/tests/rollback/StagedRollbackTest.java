@@ -68,10 +68,11 @@ public class StagedRollbackTest {
 
 
     /**
-     * Test basic rollbacks. Enable rollback phase.
+     * Test rollbacks of staged installs involving only apks.
+     * Enable rollback phase.
      */
     @Test
-    public void testBasicEnableRollback() throws Exception {
+    public void testApkOnlyEnableRollback() throws Exception {
         RollbackTestUtils.uninstall(TEST_APP_A);
         assertEquals(-1, RollbackTestUtils.getInstalledVersion(TEST_APP_A));
 
@@ -81,14 +82,15 @@ public class StagedRollbackTest {
         RollbackTestUtils.installStaged(true, "RollbackTestAppAv2.apk");
 
         // At this point, the host test driver will reboot the device and run
-        // testBasicCommitRollback().
+        // testApkOnlyCommitRollback().
     }
 
     /**
-     * Test basic rollbacks. Commit rollback phase.
+     * Test rollbacks of staged installs involving only apks.
+     * Commit rollback phase.
      */
     @Test
-    public void testBasicCommitRollback() throws Exception {
+    public void testApkOnlyCommitRollback() throws Exception {
         assertEquals(2, RollbackTestUtils.getInstalledVersion(TEST_APP_A));
 
         RollbackManager rm = RollbackTestUtils.getRollbackManager();
@@ -111,14 +113,15 @@ public class StagedRollbackTest {
         assertEquals(2, RollbackTestUtils.getInstalledVersion(TEST_APP_A));
 
         // At this point, the host test driver will reboot the device and run
-        // testBasicConfirmRollback().
+        // testApkOnlyConfirmRollback().
     }
 
     /**
-     * Test basic rollbacks. Confirm rollback phase.
+     * Test rollbacks of staged installs involving only apks.
+     * Confirm rollback phase.
      */
     @Test
-    public void testBasicConfirmRollback() throws Exception {
+    public void testApkOnlyConfirmRollback() throws Exception {
         assertEquals(1, RollbackTestUtils.getInstalledVersion(TEST_APP_A));
 
         RollbackManager rm = RollbackTestUtils.getRollbackManager();
