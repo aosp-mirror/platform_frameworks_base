@@ -41,12 +41,14 @@ import static android.view.View.GONE;
 import static android.view.WindowManager.DOCKED_BOTTOM;
 import static android.view.WindowManager.DOCKED_INVALID;
 import static android.view.WindowManager.DOCKED_TOP;
+import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
 import static android.view.WindowManager.LayoutParams.FLAG_SECURE;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.FLAG_SPLIT_TOUCH;
+import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.NEEDS_MENU_SET_TRUE;
 import static android.view.WindowManager.LayoutParams.NEEDS_MENU_UNSET;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
@@ -182,6 +184,8 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.util.ToBooleanFunction;
 import com.android.internal.util.function.TriConsumer;
+import com.android.internal.util.function.pooled.PooledConsumer;
+import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.AnimationThread;
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.wm.utils.DisplayRotationUtil;
@@ -887,6 +891,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         mTapDetector = new TaskTapPointerEventListener(mWmService, this);
         registerPointerEventListener(mTapDetector);
         registerPointerEventListener(mWmService.mMousePositionTracker);
+        if (mWmService.mAtmService.getRecentTasks() != null) {
+            registerPointerEventListener(
+                    mWmService.mAtmService.getRecentTasks().getInputListener());
+        }
 
         mDisplayPolicy = new DisplayPolicy(service, this);
         mDisplayRotation = new DisplayRotation(service, this);
@@ -2378,6 +2386,27 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             }
         }
         return -1;
+    }
+
+    /**
+     * Returns true if the input point is within an app window.
+     */
+    boolean pointWithinAppWindow(int x, int y) {
+        final int[] targetWindowType = {-1};
+        final Consumer fn = PooledLambda.obtainConsumer((w, nonArg) -> {
+            if (targetWindowType[0] != -1) {
+                return;
+            }
+
+            if (w.isOnScreen() && w.isVisibleLw() && w.getFrameLw().contains(x, y)) {
+                targetWindowType[0] = w.mAttrs.type;
+                return;
+            }
+        }, PooledLambda.__(WindowState.class), mTmpRect);
+        forAllWindows(fn, true /* traverseTopToBottom */);
+        ((PooledConsumer) fn).recycle();
+        return FIRST_APPLICATION_WINDOW <= targetWindowType[0]
+                        && targetWindowType[0] <= LAST_APPLICATION_WINDOW;
     }
 
     /**

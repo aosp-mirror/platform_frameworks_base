@@ -2736,6 +2736,9 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         if (activityOptions != null) {
             activityType = activityOptions.getLaunchActivityType();
             windowingMode = activityOptions.getLaunchWindowingMode();
+            if (activityOptions.freezeRecentTasksReordering()) {
+                mRecentTasks.setFreezeTaskListReordering();
+            }
         }
         if (activityType == ACTIVITY_TYPE_HOME || activityType == ACTIVITY_TYPE_RECENTS) {
             throw new IllegalArgumentException("startActivityFromRecents: Task "

@@ -583,6 +583,114 @@ public class RecentTasksTest extends ActivityTestsBase {
     }
 
     @Test
+    public void testFreezeTaskListOrder_reorderExistingTask() {
+        // Add some tasks
+        mRecentTasks.add(mTasks.get(0));
+        mRecentTasks.add(mTasks.get(1));
+        mRecentTasks.add(mTasks.get(2));
+        mRecentTasks.add(mTasks.get(3));
+        mRecentTasks.add(mTasks.get(4));
+        mCallbacksRecorder.clear();
+
+        // Freeze the list
+        mRecentTasks.setFreezeTaskListReordering();
+        assertTrue(mRecentTasks.isFreezeTaskListReorderingSet());
+
+        // Relaunch a few tasks
+        mRecentTasks.add(mTasks.get(3));
+        mRecentTasks.add(mTasks.get(2));
+
+        // Commit the task ordering with a specific task focused
+        mRecentTasks.resetFreezeTaskListReordering(mTasks.get(2));
+        assertFalse(mRecentTasks.isFreezeTaskListReorderingSet());
+
+        // Ensure that the order of the task list is the same as before, but with the focused task
+        // at the front
+        assertRecentTasksOrder(mTasks.get(2),
+                mTasks.get(4),
+                mTasks.get(3),
+                mTasks.get(1),
+                mTasks.get(0));
+
+        assertThat(mCallbacksRecorder.mAdded).isEmpty();
+        assertThat(mCallbacksRecorder.mTrimmed).isEmpty();
+        assertThat(mCallbacksRecorder.mRemoved).isEmpty();
+    }
+
+    @Test
+    public void testFreezeTaskListOrder_addRemoveTasks() {
+        // Add some tasks
+        mRecentTasks.add(mTasks.get(0));
+        mRecentTasks.add(mTasks.get(1));
+        mRecentTasks.add(mTasks.get(2));
+        mCallbacksRecorder.clear();
+
+        // Freeze the list
+        mRecentTasks.setFreezeTaskListReordering();
+        assertTrue(mRecentTasks.isFreezeTaskListReorderingSet());
+
+        // Add and remove some tasks
+        mRecentTasks.add(mTasks.get(3));
+        mRecentTasks.add(mTasks.get(4));
+        mRecentTasks.remove(mTasks.get(0));
+        mRecentTasks.remove(mTasks.get(1));
+
+        // Unfreeze the list
+        mRecentTasks.resetFreezeTaskListReordering(null);
+        assertFalse(mRecentTasks.isFreezeTaskListReorderingSet());
+
+        // Ensure that the order of the task list accounts for the added and removed tasks (added
+        // at the end)
+        assertRecentTasksOrder(mTasks.get(4),
+                mTasks.get(3),
+                mTasks.get(2));
+
+        assertThat(mCallbacksRecorder.mAdded).hasSize(2);
+        assertThat(mCallbacksRecorder.mAdded).contains(mTasks.get(3));
+        assertThat(mCallbacksRecorder.mAdded).contains(mTasks.get(4));
+        assertThat(mCallbacksRecorder.mRemoved).hasSize(2);
+        assertThat(mCallbacksRecorder.mRemoved).contains(mTasks.get(0));
+        assertThat(mCallbacksRecorder.mRemoved).contains(mTasks.get(1));
+    }
+
+    @Test
+    public void testFreezeTaskListOrder_timeout() {
+        // Add some tasks
+        mRecentTasks.add(mTasks.get(0));
+        mRecentTasks.add(mTasks.get(1));
+        mRecentTasks.add(mTasks.get(2));
+        mRecentTasks.add(mTasks.get(3));
+        mRecentTasks.add(mTasks.get(4));
+
+        // Freeze the list
+        long freezeTime = SystemClock.elapsedRealtime();
+        mRecentTasks.setFreezeTaskListReordering();
+        assertTrue(mRecentTasks.isFreezeTaskListReorderingSet());
+
+        // Relaunch a few tasks
+        mRecentTasks.add(mTasks.get(2));
+        mRecentTasks.add(mTasks.get(1));
+
+        // Override the freeze timeout params to simulate the timeout (simulate the freeze at 100ms
+        // ago with a timeout of 1ms)
+        mRecentTasks.setFreezeTaskListTimeoutParams(freezeTime - 100, 1);
+
+        ActivityStack stack = mTasks.get(2).getStack();
+        stack.moveToFront("", mTasks.get(2));
+        doReturn(stack).when(mTestService.mRootActivityContainer).getTopDisplayFocusedStack();
+        mRecentTasks.resetFreezeTaskListReorderingOnTimeout();
+        assertFalse(mRecentTasks.isFreezeTaskListReorderingSet());
+
+        // Ensure that the order of the task list is the same as before, but with the focused task
+        // at the front
+        assertRecentTasksOrder(mTasks.get(2),
+                mTasks.get(4),
+                mTasks.get(3),
+                mTasks.get(1),
+                mTasks.get(0));
+    }
+
+    @Test
     public void testBackStackTasks_expectNoTrim() {
         mRecentTasks.setParameters(-1 /* min */, 1 /* max */, -1 /* ms */);
 
@@ -719,6 +827,18 @@ public class RecentTasksTest extends ActivityTestsBase {
                         SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT,
                         false /* toTop */, false /* animate */, null /* initialBounds */,
                         true /* showRecents */));
+    }
+
+    /**
+     * Ensures that the recent tasks list is in the provided order. Note that the expected tasks
+     * should be ordered from least to most recent.
+     */
+    private void assertRecentTasksOrder(TaskRecord... expectedTasks) {
+        ArrayList<TaskRecord> tasks = mRecentTasks.getRawTasks();
+        assertTrue(expectedTasks.length == tasks.size());
+        for (int i = 0; i < tasks.size(); i++)  {
+            assertTrue(expectedTasks[i] == tasks.get(i));
+        }
     }
 
     private void assertNotRestoreTask(Runnable action) {
