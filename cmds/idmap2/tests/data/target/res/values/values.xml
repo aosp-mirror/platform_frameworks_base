@@ -33,6 +33,7 @@
     <string name="policy_system_vendor">policy_system_vendor</string>
     <string name="policy_product">policy_product</string>
     <string name="policy_public">policy_public</string>
+    <string name="policy_signature">policy_signature</string>
 
     <item type="string" name="other" />
 </resources>

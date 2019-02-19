@@ -15,20 +15,12 @@
 -->
 <resources>
 <overlayable name="TestResources">
-    <!-- Publicly overlayable resources -->
-    <item type="string" name="a" />
-    <item type="string" name="b" />
-    <item type="string" name="c" />
-    <item type="string" name="str1" />
-    <item type="string" name="str2" />
-    <item type="string" name="str3" />
-    <item type="string" name="str4" />
-    <item type="string" name="x" />
-    <item type="string" name="y" />
-    <item type="string" name="z" />
-    <item type="integer" name="int1" />
+    <!-- Resources with signature restrictions -->
+    <policy type="signature">
+        <item type="string" name="policy_signature" />
+    </policy>
 
-    <!-- Resources with partition restrictins -->
+    <!-- Resources with partition restrictions -->
     <policy type="system">
         <item type="string" name="policy_system" />
     </policy>
@@ -41,12 +33,26 @@
         <item type="string" name="policy_product" />
     </policy>
 
+    <!-- Resources publicly overlayable -->
     <policy type="public">
         <item type="string" name="policy_public" />
+        <item type="string" name="a" />
+        <item type="string" name="b" />
+        <item type="string" name="c" />
+        <item type="string" name="str1" />
+        <item type="string" name="str2" />
+        <item type="string" name="str3" />
+        <item type="string" name="str4" />
+        <item type="string" name="x" />
+        <item type="string" name="y" />
+        <item type="string" name="z" />
+        <item type="integer" name="int1" />
     </policy>
 </overlayable>
 
 <overlayable name="OtherResources">
-    <item type="string" name="other" />
+    <policy type="public">
+        <item type="string" name="other" />
+    </policy>
 </overlayable>
 </resources>
