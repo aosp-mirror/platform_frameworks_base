@@ -1300,9 +1300,9 @@ package android.content {
   }
 
   public abstract class ContentResolver {
-    method public android.os.Bundle getCache(android.net.Uri);
+    method @Nullable public android.os.Bundle getCache(@NonNull android.net.Uri);
     method public android.graphics.drawable.Drawable getTypeDrawable(String);
-    method public void putCache(android.net.Uri, android.os.Bundle);
+    method public void putCache(@NonNull android.net.Uri, @Nullable android.os.Bundle);
   }
 
   public abstract class Context {

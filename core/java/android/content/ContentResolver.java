@@ -3148,14 +3148,17 @@ public abstract class ContentResolver implements ContentInterface {
     }
 
     /**
-     * Put the cache with the key.
+     * Store the given {@link Bundle} as a long-lived cached object within the
+     * system. This can be useful to avoid expensive re-parsing when apps are
+     * restarted multiple times on low-RAM devices.
+     * <p>
+     * The {@link Bundle} is automatically invalidated when a
+     * {@link #notifyChange(Uri, ContentObserver)} event applies to the key.
      *
-     * @param key the key to add
-     * @param value the value to add
-     * {@hide}
+     * @hide
      */
     @SystemApi
-    public void putCache(Uri key, Bundle value) {
+    public void putCache(@NonNull Uri key, @Nullable Bundle value) {
         try {
             getContentService().putCache(mContext.getPackageName(), key, value,
                     mContext.getUserId());
@@ -3165,15 +3168,16 @@ public abstract class ContentResolver implements ContentInterface {
     }
 
     /**
-     * Get the cache with the key.
+     * Retrieve the last {@link Bundle} stored as a long-lived cached object
+     * within the system.
      *
-     * @param key the key to get the value
-     * @return the matched value. If the key doesn't exist, will return null.
-     * @see #putCache(Uri, Bundle)
-     * {@hide}
+     * @return {@code null} if no cached object has been stored, or if the
+     *         stored object has been invalidated due to a
+     *         {@link #notifyChange(Uri, ContentObserver)} event.
+     * @hide
      */
     @SystemApi
-    public Bundle getCache(Uri key) {
+    public @Nullable Bundle getCache(@NonNull Uri key) {
         try {
             final Bundle bundle = getContentService().getCache(mContext.getPackageName(), key,
                     mContext.getUserId());
