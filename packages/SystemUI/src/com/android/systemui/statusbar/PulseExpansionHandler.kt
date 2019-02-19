@@ -47,8 +47,7 @@ import kotlin.math.max
 @Singleton
 class PulseExpansionHandler @Inject
 constructor(context: Context,
-            private val mWakeUpCoordinator: NotificationWakeUpCoordinator,
-            private val mAmbientPulseManager: AmbientPulseManager) : Gefingerpoken {
+            private val mWakeUpCoordinator: NotificationWakeUpCoordinator) : Gefingerpoken {
     private val mPowerManager: PowerManager?
     private var mShadeController: ShadeController? = null
 
@@ -166,12 +165,10 @@ constructor(context: Context,
             child.actualHeight = newHeight
             expansionHeight = max(newHeight.toFloat(), expansionHeight)
         } else {
-            if (!mAmbientPulseManager.hasNotifications()) {
-                // No pulsing notifications, we need to make notifications visible
-                val target = if (mReachedWakeUpHeight) mWakeUpHeight else 0.0f
-                mWakeUpCoordinator.setNotificationsVisible(height > target, true /* animate */,
-                        true /* increaseSpeed */)
-            }
+            val target = if (mReachedWakeUpHeight) mWakeUpHeight else 0.0f
+            mWakeUpCoordinator.setNotificationsVisibleForExpansion(height > target,
+                    true /* animate */,
+                    true /* increaseSpeed */)
             expansionHeight = max(mWakeUpHeight, expansionHeight)
         }
         val emptyDragAmount = mWakeUpCoordinator.setPulseHeight(expansionHeight)
@@ -231,10 +228,9 @@ constructor(context: Context,
         } else {
             resetClock()
         }
-        if (!mAmbientPulseManager.hasNotifications()) {
-            mWakeUpCoordinator.setNotificationsVisible(false /* visible */, true /* animate */,
-                    false /* increaseSpeed */)
-        }
+        mWakeUpCoordinator.setNotificationsVisibleForExpansion(false /* visible */,
+                true /* animate */,
+                false /* increaseSpeed */)
         isExpanding = false
     }
 

@@ -21,6 +21,7 @@ import android.util.FloatProperty
 import android.view.animation.Interpolator
 import com.android.systemui.Interpolators
 import com.android.systemui.statusbar.AmbientPulseManager
+import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator
 
@@ -29,7 +30,8 @@ import javax.inject.Singleton
 
 @Singleton
 class NotificationWakeUpCoordinator @Inject constructor(
-        private val mAmbientPulseManager: AmbientPulseManager) {
+        private val mAmbientPulseManager: AmbientPulseManager)
+    : AmbientPulseManager.OnAmbientChangedListener {
 
     private val mNotificationVisibility
             = object : FloatProperty<NotificationWakeUpCoordinator>("notificationVisibility") {
@@ -49,9 +51,15 @@ class NotificationWakeUpCoordinator @Inject constructor(
     private var mDozeAmount: Float = 0.0f
     private var mNotificationVisibleAmount = 0.0f
     private var mNotificationsVisible = false
+    private var mNotificationsVisibleForExpansion = false
     private var mDarkAnimator: ObjectAnimator? = null
     private var mVisibilityAmount = 0.0f
     private var mLinearVisibilityAmount = 0.0f
+    private var mPulsing: Boolean = false
+
+    init {
+        mAmbientPulseManager.addListener(this)
+    }
 
     fun setStackScroller(stackScroller: NotificationStackScrollLayout) {
         mStackScroller = stackScroller
@@ -62,7 +70,22 @@ class NotificationWakeUpCoordinator @Inject constructor(
      * @param animate should this change be animated
      * @param increaseSpeed should the speed be increased of the animation
      */
-    fun setNotificationsVisible(visible: Boolean, animate: Boolean, increaseSpeed: Boolean) {
+    fun setNotificationsVisibleForExpansion(visible: Boolean, animate: Boolean,
+                                                    increaseSpeed: Boolean) {
+        mNotificationsVisibleForExpansion = visible
+        updateNotificationVisibility(animate, increaseSpeed)
+    }
+
+    private fun updateNotificationVisibility(animate: Boolean, increaseSpeed: Boolean) {
+        var visible = false
+        if (mPulsing) {
+            visible = mNotificationsVisibleForExpansion || mAmbientPulseManager.hasNotifications()
+        }
+        setNotificationsVisible(visible, animate, increaseSpeed)
+    }
+
+    private fun setNotificationsVisible(visible: Boolean, animate: Boolean,
+                                        increaseSpeed: Boolean) {
         if (mNotificationsVisible == visible) {
             return
         }
@@ -125,7 +148,8 @@ class NotificationWakeUpCoordinator @Inject constructor(
 
     fun setDozing(dozing: Boolean, animate: Boolean) {
         if (dozing) {
-            setNotificationsVisible(false /* animate */, false, true /* visible */ )
+            mNotificationsVisible = false
+            mNotificationsVisibleForExpansion = false
         }
         if (animate) {
             notifyAnimationStart(!dozing)
@@ -137,13 +161,11 @@ class NotificationWakeUpCoordinator @Inject constructor(
     }
 
     fun setPulsing(pulsing: Boolean) {
-        val hasAmbientNotifications = mAmbientPulseManager.hasNotifications();
-        if (pulsing && hasAmbientNotifications) {
-            setNotificationsVisible(true /* visible */, true /* animate */,
-                    false /* increaseSpeed */)
-        } else if (!pulsing && !hasAmbientNotifications) {
-            setNotificationsVisible(false /* visible */, true /* animate */,
-                    false /* increaseSpeed */)
-        }
+        mPulsing = pulsing;
+        updateNotificationVisibility(animate = true, increaseSpeed = false)
+    }
+
+    override fun onAmbientStateChanged(entry: NotificationEntry?, isPulsing: Boolean) {
+        updateNotificationVisibility(animate = true, increaseSpeed = false)
     }
 }
