@@ -20,8 +20,8 @@
     android:layout_width="match_parent"
     android:layout_height="@dimen/navigation_bar_size">
 
-    <include android:id="@+id/rot0" layout="@layout/navigation_layout" />
+    <include android:id="@+id/horizontal" layout="@layout/navigation_layout" />
 
-    <include android:id="@+id/rot90" layout="@layout/navigation_layout_rot90" />
+    <include android:id="@+id/vertical" layout="@layout/navigation_layout_vertical" />
 
 </com.android.systemui.tuner.PreviewNavInflater>
