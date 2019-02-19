@@ -17,6 +17,8 @@
 package android.provider;
 
 import android.annotation.BytesLong;
+import android.annotation.CurrentTimeMillisLong;
+import android.annotation.CurrentTimeSecondsLong;
 import android.annotation.DurationMillisLong;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
@@ -40,7 +42,9 @@ import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.ImageDecoder;
 import android.graphics.Point;
+import android.graphics.PostProcessor;
 import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Bundle;
@@ -78,8 +82,15 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 /**
- * The Media provider contains meta data for all available media on both internal
- * and external storage devices.
+ * The contract between the media provider and applications. Contains
+ * definitions for the supported URIs and columns.
+ * <p>
+ * The media provider provides an indexed collection of common media types, such
+ * as {@link Audio}, {@link Video}, and {@link Images}, from any attached
+ * storage devices. Each collection is organized based on the primary MIME type
+ * of the underlying content; for example, {@code image/*} content is indexed
+ * under {@link Images}. The {@link Files} collection provides a broad view
+ * across all collections, and does not filter by MIME type.
  */
 public final class MediaStore {
     private final static String TAG = "MediaStore";
@@ -847,11 +858,11 @@ public final class MediaStore {
     }
 
     /**
-     * Common fields for most MediaProvider tables
+     * Common media metadata columns.
      */
     public interface MediaColumns extends BaseColumns {
         /**
-         * Path to the file on disk.
+         * Path to the media item on disk.
          * <p>
          * Note that apps may not have filesystem permissions to directly access
          * this path. Instead of trying to open this path directly, apps should
@@ -871,7 +882,7 @@ public final class MediaStore {
         public static final String DATA = "_data";
 
         /**
-         * Hash of the file on disk.
+         * Hash of the media item on disk.
          * <p>
          * Contains a 20-byte binary blob which is the SHA-1 hash of the file as
          * persisted on disk. For performance reasons, the hash may not be
@@ -890,35 +901,35 @@ public final class MediaStore {
         public static final String HASH = "_hash";
 
         /**
-         * The size of the file in bytes
+         * The size of the media item.
          */
+        @BytesLong
         @Column(value = Cursor.FIELD_TYPE_INTEGER, readOnly = true)
         public static final String SIZE = "_size";
 
         /**
-         * The display name of the file
+         * The display name of the media item.
          */
         @Column(Cursor.FIELD_TYPE_STRING)
         public static final String DISPLAY_NAME = "_display_name";
 
         /**
-         * The title of the content
+         * The title of the media item.
          */
         @Column(value = Cursor.FIELD_TYPE_STRING, readOnly = true)
         public static final String TITLE = "title";
 
         /**
-         * The time the file was added to the media provider
-         * Units are seconds since 1970.
+         * The time the media item was first added.
          */
+        @CurrentTimeSecondsLong
         @Column(value = Cursor.FIELD_TYPE_INTEGER, readOnly = true)
         public static final String DATE_ADDED = "date_added";
 
         /**
-         * The time the file was last modified
-         * Units are seconds since 1970.
-         * NOTE: This is for internal use by the media scanner.  Do not modify this field.
+         * The time the media item was last modified.
          */
+        @CurrentTimeSecondsLong
         @Column(value = Cursor.FIELD_TYPE_INTEGER, readOnly = true)
         public static final String DATE_MODIFIED = "date_modified";
 
@@ -986,23 +997,25 @@ public final class MediaStore {
         public static final String IS_TRASHED = "is_trashed";
 
         /**
-         * The time the file should be considered expired. Units are seconds
-         * since 1970. Typically only meaningful in the context of
-         * {@link #IS_PENDING} or {@link #IS_TRASHED}.
+         * The time the media item should be considered expired. Typically only
+         * meaningful in the context of {@link #IS_PENDING} or
+         * {@link #IS_TRASHED}.
+         *
          * @removed
          */
         @Deprecated
+        @CurrentTimeSecondsLong
         @Column(Cursor.FIELD_TYPE_INTEGER)
         public static final String DATE_EXPIRES = "date_expires";
 
         /**
-         * The width of the image/video in pixels.
+         * The width of the media item, in pixels.
          */
         @Column(value = Cursor.FIELD_TYPE_INTEGER, readOnly = true)
         public static final String WIDTH = "width";
 
         /**
-         * The height of the image/video in pixels.
+         * The height of the media item, in pixels.
          */
         @Column(value = Cursor.FIELD_TYPE_INTEGER, readOnly = true)
         public static final String HEIGHT = "height";
@@ -1151,8 +1164,7 @@ public final class MediaStore {
         }
 
         /**
-         * Fields for master table for all media files.
-         * Table also contains MediaColumns._ID, DATA, SIZE and DATE_MODIFIED.
+         * File metadata columns.
          */
         public interface FileColumns extends MediaColumns {
             /**
@@ -1179,15 +1191,26 @@ public final class MediaStore {
             public static final String PARENT = "parent";
 
             /**
-             * The MIME type of the file
-             * <P>Type: TEXT</P>
+             * The MIME type of the media item.
+             * <p>
+             * This is typically defined based on the file extension of the media
+             * item. However, it may be the value of the {@code format} attribute
+             * defined by the <em>Dublin Core Media Initiative</em> standard,
+             * extracted from any XMP metadata contained within this media item.
+             * <p class="note">
+             * Note: the {@code format} attribute may be ignored if the top-level
+             * MIME type disagrees with the file extension. For example, it's
+             * reasonable for an {@code image/jpeg} file to declare a {@code format}
+             * of {@code image/vnd.google.panorama360+jpg}, but declaring a
+             * {@code format} of {@code audio/ogg} would be ignored.
+             * <p>
+             * This is a read-only column that is automatically computed.
              */
             @Column(Cursor.FIELD_TYPE_STRING)
             public static final String MIME_TYPE = "mime_type";
 
             /**
-             * The title of the content
-             * <P>Type: TEXT</P>
+             * The title of the media item.
              */
             @Column(value = Cursor.FIELD_TYPE_STRING, readOnly = true)
             public static final String TITLE = "title";
@@ -1245,10 +1268,12 @@ public final class MediaStore {
         public static final Point MICRO_SIZE = new Point(96, 96);
     }
 
-    /** Column fields for downloaded files used in {@link Downloads} table */
+    /**
+     * Download metadata columns.
+     */
     public interface DownloadColumns extends MediaColumns {
         /**
-         * Uri indicating where the file has been downloaded from.
+         * Uri indicating where the item has been downloaded from.
          */
         @Column(Cursor.FIELD_TYPE_STRING)
         String DOWNLOAD_URI = "download_uri";
@@ -1422,9 +1447,12 @@ public final class MediaStore {
     }
 
     /**
-     * Contains meta data for all available images.
+     * Collection of all media with MIME type of {@code image/*}.
      */
     public static final class Images {
+        /**
+         * Image metadata columns.
+         */
         public interface ImageColumns extends MediaColumns {
             /**
              * The description of the image
@@ -1473,9 +1501,9 @@ public final class MediaStore {
             public static final String LONGITUDE = "longitude";
 
             /**
-             * The date & time that the image was taken in units
-             * of milliseconds since jan 1, 1970.
+             * The time the media item was taken.
              */
+            @CurrentTimeMillisLong
             @Column(value = Cursor.FIELD_TYPE_INTEGER, readOnly = true)
             public static final String DATE_TAKEN = "datetaken";
 
@@ -1531,16 +1559,34 @@ public final class MediaStore {
         }
 
         public static final class Media implements ImageColumns {
+            /**
+             * @deprecated all queries should be performed through
+             *             {@link ContentResolver} directly, which offers modern
+             *             features like {@link CancellationSignal}.
+             */
+            @Deprecated
             public static final Cursor query(ContentResolver cr, Uri uri, String[] projection) {
                 return cr.query(uri, projection, null, null, DEFAULT_SORT_ORDER);
             }
 
+            /**
+             * @deprecated all queries should be performed through
+             *             {@link ContentResolver} directly, which offers modern
+             *             features like {@link CancellationSignal}.
+             */
+            @Deprecated
             public static final Cursor query(ContentResolver cr, Uri uri, String[] projection,
                     String where, String orderBy) {
                 return cr.query(uri, projection, where,
                                              null, orderBy == null ? DEFAULT_SORT_ORDER : orderBy);
             }
 
+            /**
+             * @deprecated all queries should be performed through
+             *             {@link ContentResolver} directly, which offers modern
+             *             features like {@link CancellationSignal}.
+             */
+            @Deprecated
             public static final Cursor query(ContentResolver cr, Uri uri, String[] projection,
                     String selection, String [] selectionArgs, String orderBy) {
                 return cr.query(uri, projection, selection,
@@ -1552,9 +1598,12 @@ public final class MediaStore {
              *
              * @param cr The content resolver to use
              * @param url The url of the image
-             * @throws FileNotFoundException
-             * @throws IOException
+             * @deprecated loading of images should be performed through
+             *             {@link ImageDecoder#createSource(ContentResolver, Uri)},
+             *             which offers modern features like
+             *             {@link PostProcessor}.
              */
+            @Deprecated
             public static final Bitmap getBitmap(ContentResolver cr, Uri url)
                     throws FileNotFoundException, IOException {
                 InputStream input = cr.openInputStream(url);
@@ -1571,8 +1620,11 @@ public final class MediaStore {
              * @param name The name of the image
              * @param description The description of the image
              * @return The URL to the newly created image
-             * @throws FileNotFoundException
+             * @deprecated inserting of images should be performed through
+             *             {@link MediaStore#createPending(Context, PendingParams)},
+             *             which offers richer control over lifecycle.
              */
+            @Deprecated
             public static final String insertImage(ContentResolver cr, String imagePath,
                     String name, String description) throws FileNotFoundException {
                 // Check if file exists with a FileInputStream
@@ -1599,7 +1651,11 @@ public final class MediaStore {
              * @param description The description of the image
              * @return The URL to the newly created image, or <code>null</code> if the image failed to be stored
              *              for any reason.
+             * @deprecated inserting of images should be performed through
+             *             {@link MediaStore#createPending(Context, PendingParams)},
+             *             which offers richer control over lifecycle.
              */
+            @Deprecated
             public static final String insertImage(ContentResolver cr, Bitmap source,
                                                    String title, String description) {
                 ContentValues values = new ContentValues();
@@ -1694,15 +1750,33 @@ public final class MediaStore {
          */
         @Deprecated
         public static class Thumbnails implements BaseColumns {
+            /**
+             * @deprecated all queries should be performed through
+             *             {@link ContentResolver} directly, which offers modern
+             *             features like {@link CancellationSignal}.
+             */
+            @Deprecated
             public static final Cursor query(ContentResolver cr, Uri uri, String[] projection) {
                 return cr.query(uri, projection, null, null, DEFAULT_SORT_ORDER);
             }
 
+            /**
+             * @deprecated all queries should be performed through
+             *             {@link ContentResolver} directly, which offers modern
+             *             features like {@link CancellationSignal}.
+             */
+            @Deprecated
             public static final Cursor queryMiniThumbnails(ContentResolver cr, Uri uri, int kind,
                     String[] projection) {
                 return cr.query(uri, projection, "kind = " + kind, null, DEFAULT_SORT_ORDER);
             }
 
+            /**
+             * @deprecated all queries should be performed through
+             *             {@link ContentResolver} directly, which offers modern
+             *             features like {@link CancellationSignal}.
+             */
+            @Deprecated
             public static final Cursor queryMiniThumbnail(ContentResolver cr, long origId, int kind,
                     String[] projection) {
                 return cr.query(EXTERNAL_CONTENT_URI, projection,
@@ -1885,11 +1959,11 @@ public final class MediaStore {
     }
 
     /**
-     * Container for all audio content.
+     * Collection of all media with MIME type of {@code audio/*}.
      */
     public static final class Audio {
         /**
-         * Columns for audio file that show up in multiple tables.
+         * Audio metadata columns.
          */
         public interface AudioColumns extends MediaColumns {
 
@@ -1901,15 +1975,17 @@ public final class MediaStore {
             public static final String TITLE_KEY = "title_key";
 
             /**
-             * The duration of the audio file, in ms
+             * The duration of the audio item.
              */
+            @DurationMillisLong
             @Column(value = Cursor.FIELD_TYPE_INTEGER, readOnly = true)
             public static final String DURATION = "duration";
 
             /**
-             * The position, in ms, playback was at when playback for this file
-             * was last stopped.
+             * The position within the audio item at which playback should be
+             * resumed.
              */
+            @DurationMillisLong
             @Column(Cursor.FIELD_TYPE_INTEGER)
             public static final String BOOKMARK = "bookmark";
 
@@ -2187,7 +2263,7 @@ public final class MediaStore {
         }
 
         /**
-         * Columns representing an audio genre
+         * Audio genre metadata columns.
          */
         public interface GenresColumns {
             /**
@@ -2290,7 +2366,7 @@ public final class MediaStore {
         }
 
         /**
-         * Columns representing a playlist
+         * Audio playlist metadata columns.
          */
         public interface PlaylistsColumns {
             /**
@@ -2321,17 +2397,16 @@ public final class MediaStore {
             public static final String DATA = "_data";
 
             /**
-             * The time the file was added to the media provider
-             * Units are seconds since 1970.
+             * The time the media item was first added.
              */
+            @CurrentTimeSecondsLong
             @Column(value = Cursor.FIELD_TYPE_INTEGER, readOnly = true)
             public static final String DATE_ADDED = "date_added";
 
             /**
-             * The time the file was last modified
-             * Units are seconds since 1970.
-             * NOTE: This is for internal use by the media scanner.  Do not modify this field.
+             * The time the media item was last modified.
              */
+            @CurrentTimeSecondsLong
             @Column(value = Cursor.FIELD_TYPE_INTEGER, readOnly = true)
             public static final String DATE_MODIFIED = "date_modified";
         }
@@ -2450,7 +2525,7 @@ public final class MediaStore {
         }
 
         /**
-         * Columns representing an artist
+         * Audio artist metadata columns.
          */
         public interface ArtistColumns {
             /**
@@ -2537,7 +2612,7 @@ public final class MediaStore {
         }
 
         /**
-         * Columns representing an album
+         * Audio album metadata columns.
          */
         public interface AlbumColumns {
 
@@ -2707,6 +2782,9 @@ public final class MediaStore {
         }
     }
 
+    /**
+     * Collection of all media with MIME type of {@code video/*}.
+     */
     public static final class Video {
 
         /**
@@ -2714,15 +2792,25 @@ public final class MediaStore {
          */
         public static final String DEFAULT_SORT_ORDER = MediaColumns.DISPLAY_NAME;
 
+        /**
+         * @deprecated all queries should be performed through
+         *             {@link ContentResolver} directly, which offers modern
+         *             features like {@link CancellationSignal}.
+         */
+        @Deprecated
         public static final Cursor query(ContentResolver cr, Uri uri, String[] projection) {
             return cr.query(uri, projection, null, null, DEFAULT_SORT_ORDER);
         }
 
+        /**
+         * Video metadata columns.
+         */
         public interface VideoColumns extends MediaColumns {
 
             /**
-             * The duration of the video file, in ms
+             * The duration of the video item.
              */
+            @DurationMillisLong
             @Column(value = Cursor.FIELD_TYPE_INTEGER, readOnly = true)
             public static final String DURATION = "duration";
 
@@ -2799,9 +2887,9 @@ public final class MediaStore {
             public static final String LONGITUDE = "longitude";
 
             /**
-             * The date & time that the video was taken in units
-             * of milliseconds since jan 1, 1970.
+             * The time the media item was taken.
              */
+            @CurrentTimeMillisLong
             @Column(value = Cursor.FIELD_TYPE_INTEGER, readOnly = true)
             public static final String DATE_TAKEN = "datetaken";
 
@@ -2849,11 +2937,10 @@ public final class MediaStore {
             public static final String GROUP_ID = "group_id";
 
             /**
-             * The bookmark for the video. Time in ms. Represents the location in the video that the
-             * video should start playing at the next time it is opened. If the value is null or
-             * out of the range 0..DURATION-1 then the video should start playing from the
-             * beginning.
+             * The position within the video item at which playback should be
+             * resumed.
              */
+            @DurationMillisLong
             @Column(Cursor.FIELD_TYPE_INTEGER)
             public static final String BOOKMARK = "bookmark";
 
