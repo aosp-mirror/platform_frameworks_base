@@ -54,6 +54,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Information for generating a widget to handle classified text.
@@ -276,8 +277,8 @@ public final class TextClassification implements Parcelable {
     @Override
     public String toString() {
         return String.format(Locale.US,
-                "TextClassification {text=%s, entities=%s, actions=%s, id=%s}",
-                mText, mEntityConfidence, mActions, mId);
+                "TextClassification {text=%s, entities=%s, actions=%s, id=%s, extras=%s}",
+                mText, mEntityConfidence, mActions, mId, mExtras);
     }
 
     /**
@@ -532,7 +533,7 @@ public final class TextClassification implements Parcelable {
 
         private Bundle buildExtras() {
             final Bundle extras = mExtras == null ? new Bundle() : mExtras.deepCopy();
-            if (!mActionIntents.isEmpty()) {
+            if (mActionIntents.stream().anyMatch(Objects::nonNull)) {
                 ExtrasUtils.putActionsIntents(extras, mActionIntents);
             }
             if (mForeignLanguageExtra != null) {
