@@ -815,4 +815,15 @@ public class BubbleStackView extends FrameLayout {
                     getNormalizedYPosition());
         }
     }
+
+    /**
+     * Called when a back gesture should be directed to the Bubbles stack. When expanded,
+     * a back key down/up event pair is forwarded to the bubble Activity.
+     */
+    boolean performBackPressIfNeeded() {
+        if (!isExpanded()) {
+            return false;
+        }
+        return mExpandedBubble.expandedView.performBackPressIfNeeded();
+    }
 }

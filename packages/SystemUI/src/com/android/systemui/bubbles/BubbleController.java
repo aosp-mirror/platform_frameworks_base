@@ -243,6 +243,16 @@ public class BubbleController implements BubbleExpandedView.OnBubbleBlockedListe
     }
 
     /**
+     * Directs a back gesture at the bubble stack. When opened, the current expanded bubble
+     * is forwarded a back key down/up pair.
+     */
+    public void performBackPressIfNeeded() {
+        if (mStackView != null) {
+            mStackView.performBackPressIfNeeded();
+        }
+    }
+
+    /**
      * Adds or updates a bubble associated with the provided notification entry.
      *
      * @param notif the notification associated with this bubble.
