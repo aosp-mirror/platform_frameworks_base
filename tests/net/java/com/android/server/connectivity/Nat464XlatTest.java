@@ -58,6 +58,7 @@ public class Nat464XlatTest {
     static final String STACKED_IFACE = "v4-test0";
     static final LinkAddress ADDR = new LinkAddress("192.0.2.5/29");
     static final String NAT64_PREFIX = "64:ff9b::/96";
+    static final int NETID = 42;
 
     @Mock ConnectivityService mConnectivity;
     @Mock NetworkMisc mMisc;
@@ -70,7 +71,11 @@ public class Nat464XlatTest {
     Handler mHandler;
 
     Nat464Xlat makeNat464Xlat() {
-        return new Nat464Xlat(mNai, mNetd, mNms);
+        return new Nat464Xlat(mNai, mNetd, mNms) {
+            @Override protected int getNetId() {
+                return NETID;
+            }
+        };
     }
 
     @Before
@@ -93,12 +98,21 @@ public class Nat464XlatTest {
     }
 
     private void assertRequiresClat(boolean expected, NetworkAgentInfo nai) {
-        String msg = String.format("requiresClat expected %b for type=%d state=%s skip464xlat=%b "
+        String msg = String.format("requiresClat expected %b for type=%d state=%s skip=%b "
                 + "nat64Prefix=%s addresses=%s", expected, nai.networkInfo.getType(),
                 nai.networkInfo.getDetailedState(),
                 mMisc.skip464xlat, nai.linkProperties.getNat64Prefix(),
                 nai.linkProperties.getLinkAddresses());
         assertEquals(msg, expected, Nat464Xlat.requiresClat(nai));
+    }
+
+    private void assertShouldStartClat(boolean expected, NetworkAgentInfo nai) {
+        String msg = String.format("shouldStartClat expected %b for type=%d state=%s skip=%b "
+                + "nat64Prefix=%s addresses=%s", expected, nai.networkInfo.getType(),
+                nai.networkInfo.getDetailedState(),
+                mMisc.skip464xlat, nai.linkProperties.getNat64Prefix(),
+                nai.linkProperties.getLinkAddresses());
+        assertEquals(msg, expected, Nat464Xlat.shouldStartClat(nai));
     }
 
     @Test
@@ -124,21 +138,35 @@ public class Nat464XlatTest {
 
                 mNai.linkProperties.setNat64Prefix(new IpPrefix("2001:db8:0:64::/96"));
                 assertRequiresClat(false, mNai);
+                assertShouldStartClat(false, mNai);
 
                 mNai.linkProperties.addLinkAddress(new LinkAddress("fc00::1/64"));
                 assertRequiresClat(false, mNai);
+                assertShouldStartClat(false, mNai);
 
                 mNai.linkProperties.addLinkAddress(new LinkAddress("2001:db8::1/64"));
                 assertRequiresClat(true, mNai);
+                assertShouldStartClat(true, mNai);
 
                 mMisc.skip464xlat = true;
                 assertRequiresClat(false, mNai);
+                assertShouldStartClat(false, mNai);
 
                 mMisc.skip464xlat = false;
                 assertRequiresClat(true, mNai);
+                assertShouldStartClat(true, mNai);
 
                 mNai.linkProperties.addLinkAddress(new LinkAddress("192.0.2.2/24"));
                 assertRequiresClat(false, mNai);
+                assertShouldStartClat(false, mNai);
+
+                mNai.linkProperties.removeLinkAddress(new LinkAddress("192.0.2.2/24"));
+                assertRequiresClat(true, mNai);
+                assertShouldStartClat(true, mNai);
+
+                mNai.linkProperties.setNat64Prefix(null);
+                assertRequiresClat(true, mNai);
+                assertShouldStartClat(false, mNai);
 
                 mNai.linkProperties = new LinkProperties(oldLp);
             }
@@ -152,7 +180,7 @@ public class Nat464XlatTest {
 
         nat.setNat64Prefix(new IpPrefix(NAT64_PREFIX));
 
-        // ConnectivityService starts clat.
+        // Start clat.
         nat.start();
 
         verify(mNms).registerObserver(eq(nat));
@@ -168,7 +196,7 @@ public class Nat464XlatTest {
         assertTrue(c.getValue().getAllInterfaceNames().contains(STACKED_IFACE));
         assertRunning(nat);
 
-        // ConnectivityService stops clat (Network disconnects, IPv4 addr appears, ...).
+        // Stop clat (Network disconnects, IPv4 addr appears, ...).
         nat.stop();
 
         verify(mNetd).clatdStop(eq(BASE_IFACE));
@@ -176,6 +204,7 @@ public class Nat464XlatTest {
         verify(mNms).unregisterObserver(eq(nat));
         assertTrue(c.getValue().getStackedLinks().isEmpty());
         assertFalse(c.getValue().getAllInterfaceNames().contains(STACKED_IFACE));
+        verify(mNetd).resolverStopPrefix64Discovery(eq(NETID));
         assertIdle(nat);
 
         // Stacked interface removed notification arrives and is ignored.
@@ -192,7 +221,6 @@ public class Nat464XlatTest {
 
         nat.setNat64Prefix(new IpPrefix(NAT64_PREFIX));
 
-        // ConnectivityService starts clat.
         nat.start();
 
         inOrder.verify(mNetd).clatdStart(eq(BASE_IFACE), eq(NAT64_PREFIX));
@@ -229,7 +257,6 @@ public class Nat464XlatTest {
         assertIdle(nat);
         inOrder.verifyNoMoreInteractions();
 
-        // ConnectivityService starts clatd again.
         nat.start();
 
         inOrder.verify(mNetd).clatdStart(eq(BASE_IFACE), eq(NAT64_PREFIX));
@@ -281,7 +308,6 @@ public class Nat464XlatTest {
 
         nat.setNat64Prefix(new IpPrefix(NAT64_PREFIX));
 
-        // ConnectivityService starts clat.
         nat.start();
 
         verify(mNms).registerObserver(eq(nat));
@@ -304,6 +330,7 @@ public class Nat464XlatTest {
         verify(mNetd).clatdStop(eq(BASE_IFACE));
         verify(mConnectivity, times(2)).handleUpdateLinkProperties(eq(mNai), c.capture());
         verify(mNms).unregisterObserver(eq(nat));
+        verify(mNetd).resolverStopPrefix64Discovery(eq(NETID));
         assertTrue(c.getValue().getStackedLinks().isEmpty());
         assertFalse(c.getValue().getAllInterfaceNames().contains(STACKED_IFACE));
         assertIdle(nat);
@@ -320,7 +347,6 @@ public class Nat464XlatTest {
 
         nat.setNat64Prefix(new IpPrefix(NAT64_PREFIX));
 
-        // ConnectivityService starts clat.
         nat.start();
 
         verify(mNms).registerObserver(eq(nat));
@@ -331,12 +357,12 @@ public class Nat464XlatTest {
 
         verify(mNetd).clatdStop(eq(BASE_IFACE));
         verify(mNms).unregisterObserver(eq(nat));
+        verify(mNetd).resolverStopPrefix64Discovery(eq(NETID));
         assertIdle(nat);
 
         // In-flight interface up notification arrives: no-op
         nat.interfaceLinkStateChanged(STACKED_IFACE, true);
         mLooper.dispatchNext();
-
 
         // Interface removed notification arrives after stopClatd() takes effect: no-op.
         nat.interfaceRemoved(STACKED_IFACE);
@@ -353,7 +379,6 @@ public class Nat464XlatTest {
 
         nat.setNat64Prefix(new IpPrefix(NAT64_PREFIX));
 
-        // ConnectivityService starts clat.
         nat.start();
 
         verify(mNms).registerObserver(eq(nat));
@@ -364,6 +389,7 @@ public class Nat464XlatTest {
 
         verify(mNetd).clatdStop(eq(BASE_IFACE));
         verify(mNms).unregisterObserver(eq(nat));
+        verify(mNetd).resolverStopPrefix64Discovery(eq(NETID));
         assertIdle(nat);
 
         verifyNoMoreInteractions(mNetd, mNms, mConnectivity);

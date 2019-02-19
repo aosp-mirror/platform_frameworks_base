@@ -592,15 +592,6 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
         for (LingerTimer timer : mLingerTimers) { pw.println(timer); }
     }
 
-    /** Starts or stops clatd as required. */
-    public void updateClat() {
-        if (!clatd.isStarted() && Nat464Xlat.requiresClat(this)) {
-            clatd.start();
-        } else if (clatd.isStarted() && !Nat464Xlat.requiresClat(this)) {
-            clatd.stop();
-        }
-    }
-
     public String toString() {
         return "NetworkAgentInfo{ ni{" + networkInfo + "}  "
                 + "network{" + network + "}  nethandle{" + network.getNetworkHandle() + "}  "

@@ -2908,7 +2908,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             e.rethrowFromSystemServer();
         }
         mNetworkAgentInfos.remove(nai.messenger);
-        nai.updateClat();
+        nai.clatd.update();
         synchronized (mNetworkForNetId) {
             // Remove the NetworkAgent, but don't mark the netId as
             // available until we've told netd to delete it below.
@@ -5249,8 +5249,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
             synchronized (networkAgent) {
                 networkAgent.linkProperties = newLp;
             }
-            // Start or stop clat accordingly to network state.
-            networkAgent.updateClat();
+            // Start or stop DNS64 detection and 464xlat according to network state.
+            networkAgent.clatd.update();
             notifyIfacesChangedForNetworkStats();
             if (networkAgent.everConnected) {
                 try {

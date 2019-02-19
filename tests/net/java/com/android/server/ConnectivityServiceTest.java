@@ -5103,8 +5103,9 @@ public class ConnectivityServiceTest {
         final TestNetworkCallback networkCallback = new TestNetworkCallback();
         mCm.registerNetworkCallback(networkRequest, networkCallback);
 
-        // Prepare ipv6 only link properties and connect.
+        // Prepare ipv6 only link properties.
         mCellNetworkAgent = new MockNetworkAgent(TRANSPORT_CELLULAR);
+        final int cellNetId = mCellNetworkAgent.getNetwork().netId;
         final LinkProperties cellLp = new LinkProperties();
         cellLp.setInterfaceName(MOBILE_IFNAME);
         cellLp.addLinkAddress(myIpv6);
@@ -5114,17 +5115,37 @@ public class ConnectivityServiceTest {
         when(mNetworkManagementService.getInterfaceConfig(CLAT_PREFIX + MOBILE_IFNAME))
                 .thenReturn(getClatInterfaceConfig(myIpv4));
 
-        // Connect with ipv6 link properties, then expect clat setup ipv4 and update link
-        // properties properly.
+        // Connect with ipv6 link properties. Expect prefix discovery to be started.
         mCellNetworkAgent.sendLinkProperties(cellLp);
         mCellNetworkAgent.connect(true);
         networkCallback.expectAvailableThenValidatedCallbacks(mCellNetworkAgent);
+        verify(mMockNetd, times(1)).resolverStartPrefix64Discovery(cellNetId);
 
-        // When NAT64 prefix detection succeeds, LinkProperties are updated and clatd is started.
+        // Switching default network updates TCP buffer sizes.
+        verifyTcpBufferSizeChange(ConnectivityService.DEFAULT_TCP_BUFFER_SIZES);
+
+        // Add an IPv4 address. Expect prefix discovery to be stopped. Netd doesn't tell us that
+        // the NAT64 prefix was removed because one was never discovered.
+        cellLp.addLinkAddress(myIpv4);
+        mCellNetworkAgent.sendLinkProperties(cellLp);
+        networkCallback.expectCallback(CallbackState.LINK_PROPERTIES, mCellNetworkAgent);
+        verify(mMockNetd, times(1)).resolverStopPrefix64Discovery(cellNetId);
+
+        verifyNoMoreInteractions(mMockNetd);
+        reset(mMockNetd);
+
+        // Remove IPv4 address. Expect prefix discovery to be started again.
+        cellLp.removeLinkAddress(myIpv4);
+        cellLp.removeRoute(new RouteInfo(myIpv4, null, MOBILE_IFNAME));
+        mCellNetworkAgent.sendLinkProperties(cellLp);
+        networkCallback.expectCallback(CallbackState.LINK_PROPERTIES, mCellNetworkAgent);
+        verify(mMockNetd, times(1)).resolverStartPrefix64Discovery(cellNetId);
+
+        // When NAT64 prefix discovery succeeds, LinkProperties are updated and clatd is started.
         Nat464Xlat clat = mService.getNat464Xlat(mCellNetworkAgent);
         assertNull(mCm.getLinkProperties(mCellNetworkAgent.getNetwork()).getNat64Prefix());
-        mService.mNetdEventCallback.onNat64PrefixEvent(mCellNetworkAgent.getNetwork().netId,
-                true /* added */, kNat64PrefixString, 96);
+        mService.mNetdEventCallback.onNat64PrefixEvent(cellNetId, true /* added */,
+                kNat64PrefixString, 96);
         LinkProperties lpBeforeClat = (LinkProperties) networkCallback.expectCallback(
                 CallbackState.LINK_PROPERTIES, mCellNetworkAgent).arg;
         assertEquals(0, lpBeforeClat.getStackedLinks().size());
@@ -5148,15 +5169,17 @@ public class ConnectivityServiceTest {
         assertNotEquals(stackedLpsAfterChange, Collections.EMPTY_LIST);
         assertEquals(makeClatLinkProperties(myIpv4), stackedLpsAfterChange.get(0));
 
-        // Add ipv4 address, expect that clatd is stopped and stacked linkproperties are cleaned up.
+        // Add ipv4 address, expect that clatd and prefix discovery are stopped and stacked
+        // linkproperties are cleaned up.
         cellLp.addLinkAddress(myIpv4);
         cellLp.addRoute(new RouteInfo(myIpv4, null, MOBILE_IFNAME));
         mCellNetworkAgent.sendLinkProperties(cellLp);
         networkCallback.expectCallback(CallbackState.LINK_PROPERTIES, mCellNetworkAgent);
         verify(mMockNetd, times(1)).clatdStop(MOBILE_IFNAME);
-        networkCallback.expectCallback(CallbackState.LINK_PROPERTIES, mCellNetworkAgent);
+        verify(mMockNetd, times(1)).resolverStopPrefix64Discovery(cellNetId);
 
         // As soon as stop is called, the linkproperties lose the stacked interface.
+        networkCallback.expectCallback(CallbackState.LINK_PROPERTIES, mCellNetworkAgent);
         LinkProperties actualLpAfterIpv4 = mCm.getLinkProperties(mCellNetworkAgent.getNetwork());
         LinkProperties expected = new LinkProperties(cellLp);
         expected.setNat64Prefix(kNat64Prefix);
@@ -5167,25 +5190,39 @@ public class ConnectivityServiceTest {
         clat.interfaceRemoved(CLAT_PREFIX + MOBILE_IFNAME);
         networkCallback.assertNoCallback();
 
+        verifyNoMoreInteractions(mMockNetd);
         reset(mMockNetd);
 
-        // Remove IPv4 address and expect clatd to be started again.
+        // Stopping prefix discovery causes netd to tell us that the NAT64 prefix is gone.
+        mService.mNetdEventCallback.onNat64PrefixEvent(cellNetId, false /* added */,
+                kNat64PrefixString, 96);
+        networkCallback.expectLinkPropertiesLike((lp) -> lp.getNat64Prefix() == null,
+                mCellNetworkAgent);
+
+        // Remove IPv4 address and expect prefix discovery and clatd to be started again.
         cellLp.removeLinkAddress(myIpv4);
         cellLp.removeRoute(new RouteInfo(myIpv4, null, MOBILE_IFNAME));
         cellLp.removeDnsServer(InetAddress.getByName("8.8.8.8"));
         mCellNetworkAgent.sendLinkProperties(cellLp);
         networkCallback.expectCallback(CallbackState.LINK_PROPERTIES, mCellNetworkAgent);
+        verify(mMockNetd, times(1)).resolverStartPrefix64Discovery(cellNetId);
+        mService.mNetdEventCallback.onNat64PrefixEvent(cellNetId, true /* added */,
+                kNat64PrefixString, 96);
+        networkCallback.expectCallback(CallbackState.LINK_PROPERTIES, mCellNetworkAgent);
         verify(mMockNetd, times(1)).clatdStart(MOBILE_IFNAME, kNat64Prefix.toString());
+
 
         // Clat iface comes up. Expect stacked link to be added.
         clat.interfaceLinkStateChanged(CLAT_PREFIX + MOBILE_IFNAME, true);
-        networkCallback.expectLinkPropertiesLike((lp) -> lp.getStackedLinks().size() == 1,
+        networkCallback.expectLinkPropertiesLike(
+                (lp) -> lp.getStackedLinks().size() == 1 && lp.getNat64Prefix() != null,
                 mCellNetworkAgent);
 
         // NAT64 prefix is removed. Expect that clat is stopped.
-        mService.mNetdEventCallback.onNat64PrefixEvent(mCellNetworkAgent.getNetwork().netId,
-                false /* added */, kNat64PrefixString, 96);
-        networkCallback.expectLinkPropertiesLike((lp) -> lp.getNat64Prefix() == null,
+        mService.mNetdEventCallback.onNat64PrefixEvent(cellNetId, false /* added */,
+                kNat64PrefixString, 96);
+        networkCallback.expectLinkPropertiesLike(
+                (lp) -> lp.getStackedLinks().size() == 0 && lp.getNat64Prefix() == null,
                 mCellNetworkAgent);
         verify(mMockNetd, times(1)).clatdStop(MOBILE_IFNAME);
         networkCallback.expectLinkPropertiesLike((lp) -> lp.getStackedLinks().size() == 0,
