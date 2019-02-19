@@ -126,6 +126,12 @@ public final class StatsLog extends StatsLogInternal {
             case PERMISSION_GRANT_REQUEST_RESULT_REPORTED:
                 write(id, (long) params[0], (int) params[1], (String) params[2], (String) params[3],
                         (boolean) params[4], (int) params[5]);
+                break;
+            case DATA_STALL_EVENT:
+                // Refer to the defintion in frameworks/base/cmds/statsd/src/atoms.proto.
+                write(id, (int) params[0], (int) params[1], (int) params[2], (byte[]) params[3],
+                        (byte[]) params[4], (byte[]) params[5]);
+                break;
         }
     }
 }
