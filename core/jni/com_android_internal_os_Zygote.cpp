@@ -1357,6 +1357,9 @@ static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids,
 
   SetSchedulerPolicy(fail_fn);
 
+  __android_log_close();
+  stats_log_close();
+
   const char* se_info_ptr = se_info.has_value() ? se_info.value().c_str() : nullptr;
   const char* nice_name_ptr = nice_name.has_value() ? nice_name.value().c_str() : nullptr;
 

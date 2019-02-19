@@ -29,6 +29,7 @@ import android.os.IVold;
 import android.os.Process;
 import android.os.SystemProperties;
 import android.os.Trace;
+import android.provider.DeviceConfig;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.util.Log;
@@ -129,21 +130,6 @@ public final class Zygote {
     public static final int BLASTULA_MANAGEMENT_MESSAGE_BYTES = 8;
 
     /**
-     * If the blastula pool should be created and used to start applications.
-     *
-     * Setting this value to false will disable the creation, maintenance, and use of the blastula
-     * pool.  When the blastula pool is disabled the application lifecycle will be identical to
-     * previous versions of Android.
-     */
-    public static final boolean BLASTULA_POOL_ENABLED = false;
-
-    /**
-     * File descriptor used for communication between the signal handler and the ZygoteServer poll
-     * loop.
-     * */
-    protected static FileDescriptor sBlastulaPoolEventFD;
-
-    /**
      * An extraArg passed when a zygote process is forking a child-zygote, specifying a name
      * in the abstract socket namespace. This socket name is what the new child zygote
      * should listen for connections on.
@@ -174,43 +160,39 @@ public final class Zygote {
     private static final String ANDROID_SOCKET_PREFIX = "ANDROID_SOCKET_";
 
     /**
-     * The maximum value that the sBlastulaPoolMax variable may take.  This value
-     * is a mirror of BLASTULA_POOL_MAX_LIMIT found in com_android_internal_os_Zygote.cpp.
+     * The duration to wait before re-checking Zygote related system properties.
+     *
+     * Five minutes in milliseconds.
      */
-    static final int BLASTULA_POOL_MAX_LIMIT = 10;
-
-    /**
-     * The minimum value that the sBlastulaPoolMin variable may take.
-     */
-    static final int BLASTULA_POOL_MIN_LIMIT = 1;
-
-    /**
-     * The runtime-adjustable maximum Blastula pool size.
-     */
-    static int sBlastulaPoolMax = BLASTULA_POOL_MAX_LIMIT;
-
-    /**
-     * The runtime-adjustable minimum Blastula pool size.
-     */
-    static int sBlastulaPoolMin = BLASTULA_POOL_MIN_LIMIT;
-
-    /**
-     * The runtime-adjustable value used to determine when to re-fill the
-     * blastula pool.  The pool will be re-filled when
-     * (sBlastulaPoolMax - gBlastulaPoolCount) >= sBlastulaPoolRefillThreshold.
-     */
-    // TODO (chriswailes): This must be updated at the same time as sBlastulaPoolMax.
-    static int sBlastulaPoolRefillThreshold = (sBlastulaPoolMax / 2);
+    public static final long PROPERTY_CHECK_INTERVAL = 300000;
 
     /**
      * @hide for internal use only
      */
     public static final int SOCKET_BUFFER_SIZE = 256;
 
-    private static LocalServerSocket sBlastulaPoolSocket = null;
-
     /** a prototype instance for a future List.toArray() */
     protected static final int[][] INT_ARRAY_2D = new int[0][0];
+
+    /**
+     * @hide for internal use only.
+     */
+    public static final String PRIMARY_SOCKET_NAME = "zygote";
+
+    /**
+     * @hide for internal use only.
+     */
+    public static final String SECONDARY_SOCKET_NAME = "zygote_secondary";
+
+    /**
+     * @hide for internal use only
+     */
+    public static final String BLASTULA_POOL_PRIMARY_SOCKET_NAME = "blastula_pool";
+
+    /**
+     * @hide for internal use only
+     */
+    public static final String BLASTULA_POOL_SECONDARY_SOCKET_NAME = "blastula_pool_secondary";
 
     private Zygote() {}
 
@@ -428,70 +410,47 @@ public final class Zygote {
     protected static native void nativeGetSocketFDs(boolean isPrimary);
 
     /**
-     * Initialize the blastula pool and fill it with the desired number of
-     * processes.
+     * Returns the raw string value of a system property.
+     *
+     * Note that Device Config is not available without an application so SystemProperties is used
+     * instead.
+     *
+     * TODO (chriswailes): Cache the system property location in native code and then write a JNI
+     *                     function to fetch it.
      */
-    protected static Runnable initBlastulaPool() {
-        if (BLASTULA_POOL_ENABLED) {
-            sBlastulaPoolEventFD = getBlastulaPoolEventFD();
-
-            return fillBlastulaPool(null);
-        } else {
-            return null;
-        }
+    public static String getSystemProperty(String propertyName, String defaultValue) {
+        return SystemProperties.get(
+                String.join(".",
+                        "persist.device_config",
+                        DeviceConfig.RuntimeNative.NAMESPACE,
+                        propertyName),
+                defaultValue);
     }
 
     /**
-     * Checks to see if the current policy says that pool should be refilled, and spawns new
-     * blastulas if necessary.
+     * Returns the value of a system property converted to a boolean using specific logic.
      *
-     * NOTE: This function doesn't need to be guarded with BLASTULA_POOL_ENABLED because it is
-     *       only called from contexts that are only valid if the pool is enabled.
+     * Note that Device Config is not available without an application so SystemProperties is used
+     * instead.
      *
-     * @param sessionSocketRawFDs  Anonymous session sockets that are currently open
-     * @return In the Zygote process this function will always return null; in blastula processes
-     *         this function will return a Runnable object representing the new application that is
-     *         passed up from blastulaMain.
+     * @see SystemProperties.getBoolean
+     *
+     * TODO (chriswailes): Cache the system property location in native code and then write a JNI
+     *                     function to fetch it.
      */
-    protected static Runnable fillBlastulaPool(int[] sessionSocketRawFDs) {
-        Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "Zygote:FillBlastulaPool");
-
-        int blastulaPoolCount = getBlastulaPoolCount();
-
-        int numBlastulasToSpawn = sBlastulaPoolMax - blastulaPoolCount;
-
-        if (blastulaPoolCount < sBlastulaPoolMin
-                || numBlastulasToSpawn >= sBlastulaPoolRefillThreshold) {
-
-            // Disable some VM functionality and reset some system values
-            // before forking.
-            ZygoteHooks.preFork();
-            resetNicePriority();
-
-            while (blastulaPoolCount++ < sBlastulaPoolMax) {
-                Runnable caller = forkBlastula(sessionSocketRawFDs);
-
-                if (caller != null) {
-                    return caller;
-                }
-            }
-
-            // Re-enable runtime services for the Zygote.  Blastula services
-            // are re-enabled in specializeBlastula.
-            ZygoteHooks.postForkCommon();
-
-            Log.i("zygote", "Filled the blastula pool. New blastulas: " + numBlastulasToSpawn);
-        }
-
-        Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
-
-        return null;
+    public static boolean getSystemPropertyBoolean(String propertyName, Boolean defaultValue) {
+        return SystemProperties.getBoolean(
+                String.join(".",
+                        "persist.device_config",
+                        DeviceConfig.RuntimeNative.NAMESPACE,
+                        propertyName),
+                defaultValue);
     }
 
     /**
      * @return Number of blastulas currently in the pool
      */
-    private static int getBlastulaPoolCount() {
+    static int getBlastulaPoolCount() {
         return nativeGetBlastulaPoolCount();
     }
 
@@ -501,7 +460,7 @@ public final class Zygote {
      * @return The event FD used for communication between the signal handler and the ZygoteServer
      *         poll loop
      */
-    private static FileDescriptor getBlastulaPoolEventFD() {
+    static FileDescriptor getBlastulaPoolEventFD() {
         FileDescriptor fd = new FileDescriptor();
         fd.setInt$(nativeGetBlastulaPoolEventFD());
 
@@ -518,7 +477,8 @@ public final class Zygote {
      *         this function will return a Runnable object representing the new application that is
      *         passed up from blastulaMain.
      */
-    private static Runnable forkBlastula(int[] sessionSocketRawFDs) {
+    static Runnable forkBlastula(LocalServerSocket blastulaPoolSocket,
+                                 int[] sessionSocketRawFDs) {
         FileDescriptor[] pipeFDs = null;
 
         try {
@@ -532,7 +492,7 @@ public final class Zygote {
 
         if (pid == 0) {
             IoUtils.closeQuietly(pipeFDs[0]);
-            return blastulaMain(pipeFDs[1]);
+            return blastulaMain(blastulaPoolSocket, pipeFDs[1]);
         } else {
             // The read-end of the pipe will be closed by the native code.
             // See removeBlastulaTableEntry();
@@ -553,7 +513,8 @@ public final class Zygote {
      *                   of the ZygoteServer.
      * @return A runnable oject representing the new application.
      */
-    static Runnable blastulaMain(FileDescriptor writePipe) {
+    private static Runnable blastulaMain(LocalServerSocket blastulaPoolSocket,
+                                         FileDescriptor writePipe) {
         final int pid = Process.myPid();
 
         LocalSocket sessionSocket = null;
@@ -563,7 +524,7 @@ public final class Zygote {
 
         while (true) {
             try {
-                sessionSocket = sBlastulaPoolSocket.accept();
+                sessionSocket = blastulaPoolSocket.accept();
 
                 BufferedReader blastulaReader =
                         new BufferedReader(new InputStreamReader(sessionSocket.getInputStream()));
@@ -611,7 +572,7 @@ public final class Zygote {
             System.exit(-1);
         } finally {
             IoUtils.closeQuietly(sessionSocket);
-            IoUtils.closeQuietly(sBlastulaPoolSocket);
+            IoUtils.closeQuietly(blastulaPoolSocket);
         }
 
         try {
@@ -660,7 +621,7 @@ public final class Zygote {
      * exception if an invalid arugment is encountered.
      * @param args  The arguments to test
      */
-    static void validateBlastulaCommand(ZygoteArguments args) {
+    private static void validateBlastulaCommand(ZygoteArguments args) {
         if (args.mAbiListQuery) {
             throw new IllegalArgumentException(BLASTULA_ERROR_PREFIX + "--query-abi-list");
         } else if (args.mPidQuery) {
@@ -848,20 +809,6 @@ public final class Zygote {
         }
 
         return args;
-    }
-
-    /**
-     * Creates a managed object representing the Blastula pool socket that has
-     * already been initialized and bound by init.
-     *
-     * TODO (chriswailes): Move the name selection logic into this function.
-     *
-     * @throws RuntimeException when open fails
-     */
-    static void createBlastulaSocket(String socketName) {
-        if (BLASTULA_POOL_ENABLED && sBlastulaPoolSocket == null) {
-            sBlastulaPoolSocket = createManagedSocketFromInitSocket(socketName);
-        }
     }
 
     /**
