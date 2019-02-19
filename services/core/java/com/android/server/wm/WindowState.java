@@ -114,6 +114,7 @@ import static com.android.server.wm.WindowManagerService.localLOGV;
 import static com.android.server.wm.WindowStateAnimator.COMMIT_DRAW_PENDING;
 import static com.android.server.wm.WindowStateAnimator.DRAW_PENDING;
 import static com.android.server.wm.WindowStateAnimator.HAS_DRAWN;
+import static com.android.server.wm.WindowStateAnimator.PRESERVED_SURFACE_LAYER;
 import static com.android.server.wm.WindowStateAnimator.READY_TO_SHOW;
 import static com.android.server.wm.WindowStateProto.ANIMATING_EXIT;
 import static com.android.server.wm.WindowStateProto.ANIMATOR;
@@ -4777,7 +4778,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     // then we can drop all negative layering on the windowing side and simply inherit
     // the default implementation here.
     public void assignChildLayers(Transaction t) {
-        int layer = 1;
+        // The surface of the main window might be preserved. So the child window on top of the main
+        // window should be also on top of the preserved surface.
+        int layer = PRESERVED_SURFACE_LAYER + 1;
         for (int i = 0; i < mChildren.size(); i++) {
             final WindowState w = mChildren.get(i);
 
