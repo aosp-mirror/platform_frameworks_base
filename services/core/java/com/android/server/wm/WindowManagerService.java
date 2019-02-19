@@ -225,7 +225,6 @@ import android.view.WindowManagerPolicyConstants.PointerEventListener;
 import android.view.inputmethod.InputMethodManagerInternal;
 
 import com.android.internal.R;
-import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
 import com.android.internal.os.IResultReceiver;
 import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.policy.IShortcutService;
@@ -6691,6 +6690,9 @@ public class WindowManagerService extends IWindowManager.Stub
                     pw.println(" ");
                     mRoot.forAllWindows(w -> {pw.println(w);}, true /* traverseTopToBottom */);
                 }
+                return;
+            } else if ("trace".equals(cmd)) {
+                // do nothing
                 return;
             } else {
                 // Dumping a single name?
