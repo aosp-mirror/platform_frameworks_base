@@ -763,6 +763,8 @@
   <java-symbol type="string" name="display_manager_hdmi_display_name" />
   <java-symbol type="string" name="display_manager_overlay_display_name" />
   <java-symbol type="string" name="display_manager_overlay_display_secure_suffix" />
+  <java-symbol type="string" name="activity_starter_block_bg_activity_starts_permissive" />
+  <java-symbol type="string" name="activity_starter_block_bg_activity_starts_enforcing" />
   <java-symbol type="string" name="display_manager_overlay_display_title" />
   <java-symbol type="string" name="double_tap_toast" />
   <java-symbol type="string" name="elapsed_time_short_format_h_mm_ss" />
