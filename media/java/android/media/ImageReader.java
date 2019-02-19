@@ -16,8 +16,12 @@
 
 package android.media;
 
+import android.annotation.IntRange;
+import android.annotation.NonNull;
 import android.graphics.ImageFormat;
+import android.graphics.ImageFormat.Format;
 import android.hardware.HardwareBuffer;
+import android.hardware.HardwareBuffer.Usage;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -120,7 +124,11 @@ public class ImageReader implements AutoCloseable {
      *            Must be greater than 0.
      * @see Image
      */
-    public static ImageReader newInstance(int width, int height, int format, int maxImages) {
+    public static @NonNull ImageReader newInstance(
+            @IntRange(from = 1) int width,
+            @IntRange(from = 1) int height,
+            @Format             int format,
+            @IntRange(from = 1) int maxImages) {
         // If the format is private don't default to USAGE_CPU_READ_OFTEN since it may not
         // work, and is inscrutable anyway
         return new ImageReader(width, height, format, maxImages,
@@ -210,8 +218,12 @@ public class ImageReader implements AutoCloseable {
      * @see Image
      * @see HardwareBuffer
      */
-    public static ImageReader newInstance(int width, int height, int format, int maxImages,
-            long usage) {
+    public static @NonNull ImageReader newInstance(
+            @IntRange(from = 1) int width,
+            @IntRange(from = 1) int height,
+            @Format             int format,
+            @IntRange(from = 1) int maxImages,
+            @Usage              long usage) {
         // TODO: Check this - can't do it just yet because format support is different
         // Unify formats! The only reliable way to validate usage is to just try it and see.
 
