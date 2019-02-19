@@ -17,12 +17,21 @@
 
 package com.android.server.accounts;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
 import android.accounts.Account;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteStatement;
+import android.os.Build;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
-import android.os.Build;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.util.Pair;
 
@@ -30,16 +39,14 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import java.io.File;
+import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Tests for {@link AccountsDb}.
@@ -63,8 +70,11 @@ public class AccountsDbTest {
     private File deDb;
     private File ceDb;
 
+    @Mock private PrintWriter mMockWriter;
+
     @Before
     public void setUp() {
+        MockitoAnnotations.initMocks(this);
         Context context = InstrumentationRegistry.getContext();
         preNDb = new File(context.getCacheDir(), PREN_DB);
         ceDb = new File(context.getCacheDir(), CE_DB);
@@ -442,5 +452,34 @@ public class AccountsDbTest {
 
         assertTrue(mAccountsDb.deleteDeAccount(accId)); // Trigger should remove visibility.
         assertNull(mAccountsDb.findAccountVisibility(account, packageName1));
+    }
+
+    @Test
+    public void testDumpDebugTable() {
+        long accId = 10;
+        long insertionPoint = mAccountsDb.reserveDebugDbInsertionPoint();
+
+        SQLiteStatement logStatement = mAccountsDb.getStatementForLogging();
+
+        logStatement.bindLong(1, accId);
+        logStatement.bindString(2, "action");
+        logStatement.bindString(3, "date");
+        logStatement.bindLong(4, 10);
+        logStatement.bindString(5, "table");
+        logStatement.bindLong(6, insertionPoint);
+        logStatement.execute();
+
+        mAccountsDb.dumpDebugTable(mMockWriter);
+
+        verify(mMockWriter, times(3)).println(anyString());
+    }
+
+    @Test
+    public void testReserveDebugDbInsertionPoint() {
+        long insertionPoint = mAccountsDb.reserveDebugDbInsertionPoint();
+        long insertionPoint2 = mAccountsDb.reserveDebugDbInsertionPoint();
+
+        assertEquals(0, insertionPoint);
+        assertEquals(1, insertionPoint2);
     }
 }

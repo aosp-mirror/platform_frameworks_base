@@ -17,11 +17,13 @@
 package com.android.server.accounts;
 
 import android.accounts.Account;
+import android.annotation.Nullable;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
 import android.os.FileUtils;
@@ -55,7 +57,6 @@ class AccountsDb implements AutoCloseable {
     private static final int PRE_N_DATABASE_VERSION = 9;
     private static final int CE_DATABASE_VERSION = 10;
     private static final int DE_DATABASE_VERSION = 3; // Added visibility support in O
-
 
     static final String TABLE_ACCOUNTS = "accounts";
     private static final String ACCOUNTS_ID = "_id";
@@ -182,6 +183,10 @@ class AccountsDb implements AutoCloseable {
     private final DeDatabaseHelper mDeDatabase;
     private final Context mContext;
     private final File mPreNDatabaseFile;
+
+    final Object mDebugStatementLock = new Object();
+    private volatile long mDebugDbInsertionPoint = -1;
+    private volatile SQLiteStatement mDebugStatementForLogging; // not thread safe.
 
     AccountsDb(DeDatabaseHelper deDatabase, Context context, File preNDatabaseFile) {
         mDeDatabase = deDatabase;
@@ -1278,29 +1283,70 @@ class AccountsDb implements AutoCloseable {
      * Finds the row key where the next insertion should take place. Returns number of rows
      * if it is less {@link #MAX_DEBUG_DB_SIZE}, otherwise finds the lowest number available.
      */
-    int calculateDebugTableInsertionPoint() {
-        SQLiteDatabase db = mDeDatabase.getReadableDatabase();
-        String queryCountDebugDbRows = "SELECT COUNT(*) FROM " + TABLE_DEBUG;
-        int size = (int) DatabaseUtils.longForQuery(db, queryCountDebugDbRows, null);
-        if (size < MAX_DEBUG_DB_SIZE) {
-            return size;
-        }
+    long calculateDebugTableInsertionPoint() {
+        try {
+            SQLiteDatabase db = mDeDatabase.getReadableDatabase();
+            String queryCountDebugDbRows = "SELECT COUNT(*) FROM " + TABLE_DEBUG;
+            int size = (int) DatabaseUtils.longForQuery(db, queryCountDebugDbRows, null);
+            if (size < MAX_DEBUG_DB_SIZE) {
+                return size;
+            }
 
-        // This query finds the smallest timestamp value (and if 2 records have
-        // same timestamp, the choose the lower id).
-        queryCountDebugDbRows = "SELECT " + DEBUG_TABLE_KEY +
-                " FROM " + TABLE_DEBUG +
-                " ORDER BY "  + DEBUG_TABLE_TIMESTAMP + "," + DEBUG_TABLE_KEY +
-                " LIMIT 1";
-        return (int) DatabaseUtils.longForQuery(db, queryCountDebugDbRows, null);
+            // This query finds the smallest timestamp value (and if 2 records have
+            // same timestamp, the choose the lower id).
+            queryCountDebugDbRows =
+                    "SELECT " + DEBUG_TABLE_KEY
+                    + " FROM " + TABLE_DEBUG
+                    + " ORDER BY "  + DEBUG_TABLE_TIMESTAMP + ","
+                    + DEBUG_TABLE_KEY
+                    + " LIMIT 1";
+            return DatabaseUtils.longForQuery(db, queryCountDebugDbRows, null);
+        } catch (SQLiteException e) {
+            Log.e(TAG, "Failed to open debug table" + e);
+            return -1;
+        }
     }
 
     SQLiteStatement compileSqlStatementForLogging() {
-        // TODO b/31708085 Fix debug logging - it eagerly opens database for write without a need
         SQLiteDatabase db = mDeDatabase.getWritableDatabase();
         String sql = "INSERT OR REPLACE INTO " + AccountsDb.TABLE_DEBUG
                 + " VALUES (?,?,?,?,?,?)";
         return db.compileStatement(sql);
+    }
+
+    /**
+     * Returns statement for logging or {@code null} on database open failure.
+     * Returned value must be guarded by {link #debugStatementLock}
+     */
+    @Nullable SQLiteStatement getStatementForLogging() {
+        if (mDebugStatementForLogging != null) {
+            return mDebugStatementForLogging;
+        }
+        try {
+            mDebugStatementForLogging =  compileSqlStatementForLogging();
+            return mDebugStatementForLogging;
+        } catch (SQLiteException e) {
+            Log.e(TAG, "Failed to open debug table" + e);
+            return null;
+        }
+    }
+
+    void closeDebugStatement() {
+        synchronized (mDebugStatementLock) {
+            if (mDebugStatementForLogging != null) {
+                mDebugStatementForLogging.close();
+                mDebugStatementForLogging = null;
+            }
+        }
+    }
+
+    long reserveDebugDbInsertionPoint() {
+        if (mDebugDbInsertionPoint == -1) {
+            mDebugDbInsertionPoint = calculateDebugTableInsertionPoint();
+            return mDebugDbInsertionPoint;
+        }
+        mDebugDbInsertionPoint = (mDebugDbInsertionPoint + 1) % MAX_DEBUG_DB_SIZE;
+        return mDebugDbInsertionPoint;
     }
 
     void dumpDebugTable(PrintWriter pw) {
