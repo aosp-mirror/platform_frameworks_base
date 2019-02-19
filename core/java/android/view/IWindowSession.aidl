@@ -148,7 +148,7 @@ interface IWindowSession {
     void setInTouchMode(boolean showFocus);
     boolean getInTouchMode();
 
-    boolean performHapticFeedback(IWindow window, int effectId, boolean always);
+    boolean performHapticFeedback(int effectId, boolean always);
 
     /**
      * Initiate the drag operation itself
