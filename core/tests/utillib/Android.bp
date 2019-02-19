@@ -1,10 +1,10 @@
-// Copyright (C) 2012 The Android Open Source Project
+// Copyright (C) 2010 The Android Open Source Project
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+//      http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -12,16 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-cc_test_library {
-    name: "libframeworks_coretests_jni",
-    defaults: ["FrameworksCoreTests_apks_defaults"],
+java_library {
+    name: "frameworks-core-util-lib",
 
-    srcs: ["com_android_frameworks_coretests_JNITest.cpp"],
+    srcs: ["**/*.java"],
 
-    sdk_version: "16",
-
-    cflags: [
-        "-Wall",
-        "-Werror",
-    ],
+    static_libs: ["junit"],
+    libs: ["android.test.base"],
 }
