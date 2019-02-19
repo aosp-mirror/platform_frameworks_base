@@ -1484,6 +1484,8 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     private static String sTheRealBuildSerial = Build.UNKNOWN;
 
+    private ParcelFileDescriptor[] mLifeMonitorFds;
+
     final class UiHandler extends Handler {
         public UiHandler() {
             super(com.android.server.UiThread.get().getLooper(), null, true);
@@ -18461,5 +18463,25 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     private boolean isOnOffloadQueue(int flags) {
         return (mEnableOffloadQueue && ((flags & Intent.FLAG_RECEIVER_OFFLOAD) != 0));
+    }
+
+    @Override
+    public ParcelFileDescriptor getLifeMonitor() {
+        if (!isCallerShell()) {
+            throw new SecurityException("Only shell can call it");
+        }
+        synchronized (this) {
+            try {
+                if (mLifeMonitorFds == null) {
+                    mLifeMonitorFds = ParcelFileDescriptor.createPipe();
+                }
+                // The returned FD will be closed, but we want to keep our reader open,
+                // so return a dup instead.
+                return mLifeMonitorFds[0].dup();
+            } catch (IOException e) {
+                Slog.w(TAG, "Unable to create pipe", e);
+                return null;
+            }
+        }
     }
 }
