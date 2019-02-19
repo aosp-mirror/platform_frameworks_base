@@ -2164,9 +2164,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 // A modal window uses the whole compatibility bounds.
                 flags |= FLAG_NOT_TOUCH_MODAL;
                 mTmpRect.set(mAppToken.getResolvedOverrideBounds());
-                // TODO(b/112288258): Remove the forced offset when the override bounds always
-                // starts from zero (See {@link ActivityRecord#resolveOverrideConfiguration}).
-                mTmpRect.offsetTo(0, 0);
             } else {
                 // Non-modal uses the application based frame.
                 mTmpRect.set(mWindowFrames.mCompatFrame);
