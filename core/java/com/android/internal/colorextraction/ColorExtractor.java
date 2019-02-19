@@ -21,7 +21,7 @@ import android.annotation.Nullable;
 import android.app.WallpaperColors;
 import android.app.WallpaperManager;
 import android.content.Context;
-import android.os.Trace;
+import android.os.AsyncTask;
 import android.util.Log;
 import android.util.SparseArray;
 
@@ -53,11 +53,11 @@ public class ColorExtractor implements WallpaperManager.OnColorsChangedListener 
     protected WallpaperColors mLockColors;
 
     public ColorExtractor(Context context) {
-        this(context, new Tonal(context));
+        this(context, new Tonal(context), true /* immediately */);
     }
 
     @VisibleForTesting
-    public ColorExtractor(Context context, ExtractionType extractionType) {
+    public ColorExtractor(Context context, ExtractionType extractionType, boolean immediately) {
         mContext = context;
         mExtractionType = extractionType;
 
@@ -71,23 +71,48 @@ public class ColorExtractor implements WallpaperManager.OnColorsChangedListener 
         }
 
         mOnColorsChangedListeners = new ArrayList<>();
-        GradientColors[] systemColors = mGradientColors.get(WallpaperManager.FLAG_SYSTEM);
-        GradientColors[] lockColors = mGradientColors.get(WallpaperManager.FLAG_LOCK);
 
         WallpaperManager wallpaperManager = mContext.getSystemService(WallpaperManager.class);
         if (wallpaperManager == null) {
             Log.w(TAG, "Can't listen to color changes!");
         } else {
             wallpaperManager.addOnColorsChangedListener(this, null /* handler */);
+            initExtractColors(wallpaperManager, immediately);
+        }
+    }
 
-            // Initialize all gradients with the current colors
-            Trace.beginSection("ColorExtractor#getWallpaperColors");
+    private void initExtractColors(WallpaperManager wallpaperManager, boolean immediately) {
+        if (immediately) {
             mSystemColors = wallpaperManager.getWallpaperColors(WallpaperManager.FLAG_SYSTEM);
             mLockColors = wallpaperManager.getWallpaperColors(WallpaperManager.FLAG_LOCK);
-            Trace.endSection();
+            extractWallpaperColors();
+        } else {
+            new LoadWallpaperColors().executeOnExecutor(
+                    AsyncTask.THREAD_POOL_EXECUTOR, wallpaperManager);
         }
+    }
 
-        // Initialize all gradients with the current colors
+    private class LoadWallpaperColors extends AsyncTask<WallpaperManager, Void, Void> {
+        private WallpaperColors mSystemColors;
+        private WallpaperColors mLockColors;
+        @Override
+        protected Void doInBackground(WallpaperManager... params) {
+            mSystemColors = params[0].getWallpaperColors(WallpaperManager.FLAG_SYSTEM);
+            mLockColors = params[0].getWallpaperColors(WallpaperManager.FLAG_LOCK);
+            return null;
+        }
+        @Override
+        protected void onPostExecute(Void b) {
+            ColorExtractor.this.mSystemColors = mSystemColors;
+            ColorExtractor.this.mLockColors = mLockColors;
+            extractWallpaperColors();
+            triggerColorsChanged(WallpaperManager.FLAG_SYSTEM | WallpaperManager.FLAG_LOCK);
+        }
+    }
+
+    private void extractWallpaperColors() {
+        GradientColors[] systemColors = mGradientColors.get(WallpaperManager.FLAG_SYSTEM);
+        GradientColors[] lockColors = mGradientColors.get(WallpaperManager.FLAG_LOCK);
         extractInto(mSystemColors,
                 systemColors[TYPE_NORMAL],
                 systemColors[TYPE_DARK],
