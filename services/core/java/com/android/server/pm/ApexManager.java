@@ -27,6 +27,7 @@ import android.content.pm.PackageParser;
 import android.content.pm.PackageParser.PackageParserException;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.ServiceManager.ServiceNotFoundException;
 import android.util.Slog;
 
 import com.android.internal.util.IndentingPrintWriter;
@@ -50,8 +51,12 @@ class ApexManager {
     private final Map<String, PackageInfo> mActivePackagesCache;
 
     ApexManager() {
-        mApexService = IApexService.Stub.asInterface(
-            ServiceManager.getService("apexservice"));
+        try {
+            mApexService = IApexService.Stub.asInterface(
+                ServiceManager.getServiceOrThrow("apexservice"));
+        } catch (ServiceNotFoundException e) {
+            throw new IllegalStateException("Required service apexservice not available");
+        }
         mActivePackagesCache = populateActivePackagesCache();
     }
 
