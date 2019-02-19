@@ -65,6 +65,8 @@ import java.util.concurrent.TimeUnit;
 @RunWith(JUnit4.class)
 public final class DexLoggerIntegrationTests {
 
+    private static final String SHA_256 = "SHA-256";
+
     // Event log tag used for SNET related events
     private static final int SNET_TAG = 0x534e4554;
 
@@ -75,6 +77,13 @@ public final class DexLoggerIntegrationTests {
     // These are job IDs from DynamicCodeLoggingService
     private static final int IDLE_LOGGING_JOB_ID = 2030028;
     private static final int AUDIT_WATCHING_JOB_ID = 203142925;
+
+    // For tests that rely on parsing audit logs, how often to retry. (There are many reasons why
+    // we might not see the audit logs, including throttling and delays in log generation, so to
+    // avoid flakiness we run these tests multiple times, allowing progressively longer between
+    // code loading and checking the logs on each try.)
+    private static final int AUDIT_LOG_RETRIES = 10;
+    private static final int RETRY_DELAY_MS = 2_000;
 
     private static Context sContext;
     private static int sMyUid;
@@ -144,78 +153,65 @@ public final class DexLoggerIntegrationTests {
 
     @Test
     public void testGeneratesEvents_nativeLibrary() throws Exception {
-        File privateCopyFile = privateFile("copied.so");
-        String expectedNameHash =
-                "996223BAD4B4FE75C57A3DEC61DB9C0B38E0A7AD479FC95F33494F4BC55A0F0E";
-        String expectedContentHash =
-                copyAndHashResource(libraryPath("DexLoggerNativeTestLibrary.so"), privateCopyFile);
+        new TestNativeCodeWithRetries() {
+            @Override
+            protected void loadNativeCode(int tryNumber) throws Exception {
+                // We need to use a different file name for each retry, because once a file is
+                // loaded, re-loading it has no effect.
+                String privateCopyName = "copied" + tryNumber + ".so";
+                File privateCopyFile = privateFile(privateCopyName);
+                mExpectedNameHash = hashOf(privateCopyName);
+                mExpectedContentHash = copyAndHashResource(
+                        libraryPath("DexLoggerNativeTestLibrary.so"), privateCopyFile);
 
-        System.load(privateCopyFile.toString());
-
-        // Run the job to scan generated audit log entries
-        runDynamicCodeLoggingJob(AUDIT_WATCHING_JOB_ID);
-
-        // And then make sure we log events about it
-        long previousEventNanos = mostRecentEventTimeNanos();
-        runDynamicCodeLoggingJob(IDLE_LOGGING_JOB_ID);
-
-        assertDclLoggedSince(previousEventNanos, DCL_NATIVE_SUBTAG,
-                expectedNameHash, expectedContentHash);
+                System.load(privateCopyFile.toString());
+            }
+        }.runTest();
     }
 
     @Test
     public void testGeneratesEvents_nativeLibrary_escapedName() throws Exception {
-        // A file name with a space will be escaped in the audit log; verify we un-escape it
-        // correctly.
-        File privateCopyFile = privateFile("second copy.so");
-        String expectedNameHash =
-                "8C39990C560B4F36F83E208E279F678746FE23A790E4C50F92686584EA2041CA";
-        String expectedContentHash =
-                copyAndHashResource(libraryPath("DexLoggerNativeTestLibrary.so"), privateCopyFile);
+        new TestNativeCodeWithRetries() {
+            @Override
+            protected void loadNativeCode(int tryNumber) throws Exception {
+                // A file name with a space will be escaped in the audit log; verify we un-escape it
+                // correctly.
+                String privateCopyName = "second copy " + tryNumber + ".so";
+                File privateCopyFile = privateFile(privateCopyName);
+                mExpectedNameHash = hashOf(privateCopyName);
+                mExpectedContentHash = copyAndHashResource(
+                        libraryPath("DexLoggerNativeTestLibrary.so"), privateCopyFile);
 
-        System.load(privateCopyFile.toString());
-
-        // Run the job to scan generated audit log entries
-        runDynamicCodeLoggingJob(AUDIT_WATCHING_JOB_ID);
-
-        // And then make sure we log events about it
-        long previousEventNanos = mostRecentEventTimeNanos();
-        runDynamicCodeLoggingJob(IDLE_LOGGING_JOB_ID);
-
-        assertDclLoggedSince(previousEventNanos, DCL_NATIVE_SUBTAG,
-                expectedNameHash, expectedContentHash);
+                System.load(privateCopyFile.toString());
+            }
+        }.runTest();
     }
 
     @Test
     public void testGeneratesEvents_nativeExecutable() throws Exception {
-        File privateCopyFile = privateFile("test_executable");
-        String expectedNameHash =
-                "3FBEC3F925A132D18F347F11AE9A5BB8DE1238828F8B4E064AA86EB68BD46DCF";
-        String expectedContentHash =
-                copyAndHashResource("/DexLoggerNativeExecutable", privateCopyFile);
-        assertThat(privateCopyFile.setExecutable(true)).isTrue();
+        new TestNativeCodeWithRetries() {
+            @Override
+            protected void loadNativeCode(int tryNumber) throws Exception {
+                String privateCopyName = "test_executable" + tryNumber;
+                File privateCopyFile = privateFile(privateCopyName);
+                mExpectedNameHash = hashOf(privateCopyName);
+                mExpectedContentHash = copyAndHashResource(
+                        "/DexLoggerNativeExecutable", privateCopyFile);
+                assertThat(privateCopyFile.setExecutable(true)).isTrue();
 
-        Process process = Runtime.getRuntime().exec(privateCopyFile.toString());
-        int exitCode = process.waitFor();
-        assertThat(exitCode).isEqualTo(0);
-
-        // Run the job to scan generated audit log entries
-        runDynamicCodeLoggingJob(AUDIT_WATCHING_JOB_ID);
-
-        // And then make sure we log events about it
-        long previousEventNanos = mostRecentEventTimeNanos();
-        runDynamicCodeLoggingJob(IDLE_LOGGING_JOB_ID);
-
-        assertDclLoggedSince(previousEventNanos, DCL_NATIVE_SUBTAG,
-                expectedNameHash, expectedContentHash);
+                Process process = Runtime.getRuntime().exec(privateCopyFile.toString());
+                int exitCode = process.waitFor();
+                assertThat(exitCode).isEqualTo(0);
+            }
+        }.runTest();
     }
 
     @Test
     public void testGeneratesEvents_spoofed_validFile() throws Exception {
         File privateCopyFile = privateFile("spoofed");
 
-        String expectedContentHash =
-                copyAndHashResource("/DexLoggerNativeExecutable", privateCopyFile);
+        String expectedContentHash = copyAndHashResource(
+                "/DexLoggerNativeExecutable", privateCopyFile);
 
         EventLog.writeEvent(EventLog.getTagCode("auditd"),
                 "type=1400 avc: granted { execute_no_trans } "
@@ -304,6 +300,40 @@ public final class DexLoggerIntegrationTests {
         assertNoDclLoggedSince(previousEventNanos, DCL_NATIVE_SUBTAG, expectedNameHash);
     }
 
+    // Abstract out the logic for running a native code loading test multiple times if needed and
+    // leaving time for audit messages to reach the log.
+    private abstract class TestNativeCodeWithRetries {
+        String mExpectedContentHash;
+        String mExpectedNameHash;
+
+        abstract void loadNativeCode(int tryNumber) throws Exception;
+
+        final void runTest() throws Exception {
+            List<String> messages = null;
+
+            for (int i = 0; i < AUDIT_LOG_RETRIES; i++) {
+                loadNativeCode(i);
+
+                SystemClock.sleep(i * RETRY_DELAY_MS);
+
+                // Run the job to scan generated audit log entries
+                runDynamicCodeLoggingJob(AUDIT_WATCHING_JOB_ID);
+
+                // And then make sure we log events about it
+                long previousEventNanos = mostRecentEventTimeNanos();
+                runDynamicCodeLoggingJob(IDLE_LOGGING_JOB_ID);
+
+                messages = findMatchingEvents(
+                        previousEventNanos, DCL_NATIVE_SUBTAG, mExpectedNameHash);
+                if (!messages.isEmpty()) {
+                    break;
+                }
+            }
+
+            assertHasDclLog(messages, mExpectedContentHash);
+        }
+    }
+
     private static File privateFile(String name) {
         return new File(sContext.getDir("dcl", Context.MODE_PRIVATE), name);
     }
@@ -315,7 +345,7 @@ public final class DexLoggerIntegrationTests {
     }
 
     private static String copyAndHashResource(String resourcePath, File copyTo) throws Exception {
-        MessageDigest hasher = MessageDigest.getInstance("SHA-256");
+        MessageDigest hasher = MessageDigest.getInstance(SHA_256);
 
         // Copy the jar from our Java resources to a private data directory
         Class<?> thisClass = DexLoggerIntegrationTests.class;
@@ -334,6 +364,16 @@ public final class DexLoggerIntegrationTests {
 
         // Compute the SHA-256 of the file content so we can check that it is the same as the value
         // we see logged.
+        return toHexString(hasher);
+    }
+
+    private String hashOf(String input) throws Exception {
+        MessageDigest hasher = MessageDigest.getInstance(SHA_256);
+        hasher.update(input.getBytes());
+        return toHexString(hasher);
+    }
+
+    private static String toHexString(MessageDigest hasher) {
         Formatter formatter = new Formatter();
         for (byte b : hasher.digest()) {
             formatter.format("%02X", b);
@@ -388,6 +428,10 @@ public final class DexLoggerIntegrationTests {
         List<String> messages =
                 findMatchingEvents(previousEventNanos, expectedSubTag, expectedNameHash);
 
+        assertHasDclLog(messages, expectedContentHash);
+    }
+
+    private static void assertHasDclLog(List<String> messages, String expectedContentHash) {
         assertWithMessage("Expected exactly one matching log entry").that(messages).hasSize(1);
         assertThat(messages.get(0)).endsWith(expectedContentHash);
     }
