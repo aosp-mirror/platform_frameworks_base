@@ -16,8 +16,6 @@
 
 package com.android.internal.location;
 
-import java.io.UnsupportedEncodingException;
-
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -25,20 +23,20 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.location.LocationManager;
 import android.location.INetInitiatedListener;
-import android.telephony.TelephonyManager;
-import android.telephony.PhoneNumberUtils;
-import android.telephony.PhoneStateListener;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.RemoteException;
-import android.os.UserHandle;
 import android.os.SystemProperties;
+import android.os.UserHandle;
+import android.telephony.PhoneNumberUtils;
+import android.telephony.PhoneStateListener;
+import android.telephony.TelephonyManager;
 import android.util.Log;
-
 import com.android.internal.R;
 import com.android.internal.telephony.GsmAlphabet;
 import com.android.internal.telephony.TelephonyProperties;
+import java.io.UnsupportedEncodingException;
 
 /**
  * A GPS Network-initiated Handler class used by LocationManager.
