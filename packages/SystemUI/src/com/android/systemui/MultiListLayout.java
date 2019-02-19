@@ -151,7 +151,10 @@ public abstract class MultiListLayout extends LinearLayout {
         return null;
     }
 
-    interface RotationListener {
+    /**
+     * Interface to provide callbacks which trigger when this list detects a rotation.
+     */
+    public interface RotationListener {
         void onRotate(int from, int to);
     }
 }
