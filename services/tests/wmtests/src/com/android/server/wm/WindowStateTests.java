@@ -35,6 +35,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_SUB_PANEL
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.reset;
@@ -54,7 +55,6 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doNothing;
 
 import android.graphics.Insets;
 import android.graphics.Matrix;
@@ -87,6 +87,7 @@ import java.util.LinkedList;
  */
 @SmallTest
 @Presubmit
+@FlakyTest(bugId = 124127512)
 public class WindowStateTests extends WindowTestsBase {
     private static int sPreviousNewInsetsMode;
 
@@ -389,6 +390,7 @@ public class WindowStateTests extends WindowTestsBase {
     }
 
     @Test
+    @FlakyTest(bugId = 74078662)
     public void testLayoutSeqResetOnReparent() {
         final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
         app.mLayoutSeq = 1;
@@ -445,6 +447,7 @@ public class WindowStateTests extends WindowTestsBase {
     }
 
     @Test
+    @FlakyTest(bugId = 74078662)
     public void testDisplayCutoutIsCalculatedRelativeToFrame() {
         final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
         WindowFrames wf = app.getWindowFrames();
