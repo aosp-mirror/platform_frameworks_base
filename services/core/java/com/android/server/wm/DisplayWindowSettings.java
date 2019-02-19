@@ -22,6 +22,7 @@ import static android.view.WindowManager.REMOVE_CONTENT_MODE_UNDEFINED;
 
 import static com.android.server.wm.DisplayContent.FORCE_SCALING_MODE_AUTO;
 import static com.android.server.wm.DisplayContent.FORCE_SCALING_MODE_DISABLED;
+import static com.android.server.wm.DisplayRotation.FIXED_TO_USER_ROTATION_DEFAULT;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
@@ -80,7 +81,8 @@ class DisplayWindowSettings {
         private boolean mShouldShowWithInsecureKeyguard = false;
         private boolean mShouldShowSystemDecors = false;
         private boolean mShouldShowIme = false;
-        private boolean mFixedToUserRotation;
+        private @DisplayRotation.FixedToUserRotation int mFixedToUserRotation =
+                FIXED_TO_USER_ROTATION_DEFAULT;
 
         private Entry(String name) {
             mName = name;
@@ -99,7 +101,7 @@ class DisplayWindowSettings {
                     && !mShouldShowWithInsecureKeyguard
                     && !mShouldShowSystemDecors
                     && !mShouldShowIme
-                    && !mFixedToUserRotation;
+                    && mFixedToUserRotation == FIXED_TO_USER_ROTATION_DEFAULT;
         }
     }
 
@@ -188,7 +190,8 @@ class DisplayWindowSettings {
         writeSettingsIfNeeded(entry, displayInfo);
     }
 
-    void setFixedToUserRotation(DisplayContent displayContent, boolean fixedToUserRotation) {
+    void setFixedToUserRotation(DisplayContent displayContent,
+            @DisplayRotation.FixedToUserRotation int fixedToUserRotation) {
         final DisplayInfo displayInfo = displayContent.getDisplayInfo();
         final Entry entry = getOrCreateEntry(displayInfo);
         entry.mFixedToUserRotation = fixedToUserRotation;
@@ -464,8 +467,7 @@ class DisplayWindowSettings {
                     "shouldShowWithInsecureKeyguard");
             entry.mShouldShowSystemDecors = getBooleanAttribute(parser, "shouldShowSystemDecors");
             entry.mShouldShowIme = getBooleanAttribute(parser, "shouldShowIme");
-            entry.mFixedToUserRotation = getBooleanAttribute(parser,
-                    "fixedToUserRotation");
+            entry.mFixedToUserRotation = getIntAttribute(parser, "fixedToUserRotation");
             mEntries.put(name, entry);
         }
         XmlUtils.skipCurrentTag(parser);
@@ -549,9 +551,9 @@ class DisplayWindowSettings {
                 if (entry.mShouldShowIme) {
                     out.attribute(null, "shouldShowIme", Boolean.toString(entry.mShouldShowIme));
                 }
-                if (entry.mFixedToUserRotation) {
+                if (entry.mFixedToUserRotation != FIXED_TO_USER_ROTATION_DEFAULT) {
                     out.attribute(null, "fixedToUserRotation",
-                            Boolean.toString(entry.mFixedToUserRotation));
+                            Integer.toString(entry.mFixedToUserRotation));
                 }
                 out.endTag(null, "display");
             }

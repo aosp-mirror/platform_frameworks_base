@@ -26,6 +26,9 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
+import static com.android.server.wm.DisplayRotation.FIXED_TO_USER_ROTATION_DEFAULT;
+import static com.android.server.wm.DisplayRotation.FIXED_TO_USER_ROTATION_DISABLED;
+import static com.android.server.wm.DisplayRotation.FIXED_TO_USER_ROTATION_ENABLED;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -407,7 +410,7 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
     }
 
     @Test
-    public void testNotFixedToUserRotationByDefault() {
+    public void testFixedToUserRotationDefault() {
         mTarget.setUserRotation(mPrimaryDisplay, WindowManagerPolicy.USER_ROTATION_LOCKED,
                 Surface.ROTATION_0);
 
@@ -419,13 +422,14 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
 
         mTarget.applySettingsToDisplayLocked(mPrimaryDisplay);
 
-        verify(displayRotation).restoreSettings(anyInt(), anyInt(), eq(false));
+        verify(displayRotation).restoreSettings(anyInt(), anyInt(),
+                eq(FIXED_TO_USER_ROTATION_DEFAULT));
         mockitoSession.finishMocking();
     }
 
     @Test
-    public void testSetFixedToUserRotation() {
-        mTarget.setFixedToUserRotation(mPrimaryDisplay, true);
+    public void testSetFixedToUserRotationDisabled() {
+        mTarget.setFixedToUserRotation(mPrimaryDisplay, FIXED_TO_USER_ROTATION_DISABLED);
 
         final MockitoSession mockitoSession = ExtendedMockito.mockitoSession()
                 .startMocking();
@@ -435,7 +439,25 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
 
         applySettingsToDisplayByNewInstance(mPrimaryDisplay);
 
-        verify(displayRotation).restoreSettings(anyInt(), anyInt(), eq(true));
+        verify(displayRotation).restoreSettings(anyInt(), anyInt(),
+                eq(FIXED_TO_USER_ROTATION_DISABLED));
+        mockitoSession.finishMocking();
+    }
+
+    @Test
+    public void testSetFixedToUserRotationEnabled() {
+        mTarget.setFixedToUserRotation(mPrimaryDisplay, FIXED_TO_USER_ROTATION_ENABLED);
+
+        final MockitoSession mockitoSession = ExtendedMockito.mockitoSession()
+                .startMocking();
+        final DisplayRotation displayRotation = mock(DisplayRotation.class);
+        spyOn(mPrimaryDisplay);
+        doReturn(displayRotation).when(mPrimaryDisplay).getDisplayRotation();
+
+        applySettingsToDisplayByNewInstance(mPrimaryDisplay);
+
+        verify(displayRotation).restoreSettings(anyInt(), anyInt(),
+                eq(FIXED_TO_USER_ROTATION_ENABLED));
         mockitoSession.finishMocking();
     }
 

@@ -3503,14 +3503,15 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    void setRotateForApp(int displayId, boolean enabled) {
+    void setRotateForApp(int displayId,
+            @DisplayRotation.FixedToUserRotation int fixedToUserRotation) {
         synchronized (mGlobalLock) {
             final DisplayContent display = mRoot.getDisplayContent(displayId);
             if (display == null) {
                 Slog.w(TAG, "Trying to set rotate for app for a missing display.");
                 return;
             }
-            display.getDisplayRotation().setFixedToUserRotation(enabled);
+            display.getDisplayRotation().setFixedToUserRotation(fixedToUserRotation);
         }
     }
 
