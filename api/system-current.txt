@@ -216,6 +216,9 @@ package android {
 
   public static final class R.bool {
     field public static final int config_sendPackageName = 17891328; // 0x1110000
+    field public static final int config_showDefaultAssistant = 17891329; // 0x1110001
+    field public static final int config_showDefaultEmergency = 17891330; // 0x1110002
+    field public static final int config_showDefaultHome = 17891331; // 0x1110003
   }
 
   public static final class R.color {
