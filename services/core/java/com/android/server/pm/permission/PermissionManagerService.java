@@ -1181,11 +1181,9 @@ public class PermissionManagerService {
             @NonNull int[] updatedUserIds) {
         AppOpsManager appOpsManager = mContext.getSystemService(AppOpsManager.class);
 
-        if (pkg.applicationInfo.targetSdkVersion < Build.VERSION_CODES.M) {
-            return updatedUserIds;
-        }
-
         String pkgName = pkg.packageName;
+        boolean supportsRuntimePermissions = pkg.applicationInfo.targetSdkVersion
+                >= Build.VERSION_CODES.M;
 
         int[] users = UserManagerService.getInstance().getUserIds();
         int numUsers = users.length;
@@ -1210,15 +1208,17 @@ public class PermissionManagerService {
                             if ((flags & (FLAG_PERMISSION_GRANTED_BY_DEFAULT
                                     | FLAG_PERMISSION_POLICY_FIXED | FLAG_PERMISSION_SYSTEM_FIXED))
                                     == 0) {
-                                int revokeResult = ps.revokeRuntimePermission(bp, userId);
-                                if (revokeResult
-                                        != PERMISSION_OPERATION_FAILURE) {
-
-                                    if (DEBUG_PERMISSIONS) {
-                                        Slog.i(TAG, "Revoking runtime permission " + permission
-                                                + " for " + pkgName
-                                                + " as it is now requested");
+                                if (supportsRuntimePermissions) {
+                                    int revokeResult = ps.revokeRuntimePermission(bp, userId);
+                                    if (revokeResult != PERMISSION_OPERATION_FAILURE) {
+                                        if (DEBUG_PERMISSIONS) {
+                                            Slog.i(TAG, "Revoking runtime permission "
+                                                    + permission + " for " + pkgName
+                                                    + " as it is now requested");
+                                        }
                                     }
+                                } else {
+                                    setAppOpMode(permission, pkg, userId, MODE_IGNORED);
                                 }
 
                                 List<String> fgPerms = mBackgroundPermissions.get(permission);
