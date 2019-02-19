@@ -1044,7 +1044,7 @@ public class ContextWrapper extends Context {
      */
     @TestApi
     @Override
-    public void setAutofillCompatibilityEnabled(boolean  autofillCompatEnabled) {
+    public void setAutofillCompatibilityEnabled(boolean autofillCompatEnabled) {
         if (mBase != null) {
             mBase.setAutofillCompatibilityEnabled(autofillCompatEnabled);
         }
@@ -1054,15 +1054,18 @@ public class ContextWrapper extends Context {
      * @hide
      */
     @Override
-    public boolean isContentCaptureSupported() {
-        return mBase.isContentCaptureSupported();
+    public ContentCaptureOptions getContentCaptureOptions() {
+        return mBase == null ? null : mBase.getContentCaptureOptions();
     }
 
     /**
      * @hide
      */
+    @TestApi
     @Override
-    public void setContentCaptureSupported(boolean supported) {
-        mBase.setContentCaptureSupported(supported);
+    public void setContentCaptureOptions(ContentCaptureOptions options) {
+        if (mBase != null) {
+            mBase.setContentCaptureOptions(options);
+        }
     }
 }

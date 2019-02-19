@@ -15,6 +15,9 @@
  */
 package android.service.contentcapture;
 
+import static android.view.contentcapture.ContentCaptureHelper.sDebug;
+import static android.view.contentcapture.ContentCaptureHelper.sVerbose;
+
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 
 import android.annotation.CallSuper;
@@ -66,10 +69,6 @@ public abstract class ContentCaptureService extends Service {
 
     private static final String TAG = ContentCaptureService.class.getSimpleName();
 
-    // TODO(b/121044306): STOPSHIP use dynamic value, or change to false
-    static final boolean DEBUG = true;
-    static final boolean VERBOSE = false;
-
     /**
      * The {@link Intent} that must be declared as handled by the service.
      *
@@ -89,7 +88,9 @@ public abstract class ContentCaptureService extends Service {
     private final IContentCaptureService mServerInterface = new IContentCaptureService.Stub() {
 
         @Override
-        public void onConnected(IBinder callback) {
+        public void onConnected(IBinder callback, boolean verbose, boolean debug) {
+            sVerbose = verbose;
+            sDebug = debug;
             mHandler.sendMessage(obtainMessage(ContentCaptureService::handleOnConnected,
                     ContentCaptureService.this, callback));
         }
@@ -227,7 +228,7 @@ public abstract class ContentCaptureService extends Service {
      */
     public void onCreateContentCaptureSession(@NonNull ContentCaptureContext context,
             @NonNull ContentCaptureSessionId sessionId) {
-        if (VERBOSE) {
+        if (sVerbose) {
             Log.v(TAG, "onCreateContentCaptureSession(id=" + sessionId + ", ctx=" + context + ")");
         }
     }
@@ -240,7 +241,7 @@ public abstract class ContentCaptureService extends Service {
     @Deprecated
     public void onContentCaptureEventsRequest(@NonNull ContentCaptureSessionId sessionId,
             @NonNull ContentCaptureEventsRequest request) {
-        if (VERBOSE) Log.v(TAG, "onContentCaptureEventsRequest(id=" + sessionId + ")");
+        if (sVerbose) Log.v(TAG, "onContentCaptureEventsRequest(id=" + sessionId + ")");
     }
 
     /**
@@ -252,7 +253,7 @@ public abstract class ContentCaptureService extends Service {
      */
     public void onContentCaptureEvent(@NonNull ContentCaptureSessionId sessionId,
             @NonNull ContentCaptureEvent event) {
-        if (VERBOSE) Log.v(TAG, "onContentCaptureEventsRequest(id=" + sessionId + ")");
+        if (sVerbose) Log.v(TAG, "onContentCaptureEventsRequest(id=" + sessionId + ")");
         onContentCaptureEventsRequest(sessionId, new ContentCaptureEventsRequest(event));
     }
 
@@ -262,7 +263,7 @@ public abstract class ContentCaptureService extends Service {
      * @param request the user data requested to be removed
      */
     public void onUserDataRemovalRequest(@NonNull UserDataRemovalRequest request) {
-        if (VERBOSE) Log.v(TAG, "onUserDataRemovalRequest()");
+        if (sVerbose) Log.v(TAG, "onUserDataRemovalRequest()");
     }
 
     /**
@@ -280,14 +281,14 @@ public abstract class ContentCaptureService extends Service {
      * @param sessionId the id of the session to destroy
      * */
     public void onDestroyContentCaptureSession(@NonNull ContentCaptureSessionId sessionId) {
-        if (VERBOSE) Log.v(TAG, "onDestroyContentCaptureSession(id=" + sessionId + ")");
+        if (sVerbose) Log.v(TAG, "onDestroyContentCaptureSession(id=" + sessionId + ")");
     }
 
     /**
      * Disables the Content Capture service for the given user.
      */
     public final void disableContentCaptureServices() {
-        if (DEBUG) Log.d(TAG, "disableContentCaptureServices()");
+        if (sDebug) Log.d(TAG, "disableContentCaptureServices()");
 
         final IContentCaptureServiceCallback callback = mCallback;
         if (callback == null) {
@@ -313,6 +314,7 @@ public abstract class ContentCaptureService extends Service {
     @Override
     @CallSuper
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        pw.print("Debug: "); pw.print(sDebug); pw.print(" Verbose: "); pw.println(sVerbose);
         final int size = mSessionUids.size();
         pw.print("Number sessions: "); pw.println(size);
         if (size > 0) {
@@ -422,7 +424,7 @@ public abstract class ContentCaptureService extends Service {
         }
         final Integer rightUid = mSessionUids.get(sessionId);
         if (rightUid == null) {
-            if (VERBOSE) {
+            if (sVerbose) {
                 Log.v(TAG, "handleIsRightCallerFor(" + event + "): no session for " + sessionId
                         + ": " + mSessionUids);
             }

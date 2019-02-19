@@ -190,6 +190,7 @@ import android.appwidget.AppWidgetManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentCallbacks2;
 import android.content.ComponentName;
+import android.content.ContentCaptureOptions;
 import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -341,6 +342,7 @@ import com.android.server.Watchdog;
 import com.android.server.am.ActivityManagerServiceDumpProcessesProto.UidObserverRegistrationProto;
 import com.android.server.am.MemoryStatUtil.MemoryStat;
 import com.android.server.appop.AppOpsService;
+import com.android.server.contentcapture.ContentCaptureManagerInternal;
 import com.android.server.firewall.IntentFirewall;
 import com.android.server.job.JobSchedulerInternal;
 import com.android.server.pm.Installer;
@@ -4748,6 +4750,15 @@ public class ActivityManagerService extends IActivityManager.Stub
                             app.info.packageName, app.info.versionCode, app.userId);
                 }
             }
+            ContentCaptureOptions contentCaptureOptions = null;
+            if (UserHandle.getAppId(app.info.uid) >= Process.FIRST_APPLICATION_UID) {
+                final ContentCaptureManagerInternal ccm =
+                        LocalServices.getService(ContentCaptureManagerInternal.class);
+                if (ccm != null) {
+                    contentCaptureOptions = ccm.getOptionsForPackage(app.userId,
+                            app.info.packageName);
+                }
+            }
 
             checkTime(startTime, "attachApplicationLocked: immediately before bindApplication");
             bindApplicationTimeMillis = SystemClock.elapsedRealtime();
@@ -4768,7 +4779,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         new Configuration(app.getWindowProcessController().getConfiguration()),
                         app.compat, getCommonServicesLocked(app.isolated),
                         mCoreSettingsObserver.getCoreSettingsLocked(),
-                        buildSerial, isAutofillCompatEnabled);
+                        buildSerial, isAutofillCompatEnabled, contentCaptureOptions);
             } else {
                 thread.bindApplication(processName, appInfo, providers, null, profilerInfo,
                         null, null, null, testMode,
@@ -4777,7 +4788,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         new Configuration(app.getWindowProcessController().getConfiguration()),
                         app.compat, getCommonServicesLocked(app.isolated),
                         mCoreSettingsObserver.getCoreSettingsLocked(),
-                        buildSerial, isAutofillCompatEnabled);
+                        buildSerial, isAutofillCompatEnabled, contentCaptureOptions);
             }
             if (profilerInfo != null) {
                 profilerInfo.closeFd();

@@ -41,7 +41,8 @@ public class ContentCaptureManagerTest {
 
     @Before
     public void before() {
-        mManager = new ContentCaptureManager(mMockContext, null);
+        mManager = new ContentCaptureManager(mMockContext, /* service= */ null,
+                /* options= */ null);
     }
 
     @Test

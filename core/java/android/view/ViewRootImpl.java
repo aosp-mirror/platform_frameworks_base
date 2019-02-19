@@ -3497,7 +3497,7 @@ public final class ViewRootImpl implements ViewParent,
         }
         try {
             // First check if context supports it, so it saves a service lookup when it doesn't
-            if (!mContext.isContentCaptureSupported()) return;
+            if (mContext.getContentCaptureOptions() == null) return;
 
             // Then check if it's enabled in the contex itself.
             final ContentCaptureManager ccm = mContext

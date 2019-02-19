@@ -31,7 +31,7 @@ import java.util.List;
  * @hide
  */
 oneway interface IContentCaptureService {
-    void onConnected(IBinder callback);
+    void onConnected(IBinder callback, boolean verbose, boolean debug);
     void onDisconnected();
     void onSessionStarted(in ContentCaptureContext context, String sessionId, int uid,
                           in IResultReceiver clientReceiver);

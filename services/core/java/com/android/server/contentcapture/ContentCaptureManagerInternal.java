@@ -16,7 +16,9 @@
 package com.android.server.contentcapture;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.content.ContentCaptureOptions;
 import android.os.Bundle;
 import android.os.IBinder;
 
@@ -41,4 +43,12 @@ public abstract class ContentCaptureManagerInternal {
      */
     public abstract boolean sendActivityAssistData(@UserIdInt int userId,
             @NonNull IBinder activityToken, @NonNull Bundle data);
+
+    /**
+     * Gets the content capture options for the given user and package, or {@code null} if the
+     * package is not whitelisted by the service.
+     */
+    @Nullable
+    public abstract ContentCaptureOptions getOptionsForPackage(@UserIdInt int userId,
+            @NonNull String packageName);
 }

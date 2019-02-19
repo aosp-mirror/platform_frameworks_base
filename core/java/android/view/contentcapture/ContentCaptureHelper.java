@@ -63,12 +63,27 @@ public final class ContentCaptureHelper {
     }
 
     /**
+     * Gets the default logging level for the device.
+     */
+    @LoggingLevel
+    public static int getDefaultLoggingLevel() {
+        return Build.IS_DEBUGGABLE ? LOGGING_LEVEL_DEBUG : LOGGING_LEVEL_OFF;
+    }
+
+    /**
      * Sets the value of the static logging level constants based on device config.
      */
     public static void setLoggingLevel() {
-        final int defaultLevel = Build.IS_DEBUGGABLE ? LOGGING_LEVEL_DEBUG : LOGGING_LEVEL_OFF;
+        final int defaultLevel = getDefaultLoggingLevel();
         final int level = getIntDeviceConfigProperty(DEVICE_CONFIG_PROPERTY_LOGGING_LEVEL,
                 defaultLevel);
+        setLoggingLevel(level);
+    }
+
+    /**
+     * Sets the value of the static logging level constants based the given level.
+     */
+    public static void setLoggingLevel(@LoggingLevel int level) {
         Log.i(TAG, "Setting logging level to " + getLoggingLevelAsString(level));
         sVerbose = sDebug = false;
         switch (level) {

@@ -41,6 +41,7 @@ import android.bluetooth.BluetoothManager;
 import android.companion.CompanionDeviceManager;
 import android.companion.ICompanionDeviceManager;
 import android.content.ClipboardManager;
+import android.content.ContentCaptureOptions;
 import android.content.Context;
 import android.content.IRestrictionsManager;
 import android.content.RestrictionsManager;
@@ -1125,16 +1126,19 @@ final class SystemServiceRegistry {
                     throws ServiceNotFoundException {
                 // Get the services without throwing as this is an optional feature
                 Context outerContext = ctx.getOuterContext();
-                if (outerContext.isContentCaptureSupported()) {
+                ContentCaptureOptions options = outerContext.getContentCaptureOptions();
+                // Options is null when the service didn't whitelist the activity or package
+                if (options != null) {
                     IBinder b = ServiceManager
                             .getService(Context.CONTENT_CAPTURE_MANAGER_SERVICE);
                     IContentCaptureManager service = IContentCaptureManager.Stub.asInterface(b);
+                    // Service is null when not provided by OEM or disabled by kill-switch.
                     if (service != null) {
-                        // When feature is disabled, we return a null manager to apps so the
-                        // performance impact is practically zero
-                        return new ContentCaptureManager(outerContext, service);
+                        return new ContentCaptureManager(outerContext, service, options);
                     }
                 }
+                // When feature is disabled or app / package not whitelisted, we return a null
+                // manager to apps so the performance impact is practically zero
                 return null;
             }});
 

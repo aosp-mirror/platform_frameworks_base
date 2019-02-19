@@ -26,6 +26,7 @@ import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.annotation.UiThread;
 import android.content.ComponentName;
+import android.content.ContentCaptureOptions;
 import android.content.Context;
 import android.os.Handler;
 import android.os.IBinder;
@@ -150,6 +151,16 @@ public final class ContentCaptureManager {
     @Retention(RetentionPolicy.SOURCE)
     public @interface LoggingLevel {}
 
+
+    /** @hide */
+    public static final int DEFAULT_MAX_BUFFER_SIZE = 100;
+    /** @hide */
+    public static final int DEFAULT_IDLE_FLUSHING_FREQUENCY_MS = 5_000;
+    /** @hide */
+    public static final int DEFAULT_TEXT_CHANGE_FLUSHING_FREQUENCY_MS = 1_000;
+    /** @hide */
+    public static final int DEFAULT_LOG_HISTORY_SIZE = 10;
+
     private final Object mLock = new Object();
 
     @NonNull
@@ -157,6 +168,9 @@ public final class ContentCaptureManager {
 
     @NonNull
     private final IContentCaptureManager mService;
+
+    @NonNull
+    final ContentCaptureOptions mOptions;
 
     // Flags used for starting session.
     @GuardedBy("mLock")
@@ -172,14 +186,12 @@ public final class ContentCaptureManager {
 
     /** @hide */
     public ContentCaptureManager(@NonNull Context context,
-            @NonNull IContentCaptureManager service) {
+            @NonNull IContentCaptureManager service, @NonNull ContentCaptureOptions options) {
         mContext = Preconditions.checkNotNull(context, "context cannot be null");
         mService = Preconditions.checkNotNull(service, "service cannot be null");
+        mOptions = Preconditions.checkNotNull(options, "options cannot be null");
 
-        // TODO(b/123096662): right now we're reading the device config values here, but ideally
-        // it should be read on ContentCaptureManagerService and passed back when the activity
-        // started.
-        ContentCaptureHelper.setLoggingLevel();
+        ContentCaptureHelper.setLoggingLevel(mOptions.loggingLevel);
 
         if (sVerbose) Log.v(TAG, "Constructor for " + context.getPackageName());
 
@@ -355,12 +367,13 @@ public final class ContentCaptureManager {
         synchronized (mLock) {
             pw.print(prefix2); pw.print("isContentCaptureEnabled(): ");
             pw.println(isContentCaptureEnabled());
-            pw.print(prefix); pw.print("Debug: "); pw.print(sDebug);
+            pw.print(prefix2); pw.print("Debug: "); pw.print(sDebug);
             pw.print(" Verbose: "); pw.println(sVerbose);
-            pw.print(prefix); pw.print("Context: "); pw.println(mContext);
-            pw.print(prefix); pw.print("User: "); pw.println(mContext.getUserId());
-            pw.print(prefix); pw.print("Service: "); pw.println(mService);
-            pw.print(prefix); pw.print("Flags: "); pw.println(mFlags);
+            pw.print(prefix2); pw.print("Context: "); pw.println(mContext);
+            pw.print(prefix2); pw.print("User: "); pw.println(mContext.getUserId());
+            pw.print(prefix2); pw.print("Service: "); pw.println(mService);
+            pw.print(prefix2); pw.print("Flags: "); pw.println(mFlags);
+            pw.print(prefix2); pw.print("Options: "); mOptions.dumpShort(pw); pw.println();
             if (mMainSession != null) {
                 final String prefix3 = prefix2 + "  ";
                 pw.print(prefix2); pw.println("Main session:");

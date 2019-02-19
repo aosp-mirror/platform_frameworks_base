@@ -23,6 +23,7 @@ import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.ContentCaptureOptions;
 import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -217,7 +218,7 @@ class ContextImpl extends Context {
     private AutofillClient mAutofillClient = null;
     private boolean mIsAutofillCompatEnabled;
 
-    private boolean mIsContentCaptureSupported = false;
+    private ContentCaptureOptions mContentCaptureOptions = null;
 
     private final Object mSync = new Object();
 
@@ -2388,14 +2389,14 @@ class ContextImpl extends Context {
 
     /** @hide */
     @Override
-    public boolean isContentCaptureSupported() {
-        return mIsContentCaptureSupported;
+    public ContentCaptureOptions getContentCaptureOptions() {
+        return mContentCaptureOptions;
     }
 
     /** @hide */
     @Override
-    public void setContentCaptureSupported(boolean supported) {
-        mIsContentCaptureSupported = supported;
+    public void setContentCaptureOptions(ContentCaptureOptions options) {
+        mContentCaptureOptions = options;
     }
 
     @UnsupportedAppUsage
