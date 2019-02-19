@@ -2078,6 +2078,11 @@ public class SearchView extends LinearLayout implements CollapsibleActionView {
             return ic;
         }
 
+        @Override
+        public boolean checkInputConnectionProxy(View view) {
+            return view == mSearchView;
+        }
+
         private void showSoftInputIfNecessary() {
             if (mHasPendingShowSoftInputRequest) {
                 final InputMethodManager imm =
