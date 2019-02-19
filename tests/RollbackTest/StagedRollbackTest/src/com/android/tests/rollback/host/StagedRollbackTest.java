@@ -53,4 +53,18 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         getDevice().reboot();
         runPhase("testApkOnlyConfirmRollback");
     }
+
+    /**
+     * Tests staged rollbacks involving only apex.
+     */
+    @Test
+    public void testApexOnly() throws Exception {
+        runPhase("testApexOnlyPrepareApex");
+        getDevice().reboot();
+        runPhase("testApexOnlyEnableRollback");
+        getDevice().reboot();
+        runPhase("testApexOnlyCommitRollback");
+        getDevice().reboot();
+        runPhase("testApexOnlyConfirmRollback");
+    }
 }

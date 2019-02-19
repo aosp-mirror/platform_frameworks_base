@@ -25,6 +25,7 @@ import android.content.rollback.RollbackManager;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.After;
@@ -46,6 +47,11 @@ public class StagedRollbackTest {
 
     private static final String TAG = "RollbackTest";
     private static final String TEST_APP_A = "com.android.tests.rollback.testapp.A";
+    private static final String TEST_APEX_PKG = "com.android.tests.rollback.testapex";
+    private static final String TEST_APEX_V1 =
+            "com.android.tests.rollback.testapex.RollbackTestApexV1.apex";
+    private static final String TEST_APEX_V2 =
+            "com.android.tests.rollback.testapex.RollbackTestApexV2.apex";
 
     /**
      * Adopts common shell permissions needed for rollback tests.
@@ -130,5 +136,84 @@ public class StagedRollbackTest {
         assertRollbackInfoEquals(TEST_APP_A, 2, 1, rollback);
         assertTrue(rollback.isStaged());
         assertNotEquals(-1, rollback.getCommittedSessionId());
+    }
+
+    /**
+     * Test rollbacks of staged installs involving only apex.
+     * Prepare apex phase.
+     */
+    @Test
+    public void testApexOnlyPrepareApex() throws Exception {
+        // Note: We can't uninstall the apex if it is already on device,
+        // because that isn't supported yet (b/123667725). As long as nothing
+        // is failing, this should be fine because we don't expect the tests
+        // to leave the device with v2 of the apex installed.
+        RollbackTestUtils.installStaged(false, TEST_APEX_V1);
+
+        // At this point, the host test driver will reboot the device and run
+        // testApexOnlyEnableRollback().
+    }
+
+    /**
+     * Test rollbacks of staged installs involving only apex.
+     * Enable rollback phase.
+     */
+    @Test
+    public void testApexOnlyEnableRollback() throws Exception {
+        assertEquals(1, RollbackTestUtils.getInstalledVersion(TEST_APEX_PKG));
+        RollbackTestUtils.installStaged(true, TEST_APEX_V2);
+
+        // At this point, the host test driver will reboot the device and run
+        // testApexOnlyCommitRollback().
+    }
+
+    /**
+     * Test rollbacks of staged installs involving only apks.
+     * Commit rollback phase.
+     */
+    @Test
+    public void testApexOnlyCommitRollback() throws Exception {
+        assertEquals(2, RollbackTestUtils.getInstalledVersion(TEST_APEX_PKG));
+
+        RollbackManager rm = RollbackTestUtils.getRollbackManager();
+        RollbackInfo rollback = getUniqueRollbackInfoForPackage(
+                rm.getAvailableRollbacks(), TEST_APEX_PKG);
+        assertRollbackInfoEquals(TEST_APEX_PKG, 2, 1, rollback);
+        assertTrue(rollback.isStaged());
+
+        RollbackTestUtils.rollback(rollback.getRollbackId());
+
+        // Note: We can't use getUniqueRollbackInfoForPackage for the apex,
+        // because we can't uninstall the apex (b/123667725), which means
+        // there's no way to clear info about rollbacks from previous tests
+        // run on the device. Look up the info by rollback id instead.
+        RollbackInfo committed = null;
+        for (RollbackInfo info : rm.getRecentlyCommittedRollbacks()) {
+            if (info.getRollbackId() == rollback.getRollbackId()) {
+                assertNull(committed);
+                committed = info;
+                break;
+            }
+        }
+        assertRollbackInfoEquals(TEST_APEX_PKG, 2, 1, committed);
+        assertTrue(committed.isStaged());
+        assertNotEquals(-1, committed.getCommittedSessionId());
+
+        RollbackTestUtils.waitForSessionReady(committed.getCommittedSessionId());
+
+        // The apex should not be rolled back until after reboot.
+        assertEquals(2, RollbackTestUtils.getInstalledVersion(TEST_APEX_PKG));
+
+        // At this point, the host test driver will reboot the device and run
+        // testApexOnlyConfirmRollback().
+    }
+
+    /**
+     * Test rollbacks of staged installs involving only apks.
+     * Confirm rollback phase.
+     */
+    @Test
+    public void testApexOnlyConfirmRollback() throws Exception {
+        assertEquals(1, RollbackTestUtils.getInstalledVersion(TEST_APEX_PKG));
     }
 }
