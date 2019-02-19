@@ -453,6 +453,8 @@ message GlobalSettingsProto {
         optional SettingProto game_driver_blacklists = 14;
         // ANGLE - Show a dialog box when ANGLE is selected for the currently running PKG
         optional SettingProto show_angle_in_use_dialog = 15;
+        // Game Driver - List of libraries in sphal accessible by Game Driver
+        optional SettingProto game_driver_sphal_libraries = 16;
     }
     optional Gpu gpu = 59;
 
