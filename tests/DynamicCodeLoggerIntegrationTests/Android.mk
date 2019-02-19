@@ -21,12 +21,12 @@ LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
 LOCAL_MODULE_TAGS := tests
-LOCAL_MODULE := DexLoggerTestLibrary
+LOCAL_MODULE := DynamicCodeLoggerTestLibrary
 LOCAL_SRC_FILES := $(call all-java-files-under, src/com/android/dcl)
 
 include $(BUILD_JAVA_LIBRARY)
 
-dexloggertest_jar := $(LOCAL_BUILT_MODULE)
+dynamiccodeloggertest_jar := $(LOCAL_BUILT_MODULE)
 
 
 # Also build a native library that the test app can dynamically load
@@ -34,7 +34,7 @@ dexloggertest_jar := $(LOCAL_BUILT_MODULE)
 include $(CLEAR_VARS)
 
 LOCAL_MODULE_TAGS := tests
-LOCAL_MODULE := DexLoggerNativeTestLibrary
+LOCAL_MODULE := DynamicCodeLoggerNativeTestLibrary
 LOCAL_SRC_FILES := src/cpp/com_android_dcl_Jni.cpp
 LOCAL_C_INCLUDES += \
     $(JNI_H_INCLUDE)
@@ -48,19 +48,19 @@ include $(BUILD_SHARED_LIBRARY)
 include $(CLEAR_VARS)
 
 LOCAL_MODULE_TAGS := tests
-LOCAL_MODULE := DexLoggerNativeExecutable
+LOCAL_MODULE := DynamicCodeLoggerNativeExecutable
 LOCAL_SRC_FILES := src/cpp/test_executable.cpp
 
 include $(BUILD_EXECUTABLE)
 
-dexloggertest_executable := $(LOCAL_BUILT_MODULE)
+dynamiccodeloggertest_executable := $(LOCAL_BUILT_MODULE)
 
 # Build the test app itself
 
 include $(CLEAR_VARS)
 
 LOCAL_MODULE_TAGS := tests
-LOCAL_PACKAGE_NAME := DexLoggerIntegrationTests
+LOCAL_PACKAGE_NAME := DynamicCodeLoggerIntegrationTests
 LOCAL_SDK_VERSION := current
 LOCAL_COMPATIBILITY_SUITE := device-tests
 LOCAL_CERTIFICATE := shared
@@ -73,12 +73,12 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
 # Include both versions of the .so if we have 2 arch
 LOCAL_MULTILIB := both
 LOCAL_JNI_SHARED_LIBRARIES := \
-    DexLoggerNativeTestLibrary \
+    DynamicCodeLoggerNativeTestLibrary \
 
-# This gets us the javalib.jar built by DexLoggerTestLibrary above as well as the various
+# This gets us the javalib.jar built by DynamicCodeLoggerTestLibrary above as well as the various
 # native binaries.
 LOCAL_JAVA_RESOURCE_FILES := \
-    $(dexloggertest_jar) \
-    $(dexloggertest_executable) \
+    $(dynamiccodeloggertest_jar) \
+    $(dynamiccodeloggertest_executable) \
 
 include $(BUILD_PACKAGE)

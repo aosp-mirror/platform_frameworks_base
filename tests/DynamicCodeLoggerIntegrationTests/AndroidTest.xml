@@ -13,17 +13,17 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<configuration description="Runs DexLogger Integration Tests">
+<configuration description="Runs DynamicLogger Integration Tests">
     <target_preparer class="com.android.tradefed.targetprep.TestAppInstallSetup">
-        <option name="test-file-name" value="DexLoggerIntegrationTests.apk"/>
+        <option name="test-file-name" value="DynamicCodeLoggerIntegrationTests.apk"/>
         <option name="cleanup-apks" value="true"/>
     </target_preparer>
 
     <option name="test-suite-tag" value="apct"/>
-    <option name="test-tag" value="DexLoggerIntegrationTests"/>
+    <option name="test-tag" value="DynamicCodeLoggerIntegrationTests"/>
 
     <test class="com.android.tradefed.testtype.AndroidJUnitTest">
-        <option name="package" value="com.android.frameworks.dexloggertest"/>
+        <option name="package" value="com.android.frameworks.dynamiccodeloggertest"/>
         <option name="runner" value="android.support.test.runner.AndroidJUnitRunner"/>
         <option name="hidden-api-checks" value="false"/>
     </test>
