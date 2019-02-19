@@ -234,17 +234,6 @@ public abstract class ContentCaptureService extends Service {
     }
 
     /**
-     *
-     * @deprecated use {@link #onContentCaptureEvent(ContentCaptureSessionId, ContentCaptureEvent)}
-     * instead.
-     */
-    @Deprecated
-    public void onContentCaptureEventsRequest(@NonNull ContentCaptureSessionId sessionId,
-            @NonNull ContentCaptureEventsRequest request) {
-        if (sVerbose) Log.v(TAG, "onContentCaptureEventsRequest(id=" + sessionId + ")");
-    }
-
-    /**
      * Notifies the service of {@link ContentCaptureEvent events} associated with a content capture
      * session.
      *
@@ -254,7 +243,6 @@ public abstract class ContentCaptureService extends Service {
     public void onContentCaptureEvent(@NonNull ContentCaptureSessionId sessionId,
             @NonNull ContentCaptureEvent event) {
         if (sVerbose) Log.v(TAG, "onContentCaptureEventsRequest(id=" + sessionId + ")");
-        onContentCaptureEventsRequest(sessionId, new ContentCaptureEventsRequest(event));
     }
 
     /**
