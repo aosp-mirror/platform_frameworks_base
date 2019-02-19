@@ -30,6 +30,7 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityThread;
+import android.content.AutofillOptions;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -699,12 +700,31 @@ public final class AutofillManagerService
         }
 
         @Override
-        public boolean isCompatibilityModeRequested(@NonNull String packageName,
+        public AutofillOptions getAutofillOptions(@NonNull String packageName,
                 long versionCode, @UserIdInt int userId) {
-            return mAutofillCompatState.isCompatibilityModeRequested(
+            final int loggingLevel;
+            if (verbose) {
+                loggingLevel = AutofillManager.FLAG_ADD_CLIENT_VERBOSE
+                        | AutofillManager.FLAG_ADD_CLIENT_DEBUG;
+            } else if (debug) {
+                loggingLevel = AutofillManager.FLAG_ADD_CLIENT_DEBUG;
+            } else {
+                loggingLevel = AutofillManager.NO_LOGGING;
+            }
+            final boolean compatModeEnabled = mAutofillCompatState.isCompatibilityModeRequested(
                     packageName, versionCode, userId);
-        }
+            final AutofillOptions options = new AutofillOptions(loggingLevel, compatModeEnabled);
 
+            synchronized (mLock) {
+                final AutofillManagerServiceImpl service =
+                        getServiceForUserLocked(UserHandle.getCallingUserId());
+                if (service != null) {
+                    service.setAugmentedAutofillWhitelistLocked(options, packageName);
+                }
+            }
+
+            return options;
+        }
     }
 
     /**

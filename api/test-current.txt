@@ -483,6 +483,17 @@ package android.bluetooth {
 
 package android.content {
 
+  public final class AutofillOptions implements android.os.Parcelable {
+    ctor public AutofillOptions(int, boolean);
+    method public int describeContents();
+    method public static android.content.AutofillOptions forWhitelistingItself();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.content.AutofillOptions> CREATOR;
+    field public boolean augmentedEnabled;
+    field public final boolean compatModeEnabled;
+    field public final int loggingLevel;
+  }
+
   public final class ContentCaptureOptions implements android.os.Parcelable {
     ctor public ContentCaptureOptions(int, int, int, int, int, @Nullable android.util.ArraySet<android.content.ComponentName>);
     method public int describeContents();
@@ -509,7 +520,7 @@ package android.content {
     method public android.content.Context createPackageContextAsUser(String, int, android.os.UserHandle) throws android.content.pm.PackageManager.NameNotFoundException;
     method public android.os.UserHandle getUser();
     method public int getUserId();
-    method public void setAutofillCompatibilityEnabled(boolean);
+    method public void setAutofillOptions(@Nullable android.content.AutofillOptions);
     method public void setContentCaptureOptions(@Nullable android.content.ContentCaptureOptions);
   }
 

@@ -187,6 +187,7 @@ import android.app.backup.IBackupManager;
 import android.app.usage.UsageEvents;
 import android.app.usage.UsageStatsManagerInternal;
 import android.appwidget.AppWidgetManager;
+import android.content.AutofillOptions;
 import android.content.BroadcastReceiver;
 import android.content.ComponentCallbacks2;
 import android.content.ComponentName;
@@ -4741,12 +4742,12 @@ public class ActivityManagerService extends IActivityManager.Stub
 
 
             // Figure out whether the app needs to run in autofill compat mode.
-            boolean isAutofillCompatEnabled = false;
+            AutofillOptions autofillOptions = null;
             if (UserHandle.getAppId(app.info.uid) >= Process.FIRST_APPLICATION_UID) {
                 final AutofillManagerInternal afm = LocalServices.getService(
                         AutofillManagerInternal.class);
                 if (afm != null) {
-                    isAutofillCompatEnabled = afm.isCompatibilityModeRequested(
+                    autofillOptions = afm.getAutofillOptions(
                             app.info.packageName, app.info.versionCode, app.userId);
                 }
             }
@@ -4779,7 +4780,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         new Configuration(app.getWindowProcessController().getConfiguration()),
                         app.compat, getCommonServicesLocked(app.isolated),
                         mCoreSettingsObserver.getCoreSettingsLocked(),
-                        buildSerial, isAutofillCompatEnabled, contentCaptureOptions);
+                        buildSerial, autofillOptions, contentCaptureOptions);
             } else {
                 thread.bindApplication(processName, appInfo, providers, null, profilerInfo,
                         null, null, null, testMode,
@@ -4788,7 +4789,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         new Configuration(app.getWindowProcessController().getConfiguration()),
                         app.compat, getCommonServicesLocked(app.isolated),
                         mCoreSettingsObserver.getCoreSettingsLocked(),
-                        buildSerial, isAutofillCompatEnabled, contentCaptureOptions);
+                        buildSerial, autofillOptions, contentCaptureOptions);
             }
             if (profilerInfo != null) {
                 profilerInfo.closeFd();

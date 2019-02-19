@@ -28,6 +28,7 @@ import android.annotation.RequiresFeature;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
+import android.content.AutofillOptions;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -482,6 +483,9 @@ public final class AutofillManager {
     @GuardedBy("mLock")
     private CompatibilityBridge mCompatibilityBridge;
 
+    @Nullable
+    private final AutofillOptions mOptions;
+
     /** @hide */
     public interface AutofillClient {
         /**
@@ -618,6 +622,12 @@ public final class AutofillManager {
     public AutofillManager(Context context, IAutoFillManager service) {
         mContext = Preconditions.checkNotNull(context, "context cannot be null");
         mService = service;
+        mOptions = context.getAutofillOptions();
+
+        if (mOptions != null) {
+            sDebug = (mOptions.loggingLevel & FLAG_ADD_CLIENT_DEBUG) != 0;
+            sVerbose = (mOptions.loggingLevel & FLAG_ADD_CLIENT_VERBOSE) != 0;
+        }
     }
 
     /**
@@ -2352,6 +2362,9 @@ public final class AutofillManager {
         pw.print(pfx); pw.print("entered ids: "); pw.println(mEnteredIds);
         pw.print(pfx); pw.print("save trigger id: "); pw.println(mSaveTriggerId);
         pw.print(pfx); pw.print("save on finish(): "); pw.println(mSaveOnFinish);
+        if (mOptions != null) {
+            pw.print(pfx); pw.print("options: "); mOptions.dumpShort(pw); pw.println();
+        }
         pw.print(pfx); pw.print("compat mode enabled: ");
         synchronized (mLock) {
             if (mCompatibilityBridge != null) {

@@ -28,6 +28,7 @@ import android.app.IApplicationThread;
 import android.app.IInstrumentationWatcher;
 import android.app.IUiAutomationConnection;
 import android.app.ProfilerInfo;
+import android.content.AutofillOptions;
 import android.content.ComponentName;
 import android.content.ContentCaptureOptions;
 import android.content.IIntentReceiver;
@@ -407,7 +408,7 @@ public class TransactionParcelTests {
                 IUiAutomationConnection iUiAutomationConnection, int i, boolean b, boolean b1,
                 boolean b2, boolean b3, Configuration configuration,
                 CompatibilityInfo compatibilityInfo, Map map, Bundle bundle1, String s1,
-                boolean autofillCompatEnabled, ContentCaptureOptions o) throws RemoteException {
+                AutofillOptions ao, ContentCaptureOptions co) throws RemoteException {
         }
 
         @Override
