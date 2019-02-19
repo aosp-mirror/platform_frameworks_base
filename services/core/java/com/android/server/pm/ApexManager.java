@@ -151,7 +151,7 @@ class ApexManager {
     }
 
     /**
-     * Mark a staged session previously submitted using {@cde submitStagedSession} as ready to be
+     * Mark a staged session previously submitted using {@code submitStagedSession} as ready to be
      * applied at next reboot.
      *
      * @param sessionId the identifier of the {@link PackageInstallerSession} being marked as ready.
