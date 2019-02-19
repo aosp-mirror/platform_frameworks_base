@@ -338,7 +338,7 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         initializeCredentialUnderSP(password, PRIMARY_USER_ID);
         final byte[] storageKey = mStorageManager.getUserUnlockToken(PRIMARY_USER_ID);
 
-        long handle = mLocalService.addEscrowToken(token, PRIMARY_USER_ID);
+        long handle = mLocalService.addEscrowToken(token, PRIMARY_USER_ID, null);
         assertFalse(mLocalService.isEscrowTokenActive(handle, PRIMARY_USER_ID));
 
         mService.verifyCredential(password, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, 0,
@@ -367,7 +367,7 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         initializeCredentialUnderSP(password, PRIMARY_USER_ID);
         final byte[] storageKey = mStorageManager.getUserUnlockToken(PRIMARY_USER_ID);
 
-        long handle = mLocalService.addEscrowToken(token, PRIMARY_USER_ID);
+        long handle = mLocalService.addEscrowToken(token, PRIMARY_USER_ID, null);
         assertFalse(mLocalService.isEscrowTokenActive(handle, PRIMARY_USER_ID));
 
         mService.verifyCredential(password, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD,
@@ -393,7 +393,7 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         initializeCredentialUnderSP(password, PRIMARY_USER_ID);
         final byte[] storageKey = mStorageManager.getUserUnlockToken(PRIMARY_USER_ID);
 
-        long handle = mLocalService.addEscrowToken(token, PRIMARY_USER_ID);
+        long handle = mLocalService.addEscrowToken(token, PRIMARY_USER_ID, null);
         assertFalse(mLocalService.isEscrowTokenActive(handle, PRIMARY_USER_ID));
 
         mService.verifyCredential(password, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD,
@@ -417,7 +417,7 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
             throws RemoteException {
         final String token = "some-high-entropy-secure-token";
         enableSyntheticPassword();
-        long handle = mLocalService.addEscrowToken(token.getBytes(), PRIMARY_USER_ID);
+        long handle = mLocalService.addEscrowToken(token.getBytes(), PRIMARY_USER_ID, null);
         assertTrue(mLocalService.isEscrowTokenActive(handle, PRIMARY_USER_ID));
         assertEquals(0, mGateKeeperService.getSecureUserId(PRIMARY_USER_ID));
         assertTrue(hasSyntheticPassword(PRIMARY_USER_ID));
@@ -427,7 +427,7 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
             throws RemoteException {
         final String token = "some-high-entropy-secure-token";
         initializeCredentialUnderSP(null, PRIMARY_USER_ID);
-        long handle = mLocalService.addEscrowToken(token.getBytes(), PRIMARY_USER_ID);
+        long handle = mLocalService.addEscrowToken(token.getBytes(), PRIMARY_USER_ID, null);
         assertTrue(mLocalService.isEscrowTokenActive(handle, PRIMARY_USER_ID));
         assertEquals(0, mGateKeeperService.getSecureUserId(PRIMARY_USER_ID));
         assertTrue(hasSyntheticPassword(PRIMARY_USER_ID));
@@ -443,7 +443,7 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
                 PASSWORD_QUALITY_ALPHABETIC, PRIMARY_USER_ID);
         enableSyntheticPassword();
 
-        long handle = mLocalService.addEscrowToken(token, PRIMARY_USER_ID);
+        long handle = mLocalService.addEscrowToken(token, PRIMARY_USER_ID, null);
         // Token not activated immediately since user password exists
         assertFalse(mLocalService.isEscrowTokenActive(handle, PRIMARY_USER_ID));
         // Activate token (password gets migrated to SP at the same time)
@@ -461,7 +461,7 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
 
         mHasSecureLockScreen = false;
         enableSyntheticPassword();
-        long handle = mLocalService.addEscrowToken(token, PRIMARY_USER_ID);
+        long handle = mLocalService.addEscrowToken(token, PRIMARY_USER_ID, null);
         assertTrue(mLocalService.isEscrowTokenActive(handle, PRIMARY_USER_ID));
 
         try {

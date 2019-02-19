@@ -16,6 +16,8 @@
 
 package com.android.server.locksettings;
 
+import static com.android.internal.widget.LockPatternUtils.EscrowTokenStateChangeCallback;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.admin.DevicePolicyManager;
@@ -281,6 +283,7 @@ public class SyntheticPasswordManager {
         byte[] secdiscardableOnDisk;
         byte[] weaverSecret;
         byte[] aggregatedSecret;
+        EscrowTokenStateChangeCallback mCallback;
     }
 
     private final Context mContext;
@@ -740,7 +743,12 @@ public class SyntheticPasswordManager {
 
     private ArrayMap<Integer, ArrayMap<Long, TokenData>> tokenMap = new ArrayMap<>();
 
-    public long createTokenBasedSyntheticPassword(byte[] token, int userId) {
+    /**
+     * Create a token based Synthetic password for the given user.
+     * @return
+     */
+    public long createTokenBasedSyntheticPassword(byte[] token, int userId,
+            @Nullable EscrowTokenStateChangeCallback changeCallback) {
         long handle = generateHandle();
         if (!tokenMap.containsKey(userId)) {
             tokenMap.put(userId, new ArrayMap<>());
@@ -756,6 +764,7 @@ public class SyntheticPasswordManager {
             tokenData.weaverSecret = null;
         }
         tokenData.aggregatedSecret = transformUnderSecdiscardable(token, secdiscardable);
+        tokenData.mCallback = changeCallback;
 
         tokenMap.get(userId).put(handle, tokenData);
         return handle;
@@ -803,6 +812,9 @@ public class SyntheticPasswordManager {
         createSyntheticPasswordBlob(handle, SYNTHETIC_PASSWORD_TOKEN_BASED, authToken,
                 tokenData.aggregatedSecret, 0L, userId);
         tokenMap.get(userId).remove(handle);
+        if (tokenData.mCallback != null) {
+            tokenData.mCallback.onEscrowTokenActivated(handle, userId);
+        }
         return true;
     }
 

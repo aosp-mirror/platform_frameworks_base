@@ -21,6 +21,7 @@ import static android.Manifest.permission.READ_CONTACTS;
 import static android.content.Context.KEYGUARD_SERVICE;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
+import static com.android.internal.widget.LockPatternUtils.EscrowTokenStateChangeCallback;
 import static com.android.internal.widget.LockPatternUtils.SYNTHETIC_PASSWORD_ENABLED_KEY;
 import static com.android.internal.widget.LockPatternUtils.SYNTHETIC_PASSWORD_HANDLE_KEY;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_BOOT;
@@ -2648,7 +2649,8 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
     }
 
-    private long addEscrowToken(byte[] token, int userId) throws RemoteException {
+    private long addEscrowToken(byte[] token, int userId, EscrowTokenStateChangeCallback callback)
+            throws RemoteException {
         if (DEBUG) Slog.d(TAG, "addEscrowToken: user=" + userId);
         synchronized (mSpManager) {
             enableSyntheticPasswordLocked();
@@ -2672,7 +2674,7 @@ public class LockSettingsService extends ILockSettings.Stub {
                     throw new SecurityException("Escrow token is disabled on the current user");
                 }
             }
-            long handle = mSpManager.createTokenBasedSyntheticPassword(token, userId);
+            long handle = mSpManager.createTokenBasedSyntheticPassword(token, userId, callback);
             if (auth != null) {
                 mSpManager.activateTokenBasedSyntheticPassword(handle, auth, userId);
             }
@@ -2943,9 +2945,10 @@ public class LockSettingsService extends ILockSettings.Stub {
     private final class LocalService extends LockSettingsInternal {
 
         @Override
-        public long addEscrowToken(byte[] token, int userId) {
+        public long addEscrowToken(byte[] token, int userId,
+                EscrowTokenStateChangeCallback callback) {
             try {
-                return LockSettingsService.this.addEscrowToken(token, userId);
+                return LockSettingsService.this.addEscrowToken(token, userId, callback);
             } catch (RemoteException re) {
                 throw re.rethrowFromSystemServer();
             }

@@ -13352,8 +13352,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 if (policy.mPasswordTokenHandle != 0) {
                     mLockPatternUtils.removeEscrowToken(policy.mPasswordTokenHandle, userHandle);
                 }
-
-                policy.mPasswordTokenHandle = mLockPatternUtils.addEscrowToken(token, userHandle);
+                policy.mPasswordTokenHandle = mLockPatternUtils.addEscrowToken(token,
+                        userHandle, /*EscrowTokenStateChangeCallback*/ null);
                 saveSettingsLocked(userHandle);
                 return policy.mPasswordTokenHandle != 0;
             } finally {
