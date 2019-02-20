@@ -33,6 +33,11 @@
     <!-- size of the dead zone when touches have recently occurred elsewhere on screen -->
     <dimen name="navigation_bar_deadzone_size_max">32dp</dimen>
 
+    <!-- dimensions for the navigation bar handle -->
+    <dimen name="navigation_handle_width">180dp</dimen>
+    <dimen name="navigation_handle_radius">2dp</dimen>
+    <dimen name="navigation_handle_bottom">8dp</dimen>
+
     <!-- Height of notification icons in the status bar -->
     <dimen name="status_bar_icon_size">@*android:dimen/status_bar_icon_size</dimen>
 

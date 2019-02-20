@@ -112,6 +112,9 @@ public class ContextualButtonGroup extends ButtonDispatcher {
      * their icons for their buttons.
      */
     public void updateIcons() {
+        if (getCurrentView() == null || !getCurrentView().isAttachedToWindow()) {
+            return;
+        }
         for (ButtonData data : mButtonData) {
             data.button.updateIcon();
         }

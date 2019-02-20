@@ -29,6 +29,7 @@ import static com.android.systemui.shared.system.NavigationBarCompat.HIT_TARGET_
 import static com.android.systemui.shared.system.NavigationBarCompat.HIT_TARGET_NONE;
 import static com.android.systemui.shared.system.NavigationBarCompat.HIT_TARGET_OVERVIEW;
 import static com.android.systemui.shared.system.NavigationBarCompat.HIT_TARGET_ROTATION;
+import static com.android.systemui.statusbar.phone.NavigationBarInflaterView.NAV_BAR_VIEWS;
 
 import android.animation.LayoutTransition;
 import android.animation.LayoutTransition.TransitionListener;
@@ -339,6 +340,11 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
                 mRightEdgePanel.setDimensions(width, height);
             }
         }
+
+        @Override
+        public void onHomeHandleVisiblilityChanged(boolean visible) {
+            showHomeHandle(visible);
+        }
     };
 
     public NavigationBarView(Context context, AttributeSet attrs) {
@@ -376,6 +382,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
 
         mButtonDispatchers.put(R.id.back, new ButtonDispatcher(R.id.back));
         mButtonDispatchers.put(R.id.home, new ButtonDispatcher(R.id.home));
+        mButtonDispatchers.put(R.id.home_handle, new ButtonDispatcher(R.id.home_handle));
         mButtonDispatchers.put(R.id.recent_apps, new ButtonDispatcher(R.id.recent_apps));
         mButtonDispatchers.put(R.id.menu, menuButton);
         mButtonDispatchers.put(R.id.ime_switcher, imeSwitcherButton);
@@ -571,6 +578,10 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     public RotationContextButton getRotateSuggestionButton() {
         return (RotationContextButton) mContextualButtonGroup
                 .getContextButton(R.id.rotate_suggestion);
+    }
+
+    public ButtonDispatcher getHomeHandle() {
+        return mButtonDispatchers.get(R.id.home_handle);
     }
 
     public SparseArray<ButtonDispatcher> getButtonDispatchers() {
@@ -855,6 +866,10 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         final boolean showSwipeUpUI = mOverviewProxyService.shouldShowSwipeUpUI();
 
         if (mNavigationInflaterView != null) {
+            if (mPrototypeController.showHomeHandle()) {
+                showHomeHandle(true /* visible */);
+            }
+
             // Reinflate the navbar if needed, no-op unless the swipe up state changes
             mNavigationInflaterView.onLikelyDefaultLayoutChange();
         }
@@ -899,6 +914,9 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
 
     private void setWindowFlag(int flags, boolean enable) {
         final ViewGroup navbarView = ((ViewGroup) getParent());
+        if (navbarView == null) {
+            return;
+        }
         WindowManager.LayoutParams lp = (WindowManager.LayoutParams) navbarView.getLayoutParams();
         if (lp == null || enable == ((lp.flags & flags) != 0)) {
             return;
@@ -910,6 +928,18 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         }
         WindowManager wm = (WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE);
         wm.updateViewLayout(navbarView, lp);
+    }
+
+    private void showHomeHandle(boolean visible) {
+        mNavigationInflaterView.onTuningChanged(NAV_BAR_VIEWS,
+                visible ? getContext().getString(R.string.config_navBarLayoutHandle) : null);
+
+        // Color adaption is tied with showing home handle, only avaliable if visible
+        if (visible) {
+            mColorAdaptionController.start();
+        } else {
+            mColorAdaptionController.end();
+        }
     }
 
     public void setMenuVisibility(final boolean show) {
@@ -1135,6 +1165,12 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
                 || mTmpLastConfiguration.getLayoutDirection() != mConfiguration.getLayoutDirection()) {
             // If car mode or density changes, we need to reset the icons.
             updateNavButtonIcons();
+        }
+
+        if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
+            mColorAdaptionController.start();
+        } else {
+            mColorAdaptionController.end();
         }
     }
 
