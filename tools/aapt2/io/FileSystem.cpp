@@ -79,6 +79,7 @@ std::unique_ptr<FileCollection> FileCollection::Create(const android::StringPiec
     return nullptr;
   }
 
+  std::vector<std::string> sorted_files;
   while (struct dirent *entry = readdir(d.get())) {
     std::string prefix_path = root.to_string();
     file::AppendPath(&prefix_path, entry->d_name);
@@ -105,8 +106,13 @@ std::unique_ptr<FileCollection> FileCollection::Create(const android::StringPiec
         continue;
       }
 
-      collection->InsertFile(full_path);
+      sorted_files.push_back(full_path);
     }
+  }
+
+  std::sort(sorted_files.begin(), sorted_files.end());
+  for (const std::string& full_path : sorted_files) {
+    collection->InsertFile(full_path);
   }
 
   return collection;
