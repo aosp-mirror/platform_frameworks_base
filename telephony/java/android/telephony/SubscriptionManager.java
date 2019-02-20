@@ -2583,8 +2583,14 @@ public class SubscriptionManager {
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public void setPreferredDataSubscriptionId(int subId) {
         if (VDBG) logd("[setPreferredDataSubscriptionId]+ subId:" + subId);
-        setSubscriptionPropertyHelper(DEFAULT_SUBSCRIPTION_ID, "setPreferredDataSubscriptionId",
-                (iSub)-> iSub.setPreferredDataSubscriptionId(subId));
+        try {
+            ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
+            if (iSub != null) {
+                iSub.setPreferredDataSubscriptionId(subId);
+            }
+        } catch (RemoteException ex) {
+            // ignore it
+        }
     }
 
     /**
