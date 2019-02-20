@@ -2122,7 +2122,10 @@ public final class Telephony {
 
             /**
              * The URI to query or modify {@link android.telephony.ims.Rcs1To1Thread}s via the
-             * content provider
+             * content provider. Can also insert to this URI to create a new 1-to-1 thread. When
+             * performing an insert, ensure that the provided content values contain the other
+             * participant's ID under the key
+             * {@link RcsParticipantColumns.RCS_PARTICIPANT_ID_COLUMN}
              */
             Uri RCS_1_TO_1_THREAD_URI = Uri.withAppendedPath(CONTENT_AND_AUTHORITY,
                     RCS_1_TO_1_THREAD_URI_PART);
