@@ -28,16 +28,16 @@ static jstring createClassloaderNamespace_native(JNIEnv* env,
                                               jstring librarySearchPath,
                                               jstring libraryPermittedPath,
                                               jboolean isShared,
-                                              jboolean isForVendor) {
+                                              jstring dexPath) {
     return android::CreateClassLoaderNamespace(env, targetSdkVersion,
                                                classLoader, isShared == JNI_TRUE,
-                                               isForVendor == JNI_TRUE,
+                                               dexPath,
                                                librarySearchPath, libraryPermittedPath);
 }
 
 static const JNINativeMethod g_methods[] = {
     { "createClassloaderNamespace",
-      "(Ljava/lang/ClassLoader;ILjava/lang/String;Ljava/lang/String;ZZ)Ljava/lang/String;",
+      "(Ljava/lang/ClassLoader;ILjava/lang/String;Ljava/lang/String;ZLjava/lang/String;)Ljava/lang/String;",
       reinterpret_cast<void*>(createClassloaderNamespace_native) },
 };
 
