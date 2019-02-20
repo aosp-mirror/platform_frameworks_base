@@ -3688,7 +3688,16 @@ class StorageManagerService extends IStorageManager.Stub
             } else if (mPmInternal.isInstantApp(packageName, UserHandle.getUserId(uid))) {
                 return Zygote.MOUNT_EXTERNAL_NONE;
             } else {
-                return Zygote.MOUNT_EXTERNAL_WRITE;
+                // STOPSHIP: remove this temporary workaround once developers
+                // fix bugs where they're opening _data paths in native code
+                switch (packageName) {
+                    case "com.facebook.katana": // b/123996076
+                    case "jp.naver.line.android": // b/124767356
+                    case "com.mxtech.videoplayer.ad": // b/124531483
+                        return Zygote.MOUNT_EXTERNAL_LEGACY;
+                    default:
+                        return Zygote.MOUNT_EXTERNAL_WRITE;
+                }
             }
         } catch (RemoteException e) {
             // Should not happen
