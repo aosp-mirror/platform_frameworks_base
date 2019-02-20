@@ -1047,20 +1047,22 @@ public class AccessPoint implements Comparable<AccessPoint> {
      * match based on SSID and security.
      */
     private boolean isInfoForThisAccessPoint(WifiConfiguration config, WifiInfo info) {
-        if (info.isOsuAp()) {
-            return (mOsuStatus != null);
+        if (info.isOsuAp() || mOsuStatus != null) {
+            return (info.isOsuAp() && mOsuStatus != null);
+        } else if (info.isPasspointAp() || isPasspoint()) {
+            return (info.isPasspointAp() && isPasspoint()
+                    && TextUtils.equals(info.getFqdn(), mConfig.FQDN));
         }
 
-        if (isPasspoint() == false && networkId != WifiConfiguration.INVALID_NETWORK_ID) {
+        if (networkId != WifiConfiguration.INVALID_NETWORK_ID) {
             return networkId == info.getNetworkId();
         } else if (config != null) {
-            return matches(config);
-        }
-        else {
+            return TextUtils.equals(getKey(config), getKey());
+        } else {
             // Might be an ephemeral connection with no WifiConfiguration. Try matching on SSID.
             // (Note that we only do this if the WifiConfiguration explicitly equals INVALID).
             // TODO: Handle hex string SSIDs.
-            return ssid.equals(removeDoubleQuotes(info.getSSID()));
+            return TextUtils.equals(removeDoubleQuotes(info.getSSID()), ssid);
         }
     }
 
@@ -1207,7 +1209,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
         final int oldLevel = getLevel();
         if (info != null && isInfoForThisAccessPoint(config, info)) {
             updated = (mInfo == null);
-            if (mConfig != config) {
+            if (!isPasspoint() && mConfig != config) {
                 // We do not set updated = true as we do not want to increase the amount of sorting
                 // and copying performed in WifiTracker at this time. If issues involving refresh
                 // are still seen, we will investigate further.

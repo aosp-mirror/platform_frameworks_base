@@ -23,6 +23,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -84,6 +85,7 @@ public class AccessPointTest {
             20 * DateUtils.MINUTE_IN_MILLIS;;
 
     private Context mContext;
+    private WifiInfo mWifiInfo;
     @Mock private RssiCurve mockBadgeCurve;
     @Mock private WifiNetworkScoreCache mockWifiNetworkScoreCache;
     public static final int NETWORK_ID = 123;
@@ -103,6 +105,9 @@ public class AccessPointTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         mContext = InstrumentationRegistry.getTargetContext();
+        mWifiInfo = new WifiInfo();
+        mWifiInfo.setSSID(WifiSsid.createFromAsciiEncoded(TEST_SSID));
+        mWifiInfo.setBSSID(TEST_BSSID);
         WifiTracker.sVerboseLogging = false;
     }
 
@@ -1159,5 +1164,57 @@ public class AccessPointTest {
 
         // Fast should still be returned since cache was updated with recent time
         assertThat(ap.getSpeed()).isEqualTo(newSpeed);
+    }
+
+    /**
+     * Verifies that a Passpoint WifiInfo updates the matching Passpoint AP
+     */
+    @Test
+    public void testUpdate_passpointWifiInfo_updatesPasspointAccessPoint() {
+        mWifiInfo.setFQDN("fqdn");
+        mWifiInfo.setProviderFriendlyName("providerFriendlyName");
+
+        WifiConfiguration spyConfig = spy(new WifiConfiguration());
+        when(spyConfig.isPasspoint()).thenReturn(true);
+        spyConfig.SSID = TEST_SSID;
+        spyConfig.BSSID = TEST_BSSID;
+        spyConfig.FQDN = "fqdn";
+        spyConfig.providerFriendlyName = "providerFriendlyName";
+        AccessPoint passpointAp = new AccessPoint(mContext, spyConfig);
+
+        assertThat(passpointAp.update(null, mWifiInfo, null)).isTrue();
+    }
+
+    /**
+     * Verifies that a Passpoint WifiInfo does not update a non-Passpoint AP with the same SSID.
+     */
+    @Test
+    public void testUpdate_passpointWifiInfo_doesNotUpdateNonPasspointAccessPoint() {
+        mWifiInfo.setFQDN("fqdn");
+        mWifiInfo.setProviderFriendlyName("providerFriendlyName");
+
+        AccessPoint ap = new TestAccessPointBuilder(mContext)
+                .setSsid(TEST_SSID)
+                .setBssid(TEST_BSSID)
+                .setScanResults(SCAN_RESULTS)
+                .build();
+
+        assertThat(ap.update(null, mWifiInfo, null)).isFalse();
+    }
+
+    /**
+     * Verifies that a non-Passpoint WifiInfo does not update a Passpoint AP with the same SSID.
+     */
+    @Test
+    public void testUpdate_nonPasspointWifiInfo_doesNotUpdatePasspointAccessPoint() {
+        WifiConfiguration spyConfig = spy(new WifiConfiguration());
+        when(spyConfig.isPasspoint()).thenReturn(true);
+        spyConfig.SSID = TEST_SSID;
+        spyConfig.BSSID = TEST_BSSID;
+        spyConfig.FQDN = "fqdn";
+        spyConfig.providerFriendlyName = "providerFriendlyName";
+        AccessPoint passpointAp = new AccessPoint(mContext, spyConfig);
+
+        assertThat(passpointAp.update(null, mWifiInfo, null)).isFalse();
     }
 }
