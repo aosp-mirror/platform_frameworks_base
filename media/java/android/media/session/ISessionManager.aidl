@@ -35,7 +35,7 @@ import android.view.KeyEvent;
  */
 interface ISessionManager {
     SessionLink createSession(String packageName, in SessionCallbackLink sessionCb, String tag,
-            int userId);
+            in Bundle sessionInfo, int userId);
     void notifySession2Created(in Session2Token sessionToken);
     List<MediaSession.Token> getSessions(in ComponentName compName, int userId);
     List<Session2Token> getSession2Tokens(int userId);

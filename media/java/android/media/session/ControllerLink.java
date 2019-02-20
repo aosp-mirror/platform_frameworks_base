@@ -158,6 +158,18 @@ public final class ControllerLink implements Parcelable {
     }
 
     /**
+     * Gets the session info of the connected session.
+     */
+    @Nullable
+    Bundle getSessionInfo() {
+        try {
+            return mISessionController.getSessionInfo();
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
      * Gets the {@link PendingIntent} for launching UI of the connected session.
      */
     @Nullable
@@ -666,6 +678,12 @@ public final class ControllerLink implements Parcelable {
             return null;
         }
 
+        /** Stub method for ISessionController.getSessionInfo */
+        @Nullable
+        public Bundle getSessionInfo() {
+            return null;
+        }
+
         /** Stub method for ISessionController.getLaunchPendingIntent */
         @Nullable
         public PendingIntent getLaunchPendingIntent() {
@@ -853,6 +871,11 @@ public final class ControllerLink implements Parcelable {
         @Override
         public String getTag() {
             return mControllerStub.getTag();
+        }
+
+        @Override
+        public Bundle getSessionInfo() {
+            return mControllerStub.getSessionInfo();
         }
 
         @Override

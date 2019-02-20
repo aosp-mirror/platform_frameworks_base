@@ -28,6 +28,7 @@ import android.media.AudioManager;
 import android.media.IRemoteVolumeController;
 import android.media.MediaSession2;
 import android.media.Session2Token;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -101,13 +102,15 @@ public final class MediaSessionManager {
      * Create a new session in the system and get the binder for it.
      *
      * @param tag A short name for debugging purposes.
+     * @param sessionInfo A bundle for additional information about this session.
      * @return The binder object from the system
      * @hide
      */
     @NonNull
-    public SessionLink createSession(@NonNull SessionCallbackLink cbStub, @NonNull String tag) {
+    public SessionLink createSession(@NonNull SessionCallbackLink cbStub, @NonNull String tag,
+            @Nullable Bundle sessionInfo) {
         try {
-            return mService.createSession(mContext.getPackageName(), cbStub, tag,
+            return mService.createSession(mContext.getPackageName(), cbStub, tag, sessionInfo,
                     UserHandle.myUserId());
         } catch (RemoteException e) {
             throw new RuntimeException(e);
