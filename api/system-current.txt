@@ -6574,7 +6574,9 @@ package android.service.euicc {
 package android.service.notification {
 
   public final class Adjustment implements android.os.Parcelable {
+    ctor public Adjustment(String, String, android.os.Bundle, CharSequence, int);
     ctor protected Adjustment(android.os.Parcel);
+    method public int getUser();
     field public static final String KEY_PEOPLE = "key_people";
   }
 
