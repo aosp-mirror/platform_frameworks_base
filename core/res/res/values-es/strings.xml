@@ -242,7 +242,7 @@
     <string name="global_action_settings" msgid="1756531602592545966">"Ajustes"</string>
     <string name="global_action_assist" msgid="3892832961594295030">"Asistencia"</string>
     <string name="global_action_voice_assist" msgid="7751191495200504480">"Asistente voz"</string>
-    <string name="global_action_lockdown" msgid="1099326950891078929">"Bloquear"</string>
+    <string name="global_action_lockdown" msgid="1099326950891078929">"Bloqueo seguro"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"&gt; 999"</string>
     <string name="notification_hidden_text" msgid="6351207030447943784">"Notificación nueva"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"Teclado virtual"</string>
@@ -584,8 +584,8 @@
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"Controla el número de contraseñas incorrectas introducidas para desbloquear la pantalla y bloquea el tablet o borra todos los datos del usuario si se introducen demasiadas contraseñas incorrectas."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Controla el número de contraseñas incorrectas introducidas para desbloquear la pantalla y bloquea la TV o borra todos los datos del usuario si se introducen demasiadas contraseñas incorrectas."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Controla el número de contraseñas incorrectas introducidas para desbloquear la pantalla y bloquea el teléfono o borra todos los datos del usuario si se introducen demasiadas contraseñas incorrectas."</string>
-    <string name="policylab_resetPassword" msgid="4934707632423915395">"Cambia el bloqueo de pantalla"</string>
-    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Cambia el bloqueo de pantalla"</string>
+    <string name="policylab_resetPassword" msgid="4934707632423915395">"Cambiar el bloqueo de pantalla"</string>
+    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Cambiar el bloqueo de pantalla"</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Bloquear la pantalla"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Controla cómo y cuándo se bloquea la pantalla"</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Borrar todos los datos"</string>
@@ -1245,7 +1245,7 @@
     <string name="no_permissions" msgid="7283357728219338112">"No es necesario ningún permiso"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"es posible que esto te cueste dinero"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"Aceptar"</string>
-    <string name="usb_charging_notification_title" msgid="1595122345358177163">"Cargando este dispositivo por USB"</string>
+    <string name="usb_charging_notification_title" msgid="1595122345358177163">"Cargando dispositivo por USB"</string>
     <string name="usb_supplying_notification_title" msgid="4631045789893086181">"Cargando dispositivo conectado por USB"</string>
     <string name="usb_mtp_notification_title" msgid="4238227258391151029">"Modo de transferencia de archivos por USB activado"</string>
     <string name="usb_ptp_notification_title" msgid="5425857879922006878">"Modo PTP por USB activado"</string>
@@ -1257,7 +1257,7 @@
     <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"Se ha detectado un accesorio de audio analógico"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"El dispositivo adjunto no es compatible con este teléfono. Toca para obtener más información."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Depuración USB habilitada"</string>
-    <string name="adb_active_notification_message" msgid="7463062450474107752">"Toca para desactivar la depuración USB"</string>
+    <string name="adb_active_notification_message" msgid="7463062450474107752">"Toca para desactivar la depuración USB."</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"Seleccionar para inhabilitar la depuración USB"</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Creando informe de errores…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"¿Compartir informe de errores?"</string>
@@ -1369,8 +1369,8 @@
     <string name="no_file_chosen" msgid="6363648562170759465">"Archivo no seleccionado"</string>
     <string name="reset" msgid="2448168080964209908">"Restablecer"</string>
     <string name="submit" msgid="1602335572089911941">"Enviar"</string>
-    <string name="car_mode_disable_notification_title" msgid="5704265646471239078">"Se está utilizando la aplicación con el modo de conducción"</string>
-    <string name="car_mode_disable_notification_message" msgid="7647248420931129377">"Toca para salir de la aplicación del modo de conducción."</string>
+    <string name="car_mode_disable_notification_title" msgid="5704265646471239078">"Aplicación de conducción en uso"</string>
+    <string name="car_mode_disable_notification_message" msgid="7647248420931129377">"Toca para salir de la aplicación de conducción."</string>
     <string name="tethered_notification_title" msgid="3146694234398202601">"Compartir conexión/Zona Wi-Fi activada"</string>
     <string name="tethered_notification_message" msgid="2113628520792055377">"Toca para configurar."</string>
     <string name="disable_tether_notification_title" msgid="7526977944111313195">"La conexión compartida está inhabilitada"</string>
@@ -1740,7 +1740,7 @@
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Contraer"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"No molestar"</string>
-    <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"Tiempo de inactividad"</string>
+    <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"Periodo de descanso"</string>
     <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"Noche de entre semana"</string>
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"Fin de semana"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"Evento"</string>

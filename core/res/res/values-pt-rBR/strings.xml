@@ -607,7 +607,7 @@
     <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Desativar recursos bloq. de tela"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Impede o uso de alguns recursos do bloqueio de tela."</string>
   <string-array name="phoneTypes">
-    <item msgid="8901098336658710359">"Residencial"</item>
+    <item msgid="8901098336658710359">"Casa"</item>
     <item msgid="869923650527136615">"Celular"</item>
     <item msgid="7897544654242874543">"Trabalho"</item>
     <item msgid="1103601433382158155">"Fax do trabalho"</item>
@@ -617,19 +617,19 @@
     <item msgid="9192514806975898961">"Personalizado"</item>
   </string-array>
   <string-array name="emailAddressTypes">
-    <item msgid="8073994352956129127">"Residencial"</item>
+    <item msgid="8073994352956129127">"Casa"</item>
     <item msgid="7084237356602625604">"Trabalho"</item>
     <item msgid="1112044410659011023">"Outros"</item>
     <item msgid="2374913952870110618">"Personalizado"</item>
   </string-array>
   <string-array name="postalAddressTypes">
-    <item msgid="6880257626740047286">"Residencial"</item>
+    <item msgid="6880257626740047286">"Casa"</item>
     <item msgid="5629153956045109251">"Trabalho"</item>
     <item msgid="4966604264500343469">"Outros"</item>
     <item msgid="4932682847595299369">"Personalizado"</item>
   </string-array>
   <string-array name="imAddressTypes">
-    <item msgid="1738585194601476694">"Residencial"</item>
+    <item msgid="1738585194601476694">"Casa"</item>
     <item msgid="1359644565647383708">"Trabalho"</item>
     <item msgid="7868549401053615677">"Outros"</item>
     <item msgid="3145118944639869809">"Personalizado"</item>
@@ -650,7 +650,7 @@
     <item msgid="1648797903785279353">"Jabber"</item>
   </string-array>
     <string name="phoneTypeCustom" msgid="1644738059053355820">"Personalizado"</string>
-    <string name="phoneTypeHome" msgid="2570923463033985887">"Residencial"</string>
+    <string name="phoneTypeHome" msgid="2570923463033985887">"Casa"</string>
     <string name="phoneTypeMobile" msgid="6501463557754751037">"Celular"</string>
     <string name="phoneTypeWork" msgid="8863939667059911633">"Comercial"</string>
     <string name="phoneTypeFaxWork" msgid="3517792160008890912">"Fax comercial"</string>
@@ -675,16 +675,16 @@
     <string name="eventTypeAnniversary" msgid="3876779744518284000">"Data comemorativa"</string>
     <string name="eventTypeOther" msgid="7388178939010143077">"Outros"</string>
     <string name="emailTypeCustom" msgid="8525960257804213846">"Personalizado"</string>
-    <string name="emailTypeHome" msgid="449227236140433919">"Residencial"</string>
+    <string name="emailTypeHome" msgid="449227236140433919">"Casa"</string>
     <string name="emailTypeWork" msgid="3548058059601149973">"Comercial"</string>
     <string name="emailTypeOther" msgid="2923008695272639549">"Outros"</string>
     <string name="emailTypeMobile" msgid="119919005321166205">"Celular"</string>
     <string name="postalTypeCustom" msgid="8903206903060479902">"Personalizado"</string>
-    <string name="postalTypeHome" msgid="8165756977184483097">"Residencial"</string>
+    <string name="postalTypeHome" msgid="8165756977184483097">"Casa"</string>
     <string name="postalTypeWork" msgid="5268172772387694495">"Comercial"</string>
     <string name="postalTypeOther" msgid="2726111966623584341">"Outros"</string>
     <string name="imTypeCustom" msgid="2074028755527826046">"Personalizado"</string>
-    <string name="imTypeHome" msgid="6241181032954263892">"Residencial"</string>
+    <string name="imTypeHome" msgid="6241181032954263892">"Casa"</string>
     <string name="imTypeWork" msgid="1371489290242433090">"Comercial"</string>
     <string name="imTypeOther" msgid="5377007495735915478">"Outros"</string>
     <string name="imProtocolCustom" msgid="6919453836618749992">"Personalizado"</string>
@@ -1257,7 +1257,7 @@
     <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"Acessório de áudio analógico detectado"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"O dispositivo anexo não é compatível com esse smartphone. Toque para saber mais."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Depuração USB conectada"</string>
-    <string name="adb_active_notification_message" msgid="7463062450474107752">"Toque para desativar a depuração USB"</string>
+    <string name="adb_active_notification_message" msgid="7463062450474107752">"Toque para desativar a depuração USB."</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"Selecione para desativar a depuração USB."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Gerando relatório do bug..."</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Compartilhar relatório do bug?"</string>
@@ -1369,8 +1369,8 @@
     <string name="no_file_chosen" msgid="6363648562170759465">"Nenhum arquivo escolhido"</string>
     <string name="reset" msgid="2448168080964209908">"Redefinir"</string>
     <string name="submit" msgid="1602335572089911941">"Enviar"</string>
-    <string name="car_mode_disable_notification_title" msgid="5704265646471239078">"O app de direção está em execução"</string>
-    <string name="car_mode_disable_notification_message" msgid="7647248420931129377">"Toque para sair do app de direção."</string>
+    <string name="car_mode_disable_notification_title" msgid="5704265646471239078">"O app para carro está sendo usado"</string>
+    <string name="car_mode_disable_notification_message" msgid="7647248420931129377">"Toque para sair do app para carro."</string>
     <string name="tethered_notification_title" msgid="3146694234398202601">"Vínculo ou ponto de acesso ativo"</string>
     <string name="tethered_notification_message" msgid="2113628520792055377">"Toque para configurar."</string>
     <string name="disable_tether_notification_title" msgid="7526977944111313195">"Tethering desativado"</string>

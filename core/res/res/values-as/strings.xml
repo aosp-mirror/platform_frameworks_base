@@ -1195,7 +1195,7 @@
     <string name="wifi_connect_alert_message" msgid="6451273376815958922">"%1$s এপ্লিকেশ্বনটোৱে ৱাই-ফাই নেটৱৰ্ক %2$sৰ সৈতে সংযুক্ত হ\'ব বিচাৰিছে"</string>
     <string name="wifi_connect_default_application" msgid="7143109390475484319">"এপ্লিকেশ্বন"</string>
     <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"ৱাই-ফাই ডাইৰেক্ট"</string>
-    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"ৱাই-ফাই ডাইৰেক্ট আৰম্ভ কৰক। এই কার্যই ৱাই-ফাই ক্লাইণ্ট/হ\'টস্প\'ট অফ কৰিব।"</string>
+    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"ৱাই-ফাই ডাইৰেক্ট আৰম্ভ কৰক। এই কার্যই ৱাই-ফাই ক্লাইণ্ট/হটস্পট অফ কৰিব।"</string>
     <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"ৱাই-ফাই ডাইৰেক্ট আৰম্ভ কৰিব পৰা নগ\'ল।"</string>
     <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"ৱাই-ফাই ডাইৰেক্ট অন হৈ আছে"</string>
     <string name="wifi_p2p_enabled_notification_message" msgid="8064677407830620023">"ছেটিংসমূহৰ বাবে টিপক"</string>
@@ -1776,7 +1776,7 @@
     <string name="importance_from_user" msgid="7318955817386549931">"এই জাননীবোৰৰ গুৰুত্ব আপুনি ছেট কৰব লাগিব।"</string>
     <string name="importance_from_person" msgid="9160133597262938296">"এই কার্যৰ সৈতে জড়িত থকা লোকসকলক ভিত্তি কৰি এইয়া গুৰুত্বপূর্ণ বুলি বিবেচনা কৰা হৈছ।"</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"<xliff:g id="APP">%1$s</xliff:g> ক <xliff:g id="ACCOUNT">%2$s</xliff:g>ৰ জৰিয়তে নতুন ব্য়ৱহাৰকাৰী সৃষ্টি কৰিবলৈ অনুমতি দিবনে?"</string>
-    <string name="user_creation_adding" msgid="4482658054622099197">"<xliff:g id="APP">%1$s</xliff:g>ক <xliff:g id="ACCOUNT">%2$s</xliff:g>ৰ (এই একাউন্টৰ এজন ব্য়ৱহাৰকাৰী ইতিমধ্য়ে আছে) জৰিয়তে নতুন ব্য়ৱহাৰকাৰী সৃষ্টি কৰিবলৈ অনুমতি দিবনে?"</string>
+    <string name="user_creation_adding" msgid="4482658054622099197">"<xliff:g id="APP">%1$s</xliff:g>ক <xliff:g id="ACCOUNT">%2$s</xliff:g>ৰ (এই একাউন্টৰ এজন ব্য়ৱহাৰকাৰী ইতিমধ্যে আছে) জৰিয়তে নতুন ব্য়ৱহাৰকাৰী সৃষ্টি কৰিবলৈ অনুমতি দিবনে?"</string>
     <string name="language_selection_title" msgid="2680677278159281088">"ভাষা যোগ কৰক"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"অঞ্চলৰ অগ্ৰাধিকাৰ"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"ভাষাৰ নাম লিখক"</string>

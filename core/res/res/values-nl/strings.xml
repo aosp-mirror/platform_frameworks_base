@@ -305,7 +305,7 @@
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"\'Verkennen via aanraking\' inschakelen"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"Aangetikte items worden hardop benoemd en het scherm kan worden verkend via gebaren."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Tekst observeren die je typt"</string>
-    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Omvat persoonlijke gegevens zoals creditcardnummers en wachtwoorden."</string>
+    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Omvat persoonsgegevens zoals creditcardnummers en wachtwoorden."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Schermvergroting bedienen"</string>
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Het zoomniveau en de positionering van het scherm bedienen."</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Gebaren uitvoeren"</string>
@@ -1125,7 +1125,7 @@
     <string name="dump_heap_notification" msgid="2618183274836056542">"<xliff:g id="PROC">%1$s</xliff:g> heeft geheugenlimiet overschreden"</string>
     <string name="dump_heap_notification_detail" msgid="3993078784053054141">"Heap dump verzameld. Tik om te delen."</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"Heap dump delen?"</string>
-    <string name="dump_heap_text" msgid="4809417337240334941">"Het proces <xliff:g id="PROC">%1$s</xliff:g> heeft de procesgeheugenlimiet overschreden met <xliff:g id="SIZE">%2$s</xliff:g>. Een heap dump is voor u beschikbaar om te delen met de betreffende ontwikkelaar. Let op: Deze heap dump kan persoonlijke gegevens bevatten waartoe de app toegang heeft."</string>
+    <string name="dump_heap_text" msgid="4809417337240334941">"Het proces <xliff:g id="PROC">%1$s</xliff:g> heeft de procesgeheugenlimiet overschreden met <xliff:g id="SIZE">%2$s</xliff:g>. Een heap dump is voor u beschikbaar om te delen met de betreffende ontwikkelaar. Let op: Deze heap dump kan persoonsgegevens bevatten waartoe de app toegang heeft."</string>
     <string name="sendText" msgid="5209874571959469142">"Een actie voor tekst selecteren"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"Belvolume"</string>
     <string name="volume_music" msgid="5421651157138628171">"Mediavolume"</string>

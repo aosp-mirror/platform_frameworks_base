@@ -588,7 +588,7 @@
     <string name="policydesc_resetPassword" msgid="1278323891710619128">"Change the screen lock."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Lock the screen"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Control how and when the screen locks."</string>
-    <string name="policylab_wipeData" msgid="3910545446758639713">"Erase all data"</string>
+    <string name="policylab_wipeData" msgid="3910545446758639713">"Delete all data"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Erase the tablet\'s data without warning by performing a factory data reset."</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Erase the TV\'s data without warning by performing a factory data reset."</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Erase the phone\'s data without warning by performing a factory data reset."</string>

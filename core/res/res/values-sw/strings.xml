@@ -350,7 +350,7 @@
     <string name="permdesc_enableCarMode" msgid="4853187425751419467">"Inaruhusu programu kuwawezesha mtindo wa gari."</string>
     <string name="permlab_killBackgroundProcesses" msgid="3914026687420177202">"funga programu zingine"</string>
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"Inaruhusu programu kukamilisha michakato ya usuli ya programu nyingine. Hii inaweza kusababisha programu nyingine kukoma kufanyakazi."</string>
-    <string name="permlab_systemAlertWindow" msgid="7238805243128138690">"Pogramu hii inaweza kuonekana juu ya programu zingine"</string>
+    <string name="permlab_systemAlertWindow" msgid="7238805243128138690">"Programu hii inaweza kuonekana juu ya programu zingine"</string>
     <string name="permdesc_systemAlertWindow" msgid="2393776099672266188">"Programu hii inaweza kuonekana juu ya programu zingine au sehemu zingine za skrini. Hii huenda ikaathiri matumizi ya kawaida ya programu na kubadilisha jinsi ambavyo programu zingine zinavyoonekana."</string>
     <string name="permlab_runInBackground" msgid="7365290743781858803">"tumia chini chini"</string>
     <string name="permdesc_runInBackground" msgid="7370142232209999824">"Programu hii inaweza kutumika chini chini. Hali hii inaweza kumaliza chaji ya betri haraka."</string>
@@ -395,9 +395,9 @@
     <string name="permdesc_readCalendar" product="tv" msgid="8837931557573064315">"Programu hii inaweza kusoma matukio yote ya kalenda yaliyohifadhiwa kwenye runinga yako na kushiriki au kuhifadhi data yako ya kalenda."</string>
     <string name="permdesc_readCalendar" product="default" msgid="4373978642145196715">"Programu hii inaweza kusoma matukio yote ya kalenda yaliyohifadhiwa kwenye simu yako na kushiriki au kuhifadhi data yako ya kalenda."</string>
     <string name="permlab_writeCalendar" msgid="8438874755193825647">"ongeza au rekebisha matukio ya kalenda na utume barua pepe kwa wageni bila ufahamu wa mmiliki"</string>
-    <string name="permdesc_writeCalendar" product="tablet" msgid="1675270619903625982">"Programu hii inaweza kuongeza, kuondoa au kubadilisha matukio kwenye kompyuta yako kibao. Pogramu hii inaweza kutuma ujumbe unaoonekana kuwa umetoka kwa wamiliki wa kalenda au kurekebisha matukio bila kuwataarifu wamiliki."</string>
-    <string name="permdesc_writeCalendar" product="tv" msgid="9017809326268135866">"Programu hii inaweza kuongeza, kuondoa au kubadilisha matukio kwenye runinga yako. Pogramu hii inaweza kutuma ujumbe unaoonekana kuwa umetoka kwa wamiliki wa kalenda au kurekebisha matukio bila kuwataarifu wamiliki."</string>
-    <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"Programu hii inaweza kuongeza, kuondoa au kubadilisha matukio kwenye simu yako. Pogramu hii inaweza kutuma ujumbe unaoonekana kuwa umetoka kwa wamiliki wa kalenda au kurekebisha matukio bila kuwataarifu wamiliki."</string>
+    <string name="permdesc_writeCalendar" product="tablet" msgid="1675270619903625982">"Programu hii inaweza kuongeza, kuondoa au kubadilisha matukio kwenye kompyuta yako kibao. Programu hii inaweza kutuma ujumbe unaoonekana kuwa umetoka kwa wamiliki wa kalenda au kurekebisha matukio bila kuwataarifu wamiliki."</string>
+    <string name="permdesc_writeCalendar" product="tv" msgid="9017809326268135866">"Programu hii inaweza kuongeza, kuondoa au kubadilisha matukio kwenye runinga yako. Programu hii inaweza kutuma ujumbe unaoonekana kuwa umetoka kwa wamiliki wa kalenda au kurekebisha matukio bila kuwataarifu wamiliki."</string>
+    <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"Programu hii inaweza kuongeza, kuondoa au kubadilisha matukio kwenye simu yako. Programu hii inaweza kutuma ujumbe unaoonekana kuwa umetoka kwa wamiliki wa kalenda au kurekebisha matukio bila kuwataarifu wamiliki."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"fikia amri za ziada za mtoa huduma ya mahali"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Ruhusu programu kufikia amri za ziada za mtoa huduma za mahali. Hii huenda ikaruhusu programu ikatize matumizi ya GPS au vyanzo vingine vya eneo."</string>
     <string name="permlab_accessFineLocation" msgid="251034415460950944">"fikia mahali halisi (inategemea mtandao na GPS)"</string>
@@ -452,7 +452,7 @@
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"Inaruhusu programu kupata orodha ya akaunti zinazojulikana kwa simu. Hii inaweza kujumuisha akaunti zozote zilizoundwa na programu ambazo umesakinisha."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"kuona mitandao"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"Huruhusu programu kuona taarifa kuhusu miunganisho ya mtandao kama vile mitandao iliyopo na iliyounganishwa."</string>
-    <string name="permlab_createNetworkSockets" msgid="7934516631384168107">"pata ufikiaji kamili wa mtandao"</string>
+    <string name="permlab_createNetworkSockets" msgid="7934516631384168107">"kupata ufikiaji kamili wa mtandao"</string>
     <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"Inaruhusu programu kuunda soketi za mtandao na kutumia itifaki za mtandao maalum. Kivinajri na programu nyingine zilizotolewa zinamaanisha kutuma data kwenye mtandao, kwa hivyo kibali hiki hakihitajiki kutuma data kwenye mtandao."</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"kubadilisha muunganisho wa mtandao"</string>
     <string name="permdesc_changeNetworkState" msgid="6789123912476416214">"Inaruhusu programu kubadilisha hali ya muunganisho wa mtandao."</string>
@@ -520,7 +520,7 @@
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"kusoma takwimu za usawazishaji"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Inaruhusu programu kusoma takwimu za upatanishi za akaunti, ikiwa ni pamoja na historia ya matukio ya upatanishi na kiasi cha data kimepatanishwa."</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"kusoma maudhui yaliyo kwenye hifadhi yako ya USB"</string>
-    <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"soma maudhui ya kadi yako ya SD"</string>
+    <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"kusoma maudhui ya kadi yako ya SD"</string>
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"Huruhusu programu kusoma maudhui ya hifadhi ya USB."</string>
     <string name="permdesc_sdcardRead" product="default" msgid="2607362473654975411">"Huruhusu programu kusoma maudhui ya kadi yako ya SD."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"kurekebisha au kufuta maudhui ya hifadhi yako ya USB"</string>
@@ -552,7 +552,7 @@
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"unganisha kwenye huduma ya kisikilizi cha arifa"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Inaruhusu kishikilizi kuunganishwa kwenye kusano cha kiwango cha juu cha huduma ya kisikilizi cha arifa. Haipaswi kuhitajika tena kwa programu za kawaida."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"bandika kwenye huduma ya mtoa masharti"</string>
-    <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Humruhusu mmiliki kubandika kwenye kiolesura cha kiwango cha juu cha huduma ya mtoa masharti. Isihitajike kamwe kwa pogramu za kawaida."</string>
+    <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Humruhusu mmiliki kubandika kwenye kiolesura cha kiwango cha juu cha huduma ya mtoa masharti. Isihitajike kamwe kwa programu za kawaida."</string>
     <string name="permlab_bindDreamService" msgid="4153646965978563462">"shurutisha kwa huduma murua"</string>
     <string name="permdesc_bindDreamService" msgid="7325825272223347863">"Huruhusu mmiliki kushurutisha kwenye kiolesura cha kiwango cha juu cha huduma murua. Haipaswi kuhitajika kwa programu za kawaida."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"omba programu ya usakinishaji inayotolewa na mtoa huduma."</string>
