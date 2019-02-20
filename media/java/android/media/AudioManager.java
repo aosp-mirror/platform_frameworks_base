@@ -36,6 +36,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.media.audiopolicy.AudioPolicy;
 import android.media.audiopolicy.AudioPolicy.AudioPolicyFocusListener;
+import android.media.projection.MediaProjection;
 import android.media.session.MediaController;
 import android.media.session.MediaSession;
 import android.media.session.MediaSessionLegacyHelper;
@@ -3197,8 +3198,10 @@ public class AudioManager {
         }
         final IAudioService service = getService();
         try {
+            MediaProjection projection = policy.getMediaProjection();
             String regId = service.registerAudioPolicy(policy.getConfig(), policy.cb(),
-                    policy.hasFocusListener(), policy.isFocusPolicy(), policy.isVolumeController());
+                    policy.hasFocusListener(), policy.isFocusPolicy(), policy.isVolumeController(),
+                    projection == null ? null : projection.getProjection());
             if (regId == null) {
                 return ERROR;
             } else {

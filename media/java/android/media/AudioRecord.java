@@ -26,6 +26,7 @@ import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityThread;
 import android.media.audiopolicy.AudioMix;
 import android.media.audiopolicy.AudioPolicy;
+import android.media.projection.MediaProjection;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -648,7 +649,9 @@ public class AudioRecord implements AudioRouting, MicrophoneDirection,
 
         private AudioRecord buildAudioPlaybackCaptureRecord() {
             AudioMix audioMix = mAudioPlaybackCaptureConfiguration.createAudioMix(mFormat);
+            MediaProjection projection = mAudioPlaybackCaptureConfiguration.getMediaProjection();
             AudioPolicy audioPolicy = new AudioPolicy.Builder(/*context=*/ null)
+                    .setMediaProjection(projection)
                     .addMix(audioMix).build();
             AudioRecord record = audioPolicy.createAudioRecordSink(audioMix);
             record.unregisterAudioPolicyOnRelease(audioPolicy);
