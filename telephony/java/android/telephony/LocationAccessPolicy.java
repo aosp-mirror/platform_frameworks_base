@@ -42,7 +42,7 @@ import java.util.List;
 public final class LocationAccessPolicy {
     private static final String TAG = "LocationAccessPolicy";
     private static final boolean DBG = false;
-    public static final int MAX_SDK_FOR_ANY_ENFORCEMENT = Build.VERSION_CODES.P;
+    public static final int MAX_SDK_FOR_ANY_ENFORCEMENT = Build.VERSION_CODES.CUR_DEVELOPMENT;
 
     public enum LocationPermissionResult {
         ALLOWED,
@@ -198,14 +198,14 @@ public final class LocationAccessPolicy {
         // If the app fails for some reason, see if it should be allowed to proceed.
         if (minSdkVersion > MAX_SDK_FOR_ANY_ENFORCEMENT) {
             String errorMsg = "Allowing " + query.callingPackage + " " + locationTypeForLog
-                    + " because we're not enforcing API " + query.minSdkVersionForFine + " yet."
+                    + " because we're not enforcing API " + minSdkVersion + " yet."
                     + " Please fix this app because it will break in the future. Called from "
                     + query.method;
             logError(context, errorMsg);
             return null;
         } else if (!isAppAtLeastSdkVersion(context, query.callingPackage, minSdkVersion)) {
             String errorMsg = "Allowing " + query.callingPackage + " " + locationTypeForLog
-                    + " because it doesn't target API " + query.minSdkVersionForFine + " yet."
+                    + " because it doesn't target API " + minSdkVersion + " yet."
                     + " Please fix this app. Called from " + query.method;
             logError(context, errorMsg);
             return null;
