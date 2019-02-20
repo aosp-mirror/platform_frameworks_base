@@ -34,6 +34,7 @@
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"ပင်နံပါတ် မှားနေသည်။"</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"ကတ် မမှန်ကန်ပါ။"</string>
     <string name="keyguard_charged" msgid="3316115607283493413">"အားအပြည့်သွင်းထားသည်"</string>
+    <string name="keyguard_plugged_in_wireless" msgid="3004717438401575235">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ကြိုးမဲ့ အားသွင်းနေသည်"</string>
     <string name="keyguard_plugged_in" msgid="3161102098900158923">"<xliff:g id="PERCENTAGE">%s</xliff:g> • အားသွင်းနေသည်"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="3684592786276709342">"<xliff:g id="PERCENTAGE">%s</xliff:g> • အမြန်အားသွင်းနေသည်"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="509533586841478405">"<xliff:g id="PERCENTAGE">%s</xliff:g> • နှေးကွေးစွာ အားသွင်းနေသည်"</string>
@@ -150,7 +151,10 @@
       <item quantity="other">ဆင်းမ်ကဒ်သည် ယခု ပိတ်သွားပါပြီ။ ရှေ့ဆက်ရန် PUK ကုဒ်ကို ထည့်ပါ။ ဆင်းမ်ကဒ် အပြီးပိတ်မသွားမီ သင့်တွင် <xliff:g id="_NUMBER_1">%d</xliff:g> ကြိမ် စမ်းသပ်ခွင့် ကျန်ပါသေးသည်။ အသေးစိတ်အချက်များအတွက် ဝန်ဆောင်မှုပေးသူကို ဆက်သွယ်ပါ။</item>
       <item quantity="one">ဆင်းမ်ကဒ်သည် ယခု ပိတ်သွားပါပြီ။ ရှေ့ဆက်ရန် PUK ကုဒ်ကို ထည့်ပါ။ ဆင်းမ်ကဒ် အပြီးပိတ်မသွားမီ သင့်တွင် <xliff:g id="_NUMBER_0">%d</xliff:g> ကြိမ် စမ်းသပ်ခွင့် ကျန်ပါသေးသည်။ အသေးစိတ်အချက်များအတွက် ဝန်ဆောင်မှုပေးသူကို ဆက်သွယ်ပါ။</item>
     </plurals>
-    <!-- no translation found for type_clock_header (6782840450655632763) -->
+    <plurals name="type_clock_header" formatted="false" msgid="6782840450655632763">
+      <item quantity="other">"<annotation name="color">"၎င်းသည်"</annotation>\n"^1\n^2 ဖြစ်သည်</item>
+      <item quantity="one">"<annotation name="color">"၎င်းသည်"</annotation>\n"^1\n^2 ဖြစ်သည်</item>
+    </plurals>
   <string-array name="type_clock_hours">
     <item msgid="3543074812389379830">"ဆယ့်နှစ်"</item>
     <item msgid="7389464214252023751">"တစ်"</item>

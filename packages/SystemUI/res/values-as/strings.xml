@@ -245,8 +245,8 @@
     <string name="accessibility_quick_settings_flashlight_changed_on" msgid="6531793301533894686">"ফ্লাশ্বলাইট অন কৰা হ’ল।"</string>
     <string name="accessibility_quick_settings_color_inversion_changed_off" msgid="4406577213290173911">"ৰং বিপৰীতকৰণ অফ কৰা হ’ল।"</string>
     <string name="accessibility_quick_settings_color_inversion_changed_on" msgid="6897462320184911126">"ৰং বিপৰীতকৰণ অন কৰা হ’ল।"</string>
-    <string name="accessibility_quick_settings_hotspot_changed_off" msgid="5004708003447561394">"ম’বাইল হ\'টস্প\'ট  অফ কৰা হ’ল।"</string>
-    <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2890951609226476206">"ম’বাইল হ\'টস্প\'ট  অন কৰা হ’ল।"</string>
+    <string name="accessibility_quick_settings_hotspot_changed_off" msgid="5004708003447561394">"ম’বাইল হটস্পট  অফ কৰা হ’ল।"</string>
+    <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2890951609226476206">"ম’বাইল হটস্পট  অন কৰা হ’ল।"</string>
     <string name="accessibility_casting_turned_off" msgid="1430668982271976172">"স্ক্ৰীণ কাষ্টিং বন্ধ কৰা হ’ল।"</string>
     <string name="accessibility_quick_settings_work_mode_off" msgid="7045417396436552890">"কৰ্মস্থান ম\'ড অফ হৈ আছে।"</string>
     <string name="accessibility_quick_settings_work_mode_on" msgid="7650588553988014341">"কৰ্মস্থান ম\'ড অন হৈ আছে।"</string>
@@ -341,7 +341,7 @@
     <string name="quick_settings_connected_battery_level" msgid="4136051440381328892">"সংযুক্ত, বেটাৰি <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="quick_settings_connecting" msgid="47623027419264404">"সংযোগ কৰি থকা হৈছে..."</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"টেডাৰ কৰি থকা হৈছে"</string>
-    <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"হ\'টস্প\'ট"</string>
+    <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"হটস্পট"</string>
     <string name="quick_settings_hotspot_secondary_label_transient" msgid="8010579363691405477">"অন কৰি থকা হৈছে…"</string>
     <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="5672131949987422420">"ডেটা সঞ্চয়কাৰী অন হৈ আছে"</string>
     <plurals name="quick_settings_hotspot_secondary_label_num_devices" formatted="false" msgid="2324635800672199428">
@@ -398,6 +398,7 @@
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"সম্পূর্ণ \n নিৰৱতা"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"কেৱল\nগুৰুত্বপূৰ্ণ"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"কেৱল\nএলাৰ্মসমূহ"</string>
+    <string name="keyguard_indication_charging_time_wireless" msgid="5376059837186496558">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • বেঁতাৰৰ জৰিয়তে চ্চাৰ্জ কৰি থকা হৈছে (সম্পূৰ্ণ হ’বলৈ <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> বাকী)"</string>
     <string name="keyguard_indication_charging_time" msgid="2056340799276374421">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • চ্চাৰ্জ কৰি থকা হৈছে (সম্পূৰ্ণ হ\'বলৈ <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> বাকী)"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="7767562163577492332">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • দ্ৰুতগতিৰে চ্চাৰ্জ কৰি থকা হৈছে (সম্পূৰ্ণ হ\'বলৈ <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> বাকী)"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="3769655133567307069">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • লাহে লাহে চ্চাৰ্জ কৰি থকা হৈছে (সম্পূৰ্ণ হ\'বলৈ <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> বাকী)"</string>
@@ -578,7 +579,7 @@
     <string name="alarm_template" msgid="3980063409350522735">"<xliff:g id="WHEN">%1$s</xliff:g> বজাত"</string>
     <string name="alarm_template_far" msgid="4242179982586714810">"<xliff:g id="WHEN">%1$s</xliff:g> বজাত"</string>
     <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"ক্ষিপ্ৰ ছেটিংসমূহ, <xliff:g id="TITLE">%s</xliff:g>।"</string>
-    <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"হ\'টস্প\'ট"</string>
+    <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"হটস্পট"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"কৰ্মস্থানৰ প্ৰ\'ফাইল"</string>
     <string name="tuner_warning_title" msgid="7094689930793031682">"কিছুমানৰ বাবে আমোদজনক হয় কিন্তু সকলোৰে বাবে নহয়"</string>
     <string name="tuner_warning" msgid="8730648121973575701">"System UI Tunerএ আপোনাক Android ব্যৱহাৰকাৰী ইণ্টাৰফেইচ সলনি কৰিবলৈ আৰু নিজৰ উপযোগিতা অনুসৰি ব্যৱহাৰ কৰিবলৈ অতিৰিক্ত সুবিধা প্ৰদান কৰে। এই পৰীক্ষামূলক সুবিধাসমূহ সলনি হ\'ব পাৰে, সেইবোৰে কাম নকৰিব পাৰে বা আগন্তুক সংস্কৰণসমূহত সেইবোৰ অন্তৰ্ভুক্ত কৰা নহ’ব পাৰে। সাৱধানেৰে আগবাঢ়ক।"</string>
@@ -610,8 +611,10 @@
     <string name="notification_channel_silenced" msgid="2877199534497961942">"এই জাননী নিৰৱে দেখুওৱা হ’ব"</string>
     <string name="notification_channel_unsilenced" msgid="4790904571552394137">"এই জাননীবোৰে আপোনাক সতৰ্ক কৰিব"</string>
     <string name="inline_blocking_helper" msgid="3055064577771478591">"আপুনি সাধাৰণতে এই জাননীসমূহ অগ্ৰাহ্য কৰে। \nসেইবোৰ দেখুওৱাই থাকিব লাগিবনে?"</string>
+    <string name="inline_done_button" msgid="492513001558716452">"কৰা হ’ল"</string>
     <string name="inline_keep_showing" msgid="8945102997083836858">"এই জাননীসমূহ দেখুওৱাই থাকিব লাগিবনে?"</string>
     <string name="inline_stop_button" msgid="4172980096860941033">"জাননী বন্ধ কৰক"</string>
+    <string name="inline_deliver_silently_button" msgid="7756289895745629140">"নিৰৱে ডেলিভাৰ কৰক"</string>
     <string name="inline_block_button" msgid="8735843688021655065">"অৱৰোধ কৰক"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"দেখুওৱাই থাকক"</string>
     <string name="inline_minimize_button" msgid="966233327974702195">"সৰু কৰক"</string>
@@ -874,13 +877,13 @@
     </plurals>
     <string name="ongoing_privacy_chip_content_single_app" msgid="4479560741898690064">"<xliff:g id="APP">%1$s</xliff:g>এ আপোনাৰ <xliff:g id="TYPES_LIST">%2$s</xliff:g> ব্যৱহাৰ কৰি আছে।"</string>
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8640691753867990511">"এপ্লিকেশ্বনসমূহে আপোনাৰ <xliff:g id="TYPES_LIST">%s</xliff:g> ব্যৱহাৰ কৰি আছে।"</string>
+    <string name="ongoing_privacy_chip_in_use" msgid="5174331553211609272">"ব্যৱহাৰ হৈ আছে:"</string>
     <plurals name="ongoing_privacy_chip_content_multiple_apps_single_op" formatted="false" msgid="4871926099254314088">
       <item quantity="one"><xliff:g id="NUM_APPS_4">%1$d</xliff:g>টা এপ্লিকেশ্বনে আপোনাৰ <xliff:g id="TYPE_5">%2$s</xliff:g> ব্যৱহাৰ কৰি আছে।</item>
       <item quantity="other"><xliff:g id="NUM_APPS_4">%1$d</xliff:g>টা এপ্লিকেশ্বনে আপোনাৰ <xliff:g id="TYPE_5">%2$s</xliff:g> ব্যৱহাৰ কৰি আছে।</item>
     </plurals>
     <string name="ongoing_privacy_dialog_ok" msgid="3273300106348958308">"বুজি পালোঁ"</string>
-    <!-- no translation found for ongoing_privacy_dialog_open_settings (6773015940472748876) -->
-    <skip />
+    <string name="ongoing_privacy_dialog_open_settings" msgid="6773015940472748876">"গোপনীয়তা ছেটিং"</string>
     <string name="ongoing_privacy_dialog_single_app_title" msgid="6019646962021696632">"এপটোৱে আপোনাৰ <xliff:g id="TYPES_LIST">%s</xliff:g> ব্যৱহাৰ কৰি আছে"</string>
     <string name="ongoing_privacy_dialog_multiple_apps_title" msgid="8013356222977903365">"এপসমূহে আপোনাৰ <xliff:g id="TYPES_LIST">%s</xliff:g> ব্যৱহাৰ কৰি আছে"</string>
     <string name="ongoing_privacy_dialog_separator" msgid="6854860652480837439">", "</string>
@@ -895,14 +898,9 @@
     <string name="sensor_privacy_mode" msgid="8982771253020769598">"ছেন্সৰ অফ হৈ আছে"</string>
     <string name="device_services" msgid="1191212554435440592">"ডিভাইচ সেৱা"</string>
     <string name="music_controls_no_title" msgid="5236895307087002011">"কোনো শিৰোনাম নাই"</string>
-    <!-- no translation found for bubbles_deep_link_button_description (8895837143057564517) -->
-    <skip />
-    <!-- no translation found for bubbles_settings_button_description (1940331766151865776) -->
-    <skip />
-    <!-- no translation found for bubbles_prompt (2684301469286150276) -->
-    <skip />
-    <!-- no translation found for no_bubbles (7173621233904687258) -->
-    <skip />
-    <!-- no translation found for yes_bubbles (668809525728633841) -->
-    <skip />
+    <string name="bubbles_deep_link_button_description" msgid="8895837143057564517">"<xliff:g id="APP_NAME">%1$s</xliff:g> খোলক"</string>
+    <string name="bubbles_settings_button_description" msgid="1940331766151865776">"<xliff:g id="APP_NAME">%1$s</xliff:g>ৰ জাননী ছেটিং খোলক"</string>
+    <string name="bubbles_prompt" msgid="2684301469286150276">"এই এপক বাবল দেখুৱাবলৈ অনুমতি দিবনে?"</string>
+    <string name="no_bubbles" msgid="7173621233904687258">"অৱৰোধ কৰক"</string>
+    <string name="yes_bubbles" msgid="668809525728633841">"অনুমতি দিয়ক"</string>
 </resources>

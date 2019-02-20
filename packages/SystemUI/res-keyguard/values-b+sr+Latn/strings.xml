@@ -34,6 +34,7 @@
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"PIN kôd je netačan."</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"Nevažeća kartica."</string>
     <string name="keyguard_charged" msgid="3316115607283493413">"Napunjena je u potpunosti"</string>
+    <string name="keyguard_plugged_in_wireless" msgid="3004717438401575235">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Bežično punjenje"</string>
     <string name="keyguard_plugged_in" msgid="3161102098900158923">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Puni se"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="3684592786276709342">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Brzo se puni"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="509533586841478405">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Sporo se puni"</string>
@@ -158,7 +159,11 @@
       <item quantity="few">SIM je sada onemogućen. Unesite PUK kôd da biste nastavili. Imate još <xliff:g id="_NUMBER_1">%d</xliff:g> pokušaja pre nego što SIM postane trajno neupotrebljiv. Detaljne informacije potražite od mobilnog operatera.</item>
       <item quantity="other">SIM je sada onemogućen. Unesite PUK kôd da biste nastavili. Imate još <xliff:g id="_NUMBER_1">%d</xliff:g> pokušaja pre nego što SIM postane trajno neupotrebljiv. Detaljne informacije potražite od mobilnog operatera.</item>
     </plurals>
-    <!-- no translation found for type_clock_header (6782840450655632763) -->
+    <plurals name="type_clock_header" formatted="false" msgid="6782840450655632763">
+      <item quantity="one">"<annotation name="color">"Sada je"</annotation>\n"^1\n^2</item>
+      <item quantity="few">"<annotation name="color">"Sada je"</annotation>\n"^1\n^2</item>
+      <item quantity="other">"<annotation name="color">"Sada je"</annotation>\n"^1\n^2</item>
+    </plurals>
   <string-array name="type_clock_hours">
     <item msgid="3543074812389379830">"dvanaest"</item>
     <item msgid="7389464214252023751">"jedan"</item>

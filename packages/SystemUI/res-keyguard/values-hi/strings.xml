@@ -34,6 +34,7 @@
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"गलत पिन कोड."</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"गलत कार्ड."</string>
     <string name="keyguard_charged" msgid="3316115607283493413">"पूरी तरह चार्ज हो गया"</string>
+    <string name="keyguard_plugged_in_wireless" msgid="3004717438401575235">"<xliff:g id="PERCENTAGE">%s</xliff:g> • वायरलेस तरीके से चार्ज हो रहा है"</string>
     <string name="keyguard_plugged_in" msgid="3161102098900158923">"<xliff:g id="PERCENTAGE">%s</xliff:g> • चार्ज हो रहा है"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="3684592786276709342">"<xliff:g id="PERCENTAGE">%s</xliff:g> • तेज़ चार्ज हो रहा है"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="509533586841478405">"<xliff:g id="PERCENTAGE">%s</xliff:g> • धीरे चार्ज हो रहा है"</string>
@@ -150,7 +151,10 @@
       <item quantity="one">सिम बंद कर दिया गया है. जारी रखने के लिए PUK कोड डालें. आपके पास <xliff:g id="_NUMBER_1">%d</xliff:g> मौके बचे हैं, उसके बाद, सिम हमेशा के लिए काम करना बंद कर देगा. जानकारी के लिए, मोबाइल और इंटरनेट सेवा देने वाली कंपनी से संपर्क करें.</item>
       <item quantity="other">सिम बंद कर दिया गया है. जारी रखने के लिए PUK कोड डालें. आपके पास <xliff:g id="_NUMBER_1">%d</xliff:g> मौके बचे हैं, उसके बाद, सिम हमेशा के लिए काम करना बंद कर देगा. जानकारी के लिए, मोबाइल और इंटरनेट सेवा देने वाली कंपनी से संपर्क करें.</item>
     </plurals>
-    <!-- no translation found for type_clock_header (6782840450655632763) -->
+    <plurals name="type_clock_header" formatted="false" msgid="6782840450655632763">
+      <item quantity="one">"<annotation name="color">"अभी"</annotation>\n"^1\n^2 बजे हैं</item>
+      <item quantity="other">"<annotation name="color">"अभी"</annotation>\n"^1\n^2 बजे हैं</item>
+    </plurals>
   <string-array name="type_clock_hours">
     <item msgid="3543074812389379830">"बारह"</item>
     <item msgid="7389464214252023751">"एक"</item>

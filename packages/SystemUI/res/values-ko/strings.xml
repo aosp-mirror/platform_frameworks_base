@@ -398,6 +398,7 @@
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"모두\n차단"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"중요 알림만\n허용"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"알람만\n"</string>
+    <string name="keyguard_indication_charging_time_wireless" msgid="5376059837186496558">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • 무선 충전 중(<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> 후 충전 완료)"</string>
     <string name="keyguard_indication_charging_time" msgid="2056340799276374421">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • 충전 중(<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> 후 충전 완료)"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="7767562163577492332">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • 고속 충전 중(<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> 후 충전 완료)"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="3769655133567307069">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • 저속 충전 중(<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> 후 충전 완료)"</string>
@@ -610,8 +611,10 @@
     <string name="notification_channel_silenced" msgid="2877199534497961942">"알림이 소리 없이 표시됩니다."</string>
     <string name="notification_channel_unsilenced" msgid="4790904571552394137">"알림이 전송됩니다."</string>
     <string name="inline_blocking_helper" msgid="3055064577771478591">"보통 이 알림을 닫았습니다. \n알림을 계속 표시하시겠습니까?"</string>
+    <string name="inline_done_button" msgid="492513001558716452">"완료"</string>
     <string name="inline_keep_showing" msgid="8945102997083836858">"이 알림을 계속 표시하시겠습니까?"</string>
     <string name="inline_stop_button" msgid="4172980096860941033">"알림 중지"</string>
+    <string name="inline_deliver_silently_button" msgid="7756289895745629140">"무음으로 알림"</string>
     <string name="inline_block_button" msgid="8735843688021655065">"차단"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"계속 표시하기"</string>
     <string name="inline_minimize_button" msgid="966233327974702195">"최소화"</string>
@@ -874,13 +877,13 @@
     </plurals>
     <string name="ongoing_privacy_chip_content_single_app" msgid="4479560741898690064">"<xliff:g id="APP">%1$s</xliff:g>이(가) <xliff:g id="TYPES_LIST">%2$s</xliff:g>을(를) 사용 중입니다."</string>
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8640691753867990511">"애플리케이션이 <xliff:g id="TYPES_LIST">%s</xliff:g>을(를) 사용 중입니다."</string>
+    <string name="ongoing_privacy_chip_in_use" msgid="5174331553211609272">"사용:"</string>
     <plurals name="ongoing_privacy_chip_content_multiple_apps_single_op" formatted="false" msgid="4871926099254314088">
       <item quantity="other">애플리케이션 <xliff:g id="NUM_APPS_4">%1$d</xliff:g>개가 <xliff:g id="TYPE_5">%2$s</xliff:g>을(를) 사용하고 있습니다.</item>
       <item quantity="one">애플리케이션 <xliff:g id="NUM_APPS_0">%1$d</xliff:g>개가 <xliff:g id="TYPE_1">%2$s</xliff:g>을(를) 사용하고 있습니다.</item>
     </plurals>
     <string name="ongoing_privacy_dialog_ok" msgid="3273300106348958308">"확인"</string>
-    <!-- no translation found for ongoing_privacy_dialog_open_settings (6773015940472748876) -->
-    <skip />
+    <string name="ongoing_privacy_dialog_open_settings" msgid="6773015940472748876">"개인정보 보호 설정"</string>
     <string name="ongoing_privacy_dialog_single_app_title" msgid="6019646962021696632">"<xliff:g id="TYPES_LIST">%s</xliff:g>을(를) 사용 중인 앱"</string>
     <string name="ongoing_privacy_dialog_multiple_apps_title" msgid="8013356222977903365">"<xliff:g id="TYPES_LIST">%s</xliff:g>을(를) 사용 중인 앱"</string>
     <string name="ongoing_privacy_dialog_separator" msgid="6854860652480837439">", "</string>
@@ -895,14 +898,9 @@
     <string name="sensor_privacy_mode" msgid="8982771253020769598">"센서 사용 안함"</string>
     <string name="device_services" msgid="1191212554435440592">"기기 서비스"</string>
     <string name="music_controls_no_title" msgid="5236895307087002011">"제목 없음"</string>
-    <!-- no translation found for bubbles_deep_link_button_description (8895837143057564517) -->
-    <skip />
-    <!-- no translation found for bubbles_settings_button_description (1940331766151865776) -->
-    <skip />
-    <!-- no translation found for bubbles_prompt (2684301469286150276) -->
-    <skip />
-    <!-- no translation found for no_bubbles (7173621233904687258) -->
-    <skip />
-    <!-- no translation found for yes_bubbles (668809525728633841) -->
-    <skip />
+    <string name="bubbles_deep_link_button_description" msgid="8895837143057564517">"<xliff:g id="APP_NAME">%1$s</xliff:g> 열기"</string>
+    <string name="bubbles_settings_button_description" msgid="1940331766151865776">"<xliff:g id="APP_NAME">%1$s</xliff:g> 알림 설정 열기"</string>
+    <string name="bubbles_prompt" msgid="2684301469286150276">"이 앱에서 풍선을 허용할까요?"</string>
+    <string name="no_bubbles" msgid="7173621233904687258">"차단"</string>
+    <string name="yes_bubbles" msgid="668809525728633841">"허용"</string>
 </resources>

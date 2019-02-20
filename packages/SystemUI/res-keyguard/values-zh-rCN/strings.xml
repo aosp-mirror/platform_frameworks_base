@@ -34,6 +34,7 @@
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"PIN 码有误。"</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"SIM 卡无效。"</string>
     <string name="keyguard_charged" msgid="3316115607283493413">"充电完成"</string>
+    <string name="keyguard_plugged_in_wireless" msgid="3004717438401575235">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 正在无线充电"</string>
     <string name="keyguard_plugged_in" msgid="3161102098900158923">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 正在充电"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="3684592786276709342">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 正在快速充电"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="509533586841478405">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 正在慢速充电"</string>
@@ -150,7 +151,10 @@
       <item quantity="other">SIM 卡现已停用，请输入 PUK 码继续使用。您还可以尝试 <xliff:g id="_NUMBER_1">%d</xliff:g> 次。如果仍不正确，该 SIM 卡将永远无法使用。有关详情，请联系您的运营商。</item>
       <item quantity="one">SIM 卡现已停用，请输入 PUK 码继续使用。您还可以尝试 <xliff:g id="_NUMBER_0">%d</xliff:g> 次。如果仍不正确，该 SIM 卡将永远无法使用。有关详情，请联系您的运营商。</item>
     </plurals>
-    <!-- no translation found for type_clock_header (6782840450655632763) -->
+    <plurals name="type_clock_header" formatted="false" msgid="6782840450655632763">
+      <item quantity="other">"<annotation name="color">"时间是"</annotation>\n"^1\n^2</item>
+      <item quantity="one">"<annotation name="color">"时间是"</annotation>\n"^1\n^2</item>
+    </plurals>
   <string-array name="type_clock_hours">
     <item msgid="3543074812389379830">"十二"</item>
     <item msgid="7389464214252023751">"一"</item>

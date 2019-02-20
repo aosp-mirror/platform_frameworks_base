@@ -34,6 +34,7 @@
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"رمز رقم التعريف الشخصي غير صحيح."</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"بطاقة غير صالحة."</string>
     <string name="keyguard_charged" msgid="3316115607283493413">"تم شحن البطارية بالكامل"</string>
+    <string name="keyguard_plugged_in_wireless" msgid="3004717438401575235">"<xliff:g id="PERCENTAGE">%s</xliff:g> • جارٍ الشحن لاسلكيًا"</string>
     <string name="keyguard_plugged_in" msgid="3161102098900158923">"<xliff:g id="PERCENTAGE">%s</xliff:g> • جارٍ الشحن"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="3684592786276709342">"<xliff:g id="PERCENTAGE">%s</xliff:g> • جارٍ الشحن سريعًا"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="509533586841478405">"<xliff:g id="PERCENTAGE">%s</xliff:g> • جارٍ الشحن ببطء"</string>
@@ -182,7 +183,14 @@
       <item quantity="other">‏تم إيقاف شريحة SIM الآن. أدخل رمز PUK للمتابعة، وتتبقى لديك <xliff:g id="_NUMBER_1">%d</xliff:g> محاولة قبل أن تصبح شريحة SIM غير صالحة للاستخدام نهائيًا. ويمكنك الاتصال بمشغل شبكة الجوّال لمعرفة التفاصيل.</item>
       <item quantity="one">‏تم إيقاف شريحة SIM الآن. أدخل رمز PUK للمتابعة، وتتبقى لديك محاولة واحدة (<xliff:g id="_NUMBER_0">%d</xliff:g>) قبل أن تصبح شريحة SIM غير صالحة للاستخدام نهائيًا. ويمكنك الاتصال بمشغل شبكة الجوّال لمعرفة التفاصيل.</item>
     </plurals>
-    <!-- no translation found for type_clock_header (6782840450655632763) -->
+    <plurals name="type_clock_header" formatted="false" msgid="6782840450655632763">
+      <item quantity="zero">"<annotation name="color">"الساعة الآن"</annotation>\n"^1\n^2</item>
+      <item quantity="two">"<annotation name="color">"الساعة الآن"</annotation>\n"^1\n^2</item>
+      <item quantity="few">"<annotation name="color">"الساعة الآن"</annotation>\n"^1\n^2</item>
+      <item quantity="many">"<annotation name="color">"الساعة الآن"</annotation>\n"^1\n^2</item>
+      <item quantity="other">"<annotation name="color">"الساعة الآن"</annotation>\n"^1\n^2</item>
+      <item quantity="one">"<annotation name="color">"الساعة الآن"</annotation>\n"^1\n^2</item>
+    </plurals>
   <string-array name="type_clock_hours">
     <item msgid="3543074812389379830">"الثانية عشرة"</item>
     <item msgid="7389464214252023751">"الواحدة"</item>
