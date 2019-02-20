@@ -9379,14 +9379,11 @@ package android.view.autofill {
 package android.view.contentcapture {
 
   public final class ContentCaptureContext implements android.os.Parcelable {
-    method @Nullable public String getAction();
     method @Nullable public android.content.ComponentName getActivityComponent();
     method public int getDisplayId();
-    method @Nullable public android.os.Bundle getExtras();
     method public int getFlags();
     method @Nullable public android.view.contentcapture.ContentCaptureSessionId getParentSessionId();
     method public int getTaskId();
-    method @Nullable public android.net.Uri getUri();
     field public static final int FLAG_DISABLED_BY_APP = 1; // 0x1
     field public static final int FLAG_DISABLED_BY_FLAG_SECURE = 2; // 0x2
   }
