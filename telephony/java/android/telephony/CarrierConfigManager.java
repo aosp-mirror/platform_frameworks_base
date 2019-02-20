@@ -2481,6 +2481,17 @@ public class CarrierConfigManager {
             "opportunistic_network_data_switch_hysteresis_time_long";
 
     /**
+     * Indicates zero or more emergency number prefix(es), because some carrier requires
+     * if users dial an emergency number address with a specific prefix, the combination of the
+     * prefix and the address is also a valid emergency number to dial. For example, an emergency
+     * number prefix is 318, and the emergency number is 911. Both 318911 and 911 can be dialed by
+     * users for emergency call. An empty array of string indicates that current carrier does not
+     * have this requirement.
+     */
+    public static final String KEY_EMERGENCY_NUMBER_PREFIX_STRING_ARRAY =
+            "emergency_number_prefix_string_array";
+
+    /**
      * GPS configs. See android.hardware.gnss@1.0 IGnssConfiguration.
      * @hide
      */
@@ -2989,6 +3000,7 @@ public class CarrierConfigManager {
                 new int[] {
                         1 /* Roaming Indicator Off */
                 });
+        sDefaults.putStringArray(KEY_EMERGENCY_NUMBER_PREFIX_STRING_ARRAY, new String[0]);
     }
 
     /**
