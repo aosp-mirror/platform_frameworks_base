@@ -128,13 +128,11 @@ static bool validateFile(const char* filename) {
     }
 
     case FILETYPE_VIRTUALKEYDEFINITION: {
-        VirtualKeyMap* map;
-        status_t status = VirtualKeyMap::load(filename, &map);
-        if (status) {
-            error("Error %d parsing virtual key definition file.\n\n", status);
+        std::unique_ptr<VirtualKeyMap> map = VirtualKeyMap::load(filename);
+        if (!map) {
+            error("Error while parsing virtual key definition file.\n\n");
             return false;
         }
-        delete map;
         break;
     }
     }
