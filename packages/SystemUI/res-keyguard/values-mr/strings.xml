@@ -34,6 +34,7 @@
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"चुकीचा पिन कोड."</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"अवैध कार्ड."</string>
     <string name="keyguard_charged" msgid="3316115607283493413">"पूर्णपणे चार्ज"</string>
+    <string name="keyguard_plugged_in_wireless" msgid="3004717438401575235">"<xliff:g id="PERCENTAGE">%s</xliff:g> • वायरलेस पद्धतीने चार्ज करत आहे"</string>
     <string name="keyguard_plugged_in" msgid="3161102098900158923">"<xliff:g id="PERCENTAGE">%s</xliff:g> • चार्ज होत आहे"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="3684592786276709342">"<xliff:g id="PERCENTAGE">%s</xliff:g> • वेगाने चार्ज होत आहे"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="509533586841478405">"<xliff:g id="PERCENTAGE">%s</xliff:g> • सावकाश चार्ज होत आहे"</string>
@@ -150,7 +151,10 @@
       <item quantity="one">सिम आता बंद केलेले आहे. सुरू ठेवण्यासाठी PUK कोड टाका. सिम कायमचे बंद होण्याआधी तुमच्याकडे <xliff:g id="_NUMBER_1">%d</xliff:g> प्रयत्न शिल्लक आहे. तपशीलांसाठी वाहकाशी संपर्क साधा.</item>
       <item quantity="other">सिम आता बंद केलेले आहे. सुरू ठेवण्यासाठी PUK कोड टाका. सिम कायमचे बंद होण्याआधी तुमच्याकडे <xliff:g id="_NUMBER_1">%d</xliff:g> प्रयत्न शिल्लक आहेत. तपशीलांसाठी वाहकाशी संपर्क साधा.</item>
     </plurals>
-    <!-- no translation found for type_clock_header (6782840450655632763) -->
+    <plurals name="type_clock_header" formatted="false" msgid="6782840450655632763">
+      <item quantity="one">"<annotation name="color">"वेळ"</annotation>\n"ता\nमि</item>
+      <item quantity="other">"<annotation name="color">"वेळ"</annotation>\n"ता\nमि</item>
+    </plurals>
   <string-array name="type_clock_hours">
     <item msgid="3543074812389379830">"बारा"</item>
     <item msgid="7389464214252023751">"एक"</item>

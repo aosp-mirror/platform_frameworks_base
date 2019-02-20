@@ -34,6 +34,7 @@
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"ລະຫັດ PIN ບໍ່ຖືກຕ້ອງ."</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"ບັດບໍ່ຖືກຕ້ອງ."</string>
     <string name="keyguard_charged" msgid="3316115607283493413">"ສາກເຕັມແລ້ວ"</string>
+    <string name="keyguard_plugged_in_wireless" msgid="3004717438401575235">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ກຳລັງສາກແບບໄຮ້ສາຍ"</string>
     <string name="keyguard_plugged_in" msgid="3161102098900158923">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ກຳລັງສາກ"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="3684592786276709342">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ກຳລັງສາກແບບດ່ວນ"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="509533586841478405">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ກຳລັງສາກແບບຊ້າ"</string>
@@ -150,7 +151,10 @@
       <item quantity="other">ຕອນນີ້ປິດການນຳໃຊ້ SIM ແລ້ວ. ໃສ່ລະຫັດ PUK ເພື່ອດຳເນີນການຕໍ່. ທ່ານສາມາດລອງໄດ້ອີກ <xliff:g id="_NUMBER_1">%d</xliff:g> ເທື່ອກ່ອນທີ່ SIM ຈະບໍ່ສາມາດໃຊ້ໄດ້ຖາວອນ. ກະລຸນາຕິດຕໍ່ຜູ້ໃຫ້ບໍລິການສຳລັບລາຍລະອຽດ.</item>
       <item quantity="one">ຕອນນີ້ປິດການນຳໃຊ້ SIM ແລ້ວ. ໃສ່ລະຫັດ PUK ເພື່ອດຳເນີນການຕໍ່. ທ່ານສາມາດລອງໄດ້ອີກ <xliff:g id="_NUMBER_0">%d</xliff:g> ເທື່ອກ່ອນທີ່ SIM ຈະບໍ່ສາມາດໃຊ້ໄດ້ຖາວອນ. ກະລຸນາຕິດຕໍ່ຜູ້ໃຫ້ບໍລິການສຳລັບລາຍລະອຽດ.</item>
     </plurals>
-    <!-- no translation found for type_clock_header (6782840450655632763) -->
+    <plurals name="type_clock_header" formatted="false" msgid="6782840450655632763">
+      <item quantity="other">"<annotation name="color">"ມັນແມ່ນ"</annotation>\n"^1\n^2</item>
+      <item quantity="one">"<annotation name="color">"ມັນແມ່ນ"</annotation>\n"^1\n^2</item>
+    </plurals>
   <string-array name="type_clock_hours">
     <item msgid="3543074812389379830">"ສິບສອງ"</item>
     <item msgid="7389464214252023751">"ໜຶ່ງ"</item>

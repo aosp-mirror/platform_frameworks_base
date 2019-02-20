@@ -34,6 +34,7 @@
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"ખોટો પિન કોડ."</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"અમાન્ય કાર્ડ."</string>
     <string name="keyguard_charged" msgid="3316115607283493413">"સંપૂર્ણપણે ચાર્જ થયેલ"</string>
+    <string name="keyguard_plugged_in_wireless" msgid="3004717438401575235">"<xliff:g id="PERCENTAGE">%s</xliff:g> • વાયરલેસથી ચાર્જ થઈ રહ્યું છે"</string>
     <string name="keyguard_plugged_in" msgid="3161102098900158923">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ચાર્જિંગ"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="3684592786276709342">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ઝડપથી ચાર્જિંગ"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="509533586841478405">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ધીમેથી ચાર્જિંગ"</string>
@@ -150,7 +151,10 @@
       <item quantity="one">સિમ હવે બંધ કરેલ છે. ચાલુ રાખવા માટે PUK કોડ દાખલ કરો. સિમ કાયમીરૂપે બિનઉપયોગી બની જાય એ પહેલાં તમારી પાસે <xliff:g id="_NUMBER_1">%d</xliff:g> પ્રયાસ બાકી છે. વિગતો માટે કૅરિઅરનો સંપર્ક કરો.</item>
       <item quantity="other">સિમ હવે બંધ કરેલ છે. ચાલુ રાખવા માટે PUK કોડ દાખલ કરો. સિમ કાયમીરૂપે બિનઉપયોગી બની જાય એ પહેલાં તમારી પાસે <xliff:g id="_NUMBER_1">%d</xliff:g> પ્રયાસો બાકી છે. વિગતો માટે કૅરિઅરનો સંપર્ક કરો.</item>
     </plurals>
-    <!-- no translation found for type_clock_header (6782840450655632763) -->
+    <plurals name="type_clock_header" formatted="false" msgid="6782840450655632763">
+      <item quantity="one">"<annotation name="color">"સમય"</annotation>\n"^1\n^2</item>
+      <item quantity="other">"<annotation name="color">"સમય"</annotation>\n"^1\n^2</item>
+    </plurals>
   <string-array name="type_clock_hours">
     <item msgid="3543074812389379830">"બાર"</item>
     <item msgid="7389464214252023751">"એક"</item>

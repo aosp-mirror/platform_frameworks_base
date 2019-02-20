@@ -34,6 +34,7 @@
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"Vale PIN-kood."</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"Kehtetu kaart."</string>
     <string name="keyguard_charged" msgid="3316115607283493413">"Täielikult laetud"</string>
+    <string name="keyguard_plugged_in_wireless" msgid="3004717438401575235">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Juhtmeta laadimine"</string>
     <string name="keyguard_plugged_in" msgid="3161102098900158923">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Laadimine"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="3684592786276709342">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Kiirlaadimine"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="509533586841478405">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Aeglane laadimine"</string>
@@ -150,7 +151,10 @@
       <item quantity="other">SIM-kaart on nüüd keelatud. Jätkamiseks sisestage PUK-kood. Teil on jäänud veel <xliff:g id="_NUMBER_1">%d</xliff:g> katset enne, kui SIM-kaart püsivalt lukustatakse. Lisateavet küsige operaatorilt.</item>
       <item quantity="one">SIM-kaart on nüüd keelatud. Jätkamiseks sisestage PUK-kood. Teil on jäänud veel <xliff:g id="_NUMBER_0">%d</xliff:g> katse enne, kui SIM-kaart püsivalt lukustatakse. Lisateavet küsige operaatorilt.</item>
     </plurals>
-    <!-- no translation found for type_clock_header (6782840450655632763) -->
+    <plurals name="type_clock_header" formatted="false" msgid="6782840450655632763">
+      <item quantity="other">"<annotation name="color">"Kell on"</annotation>\n"^1\n^2</item>
+      <item quantity="one">"<annotation name="color">"Kell on"</annotation>\n"^1\n^2</item>
+    </plurals>
   <string-array name="type_clock_hours">
     <item msgid="3543074812389379830">"Kaksteist"</item>
     <item msgid="7389464214252023751">"Üks"</item>

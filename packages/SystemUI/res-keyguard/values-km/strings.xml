@@ -34,6 +34,7 @@
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"កូដ PIN មិន​ត្រឹមត្រូវ​ទេ។"</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"បណ្ណមិនត្រឹមត្រូវទេ។"</string>
     <string name="keyguard_charged" msgid="3316115607283493413">"បានសាក​ថ្មពេញ"</string>
+    <string name="keyguard_plugged_in_wireless" msgid="3004717438401575235">"<xliff:g id="PERCENTAGE">%s</xliff:g> • កំពុង​សាកថ្ម​ឥតខ្សែ"</string>
     <string name="keyguard_plugged_in" msgid="3161102098900158923">"<xliff:g id="PERCENTAGE">%s</xliff:g> • កំពុង​សាកថ្ម"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="3684592786276709342">"<xliff:g id="PERCENTAGE">%s</xliff:g> • កំពុង​សាកថ្មយ៉ាង​ឆាប់រហ័ស"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="509533586841478405">"<xliff:g id="PERCENTAGE">%s</xliff:g> • កំពុង​សាកថ្មយឺត"</string>
@@ -150,7 +151,10 @@
       <item quantity="other">ឥឡូវនេះស៊ីមត្រូវបានបិទ។ សូមបញ្ចូលកូដ PUK ដើម្បីបន្ត។ អ្នកនៅសល់ការព្យាយាម <xliff:g id="_NUMBER_1">%d</xliff:g> ដងទៀត​មុនពេល​ស៊ីម​មិនអាច​ប្រើបាន​ជា​អចិន្ត្រៃយ៍។ ទាក់ទង​ទៅ​ក្រុមហ៊ុន​សេវា​ទូរសព្ទ​សម្រាប់ព័ត៌មានលម្អិត។</item>
       <item quantity="one">ឥឡូវនេះស៊ីមត្រូវបានបិទ។ សូមបញ្ចូលកូដ PUK ដើម្បីបន្ត។ អ្នកនៅសល់ការព្យាយាម <xliff:g id="_NUMBER_0">%d</xliff:g> ដងទៀតមុនពេលស៊ីមមិនអាចប្រើបានជាអចិន្ត្រៃយ៍។ ទាក់ទង​ទៅ​ក្រុមហ៊ុន​សេវា​ទូរសព្ទ​សម្រាប់​ព័ត៌មាន​លម្អិត។</item>
     </plurals>
-    <!-- no translation found for type_clock_header (6782840450655632763) -->
+    <plurals name="type_clock_header" formatted="false" msgid="6782840450655632763">
+      <item quantity="other">"<annotation name="color">"ម៉ោង"</annotation>\n"^1\n^2</item>
+      <item quantity="one">"<annotation name="color">"ម៉ោង"</annotation>\n"^1\n^2</item>
+    </plurals>
   <string-array name="type_clock_hours">
     <item msgid="3543074812389379830">"ដប់ពីរ"</item>
     <item msgid="7389464214252023751">"មួយ"</item>

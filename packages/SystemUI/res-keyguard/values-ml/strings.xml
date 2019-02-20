@@ -34,6 +34,7 @@
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"പിൻ കോഡ് തെറ്റാണ്."</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"അസാധുവായ കാർഡ്."</string>
     <string name="keyguard_charged" msgid="3316115607283493413">"പൂർണ്ണമായി ചാർജ് ചെയ്‌തു"</string>
+    <string name="keyguard_plugged_in_wireless" msgid="3004717438401575235">"<xliff:g id="PERCENTAGE">%s</xliff:g> • വയർലെസ്സ് ആയി ചാർജ്ജ് ചെയ്യുന്നു"</string>
     <string name="keyguard_plugged_in" msgid="3161102098900158923">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ചാർജ് ചെയ്യുന്നു"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="3684592786276709342">"<xliff:g id="PERCENTAGE">%s</xliff:g> • വേഗത്തിൽ ചാർജ് ചെയ്യുന്നു"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="509533586841478405">"<xliff:g id="PERCENTAGE">%s</xliff:g> • പതുക്കെ ചാർജ് ചെയ്യുന്നു"</string>
@@ -150,7 +151,10 @@
       <item quantity="other">സിം ഇപ്പോൾ പ്രവർത്തനരഹിതമാക്കി. തുടരുന്നതിന് PUK കോഡ് നൽകുക. സിം ശാശ്വതമായി ഉപയോഗശൂന്യമാകുന്നതിന് മുമ്പായി <xliff:g id="_NUMBER_1">%d</xliff:g> ശ്രമങ്ങൾ കൂടി ശേഷിക്കുന്നു. വിശദാംശങ്ങൾക്ക് കാരിയറുമായി ബന്ധപ്പെടുക.</item>
       <item quantity="one">സിം ഇപ്പോൾ പ്രവർത്തനരഹിതമാക്കി. തുടരുന്നതിന് PUK കോഡ് നൽകുക. സിം ശാശ്വതമായി ഉപയോഗശൂന്യമാകുന്നതിന് മുമ്പായി <xliff:g id="_NUMBER_0">%d</xliff:g> ശ്രമം കൂടി ശേഷിക്കുന്നു. വിശദാംശങ്ങൾക്ക് കാരിയറുമായി ബന്ധപ്പെടുക.</item>
     </plurals>
-    <!-- no translation found for type_clock_header (6782840450655632763) -->
+    <plurals name="type_clock_header" formatted="false" msgid="6782840450655632763">
+      <item quantity="other">"<annotation name="color">"സമയം"</annotation>\n"^1\n^2</item>
+      <item quantity="one">"<annotation name="color">"സമയം"</annotation>\n"^1\n^2</item>
+    </plurals>
   <string-array name="type_clock_hours">
     <item msgid="3543074812389379830">"പന്ത്രണ്ട്"</item>
     <item msgid="7389464214252023751">"ഒന്ന്"</item>

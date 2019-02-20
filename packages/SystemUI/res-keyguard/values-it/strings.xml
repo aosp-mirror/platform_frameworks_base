@@ -34,6 +34,7 @@
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"Codice PIN errato."</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"Scheda non valida."</string>
     <string name="keyguard_charged" msgid="3316115607283493413">"Completamente carica"</string>
+    <string name="keyguard_plugged_in_wireless" msgid="3004717438401575235">"<xliff:g id="PERCENTAGE">%s</xliff:g> • In ricarica wireless"</string>
     <string name="keyguard_plugged_in" msgid="3161102098900158923">"<xliff:g id="PERCENTAGE">%s</xliff:g> • In carica"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="3684592786276709342">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Ricarica veloce"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="509533586841478405">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Ricarica lenta"</string>
@@ -150,7 +151,10 @@
       <item quantity="other">La scheda SIM è ora disattivata. Inserisci il codice PUK per continuare. Hai ancora <xliff:g id="_NUMBER_1">%d</xliff:g> tentativi a disposizione prima che la SIM diventi definitivamente inutilizzabile. Per informazioni dettagliate, contatta l\'operatore.</item>
       <item quantity="one">La scheda SIM è ora disattivata. Inserisci il codice PUK per continuare. Hai ancora <xliff:g id="_NUMBER_0">%d</xliff:g> tentativo a disposizione prima che la SIM diventi definitivamente inutilizzabile. Per informazioni dettagliate, contatta l\'operatore.</item>
     </plurals>
-    <!-- no translation found for type_clock_header (6782840450655632763) -->
+    <plurals name="type_clock_header" formatted="false" msgid="6782840450655632763">
+      <item quantity="other">"<annotation name="color">"Ora: "</annotation>\n"^1\n^2S</item>
+      <item quantity="one">"<annotation name="color">"Ora: "</annotation>\n"^1\n^2S</item>
+    </plurals>
   <string-array name="type_clock_hours">
     <item msgid="3543074812389379830">"Dodici"</item>
     <item msgid="7389464214252023751">"Una"</item>

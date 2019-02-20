@@ -36,6 +36,7 @@
     <!-- String.format failed for translation -->
     <!-- no translation found for keyguard_charged (3316115607283493413) -->
     <skip />
+    <string name="keyguard_plugged_in_wireless" msgid="3004717438401575235">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Simsiz quvvat olmoqda"</string>
     <string name="keyguard_plugged_in" msgid="3161102098900158923">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Quvvat olmoqda"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="3684592786276709342">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Tezkor quvvat olmoqda"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="509533586841478405">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Sekin quvvat olmoqda"</string>
@@ -152,7 +153,10 @@
       <item quantity="other">SIM karta faolsizlantirildi. Davom etish uchun PUK kodni kiriting. Yana <xliff:g id="_NUMBER_1">%d</xliff:g> marta xato qilsangiz, SIM kartangiz butunlay qulflanadi. Batafsil axborot olish uchun tarmoq operatoriga murojaat qiling.</item>
       <item quantity="one">SIM karta faolsizlantirildi. Davom etish uchun PUK kodni kiriting. Yana <xliff:g id="_NUMBER_0">%d</xliff:g> marta xato qilsangiz, SIM kartangiz butunlay qulflanadi. Batafsil axborot olish uchun tarmoq operatoriga murojaat qiling.</item>
     </plurals>
-    <!-- no translation found for type_clock_header (6782840450655632763) -->
+    <plurals name="type_clock_header" formatted="false" msgid="6782840450655632763">
+      <item quantity="other">"<annotation name="color">"Soat"</annotation>\n"^1\n^2</item>
+      <item quantity="one">"<annotation name="color">"Soat"</annotation>\n"^1\n^2</item>
+    </plurals>
   <string-array name="type_clock_hours">
     <item msgid="3543074812389379830">"Oʻn ikki"</item>
     <item msgid="7389464214252023751">"Bir"</item>

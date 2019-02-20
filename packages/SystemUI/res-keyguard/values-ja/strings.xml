@@ -34,6 +34,7 @@
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"PIN コードが無効です。"</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"無効なカードです。"</string>
     <string name="keyguard_charged" msgid="3316115607283493413">"充電完了"</string>
+    <string name="keyguard_plugged_in_wireless" msgid="3004717438401575235">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ワイヤレス充電中"</string>
     <string name="keyguard_plugged_in" msgid="3161102098900158923">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 充電中"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="3684592786276709342">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 急速充電中"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="509533586841478405">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 低速充電中"</string>
@@ -150,7 +151,10 @@
       <item quantity="other">SIM が無効になりました。続行するには PUK コードを入力してください。入力できるのはあと <xliff:g id="_NUMBER_1">%d</xliff:g> 回です。この回数を超えると SIM は完全に使用できなくなります。詳しくは携帯通信会社にお問い合わせください。</item>
       <item quantity="one">SIM が無効になりました。続行するには PUK コードを入力してください。入力できるのはあと <xliff:g id="_NUMBER_0">%d</xliff:g> 回です。この回数を超えると SIM は完全に使用できなくなります。詳しくは携帯通信会社にお問い合わせください。</item>
     </plurals>
-    <!-- no translation found for type_clock_header (6782840450655632763) -->
+    <plurals name="type_clock_header" formatted="false" msgid="6782840450655632763">
+      <item quantity="other">^1 時\n^2 分\n"<annotation name="color">"です"</annotation>"</item>
+      <item quantity="one">^1 時\n^2 分\n"<annotation name="color">"です"</annotation>"</item>
+    </plurals>
   <string-array name="type_clock_hours">
     <item msgid="3543074812389379830">"12"</item>
     <item msgid="7389464214252023751">"1"</item>

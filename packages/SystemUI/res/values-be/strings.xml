@@ -404,6 +404,7 @@
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"Поўная\nцішыня"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"Толькі\nпрыярытэтныя"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"Толькі\nбудзільнікі"</string>
+    <string name="keyguard_indication_charging_time_wireless" msgid="5376059837186496558">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Ідзе бесправадная зарадка (да поўнага зараду засталося <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>)"</string>
     <string name="keyguard_indication_charging_time" msgid="2056340799276374421">"Ідзе зарадка (<xliff:g id="PERCENTAGE">%2$s</xliff:g>, яшчэ <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>)"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="7767562163577492332">"Ідзе хуткая зарадка (<xliff:g id="PERCENTAGE">%2$s</xliff:g>, яшчэ <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>)"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="3769655133567307069">"Ідзе павольная зарадка (<xliff:g id="PERCENTAGE">%2$s</xliff:g>, яшчэ <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>)"</string>
@@ -618,8 +619,10 @@
     <string name="notification_channel_silenced" msgid="2877199534497961942">"Гэтыя апавяшчэнні будуць паказвацца без гуку"</string>
     <string name="notification_channel_unsilenced" msgid="4790904571552394137">"Гэтыя апавяшчэнні будуць паказвацца з гукам"</string>
     <string name="inline_blocking_helper" msgid="3055064577771478591">"Звычайна вы адхіляеце гэтыя апавяшчэнні. \nПаказваць іх?"</string>
+    <string name="inline_done_button" msgid="492513001558716452">"Гатова"</string>
     <string name="inline_keep_showing" msgid="8945102997083836858">"Працягваць паказваць гэтыя апавяшчэнні?"</string>
     <string name="inline_stop_button" msgid="4172980096860941033">"Спыніць апавяшчэнні"</string>
+    <string name="inline_deliver_silently_button" msgid="7756289895745629140">"Дастаўляць бязгучна"</string>
     <string name="inline_block_button" msgid="8735843688021655065">"Заблакіраваць"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"Працягваць паказваць"</string>
     <string name="inline_minimize_button" msgid="966233327974702195">"Згарнуць"</string>
@@ -888,6 +891,7 @@
     </plurals>
     <string name="ongoing_privacy_chip_content_single_app" msgid="4479560741898690064">"Праграма \"<xliff:g id="APP">%1$s</xliff:g>\" выкарыстоўвае: <xliff:g id="TYPES_LIST">%2$s</xliff:g>."</string>
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8640691753867990511">"Праграмы выкарыстоўваюць: <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
+    <string name="ongoing_privacy_chip_in_use" msgid="5174331553211609272">"Занята:"</string>
     <plurals name="ongoing_privacy_chip_content_multiple_apps_single_op" formatted="false" msgid="4871926099254314088">
       <item quantity="one">Функцыю \"<xliff:g id="TYPE_5">%2$s</xliff:g>\" выкарыстоўвае <xliff:g id="NUM_APPS_4">%1$d</xliff:g> праграма.</item>
       <item quantity="few">Функцыю \"<xliff:g id="TYPE_3">%2$s</xliff:g>\" выкарыстоўваюць <xliff:g id="NUM_APPS_2">%1$d</xliff:g> праграмы.</item>
@@ -895,8 +899,7 @@
       <item quantity="other">Функцыю \"<xliff:g id="TYPE_5">%2$s</xliff:g>\" выкарыстоўваюць <xliff:g id="NUM_APPS_4">%1$d</xliff:g> праграмы.</item>
     </plurals>
     <string name="ongoing_privacy_dialog_ok" msgid="3273300106348958308">"Зразумела"</string>
-    <!-- no translation found for ongoing_privacy_dialog_open_settings (6773015940472748876) -->
-    <skip />
+    <string name="ongoing_privacy_dialog_open_settings" msgid="6773015940472748876">"Налады прыватнасці"</string>
     <string name="ongoing_privacy_dialog_single_app_title" msgid="6019646962021696632">"Праграма, якая выкарыстоўвае: <xliff:g id="TYPES_LIST">%s</xliff:g>"</string>
     <string name="ongoing_privacy_dialog_multiple_apps_title" msgid="8013356222977903365">"Праграмы, якія выкарыстоўваюць: <xliff:g id="TYPES_LIST">%s</xliff:g>"</string>
     <string name="ongoing_privacy_dialog_separator" msgid="6854860652480837439">", "</string>
@@ -913,14 +916,9 @@
     <string name="sensor_privacy_mode" msgid="8982771253020769598">"Датчыкі выкл."</string>
     <string name="device_services" msgid="1191212554435440592">"Сэрвісы прылады"</string>
     <string name="music_controls_no_title" msgid="5236895307087002011">"Без назвы"</string>
-    <!-- no translation found for bubbles_deep_link_button_description (8895837143057564517) -->
-    <skip />
-    <!-- no translation found for bubbles_settings_button_description (1940331766151865776) -->
-    <skip />
-    <!-- no translation found for bubbles_prompt (2684301469286150276) -->
-    <skip />
-    <!-- no translation found for no_bubbles (7173621233904687258) -->
-    <skip />
-    <!-- no translation found for yes_bubbles (668809525728633841) -->
-    <skip />
+    <string name="bubbles_deep_link_button_description" msgid="8895837143057564517">"Адкрыць праграму \"<xliff:g id="APP_NAME">%1$s</xliff:g>\""</string>
+    <string name="bubbles_settings_button_description" msgid="1940331766151865776">"Адкрыць налады апавяшчэнняў для праграмы \"<xliff:g id="APP_NAME">%1$s</xliff:g>\""</string>
+    <string name="bubbles_prompt" msgid="2684301469286150276">"Дазволіць дыялогі з гэтай праграмы?"</string>
+    <string name="no_bubbles" msgid="7173621233904687258">"Заблакіраваць"</string>
+    <string name="yes_bubbles" msgid="668809525728633841">"Дазволіць"</string>
 </resources>

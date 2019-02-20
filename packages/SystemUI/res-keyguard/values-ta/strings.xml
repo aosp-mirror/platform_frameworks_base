@@ -34,6 +34,7 @@
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"தவறான பின் குறியீடு."</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"செல்லாத சிம் கார்டு."</string>
     <string name="keyguard_charged" msgid="3316115607283493413">"முழுவதுமாகச் சார்ஜ் ஆகிவிட்டது"</string>
+    <string name="keyguard_plugged_in_wireless" msgid="3004717438401575235">"<xliff:g id="PERCENTAGE">%s</xliff:g> • வயர்லெஸ் முறையில் சார்ஜாகிறது"</string>
     <string name="keyguard_plugged_in" msgid="3161102098900158923">"<xliff:g id="PERCENTAGE">%s</xliff:g> • சார்ஜாகிறது"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="3684592786276709342">"<xliff:g id="PERCENTAGE">%s</xliff:g> • வேகமாகச் சார்ஜாகிறது"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="509533586841478405">"<xliff:g id="PERCENTAGE">%s</xliff:g> • மெதுவாகச் சார்ஜாகிறது"</string>
@@ -95,10 +96,10 @@
     <string name="kg_failed_attempts_almost_at_erase_user" product="default" msgid="2151286957817486128">"மொபைலைத் திறக்க, <xliff:g id="NUMBER_0">%1$d</xliff:g> முறை தவறாக முயன்றுவிட்டீர்கள். இன்னும் <xliff:g id="NUMBER_1">%2$d</xliff:g> முறை தவறாக முயன்றால், இந்தப் பயனர் அகற்றப்பட்டு, எல்லாப் பயனர் தரவும் நீக்கப்படும்."</string>
     <string name="kg_failed_attempts_now_erasing_user" product="tablet" msgid="5464020754932560928">"டேப்லெட்டைத் திறக்க, <xliff:g id="NUMBER">%d</xliff:g> முறை தவறாக முயன்றுவிட்டீர்கள். இந்தப் பயனர் அகற்றப்பட்டு, எல்லாப் பயனர் தரவும் நீக்கப்படும்."</string>
     <string name="kg_failed_attempts_now_erasing_user" product="default" msgid="6171564974118059">"மொபைலைத் திறக்க, <xliff:g id="NUMBER">%d</xliff:g> முறை தவறாக முயன்றுவிட்டீர்கள். இந்தப் பயனர் அகற்றப்பட்டு, எல்லாப் பயனர் தரவும் நீக்கப்படும்."</string>
-    <string name="kg_failed_attempts_almost_at_erase_profile" product="tablet" msgid="9154513795928824239">"டேப்லெட்டைத் திறக்க, <xliff:g id="NUMBER_0">%1$d</xliff:g> முறை தவறாக முயன்றுவிட்டீர்கள். இன்னும் <xliff:g id="NUMBER_1">%2$d</xliff:g> முறை தவறாக முயன்றால், பணி விவரம் அகற்றப்பட்டு, எல்லாச் சுயவிவரத் தரவும் நீக்கப்படும்."</string>
-    <string name="kg_failed_attempts_almost_at_erase_profile" product="default" msgid="2162434417489128282">"மொபைலைத் திறக்க, <xliff:g id="NUMBER_0">%1$d</xliff:g> முறை தவறாக முயன்றுவிட்டீர்கள். இன்னும் <xliff:g id="NUMBER_1">%2$d</xliff:g> முறை தவறாக முயன்றால், பணி விவரம் அகற்றப்பட்டு, எல்லாச் சுயவிவரத் தரவும் நீக்கப்படும்."</string>
-    <string name="kg_failed_attempts_now_erasing_profile" product="tablet" msgid="8966727588974691544">"டேப்லெட்டைத் திறக்க, <xliff:g id="NUMBER">%d</xliff:g> முறை தவறாக முயன்றுவிட்டீர்கள். பணி விவரம் அகற்றப்பட்டு, எல்லாச் சுயவிவரத் தரவும் நீக்கப்படும்."</string>
-    <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="8476407539834855">"மொபைலைத் திறக்க, <xliff:g id="NUMBER">%d</xliff:g> முறை தவறாக முயன்றுவிட்டீர்கள். பணி விவரம் அகற்றப்பட்டு, எல்லாச் சுயவிவரத் தரவும் நீக்கப்படும்."</string>
+    <string name="kg_failed_attempts_almost_at_erase_profile" product="tablet" msgid="9154513795928824239">"டேப்லெட்டைத் திறக்க, <xliff:g id="NUMBER_0">%1$d</xliff:g> முறை தவறாக முயன்றுவிட்டீர்கள். இன்னும் <xliff:g id="NUMBER_1">%2$d</xliff:g> முறை தவறாக முயன்றால், பணிக் கணக்கு அகற்றப்பட்டு, எல்லாச் சுயவிவரத் தரவும் நீக்கப்படும்."</string>
+    <string name="kg_failed_attempts_almost_at_erase_profile" product="default" msgid="2162434417489128282">"மொபைலைத் திறக்க, <xliff:g id="NUMBER_0">%1$d</xliff:g> முறை தவறாக முயன்றுவிட்டீர்கள். இன்னும் <xliff:g id="NUMBER_1">%2$d</xliff:g> முறை தவறாக முயன்றால், பணிக் கணக்கு அகற்றப்பட்டு, எல்லாச் சுயவிவரத் தரவும் நீக்கப்படும்."</string>
+    <string name="kg_failed_attempts_now_erasing_profile" product="tablet" msgid="8966727588974691544">"டேப்லெட்டைத் திறக்க, <xliff:g id="NUMBER">%d</xliff:g> முறை தவறாக முயன்றுவிட்டீர்கள். பணிக் கணக்கு அகற்றப்பட்டு, எல்லாச் சுயவிவரத் தரவும் நீக்கப்படும்."</string>
+    <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="8476407539834855">"மொபைலைத் திறக்க, <xliff:g id="NUMBER">%d</xliff:g> முறை தவறாக முயன்றுவிட்டீர்கள். பணிக் கணக்கு அகற்றப்பட்டு, எல்லாச் சுயவிவரத் தரவும் நீக்கப்படும்."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="956706236554092172">"திறப்பதற்கான பேட்டர்னை, <xliff:g id="NUMBER_0">%1$d</xliff:g> முறை தவறாக வரைந்துவிட்டீர்கள். இன்னும் <xliff:g id="NUMBER_1">%2$d</xliff:g> முறை தவறாக வரைந்தால், மின்னஞ்சல் கணக்கைப் பயன்படுத்தி டேப்லெட்டைத் திறக்கும்படி கேட்கப்படுவீர்கள்.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> வினாடிகளில் மீண்டும் முயலவும்."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="8364140853305528449">"திறப்பதற்கான பேட்டர்னை, <xliff:g id="NUMBER_0">%1$d</xliff:g> முறை தவறாக வரைந்துவிட்டீர்கள். இன்னும் <xliff:g id="NUMBER_1">%2$d</xliff:g> முறை தவறாக வரைந்தால், மின்னஞ்சல் கணக்கைப் பயன்படுத்தி மொபைலைத் திறக்கும்படி கேட்கப்படுவீர்கள்.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> வினாடிகளில் மீண்டும் முயலவும்."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="3389829202093674267">"சிம்மின் பின் குறியீடு தவறானது. இனி சாதனத்தைத் திறக்க, உங்கள் தொலைத்தொடர்பு நிறுவனத்தைத் தொடர்புகொள்ள வேண்டும்."</string>
@@ -150,7 +151,10 @@
       <item quantity="other">சிம் தற்போது முடக்கப்பட்டுள்ளது. தொடர்வதற்கு, PUK குறியீட்டை உள்ளிடவும். நீங்கள் <xliff:g id="_NUMBER_1">%d</xliff:g> முறை மட்டுமே முயற்சிக்க முடியும். அதன்பிறகு சிம் நிரந்தரமாக முடக்கப்படும். விவரங்களுக்கு, மொபைல் நிறுவனத்தைத் தொடர்புகொள்ளவும்.</item>
       <item quantity="one">சிம் தற்போது முடக்கப்பட்டுள்ளது. தொடர்வதற்கு, PUK குறியீட்டை உள்ளிடவும். நீங்கள் <xliff:g id="_NUMBER_0">%d</xliff:g> முறை மட்டுமே முயற்சிக்க முடியும். அதன்பிறகு சிம் நிரந்தரமாக முடக்கப்படும். விவரங்களுக்கு, மொபைல் நிறுவனத்தைத் தொடர்புகொள்ளவும்.</item>
     </plurals>
-    <!-- no translation found for type_clock_header (6782840450655632763) -->
+    <plurals name="type_clock_header" formatted="false" msgid="6782840450655632763">
+      <item quantity="other">"<annotation name="color">"மணி இப்போது"</annotation>\n"^1\n^2</item>
+      <item quantity="one">"<annotation name="color">"மணி இப்போது"</annotation>\n"^1\n^2</item>
+    </plurals>
   <string-array name="type_clock_hours">
     <item msgid="3543074812389379830">"பன்னிரண்டு"</item>
     <item msgid="7389464214252023751">"ஒன்று"</item>
