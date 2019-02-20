@@ -34,6 +34,7 @@ import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.MeasureSpec;
+import android.view.ViewGroup;
 
 import androidx.annotation.VisibleForTesting;
 
@@ -241,6 +242,7 @@ public final class ClockManager {
         // Draw clock view hierarchy to canvas.
         Bitmap bitmap = Bitmap.createBitmap(mWidth, mHeight, Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);
+        dispatchVisibilityAggregated(clockView, true);
         clockView.measure(MeasureSpec.makeMeasureSpec(mWidth, MeasureSpec.EXACTLY),
                 MeasureSpec.makeMeasureSpec(mHeight, MeasureSpec.EXACTLY));
         clockView.layout(0, 0, mWidth, mHeight);
@@ -248,6 +250,24 @@ public final class ClockManager {
         clockView.draw(canvas);
 
         return bitmap;
+    }
+
+    private void dispatchVisibilityAggregated(View view, boolean isVisible) {
+        // Similar to View.dispatchVisibilityAggregated implementation.
+        final boolean thisVisible = view.getVisibility() == View.VISIBLE;
+        if (thisVisible || !isVisible) {
+            view.onVisibilityAggregated(isVisible);
+        }
+
+        if (view instanceof ViewGroup) {
+            isVisible = thisVisible && isVisible;
+            ViewGroup vg = (ViewGroup) view;
+            int count = vg.getChildCount();
+
+            for (int i = 0; i < count; i++) {
+                dispatchVisibilityAggregated(vg.getChildAt(i), isVisible);
+            }
+        }
     }
 
     private void notifyClockChanged(ClockPlugin plugin) {
