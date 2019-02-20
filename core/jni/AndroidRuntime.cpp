@@ -163,6 +163,7 @@ extern int register_android_view_RenderNodeAnimator(JNIEnv* env);
 extern int register_android_view_Surface(JNIEnv* env);
 extern int register_android_view_SurfaceControl(JNIEnv* env);
 extern int register_android_view_SurfaceSession(JNIEnv* env);
+extern int register_android_view_CompositionSamplingListener(JNIEnv* env);
 extern int register_android_view_TextureView(JNIEnv* env);
 extern int register_android_view_ThreadedRenderer(JNIEnv* env);
 extern int register_com_android_internal_view_animation_NativeInterpolatorFactoryHelper(JNIEnv *env);
@@ -1415,6 +1416,7 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_android_view_Surface),
     REG_JNI(register_android_view_SurfaceControl),
     REG_JNI(register_android_view_SurfaceSession),
+    REG_JNI(register_android_view_CompositionSamplingListener),
     REG_JNI(register_android_view_TextureView),
     REG_JNI(register_com_android_internal_view_animation_NativeInterpolatorFactoryHelper),
     REG_JNI(register_com_google_android_gles_jni_EGLImpl),

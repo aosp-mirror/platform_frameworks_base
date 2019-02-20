@@ -62,6 +62,7 @@ cc_library_shared {
         "android_graphics_drawable_AnimatedVectorDrawable.cpp",
         "android_graphics_drawable_VectorDrawable.cpp",
         "android_graphics_Picture.cpp",
+        "android_view_CompositionSamplingListener.cpp",
         "android_view_DisplayEventReceiver.cpp",
         "android_view_DisplayListCanvas.cpp",
         "android_view_TextureLayer.cpp",
