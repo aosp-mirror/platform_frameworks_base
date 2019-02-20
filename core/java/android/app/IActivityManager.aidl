@@ -204,6 +204,7 @@ interface IActivityManager {
     void setProcessImportant(in IBinder token, int pid, boolean isForeground, String reason);
     void setServiceForeground(in ComponentName className, in IBinder token,
             int id, in Notification notification, int flags, int foregroundServiceType);
+    int getForegroundServiceType(in ComponentName className, in IBinder token);
     boolean moveActivityTaskToBack(in IBinder token, boolean nonRoot);
     void getMemoryInfo(out ActivityManager.MemoryInfo outInfo);
     List<ActivityManager.ProcessErrorStateInfo> getProcessesInErrorState();

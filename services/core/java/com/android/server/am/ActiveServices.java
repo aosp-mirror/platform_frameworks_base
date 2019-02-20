@@ -933,6 +933,27 @@ public final class ActiveServices {
         }
     }
 
+    /**
+     * Return the current foregroundServiceType of the ServiceRecord.
+     * @param className ComponentName of the Service class.
+     * @param token IBinder token.
+     * @return current foreground service type.
+     */
+    public int getForegroundServiceTypeLocked(ComponentName className, IBinder token) {
+        final int userId = UserHandle.getCallingUserId();
+        final long origId = Binder.clearCallingIdentity();
+        int ret = ServiceInfo.FOREGROUND_SERVICE_TYPE_NONE;
+        try {
+            ServiceRecord r = findServiceLocked(className, token, userId);
+            if (r != null) {
+                ret = r.foregroundServiceType;
+            }
+        } finally {
+            Binder.restoreCallingIdentity(origId);
+        }
+        return ret;
+    }
+
     boolean foregroundAppShownEnoughLocked(ActiveForegroundApp aa, long nowElapsed) {
         if (DEBUG_FOREGROUND_SERVICE) Slog.d(TAG, "Shown enough: pkg=" + aa.mPackageName + ", uid="
                 + aa.mUid);
@@ -1260,10 +1281,11 @@ public final class ActiveServices {
                 // Check the passed in foreground service type flags is a subset of manifest
                 // foreground service type flags.
                 if ((foregroundServiceType & manifestType) != foregroundServiceType) {
-                    // STOPSHIP(b/120611119): replace log message with IllegalArgumentException.
-                    Slog.w(TAG, "foregroundServiceType must be a subset of "
-                            + "foregroundServiceType attribute in "
-                            + "service element of manifest file");
+                    throw new IllegalArgumentException("foregroundServiceType "
+                        + String.format("0x%08X", foregroundServiceType)
+                        + " is not a subset of foregroundServiceType attribute "
+                        +  String.format("0x%08X", manifestType)
+                        + " in service element of manifest file");
                 }
             }
             boolean alreadyStartedOp = false;
