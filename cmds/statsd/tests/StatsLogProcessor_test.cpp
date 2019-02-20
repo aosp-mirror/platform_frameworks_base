@@ -173,7 +173,7 @@ TEST(StatsLogProcessorTest, TestUidMapHasSnapshot) {
 
     // Expect to get no metrics, but snapshot specified above in uidmap.
     vector<uint8_t> bytes;
-    p.onDumpReport(key, 1, false, true, ADB_DUMP, &bytes);
+    p.onDumpReport(key, 1, false, true, ADB_DUMP, FAST, &bytes);
 
     ConfigMetricsReportList output;
     output.ParseFromArray(bytes.data(), bytes.size());
@@ -204,7 +204,7 @@ TEST(StatsLogProcessorTest, TestEmptyConfigHasNoUidMap) {
 
     // Expect to get no metrics, but snapshot specified above in uidmap.
     vector<uint8_t> bytes;
-    p.onDumpReport(key, 1, false, true, ADB_DUMP, &bytes);
+    p.onDumpReport(key, 1, false, true, ADB_DUMP, FAST, &bytes);
 
     ConfigMetricsReportList output;
     output.ParseFromArray(bytes.data(), bytes.size());
@@ -235,7 +235,7 @@ TEST(StatsLogProcessorTest, TestReportIncludesSubConfig) {
 
     // Expect to get no metrics, but snapshot specified above in uidmap.
     vector<uint8_t> bytes;
-    p.onDumpReport(key, 1, false, true, ADB_DUMP, &bytes);
+    p.onDumpReport(key, 1, false, true, ADB_DUMP, FAST, &bytes);
 
     ConfigMetricsReportList output;
     output.ParseFromArray(bytes.data(), bytes.size());
@@ -269,21 +269,21 @@ TEST(StatsLogProcessorTest, TestOnDumpReportEraseData) {
     ConfigMetricsReportList output;
 
     // Dump report WITHOUT erasing data.
-    processor->onDumpReport(cfgKey, 3, true, false /* Do NOT erase data. */, ADB_DUMP, &bytes);
+    processor->onDumpReport(cfgKey, 3, true, false /* Do NOT erase data. */, ADB_DUMP, FAST, &bytes);
     output.ParseFromArray(bytes.data(), bytes.size());
     EXPECT_EQ(output.reports_size(), 1);
     EXPECT_EQ(output.reports(0).metrics_size(), 1);
     EXPECT_EQ(output.reports(0).metrics(0).count_metrics().data_size(), 1);
 
     // Dump report WITH erasing data. There should be data since we didn't previously erase it.
-    processor->onDumpReport(cfgKey, 4, true, true /* DO erase data. */, ADB_DUMP, &bytes);
+    processor->onDumpReport(cfgKey, 4, true, true /* DO erase data. */, ADB_DUMP, FAST, &bytes);
     output.ParseFromArray(bytes.data(), bytes.size());
     EXPECT_EQ(output.reports_size(), 1);
     EXPECT_EQ(output.reports(0).metrics_size(), 1);
     EXPECT_EQ(output.reports(0).metrics(0).count_metrics().data_size(), 1);
 
     // Dump report again. There should be no data since we erased it.
-    processor->onDumpReport(cfgKey, 5, true, true /* DO erase data. */, ADB_DUMP, &bytes);
+    processor->onDumpReport(cfgKey, 5, true, true /* DO erase data. */, ADB_DUMP, FAST, &bytes);
     output.ParseFromArray(bytes.data(), bytes.size());
     // We don't care whether statsd has a report, as long as it has no count metrics in it.
     bool noData = output.reports_size() == 0

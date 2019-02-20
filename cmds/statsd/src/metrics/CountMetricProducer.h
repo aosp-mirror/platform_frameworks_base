@@ -57,6 +57,7 @@ private:
     void onDumpReportLocked(const int64_t dumpTimeNs,
                             const bool include_current_partial_bucket,
                             const bool erase_data,
+                            const DumpLatency dumpLatency,
                             std::set<string> *str_set,
                             android::util::ProtoOutputStream* protoOutput) override;
 
@@ -78,7 +79,8 @@ private:
     // Util function to flush the old packet.
     void flushIfNeededLocked(const int64_t& newEventTime) override;
 
-    void flushCurrentBucketLocked(const int64_t& eventTimeNs) override;
+    void flushCurrentBucketLocked(const int64_t& eventTimeNs,
+                                  const int64_t& nextBucketStartTimeNs) override;
 
     std::unordered_map<MetricDimensionKey, std::vector<CountBucket>> mPastBuckets;
 
