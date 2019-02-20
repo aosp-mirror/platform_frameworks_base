@@ -16,6 +16,7 @@
 
 package android.view.autofill;
 
+import static android.service.autofill.FillRequest.FLAG_AUGMENTED_AUTOFILL_REQUEST;
 import static android.service.autofill.FillRequest.FLAG_MANUAL_REQUEST;
 import static android.view.autofill.Helper.sDebug;
 import static android.view.autofill.Helper.sVerbose;
@@ -466,6 +467,13 @@ public final class AutofillManager {
      * */
     @GuardedBy("mLock")
     @Nullable private ArraySet<AutofillId> mEnteredIds;
+
+    /**
+     * Views that were otherwised not important for autofill but triggered a session because the
+     * context is whitelisted for augmented autofill.
+     */
+    @GuardedBy("mLock")
+    @Nullable private Set<AutofillId> mEnteredForAugmentedAutofillIds;
 
     /** If set, session is commited when the field is clicked. */
     @GuardedBy("mLock")
@@ -1626,6 +1634,11 @@ public final class AutofillManager {
     @GuardedBy("mLock")
     private void startSessionLocked(@NonNull AutofillId id, @NonNull Rect bounds,
             @NonNull AutofillValue value, int flags) {
+        if (mEnteredForAugmentedAutofillIds != null
+                && mEnteredForAugmentedAutofillIds.contains(id)) {
+            if (sVerbose) Log.v(TAG, "Starting session for augmented autofill on " + id);
+            flags |= FLAG_AUGMENTED_AUTOFILL_REQUEST;
+        }
         if (sVerbose) {
             Log.v(TAG, "startSessionLocked(): id=" + id + ", bounds=" + bounds + ", value=" + value
                     + ", flags=" + flags + ", state=" + getStateAsStringLocked()
@@ -1859,6 +1872,25 @@ public final class AutofillManager {
 
     private <T> ArrayList<T> toList(@Nullable Set<T> set) {
         return set == null ? null : new ArrayList<T>(set);
+    }
+
+    /**
+     * Notifies that a non-autofillable view was entered because the activity is whitelisted for
+     * augmented autofill.
+     *
+     * <p>This method is necessary to set the right flag on start, so the server-side session
+     * doesn't trigger the standard autofill workflow, but the augmented's instead.
+     *
+     * @hide
+     */
+    public void notifyViewEnteredForAugmentedAutofill(@NonNull View view) {
+        final AutofillId id = view.getAutofillId();
+        synchronized (mLock) {
+            if (mEnteredForAugmentedAutofillIds == null) {
+                mEnteredForAugmentedAutofillIds = new ArraySet<>(1);
+            }
+            mEnteredForAugmentedAutofillIds.add(id);
+        }
     }
 
     private void requestShowFillUi(int sessionId, AutofillId id, int width, int height,
@@ -2360,6 +2392,10 @@ public final class AutofillManager {
         }
         pw.print(pfx); pw.print("fillable ids: "); pw.println(mFillableIds);
         pw.print(pfx); pw.print("entered ids: "); pw.println(mEnteredIds);
+        if (mEnteredForAugmentedAutofillIds != null) {
+            pw.print(pfx); pw.print("entered ids for augmented autofill: ");
+            pw.println(mEnteredForAugmentedAutofillIds);
+        }
         pw.print(pfx); pw.print("save trigger id: "); pw.println(mSaveTriggerId);
         pw.print(pfx); pw.print("save on finish(): "); pw.println(mSaveOnFinish);
         if (mOptions != null) {
