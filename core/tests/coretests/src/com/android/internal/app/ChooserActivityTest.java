@@ -30,6 +30,7 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -41,6 +42,7 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -648,6 +650,59 @@ public class ChooserActivityTest {
         waitForIdle();
         onView(withId(R.id.content_preview_filename)).check(matches(isDisplayed()));
         onView(withId(R.id.content_preview_filename)).check(matches(withText("app.pdf + 2 files")));
+        onView(withId(R.id.content_preview_file_icon)).check(matches(isDisplayed()));
+    }
+
+    @Test
+    public void contentProviderThrowSecurityException() throws InterruptedException {
+        Uri uri = Uri.parse("content://com.android.frameworks.coretests/app.pdf");
+
+        ArrayList<Uri> uris = new ArrayList<>();
+        uris.add(uri);
+
+        Intent sendIntent = createSendUriIntentWithPreview(uris);
+
+        List<ResolvedComponentInfo> resolvedComponentInfos = createResolvedComponentsForTest(2);
+        when(sOverrides.resolverListController.getResolversForIntent(Mockito.anyBoolean(),
+                Mockito.anyBoolean(),
+                Mockito.isA(List.class))).thenReturn(resolvedComponentInfos);
+
+        sOverrides.resolverForceException = true;
+
+        mActivityRule.launchActivity(Intent.createChooser(sendIntent, null));
+        waitForIdle();
+        onView(withId(R.id.content_preview_filename)).check(matches(isDisplayed()));
+        onView(withId(R.id.content_preview_filename)).check(matches(withText("app.pdf")));
+        onView(withId(R.id.content_preview_file_icon)).check(matches(isDisplayed()));
+    }
+
+    @Test
+    public void contentProviderReturnsNoColumns() throws InterruptedException {
+        Uri uri = Uri.parse("content://com.android.frameworks.coretests/app.pdf");
+
+        ArrayList<Uri> uris = new ArrayList<>();
+        uris.add(uri);
+        uris.add(uri);
+
+        Intent sendIntent = createSendUriIntentWithPreview(uris);
+
+        List<ResolvedComponentInfo> resolvedComponentInfos = createResolvedComponentsForTest(2);
+        when(sOverrides.resolverListController.getResolversForIntent(Mockito.anyBoolean(),
+                Mockito.anyBoolean(),
+                Mockito.isA(List.class))).thenReturn(resolvedComponentInfos);
+
+        Cursor cursor = mock(Cursor.class);
+        when(cursor.getCount()).thenReturn(1);
+        Mockito.doNothing().when(cursor).close();
+        when(cursor.moveToFirst()).thenReturn(true);
+        when(cursor.getColumnIndex(Mockito.anyString())).thenReturn(-1);
+
+        sOverrides.resolverCursor = cursor;
+
+        mActivityRule.launchActivity(Intent.createChooser(sendIntent, null));
+        waitForIdle();
+        onView(withId(R.id.content_preview_filename)).check(matches(isDisplayed()));
+        onView(withId(R.id.content_preview_filename)).check(matches(withText("app.pdf + 1 file")));
         onView(withId(R.id.content_preview_file_icon)).check(matches(isDisplayed()));
     }
 
