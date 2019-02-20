@@ -41,6 +41,7 @@
 #include <utils/Condition.h>
 #include <utils/Log.h>
 #include <utils/Mutex.h>
+#include <thread>
 
 namespace android {
 namespace uirenderer {
@@ -175,9 +176,6 @@ void RenderThread::initThreadLocals() {
     mRenderState = new RenderState(*this);
     mVkManager = new VulkanManager();
     mCacheManager = new CacheManager(mDisplayInfo);
-    if (Properties::getRenderPipelineType() == RenderPipelineType::SkiaVulkan) {
-        requireVkContext();
-    }
 }
 
 void RenderThread::requireGlContext() {
@@ -407,6 +405,17 @@ sk_sp<Bitmap> RenderThread::allocateHardwareBitmap(SkBitmap& skBitmap) {
 
 bool RenderThread::isCurrent() {
     return gettid() == getInstance().getTid();
+}
+
+void RenderThread::preload() {
+    std::thread eglInitThread([]() {
+        //TODO: don't load EGL drivers for Vulkan, when HW bitmap uploader is refactored.
+        eglGetDisplay(EGL_DEFAULT_DISPLAY);
+    });
+    eglInitThread.detach();
+    if (Properties::getRenderPipelineType() == RenderPipelineType::SkiaVulkan) {
+        requireVkContext();
+    }
 }
 
 } /* namespace renderthread */
