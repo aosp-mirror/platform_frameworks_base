@@ -629,6 +629,7 @@ public class PackageManagerService extends IPackageManager.Stub
     final boolean mIsUpgrade;
     final boolean mIsPreNUpgrade;
     final boolean mIsPreNMR1Upgrade;
+    final boolean mIsPreQUpgrade;
 
     @GuardedBy("mPackages")
     private boolean mDexOptDialogShown;
@@ -2399,6 +2400,7 @@ public class PackageManagerService extends IPackageManager.Stub
             mIsPreNUpgrade = mIsUpgrade && ver.sdkVersion < Build.VERSION_CODES.N;
 
             mIsPreNMR1Upgrade = mIsUpgrade && ver.sdkVersion < Build.VERSION_CODES.N_MR1;
+            mIsPreQUpgrade = mIsUpgrade && ver.sdkVersion < Build.VERSION_CODES.Q;
 
             int preUpgradeSdkVersion = ver.sdkVersion;
 
@@ -3023,6 +3025,21 @@ public class PackageManagerService extends IPackageManager.Stub
                     }
                 }
                 ver.fingerprint = Build.FINGERPRINT;
+            }
+
+            // Grandfather existing (installed before Q) non-system apps to hide
+            // their icons in launcher.
+            if (!onlyCore && mIsPreQUpgrade) {
+                Slog.i(TAG, "Whitelisting all existing apps to hide their icons");
+                int size = mSettings.mPackages.size();
+                for (int i = 0; i < size; i++) {
+                    final PackageSetting ps = mSettings.mPackages.valueAt(i);
+                    if ((ps.pkgFlags & ApplicationInfo.FLAG_SYSTEM) != 0) {
+                        continue;
+                    }
+                    ps.disableComponentLPw(PackageManager.APP_DETAILS_ACTIVITY_CLASS_NAME,
+                            UserHandle.USER_SYSTEM);
+                }
             }
 
             // clear only after permissions and other defaults have been updated
