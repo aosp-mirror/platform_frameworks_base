@@ -731,17 +731,6 @@ public final class Zygote {
      * @throws IOException passed straight through
      */
     static String[] readArgumentList(BufferedReader socketReader) throws IOException {
-
-        /**
-         * See android.os.Process.zygoteSendArgsAndGetPid()
-         * Presently the wire format to the zygote process is:
-         * a) a count of arguments (argc, in essence)
-         * b) a number of newline-separated argument strings equal to count
-         *
-         * After the zygote process reads these it will write the pid of
-         * the child or -1 on failure.
-         */
-
         int argc;
 
         try {
