@@ -66,10 +66,14 @@ public:
 
     void onDumpReport(const ConfigKey& key, const int64_t dumpTimeNs,
                       const bool include_current_partial_bucket, const bool erase_data,
-                      const DumpReportReason dumpReportReason, vector<uint8_t>* outData);
+                      const DumpReportReason dumpReportReason, 
+                      const DumpLatency dumpLatency,
+                      vector<uint8_t>* outData);
     void onDumpReport(const ConfigKey& key, const int64_t dumpTimeNs,
                       const bool include_current_partial_bucket, const bool erase_data,
-                      const DumpReportReason dumpReportReason, ProtoOutputStream* proto);
+                      const DumpReportReason dumpReportReason,
+                      const DumpLatency dumpLatency,
+                      ProtoOutputStream* proto);
 
     /* Tells MetricsManager that the alarms in alarmSet have fired. Modifies anomaly alarmSet. */
     void onAnomalyAlarmFired(
@@ -82,7 +86,8 @@ public:
             unordered_set<sp<const InternalAlarm>, SpHash<InternalAlarm>> alarmSet);
 
     /* Flushes data to disk. Data on memory will be gone after written to disk. */
-    void WriteDataToDisk(const DumpReportReason dumpReportReason);
+    void WriteDataToDisk(const DumpReportReason dumpReportReason,
+                         const DumpLatency dumpLatency);
 
     /* Persist metric activation status onto disk. */
     void WriteMetricsActivationToDisk(int64_t currentTimeNs);
@@ -153,14 +158,17 @@ private:
 
     void GetActiveConfigsLocked(const int uid, vector<int64_t>& outActiveConfigs);
 
-    void WriteDataToDiskLocked(const DumpReportReason dumpReportReason);
+    void WriteDataToDiskLocked(const DumpReportReason dumpReportReason,
+                               const DumpLatency dumpLatency);
     void WriteDataToDiskLocked(const ConfigKey& key, const int64_t timestampNs,
-                               const DumpReportReason dumpReportReason);
+                               const DumpReportReason dumpReportReason,
+                               const DumpLatency dumpLatency);
 
     void onConfigMetricsReportLocked(const ConfigKey& key, const int64_t dumpTimeStampNs,
                                      const bool include_current_partial_bucket,
                                      const bool erase_data,
                                      const DumpReportReason dumpReportReason,
+                                     const DumpLatency dumpLatency,
                                      util::ProtoOutputStream* proto);
 
     /* Check if we should send a broadcast if approaching memory limits and if we're over, we

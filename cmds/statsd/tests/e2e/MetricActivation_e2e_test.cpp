@@ -211,7 +211,7 @@ TEST(MetricActivationE2eTest, TestCountMetric) {
     ConfigMetricsReportList reports;
     vector<uint8_t> buffer;
     processor.onDumpReport(cfgKey, bucketStartTimeNs + NS_PER_SEC * 60 * 15 + 1, false, true,
-                            ADB_DUMP, &buffer);
+                            ADB_DUMP, FAST, &buffer);
     EXPECT_TRUE(buffer.size() > 0);
     EXPECT_TRUE(reports.ParseFromArray(&buffer[0], buffer.size()));
     backfillDimensionPath(&reports);

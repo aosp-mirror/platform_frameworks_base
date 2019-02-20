@@ -456,6 +456,7 @@ void DurationMetricProducer::clearPastBucketsLocked(const int64_t dumpTimeNs) {
 void DurationMetricProducer::onDumpReportLocked(const int64_t dumpTimeNs,
                                                 const bool include_current_partial_bucket,
                                                 const bool erase_data,
+                                                const DumpLatency dumpLatency,
                                                 std::set<string> *str_set,
                                                 ProtoOutputStream* protoOutput) {
     if (include_current_partial_bucket) {
@@ -581,7 +582,8 @@ void DurationMetricProducer::flushIfNeededLocked(const int64_t& eventTimeNs) {
     mCurrentBucketNum += numBucketsForward;
 }
 
-void DurationMetricProducer::flushCurrentBucketLocked(const int64_t& eventTimeNs) {
+void DurationMetricProducer::flushCurrentBucketLocked(const int64_t& eventTimeNs,
+                                                      const int64_t& nextBucketStartTimeNs) {
     for (auto whatIt = mCurrentSlicedDurationTrackerMap.begin();
             whatIt != mCurrentSlicedDurationTrackerMap.end();) {
         for (auto it = whatIt->second.begin(); it != whatIt->second.end();) {

@@ -121,7 +121,7 @@ TEST(ValueMetricE2eTest, TestPulledEvents) {
     ConfigMetricsReportList reports;
     vector<uint8_t> buffer;
     processor->onDumpReport(cfgKey, configAddedTimeNs + 7 * bucketSizeNs + 10, false, true,
-                            ADB_DUMP, &buffer);
+                            ADB_DUMP, FAST, &buffer);
     EXPECT_TRUE(buffer.size() > 0);
     EXPECT_TRUE(reports.ParseFromArray(&buffer[0], buffer.size()));
     backfillDimensionPath(&reports);
@@ -228,7 +228,7 @@ TEST(ValueMetricE2eTest, TestPulledEvents_LateAlarm) {
     ConfigMetricsReportList reports;
     vector<uint8_t> buffer;
     processor->onDumpReport(cfgKey, configAddedTimeNs + 9 * bucketSizeNs + 10, false, true,
-                            ADB_DUMP, &buffer);
+                            ADB_DUMP, FAST, &buffer);
     EXPECT_TRUE(buffer.size() > 0);
     EXPECT_TRUE(reports.ParseFromArray(&buffer[0], buffer.size()));
     backfillDimensionPath(&reports);

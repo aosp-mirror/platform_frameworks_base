@@ -139,13 +139,13 @@ void CountMetricProducer::onSlicedConditionMayChangeLocked(bool overallCondition
 
 
 void CountMetricProducer::clearPastBucketsLocked(const int64_t dumpTimeNs) {
-    flushIfNeededLocked(dumpTimeNs);
     mPastBuckets.clear();
 }
 
 void CountMetricProducer::onDumpReportLocked(const int64_t dumpTimeNs,
                                              const bool include_current_partial_bucket,
                                              const bool erase_data,
+                                             const DumpLatency dumpLatency,
                                              std::set<string> *str_set,
                                              ProtoOutputStream* protoOutput) {
     if (include_current_partial_bucket) {
@@ -319,7 +319,7 @@ void CountMetricProducer::flushIfNeededLocked(const int64_t& eventTimeNs) {
         return;
     }
 
-    flushCurrentBucketLocked(eventTimeNs);
+    flushCurrentBucketLocked(eventTimeNs, eventTimeNs);
     // Setup the bucket start time and number.
     int64_t numBucketsForward = 1 + (eventTimeNs - currentBucketEndTimeNs) / mBucketSizeNs;
     mCurrentBucketStartTimeNs = currentBucketEndTimeNs + (numBucketsForward - 1) * mBucketSizeNs;
@@ -328,7 +328,8 @@ void CountMetricProducer::flushIfNeededLocked(const int64_t& eventTimeNs) {
          (long long)mCurrentBucketStartTimeNs);
 }
 
-void CountMetricProducer::flushCurrentBucketLocked(const int64_t& eventTimeNs) {
+void CountMetricProducer::flushCurrentBucketLocked(const int64_t& eventTimeNs,
+                                                   const int64_t& nextBucketStartTimeNs) {
     int64_t fullBucketEndTimeNs = getCurrentBucketEndTimeNs();
     CountBucket info;
     info.mBucketStartNs = mCurrentBucketStartTimeNs;
