@@ -42,6 +42,6 @@
     <string name="bugreport_info_name" msgid="4414036021935139527">"ಫೈಲ್‌ಹೆಸರು"</string>
     <string name="bugreport_info_title" msgid="2306030793918239804">"ಬಗ್ ಶೀರ್ಷಿಕೆ"</string>
     <string name="bugreport_info_description" msgid="5072835127481627722">"ಬಗ್ ಸಾರಾಂಶ"</string>
-    <string name="save" msgid="4781509040564835759">"ಉಳಿಸು"</string>
+    <string name="save" msgid="4781509040564835759">"ಉಳಿಸಿ"</string>
     <string name="bugreport_intent_chooser_title" msgid="7605709494790894076">"ಬಗ್ ವರದಿಯನ್ನು ಹಂಚು"</string>
 </resources>
