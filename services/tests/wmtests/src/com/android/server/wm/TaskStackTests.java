@@ -19,6 +19,9 @@ package com.android.server.wm;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
@@ -167,5 +170,23 @@ public class TaskStackTests extends WindowTestsBase {
         final int stack2PositionInParent = stack1.getParent().mChildren.indexOf(stack2);
         assertEquals(stack1PositionInParent, stack2PositionInParent + 1);
         assertTrue(task1.mOnDisplayChangedCalled);
+    }
+
+    @Test
+    public void testStackOutset() {
+        final TaskStack stack = createTaskStackOnDisplay(mDisplayContent);
+        spyOn(stack);
+
+        final int stackOutset = 10;
+        doReturn(stackOutset).when(stack).getStackOutset();
+
+        final Rect stackBounds = new Rect(200, 200, 800, 1000);
+        // Update surface position and size by the given bounds.
+        stack.setBounds(stackBounds);
+
+        assertEquals(stackBounds.width() + 2 * stackOutset, stack.getLastSurfaceSize().x);
+        assertEquals(stackBounds.height() + 2 * stackOutset, stack.getLastSurfaceSize().y);
+        assertEquals(stackBounds.left - stackOutset, stack.getLastSurfacePosition().x);
+        assertEquals(stackBounds.top - stackOutset, stack.getLastSurfacePosition().y);
     }
 }

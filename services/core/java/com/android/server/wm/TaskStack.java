@@ -71,6 +71,7 @@ import android.view.DisplayCutout;
 import android.view.DisplayInfo;
 import android.view.SurfaceControl;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.DividerSnapAlgorithm;
 import com.android.internal.policy.DividerSnapAlgorithm.SnapTarget;
 import com.android.internal.policy.DockedDividerUtils;
@@ -787,6 +788,14 @@ public class TaskStack extends WindowContainer<Task> implements
         return 0;
     }
 
+    @Override
+    void getRelativeDisplayedPosition(Point outPos) {
+        super.getRelativeDisplayedPosition(outPos);
+        final int outset = getStackOutset();
+        outPos.x -= outset;
+        outPos.y -= outset;
+    }
+
     private void updateSurfaceSize(SurfaceControl.Transaction transaction) {
         if (mSurfaceControl == null) {
             return;
@@ -805,6 +814,11 @@ public class TaskStack extends WindowContainer<Task> implements
         }
         transaction.setWindowCrop(mSurfaceControl, width, height);
         mLastSurfaceSize.set(width, height);
+    }
+
+    @VisibleForTesting
+    Point getLastSurfaceSize() {
+        return mLastSurfaceSize;
     }
 
     @Override
