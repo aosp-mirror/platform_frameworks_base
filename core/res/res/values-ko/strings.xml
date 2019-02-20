@@ -509,8 +509,8 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"앱이 NFC(근거리 무선 통신) 태그, 카드 및 리더와 통신할 수 있도록 허용합니다."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"화면 잠금 사용 중지"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"앱이 키 잠금 및 관련 비밀번호 보안을 사용중지할 수 있도록 허용합니다. 예를 들어, 휴대전화가 수신전화를 받을 때 키 잠금을 사용중지했다가 통화가 끝나면 키 잠금을 다시 사용할 수 있습니다."</string>
-    <string name="permlab_getAndRequestScreenLockComplexity" msgid="3911592334192005424">"화면 잠금 복잡도 확인 및 요청"</string>
-    <string name="permdesc_getAndRequestScreenLockComplexity" msgid="9045202063228854873">"앱이 화면 잠금 길이와 유형의 가능한 범위를 나타내는 잠금 화면 복잡도 수준(높음, 보통, 낮음 또는 없음)을 파악하도록 허용합니다. 앱이 사용자에게 화면 잠금을 특정 수준으로 업데이트할 것을 제안할 수도 있지만, 사용자는 자유롭게 이를 무시하고 다른 곳으로 이동할 수 있습니다. 화면 잠금은 일반 텍스트로 저장되지 않으므로 앱에서 정확한 비밀번호를 알 수 없습니다."</string>
+    <string name="permlab_requestScreenLockComplexity" msgid="7028982116060987169">"화면 잠금 복잡도 요청"</string>
+    <string name="permdesc_requestScreenLockComplexity" msgid="2806396846128185677">"앱이 화면 잠금 길이와 유형의 가능한 범위를 나타내는 잠금 화면 복잡도 수준(높음, 보통, 낮음 또는 없음)을 파악하도록 허용합니다. 앱이 사용자에게 화면 잠금을 특정 수준으로 업데이트할 것을 제안할 수도 있지만, 사용자는 자유롭게 이를 무시하고 다른 곳으로 이동할 수 있습니다. 화면 잠금은 일반 텍스트로 저장되지 않으므로 앱에서 정확한 비밀번호를 알 수 없습니다."</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"생체 인식 하드웨어 사용"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"앱에서 생체 인식 하드웨어를 인증에 사용하도록 허용합니다."</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"지문 하드웨어 관리"</string>
@@ -536,6 +536,7 @@
     <string name="biometric_error_user_canceled" msgid="2260175018114348727">"인증이 취소되었습니다."</string>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"인식할 수 없음"</string>
     <string name="biometric_error_canceled" msgid="349665227864885880">"인증이 취소되었습니다."</string>
+    <string name="biometric_error_device_not_secured" msgid="6583143098363528349">"PIN, 패턴, 비밀번호가 설정되지 않음"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"지문이 일부만 인식되었습니다. 다시 시도해 주세요."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"지문을 인식할 수 없습니다. 다시 시도해 주세요."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"지문 센서를 깨끗이 닦고 다시 시도하세요."</string>
@@ -555,7 +556,7 @@
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"시도 횟수가 너무 많습니다. 지문 센서가 사용 중지되었습니다."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"다시 시도해 보세요."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="7654382120628334248">"등록된 지문이 없습니다."</string>
-    <string name="fingerprint_error_hw_not_present" msgid="5729436878065119329">"기기에 지문 센서가 없습니다."</string>
+    <string name="fingerprint_error_hw_not_present" msgid="409523969613176352">"기기에 지문 센서가 없습니다."</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"손가락 <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -575,7 +576,14 @@
     <string name="face_acquired_too_left" msgid="2712489669456176505">"센서를 왼쪽으로 옮겨 주세요."</string>
     <string name="face_acquired_poor_gaze" msgid="8344973502980415859">"센서를 바라보세요."</string>
     <string name="face_acquired_not_detected" msgid="5707782294589511391">"얼굴을 감지할 수 없습니다."</string>
-    <string name="face_acquired_not_steady" msgid="3722829465011040042">"얼굴을 움직이지 말고 기기를 마주 보세요."</string>
+    <string name="face_acquired_too_much_motion" msgid="470381210701463822">"너무 많이 움직였습니다."</string>
+    <string name="face_acquired_recalibrate" msgid="8077949502893707539">"얼굴을 다시 등록해 주세요."</string>
+    <string name="face_acquired_too_different" msgid="5553210341111255124">"다른 얼굴이 감지되었습니다."</string>
+    <string name="face_acquired_too_similar" msgid="1508776858407646460">"너무 비슷합니다. 다른 포즈를 취해 보세요."</string>
+    <string name="face_acquired_pan_too_extreme" msgid="8203001424525231680">"카메라를 더 똑바로 바라보세요."</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="7641326344460439970">"카메라를 더 똑바로 바라보세요."</string>
+    <string name="face_acquired_roll_too_extreme" msgid="1444829237745898619">"고개를 똑바로 세워 주세요."</string>
+    <string name="face_acquired_obscured" msgid="3055077697850272097">"얼굴이 보이게 해 주세요."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="6255891785768984615">"얼굴 인식 하드웨어를 사용할 수 없습니다."</string>
@@ -587,7 +595,7 @@
     <string name="face_error_lockout_permanent" msgid="8198354656746088890">"시도 횟수가 너무 많아 얼굴 인증이 사용 중지되었습니다."</string>
     <string name="face_error_unable_to_process" msgid="238761109287767270">"다시 시도해 보세요."</string>
     <string name="face_error_not_enrolled" msgid="9166792142679691323">"등록된 얼굴이 없습니다."</string>
-    <string name="face_error_hw_not_present" msgid="4737289254517095671">"이 기기에는 얼굴 인증 센서가 없습니다."</string>
+    <string name="face_error_hw_not_present" msgid="916085883581450331">"이 기기에는 얼굴 인증 센서가 없습니다."</string>
     <string name="face_name_template" msgid="7004562145809595384">"얼굴 <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -947,8 +955,7 @@
     <string name="save_password_never" msgid="8274330296785855105">"안함"</string>
     <string name="open_permission_deny" msgid="7374036708316629800">"페이지를 열 수 있는 권한이 없습니다."</string>
     <string name="text_copied" msgid="4985729524670131385">"텍스트가 클립보드에 복사되었습니다."</string>
-    <!-- no translation found for copied (8564151838171791598) -->
-    <skip />
+    <string name="copied" msgid="8564151838171791598">"복사 완료"</string>
     <string name="more_item_label" msgid="4650918923083320495">"더보기"</string>
     <string name="prepend_shortcut_label" msgid="2572214461676015642">"Menu+"</string>
     <string name="menu_meta_shortcut_label" msgid="4647153495550313570">"Meta+"</string>
@@ -1389,7 +1396,7 @@
     <string name="ext_media_init_action" msgid="7952885510091978278">"설정"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"마운트 해제"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"둘러보기"</string>
-    <!-- no translation found for ext_media_seamless_action (5356508985817068711) -->
+    <!-- no translation found for ext_media_seamless_action (6575980560886881233) -->
     <skip />
     <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> 없음"</string>
     <string name="ext_media_missing_message" msgid="4012389235250987930">"기기를 다시 삽입하세요."</string>
@@ -1990,4 +1997,8 @@
     <string name="dynamic_mode_notification_title" msgid="508815255807182035">"평소에 충전하는 시간 전에 배터리가 소진될 수 있습니다."</string>
     <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"배터리 수명을 연장하기 위해 배터리 세이버가 활성화되었습니다."</string>
     <string name="car_loading_profile" msgid="3545132581795684027">"로드 중"</string>
+    <plurals name="file_count" formatted="false" msgid="1628600959752419449">
+      <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> 및 파일 <xliff:g id="COUNT_3">%d</xliff:g>개</item>
+      <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> 및 파일 <xliff:g id="COUNT_1">%d</xliff:g>개</item>
+    </plurals>
 </resources>

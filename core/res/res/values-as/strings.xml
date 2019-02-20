@@ -509,8 +509,8 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"এপটোক নিয়েৰ ফিল্ড কমিউনিকেশ্বন (NFC) টেগ, কাৰ্ড আৰু ৰিডাৰসমূহৰ সৈতে যোগাযোগ কৰিবলৈ অনুমতি দিয়ে।"</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"আপোনাৰ স্ক্ৰীণ ল\'ক অক্ষম কৰক"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"এপটোক কী ল\'ক আৰু জড়িত হোৱা যিকোনো পাছৱৰ্ডৰ সুৰক্ষা অক্ষম কৰিব দিয়ে৷ উদাহৰণস্বৰূপে, কোনো অন্তৰ্গামী ফ\'ন কল উঠোৱাৰ সময়ত ফ\'নটোৱে কী-লকটো অক্ষম কৰে, তাৰ পিছত কল শেষ হ\'লেই কী লকটো পুনৰ সক্ষম কৰে৷"</string>
-    <string name="permlab_getAndRequestScreenLockComplexity" msgid="3911592334192005424">"স্ক্ৰীণ ল’কৰ জটিলতা লাভ কৰক আৰু অনুৰোধ কৰক"</string>
-    <string name="permdesc_getAndRequestScreenLockComplexity" msgid="9045202063228854873">"স্ক্ৰীণ ল’কৰ জটিলতাৰ স্তৰ (উচ্চ, মধ্যম, নিম্ন বা একেবাৰে নাই), যি স্ক্ৰীণ ল’কৰ সম্ভাব্য দৈৰ্ঘ্য বা স্ক্ৰীণ ল’কৰ প্ৰকাৰ দৰ্শায় সেইবোৰ শিকিবলৈ এপক অনুমতি দিয়ে। লগতে এপটোৱে ব্যৱহাৰকাৰীক স্ক্ৰীণ ল’কটো এটা নিৰ্দিষ্ট স্তৰলৈ আপডে’ট কৰিবলৈ পৰামৰ্শ দিব পাৰে যিটো ব্যৱহাৰকাৰীয়ে উপেক্ষা কৰি পৰৱর্তী পৃষ্ঠালৈ যাব পাৰে। মনত ৰাখিব যে স্ক্ৰীণ ল’কটো সাধাৰণ পাঠ হিচাপে সঞ্চয় কৰা নহয় সেয়ে এপটোৱে সঠিক পাছৱৰ্ডটো জানিব নোৱাৰে।"</string>
+    <string name="permlab_requestScreenLockComplexity" msgid="7028982116060987169">"স্ক্ৰীণ লকৰ জটিলতাৰ অনুৰোধ জনোৱা"</string>
+    <string name="permdesc_requestScreenLockComplexity" msgid="2806396846128185677">"এপটোক স্ক্ৰীণ ল’কৰ জটিলতাৰ স্তৰ (উচ্চ, মধ্যম, নিম্ন বা একেবাৰে নাই), শিকিবলৈ অনুমতি দিয়ে ই স্ক্ৰীণ ল’কৰ সম্ভাব্য দৈৰ্ঘ্য বা স্ক্ৰীণ ল’কৰ প্ৰকাৰ দৰ্শায়। লগতে এপটোৱে ব্যৱহাৰকাৰীক স্ক্ৰীণ ল’কটো এটা নিৰ্দিষ্ট স্তৰলৈ আপডে’ট কৰিবলৈ পৰামৰ্শ দিব পাৰে যিটো ব্যৱহাৰকাৰীয়ে উপেক্ষা কৰি পৰৱর্তী পৃষ্ঠালৈ যাব পাৰে। মনত ৰাখিব যে স্ক্ৰীণ ল’কটো সাধাৰণ পাঠ হিচাপে সঞ্চয় কৰা নহয় সেয়ে এপটোৱে সঠিক পাছৱৰ্ডটো জানিব নোৱাৰে।"</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"বায়োমেট্ৰিক হাৰ্ডৱেৰ ব্য়ৱহাৰ কৰক"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"বিশ্বাসযোগ্য়তা প্ৰমাণীকৰণৰ বাবে এপক বায়োমেট্ৰিক হাৰ্ডৱেৰ ব্য়ৱহাৰ কৰিবলৈ অনুমতি দিয়ে"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"ফিংগাৰপ্ৰিণ্ট হাৰ্ডৱেৰ পৰিচালনা কৰিব পাৰে"</string>
@@ -536,6 +536,8 @@
     <string name="biometric_error_user_canceled" msgid="2260175018114348727">"বিশ্বাসযোগ্যতাৰ প্ৰমাণীকৰণ বাতিল কৰা হৈছে"</string>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"চিনাক্ত কৰিব পৰা নাই"</string>
     <string name="biometric_error_canceled" msgid="349665227864885880">"বিশ্বাসযোগ্যতাৰ প্ৰমাণীকৰণ বাতিল কৰা হৈছে"</string>
+    <!-- no translation found for biometric_error_device_not_secured (6583143098363528349) -->
+    <skip />
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"ফিংগাৰপ্ৰিণ্ট আংশিকভাৱে চিনাক্ত কৰা হৈছে। অনুগ্ৰহ কৰি আকৌ চেষ্টা কৰক৷"</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"ফিগাৰপ্ৰিণ্টৰ প্ৰক্ৰিয়া সম্পাদন কৰিবপৰা নগ\'ল। অনুগ্ৰহ কৰি আকৌ চেষ্টা কৰক৷"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"ফিংগাৰপ্ৰিণ্ট ছেন্সৰটো লেতেৰা হৈ আছে। অনুগ্ৰহ কৰি পৰিষ্কাৰ কৰি আকৌ চেষ্টা কৰক।"</string>
@@ -555,7 +557,8 @@
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"অত্যধিক প্ৰয়াস। ফিংগাৰপ্ৰিণ্ট ছেন্সৰ অক্ষম কৰা হ’ল।"</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"আকৌ চেষ্টা কৰক।"</string>
     <string name="fingerprint_error_no_fingerprints" msgid="7654382120628334248">"কোনো ফিংগাৰপ্ৰিণ্ট যোগ কৰা নহ\'ল।"</string>
-    <string name="fingerprint_error_hw_not_present" msgid="5729436878065119329">"এই ডিভাইচটোত ফিংগাৰপ্ৰিণ্ট ছেন্সৰ নাই"</string>
+    <!-- no translation found for fingerprint_error_hw_not_present (409523969613176352) -->
+    <skip />
     <string name="fingerprint_name_template" msgid="5870957565512716938">"<xliff:g id="FINGERID">%d</xliff:g> আঙুলি"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -575,7 +578,22 @@
     <string name="face_acquired_too_left" msgid="2712489669456176505">"অনুগ্ৰহ কৰি ছেন্সৰটো বাওঁফাললৈ নিয়ক।"</string>
     <string name="face_acquired_poor_gaze" msgid="8344973502980415859">"অনুগ্ৰহ কৰি ছেন্সৰটোলৈ চাওক।"</string>
     <string name="face_acquired_not_detected" msgid="5707782294589511391">"কোনো মুখমণ্ডল চিনাক্ত কৰিব পৰা নগ’ল।"</string>
-    <string name="face_acquired_not_steady" msgid="3722829465011040042">"ডিভাইচৰ আগত মুখখন স্থিৰ কৰি ৰাখক।"</string>
+    <!-- no translation found for face_acquired_too_much_motion (470381210701463822) -->
+    <skip />
+    <!-- no translation found for face_acquired_recalibrate (8077949502893707539) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_different (5553210341111255124) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_similar (1508776858407646460) -->
+    <skip />
+    <!-- no translation found for face_acquired_pan_too_extreme (8203001424525231680) -->
+    <skip />
+    <!-- no translation found for face_acquired_tilt_too_extreme (7641326344460439970) -->
+    <skip />
+    <!-- no translation found for face_acquired_roll_too_extreme (1444829237745898619) -->
+    <skip />
+    <!-- no translation found for face_acquired_obscured (3055077697850272097) -->
+    <skip />
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="6255891785768984615">"মুখমণ্ডলৰ হাৰ্ডৱেৰ উপলব্ধ নহয়।"</string>
@@ -587,7 +605,8 @@
     <string name="face_error_lockout_permanent" msgid="8198354656746088890">"অত্যধিক প্ৰয়াস। মুখমণ্ডলৰ জৰিয়তে সত্যাপন অক্ষম কৰা হ’ল।"</string>
     <string name="face_error_unable_to_process" msgid="238761109287767270">"আকৌ চেষ্টা কৰক।"</string>
     <string name="face_error_not_enrolled" msgid="9166792142679691323">"কোনো মুখমণ্ডল যোগ কৰা নহ’ল।"</string>
-    <string name="face_error_hw_not_present" msgid="4737289254517095671">"এই ডিভাইচটোত মুখমণ্ডল সত্যাপন ছেন্সৰ নাই।"</string>
+    <!-- no translation found for face_error_hw_not_present (916085883581450331) -->
+    <skip />
     <string name="face_name_template" msgid="7004562145809595384">"মুখমণ্ডল <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -947,8 +966,7 @@
     <string name="save_password_never" msgid="8274330296785855105">"কেতিয়াও মনত নাৰাখিব"</string>
     <string name="open_permission_deny" msgid="7374036708316629800">"এই পৃষ্ঠাটো খুলিবলৈ আপোনাৰ অনুমতি নাই।"</string>
     <string name="text_copied" msgid="4985729524670131385">"ক্লিপব\'র্ডলৈ বাৰ্তা প্ৰতিলিপি কৰা হ’ল।"</string>
-    <!-- no translation found for copied (8564151838171791598) -->
-    <skip />
+    <string name="copied" msgid="8564151838171791598">"প্ৰতিলিপি কৰা হ’ল"</string>
     <string name="more_item_label" msgid="4650918923083320495">"অধিক"</string>
     <string name="prepend_shortcut_label" msgid="2572214461676015642">"মেনু+"</string>
     <string name="menu_meta_shortcut_label" msgid="4647153495550313570">"মেটা+"</string>
@@ -1134,8 +1152,7 @@
     <string name="whichEditApplication" msgid="144727838241402655">"ইয়াৰ দ্বাৰা সম্পাদনা কৰক"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"%1$sৰদ্বাৰা সম্পাদনা কৰক"</string>
     <string name="whichEditApplicationLabel" msgid="7183524181625290300">"সম্পাদনা কৰক"</string>
-    <!-- no translation found for whichSendApplication (5803792421724377602) -->
-    <skip />
+    <string name="whichSendApplication" msgid="5803792421724377602">"শ্বেয়াৰ কৰক"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"%1$sৰ জৰিয়তে শ্বেয়াৰ কৰক"</string>
     <string name="whichSendApplicationLabel" msgid="4579076294675975354">"শ্বেয়াৰ কৰক"</string>
     <string name="whichSendToApplication" msgid="8272422260066642057">"ইয়াৰ মাধ্য়মেৰে প্ৰেৰণ কৰক"</string>
@@ -1284,7 +1301,7 @@
     <string name="wifi_connect_alert_message" msgid="6451273376815958922">"%1$s এপ্লিকেশ্বনটোৱে ৱাই-ফাই নেটৱৰ্ক %2$sৰ সৈতে সংযুক্ত হ\'ব বিচাৰিছে"</string>
     <string name="wifi_connect_default_application" msgid="7143109390475484319">"এপ্লিকেশ্বন"</string>
     <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"ৱাই-ফাই ডাইৰেক্ট"</string>
-    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"ৱাই-ফাই ডাইৰেক্ট আৰম্ভ কৰক। এই কার্যই ৱাই-ফাই ক্লাইণ্ট/হ\'টস্প\'ট অফ কৰিব।"</string>
+    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"ৱাই-ফাই ডাইৰেক্ট আৰম্ভ কৰক। এই কার্যই ৱাই-ফাই ক্লাইণ্ট/হটস্পট অফ কৰিব।"</string>
     <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"ৱাই-ফাই ডাইৰেক্ট আৰম্ভ কৰিব পৰা নগ\'ল।"</string>
     <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"ৱাই-ফাই ডাইৰেক্ট অন হৈ আছে"</string>
     <string name="wifi_p2p_enabled_notification_message" msgid="8064677407830620023">"ছেটিংসমূহৰ বাবে টিপক"</string>
@@ -1391,7 +1408,7 @@
     <string name="ext_media_init_action" msgid="7952885510091978278">"ছেট আপ কৰক"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"বাহিৰ কৰক"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"অন্বেষণ কৰক"</string>
-    <!-- no translation found for ext_media_seamless_action (5356508985817068711) -->
+    <!-- no translation found for ext_media_seamless_action (6575980560886881233) -->
     <skip />
     <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> উপলব্ধ নহয়"</string>
     <string name="ext_media_missing_message" msgid="4012389235250987930">"ডিভাইচ আকৌ ভৰাওক"</string>
@@ -1874,7 +1891,7 @@
     <string name="importance_from_user" msgid="7318955817386549931">"এই জাননীবোৰৰ গুৰুত্ব আপুনি ছেট কৰব লাগিব।"</string>
     <string name="importance_from_person" msgid="9160133597262938296">"এই কার্যৰ সৈতে জড়িত থকা লোকসকলক ভিত্তি কৰি এইয়া গুৰুত্বপূর্ণ বুলি বিবেচনা কৰা হৈছ।"</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"<xliff:g id="APP">%1$s</xliff:g> ক <xliff:g id="ACCOUNT">%2$s</xliff:g>ৰ জৰিয়তে নতুন ব্য়ৱহাৰকাৰী সৃষ্টি কৰিবলৈ অনুমতি দিবনে?"</string>
-    <string name="user_creation_adding" msgid="4482658054622099197">"<xliff:g id="APP">%1$s</xliff:g>ক <xliff:g id="ACCOUNT">%2$s</xliff:g>ৰ (এই একাউন্টৰ এজন ব্য়ৱহাৰকাৰী ইতিমধ্য়ে আছে) জৰিয়তে নতুন ব্য়ৱহাৰকাৰী সৃষ্টি কৰিবলৈ অনুমতি দিবনে?"</string>
+    <string name="user_creation_adding" msgid="4482658054622099197">"<xliff:g id="APP">%1$s</xliff:g>ক <xliff:g id="ACCOUNT">%2$s</xliff:g>ৰ (এই একাউন্টৰ এজন ব্য়ৱহাৰকাৰী ইতিমধ্যে আছে) জৰিয়তে নতুন ব্য়ৱহাৰকাৰী সৃষ্টি কৰিবলৈ অনুমতি দিবনে?"</string>
     <string name="language_selection_title" msgid="2680677278159281088">"ভাষা যোগ কৰক"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"অঞ্চলৰ অগ্ৰাধিকাৰ"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"ভাষাৰ নাম লিখক"</string>
@@ -1992,4 +2009,8 @@
     <string name="dynamic_mode_notification_title" msgid="508815255807182035">"চ্চাৰ্জ কৰাৰ সচৰাচৰ সময়ৰ আগতেই বেটাৰি শেষ হ’ব পাৰে"</string>
     <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"বেটাৰিৰ খৰচ কমাবলৈ বেটাৰি সঞ্চয়কাৰী অন কৰা হৈছে"</string>
     <string name="car_loading_profile" msgid="3545132581795684027">"ল’ড হৈ আছে"</string>
+    <plurals name="file_count" formatted="false" msgid="1628600959752419449">
+      <item quantity="one"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g>টা ফাইল</item>
+      <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g>টা ফাইল</item>
+    </plurals>
 </resources>

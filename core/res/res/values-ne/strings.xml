@@ -509,8 +509,8 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"अनुप्रयोगलाई नयाँ क्षेत्र संचार (NFC) ट्यागहरू, कार्डहरू र पाठकहरूसँग अन्तर्क्रिया गर्न अनुमति दिन्छ।"</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"स्क्रिन लक असक्षम पार्नुहोस्"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"कुनै सम्बन्धित पासवर्ड सुरक्षा र किलकलाई असक्षम पार्न अनुप्रयोगलाई अनुमति दिन्छ। उदाहरणको लागि, अन्तर्गमन फोन कल प्राप्त गर्दा फोनले किलकलाई असक्षम पार्छ, त्यसपछि कल सकिएको बेला किलक पुनःसक्षम पार्छ।"</string>
-    <string name="permlab_getAndRequestScreenLockComplexity" msgid="3911592334192005424">"स्क्रिन लकको जटिलतासम्बन्धी जानकारी प्राप्त गर्न र त्यसका लागि अनुरोध गर्न"</string>
-    <string name="permdesc_getAndRequestScreenLockComplexity" msgid="9045202063228854873">"यसले अनुप्रयोगलाई स्क्रिन लकको जटिलताको स्तर (उच्च, मध्यम, न्यून वा कुनै पनि होइन) थाहा पाउने अनुमति दिन्छ जसले स्क्रिन लकको लम्बाइको सम्भावित दायरा र त्यसको प्रकारलाई जनाउँछ। यसै गरी, यो अनुप्रयोगले प्रयोगकर्ताहरूलाई स्क्रिन लक अद्यावधिक गर्ने सुझाव पनि दिन सक्छ तर प्रयोगकर्ताहरू उक्त सुझावको बेवास्ता गरी बाहिर निस्कन सक्छन्। स्क्रिन लकलाई सादा पाठको ढाँचामा भण्डारण नगरिने हुँदा यो अनुप्रयोगले वास्तविक पासवर्ड थाहा पाउँदैन भन्ने कुरा याद राख्नुहोस्।"</string>
+    <string name="permlab_requestScreenLockComplexity" msgid="7028982116060987169">"स्क्रिन लकको जटिलतासम्बन्धी जानकारी प्राप्त गर्ने अनुरोध गर्नुहोस्"</string>
+    <string name="permdesc_requestScreenLockComplexity" msgid="2806396846128185677">"यसले अनुप्रयोगलाई स्क्रिन लकको जटिलताको स्तर (उच्च, मध्यम, न्यून वा कुनै पनि होइन) थाहा पाउने अनुमति दिन्छ जसले स्क्रिन लकको लम्बाइको सम्भावित दायरा र त्यसको प्रकारलाई जनाउँछ। यसै गरी, यो अनुप्रयोगले प्रयोगकर्ताहरूलाई स्क्रिन लक अद्यावधिक गर्ने सुझाव पनि दिन सक्छ तर प्रयोगकर्ताहरू उक्त सुझावको बेवास्ता गरी बाहिर निस्कन सक्छन्। स्क्रिन लकलाई सादा पाठको ढाँचामा भण्डारण नगरिने हुँदा यो अनुप्रयोगले वास्तविक पासवर्ड थाहा पाउँदैन भन्ने कुरा याद राख्नुहोस्।"</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"बायोमेट्रिक हार्डवेयर प्रयोग गर्नुहोस्‌"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"अनुप्रयोगलाई प्रमाणीकरणका लागि बायोमेट्रिक हार्डवेयर प्रयोग गर्न अनुमति दिन्छ"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"औठाछाप हार्डवेयर व्यवस्थापन गर्नुहोस्"</string>
@@ -536,6 +536,7 @@
     <string name="biometric_error_user_canceled" msgid="2260175018114348727">"प्रमाणीकरण रद्द गरियो"</string>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"पहिचान भएन"</string>
     <string name="biometric_error_canceled" msgid="349665227864885880">"प्रमाणीकरण रद्द गरियो"</string>
+    <string name="biometric_error_device_not_secured" msgid="6583143098363528349">"कुनै पनि PIN, ढाँचा वा पासवर्ड सेट गरिएको छैन"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"आंशिक औठाछाप पत्ता लाग्यो। कृपया फेरि प्रयास गर्नुहोस्।"</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"औठाछाप प्रशोधन गर्न सकिएन। कृपया फेरि प्रयास गर्नुहोस्।"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"औँठाछाप सेन्सर फोहोर छ। कृपया सफा गरेर फेरि प्रयास गर्नुहोस्।"</string>
@@ -555,7 +556,7 @@
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"अत्यन्त धेरै प्रयासहरू। फिंगरप्रिन्ट सेन्सरलाई असक्षम पारियो।"</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"पुन: प्रयास गर्नुहोला।"</string>
     <string name="fingerprint_error_no_fingerprints" msgid="7654382120628334248">"कुनै पनि फिंगरप्रिन्ट दर्ता गरिएको छैन।"</string>
-    <string name="fingerprint_error_hw_not_present" msgid="5729436878065119329">"यो यन्त्रमा कुनै फिंगरप्रिन्ट सेन्सर छैन"</string>
+    <string name="fingerprint_error_hw_not_present" msgid="409523969613176352">"यो यन्त्रमा कुनै पनि फिंगरप्रिन्ट सेन्सर छैन।"</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"औंला <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -575,7 +576,14 @@
     <string name="face_acquired_too_left" msgid="2712489669456176505">"कृपया सेन्सरलाई बायाँतिर सार्नुहोस्।"</string>
     <string name="face_acquired_poor_gaze" msgid="8344973502980415859">"कृपया सेन्सरमा हेर्नुहोस्।"</string>
     <string name="face_acquired_not_detected" msgid="5707782294589511391">"अनुहार पत्ता लागेन।"</string>
-    <string name="face_acquired_not_steady" msgid="3722829465011040042">"यन्त्रको अगाडि अनुहार स्थिर राख्नुहोस्।"</string>
+    <string name="face_acquired_too_much_motion" msgid="470381210701463822">"अत्यधिक हल्लियो।"</string>
+    <string name="face_acquired_recalibrate" msgid="8077949502893707539">"कृपया आफ्नो अनुहार पुनः दर्ता गर्नुहोस्।"</string>
+    <string name="face_acquired_too_different" msgid="5553210341111255124">"अर्कै अनुहार पत्ता लाग्यो।"</string>
+    <string name="face_acquired_too_similar" msgid="1508776858407646460">"अनुहार उस्तै भयो, कृपया आफ्नो पोज बदल्नुहोस्।"</string>
+    <string name="face_acquired_pan_too_extreme" msgid="8203001424525231680">"कृपया आफ्नो अनुहार अझ सीधा पारेर क्यामेरामा हेर्नु"</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="7641326344460439970">"कृपया आफ्नो अनुहार अझ सीधा पारेर क्यामेरामा हेर्नु"</string>
+    <string name="face_acquired_roll_too_extreme" msgid="1444829237745898619">"कृपया आफ्नो अनुहार ठाडो रूपमा सीधा पार्नुहोस्।"</string>
+    <string name="face_acquired_obscured" msgid="3055077697850272097">"कृपया आफ्नो अनुहार नढाक्नुहोस्।"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="6255891785768984615">"अनुहार पहिचान गर्ने हार्डवेयर उपलब्ध छैन।"</string>
@@ -587,7 +595,7 @@
     <string name="face_error_lockout_permanent" msgid="8198354656746088890">"अत्यधिक धेरैपटक गलत प्रयासहरू भए। अनुहार प्रमाणिकरणलाई असक्षम पारियो।"</string>
     <string name="face_error_unable_to_process" msgid="238761109287767270">"फेरि प्रयास गर्नुहोस्।"</string>
     <string name="face_error_not_enrolled" msgid="9166792142679691323">"कुनै पनि अनुहार दर्ता गरिएन।"</string>
-    <string name="face_error_hw_not_present" msgid="4737289254517095671">"यो यन्त्रमा कुनै अनुहार प्रमाणिकरण सेन्सर छैन"</string>
+    <string name="face_error_hw_not_present" msgid="916085883581450331">"यो यन्त्रमा अनुहार प्रमाणीकरण गर्ने कुनै पनि सेन्सर छैन।"</string>
     <string name="face_name_template" msgid="7004562145809595384">"अनुहार <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -947,8 +955,7 @@
     <string name="save_password_never" msgid="8274330296785855105">"कहिल्यै पनि होइन"</string>
     <string name="open_permission_deny" msgid="7374036708316629800">"यो पृष्ठ खोल्न तपाईँलाई अनुमति छैन।"</string>
     <string name="text_copied" msgid="4985729524670131385">"क्लिपबोर्डमा प्रतिलिप गरिएको पाठ।"</string>
-    <!-- no translation found for copied (8564151838171791598) -->
-    <skip />
+    <string name="copied" msgid="8564151838171791598">"प्रतिलिपि गरियो"</string>
     <string name="more_item_label" msgid="4650918923083320495">"बढी"</string>
     <string name="prepend_shortcut_label" msgid="2572214461676015642">"मेनु+"</string>
     <string name="menu_meta_shortcut_label" msgid="4647153495550313570">"Meta+"</string>
@@ -1140,8 +1147,7 @@
     <!-- no translation found for whichEditApplicationNamed (1775815530156447790) -->
     <skip />
     <string name="whichEditApplicationLabel" msgid="7183524181625290300">"सम्पादन गर्नुहोस्"</string>
-    <!-- no translation found for whichSendApplication (5803792421724377602) -->
-    <skip />
+    <string name="whichSendApplication" msgid="5803792421724377602">"आदान प्रदान गर्नुहोस्"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"%1$s सँग साझेदारी गर्नुहोस्"</string>
     <string name="whichSendApplicationLabel" msgid="4579076294675975354">"साझेदारी गर्नुहोस्"</string>
     <string name="whichSendToApplication" msgid="8272422260066642057">"यसको प्रयोग गरी पठाउनुहोस्"</string>
@@ -1396,7 +1402,7 @@
     <string name="ext_media_init_action" msgid="7952885510091978278">"सेटअप गर्नुहोस्"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"निकाल्नुहोस्"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"अन्वेषण गर्नुहोस्"</string>
-    <!-- no translation found for ext_media_seamless_action (5356508985817068711) -->
+    <!-- no translation found for ext_media_seamless_action (6575980560886881233) -->
     <skip />
     <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> हराइरहेको"</string>
     <string name="ext_media_missing_message" msgid="4012389235250987930">"यन्त्र फेरि घुसाउनुहोस्"</string>
@@ -1997,4 +2003,8 @@
     <string name="dynamic_mode_notification_title" msgid="508815255807182035">"प्रायः चार्ज गर्ने समय हुनुभन्दा पहिले नै ब्याट्री सकिन सक्छ"</string>
     <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"ब्याट्रीको आयु बढाउन ब्याट्री सेभर सक्रिय गरियो"</string>
     <string name="car_loading_profile" msgid="3545132581795684027">"लोड गर्दै"</string>
+    <plurals name="file_count" formatted="false" msgid="1628600959752419449">
+      <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> फाइलहरू</item>
+      <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> + <xliff:g id="COUNT_1">%d</xliff:g> फाइल</item>
+    </plurals>
 </resources>

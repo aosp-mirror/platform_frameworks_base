@@ -509,8 +509,8 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"অ্যাপ্লিকেশানকে নিয়ার ফিল্ড কমিউনিকেশন (NFC) ট্যাগ, কার্ড এবং রিডারগুলির সাথে যোগাযোগ করতে দেয়৷"</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"আপনার স্ক্রিন লক অক্ষম করুন"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"কী-লক এবং যেকোনো সংশ্লিষ্ট পাসওয়ার্ড সুরক্ষা অক্ষম করতে অ্যাপ্লিকেশানটিকে মঞ্জুর করে৷ উদাহরণস্বরূপ, একটি ইনকামিং ফোন কল গ্রহণ করার সময়ে ফোনটি কী-লক অক্ষম করে, তারপরে কল শেষ হয়ে গেলে কী-লকটিকে আবার সক্ষম করে৷"</string>
-    <string name="permlab_getAndRequestScreenLockComplexity" msgid="3911592334192005424">"স্ক্রিন লক কমপ্লেক্সিটি প্যাটার্নটির জন্য অনুরোধ জানান এবং ব্যবহার করুন"</string>
-    <string name="permdesc_getAndRequestScreenLockComplexity" msgid="9045202063228854873">"স্ক্রিন লক কমপ্লেক্সিটি প্যাটার্নটির লেভেল (বেশি, মাঝারি, কম বা কোনও কিছুই নেই) জানতে অ্যাপকে অনুমতি দিন, যা সম্ভাব্য স্ক্রিন লকের ধরন এবং তা কতটা দীর্ঘ হবে তার ইঙ্গিত দেয়। একটি নির্দিষ্ট লেভেল পর্যন্ত স্ক্রিন লক আপডেট করা যাবে তাও এই অ্যাপটি সাজেস্ট করতে পারে, তবে ব্যবহারকারীর তা উপেক্ষা করার এবং অন্য কোথাও চলে যাওয়ার স্বাধীনতা আছে। মনে রাখবেন প্লেনটেক্সটে স্ক্রিন লক স্টোর করা হয় না, তাই সঠিক পাসওয়ার্ড অ্যাপের পক্ষে জানা সম্ভব নয়।"</string>
+    <string name="permlab_requestScreenLockComplexity" msgid="7028982116060987169">"স্ক্রিন লকের জটিলতা জানার অনুরোধ করুন"</string>
+    <string name="permdesc_requestScreenLockComplexity" msgid="2806396846128185677">"এটি অ্যাপটিকে স্ক্রিন লকের জটিলতার লেভেল বুঝতে সাহায্য করে (খুব জটিল, মাঝারি ধরনের জটিল, অল্প জটিল বা কোনও জটিলতা নেই), যা স্ক্রিন লকটি সম্ভত কত দীর্ঘ ও সেটির ধরন কীরকম, তার ইঙ্গিত দেয়। একটি নির্দিষ্ট লেভেল পর্যন্ত স্ক্রিন লক আপডেট করা যাবে তাও এই অ্যাপটি সাজেস্ট করতে পারে, তবে ব্যবহারকারীর তা উপেক্ষা করার এবং অন্য কোথাও চলে যাওয়ার স্বাধীনতা আছে। লক্ষ্য করবেন, স্ক্রিন লকটি যেহেতু প্লেন টেক্সট ফর্ম্যাটে স্টোর করা হয় না, তাই সঠিক পাসওয়ার্ডটি অ্যাপের পক্ষে জানা সম্ভব নয়।"</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"বায়োমেট্রিক হার্ডওয়্যার ব্যবহার করুন"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"অ্যাপটিকে যাচাইকরণের জন্য বায়োমেট্রিক হার্ডওয়্যার ব্যবহার করার অনুমতি দেয়"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"আঙ্গুলের ছাপ নেওয়ার হার্ডওয়্যার পরিচালনা করুন"</string>
@@ -536,6 +536,7 @@
     <string name="biometric_error_user_canceled" msgid="2260175018114348727">"যাচাইকরণ বাতিল হয়েছে"</string>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"স্বীকৃত নয়"</string>
     <string name="biometric_error_canceled" msgid="349665227864885880">"যাচাইকরণ বাতিল হয়েছে"</string>
+    <string name="biometric_error_device_not_secured" msgid="6583143098363528349">"পিন, প্যাটার্ন অথবা পাসওয়ার্ড সেট করা নেই"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"আঙ্গুলের ছাপ আংশিক শনাক্ত করা হয়েছে৷ অনুগ্রহ করে আবার চেষ্টা করুন৷"</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"আঙ্গুলের ছাপ প্রক্রিয়া করা যায়নি৷ অনুগ্রহ করে আবার চেষ্টা করুন৷"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"আঙ্গুলের ছাপ নেওয়ার সেন্সরটি অপরিস্কার৷ অনুগ্রহ করে পরিষ্কার করে আবার চেষ্টা করুন৷"</string>
@@ -555,7 +556,7 @@
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"বহুবার চেষ্টা করেছেন। আঙ্গুলের ছাপ নেওয়ার সেন্সর অক্ষম করা হয়েছে।"</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"আবার চেষ্টা করুন৷"</string>
     <string name="fingerprint_error_no_fingerprints" msgid="7654382120628334248">"কোনও আঙ্গুলের ছাপ নথিভুক্ত করা হয়নি।"</string>
-    <string name="fingerprint_error_hw_not_present" msgid="5729436878065119329">"এই ডিভাইসে আঙ্গুলের ছাপের সেন্সর নেই"</string>
+    <string name="fingerprint_error_hw_not_present" msgid="409523969613176352">"এই ডিভাইসে ফিঙ্গারপ্রিন্ট সেন্সর নেই।"</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"আঙ্গুল <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -575,7 +576,14 @@
     <string name="face_acquired_too_left" msgid="2712489669456176505">"অনুগ্রহ করে সেন্সরটি বাঁ দিকে নিয়ে যান।"</string>
     <string name="face_acquired_poor_gaze" msgid="8344973502980415859">"অনুগ্রহ করে সেন্সরের দিকে তাকান।"</string>
     <string name="face_acquired_not_detected" msgid="5707782294589511391">"কোনও ফেস শনাক্ত করা যায়নি।"</string>
-    <string name="face_acquired_not_steady" msgid="3722829465011040042">"ডিভাইসের সামনে ফেসটি স্থির রাখুন।"</string>
+    <string name="face_acquired_too_much_motion" msgid="470381210701463822">"খুব বেশি নড়ছে।"</string>
+    <string name="face_acquired_recalibrate" msgid="8077949502893707539">"আপনার মুখের ছবি আবার নথিভুক্ত করুন।"</string>
+    <string name="face_acquired_too_different" msgid="5553210341111255124">"বিভিন্ন ব্যক্তির মুখের ছবি শনাক্ত করা হয়েছে।"</string>
+    <string name="face_acquired_too_similar" msgid="1508776858407646460">"একই ধরনের দেখতে, একটু অন্যদিকে ঘুরে দাঁড়ান।"</string>
+    <string name="face_acquired_pan_too_extreme" msgid="8203001424525231680">"সরাসরি ক্যামেরার দিকে তাকান।"</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="7641326344460439970">"সরাসরি ক্যামেরার দিকে তাকান।"</string>
+    <string name="face_acquired_roll_too_extreme" msgid="1444829237745898619">"মাথা সোজা করে রাখুন।"</string>
+    <string name="face_acquired_obscured" msgid="3055077697850272097">"আপনার মুখটা আলোর দিকে নিয়ে আসুন।"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="6255891785768984615">"ফেসের হার্ডওয়্যার উপলভ্য নয়৷"</string>
@@ -587,7 +595,7 @@
     <string name="face_error_lockout_permanent" msgid="8198354656746088890">"অনেকবার চেষ্টা করা হয়েছে৷ ফেস যাচাইকরণ বন্ধ আছে।"</string>
     <string name="face_error_unable_to_process" msgid="238761109287767270">"আবার চেষ্টা করুন।"</string>
     <string name="face_error_not_enrolled" msgid="9166792142679691323">"কোনও ফেস নথিভুক্ত করা হয়নি।"</string>
-    <string name="face_error_hw_not_present" msgid="4737289254517095671">"এই ডিভাইসে ফেস যাচাইকরণ সেন্সর নেই"</string>
+    <string name="face_error_hw_not_present" msgid="916085883581450331">"এই ডিভাইসের ফেস যাচাইকরণ সেন্সর নেই।"</string>
     <string name="face_name_template" msgid="7004562145809595384">"<xliff:g id="FACEID">%d</xliff:g> ফেস"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -947,8 +955,7 @@
     <string name="save_password_never" msgid="8274330296785855105">"কখনই নয়"</string>
     <string name="open_permission_deny" msgid="7374036708316629800">"এই পৃষ্ঠাটি খোলার জন্য আপনার কাছে অনুমতি নেই৷"</string>
     <string name="text_copied" msgid="4985729524670131385">"ক্লিপবোর্ডে পাঠ্য অনুলিপি করা হয়েছে৷"</string>
-    <!-- no translation found for copied (8564151838171791598) -->
-    <skip />
+    <string name="copied" msgid="8564151838171791598">"কপি করা হয়েছে"</string>
     <string name="more_item_label" msgid="4650918923083320495">"আরও"</string>
     <string name="prepend_shortcut_label" msgid="2572214461676015642">"মেনু+"</string>
     <string name="menu_meta_shortcut_label" msgid="4647153495550313570">"Meta+"</string>
@@ -1134,8 +1141,7 @@
     <string name="whichEditApplication" msgid="144727838241402655">"এর মাধ্যমে সম্পাদনা করুন"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"%1$s দিয়ে সম্পাদনা করুন"</string>
     <string name="whichEditApplicationLabel" msgid="7183524181625290300">"সম্পাদনা করুন"</string>
-    <!-- no translation found for whichSendApplication (5803792421724377602) -->
-    <skip />
+    <string name="whichSendApplication" msgid="5803792421724377602">"শেয়ার করুন"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"%1$s এর সাথে শেয়ার করুন"</string>
     <string name="whichSendApplicationLabel" msgid="4579076294675975354">"শেয়ার করুন"</string>
     <string name="whichSendToApplication" msgid="8272422260066642057">"এটি ব্যবহার করে পাঠান"</string>
@@ -1391,7 +1397,7 @@
     <string name="ext_media_init_action" msgid="7952885510091978278">"সেট আপ করুন"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"বের করে নিন"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"ঘুরে দেখুন"</string>
-    <!-- no translation found for ext_media_seamless_action (5356508985817068711) -->
+    <!-- no translation found for ext_media_seamless_action (6575980560886881233) -->
     <skip />
     <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> অনুপস্থিত"</string>
     <string name="ext_media_missing_message" msgid="4012389235250987930">"ডিভাইসটি আবার ঢোকান"</string>
@@ -1992,4 +1998,8 @@
     <string name="dynamic_mode_notification_title" msgid="508815255807182035">"সাধারণত যখন চার্জ দেন, তার আগে চার্জ শেষ হয়ে যেতে পারে"</string>
     <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"ডিভাইস বেশিক্ষণ চালু রাখতে ব্যাটারি সেভার চালু করা হয়েছে"</string>
     <string name="car_loading_profile" msgid="3545132581795684027">"লোড হচ্ছে"</string>
+    <plurals name="file_count" formatted="false" msgid="1628600959752419449">
+      <item quantity="one"><xliff:g id="FILE_NAME_2">%s</xliff:g> এবং আরও <xliff:g id="COUNT_3">%d</xliff:g>টি ফাইল</item>
+      <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> এবং আরও <xliff:g id="COUNT_3">%d</xliff:g>টি ফাইল</item>
+    </plurals>
 </resources>

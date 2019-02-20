@@ -509,8 +509,8 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Hiermee kan de app communiceren met NFC-tags (Near Field Communication), kaarten en lezers."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"je schermvergrendeling uitschakelen"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Hiermee kan de app de toetsenblokkering en bijbehorende wachtwoordbeveiliging uitschakelen. Zo kan de telefoon de toetsenblokkering uitschakelen wanneer je wordt gebeld en de toetsenblokkering weer inschakelen als het gesprek is beëindigd."</string>
-    <string name="permlab_getAndRequestScreenLockComplexity" msgid="3911592334192005424">"complexiteit van schermbeveiliging ophalen en aanvragen"</string>
-    <string name="permdesc_getAndRequestScreenLockComplexity" msgid="9045202063228854873">"Hiermee krijgt de app toestemming om het complexiteitsniveau van de schermvergrendeling te achterhalen (hoog, midden, laag of geen). Dat geeft een indicatie van het mogelijke lengtebereik en type van de schermvergrendeling. De app kan gebruikers ook voorstellen de schermvergrendeling naar een bepaald niveau te updaten, maar gebruikers kunnen dit altijd negeren en de app verlaten. De schermvergrendeling wordt niet opgeslagen in platte tekst, zodat de app het precieze wachtwoord niet weet."</string>
+    <string name="permlab_requestScreenLockComplexity" msgid="7028982116060987169">"complexiteit van schermvergrendeling opvragen"</string>
+    <string name="permdesc_requestScreenLockComplexity" msgid="2806396846128185677">"Hiermee krijgt de app toestemming om het complexiteitsniveau van de schermvergrendeling te achterhalen (hoog, midden, laag of geen). Dat geeft een indicatie van het mogelijke lengtebereik en type van de schermvergrendeling. De app kan gebruikers ook voorstellen de schermvergrendeling naar een bepaald niveau te updaten, maar gebruikers kunnen dit altijd negeren en de app verlaten. De schermvergrendeling wordt niet opgeslagen in platte tekst, zodat de app het precieze wachtwoord niet weet."</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"biometrische hardware gebruiken"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"Hiermee kan de app biometrische hardware gebruiken voor verificatie"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"Vingerafdrukhardware beheren"</string>
@@ -536,6 +536,7 @@
     <string name="biometric_error_user_canceled" msgid="2260175018114348727">"Verificatie geannuleerd"</string>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"Niet herkend"</string>
     <string name="biometric_error_canceled" msgid="349665227864885880">"Verificatie geannuleerd"</string>
+    <string name="biometric_error_device_not_secured" msgid="6583143098363528349">"Geen pincode, patroon of wachtwoord ingesteld"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Gedeeltelijke vingerafdruk gedetecteerd. Probeer het opnieuw."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Kan vingerafdruk niet verwerken. Probeer het opnieuw."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"De vingerafdruksensor moet worden schoongemaakt. Probeer het daarna opnieuw."</string>
@@ -555,7 +556,7 @@
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"Te veel pogingen. Vingerafdruksensor uitgeschakeld."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Probeer het opnieuw."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="7654382120628334248">"Geen vingerafdrukken geregistreerd."</string>
-    <string name="fingerprint_error_hw_not_present" msgid="5729436878065119329">"Dit apparaat heeft geen vingerafdruksensor"</string>
+    <string name="fingerprint_error_hw_not_present" msgid="409523969613176352">"Dit apparaat heeft geen vingerafdruksensor."</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"Vinger <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -575,7 +576,14 @@
     <string name="face_acquired_too_left" msgid="2712489669456176505">"Beweeg de sensor naar links."</string>
     <string name="face_acquired_poor_gaze" msgid="8344973502980415859">"Kijk naar de sensor."</string>
     <string name="face_acquired_not_detected" msgid="5707782294589511391">"Geen gezicht gedetecteerd."</string>
-    <string name="face_acquired_not_steady" msgid="3722829465011040042">"Houd het gezicht stil voor het apparaat."</string>
+    <string name="face_acquired_too_much_motion" msgid="470381210701463822">"Te veel beweging."</string>
+    <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Registreer je gezicht opnieuw."</string>
+    <string name="face_acquired_too_different" msgid="5553210341111255124">"Ander gezicht gedetecteerd."</string>
+    <string name="face_acquired_too_similar" msgid="1508776858407646460">"Lijkt te veel op elkaar. Verander je pose."</string>
+    <string name="face_acquired_pan_too_extreme" msgid="8203001424525231680">"Kijk rechter in de camera."</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="7641326344460439970">"Kijk rechter in de camera."</string>
+    <string name="face_acquired_roll_too_extreme" msgid="1444829237745898619">"Houd je hoofd verticaal recht."</string>
+    <string name="face_acquired_obscured" msgid="3055077697850272097">"Laat je gezicht zien."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="6255891785768984615">"Hardware voor gezichtsherkenning niet beschikbaar."</string>
@@ -587,7 +595,7 @@
     <string name="face_error_lockout_permanent" msgid="8198354656746088890">"Te veel pogingen. Gezichtsherkenning inactief."</string>
     <string name="face_error_unable_to_process" msgid="238761109287767270">"Probeer het opnieuw."</string>
     <string name="face_error_not_enrolled" msgid="9166792142679691323">"Geen gezicht geregistreerd."</string>
-    <string name="face_error_hw_not_present" msgid="4737289254517095671">"Dit apparaat heeft geen sensor voor gezichtsherkenning"</string>
+    <string name="face_error_hw_not_present" msgid="916085883581450331">"Dit apparaat heeft geen sensor voor gezichtsherkenning."</string>
     <string name="face_name_template" msgid="7004562145809595384">"Gezicht <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -947,8 +955,7 @@
     <string name="save_password_never" msgid="8274330296785855105">"Nooit"</string>
     <string name="open_permission_deny" msgid="7374036708316629800">"Je hebt geen toestemming om deze pagina te openen."</string>
     <string name="text_copied" msgid="4985729524670131385">"Tekst naar klembord gekopieerd."</string>
-    <!-- no translation found for copied (8564151838171791598) -->
-    <skip />
+    <string name="copied" msgid="8564151838171791598">"Gekopieerd"</string>
     <string name="more_item_label" msgid="4650918923083320495">"Meer"</string>
     <string name="prepend_shortcut_label" msgid="2572214461676015642">"Menu+"</string>
     <string name="menu_meta_shortcut_label" msgid="4647153495550313570">"Meta +"</string>
@@ -1389,7 +1396,7 @@
     <string name="ext_media_init_action" msgid="7952885510091978278">"Configureren"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Uitwerpen"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"Verkennen"</string>
-    <!-- no translation found for ext_media_seamless_action (5356508985817068711) -->
+    <!-- no translation found for ext_media_seamless_action (6575980560886881233) -->
     <skip />
     <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> ontbreekt"</string>
     <string name="ext_media_missing_message" msgid="4012389235250987930">"Voer apparaat opnieuw in"</string>
@@ -1990,4 +1997,8 @@
     <string name="dynamic_mode_notification_title" msgid="508815255807182035">"De batterij raakt mogelijk leeg voordat deze normaal gesproken wordt opgeladen"</string>
     <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"Batterijbesparing is geactiveerd om de batterijduur te verlengen"</string>
     <string name="car_loading_profile" msgid="3545132581795684027">"Laden"</string>
+    <plurals name="file_count" formatted="false" msgid="1628600959752419449">
+      <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> bestanden</item>
+      <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> + <xliff:g id="COUNT_1">%d</xliff:g> bestand</item>
+    </plurals>
 </resources>

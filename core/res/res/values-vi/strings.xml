@@ -509,8 +509,8 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Cho phép ứng dụng giao tiếp với thẻ Giao tiếp trường gần (NFC), thẻ và trình đọc."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"vô hiệu hóa khóa màn hình của bạn"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Cho phép ứng dụng tắt khóa phím và bất kỳ bảo mật mật khẩu được liên kết nào. Ví dụ: điện thoại tắt khóa phím khi nhận được cuộc gọi đến, sau đó bật lại khóa phím khi cuộc gọi kết thúc."</string>
-    <string name="permlab_getAndRequestScreenLockComplexity" msgid="3911592334192005424">"nhận và yêu cầu độ phức tạp của khóa màn hình"</string>
-    <string name="permdesc_getAndRequestScreenLockComplexity" msgid="9045202063228854873">"Cho phép ứng dụng nắm được mức độ phức tạp của khóa màn hình (cao, trung bình, thấp hoặc không có), cho biết khoảng độ dài và loại khóa màn hình có thể có. Ứng dụng cũng có thể đề xuất cho người dùng rằng họ nên cập nhật khóa màn hình lên một mức độ nhất định nhưng người dùng có thể tùy ý bỏ qua và chuyển sang phần khác. Xin lưu ý rằng khóa màn hình không được lưu trữ dưới dạng văn bản thuần túy, do đó, ứng dụng sẽ không biết mật khẩu chính xác."</string>
+    <string name="permlab_requestScreenLockComplexity" msgid="7028982116060987169">"yêu cầu mức độ phức tạp của khóa màn hình"</string>
+    <string name="permdesc_requestScreenLockComplexity" msgid="2806396846128185677">"Cho phép ứng dụng nắm được độ phức tạp của khóa màn hình (cao, trung bình, thấp hoặc không có). Mức độ này cho biết khoảng độ dài và loại khóa màn hình có thể có. Ứng dụng cũng có thể gợi ý người dùng nên cập nhật khóa màn hình lên một mức độ nhất định, nhưng người dùng có thể tùy ý bỏ qua và chuyển sang phần khác. Xin lưu ý rằng khóa màn hình không được lưu trữ dưới dạng văn bản thuần túy, vì vậy ứng dụng sẽ không biết mật khẩu chính xác."</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"sử dụng phần cứng sinh trắc học"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"Cho phép ứng dụng dùng phần cứng sinh trắc học để xác thực"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"quản lý phần cứng vân tay"</string>
@@ -536,6 +536,7 @@
     <string name="biometric_error_user_canceled" msgid="2260175018114348727">"Đã hủy xác thực"</string>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"Không nhận dạng được"</string>
     <string name="biometric_error_canceled" msgid="349665227864885880">"Đã hủy xác thực"</string>
+    <string name="biometric_error_device_not_secured" msgid="6583143098363528349">"Chưa đặt mã PIN, hình mở khóa hoặc mật khẩu"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Đã phát hiện được một phần vân tay. Vui lòng thử lại."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Không thể xử lý vân tay. Vui lòng thử lại."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Cảm biến vân tay bị bẩn. Hãy làm sạch và thử lại."</string>
@@ -555,7 +556,7 @@
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"Quá nhiều lần thử. Cảm biến vân tay đã bị tắt."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Thử lại."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="7654382120628334248">"Chưa đăng ký vân tay."</string>
-    <string name="fingerprint_error_hw_not_present" msgid="5729436878065119329">"Thiết bị này không có cảm biến vân tay"</string>
+    <string name="fingerprint_error_hw_not_present" msgid="409523969613176352">"Thiết bị này không có cảm biến vân tay."</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"Ngón tay <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -575,7 +576,14 @@
     <string name="face_acquired_too_left" msgid="2712489669456176505">"Hay đưa cảm biến sang bên trái."</string>
     <string name="face_acquired_poor_gaze" msgid="8344973502980415859">"Hãy nhìn vào cảm biến."</string>
     <string name="face_acquired_not_detected" msgid="5707782294589511391">"Không phát hiện được khuôn mặt nào."</string>
-    <string name="face_acquired_not_steady" msgid="3722829465011040042">"Hãy giữ yên khuôn mặt trước thiết bị."</string>
+    <string name="face_acquired_too_much_motion" msgid="470381210701463822">"Thiết bị chuyển động quá nhiều."</string>
+    <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Vui lòng đăng ký lại khuôn mặt của bạn."</string>
+    <string name="face_acquired_too_different" msgid="5553210341111255124">"Đã phát hiện thấy khuôn mặt khác."</string>
+    <string name="face_acquired_too_similar" msgid="1508776858407646460">"Khuôn mặt quá giống nhau, vui lòng đổi tư thế."</string>
+    <string name="face_acquired_pan_too_extreme" msgid="8203001424525231680">"Vui lòng nhìn thẳng vào máy ảnh."</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="7641326344460439970">"Vui lòng nhìn thẳng vào máy ảnh."</string>
+    <string name="face_acquired_roll_too_extreme" msgid="1444829237745898619">"Vui lòng giữ thẳng đầu."</string>
+    <string name="face_acquired_obscured" msgid="3055077697850272097">"Vui lòng không che mặt của bạn."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="6255891785768984615">"Không truy cập được phần cứng nhận dạng khuôn mặt."</string>
@@ -587,7 +595,7 @@
     <string name="face_error_lockout_permanent" msgid="8198354656746088890">"Đã thử quá nhiều lần. Đã tắt xác thực khuôn mặt."</string>
     <string name="face_error_unable_to_process" msgid="238761109287767270">"Hãy thử lại."</string>
     <string name="face_error_not_enrolled" msgid="9166792142679691323">"Bạn chưa đăng ký khuôn mặt."</string>
-    <string name="face_error_hw_not_present" msgid="4737289254517095671">"Thiết bị này không có cảm biến xác thực khuôn mặt"</string>
+    <string name="face_error_hw_not_present" msgid="916085883581450331">"Thiết bị này không có cảm biến xác thực khuôn mặt."</string>
     <string name="face_name_template" msgid="7004562145809595384">"Khuôn mặt <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -947,8 +955,7 @@
     <string name="save_password_never" msgid="8274330296785855105">"Chưa bao giờ"</string>
     <string name="open_permission_deny" msgid="7374036708316629800">"Bạn không được phép mở trang này."</string>
     <string name="text_copied" msgid="4985729524670131385">"Đã sao chép văn bản vào khay nhớ tạm thời."</string>
-    <!-- no translation found for copied (8564151838171791598) -->
-    <skip />
+    <string name="copied" msgid="8564151838171791598">"Đã sao chép"</string>
     <string name="more_item_label" msgid="4650918923083320495">"Thêm"</string>
     <string name="prepend_shortcut_label" msgid="2572214461676015642">"Trình đơn+"</string>
     <string name="menu_meta_shortcut_label" msgid="4647153495550313570">"Meta+"</string>
@@ -1389,7 +1396,7 @@
     <string name="ext_media_init_action" msgid="7952885510091978278">"Thiết lập"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Tháo"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"Khám phá"</string>
-    <!-- no translation found for ext_media_seamless_action (5356508985817068711) -->
+    <!-- no translation found for ext_media_seamless_action (6575980560886881233) -->
     <skip />
     <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> bị thiếu"</string>
     <string name="ext_media_missing_message" msgid="4012389235250987930">"Hãy lắp lại thiết bị"</string>
@@ -1990,4 +1997,8 @@
     <string name="dynamic_mode_notification_title" msgid="508815255807182035">"Pin có thể hết trước khi sạc bình thường"</string>
     <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"Trình tiết kiệm pin được kích hoạt để kéo dài thời lượng pin"</string>
     <string name="car_loading_profile" msgid="3545132581795684027">"Đang tải"</string>
+    <plurals name="file_count" formatted="false" msgid="1628600959752419449">
+      <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> tệp</item>
+      <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> + <xliff:g id="COUNT_1">%d</xliff:g> tệp</item>
+    </plurals>
 </resources>

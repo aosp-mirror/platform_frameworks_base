@@ -512,8 +512,8 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Дозвољава апликацији да комуницира са ознакама, картицама и читачима комуникације кратког домета (NFC)."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"онемогућавање закључавања екрана"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Дозвољава апликацији да онемогући закључавање тастатуре и све повезане безбедносне мере са лозинкама. На пример, телефон онемогућава закључавање тастатуре при пријему долазног телефонског позива, а затим га поново омогућава по завршетку позива."</string>
-    <string name="permlab_getAndRequestScreenLockComplexity" msgid="3911592334192005424">"добијање и тражење нивоа сложености закључавања екрана"</string>
-    <string name="permdesc_getAndRequestScreenLockComplexity" msgid="9045202063228854873">"Дозвољава апликацији да сазна ниво сложености закључавања екрана (висока, средња, ниска или ниједна), што указује на могући опсег трајања и тип закључавања екрана. Апликација може и да предлаже корисницима да ажурирају закључавање екрана на одређени ниво, али корисници слободно могу да занемаре то и да иду на друге странице. Имајте на уму да се подаци за закључавање екрана не чувају као обичан текст, па апликација не зна тачну лозинку."</string>
+    <string name="permlab_requestScreenLockComplexity" msgid="7028982116060987169">"тражење сложености закључавања екрана"</string>
+    <string name="permdesc_requestScreenLockComplexity" msgid="2806396846128185677">"Дозвољава апликацији да сазна ниво сложености закључавања екрана (висока, средња, ниска или ниједна), што указује на могући опсег трајања и тип закључавања екрана. Апликација може и да предлаже корисницима да ажурирају закључавање екрана на одређени ниво, али корисници слободно могу да занемаре то и да иду на друге странице. Имајте на уму да се подаци за закључавање екрана не чувају као обичан текст, па апликација не зна тачну лозинку."</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"користи биометријски хардвер"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"Дозвољава апликацији да користи биометријски хардвер за потврду идентитета"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"управљај хардвером за отиске прстију"</string>
@@ -539,6 +539,7 @@
     <string name="biometric_error_user_canceled" msgid="2260175018114348727">"Потврда идентитета је отказана"</string>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"Није препознато"</string>
     <string name="biometric_error_canceled" msgid="349665227864885880">"Потврда идентитета је отказана"</string>
+    <string name="biometric_error_device_not_secured" msgid="6583143098363528349">"Нисте подесили ни PIN, ни шаблон, ни лозинку"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Откривен је делимични отисак прста. Пробајте поново."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Није успела обрада отиска прста. Пробајте поново."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Сензор за отиске прстију је прљав. Очистите га и покушајте поново."</string>
@@ -558,7 +559,7 @@
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"Превише покушаја. Сензор за отисак прста је онемогућен."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Пробајте поново."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="7654382120628334248">"Није регистрован ниједан отисак прста."</string>
-    <string name="fingerprint_error_hw_not_present" msgid="5729436878065119329">"Овај уређај нема сензор за отисак прста"</string>
+    <string name="fingerprint_error_hw_not_present" msgid="409523969613176352">"Овај уређај нема сензор за отисак прста."</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"Прст <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -578,7 +579,14 @@
     <string name="face_acquired_too_left" msgid="2712489669456176505">"Померите сензор улево."</string>
     <string name="face_acquired_poor_gaze" msgid="8344973502980415859">"Гледајте у сензор."</string>
     <string name="face_acquired_not_detected" msgid="5707782294589511391">"Није откривено ниједно лице."</string>
-    <string name="face_acquired_not_steady" msgid="3722829465011040042">"Задржите лице испред уређаја без померања."</string>
+    <string name="face_acquired_too_much_motion" msgid="470381210701463822">"Много се померате."</string>
+    <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Поново региструјте лице."</string>
+    <string name="face_acquired_too_different" msgid="5553210341111255124">"Откривено је друго лице."</string>
+    <string name="face_acquired_too_similar" msgid="1508776858407646460">"Превише је слично, промените позу."</string>
+    <string name="face_acquired_pan_too_extreme" msgid="8203001424525231680">"Гледајте право у камеру."</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="7641326344460439970">"Гледајте право у камеру."</string>
+    <string name="face_acquired_roll_too_extreme" msgid="1444829237745898619">"Исправите главу."</string>
+    <string name="face_acquired_obscured" msgid="3055077697850272097">"Откријте лице."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="6255891785768984615">"Харвдер за лице није доступан."</string>
@@ -590,7 +598,7 @@
     <string name="face_error_lockout_permanent" msgid="8198354656746088890">"Више покушаја. Потврда идентитета је онемогућена."</string>
     <string name="face_error_unable_to_process" msgid="238761109287767270">"Пробајте поново."</string>
     <string name="face_error_not_enrolled" msgid="9166792142679691323">"Није регистровано ниједно лице."</string>
-    <string name="face_error_hw_not_present" msgid="4737289254517095671">"Овај уређај нема сензор за потврду идентитета помоћу лица"</string>
+    <string name="face_error_hw_not_present" msgid="916085883581450331">"Овај уређај нема сензор за потврду идентитета помоћу лица."</string>
     <string name="face_name_template" msgid="7004562145809595384">"Лице <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -950,8 +958,7 @@
     <string name="save_password_never" msgid="8274330296785855105">"Никад"</string>
     <string name="open_permission_deny" msgid="7374036708316629800">"Немате дозволу да отворите ову страницу."</string>
     <string name="text_copied" msgid="4985729524670131385">"Текст је копиран у привремену меморију."</string>
-    <!-- no translation found for copied (8564151838171791598) -->
-    <skip />
+    <string name="copied" msgid="8564151838171791598">"Копирано је"</string>
     <string name="more_item_label" msgid="4650918923083320495">"Још"</string>
     <string name="prepend_shortcut_label" msgid="2572214461676015642">"Мени+"</string>
     <string name="menu_meta_shortcut_label" msgid="4647153495550313570">"Meta+"</string>
@@ -1411,7 +1418,7 @@
     <string name="ext_media_init_action" msgid="7952885510091978278">"Активирај"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Избаци"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"Истражи"</string>
-    <!-- no translation found for ext_media_seamless_action (5356508985817068711) -->
+    <!-- no translation found for ext_media_seamless_action (6575980560886881233) -->
     <skip />
     <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> недостаје"</string>
     <string name="ext_media_missing_message" msgid="4012389235250987930">"Поново уметните уређај"</string>
@@ -2025,4 +2032,9 @@
     <string name="dynamic_mode_notification_title" msgid="508815255807182035">"Батерија ће се можда испразнити пре уобичајеног пуњења"</string>
     <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"Уштеда батерије је активирана да би се продужило трајање батерије"</string>
     <string name="car_loading_profile" msgid="3545132581795684027">"Учитава се"</string>
+    <plurals name="file_count" formatted="false" msgid="1628600959752419449">
+      <item quantity="one"><xliff:g id="FILE_NAME_2">%s</xliff:g> и још <xliff:g id="COUNT_3">%d</xliff:g> датотека</item>
+      <item quantity="few"><xliff:g id="FILE_NAME_2">%s</xliff:g> и још <xliff:g id="COUNT_3">%d</xliff:g> датотеке</item>
+      <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> и још <xliff:g id="COUNT_3">%d</xliff:g> датотека</item>
+    </plurals>
 </resources>

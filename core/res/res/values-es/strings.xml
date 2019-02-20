@@ -509,8 +509,8 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Permite que la aplicación se comunique con lectores, tarjetas y etiquetas de Comunicación de campo cercano (NFC)."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"inhabilitar el bloqueo de pantalla"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Permite que la aplicación inhabilite el bloqueo del teclado y cualquier protección con contraseña asociada. Por ejemplo, el teléfono puede inhabilitar el bloqueo del teclado cuando se recibe una llamada telefónica y volver a habilitarlo cuando finaliza la llamada."</string>
-    <string name="permlab_getAndRequestScreenLockComplexity" msgid="3911592334192005424">"obtener y solicitar el nivel de complejidad del bloqueo de pantalla"</string>
-    <string name="permdesc_getAndRequestScreenLockComplexity" msgid="9045202063228854873">"Permite que la aplicación entienda el nivel de complejidad del bloqueo de pantalla (alto, medio, bajo o ninguno) que indica la longitud y el tipo del bloqueo de pantalla posibles. La aplicación también puede sugerir a los usuarios que actualicen el bloqueo de pantalla para que tenga un nivel concreto de complejidad, pero los usuarios pueden ignorar la advertencia libremente. El bloqueo de pantalla no se almacena en texto sin formato, así que la aplicación no puede saber cuál es la contraseña exacta."</string>
+    <string name="permlab_requestScreenLockComplexity" msgid="7028982116060987169">"solicitar complejidad del bloqueo de pantalla"</string>
+    <string name="permdesc_requestScreenLockComplexity" msgid="2806396846128185677">"Permite que la aplicación entienda el nivel de complejidad del bloqueo de pantalla (alto, medio, bajo o ninguno) que indica la longitud y el tipo del bloqueo de pantalla posibles. La aplicación también puede sugerir a los usuarios que actualicen el bloqueo de pantalla para que tenga un nivel concreto de complejidad, pero los usuarios pueden ignorar la advertencia libremente. El bloqueo de pantalla no se almacena en texto sin formato, así que la aplicación no puede saber cuál es la contraseña exacta."</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"usar hardware biométrico"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"Permite que la aplicación utilice el hardware biométrico para realizar la autenticación"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"administrar hardware de huellas digitales"</string>
@@ -536,6 +536,7 @@
     <string name="biometric_error_user_canceled" msgid="2260175018114348727">"Autenticación cancelada"</string>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"No se reconoce"</string>
     <string name="biometric_error_canceled" msgid="349665227864885880">"Autenticación cancelada"</string>
+    <string name="biometric_error_device_not_secured" msgid="6583143098363528349">"No se ha definido el PIN, el patrón o la contraseña"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Se ha detectado una huella digital parcial. Vuelve a intentarlo."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"No se ha podido procesar la huella digital. Vuelve a intentarlo."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"El sensor de huellas digitales está sucio. Límpialo y vuelve a intentarlo."</string>
@@ -555,7 +556,7 @@
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"Demasiados intentos. Se ha inhabilitado el sensor de huellas digitales."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Vuelve a intentarlo."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="7654382120628334248">"No se ha registrado ninguna huella digital."</string>
-    <string name="fingerprint_error_hw_not_present" msgid="5729436878065119329">"El dispositivo no tiene ningún sensor de huellas digitales"</string>
+    <string name="fingerprint_error_hw_not_present" msgid="409523969613176352">"Este dispositivo no tiene sensor de huellas digitales."</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"Dedo <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -575,7 +576,14 @@
     <string name="face_acquired_too_left" msgid="2712489669456176505">"Mueve el sensor hacia la izquierda."</string>
     <string name="face_acquired_poor_gaze" msgid="8344973502980415859">"Mira al sensor."</string>
     <string name="face_acquired_not_detected" msgid="5707782294589511391">"No se ha detectado ninguna cara."</string>
-    <string name="face_acquired_not_steady" msgid="3722829465011040042">"Mantén la cara fija enfrente del dispositivo."</string>
+    <string name="face_acquired_too_much_motion" msgid="470381210701463822">"Te mueves demasiado."</string>
+    <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Vuelve a registrar tu cara."</string>
+    <string name="face_acquired_too_different" msgid="5553210341111255124">"Se ha detectado otra cara."</string>
+    <string name="face_acquired_too_similar" msgid="1508776858407646460">"Se parece mucha a la anterior. Pon otra cara."</string>
+    <string name="face_acquired_pan_too_extreme" msgid="8203001424525231680">"Mira más fijamente a la cámara."</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="7641326344460439970">"Mira más fijamente a la cámara."</string>
+    <string name="face_acquired_roll_too_extreme" msgid="1444829237745898619">"Mantén la cabeza en posición vertical."</string>
+    <string name="face_acquired_obscured" msgid="3055077697850272097">"No te tapes la cara."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="6255891785768984615">"Hardware de reconocimiento facial no disponible."</string>
@@ -587,7 +595,7 @@
     <string name="face_error_lockout_permanent" msgid="8198354656746088890">"Demasiados intentos. Autent. facial inhabilitada."</string>
     <string name="face_error_unable_to_process" msgid="238761109287767270">"Inténtalo de nuevo."</string>
     <string name="face_error_not_enrolled" msgid="9166792142679691323">"No has registrado ninguna cara."</string>
-    <string name="face_error_hw_not_present" msgid="4737289254517095671">"Este dispositivo no tiene sensor de autenticación facial"</string>
+    <string name="face_error_hw_not_present" msgid="916085883581450331">"Este dispositivo no tiene sensor de autenticación facial."</string>
     <string name="face_name_template" msgid="7004562145809595384">"Cara <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -947,8 +955,7 @@
     <string name="save_password_never" msgid="8274330296785855105">"Nunca"</string>
     <string name="open_permission_deny" msgid="7374036708316629800">"No tienes permiso para abrir esta página."</string>
     <string name="text_copied" msgid="4985729524670131385">"Texto copiado al portapapeles."</string>
-    <!-- no translation found for copied (8564151838171791598) -->
-    <skip />
+    <string name="copied" msgid="8564151838171791598">"Copiado"</string>
     <string name="more_item_label" msgid="4650918923083320495">"Más"</string>
     <string name="prepend_shortcut_label" msgid="2572214461676015642">"MENU+"</string>
     <string name="menu_meta_shortcut_label" msgid="4647153495550313570">"Meta +"</string>
@@ -1389,7 +1396,7 @@
     <string name="ext_media_init_action" msgid="7952885510091978278">"Configurar"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Expulsar"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"Explorar"</string>
-    <!-- no translation found for ext_media_seamless_action (5356508985817068711) -->
+    <!-- no translation found for ext_media_seamless_action (6575980560886881233) -->
     <skip />
     <string name="ext_media_missing_title" msgid="620980315821543904">"Falta <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_missing_message" msgid="4012389235250987930">"Introduce el dispositivo"</string>
@@ -1835,7 +1842,7 @@
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Contraer"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"No molestar"</string>
-    <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"Tiempo de inactividad"</string>
+    <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"Periodo de descanso"</string>
     <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"Noche de entre semana"</string>
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"Fin de semana"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"Evento"</string>
@@ -1990,4 +1997,8 @@
     <string name="dynamic_mode_notification_title" msgid="508815255807182035">"Es posible que te quedes sin batería antes de lo habitual"</string>
     <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"Se ha activado el ahorro de batería para aumentar la duración de la batería"</string>
     <string name="car_loading_profile" msgid="3545132581795684027">"Cargando"</string>
+    <plurals name="file_count" formatted="false" msgid="1628600959752419449">
+      <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> y <xliff:g id="COUNT_3">%d</xliff:g> archivos</item>
+      <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> y <xliff:g id="COUNT_1">%d</xliff:g> archivo</item>
+    </plurals>
 </resources>

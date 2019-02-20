@@ -509,8 +509,8 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"ઍપ્લિકેશનને નિઅર ફીલ્ડ કમ્યુનિકેશન (NFC) ટૅગ, કાર્ડ અને રીડર સાથે સંચાર કરવાની મંજૂરી આપે છે."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"તમારું સ્ક્રીન લૉક અક્ષમ કરો"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"એપ્લિકેશનને કીલૉક અને કોઈપણ સંકળાયેલ પાસવર્ડ સુરક્ષા અક્ષમ કરવાની મંજૂરી આપે છે. ઉદાહરણ તરીકે, ઇનકમિંગ ફોન કૉલ પ્રાપ્ત કરતી વખતે ફોન, કીલૉકને અક્ષમ કરે છે, પછી કૉલ સમાપ્ત થઈ જવા પર કીલૉક ફરીથી સક્ષમ કરે છે."</string>
-    <string name="permlab_getAndRequestScreenLockComplexity" msgid="3911592334192005424">"સ્ક્રીન લૉકની જટિલતા મેળવીને વિનંતી કરો"</string>
-    <string name="permdesc_getAndRequestScreenLockComplexity" msgid="9045202063228854873">"ઍપને સ્ક્રીન લૉકની જટિલતાનું લેવલ (ઊંચું, મધ્યમ, નીચું અથવા કોઈ નહીં) જાણવાની મંજૂરી આપે છે, જે સ્ક્રીન લૉકના પ્રકાર અને લંબાઈની સંભવિત શ્રેણી સૂચવે છે. ઍપ વપરાશકર્તાઓને સ્ક્રીન લૉકને ચોક્કસ લેવલ સુધી અપડેટ કરવાનું સૂચન પણ કરી શકે છે, પરંતુ વપરાશકર્તાઓ મુક્ત રીતે અવગણીને નૅવિગેટ કરી શકે છે. નોંધી લો કે સ્ક્રીન લૉકનો plaintextમાં સંગ્રહ કરવામાં આવતો નથી, તેથી ઍપને ચોક્કસ પાસવર્ડની જાણ હોતી નથી."</string>
+    <string name="permlab_requestScreenLockComplexity" msgid="7028982116060987169">"સ્ક્રીન લૉકની જટિલતા જાણવા માટે વિનંતી કરો"</string>
+    <string name="permdesc_requestScreenLockComplexity" msgid="2806396846128185677">"ઍપને સ્ક્રીન લૉકની જટિલતાનું લેવલ (ઊંચું, મધ્યમ, નીચું અથવા કોઈ નહીં) જાણવાની મંજૂરી આપે છે, જે સ્ક્રીન લૉકના પ્રકાર અને લંબાઈની સંભવિત શ્રેણી સૂચવે છે. ઍપ વપરાશકર્તાઓને સ્ક્રીન લૉકને ચોક્કસ લેવલ સુધી અપડેટ કરવાનું સૂચન પણ કરી શકે છે, પરંતુ વપરાશકર્તાઓ મુક્ત રીતે તેને અવગણીને નૅવિગેટ કરી શકે છે. એ વાતની નોંધ કરજો કે સ્ક્રીન લૉકનો સાદા ટેક્સ્ટમાં સંગ્રહ કરવામાં આવતો નથી, તેથી ઍપને ચોક્કસ પાસવર્ડની જાણ હોતી નથી."</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"બાયોમેટ્રિક હાર્ડવેરનો ઉપયોગ કરો"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"ઍપને પ્રમાણીકરણ માટે બાયોમેટ્રિક હાર્ડવેરનો ઉપયોગ કરવાની મંજૂરી આપે છે"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"ફિંગરપ્રિન્ટ હાર્ડવેરને સંચાલિત કરો"</string>
@@ -536,6 +536,7 @@
     <string name="biometric_error_user_canceled" msgid="2260175018114348727">"પ્રમાણીકરણ રદ કર્યું"</string>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"ઓળખાયેલ નથી"</string>
     <string name="biometric_error_canceled" msgid="349665227864885880">"પ્રમાણીકરણ રદ કર્યું"</string>
+    <string name="biometric_error_device_not_secured" msgid="6583143098363528349">"કોઈ પિન, પૅટર્ન અથવા પાસવર્ડ સેટ કરેલો નથી"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"આંશિક ફિંગરપ્રિન્ટ મળી. કૃપા કરીને ફરી પ્રયાસ કરો."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"ફિંગરપ્રિન્ટ પ્રક્રિયા કરી શકાઈ નથી. કૃપા કરીને ફરી પ્રયાસ કરો."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"ફિંગરપ્રિન્ટ સેન્સર ગંદું છે. કૃપા કરીને સાફ કરો અને ફરી પ્રયાસ કરો."</string>
@@ -555,7 +556,7 @@
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"ઘણા વધુ પ્રયત્નો. ફિંગરપ્રિન્ટ સેન્સર અક્ષમ કરવામાં આવ્યું છે."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"ફરી પ્રયાસ કરો."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="7654382120628334248">"કોઈ ફિંગરપ્રિન્ટની નોંધણી કરવામાં આવી નથી."</string>
-    <string name="fingerprint_error_hw_not_present" msgid="5729436878065119329">"આ ઉપકરણમાં કોઈ ફિંગરપ્રિન્ટ સેન્સર નથી"</string>
+    <string name="fingerprint_error_hw_not_present" msgid="409523969613176352">"આ ડિવાઇસમાં કોઈ ફિંગરપ્રિન્ટ સેન્સર નથી."</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"આંગળી <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -575,7 +576,14 @@
     <string name="face_acquired_too_left" msgid="2712489669456176505">"કૃપા કરીને સેન્સરને ડાબી બાજુ ખસેડો."</string>
     <string name="face_acquired_poor_gaze" msgid="8344973502980415859">"કૃપા કરીને સેન્સરની સામે જુઓ."</string>
     <string name="face_acquired_not_detected" msgid="5707782294589511391">"કોઈ ચહેરો મળ્યો નથી."</string>
-    <string name="face_acquired_not_steady" msgid="3722829465011040042">"ઉપકરણની સામે ચહેરો સ્થિર રાખો."</string>
+    <string name="face_acquired_too_much_motion" msgid="470381210701463822">"ડિવાઇસ ઘણો હલી રહ્યો છે."</string>
+    <string name="face_acquired_recalibrate" msgid="8077949502893707539">"કૃપા કરીને તમારા ચહેરાની ફરી નોંધણી કરાવો."</string>
+    <string name="face_acquired_too_different" msgid="5553210341111255124">"અલગ ચહેરાની ઓળખ થઈ."</string>
+    <string name="face_acquired_too_similar" msgid="1508776858407646460">"ઘણી સમાનતા ધરાવે છે, કૃપા કરીને તમારો પોઝ બદલો."</string>
+    <string name="face_acquired_pan_too_extreme" msgid="8203001424525231680">"કૃપા કરીને કૅમેરા તરફ સીધું જુઓ."</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="7641326344460439970">"કૃપા કરીને કૅમેરા તરફ સીધું જુઓ."</string>
+    <string name="face_acquired_roll_too_extreme" msgid="1444829237745898619">"કૃપા કરીને તમારું માથું સીધું ઊભું રાખો."</string>
+    <string name="face_acquired_obscured" msgid="3055077697850272097">"કૃપા કરીને તમારો ચહેરો ઢાંકો નહીં."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="6255891785768984615">"ચહેરા માટેનું હાર્ડવેર ઉપલબ્ધ નથી."</string>
@@ -587,7 +595,7 @@
     <string name="face_error_lockout_permanent" msgid="8198354656746088890">"ઘણા બધા પ્રયત્નો. ચહેરાનું પ્રમાણીકરણ બંધ કરવામાં આવ્યું છે."</string>
     <string name="face_error_unable_to_process" msgid="238761109287767270">"ફરી પ્રયાસ કરો."</string>
     <string name="face_error_not_enrolled" msgid="9166792142679691323">"કોઈ ચહેરાની નોંધણી કરવામાં આવી નથી."</string>
-    <string name="face_error_hw_not_present" msgid="4737289254517095671">"આ ઉપકરણમાં ચહેરાના પ્રમાણીકરણ માટે કોઈ સેન્સર નથી"</string>
+    <string name="face_error_hw_not_present" msgid="916085883581450331">"આ ડિવાઇસમાં ચહેરાના પ્રમાણીકરણ માટે કોઈ સેન્સર નથી."</string>
     <string name="face_name_template" msgid="7004562145809595384">"ચહેરાનું <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -947,8 +955,7 @@
     <string name="save_password_never" msgid="8274330296785855105">"ક્યારેય નહીં"</string>
     <string name="open_permission_deny" msgid="7374036708316629800">"તમને આ પૃષ્ઠને ખોલવાની પરવાનગી નથી."</string>
     <string name="text_copied" msgid="4985729524670131385">"ક્લિપબોર્ડ પર ટેક્સ્ટ કૉપિ કરી."</string>
-    <!-- no translation found for copied (8564151838171791598) -->
-    <skip />
+    <string name="copied" msgid="8564151838171791598">"કૉપિ કરેલ"</string>
     <string name="more_item_label" msgid="4650918923083320495">"વધુ"</string>
     <string name="prepend_shortcut_label" msgid="2572214461676015642">"મેનૂ+"</string>
     <string name="menu_meta_shortcut_label" msgid="4647153495550313570">"Meta+"</string>
@@ -1390,7 +1397,7 @@
     <string name="ext_media_init_action" msgid="7952885510091978278">"સેટ કરો"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"બહાર કાઢો"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"અન્વેષણ કરો"</string>
-    <!-- no translation found for ext_media_seamless_action (5356508985817068711) -->
+    <!-- no translation found for ext_media_seamless_action (6575980560886881233) -->
     <skip />
     <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> ખૂટે છે"</string>
     <string name="ext_media_missing_message" msgid="4012389235250987930">"ફરીથી ઉપકરણ દાખલ કરો"</string>
@@ -1991,4 +1998,8 @@
     <string name="dynamic_mode_notification_title" msgid="508815255807182035">"સામાન્ય રીતે ચાર્જ કરવાના સમય પહેલાં બૅટરી સમાપ્ત થઈ શકે છે"</string>
     <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"બૅટરી આવરદા વધારવા માટે બૅટરી સેવર ચાલુ કર્યું"</string>
     <string name="car_loading_profile" msgid="3545132581795684027">"લોડિંગ"</string>
+    <plurals name="file_count" formatted="false" msgid="1628600959752419449">
+      <item quantity="one"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> ફાઇલ</item>
+      <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> ફાઇલ</item>
+    </plurals>
 </resources>

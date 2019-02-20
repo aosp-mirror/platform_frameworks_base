@@ -512,8 +512,8 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Permite aplicației să comunice cu etichetele, cardurile și cititoarele NFC (Near Field Communication)."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"dezactivează blocarea ecranului"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Permite aplicației să dezactiveze blocarea tastelor și orice modalitate asociată de securizare prin parolă. De exemplu, telefonul dezactivează blocarea tastelor când se primește un apel telefonic și reactivează blocarea tastelor la terminarea apelului."</string>
-    <string name="permlab_getAndRequestScreenLockComplexity" msgid="3911592334192005424">"primește și solicită complexitatea blocării ecranului"</string>
-    <string name="permdesc_getAndRequestScreenLockComplexity" msgid="9045202063228854873">"Permite aplicației să învețe nivelul de complexitate al blocării ecranului (ridicat, mediu, scăzut sau fără) ce indică intervalul posibil de lungime a parolei și tipul de blocare a ecranului. Aplicația le poate sugera utilizatorilor să își actualizeze blocarea ecranului la un anumit nivel, dar utilizatorii pot ignora sugestia și pot naviga în continuare. Rețineți că blocarea ecranului nu este stocată ca text simplu, astfel încât aplicația să nu cunoască parola exactă."</string>
+    <string name="permlab_requestScreenLockComplexity" msgid="7028982116060987169">"solicitați complexitatea blocării ecranului"</string>
+    <string name="permdesc_requestScreenLockComplexity" msgid="2806396846128185677">"Permite aplicației să învețe nivelul de complexitate al blocării ecranului (ridicat, mediu, scăzut sau fără) ce indică intervalul posibil de lungime a parolei și tipul de blocare a ecranului. Aplicația le poate sugera utilizatorilor să își actualizeze blocarea ecranului la un anumit nivel, dar utilizatorii pot ignora sugestia și pot naviga în continuare. Rețineți că blocarea ecranului nu este stocată ca text simplu, astfel încât aplicația să nu cunoască parola exactă."</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"utilizați hardware biometric"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"Permite aplicației să folosească hardware biometric pentru autentificare"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"gestionează hardware-ul pentru amprentă"</string>
@@ -539,6 +539,7 @@
     <string name="biometric_error_user_canceled" msgid="2260175018114348727">"Autentificarea a fost anulată"</string>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"Nu este recunoscut"</string>
     <string name="biometric_error_canceled" msgid="349665227864885880">"Autentificarea a fost anulată"</string>
+    <string name="biometric_error_device_not_secured" msgid="6583143098363528349">"Nu este setat niciun cod PIN, model sau parolă"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"S-a detectat parțial amprenta. Încercați din nou."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Amprenta nu a putut fi procesată. Încercați din nou."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Senzorul pentru amprente este murdar. Curățați-l și încercați din nou."</string>
@@ -558,7 +559,7 @@
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"Prea multe încercări. Senzorul de amprentă este dezactivat."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Încercați din nou."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="7654382120628334248">"Nu au fost înregistrate amprente."</string>
-    <string name="fingerprint_error_hw_not_present" msgid="5729436878065119329">"Acest dispozitiv nu are senzor de amprentă"</string>
+    <string name="fingerprint_error_hw_not_present" msgid="409523969613176352">"Dispozitivul nu are senzor de amprentă."</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"Degetul <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -578,7 +579,14 @@
     <string name="face_acquired_too_left" msgid="2712489669456176505">"Deplasați senzorul spre stânga."</string>
     <string name="face_acquired_poor_gaze" msgid="8344973502980415859">"Priviți spre senzor."</string>
     <string name="face_acquired_not_detected" msgid="5707782294589511391">"Nu s-a detectat niciun chip."</string>
-    <string name="face_acquired_not_steady" msgid="3722829465011040042">"Țineți chipul nemișcat în fața dispozitivului."</string>
+    <string name="face_acquired_too_much_motion" msgid="470381210701463822">"Prea multă mișcare."</string>
+    <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Reînregistrați-vă chipul."</string>
+    <string name="face_acquired_too_different" msgid="5553210341111255124">"A fost detectat un chip diferit."</string>
+    <string name="face_acquired_too_similar" msgid="1508776858407646460">"Prea asemănător, schimbați poziția."</string>
+    <string name="face_acquired_pan_too_extreme" msgid="8203001424525231680">"Priviți mai direct spre cameră."</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="7641326344460439970">"Priviți mai direct spre cameră."</string>
+    <string name="face_acquired_roll_too_extreme" msgid="1444829237745898619">"Îndreptați capul pe verticală."</string>
+    <string name="face_acquired_obscured" msgid="3055077697850272097">"Descoperiți-vă chipul."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="6255891785768984615">"Hardware-ul pentru chip nu este disponibil."</string>
@@ -590,7 +598,7 @@
     <string name="face_error_lockout_permanent" msgid="8198354656746088890">"Prea multe încercări. Autentificarea facială este dezactivată."</string>
     <string name="face_error_unable_to_process" msgid="238761109287767270">"Încercați din nou."</string>
     <string name="face_error_not_enrolled" msgid="9166792142679691323">"Nu au fost înregistrate chipuri."</string>
-    <string name="face_error_hw_not_present" msgid="4737289254517095671">"Dispozitivul nu are un senzor de autentificare a chipului"</string>
+    <string name="face_error_hw_not_present" msgid="916085883581450331">"Dispozitivul nu are un senzor de autentificare a chipului."</string>
     <string name="face_name_template" msgid="7004562145809595384">"Chip <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -950,8 +958,7 @@
     <string name="save_password_never" msgid="8274330296785855105">"Niciodată"</string>
     <string name="open_permission_deny" msgid="7374036708316629800">"Nu aveți permisiunea de a deschide această pagină."</string>
     <string name="text_copied" msgid="4985729524670131385">"Text copiat în clipboard."</string>
-    <!-- no translation found for copied (8564151838171791598) -->
-    <skip />
+    <string name="copied" msgid="8564151838171791598">"Copiat"</string>
     <string name="more_item_label" msgid="4650918923083320495">"Mai multe"</string>
     <string name="prepend_shortcut_label" msgid="2572214461676015642">"Meniu+"</string>
     <string name="menu_meta_shortcut_label" msgid="4647153495550313570">"Meta+"</string>
@@ -1411,7 +1418,7 @@
     <string name="ext_media_init_action" msgid="7952885510091978278">"Configurați"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Scoateți"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"Explorați"</string>
-    <!-- no translation found for ext_media_seamless_action (5356508985817068711) -->
+    <!-- no translation found for ext_media_seamless_action (6575980560886881233) -->
     <skip />
     <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> lipsește"</string>
     <string name="ext_media_missing_message" msgid="4012389235250987930">"Reintroduceți dispozitivul"</string>
@@ -2025,4 +2032,9 @@
     <string name="dynamic_mode_notification_title" msgid="508815255807182035">"Bateria se poate descărca înainte de încărcarea obișnuită"</string>
     <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"Economisirea bateriei este activată pentru a prelungi durata de funcționare a bateriei"</string>
     <string name="car_loading_profile" msgid="3545132581795684027">"Se încarcă"</string>
+    <plurals name="file_count" formatted="false" msgid="1628600959752419449">
+      <item quantity="few"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> fișiere</item>
+      <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> de fișiere</item>
+      <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> + <xliff:g id="COUNT_1">%d</xliff:g> fișier</item>
+    </plurals>
 </resources>

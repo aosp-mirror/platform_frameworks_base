@@ -509,8 +509,8 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Ivuela uhlelo lokusebenza ukuthi ixhumane ne-Near Field Communication (NFC) amathegi, amakhadi kanye nezinhlelo zokufunda."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"khubaza ukukhiya kwakho iskrini"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Ivumela uhlelo lokusebenza ukukhubaza ukuvala ukhiye nanoma yikuphi ukuphepha kwephasiwedi okuhlobene. Isibonelo, ifoni ikhubaza ukuvala ukhiye lapho ithola ikholi yefoni engenayo, bese inike amandla kabusha ukuvala ukhiye lapho ikholi isiqedile."</string>
-    <string name="permlab_getAndRequestScreenLockComplexity" msgid="3911592334192005424">"thola futhi ucele ukukhiywa kwesikrini"</string>
-    <string name="permdesc_getAndRequestScreenLockComplexity" msgid="9045202063228854873">"Ivumela uhlelo lokusebenza ukufunda ileveli yokukhiywa kwesikrini (phezulu, phakathi, phansi noma lutho), okubonisa ibanga elinokwenzeka lobubanzi nohlobo lokukhiywa kwesikrini. Uhlelo lokusebenza futhi lingaphakamisa kubasebenzisi ukuthi babuyekeze ukukhiywa kwesikrini kuya kwenye ileveli kodwa abasebenzisi bangaziba kalula bese bazule. Qaphela ukuthi ukhiywa kwesikrini akulondoloziwe embalweni ocacile ukuze uhlelo lokusebenza lingazi iphasiwedi."</string>
+    <string name="permlab_requestScreenLockComplexity" msgid="7028982116060987169">"cela ukuxubana kokukhiya isikrini"</string>
+    <string name="permdesc_requestScreenLockComplexity" msgid="2806396846128185677">"Ivumela uhlelo lokusebenza ukufunda ileveli yokukhiywa kwesikrini (phezulu, phakathi, phansi noma lutho), okubonisa ibanga elinokwenzeka lobubanzi nohlobo lokukhiywa kwesikrini. Uhlelo lokusebenza futhi lingaphakamisa kubasebenzisi ukuthi babuyekeze ukukhiywa kwesikrini kuya kwenye ileveli kodwa abasebenzisi bangaziba kalula bese bazule. Qaphela ukuthi ukhiywa kwesikrini akulondoloziwe embalweni ocacile ukuze uhlelo lokusebenza lingazi iphasiwedi."</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"sebenzisa izingxenyekazi zekhompyutha ze-biometric"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"Ivumela uhlelo lokusebenza ukuthi lusebenzise izingxenyekazi zekhompyutha ze-biometric ukuze kuqinisekiswe"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"phatha izingxenyekazi zekhompyutha zezigxivizo zeminwe"</string>
@@ -536,6 +536,7 @@
     <string name="biometric_error_user_canceled" msgid="2260175018114348727">"Ukufakazela ubuqiniso kukhanseliwe"</string>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"Akwaziwa"</string>
     <string name="biometric_error_canceled" msgid="349665227864885880">"Ukufakazela ubuqiniso kukhanseliwe"</string>
+    <string name="biometric_error_device_not_secured" msgid="6583143098363528349">"Ayikho iphinikhodi, iphethini, noma iphasiwedi esethiwe"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Izigxivizo zeminwe ezincane zitholiwe. Sicela uzame futhi."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Ayikwazanga ukucubungula izigxivizo zeminwe. Sicela uzame futhi."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Inzwa yezigxivizo zeminwe ingcolile. Sicela uyihlanze uphinde uzame futhi."</string>
@@ -555,7 +556,7 @@
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"Imizamo eminingi kakhulu. Inzwa yezigxivizo zeminwe ikhutshaziwe."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Zama futhi."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="7654382120628334248">"Azikho izigxivizo zeminwe ezibhalisiwe."</string>
-    <string name="fingerprint_error_hw_not_present" msgid="5729436878065119329">"Le divayisi ayinayo inzwa yezigxivizo zeminwe"</string>
+    <string name="fingerprint_error_hw_not_present" msgid="409523969613176352">"Le divayisi ayinayo inzwa yezigxivizo zeminwe."</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"Umunwe ongu-<xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -575,7 +576,14 @@
     <string name="face_acquired_too_left" msgid="2712489669456176505">"Sicela uhambise inzwa ngakwesokunxele."</string>
     <string name="face_acquired_poor_gaze" msgid="8344973502980415859">"Sicela ubheke kunzwa."</string>
     <string name="face_acquired_not_detected" msgid="5707782294589511391">"Abukho ubuso obutholiwe."</string>
-    <string name="face_acquired_not_steady" msgid="3722829465011040042">"Gcina ubuso bumile ngaphambi kwedivayisi."</string>
+    <string name="face_acquired_too_much_motion" msgid="470381210701463822">"Ukunyakaza okukhulu kakhulu."</string>
+    <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Sicela uphinde ubhalise ubuso bakho."</string>
+    <string name="face_acquired_too_different" msgid="5553210341111255124">"Ubuso obuhlukile butholiwe."</string>
+    <string name="face_acquired_too_similar" msgid="1508776858407646460">"Kufana kakhulu, sicela ushintshe ukuma kwakho."</string>
+    <string name="face_acquired_pan_too_extreme" msgid="8203001424525231680">"Sicela ubheke ngokuqondile kukhamera."</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="7641326344460439970">"Sicela ubheke ngokuqondile kukhamera."</string>
+    <string name="face_acquired_roll_too_extreme" msgid="1444829237745898619">"Sicela uqondise ikhanda lakho ngokumile."</string>
+    <string name="face_acquired_obscured" msgid="3055077697850272097">"Sicela uvule ubuso bakho."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="6255891785768984615">"Izingxenyekazi zekhompuyutha zobuso azitholakali."</string>
@@ -587,7 +595,7 @@
     <string name="face_error_lockout_permanent" msgid="8198354656746088890">"Imizamo eminingi kakhulu. Ukufakazela ubuqiniso kobuso kukhutshaziwe."</string>
     <string name="face_error_unable_to_process" msgid="238761109287767270">"Zama futhi."</string>
     <string name="face_error_not_enrolled" msgid="9166792142679691323">"Abukho ubuso obubhalisiwe."</string>
-    <string name="face_error_hw_not_present" msgid="4737289254517095671">"Le divayisi ayinayo inzwa yokufakazela ubuqiniso yobuso"</string>
+    <string name="face_error_hw_not_present" msgid="916085883581450331">"Le divayisi ayinayo inzwa yokufakazela ubuqiniso yobuso."</string>
     <string name="face_name_template" msgid="7004562145809595384">"Ubuso be-<xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -947,8 +955,7 @@
     <string name="save_password_never" msgid="8274330296785855105">"Akusoze"</string>
     <string name="open_permission_deny" msgid="7374036708316629800">"Awunayo imvume yokuvula leli khasi."</string>
     <string name="text_copied" msgid="4985729524670131385">"Umbhalo ukopishwe ebhodini lokunamathisela."</string>
-    <!-- no translation found for copied (8564151838171791598) -->
-    <skip />
+    <string name="copied" msgid="8564151838171791598">"Kukopishiwe"</string>
     <string name="more_item_label" msgid="4650918923083320495">"Okuningi"</string>
     <string name="prepend_shortcut_label" msgid="2572214461676015642">"Imenyu+"</string>
     <string name="menu_meta_shortcut_label" msgid="4647153495550313570">"Meta+"</string>
@@ -1389,7 +1396,7 @@
     <string name="ext_media_init_action" msgid="7952885510091978278">"Setha"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Khipha"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"Hlola"</string>
-    <!-- no translation found for ext_media_seamless_action (5356508985817068711) -->
+    <!-- no translation found for ext_media_seamless_action (6575980560886881233) -->
     <skip />
     <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> okulahlekile"</string>
     <string name="ext_media_missing_message" msgid="4012389235250987930">"Faka idivayisi futhi"</string>
@@ -1990,4 +1997,8 @@
     <string name="dynamic_mode_notification_title" msgid="508815255807182035">"Ibhethri lingaphela ngaphambi kokushaja okuvamile"</string>
     <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"Isilondolozi sebhethri siyasebenza ngaphandle kwempilo yebhethri"</string>
     <string name="car_loading_profile" msgid="3545132581795684027">"Iyalayisha"</string>
+    <plurals name="file_count" formatted="false" msgid="1628600959752419449">
+      <item quantity="one"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> amafayela</item>
+      <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> amafayela</item>
+    </plurals>
 </resources>

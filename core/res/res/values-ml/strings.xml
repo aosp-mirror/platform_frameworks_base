@@ -509,8 +509,8 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"നിയർ ഫീൽഡ് കമ്മ്യൂണിക്കേഷൻ (NFC) ടാഗുകളുമായും കാർഡുകളുമായും റീഡറുകളുമായുള്ള ആശയവിനിമയത്തിന് അപ്ലിക്കേഷനുകളെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"നിങ്ങളുടെ സ്‌ക്രീൻ ലോക്ക് പ്രവർത്തനരഹിതമാക്കുക"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"കീലോക്കും ഏതെങ്കിലും അനുബന്ധ പാസ്‌വേഡ് സുരക്ഷയും പ്രവർത്തനരഹിതമാക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ഉദാഹരണത്തിന്, ഒരു ഇൻകമിംഗ് കോൾ സ്വീകരിക്കുമ്പോൾ ഫോൺ കീലോക്ക് പ്രവർത്തനരഹിതമാക്കുന്നു, കോൾ അവസാനിക്കുമ്പോൾ കീലോക്ക് വീണ്ടും പ്രവർത്തനക്ഷമമാകുന്നു."</string>
-    <string name="permlab_getAndRequestScreenLockComplexity" msgid="3911592334192005424">"സ്ക്രീൻ ലോക്ക് സങ്കീർണ്ണത അഭ്യർത്ഥിച്ച്, നേടുക"</string>
-    <string name="permdesc_getAndRequestScreenLockComplexity" msgid="9045202063228854873">"സ്ക്രീൻ ലോക്കിന്റെ സാധ്യമായ നീളവും തരവും സൂചിപ്പിക്കുന്ന, അതിന്റെ സങ്കീർണ്ണതാ നില (ഉയർന്നത്, ഇടത്തരം, കുറഞ്ഞത് അല്ലെങ്കിൽ ഒന്നുമില്ല) മനസിലാക്കാൻ ആപ്പിനെ അനുവദിക്കുന്നു. സ്‌ക്രീൻ ലോക്ക് ഒരു പ്രത്യേക തലത്തിലേക്ക് അപ്ഡേറ്റ് ചെയ്യുന്ന ഉപയോക്താക്കൾക്ക് നിർദ്ദേശിക്കാനും ആപ്പിനാവും, മാത്രമല്ല ഉപയോക്താക്കൾക്ക് എളുപ്പത്തിൽ അവഗണിക്കാനും മറ്റൊന്നിലേക്ക് നാവിഗേറ്റ് ചെയ്യാനുമാവും. പ്ലെയിൻടെക്‌സ്‌റ്റിൽ സ്ക്രീൻ ലോക്ക് സംഭരിക്കപ്പെട്ടിട്ടില്ലെന്ന കാര്യം ശ്രദ്ധിക്കുക, അതിനാൽ ആപ്പിന് കൃത്യമായ പാസ്‌വേഡ് അറിയില്ല."</string>
+    <string name="permlab_requestScreenLockComplexity" msgid="7028982116060987169">"സ്‌ക്രീൻ ലോക്ക് സങ്കീർണ്ണത അഭ്യർത്ഥിക്കുക"</string>
+    <string name="permdesc_requestScreenLockComplexity" msgid="2806396846128185677">"സ്ക്രീൻ ലോക്കിന്റെ സാധ്യമായ നീളവും തരവും സൂചിപ്പിക്കുന്ന, അതിന്റെ സങ്കീർണ്ണത നില (ഉയർന്നത്, ഇടത്തരം, കുറഞ്ഞത് അല്ലെങ്കിൽ ഒന്നുമില്ല) മനസിലാക്കാൻ ആപ്പിനെ അനുവദിക്കുന്നു. സ്‌ക്രീൻ ലോക്ക് ഒരു പ്രത്യേക തലത്തിലേക്ക് അപ്ഡേറ്റ് ചെയ്യുന്ന ഉപയോക്താക്കൾക്ക് നിർദ്ദേശിക്കാനും ആപ്പിനാവും, മാത്രമല്ല ഉപയോക്താക്കൾക്ക് എളുപ്പത്തിൽ അവഗണിക്കാനും മറ്റൊന്നിലേക്ക് നാവിഗേറ്റ് ചെയ്യാനുമാവും. പ്ലെയിൻടെക്‌സ്‌റ്റിൽ സ്ക്രീൻ ലോക്ക് സംഭരിക്കപ്പെട്ടിട്ടില്ലെന്ന കാര്യം ശ്രദ്ധിക്കുക, അതിനാൽ ആപ്പിന് കൃത്യമായ പാസ്‌വേഡ് അറിയില്ല."</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"ബയോമെട്രിക് ഹാർ‌ഡ്‌വെയർ ഉപയോഗിക്കുക"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"പരിശോധിച്ചുറപ്പിക്കുന്നതിനായി, ബയോമെട്രിക് ഹാർഡ്‌വെയർ ഉപയോഗിക്കാൻ ആപ്പിനെ അനുവദിക്കുക"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"ഫിംഗർപ്രിന്റ് ഹാർഡ്‌വെയർ നിയന്ത്രിക്കുക"</string>
@@ -536,6 +536,7 @@
     <string name="biometric_error_user_canceled" msgid="2260175018114348727">"പരിശോധിച്ചുറപ്പിക്കൽ റദ്ദാക്കി"</string>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"തിരിച്ചറിഞ്ഞില്ല"</string>
     <string name="biometric_error_canceled" msgid="349665227864885880">"പരിശോധിച്ചുറപ്പിക്കൽ റദ്ദാക്കി"</string>
+    <string name="biometric_error_device_not_secured" msgid="6583143098363528349">"പിന്നോ പാറ്റേണോ പാസ്‌വേഡോ സജ്ജീകരിച്ചിട്ടില്ല"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"വിരലടയാളം ഭാഗികമായി തിരിച്ചറിഞ്ഞു. വീണ്ടും ശ്രമിക്കുക."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"വിരലടയാളം പ്രോസസ്സ് ചെയ്യാനായില്ല. വീണ്ടും ശ്രമിക്കുക."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"വിരലടയാള സെൻസറിന് വൃത്തിയില്ല. അത് ശുചിയാക്കി വീണ്ടും ശ്രമിക്കുക."</string>
@@ -555,7 +556,7 @@
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"നിരവധി തവണ ശ്രമിച്ചതിനാൽ, വിരലടയാള സെൻസർ പ്രവർത്തനരഹിതമായി."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"വീണ്ടും ശ്രമിക്കൂ."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="7654382120628334248">"വിരലടയാളങ്ങൾ എൻറോൾ ചെയ്തിട്ടില്ല."</string>
-    <string name="fingerprint_error_hw_not_present" msgid="5729436878065119329">"ഈ ഉപകരണത്തിൽ വിരലടയാള സെൻസർ ഇല്ല"</string>
+    <string name="fingerprint_error_hw_not_present" msgid="409523969613176352">"ഈ ഉപകരണത്തിൽ വിരലടയാള സെൻസറില്ല."</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"കൈവിരൽ <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -575,7 +576,14 @@
     <string name="face_acquired_too_left" msgid="2712489669456176505">"സെൻസർ ഇടത്തേയ്ക്ക് നീക്കുക."</string>
     <string name="face_acquired_poor_gaze" msgid="8344973502980415859">"സെൻസറിലേക്ക് നോക്കുക."</string>
     <string name="face_acquired_not_detected" msgid="5707782294589511391">"മുഖം കണ്ടെത്താനായില്ല."</string>
-    <string name="face_acquired_not_steady" msgid="3722829465011040042">"ഉപകരണത്തിന് മുന്നിൽ മുഖം ഇളകാതെ നേരെ നിറുത്തുക."</string>
+    <string name="face_acquired_too_much_motion" msgid="470381210701463822">"ഉപകരണം വളരെയധികം ഇളകുന്നു."</string>
+    <string name="face_acquired_recalibrate" msgid="8077949502893707539">"നിങ്ങളുടെ മുഖം വീണ്ടും എൻറോൾ ചെയ്യുക."</string>
+    <string name="face_acquired_too_different" msgid="5553210341111255124">"മറ്റൊരു മുഖം തിരിച്ചറിഞ്ഞു."</string>
+    <string name="face_acquired_too_similar" msgid="1508776858407646460">"വളരെയധികം സമാനത, നിങ്ങളുടെ പോസ് മാറ്റുക."</string>
+    <string name="face_acquired_pan_too_extreme" msgid="8203001424525231680">"അൽപ്പം കൂടി ക്യാമറയ്‌ക്ക് നേരെ നോക്കൂ."</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="7641326344460439970">"അൽപ്പം കൂടി ക്യാമറയ്‌ക്ക് നേരെ നോക്കൂ."</string>
+    <string name="face_acquired_roll_too_extreme" msgid="1444829237745898619">"നിങ്ങളുടെ തല ലംബമായി നേരെയാക്കുക"</string>
+    <string name="face_acquired_obscured" msgid="3055077697850272097">"നിങ്ങളുടെ മുഖം വ്യക്തമാക്കുക."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="6255891785768984615">"മുഖത്തിന്റെ ഹാർഡ്‌വെയർ ലഭ്യമല്ല."</string>
@@ -587,7 +595,7 @@
     <string name="face_error_lockout_permanent" msgid="8198354656746088890">"നിരവധി തവണ ശ്രമിച്ചു. മുഖം തിരിച്ചറിയൽ പ്രവർത്തനരഹിതമാക്കി."</string>
     <string name="face_error_unable_to_process" msgid="238761109287767270">"വീണ്ടും ശ്രമിക്കുക."</string>
     <string name="face_error_not_enrolled" msgid="9166792142679691323">"ഒരു മുഖവും എൻറോൾ ചെയ്‌തിട്ടില്ല."</string>
-    <string name="face_error_hw_not_present" msgid="4737289254517095671">"ഈ ഉപകരണത്തിന് മുഖം തിരിച്ചറിയാനാവുന്ന സെൻസർ ഇല്ല"</string>
+    <string name="face_error_hw_not_present" msgid="916085883581450331">"ഈ ഉപകരണത്തിൽ മുഖം പരിശോധിച്ചുറപ്പിക്കാനുള്ള സെൻസറില്ല."</string>
     <string name="face_name_template" msgid="7004562145809595384">"മുഖം <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -947,8 +955,7 @@
     <string name="save_password_never" msgid="8274330296785855105">"ഒരിക്കലും"</string>
     <string name="open_permission_deny" msgid="7374036708316629800">"ഈ പേജ് തുറക്കുന്നതിന് നിങ്ങൾക്ക് അനുമതിയില്ല."</string>
     <string name="text_copied" msgid="4985729524670131385">"ടെക്‌സ്റ്റ് ക്ലിപ്‍ബോർഡിലേക്ക് പകർത്തി."</string>
-    <!-- no translation found for copied (8564151838171791598) -->
-    <skip />
+    <string name="copied" msgid="8564151838171791598">"പകർത്തി"</string>
     <string name="more_item_label" msgid="4650918923083320495">"കൂടുതൽ"</string>
     <string name="prepend_shortcut_label" msgid="2572214461676015642">"മെനു+"</string>
     <string name="menu_meta_shortcut_label" msgid="4647153495550313570">"മെറ്റ+"</string>
@@ -1390,7 +1397,7 @@
     <string name="ext_media_init_action" msgid="7952885510091978278">"സജ്ജമാക്കുക"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"നിരസിക്കുക"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"അടുത്തറിയുക"</string>
-    <!-- no translation found for ext_media_seamless_action (5356508985817068711) -->
+    <!-- no translation found for ext_media_seamless_action (6575980560886881233) -->
     <skip />
     <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> കാണുന്നില്ല"</string>
     <string name="ext_media_missing_message" msgid="4012389235250987930">"ഉപകരണത്തിലേക്ക് വീണ്ടും ഇടുക"</string>
@@ -1991,4 +1998,8 @@
     <string name="dynamic_mode_notification_title" msgid="508815255807182035">"സാധാരണയുള്ളതിലും നേരത്തെ ബാറ്ററിയുടെ ചാർജ് തീർന്നേക്കാം"</string>
     <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"ബാറ്ററി ലൈഫ് വര്‍ദ്ധിപ്പിക്കാൻ, ബാറ്ററി ലാഭിക്കൽ സജീവമാക്കി"</string>
     <string name="car_loading_profile" msgid="3545132581795684027">"ലോഡ് ചെയ്യുന്നു"</string>
+    <plurals name="file_count" formatted="false" msgid="1628600959752419449">
+      <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> ഫയലുകൾ</item>
+      <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> + <xliff:g id="COUNT_1">%d</xliff:g> ഫയൽ</item>
+    </plurals>
 </resources>
