@@ -363,27 +363,26 @@ public class TelephonyManager {
      * Returns 3 for Tri standby mode.(Tri SIM functionality)
      */
     public int getPhoneCount() {
-        int phoneCount = 0;
-
-        // check for voice and data support, 0 if not supported
-        if (!isVoiceCapable() && !isSmsCapable()) {
-            ConnectivityManager cm = (ConnectivityManager) mContext.getSystemService(
-                    Context.CONNECTIVITY_SERVICE);
-            if (cm != null) {
-                if (!cm.isNetworkSupported(ConnectivityManager.TYPE_MOBILE)) {
-                    return phoneCount;
+        int phoneCount = 1;
+        switch (getMultiSimConfiguration()) {
+            case UNKNOWN:
+                ConnectivityManager cm = mContext == null ? null : (ConnectivityManager) mContext
+                        .getSystemService(Context.CONNECTIVITY_SERVICE);
+                // check for voice and data support, 0 if not supported
+                if (!isVoiceCapable() && !isSmsCapable() && cm != null
+                        && !cm.isNetworkSupported(ConnectivityManager.TYPE_MOBILE)) {
+                    phoneCount = 0;
+                } else {
+                    phoneCount = 1;
                 }
-            }
-        }
-
-        phoneCount = 1;
-        try {
-            ITelephony telephony = getITelephony();
-            if (telephony != null) {
-                phoneCount = telephony.getNumOfActiveSims();
-            }
-        } catch (RemoteException ex) {
-            Rlog.e(TAG, "getNumOfActiveSims RemoteException", ex);
+                break;
+            case DSDS:
+            case DSDA:
+                phoneCount = PhoneConstants.MAX_PHONE_COUNT_DUAL_SIM;
+                break;
+            case TSTS:
+                phoneCount = PhoneConstants.MAX_PHONE_COUNT_TRI_SIM;
+                break;
         }
         return phoneCount;
     }
