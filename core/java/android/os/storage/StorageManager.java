@@ -1561,7 +1561,13 @@ public class StorageManager {
         return SystemProperties.getBoolean(PROP_HAS_ADOPTABLE, false);
     }
 
-    /** {@hide} */
+    /**
+     * Return if the currently booted device has the "isolated storage" feature
+     * flag enabled. This will eventually be fully enabled in the final
+     * {@link android.os.Build.VERSION_CODES#Q} release.
+     *
+     * @hide
+     */
     @SystemApi
     @TestApi
     public static boolean hasIsolatedStorage() {

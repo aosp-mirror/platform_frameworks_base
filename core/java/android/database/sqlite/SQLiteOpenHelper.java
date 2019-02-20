@@ -48,6 +48,9 @@ import java.io.File;
  *
  * <p class="note"><strong>Note:</strong> this class assumes
  * monotonically increasing version numbers for upgrades.</p>
+ *
+ * <p class="note"><strong>Note:</strong> the {@link AutoCloseable} interface was
+ * first added in the {@link android.os.Build.VERSION_CODES#Q} release.</p>
  */
 public abstract class SQLiteOpenHelper implements AutoCloseable {
     private static final String TAG = SQLiteOpenHelper.class.getSimpleName();

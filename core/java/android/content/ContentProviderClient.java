@@ -626,15 +626,14 @@ public class ContentProviderClient implements ContentInterface, AutoCloseable {
         return ContentProvider.coerceToLocalContentProvider(mContentProvider);
     }
 
-    /**
-     * Closes the given object quietly, ignoring any checked exceptions. Does
-     * nothing if the given object is {@code null}.
-     */
+    /** {@hide} */
+    @Deprecated
     public static void closeQuietly(ContentProviderClient client) {
         IoUtils.closeQuietly(client);
     }
 
     /** {@hide} */
+    @Deprecated
     public static void releaseQuietly(ContentProviderClient client) {
         IoUtils.closeQuietly(client);
     }
