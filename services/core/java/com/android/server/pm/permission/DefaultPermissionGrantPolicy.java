@@ -642,10 +642,16 @@ public final class DefaultPermissionGrantPolicy {
         // Location
         if (locationPackageNames != null) {
             for (String packageName : locationPackageNames) {
+                // STOPSHIP: remove this force-granting of legacy storage
+                // permissions once b/124466734 is resolved
+                final Set<String> storageWorkaround = new ArraySet<>();
+                storageWorkaround.add(Manifest.permission.READ_EXTERNAL_STORAGE);
+                storageWorkaround.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+
                 grantPermissionsToSystemPackage(packageName, userId,
                         CONTACTS_PERMISSIONS, CALENDAR_PERMISSIONS, MICROPHONE_PERMISSIONS,
                         PHONE_PERMISSIONS, SMS_PERMISSIONS, CAMERA_PERMISSIONS,
-                        SENSORS_PERMISSIONS, STORAGE_PERMISSIONS, MEDIA_AURAL_PERMISSIONS);
+                        SENSORS_PERMISSIONS, STORAGE_PERMISSIONS, storageWorkaround);
                 grantSystemFixedPermissionsToSystemPackage(packageName, userId,
                         LOCATION_PERMISSIONS, ACTIVITY_RECOGNITION_PERMISSIONS);
             }
