@@ -37,7 +37,7 @@ public class StretchAnalogClock extends View {
 
     private final Paint mHourPaint = new Paint();
     private final Paint mMinutePaint = new Paint();
-    private Calendar mTime;
+    private Calendar mTime = Calendar.getInstance(TimeZone.getDefault());
     private TimeZone mTimeZone;
 
     public StretchAnalogClock(Context context) {
@@ -138,7 +138,7 @@ public class StretchAnalogClock extends View {
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        mTime = Calendar.getInstance(mTimeZone != null ? mTimeZone : TimeZone.getDefault());
+        mTime.setTimeZone(mTimeZone != null ? mTimeZone : TimeZone.getDefault());
         onTimeChanged();
     }
 }
