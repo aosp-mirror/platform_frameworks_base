@@ -338,13 +338,25 @@ class ZygoteConnection {
 
         private final MetricsLogger mMetricsLogger = new MetricsLogger();
         private static HiddenApiUsageLogger sInstance = new HiddenApiUsageLogger();
+        private int mHiddenApiAccessLogSampleRate = 0;
+
+        public static void setHiddenApiAccessLogSampleRate(int sampleRate) {
+            sInstance.mHiddenApiAccessLogSampleRate = sampleRate;
+        }
 
         public static HiddenApiUsageLogger getInstance() {
             return HiddenApiUsageLogger.sInstance;
         }
 
-        public void hiddenApiUsed(String packageName, String signature,
+        public void hiddenApiUsed(int sampledValue, String packageName, String signature,
                 int accessMethod, boolean accessDenied) {
+            if (sampledValue < mHiddenApiAccessLogSampleRate) {
+                logUsage(packageName, signature, accessMethod, accessDenied);
+            }
+        }
+
+        private void logUsage(String packageName, String signature, int accessMethod,
+                                  boolean accessDenied) {
             int accessMethodMetric = HiddenApiUsageLogger.ACCESS_METHOD_NONE;
             switch(accessMethod) {
                 case HiddenApiUsageLogger.ACCESS_METHOD_NONE:
@@ -375,6 +387,7 @@ class ZygoteConnection {
     private void handleHiddenApiAccessLogSampleRate(int samplingRate) {
         try {
             ZygoteInit.setHiddenApiAccessLogSampleRate(samplingRate);
+            HiddenApiUsageLogger.setHiddenApiAccessLogSampleRate(samplingRate);
             ZygoteInit.setHiddenApiUsageLogger(HiddenApiUsageLogger.getInstance());
             mSocketOutStream.writeInt(0);
         } catch (IOException ioe) {
