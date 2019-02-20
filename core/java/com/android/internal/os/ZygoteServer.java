@@ -241,42 +241,43 @@ class ZygoteServer {
     }
 
     private void fetchBlastulaPoolPolicyProps() {
-        final String blastulaPoolSizeMaxPropString =
-                Zygote.getSystemProperty(
-                        DeviceConfig.RuntimeNative.BLASTULA_POOL_SIZE_MAX,
-                        BLASTULA_POOL_SIZE_MAX_DEFAULT);
+        if (mBlastulaPoolSupported) {
+            final String blastulaPoolSizeMaxPropString =
+                    Zygote.getSystemProperty(
+                            DeviceConfig.RuntimeNative.BLASTULA_POOL_SIZE_MAX,
+                            BLASTULA_POOL_SIZE_MAX_DEFAULT);
 
-        if (!blastulaPoolSizeMaxPropString.isEmpty()) {
-            mBlastulaPoolSizeMax =
-                    Integer.min(
-                            Integer.parseInt(blastulaPoolSizeMaxPropString),
-                            BLASTULA_POOL_SIZE_MAX_LIMIT);
+            if (!blastulaPoolSizeMaxPropString.isEmpty()) {
+                mBlastulaPoolSizeMax =
+                        Integer.min(
+                                Integer.parseInt(blastulaPoolSizeMaxPropString),
+                                BLASTULA_POOL_SIZE_MAX_LIMIT);
+            }
+
+            final String blastulaPoolSizeMinPropString =
+                    Zygote.getSystemProperty(
+                            DeviceConfig.RuntimeNative.BLASTULA_POOL_SIZE_MIN,
+                            BLASTULA_POOL_SIZE_MIN_DEFAULT);
+
+            if (!blastulaPoolSizeMinPropString.isEmpty()) {
+                mBlastulaPoolSizeMin =
+                        Integer.max(
+                                Integer.parseInt(blastulaPoolSizeMinPropString),
+                                BLASTULA_POOL_SIZE_MIN_LIMIT);
+            }
+
+            final String blastulaPoolRefillThresholdPropString =
+                    Zygote.getSystemProperty(
+                            DeviceConfig.RuntimeNative.BLASTULA_POOL_REFILL_THRESHOLD,
+                            Integer.toString(mBlastulaPoolSizeMax / 2));
+
+            if (!blastulaPoolRefillThresholdPropString.isEmpty()) {
+                mBlastulaPoolRefillThreshold =
+                        Integer.min(
+                                Integer.parseInt(blastulaPoolRefillThresholdPropString),
+                                mBlastulaPoolSizeMax);
+            }
         }
-
-        final String blastulaPoolSizeMinPropString =
-                Zygote.getSystemProperty(
-                        DeviceConfig.RuntimeNative.BLASTULA_POOL_SIZE_MIN,
-                        BLASTULA_POOL_SIZE_MIN_DEFAULT);
-
-        if (!blastulaPoolSizeMinPropString.isEmpty()) {
-            mBlastulaPoolSizeMin =
-                    Integer.max(
-                            Integer.parseInt(blastulaPoolSizeMinPropString),
-                            BLASTULA_POOL_SIZE_MIN_LIMIT);
-        }
-
-        final String blastulaPoolRefillThresholdPropString =
-                Zygote.getSystemProperty(
-                        DeviceConfig.RuntimeNative.BLASTULA_POOL_REFILL_THRESHOLD,
-                        Integer.toString(mBlastulaPoolSizeMax / 2));
-
-        if (!blastulaPoolRefillThresholdPropString.isEmpty()) {
-            mBlastulaPoolRefillThreshold =
-                    Integer.min(
-                        Integer.parseInt(blastulaPoolRefillThresholdPropString),
-                        mBlastulaPoolSizeMax);
-        }
-
     }
 
     private long mLastPropCheckTimestamp = 0;
@@ -333,6 +334,28 @@ class ZygoteServer {
         Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
 
         return null;
+    }
+
+    /**
+     * Empty or fill the blastula pool as dictated by the current and new blastula pool statuses.
+     */
+    Runnable setBlastulaPoolStatus(boolean newStatus, LocalSocket sessionSocket) {
+        if (!mBlastulaPoolSupported) {
+            Log.w(TAG,
+                    "Attempting to enable a blastula pool for a Zygote that doesn't support it.");
+            return null;
+        } else if (mBlastulaPoolEnabled == newStatus) {
+            return null;
+        }
+
+        mBlastulaPoolEnabled = newStatus;
+
+        if (newStatus) {
+            return fillBlastulaPool(new int[]{ sessionSocket.getFileDescriptor().getInt$() });
+        } else {
+            Zygote.emptyBlastulaPool();
+            return null;
+        }
     }
 
     /**
@@ -425,6 +448,7 @@ class ZygoteServer {
                         ZygoteConnection connection = peers.get(pollIndex);
                         final Runnable command = connection.processOneCommand(this);
 
+                        // TODO (chriswailes): Is this extra check necessary?
                         if (mIsForkChild) {
                             // We're in the child. We should always have a command to run at this
                             // stage if processOneCommand hasn't called "exec".

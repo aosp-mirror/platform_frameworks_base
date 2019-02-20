@@ -155,10 +155,10 @@ static std::atomic_uint32_t gBlastulaPoolCount = 0;
 static int gBlastulaPoolEventFD = -1;
 
 /**
- * The maximum value that the gBlastulaPoolMax variable may take.  This value
- * is a mirror of Zygote.BLASTULA_POOL_MAX_LIMIT
+ * The maximum value that the gBlastulaPoolSizeMax variable may take.  This value
+ * is a mirror of ZygoteServer.BLASTULA_POOL_SIZE_MAX_LIMIT
  */
-static constexpr int BLASTULA_POOL_MAX_LIMIT = 10;
+static constexpr int BLASTULA_POOL_SIZE_MAX_LIMIT = 100;
 
 /**
  * A helper class containing accounting information for Blastulas.
@@ -217,6 +217,15 @@ class BlastulaTableEntry {
   }
 
   void Clear() {
+    EntryStorage storage = mStorage.load();
+
+    if (storage != INVALID_ENTRY_VALUE) {
+      close(storage.read_pipe_fd);
+      mStorage.store(INVALID_ENTRY_VALUE);
+    }
+  }
+
+  void Invalidate() {
     mStorage.store(INVALID_ENTRY_VALUE);
   }
 
@@ -261,7 +270,7 @@ class BlastulaTableEntry {
  * the BlastulaTableEntry class prevent data races during these concurrent
  * operations.
  */
-static std::array<BlastulaTableEntry, BLASTULA_POOL_MAX_LIMIT> gBlastulaTable;
+static std::array<BlastulaTableEntry, BLASTULA_POOL_SIZE_MAX_LIMIT> gBlastulaTable;
 
 /**
  * The list of open zygote file descriptors.
@@ -1914,7 +1923,10 @@ static void com_android_internal_os_Zygote_nativeEmptyBlastulaPool(JNIEnv* env, 
 
     if (entry_storage.has_value()) {
       kill(entry_storage.value().pid, SIGKILL);
-      entry.Clear();
+      close(entry_storage.value().read_pipe_fd);
+
+      // Avoid a second atomic load by invalidating instead of clearing.
+      entry.Invalidate();
       --gBlastulaPoolCount;
     }
   }

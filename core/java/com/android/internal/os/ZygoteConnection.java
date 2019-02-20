@@ -158,6 +158,10 @@ class ZygoteConnection {
             return null;
         }
 
+        if (parsedArgs.mBlastulaPoolStatusSpecified) {
+            return handleBlastulaPoolStatusChange(zygoteServer, parsedArgs.mBlastulaPoolEnabled);
+        }
+
         if (parsedArgs.mPreloadDefault) {
             handlePreload();
             return null;
@@ -369,6 +373,22 @@ class ZygoteConnection {
     private Runnable handleApiBlacklistExemptions(ZygoteServer zygoteServer, String[] exemptions) {
         return stateChangeWithBlastulaPoolReset(zygoteServer,
                 () -> ZygoteInit.setApiBlacklistExemptions(exemptions));
+    }
+
+    private Runnable handleBlastulaPoolStatusChange(ZygoteServer zygoteServer, boolean newStatus) {
+        try {
+            Runnable fpResult = zygoteServer.setBlastulaPoolStatus(newStatus, mSocket);
+
+            if (fpResult == null) {
+                mSocketOutStream.writeInt(0);
+            } else {
+                zygoteServer.setForkChild();
+            }
+
+            return fpResult;
+        } catch (IOException ioe) {
+            throw new IllegalStateException("Error writing to command socket", ioe);
+        }
     }
 
     private static class HiddenApiUsageLogger implements VMRuntime.HiddenApiUsageLogger {

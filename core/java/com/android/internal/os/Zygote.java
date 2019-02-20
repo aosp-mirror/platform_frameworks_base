@@ -162,9 +162,9 @@ public final class Zygote {
     /**
      * The duration to wait before re-checking Zygote related system properties.
      *
-     * Five minutes in milliseconds.
+     * One minute in milliseconds.
      */
-    public static final long PROPERTY_CHECK_INTERVAL = 300000;
+    public static final long PROPERTY_CHECK_INTERVAL = 60000;
 
     /**
      * @hide for internal use only
