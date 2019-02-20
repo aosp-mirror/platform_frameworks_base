@@ -346,6 +346,7 @@ void RenderThread::requestVsync() {
 
 bool RenderThread::threadLoop() {
     setpriority(PRIO_PROCESS, 0, PRIORITY_DISPLAY);
+    Looper::setForThread(mLooper);
     if (gOnStartHook) {
         gOnStartHook("RenderThread");
     }

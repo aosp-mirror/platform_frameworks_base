@@ -318,6 +318,7 @@ cc_test {
         "tests/unit/RenderNodeDrawableTests.cpp",
         "tests/unit/RenderNodeTests.cpp",
         "tests/unit/RenderPropertiesTests.cpp",
+        "tests/unit/RenderThreadTests.cpp",
         "tests/unit/ShaderCacheTests.cpp",
         "tests/unit/SkiaBehaviorTests.cpp",
         "tests/unit/SkiaDisplayListTests.cpp",
