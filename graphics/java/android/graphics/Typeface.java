@@ -128,7 +128,8 @@ public class Typeface {
 
     // Following two fields are not used but left for hiddenapi private list
     /**
-     * Use {@link SystemFonts#getAvailableFonts()} instead.
+     * sSystemFontMap is read only and unmodifiable.
+     * Use public API {@link #create(String, int)} to get the typeface for given familyName.
      */
     @UnsupportedAppUsage(trackingBug = 123769347)
     static final Map<String, Typeface> sSystemFontMap;
