@@ -16,6 +16,7 @@
 
 package com.android.server.rollback;
 
+import android.annotation.NonNull;
 import android.app.AppOpsManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -842,6 +843,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             String packageName = newPackage.packageName;
             for (PackageRollbackInfo info : rd.packages) {
                 if (info.getPackageName().equals(packageName)) {
+                    info.getInstalledUsers().addAll(IntArray.wrap(installedUsers));
                     AppDataRollbackHelper.SnapshotAppDataResult rs =
                             mAppDataRollbackHelper.snapshotAppData(packageName, installedUsers);
                     info.getPendingBackups().addAll(rs.pendingBackups);
@@ -874,7 +876,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
      * the child sessions, not the parent session.
      */
     private boolean enableRollbackForSession(PackageInstaller.SessionInfo session,
-            int[] installedUsers, boolean snapshotUserData) {
+            @NonNull int[] installedUsers, boolean snapshotUserData) {
         // TODO: Don't attempt to enable rollback for split installs.
         final int installFlags = session.installFlags;
         if ((installFlags & PackageManager.INSTALL_ENABLE_ROLLBACK) == 0) {
@@ -1016,7 +1018,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             }
 
             if (!session.isMultiPackage()) {
-                if (!enableRollbackForSession(session, null, false)) {
+                if (!enableRollbackForSession(session, new int[0], false)) {
                     Log.e(TAG, "Unable to enable rollback for session: " + sessionId);
                     result.offer(false);
                     return;
@@ -1030,7 +1032,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                         result.offer(false);
                         return;
                     }
-                    if (!enableRollbackForSession(childSession, null, false)) {
+                    if (!enableRollbackForSession(childSession, new int[0], false)) {
                         Log.e(TAG, "Unable to enable rollback for session: " + sessionId);
                         result.offer(false);
                         return;

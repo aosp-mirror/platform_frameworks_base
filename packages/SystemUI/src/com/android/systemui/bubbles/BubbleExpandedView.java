@@ -335,6 +335,14 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
         updateView();
     }
 
+    boolean performBackPressIfNeeded() {
+        if (mActivityView == null || !usingActivityView()) {
+            return false;
+        }
+        mActivityView.performBackPress();
+        return true;
+    }
+
     @Override
     public void onClick(View view) {
         if (mEntry == null) {

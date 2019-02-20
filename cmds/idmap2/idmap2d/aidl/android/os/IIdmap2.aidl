@@ -24,6 +24,7 @@ interface IIdmap2 {
   const int POLICY_SYSTEM_PARTITION = 0x00000002;
   const int POLICY_VENDOR_PARTITION = 0x00000004;
   const int POLICY_PRODUCT_PARTITION = 0x00000008;
+  const int POLICY_SIGNATURE = 0x00000010;
 
   @utf8InCpp String getIdmapPath(@utf8InCpp String overlayApkPath, int userId);
   boolean removeIdmap(@utf8InCpp String overlayApkPath, int userId);

@@ -841,25 +841,14 @@
     <dimen name="default_gear_space">18dp</dimen>
     <dimen name="cell_overlay_padding">18dp</dimen>
 
+    <!-- Global actions power menu -->
     <dimen name="global_actions_panel_width">120dp</dimen>
-
-    <dimen name="global_actions_grid_container_bottom_margin">16dp</dimen>
-
-    <dimen name="global_actions_grid_side_margin">4dp</dimen>
-    <dimen name="global_actions_grid_separated_panel_width">104dp</dimen>
-    <dimen name="global_actions_grid_top_padding">8dp</dimen>
-    <dimen name="global_actions_grid_bottom_padding">8dp</dimen>
-    <dimen name="global_actions_grid_left_padding">4dp</dimen>
-    <dimen name="global_actions_grid_right_padding">4dp</dimen>
-
-    <dimen name="global_actions_grid_item_side_margin">12dp</dimen>
-    <dimen name="global_actions_grid_item_vertical_margin">8dp</dimen>
-
     <dimen name="global_actions_top_padding">120dp</dimen>
-
     <dimen name="global_actions_padding">12dp</dimen>
-
     <dimen name="global_actions_translate">9dp</dimen>
+
+    <!-- Global actions grid layout -->
+    <dimen name="global_actions_grid_side_margin">4dp</dimen>
 
     <!-- The maximum offset in either direction that elements are moved horizontally to prevent
          burn-in on AOD. -->

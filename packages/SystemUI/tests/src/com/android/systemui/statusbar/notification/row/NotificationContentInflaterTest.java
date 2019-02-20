@@ -99,7 +99,11 @@ public class NotificationContentInflaterTest extends SysuiTestCase {
     public void testIncreasedHeadsUpBeingUsed() {
         mNotificationInflater.setUsesIncreasedHeadsUpHeight(true);
         Notification.Builder builder = spy(mBuilder);
-        mNotificationInflater.inflateNotificationViews(FLAG_CONTENT_VIEW_ALL, builder, mContext);
+        mNotificationInflater.inflateNotificationViews(
+                false /* inflateSynchronously */,
+                FLAG_CONTENT_VIEW_ALL,
+                builder,
+                mContext);
         verify(builder).createHeadsUpContentView(true);
     }
 
@@ -107,7 +111,11 @@ public class NotificationContentInflaterTest extends SysuiTestCase {
     public void testIncreasedHeightBeingUsed() {
         mNotificationInflater.setUsesIncreasedHeight(true);
         Notification.Builder builder = spy(mBuilder);
-        mNotificationInflater.inflateNotificationViews(FLAG_CONTENT_VIEW_ALL, builder, mContext);
+        mNotificationInflater.inflateNotificationViews(
+                false /* inflateSynchronously */,
+                FLAG_CONTENT_VIEW_ALL,
+                builder,
+                mContext);
         verify(builder).createContentView(true);
     }
 
@@ -163,7 +171,11 @@ public class NotificationContentInflaterTest extends SysuiTestCase {
                 new NotificationContentInflater.InflationProgress();
         result.packageContext = mContext;
         CountDownLatch countDownLatch = new CountDownLatch(1);
-        NotificationContentInflater.applyRemoteView(result, FLAG_CONTENT_VIEW_EXPANDED, 0,
+        NotificationContentInflater.applyRemoteView(
+                false /* inflateSynchronously */,
+                result,
+                FLAG_CONTENT_VIEW_EXPANDED,
+                0,
                 new ArrayMap() /* cachedContentViews */, mRow, false /* redactAmbient */,
                 true /* isNewView */, (v, p, r) -> true,
                 new InflationCallback() {
@@ -246,6 +258,7 @@ public class NotificationContentInflaterTest extends SysuiTestCase {
             NotificationContentInflater inflater) throws Exception {
         CountDownLatch countDownLatch = new CountDownLatch(1);
         final ExceptionHolder exceptionHolder = new ExceptionHolder();
+        inflater.setInflateSynchronously(true);
         inflater.setInflationCallback(new InflationCallback() {
             @Override
             public void handleInflationException(StatusBarNotification notification,
@@ -264,11 +277,6 @@ public class NotificationContentInflaterTest extends SysuiTestCase {
                             "Inflation finished even though there should be an error"));
                 }
                 countDownLatch.countDown();
-            }
-
-            @Override
-            public boolean doInflateSynchronous() {
-                return true;
             }
         });
         block.run();

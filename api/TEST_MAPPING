@@ -2,6 +2,9 @@
   "presubmit": [
     {
       "name": "CtsCurrentApiSignatureTestCases"
+    },
+    {
+      "name": "GtsUnofficialApisUsageTestCases"
     }
   ]
 }

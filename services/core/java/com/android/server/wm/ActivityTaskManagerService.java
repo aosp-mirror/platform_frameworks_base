@@ -2467,7 +2467,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 }
                 final Rect destBounds = new Rect();
                 stack.getAnimationOrCurrentBounds(destBounds);
-                if (!destBounds.isEmpty() || !destBounds.equals(compareBounds)) {
+                if (destBounds.isEmpty() || !destBounds.equals(compareBounds)) {
                     Slog.w(TAG, "The current stack bounds does not matched! It may be obsolete.");
                     return;
                 }

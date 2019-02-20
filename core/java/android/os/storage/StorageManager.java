@@ -38,6 +38,7 @@ import android.content.pm.IPackageMoveObserver;
 import android.content.pm.PackageManager;
 import android.content.res.ObbInfo;
 import android.content.res.ObbScanner;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.Environment;
 import android.os.FileUtils;
@@ -55,6 +56,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.ServiceManager.ServiceNotFoundException;
 import android.os.SystemProperties;
+import android.provider.MediaStore;
 import android.provider.Settings;
 import android.sysprop.VoldProperties;
 import android.system.ErrnoException;
@@ -1096,10 +1098,30 @@ public class StorageManager {
     }
 
     /**
-     * Return the {@link StorageVolume} that contains the given file, or {@code null} if none.
+     * Return the {@link StorageVolume} that contains the given file, or
+     * {@code null} if none.
      */
     public @Nullable StorageVolume getStorageVolume(File file) {
         return getStorageVolume(getVolumeList(), file);
+    }
+
+    /**
+     * Return the {@link StorageVolume} that contains the given
+     * {@link MediaStore} item.
+     */
+    public @NonNull StorageVolume getStorageVolume(@NonNull Uri uri) {
+        final String volumeName = MediaStore.getVolumeName(uri);
+        switch (volumeName) {
+            case MediaStore.VOLUME_EXTERNAL:
+                return getPrimaryStorageVolume();
+            default:
+                for (StorageVolume vol : getStorageVolumes()) {
+                    if (Objects.equals(vol.getNormalizedUuid(), volumeName)) {
+                        return vol;
+                    }
+                }
+        }
+        throw new IllegalStateException("Unknown volume for " + uri);
     }
 
     /** {@hide} */

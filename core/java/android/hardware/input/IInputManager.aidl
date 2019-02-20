@@ -16,7 +16,6 @@
 
 package android.hardware.input;
 
-import android.app.IInputForwarder;
 import android.hardware.input.InputDeviceIdentifier;
 import android.hardware.input.KeyboardLayout;
 import android.hardware.input.IInputDevicesChangedListener;
@@ -82,7 +81,4 @@ interface IInputManager {
     void setCustomPointerIcon(in PointerIcon icon);
 
     void requestPointerCapture(IBinder windowToken, boolean enabled);
-
-    /** Create input forwarder to deliver touch events to owned display. */
-    IInputForwarder createInputForwarder(int displayId);
 }

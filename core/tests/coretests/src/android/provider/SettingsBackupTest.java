@@ -494,6 +494,7 @@ public class SettingsBackupTest {
                     Settings.Global.GAME_DRIVER_BLACKLISTS,
                     Settings.Global.GAME_DRIVER_BLACKLIST,
                     Settings.Global.GAME_DRIVER_WHITELIST,
+                    Settings.Global.GAME_DRIVER_SPHAL_LIBRARIES,
                     Settings.Global.GLOBAL_SETTINGS_SHOW_ANGLE_IN_USE_DIALOG_BOX,
                     Settings.Global.GPU_DEBUG_LAYER_APP,
                     Settings.Global.ENABLE_GNSS_RAW_MEAS_FULL_TRACKING,

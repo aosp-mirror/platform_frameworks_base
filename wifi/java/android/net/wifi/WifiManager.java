@@ -2136,17 +2136,26 @@ public class WifiManager {
     }
 
     /**
+     * @deprecated Please use {@link android.content.pm.PackageManager#hasSystemFeature(String)}
+     * with {@link android.content.pm.PackageManager#FEATURE_WIFI_RTT} and
+     * {@link android.content.pm.PackageManager#FEATURE_WIFI_AWARE}.
+     *
      * @return true if this adapter supports Device-to-device RTT
      * @hide
      */
+    @Deprecated
     @SystemApi
     public boolean isDeviceToDeviceRttSupported() {
         return isFeatureSupported(WIFI_FEATURE_D2D_RTT);
     }
 
     /**
+     * @deprecated Please use {@link android.content.pm.PackageManager#hasSystemFeature(String)}
+     * with {@link android.content.pm.PackageManager#FEATURE_WIFI_RTT}.
+     *
      * @return true if this adapter supports Device-to-AP RTT
      */
+    @Deprecated
     public boolean isDeviceToApRttSupported() {
         return isFeatureSupported(WIFI_FEATURE_D2AP_RTT);
     }

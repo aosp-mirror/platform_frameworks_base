@@ -17,7 +17,6 @@
 package com.android.server.input;
 
 import android.annotation.NonNull;
-import android.app.IInputForwarder;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -1683,29 +1682,6 @@ public class InputManagerService extends IInputManager.Stub
     public void monitor() {
         synchronized (mInputFilterLock) { }
         nativeMonitor(mPtr);
-    }
-
-    // Binder call
-    @Override
-    public IInputForwarder createInputForwarder(int displayId) throws RemoteException {
-        if (!checkCallingPermission(android.Manifest.permission.INJECT_EVENTS,
-                "createInputForwarder()")) {
-            throw new SecurityException("Requires INJECT_EVENTS permission");
-        }
-        final DisplayManager displayManager = mContext.getSystemService(DisplayManager.class);
-        final Display display = displayManager.getDisplay(displayId);
-        if (display == null) {
-            throw new IllegalArgumentException(
-                    "Can't create input forwarder for non-existent displayId: " + displayId);
-        }
-        final int callingUid = Binder.getCallingUid();
-        final int displayOwnerUid = display.getOwnerUid();
-        if (callingUid != displayOwnerUid) {
-            throw new SecurityException(
-                    "Only owner of the display can forward input events to it.");
-        }
-
-        return new InputForwarder(displayId);
     }
 
     // Native callback.

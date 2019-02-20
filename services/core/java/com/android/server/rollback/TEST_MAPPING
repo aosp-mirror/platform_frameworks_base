@@ -2,6 +2,9 @@
   "presubmit": [
     {
       "name": "RollbackTest"
+    },
+    {
+      "name": "StagedRollbackTest"
     }
   ]
 }

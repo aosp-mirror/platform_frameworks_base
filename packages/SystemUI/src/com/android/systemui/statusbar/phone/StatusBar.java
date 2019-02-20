@@ -3261,7 +3261,11 @@ public class StatusBar extends SystemUI implements DemoMode,
             return true;
         }
         if (mState != StatusBarState.KEYGUARD && mState != StatusBarState.SHADE_LOCKED) {
-            animateCollapsePanels();
+            if (mNotificationPanel.canPanelBeCollapsed()) {
+                animateCollapsePanels();
+            } else {
+                mBubbleController.performBackPressIfNeeded();
+            }
             return true;
         }
         if (mKeyguardUserSwitcher != null && mKeyguardUserSwitcher.hideIfNotSimple(true)) {

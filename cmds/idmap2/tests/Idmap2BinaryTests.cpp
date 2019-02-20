@@ -132,9 +132,9 @@ TEST_F(Idmap2BinaryTests, Dump) {
   ASSERT_THAT(result, NotNull());
   ASSERT_EQ(result->status, EXIT_SUCCESS) << result->stderr;
   ASSERT_NE(result->stdout.find("0x7f010000 -> 0x7f010000 integer/int1"), std::string::npos);
-  ASSERT_NE(result->stdout.find("0x7f020009 -> 0x7f020000 string/str1"), std::string::npos);
-  ASSERT_NE(result->stdout.find("0x7f02000b -> 0x7f020001 string/str3"), std::string::npos);
-  ASSERT_NE(result->stdout.find("0x7f02000c -> 0x7f020002 string/str4"), std::string::npos);
+  ASSERT_NE(result->stdout.find("0x7f02000a -> 0x7f020000 string/str1"), std::string::npos);
+  ASSERT_NE(result->stdout.find("0x7f02000c -> 0x7f020001 string/str3"), std::string::npos);
+  ASSERT_NE(result->stdout.find("0x7f02000d -> 0x7f020002 string/str4"), std::string::npos);
   ASSERT_EQ(result->stdout.find("00000210:     007f  target package id"), std::string::npos);
 
   // clang-format off
@@ -286,7 +286,7 @@ TEST_F(Idmap2BinaryTests, Lookup) {
                           "lookup",
                           "--idmap-path", GetIdmapPath(),
                           "--config", "",
-                          "--resid", "0x7f020009"});  // string/str1
+                          "--resid", "0x7f02000a"});  // string/str1
   // clang-format on
   ASSERT_THAT(result, NotNull());
   ASSERT_EQ(result->status, EXIT_SUCCESS) << result->stderr;

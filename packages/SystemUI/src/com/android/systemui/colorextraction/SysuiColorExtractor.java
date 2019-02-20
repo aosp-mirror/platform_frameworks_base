@@ -61,7 +61,7 @@ public class SysuiColorExtractor extends ColorExtractor implements Dumpable {
 
     @VisibleForTesting
     public SysuiColorExtractor(Context context, ExtractionType type, boolean registerVisibility) {
-        super(context, type);
+        super(context, type, false /* immediately */);
         mTonal = type instanceof Tonal ? (Tonal) type : new Tonal(context);
         mWpHiddenColors = new GradientColors();
 

@@ -2332,6 +2332,20 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
             if (!task.canBeLaunchedOnDisplay(actualDisplayId)) {
                 throw new IllegalStateException("Task resolved to incompatible display");
             }
+
+            final ActivityDisplay preferredDisplay =
+                    mRootActivityContainer.getActivityDisplay(preferredDisplayId);
+
+            final boolean singleTaskInstance = preferredDisplay != null
+                    && preferredDisplay.isSingleTaskInstance();
+
+            if (singleTaskInstance) {
+                // Suppress the warning toast if the preferredDisplay was set to singleTask.
+                // The singleTaskInstance displays will only contain one task and any attempt to
+                // launch new task will re-route to the default display.
+                return;
+            }
+
             if (preferredDisplayId != actualDisplayId) {
                 Slog.w(TAG, "Failed to put " + task + " on display " + preferredDisplayId);
                 // Display a warning toast that we failed to put a task on a secondary display.

@@ -145,6 +145,38 @@ public final class DeviceConfig {
     @SystemApi
     public interface RuntimeNative {
         String NAMESPACE = "runtime_native";
+
+        /**
+         * Zygote flags. See {@link com.internal.os.Zygote}.
+         */
+
+        /**
+         * If {@code true}, enables the blastula pool feature.
+         *
+         * @hide for internal use only
+         */
+        String BLASTULA_POOL_ENABLED = "blastula_pool_enabled";
+
+        /**
+         * The maximum number of processes to keep in the blastula pool.
+         *
+         * @hide for internal use only
+         */
+        String BLASTULA_POOL_SIZE_MAX = "blastula_pool_size_max";
+
+        /**
+         * The minimum number of processes to keep in the blastula pool.
+         *
+         * @hide for internal use only
+         */
+        String BLASTULA_POOL_SIZE_MIN = "blastula_pool_size_max";
+
+        /**
+         * The threshold used to determine if the pool should be refilled.
+         *
+         * @hide for internal use only
+         */
+        String BLASTULA_POOL_REFILL_THRESHOLD = "blastula_refill_threshold";
     }
 
     /**

@@ -27,6 +27,7 @@ import android.content.pm.PackageParser;
 import android.content.pm.PackageParser.PackageParserException;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.ServiceManager.ServiceNotFoundException;
 import android.util.Slog;
 
 import com.android.internal.util.IndentingPrintWriter;
@@ -50,8 +51,12 @@ class ApexManager {
     private final Map<String, PackageInfo> mActivePackagesCache;
 
     ApexManager() {
-        mApexService = IApexService.Stub.asInterface(
-            ServiceManager.getService("apexservice"));
+        try {
+            mApexService = IApexService.Stub.asInterface(
+                ServiceManager.getServiceOrThrow("apexservice"));
+        } catch (ServiceNotFoundException e) {
+            throw new IllegalStateException("Required service apexservice not available");
+        }
         mActivePackagesCache = populateActivePackagesCache();
     }
 
@@ -151,7 +156,7 @@ class ApexManager {
     }
 
     /**
-     * Mark a staged session previously submitted using {@cde submitStagedSession} as ready to be
+     * Mark a staged session previously submitted using {@code submitStagedSession} as ready to be
      * applied at next reboot.
      *
      * @param sessionId the identifier of the {@link PackageInstallerSession} being marked as ready.
@@ -227,8 +232,6 @@ class ApexManager {
                     ipw.println("State: STAGED");
                 } else if (si.isActivated) {
                     ipw.println("State: ACTIVATED");
-                } else if (si.isActivationPendingRetry) {
-                    ipw.println("State: ACTIVATION PENDING RETRY");
                 } else if (si.isActivationFailed) {
                     ipw.println("State: ACTIVATION FAILED");
                 }

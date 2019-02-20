@@ -22,6 +22,7 @@
 
     <!-- Requests to overlay a resource that belongs to a policy the overlay does not fulfill. -->
     <string name="policy_product">policy_product</string>
+    <string name="policy_signature">policy_signature</string>
 
     <!-- Requests to overlay a resource that is not declared as overlayable. -->
     <string name="not_overlayable">not_overlayable</string>
