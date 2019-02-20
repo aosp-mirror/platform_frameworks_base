@@ -420,9 +420,21 @@ public abstract class TextClassifierService extends Service {
     /**
      * Returns a TextClassifier that runs in this service's process.
      * If the local TextClassifier is disabled, this returns {@link TextClassifier#NO_OP}.
+     *
+     * @deprecated Use {@link #getDefaultTextClassifierImplementation(Context)} instead.
      */
+    @Deprecated
     public final TextClassifier getLocalTextClassifier() {
-        final TextClassificationManager tcm = getSystemService(TextClassificationManager.class);
+        // Deprecated: In the future, we may not guarantee that this runs in the service's process.
+        return getDefaultTextClassifierImplementation(this);
+    }
+
+    /**
+     * Returns the platform's default TextClassifier implementation.
+     */
+    public static TextClassifier getDefaultTextClassifierImplementation(@NonNull Context context) {
+        final TextClassificationManager tcm =
+                context.getSystemService(TextClassificationManager.class);
         if (tcm != null) {
             return tcm.getTextClassifier(TextClassifier.LOCAL);
         }
