@@ -3923,7 +3923,6 @@ com.android.ims.internal.IImsServiceFeatureCallback$Stub
 com.android.internal.R$styleable
 com.android.internal.app.AlertController
 com.android.internal.app.AlertController$AlertParams
-com.android.internal.app.ColorDisplayController
 com.android.internal.app.IAppOpsCallback
 com.android.internal.app.IAppOpsCallback$Stub
 com.android.internal.app.IAppOpsService
