@@ -70,7 +70,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.database.ContentObserver;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
@@ -99,7 +98,6 @@ import android.service.dreams.IDreamManager;
 import android.service.notification.StatusBarNotification;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
-import android.util.FeatureFlagUtils;
 import android.util.Log;
 import android.util.Slog;
 import android.view.Display;
@@ -474,9 +472,6 @@ public class StatusBar extends SystemUI implements DemoMode,
             WallpaperInfo info = wallpaperManager.getWallpaperInfo(UserHandle.USER_CURRENT);
             final boolean deviceSupportsAodWallpaper = mContext.getResources().getBoolean(
                     com.android.internal.R.bool.config_dozeSupportsAodWallpaper);
-            final boolean aodImageWallpaperEnabled = FeatureFlagUtils.isEnabled(mContext,
-                    FeatureFlagUtils.AOD_IMAGEWALLPAPER_ENABLED);
-            updateAodMaskVisibility(deviceSupportsAodWallpaper && aodImageWallpaperEnabled);
             // If WallpaperInfo is null, it must be ImageWallpaper.
             final boolean supportsAmbientMode = deviceSupportsAodWallpaper
                     && (info == null || info.supportsAmbientMode());
@@ -580,7 +575,6 @@ public class StatusBar extends SystemUI implements DemoMode,
     protected NotificationPresenter mPresenter;
     private NotificationActivityStarter mNotificationActivityStarter;
     private boolean mPulsing;
-    private ContentObserver mFeatureFlagObserver;
     protected BubbleController mBubbleController;
     private final BubbleController.BubbleExpandListener mBubbleExpandListener =
             (isExpanding, key) -> {
@@ -705,9 +699,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         mContext.registerReceiverAsUser(mWallpaperChangedReceiver, UserHandle.ALL,
                 wallpaperChangedFilter, null /* broadcastPermission */, null /* scheduler */);
         mWallpaperChangedReceiver.onReceive(mContext, null);
-        mFeatureFlagObserver = new FeatureFlagObserver(
-                FeatureFlagUtils.AOD_IMAGEWALLPAPER_ENABLED /* feature */,
-                () -> mWallpaperChangedReceiver.onReceive(mContext, null) /* callback */);
 
         // Set up the initial notification state. This needs to happen before CommandQueue.disable()
         setUpPresenter();
@@ -4426,32 +4417,4 @@ public class StatusBar extends SystemUI implements DemoMode,
         return mStatusBarMode;
     }
 
-    private void updateAodMaskVisibility(boolean supportsAodWallpaper) {
-        View mask = mStatusBarWindow.findViewById(R.id.aod_mask);
-        if (mask != null) {
-            mask.setVisibility(supportsAodWallpaper ? View.VISIBLE : View.INVISIBLE);
-        }
-    }
-
-    private final class FeatureFlagObserver extends ContentObserver {
-        private final Runnable mCallback;
-
-        FeatureFlagObserver(String feature, Runnable callback) {
-            this(null, feature, callback);
-        }
-
-        private FeatureFlagObserver(Handler handler, String feature, Runnable callback) {
-            super(handler);
-            mCallback = callback;
-            mContext.getContentResolver().registerContentObserver(
-                    Settings.Global.getUriFor(feature), false, this);
-        }
-
-        @Override
-        public void onChange(boolean selfChange) {
-            if (mCallback != null) {
-                mStatusBarWindow.post(mCallback);
-            }
-        }
-    }
 }

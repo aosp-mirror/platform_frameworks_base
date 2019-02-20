@@ -84,7 +84,6 @@ import android.service.wallpaper.WallpaperService;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.util.EventLog;
-import android.util.FeatureFlagUtils;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
@@ -2260,10 +2259,6 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 // Cannot talk to wallpaper engine.
             }
         }
-    }
-
-    private boolean isAodImageWallpaperEnabled() {
-        return FeatureFlagUtils.isEnabled(mContext, FeatureFlagUtils.AOD_IMAGEWALLPAPER_ENABLED);
     }
 
     @Override
