@@ -1705,9 +1705,15 @@ public final class ProcessList {
             zygoteProcesses.remove(app);
             if (zygoteProcesses.size() == 0) {
                 mService.mHandler.removeMessages(KILL_APP_ZYGOTE_MSG);
-                Message msg = mService.mHandler.obtainMessage(KILL_APP_ZYGOTE_MSG);
-                msg.obj = appZygote;
-                mService.mHandler.sendMessageDelayed(msg, KILL_APP_ZYGOTE_DELAY_MS);
+                if (app.removed) {
+                    // If we stopped this process because the package hosting it was removed,
+                    // there's no point in delaying the app zygote kill.
+                    killAppZygoteIfNeededLocked(appZygote);
+                } else {
+                    Message msg = mService.mHandler.obtainMessage(KILL_APP_ZYGOTE_MSG);
+                    msg.obj = appZygote;
+                    mService.mHandler.sendMessageDelayed(msg, KILL_APP_ZYGOTE_DELAY_MS);
+                }
             }
         }
     }
@@ -2161,6 +2167,29 @@ public final class ProcessList {
         int N = procs.size();
         for (int i=0; i<N; i++) {
             removeProcessLocked(procs.get(i), callerWillRestart, allowRestart, reason);
+        }
+        // See if there are any app zygotes running for this packageName / UID combination,
+        // and kill it if so.
+        final ArrayList<AppZygote> zygotesToKill = new ArrayList<>();
+        for (SparseArray<AppZygote> appZygotes : mAppZygotes.getMap().values()) {
+            for (int i = 0; i < appZygotes.size(); ++i) {
+                final int appZygoteUid = appZygotes.keyAt(i);
+                if (userId != UserHandle.USER_ALL && UserHandle.getUserId(appZygoteUid) != userId) {
+                    continue;
+                }
+                if (appId >= 0 && UserHandle.getAppId(appZygoteUid) != appId) {
+                    continue;
+                }
+                final AppZygote appZygote = appZygotes.valueAt(i);
+                if (packageName != null
+                        && !packageName.equals(appZygote.getAppInfo().packageName)) {
+                    continue;
+                }
+                zygotesToKill.add(appZygote);
+            }
+        }
+        for (AppZygote appZygote : zygotesToKill) {
+            killAppZygoteIfNeededLocked(appZygote);
         }
         mService.updateOomAdjLocked();
         return N > 0;
