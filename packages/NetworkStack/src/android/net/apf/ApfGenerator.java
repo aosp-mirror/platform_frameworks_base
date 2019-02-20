@@ -108,7 +108,7 @@ public class ApfGenerator {
         private String mLabel;
         // When mOpcode == Opcodes.JNEBS:
         private byte[] mCompareBytes;
-        // Offset in bytes from the begining of this program. Set by {@link ApfGenerator#generate}.
+        // Offset in bytes from the beginning of this program. Set by {@link ApfGenerator#generate}.
         int offset;
 
         Instruction(Opcodes opcode, Register register) {
@@ -431,7 +431,7 @@ public class ApfGenerator {
 
     /**
      * Add an instruction to the end of the program to load the byte at offset {@code offset}
-     * bytes from the begining of the packet into {@code register}.
+     * bytes from the beginning of the packet into {@code register}.
      */
     public ApfGenerator addLoad8(Register register, int offset) {
         Instruction instruction = new Instruction(Opcodes.LDB, register);
@@ -442,7 +442,7 @@ public class ApfGenerator {
 
     /**
      * Add an instruction to the end of the program to load 16-bits at offset {@code offset}
-     * bytes from the begining of the packet into {@code register}.
+     * bytes from the beginning of the packet into {@code register}.
      */
     public ApfGenerator addLoad16(Register register, int offset) {
         Instruction instruction = new Instruction(Opcodes.LDH, register);
@@ -453,7 +453,7 @@ public class ApfGenerator {
 
     /**
      * Add an instruction to the end of the program to load 32-bits at offset {@code offset}
-     * bytes from the begining of the packet into {@code register}.
+     * bytes from the beginning of the packet into {@code register}.
      */
     public ApfGenerator addLoad32(Register register, int offset) {
         Instruction instruction = new Instruction(Opcodes.LDW, register);
@@ -464,7 +464,7 @@ public class ApfGenerator {
 
     /**
      * Add an instruction to the end of the program to load a byte from the packet into
-     * {@code register}. The offset of the loaded byte from the begining of the packet is
+     * {@code register}. The offset of the loaded byte from the beginning of the packet is
      * the sum of {@code offset} and the value in register R1.
      */
     public ApfGenerator addLoad8Indexed(Register register, int offset) {

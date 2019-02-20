@@ -1006,7 +1006,7 @@ public class ApfTest {
 
     private static final int IPV4_HEADER_LEN = 20;
     private static final int IPV4_VERSION_IHL_OFFSET = ETH_HEADER_LEN + 0;
-    private static final int IPV4_TOTAL_LENGTH_OFFSET  = ETH_HEADER_LEN + 2;
+    private static final int IPV4_TOTAL_LENGTH_OFFSET = ETH_HEADER_LEN + 2;
     private static final int IPV4_PROTOCOL_OFFSET = ETH_HEADER_LEN + 9;
     private static final int IPV4_SRC_ADDR_OFFSET = ETH_HEADER_LEN + 12;
     private static final int IPV4_DEST_ADDR_OFFSET = ETH_HEADER_LEN + 16;
