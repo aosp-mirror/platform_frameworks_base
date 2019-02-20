@@ -126,6 +126,14 @@ public abstract class AugmentedAutofillService extends Service {
     }
 
     /**
+     * Called when the Android system connects to service.
+     *
+     * <p>You should generally do initialization here rather than in {@link #onCreate}.
+     */
+    public void onConnected() {
+    }
+
+    /**
      * Asks the service to handle an "augmented" autofill request.
      *
      * <p>This method is called when the "stantard" autofill service cannot handle a request, which
@@ -156,6 +164,14 @@ public abstract class AugmentedAutofillService extends Service {
     public void onFillRequest(@NonNull FillRequest request,
             @NonNull CancellationSignal cancellationSignal, @NonNull FillController controller,
             @NonNull FillCallback callback) {
+    }
+
+    /**
+     * Called when the Android system disconnects from the service.
+     *
+     * <p> At this point this service may no longer be an active {@link AugmentedAutofillService}.
+     */
+    public void onDisconnected() {
     }
 
     private void handleOnFillRequest(int sessionId, @NonNull IBinder client, int taskId,
