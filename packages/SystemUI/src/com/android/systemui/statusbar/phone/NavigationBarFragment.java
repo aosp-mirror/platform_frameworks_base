@@ -185,6 +185,11 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
         }
 
         @Override
+        public void startAssistant(Bundle bundle) {
+            mAssistManager.startAssist(bundle);
+        }
+
+        @Override
         public void onBackButtonAlphaChanged(float alpha, boolean animate) {
             final ButtonDispatcher backButton = mNavigationBarView.getBackButton();
             if (QuickStepController.shouldhideBackButton(getContext())) {

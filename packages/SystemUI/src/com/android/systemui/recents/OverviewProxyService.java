@@ -29,6 +29,7 @@ import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_SUP
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_SYSUI_PROXY;
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_WINDOW_CORNER_RADIUS;
 
+import android.annotation.FloatRange;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -264,6 +265,30 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             long token = Binder.clearCallingIdentity();
             try {
                 return mSupportsRoundedCornersOnWindows;
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        public void onAssistantProgress(@FloatRange(from = 0.0, to = 1.0) float progress) {
+            if (!verifyCaller("onAssistantProgress")) {
+                return;
+            }
+            long token = Binder.clearCallingIdentity();
+            try {
+                mHandler.post(() -> notifyAssistantProgress(progress));
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        public void startAssistant(Bundle bundle) {
+            if (!verifyCaller("startAssistant")) {
+                return;
+            }
+            long token = Binder.clearCallingIdentity();
+            try {
+                mHandler.post(() -> notifyStartAssistant(bundle));
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -590,6 +615,18 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         }
     }
 
+    private void notifyAssistantProgress(@FloatRange(from = 0.0, to = 1.0) float progress) {
+        for (int i = mConnectionCallbacks.size() - 1; i >= 0; --i) {
+            mConnectionCallbacks.get(i).onAssistantProgress(progress);
+        }
+    }
+
+    private void notifyStartAssistant(Bundle bundle) {
+        for (int i = mConnectionCallbacks.size() - 1; i >= 0; --i) {
+            mConnectionCallbacks.get(i).startAssistant(bundle);
+        }
+    }
+
     private void updateEnabledState() {
         mIsEnabled = mContext.getPackageManager().resolveServiceAsUser(mQuickStepIntent,
                 MATCH_DIRECT_BOOT_UNAWARE,
@@ -637,5 +674,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         default void onOverviewShown(boolean fromHome) {}
         default void onQuickScrubStarted() {}
         default void onBackButtonAlphaChanged(float alpha, boolean animate) {}
+        default void onAssistantProgress(@FloatRange(from = 0.0, to = 1.0) float progress) {}
+        default void startAssistant(Bundle bundle) {}
     }
 }
