@@ -17,6 +17,8 @@
 #ifndef AAPT_SPLIT_UTIL_H
 #define AAPT_SPLIT_UTIL_H
 
+#include <regex>
+
 #include "androidfw/StringPiece.h"
 
 #include "AppInfo.h"
@@ -71,6 +73,9 @@ std::string MakePackageSafeName(const std::string &name);
 // version code using the versionCode attribute only, and encodes using both versionCode and
 // versionCodeMajor if the version code requires more than 32 bits.
 void SetLongVersionCode(xml::Element* manifest, uint64_t version_code);
+
+// Returns a case insensitive regular expression based on the input.
+std::regex GetRegularExpression(const std::string &input);
 
 }  // namespace aapt
 

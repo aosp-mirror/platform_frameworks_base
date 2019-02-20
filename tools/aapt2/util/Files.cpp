@@ -251,6 +251,25 @@ bool AppendArgsFromFile(const StringPiece& path, std::vector<std::string>* out_a
   return true;
 }
 
+bool AppendSetArgsFromFile(const StringPiece& path, std::unordered_set<std::string>* out_argset,
+                           std::string* out_error) {
+  std::string contents;
+  if(!ReadFileToString(path.to_string(), &contents, true /*follow_symlinks*/)) {
+    if (out_error) {
+      *out_error = "failed to read argument-list file";
+    }
+    return false;
+  }
+
+  for (StringPiece line : util::Tokenize(contents, ' ')) {
+    line = util::TrimWhitespace(line);
+    if (!line.empty()) {
+      out_argset->insert(line.to_string());
+    }
+  }
+  return true;
+}
+
 bool FileFilter::SetPattern(const StringPiece& pattern) {
   pattern_tokens_ = util::SplitAndLowercase(pattern, ':');
   return true;
