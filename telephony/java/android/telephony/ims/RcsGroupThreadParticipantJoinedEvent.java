@@ -16,16 +16,13 @@
 package android.telephony.ims;
 
 import android.annotation.NonNull;
-import android.os.Parcel;
-import android.os.Parcelable;
 
 /**
  * An event that indicates an RCS participant has joined an {@link RcsThread}. Please see US6-3 -
  * GSMA RCC.71 (RCS Universal Profile Service Definition Document)
  */
-public final class RcsGroupThreadParticipantJoinedEvent extends RcsGroupThreadEvent implements
-        Parcelable {
-    private final int mJoinedParticipantId;
+public final class RcsGroupThreadParticipantJoinedEvent extends RcsGroupThreadEvent {
+    private final RcsParticipant mJoinedParticipantId;
 
     /**
      * Creates a new {@link RcsGroupThreadParticipantJoinedEvent}. This event is not persisted into
@@ -44,23 +41,14 @@ public final class RcsGroupThreadParticipantJoinedEvent extends RcsGroupThreadEv
             @NonNull RcsGroupThread rcsGroupThread, @NonNull RcsParticipant originatingParticipant,
             @NonNull RcsParticipant joinedParticipant) {
         super(timestamp, rcsGroupThread.getThreadId(), originatingParticipant.getId());
-        mJoinedParticipantId = joinedParticipant.getId();
-    }
-
-    /**
-     * @hide - internal constructor for queries
-     */
-    public RcsGroupThreadParticipantJoinedEvent(long timestamp, int rcsGroupThreadId,
-            int originatingParticipantId, int joinedParticipantId) {
-        super(timestamp, rcsGroupThreadId, originatingParticipantId);
-        mJoinedParticipantId = joinedParticipantId;
+        mJoinedParticipantId = joinedParticipant;
     }
 
     /**
      * @return Returns the {@link RcsParticipant} that joined the associated {@link RcsGroupThread}
      */
     public RcsParticipant getJoinedParticipant() {
-        return new RcsParticipant(mJoinedParticipantId);
+        return mJoinedParticipantId;
     }
 
     /**
@@ -74,34 +62,5 @@ public final class RcsGroupThreadParticipantJoinedEvent extends RcsGroupThreadEv
                 iRcs -> iRcs.createGroupThreadParticipantJoinedEvent(getTimestamp(),
                         getRcsGroupThread().getThreadId(), getOriginatingParticipant().getId(),
                         getJoinedParticipant().getId()));
-    }
-
-    public static final Creator<RcsGroupThreadParticipantJoinedEvent> CREATOR =
-            new Creator<RcsGroupThreadParticipantJoinedEvent>() {
-                @Override
-                public RcsGroupThreadParticipantJoinedEvent createFromParcel(Parcel in) {
-                    return new RcsGroupThreadParticipantJoinedEvent(in);
-                }
-
-                @Override
-                public RcsGroupThreadParticipantJoinedEvent[] newArray(int size) {
-                    return new RcsGroupThreadParticipantJoinedEvent[size];
-                }
-            };
-
-    private RcsGroupThreadParticipantJoinedEvent(Parcel in) {
-        super(in);
-        mJoinedParticipantId = in.readInt();
-    }
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        super.writeToParcel(dest, flags);
-        dest.writeInt(mJoinedParticipantId);
     }
 }

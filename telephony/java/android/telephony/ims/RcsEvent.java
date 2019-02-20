@@ -15,16 +15,11 @@
  */
 package android.telephony.ims;
 
-import android.os.Parcel;
-
 /**
  * The base class for events that can happen on {@link RcsParticipant}s and {@link RcsThread}s.
  */
 public abstract class RcsEvent {
-    /**
-     * @hide
-     */
-    protected final long mTimestamp;
+    private final long mTimestamp;
 
     protected RcsEvent(long timestamp) {
         mTimestamp = timestamp;
@@ -44,18 +39,4 @@ public abstract class RcsEvent {
      * @hide
      */
     abstract void persist() throws RcsMessageStoreException;
-
-    /**
-     * @hide
-     */
-    RcsEvent(Parcel in) {
-        mTimestamp = in.readLong();
-    }
-
-    /**
-     * @hide
-     */
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeLong(mTimestamp);
-    }
 }
