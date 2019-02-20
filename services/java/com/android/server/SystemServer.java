@@ -2215,12 +2215,12 @@ public final class SystemServer {
 
     private void startContentCaptureService(@NonNull Context context) {
         // First check if it was explicitly enabled by DeviceConfig
-        boolean explicitlySupported = false;
+        boolean explicitlyEnabled = false;
         String settings = DeviceConfig.getProperty(DeviceConfig.NAMESPACE_CONTENT_CAPTURE,
                 ContentCaptureManager.DEVICE_CONFIG_PROPERTY_SERVICE_EXPLICITLY_ENABLED);
         if (settings != null && !settings.equalsIgnoreCase("default")) {
-            explicitlySupported = Boolean.parseBoolean(settings);
-            if (explicitlySupported) {
+            explicitlyEnabled = Boolean.parseBoolean(settings);
+            if (explicitlyEnabled) {
                 Slog.d(TAG, "ContentCaptureService explicitly enabled by DeviceConfig");
             } else {
                 Slog.d(TAG, "ContentCaptureService explicitly disabled by DeviceConfig");
@@ -2229,7 +2229,7 @@ public final class SystemServer {
         }
 
         // Then check if OEM overlaid the resource that defines the service.
-        if (!explicitlySupported) {
+        if (!explicitlyEnabled) {
             final String serviceName = context
                     .getString(com.android.internal.R.string.config_defaultContentCaptureService);
             if (TextUtils.isEmpty(serviceName)) {
