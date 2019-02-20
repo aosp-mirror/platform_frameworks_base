@@ -4291,6 +4291,13 @@
     <!-- Title text to append when the display is secure.  [CHAR LIMIT=30] -->
     <string name="display_manager_overlay_display_secure_suffix">, secure</string>
 
+    <!-- Activity starter -->
+    <!-- Toast message for blocking background activity starts feature running in permissive mode -->
+    <string name="activity_starter_block_bg_activity_starts_permissive">This background activity start from <xliff:g id="packageName" example="com.example">%1$s</xliff:g> will be blocked in future Q builds. See go/q-bg-block.</string>
+
+    <!-- Toast message for blocking background activity starts feature running in enforcing mode -->
+    <string name="activity_starter_block_bg_activity_starts_enforcing">Background activity start from <xliff:g id="packageName" example="com.example">%1$s</xliff:g> blocked. See go/q-bg-block. </string>
+
     <!-- Keyguard strings -->
     <!-- Message shown in pattern unlock after some number of unsuccessful attempts -->
     <string name="kg_forgot_pattern_button_text">Forgot Pattern</string>

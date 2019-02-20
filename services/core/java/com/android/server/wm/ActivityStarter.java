@@ -98,6 +98,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Rect;
 import android.os.Binder;
 import android.os.Bundle;
@@ -115,6 +116,7 @@ import android.util.Pools.SynchronizedPool;
 import android.util.Slog;
 import android.widget.Toast;
 
+import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.HeavyWeightSwitcherActivity;
 import com.android.internal.app.IVoiceInteractor;
@@ -761,11 +763,11 @@ class ActivityStarter {
             abort |= (abortBackgroundStart && !mService.isBackgroundActivityStartsEnabled());
             // TODO: remove this toast after feature development is done
             if (abortBackgroundStart) {
-                final String toastMsg = abort
-                        ? "Background activity start from " + callingPackage
-                                + " blocked. See go/q-bg-block."
-                        : "This background activity start from " + callingPackage
-                                + " will be blocked in future Q builds. See go/q-bg-block.";
+                final Resources res = mService.mContext.getResources();
+                final String toastMsg = res.getString(abort
+                            ? R.string.activity_starter_block_bg_activity_starts_enforcing
+                            : R.string.activity_starter_block_bg_activity_starts_permissive,
+                        callingPackage);
                 mService.mUiHandler.post(() -> {
                     Toast.makeText(mService.mContext, toastMsg, Toast.LENGTH_LONG).show();
                 });
