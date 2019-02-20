@@ -37,6 +37,7 @@ static inline const char* toString(bool value) {
 
 struct FrameCallback {
     AChoreographer_frameCallback callback;
+    AChoreographer_frameCallback64 callback64;
     void* data;
     nsecs_t dueTime;
 
@@ -50,8 +51,8 @@ struct FrameCallback {
 
 class Choreographer : public DisplayEventDispatcher, public MessageHandler {
 public:
-    void postFrameCallback(AChoreographer_frameCallback cb, void* data);
-    void postFrameCallbackDelayed(AChoreographer_frameCallback cb, void* data, nsecs_t delay);
+    void postFrameCallbackDelayed(AChoreographer_frameCallback cb,
+                                  AChoreographer_frameCallback64 cb64, void* data, nsecs_t delay);
 
     enum {
         MSG_SCHEDULE_CALLBACKS = 0,
@@ -107,14 +108,10 @@ Choreographer::Choreographer(const sp<Looper>& looper) :
     DisplayEventDispatcher(looper), mLooper(looper), mThreadId(std::this_thread::get_id()) {
 }
 
-void Choreographer::postFrameCallback(AChoreographer_frameCallback cb, void* data) {
-    postFrameCallbackDelayed(cb, data, 0);
-}
-
 void Choreographer::postFrameCallbackDelayed(
-        AChoreographer_frameCallback cb, void* data, nsecs_t delay) {
+        AChoreographer_frameCallback cb, AChoreographer_frameCallback64 cb64, void* data, nsecs_t delay) {
     nsecs_t now = systemTime(SYSTEM_TIME_MONOTONIC);
-    FrameCallback callback{cb, data, now + delay};
+    FrameCallback callback{cb, cb64, data, now + delay};
     {
         AutoMutex _l{mLock};
         mCallbacks.push(callback);
@@ -156,7 +153,11 @@ void Choreographer::dispatchVsync(nsecs_t timestamp, PhysicalDisplayId, uint32_t
         }
     }
     for (const auto& cb : callbacks) {
-        cb.callback(timestamp, cb.data);
+        if (cb.callback64 != nullptr) {
+            cb.callback64(timestamp, cb.data);
+        } else if (cb.callback != nullptr) {
+            cb.callback(timestamp, cb.data);
+        }
     }
 }
 
@@ -204,10 +205,21 @@ AChoreographer* AChoreographer_getInstance() {
 
 void AChoreographer_postFrameCallback(AChoreographer* choreographer,
         AChoreographer_frameCallback callback, void* data) {
-    AChoreographer_to_Choreographer(choreographer)->postFrameCallback(callback, data);
+    AChoreographer_to_Choreographer(choreographer)->postFrameCallbackDelayed(
+            callback, nullptr, data, 0);
 }
 void AChoreographer_postFrameCallbackDelayed(AChoreographer* choreographer,
         AChoreographer_frameCallback callback, void* data, long delayMillis) {
     AChoreographer_to_Choreographer(choreographer)->postFrameCallbackDelayed(
-            callback, data, ms2ns(delayMillis));
+            callback, nullptr, data, ms2ns(delayMillis));
+}
+void AChoreographer_postFrameCallback64(AChoreographer* choreographer,
+        AChoreographer_frameCallback64 callback, void* data) {
+    AChoreographer_to_Choreographer(choreographer)->postFrameCallbackDelayed(
+            nullptr, callback, data, 0);
+}
+void AChoreographer_postFrameCallbackDelayed64(AChoreographer* choreographer,
+        AChoreographer_frameCallback64 callback, void* data, uint32_t delayMillis) {
+    AChoreographer_to_Choreographer(choreographer)->postFrameCallbackDelayed(
+            nullptr, callback, data, ms2ns(delayMillis));
 }
