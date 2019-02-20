@@ -82,6 +82,8 @@ class WindowTestUtils {
             }, new ComponentName("", ""), false, dc, true /* fillsParent */);
             mTargetSdk = Build.VERSION_CODES.CUR_DEVELOPMENT;
             mSkipOnParentChanged = skipOnParentChanged;
+            mActivityRecord = mock(ActivityRecord.class);
+            mActivityRecord.app = mock(WindowProcessController.class);
         }
 
         int getWindowsCount() {
