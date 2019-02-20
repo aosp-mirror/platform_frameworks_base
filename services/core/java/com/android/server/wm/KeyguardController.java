@@ -29,6 +29,7 @@ import static android.view.WindowManagerPolicyConstants.KEYGUARD_GOING_AWAY_FLAG
 import static android.view.WindowManagerPolicyConstants.KEYGUARD_GOING_AWAY_FLAG_TO_SHADE;
 import static android.view.WindowManagerPolicyConstants.KEYGUARD_GOING_AWAY_FLAG_WITH_WALLPAPER;
 
+import static com.android.server.am.KeyguardControllerProto.AOD_SHOWING;
 import static com.android.server.am.KeyguardControllerProto.KEYGUARD_OCCLUDED_STATES;
 import static com.android.server.am.KeyguardControllerProto.KEYGUARD_SHOWING;
 import static com.android.server.am.KeyguardOccludedProto.DISPLAY_ID;
@@ -86,11 +87,21 @@ class KeyguardController {
 
     /**
      * @return true if either Keyguard or AOD are showing, not going away, and not being occluded
-     *         on the given display, false otherwise
+     *         on the given display, false otherwise.
      */
     boolean isKeyguardOrAodShowing(int displayId) {
         return (mKeyguardShowing || mAodShowing) && !mKeyguardGoingAway
                 && !isDisplayOccluded(displayId);
+    }
+
+    /**
+     * @return {@code true} if 1) Keyguard is showing, not going away, and not being occluded on the
+     *         given display, or 2) AOD is showing, {@code false} otherwise.
+     * TODO(b/125198167): Replace isKeyguardOrAodShowing() by this logic.
+     */
+    boolean isKeyguardUnoccludedOrAodShowing(int displayId) {
+        return (mKeyguardShowing && !mKeyguardGoingAway && !isDisplayOccluded(displayId))
+                || mAodShowing;
     }
 
     /**
@@ -380,10 +391,11 @@ class KeyguardController {
         for (int displayNdx = mRootActivityContainer.getChildCount() - 1;
              displayNdx >= 0; displayNdx--) {
             final ActivityDisplay display = mRootActivityContainer.getChildAt(displayNdx);
-            final KeyguardDisplayState state = getDisplay(display.mDisplayId);
-            if (isKeyguardOrAodShowing(display.mDisplayId) && state.mSleepToken == null) {
+            final int displayId = display.mDisplayId;
+            final KeyguardDisplayState state = getDisplay(displayId);
+            if (isKeyguardUnoccludedOrAodShowing(displayId) && state.mSleepToken == null) {
                 state.acquiredSleepToken();
-            } else if (!isKeyguardOrAodShowing(display.mDisplayId) && state.mSleepToken != null) {
+            } else if (!isKeyguardUnoccludedOrAodShowing(displayId) && state.mSleepToken != null) {
                 state.releaseSleepToken();
             }
         }
@@ -528,6 +540,7 @@ class KeyguardController {
 
     void writeToProto(ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
+        proto.write(AOD_SHOWING, mAodShowing);
         proto.write(KEYGUARD_SHOWING, mKeyguardShowing);
         writeDisplayStatesToProto(proto, KEYGUARD_OCCLUDED_STATES);
         proto.end(token);
