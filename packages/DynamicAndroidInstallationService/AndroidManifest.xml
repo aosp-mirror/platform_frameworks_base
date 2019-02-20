@@ -4,7 +4,7 @@
 
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.MANAGE_DYNAMNIC_ANDROID" />
+    <uses-permission android:name="android.permission.MANAGE_DYNAMIC_ANDROID" />
     <uses-permission android:name="android.permission.REBOOT" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
@@ -16,7 +16,7 @@
             android:name=".DynamicAndroidInstallationService"
             android:enabled="true"
             android:exported="true"
-            android:permission="android.permission.MANAGE_DYNAMNIC_ANDROID"
+            android:permission="android.permission.MANAGE_DYNAMIC_ANDROID"
             android:process=":dynandroid">
             <intent-filter>
                 <action android:name="android.content.action.NOTIFY_IF_IN_USE" />
@@ -26,7 +26,7 @@
 
         <activity android:name=".VerificationActivity"
             android:exported="true"
-            android:permission="android.permission.MANAGE_DYNAMNIC_ANDROID"
+            android:permission="android.permission.MANAGE_DYNAMIC_ANDROID"
             android:theme="@android:style/Theme.Material.Light.Dialog.NoActionBar"
             android:process=":dynandroid">
             <intent-filter>
