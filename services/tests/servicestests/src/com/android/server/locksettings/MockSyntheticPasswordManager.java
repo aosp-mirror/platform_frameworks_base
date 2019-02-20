@@ -35,10 +35,12 @@ public class MockSyntheticPasswordManager extends SyntheticPasswordManager {
 
     private FakeGateKeeperService mGateKeeper;
     private IWeaver mWeaverService;
+    private PasswordSlotManagerTestable mPasswordSlotManager;
 
     public MockSyntheticPasswordManager(Context context, LockSettingsStorage storage,
-            FakeGateKeeperService gatekeeper, UserManager userManager) {
-        super(context, storage, userManager);
+            FakeGateKeeperService gatekeeper, UserManager userManager,
+            PasswordSlotManager passwordSlotManager) {
+        super(context, storage, userManager, passwordSlotManager);
         mGateKeeper = gatekeeper;
     }
 
@@ -113,5 +115,4 @@ public class MockSyntheticPasswordManager extends SyntheticPasswordManager {
         mWeaverService = new MockWeaverService();
         initWeaverService();
     }
-
 }

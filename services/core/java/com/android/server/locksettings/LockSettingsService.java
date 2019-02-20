@@ -404,7 +404,8 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
 
         public SyntheticPasswordManager getSyntheticPasswordManager(LockSettingsStorage storage) {
-            return new SyntheticPasswordManager(getContext(), storage, getUserManager());
+            return new SyntheticPasswordManager(getContext(), storage, getUserManager(),
+                    new PasswordSlotManager());
         }
 
         public boolean hasBiometrics() {
