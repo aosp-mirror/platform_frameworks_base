@@ -7,7 +7,9 @@
                     "include-filter": "android.cts.statsd.atom.UidAtomTests#testRoleHolder"
                 }
             ]
-        },
+        }
+    ],
+    "postsubmit": [
         {
             "name": "CtsRoleTestCases"
         }
