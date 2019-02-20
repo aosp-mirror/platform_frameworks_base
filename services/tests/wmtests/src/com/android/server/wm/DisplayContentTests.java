@@ -61,7 +61,6 @@ import android.os.SystemClock;
 import android.platform.test.annotations.Presubmit;
 import android.util.DisplayMetrics;
 import android.view.DisplayCutout;
-import android.view.DisplayInfo;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.Surface;
@@ -87,18 +86,22 @@ import java.util.List;
  * Tests for the {@link DisplayContent} class.
  *
  * Build/Install/Run:
- *  atest FrameworksServicesTests:DisplayContentTests
+ *  atest WmTests:DisplayContentTests
  */
 @SmallTest
 @Presubmit
 public class DisplayContentTests extends WindowTestsBase {
 
     @Test
-    @FlakyTest(bugId = 77772044)
+    @FlakyTest(detail = "Promote to presubmit when shown to be stable.")
     public void testForAllWindows() {
         final WindowState exitingAppWindow = createWindow(null, TYPE_BASE_APPLICATION,
                 mDisplayContent, "exiting app");
         final AppWindowToken exitingAppToken = exitingAppWindow.mAppToken;
+        // Wait until everything in animation handler get executed to prevent the exiting window
+        // from being removed during WindowSurfacePlacer Traversal.
+        waitUntilHandlersIdle();
+
         exitingAppToken.mIsExiting = true;
         exitingAppToken.getTask().mStack.mExitingAppTokens.add(exitingAppToken);
 
