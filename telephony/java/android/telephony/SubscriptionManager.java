@@ -2081,7 +2081,7 @@ public class SubscriptionManager {
         try {
             ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
             if (iSub != null) {
-                subId = iSub.getActiveSubIdList();
+                subId = iSub.getActiveSubIdList(/*visibleOnly*/true);
             }
         } catch (RemoteException ex) {
             // ignore it
@@ -2866,7 +2866,7 @@ public class SubscriptionManager {
      *
      * @hide
      */
-    private boolean shouldHideSubscription(SubscriptionInfo info) {
+    public boolean shouldHideSubscription(SubscriptionInfo info) {
         if (info == null) return false;
 
         // If hasCarrierPrivileges or canManageSubscription returns true, it means caller
@@ -2874,8 +2874,14 @@ public class SubscriptionManager {
         boolean hasCarrierPrivilegePermission = (info.isEmbedded() && canManageSubscription(info))
                 || TelephonyManager.from(mContext).hasCarrierPrivileges(info.getSubscriptionId());
 
-        return (!TextUtils.isEmpty(info.getGroupUuid()) && info.isOpportunistic()
-                && !hasCarrierPrivilegePermission);
+        return isInvisibleSubscription(info) && !hasCarrierPrivilegePermission;
+    }
+
+    /**
+     * @hide
+     */
+    public static boolean isInvisibleSubscription(SubscriptionInfo info) {
+        return info != null && !TextUtils.isEmpty(info.getGroupUuid()) && info.isOpportunistic();
     }
 
     /**
