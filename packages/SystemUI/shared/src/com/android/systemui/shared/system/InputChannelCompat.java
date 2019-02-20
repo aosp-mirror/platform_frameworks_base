@@ -24,6 +24,7 @@ import android.view.Choreographer;
 import android.view.InputChannel;
 import android.view.InputEvent;
 import android.view.InputEventSender;
+import android.view.MotionEvent;
 
 /**
  * @see android.view.InputChannel
@@ -61,6 +62,19 @@ public class InputChannelCompat {
 
         InputChannel channel = params.getParcelable(key);
         return new InputEventReceiver(channel, looper, choreographer, listener);
+    }
+
+    /**
+     * Version of addBatch method which preserves time accuracy in nanoseconds instead of
+     * converting the time to milliseconds.
+     * @param src old MotionEvent where the target should be appended
+     * @param target new MotionEvent which should be added to the src
+     * @return true if the merge was successful
+     *
+     * @see MotionEvent#addBatch(MotionEvent)
+     */
+    public static boolean mergeMotionEvent(MotionEvent src, MotionEvent target) {
+        return target.addBatch(src);
     }
 
     /**
