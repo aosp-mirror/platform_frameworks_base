@@ -19,9 +19,8 @@ import static com.google.common.truth.Truth.assertThat;
 
 import android.os.Parcel;
 import android.support.test.runner.AndroidJUnit4;
-import android.telephony.ims.RcsGroupThread;
 import android.telephony.ims.RcsGroupThreadParticipantLeftEvent;
-import android.telephony.ims.RcsParticipant;
+import android.telephony.ims.RcsGroupThreadParticipantLeftEventDescriptor;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -30,24 +29,29 @@ import org.junit.runner.RunWith;
 public class RcsGroupThreadParticipantLeftEventTest {
     @Test
     public void testCanUnparcel() {
-        RcsGroupThread rcsGroupThread = new RcsGroupThread(1);
-        RcsParticipant rcsParticipant = new RcsParticipant(2);
+        int rcsGroupThreadId = 1;
+        int rcsParticipantId = 2;
 
-        RcsGroupThreadParticipantLeftEvent participantLeftEvent =
-                new RcsGroupThreadParticipantLeftEvent(1234567890, rcsGroupThread, rcsParticipant,
-                        rcsParticipant);
+        RcsGroupThreadParticipantLeftEventDescriptor participantLeftEventDescriptor =
+                new RcsGroupThreadParticipantLeftEventDescriptor(
+                        1234567890, rcsGroupThreadId, rcsParticipantId, rcsParticipantId);
 
         Parcel parcel = Parcel.obtain();
-        participantLeftEvent.writeToParcel(parcel, participantLeftEvent.describeContents());
+        participantLeftEventDescriptor.writeToParcel(
+                parcel, participantLeftEventDescriptor.describeContents());
 
         parcel.setDataPosition(0);
 
         // create from parcel
         parcel.setDataPosition(0);
-        participantLeftEvent = RcsGroupThreadParticipantLeftEvent.CREATOR.createFromParcel(
-                parcel);
+        participantLeftEventDescriptor = RcsGroupThreadParticipantLeftEventDescriptor.CREATOR
+                .createFromParcel(parcel);
+
+        RcsGroupThreadParticipantLeftEvent participantLeftEvent =
+                participantLeftEventDescriptor.createRcsEvent();
+
         assertThat(participantLeftEvent.getRcsGroupThread().getThreadId()).isEqualTo(1);
-        assertThat(participantLeftEvent.getLeavingParticipantId().getId()).isEqualTo(2);
+        assertThat(participantLeftEvent.getLeavingParticipant().getId()).isEqualTo(2);
         assertThat(participantLeftEvent.getTimestamp()).isEqualTo(1234567890);
     }
 }

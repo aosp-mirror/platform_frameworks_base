@@ -19,9 +19,8 @@ import static com.google.common.truth.Truth.assertThat;
 
 import android.os.Parcel;
 import android.support.test.runner.AndroidJUnit4;
-import android.telephony.ims.RcsGroupThread;
 import android.telephony.ims.RcsGroupThreadNameChangedEvent;
-import android.telephony.ims.RcsParticipant;
+import android.telephony.ims.RcsGroupThreadNameChangedEventDescriptor;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -32,20 +31,24 @@ public class RcsGroupThreadNameChangedEventTest {
     public void testCanUnparcel() {
         String newName = "new name";
 
-        RcsGroupThread rcsGroupThread = new RcsGroupThread(1);
-        RcsParticipant rcsParticipant = new RcsParticipant(2);
+        int rcsGroupThreadId = 1;
+        int rcsParticipantId = 2;
 
-        RcsGroupThreadNameChangedEvent nameChangedEvent =
-                new RcsGroupThreadNameChangedEvent(1234567890, rcsGroupThread, rcsParticipant,
-                        newName);
+        RcsGroupThreadNameChangedEventDescriptor nameChangedEventDescriptor =
+                new RcsGroupThreadNameChangedEventDescriptor(
+                        1234567890, rcsGroupThreadId, rcsParticipantId, newName);
 
         Parcel parcel = Parcel.obtain();
-        nameChangedEvent.writeToParcel(parcel, nameChangedEvent.describeContents());
+        nameChangedEventDescriptor.writeToParcel(
+                parcel, nameChangedEventDescriptor.describeContents());
 
         parcel.setDataPosition(0);
 
-        nameChangedEvent = RcsGroupThreadNameChangedEvent.CREATOR.createFromParcel(
-                parcel);
+        nameChangedEventDescriptor = RcsGroupThreadNameChangedEventDescriptor.CREATOR
+                .createFromParcel(parcel);
+
+        RcsGroupThreadNameChangedEvent nameChangedEvent =
+                nameChangedEventDescriptor.createRcsEvent();
 
         assertThat(nameChangedEvent.getNewName()).isEqualTo(newName);
         assertThat(nameChangedEvent.getRcsGroupThread().getThreadId()).isEqualTo(1);
