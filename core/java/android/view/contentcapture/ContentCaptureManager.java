@@ -327,39 +327,8 @@ public final class ContentCaptureManager {
             case RESULT_CODE_NOT_SERVICE:
                 throw new SecurityException("caller is not user's ContentCapture service");
             default:
-                throw new IllegalStateException("received invalid result: " + resultCode);
-        }
-    }
-
-    /**
-     * Sets whether Content Capture is enabled for the given user.
-     *
-     * @throws SecurityException if caller is not the app that owns the Content Capture service
-     * associated with the user.
-     *
-     * @hide
-     */
-    @SystemApi
-    @TestApi
-    public void setContentCaptureFeatureEnabled(boolean enabled) {
-        if (sDebug) Log.d(TAG, "setContentCaptureFeatureEnabled(): setting to " + enabled);
-
-        final SyncResultReceiver resultReceiver = new SyncResultReceiver(SYNC_CALLS_TIMEOUT_MS);
-        final int resultCode;
-        try {
-            mService.setContentCaptureFeatureEnabled(enabled, resultReceiver);
-            resultCode = resultReceiver.getIntResult();
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-        switch (resultCode) {
-            case RESULT_CODE_TRUE:
-                // Our work is done here, in our void existance...
-                return;
-            case RESULT_CODE_NOT_SERVICE:
-                throw new SecurityException("caller is not user's ContentCapture service");
-            default:
-                throw new IllegalStateException("received invalid result: " + resultCode);
+                Log.wtf(TAG, "received invalid result: " + resultCode);
+                return false;
         }
     }
 
