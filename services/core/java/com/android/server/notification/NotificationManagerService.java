@@ -594,8 +594,6 @@ public class NotificationManagerService extends SystemService {
             mConditionProviders.migrateToXml();
             handleSavePolicyFile();
         }
-
-        mAssistants.ensureAssistant();
     }
 
     private void loadPolicyFile() {

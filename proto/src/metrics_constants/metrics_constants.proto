@@ -3589,7 +3589,7 @@ message MetricsEvent {
     // OPEN: Settings > Apps > Default Apps > Default sms
     DEFAULT_SMS_PICKER = 789;
 
-    // OPEN: Settings > Apps > Default Apps > Default notification assistant
+    // OPEN: Settings > Apps > Notification > Notification Assistant
     DEFAULT_NOTIFICATION_ASSISTANT = 790;
 
     // OPEN: Settings > Apps > Default Apps > Warning dialog to confirm selection
