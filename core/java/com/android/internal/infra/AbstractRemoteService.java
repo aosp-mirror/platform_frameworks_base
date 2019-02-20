@@ -148,10 +148,10 @@ public abstract class AbstractRemoteService<S extends AbstractRemoteService<S, I
     }
 
     private void handleOnConnectedStateChangedInternal(boolean connected) {
+        handleOnConnectedStateChanged(connected);
         if (connected) {
             handlePendingRequests();
         }
-        handleOnConnectedStateChanged(connected);
     }
 
     /**
