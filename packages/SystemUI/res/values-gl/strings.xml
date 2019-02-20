@@ -299,7 +299,7 @@
     <string name="quick_settings_location_off_label" msgid="7464544086507331459">"Localización desactivada"</string>
     <string name="quick_settings_media_device_label" msgid="1302906836372603762">"Dispositivo multimedia"</string>
     <string name="quick_settings_rssi_label" msgid="7725671335550695589">"RSSI"</string>
-    <string name="quick_settings_rssi_emergency_only" msgid="2713774041672886750">"Só chamadas de urxencia"</string>
+    <string name="quick_settings_rssi_emergency_only" msgid="2713774041672886750">"Só chamadas de emerxencia"</string>
     <string name="quick_settings_settings_label" msgid="5326556592578065401">"Configuración"</string>
     <string name="quick_settings_time_label" msgid="4635969182239736408">"Hora"</string>
     <string name="quick_settings_user_label" msgid="5238995632130897840">"Eu"</string>
