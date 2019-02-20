@@ -1281,6 +1281,10 @@ package android.net.util {
 
 package android.os {
 
+  public class BatteryManager {
+    method @RequiresPermission("android.permission.POWER_SAVER") public boolean setChargingStateUpdateDelayMillis(int);
+  }
+
   public class Build {
     method public static boolean is64BitAbi(String);
   }
