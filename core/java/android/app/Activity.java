@@ -3783,14 +3783,14 @@ public class Activity extends ContextThemeWrapper
 
 
     /**
-     * Moves the activity from {@link WindowConfiguration#WINDOWING_MODE_FREEFORM} windowing mode to
-     * {@link WindowConfiguration#WINDOWING_MODE_FULLSCREEN}.
+     * Moves the activity between {@link WindowConfiguration#WINDOWING_MODE_FREEFORM} windowing mode
+     * and {@link WindowConfiguration#WINDOWING_MODE_FULLSCREEN}.
      *
      * @hide
      */
     @Override
-    public void exitFreeformMode() throws RemoteException {
-        ActivityTaskManager.getService().exitFreeformMode(mToken);
+    public void toggleFreeformWindowingMode() throws RemoteException {
+        ActivityTaskManager.getService().toggleFreeformWindowingMode(mToken);
     }
 
     /**

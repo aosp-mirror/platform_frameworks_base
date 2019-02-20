@@ -329,13 +329,13 @@ public class DecorCaptionView extends ViewGroup implements View.OnTouchListener,
     }
 
     /**
-     * Maximize the window by moving it to the maximized workspace stack.
+     * Maximize or restore the window by moving it to the maximized or freeform workspace stack.
      **/
-    private void maximizeWindow() {
+    private void toggleFreeformWindowingMode() {
         Window.WindowControllerCallback callback = mOwner.getWindowControllerCallback();
         if (callback != null) {
             try {
-                callback.exitFreeformMode();
+                callback.toggleFreeformWindowingMode();
             } catch (RemoteException ex) {
                 Log.e(TAG, "Cannot change task workspace.");
             }
@@ -395,7 +395,7 @@ public class DecorCaptionView extends ViewGroup implements View.OnTouchListener,
     @Override
     public boolean onSingleTapUp(MotionEvent e) {
         if (mClickTarget == mMaximize) {
-            maximizeWindow();
+            toggleFreeformWindowingMode();
         } else if (mClickTarget == mClose) {
             mOwner.dispatchOnWindowDismissed(
                     true /*finishTask*/, false /*suppressWindowTransition*/);

@@ -622,11 +622,10 @@ public abstract class Window {
     /** @hide */
     public interface WindowControllerCallback {
         /**
-         * Moves the activity from
-         * Moves the activity from {@link WindowConfiguration#WINDOWING_MODE_FREEFORM} windowing
-         * mode to {@link WindowConfiguration#WINDOWING_MODE_FULLSCREEN}.
+         * Moves the activity between {@link WindowConfiguration#WINDOWING_MODE_FREEFORM} windowing
+         * mode and {@link WindowConfiguration#WINDOWING_MODE_FULLSCREEN}.
          */
-        void exitFreeformMode() throws RemoteException;
+        void toggleFreeformWindowingMode() throws RemoteException;
 
         /**
          * Puts the activity in picture-in-picture mode if the activity supports.
