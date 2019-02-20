@@ -3629,6 +3629,28 @@ package android.media.audiopolicy {
     method public android.media.audiopolicy.AudioPolicy.Builder setLooper(@NonNull android.os.Looper) throws java.lang.IllegalArgumentException;
   }
 
+  public final class AudioProductStrategies implements java.lang.Iterable<android.media.audiopolicy.AudioProductStrategy> android.os.Parcelable {
+    ctor public AudioProductStrategies();
+    method public int describeContents();
+    method @NonNull public android.media.AudioAttributes getAudioAttributesForLegacyStreamType(int);
+    method @NonNull public android.media.AudioAttributes getAudioAttributesForProductStrategy(@NonNull android.media.audiopolicy.AudioProductStrategy);
+    method @Nullable public android.media.audiopolicy.AudioProductStrategy getById(int);
+    method public int getLegacyStreamTypeForAudioAttributes(@NonNull android.media.AudioAttributes);
+    method public java.util.Iterator<android.media.audiopolicy.AudioProductStrategy> iterator();
+    method public int size();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.media.audiopolicy.AudioProductStrategies> CREATOR;
+  }
+
+  public final class AudioProductStrategy implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public android.media.AudioAttributes getAudioAttributes();
+    method public int getId();
+    method @NonNull public String name();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.media.audiopolicy.AudioProductStrategy> CREATOR;
+  }
+
 }
 
 package android.media.session {
