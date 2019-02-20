@@ -67,7 +67,6 @@ public class SettingsBackupTest {
                     Settings.System.LOCKSCREEN_DISABLED, // ?
                     Settings.System.MEDIA_BUTTON_RECEIVER, // candidate for backup?
                     Settings.System.MUTE_STREAMS_AFFECTED, //  candidate for backup?
-                    Settings.System.NOTIFICATION_LIGHT_PULSE, // candidate for backup?
                     Settings.System.NOTIFICATION_SOUND_CACHE, // internal cache
                     Settings.System.POINTER_LOCATION, // backup candidate?
                     Settings.System.DEBUG_ENABLE_ENHANCED_CALL_BLOCKING, // used for testing only
@@ -567,10 +566,8 @@ public class SettingsBackupTest {
                  Settings.Secure.LAST_SETUP_SHOWN,
                  Settings.Secure.LOCATION_CHANGER,
                  Settings.Secure.LOCATION_MODE,
-                 Settings.Secure.LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS, // Candidate?
                  Settings.Secure.LOCK_SCREEN_ALLOW_REMOTE_INPUT, // Candidate?
                  Settings.Secure.LOCK_SCREEN_LOCK_AFTER_TIMEOUT,
-                 Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS, // Candidate?
                  Settings.Secure.LOCK_TO_APP_EXIT_LOCKED,
                  Settings.Secure.MANAGED_PROFILE_CONTACT_REMOTE_SEARCH,
                  Settings.Secure.MULTI_PRESS_TIMEOUT,

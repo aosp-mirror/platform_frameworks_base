@@ -104,7 +104,6 @@ class WindowSurfaceController {
 
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "new SurfaceControl");
         final SurfaceControl.Builder b = win.makeSurface()
-                .setBufferLayer()
                 .setParent(win.getSurfaceControl())
                 .setName(name)
                 .setSize(w, h)

@@ -559,8 +559,8 @@
     <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"מאפשר לאפליקציה לנהל מדיניות הרשת להגדיר כללים ספציפיים-לאפליקציה."</string>
     <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"שנה ניהול חשבונות של שימוש ברשת"</string>
     <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"הרשאה זו מאפשרת לאפליקציה לשנות את אופן החישוב של נתוני שימוש ברשת מול כל אפליקציה. לא מיועד לשימוש באפליקציות רגילות."</string>
-    <string name="permlab_accessNotifications" msgid="7673416487873432268">"גישה להודעות"</string>
-    <string name="permdesc_accessNotifications" msgid="458457742683431387">"מאפשר לאפליקציה לאחזר, לבדוק ולמחוק הודעות, כולל כאלה שפורסמו על ידי אפליקציות אחרות."</string>
+    <string name="permlab_accessNotifications" msgid="7673416487873432268">"גישה להתראות"</string>
+    <string name="permdesc_accessNotifications" msgid="458457742683431387">"מאפשר לאפליקציה לאחזר, לבדוק ולמחוק התראות, כולל כאלה שפורסמו על ידי אפליקציות אחרות."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"איגוד לשירות של מאזין להתראות"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"הרשאה זו מאפשרת למשתמש לבצע איגוד לממשק הרמה העליונה של שירות מאזין להתראות. הרשאה זו אף פעם אינה נחוצה לאפליקציות רגילים."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"איגוד לשירות ספק תנאי"</string>
@@ -597,7 +597,7 @@
     <string name="policylab_resetPassword" msgid="4934707632423915395">"שינוי נעילת המסך"</string>
     <string name="policydesc_resetPassword" msgid="1278323891710619128">"שינוי של נעילת המסך."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"נעילת המסך"</string>
-    <string name="policydesc_forceLock" msgid="1141797588403827138">"שליטה באופן ובתזמון של נעילת המסך"</string>
+    <string name="policydesc_forceLock" msgid="1141797588403827138">"שליטה באופן ובתזמון של נעילת המסך."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"מחיקת כל הנתונים"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"מחק את נתוני הטאבלט ללא אזהרה על ידי ביצוע איפוס נתוני יצרן."</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"מחיקה של נתוני הטלוויזיה ללא אזהרה, על ידי ביצוע איפוס לנתוני היצרן."</string>
@@ -1845,7 +1845,7 @@
       <item quantity="one">בחרת <xliff:g id="COUNT_0">%1$d</xliff:g></item>
     </plurals>
     <string name="default_notification_channel_label" msgid="5929663562028088222">"ללא שיוך לקטגוריה"</string>
-    <string name="importance_from_user" msgid="7318955817386549931">"אתה מגדיר את החשיבות של ההודעות האלה."</string>
+    <string name="importance_from_user" msgid="7318955817386549931">"עליך להגדיר את החשיבות של ההתראות האלה."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"ההודעה חשובה בשל האנשים המעורבים."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"האם לאפשר ל-<xliff:g id="APP">%1$s</xliff:g> ליצור משתמש חדש לחשבון <xliff:g id="ACCOUNT">%2$s</xliff:g> ?"</string>
     <string name="user_creation_adding" msgid="4482658054622099197">"האם לאפשר ל-<xliff:g id="APP">%1$s</xliff:g> ליצור משתמש חדש לחשבון <xliff:g id="ACCOUNT">%2$s</xliff:g> (כבר קיים משתמש לחשבון הזה) ?"</string>

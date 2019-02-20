@@ -3418,6 +3418,8 @@
   <java-symbol type="string" name="config_misprovisionedDeviceModel" />
   <java-symbol type="string" name="config_misprovisionedBrandValue" />
 
+  <java-symbol type="integer" name="db_wal_truncate_size" />
+
   <!-- For Bluetooth AbsoluteVolume -->
   <java-symbol type="fraction" name="config_prescaleAbsoluteVolume_index1" />
   <java-symbol type="fraction" name="config_prescaleAbsoluteVolume_index2" />

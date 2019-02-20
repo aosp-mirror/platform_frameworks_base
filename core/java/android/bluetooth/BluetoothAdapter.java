@@ -3044,7 +3044,7 @@ public final class BluetoothAdapter {
      * socket will be encrypted.
      * <p>Use {@link BluetoothServerSocket#accept} to retrieve incoming connections from a listening
      * {@link BluetoothServerSocket}.
-     * <p>The system will assign a dynamic PSM value. This PSM value can be read from the {#link
+     * <p>The system will assign a dynamic PSM value. This PSM value can be read from the {@link
      * BluetoothServerSocket#getPsm()} and this value will be released when this server socket is
      * closed, Bluetooth is turned off, or the application exits unexpectedly.
      * <p>The mechanism of disclosing the assigned dynamic PSM value to the initiating peer is
@@ -3102,7 +3102,7 @@ public final class BluetoothAdapter {
      * <p>Use {@link BluetoothServerSocket#accept} to retrieve incoming connections from a listening
      * {@link BluetoothServerSocket}.
      * <p>The system will assign a dynamic protocol/service multiplexer (PSM) value. This PSM value
-     * can be read from the {#link BluetoothServerSocket#getPsm()} and this value will be released
+     * can be read from the {@link BluetoothServerSocket#getPsm()} and this value will be released
      * when this server socket is closed, Bluetooth is turned off, or the application exits
      * unexpectedly.
      * <p>The mechanism of disclosing the assigned dynamic PSM value to the initiating peer is

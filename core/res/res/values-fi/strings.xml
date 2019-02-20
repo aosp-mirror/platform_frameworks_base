@@ -579,9 +579,9 @@
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"Antaa sovelluksen luoda sidoksen operaattorin palveluun. Ei tavallisten sovelluksien käyttöön."</string>
     <string name="permlab_access_notification_policy" msgid="4247510821662059671">"Älä häiritse -tilan käyttöoikeus"</string>
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Sallii sovelluksen lukea ja muokata Älä häiritse -tilan asetuksia."</string>
-    <string name="policylab_limitPassword" msgid="4497420728857585791">"Aseta salasanasäännöt"</string>
-    <string name="policydesc_limitPassword" msgid="2502021457917874968">"Hallinnoi ruudun ruudun lukituksen salasanoissa ja PIN-koodeissa sallittuja merkkejä ja niiden pituutta."</string>
-    <string name="policylab_watchLogin" msgid="5091404125971980158">"Tarkkaile näytön avaamisyrityksiä"</string>
+    <string name="policylab_limitPassword" msgid="4497420728857585791">"Asentaa salasanasäännöt"</string>
+    <string name="policydesc_limitPassword" msgid="2502021457917874968">"Hallinnoida ruudun lukituksen salasanoissa ja PIN-koodeissa sallittuja merkkejä ja niiden pituutta."</string>
+    <string name="policylab_watchLogin" msgid="5091404125971980158">"Tarkkailla näytön avaamisyrityksiä"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Valvoo väärien salasanojen lukumäärää näytön lukituksen poistossa sekä lukitsee tablet-laitteen tai poistaa sen tiedot, jos salasana syötetään väärin liian monta kertaa."</string>
     <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"Valvo väärien salasanojen määrää poistettaessa näytön lukitusta ja lukitse televisio tai poista television kaikki tiedot, jos salasana kirjoitetaan väärin liian monta kertaa."</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Valvoo väärien salasanojen lukumäärää näytön lukituksen poistossa ja lukitsee puhelimen tai poistaa sen kaikki tiedot, jos väärä salasana syötetään liian monta kertaa."</string>
@@ -602,14 +602,14 @@
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="6787904546711590238">"Pyyhi tämän käyttäjän tiedot puhelimesta ilman varoitusta."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Aseta laitteen yleinen välityspalvelin"</string>
     <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"Aseta laitteen yleinen välityspalvelin käyttöön, kun käytäntö on käytössä. Vain laitteen omistaja voi asettaa yleisen välityspalvelimen."</string>
-    <string name="policylab_expirePassword" msgid="5610055012328825874">"Määritä ruudun lukituksen salasanan viimeinen voimassaolopäivä"</string>
-    <string name="policydesc_expirePassword" msgid="5367525762204416046">"Muuta sitä, miten usein ruudun lukituksen salasana, PIN-koodi tai kuvio tulee vaihtaa."</string>
-    <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Aseta tallennustilan salaus"</string>
+    <string name="policylab_expirePassword" msgid="5610055012328825874">"Määrittää ruudun lukituksen salasanan viimeinen voimassaolopäivä"</string>
+    <string name="policydesc_expirePassword" msgid="5367525762204416046">"Muuttaa sitä, miten usein ruudun lukituksen salasana, PIN-koodi tai kuvio tulee vaihtaa."</string>
+    <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Asettaa tallennustilan salaus"</string>
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Pakota tallennettujen sovellustietojen salaus."</string>
-    <string name="policylab_disableCamera" msgid="6395301023152297826">"Poista kamerat käytöstä"</string>
-    <string name="policydesc_disableCamera" msgid="2306349042834754597">"Estä laitteen kaikkien kameroiden käyttö."</string>
+    <string name="policylab_disableCamera" msgid="6395301023152297826">"Poistaa kamerat käytöstä"</string>
+    <string name="policydesc_disableCamera" msgid="2306349042834754597">"Estää laitteen kaikkien kameroiden käytön."</string>
     <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Estää lukitun näytön toimintoja"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Estä joidenkin lukitun näytön toimintojen käyttö."</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Estää joidenkin lukitun näytön toimintojen käytön."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Koti"</item>
     <item msgid="869923650527136615">"Mobiili"</item>

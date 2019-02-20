@@ -1002,7 +1002,7 @@ public class AssistStructure implements Parcelable {
         }
 
         /**
-         * Gets the the type of value that can be used to autofill the view contents.
+         * Gets the type of value that can be used to autofill the view contents.
          *
          * <p>It's only relevant when the {@link AssistStructure} is used for autofill purposes.
          *
@@ -1028,7 +1028,7 @@ public class AssistStructure implements Parcelable {
         }
 
         /**
-         * Gets the the value of this view.
+         * Gets the value of this view.
          *
          * <p>It's only relevant when the {@link AssistStructure} is used for autofill purposes,
          * not for assist purposes.
@@ -1350,7 +1350,7 @@ public class AssistStructure implements Parcelable {
         }
 
         /**
-         * Returns the the list of locales associated with this view.
+         * Returns the list of locales associated with this view.
          */
         @Nullable public LocaleList getLocaleList() {
             return mLocaleList;

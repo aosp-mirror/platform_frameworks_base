@@ -814,7 +814,7 @@
     <string name="tuner_app" msgid="3507057938640108777">"Aplikacioni <xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Sinjalizimet"</string>
     <string name="notification_channel_battery" msgid="5786118169182888462">"Bateria"</string>
-    <string name="notification_channel_screenshot" msgid="6314080179230000938">"Pamjet e ekranit"</string>
+    <string name="notification_channel_screenshot" msgid="6314080179230000938">"Pamje ekrani"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"Mesazhe të përgjithshme"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"Hapësira ruajtëse"</string>
     <string name="notification_channel_hints" msgid="7323870212489152689">"Sugjerimet"</string>

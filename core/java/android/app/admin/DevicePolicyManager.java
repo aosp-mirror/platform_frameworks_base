@@ -3306,7 +3306,7 @@ public class DevicePolicyManager {
      * restrictions on the parent profile.
      *
      * @param admin The name of the admin component to check, or {@code null} to aggregate
-     *         accross all participating admins.
+     *         across all participating admins.
      * @return The timeout in milliseconds or 0 if not configured for the provided admin.
      */
     public long getRequiredStrongAuthTimeout(@Nullable ComponentName admin) {
@@ -3890,6 +3890,11 @@ public class DevicePolicyManager {
 
     /**
      * Installs the given certificate as a user CA.
+     * <p>
+     * Inserted user CAs aren't automatically trusted by apps in Android 7.0 (API level 24) and
+     * higher. App developers can change the default behavior for an app by adding a
+     * <a href="{@docRoot}training/articles/security-config.html">Security Configuration
+     * File</a> to the app manifest file.
      *
      * The caller must be a profile or device owner on that user, or a delegate package given the
      * {@link #DELEGATION_CERT_INSTALL} scope via {@link #setDelegatedScopes}; otherwise a

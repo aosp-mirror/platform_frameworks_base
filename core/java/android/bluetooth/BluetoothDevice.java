@@ -793,7 +793,7 @@ public final class BluetoothDevice implements Parcelable {
     public static final int ACCESS_REJECTED = 2;
 
     /**
-     * No preferrence of physical transport for GATT connections to remote dual-mode devices
+     * No preference of physical transport for GATT connections to remote dual-mode devices
      */
     public static final int TRANSPORT_AUTO = 0;
 
@@ -1799,7 +1799,7 @@ public final class BluetoothDevice implements Parcelable {
      * For example, for Bluetooth 2.1 devices, if any of the devices does not
      * have an input and output capability or just has the ability to
      * display a numeric key, a secure socket connection is not possible.
-     * In such a case, use {#link createInsecureRfcommSocket}.
+     * In such a case, use {@link createInsecureRfcommSocket}.
      * For more details, refer to the Security Model section 5.2 (vol 3) of
      * Bluetooth Core Specification version 2.1 + EDR.
      * <p>Use {@link BluetoothSocket#connect} to initiate the outgoing
@@ -1834,7 +1834,7 @@ public final class BluetoothDevice implements Parcelable {
      * For example, for Bluetooth 2.1 devices, if any of the devices does not
      * have an input and output capability or just has the ability to
      * display a numeric key, a secure socket connection is not possible.
-     * In such a case, use {#link createInsecureRfcommSocket}.
+     * In such a case, use {@link createInsecureRfcommSocket}.
      * For more details, refer to the Security Model section 5.2 (vol 3) of
      * Bluetooth Core Specification version 2.1 + EDR.
      * <p>Use {@link BluetoothSocket#connect} to initiate the outgoing
@@ -1891,7 +1891,7 @@ public final class BluetoothDevice implements Parcelable {
      * For example, for Bluetooth 2.1 devices, if any of the devices does not
      * have an input and output capability or just has the ability to
      * display a numeric key, a secure socket connection is not possible.
-     * In such a case, use {#link createInsecureRfcommSocketToServiceRecord}.
+     * In such a case, use {@link #createInsecureRfcommSocketToServiceRecord}.
      * For more details, refer to the Security Model section 5.2 (vol 3) of
      * Bluetooth Core Specification version 2.1 + EDR.
      * <p>Hint: If you are connecting to a Bluetooth serial board then try
@@ -2174,8 +2174,7 @@ public final class BluetoothDevice implements Parcelable {
      * <p>The remote device will be authenticated and communication on this socket will be
      * encrypted.
      * <p> Use this socket if an authenticated socket link is possible. Authentication refers
-     * to the authentication of the link key to prevent man-in-the-middle type of attacks. When a
-     * secure socket connection is not possible, use {#link createInsecureL2capChannel(int)}.
+     * to the authentication of the link key to prevent man-in-the-middle type of attacks.
      *
      * @param psm dynamic PSM value from remote device
      * @return a CoC #BluetoothSocket ready for an outgoing connection

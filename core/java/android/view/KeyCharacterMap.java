@@ -124,7 +124,7 @@ public class KeyCharacterMap implements Parcelable {
     /**
      * Modifier keys may be chorded with character keys.
      *
-     * @see {#link #getModifierBehavior()} for more details.
+     * @see {@link #getModifierBehavior()} for more details.
      */
     public static final int MODIFIER_BEHAVIOR_CHORDED = 0;
 
@@ -132,7 +132,7 @@ public class KeyCharacterMap implements Parcelable {
      * Modifier keys may be chorded with character keys or they may toggle
      * into latched or locked states when pressed independently.
      *
-     * @see {#link #getModifierBehavior()} for more details.
+     * @see {@link #getModifierBehavior()} for more details.
      */
     public static final int MODIFIER_BEHAVIOR_CHORDED_OR_TOGGLED = 1;
 

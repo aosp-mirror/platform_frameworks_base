@@ -18,7 +18,7 @@
 <!-- Extends RelativeLayout -->
 <com.android.systemui.statusbar.phone.KeyguardStatusBarView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:systemui="http://schemas.android.com/apk/res/com.android.systemui"
+    xmlns:systemui="http://schemas.android.com/apk/res-auto"
     android:id="@+id/keyguard_header"
     android:layout_width="match_parent"
     android:layout_height="@dimen/status_bar_header_height_keyguard"
@@ -73,6 +73,8 @@
         android:textDirection="locale"
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:textColor="?attr/wallpaperTextColorSecondary"
-        android:singleLine="true" />
+        android:singleLine="true"
+        systemui:showMissingSim="true"
+        systemui:showAirplaneMode="true" />
 
 </com.android.systemui.statusbar.phone.KeyguardStatusBarView>
