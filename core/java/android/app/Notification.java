@@ -8408,6 +8408,7 @@ public class Notification implements Parcelable
     public static final class BubbleMetadata implements Parcelable {
 
         private PendingIntent mPendingIntent;
+        private PendingIntent mDeleteIntent;
         private CharSequence mTitle;
         private Icon mIcon;
         private int mDesiredHeight;
@@ -8436,11 +8437,13 @@ public class Notification implements Parcelable
          */
         private static final int FLAG_SUPPRESS_INITIAL_NOTIFICATION = 0x00000002;
 
-        private BubbleMetadata(PendingIntent intent, CharSequence title, Icon icon, int height) {
-            mPendingIntent = intent;
+        private BubbleMetadata(PendingIntent expandIntent, PendingIntent deleteIntent,
+                CharSequence title, Icon icon, int height) {
+            mPendingIntent = expandIntent;
             mTitle = title;
             mIcon = icon;
             mDesiredHeight = height;
+            mDeleteIntent = deleteIntent;
         }
 
         private BubbleMetadata(Parcel in) {
@@ -8449,6 +8452,9 @@ public class Notification implements Parcelable
             mIcon = Icon.CREATOR.createFromParcel(in);
             mDesiredHeight = in.readInt();
             mFlags = in.readInt();
+            if (in.readInt() != 0) {
+                mDeleteIntent = PendingIntent.CREATOR.createFromParcel(in);
+            }
         }
 
         /**
@@ -8456,6 +8462,13 @@ public class Notification implements Parcelable
          */
         public PendingIntent getIntent() {
             return mPendingIntent;
+        }
+
+        /**
+         * @return the pending intent to send when the bubble is dismissed by a user, if one exists.
+         */
+        public PendingIntent getDeleteIntent() {
+            return mDeleteIntent;
         }
 
         /**
@@ -8525,6 +8538,10 @@ public class Notification implements Parcelable
             mIcon.writeToParcel(out, 0);
             out.writeInt(mDesiredHeight);
             out.writeInt(mFlags);
+            out.writeInt(mDeleteIntent != null ? 1 : 0);
+            if (mDeleteIntent != null) {
+                mDeleteIntent.writeToParcel(out, 0);
+            }
         }
 
         private void setFlags(int flags) {
@@ -8541,6 +8558,7 @@ public class Notification implements Parcelable
             private Icon mIcon;
             private int mDesiredHeight;
             private int mFlags;
+            private PendingIntent mDeleteIntent;
 
             /**
              * Constructs a new builder object.
@@ -8633,6 +8651,14 @@ public class Notification implements Parcelable
             }
 
             /**
+             * Sets an optional intent to send when this bubble is explicitly removed by the user.
+             */
+            public BubbleMetadata.Builder setDeleteIntent(PendingIntent deleteIntent) {
+                mDeleteIntent = deleteIntent;
+                return this;
+            }
+
+            /**
              * Creates the {@link BubbleMetadata} defined by this builder.
              * <p>Will throw {@link IllegalStateException} if required fields have not been set
              * on this builder.</p>
@@ -8647,8 +8673,8 @@ public class Notification implements Parcelable
                 if (mIcon == null) {
                     throw new IllegalStateException("Must supply an icon for the bubble");
                 }
-                BubbleMetadata data = new BubbleMetadata(mPendingIntent, mTitle, mIcon,
-                        mDesiredHeight);
+                BubbleMetadata data = new BubbleMetadata(mPendingIntent, mDeleteIntent, mTitle,
+                        mIcon, mDesiredHeight);
                 data.setFlags(mFlags);
                 return data;
             }
