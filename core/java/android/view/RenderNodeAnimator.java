@@ -288,7 +288,7 @@ public class RenderNodeAnimator extends Animator {
         throw new UnsupportedOperationException();
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.O)
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public void setTarget(View view) {
         mViewTarget = view;
         setTarget(mViewTarget.mRenderNode);
@@ -300,7 +300,7 @@ public class RenderNodeAnimator extends Animator {
     }
 
     /** @hide */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.O)
     public void setTarget(DisplayListCanvas canvas) {
         setTarget((RecordingCanvas) canvas);
     }
