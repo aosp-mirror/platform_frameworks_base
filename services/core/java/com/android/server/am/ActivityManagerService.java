@@ -14455,6 +14455,25 @@ public class ActivityManagerService extends IActivityManager.Stub
                         + " has background restrictions");
                 return ActivityManager.START_CANCELED;
             }
+            if (brOptions.allowsBackgroundActivityStarts()) {
+                // See if the caller is allowed to do this.  Note we are checking against
+                // the actual real caller (not whoever provided the operation as say a
+                // PendingIntent), because that who is actually supplied the arguments.
+                if (checkComponentPermission(
+                        android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND,
+                        realCallingPid, realCallingUid, -1, true)
+                        != PackageManager.PERMISSION_GRANTED) {
+                    String msg = "Permission Denial: " + intent.getAction()
+                            + " broadcast from " + callerPackage + " (pid=" + callingPid
+                            + ", uid=" + callingUid + ")"
+                            + " requires "
+                            + android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND;
+                    Slog.w(TAG, msg);
+                    throw new SecurityException(msg);
+                } else {
+                    allowBackgroundActivityStarts = true;
+                }
+            }
         }
 
         // Verify that protected broadcasts are only being sent by system code,
