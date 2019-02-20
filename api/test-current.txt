@@ -2235,6 +2235,7 @@ package android.telephony {
   public class TelephonyManager {
     method public int checkCarrierPrivilegesForPackage(String);
     method public int getCarrierIdListVersion();
+    method public android.util.Pair<java.lang.Integer,java.lang.Integer> getRadioHalVersion();
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void refreshUiccProfile();
     method public void setCarrierTestOverride(String, String, String, String, String, String, String);
     field public static final int CARRIER_PRIVILEGE_STATUS_ERROR_LOADING_RULES = -2; // 0xfffffffe
