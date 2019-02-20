@@ -1462,14 +1462,15 @@ public final class DefaultPermissionGrantPolicy {
                         outGrantExceptions.get(packageName);
                 if (packageExceptions == null) {
                     // The package must be on the system image
-                    if (!isSystemPackage(packageName)) {
-                        Log.w(TAG, "Unknown package:" + packageName);
+                    PackageInfo packageInfo = getSystemPackageInfo(packageName);
+                    if (!isSystemPackage(packageInfo)) {
+                        Log.w(TAG, "Unknown system package:" + packageName);
                         XmlUtils.skipCurrentTag(parser);
                         continue;
                     }
 
                     // The package must support runtime permissions
-                    if (!doesPackageSupportRuntimePermissions(getSystemPackageInfo(packageName))) {
+                    if (!doesPackageSupportRuntimePermissions(packageInfo)) {
                         Log.w(TAG, "Skipping non supporting runtime permissions package:"
                                 + packageName);
                         XmlUtils.skipCurrentTag(parser);
