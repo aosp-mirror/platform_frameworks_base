@@ -918,6 +918,7 @@ public class Vpn {
         TreeSet<IpPrefix> ipv4Prefixes = new TreeSet<>(prefixLengthComparator);
         TreeSet<IpPrefix> ipv6Prefixes = new TreeSet<>(prefixLengthComparator);
         for (final RouteInfo route : routes) {
+            if (route.getType() == RouteInfo.RTN_UNREACHABLE) continue;
             IpPrefix destination = route.getDestination();
             if (destination.isIPv4()) {
                 ipv4Prefixes.add(destination);
