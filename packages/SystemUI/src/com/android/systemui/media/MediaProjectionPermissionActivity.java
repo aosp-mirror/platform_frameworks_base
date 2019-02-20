@@ -40,19 +40,15 @@ import android.text.style.StyleSpan;
 import android.util.Log;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
 
 import com.android.systemui.R;
 
 public class MediaProjectionPermissionActivity extends Activity
-        implements DialogInterface.OnClickListener, CheckBox.OnCheckedChangeListener,
-        DialogInterface.OnCancelListener {
+        implements DialogInterface.OnClickListener, DialogInterface.OnCancelListener {
     private static final String TAG = "MediaProjectionPermissionActivity";
     private static final float MAX_APP_NAME_SIZE_PX = 500f;
     private static final String ELLIPSIS = "\u2026";
 
-    private boolean mPermanentGrant;
     private String mPackageName;
     private int mUid;
     private IMediaProjectionManager mService;
@@ -85,8 +81,7 @@ public class MediaProjectionPermissionActivity extends Activity
 
         try {
             if (mService.hasProjectionPermission(mUid, mPackageName)) {
-                setResult(RESULT_OK, getMediaProjectionIntent(mUid, mPackageName,
-                        false /*permanentGrant*/));
+                setResult(RESULT_OK, getMediaProjectionIntent(mUid, mPackageName));
                 finish();
                 return;
             }
@@ -136,19 +131,20 @@ public class MediaProjectionPermissionActivity extends Activity
                     appNameIndex, appNameIndex + appName.length(), 0);
         }
 
+        String dialogTitle = getString(R.string.media_projection_dialog_title, appName);
+
         mDialog = new AlertDialog.Builder(this)
+                .setTitle(dialogTitle)
                 .setIcon(aInfo.loadIcon(packageManager))
                 .setMessage(message)
                 .setPositiveButton(R.string.media_projection_action_text, this)
                 .setNegativeButton(android.R.string.cancel, this)
-                .setView(R.layout.remember_permission_checkbox)
                 .setOnCancelListener(this)
                 .create();
 
         mDialog.create();
         mDialog.getButton(DialogInterface.BUTTON_POSITIVE).setFilterTouchesWhenObscured(true);
 
-        ((CheckBox) mDialog.findViewById(R.id.remember)).setOnCheckedChangeListener(this);
         final Window w = mDialog.getWindow();
         w.setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
         w.addSystemFlags(SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS);
@@ -168,8 +164,7 @@ public class MediaProjectionPermissionActivity extends Activity
     public void onClick(DialogInterface dialog, int which) {
         try {
             if (which == AlertDialog.BUTTON_POSITIVE) {
-                setResult(RESULT_OK, getMediaProjectionIntent(
-                        mUid, mPackageName, mPermanentGrant));
+                setResult(RESULT_OK, getMediaProjectionIntent(mUid, mPackageName));
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Error granting projection permission", e);
@@ -182,15 +177,10 @@ public class MediaProjectionPermissionActivity extends Activity
         }
     }
 
-    @Override
-    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-        mPermanentGrant = isChecked;
-    }
-
-    private Intent getMediaProjectionIntent(int uid, String packageName, boolean permanentGrant)
+    private Intent getMediaProjectionIntent(int uid, String packageName)
             throws RemoteException {
         IMediaProjection projection = mService.createProjection(uid, packageName,
-                 MediaProjectionManager.TYPE_SCREEN_CAPTURE, permanentGrant);
+                 MediaProjectionManager.TYPE_SCREEN_CAPTURE, false /* permanentGrant */);
         Intent intent = new Intent();
         intent.putExtra(MediaProjectionManager.EXTRA_MEDIA_PROJECTION, projection.asBinder());
         return intent;
