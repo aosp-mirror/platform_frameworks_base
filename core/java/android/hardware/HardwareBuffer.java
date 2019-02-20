@@ -17,6 +17,7 @@
 package android.hardware;
 
 import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.annotation.LongDef;
 import android.annotation.NonNull;
 import android.annotation.UnsupportedAppUsage;
@@ -156,8 +157,9 @@ public final class HardwareBuffer implements Parcelable, AutoCloseable {
      *     is less than one or not supported, or if the passed usage flags are not a supported set.
      */
     @NonNull
-    public static HardwareBuffer create(int width, int height, @Format int format, int layers,
-            @Usage long usage) {
+    public static HardwareBuffer create(
+            @IntRange(from = 1) int width, @IntRange(from = 1) int height,
+            @Format int format, @IntRange(from = 1) int layers, @Usage long usage) {
         if (!HardwareBuffer.isSupportedFormat(format)) {
             throw new IllegalArgumentException("Invalid pixel format " + format);
         }
@@ -194,8 +196,8 @@ public final class HardwareBuffer implements Parcelable, AutoCloseable {
      * @param usage The @Usage flags describing how the buffer will be used
      * @return True if the combination is supported, false otherwise.
      */
-    public static boolean isSupported(int width, int height, @Format int format, int layers,
-            @Usage long usage) {
+    public static boolean isSupported(@IntRange(from = 1) int width, @IntRange(from = 1) int height,
+            @Format int format, @IntRange(from = 1) int layers, @Usage long usage) {
         if (!HardwareBuffer.isSupportedFormat(format)) {
             throw new IllegalArgumentException("Invalid pixel format " + format);
         }
