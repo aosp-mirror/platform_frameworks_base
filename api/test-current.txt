@@ -352,6 +352,10 @@ package android.app {
     method public boolean isUiModeLocked();
   }
 
+  public class WallpaperManager {
+    method @RequiresPermission("android.permission.SET_WALLPAPER_COMPONENT") public boolean setWallpaperComponent(android.content.ComponentName);
+  }
+
   public class WindowConfiguration implements java.lang.Comparable<android.app.WindowConfiguration> android.os.Parcelable {
     ctor public WindowConfiguration();
     method public int compareTo(android.app.WindowConfiguration);
@@ -600,6 +604,7 @@ package android.content {
   public abstract class Context {
     method public android.content.Context createPackageContextAsUser(String, int, android.os.UserHandle) throws android.content.pm.PackageManager.NameNotFoundException;
     method public abstract android.view.Display getDisplay();
+    method public abstract int getDisplayId();
     method public android.os.UserHandle getUser();
     method public int getUserId();
     method public void setAutofillOptions(@Nullable android.content.AutofillOptions);
@@ -610,6 +615,7 @@ package android.content {
 
   public class ContextWrapper extends android.content.Context {
     method public android.view.Display getDisplay();
+    method public int getDisplayId();
   }
 
   public class Intent implements java.lang.Cloneable android.os.Parcelable {

@@ -182,6 +182,10 @@
     <!-- Permission needed to run keyguard manager tests in CTS -->
     <uses-permission android:name="android.permission.CONTROL_KEYGUARD_SECURE_NOTIFICATIONS" />
 
+    <!-- Permission needed to test wallpaper component -->
+    <uses-permission android:name="android.permission.SET_WALLPAPER" />
+    <uses-permission android:name="android.permission.SET_WALLPAPER_COMPONENT" />
+
     <application android:label="@string/app_label"
                  android:defaultToDeviceProtectedStorage="true"
                  android:directBootAware="true">
