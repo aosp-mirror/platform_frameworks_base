@@ -3594,6 +3594,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         @Override
         public void onStartedWakingUp() {
             mDeviceInteractive = true;
+            mWakeUpCoordinator.setWakingUp(true);
             mAmbientPulseManager.releaseAllImmediately();
             mVisualStabilityManager.setScreenOn(true);
             updateNotificationPanelTouchState();
@@ -3601,6 +3602,11 @@ public class StatusBar extends SystemUI implements DemoMode,
             updateIsKeyguard();
             mDozeServiceHost.stopDozing();
             mPulseExpansionHandler.onStartedWakingUp();
+        }
+
+        @Override
+        public void onFinishedWakingUp() {
+            mWakeUpCoordinator.setWakingUp(false);
         }
     };
 
@@ -3904,7 +3910,6 @@ public class StatusBar extends SystemUI implements DemoMode,
                     }
                     updateScrimController();
                     mPulseExpansionHandler.setPulsing(pulsing);
-                    mWakeUpCoordinator.setPulsing(pulsing);
                 }
             }, reason);
             // DozeScrimController is in pulse state, now let's ask ScrimController to start

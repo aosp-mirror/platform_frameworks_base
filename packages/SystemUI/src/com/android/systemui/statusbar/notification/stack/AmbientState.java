@@ -185,10 +185,11 @@ public class AmbientState {
 
     /** Dark ratio of the status bar **/
     public void setDarkAmount(float darkAmount) {
-        mDarkAmount = darkAmount;
-        if (darkAmount == 1.0f) {
+        if (darkAmount == 1.0f && mDarkAmount != darkAmount) {
+            // Whenever we are fully dark, let's reset the pulseHeight again
             mPulseHeight = MAX_PULSE_HEIGHT;
         }
+        mDarkAmount = darkAmount;
     }
 
     /** Returns the dark ratio of the status bar */
@@ -307,7 +308,7 @@ public class AmbientState {
     }
 
     public boolean isPulseExpanding() {
-        return mPulseHeight != MAX_PULSE_HEIGHT && mDarkAmount != 1.0f;
+        return mPulseHeight != MAX_PULSE_HEIGHT && mDozeAmount != 0.0f && mDarkAmount != 1.0f;
     }
 
     public boolean isShadeExpanded() {
@@ -453,19 +454,6 @@ public class AmbientState {
     }
 
     /**
-     * Similar to the normal is above shelf logic but doesn't allow it to be above in AOD1.
-     *
-     * @param expandableView the view to check
-     */
-    public boolean isAboveShelf(ExpandableView expandableView) {
-        if (!(expandableView instanceof ExpandableNotificationRow)) {
-            return expandableView.isAboveShelf();
-        }
-        ExpandableNotificationRow row = (ExpandableNotificationRow) expandableView;
-        return row.isAboveShelf() && !isDozingAndNotPulsing(row);
-    }
-
-    /**
      * @return whether a view is dozing and not pulsing right now
      */
     public boolean isDozingAndNotPulsing(ExpandableView view) {
@@ -524,7 +512,7 @@ public class AmbientState {
     public void setDozeAmount(float dozeAmount) {
         if (dozeAmount != mDozeAmount) {
             mDozeAmount = dozeAmount;
-            if (dozeAmount == 1.0f) {
+            if (dozeAmount == 0.0f || dozeAmount == 1.0f) {
                 // We woke all the way up, let's reset the pulse height
                 mPulseHeight = MAX_PULSE_HEIGHT;
             }

@@ -131,7 +131,7 @@ public class AmbientPulseManager extends AlertingNotificationManager {
          * @param entry the entry that changed
          * @param isPulsing true if the entry is now pulsing, false otherwise
          */
-        void onAmbientStateChanged(NotificationEntry entry, boolean isPulsing);
+        void onAmbientStateChanged(@NonNull NotificationEntry entry, boolean isPulsing);
     }
 
     private final class AmbientEntry extends AlertEntry {

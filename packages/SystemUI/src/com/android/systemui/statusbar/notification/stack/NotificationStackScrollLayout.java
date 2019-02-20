@@ -1372,7 +1372,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     private boolean isHeadsUpTransition() {
         NotificationSection firstVisibleSection = getFirstVisibleSection();
         return mTrackingHeadsUp && firstVisibleSection != null
-                && mAmbientState.isAboveShelf(firstVisibleSection.getFirstVisibleChild());
+                && firstVisibleSection.getFirstVisibleChild().isAboveShelf();
     }
 
     /**
@@ -5633,6 +5633,34 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     public void setDozeAmount(float dozeAmount) {
         mAmbientState.setDozeAmount(dozeAmount);
         requestChildrenUpdate();
+    }
+
+    public void wakeUpFromPulse() {
+        setPulseHeight(getWakeUpHeight());
+        // Let's place the hidden views at the end of the pulsing notification to make sure we have
+        // a smooth animation
+        boolean firstVisibleView = true;
+        float wakeUplocation = -1f;
+        int childCount = getChildCount();
+        for (int i = 0; i < childCount; i++) {
+            ExpandableView view = (ExpandableView) getChildAt(i);
+            if (view.getVisibility() == View.GONE) {
+                continue;
+            }
+            boolean isShelf = view == mShelf;
+            if (!(view instanceof ExpandableNotificationRow) && !isShelf) {
+                continue;
+            }
+            if (view.getVisibility() == View.VISIBLE && !isShelf) {
+                if (firstVisibleView) {
+                    firstVisibleView = false;
+                    wakeUplocation = view.getTranslationY()
+                            + view.getActualHeight() - mShelf.getIntrinsicHeight();
+                }
+            } else if (!firstVisibleView) {
+                view.setTranslationY(wakeUplocation);
+            }
+        }
     }
 
     /**

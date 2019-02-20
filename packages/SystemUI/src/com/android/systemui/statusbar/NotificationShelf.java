@@ -232,8 +232,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
             openedAmount = Math.min(1.0f, openedAmount);
             viewState.openedAmount = openedAmount;
             viewState.clipTopAmount = 0;
-            viewState.alpha = mAmbientState.hasPulsingNotifications()
-                    && !mAmbientState.isPulseExpanding() ? 0 : 1;
+            viewState.alpha = 1;
             viewState.belowSpeedBump = mAmbientState.getSpeedBumpIndex() == 0;
             viewState.hideSensitive = false;
             viewState.xTranslation = getTranslationX();
@@ -501,7 +500,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
         float viewEnd = row.getTranslationY() + row.getActualHeight();
         boolean isPinned = (row.isPinned() || row.isHeadsUpAnimatingAway())
                 && !mAmbientState.isDozingAndNotPulsing(row);
-        boolean shouldClipOwnTop = row.isAmbientPulsing()
+        boolean shouldClipOwnTop = row.showingAmbientPulsing()
                 || (mAmbientState.isPulseExpanding() && childIndex == 0);
         if (viewEnd > notificationClipEnd && !shouldClipOwnTop
                 && (mAmbientState.isShadeExpanded() || !isPinned)) {
@@ -671,7 +670,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
                 ? fullTransitionAmount
                 : transitionAmount;
         iconState.clampedAppearAmount = clampedAmount;
-        float contentTransformationAmount = !mAmbientState.isAboveShelf(row)
+        float contentTransformationAmount = !row.isAboveShelf()
                     && (isLastChild || iconState.translateContent)
                 ? iconTransitionAmount
                 : 0.0f;
@@ -740,7 +739,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
                 iconState.scaleY = 1.0f;
                 iconState.hidden = false;
             }
-            if (mAmbientState.isAboveShelf(row) || (!row.isInShelf() && (isLastChild && row.areGutsExposed()
+            if (row.isAboveShelf() || (!row.isInShelf() && (isLastChild && row.areGutsExposed()
                     || row.getTranslationZ() > mAmbientState.getBaseZHeight()))) {
                 iconState.hidden = true;
             }

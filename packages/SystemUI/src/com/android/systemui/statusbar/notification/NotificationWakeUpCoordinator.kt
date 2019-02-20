@@ -55,7 +55,8 @@ class NotificationWakeUpCoordinator @Inject constructor(
     private var mDarkAnimator: ObjectAnimator? = null
     private var mVisibilityAmount = 0.0f
     private var mLinearVisibilityAmount = 0.0f
-    private var mPulsing: Boolean = false
+    private var mWakingUp = false
+    private val mEntrySetToClearWhenFinished = mutableSetOf<NotificationEntry>()
 
     init {
         mAmbientPulseManager.addListener(this)
@@ -77,9 +78,11 @@ class NotificationWakeUpCoordinator @Inject constructor(
     }
 
     private fun updateNotificationVisibility(animate: Boolean, increaseSpeed: Boolean) {
-        var visible = false
-        if (mPulsing) {
-            visible = mNotificationsVisibleForExpansion || mAmbientPulseManager.hasNotifications()
+        var visible = mNotificationsVisibleForExpansion || mAmbientPulseManager.hasNotifications()
+        if (!visible && mNotificationsVisible && mWakingUp && mDozeAmount != 0.0f) {
+            // let's not make notifications invisible while waking up, otherwise the animation
+            // is strange
+            return;
         }
         setNotificationsVisible(visible, animate, increaseSpeed)
     }
@@ -104,6 +107,11 @@ class NotificationWakeUpCoordinator @Inject constructor(
         mDozeAmount = interpolatedAmount
         mStackScroller.setDozeAmount(mDozeAmount)
         updateDarkAmount()
+        if (linearAmount == 0.0f) {
+            setNotificationsVisible(visible = false, animate = false, increaseSpeed = false);
+            setNotificationsVisibleForExpansion(visible = false, animate = false,
+                    increaseSpeed = false)
+        }
     }
 
     private fun startVisibilityAnimation(increaseSpeed: Boolean) {
@@ -129,7 +137,14 @@ class NotificationWakeUpCoordinator @Inject constructor(
         mLinearVisibilityAmount = visibilityAmount
         mVisibilityAmount = mVisibilityInterpolator.getInterpolation(
                 visibilityAmount)
+        handleAnimationFinished();
         updateDarkAmount()
+    }
+
+    private fun handleAnimationFinished() {
+        if (mLinearDozeAmount == 0.0f || mLinearVisibilityAmount == 0.0f) {
+            mEntrySetToClearWhenFinished.forEach { it.setAmbientGoingAway(false) }
+        }
     }
 
     fun getWakeUpHeight() : Float {
@@ -148,8 +163,7 @@ class NotificationWakeUpCoordinator @Inject constructor(
 
     fun setDozing(dozing: Boolean, animate: Boolean) {
         if (dozing) {
-            mNotificationsVisible = false
-            mNotificationsVisibleForExpansion = false
+            setNotificationsVisible(visible = false, animate = false, increaseSpeed = false)
         }
         if (animate) {
             notifyAnimationStart(!dozing)
@@ -160,12 +174,22 @@ class NotificationWakeUpCoordinator @Inject constructor(
         return mStackScroller.setPulseHeight(height)
     }
 
-    fun setPulsing(pulsing: Boolean) {
-        mPulsing = pulsing;
-        updateNotificationVisibility(animate = true, increaseSpeed = false)
+    fun setWakingUp(wakingUp: Boolean) {
+        mWakingUp = wakingUp
+        if (wakingUp && mNotificationsVisible && !mNotificationsVisibleForExpansion) {
+            // We're waking up while pulsing, let's make sure the animation looks nice
+            mStackScroller.wakeUpFromPulse();
+        }
     }
 
-    override fun onAmbientStateChanged(entry: NotificationEntry?, isPulsing: Boolean) {
+    override fun onAmbientStateChanged(entry: NotificationEntry, isPulsing: Boolean) {
+        if (!isPulsing && mLinearDozeAmount != 0.0f) {
+            entry.setAmbientGoingAway(true)
+            mEntrySetToClearWhenFinished.add(entry)
+        } else if (isPulsing && mEntrySetToClearWhenFinished.contains(entry)) {
+            mEntrySetToClearWhenFinished.remove(entry)
+            entry.setAmbientGoingAway(false)
+        }
         updateNotificationVisibility(animate = true, increaseSpeed = false)
     }
 }

@@ -527,7 +527,7 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable {
     public void setHeadsUpIsVisible() {
     }
 
-    public boolean isAmbientPulsing() {
+    public boolean showingAmbientPulsing() {
         return false;
     }
 
