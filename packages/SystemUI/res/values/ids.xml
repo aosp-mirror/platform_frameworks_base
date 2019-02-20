@@ -111,11 +111,6 @@
     <!-- Optional cancel button on Keyguard -->
     <item type="id" name="cancel_button"/>
 
-    <!-- AodMaskView transition tag -->
-    <item type="id" name="aod_mask_transition_progress_tag" />
-    <item type="id" name="aod_mask_transition_progress_end_tag" />
-    <item type="id" name="aod_mask_transition_progress_start_tag" />
-
     <!-- For saving DynamicAnimation physics animations as view tags. -->
     <item type="id" name="translation_x_dynamicanimation_tag"/>
     <item type="id" name="translation_y_dynamicanimation_tag"/>
