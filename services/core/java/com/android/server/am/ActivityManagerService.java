@@ -5613,7 +5613,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     int checkCallingPermission(String permission) {
         return checkPermission(permission,
                 Binder.getCallingPid(),
-                UserHandle.getAppId(Binder.getCallingUid()));
+                Binder.getCallingUid());
     }
 
     /**
