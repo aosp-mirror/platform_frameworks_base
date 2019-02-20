@@ -295,30 +295,29 @@ public class StagingManager {
         }
     }
 
-    private String findFirstAPKInDir(File stageDir) {
+    private List<String> findAPKsInDir(File stageDir) {
+        List<String> ret = new ArrayList<>();
         if (stageDir != null && stageDir.exists()) {
             for (File file : stageDir.listFiles()) {
                 if (file.getAbsolutePath().toLowerCase().endsWith(".apk")) {
-                    return file.getAbsolutePath();
+                    ret.add(file.getAbsolutePath());
                 }
             }
         }
-        return null;
+        return ret;
     }
 
     private PackageInstallerSession createAndWriteApkSession(
             @NonNull PackageInstallerSession originalSession) {
-        // TODO(b/123629153): support split APKs.
         if (originalSession.stageDir == null) {
             Slog.wtf(TAG, "Attempting to install a staged APK session with no staging dir");
             return null;
         }
-        String apkFilePath = findFirstAPKInDir(originalSession.stageDir);
-        if (apkFilePath == null) {
+        List<String> apkFilePaths = findAPKsInDir(originalSession.stageDir);
+        if (apkFilePaths.isEmpty()) {
             Slog.w(TAG, "Can't find staged APK in " + originalSession.stageDir.getAbsolutePath());
             return null;
         }
-        File apkFile = new File(apkFilePath);
 
         PackageInstaller.SessionParams params = originalSession.params.copy();
         params.isStaged = false;
@@ -329,14 +328,17 @@ public class StagingManager {
 
         try {
             apkSession.open();
-            ParcelFileDescriptor pfd = ParcelFileDescriptor.open(apkFile,
-                    ParcelFileDescriptor.MODE_READ_ONLY);
-            long sizeBytes = pfd.getStatSize();
-            if (sizeBytes < 0) {
-                Slog.e(TAG, "Unable to get size of: " + apkFilePath);
-                return null;
+            for (String apkFilePath : apkFilePaths) {
+                File apkFile = new File(apkFilePath);
+                ParcelFileDescriptor pfd = ParcelFileDescriptor.open(apkFile,
+                        ParcelFileDescriptor.MODE_READ_ONLY);
+                long sizeBytes = pfd.getStatSize();
+                if (sizeBytes < 0) {
+                    Slog.e(TAG, "Unable to get size of: " + apkFilePath);
+                    return null;
+                }
+                apkSession.write(apkFile.getName(), 0, sizeBytes, pfd);
             }
-            apkSession.write(apkFile.getName(), 0, sizeBytes, pfd);
         } catch (IOException e) {
             Slog.e(TAG, "Failure to install APK staged session " + originalSession.sessionId, e);
             return null;
