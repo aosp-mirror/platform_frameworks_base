@@ -17,16 +17,14 @@ package android.telephony.ims;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.os.Parcel;
-import android.os.Parcelable;
 
 /**
  * An event that indicates an {@link RcsParticipant}'s alias was changed. Please see US18-2 - GSMA
  * RCC.71 (RCS Universal Profile Service Definition Document)
  */
-public final class RcsParticipantAliasChangedEvent extends RcsEvent implements Parcelable {
-    // The ID of the participant that changed their alias
-    private final int mParticipantId;
+public final class RcsParticipantAliasChangedEvent extends RcsEvent {
+    // The participant that changed their alias
+    private final RcsParticipant mParticipant;
     // The new alias of the above participant
     private final String mNewAlias;
 
@@ -43,17 +41,7 @@ public final class RcsParticipantAliasChangedEvent extends RcsEvent implements P
     public RcsParticipantAliasChangedEvent(long timestamp, @NonNull RcsParticipant participant,
             @Nullable String newAlias) {
         super(timestamp);
-        mParticipantId = participant.getId();
-        mNewAlias = newAlias;
-    }
-
-    /**
-     * @hide - internal constructor for queries
-     */
-    public RcsParticipantAliasChangedEvent(long timestamp, int participantId,
-            @Nullable String newAlias) {
-        super(timestamp);
-        mParticipantId = participantId;
+        mParticipant = participant;
         mNewAlias = newAlias;
     }
 
@@ -61,8 +49,8 @@ public final class RcsParticipantAliasChangedEvent extends RcsEvent implements P
      * @return Returns the {@link RcsParticipant} whose alias was changed.
      */
     @NonNull
-    public RcsParticipant getParticipantId() {
-        return new RcsParticipant(mParticipantId);
+    public RcsParticipant getParticipant() {
+        return mParticipant;
     }
 
     /**
@@ -81,37 +69,6 @@ public final class RcsParticipantAliasChangedEvent extends RcsEvent implements P
     @Override
     public void persist() throws RcsMessageStoreException {
         RcsControllerCall.call(iRcs -> iRcs.createParticipantAliasChangedEvent(
-                getTimestamp(), getParticipantId().getId(), getNewAlias()));
-    }
-
-    public static final Creator<RcsParticipantAliasChangedEvent> CREATOR =
-            new Creator<RcsParticipantAliasChangedEvent>() {
-                @Override
-                public RcsParticipantAliasChangedEvent createFromParcel(Parcel in) {
-                    return new RcsParticipantAliasChangedEvent(in);
-                }
-
-                @Override
-                public RcsParticipantAliasChangedEvent[] newArray(int size) {
-                    return new RcsParticipantAliasChangedEvent[size];
-                }
-            };
-
-    private RcsParticipantAliasChangedEvent(Parcel in) {
-        super(in);
-        mNewAlias = in.readString();
-        mParticipantId = in.readInt();
-    }
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        super.writeToParcel(dest, flags);
-        dest.writeString(mNewAlias);
-        dest.writeInt(mParticipantId);
+                getTimestamp(), getParticipant().getId(), getNewAlias()));
     }
 }
