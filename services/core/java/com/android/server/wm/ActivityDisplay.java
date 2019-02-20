@@ -368,7 +368,7 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
         return null;
     }
 
-    private boolean alwaysCreateStack(int windowingMode, int activityType) {
+    boolean alwaysCreateStack(int windowingMode, int activityType) {
         // Always create a stack for fullscreen, freeform, and split-screen-secondary windowing
         // modes so that we can manage visual ordering and return types correctly.
         return activityType == ACTIVITY_TYPE_STANDARD
