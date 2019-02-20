@@ -701,6 +701,14 @@ class ActivityStack extends ConfigurationContainer {
      */
     void setWindowingMode(int preferredWindowingMode, boolean animate, boolean showRecents,
             boolean enteringSplitScreenMode, boolean deferEnsuringVisibility, boolean creating) {
+        mWindowManager.inSurfaceTransaction(() -> setWindowingModeInSurfaceTransaction(
+                preferredWindowingMode, animate, showRecents, enteringSplitScreenMode,
+                deferEnsuringVisibility, creating));
+    }
+
+    private void setWindowingModeInSurfaceTransaction(int preferredWindowingMode, boolean animate,
+            boolean showRecents, boolean enteringSplitScreenMode, boolean deferEnsuringVisibility,
+            boolean creating) {
         final int currentMode = getWindowingMode();
         final int currentOverrideMode = getRequestedOverrideWindowingMode();
         final ActivityDisplay display = getDisplay();
@@ -744,7 +752,7 @@ class ActivityStack extends ConfigurationContainer {
                 // warning toast about it.
                 mService.getTaskChangeNotificationController().notifyActivityDismissingDockedStack();
                 final ActivityStack primarySplitStack = display.getSplitScreenPrimaryStack();
-                primarySplitStack.setWindowingMode(WINDOWING_MODE_UNDEFINED,
+                primarySplitStack.setWindowingModeInSurfaceTransaction(WINDOWING_MODE_UNDEFINED,
                         false /* animate */, false /* showRecents */,
                         false /* enteringSplitScreenMode */, true /* deferEnsuringVisibility */,
                         primarySplitStack == this ? creating : false);
