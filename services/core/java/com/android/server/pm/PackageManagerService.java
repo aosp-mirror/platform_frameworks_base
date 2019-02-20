@@ -12867,8 +12867,14 @@ public class PackageManagerService extends IPackageManager.Stub
                 "setPackagesSuspendedAsUser");
 
         final int callingUid = Binder.getCallingUid();
-        if (callingUid != Process.ROOT_UID && callingUid != Process.SYSTEM_UID
-                && getPackageUid(callingPackage, 0, userId) != callingUid) {
+        final int packageUid = getPackageUid(callingPackage, 0, userId);
+        final boolean allowedCallingUid = callingUid == Process.ROOT_UID
+                || callingUid == Process.SYSTEM_UID;
+        final boolean allowedPackageUid = packageUid == callingUid;
+        final boolean allowedShell = callingUid == SHELL_UID
+                && UserHandle.isSameApp(packageUid, callingUid);
+
+        if (!allowedCallingUid && !allowedShell && !allowedPackageUid) {
             throw new SecurityException("Calling package " + callingPackage + " in user "
                     + userId + " does not belong to calling uid " + callingUid);
         }
