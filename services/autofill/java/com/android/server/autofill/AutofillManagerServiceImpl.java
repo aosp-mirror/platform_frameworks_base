@@ -1071,6 +1071,7 @@ final class AutofillManagerServiceImpl
                 mRemoteAugmentedAutofillService.destroy();
                 mRemoteAugmentedAutofillService = null;
             }
+            mRemoteAugmentedAutofillService = getRemoteAugmentedAutofillServiceLocked();
         }
     }
 
