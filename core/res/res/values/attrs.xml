@@ -8004,7 +8004,8 @@
 
         <!-- Indicates that this wallpaper service can support multiple engines to render on each
              surface independently. An example use case is a multi-display set-up where the
-             wallpaper service can render surfaces to each of the connected displays. -->
+             wallpaper service can render surfaces to each of the connected displays. Corresponds to
+             {@link android.app.WallpaperInfo#supportsMultipleDisplays()} -->
         <attr name="supportsMultipleDisplays" format="boolean" />
 
     </declare-styleable>
