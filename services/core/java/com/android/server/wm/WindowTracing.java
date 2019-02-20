@@ -217,7 +217,7 @@ class WindowTracing {
         }
     }
 
-    private String getStatus() {
+    String getStatus() {
         return "Status: "
                 + ((isEnabled()) ? "Enabled" : "Disabled")
                 + "\n"
