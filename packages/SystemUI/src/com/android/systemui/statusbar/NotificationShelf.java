@@ -232,7 +232,8 @@ public class NotificationShelf extends ActivatableNotificationView implements
             openedAmount = Math.min(1.0f, openedAmount);
             viewState.openedAmount = openedAmount;
             viewState.clipTopAmount = 0;
-            viewState.alpha = mAmbientState.hasPulsingNotifications() ? 0 : 1;
+            viewState.alpha = mAmbientState.hasPulsingNotifications()
+                    && !mAmbientState.isPulseExpanding() ? 0 : 1;
             viewState.belowSpeedBump = mAmbientState.getSpeedBumpIndex() == 0;
             viewState.hideSensitive = false;
             viewState.xTranslation = getTranslationX();
@@ -491,29 +492,33 @@ public class NotificationShelf extends ActivatableNotificationView implements
         }
     }
 
+    /**
+     * Update the clipping of this view.
+     * @return the amount that our own top should be clipped
+     */
     private int updateNotificationClipHeight(ExpandableNotificationRow row,
             float notificationClipEnd, int childIndex) {
         float viewEnd = row.getTranslationY() + row.getActualHeight();
         boolean isPinned = (row.isPinned() || row.isHeadsUpAnimatingAway())
                 && !mAmbientState.isDozingAndNotPulsing(row);
-        if (viewEnd > notificationClipEnd
+        boolean shouldClipOwnTop = row.isAmbientPulsing()
+                || (mAmbientState.isPulseExpanding() && childIndex == 0);
+        if (viewEnd > notificationClipEnd && !shouldClipOwnTop
                 && (mAmbientState.isShadeExpanded() || !isPinned)) {
             int clipBottomAmount = (int) (viewEnd - notificationClipEnd);
             if (isPinned) {
                 clipBottomAmount = Math.min(row.getIntrinsicHeight() - row.getCollapsedHeight(),
                         clipBottomAmount);
             }
-            if (!row.isAmbientPulsing()
-                    && (!mAmbientState.isPulseExpanding() || childIndex != 0)) {
-                row.setClipBottomAmount(clipBottomAmount);
-            } else {
-                row.setClipBottomAmount(0);
-                return clipBottomAmount;
-            }
+            row.setClipBottomAmount(clipBottomAmount);
         } else {
             row.setClipBottomAmount(0);
         }
-        return 0;
+        if (shouldClipOwnTop) {
+            return (int) (viewEnd - getTranslationY());
+        } else {
+            return 0;
+        }
     }
 
     @Override
