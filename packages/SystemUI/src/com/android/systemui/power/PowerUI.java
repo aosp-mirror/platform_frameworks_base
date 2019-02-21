@@ -27,7 +27,6 @@ import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.os.BatteryManager;
 import android.os.Handler;
-import android.os.HardwarePropertiesManager;
 import android.os.IBinder;
 import android.os.IThermalEventListener;
 import android.os.IThermalService;
@@ -70,7 +69,6 @@ public class PowerUI extends SystemUI {
     final Receiver mReceiver = new Receiver();
 
     private PowerManager mPowerManager;
-    private HardwarePropertiesManager mHardwarePropertiesManager;
     private WarningsUI mWarnings;
     private final Configuration mLastConfiguration = new Configuration();
     private long mTimeRemaining = Long.MAX_VALUE;
@@ -96,8 +94,6 @@ public class PowerUI extends SystemUI {
 
     public void start() {
         mPowerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
-        mHardwarePropertiesManager = (HardwarePropertiesManager)
-                mContext.getSystemService(Context.HARDWARE_PROPERTIES_SERVICE);
         mScreenOffTime = mPowerManager.isScreenOn() ? -1 : SystemClock.elapsedRealtime();
         mWarnings = Dependency.get(WarningsUI.class);
         mEnhancedEstimates = Dependency.get(EnhancedEstimates.class);

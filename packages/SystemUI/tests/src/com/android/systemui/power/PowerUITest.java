@@ -31,7 +31,6 @@ import static org.mockito.Mockito.when;
 import android.content.Context;
 import android.content.Intent;
 import android.os.BatteryManager;
-import android.os.HardwarePropertiesManager;
 import android.os.IThermalEventListener;
 import android.os.IThermalService;
 import android.os.PowerManager;
@@ -76,7 +75,6 @@ public class PowerUITest extends SysuiTestCase {
     private static final int OLD_BATTERY_LEVEL_NINE = 9;
     private static final int OLD_BATTERY_LEVEL_10 = 10;
     private static final long VERY_BELOW_SEVERE_HYBRID_THRESHOLD = TimeUnit.MINUTES.toMillis(15);
-    private HardwarePropertiesManager mHardProps;
     private WarningsUI mMockWarnings;
     private PowerUI mPowerUI;
     private EnhancedEstimates mEnhancedEstimates;
@@ -90,10 +88,8 @@ public class PowerUITest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
         mMockWarnings = mDependency.injectMockDependency(WarningsUI.class);
         mEnhancedEstimates = mDependency.injectMockDependency(EnhancedEstimates.class);
-        mHardProps = mock(HardwarePropertiesManager.class);
 
         mContext.putComponent(StatusBar.class, mock(StatusBar.class));
-        mContext.addMockSystemService(Context.HARDWARE_PROPERTIES_SERVICE, mHardProps);
         mContext.addMockSystemService(Context.POWER_SERVICE, mPowerManager);
 
         createPowerUi();
