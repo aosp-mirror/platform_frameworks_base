@@ -18,6 +18,7 @@
 //#define LOG_NDEBUG 0
 #define LOG_TAG "MediaMetadataRetrieverJNI"
 
+#include <cmath>
 #include <assert.h>
 #include <utils/Log.h>
 #include <utils/threads.h>
@@ -32,7 +33,7 @@
 #include <nativehelper/JNIHelp.h>
 #include "android_runtime/AndroidRuntime.h"
 #include "android_media_MediaDataSource.h"
-#include "android_media_Utils.h"
+#include "android_media_Streams.h"
 #include "android_util_Binder.h"
 
 #include "android/graphics/GraphicsJNI.h"
