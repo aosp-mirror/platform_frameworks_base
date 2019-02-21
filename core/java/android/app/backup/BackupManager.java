@@ -762,6 +762,7 @@ public class BackupManager {
      */
     @Nullable
     public UserHandle getUserForAncestralSerialNumber(long ancestralSerialNumber) {
+        checkServiceBinder();
         if (sService != null) {
             try {
                 return sService.getUserForAncestralSerialNumber(ancestralSerialNumber);
@@ -782,6 +783,7 @@ public class BackupManager {
     @SystemApi
     @RequiresPermission(android.Manifest.permission.BACKUP)
     public void setAncestralSerialNumber(long ancestralSerialNumber) {
+        checkServiceBinder();
         if (sService != null) {
             try {
                 sService.setAncestralSerialNumber(ancestralSerialNumber);
@@ -802,6 +804,7 @@ public class BackupManager {
     @TestApi
     @RequiresPermission(android.Manifest.permission.BACKUP)
     public Intent getConfigurationIntent(String transportName) {
+        checkServiceBinder();
         if (sService != null) {
             try {
                 return sService.getConfigurationIntentForUser(mContext.getUserId(), transportName);
@@ -823,6 +826,7 @@ public class BackupManager {
     @TestApi
     @RequiresPermission(android.Manifest.permission.BACKUP)
     public String getDestinationString(String transportName) {
+        checkServiceBinder();
         if (sService != null) {
             try {
                 return sService.getDestinationStringForUser(mContext.getUserId(), transportName);
@@ -844,6 +848,7 @@ public class BackupManager {
     @TestApi
     @RequiresPermission(android.Manifest.permission.BACKUP)
     public Intent getDataManagementIntent(String transportName) {
+        checkServiceBinder();
         if (sService != null) {
             try {
                 return sService.getDataManagementIntentForUser(mContext.getUserId(), transportName);
@@ -867,6 +872,7 @@ public class BackupManager {
     @TestApi
     @RequiresPermission(android.Manifest.permission.BACKUP)
     public String getDataManagementLabel(String transportName) {
+        checkServiceBinder();
         if (sService != null) {
             try {
                 return sService.getDataManagementLabelForUser(mContext.getUserId(), transportName);

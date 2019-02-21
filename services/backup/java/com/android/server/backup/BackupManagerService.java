@@ -464,15 +464,25 @@ public class BackupManagerService {
      */
     @Nullable
     public UserHandle getUserForAncestralSerialNumber(long ancestralSerialNumber) {
-        for (UserHandle handle : mContext.getSystemService(UserManager.class).getUserProfiles()) {
-            UserBackupManagerService userBackupManagerService = getServiceUsers().get(
-                    handle.getIdentifier());
+        int callingUserId = Binder.getCallingUserHandle().getIdentifier();
+        long oldId = Binder.clearCallingIdentity();
+        int[] userIds;
+        try {
+            userIds = mContext.getSystemService(UserManager.class).getProfileIds(callingUserId,
+                    false);
+        } finally {
+            Binder.restoreCallingIdentity(oldId);
+        }
+
+        for (int userId : userIds) {
+            UserBackupManagerService userBackupManagerService = getServiceUsers().get(userId);
             if (userBackupManagerService != null) {
                 if (userBackupManagerService.getAncestralSerialNumber() == ancestralSerialNumber) {
-                    return handle;
+                    return UserHandle.of(userId);
                 }
             }
         }
+
         return null;
     }
 
