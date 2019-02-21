@@ -451,7 +451,7 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
         }
 
         final int numberEvents = mEvents.size();
-        final String reasonString = getflushReasonAsString(reason);
+        final String reasonString = getFlushReasonAsString(reason);
         if (sDebug) {
             Log.d(TAG, "Flushing " + numberEvents + " event(s) for " + getDebugState(reason));
         }
@@ -684,6 +684,6 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
 
     @NonNull
     private String getDebugState(@FlushReason int reason) {
-        return getDebugState() + ", reason=" + getflushReasonAsString(reason);
+        return getDebugState() + ", reason=" + getFlushReasonAsString(reason);
     }
 }

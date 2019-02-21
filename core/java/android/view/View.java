@@ -9408,7 +9408,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             }
             setNotifiedContentCaptureAppeared();
 
-            // TODO(b/123307965): instead of post, we should queue it on AttachInfo and then
+            // TODO(b/125395044): instead of post, we should queue it on AttachInfo and then
             // dispatch on RootImpl, as we're doing with the removed ones (in that case, we should
             // merge the delayNotifyContentCaptureDisappeared() into a more generic method that
             // takes a session and a command, where the command is either view added or removed
@@ -9703,11 +9703,17 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @hide
      */
-    public void dispatchInitialProvideContentCaptureStructure(@NonNull ContentCaptureManager ccm) {
+    public void dispatchInitialProvideContentCaptureStructure() {
         AttachInfo ai = mAttachInfo;
         if (ai == null) {
             Log.w(CONTENT_CAPTURE_LOG_TAG,
                     "dispatchProvideContentCaptureStructure(): no AttachInfo for " + this);
+            return;
+        }
+        ContentCaptureManager ccm = ai.mContentCaptureManager;
+        if (ccm == null) {
+            Log.w(CONTENT_CAPTURE_LOG_TAG, "dispatchProvideContentCaptureStructure(): "
+                    + "no ContentCaptureManager for " + this);
             return;
         }
 
@@ -28405,7 +28411,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
 
         @Nullable
-        private ContentCaptureManager getContentCaptureManager(@NonNull Context context) {
+        ContentCaptureManager getContentCaptureManager(@NonNull Context context) {
             if (mContentCaptureManager != null) {
                 return mContentCaptureManager;
             }
