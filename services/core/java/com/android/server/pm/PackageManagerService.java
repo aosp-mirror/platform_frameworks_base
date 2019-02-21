@@ -14346,27 +14346,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
 
                 if (dataOwnerPkg != null) {
-                    // If installed, the package will get access to data left on the device by its
-                    // predecessor. As a security measure, this is permited only if this is not a
-                    // version downgrade or if the predecessor package is marked as debuggable and
-                    // a downgrade is explicitly requested.
-                    //
-                    // On debuggable platform builds, downgrades are permitted even for
-                    // non-debuggable packages to make testing easier. Debuggable platform builds do
-                    // not offer security guarantees and thus it's OK to disable some security
-                    // mechanisms to make debugging/testing easier on those builds. However, even on
-                    // debuggable builds downgrades of packages are permitted only if requested via
-                    // installFlags. This is because we aim to keep the behavior of debuggable
-                    // platform builds as close as possible to the behavior of non-debuggable
-                    // platform builds.
-                    final boolean downgradeRequested =
-                            (installFlags & PackageManager.INSTALL_ALLOW_DOWNGRADE) != 0;
-                    final boolean packageDebuggable =
-                                (dataOwnerPkg.applicationInfo.flags
-                                        & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
-                    final boolean downgradePermitted =
-                            (downgradeRequested) && ((Build.IS_DEBUGGABLE) || (packageDebuggable));
-                    if (!downgradePermitted) {
+                    if (!PackageManagerServiceUtils.isDowngradePermitted(installFlags,
+                            dataOwnerPkg.applicationInfo.flags)) {
                         try {
                             checkDowngrade(dataOwnerPkg, pkgLite);
                         } catch (PackageManagerException e) {
