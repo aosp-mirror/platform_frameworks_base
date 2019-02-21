@@ -1482,7 +1482,7 @@ public final class DisplayManagerService extends SystemService {
             pw.println("  mSingleDisplayDemoMode=" + mSingleDisplayDemoMode);
             pw.println("  mWifiDisplayScanRequestCount=" + mWifiDisplayScanRequestCount);
             pw.println("  mStableDisplaySize=" + mStableDisplaySize);
-
+            pw.println("  mMinimumBrightnessCurve=" + mMinimumBrightnessCurve);
 
             IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "    ");
             ipw.increaseIndent();
