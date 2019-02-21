@@ -174,6 +174,7 @@ public final class ZramWriteback extends JobService {
         // back at later point if they remain untouched.
         js.schedule(new JobInfo.Builder(MARK_IDLE_JOB_ID, sZramWriteback)
                         .setMinimumLatency(TimeUnit.MINUTES.toMillis(markIdleDelay))
+                        .setOverrideDeadline(TimeUnit.MINUTES.toMillis(markIdleDelay))
                         .build());
 
         // Schedule a one time job to flush idle pages to disk.
