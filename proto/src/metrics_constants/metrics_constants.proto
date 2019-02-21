@@ -247,6 +247,12 @@ message MetricsEvent {
     LOCATION_GONE = 6; // the view isn't laid out at all
   }
 
+  // Subtypes for profile logging
+  enum ActiveUserProfile {
+    PARENT_PROFILE = 1;
+    MANAGED_PROFILE = 2;
+  }
+
   // Known visual elements: views or controls.
   enum View {
     // Unknown view
@@ -7001,6 +7007,10 @@ message MetricsEvent {
     // OS: Q
     // Different display can have different orientations, so need to log display id
     FIELD_DISPLAY_ID = 1660;
+
+    // ACTION: Changing from work to parent profile or vice versa
+    // OS: Q
+    ACTION_SWITCH_SHARE_PROFILE = 1661;
 
     // ---- End Q Constants, all Q constants go above this line ----
     // Add new aosp constants above this line.
