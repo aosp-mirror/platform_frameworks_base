@@ -135,7 +135,7 @@ public class KeySyncTaskTest {
                 mSnapshotListenersStorage,
                 TEST_USER_ID,
                 TEST_CREDENTIAL_TYPE,
-                TEST_CREDENTIAL,
+                TEST_CREDENTIAL.getBytes(),
                 /*credentialUpdated=*/ false,
                 mPlatformKeyManager,
                 mTestOnlyInsecureCertificateHelper,
@@ -159,17 +159,17 @@ public class KeySyncTaskTest {
 
     @Test
     public void isPin_isTrueForNumericString() {
-        assertTrue(KeySyncTask.isPin("3298432574398654376547"));
+        assertTrue(KeySyncTask.isPin("3298432574398654376547".getBytes()));
     }
 
     @Test
     public void isPin_isFalseForStringContainingLetters() {
-        assertFalse(KeySyncTask.isPin("398i54369548654"));
+        assertFalse(KeySyncTask.isPin("398i54369548654".getBytes()));
     }
 
     @Test
     public void isPin_isFalseForStringContainingSymbols() {
-        assertFalse(KeySyncTask.isPin("-3987543643"));
+        assertFalse(KeySyncTask.isPin("-3987543643".getBytes()));
     }
 
     @Test
@@ -178,8 +178,8 @@ public class KeySyncTaskTest {
         byte[] salt = randomBytes(16);
 
         assertArrayEquals(
-                KeySyncTask.hashCredentialsBySaltedSha256(salt, credentials),
-                KeySyncTask.hashCredentialsBySaltedSha256(salt, credentials));
+                KeySyncTask.hashCredentialsBySaltedSha256(salt, credentials.getBytes()),
+                KeySyncTask.hashCredentialsBySaltedSha256(salt, credentials.getBytes()));
     }
 
     @Test
@@ -188,8 +188,8 @@ public class KeySyncTaskTest {
 
         assertFalse(
                 Arrays.equals(
-                    KeySyncTask.hashCredentialsBySaltedSha256(salt, "password1234"),
-                    KeySyncTask.hashCredentialsBySaltedSha256(salt, "password12345")));
+                    KeySyncTask.hashCredentialsBySaltedSha256(salt, "password1234".getBytes()),
+                    KeySyncTask.hashCredentialsBySaltedSha256(salt, "password12345".getBytes())));
     }
 
     @Test
@@ -198,34 +198,38 @@ public class KeySyncTaskTest {
 
         assertFalse(
                 Arrays.equals(
-                        KeySyncTask.hashCredentialsBySaltedSha256(randomBytes(64), credentials),
-                        KeySyncTask.hashCredentialsBySaltedSha256(randomBytes(64), credentials)));
+                        KeySyncTask.hashCredentialsBySaltedSha256(randomBytes(64),
+                                credentials.getBytes()),
+                        KeySyncTask.hashCredentialsBySaltedSha256(randomBytes(64),
+                                credentials.getBytes())));
     }
 
     @Test
     public void hashCredentialsBySaltedSha256_returnsDifferentHashEvenIfConcatIsSame() {
         assertFalse(
                 Arrays.equals(
-                        KeySyncTask.hashCredentialsBySaltedSha256(utf8Bytes("123"), "4567"),
-                        KeySyncTask.hashCredentialsBySaltedSha256(utf8Bytes("1234"), "567")));
+                        KeySyncTask.hashCredentialsBySaltedSha256(utf8Bytes("123"),
+                                "4567".getBytes()),
+                        KeySyncTask.hashCredentialsBySaltedSha256(utf8Bytes("1234"),
+                                "567".getBytes())));
     }
 
     @Test
     public void getUiFormat_returnsPinIfPin() {
         assertEquals(UI_FORMAT_PIN,
-                KeySyncTask.getUiFormat(CREDENTIAL_TYPE_PASSWORD, "1234"));
+                KeySyncTask.getUiFormat(CREDENTIAL_TYPE_PASSWORD, "1234".getBytes()));
     }
 
     @Test
     public void getUiFormat_returnsPasswordIfPassword() {
         assertEquals(UI_FORMAT_PASSWORD,
-                KeySyncTask.getUiFormat(CREDENTIAL_TYPE_PASSWORD, "1234a"));
+                KeySyncTask.getUiFormat(CREDENTIAL_TYPE_PASSWORD, "1234a".getBytes()));
     }
 
     @Test
     public void getUiFormat_returnsPatternIfPattern() {
         assertEquals(UI_FORMAT_PATTERN,
-                KeySyncTask.getUiFormat(CREDENTIAL_TYPE_PATTERN, "1234"));
+                KeySyncTask.getUiFormat(CREDENTIAL_TYPE_PATTERN, "1234".getBytes()));
 
     }
 
@@ -287,7 +291,7 @@ public class KeySyncTaskTest {
                 mSnapshotListenersStorage,
                 TEST_USER_ID,
                 CREDENTIAL_TYPE_PASSWORD,
-                /*credential=*/ password,
+                /*credential=*/ password.getBytes(),
                 /*credentialUpdated=*/ false,
                 mPlatformKeyManager,
                 mTestOnlyInsecureCertificateHelper,
@@ -328,7 +332,7 @@ public class KeySyncTaskTest {
                 mSnapshotListenersStorage,
                 TEST_USER_ID,
                 CREDENTIAL_TYPE_PATTERN,
-                /*credential=*/ pattern,
+                /*credential=*/ pattern.getBytes(),
                 /*credentialUpdated=*/ false,
                 mPlatformKeyManager,
                 mTestOnlyInsecureCertificateHelper,
@@ -362,7 +366,7 @@ public class KeySyncTaskTest {
                 mSnapshotListenersStorage,
                 TEST_USER_ID,
                 CREDENTIAL_TYPE_PASSWORD,
-                /*credential=*/ shortPassword,
+                /*credential=*/ shortPassword.getBytes(),
                 /*credentialUpdated=*/ false,
                 mPlatformKeyManager,
                 mTestOnlyInsecureCertificateHelper,
@@ -522,7 +526,7 @@ public class KeySyncTaskTest {
         verify(mSnapshotListenersStorage).recoverySnapshotAvailable(TEST_RECOVERY_AGENT_UID);
         byte[] lockScreenHash = KeySyncTask.hashCredentialsBySaltedSha256(
                 keyDerivationParams.getSalt(),
-                TEST_CREDENTIAL);
+                TEST_CREDENTIAL.getBytes());
         Long counterId = mRecoverableKeyStoreDb.getCounterId(TEST_USER_ID, TEST_RECOVERY_AGENT_UID);
         assertThat(counterId).isNotNull();
         byte[] recoveryKey = decryptThmEncryptedKey(
@@ -616,7 +620,7 @@ public class KeySyncTaskTest {
                 mSnapshotListenersStorage,
                 TEST_USER_ID,
                 CREDENTIAL_TYPE_PASSWORD,
-                password,
+                password.getBytes(),
                 /*credentialUpdated=*/ false,
                 mPlatformKeyManager,
                 mTestOnlyInsecureCertificateHelper,
@@ -647,7 +651,7 @@ public class KeySyncTaskTest {
                 mSnapshotListenersStorage,
                 TEST_USER_ID,
                 CREDENTIAL_TYPE_PASSWORD,
-                /*credential=*/ pin,
+                /*credential=*/ pin.getBytes(),
                 /*credentialUpdated=*/ false,
                 mPlatformKeyManager,
                 mTestOnlyInsecureCertificateHelper,
@@ -679,7 +683,7 @@ public class KeySyncTaskTest {
                 mSnapshotListenersStorage,
                 TEST_USER_ID,
                 CREDENTIAL_TYPE_PATTERN,
-                "12345",
+                "12345".getBytes(),
                 /*credentialUpdated=*/ false,
                 mPlatformKeyManager,
                 mTestOnlyInsecureCertificateHelper,
@@ -763,7 +767,7 @@ public class KeySyncTaskTest {
           mSnapshotListenersStorage,
           TEST_USER_ID,
           /*credentialType=*/ 3,
-          "12345",
+          "12345".getBytes(),
           /*credentialUpdated=*/ false,
           mPlatformKeyManager,
           mTestOnlyInsecureCertificateHelper,

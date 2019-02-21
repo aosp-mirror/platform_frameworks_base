@@ -87,35 +87,36 @@ public class LockSettingsShellCommandTest {
     public void testWrongPassword() throws Exception {
         when(mLockPatternUtils.isLockPatternEnabled(mUserId)).thenReturn(false);
         when(mLockPatternUtils.isLockPasswordEnabled(mUserId)).thenReturn(true);
-        when(mLockPatternUtils.checkPassword("1234", mUserId)).thenReturn(false);
+        when(mLockPatternUtils.checkPassword("1234".getBytes(), mUserId)).thenReturn(false);
         assertEquals(-1, mCommand.exec(mBinder, in, out, err,
                 new String[] { "set-pin", "--old", "1234" },
                 mShellCallback, mResultReceiver));
-        verify(mLockPatternUtils, never()).saveLockPassword(any(), any(), anyInt(), anyInt());
+        verify(mLockPatternUtils, never()).saveLockPassword(any(byte[].class), any(byte[].class),
+                anyInt(), anyInt());
     }
 
     @Test
     public void testChangePin() throws Exception {
         when(mLockPatternUtils.isLockPatternEnabled(mUserId)).thenReturn(false);
         when(mLockPatternUtils.isLockPasswordEnabled(mUserId)).thenReturn(true);
-        when(mLockPatternUtils.checkPassword("1234", mUserId)).thenReturn(true);
+        when(mLockPatternUtils.checkPassword("1234".getBytes(), mUserId)).thenReturn(true);
         assertEquals(0, mCommand.exec(new Binder(), in, out, err,
                 new String[] { "set-pin", "--old", "1234", "4321" },
                 mShellCallback, mResultReceiver));
-        verify(mLockPatternUtils).saveLockPassword("4321", "1234", PASSWORD_QUALITY_NUMERIC,
-                mUserId);
+        verify(mLockPatternUtils).saveLockPassword("4321".getBytes(), "1234".getBytes(),
+                PASSWORD_QUALITY_NUMERIC, mUserId);
     }
 
     @Test
     public void testChangePassword() throws Exception {
         when(mLockPatternUtils.isLockPatternEnabled(mUserId)).thenReturn(false);
         when(mLockPatternUtils.isLockPasswordEnabled(mUserId)).thenReturn(true);
-        when(mLockPatternUtils.checkPassword("1234", mUserId)).thenReturn(true);
+        when(mLockPatternUtils.checkPassword("1234".getBytes(), mUserId)).thenReturn(true);
         assertEquals(0,  mCommand.exec(new Binder(), in, out, err,
                 new String[] { "set-password", "--old", "1234", "4321" },
                 mShellCallback, mResultReceiver));
-        verify(mLockPatternUtils).saveLockPassword("4321", "1234", PASSWORD_QUALITY_ALPHABETIC,
-                mUserId);
+        verify(mLockPatternUtils).saveLockPassword("4321".getBytes(), "1234".getBytes(),
+                PASSWORD_QUALITY_ALPHABETIC, mUserId);
     }
 
     @Test
@@ -126,7 +127,8 @@ public class LockSettingsShellCommandTest {
         assertEquals(0, mCommand.exec(new Binder(), in, out, err,
                 new String[] { "set-pattern", "--old", "1234", "4321" },
                 mShellCallback, mResultReceiver));
-        verify(mLockPatternUtils).saveLockPattern(stringToPattern("4321"), "1234", mUserId);
+        verify(mLockPatternUtils).saveLockPattern(stringToPattern("4321"), "1234".getBytes(),
+                mUserId);
     }
 
     @Test
@@ -137,6 +139,6 @@ public class LockSettingsShellCommandTest {
         assertEquals(0, mCommand.exec(new Binder(), in, out, err,
                 new String[] { "clear", "--old", "1234" },
                 mShellCallback, mResultReceiver));
-        verify(mLockPatternUtils).clearLock("1234", mUserId);
+        verify(mLockPatternUtils).clearLock("1234".getBytes(), mUserId);
     }
 }
