@@ -51,7 +51,7 @@ import java.util.function.ToDoubleFunction;
 public class BinderCallsStats implements BinderInternal.Observer {
     public static final boolean ENABLED_DEFAULT = true;
     public static final boolean DETAILED_TRACKING_DEFAULT = true;
-    public static final int PERIODIC_SAMPLING_INTERVAL_DEFAULT = 100;
+    public static final int PERIODIC_SAMPLING_INTERVAL_DEFAULT = 1000;
     public static final boolean DEFAULT_TRACK_SCREEN_INTERACTIVE = false;
     public static final boolean DEFAULT_TRACK_DIRECT_CALLING_UID = true;
     public static final int MAX_BINDER_CALL_STATS_COUNT_DEFAULT = 5000;
