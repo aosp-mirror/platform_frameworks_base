@@ -35,6 +35,7 @@ import static android.content.pm.PackageManager.FLAG_PERMISSION_REVOKE_WHEN_REQU
 import static android.content.pm.PackageManager.FLAG_PERMISSION_SYSTEM_FIXED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_FIXED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_SET;
+import static android.content.pm.PackageManager.MASK_PERMISSION_FLAGS;
 import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 import static android.os.UserHandle.getAppId;
 import static android.os.UserHandle.getUid;
@@ -1031,7 +1032,8 @@ public class PermissionManagerService {
                                     updatedUserIds = ArrayUtils.appendInt(updatedUserIds, userId);
                                 }
 
-                                permissionsState.updatePermissionFlags(bp, userId, flags, flags);
+                                permissionsState.updatePermissionFlags(bp, userId,
+                                        MASK_PERMISSION_FLAGS, flags);
                             }
                         } break;
 
@@ -1081,7 +1083,8 @@ public class PermissionManagerService {
                                     updatedUserIds = ArrayUtils.appendInt(updatedUserIds, userId);
                                 }
 
-                                permissionsState.updatePermissionFlags(bp, userId, flags, flags);
+                                permissionsState.updatePermissionFlags(bp, userId,
+                                        MASK_PERMISSION_FLAGS, flags);
                             }
                         } break;
 
