@@ -169,7 +169,7 @@ public final class DeviceConfig {
          *
          * @hide for internal use only
          */
-        String BLASTULA_POOL_SIZE_MIN = "blastula_pool_size_max";
+        String BLASTULA_POOL_SIZE_MIN = "blastula_pool_size_min";
 
         /**
          * The threshold used to determine if the pool should be refilled.
