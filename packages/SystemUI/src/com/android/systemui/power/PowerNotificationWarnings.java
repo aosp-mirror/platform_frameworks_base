@@ -16,6 +16,7 @@
 
 package com.android.systemui.power;
 
+import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -41,6 +42,7 @@ import android.text.style.URLSpan;
 import android.util.Log;
 import android.util.Slog;
 import android.view.View;
+import android.view.WindowManager;
 
 import androidx.annotation.VisibleForTesting;
 
@@ -48,10 +50,13 @@ import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.settingslib.Utils;
 import com.android.settingslib.fuelgauge.BatterySaverUtils;
 import com.android.settingslib.utils.PowerUtil;
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.SystemUI;
+import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.util.NotificationChannels;
+import com.android.systemui.volume.Events;
 
 import java.io.PrintWriter;
 import java.text.NumberFormat;
@@ -118,6 +123,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
     private final Context mContext;
     private final NotificationManager mNoMan;
     private final PowerManager mPowerMan;
+    private final KeyguardManager mKeyguard;
     private final Handler mHandler = new Handler(Looper.getMainLooper());
     private final Receiver mReceiver = new Receiver();
     private final Intent mOpenBatterySettings = settings(Intent.ACTION_POWER_USAGE_SUMMARY);
@@ -141,6 +147,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
     private boolean mHighTempWarning;
     private SystemUIDialog mHighTempDialog;
     private SystemUIDialog mThermalShutdownDialog;
+    @VisibleForTesting SystemUIDialog mUsbHighTempDialog;
 
     /**
      */
@@ -149,6 +156,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
         mContext = context;
         mNoMan = mContext.getSystemService(NotificationManager.class);
         mPowerMan = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+        mKeyguard = mContext.getSystemService(KeyguardManager.class);
         mReceiver.init();
     }
 
@@ -165,6 +173,8 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
         pw.print("mHighTempDialog="); pw.println(mHighTempDialog != null ? "not null" : null);
         pw.print("mThermalShutdownDialog=");
         pw.println(mThermalShutdownDialog != null ? "not null" : null);
+        pw.print("mUsbHighTempDialog=");
+        pw.println(mUsbHighTempDialog != null ? "not null" : null);
     }
 
     private int getLowBatteryAutoTriggerDefaultLevel() {
@@ -431,6 +441,53 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
         final Notification n = nb.build();
         mNoMan.notifyAsUser(
                 TAG_TEMPERATURE, SystemMessage.NOTE_THERMAL_SHUTDOWN, n, UserHandle.ALL);
+    }
+
+    @Override
+    public void showUsbHighTemperatureAlarm() {
+        mHandler.post(() -> showUsbHighTemperatureAlarmInternal());
+    }
+
+    private void showUsbHighTemperatureAlarmInternal() {
+        if (mUsbHighTempDialog != null) {
+            return;
+        }
+
+        final SystemUIDialog d = new SystemUIDialog(mContext, R.style.Theme_SystemUI_Dialog_Alert);
+        d.setCancelable(false);
+        d.setIconAttribute(android.R.attr.alertDialogIcon);
+        d.setTitle(R.string.high_temp_alarm_title);
+        d.setShowForAllUsers(true);
+        d.setMessage(mContext.getString(R.string.high_temp_alarm_notify_message, ""));
+        d.setPositiveButton((com.android.internal.R.string.ok),
+                (dialogInterface, which) -> mUsbHighTempDialog = null);
+        d.setNegativeButton((R.string.high_temp_alarm_help_care_steps),
+                (dialogInterface, which) -> {
+                    final String contextString = mContext.getString(
+                            R.string.high_temp_alarm_help_url);
+                    final Intent helpIntent = new Intent();
+                    helpIntent.setClassName("com.android.settings",
+                            "com.android.settings.HelpTrampoline");
+                    helpIntent.putExtra(Intent.EXTRA_TEXT, contextString);
+                    Dependency.get(ActivityStarter.class).startActivity(helpIntent,
+                            true /* dismissShade */, resultCode -> {
+                                mUsbHighTempDialog = null;
+                            });
+                });
+        d.setOnDismissListener(dialogInterface -> {
+            mUsbHighTempDialog = null;
+            Events.writeEvent(mContext, Events.EVENT_DISMISS_USB_OVERHEAT_ALARM,
+                    Events.DISMISS_REASON_USB_OVERHEAD_ALARM_CHANGED,
+                    mKeyguard.isKeyguardLocked());
+        });
+        d.getWindow().addFlags(WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
+                | WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        d.show();
+        mUsbHighTempDialog = d;
+
+        Events.writeEvent(mContext, Events.EVENT_SHOW_USB_OVERHEAT_ALARM,
+                Events.SHOW_REASON_USB_OVERHEAD_ALARM_CHANGED,
+                mKeyguard.isKeyguardLocked());
     }
 
     @Override
