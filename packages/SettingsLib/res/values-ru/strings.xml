@@ -40,8 +40,6 @@
     <string name="connected_via_passpoint" msgid="2826205693803088747">"Подключено к %1$s"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"Доступно через %1$s"</string>
     <string name="wifi_connected_no_internet" msgid="8202906332837777829">"Подключено, без доступа к Интернету"</string>
-    <string name="wifi_status_no_internet" msgid="5784710974669608361">"Нет подключения к Интернету"</string>
-    <string name="wifi_status_sign_in_required" msgid="123517180404752756">"Требуется выполнить вход."</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"К точке доступа подключено слишком много устройств"</string>
     <string name="connected_via_carrier" msgid="7583780074526041912">"Подключено к %1$s"</string>
     <string name="available_via_carrier" msgid="1469036129740799053">"Доступно через %1$s"</string>
@@ -56,7 +54,7 @@
     <string name="bluetooth_disconnecting" msgid="8913264760027764974">"Отключение..."</string>
     <string name="bluetooth_connecting" msgid="8555009514614320497">"Подключение..."</string>
     <string name="bluetooth_connected" msgid="5427152882755735944">"Подключено<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_pairing" msgid="1426882272690346242">"Устанавливается соединение..."</string>
+    <string name="bluetooth_pairing" msgid="1426882272690346242">"Сопряжение..."</string>
     <string name="bluetooth_connected_no_headset" msgid="616068069034994802">"Подключено (кроме звонков)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp" msgid="3736431800395923868">"Подключено (кроме аудио)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_map" msgid="3200033913678466453">"Подключено (кроме сообщений)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
@@ -65,9 +63,6 @@
     <string name="bluetooth_connected_no_headset_battery_level" msgid="1610296229139400266">"Подключено (кроме звонков), уровень заряда батареи: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp_battery_level" msgid="3908466636369853652">"Подключено (кроме аудио), уровень заряда батареи: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="1163440823807659316">"Подключено (кроме звонков и аудио), уровень заряда батареи: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
-    <string name="bluetooth_active_battery_level" msgid="3149689299296462009">"Активно. Уровень заряда: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>."</string>
-    <string name="bluetooth_battery_level" msgid="1447164613319663655">"Уровень заряда: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_active_no_battery_level" msgid="8380223546730241956">"Активно"</string>
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"Профиль A2DP"</string>
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"Звонки"</string>
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"Профиль OPP"</string>
@@ -102,11 +97,11 @@
     <string name="bluetooth_pairing_accept" msgid="6163520056536604875">"Добавить"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="6061699265220789149">"ДОБАВИТЬ"</string>
     <string name="bluetooth_pairing_decline" msgid="4185420413578948140">"Отмена"</string>
-    <string name="bluetooth_pairing_will_share_phonebook" msgid="4982239145676394429">"Установление соединения обеспечивает доступ к вашим контактам и журналу звонков при подключении."</string>
-    <string name="bluetooth_pairing_error_message" msgid="3748157733635947087">"Не удалось подключиться к устройству \"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>\"."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="8337234855188925274">"Не удалось подключиться к устройству \"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>\", так как введен неверный PIN-код или пароль."</string>
+    <string name="bluetooth_pairing_will_share_phonebook" msgid="4982239145676394429">"Сопряжение обеспечивает доступ к вашим контактам и журналу звонков при подключении."</string>
+    <string name="bluetooth_pairing_error_message" msgid="3748157733635947087">"Не удалось установить сопряжение с устройством \"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>\"."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="8337234855188925274">"Не удалось установить сопряжение с устройством \"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>\", так как введен неверный PIN-код или пароль."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="7870998403045801381">"Не удается установить соединение с устройством \"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>\"."</string>
-    <string name="bluetooth_pairing_rejected_error_message" msgid="1648157108520832454">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> не разрешает подключение."</string>
+    <string name="bluetooth_pairing_rejected_error_message" msgid="1648157108520832454">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> не разрешает сопряжение."</string>
     <string name="bluetooth_talkback_computer" msgid="4875089335641234463">"Компьютер"</string>
     <string name="bluetooth_talkback_headset" msgid="5140152177885220949">"Гарнитура"</string>
     <string name="bluetooth_talkback_phone" msgid="4260255181240622896">"Телефон"</string>
@@ -114,10 +109,6 @@
     <string name="bluetooth_talkback_headphone" msgid="26580326066627664">"Наушники"</string>
     <string name="bluetooth_talkback_input_peripheral" msgid="5165842622743212268">"Периферийное устройство ввода"</string>
     <string name="bluetooth_talkback_bluetooth" msgid="5615463912185280812">"Bluetooth"</string>
-    <string name="bluetooth_hearingaid_left_pairing_message" msgid="7378813500862148102">"Подключаем левый слуховой аппарат…"</string>
-    <string name="bluetooth_hearingaid_right_pairing_message" msgid="1550373802309160891">"Подключаем правый слуховой аппарат…"</string>
-    <string name="bluetooth_hearingaid_left_battery_level" msgid="8797811465352097562">"Левый слуховой аппарат: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> заряда"</string>
-    <string name="bluetooth_hearingaid_right_battery_level" msgid="7309476148173459677">"Правый слуховой аппарат: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> заряда"</string>
     <string name="accessibility_wifi_off" msgid="1166761729660614716">"Wi-Fi выключен"</string>
     <string name="accessibility_no_wifi" msgid="8834610636137374508">"Wi-Fi отключен"</string>
     <string name="accessibility_wifi_one_bar" msgid="4869376278894301820">"Wi-Fi: одно деление"</string>
@@ -193,11 +184,11 @@
     <string name="enable_adb_summary" msgid="4881186971746056635">"Включить режим отладки при подключении к компьютеру по USB"</string>
     <string name="clear_adb_keys" msgid="4038889221503122743">"Отозвать доступ для USB-отладки"</string>
     <string name="bugreport_in_power" msgid="7923901846375587241">"Отчет об ошибке"</string>
-    <string name="bugreport_in_power_summary" msgid="1778455732762984579">"Показывать в меню кнопки питания пункт для отправки отчета об ошибке"</string>
+    <string name="bugreport_in_power_summary" msgid="1778455732762984579">"Показывать в меню кнопку для отправки отчета об ошибке"</string>
     <string name="keep_screen_on" msgid="1146389631208760344">"Не выключать экран"</string>
     <string name="keep_screen_on_summary" msgid="2173114350754293009">"Во время зарядки экран будет всегда включен"</string>
     <string name="bt_hci_snoop_log" msgid="3340699311158865670">"Включить журнал HCI Bluetooth"</string>
-    <string name="bt_hci_snoop_log_summary" msgid="366083475849911315">"Сохранять все пакеты HCI Bluetooth в файле (перезапустите Bluetooth после изменения этой настройки)"</string>
+    <string name="bt_hci_snoop_log_summary" msgid="730247028210113851">"Сохранять все пакеты HCI Bluetooth в файле"</string>
     <string name="oem_unlock_enable" msgid="6040763321967327691">"Заводская разблокировка"</string>
     <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"Разрешить разблокировку загрузчика ОС"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="4802157344812385674">"Разрешить заводскую разблокировку?"</string>
@@ -216,28 +207,26 @@
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Версия Bluetooth AVRCP"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Выберите версию Bluetooth AVRCP"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Аудиокодек для передачи через Bluetooth"</string>
-    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="8436224899475822557">"Запустить аудиокодек для Bluetooth\nВыбор"</string>
+    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="4558347981670553665">"Аудиокодек для Bluetooth"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"Частота дискретизации при передаче через Bluetooth"</string>
-    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="8010380028880963535">"Запустить аудиокодек для Bluetooth\nВыбор: частота дискретизации"</string>
+    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="5628790207448471613">"Аудиокодек для Bluetooth:\nчастота дискретизации"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"Глубина кодирования звука при передаче через Bluetooth"</string>
-    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="8063859754619484760">"Запустить аудиокодек для Bluetooth\nВыбор: разрядность"</string>
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4546131401358681321">"Аудиокодек для Bluetooth:\nразрядность"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"Режим аудиоканала Bluetooth"</string>
-    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="7234956835280563341">"Запустить аудиокодек для Bluetooth\nВыбор: режим канала"</string>
+    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="9133545781346216071">"Аудиокодек для Bluetooth:\nрежим канала"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"Аудиокодек LDAC для Bluetooth: качество воспроизведения"</string>
-    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="6893955536658137179">"Запустить аудиокодек LDAC для Bluetooth\nВыбор: качество воспроизведения"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"Аудиокодек LDAC для Bluetooth:\nкачество воспроизведения"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Потоковая передача: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"Персональный DNS-сервер"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"Выберите режим персонального DNS-сервера"</string>
-    <string name="private_dns_mode_off" msgid="8236575187318721684">"Отключено"</string>
-    <string name="private_dns_mode_opportunistic" msgid="8314986739896927399">"Автоматический режим"</string>
+    <string name="private_dns_mode_off" msgid="8236575187318721684">"ВЫКЛ"</string>
+    <!-- no translation found for private_dns_mode_opportunistic (8314986739896927399) -->
+    <skip />
     <string name="private_dns_mode_provider" msgid="8354935160639360804">"Имя хоста поставщика персонального DNS-сервера"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"Введите имя хоста поставщика услуг DNS"</string>
-    <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"Ошибка подключения"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Показывать параметры сертификации беспроводных мониторов"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"При выборе Wi‑Fi указывать в журнале RSSI для каждого SSID"</string>
     <string name="wifi_connected_mac_randomization_summary" msgid="1743059848752201485">"Генерировать случайные MAC-адреса при подключении к сетям Wi-Fi"</string>
-    <string name="wifi_metered_label" msgid="4514924227256839725">"Сеть с тарификацией трафика"</string>
-    <string name="wifi_unmetered_label" msgid="6124098729457992931">"Сеть без тарификации трафика"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Размер буфера журнала"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Выберите размер буфера журнала"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"Очистить постоянный диск журнала?"</string>
@@ -249,7 +238,7 @@
     <string name="allow_mock_location" msgid="2787962564578664888">"Фиктивные местоположения"</string>
     <string name="allow_mock_location_summary" msgid="317615105156345626">"Разрешить использование фиктивных местоположений"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"Включить проверку атрибутов"</string>
-    <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Не отключать передачу данных по мобильной сети даже при активном Wi-Fi-подключении (для быстрого переключения между сетями)"</string>
+    <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Не отключать передачу данных по мобильной сети даже при активном Wi-Fi-подключении (для быстрого переключения между сетями)."</string>
     <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"Использовать аппаратное ускорение в режиме модема (если доступно)"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"Разрешить отладку по USB?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"Отладка по USB – это режим, который позволяет использовать ваше устройство как внешний накопитель: перемещать файлы (с компьютера и на компьютер), напрямую устанавливать приложения, а также просматривать системные журналы."</string>
@@ -259,7 +248,7 @@
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Проверять приложения при установке"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Выполнять проверку безопасности приложений при установке через ADB/ADT"</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"Показывать Bluetooth-устройства без названий (только с MAC-адресами)"</string>
-    <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Отключить абсолютный уровень громкости Bluetooth при возникновении проблем на удаленных устройствах, например при слишком громком звучании или невозможности контролировать настройку"</string>
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Отключить абсолютный уровень громкости Bluetooth при возникновении проблем на удаленных устройствах, например при слишком громком звучании или невозможности контролировать настройку."</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Локальный терминальный доступ"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Разрешить терминальный доступ к локальной оболочке"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"Проверка HDCP"</string>
@@ -270,7 +259,7 @@
     <string name="debug_app_set" msgid="2063077997870280017">"Отладка приложения \"<xliff:g id="APP_NAME">%1$s</xliff:g>\""</string>
     <string name="select_application" msgid="5156029161289091703">"Выбор приложения"</string>
     <string name="no_application" msgid="2813387563129153880">"Нет"</string>
-    <string name="wait_for_debugger" msgid="1202370874528893091">"Ждать подключения отладчика"</string>
+    <string name="wait_for_debugger" msgid="1202370874528893091">"Подождите, пока подключится отладчик"</string>
     <string name="wait_for_debugger_summary" msgid="1766918303462746804">"Приложение ожидает подключения отладчика"</string>
     <string name="debug_input_category" msgid="1811069939601180246">"Ввод"</string>
     <string name="debug_drawing_category" msgid="6755716469267367852">"Отрисовка"</string>
@@ -314,10 +303,10 @@
     <string name="overlay_display_devices_title" msgid="5364176287998398539">"Эмуляция доп. экранов"</string>
     <string name="debug_applications_category" msgid="4206913653849771549">"Приложения"</string>
     <string name="immediately_destroy_activities" msgid="1579659389568133959">"Вытеснение фоновых Activity"</string>
-    <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"Удалять все Activity после выхода пользователя"</string>
+    <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"Удалять сводку действий после их завершения"</string>
     <string name="app_process_limit_title" msgid="4280600650253107163">"Лимит фоновых процессов"</string>
-    <string name="show_all_anrs" msgid="4924885492787069007">"ANR в фоновом режиме"</string>
-    <string name="show_all_anrs_summary" msgid="6636514318275139826">"Уведомлять о том, что приложение, запущенное в фоновом режиме, не отвечает"</string>
+    <string name="show_all_anrs" msgid="28462979638729082">"Все ANR"</string>
+    <string name="show_all_anrs_summary" msgid="641908614413544127">"Уведомлять о том, что приложение не отвечает"</string>
     <string name="show_notification_channel_warnings" msgid="1399948193466922683">"Показывать предупреждения канала передачи уведомлений"</string>
     <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"Показывать предупреждение о новых уведомлениях приложения вне допустимого канала"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"Разрешить сохранение на внешние накопители"</string>
@@ -367,26 +356,40 @@
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"Коррекция цвета"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"Это экспериментальная функция, она может снизить производительность устройства."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"Новая настройка: <xliff:g id="TITLE">%1$s</xliff:g>"</string>
-    <string name="power_remaining_settings_home_page" msgid="4845022416859002011">"Уровень заряда – <xliff:g id="PERCENTAGE">%1$s</xliff:g>. <xliff:g id="TIME_STRING">%2$s</xliff:g>."</string>
-    <string name="power_remaining_duration_only" msgid="6123167166221295462">"Заряда хватит примерно на <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
-    <string name="power_discharging_duration" msgid="8848256785736335185">"Заряда (<xliff:g id="LEVEL">%2$s</xliff:g>) хватит примерно на <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
-    <string name="power_remaining_duration_only_enhanced" msgid="4189311599812296592">"Заряда хватит примерно на <xliff:g id="TIME_REMAINING">%1$s</xliff:g> при текущем уровне расхода"</string>
-    <string name="power_discharging_duration_enhanced" msgid="1992003260664804080">"Заряда (<xliff:g id="LEVEL">%2$s</xliff:g>) хватит примерно на <xliff:g id="TIME_REMAINING">%1$s</xliff:g> при текущем уровне расхода"</string>
-    <string name="power_remaining_duration_only_short" msgid="3463575350656389957">"Заряда хватит на <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
-    <string name="power_discharge_by_enhanced" msgid="2095821536747992464">"При текущем уровне использования (<xliff:g id="LEVEL">%2$s</xliff:g>) заряда хватит примерно до <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_discharge_by_only_enhanced" msgid="2175151772952365149">"При текущем уровне использования заряда хватит примерно до <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_discharge_by" msgid="6453537733650125582">"Заряда (<xliff:g id="LEVEL">%2$s</xliff:g>) хватит примерно до <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_discharge_by_only" msgid="107616694963545745">"Заряда хватит примерно до <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_remaining_duration_only" msgid="845431008899029842">"Осталось примерно <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <!-- no translation found for power_discharging_duration (6655472132189365839) -->
+    <skip />
+    <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"Осталось примерно <xliff:g id="TIME">%1$s</xliff:g> при текущем уровне использования"</string>
+    <!-- no translation found for power_discharging_duration_enhanced (5726302316642148671) -->
+    <skip />
+    <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"Осталось: <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <!-- no translation found for power_discharge_by_enhanced (8788299408879961465) -->
+    <skip />
+    <!-- no translation found for power_discharge_by_only_enhanced (7692297898877104416) -->
+    <skip />
+    <!-- no translation found for power_discharge_by (6427074755635635749) -->
+    <skip />
+    <!-- no translation found for power_discharge_by_only (5888058889261108064) -->
+    <skip />
     <string name="power_remaining_less_than_duration_only" msgid="5996752448813295329">"Осталось менее <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
-    <string name="power_remaining_less_than_duration" msgid="5751885147712659423">"Уровень заряда батареи: <xliff:g id="LEVEL">%2$s</xliff:g> (хватит менее чем на <xliff:g id="THRESHOLD">%1$s</xliff:g>)"</string>
-    <string name="power_remaining_more_than_subtext" msgid="3176771815132876675">"Уровень заряда батареи: <xliff:g id="LEVEL">%2$s</xliff:g> (хватит более чем на <xliff:g id="TIME_REMAINING">%1$s</xliff:g>)"</string>
-    <string name="power_remaining_only_more_than_subtext" msgid="8931654680569617380">"Хватит более чем на <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="1181059207608751924">"Телефон скоро завершит работу"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="2606370266981054691">"Планшет скоро завершит работу"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="2918084807716859985">"Устройство скоро завершит работу"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="default" msgid="3090926004324573908">"Уровень заряда батареи: <xliff:g id="LEVEL">%1$s</xliff:g>. Телефон скоро завершит работу."</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7466484148515796216">"Уровень заряда батареи: <xliff:g id="LEVEL">%1$s</xliff:g>. Планшет скоро завершит работу."</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="603933521600231649">"Уровень заряда батареи: <xliff:g id="LEVEL">%1$s</xliff:g>. Устройство скоро завершит работу."</string>
+    <!-- no translation found for power_remaining_less_than_duration (5751885147712659423) -->
+    <skip />
+    <!-- no translation found for power_remaining_more_than_subtext (3176771815132876675) -->
+    <skip />
+    <!-- no translation found for power_remaining_only_more_than_subtext (8931654680569617380) -->
+    <skip />
+    <!-- no translation found for power_remaining_duration_only_shutdown_imminent (1181059207608751924) -->
+    <skip />
+    <!-- no translation found for power_remaining_duration_only_shutdown_imminent (2606370266981054691) -->
+    <skip />
+    <!-- no translation found for power_remaining_duration_only_shutdown_imminent (2918084807716859985) -->
+    <skip />
+    <!-- no translation found for power_remaining_duration_shutdown_imminent (3090926004324573908) -->
+    <skip />
+    <!-- no translation found for power_remaining_duration_shutdown_imminent (7466484148515796216) -->
+    <skip />
+    <!-- no translation found for power_remaining_duration_shutdown_imminent (603933521600231649) -->
+    <skip />
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"Ещё <xliff:g id="TIME">%1$s</xliff:g> до полной зарядки"</string>
     <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> до полной зарядки"</string>
@@ -431,7 +434,6 @@
     <string name="ims_reg_status_registered" msgid="933003316932739188">"Зарегистрирован"</string>
     <string name="ims_reg_status_not_registered" msgid="6529783773485229486">"Не зарегистрирован"</string>
     <string name="status_unavailable" msgid="7862009036663793314">"Недоступно"</string>
-    <string name="wifi_status_mac_randomized" msgid="5589328382467438245">"Случайный MAC-адрес"</string>
     <plurals name="wifi_tether_connected_summary" formatted="false" msgid="3871603864314407780">
       <item quantity="one">Подключено %1$d устройство</item>
       <item quantity="few">Подключено %1$d устройства</item>
@@ -440,9 +442,8 @@
     </plurals>
     <string name="accessibility_manual_zen_more_time" msgid="1636187409258564291">"Увеличить продолжительность"</string>
     <string name="accessibility_manual_zen_less_time" msgid="6590887204171164991">"Уменьшить продолжительность"</string>
-    <string name="cancel" msgid="6859253417269739139">"Отмена"</string>
-    <string name="okay" msgid="1997666393121016642">"ОК"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="8287824809739581837">"Включить"</string>
+    <string name="cancel" msgid="6859253417269739139">"Отмена"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2297134204747331078">"Включите режим \"Не беспокоить\""</string>
     <string name="zen_mode_settings_summary_off" msgid="6119891445378113334">"Никогда"</string>
     <string name="zen_interruption_level_priority" msgid="2078370238113347720">"Только важные"</string>
@@ -451,7 +452,4 @@
     <string name="zen_alarm_warning" msgid="6236690803924413088">"Следующий будильник: <xliff:g id="WHEN">%1$s</xliff:g>. Звук отключен."</string>
     <string name="alarm_template" msgid="4996153414057676512">"<xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="3779172822607461675">"<xliff:g id="WHEN">%1$s</xliff:g>"</string>
-    <string name="zen_mode_duration_settings_title" msgid="229547412251222757">"Длительность"</string>
-    <string name="zen_mode_duration_always_prompt_title" msgid="6478923750878945501">"Всегда спрашивать"</string>
-    <string name="time_unit_just_now" msgid="6363336622778342422">"Только что"</string>
 </resources>

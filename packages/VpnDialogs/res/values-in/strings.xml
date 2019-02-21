@@ -17,7 +17,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="prompt" msgid="3183836924226407828">"Permintaan sambungan"</string>
-    <string name="warning" msgid="809658604548412033">"<xliff:g id="APP">%s</xliff:g> ingin menyiapkan sambungan VPN yang memungkinkannya memantau traffic jaringan. Terima hanya jika Anda memercayai sumber. &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; muncul di bagian atas layar Anda saat VPN aktif."</string>
+    <string name="warning" msgid="809658604548412033">"<xliff:g id="APP">%s</xliff:g> ingin menyiapkan sambungan VPN yang memungkinkannya memantau lalu-lintas jaringan. Terima hanya jika Anda memercayai sumber. &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; muncul di bagian atas layar Anda saat VPN aktif."</string>
     <string name="legacy_title" msgid="192936250066580964">"VPN tersambung"</string>
     <string name="session" msgid="6470628549473641030">"Sesi:"</string>
     <string name="duration" msgid="3584782459928719435">"Durasi:"</string>

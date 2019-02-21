@@ -59,7 +59,7 @@
     <item msgid="45075631231212732">"Kila wakati tumia ukakuaji wa HDCP"</item>
   </string-array>
   <string-array name="bluetooth_avrcp_versions">
-    <item msgid="5347678900838034763">"AVRCP 1.4 (Chaguomsingi)"</item>
+    <item msgid="5347678900838034763">"AVRCP 1.4 (Chaguo-msingi)"</item>
     <item msgid="2809759619990248160">"AVRCP 1.3"</item>
     <item msgid="6199178154704729352">"AVRCP 1.5"</item>
     <item msgid="5172170854953034852">"AVRCP 1.6"</item>
@@ -71,7 +71,7 @@
     <item msgid="3422726142222090896">"avrcp16"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_titles">
-    <item msgid="7065842274271279580">"Tumia Uteuzi wa Mfumo (Chaguomsingi)"</item>
+    <item msgid="7065842274271279580">"Tumia Uteuzi wa Mfumo (Chaguo-msingi)"</item>
     <item msgid="7539690996561263909">"SBC"</item>
     <item msgid="686685526567131661">"AAC"</item>
     <item msgid="5254942598247222737">"Sauti ya <xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX">aptX™</xliff:g>"</item>
@@ -81,7 +81,7 @@
     <item msgid="3304843301758635896">"Zima Kodeki Zisizo za Lazima"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_summaries">
-    <item msgid="5062108632402595000">"Tumia Uteuzi wa Mfumo (Chaguomsingi)"</item>
+    <item msgid="5062108632402595000">"Tumia Uteuzi wa Mfumo (Chaguo-msingi)"</item>
     <item msgid="6898329690939802290">"SBC"</item>
     <item msgid="6839647709301342559">"AAC"</item>
     <item msgid="7848030269621918608">"Sauti ya <xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX">aptX™</xliff:g>"</item>
@@ -91,38 +91,38 @@
     <item msgid="741805482892725657">"Zima Kodeki Zisizo za Lazima"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_sample_rate_titles">
-    <item msgid="3093023430402746802">"Tumia Uteuzi wa Mfumo (Chaguomsingi)"</item>
+    <item msgid="3093023430402746802">"Tumia Uteuzi wa Mfumo (Chaguo-msingi)"</item>
     <item msgid="8895532488906185219">"kHz 44.1"</item>
     <item msgid="2909915718994807056">"kHz 48.0"</item>
     <item msgid="3347287377354164611">"kHz 88.2"</item>
     <item msgid="1234212100239985373">"kHz 96.0"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_sample_rate_summaries">
-    <item msgid="3214516120190965356">"Tumia Uteuzi wa Mfumo (Chaguomsingi)"</item>
+    <item msgid="3214516120190965356">"Tumia Uteuzi wa Mfumo (Chaguo-msingi)"</item>
     <item msgid="4482862757811638365">"kHz 44.1"</item>
     <item msgid="354495328188724404">"kHz 48.0"</item>
     <item msgid="7329816882213695083">"kHz 88.2"</item>
     <item msgid="6967397666254430476">"kHz 96.0"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_bits_per_sample_titles">
-    <item msgid="2684127272582591429">"Tumia Uteuzi wa Mfumo (Chaguomsingi)"</item>
+    <item msgid="2684127272582591429">"Tumia Uteuzi wa Mfumo (Chaguo-msingi)"</item>
     <item msgid="5618929009984956469">"Biti 16 kwa kila sampuli"</item>
     <item msgid="3412640499234627248">"Biti 24 kwa kila sampuli"</item>
     <item msgid="121583001492929387">"Biti 32 kwa kila sampuli"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_bits_per_sample_summaries">
-    <item msgid="1081159789834584363">"Tumia Uteuzi wa Mfumo (Chaguomsingi)"</item>
+    <item msgid="1081159789834584363">"Tumia Uteuzi wa Mfumo (Chaguo-msingi)"</item>
     <item msgid="4726688794884191540">"Biti 16 kwa kila sampuli"</item>
     <item msgid="305344756485516870">"Biti 24 kwa kila sampuli"</item>
     <item msgid="244568657919675099">"Biti 32 kwa kila sampuli"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_channel_mode_titles">
-    <item msgid="5226878858503393706">"Tumia Uteuzi wa Mfumo (Chaguomsingi)"</item>
+    <item msgid="5226878858503393706">"Tumia Uteuzi wa Mfumo (Chaguo-msingi)"</item>
     <item msgid="4106832974775067314">"Mono"</item>
     <item msgid="5571632958424639155">"Stereo"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_channel_mode_summaries">
-    <item msgid="4118561796005528173">"Tumia Uteuzi wa Mfumo (Chaguomsingi)"</item>
+    <item msgid="4118561796005528173">"Tumia Uteuzi wa Mfumo (Chaguo-msingi)"</item>
     <item msgid="8900559293912978337">"Mono"</item>
     <item msgid="8883739882299884241">"Stereo"</item>
   </string-array>
@@ -137,12 +137,6 @@
     <item msgid="4327143584633311908">"Ubora wa Muunganisho na Sauti Umesawazishwa"</item>
     <item msgid="4681409244565426925">"Imeimarishwa kwa ajili ya Ubora wa Muunganisho"</item>
     <item msgid="364670732877872677">"Kazi Bora Zaidi (Kasi Maalum ya Biti)"</item>
-  </string-array>
-  <string-array name="bluetooth_audio_active_device_summaries">
-    <item msgid="4862957058729193940"></item>
-    <item msgid="6481691720774549651">", inatumika"</item>
-    <item msgid="8962366465966010158">", inatumika (maudhui)"</item>
-    <item msgid="4046665544396189228">", inatumika (simu)"</item>
   </string-array>
   <string-array name="select_logd_size_titles">
     <item msgid="8665206199209698501">"Imezimwa"</item>
@@ -179,21 +173,21 @@
     <item msgid="8489661142527693381">"akiba ya kumbukumbu ya keneli pekee"</item>
   </string-array>
   <string-array name="window_animation_scale_entries">
-    <item msgid="8134156599370824081">"Uhuishaji umezimwa"</item>
-    <item msgid="6624864048416710414">"Skeli .5x ya uhuishaji"</item>
-    <item msgid="2219332261255416635">"Skeli 1x ya uhuishaji"</item>
-    <item msgid="3544428804137048509">"Skeli 1.5x ya uhuishaji"</item>
-    <item msgid="3110710404225974514">"Skeli 2x ya uhuishaji"</item>
-    <item msgid="4402738611528318731">"Skeli 5x ya uhuishaji"</item>
-    <item msgid="6189539267968330656">"Skeli 10x ya uhuishaji"</item>
+    <item msgid="8134156599370824081">"Haiwani imezimwa"</item>
+    <item msgid="6624864048416710414">"Skeli .5x ya haiwani"</item>
+    <item msgid="2219332261255416635">"Skeli 1x ya haiwani"</item>
+    <item msgid="3544428804137048509">"Skeli 1.5x ya haiwani"</item>
+    <item msgid="3110710404225974514">"Skeli 2x ya haiwani"</item>
+    <item msgid="4402738611528318731">"Skeli 5x ya haiwani"</item>
+    <item msgid="6189539267968330656">"Skeli 10x ya haiwani"</item>
   </string-array>
   <string-array name="transition_animation_scale_entries">
-    <item msgid="8464255836173039442">"Uhuishaji umezimwa"</item>
-    <item msgid="3375781541913316411">"Skeli .5x ya uhuishaji"</item>
-    <item msgid="1991041427801869945">"Skeli 1x ya uhuishaji"</item>
-    <item msgid="4012689927622382874">"Skeli 1.5x ya uhuishaji"</item>
-    <item msgid="3289156759925947169">"Skeli 2x ya uhuishaji"</item>
-    <item msgid="7705857441213621835">"Skeli 5x ya uhuishaji"</item>
+    <item msgid="8464255836173039442">"Haiwani imezimwa"</item>
+    <item msgid="3375781541913316411">"Skeli .5x ya haiwani"</item>
+    <item msgid="1991041427801869945">"Skeli 1x ya haiwani"</item>
+    <item msgid="4012689927622382874">"Skeli 1.5x ya haiwani"</item>
+    <item msgid="3289156759925947169">"Skeli 2x ya haiwani"</item>
+    <item msgid="7705857441213621835">"Skeli 5x ya haiwani"</item>
     <item msgid="6660750935954853365">"Skeli ya 10x ya uhuishaji"</item>
   </string-array>
   <string-array name="animator_duration_scale_entries">
@@ -242,7 +236,7 @@
   </string-array>
   <string-array name="app_process_limit_entries">
     <item msgid="3401625457385943795">"Kiwango cha wastani"</item>
-    <item msgid="4071574792028999443">"Hakuna michakato ya mandhari nyuma"</item>
+    <item msgid="4071574792028999443">"Hakuna mchakato wa mandari nyuma"</item>
     <item msgid="4810006996171705398">"Angalau mchakato 1"</item>
     <item msgid="8586370216857360863">"Angalau michakato 2"</item>
     <item msgid="836593137872605381">"Angalau michakato 3"</item>

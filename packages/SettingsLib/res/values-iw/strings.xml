@@ -40,8 +40,6 @@
     <string name="connected_via_passpoint" msgid="2826205693803088747">"‏מחובר דרך %1$s"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"‏זמינה דרך %1$s"</string>
     <string name="wifi_connected_no_internet" msgid="8202906332837777829">"מחובר. אין אינטרנט"</string>
-    <string name="wifi_status_no_internet" msgid="5784710974669608361">"אין אינטרנט"</string>
-    <string name="wifi_status_sign_in_required" msgid="123517180404752756">"נדרשת כניסה"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"נקודת הגישה מלאה באופן זמני"</string>
     <string name="connected_via_carrier" msgid="7583780074526041912">"‏מחובר לרשת של %1$s"</string>
     <string name="available_via_carrier" msgid="1469036129740799053">"‏זמינה דרך %1$s"</string>
@@ -65,9 +63,6 @@
     <string name="bluetooth_connected_no_headset_battery_level" msgid="1610296229139400266">"מחובר (ללא טלפון), שיעור הסוללה <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp_battery_level" msgid="3908466636369853652">"מחובר (ללא מדיה), שיעור הסוללה <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="1163440823807659316">"מחובר (ללא טלפון או מדיה), שיעור הסוללה <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
-    <string name="bluetooth_active_battery_level" msgid="3149689299296462009">"פעיל, טעינת הסוללה: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_battery_level" msgid="1447164613319663655">"טעינת הסוללה: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_active_no_battery_level" msgid="8380223546730241956">"פעיל"</string>
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"אודיו של מדיה"</string>
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"שיחות טלפון"</string>
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"העברת קבצים"</string>
@@ -114,10 +109,6 @@
     <string name="bluetooth_talkback_headphone" msgid="26580326066627664">"אוזנייה"</string>
     <string name="bluetooth_talkback_input_peripheral" msgid="5165842622743212268">"ציוד קלט היקפי"</string>
     <string name="bluetooth_talkback_bluetooth" msgid="5615463912185280812">"Bluetooth"</string>
-    <string name="bluetooth_hearingaid_left_pairing_message" msgid="7378813500862148102">"מתבצעת התאמה של מכשיר שמיעה שמאלי…"</string>
-    <string name="bluetooth_hearingaid_right_pairing_message" msgid="1550373802309160891">"מתבצעת התאמה של מכשיר שמיעה ימני…"</string>
-    <string name="bluetooth_hearingaid_left_battery_level" msgid="8797811465352097562">"שמאלי - טעינת הסוללה: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_hearingaid_right_battery_level" msgid="7309476148173459677">"ימני - טעינת הסוללה: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="accessibility_wifi_off" msgid="1166761729660614716">"‏Wi-Fi כבוי."</string>
     <string name="accessibility_no_wifi" msgid="8834610636137374508">"‏Wi-Fi מנותק."</string>
     <string name="accessibility_wifi_one_bar" msgid="4869376278894301820">"‏פס אחד של Wi-Fi."</string>
@@ -138,7 +129,7 @@
     <string name="user_guest" msgid="8475274842845401871">"אורח"</string>
     <string name="unknown" msgid="1592123443519355854">"לא ידוע"</string>
     <string name="running_process_item_user_label" msgid="3129887865552025943">"משתמש: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
-    <string name="launch_defaults_some" msgid="313159469856372621">"הוגדרו כמה ברירות מחדל"</string>
+    <string name="launch_defaults_some" msgid="313159469856372621">"הוגדרו כמה ברירת מחדל"</string>
     <string name="launch_defaults_none" msgid="4241129108140034876">"לא הוגדרו ברירות מחדל"</string>
     <string name="tts_settings" msgid="8186971894801348327">"הגדרות טקסט לדיבור"</string>
     <string name="tts_settings_title" msgid="1237820681016639683">"פלט טקסט לדיבור"</string>
@@ -197,7 +188,7 @@
     <string name="keep_screen_on" msgid="1146389631208760344">"השאר פועל"</string>
     <string name="keep_screen_on_summary" msgid="2173114350754293009">"המסך לעולם לא יהיה במצב שינה במהלך טעינה"</string>
     <string name="bt_hci_snoop_log" msgid="3340699311158865670">"‏הפעלת Snoop Log של Bluetooth HCI"</string>
-    <string name="bt_hci_snoop_log_summary" msgid="366083475849911315">"‏איחוד של כל חבילות Bluetooth HCI בקובץ (יש להחליף מצב Bluetooth לאחר שינוי הגדרה זו)"</string>
+    <string name="bt_hci_snoop_log_summary" msgid="730247028210113851">"‏אחד את כל חבילות Bluetooth HCI בקובץ"</string>
     <string name="oem_unlock_enable" msgid="6040763321967327691">"‏ביטול נעילה של OEM"</string>
     <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"אפשר ביטול של נעילת מנהל האתחול"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="4802157344812385674">"‏האם לאפשר ביטול נעילה של OEM (יצרן ציוד מקורי)?"</string>
@@ -216,28 +207,26 @@
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"‏Bluetooth גרסה AVRCP"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"‏בחר Bluetooth גרסה AVRCP"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"‏Codec אודיו ל-Bluetooth"</string>
-    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="8436224899475822557">"‏הפעלת ‏Codec אודיו ל-Bluetooth\nבחירה"</string>
+    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="4558347981670553665">"‏בחירת ‏Codec אודיו ל-Bluetooth"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"‏קצב דגימה של אודיו ל-Bluetooth"</string>
-    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="8010380028880963535">"‏הפעלת ‏Codec אודיו ל-Bluetooth\nבחירה: קצב דגימה"</string>
+    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="5628790207448471613">"‏בחירת Codec אודיו ל-Bluetooth‏:\nקצב דגימה"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"‏מספר סיביות לדגימה באודיו ל-Bluetooth"</string>
-    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="8063859754619484760">"‏הפעלת ‏Codec אודיו ל-Bluetooth\nבחירה: סיביות לדגימה"</string>
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4546131401358681321">"‏בחירת codec אודיו ל-Bluetooth:‏\nסיביות לדגימה"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"‏מצב של ערוץ אודיו ל-Bluetooth"</string>
-    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="7234956835280563341">"‏הפעלת ‏Codec אודיו ל-Bluetooth\nבחירה: מצב ערוץ"</string>
+    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="9133545781346216071">"‏בחירת codec אודיו ל-Bluetooth:‏\nמצב ערוץ"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"‏Codec אודיו LDAC ל-Bluetooth: איכות נגינה"</string>
-    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="6893955536658137179">"‏הפעלת Codec אודיו LDAC ל-Bluetooth\nבחירה: איכות נגינה"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"‏בחירת Codec אודיו LDAC ל-Bluetooth:‏\nאיכות נגינה"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"סטרימינג: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"‏DNS פרטי"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"‏צריך לבחור במצב DNS פרטי"</string>
     <string name="private_dns_mode_off" msgid="8236575187318721684">"מושבת"</string>
-    <string name="private_dns_mode_opportunistic" msgid="8314986739896927399">"באופן אוטומטי"</string>
+    <!-- no translation found for private_dns_mode_opportunistic (8314986739896927399) -->
+    <skip />
     <string name="private_dns_mode_provider" msgid="8354935160639360804">"‏שם מארח של ספק DNS פרטי"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"‏צריך להזין את שם המארח של ספק DNS"</string>
-    <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"לא ניתן היה להתחבר"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"‏הצג אפשרויות עבור אישור של תצוגת WiFi"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"‏העלה את רמת הרישום של Wi‑Fi ביומן, הצג לכל SSID RSSI ב-Wi‑Fi Picker"</string>
     <string name="wifi_connected_mac_randomization_summary" msgid="1743059848752201485">"‏יצירת כתובת MAC אקראית בהתחברות לרשתות Wi-Fi"</string>
-    <string name="wifi_metered_label" msgid="4514924227256839725">"נמדדת"</string>
-    <string name="wifi_unmetered_label" msgid="6124098729457992931">"לא נמדדת"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"גדלי מאגר של יומן רישום"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"בחר גדלים של יוצר יומן לכל מאגר יומן"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"האם למחוק את אחסון המתעד המתמיד?"</string>
@@ -316,10 +305,10 @@
     <string name="immediately_destroy_activities" msgid="1579659389568133959">"ללא שמירת פעילויות"</string>
     <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"השמד כל פעילות ברגע שהמשתמש עוזב אותה"</string>
     <string name="app_process_limit_title" msgid="4280600650253107163">"מגבלה של תהליכים ברקע"</string>
-    <string name="show_all_anrs" msgid="4924885492787069007">"‏הצגת מקרי ANR ברקע"</string>
-    <string name="show_all_anrs_summary" msgid="6636514318275139826">"הצגת תיבת דו-שיח של \'אפליקציה לא מגיבה\' עבור אפליקציות שפועלות ברקע"</string>
-    <string name="show_notification_channel_warnings" msgid="1399948193466922683">"אזהרות לגבי ערוץ התראות"</string>
-    <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"הצגת אזהרה כשאפליקציה שולחת התראה ללא ערוץ חוקי"</string>
+    <string name="show_all_anrs" msgid="28462979638729082">"‏הצג את כל פריטי ה-ANR"</string>
+    <string name="show_all_anrs_summary" msgid="641908614413544127">"הצג תיבת דו-שיח של \'אפליקציה לא מגיבה\' עבור אפליקציות שפועלות ברקע"</string>
+    <string name="show_notification_channel_warnings" msgid="1399948193466922683">"אזהרות לגבי ערוץ הודעות"</string>
+    <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"הצגת אזהרה כשאפליקציה שולחת הודעה ללא ערוץ חוקי"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"אילוץ הרשאת אפליקציות באחסון חיצוני"</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"מאפשר כתיבה של כל אפליקציה באחסון חיצוני, ללא התחשבות בערכי המניפסט"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"אלץ יכולת קביעת גודל של הפעילויות"</string>
@@ -367,26 +356,40 @@
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"תיקון צבע"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"תכונה זו היא ניסיונית ועשויה להשפיע על הביצועים."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"נעקף על ידי <xliff:g id="TITLE">%1$s</xliff:g>"</string>
-    <string name="power_remaining_settings_home_page" msgid="4845022416859002011">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
-    <string name="power_remaining_duration_only" msgid="6123167166221295462">"הזמן הנותר: בערך <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
-    <string name="power_discharging_duration" msgid="8848256785736335185">"הזמן הנותר: בערך <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_only_enhanced" msgid="4189311599812296592">"הזמן הנותר על סמך השימוש שלך: בערך <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
-    <string name="power_discharging_duration_enhanced" msgid="1992003260664804080">"הזמן הנותר על סמך השימוש שלך: בערך <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_only_short" msgid="3463575350656389957">"הזמן הנותר: <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
-    <string name="power_discharge_by_enhanced" msgid="2095821536747992464">"אמורה להחזיק מעמד בערך עד <xliff:g id="TIME">%1$s</xliff:g> על סמך השימוש במכשיר (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_discharge_by_only_enhanced" msgid="2175151772952365149">"אמורה להחזיק מעמד בערך עד <xliff:g id="TIME">%1$s</xliff:g> על סמך השימוש במכשיר"</string>
-    <string name="power_discharge_by" msgid="6453537733650125582">"אמורה להחזיק מעמד בערך עד <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_discharge_by_only" msgid="107616694963545745">"אמורה להחזיק מעמד בערך עד <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_remaining_duration_only" msgid="845431008899029842">"עוד <xliff:g id="TIME">%1$s</xliff:g> בקירוב"</string>
+    <!-- no translation found for power_discharging_duration (6655472132189365839) -->
+    <skip />
+    <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"על סמך השימוש במכשיר, הסוללה תתרוקן בעוד <xliff:g id="TIME">%1$s</xliff:g>, בקירוב"</string>
+    <!-- no translation found for power_discharging_duration_enhanced (5726302316642148671) -->
+    <skip />
+    <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"נותרו <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <!-- no translation found for power_discharge_by_enhanced (8788299408879961465) -->
+    <skip />
+    <!-- no translation found for power_discharge_by_only_enhanced (7692297898877104416) -->
+    <skip />
+    <!-- no translation found for power_discharge_by (6427074755635635749) -->
+    <skip />
+    <!-- no translation found for power_discharge_by_only (5888058889261108064) -->
+    <skip />
     <string name="power_remaining_less_than_duration_only" msgid="5996752448813295329">"נותרו פחות מ-<xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
-    <string name="power_remaining_less_than_duration" msgid="5751885147712659423">"נותרו פחות מ-<xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_more_than_subtext" msgid="3176771815132876675">"נותרו יותר מ-<xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_only_more_than_subtext" msgid="8931654680569617380">"הזמן שנותר: יותר מ-<xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="1181059207608751924">"ייתכן שהטלפון ייכבה בקרוב"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="2606370266981054691">"ייתכן שהטאבלט ייכבה בקרוב"</string>
-    <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="2918084807716859985">"ייתכן שהמכשיר ייכבה בקרוב"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="default" msgid="3090926004324573908">"ייתכן שהטלפון ייכבה בקרוב (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7466484148515796216">"ייתכן שהטאבלט ייכבה בקרוב (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="603933521600231649">"ייתכן שהמכשיר ייכבה בקרוב (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <!-- no translation found for power_remaining_less_than_duration (5751885147712659423) -->
+    <skip />
+    <!-- no translation found for power_remaining_more_than_subtext (3176771815132876675) -->
+    <skip />
+    <!-- no translation found for power_remaining_only_more_than_subtext (8931654680569617380) -->
+    <skip />
+    <!-- no translation found for power_remaining_duration_only_shutdown_imminent (1181059207608751924) -->
+    <skip />
+    <!-- no translation found for power_remaining_duration_only_shutdown_imminent (2606370266981054691) -->
+    <skip />
+    <!-- no translation found for power_remaining_duration_only_shutdown_imminent (2918084807716859985) -->
+    <skip />
+    <!-- no translation found for power_remaining_duration_shutdown_imminent (3090926004324573908) -->
+    <skip />
+    <!-- no translation found for power_remaining_duration_shutdown_imminent (7466484148515796216) -->
+    <skip />
+    <!-- no translation found for power_remaining_duration_shutdown_imminent (603933521600231649) -->
+    <skip />
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g>‏ - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"<xliff:g id="TIME">%1$s</xliff:g> עד לטעינה מלאה"</string>
     <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> עד לטעינה מלאה"</string>
@@ -431,7 +434,6 @@
     <string name="ims_reg_status_registered" msgid="933003316932739188">"רשום"</string>
     <string name="ims_reg_status_not_registered" msgid="6529783773485229486">"לא רשום"</string>
     <string name="status_unavailable" msgid="7862009036663793314">"לא זמין"</string>
-    <string name="wifi_status_mac_randomized" msgid="5589328382467438245">"‏MAC נמצא במצב אקראי"</string>
     <plurals name="wifi_tether_connected_summary" formatted="false" msgid="3871603864314407780">
       <item quantity="two">‏%1$d מכשירים מחוברים</item>
       <item quantity="many">‏%1$d מכשירים מחוברים</item>
@@ -440,9 +442,8 @@
     </plurals>
     <string name="accessibility_manual_zen_more_time" msgid="1636187409258564291">"יותר זמן."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6590887204171164991">"פחות זמן."</string>
-    <string name="cancel" msgid="6859253417269739139">"ביטול"</string>
-    <string name="okay" msgid="1997666393121016642">"אישור"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="8287824809739581837">"הפעלה"</string>
+    <string name="cancel" msgid="6859253417269739139">"ביטול"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2297134204747331078">"הפעלת מצב נא לא להפריע"</string>
     <string name="zen_mode_settings_summary_off" msgid="6119891445378113334">"אף פעם"</string>
     <string name="zen_interruption_level_priority" msgid="2078370238113347720">"עדיפות בלבד"</string>
@@ -451,7 +452,4 @@
     <string name="zen_alarm_warning" msgid="6236690803924413088">"לא תושמע ההתראה הבאה <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template" msgid="4996153414057676512">"בשעה <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="3779172822607461675">"ב-<xliff:g id="WHEN">%1$s</xliff:g>"</string>
-    <string name="zen_mode_duration_settings_title" msgid="229547412251222757">"משך"</string>
-    <string name="zen_mode_duration_always_prompt_title" msgid="6478923750878945501">"שאל בכל פעם"</string>
-    <string name="time_unit_just_now" msgid="6363336622778342422">"הרגע"</string>
 </resources>

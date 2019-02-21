@@ -17,7 +17,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="prompt" msgid="3183836924226407828">"网络连接请求"</string>
-    <string name="warning" msgid="809658604548412033">"“<xliff:g id="APP">%s</xliff:g>”想要设置一个 VPN 连接，以便监控网络流量。除非您信任该来源，否则请勿接受此请求。&lt;br /&gt; &lt;br /&gt;启用 VPN 后，屏幕顶部会出现一个 &lt;img src=vpn_icon /&gt; 图标。"</string>
+    <string name="warning" msgid="809658604548412033">"<xliff:g id="APP">%s</xliff:g>想要设置一个 VPN 连接，以允许其监控网络流量。除非您信任该来源，否则请勿接受此请求。启用 VPN 时，您的屏幕顶部会显示 &lt;img src=vpn_icon /&gt; 图标。"</string>
     <string name="legacy_title" msgid="192936250066580964">"已连接VPN"</string>
     <string name="session" msgid="6470628549473641030">"会话："</string>
     <string name="duration" msgid="3584782459928719435">"时长："</string>

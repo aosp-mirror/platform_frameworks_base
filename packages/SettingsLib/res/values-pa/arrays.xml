@@ -55,7 +55,7 @@
   </string-array>
   <string-array name="hdcp_checking_summaries">
     <item msgid="505558545611516707">"ਕਦੇ ਵੀ HDCP ਜਾਂਚ ਨਾ ਵਰਤੋ"</item>
-    <item msgid="3878793616631049349">"ਸਿਰਫ਼ DRM ਸਮੱਗਰੀ ਲਈ HDCP ਜਾਂਚ ਦੀ ਵਰਤੋਂ ਕਰੋ"</item>
+    <item msgid="3878793616631049349">"ਕੇਵਲ DRM ਸਮੱਗਰੀ ਲਈ HDCP ਜਾਂਚ"</item>
     <item msgid="45075631231212732">"ਹਮੇਸਾਂ HDCP ਜਾਂਚ ਵਰਤੋ"</item>
   </string-array>
   <string-array name="bluetooth_avrcp_versions">
@@ -137,12 +137,6 @@
     <item msgid="4327143584633311908">"ਸੰਤੁਲਿਤ  ਆਡੀਓ  ਅਤੇ ਕਨੈਕਸ਼ਨ ਗੁਣਵੱਤਾ"</item>
     <item msgid="4681409244565426925">"ਕਨੈਕਸ਼ਨ ਗੁਣਵੱਤਾ ਲਈ ਸੁਯੋਗ ਬਣਾਇਆ ਗਿਆ"</item>
     <item msgid="364670732877872677">"ਸਰਵੋਤਮ ਕੋਸ਼ਿਸ਼ (ਅਨੁਕੂਲਨਕਾਰੀ ਬਿਟ ਰੇਟ)"</item>
-  </string-array>
-  <string-array name="bluetooth_audio_active_device_summaries">
-    <item msgid="4862957058729193940"></item>
-    <item msgid="6481691720774549651">", ਕਿਰਿਆਸ਼ੀਲ"</item>
-    <item msgid="8962366465966010158">", ਕਿਰਿਆਸ਼ੀਲ (ਮੀਡੀਆ)"</item>
-    <item msgid="4046665544396189228">", ਕਿਰਿਆਸ਼ੀਲ (ਫ਼ੋਨ)"</item>
   </string-array>
   <string-array name="select_logd_size_titles">
     <item msgid="8665206199209698501">"ਬੰਦ"</item>

@@ -1687,3 +1687,10 @@ droidstubs {
         },
     },
 }
+
+filegroup {
+    name: "framework-annotation-nonnull-srcs",
+    srcs: [
+        "core/java/android/annotation/NonNull.java",
+    ],
+}

@@ -26,10 +26,10 @@
     <string name="label_color" msgid="1108690305218188969">"रंग"</string>
     <string name="label_duplex" msgid="5370037254347072243">"दोन्ही बाजूंनी"</string>
     <string name="label_orientation" msgid="2853142581990496477">"ओरिएंटेशन"</string>
-    <string name="label_pages" msgid="7768589729282182230">"पेज"</string>
+    <string name="label_pages" msgid="7768589729282182230">"पृष्ठे"</string>
     <string name="destination_default_text" msgid="5422708056807065710">"प्रिंटर निवडा"</string>
     <string name="template_all_pages" msgid="3322235982020148762">"सर्व <xliff:g id="PAGE_COUNT">%1$s</xliff:g>"</string>
-    <string name="template_page_range" msgid="428638530038286328">"<xliff:g id="PAGE_COUNT">%1$s</xliff:g> ची वर्गवारी"</string>
+    <string name="template_page_range" msgid="428638530038286328">"<xliff:g id="PAGE_COUNT">%1$s</xliff:g> ची श्रेणी"</string>
     <string name="pages_range_example" msgid="8558694453556945172">"उदा. 1—5,8,11—13"</string>
     <string name="print_preview" msgid="8010217796057763343">"प्रिंट पूर्वावलोकन"</string>
     <string name="install_for_print_preview" msgid="6366303997385509332">"पूर्वावलोकनासाठी पीडीएफ व्ह्यूअर इंस्टॉल करा"</string>
@@ -88,7 +88,7 @@
     <string name="no_connection_to_printer" msgid="2159246915977282728">"प्रिंटरवर कोणतेही कनेक्‍शन नाही"</string>
     <string name="reason_unknown" msgid="5507940196503246139">"अज्ञात"</string>
     <string name="print_service_security_warning_title" msgid="2160752291246775320">"<xliff:g id="SERVICE">%1$s</xliff:g> वापरायची?"</string>
-    <string name="print_service_security_warning_summary" msgid="1427434625361692006">"तुमचा दस्तऐवज प्रिंटरपर्यंत पोहचण्‍यापूर्वी एक किंवा अधिक सर्व्हरद्वारे जाऊ शकतो."</string>
+    <string name="print_service_security_warning_summary" msgid="1427434625361692006">"आपला दस्तऐवज प्रिंटरपर्यंत पोहचण्‍यापूर्वी एक किंवा अधिक सर्व्हरद्वारे जाऊ शकतो."</string>
   <string-array name="color_mode_labels">
     <item msgid="7602948745415174937">"कृष्‍ण धवल"</item>
     <item msgid="2762241247228983754">"रंग"</item>

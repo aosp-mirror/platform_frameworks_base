@@ -363,7 +363,7 @@
 
     <!-- Max number of Bluetooth tethering connections allowed. If this is
          updated config_tether_dhcp_range has to be updated appropriately. -->
-    <integer translateable="false" name="config_max_pan_devices">5</integer>
+    <integer translatable="false" name="config_max_pan_devices">5</integer>
 
     <!-- Dhcp range (min, max) to use for tethering purposes -->
     <string-array translatable="false" name="config_tether_dhcp_range">

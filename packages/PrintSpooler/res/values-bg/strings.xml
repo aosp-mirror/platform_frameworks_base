@@ -103,7 +103,7 @@
     <item msgid="3199660090246166812">"Хоризонтално"</item>
   </string-array>
     <string name="print_write_error_message" msgid="5787642615179572543">"Не можа да се запише във файла"</string>
-    <string name="print_error_default_message" msgid="8602678405502922346">"За съжаление, това не проработи. Опитайте отново."</string>
+    <string name="print_error_default_message" msgid="8602678405502922346">"За съжаление това не проработи. Опитайте отново."</string>
     <string name="print_error_retry" msgid="1426421728784259538">"Нов опит"</string>
     <string name="print_error_printer_unavailable" msgid="8985614415253203381">"В момента този принтер не е налице."</string>
     <string name="print_cannot_load_page" msgid="6179560924492912009">"Визуализацията не може да се покаже"</string>

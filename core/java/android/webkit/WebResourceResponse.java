@@ -41,13 +41,21 @@ public class WebResourceResponse {
     private InputStream mInputStream;
 
     /**
-     * Constructs a resource response with the given MIME type, encoding, and
-     * input stream. Callers must implement
+     * Constructs a resource response with the given MIME type, character encoding,
+     * and input stream. Callers must implement
      * {@link InputStream#read(byte[]) InputStream.read(byte[])} for the input
      * stream.
      *
-     * @param mimeType the resource response's MIME type, for example text/html
-     * @param encoding the resource response's encoding
+     * <p class="note"><b>Note:</b> The MIME type and character encoding must
+     * be specified as separate parameters (for example {@code "text/html"} and
+     * {@code "utf-8"}), not a single value like the {@code "text/html; charset=utf-8"}
+     * format used in the HTTP Content-Type header. Do not use the value of a HTTP
+     * Content-Encoding header for {@code encoding}, as that header does not specify a
+     * character encoding. Content without a defined character encoding (for example
+     * image resources) should pass {@code null} for {@code encoding}.
+     *
+     * @param mimeType the resource response's MIME type, for example {@code "text/html"}.
+     * @param encoding the resource response's character encoding, for example {@code "utf-8"}.
      * @param data the input stream that provides the resource response's data. Must not be a
      *             StringBufferInputStream.
      */
@@ -63,8 +71,11 @@ public class WebResourceResponse {
      * implement {@link InputStream#read(byte[]) InputStream.read(byte[])} for
      * the input stream.
      *
-     * @param mimeType the resource response's MIME type, for example text/html
-     * @param encoding the resource response's encoding
+     * <p class="note"><b>Note:</b> See {@link #WebResourceResponse(String,String,InputStream)}
+     * for details on what should be specified for {@code mimeType} and {@code encoding}.
+     *
+     * @param mimeType the resource response's MIME type, for example {@code "text/html"}.
+     * @param encoding the resource response's character encoding, for example {@code "utf-8"}.
      * @param statusCode the status code needs to be in the ranges [100, 299], [400, 599].
      *                   Causing a redirect by specifying a 3xx code is not supported.
      * @param reasonPhrase the phrase describing the status code, for example "OK". Must be

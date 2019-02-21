@@ -28,15 +28,12 @@
     <string name="keyguard_password_entry_touch_hint" msgid="5790410752696806482"><font size="17">"Sentuh untuk menaip kata laluan"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="595980919238127672">"Taip kata laluan untuk membuka kunci"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="7504123374204446086">"Taip PIN untuk membuka kunci"</string>
-    <string name="keyguard_enter_your_pin" msgid="7152989016739952871">"Masukkan PIN anda"</string>
-    <string name="keyguard_enter_your_pattern" msgid="3915717164691787047">"Masukkan Corak anda"</string>
-    <string name="keyguard_enter_your_password" msgid="5761514484663983731">"Masukkan Kata Laluan anda"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"Kod PIN salah."</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"Kad Tidak Sah."</string>
     <string name="keyguard_charged" msgid="2222329688813033109">"Sudah dicas"</string>
-    <string name="keyguard_plugged_in" msgid="3161102098900158923">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Mengecas"</string>
-    <string name="keyguard_plugged_in_charging_fast" msgid="3684592786276709342">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Mengecas dengan cepat"</string>
-    <string name="keyguard_plugged_in_charging_slowly" msgid="509533586841478405">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Mengecas dengan perlahan"</string>
+    <string name="keyguard_plugged_in" msgid="89308975354638682">"Mengecas"</string>
+    <string name="keyguard_plugged_in_charging_fast" msgid="8869226755413795173">"Mengecas dengan cepat"</string>
+    <string name="keyguard_plugged_in_charging_slowly" msgid="6637043106038550407">"Mengecas dengan perlahan"</string>
     <string name="keyguard_low_battery" msgid="9218432555787624490">"Sambungkan pengecas anda."</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8566679946700751371">"Tekan Menu untuk membuka kunci."</string>
     <string name="keyguard_network_locked_message" msgid="6743537524631420759">"Rangkaian dikunci"</string>
@@ -51,7 +48,6 @@
     <string name="keyguard_sim_puk_locked_message" msgid="1772789643694942073">"Kad SIM dikunci dengan PUK."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="3586601150825821675">"Membuka kunci kad SIM…"</string>
     <string name="keyguard_accessibility_pin_area" msgid="703175752097279029">"Bahagian PIN"</string>
-    <string name="keyguard_accessibility_password" msgid="7695303207740941101">"Kata laluan peranti"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="912702510825058921">"Bahagian PIN SIM"</string>
     <string name="keyguard_accessibility_sim_puk_area" msgid="136979425761438705">"Bahagian PUK SIM"</string>
     <string name="keyguard_accessibility_next_alarm" msgid="5835196989158584991">"Penggera seterusnya ditetapkan pada <xliff:g id="ALARM">%1$s</xliff:g>"</string>
@@ -141,9 +137,9 @@
       <item quantity="one">Peranti tidak dibuka kuncinya selama <xliff:g id="NUMBER_0">%d</xliff:g> jam. Sahkan kata laluan.</item>
     </plurals>
     <string name="fingerprint_not_recognized" msgid="348813995267914625">"Tidak dikenali"</string>
-    <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
-      <item quantity="other">Masukkan PIN SIM. Tinggal <xliff:g id="NUMBER_1">%d</xliff:g> percubaan lagi.</item>
-      <item quantity="one">Masukkan PIN SIM. Tinggal <xliff:g id="NUMBER_0">%d</xliff:g> percubaan lagi sebelum anda perlu menghubungi pembawa anda untuk membuka kunci peranti.</item>
+    <plurals name="kg_password_default_pin_message" formatted="false" msgid="6203676909479972943">
+      <item quantity="other">Masukkan PIN SIM, tinggal <xliff:g id="NUMBER_1">%d</xliff:g> percubaan lagi.</item>
+      <item quantity="one">Masukkan PIN SIM, tinggal <xliff:g id="NUMBER_0">%d</xliff:g> percubaan lagi sebelum anda harus menghubungi pembawa anda untuk membuka kunci peranti.</item>
     </plurals>
     <plurals name="kg_password_default_puk_message" formatted="false" msgid="8744416410184198352">
       <item quantity="other">Kini SIM dilumpuhkan. Masukkan kod PUK untuk meneruskan. Tinggal <xliff:g id="_NUMBER_1">%d</xliff:g> percubaan sebelum SIM tidak boleh digunakan secara kekal. Hubungi pembawa untuk mendapatkan butiran.</item>
