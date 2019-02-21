@@ -49,7 +49,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Integration tests for {@link DynamicCodeLogger}, formerly known as {@code DexLogger}.
+ * Integration tests for {@link DynamicCodeLogger}.
  *
  * The setup for the test dynamically loads code in a jar extracted
  * from our assets (a secondary dex file).
@@ -59,11 +59,11 @@ import java.util.concurrent.TimeUnit;
  * file's name and content.  We verify that this message appears in
  * the event log.
  *
- * Run with "atest DexLoggerIntegrationTests".
+ * Run with "atest DynamicCodeLoggerIntegrationTests".
  */
 @LargeTest
 @RunWith(JUnit4.class)
-public final class DexLoggerIntegrationTests {
+public final class DynamicCodeLoggerIntegrationTests {
 
     private static final String SHA_256 = "SHA-256";
 
@@ -162,7 +162,7 @@ public final class DexLoggerIntegrationTests {
                 File privateCopyFile = privateFile(privateCopyName);
                 mExpectedNameHash = hashOf(privateCopyName);
                 mExpectedContentHash = copyAndHashResource(
-                        libraryPath("DexLoggerNativeTestLibrary.so"), privateCopyFile);
+                        libraryPath("DynamicCodeLoggerNativeTestLibrary.so"), privateCopyFile);
 
                 System.load(privateCopyFile.toString());
             }
@@ -180,7 +180,7 @@ public final class DexLoggerIntegrationTests {
                 File privateCopyFile = privateFile(privateCopyName);
                 mExpectedNameHash = hashOf(privateCopyName);
                 mExpectedContentHash = copyAndHashResource(
-                        libraryPath("DexLoggerNativeTestLibrary.so"), privateCopyFile);
+                        libraryPath("DynamicCodeLoggerNativeTestLibrary.so"), privateCopyFile);
 
                 System.load(privateCopyFile.toString());
             }
@@ -196,7 +196,7 @@ public final class DexLoggerIntegrationTests {
                 File privateCopyFile = privateFile(privateCopyName);
                 mExpectedNameHash = hashOf(privateCopyName);
                 mExpectedContentHash = copyAndHashResource(
-                        "/DexLoggerNativeExecutable", privateCopyFile);
+                        "/DynamicCodeLoggerNativeExecutable", privateCopyFile);
                 assertThat(privateCopyFile.setExecutable(true)).isTrue();
 
                 Process process = Runtime.getRuntime().exec(privateCopyFile.toString());
@@ -211,7 +211,7 @@ public final class DexLoggerIntegrationTests {
         File privateCopyFile = privateFile("spoofed");
 
         String expectedContentHash = copyAndHashResource(
-                "/DexLoggerNativeExecutable", privateCopyFile);
+                "/DynamicCodeLoggerNativeExecutable", privateCopyFile);
 
         EventLog.writeEvent(EventLog.getTagCode("auditd"),
                 "type=1400 avc: granted { execute_no_trans } "
@@ -275,7 +275,7 @@ public final class DexLoggerIntegrationTests {
     public void testGeneratesEvents_spoofed_otherAppFile() throws Exception {
         File ourPath = sContext.getDatabasePath("android_pay");
         File targetPath = new File(ourPath.toString()
-                .replace("com.android.frameworks.dexloggertest", "com.google.android.gms"));
+                .replace("com.android.frameworks.dynamiccodeloggertest", "com.google.android.gms"));
 
         assertWithMessage("Expected " + targetPath + " to not be readable")
                 .that(targetPath.canRead()).isFalse();
@@ -348,7 +348,7 @@ public final class DexLoggerIntegrationTests {
         MessageDigest hasher = MessageDigest.getInstance(SHA_256);
 
         // Copy the jar from our Java resources to a private data directory
-        Class<?> thisClass = DexLoggerIntegrationTests.class;
+        Class<?> thisClass = DynamicCodeLoggerIntegrationTests.class;
         try (InputStream input = thisClass.getResourceAsStream(resourcePath);
              OutputStream output = new FileOutputStream(copyTo)) {
             byte[] buffer = new byte[1024];

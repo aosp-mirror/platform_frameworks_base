@@ -15,7 +15,7 @@
 -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-        package="com.android.frameworks.dexloggertest">
+        package="com.android.frameworks.dynamiccodeloggertest">
 
     <!-- Tests feature introduced in P (28) -->
     <uses-sdk
@@ -30,6 +30,6 @@
 
     <instrumentation
         android:name="android.support.test.runner.AndroidJUnitRunner"
-        android:targetPackage="com.android.frameworks.dexloggertest"
-        android:label="Integration test for DexLogger" />
+        android:targetPackage="com.android.frameworks.dynamiccodeloggertest"
+        android:label="Integration test for DynamicCodeLogger" />
 </manifest>
