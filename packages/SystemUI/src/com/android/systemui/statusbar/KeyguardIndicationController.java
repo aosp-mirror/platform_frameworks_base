@@ -130,7 +130,7 @@ public class KeyguardIndicationController implements StateListener {
                 mTextView.getTextColors() : ColorStateList.valueOf(Color.WHITE);
         mDisclosure = indicationArea.findViewById(R.id.keyguard_indication_enterprise_disclosure);
         mLockIcon = lockIcon;
-        mWakeLock = new SettableWakeLock(wakeLock);
+        mWakeLock = new SettableWakeLock(wakeLock, TAG);
 
         Resources res = context.getResources();
         mSlowThreshold = res.getInteger(R.integer.config_chargingSlowlyThreshold);
