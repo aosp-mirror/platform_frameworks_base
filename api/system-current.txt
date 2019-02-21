@@ -6385,20 +6385,12 @@ package android.service.carrier {
 
 package android.service.contentcapture {
 
-  @Deprecated public final class ContentCaptureEventsRequest implements android.os.Parcelable {
-    method @Deprecated public int describeContents();
-    method @Deprecated @NonNull public java.util.List<android.view.contentcapture.ContentCaptureEvent> getEvents();
-    method @Deprecated public void writeToParcel(android.os.Parcel, int);
-    field @Deprecated public static final android.os.Parcelable.Creator<android.service.contentcapture.ContentCaptureEventsRequest> CREATOR;
-  }
-
   public abstract class ContentCaptureService extends android.app.Service {
     ctor public ContentCaptureService();
     method public final void disableContentCaptureServices();
     method public void onActivitySnapshot(@NonNull android.view.contentcapture.ContentCaptureSessionId, @NonNull android.service.contentcapture.SnapshotData);
     method public void onConnected();
     method public void onContentCaptureEvent(@NonNull android.view.contentcapture.ContentCaptureSessionId, @NonNull android.view.contentcapture.ContentCaptureEvent);
-    method @Deprecated public void onContentCaptureEventsRequest(@NonNull android.view.contentcapture.ContentCaptureSessionId, @NonNull android.service.contentcapture.ContentCaptureEventsRequest);
     method public void onCreateContentCaptureSession(@NonNull android.view.contentcapture.ContentCaptureContext, @NonNull android.view.contentcapture.ContentCaptureSessionId);
     method public void onDestroyContentCaptureSession(@NonNull android.view.contentcapture.ContentCaptureSessionId);
     method public void onDisconnected();
