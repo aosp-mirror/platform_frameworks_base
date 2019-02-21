@@ -1012,7 +1012,7 @@
     <!-- How much to inset the icon in the circle -->
     <dimen name="bubble_icon_inset">16dp</dimen>
     <!-- Padding around the view displayed when the bubble is expanded -->
-    <dimen name="bubble_expanded_view_padding">8dp</dimen>
+    <dimen name="bubble_expanded_view_padding">4dp</dimen>
     <!-- Default (and minimum) height of the expanded view shown when the bubble is expanded -->
     <dimen name="bubble_expanded_default_height">180dp</dimen>
     <!-- Height of the triangle that points to the expanded bubble -->
