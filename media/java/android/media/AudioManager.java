@@ -3188,6 +3188,10 @@ public class AudioManager {
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
     public int registerAudioPolicy(@NonNull AudioPolicy policy) {
+        return registerAudioPolicyStatic(policy);
+    }
+
+    static int registerAudioPolicyStatic(@NonNull AudioPolicy policy) {
         if (policy == null) {
             throw new IllegalArgumentException("Illegal null AudioPolicy argument");
         }
@@ -3214,6 +3218,10 @@ public class AudioManager {
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
     public void unregisterAudioPolicyAsync(@NonNull AudioPolicy policy) {
+        unregisterAudioPolicyAsyncStatic(policy);
+    }
+
+    static void unregisterAudioPolicyAsyncStatic(@NonNull AudioPolicy policy) {
         if (policy == null) {
             throw new IllegalArgumentException("Illegal null AudioPolicy argument");
         }
