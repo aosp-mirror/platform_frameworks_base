@@ -99,7 +99,8 @@ public class PasswordMetricsTest {
 
     @Test
     public void testComputeForPassword_metrics() {
-        final PasswordMetrics metrics = PasswordMetrics.computeForPassword("6B~0z1Z3*8A");
+        final PasswordMetrics metrics =
+                PasswordMetrics.computeForPassword("6B~0z1Z3*8A".getBytes());
         assertEquals(11, metrics.length);
         assertEquals(4, metrics.letters);
         assertEquals(3, metrics.upperCase);
@@ -112,32 +113,32 @@ public class PasswordMetricsTest {
     @Test
     public void testComputeForPassword_quality() {
         assertEquals(DevicePolicyManager.PASSWORD_QUALITY_ALPHANUMERIC,
-                PasswordMetrics.computeForPassword("a1").quality);
+                PasswordMetrics.computeForPassword("a1".getBytes()).quality);
         assertEquals(DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC,
-                PasswordMetrics.computeForPassword("a").quality);
+                PasswordMetrics.computeForPassword("a".getBytes()).quality);
         assertEquals(DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC,
-                PasswordMetrics.computeForPassword("*~&%$").quality);
+                PasswordMetrics.computeForPassword("*~&%$".getBytes()).quality);
         assertEquals(DevicePolicyManager.PASSWORD_QUALITY_NUMERIC_COMPLEX,
-                PasswordMetrics.computeForPassword("1").quality);
+                PasswordMetrics.computeForPassword("1".getBytes()).quality);
         // contains a long sequence so isn't complex
         assertEquals(PASSWORD_QUALITY_NUMERIC,
-                PasswordMetrics.computeForPassword("1234").quality);
+                PasswordMetrics.computeForPassword("1234".getBytes()).quality);
         assertEquals(DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED,
-                PasswordMetrics.computeForPassword("").quality);
+                PasswordMetrics.computeForPassword("".getBytes()).quality);
     }
 
     @Test
     public void testMaxLengthSequence() {
-        assertEquals(4, PasswordMetrics.maxLengthSequence("1234"));
-        assertEquals(5, PasswordMetrics.maxLengthSequence("13579"));
-        assertEquals(4, PasswordMetrics.maxLengthSequence("1234abd"));
-        assertEquals(3, PasswordMetrics.maxLengthSequence("aabc"));
-        assertEquals(1, PasswordMetrics.maxLengthSequence("qwertyuio"));
-        assertEquals(3, PasswordMetrics.maxLengthSequence("@ABC"));
+        assertEquals(4, PasswordMetrics.maxLengthSequence("1234".getBytes()));
+        assertEquals(5, PasswordMetrics.maxLengthSequence("13579".getBytes()));
+        assertEquals(4, PasswordMetrics.maxLengthSequence("1234abd".getBytes()));
+        assertEquals(3, PasswordMetrics.maxLengthSequence("aabc".getBytes()));
+        assertEquals(1, PasswordMetrics.maxLengthSequence("qwertyuio".getBytes()));
+        assertEquals(3, PasswordMetrics.maxLengthSequence("@ABC".getBytes()));
         // anything that repeats
-        assertEquals(4, PasswordMetrics.maxLengthSequence(";;;;"));
+        assertEquals(4, PasswordMetrics.maxLengthSequence(";;;;".getBytes()));
         // ordered, but not composed of alphas or digits
-        assertEquals(1, PasswordMetrics.maxLengthSequence(":;<=>"));
+        assertEquals(1, PasswordMetrics.maxLengthSequence(":;<=>".getBytes()));
     }
 
     @Test
@@ -158,8 +159,8 @@ public class PasswordMetricsTest {
         assertNotEquals(new PasswordMetrics(DevicePolicyManager.PASSWORD_QUALITY_SOMETHING, 4),
                 new PasswordMetrics(PASSWORD_QUALITY_COMPLEX, 4));
 
-        metrics0 = PasswordMetrics.computeForPassword("1234abcd,./");
-        metrics1 = PasswordMetrics.computeForPassword("1234abcd,./");
+        metrics0 = PasswordMetrics.computeForPassword("1234abcd,./".getBytes());
+        metrics1 = PasswordMetrics.computeForPassword("1234abcd,./".getBytes());
         assertEquals(metrics0, metrics1);
         metrics1.letters++;
         assertNotEquals(metrics0, metrics1);
@@ -197,7 +198,7 @@ public class PasswordMetricsTest {
     @Test
     public void testDetermineComplexity_none() {
         assertEquals(PASSWORD_COMPLEXITY_NONE,
-                PasswordMetrics.computeForPassword("").determineComplexity());
+                PasswordMetrics.computeForPassword("".getBytes()).determineComplexity());
     }
 
     @Test
@@ -209,61 +210,61 @@ public class PasswordMetricsTest {
     @Test
     public void testDetermineComplexity_lowNumeric() {
         assertEquals(PASSWORD_COMPLEXITY_LOW,
-                PasswordMetrics.computeForPassword("1234").determineComplexity());
+                PasswordMetrics.computeForPassword("1234".getBytes()).determineComplexity());
     }
 
     @Test
     public void testDetermineComplexity_lowNumericComplex() {
         assertEquals(PASSWORD_COMPLEXITY_LOW,
-                PasswordMetrics.computeForPassword("124").determineComplexity());
+                PasswordMetrics.computeForPassword("124".getBytes()).determineComplexity());
     }
 
     @Test
     public void testDetermineComplexity_lowAlphabetic() {
         assertEquals(PASSWORD_COMPLEXITY_LOW,
-                PasswordMetrics.computeForPassword("a!").determineComplexity());
+                PasswordMetrics.computeForPassword("a!".getBytes()).determineComplexity());
     }
 
     @Test
     public void testDetermineComplexity_lowAlphanumeric() {
         assertEquals(PASSWORD_COMPLEXITY_LOW,
-                PasswordMetrics.computeForPassword("a!1").determineComplexity());
+                PasswordMetrics.computeForPassword("a!1".getBytes()).determineComplexity());
     }
 
     @Test
     public void testDetermineComplexity_mediumNumericComplex() {
         assertEquals(PASSWORD_COMPLEXITY_MEDIUM,
-                PasswordMetrics.computeForPassword("1238").determineComplexity());
+                PasswordMetrics.computeForPassword("1238".getBytes()).determineComplexity());
     }
 
     @Test
     public void testDetermineComplexity_mediumAlphabetic() {
         assertEquals(PASSWORD_COMPLEXITY_MEDIUM,
-                PasswordMetrics.computeForPassword("ab!c").determineComplexity());
+                PasswordMetrics.computeForPassword("ab!c".getBytes()).determineComplexity());
     }
 
     @Test
     public void testDetermineComplexity_mediumAlphanumeric() {
         assertEquals(PASSWORD_COMPLEXITY_MEDIUM,
-                PasswordMetrics.computeForPassword("ab!1").determineComplexity());
+                PasswordMetrics.computeForPassword("ab!1".getBytes()).determineComplexity());
     }
 
     @Test
     public void testDetermineComplexity_highNumericComplex() {
         assertEquals(PASSWORD_COMPLEXITY_HIGH,
-                PasswordMetrics.computeForPassword("12389647!").determineComplexity());
+                PasswordMetrics.computeForPassword("12389647!".getBytes()).determineComplexity());
     }
 
     @Test
     public void testDetermineComplexity_highAlphabetic() {
         assertEquals(PASSWORD_COMPLEXITY_HIGH,
-                PasswordMetrics.computeForPassword("alphabetic!").determineComplexity());
+                PasswordMetrics.computeForPassword("alphabetic!".getBytes()).determineComplexity());
     }
 
     @Test
     public void testDetermineComplexity_highAlphanumeric() {
-        assertEquals(PASSWORD_COMPLEXITY_HIGH,
-                PasswordMetrics.computeForPassword("alphanumeric123!").determineComplexity());
+        assertEquals(PASSWORD_COMPLEXITY_HIGH, PasswordMetrics.computeForPassword(
+                "alphanumeric123!".getBytes()).determineComplexity());
     }
 
     @Test

@@ -97,7 +97,7 @@ public class SyntheticPasswordManager {
     private static final String WEAVER_SLOT_NAME = "weaver";
 
     public static final long DEFAULT_HANDLE = 0L;
-    private static final String DEFAULT_PASSWORD = "default-password";
+    private static final byte[] DEFAULT_PASSWORD = "default-password".getBytes();
 
     private static final byte WEAVER_VERSION = 1;
     private static final int INVALID_WEAVER_SLOT = -1;
@@ -165,7 +165,7 @@ public class SyntheticPasswordManager {
             }
         }
 
-        public String deriveKeyStorePassword() {
+        public byte[] deriveKeyStorePassword() {
             return bytesToHex(derivePassword(PERSONALIZATION_KEY_STORE_PASSWORD));
         }
 
@@ -454,11 +454,11 @@ public class SyntheticPasswordManager {
      *
      */
     public AuthenticationToken newSyntheticPasswordAndSid(IGateKeeperService gatekeeper,
-            byte[] hash, String credential, int userId) throws RemoteException {
+            byte[] hash, byte[] credential, int userId) throws RemoteException {
         AuthenticationToken result = AuthenticationToken.create();
         GateKeeperResponse response;
         if (hash != null) {
-            response = gatekeeper.enroll(userId, hash, credential.getBytes(),
+            response = gatekeeper.enroll(userId, hash, credential,
                     result.deriveGkPassword());
             if (response.getResponseCode() != GateKeeperResponse.RESPONSE_OK) {
                 Log.w(TAG, "Fail to migrate SID, assuming no SID, user " + userId);
@@ -616,7 +616,7 @@ public class SyntheticPasswordManager {
      * @see #clearSidForUser
      */
     public long createPasswordBasedSyntheticPassword(IGateKeeperService gatekeeper,
-            String credential, int credentialType, AuthenticationToken authToken,
+            byte[] credential, int credentialType, AuthenticationToken authToken,
             int requestedQuality, int userId)
                     throws RemoteException {
         if (credential == null || credentialType == LockPatternUtils.CREDENTIAL_TYPE_NONE) {
@@ -670,7 +670,7 @@ public class SyntheticPasswordManager {
     }
 
     public VerifyCredentialResponse verifyFrpCredential(IGateKeeperService gatekeeper,
-            String userCredential, int credentialType,
+            byte[] userCredential, int credentialType,
             ICheckCredentialProgressCallback progressCallback) throws RemoteException {
         PersistentData persistentData = mStorage.readPersistentDataBlock();
         if (persistentData.type == PersistentData.TYPE_SP) {
@@ -839,7 +839,7 @@ public class SyntheticPasswordManager {
      * unknown. Caller might choose to validate it by examining AuthenticationResult.credentialType
      */
     public AuthenticationResult unwrapPasswordBasedSyntheticPassword(IGateKeeperService gatekeeper,
-            long handle, String credential, int userId,
+            long handle, byte[] credential, int userId,
             ICheckCredentialProgressCallback progressCallback) throws RemoteException {
         if (credential == null) {
             credential = DEFAULT_PASSWORD;
@@ -1152,7 +1152,7 @@ public class SyntheticPasswordManager {
         return String.format("%s%x", LockPatternUtils.SYNTHETIC_PASSWORD_KEY_PREFIX, handle);
     }
 
-    private byte[] computePasswordToken(String password, PasswordData data) {
+    private byte[] computePasswordToken(byte[] password, PasswordData data) {
         return scrypt(password, data.salt, 1 << data.scryptN, 1 << data.scryptR, 1 << data.scryptP,
                 PASSWORD_TOKEN_LENGTH);
     }
@@ -1173,8 +1173,8 @@ public class SyntheticPasswordManager {
         return nativeSidFromPasswordHandle(handle);
     }
 
-    protected byte[] scrypt(String password, byte[] salt, int N, int r, int p, int outLen) {
-        return new Scrypt().scrypt(password.getBytes(), salt, N, r, p, outLen);
+    protected byte[] scrypt(byte[] password, byte[] salt, int n, int r, int p, int outLen) {
+        return new Scrypt().scrypt(password, salt, n, r, p, outLen);
     }
 
     native long nativeSidFromPasswordHandle(byte[] handle);
@@ -1195,17 +1195,17 @@ public class SyntheticPasswordManager {
         return result;
     }
 
-    final protected static char[] hexArray = "0123456789ABCDEF".toCharArray();
-    public static String bytesToHex(byte[] bytes) {
+    protected static final byte[] HEX_ARRAY = "0123456789ABCDEF".getBytes();
+    private static byte[] bytesToHex(byte[] bytes) {
         if (bytes == null) {
-            return "null";
+            return "null".getBytes();
         }
-        char[] hexChars = new char[bytes.length * 2];
+        byte[] hexBytes = new byte[bytes.length * 2];
         for ( int j = 0; j < bytes.length; j++ ) {
             int v = bytes[j] & 0xFF;
-            hexChars[j * 2] = hexArray[v >>> 4];
-            hexChars[j * 2 + 1] = hexArray[v & 0x0F];
+            hexBytes[j * 2] = HEX_ARRAY[v >>> 4];
+            hexBytes[j * 2 + 1] = HEX_ARRAY[v & 0x0F];
         }
-        return new String(hexChars);
+        return hexBytes;
     }
 }

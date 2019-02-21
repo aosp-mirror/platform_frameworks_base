@@ -4167,7 +4167,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         assertTrue(dpm.isResetPasswordTokenActive(admin1));
 
         // test reset password with token
-        when(getServices().lockPatternUtils.setLockCredentialWithToken(eq(password),
+        when(getServices().lockPatternUtils.setLockCredentialWithToken(eq(password.getBytes()),
                 eq(LockPatternUtils.CREDENTIAL_TYPE_PASSWORD),
                 eq(DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC), eq(handle), eq(token),
                 eq(UserHandle.USER_SYSTEM)))
@@ -5214,7 +5214,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 .thenReturn(DpmMockContext.CALLER_USER_HANDLE);
         dpms.mUserPasswordMetrics.put(
                 DpmMockContext.CALLER_USER_HANDLE,
-                PasswordMetrics.computeForPassword("asdf"));
+                PasswordMetrics.computeForPassword("asdf".getBytes()));
 
         assertEquals(PASSWORD_COMPLEXITY_MEDIUM, dpm.getPasswordComplexity());
     }
@@ -5231,10 +5231,10 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         dpms.mUserPasswordMetrics.put(
                 DpmMockContext.CALLER_USER_HANDLE,
-                PasswordMetrics.computeForPassword("asdf"));
+                PasswordMetrics.computeForPassword("asdf".getBytes()));
         dpms.mUserPasswordMetrics.put(
                 parentUser.id,
-                PasswordMetrics.computeForPassword("parentUser"));
+                PasswordMetrics.computeForPassword("parentUser".getBytes()));
 
         assertEquals(PASSWORD_COMPLEXITY_HIGH, dpm.getPasswordComplexity());
     }
