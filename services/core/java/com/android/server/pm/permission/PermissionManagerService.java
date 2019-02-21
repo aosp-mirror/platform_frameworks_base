@@ -1201,28 +1201,22 @@ public class PermissionManagerService {
                         if ((flags & FLAG_PERMISSION_REVOKE_WHEN_REQUESTED) != 0) {
                             BasePermission bp = mSettings.getPermissionLocked(permission);
 
-                            ps.updatePermissionFlags(bp, userId,
-                                    FLAG_PERMISSION_REVOKE_WHEN_REQUESTED
-                                            | FLAG_PERMISSION_USER_FIXED | FLAG_PERMISSION_USER_SET,
-                                    0);
-                            updatedUserIds = ArrayUtils.appendInt(updatedUserIds,
-                                    userId);
+                            int flagsToRemove = FLAG_PERMISSION_REVOKE_WHEN_REQUESTED;
 
                             if ((flags & (FLAG_PERMISSION_GRANTED_BY_DEFAULT
                                     | FLAG_PERMISSION_POLICY_FIXED | FLAG_PERMISSION_SYSTEM_FIXED))
-                                    == 0) {
-                                if (supportsRuntimePermissions) {
-                                    int revokeResult = ps.revokeRuntimePermission(bp, userId);
-                                    if (revokeResult != PERMISSION_OPERATION_FAILURE) {
-                                        if (DEBUG_PERMISSIONS) {
-                                            Slog.i(TAG, "Revoking runtime permission "
-                                                    + permission + " for " + pkgName
-                                                    + " as it is now requested");
-                                        }
+                                    == 0 && supportsRuntimePermissions) {
+                                int revokeResult = ps.revokeRuntimePermission(bp, userId);
+                                if (revokeResult != PERMISSION_OPERATION_FAILURE) {
+                                    if (DEBUG_PERMISSIONS) {
+                                        Slog.i(TAG, "Revoking runtime permission "
+                                                + permission + " for " + pkgName
+                                                + " as it is now requested");
                                     }
-                                } else {
-                                    setAppOpMode(permission, pkg, userId, MODE_IGNORED);
                                 }
+
+                                flagsToRemove |=
+                                        FLAG_PERMISSION_USER_FIXED | FLAG_PERMISSION_USER_SET;
 
                                 List<String> fgPerms = mBackgroundPermissions.get(permission);
                                 if (fgPerms != null) {
@@ -1241,6 +1235,9 @@ public class PermissionManagerService {
                                     }
                                 }
                             }
+
+                            ps.updatePermissionFlags(bp, userId, flagsToRemove, 0);
+                            updatedUserIds = ArrayUtils.appendInt(updatedUserIds, userId);
                         }
                     }
                 }
