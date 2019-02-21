@@ -75,7 +75,6 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
 
     // Header
     private View mHeaderView;
-    private TextView mHeaderTextView;
     private ImageButton mDeepLinkIcon;
     private ImageButton mSettingsIcon;
 
@@ -197,7 +196,6 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
         mHeaderHeight = getContext().getResources().getDimensionPixelSize(
                 R.dimen.bubble_expanded_header_height);
         mHeaderView = findViewById(R.id.header_layout);
-        mHeaderTextView = findViewById(R.id.header_text);
         mDeepLinkIcon = findViewById(R.id.deep_link_button);
         mSettingsIcon = findViewById(R.id.settings_button);
         mDeepLinkIcon.setOnClickListener(this);
@@ -295,13 +293,6 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
                 R.string.bubbles_settings_button_description, mAppName));
         mDeepLinkIcon.setContentDescription(getResources().getString(
                 R.string.bubbles_deep_link_button_description, mAppName));
-        if (mEntry != null && mEntry.getBubbleMetadata() != null) {
-            mHeaderTextView.setText(mEntry.getBubbleMetadata().getTitle());
-        } else {
-            // This should only happen if we're auto-bubbling notification content that isn't
-            // explicitly a bubble
-            mHeaderTextView.setText(mAppName);
-        }
     }
 
     private void updatePermissionView() {

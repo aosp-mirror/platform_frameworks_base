@@ -39,26 +39,13 @@
             android:layout_height="@dimen/bubble_expanded_header_height"
             android:layout_width="match_parent"
             android:animateLayoutChanges="true"
+            android:gravity="end|center_vertical"
             android:orientation="horizontal">
-
-            <TextView
-                android:id="@+id/header_text"
-                android:textAppearance="@*android:style/TextAppearance.Material.Title"
-                android:textSize="18sp"
-                android:layout_weight="1"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:gravity="start|center_vertical"
-                android:singleLine="true"
-                android:paddingLeft="@dimen/bubble_expanded_header_horizontal_padding"
-                android:paddingRight="@dimen/bubble_expanded_header_horizontal_padding"
-            />
 
             <ImageButton
                 android:id="@+id/deep_link_button"
                 android:layout_width="@dimen/bubble_header_icon_size"
                 android:layout_height="@dimen/bubble_header_icon_size"
-                android:gravity="end|center_vertical"
                 android:src="@drawable/ic_open_in_new"
                 android:scaleType="center"
                 android:tint="?android:attr/colorForeground"
@@ -70,7 +57,6 @@
                 android:layout_width="@dimen/bubble_header_icon_size"
                 android:layout_height="@dimen/bubble_header_icon_size"
                 android:src="@drawable/ic_settings"
-                android:gravity="end|center_vertical"
                 android:scaleType="center"
                 android:tint="?android:attr/colorForeground"
                 android:background="?android:attr/selectableItemBackground"
