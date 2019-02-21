@@ -306,10 +306,10 @@ class LaunchParamsPersister {
 
     private class PackageListObserver implements PackageManagerInternal.PackageListObserver {
         @Override
-        public void onPackageAdded(String packageName) { }
+        public void onPackageAdded(String packageName, int uid) { }
 
         @Override
-        public void onPackageRemoved(String packageName) {
+        public void onPackageRemoved(String packageName, int uid) {
             removeRecordForPackage(packageName);
         }
     }

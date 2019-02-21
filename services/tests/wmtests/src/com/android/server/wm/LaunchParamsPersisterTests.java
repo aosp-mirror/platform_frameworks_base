@@ -316,7 +316,7 @@ public class LaunchParamsPersisterTests extends ActivityTestsBase {
     public void testClearsRecordInMemoryOnPackageUninstalled() {
         mTarget.saveTask(mTestTask);
 
-        mObserver.onPackageRemoved(TEST_COMPONENT.getPackageName());
+        mObserver.onPackageRemoved(TEST_COMPONENT.getPackageName(), TEST_USER_ID);
 
         mTarget.getLaunchParams(mTestTask, null, mResult);
 
@@ -327,7 +327,7 @@ public class LaunchParamsPersisterTests extends ActivityTestsBase {
     public void testClearsWriteQueueItemOnPackageUninstalled() {
         mTarget.saveTask(mTestTask);
 
-        mObserver.onPackageRemoved(TEST_COMPONENT.getPackageName());
+        mObserver.onPackageRemoved(TEST_COMPONENT.getPackageName(), TEST_USER_ID);
 
         final LaunchParamsPersister target = new LaunchParamsPersister(mPersisterQueue, mSupervisor,
                 mUserFolderGetter);
@@ -344,7 +344,7 @@ public class LaunchParamsPersisterTests extends ActivityTestsBase {
         mTarget.saveTask(mTestTask);
         mPersisterQueue.flush();
 
-        mObserver.onPackageRemoved(TEST_COMPONENT.getPackageName());
+        mObserver.onPackageRemoved(TEST_COMPONENT.getPackageName(), TEST_USER_ID);
 
         final LaunchParamsPersister target = new LaunchParamsPersister(mPersisterQueue, mSupervisor,
                 mUserFolderGetter);
