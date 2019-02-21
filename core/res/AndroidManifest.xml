@@ -1167,8 +1167,7 @@
     <!-- ====================================================================== -->
     <eat-comment />
 
-    <!-- Used for permissions that are associated with activity recognition.
-         TODO(zezeozue). STOPSHIP: Add icon -->
+    <!-- Used for permissions that are associated with activity recognition. -->
     <permission-group android:name="android.permission-group.ACTIVITY_RECOGNITION"
         android:icon="@drawable/perm_group_activity_recognition"
         android:label="@string/permgrouplab_activityRecognition"
