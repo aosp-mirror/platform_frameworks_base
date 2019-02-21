@@ -833,6 +833,11 @@ public class AccessPoint implements Comparable<AccessPoint> {
         return ssid;
     }
 
+    /**
+     * Returns the name associated with the stored config.
+     * @deprecated Please use {@link #getTitle()} instead to get the display name of an AccessPoint.
+     */
+    @Deprecated
     public String getConfigName() {
         if (mConfig != null && mConfig.isPasspoint()) {
             return mConfig.providerFriendlyName;
@@ -895,6 +900,8 @@ public class AccessPoint implements Comparable<AccessPoint> {
     public String getTitle() {
         if (isPasspoint()) {
             return mConfig.providerFriendlyName;
+        } else if (isPasspointConfig()) {
+            return mProviderFriendlyName;
         } else if (isOsuProvider()) {
             return mOsuProvider.getFriendlyName();
         } else {

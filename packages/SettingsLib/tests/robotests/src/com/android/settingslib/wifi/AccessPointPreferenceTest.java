@@ -98,7 +98,7 @@ public class AccessPointPreferenceTest {
                 .build();
         final AccessPointPreference preference = mock(AccessPointPreference.class);
 
-        AccessPointPreference.setTitle(preference, ap, false /* savedNetwork */);
+        AccessPointPreference.setTitle(preference, ap);
         verify(preference).setTitle(ssid);
     }
 }
