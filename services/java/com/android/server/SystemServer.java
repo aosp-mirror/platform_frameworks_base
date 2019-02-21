@@ -310,6 +310,7 @@ public final class SystemServer {
 
     private boolean mOnlyCore;
     private boolean mFirstBoot;
+    private final int mStartCount;
     private final boolean mRuntimeRestart;
     private final long mRuntimeStartElapsedTime;
     private final long mRuntimeStartUptime;
@@ -317,6 +318,9 @@ public final class SystemServer {
     private static final String START_SENSOR_SERVICE = "StartSensorService";
     private static final String START_HIDL_SERVICES = "StartHidlServices";
 
+    private static final String SYSPROP_START_COUNT = "sys.system_server.start_count";
+    private static final String SYSPROP_START_ELAPSED = "sys.system_server.start_elapsed";
+    private static final String SYSPROP_START_UPTIME = "sys.system_server.start_uptime";
 
     private Future<?> mSensorServiceStart;
     private Future<?> mZygotePreload;
@@ -346,16 +350,33 @@ public final class SystemServer {
     public SystemServer() {
         // Check for factory test mode.
         mFactoryTestMode = FactoryTest.getMode();
-        // Remember if it's runtime restart(when sys.boot_completed is already set) or reboot
-        mRuntimeRestart = "1".equals(SystemProperties.get("sys.boot_completed"));
 
+        // Record process start information.
+        // Note SYSPROP_START_COUNT will increment by *2* on a FDE device when it fully boots;
+        // one for the password screen, second for the actual boot.
+        mStartCount = SystemProperties.getInt(SYSPROP_START_COUNT, 0) + 1;
         mRuntimeStartElapsedTime = SystemClock.elapsedRealtime();
         mRuntimeStartUptime = SystemClock.uptimeMillis();
+
+        // Remember if it's runtime restart(when sys.boot_completed is already set) or reboot
+        // We don't use "mStartCount > 1" here because it'll be wrong on a FDE device.
+        // TODO: mRuntimeRestart will *not* be set to true if the proccess crashes before
+        // sys.boot_completed is set. Fix it.
+        mRuntimeRestart = "1".equals(SystemProperties.get("sys.boot_completed"));
     }
 
     private void run() {
         try {
             traceBeginAndSlog("InitBeforeStartServices");
+
+            // Record the process start information in sys props.
+            SystemProperties.set(SYSPROP_START_COUNT, String.valueOf(mStartCount));
+            SystemProperties.set(SYSPROP_START_ELAPSED, String.valueOf(mRuntimeStartElapsedTime));
+            SystemProperties.set(SYSPROP_START_UPTIME, String.valueOf(mRuntimeStartUptime));
+
+            EventLog.writeEvent(EventLogTags.SYSTEM_SERVER_START,
+                    mStartCount, mRuntimeStartUptime, mRuntimeStartElapsedTime);
+
             // If a device's clock is before 1970 (before 0), a lot of
             // APIs crash dealing with negative numbers, notably
             // java.io.File#setLastModified, so instead we fake it and
