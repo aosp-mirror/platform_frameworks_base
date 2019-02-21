@@ -116,7 +116,7 @@ public class PackageBackwardCompatibility extends PackageSharedLibraryUpdater {
 
     private final PackageSharedLibraryUpdater[] mPackageUpdaters;
 
-    public PackageBackwardCompatibility(
+    private PackageBackwardCompatibility(
             boolean bootClassPathContainsATB, PackageSharedLibraryUpdater[] packageUpdaters) {
         this.mBootClassPathContainsATB = bootClassPathContainsATB;
         this.mPackageUpdaters = packageUpdaters;

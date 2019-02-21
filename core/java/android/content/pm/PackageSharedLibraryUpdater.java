@@ -17,7 +17,6 @@ package android.content.pm;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.os.Build;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
@@ -58,11 +57,6 @@ public abstract class PackageSharedLibraryUpdater {
             ArrayList<String> usesOptionalLibraries, String apacheHttpLegacy) {
         return ArrayUtils.contains(usesLibraries, apacheHttpLegacy)
                 || ArrayUtils.contains(usesOptionalLibraries, apacheHttpLegacy);
-    }
-
-    static boolean apkTargetsApiLevelLessThanOrEqualToOMR1(PackageParser.Package pkg) {
-        int targetSdkVersion = pkg.applicationInfo.targetSdkVersion;
-        return targetSdkVersion < Build.VERSION_CODES.P;
     }
 
     /**
