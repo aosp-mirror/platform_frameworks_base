@@ -75,6 +75,7 @@ import java.io.PrintWriter;
 class WindowStateAnimator {
     static final String TAG = TAG_WITH_CLASS_NAME ? "WindowStateAnimator" : TAG_WM;
     static final int WINDOW_FREEZE_LAYER = TYPE_LAYER_MULTIPLIER * 200;
+    static final int PRESERVED_SURFACE_LAYER = 1;
 
     /**
      * Mode how the window gets clipped by the stack bounds during an animation: The clipping should
@@ -373,8 +374,8 @@ class WindowStateAnimator {
         if (mSurfaceController != null) {
             // Our SurfaceControl is always at layer 0 within the parent Surface managed by
             // window-state. We want this old Surface to stay on top of the new one
-            // until we do the swap, so we place it at layer 1.
-            mSurfaceController.mSurfaceControl.setLayer(1);
+            // until we do the swap, so we place it at a positive layer.
+            mSurfaceController.mSurfaceControl.setLayer(PRESERVED_SURFACE_LAYER);
         }
         mDestroyPreservedSurfaceUponRedraw = true;
         mSurfaceDestroyDeferred = true;
