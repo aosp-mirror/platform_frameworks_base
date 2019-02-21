@@ -42,27 +42,16 @@ class OngoingPrivacyDialog constructor(
 
     private val iconSize = context.resources.getDimensionPixelSize(
             R.dimen.ongoing_appops_dialog_icon_size)
-    private val plusSize = context.resources.getDimensionPixelSize(
-            R.dimen.ongoing_appops_dialog_app_plus_size)
     private val iconColor = context.resources.getColor(
             com.android.internal.R.color.text_color_primary, context.theme)
-    private val plusColor: Int
     private val iconMargin = context.resources.getDimensionPixelSize(
             R.dimen.ongoing_appops_dialog_icon_margin)
-    private val MAX_ITEMS = context.resources.getInteger(R.integer.ongoing_appops_dialog_max_apps)
     private val iconFactory = IconDrawableFactory.newInstance(context, true)
     private var dismissDialog: (() -> Unit)? = null
     private val appsAndTypes = dialogBuilder.appsAndTypes
             .sortedWith(compareBy({ -it.second.size }, // Sort by number of AppOps
             { it.second.min() },
             { it.first }))
-
-    init {
-        val a = context.theme.obtainStyledAttributes(
-                intArrayOf(com.android.internal.R.attr.colorAccent))
-        plusColor = a.getColor(0, 0)
-        a.recycle()
-    }
 
     fun createDialog(): Dialog {
         val builder = AlertDialog.Builder(context).apply {
@@ -96,33 +85,9 @@ class OngoingPrivacyDialog constructor(
 
         val numItems = appsAndTypes.size
         for (i in 0..(numItems - 1)) {
-            if (i >= MAX_ITEMS) break
             val item = appsAndTypes[i]
             addAppItem(appsList, item.first, item.second, dialogBuilder.types.size > 1)
         }
-
-        if (numItems > MAX_ITEMS) {
-            val overflow = contentView.findViewById(R.id.overflow) as LinearLayout
-            overflow.visibility = View.VISIBLE
-            val overflowText = overflow.findViewById(R.id.app_name) as TextView
-            overflowText.text = context.resources.getQuantityString(
-                    R.plurals.ongoing_privacy_dialog_overflow_text,
-                    numItems - MAX_ITEMS,
-                    numItems - MAX_ITEMS
-            )
-            val overflowPlus = overflow.findViewById(R.id.app_icon) as ImageView
-            val lp = overflowPlus.layoutParams.apply {
-                height = plusSize
-                width = plusSize
-            }
-            overflowPlus.layoutParams = lp
-            overflowPlus.apply {
-                val plus = context.getDrawable(R.drawable.plus)
-                imageTintList = ColorStateList.valueOf(plusColor)
-                setImageDrawable(plus)
-            }
-        }
-
         return contentView
     }
 
