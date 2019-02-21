@@ -2613,12 +2613,24 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     + " when server returned null for session " + this.id);
         }
 
+        final boolean isWhitelisted = mService
+                .isWhitelistedForAugmentedAutofillLocked(mComponentName);
+
         final String historyItem =
                 "aug:id=" + id + " u=" + uid + " m=" + mode
                 + " a=" + ComponentName.flattenToShortString(mComponentName)
                 + " f=" + mCurrentViewId
-                + " s=" + remoteService.getComponentName();
+                + " s=" + remoteService.getComponentName()
+                + " w=" + isWhitelisted;
         mService.getMaster().logRequestLocked(historyItem);
+
+        if (!isWhitelisted) {
+            if (sVerbose) {
+                Slog.v(TAG, mComponentName.toShortString() + " is not whitelisted for "
+                        + "augmented autofill");
+            }
+            return null;
+        }
 
         final AutofillValue currentValue = mViewStates.get(mCurrentViewId).getCurrentValue();
 

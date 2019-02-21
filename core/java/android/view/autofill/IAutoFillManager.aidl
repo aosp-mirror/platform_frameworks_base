@@ -63,4 +63,6 @@ oneway interface IAutoFillManager {
     void getAutofillServiceComponentName(in IResultReceiver result);
     void getAvailableFieldClassificationAlgorithms(in IResultReceiver result);
     void getDefaultFieldClassificationAlgorithm(in IResultReceiver result);
+    void setAugmentedAutofillWhitelist(in List<String> packages, in List<ComponentName> activities,
+        in IResultReceiver result);
 }

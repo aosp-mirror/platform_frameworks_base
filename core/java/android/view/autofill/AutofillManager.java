@@ -369,6 +369,11 @@ public final class AutofillManager {
     public static final String DEVICE_CONFIG_AUTOFILL_SMART_SUGGESTION_SUPPORTED_MODES =
             "smart_suggestion_supported_modes";
 
+    /** @hide */
+    public static final int RESULT_OK = 0;
+    /** @hide */
+    public static final int RESULT_CODE_NOT_SERVICE = -1;
+
     /**
      * Makes an authentication id from a request id and a dataset id.
      *
@@ -1789,7 +1794,11 @@ public final class AutofillManager {
     @Deprecated
     public void setAugmentedAutofillWhitelist(@Nullable List<String> packages,
             @Nullable List<ComponentName> activities) {
-        // TODO(b/123100824): implement
+        setAugmentedAutofillWhitelist(toSet(packages), toSet(activities));
+    }
+
+    private <T> ArraySet<T> toSet(@Nullable List<T> set) {
+        return set == null ? null : new ArraySet<T>(set);
     }
 
     /**
@@ -1814,7 +1823,32 @@ public final class AutofillManager {
     @TestApi
     public void setAugmentedAutofillWhitelist(@Nullable Set<String> packages,
             @Nullable Set<ComponentName> activities) {
-        // TODO(b/123100824): implement
+        if (!hasAutofillFeature()) {
+            return;
+        }
+
+        final SyncResultReceiver resultReceiver = new SyncResultReceiver(SYNC_CALLS_TIMEOUT_MS);
+        final int resultCode;
+        try {
+            mService.setAugmentedAutofillWhitelist(toList(packages), toList(activities),
+                    resultReceiver);
+            resultCode = resultReceiver.getIntResult();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+        switch (resultCode) {
+            case RESULT_OK:
+                return;
+            case RESULT_CODE_NOT_SERVICE:
+                throw new SecurityException("caller is not user's Augmented Autofill Service");
+            default:
+                Log.wtf(TAG, "setAugmentedAutofillWhitelist(): received invalid result: "
+                        + resultCode);
+        }
+    }
+
+    private <T> ArrayList<T> toList(@Nullable Set<T> set) {
+        return set == null ? null : new ArrayList<T>(set);
     }
 
     private void requestShowFillUi(int sessionId, AutofillId id, int width, int height,
