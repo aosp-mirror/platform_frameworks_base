@@ -2008,11 +2008,6 @@
          a transaction, so it interacts poorly with SECURE_DELETE. -->
     <string name="db_default_journal_mode" translatable="false">TRUNCATE</string>
 
-    <!-- Enables compatibility WAL mode.
-         In this mode, only database journal mode will be changed, connection pool
-         size will still be limited to a single connection. -->
-    <bool name="db_compatibility_wal_supported">true</bool>
-
     <!-- Maximum size of the persistent journal file in bytes.
          If the journal file grows to be larger than this amount then SQLite will
          truncate it after committing the transaction. -->

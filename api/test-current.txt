@@ -685,7 +685,6 @@ package android.database.sqlite {
     method public static int getWALAutoCheckpoint();
     method public static int getWALConnectionPoolSize();
     method public static String getWALSyncMode();
-    method public static boolean isCompatibilityWalSupported();
     method public static int releaseMemory();
   }
 

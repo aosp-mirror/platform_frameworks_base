@@ -266,12 +266,17 @@ public final class SQLiteDatabase extends SQLiteClosable {
      */
     public static final int ENABLE_WRITE_AHEAD_LOGGING = 0x20000000;
 
+
+    // Note: The below value was only used on Android Pie.
+    // public static final int DISABLE_COMPATIBILITY_WAL = 0x40000000;
+
     /**
-     * Open flag: Flag for {@link #openDatabase} to disable Compatibility WAL when opening database.
+     * Open flag: Flag for {@link #openDatabase} to enable the legacy Compatibility WAL when opening
+     * database.
      *
      * @hide
      */
-    public static final int DISABLE_COMPATIBILITY_WAL = 0x40000000;
+    public static final int ENABLE_LEGACY_COMPATIBILITY_WAL = 0x80000000;
 
     /**
      * Absolute max value that can be set by {@link #setMaxSqlCacheSize(int)}.
@@ -309,10 +314,8 @@ public final class SQLiteDatabase extends SQLiteClosable {
         mConfigurationLocked.idleConnectionTimeoutMs = effectiveTimeoutMs;
         mConfigurationLocked.journalMode = journalMode;
         mConfigurationLocked.syncMode = syncMode;
-        if (!SQLiteGlobal.isCompatibilityWalSupported() || (
-                SQLiteCompatibilityWalFlags.areFlagsSet() && !SQLiteCompatibilityWalFlags
-                        .isCompatibilityWalSupported())) {
-            mConfigurationLocked.openFlags |= DISABLE_COMPATIBILITY_WAL;
+        if (SQLiteCompatibilityWalFlags.isLegacyCompatibilityWalEnabled()) {
+            mConfigurationLocked.openFlags |= ENABLE_LEGACY_COMPATIBILITY_WAL;
         }
     }
 
@@ -2123,15 +2126,18 @@ public final class SQLiteDatabase extends SQLiteClosable {
             throwIfNotOpenLocked();
 
             final int oldFlags = mConfigurationLocked.openFlags;
-            final boolean walDisabled = (oldFlags & ENABLE_WRITE_AHEAD_LOGGING) == 0;
-            final boolean compatibilityWalDisabled = (oldFlags & DISABLE_COMPATIBILITY_WAL) != 0;
-            if (walDisabled && compatibilityWalDisabled) {
+            final boolean walEnabled = (oldFlags & ENABLE_WRITE_AHEAD_LOGGING) != 0;
+            final boolean compatibilityWalEnabled =
+                    (oldFlags & ENABLE_LEGACY_COMPATIBILITY_WAL) != 0;
+            // WAL was never enabled for this database, so there's nothing left to do.
+            if (!walEnabled && !compatibilityWalEnabled) {
                 return;
             }
 
+            // If an app explicitly disables WAL, it takes priority over any directive
+            // to use the legacy "compatibility WAL" mode.
             mConfigurationLocked.openFlags &= ~ENABLE_WRITE_AHEAD_LOGGING;
-            // If an app explicitly disables WAL, compatibility mode should be disabled too
-            mConfigurationLocked.openFlags |= DISABLE_COMPATIBILITY_WAL;
+            mConfigurationLocked.openFlags &= ~ENABLE_LEGACY_COMPATIBILITY_WAL;
 
             try {
                 mConnectionPoolLocked.reconfigure(mConfigurationLocked);

@@ -321,7 +321,7 @@ public final class SQLiteConnectionPool implements Closeable {
             // We should do in-place switching when transitioning from compatibility WAL
             // to rollback journal. Otherwise transient connection state will be lost
             boolean onlyCompatWalChanged = (mConfiguration.openFlags ^ configuration.openFlags)
-                    == SQLiteDatabase.DISABLE_COMPATIBILITY_WAL;
+                    == SQLiteDatabase.ENABLE_LEGACY_COMPATIBILITY_WAL;
 
             if (!onlyCompatWalChanged && mConfiguration.openFlags != configuration.openFlags) {
                 // If we are changing open flags and WAL mode at the same time, then
@@ -1113,19 +1113,18 @@ public final class SQLiteConnectionPool implements Closeable {
             if (directories != null) {
                 directories.add(new File(mConfiguration.path).getParent());
             }
+            boolean isCompatibilityWalEnabled = mConfiguration.isLegacyCompatibilityWalEnabled();
             printer.println("Connection pool for " + mConfiguration.path + ":");
             printer.println("  Open: " + mIsOpen);
             printer.println("  Max connections: " + mMaxConnectionPoolSize);
             printer.println("  Total execution time: " + mTotalExecutionTimeCounter);
             printer.println("  Configuration: openFlags=" + mConfiguration.openFlags
-                    + ", useCompatibilityWal=" + mConfiguration.useCompatibilityWal()
+                    + ", isLegacyCompatibilityWalEnabled=" + isCompatibilityWalEnabled
                     + ", journalMode=" + TextUtils.emptyIfNull(mConfiguration.journalMode)
                     + ", syncMode=" + TextUtils.emptyIfNull(mConfiguration.syncMode));
 
-            if (SQLiteCompatibilityWalFlags.areFlagsSet()) {
-                printer.println("  Compatibility WAL settings: compatibility_wal_supported="
-                        + SQLiteCompatibilityWalFlags
-                        .isCompatibilityWalSupported() + ", wal_syncmode="
+            if (isCompatibilityWalEnabled) {
+                printer.println("  Compatibility WAL enabled: wal_syncmode="
                         + SQLiteCompatibilityWalFlags.getWALSyncMode());
             }
             if (mConfiguration.isLookasideConfigSet()) {
