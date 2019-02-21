@@ -85,6 +85,18 @@ public abstract class AugmentedAutofillService extends Service {
     private final IAugmentedAutofillService mInterface = new IAugmentedAutofillService.Stub() {
 
         @Override
+        public void onConnected() {
+            mHandler.sendMessage(obtainMessage(AugmentedAutofillService::handleOnConnected,
+                    AugmentedAutofillService.this));
+        }
+
+        @Override
+        public void onDisconnected() {
+            mHandler.sendMessage(obtainMessage(AugmentedAutofillService::handleOnDisconnected,
+                    AugmentedAutofillService.this));
+        }
+
+        @Override
         public void onFillRequest(int sessionId, IBinder client, int taskId,
                 ComponentName componentName, AutofillId focusedId, AutofillValue focusedValue,
                 long requestTime, IFillCallback callback) {
@@ -172,6 +184,14 @@ public abstract class AugmentedAutofillService extends Service {
      * <p> At this point this service may no longer be an active {@link AugmentedAutofillService}.
      */
     public void onDisconnected() {
+    }
+
+    private void handleOnConnected() {
+        onConnected();
+    }
+
+    private void handleOnDisconnected() {
+        onDisconnected();
     }
 
     private void handleOnFillRequest(int sessionId, @NonNull IBinder client, int taskId,

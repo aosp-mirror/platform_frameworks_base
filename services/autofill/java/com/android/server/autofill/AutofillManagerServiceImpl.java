@@ -1179,6 +1179,7 @@ final class AutofillManagerServiceImpl
                 if (mMaster.verbose) Slog.v(TAG, "whitelisting augmented packages: " + packages);
                 mWhitelistedAugmentAutofillPackages.addAll(packages);
             }
+            mRemoteAugmentedAutofillService = getRemoteAugmentedAutofillServiceLocked();
         }
     }
 
