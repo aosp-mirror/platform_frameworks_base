@@ -51,7 +51,7 @@ public class SyncRtSurfaceTransactionApplierCompat {
      *               this method to avoid synchronization issues.
      */
     public void scheduleApply(final SyncRtSurfaceTransactionApplierCompat.SurfaceParams... params) {
-        if (mTargetViewRootImpl == null) {
+        if (mTargetViewRootImpl == null || mTargetViewRootImpl.getView() == null) {
             return;
         }
         mTargetViewRootImpl.registerRtFrameCallback(new HardwareRenderer.FrameDrawingCallback() {
