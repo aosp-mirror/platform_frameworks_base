@@ -1267,7 +1267,7 @@ public final class Bitmap implements Parcelable {
             node.setLeftTopRightBottom(0, 0, width, height);
             node.setClipToBounds(false);
             node.setForceDarkAllowed(false);
-            final RecordingCanvas canvas = node.startRecording(width, height);
+            final RecordingCanvas canvas = node.beginRecording(width, height);
             if (source.getWidth() != width || source.getHeight() != height) {
                 canvas.scale(width / (float) source.getWidth(),
                         height / (float) source.getHeight());

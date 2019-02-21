@@ -71,7 +71,7 @@ public class RenderNodePerfTest {
         final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         RenderNode node = RenderNode.create("LinearLayout", null);
         while (state.keepRunning()) {
-            node.startRecording(100, 100);
+            node.beginRecording(100, 100);
             node.endRecording();
         }
     }
@@ -86,7 +86,7 @@ public class RenderNodePerfTest {
 
         while (state.keepRunning()) {
             for (int i = 0; i < nodes.length; i++) {
-                nodes[i].startRecording(100, 100);
+                nodes[i].beginRecording(100, 100);
             }
             for (int i = nodes.length - 1; i >= 0; i--) {
                 nodes[i].endRecording();

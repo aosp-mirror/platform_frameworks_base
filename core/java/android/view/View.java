@@ -16043,7 +16043,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     @ViewDebug.ExportedProperty(category = "drawing")
     @InspectableProperty
     public float getRotation() {
-        return mRenderNode.getRotation();
+        return mRenderNode.getRotationZ();
     }
 
     /**
@@ -16064,7 +16064,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (rotation != getRotation()) {
             // Double-invalidation is necessary to capture view's old and new areas
             invalidateViewProperty(true, false);
-            mRenderNode.setRotation(rotation);
+            mRenderNode.setRotationZ(rotation);
             invalidateViewProperty(false, true);
 
             invalidateParentIfNeededAndWasQuickRejected();
@@ -20578,7 +20578,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             int height = mBottom - mTop;
             int layerType = getLayerType();
 
-            final RecordingCanvas canvas = renderNode.startRecording(width, height);
+            final RecordingCanvas canvas = renderNode.beginRecording(width, height);
 
             try {
                 if (layerType == LAYER_TYPE_SOFTWARE) {
@@ -21233,7 +21233,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         } else {
             mClipBounds = null;
         }
-        mRenderNode.setClipBounds(mClipBounds);
+        mRenderNode.setClipRect(mClipBounds);
         invalidateViewProperty(false, false);
     }
 
@@ -21978,7 +21978,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         final Rect bounds = drawable.getBounds();
         final int width = bounds.width();
         final int height = bounds.height();
-        final RecordingCanvas canvas = renderNode.startRecording(width, height);
+        final RecordingCanvas canvas = renderNode.beginRecording(width, height);
 
         // Reverse left/top translation done by drawable canvas, which will
         // instead be applied by rendernode's LTRB bounds below. This way, the

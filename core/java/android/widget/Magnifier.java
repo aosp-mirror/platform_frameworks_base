@@ -859,7 +859,7 @@ public final class Magnifier {
             );
             setupOverlay();
 
-            final RecordingCanvas canvas = mRenderer.getRootNode().start(width, height);
+            final RecordingCanvas canvas = mRenderer.getRootNode().beginRecording(width, height);
             try {
                 canvas.insertReorderBarrier();
                 canvas.drawRenderNode(mBitmapRenderNode);
@@ -867,7 +867,7 @@ public final class Magnifier {
                 canvas.drawRenderNode(mOverlayRenderNode);
                 canvas.insertInorderBarrier();
             } finally {
-                mRenderer.getRootNode().end(canvas);
+                mRenderer.getRootNode().endRecording();
             }
             if (mCallback != null) {
                 mCurrentContent =
@@ -898,11 +898,12 @@ public final class Magnifier {
             bitmapRenderNode.setClipToOutline(true);
 
             // Create a dummy draw, which will be replaced later with real drawing.
-            final RecordingCanvas canvas = bitmapRenderNode.start(mContentWidth, mContentHeight);
+            final RecordingCanvas canvas = bitmapRenderNode.beginRecording(
+                    mContentWidth, mContentHeight);
             try {
                 canvas.drawColor(0xFF00FF00);
             } finally {
-                bitmapRenderNode.end(canvas);
+                bitmapRenderNode.endRecording();
             }
 
             return bitmapRenderNode;
@@ -954,7 +955,7 @@ public final class Magnifier {
             // Draw the drawable to the render node. This happens once during
             // initialization and whenever the overlay drawable is invalidated.
             final RecordingCanvas canvas =
-                    mOverlayRenderNode.startRecording(mContentWidth, mContentHeight);
+                    mOverlayRenderNode.beginRecording(mContentWidth, mContentHeight);
             try {
                 mOverlay.setBounds(0, 0, mContentWidth, mContentHeight);
                 mOverlay.draw(canvas);
@@ -1035,7 +1036,7 @@ public final class Magnifier {
                 }
 
                 final RecordingCanvas canvas =
-                        mBitmapRenderNode.start(mContentWidth, mContentHeight);
+                        mBitmapRenderNode.beginRecording(mContentWidth, mContentHeight);
                 try {
                     final Rect srcRect = new Rect(0, 0, mBitmap.getWidth(), mBitmap.getHeight());
                     final Rect dstRect = new Rect(0, 0, mContentWidth, mContentHeight);
@@ -1043,7 +1044,7 @@ public final class Magnifier {
                     paint.setFilterBitmap(true);
                     canvas.drawBitmap(mBitmap, srcRect, dstRect, paint);
                 } finally {
-                    mBitmapRenderNode.end(canvas);
+                    mBitmapRenderNode.endRecording();
                 }
 
                 if (mPendingWindowPositionUpdate || mFirstDraw) {

@@ -258,7 +258,7 @@ public class HardwareRenderer {
      *                and the renderer will draw nothing.
      */
     public void setContentRoot(@Nullable RenderNode content) {
-        RecordingCanvas canvas = mRootNode.startRecording();
+        RecordingCanvas canvas = mRootNode.beginRecording();
         if (content != null) {
             canvas.drawRenderNode(content);
         }
