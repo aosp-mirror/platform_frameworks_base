@@ -256,10 +256,16 @@ class WindowTestsBase {
 
     WindowTestUtils.TestAppWindowToken createTestAppWindowToken(DisplayContent dc, int
             windowingMode, int activityType) {
+        return createTestAppWindowToken(dc, windowingMode, activityType,
+                true /*skipOnParentChanged */);
+    }
+
+    WindowTestUtils.TestAppWindowToken createTestAppWindowToken(DisplayContent dc, int
+            windowingMode, int activityType, boolean skipOnParentChanged) {
         final TaskStack stack = createTaskStackOnDisplay(windowingMode, activityType, dc);
         final Task task = createTaskInStack(stack, 0 /* userId */);
         final WindowTestUtils.TestAppWindowToken appWindowToken =
-                WindowTestUtils.createTestAppWindowToken(dc);
+                WindowTestUtils.createTestAppWindowToken(dc, skipOnParentChanged);
         task.addChild(appWindowToken, 0);
         return appWindowToken;
     }

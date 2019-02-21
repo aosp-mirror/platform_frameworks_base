@@ -57,7 +57,14 @@ class WindowTestUtils {
 
     static TestAppWindowToken createTestAppWindowToken(DisplayContent dc) {
         synchronized (dc.mWmService.mGlobalLock) {
-            return new TestAppWindowToken(dc);
+            return new TestAppWindowToken(dc, true /* skipOnParentChanged */);
+        }
+    }
+
+    static TestAppWindowToken createTestAppWindowToken(DisplayContent dc,
+            boolean skipOnParentChanged) {
+        synchronized (dc.mWmService.mGlobalLock) {
+            return new TestAppWindowToken(dc, skipOnParentChanged);
         }
     }
 
@@ -68,7 +75,7 @@ class WindowTestUtils {
         private Transaction mPendingTransactionOverride;
         boolean mSkipOnParentChanged = true;
 
-        private TestAppWindowToken(DisplayContent dc) {
+        private TestAppWindowToken(DisplayContent dc, boolean skipOnParentChanged) {
             super(dc.mWmService, new IApplicationToken.Stub() {
                 @Override
                 public String getName() {
@@ -76,6 +83,7 @@ class WindowTestUtils {
                 }
             }, new ComponentName("", ""), false, dc, true /* fillsParent */);
             mTargetSdk = Build.VERSION_CODES.CUR_DEVELOPMENT;
+            mSkipOnParentChanged = skipOnParentChanged;
         }
 
         int getWindowsCount() {
