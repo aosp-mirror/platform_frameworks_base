@@ -317,14 +317,14 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
      * receivers to launch an activity and get that to run before the device
      * goes back to sleep.
      */
-    PowerManager.WakeLock mLaunchingActivity;
+    PowerManager.WakeLock mLaunchingActivityWakeLock;
 
     /**
      * Set when the system is going to sleep, until we have
      * successfully paused the current activity and released our wake lock.
      * At that point the system is allowed to actually sleep.
      */
-    PowerManager.WakeLock mGoingToSleep;
+    PowerManager.WakeLock mGoingToSleepWakeLock;
 
     /**
      * Temporary rect used during docked stack resize calculation so we don't need to create a new
@@ -467,10 +467,10 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
      */
     void initPowerManagement() {
         mPowerManager = mService.mContext.getSystemService(PowerManager.class);
-        mGoingToSleep = mPowerManager
+        mGoingToSleepWakeLock = mPowerManager
                 .newWakeLock(PARTIAL_WAKE_LOCK, "ActivityManager-Sleep");
-        mLaunchingActivity = mPowerManager.newWakeLock(PARTIAL_WAKE_LOCK, "*launch*");
-        mLaunchingActivity.setReferenceCounted(false);
+        mLaunchingActivityWakeLock = mPowerManager.newWakeLock(PARTIAL_WAKE_LOCK, "*launch*");
+        mLaunchingActivityWakeLock.setReferenceCounted(false);
     }
 
     void setWindowManager(WindowManagerService wm) {
@@ -1213,14 +1213,14 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
     }
 
     void setLaunchSource(int uid) {
-        mLaunchingActivity.setWorkSource(new WorkSource(uid));
+        mLaunchingActivityWakeLock.setWorkSource(new WorkSource(uid));
     }
 
     void acquireLaunchWakelock() {
         if (VALIDATE_WAKE_LOCK_CALLER && Binder.getCallingUid() != Process.myUid()) {
             throw new IllegalStateException("Calling must be system uid");
         }
-        mLaunchingActivity.acquire();
+        mLaunchingActivityWakeLock.acquire();
         if (!mHandler.hasMessages(LAUNCH_TIMEOUT_MSG)) {
             // To be safe, don't allow the wake lock to be held for too long.
             mHandler.sendEmptyMessageDelayed(LAUNCH_TIMEOUT_MSG, LAUNCH_TIMEOUT);
@@ -1302,13 +1302,13 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                 mService.scheduleAppGcsLocked();
             }
 
-            if (mLaunchingActivity.isHeld()) {
+            if (mLaunchingActivityWakeLock.isHeld()) {
                 mHandler.removeMessages(LAUNCH_TIMEOUT_MSG);
                 if (VALIDATE_WAKE_LOCK_CALLER &&
                         Binder.getCallingUid() != Process.myUid()) {
                     throw new IllegalStateException("Calling must be system uid");
                 }
-                mLaunchingActivity.release();
+                mLaunchingActivityWakeLock.release();
             }
             mRootActivityContainer.ensureActivitiesVisible(null, 0, !PRESERVE_WINDOWS);
         }
@@ -1972,13 +1972,13 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
 
     void goingToSleepLocked() {
         scheduleSleepTimeout();
-        if (!mGoingToSleep.isHeld()) {
-            mGoingToSleep.acquire();
-            if (mLaunchingActivity.isHeld()) {
+        if (!mGoingToSleepWakeLock.isHeld()) {
+            mGoingToSleepWakeLock.acquire();
+            if (mLaunchingActivityWakeLock.isHeld()) {
                 if (VALIDATE_WAKE_LOCK_CALLER && Binder.getCallingUid() != Process.myUid()) {
                     throw new IllegalStateException("Calling must be system uid");
                 }
-                mLaunchingActivity.release();
+                mLaunchingActivityWakeLock.release();
                 mHandler.removeMessages(LAUNCH_TIMEOUT_MSG);
             }
         }
@@ -2020,8 +2020,8 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
 
     void comeOutOfSleepIfNeededLocked() {
         removeSleepTimeouts();
-        if (mGoingToSleep.isHeld()) {
-            mGoingToSleep.release();
+        if (mGoingToSleepWakeLock.isHeld()) {
+            mGoingToSleepWakeLock.release();
         }
     }
 
@@ -2051,8 +2051,8 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
 
         removeSleepTimeouts();
 
-        if (mGoingToSleep.isHeld()) {
-            mGoingToSleep.release();
+        if (mGoingToSleepWakeLock.isHeld()) {
+            mGoingToSleepWakeLock.release();
         }
         if (mService.mShuttingDown) {
             mService.mGlobalLock.notifyAll();
@@ -2561,13 +2561,13 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                 } break;
                 case LAUNCH_TIMEOUT_MSG: {
                     synchronized (mService.mGlobalLock) {
-                        if (mLaunchingActivity.isHeld()) {
+                        if (mLaunchingActivityWakeLock.isHeld()) {
                             Slog.w(TAG, "Launch timeout has expired, giving up wake lock!");
                             if (VALIDATE_WAKE_LOCK_CALLER
                                     && Binder.getCallingUid() != Process.myUid()) {
                                 throw new IllegalStateException("Calling must be system uid");
                             }
-                            mLaunchingActivity.release();
+                            mLaunchingActivityWakeLock.release();
                         }
                     }
                 } break;
