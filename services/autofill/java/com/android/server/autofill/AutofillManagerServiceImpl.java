@@ -1096,14 +1096,17 @@ final class AutofillManagerServiceImpl
      * Called when the {@link #mAugmentedAutofillResolver} changed (among other places).
      */
     private void updateRemoteAugmentedAutofillService(@Nullable String serviceName) {
-        if (serviceName == null) {
-            if (sVerbose) Slog.v(TAG, "updateRemoteAugmentedAutofillService(): time's up!");
-            synchronized (mLock) {
-                if (mRemoteAugmentedAutofillService != null) {
-                    mRemoteAugmentedAutofillService.destroy();
-                    mRemoteAugmentedAutofillService = null;
+        synchronized (mLock) {
+            if (mRemoteAugmentedAutofillService != null) {
+                if (sVerbose) {
+                    Slog.v(TAG, "updateRemoteAugmentedAutofillService(): "
+                            + "destroying old remote service");
                 }
+                mRemoteAugmentedAutofillService.destroy();
+                mRemoteAugmentedAutofillService = null;
             }
+
+            mRemoteAugmentedAutofillService = getRemoteAugmentedAutofillServiceLocked();
         }
     }
 
