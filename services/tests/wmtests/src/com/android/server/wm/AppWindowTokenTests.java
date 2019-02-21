@@ -60,7 +60,7 @@ import org.junit.Test;
  * Tests for the {@link AppWindowToken} class.
  *
  * Build/Install/Run:
- *  atest FrameworksServicesTests:AppWindowTokenTests
+ *  atest WmTests:AppWindowTokenTests
  */
 @SmallTest
 @Presubmit
@@ -76,9 +76,9 @@ public class AppWindowTokenTests extends WindowTestsBase {
     public void setUp() throws Exception {
         mStack = createTaskStackOnDisplay(mDisplayContent);
         mTask = createTaskInStack(mStack, 0 /* userId */);
-        mToken = WindowTestUtils.createTestAppWindowToken(mDisplayContent);
+        mToken = WindowTestUtils.createTestAppWindowToken(mDisplayContent,
+                false /* skipOnParentChanged */);
 
-        mToken.mSkipOnParentChanged = false;
         mTask.addChild(mToken, 0);
     }
 

@@ -21,11 +21,9 @@ import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
 
-import static junit.framework.TestCase.assertNotNull;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
-import static org.junit.Assert.assertNull;
-
-import android.graphics.Bitmap;
 import android.os.IBinder;
 import android.platform.test.annotations.Presubmit;
 
@@ -37,7 +35,7 @@ import org.junit.Test;
  * Tests for the {@link WallpaperController} class.
  *
  * Build/Install/Run:
- *  atest FrameworksServicesTests:WallpaperControllerTests
+ *  atest WmTests:WallpaperControllerTests
  */
 @SmallTest
 @Presubmit
@@ -49,34 +47,29 @@ public class WallpaperControllerTests extends WindowTestsBase {
         synchronized (mWm.mGlobalLock) {
             // No wallpaper
             final DisplayContent dc = createNewDisplay();
-            Bitmap wallpaperBitmap = dc.mWallpaperController.screenshotWallpaperLocked();
-            assertNull(wallpaperBitmap);
+            assertFalse(dc.mWallpaperController.canScreenshotWallpaper());
 
             // No wallpaper WSA Surface
             WindowToken wallpaperWindowToken = new WallpaperWindowToken(mWm, mock(IBinder.class),
                     true, dc, true /* ownerCanManageAppTokens */);
             WindowState wallpaperWindow = createWindow(null /* parent */, TYPE_WALLPAPER,
                     wallpaperWindowToken, "wallpaperWindow");
-            wallpaperBitmap = dc.mWallpaperController.screenshotWallpaperLocked();
-            assertNull(wallpaperBitmap);
+            assertFalse(dc.mWallpaperController.canScreenshotWallpaper());
 
             // Wallpaper with not visible WSA surface.
             wallpaperWindow.mWinAnimator.mSurfaceController = windowSurfaceController;
             wallpaperWindow.mWinAnimator.mLastAlpha = 1;
-            wallpaperBitmap = dc.mWallpaperController.screenshotWallpaperLocked();
-            assertNull(wallpaperBitmap);
+            assertFalse(dc.mWallpaperController.canScreenshotWallpaper());
 
             when(windowSurfaceController.getShown()).thenReturn(true);
 
             // Wallpaper with WSA alpha set to 0.
             wallpaperWindow.mWinAnimator.mLastAlpha = 0;
-            wallpaperBitmap = dc.mWallpaperController.screenshotWallpaperLocked();
-            assertNull(wallpaperBitmap);
+            assertFalse(dc.mWallpaperController.canScreenshotWallpaper());
 
             // Wallpaper window with WSA Surface
             wallpaperWindow.mWinAnimator.mLastAlpha = 1;
-            wallpaperBitmap = dc.mWallpaperController.screenshotWallpaperLocked();
-            assertNotNull(wallpaperBitmap);
+            assertTrue(dc.mWallpaperController.canScreenshotWallpaper());
         }
     }
 }

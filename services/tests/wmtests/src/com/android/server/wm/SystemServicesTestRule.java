@@ -167,7 +167,7 @@ public class SystemServicesTestRule implements TestRule {
 
         mWindowManagerPolicy = new TestWindowManagerPolicy(this::getWindowManagerService);
         mWindowManagerService = WindowManagerService.main(
-                context, ims, false, false, mWindowManagerPolicy, atms);
+                context, ims, false, false, mWindowManagerPolicy, atms, StubTransaction::new);
 
         mWindowManagerService.onInitReady();
 
