@@ -136,8 +136,7 @@
     <string name="process_kernel_label" msgid="3916858646836739323">"Android OS"</string>
     <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"നീക്കംചെയ്‌ത അപ്ലിക്കേഷനുകൾ"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"നീക്കംചെയ്‌ത അപ്ലിക്കേഷനുകളും ഉപയോക്താക്കളും"</string>
-    <!-- no translation found for data_usage_ota (5377889154805560860) -->
-    <skip />
+    <string name="data_usage_ota" msgid="5377889154805560860">"സിസ്‌റ്റം അപ്‌ഡേറ്റുകൾ"</string>
     <string name="tether_settings_title_usb" msgid="6688416425801386511">"USB ടെതറിംഗ്"</string>
     <string name="tether_settings_title_wifi" msgid="3277144155960302049">"പോർട്ടബിൾ ഹോട്ട്സ്‌പോട്ട്"</string>
     <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"ബ്ലൂടൂത്ത് ടെതറിംഗ്"</string>
