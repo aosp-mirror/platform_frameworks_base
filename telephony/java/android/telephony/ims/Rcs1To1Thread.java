@@ -22,6 +22,8 @@ import android.annotation.WorkerThread;
  * Rcs1To1Thread represents a single RCS conversation thread with a total of two
  * {@link RcsParticipant}s. Please see Section 5 (1-to-1 Messaging) - GSMA RCC.71 (RCS Universal
  * Profile Service Definition Document)
+ *
+ * @hide
  */
 public class Rcs1To1Thread extends RcsThread {
     private int mThreadId;
