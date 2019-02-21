@@ -493,6 +493,11 @@ void StatsdStats::noteInvalidatedBucket(int64_t metricId) {
     getAtomMetricStats(metricId).invalidatedBucket++;
 }
 
+void StatsdStats::noteBucketCount(int64_t metricId) {
+    lock_guard<std::mutex> lock(mLock);
+    getAtomMetricStats(metricId).bucketCount++;
+}
+
 void StatsdStats::noteBucketBoundaryDelayNs(int64_t metricId, int64_t timeDelayNs) {
     lock_guard<std::mutex> lock(mLock);
     AtomMetricStats& pullStats = getAtomMetricStats(metricId);
