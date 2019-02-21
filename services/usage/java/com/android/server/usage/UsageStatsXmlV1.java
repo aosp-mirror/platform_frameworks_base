@@ -384,10 +384,7 @@ final class UsageStatsXmlV1 {
         statsOut.packageStats.clear();
         statsOut.configurations.clear();
         statsOut.activeConfiguration = null;
-
-        if (statsOut.events != null) {
-            statsOut.events.clear();
-        }
+        statsOut.events.clear();
 
         statsOut.endTime = statsOut.beginTime + XmlUtils.readLongAttribute(parser, END_TIME_ATTR);
         try {
@@ -481,7 +478,7 @@ final class UsageStatsXmlV1 {
         xml.endTag(null, CONFIGURATIONS_TAG);
 
         xml.startTag(null, EVENT_LOG_TAG);
-        final int eventCount = stats.events != null ? stats.events.size() : 0;
+        final int eventCount = stats.events.size();
         for (int i = 0; i < eventCount; i++) {
             writeEvent(xml, stats, stats.events.get(i));
         }

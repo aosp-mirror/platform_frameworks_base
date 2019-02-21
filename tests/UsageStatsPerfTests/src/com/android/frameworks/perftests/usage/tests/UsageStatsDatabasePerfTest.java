@@ -18,7 +18,6 @@ package com.android.frameworks.perftests.usage.tests;
 
 import static junit.framework.Assert.assertEquals;
 
-import android.app.usage.EventList;
 import android.app.usage.UsageEvents;
 import android.app.usage.UsageStatsManager;
 import android.content.Context;
@@ -84,9 +83,6 @@ public class UsageStatsDatabasePerfTest {
 
     private static void populateIntervalStats(IntervalStats intervalStats, int packageCount,
             int eventsPerPackage) {
-        if (intervalStats.events == null) {
-            intervalStats.events = new EventList();
-        }
         for (int pkg = 0; pkg < packageCount; pkg++) {
             UsageEvents.Event event = new UsageEvents.Event();
             event.mPackage = "fake.package.name" + pkg;

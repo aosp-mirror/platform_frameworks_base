@@ -16,7 +16,6 @@
 package com.android.server.usage;
 
 import android.app.usage.ConfigurationStats;
-import android.app.usage.EventList;
 import android.app.usage.UsageEvents;
 import android.app.usage.UsageStats;
 import android.content.res.Configuration;
@@ -303,10 +302,6 @@ final class UsageStatsProto {
         if (event.mPackage == null) {
             throw new ProtocolException("no package field present");
         }
-
-        if (statsOut.events == null) {
-            statsOut.events = new EventList();
-        }
         statsOut.events.insert(event);
     }
 
@@ -514,10 +509,7 @@ final class UsageStatsProto {
         statsOut.packageStats.clear();
         statsOut.configurations.clear();
         statsOut.activeConfiguration = null;
-
-        if (statsOut.events != null) {
-            statsOut.events.clear();
-        }
+        statsOut.events.clear();
 
         while (true) {
             switch (proto.nextField()) {
@@ -607,7 +599,7 @@ final class UsageStatsProto {
             writeConfigStats(proto, IntervalStatsProto.CONFIGURATIONS, stats,
                     stats.configurations.valueAt(i), active);
         }
-        final int eventCount = stats.events != null ? stats.events.size() : 0;
+        final int eventCount = stats.events.size();
         for (int i = 0; i < eventCount; i++) {
             writeEvent(proto, IntervalStatsProto.EVENT_LOG, stats, stats.events.get(i));
         }
