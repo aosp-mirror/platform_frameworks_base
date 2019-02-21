@@ -5630,7 +5630,7 @@ message TrainInfo {
  *   frameworks/base/packages/SystemUI/
  */
 message AssistGestureStageReported {
-  optional android.hardware.sensor.assist.AssistGestureStageEnum gesture_stage = 1;
+    optional android.hardware.sensor.assist.AssistGestureStageEnum gesture_stage = 1;
 }
 
 /**
@@ -5640,8 +5640,8 @@ message AssistGestureStageReported {
  *   frameworks/base/packages/SystemUI/
  */
 message AssistGestureFeedbackReported {
-  // Whether or not the gesture was used.
-  optional android.hardware.sensor.assist.AssistGestureFeedbackEnum feedback_type = 1;
+    // Whether or not the gesture was used.
+    optional android.hardware.sensor.assist.AssistGestureFeedbackEnum feedback_type = 1;
 }
 
 /**
@@ -5651,8 +5651,8 @@ message AssistGestureFeedbackReported {
  *   frameworks/base/packages/SystemUI/
  */
 message AssistGestureProgressReported {
-  // [0,100] progress for the assist gesture.
-  optional int32 progress = 1;
+    // [0,100] progress for the assist gesture.
+    optional int32 progress = 1;
 }
 
 /*
