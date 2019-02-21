@@ -524,6 +524,9 @@ message WifiLog {
 
   // Link Probe metrics
   optional LinkProbeStats link_probe_stats = 139;
+
+  // List of NetworkSelectionExperimentDecisions stats for each experiment
+  repeated NetworkSelectionExperimentDecisions network_selection_experiment_decisions_list = 140;
 }
 
 // Information that gets logged for every WiFi connection.
@@ -2285,4 +2288,27 @@ message LinkProbeStats {
 
   // Counts the occurrences of error codes for failed link probes.
   repeated LinkProbeFailureReasonCount failure_reason_counts = 8;
+}
+
+// Stores the decisions that were made by a experiment when compared against another experiment
+message NetworkSelectionExperimentDecisions {
+  // the id of one experiment
+  optional int32 experiment1_id = 1;
+
+  // the id of the other experiment
+  optional int32 experiment2_id = 2;
+
+  // Counts occurrences of the number of network choices there were when experiment1 makes the
+  // same network selection as experiment2.
+  // The keys are the number of network choices, and the values are the number of occurrences of
+  // this number of network choices when exp1 and exp2 make the same network selection.
+  repeated MapEntryInt32Int32 same_selection_num_choices_counter = 3;
+
+  // Counts occurrences of the number of network choices there were when experiment1 makes the
+  // same network selection as experiment2.
+  // The keys are the number of network choices, and the values are the number of occurrences of
+  // this number of network choices when exp1 and exp2 make different network selections.
+  // Note that it is possible for the network selection to be different even when there only exists
+  // a single network choice, since choosing not to connect to that network is a valid choice.
+  repeated MapEntryInt32Int32 different_selection_num_choices_counter = 4;
 }
