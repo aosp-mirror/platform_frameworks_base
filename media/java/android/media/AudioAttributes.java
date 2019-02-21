@@ -368,6 +368,12 @@ public final class AudioAttributes implements Parcelable {
      */
     public final static int FLAG_DEEP_BUFFER = 0x1 << 9;
 
+    /**
+     * @hide
+     * Flag specifying that the audio shall not be captured by other apps.
+     */
+    public static final int FLAG_NO_CAPTURE = 0x1 << 10;
+
     private final static int FLAG_ALL = FLAG_AUDIBILITY_ENFORCED | FLAG_SECURE | FLAG_SCO |
             FLAG_BEACON | FLAG_HW_AV_SYNC | FLAG_HW_HOTWORD | FLAG_BYPASS_INTERRUPTION_POLICY |
             FLAG_BYPASS_MUTE | FLAG_LOW_LATENCY | FLAG_DEEP_BUFFER;
@@ -614,6 +620,22 @@ public final class AudioAttributes implements Parcelable {
         public Builder setFlags(int flags) {
             flags &= AudioAttributes.FLAG_ALL;
             mFlags |= flags;
+            return this;
+        }
+
+        /**
+         * Specifying if audio shall or shall not be captured by other apps.
+         * By default, capture is allowed.
+         * @param allowCapture false to forbid capture of the audio by any apps,
+         *                     true to allow apps to capture the audio
+         * @return the same Builder instance
+         */
+        public Builder setAllowCapture(boolean allowCapture) {
+            if (allowCapture) {
+                mFlags &= ~FLAG_NO_CAPTURE;
+            } else {
+                mFlags |= FLAG_NO_CAPTURE;
+            }
             return this;
         }
 
