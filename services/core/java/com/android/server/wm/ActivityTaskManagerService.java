@@ -26,7 +26,6 @@ import static android.Manifest.permission.REMOVE_TASKS;
 import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
 import static android.Manifest.permission.STOP_APP_SWITCHES;
 import static android.app.ActivityManager.LOCK_TASK_MODE_NONE;
-import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
 import static android.app.ActivityManagerInternal.ALLOW_FULL_ONLY;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.ActivityTaskManager.RESIZE_MODE_PRESERVE_WINDOW;
@@ -272,6 +271,10 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.lang.ref.WeakReference;
 import java.text.DateFormat;
 import java.util.ArrayList;
@@ -363,7 +366,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     private UserManagerService mUserManager;
     private AppOpsService mAppOpsService;
     /** All active uids in the system. */
-    private final SparseArray<Integer> mActiveUids = new SparseArray<>();
+    private final MirrorActiveUids mActiveUids = new MirrorActiveUids();
     private final SparseArray<String> mPendingTempWhitelist = new SparseArray<>();
     /** All processes currently running that might have a window organized by name. */
     final ProcessMap<WindowProcessController> mProcessNames = new ProcessMap<>();
@@ -645,6 +648,17 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 }
             }
         }
+    }
+
+    /** Indicates that the method may be invoked frequently or is sensitive to performance. */
+    @Target(ElementType.METHOD)
+    @Retention(RetentionPolicy.SOURCE)
+    @interface HotPath {
+        int NONE = 0;
+        int OOM_ADJUSTMENT = 1;
+        int LRU_UPDATE = 2;
+        int PROCESS_CHANGE = 3;
+        int caller() default NONE;
     }
 
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
@@ -5720,12 +5734,12 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         return null;
     }
 
-    int getUidStateLocked(int uid) {
-        return mActiveUids.get(uid, PROCESS_STATE_NONEXISTENT);
+    int getUidState(int uid) {
+        return mActiveUids.getUidState(uid);
     }
 
     boolean isUidForeground(int uid) {
-        return (getUidStateLocked(uid) == ActivityManager.PROCESS_STATE_TOP)
+        return (getUidState(uid) == ActivityManager.PROCESS_STATE_TOP)
                 || mWindowManager.mRoot.isAnyNonToastWindowVisibleForUid(uid);
     }
 
@@ -6118,23 +6132,26 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             }
         }
 
+        @HotPath(caller = HotPath.PROCESS_CHANGE)
         @Override
         public void onProcessAdded(WindowProcessController proc) {
-            synchronized (mGlobalLock) {
+            synchronized (mGlobalLockWithoutBoost) {
                 mProcessNames.put(proc.mName, proc.mUid, proc);
             }
         }
 
+        @HotPath(caller = HotPath.PROCESS_CHANGE)
         @Override
         public void onProcessRemoved(String name, int uid) {
-            synchronized (mGlobalLock) {
+            synchronized (mGlobalLockWithoutBoost) {
                 mProcessNames.remove(name, uid);
             }
         }
 
+        @HotPath(caller = HotPath.PROCESS_CHANGE)
         @Override
         public void onCleanUpApplicationRecord(WindowProcessController proc) {
-            synchronized (mGlobalLock) {
+            synchronized (mGlobalLockWithoutBoost) {
                 if (proc == mHomeProcess) {
                     mHomeProcess = null;
                 }
@@ -6144,23 +6161,26 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             }
         }
 
+        @HotPath(caller = HotPath.OOM_ADJUSTMENT)
         @Override
         public int getTopProcessState() {
-            synchronized (mGlobalLock) {
+            synchronized (mGlobalLockWithoutBoost) {
                 return mTopProcessState;
             }
         }
 
+        @HotPath(caller = HotPath.OOM_ADJUSTMENT)
         @Override
         public boolean isHeavyWeightProcess(WindowProcessController proc) {
-            synchronized (mGlobalLock) {
+            synchronized (mGlobalLockWithoutBoost) {
                 return proc == mHeavyWeightProcess;
             }
         }
 
+        @HotPath(caller = HotPath.PROCESS_CHANGE)
         @Override
         public void clearHeavyWeightProcessIfEquals(WindowProcessController proc) {
-            synchronized (mGlobalLock) {
+            synchronized (mGlobalLockWithoutBoost) {
                 ActivityTaskManagerService.this.clearHeavyWeightProcessIfEquals(proc);
             }
         }
@@ -6176,9 +6196,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             }
         }
 
+        @HotPath(caller = HotPath.OOM_ADJUSTMENT)
         @Override
         public boolean isSleeping() {
-            synchronized (mGlobalLock) {
+            synchronized (mGlobalLockWithoutBoost) {
                 return isSleepingLocked();
             }
         }
@@ -6422,9 +6443,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             }
         }
 
+        @HotPath(caller = HotPath.PROCESS_CHANGE)
         @Override
         public boolean isFactoryTestProcess(WindowProcessController wpc) {
-            synchronized (mGlobalLock) {
+            synchronized (mGlobalLockWithoutBoost) {
                 if (mFactoryTest == FACTORY_TEST_OFF) {
                     return false;
                 }
@@ -6477,10 +6499,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             }
         }
 
+        @HotPath(caller = HotPath.PROCESS_CHANGE)
         @Override
         public void handleAppDied(WindowProcessController wpc, boolean restarting,
                 Runnable finishInstrumentationCallback) {
-            synchronized (mGlobalLock) {
+            synchronized (mGlobalLockWithoutBoost) {
                 // Remove this application's activities from active lists.
                 boolean hasVisibleActivities = mRootActivityContainer.handleAppDied(wpc);
 
@@ -6579,16 +6602,18 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             }
         }
 
+        @HotPath(caller = HotPath.PROCESS_CHANGE)
         @Override
         public void preBindApplication(WindowProcessController wpc) {
-            synchronized (mGlobalLock) {
+            synchronized (mGlobalLockWithoutBoost) {
                 mStackSupervisor.getActivityMetricsLogger().notifyBindApplication(wpc.mInfo);
             }
         }
 
+        @HotPath(caller = HotPath.PROCESS_CHANGE)
         @Override
         public boolean attachApplication(WindowProcessController wpc) throws RemoteException {
-            synchronized (mGlobalLock) {
+            synchronized (mGlobalLockWithoutBoost) {
                 return mRootActivityContainer.attachApplication(wpc);
             }
         }
@@ -6916,6 +6941,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             }
         }
 
+        @HotPath(caller = HotPath.OOM_ADJUSTMENT)
         @Override
         public WindowProcessController getTopApp() {
             synchronized (mGlobalLockWithoutBoost) {
@@ -6924,6 +6950,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             }
         }
 
+        @HotPath(caller = HotPath.OOM_ADJUSTMENT)
         @Override
         public void rankTaskLayersIfNeeded() {
             synchronized (mGlobalLockWithoutBoost) {
@@ -6968,34 +6995,28 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             }
         }
 
+        @HotPath(caller = HotPath.OOM_ADJUSTMENT)
         @Override
         public void onUidActive(int uid, int procState) {
-            synchronized (mGlobalLockWithoutBoost) {
-                mActiveUids.put(uid, procState);
-            }
+            mActiveUids.onUidActive(uid, procState);
         }
 
+        @HotPath(caller = HotPath.OOM_ADJUSTMENT)
         @Override
         public void onUidInactive(int uid) {
-            synchronized (mGlobalLockWithoutBoost) {
-                mActiveUids.remove(uid);
-            }
+            mActiveUids.onUidInactive(uid);
         }
 
+        @HotPath(caller = HotPath.OOM_ADJUSTMENT)
         @Override
         public void onActiveUidsCleared() {
-            synchronized (mGlobalLockWithoutBoost) {
-                mActiveUids.clear();
-            }
+            mActiveUids.onActiveUidsCleared();
         }
 
+        @HotPath(caller = HotPath.OOM_ADJUSTMENT)
         @Override
         public void onUidProcStateChanged(int uid, int procState) {
-            synchronized (mGlobalLockWithoutBoost) {
-                if (mActiveUids.get(uid) != null) {
-                    mActiveUids.put(uid, procState);
-                }
-            }
+            mActiveUids.onUidProcStateChanged(uid, procState);
         }
 
         @Override

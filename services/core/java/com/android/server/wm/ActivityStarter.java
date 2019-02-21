@@ -938,7 +938,7 @@ class ActivityStarter {
             return false;
         }
         // don't abort if the callingUid is in the foreground or is a persistent system process
-        final int callingUidProcState = mService.getUidStateLocked(callingUid);
+        final int callingUidProcState = mService.getUidState(callingUid);
         final boolean callingUidHasAnyVisibleWindow =
                 mService.mWindowManager.mRoot.isAnyNonToastWindowVisibleForUid(callingUid);
         final boolean isCallingUidForeground = callingUidHasAnyVisibleWindow
@@ -951,7 +951,7 @@ class ActivityStarter {
         // take realCallingUid into consideration
         final int realCallingUidProcState = (callingUid == realCallingUid)
                 ? callingUidProcState
-                : mService.getUidStateLocked(realCallingUid);
+                : mService.getUidState(realCallingUid);
         final boolean realCallingUidHasAnyVisibleWindow = (callingUid == realCallingUid)
                 ? callingUidHasAnyVisibleWindow
                 : mService.mWindowManager.mRoot.isAnyNonToastWindowVisibleForUid(realCallingUid);
