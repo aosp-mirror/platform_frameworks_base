@@ -403,6 +403,11 @@ public:
     void noteInvalidatedBucket(int64_t metricId);
 
     /**
+     * Tracks the total number of buckets (include skipped/invalid buckets).
+     */
+    void noteBucketCount(int64_t metricId);
+
+    /**
      * For pulls at bucket boundaries, it represents the misalignment between the real timestamp and
      * the end of the bucket.
      */
@@ -464,6 +469,7 @@ public:
         int64_t minBucketBoundaryDelayNs = 0;
         int64_t maxBucketBoundaryDelayNs = 0;
         long bucketUnknownCondition = 0;
+        long bucketCount = 0;
     } AtomMetricStats;
 
 private:

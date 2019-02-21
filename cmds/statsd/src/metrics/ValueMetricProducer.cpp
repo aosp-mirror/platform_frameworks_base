@@ -769,6 +769,7 @@ void ValueMetricProducer::flushCurrentBucketLocked(const int64_t& eventTimeNs,
     if (!mCurrentBucketIsInvalid) {
         appendToFullBucket(eventTimeNs, fullBucketEndTimeNs);
     }
+    StatsdStats::getInstance().noteBucketCount(mMetricId);
     initCurrentSlicedBucket();
     mCurrentBucketIsInvalid = false;
     mCurrentBucketStartTimeNs = nextBucketStartTimeNs;

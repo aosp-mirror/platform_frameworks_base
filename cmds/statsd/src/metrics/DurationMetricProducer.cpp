@@ -601,6 +601,7 @@ void DurationMetricProducer::flushCurrentBucketLocked(const int64_t& eventTimeNs
             whatIt++;
         }
     }
+    StatsdStats::getInstance().noteBucketCount(mMetricId);
 }
 
 void DurationMetricProducer::dumpStatesLocked(FILE* out, bool verbose) const {

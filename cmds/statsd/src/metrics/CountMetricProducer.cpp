@@ -371,6 +371,7 @@ void CountMetricProducer::flushCurrentBucketLocked(const int64_t& eventTimeNs,
         }
     }
 
+    StatsdStats::getInstance().noteBucketCount(mMetricId);
     // Only resets the counters, but doesn't setup the times nor numbers.
     // (Do not clear since the old one is still referenced in mAnomalyTrackers).
     mCurrentSlicedCounter = std::make_shared<DimToValMap>();
