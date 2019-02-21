@@ -32,7 +32,6 @@ import android.content.pm.ParceledListSlice;
 import android.content.pm.VersionedPackage;
 import android.content.rollback.IRollbackManager;
 import android.content.rollback.PackageRollbackInfo;
-import android.content.rollback.PackageRollbackInfo.RestoreInfo;
 import android.content.rollback.RollbackInfo;
 import android.content.rollback.RollbackManager;
 import android.os.Binder;
@@ -466,18 +465,17 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
 
     void onUnlockUser(int userId) {
         getHandler().post(() -> {
-            final ArrayList<String> pendingBackupPackages = new ArrayList<>();
-            final Map<String, RestoreInfo> pendingRestorePackages = new HashMap<>();
-            final List<RollbackData> changed;
+            final List<RollbackData> availableRollbacks;
+            final List<RollbackInfo> recentlyExecutedRollbacks;
             synchronized (mLock) {
                 ensureRollbackDataLoadedLocked();
-                changed = mAppDataRollbackHelper.computePendingBackupsAndRestores(userId,
-                        pendingBackupPackages, pendingRestorePackages, mAvailableRollbacks,
-                        mRecentlyExecutedRollbacks);
+                availableRollbacks = new ArrayList<>(mAvailableRollbacks);
+                recentlyExecutedRollbacks = new ArrayList<>(mRecentlyExecutedRollbacks);
             }
 
-            mAppDataRollbackHelper.commitPendingBackupAndRestoreForUser(userId,
-                    pendingBackupPackages, pendingRestorePackages, changed);
+            final List<RollbackData> changed =
+                    mAppDataRollbackHelper.commitPendingBackupAndRestoreForUser(userId,
+                            availableRollbacks, recentlyExecutedRollbacks);
 
             for (RollbackData rd : changed) {
                 try {
@@ -844,13 +842,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             for (PackageRollbackInfo info : rd.packages) {
                 if (info.getPackageName().equals(packageName)) {
                     info.getInstalledUsers().addAll(IntArray.wrap(installedUsers));
-                    AppDataRollbackHelper.SnapshotAppDataResult rs =
-                            mAppDataRollbackHelper.snapshotAppData(packageName, installedUsers);
-                    info.getPendingBackups().addAll(rs.pendingBackups);
-                    for (int i = 0; i < rs.ceSnapshotInodes.size(); i++) {
-                        info.putCeSnapshotInode(rs.ceSnapshotInodes.keyAt(i),
-                                rs.ceSnapshotInodes.valueAt(i));
-                    }
+                    mAppDataRollbackHelper.snapshotAppData(rd.rollbackId, info);
                     try {
                         mRollbackStore.saveAvailableRollback(rd);
                     } catch (IOException ioe) {
@@ -919,18 +911,10 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         VersionedPackage installedVersion = new VersionedPackage(packageName,
                 pkgInfo.getLongVersionCode());
 
-        final AppDataRollbackHelper.SnapshotAppDataResult result;
-        if (snapshotUserData && !isApex) {
-            result = mAppDataRollbackHelper.snapshotAppData(packageName, installedUsers);
-        } else {
-            result = new AppDataRollbackHelper.SnapshotAppDataResult(IntArray.wrap(new int[0]),
-                new SparseLongArray());
-        }
-
         PackageRollbackInfo info = new PackageRollbackInfo(newVersion, installedVersion,
-                result.pendingBackups, new ArrayList<>(), isApex, IntArray.wrap(installedUsers),
-                result.ceSnapshotInodes);
-
+                new IntArray() /* pendingBackups */, new ArrayList<>() /* pendingRestores */,
+                isApex, IntArray.wrap(installedUsers),
+                new SparseLongArray() /* ceSnapshotInodes */);
         RollbackData data;
         try {
             int childSessionId = session.getSessionId();
@@ -948,7 +932,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                     int rollbackId = allocateRollbackIdLocked();
                     if (session.isStaged()) {
                         data = mRollbackStore.createPendingStagedRollback(rollbackId,
-                                parentSessionId);
+                            parentSessionId);
                     } else {
                         data = mRollbackStore.createAvailableRollback(rollbackId);
                     }
@@ -959,6 +943,10 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         } catch (IOException e) {
             Log.e(TAG, "Unable to create rollback for " + packageName, e);
             return false;
+        }
+
+        if (snapshotUserData && !isApex) {
+            mAppDataRollbackHelper.snapshotAppData(data.rollbackId, info);
         }
 
         try {
@@ -980,8 +968,15 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         getHandler().post(() -> {
             final RollbackData rollbackData = getRollbackForPackage(packageName);
             for (int userId : userIds) {
+                if (rollbackData == null || !rollbackData.inProgress) {
+                    Log.e(TAG, "Request to restore userData for: " + packageName
+                                  + ", but no rollback in progress.");
+                    continue;
+                }
+                final PackageRollbackInfo info = getPackageRollbackInfo(rollbackData, packageName);
                 final boolean changedRollbackData = mAppDataRollbackHelper.restoreAppData(
-                        packageName, rollbackData, userId, appId, ceDataInode, seInfo);
+                        rollbackData.rollbackId, info, userId, appId, seInfo);
+
                 // We've updated metadata about this rollback, so save it to flash.
                 if (changedRollbackData) {
                     try {
@@ -1252,7 +1247,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
      * Returns the {@code PackageRollbackInfo} associated with {@code packageName} from
      * a specified {@code RollbackData}.
      */
-    static PackageRollbackInfo getPackageRollbackInfo(RollbackData data,
+    private static PackageRollbackInfo getPackageRollbackInfo(RollbackData data,
             String packageName) {
         for (PackageRollbackInfo info : data.packages) {
             if (info.getPackageName().equals(packageName)) {
@@ -1281,11 +1276,10 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
     private void deleteRollback(RollbackData rollbackData) {
         for (PackageRollbackInfo info : rollbackData.packages) {
             IntArray installedUsers = info.getInstalledUsers();
-            SparseLongArray ceSnapshotInodes = info.getCeSnapshotInodes();
             for (int i = 0; i < installedUsers.size(); i++) {
                 int userId = installedUsers.get(i);
-                mAppDataRollbackHelper.destroyAppDataSnapshot(info.getPackageName(), userId,
-                        ceSnapshotInodes.get(userId, 0));
+                mAppDataRollbackHelper.destroyAppDataSnapshot(rollbackData.rollbackId, info,
+                        userId);
             }
         }
         mRollbackStore.deleteAvailableRollback(rollbackData);
