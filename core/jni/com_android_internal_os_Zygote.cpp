@@ -613,17 +613,13 @@ static void CreateDir(const std::string& dir,
     }
 }
 
-static void CreatePkgSandboxTarget(uid_t uid, const std::string& package_name, fail_fn_t fail_fn) {
-    // Create /mnt/user/0/package/<package-name>
-    userid_t user_id = multiuser_get_user_id(uid);
-    std::string pkg_sandbox_dir = StringPrintf("/mnt/user/%d", user_id);
+static void CreatePkgSandboxTarget(userid_t userId, fail_fn_t fail_fn) {
+    // Create /mnt/user/0/package
+    std::string pkg_sandbox_dir = StringPrintf("/mnt/user/%d", userId);
     CreateDir(pkg_sandbox_dir, 0751, AID_ROOT, AID_ROOT, fail_fn);
 
     StringAppendF(&pkg_sandbox_dir, "/package");
-    CreateDir(pkg_sandbox_dir, 0700, AID_ROOT, AID_ROOT, fail_fn);
-
-    StringAppendF(&pkg_sandbox_dir, "/%s", package_name.c_str());
-    CreateDir(pkg_sandbox_dir, 0755, uid, uid, fail_fn);
+    CreateDir(pkg_sandbox_dir, 0755, AID_ROOT, AID_ROOT, fail_fn);
 }
 
 static void BindMount(const std::string& sourceDir, const std::string& targetDir,
@@ -650,25 +646,25 @@ static void MountPkgSpecificDir(const std::string& mntSourceRoot,
     BindMount(mntSourceDir, mntTargetDir, fail_fn);
 }
 
-static void CreateSubDirs(int dirfd, const std::string& parentDirPath,
+static void CreateSubDirs(int parentFd, const std::string& parentPath,
                           const std::vector<std::string>& subDirs,
                           fail_fn_t fail_fn) {
     for (auto& dirName : subDirs) {
         struct stat sb;
-        if (TEMP_FAILURE_RETRY(fstatat(dirfd, dirName.c_str(), &sb, 0)) == 0) {
+        if (TEMP_FAILURE_RETRY(fstatat(parentFd, dirName.c_str(), &sb, 0)) == 0) {
             if (S_ISDIR(sb.st_mode)) {
                 continue;
-            } else if (TEMP_FAILURE_RETRY(unlinkat(dirfd, dirName.c_str(), 0)) == -1) {
+            } else if (TEMP_FAILURE_RETRY(unlinkat(parentFd, dirName.c_str(), 0)) == -1) {
                 fail_fn(CREATE_ERROR("Failed to unlinkat on %s/%s: %s",
-                        parentDirPath.c_str(), dirName.c_str(), strerror(errno)));
+                        parentPath.c_str(), dirName.c_str(), strerror(errno)));
             }
         } else if (errno != ENOENT) {
             fail_fn(CREATE_ERROR("Failed to fstatat on %s/%s: %s",
-                    parentDirPath.c_str(), dirName.c_str(), strerror(errno)));
+                    parentPath.c_str(), dirName.c_str(), strerror(errno)));
         }
-        if (TEMP_FAILURE_RETRY(mkdirat(dirfd, dirName.c_str(), 0700)) == -1 && errno != EEXIST) {
+        if (TEMP_FAILURE_RETRY(mkdirat(parentFd, dirName.c_str(), 0700)) == -1 && errno != EEXIST) {
             fail_fn(CREATE_ERROR("Failed to mkdirat on %s/%s: %s",
-                    parentDirPath.c_str(), dirName.c_str(), strerror(errno)));
+                    parentPath.c_str(), dirName.c_str(), strerror(errno)));
         }
     }
 }
@@ -754,6 +750,9 @@ static void PreparePkgSpecificDirs(const std::vector<std::string>& packageNames,
         if (TEMP_FAILURE_RETRY(access(mntSource.c_str(), F_OK)) == -1) {
             ALOGE("Can't access %s: %s", mntSource.c_str(), strerror(errno));
             continue;
+        } else if (TEMP_FAILURE_RETRY(access(mntTarget.c_str(), F_OK)) == -1) {
+            ALOGE("Can't access %s: %s", mntTarget.c_str(), strerror(errno));
+            continue;
         }
 
         // Ensure /mnt/runtime/write/emulated/0/Android/{data,media,obb}
@@ -778,6 +777,39 @@ static void PreparePkgSpecificDirs(const std::vector<std::string>& packageNames,
             StringAppendF(&mntSource, "/Android/obb");
             StringAppendF(&mntTarget, "/Android/obb");
             BindMount(mntSource, mntTarget, fail_fn);
+        }
+    }
+}
+
+static void handleMountModeInstaller(int mountMode,
+                                     userid_t userId,
+                                     const std::string& sandboxId,
+                                     fail_fn_t fail_fn) {
+    std::string obbMountDir = StringPrintf("/mnt/user/%d/obb_mount", userId);
+    std::string obbMountFile = StringPrintf("%s/%s", obbMountDir.c_str(), sandboxId.c_str());
+    if (mountMode == MOUNT_EXTERNAL_INSTALLER) {
+        if (TEMP_FAILURE_RETRY(access(obbMountFile.c_str(), F_OK)) != -1) {
+            return;
+        } else if (errno != ENOENT) {
+            fail_fn(CREATE_ERROR("Failed to access %s: %s", obbMountFile.c_str(), strerror(errno)));
+        }
+        if (fs_prepare_dir(obbMountDir.c_str(), 0700, AID_ROOT, AID_ROOT) != 0) {
+            fail_fn(CREATE_ERROR("Failed to fs_prepare_dir %s: %s",
+                    obbMountDir.c_str(), strerror(errno)));
+        }
+        const android::base::unique_fd fd(TEMP_FAILURE_RETRY(
+                open(obbMountFile.c_str(), O_RDWR | O_CREAT, 0600)));
+        if (fd.get() < 0) {
+            fail_fn(CREATE_ERROR("Failed to create %s: %s", obbMountFile.c_str(), strerror(errno)));
+        }
+    } else {
+        if (TEMP_FAILURE_RETRY(access(obbMountFile.c_str(), F_OK)) != -1) {
+            if (TEMP_FAILURE_RETRY(unlink(obbMountFile.c_str())) == -1) {
+                fail_fn(CREATE_ERROR("Failed to unlink %s: %s",
+                        obbMountDir.c_str(), strerror(errno)));
+            }
+        } else if (errno != ENOENT) {
+            fail_fn(CREATE_ERROR("Failed to access %s: %s", obbMountFile.c_str(), strerror(errno)));
         }
     }
 }
@@ -844,48 +876,19 @@ static void MountEmulatedStorage(uid_t uid, jint mount_mode,
             }
 
             userid_t user_id = multiuser_get_user_id(uid);
-            std::string pkgSandboxDir =
-                StringPrintf("/mnt/user/%d/package/%s", user_id, package_name.c_str());
-            bool sandboxAlreadyCreated = true;
-            if (TEMP_FAILURE_RETRY(access(pkgSandboxDir.c_str(), F_OK)) == -1) {
-                if (errno == ENOENT) {
-                    ALOGD("Sandbox not yet created for %s", pkgSandboxDir.c_str());
-                    sandboxAlreadyCreated = false;
-                    CreatePkgSandboxTarget(uid, package_name, fail_fn);
-                } else {
-                    fail_fn(CREATE_ERROR("Failed to access %s: %s",
-                                         pkgSandboxDir.c_str(), strerror(errno)));
-                }
-            }
+            CreatePkgSandboxTarget(user_id, fail_fn);
 
+            std::string pkgSandboxDir = StringPrintf("/mnt/user/%d/package", user_id);
             if (TEMP_FAILURE_RETRY(mount(pkgSandboxDir.c_str(), "/storage",
                                          nullptr, MS_BIND | MS_REC | MS_SLAVE, nullptr)) == -1) {
                 fail_fn(CREATE_ERROR("Failed to mount %s to /storage: %s",
                                      pkgSandboxDir.c_str(), strerror(errno)));
             }
 
-            if (TEMP_FAILURE_RETRY(access("/storage/obb_mount", F_OK)) == 0) {
-                if (mount_mode != MOUNT_EXTERNAL_INSTALLER) {
-                    remove("/storage/obb_mount");
-                }
-            } else {
-                if (mount_mode == MOUNT_EXTERNAL_INSTALLER) {
-                    int fd =
-                        TEMP_FAILURE_RETRY(open("/storage/obb_mount", O_RDWR | O_CREAT, 0660));
-                    if (fd == -1) {
-                        fail_fn(CREATE_ERROR("Couldn't create /storage/obb_mount: %s",
-                                             strerror(errno)));
-                    }
-                    close(fd);
-                }
-            }
-            // If the sandbox was already created by vold, only then set up the bind mounts for
-            // pkg specific directories. Otherwise, leave as is and bind mounts will be taken
-            // care of by vold later.
-            if (sandboxAlreadyCreated) {
-                PreparePkgSpecificDirs(packages_for_uid, visible_vol_ids,
-                    mount_mode == MOUNT_EXTERNAL_INSTALLER, sandbox_id, user_id, uid, fail_fn);
-            }
+            handleMountModeInstaller(mount_mode, user_id, sandbox_id, fail_fn);
+
+            PreparePkgSpecificDirs(packages_for_uid, visible_vol_ids,
+                mount_mode == MOUNT_EXTERNAL_INSTALLER, sandbox_id, user_id, uid, fail_fn);
         }
     } else {
         if (TEMP_FAILURE_RETRY(mount(storageSource.string(), "/storage", nullptr,
