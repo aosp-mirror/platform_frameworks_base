@@ -5287,6 +5287,50 @@
     <!-- Summary of notification letting users know why battery saver was turned on automatically [CHAR_LIMIT=NONE]-->
     <string name="dynamic_mode_notification_summary">Battery Saver activated to extend battery life</string>
 
+    <!-- Description of media type: folder or directory that contains additional files. [CHAR LIMIT=32] -->
+    <string name="mime_type_folder">Folder</string>
+    <!-- Description of media type: application file, such as APK. [CHAR LIMIT=32] -->
+    <string name="mime_type_apk">Android application</string>
+
+    <!-- Description of media type: generic file with unknown contents. [CHAR LIMIT=32] -->
+    <string name="mime_type_generic">File</string>
+    <!-- Description of media type: generic file with unknown contents. The 'extension' variable is the file name extension. [CHAR LIMIT=32] -->
+    <string name="mime_type_generic_ext"><xliff:g id="extension" example="PDF">%1$s</xliff:g> file</string>
+
+    <!-- Description of media type: audio file, such as MP3 or WAV. [CHAR LIMIT=32] -->
+    <string name="mime_type_audio">Audio</string>
+    <!-- Description of media type: audio file, such as MP3 or WAV. The 'extension' variable is the file name extension. [CHAR LIMIT=32] -->
+    <string name="mime_type_audio_ext"><xliff:g id="extension" example="PDF">%1$s</xliff:g> audio</string>
+
+    <!-- Description of media type: video file, such as MP4 or MKV. [CHAR LIMIT=32] -->
+    <string name="mime_type_video">Video</string>
+    <!-- Description of media type: video file, such as MP4 or MKV. The 'extension' variable is the file name extension. [CHAR LIMIT=32] -->
+    <string name="mime_type_video_ext"><xliff:g id="extension" example="PDF">%1$s</xliff:g> video</string>
+
+    <!-- Description of media type: image file, such as JPG or PNG. [CHAR LIMIT=32] -->
+    <string name="mime_type_image">Image</string>
+    <!-- Description of media type: image file, such as JPG or PNG. The 'extension' variable is the file name extension. [CHAR LIMIT=32] -->
+    <string name="mime_type_image_ext"><xliff:g id="extension" example="PDF">%1$s</xliff:g> image</string>
+
+    <!-- Description of media type: archive file, such as ZIP or TAR. [CHAR LIMIT=32] -->
+    <string name="mime_type_compressed">Archive</string>
+    <!-- Description of media type: archive file, such as ZIP or TAR. The 'extension' variable is the file name extension. [CHAR LIMIT=32] -->
+    <string name="mime_type_compressed_ext"><xliff:g id="extension" example="PDF">%1$s</xliff:g> archive</string>
+
+    <!-- Description of media type: document file, such as DOC or PDF. [CHAR LIMIT=32] -->
+    <string name="mime_type_document">Document</string>
+    <!-- Description of media type: document file, such as DOC or PDF. The 'extension' variable is the file name extension. [CHAR LIMIT=32] -->
+    <string name="mime_type_document_ext"><xliff:g id="extension" example="PDF">%1$s</xliff:g> document</string>
+
+    <!-- Description of media type: spreadsheet file, such as XLS. [CHAR LIMIT=32] -->
+    <string name="mime_type_spreadsheet">Spreadsheet</string>
+    <!-- Description of media type: spreadsheet file, such as XLS. The 'extension' variable is the file name extension. [CHAR LIMIT=32] -->
+    <string name="mime_type_spreadsheet_ext"><xliff:g id="extension" example="PDF">%1$s</xliff:g> spreadsheet</string>
+
+    <!-- Description of media type: presentation file, such as PPT. [CHAR LIMIT=32] -->
+    <string name="mime_type_presentation">Presentation</string>
+    <!-- Description of media type: presentation file, such as PPT. The 'extension' variable is the file name extension. [CHAR LIMIT=32] -->
+    <string name="mime_type_presentation_ext"><xliff:g id="extension" example="PDF">%1$s</xliff:g> presentation</string>
 
     <!-- Strings for car -->
     <!-- String displayed when loading a user in the car [CHAR LIMIT=30] -->

@@ -42,6 +42,7 @@ import android.graphics.ImageDecoder.ImageInfo;
 import android.graphics.ImageDecoder.Source;
 import android.graphics.Point;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.CancellationSignal;
@@ -3365,16 +3366,68 @@ public abstract class ContentResolver implements ContentInterface {
         return mContext.getUserId();
     }
 
-    /**
-     * Get the system drawable of the mime type.
-     *
-     * @param mimeType the requested mime type
-     * @return the matched drawable
-     * @hide
-     */
-    @SystemApi
+    /** {@hide} */
+    @Deprecated
     public Drawable getTypeDrawable(String mimeType) {
-        return MimeIconUtils.loadMimeIcon(mContext, mimeType);
+        return getTypeInfo(mimeType).getIcon().loadDrawable(mContext);
+    }
+
+    /**
+     * Return a detailed description of the given MIME type, including an icon
+     * and label that describe the type.
+     *
+     * @param mimeType Valid, concrete MIME type.
+     */
+    public final @NonNull TypeInfo getTypeInfo(@NonNull String mimeType) {
+        Objects.requireNonNull(mimeType);
+        return MimeIconUtils.getTypeInfo(mimeType);
+    }
+
+    /**
+     * Detailed description of a specific MIME type, including an icon and label
+     * that describe the type.
+     */
+    public static final class TypeInfo {
+        private final Icon mIcon;
+        private final CharSequence mLabel;
+        private final CharSequence mContentDescription;
+
+        /** {@hide} */
+        public TypeInfo(@NonNull Icon icon, @NonNull CharSequence label,
+                @NonNull CharSequence contentDescription) {
+            mIcon = Objects.requireNonNull(icon);
+            mLabel = Objects.requireNonNull(label);
+            mContentDescription = Objects.requireNonNull(contentDescription);
+        }
+
+        /**
+         * Return a visual representation of this MIME type. This can be styled
+         * using {@link Icon#setTint(int)} to match surrounding UI.
+         *
+         * @see Icon#loadDrawable(Context)
+         * @see android.widget.ImageView#setImageDrawable(Drawable)
+         */
+        public @NonNull Icon getIcon() {
+            return mIcon;
+        }
+
+        /**
+         * Return a textual representation of this MIME type.
+         *
+         * @see android.widget.TextView#setText(CharSequence)
+         */
+        public @NonNull CharSequence getLabel() {
+            return mLabel;
+        }
+
+        /**
+         * Return a content description for this MIME type.
+         *
+         * @see android.view.View#setContentDescription(CharSequence)
+         */
+        public @NonNull CharSequence getContentDescription() {
+            return mContentDescription;
+        }
     }
 
     /**
