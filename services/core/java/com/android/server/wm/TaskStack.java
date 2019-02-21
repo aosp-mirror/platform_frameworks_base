@@ -832,7 +832,7 @@ public class TaskStack extends WindowContainer<Task> implements
 
         updateSurfaceBounds();
         if (mAnimationBackgroundSurface == null) {
-            mAnimationBackgroundSurface = makeChildSurface(null).setColorLayer(true)
+            mAnimationBackgroundSurface = makeChildSurface(null).setColorLayer()
                     .setName("animation background stackId=" + mStackId)
                     .build();
         }

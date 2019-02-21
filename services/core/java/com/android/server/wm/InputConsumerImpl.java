@@ -22,13 +22,11 @@ import android.os.IBinder;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import android.view.InputChannel;
-import android.view.WindowManager;
-
 import android.view.InputApplicationHandle;
+import android.view.InputChannel;
 import android.view.InputWindowHandle;
 import android.view.SurfaceControl;
-import android.util.Slog;
+import android.view.WindowManager;
 
 import java.io.PrintWriter;
 
@@ -89,7 +87,7 @@ class InputConsumerImpl implements IBinder.DeathRecipient {
         mWindowHandle.scaleFactor = 1.0f;
 
         mInputSurface = mService.makeSurfaceBuilder(mService.mRoot.getDisplayContent(displayId)
-                .getSession()).setContainerLayer(true).setName("Input Consumer " + name)
+                .getSession()).setContainerLayer().setName("Input Consumer " + name)
                 .build();
     }
 

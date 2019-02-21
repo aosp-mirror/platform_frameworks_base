@@ -489,7 +489,16 @@ public final class SurfaceControl implements Parcelable {
             }
             mWidth = width;
             mHeight = height;
-            return this;
+            // set this as a buffer layer since we are specifying a buffer size.
+            return setFlags(FX_SURFACE_NORMAL, FX_SURFACE_MASK);
+        }
+
+        /**
+         * Set the initial size of the controlled surface's buffers in pixels.
+         */
+        private void unsetBufferSize() {
+            mWidth = 0;
+            mHeight = 0;
         }
 
         /**
@@ -607,16 +616,11 @@ public final class SurfaceControl implements Parcelable {
          * Color layers will not have an associated BufferQueue and will instead always render a
          * solid color (that is, solid before plane alpha). Currently that color is black.
          *
-         * @param isColorLayer Whether to create a color layer.
          * @hide
          */
-        public Builder setColorLayer(boolean isColorLayer) {
-            if (isColorLayer) {
-                mFlags |= FX_SURFACE_DIM;
-            } else {
-                mFlags &= ~FX_SURFACE_DIM;
-            }
-            return this;
+        public Builder setColorLayer() {
+            unsetBufferSize();
+            return setFlags(FX_SURFACE_DIM, FX_SURFACE_MASK);
         }
 
         private boolean isColorLayerSet() {
@@ -629,16 +633,11 @@ public final class SurfaceControl implements Parcelable {
          * Container layers will not be rendered in any fashion and instead are used
          * as a parent of renderable layers.
          *
-         * @param isContainerLayer Whether to create a container layer.
          * @hide
          */
-        public Builder setContainerLayer(boolean isContainerLayer) {
-            if (isContainerLayer) {
-                mFlags |= FX_SURFACE_CONTAINER;
-            } else {
-                mFlags &= ~FX_SURFACE_CONTAINER;
-            }
-            return this;
+        public Builder setContainerLayer() {
+            unsetBufferSize();
+            return setFlags(FX_SURFACE_CONTAINER, FX_SURFACE_MASK);
         }
 
         private boolean isContainerLayerSet() {
@@ -646,7 +645,7 @@ public final class SurfaceControl implements Parcelable {
         }
 
         /**
-         * Set 'Surface creation flags' such as {@link HIDDEN}, {@link SECURE}.
+         * Set 'Surface creation flags' such as {@link #HIDDEN}, {@link #SECURE}.
          *
          * TODO: Finish conversion to individual builder methods?
          * @param flags The combined flags
@@ -654,6 +653,11 @@ public final class SurfaceControl implements Parcelable {
          */
         public Builder setFlags(int flags) {
             mFlags = flags;
+            return this;
+        }
+
+        private Builder setFlags(int flags, int mask) {
+            mFlags = (mFlags & ~mask) | flags;
             return this;
         }
     }

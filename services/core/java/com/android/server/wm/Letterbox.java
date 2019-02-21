@@ -233,7 +233,7 @@ public class Letterbox {
 
         private void createSurface() {
             mSurface = mFactory.get().setName("Letterbox - " + mType)
-                    .setFlags(HIDDEN).setColorLayer(true).build();
+                    .setFlags(HIDDEN).setColorLayer().build();
             mSurface.setLayer(-1);
             mSurface.setColor(new float[]{0, 0, 0});
         }
