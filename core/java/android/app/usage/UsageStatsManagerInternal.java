@@ -257,12 +257,14 @@ public abstract class UsageStatsManagerInternal {
             int numDeferredJobs, long timeSinceLastJobRun);
 
     /**
-     * Report a sync is scheduled by a foreground app.
+     * Report a sync that was scheduled.
      *
      * @param packageName name of the package that owns the sync adapter.
      * @param userId which user the app is associated with
+     * @param exempted is sync app standby exempted
      */
-    public abstract void reportExemptedSyncScheduled(String packageName, @UserIdInt int userId);
+    public abstract void reportSyncScheduled(String packageName, @UserIdInt int userId,
+                                             boolean exempted);
 
     /**
      * Report a sync that was scheduled by a foreground app is about to be executed.
