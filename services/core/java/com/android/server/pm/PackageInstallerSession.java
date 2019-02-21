@@ -1887,6 +1887,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     false, true).rethrowAsRuntimeException();
         }
         synchronized (mLock) {
+            assertCallerIsOwnerOrRootLocked();
+            assertPreparedAndNotSealedLocked("addChildSessionId");
+
             final int indexOfSession = mChildSessionIds.indexOfKey(childSessionId);
             if (indexOfSession >= 0) {
                 return;
