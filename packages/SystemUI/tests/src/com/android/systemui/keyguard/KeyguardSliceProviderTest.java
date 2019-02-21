@@ -166,25 +166,22 @@ public class KeyguardSliceProviderTest extends SysuiTestCase {
 
     @Test
     public void onMetadataChanged_updatesSlice() {
-        mProvider.onMetadataChanged(mock(MediaMetadata.class));
         mProvider.onDozingChanged(true);
+        reset(mContentResolver);
+        mProvider.onMetadataChanged(mock(MediaMetadata.class));
         verify(mContentResolver).notifyChange(eq(mProvider.getUri()), eq(null));
 
         // Hides after waking up
         reset(mContentResolver);
         mProvider.onDozingChanged(false);
         verify(mContentResolver).notifyChange(eq(mProvider.getUri()), eq(null));
-
-        // And won't update slice if device is awake
-        reset(mContentResolver);
-        mProvider.onMetadataChanged(mock(MediaMetadata.class));
-        verify(mContentResolver, never()).notifyChange(eq(mProvider.getUri()), eq(null));
     }
 
     @Test
     public void onDozingChanged_updatesSliceIfMedia() {
-        // Show media when dozing
         mProvider.onMetadataChanged(mock(MediaMetadata.class));
+        reset(mContentResolver);
+        // Show media when dozing
         mProvider.onDozingChanged(true);
         verify(mContentResolver).notifyChange(eq(mProvider.getUri()), eq(null));
 

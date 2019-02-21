@@ -419,17 +419,16 @@ public class KeyguardSliceProvider extends SliceProvider implements
         return KeyguardUpdateMonitor.getInstance(getContext());
     }
 
+    /**
+     * Called whenever new media metadata is available.
+     * @param metadata New metadata.
+     */
     @Override
     public void onMetadataChanged(MediaMetadata metadata) {
-        final boolean notify;
         synchronized (this) {
-            boolean neededMedia = needsMediaLocked();
             mMediaMetaData = metadata;
-            notify = neededMedia != needsMediaLocked();
         }
-        if (notify) {
-            notifyChange();
-        }
+        notifyChange();
     }
 
     protected void notifyChange() {
