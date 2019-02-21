@@ -587,8 +587,11 @@ public class VolumeDialogImpl implements VolumeDialog {
         mHandler.removeMessages(H.DISMISS);
         mHandler.removeMessages(H.SHOW);
         mDialogView.animate().cancel();
-        mShowing = false;
-
+        if (mShowing) {
+            mShowing = false;
+            // Only logs when the volume dialog visibility is changed.
+            Events.writeEvent(mContext, Events.EVENT_DISMISS_DIALOG, reason);
+        }
         mDialogView.setTranslationX(0);
         mDialogView.setAlpha(1);
         ViewPropertyAnimator animator = mDialogView.animate()
@@ -601,8 +604,6 @@ public class VolumeDialogImpl implements VolumeDialog {
                 }, 50));
         if (!isLandscape()) animator.translationX(mDialogView.getWidth() / 2);
         animator.start();
-
-        Events.writeEvent(mContext, Events.EVENT_DISMISS_DIALOG, reason);
         mController.notifyVisible(false);
         synchronized (mSafetyWarningLock) {
             if (mSafetyWarning != null) {
