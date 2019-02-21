@@ -20,6 +20,7 @@
 
 #include "DominatorTree.h"
 #include "ResourceTable.h"
+#include "trace/TraceBuffer.h"
 
 using android::ConfigDescription;
 
@@ -65,6 +66,7 @@ void RemoveIfExcluded(std::set<std::pair<ConfigDescription, int>>& excluded_conf
 }  // namespace
 
 bool ResourceExcluder::Consume(IAaptContext* context, ResourceTable* table) {
+  TRACE_NAME("ResourceExcluder::Consume");
   for (auto& package : table->packages) {
     for (auto& type : package->types) {
       for (auto& entry : type->entries) {

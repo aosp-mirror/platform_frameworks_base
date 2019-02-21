@@ -30,6 +30,7 @@
 #include "NameMangler.h"
 #include "ResourceValues.h"
 #include "ValueVisitor.h"
+#include "trace/TraceBuffer.h"
 #include "text/Unicode.h"
 #include "util/Util.h"
 
@@ -79,6 +80,7 @@ ResourceTablePackage* ResourceTable::FindPackageById(uint8_t id) const {
 }
 
 ResourceTablePackage* ResourceTable::CreatePackage(const StringPiece& name, Maybe<uint8_t> id) {
+  TRACE_CALL();
   ResourceTablePackage* package = FindOrCreatePackage(name);
   if (id && !package->id) {
     package->id = id;

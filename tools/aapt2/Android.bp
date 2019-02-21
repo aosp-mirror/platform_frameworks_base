@@ -141,6 +141,7 @@ cc_library_host_static {
         "ResourceValues.cpp",
         "SdkConstants.cpp",
         "StringPool.cpp",
+        "trace/TraceBuffer.cpp",
         "xml/XmlActionExecutor.cpp",
         "xml/XmlDom.cpp",
         "xml/XmlPullParser.cpp",

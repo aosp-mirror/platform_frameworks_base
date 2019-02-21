@@ -27,6 +27,7 @@
 #include "link/Linkers.h"
 #include "process/IResourceTableConsumer.h"
 #include "process/SymbolTable.h"
+#include "trace/TraceBuffer.h"
 #include "util/Util.h"
 #include "xml/XmlUtil.h"
 
@@ -353,6 +354,7 @@ bool ReferenceLinker::LinkReference(const CallSite& callsite, Reference* referen
 }
 
 bool ReferenceLinker::Consume(IAaptContext* context, ResourceTable* table) {
+  TRACE_NAME("ReferenceLinker::Consume");
   EmptyDeclStack decl_stack;
   bool error = false;
   for (auto& package : table->packages) {

@@ -21,6 +21,7 @@
 #include "android-base/logging.h"
 
 #include "ResourceUtils.h"
+#include "trace/TraceBuffer.h"
 #include "util/Util.h"
 #include "xml/XmlActionExecutor.h"
 #include "xml/XmlDom.h"
@@ -451,6 +452,7 @@ static bool RenameManifestPackage(const StringPiece& package_override, xml::Elem
 }
 
 bool ManifestFixer::Consume(IAaptContext* context, xml::XmlResource* doc) {
+  TRACE_CALL();
   xml::Element* root = xml::FindRootElement(doc->root.get());
   if (!root || !root->namespace_uri.empty() || root->name != "manifest") {
     context->GetDiagnostics()->Error(DiagMessage(doc->file.source)

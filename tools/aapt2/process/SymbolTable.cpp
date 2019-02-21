@@ -30,6 +30,7 @@
 #include "Resource.h"
 #include "ResourceUtils.h"
 #include "ValueVisitor.h"
+#include "trace/TraceBuffer.h"
 #include "util/Util.h"
 
 using ::android::ApkAssets;
@@ -217,6 +218,7 @@ std::unique_ptr<SymbolTable::Symbol> ResourceTableSymbolSource::FindByName(
 }
 
 bool AssetManagerSymbolSource::AddAssetPath(const StringPiece& path) {
+  TRACE_CALL();
   if (std::unique_ptr<const ApkAssets> apk = ApkAssets::Load(path.data())) {
     apk_assets_.push_back(std::move(apk));
 
@@ -233,6 +235,7 @@ bool AssetManagerSymbolSource::AddAssetPath(const StringPiece& path) {
 }
 
 std::map<size_t, std::string> AssetManagerSymbolSource::GetAssignedPackageIds() const {
+  TRACE_CALL();
   std::map<size_t, std::string> package_map;
   asset_manager_.ForEachPackage([&package_map](const std::string& name, uint8_t id) -> bool {
     package_map.insert(std::make_pair(id, name));

@@ -25,6 +25,7 @@
 #include "split/TableSplitter.h"
 #include "format/binary/TableFlattener.h"
 #include "link/ManifestFixer.h"
+#include "trace/TraceBuffer.h"
 
 namespace aapt {
 
@@ -277,6 +278,8 @@ class LinkCommand : public Command {
         "Do not allow overlays with different visibility levels.",
         &options_.strict_visibility);
     AddOptionalSwitch("-v", "Enables verbose logging.", &verbose_);
+    AddOptionalFlag("--trace-folder", "Generate systrace json trace fragment to specified folder.",
+                    &trace_folder_);
   }
 
   int Action(const std::vector<std::string>& args) override;
@@ -300,6 +303,7 @@ class LinkCommand : public Command {
   bool proto_format_ = false;
   Maybe<std::string> stable_id_file_path_;
   std::vector<std::string> split_args_;
+  Maybe<std::string> trace_folder_;
 };
 
 }// namespace aapt

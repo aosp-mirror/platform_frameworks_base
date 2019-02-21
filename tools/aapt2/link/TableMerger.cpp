@@ -21,6 +21,7 @@
 #include "ResourceTable.h"
 #include "ResourceUtils.h"
 #include "ResourceValues.h"
+#include "trace/TraceBuffer.h"
 #include "ValueVisitor.h"
 #include "util/Util.h"
 
@@ -38,6 +39,7 @@ TableMerger::TableMerger(IAaptContext* context, ResourceTable* out_table,
 }
 
 bool TableMerger::Merge(const Source& src, ResourceTable* table, bool overlay) {
+  TRACE_CALL();
   // We allow adding new resources if this is not an overlay, or if the options allow overlays
   // to add new resources.
   return MergeImpl(src, table, overlay, options_.auto_add_overlay || !overlay /*allow_new*/);
