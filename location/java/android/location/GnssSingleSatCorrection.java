@@ -60,6 +60,7 @@ public final class GnssSingleSatCorrection implements Parcelable {
     private int mSingleSatCorrectionFlags;
 
     /** Defines the constellation of the given satellite as defined in {@link GnssStatus}. */
+    @GnssStatus.ConstellationType
     private int mConstellationType;
 
     /**
@@ -115,7 +116,7 @@ public final class GnssSingleSatCorrection implements Parcelable {
     }
 
     /** Gets a bitmask of fields present in this object */
-    public int getSingleSatCorrectionFlags() {
+    public int getSingleSatelliteCorrectionFlags() {
         return mSingleSatCorrectionFlags;
     }
 
@@ -136,7 +137,7 @@ public final class GnssSingleSatCorrection implements Parcelable {
      * <p>Interpretation depends on {@link #getConstellationType()}. See {@link
      * GnssStatus#getSvid(int)}.
      */
-    public int getSatId() {
+    public int getSatelliteId() {
         return mSatId;
     }
 
@@ -162,7 +163,7 @@ public final class GnssSingleSatCorrection implements Parcelable {
      * location.
      */
     @FloatRange(from = 0f, to = 1f)
-    public float getProbSatIsLos() {
+    public float getProbabilityLineOfSight() {
         return mProbSatIsLos;
     }
 
@@ -189,8 +190,8 @@ public final class GnssSingleSatCorrection implements Parcelable {
         return mReflectingPlane;
     }
 
-    /** Returns {@code true} if {@link #getProbSatIsLos()} is valid. */
-    public boolean hasSatelliteLineOfSight() {
+    /** Returns {@code true} if {@link #getProbabilityLineOfSight()} is valid. */
+    public boolean hasValidSatelliteLineOfSight() {
         return (mSingleSatCorrectionFlags & HAS_PROB_SAT_IS_LOS_MASK) != 0;
     }
 
@@ -220,11 +221,11 @@ public final class GnssSingleSatCorrection implements Parcelable {
                 public GnssSingleSatCorrection createFromParcel(Parcel parcel) {
                     GnssSingleSatCorrection singleSatCorrection =
                             new Builder()
-                                    .setSingleSatCorrectionFlags(parcel.readInt())
+                                    .setSingleSatelliteCorrectionFlags(parcel.readInt())
                                     .setConstellationType(parcel.readInt())
-                                    .setSatId(parcel.readInt())
+                                    .setSatelliteId(parcel.readInt())
                                     .setCarrierFrequencyHz(parcel.readFloat())
-                                    .setProbSatIsLos(parcel.readFloat())
+                                    .setProbabilityLineOfSight(parcel.readFloat())
                                     .setExcessPathLengthMeters(parcel.readFloat())
                                     .setExcessPathLengthUncertaintyMeters(parcel.readFloat())
                                     .setReflectingPlane(
@@ -272,7 +273,7 @@ public final class GnssSingleSatCorrection implements Parcelable {
     }
 
     /** Builder for {@link GnssSingleSatCorrection} */
-    public static class Builder {
+    public static final class Builder {
 
         /**
          * For documentation of below fields, see corresponding fields in {@link
@@ -289,19 +290,19 @@ public final class GnssSingleSatCorrection implements Parcelable {
         private GnssReflectingPlane mReflectingPlane;
 
         /** Sets a bitmask of fields present in this object */
-        public Builder setSingleSatCorrectionFlags(int singleSatCorrectionFlags) {
+        public Builder setSingleSatelliteCorrectionFlags(int singleSatCorrectionFlags) {
             mSingleSatCorrectionFlags = singleSatCorrectionFlags;
             return this;
         }
 
         /** Sets the constellation type. */
-        public Builder setConstellationType(int constellationType) {
+        public Builder setConstellationType(@GnssStatus.ConstellationType int constellationType) {
             mConstellationType = constellationType;
             return this;
         }
 
-        /** Sets the Satellite ID. */
-        public Builder setSatId(int satId) {
+        /** Sets the Satellite ID defined in the ICD of the given constellation. */
+        public Builder setSatelliteId(int satId) {
             mSatId = satId;
             return this;
         }
@@ -316,7 +317,8 @@ public final class GnssSingleSatCorrection implements Parcelable {
          * Sets the line-of-sight probability of the satellite at the given location in the range
          * between 0 and 1.
          */
-        public Builder setProbSatIsLos(@FloatRange(from = 0f, to = 1f) float probSatIsLos) {
+        public Builder setProbabilityLineOfSight(
+                @FloatRange(from = 0f, to = 1f) float probSatIsLos) {
             Preconditions.checkArgumentInRange(
                     probSatIsLos, 0, 1, "probSatIsLos should be between 0 and 1.");
             mProbSatIsLos = probSatIsLos;

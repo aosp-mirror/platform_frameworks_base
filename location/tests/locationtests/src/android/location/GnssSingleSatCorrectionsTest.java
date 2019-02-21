@@ -40,11 +40,11 @@ public class GnssSingleSatCorrectionsTest extends TestCase {
     }
 
     public static void verifyTestValues(GnssSingleSatCorrection singleSatCorrection) {
-        assertEquals(15, singleSatCorrection.getSingleSatCorrectionFlags());
+        assertEquals(15, singleSatCorrection.getSingleSatelliteCorrectionFlags());
         assertEquals(GnssStatus.CONSTELLATION_GALILEO, singleSatCorrection.getConstellationType());
-        assertEquals(12, singleSatCorrection.getSatId());
+        assertEquals(12, singleSatCorrection.getSatelliteId());
         assertEquals(1575420000f, singleSatCorrection.getCarrierFrequencyHz());
-        assertEquals(0.1f, singleSatCorrection.getProbSatIsLos());
+        assertEquals(0.1f, singleSatCorrection.getProbabilityLineOfSight());
         assertEquals(10.0f, singleSatCorrection.getExcessPathLengthMeters());
         assertEquals(5.0f, singleSatCorrection.getExcessPathLengthUncertaintyMeters());
         GnssReflectingPlane reflectingPlane = singleSatCorrection.getReflectingPlane();
@@ -52,27 +52,27 @@ public class GnssSingleSatCorrectionsTest extends TestCase {
     }
 
     private static void setTestValues(GnssSingleSatCorrection.Builder singleSatCorrection) {
-        GnssSingleSatCorrection singleSatCorr = generateTestSingleSatCorrection();
+        GnssSingleSatCorrection singleSatCor = generateTestSingleSatCorrection();
         singleSatCorrection
-                .setSingleSatCorrectionFlags(singleSatCorr.getSingleSatCorrectionFlags())
-                .setConstellationType(singleSatCorr.getConstellationType())
-                .setSatId(singleSatCorr.getSatId())
-                .setCarrierFrequencyHz(singleSatCorr.getCarrierFrequencyHz())
-                .setProbSatIsLos(singleSatCorr.getProbSatIsLos())
-                .setExcessPathLengthMeters(singleSatCorr.getExcessPathLengthMeters())
+                .setSingleSatelliteCorrectionFlags(singleSatCor.getSingleSatelliteCorrectionFlags())
+                .setConstellationType(singleSatCor.getConstellationType())
+                .setSatelliteId(singleSatCor.getSatelliteId())
+                .setCarrierFrequencyHz(singleSatCor.getCarrierFrequencyHz())
+                .setProbabilityLineOfSight(singleSatCor.getProbabilityLineOfSight())
+                .setExcessPathLengthMeters(singleSatCor.getExcessPathLengthMeters())
                 .setExcessPathLengthUncertaintyMeters(
-                        singleSatCorr.getExcessPathLengthUncertaintyMeters())
-                .setReflectingPlane(singleSatCorr.getReflectingPlane());
+                        singleSatCor.getExcessPathLengthUncertaintyMeters())
+                .setReflectingPlane(singleSatCor.getReflectingPlane());
     }
 
     public static GnssSingleSatCorrection generateTestSingleSatCorrection() {
         GnssSingleSatCorrection.Builder singleSatCorrection =
                 new GnssSingleSatCorrection.Builder()
-                        .setSingleSatCorrectionFlags(15)
+                        .setSingleSatelliteCorrectionFlags(15)
                         .setConstellationType(GnssStatus.CONSTELLATION_GALILEO)
-                        .setSatId(12)
+                        .setSatelliteId(12)
                         .setCarrierFrequencyHz(1575420000f)
-                        .setProbSatIsLos(0.1f)
+                        .setProbabilityLineOfSight(0.1f)
                         .setExcessPathLengthMeters(10.0f)
                         .setExcessPathLengthUncertaintyMeters(5.0f)
                         .setReflectingPlane(GnssReflectingPlaneTest.generateTestReflectingPlane());
