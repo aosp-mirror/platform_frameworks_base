@@ -486,4 +486,7 @@ interface IActivityManager {
      * started from the shell.
      */
     void stopDelegateShellPermissionIdentity();
+
+    /** Returns a file descriptor that'll be closed when the system server process dies. */
+    ParcelFileDescriptor getLifeMonitor();
 }
