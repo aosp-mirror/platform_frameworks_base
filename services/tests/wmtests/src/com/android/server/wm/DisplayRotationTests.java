@@ -807,7 +807,7 @@ public class DisplayRotationTests {
         private void build() throws Exception {
             mMockContext = mock(Context.class);
 
-            mMockDisplayContent = mock(WindowTestUtils.TestDisplayContent.class);
+            mMockDisplayContent = mock(DisplayContent.class);
             mMockDisplayContent.isDefaultDisplay = mIsDefaultDisplay;
             when(mMockDisplayContent.calculateDisplayCutoutForRotation(anyInt()))
                     .thenReturn(WmDisplayCutout.NO_CUTOUT);
