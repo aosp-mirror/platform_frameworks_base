@@ -35,6 +35,7 @@ import android.app.AppGlobals;
 import android.app.assist.AssistContent;
 import android.app.assist.AssistStructure;
 import android.content.ComponentName;
+import android.content.ContentCaptureOptions;
 import android.content.pm.ActivityPresentationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -406,6 +407,27 @@ final class ContentCapturePerUserService
             final ContentCaptureServerSession session = mSessions.valueAt(i);
             output.add(session.toShortString());
         }
+    }
+
+    @GuardedBy("mLock")
+    ContentCaptureOptions getOptionsForPackageLocked(@NonNull String packageName) {
+        if (!mWhitelistedPackages.contains(packageName)) {
+            if (mMaster.verbose) {
+                Slog.v(mTag, "getOptionsForPackage(" + packageName + "): not whitelisted");
+            }
+            return null;
+        }
+
+        // TODO(b/122595322): need to check whitelisted activities as well.
+        final ArraySet<ComponentName> whitelistedComponents = null;
+        ContentCaptureOptions options = new ContentCaptureOptions(mMaster.mDevCfgLoggingLevel,
+                mMaster.mDevCfgMaxBufferSize, mMaster.mDevCfgIdleFlushingFrequencyMs,
+                mMaster.mDevCfgTextChangeFlushingFrequencyMs, mMaster.mDevCfgLogHistorySize,
+                whitelistedComponents);
+        if (mMaster.verbose) {
+            Slog.v(mTag, "getOptionsForPackage(" + packageName + "): " + options);
+        }
+        return options;
     }
 
     @Override

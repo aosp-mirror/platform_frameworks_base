@@ -16,6 +16,7 @@
 
 package com.android.internal.policy;
 
+import android.content.ContentCaptureOptions;
 import android.content.Context;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
@@ -93,7 +94,11 @@ class DecorContext extends ContextThemeWrapper {
     }
 
     @Override
-    public boolean isContentCaptureSupported() {
-        return true;
+    public ContentCaptureOptions getContentCaptureOptions() {
+        Context activityContext = mActivityContext.get();
+        if (activityContext != null) {
+            return activityContext.getContentCaptureOptions();
+        }
+        return null;
     }
 }

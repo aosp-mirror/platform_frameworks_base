@@ -5353,22 +5353,21 @@ public abstract class Context {
     }
 
     /**
-     * Checks whether this context supports content capture.
+     * Gets the Content Capture options for this context, or {@code null} if it's not whitelisted.
      *
      * @hide
      */
-    // NOTE: for now we just need to check if it's supported so we can optimize calls that can be
-    // skipped when it isn't. Eventually, we might need a full
-    // ContentCaptureManager.ContentCaptureClient interface (as it's done with AutofillClient).
-    //
-    public boolean isContentCaptureSupported() {
-        return false;
+    @Nullable
+    public ContentCaptureOptions getContentCaptureOptions() {
+        return null;
     }
 
     /**
      * @hide
      */
-    public void setContentCaptureSupported(@SuppressWarnings("unused") boolean supported) {
+    @TestApi
+    public void setContentCaptureOptions(
+            @SuppressWarnings("unused") @Nullable ContentCaptureOptions options) {
     }
 
     /**

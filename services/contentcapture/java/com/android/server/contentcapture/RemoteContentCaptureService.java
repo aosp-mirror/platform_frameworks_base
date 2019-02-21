@@ -15,6 +15,9 @@
  */
 package com.android.server.contentcapture;
 
+import static android.view.contentcapture.ContentCaptureHelper.sDebug;
+import static android.view.contentcapture.ContentCaptureHelper.sVerbose;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ComponentName;
@@ -75,7 +78,7 @@ final class RemoteContentCaptureService
         }
         try {
             if (state) {
-                mService.onConnected(mServerCallback);
+                mService.onConnected(mServerCallback, sVerbose, sDebug);
             } else {
                 mService.onDisconnected();
             }

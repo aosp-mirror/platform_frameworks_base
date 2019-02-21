@@ -483,6 +483,20 @@ package android.bluetooth {
 
 package android.content {
 
+  public final class ContentCaptureOptions implements android.os.Parcelable {
+    ctor public ContentCaptureOptions(int, int, int, int, int, @Nullable android.util.ArraySet<android.content.ComponentName>);
+    method public int describeContents();
+    method public static android.content.ContentCaptureOptions forWhitelistingItself();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.content.ContentCaptureOptions> CREATOR;
+    field public final int idleFlushingFrequencyMs;
+    field public final int logHistorySize;
+    field public final int loggingLevel;
+    field public final int maxBufferSize;
+    field public final int textChangeFlushingFrequencyMs;
+    field @Nullable public final android.util.ArraySet<android.content.ComponentName> whitelistedComponents;
+  }
+
   public class ContentProviderClient implements java.lang.AutoCloseable {
     method @RequiresPermission(android.Manifest.permission.REMOVE_TASKS) public void setDetectNotResponding(long);
   }
@@ -496,6 +510,7 @@ package android.content {
     method public android.os.UserHandle getUser();
     method public int getUserId();
     method public void setAutofillCompatibilityEnabled(boolean);
+    method public void setContentCaptureOptions(@Nullable android.content.ContentCaptureOptions);
   }
 
 }

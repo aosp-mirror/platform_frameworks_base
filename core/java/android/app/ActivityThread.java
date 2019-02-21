@@ -46,6 +46,7 @@ import android.app.servertransaction.TransactionExecutorHelper;
 import android.content.BroadcastReceiver;
 import android.content.ComponentCallbacks2;
 import android.content.ComponentName;
+import android.content.ContentCaptureOptions;
 import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -746,6 +747,14 @@ public final class ActivityThread extends ClientTransactionHandler {
 
         boolean autofillCompatibilityEnabled;
 
+        /**
+         * Content capture options for the application - when null, it means ContentCapture is not
+         * enabled for the package.
+         */
+        @Nullable
+        ContentCaptureOptions contentCaptureOptions;
+
+        @Override
         public String toString() {
             return "AppBindData{appInfo=" + appInfo + "}";
         }
@@ -966,7 +975,8 @@ public final class ActivityThread extends ClientTransactionHandler {
                 boolean enableBinderTracking, boolean trackAllocation,
                 boolean isRestrictedBackupMode, boolean persistent, Configuration config,
                 CompatibilityInfo compatInfo, Map services, Bundle coreSettings,
-                String buildSerial, boolean autofillCompatibilityEnabled) {
+                String buildSerial, boolean autofillCompatibilityEnabled,
+                ContentCaptureOptions contentCaptureOptions) {
 
             if (services != null) {
                 if (false) {
@@ -1014,6 +1024,7 @@ public final class ActivityThread extends ClientTransactionHandler {
             data.initProfilerInfo = profilerInfo;
             data.buildSerial = buildSerial;
             data.autofillCompatibilityEnabled = autofillCompatibilityEnabled;
+            data.contentCaptureOptions = contentCaptureOptions;
             sendMessage(H.BIND_APPLICATION, data);
         }
 
@@ -6154,6 +6165,9 @@ public final class ActivityThread extends ClientTransactionHandler {
 
             // Propagate autofill compat state
             app.setAutofillCompatibilityEnabled(data.autofillCompatibilityEnabled);
+
+            // Propagate Content Capture options
+            app.setContentCaptureOptions(data.contentCaptureOptions);
 
             mInitialApplication = app;
 

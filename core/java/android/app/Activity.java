@@ -1110,7 +1110,7 @@ public class Activity extends ContextThemeWrapper
         super.attachBaseContext(newBase);
         if (newBase != null) {
             newBase.setAutofillClient(this);
-            newBase.setContentCaptureSupported(true);
+            newBase.setContentCaptureOptions(getContentCaptureOptions());
         }
     }
 
@@ -1118,12 +1118,6 @@ public class Activity extends ContextThemeWrapper
     @Override
     public final AutofillClient getAutofillClient() {
         return this;
-    }
-
-    /** @hide */
-    @Override
-    public boolean isContentCaptureSupported() {
-        return true;
     }
 
     /**
@@ -7615,6 +7609,7 @@ public class Activity extends ContextThemeWrapper
         mWindow.setColorMode(info.colorMode);
 
         setAutofillCompatibilityEnabled(application.isAutofillCompatibilityEnabled());
+        setContentCaptureOptions(application.getContentCaptureOptions());
     }
 
     private void enableAutofillCompatibilityIfNeeded() {
