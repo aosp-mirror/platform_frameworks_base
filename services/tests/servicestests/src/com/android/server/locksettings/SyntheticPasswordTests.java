@@ -554,6 +554,18 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         assertArrayEquals(PAYLOAD2, deserialized.passwordHandle);
     }
 
+    public void testGsiDisablesAuthSecret() throws RemoteException {
+        mGsiService.setIsGsiRunning(true);
+
+        final String password = "testGsiDisablesAuthSecret-password";
+
+        initializeCredentialUnderSP(password, PRIMARY_USER_ID);
+        assertEquals(VerifyCredentialResponse.RESPONSE_OK, mService.verifyCredential(
+                password, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, 0, PRIMARY_USER_ID)
+                        .getResponseCode());
+        verify(mAuthSecretService, never()).primaryUserCredential(any(ArrayList.class));
+    }
+
     // b/62213311
     //TODO: add non-migration work profile case, and unify/un-unify transition.
     //TODO: test token after user resets password

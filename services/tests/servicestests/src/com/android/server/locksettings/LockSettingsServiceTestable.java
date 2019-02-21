@@ -44,11 +44,12 @@ public class LockSettingsServiceTestable extends LockSettingsService {
         private IStorageManager mStorageManager;
         private SyntheticPasswordManager mSpManager;
         private IAuthSecret mAuthSecretService;
+        private FakeGsiService mGsiService;
 
         public MockInjector(Context context, LockSettingsStorage storage, KeyStore keyStore,
                 IActivityManager activityManager, LockPatternUtils lockPatternUtils,
                 IStorageManager storageManager, SyntheticPasswordManager spManager,
-                IAuthSecret authSecretService) {
+                IAuthSecret authSecretService, FakeGsiService gsiService) {
             super(context);
             mLockSettingsStorage = storage;
             mKeyStore = keyStore;
@@ -56,6 +57,7 @@ public class LockSettingsServiceTestable extends LockSettingsService {
             mLockPatternUtils = lockPatternUtils;
             mStorageManager = storageManager;
             mSpManager = spManager;
+            mGsiService = gsiService;
         }
 
         @Override
@@ -107,14 +109,20 @@ public class LockSettingsServiceTestable extends LockSettingsService {
         public int binderGetCallingUid() {
             return Process.SYSTEM_UID;
         }
+
+        @Override
+        public boolean isGsiRunning() {
+            return mGsiService.isGsiRunning();
+        }
     }
 
     protected LockSettingsServiceTestable(Context context, LockPatternUtils lockPatternUtils,
             LockSettingsStorage storage, FakeGateKeeperService gatekeeper, KeyStore keystore,
             IStorageManager storageManager, IActivityManager mActivityManager,
-            SyntheticPasswordManager spManager, IAuthSecret authSecretService) {
+            SyntheticPasswordManager spManager, IAuthSecret authSecretService,
+            FakeGsiService gsiService) {
         super(new MockInjector(context, storage, keystore, mActivityManager, lockPatternUtils,
-                storageManager, spManager, authSecretService));
+                storageManager, spManager, authSecretService, gsiService));
         mGateKeeperService = gatekeeper;
         mAuthSecretService = authSecretService;
     }
