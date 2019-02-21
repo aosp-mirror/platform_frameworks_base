@@ -371,10 +371,17 @@ public final class WallpaperInfo implements Parcelable {
      * Returns whether this wallpaper service can support multiple engines to render on each surface
      * independently. An example use case is a multi-display set-up where the wallpaper service can
      * render surfaces to each of the connected displays.
+     * <p>
+     * This corresponds to the value {@link android.R.styleable#Wallpaper_supportsMultipleDisplays}
+     * in the XML description of the wallpaper.
+     * <p>
+     * The default value is {@code false}.
      *
      * @see WallpaperService#onCreateEngine()
      * @see WallpaperService.Engine#onCreate(SurfaceHolder)
      * @return {@code true} if multiple engines can render independently on each surface.
+     *
+     * @attr ref android.R.styleable#Wallpaper_supportsMultipleDisplays
      */
     public boolean supportsMultipleDisplays() {
         return mSupportMultipleDisplays;

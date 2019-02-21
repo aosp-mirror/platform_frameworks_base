@@ -35,6 +35,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.security.keystore.AndroidKeyStoreProvider;
+import android.security.keystore.KeyPermanentlyInvalidatedException;
 import android.security.keystore.KeyProperties;
 
 import com.android.org.conscrypt.TrustedCertificateStore;
@@ -592,7 +593,7 @@ public final class KeyChain {
             try {
                 return AndroidKeyStoreProvider.loadAndroidKeyStoreKeyPairFromKeystore(
                         KeyStore.getInstance(), keyId, KeyStore.UID_SELF);
-            } catch (RuntimeException | UnrecoverableKeyException e) {
+            } catch (RuntimeException | UnrecoverableKeyException | KeyPermanentlyInvalidatedException e) {
                 throw new KeyChainException(e);
             }
         }

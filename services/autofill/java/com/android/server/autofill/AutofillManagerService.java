@@ -1026,6 +1026,29 @@ public final class AutofillManagerService
         }
 
         @Override
+        public void setAugmentedAutofillWhitelist(@Nullable List<String> packages,
+                @Nullable List<ComponentName> activities, @NonNull IResultReceiver receiver)
+                throws RemoteException {
+            final int userId = UserHandle.getCallingUserId();
+
+            boolean ok;
+            synchronized (mLock) {
+                final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
+                if (service != null) {
+                    ok = service.setAugmentedAutofillWhitelistLocked(packages, activities,
+                            getCallingUid());
+                } else {
+                    if (sVerbose) {
+                        Slog.v(TAG, "setAugmentedAutofillWhitelist(): no service for " + userId);
+                    }
+                    ok = false;
+                }
+            }
+            send(receiver,
+                    ok ? AutofillManager.RESULT_OK : AutofillManager.RESULT_CODE_NOT_SERVICE);
+        }
+
+        @Override
         public void getAvailableFieldClassificationAlgorithms(@NonNull IResultReceiver receiver)
                 throws RemoteException {
             final int userId = UserHandle.getCallingUserId();

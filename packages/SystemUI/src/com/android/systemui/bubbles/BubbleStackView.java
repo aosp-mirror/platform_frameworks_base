@@ -99,6 +99,7 @@ public class BubbleStackView extends FrameLayout {
     private int mExpandedAnimateXDistance;
     private int mExpandedAnimateYDistance;
     private int mStatusBarHeight;
+    private int mPipDismissHeight;
 
     private Bubble mExpandedBubble;
     private boolean mIsExpanded;
@@ -159,6 +160,8 @@ public class BubbleStackView extends FrameLayout {
                 res.getDimensionPixelSize(R.dimen.bubble_expanded_animate_y_distance);
         mStatusBarHeight =
                 res.getDimensionPixelSize(com.android.internal.R.dimen.status_bar_height);
+        mPipDismissHeight = mContext.getResources().getDimensionPixelSize(
+                R.dimen.pip_dismiss_gradient_height);
 
         mDisplaySize = new Point();
         WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
@@ -390,8 +393,7 @@ public class BubbleStackView extends FrameLayout {
      */
     public void updateBubble(NotificationEntry entry, boolean updatePosition) {
         Bubble b = mBubbleData.getBubble(entry.key);
-        b.iconView.update(entry);
-        // TODO: should also update the expanded view here (e.g. height change)
+        mBubbleData.updateBubble(entry.key, entry);
 
         if (updatePosition && !mIsExpanded) {
             // If alerting it gets promoted to top of the stack.
@@ -653,6 +655,20 @@ public class BubbleStackView extends FrameLayout {
     }
 
     /**
+     * Calculates how large the expanded view of the bubble can be. This takes into account the
+     * y position when the bubbles are expanded as well as the bounds of the dismiss target.
+     */
+    int getMaxExpandedHeight() {
+        int expandedY = (int) mExpandedAnimationController.getExpandedY();
+        int bubbleContainerHeight = mBubbleContainer.getChildAt(0) != null
+                ? mBubbleContainer.getChildAt(0).getHeight()
+                : 0;
+        // PIP dismiss view uses FLAG_LAYOUT_IN_SCREEN so we need to subtract the bottom inset
+        int pipDismissHeight = mPipDismissHeight - getBottomInset();
+        return mDisplaySize.y - expandedY - mBubbleSize - pipDismissHeight;
+    }
+
+    /**
      * Minimum velocity, in pixels/second, required to get from x to destX while being slowed by a
      * given frictional force.
      *
@@ -685,6 +701,14 @@ public class BubbleStackView extends FrameLayout {
                             : 0);
         }
 
+        return 0;
+    }
+
+    private int getBottomInset() {
+        if (getRootWindowInsets() != null) {
+            WindowInsets insets = getRootWindowInsets();
+            return insets.getSystemWindowInsetBottom();
+        }
         return 0;
     }
 

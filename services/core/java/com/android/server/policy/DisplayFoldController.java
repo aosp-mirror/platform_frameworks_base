@@ -87,10 +87,13 @@ class DisplayFoldController {
             final int dy = (mNonOverrideDisplayInfo.logicalHeight - foldedArea.height()) / 2
                     - foldedArea.top;
 
+            // Bypass scaling otherwise LogicalDisplay will scale contents by default.
+            mDisplayManagerInternal.setDisplayScalingDisabled(mDisplayId, true);
             mWindowManagerInternal.setForcedDisplaySize(mDisplayId,
                     foldedArea.width(), foldedArea.height());
             mDisplayManagerInternal.setDisplayOffsets(mDisplayId, -dx, -dy);
         } else {
+            mDisplayManagerInternal.setDisplayScalingDisabled(mDisplayId, false);
             mWindowManagerInternal.clearForcedDisplaySize(mDisplayId);
             mDisplayManagerInternal.setDisplayOffsets(mDisplayId, 0, 0);
         }

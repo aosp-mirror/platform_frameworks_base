@@ -11731,6 +11731,14 @@ public final class Settings {
         public static final String APP_IDLE_CONSTANTS = "app_idle_constants";
 
         /**
+         * Enable ART bytecode verification verifications for debuggable apps.
+         * 0 = disable, 1 = enable.
+         * @hide
+         */
+        public static final String ART_VERIFIER_VERIFY_DEBUGGABLE =
+                "art_verifier_verify_debuggable";
+
+        /**
          * Power manager specific settings.
          * This is encoded as a key=value list, separated by commas. Ex:
          *

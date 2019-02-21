@@ -37,6 +37,7 @@ import android.content.pm.ShortcutInfo;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Rect;
+import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -3094,18 +3095,25 @@ public class Intent implements Parcelable, Cloneable {
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_MEDIA_SCANNER_FINISHED = "android.intent.action.MEDIA_SCANNER_FINISHED";
 
-   /**
-     * Broadcast Action:  Request the media scanner to scan a file and add it to the media database.
-     * The path to the file is contained in the Intent.mData field.
+    /**
+     * Broadcast Action: Request the media scanner to scan a file and add it to
+     * the media database.
+     * <p>
+     * The path to the file is contained in {@link Intent#getData()}.
+     *
+     * @deprecated Starting in the {@link android.os.Build.VERSION_CODES#Q}
+     *             release, shared storage paths are sandboxed per application,
+     *             and this broadcast cannot correctly translate those sandboxed
+     *             paths. Callers will need to instead migrate to using
+     *             {@link MediaScannerConnection}.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    @Deprecated
     public static final String ACTION_MEDIA_SCANNER_SCAN_FILE = "android.intent.action.MEDIA_SCANNER_SCAN_FILE";
 
-    /**
-     * Broadcast Action:  Request the media scanner to scan a storage volume and add it to the media database.
-     * The path to the storage volume is contained in the Intent.mData field.
-     */
+    /** @hide */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    @Deprecated
     public static final String ACTION_MEDIA_SCANNER_SCAN_VOLUME = "android.intent.action.MEDIA_SCANNER_SCAN_VOLUME";
 
    /**
@@ -4336,6 +4344,18 @@ public class Intent implements Parcelable, Cloneable {
             "android.intent.action.DEVICE_CUSTOMIZATION_READY";
 
 
+    /**
+     * Activity Action: Display an activity state associated with an unique {@link LocusId}.
+     *
+     * <p>For example, a chat app could use the context to resume a conversation between 2 users.
+     *
+     * <p>Input: {@link #EXTRA_LOCUS_ID} specifies the unique identifier of the locus in the
+     * app domain. Should be stable across reboots and backup / restore.
+     * <p>Output: nothing.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_VIEW_LOCUS = "android.intent.action.VIEW_LOCUS";
+
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
     // Standard intent categories (see addCategory()).
@@ -5533,6 +5553,15 @@ public class Intent implements Parcelable, Cloneable {
      * @hide
      */
     public static final int EXTRA_MEDIA_RESOURCE_TYPE_AUDIO_CODEC = 1;
+
+    /**
+     * Intent extra: ID of the context used on {@link #ACTION_VIEW_LOCUS}.
+     *
+     * <p>
+     * Type: {@link LocusId}
+     * </p>
+     */
+    public static final String EXTRA_LOCUS_ID = "android.intent.extra.LOCUS_ID";
 
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------

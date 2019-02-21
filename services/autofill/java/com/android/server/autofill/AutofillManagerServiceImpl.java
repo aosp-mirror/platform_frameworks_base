@@ -40,6 +40,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.Process;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.SystemClock;
@@ -58,6 +59,7 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.DebugUtils;
 import android.util.LocalLog;
+import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TimeUtils;
@@ -164,6 +166,16 @@ final class AutofillManagerServiceImpl
     @GuardedBy("mLock")
     @Nullable
     private RemoteAugmentedAutofillService mRemoteAugmentedAutofillService;
+
+    @GuardedBy("mLock")
+    @Nullable
+    private ServiceInfo mRemoteAugmentedAutofillServiceInfo;
+
+    /**
+     * List of packages that are whitelisted to be trigger augmented autofill.
+     */
+    @GuardedBy("mLock")
+    private final ArraySet<String> mWhitelistedAugmentAutofillPackages = new ArraySet<>();
 
     AutofillManagerServiceImpl(AutofillManagerService master, Object lock,
             LocalLog uiLatencyHistory, LocalLog wtfHistory, int userId, AutoFillUI ui,
@@ -844,10 +856,11 @@ final class AutofillManagerServiceImpl
     }
 
     @GuardedBy("mLock")
-    private boolean isCalledByServiceLocked(String methodName, int callingUid) {
-        if (getServiceUidLocked() != callingUid) {
+    private boolean isCalledByServiceLocked(@NonNull String methodName, int callingUid) {
+        final int serviceUid = getServiceUidLocked();
+        if (serviceUid != callingUid) {
             Slog.w(TAG, methodName + "() called by UID " + callingUid
-                    + ", but service UID is " + getServiceUidLocked());
+                    + ", but service UID is " + serviceUid);
             return false;
         }
         return true;
@@ -886,6 +899,19 @@ final class AutofillManagerServiceImpl
             pw.print(prefix); pw.println("RemoteAugmentedAutofillService: ");
             mRemoteAugmentedAutofillService.dump(prefix2, pw);
         }
+        if (mRemoteAugmentedAutofillServiceInfo != null) {
+            pw.print(prefix); pw.print("RemoteAugmentedAutofillServiceInfo: ");
+            pw.println(mRemoteAugmentedAutofillServiceInfo);
+        }
+
+        final int whitelistSize = mWhitelistedAugmentAutofillPackages.size();
+        pw.print(prefix); pw.print("Packages whitelisted for augmented autofill: ");
+        pw.println(whitelistSize);
+        for (int i = 0; i < whitelistSize; i++) {
+            final String whitelistedPkg = mWhitelistedAugmentAutofillPackages.valueAt(i);
+            pw.print(prefix2); pw.print(i + 1); pw.print(": "); pw.println(whitelistedPkg);
+        }
+
         pw.print(prefix); pw.print("Field classification enabled: ");
             pw.println(isFieldClassificationEnabledLocked());
         pw.print(prefix); pw.print("Compat pkgs: ");
@@ -1037,9 +1063,13 @@ final class AutofillManagerServiceImpl
                 }
                 return null;
             }
-            final ComponentName componentName = RemoteAugmentedAutofillService.getComponentName(
-                    serviceName, mUserId, mAugmentedAutofillResolver.isTemporary(mUserId));
-            if (componentName == null) return null;
+            final Pair<ServiceInfo, ComponentName> pair = RemoteAugmentedAutofillService
+                    .getComponentName(
+                            serviceName, mUserId, mAugmentedAutofillResolver.isTemporary(mUserId));
+            if (pair == null) return null;
+
+            mRemoteAugmentedAutofillServiceInfo = pair.first;
+            final ComponentName componentName = pair.second;
             if (sVerbose) {
                 Slog.v(TAG, "getRemoteAugmentedAutofillServiceLocked(): " + componentName);
             }
@@ -1067,9 +1097,87 @@ final class AutofillManagerServiceImpl
     private void updateRemoteAugmentedAutofillService(@Nullable String serviceName) {
         if (serviceName == null) {
             if (sVerbose) Slog.v(TAG, "updateRemoteAugmentedAutofillService(): time's up!");
-            if (mRemoteAugmentedAutofillService != null) {
-                mRemoteAugmentedAutofillService.destroy();
-                mRemoteAugmentedAutofillService = null;
+            synchronized (mLock) {
+                if (mRemoteAugmentedAutofillService != null) {
+                    mRemoteAugmentedAutofillService.destroy();
+                    mRemoteAugmentedAutofillService = null;
+                }
+            }
+        }
+    }
+
+    /**
+     * Sets which packages and activities can trigger augmented autofill.
+     *
+     * @return whether caller UID is the augmented autofill service for the user
+     */
+    boolean setAugmentedAutofillWhitelistLocked(List<String> packages,
+            List<ComponentName> activities, int callingUid) {
+
+        if (!isCalledByAugmentedAutofillServiceLocked("setAugmentedAutofillWhitelistLocked",
+                callingUid)) {
+            return false;
+        }
+        if (mMaster.verbose) {
+            Slog.v(TAG, "setAugmentedAutofillWhitelistLocked(packages=" + packages + ", activities="
+                    + activities + ")");
+        }
+        whitelistForAugmentedAutofillPackages(packages);
+
+        // TODO(b/123100824): whitelist activities as well
+        // TODO(b/122858578): log metrics
+        return true;
+    }
+
+    @GuardedBy("mLock")
+    private boolean isCalledByAugmentedAutofillServiceLocked(@NonNull String methodName,
+            int callingUid) {
+        // Lazy load service first
+        final RemoteAugmentedAutofillService service = getRemoteAugmentedAutofillServiceLocked();
+        if (service == null) {
+            Slog.w(TAG, methodName + "() called by UID " + callingUid
+                    + ", but there is no augmented autofill service defined for user "
+                    + getUserId());
+            return false;
+        }
+
+        if (getAugmentedAutofillServiceUidLocked() != callingUid) {
+            Slog.w(TAG, methodName + "() called by UID " + callingUid
+                    + ", but service UID is " + getAugmentedAutofillServiceUidLocked()
+                    + " for user " + getUserId());
+            return false;
+        }
+        return true;
+    }
+
+    @GuardedBy("mLock")
+    private int getAugmentedAutofillServiceUidLocked() {
+        if (mRemoteAugmentedAutofillServiceInfo == null) {
+            if (mMaster.verbose) {
+                Slog.v(TAG, "getAugmentedAutofillServiceUid(): "
+                        + "no mRemoteAugmentedAutofillServiceInfo");
+            }
+            return Process.INVALID_UID;
+        }
+        return mRemoteAugmentedAutofillServiceInfo.applicationInfo.uid;
+    }
+
+    @GuardedBy("mLock")
+    boolean isWhitelistedForAugmentedAutofillLocked(@NonNull ComponentName componentName) {
+        // TODO(b/122595322): need to check whitelisted activities as well.
+        final String packageName = componentName.getPackageName();
+        return mWhitelistedAugmentAutofillPackages.contains(packageName);
+    }
+
+    private void whitelistForAugmentedAutofillPackages(@NonNull List<String> packages) {
+        // TODO(b/123100824): add CTS test for when it's null
+        synchronized (mLock) {
+            if (packages == null) {
+                if (mMaster.verbose) Slog.v(TAG, "clearing all whitelisted augmented packages");
+                mWhitelistedAugmentAutofillPackages.clear();
+            } else {
+                if (mMaster.verbose) Slog.v(TAG, "whitelisting augmented packages: " + packages);
+                mWhitelistedAugmentAutofillPackages.addAll(packages);
             }
         }
     }

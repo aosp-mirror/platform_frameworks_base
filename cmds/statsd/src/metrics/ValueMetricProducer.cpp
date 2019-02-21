@@ -188,13 +188,28 @@ void ValueMetricProducer::clearPastBucketsLocked(const int64_t dumpTimeNs) {
 void ValueMetricProducer::onDumpReportLocked(const int64_t dumpTimeNs,
                                              const bool include_current_partial_bucket,
                                              const bool erase_data,
+                                             const DumpLatency dumpLatency,
                                              std::set<string> *str_set,
                                              ProtoOutputStream* protoOutput) {
     VLOG("metric %lld dump report now...", (long long)mMetricId);
+    flushIfNeededLocked(dumpTimeNs);
     if (include_current_partial_bucket) {
-        flushLocked(dumpTimeNs);
-    } else {
-        flushIfNeededLocked(dumpTimeNs);
+        // For pull metrics, we need to do a pull at bucket boundaries. If we do not do that the
+        // current bucket will have incomplete data and the next will have the wrong snapshot to do
+        // a diff against. If the condition is false, we are fine since the base data is reset and
+        // we are not tracking anything.
+        bool pullNeeded = mIsPulled && mCondition == ConditionState::kTrue;
+        if (pullNeeded) {
+            switch (dumpLatency) {
+                case FAST:
+                    invalidateCurrentBucket();
+                    break;
+                case NO_TIME_CONSTRAINTS:
+                    pullAndMatchEventsLocked(dumpTimeNs);
+                    break;
+            }
+        } 
+        flushCurrentBucketLocked(dumpTimeNs, dumpTimeNs);
     }
     protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_ID, (long long)mMetricId);
     protoOutput->write(FIELD_TYPE_BOOL | FIELD_ID_IS_ACTIVE, isActiveLocked());
@@ -712,23 +727,21 @@ void ValueMetricProducer::flushIfNeededLocked(const int64_t& eventTimeNs) {
         return;
     }
 
-    flushCurrentBucketLocked(eventTimeNs);
-
     int64_t numBucketsForward = 1 + (eventTimeNs - currentBucketEndTimeNs) / mBucketSizeNs;
-    mCurrentBucketStartTimeNs = currentBucketEndTimeNs + (numBucketsForward - 1) * mBucketSizeNs;
-    mCurrentBucketNum += numBucketsForward;
+    int64_t nextBucketStartTimeNs = currentBucketEndTimeNs + (numBucketsForward - 1) * mBucketSizeNs;
+    flushCurrentBucketLocked(eventTimeNs, nextBucketStartTimeNs);
 
+    mCurrentBucketNum += numBucketsForward;
     if (numBucketsForward > 1) {
         VLOG("Skipping forward %lld buckets", (long long)numBucketsForward);
         StatsdStats::getInstance().noteSkippedForwardBuckets(mMetricId);
         // take base again in future good bucket.
         resetBase();
     }
-    VLOG("metric %lld: new bucket start time: %lld", (long long)mMetricId,
-         (long long)mCurrentBucketStartTimeNs);
 }
 
-void ValueMetricProducer::flushCurrentBucketLocked(const int64_t& eventTimeNs) {
+void ValueMetricProducer::flushCurrentBucketLocked(const int64_t& eventTimeNs,
+                                                   const int64_t& nextBucketStartTimeNs) {
     if (mCondition == ConditionState::kUnknown) {
         StatsdStats::getInstance().noteBucketUnknownCondition(mMetricId);
     }
@@ -758,6 +771,9 @@ void ValueMetricProducer::flushCurrentBucketLocked(const int64_t& eventTimeNs) {
     }
     initCurrentSlicedBucket();
     mCurrentBucketIsInvalid = false;
+    mCurrentBucketStartTimeNs = nextBucketStartTimeNs;
+    VLOG("metric %lld: new bucket start time: %lld", (long long)mMetricId,
+         (long long)mCurrentBucketStartTimeNs);
 }
 
 ValueBucket ValueMetricProducer::buildPartialBucket(int64_t bucketEndTime,

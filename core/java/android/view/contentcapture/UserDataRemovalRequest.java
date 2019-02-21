@@ -17,7 +17,7 @@ package android.view.contentcapture;
 
 import android.annotation.NonNull;
 import android.app.ActivityThread;
-import android.net.Uri;
+import android.content.LocusId;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.IntArray;
@@ -36,16 +36,16 @@ public final class UserDataRemovalRequest implements Parcelable {
     private final String mPackageName;
 
     private final boolean mForEverything;
-    private ArrayList<UriRequest> mUriRequests;
+    private ArrayList<LocusIdRequest> mLocusIdRequests;
 
     private UserDataRemovalRequest(@NonNull Builder builder) {
         mPackageName = ActivityThread.currentActivityThread().getApplication().getPackageName();
         mForEverything = builder.mForEverything;
-        if (builder.mUris != null) {
-            final int size = builder.mUris.size();
-            mUriRequests = new ArrayList<>(size);
+        if (builder.mLocusIds != null) {
+            final int size = builder.mLocusIds.size();
+            mLocusIdRequests = new ArrayList<>(size);
             for (int i = 0; i < size; i++) {
-                mUriRequests.add(new UriRequest(builder.mUris.get(i),
+                mLocusIdRequests.add(new LocusIdRequest(builder.mLocusIds.get(i),
                         builder.mRecursive.get(i) == 1));
             }
         }
@@ -56,9 +56,9 @@ public final class UserDataRemovalRequest implements Parcelable {
         mForEverything = parcel.readBoolean();
         if (!mForEverything) {
             final int size = parcel.readInt();
-            mUriRequests = new ArrayList<>(size);
+            mLocusIdRequests = new ArrayList<>(size);
             for (int i = 0; i < size; i++) {
-                mUriRequests.add(new UriRequest((Uri) parcel.readValue(null),
+                mLocusIdRequests.add(new LocusIdRequest((LocusId) parcel.readValue(null),
                         parcel.readBoolean()));
             }
         }
@@ -80,11 +80,11 @@ public final class UserDataRemovalRequest implements Parcelable {
     }
 
     /**
-     * Gets the list of {@code Uri}s the apps is requesting to remove.
+     * Gets the list of {@code LousId}s the apps is requesting to remove.
      */
     @NonNull
-    public List<UriRequest> getUriRequests() {
-        return mUriRequests;
+    public List<LocusIdRequest> getLocusIdRequests() {
+        return mLocusIdRequests;
     }
 
     /**
@@ -93,7 +93,7 @@ public final class UserDataRemovalRequest implements Parcelable {
     public static final class Builder {
 
         private boolean mForEverything;
-        private ArrayList<Uri> mUris;
+        private ArrayList<LocusId> mLocusIds;
         private IntArray mRecursive;
 
         private boolean mDestroyed;
@@ -106,36 +106,32 @@ public final class UserDataRemovalRequest implements Parcelable {
         @NonNull
         public Builder forEverything() {
             throwIfDestroyed();
-            if (mUris != null) {
-                throw new IllegalStateException("Already added Uris");
-            }
+            Preconditions.checkState(mLocusIds == null, "Already added LocusIds");
 
             mForEverything = true;
             return this;
         }
 
         /**
-         * Request service to remove data associated with a given {@link Uri}.
+         * Request service to remove data associated with a given {@link LocusId}.
          *
-         * @param uri URI being requested to be removed.
-         * @param recursive whether it should remove the data associated with just the URI or its
-         * tree of descendants.
+         * @param locusId the {@link LocusId} being requested to be removed.
+         * @param recursive whether it should remove the data associated with just the
+         * {@code LocusId} or its tree of descendants.
          *
          * @return this builder
          */
-        public Builder addUri(@NonNull Uri uri, boolean recursive) {
+        public Builder addLocusId(@NonNull LocusId locusId, boolean recursive) {
             throwIfDestroyed();
-            if (mForEverything) {
-                throw new IllegalStateException("Already is for everything");
-            }
-            Preconditions.checkNotNull(uri);
+            Preconditions.checkState(!mForEverything, "Already is for everything");
+            Preconditions.checkNotNull(locusId);
 
-            if (mUris == null) {
-                mUris = new ArrayList<>();
+            if (mLocusIds == null) {
+                mLocusIds = new ArrayList<>();
                 mRecursive = new IntArray();
             }
 
-            mUris.add(uri);
+            mLocusIds.add(locusId);
             mRecursive.add(recursive ? 1 : 0);
             return this;
         }
@@ -147,7 +143,7 @@ public final class UserDataRemovalRequest implements Parcelable {
         public UserDataRemovalRequest build() {
             throwIfDestroyed();
 
-            Preconditions.checkState(mForEverything || mUris != null);
+            Preconditions.checkState(mForEverything || mLocusIds != null);
 
             mDestroyed = true;
             return new UserDataRemovalRequest(this);
@@ -168,11 +164,11 @@ public final class UserDataRemovalRequest implements Parcelable {
         parcel.writeString(mPackageName);
         parcel.writeBoolean(mForEverything);
         if (!mForEverything) {
-            final int size = mUriRequests.size();
+            final int size = mLocusIdRequests.size();
             parcel.writeInt(size);
             for (int i = 0; i < size; i++) {
-                final UriRequest request = mUriRequests.get(i);
-                parcel.writeValue(request.getUri());
+                final LocusIdRequest request = mLocusIdRequests.get(i);
+                parcel.writeValue(request.getLocusId());
                 parcel.writeBoolean(request.isRecursive());
             }
         }
@@ -193,28 +189,28 @@ public final class UserDataRemovalRequest implements Parcelable {
     };
 
     /**
-     * Representation of a request to remove data associated with an {@link Uri}.
+     * Representation of a request to remove data associated with a {@link LocusId}.
      */
-    public final class UriRequest {
-        private final @NonNull Uri mUri;
+    public final class LocusIdRequest {
+        private final @NonNull LocusId mLocusId;
         private final boolean mRecursive;
 
-        private UriRequest(@NonNull Uri uri, boolean recursive) {
-            this.mUri = uri;
+        private LocusIdRequest(@NonNull LocusId locusId, boolean recursive) {
+            this.mLocusId = locusId;
             this.mRecursive = recursive;
         }
 
         /**
-         * Gets the URI per se.
+         * Gets the {@code LocusId} per se.
          */
         @NonNull
-        public Uri getUri() {
-            return mUri;
+        public LocusId getLocusId() {
+            return mLocusId;
         }
 
         /**
-         * Checks whether the request is to remove just the data associated with the URI per se, or
-         * also its descendants.
+         * Checks whether the request is to remove just the data associated with the {@link LocusId}
+         *  per se, or also its descendants.
          */
         @NonNull
         public boolean isRecursive() {

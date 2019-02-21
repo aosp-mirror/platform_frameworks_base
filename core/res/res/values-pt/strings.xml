@@ -509,8 +509,8 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Permite que o app se comunique com leitores, cartões e etiqueta NFC (comunicação a curta distância)."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"desativar o bloqueio de tela"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Permite que o app desative o bloqueio de teclas e qualquer segurança por senha associada. Por exemplo, o telefone desativa o bloqueio de telas ao receber uma chamada e o reativa quando a chamada é finalizada."</string>
-    <string name="permlab_getAndRequestScreenLockComplexity" msgid="3911592334192005424">"receber e solicitar complexidade de bloqueio de tela"</string>
-    <string name="permdesc_getAndRequestScreenLockComplexity" msgid="9045202063228854873">"Permite que o app saiba o nível de complexidade do bloqueio de tela (alto, médio, baixo ou nenhum), que indica o intervalo possível de comprimento e o tipo de bloqueio de tela. O app também pode sugerir a atualização do bloqueio de tela até um certo nível, mas os usuários podem ignorar a sugestão. O bloqueio de tela não é armazenado em texto simples, então o app não tem acesso à senha exata."</string>
+    <string name="permlab_requestScreenLockComplexity" msgid="7028982116060987169">"solicitar complexidade do bloqueio de tela"</string>
+    <string name="permdesc_requestScreenLockComplexity" msgid="2806396846128185677">"Permite que o app saiba o nível de complexidade do bloqueio de tela (alto, médio, baixo ou nenhum), que indica o intervalo possível de comprimento e o tipo de bloqueio de tela. O app também pode sugerir a atualização do bloqueio de tela até um certo nível, mas os usuários podem ignorar a sugestão. O bloqueio de tela não é armazenado em texto simples, então o app não tem acesso à senha exata."</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"Usar hardware de biometria"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"Permite que o app use hardware de biometria para autenticação"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"gerenciar hardware de impressão digital"</string>
@@ -536,6 +536,7 @@
     <string name="biometric_error_user_canceled" msgid="2260175018114348727">"Autenticação cancelada"</string>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"Não reconhecido"</string>
     <string name="biometric_error_canceled" msgid="349665227864885880">"Autenticação cancelada"</string>
+    <string name="biometric_error_device_not_secured" msgid="6583143098363528349">"Nenhum PIN, padrão ou senha configurado"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Impressão digital parcial detectada. Tente novamente."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Não foi possível processar a impressão digital. Tente novamente."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"O sensor de impressão digital está sujo. Limpe-o e tente novamente."</string>
@@ -555,7 +556,7 @@
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"Excesso de tentativas. Sensor de impressão digital desativado."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Tente novamente."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="7654382120628334248">"Nenhuma impressão digital registrada."</string>
-    <string name="fingerprint_error_hw_not_present" msgid="5729436878065119329">"Este dispositivo não tem um sensor de impressão digital"</string>
+    <string name="fingerprint_error_hw_not_present" msgid="409523969613176352">"Este dispositivo não tem um sensor de impressão digital."</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"Dedo <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -575,7 +576,14 @@
     <string name="face_acquired_too_left" msgid="2712489669456176505">"Mova o sensor para a esquerda."</string>
     <string name="face_acquired_poor_gaze" msgid="8344973502980415859">"Olhe para o sensor."</string>
     <string name="face_acquired_not_detected" msgid="5707782294589511391">"Nenhum rosto detectado."</string>
-    <string name="face_acquired_not_steady" msgid="3722829465011040042">"Mantenha o rosto parado na frente do dispositivo."</string>
+    <string name="face_acquired_too_much_motion" msgid="470381210701463822">"Muito movimento."</string>
+    <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Registre seu rosto novamente."</string>
+    <string name="face_acquired_too_different" msgid="5553210341111255124">"Rosto diferente detectado."</string>
+    <string name="face_acquired_too_similar" msgid="1508776858407646460">"Muito parecido, mude de posição."</string>
+    <string name="face_acquired_pan_too_extreme" msgid="8203001424525231680">"Olhe mais diretamente para a câmera."</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="7641326344460439970">"Olhe mais diretamente para a câmera."</string>
+    <string name="face_acquired_roll_too_extreme" msgid="1444829237745898619">"Alinhe sua cabeça na vertical."</string>
+    <string name="face_acquired_obscured" msgid="3055077697850272097">"Descubra seu rosto."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="6255891785768984615">"Hardware de rosto não disponível."</string>
@@ -587,7 +595,7 @@
     <string name="face_error_lockout_permanent" msgid="8198354656746088890">"Excesso de tentativas. Autenticação facial desat."</string>
     <string name="face_error_unable_to_process" msgid="238761109287767270">"Tente novamente."</string>
     <string name="face_error_not_enrolled" msgid="9166792142679691323">"Nenhum rosto registrado."</string>
-    <string name="face_error_hw_not_present" msgid="4737289254517095671">"Este dispositivo não tem um sensor de autenticação facial"</string>
+    <string name="face_error_hw_not_present" msgid="916085883581450331">"Este dispositivo não tem um sensor de autenticação facial."</string>
     <string name="face_name_template" msgid="7004562145809595384">"Rosto <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -947,8 +955,7 @@
     <string name="save_password_never" msgid="8274330296785855105">"Nunca"</string>
     <string name="open_permission_deny" msgid="7374036708316629800">"Você não tem permissão para abrir esta página."</string>
     <string name="text_copied" msgid="4985729524670131385">"Texto copiado para a área de transferência."</string>
-    <!-- no translation found for copied (8564151838171791598) -->
-    <skip />
+    <string name="copied" msgid="8564151838171791598">"Copiado"</string>
     <string name="more_item_label" msgid="4650918923083320495">"Mais"</string>
     <string name="prepend_shortcut_label" msgid="2572214461676015642">"Menu+"</string>
     <string name="menu_meta_shortcut_label" msgid="4647153495550313570">"Meta+"</string>
@@ -1389,7 +1396,7 @@
     <string name="ext_media_init_action" msgid="7952885510091978278">"Configurar"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Ejetar"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"Explorar"</string>
-    <!-- no translation found for ext_media_seamless_action (5356508985817068711) -->
+    <!-- no translation found for ext_media_seamless_action (6575980560886881233) -->
     <skip />
     <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> ausente"</string>
     <string name="ext_media_missing_message" msgid="4012389235250987930">"Insira o dispositivo novamente"</string>
@@ -1990,4 +1997,8 @@
     <string name="dynamic_mode_notification_title" msgid="508815255807182035">"A bateria pode acabar antes da recarga normal"</string>
     <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"A \"Economia de bateria\" foi ativada para aumentar a duração da carga"</string>
     <string name="car_loading_profile" msgid="3545132581795684027">"Carregando"</string>
+    <plurals name="file_count" formatted="false" msgid="1628600959752419449">
+      <item quantity="one"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> arquivo</item>
+      <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> arquivos</item>
+    </plurals>
 </resources>

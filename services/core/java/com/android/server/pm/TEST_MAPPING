@@ -1,4 +1,15 @@
 {
+  "presubmit": [
+    {
+      "name": "CtsUsesLibraryHostTestCases"
+    },
+    {
+      "name": "CtsClassloaderSplitsHostTestCases"
+    },
+    {
+      "name": "CtsCompilationTestCases"
+    }
+  ],
   "imports": [
     {
       "path": "system/apex/tests"

@@ -509,8 +509,8 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Permet à l\'application de communiquer avec des bornes, des cartes et des lecteurs compatibles avec la technologie NFC (communication en champ proche)."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"désactiver le verrouillage de l\'écran"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Permet à l\'application de désactiver le verrouillage des touches et toute mesure de sécurité par mot de passe associée. Par exemple, votre téléphone désactive le verrouillage des touches lorsque vous recevez un appel, puis le réactive lorsque vous raccrochez."</string>
-    <string name="permlab_getAndRequestScreenLockComplexity" msgid="3911592334192005424">"obtenir et demander la complexité de l\'écran de verrouillage"</string>
-    <string name="permdesc_getAndRequestScreenLockComplexity" msgid="9045202063228854873">"Autorise l\'application à apprendre le niveau de complexité de l\'écran de verrouillage (élevé, moyen, faible ou aucun), qui indique la gamme possible de longueur et de type de verrouillage d\'écran. L\'application peut aussi suggérer aux utilisateurs de mettre à jour l\'écran de verrouillage afin d\'utiliser un certain niveau de complexité, mais ils peuvent ignorer la suggestion. Notez que le verrouillage d\'écran n\'est pas stocké en texte brut pour de manière à ce que l\'application n\'ait pas accès au mot de passe exact."</string>
+    <string name="permlab_requestScreenLockComplexity" msgid="7028982116060987169">"demander la complexité du verrouillage d\'écran"</string>
+    <string name="permdesc_requestScreenLockComplexity" msgid="2806396846128185677">"Autorise l\'application à apprendre le niveau de complexité de l\'écran de verrouillage (élevé, moyen, faible ou aucun), qui indique la gamme possible de longueur et de type de verrouillage d\'écran. L\'application peut aussi suggérer aux utilisateurs de mettre à jour l\'écran de verrouillage afin d\'utiliser un certain niveau de complexité, mais ils peuvent ignorer la suggestion. Notez que le verrouillage d\'écran n\'est pas stocké en texte brut pour de manière à ce que l\'application n\'ait pas accès au mot de passe exact."</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"utiliser le matériel biométrique"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"Permet à l\'application d\'utiliser du matériel biométrique pour l\'authentification"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"gérer le matériel d\'empreinte digitale"</string>
@@ -536,6 +536,7 @@
     <string name="biometric_error_user_canceled" msgid="2260175018114348727">"Authentification annulée"</string>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"Données biométriques non reconnues"</string>
     <string name="biometric_error_canceled" msgid="349665227864885880">"Authentification annulée"</string>
+    <string name="biometric_error_device_not_secured" msgid="6583143098363528349">"Aucun NIP, schéma ou mot de passe défini"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Empreinte digitale partielle détectée. Veuillez essayer de nouveau."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Impossible de traiter les empreintes digitales. Veuillez essayer de nouveau."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Le capteur d\'empreintes digitales est sale. Veuillez le nettoyer et essayer de nouveau."</string>
@@ -555,7 +556,7 @@
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"Trop de tentatives. Capteur d\'empreintes digitales désactivé."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Réessayer."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="7654382120628334248">"Aucune empreinte digitale enregistrée."</string>
-    <string name="fingerprint_error_hw_not_present" msgid="5729436878065119329">"Cet appareil ne possède pas de capteur d\'empreintes digitales"</string>
+    <string name="fingerprint_error_hw_not_present" msgid="409523969613176352">"Cet appareil ne possède pas de capteur d\'empreintes digitales."</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"Doigt <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -575,7 +576,14 @@
     <string name="face_acquired_too_left" msgid="2712489669456176505">"Veuillez déplacer le capteur vers la gauche."</string>
     <string name="face_acquired_poor_gaze" msgid="8344973502980415859">"Veuillez regarder le capteur."</string>
     <string name="face_acquired_not_detected" msgid="5707782294589511391">"Aucun visage détecté."</string>
-    <string name="face_acquired_not_steady" msgid="3722829465011040042">"Gardez le visage stable devant l\'appareil."</string>
+    <string name="face_acquired_too_much_motion" msgid="470381210701463822">"Trop de mouvement."</string>
+    <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Veuillez inscrire votre visage à nouveau."</string>
+    <string name="face_acquired_too_different" msgid="5553210341111255124">"Un visage différent a été détecté."</string>
+    <string name="face_acquired_too_similar" msgid="1508776858407646460">"Trop similaire. Changez de pose."</string>
+    <string name="face_acquired_pan_too_extreme" msgid="8203001424525231680">"Veuillez regarder l\'appareil photo plus directement."</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="7641326344460439970">"Veuillez regarder l\'appareil photo plus directement."</string>
+    <string name="face_acquired_roll_too_extreme" msgid="1444829237745898619">"Veuillez redresse votre tête verticalement."</string>
+    <string name="face_acquired_obscured" msgid="3055077697850272097">"Veuillez découvrir votre visage."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="6255891785768984615">"Matériel de reconnaissance du visage indisponible."</string>
@@ -587,7 +595,7 @@
     <string name="face_error_lockout_permanent" msgid="8198354656746088890">"Trop de tentatives. Capt. reconn. visage désactivé."</string>
     <string name="face_error_unable_to_process" msgid="238761109287767270">"Réessayez."</string>
     <string name="face_error_not_enrolled" msgid="9166792142679691323">"Aucun visage inscrit."</string>
-    <string name="face_error_hw_not_present" msgid="4737289254517095671">"Cet appareil ne possède pas de capteur de reconn. du visage"</string>
+    <string name="face_error_hw_not_present" msgid="916085883581450331">"Cet appareil ne possède pas de capteur de reconn. du visage."</string>
     <string name="face_name_template" msgid="7004562145809595384">"Visage <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -947,8 +955,7 @@
     <string name="save_password_never" msgid="8274330296785855105">"Jamais"</string>
     <string name="open_permission_deny" msgid="7374036708316629800">"Vous n\'êtes pas autorisé à ouvrir cette page."</string>
     <string name="text_copied" msgid="4985729524670131385">"Le texte a été copié dans le presse-papiers."</string>
-    <!-- no translation found for copied (8564151838171791598) -->
-    <skip />
+    <string name="copied" msgid="8564151838171791598">"Copié"</string>
     <string name="more_item_label" msgid="4650918923083320495">"Plus"</string>
     <string name="prepend_shortcut_label" msgid="2572214461676015642">"Menu+"</string>
     <string name="menu_meta_shortcut_label" msgid="4647153495550313570">"Méta+"</string>
@@ -1389,7 +1396,7 @@
     <string name="ext_media_init_action" msgid="7952885510091978278">"Configurer"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Éjecter"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"Découvrir"</string>
-    <!-- no translation found for ext_media_seamless_action (5356508985817068711) -->
+    <!-- no translation found for ext_media_seamless_action (6575980560886881233) -->
     <skip />
     <string name="ext_media_missing_title" msgid="620980315821543904">"Mémoire de stockage <xliff:g id="NAME">%s</xliff:g> manquante"</string>
     <string name="ext_media_missing_message" msgid="4012389235250987930">"Insérez l\'appareil de nouveau"</string>
@@ -1990,4 +1997,8 @@
     <string name="dynamic_mode_notification_title" msgid="508815255807182035">"La pile pourrait s\'épuiser avant la charge habituelle"</string>
     <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"Le mode Économiseur de pile est activé afin de prolonger l\'autonomie"</string>
     <string name="car_loading_profile" msgid="3545132581795684027">"Chargement en cours…"</string>
+    <plurals name="file_count" formatted="false" msgid="1628600959752419449">
+      <item quantity="one"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> fichier</item>
+      <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> fichiers</item>
+    </plurals>
 </resources>

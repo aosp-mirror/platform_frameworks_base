@@ -57,11 +57,11 @@ import android.annotation.SuppressLint;
 import android.app.WindowConfiguration;
 import android.content.res.Configuration;
 import android.graphics.Rect;
+import android.metrics.LogMaker;
 import android.os.SystemClock;
 import android.platform.test.annotations.Presubmit;
 import android.util.DisplayMetrics;
 import android.view.DisplayCutout;
-import android.view.DisplayInfo;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.Surface;
@@ -72,10 +72,13 @@ import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
 import com.android.dx.mockito.inline.extended.ExtendedMockito;
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.nano.MetricsProto;
 import com.android.server.wm.utils.WmDisplayCutout;
 
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -87,18 +90,22 @@ import java.util.List;
  * Tests for the {@link DisplayContent} class.
  *
  * Build/Install/Run:
- *  atest FrameworksServicesTests:DisplayContentTests
+ *  atest WmTests:DisplayContentTests
  */
 @SmallTest
 @Presubmit
 public class DisplayContentTests extends WindowTestsBase {
 
     @Test
-    @FlakyTest(bugId = 77772044)
+    @FlakyTest(detail = "Promote to presubmit when shown to be stable.")
     public void testForAllWindows() {
         final WindowState exitingAppWindow = createWindow(null, TYPE_BASE_APPLICATION,
                 mDisplayContent, "exiting app");
         final AppWindowToken exitingAppToken = exitingAppWindow.mAppToken;
+        // Wait until everything in animation handler get executed to prevent the exiting window
+        // from being removed during WindowSurfacePlacer Traversal.
+        waitUntilHandlersIdle();
+
         exitingAppToken.mIsExiting = true;
         exitingAppToken.getTask().mStack.mExitingAppTokens.add(exitingAppToken);
 
@@ -664,6 +671,28 @@ public class DisplayContentTests extends WindowTestsBase {
             dc.mInputMethodTarget = createWindow(null, TYPE_STATUS_BAR, "statusBar");
             assertEquals(dc.getWindowingLayer(), dc.computeImeParent());
         }
+    }
+
+    @Test
+    public void testOrientationChangeLogging() {
+        MetricsLogger mockLogger = mock(MetricsLogger.class);
+        Configuration oldConfig = new Configuration();
+        oldConfig.orientation = Configuration.ORIENTATION_LANDSCAPE;
+
+        Configuration newConfig = new Configuration();
+        newConfig.orientation = Configuration.ORIENTATION_PORTRAIT;
+        final DisplayContent displayContent = spy(createNewDisplay());
+        Mockito.doReturn(mockLogger).when(displayContent).getMetricsLogger();
+        Mockito.doReturn(oldConfig).doReturn(newConfig).when(displayContent).getConfiguration();
+
+        displayContent.onConfigurationChanged(newConfig);
+
+        ArgumentCaptor<LogMaker> logMakerCaptor = ArgumentCaptor.forClass(LogMaker.class);
+        verify(mockLogger).write(logMakerCaptor.capture());
+        assertThat(logMakerCaptor.getValue().getCategory(),
+                is(MetricsProto.MetricsEvent.ACTION_PHONE_ORIENTATION_CHANGED));
+        assertThat(logMakerCaptor.getValue().getSubtype(),
+                is(Configuration.ORIENTATION_PORTRAIT));
     }
 
     private boolean isOptionsPanelAtRight(int displayId) {

@@ -268,6 +268,7 @@ struct ResourceFileFlattenerOptions {
   bool update_proguard_spec = false;
   OutputFormat output_format = OutputFormat::kApk;
   std::unordered_set<std::string> extensions_to_not_compress;
+  Maybe<std::regex> regex_to_not_compress;
 };
 
 // A sampling of public framework resource IDs.
@@ -377,8 +378,15 @@ ResourceFileFlattener::ResourceFileFlattener(const ResourceFileFlattenerOptions&
   }
 }
 
+// TODO(rtmitchell): turn this function into a variable that points to a method that retrieves the
+// compression flag
 uint32_t ResourceFileFlattener::GetCompressionFlags(const StringPiece& str) {
   if (options_.do_not_compress_anything) {
+    return 0;
+  }
+
+  if (options_.regex_to_not_compress
+      && std::regex_search(str.to_string(), options_.regex_to_not_compress.value())) {
     return 0;
   }
 
@@ -1531,7 +1539,11 @@ class Linker {
     for (auto& entry : merged_assets) {
       uint32_t compression_flags = ArchiveEntry::kCompress;
       std::string extension = file::GetExtension(entry.first).to_string();
-      if (options_.extensions_to_not_compress.count(extension) > 0) {
+
+      if (options_.do_not_compress_anything
+          || options_.extensions_to_not_compress.count(extension) > 0
+          || (options_.regex_to_not_compress
+              && std::regex_search(extension, options_.regex_to_not_compress.value()))) {
         compression_flags = 0u;
       }
 
@@ -1559,6 +1571,7 @@ class Linker {
     file_flattener_options.keep_raw_values = keep_raw_values;
     file_flattener_options.do_not_compress_anything = options_.do_not_compress_anything;
     file_flattener_options.extensions_to_not_compress = options_.extensions_to_not_compress;
+    file_flattener_options.regex_to_not_compress = options_.regex_to_not_compress;
     file_flattener_options.no_auto_version = options_.no_auto_version;
     file_flattener_options.no_version_vectors = options_.no_version_vectors;
     file_flattener_options.no_version_transitions = options_.no_version_transitions;
@@ -2163,6 +2176,20 @@ int LinkCommand::Action(const std::vector<std::string>& args) {
     if (!LoadStableIdMap(context.GetDiagnostics(), stable_id_file_path_.value(),
         &options_.stable_id_map)) {
       return 1;
+    }
+  }
+
+  if (no_compress_regex) {
+    std::string regex = no_compress_regex.value();
+    if (util::StartsWith(regex, "@")) {
+      const std::string path = regex.substr(1, regex.size() -1);
+      std::string error;
+      if (!file::AppendSetArgsFromFile(path, &options_.extensions_to_not_compress, &error)) {
+        context.GetDiagnostics()->Error(DiagMessage(path) << error);
+        return 1;
+      }
+    } else {
+      options_.regex_to_not_compress = GetRegularExpression(no_compress_regex.value());
     }
   }
 

@@ -2992,6 +2992,12 @@
     <public-group type="bool" first-id="0x01110000">
         <!-- @hide @SystemApi -->
         <public name="config_sendPackageName" />
+      <!-- @hide @SystemApi -->
+      <public name="config_showDefaultAssistant" />
+      <!-- @hide @SystemApi -->
+      <public name="config_showDefaultEmergency" />
+      <!-- @hide @SystemApi -->
+      <public name="config_showDefaultHome" />
     </public-group>
 
     <public-group type="dimen" first-id="0x01050007">

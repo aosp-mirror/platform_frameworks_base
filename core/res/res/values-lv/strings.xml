@@ -512,8 +512,8 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Ļauj lietotnei sazināties ar tuva darbības lauka sakaru (Near Field Communication — NFC) atzīmēm, kartēm un lasītājiem."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"atspējot ekrāna bloķēšanu"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Ļauj lietotnei atspējot taustiņslēgu un visu saistīto paroļu drošību. Piemēram, tālrunis atspējo taustiņslēgu, saņemot ienākošu zvanu, un pēc zvana pabeigšanas atkārtoti iespējo taustiņslēgu."</string>
-    <string name="permlab_getAndRequestScreenLockComplexity" msgid="3911592334192005424">"saņemt un pieprasīt informāciju par ekrāna bloķēšanas sarežģītību"</string>
-    <string name="permdesc_getAndRequestScreenLockComplexity" msgid="9045202063228854873">"Atļauj lietotnei saglabāt informāciju par ekrāna bloķēšanas sarežģītības pakāpi (augsta, vidēja, zema, nav), kas apzīmē iespējamo garumu un ekrāna bloķēšanas veidus. Lietotnē lietotājiem var tikt rādīts arī ieteikums ekrāna bloķēšanai iestatīt citu līmeni, taču šo ieteikumu var ignorēt un aizvērt. Ņemiet vērā, ka ekrāna bloķēšanas informācija netiek glabāta vienkārša teksta formātā, tāpēc lietotnei nav piekļuves precīzai parolei."</string>
+    <string name="permlab_requestScreenLockComplexity" msgid="7028982116060987169">"Ekrāna bloķēšanas sarežģītības pakāpes informācijas pieprasījums"</string>
+    <string name="permdesc_requestScreenLockComplexity" msgid="2806396846128185677">"Atļauj lietotnei piekļūt informācijai par ekrāna bloķēšanas sarežģītības pakāpi (augsta, vidēja, zema, nav), kas apzīmē iespējamo paroles garumu un ekrāna bloķēšanas veidus. Lietotnē lietotājiem var tikt rādīts arī ieteikums ekrāna bloķēšanai iestatīt citu līmeni, taču šo ieteikumu var ignorēt un aizvērt. Ņemiet vērā, ka ekrāna bloķēšanas parole netiek glabāta vienkārša teksta formātā, tāpēc lietotnei nav piekļuves precīzai parolei."</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"izmantot biometrisko datu aparatūru"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"Atļauj lietotnei izmantot biometrisko datu aparatūru autentificēšanai"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"pārvaldīt pirkstu nospiedumu aparatūru"</string>
@@ -539,6 +539,7 @@
     <string name="biometric_error_user_canceled" msgid="2260175018114348727">"Autentifikācija ir atcelta"</string>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"Dati nav atpazīti"</string>
     <string name="biometric_error_canceled" msgid="349665227864885880">"Autentifikācija ir atcelta"</string>
+    <string name="biometric_error_device_not_secured" msgid="6583143098363528349">"PIN, kombinācija vai parole nav iestatīta"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Noteikts daļējs pirksta nospiedums. Lūdzu, mēģiniet vēlreiz."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Nevarēja apstrādāt pirksta nospiedumu. Lūdzu, mēģiniet vēlreiz."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Pirkstu nospiedumu sensors ir netīrs. Lūdzu, notīriet to un mēģiniet vēlreiz."</string>
@@ -558,7 +559,7 @@
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"Pārāk daudz mēģinājumu. Pirksta nospieduma sensors atspējots."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Mēģiniet vēlreiz."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="7654382120628334248">"Nav reģistrēts neviens pirksta nospiedums."</string>
-    <string name="fingerprint_error_hw_not_present" msgid="5729436878065119329">"Šajā ierīcē nav pirksta nospieduma sensora."</string>
+    <string name="fingerprint_error_hw_not_present" msgid="409523969613176352">"Šajā ierīcē nav pirksta nospieduma sensora."</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"<xliff:g id="FINGERID">%d</xliff:g>. pirksts"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -578,7 +579,14 @@
     <string name="face_acquired_too_left" msgid="2712489669456176505">"Pavirziet sensoru pa kreisi."</string>
     <string name="face_acquired_poor_gaze" msgid="8344973502980415859">"Lūdzu, paskatieties uz sensoru."</string>
     <string name="face_acquired_not_detected" msgid="5707782294589511391">"Nav atrasta neviena seja."</string>
-    <string name="face_acquired_not_steady" msgid="3722829465011040042">"Turiet ierīci vērstu pret nekustīgu seju."</string>
+    <string name="face_acquired_too_much_motion" msgid="470381210701463822">"Pārāk daudz kustību."</string>
+    <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Lūdzu, atkārtoti reģistrējiet savu seju."</string>
+    <string name="face_acquired_too_different" msgid="5553210341111255124">"Tika noteikta cita seja."</string>
+    <string name="face_acquired_too_similar" msgid="1508776858407646460">"Pārāk līdzīgi. Lūdzu, mainiet pozu."</string>
+    <string name="face_acquired_pan_too_extreme" msgid="8203001424525231680">"Lūdzu, tiešāk skatieties uz kameru."</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="7641326344460439970">"Lūdzu, tiešāk skatieties uz kameru."</string>
+    <string name="face_acquired_roll_too_extreme" msgid="1444829237745898619">"Lūdzu, vertikāli iztaisnojiet galvu."</string>
+    <string name="face_acquired_obscured" msgid="3055077697850272097">"Lūdzu, atsedziet seju."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="6255891785768984615">"Sejas autentifikācijas aparatūra nav pieejama."</string>
@@ -590,7 +598,7 @@
     <string name="face_error_lockout_permanent" msgid="8198354656746088890">"Par daudz mēģinājumu. Sejas atpazīšana atspējota."</string>
     <string name="face_error_unable_to_process" msgid="238761109287767270">"Mēģiniet vēlreiz."</string>
     <string name="face_error_not_enrolled" msgid="9166792142679691323">"Nav reģistrēti sejas dati."</string>
-    <string name="face_error_hw_not_present" msgid="4737289254517095671">"Šai ierīcei nav sejas autentifikācijas sensora."</string>
+    <string name="face_error_hw_not_present" msgid="916085883581450331">"Šai ierīcei nav sejas autentifikācijas sensora."</string>
     <string name="face_name_template" msgid="7004562145809595384">"Seja <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -950,8 +958,7 @@
     <string name="save_password_never" msgid="8274330296785855105">"Nekad"</string>
     <string name="open_permission_deny" msgid="7374036708316629800">"Jums nav atļaujas atvērt šo lapu."</string>
     <string name="text_copied" msgid="4985729524670131385">"Teksts ir kopēts uz starpliktuvi."</string>
-    <!-- no translation found for copied (8564151838171791598) -->
-    <skip />
+    <string name="copied" msgid="8564151838171791598">"Nokopēts"</string>
     <string name="more_item_label" msgid="4650918923083320495">"Vairāk"</string>
     <string name="prepend_shortcut_label" msgid="2572214461676015642">"Izvēlne+"</string>
     <string name="menu_meta_shortcut_label" msgid="4647153495550313570">"Meta taustiņš +"</string>
@@ -1411,7 +1418,7 @@
     <string name="ext_media_init_action" msgid="7952885510091978278">"Iestatīt"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Izstumt"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"Izpētīt"</string>
-    <!-- no translation found for ext_media_seamless_action (5356508985817068711) -->
+    <!-- no translation found for ext_media_seamless_action (6575980560886881233) -->
     <skip />
     <string name="ext_media_missing_title" msgid="620980315821543904">"Nav ierīces <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_missing_message" msgid="4012389235250987930">"Vēlreiz pievienojiet ierīci."</string>
@@ -2025,4 +2032,9 @@
     <string name="dynamic_mode_notification_title" msgid="508815255807182035">"Akumulators var izlādēties pirms parastā uzlādes laika"</string>
     <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"Aktivizēts akumulatora jaudas taupīšanas režīms, lai palielinātu akumulatora darbības ilgumu"</string>
     <string name="car_loading_profile" msgid="3545132581795684027">"Ielāde"</string>
+    <plurals name="file_count" formatted="false" msgid="1628600959752419449">
+      <item quantity="zero"><xliff:g id="FILE_NAME_2">%s</xliff:g> un <xliff:g id="COUNT_3">%d</xliff:g> failu</item>
+      <item quantity="one"><xliff:g id="FILE_NAME_2">%s</xliff:g> un <xliff:g id="COUNT_3">%d</xliff:g> fails</item>
+      <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> un <xliff:g id="COUNT_3">%d</xliff:g> faili</item>
+    </plurals>
 </resources>

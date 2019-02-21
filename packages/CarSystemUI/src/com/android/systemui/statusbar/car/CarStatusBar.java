@@ -512,29 +512,49 @@ public class CarStatusBar extends StatusBar implements
     }
 
     @Override
+    public void setLockscreenUser(int newUserId) {
+        super.setLockscreenUser(newUserId);
+        // Try to dismiss the keyguard after every user switch.
+        dismissKeyguardWhenUserSwitcherNotDisplayed();
+    }
+
+    @Override
     public void onStateChanged(int newState) {
         super.onStateChanged(newState);
 
         startSwitchToGuestTimerIfDrivingOnKeyguard();
 
-        if (mFullscreenUserSwitcher == null) {
-            return; // Not using the full screen user switcher.
-        }
-
-        if (newState == StatusBarState.FULLSCREEN_USER_SWITCHER) {
-            if (!mFullscreenUserSwitcher.isVisible()) {
-                // Current execution path continues to set state after this, thus we deffer the
-                // dismissal to the next execution cycle.
-                postDismissKeyguard(); // Dismiss the keyguard if switcher is not visible.
-            }
+        if (newState != StatusBarState.FULLSCREEN_USER_SWITCHER) {
+            hideUserSwitcher();
         } else {
+            dismissKeyguardWhenUserSwitcherNotDisplayed();
+        }
+    }
+
+    /** Makes the full screen user switcher visible, if applicable. */
+    public void showUserSwitcher() {
+        if (mFullscreenUserSwitcher != null && mState == StatusBarState.FULLSCREEN_USER_SWITCHER) {
+            mFullscreenUserSwitcher.show(); // Makes the switcher visible.
+        }
+    }
+
+    private void hideUserSwitcher() {
+        if (mFullscreenUserSwitcher != null) {
             mFullscreenUserSwitcher.hide();
         }
     }
 
-    public void showUserSwitcher() {
-        if (mFullscreenUserSwitcher != null && mState == StatusBarState.FULLSCREEN_USER_SWITCHER) {
-            mFullscreenUserSwitcher.show(); // Makes the switcher visible.
+    // We automatically dismiss keyguard unless user switcher is being shown on the keyguard.
+    private void dismissKeyguardWhenUserSwitcherNotDisplayed() {
+        if (mFullscreenUserSwitcher == null) {
+            return; // Not using the full screen user switcher.
+        }
+
+        if (mState == StatusBarState.FULLSCREEN_USER_SWITCHER
+                && !mFullscreenUserSwitcher.isVisible()) {
+            // Current execution path continues to set state after this, thus we deffer the
+            // dismissal to the next execution cycle.
+            postDismissKeyguard(); // Dismiss the keyguard if switcher is not visible.
         }
     }
 

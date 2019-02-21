@@ -216,6 +216,9 @@ package android {
 
   public static final class R.bool {
     field public static final int config_sendPackageName = 17891328; // 0x1110000
+    field public static final int config_showDefaultAssistant = 17891329; // 0x1110001
+    field public static final int config_showDefaultEmergency = 17891330; // 0x1110002
+    field public static final int config_showDefaultHome = 17891331; // 0x1110003
   }
 
   public static final class R.color {
@@ -454,6 +457,7 @@ package android.app {
 
   public class BroadcastOptions {
     method public static android.app.BroadcastOptions makeBasic();
+    method @RequiresPermission("android.permission.START_ACTIVITIES_FROM_BACKGROUND") public void setAllowBackgroundActivityStarts(boolean);
     method public void setDontSendToRestrictedApps(boolean);
     method @RequiresPermission(android.Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST) public void setTemporaryAppWhitelistDuration(long);
     method public android.os.Bundle toBundle();
@@ -1300,9 +1304,9 @@ package android.content {
   }
 
   public abstract class ContentResolver {
-    method public android.os.Bundle getCache(android.net.Uri);
+    method @Nullable public android.os.Bundle getCache(@NonNull android.net.Uri);
     method public android.graphics.drawable.Drawable getTypeDrawable(String);
-    method public void putCache(android.net.Uri, android.os.Bundle);
+    method public void putCache(@NonNull android.net.Uri, @Nullable android.os.Bundle);
   }
 
   public abstract class Context {
@@ -3496,6 +3500,18 @@ package android.media {
     method public android.media.AudioRecord.Builder setSessionId(int) throws java.lang.IllegalArgumentException;
   }
 
+  public class HwAudioSource {
+    method public void start();
+    method public void stop();
+  }
+
+  public static class HwAudioSource.Builder {
+    ctor public HwAudioSource.Builder();
+    method @NonNull public android.media.HwAudioSource build();
+    method @NonNull public android.media.HwAudioSource.Builder setAudioAttributes(@NonNull android.media.AudioAttributes);
+    method @NonNull public android.media.HwAudioSource.Builder setAudioDeviceInfo(@NonNull android.media.AudioDeviceInfo);
+  }
+
   public final class MediaRecorder.AudioSource {
     field @RequiresPermission(android.Manifest.permission.CAPTURE_AUDIO_OUTPUT) public static final int ECHO_REFERENCE = 1997; // 0x7cd
     field @RequiresPermission(android.Manifest.permission.CAPTURE_AUDIO_HOTWORD) public static final int HOTWORD = 1999; // 0x7cf
@@ -3614,6 +3630,28 @@ package android.media.audiopolicy {
     method public android.media.audiopolicy.AudioPolicy.Builder setAudioPolicyVolumeCallback(@NonNull android.media.audiopolicy.AudioPolicy.AudioPolicyVolumeCallback);
     method public android.media.audiopolicy.AudioPolicy.Builder setIsAudioFocusPolicy(boolean);
     method public android.media.audiopolicy.AudioPolicy.Builder setLooper(@NonNull android.os.Looper) throws java.lang.IllegalArgumentException;
+  }
+
+  public final class AudioProductStrategies implements java.lang.Iterable<android.media.audiopolicy.AudioProductStrategy> android.os.Parcelable {
+    ctor public AudioProductStrategies();
+    method public int describeContents();
+    method @NonNull public android.media.AudioAttributes getAudioAttributesForLegacyStreamType(int);
+    method @NonNull public android.media.AudioAttributes getAudioAttributesForProductStrategy(@NonNull android.media.audiopolicy.AudioProductStrategy);
+    method @Nullable public android.media.audiopolicy.AudioProductStrategy getById(int);
+    method public int getLegacyStreamTypeForAudioAttributes(@NonNull android.media.AudioAttributes);
+    method public java.util.Iterator<android.media.audiopolicy.AudioProductStrategy> iterator();
+    method public int size();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.media.audiopolicy.AudioProductStrategies> CREATOR;
+  }
+
+  public final class AudioProductStrategy implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public android.media.AudioAttributes getAudioAttributes();
+    method public int getId();
+    method @NonNull public String name();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.media.audiopolicy.AudioProductStrategy> CREATOR;
   }
 
 }
@@ -6288,6 +6326,8 @@ package android.service.autofill.augmented {
     ctor public AugmentedAutofillService();
     method protected final void dump(java.io.FileDescriptor, java.io.PrintWriter, String[]);
     method protected void dump(@NonNull java.io.PrintWriter, @NonNull String[]);
+    method public void onConnected();
+    method public void onDisconnected();
     method public void onFillRequest(@NonNull android.service.autofill.augmented.FillRequest, @NonNull android.os.CancellationSignal, @NonNull android.service.autofill.augmented.FillController, @NonNull android.service.autofill.augmented.FillCallback);
     field public static final String SERVICE_INTERFACE = "android.service.autofill.augmented.AugmentedAutofillService";
   }
@@ -6355,6 +6395,7 @@ package android.service.contentcapture {
 
   public abstract class ContentCaptureService extends android.app.Service {
     ctor public ContentCaptureService();
+    method public final void disableContentCaptureServices();
     method public void onActivitySnapshot(@NonNull android.view.contentcapture.ContentCaptureSessionId, @NonNull android.service.contentcapture.SnapshotData);
     method public void onConnected();
     method public void onContentCaptureEvent(@NonNull android.view.contentcapture.ContentCaptureSessionId, @NonNull android.view.contentcapture.ContentCaptureEvent);
@@ -6536,7 +6577,9 @@ package android.service.euicc {
 package android.service.notification {
 
   public final class Adjustment implements android.os.Parcelable {
+    ctor public Adjustment(String, String, android.os.Bundle, CharSequence, int);
     ctor protected Adjustment(android.os.Parcel);
+    method public int getUser();
     field public static final String KEY_PEOPLE = "key_people";
   }
 
@@ -6678,7 +6721,8 @@ package android.service.textclassifier {
 
   public abstract class TextClassifierService extends android.app.Service {
     ctor public TextClassifierService();
-    method public final android.view.textclassifier.TextClassifier getLocalTextClassifier();
+    method public static android.view.textclassifier.TextClassifier getDefaultTextClassifierImplementation(@NonNull android.content.Context);
+    method @Deprecated public final android.view.textclassifier.TextClassifier getLocalTextClassifier();
     method @Nullable public final android.os.IBinder onBind(android.content.Intent);
     method public abstract void onClassifyText(@Nullable android.view.textclassifier.TextClassificationSessionId, @NonNull android.view.textclassifier.TextClassification.Request, @NonNull android.os.CancellationSignal, @NonNull android.service.textclassifier.TextClassifierService.Callback<android.view.textclassifier.TextClassification>);
     method public void onCreateTextClassificationSession(@NonNull android.view.textclassifier.TextClassificationContext, @NonNull android.view.textclassifier.TextClassificationSessionId);
@@ -9339,14 +9383,11 @@ package android.view.autofill {
 package android.view.contentcapture {
 
   public final class ContentCaptureContext implements android.os.Parcelable {
-    method @Nullable public String getAction();
     method @Nullable public android.content.ComponentName getActivityComponent();
     method public int getDisplayId();
-    method @Nullable public android.os.Bundle getExtras();
     method public int getFlags();
     method @Nullable public android.view.contentcapture.ContentCaptureSessionId getParentSessionId();
     method public int getTaskId();
-    method @Nullable public android.net.Uri getUri();
     field public static final int FLAG_DISABLED_BY_APP = 1; // 0x1
     field public static final int FLAG_DISABLED_BY_FLAG_SECURE = 2; // 0x2
   }
@@ -9372,7 +9413,6 @@ package android.view.contentcapture {
 
   public final class ContentCaptureManager {
     method public boolean isContentCaptureFeatureEnabled();
-    method public void setContentCaptureFeatureEnabled(boolean);
   }
 
   public final class ViewNode extends android.app.assist.AssistStructure.ViewNode {

@@ -381,6 +381,14 @@ void RenderProxy::releaseVDAtlasEntries() {
     });
 }
 
+void RenderProxy::preload() {
+    // Create RenderThread object and start the thread. Then preload Vulkan/EGL driver.
+    auto& thread = RenderThread::getInstance();
+    thread.queue().post([&thread]() {
+        thread.preload();
+    });
+}
+
 } /* namespace renderthread */
 } /* namespace uirenderer */
 } /* namespace android */

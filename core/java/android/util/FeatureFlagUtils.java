@@ -22,9 +22,7 @@ import android.provider.Settings;
 import android.text.TextUtils;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Util class to get feature flag information.
@@ -40,11 +38,9 @@ public class FeatureFlagUtils {
     public static final String HEARING_AID_SETTINGS = "settings_bluetooth_hearing_aid";
     public static final String SAFETY_HUB = "settings_safety_hub";
     public static final String SCREENRECORD_LONG_PRESS = "settings_screenrecord_long_press";
-    public static final String AOD_IMAGEWALLPAPER_ENABLED = "settings_aod_imagewallpaper_enabled";
     public static final String GLOBAL_ACTIONS_GRID_ENABLED = "settings_global_actions_grid_enabled";
 
     private static final Map<String, String> DEFAULT_FLAGS;
-    private static final Set<String> OBSERVABLE_FLAGS;
 
     static {
         DEFAULT_FLAGS = new HashMap<>();
@@ -60,11 +56,7 @@ public class FeatureFlagUtils {
         DEFAULT_FLAGS.put(HEARING_AID_SETTINGS, "false");
         DEFAULT_FLAGS.put(SAFETY_HUB, "false");
         DEFAULT_FLAGS.put(SCREENRECORD_LONG_PRESS, "false");
-        DEFAULT_FLAGS.put(AOD_IMAGEWALLPAPER_ENABLED, "false");
         DEFAULT_FLAGS.put(GLOBAL_ACTIONS_GRID_ENABLED, "false");
-
-        OBSERVABLE_FLAGS = new HashSet<>();
-        OBSERVABLE_FLAGS.add(AOD_IMAGEWALLPAPER_ENABLED);
     }
 
     /**
@@ -101,16 +93,6 @@ public class FeatureFlagUtils {
      */
     public static void setEnabled(Context context, String feature, boolean enabled) {
         SystemProperties.set(FFLAG_OVERRIDE_PREFIX + feature, enabled ? "true" : "false");
-
-        // Also update Settings.Global if needed so that we can observe it via observer.
-        if (OBSERVABLE_FLAGS.contains(feature)) {
-            setObservableFlag(context, feature, enabled);
-        }
-    }
-
-    private static void setObservableFlag(Context context, String feature, boolean enabled) {
-        Settings.Global.putString(
-                context.getContentResolver(), feature, enabled ? "true" : "false");
     }
 
     /**

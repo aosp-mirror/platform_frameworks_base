@@ -23,12 +23,14 @@ import static junit.framework.TestCase.fail;
 import static org.testng.Assert.assertEquals;
 
 import android.app.usage.EventList;
+import android.app.usage.TimeSparseArray;
 import android.app.usage.UsageEvents.Event;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.test.suitebuilder.annotation.SmallTest;
+import android.util.AtomicFile;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
@@ -38,6 +40,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
@@ -447,5 +450,46 @@ public class UsageStatsDatabaseTest {
         // test invalid backup versions as well
         runBackupRestoreTest(0);
         runBackupRestoreTest(99999);
+    }
+
+    /**
+     * Test the pruning in indexFilesLocked() that only allow up to 100 daily files, 50 weekly files
+     * , 12 monthly files, 10 yearly files.
+     */
+    @Test
+    public void testMaxFiles() throws IOException {
+        final File[] intervalDirs = new File[]{
+            new File(mTestDir, "daily"),
+            new File(mTestDir, "weekly"),
+            new File(mTestDir, "monthly"),
+            new File(mTestDir, "yearly"),
+        };
+        // Create 10 extra files under each interval dir.
+        final int extra = 10;
+        final int length = intervalDirs.length;
+        for (int i = 0; i < length; i++) {
+            final int numFiles = UsageStatsDatabase.MAX_FILES_PER_INTERVAL_TYPE[i] + extra;
+            for (int f = 0; f < numFiles; f++) {
+                final AtomicFile file = new AtomicFile(new File(intervalDirs[i], Long.toString(f)));
+                FileOutputStream fos = file.startWrite();
+                fos.write(1);
+                file.finishWrite(fos);
+            }
+        }
+        // indexFilesLocked() list files under each interval dir, if number of files are more than
+        // the max allowed files for each interval type, it deletes the lowest numbered files.
+        mUsageStatsDatabase.forceIndexFiles();
+        final int len = mUsageStatsDatabase.mSortedStatFiles.length;
+        for (int i = 0; i < len; i++) {
+            final TimeSparseArray<AtomicFile> files =  mUsageStatsDatabase.mSortedStatFiles[i];
+            // The stats file for each interval type equals to max allowed.
+            assertEquals(UsageStatsDatabase.MAX_FILES_PER_INTERVAL_TYPE[i],
+                    files.size());
+            // The highest numbered file,
+            assertEquals(UsageStatsDatabase.MAX_FILES_PER_INTERVAL_TYPE[i] + extra - 1,
+                    files.keyAt(files.size() - 1));
+            // The lowest numbered file:
+            assertEquals(extra, files.keyAt(0));
+        }
     }
 }

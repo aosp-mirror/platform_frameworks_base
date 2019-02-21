@@ -24,13 +24,17 @@ import android.app.ActivityManager;
 import android.car.Car;
 import android.car.CarNotConnectedException;
 import android.car.drivingstate.CarUxRestrictionsManager;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.res.Configuration;
 import android.graphics.PixelFormat;
 import android.os.IBinder;
 import android.os.ServiceManager;
+import android.os.UserHandle;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
 import android.view.GestureDetector;
@@ -91,12 +95,28 @@ public class NotificationsUI extends SystemUI
     private static int sSettleOpenPercentage;
     private static int sSettleClosePercentage;
 
+    private final BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (action.equals(Intent.ACTION_USER_SWITCHED)) {
+                mCarNotificationListener.registerAsSystemService(mContext,
+                        mCarUxRestrictionManagerWrapper,
+                        mClickHandlerFactory);
+                inflateNotificationContent();
+            }
+        }
+    };
+
     /**
      * Inits the window that hosts the notifications and establishes the connections
      * to the car related services.
      */
     @Override
     public void start() {
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_USER_SWITCHED);
+        mContext.registerReceiverAsUser(mIntentReceiver, UserHandle.ALL, filter, null, null);
         sSettleOpenPercentage = mContext.getResources().getInteger(
                 R.integer.notification_settle_open_percentage);
         sSettleClosePercentage = mContext.getResources().getInteger(
@@ -117,8 +137,7 @@ public class NotificationsUI extends SystemUI
                         closeCarNotifications(DEFAULT_FLING_VELOCITY);
                     }
                 });
-        mCarNotificationListener.registerAsSystemService(mContext, mCarUxRestrictionManagerWrapper,
-                mClickHandlerFactory);
+
         mCar = Car.createCar(mContext, mCarConnectionListener);
         mCar.connect();
         NotificationGestureListener gestureListener = new NotificationGestureListener();
@@ -130,8 +149,6 @@ public class NotificationsUI extends SystemUI
                 R.layout.navigation_bar_window, null);
         mCarNotificationWindow
                 .setBackgroundColor(mContext.getColor(R.color.notification_shade_background_color));
-
-        inflateNotificationContent();
 
         WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT,

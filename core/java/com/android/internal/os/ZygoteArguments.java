@@ -217,8 +217,17 @@ class ZygoteArguments {
      * Per security review bug #1112214, duplicate args are disallowed in critical cases to make
      * injection harder.
      */
-    private void parseArgs(String[] args)
-            throws IllegalArgumentException {
+    private void parseArgs(String[] args) throws IllegalArgumentException {
+        /*
+         * See android.os.ZygoteProcess.zygoteSendArgsAndGetResult()
+         * Presently the wire format to the zygote process is:
+         * a) a count of arguments (argc, in essence)
+         * b) a number of newline-separated argument strings equal to count
+         *
+         * After the zygote process reads these it will write the pid of
+         * the child or -1 on failure.
+         */
+
         int curArg = 0;
 
         boolean seenRuntimeArgs = false;

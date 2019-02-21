@@ -44,6 +44,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE := frameworks-base-overlays-debug
 LOCAL_REQUIRED_MODULES := \
 	ExperimentNavigationBarFloatingOverlay \
+	ExperimentNavigationBarVisualInsetOverlay \
 	ExperimentNavigationBarDefaultOverlay \
 	ExperimentNavigationBarSlimOverlay32 \
 	ExperimentNavigationBarSlimOverlay40 \

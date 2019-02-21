@@ -509,8 +509,8 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Võimaldab rakendusel suhelda lähiväljaside (NFC) märgendite, kaartide ja lugeritega."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"keelake ekraanilukk"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Võimaldab rakendusel keelata klahviluku ja muu seotud parooli turvalisuse. Näiteks keelab telefon klahviluku sissetuleva kõne vastuvõtmisel ja lubab klahviluku uuesti, kui kõne on lõpetatud."</string>
-    <string name="permlab_getAndRequestScreenLockComplexity" msgid="3911592334192005424">"Hankida ja taotleda ekraaniluku keerukuse teavet"</string>
-    <string name="permdesc_getAndRequestScreenLockComplexity" msgid="9045202063228854873">"Lubab rakendusel vaadata ekraaniluku keerukuse taset (kõrge, keskmine, madal või puudub), mis näitab ekraaniluku võimalikku pikkust ja tüüpi. Rakendus võib kasutajatele soovitada ka ekraaniluku viimist teatud tasemele, kuid kasutajad võivad seda eirata ja kuvalt lahkuda. Pange tähele, et ekraanilukku ei salvestata lihttekstina, seega ei tea rakendus täpset parooli."</string>
+    <string name="permlab_requestScreenLockComplexity" msgid="7028982116060987169">"taotleda ekraaniluku keerukust"</string>
+    <string name="permdesc_requestScreenLockComplexity" msgid="2806396846128185677">"Lubab rakendusel vaadata ekraaniluku keerukuse taset (kõrge, keskmine, madal või puudub), mis näitab ekraaniluku võimalikku pikkust ja tüüpi. Rakendus võib kasutajatele soovitada ka ekraaniluku viimist teatud tasemele, kuid kasutajad võivad seda eirata ja kuvalt lahkuda. Pange tähele, et ekraanilukku ei salvestata lihttekstina, seega ei tea rakendus täpset parooli."</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"kasutada biomeetrilist riistvara"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"Võimaldab rakendusel autentimiseks kasutada biomeetrilist riistvara"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"sõrmejälje riistvara haldamine"</string>
@@ -536,6 +536,7 @@
     <string name="biometric_error_user_canceled" msgid="2260175018114348727">"Autentimine tühistati"</string>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"Ei tuvastatud"</string>
     <string name="biometric_error_canceled" msgid="349665227864885880">"Autentimine tühistati"</string>
+    <string name="biometric_error_device_not_secured" msgid="6583143098363528349">"PIN-koodi, mustrit ega parooli pole määratud"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Tuvastati osaline sõrmejälg. Proovige uuesti."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Sõrmejälge ei õnnestunud töödelda. Proovige uuesti."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Sõrmejäljeandur on must. Puhastage see ja proovige uuesti."</string>
@@ -555,7 +556,7 @@
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"Liiga palju katseid. Sõrmejäljeandur on keelatud."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Proovige uuesti."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="7654382120628334248">"Ühtegi sõrmejälge pole registreeritud."</string>
-    <string name="fingerprint_error_hw_not_present" msgid="5729436878065119329">"Selles seadmes pole sõrmejäljeandurit"</string>
+    <string name="fingerprint_error_hw_not_present" msgid="409523969613176352">"Selles seadmes pole sõrmejäljeandurit."</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"Sõrm <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -575,7 +576,14 @@
     <string name="face_acquired_too_left" msgid="2712489669456176505">"Liigutage andurit vasakule."</string>
     <string name="face_acquired_poor_gaze" msgid="8344973502980415859">"Vaadake andurit."</string>
     <string name="face_acquired_not_detected" msgid="5707782294589511391">"Nägu ei tuvastatud."</string>
-    <string name="face_acquired_not_steady" msgid="3722829465011040042">"Hoidke nägu seadme ees paigal."</string>
+    <string name="face_acquired_too_much_motion" msgid="470381210701463822">"Liiga palju liikumist."</string>
+    <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Registreerige oma nägu uuesti."</string>
+    <string name="face_acquired_too_different" msgid="5553210341111255124">"Tuvastati teine nägu."</string>
+    <string name="face_acquired_too_similar" msgid="1508776858407646460">"Liiga sarnane, palun muutke oma asendit."</string>
+    <string name="face_acquired_pan_too_extreme" msgid="8203001424525231680">"Vaadake otse kaamerasse."</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="7641326344460439970">"Vaadake otse kaamerasse."</string>
+    <string name="face_acquired_roll_too_extreme" msgid="1444829237745898619">"Pange pea vertikaalselt otseks."</string>
+    <string name="face_acquired_obscured" msgid="3055077697850272097">"Tooge oma nägu esile."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="6255891785768984615">"Näotuvastuse riistvara pole saadaval."</string>
@@ -587,7 +595,7 @@
     <string name="face_error_lockout_permanent" msgid="8198354656746088890">"Liiga palju katseid. Näotuvastus on keelatud."</string>
     <string name="face_error_unable_to_process" msgid="238761109287767270">"Proovige uuesti."</string>
     <string name="face_error_not_enrolled" msgid="9166792142679691323">"Nägu pole registreeritud."</string>
-    <string name="face_error_hw_not_present" msgid="4737289254517095671">"Sellel seadmel pole näotuvastuse andurit"</string>
+    <string name="face_error_hw_not_present" msgid="916085883581450331">"Sellel seadmel pole näotuvastuse andurit."</string>
     <string name="face_name_template" msgid="7004562145809595384">"Nägu <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -947,8 +955,7 @@
     <string name="save_password_never" msgid="8274330296785855105">"Mitte kunagi"</string>
     <string name="open_permission_deny" msgid="7374036708316629800">"Teil pole luba selle lehe avamiseks."</string>
     <string name="text_copied" msgid="4985729524670131385">"Lõikelauale kopeeritud tekst."</string>
-    <!-- no translation found for copied (8564151838171791598) -->
-    <skip />
+    <string name="copied" msgid="8564151838171791598">"Kopeeritud"</string>
     <string name="more_item_label" msgid="4650918923083320495">"Rohkem"</string>
     <string name="prepend_shortcut_label" msgid="2572214461676015642">"Menüü+"</string>
     <string name="menu_meta_shortcut_label" msgid="4647153495550313570">"Meta +"</string>
@@ -1389,7 +1396,7 @@
     <string name="ext_media_init_action" msgid="7952885510091978278">"Seadistus"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Eemaldamine"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"Avastamine"</string>
-    <!-- no translation found for ext_media_seamless_action (5356508985817068711) -->
+    <!-- no translation found for ext_media_seamless_action (6575980560886881233) -->
     <skip />
     <string name="ext_media_missing_title" msgid="620980315821543904">"Üksust <xliff:g id="NAME">%s</xliff:g> pole"</string>
     <string name="ext_media_missing_message" msgid="4012389235250987930">"Sisestage seade uuesti"</string>
@@ -1990,4 +1997,8 @@
     <string name="dynamic_mode_notification_title" msgid="508815255807182035">"Aku võib enne tavapärast laadimist tühjaks saada"</string>
     <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"Akusäästja aktiveeriti aku tööea pikendamiseks"</string>
     <string name="car_loading_profile" msgid="3545132581795684027">"Laadimine"</string>
+    <plurals name="file_count" formatted="false" msgid="1628600959752419449">
+      <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> faili</item>
+      <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> + <xliff:g id="COUNT_1">%d</xliff:g> fail</item>
+    </plurals>
 </resources>

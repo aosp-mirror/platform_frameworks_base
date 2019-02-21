@@ -89,8 +89,8 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
     private boolean mActivityViewReady = false;
     private PendingIntent mBubbleIntent;
 
-    private int mBubbleHeight;
-    private int mDefaultHeight;
+    private int mMinHeight;
+    private int mHeaderHeight;
 
     private NotificationEntry mEntry;
     private PackageManager mPm;
@@ -149,7 +149,7 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
             int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         mPm = context.getPackageManager();
-        mDefaultHeight = getResources().getDimensionPixelSize(
+        mMinHeight = getResources().getDimensionPixelSize(
                 R.dimen.bubble_expanded_default_height);
         try {
             mNotificationManagerService = INotificationManager.Stub.asInterface(
@@ -194,6 +194,8 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
         viewWrapper.setLayoutTransition(transition);
         viewWrapper.getLayoutTransition().enableTransitionType(LayoutTransition.CHANGING);
 
+        mHeaderHeight = getContext().getResources().getDimensionPixelSize(
+                R.dimen.bubble_expanded_header_height);
         mHeaderView = findViewById(R.id.header_layout);
         mHeaderTextView = findViewById(R.id.header_text);
         mDeepLinkIcon = findViewById(R.id.deep_link_button);
@@ -273,6 +275,21 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
         mActivityView.setCallback(mStateCallback);
     }
 
+    /**
+     * Updates the entry backing this view. This will not re-populate ActivityView, it will
+     * only update the deep-links in the header, the title, and the height of the view.
+     */
+    public void update(NotificationEntry entry) {
+        if (entry.key.equals(mEntry.key)) {
+            mEntry = entry;
+            updateHeaderView();
+            updateHeight();
+        } else {
+            Log.w(TAG, "Trying to update entry with different key, new entry: "
+                    + entry.key + " old entry: " + mEntry.key);
+        }
+    }
+
     private void updateHeaderView() {
         mSettingsIcon.setContentDescription(getResources().getString(
                 R.string.bubbles_settings_button_description, mAppName));
@@ -315,14 +332,6 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
                 removeView(mNotifRow);
                 mNotifRow = null;
             }
-            Notification.BubbleMetadata data = mEntry.getBubbleMetadata();
-            mBubbleHeight = data != null && data.getDesiredHeight() > 0
-                    ? data.getDesiredHeight()
-                    : mDefaultHeight;
-            // XXX: enforce max / min height
-            LayoutParams lp = (LayoutParams) mActivityView.getLayoutParams();
-            lp.height = mBubbleHeight;
-            mActivityView.setLayoutParams(lp);
             mActivityView.setVisibility(VISIBLE);
         } else {
             // Hide activity view if we had it previously
@@ -341,6 +350,28 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
         }
         mActivityView.performBackPress();
         return true;
+    }
+
+    void updateHeight() {
+        if (usingActivityView()) {
+            Notification.BubbleMetadata data = mEntry.getBubbleMetadata();
+            int desiredHeight;
+            if (data == null) {
+                // This is a contentIntent based bubble, lets allow it to be the max height
+                // as it was forced into this mode and not prepared to be small
+                desiredHeight = mStackView.getMaxExpandedHeight();
+            } else {
+                desiredHeight = data.getDesiredHeight() > 0
+                        ? data.getDesiredHeight()
+                        : mMinHeight;
+            }
+            int max = mStackView.getMaxExpandedHeight() - mHeaderHeight;
+            int height = Math.min(desiredHeight, max);
+            height = Math.max(height, mMinHeight);
+            LayoutParams lp = (LayoutParams) mActivityView.getLayoutParams();
+            lp.height = height;
+            mActivityView.setLayoutParams(lp);
+        }
     }
 
     @Override
@@ -407,6 +438,7 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
         } else if (mNotifRow != null) {
             applyRowState(mNotifRow);
         }
+        updateHeight();
     }
 
     /**

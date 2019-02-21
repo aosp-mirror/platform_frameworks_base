@@ -16,6 +16,7 @@
 
 package com.android.systemui.util.wakelock;
 
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
@@ -52,11 +53,11 @@ public class KeepAwakeAnimationListenerTest extends SysuiTestCase {
     @Test
     public void onAnimationStart_holdsWakeLock() {
         mKeepAwakeAnimationListener.onAnimationStart((Animator) null);
-        verify(mWakeLock).acquire();
-        verify(mWakeLock, never()).release();
+        verify(mWakeLock).acquire(anyString());
+        verify(mWakeLock, never()).release(anyString());
 
         mKeepAwakeAnimationListener.onAnimationEnd((Animator) null);
-        verify(mWakeLock).release();
+        verify(mWakeLock).release(anyString());
     }
 
     @Test(expected = IllegalStateException.class)

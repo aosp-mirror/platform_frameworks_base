@@ -122,6 +122,9 @@ public class ThumbnailUtils {
      * @param filePath The audio file.
      * @param kind The desired thumbnail kind, such as
      *            {@link android.provider.MediaStore.Images.Thumbnails#MINI_KIND}.
+     * @deprecated Callers should migrate to using
+     *             {@link #createAudioThumbnail(File, Size, CancellationSignal)},
+     *             as it offers more control over resizing and cancellation.
      */
     @Deprecated
     public static @Nullable Bitmap createAudioThumbnail(@NonNull String filePath, int kind) {
@@ -211,6 +214,9 @@ public class ThumbnailUtils {
      * @param filePath The image file.
      * @param kind The desired thumbnail kind, such as
      *            {@link android.provider.MediaStore.Images.Thumbnails#MINI_KIND}.
+     * @deprecated Callers should migrate to using
+     *             {@link #createImageThumbnail(File, Size, CancellationSignal)},
+     *             as it offers more control over resizing and cancellation.
      */
     @Deprecated
     public static @Nullable Bitmap createImageThumbnail(@NonNull String filePath, int kind) {
@@ -270,6 +276,9 @@ public class ThumbnailUtils {
      * @param filePath The video file.
      * @param kind The desired thumbnail kind, such as
      *            {@link android.provider.MediaStore.Images.Thumbnails#MINI_KIND}.
+     * @deprecated Callers should migrate to using
+     *             {@link #createVideoThumbnail(File, Size, CancellationSignal)},
+     *             as it offers more control over resizing and cancellation.
      */
     @Deprecated
     public static @Nullable Bitmap createVideoThumbnail(@NonNull String filePath, int kind) {

@@ -16,6 +16,7 @@
 
 package android.content;
 
+import android.annotation.NonNull;
 import android.net.Uri;
 
 import java.util.List;
@@ -83,7 +84,7 @@ public class ContentUris {
      * @return the long conversion of the last segment or -1 if the path is
      *  empty
      */
-    public static long parseId(Uri contentUri) {
+    public static long parseId(@NonNull Uri contentUri) {
         String last = contentUri.getLastPathSegment();
         return last == null ? -1 : Long.parseLong(last);
     }
@@ -96,7 +97,7 @@ public class ContentUris {
      *
      * @return the given builder
      */
-    public static Uri.Builder appendId(Uri.Builder builder, long id) {
+    public static @NonNull Uri.Builder appendId(@NonNull Uri.Builder builder, long id) {
         return builder.appendEncodedPath(String.valueOf(id));
     }
 
@@ -108,7 +109,7 @@ public class ContentUris {
      *
      * @return a new URI with the given ID appended to the end of the path
      */
-    public static Uri withAppendedId(Uri contentUri, long id) {
+    public static @NonNull Uri withAppendedId(@NonNull Uri contentUri, long id) {
         return appendId(contentUri.buildUpon(), id).build();
     }
 
@@ -120,7 +121,7 @@ public class ContentUris {
      * @throws IllegalArgumentException when the given URI has no ID to remove
      *             from the end of the path
      */
-    public static Uri removeId(Uri contentUri) {
+    public static @NonNull Uri removeId(@NonNull Uri contentUri) {
         // Verify that we have a valid ID to actually remove
         final String last = contentUri.getLastPathSegment();
         if (last == null) {

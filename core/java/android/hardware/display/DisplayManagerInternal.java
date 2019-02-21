@@ -171,6 +171,15 @@ public abstract class DisplayManagerInternal {
     public abstract void setDisplayOffsets(int displayId, int x, int y);
 
     /**
+     * Disables scaling for a display.
+     *
+     * @param displayId The logical display id to disable scaling for.
+     * @param disableScaling {@code true} to disable scaling,
+     * {@code false} to use the default scaling behavior of the logical display.
+     */
+    public abstract void setDisplayScalingDisabled(int displayId, boolean disableScaling);
+
+    /**
      * Provide a list of UIDs that are present on the display and are allowed to access it.
      *
      * @param displayAccessUIDs Mapping displayId -> int array of UIDs.

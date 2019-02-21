@@ -283,8 +283,6 @@ class ZygoteServer {
      *         passed up from blastulaMain.
      */
     private Runnable fillBlastulaPool(int[] sessionSocketRawFDs) {
-        Log.i(TAG, "FDHUNT - Marker 2 - fillBlastulaPool");
-
         if (mBlastulaPoolEnabled) {
             Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "Zygote:FillBlastulaPool");
 
@@ -446,8 +444,6 @@ class ZygoteServer {
                     }
                 } else {
                     // Either the blastula pool event FD or a blastula reporting pipe.
-
-                    Log.i(TAG, "FDHUNT - Marker 1 - runSelectLoop");
 
                     // If this is the event FD the payload will be the number of blastulas removed.
                     // If this is a reporting pipe FD the payload will be the PID of the blastula

@@ -402,6 +402,7 @@
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"Úplné\nticho"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"Iba\nprioritné"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"Iba\nbudíky"</string>
+    <string name="keyguard_indication_charging_time_wireless" msgid="5376059837186496558">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Prebieha bezdrôtové nabíjanie (úplné nabitie o <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>)"</string>
     <string name="keyguard_indication_charging_time" msgid="2056340799276374421">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Nabíja sa (úplné nabitie o <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>)"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="7767562163577492332">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Nabíja sa rýchlo (úplné nabitie o <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>)"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="3769655133567307069">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Nabíja sa pomaly (úplné nabitie o <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>)"</string>
@@ -616,8 +617,10 @@
     <string name="notification_channel_silenced" msgid="2877199534497961942">"Tieto upozornenia sa budú zobrazovať potichu"</string>
     <string name="notification_channel_unsilenced" msgid="4790904571552394137">"Tieto upozornenia vás upozornia"</string>
     <string name="inline_blocking_helper" msgid="3055064577771478591">"Tieto upozornenia zvyčajne odmietate. \nChcete ich naďalej zobrazovať?"</string>
+    <string name="inline_done_button" msgid="492513001558716452">"Hotovo"</string>
     <string name="inline_keep_showing" msgid="8945102997083836858">"Majú sa tieto upozornenia naďalej zobrazovať?"</string>
     <string name="inline_stop_button" msgid="4172980096860941033">"Prestať zobrazovať upozornenia"</string>
+    <string name="inline_deliver_silently_button" msgid="7756289895745629140">"Poskytovať bez zvukov"</string>
     <string name="inline_block_button" msgid="8735843688021655065">"Blokovať"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"Naďalej zobrazovať"</string>
     <string name="inline_minimize_button" msgid="966233327974702195">"Minimalizovať"</string>
@@ -886,6 +889,7 @@
     </plurals>
     <string name="ongoing_privacy_chip_content_single_app" msgid="4479560741898690064">"<xliff:g id="APP">%1$s</xliff:g> používa zoznam <xliff:g id="TYPES_LIST">%2$s</xliff:g>."</string>
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8640691753867990511">"Aplikácie používajú zoznam <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
+    <string name="ongoing_privacy_chip_in_use" msgid="5174331553211609272">"Používa sa:"</string>
     <plurals name="ongoing_privacy_chip_content_multiple_apps_single_op" formatted="false" msgid="4871926099254314088">
       <item quantity="few"><xliff:g id="TYPE_3">%2$s</xliff:g> používajú <xliff:g id="NUM_APPS_2">%1$d</xliff:g> aplikácie</item>
       <item quantity="many"><xliff:g id="NUM_APPS_4">%1$d</xliff:g> applications are using your <xliff:g id="TYPE_5">%2$s</xliff:g>.</item>
@@ -912,10 +916,7 @@
     <string name="music_controls_no_title" msgid="5236895307087002011">"Bez názvu"</string>
     <string name="bubbles_deep_link_button_description" msgid="8895837143057564517">"Otvoriť <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="bubbles_settings_button_description" msgid="1940331766151865776">"Otvoriť nastavenia upozornení pre <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <!-- no translation found for bubbles_prompt (2684301469286150276) -->
-    <skip />
-    <!-- no translation found for no_bubbles (7173621233904687258) -->
-    <skip />
-    <!-- no translation found for yes_bubbles (668809525728633841) -->
-    <skip />
+    <string name="bubbles_prompt" msgid="2684301469286150276">"Chcete povoliť bubliny z tejto aplikácie?"</string>
+    <string name="no_bubbles" msgid="7173621233904687258">"Blokovať"</string>
+    <string name="yes_bubbles" msgid="668809525728633841">"Povoliť"</string>
 </resources>

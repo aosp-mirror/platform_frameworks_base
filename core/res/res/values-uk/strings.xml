@@ -515,8 +515,8 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Дозволяє програмі обмінюватися даними з тегами, картками та читачами екрана Near Field Communication (NFC)."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"вимикати блокування екрана"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Дозволяє програмі вимикати блокування клавіатури та будь-який пов’язаний паролем захист. Наприклад: телефон вимикає блокування клавіатури під час отримання вхідного дзвінка, після закінчення якого блокування клавіатури відновлюється."</string>
-    <string name="permlab_getAndRequestScreenLockComplexity" msgid="3911592334192005424">"отримувати надсилати запити щодо рівня складності пароля для блокування екрана"</string>
-    <string name="permdesc_getAndRequestScreenLockComplexity" msgid="9045202063228854873">"Дає змогу додатку визначати рівень складності пароля для блокування екрана (високий, середній, низький або нульовий), що вказує на можливий діапазон його довжини й тип. Додаток також може пропонувати користувачам підвищити рівень складності пароля для блокування екрана, але цю пропозицію можна ігнорувати. Примітка: оскільки пароль зашифрований, додаток його не знає."</string>
+    <string name="permlab_requestScreenLockComplexity" msgid="7028982116060987169">"запит складності пароля для блокування екрана"</string>
+    <string name="permdesc_requestScreenLockComplexity" msgid="2806396846128185677">"Дає додатку змогу визначати рівень складності пароля для блокування екрана (високий, середній, низький або нульовий). Враховуються кількість символів і тип блокування. Додаток також може пропонувати користувачам підвищити рівень складності пароля для блокування екрана, але цю пропозицію можна ігнорувати. Примітка: оскільки пароль зашифрований, додаток його не знає."</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"використовувати біометричне апаратне забезпечення"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"Додаток може використовувати біометричне апаратне забезпечення для автентифікації"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"керувати апаратним забезпеченням для цифрових відбитків"</string>
@@ -542,6 +542,7 @@
     <string name="biometric_error_user_canceled" msgid="2260175018114348727">"Автентифікацію скасовано"</string>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"Не розпізнано"</string>
     <string name="biometric_error_canceled" msgid="349665227864885880">"Автентифікацію скасовано"</string>
+    <string name="biometric_error_device_not_secured" msgid="6583143098363528349">"Не вказано PIN-код, ключ або пароль"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Відбиток розпізнано частково. Повторіть спробу."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Не вдалось обробити відбиток. Повторіть спробу."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Датчик відбитків забруднився. Очистьте його та повторіть спробу."</string>
@@ -561,7 +562,7 @@
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"Забагато спроб. Сканер відбитків пальців вимкнено."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Повторіть спробу."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="7654382120628334248">"Відбитки пальців не зареєстровано."</string>
-    <string name="fingerprint_error_hw_not_present" msgid="5729436878065119329">"На цьому пристрої немає сканера відбитків пальців"</string>
+    <string name="fingerprint_error_hw_not_present" msgid="409523969613176352">"На цьому пристрої немає сканера відбитків пальців."</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"Відбиток пальця <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -581,7 +582,14 @@
     <string name="face_acquired_too_left" msgid="2712489669456176505">"Перемістіть сканер ліворуч."</string>
     <string name="face_acquired_poor_gaze" msgid="8344973502980415859">"Дивіться на сканер."</string>
     <string name="face_acquired_not_detected" msgid="5707782294589511391">"Обличчя не виявлено."</string>
-    <string name="face_acquired_not_steady" msgid="3722829465011040042">"Тримайте обличчя нерухомо перед пристроєм."</string>
+    <string name="face_acquired_too_much_motion" msgid="470381210701463822">"Забагато рухів."</string>
+    <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Повторно проскануйте обличчя."</string>
+    <string name="face_acquired_too_different" msgid="5553210341111255124">"Виявлено інше обличчя."</string>
+    <string name="face_acquired_too_similar" msgid="1508776858407646460">"Надто схоже на попередню спробу, змініть позу."</string>
+    <string name="face_acquired_pan_too_extreme" msgid="8203001424525231680">"Дивіться просто в камеру."</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="7641326344460439970">"Дивіться просто в камеру."</string>
+    <string name="face_acquired_roll_too_extreme" msgid="1444829237745898619">"Тримайте голову вертикально."</string>
+    <string name="face_acquired_obscured" msgid="3055077697850272097">"Відкрийте обличчя."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="6255891785768984615">"Обладнання для сканування облич недоступне."</string>
@@ -593,7 +601,7 @@
     <string name="face_error_lockout_permanent" msgid="8198354656746088890">"Забагато спроб. Автентифікацію обличчя вимкнено."</string>
     <string name="face_error_unable_to_process" msgid="238761109287767270">"Повторіть спробу."</string>
     <string name="face_error_not_enrolled" msgid="9166792142679691323">"Немає зареєстрованих облич."</string>
-    <string name="face_error_hw_not_present" msgid="4737289254517095671">"На цьому пристрої немає сканера для автентифікації облич"</string>
+    <string name="face_error_hw_not_present" msgid="916085883581450331">"На цьому пристрої немає сканера для автентифікації облич."</string>
     <string name="face_name_template" msgid="7004562145809595384">"Обличчя <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -953,8 +961,7 @@
     <string name="save_password_never" msgid="8274330296785855105">"Ніколи"</string>
     <string name="open_permission_deny" msgid="7374036708316629800">"У вас немає дозволу на відкривання цієї сторінки."</string>
     <string name="text_copied" msgid="4985729524670131385">"Текст скопійов. в буф. обм."</string>
-    <!-- no translation found for copied (8564151838171791598) -->
-    <skip />
+    <string name="copied" msgid="8564151838171791598">"Скопійовано"</string>
     <string name="more_item_label" msgid="4650918923083320495">"Більше"</string>
     <string name="prepend_shortcut_label" msgid="2572214461676015642">"Меню+"</string>
     <string name="menu_meta_shortcut_label" msgid="4647153495550313570">"Meta+"</string>
@@ -1433,7 +1440,7 @@
     <string name="ext_media_init_action" msgid="7952885510091978278">"Налаштувати"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Відключити"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"Переглянути"</string>
-    <!-- no translation found for ext_media_seamless_action (5356508985817068711) -->
+    <!-- no translation found for ext_media_seamless_action (6575980560886881233) -->
     <skip />
     <string name="ext_media_missing_title" msgid="620980315821543904">"Немає пристрою <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_missing_message" msgid="4012389235250987930">"Вставте пристрій знову"</string>
@@ -2060,4 +2067,10 @@
     <string name="dynamic_mode_notification_title" msgid="508815255807182035">"Акумулятор може розрядитися раніше ніж зазвичай"</string>
     <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"Режим економії заряду акумулятора активовано для збільшення часу його роботи"</string>
     <string name="car_loading_profile" msgid="3545132581795684027">"Завантаження"</string>
+    <plurals name="file_count" formatted="false" msgid="1628600959752419449">
+      <item quantity="one"><xliff:g id="FILE_NAME_2">%s</xliff:g> і ще <xliff:g id="COUNT_3">%d</xliff:g> файл</item>
+      <item quantity="few"><xliff:g id="FILE_NAME_2">%s</xliff:g> і ще <xliff:g id="COUNT_3">%d</xliff:g> файли</item>
+      <item quantity="many"><xliff:g id="FILE_NAME_2">%s</xliff:g> і ще <xliff:g id="COUNT_3">%d</xliff:g> файлів</item>
+      <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> і ще <xliff:g id="COUNT_3">%d</xliff:g> файлу</item>
+    </plurals>
 </resources>

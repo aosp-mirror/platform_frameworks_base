@@ -193,6 +193,18 @@ class ApexManager {
     }
 
     /**
+     * Whether the current device supports the management of APEX packages.
+     *
+     * @return true if APEX packages can be managed on this device, false otherwise.
+     */
+    boolean isApexSupported() {
+        // There is no system-wide property available to check if APEX are flattened and hence can't
+        // be updated. In absence of such property, we assume that if we didn't index APEX packages
+        // since they were flattened, no APEX management should be possible.
+        return !mActivePackagesCache.isEmpty();
+    }
+
+    /**
      * Dumps various state information to the provided {@link PrintWriter} object.
      *
      * @param pw the {@link PrintWriter} object to send information to.

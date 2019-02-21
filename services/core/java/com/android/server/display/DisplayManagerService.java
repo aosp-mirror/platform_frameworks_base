@@ -1222,6 +1222,22 @@ public final class DisplayManagerService extends SystemService {
         }
     }
 
+    private void setDisplayScalingDisabledInternal(int displayId, boolean disable) {
+        synchronized (mSyncRoot) {
+            final LogicalDisplay display = mLogicalDisplays.get(displayId);
+            if (display == null) {
+                return;
+            }
+            if (display.isDisplayScalingDisabled() != disable) {
+                if (DEBUG) {
+                    Slog.d(TAG, "Display " + displayId + " content scaling disabled = " + disable);
+                }
+                display.setDisplayScalingDisabledLocked(disable);
+                scheduleTraversalLocked(false);
+            }
+        }
+    }
+
     // Updates the lists of UIDs that are present on displays.
     private void setDisplayAccessUIDsInternal(SparseArray<IntArray> newDisplayAccessUIDs) {
         synchronized (mSyncRoot) {
@@ -2356,6 +2372,11 @@ public final class DisplayManagerService extends SystemService {
         @Override
         public void setDisplayOffsets(int displayId, int x, int y) {
             setDisplayOffsetsInternal(displayId, x, y);
+        }
+
+        @Override
+        public void setDisplayScalingDisabled(int displayId, boolean disableScaling) {
+            setDisplayScalingDisabledInternal(displayId, disableScaling);
         }
 
         @Override

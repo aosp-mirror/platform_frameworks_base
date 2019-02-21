@@ -220,7 +220,7 @@
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"הטלפון שלך יכובה."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"האם ברצונך לבצע כיבוי?"</string>
     <string name="reboot_safemode_title" msgid="7054509914500140361">"אתחל למצב בטוח"</string>
-    <string name="reboot_safemode_confirm" msgid="55293944502784668">"האם אתה רוצה לאתחל למצב בטוח? פעולה זו תשבית את כל יישומי צד שלישי שהתקנת. הם ישוחזרו לאחר שתאתחל שוב."</string>
+    <string name="reboot_safemode_confirm" msgid="55293944502784668">"האם ברצונך לאתחל ולעבור למצב בטוח? פעולה זו תשבית את כל יישומי צד שלישי שהתקנת. הם ישוחזרו לאחר הפעלה מחדש של המכשיר."</string>
     <string name="recent_tasks_title" msgid="3691764623638127888">"נוצרו לאחרונה"</string>
     <string name="no_recent_tasks" msgid="8794906658732193473">"אין אפליקציות אחרונות"</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"אפשרויות טאבלט"</string>
@@ -515,8 +515,8 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"מאפשר לאפליקציה נהל תקשורת עם תגים, כרטיסים וקוראים מסוג \'תקשורת מטווח קצר\'."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"ביטול נעילת המסך שלך"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"מאפשר לאפליקציה להשבית את נעילת המקשים וכל אמצעי אבטחה משויך המבוסס על סיסמה. לדוגמה, הטלפון משבית את נעילת המקשים בעת קבלה של שיחת טלפון נכנסת, ולאחר מכן מפעיל מחדש את נעילת המקשים עם סיום השיחה."</string>
-    <string name="permlab_getAndRequestScreenLockComplexity" msgid="3911592334192005424">"קבלה ובקשה של מורכבות לנעילת מסך"</string>
-    <string name="permdesc_getAndRequestScreenLockComplexity" msgid="9045202063228854873">"‏מאפשרת לאפליקציה ללמוד את רמת המורכבות של נעילת המסך (גבוהה, בינונית, נמוכה או ללא). רמה זו מציינת את הטווח האפשרי של אורך וסוג של נעילת המסך. האפליקציה יכולה גם להציע למשתמשים שיעדכנו את נעילת המסך ברמה מסוימת, אבל המשתמשים יכולים להתעלם מההצעה ולנווט לפריט אחר כרצונם. יש לשים לב שנעילת המסך לא מאוחסנת ב-plaintext, ולכן האפליקציה לא יודעת מה הסיסמה המדויקת."</string>
+    <string name="permlab_requestScreenLockComplexity" msgid="7028982116060987169">"בקשה לפרטי המורכבות של נעילת מסך"</string>
+    <string name="permdesc_requestScreenLockComplexity" msgid="2806396846128185677">"‏מאפשרת לאפליקציה ללמוד את רמת המורכבות של נעילת המסך (גבוהה, בינונית, נמוכה או ללא). רמה זו מציינת את הטווח האפשרי לאורך ולסוג של נעילת המסך. האפליקציה יכולה גם להציע למשתמשים שיעדכנו את נעילת המסך ברמה מסוימת, אבל המשתמשים יכולים להתעלם מההצעה ולנווט לפריט אחר כרצונם. יש לשים לב שנעילת המסך לא מאוחסנת ב-plaintext, ולכן האפליקציה לא יודעת מה הסיסמה המדויקת."</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"שימוש בחומרה ביומטרית"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"מאפשרת לאפליקציה להשתמש בחומרה ביומטרית לצורך אימות"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"ניהול חומרה של טביעות אצבעות"</string>
@@ -542,6 +542,7 @@
     <string name="biometric_error_user_canceled" msgid="2260175018114348727">"האימות בוטל"</string>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"לא זוהתה"</string>
     <string name="biometric_error_canceled" msgid="349665227864885880">"האימות בוטל"</string>
+    <string name="biometric_error_device_not_secured" msgid="6583143098363528349">"עוד לא הוגדרו קוד גישה, קו ביטול נעילה או סיסמה"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"זוהתה טביעת אצבע חלקית. נסה שוב."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"לא ניתן היה לעבד את טביעת האצבע. נסה שוב."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"החיישן של טביעות האצבעות מלוכלך. נקה אותו ונסה שוב."</string>
@@ -561,7 +562,7 @@
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"יותר מדי ניסיונות. חיישן טביעות האצבע הושבת."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"נסה שוב."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="7654382120628334248">"לא נרשמו טביעות אצבע."</string>
-    <string name="fingerprint_error_hw_not_present" msgid="5729436878065119329">"במכשיר זה אין חיישן טביעות אצבע"</string>
+    <string name="fingerprint_error_hw_not_present" msgid="409523969613176352">"במכשיר זה אין חיישן טביעות אצבע."</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"אצבע <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -581,7 +582,14 @@
     <string name="face_acquired_too_left" msgid="2712489669456176505">"יש להזיז את החיישן שמאלה."</string>
     <string name="face_acquired_poor_gaze" msgid="8344973502980415859">"יש להסתכל על החיישן."</string>
     <string name="face_acquired_not_detected" msgid="5707782294589511391">"לא זוהו פנים."</string>
-    <string name="face_acquired_not_steady" msgid="3722829465011040042">"יש להחזיק את הפנים באופן יציב מול המכשיר."</string>
+    <string name="face_acquired_too_much_motion" msgid="470381210701463822">"יש יותר מדי תנועה."</string>
+    <string name="face_acquired_recalibrate" msgid="8077949502893707539">"יש לרשום מחדש את הפנים."</string>
+    <string name="face_acquired_too_different" msgid="5553210341111255124">"זוהו פנים שונות."</string>
+    <string name="face_acquired_too_similar" msgid="1508776858407646460">"דומה מדי, יש לשנות תנוחה."</string>
+    <string name="face_acquired_pan_too_extreme" msgid="8203001424525231680">"יש להביט ישירות אל המצלמה."</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="7641326344460439970">"יש להביט ישירות אל המצלמה."</string>
+    <string name="face_acquired_roll_too_extreme" msgid="1444829237745898619">"יש ליישר את הראש במאונך."</string>
+    <string name="face_acquired_obscured" msgid="3055077697850272097">"יש להסיר את הכיסוי מהפנים."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="6255891785768984615">"החומרה לזיהוי הפנים לא זמינה."</string>
@@ -593,7 +601,7 @@
     <string name="face_error_lockout_permanent" msgid="8198354656746088890">"יותר מדי ניסיונות. אימות הפנים הושבת."</string>
     <string name="face_error_unable_to_process" msgid="238761109287767270">"יש לנסות שוב."</string>
     <string name="face_error_not_enrolled" msgid="9166792142679691323">"לא נרשמו פנים."</string>
-    <string name="face_error_hw_not_present" msgid="4737289254517095671">"במכשיר זה אין חיישן לאימות פנים"</string>
+    <string name="face_error_hw_not_present" msgid="916085883581450331">"במכשיר זה אין חיישן לאימות פנים."</string>
     <string name="face_name_template" msgid="7004562145809595384">"פנים <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -953,8 +961,7 @@
     <string name="save_password_never" msgid="8274330296785855105">"אף פעם"</string>
     <string name="open_permission_deny" msgid="7374036708316629800">"אין לך הרשאה לפתוח דף זה."</string>
     <string name="text_copied" msgid="4985729524670131385">"הטקסט הועתק ללוח."</string>
-    <!-- no translation found for copied (8564151838171791598) -->
-    <skip />
+    <string name="copied" msgid="8564151838171791598">"ההעתקה בוצעה"</string>
     <string name="more_item_label" msgid="4650918923083320495">"עוד"</string>
     <string name="prepend_shortcut_label" msgid="2572214461676015642">"תפריט+"</string>
     <string name="menu_meta_shortcut_label" msgid="4647153495550313570">"Meta+"</string>
@@ -1433,7 +1440,7 @@
     <string name="ext_media_init_action" msgid="7952885510091978278">"הגדר"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"הוצא"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"גלה"</string>
-    <!-- no translation found for ext_media_seamless_action (5356508985817068711) -->
+    <!-- no translation found for ext_media_seamless_action (6575980560886881233) -->
     <skip />
     <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> חסר"</string>
     <string name="ext_media_missing_message" msgid="4012389235250987930">"יש להכניס שוב את ההתקן"</string>
@@ -1546,7 +1553,7 @@
     <string name="add_account_button_label" msgid="3611982894853435874">"הוספת חשבון"</string>
     <string name="number_picker_increment_button" msgid="2412072272832284313">"הוסף"</string>
     <string name="number_picker_decrement_button" msgid="476050778386779067">"הפחת"</string>
-    <string name="number_picker_increment_scroll_mode" msgid="5259126567490114216">"<xliff:g id="VALUE">%s</xliff:g> גע והחזק."</string>
+    <string name="number_picker_increment_scroll_mode" msgid="5259126567490114216">"<xliff:g id="VALUE">%s</xliff:g> לחיצה ארוכה."</string>
     <string name="number_picker_increment_scroll_action" msgid="9101473045891835490">"הסט למעלה כדי להוסיף ולמטה כדי להפחית."</string>
     <string name="time_picker_increment_minute_button" msgid="8865885114028614321">"הוספת דקה"</string>
     <string name="time_picker_decrement_minute_button" msgid="6246834937080684791">"הפחת דקה"</string>
@@ -1573,7 +1580,7 @@
     <string name="activitychooserview_choose_application_error" msgid="8624618365481126668">"לא ניתן היה להפעיל את <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="shareactionprovider_share_with" msgid="806688056141131819">"שתף עם"</string>
     <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"שתף עם <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
-    <string name="content_description_sliding_handle" msgid="415975056159262248">"ידית להחלקה. גע והחזק."</string>
+    <string name="content_description_sliding_handle" msgid="415975056159262248">"ידית להחלקה. לחיצה ארוכה."</string>
     <string name="description_target_unlock_tablet" msgid="3833195335629795055">"החלק לביטול נעילה."</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"נווט לדף הבית"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"נווט למעלה"</string>
@@ -1706,7 +1713,7 @@
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> הושבת על-ידי קיצור הדרך לנגישות"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"יש ללחוץ לחיצה ארוכה על שני לחצני עוצמת הקול למשך שלוש שניות כדי להשתמש בשירות <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"בחר תכונה שתופעל כשתלחץ על הלחצן \'נגישות\':"</string>
-    <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"כדי להחליף תכונה, גע בלחצן \'נגישות\' והחזק אותו."</string>
+    <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"כדי להחליף תכונה, יש ללחוץ לחיצה ארוכה על הלחצן \'נגישות\'."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"הגדלה"</string>
     <string name="user_switched" msgid="3768006783166984410">"המשתמש הנוכחי <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="2871009331809089783">"עובר אל <xliff:g id="NAME">%1$s</xliff:g>…"</string>
@@ -1952,7 +1959,7 @@
     <string name="app_suspended_default_message" msgid="123166680425711887">"האפליקציה <xliff:g id="APP_NAME_0">%1$s</xliff:g> לא זמינה כרגע. את הזמינות שלה אפשר לנהל באפליקציה <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="1131804827776778187">"מידע נוסף"</string>
     <string name="work_mode_off_title" msgid="1118691887588435530">"להפעיל את פרופיל העבודה?"</string>
-    <string name="work_mode_off_message" msgid="5130856710614337649">"אפליקציות העבודה, הודעות, נתונים ותכונות נוספות של פרופיל העבודה יופעלו"</string>
+    <string name="work_mode_off_message" msgid="5130856710614337649">"אפליקציות העבודה, התראות, נתונים ותכונות נוספות של פרופיל העבודה יופעלו"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"הפעל"</string>
     <string name="deprecated_target_sdk_message" msgid="1449696506742572767">"‏האפליקציה הזו עוצבה לגרסה ישנה יותר של Android וייתכן שלא תפעל כראוי. ניתן לבדוק אם יש עדכונים או ליצור קשר עם המפתח."</string>
     <string name="deprecated_target_sdk_app_store" msgid="5032340500368495077">"האם יש עדכון חדש?"</string>
@@ -2044,10 +2051,10 @@
     <string name="slices_permission_request" msgid="8484943441501672932">"<xliff:g id="APP_0">%1$s</xliff:g> רוצה להציג חלקים מ-<xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7867478911006447565">"עריכה"</string>
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="8902050240801159042">"שיחות והודעות ירטטו"</string>
-    <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"שיחות והודעות יושתקו"</string>
+    <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"שיחות והתראות יושתקו"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"שינויי מערכת"</string>
     <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"נא לא להפריע"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="3288313883409759733">"חדש: מצב \'נא לא להפריע\' מסתיר הודעות"</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="3288313883409759733">"חדש: מצב \'נא לא להפריע\' מסתיר התראות"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="5533674060311631165">"ניתן להקיש כדי לקבל מידע נוסף ולשנות."</string>
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"ההגדרה \'נא לא להפריע\' השתנתה"</string>
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"יש להקיש כדי לבדוק מה חסום."</string>
@@ -2060,4 +2067,10 @@
     <string name="dynamic_mode_notification_title" msgid="508815255807182035">"הסוללה עלולה להתרוקן לפני המועד הרגיל של הטעינה"</string>
     <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"תכונת החיסכון בסוללה הופעלה כדי להאריך את חיי הסוללה"</string>
     <string name="car_loading_profile" msgid="3545132581795684027">"בטעינה"</string>
+    <plurals name="file_count" formatted="false" msgid="1628600959752419449">
+      <item quantity="two"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> קבצים</item>
+      <item quantity="many"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> קבצים</item>
+      <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> קבצים</item>
+      <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> + קובץ  אחד (<xliff:g id="COUNT_1">%d</xliff:g>)</item>
+    </plurals>
 </resources>

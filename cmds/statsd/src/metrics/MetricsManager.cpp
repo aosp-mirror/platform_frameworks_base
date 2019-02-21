@@ -217,6 +217,7 @@ void MetricsManager::dropData(const int64_t dropTimeNs) {
 void MetricsManager::onDumpReport(const int64_t dumpTimeStampNs,
                                   const bool include_current_partial_bucket,
                                   const bool erase_data,
+                                  const DumpLatency dumpLatency,
                                   std::set<string> *str_set,
                                   ProtoOutputStream* protoOutput) {
     VLOG("=========================Metric Reports Start==========================");
@@ -227,10 +228,10 @@ void MetricsManager::onDumpReport(const int64_t dumpTimeStampNs,
                     FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | FIELD_ID_METRICS);
             if (mHashStringsInReport) {
                 producer->onDumpReport(dumpTimeStampNs, include_current_partial_bucket, erase_data,
-                                       str_set, protoOutput);
+                                       dumpLatency, str_set, protoOutput);
             } else {
                 producer->onDumpReport(dumpTimeStampNs, include_current_partial_bucket, erase_data,
-                                       nullptr, protoOutput);
+                                       dumpLatency, nullptr, protoOutput);
             }
             protoOutput->end(token);
         } else {

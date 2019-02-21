@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.phone;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.Color;
@@ -27,11 +28,13 @@ import android.os.Looper;
 import android.provider.Settings;
 import android.util.DisplayMetrics;
 import android.view.SurfaceControl;
+import android.view.View;
+
+import com.android.systemui.R;
 
 public class NavBarTintController {
-    public static final String NAV_COLOR_TRANSITION_TIME_SETTING = "navbar_color_adapt_transition";
     public static final int MIN_COLOR_ADAPT_TRANSITION_TIME = 400;
-    public static final int DEFAULT_COLOR_ADAPT_TRANSITION_TIME = 1500;
+    public static final int DEFAULT_COLOR_ADAPT_TRANSITION_TIME = 1700;
 
     private final HandlerThread mColorAdaptHandlerThread = new HandlerThread("ColorExtractThread");
     private Handler mColorAdaptionHandler;
@@ -42,23 +45,25 @@ public class NavBarTintController {
     // Passing the threshold of this luminance value will make the button black otherwise white
     private static final float LUMINANCE_THRESHOLD = 0.3f;
 
-    // The home button's icon is actually smaller than the button's size, the percentage will
-    // cut into the button's size to determine the icon size
-    private static final float PERCENTAGE_BUTTON_PADDING = 0.3f;
-
-    // The distance from the home button to color sample around
-    private static final int COLOR_SAMPLE_MARGIN = 20;
+    // The margin from the bounds of the view to color sample around
+    private static final int COLOR_SAMPLE_MARGIN = 10;
 
     private boolean mRunning;
 
     private final NavigationBarView mNavigationBarView;
     private final LightBarTransitionsController mLightBarController;
     private final Handler mMainHandler = new Handler(Looper.getMainLooper());
+    private final int mBarRadius;
+    private final int mBarBottom;
 
     public NavBarTintController(NavigationBarView navigationBarView,
             LightBarTransitionsController lightBarController) {
         mNavigationBarView = navigationBarView;
         mLightBarController = lightBarController;
+
+        final Resources res = navigationBarView.getResources();
+        mBarRadius = res.getDimensionPixelSize(R.dimen.navigation_handle_radius);
+        mBarBottom = res.getDimensionPixelSize(R.dimen.navigation_handle_bottom);
     }
 
     public void start() {
@@ -91,27 +96,28 @@ public class NavBarTintController {
     private void updateTint() {
         int[] navPos = new int[2];
         int[] butPos = new int[2];
-        if (mNavigationBarView.getHomeButton().getCurrentView() == null) {
+        View view = mNavigationBarView.getHomeHandle().getCurrentView();
+        if (view == null) {
             return;
         }
 
-        // Determine the area of the home icon in the larger home button
-        mNavigationBarView.getHomeButton().getCurrentView().getLocationInSurface(butPos);
-        final int navWidth = mNavigationBarView.getHomeButton().getCurrentView().getWidth();
-        final int navHeight = mNavigationBarView.getHomeButton().getCurrentView().getHeight();
-        final int xPadding = (int) (PERCENTAGE_BUTTON_PADDING * navWidth);
-        final int yPadding = (int) (PERCENTAGE_BUTTON_PADDING * navHeight);
-        final Rect homeButtonRect = new Rect(butPos[0] + xPadding, butPos[1] + yPadding,
-                navWidth + butPos[0]  - xPadding, navHeight + butPos[1] - yPadding);
-        if (mNavigationBarView.getCurrentView() == null || homeButtonRect.isEmpty()) {
+        // Determine the area of the icon within its view bounds
+        view.getLocationInSurface(butPos);
+        final int navWidth = view.getWidth();
+        final int navHeight = view.getHeight();
+        int viewBottom = butPos[1] + navHeight - mBarBottom;
+        final Rect viewIconRect = new Rect(butPos[0], viewBottom - mBarRadius * 2,
+                butPos[0] + navWidth, viewBottom);
+
+        if (mNavigationBarView.getCurrentView() == null || viewIconRect.isEmpty()) {
             scheduleColorAdaption();
             return;
         }
         mNavigationBarView.getCurrentView().getLocationOnScreen(navPos);
-        homeButtonRect.offset(navPos[0], navPos[1]);
+        viewIconRect.offset(navPos[0], navPos[1]);
 
         // Apply a margin area around the button region to sample the colors, crop from screenshot
-        final Rect cropRect = new Rect(homeButtonRect);
+        final Rect cropRect = new Rect(viewIconRect);
         cropRect.inset(-COLOR_SAMPLE_MARGIN, -COLOR_SAMPLE_MARGIN);
         if (cropRect.isEmpty()) {
             scheduleColorAdaption();
@@ -120,8 +126,8 @@ public class NavBarTintController {
 
         // Determine the size of the home area
         Rect homeArea = new Rect(COLOR_SAMPLE_MARGIN, COLOR_SAMPLE_MARGIN,
-                homeButtonRect.width() + COLOR_SAMPLE_MARGIN,
-                homeButtonRect.height() + COLOR_SAMPLE_MARGIN);
+                viewIconRect.width() + COLOR_SAMPLE_MARGIN,
+                viewIconRect.height() + COLOR_SAMPLE_MARGIN);
 
         // Get the screenshot around the home button icon to determine the color
         DisplayMetrics mDisplayMetrics = new DisplayMetrics();
@@ -129,7 +135,8 @@ public class NavBarTintController {
         final Bitmap hardBitmap = SurfaceControl
                 .screenshot(new Rect(), mDisplayMetrics.widthPixels, mDisplayMetrics.heightPixels,
                         mNavigationBarView.getContext().getDisplay().getRotation());
-        if (hardBitmap != null && cropRect.bottom <= hardBitmap.getHeight()) {
+        if (cropRect.bottom <= hardBitmap.getHeight()
+                && cropRect.left + cropRect.width() <= hardBitmap.getWidth()) {
             final Bitmap cropBitmap = Bitmap.createBitmap(hardBitmap, cropRect.left, cropRect.top,
                     cropRect.width(), cropRect.height());
             final Bitmap softBitmap = cropBitmap.copy(Config.ARGB_8888, false);
@@ -204,6 +211,8 @@ public class NavBarTintController {
 
     public static boolean isEnabled(Context context) {
         return Settings.Global.getInt(context.getContentResolver(),
-                NavigationPrototypeController.NAV_COLOR_ADAPT_ENABLE_SETTING, 0) == 1;
+                NavigationPrototypeController.NAV_COLOR_ADAPT_ENABLE_SETTING, 0) == 1
+            && Settings.Global.getInt(context.getContentResolver(),
+                NavigationPrototypeController.SHOW_HOME_HANDLE_SETTING, 0) == 1;
     }
 }

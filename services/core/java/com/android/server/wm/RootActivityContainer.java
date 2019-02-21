@@ -1126,6 +1126,13 @@ class RootActivityContainer extends ConfigurationContainer
                 if (!stack.isFocusableAndVisible() || topRunningActivity == null) {
                     continue;
                 }
+                if (stack == targetStack) {
+                    // Simply update the result for targetStack because the targetStack had
+                    // already resumed in above. We don't want to resume it again, especially in
+                    // some cases, it would cause a second launch failure if app process was dead.
+                    resumedOnDisplay |= result;
+                    continue;
+                }
                 if (topRunningActivity.isState(RESUMED)) {
                     // Kick off any lingering app transitions form the MoveTaskToFront operation.
                     stack.executeAppTransition(targetOptions);

@@ -43,6 +43,8 @@ public class DozeMachine {
 
     static final String TAG = "DozeMachine";
     static final boolean DEBUG = DozeService.DEBUG;
+    private static final String REASON_CHANGE_STATE = "DozeMachine#requestState";
+    private static final String REASON_HELD_FOR_STATE = "DozeMachine#heldForState";
 
     public enum State {
         /** Default state. Transition to INITIALIZED to get Doze going. */
@@ -167,14 +169,14 @@ public class DozeMachine {
         boolean runNow = !isExecutingTransition();
         mQueuedRequests.add(requestedState);
         if (runNow) {
-            mWakeLock.acquire();
+            mWakeLock.acquire(REASON_CHANGE_STATE);
             for (int i = 0; i < mQueuedRequests.size(); i++) {
                 // Transitions in Parts can call back into requestState, which will
                 // cause mQueuedRequests to grow.
                 transitionTo(mQueuedRequests.get(i), pulseReason);
             }
             mQueuedRequests.clear();
-            mWakeLock.release();
+            mWakeLock.release(REASON_CHANGE_STATE);
         }
     }
 
@@ -311,10 +313,10 @@ public class DozeMachine {
     private void updateWakeLockState(State newState) {
         boolean staysAwake = newState.staysAwake();
         if (mWakeLockHeldForCurrentState && !staysAwake) {
-            mWakeLock.release();
+            mWakeLock.release(REASON_HELD_FOR_STATE);
             mWakeLockHeldForCurrentState = false;
         } else if (!mWakeLockHeldForCurrentState && staysAwake) {
-            mWakeLock.acquire();
+            mWakeLock.acquire(REASON_HELD_FOR_STATE);
             mWakeLockHeldForCurrentState = true;
         }
     }
@@ -336,6 +338,7 @@ public class DozeMachine {
     public void dump(PrintWriter pw) {
         pw.print(" state="); pw.println(mState);
         pw.print(" wakeLockHeldForCurrentState="); pw.println(mWakeLockHeldForCurrentState);
+        pw.print(" wakeLock="); pw.println(mWakeLock);
         pw.println("Parts:");
         for (Part p : mParts) {
             p.dump(pw);

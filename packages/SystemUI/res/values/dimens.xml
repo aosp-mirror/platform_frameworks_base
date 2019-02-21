@@ -33,6 +33,11 @@
     <!-- size of the dead zone when touches have recently occurred elsewhere on screen -->
     <dimen name="navigation_bar_deadzone_size_max">32dp</dimen>
 
+    <!-- dimensions for the navigation bar handle -->
+    <dimen name="navigation_handle_width">180dp</dimen>
+    <dimen name="navigation_handle_radius">2dp</dimen>
+    <dimen name="navigation_handle_bottom">8dp</dimen>
+
     <!-- Height of notification icons in the status bar -->
     <dimen name="status_bar_icon_size">@*android:dimen/status_bar_icon_size</dimen>
 
@@ -1008,8 +1013,8 @@
     <dimen name="bubble_icon_inset">16dp</dimen>
     <!-- Padding around the view displayed when the bubble is expanded -->
     <dimen name="bubble_expanded_view_padding">8dp</dimen>
-    <!-- Default height of the expanded view shown when the bubble is expanded -->
-    <dimen name="bubble_expanded_default_height">400dp</dimen>
+    <!-- Default (and minimum) height of the expanded view shown when the bubble is expanded -->
+    <dimen name="bubble_expanded_default_height">180dp</dimen>
     <!-- Height of the triangle that points to the expanded bubble -->
     <dimen name="bubble_pointer_height">4dp</dimen>
     <!-- Width of the triangle that points to the expanded bubble -->

@@ -34,6 +34,7 @@
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"ଭୁଲ PIN କୋଡ୍।"</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"ଅମାନ୍ୟ କାର୍ଡ।"</string>
     <string name="keyguard_charged" msgid="3316115607283493413">"ସମ୍ପୂର୍ଣ୍ଣ ଭାବରେ ଚାର୍ଜ ହୋ‍ଇଗଲା"</string>
+    <string name="keyguard_plugged_in_wireless" msgid="3004717438401575235">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ୱାୟାର୍‍‍ଲେସ୍‍‍ଭାବରେ ଚାର୍ଜ ହେଉଛି"</string>
     <string name="keyguard_plugged_in" msgid="3161102098900158923">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ଚାର୍ଜ ହେଉଛି"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="3684592786276709342">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ଦ୍ରୁତ ଭାବେ ଚାର୍ଜ ହେଉଛି"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="509533586841478405">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ଧୀରେ ଚାର୍ଜ ହେଉଛି"</string>
@@ -150,7 +151,10 @@
       <item quantity="other">SIM କାର୍ଡକୁ ବର୍ତ୍ତମାନ ଅକ୍ଷମ କରିଦିଆଯାଇଛି। ଜାରି ରଖିବାକୁ PUK କୋଡ୍‍ ଲେଖନ୍ତୁ। ଆଉ <xliff:g id="_NUMBER_1">%d</xliff:g> ଥର ଭୁଲ କୋଡ୍‍ ଲେଖିବା ପରେ SIM କାର୍ଡ ସ୍ଥାୟୀ ଭାବେ ଅନୁପଯୋଗୀ ହୋଇଯିବ। ବିବରଣୀ ପାଇଁ କେରିଅର୍‌ର ସହ ଯୋଗାଯୋଗ କରନ୍ତୁ।</item>
       <item quantity="one">SIM କାର୍ଡକୁ ବର୍ତ୍ତମାନ ଅକ୍ଷମ କରିଦିଆଯାଇଛି। ଜାରି ରଖିବାକୁ PUK କୋଡ୍‍ ଲେଖନ୍ତୁ। ଆଉ <xliff:g id="_NUMBER_0">%d</xliff:g> ଥର ଭୁଲ କୋଡ୍‍ ଲେଖିବା ପରେ SIM କାର୍ଡ ସ୍ଥାୟୀ ଭାବେ ଅନୁପଯୋଗୀ ହୋଇଯିବ। ବିବରଣୀ ପାଇଁ କେରିଅର୍‌ର ସହ ଯୋଗାଯୋଗ କରନ୍ତୁ।</item>
     </plurals>
-    <!-- no translation found for type_clock_header (6782840450655632763) -->
+    <plurals name="type_clock_header" formatted="false" msgid="6782840450655632763">
+      <item quantity="other">"<annotation name="color">"ଏହାର"</annotation>\n"^1\n^2</item>
+      <item quantity="one">"<annotation name="color">"ଏହାର"</annotation>\n"^1\n^2</item>
+    </plurals>
   <string-array name="type_clock_hours">
     <item msgid="3543074812389379830">"ବାର"</item>
     <item msgid="7389464214252023751">"ଏକ"</item>

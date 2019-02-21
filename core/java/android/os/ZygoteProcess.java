@@ -398,8 +398,8 @@ public class ZygoteProcess {
             }
         }
 
-        /**
-         * See com.android.internal.os.SystemZygoteInit.readArgumentList()
+        /*
+         * See com.android.internal.os.ZygoteArguments.parseArgs()
          * Presently the wire format to the zygote process is:
          * a) a count of arguments (argc, in essence)
          * b) a number of newline-separated argument strings equal to count

@@ -34,6 +34,7 @@
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"Неправильний PIN-код."</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"Недійсна картка."</string>
     <string name="keyguard_charged" msgid="3316115607283493413">"Повністю заряджений"</string>
+    <string name="keyguard_plugged_in_wireless" msgid="3004717438401575235">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Бездротове заряджання"</string>
     <string name="keyguard_plugged_in" msgid="3161102098900158923">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Заряджання"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="3684592786276709342">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Швидке заряджання"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="509533586841478405">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Повільне заряджання"</string>
@@ -166,7 +167,12 @@
       <item quantity="many">SIM-карту заблоковано. Щоб продовжити, введіть PUK-код. Залишилося <xliff:g id="_NUMBER_1">%d</xliff:g> спроб. Після цього SIM-карту буде назавжди заблоковано. Щоб дізнатися більше, зверніться до свого оператора.</item>
       <item quantity="other">SIM-карту заблоковано. Щоб продовжити, введіть PUK-код. Залишилося <xliff:g id="_NUMBER_1">%d</xliff:g> спроби. Після цього SIM-карту буде назавжди заблоковано. Щоб дізнатися більше, зверніться до свого оператора.</item>
     </plurals>
-    <!-- no translation found for type_clock_header (6782840450655632763) -->
+    <plurals name="type_clock_header" formatted="false" msgid="6782840450655632763">
+      <item quantity="one">"<annotation name="color">"Зараз"</annotation>\n"^1\n^2</item>
+      <item quantity="few">"<annotation name="color">"Зараз"</annotation>\n"^1\n^2</item>
+      <item quantity="many">"<annotation name="color">"Зараз"</annotation>\n"^1\n^2</item>
+      <item quantity="other">"<annotation name="color">"Зараз"</annotation>\n"^1\n^2</item>
+    </plurals>
   <string-array name="type_clock_hours">
     <item msgid="3543074812389379830">"дванадцята"</item>
     <item msgid="7389464214252023751">"перша"</item>

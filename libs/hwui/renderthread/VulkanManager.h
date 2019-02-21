@@ -150,7 +150,7 @@ public:
     // Returned pointers are owned by VulkanManager.
     VkFunctorInitParams getVkFunctorInitParams() const;
 
-    sk_sp<GrContext> createContext(GrContextOptions options);
+    sk_sp<GrContext> createContext(const GrContextOptions& options);
 
 private:
     // Sets up the VkInstance and VkDevice objects. Also fills out the passed in

@@ -44,6 +44,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.service.contentcapture.ContentCaptureService;
 import android.service.contentcapture.IContentCaptureServiceCallback;
 import android.service.contentcapture.SnapshotData;
@@ -466,6 +467,19 @@ final class ContentCapturePerUserService
 
             // TODO(b/122595322): whitelist activities as well
             // TODO(b/119613670): log metrics
+        }
+
+        @Override
+        public void disableSelf() {
+            if (mMaster.verbose) Slog.v(TAG, "disableSelf()");
+
+            final long token = Binder.clearCallingIdentity();
+            try {
+                Settings.Secure.putStringForUser(getContext().getContentResolver(),
+                        Settings.Secure.CONTENT_CAPTURE_ENABLED, "false", mUserId);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
         }
     }
 }

@@ -1260,10 +1260,11 @@ public final class ActiveServices {
                 // Check the passed in foreground service type flags is a subset of manifest
                 // foreground service type flags.
                 if ((foregroundServiceType & manifestType) != foregroundServiceType) {
-                    // STOPSHIP(b/120611119): replace log message with IllegalArgumentException.
-                    Slog.w(TAG, "foregroundServiceType must be a subset of "
-                            + "foregroundServiceType attribute in "
-                            + "service element of manifest file");
+                    throw new IllegalArgumentException("foregroundServiceType "
+                        + String.format("0x%08X", foregroundServiceType)
+                        + " is not a subset of foregroundServiceType attribute "
+                        +  String.format("0x%08X", manifestType)
+                        + " in service element of manifest file");
                 }
             }
             boolean alreadyStartedOp = false;

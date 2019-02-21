@@ -18,17 +18,29 @@ package com.android.systemui.util.wakelock;
 
 import android.content.Context;
 import android.os.PowerManager;
+import android.util.Log;
 
 import androidx.annotation.VisibleForTesting;
+
+import java.util.HashMap;
 
 /** WakeLock wrapper for testability */
 public interface WakeLock {
 
-    /** @see android.os.PowerManager.WakeLock#acquire() */
-    void acquire();
+    static final String TAG = "WakeLock";
+    static final String REASON_WRAP = "wrap";
 
-    /** @see android.os.PowerManager.WakeLock#release() */
-    void release();
+    /**
+     * @param why A tag that will be saved for sysui dumps.
+     * @see android.os.PowerManager.WakeLock#acquire()
+     **/
+    void acquire(String why);
+
+    /**
+     * @param why Same tag used in {@link #acquire(String)}
+     * @see android.os.PowerManager.WakeLock#release()
+     **/
+    void release(String why);
 
     /** @see android.os.PowerManager.WakeLock#wrap(Runnable) */
     Runnable wrap(Runnable r);
@@ -44,31 +56,49 @@ public interface WakeLock {
     }
 
     static Runnable wrapImpl(WakeLock w, Runnable r) {
-        w.acquire();
+        w.acquire(REASON_WRAP);
         return () -> {
             try {
                 r.run();
             } finally {
-                w.release();
+                w.release(REASON_WRAP);
             }
         };
     }
 
     static WakeLock wrap(final PowerManager.WakeLock inner) {
         return new WakeLock() {
+            private final HashMap<String, Integer> mActiveClients = new HashMap<>();
+
             /** @see PowerManager.WakeLock#acquire() */
-            public void acquire() {
+            public void acquire(String why) {
+                mActiveClients.putIfAbsent(why, 0);
+                mActiveClients.put(why, mActiveClients.get(why) + 1);
                 inner.acquire();
             }
 
             /** @see PowerManager.WakeLock#release() */
-            public void release() {
+            public void release(String why) {
+                Integer count = mActiveClients.get(why);
+                if (count == null) {
+                    Log.wtf(TAG, "Releasing WakeLock with invalid reason: " + why,
+                            new Throwable());
+                } else if (count == 1) {
+                    mActiveClients.remove(why);
+                } else {
+                    mActiveClients.put(why, count - 1);
+                }
                 inner.release();
             }
 
             /** @see PowerManager.WakeLock#wrap(Runnable) */
             public Runnable wrap(Runnable runnable) {
                 return wrapImpl(this, runnable);
+            }
+
+            @Override
+            public String toString() {
+                return "active clients= " + mActiveClients.toString();
             }
         };
     }

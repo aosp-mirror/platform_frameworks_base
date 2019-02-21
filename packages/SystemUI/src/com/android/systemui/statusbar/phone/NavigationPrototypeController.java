@@ -20,6 +20,7 @@ import android.annotation.IntDef;
 import android.content.Context;
 import android.content.res.Resources;
 import android.database.ContentObserver;
+import android.graphics.Point;
 import android.net.Uri;
 import android.os.Handler;
 import android.provider.Settings;
@@ -37,12 +38,11 @@ public class NavigationPrototypeController extends ContentObserver {
     private static final String HIDE_HOME_BUTTON_SETTING = "quickstepcontroller_hidehome";
     private static final String PROTOTYPE_ENABLED = "prototype_enabled";
 
-    private static final String EDGE_SENSITIVITY_HEIGHT_SETTING =
-            "quickstepcontroller_edge_height_sensitivity";
     public static final String EDGE_SENSITIVITY_WIDTH_SETTING =
             "quickstepcontroller_edge_width_sensitivity";
     private final String GESTURE_MATCH_SETTING = "quickstepcontroller_gesture_match_map";
     public static final String NAV_COLOR_ADAPT_ENABLE_SETTING = "navbar_color_adapt_enable";
+    public static final String SHOW_HOME_HANDLE_SETTING = "quickstepcontroller_showhandle";
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({ACTION_DEFAULT, ACTION_QUICKSTEP, ACTION_QUICKSCRUB, ACTION_BACK,
@@ -86,7 +86,7 @@ public class NavigationPrototypeController extends ContentObserver {
         registerObserver(GESTURE_MATCH_SETTING);
         registerObserver(NAV_COLOR_ADAPT_ENABLE_SETTING);
         registerObserver(EDGE_SENSITIVITY_WIDTH_SETTING);
-        registerObserver(EDGE_SENSITIVITY_HEIGHT_SETTING);
+        registerObserver(SHOW_HOME_HANDLE_SETTING);
     }
 
     /**
@@ -114,20 +114,29 @@ public class NavigationPrototypeController extends ContentObserver {
             } else if (path.endsWith(NAV_COLOR_ADAPT_ENABLE_SETTING)) {
                 mListener.onColorAdaptChanged(
                         NavBarTintController.isEnabled(mContext));
-            } else if (path.endsWith(EDGE_SENSITIVITY_WIDTH_SETTING)
-                    || path.endsWith(EDGE_SENSITIVITY_HEIGHT_SETTING)) {
+            } else if (path.endsWith(EDGE_SENSITIVITY_WIDTH_SETTING)) {
                 mListener.onEdgeSensitivityChanged(getEdgeSensitivityWidth(),
                         getEdgeSensitivityHeight());
+            } else if (path.endsWith(SHOW_HOME_HANDLE_SETTING)) {
+                mListener.onHomeHandleVisiblilityChanged(showHomeHandle());
             }
         }
     }
 
+    /**
+     * @return the width for edge swipe
+     */
     public int getEdgeSensitivityWidth() {
         return convertDpToPixel(getGlobalInt(EDGE_SENSITIVITY_WIDTH_SETTING, 0));
     }
 
+    /**
+     * @return full screen height
+     */
     public int getEdgeSensitivityHeight() {
-        return convertDpToPixel(getGlobalInt(EDGE_SENSITIVITY_HEIGHT_SETTING, 0));
+        final Point size = new Point();
+        mContext.getDisplay().getRealSize(size);
+        return size.y;
     }
 
     public boolean isEnabled() {
@@ -147,6 +156,10 @@ public class NavigationPrototypeController extends ContentObserver {
      */
     boolean hideHomeButton() {
         return getGlobalBool(HIDE_HOME_BUTTON_SETTING, false /* default */);
+    }
+
+    boolean showHomeHandle() {
+        return getGlobalBool(SHOW_HOME_HANDLE_SETTING, false /* default */);
     }
 
     /**
@@ -185,6 +198,7 @@ public class NavigationPrototypeController extends ContentObserver {
         void onGestureRemap(@GestureAction int[] actions);
         void onBackButtonVisibilityChanged(boolean visible);
         void onHomeButtonVisibilityChanged(boolean visible);
+        void onHomeHandleVisiblilityChanged(boolean visible);
         void onColorAdaptChanged(boolean enabled);
         void onEdgeSensitivityChanged(int width, int height);
     }

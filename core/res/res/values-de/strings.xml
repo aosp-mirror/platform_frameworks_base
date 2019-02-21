@@ -509,8 +509,8 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Ermöglicht der App die Kommunikation mit Tags für die Nahfeldkommunikation, Karten und Readern"</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"Displaysperre deaktivieren"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Ermöglicht der App, die Tastensperre sowie den damit verbundenen Passwortschutz zu deaktivieren. Das Telefon deaktiviert die Tastensperre beispielsweise, wenn ein Anruf eingeht, und aktiviert sie wieder, nachdem das Gespräch beendet wurde."</string>
-    <string name="permlab_getAndRequestScreenLockComplexity" msgid="3911592334192005424">"Komplexität der Displaysperre erfahren und anfragen"</string>
-    <string name="permdesc_getAndRequestScreenLockComplexity" msgid="9045202063228854873">"Ermöglicht es der App, die Komplexitätsstufe der Displaysperre (hoch, mittel, niedrig oder keine) zu erfahren, was auf die mögliche Dauer und Art der Displaysperre hinweist. Die App kann Nutzern auch vorschlagen, die Displaysperre auf eine bestimmte Stufe zu aktualisieren, Nutzer können diesen Vorschlag jedoch auch einfach ignorieren und fortfahren. Beachten Sie, dass die Displaysperre nicht im Klartext gespeichert ist, sodass die App nicht das genaue Passwort kennt."</string>
+    <string name="permlab_requestScreenLockComplexity" msgid="7028982116060987169">"Komplexitätsstufe der Displaysperre anfragen"</string>
+    <string name="permdesc_requestScreenLockComplexity" msgid="2806396846128185677">"Ermöglicht es der App, die Komplexitätsstufe der Displaysperre (hoch, mittel, niedrig oder keine) zu erfahren, was auf die mögliche Dauer und Art der Displaysperre hinweist. Die App kann Nutzern auch vorschlagen, die Displaysperre auf eine bestimmte Stufe zu aktualisieren, Nutzer können diesen Vorschlag jedoch auch einfach ignorieren und fortfahren. Beachten Sie, dass die Displaysperre nicht im Klartext gespeichert ist, sodass die App nicht das genaue Passwort kennt."</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"Biometrische Hardware verwenden"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"Erlaubt der App, biometrische Hardware zur Authentifizierung zu verwenden"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"Fingerabdruckhardware verwalten"</string>
@@ -536,6 +536,7 @@
     <string name="biometric_error_user_canceled" msgid="2260175018114348727">"Authentifizierung abgebrochen"</string>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"Nicht erkannt"</string>
     <string name="biometric_error_canceled" msgid="349665227864885880">"Authentifizierung abgebrochen"</string>
+    <string name="biometric_error_device_not_secured" msgid="6583143098363528349">"Keine PIN, kein Muster und kein Passwort festgelegt"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Fingerabdruck teilweise erkannt. Bitte versuche es noch einmal."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Fingerabdruck konnte nicht verarbeitet werden. Bitte versuche es noch einmal."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Fingerabdrucksensor ist verschmutzt. Reinige ihn und versuche es noch einmal."</string>
@@ -555,7 +556,7 @@
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"Zu viele Versuche. Der Fingerabdrucksensor wurde deaktiviert."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Bitte versuche es noch einmal."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="7654382120628334248">"Keine Fingerabdrücke erfasst."</string>
-    <string name="fingerprint_error_hw_not_present" msgid="5729436878065119329">"Dieses Gerät hat keinen Fingerabdrucksensor"</string>
+    <string name="fingerprint_error_hw_not_present" msgid="409523969613176352">"Dieses Gerät hat keinen Fingerabdrucksensor."</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"Finger <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -575,7 +576,14 @@
     <string name="face_acquired_too_left" msgid="2712489669456176505">"Sensor nach links bewegen."</string>
     <string name="face_acquired_poor_gaze" msgid="8344973502980415859">"Blick auf den Sensor richten."</string>
     <string name="face_acquired_not_detected" msgid="5707782294589511391">"Kein Gesicht erkannt."</string>
-    <string name="face_acquired_not_steady" msgid="3722829465011040042">"Gerät vor das Gesicht halten und nicht bewegen."</string>
+    <string name="face_acquired_too_much_motion" msgid="470381210701463822">"Bitte halte das Gerät ruhig."</string>
+    <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Bitte registriere dein Gesicht noch einmal."</string>
+    <string name="face_acquired_too_different" msgid="5553210341111255124">"Anderes Gesicht erkannt."</string>
+    <string name="face_acquired_too_similar" msgid="1508776858407646460">"Zu ähnlich. Bitte dreh deinen Kopf etwas."</string>
+    <string name="face_acquired_pan_too_extreme" msgid="8203001424525231680">"Bitte sieh direkt in die Kamera."</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="7641326344460439970">"Bitte sieh direkt in die Kamera."</string>
+    <string name="face_acquired_roll_too_extreme" msgid="1444829237745898619">"Bitte halte deinen Kopf gerade."</string>
+    <string name="face_acquired_obscured" msgid="3055077697850272097">"Dein Gesicht darf nicht verdeckt sein."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="6255891785768984615">"Hardware zur Gesichtserkennung nicht verfügbar."</string>
@@ -587,7 +595,7 @@
     <string name="face_error_lockout_permanent" msgid="8198354656746088890">"Zu viele Versuche. Gesichtserkennung deaktiviert."</string>
     <string name="face_error_unable_to_process" msgid="238761109287767270">"Versuch es noch einmal."</string>
     <string name="face_error_not_enrolled" msgid="9166792142679691323">"Kein Gesicht erfasst."</string>
-    <string name="face_error_hw_not_present" msgid="4737289254517095671">"Dieses Gerät hat keinen Gesichtserkennungssensor"</string>
+    <string name="face_error_hw_not_present" msgid="916085883581450331">"Dieses Gerät hat keinen Sensor zur Gesichtserkennung."</string>
     <string name="face_name_template" msgid="7004562145809595384">"Gesicht <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -947,8 +955,7 @@
     <string name="save_password_never" msgid="8274330296785855105">"Nie"</string>
     <string name="open_permission_deny" msgid="7374036708316629800">"Du bist nicht zum Öffnen dieser Seite berechtigt."</string>
     <string name="text_copied" msgid="4985729524670131385">"Text in Zwischenablage kopiert."</string>
-    <!-- no translation found for copied (8564151838171791598) -->
-    <skip />
+    <string name="copied" msgid="8564151838171791598">"Kopiert"</string>
     <string name="more_item_label" msgid="4650918923083320495">"Mehr"</string>
     <string name="prepend_shortcut_label" msgid="2572214461676015642">"Menü+"</string>
     <string name="menu_meta_shortcut_label" msgid="4647153495550313570">"Meta-Taste +"</string>
@@ -1389,7 +1396,7 @@
     <string name="ext_media_init_action" msgid="7952885510091978278">"Einrichten"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Auswerfen"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"Ansehen"</string>
-    <!-- no translation found for ext_media_seamless_action (5356508985817068711) -->
+    <!-- no translation found for ext_media_seamless_action (6575980560886881233) -->
     <skip />
     <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> fehlt"</string>
     <string name="ext_media_missing_message" msgid="4012389235250987930">"Gerät wieder einlegen"</string>
@@ -1990,4 +1997,8 @@
     <string name="dynamic_mode_notification_title" msgid="508815255807182035">"Dein Akku könnte vor der gewöhnlichen Ladezeit leer sein"</string>
     <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"Energiesparmodus aktiviert, um die Akkulaufzeit zu verlängern"</string>
     <string name="car_loading_profile" msgid="3545132581795684027">"Wird geladen"</string>
+    <plurals name="file_count" formatted="false" msgid="1628600959752419449">
+      <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> und <xliff:g id="COUNT_3">%d</xliff:g> Dateien</item>
+      <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> und <xliff:g id="COUNT_1">%d</xliff:g> Datei</item>
+    </plurals>
 </resources>

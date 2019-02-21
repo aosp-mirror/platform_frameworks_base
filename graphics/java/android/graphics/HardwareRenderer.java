@@ -1027,6 +1027,18 @@ public class HardwareRenderer {
      */
     public static native void disableVsync();
 
+    /**
+     * Start render thread and initialize EGL or Vulkan.
+     *
+     * Initializing EGL involves loading and initializing the graphics driver. Some drivers take
+     * several 10s of milliseconds to do this, so doing it on-demand when an app tries to render
+     * its first frame adds directly to user-visible app launch latency.
+     *
+     * Should only be called after GraphicsEnvironment.chooseDriver().
+     * @hide
+     */
+    public static native void preload();
+
     /** @hide */
     protected static native void setupShadersDiskCache(String cacheFile, String skiaCacheFile);
 

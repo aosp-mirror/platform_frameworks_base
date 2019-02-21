@@ -246,6 +246,7 @@ message Atom {
         AssistGestureFeedbackReported assist_gesture_feedback_reported = 175;
         AssistGestureProgressReported assist_gesture_progress_reported = 176;
         TouchGestureClassified touch_gesture_classified = 177;
+        HiddenApiUsed hidden_api_used = 178 [(allow_from_any_uid) = true];
     }
 
     // Pulled events will start at field 10000.
@@ -3338,6 +3339,33 @@ message ServiceLaunchReported {
     optional string service_name = 3;
 }
 
+/**
+ * Logs when a hidden API is used.
+ *
+ * Logged from:
+ *     libcore/libart/src/main/java/dalvik/system/VMRuntime.java
+ */
+message HiddenApiUsed {
+    // The uid of the app making the hidden access.
+    optional int32 uid = 1 [(is_uid) = true];
+
+    // Signature of the method or field accessed.
+    optional string signature = 2;
+
+    enum AccessMethod {
+        NONE = 0;
+        REFLECTION = 1;
+        JNI = 2;
+        LINKING = 3;
+    }
+
+    // Type of access.
+    optional AccessMethod access_method = 3;
+
+    // Whether the access was prevented or not.
+    optional bool access_denied = 4;
+}
+
 //////////////////////////////////////////////////////////////////////
 // Pulled atoms below this line //
 //////////////////////////////////////////////////////////////////////
@@ -5602,7 +5630,7 @@ message TrainInfo {
  *   frameworks/base/packages/SystemUI/
  */
 message AssistGestureStageReported {
-  optional android.hardware.sensor.assist.AssistGestureStageEnum gesture_stage = 1;
+    optional android.hardware.sensor.assist.AssistGestureStageEnum gesture_stage = 1;
 }
 
 /**
@@ -5612,8 +5640,8 @@ message AssistGestureStageReported {
  *   frameworks/base/packages/SystemUI/
  */
 message AssistGestureFeedbackReported {
-  // Whether or not the gesture was used.
-  optional android.hardware.sensor.assist.AssistGestureFeedbackEnum feedback_type = 1;
+    // Whether or not the gesture was used.
+    optional android.hardware.sensor.assist.AssistGestureFeedbackEnum feedback_type = 1;
 }
 
 /**
@@ -5623,8 +5651,8 @@ message AssistGestureFeedbackReported {
  *   frameworks/base/packages/SystemUI/
  */
 message AssistGestureProgressReported {
-  // [0,100] progress for the assist gesture.
-  optional int32 progress = 1;
+    // [0,100] progress for the assist gesture.
+    optional int32 progress = 1;
 }
 
 /*

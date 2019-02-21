@@ -10635,7 +10635,6 @@ PLcom/android/server/display/ColorDisplayService$CustomAutoMode;->updateNextAlar
 PLcom/android/server/display/ColorDisplayService;-><init>(Landroid/content/Context;)V
 PLcom/android/server/display/ColorDisplayService;->access$1000(Lcom/android/server/display/ColorDisplayService;)Ljava/lang/Boolean;
 PLcom/android/server/display/ColorDisplayService;->access$602(Lcom/android/server/display/ColorDisplayService;Landroid/animation/ValueAnimator;)Landroid/animation/ValueAnimator;
-PLcom/android/server/display/ColorDisplayService;->access$900(Lcom/android/server/display/ColorDisplayService;)Lcom/android/internal/app/ColorDisplayController;
 PLcom/android/server/display/ColorDisplayService;->applyTint(Z)V
 PLcom/android/server/display/ColorDisplayService;->getDateTimeAfter(Ljava/time/LocalTime;Ljava/time/LocalDateTime;)Ljava/time/LocalDateTime;
 PLcom/android/server/display/ColorDisplayService;->getDateTimeBefore(Ljava/time/LocalTime;Ljava/time/LocalDateTime;)Ljava/time/LocalDateTime;

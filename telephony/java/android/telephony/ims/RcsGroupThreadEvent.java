@@ -16,7 +16,6 @@
 package android.telephony.ims;
 
 import android.annotation.NonNull;
-import android.os.Parcel;
 
 /**
  * An event that happened on an {@link RcsGroupThread}.
@@ -46,23 +45,5 @@ public abstract class RcsGroupThreadEvent extends RcsEvent {
     @NonNull
     public RcsParticipant getOriginatingParticipant() {
         return new RcsParticipant(mOriginatingParticipantId);
-    }
-
-    /**
-     * @hide
-     */
-    RcsGroupThreadEvent(Parcel in) {
-        super(in);
-        mRcsGroupThreadId = in.readInt();
-        mOriginatingParticipantId = in.readInt();
-    }
-
-    /**
-     * @hide
-     */
-    public void writeToParcel(Parcel dest, int flags) {
-        super.writeToParcel(dest, flags);
-        dest.writeInt(mRcsGroupThreadId);
-        dest.writeInt(mOriginatingParticipantId);
     }
 }

@@ -37,7 +37,6 @@ import static android.view.Surface.ROTATION_180;
 import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
 import static android.view.View.GONE;
-import static android.view.ViewRootImpl.NEW_INSETS_MODE_NONE;
 import static android.view.WindowManager.DOCKED_BOTTOM;
 import static android.view.WindowManager.DOCKED_INVALID;
 import static android.view.WindowManager.DOCKED_TOP;
@@ -145,6 +144,7 @@ import android.graphics.RectF;
 import android.graphics.Region;
 import android.graphics.Region.Op;
 import android.hardware.display.DisplayManagerInternal;
+import android.metrics.LogMaker;
 import android.os.Binder;
 import android.os.Debug;
 import android.os.Handler;
@@ -173,11 +173,12 @@ import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 import android.view.SurfaceSession;
 import android.view.View;
-import android.view.ViewRootImpl;
 import android.view.WindowManager;
 import android.view.WindowManagerPolicyConstants.PointerEventListener;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.util.ToBooleanFunction;
 import com.android.internal.util.function.TriConsumer;
 import com.android.server.AnimationThread;
@@ -259,6 +260,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     final ArraySet<AppWindowToken> mChangingApps = new ArraySet<>();
     final UnknownAppVisibilityController mUnknownAppVisibilityController;
     BoundsAnimationController mBoundsAnimationController;
+
+    private MetricsLogger mMetricsLogger;
 
     /**
      * List of clients without a transtiton animation that we notify once we are done
@@ -1980,9 +1983,17 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
     @Override
     public void onConfigurationChanged(Configuration newParentConfig) {
+        final int lastOrientation = getConfiguration().orientation;
         super.onConfigurationChanged(newParentConfig);
         if (mDisplayPolicy != null) {
             mDisplayPolicy.onConfigurationChanged();
+        }
+
+        if (lastOrientation != getConfiguration().orientation) {
+            getMetricsLogger().write(
+                    new LogMaker(MetricsEvent.ACTION_PHONE_ORIENTATION_CHANGED)
+                    .setSubtype(getConfiguration().orientation)
+                    .addTaggedData(MetricsEvent.FIELD_DISPLAY_ID, getDisplayId()));
         }
 
         // If there was no pinned stack, we still need to notify the controller of the display info
@@ -3257,9 +3268,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     }
 
     private void updateImeParent() {
-        if (ViewRootImpl.sNewInsetsMode == NEW_INSETS_MODE_NONE) {
-            return;
-        }
         final SurfaceControl newParent = computeImeParent();
         if (newParent != null) {
             mPendingTransaction.reparent(mImeWindowsContainers.mSurfaceControl, newParent);
@@ -4960,5 +4968,12 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         mDisplayPolicy.setForwardedInsets(insets);
         setLayoutNeeded();
         mWmService.mWindowPlacerLocked.requestTraversal();
+    }
+
+    protected MetricsLogger getMetricsLogger() {
+        if (mMetricsLogger == null) {
+            mMetricsLogger = new MetricsLogger();
+        }
+        return mMetricsLogger;
     }
 }

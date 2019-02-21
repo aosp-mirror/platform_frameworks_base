@@ -445,8 +445,11 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
         // Respect the disabled flag, no need for action as flag change callback will handle hiding
         if (rotateSuggestionsDisabled) return;
 
-        mNavigationBarView.getRotateSuggestionButton()
-                .onRotationProposal(rotation, winRotation, isValid);
+        View rotationButton = mNavigationBarView.getRotateSuggestionButton().getCurrentView();
+        if (rotationButton != null && rotationButton.isAttachedToWindow()) {
+            mNavigationBarView.getRotateSuggestionButton()
+                    .onRotationProposal(rotation, winRotation, isValid);
+        }
     }
 
     /**

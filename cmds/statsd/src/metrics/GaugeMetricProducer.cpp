@@ -184,6 +184,7 @@ void GaugeMetricProducer::clearPastBucketsLocked(const int64_t dumpTimeNs) {
 void GaugeMetricProducer::onDumpReportLocked(const int64_t dumpTimeNs,
                                              const bool include_current_partial_bucket,
                                              const bool erase_data,
+                                             const DumpLatency dumpLatency,
                                              std::set<string> *str_set,
                                              ProtoOutputStream* protoOutput) {
     VLOG("Gauge metric %lld report now...", (long long)mMetricId);
@@ -528,7 +529,7 @@ void GaugeMetricProducer::flushIfNeededLocked(const int64_t& eventTimeNs) {
         return;
     }
 
-    flushCurrentBucketLocked(eventTimeNs);
+    flushCurrentBucketLocked(eventTimeNs, eventTimeNs);
 
     // Adjusts the bucket start and end times.
     int64_t numBucketsForward = 1 + (eventTimeNs - currentBucketEndTimeNs) / mBucketSizeNs;
@@ -538,7 +539,8 @@ void GaugeMetricProducer::flushIfNeededLocked(const int64_t& eventTimeNs) {
          (long long)mCurrentBucketStartTimeNs);
 }
 
-void GaugeMetricProducer::flushCurrentBucketLocked(const int64_t& eventTimeNs) {
+void GaugeMetricProducer::flushCurrentBucketLocked(const int64_t& eventTimeNs,
+                                                   const int64_t& nextBucketStartTimeNs) {
     int64_t fullBucketEndTimeNs = getCurrentBucketEndTimeNs();
 
     GaugeBucket info;

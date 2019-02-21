@@ -21,13 +21,15 @@ import com.android.internal.util.Preconditions;
 public class SettableWakeLock {
 
     private final WakeLock mInner;
+    private final String mWhy;
 
     private boolean mAcquired;
 
-    public SettableWakeLock(WakeLock inner) {
+    public SettableWakeLock(WakeLock inner, String why) {
         Preconditions.checkNotNull(inner, "inner wakelock required");
 
         mInner = inner;
+        mWhy = why;
     }
 
     public synchronized boolean isAcquired() {
@@ -37,9 +39,9 @@ public class SettableWakeLock {
     public synchronized void setAcquired(boolean acquired) {
         if (mAcquired != acquired) {
             if (acquired) {
-                mInner.acquire();
+                mInner.acquire(mWhy);
             } else {
-                mInner.release();
+                mInner.release(mWhy);
             }
             mAcquired = acquired;
         }

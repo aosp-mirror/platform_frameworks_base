@@ -398,6 +398,7 @@
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"Silencio\ntotal"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"Solo\ncon prioridad"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"Solo\nalarmas"</string>
+    <string name="keyguard_indication_charging_time_wireless" msgid="5376059837186496558">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Cargando sin cables (<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> para carga completa)"</string>
     <string name="keyguard_indication_charging_time" msgid="2056340799276374421">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Cargando (<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> para carga completa)"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="7767562163577492332">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Carga rápida (<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> para carga completa)"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="3769655133567307069">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Carga lenta (<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> para carga completa)"</string>
@@ -610,8 +611,10 @@
     <string name="notification_channel_silenced" msgid="2877199534497961942">"Estas notificaciones se mostrarán de forma silenciosa"</string>
     <string name="notification_channel_unsilenced" msgid="4790904571552394137">"Estas notificaciones te avisarán con sonido"</string>
     <string name="inline_blocking_helper" msgid="3055064577771478591">"Normalmente ignoras estas notificaciones. \n¿Quieres seguir viéndolas?"</string>
+    <string name="inline_done_button" msgid="492513001558716452">"Listo"</string>
     <string name="inline_keep_showing" msgid="8945102997083836858">"¿Quieres seguir viendo estas notificaciones?"</string>
     <string name="inline_stop_button" msgid="4172980096860941033">"Detener las notificaciones"</string>
+    <string name="inline_deliver_silently_button" msgid="7756289895745629140">"Enviar en silencio"</string>
     <string name="inline_block_button" msgid="8735843688021655065">"Bloquear"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"Seguir mostrando"</string>
     <string name="inline_minimize_button" msgid="966233327974702195">"Minimizar"</string>
@@ -874,13 +877,13 @@
     </plurals>
     <string name="ongoing_privacy_chip_content_single_app" msgid="4479560741898690064">"<xliff:g id="APP">%1$s</xliff:g> está usando tu <xliff:g id="TYPES_LIST">%2$s</xliff:g>."</string>
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8640691753867990511">"Hay aplicaciones que usan tu <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
+    <string name="ongoing_privacy_chip_in_use" msgid="5174331553211609272">"En uso:"</string>
     <plurals name="ongoing_privacy_chip_content_multiple_apps_single_op" formatted="false" msgid="4871926099254314088">
       <item quantity="other"><xliff:g id="NUM_APPS_4">%1$d</xliff:g> aplicaciones están usando tu <xliff:g id="TYPE_5">%2$s</xliff:g>.</item>
       <item quantity="one"><xliff:g id="NUM_APPS_0">%1$d</xliff:g> aplicación está usando tu <xliff:g id="TYPE_1">%2$s</xliff:g>.</item>
     </plurals>
     <string name="ongoing_privacy_dialog_ok" msgid="3273300106348958308">"Entendido"</string>
-    <!-- no translation found for ongoing_privacy_dialog_open_settings (6773015940472748876) -->
-    <skip />
+    <string name="ongoing_privacy_dialog_open_settings" msgid="6773015940472748876">"Ajustes privacidad"</string>
     <string name="ongoing_privacy_dialog_single_app_title" msgid="6019646962021696632">"Aplicación que usa tu <xliff:g id="TYPES_LIST">%s</xliff:g>"</string>
     <string name="ongoing_privacy_dialog_multiple_apps_title" msgid="8013356222977903365">"Aplicaciones que usan tu <xliff:g id="TYPES_LIST">%s</xliff:g>"</string>
     <string name="ongoing_privacy_dialog_separator" msgid="6854860652480837439">", "</string>
@@ -895,14 +898,9 @@
     <string name="sensor_privacy_mode" msgid="8982771253020769598">"Sensores desactivados"</string>
     <string name="device_services" msgid="1191212554435440592">"Servicios del dispositivo"</string>
     <string name="music_controls_no_title" msgid="5236895307087002011">"Sin título"</string>
-    <!-- no translation found for bubbles_deep_link_button_description (8895837143057564517) -->
-    <skip />
-    <!-- no translation found for bubbles_settings_button_description (1940331766151865776) -->
-    <skip />
-    <!-- no translation found for bubbles_prompt (2684301469286150276) -->
-    <skip />
-    <!-- no translation found for no_bubbles (7173621233904687258) -->
-    <skip />
-    <!-- no translation found for yes_bubbles (668809525728633841) -->
-    <skip />
+    <string name="bubbles_deep_link_button_description" msgid="8895837143057564517">"Abrir <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="bubbles_settings_button_description" msgid="1940331766151865776">"Abrir los ajustes de notificaciones de <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="bubbles_prompt" msgid="2684301469286150276">"¿Quieres permitir burbujas de esta aplicación?"</string>
+    <string name="no_bubbles" msgid="7173621233904687258">"Bloquear"</string>
+    <string name="yes_bubbles" msgid="668809525728633841">"Permitir"</string>
 </resources>

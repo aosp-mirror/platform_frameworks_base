@@ -1318,26 +1318,28 @@ public class NetworkMonitor extends StateMachine {
             // is needed (i.e. can't browse a 204).  This could be the result of an HTTP
             // proxy server.
             if (httpResponseCode == 200) {
+                long contentLength = urlConnection.getContentLengthLong();
                 if (probeType == ValidationProbeEvent.PROBE_PAC) {
                     validationLog(
                             probeType, url, "PAC fetch 200 response interpreted as 204 response.");
                     httpResponseCode = CaptivePortalProbeResult.SUCCESS_CODE;
-                } else if (urlConnection.getContentLengthLong() == 0) {
-                    // Consider 200 response with "Content-length=0" to not be a captive portal.
-                    // There's no point in considering this a captive portal as the user cannot
-                    // sign-in to an empty page. Probably the result of a broken transparent proxy.
-                    // See http://b/9972012.
-                    validationLog(probeType, url,
-                            "200 response with Content-length=0 interpreted as 204 response.");
-                    httpResponseCode = CaptivePortalProbeResult.SUCCESS_CODE;
-                } else if (urlConnection.getContentLengthLong() == -1) {
-                    // When no Content-length (default value == -1), attempt to read a byte from the
-                    // response. Do not use available() as it is unreliable. See http://b/33498325.
+                } else if (contentLength == -1) {
+                    // When no Content-length (default value == -1), attempt to read a byte
+                    // from the response. Do not use available() as it is unreliable.
+                    // See http://b/33498325.
                     if (urlConnection.getInputStream().read() == -1) {
-                        validationLog(
-                                probeType, url, "Empty 200 response interpreted as 204 response.");
-                        httpResponseCode = CaptivePortalProbeResult.SUCCESS_CODE;
+                        validationLog(probeType, url,
+                                "Empty 200 response interpreted as failed response.");
+                        httpResponseCode = CaptivePortalProbeResult.FAILED_CODE;
                     }
+                } else if (contentLength <= 4) {
+                    // Consider 200 response with "Content-length <= 4" to not be a captive
+                    // portal. There's no point in considering this a captive portal as the
+                    // user cannot sign-in to an empty page. Probably the result of a broken
+                    // transparent proxy. See http://b/9972012 and http://b/122999481.
+                    validationLog(probeType, url, "200 response with Content-length <= 4"
+                            + " interpreted as failed response.");
+                    httpResponseCode = CaptivePortalProbeResult.FAILED_CODE;
                 }
             }
         } catch (IOException e) {

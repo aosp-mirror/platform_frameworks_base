@@ -115,6 +115,8 @@ public:
     void requireVkContext();
     void destroyRenderingContext();
 
+    void preload();
+
     /**
      * isCurrent provides a way to query, if the caller is running on
      * the render thread.

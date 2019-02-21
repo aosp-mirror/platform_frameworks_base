@@ -215,7 +215,7 @@ interface IActivityTaskManager {
     void registerTaskStackListener(in ITaskStackListener listener);
     void unregisterTaskStackListener(in ITaskStackListener listener);
     void setTaskResizeable(int taskId, int resizeableMode);
-    void exitFreeformMode(in IBinder token);
+    void toggleFreeformWindowingMode(in IBinder token);
     void resizeTask(int taskId, in Rect bounds, int resizeMode);
     void moveStackToDisplay(int stackId, int displayId);
     void removeStack(int stackId);

@@ -43,14 +43,6 @@
                    android:visibility="invisible" />
     </com.android.systemui.statusbar.BackDropView>
 
-    <com.android.systemui.wallpaper.AodMaskView
-        android:id="@+id/aod_mask"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:importantForAccessibility="no"
-        android:visibility="invisible"
-        sysui:ignoreRightInset="true" />
-
     <com.android.systemui.statusbar.ScrimView
         android:id="@+id/scrim_behind"
         android:layout_width="match_parent"

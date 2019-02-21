@@ -25,7 +25,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.AssetManager;
-import android.opengl.EGL14;
 import android.provider.Settings;
 import android.util.Log;
 import android.widget.Toast;
@@ -675,25 +674,6 @@ public class GraphicsEnvironment {
                 driverBuildDate == null ? "" : driverBuildDate, packageName);
 
         return true;
-    }
-
-    /**
-     * Start a background thread to initialize EGL.
-     *
-     * Initializing EGL involves loading and initializing the graphics driver. Some drivers take
-     * several 10s of milliseconds to do this, so doing it on-demand when an app tries to render
-     * its first frame adds directly to user-visible app launch latency. By starting it earlier
-     * on a separate thread, it can usually be finished well before the UI is ready to be drawn.
-     *
-     * Should only be called after chooseDriver().
-     */
-    public static void earlyInitEGL() {
-        final Thread eglInitThread = new Thread(
-                () -> {
-                    EGL14.eglGetDisplay(EGL14.EGL_DEFAULT_DISPLAY);
-                },
-                "EGL Init");
-        eglInitThread.start();
     }
 
     private static String chooseAbi(ApplicationInfo ai) {

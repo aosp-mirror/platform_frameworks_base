@@ -44,7 +44,7 @@ public class TypographicClock extends TextView {
     private final String[] mHours;
     private final String[] mMinutes;
     private int mAccentColor;
-    private Calendar mTime;
+    private final Calendar mTime = Calendar.getInstance(TimeZone.getDefault());
     private String mDescFormat;
     private TimeZone mTimeZone;
 
@@ -58,7 +58,6 @@ public class TypographicClock extends TextView {
 
     public TypographicClock(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        mTime = Calendar.getInstance();
         mDescFormat = ((SimpleDateFormat) DateFormat.getTimeFormat(context)).toLocalizedPattern();
         mResources = context.getResources();
         mHours = mResources.getStringArray(R.array.type_clock_hours);
@@ -111,12 +110,13 @@ public class TypographicClock extends TextView {
      */
     public void setClockColor(int color) {
         mAccentColor = color;
+        onTimeChanged();
     }
 
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        mTime = Calendar.getInstance(mTimeZone != null ? mTimeZone : TimeZone.getDefault());
+        mTime.setTimeZone(mTimeZone != null ? mTimeZone : TimeZone.getDefault());
         onTimeChanged();
     }
 }

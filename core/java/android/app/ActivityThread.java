@@ -3229,8 +3229,9 @@ public final class ActivityThread extends ClientTransactionHandler {
             TAG, "Handling launch of " + r);
 
         // Initialize before creating the activity
-        if (!ThreadedRenderer.sRendererDisabled) {
-            GraphicsEnvironment.earlyInitEGL();
+        if (!ThreadedRenderer.sRendererDisabled
+                && (r.activityInfo.flags & ActivityInfo.FLAG_HARDWARE_ACCELERATED) != 0) {
+            HardwareRenderer.preload();
         }
         WindowManagerGlobal.initialize();
 

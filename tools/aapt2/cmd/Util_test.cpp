@@ -383,4 +383,12 @@ TEST (UtilTest, AdjustSplitConstraintsForMinSdk) {
   EXPECT_NE(*adjusted_contraints[1].configs.begin(), ConfigDescription::DefaultConfig());
 }
 
+TEST(UtilTest, RegularExperssions) {
+  std::string valid(".bc$");
+  std::regex expression = GetRegularExpression(valid);
+  EXPECT_TRUE(std::regex_search("file.abc", expression));
+  EXPECT_TRUE(std::regex_search("file.123bc", expression));
+  EXPECT_FALSE(std::regex_search("abc.zip", expression));
+}
+
 }  // namespace aapt

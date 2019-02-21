@@ -43,8 +43,8 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.FilenameFilter;
-import java.io.InputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
@@ -84,6 +84,9 @@ public class UsageStatsDatabase {
     @VisibleForTesting
     public static final int BACKUP_VERSION = 4;
 
+    @VisibleForTesting
+    static final int[] MAX_FILES_PER_INTERVAL_TYPE = new int[]{100, 50, 12, 10};
+
     // Key under which the payload blob is stored
     // same as UsageStatsBackupHelper.KEY_USAGE_STATS
     static final String KEY_USAGE_STATS = "usage_stats";
@@ -104,7 +107,8 @@ public class UsageStatsDatabase {
 
     private final Object mLock = new Object();
     private final File[] mIntervalDirs;
-    private final TimeSparseArray<AtomicFile>[] mSortedStatFiles;
+    @VisibleForTesting
+    final TimeSparseArray<AtomicFile>[] mSortedStatFiles;
     private final UnixCalendar mCal;
     private final File mVersionFile;
     private final File mBackupsDir;
@@ -126,10 +130,10 @@ public class UsageStatsDatabase {
     @VisibleForTesting
     public UsageStatsDatabase(File dir, int version) {
         mIntervalDirs = new File[]{
-                new File(dir, "daily"),
-                new File(dir, "weekly"),
-                new File(dir, "monthly"),
-                new File(dir, "yearly"),
+            new File(dir, "daily"),
+            new File(dir, "weekly"),
+            new File(dir, "monthly"),
+            new File(dir, "yearly"),
         };
         mCurrentVersion = version;
         mVersionFile = new File(dir, "version");
@@ -248,6 +252,14 @@ public class UsageStatsDatabase {
         return true;
     }
 
+    /** @hide */
+    @VisibleForTesting
+    void forceIndexFiles() {
+        synchronized (mLock) {
+            indexFilesLocked();
+        }
+    }
+
     private void indexFilesLocked() {
         final FilenameFilter backupFileFilter = new FilenameFilter() {
             @Override
@@ -255,7 +267,6 @@ public class UsageStatsDatabase {
                 return !name.endsWith(BAK_SUFFIX);
             }
         };
-
         // Index the available usage stat files on disk.
         for (int i = 0; i < mSortedStatFiles.length; i++) {
             if (mSortedStatFiles[i] == null) {
@@ -268,14 +279,25 @@ public class UsageStatsDatabase {
                 if (DEBUG) {
                     Slog.d(TAG, "Found " + files.length + " stat files for interval " + i);
                 }
-
-                for (File f : files) {
+                final int len = files.length;
+                for (int j = 0; j < len; j++) {
+                    final File f = files[j];
                     final AtomicFile af = new AtomicFile(f);
                     try {
                         mSortedStatFiles[i].put(parseBeginTime(af), af);
                     } catch (IOException e) {
                         Slog.e(TAG, "failed to index file: " + f, e);
                     }
+                }
+
+                // only keep the max allowed number of files for each interval type.
+                final int toDelete = mSortedStatFiles[i].size() - MAX_FILES_PER_INTERVAL_TYPE[i];
+                if (toDelete > 0) {
+                    for (int j = 0; j < toDelete; j++) {
+                        mSortedStatFiles[i].valueAt(0).delete();
+                        mSortedStatFiles[i].removeAt(0);
+                    }
+                    Slog.d(TAG, "Deleted " + toDelete + " stat files for interval " + i);
                 }
             }
         }

@@ -515,8 +515,8 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Podpira komunikacijo med računalnikom in oznakami, karticami in bralniki komunikacije s tehnologijo bližnjega polja."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"onemogočanje zaklepanja zaslona"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Aplikaciji dovoljuje, da onemogoči zaklep tipkovnice in morebitno povezano varnostno geslo. Telefon na primer onemogoči zaklep tipkovnice pri dohodnem klicu ter vnovič omogoči zaklep, ko je klic končan."</string>
-    <string name="permlab_getAndRequestScreenLockComplexity" msgid="3911592334192005424">"pridobi in zahtevaj zapletenost zaklepanja zaslona"</string>
-    <string name="permdesc_getAndRequestScreenLockComplexity" msgid="9045202063228854873">"Aplikaciji dovoljuje, da pridobi raven zapletenosti zaklepanja zaslona (visoka, srednja, nizka ali brez), ki označuje možen obseg dolžine in vrsto zaklepanja zaslona. Aplikacija lahko tudi predlaga uporabnikom, da posodobijo zaklepanje zaslona na določeno raven, vendar lahko uporabniki to opozorilo prezrejo in ga zaprejo tako, da se pomaknejo stran. Upoštevajte, da zaklepanje zaslona ni shranjeno v navadnem besedilu, tako da aplikacija ne pozna točnega gesla."</string>
+    <string name="permlab_requestScreenLockComplexity" msgid="7028982116060987169">"zahteva zapletenost zaklepanja zaslona"</string>
+    <string name="permdesc_requestScreenLockComplexity" msgid="2806396846128185677">"Aplikaciji dovoljuje, da pridobi raven zapletenosti zaklepanja zaslona (visoka, srednja, nizka ali brez), ki označuje možen obseg dolžine in vrsto zaklepanja zaslona. Aplikacija lahko tudi predlaga uporabnikom, da posodobijo zaklepanje zaslona na določeno raven, vendar lahko uporabniki to opozorilo prezrejo in ga zaprejo tako, da se pomaknejo stran. Upoštevajte, da zaklepanje zaslona ni shranjeno v navadnem besedilu, tako da aplikacija ne pozna točnega gesla."</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"uporaba strojne opreme za biometrične podatke"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"Aplikaciji omogoča uporabo strojne opreme za biometrične podatke za preverjanje pristnosti"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"upravljanje strojne opreme za prstne odtise"</string>
@@ -542,6 +542,7 @@
     <string name="biometric_error_user_canceled" msgid="2260175018114348727">"Preverjanje pristnosti je preklicano"</string>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"Ni prepoznano"</string>
     <string name="biometric_error_canceled" msgid="349665227864885880">"Preverjanje pristnosti je preklicano"</string>
+    <string name="biometric_error_device_not_secured" msgid="6583143098363528349">"Nastavljena ni nobena koda PIN, vzorec ali geslo"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Zaznan delni prstni odtis. Poskusite znova."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Prstnega odtisa ni bilo mogoče obdelati. Poskusite znova."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Tipalo prstnih odtisov je umazano. Očistite ga in poskusite znova."</string>
@@ -561,7 +562,7 @@
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"Preveč poskusov. Tipalo prstnih odtisov je onemogočeno."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Poskusite znova."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="7654382120628334248">"Ni včlanjenih prstnih odtisov."</string>
-    <string name="fingerprint_error_hw_not_present" msgid="5729436878065119329">"Ta naprava nima tipala prstnih odtisov"</string>
+    <string name="fingerprint_error_hw_not_present" msgid="409523969613176352">"Ta naprava nima tipala prstnih odtisov."</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"Prst <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -581,7 +582,14 @@
     <string name="face_acquired_too_left" msgid="2712489669456176505">"Tipalo premaknite v levo."</string>
     <string name="face_acquired_poor_gaze" msgid="8344973502980415859">"Poglejte v tipalo."</string>
     <string name="face_acquired_not_detected" msgid="5707782294589511391">"Ni zaznanih obrazov."</string>
-    <string name="face_acquired_not_steady" msgid="3722829465011040042">"Obraz naj bo pri miru in pred napravo."</string>
+    <string name="face_acquired_too_much_motion" msgid="470381210701463822">"Preveč se premikate."</string>
+    <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Znova prijavite svoj obraz."</string>
+    <string name="face_acquired_too_different" msgid="5553210341111255124">"Zaznan je drug obraz."</string>
+    <string name="face_acquired_too_similar" msgid="1508776858407646460">"Preveč podobno, spremenite položaj."</string>
+    <string name="face_acquired_pan_too_extreme" msgid="8203001424525231680">"Glejte bolj naravnost v fotoaparat."</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="7641326344460439970">"Glejte bolj naravnost v fotoaparat."</string>
+    <string name="face_acquired_roll_too_extreme" msgid="1444829237745898619">"Zravnajte glavo."</string>
+    <string name="face_acquired_obscured" msgid="3055077697850272097">"Odkrijte si obraz."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="6255891785768984615">"Strojna oprema za prepoznavo obraza ni na voljo."</string>
@@ -593,7 +601,7 @@
     <string name="face_error_lockout_permanent" msgid="8198354656746088890">"Preveč poskusov. Preverjanje pristnosti obraza je onemogočeno."</string>
     <string name="face_error_unable_to_process" msgid="238761109287767270">"Poskusite znova."</string>
     <string name="face_error_not_enrolled" msgid="9166792142679691323">"Ni prijavljenih obrazov."</string>
-    <string name="face_error_hw_not_present" msgid="4737289254517095671">"Ta naprava nima tipala za preverjanje pristnosti obraza"</string>
+    <string name="face_error_hw_not_present" msgid="916085883581450331">"Ta naprava nima tipala za preverjanje pristnosti obraza."</string>
     <string name="face_name_template" msgid="7004562145809595384">"Obraz <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -953,8 +961,7 @@
     <string name="save_password_never" msgid="8274330296785855105">"Nikoli"</string>
     <string name="open_permission_deny" msgid="7374036708316629800">"Nimate dovoljenja za odpiranje te strani."</string>
     <string name="text_copied" msgid="4985729524670131385">"Besedilo, kopirano v odložišče."</string>
-    <!-- no translation found for copied (8564151838171791598) -->
-    <skip />
+    <string name="copied" msgid="8564151838171791598">"Kopirano"</string>
     <string name="more_item_label" msgid="4650918923083320495">"Več"</string>
     <string name="prepend_shortcut_label" msgid="2572214461676015642">"Meni+"</string>
     <string name="menu_meta_shortcut_label" msgid="4647153495550313570">"Meta +"</string>
@@ -1433,7 +1440,7 @@
     <string name="ext_media_init_action" msgid="7952885510091978278">"Nastavi"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Izvrzite"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"Raziščite"</string>
-    <!-- no translation found for ext_media_seamless_action (5356508985817068711) -->
+    <!-- no translation found for ext_media_seamless_action (6575980560886881233) -->
     <skip />
     <string name="ext_media_missing_title" msgid="620980315821543904">"Ni shrambe <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_missing_message" msgid="4012389235250987930">"Znova vstavite napravo"</string>
@@ -2060,4 +2067,10 @@
     <string name="dynamic_mode_notification_title" msgid="508815255807182035">"Akumulator se bo morda izpraznil, preden ga običajno priključite na polnjenje"</string>
     <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"Vklopilo se je varčevanje z energijo akumulatorja za podaljšanje časa delovanja akumulatorja"</string>
     <string name="car_loading_profile" msgid="3545132581795684027">"Nalaganje"</string>
+    <plurals name="file_count" formatted="false" msgid="1628600959752419449">
+      <item quantity="one"><xliff:g id="FILE_NAME_2">%s</xliff:g> in še <xliff:g id="COUNT_3">%d</xliff:g> datoteka</item>
+      <item quantity="two"><xliff:g id="FILE_NAME_2">%s</xliff:g> in še <xliff:g id="COUNT_3">%d</xliff:g> datoteki</item>
+      <item quantity="few"><xliff:g id="FILE_NAME_2">%s</xliff:g> in še <xliff:g id="COUNT_3">%d</xliff:g> datoteke</item>
+      <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> in še <xliff:g id="COUNT_3">%d</xliff:g> datotek</item>
+    </plurals>
 </resources>

@@ -16,16 +16,13 @@
 package android.telephony.ims;
 
 import android.annotation.NonNull;
-import android.os.Parcel;
-import android.os.Parcelable;
 
 /**
  * An event that indicates an RCS participant has left an {@link RcsThread}. Please see US6-23 -
  * GSMA RCC.71 (RCS Universal Profile Service Definition Document)
  */
-public final class RcsGroupThreadParticipantLeftEvent extends RcsGroupThreadEvent implements
-        Parcelable {
-    private final int mLeavingParticipantId;
+public final class RcsGroupThreadParticipantLeftEvent extends RcsGroupThreadEvent {
+    private RcsParticipant mLeavingParticipant;
 
     /**
      * Creates a new {@link RcsGroupThreadParticipantLeftEvent}. his event is not persisted into
@@ -46,16 +43,7 @@ public final class RcsGroupThreadParticipantLeftEvent extends RcsGroupThreadEven
             @NonNull RcsGroupThread rcsGroupThread, @NonNull RcsParticipant originatingParticipant,
             @NonNull RcsParticipant leavingParticipant) {
         super(timestamp, rcsGroupThread.getThreadId(), originatingParticipant.getId());
-        mLeavingParticipantId = leavingParticipant.getId();
-    }
-
-    /**
-     * @hide - internal constructor for queries
-     */
-    public RcsGroupThreadParticipantLeftEvent(long timestamp, int rcsGroupThreadId,
-            int originatingParticipantId, int leavingParticipantId) {
-        super(timestamp, rcsGroupThreadId, originatingParticipantId);
-        mLeavingParticipantId = leavingParticipantId;
+        mLeavingParticipant = leavingParticipant;
     }
 
     /**
@@ -63,44 +51,15 @@ public final class RcsGroupThreadParticipantLeftEvent extends RcsGroupThreadEven
      * after this {@link RcsGroupThreadParticipantLeftEvent} happened.
      */
     @NonNull
-    public RcsParticipant getLeavingParticipantId() {
-        return new RcsParticipant(mLeavingParticipantId);
+    public RcsParticipant getLeavingParticipant() {
+        return mLeavingParticipant;
     }
 
     @Override
     public void persist() throws RcsMessageStoreException {
         RcsControllerCall.call(
-                iRcs -> iRcs.createGroupThreadParticipantJoinedEvent(getTimestamp(),
+                iRcs -> iRcs.createGroupThreadParticipantLeftEvent(getTimestamp(),
                         getRcsGroupThread().getThreadId(), getOriginatingParticipant().getId(),
-                        getLeavingParticipantId().getId()));
-    }
-
-    public static final Creator<RcsGroupThreadParticipantLeftEvent> CREATOR =
-            new Creator<RcsGroupThreadParticipantLeftEvent>() {
-                @Override
-                public RcsGroupThreadParticipantLeftEvent createFromParcel(Parcel in) {
-                    return new RcsGroupThreadParticipantLeftEvent(in);
-                }
-
-                @Override
-                public RcsGroupThreadParticipantLeftEvent[] newArray(int size) {
-                    return new RcsGroupThreadParticipantLeftEvent[size];
-                }
-            };
-
-    private RcsGroupThreadParticipantLeftEvent(Parcel in) {
-        super(in);
-        mLeavingParticipantId = in.readInt();
-    }
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        super.writeToParcel(dest, flags);
-        dest.writeInt(mLeavingParticipantId);
+                        getLeavingParticipant().getId()));
     }
 }

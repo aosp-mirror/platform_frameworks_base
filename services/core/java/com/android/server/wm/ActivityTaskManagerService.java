@@ -3202,23 +3202,34 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     @Override
-    public void exitFreeformMode(IBinder token) {
+    public void toggleFreeformWindowingMode(IBinder token) {
         synchronized (mGlobalLock) {
             long ident = Binder.clearCallingIdentity();
             try {
                 final ActivityRecord r = ActivityRecord.forTokenLocked(token);
                 if (r == null) {
                     throw new IllegalArgumentException(
-                            "exitFreeformMode: No activity record matching token=" + token);
+                            "toggleFreeformWindowingMode: No activity record matching token="
+                                    + token);
                 }
 
                 final ActivityStack stack = r.getActivityStack();
-                if (stack == null || !stack.inFreeformWindowingMode()) {
-                    throw new IllegalStateException(
-                            "exitFreeformMode: You can only go fullscreen from freeform.");
+                if (stack == null) {
+                    throw new IllegalStateException("toggleFreeformWindowingMode: the activity "
+                            + "doesn't have a stack");
                 }
 
-                stack.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
+                if (!stack.inFreeformWindowingMode()
+                        && stack.getWindowingMode() != WINDOWING_MODE_FULLSCREEN) {
+                    throw new IllegalStateException("toggleFreeformWindowingMode: You can only "
+                            + "toggle between fullscreen and freeform.");
+                }
+
+                if (stack.inFreeformWindowingMode()) {
+                    stack.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
+                } else {
+                    stack.setWindowingMode(WINDOWING_MODE_FREEFORM);
+                }
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -5923,14 +5934,12 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 Binder.restoreCallingIdentity(ident);
             }
 
-            synchronized (mGlobalLock) {
-                return getActivityStartController().startActivitiesInPackage(
-                        packageUid, packageName,
-                        intents, resolvedTypes, null /* resultTo */,
-                        SafeActivityOptions.fromBundle(bOptions), userId,
-                        false /* validateIncomingUser */, null /* originatingPendingIntent */,
-                        false /* allowBackgroundActivityStart */);
-            }
+            return getActivityStartController().startActivitiesInPackage(
+                    packageUid, packageName,
+                    intents, resolvedTypes, null /* resultTo */,
+                    SafeActivityOptions.fromBundle(bOptions), userId,
+                    false /* validateIncomingUser */, null /* originatingPendingIntent */,
+                    false /* allowBackgroundActivityStart */);
         }
 
         @Override

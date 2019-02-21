@@ -46,6 +46,16 @@ enum ActivationState {
     kActiveOnBoot = 2,
 };
 
+enum DumpLatency {
+    // In some cases, we only have a short time range to do the dump, e.g. statsd is being killed.
+    // We might be able to return all the data in this mode. For instance, pull metrics might need
+    // to be pulled when the current bucket is requested.
+    FAST = 1,
+    // In other cases, it is fine for a dump to take more than a few milliseconds, e.g. config
+    // updates.
+    NO_TIME_CONSTRAINTS = 2
+};
+
 // A MetricProducer is responsible for compute one single metrics, creating stats log report, and
 // writing the report to dropbox. MetricProducers should respond to package changes as required in
 // PackageInfoListener, but if none of the metrics are slicing by package name, then the update can
@@ -87,8 +97,7 @@ public:
             flushIfNeededLocked(eventTimeNs);
         }
         // Now flush a partial bucket.
-        flushCurrentBucketLocked(eventTimeNs);
-        mCurrentBucketStartTimeNs = eventTimeNs;
+        flushCurrentBucketLocked(eventTimeNs, eventTimeNs);
         // Don't update the current bucket number so that the anomaly tracker knows this bucket
         // is a partial bucket and can merge it with the previous bucket.
     };
@@ -135,11 +144,12 @@ public:
     void onDumpReport(const int64_t dumpTimeNs,
                       const bool include_current_partial_bucket,
                       const bool erase_data,
+                      const DumpLatency dumpLatency,
                       std::set<string> *str_set,
                       android::util::ProtoOutputStream* protoOutput) {
         std::lock_guard<std::mutex> lock(mMutex);
         return onDumpReportLocked(dumpTimeNs, include_current_partial_bucket, erase_data,
-                str_set, protoOutput);
+                dumpLatency, str_set, protoOutput);
     }
 
     void clearPastBuckets(const int64_t dumpTimeNs) {
@@ -239,6 +249,7 @@ protected:
     virtual void onDumpReportLocked(const int64_t dumpTimeNs,
                                     const bool include_current_partial_bucket,
                                     const bool erase_data,
+                                    const DumpLatency dumpLatency,
                                     std::set<string> *str_set,
                                     android::util::ProtoOutputStream* protoOutput) = 0;
     virtual void clearPastBucketsLocked(const int64_t dumpTimeNs) = 0;
@@ -270,7 +281,7 @@ protected:
      */
     virtual void flushLocked(const int64_t& eventTimeNs) {
         flushIfNeededLocked(eventTimeNs);
-        flushCurrentBucketLocked(eventTimeNs);
+        flushCurrentBucketLocked(eventTimeNs, eventTimeNs);
     };
 
     /**
@@ -283,7 +294,8 @@ protected:
      * flushIfNeededLocked or the app upgrade handler; the caller MUST update the bucket timestamp
      * and bucket number as needed.
      */
-    virtual void flushCurrentBucketLocked(const int64_t& eventTimeNs){};
+    virtual void flushCurrentBucketLocked(const int64_t& eventTimeNs,
+                                          const int64_t& nextBucketStartTimeNs) {};
 
     // Convenience to compute the current bucket's end time, which is always aligned with the
     // start time of the metric.

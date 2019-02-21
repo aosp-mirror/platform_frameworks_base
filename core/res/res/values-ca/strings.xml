@@ -509,8 +509,8 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Permet que l\'aplicació es comuniqui amb les etiquetes, les targetes i els lectors de Comunicació de camp proper (NFC)."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"desactivació del bloqueig de pantalla"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Permet que l\'aplicació desactivi el bloqueig del teclat i qualsevol element de seguretat de contrasenyes associat. Per exemple, el telèfon desactiva el bloqueig del teclat en rebre una trucada entrant i, a continuació, reactiva el bloqueig del teclat quan finalitza la trucada."</string>
-    <string name="permlab_getAndRequestScreenLockComplexity" msgid="3911592334192005424">"obtenir i sol·licitar el nivell de complexitat del bloqueig de pantalla"</string>
-    <string name="permdesc_getAndRequestScreenLockComplexity" msgid="9045202063228854873">"Permet que l\'aplicació conegui el nivell de complexitat del bloqueig de pantalla (alt, mitjà, baix o cap), que indica la llargària i el tipus de bloqueig de pantalla possibles. L\'aplicació també pot suggerir que els usuaris actualitzin el bloqueig de pantalla a un nivell determinat, però els usuaris poden ignorar aquestes recomanacions. Tingues en compte que el bloqueig de pantalla no s\'emmagatzema com a text sense format, de manera que l\'aplicació no coneix la contrasenya exacta."</string>
+    <string name="permlab_requestScreenLockComplexity" msgid="7028982116060987169">"sol·licita una determinada complexitat del bloqueig de pantalla"</string>
+    <string name="permdesc_requestScreenLockComplexity" msgid="2806396846128185677">"Permet que l\'aplicació conegui el nivell de complexitat del bloqueig de pantalla (alt, mitjà, baix o cap), que indica la llargària i el tipus de bloqueig de pantalla possibles. L\'aplicació també pot suggerir que els usuaris actualitzin el bloqueig de pantalla a un nivell determinat, però els usuaris poden ignorar aquestes recomanacions. Tingues en compte que el bloqueig de pantalla no s\'emmagatzema com a text sense format, de manera que l\'aplicació no coneix la contrasenya exacta."</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"utilitza maquinari biomètric"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"Permet que l\'aplicació faci servir maquinari biomètric per a l\'autenticació"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"Gestionar el maquinari d\'empremtes digitals"</string>
@@ -536,6 +536,7 @@
     <string name="biometric_error_user_canceled" msgid="2260175018114348727">"S\'ha cancel·lat l\'autenticació"</string>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"No s\'ha reconegut"</string>
     <string name="biometric_error_canceled" msgid="349665227864885880">"S\'ha cancel·lat l\'autenticació"</string>
+    <string name="biometric_error_device_not_secured" msgid="6583143098363528349">"No s\'ha establert cap PIN, patró o contrasenya"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"S\'ha detectat una empremta digital parcial. Torna-ho a provar."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"No s\'ha pogut processar l\'empremta digital. Torna-ho a provar."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"El sensor d\'empremtes digitals està brut. Neteja\'l i torna-ho a provar."</string>
@@ -555,7 +556,7 @@
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"S\'han fet massa intents. S\'ha desactivat el sensor d\'empremtes digitals."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Torna-ho a provar."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="7654382120628334248">"No s\'ha registrat cap empremta digital."</string>
-    <string name="fingerprint_error_hw_not_present" msgid="5729436878065119329">"Aquest dispositiu no té sensor d\'empremtes digitals"</string>
+    <string name="fingerprint_error_hw_not_present" msgid="409523969613176352">"Aquest dispositiu no té sensor d\'empremtes digitals."</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"Dit <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -575,7 +576,14 @@
     <string name="face_acquired_too_left" msgid="2712489669456176505">"Mou el sensor cap a l\'esquerra."</string>
     <string name="face_acquired_poor_gaze" msgid="8344973502980415859">"Mira el sensor."</string>
     <string name="face_acquired_not_detected" msgid="5707782294589511391">"No s\'ha detectat cap cara."</string>
-    <string name="face_acquired_not_steady" msgid="3722829465011040042">"Mantén la cara quieta davant del dispositiu."</string>
+    <string name="face_acquired_too_much_motion" msgid="470381210701463822">"Massa moviment."</string>
+    <string name="face_acquired_recalibrate" msgid="8077949502893707539">"Torna a registrar la teva cara."</string>
+    <string name="face_acquired_too_different" msgid="5553210341111255124">"S\'ha detectat una altra cara."</string>
+    <string name="face_acquired_too_similar" msgid="1508776858407646460">"És massa semblant; canvia de postura."</string>
+    <string name="face_acquired_pan_too_extreme" msgid="8203001424525231680">"Mira més directament cap a la càmera."</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="7641326344460439970">"Mira més directament cap a la càmera."</string>
+    <string name="face_acquired_roll_too_extreme" msgid="1444829237745898619">"Mantén el cap recte, sense inclinar-lo."</string>
+    <string name="face_acquired_obscured" msgid="3055077697850272097">"No et tapis la cara."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="6255891785768984615">"Maquinari de reconeixement facial no disponible."</string>
@@ -587,7 +595,7 @@
     <string name="face_error_lockout_permanent" msgid="8198354656746088890">"Massa intents. Autenticació facial desactivada."</string>
     <string name="face_error_unable_to_process" msgid="238761109287767270">"Torna-ho a provar."</string>
     <string name="face_error_not_enrolled" msgid="9166792142679691323">"No s\'ha registrat cap cara."</string>
-    <string name="face_error_hw_not_present" msgid="4737289254517095671">"Aquest dispositiu no té sensor d\'autenticació facial"</string>
+    <string name="face_error_hw_not_present" msgid="916085883581450331">"Aquest dispositiu no té sensor d\'autenticació facial."</string>
     <string name="face_name_template" msgid="7004562145809595384">"Cara <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -947,8 +955,7 @@
     <string name="save_password_never" msgid="8274330296785855105">"Mai"</string>
     <string name="open_permission_deny" msgid="7374036708316629800">"No tens permís per obrir aquesta pàgina."</string>
     <string name="text_copied" msgid="4985729524670131385">"Text copiat al Porta-retalls."</string>
-    <!-- no translation found for copied (8564151838171791598) -->
-    <skip />
+    <string name="copied" msgid="8564151838171791598">"S\'ha copiat"</string>
     <string name="more_item_label" msgid="4650918923083320495">"Més"</string>
     <string name="prepend_shortcut_label" msgid="2572214461676015642">"Menú+"</string>
     <string name="menu_meta_shortcut_label" msgid="4647153495550313570">"Meta+"</string>
@@ -1389,7 +1396,7 @@
     <string name="ext_media_init_action" msgid="7952885510091978278">"Configura"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Expulsa"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"Explora"</string>
-    <!-- no translation found for ext_media_seamless_action (5356508985817068711) -->
+    <!-- no translation found for ext_media_seamless_action (6575980560886881233) -->
     <skip />
     <string name="ext_media_missing_title" msgid="620980315821543904">"No es detecta <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_missing_message" msgid="4012389235250987930">"Torna a inserir el dispositiu"</string>
@@ -1990,4 +1997,8 @@
     <string name="dynamic_mode_notification_title" msgid="508815255807182035">"És possible que la bateria s\'esgoti abans de la càrrega habitual"</string>
     <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"S\'ha activat l\'estalvi de bateria per allargar-ne la durada"</string>
     <string name="car_loading_profile" msgid="3545132581795684027">"S\'està carregant"</string>
+    <plurals name="file_count" formatted="false" msgid="1628600959752419449">
+      <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> i <xliff:g id="COUNT_3">%d</xliff:g> fitxers més</item>
+      <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> i <xliff:g id="COUNT_1">%d</xliff:g> fitxer més</item>
+    </plurals>
 </resources>
