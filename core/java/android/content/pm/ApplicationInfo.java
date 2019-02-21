@@ -662,6 +662,14 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      */
     public static final int PRIVATE_FLAG_ALLOW_CLEAR_USER_DATA_ON_FAILED_RESTORE = 1 << 26;
 
+    /**
+     * Value for {@link #privateFlags}: true if the application allows its audio playback
+     * to be captured by other apps.
+     *
+     * @hide
+     */
+    public static final int PRIVATE_FLAG_ALLOW_AUDIO_PLAYBACK_CAPTURE  = 1 << 27;
+
     /** @hide */
     @IntDef(flag = true, prefix = { "PRIVATE_FLAG_" }, value = {
             PRIVATE_FLAG_ACTIVITIES_RESIZE_MODE_RESIZEABLE,
@@ -688,7 +696,8 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
             PRIVATE_FLAG_VENDOR,
             PRIVATE_FLAG_VIRTUAL_PRELOAD,
             PRIVATE_FLAG_HAS_FRAGILE_USER_DATA,
-            PRIVATE_FLAG_ALLOW_CLEAR_USER_DATA_ON_FAILED_RESTORE
+            PRIVATE_FLAG_ALLOW_CLEAR_USER_DATA_ON_FAILED_RESTORE,
+            PRIVATE_FLAG_ALLOW_AUDIO_PLAYBACK_CAPTURE
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ApplicationInfoPrivateFlags {}
@@ -1342,6 +1351,8 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
             }
             pw.println(prefix + "HiddenApiEnforcementPolicy=" + getHiddenApiEnforcementPolicy());
             pw.println(prefix + "usesNonSdkApi=" + usesNonSdkApi());
+            pw.println(prefix + "allowsPlaybackCapture="
+                        + (isAudioPlaybackCaptureAllowed() ? "true" : "false"));
         }
         super.dumpBack(pw, prefix);
     }
@@ -1788,6 +1799,17 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      */
     public boolean hasFragileUserData() {
         return (privateFlags & PRIVATE_FLAG_HAS_FRAGILE_USER_DATA) != 0;
+    }
+
+    /**
+     * Whether an app allows its playback audio to be captured by other apps.
+     *
+     * @return {@code true} if the app indicates that its audio can be captured by other apps.
+     *
+     * @hide
+     */
+    public boolean isAudioPlaybackCaptureAllowed() {
+        return (privateFlags & PRIVATE_FLAG_ALLOW_AUDIO_PLAYBACK_CAPTURE) != 0;
     }
 
     private boolean isAllowedToUseHiddenApis() {
