@@ -39,7 +39,7 @@ public abstract class AbstractMultiplePendingRequestsRemoteService<S
 
     private final int mInitialCapacity;
 
-    protected ArrayList<PendingRequest<S, I>> mPendingRequests;
+    protected ArrayList<BasePendingRequest<S, I>> mPendingRequests;
 
     public AbstractMultiplePendingRequestsRemoteService(@NonNull Context context,
             @NonNull String serviceInterface, @NonNull ComponentName componentName, int userId,
@@ -85,7 +85,7 @@ public abstract class AbstractMultiplePendingRequestsRemoteService<S
     }
 
     @Override // from AbstractRemoteService
-    void handlePendingRequestWhileUnBound(@NonNull PendingRequest<S, I> pendingRequest) {
+    void handlePendingRequestWhileUnBound(@NonNull BasePendingRequest<S, I> pendingRequest) {
         if (mPendingRequests == null) {
             mPendingRequests = new ArrayList<>(mInitialCapacity);
         }

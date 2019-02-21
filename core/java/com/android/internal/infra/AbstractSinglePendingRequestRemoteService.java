@@ -38,7 +38,7 @@ public abstract class AbstractSinglePendingRequestRemoteService<S
         extends AbstractSinglePendingRequestRemoteService<S, I>, I extends IInterface>
         extends AbstractRemoteService<S, I> {
 
-    protected PendingRequest<S, I> mPendingRequest;
+    protected BasePendingRequest<S, I> mPendingRequest;
 
     public AbstractSinglePendingRequestRemoteService(@NonNull Context context,
             @NonNull String serviceInterface, @NonNull ComponentName componentName, int userId,
@@ -51,7 +51,7 @@ public abstract class AbstractSinglePendingRequestRemoteService<S
     @Override // from AbstractRemoteService
     void handlePendingRequests() {
         if (mPendingRequest != null) {
-            final PendingRequest<S, I> pendingRequest = mPendingRequest;
+            final BasePendingRequest<S, I> pendingRequest = mPendingRequest;
             mPendingRequest = null;
             handlePendingRequest(pendingRequest);
         }
@@ -73,7 +73,7 @@ public abstract class AbstractSinglePendingRequestRemoteService<S
     }
 
     @Override // from AbstractRemoteService
-    void handlePendingRequestWhileUnBound(@NonNull PendingRequest<S, I> pendingRequest) {
+    void handlePendingRequestWhileUnBound(@NonNull BasePendingRequest<S, I> pendingRequest) {
         if (mPendingRequest != null) {
             if (mVerbose) {
                 Slog.v(mTag, "handlePendingRequestWhileUnBound(): cancelling " + mPendingRequest

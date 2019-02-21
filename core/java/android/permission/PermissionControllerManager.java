@@ -480,7 +480,7 @@ public final class PermissionControllerManager {
         }
 
         @Override
-        public void scheduleRequest(@NonNull PendingRequest<RemoteService,
+        public void scheduleRequest(@NonNull BasePendingRequest<RemoteService,
                 IPermissionController> pendingRequest) {
             super.scheduleRequest(pendingRequest);
         }
