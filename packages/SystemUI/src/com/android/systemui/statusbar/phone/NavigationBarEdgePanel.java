@@ -103,7 +103,7 @@ public class NavigationBarEdgePanel extends View {
     public static NavigationBarEdgePanel create(@NonNull Context context, int width, int height,
             int gravity) {
         final WindowManager.LayoutParams lp = new WindowManager.LayoutParams(width, height,
-                WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL,
+                WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
                 WindowManager.LayoutParams.FLAG_TOUCHABLE_WHEN_WAKING
                     | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                     | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
