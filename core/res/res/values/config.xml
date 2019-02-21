@@ -3195,6 +3195,10 @@
     <!-- True if home app should be pinned via Pinner Service -->
     <bool name="config_pinnerHomeApp">false</bool>
 
+    <!-- List of files pinned by the Pinner Service with the apex boot image b/119800099 -->
+    <string-array translatable="false" name="config_apexBootImagePinnerServiceFiles">
+    </string-array>
+
     <!-- Number of days preloaded file cache should be preserved on a device before it can be
          deleted -->
     <integer name="config_keepPreloadsMinDays">7</integer>
