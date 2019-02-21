@@ -1,0 +1,5 @@
+android_test {
+    name: "LocationTracker",
+    srcs: ["**/*.java"],
+    sdk_version: "current",
+}

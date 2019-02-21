@@ -1,0 +1,6 @@
+android_test {
+    name: "ActivityTest",
+    srcs: ["**/*.java"],
+    platform_apis: true,
+    certificate: "platform",
+}
