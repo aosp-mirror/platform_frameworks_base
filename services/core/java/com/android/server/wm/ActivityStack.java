@@ -4019,7 +4019,7 @@ class ActivityStack extends ConfigurationContainer {
                         "Prepare close transition: finishing " + r);
                 if (endTask) {
                     mService.getTaskChangeNotificationController().notifyTaskRemovalStarted(
-                            task.taskId);
+                            task.getTaskInfo());
                 }
                 getDisplay().mDisplayContent.prepareAppTransition(transit, false);
 
@@ -4924,8 +4924,7 @@ class ActivityStack extends ConfigurationContainer {
 
             mRootActivityContainer.resumeFocusedStacksTopActivities();
             EventLog.writeEvent(EventLogTags.AM_TASK_TO_FRONT, tr.userId, tr.taskId);
-
-            mService.getTaskChangeNotificationController().notifyTaskMovedToFront(tr.taskId);
+            mService.getTaskChangeNotificationController().notifyTaskMovedToFront(tr.getTaskInfo());
         } finally {
             getDisplay().continueUpdateImeTarget();
         }

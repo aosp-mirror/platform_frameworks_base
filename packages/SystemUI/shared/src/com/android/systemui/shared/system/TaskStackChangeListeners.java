@@ -16,8 +16,9 @@
 
 package com.android.systemui.shared.system;
 
-import android.app.ActivityTaskManager;
+import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityManager.TaskSnapshot;
+import android.app.ActivityTaskManager;
 import android.app.IActivityManager;
 import android.app.TaskStackListener;
 import android.content.ComponentName;
@@ -132,8 +133,11 @@ public class TaskStackChangeListeners extends TaskStackListener {
     }
 
     @Override
-    public void onActivityLaunchOnSecondaryDisplayFailed() throws RemoteException {
-        mHandler.sendEmptyMessage(H.ON_ACTIVITY_LAUNCH_ON_SECONDARY_DISPLAY_FAILED);
+    public void onActivityLaunchOnSecondaryDisplayFailed(RunningTaskInfo taskInfo,
+            int requestedDisplayId) throws RemoteException {
+        mHandler.obtainMessage(H.ON_ACTIVITY_LAUNCH_ON_SECONDARY_DISPLAY_FAILED, requestedDisplayId,
+                0 /* unused */,
+                taskInfo).sendToTarget();
     }
 
     @Override
@@ -157,8 +161,9 @@ public class TaskStackChangeListeners extends TaskStackListener {
     }
 
     @Override
-    public void onTaskMovedToFront(int taskId) throws RemoteException {
-        mHandler.obtainMessage(H.ON_TASK_MOVED_TO_FRONT, taskId, 0).sendToTarget();
+    public void onTaskMovedToFront(RunningTaskInfo taskInfo)
+            throws RemoteException {
+        mHandler.obtainMessage(H.ON_TASK_MOVED_TO_FRONT, taskInfo).sendToTarget();
     }
 
     @Override
@@ -258,8 +263,10 @@ public class TaskStackChangeListeners extends TaskStackListener {
                         break;
                     }
                     case ON_ACTIVITY_LAUNCH_ON_SECONDARY_DISPLAY_FAILED: {
+                        final RunningTaskInfo info = (RunningTaskInfo) msg.obj;
                         for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
-                            mTaskStackListeners.get(i).onActivityLaunchOnSecondaryDisplayFailed();
+                            mTaskStackListeners.get(i)
+                                    .onActivityLaunchOnSecondaryDisplayFailed(info);
                         }
                         break;
                     }
@@ -283,15 +290,16 @@ public class TaskStackChangeListeners extends TaskStackListener {
                         break;
                     }
                     case ON_TASK_MOVED_TO_FRONT: {
+                        final RunningTaskInfo info = (RunningTaskInfo) msg.obj;
                         for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
-                            mTaskStackListeners.get(i).onTaskMovedToFront(msg.arg1);
+                            mTaskStackListeners.get(i).onTaskMovedToFront(info);
                         }
                         break;
                     }
                     case ON_ACTIVITY_REQUESTED_ORIENTATION_CHANGE: {
                         for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
-                            mTaskStackListeners.get(i).onActivityRequestedOrientationChanged(
-                                    msg.arg1, msg.arg2);
+                            mTaskStackListeners.get(i)
+                                    .onActivityRequestedOrientationChanged(msg.arg1, msg.arg2);
                         }
                         break;
                     }

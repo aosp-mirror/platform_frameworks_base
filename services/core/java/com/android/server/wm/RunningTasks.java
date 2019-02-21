@@ -35,8 +35,6 @@ class RunningTasks {
     private static final Comparator<TaskRecord> LAST_ACTIVE_TIME_COMPARATOR =
             (o1, o2) -> Long.signum(o2.lastActiveTime - o1.lastActiveTime);
 
-    private final TaskRecord.TaskActivitiesReport mTmpReport =
-            new TaskRecord.TaskActivitiesReport();
     private final TreeSet<TaskRecord> mTmpSortedSet = new TreeSet<>(LAST_ACTIVE_TIME_COMPARATOR);
     private final ArrayList<TaskRecord> mTmpStackTasks = new ArrayList<>();
 
@@ -80,7 +78,7 @@ class RunningTasks {
      */
     private RunningTaskInfo createRunningTaskInfo(TaskRecord task) {
         final RunningTaskInfo rti = new RunningTaskInfo();
-        task.fillTaskInfo(rti, mTmpReport);
+        task.fillTaskInfo(rti);
         // Fill in some deprecated values
         rti.id = rti.taskId;
         return rti;

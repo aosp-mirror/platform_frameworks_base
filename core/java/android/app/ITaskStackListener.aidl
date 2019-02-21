@@ -73,8 +73,12 @@ oneway interface ITaskStackListener {
     /**
      * Called when an activity was requested to be launched on a secondary display but was not
      * allowed there.
+     *
+     * @param taskInfo info about the Activity's task
+     * @param requestedDisplayId the id of the requested launch display
      */
-    void onActivityLaunchOnSecondaryDisplayFailed();
+    void onActivityLaunchOnSecondaryDisplayFailed(in ActivityManager.RunningTaskInfo taskInfo,
+            int requestedDisplayId);
 
     /**
      * Called when a task is added.
@@ -94,18 +98,17 @@ oneway interface ITaskStackListener {
     /**
      * Called when a task is moved to the front of its stack.
      *
-     * @param taskId id of the task.
+     * @param taskInfo info about the task which moved
     */
-    void onTaskMovedToFront(int taskId);
+    void onTaskMovedToFront(in ActivityManager.RunningTaskInfo taskInfo);
 
     /**
      * Called when a task’s description is changed due to an activity calling
      * ActivityManagerService.setTaskDescription
      *
-     * @param taskId id of the task.
-     * @param td the new TaskDescription.
+     * @param taskInfo info about the task which changed, with {@link TaskInfo#taskDescription}
     */
-    void onTaskDescriptionChanged(int taskId, in ActivityManager.TaskDescription td);
+    void onTaskDescriptionChanged(in ActivityManager.RunningTaskInfo taskInfo);
 
     /**
      * Called when a activity’s orientation is changed due to it calling
@@ -120,8 +123,10 @@ oneway interface ITaskStackListener {
      * Called when the task is about to be finished but before its surfaces are
      * removed from the window manager. This allows interested parties to
      * perform relevant animations before the window disappears.
+     *
+     * @param taskInfo info about the task being removed
      */
-    void onTaskRemovalStarted(int taskId);
+    void onTaskRemovalStarted(in ActivityManager.RunningTaskInfo taskInfo);
 
     /**
      * Called when the task has been put in a locked state because one or more of the

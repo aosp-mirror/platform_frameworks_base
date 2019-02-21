@@ -16,7 +16,7 @@
 
 package com.android.systemui.shared.system;
 
-import android.app.ActivityManager.TaskSnapshot;
+import android.app.ActivityManager.RunningTaskInfo;
 import android.content.ComponentName;
 import android.os.UserHandle;
 import android.util.Log;
@@ -43,10 +43,20 @@ public abstract class TaskStackChangeListener {
     public void onActivityForcedResizable(String packageName, int taskId, int reason) { }
     public void onActivityDismissingDockedStack() { }
     public void onActivityLaunchOnSecondaryDisplayFailed() { }
+
+    public void onActivityLaunchOnSecondaryDisplayFailed(RunningTaskInfo taskInfo) {
+        onActivityLaunchOnSecondaryDisplayFailed();
+    }
+
     public void onTaskProfileLocked(int taskId, int userId) { }
     public void onTaskCreated(int taskId, ComponentName componentName) { }
     public void onTaskRemoved(int taskId) { }
     public void onTaskMovedToFront(int taskId) { }
+
+    public void onTaskMovedToFront(RunningTaskInfo taskInfo) {
+        onTaskMovedToFront(taskInfo.taskId);
+    }
+
     public void onActivityRequestedOrientationChanged(int taskId, int requestedOrientation) { }
 
     /**
