@@ -6771,7 +6771,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         + "not exist: " + displayId);
                 return false;
             }
-            return mDisplayWindowSettings.shouldShowSystemDecorsLocked(displayContent);
+            return displayContent.supportsSystemDecorations();
         }
     }
 
@@ -7238,6 +7238,13 @@ public class WindowManagerService extends IWindowManager.Stub
                     return window.getDisplayContent().getDisplayId();
                 }
                 return Display.INVALID_DISPLAY;
+            }
+        }
+
+        @Override
+        public boolean shouldShowSystemDecorOnDisplay(int displayId) {
+            synchronized (mGlobalLock) {
+                return WindowManagerService.this.shouldShowSystemDecors(displayId);
             }
         }
     }

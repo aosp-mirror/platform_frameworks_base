@@ -535,7 +535,7 @@ public class DisplayPolicy {
             }
         } else {
             mHasStatusBar = false;
-            mHasNavigationBar = mDisplayContent.getDisplay().supportsSystemDecorations();
+            mHasNavigationBar = mDisplayContent.supportsSystemDecorations();
         }
     }
 

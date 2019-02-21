@@ -64,7 +64,6 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.database.ContentObserver;
 import android.graphics.drawable.Drawable;
-import android.hardware.display.DisplayManagerInternal;
 import android.inputmethodservice.InputMethodService;
 import android.net.Uri;
 import android.os.Binder;
@@ -99,8 +98,6 @@ import android.util.PrintWriterPrinter;
 import android.util.Printer;
 import android.util.Slog;
 import android.view.ContextThemeWrapper;
-import android.view.Display;
-import android.view.DisplayInfo;
 import android.view.IWindowManager;
 import android.view.InputChannel;
 import android.view.LayoutInflater;
@@ -1374,13 +1371,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         mIWindowManager = IWindowManager.Stub.asInterface(
                 ServiceManager.getService(Context.WINDOW_SERVICE));
         mWindowManagerInternal = LocalServices.getService(WindowManagerInternal.class);
-        final DisplayManagerInternal displayManagerInternal = LocalServices.getService(
-                DisplayManagerInternal.class);
-        mImeDisplayValidator = (displayId) -> {
-            final DisplayInfo displayInfo = displayManagerInternal.getDisplayInfo(displayId);
-            return displayInfo != null
-                    && (displayInfo.flags & Display.FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS) != 0;
-        };
+        mImeDisplayValidator = mWindowManagerInternal::shouldShowSystemDecorOnDisplay;
         mCaller = new HandlerCaller(context, null, new HandlerCaller.Callback() {
             @Override
             public void executeMessage(Message msg) {

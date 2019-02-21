@@ -2705,10 +2705,6 @@ package android.view {
     field public static final int CALLBACK_ANIMATION = 1; // 0x1
   }
 
-  public final class Display {
-    method public boolean supportsSystemDecorations();
-  }
-
   public class FocusFinder {
     method public static void sort(android.view.View[], int, int, android.view.ViewGroup, boolean);
   }
@@ -2778,6 +2774,7 @@ package android.view {
     method public default void setShouldShowIme(int, boolean);
     method public default void setShouldShowSystemDecors(int, boolean);
     method public default void setShouldShowWithInsecureKeyguard(int, boolean);
+    method public default boolean shouldShowSystemDecors(int);
   }
 
   public static class WindowManager.LayoutParams extends android.view.ViewGroup.LayoutParams implements android.os.Parcelable {

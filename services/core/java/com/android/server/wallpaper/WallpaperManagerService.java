@@ -100,7 +100,9 @@ import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.JournaledFile;
 import com.android.server.EventLogTags;
 import com.android.server.FgThread;
+import com.android.server.LocalServices;
 import com.android.server.SystemService;
+import com.android.server.wm.WindowManagerInternal;
 
 import libcore.io.IoUtils;
 
@@ -743,6 +745,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
 
     private final Context mContext;
     private final IWindowManager mIWindowManager;
+    private final WindowManagerInternal mWindowManagerInternal;
     private final IPackageManager mIPackageManager;
     private final MyPackageMonitor mMonitor;
     private final AppOpsManager mAppOpsManager;
@@ -1185,9 +1188,12 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         }
 
         private boolean isUsableDisplay(Display display) {
-            return display != null &&  display.hasAccess(mClientUid)
-                    && (display.supportsSystemDecorations()
-                            || display.getDisplayId() == DEFAULT_DISPLAY);
+            if (display == null || !display.hasAccess(mClientUid)) {
+                return false;
+            }
+            final int displayId = display.getDisplayId();
+            return displayId == DEFAULT_DISPLAY
+                    || mWindowManagerInternal.shouldShowSystemDecorOnDisplay(displayId);
         }
 
         void forEachDisplayConnector(Consumer<DisplayConnector> action) {
@@ -1577,6 +1583,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         mDefaultWallpaperComponent = WallpaperManager.getDefaultWallpaperComponent(context);
         mIWindowManager = IWindowManager.Stub.asInterface(
                 ServiceManager.getService(Context.WINDOW_SERVICE));
+        mWindowManagerInternal = LocalServices.getService(WindowManagerInternal.class);
         mIPackageManager = AppGlobals.getPackageManager();
         mAppOpsManager = (AppOpsManager) mContext.getSystemService(Context.APP_OPS_SERVICE);
         mDisplayManager = mContext.getSystemService(DisplayManager.class);
