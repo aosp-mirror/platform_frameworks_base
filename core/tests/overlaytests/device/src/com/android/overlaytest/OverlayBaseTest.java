@@ -17,9 +17,12 @@
 package com.android.overlaytest;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import android.app.UiAutomation;
+import android.content.res.AssetManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
@@ -29,6 +32,8 @@ import android.util.AttributeSet;
 import android.util.Xml;
 
 import androidx.test.InstrumentationRegistry;
+
+import com.android.internal.util.ArrayUtils;
 
 import org.junit.Before;
 import org.junit.Ignore;
@@ -289,6 +294,33 @@ public abstract class OverlayBaseTest {
         final String mo = "Lorem ipsum: multiple overlays.";
 
         assertEquals(getExpected(no, so, mo), actual);
+    }
+
+    @Test
+    public void testAssetsNotPossibleToOverlay() throws Throwable {
+        final AssetManager am = mResources.getAssets();
+
+        // AssetManager#list will include assets from all loaded non-overlay
+        // APKs, including the framework; framework-res.apk contains at least
+        // assets/{images,webkit}. Rather than checking the list, verify that
+        // assets only present in overlays are never part of the list.
+        String[] files = am.list("");
+        assertTrue(ArrayUtils.contains(files, "package-name.txt"));
+        assertFalse(ArrayUtils.contains(files, "foo.txt"));
+        assertFalse(ArrayUtils.contains(files, "bar.txt"));
+
+        String contents = null;
+        try (InputStream is = am.open("package-name.txt")) {
+            final BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(is, StandardCharsets.UTF_8));
+            StringBuilder str = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                str.append(line);
+            }
+            contents = str.toString();
+        }
+        assertEquals("com.android.overlaytest", contents);
     }
 
     /*
