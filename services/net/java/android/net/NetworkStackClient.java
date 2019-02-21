@@ -30,6 +30,7 @@ import android.content.pm.PackageManager;
 import android.net.dhcp.DhcpServingParamsParcel;
 import android.net.dhcp.IDhcpServerCallbacks;
 import android.net.ip.IIpClientCallbacks;
+import android.net.util.SharedLog;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.Process;
@@ -40,6 +41,7 @@ import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 
+import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 
@@ -60,6 +62,9 @@ public class NetworkStackClient {
     @Nullable
     @GuardedBy("mPendingNetStackRequests")
     private INetworkStackConnector mConnector;
+
+    @GuardedBy("mLog")
+    private final SharedLog mLog = new SharedLog(TAG);
 
     private volatile boolean mNetworkStackStartRequested = false;
 
@@ -129,13 +134,14 @@ public class NetworkStackClient {
     private class NetworkStackConnection implements ServiceConnection {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
+            log("Network stack service connected");
             registerNetworkStackService(service);
         }
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
             // TODO: crash/reboot the system ?
-            Slog.wtf(TAG, "Lost network stack connector");
+            logWtf("Lost network stack connector", null);
         }
     };
 
@@ -144,6 +150,7 @@ public class NetworkStackClient {
 
         ServiceManager.addService(Context.NETWORK_STACK_SERVICE, service, false /* allowIsolated */,
                 DUMP_FLAG_PRIORITY_HIGH | DUMP_FLAG_PRIORITY_NORMAL);
+        log("Network stack service registered");
 
         final ArrayList<NetworkStackCallback> requests;
         synchronized (mPendingNetStackRequests) {
@@ -166,6 +173,7 @@ public class NetworkStackClient {
      * started.
      */
     public void start(Context context) {
+        log("Starting network stack");
         mNetworkStackStartRequested = true;
         // Try to bind in-process if the library is available
         IBinder connector = null;
@@ -177,7 +185,7 @@ public class NetworkStackClient {
             connector = (IBinder) service.getMethod("makeConnector", Context.class)
                     .invoke(null, context);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-            Slog.wtf(TAG, "Could not create network stack connector from NetworkStackService");
+            logWtf("Could not create network stack connector from NetworkStackService", e);
             // TODO: crash/reboot system here ?
             return;
         } catch (ClassNotFoundException e) {
@@ -186,17 +194,19 @@ public class NetworkStackClient {
 
         // In-process network stack. Add the service to the service manager here.
         if (connector != null) {
+            log("Registering in-process network stack connector");
             registerNetworkStackService(connector);
             return;
         }
         // Start the network stack process. The service will be added to the service manager in
         // NetworkStackConnection.onServiceConnected().
+        log("Starting network stack process");
         final Intent intent = new Intent(INetworkStackConnector.class.getName());
         final ComponentName comp = intent.resolveSystemService(context.getPackageManager(), 0);
         intent.setComponent(comp);
 
         if (comp == null) {
-            Slog.wtf(TAG, "Could not resolve the network stack with " + intent);
+            logWtf("Could not resolve the network stack with " + intent, null);
             // TODO: crash/reboot system server ?
             return;
         }
@@ -205,7 +215,7 @@ public class NetworkStackClient {
         try {
             uid = pm.getPackageUidAsUser(comp.getPackageName(), UserHandle.USER_SYSTEM);
         } catch (PackageManager.NameNotFoundException e) {
-            Slog.wtf("Network stack package not found", e);
+            logWtf("Network stack package not found", e);
             // Fall through
         }
         if (uid != Process.NETWORK_STACK_UID) {
@@ -221,9 +231,30 @@ public class NetworkStackClient {
 
         if (!context.bindServiceAsUser(intent, new NetworkStackConnection(),
                 Context.BIND_AUTO_CREATE | Context.BIND_IMPORTANT, UserHandle.SYSTEM)) {
-            Slog.wtf(TAG,
-                    "Could not bind to network stack in-process, or in app with " + intent);
+            logWtf("Could not bind to network stack in-process, or in app with " + intent, null);
+            return;
             // TODO: crash/reboot system server if no network stack after a timeout ?
+        }
+
+        log("Network stack service start requested");
+    }
+
+    private void log(@NonNull String message) {
+        synchronized (mLog) {
+            mLog.log(message);
+        }
+    }
+
+    private void logWtf(@NonNull String message, @Nullable Throwable e) {
+        Slog.wtf(TAG, message);
+        synchronized (mLog) {
+            mLog.e(message, e);
+        }
+    }
+
+    private void loge(@NonNull String message, @Nullable Throwable e) {
+        synchronized (mLog) {
+            mLog.e(message, e);
         }
     }
 
@@ -243,12 +274,12 @@ public class NetworkStackClient {
             while ((connector = ServiceManager.getService(Context.NETWORK_STACK_SERVICE)) == null) {
                 Thread.sleep(20);
                 if (System.currentTimeMillis() - before > NETWORKSTACK_TIMEOUT_MS) {
-                    Slog.e(TAG, "Timeout waiting for NetworkStack connector");
+                    loge("Timeout waiting for NetworkStack connector", null);
                     return null;
                 }
             }
         } catch (InterruptedException e) {
-            Slog.e(TAG, "Error waiting for NetworkStack connector", e);
+            loge("Error waiting for NetworkStack connector", e);
             return null;
         }
 
@@ -285,5 +316,21 @@ public class NetworkStackClient {
         }
 
         request.onNetworkStackConnected(connector);
+    }
+
+    /**
+     * Dump NetworkStackClient logs to the specified {@link PrintWriter}.
+     */
+    public void dump(PrintWriter pw) {
+        // dump is thread-safe on SharedLog
+        mLog.dump(null, pw, null);
+
+        final int requestsQueueLength;
+        synchronized (mPendingNetStackRequests) {
+            requestsQueueLength = mPendingNetStackRequests.size();
+        }
+
+        pw.println();
+        pw.println("pendingNetStackRequests length: " + requestsQueueLength);
     }
 }
