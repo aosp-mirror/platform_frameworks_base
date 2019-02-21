@@ -42,6 +42,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.MediaStore;
@@ -232,9 +233,17 @@ public final class PinnerService extends SystemService {
      * Handler for on start pinning message
      */
     private void handlePinOnStart() {
-         // Files to pin come from the overlay and can be specified per-device config
-        String[] filesToPin = mContext.getResources().getStringArray(
-                com.android.internal.R.array.config_defaultPinnerServiceFiles);
+        final String bootImage = SystemProperties.get("dalvik.vm.boot-image", "");
+        String[] filesToPin = null;
+        if (bootImage.endsWith("apex.art")) {
+            // Use the files listed for that specific boot image
+            filesToPin = mContext.getResources().getStringArray(
+                  com.android.internal.R.array.config_apexBootImagePinnerServiceFiles);
+        } else {
+            // Files to pin come from the overlay and can be specified per-device config
+            filesToPin = mContext.getResources().getStringArray(
+                  com.android.internal.R.array.config_defaultPinnerServiceFiles);
+        }
         // Continue trying to pin each file even if we fail to pin some of them
         for (String fileToPin : filesToPin) {
             PinnedFile pf = pinFile(fileToPin,
