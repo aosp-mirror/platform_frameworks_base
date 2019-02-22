@@ -124,7 +124,7 @@ public final class GnssMeasurementCorrections implements Parcelable {
      * Gets a set of {@link GnssSingleSatCorrection} each containing measurement corrections for a
      * satellite in view
      */
-    public @Nullable List<GnssSingleSatCorrection> getSingleSatCorrectionList() {
+    public @Nullable List<GnssSingleSatCorrection> getSingleSatelliteCorrectionList() {
         return mSingleSatCorrectionList;
     }
 
@@ -137,7 +137,7 @@ public final class GnssMeasurementCorrections implements Parcelable {
             new Creator<GnssMeasurementCorrections>() {
                 @Override
                 public GnssMeasurementCorrections createFromParcel(Parcel parcel) {
-                    GnssMeasurementCorrections.Builder gnssMeasurementCorrectons =
+                    final GnssMeasurementCorrections.Builder gnssMeasurementCorrectons =
                             new Builder()
                                     .setLatitudeDegrees(parcel.readDouble())
                                     .setLongitudeDegrees(parcel.readDouble())
@@ -147,7 +147,7 @@ public final class GnssMeasurementCorrections implements Parcelable {
                                     .setToaGpsNanosecondsOfWeek(parcel.readLong());
                     List<GnssSingleSatCorrection> singleSatCorrectionList = new ArrayList<>();
                     parcel.readTypedList(singleSatCorrectionList, GnssSingleSatCorrection.CREATOR);
-                    gnssMeasurementCorrectons.setSingleSatCorrectionList(
+                    gnssMeasurementCorrectons.setSingleSatelliteCorrectionList(
                             singleSatCorrectionList.isEmpty() ? null : singleSatCorrectionList);
                     return gnssMeasurementCorrectons.build();
                 }
@@ -188,7 +188,7 @@ public final class GnssMeasurementCorrections implements Parcelable {
     }
 
     /** Builder for {@link GnssMeasurementCorrections} */
-    public static class Builder {
+    public static final class Builder {
         /**
          * For documentation of below fields, see corresponding fields in {@link
          * GnssMeasurementCorrections}.
@@ -253,7 +253,7 @@ public final class GnssMeasurementCorrections implements Parcelable {
          * Sets a the list of {@link GnssSingleSatCorrection} containing measurement corrections for
          * a satellite in view
          */
-        public Builder setSingleSatCorrectionList(
+        public Builder setSingleSatelliteCorrectionList(
                 @Nullable List<GnssSingleSatCorrection> singleSatCorrectionList) {
             if (singleSatCorrectionList == null) {
                 mSingleSatCorrectionList = null;

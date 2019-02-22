@@ -53,15 +53,15 @@ public class GnssMeasurementCorrectionsTest extends TestCase {
         assertEquals(604000000000000L, measurementCorrections.getToaGpsNanosecondsOfWeek());
 
         GnssSingleSatCorrection singleSatCorrection =
-                measurementCorrections.getSingleSatCorrectionList().get(0);
+                measurementCorrections.getSingleSatelliteCorrectionList().get(0);
         GnssSingleSatCorrectionsTest.verifyTestValues(singleSatCorrection);
 
-        singleSatCorrection = measurementCorrections.getSingleSatCorrectionList().get(1);
-        assertEquals(15, singleSatCorrection.getSingleSatCorrectionFlags());
+        singleSatCorrection = measurementCorrections.getSingleSatelliteCorrectionList().get(1);
+        assertEquals(15, singleSatCorrection.getSingleSatelliteCorrectionFlags());
         assertEquals(GnssStatus.CONSTELLATION_GPS, singleSatCorrection.getConstellationType());
-        assertEquals(11, singleSatCorrection.getSatId());
+        assertEquals(11, singleSatCorrection.getSatelliteId());
         assertEquals(1575430000f, singleSatCorrection.getCarrierFrequencyHz());
-        assertEquals(0.9f, singleSatCorrection.getProbSatIsLos());
+        assertEquals(0.9f, singleSatCorrection.getProbabilityLineOfSight());
         assertEquals(50.0f, singleSatCorrection.getExcessPathLengthMeters());
         assertEquals(55.0f, singleSatCorrection.getExcessPathLengthUncertaintyMeters());
         GnssReflectingPlane reflectingPlane = singleSatCorrection.getReflectingPlane();
@@ -82,17 +82,17 @@ public class GnssMeasurementCorrectionsTest extends TestCase {
         List<GnssSingleSatCorrection> singleSatCorrectionList = new ArrayList<>();
         singleSatCorrectionList.add(GnssSingleSatCorrectionsTest.generateTestSingleSatCorrection());
         singleSatCorrectionList.add(generateTestSingleSatCorrection());
-        measurementCorrections.setSingleSatCorrectionList(singleSatCorrectionList);
+        measurementCorrections.setSingleSatelliteCorrectionList(singleSatCorrectionList);
     }
 
     private static GnssSingleSatCorrection generateTestSingleSatCorrection() {
         GnssSingleSatCorrection.Builder singleSatCorrection = new GnssSingleSatCorrection.Builder();
         singleSatCorrection
-                .setSingleSatCorrectionFlags(8)
+                .setSingleSatelliteCorrectionFlags(8)
                 .setConstellationType(GnssStatus.CONSTELLATION_GPS)
-                .setSatId(11)
+                .setSatelliteId(11)
                 .setCarrierFrequencyHz(1575430000f)
-                .setProbSatIsLos(0.9f)
+                .setProbabilityLineOfSight(0.9f)
                 .setExcessPathLengthMeters(50.0f)
                 .setExcessPathLengthUncertaintyMeters(55.0f)
                 .setReflectingPlane(generateTestReflectingPlane());
