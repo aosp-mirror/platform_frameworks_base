@@ -474,8 +474,6 @@ public class SwipeHelper implements Gefingerpoken {
         if (anim == null) {
             return;
         }
-        int duration = SNAP_ANIM_LEN;
-        anim.setDuration(duration);
         anim.addListener(new AnimatorListenerAdapter() {
             boolean wasCancelled = false;
 
@@ -495,6 +493,9 @@ public class SwipeHelper implements Gefingerpoken {
         });
         prepareSnapBackAnimation(animView, anim);
         mSnappingChild = true;
+        float maxDistance = Math.abs(targetLeft - getTranslation(animView));
+        mFlingAnimationUtils.apply(anim, getTranslation(animView), targetLeft, velocity,
+                maxDistance);
         anim.start();
     }
 
