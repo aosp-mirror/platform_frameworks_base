@@ -70,6 +70,7 @@ import android.view.autofill.IAutoFillManagerClient;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.infra.AbstractRemoteService;
 import com.android.internal.os.IResultReceiver;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.Preconditions;
@@ -108,6 +109,8 @@ public final class AutofillManagerService
     private static final char COMPAT_PACKAGE_URL_IDS_DELIMITER = ',';
     private static final char COMPAT_PACKAGE_URL_IDS_BLOCK_BEGIN = '[';
     private static final char COMPAT_PACKAGE_URL_IDS_BLOCK_END = ']';
+
+    private static final int DEFAULT_AUGMENTED_AUTOFILL_REQUEST_TIMEOUT_MILLIS = 5_000;
 
     /**
      * Maximum number of partitions that can be allowed in a session.
@@ -162,6 +165,11 @@ public final class AutofillManagerService
     @GuardedBy("mLock")
     private int mSupportedSmartSuggestionModes;
 
+    @GuardedBy("mLock")
+    int mAugmentedServiceIdleUnbindTimeoutMs;
+    @GuardedBy("mLock")
+    int mAugmentedServiceRequestTimeoutMs;
+
     public AutofillManagerService(Context context) {
         super(context,
                 new SecureSettingsServiceNameResolver(context, Settings.Secure.AUTOFILL_SERVICE),
@@ -171,12 +179,12 @@ public final class AutofillManagerService
 
         DeviceConfig.addOnPropertyChangedListener(DeviceConfig.NAMESPACE_AUTOFILL,
                 ActivityThread.currentApplication().getMainExecutor(),
-                (namespace, name, value) -> setSmartSuggestionModesFromDeviceConfig(value));
+                (namespace, key, value) -> onDeviceConfigChange(key, value));
 
         setLogLevelFromSettings();
         setMaxPartitionsFromSettings();
         setMaxVisibleDatasetsFromSettings();
-        setSmartSuggestionModesFromDeviceConfig();
+        setDeviceConfigProperties();
 
         final IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
@@ -224,6 +232,18 @@ public final class AutofillManagerService
                 synchronized (mLock) {
                     updateCachedServiceLocked(userId);
                 }
+        }
+    }
+
+    private void onDeviceConfigChange(@NonNull String key, @Nullable String value) {
+        switch (key) {
+            case AutofillManager.DEVICE_CONFIG_AUTOFILL_SMART_SUGGESTION_SUPPORTED_MODES:
+            case AutofillManager.DEVICE_CONFIG_AUGMENTED_SERVICE_IDLE_UNBIND_TIMEOUT:
+            case AutofillManager.DEVICE_CONFIG_AUGMENTED_SERVICE_REQUEST_TIMEOUT:
+                setDeviceConfigProperties();
+                break;
+            default:
+                Slog.i(mTag, "Ignoring change on " + key);
         }
     }
 
@@ -457,27 +477,24 @@ public final class AutofillManagerService
         }
     }
 
-    private void setSmartSuggestionModesFromDeviceConfig() {
-        final String value = DeviceConfig.getProperty(DeviceConfig.NAMESPACE_AUTOFILL,
-                AutofillManager.DEVICE_CONFIG_AUTOFILL_SMART_SUGGESTION_SUPPORTED_MODES);
-        setSmartSuggestionModesFromDeviceConfig(value);
-    }
-
-    private void setSmartSuggestionModesFromDeviceConfig(@Nullable String value) {
-        if (sDebug) Slog.d(TAG, "setSmartSuggestionEmulationFromDeviceConfig(): value=" + value);
-        final int flags;
-        if (value == null) {
-            flags = AutofillManager.FLAG_SMART_SUGGESTION_SYSTEM;
-        } else {
-            try {
-                flags = Integer.parseInt(value);
-            } catch (Exception e) {
-                Slog.w(TAG, "setSmartSuggestionEmulationFromDeviceConfig(): NAN:" + value);
-                return;
-            }
-        }
+    private void setDeviceConfigProperties() {
         synchronized (mLock) {
-            mSupportedSmartSuggestionModes = flags;
+            mAugmentedServiceIdleUnbindTimeoutMs = Helper.getIntDeviceConfigProperty(
+                    AutofillManager.DEVICE_CONFIG_AUGMENTED_SERVICE_IDLE_UNBIND_TIMEOUT,
+                    (int) AbstractRemoteService.PERMANENT_BOUND_TIMEOUT_MS);
+            mAugmentedServiceRequestTimeoutMs = Helper.getIntDeviceConfigProperty(
+                    AutofillManager.DEVICE_CONFIG_AUGMENTED_SERVICE_REQUEST_TIMEOUT,
+                    DEFAULT_AUGMENTED_AUTOFILL_REQUEST_TIMEOUT_MILLIS);
+            mSupportedSmartSuggestionModes = Helper.getIntDeviceConfigProperty(
+                    AutofillManager.DEVICE_CONFIG_AUTOFILL_SMART_SUGGESTION_SUPPORTED_MODES,
+                    AutofillManager.FLAG_SMART_SUGGESTION_SYSTEM);
+            if (verbose) {
+                Slog.v(mTag, "setDeviceConfigProperties(): "
+                        + "augmentedIdleTimeout=" + mAugmentedServiceIdleUnbindTimeoutMs
+                        + ", augmentedRequestTimeout=" + mAugmentedServiceRequestTimeoutMs
+                        + ", smartSuggestionMode="
+                        + getSmartSuggestionModeToString(mSupportedSmartSuggestionModes));
+            }
         }
     }
 
@@ -1280,6 +1297,10 @@ public final class AutofillManagerService
                         pw.print("Smart Suggestion modes: ");
                         pw.println(getSmartSuggestionModeToString(mSupportedSmartSuggestionModes));
                     }
+                    pw.print("Augmented Service Idle Unbind Timeout: ");
+                    pw.println(mAugmentedServiceIdleUnbindTimeoutMs);
+                    pw.print("Augmented Service Request Timeout: ");
+                    pw.println(mAugmentedServiceRequestTimeoutMs);
                     if (showHistory) {
                         pw.println(); pw.println("Requests history:"); pw.println();
                         mRequestsHistory.reverseDump(fd, pw, args);
