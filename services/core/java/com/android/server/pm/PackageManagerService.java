@@ -20032,8 +20032,11 @@ public class PackageManagerService extends IPackageManager.Stub
 
     private @Nullable String getDocumenterPackageName() {
         final Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("*/*");
+        final String resolvedType = intent.resolveTypeIfNeeded(mContext.getContentResolver());
 
-        final List<ResolveInfo> matches = queryIntentActivitiesInternal(intent, null,
+        final List<ResolveInfo> matches = queryIntentActivitiesInternal(intent, resolvedType,
                 MATCH_SYSTEM_ONLY | MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE
                         | MATCH_DISABLED_COMPONENTS,
                 UserHandle.myUserId());
