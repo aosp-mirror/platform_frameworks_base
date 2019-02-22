@@ -126,7 +126,7 @@ final class ContentCapturePerUserService
             mRemoteService = new RemoteContentCaptureService(mMaster.getContext(),
                     ContentCaptureService.SERVICE_INTERFACE, serviceComponentName,
                     mRemoteServiceCallback, mUserId, this, mMaster.isBindInstantServiceAllowed(),
-                    mMaster.verbose);
+                    mMaster.verbose, mMaster.mDevCfgIdleUnbindTimeoutMs);
         }
     }
 

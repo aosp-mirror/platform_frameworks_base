@@ -41,14 +41,16 @@ final class RemoteContentCaptureService
     private static final long TIMEOUT_REMOTE_REQUEST_MILLIS = 2 * DateUtils.SECOND_IN_MILLIS;
 
     private final IBinder mServerCallback;
+    private final int mIdleUnbindTimeoutMs;
 
     RemoteContentCaptureService(Context context, String serviceInterface,
             ComponentName serviceComponentName, IContentCaptureServiceCallback callback, int userId,
             ContentCaptureServiceCallbacks callbacks, boolean bindInstantServiceAllowed,
-            boolean verbose) {
+            boolean verbose, int idleUnbindTimeoutMs) {
         super(context, serviceInterface, serviceComponentName, userId, callbacks,
                 bindInstantServiceAllowed, verbose, /* initialCapacity= */ 2);
         mServerCallback = callback.asBinder();
+        mIdleUnbindTimeoutMs = idleUnbindTimeoutMs;
 
         // Bind right away, which will trigger a onConnected() on service's
         scheduleBind();
@@ -61,8 +63,7 @@ final class RemoteContentCaptureService
 
     @Override // from AbstractRemoteService
     protected long getTimeoutIdleBindMillis() {
-        // TODO(b/111276913): read from Settings so it can be changed in the field
-        return PERMANENT_BOUND_TIMEOUT_MS;
+        return mIdleUnbindTimeoutMs;
     }
 
     @Override // from AbstractRemoteService
