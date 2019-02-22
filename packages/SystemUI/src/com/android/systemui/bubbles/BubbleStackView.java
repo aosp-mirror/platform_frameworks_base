@@ -128,6 +128,7 @@ public class BubbleStackView extends FrameLayout {
 
     private Bubble mExpandedBubble;
     private boolean mIsExpanded;
+    private boolean mImeVisible;
 
     private BubbleTouchHandler mTouchHandler;
     private BubbleController.BubbleExpandListener mExpandListener;
@@ -236,6 +237,28 @@ public class BubbleStackView extends FrameLayout {
         setClipChildren(false);
         setFocusable(true);
         mBubbleContainer.bringToFront();
+
+        setOnApplyWindowInsetsListener((View view, WindowInsets insets) -> {
+            final int keyboardHeight = insets.getSystemWindowInsetBottom()
+                    - insets.getStableInsetBottom();
+            if (!mIsExpanded) {
+                return view.onApplyWindowInsets(insets);
+            }
+            mImeVisible = keyboardHeight != 0;
+
+            float newY = getYPositionForExpandedView();
+            if (newY < 0) {
+                // TODO: This means our expanded content is too big to fit on screen. Right now
+                // we'll let it translate off but we should be clipping it & pushing the header
+                // down so that it always remains visible.
+            }
+            mExpandedViewYAnim.animateToFinalPosition(newY);
+            mExpandedAnimationController.updateYPosition(
+                    // Update the insets after we're done translating otherwise position
+                    // calculation for them won't be correct.
+                    () -> mExpandedBubble.expandedView.updateInsets(insets));
+            return view.onApplyWindowInsets(insets);
+        });
     }
 
     @Override
@@ -639,15 +662,6 @@ public class BubbleStackView extends FrameLayout {
         }
     }
 
-    /**
-     * The width of the collapsed stack of bubbles.
-     */
-    public int getStackWidth() {
-        return mBubblePadding * (mBubbleContainer.getChildCount() - 1)
-                + mBubbleSize + mBubbleContainer.getPaddingEnd()
-                + mBubbleContainer.getPaddingStart();
-    }
-
     private void notifyExpansionChanged(NotificationEntry entry, boolean expanded) {
         if (mExpandListener != null) {
             mExpandListener.onBubbleExpandChanged(expanded, entry != null ? entry.key : null);
@@ -836,8 +850,13 @@ public class BubbleStackView extends FrameLayout {
             // calculation is correct)
             mExpandedBubble.expandedView.updateView();
             final float y = getYPositionForExpandedView();
-            mExpandedViewContainer.setTranslationY(y);
-            // Then update the view so that ActivityView knows we translated
+            if (!mExpandedViewYAnim.isRunning()) {
+                // We're not animating so set the value
+                mExpandedViewContainer.setTranslationY(y);
+            } else {
+                // We are animating so update the value
+                mExpandedViewYAnim.animateToFinalPosition(y);
+            }
             mExpandedBubble.expandedView.updateView();
         }
 
