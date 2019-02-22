@@ -45,13 +45,13 @@ public final class CallIdentification implements Parcelable {
      * {@link CallIdentification} for a screened call.
      */
     public static class Builder {
-        private String mName;
-        private String mDescription;
-        private String mDetails;
+        private CharSequence mName;
+        private CharSequence mDescription;
+        private CharSequence mDetails;
         private Icon mPhoto;
         private int mNuisanceConfidence = CallIdentification.CONFIDENCE_UNKNOWN;
         private String mPackageName;
-        private String mAppName;
+        private CharSequence mAppName;
 
         /**
          * Default builder constructor.
@@ -67,7 +67,7 @@ public final class CallIdentification implements Parcelable {
          * @param callIdAppName The app name.
          * @hide
          */
-        public Builder(String callIdPackageName, String callIdAppName) {
+        public Builder(String callIdPackageName, CharSequence callIdAppName) {
             mPackageName = callIdPackageName;
             mAppName = callIdAppName;
         }
@@ -80,7 +80,7 @@ public final class CallIdentification implements Parcelable {
          * @param name The name associated with the call, or {@code null} if none is provided.
          * @return Builder instance.
          */
-        public Builder setName(@Nullable String name) {
+        public Builder setName(@Nullable CharSequence name) {
             mName = name;
             return this;
         }
@@ -97,7 +97,7 @@ public final class CallIdentification implements Parcelable {
          * @param description The call description, or {@code null} if none is provided.
          * @return Builder instance.
          */
-        public Builder setDescription(@Nullable String description) {
+        public Builder setDescription(@Nullable CharSequence description) {
             mDescription = description;
             return this;
         }
@@ -114,7 +114,7 @@ public final class CallIdentification implements Parcelable {
          * @param details The call details, or {@code null} if none is provided.
          * @return Builder instance.
          */
-        public Builder setDetails(@Nullable String details) {
+        public Builder setDetails(@Nullable CharSequence details) {
             mDetails = details;
             return this;
         }
@@ -241,10 +241,10 @@ public final class CallIdentification implements Parcelable {
      *                             call identification.
      * @hide
      */
-    private CallIdentification(@Nullable String name, @Nullable String description,
-            @Nullable String details, @Nullable Icon photo,
+    private CallIdentification(@Nullable CharSequence name, @Nullable CharSequence description,
+            @Nullable CharSequence details, @Nullable Icon photo,
             @NuisanceConfidence int nuisanceConfidence, @NonNull String callScreeningPackageName,
-            @NonNull String callScreeningAppName) {
+            @NonNull CharSequence callScreeningAppName) {
         mName = name;
         mDescription = description;
         mDetails = details;
@@ -254,13 +254,13 @@ public final class CallIdentification implements Parcelable {
         mCallScreeningPackageName = callScreeningPackageName;
     }
 
-    private String mName;
-    private String mDescription;
-    private String mDetails;
+    private CharSequence mName;
+    private CharSequence mDescription;
+    private CharSequence mDetails;
     private Icon mPhoto;
     private int mNuisanceConfidence;
     private String mCallScreeningPackageName;
-    private String mCallScreeningAppName;
+    private CharSequence mCallScreeningAppName;
 
     @Override
     public int describeContents() {
@@ -269,13 +269,13 @@ public final class CallIdentification implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int i) {
-        parcel.writeString(mName);
-        parcel.writeString(mDescription);
-        parcel.writeString(mDetails);
+        parcel.writeCharSequence(mName);
+        parcel.writeCharSequence(mDescription);
+        parcel.writeCharSequence(mDetails);
         parcel.writeParcelable(mPhoto, 0);
         parcel.writeInt(mNuisanceConfidence);
         parcel.writeString(mCallScreeningPackageName);
-        parcel.writeString(mCallScreeningAppName);
+        parcel.writeCharSequence(mCallScreeningAppName);
     }
 
     /**
@@ -286,13 +286,13 @@ public final class CallIdentification implements Parcelable {
 
                 @Override
                 public CallIdentification createFromParcel(Parcel source) {
-                    String name = source.readString();
-                    String description = source.readString();
-                    String details = source.readString();
+                    CharSequence name = source.readCharSequence();
+                    CharSequence description = source.readCharSequence();
+                    CharSequence details = source.readCharSequence();
                     Icon photo = source.readParcelable(ClassLoader.getSystemClassLoader());
                     int nuisanceConfidence = source.readInt();
                     String callScreeningPackageName = source.readString();
-                    String callScreeningAppName = source.readString();
+                    CharSequence callScreeningAppName = source.readCharSequence();
                     return new CallIdentification(name, description, details, photo,
                             nuisanceConfidence, callScreeningPackageName, callScreeningAppName);
                 }
@@ -311,7 +311,7 @@ public final class CallIdentification implements Parcelable {
      *
      * @return The name associated with the number, or {@code null} if none was provided.
      */
-    public final @Nullable String getName() {
+    public final @Nullable CharSequence getName() {
         return mName;
     }
 
@@ -325,7 +325,7 @@ public final class CallIdentification implements Parcelable {
      *
      * @return The call description, or {@code null} if none was provided.
      */
-    public final @Nullable String getDescription() {
+    public final @Nullable CharSequence getDescription() {
         return mDescription;
     }
 
@@ -340,7 +340,7 @@ public final class CallIdentification implements Parcelable {
      *
      * @return The call details, or {@code null} if none was provided.
      */
-    public final @Nullable String getDetails() {
+    public final @Nullable CharSequence getDetails() {
         return mDetails;
     }
 
@@ -363,8 +363,7 @@ public final class CallIdentification implements Parcelable {
      *
      * @return The nuisance confidence.
      */
-    public final @NuisanceConfidence
-    int getNuisanceConfidence() {
+    public final @NuisanceConfidence int getNuisanceConfidence() {
         return mNuisanceConfidence;
     }
 
@@ -387,7 +386,7 @@ public final class CallIdentification implements Parcelable {
      *
      * @return The name of the app.
      */
-    public final @NonNull String getCallScreeningAppName() {
+    public final @NonNull CharSequence getCallScreeningAppName() {
         return mCallScreeningAppName;
     }
 
@@ -407,7 +406,7 @@ public final class CallIdentification implements Parcelable {
      * @param callScreeningAppName The app name.
      * @hide
      */
-    public void setCallScreeningAppName(@NonNull String callScreeningAppName) {
+    public void setCallScreeningAppName(@NonNull CharSequence callScreeningAppName) {
         mCallScreeningAppName = callScreeningAppName;
     }
 
