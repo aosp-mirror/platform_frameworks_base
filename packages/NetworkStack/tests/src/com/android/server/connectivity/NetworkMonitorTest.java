@@ -30,6 +30,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.anyObject;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -48,6 +49,7 @@ import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
 import android.net.captiveportal.CaptivePortalProbeResult;
+import android.net.metrics.DataStallStatsUtils;
 import android.net.metrics.IpConnectivityLog;
 import android.net.util.SharedLog;
 import android.net.wifi.WifiManager;
@@ -98,6 +100,7 @@ public class NetworkMonitorTest {
     private @Mock NetworkMonitor.Dependencies mDependencies;
     private @Mock INetworkMonitorCallbacks mCallbacks;
     private @Spy Network mNetwork = new Network(TEST_NETID);
+    private @Mock DataStallStatsUtils mDataStallStatsUtils;
 
     private static final int TEST_NETID = 4242;
 
@@ -186,9 +189,9 @@ public class NetworkMonitorTest {
         private long mProbeTime = 0;
 
         WrappedNetworkMonitor(Context context, Network network, IpConnectivityLog logger,
-                Dependencies deps) {
+                Dependencies deps, DataStallStatsUtils statsUtils) {
                 super(context, mCallbacks, network, logger,
-                        new SharedLog("test_nm"), deps);
+                        new SharedLog("test_nm"), deps, statsUtils);
         }
 
         @Override
@@ -203,7 +206,7 @@ public class NetworkMonitorTest {
 
     private WrappedNetworkMonitor makeMeteredWrappedNetworkMonitor() {
         final WrappedNetworkMonitor nm = new WrappedNetworkMonitor(
-                mContext, mNetwork, mLogger, mDependencies);
+                mContext, mNetwork, mLogger, mDependencies, mDataStallStatsUtils);
         when(mCm.getNetworkCapabilities(any())).thenReturn(METERED_CAPABILITIES);
         nm.start();
         waitForIdle(nm.getHandler());
@@ -212,7 +215,7 @@ public class NetworkMonitorTest {
 
     private WrappedNetworkMonitor makeNotMeteredWrappedNetworkMonitor() {
         final WrappedNetworkMonitor nm = new WrappedNetworkMonitor(
-                mContext, mNetwork, mLogger, mDependencies);
+                mContext, mNetwork, mLogger, mDependencies, mDataStallStatsUtils);
         when(mCm.getNetworkCapabilities(any())).thenReturn(NOT_METERED_CAPABILITIES);
         nm.start();
         waitForIdle(nm.getHandler());
@@ -222,7 +225,7 @@ public class NetworkMonitorTest {
     private NetworkMonitor makeMonitor() {
         final NetworkMonitor nm = new NetworkMonitor(
                 mContext, mCallbacks, mNetwork, mLogger, mValidationLogger,
-                mDependencies);
+                mDependencies, mDataStallStatsUtils);
         nm.start();
         waitForIdle(nm.getHandler());
         return nm;
@@ -505,6 +508,23 @@ public class NetworkMonitorTest {
                 .notifyNetworkTested(NETWORK_TEST_RESULT_VALID, null);
     }
 
+    @Test
+    public void testDataStall_StallSuspectedAndSendMetrics() throws IOException {
+        WrappedNetworkMonitor wrappedMonitor = makeNotMeteredWrappedNetworkMonitor();
+        wrappedMonitor.setLastProbeTime(SystemClock.elapsedRealtime() - 1000);
+        makeDnsTimeoutEvent(wrappedMonitor, 5);
+        assertTrue(wrappedMonitor.isDataStall());
+        verify(mDataStallStatsUtils, times(1)).write(eq(anyObject()), eq(anyObject()));
+    }
+
+    @Test
+    public void testDataStall_NoStallSuspectedAndSendMetrics() throws IOException {
+        WrappedNetworkMonitor wrappedMonitor = makeNotMeteredWrappedNetworkMonitor();
+        wrappedMonitor.setLastProbeTime(SystemClock.elapsedRealtime() - 1000);
+        makeDnsTimeoutEvent(wrappedMonitor, 3);
+        assertFalse(wrappedMonitor.isDataStall());
+        verify(mDataStallStatsUtils, times(0)).write(eq(anyObject()), eq(anyObject()));
+    }
     private void makeDnsTimeoutEvent(WrappedNetworkMonitor wrappedMonitor, int count) {
         for (int i = 0; i < count; i++) {
             wrappedMonitor.getDnsStallDetector().accumulateConsecutiveDnsTimeoutCount(
