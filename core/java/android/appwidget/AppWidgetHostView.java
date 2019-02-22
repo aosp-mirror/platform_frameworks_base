@@ -30,7 +30,6 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Rect;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.Parcelable;
@@ -178,40 +177,29 @@ public class AppWidgetHostView extends FrameLayout {
      */
     public static Rect getDefaultPaddingForWidget(Context context, ComponentName component,
             Rect padding) {
-        ApplicationInfo appInfo = null;
-        try {
-            appInfo = context.getPackageManager().getApplicationInfo(component.getPackageName(), 0);
-        } catch (NameNotFoundException e) {
-            // if we can't find the package, ignore
-        }
-        return getDefaultPaddingForWidget(context, appInfo, padding);
+        return getDefaultPaddingForWidget(context, padding);
     }
 
-    @UnsupportedAppUsage
-    private static Rect getDefaultPaddingForWidget(Context context, ApplicationInfo appInfo,
-            Rect padding) {
+    private static Rect getDefaultPaddingForWidget(Context context, Rect padding) {
         if (padding == null) {
             padding = new Rect(0, 0, 0, 0);
         } else {
             padding.set(0, 0, 0, 0);
         }
-        if (appInfo != null && appInfo.targetSdkVersion >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-            Resources r = context.getResources();
-            padding.left = r.getDimensionPixelSize(com.android.internal.
-                    R.dimen.default_app_widget_padding_left);
-            padding.right = r.getDimensionPixelSize(com.android.internal.
-                    R.dimen.default_app_widget_padding_right);
-            padding.top = r.getDimensionPixelSize(com.android.internal.
-                    R.dimen.default_app_widget_padding_top);
-            padding.bottom = r.getDimensionPixelSize(com.android.internal.
-                    R.dimen.default_app_widget_padding_bottom);
-        }
+        Resources r = context.getResources();
+        padding.left = r.getDimensionPixelSize(
+                com.android.internal.R.dimen.default_app_widget_padding_left);
+        padding.right = r.getDimensionPixelSize(
+                com.android.internal.R.dimen.default_app_widget_padding_right);
+        padding.top = r.getDimensionPixelSize(
+                com.android.internal.R.dimen.default_app_widget_padding_top);
+        padding.bottom = r.getDimensionPixelSize(
+                com.android.internal.R.dimen.default_app_widget_padding_bottom);
         return padding;
     }
 
     private Rect getDefaultPadding() {
-        return getDefaultPaddingForWidget(mContext,
-                mInfo == null ? null : mInfo.providerInfo.applicationInfo, null);
+        return getDefaultPaddingForWidget(mContext, null);
     }
 
     public int getAppWidgetId() {
