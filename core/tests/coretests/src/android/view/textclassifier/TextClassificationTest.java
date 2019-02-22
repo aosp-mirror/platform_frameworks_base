@@ -93,8 +93,8 @@ public class TextClassificationTest {
         final String id = "id";
         final TextClassification reference = new TextClassification.Builder()
                 .setText(text)
-                .addAction(remoteAction0)
-                .addAction(remoteAction1)
+                .addAction(remoteAction0)  // Action intent not included.
+                .addAction(remoteAction1)  // Action intent not included.
                 .setEntityType(TextClassifier.TYPE_ADDRESS, 0.3f)
                 .setEntityType(TextClassifier.TYPE_PHONE, 0.7f)
                 .setId(id)
@@ -132,6 +132,7 @@ public class TextClassificationTest {
 
         // Extras
         assertEquals(BUNDLE_VALUE, result.getExtras().getString(BUNDLE_KEY));
+        assertNull(ExtrasUtils.getActionsIntents(result));
     }
 
     @Test
