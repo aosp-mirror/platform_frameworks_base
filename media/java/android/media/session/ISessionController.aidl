@@ -44,6 +44,7 @@ interface ISessionController {
     void unregisterCallback(in ControllerCallbackLink cb);
     String getPackageName();
     String getTag();
+    Bundle getSessionInfo();
     PendingIntent getLaunchPendingIntent();
     long getFlags();
     MediaController.PlaybackInfo getVolumeAttributes();

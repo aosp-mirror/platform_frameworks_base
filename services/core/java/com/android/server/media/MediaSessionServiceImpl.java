@@ -549,9 +549,11 @@ public class MediaSessionServiceImpl extends MediaSessionService.ServiceImpl {
     }
 
     private MediaSessionRecord createSessionInternal(int callerPid, int callerUid, int userId,
-            String callerPackageName, SessionCallbackLink cb, String tag) throws RemoteException {
+            String callerPackageName, SessionCallbackLink cb, String tag, Bundle sessionInfo)
+            throws RemoteException {
         synchronized (mLock) {
-            return createSessionLocked(callerPid, callerUid, userId, callerPackageName, cb, tag);
+            return createSessionLocked(callerPid, callerUid, userId, callerPackageName, cb,
+                    tag, sessionInfo);
         }
     }
 
@@ -563,7 +565,7 @@ public class MediaSessionServiceImpl extends MediaSessionService.ServiceImpl {
      * 4. It needs to be added to the relevant user record.
      */
     private MediaSessionRecord createSessionLocked(int callerPid, int callerUid, int userId,
-            String callerPackageName, SessionCallbackLink cb, String tag) {
+            String callerPackageName, SessionCallbackLink cb, String tag, Bundle sessionInfo) {
         FullUserRecord user = getFullUserRecordLocked(userId);
         if (user == null) {
             Log.w(TAG, "Request from invalid user: " +  userId + ", pkg=" + callerPackageName);
@@ -571,7 +573,7 @@ public class MediaSessionServiceImpl extends MediaSessionService.ServiceImpl {
         }
 
         final MediaSessionRecord session = new MediaSessionRecord(callerPid, callerUid, userId,
-                callerPackageName, cb, tag, this, mHandler.getLooper());
+                callerPackageName, cb, tag, sessionInfo, this, mHandler.getLooper());
         try {
             cb.getBinder().linkToDeath(session, 0);
         } catch (RemoteException e) {
@@ -991,7 +993,7 @@ public class MediaSessionServiceImpl extends MediaSessionService.ServiceImpl {
 
         @Override
         public SessionLink createSession(String packageName, SessionCallbackLink cb, String tag,
-                int userId) throws RemoteException {
+                Bundle sessionInfo, int userId) throws RemoteException {
             final int pid = Binder.getCallingPid();
             final int uid = Binder.getCallingUid();
             final long token = Binder.clearCallingIdentity();
@@ -1002,8 +1004,8 @@ public class MediaSessionServiceImpl extends MediaSessionService.ServiceImpl {
                 if (cb == null) {
                     throw new IllegalArgumentException("Controller callback cannot be null");
                 }
-                return createSessionInternal(pid, uid, resolvedUserId, packageName, cb, tag)
-                        .getSessionBinder();
+                return createSessionInternal(pid, uid, resolvedUserId, packageName, cb, tag,
+                        sessionInfo).getSessionBinder();
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
