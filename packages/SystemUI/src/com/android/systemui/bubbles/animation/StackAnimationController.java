@@ -206,12 +206,12 @@ public class StackAnimationController extends
                         .setDampingRatio(SPRING_DAMPING_RATIO),
                 /* destination */ null);
 
-        mLayout.setEndListenerForProperties(
-                (animation, canceled, value, velocity) -> {
+        mLayout.setEndActionForMultipleProperties(
+                () -> {
                     mRestingStackPosition = new PointF();
                     mRestingStackPosition.set(mStackPosition);
-                    mLayout.removeEndListenerForProperty(DynamicAnimation.TRANSLATION_X);
-                    mLayout.removeEndListenerForProperty(DynamicAnimation.TRANSLATION_Y);
+                    mLayout.removeEndActionForProperty(DynamicAnimation.TRANSLATION_X);
+                    mLayout.removeEndActionForProperty(DynamicAnimation.TRANSLATION_Y);
                 },
                 DynamicAnimation.TRANSLATION_X, DynamicAnimation.TRANSLATION_Y);
     }
@@ -292,8 +292,8 @@ public class StackAnimationController extends
         cancelStackPositionAnimation(DynamicAnimation.TRANSLATION_X);
         cancelStackPositionAnimation(DynamicAnimation.TRANSLATION_Y);
 
-        mLayout.removeEndListenerForProperty(DynamicAnimation.TRANSLATION_X);
-        mLayout.removeEndListenerForProperty(DynamicAnimation.TRANSLATION_Y);
+        mLayout.removeEndActionForProperty(DynamicAnimation.TRANSLATION_X);
+        mLayout.removeEndActionForProperty(DynamicAnimation.TRANSLATION_Y);
     }
 
     /**
@@ -441,19 +441,18 @@ public class StackAnimationController extends
 
     @Override
     void onChildRemoved(View child, int index, Runnable finishRemoval) {
-        // Animate the child out, actually removing it once its alpha is zero.
-        mLayout.animateValueForChild(DynamicAnimation.ALPHA, child, 0f, finishRemoval);
-        mLayout.animateValueForChild(DynamicAnimation.SCALE_X, child, ANIMATE_IN_STARTING_SCALE);
-        mLayout.animateValueForChild(DynamicAnimation.SCALE_Y, child, ANIMATE_IN_STARTING_SCALE);
-
         // Animate the removing view in the opposite direction of the stack.
         final float xOffset = getOffsetForChainedPropertyAnimation(DynamicAnimation.TRANSLATION_X);
-        mLayout.animateValueForChild(DynamicAnimation.TRANSLATION_X, child,
-                mStackPosition.x - (-xOffset * ANIMATE_TRANSLATION_FACTOR));
+        animationForChild(child)
+                .alpha(0f, finishRemoval /* after */)
+                .scaleX(ANIMATE_IN_STARTING_SCALE)
+                .scaleY(ANIMATE_IN_STARTING_SCALE)
+                .translationX(mStackPosition.x - (-xOffset * ANIMATE_TRANSLATION_FACTOR))
+                .start();
 
-        // Pull the top of the stack to the correct position, the chained animations will instruct
-        // any children that are out of place to animate to the correct position.
-        mLayout.animateValueForChildAtIndex(DynamicAnimation.TRANSLATION_X, 0, mStackPosition.x);
+        if (mLayout.getChildCount() > 0) {
+            animationForChildAtIndex(0).translationX(mStackPosition.x).start();
+        }
     }
 
     /** Moves the stack, without any animation, to the starting position. */
@@ -486,10 +485,12 @@ public class StackAnimationController extends
 
         if (mLayout.getChildCount() > 0) {
             property.setValue(mLayout.getChildAt(0), value);
-            mLayout.animateValueForChildAtIndex(
-                    property,
-                    /* index */ 1,
-                    value + getOffsetForChainedPropertyAnimation(property));
+
+            if (mLayout.getChildCount() > 1) {
+                animationForChildAtIndex(1)
+                        .property(property, value + getOffsetForChainedPropertyAnimation(property))
+                        .start();
+            }
         }
     }
 
@@ -520,23 +521,15 @@ public class StackAnimationController extends
     private void animateInBubble(View child) {
         child.setTranslationY(mStackPosition.y);
 
-        // Pop in the new bubble.
-        child.setScaleX(ANIMATE_IN_STARTING_SCALE);
-        child.setScaleY(ANIMATE_IN_STARTING_SCALE);
-        mLayout.animateValueForChildAtIndex(DynamicAnimation.SCALE_X, 0, 1f);
-        mLayout.animateValueForChildAtIndex(DynamicAnimation.SCALE_Y, 0, 1f);
-
-        // Fade in the new bubble.
-        child.setAlpha(0);
-        mLayout.animateValueForChildAtIndex(DynamicAnimation.ALPHA, 0, 1f);
-
-        // Start the new bubble 4x the normal offset distance in the opposite direction. We'll
-        // animate in from this position. Since the animations are chained, when the new bubble
-        // flies in from the side, it will push the other ones out of the way.
         float xOffset = getOffsetForChainedPropertyAnimation(DynamicAnimation.TRANSLATION_X);
-        child.setTranslationX(mStackPosition.x - ANIMATE_TRANSLATION_FACTOR * xOffset);
-        mLayout.animateValueForChildAtIndex(
-                DynamicAnimation.TRANSLATION_X, 0, mStackPosition.x);
+        animationForChild(child)
+                .scaleX(ANIMATE_IN_STARTING_SCALE /* from */, 1f /* to */)
+                .scaleY(ANIMATE_IN_STARTING_SCALE /* from */, 1f /* to */)
+                .alpha(0f /* from */, 1f /* to */)
+                .translationX(
+                        mStackPosition.x - ANIMATE_TRANSLATION_FACTOR * xOffset /* from */,
+                        mStackPosition.x /* to */)
+                .start();
     }
 
     /**

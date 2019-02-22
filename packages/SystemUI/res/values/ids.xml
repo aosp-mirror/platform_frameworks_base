@@ -111,13 +111,14 @@
     <!-- Optional cancel button on Keyguard -->
     <item type="id" name="cancel_button"/>
 
-    <!-- For saving DynamicAnimation physics animations as view tags. -->
+    <!-- For saving PhysicsAnimationLayout animations/animators as view tags. -->
     <item type="id" name="translation_x_dynamicanimation_tag"/>
     <item type="id" name="translation_y_dynamicanimation_tag"/>
     <item type="id" name="translation_z_dynamicanimation_tag"/>
     <item type="id" name="alpha_dynamicanimation_tag"/>
     <item type="id" name="scale_x_dynamicanimation_tag"/>
     <item type="id" name="scale_y_dynamicanimation_tag"/>
+    <item type="id" name="physics_animator_tag"/>
 
     <!-- Global Actions Menu -->
     <item type="id" name="global_actions_view" />
