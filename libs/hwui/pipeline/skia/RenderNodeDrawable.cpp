@@ -161,7 +161,7 @@ void RenderNodeDrawable::forceDraw(SkCanvas* canvas) {
             SkAutoCanvasRestore acr2(canvas, shouldClip);
             canvas->setMatrix(mProjectedDisplayList->mParentMatrix);
             if (shouldClip) {
-                clipOutline(*mProjectedDisplayList->mProjectedOutline, canvas, nullptr);
+                canvas->clipPath(*mProjectedDisplayList->mProjectedOutline->getPath());
             }
             drawBackwardsProjectedNodes(canvas, *mProjectedDisplayList);
         }
