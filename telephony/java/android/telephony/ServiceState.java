@@ -1569,6 +1569,17 @@ public class ServiceState implements Parcelable {
     /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public @TelephonyManager.NetworkType int getDataNetworkType() {
+        final NetworkRegistrationState iwlanRegState = getNetworkRegistrationState(
+                NetworkRegistrationState.DOMAIN_PS, AccessNetworkConstants.TransportType.WLAN);
+        if (iwlanRegState != null
+                && iwlanRegState.getRegState() == NetworkRegistrationState.REG_STATE_HOME) {
+            // If the device is on IWLAN, return IWLAN as the network type. This is to simulate the
+            // behavior of legacy mode device. In the future caller should use
+            // getNetworkRegistrationState() to retrieve the actual data network type on cellular
+            // or on IWLAN.
+            return iwlanRegState.getAccessNetworkTechnology();
+        }
+
         final NetworkRegistrationState regState = getNetworkRegistrationState(
                 NetworkRegistrationState.DOMAIN_PS, AccessNetworkConstants.TransportType.WWAN);
         if (regState != null) {
