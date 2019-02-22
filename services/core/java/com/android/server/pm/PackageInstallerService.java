@@ -483,11 +483,12 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             }
         }
 
-        if (params.isStaged) {
+        boolean isApex = (params.installFlags & PackageManager.INSTALL_APEX) != 0;
+        if (params.isStaged || isApex) {
             mContext.enforceCallingOrSelfPermission(Manifest.permission.INSTALL_PACKAGES, TAG);
         }
 
-        if ((params.installFlags & PackageManager.INSTALL_APEX) != 0) {
+        if (isApex) {
             if (!mApexManager.isApexSupported()) {
                 throw new IllegalArgumentException(
                     "This device doesn't support the installation of APEX files");
