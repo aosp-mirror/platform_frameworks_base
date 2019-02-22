@@ -16,8 +16,11 @@
 
 package android.net.util;
 
+import android.annotation.NonNull;
+
 import java.io.FileDescriptor;
 import java.io.IOException;
+import java.util.List;
 
 /**
  * Collection of utilities for the network stack.
@@ -39,5 +42,27 @@ public class NetworkStackUtils {
             SocketUtils.closeSocket(fd);
         } catch (IOException ignored) {
         }
+    }
+
+    /**
+     * Returns an int array from the given Integer list.
+     */
+    public static int[] convertToIntArray(@NonNull List<Integer> list) {
+        int[] array = new int[list.size()];
+        for (int i = 0; i < list.size(); i++) {
+            array[i] = list.get(i);
+        }
+        return array;
+    }
+
+    /**
+     * Returns a long array from the given long list.
+     */
+    public static long[] convertToLongArray(@NonNull List<Long> list) {
+        long[] array = new long[list.size()];
+        for (int i = 0; i < list.size(); i++) {
+            array[i] = list.get(i);
+        }
+        return array;
     }
 }

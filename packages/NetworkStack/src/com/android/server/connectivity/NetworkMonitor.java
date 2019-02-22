@@ -33,6 +33,7 @@ import static android.net.metrics.ValidationProbeEvent.PROBE_FALLBACK;
 import static android.net.metrics.ValidationProbeEvent.PROBE_PRIVDNS;
 import static android.net.util.NetworkStackUtils.isEmpty;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
@@ -50,6 +51,8 @@ import android.net.TrafficStats;
 import android.net.Uri;
 import android.net.captiveportal.CaptivePortalProbeResult;
 import android.net.captiveportal.CaptivePortalProbeSpec;
+import android.net.metrics.DataStallDetectionStats;
+import android.net.metrics.DataStallStatsUtils;
 import android.net.metrics.IpConnectivityLog;
 import android.net.metrics.NetworkEvent;
 import android.net.metrics.ValidationProbeEvent;
@@ -66,8 +69,10 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.telephony.AccessNetworkConstants;
+import android.telephony.CellSignalStrength;
 import android.telephony.NetworkRegistrationState;
 import android.telephony.ServiceState;
+import android.telephony.SignalStrength;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
@@ -126,6 +131,9 @@ public class NetworkMonitor extends StateMachine {
     private static final int DATA_STALL_EVALUATION_TYPE_DNS = 1;
     private static final int DEFAULT_DATA_STALL_EVALUATION_TYPES =
             (1 << DATA_STALL_EVALUATION_TYPE_DNS);
+    // Reevaluate it as intending to increase the number. Larger log size may cause statsd
+    // log buffer bust and have stats log lost.
+    private static final int DEFAULT_DNS_LOG_SIZE = 20;
 
     enum EvaluationResult {
         VALIDATED(true),
@@ -244,6 +252,7 @@ public class NetworkMonitor extends StateMachine {
     private final ConnectivityManager mCm;
     private final IpConnectivityLog mMetricsLog;
     private final Dependencies mDependencies;
+    private final DataStallStatsUtils mDetectionStatsUtils;
 
     // Configuration values for captive portal detection probes.
     private final String mCaptivePortalUserAgent;
@@ -302,17 +311,19 @@ public class NetworkMonitor extends StateMachine {
     private final int mDataStallEvaluationType;
     private final DnsStallDetector mDnsStallDetector;
     private long mLastProbeTime;
+    // Set to true if data stall is suspected and reset to false after metrics are sent to statsd.
+    private boolean mCollectDataStallMetrics = false;
 
     public NetworkMonitor(Context context, INetworkMonitorCallbacks cb, Network network,
             SharedLog validationLog) {
         this(context, cb, network, new IpConnectivityLog(), validationLog,
-                Dependencies.DEFAULT);
+                Dependencies.DEFAULT, new DataStallStatsUtils());
     }
 
     @VisibleForTesting
     protected NetworkMonitor(Context context, INetworkMonitorCallbacks cb, Network network,
             IpConnectivityLog logger, SharedLog validationLogs,
-            Dependencies deps) {
+            Dependencies deps, DataStallStatsUtils detectionStatsUtils) {
         // Add suffix indicating which NetworkMonitor we're talking about.
         super(TAG + "/" + network.toString());
 
@@ -325,6 +336,7 @@ public class NetworkMonitor extends StateMachine {
         mValidationLogs = validationLogs;
         mCallback = cb;
         mDependencies = deps;
+        mDetectionStatsUtils = detectionStatsUtils;
         mNonPrivateDnsBypassNetwork = network;
         mNetwork = deps.getPrivateDnsBypassNetwork(network);
         mTelephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
@@ -656,6 +668,7 @@ public class NetworkMonitor extends StateMachine {
                 case EVENT_DNS_NOTIFICATION:
                     mDnsStallDetector.accumulateConsecutiveDnsTimeoutCount(message.arg1);
                     if (isDataStall()) {
+                        mCollectDataStallMetrics = true;
                         validationLog("Suspecting data stall, reevaluate");
                         transitionTo(mEvaluatingState);
                     }
@@ -666,6 +679,65 @@ public class NetworkMonitor extends StateMachine {
             return HANDLED;
         }
     }
+
+    private void writeDataStallStats(@NonNull final CaptivePortalProbeResult result) {
+        /*
+         * Collect data stall detection level information for each transport type. Collect type
+         * specific information for cellular and wifi only currently. Generate
+         * DataStallDetectionStats for each transport type. E.g., if a network supports both
+         * TRANSPORT_WIFI and TRANSPORT_VPN, two DataStallDetectionStats will be generated.
+         */
+        final int[] transports = mNetworkCapabilities.getTransportTypes();
+
+        for (int i = 0; i < transports.length; i++) {
+            DataStallStatsUtils.write(buildDataStallDetectionStats(transports[i]), result);
+        }
+        mCollectDataStallMetrics = false;
+    }
+
+    @VisibleForTesting
+    protected DataStallDetectionStats buildDataStallDetectionStats(int transport) {
+        final DataStallDetectionStats.Builder stats = new DataStallDetectionStats.Builder();
+        if (VDBG_STALL) log("collectDataStallMetrics: type=" + transport);
+        stats.setEvaluationType(DATA_STALL_EVALUATION_TYPE_DNS);
+        stats.setNetworkType(transport);
+        switch (transport) {
+            case NetworkCapabilities.TRANSPORT_WIFI:
+                // TODO: Update it if status query in dual wifi is supported.
+                final WifiInfo wifiInfo = mWifiManager.getConnectionInfo();
+                stats.setWiFiData(wifiInfo);
+                break;
+            case NetworkCapabilities.TRANSPORT_CELLULAR:
+                final boolean isRoaming = !mNetworkCapabilities.hasCapability(
+                        NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING);
+                final SignalStrength ss = mTelephonyManager.getSignalStrength();
+                // TODO(b/120452078): Support multi-sim.
+                stats.setCellData(
+                        mTelephonyManager.getDataNetworkType(),
+                        isRoaming,
+                        mTelephonyManager.getNetworkOperator(),
+                        mTelephonyManager.getSimOperator(),
+                        (ss != null)
+                        ? ss.getLevel() : CellSignalStrength.SIGNAL_STRENGTH_NONE_OR_UNKNOWN);
+                break;
+            default:
+                // No transport type specific information for the other types.
+                break;
+        }
+        addDnsEvents(stats);
+
+        return stats.build();
+    }
+
+    private void addDnsEvents(@NonNull final DataStallDetectionStats.Builder stats) {
+        final int size = mDnsStallDetector.mResultIndices.size();
+        for (int i = 1; i <= DEFAULT_DNS_LOG_SIZE && i <= size; i++) {
+            final int index = mDnsStallDetector.mResultIndices.indexOf(size - i);
+            stats.addDnsEvent(mDnsStallDetector.mDnsEvents[index].mReturnCode,
+                    mDnsStallDetector.mDnsEvents[index].mTimeStamp);
+        }
+    }
+
 
     // Being in the MaybeNotifyState State indicates the user may have been notified that sign-in
     // is required.  This State takes care to clear the notification upon exit from the State.
@@ -972,6 +1044,11 @@ public class NetworkMonitor extends StateMachine {
                     final CaptivePortalProbeResult probeResult =
                             (CaptivePortalProbeResult) message.obj;
                     mLastProbeTime = SystemClock.elapsedRealtime();
+
+                    if (mCollectDataStallMetrics) {
+                        writeDataStallStats(probeResult);
+                    }
+
                     if (probeResult.isSuccessful()) {
                         // Transit EvaluatingPrivateDnsState to get to Validated
                         // state (even if no Private DNS validation required).
@@ -1617,7 +1694,6 @@ public class NetworkMonitor extends StateMachine {
      */
     @VisibleForTesting
     protected class DnsStallDetector {
-        private static final int DEFAULT_DNS_LOG_SIZE = 50;
         private int mConsecutiveTimeoutCount = 0;
         private int mSize;
         final DnsResult[] mDnsEvents;
