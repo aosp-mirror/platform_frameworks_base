@@ -696,7 +696,9 @@ public class ApplicationPackageManager extends PackageManager {
             int flagMask, int flagValues, UserHandle user) {
         try {
             mPM.updatePermissionFlags(permissionName, packageName, flagMask,
-                    flagValues, user.getIdentifier());
+                    flagValues,
+                    mContext.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.Q,
+                    user.getIdentifier());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

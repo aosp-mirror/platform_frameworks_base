@@ -213,7 +213,8 @@ public class IPackageManagerStub implements IPackageManager {
 
     @Override
     public void updatePermissionFlags(String permissionName, String packageName, int flagMask,
-        int flagValues, int userId) throws RemoteException {
+            int flagValues, boolean checkAdjustPolicyFlagPermission, int userId)
+            throws RemoteException {
 
     }
 

@@ -3418,6 +3418,11 @@
     <permission android:name="android.permission.GET_RUNTIME_PERMISSIONS"
                 android:protectionLevel="signature" />
 
+    <!-- @SystemApi Allows an application to change policy_fixed permissions.
+    @hide -->
+    <permission android:name="android.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY"
+                android:protectionLevel="signature|installer" />
+
     <!-- @hide Allows an application to observe permission changes. -->
     <permission android:name="android.permission.OBSERVE_GRANT_REVOKE_PERMISSIONS"
         android:protectionLevel="signature|privileged" />
