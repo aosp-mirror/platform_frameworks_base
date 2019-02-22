@@ -1558,6 +1558,7 @@ package android.content.pm {
     method public void setDontKillApp(boolean);
     method public void setEnableRollback();
     method @RequiresPermission(android.Manifest.permission.INSTALL_GRANT_RUNTIME_PERMISSIONS) public void setGrantedRuntimePermissions(String[]);
+    method @RequiresPermission(android.Manifest.permission.INSTALL_PACKAGES) public void setInstallAsApex();
     method public void setInstallAsInstantApp(boolean);
     method public void setInstallAsVirtualPreload();
     method @RequiresPermission(android.Manifest.permission.INSTALL_PACKAGES) public void setStaged();

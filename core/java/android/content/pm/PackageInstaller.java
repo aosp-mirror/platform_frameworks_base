@@ -1545,7 +1545,11 @@ public class PackageInstaller {
 
         /**
          * Set this session to be installing an APEX package.
+         *
+         * {@hide}
          */
+        @SystemApi
+        @RequiresPermission(Manifest.permission.INSTALL_PACKAGES)
         public void setInstallAsApex() {
             installFlags |= PackageManager.INSTALL_APEX;
         }
