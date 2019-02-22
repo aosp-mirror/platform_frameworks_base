@@ -1085,6 +1085,7 @@ final class AutofillManagerServiceImpl
                             if (remoteService != null) {
                                 remoteService.destroy();
                             }
+                            mRemoteAugmentedAutofillService = null;
                         }
                     }, mMaster.isInstantServiceAllowed(), mMaster.verbose);
         }
