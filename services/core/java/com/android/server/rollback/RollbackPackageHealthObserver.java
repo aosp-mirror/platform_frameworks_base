@@ -149,7 +149,8 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
      * This may cause {@code packages} to be rolled back if they crash too freqeuntly.
      */
     public void startObservingHealth(List<String> packages, long durationMs) {
-        PackageWatchdog.getInstance(mContext).startObservingHealth(this, packages, durationMs);
+        PackageWatchdog.getInstance(mContext).startObservingHealth(this, packages, durationMs,
+                false /* withExplicitHealthCheck */);
     }
 
     private Pair<RollbackInfo, Boolean> getAvailableRollback(RollbackManager rollbackManager,
