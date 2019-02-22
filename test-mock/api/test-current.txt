@@ -10,7 +10,9 @@ package android.test.mock {
     method public String getPermissionControllerPackageName();
     method @NonNull public String getServicesSystemSharedLibraryPackageName();
     method @NonNull public String getSharedSystemSharedLibraryPackageName();
+    method public void grantRuntimePermission(String, String, android.os.UserHandle);
     method public boolean isPermissionReviewModeEnabled();
+    method public void revokeRuntimePermission(String, String, android.os.UserHandle);
   }
 
 }

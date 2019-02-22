@@ -22,6 +22,7 @@ import android.app.ActivityThread;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
 import android.app.AppOpsManagerInternal;
+import android.app.AppOpsManagerInternal.CheckOpsDelegate;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -206,6 +207,8 @@ public class AppOpsService extends IAppOpsService.Stub {
     private final ArrayMap<IBinder, ClientRestrictionState> mOpUserRestrictions = new ArrayMap<>();
 
     SparseIntArray mProfileOwners;
+
+    private CheckOpsDelegate mCheckOpsDelegate;
 
     /**
      * All times are in milliseconds. These constants are kept synchronized with the system
@@ -1411,15 +1414,39 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
     }
 
+    public CheckOpsDelegate getAppOpsServiceDelegate() {
+        synchronized (this) {
+            return mCheckOpsDelegate;
+        }
+    }
+
+    public void setAppOpsServiceDelegate(CheckOpsDelegate delegate) {
+        synchronized (this) {
+            mCheckOpsDelegate = delegate;
+        }
+    }
+
     @Override
     public int checkOperation(int code, int uid, String packageName) {
-        verifyIncomingUid(uid);
-        verifyIncomingOp(code);
-        String resolvedPackageName = resolvePackageName(uid, packageName);
-        if (resolvedPackageName == null) {
-            return AppOpsManager.MODE_IGNORED;
-        }
+        final CheckOpsDelegate delegate;
         synchronized (this) {
+            if (mCheckOpsDelegate == null) {
+                return checkOperationImpl(code, uid, packageName);
+            }
+            delegate = mCheckOpsDelegate;
+        }
+        return delegate.checkOperation(code, uid, packageName,
+                    AppOpsService.this::checkOperationImpl);
+    }
+
+    private int checkOperationImpl(int code, int uid, String packageName) {
+        synchronized (this) {
+            verifyIncomingUid(uid);
+            verifyIncomingOp(code);
+            String resolvedPackageName = resolvePackageName(uid, packageName);
+            if (resolvedPackageName == null) {
+                return AppOpsManager.MODE_IGNORED;
+            }
             if (isOpRestrictedLocked(uid, code, resolvedPackageName)) {
                 return AppOpsManager.MODE_IGNORED;
             }
@@ -1439,20 +1466,33 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     @Override
     public int checkAudioOperation(int code, int usage, int uid, String packageName) {
-        boolean suspended;
-        try {
-            suspended = isPackageSuspendedForUser(packageName, uid);
-        } catch (IllegalArgumentException ex) {
-            // Package not found.
-            suspended = false;
-        }
-
-        if (suspended) {
-            Slog.i(TAG, "Audio disabled for suspended package=" + packageName + " for uid=" + uid);
-            return AppOpsManager.MODE_IGNORED;
-        }
-
+        final CheckOpsDelegate delegate;
         synchronized (this) {
+            if (mCheckOpsDelegate == null) {
+                return checkAudioOperationImpl(code, usage, uid, packageName);
+            }
+            delegate = mCheckOpsDelegate;
+        }
+        return delegate.checkAudioOperation(code, usage, uid, packageName,
+                AppOpsService.this::checkAudioOperationImpl);
+    }
+
+    private int checkAudioOperationImpl(int code, int usage, int uid, String packageName) {
+        synchronized (this) {
+            boolean suspended;
+            try {
+                suspended = isPackageSuspendedForUser(packageName, uid);
+            } catch (IllegalArgumentException ex) {
+                // Package not found.
+                suspended = false;
+            }
+
+            if (suspended) {
+                Slog.i(TAG, "Audio disabled for suspended package=" + packageName
+                        + " for uid=" + uid);
+                return AppOpsManager.MODE_IGNORED;
+            }
+
             final int mode = checkRestrictionLocked(code, usage, uid, packageName);
             if (mode != AppOpsManager.MODE_ALLOWED) {
                 return mode;
@@ -1530,10 +1570,10 @@ public class AppOpsService extends IAppOpsService.Stub {
     }
 
     @Override
-    public int noteProxyOperation(int code, String proxyPackageName,
-            int proxiedUid, String proxiedPackageName) {
+    public int noteProxyOperation(int code, int proxyUid,
+            String proxyPackageName, int proxiedUid, String proxiedPackageName) {
+        verifyIncomingUid(proxyUid);
         verifyIncomingOp(code);
-        final int proxyUid = Binder.getCallingUid();
         String resolveProxyPackageName = resolvePackageName(proxyUid, proxyPackageName);
         if (resolveProxyPackageName == null) {
             return AppOpsManager.MODE_IGNORED;
@@ -1553,6 +1593,18 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     @Override
     public int noteOperation(int code, int uid, String packageName) {
+        final CheckOpsDelegate delegate;
+        synchronized (this) {
+            if (mCheckOpsDelegate == null) {
+                return noteOperationImpl(code, uid, packageName);
+            }
+            delegate = mCheckOpsDelegate;
+        }
+        return delegate.noteOperation(code, uid, packageName,
+                AppOpsService.this::noteOperationImpl);
+    }
+
+    private int noteOperationImpl(int code, int uid, String packageName) {
         verifyIncomingUid(uid);
         verifyIncomingOp(code);
         String resolvedPackageName = resolvePackageName(uid, packageName);
