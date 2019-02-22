@@ -55,8 +55,11 @@ public class AppTransitionTests extends WindowTestsBase {
 
     @Before
     public void setUp() throws Exception {
-        spyOn(mWm.mRoot);
-        doNothing().when(mWm.mRoot).performSurfacePlacement(anyBoolean());
+        synchronized (mWm.mGlobalLock) {
+            // Hold the lock to protect the stubbing from being accessed by other threads.
+            spyOn(mWm.mRoot);
+            doNothing().when(mWm.mRoot).performSurfacePlacement(anyBoolean());
+        }
         mDc = mWm.getDefaultDisplayContentLocked();
     }
 
