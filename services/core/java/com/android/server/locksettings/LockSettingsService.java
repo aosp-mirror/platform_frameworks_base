@@ -407,6 +407,10 @@ public class LockSettingsService extends ILockSettings.Stub {
             return new SyntheticPasswordManager(getContext(), storage, getUserManager());
         }
 
+        public boolean hasBiometrics() {
+            return BiometricManager.hasBiometrics(mContext);
+        }
+
         public int binderGetCallingUid() {
             return Binder.getCallingUid();
         }
@@ -2434,7 +2438,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             notifyActivePasswordMetricsAvailable(userCredential, userId);
             unlockKeystore(authResult.authToken.deriveKeyStorePassword(), userId);
             // Reset lockout
-            if (BiometricManager.hasBiometrics(mContext)) {
+            if (mInjector.hasBiometrics()) {
                 BiometricManager bm = mContext.getSystemService(BiometricManager.class);
                 Slog.i(TAG, "Resetting lockout, length: "
                         + authResult.gkResponse.getPayload().length);
