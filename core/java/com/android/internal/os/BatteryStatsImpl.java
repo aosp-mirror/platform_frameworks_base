@@ -230,6 +230,15 @@ public class BatteryStatsImpl extends BatteryStats {
     public boolean mPerProcStateCpuTimesAvailable = true;
 
     /**
+     * When per process state cpu times tracking is off, cpu times in KernelSingleUidTimeReader are
+     * not updated. So, when the setting is turned on later, we would end up with huge cpu time
+     * deltas. This flag tracks the case where tracking is turned on from off so that we won't
+     * end up attributing the huge deltas to wrong buckets.
+     */
+    @GuardedBy("this")
+    private boolean mIsPerProcessStateCpuDataStale;
+
+    /**
      * Uids for which per-procstate cpu times need to be updated.
      *
      * Contains uid -> procState mappings.
@@ -402,7 +411,7 @@ public class BatteryStatsImpl extends BatteryStats {
             }
             // If the KernelSingleUidTimeReader has stale cpu times, then we shouldn't try to
             // compute deltas since it might result in mis-attributing cpu times to wrong states.
-            if (mKernelSingleUidTimeReader.hasStaleData()) {
+            if (mIsPerProcessStateCpuDataStale) {
                 mPendingUids.clear();
                 return;
             }
@@ -485,9 +494,9 @@ public class BatteryStatsImpl extends BatteryStats {
                     mKernelUidCpuFreqTimeReader.getAllUidCpuFreqTimeMs();
             // If the KernelSingleUidTimeReader has stale cpu times, then we shouldn't try to
             // compute deltas since it might result in mis-attributing cpu times to wrong states.
-            if (mKernelSingleUidTimeReader.hasStaleData()) {
+            if (mIsPerProcessStateCpuDataStale) {
                 mKernelSingleUidTimeReader.setAllUidsCpuTimesMs(allUidCpuFreqTimesMs);
-                mKernelSingleUidTimeReader.markDataAsStale(false);
+                mIsPerProcessStateCpuDataStale = false;
                 mPendingUids.clear();
                 return;
             }
@@ -13430,7 +13439,7 @@ public class BatteryStatsImpl extends BatteryStats {
         private void updateTrackCpuTimesByProcStateLocked(boolean wasEnabled, boolean isEnabled) {
             TRACK_CPU_TIMES_BY_PROC_STATE = isEnabled;
             if (isEnabled && !wasEnabled) {
-                mKernelSingleUidTimeReader.markDataAsStale(true);
+                mIsPerProcessStateCpuDataStale = true;
                 mExternalSync.scheduleCpuSyncDueToSettingChange();
 
                 mNumSingleUidCpuTimeReads = 0;
