@@ -50,5 +50,8 @@ interface IPackageInstaller {
     void uninstall(in VersionedPackage versionedPackage, String callerPackageName, int flags,
             in IntentSender statusReceiver, int userId);
 
+    void installExistingPackage(String packageName, int installFlags, int installReason,
+            in IntentSender statusReceiver, int userId);
+
     void setPermissionsResult(int sessionId, boolean accepted);
 }

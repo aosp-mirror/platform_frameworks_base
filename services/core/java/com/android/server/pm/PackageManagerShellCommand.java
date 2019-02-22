@@ -1114,6 +1114,7 @@ class PackageManagerShellCommand extends ShellCommand {
         int userId = UserHandle.USER_SYSTEM;
         int installFlags = 0;
         String opt;
+        boolean waitTillComplete = false;
         while ((opt = getNextOption()) != null) {
             switch (opt) {
                 case "--user":
@@ -1128,6 +1129,9 @@ class PackageManagerShellCommand extends ShellCommand {
                     installFlags &= ~PackageManager.INSTALL_INSTANT_APP;
                     installFlags |= PackageManager.INSTALL_FULL_APP;
                     break;
+                case "--wait":
+                    waitTillComplete = true;
+                    break;
                 default:
                     pw.println("Error: Unknown option: " + opt);
                     return 1;
@@ -1140,9 +1144,23 @@ class PackageManagerShellCommand extends ShellCommand {
             return 1;
         }
 
+        int installReason = PackageManager.INSTALL_REASON_UNKNOWN;
         try {
+            if (waitTillComplete) {
+                final LocalIntentReceiver receiver = new LocalIntentReceiver();
+                final IPackageInstaller installer = mInterface.getPackageInstaller();
+                pw.println("Installing package " + packageName + " for user: " + userId);
+                installer.installExistingPackage(packageName, installFlags, installReason,
+                        receiver.getIntentSender(), userId);
+                final Intent result = receiver.getResult();
+                final int status = result.getIntExtra(PackageInstaller.EXTRA_STATUS,
+                        PackageInstaller.STATUS_FAILURE);
+                pw.println("Received intent for package install");
+                return status == PackageInstaller.STATUS_SUCCESS ? 0 : 1;
+            }
+
             final int res = mInterface.installExistingPackageAsUser(packageName, userId,
-                    installFlags, PackageManager.INSTALL_REASON_UNKNOWN);
+                    installFlags, installReason);
             if (res == PackageManager.INSTALL_FAILED_INVALID_URI) {
                 throw new NameNotFoundException("Package " + packageName + " doesn't exist");
             }

@@ -590,6 +590,30 @@ public class PackageInstaller {
         }
     }
 
+    /**
+     * Install the given package, which already exists on the device, for the user for which this
+     * installer was created.
+     *
+     * @param packageName The package to install.
+     * @param installReason Reason for install.
+     * @param statusReceiver Where to deliver the result.
+     */
+    @RequiresPermission(allOf = {
+            Manifest.permission.INSTALL_PACKAGES,
+            Manifest.permission.INSTALL_EXISTING_PACKAGES})
+    public void installExistingPackage(@NonNull String packageName,
+            @InstallReason int installReason,
+            @Nullable IntentSender statusReceiver) {
+        Preconditions.checkNotNull(packageName, "packageName cannot be null");
+        try {
+            mInstaller.installExistingPackage(packageName, 0, installReason, statusReceiver,
+                    mUserId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+
     /** {@hide} */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.INSTALL_PACKAGES)
