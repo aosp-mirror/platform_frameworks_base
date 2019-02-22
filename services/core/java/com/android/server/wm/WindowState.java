@@ -2180,16 +2180,22 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (modal && mAppToken != null) {
             // Limit the outer touch to the activity stack region.
             flags |= FLAG_NOT_TOUCH_MODAL;
-            // If this is a modal window we need to dismiss it if it's not full screen and the
-            // touch happens outside of the frame that displays the content. This means we
-            // need to intercept touches outside of that window. The dim layer user
-            // associated with the window (task or stack) will give us the good bounds, as
-            // they would be used to display the dim layer.
-            final Task task = getTask();
-            if (task != null) {
-                task.getDimBounds(mTmpRect);
-            } else {
-                getStack().getDimBounds(mTmpRect);
+            // If the inner bounds of letterbox is available, then it will be used as the touchable
+            // region so it won't cover the touchable letterbox and the touch events can slip to
+            // activity from letterbox.
+            mAppToken.getLetterboxInnerBounds(mTmpRect);
+            if (mTmpRect.isEmpty()) {
+                // If this is a modal window we need to dismiss it if it's not full screen and the
+                // touch happens outside of the frame that displays the content. This means we need
+                // to intercept touches outside of that window. The dim layer user associated with
+                // the window (task or stack) will give us the good bounds, as they would be used to
+                // display the dim layer.
+                final Task task = getTask();
+                if (task != null) {
+                    task.getDimBounds(mTmpRect);
+                } else {
+                    getStack().getDimBounds(mTmpRect);
+                }
             }
             if (inFreeformWindowingMode()) {
                 // For freeform windows we the touch region to include the whole surface for the

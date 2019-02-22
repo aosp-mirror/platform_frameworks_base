@@ -92,6 +92,11 @@ public class Letterbox {
                 mBottom.getHeight());
     }
 
+    /** @return The frame that used to place the content. */
+    Rect getInnerFrame() {
+        return mInner;
+    }
+
     /**
      * Returns true if any part of the letterbox overlaps with the given {@code rect}.
      */
@@ -162,6 +167,7 @@ public class Letterbox {
         final InputWindowHandle mWindowHandle;
         final InputEventReceiver mInputEventReceiver;
         final WindowManagerService mWmService;
+        final Binder mToken = new Binder();
 
         InputInterceptor(String namePrefix, WindowState win) {
             mWmService = win.mWmService;
@@ -171,13 +177,12 @@ public class Letterbox {
             mClientChannel = channels[1];
             mInputEventReceiver = new SimpleInputReceiver(mClientChannel);
 
-            final Binder token = new Binder();
-            mWmService.mInputManager.registerInputChannel(mServerChannel, token);
+            mWmService.mInputManager.registerInputChannel(mServerChannel, mToken);
 
             mWindowHandle = new InputWindowHandle(null /* inputApplicationHandle */,
                     null /* clientWindow */, win.getDisplayId());
             mWindowHandle.name = name;
-            mWindowHandle.token = token;
+            mWindowHandle.token = mToken;
             mWindowHandle.layoutParamsFlags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                     | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
                     | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH
@@ -192,6 +197,14 @@ public class Letterbox {
         }
 
         void updateTouchableRegion(Rect frame) {
+            if (frame.isEmpty()) {
+                // Use null token to indicate the surface doesn't need to receive input event (see
+                // the usage of Layer.hasInput in SurfaceFlinger), so InputDispatcher won't keep the
+                // unnecessary records.
+                mWindowHandle.token = null;
+                return;
+            }
+            mWindowHandle.token = mToken;
             mWindowHandle.touchableRegion.set(frame);
             mWindowHandle.touchableRegion.translate(-frame.left, -frame.top);
         }
@@ -289,13 +302,13 @@ public class Letterbox {
                 t.setPosition(mSurface, mSurfaceFrameRelative.left, mSurfaceFrameRelative.top);
                 t.setWindowCrop(mSurface, mSurfaceFrameRelative.width(),
                         mSurfaceFrameRelative.height());
-                if (mInputInterceptor != null) {
-                    mInputInterceptor.updateTouchableRegion(mSurfaceFrameRelative);
-                    t.setInputWindowInfo(mSurface, mInputInterceptor.mWindowHandle);
-                }
                 t.show(mSurface);
             } else if (mSurface != null) {
                 t.hide(mSurface);
+            }
+            if (mSurface != null && mInputInterceptor != null) {
+                mInputInterceptor.updateTouchableRegion(mSurfaceFrameRelative);
+                t.setInputWindowInfo(mSurface, mInputInterceptor.mWindowHandle);
             }
         }
 
