@@ -144,7 +144,7 @@ final class HistoricalRegistry {
      * Whether history is enabled.
      */
     @GuardedBy("mInMemoryLock")
-    private int mMode = AppOpsManager.HISTORICAL_MODE_ENABLED_ACTIVE;
+    private int mMode = AppOpsManager.HISTORICAL_MODE_DISABLED;
 
     /**
      * This granularity has been chosen to allow clean delineation for intervals
