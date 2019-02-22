@@ -116,9 +116,11 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     final static boolean ALTERNATE_CAR_MODE_UI = false;
 
     View mCurrentView = null;
-    View[] mRotatedViews = new View[4];
+    private View mVertical;
+    private View mHorizontal;
 
-    boolean mVertical;
+    /** Indicates that navigation bar is vertical. */
+    private boolean mIsVertical;
     private int mCurrentRotation = -1;
 
     boolean mLongClickableAccessibilityButton;
@@ -350,7 +352,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     public NavigationBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
 
-        mVertical = false;
+        mIsVertical = false;
         mLongClickableAccessibilityButton = false;
 
         // Set up the context group of buttons
@@ -471,7 +473,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
 
     public void setOnVerticalChangedListener(OnVerticalChangedListener onVerticalChangedListener) {
         mOnVerticalChangedListener = onVerticalChangedListener;
-        notifyVerticalChangedListener(mVertical);
+        notifyVerticalChangedListener(mIsVertical);
     }
 
     @Override
@@ -545,10 +547,6 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
 
     public View getCurrentView() {
         return mCurrentView;
-    }
-
-    public View[] getAllViews() {
-        return mRotatedViews;
     }
 
     public ButtonDispatcher getRecentsButton() {
@@ -657,7 +655,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
 
         // Animate the back button's rotation to the new degrees and only in portrait move up the
         // back button to line up with the other buttons
-        float targetY = !mOverviewProxyService.shouldShowSwipeUpUI() && !mVertical && useAltBack
+        float targetY = !mOverviewProxyService.shouldShowSwipeUpUI() && !mIsVertical && useAltBack
                 ? - getResources().getDimension(R.dimen.navbar_back_button_ime_offset)
                 : 0;
         ObjectAnimator navBarAnimator = ObjectAnimator.ofPropertyValuesHolder(drawable,
@@ -669,7 +667,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     }
 
     private void orientHomeButton(KeyButtonDrawable drawable) {
-        drawable.setRotation(mVertical ? 90 : 0);
+        drawable.setRotation(mIsVertical ? 90 : 0);
     }
 
     private KeyButtonDrawable chooseNavigationIconDrawable(@DrawableRes int icon,
@@ -964,7 +962,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         getImeSwitchButton().setOnClickListener(mImeSwitcherClickListener);
 
         DockedStackExistsListener.register(mDockedListener);
-        updateRotatedViews();
+        updateOrientationViews();
         reloadNavIcons();
     }
 
@@ -1028,34 +1026,35 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         view.setTranslationY(posY);
     }
 
-    private void updateRotatedViews() {
-        mRotatedViews[Surface.ROTATION_0] =
-                mRotatedViews[Surface.ROTATION_180] = findViewById(R.id.rot0);
-        mRotatedViews[Surface.ROTATION_270] =
-                mRotatedViews[Surface.ROTATION_90] = findViewById(R.id.rot90);
+    private void updateOrientationViews() {
+        mHorizontal = findViewById(R.id.horizontal);
+        mVertical = findViewById(R.id.vertical);
 
         updateCurrentView();
     }
 
-    public boolean needsReorient(int rotation) {
+    boolean needsReorient(int rotation) {
         return mCurrentRotation != rotation;
     }
 
     private void updateCurrentView() {
-        final int rot = getContextDisplay().getRotation();
-        for (int i=0; i<4; i++) {
-            mRotatedViews[i].setVisibility(View.GONE);
-        }
-        mCurrentView = mRotatedViews[rot];
+        resetViews();
+        mCurrentView = mIsVertical ? mVertical : mHorizontal;
         mCurrentView.setVisibility(View.VISIBLE);
-        mNavigationInflaterView.setAlternativeOrder(rot == Surface.ROTATION_90);
+        mNavigationInflaterView.setVertical(mIsVertical);
+        mCurrentRotation = getContextDisplay().getRotation();
+        mNavigationInflaterView.setAlternativeOrder(mCurrentRotation == Surface.ROTATION_90);
         mNavigationInflaterView.updateButtonDispatchersCurrentView();
         updateLayoutTransitionsEnabled();
-        mCurrentRotation = rot;
+    }
+
+    private void resetViews() {
+        mHorizontal.setVisibility(View.GONE);
+        mVertical.setVisibility(View.GONE);
     }
 
     private void updateRecentsIcon() {
-        mDockedIcon.setRotation(mDockedStackExists && mVertical ? 90 : 0);
+        mDockedIcon.setRotation(mDockedStackExists && mIsVertical ? 90 : 0);
         getRecentsButton().setImageDrawable(mDockedStackExists ? mDockedIcon : mRecentIcon);
         mBarTransitions.reapplyDarkIntensity();
     }
@@ -1077,7 +1076,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     }
 
     public boolean isVertical() {
-        return mVertical;
+        return mIsVertical;
     }
 
     public void reorient() {
@@ -1101,7 +1100,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         updateTaskSwitchHelper();
         updateNavButtonIcons();
 
-        getHomeButton().setVertical(mVertical);
+        getHomeButton().setVertical(mIsVertical);
     }
 
     private void updateTaskSwitchHelper() {
@@ -1134,9 +1133,12 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
                     "onSizeChanged: (%dx%d) old: (%dx%d)", w, h, oldw, oldh));
 
         final boolean newVertical = w > 0 && h > w;
-        if (newVertical != mVertical) {
-            mVertical = newVertical;
-            //Log.v(TAG, String.format("onSizeChanged: h=%d, w=%d, vert=%s", h, w, mVertical?"y":"n"));
+        if (newVertical != mIsVertical) {
+            mIsVertical = newVertical;
+            if (DEBUG) {
+                Log.d(TAG, String.format("onSizeChanged: h=%d, w=%d, vert=%s", h, w,
+                        mIsVertical ? "y" : "n"));
+            }
             reorient();
             notifyVerticalChangedListener(newVertical);
         }
@@ -1347,7 +1349,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
 
         pw.println(String.format("      disabled=0x%08x vertical=%s menu=%s darkIntensity=%.2f",
                         mDisabledFlags,
-                        mVertical ? "true" : "false",
+                        mIsVertical ? "true" : "false",
                         getMenuButton().isVisible() ? "true" : "false",
                         getLightTransitionsController().getCurrentDarkIntensity()));
 
