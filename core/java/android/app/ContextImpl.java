@@ -19,8 +19,8 @@ package android.app;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
+import android.content.AutofillOptions;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentCaptureOptions;
@@ -215,8 +215,8 @@ class ContextImpl extends Context {
     // The name of the split this Context is representing. May be null.
     private @Nullable String mSplitName = null;
 
-    private AutofillClient mAutofillClient = null;
-    private boolean mIsAutofillCompatEnabled;
+    private @Nullable AutofillClient mAutofillClient = null;
+    private @Nullable AutofillOptions mAutofillOptions;
 
     private ContentCaptureOptions mContentCaptureOptions = null;
 
@@ -2376,15 +2376,14 @@ class ContextImpl extends Context {
 
     /** @hide */
     @Override
-    public boolean isAutofillCompatibilityEnabled() {
-        return mIsAutofillCompatEnabled;
+    public AutofillOptions getAutofillOptions() {
+        return mAutofillOptions;
     }
 
     /** @hide */
-    @TestApi
     @Override
-    public void setAutofillCompatibilityEnabled(boolean autofillCompatEnabled) {
-        mIsAutofillCompatEnabled = autofillCompatEnabled;
+    public void setAutofillOptions(AutofillOptions options) {
+        mAutofillOptions = options;
     }
 
     /** @hide */

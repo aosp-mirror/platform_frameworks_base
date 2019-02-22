@@ -5340,16 +5340,24 @@ public abstract class Context {
     /**
      * @hide
      */
-    public boolean isAutofillCompatibilityEnabled() {
-        return false;
+    public final boolean isAutofillCompatibilityEnabled() {
+        final AutofillOptions options = getAutofillOptions();
+        return options != null && options.compatModeEnabled;
+    }
+
+    /**
+     * @hide
+     */
+    @Nullable
+    public AutofillOptions getAutofillOptions() {
+        return null;
     }
 
     /**
      * @hide
      */
     @TestApi
-    public void setAutofillCompatibilityEnabled(
-            @SuppressWarnings("unused") boolean autofillCompatEnabled) {
+    public void setAutofillOptions(@SuppressWarnings("unused") @Nullable AutofillOptions options) {
     }
 
     /**

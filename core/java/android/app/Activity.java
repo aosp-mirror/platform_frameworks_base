@@ -7608,7 +7608,7 @@ public class Activity extends ContextThemeWrapper
 
         mWindow.setColorMode(info.colorMode);
 
-        setAutofillCompatibilityEnabled(application.isAutofillCompatibilityEnabled());
+        setAutofillOptions(application.getAutofillOptions());
         setContentCaptureOptions(application.getContentCaptureOptions());
     }
 

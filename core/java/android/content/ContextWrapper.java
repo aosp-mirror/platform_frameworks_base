@@ -1031,22 +1031,17 @@ public class ContextWrapper extends Context {
         mBase.setAutofillClient(client);
     }
 
-    /**
-     * @hide
-     */
+    /** @hide */
     @Override
-    public boolean isAutofillCompatibilityEnabled() {
-        return mBase != null && mBase.isAutofillCompatibilityEnabled();
+    public AutofillOptions getAutofillOptions() {
+        return mBase == null ? null : mBase.getAutofillOptions();
     }
 
-    /**
-     * @hide
-     */
-    @TestApi
+    /** @hide */
     @Override
-    public void setAutofillCompatibilityEnabled(boolean autofillCompatEnabled) {
+    public void setAutofillOptions(AutofillOptions options) {
         if (mBase != null) {
-            mBase.setAutofillCompatibilityEnabled(autofillCompatEnabled);
+            mBase.setAutofillOptions(options);
         }
     }
 
