@@ -136,8 +136,7 @@
     <string name="process_kernel_label" msgid="3916858646836739323">"एन्ड्रोइड OS"</string>
     <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"हटाइएका अनुप्रयोगहरू"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"अनुप्रयोगहरू र प्रयोगकर्ताहरू हटाइयो।"</string>
-    <!-- no translation found for data_usage_ota (5377889154805560860) -->
-    <skip />
+    <string name="data_usage_ota" msgid="5377889154805560860">"प्रणालीसम्बन्धी अद्यावधिकहरू"</string>
     <string name="tether_settings_title_usb" msgid="6688416425801386511">"USB टेथर गर्दै"</string>
     <string name="tether_settings_title_wifi" msgid="3277144155960302049">"पोर्टेबल हटस्पट"</string>
     <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"ब्लुटुथ टेथर गर्दै"</string>
