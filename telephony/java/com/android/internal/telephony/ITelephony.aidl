@@ -1826,10 +1826,12 @@ interface ITelephony {
     void setMultisimCarrierRestriction(boolean isMultisimCarrierRestricted);
 
     /**
-     * Returns if the usage of multiple SIM cards at the same time is restricted.
-     * @hide
+     * Returns if the usage of multiple SIM cards at the same time is supported.
+     *
+     * @param callingPackage The package making the call.
+     * @return true if multisim is supported, false otherwise.
      */
-    boolean isMultisimCarrierRestricted();
+    boolean isMultisimSupported(String callingPackage);
 
     /**
      * Switch configs to enable multi-sim or switch back to single-sim
