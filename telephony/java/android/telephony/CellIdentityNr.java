@@ -88,11 +88,14 @@ public final class CellIdentityNr extends CellIdentity {
     }
 
     /**
-     * Get the Absolute Radio Frequency Channel Number.
+     * Get the New Radio Absolute Radio Frequency Channel Number.
+     *
+     * Reference: 3GPP TS 38.101-1 section 5.4.2.1 NR-ARFCN and channel raster.
+     * Reference: 3GPP TS 38.101-2 section 5.4.2.1 NR-ARFCN and channel raster.
+     *
      * @return Integer value in range [0, 3279165] or {@link CellInfo#UNAVAILABLE} if unknown.
      */
-    @Override
-    public int getChannelNumber() {
+    public int getNrarfcn() {
         return mNrArfcn;
     }
 
