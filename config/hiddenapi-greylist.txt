@@ -3018,15 +3018,8 @@ Lcom/android/internal/telephony/IccPhoneBookInterfaceManager;->logd(Ljava/lang/S
 Lcom/android/internal/telephony/IccPhoneBookInterfaceManager;->loge(Ljava/lang/String;)V
 Lcom/android/internal/telephony/IccPhoneBookInterfaceManager;->mAdnCache:Lcom/android/internal/telephony/uicc/AdnRecordCache;
 Lcom/android/internal/telephony/IccPhoneBookInterfaceManager;->mBaseHandler:Landroid/os/Handler;
-Lcom/android/internal/telephony/IccPhoneBookInterfaceManager;->mCurrentApp:Lcom/android/internal/telephony/uicc/UiccCardApplication;
-Lcom/android/internal/telephony/IccPhoneBookInterfaceManager;->mIs3gCard:Z
-Lcom/android/internal/telephony/IccPhoneBookInterfaceManager;->mLock:Ljava/lang/Object;
 Lcom/android/internal/telephony/IccPhoneBookInterfaceManager;->mPhone:Lcom/android/internal/telephony/Phone;
-Lcom/android/internal/telephony/IccPhoneBookInterfaceManager;->mRecords:Ljava/util/List;
-Lcom/android/internal/telephony/IccPhoneBookInterfaceManager;->mRecordSize:[I
-Lcom/android/internal/telephony/IccPhoneBookInterfaceManager;->mSuccess:Z
 Lcom/android/internal/telephony/IccPhoneBookInterfaceManager;->updateEfForIccType(I)I
-Lcom/android/internal/telephony/IccPhoneBookInterfaceManager;->waitForResult(Ljava/util/concurrent/atomic/AtomicBoolean;)V
 Lcom/android/internal/telephony/IccProvider;-><init>()V
 Lcom/android/internal/telephony/IccProvider;->ADDRESS_BOOK_COLUMN_NAMES:[Ljava/lang/String;
 Lcom/android/internal/telephony/IccProvider;->DBG:Z
