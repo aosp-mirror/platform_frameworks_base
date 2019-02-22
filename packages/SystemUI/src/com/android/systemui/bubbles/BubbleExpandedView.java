@@ -39,6 +39,7 @@ import android.graphics.Color;
 import android.graphics.Insets;
 import android.graphics.Point;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.ShapeDrawable;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -189,6 +190,8 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
         mPointerView.setBackground(triangleDrawable);
 
         FrameLayout viewWrapper = findViewById(R.id.header_permission_wrapper);
+        viewWrapper.setBackground(createHeaderPermissionBackground(bgColor));
+
         LayoutTransition transition = new LayoutTransition();
         transition.setDuration(200);
 
@@ -203,6 +206,7 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
         transition.setAnimateParentHierarchy(false);
         viewWrapper.setLayoutTransition(transition);
         viewWrapper.getLayoutTransition().enableTransitionType(LayoutTransition.CHANGING);
+
 
         mHeaderHeight = getContext().getResources().getDimensionPixelSize(
                 R.dimen.bubble_expanded_header_height);
@@ -243,11 +247,33 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
         if (!mShowOnTop) {
             removeView(mPointerView);
             if (mUseFooter) {
+                View divider = findViewById(R.id.divider);
+                viewWrapper.removeView(divider);
                 removeView(viewWrapper);
+                addView(divider);
                 addView(viewWrapper);
             }
             addView(mPointerView);
         }
+    }
+
+    /**
+     * Creates a background with corners rounded based on how the view is configured to display
+     */
+    private Drawable createHeaderPermissionBackground(int bgColor) {
+        TypedArray ta2 = getContext().obtainStyledAttributes(
+                new int[] {android.R.attr.dialogCornerRadius});
+        final float cr = ta2.getDimension(0, 0f);
+        ta2.recycle();
+
+        float[] radii = mUseFooter
+                ? new float[] {0, 0, 0, 0, cr, cr, cr, cr}
+                : new float[] {cr, cr, cr, cr, 0, 0, 0, 0};
+        GradientDrawable chromeBackground = new GradientDrawable();
+        chromeBackground.setShape(GradientDrawable.RECTANGLE);
+        chromeBackground.setCornerRadii(radii);
+        chromeBackground.setColor(bgColor);
+        return chromeBackground;
     }
 
     /**
