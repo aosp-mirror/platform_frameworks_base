@@ -209,8 +209,10 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         mStagingManager = new StagingManager(pm, this, am);
     }
 
-    private void setBootCompleted()  {
+    private void onBootCompleted()  {
         mBootCompleted = true;
+        // Tell APEX manager about it as well
+        mApexManager.onBootCompleted();
     }
 
     boolean isBootCompleted()  {
@@ -223,7 +225,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         mContext.registerReceiver(new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                setBootCompleted();
+                onBootCompleted();
                 mContext.unregisterReceiver(this);
             }
         }, new IntentFilter(Intent.ACTION_BOOT_COMPLETED));
