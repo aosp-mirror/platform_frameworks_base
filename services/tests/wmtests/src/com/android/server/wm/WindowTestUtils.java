@@ -28,7 +28,6 @@ import android.os.Build;
 import android.os.IBinder;
 import android.view.IApplicationToken;
 import android.view.IWindow;
-import android.view.SurfaceControl.Transaction;
 import android.view.WindowManager;
 
 /**
@@ -72,7 +71,6 @@ class WindowTestUtils {
     static class TestAppWindowToken extends AppWindowToken {
         boolean mOnTop = false;
         private boolean mSkipPrepareSurfaces;
-        private Transaction mPendingTransactionOverride;
         boolean mSkipOnParentChanged = true;
 
         private TestAppWindowToken(DisplayContent dc, boolean skipOnParentChanged) {
@@ -125,17 +123,6 @@ class WindowTestUtils {
 
         void setSkipPrepareSurfaces(boolean ignore) {
             mSkipPrepareSurfaces = ignore;
-        }
-
-        void setPendingTransaction(Transaction transaction) {
-            mPendingTransactionOverride = transaction;
-        }
-
-        @Override
-        public Transaction getPendingTransaction() {
-            return mPendingTransactionOverride == null
-                    ? super.getPendingTransaction()
-                    : mPendingTransactionOverride;
         }
     }
 

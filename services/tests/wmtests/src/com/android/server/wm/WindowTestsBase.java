@@ -37,7 +37,10 @@ import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
+
+import static org.mockito.Mockito.mock;
+
 
 import android.content.Context;
 import android.content.res.Configuration;
@@ -47,6 +50,8 @@ import android.util.Log;
 import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.IWindow;
+import android.view.Surface;
+import android.view.SurfaceControl.Transaction;
 import android.view.WindowManager;
 
 import com.android.server.AttributeCache;
@@ -96,10 +101,9 @@ class WindowTestsBase {
     private MockTracker mMockTracker;
 
     /**
-     * To restore the original SurfaceControl.Transaction factory if any tests changed
-     * {@link WindowManagerService#mTransactionFactory}.
+     * Spied {@link Transaction} class than can be used to verify calls.
      */
-    private TransactionFactory mOriginalTransactionFactory;
+    Transaction mTransaction;
 
     @Rule
     public final DexmakerShareClassLoaderRule mDexmakerShareClassLoaderRule =
@@ -129,11 +133,21 @@ class WindowTestsBase {
         // in the set up are clear. This can be removed when b/37850063 is fixed.
         try {
             mMockSession = mock(Session.class);
+            mTransaction = spy(StubTransaction.class);
 
             final Context context = getInstrumentation().getTargetContext();
 
             mWm = mSystemServicesTestRule.getWindowManagerService();
-            mOriginalTransactionFactory = mWm.mTransactionFactory;
+
+            // Setup factory classes to prevent calls to native code.
+
+            // Return a spied Transaction class than can be used to verify calls.
+            mWm.mTransactionFactory = () -> mTransaction;
+            // Return a SurfaceControl.Builder class that creates mocked SurfaceControl instances.
+            mWm.mSurfaceBuilderFactory = (unused) -> new MockSurfaceControlBuilder();
+            // Return mocked Surface instances.
+            mWm.mSurfaceFactory = () -> mock(Surface.class);
+
             beforeCreateDisplay();
 
             context.getDisplay().getDisplayInfo(mDisplayInfo);
@@ -183,7 +197,6 @@ class WindowTestsBase {
             // stable state to clean up for consistency.
             waitUntilHandlersIdle();
 
-            mWm.mTransactionFactory = mOriginalTransactionFactory;
             final LinkedList<WindowState> nonCommonWindows = new LinkedList<>();
 
             synchronized (mWm.mGlobalLock) {

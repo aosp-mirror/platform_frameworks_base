@@ -814,8 +814,9 @@ public class WindowManagerService extends IWindowManager.Stub
 
     SurfaceBuilderFactory mSurfaceBuilderFactory = SurfaceControl.Builder::new;
     TransactionFactory mTransactionFactory = SurfaceControl.Transaction::new;
+    SurfaceFactory mSurfaceFactory = Surface::new;
 
-    private final SurfaceControl.Transaction mTransaction = mTransactionFactory.make();
+    private final SurfaceControl.Transaction mTransaction;
 
     static void boostPriorityForLockedSection() {
         sThreadPriorityBooster.boost();
@@ -909,9 +910,21 @@ public class WindowManagerService extends IWindowManager.Stub
     public static WindowManagerService main(final Context context, final InputManagerService im,
             final boolean showBootMsgs, final boolean onlyCore, WindowManagerPolicy policy,
             ActivityTaskManagerService atm) {
+        return main(context, im, showBootMsgs, onlyCore, policy, atm,
+                SurfaceControl.Transaction::new);
+    }
+
+    /**
+     * Creates and returns an instance of the WindowManagerService. This call allows the caller
+     * to override the {@link TransactionFactory} to stub functionality under test.
+     */
+    @VisibleForTesting
+    public static WindowManagerService main(final Context context, final InputManagerService im,
+            final boolean showBootMsgs, final boolean onlyCore, WindowManagerPolicy policy,
+            ActivityTaskManagerService atm, TransactionFactory transactionFactory) {
         DisplayThread.getHandler().runWithScissors(() ->
                 sInstance = new WindowManagerService(context, im, showBootMsgs, onlyCore, policy,
-                        atm), 0);
+                        atm, transactionFactory), 0);
         return sInstance;
     }
 
@@ -933,7 +946,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     private WindowManagerService(Context context, InputManagerService inputManager,
             boolean showBootMsgs, boolean onlyCore, WindowManagerPolicy policy,
-            ActivityTaskManagerService atm) {
+            ActivityTaskManagerService atm, TransactionFactory transactionFactory) {
         installLock(this, INDEX_WINDOW);
         mGlobalLock = atm.getGlobalLock();
         mAtmService = atm;
@@ -962,6 +975,9 @@ public class WindowManagerService extends IWindowManager.Stub
         mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);
         mDisplayWindowSettings = new DisplayWindowSettings(this);
 
+
+        mTransactionFactory = transactionFactory;
+        mTransaction = mTransactionFactory.make();
         mPolicy = policy;
         mAnimator = new WindowAnimator(this);
         mRoot = new RootWindowContainer(this);
