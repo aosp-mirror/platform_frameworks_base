@@ -206,6 +206,11 @@ public final class DefaultPermissionGrantPolicy {
         // STOPSHIP(b/112545973): remove once feature enabled by default
         if (StorageManager.hasIsolatedStorage()) {
             MEDIA_AURAL_PERMISSIONS.add(Manifest.permission.READ_MEDIA_AUDIO);
+
+            // STOPSHIP(b/124466734): remove these manual grants once the legacy
+            // permission logic is unified with PermissionController
+            MEDIA_AURAL_PERMISSIONS.add(Manifest.permission.READ_EXTERNAL_STORAGE);
+            MEDIA_AURAL_PERMISSIONS.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
         }
     }
 
@@ -215,6 +220,11 @@ public final class DefaultPermissionGrantPolicy {
         if (StorageManager.hasIsolatedStorage()) {
             MEDIA_VISUAL_PERMISSIONS.add(Manifest.permission.READ_MEDIA_VIDEO);
             MEDIA_VISUAL_PERMISSIONS.add(Manifest.permission.READ_MEDIA_IMAGES);
+
+            // STOPSHIP(b/124466734): remove these manual grants once the legacy
+            // permission logic is unified with PermissionController
+            MEDIA_VISUAL_PERMISSIONS.add(Manifest.permission.READ_EXTERNAL_STORAGE);
+            MEDIA_VISUAL_PERMISSIONS.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
         }
     }
 
@@ -642,16 +652,10 @@ public final class DefaultPermissionGrantPolicy {
         // Location
         if (locationPackageNames != null) {
             for (String packageName : locationPackageNames) {
-                // STOPSHIP: remove this force-granting of legacy storage
-                // permissions once b/124466734 is resolved
-                final Set<String> storageWorkaround = new ArraySet<>();
-                storageWorkaround.add(Manifest.permission.READ_EXTERNAL_STORAGE);
-                storageWorkaround.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
-
                 grantPermissionsToSystemPackage(packageName, userId,
                         CONTACTS_PERMISSIONS, CALENDAR_PERMISSIONS, MICROPHONE_PERMISSIONS,
                         PHONE_PERMISSIONS, SMS_PERMISSIONS, CAMERA_PERMISSIONS,
-                        SENSORS_PERMISSIONS, STORAGE_PERMISSIONS, storageWorkaround);
+                        SENSORS_PERMISSIONS, STORAGE_PERMISSIONS, MEDIA_AURAL_PERMISSIONS);
                 grantSystemFixedPermissionsToSystemPackage(packageName, userId,
                         LOCATION_PERMISSIONS, ACTIVITY_RECOGNITION_PERMISSIONS);
             }
