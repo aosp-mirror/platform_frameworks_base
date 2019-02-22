@@ -5918,6 +5918,13 @@ package android.telephony {
     field public static final int VSNCP_TIMEOUT = 2236; // 0x8bc
   }
 
+  public final class DataSpecificRegistrationStates implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public android.telephony.LteVopsSupportInfo getLteVopsSupportInfo();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.telephony.DataSpecificRegistrationStates> CREATOR;
+  }
+
   public final class DisconnectCause {
     field public static final int ALREADY_DIALING = 72; // 0x48
     field public static final int ANSWERED_ELSEWHERE = 52; // 0x34
@@ -6026,6 +6033,7 @@ package android.telephony {
     method public int getAccessNetworkTechnology();
     method public int[] getAvailableServices();
     method public android.telephony.CellIdentity getCellIdentity();
+    method @Nullable public android.telephony.DataSpecificRegistrationStates getDataSpecificStates();
     method public int getDomain();
     method public int getRegState();
     method public int getRejectCause();
