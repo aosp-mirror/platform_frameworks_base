@@ -621,7 +621,8 @@ public class DisplayContentTests extends WindowTestsBase {
     @Test
     public void testOnDescendantOrientationRequestChanged_FrozenToUserRotation() {
         final DisplayContent dc = createNewDisplay();
-        dc.getDisplayRotation().setFixedToUserRotation(true);
+        dc.getDisplayRotation().setFixedToUserRotation(
+                DisplayRotation.FIXED_TO_USER_ROTATION_ENABLED);
         mWm.mAtmService.mRootActivityContainer = mock(RootActivityContainer.class);
         final int newOrientation = dc.getLastOrientation() == SCREEN_ORIENTATION_LANDSCAPE
                 ? SCREEN_ORIENTATION_PORTRAIT

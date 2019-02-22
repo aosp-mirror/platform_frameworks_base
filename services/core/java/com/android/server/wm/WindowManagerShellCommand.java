@@ -342,21 +342,24 @@ public class WindowManagerShellCommand extends ShellCommand {
             arg = getNextArgRequired();
         }
 
-        final boolean enabled;
+        final @DisplayRotation.FixedToUserRotation  int fixedToUserRotation;
         switch (arg) {
             case "enabled":
-                enabled = true;
+                fixedToUserRotation = DisplayRotation.FIXED_TO_USER_ROTATION_ENABLED;
                 break;
             case "disabled":
-                enabled = false;
+                fixedToUserRotation = DisplayRotation.FIXED_TO_USER_ROTATION_DISABLED;
+                break;
+            case "default":
+                fixedToUserRotation = DisplayRotation.FIXED_TO_USER_ROTATION_DISABLED;
                 break;
             default:
-                getErrPrintWriter().println("Error: expecting enabled or disabled, but we get "
-                        + arg);
+                getErrPrintWriter().println("Error: expecting enabled, disabled or default, but we "
+                        + "get " + arg);
                 return -1;
         }
 
-        mInternal.setRotateForApp(displayId, enabled);
+        mInternal.setRotateForApp(displayId, fixedToUserRotation);
         return 0;
     }
 
