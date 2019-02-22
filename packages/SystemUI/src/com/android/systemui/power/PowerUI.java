@@ -55,6 +55,7 @@ import java.util.Arrays;
 import java.util.concurrent.Future;
 
 public class PowerUI extends SystemUI {
+
     static final String TAG = "PowerUI";
     static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
     private static final long TEMPERATURE_INTERVAL = 30 * DateUtils.SECOND_IN_MILLIS;
@@ -63,6 +64,7 @@ public class PowerUI extends SystemUI {
     static final long THREE_HOURS_IN_MILLIS = DateUtils.HOUR_IN_MILLIS * 3;
     private static final int CHARGE_CYCLE_PERCENT_RESET = 45;
     private static final long SIX_HOURS_MILLIS = Duration.ofHours(6).toMillis();
+    public static final int NO_ESTIMATE_AVAILABLE = -1;
 
     private final Handler mHandler = new Handler();
     @VisibleForTesting
@@ -71,13 +73,9 @@ public class PowerUI extends SystemUI {
     private PowerManager mPowerManager;
     private WarningsUI mWarnings;
     private final Configuration mLastConfiguration = new Configuration();
-    private long mTimeRemaining = Long.MAX_VALUE;
     private int mPlugType = 0;
     private int mInvalidCharger = 0;
     private EnhancedEstimates mEnhancedEstimates;
-    private Estimate mLastEstimate;
-    private boolean mLowWarningShownThisChargeCycle;
-    private boolean mSevereWarningShownThisChargeCycle;
     private Future mLastShowWarningTask;
     private boolean mEnableSkinTemperatureWarning;
     private boolean mEnableUsbTemperatureAlarm;
@@ -87,6 +85,10 @@ public class PowerUI extends SystemUI {
 
     private long mScreenOffTime = -1;
 
+    @VisibleForTesting boolean mLowWarningShownThisChargeCycle;
+    @VisibleForTesting boolean mSevereWarningShownThisChargeCycle;
+    @VisibleForTesting BatteryStateSnapshot mCurrentBatteryStateSnapshot;
+    @VisibleForTesting BatteryStateSnapshot mLastBatteryStateSnapshot;
     @VisibleForTesting IThermalService mThermalService;
 
     @VisibleForTesting int mBatteryLevel = 100;
@@ -205,6 +207,7 @@ public class PowerUI extends SystemUI {
                 mPlugType = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 1);
                 final int oldInvalidCharger = mInvalidCharger;
                 mInvalidCharger = intent.getIntExtra(BatteryManager.EXTRA_INVALID_CHARGER, 0);
+                mLastBatteryStateSnapshot = mCurrentBatteryStateSnapshot;
 
                 final boolean plugged = mPlugType != 0;
                 final boolean oldPlugged = oldPlugType != 0;
@@ -233,16 +236,22 @@ public class PowerUI extends SystemUI {
                     mWarnings.dismissInvalidChargerWarning();
                 } else if (mWarnings.isInvalidChargerWarningShowing()) {
                     // if invalid charger is showing, don't show low battery
+                    if (DEBUG) {
+                        Slog.d(TAG, "Bad Charger");
+                    }
                     return;
                 }
 
                 // Show the correct version of low battery warning if needed
                 if (mLastShowWarningTask != null) {
                     mLastShowWarningTask.cancel(true);
+                    if (DEBUG) {
+                        Slog.d(TAG, "cancelled task");
+                    }
                 }
                 mLastShowWarningTask = ThreadUtils.postOnBackgroundThread(() -> {
-                    maybeShowBatteryWarning(
-                            oldBatteryLevel, plugged, oldPlugged, oldBucket, bucket);
+                    maybeShowBatteryWarningV2(
+                            plugged, bucket);
                 });
 
             } else if (Intent.ACTION_SCREEN_OFF.equals(action)) {
@@ -257,53 +266,150 @@ public class PowerUI extends SystemUI {
         }
     }
 
-    protected void maybeShowBatteryWarning(int oldBatteryLevel, boolean plugged, boolean oldPlugged,
-            int oldBucket, int bucket) {
-        boolean isPowerSaver = mPowerManager.isPowerSaveMode();
-        // only play SFX when the dialog comes up or the bucket changes
-        final boolean playSound = bucket != oldBucket || oldPlugged;
+    protected void maybeShowBatteryWarningV2(boolean plugged, int bucket) {
         final boolean hybridEnabled = mEnhancedEstimates.isHybridNotificationEnabled();
-        if (hybridEnabled) {
-            Estimate estimate = mLastEstimate;
-            if (estimate == null || mBatteryLevel != oldBatteryLevel) {
-                estimate = mEnhancedEstimates.getEstimate();
-                mLastEstimate = estimate;
-            }
-            // Turbo is not always booted once SysUI is running so we have to make sure we actually
-            // get data back
-            if (estimate != null) {
-                mTimeRemaining = estimate.estimateMillis;
-                mWarnings.updateEstimate(estimate);
-                mWarnings.updateThresholds(mEnhancedEstimates.getLowWarningThreshold(),
-                        mEnhancedEstimates.getSevereWarningThreshold());
+        final boolean isPowerSaverMode = mPowerManager.isPowerSaveMode();
 
-                // if we are now over 45% battery & 6 hours remaining we can trigger hybrid
-                // notification again
-                if (mBatteryLevel >= CHARGE_CYCLE_PERCENT_RESET
-                        && mTimeRemaining > SIX_HOURS_MILLIS) {
-                    mLowWarningShownThisChargeCycle = false;
-                    mSevereWarningShownThisChargeCycle = false;
-                }
+        // Stick current battery state into an immutable container to determine if we should show
+        // a warning.
+        if (DEBUG) {
+            Slog.d(TAG, "evaluating which notification to show");
+        }
+        if (hybridEnabled) {
+            if (DEBUG) {
+                Slog.d(TAG, "using hybrid");
+            }
+            Estimate estimate = refreshEstimateIfNeeded();
+            mCurrentBatteryStateSnapshot = new BatteryStateSnapshot(mBatteryLevel, isPowerSaverMode,
+                    plugged, bucket, mBatteryStatus, mLowBatteryReminderLevels[1],
+                    mLowBatteryReminderLevels[0], estimate.getEstimateMillis(),
+                    mEnhancedEstimates.getSevereWarningThreshold(),
+                    mEnhancedEstimates.getLowWarningThreshold(), estimate.isBasedOnUsage());
+        } else {
+            if (DEBUG) {
+                Slog.d(TAG, "using standard");
+            }
+            mCurrentBatteryStateSnapshot = new BatteryStateSnapshot(mBatteryLevel, isPowerSaverMode,
+                    plugged, bucket, mBatteryStatus, mLowBatteryReminderLevels[1],
+                    mLowBatteryReminderLevels[0]);
+        }
+
+        mWarnings.updateSnapshot(mCurrentBatteryStateSnapshot);
+        if (mCurrentBatteryStateSnapshot.isHybrid()) {
+            maybeShowHybridWarning(mCurrentBatteryStateSnapshot, mLastBatteryStateSnapshot);
+        } else {
+            maybeShowBatteryWarning(mCurrentBatteryStateSnapshot, mLastBatteryStateSnapshot);
+        }
+    }
+
+    // updates the time estimate if we don't have one or battery level has changed.
+    @VisibleForTesting
+    Estimate refreshEstimateIfNeeded() {
+        if (mLastBatteryStateSnapshot == null
+                || mLastBatteryStateSnapshot.getTimeRemainingMillis() == NO_ESTIMATE_AVAILABLE
+                || mBatteryLevel != mLastBatteryStateSnapshot.getBatteryLevel()) {
+            final Estimate estimate = mEnhancedEstimates.getEstimate();
+            if (DEBUG) {
+                Slog.d(TAG, "updated estimate: " + estimate.getEstimateMillis());
+            }
+            return estimate;
+        }
+        return new Estimate(mLastBatteryStateSnapshot.getTimeRemainingMillis(),
+                mLastBatteryStateSnapshot.isBasedOnUsage());
+    }
+
+    @VisibleForTesting
+    void maybeShowHybridWarning(BatteryStateSnapshot currentSnapshot,
+            BatteryStateSnapshot lastSnapshot) {
+        // if we are now over 45% battery & 6 hours remaining so we can trigger hybrid
+        // notification again
+        if (currentSnapshot.getBatteryLevel() >= CHARGE_CYCLE_PERCENT_RESET
+                && currentSnapshot.getTimeRemainingMillis() > SIX_HOURS_MILLIS) {
+            mLowWarningShownThisChargeCycle = false;
+            mSevereWarningShownThisChargeCycle = false;
+            if (DEBUG) {
+                Slog.d(TAG, "Charge cycle reset! Can show warnings again");
             }
         }
 
-        if (shouldShowLowBatteryWarning(plugged, oldPlugged, oldBucket, bucket,
-                mTimeRemaining, isPowerSaver, mBatteryStatus)) {
-            mWarnings.showLowBatteryWarning(playSound);
+        final boolean playSound = currentSnapshot.getBucket() != lastSnapshot.getBucket()
+                || lastSnapshot.getPlugged();
 
+        if (shouldShowHybridWarning(currentSnapshot)) {
+            mWarnings.showLowBatteryWarning(playSound);
             // mark if we've already shown a warning this cycle. This will prevent the notification
             // trigger from spamming users by only showing low/critical warnings once per cycle
-            if (hybridEnabled) {
-                if (mTimeRemaining <= mEnhancedEstimates.getSevereWarningThreshold()
-                        || mBatteryLevel <= mLowBatteryReminderLevels[1]) {
-                    mSevereWarningShownThisChargeCycle = true;
-                    mLowWarningShownThisChargeCycle = true;
-                } else {
-                    mLowWarningShownThisChargeCycle = true;
+            if (currentSnapshot.getTimeRemainingMillis()
+                    <= currentSnapshot.getSevereLevelThreshold()
+                    || currentSnapshot.getBatteryLevel() <= mLowBatteryReminderLevels[1]) {
+                mSevereWarningShownThisChargeCycle = true;
+                mLowWarningShownThisChargeCycle = true;
+                if (DEBUG) {
+                    Slog.d(TAG, "Severe warning marked as shown this cycle");
                 }
+            } else {
+                Slog.d(TAG, "Low warning marked as shown this cycle");
+                mLowWarningShownThisChargeCycle = true;
             }
-        } else if (shouldDismissLowBatteryWarning(plugged, oldBucket, bucket, mTimeRemaining,
-                isPowerSaver)) {
+
+        } else if (shouldDismissHybridWarning(currentSnapshot)) {
+            if (DEBUG) {
+                Slog.d(TAG, "Dismissing warning");
+            }
+            mWarnings.dismissLowBatteryWarning();
+        } else {
+            if (DEBUG) {
+                Slog.d(TAG, "Updating warning");
+            }
+            mWarnings.updateLowBatteryWarning();
+        }
+    }
+
+    @VisibleForTesting
+    boolean shouldShowHybridWarning(BatteryStateSnapshot snapshot) {
+        if (snapshot.getPlugged()
+                || snapshot.getBatteryStatus() == BatteryManager.BATTERY_STATUS_UNKNOWN) {
+            Slog.d(TAG, "can't show warning due to - plugged: " + snapshot.getPlugged()
+                    + " status unknown: "
+                    + (snapshot.getBatteryStatus() == BatteryManager.BATTERY_STATUS_UNKNOWN));
+            return false;
+        }
+
+        // Only show the low warning once per charge cycle & no battery saver
+        final boolean canShowWarning = !mLowWarningShownThisChargeCycle && !snapshot.isPowerSaver()
+                && (snapshot.getTimeRemainingMillis() < snapshot.getLowThresholdMillis()
+                || snapshot.getBatteryLevel() <= snapshot.getLowLevelThreshold());
+
+        // Only show the severe warning once per charge cycle
+        final boolean canShowSevereWarning = !mSevereWarningShownThisChargeCycle
+                && (snapshot.getTimeRemainingMillis() < snapshot.getSevereThresholdMillis()
+                || snapshot.getBatteryLevel() <= snapshot.getSevereLevelThreshold());
+
+        final boolean canShow = canShowWarning || canShowSevereWarning;
+        if (DEBUG) {
+            Slog.d(TAG, "Enhanced trigger is: " + canShow + "\nwith battery snapshot:"
+                    + " mLowWarningShownThisChargeCycle: " + mLowWarningShownThisChargeCycle
+                    + " mSevereWarningShownThisChargeCycle: " + mSevereWarningShownThisChargeCycle
+                    + "\n" + snapshot.toString());
+        }
+        return canShow;
+    }
+
+    @VisibleForTesting
+    boolean shouldDismissHybridWarning(BatteryStateSnapshot snapshot) {
+        return snapshot.getPlugged()
+                || snapshot.getTimeRemainingMillis() > snapshot.getLowThresholdMillis();
+    }
+
+    protected void maybeShowBatteryWarning(
+            BatteryStateSnapshot currentSnapshot,
+            BatteryStateSnapshot lastSnapshot) {
+        final boolean playSound = currentSnapshot.getBucket() != lastSnapshot.getBucket()
+                || lastSnapshot.getPlugged();
+
+        if (shouldShowLowBatteryWarning(currentSnapshot, lastSnapshot)) {
+            mWarnings.showLowBatteryWarning(playSound);
+        } else if (shouldDismissLowBatteryWarning(currentSnapshot, lastSnapshot)) {
             mWarnings.dismissLowBatteryWarning();
         } else {
             mWarnings.updateLowBatteryWarning();
@@ -311,64 +417,25 @@ public class PowerUI extends SystemUI {
     }
 
     @VisibleForTesting
-    boolean shouldShowLowBatteryWarning(boolean plugged, boolean oldPlugged, int oldBucket,
-            int bucket, long timeRemaining, boolean isPowerSaver, int batteryStatus) {
-        if (mEnhancedEstimates.isHybridNotificationEnabled()) {
-            // triggering logic when enhanced estimate is available
-            return isEnhancedTrigger(plugged, timeRemaining, isPowerSaver, batteryStatus);
-        }
-        // legacy triggering logic
-        return !plugged
-                && !isPowerSaver
-                && (((bucket < oldBucket || oldPlugged) && bucket < 0))
-                && batteryStatus != BatteryManager.BATTERY_STATUS_UNKNOWN;
+    boolean shouldShowLowBatteryWarning(
+            BatteryStateSnapshot currentSnapshot,
+            BatteryStateSnapshot lastSnapshot) {
+        return !currentSnapshot.getPlugged()
+                && !currentSnapshot.isPowerSaver()
+                && (((currentSnapshot.getBucket() < lastSnapshot.getBucket()
+                        || lastSnapshot.getPlugged())
+                && currentSnapshot.getBucket() < 0))
+                && currentSnapshot.getBatteryStatus() != BatteryManager.BATTERY_STATUS_UNKNOWN;
     }
 
     @VisibleForTesting
-    boolean shouldDismissLowBatteryWarning(boolean plugged, int oldBucket, int bucket,
-            long timeRemaining, boolean isPowerSaver) {
-        final boolean hybridEnabled = mEnhancedEstimates.isHybridNotificationEnabled();
-        final boolean hybridWouldDismiss = hybridEnabled
-                && timeRemaining > mEnhancedEstimates.getLowWarningThreshold();
-        final boolean standardWouldDismiss = (bucket > oldBucket && bucket > 0);
-        return (isPowerSaver && !hybridEnabled)
-                || plugged
-                || (standardWouldDismiss && (!mEnhancedEstimates.isHybridNotificationEnabled()
-                        || hybridWouldDismiss));
-    }
-
-    private boolean isEnhancedTrigger(boolean plugged, long timeRemaining, boolean isPowerSaver,
-            int batteryStatus) {
-        if (plugged || batteryStatus == BatteryManager.BATTERY_STATUS_UNKNOWN) {
-            return false;
-        }
-        int warnLevel = mLowBatteryReminderLevels[0];
-        int critLevel = mLowBatteryReminderLevels[1];
-
-        // Only show the low warning once per charge cycle & no battery saver
-        final boolean canShowWarning = !mLowWarningShownThisChargeCycle && !isPowerSaver
-                && (timeRemaining < mEnhancedEstimates.getLowWarningThreshold()
-                || mBatteryLevel <= warnLevel);
-
-        // Only show the severe warning once per charge cycle
-        final boolean canShowSevereWarning = !mSevereWarningShownThisChargeCycle
-                && (timeRemaining < mEnhancedEstimates.getSevereWarningThreshold()
-                || mBatteryLevel <= critLevel);
-
-        final boolean canShow = canShowWarning || canShowSevereWarning;
-        if (DEBUG) {
-            Slog.d(TAG, "Enhanced trigger is: " + canShow + "\nwith values: "
-                    + " mLowWarningShownThisChargeCycle: " + mLowWarningShownThisChargeCycle
-                    + " mSevereWarningShownThisChargeCycle: " + mSevereWarningShownThisChargeCycle
-                    + " mEnhancedEstimates.timeremaining: " + timeRemaining
-                    + " mBatteryLevel: " + mBatteryLevel
-                    + " canShowWarning: " + canShowWarning
-                    + " canShowSevereWarning: " + canShowSevereWarning
-                    + " plugged: " + plugged
-                    + " batteryStatus: " + batteryStatus
-                    + " isPowerSaver: " + isPowerSaver);
-        }
-        return canShowWarning || canShowSevereWarning;
+    boolean shouldDismissLowBatteryWarning(
+            BatteryStateSnapshot currentSnapshot,
+            BatteryStateSnapshot lastSnapshot) {
+        return currentSnapshot.isPowerSaver()
+                || currentSnapshot.getPlugged()
+                || (currentSnapshot.getBucket() > lastSnapshot.getBucket()
+                        && currentSnapshot.getBucket() > 0);
     }
 
     private void initTemperature() {
@@ -453,12 +520,20 @@ public class PowerUI extends SystemUI {
         mWarnings.dump(pw);
     }
 
+    /**
+     * The interface to allow PowerUI to communicate with whatever implementation of WarningsUI
+     * is being used by the system.
+     */
     public interface WarningsUI {
+
+        /**
+         * Updates battery and screen info for determining whether to trigger battery warnings or
+         * not.
+         * @param batteryLevel The current battery level
+         * @param bucket The current battery bucket
+         * @param screenOffTime How long the screen has been off in millis
+         */
         void update(int batteryLevel, int bucket, long screenOffTime);
-
-        void updateEstimate(Estimate estimate);
-
-        void updateThresholds(long lowThreshold, long severeThreshold);
 
         void dismissLowBatteryWarning();
 
@@ -486,6 +561,12 @@ public class PowerUI extends SystemUI {
         void dump(PrintWriter pw);
 
         void userSwitched();
+
+        /**
+         * Updates the snapshot of battery state used for evaluating battery warnings
+         * @param snapshot object containing relevant values for making battery warning decisions.
+         */
+        void updateSnapshot(BatteryStateSnapshot snapshot);
     }
 
     // Thermal event received from thermal service manager subsystem

@@ -134,10 +134,6 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
     private int mShowing;
 
     private long mWarningTriggerTimeMs;
-
-    private Estimate mEstimate;
-    private long mLowWarningThreshold;
-    private long mSevereWarningThreshold;
     private boolean mWarning;
     private boolean mShowAutoSaverSuggestion;
     private boolean mPlaySound;
@@ -148,6 +144,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
     private SystemUIDialog mHighTempDialog;
     private SystemUIDialog mThermalShutdownDialog;
     @VisibleForTesting SystemUIDialog mUsbHighTempDialog;
+    private BatteryStateSnapshot mCurrentBatterySnapshot;
 
     /**
      */
@@ -195,17 +192,8 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
     }
 
     @Override
-    public void updateEstimate(Estimate estimate) {
-        mEstimate = estimate;
-        if (estimate.estimateMillis <= mLowWarningThreshold) {
-            mWarningTriggerTimeMs = System.currentTimeMillis();
-        }
-    }
-
-    @Override
-    public void updateThresholds(long lowThreshold, long severeThreshold) {
-        mLowWarningThreshold = lowThreshold;
-        mSevereWarningThreshold = severeThreshold;
+    public void updateSnapshot(BatteryStateSnapshot snapshot) {
+        mCurrentBatterySnapshot = snapshot;
     }
 
     private void updateNotification() {
@@ -254,15 +242,17 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
 
     protected void showWarningNotification() {
         final String percentage = NumberFormat.getPercentInstance()
-                .format((double) mBatteryLevel / 100.0);
+                .format((double) mCurrentBatterySnapshot.getBatteryLevel() / 100.0);
 
-        // get standard notification copy
+        // get shared standard notification copy
         String title = mContext.getString(R.string.battery_low_title);
-        String contentText = mContext.getString(R.string.battery_low_percent_format, percentage);
+        String contentText;
 
-        // override notification copy if hybrid notification enabled
-        if (mEstimate != null) {
+        // get correct content text if notification is hybrid or not
+        if (mCurrentBatterySnapshot.isHybrid()) {
             contentText = getHybridContentString(percentage);
+        } else {
+            contentText = mContext.getString(R.string.battery_low_percent_format, percentage);
         }
 
         final Notification.Builder nb =
@@ -282,8 +272,9 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
         }
         // Make the notification red if the percentage goes below a certain amount or the time
         // remaining estimate is disabled
-        if (mEstimate == null || mBucket < 0
-                || mEstimate.estimateMillis < mSevereWarningThreshold) {
+        if (!mCurrentBatterySnapshot.isHybrid() || mBucket < 0
+                || mCurrentBatterySnapshot.getTimeRemainingMillis()
+                        < mCurrentBatterySnapshot.getSevereThresholdMillis()) {
             nb.setColor(Utils.getColorAttrDefaultColor(mContext, android.R.attr.colorError));
         }
 
@@ -324,10 +315,10 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
 
     private String getHybridContentString(String percentage) {
         return PowerUtil.getBatteryRemainingStringFormatted(
-            mContext,
-            mEstimate.estimateMillis,
-            percentage,
-            mEstimate.isBasedOnUsage);
+                mContext,
+                mCurrentBatterySnapshot.getTimeRemainingMillis(),
+                percentage,
+                mCurrentBatterySnapshot.isBasedOnUsage());
     }
 
     private PendingIntent pendingBroadcast(String action) {
