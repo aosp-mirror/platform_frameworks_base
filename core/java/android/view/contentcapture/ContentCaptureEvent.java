@@ -72,23 +72,25 @@ public final class ContentCaptureEvent implements Parcelable {
     public static final int TYPE_VIEW_TEXT_CHANGED = 3;
 
     /**
-     * Called before events (such as {@link #TYPE_VIEW_APPEARED}) representing the initial view
-     * hierarchy are sent.
+     * Called before events (such as {@link #TYPE_VIEW_APPEARED} and/or
+     * {@link #TYPE_VIEW_DISAPPEARED}) representing a view hierarchy are sent.
      *
      * <p><b>NOTE</b>: there is no guarantee this event will be sent. For example, it's not sent
      * if the initial view hierarchy doesn't initially have any view that's important for content
      * capture.
      */
+    // TODO(b/125395044): change to TYPE_VIEW_TREE_APPEARING
     public static final int TYPE_INITIAL_VIEW_TREE_APPEARING = 4;
 
     /**
-     * Called after events (such as {@link #TYPE_VIEW_APPEARED}) representing the initial view
-     * hierarchy are sent.
+     * Called after events (such as {@link #TYPE_VIEW_APPEARED} and/or
+     * {@link #TYPE_VIEW_DISAPPEARED}) representing a view hierarchy were sent.
      *
      * <p><b>NOTE</b>: there is no guarantee this event will be sent. For example, it's not sent
      * if the initial view hierarchy doesn't initially have any view that's important for content
      * capture.
      */
+    // TODO(b/125395044): change to TYPE_VIEW_TREE_APPEARED
     public static final int TYPE_INITIAL_VIEW_TREE_APPEARED = 5;
 
     /**
@@ -418,9 +420,9 @@ public final class ContentCaptureEvent implements Parcelable {
             case TYPE_VIEW_TEXT_CHANGED:
                 return "VIEW_TEXT_CHANGED";
             case TYPE_INITIAL_VIEW_TREE_APPEARING:
-                return "INITIAL_VIEW_HIERARCHY_STARTED";
+                return "VIEW_TREE_APPEARING";
             case TYPE_INITIAL_VIEW_TREE_APPEARED:
-                return "INITIAL_VIEW_HIERARCHY_FINISHED";
+                return "VIEW_TREE_APPEARED";
             case TYPE_CONTEXT_UPDATED:
                 return "CONTEXT_UPDATED";
             default:

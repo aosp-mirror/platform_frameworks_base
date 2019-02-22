@@ -2796,28 +2796,58 @@ public final class ViewRootImpl implements ViewParent,
             }
         }
 
-        // TODO(b/125395044): might need to check for added events too and flush them
-        if (mAttachInfo.mContentCaptureRemovedIds != null) {
-            MainContentCaptureSession mainSession = mAttachInfo.mContentCaptureManager
-                    .getMainContentCaptureSession();
-            Trace.traceBegin(Trace.TRACE_TAG_VIEW, "notifyContentCaptureViewsGone");
-            try {
-                for (int i = 0; i < mAttachInfo.mContentCaptureRemovedIds.size(); i++) {
-                    String sessionId = mAttachInfo.mContentCaptureRemovedIds
-                            .keyAt(i);
-                    ArrayList<AutofillId> ids = mAttachInfo.mContentCaptureRemovedIds
-                            .valueAt(i);
-                    mainSession.notifyViewsDisappeared(sessionId, ids);
-                }
-                mAttachInfo.mContentCaptureRemovedIds = null;
-                mAttachInfo.mContentCaptureManager
-                        .flush(ContentCaptureSession.FLUSH_REASON_POST_VIEW_ROOT_TRAVERSAL);
-            } finally {
-                Trace.traceEnd(Trace.TRACE_TAG_VIEW);
-            }
+        if (mAttachInfo.mContentCaptureEvents != null) {
+            notifyContentCatpureEvents();
         }
 
         mIsInTraversal = false;
+    }
+
+    private void notifyContentCatpureEvents() {
+        Trace.traceBegin(Trace.TRACE_TAG_VIEW, "notifyContentCaptureEvents");
+        try {
+            MainContentCaptureSession mainSession = mAttachInfo.mContentCaptureManager
+                    .getMainContentCaptureSession();
+            if (mainSession == null) {
+                Log.w(mTag, "no MainContentCaptureSession on AttachInfo");
+                return;
+            }
+            for (int i = 0; i < mAttachInfo.mContentCaptureEvents.size(); i++) {
+                String sessionId = mAttachInfo.mContentCaptureEvents
+                        .keyAt(i);
+                mainSession.notifyViewHierarchyEvent(sessionId, /* started = */ true);
+                ArrayList<Object> events = mAttachInfo.mContentCaptureEvents
+                        .valueAt(i);
+                for_each_event: for (int j = 0; j < events.size(); j++) {
+                    Object event = events.get(j);
+                    if (event instanceof AutofillId) {
+                        mainSession.notifyViewDisappeared(sessionId, (AutofillId) event);
+                    } else if (event instanceof View) {
+                        View view = (View) event;
+                        ContentCaptureSession session = view.getContentCaptureSession();
+                        if (session == null) {
+                            Log.w(mTag, "no content capture session on view: " + view);
+                            continue for_each_event;
+                        }
+                        String actualId = session.getId().toString();
+                        if (!actualId.equals(sessionId)) {
+                            Log.w(mTag, "content capture session mismatch for view (" + view
+                                    + "): was " + sessionId + " before, it's " + actualId + " now");
+                            continue for_each_event;
+                        }
+                        ViewStructure structure = session.newViewStructure(view);
+                        view.onProvideContentCaptureStructure(structure, /* flags= */ 0);
+                        session.notifyViewAppeared(structure);
+                    } else {
+                        Log.w(mTag, "invalid content capture event: " + event);
+                    }
+                }
+                mainSession.notifyViewHierarchyEvent(sessionId, /* started = */ false);
+            }
+            mAttachInfo.mContentCaptureEvents = null;
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_VIEW);
+        }
     }
 
     private void notifySurfaceDestroyed() {
@@ -2950,10 +2980,9 @@ public final class ViewRootImpl implements ViewParent,
             }
         }
         mFirstInputStage.onWindowFocusChanged(hasWindowFocus);
-        // TODO(b/125395044): right now the list of events is always empty on
-        // when hasWindowFocus is false, as the removed events are effectively flushed on
-        // FLUSH_REASON_POST_VIEW_ROOT_TRAVERSAL. If after the final refactorings that's still the
-        // case, we should add another reason for FLUSH_REASON_VIEW_ROOT_EXITED
+        // NOTE: there's no view visibility (appeared / disapparead) events when the windows focus
+        // is lost, so we don't need to to force a flush - there might be other events such as
+        // text changes, but these should be flushed independently.
         if (hasWindowFocus) {
             performContentCaptureFlushIfNecessary(
                     ContentCaptureSession.FLUSH_REASON_VIEW_ROOT_ENTERED);

@@ -134,8 +134,6 @@ public abstract class ContentCaptureSession implements AutoCloseable {
     /** @hide */
     public static final int FLUSH_REASON_VIEW_ROOT_ENTERED = 2;
     /** @hide */
-    public static final int FLUSH_REASON_POST_VIEW_ROOT_TRAVERSAL = 3;
-    /** @hide */
     public static final int FLUSH_REASON_SESSION_STARTED = 4;
     /** @hide */
     public static final int FLUSH_REASON_SESSION_FINISHED = 5;
@@ -149,7 +147,6 @@ public abstract class ContentCaptureSession implements AutoCloseable {
             FLUSH_REASON_SESSION_FINISHED,
             FLUSH_REASON_IDLE_TIMEOUT,
             FLUSH_REASON_VIEW_ROOT_ENTERED,
-            FLUSH_REASON_POST_VIEW_ROOT_TRAVERSAL
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface FlushReason{}
@@ -512,8 +509,6 @@ public abstract class ContentCaptureSession implements AutoCloseable {
                 return "IDLE";
             case FLUSH_REASON_VIEW_ROOT_ENTERED:
                 return "ENTERED";
-            case FLUSH_REASON_POST_VIEW_ROOT_TRAVERSAL:
-                return "TRAVERSAL";
             default:
                 return "UNKOWN-" + reason;
         }

@@ -126,7 +126,6 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
     @Nullable
     private final LocalLog mFlushHistory;
 
-    /** @hide */
     protected MainContentCaptureSession(@NonNull Context context,
             @NonNull ContentCaptureManager manager, @NonNull Handler handler,
             @NonNull IContentCaptureManager systemServerInterface) {
@@ -153,8 +152,6 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
 
     /**
      * Starts this session.
-     *
-     * @hide
      */
     @UiThread
     void start(@NonNull IBinder token, @NonNull ComponentName component,
@@ -547,7 +544,7 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
 
     @Override
     public void internalNotifyViewHierarchyEvent(boolean started) {
-        notifyInitialViewHierarchyEvent(mId, started);
+        notifyViewHierarchyEvent(mId, started);
     }
 
     @Override
@@ -581,21 +578,9 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
                 .setViewNode(node.mNode));
     }
 
-    void notifyViewDisappeared(@NonNull String sessionId, @NonNull AutofillId id) {
-        sendEvent(
-                new ContentCaptureEvent(sessionId, TYPE_VIEW_DISAPPEARED).setAutofillId(id));
-    }
-
-    /** @hide */
-    public void notifyViewsDisappeared(@NonNull String sessionId,
-            @NonNull ArrayList<AutofillId> ids) {
-        final ContentCaptureEvent event = new ContentCaptureEvent(sessionId, TYPE_VIEW_DISAPPEARED);
-        if (ids.size() == 1) {
-            event.setAutofillId(ids.get(0));
-        } else {
-            event.setAutofillIds(ids);
-        }
-        sendEvent(event);
+    /** Public because is also used by ViewRootImpl */
+    public void notifyViewDisappeared(@NonNull String sessionId, @NonNull AutofillId id) {
+        sendEvent(new ContentCaptureEvent(sessionId, TYPE_VIEW_DISAPPEARED).setAutofillId(id));
     }
 
     void notifyViewTextChanged(@NonNull String sessionId, @NonNull AutofillId id,
@@ -604,13 +589,11 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
                 .setText(text));
     }
 
-    void notifyInitialViewHierarchyEvent(@NonNull String sessionId, boolean started) {
-        if (started) {
-            sendEvent(new ContentCaptureEvent(sessionId, TYPE_INITIAL_VIEW_TREE_APPEARING));
-        } else {
-            sendEvent(new ContentCaptureEvent(sessionId, TYPE_INITIAL_VIEW_TREE_APPEARED),
-                    FORCE_FLUSH);
-        }
+    /** Public because is also used by ViewRootImpl */
+    public void notifyViewHierarchyEvent(@NonNull String sessionId, boolean started) {
+        final int type = started ? TYPE_INITIAL_VIEW_TREE_APPEARING
+                : TYPE_INITIAL_VIEW_TREE_APPEARED;
+        sendEvent(new ContentCaptureEvent(sessionId, type), FORCE_FLUSH);
     }
 
     void notifyContextUpdated(@NonNull String sessionId,
