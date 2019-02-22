@@ -17,7 +17,6 @@ package com.android.keyguard;
 
 import static android.view.Display.DEFAULT_DISPLAY;
 
-import android.annotation.Nullable;
 import android.app.Presentation;
 import android.content.Context;
 import android.graphics.Point;
@@ -32,14 +31,10 @@ import android.view.DisplayInfo;
 import android.view.View;
 import android.view.WindowManager;
 
-import java.util.function.BooleanSupplier;
-
 // TODO(multi-display): Support multiple external displays
 public class KeyguardDisplayManager {
     protected static final String TAG = "KeyguardDisplayManager";
     private static boolean DEBUG = KeyguardConstants.DEBUG;
-
-    private final ViewMediatorCallback mCallback;
 
     private final MediaRouter mMediaRouter;
     private final DisplayManager mDisplayService;
@@ -57,7 +52,7 @@ public class KeyguardDisplayManager {
         public void onDisplayAdded(int displayId) {
             final Display display = mDisplayService.getDisplay(displayId);
             if (mShowing) {
-                notifyIfChanged(() -> showPresentation(display));
+                showPresentation(display);
             }
         }
 
@@ -76,13 +71,12 @@ public class KeyguardDisplayManager {
 
         @Override
         public void onDisplayRemoved(int displayId) {
-            notifyIfChanged(() -> hidePresentation(displayId));
+            hidePresentation(displayId);
         }
     };
 
-    public KeyguardDisplayManager(Context context, ViewMediatorCallback callback) {
+    public KeyguardDisplayManager(Context context) {
         mContext = context;
-        mCallback = callback;
         mMediaRouter = mContext.getSystemService(MediaRouter.class);
         mDisplayService = mContext.getSystemService(DisplayManager.class);
         mDisplayService.registerDisplayListener(mDisplayListener, null /* handler */);
@@ -138,42 +132,13 @@ public class KeyguardDisplayManager {
 
     /**
      * @param displayId The id of the display to hide the presentation off.
-     * @return {@code true} if the a presentation was removed.
-     *         {@code false} if the presentation was not added before.
      */
-    private boolean hidePresentation(int displayId) {
+    private void hidePresentation(int displayId) {
         final Presentation presentation = mPresentations.get(displayId);
         if (presentation != null) {
             presentation.dismiss();
             mPresentations.remove(displayId);
-            return true;
         }
-        return false;
-    }
-
-    private void notifyIfChanged(BooleanSupplier updateMethod) {
-        if (updateMethod.getAsBoolean()) {
-            final int[] displayList = getPresentationDisplayIds();
-            mCallback.onSecondaryDisplayShowingChanged(displayList);
-        }
-    }
-
-    /**
-     * @return An array of displayId's on which a {@link KeyguardPresentation} is showing on.
-     */
-    @Nullable
-    private int[] getPresentationDisplayIds() {
-        final int size = mPresentations.size();
-        if (size == 0) return null;
-
-        final int[] displayIds = new int[size];
-        for (int i = mPresentations.size() - 1; i >= 0; i--) {
-            final Presentation presentation = mPresentations.valueAt(i);
-            if (presentation != null) {
-                displayIds[i] = presentation.getDisplay().getDisplayId();
-            }
-        }
-        return displayIds;
     }
 
     public void show() {
@@ -181,7 +146,7 @@ public class KeyguardDisplayManager {
             if (DEBUG) Log.v(TAG, "show");
             mMediaRouter.addCallback(MediaRouter.ROUTE_TYPE_REMOTE_DISPLAY,
                     mMediaRouterCallback, MediaRouter.CALLBACK_FLAG_PASSIVE_DISCOVERY);
-            notifyIfChanged(() -> updateDisplays(true /* showing */));
+            updateDisplays(true /* showing */);
         }
         mShowing = true;
     }
@@ -190,7 +155,7 @@ public class KeyguardDisplayManager {
         if (mShowing) {
             if (DEBUG) Log.v(TAG, "hide");
             mMediaRouter.removeCallback(mMediaRouterCallback);
-            notifyIfChanged(() -> updateDisplays(false /* showing */));
+            updateDisplays(false /* showing */);
         }
         mShowing = false;
     }
@@ -200,19 +165,19 @@ public class KeyguardDisplayManager {
         @Override
         public void onRouteSelected(MediaRouter router, int type, RouteInfo info) {
             if (DEBUG) Log.d(TAG, "onRouteSelected: type=" + type + ", info=" + info);
-            notifyIfChanged(() -> updateDisplays(mShowing));
+            updateDisplays(mShowing);
         }
 
         @Override
         public void onRouteUnselected(MediaRouter router, int type, RouteInfo info) {
             if (DEBUG) Log.d(TAG, "onRouteUnselected: type=" + type + ", info=" + info);
-            notifyIfChanged(() -> updateDisplays(mShowing));
+            updateDisplays(mShowing);
         }
 
         @Override
         public void onRoutePresentationDisplayChanged(MediaRouter router, RouteInfo info) {
             if (DEBUG) Log.d(TAG, "onRoutePresentationDisplayChanged: info=" + info);
-            notifyIfChanged(() -> updateDisplays(mShowing));
+            updateDisplays(mShowing);
         }
     };
 
