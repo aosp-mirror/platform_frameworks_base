@@ -19,6 +19,7 @@ package android.media.audiopolicy;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.media.AudioAttributes;
@@ -417,22 +418,35 @@ public class AudioPolicy {
                 Log.e(TAG, "Cannot use unregistered AudioPolicy");
                 return false;
             }
-            if (mContext == null) {
-                Log.e(TAG, "Cannot use AudioPolicy without context");
-                return false;
-            }
             if (mRegistrationId == null) {
                 Log.e(TAG, "Cannot use unregistered AudioPolicy");
                 return false;
             }
         }
-        if (!(PackageManager.PERMISSION_GRANTED == mContext.checkCallingOrSelfPermission(
+        if (!(PackageManager.PERMISSION_GRANTED == checkCallingOrSelfPermission(
                         android.Manifest.permission.MODIFY_AUDIO_ROUTING))) {
             Slog.w(TAG, "Cannot use AudioPolicy for pid " + Binder.getCallingPid() + " / uid "
                     + Binder.getCallingUid() + ", needs MODIFY_AUDIO_ROUTING");
             return false;
         }
         return true;
+    }
+
+    /**
+     * Returns {@link PackageManager#PERMISSION_GRANTED} if the caller has the given permission.
+     */
+    private @PackageManager.PermissionResult int checkCallingOrSelfPermission(String permission) {
+        if (mContext != null) {
+            return mContext.checkCallingOrSelfPermission(permission);
+        }
+        Slog.v(TAG, "Null context, checking permission via ActivityManager");
+        int pid = Binder.getCallingPid();
+        int uid = Binder.getCallingUid();
+        try {
+            return ActivityManager.getService().checkPermission(permission, pid, uid);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     private void checkMixReadyToUse(AudioMix mix, boolean forTrack)

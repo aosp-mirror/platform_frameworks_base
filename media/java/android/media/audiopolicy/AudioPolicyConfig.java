@@ -18,8 +18,6 @@ package android.media.audiopolicy;
 
 import android.annotation.NonNull;
 import android.media.AudioFormat;
-import android.media.AudioManager;
-import android.media.AudioPatch;
 import android.media.audiopolicy.AudioMixingRule.AudioMixMatchCriterion;
 import android.os.Parcel;
 import android.os.Parcelable;
