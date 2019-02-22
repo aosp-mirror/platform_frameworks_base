@@ -3107,10 +3107,6 @@ Lcom/android/internal/telephony/ISms$Stub;-><init>()V
 Lcom/android/internal/telephony/ISms$Stub;->asInterface(Landroid/os/IBinder;)Lcom/android/internal/telephony/ISms;
 Lcom/android/internal/telephony/ISub$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
 Lcom/android/internal/telephony/ISub$Stub;->asInterface(Landroid/os/IBinder;)Lcom/android/internal/telephony/ISub;
-Lcom/android/internal/telephony/ISub;->getActiveSubIdList()[I
-Lcom/android/internal/telephony/ISub;->getDefaultDataSubId()I
-Lcom/android/internal/telephony/ISub;->getDefaultSubId()I
-Lcom/android/internal/telephony/ISub;->setDefaultDataSubId(I)V
 Lcom/android/internal/telephony/ITelephony$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
 Lcom/android/internal/telephony/ITelephony$Stub$Proxy;->getDeviceId(Ljava/lang/String;)Ljava/lang/String;
 Lcom/android/internal/telephony/ITelephony$Stub$Proxy;->isRadioOn(Ljava/lang/String;)Z
