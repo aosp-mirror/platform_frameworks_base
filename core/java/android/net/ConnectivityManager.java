@@ -3147,9 +3147,9 @@ public class ConnectivityManager {
 
         /**
          * Called if no network is found in the timeout time specified in
-         * {@link #requestNetwork(NetworkRequest, NetworkCallback, int)} call. This callback is not
-         * called for the version of {@link #requestNetwork(NetworkRequest, NetworkCallback)}
-         * without timeout. When this callback is invoked the associated
+         * {@link #requestNetwork(NetworkRequest, NetworkCallback, int)} call or if the
+         * requested network request cannot be fulfilled (whether or not a timeout was
+         * specified). When this callback is invoked the associated
          * {@link NetworkRequest} will have already been removed and released, as if
          * {@link #unregisterNetworkCallback(NetworkCallback)} had been called.
          */
