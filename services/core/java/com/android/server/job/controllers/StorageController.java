@@ -81,20 +81,16 @@ public final class StorageController extends StateController {
         synchronized (mLock) {
             for (int i = mTrackedTasks.size() - 1; i >= 0; i--) {
                 final JobStatus ts = mTrackedTasks.valueAt(i);
-                boolean previous = ts.setStorageNotLowConstraintSatisfied(storageNotLow);
-                if (previous != storageNotLow) {
-                    reportChange = true;
-                }
+                reportChange |= ts.setStorageNotLowConstraintSatisfied(storageNotLow);
             }
         }
-        // Let the scheduler know that state has changed. This may or may not result in an
-        // execution.
-        if (reportChange) {
-            mStateChangedListener.onControllerStateChanged();
-        }
-        // Also tell the scheduler that any ready jobs should be flushed.
         if (storageNotLow) {
+            // Tell the scheduler that any ready jobs should be flushed.
             mStateChangedListener.onRunJobNow(null);
+        } else if (reportChange) {
+            // Let the scheduler know that state has changed. This may or may not result in an
+            // execution.
+            mStateChangedListener.onControllerStateChanged();
         }
     }
 
@@ -143,9 +139,10 @@ public final class StorageController extends StateController {
                             + sElapsedRealtimeClock.millis());
                 }
                 mStorageLow = true;
+                maybeReportNewStorageState();
             } else if (Intent.ACTION_DEVICE_STORAGE_OK.equals(action)) {
                 if (DEBUG) {
-                    Slog.d(TAG, "Available stoage high enough to do work. @ "
+                    Slog.d(TAG, "Available storage high enough to do work. @ "
                             + sElapsedRealtimeClock.millis());
                 }
                 mStorageLow = false;
