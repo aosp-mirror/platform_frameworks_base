@@ -174,13 +174,17 @@ void ValueMetricProducer::onSlicedConditionMayChangeLocked(bool overallCondition
 }
 
 void ValueMetricProducer::dropDataLocked(const int64_t dropTimeNs) {
-    flushIfNeededLocked(dropTimeNs);
     StatsdStats::getInstance().noteBucketDropped(mMetricId);
-    mPastBuckets.clear();
+    // We are going to flush the data without doing a pull first so we need to invalidte the data.
+    bool pullNeeded = mIsPulled && mCondition == ConditionState::kTrue;
+    if (pullNeeded) {
+        invalidateCurrentBucket();
+    }
+    flushIfNeededLocked(dropTimeNs);
+    clearPastBucketsLocked(dropTimeNs);
 }
 
 void ValueMetricProducer::clearPastBucketsLocked(const int64_t dumpTimeNs) {
-    flushIfNeededLocked(dumpTimeNs);
     mPastBuckets.clear();
     mSkippedBuckets.clear();
 }
@@ -192,7 +196,6 @@ void ValueMetricProducer::onDumpReportLocked(const int64_t dumpTimeNs,
                                              std::set<string> *str_set,
                                              ProtoOutputStream* protoOutput) {
     VLOG("metric %lld dump report now...", (long long)mMetricId);
-    flushIfNeededLocked(dumpTimeNs);
     if (include_current_partial_bucket) {
         // For pull metrics, we need to do a pull at bucket boundaries. If we do not do that the
         // current bucket will have incomplete data and the next will have the wrong snapshot to do
@@ -208,7 +211,7 @@ void ValueMetricProducer::onDumpReportLocked(const int64_t dumpTimeNs,
                     pullAndMatchEventsLocked(dumpTimeNs);
                     break;
             }
-        } 
+        }
         flushCurrentBucketLocked(dumpTimeNs, dumpTimeNs);
     }
     protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_ID, (long long)mMetricId);
@@ -325,12 +328,16 @@ void ValueMetricProducer::onDumpReportLocked(const int64_t dumpTimeNs,
     }
 }
 
-void ValueMetricProducer::invalidateCurrentBucket() {
+void ValueMetricProducer::invalidateCurrentBucketWithoutResetBase() {
     if (!mCurrentBucketIsInvalid) {
         // Only report once per invalid bucket.
         StatsdStats::getInstance().noteInvalidatedBucket(mMetricId);
     }
     mCurrentBucketIsInvalid = true;
+}
+
+void ValueMetricProducer::invalidateCurrentBucket() {
+    invalidateCurrentBucketWithoutResetBase();
     resetBase();
 }
 
@@ -345,42 +352,58 @@ void ValueMetricProducer::resetBase() {
 
 void ValueMetricProducer::onConditionChangedLocked(const bool condition,
                                                    const int64_t eventTimeNs) {
-    if (eventTimeNs < mCurrentBucketStartTimeNs) {
+    bool isEventTooLate  = eventTimeNs < mCurrentBucketStartTimeNs;
+    if (!isEventTooLate) {
+        if (mCondition == ConditionState::kUnknown) {
+            // If the condition was unknown, we mark the bucket as invalid since the bucket will
+            // contain partial data. For instance, the condition change might happen close to the
+            // end of the bucket and we might miss lots of data.
+            //
+            // We still want to pull to set the base.
+            invalidateCurrentBucket();
+        }
+
+        // Pull on condition changes.
+        bool conditionChanged =
+                (mCondition == ConditionState::kTrue && condition == ConditionState::kFalse)
+                || (mCondition == ConditionState::kFalse && condition == ConditionState::kTrue);
+        // We do not need to pull when we go from unknown to false.
+        //
+        // We also pull if the condition was already true in order to be able to flush the bucket at
+        // the end if needed.
+        //
+        // onConditionChangedLocked might happen on bucket boundaries if this is called before
+        // #onDataPulled.
+        if (mIsPulled && (conditionChanged || condition)) {
+            pullAndMatchEventsLocked(eventTimeNs);
+        }
+
+        // When condition change from true to false, clear diff base but don't
+        // reset other counters as we may accumulate more value in the bucket.
+        if (mUseDiff && mCondition == ConditionState::kTrue
+                && condition == ConditionState::kFalse) {
+            resetBase();
+        }
+        mCondition = condition ? ConditionState::kTrue : ConditionState::kFalse;
+
+    } else {
         VLOG("Skip event due to late arrival: %lld vs %lld", (long long)eventTimeNs,
              (long long)mCurrentBucketStartTimeNs);
         StatsdStats::getInstance().noteConditionChangeInNextBucket(mMetricId);
         invalidateCurrentBucket();
-        return;
+        // Something weird happened. If we received another event if the future, the condition might
+        // be wrong.
+        mCondition = ConditionState::kUnknown;
     }
 
+    // This part should alway be called.
     flushIfNeededLocked(eventTimeNs);
-
-    if (mCondition != ConditionState::kUnknown) {
-        // Pull on condition changes.
-        bool conditionChanged = mCondition != condition;
-        // We do not need to pull when we go from unknown to false.
-        if (mIsPulled && conditionChanged) {
-            pullAndMatchEventsLocked(eventTimeNs);
-        }
-
-        // when condition change from true to false, clear diff base but don't
-        // reset other counters as we may accumulate more value in the bucket.
-        if (mUseDiff && mCondition == ConditionState::kTrue && condition == ConditionState::kFalse) {
-            resetBase();
-        }
-    } else {
-        // If the condition was unknown, we mark the bucket as invalid since the bucket will contain
-        // partial data. For instance, the condition change might happen close to the end of the
-        // bucket and we might miss lots of data.
-        invalidateCurrentBucket();
-    }
-    mCondition = condition ? ConditionState::kTrue : ConditionState::kFalse;
 }
 
 void ValueMetricProducer::pullAndMatchEventsLocked(const int64_t timestampNs) {
     vector<std::shared_ptr<LogEvent>> allData;
     if (!mPullerManager->Pull(mPullTagId, &allData)) {
-        ALOGE("Gauge Stats puller failed for tag: %d at %lld", mPullTagId, (long long)timestampNs);
+        ALOGE("Stats puller failed for tag: %d at %lld", mPullTagId, (long long)timestampNs);
         invalidateCurrentBucket();
         return;
     }
@@ -392,38 +415,46 @@ int64_t ValueMetricProducer::calcPreviousBucketEndTime(const int64_t currentTime
     return mTimeBaseNs + ((currentTimeNs - mTimeBaseNs) / mBucketSizeNs) * mBucketSizeNs;
 }
 
+// By design, statsd pulls data at bucket boundaries using AlarmManager. These pulls are likely
+// to be delayed. Other events like condition changes or app upgrade which are not based on
+// AlarmManager might have arrived earlier and close the bucket.
 void ValueMetricProducer::onDataPulled(const std::vector<std::shared_ptr<LogEvent>>& allData,
                                        bool pullSuccess, int64_t originalPullTimeNs) {
     std::lock_guard<std::mutex> lock(mMutex);
-    if (mCondition == ConditionState::kTrue) {
-        if (!pullSuccess) {
+        if (mCondition == ConditionState::kTrue) {
             // If the pull failed, we won't be able to compute a diff.
-            invalidateCurrentBucket();
-            return;
+            if (!pullSuccess) {
+                invalidateCurrentBucket();
+            } else {
+                bool isEventLate = originalPullTimeNs < getCurrentBucketEndTimeNs();
+                if (isEventLate) {
+                    // If the event is late, we are in the middle of a bucket. Just
+                    // process the data without trying to snap the data to the nearest bucket.
+                    accumulateEvents(allData, originalPullTimeNs, originalPullTimeNs);
+                } else {
+                    // For scheduled pulled data, the effective event time is snap to the nearest
+                    // bucket end. In the case of waking up from a deep sleep state, we will
+                    // attribute to the previous bucket end. If the sleep was long but not very
+                    // long, we will be in the immediate next bucket. Previous bucket may get a
+                    // larger number as we pull at a later time than real bucket end.
+                    //
+                    // If the sleep was very long, we skip more than one bucket before sleep. In
+                    // this case, if the diff base will be cleared and this new data will serve as
+                    // new diff base.
+                    int64_t bucketEndTime = calcPreviousBucketEndTime(originalPullTimeNs) - 1;
+                    StatsdStats::getInstance().noteBucketBoundaryDelayNs(
+                            mMetricId, originalPullTimeNs - bucketEndTime);
+                    accumulateEvents(allData, originalPullTimeNs, bucketEndTime);
+                }
+            }
         }
 
-        // For scheduled pulled data, the effective event time is snap to the nearest
-        // bucket end. In the case of waking up from a deep sleep state, we will
-        // attribute to the previous bucket end. If the sleep was long but not very long, we
-        // will be in the immediate next bucket. Previous bucket may get a larger number as
-        // we pull at a later time than real bucket end.
-        // If the sleep was very long, we skip more than one bucket before sleep. In this case,
-        // if the diff base will be cleared and this new data will serve as new diff base.
-        int64_t bucketEndTime = calcPreviousBucketEndTime(originalPullTimeNs) - 1;
-        StatsdStats::getInstance().noteBucketBoundaryDelayNs(
-                mMetricId, originalPullTimeNs - bucketEndTime);
-        accumulateEvents(allData, originalPullTimeNs, bucketEndTime);
-
-        // We can probably flush the bucket. Since we used bucketEndTime when calling
-        // #onMatchedLogEventInternalLocked, the current bucket will not have been flushed.
-        flushIfNeededLocked(originalPullTimeNs);
-
-    } else {
-        VLOG("No need to commit data on condition false.");
-    }
+    // We can probably flush the bucket. Since we used bucketEndTime when calling
+    // #onMatchedLogEventInternalLocked, the current bucket will not have been flushed.
+    flushIfNeededLocked(originalPullTimeNs);
 }
 
-void ValueMetricProducer::accumulateEvents(const std::vector<std::shared_ptr<LogEvent>>& allData, 
+void ValueMetricProducer::accumulateEvents(const std::vector<std::shared_ptr<LogEvent>>& allData,
                                            int64_t originalPullTimeNs, int64_t eventElapsedTimeNs) {
     bool isEventLate = eventElapsedTimeNs < mCurrentBucketStartTimeNs;
     if (isEventLate) {
@@ -463,7 +494,7 @@ void ValueMetricProducer::accumulateEvents(const std::vector<std::shared_ptr<Log
     // If the new pulled data does not contains some keys we track in our intervals, we need to
     // reset the base.
     for (auto& slice : mCurrentSlicedBucket) {
-        bool presentInPulledData = mMatchedMetricDimensionKeys.find(slice.first) 
+        bool presentInPulledData = mMatchedMetricDimensionKeys.find(slice.first)
                 != mMatchedMetricDimensionKeys.end();
         if (!presentInPulledData) {
             for (auto& interval : slice.second) {
@@ -587,7 +618,10 @@ void ValueMetricProducer::onMatchedLogEventInternalLocked(const size_t matcherIn
     }
     mMatchedMetricDimensionKeys.insert(eventKey);
 
-    flushIfNeededLocked(eventTimeNs);
+    if (!mIsPulled) {
+        // We cannot flush without doing a pull first.
+        flushIfNeededLocked(eventTimeNs);
+    }
 
     // For pulled data, we already check condition when we decide to pull or
     // in onDataPulled. So take all of them.
@@ -722,32 +756,42 @@ void ValueMetricProducer::onMatchedLogEventInternalLocked(const size_t matcherIn
     }
 }
 
+// For pulled metrics, we always need to make sure we do a pull before flushing the bucket
+// if mCondition is true!
 void ValueMetricProducer::flushIfNeededLocked(const int64_t& eventTimeNs) {
     int64_t currentBucketEndTimeNs = getCurrentBucketEndTimeNs();
-
     if (eventTimeNs < currentBucketEndTimeNs) {
         VLOG("eventTime is %lld, less than next bucket start time %lld", (long long)eventTimeNs,
              (long long)(currentBucketEndTimeNs));
         return;
     }
-
-    int64_t numBucketsForward = 1 + (eventTimeNs - currentBucketEndTimeNs) / mBucketSizeNs;
+    int64_t numBucketsForward = calcBucketsForwardCount(eventTimeNs);
     int64_t nextBucketStartTimeNs = currentBucketEndTimeNs + (numBucketsForward - 1) * mBucketSizeNs;
     flushCurrentBucketLocked(eventTimeNs, nextBucketStartTimeNs);
+}
 
-    mCurrentBucketNum += numBucketsForward;
-    if (numBucketsForward > 1) {
-        VLOG("Skipping forward %lld buckets", (long long)numBucketsForward);
-        StatsdStats::getInstance().noteSkippedForwardBuckets(mMetricId);
-        // take base again in future good bucket.
-        resetBase();
+int64_t ValueMetricProducer::calcBucketsForwardCount(const int64_t& eventTimeNs) const {
+    int64_t currentBucketEndTimeNs = getCurrentBucketEndTimeNs();
+    if (eventTimeNs < currentBucketEndTimeNs) {
+        return 0;
     }
+    return 1 + (eventTimeNs - currentBucketEndTimeNs) / mBucketSizeNs;
 }
 
 void ValueMetricProducer::flushCurrentBucketLocked(const int64_t& eventTimeNs,
                                                    const int64_t& nextBucketStartTimeNs) {
     if (mCondition == ConditionState::kUnknown) {
         StatsdStats::getInstance().noteBucketUnknownCondition(mMetricId);
+    }
+
+    int64_t numBucketsForward = calcBucketsForwardCount(eventTimeNs);
+    mCurrentBucketNum += numBucketsForward;
+    if (numBucketsForward > 1) {
+        VLOG("Skipping forward %lld buckets", (long long)numBucketsForward);
+        StatsdStats::getInstance().noteSkippedForwardBuckets(mMetricId);
+        // Something went wrong. Maybe the device was sleeping for a long time. It is better
+        // to mark the current bucket as invalid. The last pull might have been successful through.
+        invalidateCurrentBucketWithoutResetBase();
     }
 
     VLOG("finalizing bucket for %ld, dumping %d slices", (long)mCurrentBucketStartTimeNs,

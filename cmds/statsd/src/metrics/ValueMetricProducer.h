@@ -39,6 +39,13 @@ struct ValueBucket {
     std::vector<Value> values;
 };
 
+
+// Aggregates values within buckets.
+//
+// There are different events that might complete a bucket
+// - a condition change
+// - an app upgrade
+// - an alarm set to the end of the bucket
 class ValueMetricProducer : public virtual MetricProducer, public virtual PullDataReceiver {
 public:
     ValueMetricProducer(const ConfigKey& key, const ValueMetric& valueMetric,
@@ -61,9 +68,8 @@ public:
         if (!mSplitBucketForAppUpgrade) {
             return;
         }
-        flushIfNeededLocked(eventTimeNs - 1);
         if (mIsPulled && mCondition) {
-            pullAndMatchEventsLocked(eventTimeNs - 1);
+            pullAndMatchEventsLocked(eventTimeNs);
         }
         flushCurrentBucketLocked(eventTimeNs, eventTimeNs);
     };
@@ -94,9 +100,12 @@ private:
 
     void dumpStatesLocked(FILE* out, bool verbose) const override;
 
-    // Util function to flush the old packet.
+    // For pulled metrics, this method should only be called if a pulled have be done. Else we will
+    // not have complete data for the bucket.
     void flushIfNeededLocked(const int64_t& eventTime) override;
 
+    // For pulled metrics, this method should only be called if a pulled have be done. Else we will
+    // not have complete data for the bucket.
     void flushCurrentBucketLocked(const int64_t& eventTimeNs,
                                   const int64_t& nextBucketStartTimeNs) override;
 
@@ -105,8 +114,12 @@ private:
     // Calculate previous bucket end time based on current time.
     int64_t calcPreviousBucketEndTime(const int64_t currentTimeNs);
 
+    // Calculate how many buckets are present between the current bucket and eventTimeNs.
+    int64_t calcBucketsForwardCount(const int64_t& eventTimeNs) const;
+
     // Mark the data as invalid.
     void invalidateCurrentBucket();
+    void invalidateCurrentBucketWithoutResetBase();
 
     const int mWhatMatcherIndex;
 
@@ -256,6 +269,10 @@ private:
     FRIEND_TEST(ValueMetricProducerTest, TestEmptyDataResetsBase_onBucketBoundary);
     FRIEND_TEST(ValueMetricProducerTest, TestPartialResetOnBucketBoundaries);
     FRIEND_TEST(ValueMetricProducerTest, TestBucketIncludingUnknownConditionIsInvalid);
+    FRIEND_TEST(ValueMetricProducerTest, TestBucketBoundariesOnConditionChange);
+    FRIEND_TEST(ValueMetricProducerTest, TestBucketBoundariesOnAppUpgrade);
+    FRIEND_TEST(ValueMetricProducerTest, TestLateOnDataPulledWithoutDiff);
+    FRIEND_TEST(ValueMetricProducerTest, TestLateOnDataPulledWithDiff);
     friend class ValueMetricProducerTestHelper;
 };
 
