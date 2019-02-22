@@ -40,8 +40,15 @@ public class GeneratedInspectionCompanionProvider implements InspectionCompanion
             final Class<InspectionCompanion<T>> companionClass =
                     (Class<InspectionCompanion<T>>) cls.getClassLoader().loadClass(companionName);
             return companionClass.newInstance();
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+        } catch (ClassNotFoundException e) {
             return null;
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        } catch (InstantiationException e) {
+            Throwable cause = e.getCause();
+            if (cause instanceof RuntimeException) throw (RuntimeException) cause;
+            if (cause instanceof Error) throw (Error) cause;
+            throw new RuntimeException(cause);
         }
     }
 }
