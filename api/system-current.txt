@@ -5918,7 +5918,7 @@ package android.telephony {
     field public static final int VSNCP_TIMEOUT = 2236; // 0x8bc
   }
 
-  public class DisconnectCause {
+  public final class DisconnectCause {
     field public static final int ALREADY_DIALING = 72; // 0x48
     field public static final int ANSWERED_ELSEWHERE = 52; // 0x34
     field public static final int BUSY = 4; // 0x4
@@ -6096,18 +6096,18 @@ package android.telephony {
 
   public class PhoneStateListener {
     method public void onCallAttributesChanged(@NonNull android.telephony.CallAttributes);
-    method public void onCallDisconnectCauseChanged(int, int);
-    method public void onImsCallDisconnectCauseChanged(@NonNull android.telephony.ims.ImsReasonInfo);
-    method public void onPreciseCallStateChanged(android.telephony.PreciseCallState);
-    method public void onPreciseDataConnectionStateChanged(android.telephony.PreciseDataConnectionState);
+    method @RequiresPermission("android.permission.READ_PRECISE_PHONE_STATE") public void onCallDisconnectCauseChanged(int, int);
+    method @RequiresPermission("android.permission.READ_PRECISE_PHONE_STATE") public void onImsCallDisconnectCauseChanged(@NonNull android.telephony.ims.ImsReasonInfo);
+    method @RequiresPermission("android.permission.READ_PRECISE_PHONE_STATE") public void onPreciseCallStateChanged(@NonNull android.telephony.PreciseCallState);
+    method @RequiresPermission("android.permission.READ_PRECISE_PHONE_STATE") public void onPreciseDataConnectionStateChanged(android.telephony.PreciseDataConnectionState);
     method public void onRadioPowerStateChanged(int);
     method public void onSrvccStateChanged(int);
     method public void onVoiceActivationStateChanged(int);
     field public static final int LISTEN_CALL_ATTRIBUTES_CHANGED = 67108864; // 0x4000000
-    field public static final int LISTEN_CALL_DISCONNECT_CAUSES = 33554432; // 0x2000000
-    field public static final int LISTEN_IMS_CALL_DISCONNECT_CAUSES = 134217728; // 0x8000000
-    field public static final int LISTEN_PRECISE_CALL_STATE = 2048; // 0x800
-    field public static final int LISTEN_PRECISE_DATA_CONNECTION_STATE = 4096; // 0x1000
+    field @RequiresPermission("android.permission.READ_PRECISE_PHONE_STATE") public static final int LISTEN_CALL_DISCONNECT_CAUSES = 33554432; // 0x2000000
+    field @RequiresPermission("android.permission.READ_PRECISE_PHONE_STATE") public static final int LISTEN_IMS_CALL_DISCONNECT_CAUSES = 134217728; // 0x8000000
+    field @RequiresPermission("android.permission.READ_PRECISE_PHONE_STATE") public static final int LISTEN_PRECISE_CALL_STATE = 2048; // 0x800
+    field @RequiresPermission("android.permission.READ_PRECISE_PHONE_STATE") public static final int LISTEN_PRECISE_DATA_CONNECTION_STATE = 4096; // 0x1000
     field public static final int LISTEN_RADIO_POWER_STATE_CHANGED = 8388608; // 0x800000
     field @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public static final int LISTEN_SRVCC_STATE_CHANGED = 16384; // 0x4000
     field public static final int LISTEN_VOICE_ACTIVATION_STATE = 131072; // 0x20000
@@ -6142,7 +6142,7 @@ package android.telephony {
     field public static final android.os.Parcelable.Creator<android.telephony.PreciseDataConnectionState> CREATOR;
   }
 
-  public class PreciseDisconnectCause {
+  public final class PreciseDisconnectCause {
     field public static final int ACCESS_CLASS_BLOCKED = 260; // 0x104
     field public static final int ACCESS_INFORMATION_DISCARDED = 43; // 0x2b
     field public static final int ACM_LIMIT_EXCEEDED = 68; // 0x44
