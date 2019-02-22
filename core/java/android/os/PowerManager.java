@@ -1569,7 +1569,7 @@ public final class PowerManager {
     @LocationPowerSaveMode
     public int getLocationPowerSaveMode() {
         final PowerSaveState powerSaveState = getPowerSaveState(ServiceType.LOCATION);
-        if (!powerSaveState.globalBatterySaverEnabled) {
+        if (!powerSaveState.batterySaverEnabled) {
             return LOCATION_MODE_NO_CHANGE;
         }
         return powerSaveState.locationMode;
