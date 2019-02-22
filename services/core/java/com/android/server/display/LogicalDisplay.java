@@ -87,7 +87,7 @@ final class LogicalDisplay {
     // True if the logical display has unique content.
     private boolean mHasContent;
 
-    private int mRequestedModeId;
+    private int[] mAllowedDisplayModes = new int[0];
     private int mRequestedColorMode;
 
     // The display offsets to apply to the display projection.
@@ -353,12 +353,14 @@ final class LogicalDisplay {
         // Set the layer stack.
         device.setLayerStackLocked(t, isBlanked ? BLANK_LAYER_STACK : mLayerStack);
 
-        // Set the color mode and mode.
+        // Set the color mode and allowed display mode.
         if (device == mPrimaryDisplayDevice) {
-            device.requestDisplayModesLocked(
-                    mRequestedColorMode, mRequestedModeId);
+            device.setAllowedDisplayModesLocked(mAllowedDisplayModes);
+            device.setRequestedColorModeLocked(mRequestedColorMode);
         } else {
-            device.requestDisplayModesLocked(0, 0);  // Revert to default.
+            // Reset to default for non primary displays
+            device.setAllowedDisplayModesLocked(new int[] {0});
+            device.setRequestedColorModeLocked(0);
         }
 
         // Only grab the display info now as it may have been changed based on the requests above.
@@ -462,17 +464,17 @@ final class LogicalDisplay {
     }
 
     /**
-     * Requests the given mode.
+     * Sets the display modes the system is free to switch between.
      */
-    public void setRequestedModeIdLocked(int modeId) {
-        mRequestedModeId = modeId;
+    public void setAllowedDisplayModesLocked(int[] modes) {
+        mAllowedDisplayModes = modes;
     }
 
     /**
-     * Returns the pending requested mode.
+     * Returns the display modes the system is free to switch between.
      */
-    public int getRequestedModeIdLocked() {
-        return mRequestedModeId;
+    public int[] getAllowedDisplayModesLocked() {
+        return mAllowedDisplayModes;
     }
 
     /**
@@ -531,7 +533,7 @@ final class LogicalDisplay {
         pw.println("mDisplayId=" + mDisplayId);
         pw.println("mLayerStack=" + mLayerStack);
         pw.println("mHasContent=" + mHasContent);
-        pw.println("mRequestedMode=" + mRequestedModeId);
+        pw.println("mAllowedDisplayModes=" + Arrays.toString(mAllowedDisplayModes));
         pw.println("mRequestedColorMode=" + mRequestedColorMode);
         pw.println("mDisplayOffset=(" + mDisplayOffsetX + ", " + mDisplayOffsetY + ")");
         pw.println("mDisplayScalingDisabled=" + mDisplayScalingDisabled);
