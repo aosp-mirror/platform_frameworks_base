@@ -783,7 +783,7 @@ public class CallLog {
                 String postDialDigits, String viaNumber, int presentation, int callType,
                 int features, PhoneAccountHandle accountHandle, long start, int duration,
                 Long dataUsage, boolean addForAllUsers, UserHandle userToBeInsertedTo,
-                boolean isRead, int callBlockReason, String callScreeningAppName,
+                boolean isRead, int callBlockReason, CharSequence callScreeningAppName,
                 String callScreeningComponentName, CallIdentification callIdentification) {
             if (VERBOSE_LOG) {
                 Log.v(LOG_TAG, String.format("Add call: number=%s, user=%s, for all=%s",
@@ -836,15 +836,19 @@ public class CallLog {
             }
 
             values.put(BLOCK_REASON, callBlockReason);
-            values.put(CALL_SCREENING_APP_NAME, callScreeningAppName);
+            values.put(CALL_SCREENING_APP_NAME, charSequenceToString(callScreeningAppName));
             values.put(CALL_SCREENING_COMPONENT_NAME, callScreeningComponentName);
 
             if (callIdentification != null) {
                 values.put(CALL_ID_PACKAGE_NAME, callIdentification.getCallScreeningPackageName());
-                values.put(CALL_ID_APP_NAME, callIdentification.getCallScreeningAppName());
-                values.put(CALL_ID_NAME, callIdentification.getName());
-                values.put(CALL_ID_DESCRIPTION, callIdentification.getDescription());
-                values.put(CALL_ID_DETAILS, callIdentification.getDetails());
+                values.put(CALL_ID_APP_NAME,
+                        charSequenceToString(callIdentification.getCallScreeningAppName()));
+                values.put(CALL_ID_NAME,
+                        charSequenceToString(callIdentification.getName()));
+                values.put(CALL_ID_DESCRIPTION,
+                        charSequenceToString(callIdentification.getDescription()));
+                values.put(CALL_ID_DETAILS,
+                        charSequenceToString(callIdentification.getDetails()));
                 values.put(CALL_ID_NUISANCE_CONFIDENCE, callIdentification.getNuisanceConfidence());
             } else {
                 values.putNull(CALL_ID_PACKAGE_NAME);
@@ -985,6 +989,10 @@ public class CallLog {
                         values);
             }
             return result;
+        }
+
+        private static String charSequenceToString(CharSequence sequence) {
+            return sequence == null ? null : sequence.toString();
         }
 
         /** @hide */
