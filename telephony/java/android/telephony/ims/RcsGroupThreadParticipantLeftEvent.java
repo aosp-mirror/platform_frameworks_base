@@ -20,6 +20,8 @@ import android.annotation.NonNull;
 /**
  * An event that indicates an RCS participant has left an {@link RcsThread}. Please see US6-23 -
  * GSMA RCC.71 (RCS Universal Profile Service Definition Document)
+ *
+ * @hide
  */
 public final class RcsGroupThreadParticipantLeftEvent extends RcsGroupThreadEvent {
     private RcsParticipant mLeavingParticipant;
