@@ -1200,9 +1200,9 @@ Status StatsService::sendBinaryPushStateChangedAtom(const android::String16& tra
 
     userid_t userId = multiuser_get_user_id(uid);
 
-    bool requiresStaging = options | IStatsManager::FLAG_REQUIRE_STAGING;
-    bool rollbackEnabled = options | IStatsManager::FLAG_ROLLBACK_ENABLED;
-    bool requiresLowLatencyMonitor = options | IStatsManager::FLAG_REQUIRE_LOW_LATENCY_MONITOR;
+    bool requiresStaging = options & IStatsManager::FLAG_REQUIRE_STAGING;
+    bool rollbackEnabled = options & IStatsManager::FLAG_ROLLBACK_ENABLED;
+    bool requiresLowLatencyMonitor = options & IStatsManager::FLAG_REQUIRE_LOW_LATENCY_MONITOR;
 
     ProtoOutputStream proto;
     for (const auto& expId : experimentIds) {
