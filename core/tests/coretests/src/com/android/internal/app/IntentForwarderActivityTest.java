@@ -25,6 +25,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -40,6 +41,7 @@ import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
+import android.metrics.LogMaker;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -50,6 +52,9 @@ import android.os.UserManager;
 import androidx.test.InstrumentationRegistry;
 import androidx.test.rule.ActivityTestRule;
 import androidx.test.runner.AndroidJUnit4;
+
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -69,6 +74,11 @@ public class IntentForwarderActivityTest {
             new ComponentName(
                     "android",
                     IntentForwarderActivity.FORWARD_INTENT_TO_MANAGED_PROFILE
+            );
+    private static final ComponentName FORWARD_TO_PARENT_COMPONENT_NAME =
+            new ComponentName(
+                    "android",
+                    IntentForwarderActivity.FORWARD_INTENT_TO_PARENT
             );
     private static final String TYPE_PLAIN_TEXT = "text/plain";
 
@@ -522,6 +532,60 @@ public class IntentForwarderActivityTest {
         verify(sInjector).showToast(anyInt(), anyInt());
     }
 
+    @Test
+    public void forwardToManagedProfile_LoggingTest() throws Exception {
+        sComponentName = FORWARD_TO_MANAGED_PROFILE_COMPONENT_NAME;
+
+        // Intent can be forwarded.
+        when(mIPm.canForwardTo(
+                any(Intent.class), nullable(String.class), anyInt(), anyInt())).thenReturn(true);
+
+        // Managed profile exists.
+        List<UserInfo> profiles = new ArrayList<>();
+        profiles.add(CURRENT_USER_INFO);
+        profiles.add(MANAGED_PROFILE_INFO);
+        when(mUserManager.getProfiles(anyInt())).thenReturn(profiles);
+
+        Intent intent = new Intent(mContext, IntentForwarderWrapperActivity.class);
+        intent.setAction(Intent.ACTION_SEND);
+        intent.setType(TYPE_PLAIN_TEXT);
+        IntentForwarderWrapperActivity activity = mActivityRule.launchActivity(intent);
+
+        ArgumentCaptor<LogMaker> logMakerCaptor = ArgumentCaptor.forClass(LogMaker.class);
+        verify(activity.getMetricsLogger()).write(logMakerCaptor.capture());
+        assertEquals(MetricsEvent.ACTION_SWITCH_SHARE_PROFILE,
+                logMakerCaptor.getValue().getCategory());
+        assertEquals(MetricsEvent.MANAGED_PROFILE,
+                logMakerCaptor.getValue().getSubtype());
+    }
+
+    @Test
+    public void forwardToParent_LoggingTest() throws Exception {
+        sComponentName = FORWARD_TO_PARENT_COMPONENT_NAME;
+
+        // Intent can be forwarded.
+        when(mIPm.canForwardTo(
+                any(Intent.class), nullable(String.class), anyInt(), anyInt())).thenReturn(true);
+
+        // Managed profile exists.
+        List<UserInfo> profiles = new ArrayList<>();
+        profiles.add(CURRENT_USER_INFO);
+        profiles.add(MANAGED_PROFILE_INFO);
+        when(mUserManager.getProfiles(anyInt())).thenReturn(profiles);
+
+        Intent intent = new Intent(mContext, IntentForwarderWrapperActivity.class);
+        intent.setAction(Intent.ACTION_SEND);
+        intent.setType(TYPE_PLAIN_TEXT);
+        IntentForwarderWrapperActivity activity = mActivityRule.launchActivity(intent);
+
+        ArgumentCaptor<LogMaker> logMakerCaptor = ArgumentCaptor.forClass(LogMaker.class);
+        verify(activity.getMetricsLogger()).write(logMakerCaptor.capture());
+        assertEquals(MetricsEvent.ACTION_SWITCH_SHARE_PROFILE,
+                logMakerCaptor.getValue().getCategory());
+        assertEquals(MetricsEvent.PARENT_PROFILE,
+                logMakerCaptor.getValue().getSubtype());
+    }
+
     private void setupShouldSkipDisclosureTest() throws RemoteException {
         sComponentName = FORWARD_TO_MANAGED_PROFILE_COMPONENT_NAME;
         sActivityName = "MyTestActivity";
@@ -541,6 +605,7 @@ public class IntentForwarderActivityTest {
 
         private Intent mStartActivityIntent;
         private int mUserIdActivityLaunchedIn;
+        private MetricsLogger mMetricsLogger = mock(MetricsLogger.class);
 
         @Override
         public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -558,6 +623,11 @@ public class IntentForwarderActivityTest {
                 IBinder permissionToken, boolean ignoreTargetSecurity, int userId) {
             mStartActivityIntent = intent;
             mUserIdActivityLaunchedIn = userId;
+        }
+
+        @Override
+        protected MetricsLogger getMetricsLogger() {
+            return mMetricsLogger;
         }
     }
 

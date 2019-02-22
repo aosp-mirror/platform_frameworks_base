@@ -381,6 +381,8 @@ public class ChooserActivity extends ResolverActivity {
         final long systemCost = mChooserShownTime - intentReceivedTime;
 
         getMetricsLogger().write(new LogMaker(MetricsEvent.ACTION_ACTIVITY_CHOOSER_SHOWN)
+                .setSubtype(isWorkProfile() ? MetricsEvent.MANAGED_PROFILE :
+                        MetricsEvent.PARENT_PROFILE)
                 .addTaggedData(MetricsEvent.FIELD_SHARESHEET_MIMETYPE, target.getType())
                 .addTaggedData(MetricsEvent.FIELD_TIME_TO_APP_TARGETS, systemCost));
 
@@ -415,6 +417,16 @@ public class ChooserActivity extends ResolverActivity {
         if (DEBUG) {
             Log.d(TAG, "System Time Cost is " + systemCost);
         }
+    }
+
+    /**
+     * Check if the profile currently used is a work profile.
+     * @return true if it is work profile, false if it is parent profile (or no work profile is
+     * set up)
+     */
+    protected boolean isWorkProfile() {
+        return ((UserManager) getSystemService(Context.USER_SERVICE))
+                .getUserInfo(UserHandle.myUserId()).isManagedProfile();
     }
 
     /**

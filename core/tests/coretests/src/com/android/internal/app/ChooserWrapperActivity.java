@@ -28,6 +28,7 @@ import android.net.Uri;
 import android.util.Size;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 
 import java.util.function.Function;
 
@@ -112,6 +113,14 @@ public class ChooserWrapperActivity extends ChooserActivity {
         return super.queryResolver(resolver, uri);
     }
 
+    @Override
+    protected boolean isWorkProfile() {
+        if (sOverrides.alternateProfileSetting != 0) {
+            return sOverrides.alternateProfileSetting == MetricsEvent.MANAGED_PROFILE;
+        }
+        return super.isWorkProfile();
+    }
+
     /**
      * We cannot directly mock the activity created since instrumentation creates it.
      * <p>
@@ -128,6 +137,7 @@ public class ChooserWrapperActivity extends ChooserActivity {
         public boolean resolverForceException;
         public Bitmap previewThumbnail;
         public MetricsLogger metricsLogger;
+        public int alternateProfileSetting;
 
         public void reset() {
             onSafelyStartCallback = null;
@@ -139,6 +149,7 @@ public class ChooserWrapperActivity extends ChooserActivity {
             resolverForceException = false;
             resolverListController = mock(ResolverListController.class);
             metricsLogger = mock(MetricsLogger.class);
+            alternateProfileSetting = 0;
         }
     }
 }
