@@ -38,6 +38,7 @@ import android.app.AlarmManager;
 import android.graphics.Color;
 import android.os.Handler;
 import android.os.Looper;
+import android.support.test.filters.FlakyTest;
 import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -251,6 +252,7 @@ public class ScrimControllerTest extends SysuiTestCase {
         assertScrimTint(mScrimBehind, false /* tinted */);
     }
 
+    @FlakyTest(bugId = 124858892)
     @Test
     public void transitionToUnlocked() {
         mScrimController.setPanelExpansion(0f);
@@ -295,6 +297,7 @@ public class ScrimControllerTest extends SysuiTestCase {
         Assert.assertEquals(mScrimState, ScrimState.BOUNCER_SCRIMMED);
     }
 
+    @FlakyTest(bugId = 124858892)
     @Test
     public void panelExpansion() {
         mScrimController.setPanelExpansion(0f);
@@ -317,6 +320,7 @@ public class ScrimControllerTest extends SysuiTestCase {
                 mScrimBehindAlpha, mScrimBehind.getViewAlpha(), 0.01f);
     }
 
+    @FlakyTest(bugId = 124858892)
     @Test
     public void panelExpansionAffectsAlpha() {
         mScrimController.setPanelExpansion(0f);
