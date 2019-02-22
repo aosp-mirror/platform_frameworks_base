@@ -94,6 +94,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -9981,18 +9982,21 @@ public class TelephonyManager {
      * a SecurityException if the caller does not have the permission.
      */
     @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
-    @Nullable
-    public Map<Integer, List<EmergencyNumber>> getCurrentEmergencyNumberList() {
+    @NonNull
+    public Map<Integer, List<EmergencyNumber>> getEmergencyNumberList() {
+        Map<Integer, List<EmergencyNumber>> emergencyNumberList = new HashMap<>();
         try {
             ITelephony telephony = getITelephony();
-            if (telephony == null) {
-                return null;
+            if (telephony != null) {
+                return telephony.getEmergencyNumberList(mContext.getOpPackageName());
+            } else {
+                throw new IllegalStateException("telephony service is null.");
             }
-            return telephony.getCurrentEmergencyNumberList(mContext.getOpPackageName());
         } catch (RemoteException ex) {
-            Log.e(TAG, "getCurrentEmergencyNumberList RemoteException", ex);
+            Log.e(TAG, "getEmergencyNumberList RemoteException", ex);
+            ex.rethrowAsRuntimeException();
         }
-        return null;
+        return emergencyNumberList;
     }
 
     /**
@@ -10031,31 +10035,34 @@ public class TelephonyManager {
      * a SecurityException if the caller does not have the permission.
      */
     @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
-    @Nullable
-    public Map<Integer, List<EmergencyNumber>> getCurrentEmergencyNumberList(
+    @NonNull
+    public Map<Integer, List<EmergencyNumber>> getEmergencyNumberList(
             @EmergencyServiceCategories int categories) {
+        Map<Integer, List<EmergencyNumber>> emergencyNumberList = new HashMap<>();
         try {
             ITelephony telephony = getITelephony();
-            if (telephony == null) {
-                return null;
-            }
-            Map<Integer, List<EmergencyNumber>> numberMap = telephony
-                    .getCurrentEmergencyNumberList(mContext.getOpPackageName());
-            if (numberMap != null) {
-                for (Integer subscriptionId : numberMap.keySet()) {
-                    List<EmergencyNumber> numberList = numberMap.get(subscriptionId);
-                    for (EmergencyNumber number : numberList) {
-                        if (!number.isInEmergencyServiceCategories(categories)) {
-                            numberList.remove(number);
+            if (telephony != null) {
+                emergencyNumberList = telephony.getEmergencyNumberList(
+                        mContext.getOpPackageName());
+                if (emergencyNumberList != null) {
+                    for (Integer subscriptionId : emergencyNumberList.keySet()) {
+                        List<EmergencyNumber> numberList = emergencyNumberList.get(subscriptionId);
+                        for (EmergencyNumber number : numberList) {
+                            if (!number.isInEmergencyServiceCategories(categories)) {
+                                numberList.remove(number);
+                            }
                         }
                     }
                 }
+                return emergencyNumberList;
+            } else {
+                throw new IllegalStateException("telephony service is null.");
             }
-            return numberMap;
         } catch (RemoteException ex) {
-            Log.e(TAG, "getCurrentEmergencyNumberList with Categories RemoteException", ex);
+            Log.e(TAG, "getEmergencyNumberList with Categories RemoteException", ex);
+            ex.rethrowAsRuntimeException();
         }
-        return null;
+        return emergencyNumberList;
     }
 
     /**
@@ -10069,15 +10076,17 @@ public class TelephonyManager {
      * @return {@code true} if the given number is an emergency number based on current locale,
      * sim, modem and network; {@code false} otherwise.
      */
-    public boolean isCurrentEmergencyNumber(@NonNull String number) {
+    public boolean isEmergencyNumber(@NonNull String number) {
         try {
             ITelephony telephony = getITelephony();
-            if (telephony == null) {
-                return false;
+            if (telephony != null) {
+                return telephony.isEmergencyNumber(number, true);
+            } else {
+                throw new IllegalStateException("telephony service is null.");
             }
-            return telephony.isCurrentEmergencyNumber(number, true);
         } catch (RemoteException ex) {
-            Log.e(TAG, "isCurrentEmergencyNumber RemoteException", ex);
+            Log.e(TAG, "isEmergencyNumber RemoteException", ex);
+            ex.rethrowAsRuntimeException();
         }
         return false;
     }
@@ -10106,15 +10115,17 @@ public class TelephonyManager {
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
-    public boolean isCurrentPotentialEmergencyNumber(@NonNull String number) {
+    public boolean isPotentialEmergencyNumber(@NonNull String number) {
         try {
             ITelephony telephony = getITelephony();
-            if (telephony == null) {
-                return false;
+            if (telephony != null) {
+                return telephony.isEmergencyNumber(number, false);
+            } else {
+                throw new IllegalStateException("telephony service is null.");
             }
-            return telephony.isCurrentEmergencyNumber(number, false);
         } catch (RemoteException ex) {
-            Log.e(TAG, "isCurrentEmergencyNumber RemoteException", ex);
+            Log.e(TAG, "isEmergencyNumber RemoteException", ex);
+            ex.rethrowAsRuntimeException();
         }
         return false;
     }
