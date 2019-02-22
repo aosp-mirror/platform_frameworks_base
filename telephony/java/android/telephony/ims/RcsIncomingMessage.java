@@ -19,6 +19,8 @@ import android.annotation.WorkerThread;
 
 /**
  * This is a single instance of a message received over RCS.
+ *
+ * @hide
  */
 public class RcsIncomingMessage extends RcsMessage {
     /**

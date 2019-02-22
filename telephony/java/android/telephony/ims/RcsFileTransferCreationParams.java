@@ -24,6 +24,8 @@ import android.os.Parcelable;
  * Pass an instance of this class to
  * {@link RcsMessage#insertFileTransfer(RcsFileTransferCreationParams)} create an
  * {@link RcsFileTransferPart} and save it into storage.
+ *
+ * @hide
  */
 public final class RcsFileTransferCreationParams implements Parcelable {
     private String mRcsFileTransferSessionId;
