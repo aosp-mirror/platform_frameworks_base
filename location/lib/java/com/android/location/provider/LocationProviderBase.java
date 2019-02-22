@@ -240,8 +240,10 @@ public abstract class LocationProviderBase {
     protected abstract void onSetRequest(ProviderRequestUnbundled request, WorkSource source);
 
     /**
-     * Dump debug information.
+     * @deprecated This callback will never be invoked on Android Q and above. This method may be
+     * removed in the future. Prefer to dump provider state via the containing service instead.
      */
+    @Deprecated
     protected void onDump(FileDescriptor fd, PrintWriter pw, String[] args) {}
 
     /**
@@ -335,11 +337,6 @@ public abstract class LocationProviderBase {
         @Override
         public void sendExtraCommand(String command, Bundle extras) {
             onSendExtraCommand(command, extras);
-        }
-
-        @Override
-        public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-            onDump(fd, pw, args);
         }
     }
 }

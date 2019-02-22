@@ -34,13 +34,11 @@ import com.android.internal.location.ILocationProvider;
 import com.android.internal.location.ILocationProviderManager;
 import com.android.internal.location.ProviderProperties;
 import com.android.internal.location.ProviderRequest;
-import com.android.internal.os.TransferPipe;
 import com.android.server.FgThread;
 import com.android.server.LocationManagerService;
 import com.android.server.ServiceWatcher;
 
 import java.io.FileDescriptor;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -189,14 +187,6 @@ public class LocationProviderProxy extends AbstractLocationProvider {
                 pw.println("  additional packages=" + mProviderPackages);
             }
         }
-        mServiceWatcher.runOnBinderBlocking(binder -> {
-            try {
-                TransferPipe.dumpAsync(binder, fd, args);
-            } catch (IOException | RemoteException e) {
-                pw.println("  <failed to dump location provider: " + e + ">");
-            }
-            return null;
-        }, null);
     }
 
     @Override

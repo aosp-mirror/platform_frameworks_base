@@ -11,7 +11,7 @@ package com.android.location.provider {
     method public android.os.IBinder getBinder();
     method public boolean isEnabled();
     method @Deprecated protected void onDisable();
-    method protected void onDump(java.io.FileDescriptor, java.io.PrintWriter, String[]);
+    method @Deprecated protected void onDump(java.io.FileDescriptor, java.io.PrintWriter, String[]);
     method @Deprecated protected void onEnable();
     method @Deprecated protected int onGetStatus(android.os.Bundle);
     method @Deprecated protected long onGetStatusUpdateTime();
