@@ -137,6 +137,16 @@ public class WifiInfo implements Parcelable {
     private boolean mOsuAp;
 
     /**
+     * Fully qualified domain name of a Passpoint configuration
+     */
+    private String mFqdn;
+
+    /**
+     * Name of Passpoint credential provider
+     */
+    private String mProviderFriendlyName;
+
+    /**
      * If connected to a network suggestion or specifier, store the package name of the app,
      * else null.
      */
@@ -223,6 +233,8 @@ public class WifiInfo implements Parcelable {
         setEphemeral(false);
         setOsuAp(false);
         setNetworkSuggestionOrSpecifierPackageName(null);
+        setFQDN(null);
+        setProviderFriendlyName(null);
         txBad = 0;
         txSuccess = 0;
         rxSuccess = 0;
@@ -257,6 +269,8 @@ public class WifiInfo implements Parcelable {
             mNetworkSuggestionOrSpecifierPackageName =
                     source.mNetworkSuggestionOrSpecifierPackageName;
             mOsuAp = source.mOsuAp;
+            mFqdn = source.mFqdn;
+            mProviderFriendlyName = source.mProviderFriendlyName;
             txBad = source.txBad;
             txRetries = source.txRetries;
             txSuccess = source.txSuccess;
@@ -504,6 +518,34 @@ public class WifiInfo implements Parcelable {
     }
 
     /** {@hide} */
+    @SystemApi
+    public boolean isPasspointAp() {
+        return mFqdn != null && mProviderFriendlyName != null;
+    }
+
+    /** {@hide} */
+    public void setFQDN(@Nullable String fqdn) {
+        mFqdn = fqdn;
+    }
+
+    /** {@hide} */
+    @SystemApi
+    public @Nullable String getFqdn() {
+        return mFqdn;
+    }
+
+    /** {@hide} */
+    public void setProviderFriendlyName(@Nullable String providerFriendlyName) {
+        mProviderFriendlyName = providerFriendlyName;
+    }
+
+    /** {@hide} */
+    @SystemApi
+    public @Nullable String getProviderFriendlyName() {
+        return mProviderFriendlyName;
+    }
+
+    /** {@hide} */
     public void setNetworkSuggestionOrSpecifierPackageName(@Nullable String packageName) {
         mNetworkSuggestionOrSpecifierPackageName = packageName;
     }
@@ -677,6 +719,8 @@ public class WifiInfo implements Parcelable {
         mSupplicantState.writeToParcel(dest, flags);
         dest.writeInt(mOsuAp ? 1 : 0);
         dest.writeString(mNetworkSuggestionOrSpecifierPackageName);
+        dest.writeString(mFqdn);
+        dest.writeString(mProviderFriendlyName);
     }
 
     /** Implement the Parcelable interface {@hide} */
@@ -716,6 +760,8 @@ public class WifiInfo implements Parcelable {
                 info.mSupplicantState = SupplicantState.CREATOR.createFromParcel(in);
                 info.mOsuAp = in.readInt() != 0;
                 info.mNetworkSuggestionOrSpecifierPackageName = in.readString();
+                info.mFqdn = in.readString();
+                info.mProviderFriendlyName = in.readString();
                 return info;
             }
 
