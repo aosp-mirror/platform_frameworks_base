@@ -966,34 +966,43 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         }
 
         getHandler().post(() -> {
-            final RollbackData rollbackData = getRollbackForPackage(packageName);
-            for (int userId : userIds) {
-                if (rollbackData == null || !rollbackData.inProgress) {
-                    Log.e(TAG, "Request to restore userData for: " + packageName
-                                  + ", but no rollback in progress.");
-                    continue;
-                }
-                final PackageRollbackInfo info = getPackageRollbackInfo(rollbackData, packageName);
-                final boolean changedRollbackData = mAppDataRollbackHelper.restoreAppData(
-                        rollbackData.rollbackId, info, userId, appId, seInfo);
-
-                // We've updated metadata about this rollback, so save it to flash.
-                if (changedRollbackData) {
-                    try {
-                        mRollbackStore.saveAvailableRollback(rollbackData);
-                    } catch (IOException ioe) {
-                        // TODO(narayan): What is the right thing to do here ? This isn't a fatal
-                        // error, since it will only result in us trying to restore data again,
-                        // which will be a no-op if there's no data available.
-                        Log.e(TAG, "Unable to save available rollback: " + packageName, ioe);
-                    }
-                }
-            }
-
+            restoreUserDataInternal(packageName, userIds, appId, ceDataInode, seInfo, token);
             final PackageManagerInternal pmi = LocalServices.getService(
                     PackageManagerInternal.class);
             pmi.finishPackageInstall(token, false);
         });
+    }
+
+    private void restoreUserDataInternal(String packageName, int[] userIds, int appId,
+            long ceDataInode, String seInfo, int token) {
+        final RollbackData rollbackData = getRollbackForPackage(packageName);
+        if (rollbackData == null) {
+            return;
+        }
+
+        if (!rollbackData.inProgress) {
+            Log.e(TAG, "Request to restore userData for: " + packageName
+                    + ", but no rollback in progress.");
+            return;
+        }
+
+        for (int userId : userIds) {
+            final PackageRollbackInfo info = getPackageRollbackInfo(rollbackData, packageName);
+            final boolean changedRollbackData = mAppDataRollbackHelper.restoreAppData(
+                    rollbackData.rollbackId, info, userId, appId, seInfo);
+
+            // We've updated metadata about this rollback, so save it to flash.
+            if (changedRollbackData) {
+                try {
+                    mRollbackStore.saveAvailableRollback(rollbackData);
+                } catch (IOException ioe) {
+                    // TODO(narayan): What is the right thing to do here ? This isn't a fatal
+                    // error, since it will only result in us trying to restore data again,
+                    // which will be a no-op if there's no data available.
+                    Log.e(TAG, "Unable to save available rollback: " + packageName, ioe);
+                }
+            }
+        }
     }
 
     @Override
