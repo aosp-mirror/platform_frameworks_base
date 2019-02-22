@@ -233,6 +233,7 @@ import android.app.ActivityThread;
 import android.app.AlertDialog;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
+import android.app.AppOpsManagerInternal.CheckOpsDelegate;
 import android.app.ApplicationErrorReport;
 import android.app.ApplicationThreadConstants;
 import android.app.BroadcastOptions;
@@ -296,6 +297,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PackageManagerInternal;
+import android.content.pm.PackageManagerInternal.CheckPermissionDelegate;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.PathPermission;
 import android.content.pm.PermissionInfo;
@@ -432,6 +434,8 @@ import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.MemInfoReader;
 import com.android.internal.util.Preconditions;
+import com.android.internal.util.function.QuadFunction;
+import com.android.internal.util.function.TriFunction;
 import com.android.server.AlarmManagerInternal;
 import com.android.server.AppOpsService;
 import com.android.server.AttributeCache;
@@ -516,6 +520,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.BiFunction;
 
 public class ActivityManagerService extends IActivityManager.Stub
         implements Watchdog.Monitor, BatteryStatsImpl.BatteryCallback {
@@ -22177,6 +22182,8 @@ public class ActivityManagerService extends IActivityManager.Stub
 
             // Can't call out of the system process with a lock held, so post a message.
             if (app.instr.mUiAutomationConnection != null) {
+                mAppOpsService.setAppOpsServiceDelegate(null);
+                getPackageManagerInternalLocked().setCheckPermissionDelegate(null);
                 mHandler.obtainMessage(SHUTDOWN_UI_AUTOMATION_CONNECTION_MSG,
                         app.instr.mUiAutomationConnection).sendToTarget();
             }
@@ -27187,6 +27194,145 @@ public class ActivityManagerService extends IActivityManager.Stub
             } finally {
                 Binder.restoreCallingIdentity(origId);
             }
+        }
+    }
+
+    @Override
+    public void startDelegateShellPermissionIdentity(int delegateUid) {
+        if (UserHandle.getCallingAppId() != Process.SHELL_UID
+                && UserHandle.getCallingAppId() != Process.ROOT_UID) {
+            throw new SecurityException("Only the shell can delegate its permissions");
+        }
+
+        // We allow delegation only to one instrumentation started from the shell
+        synchronized (ActivityManagerService.this) {
+            // If there is a delegate it should be the same instance for app ops and permissions.
+            if (mAppOpsService.getAppOpsServiceDelegate()
+                    != getPackageManagerInternalLocked().getCheckPermissionDelegate()) {
+                throw new IllegalStateException("Bad shell delegate state");
+            }
+
+            // If the delegate is already set up for the target UID, nothing to do.
+            if (mAppOpsService.getAppOpsServiceDelegate() != null) {
+                if (!(mAppOpsService.getAppOpsServiceDelegate() instanceof ShellDelegate)) {
+                    throw new IllegalStateException("Bad shell delegate state");
+                }
+                if (((ShellDelegate) mAppOpsService.getAppOpsServiceDelegate())
+                        .getDelegateUid() != delegateUid) {
+                    throw new SecurityException("Shell can delegate permissions only "
+                            + "to one instrumentation at a time");
+                }
+                return;
+            }
+
+            final int instrCount = mActiveInstrumentation.size();
+            for (int i = 0; i < instrCount; i++) {
+                final ActiveInstrumentation instr = mActiveInstrumentation.get(i);
+                if (instr.mTargetInfo.uid != delegateUid) {
+                    continue;
+                }
+                // If instrumentation started from the shell the connection is not null
+                if (instr.mUiAutomationConnection == null) {
+                    throw new SecurityException("Shell can delegate its permissions" +
+                            " only to an instrumentation started from the shell");
+                }
+
+                // Hook them up...
+                final ShellDelegate shellDelegate = new ShellDelegate(
+                        instr.mTargetInfo.packageName, delegateUid);
+                mAppOpsService.setAppOpsServiceDelegate(shellDelegate);
+                getPackageManagerInternalLocked().setCheckPermissionDelegate(shellDelegate);
+                return;
+            }
+        }
+    }
+
+    @Override
+    public void stopDelegateShellPermissionIdentity() {
+        if (UserHandle.getCallingAppId() != Process.SHELL_UID
+                && UserHandle.getCallingAppId() != Process.ROOT_UID) {
+            throw new SecurityException("Only the shell can delegate its permissions");
+        }
+        synchronized (ActivityManagerService.this) {
+            mAppOpsService.setAppOpsServiceDelegate(null);
+            getPackageManagerInternalLocked().setCheckPermissionDelegate(null);
+        }
+    }
+
+    private class ShellDelegate implements CheckOpsDelegate, CheckPermissionDelegate {
+        private final String mTargetPackageName;
+        private final int mTargetUid;
+
+        ShellDelegate(String targetPacakgeName, int targetUid) {
+            mTargetPackageName = targetPacakgeName;
+            mTargetUid = targetUid;
+        }
+
+        int getDelegateUid() {
+            return mTargetUid;
+        }
+
+        @Override
+        public int checkOperation(int code, int uid, String packageName,
+                TriFunction<Integer, Integer, String, Integer> superImpl) {
+            if (uid == mTargetUid) {
+                final long identity = Binder.clearCallingIdentity();
+                try {
+                    return superImpl.apply(code, Process.SHELL_UID,
+                            "com.android.shell");
+                } finally {
+                    Binder.restoreCallingIdentity(identity);
+                }
+            }
+            return superImpl.apply(code, uid, packageName);
+        }
+
+        @Override
+        public int checkAudioOperation(int code, int usage, int uid, String packageName,
+                QuadFunction<Integer, Integer, Integer, String, Integer> superImpl) {
+            if (uid == mTargetUid) {
+                final long identity = Binder.clearCallingIdentity();
+                try {
+                    return superImpl.apply(code, usage, Process.SHELL_UID,
+                            "com.android.shell");
+                } finally {
+                    Binder.restoreCallingIdentity(identity);
+                }
+            }
+            return superImpl.apply(code, usage, uid, packageName);
+        }
+
+        @Override
+        public int noteOperation(int code, int uid, String packageName,
+                TriFunction<Integer, Integer, String, Integer> superImpl) {
+            if (uid == mTargetUid) {
+                final long identity = Binder.clearCallingIdentity();
+                try {
+                    return mAppOpsService.noteProxyOperation(code, Process.SHELL_UID,
+                            "com.android.shell", uid, packageName);
+                } finally {
+                    Binder.restoreCallingIdentity(identity);
+                }
+            }
+            return superImpl.apply(code, uid, packageName);
+        }
+
+        @Override
+        public int checkPermission(String permName, String pkgName, int userId,
+                TriFunction<String, String, Integer, Integer> superImpl) {
+            if (mTargetPackageName.equals(pkgName)) {
+                return superImpl.apply(permName, "com.android.shell", userId);
+            }
+            return superImpl.apply(permName, pkgName, userId);
+        }
+
+        @Override
+        public int checkUidPermission(String permName, int uid,
+                BiFunction<String, Integer, Integer> superImpl) {
+            if (uid == mTargetUid) {
+                return superImpl.apply(permName, Process.SHELL_UID);
+            }
+            return superImpl.apply(permName, uid);
         }
     }
 }
