@@ -18,9 +18,13 @@ package com.android.systemui.power;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+import android.content.Context;
+import android.os.PowerManager;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
@@ -31,56 +35,60 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 
 @RunWith(AndroidTestingRunner.class)
-@RunWithLooper
+@RunWithLooper(setAsMainLooper = true)
 @SmallTest
-public class OverheatAlarmControllerTest extends SysuiTestCase{
-    OverheatAlarmController mOverheatAlarmController;
+public class OverheatAlarmControllerTest extends SysuiTestCase {
+    @Mock
+    Context mMockContext;
+    @Mock
+    PowerManager mMockPowerManager;
+
     OverheatAlarmController mSpyOverheatAlarmController;
 
     @Before
     public void setUp() {
-        mOverheatAlarmController = OverheatAlarmController.getInstance(mContext);
-        mSpyOverheatAlarmController = spy(mOverheatAlarmController);
+        mMockContext = mock(Context.class);
+        mMockPowerManager = mock(PowerManager.class);
+        mSpyOverheatAlarmController = spy(new OverheatAlarmController(mMockContext));
+        when(mMockContext.getSystemService(Context.POWER_SERVICE)).thenReturn(mMockPowerManager);
     }
 
     @After
     public void tearDown() {
-        mSpyOverheatAlarmController.stopAlarm();
+        mMockContext = null;
+        mMockPowerManager = null;
+        mSpyOverheatAlarmController = null;
     }
 
     @Test
-    public void testGetInstance() {
-        assertThat(mOverheatAlarmController).isNotNull();
+    public void testStartAlarm_shouldPlaySound() {
+        mSpyOverheatAlarmController.startAlarm(mMockContext);
+        verify(mSpyOverheatAlarmController).playSound(mMockContext);
     }
 
     @Test
-    public void testStartAlarm_PlaySound() {
-        mSpyOverheatAlarmController.startAlarm(mContext);
-        verify(mSpyOverheatAlarmController).playSound(mContext);
-    }
-
-    @Test
-    public void testStartAlarm_InitVibrate() {
-        mSpyOverheatAlarmController.startAlarm(mContext);
+    public void testStartAlarm_shouldStartVibrate() {
+        mSpyOverheatAlarmController.startAlarm(mMockContext);
         verify(mSpyOverheatAlarmController).startVibrate();
     }
 
     @Test
-    public void testStartAlarm_StartVibrate() {
-        mSpyOverheatAlarmController.startAlarm(mContext);
+    public void testStartVibrate_shouldPerformVibrate() {
+        mSpyOverheatAlarmController.startVibrate();
         verify(mSpyOverheatAlarmController).performVibrate();
     }
 
     @Test
-    public void testStopAlarm_StopPlayer() {
+    public void testStopAlarm_shouldStopPlay() {
         mSpyOverheatAlarmController.stopAlarm();
         verify(mSpyOverheatAlarmController).stopPlayer();
     }
 
     @Test
-    public void testStopAlarm_StopVibrate() {
+    public void testStopAlarm_shouldStopVibrate() {
         mSpyOverheatAlarmController.stopAlarm();
         verify(mSpyOverheatAlarmController).stopVibrate();
     }
