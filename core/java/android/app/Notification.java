@@ -8409,7 +8409,6 @@ public class Notification implements Parcelable
 
         private PendingIntent mPendingIntent;
         private PendingIntent mDeleteIntent;
-        private CharSequence mTitle;
         private Icon mIcon;
         private int mDesiredHeight;
         private int mFlags;
@@ -8438,9 +8437,8 @@ public class Notification implements Parcelable
         private static final int FLAG_SUPPRESS_INITIAL_NOTIFICATION = 0x00000002;
 
         private BubbleMetadata(PendingIntent expandIntent, PendingIntent deleteIntent,
-                CharSequence title, Icon icon, int height) {
+                Icon icon, int height) {
             mPendingIntent = expandIntent;
-            mTitle = title;
             mIcon = icon;
             mDesiredHeight = height;
             mDeleteIntent = deleteIntent;
@@ -8448,7 +8446,6 @@ public class Notification implements Parcelable
 
         private BubbleMetadata(Parcel in) {
             mPendingIntent = PendingIntent.CREATOR.createFromParcel(in);
-            mTitle = in.readCharSequence();
             mIcon = Icon.CREATOR.createFromParcel(in);
             mDesiredHeight = in.readInt();
             mFlags = in.readInt();
@@ -8474,11 +8471,13 @@ public class Notification implements Parcelable
         /**
          * @return the title that will appear along with the app content defined by
          * {@link #getIntent()} for this bubble.
+         *
+         * @deprecated titles are no longer required or shown.
          */
+        @Deprecated
         public CharSequence getTitle() {
-            return mTitle;
+            return "";
         }
-
         /**
          * @return the icon that will be displayed for this bubble when it is collapsed.
          */
@@ -8534,7 +8533,6 @@ public class Notification implements Parcelable
         @Override
         public void writeToParcel(Parcel out, int flags) {
             mPendingIntent.writeToParcel(out, 0);
-            out.writeCharSequence(mTitle);
             mIcon.writeToParcel(out, 0);
             out.writeInt(mDesiredHeight);
             out.writeInt(mFlags);
@@ -8554,7 +8552,6 @@ public class Notification implements Parcelable
         public static class Builder {
 
             private PendingIntent mPendingIntent;
-            private CharSequence mTitle;
             private Icon mIcon;
             private int mDesiredHeight;
             private int mFlags;
@@ -8583,12 +8580,11 @@ public class Notification implements Parcelable
              *
              * <p>A title is required and should expect to fit on a single line and make sense when
              * shown with the content defined by {@link #setIntent(PendingIntent)}.</p>
+             *
+             * @deprecated titles are no longer required or shown.
              */
+            @Deprecated
             public BubbleMetadata.Builder setTitle(CharSequence title) {
-                if (TextUtils.isEmpty(title)) {
-                    throw new IllegalArgumentException("Bubbles require non-null or empty title");
-                }
-                mTitle = title;
                 return this;
             }
 
@@ -8667,13 +8663,10 @@ public class Notification implements Parcelable
                 if (mPendingIntent == null) {
                     throw new IllegalStateException("Must supply pending intent to bubble");
                 }
-                if (TextUtils.isEmpty(mTitle)) {
-                    throw new IllegalStateException("Must supply a title for the bubble");
-                }
                 if (mIcon == null) {
                     throw new IllegalStateException("Must supply an icon for the bubble");
                 }
-                BubbleMetadata data = new BubbleMetadata(mPendingIntent, mDeleteIntent, mTitle,
+                BubbleMetadata data = new BubbleMetadata(mPendingIntent, mDeleteIntent,
                         mIcon, mDesiredHeight);
                 data.setFlags(mFlags);
                 return data;
