@@ -1037,11 +1037,15 @@ public class Activity extends ContextThemeWrapper
     }
 
     /** @hide */ private static final int CONTENT_CAPTURE_START = 1;
-    /** @hide */ private static final int CONTENT_CAPTURE_STOP = 2;
+    /** @hide */ private static final int CONTENT_CAPTURE_RESUME = 2;
+    /** @hide */ private static final int CONTENT_CAPTURE_PAUSE = 3;
+    /** @hide */ private static final int CONTENT_CAPTURE_STOP = 4;
 
     /** @hide */
     @IntDef(prefix = { "CONTENT_CAPTURE_" }, value = {
             CONTENT_CAPTURE_START,
+            CONTENT_CAPTURE_RESUME,
+            CONTENT_CAPTURE_PAUSE,
             CONTENT_CAPTURE_STOP
     })
     @Retention(RetentionPolicy.SOURCE)
@@ -1051,6 +1055,10 @@ public class Activity extends ContextThemeWrapper
         switch (type) {
             case CONTENT_CAPTURE_START:
                 return "START";
+            case CONTENT_CAPTURE_RESUME:
+                return "RESUME";
+            case CONTENT_CAPTURE_PAUSE:
+                return "PAUSE";
             case CONTENT_CAPTURE_STOP:
                 return "STOP";
             default:
@@ -1077,10 +1085,16 @@ public class Activity extends ContextThemeWrapper
                             & WindowManager.LayoutParams.FLAG_SECURE) != 0) {
                         flags |= ContentCaptureContext.FLAG_DISABLED_BY_FLAG_SECURE;
                     }
-                    cm.onActivityStarted(mToken, getComponentName(), flags);
+                    cm.onActivityCreated(mToken, getComponentName(), flags);
+                    break;
+                case CONTENT_CAPTURE_RESUME:
+                    cm.onActivityResumed();
+                    break;
+                case CONTENT_CAPTURE_PAUSE:
+                    cm.onActivityPaused();
                     break;
                 case CONTENT_CAPTURE_STOP:
-                    cm.onActivityStopped();
+                    cm.onActivityDestroyed();
                     break;
                 default:
                     Log.wtf(TAG, "Invalid @ContentCaptureNotificationType: " + type);
@@ -1639,6 +1653,8 @@ public class Activity extends ContextThemeWrapper
         }
 
         mCalled = true;
+
+        notifyContentCaptureManagerIfNeeded(CONTENT_CAPTURE_START);
     }
 
     /**
@@ -1682,7 +1698,6 @@ public class Activity extends ContextThemeWrapper
         if (mAutoFillResetNeeded) {
             getAutofillManager().onVisibleForAutofill();
         }
-        notifyContentCaptureManagerIfNeeded(CONTENT_CAPTURE_START);
     }
 
     /**
@@ -1765,6 +1780,9 @@ public class Activity extends ContextThemeWrapper
                 }
             }
         }
+
+        notifyContentCaptureManagerIfNeeded(CONTENT_CAPTURE_RESUME);
+
         mCalled = true;
     }
 
@@ -2181,6 +2199,8 @@ public class Activity extends ContextThemeWrapper
                 mAutoFillIgnoreFirstResumePause = false;
             }
         }
+
+        notifyContentCaptureManagerIfNeeded(CONTENT_CAPTURE_PAUSE);
         mCalled = true;
     }
 
@@ -2370,7 +2390,6 @@ public class Activity extends ContextThemeWrapper
                 getAutofillManager().onPendingSaveUi(AutofillManager.PENDING_UI_OPERATION_CANCEL,
                         mIntent.getIBinderExtra(AutofillManager.EXTRA_RESTORE_SESSION_TOKEN));
             }
-            notifyContentCaptureManagerIfNeeded(CONTENT_CAPTURE_STOP);
         }
         mEnterAnimationComplete = false;
     }
@@ -2442,6 +2461,8 @@ public class Activity extends ContextThemeWrapper
         }
 
         dispatchActivityDestroyed();
+
+        notifyContentCaptureManagerIfNeeded(CONTENT_CAPTURE_STOP);
     }
 
     /**

@@ -134,19 +134,19 @@ public abstract class ContentCaptureSession implements AutoCloseable {
     /** @hide */
     public static final int FLUSH_REASON_VIEW_ROOT_ENTERED = 2;
     /** @hide */
-    public static final int FLUSH_REASON_SESSION_STARTED = 4;
+    public static final int FLUSH_REASON_SESSION_STARTED = 3;
     /** @hide */
-    public static final int FLUSH_REASON_SESSION_FINISHED = 5;
+    public static final int FLUSH_REASON_SESSION_FINISHED = 4;
     /** @hide */
-    public static final int FLUSH_REASON_IDLE_TIMEOUT = 6;
+    public static final int FLUSH_REASON_IDLE_TIMEOUT = 5;
 
     /** @hide */
     @IntDef(prefix = { "FLUSH_REASON_" }, value = {
             FLUSH_REASON_FULL,
+            FLUSH_REASON_VIEW_ROOT_ENTERED,
             FLUSH_REASON_SESSION_STARTED,
             FLUSH_REASON_SESSION_FINISHED,
-            FLUSH_REASON_IDLE_TIMEOUT,
-            FLUSH_REASON_VIEW_ROOT_ENTERED,
+            FLUSH_REASON_IDLE_TIMEOUT
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface FlushReason{}
@@ -411,7 +411,7 @@ public abstract class ContentCaptureSession implements AutoCloseable {
             @Nullable CharSequence text);
 
     /** @hide */
-    public abstract void internalNotifyViewHierarchyEvent(boolean started);
+    public abstract void internalNotifyViewTreeEvent(boolean started);
 
     /**
      * Creates a {@link ViewStructure} for a "standard" view.
@@ -501,14 +501,14 @@ public abstract class ContentCaptureSession implements AutoCloseable {
         switch (reason) {
             case FLUSH_REASON_FULL:
                 return "FULL";
+            case FLUSH_REASON_VIEW_ROOT_ENTERED:
+                return "VIEW_ROOT";
             case FLUSH_REASON_SESSION_STARTED:
                 return "STARTED";
             case FLUSH_REASON_SESSION_FINISHED:
                 return "FINISHED";
             case FLUSH_REASON_IDLE_TIMEOUT:
                 return "IDLE";
-            case FLUSH_REASON_VIEW_ROOT_ENTERED:
-                return "ENTERED";
             default:
                 return "UNKOWN-" + reason;
         }

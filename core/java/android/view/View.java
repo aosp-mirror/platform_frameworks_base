@@ -9732,11 +9732,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             return;
         }
 
-        session.internalNotifyViewHierarchyEvent(/* started= */ true);
+        session.internalNotifyViewTreeEvent(/* started= */ true);
         try {
             dispatchProvideContentCaptureStructure();
         } finally {
-            session.internalNotifyViewHierarchyEvent(/* started= */ false);
+            session.internalNotifyViewTreeEvent(/* started= */ false);
         }
     }
 

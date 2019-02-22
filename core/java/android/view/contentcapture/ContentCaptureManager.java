@@ -224,7 +224,7 @@ public final class ContentCaptureManager {
 
     /** @hide */
     @UiThread
-    public void onActivityStarted(@NonNull IBinder applicationToken,
+    public void onActivityCreated(@NonNull IBinder applicationToken,
             @NonNull ComponentName activityComponent, int flags) {
         synchronized (mLock) {
             mFlags |= flags;
@@ -234,7 +234,19 @@ public final class ContentCaptureManager {
 
     /** @hide */
     @UiThread
-    public void onActivityStopped() {
+    public void onActivityResumed() {
+        getMainContentCaptureSession().notifySessionLifecycle(/* started= */ true);
+    }
+
+    /** @hide */
+    @UiThread
+    public void onActivityPaused() {
+        getMainContentCaptureSession().notifySessionLifecycle(/* started= */ false);
+    }
+
+    /** @hide */
+    @UiThread
+    public void onActivityDestroyed() {
         getMainContentCaptureSession().destroy();
     }
 

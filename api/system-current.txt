@@ -9397,11 +9397,13 @@ package android.view.contentcapture {
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.view.contentcapture.ContentCaptureEvent> CREATOR;
     field public static final int TYPE_CONTEXT_UPDATED = 6; // 0x6
-    field public static final int TYPE_INITIAL_VIEW_TREE_APPEARED = 5; // 0x5
-    field public static final int TYPE_INITIAL_VIEW_TREE_APPEARING = 4; // 0x4
+    field public static final int TYPE_SESSION_PAUSED = 8; // 0x8
+    field public static final int TYPE_SESSION_RESUMED = 7; // 0x7
     field public static final int TYPE_VIEW_APPEARED = 1; // 0x1
     field public static final int TYPE_VIEW_DISAPPEARED = 2; // 0x2
     field public static final int TYPE_VIEW_TEXT_CHANGED = 3; // 0x3
+    field public static final int TYPE_VIEW_TREE_APPEARED = 5; // 0x5
+    field public static final int TYPE_VIEW_TREE_APPEARING = 4; // 0x4
   }
 
   public final class ContentCaptureManager {
