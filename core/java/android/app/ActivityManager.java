@@ -3925,6 +3925,14 @@ public class ActivityManager {
     /**
      * @hide
      */
+    @TestApi
+    public static void resumeAppSwitches() throws RemoteException {
+        getService().resumeAppSwitches();
+    }
+
+    /**
+     * @hide
+     */
     public static void noteWakeupAlarm(PendingIntent ps, WorkSource workSource, int sourceUid,
             String sourcePkg, String tag) {
         try {

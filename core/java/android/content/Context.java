@@ -5241,9 +5241,10 @@ public abstract class Context {
     public abstract DisplayAdjustments getDisplayAdjustments(int displayId);
 
     /**
+     * @return Returns the {@link Display} object this context is associated with.
      * @hide
      */
-    @UnsupportedAppUsage
+    @TestApi
     public abstract Display getDisplay();
 
     /**

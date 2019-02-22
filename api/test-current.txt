@@ -17,6 +17,10 @@ package android {
     field public static final String WRITE_OBB = "android.permission.WRITE_OBB";
   }
 
+  public static final class R.bool {
+    field public static final int config_perDisplayFocusEnabled = 17891332; // 0x1110004
+  }
+
   public static final class R.string {
     field public static final int config_defaultAssistant = 17039393; // 0x1040021
     field public static final int config_defaultDialer = 17039395; // 0x1040023
@@ -48,6 +52,7 @@ package android.app {
     method public long getTotalRam();
     method @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) public int getUidImportance(int);
     method @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) public void removeOnUidImportanceListener(android.app.ActivityManager.OnUidImportanceListener);
+    method public static void resumeAppSwitches() throws android.os.RemoteException;
     method @RequiresPermission(android.Manifest.permission.CHANGE_CONFIGURATION) public void scheduleApplicationInfoChanged(java.util.List<java.lang.String>, int);
   }
 
@@ -92,6 +97,31 @@ package android.app {
     field public static final int INVALID_STACK_ID = -1; // 0xffffffff
     field public static final int SPLIT_SCREEN_CREATE_MODE_BOTTOM_OR_RIGHT = 1; // 0x1
     field public static final int SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT = 0; // 0x0
+  }
+
+  public class ActivityView extends android.view.ViewGroup {
+    ctor public ActivityView(android.content.Context);
+    ctor public ActivityView(android.content.Context, android.util.AttributeSet);
+    ctor public ActivityView(android.content.Context, android.util.AttributeSet, int);
+    ctor public ActivityView(android.content.Context, android.util.AttributeSet, int, boolean);
+    method public void onLayout(boolean, int, int, int, int);
+    method public void onLocationChanged();
+    method public void performBackPress();
+    method public void release();
+    method public void setCallback(android.app.ActivityView.StateCallback);
+    method public void setForwardedInsets(android.graphics.Insets);
+    method public void startActivity(@NonNull android.content.Intent);
+    method public void startActivity(@NonNull android.content.Intent, android.os.UserHandle);
+    method public void startActivity(@NonNull android.app.PendingIntent);
+  }
+
+  public abstract static class ActivityView.StateCallback {
+    ctor public ActivityView.StateCallback();
+    method public abstract void onActivityViewDestroyed(android.app.ActivityView);
+    method public abstract void onActivityViewReady(android.app.ActivityView);
+    method public void onTaskCreated(int, android.content.ComponentName);
+    method public void onTaskMovedToFront(int);
+    method public void onTaskRemovalStarted(int);
   }
 
   public class AppDetailsActivity extends android.app.Activity {
@@ -518,10 +548,15 @@ package android.content {
 
   public abstract class Context {
     method public android.content.Context createPackageContextAsUser(String, int, android.os.UserHandle) throws android.content.pm.PackageManager.NameNotFoundException;
+    method public abstract android.view.Display getDisplay();
     method public android.os.UserHandle getUser();
     method public int getUserId();
     method public void setAutofillOptions(@Nullable android.content.AutofillOptions);
     method public void setContentCaptureOptions(@Nullable android.content.ContentCaptureOptions);
+  }
+
+  public class ContextWrapper extends android.content.Context {
+    method public android.view.Display getDisplay();
   }
 
 }
@@ -969,6 +1004,50 @@ package android.media.audiofx {
 
 }
 
+package android.metrics {
+
+  public class LogMaker {
+    ctor public LogMaker(int);
+    ctor public LogMaker(Object[]);
+    method public android.metrics.LogMaker addTaggedData(int, Object);
+    method public android.metrics.LogMaker clearCategory();
+    method public android.metrics.LogMaker clearPackageName();
+    method public android.metrics.LogMaker clearSubtype();
+    method public android.metrics.LogMaker clearTaggedData(int);
+    method public android.metrics.LogMaker clearType();
+    method public void deserialize(Object[]);
+    method public int getCategory();
+    method public long getCounterBucket();
+    method public String getCounterName();
+    method public int getCounterValue();
+    method public String getPackageName();
+    method public int getProcessId();
+    method public int getSubtype();
+    method public Object getTaggedData(int);
+    method public long getTimestamp();
+    method public int getType();
+    method public int getUid();
+    method public boolean isLongCounterBucket();
+    method public boolean isSubsetOf(android.metrics.LogMaker);
+    method public boolean isValidValue(Object);
+    method public Object[] serialize();
+    method public android.metrics.LogMaker setCategory(int);
+    method public android.metrics.LogMaker setPackageName(String);
+    method public android.metrics.LogMaker setSubtype(int);
+    method public android.metrics.LogMaker setType(int);
+  }
+
+  public class MetricsReader {
+    ctor public MetricsReader();
+    method public void checkpoint();
+    method public boolean hasNext();
+    method public android.metrics.LogMaker next();
+    method public void read(long);
+    method public void reset();
+  }
+
+}
+
 package android.net {
 
   public class CaptivePortal implements android.os.Parcelable {
@@ -1313,6 +1392,7 @@ package android.os {
 
   public class Build {
     method public static boolean is64BitAbi(String);
+    field public static final boolean IS_EMULATOR;
   }
 
   public static class Build.VERSION {
@@ -1893,6 +1973,7 @@ package android.provider {
     field public static final String LOCATION_GLOBAL_KILL_SWITCH = "location_global_kill_switch";
     field public static final String LOW_POWER_MODE = "low_power";
     field public static final String LOW_POWER_MODE_STICKY = "low_power_sticky";
+    field public static final String OVERLAY_DISPLAY_DEVICES = "overlay_display_devices";
     field public static final String SMS_ACCESS_RESTRICTION_ENABLED = "sms_access_restriction_enabled";
     field public static final String USE_OPEN_WIFI_PACKAGE = "use_open_wifi_package";
   }
@@ -1911,6 +1992,7 @@ package android.provider {
     field public static final String CONTENT_CAPTURE_ENABLED = "content_capture_enabled";
     field public static final String DISABLED_PRINT_SERVICES = "disabled_print_services";
     field @Deprecated public static final String ENABLED_NOTIFICATION_POLICY_ACCESS_PACKAGES = "enabled_notification_policy_access_packages";
+    field public static final String ENABLED_VR_LISTENERS = "enabled_vr_listeners";
     field public static final String LOCATION_ACCESS_CHECK_DELAY_MILLIS = "location_access_check_delay_millis";
     field public static final String LOCATION_ACCESS_CHECK_INTERVAL_MILLIS = "location_access_check_interval_millis";
     field public static final String NOTIFICATION_BADGING = "notification_badging";
@@ -2391,6 +2473,10 @@ package android.util {
     method public E valueAtUnchecked(int);
   }
 
+  public class TimeUtils {
+    method public static String formatDuration(long);
+  }
+
 }
 
 package android.util.proto {
@@ -2610,6 +2696,10 @@ package android.view {
     method public void removeCallbacks(int, Runnable, Object);
     method public static void setFrameDelay(long);
     field public static final int CALLBACK_ANIMATION = 1; // 0x1
+  }
+
+  public final class Display {
+    method public boolean supportsSystemDecorations();
   }
 
   public class FocusFinder {

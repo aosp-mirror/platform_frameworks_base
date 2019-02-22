@@ -8131,6 +8131,7 @@ public final class Settings {
          *
          * @hide
          */
+        @TestApi
         public static final String ENABLED_VR_LISTENERS = "enabled_vr_listeners";
 
         private static final Validator ENABLED_VR_LISTENERS_VALIDATOR =
@@ -10780,6 +10781,7 @@ public final class Settings {
         *
         * @hide
         */
+       @TestApi
        public static final String OVERLAY_DISPLAY_DEVICES = "overlay_display_devices";
 
         /**

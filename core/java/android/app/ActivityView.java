@@ -21,7 +21,7 @@ import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_C
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC;
 
 import android.annotation.NonNull;
-import android.annotation.UnsupportedAppUsage;
+import android.annotation.TestApi;
 import android.app.ActivityManager.StackInfo;
 import android.content.ComponentName;
 import android.content.Context;
@@ -59,6 +59,7 @@ import java.util.List;
  * on VirtualDisplays.
  * @hide
  */
+@TestApi
 public class ActivityView extends ViewGroup {
 
     private static final String DISPLAY_NAME = "ActivityViewVirtualDisplay";
@@ -92,7 +93,6 @@ public class ActivityView extends ViewGroup {
 
     private Insets mForwardedInsets;
 
-    @UnsupportedAppUsage
     public ActivityView(Context context) {
         this(context, null /* attrs */);
     }
@@ -151,7 +151,7 @@ public class ActivityView extends ViewGroup {
          * Called when a task is moved to the front of the stack inside the container.
          * This is a filtered version of {@link TaskStackListener}
          */
-        public void onTaskMovedToFront(ActivityManager.StackInfo stackInfo) { }
+        public void onTaskMovedToFront(int taskId) { }
 
         /**
          * Called when a task is about to be removed from the stack inside the container.
@@ -195,7 +195,6 @@ public class ActivityView extends ViewGroup {
      * @see StateCallback
      * @see #startActivity(PendingIntent)
      */
-    @UnsupportedAppUsage
     public void startActivity(@NonNull Intent intent) {
         final ActivityOptions options = prepareActivityOptions();
         getContext().startActivity(intent, options.toBundle());
@@ -238,7 +237,6 @@ public class ActivityView extends ViewGroup {
      * @see StateCallback
      * @see #startActivity(Intent)
      */
-    @UnsupportedAppUsage
     public void startActivity(@NonNull PendingIntent pendingIntent) {
         final ActivityOptions options = prepareActivityOptions();
         try {
@@ -272,7 +270,6 @@ public class ActivityView extends ViewGroup {
      *
      * @see StateCallback
      */
-    @UnsupportedAppUsage
     public void release() {
         if (mVirtualDisplay == null) {
             throw new IllegalStateException(
@@ -556,7 +553,7 @@ public class ActivityView extends ViewGroup {
             // notifying the callback
             if (stackInfo != null
                     && taskInfo.taskId == stackInfo.taskIds[stackInfo.taskIds.length - 1]) {
-                mActivityViewCallback.onTaskMovedToFront(stackInfo);
+                mActivityViewCallback.onTaskMovedToFront(taskInfo.taskId);
             }
         }
 
