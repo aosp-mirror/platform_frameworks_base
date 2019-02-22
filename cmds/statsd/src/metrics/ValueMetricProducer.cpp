@@ -355,21 +355,25 @@ void ValueMetricProducer::onConditionChangedLocked(const bool condition,
 
     flushIfNeededLocked(eventTimeNs);
 
-    // Pull on condition changes.
-    bool conditionChanged = mCondition != condition;
-    bool unknownToFalse = mCondition == ConditionState::kUnknown
-            && condition == ConditionState::kFalse;
-    // We do not need to pull when we go from unknown to false.
-    if (mIsPulled && conditionChanged && !unknownToFalse) {
-        pullAndMatchEventsLocked(eventTimeNs);
-    }
+    if (mCondition != ConditionState::kUnknown) {
+        // Pull on condition changes.
+        bool conditionChanged = mCondition != condition;
+        // We do not need to pull when we go from unknown to false.
+        if (mIsPulled && conditionChanged) {
+            pullAndMatchEventsLocked(eventTimeNs);
+        }
 
-    // when condition change from true to false, clear diff base but don't
-    // reset other counters as we may accumulate more value in the bucket.
-    if (mUseDiff && mCondition == ConditionState::kTrue && condition == ConditionState::kFalse) {
-        resetBase();
+        // when condition change from true to false, clear diff base but don't
+        // reset other counters as we may accumulate more value in the bucket.
+        if (mUseDiff && mCondition == ConditionState::kTrue && condition == ConditionState::kFalse) {
+            resetBase();
+        }
+    } else {
+        // If the condition was unknown, we mark the bucket as invalid since the bucket will contain
+        // partial data. For instance, the condition change might happen close to the end of the
+        // bucket and we might miss lots of data.
+        invalidateCurrentBucket();
     }
-
     mCondition = condition ? ConditionState::kTrue : ConditionState::kFalse;
 }
 

@@ -255,6 +255,8 @@ private:
     FRIEND_TEST(ValueMetricProducerTest, TestEmptyDataResetsBase_onConditionChanged);
     FRIEND_TEST(ValueMetricProducerTest, TestEmptyDataResetsBase_onBucketBoundary);
     FRIEND_TEST(ValueMetricProducerTest, TestPartialResetOnBucketBoundaries);
+    FRIEND_TEST(ValueMetricProducerTest, TestBucketIncludingUnknownConditionIsInvalid);
+    friend class ValueMetricProducerTestHelper;
 };
 
 }  // namespace statsd
