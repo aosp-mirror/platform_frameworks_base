@@ -121,7 +121,6 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
-import android.app.AppDetailsActivity;
 import android.app.AppOpsManager;
 import android.app.BroadcastOptions;
 import android.app.IActivityManager;
@@ -20197,13 +20196,9 @@ public class PackageManagerService extends IPackageManager.Stub
         }
         // Only allow apps with CHANGE_COMPONENT_ENABLED_STATE permission to change hidden
         // app details activity
-        if (AppDetailsActivity.class.getName().equals(className)) {
-            if (mContext.checkCallingOrSelfPermission(
-                    android.Manifest.permission.CHANGE_COMPONENT_ENABLED_STATE)
-                    != PackageManager.PERMISSION_GRANTED) {
-                Slog.e(TAG, "Cannot disable a protected component: " + packageName);
-                return;
-            }
+        if (PackageManager.APP_DETAILS_ACTIVITY_CLASS_NAME.equals(className)
+                && !allowedByPermission) {
+            throw new SecurityException("Cannot disable a system-generated component");
         }
 
         synchronized (mPackages) {
