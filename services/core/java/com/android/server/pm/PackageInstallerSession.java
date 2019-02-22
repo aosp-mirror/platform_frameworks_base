@@ -1474,12 +1474,12 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             // Inherit base if not overridden
             if (mResolvedBaseFile == null) {
                 mResolvedBaseFile = new File(appInfo.getBaseCodePath());
-                mResolvedInheritedFiles.add(mResolvedBaseFile);
+                resolveInheritedFile(mResolvedBaseFile);
                 // Inherit the dex metadata if present.
                 final File baseDexMetadataFile =
                         DexMetadataHelper.findDexMetadataForFile(mResolvedBaseFile);
                 if (baseDexMetadataFile != null) {
-                    mResolvedInheritedFiles.add(baseDexMetadataFile);
+                    resolveInheritedFile(baseDexMetadataFile);
                 }
                 baseApk = existingBase;
             }
@@ -1491,12 +1491,12 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     final File splitFile = new File(existing.splitCodePaths[i]);
                     final boolean splitRemoved = removeSplitList.contains(splitName);
                     if (!stagedSplits.contains(splitName) && !splitRemoved) {
-                        mResolvedInheritedFiles.add(splitFile);
+                        resolveInheritedFile(splitFile);
                         // Inherit the dex metadata if present.
                         final File splitDexMetadataFile =
                                 DexMetadataHelper.findDexMetadataForFile(splitFile);
                         if (splitDexMetadataFile != null) {
-                            mResolvedInheritedFiles.add(splitDexMetadataFile);
+                            resolveInheritedFile(splitDexMetadataFile);
                         }
                     }
                 }
@@ -1608,6 +1608,17 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 VerityUtils.getFsveritySignatureFilePath(targetFile.getPath()));
         maybeRenameFile(originalSignature, stagedSignature);
         mResolvedStagedFiles.add(stagedSignature);
+    }
+
+    private void resolveInheritedFile(File origFile) {
+        mResolvedInheritedFiles.add(origFile);
+
+        // Inherit the fsverity signature file if present.
+        final File fsveritySignatureFile = new File(
+                VerityUtils.getFsveritySignatureFilePath(origFile.getPath()));
+        if (fsveritySignatureFile.exists()) {
+            mResolvedInheritedFiles.add(fsveritySignatureFile);
+        }
     }
 
     @GuardedBy("mLock")

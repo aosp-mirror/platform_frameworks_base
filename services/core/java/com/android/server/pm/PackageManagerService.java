@@ -17041,7 +17041,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
             if (!legacyMode) {
                 // fs-verity is optional for now.  Only set up if signature is provided.
-                if (new File(signaturePath).exists()) {
+                if (new File(signaturePath).exists() && !VerityUtils.hasFsverity(filePath)) {
                     try {
                         VerityUtils.setUpFsverity(filePath, signaturePath);
                     } catch (IOException | DigestException | NoSuchAlgorithmException
