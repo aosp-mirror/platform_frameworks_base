@@ -85,6 +85,12 @@ class WindowSurfacePlacer {
         return mDeferDepth > 0;
     }
 
+    void performSurfacePlacementIfScheduled() {
+        if (mTraversalScheduled) {
+            performSurfacePlacement();
+        }
+    }
+
     final void performSurfacePlacement() {
         performSurfacePlacement(false /* force */);
     }

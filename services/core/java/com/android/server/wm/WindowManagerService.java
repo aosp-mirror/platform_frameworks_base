@@ -209,6 +209,7 @@ import android.view.IWindowSession;
 import android.view.IWindowSessionCallback;
 import android.view.InputChannel;
 import android.view.InputDevice;
+import android.view.InputEvent;
 import android.view.InputEventReceiver;
 import android.view.InsetsState;
 import android.view.KeyEvent;
@@ -7418,5 +7419,17 @@ public class WindowManagerService extends IWindowManager.Stub
                 Binder.restoreCallingIdentity(token);
             }
         }
+    }
+
+    @Override
+    public boolean injectInputAfterTransactionsApplied(InputEvent ev, int mode) {
+        synchronized (mGlobalLock) {
+            mWindowPlacerLocked.performSurfacePlacementIfScheduled();
+            new SurfaceControl.Transaction()
+                    .syncInputWindows()
+                    .apply(true);
+        }
+
+        return mInputManager.injectInputEvent(ev, mode);
     }
 }
