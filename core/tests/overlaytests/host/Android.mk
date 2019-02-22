@@ -21,7 +21,7 @@ LOCAL_MODULE := OverlayHostTests
 LOCAL_JAVA_LIBRARIES := tradefed
 LOCAL_COMPATIBILITY_SUITE := general-tests
 LOCAL_TARGET_REQUIRED_MODULES := \
-    OverlayHostTests_BadSignatureOverlay \
+    OverlayHostTests_NonPlatformSignatureOverlay \
     OverlayHostTests_PlatformSignatureStaticOverlay \
     OverlayHostTests_PlatformSignatureOverlay \
     OverlayHostTests_UpdateOverlay \

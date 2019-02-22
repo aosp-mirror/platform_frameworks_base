@@ -67,10 +67,10 @@ public class InstallOverlayTests extends BaseHostJUnit4Test {
     }
 
     @Test
-    public void failToInstallNonPlatformSignedOverlay() throws Exception {
+    public void failToInstallNonPlatformSignedOverlayTargetPreQ() throws Exception {
         try {
-            installPackage("OverlayHostTests_BadSignatureOverlay.apk");
-            fail("installed a non-platform signed overlay");
+            installPackage("OverlayHostTests_NonPlatformSignatureOverlay.apk");
+            fail("installed a non-platform signed overlay with targetSdkVersion < Q");
         } catch (Exception e) {
             // Expected.
         }
@@ -157,7 +157,7 @@ public class InstallOverlayTests extends BaseHostJUnit4Test {
 
     private void delay() {
         try {
-            Thread.sleep(100);
+            Thread.sleep(1000);
         } catch (InterruptedException e) {
         }
     }
