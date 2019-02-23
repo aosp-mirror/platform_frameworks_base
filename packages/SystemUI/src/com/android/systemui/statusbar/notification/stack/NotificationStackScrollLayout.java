@@ -365,6 +365,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     };
     protected ViewGroup mQsContainer;
     private boolean mContinuousShadowUpdate;
+    private boolean mContinuousBackgroundUpdate;
     private ViewTreeObserver.OnPreDrawListener mShadowUpdater
             = new ViewTreeObserver.OnPreDrawListener() {
 
@@ -374,6 +375,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             return true;
         }
     };
+    private ViewTreeObserver.OnPreDrawListener mBackgroundUpdater = () -> {
+                updateBackground();
+                return true;
+            };
     private Comparator<ExpandableView> mViewPositionComparator = new Comparator<ExpandableView>() {
         @Override
         public int compare(ExpandableView view, ExpandableView otherView) {
@@ -813,26 +818,32 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         int backgroundRectTop = top;
         int lastSectionBottom =
                 mSections[0].getCurrentBounds().bottom + animationYOffset;
+        int previousLeft = left;
+        boolean first = true;
         for (NotificationSection section : mSections) {
             if (section.getFirstVisibleChild() == null) {
                 continue;
             }
             int sectionTop = section.getCurrentBounds().top + animationYOffset;
+            int ownLeft = Math.min(Math.max(left, section.getCurrentBounds().left), right);
             // If sections are directly adjacent to each other, we don't want to draw them
             // as separate roundrects, as the rounded corners right next to each other look
             // bad.
-            if (sectionTop - lastSectionBottom > DISTANCE_BETWEEN_ADJACENT_SECTIONS_PX) {
-                canvas.drawRoundRect(left,
+            if (sectionTop - lastSectionBottom > DISTANCE_BETWEEN_ADJACENT_SECTIONS_PX
+                    || (previousLeft != ownLeft && !first)) {
+                canvas.drawRoundRect(ownLeft,
                         backgroundRectTop,
                         right,
                         lastSectionBottom,
                         mCornerRadius, mCornerRadius, mBackgroundPaint);
                 backgroundRectTop = sectionTop;
             }
+            previousLeft = ownLeft;
             lastSectionBottom =
                     section.getCurrentBounds().bottom + animationYOffset;
+            first = false;
         }
-        canvas.drawRoundRect(left,
+        canvas.drawRoundRect(previousLeft,
                 backgroundRectTop,
                 right,
                 lastSectionBottom,
@@ -2463,13 +2474,16 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         } else if (lastSection == null) {
             minTopPosition = mTopPadding;
         }
+        boolean shiftPulsingWithFirst = mAmbientPulseManager.getAllEntries().count() <= 1;
         for (NotificationSection section : mSections) {
             int minBottomPosition = minTopPosition;
             if (section == lastSection) {
                 // We need to make sure the section goes all the way to the shelf
                 minBottomPosition = (int) (mShelf.getTranslationY() + mShelf.getIntrinsicHeight());
             }
-            minTopPosition = section.updateVerticalBounds(minTopPosition, minBottomPosition);
+            minTopPosition = section.updateBounds(minTopPosition, minBottomPosition,
+                    shiftPulsingWithFirst);
+            shiftPulsingWithFirst = false;
         }
     }
 
@@ -5632,6 +5646,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
      */
     public void setDozeAmount(float dozeAmount) {
         mAmbientState.setDozeAmount(dozeAmount);
+        updateContinuousBackgroundDrawing();
         requestChildrenUpdate();
     }
 
@@ -5753,6 +5768,19 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             }
         }
         mAmbientState.setSectionBoundaryIndex(0, gapIndex);
+    }
+
+    private void updateContinuousBackgroundDrawing() {
+        boolean continuousBackground = !mAmbientState.isFullyAwake()
+                && !mAmbientState.getDraggedViews().isEmpty();
+        if (continuousBackground != mContinuousBackgroundUpdate) {
+            mContinuousBackgroundUpdate = continuousBackground;
+            if (continuousBackground) {
+                getViewTreeObserver().addOnPreDrawListener(mBackgroundUpdater);
+            } else {
+                getViewTreeObserver().removeOnPreDrawListener(mBackgroundUpdater);
+            }
+        }
     }
 
     @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
@@ -6108,8 +6136,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         }
 
         @Override
-        public boolean isExpanded() {
-            return NotificationStackScrollLayout.this.isExpanded();
+        public boolean shouldDismissQuickly() {
+            return NotificationStackScrollLayout.this.isExpanded() && mAmbientState.isFullyAwake();
         }
 
         @Override
@@ -6209,6 +6237,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             setSwipingInProgress(true);
             mAmbientState.onBeginDrag((ExpandableView) v);
             updateContinuousShadowDrawing();
+            updateContinuousBackgroundDrawing();
             requestChildrenUpdate();
         }
 
@@ -6216,6 +6245,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         public void onChildSnappedBack(View animView, float targetLeft) {
             mAmbientState.onDragFinished(animView);
             updateContinuousShadowDrawing();
+            updateContinuousBackgroundDrawing();
             NotificationMenuRowPlugin menuRow = mSwipeHelper.getCurrentMenuRow();
             if (menuRow != null && targetLeft == 0) {
                 menuRow.resetMenu();

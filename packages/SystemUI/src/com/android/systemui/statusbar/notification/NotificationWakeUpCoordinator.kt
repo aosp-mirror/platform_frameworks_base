@@ -183,13 +183,22 @@ class NotificationWakeUpCoordinator @Inject constructor(
     }
 
     override fun onAmbientStateChanged(entry: NotificationEntry, isPulsing: Boolean) {
-        if (!isPulsing && mLinearDozeAmount != 0.0f) {
-            entry.setAmbientGoingAway(true)
-            mEntrySetToClearWhenFinished.add(entry)
-        } else if (isPulsing && mEntrySetToClearWhenFinished.contains(entry)) {
+        var animate = true
+        if (!isPulsing) {
+            if (mLinearDozeAmount != 0.0f) {
+                if (entry.isRowDismissed) {
+                    // if we animate, we see the shelf briefly visible. Instead we fully animate
+                    // the notification and its background out
+                    animate = false
+                } else {
+                    entry.setAmbientGoingAway(true)
+                    mEntrySetToClearWhenFinished.add(entry)
+                }
+            }
+        } else if (mEntrySetToClearWhenFinished.contains(entry)) {
             mEntrySetToClearWhenFinished.remove(entry)
             entry.setAmbientGoingAway(false)
         }
-        updateNotificationVisibility(animate = true, increaseSpeed = false)
+        updateNotificationVisibility(animate, increaseSpeed = false)
     }
 }

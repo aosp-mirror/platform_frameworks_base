@@ -236,7 +236,8 @@ class NotificationSection {
      * @param minBottomPosition the minimum position that the bottom needs to have
      * @return the position of the new bottom
      */
-    public int updateVerticalBounds(int minTopPosition, int minBottomPosition) {
+    public int updateBounds(int minTopPosition, int minBottomPosition,
+            boolean shiftBackgroundWithFirst) {
         int top = minTopPosition;
         int bottom = minTopPosition;
         ActivatableNotificationView firstView = getFirstVisibleChild();
@@ -257,6 +258,9 @@ class NotificationSection {
                 // If we're pulsing, the notification can actually go below!
                 bottom = Math.max(bottom, finalTranslationY
                         + ExpandableViewState.getFinalActualHeight(firstView));
+                if (shiftBackgroundWithFirst) {
+                    mBounds.left += Math.max(firstView.getTranslation(), 0);
+                }
             }
         }
         top = Math.max(minTopPosition, top);

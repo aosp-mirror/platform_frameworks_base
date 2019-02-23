@@ -518,4 +518,12 @@ public class AmbientState {
             }
         }
     }
+
+    /**
+     * Is the device fully awake, which is different from not tark at all when there are pulsing
+     * notifications.
+     */
+    public boolean isFullyAwake() {
+        return mDozeAmount == 0.0f;
+    }
 }
