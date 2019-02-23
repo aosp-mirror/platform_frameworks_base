@@ -34,6 +34,7 @@ import android.media.PlayerBase;
 import android.media.VolumePolicy;
 import android.media.audiopolicy.AudioPolicyConfig;
 import android.media.audiopolicy.IAudioPolicyCallback;
+import android.media.projection.IMediaProjection;
 
 /**
  * {@hide}
@@ -176,7 +177,7 @@ interface IAudioService {
 
     String registerAudioPolicy(in AudioPolicyConfig policyConfig,
             in IAudioPolicyCallback pcb, boolean hasFocusListener, boolean isFocusPolicy,
-            boolean isVolumeController);
+            boolean isVolumeController, in IMediaProjection projection);
 
     oneway void unregisterAudioPolicyAsync(in IAudioPolicyCallback pcb);
 

@@ -89,6 +89,8 @@ import android.media.audiopolicy.AudioMix;
 import android.media.audiopolicy.AudioPolicy;
 import android.media.audiopolicy.AudioPolicyConfig;
 import android.media.audiopolicy.IAudioPolicyCallback;
+import android.media.projection.IMediaProjection;
+import android.media.projection.IMediaProjectionManager;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
@@ -99,6 +101,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
@@ -452,6 +455,8 @@ public class AudioService extends IAudioService.Stub
 
     // Broadcast receiver for device connections intent broadcasts
     private final BroadcastReceiver mReceiver = new AudioServiceBroadcastReceiver();
+
+    private IMediaProjectionManager mProjectionService; // to validate projection token
 
     /** Interface for UserManagerService. */
     private final UserManagerInternal mUserManagerInternal;
@@ -6186,22 +6191,21 @@ public class AudioService extends IAudioService.Stub
     // Audio policy management
     //==========================================================================================
     public String registerAudioPolicy(AudioPolicyConfig policyConfig, IAudioPolicyCallback pcb,
-            boolean hasFocusListener, boolean isFocusPolicy, boolean isVolumeController) {
+            boolean hasFocusListener, boolean isFocusPolicy, boolean isVolumeController,
+            IMediaProjection projection) {
         AudioSystem.setDynamicPolicyCallback(mDynPolicyCallback);
 
-        String regId = null;
-        // error handling
-        boolean hasPermissionForPolicy =
-                (PackageManager.PERMISSION_GRANTED == mContext.checkCallingPermission(
-                        android.Manifest.permission.MODIFY_AUDIO_ROUTING));
-        if (!hasPermissionForPolicy) {
-            Slog.w(TAG, "Can't register audio policy for pid " + Binder.getCallingPid() + " / uid "
-                    + Binder.getCallingUid() + ", need MODIFY_AUDIO_ROUTING");
+        if (!isPolicyRegisterAllowed(policyConfig, projection)) {
+            Slog.w(TAG, "Permission denied to register audio policy for pid "
+                    + Binder.getCallingPid() + " / uid " + Binder.getCallingUid()
+                    + ", need MODIFY_AUDIO_ROUTING or MediaProjection that can project audio");
             return null;
         }
 
         mDynPolicyLogger.log((new AudioEventLogger.StringEvent("registerAudioPolicy for "
                 + pcb.asBinder() + " with config:" + policyConfig)).printLog(TAG));
+
+        String regId = null;
         synchronized (mAudioPolicies) {
             try {
                 if (mAudioPolicies.containsKey(pcb.asBinder())) {
@@ -6221,6 +6225,76 @@ public class AudioService extends IAudioService.Stub
             }
         }
         return regId;
+    }
+
+    /**
+     * Apps with MODIFY_AUDIO_ROUTING can register any policy.
+     * Apps with an audio capable MediaProjection are allowed to register a RENDER|LOOPBACK policy
+     * as those policy do not modify the audio routing.
+     */
+    private boolean isPolicyRegisterAllowed(AudioPolicyConfig policyConfig,
+             IMediaProjection projection) {
+
+        boolean isLoopbackRenderPolicy = policyConfig.getMixes().stream().allMatch(
+                mix -> mix.getRouteFlags() == (mix.ROUTE_FLAG_RENDER | mix.ROUTE_FLAG_LOOP_BACK));
+
+        // Policy that do not modify the audio routing only need an audio projection
+        if (isLoopbackRenderPolicy && canProjectAudio(projection)) {
+            return true;
+        }
+
+        boolean hasPermissionModifyAudioRouting =
+                (PackageManager.PERMISSION_GRANTED == mContext.checkCallingPermission(
+                        android.Manifest.permission.MODIFY_AUDIO_ROUTING));
+        if (hasPermissionModifyAudioRouting) {
+            return true;
+        }
+        return false;
+    }
+
+    /** @return true if projection is a valid MediaProjection that can project audio. */
+    private boolean canProjectAudio(IMediaProjection projection) {
+        if (projection == null) {
+            return false;
+        }
+
+        IMediaProjectionManager projectionService = getProjectionService();
+        if (projectionService == null) {
+            Log.e(TAG, "Can't get service IMediaProjectionManager");
+            return false;
+        }
+
+        try {
+            if (!projectionService.isValidMediaProjection(projection)) {
+                Log.w(TAG, "App passed invalid MediaProjection token");
+                return false;
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Can't call .isValidMediaProjection() on IMediaProjectionManager"
+                    + projectionService.asBinder(), e);
+            return false;
+        }
+
+        try {
+            if (!projection.canProjectAudio()) {
+                Log.w(TAG, "App passed MediaProjection that can not project audio");
+                return false;
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Can't call .canProjectAudio() on valid IMediaProjection"
+                    + projection.asBinder(), e);
+            return false;
+        }
+
+        return true;
+    }
+
+    private IMediaProjectionManager getProjectionService() {
+        if (mProjectionService == null) {
+            IBinder b = ServiceManager.getService(Context.MEDIA_PROJECTION_SERVICE);
+            mProjectionService = IMediaProjectionManager.Stub.asInterface(b);
+        }
+        return mProjectionService;
     }
 
     public void unregisterAudioPolicyAsync(IAudioPolicyCallback pcb) {

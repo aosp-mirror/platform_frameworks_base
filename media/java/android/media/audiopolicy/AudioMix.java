@@ -133,7 +133,8 @@ public class AudioMix {
     }
 
 
-    int getRouteFlags() {
+    /** @hide */
+    public int getRouteFlags() {
         return mRouteFlags;
     }
 
