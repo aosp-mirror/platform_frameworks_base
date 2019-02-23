@@ -1523,7 +1523,7 @@ Landroid/view/IWindowSession$Stub;->asInterface(Landroid/os/IBinder;)Landroid/vi
 Landroid/view/IWindowSession;->finishDrawing(Landroid/view/IWindow;)V
 Landroid/view/IWindowSession;->getInTouchMode()Z
 Landroid/view/IWindowSession;->performDrag(Landroid/view/IWindow;ILandroid/view/SurfaceControl;IFFFFLandroid/content/ClipData;)Landroid/os/IBinder;
-Landroid/view/IWindowSession;->performHapticFeedback(Landroid/view/IWindow;IZ)Z
+Landroid/view/IWindowSession;->performHapticFeedback(IZ)Z
 Landroid/view/IWindowSession;->remove(Landroid/view/IWindow;)V
 Landroid/view/IWindowSession;->setInTouchMode(Z)V
 Landroid/view/IWindowSession;->setTransparentRegion(Landroid/view/IWindow;Landroid/graphics/Region;)V

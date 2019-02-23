@@ -2942,7 +2942,7 @@ HSPLcom/android/server/policy/WindowManagerPolicy;->onConfigurationChanged()V
 HSPLcom/android/server/policy/WindowManagerPolicy;->onKeyguardOccludedChangedLw(Z)V
 HSPLcom/android/server/policy/WindowManagerPolicy;->onLockTaskStateChangedLw(I)V
 HSPLcom/android/server/policy/WindowManagerPolicy;->onSystemUiStarted()V
-HSPLcom/android/server/policy/WindowManagerPolicy;->performHapticFeedbackLw(Lcom/android/server/policy/WindowManagerPolicy$WindowState;IZ)Z
+HSPLcom/android/server/policy/WindowManagerPolicy;->performHapticFeedback(ILjava/lang/String;IZ)Z
 HSPLcom/android/server/policy/WindowManagerPolicy;->prepareAddWindowLw(Lcom/android/server/policy/WindowManagerPolicy$WindowState;Landroid/view/WindowManager$LayoutParams;)I
 HSPLcom/android/server/policy/WindowManagerPolicy;->registerShortcutKey(JLcom/android/internal/policy/IShortcutService;)V
 HSPLcom/android/server/policy/WindowManagerPolicy;->removeWindowLw(Lcom/android/server/policy/WindowManagerPolicy$WindowState;)V
@@ -15736,7 +15736,7 @@ PLcom/android/server/policy/PhoneWindowManager;->onConfigurationChanged()V
 PLcom/android/server/policy/PhoneWindowManager;->onKeyguardOccludedChangedLw(Z)V
 PLcom/android/server/policy/PhoneWindowManager;->onOverlayChangedLw()V
 PLcom/android/server/policy/PhoneWindowManager;->onSystemUiStarted()V
-PLcom/android/server/policy/PhoneWindowManager;->performHapticFeedbackLw(Lcom/android/server/policy/WindowManagerPolicy$WindowState;IZ)Z
+PLcom/android/server/policy/PhoneWindowManager;->performHapticFeedback(ILjava/lang/String;IZ)Z
 PLcom/android/server/policy/PhoneWindowManager;->powerPress(JZI)V
 PLcom/android/server/policy/PhoneWindowManager;->prepareAddWindowLw(Lcom/android/server/policy/WindowManagerPolicy$WindowState;Landroid/view/WindowManager$LayoutParams;)I
 PLcom/android/server/policy/PhoneWindowManager;->readCameraLensCoverState()V
@@ -18331,7 +18331,7 @@ PLcom/android/server/wm/Session;->getWindowId(Landroid/os/IBinder;)Landroid/view
 PLcom/android/server/wm/Session;->killSessionLocked()V
 PLcom/android/server/wm/Session;->onRectangleOnScreenRequested(Landroid/os/IBinder;Landroid/graphics/Rect;)V
 PLcom/android/server/wm/Session;->onWindowSurfaceVisibilityChanged(Lcom/android/server/wm/WindowSurfaceController;ZI)V
-PLcom/android/server/wm/Session;->performHapticFeedback(Landroid/view/IWindow;IZ)Z
+PLcom/android/server/wm/Session;->performHapticFeedback(IZ)Z
 PLcom/android/server/wm/Session;->relayout(Landroid/view/IWindow;ILandroid/view/WindowManager$LayoutParams;IIIIJLandroid/graphics/Rect;Landroid/graphics/Rect;Landroid/graphics/Rect;Landroid/graphics/Rect;Landroid/graphics/Rect;Landroid/graphics/Rect;Landroid/graphics/Rect;Landroid/view/DisplayCutout$ParcelableWrapper;Landroid/util/MergedConfiguration;Landroid/view/Surface;)I
 PLcom/android/server/wm/Session;->remove(Landroid/view/IWindow;)V
 PLcom/android/server/wm/Session;->sendWallpaperCommand(Landroid/os/IBinder;Ljava/lang/String;IIILandroid/os/Bundle;Z)Landroid/os/Bundle;

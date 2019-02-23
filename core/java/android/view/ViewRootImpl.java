@@ -6996,7 +6996,7 @@ public final class ViewRootImpl implements ViewParent,
     @Override
     public boolean performHapticFeedback(int effectId, boolean always) {
         try {
-            return mWindowSession.performHapticFeedback(mWindow, effectId, always);
+            return mWindowSession.performHapticFeedback(effectId, always);
         } catch (RemoteException e) {
             return false;
         }
