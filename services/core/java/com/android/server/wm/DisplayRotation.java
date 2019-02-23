@@ -236,16 +236,13 @@ public class DisplayRotation {
         }
         mDemoRotationLock = SystemProperties.getBoolean("persist.demo.rotationlock", false);
 
-        // Only force the default orientation if the screen is xlarge, at least 960dp x 720dp, per
-        // http://developer.android.com/guide/practices/screens_support.html#range
-        // For car, ignore the dp limitation. It's physically impossible to rotate the car's screen
-        // so if the orientation is forced, we need to respect that no matter what.
+        // It's physically impossible to rotate the car's screen.
         final boolean isCar = mContext.getPackageManager().hasSystemFeature(
                 PackageManager.FEATURE_AUTOMOTIVE);
-        // For TV, it's usually 960dp x 540dp, ignore the size limitation.
-        // so if the orientation is forced, we need to respect that no matter what.
+        // It's also not likely to rotate a TV screen.
         final boolean isTv = mContext.getPackageManager().hasSystemFeature(
                 PackageManager.FEATURE_LEANBACK);
+        // Not much of use to rotate the display since it's close to square.
         final boolean isCloseToSquare =
                 isNonDecorDisplayCloseToSquare(Surface.ROTATION_0, width, height);
         final boolean forceDesktopMode =
