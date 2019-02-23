@@ -4,7 +4,7 @@
     <string name="app_name" msgid="5934709770924185752">"CaptivePortalLogin"</string>
     <string name="action_use_network" msgid="6076184727448466030">"Gunakan jaringan ini sebagaimana adanya"</string>
     <string name="action_do_not_use_network" msgid="4577366536956516683">"Jangan gunakan jaringan ini"</string>
-    <string name="action_bar_label" msgid="917235635415966620">"Login ke jaringan"</string>
+    <string name="action_bar_label" msgid="917235635415966620">"Masuk ke jaringan"</string>
     <string name="action_bar_title" msgid="5645564790486983117">"Login ke %1$s"</string>
     <string name="ssl_error_warning" msgid="6653188881418638872">"Jaringan yang ingin Anda masuki mengalami masalah keamanan."</string>
     <string name="ssl_error_example" msgid="647898534624078900">"Misalnya, halaman masuk mungkin bukan milik organisasi yang ditampilkan."</string>

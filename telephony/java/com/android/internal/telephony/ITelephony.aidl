@@ -1417,6 +1417,14 @@ interface ITelephony {
     void carrierActionReportDefaultNetworkStatus(int subId, boolean report);
 
     /**
+     * Action set from carrier signalling broadcast receivers to reset all carrier actions.
+     * Permissions android.Manifest.permission.MODIFY_PHONE_STATE is required
+     * @param subId the subscription ID that this action applies to.
+     * @hide
+     */
+    void carrierActionResetAll(int subId);
+
+    /**
      * Get aggregated video call data usage since boot.
      * Permissions android.Manifest.permission.READ_NETWORK_USAGE_HISTORY is required.
      *

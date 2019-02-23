@@ -19,9 +19,6 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="car_guest" msgid="3738772168718508650">"Gonbidatua"</string>
-    <string name="car_add_user" msgid="5245196248349230898">"Gehitu erabiltzaile bat"</string>
-    <string name="car_new_user" msgid="8142927244990323906">"Erabiltzaile berria"</string>
-    <string name="user_add_user_message_setup" msgid="1791011504259527329">"Erabiltzaile bat gehitzen duzunean, bere eremua konfiguratu beharko du."</string>
-    <string name="user_add_user_message_update" msgid="3383320289232716179">"Edozein erabiltzailek egunera ditzake beste erabiltzaile guztien aplikazioak."</string>
+    <string name="unknown_user_label" msgid="4323896111737677955">"Ezezaguna"</string>
+    <string name="start_driving" msgid="864023351402918991">"Hasi gidatzen"</string>
 </resources>

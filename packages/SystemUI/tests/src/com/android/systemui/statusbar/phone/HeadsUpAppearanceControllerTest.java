@@ -142,22 +142,6 @@ public class HeadsUpAppearanceControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testDestroy() {
-        reset(mHeadsUpManager);
-        reset(mDarkIconDispatcher);
-        reset(mPanelView);
-        reset(mStackScroller);
-        mHeadsUpAppearanceController.destroy();
-        verify(mHeadsUpManager).removeListener(any());
-        verify(mDarkIconDispatcher).removeDarkReceiver((DarkIconDispatcher.DarkReceiver) any());
-        verify(mPanelView).removeVerticalTranslationListener(any());
-        verify(mPanelView).removeTrackingHeadsUpListener(any());
-        verify(mPanelView).setHeadsUpAppearanceController(any());
-        verify(mStackScroller).removeOnExpandedHeightListener(any());
-        verify(mStackScroller).removeOnLayoutChangeListener(any());
-    }
-
-    @Test
     public void testHeaderReadFromOldController() {
         mHeadsUpAppearanceController.setExpandedHeight(1.0f, 1.0f);
 
@@ -177,5 +161,21 @@ public class HeadsUpAppearanceControllerTest extends SysuiTestCase {
                 newController.mExpandFraction, 0.0f);
         Assert.assertEquals(mHeadsUpAppearanceController.mIsExpanded,
                 newController.mIsExpanded);
+    }
+
+    @Test
+    public void testDestroy() {
+        reset(mHeadsUpManager);
+        reset(mDarkIconDispatcher);
+        reset(mPanelView);
+        reset(mStackScroller);
+        mHeadsUpAppearanceController.destroy();
+        verify(mHeadsUpManager).removeListener(any());
+        verify(mDarkIconDispatcher).removeDarkReceiver((DarkIconDispatcher.DarkReceiver) any());
+        verify(mPanelView).removeVerticalTranslationListener(any());
+        verify(mPanelView).removeTrackingHeadsUpListener(any());
+        verify(mPanelView).setHeadsUpAppearanceController(any());
+        verify(mStackScroller).removeOnExpandedHeightListener(any());
+        verify(mStackScroller).removeOnLayoutChangeListener(any());
     }
 }

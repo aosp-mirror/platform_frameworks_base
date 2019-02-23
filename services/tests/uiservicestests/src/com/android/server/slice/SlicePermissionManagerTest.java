@@ -101,4 +101,34 @@ public class SlicePermissionManagerTest extends UiServiceTestCase {
         assertTrue(FileUtils.deleteContentsAndDir(sliceDir));
     }
 
+    @Test
+    public void testInvalid() throws Exception {
+        File sliceDir = new File(mContext.getCacheDir(), "slices-test");
+        if (!sliceDir.exists()) {
+            sliceDir.mkdir();
+        }
+        SlicePermissionManager permissions = new SlicePermissionManager(mContext,
+                TestableLooper.get(this).getLooper(), sliceDir);
+
+        DirtyTracker.Persistable junk = new DirtyTracker.Persistable() {
+            @Override
+            public String getFileName() {
+                return "invalidData";
+            }
+
+            @Override
+            public void writeTo(XmlSerializer out) throws IOException {
+                throw new RuntimeException("this doesn't work");
+            }
+        };
+
+        // let's put something bad in here
+        permissions.addDirtyImmediate(junk);
+        // force a persist. if this throws, it would take down system_server
+        permissions.handlePersist();
+
+        // Cleanup.
+        assertTrue(FileUtils.deleteContentsAndDir(sliceDir));
+    }
+
 }

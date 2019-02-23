@@ -234,13 +234,13 @@ void Caches::flush(FlushMode mode) {
             gradientCache.clear();
             fontRenderer.clear();
             fboCache.clear();
-            [[fallthrough]];
+        // fall through
         case FlushMode::Moderate:
             fontRenderer.flush();
             textureCache.flush();
             pathCache.clear();
             tessellationCache.clear();
-            [[fallthrough]];
+        // fall through
         case FlushMode::Layers:
             renderBufferCache.clear();
             break;

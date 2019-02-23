@@ -8,7 +8,7 @@
     <!-- String.format failed for translation -->
     <!-- no translation found for action_bar_title (5645564790486983117) -->
     <skip />
-    <string name="ssl_error_warning" msgid="6653188881418638872">"الشبكة التي تحاول الانضمام إليها بها مشاكل أمنية."</string>
+    <string name="ssl_error_warning" msgid="6653188881418638872">"الشبكة التي تحاول الانضمام إليها بها مشكلات أمنية."</string>
     <string name="ssl_error_example" msgid="647898534624078900">"على سبيل المثال، قد لا تنتمي صفحة تسجيل الدخول إلى المنظمة المعروضة."</string>
     <string name="ssl_error_continue" msgid="6492718244923937110">"المتابعة على أي حال عبر المتصفح"</string>
     <string name="ok" msgid="1509280796718850364">"موافق"</string>

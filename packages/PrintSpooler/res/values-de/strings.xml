@@ -103,7 +103,7 @@
     <item msgid="3199660090246166812">"Querformat"</item>
   </string-array>
     <string name="print_write_error_message" msgid="5787642615179572543">"Fehler beim Schreiben in Datei"</string>
-    <string name="print_error_default_message" msgid="8602678405502922346">"Fehler. Bitte versuche es noch einmal."</string>
+    <string name="print_error_default_message" msgid="8602678405502922346">"Fehler. Bitte versuche es erneut."</string>
     <string name="print_error_retry" msgid="1426421728784259538">"Erneut versuchen"</string>
     <string name="print_error_printer_unavailable" msgid="8985614415253203381">"Dieser Drucker ist momentan nicht verfügbar."</string>
     <string name="print_cannot_load_page" msgid="6179560924492912009">"Vorschau kann nicht angezeigt werden"</string>

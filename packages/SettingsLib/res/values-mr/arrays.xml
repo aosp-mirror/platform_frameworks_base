@@ -71,58 +71,58 @@
     <item msgid="3422726142222090896">"avrcp16"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_titles">
-    <item msgid="7065842274271279580">"सिस्टम निवड वापरा (डीफॉल्ट)"</item>
+    <item msgid="7065842274271279580">"प्रणाली निवड वापरा (डीफॉल्ट)"</item>
     <item msgid="7539690996561263909">"SBC"</item>
     <item msgid="686685526567131661">"AAC"</item>
     <item msgid="5254942598247222737">"<xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX">aptX™</xliff:g> ऑडिओ"</item>
     <item msgid="2091430979086738145">"<xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX_HD">aptX™ HD</xliff:g> ऑडिओ"</item>
     <item msgid="6751080638867012696">"LDAC"</item>
-    <item msgid="723675059572222462">"पर्यायी कोडेक सुरू करा"</item>
+    <item msgid="723675059572222462">"पर्यायी कोडेक सक्षम करा"</item>
     <item msgid="3304843301758635896">"पर्यायी कोडेक अक्षम करा"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_summaries">
-    <item msgid="5062108632402595000">"सिस्टम निवड वापरा (डीफॉल्ट)"</item>
+    <item msgid="5062108632402595000">"प्रणाली निवड वापरा (डीफॉल्ट)"</item>
     <item msgid="6898329690939802290">"SBC"</item>
     <item msgid="6839647709301342559">"AAC"</item>
     <item msgid="7848030269621918608">"<xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX">aptX™</xliff:g> ऑडिओ"</item>
     <item msgid="298198075927343893">"<xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX_HD">aptX™ HD</xliff:g> ऑडिओ"</item>
     <item msgid="7950781694447359344">"LDAC"</item>
-    <item msgid="2209680154067241740">"पर्यायी कोडेक सुरू करा"</item>
+    <item msgid="2209680154067241740">"पर्यायी कोडेक सक्षम करा"</item>
     <item msgid="741805482892725657">"पर्यायी कोडेक अक्षम करा"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_sample_rate_titles">
-    <item msgid="3093023430402746802">"सिस्टम निवड वापरा (डीफॉल्ट)"</item>
+    <item msgid="3093023430402746802">"प्रणाली निवड वापरा (डीफॉल्ट)"</item>
     <item msgid="8895532488906185219">"44.1 kHz"</item>
     <item msgid="2909915718994807056">"48.0 kHz"</item>
     <item msgid="3347287377354164611">"88.2 kHz"</item>
     <item msgid="1234212100239985373">"96.0 kHz"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_sample_rate_summaries">
-    <item msgid="3214516120190965356">"सिस्टम निवड वापरा (डीफॉल्ट)"</item>
+    <item msgid="3214516120190965356">"प्रणाली निवड वापरा (डीफॉल्ट)"</item>
     <item msgid="4482862757811638365">"44.1 kHz"</item>
     <item msgid="354495328188724404">"48.0 kHz"</item>
     <item msgid="7329816882213695083">"88.2 kHz"</item>
     <item msgid="6967397666254430476">"96.0 kHz"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_bits_per_sample_titles">
-    <item msgid="2684127272582591429">"सिस्टम निवड वापरा (डीफॉल्ट)"</item>
+    <item msgid="2684127272582591429">"प्रणाली निवड वापरा (डीफॉल्ट)"</item>
     <item msgid="5618929009984956469">"16 बिट/पॅटर्न"</item>
     <item msgid="3412640499234627248">"24 बिट/पॅटर्न"</item>
     <item msgid="121583001492929387">"32 बिट/पॅटर्न"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_bits_per_sample_summaries">
-    <item msgid="1081159789834584363">"सिस्टम निवड वापरा (डीफॉल्ट)"</item>
+    <item msgid="1081159789834584363">"प्रणाली निवड वापरा (डीफॉल्ट)"</item>
     <item msgid="4726688794884191540">"16 बिट/पॅटर्न"</item>
     <item msgid="305344756485516870">"24 बिट/पॅटर्न"</item>
     <item msgid="244568657919675099">"32 बिट/पॅटर्न"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_channel_mode_titles">
-    <item msgid="5226878858503393706">"सिस्टम निवड वापरा (डीफॉल्ट)"</item>
+    <item msgid="5226878858503393706">"प्रणाली निवड वापरा (डीफॉल्ट)"</item>
     <item msgid="4106832974775067314">"मोनो"</item>
     <item msgid="5571632958424639155">"स्टिरिओ"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_channel_mode_summaries">
-    <item msgid="4118561796005528173">"सिस्टम निवड वापरा (डीफॉल्ट)"</item>
+    <item msgid="4118561796005528173">"प्रणाली निवड वापरा (डीफॉल्ट)"</item>
     <item msgid="8900559293912978337">"मोनो"</item>
     <item msgid="8883739882299884241">"स्टिरिओ"</item>
   </string-array>
@@ -137,12 +137,6 @@
     <item msgid="4327143584633311908">"संतुलित ऑडिओ आणि कनेक्शन गुणवत्ता"</item>
     <item msgid="4681409244565426925">"कनेक्शन गुणवत्तेसाठी ऑप्टिमाइझ केले"</item>
     <item msgid="364670732877872677">"सर्वोत्तम प्रयत्न (अनुकूल बिट रेट)"</item>
-  </string-array>
-  <string-array name="bluetooth_audio_active_device_summaries">
-    <item msgid="4862957058729193940"></item>
-    <item msgid="6481691720774549651">", अॅक्टिव्ह"</item>
-    <item msgid="8962366465966010158">", अॅक्टिव्ह (मीडिया)"</item>
-    <item msgid="4046665544396189228">", अॅक्टिव्ह (फोन)"</item>
   </string-array>
   <string-array name="select_logd_size_titles">
     <item msgid="8665206199209698501">"बंद"</item>
