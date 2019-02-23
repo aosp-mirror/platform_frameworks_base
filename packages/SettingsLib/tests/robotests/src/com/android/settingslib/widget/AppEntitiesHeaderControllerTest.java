@@ -85,6 +85,23 @@ public class AppEntitiesHeaderControllerTest {
     }
 
     @Test
+    public void setHeaderDetails_onlyDetailsTextSet_shouldSetToDetailsView() {
+        mController.setHeaderDetails(TITLE).apply();
+        final TextView view = mAppEntitiesHeaderView.findViewById(R.id.header_details);
+
+        assertThat(view.getText()).isEqualTo(TITLE);
+    }
+
+    @Test
+    public void setHeaderDetails_detailsTextAndResBothSet_shouldSetTextToDetailsView() {
+        mController.setHeaderDetailsRes(R.string.expand_button_title);
+        mController.setHeaderDetails(TITLE).apply();
+        final TextView view = mAppEntitiesHeaderView.findViewById(R.id.header_details);
+
+        assertThat(view.getText()).isEqualTo(TITLE);
+    }
+
+    @Test
     public void setHeaderDetailsClickListener_setClickListener_detailsViewAttachClickListener() {
         mController.setHeaderDetailsClickListener(v -> {
         }).apply();
