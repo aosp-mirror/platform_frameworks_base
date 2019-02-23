@@ -89,7 +89,7 @@ public class BarView extends LinearLayout {
     private void init() {
         LayoutInflater.from(getContext()).inflate(R.layout.settings_bar_view, this);
         setOrientation(LinearLayout.VERTICAL);
-        setGravity(Gravity.CENTER);
+        setGravity(Gravity.CENTER | Gravity.BOTTOM);
 
         mBarView = findViewById(R.id.bar_view);
         mIcon = findViewById(R.id.icon_view);

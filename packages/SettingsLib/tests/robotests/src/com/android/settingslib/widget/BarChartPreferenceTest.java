@@ -305,7 +305,7 @@ public class BarChartPreferenceTest {
     }
 
     @Test
-    public void onBindViewHolder_loadingStateIsTrue_shouldNotInitAnyView() {
+    public void onBindViewHolder_loadingStateIsTrue_shouldHideAllViews() {
         final BarViewInfo viewInfo = new BarViewInfo(mIcon, 30 /* barNumber */, R.string.debug_app);
         viewInfo.setClickListener(v -> {
         });
@@ -317,8 +317,7 @@ public class BarChartPreferenceTest {
 
         mPreference.onBindViewHolder(mHolder);
 
-        assertThat(TextUtils.isEmpty(mTitleView.getText())).isTrue();
-        assertThat(TextUtils.isEmpty(mDetailsView.getText())).isTrue();
+        assertThat(mHolder.itemView.getVisibility()).isEqualTo(View.INVISIBLE);
     }
 
     @Test
@@ -334,6 +333,7 @@ public class BarChartPreferenceTest {
 
         mPreference.onBindViewHolder(mHolder);
 
+        assertThat(mHolder.itemView.getVisibility()).isEqualTo(View.VISIBLE);
         assertThat(TextUtils.isEmpty(mTitleView.getText())).isFalse();
         assertThat(TextUtils.isEmpty(mDetailsView.getText())).isFalse();
     }

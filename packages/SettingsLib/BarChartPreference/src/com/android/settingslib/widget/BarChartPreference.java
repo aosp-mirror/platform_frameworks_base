@@ -160,8 +160,11 @@ public class BarChartPreference extends Preference {
 
         // If the state is loading, we just show a blank view.
         if (mIsLoading) {
+            holder.itemView.setVisibility(View.INVISIBLE);
             return;
         }
+        holder.itemView.setVisibility(View.VISIBLE);
+
         // We must show title of bar chart.
         bindChartTitleView(holder);
 
