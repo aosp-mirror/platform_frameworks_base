@@ -16,7 +16,6 @@
 
 package com.android.server.pm.permission;
 
-import static android.Manifest.permission.ACCESS_BACKGROUND_LOCATION;
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 import static android.app.AppOpsManager.MODE_ALLOWED;
@@ -1364,8 +1363,6 @@ public class PermissionManagerService {
             @NonNull PermissionsState origPs,
             @NonNull PermissionsState ps, @NonNull PackageParser.Package pkg,
             @NonNull int[] updatedUserIds) {
-        AppOpsManager appOpsManager = mContext.getSystemService(AppOpsManager.class);
-
         String pkgName = pkg.packageName;
         ArraySet<String> newImplicitPermissions = new ArraySet<>();
 
@@ -1428,48 +1425,28 @@ public class PermissionManagerService {
                                 FLAG_PERMISSION_REVOKE_WHEN_REQUESTED);
                         updatedUserIds = ArrayUtils.appendInt(updatedUserIds, userId);
 
-                        // SPECIAL BEHAVIOR for background location. Foreground only by default.
-                        if (newPerm.equals(ACCESS_BACKGROUND_LOCATION)) {
-                            int numSourcePerms = sourcePerms.size();
-                            for (int sourcePermNum = 0; sourcePermNum < numSourcePerms;
-                                    sourcePermNum++) {
-                                String sourcePerm = sourcePerms.valueAt(sourcePermNum);
-
-                                if (ps.hasRuntimePermission(sourcePerm, userId)
-                                        && ps.getRuntimePermissionState(sourcePerm, userId)
-                                        .isGranted()
-                                        && appOpsManager.unsafeCheckOpNoThrow(
-                                                permissionToOp(sourcePerm), getUid(userId,
-                                                getAppId(pkg.applicationInfo.uid)), pkgName)
-                                        == MODE_ALLOWED) {
-                                    setAppOpMode(sourcePerm, pkg, userId, MODE_FOREGROUND);
-                                }
-                            }
-                        } else {
-                            boolean inheritsFromInstallPerm = false;
-                            for (int sourcePermNum = 0; sourcePermNum < sourcePerms.size();
-                                    sourcePermNum++) {
-                                if (ps.hasInstallPermission(sourcePerms.valueAt(sourcePermNum))) {
-                                    inheritsFromInstallPerm = true;
-                                    break;
-                                }
-                            }
-
-                            if (!origPs.hasRequestedPermission(sourcePerms)
-                                    && !inheritsFromInstallPerm) {
-                                // Both permissions are new so nothing to inherit.
-                                if (DEBUG_PERMISSIONS) {
-                                    Slog.i(TAG, newPerm + " does not inherit from " + sourcePerms
-                                            + " for " + pkgName
-                                            + " as split permission is also new");
-                                }
-
+                        boolean inheritsFromInstallPerm = false;
+                        for (int sourcePermNum = 0; sourcePermNum < sourcePerms.size();
+                                sourcePermNum++) {
+                            if (ps.hasInstallPermission(sourcePerms.valueAt(sourcePermNum))) {
+                                inheritsFromInstallPerm = true;
                                 break;
-                            } else {
-                                // Inherit from new install or existing runtime permissions
-                                inheritPermissionStateToNewImplicitPermissionLocked(sourcePerms,
-                                        newPerm, ps, pkg, userId);
                             }
+                        }
+
+                        if (!origPs.hasRequestedPermission(sourcePerms)
+                                && !inheritsFromInstallPerm) {
+                            // Both permissions are new so nothing to inherit.
+                            if (DEBUG_PERMISSIONS) {
+                                Slog.i(TAG, newPerm + " does not inherit from " + sourcePerms
+                                        + " for " + pkgName + " as split permission is also new");
+                            }
+
+                            break;
+                        } else {
+                            // Inherit from new install or existing runtime permissions
+                            inheritPermissionStateToNewImplicitPermissionLocked(sourcePerms,
+                                    newPerm, ps, pkg, userId);
                         }
                     }
                 }
