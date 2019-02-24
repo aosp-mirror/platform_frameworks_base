@@ -121,7 +121,6 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
-import android.app.AppDetailsActivity;
 import android.app.AppOpsManager;
 import android.app.BroadcastOptions;
 import android.app.IActivityManager;
@@ -630,6 +629,7 @@ public class PackageManagerService extends IPackageManager.Stub
     final boolean mIsUpgrade;
     final boolean mIsPreNUpgrade;
     final boolean mIsPreNMR1Upgrade;
+    final boolean mIsPreQUpgrade;
 
     @GuardedBy("mPackages")
     private boolean mDexOptDialogShown;
@@ -1303,12 +1303,14 @@ public class PackageManagerService extends IPackageManager.Stub
     // Recordkeeping of restore-after-install operations that are currently in flight
     // between the Package Manager and the Backup Manager
     static class PostInstallData {
-        public InstallArgs args;
-        public PackageInstalledInfo res;
+        public final InstallArgs args;
+        public final PackageInstalledInfo res;
+        public final Runnable mPostInstallRunnable;
 
-        PostInstallData(InstallArgs _a, PackageInstalledInfo _r) {
+        PostInstallData(InstallArgs _a, PackageInstalledInfo _r, Runnable postInstallRunnable) {
             args = _a;
             res = _r;
+            mPostInstallRunnable = postInstallRunnable;
         }
     }
 
@@ -1440,7 +1442,9 @@ public class PackageManagerService extends IPackageManager.Stub
                     final boolean didRestore = (msg.arg2 != 0);
                     mRunningInstalls.delete(msg.arg1);
 
-                    if (data != null) {
+                    if (data != null && data.mPostInstallRunnable != null) {
+                        data.mPostInstallRunnable.run();
+                    } else if (data != null) {
                         InstallArgs args = data.args;
                         PackageInstalledInfo parentRes = data.res;
 
@@ -2396,6 +2400,7 @@ public class PackageManagerService extends IPackageManager.Stub
             mIsPreNUpgrade = mIsUpgrade && ver.sdkVersion < Build.VERSION_CODES.N;
 
             mIsPreNMR1Upgrade = mIsUpgrade && ver.sdkVersion < Build.VERSION_CODES.N_MR1;
+            mIsPreQUpgrade = mIsUpgrade && ver.sdkVersion < Build.VERSION_CODES.Q;
 
             int preUpgradeSdkVersion = ver.sdkVersion;
 
@@ -3020,6 +3025,21 @@ public class PackageManagerService extends IPackageManager.Stub
                     }
                 }
                 ver.fingerprint = Build.FINGERPRINT;
+            }
+
+            // Grandfather existing (installed before Q) non-system apps to hide
+            // their icons in launcher.
+            if (!onlyCore && mIsPreQUpgrade) {
+                Slog.i(TAG, "Whitelisting all existing apps to hide their icons");
+                int size = mSettings.mPackages.size();
+                for (int i = 0; i < size; i++) {
+                    final PackageSetting ps = mSettings.mPackages.valueAt(i);
+                    if ((ps.pkgFlags & ApplicationInfo.FLAG_SYSTEM) != 0) {
+                        continue;
+                    }
+                    ps.disableComponentLPw(PackageManager.APP_DETAILS_ACTIVITY_CLASS_NAME,
+                            UserHandle.USER_SYSTEM);
+                }
             }
 
             // clear only after permissions and other defaults have been updated
@@ -4212,6 +4232,55 @@ public class PackageManagerService extends IPackageManager.Stub
         return -1;
     }
 
+    /**
+     * Check if any package sharing/holding a uid has a low enough target SDK.
+     *
+     * @param uid The uid of the packages
+     * @param higherTargetSDK The target SDK that might be higher than the searched package
+     *
+     * @return {@code true} if there is a package sharing/holding the uid with
+     * {@code package.targetSDK < higherTargetSDK}
+     */
+    private boolean hasTargetSdkInUidLowerThan(int uid, int higherTargetSDK) {
+        int userId = UserHandle.getUserId(uid);
+
+        synchronized (mPackages) {
+            Object obj = mSettings.getSettingLPr(UserHandle.getAppId(uid));
+            if (obj == null) {
+                return false;
+            }
+
+            if (obj instanceof PackageSetting) {
+                final PackageSetting ps = (PackageSetting) obj;
+
+                if (!ps.getInstalled(userId)) {
+                    return false;
+                }
+
+                return ps.pkg.applicationInfo.targetSdkVersion < higherTargetSDK;
+            } else if (obj instanceof SharedUserSetting) {
+                final SharedUserSetting sus = (SharedUserSetting) obj;
+
+                final int numPkgs = sus.packages.size();
+                for (int i = 0; i < numPkgs; i++) {
+                    final PackageSetting ps = sus.packages.valueAt(i);
+
+                    if (!ps.getInstalled(userId)) {
+                        continue;
+                    }
+
+                    if (ps.pkg.applicationInfo.targetSdkVersion < higherTargetSDK) {
+                        return true;
+                    }
+                }
+
+                return false;
+            } else {
+                return false;
+            }
+        }
+    }
+
     @Override
     public int[] getPackageGids(String packageName, int flags, int userId) {
         if (!sUserManager.exists(userId)) return null;
@@ -5280,13 +5349,21 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public void grantRuntimePermission(String packageName, String permName, final int userId) {
-        mPermissionManager.grantRuntimePermission(permName, packageName, false /*overridePolicy*/,
+        boolean overridePolicy = (checkUidPermission(
+                Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY, Binder.getCallingUid())
+                == PackageManager.PERMISSION_GRANTED);
+
+        mPermissionManager.grantRuntimePermission(permName, packageName, overridePolicy,
                 getCallingUid(), userId, mPermissionCallback);
     }
 
     @Override
     public void revokeRuntimePermission(String packageName, String permName, int userId) {
-        mPermissionManager.revokeRuntimePermission(permName, packageName, false /*overridePolicy*/,
+        boolean overridePolicy = (checkUidPermission(
+                Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY, Binder.getCallingUid())
+                == PackageManager.PERMISSION_GRANTED);
+
+        mPermissionManager.revokeRuntimePermission(permName, packageName, overridePolicy,
                 getCallingUid(), userId, mPermissionCallback);
     }
 
@@ -5329,10 +5406,37 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public void updatePermissionFlags(String permName, String packageName, int flagMask,
-            int flagValues, int userId) {
+            int flagValues, boolean checkAdjustPolicyFlagPermission, int userId) {
+        int callingUid = getCallingUid();
+        boolean overridePolicy = false;
+
+        if (callingUid != Process.SYSTEM_UID && callingUid != Process.ROOT_UID) {
+            long callingIdentity = Binder.clearCallingIdentity();
+            try {
+                if ((flagMask & FLAG_PERMISSION_POLICY_FIXED) != 0) {
+                    if (checkAdjustPolicyFlagPermission) {
+                        mContext.enforceCallingOrSelfPermission(
+                                Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY,
+                                "Need " + Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY
+                                        + " to change policy flags");
+                    } else if (!hasTargetSdkInUidLowerThan(callingUid, Build.VERSION_CODES.Q)) {
+                        throw new IllegalArgumentException(
+                                Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY + " needs "
+                                        + " to be checked for packages targeting "
+                                        + Build.VERSION_CODES.Q + " or later when changing policy "
+                                        + "flags");
+                    }
+
+                    overridePolicy = true;
+                }
+            } finally {
+                Binder.restoreCallingIdentity(callingIdentity);
+            }
+        }
+
         mPermissionManager.updatePermissionFlags(
-                permName, packageName, flagMask, flagValues, getCallingUid(), userId,
-                mPermissionCallback);
+                permName, packageName, flagMask, flagValues, callingUid, userId,
+                overridePolicy, mPermissionCallback);
     }
 
     /**
@@ -12683,6 +12787,11 @@ public class PackageManagerService extends IPackageManager.Stub
     @Override
     public int installExistingPackageAsUser(String packageName, int userId, int installFlags,
             int installReason) {
+        return installExistingPackageAsUser(packageName, userId, installFlags, installReason, null);
+    }
+
+    int installExistingPackageAsUser(String packageName, int userId, int installFlags,
+            int installReason, IntentSender intentSender) {
         if (DEBUG_INSTALL) {
             Log.v(TAG, "installExistingPackageAsUser package=" + packageName + " userId=" + userId
                     + " installFlags=" + installFlags + " installReason=" + installReason);
@@ -12762,13 +12871,27 @@ public class PackageManagerService extends IPackageManager.Stub
                 PackageInstalledInfo res =
                         createPackageInstalledInfo(PackageManager.INSTALL_SUCCEEDED);
                 res.pkg = pkgSetting.pkg;
-                restoreAndPostInstall(userId, res, null);
+                res.newUsers = new int[]{ userId };
+                PostInstallData postInstallData = intentSender == null ? null :
+                        new PostInstallData(null, res, () -> onRestoreComplete(res.returnCode,
+                              mContext, intentSender));
+                restoreAndPostInstall(userId, res, postInstallData);
             }
         } finally {
             Binder.restoreCallingIdentity(callingId);
         }
 
         return PackageManager.INSTALL_SUCCEEDED;
+    }
+
+    static void onRestoreComplete(int returnCode, Context context, IntentSender target) {
+        Intent fillIn = new Intent();
+        fillIn.putExtra(PackageInstaller.EXTRA_STATUS,
+                PackageManager.installStatusToPublicStatus(returnCode));
+        try {
+            target.sendIntent(context, 0, fillIn, null, null);
+        } catch (SendIntentException ignored) {
+        }
     }
 
     static void setInstantAppForUser(PackageSetting pkgSetting, int userId,
@@ -12867,8 +12990,14 @@ public class PackageManagerService extends IPackageManager.Stub
                 "setPackagesSuspendedAsUser");
 
         final int callingUid = Binder.getCallingUid();
-        if (callingUid != Process.ROOT_UID && callingUid != Process.SYSTEM_UID
-                && getPackageUid(callingPackage, 0, userId) != callingUid) {
+        final int packageUid = getPackageUid(callingPackage, 0, userId);
+        final boolean allowedCallingUid = callingUid == Process.ROOT_UID
+                || callingUid == Process.SYSTEM_UID;
+        final boolean allowedPackageUid = packageUid == callingUid;
+        final boolean allowedShell = callingUid == SHELL_UID
+                && UserHandle.isSameApp(packageUid, callingUid);
+
+        if (!allowedCallingUid && !allowedShell && !allowedPackageUid) {
             throw new SecurityException("Calling package " + callingPackage + " in user "
                     + userId + " does not belong to calling uid " + callingUid);
         }
@@ -13058,6 +13187,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public String[] getUnsuspendablePackagesForUser(String[] packageNames, int userId) {
+        Preconditions.checkNotNull("packageNames cannot be null", packageNames);
         mContext.enforceCallingOrSelfPermission(Manifest.permission.SUSPEND_APPS,
                 "getUnsuspendablePackagesForUser");
         final int callingUid = Binder.getCallingUid();
@@ -13726,7 +13856,7 @@ public class PackageManagerService extends IPackageManager.Stub
             }
             for (InstallRequest request : installRequests) {
                 restoreAndPostInstall(request.args.user.getIdentifier(), request.installResult,
-                        new PostInstallData(request.args, request.installResult));
+                        new PostInstallData(request.args, request.installResult, null));
             }
         });
     }
@@ -17040,7 +17170,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
             if (!legacyMode) {
                 // fs-verity is optional for now.  Only set up if signature is provided.
-                if (new File(signaturePath).exists()) {
+                if (new File(signaturePath).exists() && !VerityUtils.hasFsverity(filePath)) {
                     try {
                         VerityUtils.setUpFsverity(filePath, signaturePath);
                     } catch (IOException | DigestException | NoSuchAlgorithmException
@@ -19947,8 +20077,11 @@ public class PackageManagerService extends IPackageManager.Stub
 
     private @Nullable String getDocumenterPackageName() {
         final Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("*/*");
+        final String resolvedType = intent.resolveTypeIfNeeded(mContext.getContentResolver());
 
-        final List<ResolveInfo> matches = queryIntentActivitiesInternal(intent, null,
+        final List<ResolveInfo> matches = queryIntentActivitiesInternal(intent, resolvedType,
                 MATCH_SYSTEM_ONLY | MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE
                         | MATCH_DISABLED_COMPONENTS,
                 UserHandle.myUserId());
@@ -20103,13 +20236,9 @@ public class PackageManagerService extends IPackageManager.Stub
         }
         // Only allow apps with CHANGE_COMPONENT_ENABLED_STATE permission to change hidden
         // app details activity
-        if (AppDetailsActivity.class.getName().equals(className)) {
-            if (mContext.checkCallingOrSelfPermission(
-                    android.Manifest.permission.CHANGE_COMPONENT_ENABLED_STATE)
-                    != PackageManager.PERMISSION_GRANTED) {
-                Slog.e(TAG, "Cannot disable a protected component: " + packageName);
-                return;
-            }
+        if (PackageManager.APP_DETAILS_ACTIVITY_CLASS_NAME.equals(className)
+                && !allowedByPermission) {
+            throw new SecurityException("Cannot disable a system-generated component");
         }
 
         synchronized (mPackages) {
@@ -22996,7 +23125,7 @@ public class PackageManagerService extends IPackageManager.Stub
         public void updatePermissionFlagsTEMP(String permName, String packageName, int flagMask,
                 int flagValues, int userId) {
             PackageManagerService.this.updatePermissionFlags(
-                    permName, packageName, flagMask, flagValues, userId);
+                    permName, packageName, flagMask, flagValues, true, userId);
         }
 
         @Override

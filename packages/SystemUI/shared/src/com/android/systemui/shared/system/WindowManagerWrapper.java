@@ -27,6 +27,7 @@ import android.graphics.Rect;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.util.Log;
+import android.view.IPinnedStackListener;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 
@@ -80,6 +81,13 @@ public class WindowManagerWrapper {
     public static final int WINDOWING_MODE_FREEFORM = WindowConfiguration.WINDOWING_MODE_FREEFORM;
 
     private static final WindowManagerWrapper sInstance = new WindowManagerWrapper();
+
+    /**
+     * Forwarder to which we can add multiple pinned stack listeners. Each listener will receive
+     * updates from the window manager service.
+     */
+    private PinnedStackListenerForwarder mPinnedStackListenerForwarder =
+            new PinnedStackListenerForwarder();
 
     public static WindowManagerWrapper getInstance() {
         return sInstance;
@@ -198,5 +206,15 @@ public class WindowManagerWrapper {
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to register docked stack listener");
         }
+    }
+
+    /**
+     * Adds a pinned stack listener, which will receive updates from the window manager service
+     * along with any other pinned stack listeners that were added via this method.
+     */
+    public void addPinnedStackListener(IPinnedStackListener listener) throws RemoteException {
+        mPinnedStackListenerForwarder.addListener(listener);
+        WindowManagerGlobal.getWindowManagerService().registerPinnedStackListener(
+                DEFAULT_DISPLAY, mPinnedStackListenerForwarder);
     }
 }

@@ -247,6 +247,12 @@ message MetricsEvent {
     LOCATION_GONE = 6; // the view isn't laid out at all
   }
 
+  // Subtypes for profile logging
+  enum ActiveUserProfile {
+    PARENT_PROFILE = 1;
+    MANAGED_PROFILE = 2;
+  }
+
   // Known visual elements: views or controls.
   enum View {
     // Unknown view
@@ -3589,7 +3595,7 @@ message MetricsEvent {
     // OPEN: Settings > Apps > Default Apps > Default sms
     DEFAULT_SMS_PICKER = 789;
 
-    // OPEN: Settings > Apps > Default Apps > Default notification assistant
+    // OPEN: Settings > Apps > Notification > Notification Assistant
     DEFAULT_NOTIFICATION_ASSISTANT = 790;
 
     // OPEN: Settings > Apps > Default Apps > Warning dialog to confirm selection
@@ -6162,6 +6168,11 @@ message MetricsEvent {
     // OS: P
     FIELD_AUTOFILL_SESSION_ID = 1456;
 
+    // FIELD: Device USB overheat alarm trigger.
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: P
+    POWER_OVERHEAT_ALARM = 1457;
+
     // ---- End P Constants, all P constants go above this line ----
 
     // Time since this notification last interrupted (visibly or audible) the user
@@ -7001,6 +7012,10 @@ message MetricsEvent {
     // OS: Q
     // Different display can have different orientations, so need to log display id
     FIELD_DISPLAY_ID = 1660;
+
+    // ACTION: Changing from work to parent profile or vice versa
+    // OS: Q
+    ACTION_SWITCH_SHARE_PROFILE = 1661;
 
     // ---- End Q Constants, all Q constants go above this line ----
     // Add new aosp constants above this line.

@@ -135,7 +135,7 @@ public class NavBarTintController {
         final Bitmap hardBitmap = SurfaceControl
                 .screenshot(new Rect(), mDisplayMetrics.widthPixels, mDisplayMetrics.heightPixels,
                         mNavigationBarView.getContext().getDisplay().getRotation());
-        if (cropRect.bottom <= hardBitmap.getHeight()
+        if (hardBitmap != null && cropRect.bottom <= hardBitmap.getHeight()
                 && cropRect.left + cropRect.width() <= hardBitmap.getWidth()) {
             final Bitmap cropBitmap = Bitmap.createBitmap(hardBitmap, cropRect.left, cropRect.top,
                     cropRect.width(), cropRect.height());

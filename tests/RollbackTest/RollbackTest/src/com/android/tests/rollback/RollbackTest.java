@@ -587,9 +587,13 @@ public class RollbackTest {
             RollbackTestUtils.installMultiPackage(false,
                     "RollbackTestAppAv1.apk",
                     "RollbackTestAppBv1.apk");
+            processUserData(TEST_APP_A);
+            processUserData(TEST_APP_B);
             RollbackTestUtils.installMultiPackage(true,
                     "RollbackTestAppAv2.apk",
                     "RollbackTestAppBv2.apk");
+            processUserData(TEST_APP_A);
+            processUserData(TEST_APP_B);
             assertEquals(2, RollbackTestUtils.getInstalledVersion(TEST_APP_A));
             assertEquals(2, RollbackTestUtils.getInstalledVersion(TEST_APP_B));
 
@@ -614,6 +618,9 @@ public class RollbackTest {
             assertRollbackInfoForAandB(rollbackB);
 
             assertEquals(rollbackA.getRollbackId(), rollbackB.getRollbackId());
+
+            processUserData(TEST_APP_A);
+            processUserData(TEST_APP_B);
         } finally {
             RollbackTestUtils.dropShellPermissionIdentity();
         }

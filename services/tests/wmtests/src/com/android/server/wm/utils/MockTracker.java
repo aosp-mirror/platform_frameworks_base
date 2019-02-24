@@ -21,6 +21,7 @@ import android.util.Log;
 import org.mockito.Mockito;
 import org.mockito.MockitoFramework;
 import org.mockito.internal.creation.settings.CreationSettings;
+import org.mockito.internal.util.MockUtil;
 import org.mockito.listeners.MockCreationListener;
 import org.mockito.mock.MockCreationSettings;
 
@@ -33,7 +34,7 @@ import java.util.IdentityHashMap;
  * same type registered.
  */
 public class MockTracker implements MockCreationListener, AutoCloseable {
-    private static final String TAG = "MockTracker";
+    private static final String TAG = MockTracker.class.getSimpleName();
 
     private static final Field SPIED_INSTANCE_FIELD;
 
@@ -52,6 +53,10 @@ public class MockTracker implements MockCreationListener, AutoCloseable {
 
     public MockTracker() {
         mMockitoFramework.addListener(this);
+    }
+
+    public void stopTracking() {
+        mMockitoFramework.removeListener(this);
     }
 
     @Override
@@ -83,10 +88,8 @@ public class MockTracker implements MockCreationListener, AutoCloseable {
         mMockitoFramework.removeListener(this);
 
         for (final Object mock : mMocks.keySet()) {
-            try {
+            if (MockUtil.isMock(mock)) {
                 Mockito.reset(mock);
-            } catch (Exception e) {
-                Log.e(TAG, "Failed to reset " + mock, e);
             }
         }
         mMocks.clear();

@@ -28,6 +28,7 @@ import android.annotation.Nullable;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityTaskManager;
 import android.app.IActivityTaskManager;
+import android.content.AutofillOptions;
 import android.content.ComponentName;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -1084,6 +1085,7 @@ final class AutofillManagerServiceImpl
                             if (remoteService != null) {
                                 remoteService.destroy();
                             }
+                            mRemoteAugmentedAutofillService = null;
                         }
                     }, mMaster.isInstantServiceAllowed(), mMaster.verbose);
         }
@@ -1169,6 +1171,13 @@ final class AutofillManagerServiceImpl
         return mWhitelistedAugmentAutofillPackages.contains(packageName);
     }
 
+    @GuardedBy("mLock")
+    void setAugmentedAutofillWhitelistLocked(@NonNull AutofillOptions options,
+            @NonNull String packageName) {
+        // TODO(b/122595322): need to setwhitelisted activities as well.
+        options.augmentedEnabled = mWhitelistedAugmentAutofillPackages.contains(packageName);
+    }
+
     private void whitelistForAugmentedAutofillPackages(@NonNull List<String> packages) {
         // TODO(b/123100824): add CTS test for when it's null
         synchronized (mLock) {
@@ -1179,6 +1188,7 @@ final class AutofillManagerServiceImpl
                 if (mMaster.verbose) Slog.v(TAG, "whitelisting augmented packages: " + packages);
                 mWhitelistedAugmentAutofillPackages.addAll(packages);
             }
+            mRemoteAugmentedAutofillService = getRemoteAugmentedAutofillServiceLocked();
         }
     }
 

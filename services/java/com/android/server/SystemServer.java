@@ -278,6 +278,8 @@ public final class SystemServer {
     private static final String UNCRYPT_PACKAGE_FILE = "/cache/recovery/uncrypt_file";
     private static final String BLOCK_MAP_FILE = "/cache/recovery/block.map";
 
+    private static final String GSI_RUNNING_PROP = "ro.gsid.image_running";
+
     // maximum number of binder threads used for system_server
     // will be higher than the system default
     private static final int sMaxBinderThreads = 31;
@@ -308,6 +310,7 @@ public final class SystemServer {
 
     private boolean mOnlyCore;
     private boolean mFirstBoot;
+    private final int mStartCount;
     private final boolean mRuntimeRestart;
     private final long mRuntimeStartElapsedTime;
     private final long mRuntimeStartUptime;
@@ -315,6 +318,9 @@ public final class SystemServer {
     private static final String START_SENSOR_SERVICE = "StartSensorService";
     private static final String START_HIDL_SERVICES = "StartHidlServices";
 
+    private static final String SYSPROP_START_COUNT = "sys.system_server.start_count";
+    private static final String SYSPROP_START_ELAPSED = "sys.system_server.start_elapsed";
+    private static final String SYSPROP_START_UPTIME = "sys.system_server.start_uptime";
 
     private Future<?> mSensorServiceStart;
     private Future<?> mZygotePreload;
@@ -344,16 +350,33 @@ public final class SystemServer {
     public SystemServer() {
         // Check for factory test mode.
         mFactoryTestMode = FactoryTest.getMode();
-        // Remember if it's runtime restart(when sys.boot_completed is already set) or reboot
-        mRuntimeRestart = "1".equals(SystemProperties.get("sys.boot_completed"));
 
+        // Record process start information.
+        // Note SYSPROP_START_COUNT will increment by *2* on a FDE device when it fully boots;
+        // one for the password screen, second for the actual boot.
+        mStartCount = SystemProperties.getInt(SYSPROP_START_COUNT, 0) + 1;
         mRuntimeStartElapsedTime = SystemClock.elapsedRealtime();
         mRuntimeStartUptime = SystemClock.uptimeMillis();
+
+        // Remember if it's runtime restart(when sys.boot_completed is already set) or reboot
+        // We don't use "mStartCount > 1" here because it'll be wrong on a FDE device.
+        // TODO: mRuntimeRestart will *not* be set to true if the proccess crashes before
+        // sys.boot_completed is set. Fix it.
+        mRuntimeRestart = "1".equals(SystemProperties.get("sys.boot_completed"));
     }
 
     private void run() {
         try {
             traceBeginAndSlog("InitBeforeStartServices");
+
+            // Record the process start information in sys props.
+            SystemProperties.set(SYSPROP_START_COUNT, String.valueOf(mStartCount));
+            SystemProperties.set(SYSPROP_START_ELAPSED, String.valueOf(mRuntimeStartElapsedTime));
+            SystemProperties.set(SYSPROP_START_UPTIME, String.valueOf(mRuntimeStartUptime));
+
+            EventLog.writeEvent(EventLogTags.SYSTEM_SERVER_START,
+                    mStartCount, mRuntimeStartUptime, mRuntimeStartElapsedTime);
+
             // If a device's clock is before 1970 (before 0), a lot of
             // APIs crash dealing with negative numbers, notably
             // java.io.File#setLastModified, so instead we fake it and
@@ -1167,7 +1190,8 @@ public final class SystemServer {
             traceEnd();
 
             final boolean hasPdb = !SystemProperties.get(PERSISTENT_DATA_BLOCK_PROP).equals("");
-            if (hasPdb) {
+            final boolean hasGsi = SystemProperties.getInt(GSI_RUNNING_PROP, 0) > 0;
+            if (hasPdb && !hasGsi) {
                 traceBeginAndSlog("StartPersistentDataBlock");
                 mSystemServiceManager.startService(PersistentDataBlockService.class);
                 traceEnd();
@@ -2215,12 +2239,12 @@ public final class SystemServer {
 
     private void startContentCaptureService(@NonNull Context context) {
         // First check if it was explicitly enabled by DeviceConfig
-        boolean explicitlySupported = false;
+        boolean explicitlyEnabled = false;
         String settings = DeviceConfig.getProperty(DeviceConfig.NAMESPACE_CONTENT_CAPTURE,
                 ContentCaptureManager.DEVICE_CONFIG_PROPERTY_SERVICE_EXPLICITLY_ENABLED);
         if (settings != null && !settings.equalsIgnoreCase("default")) {
-            explicitlySupported = Boolean.parseBoolean(settings);
-            if (explicitlySupported) {
+            explicitlyEnabled = Boolean.parseBoolean(settings);
+            if (explicitlyEnabled) {
                 Slog.d(TAG, "ContentCaptureService explicitly enabled by DeviceConfig");
             } else {
                 Slog.d(TAG, "ContentCaptureService explicitly disabled by DeviceConfig");
@@ -2229,7 +2253,7 @@ public final class SystemServer {
         }
 
         // Then check if OEM overlaid the resource that defines the service.
-        if (!explicitlySupported) {
+        if (!explicitlyEnabled) {
             final String serviceName = context
                     .getString(com.android.internal.R.string.config_defaultContentCaptureService);
             if (TextUtils.isEmpty(serviceName)) {

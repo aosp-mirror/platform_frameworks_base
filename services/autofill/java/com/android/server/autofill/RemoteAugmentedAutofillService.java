@@ -55,6 +55,9 @@ final class RemoteAugmentedAutofillService
             boolean bindInstantServiceAllowed, boolean verbose) {
         super(context, AugmentedAutofillService.SERVICE_INTERFACE, serviceName, userId, callbacks,
                 bindInstantServiceAllowed, verbose);
+
+        // Bind right away.
+        scheduleBind();
     }
 
     @Nullable
@@ -80,6 +83,22 @@ final class RemoteAugmentedAutofillService
             return null;
         }
         return new Pair<>(serviceInfo, serviceComponent);
+    }
+
+    @Override // from RemoteService
+    protected void handleOnConnectedStateChanged(boolean state) {
+        if (state && getTimeoutIdleBindMillis() != PERMANENT_BOUND_TIMEOUT_MS) {
+            scheduleUnbind();
+        }
+        try {
+            if (state) {
+                mService.onConnected();
+            } else {
+                mService.onDisconnected();
+            }
+        } catch (Exception e) {
+            Slog.w(mTag, "Exception calling onConnectedStateChanged(" + state + "): " + e);
+        }
     }
 
     @Override // from AbstractRemoteService

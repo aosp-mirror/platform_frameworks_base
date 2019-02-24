@@ -920,8 +920,7 @@ message GlobalSettingsProto {
         // Temperature at which the high temperature warning notification should
         // be shown.
         optional SettingProto warning_temperature_level = 2 [ (android.privacy).dest = DEST_AUTOMATIC ];
-        // USB temperature at which the high temperature alarm notification should be shown.
-        optional SettingProto usb_alarm_temperature_level = 3 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto show_usb_temperature_alarm = 3 [ (android.privacy).dest = DEST_AUTOMATIC ];
     }
     optional TemperatureWarning temperature_warning = 119;
 

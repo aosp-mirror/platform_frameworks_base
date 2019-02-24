@@ -9378,7 +9378,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         AttachInfo ai = mAttachInfo;
 
         // First check if context has client, so it saves a service lookup when it doesn't
-        if (!mContext.isContentCaptureSupported()) return;
+        if (mContext.getContentCaptureOptions() == null) return;
 
         // Then check if it's enabled in the context...
         final ContentCaptureManager ccm = ai != null ? ai.getContentCaptureManager(mContext)

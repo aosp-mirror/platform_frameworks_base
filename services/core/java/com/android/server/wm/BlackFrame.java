@@ -48,7 +48,7 @@ public class BlackFrame {
 
             surface = dc.makeOverlay()
                     .setName("BlackSurface")
-                    .setColorLayer(true)
+                    .setColorLayer()
                     .setParent(null) // TODO: Work-around for b/69259549
                     .build();
             transaction.setWindowCrop(surface, w, h);

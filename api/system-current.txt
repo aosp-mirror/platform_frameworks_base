@@ -15,6 +15,7 @@ package android {
     field public static final String ACCESS_SHORTCUTS = "android.permission.ACCESS_SHORTCUTS";
     field public static final String ACCESS_SURFACE_FLINGER = "android.permission.ACCESS_SURFACE_FLINGER";
     field public static final String ACTIVITY_EMBEDDING = "android.permission.ACTIVITY_EMBEDDING";
+    field public static final String ADJUST_RUNTIME_PERMISSIONS_POLICY = "android.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY";
     field public static final String ALLOCATE_AGGRESSIVE = "android.permission.ALLOCATE_AGGRESSIVE";
     field public static final String ALLOW_ANY_CODEC_FOR_PLAYBACK = "android.permission.ALLOW_ANY_CODEC_FOR_PLAYBACK";
     field public static final String AMBIENT_WALLPAPER = "android.permission.AMBIENT_WALLPAPER";
@@ -1305,7 +1306,6 @@ package android.content {
 
   public abstract class ContentResolver {
     method @Nullable public android.os.Bundle getCache(@NonNull android.net.Uri);
-    method public android.graphics.drawable.Drawable getTypeDrawable(String);
     method public void putCache(@NonNull android.net.Uri, @Nullable android.os.Bundle);
   }
 
@@ -1558,6 +1558,7 @@ package android.content.pm {
     method public void setDontKillApp(boolean);
     method public void setEnableRollback();
     method @RequiresPermission(android.Manifest.permission.INSTALL_GRANT_RUNTIME_PERMISSIONS) public void setGrantedRuntimePermissions(String[]);
+    method @RequiresPermission(android.Manifest.permission.INSTALL_PACKAGES) public void setInstallAsApex();
     method public void setInstallAsInstantApp(boolean);
     method public void setInstallAsVirtualPreload();
     method @RequiresPermission(android.Manifest.permission.INSTALL_PACKAGES) public void setStaged();
@@ -1576,6 +1577,7 @@ package android.content.pm {
     method @RequiresPermission("android.permission.OBSERVE_GRANT_REVOKE_PERMISSIONS") public abstract void addOnPermissionsChangeListener(android.content.pm.PackageManager.OnPermissionsChangedListener);
     method public abstract boolean arePermissionsIndividuallyControlled();
     method public abstract java.util.List<android.content.IntentFilter> getAllIntentFilters(String);
+    method public boolean getAppDetailsActivityEnabled(@NonNull String);
     method @NonNull @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS) public android.content.pm.ApplicationInfo getApplicationInfoAsUser(@NonNull String, int, @NonNull android.os.UserHandle) throws android.content.pm.PackageManager.NameNotFoundException;
     method @NonNull public android.content.pm.dex.ArtManager getArtManager();
     method @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL) public abstract String getDefaultBrowserPackageNameAsUser(int);
@@ -1591,8 +1593,8 @@ package android.content.pm {
     method @android.content.pm.PackageManager.PermissionFlags @RequiresPermission(anyOf={android.Manifest.permission.GRANT_RUNTIME_PERMISSIONS, android.Manifest.permission.REVOKE_RUNTIME_PERMISSIONS}) public abstract int getPermissionFlags(String, String, @NonNull android.os.UserHandle);
     method @NonNull @RequiresPermission(android.Manifest.permission.SUSPEND_APPS) public String[] getUnsuspendablePackages(@NonNull String[]);
     method @RequiresPermission(android.Manifest.permission.GRANT_RUNTIME_PERMISSIONS) public abstract void grantRuntimePermission(@NonNull String, @NonNull String, @NonNull android.os.UserHandle);
-    method public abstract int installExistingPackage(String) throws android.content.pm.PackageManager.NameNotFoundException;
-    method public abstract int installExistingPackage(String, int) throws android.content.pm.PackageManager.NameNotFoundException;
+    method @Deprecated public abstract int installExistingPackage(String) throws android.content.pm.PackageManager.NameNotFoundException;
+    method @Deprecated public abstract int installExistingPackage(String, int) throws android.content.pm.PackageManager.NameNotFoundException;
     method @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS) public java.util.List<android.content.pm.ResolveInfo> queryBroadcastReceiversAsUser(android.content.Intent, int, android.os.UserHandle);
     method @NonNull @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS) public java.util.List<android.content.pm.ResolveInfo> queryIntentActivitiesAsUser(@NonNull android.content.Intent, int, @NonNull android.os.UserHandle);
     method @NonNull @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS) public java.util.List<android.content.pm.ResolveInfo> queryIntentContentProvidersAsUser(@NonNull android.content.Intent, int, @NonNull android.os.UserHandle);
@@ -1602,6 +1604,7 @@ package android.content.pm {
     method @Deprecated public void replacePreferredActivity(@NonNull android.content.IntentFilter, int, @NonNull java.util.List<android.content.ComponentName>, @NonNull android.content.ComponentName);
     method @RequiresPermission(android.Manifest.permission.REVOKE_RUNTIME_PERMISSIONS) public abstract void revokeRuntimePermission(@NonNull String, @NonNull String, @NonNull android.os.UserHandle);
     method public void sendDeviceCustomizationReadyBroadcast();
+    method @RequiresPermission(value=android.Manifest.permission.CHANGE_COMPONENT_ENABLED_STATE, conditional=true) public void setAppDetailsActivityEnabled(@NonNull String, boolean);
     method @RequiresPermission(allOf={android.Manifest.permission.SET_PREFERRED_APPLICATIONS, android.Manifest.permission.INTERACT_ACROSS_USERS_FULL}) public abstract boolean setDefaultBrowserPackageNameAsUser(String, int);
     method @NonNull @RequiresPermission(android.Manifest.permission.SUSPEND_APPS) public String[] setDistractingPackageRestrictions(@NonNull String[], int);
     method @RequiresPermission(android.Manifest.permission.SET_HARMFUL_APP_WARNINGS) public void setHarmfulAppWarning(@NonNull String, @Nullable CharSequence);
@@ -3037,21 +3040,21 @@ package android.location {
     method public double getHorizontalPositionUncertaintyMeters();
     method public double getLatitudeDegrees();
     method public double getLongitudeDegrees();
-    method @Nullable public java.util.List<android.location.GnssSingleSatCorrection> getSingleSatCorrectionList();
+    method @Nullable public java.util.List<android.location.GnssSingleSatCorrection> getSingleSatelliteCorrectionList();
     method public long getToaGpsNanosecondsOfWeek();
     method public double getVerticalPositionUncertaintyMeters();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.location.GnssMeasurementCorrections> CREATOR;
   }
 
-  public static class GnssMeasurementCorrections.Builder {
+  public static final class GnssMeasurementCorrections.Builder {
     ctor public GnssMeasurementCorrections.Builder();
     method public android.location.GnssMeasurementCorrections build();
     method public android.location.GnssMeasurementCorrections.Builder setAltitudeMeters(double);
     method public android.location.GnssMeasurementCorrections.Builder setHorizontalPositionUncertaintyMeters(double);
     method public android.location.GnssMeasurementCorrections.Builder setLatitudeDegrees(double);
     method public android.location.GnssMeasurementCorrections.Builder setLongitudeDegrees(double);
-    method public android.location.GnssMeasurementCorrections.Builder setSingleSatCorrectionList(@Nullable java.util.List<android.location.GnssSingleSatCorrection>);
+    method public android.location.GnssMeasurementCorrections.Builder setSingleSatelliteCorrectionList(@Nullable java.util.List<android.location.GnssSingleSatCorrection>);
     method public android.location.GnssMeasurementCorrections.Builder setToaGpsNanosecondsOfWeek(long);
     method public android.location.GnssMeasurementCorrections.Builder setVerticalPositionUncertaintyMeters(double);
   }
@@ -3066,7 +3069,7 @@ package android.location {
     field public static final android.os.Parcelable.Creator<android.location.GnssReflectingPlane> CREATOR;
   }
 
-  public static class GnssReflectingPlane.Builder {
+  public static final class GnssReflectingPlane.Builder {
     ctor public GnssReflectingPlane.Builder();
     method public android.location.GnssReflectingPlane build();
     method public android.location.GnssReflectingPlane.Builder setAltitudeMeters(double);
@@ -3081,14 +3084,14 @@ package android.location {
     method public int getConstellationType();
     method public float getExcessPathLengthMeters();
     method public float getExcessPathLengthUncertaintyMeters();
-    method @FloatRange(from=0.0f, to=1.0f) public float getProbSatIsLos();
+    method @FloatRange(from=0.0f, to=1.0f) public float getProbabilityLineOfSight();
     method @Nullable public android.location.GnssReflectingPlane getReflectingPlane();
-    method public int getSatId();
-    method public int getSingleSatCorrectionFlags();
+    method public int getSatelliteId();
+    method public int getSingleSatelliteCorrectionFlags();
     method public boolean hasExcessPathLength();
     method public boolean hasExcessPathLengthUncertainty();
     method public boolean hasReflectingPlane();
-    method public boolean hasSatelliteLineOfSight();
+    method public boolean hasValidSatelliteLineOfSight();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.location.GnssSingleSatCorrection> CREATOR;
     field public static final int HAS_EXCESS_PATH_LENGTH_MASK = 2; // 0x2
@@ -3097,17 +3100,17 @@ package android.location {
     field public static final int HAS_REFLECTING_PLANE_MASK = 8; // 0x8
   }
 
-  public static class GnssSingleSatCorrection.Builder {
+  public static final class GnssSingleSatCorrection.Builder {
     ctor public GnssSingleSatCorrection.Builder();
     method public android.location.GnssSingleSatCorrection build();
     method public android.location.GnssSingleSatCorrection.Builder setCarrierFrequencyHz(float);
     method public android.location.GnssSingleSatCorrection.Builder setConstellationType(int);
     method public android.location.GnssSingleSatCorrection.Builder setExcessPathLengthMeters(float);
     method public android.location.GnssSingleSatCorrection.Builder setExcessPathLengthUncertaintyMeters(float);
-    method public android.location.GnssSingleSatCorrection.Builder setProbSatIsLos(@FloatRange(from=0.0f, to=1.0f) float);
+    method public android.location.GnssSingleSatCorrection.Builder setProbabilityLineOfSight(@FloatRange(from=0.0f, to=1.0f) float);
     method public android.location.GnssSingleSatCorrection.Builder setReflectingPlane(android.location.GnssReflectingPlane);
-    method public android.location.GnssSingleSatCorrection.Builder setSatId(int);
-    method public android.location.GnssSingleSatCorrection.Builder setSingleSatCorrectionFlags(int);
+    method public android.location.GnssSingleSatCorrection.Builder setSatelliteId(int);
+    method public android.location.GnssSingleSatCorrection.Builder setSingleSatelliteCorrectionFlags(int);
   }
 
   public class GpsClock implements android.os.Parcelable {
@@ -4665,7 +4668,10 @@ package android.net.wifi {
   }
 
   public class WifiInfo implements android.os.Parcelable {
+    method @Nullable public String getFqdn();
+    method @Nullable public String getProviderFriendlyName();
     method public boolean isOsuAp();
+    method public boolean isPasspointAp();
   }
 
   public class WifiManager {
@@ -5538,6 +5544,7 @@ package android.os {
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public android.os.PersistableBundle getSeedAccountOptions();
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public String getSeedAccountType();
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public long[] getSerialNumbersOfUsers(boolean);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public android.graphics.Bitmap getUserIcon();
     method @Deprecated @android.os.UserManager.UserRestrictionSource @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public int getUserRestrictionSource(String, android.os.UserHandle);
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public java.util.List<android.os.UserManager.EnforcingUser> getUserRestrictionSources(String, android.os.UserHandle);
     method public boolean hasRestrictedProfiles();
@@ -5548,6 +5555,8 @@ package android.os {
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public boolean isPrimaryUser();
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public boolean isRestrictedProfile();
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public boolean removeUser(android.os.UserHandle);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public void setUserIcon(android.graphics.Bitmap);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public void setUserName(String);
     field public static final String ACTION_USER_RESTRICTIONS_CHANGED = "android.os.action.USER_RESTRICTIONS_CHANGED";
     field @Deprecated public static final String DISALLOW_OEM_UNLOCK = "no_oem_unlock";
     field public static final String DISALLOW_RUN_IN_BACKGROUND = "no_run_in_background";
@@ -5624,6 +5633,7 @@ package android.permission {
     method @BinderThread public abstract void onRestoreRuntimePermissionsBackup(@NonNull android.os.UserHandle, @NonNull java.io.InputStream);
     method public abstract void onRevokeRuntimePermission(@NonNull String, @NonNull String);
     method @NonNull public abstract java.util.Map<java.lang.String,java.util.List<java.lang.String>> onRevokeRuntimePermissions(@NonNull java.util.Map<java.lang.String,java.util.List<java.lang.String>>, boolean, int, @NonNull String);
+    method public abstract boolean onSetRuntimePermissionGrantStateByDeviceAdmin(@NonNull String, @NonNull String, @NonNull String, int);
     field public static final String SERVICE_INTERFACE = "android.permission.PermissionControllerService";
   }
 
@@ -6386,20 +6396,12 @@ package android.service.carrier {
 
 package android.service.contentcapture {
 
-  @Deprecated public final class ContentCaptureEventsRequest implements android.os.Parcelable {
-    method @Deprecated public int describeContents();
-    method @Deprecated @NonNull public java.util.List<android.view.contentcapture.ContentCaptureEvent> getEvents();
-    method @Deprecated public void writeToParcel(android.os.Parcel, int);
-    field @Deprecated public static final android.os.Parcelable.Creator<android.service.contentcapture.ContentCaptureEventsRequest> CREATOR;
-  }
-
   public abstract class ContentCaptureService extends android.app.Service {
     ctor public ContentCaptureService();
     method public final void disableContentCaptureServices();
     method public void onActivitySnapshot(@NonNull android.view.contentcapture.ContentCaptureSessionId, @NonNull android.service.contentcapture.SnapshotData);
     method public void onConnected();
     method public void onContentCaptureEvent(@NonNull android.view.contentcapture.ContentCaptureSessionId, @NonNull android.view.contentcapture.ContentCaptureEvent);
-    method @Deprecated public void onContentCaptureEventsRequest(@NonNull android.view.contentcapture.ContentCaptureSessionId, @NonNull android.service.contentcapture.ContentCaptureEventsRequest);
     method public void onCreateContentCaptureSession(@NonNull android.view.contentcapture.ContentCaptureContext, @NonNull android.view.contentcapture.ContentCaptureSessionId);
     method public void onDestroyContentCaptureSession(@NonNull android.view.contentcapture.ContentCaptureSessionId);
     method public void onDisconnected();
@@ -7921,7 +7923,6 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isCurrentPotentialEmergencyNumber(@NonNull String);
     method public boolean isDataConnectivityPossible();
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, android.Manifest.permission.READ_PHONE_STATE}) public boolean isIdle();
-    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isMultisimCarrierRestricted();
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, android.Manifest.permission.READ_PHONE_STATE}) public boolean isOffhook();
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, android.Manifest.permission.READ_PHONE_STATE}) public boolean isRadioOn();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isRebootRequiredForModemConfigChange();

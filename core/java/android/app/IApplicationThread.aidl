@@ -21,7 +21,9 @@ import android.app.IUiAutomationConnection;
 import android.app.ProfilerInfo;
 import android.app.ResultInfo;
 import android.app.servertransaction.ClientTransaction;
+import android.content.AutofillOptions;
 import android.content.ComponentName;
+import android.content.ContentCaptureOptions;
 import android.content.IIntentReceiver;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -68,7 +70,8 @@ oneway interface IApplicationThread {
             int debugMode, boolean enableBinderTracking, boolean trackAllocation,
             boolean restrictedBackupMode, boolean persistent, in Configuration config,
             in CompatibilityInfo compatInfo, in Map services,
-            in Bundle coreSettings, in String buildSerial, boolean isAutofillCompatEnabled);
+            in Bundle coreSettings, in String buildSerial, in AutofillOptions autofillOptions,
+            in ContentCaptureOptions contentCaptureOptions);
     void runIsolatedEntryPoint(in String entryPoint, in String[] entryPointArgs);
     void scheduleExit();
     void scheduleServiceArgs(IBinder token, in ParceledListSlice args);

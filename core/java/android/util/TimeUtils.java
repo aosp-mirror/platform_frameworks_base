@@ -18,6 +18,7 @@ package android.util;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.os.Build;
 import android.os.SystemClock;
@@ -302,6 +303,7 @@ public class TimeUtils {
     }
 
     /** @hide Just for debugging; not internationalized. */
+    @TestApi
     public static String formatDuration(long duration) {
         synchronized (sFormatSync) {
             int len = formatDurationLocked(duration, 0);

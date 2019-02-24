@@ -34,7 +34,7 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
      * Runs the given phase of a test by calling into the device.
      * Throws an exception if the test phase fails.
      * <p>
-     * For example, <code>runPhase("testBasicEnableRollback");</code>
+     * For example, <code>runPhase("testApkOnlyEnableRollback");</code>
      */
     private void runPhase(String phase) throws Exception {
         assertTrue(runDeviceTests("com.android.tests.rollback",
@@ -43,14 +43,28 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
     }
 
     /**
-     * Tests staged rollbacks.
+     * Tests staged rollbacks involving only apks.
      */
     @Test
-    public void testBasic() throws Exception {
-        runPhase("testBasicEnableRollback");
+    public void testApkOnly() throws Exception {
+        runPhase("testApkOnlyEnableRollback");
         getDevice().reboot();
-        runPhase("testBasicCommitRollback");
+        runPhase("testApkOnlyCommitRollback");
         getDevice().reboot();
-        runPhase("testBasicConfirmRollback");
+        runPhase("testApkOnlyConfirmRollback");
+    }
+
+    /**
+     * Tests staged rollbacks involving only apex.
+     */
+    @Test
+    public void testApexOnly() throws Exception {
+        runPhase("testApexOnlyPrepareApex");
+        getDevice().reboot();
+        runPhase("testApexOnlyEnableRollback");
+        getDevice().reboot();
+        runPhase("testApexOnlyCommitRollback");
+        getDevice().reboot();
+        runPhase("testApexOnlyConfirmRollback");
     }
 }

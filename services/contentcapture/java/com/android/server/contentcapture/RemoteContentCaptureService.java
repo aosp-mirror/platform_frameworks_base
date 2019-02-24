@@ -15,6 +15,9 @@
  */
 package com.android.server.contentcapture;
 
+import static android.view.contentcapture.ContentCaptureHelper.sDebug;
+import static android.view.contentcapture.ContentCaptureHelper.sVerbose;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ComponentName;
@@ -23,7 +26,6 @@ import android.os.IBinder;
 import android.service.contentcapture.IContentCaptureService;
 import android.service.contentcapture.IContentCaptureServiceCallback;
 import android.service.contentcapture.SnapshotData;
-import android.text.format.DateUtils;
 import android.util.Slog;
 import android.view.contentcapture.ContentCaptureContext;
 import android.view.contentcapture.UserDataRemovalRequest;
@@ -34,8 +36,6 @@ import com.android.internal.os.IResultReceiver;
 final class RemoteContentCaptureService
         extends AbstractMultiplePendingRequestsRemoteService<RemoteContentCaptureService,
         IContentCaptureService> {
-
-    private static final long TIMEOUT_REMOTE_REQUEST_MILLIS = 2 * DateUtils.SECOND_IN_MILLIS;
 
     private final IBinder mServerCallback;
 
@@ -62,12 +62,6 @@ final class RemoteContentCaptureService
         return PERMANENT_BOUND_TIMEOUT_MS;
     }
 
-    @Override // from AbstractRemoteService
-    protected long getRemoteRequestMillis() {
-        // TODO(b/111276913): read from Settings so it can be changed in the field
-        return TIMEOUT_REMOTE_REQUEST_MILLIS;
-    }
-
     @Override // from RemoteService
     protected void handleOnConnectedStateChanged(boolean state) {
         if (state && getTimeoutIdleBindMillis() != PERMANENT_BOUND_TIMEOUT_MS) {
@@ -75,7 +69,7 @@ final class RemoteContentCaptureService
         }
         try {
             if (state) {
-                mService.onConnected(mServerCallback);
+                mService.onConnected(mServerCallback, sVerbose, sDebug);
             } else {
                 mService.onDisconnected();
             }

@@ -16,6 +16,7 @@
 package android.metrics;
 
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.content.ComponentName;
 import android.util.Log;
 import android.util.SparseArray;
@@ -31,6 +32,7 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
  * @hide
  */
 @SystemApi
+@TestApi
 public class LogMaker {
     private static final String TAG = "LogBuilder";
 

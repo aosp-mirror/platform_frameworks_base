@@ -2811,6 +2811,7 @@ class StorageManagerService extends IStorageManager.Stub
 
     @Override
     public void unlockUserKey(int userId, int serialNumber, byte[] token, byte[] secret) {
+        Slog.d(TAG, "unlockUserKey: " + userId);
         enforcePermission(android.Manifest.permission.STORAGE_INTERNAL);
 
         if (StorageManager.isFileEncryptedNativeOrEmulated()) {
@@ -4056,6 +4057,11 @@ class StorageManagerService extends IStorageManager.Stub
 
         @Override
         public String[] getVisibleVolumesForUser(int userId) {
+            synchronized (mLock) {
+                if (!ArrayUtils.contains(mSystemUnlockedUsers, userId)) {
+                    return EmptyArray.STRING;
+                }
+            }
             final ArrayList<String> visibleVolsForUser = new ArrayList<>();
             for (int i = mVisibleVols.size() - 1; i >= 0; --i) {
                 final VolumeInfo vol = mVisibleVols.get(i);

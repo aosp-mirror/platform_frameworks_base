@@ -57,44 +57,61 @@ import com.android.server.LockGuard;
 import com.android.server.Watchdog;
 import com.android.server.input.InputManagerService;
 import com.android.server.policy.WindowManagerPolicy;
+import com.android.server.wm.utils.MockTracker;
 
+import org.junit.rules.TestRule;
+import org.junit.runner.Description;
+import org.junit.runners.model.Statement;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.quality.Strictness;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * A Test utility class to create a mock {@link WindowManagerService} instance for tests.
+ * JUnit test rule to create a mock {@link WindowManagerService} instance for tests.
  */
-class TestSystemServices {
-    private static StaticMockitoSession sMockitoSession;
-    private static WindowManagerService sService;
-    private static TestWindowManagerPolicy sPolicy;
+public class SystemServicesTestRule implements TestRule {
 
-    static AtomicBoolean sCurrentMessagesProcessed = new AtomicBoolean(false);
+    private static final String TAG = SystemServicesTestRule.class.getSimpleName();
 
-    static void setUpWindowManagerService() {
-        sMockitoSession = mockitoSession()
-                .spyStatic(LockGuard.class)
-                .spyStatic(Watchdog.class)
+    private final AtomicBoolean mCurrentMessagesProcessed = new AtomicBoolean(false);
+
+    private MockTracker mMockTracker;
+    private StaticMockitoSession mMockitoSession;
+    private WindowManagerService mWindowManagerService;
+    private TestWindowManagerPolicy mWindowManagerPolicy;
+
+    /** {@link MockTracker} to track mocks created by {@link SystemServicesTestRule}. */
+    private static class Tracker extends MockTracker {
+        // This empty extended class is necessary since Mockito distinguishes a listener by it
+        // class.
+    }
+
+    @Override
+    public Statement apply(Statement base, Description description) {
+        return new Statement() {
+            @Override
+            public void evaluate() throws Throwable {
+                try {
+                    runWithDexmakerShareClassLoader(SystemServicesTestRule.this::setUp);
+                    base.evaluate();
+                } finally {
+                    tearDown();
+                }
+            }
+        };
+    }
+
+    private void setUp() {
+        mMockTracker = new Tracker();
+
+        mMockitoSession = mockitoSession()
+                .spyStatic(LocalServices.class)
+                .mockStatic(LockGuard.class)
+                .mockStatic(Watchdog.class)
                 .strictness(Strictness.LENIENT)
                 .startMocking();
 
-        runWithDexmakerShareClassLoader(TestSystemServices::setUpTestWindowService);
-    }
-
-    static void tearDownWindowManagerService() {
-        waitUntilWindowManagerHandlersIdle();
-        removeLocalServices();
-        sService = null;
-        sPolicy = null;
-
-        sMockitoSession.finishMocking();
-        sMockitoSession = null;
-    }
-
-    private static void setUpTestWindowService() {
-        doReturn(null).when(() -> LockGuard.installLock(any(), anyInt()));
         doReturn(mock(Watchdog.class)).when(Watchdog::getInstance);
 
         final Context context = getInstrumentation().getTargetContext();
@@ -116,21 +133,18 @@ class TestSystemServices {
         doReturn(appOpsManager).when(context)
                 .getSystemService(eq(Context.APP_OPS_SERVICE));
 
-        removeLocalServices();
-
         final DisplayManagerInternal dmi = mock(DisplayManagerInternal.class);
-        LocalServices.addService(DisplayManagerInternal.class, dmi);
+        doReturn(dmi).when(() -> LocalServices.getService(eq(DisplayManagerInternal.class)));
 
         final PowerManagerInternal pmi = mock(PowerManagerInternal.class);
-        LocalServices.addService(PowerManagerInternal.class, pmi);
         final PowerSaveState state = new PowerSaveState.Builder().build();
         doReturn(state).when(pmi).getLowPowerState(anyInt());
+        doReturn(pmi).when(() -> LocalServices.getService(eq(PowerManagerInternal.class)));
 
         final ActivityManagerInternal ami = mock(ActivityManagerInternal.class);
-        LocalServices.addService(ActivityManagerInternal.class, ami);
+        doReturn(ami).when(() -> LocalServices.getService(eq(ActivityManagerInternal.class)));
 
         final ActivityTaskManagerInternal atmi = mock(ActivityTaskManagerInternal.class);
-        LocalServices.addService(ActivityTaskManagerInternal.class, atmi);
         doAnswer((InvocationOnMock invocationOnMock) -> {
             final Runnable runnable = invocationOnMock.getArgument(0);
             if (runnable != null) {
@@ -138,6 +152,7 @@ class TestSystemServices {
             }
             return null;
         }).when(atmi).notifyKeyguardFlagsChanged(nullable(Runnable.class), anyInt());
+        doReturn(atmi).when(() -> LocalServices.getService(eq(ActivityTaskManagerInternal.class)));
 
         final InputManagerService ims = mock(InputManagerService.class);
         // InputChannel is final and can't be mocked.
@@ -150,31 +165,46 @@ class TestSystemServices {
         final WindowManagerGlobalLock wmLock = new WindowManagerGlobalLock();
         doReturn(wmLock).when(atms).getGlobalLock();
 
-        sPolicy = new TestWindowManagerPolicy(TestSystemServices::getWindowManagerService);
-        sService = WindowManagerService.main(context, ims, false, false, sPolicy, atms);
+        mWindowManagerPolicy = new TestWindowManagerPolicy(this::getWindowManagerService);
+        mWindowManagerService = WindowManagerService.main(
+                context, ims, false, false, mWindowManagerPolicy, atms, StubTransaction::new);
 
-        sService.onInitReady();
+        mWindowManagerService.onInitReady();
 
-        final Display display = sService.mDisplayManager.getDisplay(DEFAULT_DISPLAY);
+        final Display display = mWindowManagerService.mDisplayManager.getDisplay(DEFAULT_DISPLAY);
         // Display creation is driven by the ActivityManagerService via
         // ActivityStackSupervisor. We emulate those steps here.
-        sService.mRoot.createDisplayContent(display, mock(ActivityDisplay.class));
+        mWindowManagerService.mRoot.createDisplayContent(display, mock(ActivityDisplay.class));
+
+        mMockTracker.stopTracking();
+    }
+
+    private void tearDown() {
+        waitUntilWindowManagerHandlersIdle();
+        removeLocalServices();
+        mWindowManagerService = null;
+        mWindowManagerPolicy = null;
+        if (mMockitoSession != null) {
+            mMockitoSession.finishMocking();
+            mMockitoSession = null;
+        }
+
+        if (mMockTracker != null) {
+            mMockTracker.close();
+            mMockTracker = null;
+        }
     }
 
     private static void removeLocalServices() {
-        LocalServices.removeServiceForTest(DisplayManagerInternal.class);
-        LocalServices.removeServiceForTest(PowerManagerInternal.class);
-        LocalServices.removeServiceForTest(ActivityManagerInternal.class);
-        LocalServices.removeServiceForTest(ActivityTaskManagerInternal.class);
         LocalServices.removeServiceForTest(WindowManagerInternal.class);
         LocalServices.removeServiceForTest(WindowManagerPolicy.class);
     }
 
-    static WindowManagerService getWindowManagerService() {
-        return sService;
+    WindowManagerService getWindowManagerService() {
+        return mWindowManagerService;
     }
 
-    static void cleanupWindowManagerHandlers() {
+    void cleanupWindowManagerHandlers() {
         final WindowManagerService wm = getWindowManagerService();
         if (wm == null) {
             return;
@@ -184,7 +214,7 @@ class TestSystemServices {
         SurfaceAnimationThread.getHandler().removeCallbacksAndMessages(null);
     }
 
-    static void waitUntilWindowManagerHandlersIdle() {
+    void waitUntilWindowManagerHandlersIdle() {
         final WindowManagerService wm = getWindowManagerService();
         if (wm == null) {
             return;
@@ -196,21 +226,21 @@ class TestSystemServices {
         waitHandlerIdle(SurfaceAnimationThread.getHandler());
     }
 
-    private static void waitHandlerIdle(Handler handler) {
-        synchronized (sCurrentMessagesProcessed) {
+    private void waitHandlerIdle(Handler handler) {
+        synchronized (mCurrentMessagesProcessed) {
             // Add a message to the handler queue and make sure it is fully processed before we move
             // on. This makes sure all previous messages in the handler are fully processed vs. just
             // popping them from the message queue.
-            sCurrentMessagesProcessed.set(false);
+            mCurrentMessagesProcessed.set(false);
             handler.post(() -> {
-                synchronized (sCurrentMessagesProcessed) {
-                    sCurrentMessagesProcessed.set(true);
-                    sCurrentMessagesProcessed.notifyAll();
+                synchronized (mCurrentMessagesProcessed) {
+                    mCurrentMessagesProcessed.set(true);
+                    mCurrentMessagesProcessed.notifyAll();
                 }
             });
-            while (!sCurrentMessagesProcessed.get()) {
+            while (!mCurrentMessagesProcessed.get()) {
                 try {
-                    sCurrentMessagesProcessed.wait();
+                    mCurrentMessagesProcessed.wait();
                 } catch (InterruptedException e) {
                 }
             }

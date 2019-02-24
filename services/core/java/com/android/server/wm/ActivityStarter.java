@@ -46,6 +46,7 @@ import static android.content.Intent.FLAG_ACTIVITY_REORDER_TO_FRONT;
 import static android.content.Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED;
 import static android.content.Intent.FLAG_ACTIVITY_RETAIN_IN_RECENTS;
 import static android.content.Intent.FLAG_ACTIVITY_SINGLE_TOP;
+import static android.content.Intent.FLAG_ACTIVITY_TASK_ON_HOME;
 import static android.content.pm.ActivityInfo.DOCUMENT_LAUNCH_ALWAYS;
 import static android.content.pm.ActivityInfo.LAUNCH_MULTIPLE;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_INSTANCE;
@@ -938,7 +939,7 @@ class ActivityStarter {
             return false;
         }
         // don't abort if the callingUid is in the foreground or is a persistent system process
-        final int callingUidProcState = mService.getUidStateLocked(callingUid);
+        final int callingUidProcState = mService.getUidState(callingUid);
         final boolean callingUidHasAnyVisibleWindow =
                 mService.mWindowManager.mRoot.isAnyNonToastWindowVisibleForUid(callingUid);
         final boolean isCallingUidForeground = callingUidHasAnyVisibleWindow
@@ -951,7 +952,7 @@ class ActivityStarter {
         // take realCallingUid into consideration
         final int realCallingUidProcState = (callingUid == realCallingUid)
                 ? callingUidProcState
-                : mService.getUidStateLocked(realCallingUid);
+                : mService.getUidState(realCallingUid);
         final boolean realCallingUidHasAnyVisibleWindow = (callingUid == realCallingUid)
                 ? callingUidHasAnyVisibleWindow
                 : mService.mWindowManager.mRoot.isAnyNonToastWindowVisibleForUid(realCallingUid);
@@ -1457,6 +1458,14 @@ class ActivityStarter {
                 // This task was started because of movement of the activity based on affinity...
                 // Now that we are actually launching it, we can assign the base intent.
                 reusedActivity.getTaskRecord().setIntent(mStartActivity);
+            } else {
+                final boolean taskOnHome =
+                        (mStartActivity.intent.getFlags() & FLAG_ACTIVITY_TASK_ON_HOME) != 0;
+                if (taskOnHome) {
+                    reusedActivity.getTaskRecord().intent.addFlags(FLAG_ACTIVITY_TASK_ON_HOME);
+                } else {
+                    reusedActivity.getTaskRecord().intent.removeFlags(FLAG_ACTIVITY_TASK_ON_HOME);
+                }
             }
 
             // This code path leads to delivering a new intent, we want to make sure we schedule it

@@ -16,6 +16,9 @@
 
 package android.permission;
 
+import static android.app.admin.DevicePolicyManager.PERMISSION_GRANT_STATE_DEFAULT;
+import static android.app.admin.DevicePolicyManager.PERMISSION_GRANT_STATE_DENIED;
+import static android.app.admin.DevicePolicyManager.PERMISSION_GRANT_STATE_GRANTED;
 import static android.permission.PermissionControllerManager.COUNT_ONLY_WHEN_GRANTED;
 import static android.permission.PermissionControllerManager.COUNT_WHEN_SYSTEM;
 
@@ -32,6 +35,7 @@ import android.annotation.BinderThread;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.app.Service;
+import android.app.admin.DevicePolicyManager.PermissionGrantState;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
@@ -180,6 +184,18 @@ public abstract class PermissionControllerService extends Service {
     public abstract boolean onIsApplicationQualifiedForRole(@NonNull String roleName,
             @NonNull String packageName);
 
+    /**
+     * Set the runtime permission state from a device admin.
+     *
+     * @param callerPackageName The package name of the admin requesting the change
+     * @param packageName Package the permission belongs to
+     * @param permission Permission to change
+     * @param grantState State to set the permission into
+     */
+    public abstract boolean onSetRuntimePermissionGrantStateByDeviceAdmin(
+            @NonNull String callerPackageName, @NonNull String packageName,
+            @NonNull String permission, @PermissionGrantState int grantState);
+
     @Override
     public final IBinder onBind(Intent intent) {
         return new IPermissionController.Stub() {
@@ -326,6 +342,35 @@ public abstract class PermissionControllerService extends Service {
                         PermissionControllerService::isApplicationQualifiedForRole,
                         PermissionControllerService.this, roleName, packageName, callback));
             }
+
+            @Override
+            public void setRuntimePermissionGrantStateByDeviceAdmin(String callerPackageName,
+                    String packageName, String permission, int grantState,
+                    RemoteCallback callback) {
+                checkStringNotEmpty(callerPackageName);
+                checkStringNotEmpty(packageName);
+                checkStringNotEmpty(permission);
+                checkArgument(grantState == PERMISSION_GRANT_STATE_GRANTED
+                        || grantState == PERMISSION_GRANT_STATE_DENIED
+                        || grantState == PERMISSION_GRANT_STATE_DEFAULT);
+                checkNotNull(callback);
+
+                if (grantState == PERMISSION_GRANT_STATE_DENIED) {
+                    enforceCallingPermission(Manifest.permission.GRANT_RUNTIME_PERMISSIONS, null);
+                }
+
+                if (grantState == PERMISSION_GRANT_STATE_DENIED) {
+                    enforceCallingPermission(Manifest.permission.REVOKE_RUNTIME_PERMISSIONS, null);
+                }
+
+                enforceCallingPermission(Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY,
+                        null);
+
+                mHandler.sendMessage(obtainMessage(
+                        PermissionControllerService::setRuntimePermissionGrantStateByDeviceAdmin,
+                        PermissionControllerService.this, callerPackageName, packageName,
+                        permission, grantState, callback));
+            }
         };
     }
 
@@ -397,6 +442,17 @@ public abstract class PermissionControllerService extends Service {
         boolean qualified = onIsApplicationQualifiedForRole(roleName, packageName);
         Bundle result = new Bundle();
         result.putBoolean(PermissionControllerManager.KEY_RESULT, qualified);
+        callback.sendResult(result);
+    }
+
+    private void setRuntimePermissionGrantStateByDeviceAdmin(@NonNull String callerPackageName,
+            @NonNull String packageName, @NonNull String permission,
+            @PermissionGrantState int grantState, @NonNull RemoteCallback callback) {
+        boolean wasSet = onSetRuntimePermissionGrantStateByDeviceAdmin(callerPackageName,
+                packageName, permission, grantState);
+
+        Bundle result = new Bundle();
+        result.putBoolean(PermissionControllerManager.KEY_RESULT, wasSet);
         callback.sendResult(result);
     }
 }

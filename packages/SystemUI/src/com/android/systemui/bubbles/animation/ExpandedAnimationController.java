@@ -17,6 +17,7 @@
 package com.android.systemui.bubbles.animation;
 
 import android.content.res.Resources;
+import android.graphics.Point;
 import android.graphics.PointF;
 import android.view.View;
 import android.view.WindowInsets;
@@ -25,6 +26,7 @@ import androidx.dynamicanimation.animation.DynamicAnimation;
 import androidx.dynamicanimation.animation.SpringForce;
 
 import com.android.systemui.R;
+import com.android.systemui.bubbles.BubbleController;
 
 import com.google.android.collect.Sets;
 
@@ -61,6 +63,14 @@ public class ExpandedAnimationController
     private float mBubbleSizePx;
     /** Height of the status bar. */
     private float mStatusBarHeight;
+    /** Size of display. */
+    private Point mDisplaySize;
+    /** Size of dismiss target at bottom of screen. */
+    private float mPipDismissHeight;
+
+    public ExpandedAnimationController(Point displaySize) {
+        mDisplaySize = displaySize;
+    }
 
     /**
      * Whether the individual bubble has been dragged out of the row of bubbles far enough to cause
@@ -88,6 +98,7 @@ public class ExpandedAnimationController
         mBubbleSizePx = res.getDimensionPixelSize(R.dimen.individual_bubble_size);
         mStatusBarHeight =
                 res.getDimensionPixelSize(com.android.internal.R.dimen.status_bar_height);
+        mPipDismissHeight = res.getDimensionPixelSize(R.dimen.pip_dismiss_gradient_height);
     }
 
     /**
@@ -204,16 +215,19 @@ public class ExpandedAnimationController
 
     /** The Y value of the row of expanded bubbles. */
     public float getExpandedY() {
+        boolean showOnTop = mLayout != null
+                && BubbleController.showBubblesAtTop(mLayout.getContext());
         final WindowInsets insets = mLayout != null ? mLayout.getRootWindowInsets() : null;
-        if (insets != null) {
+        if (showOnTop && insets != null) {
             return mBubblePaddingPx + Math.max(
                     mStatusBarHeight,
                     insets.getDisplayCutout() != null
                             ? insets.getDisplayCutout().getSafeInsetTop()
                             : 0);
+        } else {
+            int bottomInset = insets != null ? insets.getSystemWindowInsetBottom() : 0;
+            return mDisplaySize.y - mBubbleSizePx - (mPipDismissHeight - bottomInset);
         }
-
-        return mBubblePaddingPx;
     }
 
     /** Runs the given Runnable after all translation-related animations have ended. */

@@ -582,7 +582,7 @@ final class ColorFade {
                 final SurfaceControl.Builder builder =
                         new SurfaceControl.Builder(mSurfaceSession).setName("ColorFade");
                 if (mMode == MODE_FADE) {
-                    builder.setColorLayer(true);
+                    builder.setColorLayer();
                 } else {
                     builder.setBufferSize(mDisplayWidth, mDisplayHeight);
                 }

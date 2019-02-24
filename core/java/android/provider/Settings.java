@@ -1204,6 +1204,21 @@ public final class Settings {
     public static final String ACTION_DREAM_SETTINGS = "android.settings.DREAM_SETTINGS";
 
     /**
+     * Activity Action: Show Notification assistant settings.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     * @see android.service.notification.NotificationAssistantService
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_NOTIFICATION_ASSISTANT_SETTINGS =
+            "android.settings.NOTIFICATION_ASSISTANT_SETTINGS";
+
+    /**
      * Activity Action: Show Notification listener settings.
      * <p>
      * In some cases, a matching Activity may not exist, so ensure you
@@ -8131,6 +8146,7 @@ public final class Settings {
          *
          * @hide
          */
+        @TestApi
         public static final String ENABLED_VR_LISTENERS = "enabled_vr_listeners";
 
         private static final Validator ENABLED_VR_LISTENERS_VALIDATOR =
@@ -10780,6 +10796,7 @@ public final class Settings {
         *
         * @hide
         */
+       @TestApi
        public static final String OVERLAY_DISPLAY_DEVICES = "overlay_display_devices";
 
         /**
@@ -13045,6 +13062,15 @@ public final class Settings {
          */
         public static final String LTE_SERVICE_FORCED = "lte_service_forced";
 
+
+        /**
+         * Specifies the behaviour the lid triggers when closed
+         * <p>
+         * See WindowManagerPolicy.WindowManagerFuncs
+         * @hide
+         */
+        public static final String LID_BEHAVIOR = "lid_behavior";
+
         /**
          * Ephemeral app cookie max size in bytes.
          * <p>
@@ -14096,17 +14122,16 @@ public final class Settings {
         public static final String SHOW_TEMPERATURE_WARNING = "show_temperature_warning";
 
         /**
+         * Whether to show the usb high temperature alarm notification.
+         * @hide
+         */
+        public static final String SHOW_USB_TEMPERATURE_ALARM = "show_usb_temperature_alarm";
+
+        /**
          * Temperature at which the high temperature warning notification should be shown.
          * @hide
          */
         public static final String WARNING_TEMPERATURE = "warning_temperature";
-
-
-        /**
-         * USB Temperature at which the high temperature alarm notification should be shown.
-         * @hide
-         */
-        public static final String USB_ALARM_TEMPERATURE = "usb_alarm_temperature";
 
         /**
          * Whether the diskstats logging task is enabled/disabled.

@@ -24,6 +24,9 @@ import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityThread;
+import android.media.audiopolicy.AudioMix;
+import android.media.audiopolicy.AudioPolicy;
+import android.media.projection.MediaProjection;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -37,6 +40,7 @@ import android.util.Log;
 import android.util.Pair;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.Preconditions;
 
 import java.io.IOException;
 import java.lang.annotation.Retention;
@@ -182,6 +186,8 @@ public class AudioRecord implements AudioRouting, MicrophoneDirection,
     //---------------------------------------------------------
     // Member variables
     //--------------------
+    private AudioPolicy mAudioCapturePolicy;
+
     /**
      * The audio data sampling rate in Hz.
      * Never {@link AudioFormat#SAMPLE_RATE_UNSPECIFIED}.
@@ -396,7 +402,7 @@ public class AudioRecord implements AudioRouting, MicrophoneDirection,
         int initResult = native_setup( new WeakReference<AudioRecord>(this),
                 mAudioAttributes, sampleRate, mChannelMask, mChannelIndexMask,
                 mAudioFormat, mNativeBufferSizeInBytes,
-                session, ActivityThread.currentOpPackageName(), 0 /*nativeRecordInJavaObj*/);
+                session, getCurrentOpPackageName(), 0 /*nativeRecordInJavaObj*/);
         if (initResult != SUCCESS) {
             loge("Error code "+initResult+" when initializing native AudioRecord object.");
             return; // with mState == STATE_UNINITIALIZED
@@ -406,6 +412,15 @@ public class AudioRecord implements AudioRouting, MicrophoneDirection,
         mSessionId = session[0];
 
         mState = STATE_INITIALIZED;
+    }
+
+    private String getCurrentOpPackageName() {
+        String opPackageName = ActivityThread.currentOpPackageName();
+        if (opPackageName != null) {
+            return opPackageName;
+        }
+        // Command line utility
+        return "uid:" + Binder.getCallingUid();
     }
 
     /**
@@ -426,6 +441,16 @@ public class AudioRecord implements AudioRouting, MicrophoneDirection,
         } else {
             mState = STATE_UNINITIALIZED;
         }
+    }
+
+    /**
+     * Sets an {@link AudioPolicy} to automatically unregister when the record is released.
+     *
+     * <p>This is to prevent users of the audio capture API from having to manually unregister the
+     * policy that was used to create the record.
+     */
+    private void unregisterAudioPolicyOnRelease(AudioPolicy audioPolicy) {
+        mAudioCapturePolicy = audioPolicy;
     }
 
     /**
@@ -491,6 +516,11 @@ public class AudioRecord implements AudioRouting, MicrophoneDirection,
      * the minimum buffer size for the source is used.
      */
     public static class Builder {
+
+        private static final String ERROR_MESSAGE_SOURCE_MISMATCH =
+                "Cannot both set audio source and set playback capture config";
+
+        private AudioPlaybackCaptureConfiguration mAudioPlaybackCaptureConfiguration;
         private AudioAttributes mAttributes;
         private AudioFormat mFormat;
         private int mBufferSizeInBytes;
@@ -509,6 +539,9 @@ public class AudioRecord implements AudioRouting, MicrophoneDirection,
          * @throws IllegalArgumentException
          */
         public Builder setAudioSource(int source) throws IllegalArgumentException {
+            Preconditions.checkState(
+                    mAudioPlaybackCaptureConfiguration == null,
+                    ERROR_MESSAGE_SOURCE_MISMATCH);
             if ( (source < MediaRecorder.AudioSource.DEFAULT) ||
                     (source > MediaRecorder.getAudioSourceMax()) ) {
                 throw new IllegalArgumentException("Invalid audio source " + source);
@@ -578,6 +611,25 @@ public class AudioRecord implements AudioRouting, MicrophoneDirection,
         }
 
         /**
+         * Sets the {@link AudioRecord} to record audio played by other apps.
+         *
+         * @param config Defines what apps to record audio from (i.e., via either their uid or
+         *               the type of audio).
+         * @throws IllegalStateException if called in conjunction with {@link #setAudioSource(int)}.
+         * @throws NullPointerException if {@code config} is null.
+         */
+        public Builder setAudioPlaybackCaptureConfig(
+                @NonNull AudioPlaybackCaptureConfiguration config) {
+            Preconditions.checkNotNull(
+                    config, "Illegal null AudioPlaybackCaptureConfiguration argument");
+            Preconditions.checkState(
+                    mAttributes == null,
+                    ERROR_MESSAGE_SOURCE_MISMATCH);
+            mAudioPlaybackCaptureConfiguration = config;
+            return this;
+        }
+
+        /**
          * @hide
          * To be only used by system components.
          * @param sessionId ID of audio session the AudioRecord must be attached to, or
@@ -595,6 +647,17 @@ public class AudioRecord implements AudioRouting, MicrophoneDirection,
             return this;
         }
 
+        private AudioRecord buildAudioPlaybackCaptureRecord() {
+            AudioMix audioMix = mAudioPlaybackCaptureConfiguration.createAudioMix(mFormat);
+            MediaProjection projection = mAudioPlaybackCaptureConfiguration.getMediaProjection();
+            AudioPolicy audioPolicy = new AudioPolicy.Builder(/*context=*/ null)
+                    .setMediaProjection(projection)
+                    .addMix(audioMix).build();
+            AudioRecord record = audioPolicy.createAudioRecordSink(audioMix);
+            record.unregisterAudioPolicyOnRelease(audioPolicy);
+            return record;
+        }
+
         /**
          * @return a new {@link AudioRecord} instance successfully initialized with all
          *     the parameters set on this <code>Builder</code>.
@@ -603,6 +666,10 @@ public class AudioRecord implements AudioRouting, MicrophoneDirection,
          *     or if the device was not available.
          */
         public AudioRecord build() throws UnsupportedOperationException {
+            if (mAudioPlaybackCaptureConfiguration != null) {
+                return buildAudioPlaybackCaptureRecord();
+            }
+
             if (mFormat == null) {
                 mFormat = new AudioFormat.Builder()
                         .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
@@ -756,6 +823,9 @@ public class AudioRecord implements AudioRouting, MicrophoneDirection,
             stop();
         } catch(IllegalStateException ise) {
             // don't raise an exception, we're releasing the resources.
+        }
+        if (mAudioCapturePolicy != null) {
+            AudioManager.unregisterAudioPolicyAsyncStatic(mAudioCapturePolicy);
         }
         native_release();
         mState = STATE_UNINITIALIZED;

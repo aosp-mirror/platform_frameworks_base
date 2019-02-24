@@ -31,7 +31,8 @@ import java.util.List;
  * @hide
  */
 oneway interface IAugmentedAutofillService {
-
+    void onConnected();
+    void onDisconnected();
     void onFillRequest(int sessionId, in IBinder autofillManagerClient, int taskId,
                        in ComponentName activityComponent, in AutofillId focusedId,
                        in AutofillValue focusedValue, long requestTime, in IFillCallback callback);

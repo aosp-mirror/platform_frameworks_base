@@ -118,7 +118,7 @@ public class WindowFrameTests extends WindowTestsBase {
     public void setUp() throws Exception {
         mWindowToken = createAppWindowToken(mWm.getDefaultDisplayContentLocked(),
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
-        mStubStack = WindowTestUtils.createMockTaskStack();
+        mStubStack = mock(TaskStack.class);
     }
 
     // Do not use this function directly in the tests below. Instead, use more explicit function

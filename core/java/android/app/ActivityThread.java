@@ -43,9 +43,11 @@ import android.app.servertransaction.PendingTransactionActions;
 import android.app.servertransaction.PendingTransactionActions.StopInfo;
 import android.app.servertransaction.TransactionExecutor;
 import android.app.servertransaction.TransactionExecutorHelper;
+import android.content.AutofillOptions;
 import android.content.BroadcastReceiver;
 import android.content.ComponentCallbacks2;
 import android.content.ComponentName;
+import android.content.ContentCaptureOptions;
 import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -744,8 +746,16 @@ public final class ActivityThread extends ClientTransactionHandler {
         /** Initial values for {@link Profiler}. */
         ProfilerInfo initProfilerInfo;
 
-        boolean autofillCompatibilityEnabled;
+        AutofillOptions autofillOptions;
 
+        /**
+         * Content capture options for the application - when null, it means ContentCapture is not
+         * enabled for the package.
+         */
+        @Nullable
+        ContentCaptureOptions contentCaptureOptions;
+
+        @Override
         public String toString() {
             return "AppBindData{appInfo=" + appInfo + "}";
         }
@@ -966,8 +976,8 @@ public final class ActivityThread extends ClientTransactionHandler {
                 boolean enableBinderTracking, boolean trackAllocation,
                 boolean isRestrictedBackupMode, boolean persistent, Configuration config,
                 CompatibilityInfo compatInfo, Map services, Bundle coreSettings,
-                String buildSerial, boolean autofillCompatibilityEnabled) {
-
+                String buildSerial, AutofillOptions autofillOptions,
+                ContentCaptureOptions contentCaptureOptions) {
             if (services != null) {
                 if (false) {
                     // Test code to make sure the app could see the passed-in services.
@@ -1013,7 +1023,8 @@ public final class ActivityThread extends ClientTransactionHandler {
             data.compatInfo = compatInfo;
             data.initProfilerInfo = profilerInfo;
             data.buildSerial = buildSerial;
-            data.autofillCompatibilityEnabled = autofillCompatibilityEnabled;
+            data.autofillOptions = autofillOptions;
+            data.contentCaptureOptions = contentCaptureOptions;
             sendMessage(H.BIND_APPLICATION, data);
         }
 
@@ -6153,7 +6164,10 @@ public final class ActivityThread extends ClientTransactionHandler {
             app = data.info.makeApplication(data.restrictedBackupMode, null);
 
             // Propagate autofill compat state
-            app.setAutofillCompatibilityEnabled(data.autofillCompatibilityEnabled);
+            app.setAutofillOptions(data.autofillOptions);
+
+            // Propagate Content Capture options
+            app.setContentCaptureOptions(data.contentCaptureOptions);
 
             mInitialApplication = app;
 

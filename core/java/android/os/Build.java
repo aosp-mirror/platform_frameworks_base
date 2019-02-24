@@ -107,6 +107,7 @@ public class Build {
      * Whether this build was for an emulator device.
      * @hide
      */
+    @TestApi
     public static final boolean IS_EMULATOR = getString("ro.kernel.qemu").equals("1");
 
     /**

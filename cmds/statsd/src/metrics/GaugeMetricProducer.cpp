@@ -576,6 +576,7 @@ void GaugeMetricProducer::flushCurrentBucketLocked(const int64_t& eventTimeNs,
         }
     }
 
+    StatsdStats::getInstance().noteBucketCount(mMetricId);
     mCurrentSlicedBucket = std::make_shared<DimToGaugeAtomsMap>();
 }
 

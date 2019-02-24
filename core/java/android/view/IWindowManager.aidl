@@ -582,4 +582,13 @@ interface IWindowManager
      *        display should be re-parented to.
      */
     void reparentDisplayContent(int displayId, in SurfaceControl sc);
+
+    /**
+     * Waits for transactions to get applied before injecting input.
+     * This includes waiting for the input windows to get sent to InputManager.
+     *
+     * This is needed for testing since the system add windows and injects input
+     * quick enough that the windows don't have time to get sent to InputManager.
+     */
+     boolean injectInputAfterTransactionsApplied(in InputEvent ev, int mode);
 }

@@ -1110,7 +1110,7 @@ public class Activity extends ContextThemeWrapper
         super.attachBaseContext(newBase);
         if (newBase != null) {
             newBase.setAutofillClient(this);
-            newBase.setContentCaptureSupported(true);
+            newBase.setContentCaptureOptions(getContentCaptureOptions());
         }
     }
 
@@ -1118,12 +1118,6 @@ public class Activity extends ContextThemeWrapper
     @Override
     public final AutofillClient getAutofillClient() {
         return this;
-    }
-
-    /** @hide */
-    @Override
-    public boolean isContentCaptureSupported() {
-        return true;
     }
 
     /**
@@ -2393,8 +2387,8 @@ public class Activity extends ContextThemeWrapper
                 getAutofillManager().onPendingSaveUi(AutofillManager.PENDING_UI_OPERATION_CANCEL,
                         mIntent.getIBinderExtra(AutofillManager.EXTRA_RESTORE_SESSION_TOKEN));
             }
-            notifyContentCaptureManagerIfNeeded(CONTENT_CAPTURE_STOP);
         }
+        notifyContentCaptureManagerIfNeeded(CONTENT_CAPTURE_STOP);
         mEnterAnimationComplete = false;
     }
 
@@ -7614,7 +7608,8 @@ public class Activity extends ContextThemeWrapper
 
         mWindow.setColorMode(info.colorMode);
 
-        setAutofillCompatibilityEnabled(application.isAutofillCompatibilityEnabled());
+        setAutofillOptions(application.getAutofillOptions());
+        setContentCaptureOptions(application.getContentCaptureOptions());
     }
 
     private void enableAutofillCompatibilityIfNeeded() {

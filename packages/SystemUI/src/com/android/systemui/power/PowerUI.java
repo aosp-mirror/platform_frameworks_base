@@ -27,7 +27,6 @@ import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.os.BatteryManager;
 import android.os.Handler;
-import android.os.HardwarePropertiesManager;
 import android.os.IBinder;
 import android.os.IThermalEventListener;
 import android.os.IThermalService;
@@ -43,7 +42,6 @@ import android.util.Log;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.logging.MetricsLogger;
 import com.android.settingslib.utils.ThreadUtils;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
@@ -71,7 +69,6 @@ public class PowerUI extends SystemUI {
     final Receiver mReceiver = new Receiver();
 
     private PowerManager mPowerManager;
-    private HardwarePropertiesManager mHardwarePropertiesManager;
     private WarningsUI mWarnings;
     private final Configuration mLastConfiguration = new Configuration();
     private long mTimeRemaining = Long.MAX_VALUE;
@@ -82,30 +79,21 @@ public class PowerUI extends SystemUI {
     private boolean mLowWarningShownThisChargeCycle;
     private boolean mSevereWarningShownThisChargeCycle;
     private Future mLastShowWarningTask;
+    private boolean mEnableSkinTemperatureWarning;
+    private boolean mEnableUsbTemperatureAlarm;
 
     private int mLowBatteryAlertCloseLevel;
     private final int[] mLowBatteryReminderLevels = new int[2];
 
     private long mScreenOffTime = -1;
 
-    private float mThresholdTemp;
-    private float[] mRecentTemps = new float[MAX_RECENT_TEMPS];
-    private int mNumTemps;
-    private long mNextLogTime;
     @VisibleForTesting IThermalService mThermalService;
 
     @VisibleForTesting int mBatteryLevel = 100;
     @VisibleForTesting int mBatteryStatus = BatteryManager.BATTERY_STATUS_UNKNOWN;
 
-    // by using the same instance (method references are not guaranteed to be the same object
-    // We create a method reference here so that we are guaranteed that we can remove a callback
-    // each time they are created).
-    private final Runnable mUpdateTempCallback = this::updateTemperatureWarning;
-
     public void start() {
         mPowerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
-        mHardwarePropertiesManager = (HardwarePropertiesManager)
-                mContext.getSystemService(Context.HARDWARE_PROPERTIES_SERVICE);
         mScreenOffTime = mPowerManager.isScreenOn() ? -1 : SystemClock.elapsedRealtime();
         mWarnings = Dependency.get(WarningsUI.class);
         mEnhancedEstimates = Dependency.get(EnhancedEstimates.class);
@@ -128,7 +116,7 @@ public class PowerUI extends SystemUI {
         // to the temperature being too high.
         showThermalShutdownDialog();
 
-        initTemperatureWarning();
+        initTemperature();
     }
 
     @Override
@@ -137,7 +125,7 @@ public class PowerUI extends SystemUI {
 
         // Safe to modify mLastConfiguration here as it's only updated by the main thread (here).
         if ((mLastConfiguration.updateFrom(newConfig) & mask) != 0) {
-            mHandler.post(this::initTemperatureWarning);
+            mHandler.post(this::initTemperature);
         }
     }
 
@@ -383,30 +371,16 @@ public class PowerUI extends SystemUI {
         return canShowWarning || canShowSevereWarning;
     }
 
-    private void initTemperatureWarning() {
+    private void initTemperature() {
         ContentResolver resolver = mContext.getContentResolver();
         Resources resources = mContext.getResources();
-        if (Settings.Global.getInt(resolver, Settings.Global.SHOW_TEMPERATURE_WARNING,
-                resources.getInteger(R.integer.config_showTemperatureWarning)) == 0) {
-            return;
-        }
 
-        mThresholdTemp = Settings.Global.getFloat(resolver, Settings.Global.WARNING_TEMPERATURE,
-                resources.getInteger(R.integer.config_warningTemperature));
-
-        if (mThresholdTemp < 0f) {
-            // Get the shutdown temperature, adjust for warning tolerance.
-            float[] throttlingTemps = mHardwarePropertiesManager.getDeviceTemperatures(
-                    HardwarePropertiesManager.DEVICE_TEMPERATURE_SKIN,
-                    HardwarePropertiesManager.TEMPERATURE_SHUTDOWN);
-            if (throttlingTemps == null
-                    || throttlingTemps.length == 0
-                    || throttlingTemps[0] == HardwarePropertiesManager.UNDEFINED_TEMPERATURE) {
-                return;
-            }
-            mThresholdTemp = throttlingTemps[0] -
-                    resources.getInteger(R.integer.config_warningTemperatureTolerance);
-        }
+        mEnableSkinTemperatureWarning = Settings.Global.getInt(resolver,
+                Settings.Global.SHOW_TEMPERATURE_WARNING,
+                resources.getInteger(R.integer.config_showTemperatureWarning)) != 0;
+        mEnableUsbTemperatureAlarm = Settings.Global.getInt(resolver,
+                Settings.Global.SHOW_USB_TEMPERATURE_ALARM,
+                resources.getInteger(R.integer.config_showUsbPortAlarm)) != 0;
 
         if (mThermalService == null) {
             // Enable push notifications of throttling from vendor thermal
@@ -416,21 +390,27 @@ public class PowerUI extends SystemUI {
 
             if (b != null) {
                 mThermalService = IThermalService.Stub.asInterface(b);
-                try {
-                    mThermalService.registerThermalEventListenerWithType(
-                            new ThermalEventListener(), Temperature.TYPE_SKIN);
-                } catch (RemoteException e) {
-                    // Should never happen.
-                }
+                registerThermalEventListener();
             } else {
                 Slog.w(TAG, "cannot find thermalservice, no throttling push notifications");
             }
         }
+    }
 
-        setNextLogTime();
-
-        // We have passed all of the checks, start checking the temp
-        mHandler.post(mUpdateTempCallback);
+    @VisibleForTesting
+    void registerThermalEventListener() {
+        try {
+            if (mEnableSkinTemperatureWarning) {
+                mThermalService.registerThermalEventListenerWithType(
+                        new ThermalEventSkinListener(), Temperature.TYPE_SKIN);
+            }
+            if (mEnableUsbTemperatureAlarm) {
+                mThermalService.registerThermalEventListenerWithType(
+                        new ThermalEventUsbListener(), Temperature.TYPE_USB_PORT);
+            }
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Failed to register thermal callback.", e);
+        }
     }
 
     private void showThermalShutdownDialog() {
@@ -438,81 +418,6 @@ public class PowerUI extends SystemUI {
                 == PowerManager.SHUTDOWN_REASON_THERMAL_SHUTDOWN) {
             mWarnings.showThermalShutdownWarning();
         }
-    }
-
-    @VisibleForTesting
-    protected void updateTemperatureWarning() {
-        float[] temps = mHardwarePropertiesManager.getDeviceTemperatures(
-                HardwarePropertiesManager.DEVICE_TEMPERATURE_SKIN,
-                HardwarePropertiesManager.TEMPERATURE_CURRENT);
-        if (temps.length != 0) {
-            float temp = temps[0];
-            mRecentTemps[mNumTemps++] = temp;
-
-            StatusBar statusBar = getComponent(StatusBar.class);
-            if (statusBar != null && !statusBar.isDeviceInVrMode()
-                    && temp >= mThresholdTemp) {
-                logAtTemperatureThreshold(temp);
-                mWarnings.showHighTemperatureWarning();
-            } else {
-                mWarnings.dismissHighTemperatureWarning();
-            }
-        }
-
-        logTemperatureStats();
-
-        // Remove any pending callbacks as we only want to enable one
-        mHandler.removeCallbacks(mUpdateTempCallback);
-        mHandler.postDelayed(mUpdateTempCallback, TEMPERATURE_INTERVAL);
-    }
-
-    private void logAtTemperatureThreshold(float temp) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("currentTemp=").append(temp)
-                .append(",thresholdTemp=").append(mThresholdTemp)
-                .append(",batteryStatus=").append(mBatteryStatus)
-                .append(",recentTemps=");
-        for (int i = 0; i < mNumTemps; i++) {
-            sb.append(mRecentTemps[i]).append(',');
-        }
-        Slog.i(TAG, sb.toString());
-    }
-
-    /**
-     * Calculates and logs min, max, and average
-     * {@link HardwarePropertiesManager#DEVICE_TEMPERATURE_SKIN} over the past
-     * {@link #TEMPERATURE_LOGGING_INTERVAL}.
-     */
-    private void logTemperatureStats() {
-        if (mNextLogTime > System.currentTimeMillis() && mNumTemps != MAX_RECENT_TEMPS) {
-            return;
-        }
-
-        if (mNumTemps > 0) {
-            float sum = mRecentTemps[0], min = mRecentTemps[0], max = mRecentTemps[0];
-            for (int i = 1; i < mNumTemps; i++) {
-                float temp = mRecentTemps[i];
-                sum += temp;
-                if (temp > max) {
-                    max = temp;
-                }
-                if (temp < min) {
-                    min = temp;
-                }
-            }
-
-            float avg = sum / mNumTemps;
-            Slog.i(TAG, "avg=" + avg + ",min=" + min + ",max=" + max);
-            MetricsLogger.histogram(mContext, "device_skin_temp_avg", (int) avg);
-            MetricsLogger.histogram(mContext, "device_skin_temp_min", (int) min);
-            MetricsLogger.histogram(mContext, "device_skin_temp_max", (int) max);
-        }
-        setNextLogTime();
-        mNumTemps = 0;
-    }
-
-    private void setNextLogTime() {
-        mNextLogTime = System.currentTimeMillis() + TEMPERATURE_LOGGING_INTERVAL;
     }
 
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
@@ -541,34 +446,80 @@ public class PowerUI extends SystemUI {
                 Settings.Global.LOW_BATTERY_SOUND_TIMEOUT, 0));
         pw.print("bucket: ");
         pw.println(Integer.toString(findBatteryLevelBucket(mBatteryLevel)));
-        pw.print("mThresholdTemp=");
-        pw.println(Float.toString(mThresholdTemp));
-        pw.print("mNextLogTime=");
-        pw.println(Long.toString(mNextLogTime));
+        pw.print("mEnableSkinTemperatureWarning=");
+        pw.println(mEnableSkinTemperatureWarning);
+        pw.print("mEnableUsbTemperatureAlarm=");
+        pw.println(mEnableUsbTemperatureAlarm);
         mWarnings.dump(pw);
     }
 
     public interface WarningsUI {
         void update(int batteryLevel, int bucket, long screenOffTime);
+
         void updateEstimate(Estimate estimate);
+
         void updateThresholds(long lowThreshold, long severeThreshold);
+
         void dismissLowBatteryWarning();
+
         void showLowBatteryWarning(boolean playSound);
+
         void dismissInvalidChargerWarning();
+
         void showInvalidChargerWarning();
+
         void updateLowBatteryWarning();
+
         boolean isInvalidChargerWarningShowing();
+
         void dismissHighTemperatureWarning();
+
         void showHighTemperatureWarning();
+
+        /**
+         * Display USB overheat alarm
+         */
+        void showUsbHighTemperatureAlarm();
+
         void showThermalShutdownWarning();
+
         void dump(PrintWriter pw);
+
         void userSwitched();
     }
 
-    // Thermal event received from vendor thermal management subsystem
-    private final class ThermalEventListener extends IThermalEventListener.Stub {
+    // Thermal event received from thermal service manager subsystem
+    @VisibleForTesting
+    final class ThermalEventSkinListener extends IThermalEventListener.Stub {
         @Override public void notifyThrottling(Temperature temp) {
-            mHandler.post(mUpdateTempCallback);
+            int status = temp.getStatus();
+
+            if (status >= Temperature.THROTTLING_EMERGENCY) {
+                StatusBar statusBar = getComponent(StatusBar.class);
+                if (statusBar != null && !statusBar.isDeviceInVrMode()) {
+                    mWarnings.showHighTemperatureWarning();
+                    Slog.d(TAG, "ThermalEventSkinListener: notifyThrottling was called "
+                            + ", current skin status = " + status
+                            + ", temperature = " + temp.getValue());
+                }
+            } else {
+                mWarnings.dismissHighTemperatureWarning();
+            }
+        }
+    }
+
+    // Thermal event received from thermal service manager subsystem
+    @VisibleForTesting
+    final class ThermalEventUsbListener extends IThermalEventListener.Stub {
+        @Override public void notifyThrottling(Temperature temp) {
+            int status = temp.getStatus();
+
+            if (status >= Temperature.THROTTLING_EMERGENCY) {
+                mWarnings.showUsbHighTemperatureAlarm();
+                Slog.d(TAG, "ThermalEventUsbListener: notifyThrottling was called "
+                        + ", current usb port status = " + status
+                        + ", temperature = " + temp.getValue());
+            }
         }
     }
 }

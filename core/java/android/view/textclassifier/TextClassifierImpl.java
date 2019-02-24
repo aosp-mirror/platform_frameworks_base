@@ -240,9 +240,7 @@ public final class TextClassifierImpl implements TextClassifier {
                                                 refTime.getZone().getId(),
                                                 localesString),
                                         mContext,
-                                        // TODO: Pass the locale list once it is supported in
-                                        //  native side.
-                                        LocaleList.getDefault().get(0).toLanguageTag()
+                                        getResourceLocaleString()
                                 );
                 if (results.length > 0) {
                     return createClassificationResult(
@@ -403,8 +401,7 @@ public final class TextClassifierImpl implements TextClassifier {
                             nativeConversation,
                             null,
                             mContext,
-                            // TODO: Pass the locale list once it is supported in native side.
-                            LocaleList.getDefault().get(0).toLanguageTag());
+                            getResourceLocaleString());
             return createConversationActionResult(request, nativeSuggestions);
         } catch (Throwable t) {
             // Avoid throwing from this method. Log the error.
@@ -456,10 +453,9 @@ public final class TextClassifierImpl implements TextClassifier {
         TextLanguage textLanguage = detectLanguage(request);
         int localeHypothesisCount = textLanguage.getLocaleHypothesisCount();
         List<String> languageTags = new ArrayList<>();
-        // TODO: Reconsider this and probably make the score threshold configurable.
         for (int i = 0; i < localeHypothesisCount; i++) {
             ULocale locale = textLanguage.getLocale(i);
-            if (textLanguage.getConfidenceScore(locale) < 0.5) {
+            if (textLanguage.getConfidenceScore(locale) < getForeignLanguageThreshold()) {
                 break;
             }
             languageTags.add(locale.toLanguageTag());
@@ -587,15 +583,10 @@ public final class TextClassifierImpl implements TextClassifier {
             }
         }
 
-        final float foreignTextThreshold = mSettings.getLangIdThresholdOverride() >= 0
-                ? mSettings.getLangIdThresholdOverride()
-                : 0.5f /* TODO: Load this from the langId model. */;
-        final Bundle foreignLanguageBundle =
-                detectForeignLanguage(classifiedText, foreignTextThreshold);
+        final Bundle foreignLanguageBundle = detectForeignLanguage(classifiedText);
         builder.setForeignLanguageExtra(foreignLanguageBundle);
 
         boolean isPrimaryAction = true;
-        final ArrayList<Intent> sourceIntents = new ArrayList<>();
         List<LabeledIntent> labeledIntents = mIntentFactory.create(
                 mContext,
                 classifiedText,
@@ -626,16 +617,20 @@ public final class TextClassifierImpl implements TextClassifier {
 
     /**
      * Returns a bundle with the language and confidence score if it finds the text to be
-     * in a foreign language. Otherwise returns null.
+     * in a foreign language. Otherwise returns null. This algorithm defines what the system thinks
+     * is a foreign language.
      */
+    // TODO: Revisit this algorithm.
+    // TODO: Consider making this public API.
     @Nullable
-    private Bundle detectForeignLanguage(String text, float threshold) {
-        if (threshold > 1) {
-            return null;
-        }
-
-        // TODO: Revisit this algorithm.
+    private Bundle detectForeignLanguage(String text) {
         try {
+            final float threshold = getForeignLanguageThreshold();
+            if (threshold > 1) {
+                Log.v(LOG_TAG, "Foreign language detection disabled.");
+                return null;
+            }
+
             final LangIdModel langId = getLangIdImpl();
             final LangIdModel.LanguageResult[] langResults = langId.detectLanguages(text);
             if (langResults.length <= 0) {
@@ -651,8 +646,8 @@ public final class TextClassifierImpl implements TextClassifier {
             if (highestScoringResult.getScore() < threshold) {
                 return null;
             }
-            // TODO: Remove
-            Log.d(LOG_TAG, String.format("Language detected: <%s:%s>",
+
+            Log.v(LOG_TAG, String.format("Language detected: <%s:%s>",
                     highestScoringResult.getLanguage(), highestScoringResult.getScore()));
 
             final Locale detected = new Locale(highestScoringResult.getLanguage());
@@ -669,6 +664,18 @@ public final class TextClassifierImpl implements TextClassifier {
             Log.e(LOG_TAG, "Error detecting foreign text. Ignored.", t);
         }
         return null;
+    }
+
+    private float getForeignLanguageThreshold() {
+        try {
+            return mSettings.getLangIdThresholdOverride() >= 0
+                    ? mSettings.getLangIdThresholdOverride()
+                    : getLangIdImpl().getTranslateThreshold();
+        } catch (FileNotFoundException e) {
+            final float defaultThreshold = 0.5f;
+            Log.v(LOG_TAG, "Using default foreign language threshold: " + defaultThreshold);
+            return defaultThreshold;
+        }
     }
 
     @Override
@@ -715,6 +722,19 @@ public final class TextClassifierImpl implements TextClassifier {
             fd.close();
         } catch (IOException e) {
             Log.e(LOG_TAG, "Error closing file.", e);
+        }
+    }
+
+    /**
+     * Returns the locale string for the current resources configuration.
+     */
+    private String getResourceLocaleString() {
+        // TODO: Pass the locale list once it is supported in native side.
+        try {
+            return mContext.getResources().getConfiguration().getLocales().get(0).toLanguageTag();
+        } catch (NullPointerException e) {
+            // NPE is unexpected. Erring on the side of caution.
+            return LocaleList.getDefault().get(0).toLanguageTag();
         }
     }
 

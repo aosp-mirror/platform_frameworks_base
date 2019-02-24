@@ -57,7 +57,7 @@ import androidx.test.rule.ActivityTestRule;
 import com.android.internal.R;
 import com.android.internal.app.ResolverActivity.ResolvedComponentInfo;
 import com.android.internal.logging.MetricsLogger;
-import com.android.internal.logging.nano.MetricsProto;
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -524,15 +524,45 @@ public class ChooserActivityTest {
         waitForIdle();
         verify(mockLogger, atLeastOnce()).write(logMakerCaptor.capture());
         assertThat(logMakerCaptor.getAllValues().get(0).getCategory(),
-                is(MetricsProto.MetricsEvent.ACTION_ACTIVITY_CHOOSER_SHOWN));
+                is(MetricsEvent.ACTION_ACTIVITY_CHOOSER_SHOWN));
         assertThat(logMakerCaptor
                 .getAllValues().get(0)
-                .getTaggedData(MetricsProto.MetricsEvent.FIELD_TIME_TO_APP_TARGETS),
+                .getTaggedData(MetricsEvent.FIELD_TIME_TO_APP_TARGETS),
                 is(notNullValue()));
         assertThat(logMakerCaptor
                 .getAllValues().get(0)
-                .getTaggedData(MetricsProto.MetricsEvent.FIELD_SHARESHEET_MIMETYPE),
+                .getTaggedData(MetricsEvent.FIELD_SHARESHEET_MIMETYPE),
                 is("TestType"));
+        assertThat(logMakerCaptor
+                        .getAllValues().get(0)
+                        .getSubtype(),
+                is(MetricsEvent.PARENT_PROFILE));
+    }
+
+    @Test
+    public void testOnCreateLoggingFromWorkProfile() {
+        Intent sendIntent = createSendTextIntent();
+        sendIntent.setType("TestType");
+        sOverrides.alternateProfileSetting = MetricsEvent.MANAGED_PROFILE;
+        MetricsLogger mockLogger = sOverrides.metricsLogger;
+        ArgumentCaptor<LogMaker> logMakerCaptor = ArgumentCaptor.forClass(LogMaker.class);
+        mActivityRule.launchActivity(Intent.createChooser(sendIntent, "logger test"));
+        waitForIdle();
+        verify(mockLogger, atLeastOnce()).write(logMakerCaptor.capture());
+        assertThat(logMakerCaptor.getAllValues().get(0).getCategory(),
+                is(MetricsEvent.ACTION_ACTIVITY_CHOOSER_SHOWN));
+        assertThat(logMakerCaptor
+                        .getAllValues().get(0)
+                        .getTaggedData(MetricsEvent.FIELD_TIME_TO_APP_TARGETS),
+                is(notNullValue()));
+        assertThat(logMakerCaptor
+                        .getAllValues().get(0)
+                        .getTaggedData(MetricsEvent.FIELD_SHARESHEET_MIMETYPE),
+                is("TestType"));
+        assertThat(logMakerCaptor
+                        .getAllValues().get(0)
+                        .getSubtype(),
+                is(MetricsEvent.MANAGED_PROFILE));
     }
 
     @Test
@@ -547,7 +577,7 @@ public class ChooserActivityTest {
         verify(mockLogger, Mockito.times(1)).write(logMakerCaptor.capture());
         // First invocation is from onCreate
         assertThat(logMakerCaptor.getAllValues().get(0).getCategory(),
-                is(MetricsProto.MetricsEvent.ACTION_ACTIVITY_CHOOSER_SHOWN));
+                is(MetricsEvent.ACTION_ACTIVITY_CHOOSER_SHOWN));
     }
 
     @Test
@@ -569,7 +599,7 @@ public class ChooserActivityTest {
         verify(mockLogger, Mockito.times(3)).write(logMakerCaptor.capture());
         // First invocation is from onCreate
         assertThat(logMakerCaptor.getAllValues().get(1).getCategory(),
-                is(MetricsProto.MetricsEvent.ACTION_SHARE_WITH_PREVIEW));
+                is(MetricsEvent.ACTION_SHARE_WITH_PREVIEW));
         assertThat(logMakerCaptor.getAllValues().get(1).getSubtype(),
                 is(CONTENT_PREVIEW_TEXT));
     }
@@ -599,11 +629,11 @@ public class ChooserActivityTest {
         verify(mockLogger, Mockito.times(3)).write(logMakerCaptor.capture());
         // First invocation is from onCreate
         assertThat(logMakerCaptor.getAllValues().get(1).getCategory(),
-                is(MetricsProto.MetricsEvent.ACTION_SHARE_WITH_PREVIEW));
+                is(MetricsEvent.ACTION_SHARE_WITH_PREVIEW));
         assertThat(logMakerCaptor.getAllValues().get(1).getSubtype(),
                 is(CONTENT_PREVIEW_IMAGE));
         assertThat(logMakerCaptor.getAllValues().get(2).getCategory(),
-                is(MetricsProto.MetricsEvent.ACTION_SHARE_WITH_PREVIEW));
+                is(MetricsEvent.ACTION_SHARE_WITH_PREVIEW));
         assertThat(logMakerCaptor.getAllValues().get(2).getSubtype(),
                 is(CONTENT_PREVIEW_IMAGE));
     }

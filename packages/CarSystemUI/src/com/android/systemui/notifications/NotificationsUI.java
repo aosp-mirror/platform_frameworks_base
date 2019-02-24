@@ -16,25 +16,21 @@
 
 package com.android.systemui.notifications;
 
+import android.app.ActivityManager;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
-import android.app.ActivityManager;
 import android.car.Car;
 import android.car.CarNotConnectedException;
 import android.car.drivingstate.CarUxRestrictionsManager;
-import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.res.Configuration;
 import android.graphics.PixelFormat;
 import android.os.IBinder;
 import android.os.ServiceManager;
-import android.os.UserHandle;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
 import android.view.GestureDetector;
@@ -95,28 +91,12 @@ public class NotificationsUI extends SystemUI
     private static int sSettleOpenPercentage;
     private static int sSettleClosePercentage;
 
-    private final BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            if (action.equals(Intent.ACTION_USER_SWITCHED)) {
-                mCarNotificationListener.registerAsSystemService(mContext,
-                        mCarUxRestrictionManagerWrapper,
-                        mClickHandlerFactory);
-                inflateNotificationContent();
-            }
-        }
-    };
-
     /**
      * Inits the window that hosts the notifications and establishes the connections
      * to the car related services.
      */
     @Override
     public void start() {
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(Intent.ACTION_USER_SWITCHED);
-        mContext.registerReceiverAsUser(mIntentReceiver, UserHandle.ALL, filter, null, null);
         sSettleOpenPercentage = mContext.getResources().getInteger(
                 R.integer.notification_settle_open_percentage);
         sSettleClosePercentage = mContext.getResources().getInteger(
@@ -133,11 +113,12 @@ public class NotificationsUI extends SystemUI
                         ServiceManager.getService(Context.STATUS_BAR_SERVICE)),
                 launchResult -> {
                     if (launchResult == ActivityManager.START_TASK_TO_FRONT
-                            || launchResult == ActivityManager.START_SUCCESS) {
+                            || launchResult == ActivityManager.START_SUCCESS){
                         closeCarNotifications(DEFAULT_FLING_VELOCITY);
                     }
                 });
-
+        mCarNotificationListener.registerAsSystemService(mContext, mCarUxRestrictionManagerWrapper,
+                mClickHandlerFactory);
         mCar = Car.createCar(mContext, mCarConnectionListener);
         mCar.connect();
         NotificationGestureListener gestureListener = new NotificationGestureListener();
@@ -149,6 +130,8 @@ public class NotificationsUI extends SystemUI
                 R.layout.navigation_bar_window, null);
         mCarNotificationWindow
                 .setBackgroundColor(mContext.getColor(R.color.notification_shade_background_color));
+
+        inflateNotificationContent();
 
         WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT,
@@ -220,7 +203,7 @@ public class NotificationsUI extends SystemUI
         // There's a view installed at a higher z-order such that we can intercept the ACTION_DOWN
         // to set the initial click state.
         mCarNotificationWindow.findViewById(R.id.glass_pane).setOnTouchListener((v, event) -> {
-            if (event.getActionMasked() == MotionEvent.ACTION_UP) {
+            if (event.getActionMasked() == MotionEvent.ACTION_UP ) {
                 mNotificationListAtBottomAtTimeOfTouch = false;
             }
             if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
@@ -271,7 +254,7 @@ public class NotificationsUI extends SystemUI
         public boolean onTouch(View v, MotionEvent event) {
             // reset mNotificationListAtBottomAtTimeOfTouch here since the "glass pane" will not
             // get the up event
-            if (event.getActionMasked() == MotionEvent.ACTION_UP) {
+            if (event.getActionMasked() == MotionEvent.ACTION_UP ) {
                 mNotificationListAtBottomAtTimeOfTouch = false;
             }
             boolean wasScrolledUp = mScrollUpDetector.onTouchEvent(event);
@@ -355,7 +338,7 @@ public class NotificationsUI extends SystemUI
         public boolean onFling(MotionEvent event1, MotionEvent event2,
                 float velocityX, float velocityY) {
             if (Math.abs(event1.getX() - event2.getX()) > SWIPE_MAX_OFF_PATH
-                    || Math.abs(velocityY) < SWIPE_THRESHOLD_VELOCITY) {
+                    || Math.abs(velocityY) < SWIPE_THRESHOLD_VELOCITY){
                 // swipe was not vertical or was not fast enough
                 return false;
             }

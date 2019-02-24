@@ -66,7 +66,7 @@ class RollbackTestUtils {
         Context context = InstrumentationRegistry.getContext();
         PackageManager pm = context.getPackageManager();
         try {
-            PackageInfo info = pm.getPackageInfo(packageName, 0);
+            PackageInfo info = pm.getPackageInfo(packageName, PackageManager.MATCH_APEX);
             return info.getLongVersionCode();
         } catch (PackageManager.NameNotFoundException e) {
             return -1;
@@ -142,7 +142,7 @@ class RollbackTestUtils {
         session = packageInstaller.openSession(sessionId);
 
         ClassLoader loader = RollbackTest.class.getClassLoader();
-        try (OutputStream packageInSession = session.openWrite("package", 0, -1);
+        try (OutputStream packageInSession = session.openWrite(resourceName, 0, -1);
              InputStream is = loader.getResourceAsStream(resourceName);) {
             byte[] buffer = new byte[4096];
             int n;
@@ -168,7 +168,8 @@ class RollbackTestUtils {
     }
 
     /**
-     * Installs the apks with the given resource names as an atomic set.
+     * Installs the APKs or APEXs with the given resource names as an atomic
+     * set. A resource is assumed to be an APEX if it has the .apex extension.
      * <p>
      * In case of staged installs, this function will return succesfully after
      * the staged install has been committed and is ready for the device to
@@ -206,6 +207,9 @@ class RollbackTestUtils {
             if (staged) {
                 params.setStaged();
             }
+            if (resourceName.endsWith(".apex")) {
+                params.setInstallAsApex();
+            }
             if (enableRollback) {
                 params.setEnableRollback();
             }
@@ -213,7 +217,7 @@ class RollbackTestUtils {
             session = packageInstaller.openSession(sessionId);
 
             ClassLoader loader = RollbackTest.class.getClassLoader();
-            try (OutputStream packageInSession = session.openWrite("package", 0, -1);
+            try (OutputStream packageInSession = session.openWrite(resourceName, 0, -1);
                  InputStream is = loader.getResourceAsStream(resourceName);) {
                 byte[] buffer = new byte[4096];
                 int n;
@@ -247,7 +251,9 @@ class RollbackTestUtils {
     }
 
     /**
-     * Installs the apks with the given resource names as a staged atomic set.
+     * Installs the APKs or APEXs with the given resource names as a staged
+     * atomic set. A resource is assumed to be an APEX if it has the .apex
+     * extension.
      *
      * @param enableRollback if rollback should be enabled.
      * @param resourceNames names of the class loader resource for the apks to

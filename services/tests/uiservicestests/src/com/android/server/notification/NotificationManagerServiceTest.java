@@ -99,7 +99,6 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.MediaStore;
-import android.provider.Settings.Secure;
 import android.service.notification.Adjustment;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationStats;
@@ -2519,7 +2518,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         verify(mListeners, times(1)).migrateToXml();
         verify(mConditionProviders, times(1)).migrateToXml();
         verify(mAssistants, times(1)).migrateToXml();
-        verify(mAssistants, times(2)).ensureAssistant();
+        verify(mAssistants, never()).ensureAssistant();
     }
 
     @Test
@@ -2539,7 +2538,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         verify(mListeners, times(2)).migrateToXml();
         verify(mConditionProviders, times(2)).migrateToXml();
         verify(mAssistants, times(2)).migrateToXml();
-        verify(mAssistants, times(2)).ensureAssistant();
+        verify(mAssistants, never()).ensureAssistant();
     }
 
     @Test

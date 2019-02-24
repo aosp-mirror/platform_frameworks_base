@@ -194,6 +194,8 @@ public class LockSettingsService extends ILockSettings.Stub {
     protected IGateKeeperService mGateKeeperService;
     protected IAuthSecret mAuthSecretService;
 
+    private static final String GSI_RUNNING_PROP = "ro.gsid.image_running";
+
     /**
      * The UIDs that are used for system credential storage in keystore.
      */
@@ -405,8 +407,16 @@ public class LockSettingsService extends ILockSettings.Stub {
             return new SyntheticPasswordManager(getContext(), storage, getUserManager());
         }
 
+        public boolean hasBiometrics() {
+            return BiometricManager.hasBiometrics(mContext);
+        }
+
         public int binderGetCallingUid() {
             return Binder.getCallingUid();
+        }
+
+        public boolean isGsiRunning() {
+            return SystemProperties.getInt(GSI_RUNNING_PROP, 0) > 0;
         }
     }
 
@@ -2217,6 +2227,11 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
         tryRemoveUserFromSpCacheLater(userId);
 
+        if (mInjector.isGsiRunning()) {
+            Slog.w(TAG, "AuthSecret disabled in GSI");
+            return;
+        }
+
         // Pass the primary user's auth secret to the HAL
         if (mAuthSecretService != null && mUserManager.getUserInfo(userId).isPrimary()) {
             try {
@@ -2423,7 +2438,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             notifyActivePasswordMetricsAvailable(userCredential, userId);
             unlockKeystore(authResult.authToken.deriveKeyStorePassword(), userId);
             // Reset lockout
-            if (BiometricManager.hasBiometrics(mContext)) {
+            if (mInjector.hasBiometrics()) {
                 BiometricManager bm = mContext.getSystemService(BiometricManager.class);
                 Slog.i(TAG, "Resetting lockout, length: "
                         + authResult.gkResponse.getPayload().length);

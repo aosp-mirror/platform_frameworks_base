@@ -31,6 +31,7 @@ import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
+import android.metrics.LogMaker;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -39,6 +40,8 @@ import android.util.Slog;
 import android.widget.Toast;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -66,6 +69,8 @@ public class IntentForwarderActivity extends Activity  {
 
     private Injector mInjector;
 
+    private MetricsLogger mMetricsLogger;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -78,9 +83,17 @@ public class IntentForwarderActivity extends Activity  {
         if (className.equals(FORWARD_INTENT_TO_PARENT)) {
             userMessageId = com.android.internal.R.string.forward_intent_to_owner;
             targetUserId = getProfileParent();
+
+            getMetricsLogger().write(
+                    new LogMaker(MetricsEvent.ACTION_SWITCH_SHARE_PROFILE)
+                    .setSubtype(MetricsEvent.PARENT_PROFILE));
         } else if (className.equals(FORWARD_INTENT_TO_MANAGED_PROFILE)) {
             userMessageId = com.android.internal.R.string.forward_intent_to_work;
             targetUserId = getManagedProfile();
+
+            getMetricsLogger().write(
+                    new LogMaker(MetricsEvent.ACTION_SWITCH_SHARE_PROFILE)
+                    .setSubtype(MetricsEvent.MANAGED_PROFILE));
         } else {
             Slog.wtf(TAG, IntentForwarderActivity.class.getName() + " cannot be called directly");
             userMessageId = -1;
@@ -255,6 +268,13 @@ public class IntentForwarderActivity extends Activity  {
         // Apps should not be allowed to target a specific package/ component in the target user.
         intent.setPackage(null);
         intent.setComponent(null);
+    }
+
+    protected MetricsLogger getMetricsLogger() {
+        if (mMetricsLogger == null) {
+            mMetricsLogger = new MetricsLogger();
+        }
+        return mMetricsLogger;
     }
 
     @VisibleForTesting

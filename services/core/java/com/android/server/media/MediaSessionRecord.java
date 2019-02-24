@@ -77,6 +77,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
     private final int mUserId;
     private final String mPackageName;
     private final String mTag;
+    private final Bundle mSessionInfo;
     private final ControllerLink mController;
     private final MediaSession.Token mSessionToken;
     private final SessionLink mSession;
@@ -121,13 +122,14 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
     private String mMetadataDescription;
 
     public MediaSessionRecord(int ownerPid, int ownerUid, int userId, String ownerPackageName,
-            SessionCallbackLink cb, String tag, MediaSessionService.ServiceImpl service,
-            Looper handlerLooper) {
+            SessionCallbackLink cb, String tag, Bundle sessionInfo,
+            MediaSessionService.ServiceImpl service, Looper handlerLooper) {
         mOwnerPid = ownerPid;
         mOwnerUid = ownerUid;
         mUserId = userId;
         mPackageName = ownerPackageName;
         mTag = tag;
+        mSessionInfo = sessionInfo;
         mController = new ControllerLink(new ControllerStub());
         mSessionToken = new MediaSession.Token(mController);
         mSession = new SessionLink(new SessionStub());
@@ -1306,6 +1308,11 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         @Override
         public String getTag() {
             return mTag;
+        }
+
+        @Override
+        public Bundle getSessionInfo() {
+            return mSessionInfo;
         }
 
         @Override

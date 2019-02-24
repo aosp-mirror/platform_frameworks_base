@@ -20,7 +20,6 @@ import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
-import android.app.AppDetailsActivity;
 import android.app.AppGlobals;
 import android.app.IApplicationThread;
 import android.app.PendingIntent;
@@ -367,7 +366,8 @@ public class LauncherAppsService extends SystemService {
         private ResolveInfo getHiddenAppActivityInfo(String packageName, int callingUid,
                 UserHandle user) {
             Intent intent = new Intent();
-            intent.setComponent(new ComponentName(packageName, AppDetailsActivity.class.getName()));
+            intent.setComponent(new ComponentName(packageName,
+                    PackageManager.APP_DETAILS_ACTIVITY_CLASS_NAME));
             final PackageManagerInternal pmInt =
                     LocalServices.getService(PackageManagerInternal.class);
             List<ResolveInfo> apps = pmInt.queryIntentActivities(intent,

@@ -95,7 +95,7 @@ public abstract class AbstractRemoteService<S extends AbstractRemoteService<S, I
     private long mNextUnbind;
 
     /** Requests that have been scheduled, but that are not finished yet */
-    private final ArrayList<PendingRequest<S, I>> mUnfinishedRequests = new ArrayList<>();
+    private final ArrayList<BasePendingRequest<S, I>> mUnfinishedRequests = new ArrayList<>();
 
     /**
      * Callback called when the service dies.
@@ -183,8 +183,15 @@ public abstract class AbstractRemoteService<S extends AbstractRemoteService<S, I
 
     /**
      * Defines how long after we make a remote request to a fill service we timeout.
+     *
+     * <p>Just need to be overridden by subclasses that uses sync {@link PendingRequest}s.
+     *
+     * @throws UnsupportedOperationException if called when not overridden.
+     *
      */
-    protected abstract long getRemoteRequestMillis();
+    protected long getRemoteRequestMillis() {
+        throw new UnsupportedOperationException("not implemented by " + getClass());
+    }
 
     /**
      * Gets the currently registered service interface or {@code null} if the service is not
@@ -243,7 +250,7 @@ public abstract class AbstractRemoteService<S extends AbstractRemoteService<S, I
         pw.append(prefix).append(tab).append("destroyed=")
                 .append(String.valueOf(mDestroyed)).println();
         pw.append(prefix).append(tab).append("numUnfinishedRequests=")
-                .append(String.valueOf(mUnfinishedRequests.size()));
+                .append(String.valueOf(mUnfinishedRequests.size())).println();
         final boolean bound = handleIsBound();
         pw.append(prefix).append(tab).append("bound=")
                 .append(String.valueOf(bound));
@@ -260,9 +267,13 @@ public abstract class AbstractRemoteService<S extends AbstractRemoteService<S, I
         pw.println();
         pw.append(prefix).append("mBindInstantServiceAllowed=").println(mBindInstantServiceAllowed);
         pw.append(prefix).append("idleTimeout=")
-            .append(Long.toString(idleTimeout / 1000)).append("s").println();
-        pw.append(prefix).append("requestTimeout=")
-            .append(Long.toString(getRemoteRequestMillis() / 1000)).append("s").println();
+            .append(Long.toString(idleTimeout / 1000)).append("s\n");
+        pw.append(prefix).append("requestTimeout=");
+        try {
+            pw.append(Long.toString(getRemoteRequestMillis() / 1000)).append("s\n");
+        } catch (UnsupportedOperationException e) {
+            pw.append("not supported\n");
+        }
         pw.println();
     }
 
@@ -273,7 +284,7 @@ public abstract class AbstractRemoteService<S extends AbstractRemoteService<S, I
      * othewise it will trigger a {@link PendingRequest#onTimeout(AbstractRemoteService)} if the
      * service doesn't respond.
      */
-    protected void scheduleRequest(@NonNull PendingRequest<S, I> pendingRequest) {
+    protected void scheduleRequest(@NonNull BasePendingRequest<S, I> pendingRequest) {
         mHandler.sendMessage(obtainMessage(
                 AbstractRemoteService::handlePendingRequest, this, pendingRequest));
     }
@@ -283,12 +294,12 @@ public abstract class AbstractRemoteService<S extends AbstractRemoteService<S, I
      *
      * @param finshedRequest The request that is finished
      */
-    void finishRequest(@NonNull PendingRequest<S, I> finshedRequest) {
+    void finishRequest(@NonNull BasePendingRequest<S, I> finshedRequest) {
         mHandler.sendMessage(
                 obtainMessage(AbstractRemoteService::handleFinishRequest, this, finshedRequest));
     }
 
-    private void handleFinishRequest(@NonNull PendingRequest<S, I> finshedRequest) {
+    private void handleFinishRequest(@NonNull BasePendingRequest<S, I> finshedRequest) {
         mUnfinishedRequests.remove(finshedRequest);
 
         if (mUnfinishedRequests.isEmpty()) {
@@ -361,7 +372,7 @@ public abstract class AbstractRemoteService<S extends AbstractRemoteService<S, I
      * Handles a request, either processing it right now when bound, or saving it to be handled when
      * bound.
      */
-    protected final void handlePendingRequest(@NonNull PendingRequest<S, I> pendingRequest) {
+    protected final void handlePendingRequest(@NonNull BasePendingRequest<S, I> pendingRequest) {
         if (checkIfDestroyed() || mCompleted) return;
 
         if (!handleIsBound()) {
@@ -384,7 +395,8 @@ public abstract class AbstractRemoteService<S extends AbstractRemoteService<S, I
     /**
      * Defines what to do with a request that arrives while not bound to the service.
      */
-    abstract void handlePendingRequestWhileUnBound(@NonNull PendingRequest<S, I> pendingRequest);
+    abstract void handlePendingRequestWhileUnBound(
+            @NonNull BasePendingRequest<S, I> pendingRequest);
 
     private boolean handleIsBound() {
         return mService != null;
@@ -471,50 +483,28 @@ public abstract class AbstractRemoteService<S extends AbstractRemoteService<S, I
     /**
      * Base class for the requests serviced by the remote service.
      *
-     * <p><b>NOTE: </b> this class is typically used when the service needs to use a callback to
-     * communicate back with the system server. For cases where that's not needed, you should use
-     * {@link AbstractRemoteService#scheduleAsyncRequest(AsyncRequest)} instead.
+     * <p><b>NOTE: </b> this class is not used directly, you should either override
+     * {@link com.android.internal.infra.AbstractRemoteService.PendingRequest} for sync requests, or
+     * use {@link AbstractRemoteService#scheduleAsyncRequest(AsyncRequest)} for async requests.
      *
      * @param <S> the remote service class
      * @param <I> the interface of the binder service
      */
-    public abstract static class PendingRequest<S extends AbstractRemoteService<S, I>,
+    public abstract static class BasePendingRequest<S extends AbstractRemoteService<S, I>,
             I extends IInterface> implements Runnable {
         protected final String mTag = getClass().getSimpleName();
         protected final Object mLock = new Object();
 
-        private final WeakReference<S> mWeakService;
-        private final Runnable mTimeoutTrigger;
-        private final Handler mServiceHandler;
+        final WeakReference<S> mWeakService;
 
         @GuardedBy("mLock")
-        private boolean mCancelled;
+        boolean mCancelled;
 
         @GuardedBy("mLock")
-        private boolean mCompleted;
+        boolean mCompleted;
 
-        protected PendingRequest(@NonNull S service) {
+        BasePendingRequest(@NonNull S service) {
             mWeakService = new WeakReference<>(service);
-            mServiceHandler = service.mHandler;
-            mTimeoutTrigger = () -> {
-                synchronized (mLock) {
-                    if (mCancelled) {
-                        return;
-                    }
-                    mCompleted = true;
-                }
-
-                final S remoteService = mWeakService.get();
-                if (remoteService != null) {
-                    // TODO(b/117779333): we should probably ignore it if service is destroyed.
-                    Slog.w(mTag, "timed out after " + service.getRemoteRequestMillis() + " ms");
-                    onTimeout(remoteService);
-                } else {
-                    Slog.w(mTag, "timed out (no service)");
-                }
-            };
-            mServiceHandler.postAtTime(mTimeoutTrigger,
-                    SystemClock.uptimeMillis() + service.getRemoteRequestMillis());
         }
 
         /**
@@ -543,9 +533,12 @@ public abstract class AbstractRemoteService<S extends AbstractRemoteService<S, I
                 service.finishRequest(this);
             }
 
-            mServiceHandler.removeCallbacks(mTimeoutTrigger);
+            onFinished();
+
             return true;
         }
+
+        void onFinished() { }
 
         /**
          * Checks whether this request was cancelled.
@@ -568,15 +561,11 @@ public abstract class AbstractRemoteService<S extends AbstractRemoteService<S, I
                 mCancelled = true;
             }
 
-            mServiceHandler.removeCallbacks(mTimeoutTrigger);
+            onCancel();
             return true;
         }
 
-        /**
-         * Called by the self-destruct timeout when the remote service didn't reply to the
-         * request on time.
-         */
-        protected abstract void onTimeout(S remoteService);
+        void onCancel() {}
 
         /**
          * Checks whether this request leads to a final state where no other requests can be made.
@@ -584,6 +573,67 @@ public abstract class AbstractRemoteService<S extends AbstractRemoteService<S, I
         protected boolean isFinal() {
             return false;
         }
+    }
+
+    /**
+     * Base class for the requests serviced by the remote service.
+     *
+     * <p><b>NOTE: </b> this class is typically used when the service needs to use a callback to
+     * communicate back with the system server. For cases where that's not needed, you should use
+     * {@link AbstractRemoteService#scheduleAsyncRequest(AsyncRequest)} instead.
+     *
+     * <p><b>NOTE: </b> you must override {@link AbstractRemoteService#getRemoteRequestMillis()},
+     * otherwise the constructor will throw an {@link UnsupportedOperationException}.
+     *
+     * @param <S> the remote service class
+     * @param <I> the interface of the binder service
+     */
+    public abstract static class PendingRequest<S extends AbstractRemoteService<S, I>,
+            I extends IInterface> extends BasePendingRequest<S, I> {
+
+        private final Runnable mTimeoutTrigger;
+        private final Handler mServiceHandler;
+
+        protected PendingRequest(S service) {
+            super(service);
+            mServiceHandler = service.mHandler;
+
+            mTimeoutTrigger = () -> {
+                synchronized (mLock) {
+                    if (mCancelled) {
+                        return;
+                    }
+                    mCompleted = true;
+                }
+
+                final S remoteService = mWeakService.get();
+                if (remoteService != null) {
+                    // TODO(b/117779333): we should probably ignore it if service is destroyed.
+                    Slog.w(mTag, "timed out after " + service.getRemoteRequestMillis() + " ms");
+                    onTimeout(remoteService);
+                } else {
+                    Slog.w(mTag, "timed out (no service)");
+                }
+            };
+            mServiceHandler.postAtTime(mTimeoutTrigger,
+                    SystemClock.uptimeMillis() + service.getRemoteRequestMillis());
+        }
+
+        @Override
+        final void onFinished() {
+            mServiceHandler.removeCallbacks(mTimeoutTrigger);
+        }
+
+        @Override
+        final void onCancel() {
+            mServiceHandler.removeCallbacks(mTimeoutTrigger);
+        }
+
+        /**
+         * Called by the self-destruct timeout when the remote service didn't reply to the
+         * request on time.
+         */
+        protected abstract void onTimeout(S remoteService);
     }
 
     /**
@@ -600,7 +650,7 @@ public abstract class AbstractRemoteService<S extends AbstractRemoteService<S, I
     }
 
     private static final class MyAsyncPendingRequest<S extends AbstractRemoteService<S, I>,
-            I extends IInterface> extends PendingRequest<S, I> {
+            I extends IInterface> extends BasePendingRequest<S, I> {
         private static final String TAG = MyAsyncPendingRequest.class.getSimpleName();
 
         private final AsyncRequest<I> mRequest;
@@ -622,13 +672,6 @@ public abstract class AbstractRemoteService<S extends AbstractRemoteService<S, I
             } finally {
                 finish();
             }
-        }
-
-        @Override
-        protected void onTimeout(S remoteService) {
-            // TODO(b/117779333): should not happen because we called finish() on run(), although
-            // currently it might be called if the service is destroyed while showing it.
-            Slog.w(TAG, "AsyncPending requested timed out");
         }
     }
 }

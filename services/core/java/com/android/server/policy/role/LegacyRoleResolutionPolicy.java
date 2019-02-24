@@ -130,6 +130,12 @@ public class LegacyRoleResolutionPolicy implements RoleManagerService.RoleHolder
                 String packageName = componentName != null ? componentName.getPackageName() : null;
                 return CollectionUtils.singletonOrEmpty(packageName);
             }
+            case RoleManager.ROLE_EMERGENCY: {
+                String defaultEmergencyApp = Settings.Secure.getStringForUser(
+                        mContext.getContentResolver(),
+                        Settings.Secure.EMERGENCY_ASSISTANCE_APPLICATION, userId);
+                return CollectionUtils.singletonOrEmpty(defaultEmergencyApp);
+            }
             default: {
                 Slog.e(LOG_TAG, "Don't know how to find legacy role holders for " + roleName);
                 return Collections.emptyList();

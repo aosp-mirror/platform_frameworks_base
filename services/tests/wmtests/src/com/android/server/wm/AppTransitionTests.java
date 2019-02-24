@@ -24,14 +24,13 @@ import static android.view.WindowManager.TRANSIT_CRASHING_ACTIVITY_CLOSE;
 import static android.view.WindowManager.TRANSIT_KEYGUARD_GOING_AWAY;
 import static android.view.WindowManager.TRANSIT_KEYGUARD_UNOCCLUDE;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyBoolean;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
-
-import static junit.framework.Assert.assertFalse;
-import static junit.framework.Assert.assertTrue;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
@@ -39,9 +38,7 @@ import android.view.Display;
 
 import androidx.test.filters.SmallTest;
 
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
@@ -54,33 +51,15 @@ import org.junit.Test;
 @Presubmit
 public class AppTransitionTests extends WindowTestsBase {
 
-    private static RootWindowContainer sOriginalRootWindowContainer;
-
     private DisplayContent mDc;
-
-    @BeforeClass
-    public static void setUpRootWindowContainerMock() {
-        final WindowManagerService wm = TestSystemServices.getWindowManagerService();
-        // For unit test, we don't need to test performSurfacePlacement to prevent some abnormal
-        // interaction with surfaceflinger native side.
-        sOriginalRootWindowContainer = wm.mRoot;
-        // Creating spied mock of RootWindowContainer shouldn't be done in @Before, since it will
-        // create unnecessary nested spied objects chain, because WindowManagerService object under
-        // test is a single instance shared among all tests that extend WindowTestsBase class.
-        // Instead it should be done once before running all tests in this test class.
-        wm.mRoot = spy(wm.mRoot);
-        doNothing().when(wm.mRoot).performSurfacePlacement(anyBoolean());
-    }
-
-    @AfterClass
-    public static void tearDownRootWindowContainerMock() {
-        final WindowManagerService wm = TestSystemServices.getWindowManagerService();
-        wm.mRoot = sOriginalRootWindowContainer;
-        sOriginalRootWindowContainer = null;
-    }
 
     @Before
     public void setUp() throws Exception {
+        synchronized (mWm.mGlobalLock) {
+            // Hold the lock to protect the stubbing from being accessed by other threads.
+            spyOn(mWm.mRoot);
+            doNothing().when(mWm.mRoot).performSurfacePlacement(anyBoolean());
+        }
         mDc = mWm.getDefaultDisplayContentLocked();
     }
 

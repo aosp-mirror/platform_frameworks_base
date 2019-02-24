@@ -420,14 +420,20 @@ public class BluetoothEventManager {
     private class ClassChangedHandler implements Handler {
         public void onReceive(Context context, Intent intent,
                 BluetoothDevice device) {
-            mDeviceManager.onBtClassChanged(device);
+            CachedBluetoothDevice cachedDevice = mDeviceManager.findDevice(device);
+            if (cachedDevice != null) {
+                cachedDevice.refresh();
+            }
         }
     }
 
     private class UuidChangedHandler implements Handler {
         public void onReceive(Context context, Intent intent,
                 BluetoothDevice device) {
-            mDeviceManager.onUuidChanged(device);
+            CachedBluetoothDevice cachedDevice = mDeviceManager.findDevice(device);
+            if (cachedDevice != null) {
+                cachedDevice.onUuidChanged();
+            }
         }
     }
 

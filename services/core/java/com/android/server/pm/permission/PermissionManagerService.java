@@ -35,6 +35,7 @@ import static android.content.pm.PackageManager.FLAG_PERMISSION_REVOKE_WHEN_REQU
 import static android.content.pm.PackageManager.FLAG_PERMISSION_SYSTEM_FIXED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_FIXED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_SET;
+import static android.content.pm.PackageManager.MASK_PERMISSION_FLAGS;
 import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 import static android.os.UserHandle.getAppId;
 import static android.os.UserHandle.getUid;
@@ -1031,7 +1032,8 @@ public class PermissionManagerService {
                                     updatedUserIds = ArrayUtils.appendInt(updatedUserIds, userId);
                                 }
 
-                                permissionsState.updatePermissionFlags(bp, userId, flags, flags);
+                                permissionsState.updatePermissionFlags(bp, userId,
+                                        MASK_PERMISSION_FLAGS, flags);
                             }
                         } break;
 
@@ -1081,7 +1083,8 @@ public class PermissionManagerService {
                                     updatedUserIds = ArrayUtils.appendInt(updatedUserIds, userId);
                                 }
 
-                                permissionsState.updatePermissionFlags(bp, userId, flags, flags);
+                                permissionsState.updatePermissionFlags(bp, userId,
+                                        MASK_PERMISSION_FLAGS, flags);
                             }
                         } break;
 
@@ -1198,28 +1201,22 @@ public class PermissionManagerService {
                         if ((flags & FLAG_PERMISSION_REVOKE_WHEN_REQUESTED) != 0) {
                             BasePermission bp = mSettings.getPermissionLocked(permission);
 
-                            ps.updatePermissionFlags(bp, userId,
-                                    FLAG_PERMISSION_REVOKE_WHEN_REQUESTED
-                                            | FLAG_PERMISSION_USER_FIXED | FLAG_PERMISSION_USER_SET,
-                                    0);
-                            updatedUserIds = ArrayUtils.appendInt(updatedUserIds,
-                                    userId);
+                            int flagsToRemove = FLAG_PERMISSION_REVOKE_WHEN_REQUESTED;
 
                             if ((flags & (FLAG_PERMISSION_GRANTED_BY_DEFAULT
                                     | FLAG_PERMISSION_POLICY_FIXED | FLAG_PERMISSION_SYSTEM_FIXED))
-                                    == 0) {
-                                if (supportsRuntimePermissions) {
-                                    int revokeResult = ps.revokeRuntimePermission(bp, userId);
-                                    if (revokeResult != PERMISSION_OPERATION_FAILURE) {
-                                        if (DEBUG_PERMISSIONS) {
-                                            Slog.i(TAG, "Revoking runtime permission "
-                                                    + permission + " for " + pkgName
-                                                    + " as it is now requested");
-                                        }
+                                    == 0 && supportsRuntimePermissions) {
+                                int revokeResult = ps.revokeRuntimePermission(bp, userId);
+                                if (revokeResult != PERMISSION_OPERATION_FAILURE) {
+                                    if (DEBUG_PERMISSIONS) {
+                                        Slog.i(TAG, "Revoking runtime permission "
+                                                + permission + " for " + pkgName
+                                                + " as it is now requested");
                                     }
-                                } else {
-                                    setAppOpMode(permission, pkg, userId, MODE_IGNORED);
                                 }
+
+                                flagsToRemove |=
+                                        FLAG_PERMISSION_USER_FIXED | FLAG_PERMISSION_USER_SET;
 
                                 List<String> fgPerms = mBackgroundPermissions.get(permission);
                                 if (fgPerms != null) {
@@ -1238,6 +1235,9 @@ public class PermissionManagerService {
                                     }
                                 }
                             }
+
+                            ps.updatePermissionFlags(bp, userId, flagsToRemove, 0);
+                            updatedUserIds = ArrayUtils.appendInt(updatedUserIds, userId);
                         }
                     }
                 }
@@ -1935,7 +1935,7 @@ public class PermissionManagerService {
                     if ((flags & PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED) != 0) {
                         updatePermissionFlags(permission, pkg.packageName,
                                 PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED, 0, callingUid,
-                                userId, callback);
+                                userId, false, callback);
                     }
                 }
             }
@@ -2441,7 +2441,8 @@ public class PermissionManagerService {
     }
 
     private void updatePermissionFlags(String permName, String packageName, int flagMask,
-            int flagValues, int callingUid, int userId, PermissionCallback callback) {
+            int flagValues, int callingUid, int userId, boolean overridePolicy,
+            PermissionCallback callback) {
         if (!mUserManagerInt.exists(userId)) {
             return;
         }
@@ -2453,6 +2454,11 @@ public class PermissionManagerService {
                 true,  // checkShell
                 false, // requirePermissionWhenSameUser
                 "updatePermissionFlags");
+
+        if ((flagMask & FLAG_PERMISSION_POLICY_FIXED) != 0 && !overridePolicy) {
+            throw new SecurityException("updatePermissionFlags requires "
+                    + Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY);
+        }
 
         // Only the system can change these flags and nothing else.
         if (callingUid != Process.SYSTEM_UID) {
@@ -2745,9 +2751,11 @@ public class PermissionManagerService {
         }
         @Override
         public void updatePermissionFlags(String permName, String packageName, int flagMask,
-                int flagValues, int callingUid, int userId, PermissionCallback callback) {
+                int flagValues, int callingUid, int userId, boolean overridePolicy,
+                PermissionCallback callback) {
             PermissionManagerService.this.updatePermissionFlags(
-                    permName, packageName, flagMask, flagValues, callingUid, userId, callback);
+                    permName, packageName, flagMask, flagValues, callingUid, userId,
+                    overridePolicy, callback);
         }
         @Override
         public boolean updatePermissionFlagsForAllApps(int flagMask, int flagValues, int callingUid,

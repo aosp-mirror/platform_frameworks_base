@@ -36,6 +36,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.media.audiopolicy.AudioPolicy;
 import android.media.audiopolicy.AudioPolicy.AudioPolicyFocusListener;
+import android.media.projection.MediaProjection;
 import android.media.session.MediaController;
 import android.media.session.MediaSession;
 import android.media.session.MediaSessionLegacyHelper;
@@ -3188,13 +3189,19 @@ public class AudioManager {
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
     public int registerAudioPolicy(@NonNull AudioPolicy policy) {
+        return registerAudioPolicyStatic(policy);
+    }
+
+    static int registerAudioPolicyStatic(@NonNull AudioPolicy policy) {
         if (policy == null) {
             throw new IllegalArgumentException("Illegal null AudioPolicy argument");
         }
         final IAudioService service = getService();
         try {
+            MediaProjection projection = policy.getMediaProjection();
             String regId = service.registerAudioPolicy(policy.getConfig(), policy.cb(),
-                    policy.hasFocusListener(), policy.isFocusPolicy(), policy.isVolumeController());
+                    policy.hasFocusListener(), policy.isFocusPolicy(), policy.isVolumeController(),
+                    projection == null ? null : projection.getProjection());
             if (regId == null) {
                 return ERROR;
             } else {
@@ -3214,6 +3221,10 @@ public class AudioManager {
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
     public void unregisterAudioPolicyAsync(@NonNull AudioPolicy policy) {
+        unregisterAudioPolicyAsyncStatic(policy);
+    }
+
+    static void unregisterAudioPolicyAsyncStatic(@NonNull AudioPolicy policy) {
         if (policy == null) {
             throw new IllegalArgumentException("Illegal null AudioPolicy argument");
         }

@@ -29,6 +29,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY;
 
 import android.Manifest;
 import android.animation.LayoutTransition;
+import android.annotation.AnyThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
@@ -1041,10 +1042,22 @@ public final class ViewRootImpl implements ViewParent,
         return mHeight;
     }
 
+    /**
+     * Destroys hardware rendering resources for this ViewRootImpl
+     *
+     * May be called on any thread
+     */
+    @AnyThread
     void destroyHardwareResources() {
-        if (mAttachInfo.mThreadedRenderer != null) {
-            mAttachInfo.mThreadedRenderer.destroyHardwareResources(mView);
-            mAttachInfo.mThreadedRenderer.destroy();
+        final ThreadedRenderer renderer = mAttachInfo.mThreadedRenderer;
+        if (renderer != null) {
+            // This is called by WindowManagerGlobal which may or may not be on the right thread
+            if (Looper.myLooper() != mAttachInfo.mHandler.getLooper()) {
+                mAttachInfo.mHandler.postAtFrontOfQueue(this::destroyHardwareResources);
+                return;
+            }
+            renderer.destroyHardwareResources(mView);
+            renderer.destroy();
         }
     }
 
@@ -3497,7 +3510,7 @@ public final class ViewRootImpl implements ViewParent,
         }
         try {
             // First check if context supports it, so it saves a service lookup when it doesn't
-            if (!mContext.isContentCaptureSupported()) return;
+            if (mContext.getContentCaptureOptions() == null) return;
 
             // Then check if it's enabled in the contex itself.
             final ContentCaptureManager ccm = mContext
@@ -6983,7 +6996,7 @@ public final class ViewRootImpl implements ViewParent,
     @Override
     public boolean performHapticFeedback(int effectId, boolean always) {
         try {
-            return mWindowSession.performHapticFeedback(mWindow, effectId, always);
+            return mWindowSession.performHapticFeedback(effectId, always);
         } catch (RemoteException e) {
             return false;
         }

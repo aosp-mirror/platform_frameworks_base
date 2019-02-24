@@ -14,14 +14,14 @@
 
 package com.android.systemui.power;
 
-import static android.os.HardwarePropertiesManager.DEVICE_TEMPERATURE_SKIN;
-import static android.os.HardwarePropertiesManager.TEMPERATURE_CURRENT;
-import static android.os.HardwarePropertiesManager.TEMPERATURE_SHUTDOWN;
 import static android.provider.Settings.Global.SHOW_TEMPERATURE_WARNING;
+import static android.provider.Settings.Global.SHOW_USB_TEMPERATURE_ALARM;
 
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.anyObject;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -31,9 +31,10 @@ import static org.mockito.Mockito.when;
 import android.content.Context;
 import android.content.Intent;
 import android.os.BatteryManager;
-import android.os.HardwarePropertiesManager;
+import android.os.IThermalEventListener;
 import android.os.IThermalService;
 import android.os.PowerManager;
+import android.os.Temperature;
 import android.provider.Settings;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
@@ -74,97 +75,104 @@ public class PowerUITest extends SysuiTestCase {
     private static final int OLD_BATTERY_LEVEL_NINE = 9;
     private static final int OLD_BATTERY_LEVEL_10 = 10;
     private static final long VERY_BELOW_SEVERE_HYBRID_THRESHOLD = TimeUnit.MINUTES.toMillis(15);
-    private HardwarePropertiesManager mHardProps;
     private WarningsUI mMockWarnings;
     private PowerUI mPowerUI;
     private EnhancedEstimates mEnhancedEstimates;
     @Mock private PowerManager mPowerManager;
     @Mock private IThermalService mThermalServiceMock;
+    private IThermalEventListener mThermalEventUsbListener;
+    private IThermalEventListener mThermalEventSkinListener;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
         mMockWarnings = mDependency.injectMockDependency(WarningsUI.class);
         mEnhancedEstimates = mDependency.injectMockDependency(EnhancedEstimates.class);
-        mHardProps = mock(HardwarePropertiesManager.class);
 
         mContext.putComponent(StatusBar.class, mock(StatusBar.class));
-        mContext.addMockSystemService(Context.HARDWARE_PROPERTIES_SERVICE, mHardProps);
         mContext.addMockSystemService(Context.POWER_SERVICE, mPowerManager);
 
         createPowerUi();
+        mThermalEventSkinListener = mPowerUI.new ThermalEventSkinListener();
+        mThermalEventUsbListener = mPowerUI.new ThermalEventUsbListener();
     }
 
     @Test
-    public void testNoConfig_NoWarnings() {
-        setOverThreshold();
-        Settings.Global.putString(mContext.getContentResolver(), SHOW_TEMPERATURE_WARNING, null);
-        TestableResources resources = mContext.getOrCreateTestableResources();
-        resources.addOverride(R.integer.config_showTemperatureWarning, 0);
-        resources.addOverride(R.integer.config_warningTemperature, 55);
-
+    public void testSkinWarning_throttlingCritical() throws Exception {
         mPowerUI.start();
-        verify(mMockWarnings, never()).showHighTemperatureWarning();
-    }
 
-    @Test
-    public void testConfig_NoWarnings() {
-        setUnderThreshold();
-        Settings.Global.putString(mContext.getContentResolver(), SHOW_TEMPERATURE_WARNING, null);
-        TestableResources resources = mContext.getOrCreateTestableResources();
-        resources.addOverride(R.integer.config_showTemperatureWarning, 1);
-        resources.addOverride(R.integer.config_warningTemperature, 55);
+        final Temperature temp = getCriticalStatusTemp(Temperature.TYPE_SKIN, "skin1");
+        mThermalEventSkinListener.notifyThrottling(temp);
 
-        mPowerUI.start();
-        verify(mMockWarnings, never()).showHighTemperatureWarning();
-    }
-
-    @Test
-    public void testConfig_Warnings() {
-        setOverThreshold();
-        Settings.Global.putString(mContext.getContentResolver(), SHOW_TEMPERATURE_WARNING, null);
-        TestableResources resources = mContext.getOrCreateTestableResources();
-        resources.addOverride(R.integer.config_showTemperatureWarning, 1);
-        resources.addOverride(R.integer.config_warningTemperature, 55);
-
-        mPowerUI.start();
-        // Guarantees mHandler has processed all messages.
+        // dismiss skin high temperature warning when throttling status is critical
         TestableLooper.get(this).processAllMessages();
-        verify(mMockWarnings).showHighTemperatureWarning();
+        verify(mMockWarnings, never()).showHighTemperatureWarning();
+        verify(mMockWarnings, times(1)).dismissHighTemperatureWarning();
     }
 
     @Test
-    public void testSettingOverrideConfig() {
-        setOverThreshold();
+    public void testSkinWarning_throttlingEmergency() throws Exception {
+        mPowerUI.start();
+
+        final Temperature temp = getEmergencyStatusTemp(Temperature.TYPE_SKIN, "skin2");
+        mThermalEventSkinListener.notifyThrottling(temp);
+
+        // show skin high temperature warning when throttling status is emergency
+        TestableLooper.get(this).processAllMessages();
+        verify(mMockWarnings, times(1)).showHighTemperatureWarning();
+        verify(mMockWarnings, never()).dismissHighTemperatureWarning();
+    }
+
+    @Test
+    public void testUsbAlarm_throttlingCritical() throws Exception {
+        mPowerUI.start();
+
+        final Temperature temp = getCriticalStatusTemp(Temperature.TYPE_USB_PORT, "usb1");
+        mThermalEventUsbListener.notifyThrottling(temp);
+
+        // not show usb high temperature alarm when throttling status is critical
+        TestableLooper.get(this).processAllMessages();
+        verify(mMockWarnings, never()).showUsbHighTemperatureAlarm();
+    }
+
+    @Test
+    public void testUsbAlarm_throttlingEmergency() throws Exception {
+        mPowerUI.start();
+
+        final Temperature temp = getEmergencyStatusTemp(Temperature.TYPE_USB_PORT, "usb2");
+        mThermalEventUsbListener.notifyThrottling(temp);
+
+        // show usb high temperature alarm when throttling status is emergency
+        TestableLooper.get(this).processAllMessages();
+        verify(mMockWarnings, times(1)).showUsbHighTemperatureAlarm();
+    }
+
+    @Test
+    public void testSettingOverrideConfig_enableSkinTemperatureWarning() throws Exception {
         Settings.Global.putInt(mContext.getContentResolver(), SHOW_TEMPERATURE_WARNING, 1);
         TestableResources resources = mContext.getOrCreateTestableResources();
         resources.addOverride(R.integer.config_showTemperatureWarning, 0);
-        resources.addOverride(R.integer.config_warningTemperature, 55);
 
         mPowerUI.start();
-        // Guarantees mHandler has processed all messages.
+        mPowerUI.registerThermalEventListener();
+
         TestableLooper.get(this).processAllMessages();
-        verify(mMockWarnings).showHighTemperatureWarning();
+        verify(mThermalServiceMock, times(1))
+                .registerThermalEventListenerWithType(anyObject(), eq(Temperature.TYPE_SKIN));
     }
 
     @Test
-    public void testShutdownBasedThreshold() {
-        int tolerance = 2;
-        Settings.Global.putString(mContext.getContentResolver(), SHOW_TEMPERATURE_WARNING, null);
+    public void testSettingOverrideConfig_enableUsbTemperatureAlarm() throws Exception {
+        Settings.Global.putInt(mContext.getContentResolver(), SHOW_USB_TEMPERATURE_ALARM, 1);
         TestableResources resources = mContext.getOrCreateTestableResources();
-        resources.addOverride(R.integer.config_showTemperatureWarning, 1);
-        resources.addOverride(R.integer.config_warningTemperature, -1);
-        resources.addOverride(R.integer.config_warningTemperatureTolerance, tolerance);
-        when(mHardProps.getDeviceTemperatures(DEVICE_TEMPERATURE_SKIN, TEMPERATURE_SHUTDOWN))
-                .thenReturn(new float[] { 55 + tolerance });
+        resources.addOverride(R.integer.config_showUsbPortAlarm, 0);
 
-        setCurrentTemp(54); // Below threshold.
         mPowerUI.start();
-        verify(mMockWarnings, never()).showHighTemperatureWarning();
+        mPowerUI.registerThermalEventListener();
 
-        setCurrentTemp(56); // Above threshold.
-        mPowerUI.updateTemperatureWarning();
-        verify(mMockWarnings).showHighTemperatureWarning();
+        TestableLooper.get(this).processAllMessages();
+        verify(mThermalServiceMock, times(1))
+                .registerThermalEventListenerWithType(anyObject(), eq(Temperature.TYPE_USB_PORT));
     }
 
     @Test
@@ -532,17 +540,14 @@ public class PowerUITest extends SysuiTestCase {
         verify(mEnhancedEstimates, times(2)).getEstimate();
     }
 
-    private void setCurrentTemp(float temp) {
-        when(mHardProps.getDeviceTemperatures(DEVICE_TEMPERATURE_SKIN, TEMPERATURE_CURRENT))
-                .thenReturn(new float[] { temp });
+    private Temperature getEmergencyStatusTemp(int type, String name) {
+        final float value = 65;
+        return new Temperature(value, type, name, Temperature.THROTTLING_EMERGENCY);
     }
 
-    private void setOverThreshold() {
-        setCurrentTemp(50000);
-    }
-
-    private void setUnderThreshold() {
-        setCurrentTemp(5);
+    private Temperature getCriticalStatusTemp(int type, String name) {
+        final float value = 60;
+        return new Temperature(value, type, name, Temperature.THROTTLING_CRITICAL);
     }
 
     private void createPowerUi() {

@@ -237,6 +237,7 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
             migrateRoleIfNecessary(RoleManager.ROLE_SMS, userId);
             migrateRoleIfNecessary(RoleManager.ROLE_ASSISTANT, userId);
             migrateRoleIfNecessary(RoleManager.ROLE_DIALER, userId);
+            migrateRoleIfNecessary(RoleManager.ROLE_EMERGENCY, userId);
 
             // Some vital packages state has changed since last role grant
             // Run grants again

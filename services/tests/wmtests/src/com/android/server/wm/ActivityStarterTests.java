@@ -661,8 +661,8 @@ public class ActivityStarterTests extends ActivityTestsBase {
         doReturn(realCallingUidHasVisibleWindow).when(mService.mWindowManager.mRoot)
                 .isAnyNonToastWindowVisibleForUid(realCallingUid);
         // process importance
-        doReturn(callingUidProcState).when(mService).getUidStateLocked(callingUid);
-        doReturn(realCallingUidProcState).when(mService).getUidStateLocked(realCallingUid);
+        doReturn(callingUidProcState).when(mService).getUidState(callingUid);
+        doReturn(realCallingUidProcState).when(mService).getUidState(realCallingUid);
         // foreground activities
         final IApplicationThread caller = mock(IApplicationThread.class);
         final ApplicationInfo ai = new ApplicationInfo();

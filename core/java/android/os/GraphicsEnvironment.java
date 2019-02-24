@@ -60,7 +60,8 @@ public class GraphicsEnvironment {
     private static final String SYSTEM_DRIVER_VERSION_NAME = "";
     private static final long SYSTEM_DRIVER_VERSION_CODE = 0;
     private static final String PROPERTY_GFX_DRIVER = "ro.gfx.driver.0";
-    private static final String PROPERTY_GFX_DRIVER_BUILD_DATE = "ro.gfx.driver.build_date";
+    private static final String PROPERTY_GFX_DRIVER_BUILD_TIME = "ro.gfx.driver_build_time";
+    private static final String METADATA_DRIVER_BUILD_TIME = "driver_build_time";
     private static final String ANGLE_RULES_FILE = "a4a_rules.json";
     private static final String ANGLE_TEMP_RULES = "debug.angle.rules";
     private static final String ACTION_ANGLE_FOR_ANDROID = "android.app.action.ANGLE_FOR_ANDROID";
@@ -79,9 +80,8 @@ public class GraphicsEnvironment {
         setupGpuLayers(context, coreSettings, pm, packageName);
         setupAngle(context, coreSettings, pm, packageName);
         if (!chooseDriver(context, coreSettings, pm, packageName)) {
-            final String driverBuildDate = SystemProperties.get(PROPERTY_GFX_DRIVER_BUILD_DATE);
             setGpuStats(SYSTEM_DRIVER_NAME, SYSTEM_DRIVER_VERSION_NAME, SYSTEM_DRIVER_VERSION_CODE,
-                    driverBuildDate == null ? "" : driverBuildDate, packageName);
+                    SystemProperties.getLong(PROPERTY_GFX_DRIVER_BUILD_TIME, 0), packageName);
         }
     }
 
@@ -664,14 +664,28 @@ public class GraphicsEnvironment {
           .append(abi);
         final String paths = sb.toString();
 
-        if (DEBUG) Log.v(TAG, "gfx driver package libs: " + paths);
-        setDriverPath(paths);
+        final String sphalLibraries =
+                coreSettings.getString(Settings.Global.GAME_DRIVER_SPHAL_LIBRARIES);
 
-        final String driverBuildDate = driverAppInfo.metaData == null
-                ? ""
-                : driverAppInfo.metaData.getString("driver_build_date");
+        if (DEBUG) {
+            Log.v(TAG,
+                    "gfx driver package search path: " + paths
+                            + ", required sphal libraries: " + sphalLibraries);
+        }
+        setDriverPathAndSphalLibraries(paths, sphalLibraries);
+
+        if (driverAppInfo.metaData == null) {
+            throw new NullPointerException("apk's meta-data cannot be null");
+        }
+
+        final String driverBuildTime = driverAppInfo.metaData.getString(METADATA_DRIVER_BUILD_TIME);
+        if (driverBuildTime == null || driverBuildTime.isEmpty()) {
+            throw new IllegalArgumentException("driver_build_time meta-data is not set");
+        }
+        // driver_build_time in the meta-data is in "L<Unix epoch timestamp>" format. e.g. L123456.
+        // Long.parseLong will throw if the meta-data "driver_build_time" is not set properly.
         setGpuStats(driverPackageName, driverPackageInfo.versionName, driverAppInfo.longVersionCode,
-                driverBuildDate == null ? "" : driverBuildDate, packageName);
+                Long.parseLong(driverBuildTime.substring(1)), packageName);
 
         return true;
     }
@@ -693,9 +707,9 @@ public class GraphicsEnvironment {
     private static native void setLayerPaths(ClassLoader classLoader, String layerPaths);
     private static native void setDebugLayers(String layers);
     private static native void setDebugLayersGLES(String layers);
-    private static native void setDriverPath(String path);
+    private static native void setDriverPathAndSphalLibraries(String path, String sphalLibraries);
     private static native void setGpuStats(String driverPackageName, String driverVersionName,
-            long driverVersionCode, String driverBuildDate, String appPackageName);
+            long driverVersionCode, long driverBuildTime, String appPackageName);
     private static native void setAngleInfo(String path, String appPackage, String devOptIn,
             FileDescriptor rulesFd, long rulesOffset, long rulesLength);
     private static native boolean getShouldUseAngle(String packageName);

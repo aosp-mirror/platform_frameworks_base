@@ -406,6 +406,11 @@ static void nativeTransferTouchFocus(JNIEnv* env, jclass clazz, jlong transactio
     transaction->transferTouchFocus(fromToken, toToken);
 }
 
+static void nativeSyncInputWindows(JNIEnv* env, jclass clazz, jlong transactionObj) {
+    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
+    transaction->syncInputWindows();
+}
+
 static void nativeSetMetadata(JNIEnv* env, jclass clazz, jlong transactionObj,
         jlong nativeObject, jint id, jobject parcelObj) {
     Parcel* parcel = parcelForJavaObject(env, parcelObj);
@@ -1246,7 +1251,9 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             "(Landroid/os/IBinder;JJ)Landroid/hardware/display/DisplayedContentSample;",
             (void*)nativeGetDisplayedContentSample },
     {"nativeSetGeometry", "(JJLandroid/graphics/Rect;Landroid/graphics/Rect;J)V",
-            (void*)nativeSetGeometry }
+            (void*)nativeSetGeometry },
+    {"nativeSyncInputWindows", "(J)V",
+            (void*)nativeSyncInputWindows }
 };
 
 int register_android_view_SurfaceControl(JNIEnv* env)

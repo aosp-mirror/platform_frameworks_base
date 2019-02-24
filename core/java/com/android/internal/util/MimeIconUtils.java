@@ -16,215 +16,253 @@
 
 package com.android.internal.util;
 
-import android.content.Context;
-import android.graphics.drawable.Drawable;
-import android.provider.DocumentsContract;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.content.ContentResolver.TypeInfo;
+import android.content.res.Resources;
+import android.graphics.drawable.Icon;
+import android.text.TextUtils;
+import android.util.ArrayMap;
 
 import com.android.internal.R;
+import com.android.internal.annotations.GuardedBy;
 
-import java.util.HashMap;
+import libcore.net.MimeUtils;
+
+import java.util.Locale;
+import java.util.Objects;
 
 public class MimeIconUtils {
+    @GuardedBy("sCache")
+    private static final ArrayMap<String, TypeInfo> sCache = new ArrayMap<>();
 
-    private static HashMap<String, Integer> sMimeIcons = new HashMap<>();
+    private static TypeInfo buildTypeInfo(String mimeType, int iconId,
+            int labelId, int extLabelId) {
+        final Resources res = Resources.getSystem();
 
-    private static void add(String mimeType, int resId) {
-        if (sMimeIcons.put(mimeType, resId) != null) {
-            throw new RuntimeException(mimeType + " already registered!");
-        }
-    }
-
-    static {
-        int icon;
-
-        // Package
-        icon = R.drawable.ic_doc_apk;
-        add("application/vnd.android.package-archive", icon);
-
-        // Audio
-        icon = R.drawable.ic_doc_audio;
-        add("application/ogg", icon);
-        add("application/x-flac", icon);
-
-        // Certificate
-        icon = R.drawable.ic_doc_certificate;
-        add("application/pgp-keys", icon);
-        add("application/pgp-signature", icon);
-        add("application/x-pkcs12", icon);
-        add("application/x-pkcs7-certreqresp", icon);
-        add("application/x-pkcs7-crl", icon);
-        add("application/x-x509-ca-cert", icon);
-        add("application/x-x509-user-cert", icon);
-        add("application/x-pkcs7-certificates", icon);
-        add("application/x-pkcs7-mime", icon);
-        add("application/x-pkcs7-signature", icon);
-
-        // Source code
-        icon = R.drawable.ic_doc_codes;
-        add("application/rdf+xml", icon);
-        add("application/rss+xml", icon);
-        add("application/x-object", icon);
-        add("application/xhtml+xml", icon);
-        add("text/css", icon);
-        add("text/html", icon);
-        add("text/xml", icon);
-        add("text/x-c++hdr", icon);
-        add("text/x-c++src", icon);
-        add("text/x-chdr", icon);
-        add("text/x-csrc", icon);
-        add("text/x-dsrc", icon);
-        add("text/x-csh", icon);
-        add("text/x-haskell", icon);
-        add("text/x-java", icon);
-        add("text/x-literate-haskell", icon);
-        add("text/x-pascal", icon);
-        add("text/x-tcl", icon);
-        add("text/x-tex", icon);
-        add("application/x-latex", icon);
-        add("application/x-texinfo", icon);
-        add("application/atom+xml", icon);
-        add("application/ecmascript", icon);
-        add("application/json", icon);
-        add("application/javascript", icon);
-        add("application/xml", icon);
-        add("text/javascript", icon);
-        add("application/x-javascript", icon);
-
-        // Compressed
-        icon = R.drawable.ic_doc_compressed;
-        add("application/mac-binhex40", icon);
-        add("application/rar", icon);
-        add("application/zip", icon);
-        add("application/x-apple-diskimage", icon);
-        add("application/x-debian-package", icon);
-        add("application/x-gtar", icon);
-        add("application/x-iso9660-image", icon);
-        add("application/x-lha", icon);
-        add("application/x-lzh", icon);
-        add("application/x-lzx", icon);
-        add("application/x-stuffit", icon);
-        add("application/x-tar", icon);
-        add("application/x-webarchive", icon);
-        add("application/x-webarchive-xml", icon);
-        add("application/gzip", icon);
-        add("application/x-7z-compressed", icon);
-        add("application/x-deb", icon);
-        add("application/x-rar-compressed", icon);
-
-        // Contact
-        icon = R.drawable.ic_doc_contact;
-        add("text/x-vcard", icon);
-        add("text/vcard", icon);
-
-        // Event
-        icon = R.drawable.ic_doc_event;
-        add("text/calendar", icon);
-        add("text/x-vcalendar", icon);
-
-        // Font
-        icon = R.drawable.ic_doc_font;
-        add("application/x-font", icon);
-        add("application/font-woff", icon);
-        add("application/x-font-woff", icon);
-        add("application/x-font-ttf", icon);
-
-        // Image
-        icon = R.drawable.ic_doc_image;
-        add("application/vnd.oasis.opendocument.graphics", icon);
-        add("application/vnd.oasis.opendocument.graphics-template", icon);
-        add("application/vnd.oasis.opendocument.image", icon);
-        add("application/vnd.stardivision.draw", icon);
-        add("application/vnd.sun.xml.draw", icon);
-        add("application/vnd.sun.xml.draw.template", icon);
-
-        // PDF
-        icon = R.drawable.ic_doc_pdf;
-        add("application/pdf", icon);
-
-        // Presentation
-        icon = R.drawable.ic_doc_presentation;
-        add("application/vnd.stardivision.impress", icon);
-        add("application/vnd.sun.xml.impress", icon);
-        add("application/vnd.sun.xml.impress.template", icon);
-        add("application/x-kpresenter", icon);
-        add("application/vnd.oasis.opendocument.presentation", icon);
-
-        // Spreadsheet
-        icon = R.drawable.ic_doc_spreadsheet;
-        add("application/vnd.oasis.opendocument.spreadsheet", icon);
-        add("application/vnd.oasis.opendocument.spreadsheet-template", icon);
-        add("application/vnd.stardivision.calc", icon);
-        add("application/vnd.sun.xml.calc", icon);
-        add("application/vnd.sun.xml.calc.template", icon);
-        add("application/x-kspread", icon);
-
-        // Document
-        icon = R.drawable.ic_doc_document;
-        add("application/vnd.oasis.opendocument.text", icon);
-        add("application/vnd.oasis.opendocument.text-master", icon);
-        add("application/vnd.oasis.opendocument.text-template", icon);
-        add("application/vnd.oasis.opendocument.text-web", icon);
-        add("application/vnd.stardivision.writer", icon);
-        add("application/vnd.stardivision.writer-global", icon);
-        add("application/vnd.sun.xml.writer", icon);
-        add("application/vnd.sun.xml.writer.global", icon);
-        add("application/vnd.sun.xml.writer.template", icon);
-        add("application/x-abiword", icon);
-        add("application/x-kword", icon);
-
-        // Video
-        icon = R.drawable.ic_doc_video;
-        add("application/x-quicktimeplayer", icon);
-        add("application/x-shockwave-flash", icon);
-
-        // Word
-        icon = R.drawable.ic_doc_word;
-        add("application/msword", icon);
-        add("application/vnd.openxmlformats-officedocument.wordprocessingml.document", icon);
-        add("application/vnd.openxmlformats-officedocument.wordprocessingml.template", icon);
-
-        // Excel
-        icon = R.drawable.ic_doc_excel;
-        add("application/vnd.ms-excel", icon);
-        add("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", icon);
-        add("application/vnd.openxmlformats-officedocument.spreadsheetml.template", icon);
-
-        // Powerpoint
-        icon = R.drawable.ic_doc_powerpoint;
-        add("application/vnd.ms-powerpoint", icon);
-        add("application/vnd.openxmlformats-officedocument.presentationml.presentation", icon);
-        add("application/vnd.openxmlformats-officedocument.presentationml.template", icon);
-        add("application/vnd.openxmlformats-officedocument.presentationml.slideshow", icon);
-    }
-
-    public static Drawable loadMimeIcon(Context context, String mimeType) {
-        if (DocumentsContract.Document.MIME_TYPE_DIR.equals(mimeType)) {
-            return context.getDrawable(R.drawable.ic_doc_folder);
-        }
-
-        // Look for exact match first
-        Integer resId = sMimeIcons.get(mimeType);
-        if (resId != null) {
-            return context.getDrawable(resId);
-        }
-
-        if (mimeType == null) {
-            // TODO: generic icon?
-            return null;
-        }
-
-        // Otherwise look for partial match
-        final String typeOnly = mimeType.split("/")[0];
-        if ("audio".equals(typeOnly)) {
-            return context.getDrawable(R.drawable.ic_doc_audio);
-        } else if ("image".equals(typeOnly)) {
-            return context.getDrawable(R.drawable.ic_doc_image);
-        } else if ("text".equals(typeOnly)) {
-            return context.getDrawable(R.drawable.ic_doc_text);
-        } else if ("video".equals(typeOnly)) {
-            return context.getDrawable(R.drawable.ic_doc_video);
+        // If this MIME type has an extension, customize the label
+        final CharSequence label;
+        final String ext = MimeUtils.guessExtensionFromMimeType(mimeType);
+        if (!TextUtils.isEmpty(ext) && extLabelId != -1) {
+            label = res.getString(extLabelId, ext.toUpperCase(Locale.US));
         } else {
-            return context.getDrawable(R.drawable.ic_doc_generic);
+            label = res.getString(labelId);
+        }
+
+        return new TypeInfo(Icon.createWithResource(res, iconId), label, label);
+    }
+
+    private static @Nullable TypeInfo buildTypeInfo(@NonNull String mimeType) {
+        switch (mimeType) {
+            case "inode/directory":
+            case "vnd.android.document/directory":
+                return buildTypeInfo(mimeType, R.drawable.ic_doc_folder,
+                        R.string.mime_type_folder, -1);
+
+            case "application/vnd.android.package-archive":
+                return buildTypeInfo(mimeType, R.drawable.ic_doc_apk,
+                        R.string.mime_type_apk, -1);
+
+            case "application/pgp-keys":
+            case "application/pgp-signature":
+            case "application/x-pkcs12":
+            case "application/x-pkcs7-certreqresp":
+            case "application/x-pkcs7-crl":
+            case "application/x-x509-ca-cert":
+            case "application/x-x509-user-cert":
+            case "application/x-pkcs7-certificates":
+            case "application/x-pkcs7-mime":
+            case "application/x-pkcs7-signature":
+                return buildTypeInfo(mimeType, R.drawable.ic_doc_certificate,
+                        R.string.mime_type_generic, R.string.mime_type_generic_ext);
+
+            case "application/rdf+xml":
+            case "application/rss+xml":
+            case "application/x-object":
+            case "application/xhtml+xml":
+            case "text/css":
+            case "text/html":
+            case "text/xml":
+            case "text/x-c++hdr":
+            case "text/x-c++src":
+            case "text/x-chdr":
+            case "text/x-csrc":
+            case "text/x-dsrc":
+            case "text/x-csh":
+            case "text/x-haskell":
+            case "text/x-java":
+            case "text/x-literate-haskell":
+            case "text/x-pascal":
+            case "text/x-tcl":
+            case "text/x-tex":
+            case "application/x-latex":
+            case "application/x-texinfo":
+            case "application/atom+xml":
+            case "application/ecmascript":
+            case "application/json":
+            case "application/javascript":
+            case "application/xml":
+            case "text/javascript":
+            case "application/x-javascript":
+                return buildTypeInfo(mimeType, R.drawable.ic_doc_codes,
+                        R.string.mime_type_document, R.string.mime_type_document_ext);
+
+            case "application/mac-binhex40":
+            case "application/rar":
+            case "application/zip":
+            case "application/x-apple-diskimage":
+            case "application/x-debian-package":
+            case "application/x-gtar":
+            case "application/x-iso9660-image":
+            case "application/x-lha":
+            case "application/x-lzh":
+            case "application/x-lzx":
+            case "application/x-stuffit":
+            case "application/x-tar":
+            case "application/x-webarchive":
+            case "application/x-webarchive-xml":
+            case "application/gzip":
+            case "application/x-7z-compressed":
+            case "application/x-deb":
+            case "application/x-rar-compressed":
+                return buildTypeInfo(mimeType, R.drawable.ic_doc_compressed,
+                        R.string.mime_type_compressed, R.string.mime_type_compressed_ext);
+
+            case "text/x-vcard":
+            case "text/vcard":
+                return buildTypeInfo(mimeType, R.drawable.ic_doc_contact,
+                        R.string.mime_type_generic, R.string.mime_type_generic_ext);
+
+            case "text/calendar":
+            case "text/x-vcalendar":
+                return buildTypeInfo(mimeType, R.drawable.ic_doc_event,
+                        R.string.mime_type_generic, R.string.mime_type_generic_ext);
+
+            case "application/x-font":
+            case "application/font-woff":
+            case "application/x-font-woff":
+            case "application/x-font-ttf":
+                return buildTypeInfo(mimeType, R.drawable.ic_doc_font,
+                        R.string.mime_type_generic, R.string.mime_type_generic_ext);
+
+            case "application/vnd.oasis.opendocument.graphics":
+            case "application/vnd.oasis.opendocument.graphics-template":
+            case "application/vnd.oasis.opendocument.image":
+            case "application/vnd.stardivision.draw":
+            case "application/vnd.sun.xml.draw":
+            case "application/vnd.sun.xml.draw.template":
+            case "application/vnd.google-apps.drawing":
+                return buildTypeInfo(mimeType, R.drawable.ic_doc_image,
+                        R.string.mime_type_image, R.string.mime_type_image_ext);
+
+            case "application/pdf":
+                return buildTypeInfo(mimeType, R.drawable.ic_doc_pdf,
+                        R.string.mime_type_document, R.string.mime_type_document_ext);
+
+            case "application/vnd.stardivision.impress":
+            case "application/vnd.sun.xml.impress":
+            case "application/vnd.sun.xml.impress.template":
+            case "application/x-kpresenter":
+            case "application/vnd.oasis.opendocument.presentation":
+            case "application/vnd.google-apps.presentation":
+                return buildTypeInfo(mimeType, R.drawable.ic_doc_presentation,
+                        R.string.mime_type_presentation, R.string.mime_type_presentation_ext);
+
+            case "application/vnd.oasis.opendocument.spreadsheet":
+            case "application/vnd.oasis.opendocument.spreadsheet-template":
+            case "application/vnd.stardivision.calc":
+            case "application/vnd.sun.xml.calc":
+            case "application/vnd.sun.xml.calc.template":
+            case "application/x-kspread":
+            case "application/vnd.google-apps.spreadsheet":
+                return buildTypeInfo(mimeType, R.drawable.ic_doc_spreadsheet,
+                        R.string.mime_type_spreadsheet, R.string.mime_type_spreadsheet_ext);
+
+            case "application/vnd.oasis.opendocument.text":
+            case "application/vnd.oasis.opendocument.text-master":
+            case "application/vnd.oasis.opendocument.text-template":
+            case "application/vnd.oasis.opendocument.text-web":
+            case "application/vnd.stardivision.writer":
+            case "application/vnd.stardivision.writer-global":
+            case "application/vnd.sun.xml.writer":
+            case "application/vnd.sun.xml.writer.global":
+            case "application/vnd.sun.xml.writer.template":
+            case "application/x-abiword":
+            case "application/x-kword":
+            case "application/vnd.google-apps.document":
+                return buildTypeInfo(mimeType, R.drawable.ic_doc_document,
+                        R.string.mime_type_document, R.string.mime_type_document_ext);
+
+            case "application/x-quicktimeplayer":
+            case "application/x-shockwave-flash":
+                return buildTypeInfo(mimeType, R.drawable.ic_doc_video,
+                        R.string.mime_type_video, R.string.mime_type_video_ext);
+
+            case "application/msword":
+            case "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+            case "application/vnd.openxmlformats-officedocument.wordprocessingml.template":
+                return buildTypeInfo(mimeType, R.drawable.ic_doc_word,
+                        R.string.mime_type_document, R.string.mime_type_document_ext);
+
+            case "application/vnd.ms-excel":
+            case "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
+            case "application/vnd.openxmlformats-officedocument.spreadsheetml.template":
+                return buildTypeInfo(mimeType, R.drawable.ic_doc_excel,
+                        R.string.mime_type_spreadsheet, R.string.mime_type_spreadsheet_ext);
+
+            case "application/vnd.ms-powerpoint":
+            case "application/vnd.openxmlformats-officedocument.presentationml.presentation":
+            case "application/vnd.openxmlformats-officedocument.presentationml.template":
+            case "application/vnd.openxmlformats-officedocument.presentationml.slideshow":
+                return buildTypeInfo(mimeType, R.drawable.ic_doc_powerpoint,
+                        R.string.mime_type_presentation, R.string.mime_type_presentation_ext);
+
+            default:
+                return buildGenericTypeInfo(mimeType);
+        }
+    }
+
+    private static @Nullable TypeInfo buildGenericTypeInfo(@NonNull String mimeType) {
+        // Look for partial matches
+        if (mimeType.startsWith("audio/")) {
+            return buildTypeInfo(mimeType, R.drawable.ic_doc_audio,
+                    R.string.mime_type_audio, R.string.mime_type_audio_ext);
+        } else if (mimeType.startsWith("video/")) {
+            return buildTypeInfo(mimeType, R.drawable.ic_doc_video,
+                    R.string.mime_type_video, R.string.mime_type_video_ext);
+        } else if (mimeType.startsWith("image/")) {
+            return buildTypeInfo(mimeType, R.drawable.ic_doc_image,
+                    R.string.mime_type_image, R.string.mime_type_image_ext);
+        } else if (mimeType.startsWith("text/")) {
+            return buildTypeInfo(mimeType, R.drawable.ic_doc_text,
+                    R.string.mime_type_document, R.string.mime_type_document_ext);
+        }
+
+        // As one last-ditch effort, try "bouncing" the MIME type through its
+        // default extension. This handles cases like "application/x-flac" to
+        // ".flac" to "audio/flac".
+        final String bouncedMimeType = MimeUtils
+                .guessMimeTypeFromExtension(MimeUtils.guessExtensionFromMimeType(mimeType));
+        if (bouncedMimeType != null && !Objects.equals(mimeType, bouncedMimeType)) {
+            return buildTypeInfo(bouncedMimeType);
+        }
+
+        // Worst case, return a generic file
+        return buildTypeInfo(mimeType, R.drawable.ic_doc_generic,
+                R.string.mime_type_generic, R.string.mime_type_generic_ext);
+    }
+
+    public static @NonNull TypeInfo getTypeInfo(@NonNull String mimeType) {
+        // Normalize MIME type
+        mimeType = mimeType.toLowerCase(Locale.US);
+
+        synchronized (sCache) {
+            TypeInfo res = sCache.get(mimeType);
+            if (res == null) {
+                res = buildTypeInfo(mimeType);
+                sCache.put(mimeType, res);
+            }
+            return res;
         }
     }
 }

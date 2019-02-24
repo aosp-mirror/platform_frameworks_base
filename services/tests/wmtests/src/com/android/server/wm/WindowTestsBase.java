@@ -37,7 +37,10 @@ import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
+
+import static org.mockito.Mockito.mock;
+
 
 import android.content.Context;
 import android.content.res.Configuration;
@@ -47,6 +50,8 @@ import android.util.Log;
 import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.IWindow;
+import android.view.Surface;
+import android.view.SurfaceControl.Transaction;
 import android.view.WindowManager;
 
 import com.android.server.AttributeCache;
@@ -58,6 +63,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.LinkedList;
 
@@ -78,8 +84,6 @@ class WindowTestsBase {
     private static int sNextDisplayId = DEFAULT_DISPLAY + 1;
     static int sNextStackId = 1000;
 
-    private static MockTracker sMockTracker;
-
     /** Non-default display. */
     DisplayContent mDisplayContent;
     DisplayInfo mDisplayInfo = new DisplayInfo();
@@ -94,15 +98,18 @@ class WindowTestsBase {
     WindowState mChildAppWindowBelow;
     HashSet<WindowState> mCommonWindows;
 
+    private MockTracker mMockTracker;
+
     /**
-     * To restore the original SurfaceControl.Transaction factory if any tests changed
-     * {@link WindowManagerService#mTransactionFactory}.
+     * Spied {@link Transaction} class than can be used to verify calls.
      */
-    private TransactionFactory mOriginalTransactionFactory;
+    Transaction mTransaction;
 
     @Rule
     public final DexmakerShareClassLoaderRule mDexmakerShareClassLoaderRule =
             new DexmakerShareClassLoaderRule();
+    @Rule
+    public final SystemServicesTestRule mSystemServicesTestRule = new SystemServicesTestRule();
 
     static WindowState.PowerManagerWrapper sPowerManagerWrapper;
 
@@ -110,34 +117,37 @@ class WindowTestsBase {
     public static void setUpOnceBase() {
         AttributeCache.init(getInstrumentation().getTargetContext());
 
-        TestSystemServices.setUpWindowManagerService();
-
-        // MockTracker needs to be initialized after TestSystemServices because we don't want to
-        // track static mocks.
-        sMockTracker = new MockTracker();
-
         sPowerManagerWrapper = mock(WindowState.PowerManagerWrapper.class);
     }
 
     @AfterClass
-    public static void tearDownOnceBase() {
-        sMockTracker.close();
-        sMockTracker = null;
-
-        TestSystemServices.tearDownWindowManagerService();
+    public static void tearDownOnceBase() throws IOException {
+        sPowerManagerWrapper = null;
     }
 
     @Before
     public void setUpBase() {
+        mMockTracker = new MockTracker();
+
         // If @Before throws an exception, the error isn't logged. This will make sure any failures
         // in the set up are clear. This can be removed when b/37850063 is fixed.
         try {
             mMockSession = mock(Session.class);
+            mTransaction = spy(StubTransaction.class);
 
             final Context context = getInstrumentation().getTargetContext();
 
-            mWm = TestSystemServices.getWindowManagerService();
-            mOriginalTransactionFactory = mWm.mTransactionFactory;
+            mWm = mSystemServicesTestRule.getWindowManagerService();
+
+            // Setup factory classes to prevent calls to native code.
+
+            // Return a spied Transaction class than can be used to verify calls.
+            mWm.mTransactionFactory = () -> mTransaction;
+            // Return a SurfaceControl.Builder class that creates mocked SurfaceControl instances.
+            mWm.mSurfaceBuilderFactory = (unused) -> new MockSurfaceControlBuilder();
+            // Return mocked Surface instances.
+            mWm.mSurfaceFactory = () -> mock(Surface.class);
+
             beforeCreateDisplay();
 
             context.getDisplay().getDisplayInfo(mDisplayInfo);
@@ -187,7 +197,6 @@ class WindowTestsBase {
             // stable state to clean up for consistency.
             waitUntilHandlersIdle();
 
-            mWm.mTransactionFactory = mOriginalTransactionFactory;
             final LinkedList<WindowState> nonCommonWindows = new LinkedList<>();
 
             synchronized (mWm.mGlobalLock) {
@@ -216,11 +225,14 @@ class WindowTestsBase {
             }
 
             // Cleaned up everything in Handler.
-            TestSystemServices.cleanupWindowManagerHandlers();
+            mSystemServicesTestRule.cleanupWindowManagerHandlers();
         } catch (Exception e) {
             Log.e(TAG, "Failed to tear down test", e);
             throw e;
         }
+
+        mMockTracker.close();
+        mMockTracker = null;
     }
 
     private WindowState createCommonWindow(WindowState parent, int type, String name) {
@@ -237,7 +249,7 @@ class WindowTestsBase {
      * Waits until the main handler for WM has processed all messages.
      */
     void waitUntilHandlersIdle() {
-        TestSystemServices.waitUntilWindowManagerHandlersIdle();
+        mSystemServicesTestRule.waitUntilWindowManagerHandlersIdle();
     }
 
     private WindowToken createWindowToken(
@@ -257,10 +269,16 @@ class WindowTestsBase {
 
     WindowTestUtils.TestAppWindowToken createTestAppWindowToken(DisplayContent dc, int
             windowingMode, int activityType) {
+        return createTestAppWindowToken(dc, windowingMode, activityType,
+                true /*skipOnParentChanged */);
+    }
+
+    WindowTestUtils.TestAppWindowToken createTestAppWindowToken(DisplayContent dc, int
+            windowingMode, int activityType, boolean skipOnParentChanged) {
         final TaskStack stack = createTaskStackOnDisplay(windowingMode, activityType, dc);
         final Task task = createTaskInStack(stack, 0 /* userId */);
         final WindowTestUtils.TestAppWindowToken appWindowToken =
-                WindowTestUtils.createTestAppWindowToken(dc);
+                WindowTestUtils.createTestAppWindowToken(dc, skipOnParentChanged);
         task.addChild(appWindowToken, 0);
         return appWindowToken;
     }

@@ -18,6 +18,8 @@ package com.android.server.wm;
 
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyInt;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
@@ -26,7 +28,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.anyInt;
 
 import android.platform.test.annotations.Presubmit;
 import android.view.InputChannel;
@@ -63,8 +64,7 @@ public class TaskPositioningControllerTests extends WindowTestsBase {
         }
 
         spyOn(mDisplayContent);
-        InputMonitor inputMonitor = mock(InputMonitor.class);
-        when(mDisplayContent.getInputMonitor()).thenReturn(inputMonitor);
+        doReturn(mock(InputMonitor.class)).when(mDisplayContent).getInputMonitor();
     }
 
     @Test

@@ -16,7 +16,9 @@
 package android.view.autofill;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.content.AutofillOptions;
 
 /**
  * Autofill Manager local system service interface.
@@ -31,12 +33,13 @@ public abstract class AutofillManagerInternal {
     public abstract void onBackKeyPressed();
 
     /**
-     * Gets whether compatibility mode is enabled for a package
+     * Gets autofill options for a package
      *
      * @param packageName The package for which to query.
      * @param versionCode The package version code.
      * @param userId The user id for which to query.
      */
-    public abstract boolean isCompatibilityModeRequested(@NonNull String packageName,
+    @Nullable
+    public abstract AutofillOptions getAutofillOptions(@NonNull String packageName,
             long versionCode, @UserIdInt int userId);
 }

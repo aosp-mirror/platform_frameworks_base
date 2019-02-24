@@ -116,7 +116,7 @@ public final class GnssReflectingPlane implements Parcelable {
     }
 
     /** Builder for {@link GnssReflectingPlane} */
-    public static class Builder {
+    public static final class Builder {
         /** For documentation, see corresponding fields in {@link GnssReflectingPlane}. */
         private double mLatitudeDegrees;
 

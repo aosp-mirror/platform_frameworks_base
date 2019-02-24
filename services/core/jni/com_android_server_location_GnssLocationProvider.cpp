@@ -2248,7 +2248,7 @@ static jboolean android_location_GnssMeasurementsProvider_inject_gnss_measuremen
             measCorrClass, "getToaGpsNanosecondsOfWeek", "()J");
 
         method_correctionsGetSingleSatCorrectionList = env->GetMethodID(
-            measCorrClass, "getSingleSatCorrectionList", "()Ljava.util.List;");
+            measCorrClass, "getSingleSatelliteCorrectionList", "()Ljava.util.List;");
     }
 
     jdouble latitudeDegreesCorr = env->CallDoubleMethod(
@@ -2285,15 +2285,15 @@ static jboolean android_location_GnssMeasurementsProvider_inject_gnss_measuremen
         if (firstGnssMeasurementCorrectionInjected == false) {
             jclass singleSatCorrClass = env->GetObjectClass(singleSatCorrectionObj);
             method_correctionSatFlags = env->GetMethodID(
-                singleSatCorrClass, "getSingleSatCorrectionFlags", "()I");
+                singleSatCorrClass, "getSingleSatelliteCorrectionFlags", "()I");
             method_correctionSatConstType = env->GetMethodID(
                 singleSatCorrClass, "getConstellationType", "()I");
             method_correctionSatId= env->GetMethodID(
-                singleSatCorrClass, "getSatId", "()I");
+                singleSatCorrClass, "getSatelliteId", "()I");
             method_correctionSatCarrierFreq = env->GetMethodID(
                 singleSatCorrClass, "getCarrierFrequencyHz", "()F");
             method_correctionSatIsLosProb = env->GetMethodID(
-                singleSatCorrClass,"getProbSatIsLos", "()F");
+                singleSatCorrClass,"getProbabilityLineOfSight", "()F");
             method_correctionSatEpl = env->GetMethodID(
                 singleSatCorrClass, "getExcessPathLengthMeters", "()F");
             method_correctionSatEplUnc = env->GetMethodID(

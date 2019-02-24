@@ -1167,8 +1167,7 @@
     <!-- ====================================================================== -->
     <eat-comment />
 
-    <!-- Used for permissions that are associated with activity recognition.
-         TODO(zezeozue). STOPSHIP: Add icon -->
+    <!-- Used for permissions that are associated with activity recognition. -->
     <permission-group android:name="android.permission-group.ACTIVITY_RECOGNITION"
         android:icon="@drawable/perm_group_activity_recognition"
         android:label="@string/permgrouplab_activityRecognition"
@@ -3418,6 +3417,11 @@
         @hide -->
     <permission android:name="android.permission.GET_RUNTIME_PERMISSIONS"
                 android:protectionLevel="signature" />
+
+    <!-- @SystemApi Allows an application to change policy_fixed permissions.
+    @hide -->
+    <permission android:name="android.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY"
+                android:protectionLevel="signature|installer" />
 
     <!-- @hide Allows an application to observe permission changes. -->
     <permission android:name="android.permission.OBSERVE_GRANT_REVOKE_PERMISSIONS"

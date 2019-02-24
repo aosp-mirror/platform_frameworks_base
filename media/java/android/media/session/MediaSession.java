@@ -132,6 +132,27 @@ public final class MediaSession {
      * @param tag A short name for debugging purposes.
      */
     public MediaSession(@NonNull Context context, @NonNull String tag) {
+        this(context, tag, null);
+    }
+
+    /**
+     * Creates a new session. The session will automatically be registered with
+     * the system but will not be published until {@link #setActive(boolean)
+     * setActive(true)} is called. You must call {@link #release()} when
+     * finished with the session.
+     * <p>
+     * The {@code sessionInfo} can include additional unchanging information about this session.
+     * For example, it can include the version of the application, or the list of the custom
+     * commands that this session supports.
+     *
+     * @param context The context to use to create the session.
+     * @param tag A short name for debugging purposes.
+     * @param sessionInfo A bundle for additional information about this session.
+     *                    Controllers can get this information by calling
+     *                    {@link MediaController#getSessionInfo()}.
+     */
+    public MediaSession(@NonNull Context context, @NonNull String tag,
+            @Nullable Bundle sessionInfo) {
         if (context == null) {
             throw new IllegalArgumentException("context cannot be null.");
         }
@@ -142,7 +163,7 @@ public final class MediaSession {
                 .getSystemService(Context.MEDIA_SESSION_SERVICE);
         try {
             SessionCallbackLink cbLink = new SessionCallbackLink(context);
-            SessionLink sessionLink = manager.createSession(cbLink, tag);
+            SessionLink sessionLink = manager.createSession(cbLink, tag, sessionInfo);
             mImpl = new MediaSessionEngine(context, sessionLink, cbLink);
             mMaxBitmapSize = context.getResources().getDimensionPixelSize(
                     android.R.dimen.config_mediaMetadataBitmapMaxSize);

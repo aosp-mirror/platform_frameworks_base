@@ -21,6 +21,7 @@ import static android.Manifest.permission.CONFIGURE_DISPLAY_COLOR_MODE;
 import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.app.KeyguardManager;
 import android.content.res.CompatibilityInfo;
@@ -911,6 +912,7 @@ public final class Display {
      * @see #FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS
      * @hide
      */
+    @TestApi
     // TODO (b/114338689): Remove the method and use IWindowManager#shouldShowSystemDecors
     public boolean supportsSystemDecorations() {
         return (mDisplayInfo.flags & FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS) != 0;

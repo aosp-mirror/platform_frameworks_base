@@ -94,7 +94,8 @@ public final class ExtrasUtils {
         if (actionIntents != null) {
             final int size = actionIntents.size();
             for (int i = 0; i < size; i++) {
-                if (intentAction.equals(actionIntents.get(i).getAction())) {
+                final Intent intent = actionIntents.get(i);
+                if (intent != null && intentAction.equals(intent.getAction())) {
                     return classification.getActions().get(i);
                 }
             }

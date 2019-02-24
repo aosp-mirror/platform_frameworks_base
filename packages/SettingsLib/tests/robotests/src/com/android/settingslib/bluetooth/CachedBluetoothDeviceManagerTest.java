@@ -369,21 +369,6 @@ public class CachedBluetoothDeviceManagerTest {
     }
 
     /**
-     * Test to verify onBtClassChanged().
-     */
-    @Test
-    public void onBtClassChanged_validBtClass_classChanged() {
-        CachedBluetoothDevice cachedDevice1 = mCachedDeviceManager.addDevice(mDevice1);
-        assertThat(cachedDevice1).isNotNull();
-        assertThat(cachedDevice1.getBtClass()).isEqualTo(DEVICE_CLASS_1);
-
-        final BluetoothClass newBluetoothClass = DEVICE_CLASS_2;
-        when(mDevice1.getBluetoothClass()).thenReturn(newBluetoothClass);
-        mCachedDeviceManager.onBtClassChanged(mDevice1);
-        assertThat(cachedDevice1.getBtClass()).isEqualTo(newBluetoothClass);
-    }
-
-    /**
      * Test to verify onDeviceDisappeared().
      */
     @Test

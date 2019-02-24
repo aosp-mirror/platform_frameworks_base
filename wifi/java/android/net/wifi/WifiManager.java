@@ -1738,10 +1738,7 @@ public class WifiManager {
      * @deprecated This is no longer supported.
      */
     @Deprecated
-    @RequiresPermission(anyOf = {
-            android.Manifest.permission.NETWORK_SETTINGS,
-            android.Manifest.permission.NETWORK_SETUP_WIZARD
-    })
+    @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
     public void removePasspointConfiguration(String fqdn) {
         try {
             if (!mService.removePasspointConfiguration(fqdn, mContext.getOpPackageName())) {

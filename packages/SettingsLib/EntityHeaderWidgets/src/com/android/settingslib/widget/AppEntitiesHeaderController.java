@@ -90,6 +90,7 @@ public class AppEntitiesHeaderController {
     private int mHeaderTitleRes;
     private int mHeaderDetailsRes;
     private int mHeaderEmptyRes;
+    private CharSequence mHeaderDetails;
     private View.OnClickListener mDetailsOnClickListener;
 
     /**
@@ -144,6 +145,14 @@ public class AppEntitiesHeaderController {
      */
     public AppEntitiesHeaderController setHeaderDetailsRes(@StringRes int detailsRes) {
         mHeaderDetailsRes = detailsRes;
+        return this;
+    }
+
+    /**
+     * Set the text for app entities header details.
+     */
+    public AppEntitiesHeaderController setHeaderDetails(CharSequence detailsText) {
+        mHeaderDetails = detailsText;
         return this;
     }
 
@@ -232,11 +241,13 @@ public class AppEntitiesHeaderController {
     }
 
     private void bindHeaderDetailsView() {
-        CharSequence detailsText = "";
-        try {
-            detailsText = mContext.getText(mHeaderDetailsRes);
-        } catch (Resources.NotFoundException e) {
-            Log.e(TAG, "Resource of header details can't not be found!", e);
+        CharSequence detailsText = mHeaderDetails;
+        if (TextUtils.isEmpty(detailsText)) {
+            try {
+                detailsText = mContext.getText(mHeaderDetailsRes);
+            } catch (Resources.NotFoundException e) {
+                Log.e(TAG, "Resource of header details can't not be found!", e);
+            }
         }
         mHeaderDetailsView.setText(detailsText);
         mHeaderDetailsView.setVisibility(

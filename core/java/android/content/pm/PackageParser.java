@@ -48,7 +48,6 @@ import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityTaskManager;
-import android.app.AppDetailsActivity;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -725,6 +724,9 @@ public class PackageParser {
                 for (int i = 0; i < N; i++) {
                     final Activity a = p.activities.get(i);
                     if (state.isMatch(a.info, flags)) {
+                        if (PackageManager.APP_DETAILS_ACTIVITY_CLASS_NAME.equals(a.className)) {
+                            continue;
+                        }
                         res[num++] = generateActivityInfo(a, flags, state, userId);
                     }
                 }
@@ -4311,7 +4313,7 @@ public class PackageParser {
         } else {
             String outInfoName
                 = buildClassName(owner.applicationInfo.packageName, name, outError);
-            if (AppDetailsActivity.class.getName().equals(outInfoName)) {
+            if (PackageManager.APP_DETAILS_ACTIVITY_CLASS_NAME.equals(outInfoName)) {
                 outError[0] = tag + " invalid android:name";
                 return false;
             }
@@ -4364,13 +4366,14 @@ public class PackageParser {
             boolean hardwareAccelerated) {
 
         // Build custom App Details activity info instead of parsing it from xml
-        Activity a = new Activity(owner, AppDetailsActivity.class.getName(), new ActivityInfo());
+        Activity a = new Activity(owner, PackageManager.APP_DETAILS_ACTIVITY_CLASS_NAME,
+                new ActivityInfo());
         a.owner = owner;
         a.setPackageName(owner.packageName);
 
         a.info.theme = android.R.style.Theme_NoDisplay;
         a.info.exported = true;
-        a.info.name = AppDetailsActivity.class.getName();
+        a.info.name = PackageManager.APP_DETAILS_ACTIVITY_CLASS_NAME;
         a.info.processName = owner.applicationInfo.processName;
         a.info.uiOptions = a.info.applicationInfo.uiOptions;
         a.info.taskAffinity = buildTaskAffinityName(owner.packageName, owner.packageName,

@@ -109,7 +109,7 @@ public final class TvInputManager {
     public @interface VideoUnavailableReason {}
 
     static final int VIDEO_UNAVAILABLE_REASON_START = 0;
-    static final int VIDEO_UNAVAILABLE_REASON_END = 4;
+    static final int VIDEO_UNAVAILABLE_REASON_END = 5;
 
     /**
      * Reason for {@link TvInputService.Session#notifyVideoUnavailable(int)} and
@@ -140,7 +140,14 @@ public final class TvInputManager {
      * {@link TvView.TvInputCallback#onVideoUnavailable(String, int)}: Video is unavailable because
      * the current TV program is audio-only.
      */
-    public static final int VIDEO_UNAVAILABLE_REASON_AUDIO_ONLY = VIDEO_UNAVAILABLE_REASON_END;
+    public static final int VIDEO_UNAVAILABLE_REASON_AUDIO_ONLY = 4;
+    /**
+     * Reason for {@link TvInputService.Session#notifyVideoUnavailable(int)} and
+     * {@link TvView.TvInputCallback#onVideoUnavailable(String, int)}: Video is unavailable because
+     * the source is not physically connected, for example the HDMI cable is not connected.
+     * @hide
+     */
+    public static final int VIDEO_UNAVAILABLE_REASON_NOT_CONNECTED = VIDEO_UNAVAILABLE_REASON_END;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)

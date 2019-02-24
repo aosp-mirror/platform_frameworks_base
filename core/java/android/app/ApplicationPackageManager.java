@@ -696,7 +696,9 @@ public class ApplicationPackageManager extends PackageManager {
             int flagMask, int flagValues, UserHandle user) {
         try {
             mPM.updatePermissionFlags(permissionName, packageName, flagMask,
-                    flagValues, user.getIdentifier());
+                    flagValues,
+                    mContext.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.Q,
+                    user.getIdentifier());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2461,6 +2463,33 @@ public class ApplicationPackageManager extends PackageManager {
     public ComponentName getHomeActivities(List<ResolveInfo> outActivities) {
         try {
             return mPM.getHomeActivities(outActivities);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    @Override
+    public void setAppDetailsActivityEnabled(String packageName, boolean enabled) {
+        try {
+            ComponentName componentName = new ComponentName(packageName,
+                    PackageManager.APP_DETAILS_ACTIVITY_CLASS_NAME);
+            mPM.setComponentEnabledSetting(componentName, enabled
+                    ? PackageManager.COMPONENT_ENABLED_STATE_DEFAULT
+                    : PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+                    PackageManager.DONT_KILL_APP, getUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    @Override
+    public boolean getAppDetailsActivityEnabled(String packageName) {
+        try {
+            ComponentName componentName = new ComponentName(packageName,
+                    PackageManager.APP_DETAILS_ACTIVITY_CLASS_NAME);
+            int state = mPM.getComponentEnabledSetting(componentName, getUserId());
+            return state == PackageManager.COMPONENT_ENABLED_STATE_ENABLED
+                    || state == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

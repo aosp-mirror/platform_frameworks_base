@@ -722,7 +722,8 @@ public class PreferencesHelper implements RankingConfig {
 
         if (!channel.equals(updatedChannel)) {
             // only log if there are real changes
-            MetricsLogger.action(getChannelLog(updatedChannel, pkg));
+            MetricsLogger.action(getChannelLog(updatedChannel, pkg)
+                    .setSubtype(fromUser ? 1 : 0));
         }
 
         if (updatedChannel.canBypassDnd() != mAreChannelsBypassingDnd

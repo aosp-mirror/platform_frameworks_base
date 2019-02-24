@@ -79,6 +79,7 @@ public final class MediaController {
     private boolean mCbRegistered = false;
     private String mPackageName;
     private String mTag;
+    private Bundle mSessionInfo;
 
     private final TransportControls mTransportControls;
 
@@ -407,6 +408,23 @@ public final class MediaController {
             }
         }
         return mPackageName;
+    }
+
+    /**
+     * Gets the additional session information which was set when the session was created.
+     *
+     * @return The additional session information
+     */
+    @Nullable
+    public Bundle getSessionInfo() {
+        if (mSessionInfo == null) {
+            try {
+                mSessionInfo = mSessionBinder.getSessionInfo();
+            } catch (RuntimeException e) {
+                Log.d(TAG, "Dead object in getSessionInfo.", e);
+            }
+        }
+        return mSessionInfo;
     }
 
     /**

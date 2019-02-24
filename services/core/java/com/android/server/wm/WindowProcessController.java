@@ -57,6 +57,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.HeavyWeightSwitcherActivity;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.Watchdog;
+import com.android.server.wm.ActivityTaskManagerService.HotPath;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -408,12 +409,14 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         return null;
     }
 
+    @HotPath(caller = HotPath.PROCESS_CHANGE)
     public void addPackage(String packageName) {
         synchronized (mAtm.mGlobalLockWithoutBoost) {
             mPkgList.add(packageName);
         }
     }
 
+    @HotPath(caller = HotPath.PROCESS_CHANGE)
     public void clearPackageList() {
         synchronized (mAtm.mGlobalLockWithoutBoost) {
             mPkgList.clear();
@@ -441,12 +444,14 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         mActivities.clear();
     }
 
+    @HotPath(caller = HotPath.OOM_ADJUSTMENT)
     public boolean hasActivities() {
         synchronized (mAtm.mGlobalLockWithoutBoost) {
             return !mActivities.isEmpty();
         }
     }
 
+    @HotPath(caller = HotPath.OOM_ADJUSTMENT)
     public boolean hasVisibleActivities() {
         synchronized (mAtm.mGlobalLockWithoutBoost) {
             for (int i = mActivities.size() - 1; i >= 0; --i) {
@@ -459,6 +464,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         return false;
     }
 
+    @HotPath(caller = HotPath.LRU_UPDATE)
     public boolean hasActivitiesOrRecentTasks() {
         synchronized (mAtm.mGlobalLockWithoutBoost) {
             return !mActivities.isEmpty() || !mRecentTasks.isEmpty();
@@ -670,6 +676,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         void onOtherActivity();
     }
 
+    @HotPath(caller = HotPath.OOM_ADJUSTMENT)
     public int computeOomAdjFromActivities(int minTaskLayer, ComputeOomAdjCallback callback) {
         synchronized (mAtm.mGlobalLockWithoutBoost) {
             final int activitiesSize = mActivities.size();
@@ -903,6 +910,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         mRecentTasks.remove(task);
     }
 
+    @HotPath(caller = HotPath.OOM_ADJUSTMENT)
     public boolean hasRecentTasks() {
         synchronized (mAtm.mGlobalLockWithoutBoost) {
             return !mRecentTasks.isEmpty();
@@ -966,18 +974,21 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         return false;
     }
 
+    @HotPath(caller = HotPath.OOM_ADJUSTMENT)
     public void onTopProcChanged() {
         synchronized (mAtm.mGlobalLockWithoutBoost) {
             mAtm.mVrController.onTopProcChangedLocked(this);
         }
     }
 
+    @HotPath(caller = HotPath.OOM_ADJUSTMENT)
     public boolean isHomeProcess() {
         synchronized (mAtm.mGlobalLockWithoutBoost) {
             return this == mAtm.mHomeProcess;
         }
     }
 
+    @HotPath(caller = HotPath.OOM_ADJUSTMENT)
     public boolean isPreviousProcess() {
         synchronized (mAtm.mGlobalLockWithoutBoost) {
             return this == mAtm.mPreviousProcess;

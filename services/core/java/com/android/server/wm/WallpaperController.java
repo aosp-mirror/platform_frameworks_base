@@ -50,6 +50,7 @@ import android.view.SurfaceControl;
 import android.view.WindowManager;
 import android.view.animation.Animation;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ToBooleanFunction;
 
 import java.io.PrintWriter;
@@ -700,24 +701,37 @@ class WallpaperController {
         mWallpaperTokens.remove(token);
     }
 
+
+    @VisibleForTesting
+    boolean canScreenshotWallpaper() {
+        return canScreenshotWallpaper(getTopVisibleWallpaper());
+    }
+
+    private boolean canScreenshotWallpaper(WindowState wallpaperWindowState) {
+        if (!mService.mPolicy.isScreenOn()) {
+            if (DEBUG_SCREENSHOT) {
+                Slog.i(TAG_WM, "Attempted to take screenshot while display was off.");
+            }
+            return false;
+        }
+
+        if (wallpaperWindowState == null) {
+            if (DEBUG_SCREENSHOT) {
+                Slog.i(TAG_WM, "No visible wallpaper to screenshot");
+            }
+            return false;
+        }
+        return true;
+    }
+
     /**
      * Take a screenshot of the wallpaper if it's visible.
      *
      * @return Bitmap of the wallpaper
      */
     Bitmap screenshotWallpaperLocked() {
-        if (!mService.mPolicy.isScreenOn()) {
-            if (DEBUG_SCREENSHOT) {
-                Slog.i(TAG_WM, "Attempted to take screenshot while display was off.");
-            }
-            return null;
-        }
-
         final WindowState wallpaperWindowState = getTopVisibleWallpaper();
-        if (wallpaperWindowState == null) {
-            if (DEBUG_SCREENSHOT) {
-                Slog.i(TAG_WM, "No visible wallpaper to screenshot");
-            }
+        if (!canScreenshotWallpaper(wallpaperWindowState)) {
             return null;
         }
 

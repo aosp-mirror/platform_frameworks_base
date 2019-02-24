@@ -322,18 +322,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         public boolean handleMessage(Message msg) {
             switch (msg.what) {
                 case MSG_COMMIT:
-                    synchronized (mLock) {
-                        try {
-                            commitLocked();
-                        } catch (PackageManagerException e) {
-                            final String completeMsg = ExceptionUtils.getCompleteMessage(e);
-                            Slog.e(TAG,
-                                    "Commit of session " + sessionId + " failed: " + completeMsg);
-                            destroyInternal();
-                            dispatchSessionFinished(e.error, completeMsg, null);
-                        }
-                    }
-
+                    handleCommit();
                     break;
                 case MSG_ON_PACKAGE_INSTALLED:
                     final SomeArgs args = (SomeArgs) msg.obj;
@@ -1073,38 +1062,66 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         mCallback.onSessionSealedBlocking(this);
     }
 
-    @GuardedBy("mLock")
-    private void commitLocked()
-            throws PackageManagerException {
+    private void handleCommit() {
         if (params.isStaged) {
             mStagingManager.commitSession(this);
             destroyInternal();
             dispatchSessionFinished(PackageManager.INSTALL_SUCCEEDED, "Session staged", null);
             return;
         }
+
         if ((params.installFlags & PackageManager.INSTALL_APEX) != 0) {
-            throw new PackageManagerException(
-                PackageManager.INSTALL_FAILED_INTERNAL_ERROR,
-                "APEX packages can only be installed using staged sessions.");
+            destroyInternal();
+            dispatchSessionFinished(PackageManager.INSTALL_FAILED_INTERNAL_ERROR,
+                    "APEX packages can only be installed using staged sessions.", null);
+            return;
         }
+
+        // For a multiPackage session, read the child sessions
+        // outside of the lock, because reading the child
+        // sessions with the lock held could lead to deadlock
+        // (b/123391593).
+        List<PackageInstallerSession> childSessions = null;
+        if (isMultiPackage()) {
+            final int[] childSessionIds = getChildSessionIds();
+            childSessions = new ArrayList<>(childSessionIds.length);
+            for (int childSessionId : childSessionIds) {
+                childSessions.add(mSessionProvider.getSession(childSessionId));
+            }
+        }
+
+        try {
+            synchronized (mLock) {
+                commitNonStagedLocked(childSessions);
+            }
+        } catch (PackageManagerException e) {
+            final String completeMsg = ExceptionUtils.getCompleteMessage(e);
+            Slog.e(TAG, "Commit of session " + sessionId + " failed: " + completeMsg);
+            destroyInternal();
+            dispatchSessionFinished(e.error, completeMsg, null);
+        }
+    }
+
+    @GuardedBy("mLock")
+    private void commitNonStagedLocked(List<PackageInstallerSession> childSessions)
+            throws PackageManagerException {
         final PackageManagerService.ActiveInstallSession committingSession =
                 makeSessionActiveLocked();
         if (committingSession == null) {
             return;
         }
         if (isMultiPackage()) {
-            final int[] childSessionIds = getChildSessionIds();
-            List<PackageManagerService.ActiveInstallSession> childSessions =
-                    new ArrayList<>(childSessionIds.length);
+            List<PackageManagerService.ActiveInstallSession> activeChildSessions =
+                    new ArrayList<>(childSessions.size());
             boolean success = true;
             PackageManagerException failure = null;
-            for (int childSessionId : getChildSessionIds()) {
-                final PackageInstallerSession session = mSessionProvider.getSession(childSessionId);
+            for (int i = 0; i < childSessions.size(); ++i) {
+                final PackageInstallerSession session = childSessions.get(i);
                 try {
                     final PackageManagerService.ActiveInstallSession activeSession =
                             session.makeSessionActiveLocked();
                     if (activeSession != null) {
-                        childSessions.add(activeSession);
+                        activeChildSessions.add(activeSession);
                     }
                 } catch (PackageManagerException e) {
                     failure = e;
@@ -1119,7 +1136,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 }
                 return;
             }
-            mPm.installStage(childSessions);
+            mPm.installStage(activeChildSessions);
         } else {
             mPm.installStage(committingSession);
         }
@@ -1474,12 +1491,12 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             // Inherit base if not overridden
             if (mResolvedBaseFile == null) {
                 mResolvedBaseFile = new File(appInfo.getBaseCodePath());
-                mResolvedInheritedFiles.add(mResolvedBaseFile);
+                resolveInheritedFile(mResolvedBaseFile);
                 // Inherit the dex metadata if present.
                 final File baseDexMetadataFile =
                         DexMetadataHelper.findDexMetadataForFile(mResolvedBaseFile);
                 if (baseDexMetadataFile != null) {
-                    mResolvedInheritedFiles.add(baseDexMetadataFile);
+                    resolveInheritedFile(baseDexMetadataFile);
                 }
                 baseApk = existingBase;
             }
@@ -1491,12 +1508,12 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     final File splitFile = new File(existing.splitCodePaths[i]);
                     final boolean splitRemoved = removeSplitList.contains(splitName);
                     if (!stagedSplits.contains(splitName) && !splitRemoved) {
-                        mResolvedInheritedFiles.add(splitFile);
+                        resolveInheritedFile(splitFile);
                         // Inherit the dex metadata if present.
                         final File splitDexMetadataFile =
                                 DexMetadataHelper.findDexMetadataForFile(splitFile);
                         if (splitDexMetadataFile != null) {
-                            mResolvedInheritedFiles.add(splitDexMetadataFile);
+                            resolveInheritedFile(splitDexMetadataFile);
                         }
                     }
                 }
@@ -1608,6 +1625,17 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 VerityUtils.getFsveritySignatureFilePath(targetFile.getPath()));
         maybeRenameFile(originalSignature, stagedSignature);
         mResolvedStagedFiles.add(stagedSignature);
+    }
+
+    private void resolveInheritedFile(File origFile) {
+        mResolvedInheritedFiles.add(origFile);
+
+        // Inherit the fsverity signature file if present.
+        final File fsveritySignatureFile = new File(
+                VerityUtils.getFsveritySignatureFilePath(origFile.getPath()));
+        if (fsveritySignatureFile.exists()) {
+            mResolvedInheritedFiles.add(fsveritySignatureFile);
+        }
     }
 
     @GuardedBy("mLock")
@@ -1887,6 +1915,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     false, true).rethrowAsRuntimeException();
         }
         synchronized (mLock) {
+            assertCallerIsOwnerOrRootLocked();
+            assertPreparedAndNotSealedLocked("addChildSessionId");
+
             final int indexOfSession = mChildSessionIds.indexOfKey(childSessionId);
             if (indexOfSession >= 0) {
                 return;

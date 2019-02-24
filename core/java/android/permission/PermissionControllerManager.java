@@ -16,8 +16,12 @@
 
 package android.permission;
 
+import static android.app.admin.DevicePolicyManager.PERMISSION_GRANT_STATE_DEFAULT;
+import static android.app.admin.DevicePolicyManager.PERMISSION_GRANT_STATE_DENIED;
+import static android.app.admin.DevicePolicyManager.PERMISSION_GRANT_STATE_GRANTED;
 import static android.permission.PermissionControllerService.SERVICE_INTERFACE;
 
+import static com.android.internal.util.Preconditions.checkArgument;
 import static com.android.internal.util.Preconditions.checkArgumentNonnegative;
 import static com.android.internal.util.Preconditions.checkCollectionElementsNotNull;
 import static com.android.internal.util.Preconditions.checkFlagsArgument;
@@ -35,6 +39,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
+import android.app.admin.DevicePolicyManager.PermissionGrantState;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -268,6 +273,40 @@ public final class PermissionControllerManager {
     }
 
     /**
+     * Set the runtime permission state from a device admin.
+     *
+     * @param callerPackageName The package name of the admin requesting the change
+     * @param packageName Package the permission belongs to
+     * @param permission Permission to change
+     * @param grantState State to set the permission into
+     * @param executor Executor to run the {@code callback} on
+     * @param callback The callback
+     *
+     * @hide
+     */
+    @RequiresPermission(allOf = {Manifest.permission.GRANT_RUNTIME_PERMISSIONS,
+            Manifest.permission.REVOKE_RUNTIME_PERMISSIONS,
+            Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY},
+            conditional = true)
+    public void setRuntimePermissionGrantStateByDeviceAdmin(@NonNull String callerPackageName,
+            @NonNull String packageName, @NonNull String permission,
+            @PermissionGrantState int grantState, @NonNull @CallbackExecutor Executor executor,
+            @NonNull Consumer<Boolean> callback) {
+        checkStringNotEmpty(callerPackageName);
+        checkStringNotEmpty(packageName);
+        checkStringNotEmpty(permission);
+        checkArgument(grantState == PERMISSION_GRANT_STATE_GRANTED
+                || grantState == PERMISSION_GRANT_STATE_DENIED
+                || grantState == PERMISSION_GRANT_STATE_DEFAULT);
+        checkNotNull(executor);
+        checkNotNull(callback);
+
+        mRemoteService.scheduleRequest(new PendingSetRuntimePermissionGrantStateByDeviceAdmin(
+                mRemoteService, callerPackageName, packageName, permission, grantState, executor,
+                callback));
+    }
+
+    /**
      * Create a backup of the runtime permissions.
      *
      * @param user The user to be backed up
@@ -480,7 +519,7 @@ public final class PermissionControllerManager {
         }
 
         @Override
-        public void scheduleRequest(@NonNull PendingRequest<RemoteService,
+        public void scheduleRequest(@NonNull BasePendingRequest<RemoteService,
                 IPermissionController> pendingRequest) {
             super.scheduleRequest(pendingRequest);
         }
@@ -793,6 +832,67 @@ public final class PermissionControllerManager {
             }
 
             finish();
+        }
+    }
+
+    /**
+     * Request for {@link #getRuntimePermissionBackup}
+     */
+    private static final class PendingSetRuntimePermissionGrantStateByDeviceAdmin extends
+            AbstractRemoteService.PendingRequest<RemoteService, IPermissionController> {
+        private final @NonNull String mCallerPackageName;
+        private final @NonNull String mPackageName;
+        private final @NonNull String mPermission;
+        private final @PermissionGrantState int mGrantState;
+
+        private final @NonNull Executor mExecutor;
+        private final @NonNull Consumer<Boolean> mCallback;
+        private final @NonNull RemoteCallback mRemoteCallback;
+
+        private PendingSetRuntimePermissionGrantStateByDeviceAdmin(@NonNull RemoteService service,
+                @NonNull String callerPackageName, @NonNull String packageName,
+                @NonNull String permission, @PermissionGrantState int grantState,
+                @NonNull @CallbackExecutor Executor executor, @NonNull Consumer<Boolean> callback) {
+            super(service);
+
+            mCallerPackageName = callerPackageName;
+            mPackageName = packageName;
+            mPermission = permission;
+            mGrantState = grantState;
+            mExecutor = executor;
+            mCallback = callback;
+
+            mRemoteCallback = new RemoteCallback(result -> executor.execute(() -> {
+                long token = Binder.clearCallingIdentity();
+                try {
+                    callback.accept(result.getBoolean(KEY_RESULT, false));
+                } finally {
+                    Binder.restoreCallingIdentity(token);
+
+                    finish();
+                }
+            }), null);
+        }
+
+        @Override
+        protected void onTimeout(RemoteService remoteService) {
+            long token = Binder.clearCallingIdentity();
+            try {
+                mExecutor.execute(() -> mCallback.accept(false));
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override
+        public void run() {
+            try {
+                getService().getServiceInterface().setRuntimePermissionGrantStateByDeviceAdmin(
+                        mCallerPackageName, mPackageName, mPermission, mGrantState, mRemoteCallback);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Error setting permissions state for device admin " + mPackageName,
+                        e);
+            }
         }
     }
 

@@ -108,6 +108,11 @@ public final class PackageRollbackInfo implements Parcelable {
     }
 
     /** @hide */
+    public void addPendingBackup(int userId) {
+        mPendingBackups.add(userId);
+    }
+
+    /** @hide */
     public IntArray getPendingBackups() {
         return mPendingBackups;
     }
@@ -151,6 +156,19 @@ public final class PackageRollbackInfo implements Parcelable {
     /** @hide */
     public void putCeSnapshotInode(int userId, long ceSnapshotInode) {
         mCeSnapshotInodes.put(userId, ceSnapshotInode);
+    }
+
+    /** @hide */
+    public void removePendingBackup(int userId) {
+        int idx = mPendingBackups.indexOf(userId);
+        if (idx != -1) {
+            mPendingBackups.remove(idx);
+        }
+    }
+
+    /** @hide */
+    public void removePendingRestoreInfo(int userId) {
+        removeRestoreInfo(getRestoreInfo(userId));
     }
 
     /** @hide */
