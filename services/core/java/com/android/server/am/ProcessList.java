@@ -1764,8 +1764,6 @@ public final class ProcessList {
                     .getPackagesForUid(uid);
             final StorageManagerInternal storageManagerInternal =
                     LocalServices.getService(StorageManagerInternal.class);
-            final String[] visibleVolIds = storageManagerInternal
-                    .getVisibleVolumesForUser(UserHandle.getUserId(uid));
             final String sandboxId = storageManagerInternal.getSandboxId(app.info.packageName);
             Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "Start proc: " +
                     app.processName);
@@ -1776,7 +1774,7 @@ public final class ProcessList {
                         app.processName, uid, uid, gids, runtimeFlags, mountExternal,
                         app.info.targetSdkVersion, seInfo, requiredAbi, instructionSet,
                         app.info.dataDir, null, app.info.packageName,
-                        packageNames, visibleVolIds, sandboxId,
+                        packageNames, sandboxId,
                         new String[] {PROC_START_SEQ_IDENT + app.startSeq});
             } else if (hostingType.equals("app_zygote")) {
                 final AppZygote appZygote = createAppZygoteForProcessIfNeeded(app);
@@ -1785,14 +1783,14 @@ public final class ProcessList {
                         app.processName, uid, uid, gids, runtimeFlags, mountExternal,
                         app.info.targetSdkVersion, seInfo, requiredAbi, instructionSet,
                         app.info.dataDir, null, app.info.packageName,
-                        packageNames, visibleVolIds, sandboxId, /*useBlastulaPool=*/ false,
+                        packageNames, sandboxId, /*useBlastulaPool=*/ false,
                         new String[] {PROC_START_SEQ_IDENT + app.startSeq});
             } else {
                 startResult = Process.start(entryPoint,
                         app.processName, uid, uid, gids, runtimeFlags, mountExternal,
                         app.info.targetSdkVersion, seInfo, requiredAbi, instructionSet,
                         app.info.dataDir, invokeWith, app.info.packageName,
-                        packageNames, visibleVolIds, sandboxId,
+                        packageNames, sandboxId,
                         new String[] {PROC_START_SEQ_IDENT + app.startSeq});
             }
             checkSlow(startTime, "startProcess: returned from zygote!");
