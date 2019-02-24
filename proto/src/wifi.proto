@@ -654,6 +654,39 @@ message ConnectionEvent {
     HLF_UNWANTED = 4;
   }
 
+  // Entity that recommended connecting to this network.
+  enum ConnectionNominator {
+    // Unknown nominator
+    NOMINATOR_UNKNOWN = 0;
+
+    // User selected network manually
+    NOMINATOR_MANUAL = 1;
+
+    // Saved network
+    NOMINATOR_SAVED = 2;
+
+    // Suggestion API
+    NOMINATOR_SUGGESTION = 3;
+
+    // Passpoint
+    NOMINATOR_PASSPOINT = 4;
+
+    // Carrier suggestion
+    NOMINATOR_CARRIER = 5;
+
+    // External scorer
+    NOMINATOR_EXTERNAL_SCORED = 6;
+
+    // Netrec
+    NOMINATOR_NETREC = 7;
+
+    // User connected choice override
+    NOMINATOR_SAVED_USER_CONNECT_CHOICE = 8;
+
+    // Open Network Available Pop-up
+    NOMINATOR_OPEN_NETWORK_AVAILABLE = 9;
+  }
+
   // Start time of the connection.
   optional int64 start_time_millis = 1;// [(datapol.semantic_type) = ST_TIMESTAMP];
 
@@ -683,6 +716,12 @@ message ConnectionEvent {
 
   // Connection is using locally generated random MAC address.
   optional bool use_randomized_mac = 10 [default = false];
+
+  // Who chose to connect.
+  optional ConnectionNominator connection_nominator = 11;
+
+  // The currently running network selector when this connection event occurred.
+  optional int32 network_selector_experiment_id = 12;
 }
 
 // Number of occurrences of a specific RSSI poll rssi value
