@@ -171,8 +171,6 @@ getPointer(JNIEnv *_env, jobject buffer, jarray *array, jint *remaining, jint *o
         *array = NULL;
         return reinterpret_cast<void*>(pointer);
     }
-    eglimageGetHandleID = _env->GetMethodID(eglimageClass, "getNativeHandle", "()J");
-    eglsyncGetHandleID = _env->GetMethodID(eglsyncClass, "getNativeHandle", "()J");
 
     *array = (jarray) _env->CallStaticObjectMethod(nioAccessClass,
             getBaseArrayID, buffer);
