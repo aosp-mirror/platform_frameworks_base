@@ -9530,8 +9530,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             // View is not important for "regular" autofill, so we must check if Augmented Autofill
             // is enabled for the activity
             final AutofillOptions options = mContext.getAutofillOptions();
-            if (options == null || !options.augmentedEnabled) {
-                // TODO(b/123100824): should also check if activity is whitelisted
+            if (options == null || !options.isAugmentedAutofillEnabled(mContext)) {
                 return false;
             }
             final AutofillManager afm = getAutofillManager();
