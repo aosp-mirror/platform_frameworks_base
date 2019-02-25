@@ -7093,7 +7093,7 @@ public final class ViewRootImpl implements ViewParent,
         RenderNode renderNode = view.mRenderNode;
         info[0]++;
         if (renderNode != null) {
-            info[1] += renderNode.computeApproximateMemoryUsage();
+            info[1] += (int) renderNode.computeApproximateMemoryUsage();
         }
 
         if (view instanceof ViewGroup) {
