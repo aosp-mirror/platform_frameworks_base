@@ -133,7 +133,8 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
      * {@link com.android.internal.infra.AbstractRemoteService} instances, or
      * {@code null} when the service doesn't bind to remote services.
      * @param disallowProperty when not {@code null}, defines a {@link UserManager} restriction that
-     *        disables the service.
+     *        disables the service. <b>NOTE: </b> you'll also need to add it to
+     *        {@code UserRestrictionsUtils.USER_RESTRICTIONS}.
      */
     protected AbstractMasterSystemService(@NonNull Context context,
             @Nullable ServiceNameResolver serviceNameResolver,
