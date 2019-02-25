@@ -81,9 +81,9 @@
         <com.android.systemui.statusbar.car.CarFacetButton
             android:id="@+id/phone_nav"
             style="@style/NavigationBarButton"
-            systemui:componentNames="com.android.car.dialer/.TelecomActivity"
             systemui:icon="@drawable/car_ic_phone"
-            systemui:intent="intent:#Intent;component=com.android.car.dialer/.TelecomActivity;launchFlags=0x14000000;end"
+            systemui:intent="intent:#Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;package=com.android.car.dialer;launchFlags=0x10000000;end"
+            systemui:packages="com.android.car.dialer"
             systemui:selectedIcon="@drawable/car_ic_phone_selected"
             systemui:useMoreIcon="false"
         />
