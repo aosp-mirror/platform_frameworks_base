@@ -33,7 +33,7 @@ interface IAppOpsService {
     void stopWatchingMode(IAppOpsCallback callback);
     IBinder getToken(IBinder clientToken);
     int permissionToOpCode(String permission);
-    int noteProxyOperation(int code, String proxyPackageName,
+    int noteProxyOperation(int code, int proxyUid, String proxyPackageName,
                 int callingUid, String callingPackageName);
 
     // Remaining methods are only used in Java.

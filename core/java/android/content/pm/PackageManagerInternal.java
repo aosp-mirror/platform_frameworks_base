@@ -29,9 +29,12 @@ import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.util.SparseArray;
 
+import com.android.internal.util.function.TriFunction;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.List;
+import java.util.function.BiFunction;
 
 /**
  * Package manager local system service interface.
@@ -62,6 +65,32 @@ public abstract class PackageManagerInternal {
         void onPackageAdded(@NonNull String packageName);
         /** A package was removed from the system. */
         void onPackageRemoved(@NonNull String packageName);
+    }
+
+    /** Interface to override permission checks via composition */
+    public interface CheckPermissionDelegate {
+        /**
+         * Allows overriding check permission behavior.
+         *
+         * @param permName The permission to check.
+         * @param pkgName The package for which to check.
+         * @param userId The user for which to check.
+         * @param superImpl The super implementation.
+         * @return The check permission result.
+         */
+        int checkPermission(String permName, String pkgName, int userId,
+                TriFunction<String, String, Integer, Integer> superImpl);
+
+        /**
+         * Allows overriding check UID permission behavior.
+         *
+         * @param permName The permission to check.
+         * @param uid The UID for which to check.
+         * @param superImpl The super implementation.
+         * @return The check permission result.
+         */
+        int checkUidPermission(String permName, int uid,
+                BiFunction<String, Integer, Integer> superImpl);
     }
 
     /**
@@ -633,4 +662,18 @@ public abstract class PackageManagerInternal {
      * Ask the package manager to compile layouts in the given package.
      */
     public abstract boolean compileLayouts(String packageName);
+
+    /**
+     * Get the delegate to influence permission checking.
+     *
+     * @return The delegate instance or null to clear.
+     */
+    public abstract @Nullable CheckPermissionDelegate getCheckPermissionDelegate();
+
+    /**
+     * Set a delegate to influence permission checking.
+     *
+     * @param delegate A delegate instance or null to clear.
+     */
+    public abstract void setCheckPermissionDelegate(@Nullable CheckPermissionDelegate delegate);
 }
