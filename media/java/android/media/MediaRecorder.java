@@ -17,6 +17,7 @@
 package android.media;
 
 import android.annotation.CallbackExecutor;
+import android.annotation.FloatRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -35,6 +36,7 @@ import android.util.Pair;
 import android.view.Surface;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.Preconditions;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -44,7 +46,6 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executor;
-
 
 /**
  * Used to record audio and video. The recording control is based on a
@@ -90,7 +91,8 @@ import java.util.concurrent.Executor;
  */
 public class MediaRecorder implements AudioRouting,
                                       AudioRecordingMonitor,
-                                      AudioRecordingMonitorClient
+                                      AudioRecordingMonitorClient,
+                                      MicrophoneDirection
 {
     static {
         System.loadLibrary("media_jni");
@@ -1525,6 +1527,36 @@ public class MediaRecorder implements AudioRouting,
 
     private native final int native_getActiveMicrophones(
             ArrayList<MicrophoneInfo> activeMicrophones);
+
+    //--------------------------------------------------------------------------
+    // MicrophoneDirection
+    //--------------------
+    /**
+     * Specifies the logical microphone (for processing).
+     *
+     * @param direction Direction constant.
+     * @return true if sucessful.
+     */
+    public boolean setMicrophoneDirection(@DirectionMode int direction) {
+        return native_setMicrophoneDirection(direction) == 0;
+    }
+
+    /**
+     * Specifies the zoom factor (i.e. the field dimension) for the selected microphone
+     * (for processing). The selected microphone is determined by the use-case for the stream.
+     *
+     * @param zoom the desired field dimension of microphone capture. Range is from -1 (wide angle),
+     * though 0 (no zoom) to 1 (maximum zoom).
+     * @return true if sucessful.
+     */
+    public boolean setMicrophoneFieldDimension(@FloatRange(from = -1.0, to = 1.0) float zoom) {
+        Preconditions.checkArgument(
+                zoom >= -1 && zoom <= 1, "Argument must fall between -1 & 1 (inclusive)");
+        return native_setMicrophoneFieldDimension(zoom) == 0;
+    }
+
+    private native int native_setMicrophoneDirection(int direction);
+    private native int native_setMicrophoneFieldDimension(float zoom);
 
     //--------------------------------------------------------------------------
     // Implementation of AudioRecordingMonitor interface
