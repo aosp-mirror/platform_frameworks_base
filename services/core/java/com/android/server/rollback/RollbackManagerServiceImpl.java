@@ -23,6 +23,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
@@ -47,6 +48,7 @@ import android.util.SparseBooleanArray;
 import android.util.SparseLongArray;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.ArrayUtils;
 import com.android.server.LocalServices;
 import com.android.server.pm.Installer;
 
@@ -362,20 +364,24 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                 int sessionId = packageInstaller.createSession(params);
                 PackageInstaller.Session session = packageInstaller.openSession(sessionId);
 
-                File packageCode = RollbackStore.getPackageCode(data, info.getPackageName());
-                if (packageCode == null) {
+                File[] packageCodePaths = RollbackStore.getPackageCodePaths(
+                        data, info.getPackageName());
+                if (packageCodePaths == null) {
                     sendFailure(statusReceiver, RollbackManager.STATUS_FAILURE,
-                            "Backup copy of package code inaccessible");
+                            "Backup copy of package inaccessible");
                     return;
                 }
 
-                try (ParcelFileDescriptor fd = ParcelFileDescriptor.open(packageCode,
-                        ParcelFileDescriptor.MODE_READ_ONLY)) {
-                    final long token = Binder.clearCallingIdentity();
-                    try {
-                        session.write(packageCode.getName(), 0, packageCode.length(), fd);
-                    } finally {
-                        Binder.restoreCallingIdentity(token);
+                for (File packageCodePath : packageCodePaths) {
+                    try (ParcelFileDescriptor fd = ParcelFileDescriptor.open(packageCodePath,
+                                ParcelFileDescriptor.MODE_READ_ONLY)) {
+                        final long token = Binder.clearCallingIdentity();
+                        try {
+                            session.write(packageCodePath.getName(), 0, packageCodePath.length(),
+                                    fd);
+                        } finally {
+                            Binder.restoreCallingIdentity(token);
+                        }
                     }
                 }
                 parentSession.addChildSessionId(sessionId);
@@ -950,7 +956,13 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         }
 
         try {
-            RollbackStore.backupPackageCode(data, packageName, pkgInfo.applicationInfo.sourceDir);
+            ApplicationInfo appInfo = pkgInfo.applicationInfo;
+            RollbackStore.backupPackageCodePath(data, packageName, appInfo.sourceDir);
+            if (!ArrayUtils.isEmpty(appInfo.splitSourceDirs)) {
+                for (String sourceDir : appInfo.splitSourceDirs) {
+                    RollbackStore.backupPackageCodePath(data, packageName, sourceDir);
+                }
+            }
         } catch (IOException e) {
             Log.e(TAG, "Unable to copy package for rollback for " + packageName, e);
             return false;

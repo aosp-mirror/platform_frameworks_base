@@ -19,9 +19,7 @@ package com.android.tests.rollback.testapp;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
-import android.os.Bundle;
+import android.content.res.Resources;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -34,6 +32,8 @@ import java.util.Scanner;
  * compatibility.
  */
 public class ProcessUserData extends BroadcastReceiver {
+
+    private static final String TAG = "RollbackTestApp";
 
     /**
      * Exception thrown in case of issue with user data.
@@ -66,14 +66,19 @@ public class ProcessUserData extends BroadcastReceiver {
      * @throws UserDataException in case of problems with app user data.
      */
     public void processUserData(Context context) throws UserDataException {
-        int appVersion = 0;
-        try {
-            ApplicationInfo appInfo = context.getPackageManager().getApplicationInfo(
-                    context.getPackageName(), PackageManager.GET_META_DATA);
-            Bundle bundle = appInfo.metaData;
-            appVersion = bundle.getInt("version");
-        } catch (PackageManager.NameNotFoundException e) {
-            throw new UserDataException("Unable to get app version info", e);
+        Resources res = context.getResources();
+        String packageName = context.getPackageName();
+
+        int appVersionId = res.getIdentifier("app_version", "integer", packageName);
+        int appVersion = res.getInteger(appVersionId);
+
+        int splitVersionId = res.getIdentifier("split_version", "integer", packageName);
+        int splitVersion = res.getInteger(splitVersionId);
+
+        // Make sure the app version and split versions are compatible.
+        if (appVersion != splitVersion) {
+            throw new UserDataException("Split version " + splitVersion
+                    + " does not match app version " + appVersion);
         }
 
         // Read the version of the app's user data and ensure it is compatible
