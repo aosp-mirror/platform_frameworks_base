@@ -33,7 +33,7 @@ import java.lang.annotation.RetentionPolicy;
  *
  * <p>The following properties are included:
  * <dl>
- *     <dt>systemRulesVersion</dt>
+ *     <dt>baseRulesVersion</dt>
  *     <dd>the IANA rules version that shipped with the OS. Always present. e.g. "2017a".</dd>
  *     <dt>distroFormatVersionSupported</dt>
  *     <dd>the distro format version supported by this device. Always present.</dd>
@@ -98,7 +98,7 @@ public final class RulesState implements Parcelable {
     private static final byte BYTE_FALSE = 0;
     private static final byte BYTE_TRUE = 1;
 
-    private final String mSystemRulesVersion;
+    private final String mBaseRulesVersion;
     private final DistroFormatVersion mDistroFormatVersionSupported;
     private final boolean mOperationInProgress;
     @StagedOperationType private final int mStagedOperationType;
@@ -106,13 +106,13 @@ public final class RulesState implements Parcelable {
     @DistroStatus private final int mDistroStatus;
     @Nullable private final DistroRulesVersion mInstalledDistroRulesVersion;
 
-    public RulesState(String systemRulesVersion, DistroFormatVersion distroFormatVersionSupported,
+    public RulesState(String baseRulesVersion, DistroFormatVersion distroFormatVersionSupported,
             boolean operationInProgress,
             @StagedOperationType int stagedOperationType,
             @Nullable DistroRulesVersion stagedDistroRulesVersion,
             @DistroStatus int distroStatus,
             @Nullable DistroRulesVersion installedDistroRulesVersion) {
-        this.mSystemRulesVersion = validateRulesVersion("systemRulesVersion", systemRulesVersion);
+        this.mBaseRulesVersion = validateRulesVersion("baseRulesVersion", baseRulesVersion);
         this.mDistroFormatVersionSupported =
                 validateNotNull("distroFormatVersionSupported", distroFormatVersionSupported);
         this.mOperationInProgress = operationInProgress;
@@ -132,8 +132,8 @@ public final class RulesState implements Parcelable {
                 "installedDistroRulesVersion", installedDistroRulesVersion);
     }
 
-    public String getSystemRulesVersion() {
-        return mSystemRulesVersion;
+    public String getBaseRulesVersion() {
+        return mBaseRulesVersion;
     }
 
     public boolean isOperationInProgress() {
@@ -172,14 +172,14 @@ public final class RulesState implements Parcelable {
     }
 
     /**
-     * Returns true if the system image data files contain IANA rules data that are newer than the
+     * Returns true if the base data files contain IANA rules data that are newer than the
      * distro IANA rules version supplied, i.e. true when the version specified would be "worse"
-     * than the one that is in the system image. Returns false if the system image version is the
+     * than the one that is in the base data. Returns false if the base version is the
      * same or older, i.e. false when the version specified would be "better" than the one that is
-     * in the system image.
+     * in the base set.
      */
-    public boolean isSystemVersionNewerThan(DistroRulesVersion distroRulesVersion) {
-        return mSystemRulesVersion.compareTo(distroRulesVersion.getRulesVersion()) > 0;
+    public boolean isBaseVersionNewerThan(DistroRulesVersion distroRulesVersion) {
+        return mBaseRulesVersion.compareTo(distroRulesVersion.getRulesVersion()) > 0;
     }
 
     public static final Parcelable.Creator<RulesState> CREATOR =
@@ -194,14 +194,14 @@ public final class RulesState implements Parcelable {
     };
 
     private static RulesState createFromParcel(Parcel in) {
-        String systemRulesVersion = in.readString();
+        String baseRulesVersion = in.readString();
         DistroFormatVersion distroFormatVersionSupported = in.readParcelable(null);
         boolean operationInProgress = in.readByte() == BYTE_TRUE;
         int distroStagedState = in.readByte();
         DistroRulesVersion stagedDistroRulesVersion = in.readParcelable(null);
         int installedDistroStatus = in.readByte();
         DistroRulesVersion installedDistroRulesVersion = in.readParcelable(null);
-        return new RulesState(systemRulesVersion, distroFormatVersionSupported, operationInProgress,
+        return new RulesState(baseRulesVersion, distroFormatVersionSupported, operationInProgress,
                 distroStagedState, stagedDistroRulesVersion,
                 installedDistroStatus, installedDistroRulesVersion);
     }
@@ -213,7 +213,7 @@ public final class RulesState implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel out, int flags) {
-        out.writeString(mSystemRulesVersion);
+        out.writeString(mBaseRulesVersion);
         out.writeParcelable(mDistroFormatVersionSupported, 0);
         out.writeByte(mOperationInProgress ? BYTE_TRUE : BYTE_FALSE);
         out.writeByte((byte) mStagedOperationType);
@@ -242,7 +242,7 @@ public final class RulesState implements Parcelable {
         if (mDistroStatus != that.mDistroStatus) {
             return false;
         }
-        if (!mSystemRulesVersion.equals(that.mSystemRulesVersion)) {
+        if (!mBaseRulesVersion.equals(that.mBaseRulesVersion)) {
             return false;
         }
         if (!mDistroFormatVersionSupported.equals(that.mDistroFormatVersionSupported)) {
@@ -259,7 +259,7 @@ public final class RulesState implements Parcelable {
 
     @Override
     public int hashCode() {
-        int result = mSystemRulesVersion.hashCode();
+        int result = mBaseRulesVersion.hashCode();
         result = 31 * result + mDistroFormatVersionSupported.hashCode();
         result = 31 * result + (mOperationInProgress ? 1 : 0);
         result = 31 * result + mStagedOperationType;
@@ -275,7 +275,7 @@ public final class RulesState implements Parcelable {
     @Override
     public String toString() {
         return "RulesState{"
-                + "mSystemRulesVersion='" + mSystemRulesVersion + '\''
+                + "mBaseRulesVersion='" + mBaseRulesVersion + '\''
                 + ", mDistroFormatVersionSupported=" + mDistroFormatVersionSupported
                 + ", mOperationInProgress=" + mOperationInProgress
                 + ", mStagedOperationType=" + mStagedOperationType
