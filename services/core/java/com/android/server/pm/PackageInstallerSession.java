@@ -1867,6 +1867,15 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         synchronized (mLock) {
             assertCallerIsOwnerOrRootLocked();
 
+            if (mCommitted && params.isStaged) {
+                synchronized (mLock) {
+                    mDestroyed = true;
+                }
+                mStagingManager.abortCommittedSession(this);
+
+                //TODO(b/123624108): delete staging dir
+            }
+
             if (mRelinquished) {
                 Slog.d(TAG, "Ignoring abandon after commit relinquished control");
                 return;
