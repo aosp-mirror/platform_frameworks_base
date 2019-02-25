@@ -27,13 +27,17 @@ interface INetworkStatsSession {
     NetworkStats getDeviceSummaryForNetwork(in NetworkTemplate template, long start, long end);
 
     /** Return network layer usage summary for traffic that matches template. */
+    @UnsupportedAppUsage
     NetworkStats getSummaryForNetwork(in NetworkTemplate template, long start, long end);
     /** Return historical network layer stats for traffic that matches template. */
+    @UnsupportedAppUsage
     NetworkStatsHistory getHistoryForNetwork(in NetworkTemplate template, int fields);
 
     /** Return network layer usage summary per UID for traffic that matches template. */
+    @UnsupportedAppUsage
     NetworkStats getSummaryForAllUid(in NetworkTemplate template, long start, long end, boolean includeTags);
     /** Return historical network layer stats for specific UID traffic that matches template. */
+    @UnsupportedAppUsage
     NetworkStatsHistory getHistoryForUid(in NetworkTemplate template, int uid, int set, int tag, int fields);
     /** Return historical network layer stats for specific UID traffic that matches template. */
     NetworkStatsHistory getHistoryIntervalForUid(in NetworkTemplate template, int uid, int set, int tag, int fields, long start, long end);
@@ -41,6 +45,7 @@ interface INetworkStatsSession {
     /** Return array of uids that have stats and are accessible to the calling user */
     int[] getRelevantUids();
 
+    @UnsupportedAppUsage
     void close();
 
 }

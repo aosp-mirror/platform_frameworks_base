@@ -23,11 +23,18 @@ import android.os.Bundle;
  * {@hide}
  */
 interface INfcAdapterExtras {
+    @UnsupportedAppUsage
     Bundle open(in String pkg, IBinder b);
+    @UnsupportedAppUsage
     Bundle close(in String pkg, IBinder b);
+    @UnsupportedAppUsage
     Bundle transceive(in String pkg, in byte[] data_in);
+    @UnsupportedAppUsage
     int getCardEmulationRoute(in String pkg);
+    @UnsupportedAppUsage
     void setCardEmulationRoute(in String pkg, int route);
+    @UnsupportedAppUsage
     void authenticate(in String pkg, in byte[] token);
+    @UnsupportedAppUsage
     String getDriverName(in String pkg);
 }
