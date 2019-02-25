@@ -6920,6 +6920,11 @@ public class PackageParser {
         }
 
         /** @hide */
+        public boolean isOdm() {
+            return applicationInfo.isOdm();
+        }
+
+        /** @hide */
         public boolean isPrivileged() {
             return applicationInfo.isPrivilegedApp();
         }

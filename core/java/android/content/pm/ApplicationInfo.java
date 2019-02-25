@@ -687,6 +687,13 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      */
     public static final int PRIVATE_FLAG_ALLOW_EXTERNAL_STORAGE_SANDBOX = 1 << 29;
 
+    /**
+     * Value for {@link #privateFlags}: whether this app is pre-installed on the
+     * ODM partition of the system image.
+     * @hide
+     */
+    public static final int PRIVATE_FLAG_ODM = 1 << 30;
+
     /** @hide */
     @IntDef(flag = true, prefix = { "PRIVATE_FLAG_" }, value = {
             PRIVATE_FLAG_ACTIVITIES_RESIZE_MODE_RESIZEABLE,
@@ -717,6 +724,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
             PRIVATE_FLAG_ALLOW_CLEAR_USER_DATA_ON_FAILED_RESTORE,
             PRIVATE_FLAG_ALLOW_AUDIO_PLAYBACK_CAPTURE,
             PRIVATE_FLAG_ALLOW_EXTERNAL_STORAGE_SANDBOX,
+            PRIVATE_FLAG_ODM,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ApplicationInfoPrivateFlags {}
@@ -1967,6 +1975,11 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     /** @hide */
     public boolean isOem() {
         return (privateFlags & ApplicationInfo.PRIVATE_FLAG_OEM) != 0;
+    }
+
+    /** @hide */
+    public boolean isOdm() {
+        return (privateFlags & ApplicationInfo.PRIVATE_FLAG_ODM) != 0;
     }
 
     /** @hide */

@@ -102,6 +102,8 @@ bool FileDescriptorWhitelist::IsAllowed(const std::string& path) const {
   static const char* kProductOverlayDir = "/product/overlay";
   static const char* kSystemProductServicesOverlayDir = "/system/product_services/overlay/";
   static const char* kProductServicesOverlayDir = "/product_services/overlay";
+  static const char* kSystemOdmOverlayDir = "/system/odm/overlay";
+  static const char* kOdmOverlayDir = "/odm/overlay";
   static const char* kApkSuffix = ".apk";
 
   if ((android::base::StartsWith(path, kOverlayDir)
@@ -110,7 +112,9 @@ bool FileDescriptorWhitelist::IsAllowed(const std::string& path) const {
        || android::base::StartsWith(path, kSystemProductOverlayDir)
        || android::base::StartsWith(path, kProductOverlayDir)
        || android::base::StartsWith(path, kSystemProductServicesOverlayDir)
-       || android::base::StartsWith(path, kProductServicesOverlayDir))
+       || android::base::StartsWith(path, kProductServicesOverlayDir)
+       || android::base::StartsWith(path, kSystemOdmOverlayDir)
+       || android::base::StartsWith(path, kOdmOverlayDir))
       && android::base::EndsWith(path, kApkSuffix)
       && path.find("/../") == std::string::npos) {
     return true;
