@@ -845,6 +845,7 @@ java_library_host {
 // specified on the build command line.
 java_library {
     name: "framework-atb-backward-compatibility",
+    installable: true,
     srcs: [
         "core/java/android/content/pm/AndroidTestBaseUpdater.java",
     ],
