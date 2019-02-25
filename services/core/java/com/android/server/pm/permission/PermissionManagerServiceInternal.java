@@ -83,7 +83,7 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
     public abstract void updatePermissions(@Nullable String packageName,
             @Nullable PackageParser.Package pkg, boolean replaceGrant,
             @NonNull Collection<PackageParser.Package> allPacakges, PermissionCallback callback);
-    public abstract void updateAllPermissions(@Nullable String volumeUuid, boolean sdkUpdated,
+    public abstract void updateAllPermissions(@Nullable String volumeUuid, int oldSdkVersion,
             @NonNull Collection<PackageParser.Package> allPacakges, PermissionCallback callback);
 
     /**

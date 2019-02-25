@@ -2945,7 +2945,7 @@ public class PackageManagerService extends IPackageManager.Stub
                         + mSdkVersion + "; regranting permissions for internal storage");
             }
             mPermissionManager.updateAllPermissions(
-                    StorageManager.UUID_PRIVATE_INTERNAL, sdkUpdated, mPackages.values(),
+                    StorageManager.UUID_PRIVATE_INTERNAL, ver.sdkVersion, mPackages.values(),
                     mPermissionCallback);
             ver.sdkVersion = mSdkVersion;
 
@@ -5382,7 +5382,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         synchronized (mPackages) {
             mPermissionManager.updateAllPermissions(
-                    StorageManager.UUID_PRIVATE_INTERNAL, false, mPackages.values(),
+                    StorageManager.UUID_PRIVATE_INTERNAL, Build.VERSION.SDK_INT, mPackages.values(),
                     mPermissionCallback);
             for (int userId : UserManagerService.getInstance().getUserIds()) {
                 final int packageCount = mPackages.size();
@@ -20689,7 +20689,7 @@ public class PackageManagerService extends IPackageManager.Stub
         // try optimizing this.
         synchronized (mPackages) {
             mPermissionManager.updateAllPermissions(
-                    StorageManager.UUID_PRIVATE_INTERNAL, false, mPackages.values(),
+                    StorageManager.UUID_PRIVATE_INTERNAL, Build.VERSION.SDK_INT, mPackages.values(),
                     mPermissionCallback);
         }
 
@@ -21680,7 +21680,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 logCriticalInfo(Log.INFO, "Platform changed from " + ver.sdkVersion + " to "
                         + mSdkVersion + "; regranting permissions for " + volumeUuid);
             }
-            mPermissionManager.updateAllPermissions(volumeUuid, sdkUpdated, mPackages.values(),
+            mPermissionManager.updateAllPermissions(volumeUuid, ver.sdkVersion, mPackages.values(),
                     mPermissionCallback);
 
             // Yay, everything is now upgraded
@@ -22680,7 +22680,7 @@ public class PackageManagerService extends IPackageManager.Stub
         synchronized(mPackages) {
             // NOTE: This adds UPDATE_PERMISSIONS_REPLACE_PKG
             mPermissionManager.updateAllPermissions(
-                    StorageManager.UUID_PRIVATE_INTERNAL, true, mPackages.values(),
+                    StorageManager.UUID_PRIVATE_INTERNAL, 0, mPackages.values(),
                     mPermissionCallback);
         }
     }
