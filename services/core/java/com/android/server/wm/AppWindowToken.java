@@ -118,7 +118,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ToBooleanFunction;
 import com.android.server.AttributeCache;
 import com.android.server.LocalServices;
-import com.android.server.display.ColorDisplayService;
+import com.android.server.display.color.ColorDisplayService;
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.policy.WindowManagerPolicy.StartingSurface;
 import com.android.server.wm.RemoteAnimationController.RemoteAnimationRecord;

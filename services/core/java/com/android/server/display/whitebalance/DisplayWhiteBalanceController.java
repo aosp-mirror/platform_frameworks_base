@@ -22,7 +22,7 @@ import android.util.Spline;
 
 import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
-import com.android.server.display.ColorDisplayService.ColorDisplayServiceInternal;
+import com.android.server.display.color.ColorDisplayService.ColorDisplayServiceInternal;
 import com.android.server.display.utils.History;
 
 import java.io.PrintWriter;

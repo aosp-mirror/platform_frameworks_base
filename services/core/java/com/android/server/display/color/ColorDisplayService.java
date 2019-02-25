@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.display;
+package com.android.server.display.color;
 
 import static android.hardware.display.ColorDisplayManager.AUTO_MODE_CUSTOM_TIME;
 import static android.hardware.display.ColorDisplayManager.AUTO_MODE_DISABLED;
@@ -24,9 +24,9 @@ import static android.hardware.display.ColorDisplayManager.COLOR_MODE_BOOSTED;
 import static android.hardware.display.ColorDisplayManager.COLOR_MODE_NATURAL;
 import static android.hardware.display.ColorDisplayManager.COLOR_MODE_SATURATED;
 
-import static com.android.server.display.DisplayTransformManager.LEVEL_COLOR_MATRIX_DISPLAY_WHITE_BALANCE;
-import static com.android.server.display.DisplayTransformManager.LEVEL_COLOR_MATRIX_NIGHT_DISPLAY;
-import static com.android.server.display.DisplayTransformManager.LEVEL_COLOR_MATRIX_SATURATION;
+import static com.android.server.display.color.DisplayTransformManager.LEVEL_COLOR_MATRIX_DISPLAY_WHITE_BALANCE;
+import static com.android.server.display.color.DisplayTransformManager.LEVEL_COLOR_MATRIX_NIGHT_DISPLAY;
+import static com.android.server.display.color.DisplayTransformManager.LEVEL_COLOR_MATRIX_SATURATION;
 
 import android.Manifest;
 import android.animation.Animator;
@@ -233,6 +233,7 @@ public final class ColorDisplayService extends SystemService {
     public void onStart() {
         publishBinderService(Context.COLOR_DISPLAY_SERVICE, new BinderService());
         publishLocalService(ColorDisplayServiceInternal.class, new ColorDisplayServiceInternal());
+        publishLocalService(DisplayTransformManager.class, new DisplayTransformManager());
     }
 
     @Override
@@ -632,9 +633,9 @@ public final class ColorDisplayService extends SystemService {
     @VisibleForTesting
     void updateDisplayWhiteBalanceStatus() {
         boolean oldActivated = mDisplayWhiteBalanceTintController.isActivated();
-        mDisplayWhiteBalanceTintController.setActivated(isDisplayWhiteBalanceSettingEnabled() &&
-                !mNightDisplayTintController.isActivated() &&
-                DisplayTransformManager.needsLinearColorMatrix());
+        mDisplayWhiteBalanceTintController.setActivated(isDisplayWhiteBalanceSettingEnabled()
+                && !mNightDisplayTintController.isActivated()
+                && DisplayTransformManager.needsLinearColorMatrix());
         boolean activated = mDisplayWhiteBalanceTintController.isActivated();
 
         if (mDisplayWhiteBalanceListener != null && oldActivated != activated) {
@@ -819,7 +820,7 @@ public final class ColorDisplayService extends SystemService {
     /**
      * Get the current color mode from system properties, or return -1 if invalid.
      *
-     * See {@link com.android.server.display.DisplayTransformManager}
+     * See {@link DisplayTransformManager}
      */
     private @ColorMode int getCurrentColorModeFromSystemProperties() {
         final int displayColorSetting = SystemProperties.getInt("persist.sys.sf.native_mode", 0);
@@ -851,7 +852,7 @@ public final class ColorDisplayService extends SystemService {
     private void dumpInternal(PrintWriter pw) {
         pw.println("COLOR DISPLAY MANAGER dumpsys (color_display)");
 
-        pw.println("Night Display:");
+        pw.println("Night display:");
         if (mNightDisplayTintController.isAvailable(getContext())) {
             pw.println("    Activated: " + mNightDisplayTintController.isActivated());
             pw.println("    Color temp: " + mNightDisplayTintController.getColorTemperature());
@@ -923,14 +924,15 @@ public final class ColorDisplayService extends SystemService {
 
             if (mLastActivatedTime != null) {
                 // Maintain the existing activated state if within the current period.
-                if (mLastActivatedTime.isBefore(now) && mLastActivatedTime.isAfter(start)
+                if (mLastActivatedTime.isBefore(now)
+                        && mLastActivatedTime.isAfter(start)
                         && (mLastActivatedTime.isAfter(end) || now.isBefore(end))) {
                     activate = mNightDisplayTintController.isActivatedSetting();
                 }
             }
 
-            if (mNightDisplayTintController.isActivatedStateNotSet() || (
-                    mNightDisplayTintController.isActivated() != activate)) {
+            if (mNightDisplayTintController.isActivatedStateNotSet()
+                    || (mNightDisplayTintController.isActivated() != activate)) {
                 mNightDisplayTintController.setActivated(activate);
             }
 
@@ -1305,10 +1307,11 @@ public final class ColorDisplayService extends SystemService {
     }
 
     final class DisplayWhiteBalanceTintController extends TintController {
+
         // Three chromaticity coordinates per color: X, Y, and Z
-        private final int NUM_VALUES_PER_PRIMARY = 3;
+        private static final int NUM_VALUES_PER_PRIMARY = 3;
         // Four colors: red, green, blue, and white
-        private final int NUM_DISPLAY_PRIMARIES_VALS = 4 * NUM_VALUES_PER_PRIMARY;
+        private static final int NUM_DISPLAY_PRIMARIES_VALS = 4 * NUM_VALUES_PER_PRIMARY;
 
         private final Object mLock = new Object();
         @VisibleForTesting
@@ -1478,25 +1481,25 @@ public final class ColorDisplayService extends SystemService {
                 pw.println("    mTemperatureMax = " + mTemperatureMax);
                 pw.println("    mTemperatureDefault = " + mTemperatureDefault);
                 pw.println("    mCurrentColorTemperature = " + mCurrentColorTemperature);
-                pw.println("    mCurrentColorTemperatureXYZ = " +
-                        matrixToString(mCurrentColorTemperatureXYZ, 3));
-                pw.println("    mDisplayColorSpaceRGB RGB-to-XYZ = " +
-                        matrixToString(mDisplayColorSpaceRGB.getTransform(), 3));
-                pw.println("    mChromaticAdaptationMatrix = " +
-                        matrixToString(mChromaticAdaptationMatrix, 3));
-                pw.println("    mDisplayColorSpaceRGB XYZ-to-RGB = " +
-                        matrixToString(mDisplayColorSpaceRGB.getInverseTransform(), 3));
-                pw.println("    mMatrixDisplayWhiteBalance = " +
-                        matrixToString(mMatrixDisplayWhiteBalance, 4));
+                pw.println("    mCurrentColorTemperatureXYZ = "
+                        + matrixToString(mCurrentColorTemperatureXYZ, 3));
+                pw.println("    mDisplayColorSpaceRGB RGB-to-XYZ = "
+                        + matrixToString(mDisplayColorSpaceRGB.getTransform(), 3));
+                pw.println("    mChromaticAdaptationMatrix = "
+                        + matrixToString(mChromaticAdaptationMatrix, 3));
+                pw.println("    mDisplayColorSpaceRGB XYZ-to-RGB = "
+                        + matrixToString(mDisplayColorSpaceRGB.getInverseTransform(), 3));
+                pw.println("    mMatrixDisplayWhiteBalance = "
+                        + matrixToString(mMatrixDisplayWhiteBalance, 4));
             }
         }
 
         private ColorSpace.Rgb makeRgbColorSpaceFromXYZ(float[] redGreenBlueXYZ, float[] whiteXYZ) {
             return new ColorSpace.Rgb(
-                "Display Color Space",
-                redGreenBlueXYZ,
-                whiteXYZ,
-                2.2f // gamma, unused for display white balance
+                    "Display Color Space",
+                    redGreenBlueXYZ,
+                    whiteXYZ,
+                    2.2f // gamma, unused for display white balance
             );
         }
 
@@ -1507,19 +1510,19 @@ public final class ColorDisplayService extends SystemService {
             }
 
             DisplayPrimaries primaries = SurfaceControl.getDisplayNativePrimaries(displayToken);
-            if (primaries == null || primaries.red == null || primaries.green == null ||
-                primaries.blue == null || primaries.white == null) {
+            if (primaries == null || primaries.red == null || primaries.green == null
+                    || primaries.blue == null || primaries.white == null) {
                 return null;
             }
 
             return makeRgbColorSpaceFromXYZ(
-                    new float[] {
-                        primaries.red.X, primaries.red.Y, primaries.red.Z,
-                        primaries.green.X, primaries.green.Y, primaries.green.Z,
-                        primaries.blue.X, primaries.blue.Y, primaries.blue.Z,
+                    new float[]{
+                            primaries.red.X, primaries.red.Y, primaries.red.Z,
+                            primaries.green.X, primaries.green.Y, primaries.green.Z,
+                            primaries.blue.X, primaries.blue.Y, primaries.blue.Z,
                     },
-                    new float[] { primaries.white.X, primaries.white.Y, primaries.white.Z }
-                    );
+                    new float[]{primaries.white.X, primaries.white.Y, primaries.white.Z}
+            );
         }
 
         private ColorSpace.Rgb getDisplayColorSpaceFromResources(Resources res) {
@@ -1540,7 +1543,7 @@ public final class ColorDisplayService extends SystemService {
 
             return makeRgbColorSpaceFromXYZ(displayRedGreenBlueXYZ, displayWhiteXYZ);
         }
-    };
+    }
 
     /**
      * Local service that allows color transforms to be enabled from other system services.
@@ -1570,10 +1573,6 @@ public final class ColorDisplayService extends SystemService {
         public boolean setDisplayWhiteBalanceListener(DisplayWhiteBalanceListener listener) {
             mDisplayWhiteBalanceListener = listener;
             return mDisplayWhiteBalanceTintController.isActivated();
-        }
-
-        public void dump(PrintWriter pw) {
-            mDisplayWhiteBalanceTintController.dump(pw);
         }
 
         /**

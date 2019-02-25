@@ -5434,7 +5434,7 @@ message MetricsEvent {
     FIELD_END_BATTERY_PERCENT = 1308;
 
     // ACTION: Settings > Display > Night Light
-    // SUBTYPE: com.android.server.display.ColorDisplayService.AutoMode value
+    // SUBTYPE: com.android.server.display.color.ColorDisplayService.AutoMode value
     // CATEGORY: SETTINGS
     // OS: P
     ACTION_NIGHT_DISPLAY_AUTO_MODE_CHANGED = 1309;

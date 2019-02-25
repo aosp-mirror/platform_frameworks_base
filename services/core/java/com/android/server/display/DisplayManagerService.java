@@ -96,7 +96,6 @@ import com.android.server.DisplayThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.UiThread;
-import com.android.server.display.ColorDisplayService.ColorDisplayServiceInternal;
 import com.android.server.wm.SurfaceAnimationThread;
 import com.android.server.wm.WindowManagerInternal;
 
@@ -357,7 +356,6 @@ public final class DisplayManagerService extends SystemService {
         publishBinderService(Context.DISPLAY_SERVICE, new BinderService(),
                 true /*allowIsolated*/);
         publishLocalService(DisplayManagerInternal.class, new LocalService());
-        publishLocalService(DisplayTransformManager.class, new DisplayTransformManager());
     }
 
     @Override
@@ -1535,13 +1533,6 @@ public final class DisplayManagerService extends SystemService {
 
             pw.println();
             mPersistentDataStore.dump(pw);
-
-            final ColorDisplayServiceInternal cds = LocalServices.getService(
-                    ColorDisplayServiceInternal.class);
-            if (cds != null) {
-                pw.println();
-                cds.dump(pw);
-            }
         }
     }
 

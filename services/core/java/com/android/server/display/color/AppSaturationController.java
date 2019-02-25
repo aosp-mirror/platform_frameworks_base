@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package com.android.server.display;
+package com.android.server.display.color;
 
 import android.annotation.UserIdInt;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.server.display.ColorDisplayService.ColorTransformController;
+import com.android.server.display.color.ColorDisplayService.ColorTransformController;
 
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
