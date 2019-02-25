@@ -57,13 +57,17 @@ public final class SmartReplyConstants extends ContentObserver {
     private final int mDefaultMinNumSystemGeneratedReplies;
     private final int mDefaultMaxNumActions;
 
-    private boolean mEnabled;
-    private boolean mRequiresTargetingP;
-    private int mMaxSqueezeRemeasureAttempts;
-    private boolean mEditChoicesBeforeSending;
-    private boolean mShowInHeadsUp;
-    private int mMinNumSystemGeneratedReplies;
-    private int mMaxNumActions;
+    // These fields are updated on the UI thread but can be accessed on both the UI thread and
+    // background threads. We use the volatile keyword here instead of synchronization blocks since
+    // we only care about variable updates here being visible to other threads (and not for example
+    // whether the variables we are reading were updated in the same go).
+    private volatile boolean mEnabled;
+    private volatile boolean mRequiresTargetingP;
+    private volatile int mMaxSqueezeRemeasureAttempts;
+    private volatile boolean mEditChoicesBeforeSending;
+    private volatile boolean mShowInHeadsUp;
+    private volatile int mMinNumSystemGeneratedReplies;
+    private volatile int mMaxNumActions;
 
     private final Context mContext;
     private final KeyValueListParser mParser = new KeyValueListParser(',');
