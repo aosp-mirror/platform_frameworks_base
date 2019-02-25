@@ -203,7 +203,7 @@ public class NetworkStackClient {
         final PackageManager pm = context.getPackageManager();
         int uid = -1;
         try {
-            uid = pm.getPackageUid(comp.getPackageName(), UserHandle.USER_SYSTEM);
+            uid = pm.getPackageUidAsUser(comp.getPackageName(), UserHandle.USER_SYSTEM);
         } catch (PackageManager.NameNotFoundException e) {
             Slog.wtf("Network stack package not found", e);
             // Fall through
