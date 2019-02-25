@@ -37,7 +37,9 @@ import android.content.pm.ParceledListSlice;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.ColorSpace;
+import android.graphics.GraphicBuffer;
 import android.graphics.Point;
+import android.graphics.Rect;
 import android.hardware.SensorManager;
 import android.hardware.display.AmbientBrightnessDayStats;
 import android.hardware.display.BrightnessChangeEvent;
@@ -1277,7 +1279,14 @@ public final class DisplayManagerService extends SystemService {
         if (token == null) {
             return false;
         }
-        SurfaceControl.screenshot(token, outSurface);
+        final GraphicBuffer gb = SurfaceControl.screenshotToBufferWithSecureLayersUnsafe(
+                token, new Rect(), 0 /* width */, 0 /* height */, false /* useIdentityTransform */,
+                0 /* rotation */);
+        try {
+            outSurface.attachAndQueueBuffer(gb);
+        } catch (RuntimeException e) {
+            Slog.w(TAG, "Failed to take screenshot - " + e.getMessage());
+        }
         return true;
     }
 
