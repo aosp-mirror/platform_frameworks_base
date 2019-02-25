@@ -21,40 +21,38 @@
     android:layout_width="0dp"
     android:layout_height="match_parent"
     android:layout_weight="1"
-    android:gravity="center_vertical|start"
-    android:orientation="horizontal"
-    android:layout_marginEnd="32dp">
+    android:gravity="end|center_vertical"
+    android:orientation="horizontal">
+
 
     <include
         layout="@layout/qs_carrier"
-        android:id="@+id/carrier1" />
+        android:id="@+id/carrier1"
+        android:layout_weight="1"/>
 
     <View
         android:id="@+id/qs_carrier_divider1"
-        android:layout_width="2dp"
+        android:layout_width="@dimen/qs_header_carrier_separator_width"
         android:layout_height="match_parent"
-        android:layout_marginTop="15dp"
-        android:layout_marginBottom="15dp"
-        android:background="?android:attr/dividerVertical"
         android:visibility="gone" />
 
     <include
         layout="@layout/qs_carrier"
         android:id="@+id/carrier2"
+        android:layout_weight="1"
         android:visibility="gone"/>
 
     <View
         android:id="@+id/qs_carrier_divider2"
-        android:layout_width="2dp"
+        android:layout_width="@dimen/qs_header_carrier_separator_width"
         android:layout_height="match_parent"
-        android:layout_marginTop="15dp"
-        android:layout_marginBottom="15dp"
-        android:background="?android:attr/dividerVertical"
+        android:layout_weight="1"
         android:visibility="gone" />
 
     <include
         layout="@layout/qs_carrier"
         android:id="@+id/carrier3"
+        android:layout_weight="1"
         android:visibility="gone"/>
 
 </com.android.systemui.qs.QSCarrierGroup>

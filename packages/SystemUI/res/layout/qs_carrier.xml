@@ -17,33 +17,30 @@
 <com.android.systemui.qs.QSCarrier
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/linear_carrier"
-    android:layout_width="0dp"
+    android:layout_width="wrap_content"
     android:layout_height="match_parent"
     android:orientation="horizontal"
-    android:layout_weight="1"
     android:gravity="center_vertical|start"
     android:background="@android:color/transparent"
     android:clickable="false"
     android:clipChildren="false"
-    android:clipToPadding="false"
-    android:paddingStart="16dp" >
+    android:clipToPadding="false" >
 
     <include
         layout="@layout/mobile_signal_group"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
+        android:layout_marginEnd="@dimen/qs_carrier_margin_width"
         android:visibility="gone" />
 
     <view class="com.android.systemui.qs.QSCarrier$QSCarrierText"
         android:id="@+id/qs_carrier_text"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:ellipsize="marquee"
-        android:textAppearance="@style/TextAppearance.QS.CarrierInfo"
-        android:textColor="?android:attr/textColorPrimary"
+        android:textAppearance="@style/TextAppearance.QS.Status"
         android:textDirection="locale"
-        android:singleLine="true" />
+        android:singleLine="true"
+        android:maxEms="7"/>
 
 </com.android.systemui.qs.QSCarrier>

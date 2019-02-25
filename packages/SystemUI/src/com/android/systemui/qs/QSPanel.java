@@ -16,8 +16,6 @@
 
 package com.android.systemui.qs;
 
-import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
-
 import static com.android.systemui.qs.tileimpl.QSTileImpl.getColorForState;
 
 import android.annotation.Nullable;
@@ -79,7 +77,6 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
     protected QSTileHost mHost;
 
     protected QSSecurityFooter mFooter;
-    private PageIndicator mPanelPageIndicator;
     private PageIndicator mFooterPageIndicator;
     private boolean mGridContentVisible = true;
 
@@ -110,11 +107,6 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         mTileLayout.setListening(mListening);
         addView((View) mTileLayout);
 
-        mPanelPageIndicator = (PageIndicator) LayoutInflater.from(context).inflate(
-                R.layout.qs_page_indicator, this, false);
-        addView(mPanelPageIndicator);
-
-        ((PagedTileLayout) mTileLayout).setPageIndicator(mPanelPageIndicator);
         mQsTileRevealController = new QSTileRevealController(mContext, this,
                 (PagedTileLayout) mTileLayout);
 
@@ -139,10 +131,6 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
 
     public View getDivider() {
         return mDivider;
-    }
-
-    public View getPageIndicator() {
-        return mPanelPageIndicator;
     }
 
     public QSTileRevealController getQsTileRevealController() {
@@ -265,21 +253,11 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
 
     private void updatePageIndicator() {
         if (mTileLayout instanceof PagedTileLayout) {
-            // If we're in landscape, and we have the footer page indicator (which we should if the
-            // footer has been initialized & linked), then we'll show the footer page indicator to
-            // save space in the main QS tile area. Otherwise, we'll use the default one under the
-            // tiles/above the footer.
-            boolean shouldUseFooterPageIndicator =
-                    getResources().getConfiguration().orientation == ORIENTATION_LANDSCAPE
-                            && mFooterPageIndicator != null;
-
-            mPanelPageIndicator.setVisibility(View.GONE);
             if (mFooterPageIndicator != null) {
                 mFooterPageIndicator.setVisibility(View.GONE);
-            }
 
-            ((PagedTileLayout) mTileLayout).setPageIndicator(
-                    shouldUseFooterPageIndicator ? mFooterPageIndicator : mPanelPageIndicator);
+                ((PagedTileLayout) mTileLayout).setPageIndicator(mFooterPageIndicator);
+            }
         }
     }
 

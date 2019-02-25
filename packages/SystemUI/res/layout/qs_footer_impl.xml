@@ -21,6 +21,8 @@
     android:id="@+id/qs_footer"
     android:layout_width="match_parent"
     android:layout_height="@dimen/qs_footer_height"
+    android:layout_marginStart="@dimen/qs_footer_margin"
+    android:layout_marginEnd="@dimen/qs_footer_margin"
     android:elevation="4dp"
     android:background="@android:color/transparent"
     android:baselineAligned="false"
@@ -41,8 +43,35 @@
         android:layout_gravity="center_vertical"
         android:gravity="end" >
 
-        <include layout="@layout/qs_carrier_group"
-        android:id="@+id/carrier_group"/>
+        <com.android.keyguard.AlphaOptimizedLinearLayout
+            android:id="@+id/qs_footer_actions_edit_container"
+            android:layout_width="@integer/qs_footer_actions_width"
+            android:layout_height="match_parent"
+            android:layout_weight="@integer/qs_footer_actions_weight"
+            android:gravity="center_vertical|start" >
+            <com.android.systemui.statusbar.AlphaOptimizedImageView
+                android:id="@android:id/edit"
+                android:layout_width="@dimen/qs_footer_action_button_size"
+                android:layout_height="@dimen/qs_footer_action_button_size"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:clickable="true"
+                android:clipToPadding="false"
+                android:contentDescription="@string/accessibility_quick_settings_edit"
+                android:focusable="true"
+                android:padding="@dimen/qs_footer_icon_padding"
+                android:src="@*android:drawable/ic_mode_edit"
+                android:tint="?android:attr/colorForeground"/>
+
+            <TextView
+                android:id="@+id/build"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:clickable="true"
+                android:gravity="center_vertical"
+                android:focusable="true"
+                android:textAppearance="@style/TextAppearance.QS.Status"
+                android:visibility="gone"/>
+         </com.android.keyguard.AlphaOptimizedLinearLayout>
 
         <com.android.systemui.qs.PageIndicator
             android:id="@+id/footer_page_indicator"
@@ -59,8 +88,8 @@
             android:gravity="center_vertical|end" >
             <com.android.systemui.statusbar.phone.MultiUserSwitch
                 android:id="@+id/multi_user_switch"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
+                android:layout_width="@dimen/qs_footer_action_button_size"
+                android:layout_height="@dimen/qs_footer_action_button_size"
                 android:layout_alignParentEnd="true"
                 android:background="@drawable/ripple_drawable"
                 android:focusable="true">
@@ -70,26 +99,14 @@
                     android:layout_width="@dimen/multi_user_avatar_expanded_size"
                     android:layout_height="@dimen/multi_user_avatar_expanded_size"
                     android:layout_gravity="center"
+                    android:tint="?android:attr/colorAccent"
                     android:scaleType="centerInside"/>
             </com.android.systemui.statusbar.phone.MultiUserSwitch>
 
-            <com.android.systemui.statusbar.AlphaOptimizedImageView
-                android:id="@android:id/edit"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:background="?android:attr/selectableItemBackgroundBorderless"
-                android:clickable="true"
-                android:clipToPadding="false"
-                android:contentDescription="@string/accessibility_quick_settings_edit"
-                android:focusable="true"
-                android:padding="15dp"
-                android:src="@*android:drawable/ic_mode_edit"
-                android:tint="?android:attr/colorForeground"/>
-
             <com.android.systemui.statusbar.AlphaOptimizedFrameLayout
                 android:id="@+id/settings_button_container"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
+                android:layout_width="@dimen/qs_footer_action_button_size"
+                android:layout_height="@dimen/qs_footer_action_button_size"
                 android:clipChildren="false"
                 android:clipToPadding="false">
 
@@ -98,10 +115,12 @@
                     style="@android:style/Widget.Material.Button.Borderless"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
+                    android:layout_gravity="center"
+                    android:padding="@dimen/qs_footer_icon_padding"
                     android:background="@drawable/ripple_drawable"
                     android:contentDescription="@string/accessibility_quick_settings_settings"
-                    android:padding="15dp"
-                    android:src="@drawable/ic_settings_16dp"
+                    android:src="@drawable/ic_settings"
+                    android:scaleType="centerInside"
                     android:tint="?android:attr/colorForeground"/>
 
                 <com.android.systemui.statusbar.AlphaOptimizedImageView
@@ -117,7 +136,6 @@
             </com.android.systemui.statusbar.AlphaOptimizedFrameLayout>
         </com.android.keyguard.AlphaOptimizedLinearLayout>
     </LinearLayout>
-
     <View
         android:id="@+id/qs_drag_handle_view"
         android:layout_width="24dp"

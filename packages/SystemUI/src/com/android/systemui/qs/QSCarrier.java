@@ -32,7 +32,7 @@ import com.android.systemui.R;
 public class QSCarrier extends LinearLayout {
 
     private View mMobileGroup;
-    private TextView mCarrierText;
+    private QSCarrierText mCarrierText;
     private ImageView mMobileSignal;
     private ImageView mMobileRoaming;
     private ColorStateList mColorForegroundStateList;
@@ -107,6 +107,7 @@ public class QSCarrier extends LinearLayout {
      * TextView that changes its ellipsize value with its visibility.
      */
     public static class QSCarrierText extends TextView {
+
         public QSCarrierText(Context context) {
             super(context);
         }

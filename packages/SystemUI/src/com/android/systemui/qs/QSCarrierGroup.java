@@ -121,6 +121,7 @@ public class QSCarrierGroup extends LinearLayout implements
         for (int i = 0; i < SIM_SLOTS; i++) {
             mCarrierGroups[i].updateState(mInfos[i]);
         }
+
         mCarrierDividers[0].setVisibility(
                 mInfos[0].visible && mInfos[1].visible ? View.VISIBLE : View.GONE);
         // This tackles the case of slots 2 being available as well as at least one other.

@@ -58,7 +58,7 @@
         android:elevation="4dp"
         android:background="@android:color/transparent"
         android:focusable="true"
-        android:accessibilityTraversalBefore="@id/qs_carrier_text"
+        android:accessibilityTraversalBefore="@android:id/edit"
     />
 
     <include layout="@layout/quick_status_bar_expanded_header" />
