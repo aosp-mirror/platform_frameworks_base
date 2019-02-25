@@ -275,6 +275,9 @@ public class RouterAdvertisementDaemon {
 
     public void stop() {
         closeSocket();
+        // Wake up mMulticastTransmitter thread to interrupt a potential 1 day sleep before
+        // the thread's termination.
+        maybeNotifyMulticastTransmitter();
         mMulticastTransmitter = null;
         mUnicastResponder = null;
     }
