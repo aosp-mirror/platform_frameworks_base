@@ -1972,7 +1972,7 @@ public class LocationManagerService extends ILocationManager.Stub {
                     continue;
                 }
 
-                // requests that ignore location settings will never provider notifications
+                // requests that ignore location settings will never provide notifications
                 if (isSettingsExemptLocked(record)) {
                     continue;
                 }
@@ -2010,19 +2010,22 @@ public class LocationManagerService extends ILocationManager.Stub {
         WorkSource worksource = new WorkSource();
         ProviderRequest providerRequest = new ProviderRequest();
 
-        long backgroundThrottleInterval;
-
-        long identity = Binder.clearCallingIdentity();
-        try {
-            backgroundThrottleInterval = Settings.Global.getLong(
-                    mContext.getContentResolver(),
-                    Settings.Global.LOCATION_BACKGROUND_THROTTLE_INTERVAL_MS,
-                    DEFAULT_BACKGROUND_THROTTLE_INTERVAL_MS);
-        } finally {
-            Binder.restoreCallingIdentity(identity);
-        }
-
         if (records != null && !records.isEmpty()) {
+            long backgroundThrottleInterval;
+
+            long identity = Binder.clearCallingIdentity();
+            try {
+                backgroundThrottleInterval = Settings.Global.getLong(
+                        mContext.getContentResolver(),
+                        Settings.Global.LOCATION_BACKGROUND_THROTTLE_INTERVAL_MS,
+                        DEFAULT_BACKGROUND_THROTTLE_INTERVAL_MS);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+
+            final boolean isForegroundOnlyMode =
+                    mPowerManager.getLocationPowerSaveMode()
+                            == PowerManager.LOCATION_MODE_FOREGROUND_ONLY;
             // initialize the low power mode to true and set to false if any of the records requires
             providerRequest.lowPowerMode = true;
             for (UpdateRecord record : records) {
@@ -2037,7 +2040,9 @@ public class LocationManagerService extends ILocationManager.Stub {
                         record.mReceiver.mAllowedResolutionLevel)) {
                     continue;
                 }
-                if (!provider.isUseableLocked()) {
+                final boolean isBatterySaverDisablingLocation =
+                        isForegroundOnlyMode && !record.mIsForegroundUid;
+                if (!provider.isUseableLocked() || isBatterySaverDisablingLocation) {
                     if (isSettingsExemptLocked(record)) {
                         providerRequest.locationSettingsIgnored = true;
                         providerRequest.lowPowerMode = false;

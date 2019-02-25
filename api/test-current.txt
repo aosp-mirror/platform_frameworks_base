@@ -1952,6 +1952,7 @@ package android.provider {
   public static final class Settings.Global extends android.provider.Settings.NameValueTable {
     field public static final String AUTOFILL_COMPAT_MODE_ALLOWED_PACKAGES = "autofill_compat_mode_allowed_packages";
     field public static final String AUTOMATIC_POWER_SAVER_MODE = "automatic_power_saver_mode";
+    field public static final String BATTERY_SAVER_CONSTANTS = "battery_saver_constants";
     field public static final String CAPTIVE_PORTAL_FALLBACK_PROBE_SPECS = "captive_portal_fallback_probe_specs";
     field public static final String CAPTIVE_PORTAL_FALLBACK_URL = "captive_portal_fallback_url";
     field public static final String CAPTIVE_PORTAL_HTTPS_URL = "captive_portal_https_url";

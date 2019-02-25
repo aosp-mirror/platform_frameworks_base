@@ -11523,6 +11523,7 @@ public final class Settings {
          * @hide
          * @see com.android.server.power.batterysaver.BatterySaverPolicy
          */
+        @TestApi
         public static final String BATTERY_SAVER_CONSTANTS = "battery_saver_constants";
 
         /**

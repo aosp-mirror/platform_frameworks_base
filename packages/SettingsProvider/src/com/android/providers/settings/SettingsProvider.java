@@ -1379,8 +1379,8 @@ public class SettingsProvider extends ContentProvider {
             }
         }
         if (enableOverride) {
-            if (Secure.LOCATION_PROVIDERS_ALLOWED.equals(name)) {
-                final Setting overridden = getLocationProvidersAllowedSetting(owningUserId);
+            if (Secure.LOCATION_MODE.equals(name)) {
+                final Setting overridden = getLocationModeSetting(owningUserId);
                 if (overridden != null) {
                     return overridden;
                 }
@@ -1475,7 +1475,7 @@ public class SettingsProvider extends ContentProvider {
         return null;
     }
 
-    private Setting getLocationProvidersAllowedSetting(int owningUserId) {
+    private Setting getLocationModeSetting(int owningUserId) {
         synchronized (mLock) {
             final Setting setting = getGlobalSetting(
                     Global.LOCATION_GLOBAL_KILL_SWITCH);
@@ -1486,7 +1486,7 @@ public class SettingsProvider extends ContentProvider {
             final SettingsState settingsState = mSettingsRegistry.getSettingsLocked(
                     SETTINGS_TYPE_SECURE, owningUserId);
             return settingsState.new Setting(
-                    Secure.LOCATION_PROVIDERS_ALLOWED,
+                    Secure.LOCATION_MODE,
                     "", // value
                     "", // tag
                     "", // default value
@@ -1497,7 +1497,7 @@ public class SettingsProvider extends ContentProvider {
                 @Override
                 public boolean update(String value, boolean setDefault, String packageName,
                         String tag, boolean forceNonSystemPackage) {
-                    Slog.wtf(LOG_TAG, "update shoudln't be called on this instance.");
+                    Slog.wtf(LOG_TAG, "update shouldn't be called on this instance.");
                     return false;
                 }
             };
@@ -3115,7 +3115,7 @@ public class SettingsProvider extends ContentProvider {
                 final int key = makeKey(SETTINGS_TYPE_SECURE, userId);
                 mGenerationRegistry.incrementGeneration(key);
 
-                final Uri uri = getNotificationUriFor(key, Secure.LOCATION_PROVIDERS_ALLOWED);
+                final Uri uri = getNotificationUriFor(key, Secure.LOCATION_MODE);
                 mHandler.obtainMessage(MyHandler.MSG_NOTIFY_URI_CHANGED,
                         userId, 0, uri).sendToTarget();
             }

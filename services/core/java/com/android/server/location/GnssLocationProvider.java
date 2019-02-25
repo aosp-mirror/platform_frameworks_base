@@ -527,6 +527,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
                 mPowerManager.getPowerSaveState(ServiceType.LOCATION);
         switch (result.locationMode) {
             case PowerManager.LOCATION_MODE_GPS_DISABLED_WHEN_SCREEN_OFF:
+            case PowerManager.LOCATION_MODE_ALL_DISABLED_WHEN_SCREEN_OFF:
                 // If we are in battery saver mode and the screen is off, disable GPS.
                 disableGps |= result.batterySaverEnabled && !mPowerManager.isInteractive();
                 break;
