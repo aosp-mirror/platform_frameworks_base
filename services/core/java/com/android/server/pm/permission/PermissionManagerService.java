@@ -20,10 +20,8 @@ import static android.Manifest.permission.ACCESS_BACKGROUND_LOCATION;
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 import static android.app.AppOpsManager.MODE_ALLOWED;
-import static android.app.AppOpsManager.MODE_DEFAULT;
 import static android.app.AppOpsManager.MODE_ERRORED;
 import static android.app.AppOpsManager.MODE_FOREGROUND;
-import static android.app.AppOpsManager.MODE_IGNORED;
 import static android.app.AppOpsManager.OP_NONE;
 import static android.app.AppOpsManager.permissionToOp;
 import static android.app.AppOpsManager.permissionToOpCode;
@@ -1271,6 +1269,7 @@ public class PermissionManagerService {
         if (pkg.applicationInfo.targetSdkVersion < Build.VERSION_CODES.M) {
             if (permissionToOp(newPerm) != null) {
                 int mostLenientSourceMode = MODE_ERRORED;
+                int flags = 0;
 
                 // Find most lenient source permission state.
                 int numSourcePerms = sourcePerms.size();
@@ -1284,20 +1283,19 @@ public class PermissionManagerService {
                             int mode = appOpsManager.unsafeCheckOpRaw(sourceOp,
                                     getUid(userId, getAppId(pkg.applicationInfo.uid)), pkgName);
 
-                            if (mode == MODE_FOREGROUND) {
-                                throw new IllegalArgumentException("split permission" + sourcePerm
-                                        + " has app-op state " + AppOpsManager.MODE_NAMES[mode]);
+                            if (mode == MODE_FOREGROUND || mode == MODE_ERRORED) {
+                                Log.wtf(TAG, "split permission" + sourcePerm + " has app-op state "
+                                        + AppOpsManager.MODE_NAMES[mode]);
+
+                                continue;
                             }
 
-                            // Leniency order: allowed > ignored > default
-                            if (mode == MODE_ALLOWED) {
-                                mostLenientSourceMode = MODE_ALLOWED;
-                                break;
-                            } else if (mode == MODE_IGNORED) {
-                                mostLenientSourceMode = MODE_IGNORED;
-                            } else if (mode == MODE_DEFAULT
-                                    && mostLenientSourceMode != MODE_IGNORED) {
-                                mostLenientSourceMode = MODE_DEFAULT;
+                            // Leniency order: allowed < ignored < default
+                            if (mode < mostLenientSourceMode) {
+                                mostLenientSourceMode = mode;
+                                flags = ps.getPermissionFlags(sourcePerm, userId);
+                            } else if (mode == mostLenientSourceMode) {
+                                flags |= ps.getPermissionFlags(sourcePerm, userId);
                             }
                         }
                     }
@@ -1310,21 +1308,31 @@ public class PermissionManagerService {
                     }
 
                     setAppOpMode(newPerm, pkg, userId, mostLenientSourceMode);
+
+                    // Add permission flags
+                    ps.updatePermissionFlags(mSettings.getPermission(newPerm), userId, flags,
+                            flags);
                 }
             }
         } else {
             boolean isGranted = false;
+            int flags = 0;
 
             int numSourcePerm = sourcePerms.size();
             for (int i = 0; i < numSourcePerm; i++) {
                 String sourcePerm = sourcePerms.valueAt(i);
-                if (ps.hasRuntimePermission(sourcePerm, userId)
-                        && ps.getRuntimePermissionState(sourcePerm, userId).isGranted()) {
+                if ((ps.hasRuntimePermission(sourcePerm, userId))
+                        || ps.hasInstallPermission(sourcePerm)) {
+                    if (!isGranted) {
+                        flags = 0;
+                    }
+
                     isGranted = true;
-                    break;
-                } else if (ps.hasInstallPermission(sourcePerm)) {
-                    isGranted = true;
-                    break;
+                    flags |= ps.getPermissionFlags(sourcePerm, userId);
+                } else {
+                    if (!isGranted) {
+                        flags |= ps.getPermissionFlags(sourcePerm, userId);
+                    }
                 }
             }
 
@@ -1336,6 +1344,9 @@ public class PermissionManagerService {
 
                 ps.grantRuntimePermission(mSettings.getPermissionLocked(newPerm), userId);
             }
+
+            // Add permission flags
+            ps.updatePermissionFlags(mSettings.getPermission(newPerm), userId, flags, flags);
         }
     }
 
