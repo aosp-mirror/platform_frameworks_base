@@ -35,8 +35,6 @@
 
 #include <ui/ANativeObjectBase.h>
 
-static int initialized = 0;
-
 static jclass egldisplayClass;
 static jclass eglcontextClass;
 static jclass eglsurfaceClass;
