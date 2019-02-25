@@ -644,6 +644,7 @@ public class ShortcutManager {
      * @return True if the package has any share target definitions, False otherwise.
      * @hide
      */
+    @SystemApi
     public boolean hasShareTargets(@NonNull String packageName) {
         try {
             return mService.hasShareTargets(mContext.getPackageName(), packageName,
