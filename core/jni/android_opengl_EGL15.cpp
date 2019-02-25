@@ -27,8 +27,6 @@
 
 #include <ui/ANativeObjectBase.h>
 
-static int initialized = 0;
-
 // classes from EGL 1.4
 static jclass egldisplayClass;
 static jclass eglsurfaceClass;
