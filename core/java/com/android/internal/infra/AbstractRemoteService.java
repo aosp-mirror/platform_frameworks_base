@@ -67,7 +67,7 @@ public abstract class AbstractRemoteService<S extends AbstractRemoteService<S, I
     private static final int MSG_BIND = 1;
     private static final int MSG_UNBIND = 2;
 
-    protected static final long PERMANENT_BOUND_TIMEOUT_MS = 0;
+    public static final long PERMANENT_BOUND_TIMEOUT_MS = 0;
 
     protected static final int LAST_PRIVATE_MSG = MSG_UNBIND;
 

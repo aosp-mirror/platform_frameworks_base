@@ -129,6 +129,14 @@ public final class ContentCaptureManager {
     @TestApi
     public static final String DEVICE_CONFIG_PROPERTY_LOGGING_LEVEL = "logging_level";
 
+    /**
+     * Sets how long (in ms) the service is bound while idle.
+     *
+     * <p>Use {@code 0} to keep it permanently bound.
+     *
+     * @hide
+     */
+    public static final String DEVICE_CONFIG_PROPERTY_IDLE_UNBIND_TIMEOUT = "idle_unbind_timeout";
 
     /** @hide */
     @TestApi

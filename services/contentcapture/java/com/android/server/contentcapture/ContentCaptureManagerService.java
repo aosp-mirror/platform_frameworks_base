@@ -52,6 +52,7 @@ import android.view.contentcapture.IContentCaptureManager;
 import android.view.contentcapture.UserDataRemovalRequest;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.infra.AbstractRemoteService;
 import com.android.internal.os.IResultReceiver;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.Preconditions;
@@ -103,11 +104,12 @@ public final class ContentCaptureManagerService extends
     private boolean mDisabledByDeviceConfig;
 
     // Device-config settings that are cached and passed back to apps
-    public int mDevCfgLoggingLevel;
-    public int mDevCfgMaxBufferSize;
-    public int mDevCfgIdleFlushingFrequencyMs;
-    public int mDevCfgTextChangeFlushingFrequencyMs;
-    public int mDevCfgLogHistorySize;
+    int mDevCfgLoggingLevel;
+    int mDevCfgMaxBufferSize;
+    int mDevCfgIdleFlushingFrequencyMs;
+    int mDevCfgTextChangeFlushingFrequencyMs;
+    int mDevCfgLogHistorySize;
+    int mDevCfgIdleUnbindTimeoutMs;
 
     public ContentCaptureManagerService(@NonNull Context context) {
         super(context, new FrameworkResourcesServiceNameResolver(context,
@@ -238,6 +240,7 @@ public final class ContentCaptureManagerService extends
             case ContentCaptureManager.DEVICE_CONFIG_PROPERTY_IDLE_FLUSH_FREQUENCY:
             case ContentCaptureManager.DEVICE_CONFIG_PROPERTY_LOG_HISTORY_SIZE:
             case ContentCaptureManager.DEVICE_CONFIG_PROPERTY_TEXT_CHANGE_FLUSH_FREQUENCY:
+            case ContentCaptureManager.DEVICE_CONFIG_PROPERTY_IDLE_UNBIND_TIMEOUT:
                 setFineTuneParamsFromDeviceConfig();
                 return;
             default:
@@ -257,11 +260,15 @@ public final class ContentCaptureManagerService extends
                 ContentCaptureManager.DEFAULT_TEXT_CHANGE_FLUSHING_FREQUENCY_MS);
         mDevCfgLogHistorySize = ContentCaptureHelper.getIntDeviceConfigProperty(
                 ContentCaptureManager.DEVICE_CONFIG_PROPERTY_LOG_HISTORY_SIZE, 20);
+        mDevCfgIdleUnbindTimeoutMs = ContentCaptureHelper.getIntDeviceConfigProperty(
+                ContentCaptureManager.DEVICE_CONFIG_PROPERTY_IDLE_UNBIND_TIMEOUT,
+                (int) AbstractRemoteService.PERMANENT_BOUND_TIMEOUT_MS);
         if (verbose) {
             Slog.v(mTag, "setFineTuneParamsFromDeviceConfig(): bufferSize=" + mDevCfgMaxBufferSize
                     + ", idleFlush=" + mDevCfgIdleFlushingFrequencyMs
                     + ", textFluxh=" + mDevCfgTextChangeFlushingFrequencyMs
-                    + ", logHistory=" + mDevCfgLogHistorySize);
+                    + ", logHistory=" + mDevCfgLogHistorySize
+                    + ", idleUnbindTimeoutMs=" + mDevCfgIdleUnbindTimeoutMs);
         }
     }
 
@@ -472,6 +479,8 @@ public final class ContentCaptureManagerService extends
         pw.print(prefix2); pw.print("textChangeFlushingFrequencyMs: ");
         pw.println(mDevCfgTextChangeFlushingFrequencyMs);
         pw.print(prefix2); pw.print("logHistorySize: "); pw.println(mDevCfgLogHistorySize);
+        pw.print(prefix2); pw.print("idleUnbindTimeoutMs: ");
+        pw.println(mDevCfgIdleUnbindTimeoutMs);
     }
 
     final class ContentCaptureManagerServiceStub extends IContentCaptureManager.Stub {
