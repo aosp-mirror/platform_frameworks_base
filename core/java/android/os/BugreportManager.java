@@ -59,7 +59,8 @@ public class BugreportManager {
                 BUGREPORT_ERROR_INVALID_INPUT,
                 BUGREPORT_ERROR_RUNTIME,
                 BUGREPORT_ERROR_USER_DENIED_CONSENT,
-                BUGREPORT_ERROR_USER_CONSENT_TIMED_OUT
+                BUGREPORT_ERROR_USER_CONSENT_TIMED_OUT,
+                BUGREPORT_ERROR_ANOTHER_REPORT_IN_PROGRESS
         })
 
         /** Possible error codes taking a bugreport can encounter */
@@ -81,6 +82,10 @@ public class BugreportManager {
         public static final int BUGREPORT_ERROR_USER_CONSENT_TIMED_OUT =
                 IDumpstateListener.BUGREPORT_ERROR_USER_CONSENT_TIMED_OUT;
 
+        /** There is currently a bugreport running. The caller should try again later. */
+        public static final int BUGREPORT_ERROR_ANOTHER_REPORT_IN_PROGRESS =
+                IDumpstateListener.BUGREPORT_ERROR_ANOTHER_REPORT_IN_PROGRESS;
+
         /**
          * Called when there is a progress update.
          * @param progress the progress in [0.0, 100.0]
@@ -96,6 +101,9 @@ public class BugreportManager {
          * <p>If {@code BUGREPORT_ERROR_USER_CONSENT_TIMED_OUT} is passed, then the consent timed
          * out, but the bugreport could be available in the internal directory of dumpstate for
          * manual retrieval.
+         *
+         * <p> If {@code BUGREPORT_ERROR_ANOTHER_REPORT_IN_PROGRESS} is passed, then the
+         * caller should try later, as only one bugreport can be in progress at a time.
          */
         public void onError(@BugreportErrorCode int errorCode) {}
 

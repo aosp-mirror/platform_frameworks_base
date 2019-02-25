@@ -146,8 +146,8 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
         if (isDumpstateBinderServiceRunningLocked()) {
             Slog.w(TAG, "'dumpstate' is already running. Cannot start a new bugreport"
                     + " while another one is currently in progress.");
-            // TODO(b/111441001): Use a new error code; add this to the documentation of the API.
-            reportError(listener, IDumpstateListener.BUGREPORT_ERROR_RUNTIME_ERROR);
+            reportError(listener,
+                    IDumpstateListener.BUGREPORT_ERROR_ANOTHER_REPORT_IN_PROGRESS);
             return;
         }
 
