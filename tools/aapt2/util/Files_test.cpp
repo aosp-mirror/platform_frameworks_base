@@ -19,6 +19,7 @@
 #include <sstream>
 
 #include "android-base/stringprintf.h"
+#include "android-base/utf8.h"
 
 #include "test/Test.h"
 
@@ -64,6 +65,41 @@ TEST_F(FilesTest, AppendPathWithLeadingOrTrailingSeparators) {
   AppendPath(&base, StringPrintf("%cthere", sTestDirSep));
   EXPECT_EQ(expected_path_, base);
 }
+
+#ifdef _WIN32
+TEST_F(FilesTest, WindowsMkdirsLongPath) {
+  // Creating directory paths longer than the Windows maximum path length (260 charatcers) should
+  // succeed.
+  const std::string kDirName = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+  const size_t kRecursiveDepth = 10u;
+
+  // Recursively create the test file path and clean up the created directories after the files have
+  // been created.
+  std::function<void(std::string, size_t)> CreateResursiveDirs =
+      [&kDirName, &CreateResursiveDirs](std::string current_path, const size_t n) -> void {
+    AppendPath(&current_path, kDirName);
+
+    if (n == 0) {
+      ASSERT_TRUE(file::mkdirs(current_path)) << "Failed to create path " << current_path;
+    } else {
+      CreateResursiveDirs(current_path, n - 1);
+    }
+
+    // Clean up the created directories.
+    _rmdir(current_path.data());
+  };
+
+  CreateResursiveDirs(
+      android::base::StringPrintf(R"(\\?\%s)", android::base::GetExecutableDirectory().data()),
+      kRecursiveDepth);
+}
+
+TEST_F(FilesTest, WindowsMkdirsLongPathMissingDrive) {
+  ASSERT_FALSE(file::mkdirs(R"(\\?\local\path\to\file)"));
+  ASSERT_FALSE(file::mkdirs(R"(\\?\:local\path\to\file)"));
+  ASSERT_FALSE(file::mkdirs(R"(\\?\\local\path\to\file)"));
+}
+#endif
 
 }  // namespace files
 }  // namespace aapt

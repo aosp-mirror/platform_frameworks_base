@@ -356,6 +356,7 @@ std::unique_ptr<Asset> AssetManager2::OpenNonAsset(const std::string& filename,
 
 ApkAssetsCookie AssetManager2::FindEntry(uint32_t resid, uint16_t density_override,
                                          bool /*stop_at_first_match*/,
+                                         bool ignore_configuration,
                                          FindEntryResult* out_entry) const {
   // Might use this if density_override != 0.
   ResTable_config density_override_config;
@@ -399,7 +400,7 @@ ApkAssetsCookie AssetManager2::FindEntry(uint32_t resid, uint16_t density_overri
 
   // If desired_config is the same as the set configuration, then we can use our filtered list
   // and we don't need to match the configurations, since they already matched.
-  const bool use_fast_path = desired_config == &configuration_;
+  const bool use_fast_path = !ignore_configuration && desired_config == &configuration_;
 
   for (size_t pi = 0; pi < package_count; pi++) {
     const ConfiguredPackage& loaded_package_impl = package_group.packages_[pi];
@@ -475,21 +476,23 @@ ApkAssetsCookie AssetManager2::FindEntry(uint32_t resid, uint16_t density_overri
       // ResTable_config, we must copy it.
       const auto iter_end = type_spec->types + type_spec->type_count;
       for (auto iter = type_spec->types; iter != iter_end; ++iter) {
-        ResTable_config this_config;
-        this_config.copyFromDtoH((*iter)->config);
+        ResTable_config this_config{};
 
-        if (!this_config.match(*desired_config)) {
-          continue;
-        }
+        if (!ignore_configuration) {
+          this_config.copyFromDtoH((*iter)->config);
+          if (!this_config.match(*desired_config)) {
+            continue;
+          }
 
-        if (best_config == nullptr) {
-          resolution_type = Resolution::Step::Type::INITIAL;
-        } else if (this_config.isBetterThan(*best_config, desired_config)) {
-          resolution_type = Resolution::Step::Type::BETTER_MATCH;
-        } else if (package_is_overlay && this_config.compare(*best_config) == 0) {
-          resolution_type = Resolution::Step::Type::OVERLAID;
-        } else {
-          continue;
+          if (best_config == nullptr) {
+            resolution_type = Resolution::Step::Type::INITIAL;
+          } else if (this_config.isBetterThan(*best_config, desired_config)) {
+            resolution_type = Resolution::Step::Type::BETTER_MATCH;
+          } else if (package_is_overlay && this_config.compare(*best_config) == 0) {
+            resolution_type = Resolution::Step::Type::OVERLAID;
+          } else {
+            continue;
+          }
         }
 
         // The configuration matches and is better than the previous selection.
@@ -505,6 +508,11 @@ ApkAssetsCookie AssetManager2::FindEntry(uint32_t resid, uint16_t density_overri
         best_config_copy = this_config;
         best_config = &best_config_copy;
         best_offset = offset;
+
+        if (ignore_configuration) {
+          // Any configuration will suffice, so break.
+          break;
+        }
 
         if (resource_resolution_logging_enabled_) {
           resolution_steps.push_back(Resolution::Step{resolution_type,
@@ -622,8 +630,9 @@ std::string AssetManager2::GetLastResourceResolution() const {
 
 bool AssetManager2::GetResourceName(uint32_t resid, ResourceName* out_name) const {
   FindEntryResult entry;
-  ApkAssetsCookie cookie =
-      FindEntry(resid, 0u /* density_override */, true /* stop_at_first_match */, &entry);
+  ApkAssetsCookie cookie = FindEntry(resid, 0u /* density_override */,
+                                     true /* stop_at_first_match */,
+                                     true /* ignore_configuration */, &entry);
   if (cookie == kInvalidCookie) {
     return false;
   }
@@ -652,13 +661,14 @@ bool AssetManager2::GetResourceName(uint32_t resid, ResourceName* out_name) cons
 
 bool AssetManager2::GetResourceFlags(uint32_t resid, uint32_t* out_flags) const {
   FindEntryResult entry;
-  ApkAssetsCookie cookie =
-      FindEntry(resid, 0u /* density_override */, false /* stop_at_first_match */, &entry);
+  ApkAssetsCookie cookie = FindEntry(resid, 0u /* density_override */,
+                                     false /* stop_at_first_match */,
+                                     true /* ignore_configuration */, &entry);
   if (cookie != kInvalidCookie) {
     *out_flags = entry.type_flags;
-    return cookie;
+    return true;
   }
-  return kInvalidCookie;
+  return false;
 }
 
 ApkAssetsCookie AssetManager2::GetResource(uint32_t resid, bool may_be_bag,
@@ -666,8 +676,8 @@ ApkAssetsCookie AssetManager2::GetResource(uint32_t resid, bool may_be_bag,
                                            ResTable_config* out_selected_config,
                                            uint32_t* out_flags) const {
   FindEntryResult entry;
-  ApkAssetsCookie cookie =
-      FindEntry(resid, density_override, false /* stop_at_first_match */, &entry);
+  ApkAssetsCookie cookie = FindEntry(resid, density_override, false /* stop_at_first_match */,
+                                     false /* ignore_configuration */, &entry);
   if (cookie == kInvalidCookie) {
     return kInvalidCookie;
   }
@@ -759,8 +769,10 @@ const ResolvedBag* AssetManager2::GetBag(uint32_t resid, std::vector<uint32_t>& 
   }
 
   FindEntryResult entry;
-  ApkAssetsCookie cookie =
-      FindEntry(resid, 0u /* density_override */, false /* stop_at_first_match */, &entry);
+  ApkAssetsCookie cookie = FindEntry(resid, 0u /* density_override */,
+                                     false /* stop_at_first_match */,
+                                     false /* ignore_configuration */,
+                                     &entry);
   if (cookie == kInvalidCookie) {
     return nullptr;
   }
@@ -1387,7 +1399,9 @@ void Theme::SetTo(const Theme& o) {
             // Find the cookie of the attribute resource id
             FindEntryResult attribute_entry_result;
             ApkAssetsCookie attribute_cookie =
-                o.asset_manager_->FindEntry(make_resid(p, t, e), 0 /* density_override */ , false,
+                o.asset_manager_->FindEntry(make_resid(p, t, e), 0 /* density_override */ ,
+                                            true /* stop_at_first_match */,
+                                            true /* ignore_configuration */,
                                             &attribute_entry_result);
 
             // Determine the package id of the attribute in the destination AssetManager

@@ -81,7 +81,7 @@ class CommandTestFixture : public TestDirectoryFixture {
             IDiagnostics* diag);
 
   // Creates a minimal android manifest within the test directory and returns the file path.
-  std::string GetDefaultManifest();
+  std::string GetDefaultManifest(const char* package_name = kDefaultPackageName);
 
   // Returns pointer to data inside APK files
   std::unique_ptr<io::IData> OpenFileAsData(LoadedApk* apk,
@@ -91,6 +91,7 @@ class CommandTestFixture : public TestDirectoryFixture {
   void AssertLoadXml(LoadedApk* apk, const io::IData* data,
                      android::ResXMLTree* out_tree);
 
+  static const char* kDefaultPackageName;
  private:
   DISALLOW_COPY_AND_ASSIGN(CommandTestFixture);
 };

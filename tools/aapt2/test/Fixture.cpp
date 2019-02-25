@@ -37,6 +37,8 @@ using testing::Ne;
 
 namespace aapt {
 
+const char* CommandTestFixture::kDefaultPackageName = "com.aapt.command.test";
+
 void ClearDirectory(const android::StringPiece& path) {
   const std::string root_dir = path.to_string();
   std::unique_ptr<DIR, decltype(closedir)*> dir(opendir(root_dir.data()), closedir);
@@ -124,12 +126,12 @@ bool CommandTestFixture::Link(const std::vector<std::string>& args,
   return LinkCommand(diag).Execute(link_args, &std::cerr) == 0;
 }
 
-std::string CommandTestFixture::GetDefaultManifest() {
+std::string CommandTestFixture::GetDefaultManifest(const char* package_name) {
   const std::string manifest_file = GetTestPath("AndroidManifest.xml");
-  CHECK(WriteFile(manifest_file, R"(
+  CHECK(WriteFile(manifest_file, android::base::StringPrintf(R"(
       <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.aapt.command.test">
-      </manifest>)"));
+          package="%s">
+      </manifest>)", package_name)));
   return manifest_file;
 }
 

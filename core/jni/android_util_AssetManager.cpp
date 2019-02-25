@@ -343,7 +343,9 @@ static jobject NativeGetOverlayableMap(JNIEnv* env, jclass /*clazz*/, jlong ptr,
   assetmanager->ForEachPackage([&](const std::string& this_package_name, uint8_t package_id) {
     if (this_package_name == std_package_name) {
       map = assetmanager->GetOverlayableMapForPackage(package_id);
+      return false;
     }
+    return true;
   });
 
   if (map == nullptr) {
@@ -521,15 +523,16 @@ static jobject NativeGetAssignedPackageIdentifiers(JNIEnv* env, jclass /*clazz*/
     return nullptr;
   }
 
-  assetmanager->ForEachPackage([&](const std::string& package_name, uint8_t package_id) {
+  assetmanager->ForEachPackage([&](const std::string& package_name, uint8_t package_id) -> bool {
     jstring jpackage_name = env->NewStringUTF(package_name.c_str());
     if (jpackage_name == nullptr) {
       // An exception is pending.
-      return;
+      return false;
     }
 
     env->CallVoidMethod(sparse_array, gSparseArrayOffsets.put, static_cast<jint>(package_id),
                         jpackage_name);
+    return true;
   });
   return sparse_array;
 }
