@@ -19,6 +19,8 @@ import android.annotation.NonNull;
 
 /**
  * An event that happened on an {@link RcsGroupThread}.
+ *
+ * @hide
  */
 public abstract class RcsGroupThreadEvent extends RcsEvent {
     private final int mRcsGroupThreadId;

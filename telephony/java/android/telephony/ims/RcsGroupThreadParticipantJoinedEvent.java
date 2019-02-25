@@ -20,6 +20,8 @@ import android.annotation.NonNull;
 /**
  * An event that indicates an RCS participant has joined an {@link RcsThread}. Please see US6-3 -
  * GSMA RCC.71 (RCS Universal Profile Service Definition Document)
+ *
+ * @hide
  */
 public final class RcsGroupThreadParticipantJoinedEvent extends RcsGroupThreadEvent {
     private final RcsParticipant mJoinedParticipantId;

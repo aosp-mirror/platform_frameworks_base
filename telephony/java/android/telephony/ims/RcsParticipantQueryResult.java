@@ -28,6 +28,8 @@ import java.util.List;
  * The result of a {@link RcsMessageStore#getRcsParticipants(RcsParticipantQueryParams)}
  * call. This class allows getting the token for querying the next batch of participants in order to
  * prevent handling large amounts of data at once.
+ *
+ * @hide
  */
 public final class RcsParticipantQueryResult implements Parcelable {
     // A token for the caller to continue their query for the next batch of results
