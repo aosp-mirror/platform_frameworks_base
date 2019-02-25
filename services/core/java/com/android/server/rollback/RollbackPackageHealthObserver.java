@@ -218,10 +218,10 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
                     && (sessionId != PackageInstaller.SessionInfo.INVALID_ID)) {
                 PackageInstaller.SessionInfo sessionInfo =
                         packageInstaller.getSessionInfo(sessionId);
-                if (sessionInfo.isSessionReady()) {
+                if (sessionInfo.isStagedSessionReady()) {
                     mContext.unregisterReceiver(listener);
                     mContext.getSystemService(PowerManager.class).reboot("Rollback staged install");
-                } else if (sessionInfo.isSessionFailed()) {
+                } else if (sessionInfo.isStagedSessionFailed()) {
                     mContext.unregisterReceiver(listener);
                 }
             }

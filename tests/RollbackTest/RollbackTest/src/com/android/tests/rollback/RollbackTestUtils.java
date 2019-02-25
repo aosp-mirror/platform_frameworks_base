@@ -345,7 +345,7 @@ class RollbackTestUtils {
                 PackageInstaller.SessionInfo info =
                         intent.getParcelableExtra(PackageInstaller.EXTRA_SESSION);
                 if (info != null && info.getSessionId() == sessionId) {
-                    if (info.isSessionReady() || info.isSessionFailed()) {
+                    if (info.isStagedSessionReady() || info.isStagedSessionFailed()) {
                         try {
                             sessionStatus.put(info);
                         } catch (InterruptedException e) {
@@ -365,13 +365,13 @@ class RollbackTestUtils {
         PackageInstaller.SessionInfo info = installer.getSessionInfo(sessionId);
 
         try {
-            if (info.isSessionReady() || info.isSessionFailed()) {
+            if (info.isStagedSessionReady() || info.isStagedSessionFailed()) {
                 sessionStatus.put(info);
             }
 
             info = sessionStatus.take();
             context.unregisterReceiver(sessionUpdatedReceiver);
-            if (info.isSessionFailed()) {
+            if (info.isStagedSessionFailed()) {
                 throw new AssertionError(info.getStagedSessionErrorMessage());
             }
         } catch (InterruptedException e) {

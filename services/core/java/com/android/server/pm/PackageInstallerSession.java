@@ -490,9 +490,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             if (info.childSessionIds == null) {
                 info.childSessionIds = EMPTY_CHILD_SESSION_ARRAY;
             }
-            info.isSessionApplied = mStagedSessionApplied;
-            info.isSessionReady = mStagedSessionReady;
-            info.isSessionFailed = mStagedSessionFailed;
+            info.isStagedSessionApplied = mStagedSessionApplied;
+            info.isStagedSessionReady = mStagedSessionReady;
+            info.isStagedSessionFailed = mStagedSessionFailed;
             info.setStagedSessionErrorCode(mStagedSessionErrorCode, mStagedSessionErrorMessage);
         }
         return info;
