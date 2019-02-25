@@ -2029,6 +2029,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             mStagedSessionErrorMessage = errorMessage;
             Slog.d(TAG, "Marking session " + sessionId + " as failed: " + errorMessage);
         }
+        cleanStageDir();
         mCallback.onStagedSessionChanged(this);
     }
 
@@ -2040,7 +2041,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             mStagedSessionFailed = false;
             mStagedSessionErrorCode = SessionInfo.STAGED_SESSION_NO_ERROR;
             mStagedSessionErrorMessage = "";
+            Slog.d(TAG, "Marking session " + sessionId + " as applied");
         }
+        cleanStageDir();
         mCallback.onStagedSessionChanged(this);
     }
 
@@ -2088,6 +2091,19 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         // deleting these dirs when the staged session has reached a final state.
         // TODO(b/118865310): Implement packageDir deletion in StagingManager.
         if (stageDir != null && !params.isStaged) {
+            try {
+                mPm.mInstaller.rmPackageDir(stageDir.getAbsolutePath());
+            } catch (InstallerException ignored) {
+            }
+        }
+    }
+
+    private void cleanStageDir() {
+        if (isMultiPackage()) {
+            for (int childSessionId : getChildSessionIds()) {
+                mSessionProvider.getSession(childSessionId).cleanStageDir();
+            }
+        } else {
             try {
                 mPm.mInstaller.rmPackageDir(stageDir.getAbsolutePath());
             } catch (InstallerException ignored) {
