@@ -850,7 +850,7 @@ public final class DefaultPermissionGrantPolicy {
         }
         for (String packageName : packageNames) {
             grantPermissionsToSystemPackage(packageName, userId,
-                    PHONE_PERMISSIONS, LOCATION_PERMISSIONS, SMS_PERMISSIONS);
+                    PHONE_PERMISSIONS, ALWAYS_LOCATION_PERMISSIONS, SMS_PERMISSIONS);
         }
     }
 
