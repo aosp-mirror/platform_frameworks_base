@@ -597,6 +597,8 @@ public class PackageManagerService extends IPackageManager.Stub
 
     private static final String ODM_OVERLAY_DIR = "/odm/overlay";
 
+    private static final String OEM_OVERLAY_DIR = "/oem/overlay";
+
     /** Canonical intent used to identify what counts as a "web browser" app */
     private static final Intent sBrowserIntent;
     static {
@@ -2532,6 +2534,13 @@ public class PackageManagerService extends IPackageManager.Stub
                     scanFlags
                     | SCAN_AS_SYSTEM
                     | SCAN_AS_ODM,
+                    0);
+            scanDirTracedLI(new File(OEM_OVERLAY_DIR),
+                    mDefParseFlags
+                    | PackageParser.PARSE_IS_SYSTEM_DIR,
+                    scanFlags
+                    | SCAN_AS_SYSTEM
+                    | SCAN_AS_OEM,
                     0);
 
             mParallelPackageParserCallback.findStaticOverlayPackages();
