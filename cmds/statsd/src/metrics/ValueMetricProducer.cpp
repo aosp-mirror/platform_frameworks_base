@@ -155,7 +155,7 @@ ValueMetricProducer::ValueMetricProducer(
     mCurrentBucketStartTimeNs = startTimeNs;
     // Kicks off the puller immediately if condition is true and diff based.
     if (mIsPulled && mCondition == ConditionState::kTrue && mUseDiff) {
-        pullAndMatchEventsLocked(startTimeNs);
+        pullAndMatchEventsLocked(startTimeNs, mCondition);
     }
     VLOG("value metric %lld created. bucket size %lld start_time: %lld", (long long)metric.id(),
          (long long)mBucketSizeNs, (long long)mTimeBaseNs);
@@ -208,7 +208,7 @@ void ValueMetricProducer::onDumpReportLocked(const int64_t dumpTimeNs,
                     invalidateCurrentBucket();
                     break;
                 case NO_TIME_CONSTRAINTS:
-                    pullAndMatchEventsLocked(dumpTimeNs);
+                    pullAndMatchEventsLocked(dumpTimeNs, mCondition);
                     break;
             }
         }
@@ -364,9 +364,10 @@ void ValueMetricProducer::onConditionChangedLocked(const bool condition,
         }
 
         // Pull on condition changes.
+        ConditionState newCondition = condition ? ConditionState::kTrue : ConditionState::kFalse;
         bool conditionChanged =
-                (mCondition == ConditionState::kTrue && condition == ConditionState::kFalse)
-                || (mCondition == ConditionState::kFalse && condition == ConditionState::kTrue);
+                (mCondition == ConditionState::kTrue && newCondition == ConditionState::kFalse)
+                || (mCondition == ConditionState::kFalse && newCondition == ConditionState::kTrue);
         // We do not need to pull when we go from unknown to false.
         //
         // We also pull if the condition was already true in order to be able to flush the bucket at
@@ -375,16 +376,16 @@ void ValueMetricProducer::onConditionChangedLocked(const bool condition,
         // onConditionChangedLocked might happen on bucket boundaries if this is called before
         // #onDataPulled.
         if (mIsPulled && (conditionChanged || condition)) {
-            pullAndMatchEventsLocked(eventTimeNs);
+            pullAndMatchEventsLocked(eventTimeNs, newCondition);
         }
 
         // When condition change from true to false, clear diff base but don't
         // reset other counters as we may accumulate more value in the bucket.
         if (mUseDiff && mCondition == ConditionState::kTrue
-                && condition == ConditionState::kFalse) {
+                && newCondition == ConditionState::kFalse) {
             resetBase();
         }
-        mCondition = condition ? ConditionState::kTrue : ConditionState::kFalse;
+        mCondition = newCondition;
 
     } else {
         VLOG("Skip event due to late arrival: %lld vs %lld", (long long)eventTimeNs,
@@ -400,7 +401,7 @@ void ValueMetricProducer::onConditionChangedLocked(const bool condition,
     flushIfNeededLocked(eventTimeNs);
 }
 
-void ValueMetricProducer::pullAndMatchEventsLocked(const int64_t timestampNs) {
+void ValueMetricProducer::pullAndMatchEventsLocked(const int64_t timestampNs, ConditionState condition) {
     vector<std::shared_ptr<LogEvent>> allData;
     if (!mPullerManager->Pull(mPullTagId, &allData)) {
         ALOGE("Stats puller failed for tag: %d at %lld", mPullTagId, (long long)timestampNs);
@@ -408,7 +409,7 @@ void ValueMetricProducer::pullAndMatchEventsLocked(const int64_t timestampNs) {
         return;
     }
 
-    accumulateEvents(allData, timestampNs, timestampNs);
+    accumulateEvents(allData, timestampNs, timestampNs, condition);
 }
 
 int64_t ValueMetricProducer::calcPreviousBucketEndTime(const int64_t currentTimeNs) {
@@ -430,7 +431,7 @@ void ValueMetricProducer::onDataPulled(const std::vector<std::shared_ptr<LogEven
                 if (isEventLate) {
                     // If the event is late, we are in the middle of a bucket. Just
                     // process the data without trying to snap the data to the nearest bucket.
-                    accumulateEvents(allData, originalPullTimeNs, originalPullTimeNs);
+                    accumulateEvents(allData, originalPullTimeNs, originalPullTimeNs, mCondition);
                 } else {
                     // For scheduled pulled data, the effective event time is snap to the nearest
                     // bucket end. In the case of waking up from a deep sleep state, we will
@@ -444,7 +445,7 @@ void ValueMetricProducer::onDataPulled(const std::vector<std::shared_ptr<LogEven
                     int64_t bucketEndTime = calcPreviousBucketEndTime(originalPullTimeNs) - 1;
                     StatsdStats::getInstance().noteBucketBoundaryDelayNs(
                             mMetricId, originalPullTimeNs - bucketEndTime);
-                    accumulateEvents(allData, originalPullTimeNs, bucketEndTime);
+                    accumulateEvents(allData, originalPullTimeNs, bucketEndTime, mCondition);
                 }
             }
         }
@@ -455,7 +456,8 @@ void ValueMetricProducer::onDataPulled(const std::vector<std::shared_ptr<LogEven
 }
 
 void ValueMetricProducer::accumulateEvents(const std::vector<std::shared_ptr<LogEvent>>& allData,
-                                           int64_t originalPullTimeNs, int64_t eventElapsedTimeNs) {
+                                           int64_t originalPullTimeNs, int64_t eventElapsedTimeNs,
+                                           ConditionState condition) {
     bool isEventLate = eventElapsedTimeNs < mCurrentBucketStartTimeNs;
     if (isEventLate) {
         VLOG("Skip bucket end pull due to late arrival: %lld vs %lld",
@@ -817,12 +819,7 @@ void ValueMetricProducer::flushCurrentBucketLocked(const int64_t& eventTimeNs,
     if (!mCurrentBucketIsInvalid) {
         appendToFullBucket(eventTimeNs, fullBucketEndTimeNs);
     }
-    StatsdStats::getInstance().noteBucketCount(mMetricId);
-    initCurrentSlicedBucket();
-    mCurrentBucketIsInvalid = false;
-    mCurrentBucketStartTimeNs = nextBucketStartTimeNs;
-    VLOG("metric %lld: new bucket start time: %lld", (long long)mMetricId,
-         (long long)mCurrentBucketStartTimeNs);
+    initCurrentSlicedBucket(nextBucketStartTimeNs);
 }
 
 ValueBucket ValueMetricProducer::buildPartialBucket(int64_t bucketEndTime,
@@ -849,7 +846,9 @@ ValueBucket ValueMetricProducer::buildPartialBucket(int64_t bucketEndTime,
     return bucket;
 }
 
-void ValueMetricProducer::initCurrentSlicedBucket() {
+void ValueMetricProducer::initCurrentSlicedBucket(int64_t nextBucketStartTimeNs) {
+    StatsdStats::getInstance().noteBucketCount(mMetricId);
+    // Cleanup data structure to aggregate values.
     for (auto it = mCurrentSlicedBucket.begin(); it != mCurrentSlicedBucket.end();) {
         bool obsolete = true;
         for (auto& interval : it->second) {
@@ -867,6 +866,16 @@ void ValueMetricProducer::initCurrentSlicedBucket() {
             it++;
         }
     }
+
+    mCurrentBucketIsInvalid = false;
+    // If we do not have a global base when the condition is true,
+    // we will have incomplete bucket for the next bucket.
+    if (mUseDiff && !mHasGlobalBase && mCondition) {
+        mCurrentBucketIsInvalid = false;
+    }
+    mCurrentBucketStartTimeNs = nextBucketStartTimeNs;
+    VLOG("metric %lld: new bucket start time: %lld", (long long)mMetricId,
+         (long long)mCurrentBucketStartTimeNs);
 }
 
 void ValueMetricProducer::appendToFullBucket(int64_t eventTimeNs, int64_t fullBucketEndTimeNs) {

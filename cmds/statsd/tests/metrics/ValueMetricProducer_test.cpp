@@ -55,8 +55,12 @@ double epsilon = 0.001;
 static void assertPastBucketValuesSingleKey(
         const std::unordered_map<MetricDimensionKey, std::vector<ValueBucket>>& mPastBuckets,
         const std::initializer_list<int>& expectedValuesList) {
-
     std::vector<int> expectedValues(expectedValuesList);
+    if (expectedValues.size() == 0) {
+        ASSERT_EQ(0, mPastBuckets.size());
+        return;
+    }
+
     ASSERT_EQ(1, mPastBuckets.size());
     ASSERT_EQ(expectedValues.size(), mPastBuckets.begin()->second.size());
 
@@ -2611,6 +2615,84 @@ TEST(ValueMetricProducerTest, TestBucketBoundariesOnAppUpgrade) {
 
     // Bucket should have been completed.
     assertPastBucketValuesSingleKey(valueProducer->mPastBuckets, {9});
+}
+
+TEST(ValueMetricProducerTest, TestDataIsNotUpdatedWhenNoConditionChanged) {
+    ValueMetric metric = ValueMetricProducerTestHelper::createMetricWithCondition();
+
+    sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
+    EXPECT_CALL(*pullerManager, Pull(tagId, _))
+            // First on condition changed.
+            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
+                data->clear();
+                data->push_back(ValueMetricProducerTestHelper::createEvent(bucketStartTimeNs, 1));
+                return true;
+            }))
+            // Second on condition changed.
+            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
+                data->clear();
+                data->push_back(ValueMetricProducerTestHelper::createEvent(bucketStartTimeNs, 3));
+                return true;
+            }));
+
+    sp<ValueMetricProducer> valueProducer =
+            ValueMetricProducerTestHelper::createValueProducerWithCondition(pullerManager, metric);
+
+    valueProducer->onConditionChanged(true, bucketStartTimeNs + 8);
+    valueProducer->onConditionChanged(false, bucketStartTimeNs + 10);
+    valueProducer->onConditionChanged(false, bucketStartTimeNs + 10);
+
+    EXPECT_EQ(1UL, valueProducer->mCurrentSlicedBucket.size());
+    auto curInterval = valueProducer->mCurrentSlicedBucket.begin()->second[0];
+    EXPECT_EQ(true, curInterval.hasValue);
+    EXPECT_EQ(2, curInterval.value.long_value);
+}
+
+TEST(ValueMetricProducerTest, TestBucketInvalidIfGlobalBaseIsNotSet) {
+    ValueMetric metric = ValueMetricProducerTestHelper::createMetricWithCondition();
+
+    sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
+    EXPECT_CALL(*pullerManager, Pull(tagId, _))
+            // First condition change.
+            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
+                data->clear();
+                data->push_back(ValueMetricProducerTestHelper::createEvent(bucketStartTimeNs, 1));
+                return true;
+            }))
+            // 2nd condition change.
+            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
+                data->clear();
+                data->push_back(ValueMetricProducerTestHelper::createEvent(bucket2StartTimeNs, 1));
+                return true;
+            }))
+            // 3rd condition change.
+            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
+                data->clear();
+                data->push_back(ValueMetricProducerTestHelper::createEvent(bucket2StartTimeNs, 1));
+                return true;
+            }));
+
+    sp<ValueMetricProducer> valueProducer =
+            ValueMetricProducerTestHelper::createValueProducerWithCondition(pullerManager, metric);
+    valueProducer->onConditionChanged(true, bucket2StartTimeNs + 10);
+
+    vector<shared_ptr<LogEvent>> allData;
+    allData.push_back(ValueMetricProducerTestHelper::createEvent(bucketStartTimeNs + 3, 10));
+    valueProducer->onDataPulled(allData, /** succeed */ false, bucketStartTimeNs + 3);
+
+    allData.clear();
+    allData.push_back(ValueMetricProducerTestHelper::createEvent(bucket2StartTimeNs, 20));
+    valueProducer->onDataPulled(allData, /** succeed */ false, bucket2StartTimeNs);
+
+    valueProducer->onConditionChanged(false, bucket2StartTimeNs + 8);
+    valueProducer->onConditionChanged(true, bucket2StartTimeNs + 10);
+
+    allData.clear();
+    allData.push_back(ValueMetricProducerTestHelper::createEvent(bucket3StartTimeNs, 30));
+    valueProducer->onDataPulled(allData, /** succeed */ true, bucket2StartTimeNs);
+
+    // There was not global base available so all buckets are invalid.
+    assertPastBucketValuesSingleKey(valueProducer->mPastBuckets, {});
 }
 
 static StatsLogReport outputStreamToProto(ProtoOutputStream* proto) {
