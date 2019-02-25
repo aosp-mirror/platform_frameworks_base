@@ -232,6 +232,11 @@ static const char* kGenerationalCCRuntimeOption = "-Xgc:generational_cc";
 // Copying (CC) garbage collector.
 static const char* kNoGenerationalCCRuntimeOption = "-Xgc:nogenerational_cc";
 
+// Feature flag name for running the JIT in Zygote experiment, b/119800099.
+static const char* ENABLE_APEX_IMAGE = "enable_apex_image";
+// Flag to pass to the runtime when using the apex image.
+static const char* kApexImageOption = "-Ximage:/system/framework/apex.art";
+
 static AndroidRuntime* gCurRuntime = NULL;
 
 /*
@@ -666,8 +671,17 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote)
     char jdwpProviderBuf[sizeof("-XjdwpProvider:") - 1 + PROPERTY_VALUE_MAX];
     char bootImageBuf[sizeof("-Ximage:") - 1 + PROPERTY_VALUE_MAX];
 
-    if (parseRuntimeOption("dalvik.vm.boot-image", bootImageBuf, "-Ximage:")) {
-        ALOGI("Boot image: '%s'\n", bootImageBuf);
+    std::string use_apex_image =
+        server_configurable_flags::GetServerConfigurableFlag(RUNTIME_NATIVE_BOOT_NAMESPACE,
+                                                             ENABLE_APEX_IMAGE,
+                                                             /*default_value=*/ "");
+    if (use_apex_image == "true") {
+        addOption(kApexImageOption);
+        ALOGI("Using Apex boot image: '%s'\n", kApexImageOption);
+    } else if (parseRuntimeOption("dalvik.vm.boot-image", bootImageBuf, "-Ximage:")) {
+        ALOGI("Using dalvik.vm.boot-image: '%s'\n", bootImageBuf);
+    } else {
+        ALOGI("Using default boot image");
     }
 
     bool checkJni = false;
