@@ -22,6 +22,10 @@ import android.apex.ApexInfo;
 import android.apex.ApexInfoList;
 import android.apex.ApexSessionInfo;
 import android.apex.IApexService;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageParser;
 import android.content.pm.PackageParser.PackageParserException;
@@ -49,17 +53,29 @@ import java.util.stream.Collectors;
 class ApexManager {
     static final String TAG = "ApexManager";
     private final IApexService mApexService;
+    private final Context mContext;
     private final Object mLock = new Object();
     @GuardedBy("mLock")
     private Map<String, PackageInfo> mActivePackagesCache;
 
-    ApexManager() {
+    ApexManager(Context context) {
         try {
             mApexService = IApexService.Stub.asInterface(
                 ServiceManager.getServiceOrThrow("apexservice"));
         } catch (ServiceNotFoundException e) {
             throw new IllegalStateException("Required service apexservice not available");
         }
+        mContext = context;
+    }
+
+    void systemReady() {
+        mContext.registerReceiver(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                onBootCompleted();
+                mContext.unregisterReceiver(this);
+            }
+        }, new IntentFilter(Intent.ACTION_BOOT_COMPLETED));
     }
 
     private void populateActivePackagesCacheIfNeeded() {
