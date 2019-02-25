@@ -68,7 +68,6 @@ import android.view.Surface;
 import android.view.ViewRootImpl;
 import android.view.test.InsetsModeSession;
 
-import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
 import com.android.dx.mockito.inline.extended.ExtendedMockito;
@@ -97,7 +96,6 @@ import java.util.List;
 public class DisplayContentTests extends WindowTestsBase {
 
     @Test
-    @FlakyTest(detail = "Promote to presubmit when shown to be stable.")
     public void testForAllWindows() {
         final WindowState exitingAppWindow = createWindow(null, TYPE_BASE_APPLICATION,
                 mDisplayContent, "exiting app");
