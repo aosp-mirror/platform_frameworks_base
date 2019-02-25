@@ -21,13 +21,22 @@ package android.media.tv;
  */
 oneway interface ITvRemoteServiceInput {
     // InputBridge related
+    @UnsupportedAppUsage
     void openInputBridge(IBinder token, String name, int width, int height, int maxPointers);
+    @UnsupportedAppUsage
     void closeInputBridge(IBinder token);
+    @UnsupportedAppUsage
     void clearInputBridge(IBinder token);
+    @UnsupportedAppUsage
     void sendTimestamp(IBinder token, long timestamp);
+    @UnsupportedAppUsage
     void sendKeyDown(IBinder token, int keyCode);
+    @UnsupportedAppUsage
     void sendKeyUp(IBinder token, int keyCode);
+    @UnsupportedAppUsage
     void sendPointerDown(IBinder token, int pointerId, int x, int y);
+    @UnsupportedAppUsage
     void sendPointerUp(IBinder token, int pointerId);
+    @UnsupportedAppUsage
     void sendPointerSync(IBinder token);
 }

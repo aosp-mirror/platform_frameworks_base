@@ -85,6 +85,7 @@ interface ILocationManager
     boolean stopGnssBatch();
     boolean injectLocation(in Location location);
 
+    @UnsupportedAppUsage
     List<String> getAllProviders();
     List<String> getProviders(in Criteria criteria, boolean enabledOnly);
     String getBestProvider(in Criteria criteria, boolean enabledOnly);
