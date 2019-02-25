@@ -1305,8 +1305,8 @@ package android.content {
   }
 
   public abstract class ContentResolver {
-    method @Nullable public android.os.Bundle getCache(@NonNull android.net.Uri);
-    method public void putCache(@NonNull android.net.Uri, @Nullable android.os.Bundle);
+    method @Nullable @RequiresPermission("android.permission.CACHE_CONTENT") public android.os.Bundle getCache(@NonNull android.net.Uri);
+    method @RequiresPermission("android.permission.CACHE_CONTENT") public void putCache(@NonNull android.net.Uri, @Nullable android.os.Bundle);
   }
 
   public abstract class Context {
