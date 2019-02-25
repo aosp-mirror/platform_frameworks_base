@@ -26,8 +26,9 @@ import com.android.internal.app.IAppOpsActiveCallback;
 import com.android.internal.app.IAppOpsNotedCallback;
 
 interface IAppOpsService {
-    // These first methods are also called by native code, so must
+    // These methods are also called by native code, so must
     // be kept in sync with frameworks/native/libs/binder/include/binder/IAppOpsService.h
+    // and not be reordered
     int checkOperation(int code, int uid, String packageName);
     int noteOperation(int code, int uid, String packageName);
     int startOperation(IBinder token, int code, int uid, String packageName,
@@ -38,6 +39,10 @@ interface IAppOpsService {
     void stopWatchingMode(IAppOpsCallback callback);
     IBinder getToken(IBinder clientToken);
     int permissionToOpCode(String permission);
+    int checkAudioOperation(int code, int usage, int uid, String packageName);
+    // End of methods also called by native code.
+    // Any new method exposed to native must be added after the last one, do not reorder
+
     int noteProxyOperation(int code, int proxyUid, String proxyPackageName,
                 int callingUid, String callingPackageName);
 
@@ -62,7 +67,6 @@ interface IAppOpsService {
     void setMode(int code, int uid, String packageName, int mode);
     @UnsupportedAppUsage
     void resetAllModes(int reqUserId, String reqPackageName);
-    int checkAudioOperation(int code, int usage, int uid, String packageName);
     void setAudioRestriction(int code, int usage, int uid, int mode, in String[] exceptionPackages);
 
     void setUserRestrictions(in Bundle restrictions, IBinder token, int userHandle);
