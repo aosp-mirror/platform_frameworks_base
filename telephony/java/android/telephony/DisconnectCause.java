@@ -26,7 +26,7 @@ import android.annotation.UnsupportedAppUsage;
  * @hide
  */
 @SystemApi
-public class DisconnectCause {
+public final class DisconnectCause {
 
     /** The disconnect cause is not valid (Not received a disconnect cause) */
     public static final int NOT_VALID                      = -1;
