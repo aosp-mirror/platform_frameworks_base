@@ -40,6 +40,7 @@ import android.annotation.StyleRes;
 import android.annotation.TestApi;
 import android.annotation.UiThread;
 import android.annotation.UnsupportedAppUsage;
+import android.content.AutofillOptions;
 import android.content.ClipData;
 import android.content.Context;
 import android.content.ContextWrapper;
@@ -9524,8 +9525,22 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     private boolean isAutofillable() {
-        return getAutofillType() != AUTOFILL_TYPE_NONE && isImportantForAutofill()
-                && getAutofillViewId() > LAST_APP_AUTOFILL_ID;
+        if (getAutofillType() == AUTOFILL_TYPE_NONE) return false;
+
+        if (!isImportantForAutofill()) {
+            // View is not important for "regular" autofill, so we must check if Augmented Autofill
+            // is enabled for the activity
+            final AutofillOptions options = mContext.getAutofillOptions();
+            if (options == null || !options.augmentedEnabled) {
+                // TODO(b/123100824): should also check if activity is whitelisted
+                return false;
+            }
+            final AutofillManager afm = getAutofillManager();
+            if (afm == null) return false;
+            afm.notifyViewEnteredForAugmentedAutofill(this);
+        }
+
+        return getAutofillViewId() > LAST_APP_AUTOFILL_ID;
     }
 
     /** @hide */
