@@ -346,7 +346,7 @@ public class BubbleStackView extends FrameLayout {
 
         // Remove it from the views
         int removedIndex = mBubbleContainer.indexOfChild(b.iconView);
-        b.expandedView.destroyActivityView(this /* tmpParent */);
+        b.expandedView.destroyActivityView();
         mBubbleContainer.removeView(b.iconView);
 
         int bubbleCount = mBubbleContainer.getChildCount();
@@ -375,7 +375,7 @@ public class BubbleStackView extends FrameLayout {
     public void stackDismissed() {
         for (Bubble bubble : mBubbleData.getBubbles()) {
             bubble.entry.setBubbleDismissed(true);
-            bubble.expandedView.destroyActivityView(this /* tmpParent */);
+            bubble.expandedView.destroyActivityView();
         }
         mBubbleData.clear();
         collapseStack();

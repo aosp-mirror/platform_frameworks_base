@@ -48,7 +48,6 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.util.StatsLog;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.WindowInsets;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
@@ -453,23 +452,14 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
     /**
      * Removes and releases an ActivityView if one was previously created for this bubble.
      */
-    public void destroyActivityView(ViewGroup tmpParent) {
+    public void destroyActivityView() {
         if (mActivityView == null) {
             return;
         }
-        if (!mActivityViewReady) {
-            // release not needed, never initialized?
-            mActivityView = null;
-            return;
+        if (mActivityViewReady) {
+            mActivityView.release();
         }
-        // HACK: release() will crash if the view is not attached.
-        if (!isAttachedToWindow()) {
-            mActivityView.setVisibility(View.GONE);
-            tmpParent.addView(this);
-        }
-
-        mActivityView.release();
-        ((ViewGroup) getParent()).removeView(this);
+        removeView(mActivityView);
         mActivityView = null;
         mActivityViewReady = false;
     }
