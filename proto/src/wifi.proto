@@ -521,6 +521,9 @@ message WifiLog {
 
   // Total number of saved networks with mac randomization enabled.
   optional int32 num_saved_networks_with_mac_randomization = 138;
+
+  // Link Probe metrics
+  optional LinkProbeStats link_probe_stats = 139;
 }
 
 // Information that gets logged for every WiFi connection.
@@ -1959,7 +1962,6 @@ message DeviceMobilityStatePnoScanStats {
   // The total duration elapsed while in this mobility state, in ms
   optional int64 total_duration_ms = 3;
 
-
   // the total duration elapsed while in this mobility state with PNO scans running, in ms
   optional int64 pno_duration_ms = 4;
 }
@@ -2210,4 +2212,77 @@ message WifiConfigStoreIO {
     // Number of read/write durations that fit into this bucket
     optional int32 count = 3;
   }
+}
+
+// Histogram bucket counting with int32. Range is [start, end)
+message HistogramBucketInt32 {
+  // lower range of the bucket (inclusive)
+  optional int32 start = 1;
+
+  // upper range of the bucket (exclusive)
+  optional int32 end = 2;
+
+  // number of samples in the bucket
+  optional int32 count = 3;
+}
+
+// Single entry in a map from int32 => int32
+message MapEntryInt32Int32 {
+  // the key
+  optional int32 key = 1;
+
+  // the value
+  optional int32 value = 2;
+}
+
+message LinkProbeStats {
+  enum LinkProbeFailureReason {
+    // unknown reason
+    LINK_PROBE_FAILURE_REASON_UNKNOWN = 0;
+
+    // Specified MCS rate when it is unsupported by the driver.
+    LINK_PROBE_FAILURE_REASON_MCS_UNSUPPORTED = 1;
+
+    // Driver reported that no ACK was received for the transmitted probe.
+    LINK_PROBE_FAILURE_REASON_NO_ACK = 2;
+
+    // Driver failed to report on the status of the transmitted probe within the timeout.
+    LINK_PROBE_FAILURE_REASON_TIMEOUT = 3;
+
+    // An existing link probe is in progress.
+    LINK_PROBE_FAILURE_REASON_ALREADY_STARTED = 4;
+  }
+
+  // Counts the number of failures for each failure reason.
+  message LinkProbeFailureReasonCount {
+    // The failure reason.
+    optional LinkProbeFailureReason failure_reason = 1;
+
+    // The number of occurrences for this failure reason.
+    optional int32 count = 2;
+  }
+
+  // Counts the occurrences of RSSI values when a link probe succeeds.
+  repeated MapEntryInt32Int32 success_rssi_counts = 1;
+
+  // Counts the occurrences of RSSI values when a link probe fails.
+  repeated MapEntryInt32Int32 failure_rssi_counts = 2;
+
+  // Counts the occurrences of Link Speed values when a link probe succeeds.
+  repeated MapEntryInt32Int32 success_link_speed_counts = 3;
+
+  // Counts the occurrences of Link Speed values when a link probe fails.
+  repeated MapEntryInt32Int32 failure_link_speed_counts = 4;
+
+  // Histogram for the number of seconds since the last TX success when a link probe succeeds.
+  repeated HistogramBucketInt32 success_seconds_since_last_tx_success_histogram = 5;
+
+  // Histogram for the number of seconds since the last TX success when a link probe fails.
+  repeated HistogramBucketInt32 failure_seconds_since_last_tx_success_histogram = 6;
+
+  // Histogram for the elapsed time of successful link probes, in ms.
+  repeated HistogramBucketInt32 success_elapsed_time_ms_histogram = 7;
+
+  // Counts the occurrences of error codes for failed link probes.
+  repeated LinkProbeFailureReasonCount failure_reason_counts = 8;
 }
