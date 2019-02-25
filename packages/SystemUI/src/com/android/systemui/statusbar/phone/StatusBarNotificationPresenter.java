@@ -64,9 +64,9 @@ import com.android.systemui.statusbar.notification.NotificationAlertingManager;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationInterruptionStateProvider;
-import com.android.systemui.statusbar.notification.NotificationRowBinder;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.collection.NotificationRowBinderImpl;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
@@ -79,7 +79,8 @@ import com.android.systemui.statusbar.policy.KeyguardMonitor;
 import java.util.ArrayList;
 
 public class StatusBarNotificationPresenter implements NotificationPresenter,
-        ConfigurationController.ConfigurationListener {
+        ConfigurationController.ConfigurationListener,
+        NotificationRowBinderImpl.BindRowCallback {
 
     private final LockscreenGestureLogger mLockscreenGestureLogger =
             Dependency.get(LockscreenGestureLogger.class);
@@ -97,8 +98,6 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
             (SysuiStatusBarStateController) Dependency.get(StatusBarStateController.class);
     private final NotificationEntryManager mEntryManager =
             Dependency.get(NotificationEntryManager.class);
-    private final NotificationRowBinder mNotificationRowBinder =
-            Dependency.get(NotificationRowBinder.class);
     private final NotificationInterruptionStateProvider mNotificationInterruptionStateProvider =
             Dependency.get(NotificationInterruptionStateProvider.class);
     private final NotificationMediaManager mMediaManager =
@@ -140,7 +139,8 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
             ScrimController scrimController,
             ActivityLaunchAnimator activityLaunchAnimator,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
-            NotificationAlertingManager notificationAlertingManager) {
+            NotificationAlertingManager notificationAlertingManager,
+            NotificationRowBinderImpl notificationRowBinder) {
         mContext = context;
         mNotificationPanel = panel;
         mHeadsUpManager = headsUp;
@@ -217,7 +217,7 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
             mEntryManager.addNotificationLifetimeExtender(mGutsManager);
             mEntryManager.addNotificationLifetimeExtenders(
                     remoteInputManager.getLifetimeExtenders());
-            mNotificationRowBinder.setUpWithPresenter(this, notifListContainer, mHeadsUpManager,
+            notificationRowBinder.setUpWithPresenter(this, notifListContainer, mHeadsUpManager,
                     mEntryManager, this);
             mNotificationInterruptionStateProvider.setUpWithPresenter(
                     this, mHeadsUpManager, this::canHeadsUp);

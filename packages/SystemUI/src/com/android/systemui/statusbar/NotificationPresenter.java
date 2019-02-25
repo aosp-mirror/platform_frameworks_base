@@ -15,7 +15,6 @@
  */
 package com.android.systemui.statusbar;
 
-import com.android.systemui.statusbar.notification.NotificationRowBinder;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 
@@ -27,8 +26,7 @@ import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
  * want to perform some action before doing so).
  */
 public interface NotificationPresenter extends ExpandableNotificationRow.OnExpandClickListener,
-        ActivatableNotificationView.OnActivatedListener,
-        NotificationRowBinder.BindRowCallback {
+        ActivatableNotificationView.OnActivatedListener {
     /**
      * Returns true if the presenter is not visible. For example, it may not be necessary to do
      * animations if this returns true.
