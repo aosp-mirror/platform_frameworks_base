@@ -3271,7 +3271,12 @@ public class DisplayPolicy {
         }
 
         final WindowState w = mTopFullscreenOpaqueWindowState;
-        if (w != mFocusedWindow) {
+        if (w == null || w != mFocusedWindow) {
+            return false;
+        }
+        // If the bounds of activity window is different from its parent, then reject to be seamless
+        // because the window position may change after rotation that will look like a sudden jump.
+        if (w.mAppToken != null && !w.mAppToken.matchParentBounds()) {
             return false;
         }
 
@@ -3279,8 +3284,7 @@ public class DisplayPolicy {
         // it and is in the fullscreen opaque state. Seamless rotation
         // requires freezing various Surface states and won't work well
         // with animations, so we disable it in the animation case for now.
-        if (w != null && !w.isAnimatingLw()
-                && w.getAttrs().rotationAnimation == ROTATION_ANIMATION_SEAMLESS) {
+        if (!w.isAnimatingLw() && w.getAttrs().rotationAnimation == ROTATION_ANIMATION_SEAMLESS) {
             return true;
         }
         return false;
