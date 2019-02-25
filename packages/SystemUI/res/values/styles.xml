@@ -458,8 +458,15 @@
     </style>
 
     <style name="TextAppearance.QSEdit.Headers"
-        parent="@*android:style/TextAppearance.Material.Body2">
-        <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
+        parent="@*android:style/TextAppearance.DeviceDefault.Body2">
+        <item name="android:textSize">11sp</item>
+        <item name="android:textColor">?android:attr/textColorSecondary</item>
+        <item name="android:textAllCaps">true</item>
+    </style>
+
+    <style name="QSCustomizeToolbar" parent="@*android:style/Widget.DeviceDefault.Toolbar">
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:elevation">10dp</item>
     </style>
 
     <style name="edit_theme" parent="qs_theme">

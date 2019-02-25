@@ -35,6 +35,8 @@
     <color name="status_bar_clock_color">#FFFFFFFF</color>
     <color name="qs_user_detail_icon_muted">#FFFFFFFF</color> <!-- not so muted after all -->
     <color name="qs_tile_disabled_color">#9E9E9E</color> <!-- 38% black -->
+    <color name="qs_customize_background">@color/GM2_grey_50</color>
+    <color name="qs_customize_decoration">@color/GM2_grey_100</color>
 
     <!-- Tint color for the content on the notification overflow card. -->
     <color name="keyguard_overflow_content_color">#ff686868</color>
@@ -72,7 +74,7 @@
     <color name="notification_primary_text_color">@*android:color/notification_primary_text_color_light</color>
 
     <!-- The "inside" of a notification, reached via longpress -->
-    <color name="notification_guts_bg_color">#f8f9fa</color>
+    <color name="notification_guts_bg_color">@color/GM2_grey_50</color>
 
     <color name="assist_orb_color">#ffffff</color>
 
@@ -123,7 +125,7 @@
 
     <color name="zen_introduction">#ffffffff</color>
 
-    <color name="smart_reply_button_text">#5F6368</color>
+    <color name="smart_reply_button_text">@color/GM2_grey_700</color>
     <color name="smart_reply_button_text_dark_bg">@*android:color/notification_primary_text_color_dark</color>
     <color name="smart_reply_button_background">#ffffffff</color>
     <color name="smart_reply_button_stroke">#ffdadce0</color>
@@ -134,4 +136,17 @@
 
     <!-- Logout button -->
     <color name="logout_button_bg_color">#ccffffff</color>
+
+    <!-- GM2 colors -->
+    <color name="GM2_grey_50">#F8F9FA</color>
+    <color name="GM2_grey_100">#F1F3F4</color>
+    <color name="GM2_grey_200">#E8EAED</color>
+    <color name="GM2_grey_300">#DADCE0</color>
+    <color name="GM2_grey_400">#BDC1C6</color>
+    <color name="GM2_grey_500">#9AA0A6</color>
+    <color name="GM2_grey_600">#80868B</color>
+    <color name="GM2_grey_650">#70757A</color>
+    <color name="GM2_grey_700">#5F6368</color>
+    <color name="GM2_grey_800">#3C4043</color>
+    <color name="GM2_grey_900">#202124</color>
 </resources>

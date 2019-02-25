@@ -37,7 +37,8 @@
             android:layout_height="wrap_content"
             android:background="@drawable/qs_customizer_toolbar"
             android:navigationContentDescription="@*android:string/action_bar_up_description"
-            style="?android:attr/toolbarStyle" />
+            style="@style/QSCustomizeToolbar"
+            />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@android:id/list"
