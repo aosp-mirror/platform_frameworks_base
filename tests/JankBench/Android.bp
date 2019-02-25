@@ -1,0 +1,21 @@
+android_test {
+    name: "JankBench",
+    manifest: "app/src/main/AndroidManifest.xml",
+    sdk_version: "current",
+    // omit gradle 'build' dir
+    srcs: ["app/src/main/java/**/*.java"],
+    // use appcompat/support lib from the tree, so improvements/
+    // regressions are reflected in test data
+    resource_dirs: ["app/src/main/res"],
+    static_libs: [
+        "android-support-design",
+        "android-support-v4",
+        "android-support-v7-appcompat",
+        "android-support-v7-cardview",
+        "android-support-v7-recyclerview",
+        "android-support-v17-leanback",
+        "apache-commons-math",
+        "junit",
+    ],
+    test_suites: ["device-tests"],
+}
