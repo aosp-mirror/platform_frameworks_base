@@ -22,6 +22,7 @@ import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.provider.Settings;
 import android.service.quicksettings.Tile;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -208,6 +209,9 @@ public class WifiTile extends QSTileImpl<SignalState> {
             if (wifiConnected) {
                 minimalContentDescription.append(cb.wifiSignalContentDescription).append(",");
                 minimalContentDescription.append(removeDoubleQuotes(cb.ssid));
+                if (!TextUtils.isEmpty(state.secondaryLabel)) {
+                    minimalContentDescription.append(",").append(state.secondaryLabel);
+                }
             }
         }
         state.contentDescription = minimalContentDescription.toString();
