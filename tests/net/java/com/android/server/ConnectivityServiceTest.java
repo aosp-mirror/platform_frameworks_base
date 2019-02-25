@@ -17,10 +17,10 @@
 package com.android.server;
 
 import static android.net.ConnectivityManager.CONNECTIVITY_ACTION;
+import static android.net.ConnectivityManager.NETID_UNSET;
 import static android.net.ConnectivityManager.PRIVATE_DNS_MODE_OFF;
 import static android.net.ConnectivityManager.PRIVATE_DNS_MODE_OPPORTUNISTIC;
 import static android.net.ConnectivityManager.PRIVATE_DNS_MODE_PROVIDER_HOSTNAME;
-import static android.net.ConnectivityManager.NETID_UNSET;
 import static android.net.ConnectivityManager.TYPE_ETHERNET;
 import static android.net.ConnectivityManager.TYPE_MOBILE;
 import static android.net.ConnectivityManager.TYPE_MOBILE_FOTA;
@@ -5224,30 +5224,34 @@ public class ConnectivityServiceTest {
         mCm.unregisterNetworkCallback(networkCallback);
     }
 
-    private static final String TEST_TCP_BUFFER_SIZES = "1,2,3,4,5,6";
-
-    private void verifyTcpBufferSizeChange(String tcpBufferSizes) throws Exception {
+    private void verifyTcpBufferSizeChange(String tcpBufferSizes) {
         String[] values = tcpBufferSizes.split(",");
         String rmemValues = String.join(" ", values[0], values[1], values[2]);
         String wmemValues = String.join(" ", values[3], values[4], values[5]);
         waitForIdle();
-        verify(mMockNetd, atLeastOnce()).setTcpRWmemorySize(rmemValues, wmemValues);
+        try {
+            verify(mMockNetd, atLeastOnce()).setTcpRWmemorySize(rmemValues, wmemValues);
+        } catch (RemoteException e) {
+            fail("mMockNetd should never throw RemoteException");
+        }
         reset(mMockNetd);
     }
 
     @Test
-    public void testTcpBufferReset() throws Exception {
+    public void testTcpBufferReset() {
+        final String testTcpBufferSizes = "1,2,3,4,5,6";
+
         mCellNetworkAgent = new MockNetworkAgent(TRANSPORT_CELLULAR);
         reset(mMockNetd);
-        // Simple connection should have updated tcp buffer size.
+        // Switching default network updates TCP buffer sizes.
         mCellNetworkAgent.connect(false);
         verifyTcpBufferSizeChange(ConnectivityService.DEFAULT_TCP_BUFFER_SIZES);
 
         // Change link Properties should have updated tcp buffer size.
         LinkProperties lp = new LinkProperties();
-        lp.setTcpBufferSizes(TEST_TCP_BUFFER_SIZES);
+        lp.setTcpBufferSizes(testTcpBufferSizes);
         mCellNetworkAgent.sendLinkProperties(lp);
-        verifyTcpBufferSizeChange(TEST_TCP_BUFFER_SIZES);
+        verifyTcpBufferSizeChange(testTcpBufferSizes);
     }
 
     @Test
