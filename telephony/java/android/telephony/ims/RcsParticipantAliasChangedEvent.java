@@ -21,6 +21,8 @@ import android.annotation.Nullable;
 /**
  * An event that indicates an {@link RcsParticipant}'s alias was changed. Please see US18-2 - GSMA
  * RCC.71 (RCS Universal Profile Service Definition Document)
+ *
+ * @hide
  */
 public final class RcsParticipantAliasChangedEvent extends RcsEvent {
     // The participant that changed their alias

@@ -22,6 +22,8 @@ import java.util.List;
  * The result of a {@link RcsMessageStore#getRcsEvents(RcsEventQueryParams)}
  * call. This class allows getting the token for querying the next batch of events in order to
  * prevent handling large amounts of data at once.
+ *
+ * @hide
  */
 public class RcsEventQueryResult {
     private RcsQueryContinuationToken mContinuationToken;

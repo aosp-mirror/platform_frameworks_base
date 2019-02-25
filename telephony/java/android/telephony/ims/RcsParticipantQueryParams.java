@@ -30,6 +30,8 @@ import java.security.InvalidParameterException;
  * The parameters to pass into
  * {@link RcsMessageStore#getRcsParticipants(RcsParticipantQueryParams)} in order to select a
  * subset of {@link RcsThread}s present in the message store.
+ *
+ * @hide
  */
 public final class RcsParticipantQueryParams implements Parcelable {
     /**
