@@ -54,6 +54,7 @@ interface IBackupManager {
     /**
      * {@link android.app.backup.IBackupManager.dataChangedForUser} for the calling user id.
      */
+    @UnsupportedAppUsage
     void dataChanged(String packageName);
 
     /**
@@ -73,6 +74,7 @@ interface IBackupManager {
     /**
      * {@link android.app.backup.IBackupManager.clearBackupDataForUser} for the calling user id.
      */
+    @UnsupportedAppUsage
     void clearBackupData(String transportName, String packageName);
 
     /**
@@ -155,6 +157,7 @@ interface IBackupManager {
     /**
      * {@link android.app.backup.IBackupManager.setBackupEnabledForUser} for the calling user id.
      */
+    @UnsupportedAppUsage
     void setBackupEnabled(boolean isEnabled);
 
     /**
@@ -178,6 +181,7 @@ interface IBackupManager {
     /**
      * {@link android.app.backup.IBackupManager.setAutoRestoreForUser} for the calling user id.
      */
+    @UnsupportedAppUsage
     void setAutoRestore(boolean doAutoRestore);
 
     /**
@@ -194,6 +198,7 @@ interface IBackupManager {
     /**
      * {@link android.app.backup.IBackupManager.isBackupEnabledForUser} for the calling user id.
      */
+    @UnsupportedAppUsage
     boolean isBackupEnabled();
 
     /**
@@ -322,6 +327,7 @@ interface IBackupManager {
      * {@link android.app.backup.IBackupManager.acknowledgeFullBackupOrRestoreForUser} for the
      * calling user id.
      */
+    @UnsupportedAppUsage
     void acknowledgeFullBackupOrRestore(int token, boolean allow,
             in String curPassword, in String encryptionPassword,
             IFullBackupRestoreObserver observer);
@@ -371,6 +377,7 @@ interface IBackupManager {
     /**
      * {@link android.app.backup.IBackupManager.getCurrentTransportForUser} for the calling user id.
      */
+    @UnsupportedAppUsage
     String getCurrentTransport();
 
      /**
@@ -397,6 +404,7 @@ interface IBackupManager {
     /**
      * {@link android.app.backup.IBackupManager.listAllTransportsForUser} for the calling user id.
      */
+    @UnsupportedAppUsage
     String[] listAllTransports();
 
     /**
@@ -434,6 +442,7 @@ interface IBackupManager {
      * {@link android.app.backup.IBackupManager.selectBackupTransportForUser} for the calling user
      * id.
      */
+    @UnsupportedAppUsage
     String selectBackupTransport(String transport);
 
     /**
@@ -590,6 +599,7 @@ interface IBackupManager {
      * @param whichUser User handle of the defined user whose backup active state
      *     is being queried.
      */
+    @UnsupportedAppUsage
     boolean isBackupServiceActive(int whichUser);
 
     /**
