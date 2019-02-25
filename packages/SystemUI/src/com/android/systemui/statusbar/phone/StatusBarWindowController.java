@@ -246,7 +246,7 @@ public class StatusBarWindowController implements Callback, Dumpable, Configurat
     private boolean isExpanded(State state) {
         return !state.forceCollapsed && (state.isKeyguardShowingAndNotOccluded()
                 || state.panelVisible || state.keyguardFadingAway || state.bouncerShowing
-                || state.headsUpShowing || state.bubblesShowing
+                || state.headsUpShowing || state.bubblesShowing || state.assistShowing
                 || state.scrimsVisibility != ScrimController.VISIBILITY_FULLY_TRANSPARENT);
     }
 
@@ -490,6 +490,21 @@ public class StatusBarWindowController implements Callback, Dumpable, Configurat
     }
 
     /**
+     * Sets whether assist UI is showing on the screen.
+     */
+    public void setAssistShowing(boolean assistShowing) {
+        mCurrentState.assistShowing = assistShowing;
+        apply(mCurrentState);
+    }
+
+    /**
+     * The assist UI showing state for the status bar.
+     */
+    public boolean getAssistShowing() {
+        return mCurrentState.assistShowing;
+    }
+
+    /**
      * Sets if there is a bubble being expanded on the screen.
      */
     public void setBubbleExpanded(boolean bubbleExpanded) {
@@ -558,6 +573,7 @@ public class StatusBarWindowController implements Callback, Dumpable, Configurat
         boolean notTouchable;
         boolean bubblesShowing;
         boolean bubbleExpanded;
+        boolean assistShowing;
 
         /**
          * The {@link StatusBar} state from the status bar.
