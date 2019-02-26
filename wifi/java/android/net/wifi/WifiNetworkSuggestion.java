@@ -45,7 +45,7 @@ public final class WifiNetworkSuggestion implements Parcelable {
     /**
      * Builder used to create {@link WifiNetworkSuggestion} objects.
      */
-    public static class Builder {
+    public static final class Builder {
         private static final int UNASSIGNED_PRIORITY = -1;
 
         /**
@@ -125,7 +125,7 @@ public final class WifiNetworkSuggestion implements Parcelable {
          * @return Instance of {@link Builder} to enable chaining of the builder method.
          * @throws IllegalArgumentException if the SSID is not valid unicode.
          */
-        public Builder setSsid(@NonNull String ssid) {
+        public @NonNull Builder setSsid(@NonNull String ssid) {
             checkNotNull(ssid);
             final CharsetEncoder unicodeEncoder = StandardCharsets.UTF_8.newEncoder();
             if (!unicodeEncoder.canEncode(ssid)) {
@@ -150,7 +150,7 @@ public final class WifiNetworkSuggestion implements Parcelable {
          * @param bssid BSSID of the network.
          * @return Instance of {@link Builder} to enable chaining of the builder method.
          */
-        public Builder setBssid(@NonNull MacAddress bssid) {
+        public @NonNull Builder setBssid(@NonNull MacAddress bssid) {
             checkNotNull(bssid);
             mBssid = MacAddress.fromBytes(bssid.toByteArray());
             return this;
@@ -161,7 +161,7 @@ public final class WifiNetworkSuggestion implements Parcelable {
          *
          * @return Instance of {@link Builder} to enable chaining of the builder method.
          */
-        public Builder setIsEnhancedOpen() {
+        public @NonNull Builder setIsEnhancedOpen() {
             mIsEnhancedOpen = true;
             return this;
         }
@@ -174,7 +174,7 @@ public final class WifiNetworkSuggestion implements Parcelable {
          * @return Instance of {@link Builder} to enable chaining of the builder method.
          * @throws IllegalArgumentException if the passphrase is not ASCII encodable.
          */
-        public Builder setWpa2Passphrase(@NonNull String passphrase) {
+        public @NonNull Builder setWpa2Passphrase(@NonNull String passphrase) {
             checkNotNull(passphrase);
             final CharsetEncoder asciiEncoder = StandardCharsets.US_ASCII.newEncoder();
             if (!asciiEncoder.canEncode(passphrase)) {
@@ -192,7 +192,7 @@ public final class WifiNetworkSuggestion implements Parcelable {
          * @return Instance of {@link Builder} to enable chaining of the builder method.
          * @throws IllegalArgumentException if the passphrase is not ASCII encodable.
          */
-        public Builder setWpa3Passphrase(@NonNull String passphrase) {
+        public @NonNull Builder setWpa3Passphrase(@NonNull String passphrase) {
             checkNotNull(passphrase);
             final CharsetEncoder asciiEncoder = StandardCharsets.US_ASCII.newEncoder();
             if (!asciiEncoder.canEncode(passphrase)) {
@@ -209,7 +209,7 @@ public final class WifiNetworkSuggestion implements Parcelable {
          * @param enterpriseConfig Instance of {@link WifiEnterpriseConfig}.
          * @return Instance of {@link Builder} to enable chaining of the builder method.
          */
-        public Builder setWpa2EnterpriseConfig(
+        public @NonNull Builder setWpa2EnterpriseConfig(
                 @NonNull WifiEnterpriseConfig enterpriseConfig) {
             checkNotNull(enterpriseConfig);
             mWpa2EnterpriseConfig = new WifiEnterpriseConfig(enterpriseConfig);
@@ -223,7 +223,7 @@ public final class WifiNetworkSuggestion implements Parcelable {
          * @param enterpriseConfig Instance of {@link WifiEnterpriseConfig}.
          * @return Instance of {@link Builder} to enable chaining of the builder method.
          */
-        public Builder setWpa3EnterpriseConfig(
+        public @NonNull Builder setWpa3EnterpriseConfig(
                 @NonNull WifiEnterpriseConfig enterpriseConfig) {
             checkNotNull(enterpriseConfig);
             mWpa3EnterpriseConfig = new WifiEnterpriseConfig(enterpriseConfig);
@@ -237,7 +237,7 @@ public final class WifiNetworkSuggestion implements Parcelable {
          *
          * @return Instance of {@link Builder} to enable chaining of the builder method.
          */
-        public Builder setIsHiddenSsid() {
+        public @NonNull Builder setIsHiddenSsid() {
             mIsHiddenSSID = true;
             return this;
         }
@@ -255,7 +255,7 @@ public final class WifiNetworkSuggestion implements Parcelable {
          *
          * @return Instance of {@link Builder} to enable chaining of the builder method.
          */
-        public Builder setIsAppInteractionRequired() {
+        public @NonNull Builder setIsAppInteractionRequired() {
             mIsAppInteractionRequired = true;
             return this;
         }
@@ -267,7 +267,7 @@ public final class WifiNetworkSuggestion implements Parcelable {
          *
          * @return Instance of {@link Builder} to enable chaining of the builder method.
          */
-        public Builder setIsUserInteractionRequired() {
+        public @NonNull Builder setIsUserInteractionRequired() {
             mIsUserInteractionRequired = true;
             return this;
         }
@@ -283,7 +283,7 @@ public final class WifiNetworkSuggestion implements Parcelable {
          * @return Instance of {@link Builder} to enable chaining of the builder method.
          * @throws IllegalArgumentException if the priority value is negative.
          */
-        public Builder setPriority(int priority) {
+        public @NonNull Builder setPriority(int priority) {
             if (priority < 0) {
                 throw new IllegalArgumentException("Invalid priority value " + priority);
             }
@@ -298,7 +298,7 @@ public final class WifiNetworkSuggestion implements Parcelable {
          *
          * @return Instance of {@link Builder} to enable chaining of the builder method.
          */
-        public Builder setIsMetered() {
+        public @NonNull Builder setIsMetered() {
             mIsMetered = true;
             return this;
         }
@@ -406,7 +406,7 @@ public final class WifiNetworkSuggestion implements Parcelable {
          * @return Instance of {@link WifiNetworkSuggestion}.
          * @throws IllegalStateException on invalid params set.
          */
-        public WifiNetworkSuggestion build() {
+        public @NonNull WifiNetworkSuggestion build() {
             if (mSsid == null) {
                 throw new IllegalStateException("setSsid should be invoked for suggestion");
             }
@@ -483,7 +483,7 @@ public final class WifiNetworkSuggestion implements Parcelable {
         this.suggestorPackageName = suggestorPackageName;
     }
 
-    public static final @android.annotation.NonNull Creator<WifiNetworkSuggestion> CREATOR =
+    public static final @NonNull Creator<WifiNetworkSuggestion> CREATOR =
             new Creator<WifiNetworkSuggestion>() {
                 @Override
                 public WifiNetworkSuggestion createFromParcel(Parcel in) {
