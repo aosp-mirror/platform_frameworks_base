@@ -16,13 +16,15 @@
 package android.view.contentcapture;
 
 import static android.view.contentcapture.ContentCaptureEvent.TYPE_CONTEXT_UPDATED;
-import static android.view.contentcapture.ContentCaptureEvent.TYPE_INITIAL_VIEW_TREE_APPEARED;
-import static android.view.contentcapture.ContentCaptureEvent.TYPE_INITIAL_VIEW_TREE_APPEARING;
 import static android.view.contentcapture.ContentCaptureEvent.TYPE_SESSION_FINISHED;
+import static android.view.contentcapture.ContentCaptureEvent.TYPE_SESSION_PAUSED;
+import static android.view.contentcapture.ContentCaptureEvent.TYPE_SESSION_RESUMED;
 import static android.view.contentcapture.ContentCaptureEvent.TYPE_SESSION_STARTED;
 import static android.view.contentcapture.ContentCaptureEvent.TYPE_VIEW_APPEARED;
 import static android.view.contentcapture.ContentCaptureEvent.TYPE_VIEW_DISAPPEARED;
 import static android.view.contentcapture.ContentCaptureEvent.TYPE_VIEW_TEXT_CHANGED;
+import static android.view.contentcapture.ContentCaptureEvent.TYPE_VIEW_TREE_APPEARED;
+import static android.view.contentcapture.ContentCaptureEvent.TYPE_VIEW_TREE_APPEARING;
 import static android.view.contentcapture.ContentCaptureHelper.getSanitizedString;
 import static android.view.contentcapture.ContentCaptureHelper.sDebug;
 import static android.view.contentcapture.ContentCaptureHelper.sVerbose;
@@ -543,8 +545,8 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
     }
 
     @Override
-    public void internalNotifyViewHierarchyEvent(boolean started) {
-        notifyViewHierarchyEvent(mId, started);
+    public void internalNotifyViewTreeEvent(boolean started) {
+        notifyViewTreeEvent(mId, started);
     }
 
     @Override
@@ -590,10 +592,15 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
     }
 
     /** Public because is also used by ViewRootImpl */
-    public void notifyViewHierarchyEvent(@NonNull String sessionId, boolean started) {
-        final int type = started ? TYPE_INITIAL_VIEW_TREE_APPEARING
-                : TYPE_INITIAL_VIEW_TREE_APPEARED;
+    public void notifyViewTreeEvent(@NonNull String sessionId, boolean started) {
+        final int type = started ? TYPE_VIEW_TREE_APPEARING : TYPE_VIEW_TREE_APPEARED;
         sendEvent(new ContentCaptureEvent(sessionId, type), FORCE_FLUSH);
+    }
+
+    /** Public because is also used by ViewRootImpl */
+    public void notifySessionLifecycle(boolean started) {
+        final int type = started ? TYPE_SESSION_RESUMED : TYPE_SESSION_PAUSED;
+        sendEvent(new ContentCaptureEvent(mId, type), FORCE_FLUSH);
     }
 
     void notifyContextUpdated(@NonNull String sessionId,

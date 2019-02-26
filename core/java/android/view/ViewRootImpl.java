@@ -2808,14 +2808,10 @@ public final class ViewRootImpl implements ViewParent,
         try {
             MainContentCaptureSession mainSession = mAttachInfo.mContentCaptureManager
                     .getMainContentCaptureSession();
-            if (mainSession == null) {
-                Log.w(mTag, "no MainContentCaptureSession on AttachInfo");
-                return;
-            }
             for (int i = 0; i < mAttachInfo.mContentCaptureEvents.size(); i++) {
                 String sessionId = mAttachInfo.mContentCaptureEvents
                         .keyAt(i);
-                mainSession.notifyViewHierarchyEvent(sessionId, /* started = */ true);
+                mainSession.notifyViewTreeEvent(sessionId, /* started= */ true);
                 ArrayList<Object> events = mAttachInfo.mContentCaptureEvents
                         .valueAt(i);
                 for_each_event: for (int j = 0; j < events.size(); j++) {
@@ -2842,7 +2838,7 @@ public final class ViewRootImpl implements ViewParent,
                         Log.w(mTag, "invalid content capture event: " + event);
                     }
                 }
-                mainSession.notifyViewHierarchyEvent(sessionId, /* started = */ false);
+                mainSession.notifyViewTreeEvent(sessionId, /* started= */ false);
             }
             mAttachInfo.mContentCaptureEvents = null;
         } finally {
@@ -2980,12 +2976,12 @@ public final class ViewRootImpl implements ViewParent,
             }
         }
         mFirstInputStage.onWindowFocusChanged(hasWindowFocus);
+
         // NOTE: there's no view visibility (appeared / disapparead) events when the windows focus
         // is lost, so we don't need to to force a flush - there might be other events such as
         // text changes, but these should be flushed independently.
         if (hasWindowFocus) {
-            performContentCaptureFlushIfNecessary(
-                    ContentCaptureSession.FLUSH_REASON_VIEW_ROOT_ENTERED);
+            handleContentCaptureFlush();
         }
     }
 
@@ -3613,11 +3609,9 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
-    private void performContentCaptureFlushIfNecessary(
-            @ContentCaptureSession.FlushReason int flushReason) {
+    private void handleContentCaptureFlush() {
         if (DEBUG_CONTENT_CAPTURE) {
-            Log.v(mTag, "performContentCaptureFlushIfNecessary("
-                    + ContentCaptureSession.getFlushReasonAsString(flushReason) + ")");
+            Log.v(mTag, "handleContentCaptureFlush()");
         }
         if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
             Trace.traceBegin(Trace.TRACE_TAG_VIEW, "flushContentCapture for "
@@ -3628,15 +3622,14 @@ public final class ViewRootImpl implements ViewParent,
 
             final ContentCaptureManager ccm = mAttachInfo.mContentCaptureManager;
             if (ccm == null) {
-                Log.w(TAG, "flush content capture: no ContentCapture on AttachInfo");
+                Log.w(TAG, "No ContentCapture on AttachInfo");
                 return;
             }
-            ccm.flush(flushReason);
+            ccm.flush(ContentCaptureSession.FLUSH_REASON_VIEW_ROOT_ENTERED);
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_VIEW);
         }
     }
-
 
     private boolean draw(boolean fullRedrawNeeded) {
         Surface surface = mSurface;
