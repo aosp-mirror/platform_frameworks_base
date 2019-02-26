@@ -29,7 +29,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import android.platform.test.annotations.Presubmit;
 import android.view.SurfaceControl;
 
-import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
 import com.android.server.wm.WindowTestUtils.TestAppWindowToken;
@@ -49,7 +48,6 @@ import org.mockito.MockitoAnnotations;
  */
 @SmallTest
 @Presubmit
-@FlakyTest(bugId = 124357362)
 public class AppWindowTokenAnimationTests extends WindowTestsBase {
 
     private TestAppWindowToken mToken;

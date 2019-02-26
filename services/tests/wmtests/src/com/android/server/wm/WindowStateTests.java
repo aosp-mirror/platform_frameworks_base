@@ -110,8 +110,11 @@ public class WindowStateTests extends WindowTestsBase {
         // TODO: Let the insets source with new mode keep the visibility control, and remove this
         // setup code. Now mTopFullscreenOpaqueWindowState will take back the control of insets
         // visibility.
-        spyOn(mDisplayContent);
-        doNothing().when(mDisplayContent).layoutAndAssignWindowLayersIfNeeded();
+        // Hold the lock to protect the mock from accesssing by other threads.
+        synchronized (mWm.mGlobalLock) {
+            spyOn(mDisplayContent);
+            doNothing().when(mDisplayContent).layoutAndAssignWindowLayersIfNeeded();
+        }
     }
 
     @Test
