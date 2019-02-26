@@ -208,13 +208,14 @@ class Class():
 
 
 class Package():
+    NAME = re.compile("package(?: .*)? ([A-Za-z.]+)")
+
     def __init__(self, line, raw, blame):
         self.line = line
         self.raw = raw.strip(" {;")
         self.blame = blame
 
-        raw = raw.split()
-        self.name = raw[raw.index("package")+1]
+        self.name = Package.NAME.match(raw).group(1)
         self.name_path = self.name.split(".")
 
     def __repr__(self):
