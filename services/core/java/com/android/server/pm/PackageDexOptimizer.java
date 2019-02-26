@@ -25,10 +25,12 @@ import android.content.pm.dex.ArtManager;
 import android.content.pm.dex.DexMetadataHelper;
 import android.os.FileUtils;
 import android.os.PowerManager;
+import android.os.Process;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.WorkSource;
+import android.os.storage.StorageManager;
 import android.util.Log;
 import android.util.Slog;
 
@@ -146,6 +148,51 @@ public class PackageDexOptimizer {
                 releaseWakeLockLI(acquireTime);
             }
         }
+    }
+
+    int performDexOpt(SharedLibraryInfo info, String[] instructionSets, DexoptOptions options) {
+        String classLoaderContext = DexoptUtils.getClassLoaderContext(info);
+        final String[] dexCodeInstructionSets = getDexCodeInstructionSets(instructionSets);
+        String compilerFilter = PackageManagerServiceCompilerMapping.getCompilerFilterForReason(
+                PackageManagerService.REASON_SHARED);
+        int result = DEX_OPT_SKIPPED;
+        for (String instructionSet : dexCodeInstructionSets) {
+            int dexoptNeeded = getDexoptNeeded(
+                        info.getPath(), instructionSet, compilerFilter,
+                        classLoaderContext, false /* newProfile */,
+                        false /* downgrade */);
+            if (Math.abs(dexoptNeeded) == DexFile.NO_DEXOPT_NEEDED) {
+                continue;
+            }
+            // Special string recognized by installd.
+            final String packageName = "*";
+            final String outputPath = null;
+            int dexFlags = DEXOPT_PUBLIC
+                    | (options.isBootComplete() ? DEXOPT_BOOTCOMPLETE : 0)
+                    | (options.isDexoptIdleBackgroundJob() ? DEXOPT_IDLE_BACKGROUND_JOB : 0);
+            dexFlags = adjustDexoptFlags(dexFlags);
+            final String uuid = StorageManager.UUID_SYSTEM;
+            final String seInfo = null;
+            final int targetSdkVersion = 0;  // Builtin libraries targets the system's SDK version
+            try {
+                mInstaller.dexopt(info.getPath(), Process.SYSTEM_UID, packageName,
+                        instructionSet, dexoptNeeded, outputPath, dexFlags, compilerFilter,
+                        uuid, classLoaderContext, seInfo, false /* downgrade */,
+                        targetSdkVersion, /*profileName*/ null, /*dexMetadataPath*/ null,
+                        getReasonName(options.getCompilationReason()));
+                // The end result is:
+                //  - FAILED if any path failed,
+                //  - PERFORMED if at least one path needed compilation,
+                //  - SKIPPED when all paths are up to date
+                if (result != DEX_OPT_FAILED) {
+                    result = DEX_OPT_PERFORMED;
+                }
+            } catch (InstallerException e) {
+                Slog.w(TAG, "Failed to dexopt", e);
+                result = DEX_OPT_FAILED;
+            }
+        }
+        return result;
     }
 
     /**
