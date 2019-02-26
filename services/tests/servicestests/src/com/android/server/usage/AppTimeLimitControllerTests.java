@@ -19,13 +19,13 @@ package com.android.server.usage;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import android.app.PendingIntent;
 import android.os.HandlerThread;
 import android.os.Looper;
-import android.support.test.filters.MediumTest;
-import android.support.test.runner.AndroidJUnit4;
+
+import androidx.test.filters.MediumTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.After;
 import org.junit.Before;

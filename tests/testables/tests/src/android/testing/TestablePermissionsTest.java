@@ -20,11 +20,10 @@ import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static org.junit.Assert.assertEquals;
 
 import android.Manifest.permission;
-import android.content.pm.PackageManager;
 import android.net.Uri;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.filters.SmallTest;
-import android.testing.TestableLooper.RunWithLooper;
+
+import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.SmallTest;
 
 import org.junit.Rule;
 import org.junit.Test;

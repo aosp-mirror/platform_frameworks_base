@@ -18,13 +18,17 @@ package com.android.server.locksettings.recoverablekeystore.certificate;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-
 import static org.testng.Assert.assertThrows;
 import static org.testng.Assert.expectThrows;
 
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.w3c.dom.Element;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 import java.io.InputStream;
 import java.security.KeyPairGenerator;
@@ -38,10 +42,6 @@ import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
-
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.w3c.dom.Element;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)

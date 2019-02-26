@@ -19,17 +19,19 @@ package com.android.server.wm;
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_SECURE;
 import static android.view.WindowManager.TRANSIT_UNSET;
+
 import static com.android.server.wm.TaskSnapshotController.*;
+
 import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertFalse;
-import static junit.framework.Assert.assertTrue;
 
 import android.platform.test.annotations.Presubmit;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
 import android.util.ArraySet;
 
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
+
 import com.google.android.collect.Sets;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 

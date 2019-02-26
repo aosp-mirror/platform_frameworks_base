@@ -21,6 +21,7 @@ import static android.app.NotificationManager.IMPORTANCE_LOW;
 import static android.app.NotificationManager.IMPORTANCE_MIN;
 
 import static junit.framework.Assert.assertEquals;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -33,7 +34,6 @@ import android.app.INotificationManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.content.ContentResolver;
-import android.content.IContentProvider;
 import android.content.Intent;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -43,11 +43,11 @@ import android.service.notification.NotificationListenerService.Ranking;
 import android.service.notification.NotificationListenerService.RankingMap;
 import android.service.notification.NotificationStats;
 import android.service.notification.StatusBarNotification;
-import android.support.test.InstrumentationRegistry;
 import android.test.ServiceTestCase;
 import android.testing.TestableContext;
 import android.util.AtomicFile;
-import android.util.Xml;
+
+import androidx.test.InstrumentationRegistry;
 
 import com.android.internal.util.FastXmlSerializer;
 
@@ -57,7 +57,6 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlSerializer;
 
 import java.io.BufferedInputStream;

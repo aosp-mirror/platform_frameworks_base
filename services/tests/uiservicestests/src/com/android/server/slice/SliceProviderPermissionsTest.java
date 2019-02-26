@@ -20,10 +20,11 @@ import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
 import android.util.Xml.Encoding;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.server.UiServiceTestCase;
 import com.android.server.slice.SlicePermissionManager.PkgUser;

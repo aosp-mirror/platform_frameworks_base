@@ -16,8 +16,6 @@
 
 package com.android.systemui;
 
-import com.android.settingslib.graph.BatteryMeterDrawableBase;
-
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyFloat;
 import static org.mockito.Mockito.anyString;
@@ -30,8 +28,11 @@ import static org.mockito.Mockito.verify;
 
 import android.content.res.Resources;
 import android.graphics.Canvas;
-import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
+
+import androidx.test.runner.AndroidJUnit4;
+
+import com.android.settingslib.graph.BatteryMeterDrawableBase;
 
 import org.junit.Before;
 import org.junit.Test;

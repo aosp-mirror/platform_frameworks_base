@@ -32,6 +32,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_IS_SCREEN_DECOR;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+
 import static org.junit.Assert.assertEquals;
 
 import android.app.Activity;
@@ -46,9 +47,6 @@ import android.hardware.display.VirtualDisplay;
 import android.media.ImageReader;
 import android.os.Handler;
 import android.platform.test.annotations.Presubmit;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
 import android.util.Pair;
 import android.view.Display;
 import android.view.DisplayInfo;
@@ -56,6 +54,10 @@ import android.view.View;
 import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.widget.TextView;
+
+import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.After;
 import org.junit.Assert;

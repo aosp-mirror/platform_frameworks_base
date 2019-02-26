@@ -30,11 +30,12 @@ import android.app.trust.TrustManager;
 import android.content.Context;
 import android.hardware.fingerprint.FingerprintManager;
 import android.os.Looper;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
 import android.view.View;
 import android.view.ViewGroup;
+
+import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.R;

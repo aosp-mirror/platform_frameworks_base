@@ -21,7 +21,7 @@ android_test {
     test_suites: ["device-tests"],
     resource_dirs: ["res"],
     static_libs: [
-        "android-support-test",
+        "androidx.test.rules",
         "frameworks-base-testutils",
         "mockito-target-extended-minus-junit4",
         "NetworkStackLib",

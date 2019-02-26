@@ -37,10 +37,11 @@ import android.app.AlarmManager;
 import android.graphics.Color;
 import android.os.Handler;
 import android.os.Looper;
-import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.View;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.internal.colorextraction.ColorExtractor.GradientColors;
 import com.android.internal.util.function.TriConsumer;

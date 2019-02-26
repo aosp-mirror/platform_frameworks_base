@@ -26,10 +26,11 @@ import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.Settings;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
 import android.test.mock.MockContentResolver;
+
+import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.server.AppOpsService;
@@ -37,7 +38,6 @@ import com.android.server.AppOpsService;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -58,7 +58,7 @@ import java.io.File;
  * Install: adb install -r \
  *     ${ANDROID_PRODUCT_OUT}/data/app/FrameworksServicesTests/FrameworksServicesTests.apk
  * Run: adb shell am instrument -e class com.android.server.am.CoreSettingsObserverTest -w \
- *     com.android.frameworks.servicestests/android.support.test.runner.AndroidJUnitRunner
+ *     com.android.frameworks.servicestests/androidx.test.runner.AndroidJUnitRunner
  */
 @SmallTest
 @RunWith(AndroidJUnit4.class)

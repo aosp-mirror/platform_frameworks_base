@@ -25,20 +25,21 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import android.app.Notification;
+import android.os.UserHandle;
+import android.service.notification.StatusBarNotification;
+import android.test.suitebuilder.annotation.SmallTest;
+
+import androidx.test.runner.AndroidJUnit4;
+
+import com.android.server.UiServiceTestCase;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-
-import android.app.Notification;
-import android.os.UserHandle;
-import android.service.notification.StatusBarNotification;
-import android.support.test.runner.AndroidJUnit4;
-import android.test.suitebuilder.annotation.SmallTest;
-
-import com.android.server.UiServiceTestCase;
 
 import java.util.ArrayList;
 import java.util.LinkedHashSet;

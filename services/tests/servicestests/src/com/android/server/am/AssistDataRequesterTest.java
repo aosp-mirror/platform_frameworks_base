@@ -41,12 +41,13 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.filters.FlakyTest;
-import android.support.test.filters.MediumTest;
-import android.support.test.runner.AndroidJUnit4;
 import android.util.Log;
 import android.view.IWindowManager;
+
+import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.FlakyTest;
+import androidx.test.filters.MediumTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.am.AssistDataRequester.AssistDataRequesterCallbacks;
 

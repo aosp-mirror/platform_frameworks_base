@@ -22,12 +22,13 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ShortcutManager;
 import android.os.Handler;
-import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.systemui.Dependency;
 import com.android.systemui.R;

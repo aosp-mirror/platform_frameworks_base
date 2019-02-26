@@ -23,6 +23,7 @@ import static android.security.keystore.recovery.RecoveryController.ERROR_DOWNGR
 import static android.security.keystore.recovery.RecoveryController.ERROR_INVALID_CERTIFICATE;
 
 import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -35,16 +36,14 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.Manifest;
 import android.app.KeyguardManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.Manifest;
 import android.os.Binder;
 import android.os.ServiceSpecificException;
 import android.os.UserHandle;
-import android.security.KeyStore;
-import android.security.keystore.AndroidKeyStoreProvider;
 import android.security.keystore.AndroidKeyStoreSecretKey;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
@@ -53,9 +52,10 @@ import android.security.keystore.recovery.KeyDerivationParams;
 import android.security.keystore.recovery.RecoveryCertPath;
 import android.security.keystore.recovery.TrustedRootCertificates;
 import android.security.keystore.recovery.WrappedApplicationKey;
-import android.support.test.filters.SmallTest;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.runner.AndroidJUnit4;
+
+import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.locksettings.recoverablekeystore.storage.ApplicationKeyStorage;
 import com.android.server.locksettings.recoverablekeystore.storage.RecoverableKeyStoreDb;
@@ -75,19 +75,16 @@ import org.mockito.Spy;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
-import java.security.UnrecoverableKeyException;
 import java.security.cert.CertPath;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
-import java.util.concurrent.Executors;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.Executors;
 
-import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
-import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 @SmallTest

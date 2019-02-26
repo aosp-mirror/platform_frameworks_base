@@ -20,9 +20,10 @@ import static android.app.AlarmManager.RTC_WAKEUP;
 
 import static org.junit.Assert.assertEquals;
 
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
 import android.util.SparseArray;
+
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.util.ObjectUtils;
 import com.android.server.AlarmManagerService.Alarm;
