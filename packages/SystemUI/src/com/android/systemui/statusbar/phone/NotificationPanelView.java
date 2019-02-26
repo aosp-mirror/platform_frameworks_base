@@ -613,8 +613,7 @@ public class NotificationPanelView extends PanelView implements
             stackScrollerPadding = mClockPositionResult.stackScrollerPadding;
         }
         mNotificationStackScroller.setIntrinsicPadding(stackScrollerPadding);
-        int burnInXOffset = mPulsing ? 0 : mClockPositionResult.clockX;
-        mNotificationStackScroller.setAntiBurnInOffsetX(burnInXOffset);
+        mNotificationStackScroller.setAntiBurnInOffsetX(mClockPositionResult.clockX);
 
         mStackScrollerMeasuringPass++;
         requestScrollerTopPaddingUpdate(animate);
