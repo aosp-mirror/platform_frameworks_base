@@ -22,6 +22,7 @@ import static android.view.WindowInsets.Type.IME;
 import static android.view.WindowInsets.Type.LAST;
 import static android.view.WindowInsets.Type.SIDE_BARS;
 import static android.view.WindowInsets.Type.SIZE;
+import static android.view.WindowInsets.Type.SYSTEM_GESTURES;
 import static android.view.WindowInsets.Type.TOP_BAR;
 import static android.view.WindowInsets.Type.all;
 import static android.view.WindowInsets.Type.compatSystemInsets;
@@ -34,7 +35,6 @@ import android.annotation.UnsupportedAppUsage;
 import android.graphics.Insets;
 import android.graphics.Rect;
 import android.util.SparseArray;
-import android.view.InsetsState.InternalInsetType;
 import android.view.WindowInsets.Type.InsetType;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethod;
@@ -228,6 +228,7 @@ public final class WindowInsets {
     static void assignCompatInsets(Insets[] typeInsetMap, Rect insets) {
         typeInsetMap[indexOf(TOP_BAR)] = Insets.of(0, insets.top, 0, 0);
         typeInsetMap[indexOf(SIDE_BARS)] = Insets.of(insets.left, 0, insets.right, insets.bottom);
+        typeInsetMap[indexOf(SYSTEM_GESTURES)] = Insets.of(insets);
     }
 
     private static boolean[] createCompatVisibilityMap(@Nullable Insets[] typeInsetMap) {
@@ -629,6 +630,28 @@ public final class WindowInsets {
     }
 
     /**
+     * Returns the system gesture insets.
+     *
+     * <p>The system gesture insets represent the area of a window where system gestures have
+     * priority and may consume some or all touch input, e.g. due to the a system bar
+     * occupying it, or it being reserved for touch-only gestures.
+     *
+     * <p>Simple taps are guaranteed to reach the window even within the system gesture insets,
+     * as long as they are outside the {@link #getSystemWindowInsets() system window insets}.
+     *
+     * <p>When {@link View#SYSTEM_UI_FLAG_LAYOUT_STABLE} is requested, an inset will be returned
+     * even when the system gestures are inactive due to
+     * {@link View#SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN} or
+     * {@link View#SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION}.
+     *
+     * <p>This inset does not affect the result of {@link #isConsumed()} and cannot be consumed.
+     */
+    @NonNull
+    public Insets getSystemGestureInsets() {
+        return getInsets(mTypeInsetsMap, SYSTEM_GESTURES);
+    }
+
+    /**
      * Returns a copy of this WindowInsets with the stable insets fully consumed.
      *
      * @return A modified copy of this WindowInsets
@@ -851,6 +874,22 @@ public final class WindowInsets {
         }
 
         /**
+         * Sets system gesture insets in pixels.
+         *
+         * <p>The system gesture insets represent the area of a window where system gestures have
+         * priority and may consume some or all touch input, e.g. due to the a system bar
+         * occupying it, or it being reserved for touch-only gestures.
+         *
+         * @see #getSystemGestureInsets()
+         * @return itself
+         */
+        @NonNull
+        public Builder setSystemGestureInsets(@NonNull Insets insets) {
+            WindowInsets.setInsets(mTypeInsetsMap, SYSTEM_GESTURES, insets);
+            return this;
+        }
+
+        /**
          * Sets the insets of a specific window type in pixels.
          *
          * <p>The insets represents the area of a a window that is partially or fully obscured by
@@ -1003,8 +1042,10 @@ public final class WindowInsets {
         static final int IME = 0x2;
         static final int SIDE_BARS = 0x4;
 
-        static final int LAST = 0x8;
-        static final int SIZE = 4;
+        static final int SYSTEM_GESTURES = 0x8;
+
+        static final int LAST = 0x10;
+        static final int SIZE = 5;
         static final int WINDOW_DECOR = LAST;
 
         static int indexOf(@InsetType int type) {
@@ -1015,8 +1056,10 @@ public final class WindowInsets {
                     return 1;
                 case SIDE_BARS:
                     return 2;
-                case WINDOW_DECOR:
+                case SYSTEM_GESTURES:
                     return 3;
+                case WINDOW_DECOR:
+                    return 4;
                 default:
                     throw new IllegalArgumentException("type needs to be >= FIRST and <= LAST,"
                             + " type=" + type);
@@ -1028,7 +1071,7 @@ public final class WindowInsets {
 
         /** @hide */
         @Retention(RetentionPolicy.SOURCE)
-        @IntDef(flag = true, value = { TOP_BAR, IME, SIDE_BARS, WINDOW_DECOR })
+        @IntDef(flag = true, value = { TOP_BAR, IME, SIDE_BARS, WINDOW_DECOR, SYSTEM_GESTURES })
         public @interface InsetType {
         }
 
@@ -1062,6 +1105,27 @@ public final class WindowInsets {
         }
 
         /**
+         * Returns an inset type representing the system gesture insets.
+         *
+         * <p>The system gesture insets represent the area of a window where system gestures have
+         * priority and may consume some or all touch input, e.g. due to the a system bar
+         * occupying it, or it being reserved for touch-only gestures.
+         *
+         * <p>Simple taps are guaranteed to reach the window even within the system gesture insets,
+         * as long as they are outside the {@link #getSystemWindowInsets() system window insets}.
+         *
+         * <p>When {@link View#SYSTEM_UI_FLAG_LAYOUT_STABLE} is requested, an inset will be returned
+         * even when the system gestures are inactive due to
+         * {@link View#SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN} or
+         * {@link View#SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION}.
+         *
+         * @see #getSystemGestureInsets()
+         */
+        public static @InsetType int systemGestures() {
+            return SYSTEM_GESTURES;
+        }
+
+        /**
          * @return All system bars. Includes {@link #topBar()} as well as {@link #sideBars()}, but
          *         not {@link #ime()}.
          */
@@ -1080,6 +1144,9 @@ public final class WindowInsets {
 
         /**
          * @return All inset types combined.
+         *
+         * TODO: Figure out if this makes sense at all, mixing e.g {@link #systemGestures()} and
+         *       {@link #ime()} does not seem very useful.
          */
         public static @InsetType int all() {
             return 0xFFFFFFFF;
