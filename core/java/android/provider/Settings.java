@@ -496,25 +496,16 @@ public final class Settings {
      * In some cases, a matching Activity may not exist, so ensure you safeguard
      * against this by checking WifiManager.isEasyConnectSupported();
      * <p>
-     * Input:
-     * The following keys in the bundle with their associated value.
-     * <ul>
-     *     <li>"qrCode": Standard Easy Connect (Wi-Fi DPP) URI bootstrapping information as a
-     *     string.</li>
-     * </ul>
+     * Input: The Intent's data URI specifies bootstrapping information for authenticating and
+     * provisioning the peer, with the "DPP" scheme.
      * <p>
-     * Output: Nothing.
+     * Output: After {@code startActivityForResult}, the callback {@code onActivityResult} will have
+     *         resultCode {@link android.app.Activity#RESULT_OK} if Wi-Fi Easy Connect configuration
+     *         success and the user clicks 'Done' button.
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
-    public static final String ACTION_PROCESS_WIFI_EASY_CONNECT_QR_CODE =
-            "android.settings.PROCESS_WIFI_EASY_CONNECT_QR_CODE";
-
-    /**
-     * An extra to put in the bundle for {@link #ACTION_PROCESS_WIFI_EASY_CONNECT_QR_CODE} intents.
-     * It must contain properly formatted Easy Connect (Wi-Fi DPP) URI bootstrapping information for
-     * the process to proceed.
-     */
-    public static final String EXTRA_QR_CODE = "android.provider.extra.QR_CODE";
+    public static final String ACTION_PROCESS_WIFI_EASY_CONNECT_URI =
+            "android.settings.PROCESS_WIFI_EASY_CONNECT_URI";
 
     /**
      * Activity Action: Show settings to allow configuration of data and view data usage.
