@@ -347,12 +347,6 @@ class StorageManagerService extends IStorageManager.Stub
     @GuardedBy("mPackagesLock")
     private final SparseArray<ArraySet<String>> mPackages = new SparseArray<>();
 
-    /**
-     * List of volumes visible to any user.
-     * TODO: may be have a map of userId -> volumes?
-     */
-    private final CopyOnWriteArrayList<VolumeInfo> mVisibleVols = new CopyOnWriteArrayList<>();
-
     private volatile int mCurrentUserId = UserHandle.USER_SYSTEM;
 
     /** Holding lock for AppFuse business */
@@ -955,8 +949,6 @@ class StorageManagerService extends IStorageManager.Stub
 
                 addInternalVolumeLocked();
             }
-
-            mVisibleVols.clear();
 
             try {
                 mVold.reset();
@@ -1895,9 +1887,6 @@ class StorageManagerService extends IStorageManager.Stub
     private void mount(VolumeInfo vol) {
         try {
             mVold.mount(vol.id, vol.mountFlags, vol.mountUserId);
-            if ((vol.mountFlags & VolumeInfo.MOUNT_FLAG_VISIBLE) != 0) {
-                mVisibleVols.add(vol);
-            }
         } catch (Exception e) {
             Slog.wtf(TAG, e);
         }
@@ -1914,9 +1903,6 @@ class StorageManagerService extends IStorageManager.Stub
     private void unmount(VolumeInfo vol) {
         try {
             mVold.unmount(vol.id);
-            if ((vol.mountFlags & VolumeInfo.MOUNT_FLAG_VISIBLE) != 0) {
-                mVisibleVols.remove(vol);
-            }
         } catch (Exception e) {
             Slog.wtf(TAG, e);
         }
@@ -3851,14 +3837,6 @@ class StorageManagerService extends IStorageManager.Stub
             pw.decreaseIndent();
 
             pw.println();
-            pw.println("mVisibleVols:");
-            pw.increaseIndent();
-            for (int i = 0; i < mVisibleVols.size(); i++) {
-                mVisibleVols.get(i).dump(pw);
-            }
-            pw.decreaseIndent();
-
-            pw.println();
             pw.println("Primary storage UUID: " + mPrimaryStorageUuid);
 
             pw.println();
@@ -4056,38 +4034,9 @@ class StorageManagerService extends IStorageManager.Stub
         }
 
         @Override
-        public String[] getVisibleVolumesForUser(int userId) {
-            synchronized (mLock) {
-                if (!ArrayUtils.contains(mSystemUnlockedUsers, userId)) {
-                    return EmptyArray.STRING;
-                }
-            }
-            final ArrayList<String> visibleVolsForUser = new ArrayList<>();
-            for (int i = mVisibleVols.size() - 1; i >= 0; --i) {
-                final VolumeInfo vol = mVisibleVols.get(i);
-                if (vol.isVisibleForUser(userId)) {
-                    visibleVolsForUser.add(getVolumeLabel(vol));
-                }
-            }
-            return visibleVolsForUser.toArray(new String[visibleVolsForUser.size()]);
-        }
-
-        @Override
         public String getSandboxId(String packageName) {
             return StorageManagerService.this.getSandboxId(packageName,
                     mPmInternal.getSharedUserIdForPackage(packageName));
-        }
-
-        private String getVolumeLabel(VolumeInfo vol) {
-            // STOPSHIP: Label needs to part of VolumeInfo and need to be passed on from vold
-            switch (vol.getType()) {
-                case VolumeInfo.TYPE_EMULATED:
-                    return "emulated";
-                case VolumeInfo.TYPE_PUBLIC:
-                    return vol.fsUuid == null ? vol.id : vol.fsUuid;
-                default:
-                    return null;
-            }
         }
     }
 }

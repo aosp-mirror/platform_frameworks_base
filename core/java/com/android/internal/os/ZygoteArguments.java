@@ -116,9 +116,6 @@ class ZygoteArguments {
     /** from --packages-for-uid */
     String[] mPackagesForUid;
 
-    /** from --visible-vols */
-    String[] mVisibleVolIds;
-
     /** from --sandbox-id */
     String mSandboxId;
 
@@ -395,8 +392,6 @@ class ZygoteArguments {
                 mPackageName = arg.substring(arg.indexOf('=') + 1);
             } else if (arg.startsWith("--packages-for-uid=")) {
                 mPackagesForUid = arg.substring(arg.indexOf('=') + 1).split(",");
-            } else if (arg.startsWith("--visible-vols=")) {
-                mVisibleVolIds = arg.substring(arg.indexOf('=') + 1).split(",");
             } else if (arg.startsWith("--sandbox-id=")) {
                 if (mSandboxId != null) {
                     throw new IllegalArgumentException("Duplicate arg specified");

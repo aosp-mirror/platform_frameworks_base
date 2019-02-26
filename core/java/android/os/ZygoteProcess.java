@@ -305,7 +305,6 @@ public class ZygoteProcess {
      * @param invokeWith null-ok the command to invoke with.
      * @param packageName null-ok the name of the package this process belongs to.
      * @param packagesForUid null-ok all the packages with the same uid as this process.
-     * @param visibleVols null-ok storage volumes that can be accessed by this process.
      * @param zygoteArgs Additional arguments to supply to the zygote process.
      *
      * @return An object that describes the result of the attempt to start the process.
@@ -323,7 +322,6 @@ public class ZygoteProcess {
                                                   @Nullable String invokeWith,
                                                   @Nullable String packageName,
                                                   @Nullable String[] packagesForUid,
-                                                  @Nullable String[] visibleVols,
                                                   @Nullable String sandboxId,
                                                   boolean useBlastulaPool,
                                                   @Nullable String[] zygoteArgs) {
@@ -339,7 +337,7 @@ public class ZygoteProcess {
             return startViaZygote(processClass, niceName, uid, gid, gids,
                     runtimeFlags, mountExternal, targetSdkVersion, seInfo,
                     abi, instructionSet, appDataDir, invokeWith, /*startChildZygote=*/false,
-                    packageName, packagesForUid, visibleVols, sandboxId,
+                    packageName, packagesForUid, sandboxId,
                     useBlastulaPool, zygoteArgs);
         } catch (ZygoteStartFailedEx ex) {
             Log.e(LOG_TAG,
@@ -531,7 +529,6 @@ public class ZygoteProcess {
      * that has its state cloned from this zygote process.
      * @param packageName null-ok the name of the package this process belongs to.
      * @param packagesForUid null-ok all the packages with the same uid as this process.
-     * @param visibleVols null-ok storage volumes that can be accessed by this process.
      * @param extraArgs Additional arguments to supply to the zygote process.
      * @return An object that describes the result of the attempt to start the process.
      * @throws ZygoteStartFailedEx if process start failed for any reason
@@ -550,7 +547,6 @@ public class ZygoteProcess {
                                                       boolean startChildZygote,
                                                       @Nullable String packageName,
                                                       @Nullable String[] packagesForUid,
-                                                      @Nullable String[] visibleVols,
                                                       @Nullable String sandboxId,
                                                       boolean useBlastulaPool,
                                                       @Nullable String[] extraArgs)
@@ -634,19 +630,6 @@ public class ZygoteProcess {
                     sb.append(',');
                 }
                 sb.append(packagesForUid[i]);
-            }
-            argsForZygote.add(sb.toString());
-        }
-
-        if (visibleVols != null && visibleVols.length > 0) {
-            final StringBuilder sb = new StringBuilder();
-            sb.append("--visible-vols=");
-
-            for (int i = 0; i < visibleVols.length; ++i) {
-                if (i != 0) {
-                    sb.append(',');
-                }
-                sb.append(visibleVols[i]);
             }
             argsForZygote.add(sb.toString());
         }
@@ -1061,7 +1044,7 @@ public class ZygoteProcess {
                     gids, runtimeFlags, 0 /* mountExternal */, 0 /* targetSdkVersion */, seInfo,
                     abi, instructionSet, null /* appDataDir */, null /* invokeWith */,
                     true /* startChildZygote */, null /* packageName */,
-                    null /* packagesForUid */, null /* visibleVolumes */, null /* sandboxId */,
+                    null /* packagesForUid */, null /* sandboxId */,
                     false /* useBlastulaPool */, extraArgs);
         } catch (ZygoteStartFailedEx ex) {
             throw new RuntimeException("Starting child-zygote through Zygote failed", ex);
