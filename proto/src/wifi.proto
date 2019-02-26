@@ -2100,6 +2100,8 @@ message GroupEvent {
 
 // Easy Connect (DPP)
 message WifiDppLog {
+  reserved 6;
+
   // Number of Configurator-Initiator requests
   optional int32 num_dpp_configurator_initiator_requests = 1;
 
@@ -2116,7 +2118,7 @@ message WifiDppLog {
   repeated DppFailureStatusHistogramBucket dpp_failure_code = 5;
 
   // Easy Connect (DPP) operation time bucket
-  repeated HistogramBucket dpp_operation_time = 6;
+  repeated HistogramBucketInt32 dpp_operation_time = 7;
 
   // Histogram bucket for Wi-Fi DPP configurator success
   message DppConfiguratorSuccessStatusHistogramBucket {
@@ -2134,18 +2136,6 @@ message WifiDppLog {
 
     // number of samples in the bucket
     optional int32 count = 2;
-  }
-
-  // Histogram bucket for Wi-Fi DPP logs. Range is [start, end)
-  message HistogramBucket {
-    // lower range of the bucket (inclusive)
-    optional int32 start = 1;
-
-    // upper range of the bucket (exclusive)
-    optional int32 end = 2;
-
-    // number of samples in the bucket
-    optional int32 count = 3;
   }
 
   enum DppConfiguratorSuccessCode {
