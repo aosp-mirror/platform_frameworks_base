@@ -2653,7 +2653,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     ProcessRecord proc;
                     int procState;
                     int statType;
-                    int pid;
+                    int pid = -1;
                     long lastPssTime;
                     synchronized (ActivityManagerService.this) {
                         if (mPendingPssProcesses.size() <= 0) {
