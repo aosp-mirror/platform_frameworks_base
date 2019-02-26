@@ -18,7 +18,6 @@ package com.android.server.rollback;
 
 import android.content.rollback.PackageRollbackInfo;
 import android.content.rollback.PackageRollbackInfo.RestoreInfo;
-import android.content.rollback.RollbackInfo;
 import android.os.storage.StorageManager;
 import android.util.IntArray;
 import android.util.Log;
@@ -153,7 +152,7 @@ public class AppDataRollbackHelper {
     }
 
     /**
-     * Computes the list of pending backups for {@code userId} given lists of available rollbacks.
+     * Computes the list of pending backups for {@code userId} given lists of rollbacks.
      * Packages pending backup for the given user are added to {@code pendingBackupPackages} along
      * with their corresponding {@code PackageRollbackInfo}.
      *
@@ -162,10 +161,10 @@ public class AppDataRollbackHelper {
      */
     private static List<RollbackData> computePendingBackups(int userId,
             Map<String, PackageRollbackInfo> pendingBackupPackages,
-            List<RollbackData> availableRollbacks) {
+            List<RollbackData> rollbacks) {
         List<RollbackData> rd = new ArrayList<>();
 
-        for (RollbackData data : availableRollbacks) {
+        for (RollbackData data : rollbacks) {
             for (PackageRollbackInfo info : data.info.getPackages()) {
                 final IntArray pendingBackupUsers = info.getPendingBackups();
                 if (pendingBackupUsers != null) {
@@ -183,20 +182,20 @@ public class AppDataRollbackHelper {
     }
 
     /**
-     * Computes the list of pending restores for {@code userId} given lists of recent rollbacks.
+     * Computes the list of pending restores for {@code userId} given lists of rollbacks.
      * Packages pending restore are added to {@code pendingRestores} along with their corresponding
      * {@code PackageRollbackInfo}.
      *
-     * @return the list of {@code RollbackInfo} that has pending restores. Note that some of the
+     * @return the list of {@code RollbackData} that has pending restores. Note that some of the
      *         restores won't be performed, because they might be counteracted by pending backups.
      */
-    private static List<RollbackInfo> computePendingRestores(int userId,
+    private static List<RollbackData> computePendingRestores(int userId,
             Map<String, PackageRollbackInfo> pendingRestorePackages,
-            List<RollbackInfo> recentRollbacks) {
-        List<RollbackInfo> rd = new ArrayList<>();
+            List<RollbackData> rollbacks) {
+        List<RollbackData> rd = new ArrayList<>();
 
-        for (RollbackInfo data : recentRollbacks) {
-            for (PackageRollbackInfo info : data.getPackages()) {
+        for (RollbackData data : rollbacks) {
+            for (PackageRollbackInfo info : data.info.getPackages()) {
                 final RestoreInfo ri = info.getRestoreInfo(userId);
                 if (ri != null) {
                     pendingRestorePackages.put(info.getPackageName(), info);
@@ -218,15 +217,15 @@ public class AppDataRollbackHelper {
      * @return a list {@code RollbackData} that have been changed and should be stored on disk.
      */
     public List<RollbackData> commitPendingBackupAndRestoreForUser(int userId,
-            List<RollbackData> availableRollbacks, List<RollbackInfo> recentlyExecutedRollbacks) {
+            List<RollbackData> rollbacks) {
 
         final Map<String, PackageRollbackInfo> pendingBackupPackages = new HashMap<>();
         final List<RollbackData> pendingBackups = computePendingBackups(userId,
-                pendingBackupPackages, availableRollbacks);
+                pendingBackupPackages, rollbacks);
 
         final Map<String, PackageRollbackInfo> pendingRestorePackages = new HashMap<>();
-        final List<RollbackInfo> pendingRestores = computePendingRestores(userId,
-                pendingRestorePackages, recentlyExecutedRollbacks);
+        final List<RollbackData> pendingRestores = computePendingRestores(userId,
+                pendingRestorePackages, rollbacks);
 
         // First remove unnecessary backups, i.e. when user did not unlock their phone between the
         // request to backup data and the request to restore it.
@@ -266,13 +265,13 @@ public class AppDataRollbackHelper {
         }
 
         if (!pendingRestorePackages.isEmpty()) {
-            for (RollbackInfo data : pendingRestores) {
-                for (PackageRollbackInfo info : data.getPackages()) {
+            for (RollbackData data : pendingRestores) {
+                for (PackageRollbackInfo info : data.info.getPackages()) {
                     final RestoreInfo ri = info.getRestoreInfo(userId);
                     if (ri != null) {
                         try {
                             mInstaller.restoreAppDataSnapshot(info.getPackageName(), ri.appId,
-                                    ri.seInfo, userId, data.getRollbackId(),
+                                    ri.seInfo, userId, data.info.getRollbackId(),
                                     Installer.FLAG_STORAGE_CE);
                             info.removeRestoreInfo(ri);
                         } catch (InstallerException ie) {
@@ -284,7 +283,9 @@ public class AppDataRollbackHelper {
             }
         }
 
-        return pendingBackups;
+        final List<RollbackData> changed = pendingBackups;
+        changed.addAll(pendingRestores);
+        return changed;
     }
 
     /**

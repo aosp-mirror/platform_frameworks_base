@@ -187,7 +187,8 @@ public final class RollbackManager {
     /**
      * Expire the rollback data for a given package.
      * This API is meant to facilitate testing of rollback logic for
-     * expiring rollback data.
+     * expiring rollback data. Removes rollback data for available and
+     * recently committed rollbacks that contain the given package.
      *
      * @param packageName the name of the package to expire data for.
      * @throws SecurityException if the caller does not have the
