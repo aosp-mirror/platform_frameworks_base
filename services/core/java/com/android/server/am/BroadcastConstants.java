@@ -38,6 +38,8 @@ public class BroadcastConstants {
     static final String KEY_DEFERRAL = "bcast_deferral";
     static final String KEY_DEFERRAL_DECAY_FACTOR = "bcast_deferral_decay_factor";
     static final String KEY_DEFERRAL_FLOOR = "bcast_deferral_floor";
+    static final String KEY_ALLOW_BG_ACTIVITY_START_TIMEOUT =
+            "bcast_allow_bg_activity_start_timeout";
 
     // All time intervals are in milliseconds
     private static final long DEFAULT_TIMEOUT = 10_000;
@@ -45,6 +47,7 @@ public class BroadcastConstants {
     private static final long DEFAULT_DEFERRAL = 5_000;
     private static final float DEFAULT_DEFERRAL_DECAY_FACTOR = 0.75f;
     private static final long DEFAULT_DEFERRAL_FLOOR = 0;
+    private static final long DEFAULT_ALLOW_BG_ACTIVITY_START_TIMEOUT = 10_000;
 
     // All time constants are in milliseconds
 
@@ -59,6 +62,8 @@ public class BroadcastConstants {
     public float DEFERRAL_DECAY_FACTOR = DEFAULT_DEFERRAL_DECAY_FACTOR;
     // Minimum that the deferral time can decay to until the backlog fully clears
     public long DEFERRAL_FLOOR = DEFAULT_DEFERRAL_FLOOR;
+    // For how long after a whitelisted receiver's start its process can start a background activity
+    public long ALLOW_BG_ACTIVITY_START_TIMEOUT = DEFAULT_ALLOW_BG_ACTIVITY_START_TIMEOUT;
 
     // Settings override tracking for this instance
     private String mSettingsKey;
@@ -113,6 +118,8 @@ public class BroadcastConstants {
             DEFERRAL_DECAY_FACTOR = mParser.getFloat(KEY_DEFERRAL_DECAY_FACTOR,
                     DEFERRAL_DECAY_FACTOR);
             DEFERRAL_FLOOR = mParser.getLong(KEY_DEFERRAL_FLOOR, DEFERRAL_FLOOR);
+            ALLOW_BG_ACTIVITY_START_TIMEOUT = mParser.getLong(KEY_ALLOW_BG_ACTIVITY_START_TIMEOUT,
+                    ALLOW_BG_ACTIVITY_START_TIMEOUT);
         }
     }
 
@@ -145,6 +152,9 @@ public class BroadcastConstants {
 
             pw.print("    "); pw.print(KEY_DEFERRAL_FLOOR); pw.print(" = ");
             TimeUtils.formatDuration(DEFERRAL_FLOOR, pw);
+
+            pw.print("    "); pw.print(KEY_ALLOW_BG_ACTIVITY_START_TIMEOUT); pw.print(" = ");
+            TimeUtils.formatDuration(ALLOW_BG_ACTIVITY_START_TIMEOUT, pw);
             pw.println();
         }
     }

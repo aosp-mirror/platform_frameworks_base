@@ -11946,6 +11946,7 @@ public final class Settings {
          * bcast_deferral               (long)
          * bcast_deferral_decay_factor  (float)
          * bcast_deferral_floor         (long)
+         * bcast_allow_bg_activity_start_timeout    (long)
          * </pre>
          *
          * @hide
