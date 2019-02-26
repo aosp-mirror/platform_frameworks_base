@@ -119,7 +119,7 @@ public abstract class CellSignalStrength {
     /** @hide */
     protected static final int getAsuFromRssiDbm(int dbm) {
         if (dbm == CellInfo.UNAVAILABLE) return 99;
-        return (dbm / 2) + 113;
+        return (dbm + 113) / 2;
     }
 
     // Range for RSCP in ASU (0-96, 255) as defined in TS 27.007 8.69
