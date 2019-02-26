@@ -61,17 +61,19 @@ public class RoSystemProperties {
             SystemProperties.getBoolean("ro.fw.system_user_split", false);
 
     // ------ ro.crypto.* -------- //
-    public static final String CRYPTO_STATE = SystemProperties.get("ro.crypto.state");
-    public static final String CRYPTO_TYPE = CryptoProperties.type().orElse("");
+    public static final CryptoProperties.state_values CRYPTO_STATE =
+            CryptoProperties.state().orElse(CryptoProperties.state_values.UNSUPPORTED);
+    public static final CryptoProperties.type_values CRYPTO_TYPE =
+            CryptoProperties.type().orElse(CryptoProperties.type_values.NONE);
     // These are pseudo-properties
     public static final boolean CRYPTO_ENCRYPTABLE =
-            !CRYPTO_STATE.isEmpty() && !"unsupported".equals(CRYPTO_STATE);
+            CRYPTO_STATE != CryptoProperties.state_values.UNSUPPORTED;
     public static final boolean CRYPTO_ENCRYPTED =
-            "encrypted".equalsIgnoreCase(CRYPTO_STATE);
+            CRYPTO_STATE == CryptoProperties.state_values.ENCRYPTED;
     public static final boolean CRYPTO_FILE_ENCRYPTED =
-            "file".equalsIgnoreCase(CRYPTO_TYPE);
+            CRYPTO_TYPE == CryptoProperties.type_values.FILE;
     public static final boolean CRYPTO_BLOCK_ENCRYPTED =
-            "block".equalsIgnoreCase(CRYPTO_TYPE);
+            CRYPTO_TYPE == CryptoProperties.type_values.BLOCK;
 
     public static final boolean CONTROL_PRIVAPP_PERMISSIONS_LOG =
             "log".equalsIgnoreCase(CONTROL_PRIVAPP_PERMISSIONS);
