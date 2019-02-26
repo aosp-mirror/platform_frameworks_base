@@ -979,7 +979,7 @@ public class ViewConfiguration {
      * @throws IllegalStateException if this method is called on a ViewConfiguration that was
      *         instantiated using a constructor with no Context parameter.
      */
-    public int getScaledMinScalingSpan() {
+    public int getScaledMinimumScalingSpan() {
         if (!mConstructedWithContext) {
             throw new IllegalStateException("Min scaling span cannot be determined when this "
                     + "method is called on a ViewConfiguration that was instantiated using a "
