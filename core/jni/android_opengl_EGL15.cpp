@@ -14,6 +14,8 @@
 ** limitations under the License.
 */
 
+// This source file is automatically generated
+
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-function"
 
@@ -90,7 +92,6 @@ nativeClassInit(JNIEnv *_env, jclass glImplClass)
     egldisplayGetHandleID = _env->GetMethodID(egldisplayClass, "getNativeHandle", "()J");
     eglsurfaceGetHandleID = _env->GetMethodID(eglsurfaceClass, "getNativeHandle", "()J");
 
-
     eglconfigConstructor = _env->GetMethodID(eglconfigClass, "<init>", "(J)V");
     eglcontextConstructor = _env->GetMethodID(eglcontextClass, "<init>", "(J)V");
     egldisplayConstructor = _env->GetMethodID(egldisplayClass, "<init>", "(J)V");
@@ -102,7 +103,6 @@ nativeClassInit(JNIEnv *_env, jclass glImplClass)
     eglNoDisplayObject = _env->NewGlobalRef(localeglNoDisplayObject);
     jobject localeglNoSurfaceObject = _env->NewObject(eglsurfaceClass, eglsurfaceConstructor, reinterpret_cast<jlong>(EGL_NO_SURFACE));
     eglNoSurfaceObject = _env->NewGlobalRef(localeglNoSurfaceObject);
-
 
     jclass eglClass = _env->FindClass("android/opengl/EGL15");
     jfieldID noContextFieldID = _env->GetStaticFieldID(eglClass, "EGL_NO_CONTEXT", "Landroid/opengl/EGLContext;");
@@ -187,7 +187,7 @@ releasePointer(JNIEnv *_env, jarray array, void *data, jboolean commit)
 
 static void *
 fromEGLHandle(JNIEnv *_env, jmethodID mid, jobject obj) {
-    if (obj == NULL){
+    if (obj == NULL) {
         jniThrowException(_env, "java/lang/IllegalArgumentException",
                           "Object is set to null.");
         return nullptr;
@@ -198,10 +198,9 @@ fromEGLHandle(JNIEnv *_env, jmethodID mid, jobject obj) {
 }
 
 static jobject
-toEGLHandle(JNIEnv *_env, jclass cls, jmethodID con, void * handle) {
-    if (cls == eglimageClass &&
-       (EGLImage)handle == EGL_NO_IMAGE) {
-           return eglNoImageObject;
+toEGLHandle(JNIEnv *_env, jclass cls, jmethodID con, void *handle) {
+    if (cls == eglimageClass && (EGLImage)handle == EGL_NO_IMAGE) {
+        return eglNoImageObject;
     }
 
     return _env->NewObject(cls, con, reinterpret_cast<jlong>(handle));
@@ -333,7 +332,7 @@ exit:
     }
     if (_exception) {
         jniThrowException(_env, _exceptionType, _exceptionMessage);
-        return false;
+        return JNI_FALSE;
     }
     return (jboolean)_returnValue;
 }
@@ -457,12 +456,9 @@ exit:
 static jobject
 android_eglCreatePlatformPixmapSurface
   (JNIEnv *_env, jobject _this, jobject dpy, jobject config, jobject native_pixmap_buf, jlongArray attrib_list_ref, jint offset) {
-    if ((true)) {
-        jniThrowException(_env, "java/lang/UnsupportedOperationException",
-            "eglCreatePlatformPixmapSurface");
+    jniThrowException(_env, "java/lang/UnsupportedOperationException",
+        "eglCreatePlatformPixmapSurface");
         return nullptr;
-    }
-    return toEGLHandle(_env, eglsurfaceClass, eglsurfaceConstructor, (EGLSurface) 0);
 }
 
 /* EGLBoolean eglWaitSync ( EGLDisplay dpy, EGLSync sync, EGLint flags ) */
