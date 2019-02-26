@@ -257,7 +257,7 @@ public class StagingManager {
                         + "activated");
                 return;
             }
-            if (apexSessionInfo.isActivationFailed || apexSessionInfo.isUnknown) {
+            if (isApexSessionFailed(apexSessionInfo)) {
                 session.setStagedSessionFailed(SessionInfo.STAGED_SESSION_ACTIVATION_FAILED,
                         "APEX activation failed. Check logcat messages from apexd for "
                                 + "more information.");
@@ -468,7 +468,13 @@ public class StagingManager {
         ApexSessionInfo session = mApexManager.getStagedSessionInfo(sessionId);
 
         /* checking if the session is in a final state, i.e., not active anymore */
-        return session.isUnknown || session.isActivationFailed || session.isSuccess;
+        return session.isUnknown || session.isActivationFailed || session.isSuccess
+                || session.isRolledBack;
+    }
+
+    private static boolean isApexSessionFailed(ApexSessionInfo apexSessionInfo) {
+        return apexSessionInfo.isActivationFailed || apexSessionInfo.isUnknown
+                || apexSessionInfo.isRolledBack;
     }
 
     @GuardedBy("mStagedSessions")
