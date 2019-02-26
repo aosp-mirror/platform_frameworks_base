@@ -276,6 +276,7 @@ public abstract class ActivityManagerInternal {
     public abstract boolean isActivityStartsLoggingEnabled();
     /** Returns true if the background activity starts is enabled. */
     public abstract boolean isBackgroundActivityStartsEnabled();
+    public abstract boolean isPackageNameWhitelistedForBgActivityStarts(String packageName);
     public abstract void reportCurKeyguardUsageEvent(boolean keyguardShowing);
 
     /** Input dispatch timeout to a window, start the ANR process. */

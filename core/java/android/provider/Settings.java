@@ -11453,6 +11453,15 @@ public final class Settings {
                 "background_activity_starts_enabled";
 
         /**
+         * The packages temporarily whitelisted to be able so start activities from background.
+         * The list of packages is {@code ":"} colon delimited.
+         *
+         * @hide
+         */
+        public static final String BACKGROUND_ACTIVITY_STARTS_PACKAGE_NAMES_WHITELIST =
+                "background_activity_starts_package_names_whitelist";
+
+        /**
          * @hide
          * @see com.android.server.appbinding.AppBindingConstants
          */
