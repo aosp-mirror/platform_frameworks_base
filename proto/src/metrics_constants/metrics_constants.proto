@@ -7078,6 +7078,15 @@ message MetricsEvent {
     // Open: Settings will show the conditional when Grayscale mode is on
     SETTINGS_CONDITION_GRAYSCALE_MODE = 1683;
 
+    // ACTION: Individual contextual card loading time
+    ACTION_CONTEXTUAL_CARD_LOAD = 1684;
+
+    //ACTION: Contextual card loading timeout
+    ACTION_CONTEXTUAL_CARD_LOAD_TIMEOUT = 1685;
+
+    //ACTION: Log result for each card's eligibility check
+    ACTION_CONTEXTUAL_CARD_ELIGIBILITY = 1686;
+
     // ---- End Q Constants, all Q constants go above this line ----
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
