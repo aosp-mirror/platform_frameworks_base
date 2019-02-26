@@ -576,7 +576,8 @@ public class HdmiControlService extends SystemService {
                 Global.HDMI_SYSTEM_AUDIO_CONTROL_ENABLED,
                 Global.MHL_INPUT_SWITCHING_ENABLED,
                 Global.MHL_POWER_CHARGE_ENABLED,
-                Global.HDMI_CEC_SWITCH_ENABLED
+                Global.HDMI_CEC_SWITCH_ENABLED,
+                Global.DEVICE_NAME
         };
         for (String s : settings) {
             resolver.registerContentObserver(Global.getUriFor(s), false, mSettingsObserver,
@@ -642,6 +643,10 @@ public class HdmiControlService extends SystemService {
                 case Global.MHL_POWER_CHARGE_ENABLED:
                     mMhlController.setOption(OPTION_MHL_POWER_CHARGE, toInt(enabled));
                     break;
+                case Global.DEVICE_NAME:
+                    String deviceName = readStringSetting(option, Build.MODEL);
+                    setDisplayName(deviceName);
+                    break;
             }
         }
     }
@@ -668,6 +673,15 @@ public class HdmiControlService extends SystemService {
     @VisibleForTesting
     boolean readBooleanSystemProperty(String key, boolean defVal) {
         return SystemProperties.getBoolean(key, defVal);
+    }
+
+    String readStringSetting(String key, String defVal) {
+        ContentResolver cr = getContext().getContentResolver();
+        String content = Global.getString(cr, key);
+        if (TextUtils.isEmpty(content)) {
+            return defVal;
+        }
+        return content;
     }
 
     private void initializeCec(int initiatedBy) {
@@ -1178,11 +1192,27 @@ public class HdmiControlService extends SystemService {
     }
 
     private HdmiDeviceInfo createDeviceInfo(int logicalAddress, int deviceType, int powerStatus) {
-        // TODO: find better name instead of model name.
-        String displayName = Build.MODEL;
+        String displayName = readStringSetting(Global.DEVICE_NAME, Build.MODEL);
         return new HdmiDeviceInfo(logicalAddress,
                 getPhysicalAddress(), pathToPortId(getPhysicalAddress()), deviceType,
                 getVendorId(), displayName, powerStatus);
+    }
+
+    // Set the display name in HdmiDeviceInfo of the current devices to content provided by
+    // Global.DEVICE_NAME. Only set and broadcast if the new name is different.
+    private void setDisplayName(String newDisplayName) {
+        for (HdmiCecLocalDevice device : getAllLocalDevices()) {
+            HdmiDeviceInfo deviceInfo = device.getDeviceInfo();
+            if (deviceInfo.getDisplayName().equals(newDisplayName)) {
+                continue;
+            }
+            device.setDeviceInfo(new HdmiDeviceInfo(
+                    deviceInfo.getLogicalAddress(), deviceInfo.getPhysicalAddress(),
+                    deviceInfo.getPortId(), deviceInfo.getDeviceType(), deviceInfo.getVendorId(),
+                    newDisplayName, deviceInfo.getDevicePowerStatus()));
+            sendCecCommand(HdmiCecMessageBuilder.buildSetOsdNameCommand(
+                    device.mAddress, Constants.ADDR_TV, newDisplayName));
+        }
     }
 
     @ServiceThreadOnly
