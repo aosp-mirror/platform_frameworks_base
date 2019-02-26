@@ -1873,7 +1873,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 }
                 mStagingManager.abortCommittedSession(this);
 
-                //TODO(b/123624108): delete staging dir
+                cleanStageDir();
             }
 
             if (mRelinquished) {
@@ -2096,9 +2096,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
         }
         // For staged sessions, we don't delete the directory where the packages have been copied,
-        // since these packages are supposed to be read on reboot. StagingManager is in charge of
-        // deleting these dirs when the staged session has reached a final state.
-        // TODO(b/118865310): Implement packageDir deletion in StagingManager.
+        // since these packages are supposed to be read on reboot.
+        // Those dirs are deleted when the staged session has reached a final state.
         if (stageDir != null && !params.isStaged) {
             try {
                 mPm.mInstaller.rmPackageDir(stageDir.getAbsolutePath());
