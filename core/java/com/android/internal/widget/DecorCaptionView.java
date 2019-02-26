@@ -103,6 +103,7 @@ public class DecorCaptionView extends ViewGroup implements View.OnTouchListener,
     private final Rect mCloseRect = new Rect();
     private final Rect mMaximizeRect = new Rect();
     private View mClickTarget;
+    private int mRootScrollY;
 
     public DecorCaptionView(Context context) {
         super(context);
@@ -154,10 +155,11 @@ public class DecorCaptionView extends ViewGroup implements View.OnTouchListener,
         if (ev.getAction() == MotionEvent.ACTION_DOWN) {
             final int x = (int) ev.getX();
             final int y = (int) ev.getY();
-            if (mMaximizeRect.contains(x, y)) {
+            // Only offset y for containment tests because the actual views are already translated.
+            if (mMaximizeRect.contains(x, y - mRootScrollY)) {
                 mClickTarget = mMaximize;
             }
-            if (mCloseRect.contains(x, y)) {
+            if (mCloseRect.contains(x, y - mRootScrollY)) {
                 mClickTarget = mClose;
             }
         }
@@ -416,5 +418,17 @@ public class DecorCaptionView extends ViewGroup implements View.OnTouchListener,
     @Override
     public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
         return false;
+    }
+
+    /**
+     * Called when {@link android.view.ViewRootImpl} scrolls for adjustPan.
+     */
+    public void onRootViewScrollYChanged(int scrollY) {
+        // Offset the caption opposite the root scroll. This keeps the caption at the
+        // top of the window during adjustPan.
+        if (mCaption != null) {
+            mRootScrollY = scrollY;
+            mCaption.setTranslationY(scrollY);
+        }
     }
 }
