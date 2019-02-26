@@ -594,8 +594,9 @@ public class VibratorService extends IVibratorService.Stub
                 if (mProcStatesCache.get(uid, ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND)
                         > ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND
                         && !vib.isNotification() && !vib.isRingtone()) {
-                    Slog.e(TAG, "Ignoring incoming vibration as process with uid = "
-                            + uid + " is background");
+                    Slog.e(TAG, "Ignoring incoming vibration as process with"
+                            + " uid = " + uid + " is background,"
+                            + " usage = " + AudioAttributes.usageToString(vib.usageHint));
                     return;
                 }
                 linkVibration(vib);
