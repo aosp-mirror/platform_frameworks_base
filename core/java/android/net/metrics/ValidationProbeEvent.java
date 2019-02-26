@@ -79,7 +79,7 @@ public final class ValidationProbeEvent implements IpConnectivityLog.Event {
     }
 
     /**
-     * Utility to create an instance of {@link ApfProgramEvent}.
+     * Utility to create an instance of {@link ValidationProbeEvent}.
      */
     public static class Builder {
         private long mDurationMs;
