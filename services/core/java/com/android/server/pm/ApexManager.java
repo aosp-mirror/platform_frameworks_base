@@ -223,6 +223,7 @@ class ApexManager {
      * @return true if APEX packages can be managed on this device, false otherwise.
      */
     boolean isApexSupported() {
+        populateActivePackagesCacheIfNeeded();
         // There is no system-wide property available to check if APEX are flattened and hence can't
         // be updated. In absence of such property, we assume that if we didn't index APEX packages
         // since they were flattened, no APEX management should be possible.
