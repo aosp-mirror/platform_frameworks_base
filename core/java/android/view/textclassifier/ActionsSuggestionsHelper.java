@@ -16,6 +16,7 @@
 
 package android.view.textclassifier;
 
+import android.annotation.Nullable;
 import android.app.Person;
 import android.content.Context;
 import android.text.TextUtils;
@@ -108,6 +109,19 @@ public final class ActionsSuggestionsHelper {
                 System.currentTimeMillis());
         return SelectionSessionLogger.SignatureParser.createSignature(
                 SelectionSessionLogger.CLASSIFIER_ID, modelName, hash);
+    }
+
+    /**
+     * Returns a {@link android.view.textclassifier.LabeledIntent.TitleChooser} for
+     * conversation actions use case.
+     */
+    @Nullable
+    public static LabeledIntent.TitleChooser createTitleChooser(String actionType) {
+        if (ConversationAction.TYPE_OPEN_URL.equals(actionType)) {
+            return (labeledIntent, resolveInfo) -> resolveInfo.handleAllWebDataURI
+                    ? labeledIntent.titleWithEntity : labeledIntent.titleWithoutEntity;
+        }
+        return null;
     }
 
     private static final class PersonEncoder {

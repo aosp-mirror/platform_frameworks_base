@@ -48,12 +48,12 @@ public final class TemplateClassificationIntentFactory implements IntentFactory 
     }
 
     /**
-     * Returns a list of {@link android.view.textclassifier.TextClassifierImpl.LabeledIntent}
+     * Returns a list of {@link android.view.textclassifier.LabeledIntent}
      * that are constructed from the classification result.
      */
     @NonNull
     @Override
-    public List<TextClassifierImpl.LabeledIntent> create(
+    public List<LabeledIntent> create(
             Context context,
             String text,
             boolean foreignText,
@@ -68,7 +68,7 @@ public final class TemplateClassificationIntentFactory implements IntentFactory 
             Log.w(TAG, "RemoteActionTemplate is missing, fallback to LegacyIntentFactory.");
             return mFallback.create(context, text, foreignText, referenceTime, classification);
         }
-        final List<TextClassifierImpl.LabeledIntent> labeledIntents =
+        final List<LabeledIntent> labeledIntents =
                 mTemplateIntentFactory.create(remoteActionTemplates);
         if (foreignText) {
             IntentFactory.insertTranslateAction(labeledIntents, context, text.trim());
