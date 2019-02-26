@@ -208,6 +208,7 @@ class WindowTracing {
                 pw.println("  frame: Log trace once per frame");
                 pw.println("  transaction: Log each transaction");
                 pw.println("  size: Set the maximum log size (in KB)");
+                pw.println("  status: Print trace status");
                 pw.println("  level [lvl]: Set the log level between");
                 pw.println("    lvl may be one of:");
                 pw.println("      critical: Only visible windows with reduced information");
