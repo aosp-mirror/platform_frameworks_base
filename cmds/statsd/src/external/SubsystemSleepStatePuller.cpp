@@ -60,41 +60,43 @@ namespace android {
 namespace os {
 namespace statsd {
 
-std::function<bool(vector<shared_ptr<LogEvent>>* data)> gPuller = {};
+static std::function<bool(vector<shared_ptr<LogEvent>>* data)> gPuller = {};
 
-sp<android::hardware::power::V1_0::IPower> gPowerHalV1_0 = nullptr;
-sp<android::hardware::power::V1_1::IPower> gPowerHalV1_1 = nullptr;
-sp<android::hardware::power::stats::V1_0::IPowerStats> gPowerStatsHalV1_0 = nullptr;
+static sp<android::hardware::power::V1_0::IPower> gPowerHalV1_0 = nullptr;
+static sp<android::hardware::power::V1_1::IPower> gPowerHalV1_1 = nullptr;
+static sp<android::hardware::power::stats::V1_0::IPowerStats> gPowerStatsHalV1_0 = nullptr;
 
-std::unordered_map<uint32_t, std::string> gEntityNames = {};
-std::unordered_map<uint32_t, std::unordered_map<uint32_t, std::string>> gStateNames = {};
+static std::unordered_map<uint32_t, std::string> gEntityNames = {};
+static std::unordered_map<uint32_t, std::unordered_map<uint32_t, std::string>> gStateNames = {};
 
-std::mutex gPowerHalMutex;
+static std::mutex gPowerHalMutex;
 
 // The caller must be holding gPowerHalMutex.
-void deinitPowerStatsLocked() {
+static void deinitPowerStatsLocked() {
     gPowerHalV1_0 = nullptr;
     gPowerHalV1_1 = nullptr;
     gPowerStatsHalV1_0 = nullptr;
 }
 
-struct PowerHalDeathRecipient : virtual public hardware::hidl_death_recipient {
+struct SubsystemSleepStatePullerDeathRecipient : virtual public hardware::hidl_death_recipient {
     virtual void serviceDied(uint64_t cookie,
-        const wp<android::hidl::base::V1_0::IBase>& who) override {
+            const wp<android::hidl::base::V1_0::IBase>& who) override {
+
         // The HAL just died. Reset all handles to HAL services.
         std::lock_guard<std::mutex> lock(gPowerHalMutex);
         deinitPowerStatsLocked();
     }
 };
 
-sp<PowerHalDeathRecipient> gDeathRecipient = new PowerHalDeathRecipient();
+static sp<SubsystemSleepStatePullerDeathRecipient> gDeathRecipient =
+        new SubsystemSleepStatePullerDeathRecipient();
 
 SubsystemSleepStatePuller::SubsystemSleepStatePuller() :
     StatsPuller(android::util::SUBSYSTEM_SLEEP_STATE) {
 }
 
 // The caller must be holding gPowerHalMutex.
-bool checkResultLocked(const Return<void> &ret, const char* function) {
+static bool checkResultLocked(const Return<void> &ret, const char* function) {
     if (!ret.isOk()) {
         ALOGE("%s failed: requested HAL service not available. Description: %s",
             function, ret.description().c_str());
@@ -108,7 +110,7 @@ bool checkResultLocked(const Return<void> &ret, const char* function) {
 
 // The caller must be holding gPowerHalMutex.
 // gPowerStatsHalV1_0 must not be null
-bool initializePowerStats() {
+static bool initializePowerStats() {
     using android::hardware::power::stats::V1_0::Status;
 
     // Clear out previous content if we are re-initializing
@@ -155,7 +157,7 @@ bool initializePowerStats() {
 }
 
 // The caller must be holding gPowerHalMutex.
-bool getPowerStatsHalLocked() {
+static bool getPowerStatsHalLocked() {
     if(gPowerStatsHalV1_0 == nullptr) {
         gPowerStatsHalV1_0 = android::hardware::power::stats::V1_0::IPowerStats::getService();
         if (gPowerStatsHalV1_0 == nullptr) {
@@ -180,7 +182,7 @@ bool getPowerStatsHalLocked() {
 }
 
 // The caller must be holding gPowerHalMutex.
-bool getIPowerStatsDataLocked(vector<shared_ptr<LogEvent>>* data) {
+static bool getIPowerStatsDataLocked(vector<shared_ptr<LogEvent>>* data) {
     using android::hardware::power::stats::V1_0::Status;
 
     if(!getPowerStatsHalLocked()) {
@@ -225,7 +227,7 @@ bool getIPowerStatsDataLocked(vector<shared_ptr<LogEvent>>* data) {
 }
 
 // The caller must be holding gPowerHalMutex.
-bool getPowerHalLocked() {
+static bool getPowerHalLocked() {
     if(gPowerHalV1_0 == nullptr) {
         gPowerHalV1_0 = android::hardware::power::V1_0::IPower::getService();
         if(gPowerHalV1_0 == nullptr) {
@@ -250,7 +252,7 @@ bool getPowerHalLocked() {
 }
 
 // The caller must be holding gPowerHalMutex.
-bool getIPowerDataLocked(vector<shared_ptr<LogEvent>>* data) {
+static bool getIPowerDataLocked(vector<shared_ptr<LogEvent>>* data) {
     using android::hardware::power::V1_0::Status;
 
     if(!getPowerHalLocked()) {
