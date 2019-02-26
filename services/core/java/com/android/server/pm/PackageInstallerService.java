@@ -28,10 +28,8 @@ import android.app.NotificationManager;
 import android.app.PackageDeleteObserver;
 import android.app.PackageInstallObserver;
 import android.app.admin.DevicePolicyManagerInternal;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.IntentSender.SendIntentException;
 import android.content.pm.ApplicationInfo;
@@ -141,7 +139,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
 
     private final Callbacks mCallbacks;
 
-    private volatile boolean mBootCompleted = false;
+    private volatile boolean mOkToSendBroadcasts = false;
 
     /**
      * File storing persisted {@link #mSessions} metadata.
@@ -209,26 +207,13 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         mStagingManager = new StagingManager(pm, this, am);
     }
 
-    private void onBootCompleted()  {
-        mBootCompleted = true;
-        // Tell APEX manager about it as well
-        mApexManager.onBootCompleted();
-    }
-
-    boolean isBootCompleted()  {
-        return mBootCompleted;
+    boolean okToSendBroadcasts()  {
+        return mOkToSendBroadcasts;
     }
 
     public void systemReady() {
         mAppOps = mContext.getSystemService(AppOpsManager.class);
 
-        mContext.registerReceiver(new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                onBootCompleted();
-                mContext.unregisterReceiver(this);
-            }
-        }, new IntentFilter(Intent.ACTION_BOOT_COMPLETED));
         synchronized (mSessions) {
             readSessionsLocked();
 
@@ -271,6 +256,16 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         for (PackageInstallerSession session : stagedSessionsToRestore) {
             mStagingManager.restoreSession(session);
         }
+        // Broadcasts are not sent while we restore sessions on boot, since no processes would be
+        // ready to listen to them. From now on, we greedily assume that broadcasts requests are
+        // safe to send out. The worst that can happen is that a broadcast is attempted before
+        // ActivityManagerService completes its own systemReady(), in which case it will be rejected
+        // with an otherwise harmless exception.
+        // A more appropriate way to do this would be to wait until the correct  boot phase is
+        // reached, but since we are not a SystemService we can't override onBootPhase.
+        // Waiting on the BOOT_COMPLETED broadcast can take several minutes, so that's not a viable
+        // way either.
+        mOkToSendBroadcasts = true;
     }
 
     @GuardedBy("mSessions")
@@ -1189,7 +1184,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
 
         public void onStagedSessionChanged(PackageInstallerSession session) {
             writeSessionsAsync();
-            if (mBootCompleted) {
+            if (mOkToSendBroadcasts) {
                 mPm.sendSessionUpdatedBroadcast(session.generateInfo(false),
                         session.userId);
             }

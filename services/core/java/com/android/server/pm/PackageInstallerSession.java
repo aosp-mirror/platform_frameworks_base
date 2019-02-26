@@ -2008,7 +2008,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
         // Send broadcast to default launcher only if it's a new install
         final boolean isNewInstall = extras == null || !extras.getBoolean(Intent.EXTRA_REPLACING);
-        if (success && isNewInstall && mPm.mInstallerService.isBootCompleted()) {
+        if (success && isNewInstall && mPm.mInstallerService.okToSendBroadcasts()) {
             mPm.sendSessionCommitBroadcast(generateInfo(), userId);
         }
 
