@@ -3041,7 +3041,6 @@ Lcom/android/internal/telephony/ServiceStateTracker;->isInHomeSidNid(II)Z
 Lcom/android/internal/telephony/ServiceStateTracker;->isInvalidOperatorNumeric(Ljava/lang/String;)Z
 Lcom/android/internal/telephony/ServiceStateTracker;->log(Ljava/lang/String;)V
 Lcom/android/internal/telephony/ServiceStateTracker;->loge(Ljava/lang/String;)V
-Lcom/android/internal/telephony/ServiceStateTracker;->mAttachedRegistrants:Landroid/os/RegistrantList;
 Lcom/android/internal/telephony/ServiceStateTracker;->mCi:Lcom/android/internal/telephony/CommandsInterface;
 Lcom/android/internal/telephony/ServiceStateTracker;->mCr:Landroid/content/ContentResolver;
 Lcom/android/internal/telephony/ServiceStateTracker;->mCurDataSpn:Ljava/lang/String;
@@ -3053,7 +3052,6 @@ Lcom/android/internal/telephony/ServiceStateTracker;->mDataRoamingOffRegistrants
 Lcom/android/internal/telephony/ServiceStateTracker;->mDataRoamingOnRegistrants:Landroid/os/RegistrantList;
 Lcom/android/internal/telephony/ServiceStateTracker;->mDefaultRoamingIndicator:I
 Lcom/android/internal/telephony/ServiceStateTracker;->mDesiredPowerState:Z
-Lcom/android/internal/telephony/ServiceStateTracker;->mDetachedRegistrants:Landroid/os/RegistrantList;
 Lcom/android/internal/telephony/ServiceStateTracker;->mDeviceShuttingDown:Z
 Lcom/android/internal/telephony/ServiceStateTracker;->mEmergencyOnly:Z
 Lcom/android/internal/telephony/ServiceStateTracker;->mIccRecords:Lcom/android/internal/telephony/uicc/IccRecords;
@@ -3081,7 +3079,6 @@ Lcom/android/internal/telephony/ServiceStateTracker;->mUiccApplcation:Lcom/andro
 Lcom/android/internal/telephony/ServiceStateTracker;->mUiccController:Lcom/android/internal/telephony/uicc/UiccController;
 Lcom/android/internal/telephony/ServiceStateTracker;->mVoiceRoamingOffRegistrants:Landroid/os/RegistrantList;
 Lcom/android/internal/telephony/ServiceStateTracker;->mVoiceRoamingOnRegistrants:Landroid/os/RegistrantList;
-Lcom/android/internal/telephony/ServiceStateTracker;->notifyDataRegStateRilRadioTechnologyChanged()V
 Lcom/android/internal/telephony/ServiceStateTracker;->notifySignalStrength()Z
 Lcom/android/internal/telephony/ServiceStateTracker;->pollState()V
 Lcom/android/internal/telephony/ServiceStateTracker;->reRegisterNetwork(Landroid/os/Message;)V
