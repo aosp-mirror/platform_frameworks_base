@@ -7034,6 +7034,37 @@ message MetricsEvent {
     // Contextual card is clicked
     ACTION_CONTEXTUAL_CARD_CLICK = 1666;
 
+    // Mapping: go/at-mapping
+    PAGE_ATSSI = 1667;
+
+    PAGE_ATSII = 1668;
+
+    PAGE_ATUS = 1669;
+
+    PAGE_ATSSP = 1670;
+
+    PAGE_ATSAP = 1671;
+
+    PAGE_ATSCP = 1672;
+
+    PAGE_ATHNP = 1673;
+
+    ACTION_ATSG = 1674;
+
+    ACTION_ATPG = 1675;
+
+    ACTION_ATCLPB = 1676;
+
+    ACTION_ATCGIB = 1677;
+
+    ACTION_ATCPAB = 1678;
+
+    ACTION_ATCSAUC = 1679;
+
+    ACTION_ATCSCUC = 1680;
+
+    ACTION_ATCHNUC = 1681;
+
     // ---- End Q Constants, all Q constants go above this line ----
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
