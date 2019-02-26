@@ -19,9 +19,12 @@ package android.hardware.camera2.params;
 import static com.android.internal.util.Preconditions.*;
 import static android.hardware.camera2.params.StreamConfigurationMap.checkArgumentFormat;
 
+import android.annotation.IntRange;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.ImageFormat;
+import android.graphics.ImageFormat.Format;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraCharacteristics.Key;
 import android.hardware.camera2.CameraDevice;
@@ -44,8 +47,9 @@ import java.util.List;
 /**
  * Immutable class to store the available mandatory stream combination.
  *
- * <p>The individual stream combinations are generated according to the guidelines
- * at {@link CameraDevice#createCaptureSession}.</p>
+ * <p>A mandatory stream combination refers to a specific entry in the documented sets of
+ * required stream {@link CameraDevice#createCaptureSession combinations}.
+ * These combinations of streams are required to be supported by the camera device.
  *
  * <p>The list of stream combinations is available by invoking
  * {@link CameraCharacteristics#get} and passing key
@@ -88,7 +92,7 @@ public final class MandatoryStreamCombination {
          *              ImageFormat/PixelFormat.
          * @hide
          */
-        public MandatoryStreamInformation(@NonNull List<Size> availableSizes, int format,
+        public MandatoryStreamInformation(@NonNull List<Size> availableSizes, @Format int format,
                 boolean isInput) {
             if (availableSizes.isEmpty()) {
                 throw new IllegalArgumentException("No available sizes");
@@ -118,7 +122,7 @@ public final class MandatoryStreamCombination {
          *
          * @return non-modifiable ascending list of available sizes.
          */
-        public List<Size> getAvailableSizes() {
+        public @NonNull List<Size> getAvailableSizes() {
             return Collections.unmodifiableList(mAvailableSizes);
         }
 
@@ -127,7 +131,7 @@ public final class MandatoryStreamCombination {
          *
          * @return integer format.
          */
-        public int getFormat() {
+        public @Format int getFormat() {
             return mFormat;
         }
 
@@ -187,7 +191,7 @@ public final class MandatoryStreamCombination {
      * @hide
      */
     public MandatoryStreamCombination(@NonNull List<MandatoryStreamInformation> streamsInformation,
-            String description, boolean isReprocessable) {
+            @NonNull String description, boolean isReprocessable) {
         if (streamsInformation.isEmpty()) {
             throw new IllegalArgumentException("Empty stream information");
         }
@@ -199,14 +203,16 @@ public final class MandatoryStreamCombination {
     /**
      * Get the mandatory stream combination description.
      *
-     * @return String with the mandatory combination description.
+     * @return CharSequence with the mandatory combination description.
      */
-    public String getDescription() {
+    public @NonNull CharSequence getDescription() {
         return mDescription;
     }
 
     /**
-     * Indicates whether the mandatory stream combination is reprocessable.
+     * Indicates whether the mandatory stream combination is reprocessable. Reprocessable is defined
+     * as a stream combination that contains one input stream
+     * ({@link MandatoryStreamInformation#isInput} return true).
      *
      * @return {@code true} in case the mandatory stream combination contains an input,
      *         {@code false} otherwise.
@@ -221,7 +227,7 @@ public final class MandatoryStreamCombination {
      * @return Non-modifiable list of stream information.
      *
      */
-    public List<MandatoryStreamInformation> getStreamsInformation() {
+    public @NonNull List<MandatoryStreamInformation> getStreamsInformation() {
         return Collections.unmodifiableList(mStreamsInformation);
     }
 
@@ -274,7 +280,8 @@ public final class MandatoryStreamCombination {
             this(format, sizeThreshold, /*isInput*/false);
         }
 
-        public StreamTemplate(int format, SizeThreshold sizeThreshold, boolean isInput) {
+        public StreamTemplate(@Format int format, @NonNull SizeThreshold sizeThreshold,
+                boolean isInput) {
             mFormat = format;
             mSizeThreshold = sizeThreshold;
             mIsInput = isInput;
@@ -286,11 +293,13 @@ public final class MandatoryStreamCombination {
         public String mDescription;
         public ReprocessType mReprocessType;
 
-        public StreamCombinationTemplate(StreamTemplate[] streamTemplates, String description) {
+        public StreamCombinationTemplate(@NonNull StreamTemplate[] streamTemplates,
+                @NonNull String description) {
             this(streamTemplates, description, /*reprocessType*/ReprocessType.NONE);
         }
 
-        public StreamCombinationTemplate(StreamTemplate[] streamTemplates, String description,
+        public StreamCombinationTemplate(@NonNull StreamTemplate[] streamTemplates,
+                @NonNull String description,
                 ReprocessType reprocessType) {
             mStreamTemplates = streamTemplates;
             mReprocessType = reprocessType;
@@ -680,7 +689,8 @@ public final class MandatoryStreamCombination {
          *         null in case device is not backward compatible or the method encounters
          *         an error.
          */
-        public List<MandatoryStreamCombination> getAvailableMandatoryStreamCombinations() {
+        public @Nullable List<MandatoryStreamCombination>
+            getAvailableMandatoryStreamCombinations() {
             if (!isColorOutputSupported()) {
                 Log.v(TAG, "Device is not backward compatible!");
                 return null;
@@ -767,8 +777,8 @@ public final class MandatoryStreamCombination {
          * @return a non-modifiable list of supported mandatory stream combinations or
          *         null in case of errors.
          */
-        private List<MandatoryStreamCombination> generateAvailableCombinations(
-                ArrayList<StreamCombinationTemplate> availableTemplates) {
+        private @Nullable List<MandatoryStreamCombination> generateAvailableCombinations(
+                @NonNull ArrayList<StreamCombinationTemplate> availableTemplates) {
             if (availableTemplates.isEmpty()) {
                 Log.e(TAG, "No available stream templates!");
                 return null;
@@ -873,7 +883,8 @@ public final class MandatoryStreamCombination {
         /**
          * Helper method to enumerate all available sizes according to size threshold and format.
          */
-        private HashMap<Pair<SizeThreshold, Integer>, List<Size>> enumerateAvailableSizes() {
+        private @Nullable HashMap<Pair<SizeThreshold, Integer>, List<Size>>
+            enumerateAvailableSizes() {
             final int[] formats = {
                 ImageFormat.PRIVATE,
                 ImageFormat.YUV_420_888,
@@ -935,12 +946,8 @@ public final class MandatoryStreamCombination {
          * Compile a list of sizes smaller than or equal to given bound.
          * Return an empty list if there is no size smaller than or equal to the bound.
          */
-        private static List<Size> getSizesWithinBound(Size[] sizes, Size bound) {
-            if (sizes == null || sizes.length == 0) {
-                Log.e(TAG, "Empty or invalid size array!");
-                return null;
-            }
-
+        private static @Nullable List<Size> getSizesWithinBound(@NonNull Size[] sizes,
+                @NonNull Size bound) {
             ArrayList<Size> ret = new ArrayList<Size>();
             for (Size size : sizes) {
                 if (size.getWidth() <= bound.getWidth() && size.getHeight() <= bound.getHeight()) {
@@ -960,7 +967,7 @@ public final class MandatoryStreamCombination {
          *
          * @throws IllegalArgumentException if sizes was null or had 0 elements
          */
-        public static Size getMaxSize(Size... sizes) {
+        public static @Nullable Size getMaxSize(@NonNull Size... sizes) {
             if (sizes == null || sizes.length == 0) {
                 throw new IllegalArgumentException("sizes was empty");
             }
@@ -1089,7 +1096,7 @@ public final class MandatoryStreamCombination {
          *
          * @return Maximum supported video size.
          */
-        private Size getMaxRecordingSize() {
+        private @Nullable Size getMaxRecordingSize() {
             int quality =
                     CamcorderProfile.hasProfile(mCameraId, CamcorderProfile.QUALITY_2160P) ?
                         CamcorderProfile.QUALITY_2160P :
@@ -1121,7 +1128,7 @@ public final class MandatoryStreamCombination {
          *
          * @return Maximum supported video size.
          */
-        private Size getMaxExternalRecordingSize() {
+        private @NonNull Size getMaxExternalRecordingSize() {
             final Size FULLHD = new Size(1920, 1080);
 
             Size[] videoSizeArr = mStreamConfigMap.getOutputSizes(
@@ -1146,7 +1153,7 @@ public final class MandatoryStreamCombination {
             return FULLHD; // doesn't matter what size is returned here
         }
 
-        private Size getMaxPreviewSize(List<Size> orderedPreviewSizes) {
+        private @NonNull Size getMaxPreviewSize(List<Size> orderedPreviewSizes) {
             if (orderedPreviewSizes != null) {
                 for (Size size : orderedPreviewSizes) {
                     if ((mDisplaySize.getWidth() >= size.getWidth()) &&
@@ -1181,7 +1188,7 @@ public final class MandatoryStreamCombination {
          */
         public static class SizeComparator implements Comparator<Size> {
             @Override
-            public int compare(Size lhs, Size rhs) {
+            public int compare(@NonNull Size lhs, @NonNull Size rhs) {
                 return compareSizes(lhs.getWidth(), lhs.getHeight(), rhs.getWidth(),
                         rhs.getHeight());
             }
@@ -1199,12 +1206,8 @@ public final class MandatoryStreamCombination {
          * @param ascending True if the order is ascending, otherwise descending order
          * @return The ordered list of sizes
          */
-        private static List<Size> getAscendingOrderSizes(final List<Size> sizeList,
-                boolean ascending) {
-            if (sizeList == null) {
-                return null;
-            }
-
+        private static @NonNull List<Size> getAscendingOrderSizes(
+                @NonNull final List<Size> sizeList, boolean ascending) {
             Comparator<Size> comparator = new SizeComparator();
             List<Size> sortedSizes = new ArrayList<Size>();
             sortedSizes.addAll(sizeList);
