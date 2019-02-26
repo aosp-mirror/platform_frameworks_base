@@ -30,7 +30,9 @@ import com.android.server.connectivity.nano.WifiData;
 import com.google.protobuf.nano.MessageNano;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Class to record the stats of detection level information for data stall.
@@ -94,6 +96,22 @@ public final class DataStallDetectionStats {
           .append(", dns: ")
           .append(HexDump.toHexString(mDns));
         return sb.toString();
+    }
+
+    @Override
+    public boolean equals(@Nullable final Object o) {
+        if (!(o instanceof DataStallDetectionStats)) return false;
+        final DataStallDetectionStats other = (DataStallDetectionStats) o;
+        return (mNetworkType == other.mNetworkType)
+            && (mEvaluationType == other.mEvaluationType)
+            && Arrays.equals(mWifiInfo, other.mWifiInfo)
+            && Arrays.equals(mCellularInfo, other.mCellularInfo)
+            && Arrays.equals(mDns, other.mDns);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mNetworkType, mEvaluationType, mWifiInfo, mCellularInfo, mDns);
     }
 
     /**
@@ -163,16 +181,17 @@ public final class DataStallDetectionStats {
         }
 
         private static int getWifiBand(@Nullable final WifiInfo info) {
-            if (info != null) {
-                int freq = info.getFrequency();
-                // Refer to ScanResult.is5GHz() and ScanResult.is24GHz().
-                if (freq > 4900 && freq < 5900) {
-                    return DataStallEventProto.AP_BAND_5GHZ;
-                } else if (freq > 2400 && freq < 2500) {
-                    return DataStallEventProto.AP_BAND_2GHZ;
-                }
+            if (info == null) return DataStallEventProto.AP_BAND_UNKNOWN;
+
+            int freq = info.getFrequency();
+            // Refer to ScanResult.is5GHz() and ScanResult.is24GHz().
+            if (freq > 4900 && freq < 5900) {
+                return DataStallEventProto.AP_BAND_5GHZ;
+            } else if (freq > 2400 && freq < 2500) {
+                return DataStallEventProto.AP_BAND_2GHZ;
+            } else {
+                return DataStallEventProto.AP_BAND_UNKNOWN;
             }
-            return DataStallEventProto.AP_BAND_UNKNOWN;
         }
 
         /**
