@@ -234,9 +234,11 @@ class RollbackStore {
     }
 
     /**
-     * Creates a backup copy of the apk or apex for a package.
+     * Creates a backup copy of an apk or apex for a package.
+     * For packages containing splits, this method should be called for each
+     * of the package's split apks in addition to the base apk.
      */
-    static void backupPackageCode(RollbackData data, String packageName, String codePath)
+    static void backupPackageCodePath(RollbackData data, String packageName, String codePath)
             throws IOException {
         File sourceFile = new File(codePath);
         File targetDir = new File(data.backupDir, packageName);
@@ -248,16 +250,16 @@ class RollbackStore {
     }
 
     /**
-     * Returns the apk or apex file backed up for the given package.
-     * Returns null if none found.
+     * Returns the apk or apex files backed up for the given package.
+     * Includes the base apk and any splits. Returns null if none found.
      */
-    static File getPackageCode(RollbackData data, String packageName) {
+    static File[] getPackageCodePaths(RollbackData data, String packageName) {
         File targetDir = new File(data.backupDir, packageName);
         File[] files = targetDir.listFiles();
-        if (files == null || files.length != 1) {
+        if (files == null || files.length == 0) {
             return null;
         }
-        return files[0];
+        return files;
     }
 
     /**

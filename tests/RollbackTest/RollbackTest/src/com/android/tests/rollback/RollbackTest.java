@@ -442,6 +442,39 @@ public class RollbackTest {
     }
 
     /**
+     * Test rollback of apks involving splits.
+     */
+    @Test
+    public void testRollbackWithSplits() throws Exception {
+        try {
+            RollbackTestUtils.adoptShellPermissionIdentity(
+                    Manifest.permission.INSTALL_PACKAGES,
+                    Manifest.permission.DELETE_PACKAGES,
+                    Manifest.permission.MANAGE_ROLLBACKS);
+
+            RollbackTestUtils.uninstall(TEST_APP_A);
+            RollbackTestUtils.installSplit(false,
+                    "RollbackTestAppASplitV1.apk",
+                    "RollbackTestAppASplitV1_anydpi.apk");
+            processUserData(TEST_APP_A);
+
+            RollbackTestUtils.installSplit(true,
+                    "RollbackTestAppASplitV2.apk",
+                    "RollbackTestAppASplitV2_anydpi.apk");
+            processUserData(TEST_APP_A);
+
+            RollbackManager rm = RollbackTestUtils.getRollbackManager();
+            RollbackInfo rollback = getUniqueRollbackInfoForPackage(
+                    rm.getAvailableRollbacks(), TEST_APP_A);
+            assertNotNull(rollback);
+            RollbackTestUtils.rollback(rollback.getRollbackId());
+            processUserData(TEST_APP_A);
+        } finally {
+            RollbackTestUtils.dropShellPermissionIdentity();
+        }
+    }
+
+    /**
      * Test restrictions on rollback broadcast sender.
      * A random app should not be able to send a ROLLBACK_COMMITTED broadcast.
      */

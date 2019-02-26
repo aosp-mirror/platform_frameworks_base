@@ -130,6 +130,19 @@ class RollbackTestUtils {
      */
     static void install(String resourceName, boolean enableRollback)
             throws InterruptedException, IOException {
+        installSplit(enableRollback, resourceName);
+    }
+
+    /**
+     * Installs the apk with the given name and its splits.
+     *
+     * @param enableRollback if rollback should be enabled.
+     * @param resourceNames names of class loader resources for the apk and
+     *        its splits to install.
+     * @throws AssertionError if the installation fails.
+     */
+    static void installSplit(boolean enableRollback, String... resourceNames)
+            throws InterruptedException, IOException {
         Context context = InstrumentationRegistry.getContext();
         PackageInstaller.Session session = null;
         PackageInstaller packageInstaller = context.getPackageManager().getPackageInstaller();
@@ -142,12 +155,14 @@ class RollbackTestUtils {
         session = packageInstaller.openSession(sessionId);
 
         ClassLoader loader = RollbackTest.class.getClassLoader();
-        try (OutputStream packageInSession = session.openWrite(resourceName, 0, -1);
-             InputStream is = loader.getResourceAsStream(resourceName);) {
-            byte[] buffer = new byte[4096];
-            int n;
-            while ((n = is.read(buffer)) >= 0) {
-                packageInSession.write(buffer, 0, n);
+        for (String resourceName : resourceNames) {
+            try (OutputStream packageInSession = session.openWrite(resourceName, 0, -1);
+                    InputStream is = loader.getResourceAsStream(resourceName);) {
+                byte[] buffer = new byte[4096];
+                int n;
+                while ((n = is.read(buffer)) >= 0) {
+                    packageInSession.write(buffer, 0, n);
+                }
             }
         }
 
