@@ -44,7 +44,7 @@ java_sdk_library {
 // ==========================================
 // This is only intended for inclusion in the android.test.runner-minus-junit,
 // robolectric_android-all-stub and repackaged.android.test.* libraries.
-// Must not be used elewhere.
+// Must not be used elsewhere.
 java_library_static {
     name: "android.test.base_static",
     installable: false,
@@ -59,19 +59,6 @@ java_library_static {
     java_version: "1.8",
 
     sdk_version: "current",
-}
-
-// Build the legacy-test library
-// =============================
-// This contains the junit.framework and android.test classes that were in
-// Android API level 25 excluding those from android.test.runner.
-// Also contains the com.android.internal.util.Predicate[s] classes.
-java_library {
-    name: "legacy-test",
-    installable: true,
-
-    sdk_version: "current",
-    static_libs: ["android.test.base_static"],
 }
 
 // Build the repackaged.android.test.base library
@@ -93,8 +80,8 @@ java_library_static {
 // ===============================================
 // This contains the android.test classes from android.test.base plus
 // the com.android.internal.util.Predicate[s] classes. This is only
-// intended for inclusion in the android.test.legacy and
-// legacy-android-test static libraries and must not be used elsewhere.
+// intended for inclusion in android.test.legacy and must not be used
+// elsewhere.
 java_library_static {
     name: "android.test.base-minus-junit",
 
