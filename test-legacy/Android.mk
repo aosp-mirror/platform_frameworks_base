@@ -24,35 +24,16 @@ ifeq (,$(TARGET_BUILD_APPS)$(filter true,$(TARGET_BUILD_PDK)))
 # Built against the SDK so that it can be statically included in APKs
 # without breaking link type checks.
 #
-# This builds directly from the source rather than simply statically
-# including the android.test.base-minus-junit and
-# android.test.runner-minus-junit libraries because the latter library
-# cannot itself be built against the SDK. That is because it uses on
-# an internal method (setTestContext) on the AndroidTestCase class.
-# That class is provided by both the android.test.base-minus-junit and
-# the current SDK and as the latter is first on the classpath its
-# version is used. Unfortunately, it does not provide the internal
-# method and so compilation fails.
-#
-# Building from source avoids that because the compiler will use the
-# source version of AndroidTestCase instead of the one from the current
-# SDK.
-#
-# The use of the internal method does not prevent this from being
-# statically included because the class that provides the method is
-# also included in this library.
 include $(CLEAR_VARS)
 
 LOCAL_MODULE := android.test.legacy
 
-LOCAL_SRC_FILES := \
-    $(call all-java-files-under, ../test-base/src/android) \
-    $(call all-java-files-under, ../test-base/src/com) \
-    $(call all-java-files-under, ../test-runner/src/android) \
-
 LOCAL_SDK_VERSION := current
 
 LOCAL_JAVA_LIBRARIES := junit android.test.mock.stubs
+LOCAL_STATIC_JAVA_LIBRARIES := \
+    android.test.base-minus-junit \
+    android.test.runner-minus-junit \
 
 include $(BUILD_STATIC_JAVA_LIBRARY)
 
