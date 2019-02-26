@@ -7017,6 +7017,23 @@ message MetricsEvent {
     // OS: Q
     ACTION_SWITCH_SHARE_PROFILE = 1661;
 
+    // ACTION: Show Contextual homepage, log latency in loading cards
+    ACTION_CONTEXTUAL_HOME_SHOW = 1662;
+
+    // ACTION: Contextual card displays
+    ACTION_CONTEXTUAL_CARD_SHOW = 1663;
+
+    // ACTION: Contextual cards are eligible to be shown, but don't rank high
+    ACTION_CONTEXTUAL_CARD_NOT_SHOW = 1664;
+
+    // ACTION: Settings > long press a card, and click dismiss
+    // Contextual card is dismissed
+    ACTION_CONTEXTUAL_CARD_DISMISS = 1665;
+
+    // ACTION: Settings > click a card
+    // Contextual card is clicked
+    ACTION_CONTEXTUAL_CARD_CLICK = 1666;
+
     // ---- End Q Constants, all Q constants go above this line ----
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
