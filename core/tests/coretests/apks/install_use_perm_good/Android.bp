@@ -1,0 +1,6 @@
+android_test_helper_app {
+    name: "FrameworksCoreTests_install_use_perm_good",
+    defaults: ["FrameworksCoreTests_apks_defaults"],
+
+    srcs: ["**/*.java"],
+}
