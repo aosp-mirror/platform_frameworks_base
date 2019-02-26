@@ -209,11 +209,8 @@ public class KeyguardServiceDelegate {
             mKeyguardState.reset();
             mHandler.post(() -> {
                 try {
-                    // There are no longer any keyguard windows on secondary displays, so pass
-                    // {@code null}. All that means is that showWhenLocked activities on
-                    // external displays now get to show.
                     ActivityTaskManager.getService().setLockScreenShown(true /* keyguardShowing */,
-                            false /* aodShowing */, null /* secondaryDisplaysShowing */);
+                            false /* aodShowing */);
                 } catch (RemoteException e) {
                     // Local call.
                 }

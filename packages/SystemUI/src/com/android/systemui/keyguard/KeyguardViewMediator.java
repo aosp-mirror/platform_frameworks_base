@@ -21,7 +21,6 @@ import static android.provider.Settings.System.SCREEN_OFF_TIMEOUT;
 import static com.android.internal.telephony.IccCardConstants.State.ABSENT;
 import static com.android.internal.telephony.IccCardConstants.State.PIN_REQUIRED;
 import static com.android.internal.telephony.IccCardConstants.State.PUK_REQUIRED;
-import static com.android.internal.telephony.IccCardConstants.State.READY;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.SOME_AUTH_REQUIRED_AFTER_USER_REQUEST;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_LOCKOUT;
@@ -95,7 +94,6 @@ import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 /**
  * Mediates requests related to the keyguard.  This includes queries about the
@@ -246,9 +244,6 @@ public class KeyguardViewMediator extends SystemUI {
 
     // AOD is enabled and status bar is in AOD state.
     private boolean mAodShowing;
-
-    // display ids of the external display on which we have put a keyguard window
-    private int[] mSecondaryDisplaysShowing;
 
     /** Cached value of #isInputRestricted */
     private boolean mInputRestricted;
@@ -687,13 +682,6 @@ public class KeyguardViewMediator extends SystemUI {
             mCustomMessage = null;
             return message;
         }
-
-        @Override
-        public void onSecondaryDisplayShowingChanged(int[] displayIds) {
-            synchronized (KeyguardViewMediator.this) {
-                setShowingLocked(mShowing, mAodShowing, displayIds, false);
-            }
-        }
     };
 
     public void userActivity() {
@@ -722,7 +710,7 @@ public class KeyguardViewMediator extends SystemUI {
         mContext.registerReceiver(mDelayedLockBroadcastReceiver, delayedActionFilter,
                 SYSTEMUI_PERMISSION, null /* scheduler */);
 
-        mKeyguardDisplayManager = new KeyguardDisplayManager(mContext, mViewMediatorCallback);
+        mKeyguardDisplayManager = new KeyguardDisplayManager(mContext);
 
         mAlarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
 
@@ -738,10 +726,10 @@ public class KeyguardViewMediator extends SystemUI {
             setShowingLocked(!shouldWaitForProvisioning()
                     && !mLockPatternUtils.isLockScreenDisabled(
                             KeyguardUpdateMonitor.getCurrentUser()),
-                    mAodShowing, mSecondaryDisplaysShowing, true /* forceCallbacks */);
+                    mAodShowing, true /* forceCallbacks */);
         } else {
             // The system's keyguard is disabled or missing.
-            setShowingLocked(false, mAodShowing, mSecondaryDisplaysShowing, true);
+            setShowingLocked(false, mAodShowing, true);
         }
 
         mStatusBarKeyguardViewManager =
@@ -1764,12 +1752,10 @@ public class KeyguardViewMediator extends SystemUI {
         playSound(mTrustedSoundId);
     }
 
-    private void updateActivityLockScreenState(boolean showing, boolean aodShowing,
-            int[] secondaryDisplaysShowing) {
+    private void updateActivityLockScreenState(boolean showing, boolean aodShowing) {
         mUiOffloadThread.submit(() -> {
             try {
-                ActivityTaskManager.getService().setLockScreenShown(showing, aodShowing,
-                        secondaryDisplaysShowing);
+                ActivityTaskManager.getService().setLockScreenShown(showing, aodShowing);
             } catch (RemoteException e) {
             }
         });
@@ -1892,8 +1878,7 @@ public class KeyguardViewMediator extends SystemUI {
 
             if (!mHiding) {
                 // Tell ActivityManager that we canceled the keyguardExitAnimation.
-                setShowingLocked(mShowing, mAodShowing, mSecondaryDisplaysShowing,
-                        true /* force */);
+                setShowingLocked(mShowing, mAodShowing, true /* force */);
                 return;
             }
             mHiding = false;
@@ -2163,23 +2148,19 @@ public class KeyguardViewMediator extends SystemUI {
     }
 
     private void setShowingLocked(boolean showing, boolean aodShowing) {
-        setShowingLocked(showing, aodShowing, mSecondaryDisplaysShowing,
-                false /* forceCallbacks */);
+        setShowingLocked(showing, aodShowing, false /* forceCallbacks */);
     }
 
-    private void setShowingLocked(boolean showing, boolean aodShowing,
-            int[] secondaryDisplaysShowing, boolean forceCallbacks) {
+    private void setShowingLocked(boolean showing, boolean aodShowing, boolean forceCallbacks) {
         final boolean notifyDefaultDisplayCallbacks = showing != mShowing
                 || aodShowing != mAodShowing || forceCallbacks;
-        if (notifyDefaultDisplayCallbacks
-                || !Arrays.equals(secondaryDisplaysShowing, mSecondaryDisplaysShowing)) {
+        if (notifyDefaultDisplayCallbacks) {
             mShowing = showing;
             mAodShowing = aodShowing;
-            mSecondaryDisplaysShowing = secondaryDisplaysShowing;
             if (notifyDefaultDisplayCallbacks) {
                 notifyDefaultDisplayCallbacks(showing);
             }
-            updateActivityLockScreenState(showing, aodShowing, secondaryDisplaysShowing);
+            updateActivityLockScreenState(showing, aodShowing);
         }
     }
 

@@ -49,7 +49,6 @@ import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.wm.ActivityTaskManagerInternal.SleepToken;
 
 import java.io.PrintWriter;
-import java.util.Arrays;
 
 /**
  * Controls Keyguard occluding, dismissing and transitions depending on what kind of activities are
@@ -120,18 +119,15 @@ class KeyguardController {
     /**
      * Update the Keyguard showing state.
      */
-    void setKeyguardShown(boolean keyguardShowing, boolean aodShowing,
-            int[] secondaryDisplaysShowing) {
+    void setKeyguardShown(boolean keyguardShowing, boolean aodShowing) {
         boolean showingChanged = keyguardShowing != mKeyguardShowing || aodShowing != mAodShowing;
         // If keyguard is going away, but SystemUI aborted the transition, need to reset state.
         showingChanged |= mKeyguardGoingAway && keyguardShowing;
-        if (!showingChanged && Arrays.equals(secondaryDisplaysShowing,
-                mSecondaryDisplayIdsShowing)) {
+        if (!showingChanged) {
             return;
         }
         mKeyguardShowing = keyguardShowing;
         mAodShowing = aodShowing;
-        mSecondaryDisplayIdsShowing = secondaryDisplaysShowing;
         mWindowManager.setAodShowing(aodShowing);
         if (showingChanged) {
             dismissDockedStackIfNeeded();
