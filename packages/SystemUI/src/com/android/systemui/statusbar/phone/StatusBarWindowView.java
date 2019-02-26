@@ -34,9 +34,12 @@ import android.media.session.MediaSessionLegacyHelper;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.SystemClock;
+import android.os.UserHandle;
+import android.provider.Settings;
 import android.util.AttributeSet;
 import android.view.ActionMode;
 import android.view.DisplayCutout;
+import android.view.GestureDetector;
 import android.view.InputDevice;
 import android.view.InputQueue;
 import android.view.KeyEvent;
@@ -53,6 +56,7 @@ import android.view.WindowInsetsController;
 import android.widget.FrameLayout;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.hardware.AmbientDisplayConfiguration;
 import com.android.internal.view.FloatingActionMode;
 import com.android.internal.widget.FloatingToolbar;
 import com.android.systemui.Dependency;
@@ -63,16 +67,23 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.DragDownHelper;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
+import com.android.systemui.tuner.TunerService;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
+/**
+ * Combined status bar and notification panel view. Also holding backdrop and scrims.
+ */
 public class StatusBarWindowView extends FrameLayout {
     public static final String TAG = "StatusBarWindowView";
     public static final boolean DEBUG = StatusBar.DEBUG;
 
+    private final GestureDetector mGestureDetector;
+    private final StatusBarStateController mStatusBarStateController;
+    private boolean mDoubleTapEnabled;
+    private boolean mSingleTapEnabled;
     private DragDownHelper mDragDownHelper;
-    private DoubleTapHelper mDoubleTapHelper;
     private NotificationStackScrollLayout mStackScrollLayout;
     private NotificationPanelView mNotificationPanel;
     private View mBrightnessMirror;
@@ -95,8 +106,37 @@ public class StatusBarWindowView extends FrameLayout {
     private boolean mTouchActive;
     private boolean mExpandAnimationRunning;
     private boolean mExpandAnimationPending;
-    private final StatusBarStateController
-            mStatusBarStateController = Dependency.get(StatusBarStateController.class);
+
+    private final GestureDetector.SimpleOnGestureListener mGestureListener =
+            new GestureDetector.SimpleOnGestureListener() {
+        @Override
+        public boolean onSingleTapConfirmed(MotionEvent e) {
+            if (mSingleTapEnabled) {
+                mService.wakeUpIfDozing(SystemClock.uptimeMillis(), StatusBarWindowView.this,
+                        "SINGLE_TAP");
+            }
+            return mSingleTapEnabled;
+        }
+
+        @Override
+        public boolean onDoubleTap(MotionEvent e) {
+            if (mDoubleTapEnabled) {
+                mService.wakeUpIfDozing(SystemClock.uptimeMillis(), StatusBarWindowView.this,
+                        "DOUBLE_TAP");
+            }
+            return mDoubleTapEnabled;
+        }
+    };
+    private final TunerService.Tunable mTunable = (key, newValue) -> {
+        AmbientDisplayConfiguration configuration = new AmbientDisplayConfiguration(mContext);
+        switch (key) {
+            case Settings.Secure.DOZE_DOUBLE_TAP_GESTURE:
+                mDoubleTapEnabled = configuration.doubleTapGestureEnabled(UserHandle.USER_CURRENT);
+                break;
+            case Settings.Secure.DOZE_TAP_SCREEN_GESTURE:
+                mSingleTapEnabled = configuration.tapGestureEnabled(UserHandle.USER_CURRENT);
+        }
+    };
 
     /**
      * If set to true, the current gesture started below the notch and we need to dispatch touch
@@ -110,10 +150,11 @@ public class StatusBarWindowView extends FrameLayout {
         mTransparentSrcPaint.setColor(0);
         mTransparentSrcPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC));
         mFalsingManager = FalsingManager.getInstance(context);
-        mDoubleTapHelper = new DoubleTapHelper(this, active -> {}, () -> {
-            mService.wakeUpIfDozing(SystemClock.uptimeMillis(), this, "DOUBLE_TAP");
-            return true;
-        }, null, null);
+        mGestureDetector = new GestureDetector(context, mGestureListener);
+        mStatusBarStateController = Dependency.get(StatusBarStateController.class);
+        Dependency.get(TunerService.class).addTunable(mTunable,
+                Settings.Secure.DOZE_DOUBLE_TAP_GESTURE,
+                Settings.Secure.DOZE_TAP_SCREEN_GESTURE);
     }
 
     @Override
@@ -306,6 +347,7 @@ public class StatusBarWindowView extends FrameLayout {
             return false;
         }
         mFalsingManager.onTouchEvent(ev, getWidth(), getHeight());
+        mGestureDetector.onTouchEvent(ev);
         if (mBrightnessMirror != null && mBrightnessMirror.getVisibility() == VISIBLE) {
             // Disallow new pointers while the brightness mirror is visible. This is so that you
             // can't touch anything other than the brightness slider while the mirror is showing
@@ -366,7 +408,6 @@ public class StatusBarWindowView extends FrameLayout {
     public boolean onTouchEvent(MotionEvent ev) {
         boolean handled = false;
         if (mService.isDozing()) {
-            mDoubleTapHelper.onTouchEvent(ev);
             handled = !mService.isPulsing();
         }
         if ((mStatusBarStateController.getState() == StatusBarState.KEYGUARD && !handled)
