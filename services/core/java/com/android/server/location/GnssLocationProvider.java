@@ -140,6 +140,9 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     private static final int LOCATION_HAS_SPEED_ACCURACY = 64;
     private static final int LOCATION_HAS_BEARING_ACCURACY = 128;
 
+    // these need to match ElapsedRealtimeFlags enum in types.hal
+    private static final int ELAPSED_REALTIME_HAS_TIMESTAMP_NS = 1;
+
     // IMPORTANT - the GPS_DELETE_* symbols here must match GnssAidingData enum in IGnss.hal
     private static final int GPS_DELETE_EPHEMERIS = 0x0001;
     private static final int GPS_DELETE_ALMANAC = 0x0002;
@@ -757,10 +760,16 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         float speedAccuracyMetersPerSecond = location.getSpeedAccuracyMetersPerSecond();
         float bearingAccuracyDegrees = location.getBearingAccuracyDegrees();
         long timestamp = location.getTime();
-        native_inject_best_location(gnssLocationFlags, latitudeDegrees, longitudeDegrees,
-                altitudeMeters, speedMetersPerSec, bearingDegrees, horizontalAccuracyMeters,
-                verticalAccuracyMeters, speedAccuracyMetersPerSecond, bearingAccuracyDegrees,
-                timestamp);
+
+        int elapsedRealtimeFlags = ELAPSED_REALTIME_HAS_TIMESTAMP_NS;
+        long elapsedRealtimeNanos = location.getElapsedRealtimeNanos();
+
+        native_inject_best_location(
+                gnssLocationFlags, latitudeDegrees, longitudeDegrees,
+                altitudeMeters, speedMetersPerSec, bearingDegrees,
+                horizontalAccuracyMeters, verticalAccuracyMeters,
+                speedAccuracyMetersPerSecond, bearingAccuracyDegrees, timestamp,
+                elapsedRealtimeFlags, elapsedRealtimeNanos);
     }
 
     /** Returns true if the location request is too frequent. */
@@ -1260,9 +1269,6 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
 
         if (VERBOSE) Log.v(TAG, "reportLocation " + location.toString());
 
-        // It would be nice to push the elapsed real-time timestamp
-        // further down the stack, but this is still useful
-        location.setElapsedRealtimeNanos(SystemClock.elapsedRealtimeNanos());
         location.setExtras(mLocationExtras.getBundle());
 
         reportLocation(location);
@@ -2151,17 +2157,11 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     private native int native_read_nmea(byte[] buffer, int bufferSize);
 
     private native void native_inject_best_location(
-            int gnssLocationFlags,
-            double latitudeDegrees,
-            double longitudeDegrees,
-            double altitudeMeters,
-            float speedMetersPerSec,
-            float bearingDegrees,
-            float horizontalAccuracyMeters,
-            float verticalAccuracyMeters,
-            float speedAccuracyMetersPerSecond,
-            float bearingAccuracyDegrees,
-            long timestamp);
+            int gnssLocationFlags, double latitudeDegrees, double longitudeDegrees,
+            double altitudeMeters, float speedMetersPerSec, float bearingDegrees,
+            float horizontalAccuracyMeters, float verticalAccuracyMeters,
+            float speedAccuracyMetersPerSecond, float bearingAccuracyDegrees,
+            long timestamp, int elapsedRealtimeFlags, long elapsedRealtimeNanos);
 
     private native void native_inject_location(double latitude, double longitude, float accuracy);
 
