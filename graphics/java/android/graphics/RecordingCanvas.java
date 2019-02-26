@@ -31,7 +31,7 @@ import dalvik.annotation.optimization.FastNative;
  * Bitmap objects that it draws, preventing the backing memory of Bitmaps from being released while
  * the RecordingCanvas is still holding a native reference to the memory.
  *
- * This is obtained by calling {@link RenderNode#startRecording()} and is valid until the matching
+ * This is obtained by calling {@link RenderNode#beginRecording()} and is valid until the matching
  * {@link RenderNode#endRecording()} is called. It must not be retained beyond that as it is
  * internally reused.
  */

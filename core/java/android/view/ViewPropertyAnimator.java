@@ -985,7 +985,7 @@ public class ViewPropertyAnimator {
                 renderNode.setTranslationZ(value);
                 break;
             case ROTATION:
-                renderNode.setRotation(value);
+                renderNode.setRotationZ(value);
                 break;
             case ROTATION_X:
                 renderNode.setRotationX(value);
@@ -1031,7 +1031,7 @@ public class ViewPropertyAnimator {
             case TRANSLATION_Z:
                 return node.getTranslationZ();
             case ROTATION:
-                return node.getRotation();
+                return node.getRotationZ();
             case ROTATION_X:
                 return node.getRotationX();
             case ROTATION_Y:

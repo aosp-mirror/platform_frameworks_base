@@ -300,9 +300,9 @@ class PackageManagerShellCommand extends ShellCommand {
                 pw.println("appPackageName = " + session.getAppPackageName()
                         + "; sessionId = " + session.getSessionId()
                         + "; isStaged = " + session.isStaged()
-                        + "; isSessionReady = " + session.isSessionReady()
-                        + "; isSessionApplied = " + session.isSessionApplied()
-                        + "; isSessionFailed = " + session.isSessionFailed() + ";");
+                        + "; isStagedSessionReady = " + session.isStagedSessionReady()
+                        + "; isStagedSessionApplied = " + session.isStagedSessionApplied()
+                        + "; isStagedSessionFailed = " + session.isStagedSessionFailed() + ";");
             }
         } catch (RemoteException e) {
             pw.println("Failure ["

@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.notification;
+package com.android.systemui.statusbar.notification.collection;
 
 import static com.android.internal.util.Preconditions.checkNotNull;
-import static com.android.systemui.Dependency.ALLOW_NOTIFICATION_LONG_PRESS_NAME;
 import static com.android.systemui.statusbar.NotificationRemoteInputManager.ENABLE_REMOTE_INPUT;
 import static com.android.systemui.statusbar.notification.row.NotificationContentInflater.FLAG_CONTENT_VIEW_AMBIENT;
 import static com.android.systemui.statusbar.notification.row.NotificationContentInflater.FLAG_CONTENT_VIEW_HEADS_UP;
@@ -39,7 +38,9 @@ import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationUiAdjustment;
-import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.InflationException;
+import com.android.systemui.statusbar.notification.NotificationClicker;
+import com.android.systemui.statusbar.notification.NotificationInterruptionStateProvider;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationContentInflater;
@@ -50,13 +51,8 @@ import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.inject.Singleton;
-
 /** Handles inflating and updating views for notifications. */
-@Singleton
-public class NotificationRowBinder {
+public class NotificationRowBinderImpl implements NotificationRowBinder {
 
     private static final String TAG = "NotificationViewManager";
 
@@ -84,9 +80,7 @@ public class NotificationRowBinder {
     private NotificationClicker mNotificationClicker;
     private final NotificationLogger mNotificationLogger = Dependency.get(NotificationLogger.class);
 
-    @Inject
-    public NotificationRowBinder(Context context,
-            @Named(ALLOW_NOTIFICATION_LONG_PRESS_NAME) boolean allowLongPress) {
+    public NotificationRowBinderImpl(Context context, boolean allowLongPress) {
         mContext = context;
         mMessagingUtil = new NotificationMessagingUtil(context);
         mAllowLongPress = allowLongPress;
@@ -122,6 +116,7 @@ public class NotificationRowBinder {
     /**
      * Inflates the views for the given entry (possibly asynchronously).
      */
+    @Override
     public void inflateViews(
             NotificationEntry entry,
             Runnable onDismissRunnable)
@@ -192,6 +187,7 @@ public class NotificationRowBinder {
      * Updates the views bound to an entry when the entry's ranking changes, either in-place or by
      * reinflating them.
      */
+    @Override
     public void onNotificationRankingUpdated(
             NotificationEntry entry,
             @Nullable Integer oldImportance,
@@ -264,7 +260,7 @@ public class NotificationRowBinder {
     }
 
     private void logNotificationExpansion(String key, boolean userAction, boolean expanded) {
-         mNotificationLogger.onExpansionChanged(key, userAction, expanded);
+        mNotificationLogger.onExpansionChanged(key, userAction, expanded);
     }
 
     /** Callback for when a row is bound to an entry. */

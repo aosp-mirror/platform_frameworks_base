@@ -61,7 +61,6 @@ import com.android.systemui.statusbar.notification.NotificationAlertingManager;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationFilter;
 import com.android.systemui.statusbar.notification.NotificationInterruptionStateProvider;
-import com.android.systemui.statusbar.notification.NotificationRowBinder;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.NotificationData.KeyguardEnvironment;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
@@ -266,7 +265,6 @@ public class Dependency extends SystemUI {
     @Inject Lazy<NotificationListener> mNotificationListener;
     @Inject Lazy<NotificationLogger> mNotificationLogger;
     @Inject Lazy<NotificationViewHierarchyManager> mNotificationViewHierarchyManager;
-    @Inject Lazy<NotificationRowBinder> mNotificationRowBinder;
     @Inject Lazy<NotificationFilter> mNotificationFilter;
     @Inject Lazy<NotificationInterruptionStateProvider> mNotificationInterruptionStateProvider;
     @Inject Lazy<KeyguardDismissUtil> mKeyguardDismissUtil;
@@ -440,7 +438,6 @@ public class Dependency extends SystemUI {
         mProviders.put(NotificationLogger.class, mNotificationLogger::get);
         mProviders.put(NotificationViewHierarchyManager.class,
                 mNotificationViewHierarchyManager::get);
-        mProviders.put(NotificationRowBinder.class, mNotificationRowBinder::get);
         mProviders.put(NotificationFilter.class, mNotificationFilter::get);
         mProviders.put(NotificationInterruptionStateProvider.class,
                 mNotificationInterruptionStateProvider::get);

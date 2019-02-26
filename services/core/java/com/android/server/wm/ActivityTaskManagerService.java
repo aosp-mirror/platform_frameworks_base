@@ -3098,8 +3098,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     @Override
-    public void setLockScreenShown(boolean keyguardShowing, boolean aodShowing,
-            int[] secondaryDisplaysShowing) {
+    public void setLockScreenShown(boolean keyguardShowing, boolean aodShowing) {
         if (checkCallingPermission(android.Manifest.permission.DEVICE_POWER)
                 != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Requires permission "
@@ -3116,8 +3115,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 mH.sendMessage(msg);
             }
             try {
-                mKeyguardController.setKeyguardShown(keyguardShowing, aodShowing,
-                        secondaryDisplaysShowing);
+                mKeyguardController.setKeyguardShown(keyguardShowing, aodShowing);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }

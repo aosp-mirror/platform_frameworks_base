@@ -59,7 +59,7 @@
     <style name="CarAction1">
         <item name="textStyle">bold</item>
         <item name="textSize">@dimen/car_action1_size</item>
-        <item name="textColor">@color/car_highlight</item>
+        <item name="textColor">@color/control_default_material</item>
     </style>
 
     <style name="CarAction1.Dark">

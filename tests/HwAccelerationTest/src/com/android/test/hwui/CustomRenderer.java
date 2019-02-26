@@ -49,7 +49,7 @@ public class CustomRenderer extends Activity {
         @Override
         public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
             mContent.setLeftTopRightBottom(0, 0, width, height);
-            RecordingCanvas canvas = mContent.startRecording();
+            RecordingCanvas canvas = mContent.beginRecording();
             canvas.drawColor(Color.WHITE);
             Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
             paint.setColor(Color.BLACK);

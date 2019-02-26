@@ -922,7 +922,7 @@ public class Surface implements Parcelable {
             if (mCanvas != null) {
                 throw new IllegalStateException("Surface was already locked!");
             }
-            mCanvas = mRenderNode.start(width, height);
+            mCanvas = mRenderNode.beginRecording(width, height);
             return mCanvas;
         }
 
@@ -931,7 +931,7 @@ public class Surface implements Parcelable {
                 throw new IllegalArgumentException("canvas object must be the same instance that "
                         + "was previously returned by lockCanvas");
             }
-            mRenderNode.end(mCanvas);
+            mRenderNode.endRecording();
             mCanvas = null;
             nHwuiDraw(mHwuiRenderer);
         }

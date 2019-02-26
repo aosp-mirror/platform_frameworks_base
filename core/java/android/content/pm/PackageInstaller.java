@@ -1743,11 +1743,11 @@ public class PackageInstaller {
         public int[] childSessionIds = NO_SESSIONS;
 
         /** {@hide} */
-        public boolean isSessionApplied;
+        public boolean isStagedSessionApplied;
         /** {@hide} */
-        public boolean isSessionReady;
+        public boolean isStagedSessionReady;
         /** {@hide} */
-        public boolean isSessionFailed;
+        public boolean isStagedSessionFailed;
         private int mStagedSessionErrorCode;
         private String mStagedSessionErrorMessage;
 
@@ -1786,9 +1786,9 @@ public class PackageInstaller {
             if (childSessionIds == null) {
                 childSessionIds = NO_SESSIONS;
             }
-            isSessionApplied = source.readBoolean();
-            isSessionReady = source.readBoolean();
-            isSessionFailed = source.readBoolean();
+            isStagedSessionApplied = source.readBoolean();
+            isStagedSessionReady = source.readBoolean();
+            isStagedSessionFailed = source.readBoolean();
             mStagedSessionErrorCode = source.readInt();
             mStagedSessionErrorMessage = source.readString();
         }
@@ -2082,36 +2082,46 @@ public class PackageInstaller {
             return childSessionIds;
         }
 
+        private void checkSessionIsStaged() {
+            if (!isStaged) {
+                throw new IllegalStateException("Session is not marked as staged.");
+            }
+        }
+
         /**
          * Whether the staged session has been applied successfully, meaning that all of its
          * packages have been activated and no further action is required.
          * Only meaningful if {@code isStaged} is true.
          */
-        public boolean isSessionApplied() {
-            return isSessionApplied;
+        public boolean isStagedSessionApplied() {
+            checkSessionIsStaged();
+            return isStagedSessionApplied;
         }
 
         /**
          * Whether the staged session is ready to be applied at next reboot. Only meaningful if
          * {@code isStaged} is true.
          */
-        public boolean isSessionReady() {
-            return isSessionReady;
+        public boolean isStagedSessionReady() {
+            checkSessionIsStaged();
+            return isStagedSessionReady;
         }
 
         /**
          * Whether something went wrong and the staged session is declared as failed, meaning that
          * it will be ignored at next reboot. Only meaningful if {@code isStaged} is true.
          */
-        public boolean isSessionFailed() {
-            return isSessionFailed;
+        public boolean isStagedSessionFailed() {
+            checkSessionIsStaged();
+            return isStagedSessionFailed;
         }
 
         /**
          * If something went wrong with a staged session, clients can check this error code to
          * understand which kind of failure happened. Only meaningful if {@code isStaged} is true.
          */
-        public int getStagedSessionErrorCode() {
+        public @StagedSessionErrorCode int getStagedSessionErrorCode() {
+            checkSessionIsStaged();
             return mStagedSessionErrorCode;
         }
 
@@ -2120,6 +2130,7 @@ public class PackageInstaller {
          * empty string if no error was encountered.
          */
         public String getStagedSessionErrorMessage() {
+            checkSessionIsStaged();
             return mStagedSessionErrorMessage;
         }
 
@@ -2162,9 +2173,9 @@ public class PackageInstaller {
             dest.writeBoolean(isStaged);
             dest.writeInt(parentSessionId);
             dest.writeIntArray(childSessionIds);
-            dest.writeBoolean(isSessionApplied);
-            dest.writeBoolean(isSessionReady);
-            dest.writeBoolean(isSessionFailed);
+            dest.writeBoolean(isStagedSessionApplied);
+            dest.writeBoolean(isStagedSessionReady);
+            dest.writeBoolean(isStagedSessionFailed);
             dest.writeInt(mStagedSessionErrorCode);
             dest.writeString(mStagedSessionErrorMessage);
         }

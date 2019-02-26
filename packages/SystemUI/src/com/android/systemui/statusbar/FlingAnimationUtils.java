@@ -32,6 +32,8 @@ import com.android.systemui.statusbar.phone.StatusBar;
  */
 public class FlingAnimationUtils {
 
+    private static final String TAG = "FlingAnimationUtils";
+
     private static final float LINEAR_OUT_SLOW_IN_X2 = 0.35f;
     private static final float LINEAR_OUT_SLOW_IN_X2_MAX = 0.68f;
     private static final float LINEAR_OUT_FASTER_IN_X2 = 0.5f;
@@ -195,6 +197,10 @@ public class FlingAnimationUtils {
     }
 
     private Interpolator getInterpolator(float startGradient, float velocityFactor) {
+        if (Float.isNaN(velocityFactor)) {
+            Log.e(TAG, "Invalid velocity factor", new Throwable());
+            return Interpolators.LINEAR_OUT_SLOW_IN;
+        }
         if (startGradient != mCachedStartGradient
                 || velocityFactor != mCachedVelocityFactor) {
             float speedup = mSpeedUpFactor * (1.0f - velocityFactor);

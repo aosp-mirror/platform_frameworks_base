@@ -611,11 +611,11 @@ public class ViewDebug {
         }
 
         if (view.isHardwareAccelerated()) {
-            RecordingCanvas canvas = node.start(dm.widthPixels, dm.heightPixels);
+            RecordingCanvas canvas = node.beginRecording(dm.widthPixels, dm.heightPixels);
             try {
                 return profileViewOperation(view, () -> view.draw(canvas));
             } finally {
-                node.end(canvas);
+                node.endRecording();
             }
         } else {
             Bitmap bitmap = Bitmap.createBitmap(

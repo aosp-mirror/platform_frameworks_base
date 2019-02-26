@@ -2,6 +2,9 @@ service bootanim /system/bin/bootanimation
     class core animation
     user graphics
     group graphics audio
+    # bootanimation depends on libandroidicu in the Runtime APEX.
+    # TODO(b/124939955): Remove this dependency on libandroidicu
+    updatable
     disabled
     oneshot
     writepid /dev/stune/top-app/tasks

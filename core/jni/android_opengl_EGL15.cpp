@@ -27,8 +27,6 @@
 
 #include <ui/ANativeObjectBase.h>
 
-static int initialized = 0;
-
 // classes from EGL 1.4
 static jclass egldisplayClass;
 static jclass eglsurfaceClass;
@@ -171,8 +169,6 @@ getPointer(JNIEnv *_env, jobject buffer, jarray *array, jint *remaining, jint *o
         *array = NULL;
         return reinterpret_cast<void*>(pointer);
     }
-    eglimageGetHandleID = _env->GetMethodID(eglimageClass, "getNativeHandle", "()J");
-    eglsyncGetHandleID = _env->GetMethodID(eglsyncClass, "getNativeHandle", "()J");
 
     *array = (jarray) _env->CallStaticObjectMethod(nioAccessClass,
             getBaseArrayID, buffer);

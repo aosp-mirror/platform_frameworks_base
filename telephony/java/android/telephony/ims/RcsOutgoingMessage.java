@@ -23,6 +23,8 @@ import java.util.List;
 
 /**
  * This is a single instance of a message sent over RCS.
+ *
+ * @hide
  */
 public class RcsOutgoingMessage extends RcsMessage {
     RcsOutgoingMessage(int id) {

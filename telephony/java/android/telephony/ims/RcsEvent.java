@@ -17,6 +17,8 @@ package android.telephony.ims;
 
 /**
  * The base class for events that can happen on {@link RcsParticipant}s and {@link RcsThread}s.
+ *
+ * @hide
  */
 public abstract class RcsEvent {
     private final long mTimestamp;

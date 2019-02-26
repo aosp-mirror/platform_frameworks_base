@@ -175,10 +175,14 @@ public class TaskStackTests extends WindowTestsBase {
     @Test
     public void testStackOutset() {
         final TaskStack stack = createTaskStackOnDisplay(mDisplayContent);
-        spyOn(stack);
-
         final int stackOutset = 10;
-        doReturn(stackOutset).when(stack).getStackOutset();
+        // Clear the handler and hold the lock for mock, to prevent multi-thread issue.
+        waitUntilHandlersIdle();
+        synchronized (mWm.mGlobalLock) {
+            spyOn(stack);
+
+            doReturn(stackOutset).when(stack).getStackOutset();
+        }
 
         final Rect stackBounds = new Rect(200, 200, 800, 1000);
         // Update surface position and size by the given bounds.

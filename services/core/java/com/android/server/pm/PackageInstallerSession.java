@@ -490,9 +490,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             if (info.childSessionIds == null) {
                 info.childSessionIds = EMPTY_CHILD_SESSION_ARRAY;
             }
-            info.isSessionApplied = mStagedSessionApplied;
-            info.isSessionReady = mStagedSessionReady;
-            info.isSessionFailed = mStagedSessionFailed;
+            info.isStagedSessionApplied = mStagedSessionApplied;
+            info.isStagedSessionReady = mStagedSessionReady;
+            info.isStagedSessionFailed = mStagedSessionFailed;
             info.setStagedSessionErrorCode(mStagedSessionErrorCode, mStagedSessionErrorMessage);
         }
         return info;
@@ -1867,6 +1867,15 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         synchronized (mLock) {
             assertCallerIsOwnerOrRootLocked();
 
+            if (mCommitted && params.isStaged) {
+                synchronized (mLock) {
+                    mDestroyed = true;
+                }
+                mStagingManager.abortCommittedSession(this);
+
+                //TODO(b/123624108): delete staging dir
+            }
+
             if (mRelinquished) {
                 Slog.d(TAG, "Ignoring abandon after commit relinquished control");
                 return;
@@ -2029,6 +2038,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             mStagedSessionErrorMessage = errorMessage;
             Slog.d(TAG, "Marking session " + sessionId + " as failed: " + errorMessage);
         }
+        cleanStageDir();
         mCallback.onStagedSessionChanged(this);
     }
 
@@ -2040,7 +2050,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             mStagedSessionFailed = false;
             mStagedSessionErrorCode = SessionInfo.STAGED_SESSION_NO_ERROR;
             mStagedSessionErrorMessage = "";
+            Slog.d(TAG, "Marking session " + sessionId + " as applied");
         }
+        cleanStageDir();
         mCallback.onStagedSessionChanged(this);
     }
 
@@ -2088,6 +2100,19 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         // deleting these dirs when the staged session has reached a final state.
         // TODO(b/118865310): Implement packageDir deletion in StagingManager.
         if (stageDir != null && !params.isStaged) {
+            try {
+                mPm.mInstaller.rmPackageDir(stageDir.getAbsolutePath());
+            } catch (InstallerException ignored) {
+            }
+        }
+    }
+
+    private void cleanStageDir() {
+        if (isMultiPackage()) {
+            for (int childSessionId : getChildSessionIds()) {
+                mSessionProvider.getSession(childSessionId).cleanStageDir();
+            }
+        } else {
             try {
                 mPm.mInstaller.rmPackageDir(stageDir.getAbsolutePath());
             } catch (InstallerException ignored) {

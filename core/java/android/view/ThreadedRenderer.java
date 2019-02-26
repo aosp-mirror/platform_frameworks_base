@@ -590,7 +590,7 @@ public final class ThreadedRenderer extends HardwareRenderer {
         }
 
         if (mRootNodeNeedsUpdate || !mRootNode.hasDisplayList()) {
-            RecordingCanvas canvas = mRootNode.startRecording(mSurfaceWidth, mSurfaceHeight);
+            RecordingCanvas canvas = mRootNode.beginRecording(mSurfaceWidth, mSurfaceHeight);
             try {
                 final int saveCount = canvas.save();
                 canvas.translate(mInsetLeft, mInsetTop);

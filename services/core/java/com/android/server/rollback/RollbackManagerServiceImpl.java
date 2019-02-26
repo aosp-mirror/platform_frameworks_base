@@ -528,7 +528,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                 PackageInstaller.SessionInfo session = installer.getSessionInfo(
                         data.stagedSessionId);
                 if (session != null) {
-                    if (session.isSessionApplied()) {
+                    if (session.isStagedSessionApplied()) {
                         synchronized (mLock) {
                             data.isAvailable = true;
                         }
@@ -538,7 +538,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                             Log.e(TAG, "Unable to save rollback info for : "
                                     + data.rollbackId, ioe);
                         }
-                    } else if (session.isSessionFailed()) {
+                    } else if (session.isStagedSessionFailed()) {
                         // TODO: Do we need to remove this from
                         // mAvailableRollbacks, or is it okay to leave as
                         // unavailable until the next reboot when it will go
@@ -1195,13 +1195,13 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         }
 
         if (pi.isStaged()) {
-            if (!pi.isSessionFailed()) {
+            if (!pi.isStagedSessionFailed()) {
                 // TODO: The session really isn't "enabled" at this point, since more work might
                 // be required post reboot.
                 // TODO: We need to make this case consistent with the call from onFinished.
                 //  Ideally, we'd call completeEnableRollback excatly once per multi-package session
                 //  with the parentSessionId only.
-                completeEnableRollback(pi.sessionId, pi.isSessionReady());
+                completeEnableRollback(pi.sessionId, pi.isStagedSessionReady());
             } else {
                 // TODO: Clean up the saved rollback when the session fails. This may need to be
                 // unified with the case where things fail post reboot.

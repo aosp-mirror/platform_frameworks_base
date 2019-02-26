@@ -717,28 +717,20 @@ static bool LoadStableIdMap(IDiagnostics* diag, const std::string& path,
   return true;
 }
 
-static int32_t FindFrameworkAssetManagerCookie(const android::AssetManager& assets) {
+static android::ApkAssetsCookie FindFrameworkAssetManagerCookie(
+    const android::AssetManager2& assets) {
   using namespace android;
 
   // Find the system package (0x01). AAPT always generates attributes with the type 0x01, so
   // we're looking for the first attribute resource in the system package.
-  const ResTable& table = assets.getResources(true);
-  Res_value val;
-  ssize_t idx = table.getResource(0x01010000, &val, true);
-  if (idx != NO_ERROR) {
-    // Try as a bag.
-    const ResTable::bag_entry* entry;
-    ssize_t cnt = table.lockBag(0x01010000, &entry);
-    if (cnt >= 0) {
-      idx = entry->stringBlock;
-    }
-    table.unlockBag(entry);
-  }
+  Res_value val{};
+  ResTable_config config{};
+  uint32_t type_spec_flags;
+  ApkAssetsCookie idx = assets.GetResource(0x01010000, true /** may_be_bag */,
+                                           0 /** density_override */, &val, &config,
+                                           &type_spec_flags);
 
-  if (idx < 0) {
-    return 0;
-  }
-  return table.getTableCookie(idx);
+  return idx;
 }
 
 class Linker {
@@ -750,17 +742,17 @@ class Linker {
         file_collection_(util::make_unique<io::FileCollection>()) {
   }
 
-  void ExtractCompileSdkVersions(android::AssetManager* assets) {
+  void ExtractCompileSdkVersions(android::AssetManager2* assets) {
     using namespace android;
 
-    int32_t cookie = FindFrameworkAssetManagerCookie(*assets);
-    if (cookie == 0) {
+    android::ApkAssetsCookie cookie = FindFrameworkAssetManagerCookie(*assets);
+    if (cookie == android::kInvalidCookie) {
       // No Framework assets loaded. Not a failure.
       return;
     }
 
     std::unique_ptr<Asset> manifest(
-        assets->openNonAsset(cookie, kAndroidManifestPath, Asset::AccessMode::ACCESS_BUFFER));
+        assets->OpenNonAsset(kAndroidManifestPath, cookie, Asset::AccessMode::ACCESS_BUFFER));
     if (manifest == nullptr) {
       // No errors.
       return;

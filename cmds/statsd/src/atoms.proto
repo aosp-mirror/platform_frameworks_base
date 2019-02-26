@@ -45,6 +45,7 @@ import "frameworks/base/core/proto/android/stats/docsui/docsui_enums.proto";
 import "frameworks/base/core/proto/android/stats/devicepolicy/device_policy.proto";
 import "frameworks/base/core/proto/android/stats/devicepolicy/device_policy_enums.proto";
 import "frameworks/base/core/proto/android/stats/launcher/launcher.proto";
+import "frameworks/base/core/proto/android/stats/style/style_enums.proto";
 import "frameworks/base/core/proto/android/telecomm/enums.proto";
 import "frameworks/base/core/proto/android/telephony/enums.proto";
 import "frameworks/base/core/proto/android/view/enums.proto";
@@ -247,6 +248,7 @@ message Atom {
         AssistGestureProgressReported assist_gesture_progress_reported = 176;
         TouchGestureClassified touch_gesture_classified = 177;
         HiddenApiUsed hidden_api_used = 178 [(allow_from_any_uid) = true];
+        StyleUIChanged style_ui_changed = 179;
     }
 
     // Pulled events will start at field 10000.
@@ -2347,6 +2349,17 @@ message LauncherUIChanged {
     optional android.stats.launcher.LauncherState dst_state = 3;
     optional android.stats.launcher.LauncherExtension extension = 4 [(log_mode) = MODE_BYTES];
     optional bool is_swipe_up_enabled = 5;
+}
+
+message StyleUIChanged {
+    optional android.stats.style.Action action = 1;
+    optional int32 color_package_hash = 2;
+    optional int32 font_package_hash  = 3;
+    optional int32 shape_package_hash = 4;
+    optional int32 clock_package_hash = 5;
+    optional int32 launcher_grid = 6;
+    optional int32 wallpaper_category_hash = 7;
+    optional int32 wallpaper_id_hash = 8;
 }
 
 /**

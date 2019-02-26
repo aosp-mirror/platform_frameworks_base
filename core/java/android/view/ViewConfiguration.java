@@ -928,8 +928,8 @@ public class ViewConfiguration {
     }
 
     /**
-     * If a MotionEvent has CLASSIFICATION_AMBIGUOUS_GESTURE set, then certain actions, such as
-     * scrolling, will be inhibited.
+     * If a MotionEvent has {@link android.view.MotionEvent#CLASSIFICATION_AMBIGUOUS_GESTURE} set,
+     * then certain actions, such as scrolling, will be inhibited.
      * However, to account for the possibility of incorrect classification,
      * the default scrolling will only be inhibited if the pointer travels less than
      * (getScaledTouchSlop() * this factor).

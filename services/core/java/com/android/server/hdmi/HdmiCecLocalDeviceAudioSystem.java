@@ -248,12 +248,8 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
         }
         if (mService.getPortInfo(portId).getType() == HdmiPortInfo.PORT_OUTPUT) {
             mCecMessageCache.flushAll();
-        } else {
-            if (connected) {
-                launchDeviceDiscovery();
-            } else {
-                // TODO(amyjojo): remove device from mDeviceInfo
-            }
+        } else if (!connected){
+            // TODO(amyjojo): remove device from mDeviceInfo
         }
     }
 
@@ -996,6 +992,17 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
         }
         // Wake up device
         mService.wakeUp();
+        // If Audio device is the active source or is on the active path,
+        // enable system audio mode without querying TV's support on sam.
+        // This is per HDMI spec 1.4b CEC 13.15.4.2.
+        if (mService.pathToPortId(getActiveSource().physicalAddress)
+                != Constants.INVALID_PORT_ID) {
+            setSystemAudioMode(true);
+            mService.sendCecCommand(
+                HdmiCecMessageBuilder.buildSetSystemAudioMode(
+                    mAddress, Constants.ADDR_BROADCAST, true));
+            return;
+        }
         // Check if TV supports System Audio Control.
         // Handle broadcasting setSystemAudioMode on or aborting message on callback.
         queryTvSystemAudioModeSupport(new TvSystemAudioModeSupportedCallback() {

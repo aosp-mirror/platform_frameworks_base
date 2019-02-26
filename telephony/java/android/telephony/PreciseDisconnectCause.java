@@ -23,7 +23,7 @@ import android.annotation.SystemApi;
  * @hide
  */
 @SystemApi
-public class PreciseDisconnectCause {
+public final class PreciseDisconnectCause {
 
     /** The disconnect cause is not valid (Not received a disconnect cause).*/
     public static final int NOT_VALID                                        = -1;

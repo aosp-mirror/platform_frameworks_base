@@ -344,7 +344,7 @@ public class TextViewPrecomputedTextPerfTest {
             textView.setText(text);
             textView.measure(width, height);
             textView.layout(0, 0, textView.getMeasuredWidth(), textView.getMeasuredHeight());
-            final RecordingCanvas c = node.startRecording(
+            final RecordingCanvas c = node.beginRecording(
                 textView.getMeasuredWidth(), textView.getMeasuredHeight());
             textView.nullLayouts();
             Canvas.freeTextLayoutCaches();
@@ -371,7 +371,7 @@ public class TextViewPrecomputedTextPerfTest {
             textView.setText(text);
             textView.measure(width, height);
             textView.layout(0, 0, textView.getMeasuredWidth(), textView.getMeasuredHeight());
-            final RecordingCanvas c = node.startRecording(
+            final RecordingCanvas c = node.beginRecording(
                 textView.getMeasuredWidth(), textView.getMeasuredHeight());
             textView.nullLayouts();
             Canvas.freeTextLayoutCaches();
@@ -400,7 +400,7 @@ public class TextViewPrecomputedTextPerfTest {
             textView.setText(text);
             textView.measure(width, height);
             textView.layout(0, 0, textView.getMeasuredWidth(), textView.getMeasuredHeight());
-            final RecordingCanvas c = node.startRecording(
+            final RecordingCanvas c = node.beginRecording(
                 textView.getMeasuredWidth(), textView.getMeasuredHeight());
             textView.nullLayouts();
             Canvas.freeTextLayoutCaches();
@@ -430,7 +430,7 @@ public class TextViewPrecomputedTextPerfTest {
             textView.setText(text);
             textView.measure(width, height);
             textView.layout(0, 0, textView.getMeasuredWidth(), textView.getMeasuredHeight());
-            final RecordingCanvas c = node.startRecording(
+            final RecordingCanvas c = node.beginRecording(
                 textView.getMeasuredWidth(), textView.getMeasuredHeight());
             textView.nullLayouts();
             Canvas.freeTextLayoutCaches();

@@ -339,7 +339,7 @@ public class BackdropFrameRenderer extends Thread implements Choreographer.Frame
         mFrameAndBackdropNode.setLeftTopRightBottom(left, top, left + width, top + height);
 
         // Draw the caption and content backdrops in to our render node.
-        RecordingCanvas canvas = mFrameAndBackdropNode.start(width, height);
+        RecordingCanvas canvas = mFrameAndBackdropNode.beginRecording(width, height);
         final Drawable drawable = mUserCaptionBackgroundDrawable != null
                 ? mUserCaptionBackgroundDrawable : mCaptionBackgroundDrawable;
 
@@ -353,7 +353,7 @@ public class BackdropFrameRenderer extends Thread implements Choreographer.Frame
             mResizingBackgroundDrawable.setBounds(0, mLastCaptionHeight, left + width, top + height);
             mResizingBackgroundDrawable.draw(canvas);
         }
-        mFrameAndBackdropNode.end(canvas);
+        mFrameAndBackdropNode.endRecording();
 
         drawColorViews(left, top, width, height, fullscreen, systemInsets, stableInsets);
 
@@ -368,7 +368,7 @@ public class BackdropFrameRenderer extends Thread implements Choreographer.Frame
         if (mSystemBarBackgroundNode == null) {
             return;
         }
-        RecordingCanvas canvas = mSystemBarBackgroundNode.start(width, height);
+        RecordingCanvas canvas = mSystemBarBackgroundNode.beginRecording(width, height);
         mSystemBarBackgroundNode.setLeftTopRightBottom(left, top, left + width, top + height);
         final int topInset = DecorView.getColorViewTopInset(mStableInsets.top, mSystemInsets.top);
         if (mStatusBarColor != null) {
@@ -384,7 +384,7 @@ public class BackdropFrameRenderer extends Thread implements Choreographer.Frame
             mNavigationBarColor.setBounds(mTmpRect);
             mNavigationBarColor.draw(canvas);
         }
-        mSystemBarBackgroundNode.end(canvas);
+        mSystemBarBackgroundNode.endRecording();
         mRenderer.drawRenderNode(mSystemBarBackgroundNode);
     }
 

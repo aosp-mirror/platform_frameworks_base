@@ -16,6 +16,7 @@
 
 package android.hardware.display;
 
+import android.annotation.FloatRange;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
@@ -59,15 +60,15 @@ public final class BrightnessCorrection implements Parcelable {
 
     /**
      * Creates a BrightnessCorrection that given {@code brightness}, corrects it to be
-     * {@code exp(scale * log(brightness) + translate)}.
+     * {@code exp(scale * ln(brightness) + translate)}.
      *
      * @param scale
-     *      How much to scale the log brightness.
+     *      How much to scale the log (base e) brightness.
      * @param translate
-     *      How much to translate the log brightness.
+     *      How much to translate the log (base e) brightness.
      *
      * @return A BrightnessCorrection that given {@code brightness}, corrects it to be
-     * {@code exp(scale * log(brightness) + translate)}.
+     * {@code exp(scale * ln(brightness) + translate)}.
      *
      * @throws IllegalArgumentException
      *      - scale or translate are NaN.
@@ -87,7 +88,8 @@ public final class BrightnessCorrection implements Parcelable {
      *
      * @return The corrected brightness.
      */
-    public float apply(float brightness) {
+    @FloatRange(from = 0.0)
+    public float apply(@FloatRange(from = 0.0) float brightness) {
         return mImplementation.apply(brightness);
     }
 
@@ -202,7 +204,7 @@ public final class BrightnessCorrection implements Parcelable {
 
     /**
      * A BrightnessCorrection that given {@code brightness}, corrects it to be
-     * {@code exp(scale * log(brightness) + translate)}.
+     * {@code exp(scale * ln(brightness) + translate)}.
      */
     private static class ScaleAndTranslateLog implements BrightnessCorrectionImplementation {
         private static final float MIN_SCALE = 0.5f;

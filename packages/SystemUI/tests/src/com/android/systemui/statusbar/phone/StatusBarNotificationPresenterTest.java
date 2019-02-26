@@ -41,6 +41,7 @@ import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.notification.ActivityLaunchAnimator;
 import com.android.systemui.statusbar.notification.NotificationAlertingManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.collection.NotificationRowBinderImpl;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 
@@ -74,7 +75,8 @@ public class StatusBarNotificationPresenterTest extends SysuiTestCase {
                 statusBarWindowView, mock(NotificationListContainerViewGroup.class),
                 mock(DozeScrimController.class), mock(ScrimController.class),
                 mock(ActivityLaunchAnimator.class), mock(StatusBarKeyguardViewManager.class),
-                mock(NotificationAlertingManager.class));
+                mock(NotificationAlertingManager.class),
+                mock(NotificationRowBinderImpl.class));
     }
 
     @Test

@@ -17110,6 +17110,13 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
+    public boolean startUserInForegroundWithListener(final int userId,
+            @Nullable IProgressListener unlockListener) {
+        // Permission check done inside UserController.
+        return mUserController.startUser(userId, /* foreground */ true, unlockListener);
+    }
+
+    @Override
     public boolean unlockUser(int userId, byte[] token, byte[] secret, IProgressListener listener) {
         return mUserController.unlockUser(userId, token, secret, listener);
     }

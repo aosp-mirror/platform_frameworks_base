@@ -18,6 +18,7 @@ package android.content.pm;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.annotation.UserIdInt;
@@ -1482,6 +1483,7 @@ public final class ShortcutInfo implements Parcelable {
      * @hide
      */
     @Nullable
+    @SystemApi
     public Person[] getPersons() {
         return clonePersons(mPersons);
     }

@@ -445,9 +445,30 @@ public class StagingManager {
 
     void abortSession(@NonNull PackageInstallerSession session) {
         synchronized (mStagedSessions) {
-            updateStoredSession(session);
             mStagedSessions.remove(session.sessionId);
         }
+    }
+
+    void abortCommittedSession(@NonNull PackageInstallerSession session) {
+        if (session.isStagedSessionApplied()) {
+            Slog.w(TAG, "Cannot abort applied session!");
+            return;
+        }
+        if (isStagedSessionFinalized(session.sessionId)) {
+            Slog.w(TAG, "Cannot abort session because it is not active or APEXD is not reachable");
+            return;
+        }
+
+        mApexManager.abortActiveSession();
+
+        abortSession(session);
+    }
+
+    private boolean isStagedSessionFinalized(int sessionId) {
+        ApexSessionInfo session = mApexManager.getStagedSessionInfo(sessionId);
+
+        /* checking if the session is in a final state, i.e., not active anymore */
+        return session.isUnknown || session.isActivationFailed || session.isSuccess;
     }
 
     @GuardedBy("mStagedSessions")

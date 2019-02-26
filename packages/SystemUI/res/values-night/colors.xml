@@ -41,4 +41,10 @@
 
     <!-- The color of the text inside a notification -->
     <color name="notification_primary_text_color">@*android:color/notification_primary_text_color_dark</color>
+
+    <!-- The color of the background in the top part of QSCustomizer -->
+    <color name="qs_customize_background">@color/GM2_grey_900</color>
+
+    <!-- The color of the background in the bottom part of QSCustomizer -->
+    <color name="qs_customize_decoration">@color/GM2_grey_800</color>
 </resources>

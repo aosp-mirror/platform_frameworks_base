@@ -23,6 +23,8 @@ import android.telephony.ims.RcsMessage.RcsMessageStatus;
 
 /**
  * An immutable summary of the latest {@link RcsMessage} on an {@link RcsThread}
+ *
+ * @hide
  */
 public final class RcsMessageSnippet implements Parcelable {
     private final String mText;

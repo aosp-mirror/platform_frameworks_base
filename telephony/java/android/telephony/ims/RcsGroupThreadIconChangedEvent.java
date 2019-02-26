@@ -22,6 +22,8 @@ import android.net.Uri;
 /**
  * An event that indicates an {@link RcsGroupThread}'s icon was changed. Please see R6-2-5 - GSMA
  * RCC.71 (RCS Universal Profile Service Definition Document)
+ *
+ * @hide
  */
 public final class RcsGroupThreadIconChangedEvent extends RcsGroupThreadEvent {
     private final Uri mNewIcon;

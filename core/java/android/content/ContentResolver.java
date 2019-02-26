@@ -3159,6 +3159,7 @@ public abstract class ContentResolver implements ContentInterface {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.CACHE_CONTENT)
     public void putCache(@NonNull Uri key, @Nullable Bundle value) {
         try {
             getContentService().putCache(mContext.getPackageName(), key, value,
@@ -3178,6 +3179,7 @@ public abstract class ContentResolver implements ContentInterface {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.CACHE_CONTENT)
     public @Nullable Bundle getCache(@NonNull Uri key) {
         try {
             final Bundle bundle = getContentService().getCache(mContext.getPackageName(), key,

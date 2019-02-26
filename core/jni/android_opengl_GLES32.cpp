@@ -27,8 +27,6 @@
 #include <utils/misc.h>
 #include <assert.h>
 
-static int initialized = 0;
-
 static jclass nioAccessClass;
 static jclass bufferClass;
 static jmethodID getBasePointerID;

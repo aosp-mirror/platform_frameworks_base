@@ -76,40 +76,54 @@ TEST(SymbolTableTest, FindByName) {
   EXPECT_THAT(symbol_table.FindByName(test::ParseNameOrDie("com.android.lib:id/foo")), NotNull());
 }
 
-TEST(SymbolTableTest, FindByNameWhenSymbolIsMangledInResTable) {
+using SymbolTableTestFixture = CommandTestFixture;
+TEST_F(SymbolTableTestFixture, FindByNameWhenSymbolIsMangledInResTable) {
   using namespace android;
+  StdErrDiagnostics diag;
 
-  std::unique_ptr<IAaptContext> context =
-      test::ContextBuilder()
-          .SetCompilationPackage("com.android.app")
-          .SetPackageId(0x7f)
-          .SetPackageType(PackageType::kApp)
-          .SetMinSdkVersion(SDK_LOLLIPOP_MR1)
-          .SetNameManglerPolicy(NameManglerPolicy{"com.android.app"})
-          .Build();
+  // Create a static library.
+  const std::string static_lib_compiled_files_dir = GetTestPath("static-lib-compiled");
+  ASSERT_TRUE(CompileFile(GetTestPath("res/values/values.xml"),
+         R"(<?xml version="1.0" encoding="utf-8"?>
+         <resources>
+             <item type="id" name="foo"/>
+        </resources>)",
+         static_lib_compiled_files_dir, &diag));
 
-  // Create a ResourceTable with a mangled resource, simulating a static library being merged into
-  // the main application package.
-  std::unique_ptr<ResourceTable> table =
-      test::ResourceTableBuilder()
-          .AddSimple("com.android.app:id/" + NameMangler::MangleEntry("com.android.lib", "foo"),
-                     ResourceId(0x7f020000))
-          .AddSimple("com.android.app:id/bar", ResourceId(0x7f020001))
-          .Build();
+  const std::string static_lib_apk = GetTestPath("static_lib.apk");
+  std::vector<std::string> link_args = {
+      "--manifest", GetDefaultManifest("com.android.lib"),
+      "--min-sdk-version", "22",
+      "--static-lib",
+      "-o", static_lib_apk,
+  };
+  ASSERT_TRUE(Link(link_args, static_lib_compiled_files_dir, &diag));
 
-  BigBuffer buffer(1024u);
-  TableFlattener flattener({}, &buffer);
-  ASSERT_TRUE(flattener.Consume(context.get(), table.get()));
+  // Merge the static library into the main application package. The static library resources will
+  // be mangled with the library package name.
+  const std::string app_compiled_files_dir = GetTestPath("app-compiled");
+  ASSERT_TRUE(CompileFile(GetTestPath("res/values/values.xml"),
+      R"(<?xml version="1.0" encoding="utf-8"?>
+         <resources>
+             <item type="id" name="bar"/>
+        </resources>)",
+        app_compiled_files_dir, &diag));
 
-  std::unique_ptr<uint8_t[]> data = util::Copy(buffer);
+  const std::string out_apk = GetTestPath("out.apk");
+  link_args = {
+      "--manifest", GetDefaultManifest("com.android.app"),
+      "--min-sdk-version", "22",
+      "-o", out_apk,
+      static_lib_apk
+  };
+  ASSERT_TRUE(Link(link_args, app_compiled_files_dir, &diag));
 
   // Construct the test AssetManager.
   auto asset_manager_source = util::make_unique<AssetManagerSymbolSource>();
-  ResTable& res_table = const_cast<ResTable&>(
-      asset_manager_source->GetAssetManager()->getResources(false /*required*/));
-  ASSERT_THAT(res_table.add(data.get(), buffer.size()), Eq(NO_ERROR));
+  asset_manager_source->AddAssetPath(out_apk);
 
-  SymbolTable symbol_table(context->GetNameMangler());
+  NameMangler name_mangler(NameManglerPolicy{"com.android.app"});
+  SymbolTable symbol_table(&name_mangler);
   symbol_table.AppendSource(std::move(asset_manager_source));
 
   EXPECT_THAT(symbol_table.FindByName(test::ParseNameOrDie("com.android.lib:id/foo")), NotNull());

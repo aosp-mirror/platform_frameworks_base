@@ -27,6 +27,8 @@ import java.util.Set;
 
 /**
  * This is a single instance of a message sent or received over RCS.
+ *
+ * @hide
  */
 public abstract class RcsMessage {
     /**

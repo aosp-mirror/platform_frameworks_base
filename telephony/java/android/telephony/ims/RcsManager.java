@@ -20,6 +20,8 @@ import android.content.Context;
 
 /**
  * The manager class for RCS related utilities.
+ *
+ * @hide
  */
 @SystemService(Context.TELEPHONY_RCS_SERVICE)
 public class RcsManager {

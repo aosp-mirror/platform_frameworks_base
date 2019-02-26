@@ -845,6 +845,7 @@ java_library_host {
 // specified on the build command line.
 java_library {
     name: "framework-atb-backward-compatibility",
+    installable: true,
     srcs: [
         "core/java/android/content/pm/AndroidTestBaseUpdater.java",
     ],
@@ -1514,7 +1515,7 @@ droiddoc {
     ],
     proofread_file: "ds-docs-proofrerad.txt",
     args: framework_docs_only_args +
-        " -toroot / -samplegroup Admin " +
+        " -toroot / -yamlV2 -metalavaApiSince -samplegroup Admin " +
         " -samplegroup Background " +
         " -samplegroup Connectivity " +
         " -samplegroup Content " +

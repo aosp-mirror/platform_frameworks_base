@@ -30,6 +30,7 @@ import android.os.ServiceManager;
 import android.os.ServiceManager.ServiceNotFoundException;
 import android.util.Slog;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.IndentingPrintWriter;
 
 import java.io.File;
@@ -48,7 +49,9 @@ import java.util.stream.Collectors;
 class ApexManager {
     static final String TAG = "ApexManager";
     private final IApexService mApexService;
-    private final Map<String, PackageInfo> mActivePackagesCache;
+    private final Object mLock = new Object();
+    @GuardedBy("mLock")
+    private Map<String, PackageInfo> mActivePackagesCache;
 
     ApexManager() {
         try {
@@ -57,31 +60,35 @@ class ApexManager {
         } catch (ServiceNotFoundException e) {
             throw new IllegalStateException("Required service apexservice not available");
         }
-        mActivePackagesCache = populateActivePackagesCache();
     }
 
-    @NonNull
-    private Map<String, PackageInfo> populateActivePackagesCache() {
-        try {
-            List<PackageInfo> list = new ArrayList<>();
-            final ApexInfo[] activePkgs = mApexService.getActivePackages();
-            for (ApexInfo ai : activePkgs) {
-                // If the device is using flattened APEX, don't report any APEX
-                // packages since they won't be managed or updated by PackageManager.
-                if ((new File(ai.packagePath)).isDirectory()) {
-                    break;
-                }
-                try {
-                    list.add(PackageParser.generatePackageInfoFromApex(
-                            new File(ai.packagePath), true /* collect certs */));
-                } catch (PackageParserException pe) {
-                    throw new IllegalStateException("Unable to parse: " + ai, pe);
-                }
+    private void populateActivePackagesCacheIfNeeded() {
+        synchronized (mLock) {
+            if (mActivePackagesCache != null) {
+                return;
             }
-            return list.stream().collect(Collectors.toMap(p -> p.packageName, Function.identity()));
-        } catch (RemoteException re) {
-            Slog.e(TAG, "Unable to retrieve packages from apexservice: " + re.toString());
-            throw new RuntimeException(re);
+            try {
+                List<PackageInfo> list = new ArrayList<>();
+                final ApexInfo[] activePkgs = mApexService.getActivePackages();
+                for (ApexInfo ai : activePkgs) {
+                    // If the device is using flattened APEX, don't report any APEX
+                    // packages since they won't be managed or updated by PackageManager.
+                    if ((new File(ai.packagePath)).isDirectory()) {
+                        break;
+                    }
+                    try {
+                        list.add(PackageParser.generatePackageInfoFromApex(
+                                new File(ai.packagePath), true /* collect certs */));
+                    } catch (PackageParserException pe) {
+                        throw new IllegalStateException("Unable to parse: " + ai, pe);
+                    }
+                }
+                mActivePackagesCache = list.stream().collect(
+                        Collectors.toMap(p -> p.packageName, Function.identity()));
+            } catch (RemoteException re) {
+                Slog.e(TAG, "Unable to retrieve packages from apexservice: " + re.toString());
+                throw new RuntimeException(re);
+            }
         }
     }
 
@@ -96,6 +103,7 @@ class ApexManager {
      *         is not found.
      */
     @Nullable PackageInfo getActivePackage(String packageName) {
+        populateActivePackagesCacheIfNeeded();
         return mActivePackagesCache.get(packageName);
     }
 
@@ -106,6 +114,7 @@ class ApexManager {
      *         active package.
      */
     Collection<PackageInfo> getActivePackages() {
+        populateActivePackagesCacheIfNeeded();
         return mActivePackagesCache.values();
     }
 
@@ -205,6 +214,21 @@ class ApexManager {
     }
 
     /**
+     * Abandons the (only) active session previously submitted.
+     *
+     * @return {@code true} upon success, {@code false} if any remote exception occurs
+     */
+    boolean abortActiveSession() {
+        try {
+            mApexService.abortActiveSession();
+            return true;
+        } catch (RemoteException re) {
+            Slog.e(TAG, "Unable to contact apexservice", re);
+            return false;
+        }
+    }
+
+    /**
      * Dumps various state information to the provided {@link PrintWriter} object.
      *
      * @param pw the {@link PrintWriter} object to send information to.
@@ -217,7 +241,7 @@ class ApexManager {
         ipw.println("Active APEX packages:");
         ipw.increaseIndent();
         try {
-            populateActivePackagesCache();
+            populateActivePackagesCacheIfNeeded();
             for (PackageInfo pi : mActivePackagesCache.values()) {
                 if (packageName != null && !packageName.equals(pi.packageName)) {
                     continue;
@@ -253,5 +277,9 @@ class ApexManager {
         } catch (RemoteException e) {
             ipw.println("Couldn't communicate with apexd.");
         }
+    }
+
+    public void onBootCompleted() {
+        populateActivePackagesCacheIfNeeded();
     }
 }

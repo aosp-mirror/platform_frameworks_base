@@ -489,4 +489,10 @@ interface IActivityManager {
 
     /** Returns a file descriptor that'll be closed when the system server process dies. */
     ParcelFileDescriptor getLifeMonitor();
+
+    /**
+     * Start user, if it us not already running, and bring it to foreground.
+     * unlockProgressListener can be null if monitoring progress is not necessary.
+     */
+    boolean startUserInForegroundWithListener(int userid, IProgressListener unlockProgressListener);
 }

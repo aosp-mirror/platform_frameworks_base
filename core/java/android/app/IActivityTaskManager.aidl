@@ -277,12 +277,8 @@ interface IActivityTaskManager {
      *
      * @param showingKeyguard True if the keyguard is showing, false otherwise.
      * @param showingAod True if AOD is showing, false otherwise.
-     * @param secondaryDisplaysShowing The displayId's of the secondary displays on which the
-     * keyguard is showing, or {@code null} if there is no such display. Only meaningful if showing
-     * is {@code true}.
      */
-    void setLockScreenShown(boolean showingKeyguard, boolean showingAod,
-            in int[] secondaryDisplaysShowing);
+    void setLockScreenShown(boolean showingKeyguard, boolean showingAod);
     Bundle getAssistContextExtras(int requestType);
     boolean launchAssistIntent(in Intent intent, int requestType, in String hint, int userHandle,
             in Bundle args);

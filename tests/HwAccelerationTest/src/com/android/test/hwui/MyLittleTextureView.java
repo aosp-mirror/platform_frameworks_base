@@ -60,14 +60,14 @@ public class MyLittleTextureView extends Activity {
         outline.setAlpha(1f);
         childNode.setOutline(outline);
         {
-            Canvas canvas = childNode.startRecording();
+            Canvas canvas = childNode.beginRecording();
             canvas.drawColor(Color.BLUE);
         }
         childNode.endRecording();
         childNode.setElevation(20f);
 
         {
-            Canvas canvas = mContent.startRecording();
+            Canvas canvas = mContent.beginRecording();
             canvas.drawColor(Color.WHITE);
             canvas.enableZ();
             canvas.drawRenderNode(childNode);

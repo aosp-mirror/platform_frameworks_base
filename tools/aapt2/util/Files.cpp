@@ -102,12 +102,21 @@ FileType GetFileType(const std::string& path) {
 #endif
 
 bool mkdirs(const std::string& path) {
-  #ifdef _WIN32
-  // Start after the drive path if present. Calling mkdir with only the drive will cause an error.
-  size_t current_pos = 1u;
-  if (path.size() >= 3 && path[1] == ':' &&
-        (path[2] == '\\' || path[2] == '/')) {
-    current_pos = 3u;
+ #ifdef _WIN32
+  // Start after the long path prefix if present.
+  bool require_drive = false;
+  size_t current_pos = 0u;
+  if (util::StartsWith(path, R"(\\?\)")) {
+    require_drive = true;
+    current_pos = 4u;
+  }
+
+  // Start after the drive path if present.
+  if (path.size() >= 3 && path[current_pos + 1] == ':' &&
+       (path[current_pos + 2] == '\\' || path[current_pos + 2] == '/')) {
+    current_pos += 3u;
+  } else if (require_drive) {
+    return false;
   }
  #else
   // Start after the first character so that we don't consume the root '/'.

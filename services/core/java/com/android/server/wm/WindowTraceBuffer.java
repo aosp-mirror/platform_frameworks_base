@@ -98,9 +98,8 @@ class WindowTraceBuffer {
                 ProtoOutputStream proto = new ProtoOutputStream();
                 proto.write(MAGIC_NUMBER, MAGIC_NUMBER_VALUE);
                 os.write(proto.getBytes());
-                while (!mBuffer.isEmpty()) {
-                    proto = mBuffer.poll();
-                    mBufferUsedSize -= proto.getRawSize();
+                for (ProtoOutputStream protoOutputStream : mBuffer) {
+                    proto = protoOutputStream;
                     byte[] protoBytes = proto.getBytes();
                     os.write(protoBytes);
                 }

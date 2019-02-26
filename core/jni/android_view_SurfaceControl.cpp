@@ -205,7 +205,7 @@ static Rect rectFromObj(JNIEnv* env, jobject rectObj) {
 
 static jobject nativeScreenshot(JNIEnv* env, jclass clazz,
         jobject displayTokenObj, jobject sourceCropObj, jint width, jint height,
-        bool useIdentityTransform, int rotation) {
+        bool useIdentityTransform, int rotation, bool captureSecureLayers) {
     sp<IBinder> displayToken = ibinderForJavaObject(env, displayTokenObj);
     if (displayToken == NULL) {
         return NULL;
@@ -213,9 +213,9 @@ static jobject nativeScreenshot(JNIEnv* env, jclass clazz,
     Rect sourceCrop = rectFromObj(env, sourceCropObj);
     sp<GraphicBuffer> buffer;
     status_t res = ScreenshotClient::capture(displayToken, ui::Dataspace::V0_SRGB,
-                                             ui::PixelFormat::RGBA_8888,
-                                             sourceCrop, width, height,
-                                             useIdentityTransform, rotation, &buffer);
+            ui::PixelFormat::RGBA_8888,
+            sourceCrop, width, height,
+            useIdentityTransform, rotation, captureSecureLayers, &buffer);
     if (res != NO_ERROR) {
         return NULL;
     }
@@ -1232,7 +1232,7 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeSetOverrideScalingMode },
     {"nativeGetHandle", "(J)Landroid/os/IBinder;",
             (void*)nativeGetHandle },
-    {"nativeScreenshot", "(Landroid/os/IBinder;Landroid/graphics/Rect;IIZI)Landroid/graphics/GraphicBuffer;",
+    {"nativeScreenshot", "(Landroid/os/IBinder;Landroid/graphics/Rect;IIZIZ)Landroid/graphics/GraphicBuffer;",
             (void*)nativeScreenshot },
     {"nativeCaptureLayers", "(Landroid/os/IBinder;Landroid/graphics/Rect;F)Landroid/graphics/GraphicBuffer;",
             (void*)nativeCaptureLayers },

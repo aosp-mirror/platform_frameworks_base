@@ -65,8 +65,6 @@ GL_API void GL_APIENTRY glWeightPointerOESBounds(GLint size, GLenum type,
         GLsizei stride, const GLvoid *pointer, GLsizei count);
 }
 
-static int initialized = 0;
-
 static jclass nioAccessClass;
 static jclass bufferClass;
 static jclass G11ImplClass;

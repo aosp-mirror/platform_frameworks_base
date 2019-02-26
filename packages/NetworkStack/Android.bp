@@ -28,6 +28,7 @@ java_library {
     static_libs: [
         "netd_aidl_interface-java",
         "networkstack-aidl-interfaces-java",
+        "datastallprotosnano",
     ]
 }
 

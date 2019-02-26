@@ -8665,24 +8665,26 @@ public class TelephonyManager {
 
 
     /**
-     * Returns a well-formed IETF BCP 47 language tag representing the locale from the SIM, e.g,
-     * en-US. Returns {@code null} if no locale could be derived from subscriptions.
+     * Returns a locale based on the country and language from the SIM. Returns {@code null} if
+     * no locale could be derived from subscriptions.
      *
      * <p>Requires Permission:
      * {@link android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE READ_PRIVILEGED_PHONE_STATE}
      *
      * @see Locale#toLanguageTag()
-     * @see Locale#forLanguageTag(String)
      *
      * @hide
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
-    @Nullable public String getSimLocale() {
+    @Nullable public Locale getSimLocale() {
         try {
             final ITelephony telephony = getITelephony();
             if (telephony != null) {
-                return telephony.getSimLocaleForSubscriber(getSubId());
+                String languageTag = telephony.getSimLocaleForSubscriber(getSubId());
+                if (!TextUtils.isEmpty(languageTag)) {
+                    return Locale.forLanguageTag(languageTag);
+                }
             }
         } catch (RemoteException ex) {
         }

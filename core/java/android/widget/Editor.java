@@ -1947,7 +1947,7 @@ public class Editor {
 
             // Rebuild display list if it is invalid
             if (blockDisplayListIsInvalid) {
-                final RecordingCanvas recordingCanvas = blockDisplayList.start(
+                final RecordingCanvas recordingCanvas = blockDisplayList.beginRecording(
                         right - left, bottom - top);
                 try {
                     // drawText is always relative to TextView's origin, this translation
@@ -1958,7 +1958,7 @@ public class Editor {
                     // No need to untranslate, previous context is popped after
                     // drawDisplayList
                 } finally {
-                    blockDisplayList.end(recordingCanvas);
+                    blockDisplayList.endRecording();
                     // Same as drawDisplayList below, handled by our TextView's parent
                     blockDisplayList.setClipToBounds(false);
                 }

@@ -132,9 +132,7 @@ public abstract class ContentCaptureSession implements AutoCloseable {
     /** @hide */
     public static final int FLUSH_REASON_FULL = 1;
     /** @hide */
-    public static final int FLUSH_REASON_ACTIVITY_PAUSED = 2;
-    /** @hide */
-    public static final int FLUSH_REASON_ACTIVITY_RESUMED = 3;
+    public static final int FLUSH_REASON_VIEW_ROOT_ENTERED = 2;
     /** @hide */
     public static final int FLUSH_REASON_SESSION_STARTED = 4;
     /** @hide */
@@ -145,14 +143,13 @@ public abstract class ContentCaptureSession implements AutoCloseable {
     /** @hide */
     @IntDef(prefix = { "FLUSH_REASON_" }, value = {
             FLUSH_REASON_FULL,
-            FLUSH_REASON_ACTIVITY_PAUSED,
-            FLUSH_REASON_ACTIVITY_RESUMED,
             FLUSH_REASON_SESSION_STARTED,
             FLUSH_REASON_SESSION_FINISHED,
-            FLUSH_REASON_IDLE_TIMEOUT
+            FLUSH_REASON_IDLE_TIMEOUT,
+            FLUSH_REASON_VIEW_ROOT_ENTERED,
     })
     @Retention(RetentionPolicy.SOURCE)
-    @interface FlushReason{}
+    public @interface FlushReason{}
 
     private final Object mLock = new Object();
 
@@ -500,20 +497,18 @@ public abstract class ContentCaptureSession implements AutoCloseable {
 
     /** @hide */
     @NonNull
-    static String getflushReasonAsString(@FlushReason int reason) {
+    public static String getFlushReasonAsString(@FlushReason int reason) {
         switch (reason) {
             case FLUSH_REASON_FULL:
                 return "FULL";
-            case FLUSH_REASON_ACTIVITY_PAUSED:
-                return "PAUSED";
-            case FLUSH_REASON_ACTIVITY_RESUMED:
-                return "RESUMED";
             case FLUSH_REASON_SESSION_STARTED:
                 return "STARTED";
             case FLUSH_REASON_SESSION_FINISHED:
                 return "FINISHED";
             case FLUSH_REASON_IDLE_TIMEOUT:
                 return "IDLE";
+            case FLUSH_REASON_VIEW_ROOT_ENTERED:
+                return "ENTERED";
             default:
                 return "UNKOWN-" + reason;
         }

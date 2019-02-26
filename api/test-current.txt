@@ -765,7 +765,7 @@ package android.hardware.display {
   public final class BrightnessConfiguration implements android.os.Parcelable {
     method public int describeContents();
     method @Nullable public android.hardware.display.BrightnessCorrection getCorrectionByCategory(int);
-    method @Nullable public android.hardware.display.BrightnessCorrection getCorrectionByPackageName(String);
+    method @Nullable public android.hardware.display.BrightnessCorrection getCorrectionByPackageName(@NonNull String);
     method public android.util.Pair<float[],float[]> getCurve();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.hardware.display.BrightnessConfiguration> CREATOR;
@@ -773,8 +773,8 @@ package android.hardware.display {
 
   public static class BrightnessConfiguration.Builder {
     ctor public BrightnessConfiguration.Builder(float[], float[]);
-    method public android.hardware.display.BrightnessConfiguration.Builder addCorrectionByCategory(int, android.hardware.display.BrightnessCorrection);
-    method public android.hardware.display.BrightnessConfiguration.Builder addCorrectionByPackageName(String, android.hardware.display.BrightnessCorrection);
+    method public android.hardware.display.BrightnessConfiguration.Builder addCorrectionByCategory(int, @NonNull android.hardware.display.BrightnessCorrection);
+    method public android.hardware.display.BrightnessConfiguration.Builder addCorrectionByPackageName(@NonNull String, @NonNull android.hardware.display.BrightnessCorrection);
     method public android.hardware.display.BrightnessConfiguration build();
     method public int getMaxCorrectionsByCategory();
     method public int getMaxCorrectionsByPackageName();
@@ -782,7 +782,7 @@ package android.hardware.display {
   }
 
   public final class BrightnessCorrection implements android.os.Parcelable {
-    method public float apply(float);
+    method @FloatRange(from=0.0) public float apply(@FloatRange(from=0.0) float);
     method @NonNull public static android.hardware.display.BrightnessCorrection createScaleAndTranslateLog(float, float);
     method public int describeContents();
     method public void writeToParcel(android.os.Parcel, int);
@@ -1952,6 +1952,7 @@ package android.provider {
   public static final class Settings.Global extends android.provider.Settings.NameValueTable {
     field public static final String AUTOFILL_COMPAT_MODE_ALLOWED_PACKAGES = "autofill_compat_mode_allowed_packages";
     field public static final String AUTOMATIC_POWER_SAVER_MODE = "automatic_power_saver_mode";
+    field public static final String BATTERY_SAVER_CONSTANTS = "battery_saver_constants";
     field public static final String CAPTIVE_PORTAL_FALLBACK_PROBE_SPECS = "captive_portal_fallback_probe_specs";
     field public static final String CAPTIVE_PORTAL_FALLBACK_URL = "captive_portal_fallback_url";
     field public static final String CAPTIVE_PORTAL_HTTPS_URL = "captive_portal_https_url";
@@ -2381,7 +2382,7 @@ package android.telephony.mbms {
 
 package android.telephony.mbms.vendor {
 
-  public class MbmsDownloadServiceBase extends android.os.Binder {
+  public class MbmsDownloadServiceBase extends android.os.Binder implements android.os.IInterface {
     ctor public MbmsDownloadServiceBase();
     method public int addProgressListener(android.telephony.mbms.DownloadRequest, android.telephony.mbms.DownloadProgressListener) throws android.os.RemoteException;
     method public int addStatusListener(android.telephony.mbms.DownloadRequest, android.telephony.mbms.DownloadStatusListener) throws android.os.RemoteException;
@@ -2414,7 +2415,7 @@ package android.telephony.mbms.vendor {
     method public void updateGroupCall(int, long, java.util.List<java.lang.Integer>, java.util.List<java.lang.Integer>);
   }
 
-  public class MbmsStreamingServiceBase extends android.os.Binder {
+  public class MbmsStreamingServiceBase extends android.os.Binder implements android.os.IInterface {
     ctor public MbmsStreamingServiceBase();
     method public android.os.IBinder asBinder();
     method public void dispose(int) throws android.os.RemoteException;
