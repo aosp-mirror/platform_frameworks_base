@@ -565,12 +565,12 @@ package android.app {
   }
 
   public class StatusBarManager {
-    method @NonNull public android.app.StatusBarManager.DisableInfo getDisableInfo();
-    method public void setDisabledForSetup(boolean);
+    method @NonNull @RequiresPermission(android.Manifest.permission.STATUS_BAR) public android.app.StatusBarManager.DisableInfo getDisableInfo();
+    method @RequiresPermission(android.Manifest.permission.STATUS_BAR) public void setDisabledForSetup(boolean);
   }
 
   public static final class StatusBarManager.DisableInfo {
-    method public boolean areNoComponentsDisabled();
+    method public boolean areAllComponentsEnabled();
     method public boolean isNavigateToHomeDisabled();
     method public boolean isNotificationPeekingDisabled();
     method public boolean isRecentsDisabled();

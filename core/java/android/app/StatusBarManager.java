@@ -19,6 +19,7 @@ package android.app;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.UnsupportedAppUsage;
@@ -365,6 +366,7 @@ public class StatusBarManager {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.STATUS_BAR)
     public void setDisabledForSetup(boolean disabled) {
         try {
             final int userId = Binder.getCallingUserHandle().getIdentifier();
@@ -388,6 +390,7 @@ public class StatusBarManager {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.STATUS_BAR)
     @NonNull
     public DisableInfo getDisableInfo() {
         try {
@@ -520,7 +523,7 @@ public class StatusBarManager {
          * @hide
          */
         @SystemApi
-        public boolean areNoComponentsDisabled() {
+        public boolean areAllComponentsEnabled() {
             return !mStatusBarExpansion && !mNavigateHome && !mNotificationPeeking && !mRecents
                     && !mSearch;
         }
