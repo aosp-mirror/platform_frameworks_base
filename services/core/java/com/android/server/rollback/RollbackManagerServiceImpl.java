@@ -434,7 +434,10 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             mAvailableRollbacks = null;
             mRecentlyExecutedRollbacks = null;
         }
-        getHandler().post(() -> ensureRollbackDataLoaded());
+        getHandler().post(() -> {
+            updateRollbackLifetimeDurationInMillis();
+            ensureRollbackDataLoaded();
+        });
     }
 
     @Override
