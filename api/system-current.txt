@@ -8830,12 +8830,12 @@ package android.telephony.ims {
     method public int describeContents();
     method public int getAudioDirection();
     method public int getAudioQuality();
-    method public boolean getRttAudioSpeech();
     method public int getRttMode();
     method public int getVideoDirection();
     method public int getVideoQuality();
+    method public boolean isReceivingRttAudio();
     method public boolean isRttCall();
-    method public void setRttAudioSpeech(boolean);
+    method public void setReceivingRttAudio(boolean);
     method public void setRttMode(int);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final int AUDIO_QUALITY_AMR = 1; // 0x1
