@@ -406,7 +406,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
     }
 
     @Test
-    public void testFixedScreenConfigurationWhenMovingToDisplay() {
+    public void testSizeCompatMode_FixedScreenConfigurationWhenMovingToDisplay() {
         // Initialize different bounds on a new display.
         final ActivityDisplay newDisplay = addNewActivityDisplayAt(ActivityDisplay.POSITION_TOP);
         newDisplay.setBounds(0, 0, 1000, 2000);
@@ -431,7 +431,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
     }
 
     @Test
-    public void testFixedScreenBoundsWhenDisplaySizeChanged() {
+    public void testSizeCompatMode_FixedScreenBoundsWhenDisplaySizeChanged() {
         when(mActivity.mAppWindowToken.getOrientationIgnoreVisibility()).thenReturn(
                 ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         mTask.getWindowConfiguration().setAppBounds(mStack.getDisplay().getBounds());
@@ -445,5 +445,29 @@ public class ActivityRecordTests extends ActivityTestsBase {
         ensureActivityConfiguration();
 
         assertEquals(originalBounds, mActivity.getBounds());
+    }
+
+    @Test
+    public void testSizeCompatMode_FixedScreenLayoutSizeBits() {
+        final int fixedScreenLayout = Configuration.SCREENLAYOUT_LONG_NO
+                | Configuration.SCREENLAYOUT_SIZE_NORMAL;
+        mTask.getConfiguration().screenLayout = fixedScreenLayout
+                | Configuration.SCREENLAYOUT_LAYOUTDIR_LTR;
+        mTask.getWindowConfiguration().setAppBounds(mStack.getDisplay().getBounds());
+        mActivity.info.resizeMode = ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
+        mActivity.info.maxAspectRatio = 1.5f;
+        ensureActivityConfiguration();
+
+        // The initial configuration should inherit from parent.
+        assertEquals(mTask.getConfiguration().screenLayout,
+                mActivity.getConfiguration().screenLayout);
+
+        mTask.getConfiguration().screenLayout = Configuration.SCREENLAYOUT_LAYOUTDIR_RTL
+                | Configuration.SCREENLAYOUT_LONG_YES | Configuration.SCREENLAYOUT_SIZE_LARGE;
+        mActivity.onConfigurationChanged(mTask.getConfiguration());
+
+        // The size and aspect ratio bits don't change, but the layout direction should be updated.
+        assertEquals(fixedScreenLayout | Configuration.SCREENLAYOUT_LAYOUTDIR_RTL,
+                mActivity.getConfiguration().screenLayout);
     }
 }

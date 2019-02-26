@@ -2751,7 +2751,9 @@ final class ActivityRecord extends ConfigurationContainer {
                 final Configuration srcConfig = task.getConfiguration();
                 overrideConfig.colorMode = srcConfig.colorMode;
                 overrideConfig.densityDpi = srcConfig.densityDpi;
-                overrideConfig.screenLayout = srcConfig.screenLayout;
+                overrideConfig.screenLayout = srcConfig.screenLayout
+                        & (Configuration.SCREENLAYOUT_LONG_MASK
+                                | Configuration.SCREENLAYOUT_SIZE_MASK);
                 // The smallest screen width is the short side of screen bounds. Because the bounds
                 // and density won't be changed, smallestScreenWidthDp is also fixed.
                 overrideConfig.smallestScreenWidthDp = srcConfig.smallestScreenWidthDp;
