@@ -40,6 +40,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
+import android.os.SystemClock;
 import android.provider.DeviceConfig;
 import android.util.IntArray;
 import android.util.Log;
@@ -120,6 +121,13 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
     private final Installer mInstaller;
     private final RollbackPackageHealthObserver mPackageHealthObserver;
     private final AppDataRollbackHelper mAppDataRollbackHelper;
+
+    // This field stores the difference in Millis between the uptime (millis since device
+    // has booted) and current time (device wall clock) - it's used to update rollback data
+    // timestamps when the time is changed, by the user or by change of timezone.
+    // No need for guarding with lock because value is only accessed in handler thread.
+    private long  mRelativeBootTime = calculateRelativeBootTime();
+
 
     RollbackManagerServiceImpl(Context context) {
         mContext = context;
@@ -217,6 +225,8 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                 }
             }
         }, enableRollbackFilter, null, getHandler());
+
+        registerTimeChangeReceiver();
     }
 
     @Override
@@ -266,6 +276,45 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         getHandler().post(() ->
                 commitRollbackInternal(rollbackId, causePackages.getList(),
                     callerPackageName, statusReceiver));
+    }
+
+    private void registerTimeChangeReceiver() {
+        final BroadcastReceiver timeChangeIntentReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                final long oldRelativeBootTime = mRelativeBootTime;
+                mRelativeBootTime = calculateRelativeBootTime();
+                final long timeDifference = mRelativeBootTime - oldRelativeBootTime;
+
+                synchronized (mLock) {
+                    ensureRollbackDataLoadedLocked();
+
+                    Iterator<RollbackData> iter = mAvailableRollbacks.iterator();
+                    while (iter.hasNext()) {
+                        RollbackData data = iter.next();
+
+                        data.timestamp = data.timestamp.plusMillis(timeDifference);
+                        try {
+                            mRollbackStore.saveAvailableRollback(data);
+                        } catch (IOException ioe) {
+                            // TODO: figure out the right way to deal with this, especially if
+                            //  it fails for some data and succeeds for others.
+                            Log.e(TAG, "Unable to save rollback info for : " + data.rollbackId,
+                                    ioe);
+                        }
+                    }
+
+                }
+            }
+        };
+        final IntentFilter filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_TIME_CHANGED);
+        mContext.registerReceiver(timeChangeIntentReceiver, filter,
+                null /* broadcastPermission */, getHandler());
+    }
+
+    private static long calculateRelativeBootTime() {
+        return System.currentTimeMillis() - SystemClock.elapsedRealtime();
     }
 
     /**
