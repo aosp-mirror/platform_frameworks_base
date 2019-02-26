@@ -22,7 +22,7 @@
 #include "android_media_MediaDataSource.h"
 #include "android_media_MediaExtractor.h"
 #include "android_media_MediaMetricsJNI.h"
-#include "android_media_Utils.h"
+#include "android_media_Streams.h"
 #include "android_os_HwRemoteBinder.h"
 #include "android_runtime/AndroidRuntime.h"
 #include "android_runtime/Log.h"

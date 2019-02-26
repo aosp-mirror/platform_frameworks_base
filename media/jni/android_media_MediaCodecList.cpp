@@ -31,7 +31,7 @@
 #include "android_runtime/AndroidRuntime.h"
 #include "jni.h"
 #include <nativehelper/JNIHelp.h>
-#include "android_media_Utils.h"
+#include "android_media_Streams.h"
 
 using namespace android;
 
