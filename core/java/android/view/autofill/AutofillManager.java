@@ -371,6 +371,24 @@ public final class AutofillManager {
     public static final String DEVICE_CONFIG_AUTOFILL_SMART_SUGGESTION_SUPPORTED_MODES =
             "smart_suggestion_supported_modes";
 
+    /**
+     * Sets how long (in ms) the augmented autofill service is bound while idle.
+     *
+     * <p>Use {@code 0} to keep it permanently bound.
+     *
+     * @hide
+     */
+    public static final String DEVICE_CONFIG_AUGMENTED_SERVICE_IDLE_UNBIND_TIMEOUT =
+            "augmented_service_idle_unbind_timeout";
+
+    /**
+     * Sets how long (in ms) the augmented autofill service request is killed if not replied.
+     *
+     * @hide
+     */
+    public static final String DEVICE_CONFIG_AUGMENTED_SERVICE_REQUEST_TIMEOUT =
+            "augmented_service_request_timeout";
+
     /** @hide */
     public static final int RESULT_OK = 0;
     /** @hide */

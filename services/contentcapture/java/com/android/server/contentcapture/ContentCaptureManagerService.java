@@ -104,12 +104,12 @@ public final class ContentCaptureManagerService extends
     private boolean mDisabledByDeviceConfig;
 
     // Device-config settings that are cached and passed back to apps
-    int mDevCfgLoggingLevel;
-    int mDevCfgMaxBufferSize;
-    int mDevCfgIdleFlushingFrequencyMs;
-    int mDevCfgTextChangeFlushingFrequencyMs;
-    int mDevCfgLogHistorySize;
-    int mDevCfgIdleUnbindTimeoutMs;
+    @GuardedBy("mLock") int mDevCfgLoggingLevel;
+    @GuardedBy("mLock") int mDevCfgMaxBufferSize;
+    @GuardedBy("mLock") int mDevCfgIdleFlushingFrequencyMs;
+    @GuardedBy("mLock") int mDevCfgTextChangeFlushingFrequencyMs;
+    @GuardedBy("mLock") int mDevCfgLogHistorySize;
+    @GuardedBy("mLock") int mDevCfgIdleUnbindTimeoutMs;
 
     public ContentCaptureManagerService(@NonNull Context context) {
         super(context, new FrameworkResourcesServiceNameResolver(context,
@@ -249,26 +249,29 @@ public final class ContentCaptureManagerService extends
     }
 
     private void setFineTuneParamsFromDeviceConfig() {
-        mDevCfgMaxBufferSize = ContentCaptureHelper.getIntDeviceConfigProperty(
-                ContentCaptureManager.DEVICE_CONFIG_PROPERTY_MAX_BUFFER_SIZE,
-                ContentCaptureManager.DEFAULT_MAX_BUFFER_SIZE);
-        mDevCfgIdleFlushingFrequencyMs = ContentCaptureHelper.getIntDeviceConfigProperty(
-                ContentCaptureManager.DEVICE_CONFIG_PROPERTY_IDLE_FLUSH_FREQUENCY,
-                ContentCaptureManager.DEFAULT_IDLE_FLUSHING_FREQUENCY_MS);
-        mDevCfgTextChangeFlushingFrequencyMs = ContentCaptureHelper.getIntDeviceConfigProperty(
-                ContentCaptureManager.DEVICE_CONFIG_PROPERTY_TEXT_CHANGE_FLUSH_FREQUENCY,
-                ContentCaptureManager.DEFAULT_TEXT_CHANGE_FLUSHING_FREQUENCY_MS);
-        mDevCfgLogHistorySize = ContentCaptureHelper.getIntDeviceConfigProperty(
-                ContentCaptureManager.DEVICE_CONFIG_PROPERTY_LOG_HISTORY_SIZE, 20);
-        mDevCfgIdleUnbindTimeoutMs = ContentCaptureHelper.getIntDeviceConfigProperty(
-                ContentCaptureManager.DEVICE_CONFIG_PROPERTY_IDLE_UNBIND_TIMEOUT,
-                (int) AbstractRemoteService.PERMANENT_BOUND_TIMEOUT_MS);
-        if (verbose) {
-            Slog.v(mTag, "setFineTuneParamsFromDeviceConfig(): bufferSize=" + mDevCfgMaxBufferSize
-                    + ", idleFlush=" + mDevCfgIdleFlushingFrequencyMs
-                    + ", textFluxh=" + mDevCfgTextChangeFlushingFrequencyMs
-                    + ", logHistory=" + mDevCfgLogHistorySize
-                    + ", idleUnbindTimeoutMs=" + mDevCfgIdleUnbindTimeoutMs);
+        synchronized (mLock) {
+            mDevCfgMaxBufferSize = ContentCaptureHelper.getIntDeviceConfigProperty(
+                    ContentCaptureManager.DEVICE_CONFIG_PROPERTY_MAX_BUFFER_SIZE,
+                    ContentCaptureManager.DEFAULT_MAX_BUFFER_SIZE);
+            mDevCfgIdleFlushingFrequencyMs = ContentCaptureHelper.getIntDeviceConfigProperty(
+                    ContentCaptureManager.DEVICE_CONFIG_PROPERTY_IDLE_FLUSH_FREQUENCY,
+                    ContentCaptureManager.DEFAULT_IDLE_FLUSHING_FREQUENCY_MS);
+            mDevCfgTextChangeFlushingFrequencyMs = ContentCaptureHelper.getIntDeviceConfigProperty(
+                    ContentCaptureManager.DEVICE_CONFIG_PROPERTY_TEXT_CHANGE_FLUSH_FREQUENCY,
+                    ContentCaptureManager.DEFAULT_TEXT_CHANGE_FLUSHING_FREQUENCY_MS);
+            mDevCfgLogHistorySize = ContentCaptureHelper.getIntDeviceConfigProperty(
+                    ContentCaptureManager.DEVICE_CONFIG_PROPERTY_LOG_HISTORY_SIZE, 20);
+            mDevCfgIdleUnbindTimeoutMs = ContentCaptureHelper.getIntDeviceConfigProperty(
+                    ContentCaptureManager.DEVICE_CONFIG_PROPERTY_IDLE_UNBIND_TIMEOUT,
+                    (int) AbstractRemoteService.PERMANENT_BOUND_TIMEOUT_MS);
+            if (verbose) {
+                Slog.v(mTag, "setFineTuneParamsFromDeviceConfig(): "
+                        + "bufferSize=" + mDevCfgMaxBufferSize
+                        + ", idleFlush=" + mDevCfgIdleFlushingFrequencyMs
+                        + ", textFluxh=" + mDevCfgTextChangeFlushingFrequencyMs
+                        + ", logHistory=" + mDevCfgLogHistorySize
+                        + ", idleUnbindTimeoutMs=" + mDevCfgIdleUnbindTimeoutMs);
+            }
         }
     }
 
