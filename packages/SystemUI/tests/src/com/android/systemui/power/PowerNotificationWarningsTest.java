@@ -16,20 +16,20 @@
 
 package com.android.systemui.power;
 
-import static com.google.common.truth.Truth.assertThat;
-
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.support.test.runner.AndroidJUnit4;
@@ -52,11 +52,13 @@ public class PowerNotificationWarningsTest extends SysuiTestCase {
     public static final String FORMATTED_45M = "0h 45m";
     public static final String FORMATTED_HOUR = "1h 0m";
     private final NotificationManager mMockNotificationManager = mock(NotificationManager.class);
+    private final KeyguardManager mMockKeyguardManager = mock(KeyguardManager.class);
     private PowerNotificationWarnings mPowerNotificationWarnings, mSpyPowerNotificationWarnings;
 
     @Before
     public void setUp() throws Exception {
         // Test Instance.
+        mContext.addMockSystemService(KeyguardManager.class, mMockKeyguardManager);
         mContext.addMockSystemService(NotificationManager.class, mMockNotificationManager);
         mPowerNotificationWarnings = new PowerNotificationWarnings(mContext);
         mSpyPowerNotificationWarnings = spy(mPowerNotificationWarnings);
@@ -166,10 +168,9 @@ public class PowerNotificationWarningsTest extends SysuiTestCase {
     public void testSetOverheatAlarmDialog_Overheat_ShouldShowing() {
         final boolean overheat = true;
         final boolean shouldBeepSound = false;
-        mContext.getMainThreadHandler().post(
-                () -> mSpyPowerNotificationWarnings.notifyHighTemperatureAlarm(overheat,
-                        shouldBeepSound));
-        waitForIdleSync();
+        mSpyPowerNotificationWarnings.notifyHighTemperatureAlarm(overheat, shouldBeepSound);
+        waitForIdleSync(mContext.getMainThreadHandler());
+
         verify(mSpyPowerNotificationWarnings, times(1)).setOverheatAlarmDialogShowing(overheat);
         verify(mSpyPowerNotificationWarnings, times(1)).setAlarmShouldSound(shouldBeepSound);
     }
@@ -178,10 +179,9 @@ public class PowerNotificationWarningsTest extends SysuiTestCase {
     public void testSetOverheatAlarmDialog_Overheat_ShouldShowingWithBeepSound() {
         final boolean overheat = true;
         final boolean shouldBeepSound = true;
-        mContext.getMainThreadHandler().post(
-                () -> mSpyPowerNotificationWarnings.notifyHighTemperatureAlarm(overheat,
-                        shouldBeepSound));
-        waitForIdleSync();
+        mSpyPowerNotificationWarnings.notifyHighTemperatureAlarm(overheat, shouldBeepSound);
+        waitForIdleSync(mContext.getMainThreadHandler());
+
         verify(mSpyPowerNotificationWarnings, times(1)).setOverheatAlarmDialogShowing(overheat);
         verify(mSpyPowerNotificationWarnings, times(1)).setAlarmShouldSound(shouldBeepSound);
     }
@@ -190,10 +190,9 @@ public class PowerNotificationWarningsTest extends SysuiTestCase {
     public void testSetOverheatAlarmDialog_NotOverheat_ShouldNotShowing() {
         final boolean overheat = false;
         final boolean shouldBeepSound = false;
-        mContext.getMainThreadHandler().post(
-                () -> mSpyPowerNotificationWarnings.notifyHighTemperatureAlarm(overheat,
-                        shouldBeepSound));
-        waitForIdleSync();
+        mSpyPowerNotificationWarnings.notifyHighTemperatureAlarm(overheat, shouldBeepSound);
+        waitForIdleSync(mContext.getMainThreadHandler());
+
         verify(mSpyPowerNotificationWarnings, never()).setOverheatAlarmDialogShowing(overheat);
         verify(mSpyPowerNotificationWarnings, never()).setAlarmShouldSound(shouldBeepSound);
     }
@@ -202,105 +201,33 @@ public class PowerNotificationWarningsTest extends SysuiTestCase {
     public void testSetOverheatAlarmDialog_NotOverheat_ShouldNotAlarmBeepSound() {
         final boolean overheat = false;
         final boolean configBeepSound = true;
-        mContext.getMainThreadHandler().post(
-                () -> mSpyPowerNotificationWarnings.notifyHighTemperatureAlarm(overheat,
-                        configBeepSound));
-        waitForIdleSync();
+        mSpyPowerNotificationWarnings.notifyHighTemperatureAlarm(overheat, configBeepSound);
+        waitForIdleSync(mContext.getMainThreadHandler());
+
         verify(mSpyPowerNotificationWarnings, never()).setOverheatAlarmDialogShowing(overheat);
         verify(mSpyPowerNotificationWarnings, never()).setAlarmShouldSound(configBeepSound);
-    }
-
-    @Test
-    public void testSetAlarmShouldSound_OverheatDrop_ShouldNotSound() {
-        final boolean overheat = true;
-        final boolean shouldBeepSound = true;
-        mContext.getMainThreadHandler().post(
-                () -> mSpyPowerNotificationWarnings.notifyHighTemperatureAlarm(overheat,
-                        shouldBeepSound));
-        waitForIdleSync();
-        // First time overheat, show overheat alarm dialog with alarm beep sound
-        verify(mSpyPowerNotificationWarnings, times(1)).setOverheatAlarmDialogShowing(overheat);
-        verify(mSpyPowerNotificationWarnings, times(1)).setAlarmShouldSound(shouldBeepSound);
-
-        // After disconnected cable or temperature drop
-        mContext.getMainThreadHandler().post(
-                () -> mSpyPowerNotificationWarnings.notifyHighTemperatureAlarm(!overheat,
-                        !shouldBeepSound));
-        waitForIdleSync();
-        verify(mSpyPowerNotificationWarnings, times(1)).setOverheatAlarmDialogShowing(!overheat);
-        verify(mSpyPowerNotificationWarnings, times(1)).setAlarmShouldSound(!shouldBeepSound);
-    }
-
-    @Test
-    public void testSetAlarmShouldSound_Overheat_Twice_ShouldShowOverheatDialogAgain() {
-        final boolean overheat = true;
-        final boolean shouldBeepSound = true;
-        // First time overheat, show mAlarmDialog and alarm beep sound
-        mContext.getMainThreadHandler().post(
-                () -> mSpyPowerNotificationWarnings.notifyHighTemperatureAlarm(overheat,
-                        shouldBeepSound));
-        waitForIdleSync();
-        verify(mSpyPowerNotificationWarnings, times(1)).setOverheatAlarmDialogShowing(overheat);
-        verify(mSpyPowerNotificationWarnings, times(1)).setAlarmShouldSound(shouldBeepSound);
-
-        // After disconnected cable or temperature drop, stop beep sound
-        mContext.getMainThreadHandler().post(
-                () -> mSpyPowerNotificationWarnings.notifyHighTemperatureAlarm(!overheat,
-                        !shouldBeepSound));
-        waitForIdleSync();
-        verify(mSpyPowerNotificationWarnings, times(1)).setOverheatAlarmDialogShowing(!overheat);
-        verify(mSpyPowerNotificationWarnings, times(1)).setAlarmShouldSound(!shouldBeepSound);
-
-        // Overheat again, ensure the previous dialog do not auto-dismiss
-        mContext.getMainThreadHandler().post(
-                () -> mSpyPowerNotificationWarnings.notifyHighTemperatureAlarm(overheat,
-                        shouldBeepSound));
-        waitForIdleSync();
-        verify(mSpyPowerNotificationWarnings, times(1)).setOverheatAlarmDialogShowing(overheat);
-        verify(mSpyPowerNotificationWarnings, times(1)).setAlarmShouldSound(shouldBeepSound);
     }
 
     @Test
     public void testOverheatAlarmDialogShowing() {
         final boolean overheat = true;
         final boolean shouldBeepSound = false;
-        mContext.getMainThreadHandler().post(
-                () -> mSpyPowerNotificationWarnings.notifyHighTemperatureAlarm(overheat,
-                        shouldBeepSound));
-        waitForIdleSync();
-        assertThat(mSpyPowerNotificationWarnings.mOverheatAlarmDialog).isNotNull();
-    }
+        mSpyPowerNotificationWarnings.notifyHighTemperatureAlarm(overheat, shouldBeepSound);
+        waitForIdleSync(mContext.getMainThreadHandler());
 
-    @Test
-    public void testOverheatAlarmDialogShowingWithBeepSound() {
-        final boolean overheat = true;
-        final boolean shouldBeepSound = true;
-        mContext.getMainThreadHandler().post(
-                () -> mSpyPowerNotificationWarnings.notifyHighTemperatureAlarm(overheat,
-                        shouldBeepSound));
-        waitForIdleSync();
-        assertThat(mSpyPowerNotificationWarnings.mOverheatAlarmDialog).isNotNull();
+        verify(mSpyPowerNotificationWarnings, atLeastOnce()).setOverheatAlarmDialogShowing(
+                overheat);
     }
 
     @Test
     public void testOverheatAlarmDialogNotShowing() {
         final boolean overheat = false;
         final boolean shouldBeepSound = false;
-        mContext.getMainThreadHandler().post(
-                () -> mSpyPowerNotificationWarnings.notifyHighTemperatureAlarm(overheat,
-                        shouldBeepSound));
-        waitForIdleSync();
-        assertThat(mSpyPowerNotificationWarnings.mOverheatAlarmDialog).isNull();
+        mSpyPowerNotificationWarnings.notifyHighTemperatureAlarm(overheat, shouldBeepSound);
+
+        waitForIdleSync(mContext.getMainThreadHandler());
+        verify(mSpyPowerNotificationWarnings, never()).setOverheatAlarmDialogShowing(
+                overheat);
     }
 
-    @Test
-    public void testOverheatAlarmDialogNotShowingWithBeepSound() {
-        final boolean overheat = false;
-        final boolean shouldBeepSound = true;
-        mContext.getMainThreadHandler().post(
-                () -> mSpyPowerNotificationWarnings.notifyHighTemperatureAlarm(overheat,
-                        shouldBeepSound));
-        waitForIdleSync();
-        assertThat(mSpyPowerNotificationWarnings.mOverheatAlarmDialog).isNull();
-    }
 }
