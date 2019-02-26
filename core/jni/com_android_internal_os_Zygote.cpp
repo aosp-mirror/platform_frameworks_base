@@ -155,10 +155,10 @@ static std::atomic_uint32_t gBlastulaPoolCount = 0;
 static int gBlastulaPoolEventFD = -1;
 
 /**
- * The maximum value that the gBlastulaPoolMax variable may take.  This value
- * is a mirror of Zygote.BLASTULA_POOL_MAX_LIMIT
+ * The maximum value that the gBlastulaPoolSizeMax variable may take.  This value
+ * is a mirror of ZygoteServer.BLASTULA_POOL_SIZE_MAX_LIMIT
  */
-static constexpr int BLASTULA_POOL_MAX_LIMIT = 10;
+static constexpr int BLASTULA_POOL_SIZE_MAX_LIMIT = 100;
 
 /**
  * A helper class containing accounting information for Blastulas.
@@ -216,6 +216,19 @@ class BlastulaTableEntry {
     }
   }
 
+  void Clear() {
+    EntryStorage storage = mStorage.load();
+
+    if (storage != INVALID_ENTRY_VALUE) {
+      close(storage.read_pipe_fd);
+      mStorage.store(INVALID_ENTRY_VALUE);
+    }
+  }
+
+  void Invalidate() {
+    mStorage.store(INVALID_ENTRY_VALUE);
+  }
+
   /**
    * @return A copy of the data stored in this entry.
    */
@@ -257,7 +270,7 @@ class BlastulaTableEntry {
  * the BlastulaTableEntry class prevent data races during these concurrent
  * operations.
  */
-static std::array<BlastulaTableEntry, BLASTULA_POOL_MAX_LIMIT> gBlastulaTable;
+static std::array<BlastulaTableEntry, BLASTULA_POOL_SIZE_MAX_LIMIT> gBlastulaTable;
 
 /**
  * The list of open zygote file descriptors.
@@ -1168,6 +1181,14 @@ static void UnblockSignal(int signum, fail_fn_t fail_fn) {
   }
 }
 
+static void ClearBlastulaTable() {
+  for (BlastulaTableEntry& entry : gBlastulaTable) {
+    entry.Clear();
+  }
+
+  gBlastulaPoolCount = 0;
+}
+
 // Utility routine to fork a process from the zygote.
 static pid_t ForkCommon(JNIEnv* env, bool is_system_server,
                         const std::vector<int>& fds_to_close,
@@ -1209,6 +1230,9 @@ static pid_t ForkCommon(JNIEnv* env, bool is_system_server,
 
     // Clean up any descriptors which must be closed immediately
     DetachDescriptors(env, fds_to_close, fail_fn);
+
+    // Invalidate the entries in the blastula table.
+    ClearBlastulaTable();
 
     // Re-open all remaining open file descriptors so that they aren't shared
     // with the zygote across a fork.
@@ -1892,6 +1916,27 @@ static jint com_android_internal_os_Zygote_nativeGetBlastulaPoolCount(JNIEnv* en
   return gBlastulaPoolCount;
 }
 
+/**
+ * Kills all processes currently in the blastula pool.
+ *
+ * @param env  Managed runtime environment
+ * @return The number of blastulas currently in the blastula pool
+ */
+static void com_android_internal_os_Zygote_nativeEmptyBlastulaPool(JNIEnv* env, jclass) {
+  for (auto& entry : gBlastulaTable) {
+    auto entry_storage = entry.GetValues();
+
+    if (entry_storage.has_value()) {
+      kill(entry_storage.value().pid, SIGKILL);
+      close(entry_storage.value().read_pipe_fd);
+
+      // Avoid a second atomic load by invalidating instead of clearing.
+      entry.Invalidate();
+      --gBlastulaPoolCount;
+    }
+  }
+}
+
 static const JNINativeMethod gMethods[] = {
     { "nativeSecurityInit", "()V",
       (void *) com_android_internal_os_Zygote_nativeSecurityInit },
@@ -1922,7 +1967,9 @@ static const JNINativeMethod gMethods[] = {
     { "nativeGetBlastulaPoolEventFD", "()I",
       (void *) com_android_internal_os_Zygote_nativeGetBlastulaPoolEventFD },
     { "nativeGetBlastulaPoolCount", "()I",
-      (void *) com_android_internal_os_Zygote_nativeGetBlastulaPoolCount }
+      (void *) com_android_internal_os_Zygote_nativeGetBlastulaPoolCount },
+    { "nativeEmptyBlastulaPool", "()V",
+      (void *) com_android_internal_os_Zygote_nativeEmptyBlastulaPool }
 };
 
 int register_com_android_internal_os_Zygote(JNIEnv* env) {

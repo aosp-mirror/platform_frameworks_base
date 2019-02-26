@@ -162,9 +162,9 @@ public final class Zygote {
     /**
      * The duration to wait before re-checking Zygote related system properties.
      *
-     * Five minutes in milliseconds.
+     * One minute in milliseconds.
      */
-    public static final long PROPERTY_CHECK_INTERVAL = 300000;
+    public static final long PROPERTY_CHECK_INTERVAL = 60000;
 
     /**
      * @hide for internal use only
@@ -427,6 +427,12 @@ public final class Zygote {
                 defaultValue);
     }
 
+    protected static void emptyBlastulaPool() {
+        nativeEmptyBlastulaPool();
+    }
+
+    private static native void nativeEmptyBlastulaPool();
+
     /**
      * Returns the value of a system property converted to a boolean using specific logic.
      *
@@ -520,7 +526,7 @@ public final class Zygote {
         LocalSocket sessionSocket = null;
         DataOutputStream blastulaOutputStream = null;
         Credentials peerCredentials = null;
-        String[] argStrings = null;
+        ZygoteArguments args = null;
 
         while (true) {
             try {
@@ -533,24 +539,23 @@ public final class Zygote {
 
                 peerCredentials = sessionSocket.getPeerCredentials();
 
-                argStrings = readArgumentList(blastulaReader);
+                String[] argStrings = readArgumentList(blastulaReader);
 
                 if (argStrings != null) {
+                    args = new ZygoteArguments(argStrings);
+
+                    // TODO (chriswailes): Should this only be run for debug builds?
+                    validateBlastulaCommand(args);
                     break;
                 } else {
                     Log.e("Blastula", "Truncated command received.");
                     IoUtils.closeQuietly(sessionSocket);
                 }
-            } catch (IOException ioEx) {
-                Log.e("Blastula", "Failed to read command: " + ioEx.getMessage());
+            } catch (Exception ex) {
+                Log.e("Blastula", ex.getMessage());
                 IoUtils.closeQuietly(sessionSocket);
             }
         }
-
-        ZygoteArguments args = new ZygoteArguments(argStrings);
-
-        // TODO (chriswailes): Should this only be run for debug builds?
-        validateBlastulaCommand(args);
 
         applyUidSecurityPolicy(args, peerCredentials);
         applyDebuggerSystemProperty(args);
@@ -740,8 +745,8 @@ public final class Zygote {
 
         if (args.mInvokeWith != null && peerUid != 0
                 && (args.mRuntimeFlags & Zygote.DEBUG_ENABLE_JDWP) == 0) {
-            throw new ZygoteSecurityException("Peer is permitted to specify an"
-                + "explicit invoke-with wrapper command only for debuggable"
+            throw new ZygoteSecurityException("Peer is permitted to specify an "
+                + "explicit invoke-with wrapper command only for debuggable "
                 + "applications.");
         }
     }
