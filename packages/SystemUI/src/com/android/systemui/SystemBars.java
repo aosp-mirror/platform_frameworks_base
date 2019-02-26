@@ -46,6 +46,13 @@ public class SystemBars extends SystemUI {
         }
     }
 
+    @Override
+    public void onBootCompleted() {
+        if (mStatusBar != null) {
+            mStatusBar.onBootCompleted();
+        }
+    }
+
     private void createStatusBarFromConfig() {
         if (DEBUG) Log.d(TAG, "createStatusBarFromConfig");
         final String clsName = mContext.getString(R.string.config_statusBarComponent);
