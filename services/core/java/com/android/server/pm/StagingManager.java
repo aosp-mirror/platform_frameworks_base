@@ -39,6 +39,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
+import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Slog;
@@ -68,15 +69,18 @@ public class StagingManager {
     private final PackageInstallerService mPi;
     private final PackageManagerService mPm;
     private final ApexManager mApexManager;
+    private final PowerManager mPowerManager;
     private final Handler mBgHandler;
 
     @GuardedBy("mStagedSessions")
     private final SparseArray<PackageInstallerSession> mStagedSessions = new SparseArray<>();
 
-    StagingManager(PackageManagerService pm, PackageInstallerService pi, ApexManager am) {
+    StagingManager(PackageManagerService pm, PackageInstallerService pi, ApexManager am,
+            Context context) {
         mPm = pm;
         mPi = pi;
         mApexManager = am;
+        mPowerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
         mBgHandler = BackgroundThread.getHandler();
     }
 
@@ -286,6 +290,20 @@ public class StagingManager {
             session.setStagedSessionFailed(SessionInfo.STAGED_SESSION_ACTIVATION_FAILED,
                     "Staged installation of APKs failed. Check logcat messages for"
                         + "more information.");
+
+            if (!hasApex) {
+                return;
+            }
+
+            if (!mApexManager.abortActiveSession()) {
+                Slog.e(TAG, "Failed to abort APEXd session");
+            } else {
+                Slog.e(TAG,
+                        "Successfully aborted apexd session. Rebooting device in order to revert "
+                                + "to the previous state of APEXd.");
+                mPowerManager.reboot(null);
+            }
+
             return;
         }
 
