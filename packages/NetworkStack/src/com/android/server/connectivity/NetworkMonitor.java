@@ -729,7 +729,8 @@ public class NetworkMonitor extends StateMachine {
         return stats.build();
     }
 
-    private void addDnsEvents(@NonNull final DataStallDetectionStats.Builder stats) {
+    @VisibleForTesting
+    protected void addDnsEvents(@NonNull final DataStallDetectionStats.Builder stats) {
         final int size = mDnsStallDetector.mResultIndices.size();
         for (int i = 1; i <= DEFAULT_DNS_LOG_SIZE && i <= size; i++) {
             final int index = mDnsStallDetector.mResultIndices.indexOf(size - i);
