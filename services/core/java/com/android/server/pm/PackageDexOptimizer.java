@@ -125,7 +125,7 @@ public class PackageDexOptimizer {
      * <p>Calls to {@link com.android.server.pm.Installer#dexopt} on {@link #mInstaller} are
      * synchronized on {@link #mInstallLock}.
      */
-    int performDexOpt(PackageParser.Package pkg, List<SharedLibraryInfo> sharedLibraries,
+    int performDexOpt(PackageParser.Package pkg,
             String[] instructionSets, CompilerStats.PackageStats packageStats,
             PackageDexUsage.PackageUseInfo packageUseInfo, DexoptOptions options) {
         if (pkg.applicationInfo.uid == -1) {
@@ -138,7 +138,7 @@ public class PackageDexOptimizer {
         synchronized (mInstallLock) {
             final long acquireTime = acquireWakeLockLI(pkg.applicationInfo.uid);
             try {
-                return performDexOptLI(pkg, sharedLibraries, instructionSets,
+                return performDexOptLI(pkg, instructionSets,
                         packageStats, packageUseInfo, options);
             } finally {
                 releaseWakeLockLI(acquireTime);
@@ -152,9 +152,9 @@ public class PackageDexOptimizer {
      */
     @GuardedBy("mInstallLock")
     private int performDexOptLI(PackageParser.Package pkg,
-            List<SharedLibraryInfo> sharedLibraries,
             String[] targetInstructionSets, CompilerStats.PackageStats packageStats,
             PackageDexUsage.PackageUseInfo packageUseInfo, DexoptOptions options) {
+        final List<SharedLibraryInfo> sharedLibraries = pkg.usesLibraryInfos;
         final String[] instructionSets = targetInstructionSets != null ?
                 targetInstructionSets : getAppDexInstructionSets(pkg.applicationInfo);
         final String[] dexCodeInstructionSets = getDexCodeInstructionSets(instructionSets);

@@ -9413,12 +9413,12 @@ public class PackageManagerService extends IPackageManager.Stub
                     options.getFlags() | DexoptOptions.DEXOPT_AS_SHARED_LIBRARY);
             for (PackageParser.Package depPackage : deps) {
                 // TODO: Analyze and investigate if we (should) profile libraries.
-                pdo.performDexOpt(depPackage, null /* sharedLibraries */, instructionSets,
+                pdo.performDexOpt(depPackage, instructionSets,
                         getOrCreateCompilerPackageStats(depPackage),
                     mDexManager.getPackageUseInfoOrDefault(depPackage.packageName), libraryOptions);
             }
         }
-        return pdo.performDexOpt(p, p.usesLibraryInfos, instructionSets,
+        return pdo.performDexOpt(p, instructionSets,
                 getOrCreateCompilerPackageStats(p),
                 mDexManager.getPackageUseInfoOrDefault(p.packageName), options);
     }
@@ -16324,7 +16324,7 @@ public class PackageManagerService extends IPackageManager.Stub
                         REASON_INSTALL,
                         DexoptOptions.DEXOPT_BOOT_COMPLETE
                                 | DexoptOptions.DEXOPT_INSTALL_WITH_DEX_METADATA_FILE);
-                mPackageDexOptimizer.performDexOpt(pkg, pkg.usesLibraryInfos,
+                mPackageDexOptimizer.performDexOpt(pkg,
                         null /* instructionSets */,
                         getOrCreateCompilerPackageStats(pkg),
                         mDexManager.getPackageUseInfoOrDefault(packageName),
