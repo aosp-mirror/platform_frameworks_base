@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 The Android Open Source Project
+ * Copyright (C) 2019 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.volume;
+package com.android.settingslib.volume;
 
 import android.app.PendingIntent;
 import android.content.Context;
@@ -27,7 +27,6 @@ import android.media.IRemoteVolumeController;
 import android.media.MediaMetadata;
 import android.media.session.MediaController;
 import android.media.session.MediaController.PlaybackInfo;
-import android.media.session.MediaSession;
 import android.media.session.MediaSession.QueueItem;
 import android.media.session.MediaSession.Token;
 import android.media.session.MediaSessionManager;
@@ -41,7 +40,6 @@ import android.os.RemoteException;
 import android.util.Log;
 
 import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -73,16 +71,24 @@ public class MediaSessions {
         mCallbacks = callbacks;
     }
 
+    /**
+     * Dump to {@code writer}
+     */
     public void dump(PrintWriter writer) {
         writer.println(getClass().getSimpleName() + " state:");
-        writer.print("  mInit: "); writer.println(mInit);
-        writer.print("  mRecords.size: "); writer.println(mRecords.size());
+        writer.print("  mInit: ");
+        writer.println(mInit);
+        writer.print("  mRecords.size: ");
+        writer.println(mRecords.size());
         int i = 0;
         for (MediaControllerRecord r : mRecords.values()) {
             dump(++i, writer, r.controller);
         }
     }
 
+    /**
+     * init MediaSessions
+     */
     public void init() {
         if (D.BUG) Log.d(TAG, "init");
         // will throw if no permission
@@ -97,12 +103,18 @@ public class MediaSessions {
         mHandler.sendEmptyMessage(H.UPDATE_SESSIONS);
     }
 
+    /**
+     * Destroy MediaSessions
+     */
     public void destroy() {
         if (D.BUG) Log.d(TAG, "destroy");
         mInit = false;
         mMgr.removeOnActiveSessionsChangedListener(mSessionsListener);
     }
 
+    /**
+     * Set volume {@code level} to remote media {@code token}
+     */
     public void setVolume(Token token, int level) {
         final MediaControllerRecord r = mRecords.get(token);
         if (r == null) {
@@ -113,15 +125,17 @@ public class MediaSessions {
         r.controller.setVolumeTo(level, 0);
     }
 
-    private void onRemoteVolumeChangedH(MediaSession.Token sessionToken, int flags) {
+    private void onRemoteVolumeChangedH(Token sessionToken, int flags) {
         final MediaController controller = new MediaController(mContext, sessionToken);
-        if (D.BUG) Log.d(TAG, "remoteVolumeChangedH " + controller.getPackageName() + " "
-                + Util.audioManagerFlagsToString(flags));
+        if (D.BUG) {
+            Log.d(TAG, "remoteVolumeChangedH " + controller.getPackageName() + " "
+                    + Util.audioManagerFlagsToString(flags));
+        }
         final Token token = controller.getSessionToken();
         mCallbacks.onRemoteVolumeChanged(token, flags);
     }
 
-    private void onUpdateRemoteControllerH(MediaSession.Token sessionToken) {
+    private void onUpdateRemoteControllerH(Token sessionToken) {
         final MediaController controller =
                 sessionToken != null ? new MediaController(mContext, sessionToken) : null;
         final String pkg = controller != null ? controller.getPackageName() : null;
@@ -191,7 +205,8 @@ public class MediaSessions {
             if (appLabel.length() > 0) {
                 return appLabel;
             }
-        } catch (NameNotFoundException e) { }
+        } catch (NameNotFoundException e) {
+        }
         return pkg;
     }
 
@@ -240,29 +255,11 @@ public class MediaSessions {
         }
     }
 
-    public static void dumpMediaSessions(Context context) {
-        final MediaSessionManager mgr = (MediaSessionManager) context
-                .getSystemService(Context.MEDIA_SESSION_SERVICE);
-        try {
-            final List<MediaController> controllers = mgr.getActiveSessions(null);
-            final int N = controllers.size();
-            if (D.BUG) Log.d(TAG, N + " controllers");
-            for (int i = 0; i < N; i++) {
-                final StringWriter sw = new StringWriter();
-                final PrintWriter pw = new PrintWriter(sw, true);
-                dump(i + 1, pw, controllers.get(i));
-                if (D.BUG) Log.d(TAG, sw.toString());
-            }
-        } catch (SecurityException e) {
-            Log.w(TAG, "Not allowed to get sessions", e);
-        }
-    }
-
     private final class MediaControllerRecord extends MediaController.Callback {
-        private final MediaController controller;
+        public final MediaController controller;
 
-        private boolean sentRemote;
-        private String name;
+        public boolean sentRemote;
+        public String name;
 
         private MediaControllerRecord(MediaController controller) {
             this.controller = controller;
@@ -274,8 +271,10 @@ public class MediaSessions {
 
         @Override
         public void onAudioInfoChanged(PlaybackInfo info) {
-            if (D.BUG) Log.d(TAG, cb("onAudioInfoChanged") + Util.playbackInfoToString(info)
-                    + " sentRemote=" + sentRemote);
+            if (D.BUG) {
+                Log.d(TAG, cb("onAudioInfoChanged") + Util.playbackInfoToString(info)
+                        + " sentRemote=" + sentRemote);
+            }
             final boolean remote = isRemote(info);
             if (!remote && sentRemote) {
                 mCallbacks.onRemoteRemoved(controller.getSessionToken());
@@ -324,22 +323,22 @@ public class MediaSessions {
 
     private final OnActiveSessionsChangedListener mSessionsListener =
             new OnActiveSessionsChangedListener() {
-        @Override
-        public void onActiveSessionsChanged(List<MediaController> controllers) {
-            onActiveSessionsUpdatedH(controllers);
-        }
-    };
+                @Override
+                public void onActiveSessionsChanged(List<MediaController> controllers) {
+                    onActiveSessionsUpdatedH(controllers);
+                }
+            };
 
     private final IRemoteVolumeController mRvc = new IRemoteVolumeController.Stub() {
         @Override
-        public void remoteVolumeChanged(MediaSession.Token sessionToken, int flags)
+        public void remoteVolumeChanged(Token sessionToken, int flags)
                 throws RemoteException {
             mHandler.obtainMessage(H.REMOTE_VOLUME_CHANGED, flags, 0,
                     sessionToken).sendToTarget();
         }
 
         @Override
-        public void updateRemoteController(final MediaSession.Token sessionToken)
+        public void updateRemoteController(final Token sessionToken)
                 throws RemoteException {
             mHandler.obtainMessage(H.UPDATE_REMOTE_CONTROLLER, sessionToken).sendToTarget();
         }
@@ -361,18 +360,32 @@ public class MediaSessions {
                     onActiveSessionsUpdatedH(mMgr.getActiveSessions(null));
                     break;
                 case REMOTE_VOLUME_CHANGED:
-                    onRemoteVolumeChangedH((MediaSession.Token) msg.obj, msg.arg1);
+                    onRemoteVolumeChangedH((Token) msg.obj, msg.arg1);
                     break;
                 case UPDATE_REMOTE_CONTROLLER:
-                    onUpdateRemoteControllerH((MediaSession.Token) msg.obj);
+                    onUpdateRemoteControllerH((Token) msg.obj);
                     break;
             }
         }
     }
 
+    /**
+     * Callback for remote media sessions
+     */
     public interface Callbacks {
+        /**
+         * Invoked when remote media session is updated
+         */
         void onRemoteUpdate(Token token, String name, PlaybackInfo pi);
+
+        /**
+         * Invoked when remote media session is removed
+         */
         void onRemoteRemoved(Token t);
+
+        /**
+         * Invoked when remote volume is changed
+         */
         void onRemoteVolumeChanged(Token token, int flags);
     }
 
