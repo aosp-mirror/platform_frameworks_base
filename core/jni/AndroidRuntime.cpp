@@ -220,6 +220,11 @@ extern int register_com_android_internal_os_Zygote(JNIEnv *env);
 extern int register_com_android_internal_os_ZygoteInit(JNIEnv *env);
 extern int register_com_android_internal_util_VirtualRefBasePtr(JNIEnv *env);
 
+// Namespace for Android Runtime flags applied during boot time.
+static const char* RUNTIME_NATIVE_BOOT_NAMESPACE = "runtime_native_boot";
+// Feature flag name for Garbage Collector type.
+static const char* GCTYPE = "gctype";
+
 static AndroidRuntime* gCurRuntime = NULL;
 
 /*
@@ -771,7 +776,9 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote)
     }
 
     std::string gc_type_override =
-            server_configurable_flags::GetServerConfigurableFlag("runtime_native", "gctype", "");
+            server_configurable_flags::GetServerConfigurableFlag(RUNTIME_NATIVE_BOOT_NAMESPACE,
+                                                                 GCTYPE,
+                                                                 /*default_value=*/ "");
     std::string gc_type_override_temp;
     if (gc_type_override.empty()) {
         parseRuntimeOption("dalvik.vm.gctype", gctypeOptsBuf, "-Xgc:");
