@@ -286,6 +286,12 @@ class ApexManager {
                     ipw.println("State: ACTIVATED");
                 } else if (si.isActivationFailed) {
                     ipw.println("State: ACTIVATION FAILED");
+                } else if (si.isSuccess) {
+                    ipw.println("State: SUCCESS");
+                } else if (si.isRollbackInProgress) {
+                    ipw.println("State: ROLLBACK IN PROGRESS");
+                } else if (si.isRolledBack) {
+                    ipw.println("State: ROLLED BACK");
                 }
                 ipw.decreaseIndent();
             }
