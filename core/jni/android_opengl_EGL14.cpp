@@ -237,7 +237,7 @@ exit:
     }
     if (_exception) {
         jniThrowException(_env, _exceptionType, _exceptionMessage);
-        return false;
+        return JNI_FALSE;
     }
     return (jboolean)_returnValue;
 }
@@ -335,7 +335,7 @@ exit:
     }
     if (_exception) {
         jniThrowException(_env, _exceptionType, _exceptionMessage);
-        return false;
+        return JNI_FALSE;
     }
     return (jboolean)_returnValue;
 }
@@ -455,7 +455,7 @@ exit:
     }
     if (_exception) {
         jniThrowException(_env, _exceptionType, _exceptionMessage);
-        return false;
+        return JNI_FALSE;
     }
     return (jboolean)_returnValue;
 }
@@ -511,7 +511,7 @@ exit:
     }
     if (_exception) {
         jniThrowException(_env, _exceptionType, _exceptionMessage);
-        return false;
+        return JNI_FALSE;
     }
     return (jboolean)_returnValue;
 }
@@ -806,7 +806,7 @@ exit:
     }
     if (_exception) {
         jniThrowException(_env, _exceptionType, _exceptionMessage);
-        return false;
+        return JNI_FALSE;
     }
     return (jboolean)_returnValue;
 }
@@ -1161,7 +1161,7 @@ exit:
     }
     if (_exception) {
         jniThrowException(_env, _exceptionType, _exceptionMessage);
-        return false;
+        return JNI_FALSE;
     }
     return (jboolean)_returnValue;
 }
@@ -1207,7 +1207,7 @@ android_eglCopyBuffers
   (JNIEnv *_env, jobject _this, jobject dpy, jobject surface, jint target) {
     jniThrowException(_env, "java/lang/UnsupportedOperationException",
         "eglCopyBuffers");
-    return (EGLBoolean) 0;
+        return JNI_FALSE;
 }
 
 static const char *classPathName = "android/opengl/EGL14";

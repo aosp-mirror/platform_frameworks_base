@@ -102,6 +102,7 @@ fromEGLHandle(JNIEnv *_env, jmethodID mid, jobject obj) {
     if (obj == NULL){
         jniThrowException(_env, "java/lang/IllegalArgumentException",
                           "Object is set to null.");
+        return nullptr;
     }
 
     return reinterpret_cast<void*>(_env->CallLongMethod(obj, mid));

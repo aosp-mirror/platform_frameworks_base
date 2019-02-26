@@ -4237,6 +4237,7 @@ exit:
     }
     if (_exception) {
         jniThrowException(_env, _exceptionType, _exceptionMessage);
+        return (jint)0;
     }
     return (jint)_returnValue;
 }
@@ -4306,6 +4307,7 @@ exit:
     }
     if (_exception) {
         jniThrowException(_env, _exceptionType, _exceptionMessage);
+        return (jint)0;
     }
     return (jint)_returnValue;
 }
@@ -4902,6 +4904,7 @@ android_glGetBufferParameteriv__II_3II
   (JNIEnv *_env, jobject _this, jint target, jint pname, jintArray params_ref, jint offset) {
     jniThrowException(_env, "java/lang/UnsupportedOperationException",
         "glGetBufferParameteriv");
+    return;
 }
 
 /* void glGetBufferParameteriv ( GLenum target, GLenum pname, GLint *params ) */
@@ -4910,6 +4913,7 @@ android_glGetBufferParameteriv__IILjava_nio_IntBuffer_2
   (JNIEnv *_env, jobject _this, jint target, jint pname, jobject params_buf) {
     jniThrowException(_env, "java/lang/UnsupportedOperationException",
         "glGetBufferParameteriv");
+    return;
 }
 
 /* void glGetClipPlanef ( GLenum pname, GLfloat *eqn ) */
