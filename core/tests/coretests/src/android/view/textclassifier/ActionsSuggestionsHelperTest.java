@@ -21,8 +21,15 @@ import static android.view.textclassifier.ConversationActions.Message.PERSON_USE
 
 import static com.google.common.truth.Truth.assertThat;
 
+import android.app.PendingIntent;
 import android.app.Person;
+import android.app.RemoteAction;
+import android.content.ComponentName;
+import android.content.Intent;
+import android.graphics.drawable.Icon;
+import android.os.Bundle;
 
+import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
@@ -36,6 +43,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
 import java.util.function.Function;
 
@@ -127,6 +135,73 @@ public class ActionsSuggestionsHelperTest {
         assertNativeMessage(conversationMessages[0], firstMessage.getText(), 1, 1000);
         assertNativeMessage(conversationMessages[1], secondMessage.getText(), 1, 0);
         assertNativeMessage(conversationMessages[2], thirdMessage.getText(), 1, 2000);
+    }
+
+    @Test
+    public void testDeduplicateActions() {
+        Bundle phoneExtras = new Bundle();
+        Intent phoneIntent = new Intent();
+        phoneIntent.setComponent(new ComponentName("phone", "intent"));
+        ExtrasUtils.putActionIntent(phoneExtras, phoneIntent);
+
+        Bundle anotherPhoneExtras = new Bundle();
+        Intent anotherPhoneIntent = new Intent();
+        anotherPhoneIntent.setComponent(new ComponentName("phone", "another.intent"));
+        ExtrasUtils.putActionIntent(anotherPhoneExtras, anotherPhoneIntent);
+
+        Bundle urlExtras = new Bundle();
+        Intent urlIntent = new Intent();
+        urlIntent.setComponent(new ComponentName("url", "intent"));
+        ExtrasUtils.putActionIntent(urlExtras, urlIntent);
+
+        PendingIntent pendingIntent = PendingIntent.getActivity(
+                InstrumentationRegistry.getTargetContext(),
+                0,
+                phoneIntent,
+                0);
+        Icon icon = Icon.createWithData(new byte[0], 0, 0);
+        ConversationAction action =
+                new ConversationAction.Builder(ConversationAction.TYPE_CALL_PHONE)
+                        .setAction(new RemoteAction(icon, "label", "1", pendingIntent))
+                        .setExtras(phoneExtras)
+                        .build();
+        ConversationAction actionWithSameLabel =
+                new ConversationAction.Builder(ConversationAction.TYPE_CALL_PHONE)
+                        .setAction(new RemoteAction(
+                                icon, "label", "2", pendingIntent))
+                        .setExtras(phoneExtras)
+                        .build();
+        ConversationAction actionWithSamePackageButDifferentClass =
+                new ConversationAction.Builder(ConversationAction.TYPE_CALL_PHONE)
+                        .setAction(new RemoteAction(
+                                icon, "label", "3", pendingIntent))
+                        .setExtras(anotherPhoneExtras)
+                        .build();
+        ConversationAction actionWithDifferentLabel =
+                new ConversationAction.Builder(ConversationAction.TYPE_CALL_PHONE)
+                        .setAction(new RemoteAction(
+                                icon, "another_label", "4", pendingIntent))
+                        .setExtras(phoneExtras)
+                        .build();
+        ConversationAction actionWithDifferentPackage =
+                new ConversationAction.Builder(ConversationAction.TYPE_OPEN_URL)
+                        .setAction(new RemoteAction(icon, "label", "5", pendingIntent))
+                        .setExtras(urlExtras)
+                        .build();
+        ConversationAction actionWithoutRemoteAction =
+                new ConversationAction.Builder(ConversationAction.TYPE_CREATE_REMINDER)
+                        .build();
+
+        List<ConversationAction> conversationActions =
+                ActionsSuggestionsHelper.removeActionsWithDuplicates(
+                        Arrays.asList(action, actionWithSameLabel,
+                                actionWithSamePackageButDifferentClass, actionWithDifferentLabel,
+                                actionWithDifferentPackage, actionWithoutRemoteAction));
+
+        assertThat(conversationActions).hasSize(3);
+        assertThat(conversationActions.get(0).getAction().getContentDescription()).isEqualTo("4");
+        assertThat(conversationActions.get(1).getAction().getContentDescription()).isEqualTo("5");
+        assertThat(conversationActions.get(2).getAction()).isNull();
     }
 
     private ZonedDateTime createZonedDateTimeFromMsUtc(long msUtc) {

@@ -132,7 +132,6 @@ public final class LabeledIntentTest {
         assertThat(intent.getComponent()).isNotNull();
     }
 
-
     @Test
     public void resolve_missingTitle() {
         assertThrows(
@@ -145,5 +144,20 @@ public final class LabeledIntentTest {
                                 INTENT,
                                 REQUEST_CODE
                         ));
+    }
+
+    @Test
+    public void resolve_noIntentHandler() {
+        Intent intent = new Intent("some.thing.does.not.exist");
+        LabeledIntent labeledIntent = new LabeledIntent(
+                TITLE_WITHOUT_ENTITY,
+                null,
+                DESCRIPTION,
+                intent,
+                REQUEST_CODE);
+
+        LabeledIntent.Result result = labeledIntent.resolve(mContext, null);
+
+        assertThat(result).isNull();
     }
 }

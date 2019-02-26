@@ -25,8 +25,6 @@ import android.app.PendingIntent;
 import android.app.RemoteAction;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.AdaptiveIconDrawable;
@@ -304,53 +302,10 @@ public final class TextClassification implements Parcelable {
      * @throws IllegalArgumentException if context or intent is null
      * @hide
      */
-    @Nullable
     public static PendingIntent createPendingIntent(
             @NonNull final Context context, @NonNull final Intent intent, int requestCode) {
-        final int flags = PendingIntent.FLAG_UPDATE_CURRENT;
-        switch (getIntentType(intent, context)) {
-            case IntentType.ACTIVITY:
-                return PendingIntent.getActivity(context, requestCode, intent, flags);
-            case IntentType.SERVICE:
-                return PendingIntent.getService(context, requestCode, intent, flags);
-            default:
-                return null;
-        }
-    }
-
-    @IntentType
-    private static int getIntentType(@NonNull Intent intent, @NonNull Context context) {
-        Preconditions.checkArgument(context != null);
-        Preconditions.checkArgument(intent != null);
-
-        final ResolveInfo activityRI = context.getPackageManager().resolveActivity(intent, 0);
-        if (activityRI != null) {
-            if (context.getPackageName().equals(activityRI.activityInfo.packageName)) {
-                return IntentType.ACTIVITY;
-            }
-            final boolean exported = activityRI.activityInfo.exported;
-            if (exported && hasPermission(context, activityRI.activityInfo.permission)) {
-                return IntentType.ACTIVITY;
-            }
-        }
-
-        final ResolveInfo serviceRI = context.getPackageManager().resolveService(intent, 0);
-        if (serviceRI != null) {
-            if (context.getPackageName().equals(serviceRI.serviceInfo.packageName)) {
-                return IntentType.SERVICE;
-            }
-            final boolean exported = serviceRI.serviceInfo.exported;
-            if (exported && hasPermission(context, serviceRI.serviceInfo.permission)) {
-                return IntentType.SERVICE;
-            }
-        }
-
-        return IntentType.UNSUPPORTED;
-    }
-
-    private static boolean hasPermission(@NonNull Context context, @NonNull String permission) {
-        return permission == null
-                || context.checkSelfPermission(permission) == PackageManager.PERMISSION_GRANTED;
+        return PendingIntent.getActivity(
+                context, requestCode, intent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
     /**
