@@ -86,6 +86,10 @@ public class AmbientDisplayConfiguration {
                 && wakeScreenGestureAvailable();
     }
 
+    public long getWakeLockScreenDebounce() {
+        return mContext.getResources().getInteger(R.integer.config_dozeWakeLockScreenDebounce);
+    }
+
     public String doubleTapSensorType() {
         return mContext.getResources().getString(R.string.config_dozeDoubleTapSensorType);
     }

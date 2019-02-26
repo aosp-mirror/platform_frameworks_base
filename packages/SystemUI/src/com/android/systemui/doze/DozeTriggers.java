@@ -143,8 +143,12 @@ public class DozeTriggers implements DozeMachine.Part {
 
         if (isWakeDisplay) {
             onWakeScreen(wakeEvent, mMachine.getState());
-        } else if (isLongPress || isWakeLockScreen) {
+        } else if (isLongPress) {
             requestPulse(pulseReason, sensorPerformedProxCheck);
+        } else if (isWakeLockScreen) {
+            if (wakeEvent) {
+                requestPulse(pulseReason, sensorPerformedProxCheck);
+            }
         } else {
             proximityCheckThenCall((result) -> {
                 if (result == ProximityCheck.RESULT_NEAR) {
@@ -228,6 +232,7 @@ public class DozeTriggers implements DozeMachine.Part {
                 if (mDockManager != null) {
                     mDockManager.addListener(mDockEventListener);
                 }
+                mDozeSensors.requestTemporaryDisable();
                 checkTriggersAtInit();
                 break;
             case DOZE:
@@ -249,6 +254,9 @@ public class DozeTriggers implements DozeMachine.Part {
             case DOZE_PULSING:
                 mDozeSensors.setTouchscreenSensorsListening(false);
                 mDozeSensors.setProxListening(true);
+                break;
+            case DOZE_PULSE_DONE:
+                mDozeSensors.requestTemporaryDisable();
                 break;
             case FINISH:
                 mBroadcastReceiver.unregister(mContext);
