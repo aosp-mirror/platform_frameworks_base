@@ -17,11 +17,11 @@
 package com.android.systemui.doze;
 
 import android.content.Context;
+import android.hardware.display.AmbientDisplayConfiguration;
 import android.os.Handler;
 import android.os.UserHandle;
 import android.util.Log;
 
-import com.android.internal.hardware.AmbientDisplayConfiguration;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.doze.DozeMachine.State;
 

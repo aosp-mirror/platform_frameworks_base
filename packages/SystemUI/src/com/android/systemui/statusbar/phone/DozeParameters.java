@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.phone;
 
 import android.content.Context;
+import android.hardware.display.AmbientDisplayConfiguration;
 import android.os.PowerManager;
 import android.os.SystemProperties;
 import android.os.UserHandle;
@@ -26,7 +27,6 @@ import android.util.MathUtils;
 import android.util.SparseBooleanArray;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.hardware.AmbientDisplayConfiguration;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.doze.AlwaysOnDisplayPolicy;

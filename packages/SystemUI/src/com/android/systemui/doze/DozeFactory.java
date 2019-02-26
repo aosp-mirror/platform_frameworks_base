@@ -21,9 +21,9 @@ import android.app.Application;
 import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
+import android.hardware.display.AmbientDisplayConfiguration;
 import android.os.Handler;
 
-import com.android.internal.hardware.AmbientDisplayConfiguration;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;

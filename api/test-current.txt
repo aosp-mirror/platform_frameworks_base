@@ -742,6 +742,13 @@ package android.hardware.display {
     field public static final android.os.Parcelable.Creator<android.hardware.display.AmbientBrightnessDayStats> CREATOR;
   }
 
+  public class AmbientDisplayConfiguration {
+    ctor public AmbientDisplayConfiguration(android.content.Context);
+    method public boolean alwaysOnAvailable();
+    method public boolean alwaysOnAvailableForUser(int);
+    method public boolean alwaysOnEnabled(int);
+  }
+
   public final class BrightnessChangeEvent implements android.os.Parcelable {
     method public int describeContents();
     method public void writeToParcel(android.os.Parcel, int);
@@ -1992,6 +1999,7 @@ package android.provider {
     field public static final String AUTOFILL_USER_DATA_MIN_VALUE_LENGTH = "autofill_user_data_min_value_length";
     field public static final String CONTENT_CAPTURE_ENABLED = "content_capture_enabled";
     field public static final String DISABLED_PRINT_SERVICES = "disabled_print_services";
+    field public static final String DOZE_ALWAYS_ON = "doze_always_on";
     field @Deprecated public static final String ENABLED_NOTIFICATION_POLICY_ACCESS_PACKAGES = "enabled_notification_policy_access_packages";
     field public static final String ENABLED_VR_LISTENERS = "enabled_vr_listeners";
     field public static final String LOCATION_ACCESS_CHECK_DELAY_MILLIS = "location_access_check_delay_millis";

@@ -17,12 +17,12 @@
 package com.android.systemui.doze;
 
 import android.annotation.MainThread;
+import android.hardware.display.AmbientDisplayConfiguration;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.util.Log;
 import android.view.Display;
 
-import com.android.internal.hardware.AmbientDisplayConfiguration;
 import com.android.internal.util.Preconditions;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.util.Assert;
