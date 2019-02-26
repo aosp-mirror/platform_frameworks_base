@@ -31,6 +31,7 @@
 #include <binder/Parcel.h>
 #include <utils/threads.h>
 #include <cutils/properties.h>
+#include <server_configurable_flags/get_flags.h>
 
 #include <SkGraphics.h>
 
@@ -769,7 +770,17 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote)
       addOption("-XX:LowMemoryMode");
     }
 
-    parseRuntimeOption("dalvik.vm.gctype", gctypeOptsBuf, "-Xgc:");
+    std::string gc_type_override =
+            server_configurable_flags::GetServerConfigurableFlag("runtime_native", "gctype", "");
+    std::string gc_type_override_temp;
+    if (gc_type_override.empty()) {
+        parseRuntimeOption("dalvik.vm.gctype", gctypeOptsBuf, "-Xgc:");
+    } else {
+        // Copy the string so it doesn't go out of scope since addOption does not make a copy.
+        gc_type_override_temp = "-Xgc:" + gc_type_override;
+        addOption(gc_type_override_temp.c_str());
+    }
+
     parseRuntimeOption("dalvik.vm.backgroundgctype", backgroundgcOptsBuf, "-XX:BackgroundGC=");
 
     /*
