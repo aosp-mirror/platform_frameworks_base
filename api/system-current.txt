@@ -4936,6 +4936,10 @@ package android.net.wifi {
 
   public final class WifiUsabilityStatsEntry implements android.os.Parcelable {
     method public int describeContents();
+    method public int getCellularDataNetworkType();
+    method public int getCellularSignalStrengthDb();
+    method public int getCellularSignalStrengthDbm();
+    method public boolean getIsSameRegisteredCell();
     method public int getLinkSpeedMbps();
     method public int getProbeElapsedTimeSinceLastUpdateMillis();
     method public int getProbeMcsRateSinceLastUpdate();

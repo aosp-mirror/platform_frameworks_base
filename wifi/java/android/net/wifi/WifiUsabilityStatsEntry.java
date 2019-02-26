@@ -20,6 +20,7 @@ import android.annotation.IntDef;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.telephony.TelephonyManager.NetworkType;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -98,6 +99,10 @@ public final class WifiUsabilityStatsEntry implements Parcelable {
     private final int mProbeMcsRateSinceLastUpdate;
     /** Rx link speed at the sample time in Mbps */
     private final int mRxLinkSpeedMbps;
+    private final @NetworkType int mCellularDataNetworkType;
+    private final int mCellularSignalStrengthDbm;
+    private final int mCellularSignalStrengthDb;
+    private final boolean mIsSameRegisteredCell;
 
     /** Constructor function {@hide} */
     public WifiUsabilityStatsEntry(long timeStampMillis, int rssi, int linkSpeedMbps,
@@ -109,7 +114,10 @@ public final class WifiUsabilityStatsEntry implements Parcelable {
             long totalHotspot2ScanTimeMillis,
             long totalCcaBusyFreqTimeMillis, long totalRadioOnFreqTimeMillis, long totalBeaconRx,
             @ProbeStatus int probeStatusSinceLastUpdate, int probeElapsedTimeSinceLastUpdateMillis,
-            int probeMcsRateSinceLastUpdate, int rxLinkSpeedMbps) {
+            int probeMcsRateSinceLastUpdate, int rxLinkSpeedMbps,
+            @NetworkType int cellularDataNetworkType,
+            int cellularSignalStrengthDbm, int cellularSignalStrengthDb,
+            boolean isSameRegisteredCell) {
         mTimeStampMillis = timeStampMillis;
         mRssi = rssi;
         mLinkSpeedMbps = linkSpeedMbps;
@@ -133,6 +141,10 @@ public final class WifiUsabilityStatsEntry implements Parcelable {
         mProbeElapsedTimeSinceLastUpdateMillis = probeElapsedTimeSinceLastUpdateMillis;
         mProbeMcsRateSinceLastUpdate = probeMcsRateSinceLastUpdate;
         mRxLinkSpeedMbps = rxLinkSpeedMbps;
+        mCellularDataNetworkType = cellularDataNetworkType;
+        mCellularSignalStrengthDbm = cellularSignalStrengthDbm;
+        mCellularSignalStrengthDb = cellularSignalStrengthDb;
+        mIsSameRegisteredCell = isSameRegisteredCell;
     }
 
     /** Implement the Parcelable interface */
@@ -165,6 +177,10 @@ public final class WifiUsabilityStatsEntry implements Parcelable {
         dest.writeInt(mProbeElapsedTimeSinceLastUpdateMillis);
         dest.writeInt(mProbeMcsRateSinceLastUpdate);
         dest.writeInt(mRxLinkSpeedMbps);
+        dest.writeInt(mCellularDataNetworkType);
+        dest.writeInt(mCellularSignalStrengthDbm);
+        dest.writeInt(mCellularSignalStrengthDb);
+        dest.writeBoolean(mIsSameRegisteredCell);
     }
 
     /** Implement the Parcelable interface */
@@ -179,7 +195,9 @@ public final class WifiUsabilityStatsEntry implements Parcelable {
                     in.readLong(), in.readLong(), in.readLong(),
                     in.readLong(), in.readLong(), in.readLong(),
                     in.readLong(), in.readLong(), in.readInt(),
-                    in.readInt(), in.readInt(), in.readInt()
+                    in.readInt(), in.readInt(), in.readInt(),
+                    in.readInt(), in.readInt(), in.readInt(),
+                    in.readBoolean()
             );
         }
 
@@ -303,5 +321,31 @@ public final class WifiUsabilityStatsEntry implements Parcelable {
     /** Rx link speed at the sample time in Mbps */
     public int getRxLinkSpeedMbps() {
         return mRxLinkSpeedMbps;
+    }
+
+    /** Cellular data network type currently in use on the device for data transmission */
+    @NetworkType public int getCellularDataNetworkType() {
+        return mCellularDataNetworkType;
+    }
+
+    /**
+     * Cellular signal strength in dBm, NR: CsiRsrp, LTE: Rsrp, WCDMA/TDSCDMA: Rscp,
+     * CDMA: Rssi, EVDO: Rssi, GSM: Rssi
+     */
+    public int getCellularSignalStrengthDbm() {
+        return mCellularSignalStrengthDbm;
+    }
+
+    /**
+     * Cellular signal strength in dB, NR: CsiSinr, LTE: Rsrq, WCDMA: EcNo, TDSCDMA: invalid,
+     * CDMA: Ecio, EVDO: SNR, GSM: invalid
+     */
+    public int getCellularSignalStrengthDb() {
+        return mCellularSignalStrengthDb;
+    }
+
+    /** Whether the primary registered cell of current entry is same as that of previous entry */
+    public boolean getIsSameRegisteredCell() {
+        return mIsSameRegisteredCell;
     }
 }
