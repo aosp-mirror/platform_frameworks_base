@@ -238,9 +238,6 @@ public class DozeTriggers implements DozeMachine.Part {
             case DOZE:
             case DOZE_AOD:
                 mDozeSensors.setProxListening(newState != DozeMachine.State.DOZE);
-                if (oldState != DozeMachine.State.INITIALIZED) {
-                    mDozeSensors.reregisterAllSensors();
-                }
                 mDozeSensors.setListening(true);
                 if (newState == DozeMachine.State.DOZE_AOD && !sWakeDisplaySensorState) {
                     onWakeScreen(false, newState);

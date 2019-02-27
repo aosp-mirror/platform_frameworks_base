@@ -190,15 +190,6 @@ public class DozeSensors {
         }
     }
 
-    public void reregisterAllSensors() {
-        for (TriggerSensor s : mSensors) {
-            s.setListening(false);
-        }
-        for (TriggerSensor s : mSensors) {
-            s.setListening(true);
-        }
-    }
-
     public void onUserSwitched() {
         for (TriggerSensor s : mSensors) {
             s.updateListener();
