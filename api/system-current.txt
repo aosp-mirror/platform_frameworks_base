@@ -4851,7 +4851,8 @@ package android.net.wifi {
     ctor public WifiScanner.ScanSettings();
     field public int band;
     field public android.net.wifi.WifiScanner.ChannelSpec[] channels;
-    field @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public boolean ignoreLocationSettings;
+    field public boolean hideFromAppOps;
+    field public boolean ignoreLocationSettings;
     field public int maxPeriodInMs;
     field public int maxScansToCache;
     field public int numBssidsPerScan;

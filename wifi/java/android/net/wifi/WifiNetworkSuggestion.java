@@ -303,58 +303,26 @@ public final class WifiNetworkSuggestion implements Parcelable {
             return this;
         }
 
-        /**
-         * Set defaults for the various low level credential type fields in the newly created
-         * WifiConfiguration object.
-         *
-         * See {@link com.android.server.wifi.WifiConfigManager#setDefaultsInWifiConfiguration(
-         * WifiConfiguration)}.
-         *
-         * @param configuration provided WifiConfiguration object.
-         */
-        private static void setDefaultsInWifiConfiguration(
-                @NonNull WifiConfiguration configuration) {
-            configuration.allowedAuthAlgorithms.set(WifiConfiguration.AuthAlgorithm.OPEN);
-            configuration.allowedProtocols.set(WifiConfiguration.Protocol.RSN);
-            configuration.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);
-            configuration.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP);
-            configuration.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.TKIP);
-        }
-
         private void setSecurityParamsInWifiConfiguration(
                 @NonNull WifiConfiguration configuration) {
             if (!TextUtils.isEmpty(mWpa2PskPassphrase)) { // WPA-PSK network.
-                configuration.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
+                configuration.setSecurityParams(WifiConfiguration.SECURITY_TYPE_PSK);
                 // WifiConfiguration.preSharedKey needs quotes around ASCII password.
                 configuration.preSharedKey = "\"" + mWpa2PskPassphrase + "\"";
             } else if (!TextUtils.isEmpty(mWpa3SaePassphrase)) { // WPA3-SAE network.
-                configuration.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.SAE);
-                // PMF mandatory for SAE.
-                configuration.requirePMF = true;
+                configuration.setSecurityParams(WifiConfiguration.SECURITY_TYPE_SAE);
                 // WifiConfiguration.preSharedKey needs quotes around ASCII password.
                 configuration.preSharedKey = "\"" + mWpa3SaePassphrase + "\"";
             } else if (mWpa2EnterpriseConfig != null) { // WPA-EAP network
-                configuration.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_EAP);
-                configuration.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.IEEE8021X);
+                configuration.setSecurityParams(WifiConfiguration.SECURITY_TYPE_EAP);
                 configuration.enterpriseConfig = mWpa2EnterpriseConfig;
             } else if (mWpa3EnterpriseConfig != null) { // WPA3-SuiteB network
-                configuration.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.SUITE_B_192);
-                configuration.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.GCMP_256);
-                // TODO (b/113878056): Verify these params once we verify SuiteB configuration.
-                configuration.allowedGroupManagementCiphers.set(
-                        WifiConfiguration.GroupMgmtCipher.BIP_GMAC_256);
-                configuration.allowedSuiteBCiphers.set(
-                        WifiConfiguration.SuiteBCipher.ECDHE_ECDSA);
-                configuration.allowedSuiteBCiphers.set(
-                        WifiConfiguration.SuiteBCipher.ECDHE_RSA);
-                configuration.requirePMF = true;
+                configuration.setSecurityParams(WifiConfiguration.SECURITY_TYPE_EAP_SUITE_B);
                 configuration.enterpriseConfig = mWpa3EnterpriseConfig;
             } else if (mIsEnhancedOpen) { // OWE network
-                configuration.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.OWE);
-                // PMF mandatory.
-                configuration.requirePMF = true;
+                configuration.setSecurityParams(WifiConfiguration.SECURITY_TYPE_OWE);
             } else { // Open network
-                configuration.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
+                configuration.setSecurityParams(WifiConfiguration.SECURITY_TYPE_OPEN);
             }
         }
 
@@ -364,7 +332,6 @@ public final class WifiNetworkSuggestion implements Parcelable {
          */
         private WifiConfiguration buildWifiConfiguration() {
             final WifiConfiguration wifiConfiguration = new WifiConfiguration();
-            setDefaultsInWifiConfiguration(wifiConfiguration);
             // WifiConfiguration.SSID needs quotes around unicode SSID.
             wifiConfiguration.SSID = "\"" + mSsid + "\"";
             if (mBssid != null) {
