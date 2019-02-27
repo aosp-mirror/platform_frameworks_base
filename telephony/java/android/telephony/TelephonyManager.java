@@ -3182,6 +3182,7 @@ public class TelephonyManager {
      * the caller does not have adequate permissions for that card.
      */
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @NonNull
     public List<UiccCardInfo> getUiccCardsInfo() {
         try {
             ITelephony telephony = getITelephony();
