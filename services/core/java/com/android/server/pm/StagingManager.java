@@ -144,12 +144,40 @@ public class StagingManager {
     private boolean submitSessionToApexService(@NonNull PackageInstallerSession session,
                                                List<PackageInstallerSession> childSessions,
                                                ApexInfoList apexInfoList) {
-        return mApexManager.submitStagedSession(
+        boolean submittedToApexd = mApexManager.submitStagedSession(
                 session.sessionId,
                 childSessions != null
                         ? childSessions.stream().mapToInt(s -> s.sessionId).toArray() :
                         new int[]{},
                 apexInfoList);
+        if (!submittedToApexd) {
+            session.setStagedSessionFailed(
+                    SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
+                    "APEX staging failed, check logcat messages from apexd for more details.");
+            return false;
+        }
+        for (ApexInfo newPackage : apexInfoList.apexInfos) {
+            PackageInfo activePackage = mApexManager.getActivePackage(newPackage.packageName);
+            if (activePackage == null) {
+                continue;
+            }
+            long activeVersion = activePackage.applicationInfo.longVersionCode;
+            boolean allowsDowngrade = PackageManagerServiceUtils.isDowngradePermitted(
+                    session.params.installFlags, activePackage.applicationInfo.flags);
+            if (activeVersion > newPackage.versionCode && !allowsDowngrade) {
+                session.setStagedSessionFailed(
+                        SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
+                        "Downgrade of APEX package " + newPackage.packageName
+                                + " is not allowed. Active version: " + activeVersion
+                                + " attempted: " + newPackage.versionCode);
+
+                if (!mApexManager.abortActiveSession()) {
+                    Slog.e(TAG, "Failed to abort apex session " + session.sessionId);
+                }
+                return false;
+            }
+        }
+        return true;
     }
 
     private static boolean isApexSession(@NonNull PackageInstallerSession session) {
@@ -184,9 +212,7 @@ public class StagingManager {
         }
 
         if (!success) {
-            session.setStagedSessionFailed(
-                    SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
-                    "APEX staging failed, check logcat messages from apexd for more details.");
+            // submitSessionToApexService will populate error.
             return;
         }
 
