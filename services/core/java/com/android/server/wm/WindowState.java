@@ -4489,6 +4489,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     @Override
     protected void onAnimationFinished() {
+        super.onAnimationFinished();
         mWinAnimator.onAnimationFinished();
     }
 

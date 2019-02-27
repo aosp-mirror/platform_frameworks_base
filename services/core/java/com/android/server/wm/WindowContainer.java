@@ -1292,6 +1292,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      * Called when an animation has finished running.
      */
     protected void onAnimationFinished() {
+        mWmService.onAnimationFinished();
     }
 
     /**

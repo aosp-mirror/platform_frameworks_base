@@ -372,6 +372,8 @@ public class WindowManagerService extends IWindowManager.Stub
     private static final int TRANSITION_ANIMATION_SCALE = 1;
     private static final int ANIMATION_DURATION_SCALE = 2;
 
+    private static final int ANIMATION_COMPLETED_TIMEOUT_MS = 5000;
+
     final WindowTracing mWindowTracing;
 
     final private KeyguardDisableHandler mKeyguardDisableHandler;
@@ -7424,13 +7426,38 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public boolean injectInputAfterTransactionsApplied(InputEvent ev, int mode) {
+        waitForAnimationsToComplete();
+
         synchronized (mGlobalLock) {
             mWindowPlacerLocked.performSurfacePlacementIfScheduled();
-            new SurfaceControl.Transaction()
-                    .syncInputWindows()
-                    .apply(true);
         }
 
+        new SurfaceControl.Transaction().syncInputWindows().apply(true);
+
         return mInputManager.injectInputEvent(ev, mode);
+    }
+
+    private void waitForAnimationsToComplete() {
+        synchronized (mGlobalLock) {
+            long timeoutRemaining = ANIMATION_COMPLETED_TIMEOUT_MS;
+            while (mRoot.isSelfOrChildAnimating() && timeoutRemaining > 0) {
+                long startTime = System.currentTimeMillis();
+                try {
+                    mGlobalLock.wait(timeoutRemaining);
+                } catch (InterruptedException e) {
+                }
+                timeoutRemaining -= (System.currentTimeMillis() - startTime);
+            }
+
+            if (mRoot.isSelfOrChildAnimating()) {
+                Log.w(TAG, "Timed out waiting for animations to complete.");
+            }
+        }
+    }
+
+    void onAnimationFinished() {
+        synchronized (mGlobalLock) {
+            mGlobalLock.notifyAll();
+        }
     }
 }
