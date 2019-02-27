@@ -221,12 +221,23 @@ void JNISoundTriggerCallback::onRecognitionEvent(struct sound_trigger_recognitio
 
     jobject jAudioFormat = NULL;
     if (event->trigger_in_data || event->capture_available) {
+        jint channelMask = (jint)audio_channel_mask_get_bits(event->audio_config.channel_mask);
+        jint channelIndexMask = (jint)AUDIO_CHANNEL_NONE;
+
+        switch (audio_channel_mask_get_representation(event->audio_config.channel_mask)) {
+        case AUDIO_CHANNEL_REPRESENTATION_INDEX:
+            channelIndexMask = channelMask;
+            channelMask = (jint)AUDIO_CHANNEL_NONE;
+            break;
+        default:
+            break;
+        }
         jAudioFormat = env->NewObject(gAudioFormatClass,
                                     gAudioFormatCstor,
                                     audioFormatFromNative(event->audio_config.format),
                                     event->audio_config.sample_rate,
-                                    inChannelMaskFromNative(event->audio_config.channel_mask),
-                                    (jint)0 /* channelIndexMask */);
+                                    channelMask,
+                                    channelIndexMask);
 
     }
     if (event->type == SOUND_MODEL_TYPE_KEYPHRASE) {
