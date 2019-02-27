@@ -4094,12 +4094,9 @@ public class AudioService extends IAudioService.Stub
      * @see AudioManager#handleBluetoothA2dpActiveDeviceChange(BluetoothDevice, int, int,
      *                                                          boolean, int)
      */
-    public int handleBluetoothA2dpActiveDeviceChange(
+    public void handleBluetoothA2dpActiveDeviceChange(
             BluetoothDevice device, int state, int profile, boolean suppressNoisyIntent,
             int a2dpVolume) {
-        // FIXME method was added by @a8439e2 but never used, and now conflicts with async behavior
-        //   of handleBluetoothA2dpDeviceConfigChange and
-        //   setBluetoothA2dpDeviceConnectionStateSuppressNoisyIntent
         if (device == null) {
             throw new IllegalArgumentException("Illegal null device");
         }
@@ -4110,7 +4107,7 @@ public class AudioService extends IAudioService.Stub
                 && state != BluetoothProfile.STATE_DISCONNECTED) {
             throw new IllegalArgumentException("Invalid state " + state);
         }
-        return mDeviceBroker.handleBluetoothA2dpActiveDeviceChange(device, state, profile,
+        mDeviceBroker.postBluetoothA2dpDeviceConfigChangeExt(device, state, profile,
                 suppressNoisyIntent, a2dpVolume);
     }
 

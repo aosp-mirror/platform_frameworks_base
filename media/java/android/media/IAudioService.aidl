@@ -171,7 +171,7 @@ interface IAudioService {
 
     void handleBluetoothA2dpDeviceConfigChange(in BluetoothDevice device);
 
-    int handleBluetoothA2dpActiveDeviceChange(in BluetoothDevice device,
+    void handleBluetoothA2dpActiveDeviceChange(in BluetoothDevice device,
             int state, int profile, boolean suppressNoisyIntent, int a2dpVolume);
 
     @UnsupportedAppUsage
