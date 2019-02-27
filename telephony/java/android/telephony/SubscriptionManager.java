@@ -63,6 +63,7 @@ import com.android.internal.telephony.ISetOpportunisticDataCallback;
 import com.android.internal.telephony.ISub;
 import com.android.internal.telephony.ITelephonyRegistry;
 import com.android.internal.telephony.PhoneConstants;
+import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -1073,7 +1074,8 @@ public class SubscriptionManager {
      * @param listener that is to be unregistered.
      */
     public void removeOnOpportunisticSubscriptionsChangedListener(
-            OnOpportunisticSubscriptionsChangedListener listener) {
+            @NonNull OnOpportunisticSubscriptionsChangedListener listener) {
+        Preconditions.checkNotNull(listener, "listener cannot be null");
         String pkgForDebug = mContext != null ? mContext.getOpPackageName() : "<unknown>";
         if (DBG) {
             logd("unregister OnOpportunisticSubscriptionsChangedListener pkgForDebug="
@@ -2689,7 +2691,8 @@ public class SubscriptionManager {
      *  @param callbackIntent pending intent that will be sent after operation is done.
      */
     @RequiresPermission(android.Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS)
-    public void switchToSubscription(int subId, PendingIntent callbackIntent) {
+    public void switchToSubscription(int subId, @NonNull PendingIntent callbackIntent) {
+        Preconditions.checkNotNull(callbackIntent, "callbackIntent cannot be null");
         EuiccManager euiccManager = new EuiccManager(mContext);
         euiccManager.switchToSubscription(subId, callbackIntent);
     }
