@@ -7483,6 +7483,7 @@ public final class Settings {
          * @hide
          */
         @SystemApi
+        @TestApi
         public static final String DOZE_ALWAYS_ON = "doze_always_on";
 
         private static final Validator DOZE_ALWAYS_ON_VALIDATOR = BOOLEAN_VALIDATOR;

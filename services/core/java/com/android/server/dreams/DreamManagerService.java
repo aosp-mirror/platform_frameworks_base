@@ -28,6 +28,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ServiceInfo;
 import android.database.ContentObserver;
+import android.hardware.display.AmbientDisplayConfiguration;
 import android.hardware.input.InputManagerInternal;
 import android.os.Binder;
 import android.os.Build;
@@ -46,7 +47,6 @@ import android.service.dreams.IDreamManager;
 import android.util.Slog;
 import android.view.Display;
 
-import com.android.internal.hardware.AmbientDisplayConfiguration;
 import com.android.internal.util.DumpUtils;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
