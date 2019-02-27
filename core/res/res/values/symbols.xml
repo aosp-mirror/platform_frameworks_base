@@ -3197,6 +3197,11 @@
   <java-symbol type="raw" name="fallback_categories" />
 
   <java-symbol type="string" name="config_icon_mask" />
+  <java-symbol type="string" name="config_batterymeterPerimeterPath" />
+  <java-symbol type="string" name="config_batterymeterFillMask" />
+  <java-symbol type="string" name="config_batterymeterBoltPath" />
+  <java-symbol type="string" name="config_batterymeterPowersavePath" />
+  <java-symbol type="bool" name="config_batterymeterDualTone" />
 
   <!-- Accessibility Shortcut -->
   <java-symbol type="string" name="accessibility_shortcut_warning_dialog_title" />
