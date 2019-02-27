@@ -304,6 +304,11 @@ public final class MediaDrm implements AutoCloseable {
         }
 
         /**
+         * The SessionException has an unknown error code.
+         */
+        public static final int ERROR_UNKNOWN = 0;
+
+        /**
          * This indicates that apps using MediaDrm sessions are
          * temporarily exceeding the capacity of available crypto
          * resources. The app should retry the operation later.
