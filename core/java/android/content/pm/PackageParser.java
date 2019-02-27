@@ -8435,6 +8435,21 @@ public class PackageParser {
     public static PackageInfo generatePackageInfoFromApex(File apexFile, boolean collectCerts)
             throws PackageParserException {
         PackageInfo pi = new PackageInfo();
+        int parseFlags = 0;
+        if (collectCerts) {
+            parseFlags |= PARSE_COLLECT_CERTIFICATES;
+            try {
+                if (apexFile.getCanonicalPath().startsWith("/system")) {
+                    // Don't need verify the APK integrity of APEXes on /system, just like
+                    // we don't do that for APKs.
+                    // TODO(b/126514108): we may be able to do this for APEXes on /data as well.
+                    parseFlags |= PARSE_IS_SYSTEM_DIR;
+                }
+            } catch (IOException e) {
+                throw new PackageParserException(INSTALL_PARSE_FAILED_UNEXPECTED_EXCEPTION,
+                        "Failed to get path for " + apexFile.getPath(), e);
+            }
+        }
 
         // TODO(b/123086053) properly fill in the ApplicationInfo with data from AndroidManifest
         // Add ApplicationInfo to the PackageInfo.
@@ -8449,8 +8464,7 @@ public class PackageParser {
 
         // TODO(b/123052859): We should avoid these repeated calls to parseApkLite each time
         // we want to generate information for APEX modules.
-        PackageParser.ApkLite apk = PackageParser.parseApkLite(apexFile,
-            collectCerts ? PackageParser.PARSE_COLLECT_CERTIFICATES : 0);
+        PackageParser.ApkLite apk = PackageParser.parseApkLite(apexFile, parseFlags);
 
         pi.packageName = apk.packageName;
         ai.packageName = apk.packageName;
