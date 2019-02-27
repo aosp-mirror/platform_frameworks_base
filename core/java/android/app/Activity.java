@@ -3521,6 +3521,12 @@ public class Activity extends ContextThemeWrapper
      * Default implementation of {@link KeyEvent.Callback#onKeyLongPress(int, KeyEvent)
      * KeyEvent.Callback.onKeyLongPress()}: always returns false (doesn't handle
      * the event).
+     *
+     * To receive this callback, you must return true from onKeyDown for the current
+     * event stream.
+     *
+     * @see KeyEvent.Callback#onKeyLongPress()
+     * @see KeyEvent.Callback#onKeyLongPress(int, KeyEvent)
      */
     public boolean onKeyLongPress(int keyCode, KeyEvent event) {
         return false;
