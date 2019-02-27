@@ -204,7 +204,8 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         mSessionsDir.mkdirs();
 
         mApexManager = am;
-        mStagingManager = new StagingManager(pm, this, am);
+
+        mStagingManager = new StagingManager(pm, this, am, context);
     }
 
     boolean okToSendBroadcasts()  {
