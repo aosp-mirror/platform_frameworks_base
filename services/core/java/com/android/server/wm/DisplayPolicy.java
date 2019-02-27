@@ -44,8 +44,8 @@ import static android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATIO
 import static android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS;
 import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.LAST_SUB_WINDOW;
-import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT;
+import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DRAW_STATUS_BAR_BACKGROUND;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_STATUS_BAR_VISIBLE_TRANSPARENT;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_INHERIT_TRANSLUCENT_DECOR;
@@ -113,6 +113,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Insets;
+import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.hardware.input.InputManager;
 import android.hardware.power.V1_0.PowerHint;
@@ -149,6 +150,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ScreenShapeHelper;
 import com.android.internal.util.ScreenshotHelper;
+import com.android.internal.widget.PointerLocationView;
 import com.android.server.LocalServices;
 import com.android.server.UiThread;
 import com.android.server.policy.WindowManagerPolicy;
@@ -343,6 +345,8 @@ public class DisplayPolicy {
 
     private InputConsumer mInputConsumer = null;
 
+    private PointerLocationView mPointerLocationView;
+
     /**
      * The area covered by system windows which belong to another display. Forwarded insets is set
      * in case this is a virtual display, this is displayed on another display that has insets, and
@@ -357,6 +361,8 @@ public class DisplayPolicy {
     private static final int MSG_UPDATE_DREAMING_SLEEP_TOKEN = 1;
     private static final int MSG_REQUEST_TRANSIENT_BARS = 2;
     private static final int MSG_DISPOSE_INPUT_CONSUMER = 3;
+    private static final int MSG_ENABLE_POINTER_LOCATION = 4;
+    private static final int MSG_DISABLE_POINTER_LOCATION = 5;
 
     private static final int MSG_REQUEST_TRANSIENT_BARS_ARG_STATUS = 0;
     private static final int MSG_REQUEST_TRANSIENT_BARS_ARG_NAVIGATION = 1;
@@ -382,6 +388,12 @@ public class DisplayPolicy {
                     break;
                 case MSG_DISPOSE_INPUT_CONSUMER:
                     disposeInputConsumer((InputConsumer) msg.obj);
+                    break;
+                case MSG_ENABLE_POINTER_LOCATION:
+                    enablePointerLocation();
+                    break;
+                case MSG_DISABLE_POINTER_LOCATION:
+                    disablePointerLocation();
                     break;
             }
         }
@@ -541,6 +553,9 @@ public class DisplayPolicy {
 
     void systemReady() {
         mSystemGestures.systemReady();
+        if (mService.mPointerLocationEnabled) {
+            setPointerLocationEnabled(true);
+        }
     }
 
     private int getDisplayId() {
@@ -747,7 +762,7 @@ public class DisplayPolicy {
             case TYPE_WALLPAPER:
                 // Dreams and wallpapers don't have an app window token and can thus not be
                 // letterboxed. Hence always let them extend under the cutout.
-                attrs.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
+                attrs.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
                 break;
             case TYPE_STATUS_BAR:
 
@@ -2095,7 +2110,7 @@ public class DisplayPolicy {
 
         // Ensure that windows with a DEFAULT or NEVER display cutout mode are laid out in
         // the cutout safe zone.
-        if (cutoutMode != LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS) {
+        if (cutoutMode != LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES) {
             final Rect displayCutoutSafeExceptMaybeBars = sTmpDisplayCutoutSafeExceptMaybeBarsRect;
             displayCutoutSafeExceptMaybeBars.set(displayFrames.mDisplayCutoutSafe);
             if (layoutInScreen && layoutInsetDecor && !requestedFullscreen
@@ -3413,5 +3428,58 @@ public class DisplayPolicy {
 
         pw.print(prefix); pw.println("Looper state:");
         mHandler.getLooper().dump(new PrintWriterPrinter(pw), prefix + "  ");
+    }
+
+    private boolean supportsPointerLocation() {
+        return mDisplayContent.isDefaultDisplay || !mDisplayContent.isPrivate();
+    }
+
+    void setPointerLocationEnabled(boolean pointerLocationEnabled) {
+        if (!supportsPointerLocation()) {
+            return;
+        }
+
+        mHandler.sendEmptyMessage(pointerLocationEnabled
+                ? MSG_ENABLE_POINTER_LOCATION : MSG_DISABLE_POINTER_LOCATION);
+    }
+
+    private void enablePointerLocation() {
+        if (mPointerLocationView != null) {
+            return;
+        }
+
+        mPointerLocationView = new PointerLocationView(mContext);
+        mPointerLocationView.setPrintCoords(false);
+        final WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
+                WindowManager.LayoutParams.MATCH_PARENT,
+                WindowManager.LayoutParams.MATCH_PARENT);
+        lp.type = WindowManager.LayoutParams.TYPE_SECURE_SYSTEM_OVERLAY;
+        lp.flags = WindowManager.LayoutParams.FLAG_FULLSCREEN
+                | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
+                | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
+        lp.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
+        if (ActivityManager.isHighEndGfx()) {
+            lp.flags |= WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
+            lp.privateFlags |=
+                    WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_HARDWARE_ACCELERATED;
+        }
+        lp.format = PixelFormat.TRANSLUCENT;
+        lp.setTitle("PointerLocation - display " + getDisplayId());
+        lp.inputFeatures |= WindowManager.LayoutParams.INPUT_FEATURE_NO_INPUT_CHANNEL;
+        final WindowManager wm = mContext.getSystemService(WindowManager.class);
+        wm.addView(mPointerLocationView, lp);
+        mDisplayContent.registerPointerEventListener(mPointerLocationView);
+    }
+
+    private void disablePointerLocation() {
+        if (mPointerLocationView == null) {
+            return;
+        }
+
+        mDisplayContent.unregisterPointerEventListener(mPointerLocationView);
+        final WindowManager wm = mContext.getSystemService(WindowManager.class);
+        wm.removeView(mPointerLocationView);
+        mPointerLocationView = null;
     }
 }
