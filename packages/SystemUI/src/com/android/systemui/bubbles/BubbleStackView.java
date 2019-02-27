@@ -26,6 +26,7 @@ import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.os.Bundle;
 import android.service.notification.StatusBarNotification;
 import android.util.Log;
 import android.util.StatsLog;
@@ -36,6 +37,7 @@ import android.view.ViewOutlineProvider;
 import android.view.ViewTreeObserver;
 import android.view.WindowInsets;
 import android.view.WindowManager;
+import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.FrameLayout;
 
 import androidx.annotation.MainThread;
@@ -205,8 +207,13 @@ public class BubbleStackView extends FrameLayout {
                         .setDampingRatio(SpringForce.DAMPING_RATIO_LOW_BOUNCY));
 
         setClipChildren(false);
-
+        setFocusable(true);
         mBubbleContainer.bringToFront();
+    }
+
+    @Override
+    public void getBoundsOnScreen(Rect outRect, boolean clipToParent) {
+        getBoundsOnScreen(outRect);
     }
 
     @Override
@@ -225,6 +232,36 @@ public class BubbleStackView extends FrameLayout {
         } else {
             return isIntersecting(mBubbleContainer, x, y);
         }
+    }
+
+    @Override
+    public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfoInternal(info);
+        info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_DISMISS);
+        if (mIsExpanded) {
+            info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_COLLAPSE);
+        } else {
+            info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_EXPAND);
+        }
+    }
+
+    @Override
+    public boolean performAccessibilityActionInternal(int action, Bundle arguments) {
+        if (super.performAccessibilityActionInternal(action, arguments)) {
+            return true;
+        }
+        switch (action) {
+            case AccessibilityNodeInfo.ACTION_DISMISS:
+                stackDismissed();
+                return true;
+            case AccessibilityNodeInfo.ACTION_COLLAPSE:
+                collapseStack();
+                return true;
+            case AccessibilityNodeInfo.ACTION_EXPAND:
+                expandStack();
+                return true;
+        }
+        return false;
     }
 
     /**
@@ -719,7 +756,9 @@ public class BubbleStackView extends FrameLayout {
     @Override
     public void getBoundsOnScreen(Rect outRect) {
         if (!mIsExpanded) {
-            mBubbleContainer.getChildAt(0).getBoundsOnScreen(outRect);
+            if (mBubbleContainer.getChildCount() > 0) {
+                mBubbleContainer.getChildAt(0).getBoundsOnScreen(outRect);
+            }
         } else {
             mBubbleContainer.getBoundsOnScreen(outRect);
         }
