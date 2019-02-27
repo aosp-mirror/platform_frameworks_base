@@ -26,6 +26,7 @@ import android.text.TextUtils;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.regex.PatternSyntaxException;
 
 /**
  * A class representing a Wi-Fi P2p configuration for setting up a connection
@@ -252,7 +253,12 @@ public class WifiP2pConfig implements Parcelable {
          * Specify the network name, a.k.a. group name,
          * for creating or joining a group.
          * <p>
-         *     Must be called - an empty network name is not valid.
+         * A network name shall begin with "DIRECT-xy". x and y are selected
+         * from the following character set: upper case letters, lower case
+         * letters and numbers.
+         * <p>
+         *     Must be called - an empty network name or an network name
+         *     not conforming to the P2P Group ID naming rule is not valid.
          *
          * @param networkName network name of a group.
          * @return The builder to facilitate chaining
@@ -262,6 +268,14 @@ public class WifiP2pConfig implements Parcelable {
             if (TextUtils.isEmpty(networkName)) {
                 throw new IllegalArgumentException(
                         "network name must be non-empty.");
+            }
+            try {
+                if (!networkName.matches("^DIRECT-[a-zA-Z0-9]{2}.*")) {
+                    throw new IllegalArgumentException(
+                            "network name must starts with the prefix DIRECT-xy.");
+                }
+            } catch (PatternSyntaxException e) {
+                // can never happen (fixed pattern)
             }
             mNetworkName = networkName;
             return this;
