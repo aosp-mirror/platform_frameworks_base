@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.display;
+package com.android.server.display.color;
 
 import android.app.ActivityTaskManager;
 import android.hardware.display.ColorDisplayManager;
@@ -117,12 +117,12 @@ public class DisplayTransformManager {
     /**
      * Sets and applies a current color transform matrix for a given level.
      * <p>
-     * Note: all color transforms are first composed to a single matrix in ascending order based
-     * on level before being applied to the display.
+     * Note: all color transforms are first composed to a single matrix in ascending order based on
+     * level before being applied to the display.
      *
      * @param level the level used to identify and compose the color transform (low -> high)
      * @param value the 4x4 color transform matrix (in column-major order), or {@code null} to
-     *              remove the color transform matrix associated with the provided level
+     * remove the color transform matrix associated with the provided level
      */
     public void setColorMatrix(int level, float[] value) {
         if (value != null && value.length != 16) {
@@ -235,13 +235,15 @@ public class DisplayTransformManager {
     }
 
     /**
-     * Return true when the specified colorMode requires the color matrix to
-     * work in linear space.
+     * Return true when the specified colorMode requires the color matrix to work in linear space.
      */
     public static boolean needsLinearColorMatrix(int colorMode) {
         return colorMode != ColorDisplayManager.COLOR_MODE_SATURATED;
     }
 
+    /**
+     * Sets color mode and updates night display transform values.
+     */
     public boolean setColorMode(int colorMode, float[] nightDisplayMatrix) {
         if (colorMode == ColorDisplayManager.COLOR_MODE_NATURAL) {
             applySaturation(COLOR_SATURATION_NATURAL);
@@ -264,8 +266,8 @@ public class DisplayTransformManager {
     }
 
     /**
-     * Returns whether the screen is color managed via SurfaceFlinger's
-     * {@link #SURFACE_FLINGER_TRANSACTION_QUERY_COLOR_MANAGED}.
+     * Returns whether the screen is color managed via SurfaceFlinger's {@link
+     * #SURFACE_FLINGER_TRANSACTION_QUERY_COLOR_MANAGED}.
      */
     public boolean isDeviceColorManaged() {
         final IBinder flinger = ServiceManager.getService(SURFACE_FLINGER);

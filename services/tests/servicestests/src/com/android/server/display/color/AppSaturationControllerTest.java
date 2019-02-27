@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.server.display;
+package com.android.server.display.color;
 
-import static com.android.server.display.AppSaturationController.TRANSLATION_VECTOR;
+import static com.android.server.display.color.AppSaturationController.TRANSLATION_VECTOR;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -29,7 +29,7 @@ import android.os.UserHandle;
 
 import androidx.test.runner.AndroidJUnit4;
 
-import com.android.server.display.ColorDisplayService.ColorTransformController;
+import com.android.server.display.color.ColorDisplayService.ColorTransformController;
 
 import org.junit.After;
 import org.junit.Before;
