@@ -18,6 +18,8 @@ import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
+import android.os.UserHandle
+import android.util.IconDrawableFactory
 import com.android.systemui.R
 
 typealias Privacy = PrivacyType
@@ -46,14 +48,21 @@ data class PrivacyApplication(val packageName: String, val uid: Int, val context
 
     private val applicationInfo: ApplicationInfo? by lazy {
         try {
-            context.packageManager.getApplicationInfo(packageName, 0)
+            val userHandle = UserHandle.getUserHandleForUid(uid)
+            context.createPackageContextAsUser(packageName, 0, userHandle).getPackageManager()
+                    .getApplicationInfo(packageName, 0)
         } catch (_: PackageManager.NameNotFoundException) {
             null
         }
     }
     val icon: Drawable by lazy {
         applicationInfo?.let {
-            context.packageManager.getApplicationIcon(it)
+            try {
+                val iconFactory = IconDrawableFactory.newInstance(context, true)
+                iconFactory.getBadgedIcon(it, UserHandle.getUserId(uid))
+            } catch (_: Exception) {
+                null
+            }
         } ?: context.getDrawable(android.R.drawable.sym_def_app_icon)
     }
 
