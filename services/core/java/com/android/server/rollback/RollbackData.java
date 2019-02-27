@@ -16,12 +16,11 @@
 
 package com.android.server.rollback;
 
-import android.content.rollback.PackageRollbackInfo;
+import android.content.rollback.RollbackInfo;
 
 import java.io.File;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Information about a rollback available for a set of atomically installed
@@ -29,14 +28,9 @@ import java.util.List;
  */
 class RollbackData {
     /**
-     * A unique identifier for this rollback.
+     * The rollback info for this rollback.
      */
-    public final int rollbackId;
-
-    /**
-     * The per-package rollback information.
-     */
-    public final List<PackageRollbackInfo> packages = new ArrayList<>();
+    public final RollbackInfo info;
 
     /**
      * The directory where the rollback data is stored.
@@ -76,17 +70,42 @@ class RollbackData {
     // NOTE: All accesses to this field are from the RollbackManager handler thread.
     public boolean restoreUserDataInProgress = false;
 
-    RollbackData(int rollbackId, File backupDir, int stagedSessionId, boolean isAvailable) {
-        this.rollbackId = rollbackId;
+    /**
+     * Constructs a new, empty RollbackData instance.
+     *
+     * @param rollbackId the id of the rollback.
+     * @param backupDir the directory where the rollback data is stored.
+     * @param stagedSessionId the session id if this is a staged rollback, -1 otherwise.
+     */
+    RollbackData(int rollbackId, File backupDir, int stagedSessionId) {
+        this.info = new RollbackInfo(rollbackId,
+                /* packages */ new ArrayList<>(),
+                /* isStaged */ stagedSessionId != -1,
+                /* causePackages */ new ArrayList<>(),
+                /* committedSessionId */ -1);
         this.backupDir = backupDir;
         this.stagedSessionId = stagedSessionId;
+        this.isAvailable = (stagedSessionId == -1);
+    }
+
+    /**
+     * Constructs a RollbackData instance with full rollback data information.
+     */
+    RollbackData(RollbackInfo info, File backupDir, Instant timestamp, int stagedSessionId,
+            boolean isAvailable, int apkSessionId, boolean restoreUserDataInProgress) {
+        this.info = info;
+        this.backupDir = backupDir;
+        this.timestamp = timestamp;
+        this.stagedSessionId = stagedSessionId;
         this.isAvailable = isAvailable;
+        this.apkSessionId = apkSessionId;
+        this.restoreUserDataInProgress = restoreUserDataInProgress;
     }
 
     /**
      * Whether the rollback is for rollback of a staged install.
      */
     public boolean isStaged() {
-        return stagedSessionId != -1;
+        return info.isStaged();
     }
 }

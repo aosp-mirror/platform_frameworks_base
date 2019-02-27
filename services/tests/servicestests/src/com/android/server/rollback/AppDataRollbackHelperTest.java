@@ -236,20 +236,20 @@ public class AppDataRollbackHelperTest {
         wasRecentlyRestored.getPendingRestores().add(
                 new RestoreInfo(73 /* userId */, 239 /* appId*/, "seInfo"));
 
-        RollbackData dataWithPendingBackup = new RollbackData(101, new File("/does/not/exist"), -1,
-                true);
-        dataWithPendingBackup.packages.add(pendingBackup);
+        RollbackData dataWithPendingBackup = new RollbackData(101, new File("/does/not/exist"), -1);
+        dataWithPendingBackup.info.getPackages().add(pendingBackup);
 
         RollbackData dataWithRecentRestore = new RollbackData(17239, new File("/does/not/exist"),
-                -1, true);
-        dataWithRecentRestore.packages.add(wasRecentlyRestored);
+                -1);
+        dataWithRecentRestore.info.getPackages().add(wasRecentlyRestored);
 
         RollbackData dataForDifferentUser = new RollbackData(17239, new File("/does/not/exist"),
-                -1, true);
-        dataForDifferentUser.packages.add(ignoredInfo);
+                -1);
+        dataForDifferentUser.info.getPackages().add(ignoredInfo);
 
         RollbackInfo rollbackInfo = new RollbackInfo(17239,
-                Arrays.asList(pendingRestore, wasRecentlyRestored), false);
+                Arrays.asList(pendingRestore, wasRecentlyRestored), false,
+                new ArrayList<>(), -1);
 
         List<RollbackData> changed = helper.commitPendingBackupAndRestoreForUser(37,
                 Arrays.asList(dataWithPendingBackup, dataWithRecentRestore, dataForDifferentUser),

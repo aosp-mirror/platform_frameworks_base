@@ -229,17 +229,22 @@ class RollbackStore {
     }
 
     /**
-     * Creates a new RollbackData instance with backupDir assigned.
+     * Creates a new RollbackData instance for a non-staged rollback with
+     * backupDir assigned.
      */
-    RollbackData createAvailableRollback(int rollbackId) throws IOException {
+    RollbackData createNonStagedRollback(int rollbackId) throws IOException {
         File backupDir = new File(mAvailableRollbacksDir, Integer.toString(rollbackId));
-        return new RollbackData(rollbackId, backupDir, -1, true);
+        return new RollbackData(rollbackId, backupDir, -1);
     }
 
-    RollbackData createPendingStagedRollback(int rollbackId, int stagedSessionId)
+    /**
+     * Creates a new RollbackData instance for a staged rollback with
+     * backupDir assigned.
+     */
+    RollbackData createStagedRollback(int rollbackId, int stagedSessionId)
             throws IOException {
         File backupDir = new File(mAvailableRollbacksDir, Integer.toString(rollbackId));
-        return new RollbackData(rollbackId, backupDir, stagedSessionId, false);
+        return new RollbackData(rollbackId, backupDir, stagedSessionId);
     }
 
     /**
@@ -277,8 +282,7 @@ class RollbackStore {
     void saveAvailableRollback(RollbackData data) throws IOException {
         try {
             JSONObject dataJson = new JSONObject();
-            dataJson.put("rollbackId", data.rollbackId);
-            dataJson.put("packages", toJson(data.packages));
+            dataJson.put("info", rollbackInfoToJson(data.info));
             dataJson.put("timestamp", data.timestamp.toString());
             dataJson.put("stagedSessionId", data.stagedSessionId);
             dataJson.put("isAvailable", data.isAvailable);
@@ -334,16 +338,14 @@ class RollbackStore {
             JSONObject dataJson = new JSONObject(
                     IoUtils.readFileAsString(rollbackJsonFile.getAbsolutePath()));
 
-            RollbackData data = new RollbackData(
-                    dataJson.getInt("rollbackId"),
+            return new RollbackData(
+                    rollbackInfoFromJson(dataJson.getJSONObject("info")),
                     backupDir,
+                    Instant.parse(dataJson.getString("timestamp")),
                     dataJson.getInt("stagedSessionId"),
-                    dataJson.getBoolean("isAvailable"));
-            data.packages.addAll(packageRollbackInfosFromJson(dataJson.getJSONArray("packages")));
-            data.timestamp = Instant.parse(dataJson.getString("timestamp"));
-            data.apkSessionId = dataJson.getInt("apkSessionId");
-            data.restoreUserDataInProgress = dataJson.getBoolean("restoreUserDataInProgress");
-            return data;
+                    dataJson.getBoolean("isAvailable"),
+                    dataJson.getInt("apkSessionId"),
+                    dataJson.getBoolean("restoreUserDataInProgress"));
         } catch (JSONException | DateTimeParseException e) {
             throw new IOException(e);
         }
