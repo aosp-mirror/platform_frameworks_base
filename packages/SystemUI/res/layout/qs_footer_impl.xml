@@ -41,34 +41,8 @@
         android:layout_gravity="center_vertical"
         android:gravity="end" >
 
-        <LinearLayout
-            android:id="@+id/qs_mobile"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:gravity="center_vertical|start"
-            android:orientation="horizontal"
-            android:layout_marginEnd="32dp">
-
-            <include
-                layout="@layout/qs_footer_carrier"
-                android:id="@+id/carrier1" />
-
-            <View
-                android:id="@+id/qs_carrier_divider"
-                android:layout_width="2dp"
-                android:layout_height="match_parent"
-                android:layout_marginTop="15dp"
-                android:layout_marginBottom="15dp"
-                android:background="?android:attr/dividerVertical"
-                android:visibility="gone" />
-
-            <include
-                layout="@layout/qs_footer_carrier"
-                android:id="@+id/carrier2"
-                android:visibility="gone"/>
-
-        </LinearLayout>
+        <include layout="@layout/qs_carrier_group"
+        android:id="@+id/carrier_group"/>
 
         <com.android.systemui.qs.PageIndicator
             android:id="@+id/footer_page_indicator"

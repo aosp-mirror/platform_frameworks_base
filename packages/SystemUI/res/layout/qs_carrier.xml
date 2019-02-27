@@ -14,9 +14,9 @@
   ~ limitations under the License
   -->
 
-<LinearLayout
+<com.android.systemui.qs.QSCarrier
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/linear_footer_carrier"
+    android:id="@+id/linear_carrier"
     android:layout_width="0dp"
     android:layout_height="match_parent"
     android:orientation="horizontal"
@@ -35,7 +35,7 @@
         android:layout_marginEnd="8dp"
         android:visibility="gone" />
 
-    <view class="com.android.systemui.qs.QSFooterImpl$QSCarrierText"
+    <view class="com.android.systemui.qs.QSCarrier$QSCarrierText"
         android:id="@+id/qs_carrier_text"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -46,4 +46,4 @@
         android:textDirection="locale"
         android:singleLine="true" />
 
-</LinearLayout>
+</com.android.systemui.qs.QSCarrier>

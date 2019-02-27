@@ -23,25 +23,19 @@ import static com.android.systemui.util.InjectionInflationController.VIEW_CONTEX
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.UserInfo;
-import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.graphics.PorterDuff.Mode;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.RippleDrawable;
 import android.os.Bundle;
 import android.os.UserManager;
-import android.telephony.SubscriptionManager;
-import android.text.TextUtils;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
@@ -49,11 +43,9 @@ import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
-import com.android.keyguard.CarrierTextController;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.settingslib.Utils;
 import com.android.settingslib.drawable.UserIconDrawable;
-import com.android.settingslib.graph.SignalDrawable;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.R.dimen;
@@ -62,9 +54,6 @@ import com.android.systemui.qs.TouchAnimator.Builder;
 import com.android.systemui.statusbar.phone.MultiUserSwitch;
 import com.android.systemui.statusbar.phone.SettingsButton;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
-import com.android.systemui.statusbar.policy.NetworkController;
-import com.android.systemui.statusbar.policy.NetworkController.EmergencyListener;
-import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
 import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.statusbar.policy.UserInfoController.OnUserInfoChangedListener;
 import com.android.systemui.tuner.TunerService;
@@ -73,15 +62,12 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 public class QSFooterImpl extends FrameLayout implements QSFooter,
-        OnClickListener, OnUserInfoChangedListener, EmergencyListener, SignalCallback,
-        CarrierTextController.CarrierTextCallback {
+        OnClickListener, OnUserInfoChangedListener {
 
-    private static final int SIM_SLOTS = 2;
     private static final String TAG = "QSFooterImpl";
 
     private final ActivityStarter mActivityStarter;
     private final UserInfoController mUserInfoController;
-    private final NetworkController mNetworkController;
     private final DeviceProvisionedController mDeviceProvisionedController;
     private SettingsButton mSettingsButton;
     protected View mSettingsContainer;
@@ -94,7 +80,7 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
 
     private boolean mListening;
 
-    private boolean mShowEmergencyCallsOnly;
+    private QSCarrierGroup mCarrierGroup;
     private View mDivider;
     protected MultiUserSwitch mMultiUserSwitch;
     private ImageView mMultiUserAvatar;
@@ -108,30 +94,15 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
     private View mActionsContainer;
     private View mDragHandle;
 
-    private View mCarrierDivider;
-    private ViewGroup mMobileFooter;
-    private View[] mMobileGroups = new View[SIM_SLOTS];
-    private ViewGroup[] mCarrierGroups = new ViewGroup[SIM_SLOTS];
-    private TextView[] mCarrierTexts = new TextView[SIM_SLOTS];
-    private ImageView[] mMobileSignals = new ImageView[SIM_SLOTS];
-    private ImageView[] mMobileRoamings = new ImageView[SIM_SLOTS];
-    private final CellSignalState[] mInfos =
-            new CellSignalState[]{new CellSignalState(), new CellSignalState()};
-
-    private final int mColorForeground;
     private OnClickListener mExpandClickListener;
-    private CarrierTextController mCarrierTextController;
 
     @Inject
     public QSFooterImpl(@Named(VIEW_CONTEXT) Context context, AttributeSet attrs,
             ActivityStarter activityStarter, UserInfoController userInfoController,
-            NetworkController networkController,
             DeviceProvisionedController deviceProvisionedController) {
         super(context, attrs);
-        mColorForeground = Utils.getColorAttrDefaultColor(context, android.R.attr.colorForeground);
         mActivityStarter = activityStarter;
         mUserInfoController = userInfoController;
-        mNetworkController = networkController;
         mDeviceProvisionedController = deviceProvisionedController;
     }
 
@@ -140,7 +111,6 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
         this(context, attrs,
                 Dependency.get(ActivityStarter.class),
                 Dependency.get(UserInfoController.class),
-                Dependency.get(NetworkController.class),
                 Dependency.get(DeviceProvisionedController.class));
     }
 
@@ -159,20 +129,7 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
         mSettingsContainer = findViewById(R.id.settings_button_container);
         mSettingsButton.setOnClickListener(this);
 
-        mMobileFooter = findViewById(R.id.qs_mobile);
-        mCarrierGroups[0] = findViewById(R.id.carrier1);
-        mCarrierGroups[1] = findViewById(R.id.carrier2);
-
-        for (int i = 0; i < SIM_SLOTS; i++) {
-            mMobileGroups[i] = mCarrierGroups[i].findViewById(R.id.mobile_combo);
-            mMobileSignals[i] = mCarrierGroups[i].findViewById(R.id.mobile_signal);
-            mMobileRoamings[i] = mCarrierGroups[i].findViewById(R.id.mobile_roaming);
-            mCarrierTexts[i] = mCarrierGroups[i].findViewById(R.id.qs_carrier_text);
-        }
-        mCarrierDivider = findViewById(R.id.qs_carrier_divider);
-        CharSequence separator = mContext.getString(
-                com.android.internal.R.string.kg_text_message_separator);
-        mCarrierTextController = new CarrierTextController(mContext, separator, false, false);
+        mCarrierGroup = findViewById(R.id.carrier_group);
 
         mMultiUserSwitch = findViewById(R.id.multi_user_switch);
         mMultiUserAvatar = mMultiUserSwitch.findViewById(R.id.multi_user_avatar);
@@ -240,8 +197,7 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
     private TouchAnimator createFooterAnimator() {
         return new TouchAnimator.Builder()
                 .addFloat(mDivider, "alpha", 0, 1)
-                .addFloat(mMobileFooter, "alpha", 0, 0, 1)
-                .addFloat(mCarrierDivider, "alpha", 0, 1)
+                .addFloat(mCarrierGroup, "alpha", 0, 0, 1)
                 .addFloat(mActionsContainer, "alpha", 0, 1)
                 .addFloat(mDragHandle, "alpha", 1, 0, 0)
                 .addFloat(mPageIndicator, "alpha", 0, 1)
@@ -364,17 +320,10 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
     private void updateListeners() {
         if (mListening) {
             mUserInfoController.addCallback(this);
-            if (mNetworkController.hasVoiceCallingFeature()) {
-                mNetworkController.addEmergencyListener(this);
-                mNetworkController.addCallback(this);
-            }
-            mCarrierTextController.setListening(this);
         } else {
             mUserInfoController.removeCallback(this);
-            mNetworkController.removeEmergencyListener(this);
-            mNetworkController.removeCallback(this);
-            mCarrierTextController.setListening(null);
         }
+        mCarrierGroup.setListening(mListening);
     }
 
     @Override
@@ -430,17 +379,6 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
     }
 
     @Override
-    public void setEmergencyCallsOnly(boolean show) {
-        boolean changed = show != mShowEmergencyCallsOnly;
-        if (changed) {
-            mShowEmergencyCallsOnly = show;
-            if (mExpanded) {
-                updateEverything();
-            }
-        }
-    }
-
-    @Override
     public void onUserInfoChanged(String name, Drawable picture, String userAccount) {
         if (picture != null &&
                 UserManager.get(mContext).isGuestUser(KeyguardUpdateMonitor.getCurrentUser()) &&
@@ -451,163 +389,5 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
                     Mode.SRC_IN);
         }
         mMultiUserAvatar.setImageDrawable(picture);
-    }
-
-    private void handleUpdateState() {
-        for (int i = 0; i < SIM_SLOTS; i++) {
-            mMobileGroups[i].setVisibility(mInfos[i].visible ? View.VISIBLE : View.GONE);
-            if (mInfos[i].visible) {
-                mMobileRoamings[i].setVisibility(mInfos[i].roaming ? View.VISIBLE : View.GONE);
-                mMobileRoamings[i].setImageTintList(ColorStateList.valueOf(mColorForeground));
-                SignalDrawable d = new SignalDrawable(mContext);
-                d.setDarkIntensity(QuickStatusBarHeader.getColorIntensity(mColorForeground));
-                mMobileSignals[i].setImageDrawable(d);
-                mMobileSignals[i].setImageLevel(mInfos[i].mobileSignalIconId);
-
-                StringBuilder contentDescription = new StringBuilder();
-                if (mInfos[i].contentDescription != null) {
-                    contentDescription.append(mInfos[i].contentDescription).append(", ");
-                }
-                if (mInfos[i].roaming) {
-                    contentDescription
-                            .append(mContext.getString(R.string.data_connection_roaming))
-                            .append(", ");
-                }
-                // TODO: show mobile data off/no internet text for 5 seconds before carrier text
-                if (TextUtils.equals(mInfos[i].typeContentDescription,
-                        mContext.getString(R.string.data_connection_no_internet))
-                        || TextUtils.equals(mInfos[i].typeContentDescription,
-                        mContext.getString(R.string.cell_data_off_content_description))) {
-                    contentDescription.append(mInfos[i].typeContentDescription);
-                }
-                mMobileSignals[i].setContentDescription(contentDescription);
-            }
-        }
-        mCarrierDivider.setVisibility(
-                mInfos[0].visible && mInfos[1].visible ? View.VISIBLE : View.GONE);
-    }
-
-    @VisibleForTesting
-    protected int getSlotIndex(int subscriptionId) {
-        return SubscriptionManager.getSlotIndex(subscriptionId);
-    }
-
-    @Override
-    public void updateCarrierInfo(CarrierTextController.CarrierTextCallbackInfo info) {
-        if (info.anySimReady) {
-            boolean[] slotSeen = new boolean[SIM_SLOTS];
-            if (info.listOfCarriers.length == info.subscriptionIds.length) {
-                for (int i = 0; i < SIM_SLOTS && i < info.listOfCarriers.length; i++) {
-                    int slot = getSlotIndex(info.subscriptionIds[i]);
-                    if (slot >= SIM_SLOTS) {
-                        Log.w(TAG, "updateInfoCarrier - slot: " + slot);
-                        continue;
-                    }
-                    if (slot == SubscriptionManager.INVALID_SIM_SLOT_INDEX) {
-                        Log.e(TAG,
-                                "Invalid SIM slot index for subscription: "
-                                        + info.subscriptionIds[i]);
-                        continue;
-                    }
-                    mInfos[slot].visible = true;
-                    slotSeen[slot] = true;
-                    mCarrierTexts[slot].setText(info.listOfCarriers[i].toString().trim());
-                    mCarrierGroups[slot].setVisibility(View.VISIBLE);
-                }
-                for (int i = 0; i < SIM_SLOTS; i++) {
-                    if (!slotSeen[i]) {
-                        mInfos[i].visible = false;
-                        mCarrierGroups[i].setVisibility(View.GONE);
-                    }
-                }
-            } else {
-                Log.e(TAG, "Carrier information arrays not of same length");
-            }
-        } else {
-            mInfos[0].visible = false;
-            mCarrierTexts[0].setText(info.carrierText);
-            mCarrierGroups[0].setVisibility(View.VISIBLE);
-            for (int i = 1; i < SIM_SLOTS; i++) {
-                mInfos[i].visible = false;
-                mCarrierTexts[i].setText("");
-                mCarrierGroups[i].setVisibility(View.GONE);
-            }
-        }
-        handleUpdateState();
-    }
-
-    @Override
-    public void setMobileDataIndicators(NetworkController.IconState statusIcon,
-            NetworkController.IconState qsIcon, int statusType,
-            int qsType, boolean activityIn, boolean activityOut,
-            String typeContentDescription,
-            String description, boolean isWide, int subId, boolean roaming) {
-        int slotIndex = getSlotIndex(subId);
-        if (slotIndex >= SIM_SLOTS) {
-            Log.w(TAG, "setMobileDataIndicators - slot: " + slotIndex);
-            return;
-        }
-        if (slotIndex == SubscriptionManager.INVALID_SIM_SLOT_INDEX) {
-            Log.e(TAG, "Invalid SIM slot index for subscription: " + subId);
-            return;
-        }
-        mInfos[slotIndex].visible = statusIcon.visible;
-        mInfos[slotIndex].mobileSignalIconId = statusIcon.icon;
-        mInfos[slotIndex].contentDescription = statusIcon.contentDescription;
-        mInfos[slotIndex].typeContentDescription = typeContentDescription;
-        mInfos[slotIndex].roaming = roaming;
-        handleUpdateState();
-    }
-
-    @Override
-    public void setNoSims(boolean hasNoSims, boolean simDetected) {
-        if (hasNoSims) {
-            mInfos[0].visible = false;
-            mInfos[1].visible = false;
-        }
-        handleUpdateState();
-    }
-
-    private final class CellSignalState {
-        boolean visible;
-        int mobileSignalIconId;
-        public String contentDescription;
-        String typeContentDescription;
-        boolean roaming;
-    }
-
-    /**
-     * TextView that changes its ellipsize value with its visibility.
-     */
-    public static class QSCarrierText extends TextView {
-        public QSCarrierText(Context context) {
-            super(context);
-        }
-
-        public QSCarrierText(Context context, AttributeSet attrs) {
-            super(context, attrs);
-        }
-
-        public QSCarrierText(Context context, AttributeSet attrs, int defStyleAttr) {
-            super(context, attrs, defStyleAttr);
-        }
-
-        public QSCarrierText(Context context, AttributeSet attrs, int defStyleAttr,
-                int defStyleRes) {
-            super(context, attrs, defStyleAttr, defStyleRes);
-        }
-
-        @Override
-        protected void onVisibilityChanged(View changedView, int visibility) {
-            super.onVisibilityChanged(changedView, visibility);
-            // Only show marquee when visible
-            if (visibility == VISIBLE) {
-                setEllipsize(TextUtils.TruncateAt.MARQUEE);
-                setSelected(true);
-            } else {
-                setEllipsize(TextUtils.TruncateAt.END);
-                setSelected(false);
-            }
-        }
     }
 }

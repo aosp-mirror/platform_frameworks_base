@@ -16,13 +16,10 @@ package com.android.systemui.qs;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.telephony.SubscriptionManager;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
@@ -31,21 +28,16 @@ import android.view.View;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.keyguard.CarrierTextController.CarrierTextCallbackInfo;
 import com.android.systemui.R;
 import com.android.systemui.R.id;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
-import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.utils.leaks.LeakCheckedTest;
 
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
@@ -77,117 +69,4 @@ public class QSFooterImplTest extends LeakCheckedTest {
         // Verify Settings wasn't launched.
         verify(mActivityStarter, never()).startActivity(any(), anyBoolean());
     }
-
-    @Test // throws no Exception
-    public void testUpdateCarrierText_sameLengts() {
-        QSFooterImpl spiedFooter = Mockito.spy(mFooter);
-        when(spiedFooter.getSlotIndex(anyInt())).thenAnswer(
-                new Answer<Integer>() {
-                    @Override
-                    public Integer answer(InvocationOnMock invocationOnMock) throws Throwable {
-                        return invocationOnMock.getArgument(0);
-                    }
-                });
-
-        // listOfCarriers length 1, subscriptionIds length 1, anySims false
-        CarrierTextCallbackInfo c1 = new CarrierTextCallbackInfo(
-                "",
-                new CharSequence[]{""},
-                false,
-                new int[]{0});
-        spiedFooter.updateCarrierInfo(c1);
-
-        // listOfCarriers length 1, subscriptionIds length 1, anySims true
-        CarrierTextCallbackInfo c2 = new CarrierTextCallbackInfo(
-                "",
-                new CharSequence[]{""},
-                true,
-                new int[]{0});
-        spiedFooter.updateCarrierInfo(c2);
-
-        // listOfCarriers length 2, subscriptionIds length 2, anySims false
-        CarrierTextCallbackInfo c3 = new CarrierTextCallbackInfo(
-                "",
-                new CharSequence[]{"", ""},
-                false,
-                new int[]{0, 1});
-        spiedFooter.updateCarrierInfo(c3);
-
-        // listOfCarriers length 2, subscriptionIds length 2, anySims true
-        CarrierTextCallbackInfo c4 = new CarrierTextCallbackInfo(
-                "",
-                new CharSequence[]{"", ""},
-                true,
-                new int[]{0, 1});
-        spiedFooter.updateCarrierInfo(c4);
-    }
-
-    @Test // throws no Exception
-    public void testUpdateCarrierText_differentLength() {
-        QSFooterImpl spiedFooter = Mockito.spy(mFooter);
-        when(spiedFooter.getSlotIndex(anyInt())).thenAnswer(
-                new Answer<Integer>() {
-                    @Override
-                    public Integer answer(InvocationOnMock invocationOnMock) throws Throwable {
-                        return invocationOnMock.getArgument(0);
-                    }
-                });
-
-        // listOfCarriers length 2, subscriptionIds length 1, anySims false
-        CarrierTextCallbackInfo c1 = new CarrierTextCallbackInfo(
-                "",
-                new CharSequence[]{"", ""},
-                false,
-                new int[]{0});
-        spiedFooter.updateCarrierInfo(c1);
-
-        // listOfCarriers length 2, subscriptionIds length 1, anySims true
-        CarrierTextCallbackInfo c2 = new CarrierTextCallbackInfo(
-                "",
-                new CharSequence[]{"", ""},
-                true,
-                new int[]{0});
-        spiedFooter.updateCarrierInfo(c2);
-
-        // listOfCarriers length 1, subscriptionIds length 2, anySims false
-        CarrierTextCallbackInfo c3 = new CarrierTextCallbackInfo(
-                "",
-                new CharSequence[]{""},
-                false,
-                new int[]{0, 1});
-        spiedFooter.updateCarrierInfo(c3);
-
-        // listOfCarriers length 1, subscriptionIds length 2, anySims true
-        CarrierTextCallbackInfo c4 = new CarrierTextCallbackInfo(
-                "",
-                new CharSequence[]{""},
-                true,
-                new int[]{0, 1});
-        spiedFooter.updateCarrierInfo(c4);
-    }
-
-    @Test // throws no Exception
-    public void testUpdateCarrierText_invalidSim() {
-        QSFooterImpl spiedFooter = Mockito.spy(mFooter);
-        when(spiedFooter.getSlotIndex(anyInt())).thenReturn(
-                SubscriptionManager.INVALID_SIM_SLOT_INDEX);
-        CarrierTextCallbackInfo c4 = new CarrierTextCallbackInfo(
-                "",
-                new CharSequence[]{"", ""},
-                true,
-                new int[]{0, 1});
-        spiedFooter.updateCarrierInfo(c4);
-    }
-
-    @Test // throws no Exception
-    public void testSetMobileDataIndicators_invalidSim() {
-        QSFooterImpl spiedFooter = Mockito.spy(mFooter);
-        when(spiedFooter.getSlotIndex(anyInt())).thenReturn(
-                SubscriptionManager.INVALID_SIM_SLOT_INDEX);
-        spiedFooter.setMobileDataIndicators(
-                mock(NetworkController.IconState.class),
-                mock(NetworkController.IconState.class),
-                0, 0, true, true, "", "", true, 0, true);
-    }
-
 }
