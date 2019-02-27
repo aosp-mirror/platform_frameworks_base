@@ -11416,7 +11416,7 @@ public final class Settings {
         /**
          * Feature flag to enable or disable the activity starts logging feature.
          * Type: int (0 for false, 1 for true)
-         * Default: 0
+         * Default: 1
          * @hide
          */
         public static final String ACTIVITY_STARTS_LOGGING_ENABLED
