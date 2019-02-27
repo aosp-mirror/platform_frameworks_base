@@ -51,6 +51,7 @@ interface IVoiceInteractionManagerService {
      * @param keyphraseId The unique identifier for the keyphrase.
      * @param bcp47Locale The BCP47 language tag  for the keyphrase's locale.
      */
+    @UnsupportedAppUsage
     SoundTrigger.KeyphraseSoundModel getKeyphraseSoundModel(int keyphraseId, in String bcp47Locale);
     /**
      * Add/Update the given keyphrase sound model.

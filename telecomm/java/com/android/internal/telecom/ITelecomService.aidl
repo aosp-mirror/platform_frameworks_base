@@ -182,6 +182,7 @@ interface ITelecomService {
     /**
      * @see TelecomServiceImpl#getCallState
      */
+    @UnsupportedAppUsage
     int getCallState();
 
     /**

@@ -32,6 +32,7 @@ interface IAppOpsService {
     int noteOperation(int code, int uid, String packageName);
     int startOperation(IBinder token, int code, int uid, String packageName,
             boolean startIfModeDefault);
+    @UnsupportedAppUsage
     void finishOperation(IBinder token, int code, int uid, String packageName);
     void startWatchingMode(int op, String packageName, IAppOpsCallback callback);
     void stopWatchingMode(IAppOpsCallback callback);
@@ -42,7 +43,9 @@ interface IAppOpsService {
 
     // Remaining methods are only used in Java.
     int checkPackage(int uid, String packageName);
+    @UnsupportedAppUsage
     List<AppOpsManager.PackageOps> getPackagesForOps(in int[] ops);
+    @UnsupportedAppUsage
     List<AppOpsManager.PackageOps> getOpsForPackage(int uid, String packageName, in int[] ops);
     void getHistoricalOps(int uid, String packageName, in List<String> ops, long beginTimeMillis,
             long endTimeMillis, in RemoteCallback callback);
@@ -55,7 +58,9 @@ interface IAppOpsService {
     void clearHistory();
     List<AppOpsManager.PackageOps> getUidOps(int uid, in int[] ops);
     void setUidMode(int code, int uid, int mode);
+    @UnsupportedAppUsage
     void setMode(int code, int uid, String packageName, int mode);
+    @UnsupportedAppUsage
     void resetAllModes(int reqUserId, String reqPackageName);
     int checkAudioOperation(int code, int usage, int uid, String packageName);
     void setAudioRestriction(int code, int usage, int uid, int mode, in String[] exceptionPackages);
