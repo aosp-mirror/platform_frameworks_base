@@ -238,6 +238,11 @@ static jobjectArray NativeCreateIdmapsForStaticOverlaysTargetingAndroid(JNIEnv* 
     return env->NewObjectArray(0, g_stringClass, nullptr);
   }
 
+  if (access("/system/bin/idmap2", X_OK) == -1) {
+    PLOG(WARNING) << "unable to execute idmap2";
+    return nullptr;
+  }
+
   std::vector<std::string> argv{"/system/bin/idmap2",
     "scan",
     "--recursive",
