@@ -88,20 +88,22 @@ class UtilTests(unittest.TestCase):
 
 
 faulty_current_txt = """
+// Signature format: 2.0
 package android.app {
   public final class Activity {
   }
 
   public final class WallpaperColors implements android.os.Parcelable {
-    ctor public WallpaperColors(android.os.Parcel);
+    ctor public WallpaperColors(@NonNull android.os.Parcel);
     method public int describeContents();
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.app.WallpaperColors> CREATOR;
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.WallpaperColors> CREATOR;
   }
 }
-""".split('\n')
+""".strip().split('\n')
 
 ok_current_txt = """
+// Signature format: 2.0
 package android.app {
   public final class Activity {
   }
@@ -109,19 +111,20 @@ package android.app {
   public final class WallpaperColors implements android.os.Parcelable {
     ctor public WallpaperColors();
     method public int describeContents();
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.app.WallpaperColors> CREATOR;
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.WallpaperColors> CREATOR;
   }
 }
-""".split('\n')
+""".strip().split('\n')
 
 system_current_txt = """
+// Signature format: 2.0
 package android.app {
   public final class WallpaperColors implements android.os.Parcelable {
     method public int getSomething();
   }
 }
-""".split('\n')
+""".strip().split('\n')
 
 
 
