@@ -54,9 +54,6 @@
                 android:orientation="vertical"
                 android:gravity="start"
             />
-
-            <include android:id="@+id/overflow" layout="@layout/ongoing_privacy_dialog_item"
-                     android:visibility="gone" />
         </LinearLayout>
 
     </LinearLayout>
