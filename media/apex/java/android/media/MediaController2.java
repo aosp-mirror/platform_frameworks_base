@@ -21,6 +21,7 @@ import static android.media.MediaConstants.KEY_PACKAGE_NAME;
 import static android.media.MediaConstants.KEY_PID;
 import static android.media.MediaConstants.KEY_PLAYBACK_ACTIVE;
 import static android.media.MediaConstants.KEY_SESSION2LINK;
+import static android.media.MediaConstants.KEY_TOKEN_EXTRAS;
 import static android.media.Session2Command.RESULT_ERROR_UNKNOWN_ERROR;
 import static android.media.Session2Command.RESULT_INFO_SKIPPED;
 import static android.media.Session2Token.TYPE_SESSION;
@@ -264,6 +265,7 @@ public class MediaController2 implements AutoCloseable {
         Session2CommandGroup allowedCommands =
                 connectionResult.getParcelable(KEY_ALLOWED_COMMANDS);
         boolean playbackActive = connectionResult.getBoolean(KEY_PLAYBACK_ACTIVE);
+        Bundle tokenExtras = connectionResult.getBundle(KEY_TOKEN_EXTRAS);
         if (DEBUG) {
             Log.d(TAG, "notifyConnected sessionBinder=" + sessionBinder
                     + ", allowedCommands=" + allowedCommands);
@@ -282,7 +284,7 @@ public class MediaController2 implements AutoCloseable {
             // so can be used without worrying about deadlock.
             sessionBinder.linkToDeath(mDeathRecipient, 0);
             mConnectedToken = new Session2Token(mSessionToken.getUid(), TYPE_SESSION,
-                    mSessionToken.getPackageName(), sessionBinder);
+                    mSessionToken.getPackageName(), sessionBinder, tokenExtras);
         }
         mCallbackExecutor.execute(() -> {
             mCallback.onConnected(MediaController2.this, allowedCommands);
