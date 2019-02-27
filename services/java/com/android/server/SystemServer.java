@@ -1231,6 +1231,7 @@ public final class SystemServer {
             }
 
             startContentCaptureService(context);
+            startAttentionService(context);
 
             // App prediction manager service
             traceBeginAndSlog("StartAppPredictionService");
@@ -1284,10 +1285,6 @@ public final class SystemServer {
                         .startService(TextClassificationManagerService.Lifecycle.class);
                 traceEnd();
             }
-
-            traceBeginAndSlog("StartAttentionManagerService");
-            mSystemServiceManager.startService(AttentionManagerService.class);
-            traceEnd();
 
             traceBeginAndSlog("StartNetworkScoreService");
             mSystemServiceManager.startService(NetworkScoreService.Lifecycle.class);
@@ -2258,6 +2255,17 @@ public final class SystemServer {
             mActivityManagerService.setContentCaptureManager(ccmi);
         }
 
+        traceEnd();
+    }
+
+    private void startAttentionService(@NonNull Context context) {
+        if (!AttentionManagerService.isServiceConfigured(context)) {
+            Slog.d(TAG, "AttentionService is not configured on this device");
+            return;
+        }
+
+        traceBeginAndSlog("StartAttentionManagerService");
+        mSystemServiceManager.startService(AttentionManagerService.class);
         traceEnd();
     }
 

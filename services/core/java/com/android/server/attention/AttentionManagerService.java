@@ -111,6 +111,11 @@ public class AttentionManagerService extends SystemService {
         cancelAndUnbindLocked(peekUserStateLocked(userId));
     }
 
+    /** Returns {@code true} if attention service is configured on this device. */
+    public static boolean isServiceConfigured(Context context) {
+        return !TextUtils.isEmpty(getServiceConfig(context));
+    }
+
     /** Resolves and sets up the attention service if it had not been done yet. */
     private boolean isServiceAvailable() {
         if (mComponentName == null) {
@@ -283,6 +288,10 @@ public class AttentionManagerService extends SystemService {
         return mUserStates.get(userId);
     }
 
+    private static String getServiceConfig(Context context) {
+        return context.getString(R.string.config_defaultAttentionService);
+    }
+
     /**
      * Provides attention service component name at runtime, making sure it's provided by the
      * system.
@@ -291,9 +300,7 @@ public class AttentionManagerService extends SystemService {
         final String flag = DeviceConfig.getProperty(NAMESPACE_ATTENTION_MANAGER_SERVICE,
                 COMPONENT_NAME);
 
-        final String componentNameString = flag != null ? flag : context.getString(
-                R.string.config_defaultAttentionService);
-
+        final String componentNameString = flag != null ? flag : getServiceConfig(context);
         if (TextUtils.isEmpty(componentNameString)) {
             return null;
         }
