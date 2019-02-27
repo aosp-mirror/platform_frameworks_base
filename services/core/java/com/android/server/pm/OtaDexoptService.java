@@ -333,7 +333,7 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
         PackageDexOptimizer optimizer = new OTADexoptPackageDexOptimizer(
                 collectingInstaller, mPackageManagerService.mInstallLock, mContext);
 
-        optimizer.performDexOpt(pkg, pkg.usesLibraryInfos,
+        optimizer.performDexOpt(pkg,
                 null /* ISAs */,
                 null /* CompilerStats.PackageStats */,
                 mPackageManagerService.getDexManager().getPackageUseInfoOrDefault(pkg.packageName),
