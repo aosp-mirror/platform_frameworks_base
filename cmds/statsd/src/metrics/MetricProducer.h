@@ -69,7 +69,7 @@ public:
           mTimeBaseNs(timeBaseNs),
           mCurrentBucketStartTimeNs(timeBaseNs),
           mCurrentBucketNum(0),
-          mCondition(conditionIndex >= 0 ? ConditionState::kUnknown : ConditionState::kTrue),
+          mCondition(initialCondition(conditionIndex)),
           mConditionSliced(false),
           mWizard(wizard),
           mConditionTrackerIndex(conditionIndex),
@@ -81,6 +81,10 @@ public:
     }
 
     virtual ~MetricProducer(){};
+
+    ConditionState initialCondition(const int conditionIndex) const {
+        return conditionIndex >= 0 ? ConditionState::kUnknown : ConditionState::kTrue;
+    }
 
     /**
      * Forces this metric to split into a partial bucket right now. If we're past a full bucket, we
