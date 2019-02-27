@@ -274,6 +274,7 @@ class RollbackStore {
             dataJson.put("stagedSessionId", data.stagedSessionId);
             dataJson.put("isAvailable", data.isAvailable);
             dataJson.put("apkSessionId", data.apkSessionId);
+            dataJson.put("restoreUserDataInProgress", data.restoreUserDataInProgress);
 
             PrintWriter pw = new PrintWriter(new File(data.backupDir, "rollback.json"));
             pw.println(dataJson.toString());
@@ -338,6 +339,7 @@ class RollbackStore {
             data.packages.addAll(packageRollbackInfosFromJson(dataJson.getJSONArray("packages")));
             data.timestamp = Instant.parse(dataJson.getString("timestamp"));
             data.apkSessionId = dataJson.getInt("apkSessionId");
+            data.restoreUserDataInProgress = dataJson.getBoolean("restoreUserDataInProgress");
             return data;
         } catch (JSONException | DateTimeParseException e) {
             throw new IOException(e);

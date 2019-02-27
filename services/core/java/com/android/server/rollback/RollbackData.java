@@ -69,12 +69,12 @@ class RollbackData {
     public int apkSessionId = -1;
 
     /**
-     * Whether this Rollback is currently in progress. This field is true from the point
-     * we commit a {@code PackageInstaller} session containing these packages to the point the
-     * {@code PackageInstaller} calls into the {@code onFinished} callback.
+     * True if we are expecting the package manager to call restoreUserData
+     * for this rollback because it has just been committed but the rollback
+     * has not yet been fully applied.
      */
     // NOTE: All accesses to this field are from the RollbackManager handler thread.
-    public boolean inProgress = false;
+    public boolean restoreUserDataInProgress = false;
 
     RollbackData(int rollbackId, File backupDir, int stagedSessionId, boolean isAvailable) {
         this.rollbackId = rollbackId;

@@ -335,7 +335,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             return;
         }
 
-        if (data.inProgress) {
+        if (data.restoreUserDataInProgress) {
             sendFailure(statusReceiver, RollbackManager.STATUS_FAILURE_ROLLBACK_UNAVAILABLE,
                     "Rollback for package is already in progress.");
             return;
@@ -441,7 +441,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                         getHandler().post(() -> {
                             // We've now completed the rollback, so we mark it as no longer in
                             // progress.
-                            data.inProgress = false;
+                            data.restoreUserDataInProgress = false;
 
                             int status = result.getIntExtra(PackageInstaller.EXTRA_STATUS,
                                     PackageInstaller.STATUS_FAILURE);
@@ -469,7 +469,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                     }
             );
 
-            data.inProgress = true;
+            data.restoreUserDataInProgress = true;
             parentSession.commit(receiver.getIntentSender());
         } catch (IOException e) {
             Log.e(TAG, "Rollback failed", e);
@@ -1044,7 +1044,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             return;
         }
 
-        if (!rollbackData.inProgress) {
+        if (!rollbackData.restoreUserDataInProgress) {
             Log.e(TAG, "Request to restore userData for: " + packageName
                     + ", but no rollback in progress.");
             return;
