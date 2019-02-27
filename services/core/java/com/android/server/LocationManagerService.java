@@ -2643,33 +2643,33 @@ public class LocationManagerService extends ILocationManager.Stub {
         synchronized (mLock) {
             checkResolutionLevelIsSufficientForProviderUseLocked(allowedResolutionLevel,
                     request.getProvider());
-            // Require that caller can manage given document
-            boolean callerHasLocationHardwarePermission =
-                    mContext.checkCallingPermission(android.Manifest.permission.LOCATION_HARDWARE)
-                            == PERMISSION_GRANTED;
-            LocationRequest sanitizedRequest = createSanitizedRequest(request,
+        }
+        // Require that caller can manage given document
+        boolean callerHasLocationHardwarePermission =
+                mContext.checkCallingPermission(android.Manifest.permission.LOCATION_HARDWARE)
+                        == PERMISSION_GRANTED;
+        LocationRequest sanitizedRequest = createSanitizedRequest(request,
+                allowedResolutionLevel,
+                callerHasLocationHardwarePermission);
+
+        if (D) {
+            Log.d(TAG, "requestGeofence: " + sanitizedRequest + " " + geofence + " " + intent);
+        }
+
+        // geo-fence manager uses the public location API, need to clear identity
+        int uid = Binder.getCallingUid();
+        if (UserHandle.getUserId(uid) != UserHandle.USER_SYSTEM) {
+            // temporary measure until geofences work for secondary users
+            Log.w(TAG, "proximity alerts are currently available only to the primary user");
+            return;
+        }
+        long identity = Binder.clearCallingIdentity();
+        try {
+            mGeofenceManager.addFence(sanitizedRequest, geofence, intent,
                     allowedResolutionLevel,
-                    callerHasLocationHardwarePermission);
-
-            if (D) {
-                Log.d(TAG, "requestGeofence: " + sanitizedRequest + " " + geofence + " " + intent);
-            }
-
-            // geo-fence manager uses the public location API, need to clear identity
-            int uid = Binder.getCallingUid();
-            if (UserHandle.getUserId(uid) != UserHandle.USER_SYSTEM) {
-                // temporary measure until geofences work for secondary users
-                Log.w(TAG, "proximity alerts are currently available only to the primary user");
-                return;
-            }
-            long identity = Binder.clearCallingIdentity();
-            try {
-                mGeofenceManager.addFence(sanitizedRequest, geofence, intent,
-                        allowedResolutionLevel,
-                        uid, packageName);
-            } finally {
-                Binder.restoreCallingIdentity(identity);
-            }
+                    uid, packageName);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
         }
     }
 
