@@ -5800,6 +5800,7 @@ package android.provider {
     field public static final String NAMESPACE_GAME_DRIVER = "game_driver";
     field public static final String NAMESPACE_INPUT_NATIVE_BOOT = "input_native_boot";
     field public static final String NAMESPACE_NETD_NATIVE = "netd_native";
+    field public static final String NAMESPACE_SYSTEMUI = "systemui";
   }
 
   public static interface DeviceConfig.ActivityManager {
@@ -5840,14 +5841,6 @@ package android.provider {
 
   public static interface DeviceConfig.MediaNative {
     field public static final String NAMESPACE = "media_native";
-  }
-
-  public static interface DeviceConfig.NotificationAssistant {
-    field public static final String GENERATE_ACTIONS = "generate_actions";
-    field public static final String GENERATE_REPLIES = "generate_replies";
-    field public static final String MAX_MESSAGES_TO_EXTRACT = "max_messages_to_extract";
-    field public static final String MAX_SUGGESTIONS = "max_suggestions";
-    field public static final String NAMESPACE = "notification_assistant";
   }
 
   public static interface DeviceConfig.OnPropertyChangedListener {
