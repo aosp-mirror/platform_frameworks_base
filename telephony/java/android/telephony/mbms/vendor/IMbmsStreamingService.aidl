@@ -26,13 +26,17 @@ import android.telephony.mbms.StreamingServiceInfo;
  */
 interface IMbmsStreamingService
 {
+    @UnsupportedAppUsage
     int initialize(IMbmsStreamingSessionCallback callback, int subId);
 
+    @UnsupportedAppUsage
     int requestUpdateStreamingServices(int subId, in List<String> serviceClasses);
 
+    @UnsupportedAppUsage
     int startStreaming(int subId, String serviceId,
             IStreamingServiceCallback callback);
 
+    @UnsupportedAppUsage
     Uri getPlaybackUri(int subId, String serviceId);
 
     void stopStreaming(int subId, String serviceId);
