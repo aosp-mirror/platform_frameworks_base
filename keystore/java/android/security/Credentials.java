@@ -20,6 +20,7 @@ import com.android.org.bouncycastle.util.io.pem.PemObject;
 import com.android.org.bouncycastle.util.io.pem.PemReader;
 import com.android.org.bouncycastle.util.io.pem.PemWriter;
 
+import android.annotation.UnsupportedAppUsage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -122,6 +123,7 @@ public class Credentials {
      * Convert objects to a PEM format which is used for
      * CA_CERTIFICATE and USER_CERTIFICATE entries.
      */
+    @UnsupportedAppUsage
     public static byte[] convertToPem(Certificate... objects)
             throws IOException, CertificateEncodingException {
         ByteArrayOutputStream bao = new ByteArrayOutputStream();
