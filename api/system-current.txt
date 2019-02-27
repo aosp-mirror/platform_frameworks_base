@@ -3455,6 +3455,7 @@ package android.media {
     method @Deprecated public int abandonAudioFocus(android.media.AudioManager.OnAudioFocusChangeListener, android.media.AudioAttributes);
     method public void clearAudioServerStateCallback();
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public int dispatchAudioFocusChange(@NonNull android.media.AudioFocusInfo, int, @NonNull android.media.audiopolicy.AudioPolicy);
+    method @NonNull @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public android.media.audiopolicy.AudioProductStrategies getAudioProductStrategies();
     method public boolean isAudioServerRunning();
     method public boolean isHdmiSystemAudioSupported();
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public int registerAudioPolicy(@NonNull android.media.audiopolicy.AudioPolicy);
@@ -3647,6 +3648,7 @@ package android.media.audiopolicy {
     method @NonNull public android.media.AudioAttributes getAudioAttributesForProductStrategy(@NonNull android.media.audiopolicy.AudioProductStrategy);
     method @Nullable public android.media.audiopolicy.AudioProductStrategy getById(int);
     method public int getLegacyStreamTypeForAudioAttributes(@NonNull android.media.AudioAttributes);
+    method @Nullable public android.media.audiopolicy.AudioProductStrategy getProductStrategyForAudioAttributes(@NonNull android.media.AudioAttributes);
     method public java.util.Iterator<android.media.audiopolicy.AudioProductStrategy> iterator();
     method public int size();
     method public void writeToParcel(@NonNull android.os.Parcel, int);

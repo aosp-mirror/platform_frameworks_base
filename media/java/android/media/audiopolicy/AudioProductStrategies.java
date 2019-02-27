@@ -144,8 +144,10 @@ public final class AudioProductStrategies implements Iterable<AudioProductStrate
      * @hide
      * @param aa the {@link AudioAttributes} for which stream type is requested
      * @return the legacy stream type relevant for the given {@link AudioAttributes}.
-     *         If the product strategy is not associated to any stream, it returns STREAM_MUSIC.
-     *         If no product strategy supports the stream type, it returns STREAM_MUSIC.
+     *         If the product strategy is not associated to any stream, it returns
+     *         {@link AudioSystem#STREAM_MUSIC}.
+     *         If no product strategy supports the stream type, it returns
+     *         {@link AudioSystem#STREAM_MUSIC}.
      */
     @SystemApi
     public int getLegacyStreamTypeForAudioAttributes(@NonNull AudioAttributes aa) {
@@ -163,6 +165,19 @@ public final class AudioProductStrategies implements Iterable<AudioProductStrate
             }
         }
         return AudioSystem.STREAM_MUSIC;
+    }
+
+    /**
+     * @hide
+     * @param aa the {@link AudioAttributes} to be considered
+     * @return {@link AudioProductStrategy} supporting the given {@link AudioAttributes}.
+     *         null is returned if no match with given attributes.
+     */
+    @SystemApi
+    @Nullable
+    public AudioProductStrategy getProductStrategyForAudioAttributes(@NonNull AudioAttributes aa) {
+        Preconditions.checkNotNull(aa, "attributes must not be null");
+        return getById(native_get_product_strategies_from_audio_attributes(aa));
     }
 
     @Override
@@ -198,4 +213,7 @@ public final class AudioProductStrategies implements Iterable<AudioProductStrate
 
     private static native int native_list_audio_product_strategies(
             ArrayList<AudioProductStrategy> strategies);
+
+    private static native int native_get_product_strategies_from_audio_attributes(
+            AudioAttributes attributes);
 }

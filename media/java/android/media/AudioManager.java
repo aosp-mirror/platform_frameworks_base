@@ -36,6 +36,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.media.audiopolicy.AudioPolicy;
 import android.media.audiopolicy.AudioPolicy.AudioPolicyFocusListener;
+import android.media.audiopolicy.AudioProductStrategies;
 import android.media.projection.MediaProjection;
 import android.media.session.MediaController;
 import android.media.session.MediaSession;
@@ -5219,6 +5220,30 @@ public class AudioManager {
      */
     public static boolean isHapticPlaybackSupported() {
         return AudioSystem.isHapticPlaybackSupported();
+    }
+
+    /**
+     * @hide
+     * Introspection API to retrieve audio product strategies.
+     * When implementing {Car|Oem}AudioManager, use this method  to retrieve the collection of
+     * audio product strategies, which is indexed by a weakly typed index in order to be extended
+     * by OEM without any needs of AOSP patches.
+     * The {Car|Oem}AudioManager can expose API to build {@link AudioAttributes} for a given product
+     * strategy refered either by its index or human readable string. It will allow clients
+     * application to start streaming data using these {@link AudioAttributes} on the selected
+     * device by Audio Policy Engine.
+     * @return a (possibly zero-length) array of
+     *         {@see android.media.audiopolicy.AudioProductStrategy} objects.
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public @NonNull AudioProductStrategies getAudioProductStrategies() {
+        final IAudioService service = getService();
+        try {
+            return service.getAudioProductStrategies();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
 
