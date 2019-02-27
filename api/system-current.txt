@@ -5412,10 +5412,6 @@ package android.telecom {
     field public static final int CAPABILITY_MULTI_USER = 32; // 0x20
   }
 
-  public final class PhoneAccountSuggestion implements android.os.Parcelable {
-    ctor public PhoneAccountSuggestion(@NonNull android.telecom.PhoneAccountHandle, int, boolean);
-  }
-
   public class PhoneAccountSuggestionService extends android.app.Service {
     ctor public PhoneAccountSuggestionService();
     method public void onAccountSuggestionRequest(@NonNull String);
