@@ -232,7 +232,8 @@ public final class LoadedApk {
         mResources = Resources.getSystem();
         mDefaultClassLoader = ClassLoader.getSystemClassLoader();
         mAppComponentFactory = createAppFactory(mApplicationInfo, mDefaultClassLoader);
-        mClassLoader = mAppComponentFactory.instantiateClassLoader(mDefaultClassLoader);
+        mClassLoader = mAppComponentFactory.instantiateClassLoader(mDefaultClassLoader,
+                new ApplicationInfo(mApplicationInfo));
     }
 
     /**
@@ -243,19 +244,15 @@ public final class LoadedApk {
         mApplicationInfo = info;
         mDefaultClassLoader = classLoader;
         mAppComponentFactory = createAppFactory(info, mDefaultClassLoader);
-        mClassLoader = mAppComponentFactory.instantiateClassLoader(mDefaultClassLoader);
+        mClassLoader = mAppComponentFactory.instantiateClassLoader(mDefaultClassLoader,
+                new ApplicationInfo(mApplicationInfo));
     }
 
     private AppComponentFactory createAppFactory(ApplicationInfo appInfo, ClassLoader cl) {
         if (appInfo.appComponentFactory != null && cl != null) {
             try {
-                AppComponentFactory factory = (AppComponentFactory) cl.loadClass(
-                        appInfo.appComponentFactory).newInstance();
-                // Pass a copy of ApplicationInfo to the factory. Copying protects the framework
-                // from apps which would override the factory and change ApplicationInfo contents.
-                // ApplicationInfo is used to set up the default class loader.
-                factory.setApplicationInfo(new ApplicationInfo(appInfo));
-                return factory;
+                return (AppComponentFactory)
+                        cl.loadClass(appInfo.appComponentFactory).newInstance();
             } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
                 Slog.e(TAG, "Unable to instantiate appComponentFactory", e);
             }
@@ -729,8 +726,8 @@ public final class LoadedApk {
                 mDefaultClassLoader = ClassLoader.getSystemClassLoader();
             }
             mAppComponentFactory = createAppFactory(mApplicationInfo, mDefaultClassLoader);
-            mClassLoader = mAppComponentFactory.instantiateClassLoader(mDefaultClassLoader);
-
+            mClassLoader = mAppComponentFactory.instantiateClassLoader(mDefaultClassLoader,
+                    new ApplicationInfo(mApplicationInfo));
             return;
         }
 
@@ -821,7 +818,8 @@ public final class LoadedApk {
             }
 
             if (mClassLoader == null) {
-                mClassLoader = mAppComponentFactory.instantiateClassLoader(mDefaultClassLoader);
+                mClassLoader = mAppComponentFactory.instantiateClassLoader(mDefaultClassLoader,
+                        new ApplicationInfo(mApplicationInfo));
             }
 
             return;
@@ -935,8 +933,10 @@ public final class LoadedApk {
         // Call AppComponentFactory to select/create the main class loader of this app.
         // Since this may call code in the app, mDefaultClassLoader must be fully set up
         // before invoking the factory.
+        // Invoke with a copy of ApplicationInfo to protect against the app changing it.
         if (mClassLoader == null) {
-            mClassLoader = mAppComponentFactory.instantiateClassLoader(mDefaultClassLoader);
+            mClassLoader = mAppComponentFactory.instantiateClassLoader(mDefaultClassLoader,
+                    new ApplicationInfo(mApplicationInfo));
         }
     }
 
