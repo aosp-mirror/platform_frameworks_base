@@ -27,7 +27,6 @@ import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.Zygote;
-import com.android.internal.util.Preconditions;
 
 import java.io.BufferedWriter;
 import java.io.DataInputStream;
@@ -122,8 +121,9 @@ public class ZygoteProcess {
                 new LocalSocketAddress(Zygote.BLASTULA_POOL_SECONDARY_SOCKET_NAME,
                                        LocalSocketAddress.Namespace.RESERVED);
 
-        // TODO (chriswailes): Uncomment when the blastula pool can be enabled.
-//        fetchBlastulaPoolEnabledProp();
+        if (fetchBlastulaPoolEnabledProp()) {
+            informZygotesOfBlastulaPoolStatus();
+        }
     }
 
     public ZygoteProcess(LocalSocketAddress primarySocketAddress,
@@ -305,7 +305,6 @@ public class ZygoteProcess {
      * @param invokeWith null-ok the command to invoke with.
      * @param packageName null-ok the name of the package this process belongs to.
      * @param packagesForUid null-ok all the packages with the same uid as this process.
-     * @param visibleVols null-ok storage volumes that can be accessed by this process.
      * @param zygoteArgs Additional arguments to supply to the zygote process.
      *
      * @return An object that describes the result of the attempt to start the process.
@@ -323,23 +322,19 @@ public class ZygoteProcess {
                                                   @Nullable String invokeWith,
                                                   @Nullable String packageName,
                                                   @Nullable String[] packagesForUid,
-                                                  @Nullable String[] visibleVols,
                                                   @Nullable String sandboxId,
                                                   boolean useBlastulaPool,
                                                   @Nullable String[] zygoteArgs) {
-        if (fetchBlastulaPoolEnabledProp()) {
-            // TODO (chriswailes): Send the appropriate command to the zygotes
-            Log.i(LOG_TAG, "Blastula pool enabled property set to: " + mBlastulaPoolEnabled);
-
-            // This can't be enabled yet, but we do want to test this code path.
-            mBlastulaPoolEnabled = false;
+        // TODO (chriswailes): Is there a better place to check this value?
+        if (fetchBlastulaPoolEnabledPropWithMinInterval()) {
+            informZygotesOfBlastulaPoolStatus();
         }
 
         try {
             return startViaZygote(processClass, niceName, uid, gid, gids,
                     runtimeFlags, mountExternal, targetSdkVersion, seInfo,
                     abi, instructionSet, appDataDir, invokeWith, /*startChildZygote=*/false,
-                    packageName, packagesForUid, visibleVols, sandboxId,
+                    packageName, packagesForUid, sandboxId,
                     useBlastulaPool, zygoteArgs);
         } catch (ZygoteStartFailedEx ex) {
             Log.e(LOG_TAG,
@@ -387,7 +382,7 @@ public class ZygoteProcess {
      * @throws ZygoteStartFailedEx if process start failed for any reason
      */
     @GuardedBy("mLock")
-    private static Process.ProcessStartResult zygoteSendArgsAndGetResult(
+    private Process.ProcessStartResult zygoteSendArgsAndGetResult(
             ZygoteState zygoteState, boolean useBlastulaPool, ArrayList<String> args)
             throws ZygoteStartFailedEx {
         // Throw early if any of the arguments are malformed. This means we can
@@ -415,7 +410,7 @@ public class ZygoteProcess {
         Process.ProcessStartResult result = new Process.ProcessStartResult();
 
         // TODO (chriswailes): Move branch body into separate function.
-        if (useBlastulaPool && isValidBlastulaCommand(args)) {
+        if (useBlastulaPool && mBlastulaPoolEnabled && isValidBlastulaCommand(args)) {
             LocalSocket blastulaSessionSocket = null;
 
             try {
@@ -444,7 +439,7 @@ public class ZygoteProcess {
                 // If there was an IOException using the blastula pool we will log the error and
                 // attempt to start the process through the Zygote.
                 Log.e(LOG_TAG, "IO Exception while communicating with blastula pool - "
-                               + ex.toString());
+                               + ex.getMessage());
             } finally {
                 try {
                     blastulaSessionSocket.close();
@@ -531,7 +526,6 @@ public class ZygoteProcess {
      * that has its state cloned from this zygote process.
      * @param packageName null-ok the name of the package this process belongs to.
      * @param packagesForUid null-ok all the packages with the same uid as this process.
-     * @param visibleVols null-ok storage volumes that can be accessed by this process.
      * @param extraArgs Additional arguments to supply to the zygote process.
      * @return An object that describes the result of the attempt to start the process.
      * @throws ZygoteStartFailedEx if process start failed for any reason
@@ -550,7 +544,6 @@ public class ZygoteProcess {
                                                       boolean startChildZygote,
                                                       @Nullable String packageName,
                                                       @Nullable String[] packagesForUid,
-                                                      @Nullable String[] visibleVols,
                                                       @Nullable String sandboxId,
                                                       boolean useBlastulaPool,
                                                       @Nullable String[] extraArgs)
@@ -638,19 +631,6 @@ public class ZygoteProcess {
             argsForZygote.add(sb.toString());
         }
 
-        if (visibleVols != null && visibleVols.length > 0) {
-            final StringBuilder sb = new StringBuilder();
-            sb.append("--visible-vols=");
-
-            for (int i = 0; i < visibleVols.length; ++i) {
-                if (i != 0) {
-                    sb.append(',');
-                }
-                sb.append(visibleVols[i]);
-            }
-            argsForZygote.add(sb.toString());
-        }
-
         if (sandboxId != null) {
             argsForZygote.add("--sandbox-id=" + sandboxId);
         }
@@ -665,7 +645,7 @@ public class ZygoteProcess {
 
         synchronized(mLock) {
             return zygoteSendArgsAndGetResult(openZygoteSocketIfNeeded(abi),
-                                              useBlastulaPool && mBlastulaPoolEnabled,
+                                              useBlastulaPool,
                                               argsForZygote);
         }
     }
@@ -683,6 +663,10 @@ public class ZygoteProcess {
                     Zygote.getSystemPropertyBoolean(
                             DeviceConfig.RuntimeNative.BLASTULA_POOL_ENABLED,
                             Boolean.parseBoolean(BLASTULA_POOL_ENABLED_DEFAULT));
+        }
+
+        if (origVal != mBlastulaPoolEnabled) {
+            Log.i(LOG_TAG, "blastulaPoolEnabled = " + mBlastulaPoolEnabled);
         }
 
         return origVal != mBlastulaPoolEnabled;
@@ -847,49 +831,57 @@ public class ZygoteProcess {
     }
 
     /**
+     * Creates a ZygoteState for the primary zygote if it doesn't exist or has been disconnected.
+     */
+    @GuardedBy("mLock")
+    private void attemptConnectionToPrimaryZygote() throws IOException {
+        if (primaryZygoteState == null || primaryZygoteState.isClosed()) {
+            primaryZygoteState =
+                    ZygoteState.connect(mZygoteSocketAddress, mBlastulaPoolSocketAddress);
+
+            maybeSetApiBlacklistExemptions(primaryZygoteState, false);
+            maybeSetHiddenApiAccessLogSampleRate(primaryZygoteState);
+        }
+    }
+
+    /**
+     * Creates a ZygoteState for the secondary zygote if it doesn't exist or has been disconnected.
+     */
+    @GuardedBy("mLock")
+    private void attemptConnectionToSecondaryZygote() throws IOException {
+        if (secondaryZygoteState == null || secondaryZygoteState.isClosed()) {
+            secondaryZygoteState =
+                    ZygoteState.connect(mZygoteSecondarySocketAddress,
+                            mBlastulaPoolSecondarySocketAddress);
+
+            maybeSetApiBlacklistExemptions(secondaryZygoteState, false);
+            maybeSetHiddenApiAccessLogSampleRate(secondaryZygoteState);
+        }
+    }
+
+    /**
      * Tries to open a session socket to a Zygote process with a compatible ABI if one is not
      * already open. If a compatible session socket is already open that session socket is returned.
      * This function may block and may have to try connecting to multiple Zygotes to find the
      * appropriate one.  Requires that mLock be held.
      */
     @GuardedBy("mLock")
-    private ZygoteState openZygoteSocketIfNeeded(String abi)
-            throws ZygoteStartFailedEx {
+    private ZygoteState openZygoteSocketIfNeeded(String abi) throws ZygoteStartFailedEx {
+        try {
+            attemptConnectionToPrimaryZygote();
 
-        Preconditions.checkState(Thread.holdsLock(mLock), "ZygoteProcess lock not held");
-
-        if (primaryZygoteState == null || primaryZygoteState.isClosed()) {
-            try {
-                primaryZygoteState =
-                    ZygoteState.connect(mZygoteSocketAddress, mBlastulaPoolSocketAddress);
-            } catch (IOException ioe) {
-                throw new ZygoteStartFailedEx("Error connecting to primary zygote", ioe);
+            if (primaryZygoteState.matches(abi)) {
+                return primaryZygoteState;
             }
 
-            maybeSetApiBlacklistExemptions(primaryZygoteState, false);
-            maybeSetHiddenApiAccessLogSampleRate(primaryZygoteState);
-        }
+            // The primary zygote didn't match. Try the secondary.
+            attemptConnectionToSecondaryZygote();
 
-        if (primaryZygoteState.matches(abi)) {
-            return primaryZygoteState;
-        }
-
-        // The primary zygote didn't match. Try the secondary.
-        if (secondaryZygoteState == null || secondaryZygoteState.isClosed()) {
-            try {
-                secondaryZygoteState =
-                    ZygoteState.connect(mZygoteSecondarySocketAddress,
-                                        mBlastulaPoolSecondarySocketAddress);
-            } catch (IOException ioe) {
-                throw new ZygoteStartFailedEx("Error connecting to secondary zygote", ioe);
+            if (secondaryZygoteState.matches(abi)) {
+                return secondaryZygoteState;
             }
-
-            maybeSetApiBlacklistExemptions(secondaryZygoteState, false);
-            maybeSetHiddenApiAccessLogSampleRate(secondaryZygoteState);
-        }
-
-        if (secondaryZygoteState.matches(abi)) {
-            return secondaryZygoteState;
+        } catch (IOException ioe) {
+            throw new ZygoteStartFailedEx("Error connecting to zygote", ioe);
         }
 
         throw new ZygoteStartFailedEx("Unsupported zygote ABI: " + abi);
@@ -1015,6 +1007,57 @@ public class ZygoteProcess {
     }
 
     /**
+     * Sends messages to the zygotes telling them to change the status of their blastula pools.  If
+     * this notification fails the ZygoteProcess will fall back to the previous behavior.
+     */
+    private void informZygotesOfBlastulaPoolStatus() {
+        final String command = "1\n--blastula-pool-enabled=" + mBlastulaPoolEnabled + "\n";
+
+        synchronized (mLock) {
+            try {
+                attemptConnectionToPrimaryZygote();
+
+                primaryZygoteState.mZygoteOutputWriter.write(command);
+                primaryZygoteState.mZygoteOutputWriter.flush();
+            } catch (IOException ioe) {
+                mBlastulaPoolEnabled = !mBlastulaPoolEnabled;
+                Log.w(LOG_TAG, "Failed to inform zygotes of blastula pool status: "
+                        + ioe.getMessage());
+                return;
+            }
+
+            try {
+                attemptConnectionToSecondaryZygote();
+
+                try {
+                    secondaryZygoteState.mZygoteOutputWriter.write(command);
+                    secondaryZygoteState.mZygoteOutputWriter.flush();
+
+                    // Wait for the secondary Zygote to finish its work.
+                    secondaryZygoteState.mZygoteInputStream.readInt();
+                } catch (IOException ioe) {
+                    throw new IllegalStateException(
+                            "Blastula pool state change cause an irrecoverable error",
+                            ioe);
+                }
+            } catch (IOException ioe) {
+                // No secondary zygote present.  This is expected on some devices.
+            }
+
+            // Wait for the response from the primary zygote here so the primary/secondary zygotes
+            // can work concurrently.
+            try {
+                // Wait for the primary zygote to finish its work.
+                primaryZygoteState.mZygoteInputStream.readInt();
+            } catch (IOException ioe) {
+                throw new IllegalStateException(
+                        "Blastula pool state change cause an irrecoverable error",
+                        ioe);
+            }
+        }
+    }
+
+    /**
      * Starts a new zygote process as a child of this zygote. This is used to create
      * secondary zygotes that inherit data from the zygote that this object
      * communicates with. This returns a new ZygoteProcess representing a connection
@@ -1061,7 +1104,7 @@ public class ZygoteProcess {
                     gids, runtimeFlags, 0 /* mountExternal */, 0 /* targetSdkVersion */, seInfo,
                     abi, instructionSet, null /* appDataDir */, null /* invokeWith */,
                     true /* startChildZygote */, null /* packageName */,
-                    null /* packagesForUid */, null /* visibleVolumes */, null /* sandboxId */,
+                    null /* packagesForUid */, null /* sandboxId */,
                     false /* useBlastulaPool */, extraArgs);
         } catch (ZygoteStartFailedEx ex) {
             throw new RuntimeException("Starting child-zygote through Zygote failed", ex);

@@ -30,7 +30,6 @@ import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
@@ -96,6 +95,7 @@ public class RecentTasksTest extends ActivityTestsBase {
     private TestActivityTaskManagerService mTestService;
     private ActivityDisplay mDisplay;
     private ActivityDisplay mOtherDisplay;
+    private ActivityDisplay mSingleTaskDisplay;
     private ActivityStack mStack;
     private ActivityStack mHomeStack;
     private TestTaskPersister mTaskPersister;
@@ -547,6 +547,41 @@ public class RecentTasksTest extends ActivityTestsBase {
         assertTrimmed(mTasks.get(0), mTasks.get(1));
     }
 
+    /**
+     * Tests that tasks on singleTaskDisplay are not visible and not trimmed/removed.
+     */
+    @Test
+    public void testVisibleTasks_singleTaskDisplay() {
+        mRecentTasks.setOnlyTestVisibleRange();
+        mRecentTasks.setParameters(-1 /* min */, 3 /* max */, -1 /* ms */);
+
+        ActivityStack singleTaskStack = mSingleTaskDisplay.createStack(
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
+
+        TaskRecord excludedTask1 = createTaskBuilder(".ExcludedTask1")
+                .setStack(singleTaskStack)
+                .build();
+
+        assertFalse("Tasks on singleTaskDisplay should not be visible recents",
+                mRecentTasks.isVisibleRecentTask(excludedTask1));
+
+        mRecentTasks.add(excludedTask1);
+
+        // Add N+1 visible tasks.
+        mRecentTasks.add(mTasks.get(0));
+        mRecentTasks.add(mTasks.get(1));
+        mRecentTasks.add(mTasks.get(2));
+        mRecentTasks.add(mTasks.get(3));
+
+        // excludedTask is not trimmed.
+        assertTrimmed(mTasks.get(0));
+
+        mRecentTasks.removeAllVisibleTasks();
+
+        // Only visible tasks removed.
+        assertTrimmed(mTasks.get(0), mTasks.get(1), mTasks.get(2), mTasks.get(3));
+    }
+
     @Test
     public void testBackStackTasks_expectNoTrim() {
         mRecentTasks.setParameters(-1 /* min */, 1 /* max */, -1 /* ms */);
@@ -879,8 +914,12 @@ public class RecentTasksTest extends ActivityTestsBase {
             super.createDefaultDisplay();
             mDisplay = mRootActivityContainer.getActivityDisplay(DEFAULT_DISPLAY);
             mOtherDisplay = TestActivityDisplay.create(mTestStackSupervisor, DEFAULT_DISPLAY + 1);
+            mSingleTaskDisplay = TestActivityDisplay.create(mTestStackSupervisor,
+                    DEFAULT_DISPLAY + 2);
+            mSingleTaskDisplay.setDisplayToSingleTaskInstance();
             mRootActivityContainer.addChild(mOtherDisplay, ActivityDisplay.POSITION_TOP);
             mRootActivityContainer.addChild(mDisplay, ActivityDisplay.POSITION_TOP);
+            mRootActivityContainer.addChild(mSingleTaskDisplay, ActivityDisplay.POSITION_TOP);
         }
     }
 

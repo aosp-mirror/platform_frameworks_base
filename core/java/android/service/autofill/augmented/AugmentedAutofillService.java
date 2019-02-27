@@ -209,7 +209,7 @@ public abstract class AugmentedAutofillService extends Service {
         } else {
             // TODO(b/123099468): figure out if it's ok to reuse the proxy; add logging
             if (DEBUG) Log.d(TAG, "Reusing proxy for session " + sessionId);
-            proxy.update(focusedId, focusedValue);
+            proxy.update(focusedId, focusedValue, callback);
         }
         // TODO(b/123101711): set cancellation signal
         final CancellationSignal cancellationSignal = null;
@@ -299,13 +299,14 @@ public abstract class AugmentedAutofillService extends Service {
         private final Object mLock = new Object();
         private final IAugmentedAutofillManagerClient mClient;
         private final int mSessionId;
-        private final IFillCallback mCallback;
         public final int taskId;
         public final ComponentName componentName;
         @GuardedBy("mLock")
         private AutofillId mFocusedId;
         @GuardedBy("mLock")
         private AutofillValue mFocusedValue;
+        @GuardedBy("mLock")
+        private IFillCallback mCallback;
 
         /**
          * Id of the last field that cause the Autofill UI to be shown.
@@ -316,8 +317,8 @@ public abstract class AugmentedAutofillService extends Service {
         private AutofillId mLastShownId;
 
         // Objects used to log metrics
-        private final long mRequestTime;
-        private long mOnSuccessTime;
+        private final long mFirstRequestTime;
+        private long mFirstOnSuccessTime;
         private long mUiFirstShownTime;
         private long mUiFirstDestroyedTime;
 
@@ -338,7 +339,7 @@ public abstract class AugmentedAutofillService extends Service {
             this.componentName = componentName;
             this.mFocusedId = focusedId;
             this.mFocusedValue = focusedValue;
-            this.mRequestTime = requestTime;
+            this.mFirstRequestTime = requestTime;
             // TODO(b/123099468): linkToDeath
         }
 
@@ -400,11 +401,18 @@ public abstract class AugmentedAutofillService extends Service {
             mClient.requestHideFillUi(mSessionId, mFocusedId);
         }
 
-        private void update(@NonNull AutofillId focusedId, @NonNull AutofillValue focusedValue) {
+        private void update(@NonNull AutofillId focusedId, @NonNull AutofillValue focusedValue,
+                @NonNull IFillCallback callback) {
             synchronized (mLock) {
                 // TODO(b/123099468): should we close the popupwindow if the focused id changed?
                 mFocusedId = focusedId;
                 mFocusedValue = focusedValue;
+                if (mCallback != null) {
+                    // TODO(b/123101711): we need to check whether the previous request was
+                    //  completed or not, and if not, cancel it first.
+                    Slog.d(TAG, "mCallback is updated.");
+                }
+                mCallback = callback;
             }
         }
 
@@ -426,11 +434,11 @@ public abstract class AugmentedAutofillService extends Service {
         public void report(@ReportEvent int event) {
             switch (event) {
                 case REPORT_EVENT_ON_SUCCESS:
-                    if (mOnSuccessTime == 0) {
-                        mOnSuccessTime = SystemClock.elapsedRealtime();
+                    if (mFirstOnSuccessTime == 0) {
+                        mFirstOnSuccessTime = SystemClock.elapsedRealtime();
                         if (DEBUG) {
-                            Slog.d(TAG, "Service responsed in "
-                                    + TimeUtils.formatDuration(mOnSuccessTime - mRequestTime));
+                            Slog.d(TAG, "Service responded in " + TimeUtils.formatDuration(
+                                    mFirstOnSuccessTime - mFirstRequestTime));
                         }
                     }
                     try {
@@ -443,8 +451,8 @@ public abstract class AugmentedAutofillService extends Service {
                     if (mUiFirstShownTime == 0) {
                         mUiFirstShownTime = SystemClock.elapsedRealtime();
                         if (DEBUG) {
-                            Slog.d(TAG, "UI shown in "
-                                    + TimeUtils.formatDuration(mUiFirstShownTime - mRequestTime));
+                            Slog.d(TAG, "UI shown in " + TimeUtils.formatDuration(
+                                    mUiFirstShownTime - mFirstRequestTime));
                         }
                     }
                     break;
@@ -452,9 +460,8 @@ public abstract class AugmentedAutofillService extends Service {
                     if (mUiFirstDestroyedTime == 0) {
                         mUiFirstDestroyedTime = SystemClock.elapsedRealtime();
                         if (DEBUG) {
-                            Slog.d(TAG, "UI destroyed in "
-                                    + TimeUtils.formatDuration(
-                                            mUiFirstDestroyedTime - mRequestTime));
+                            Slog.d(TAG, "UI destroyed in " + TimeUtils.formatDuration(
+                                    mUiFirstDestroyedTime - mFirstRequestTime));
                         }
                     }
                     break;
@@ -486,20 +493,20 @@ public abstract class AugmentedAutofillService extends Service {
                 pw.print(prefix); pw.println("smartSuggestion:");
                 mSmartSuggestion.dump(prefix2, pw);
             }
-            if (mOnSuccessTime > 0) {
-                final long responseTime = mOnSuccessTime - mRequestTime;
+            if (mFirstOnSuccessTime > 0) {
+                final long responseTime = mFirstOnSuccessTime - mFirstRequestTime;
                 pw.print(prefix); pw.print("response time: ");
                 TimeUtils.formatDuration(responseTime, pw); pw.println();
             }
 
             if (mUiFirstShownTime > 0) {
-                final long uiRenderingTime = mUiFirstShownTime - mRequestTime;
+                final long uiRenderingTime = mUiFirstShownTime - mFirstRequestTime;
                 pw.print(prefix); pw.print("UI rendering time: ");
                 TimeUtils.formatDuration(uiRenderingTime, pw); pw.println();
             }
 
             if (mUiFirstDestroyedTime > 0) {
-                final long uiTotalTime = mUiFirstDestroyedTime - mRequestTime;
+                final long uiTotalTime = mUiFirstDestroyedTime - mFirstRequestTime;
                 pw.print(prefix); pw.print("UI life time: ");
                 TimeUtils.formatDuration(uiTotalTime, pw); pw.println();
             }
@@ -510,6 +517,7 @@ public abstract class AugmentedAutofillService extends Service {
                 if (mFillWindow != null) {
                     if (DEBUG) Log.d(TAG, "destroying window");
                     mFillWindow.destroy();
+                    mFillWindow = null;
                 }
             }
         }

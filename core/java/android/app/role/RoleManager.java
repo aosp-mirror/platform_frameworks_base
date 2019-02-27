@@ -71,10 +71,8 @@ public final class RoleManager {
     /**
      * The name of the assistant app role.
      *
-     * @hide
+     * @see android.service.voice.VoiceInteractionService
      */
-    @SystemApi
-    @TestApi
     public static final String ROLE_ASSISTANT = "android.app.role.ASSISTANT";
 
     /**
@@ -149,9 +147,6 @@ public final class RoleManager {
      * place the call through a call redirection service.
      *
      * @see android.telecom.CallRedirectionService
-     *
-     * TODO: STOPSHIP: Make name of required roles public API
-     * @hide
      */
     public static final String ROLE_CALL_REDIRECTION = "android.app.role.CALL_REDIRECTION";
 
@@ -159,9 +154,6 @@ public final class RoleManager {
      * The name of the call screening and caller id role.
      *
      * @see android.telecom.CallScreeningService
-     *
-     * TODO: STOPSHIP: Make name of required roles public API
-     * @hide
      */
     public static final String ROLE_CALL_SCREENING = "android.app.role.CALL_SCREENING";
 

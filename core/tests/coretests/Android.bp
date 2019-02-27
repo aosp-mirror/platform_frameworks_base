@@ -1,0 +1,113 @@
+android_test {
+    name: "FrameworksCoreTests",
+
+    srcs: [
+        "src/**/*.java",
+        "src/**/I*.aidl",
+        "DisabledTestApp/src/**/*.java",
+        "EnabledTestApp/src/**/*.java",
+        "BinderProxyCountingTestApp/src/**/*.java",
+        "BinderProxyCountingTestService/src/**/*.java",
+        "aidl/**/I*.aidl",
+    ],
+
+    aidl: {
+        local_include_dirs: ["aidl"],
+    },
+
+    dxflags: ["--core-library"],
+
+    aaptflags: [
+        "-0 .dat",
+        "-0 .gld",
+        "-c fa",
+    ],
+    static_libs: [
+        "frameworks-base-testutils",
+        "core-tests-support",
+        "android-common",
+        "frameworks-core-util-lib",
+        "mockwebserver",
+        "guava",
+        "androidx.test.espresso.core",
+        "androidx.test.ext.junit",
+        "androidx.test.runner",
+        "androidx.test.rules",
+        "mockito-target-minus-junit4",
+        "ub-uiautomator",
+        "platform-test-annotations",
+        "truth-prebuilt",
+        "print-test-util-lib",
+        "testng",
+    ],
+
+    libs: [
+        "android.test.runner",
+        "telephony-common",
+        "testables",
+        "org.apache.http.legacy",
+        "android.test.base",
+        "android.test.mock",
+        "framework-atb-backward-compatibility",
+    ],
+
+    platform_apis: true,
+    test_suites: ["device-tests"],
+
+    certificate: "platform",
+
+    resource_dirs: ["res"],
+    resource_zips: [":FrameworksCoreTests_apks_as_resources"],
+}
+
+// Rules to copy all the test apks to the intermediate raw resource directory
+java_genrule {
+    name: "FrameworksCoreTests_apks_as_resources",
+    srcs: [
+        ":FrameworksCoreTests_install",
+        ":FrameworksCoreTests_install_bad_dex",
+        ":FrameworksCoreTests_install_complete_package_info",
+        ":FrameworksCoreTests_install_decl_perm",
+        ":FrameworksCoreTests_install_jni_lib_open_from_apk",
+        ":FrameworksCoreTests_install_loc_auto",
+        ":FrameworksCoreTests_install_loc_internal",
+        ":FrameworksCoreTests_install_loc_sdcard",
+        ":FrameworksCoreTests_install_loc_unspecified",
+        ":FrameworksCoreTests_install_multi_package",
+        ":FrameworksCoreTests_install_split_base",
+        ":FrameworksCoreTests_install_split_feature_a",
+        ":FrameworksCoreTests_install_use_perm_good",
+        ":FrameworksCoreTests_install_uses_feature",
+        ":FrameworksCoreTests_install_verifier_bad",
+        ":FrameworksCoreTests_install_verifier_good",
+        ":FrameworksCoreTests_keyset_permdef_sa_unone",
+        ":FrameworksCoreTests_keyset_permuse_sa_ua_ub",
+        ":FrameworksCoreTests_keyset_permuse_sb_ua_ub",
+        ":FrameworksCoreTests_keyset_sab_ua",
+        ":FrameworksCoreTests_keyset_sa_ua",
+        ":FrameworksCoreTests_keyset_sa_uab",
+        ":FrameworksCoreTests_keyset_sa_ua_ub",
+        ":FrameworksCoreTests_keyset_sa_ub",
+        ":FrameworksCoreTests_keyset_sa_unone",
+        ":FrameworksCoreTests_keyset_sau_ub",
+        ":FrameworksCoreTests_keyset_sb_ua",
+        ":FrameworksCoreTests_keyset_sb_ub",
+        ":FrameworksCoreTests_keyset_splata_api",
+        ":FrameworksCoreTests_keyset_splat_api",
+        ":FrameworksCoreTests_locales",
+        ":FrameworksCoreTests_version_1",
+        ":FrameworksCoreTests_version_1_diff",
+        ":FrameworksCoreTests_version_1_nosys",
+        ":FrameworksCoreTests_version_2",
+        ":FrameworksCoreTests_version_2_diff",
+        ":FrameworksCoreTests_version_3",
+    ],
+    out: ["FrameworkCoreTests_apks_as_resources.res.zip"],
+    tools: ["soong_zip"],
+
+    cmd: "mkdir -p $(genDir)/res/raw && " +
+        "for i in $(in); do " +
+        "  x=$${i##*FrameworksCoreTests_}; echo $${x}; cp $$i $(genDir)/res/raw/$${x%.apk};" +
+        "done && " +
+        "$(location soong_zip) -o $(out) -C $(genDir)/res -D $(genDir)/res",
+}

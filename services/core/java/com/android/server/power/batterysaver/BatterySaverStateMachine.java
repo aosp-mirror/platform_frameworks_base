@@ -280,7 +280,7 @@ public class BatterySaverStateMachine {
                 Settings.Global.DYNAMIC_POWER_SAVINGS_DISABLE_THRESHOLD,
                 mDynamicPowerSavingsDefaultDisableThreshold);
         final boolean isStickyAutoDisableEnabled = getGlobalSetting(
-                Settings.Global.LOW_POWER_MODE_STICKY_AUTO_DISABLE_ENABLED, 0) != 0;
+                Settings.Global.LOW_POWER_MODE_STICKY_AUTO_DISABLE_ENABLED, 1) != 0;
         final int stickyAutoDisableThreshold = getGlobalSetting(
                 Settings.Global.LOW_POWER_MODE_STICKY_AUTO_DISABLE_LEVEL, 90);
 

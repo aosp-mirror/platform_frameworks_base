@@ -29,7 +29,6 @@ import android.os.UserManager;
 import android.provider.Browser;
 import android.provider.CalendarContract;
 import android.provider.ContactsContract;
-import android.view.textclassifier.TextClassifierImpl.LabeledIntent;
 
 import com.google.android.textclassifier.AnnotatorModel;
 
@@ -100,8 +99,7 @@ public final class LegacyIntentFactory implements IntentFactory {
             IntentFactory.insertTranslateAction(actions, context, text);
         }
         actions.forEach(
-                action -> action.getIntent()
-                        .putExtra(TextClassifier.EXTRA_FROM_TEXT_CLASSIFIER, true));
+                action -> action.intent.putExtra(TextClassifier.EXTRA_FROM_TEXT_CLASSIFIER, true));
         return actions;
     }
 
@@ -110,12 +108,14 @@ public final class LegacyIntentFactory implements IntentFactory {
         final List<LabeledIntent> actions = new ArrayList<>();
         actions.add(new LabeledIntent(
                 context.getString(com.android.internal.R.string.email),
+                /* titleWithEntity */ null,
                 context.getString(com.android.internal.R.string.email_desc),
                 new Intent(Intent.ACTION_SENDTO)
                         .setData(Uri.parse(String.format("mailto:%s", text))),
                 LabeledIntent.DEFAULT_REQUEST_CODE));
         actions.add(new LabeledIntent(
                 context.getString(com.android.internal.R.string.add_contact),
+                /* titleWithEntity */ null,
                 context.getString(com.android.internal.R.string.add_contact_desc),
                 new Intent(Intent.ACTION_INSERT_OR_EDIT)
                         .setType(ContactsContract.Contacts.CONTENT_ITEM_TYPE)
@@ -133,6 +133,7 @@ public final class LegacyIntentFactory implements IntentFactory {
         if (!userRestrictions.getBoolean(UserManager.DISALLOW_OUTGOING_CALLS, false)) {
             actions.add(new LabeledIntent(
                     context.getString(com.android.internal.R.string.dial),
+                    /* titleWithEntity */ null,
                     context.getString(com.android.internal.R.string.dial_desc),
                     new Intent(Intent.ACTION_DIAL).setData(
                             Uri.parse(String.format("tel:%s", text))),
@@ -140,6 +141,7 @@ public final class LegacyIntentFactory implements IntentFactory {
         }
         actions.add(new LabeledIntent(
                 context.getString(com.android.internal.R.string.add_contact),
+                /* titleWithEntity */ null,
                 context.getString(com.android.internal.R.string.add_contact_desc),
                 new Intent(Intent.ACTION_INSERT_OR_EDIT)
                         .setType(ContactsContract.Contacts.CONTENT_ITEM_TYPE)
@@ -148,6 +150,7 @@ public final class LegacyIntentFactory implements IntentFactory {
         if (!userRestrictions.getBoolean(UserManager.DISALLOW_SMS, false)) {
             actions.add(new LabeledIntent(
                     context.getString(com.android.internal.R.string.sms),
+                    /* titleWithEntity */ null,
                     context.getString(com.android.internal.R.string.sms_desc),
                     new Intent(Intent.ACTION_SENDTO)
                             .setData(Uri.parse(String.format("smsto:%s", text))),
@@ -163,6 +166,7 @@ public final class LegacyIntentFactory implements IntentFactory {
             final String encText = URLEncoder.encode(text, "UTF-8");
             actions.add(new LabeledIntent(
                     context.getString(com.android.internal.R.string.map),
+                    /* titleWithEntity */ null,
                     context.getString(com.android.internal.R.string.map_desc),
                     new Intent(Intent.ACTION_VIEW)
                             .setData(Uri.parse(String.format("geo:0,0?q=%s", encText))),
@@ -181,6 +185,7 @@ public final class LegacyIntentFactory implements IntentFactory {
         final List<LabeledIntent> actions = new ArrayList<>();
         actions.add(new LabeledIntent(
                 context.getString(com.android.internal.R.string.browse),
+                /* titleWithEntity */ null,
                 context.getString(com.android.internal.R.string.browse_desc),
                 new Intent(Intent.ACTION_VIEW)
                         .setDataAndNormalize(Uri.parse(text))
@@ -211,6 +216,7 @@ public final class LegacyIntentFactory implements IntentFactory {
         final List<LabeledIntent> actions = new ArrayList<>();
         actions.add(new LabeledIntent(
                 context.getString(com.android.internal.R.string.view_flight),
+                /* titleWithEntity */ null,
                 context.getString(com.android.internal.R.string.view_flight_desc),
                 new Intent(Intent.ACTION_WEB_SEARCH)
                         .putExtra(SearchManager.QUERY, text),
@@ -225,6 +231,7 @@ public final class LegacyIntentFactory implements IntentFactory {
         ContentUris.appendId(builder, parsedTime.toEpochMilli());
         return new LabeledIntent(
                 context.getString(com.android.internal.R.string.view_calendar),
+                /* titleWithEntity */ null,
                 context.getString(com.android.internal.R.string.view_calendar_desc),
                 new Intent(Intent.ACTION_VIEW).setData(builder.build()),
                 LabeledIntent.DEFAULT_REQUEST_CODE);
@@ -236,6 +243,7 @@ public final class LegacyIntentFactory implements IntentFactory {
         final boolean isAllDay = TextClassifier.TYPE_DATE.equals(type);
         return new LabeledIntent(
                 context.getString(com.android.internal.R.string.add_calendar_event),
+                /* titleWithEntity */ null,
                 context.getString(com.android.internal.R.string.add_calendar_event_desc),
                 new Intent(Intent.ACTION_INSERT)
                         .setData(CalendarContract.Events.CONTENT_URI)
@@ -252,6 +260,7 @@ public final class LegacyIntentFactory implements IntentFactory {
         final List<LabeledIntent> actions = new ArrayList<>();
         actions.add(new LabeledIntent(
                 context.getString(com.android.internal.R.string.define),
+                /* titleWithEntity */ null,
                 context.getString(com.android.internal.R.string.define_desc),
                 new Intent(Intent.ACTION_DEFINE)
                         .putExtra(Intent.EXTRA_TEXT, text),

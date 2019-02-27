@@ -42,29 +42,29 @@ public final class TemplateIntentFactory {
     private static final String TAG = TextClassifier.DEFAULT_LOG_TAG;
 
     @NonNull
-    public List<TextClassifierImpl.LabeledIntent> create(
+    public List<LabeledIntent> create(
             @Nullable RemoteActionTemplate[] remoteActionTemplates) {
         if (ArrayUtils.isEmpty(remoteActionTemplates)) {
             return Collections.emptyList();
         }
-        final List<TextClassifierImpl.LabeledIntent> labeledIntents = new ArrayList<>();
+        final List<LabeledIntent> labeledIntents = new ArrayList<>();
         for (RemoteActionTemplate remoteActionTemplate : remoteActionTemplates) {
             if (!isValidTemplate(remoteActionTemplate)) {
                 Log.w(TAG, "Invalid RemoteActionTemplate skipped.");
                 continue;
             }
             labeledIntents.add(
-                    new TextClassifierImpl.LabeledIntent(
-                            remoteActionTemplate.title,
+                    new LabeledIntent(
+                            remoteActionTemplate.titleWithoutEntity,
+                            remoteActionTemplate.titleWithEntity,
                             remoteActionTemplate.description,
                             createIntent(remoteActionTemplate),
                             remoteActionTemplate.requestCode == null
-                                    ? TextClassifierImpl.LabeledIntent.DEFAULT_REQUEST_CODE
+                                    ? LabeledIntent.DEFAULT_REQUEST_CODE
                                     : remoteActionTemplate.requestCode));
         }
         labeledIntents.forEach(
-                action -> action.getIntent()
-                        .putExtra(TextClassifier.EXTRA_FROM_TEXT_CLASSIFIER, true));
+                action -> action.intent.putExtra(TextClassifier.EXTRA_FROM_TEXT_CLASSIFIER, true));
         return labeledIntents;
     }
 
@@ -73,7 +73,8 @@ public final class TemplateIntentFactory {
             Log.w(TAG, "Invalid RemoteActionTemplate: is null");
             return false;
         }
-        if (TextUtils.isEmpty(remoteActionTemplate.title)) {
+        if (TextUtils.isEmpty(remoteActionTemplate.titleWithEntity)
+                && TextUtils.isEmpty(remoteActionTemplate.titleWithoutEntity)) {
             Log.w(TAG, "Invalid RemoteActionTemplate: title is null");
             return false;
         }

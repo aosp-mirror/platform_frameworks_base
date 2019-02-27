@@ -70,6 +70,8 @@ private:
 
     void dispatchVsync(nsecs_t timestamp, PhysicalDisplayId displayId, uint32_t count) override;
     void dispatchHotplug(nsecs_t timestamp, PhysicalDisplayId displayId, bool connected) override;
+    void dispatchConfigChanged(nsecs_t timestamp, PhysicalDisplayId displayId,
+                               int32_t configId) override;
 
     void scheduleCallbacks();
 
@@ -162,6 +164,13 @@ void Choreographer::dispatchHotplug(nsecs_t, PhysicalDisplayId displayId, bool c
     ALOGV("choreographer %p ~ received hotplug event (displayId=%"
             ANDROID_PHYSICAL_DISPLAY_ID_FORMAT ", connected=%s), ignoring.",
             this, displayId, toString(connected));
+}
+
+void Choreographer::dispatchConfigChanged(nsecs_t, PhysicalDisplayId displayId,
+                                          int32_t configId) {
+    ALOGV("choreographer %p ~ received config changed event (displayId=%"
+            ANDROID_PHYSICAL_DISPLAY_ID_FORMAT ", configId=%s), ignoring.",
+            this, displayId, toString(configId));
 }
 
 void Choreographer::handleMessage(const Message& message) {

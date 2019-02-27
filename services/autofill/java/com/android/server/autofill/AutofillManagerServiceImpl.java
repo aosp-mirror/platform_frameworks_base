@@ -98,7 +98,7 @@ final class AutofillManagerServiceImpl
     private static final int MAX_SESSION_ID_CREATE_TRIES = 2048;
 
     /** Minimum interval to prune abandoned sessions */
-    private static final int MAX_ABANDONED_SESSION_MILLIS = 30000;
+    private static final int MAX_ABANDONED_SESSION_MILLIS = 30_000;
 
     private final AutoFillUI mUi;
     private final MetricsLogger mMetricsLogger = new MetricsLogger();
@@ -1087,7 +1087,9 @@ final class AutofillManagerServiceImpl
                             }
                             mRemoteAugmentedAutofillService = null;
                         }
-                    }, mMaster.isInstantServiceAllowed(), mMaster.verbose);
+                    }, mMaster.isInstantServiceAllowed(), mMaster.verbose,
+                    mMaster.mAugmentedServiceIdleUnbindTimeoutMs,
+                    mMaster.mAugmentedServiceRequestTimeoutMs);
         }
 
         return mRemoteAugmentedAutofillService;

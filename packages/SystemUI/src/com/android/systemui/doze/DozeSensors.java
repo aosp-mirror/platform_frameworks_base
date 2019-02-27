@@ -38,6 +38,8 @@ import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
 
+import androidx.annotation.VisibleForTesting;
+
 import com.android.internal.hardware.AmbientDisplayConfiguration;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
@@ -60,7 +62,6 @@ public class DozeSensors {
     private final Context mContext;
     private final AlarmManager mAlarmManager;
     private final SensorManager mSensorManager;
-    private final TriggerSensor[] mSensors;
     private final ContentResolver mResolver;
     private final TriggerSensor mPickupSensor;
     private final DozeParameters mDozeParameters;
@@ -68,10 +69,12 @@ public class DozeSensors {
     private final WakeLock mWakeLock;
     private final Consumer<Boolean> mProxCallback;
     private final Callback mCallback;
+    @VisibleForTesting
+    protected final TriggerSensor[] mSensors;
 
     private final Handler mHandler = new Handler();
     private final ProxSensor mProxSensor;
-
+    private long mDebounceFrom;
 
     public DozeSensors(Context context, AlarmManager alarmManager, SensorManager sensorManager,
             DozeParameters dozeParameters, AmbientDisplayConfiguration config, WakeLock wakeLock,
@@ -134,11 +137,19 @@ public class DozeSensors {
                         mConfig.wakeScreenGestureAvailable() && alwaysOn,
                         DozeLog.PULSE_REASON_SENSOR_WAKE_LOCK_SCREEN,
                         false /* reports touch coordinates */,
-                        false /* touchscreen */),
+                        false /* touchscreen */, mConfig.getWakeLockScreenDebounce()),
         };
 
         mProxSensor = new ProxSensor(policy);
         mCallback = callback;
+    }
+
+    /**
+     * Temporarily disable some sensors to avoid turning on the device while the user is
+     * turning it off.
+     */
+    public void requestTemporaryDisable() {
+        mDebounceFrom = SystemClock.uptimeMillis();
     }
 
     private Sensor findSensorWithType(String type) {
@@ -320,7 +331,8 @@ public class DozeSensors {
         }
     }
 
-    private class TriggerSensor extends TriggerEventListener {
+    @VisibleForTesting
+    class TriggerSensor extends TriggerEventListener {
         final Sensor mSensor;
         final boolean mConfigured;
         final int mPulseReason;
@@ -467,23 +479,25 @@ public class DozeSensors {
     /**
      * A Sensor that is injected via plugin.
      */
-    private class PluginSensor extends TriggerSensor {
+    @VisibleForTesting
+    class PluginSensor extends TriggerSensor implements SensorManagerPlugin.SensorEventListener {
 
-        private final SensorManagerPlugin.Sensor mPluginSensor;
-        private final SensorManagerPlugin.SensorEventListener mTriggerEventListener = (event) -> {
-            DozeLog.traceSensor(mContext, mPulseReason);
-            mHandler.post(mWakeLock.wrap(() -> {
-                if (DEBUG) Log.d(TAG, "onSensorEvent: " + triggerEventToString(event));
-                mCallback.onSensorPulse(mPulseReason, true /* sensorPerformsProxCheck */, -1, -1,
-                        event.getValues());
-            }));
-        };
+        final SensorManagerPlugin.Sensor mPluginSensor;
+        private long mDebounce;
 
         PluginSensor(SensorManagerPlugin.Sensor sensor, String setting, boolean configured,
                 int pulseReason, boolean reportsTouchCoordinates, boolean requiresTouchscreen) {
+            this(sensor, setting, configured, pulseReason, reportsTouchCoordinates,
+                    requiresTouchscreen, 0L /* debounce */);
+        }
+
+        PluginSensor(SensorManagerPlugin.Sensor sensor, String setting, boolean configured,
+                int pulseReason, boolean reportsTouchCoordinates, boolean requiresTouchscreen,
+                long debounce) {
             super(null, setting, configured, pulseReason, reportsTouchCoordinates,
                     requiresTouchscreen);
             mPluginSensor = sensor;
+            mDebounce = debounce;
         }
 
         @Override
@@ -492,11 +506,11 @@ public class DozeSensors {
             AsyncSensorManager asyncSensorManager = (AsyncSensorManager) mSensorManager;
             if (mRequested && !mDisabled && (enabledBySetting() || mIgnoresSetting)
                     && !mRegistered) {
-                asyncSensorManager.registerPluginListener(mPluginSensor, mTriggerEventListener);
+                asyncSensorManager.registerPluginListener(mPluginSensor, this);
                 mRegistered = true;
                 if (DEBUG) Log.d(TAG, "registerPluginListener");
             } else if (mRegistered) {
-                asyncSensorManager.unregisterPluginListener(mPluginSensor, mTriggerEventListener);
+                asyncSensorManager.unregisterPluginListener(mPluginSensor, this);
                 mRegistered = false;
                 if (DEBUG) Log.d(TAG, "unregisterPluginListener");
             }
@@ -523,6 +537,21 @@ public class DozeSensors {
                 }
             }
             return sb.append(']').toString();
+        }
+
+        @Override
+        public void onSensorChanged(SensorManagerPlugin.SensorEvent event) {
+            DozeLog.traceSensor(mContext, mPulseReason);
+            mHandler.post(mWakeLock.wrap(() -> {
+                final long now = SystemClock.uptimeMillis();
+                if (now < mDebounceFrom + mDebounce) {
+                    if (DEBUG) Log.d(TAG, "onSensorEvent dropped: " + triggerEventToString(event));
+                    return;
+                }
+                if (DEBUG) Log.d(TAG, "onSensorEvent: " + triggerEventToString(event));
+                mCallback.onSensorPulse(mPulseReason, true /* sensorPerformsProxCheck */, -1, -1,
+                        event.getValues());
+            }));
         }
     }
 

@@ -1111,7 +1111,6 @@ package android.app.role {
     method @RequiresPermission("com.android.permissioncontroller.permission.MANAGE_ROLES_FROM_CONTROLLER") public boolean removeRoleHolderFromController(@NonNull String, @NonNull String);
     method @RequiresPermission("com.android.permissioncontroller.permission.MANAGE_ROLES_FROM_CONTROLLER") public void setRoleNamesFromController(@NonNull java.util.List<java.lang.String>);
     field public static final int MANAGE_HOLDERS_FLAG_DONT_KILL_APP = 1; // 0x1
-    field public static final String ROLE_ASSISTANT = "android.app.role.ASSISTANT";
   }
 
   public interface RoleManagerCallback {
@@ -1173,7 +1172,7 @@ package android.app.usage {
     method @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) public int getAppStandbyBucket(String);
     method @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) public java.util.Map<java.lang.String,java.lang.Integer> getAppStandbyBuckets();
     method public int getUsageSource();
-    method @RequiresPermission(allOf={android.Manifest.permission.SUSPEND_APPS, android.Manifest.permission.OBSERVE_APP_USAGE}) public void registerAppUsageLimitObserver(int, @NonNull String[], long, @NonNull java.util.concurrent.TimeUnit, android.app.PendingIntent);
+    method @RequiresPermission(allOf={android.Manifest.permission.SUSPEND_APPS, android.Manifest.permission.OBSERVE_APP_USAGE}) public void registerAppUsageLimitObserver(int, @NonNull String[], long, @NonNull java.util.concurrent.TimeUnit, @Nullable android.app.PendingIntent);
     method @RequiresPermission(android.Manifest.permission.OBSERVE_APP_USAGE) public void registerAppUsageObserver(int, @NonNull String[], long, @NonNull java.util.concurrent.TimeUnit, @NonNull android.app.PendingIntent);
     method @RequiresPermission(android.Manifest.permission.OBSERVE_APP_USAGE) public void registerUsageSessionObserver(int, @NonNull String[], long, @NonNull java.util.concurrent.TimeUnit, long, @NonNull java.util.concurrent.TimeUnit, @NonNull android.app.PendingIntent, @Nullable android.app.PendingIntent);
     method public void reportUsageStart(@NonNull android.app.Activity, @NonNull String);
@@ -3599,10 +3598,10 @@ package android.media.audiopolicy {
     method public int detachMixes(@NonNull java.util.List<android.media.audiopolicy.AudioMix>);
     method public int getFocusDuckingBehavior();
     method public int getStatus();
-    method public int removeUidDeviceAffinity(int);
+    method public boolean removeUidDeviceAffinity(int);
     method public int setFocusDuckingBehavior(int) throws java.lang.IllegalArgumentException, java.lang.IllegalStateException;
     method public void setRegistration(String);
-    method public int setUidDeviceAffinity(int, @NonNull java.util.List<android.media.AudioDeviceInfo>);
+    method public boolean setUidDeviceAffinity(int, @NonNull java.util.List<android.media.AudioDeviceInfo>);
     method public String toLogFriendlyString();
     field public static final int FOCUS_POLICY_DUCKING_DEFAULT = 0; // 0x0
     field public static final int FOCUS_POLICY_DUCKING_IN_APP = 0; // 0x0
@@ -3626,6 +3625,7 @@ package android.media.audiopolicy {
   }
 
   public abstract static class AudioPolicy.AudioPolicyVolumeCallback {
+    ctor public AudioPolicy.AudioPolicyVolumeCallback();
     method public void onVolumeAdjustment(int);
   }
 
@@ -8027,7 +8027,7 @@ package android.telephony {
   }
 
   public class UiccSlotInfo implements android.os.Parcelable {
-    ctor public UiccSlotInfo(boolean, boolean, String, int, int, boolean);
+    ctor @Deprecated public UiccSlotInfo(boolean, boolean, String, int, int, boolean);
     method public int describeContents();
     method public String getCardId();
     method public int getCardStateInfo();
@@ -8035,6 +8035,7 @@ package android.telephony {
     method public boolean getIsEuicc();
     method public boolean getIsExtendedApduSupported();
     method public int getLogicalSlotIdx();
+    method public boolean isRemovable();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final int CARD_STATE_INFO_ABSENT = 1; // 0x1
     field public static final int CARD_STATE_INFO_ERROR = 3; // 0x3
@@ -8830,12 +8831,12 @@ package android.telephony.ims {
     method public int describeContents();
     method public int getAudioDirection();
     method public int getAudioQuality();
-    method public boolean getRttAudioSpeech();
     method public int getRttMode();
     method public int getVideoDirection();
     method public int getVideoQuality();
+    method public boolean isReceivingRttAudio();
     method public boolean isRttCall();
-    method public void setRttAudioSpeech(boolean);
+    method public void setReceivingRttAudio(boolean);
     method public void setRttMode(int);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final int AUDIO_QUALITY_AMR = 1; // 0x1
@@ -9411,11 +9412,13 @@ package android.view.contentcapture {
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.view.contentcapture.ContentCaptureEvent> CREATOR;
     field public static final int TYPE_CONTEXT_UPDATED = 6; // 0x6
-    field public static final int TYPE_INITIAL_VIEW_TREE_APPEARED = 5; // 0x5
-    field public static final int TYPE_INITIAL_VIEW_TREE_APPEARING = 4; // 0x4
+    field public static final int TYPE_SESSION_PAUSED = 8; // 0x8
+    field public static final int TYPE_SESSION_RESUMED = 7; // 0x7
     field public static final int TYPE_VIEW_APPEARED = 1; // 0x1
     field public static final int TYPE_VIEW_DISAPPEARED = 2; // 0x2
     field public static final int TYPE_VIEW_TEXT_CHANGED = 3; // 0x3
+    field public static final int TYPE_VIEW_TREE_APPEARED = 5; // 0x5
+    field public static final int TYPE_VIEW_TREE_APPEARING = 4; // 0x4
   }
 
   public final class ContentCaptureManager {

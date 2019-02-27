@@ -1062,7 +1062,6 @@ public final class Magnifier {
                                 return;
                             }
                             synchronized (mLock) {
-                                mRenderer.setLightCenter(mDisplay, pendingX, pendingY);
                                 // Show or move the window at the content draw frame.
                                 SurfaceControl.openTransaction();
                                 mSurfaceControl.deferTransactionUntil(mSurface, frame);
@@ -1077,6 +1076,7 @@ public final class Magnifier {
                             }
                         }
                     };
+                    mRenderer.setLightCenter(mDisplay, pendingX, pendingY);
                 } else {
                     callback = null;
                 }

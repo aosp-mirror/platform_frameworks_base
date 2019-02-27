@@ -39,17 +39,40 @@ namespace android {
 namespace os {
 namespace statsd {
 
-sp<android::hardware::power::stats::V1_0::IPowerStats> gPowerStatsHal = nullptr;
-std::mutex gPowerStatsHalMutex;
-bool gPowerStatsExist = true; // Initialized to ensure making a first attempt.
-std::vector<RailInfo> gRailInfo;
+static sp<android::hardware::power::stats::V1_0::IPowerStats> gPowerStatsHal = nullptr;
+static std::mutex gPowerStatsHalMutex;
+static bool gPowerStatsExist = true; // Initialized to ensure making a first attempt.
+static std::vector<RailInfo> gRailInfo;
 
-bool getPowerStatsHal() {
+struct PowerStatsPullerDeathRecipient : virtual public hardware::hidl_death_recipient {
+    virtual void serviceDied(uint64_t cookie,
+            const wp<android::hidl::base::V1_0::IBase>& who) override {
+        // The HAL just died. Reset all handles to HAL services.
+        std::lock_guard<std::mutex> lock(gPowerStatsHalMutex);
+        gPowerStatsHal = nullptr;
+    }
+};
+
+static sp<PowerStatsPullerDeathRecipient> gDeathRecipient = new PowerStatsPullerDeathRecipient();
+
+static bool getPowerStatsHalLocked() {
     if (gPowerStatsHal == nullptr && gPowerStatsExist) {
         gPowerStatsHal = android::hardware::power::stats::V1_0::IPowerStats::getService();
         if (gPowerStatsHal == nullptr) {
             ALOGW("Couldn't load power.stats HAL service");
             gPowerStatsExist = false;
+        } else {
+            // Link death recipient to power.stats service handle
+            hardware::Return<bool> linked = gPowerStatsHal->linkToDeath(gDeathRecipient, 0);
+            if (!linked.isOk()) {
+                ALOGE("Transaction error in linking to power.stats HAL death: %s",
+                        linked.description().c_str());
+                gPowerStatsHal = nullptr;
+                return false;
+            } else if (!linked) {
+                ALOGW("Unable to link to power.stats HAL death notifications");
+                // We should still continue even though linking failed
+            }
         }
     }
     return gPowerStatsHal != nullptr;
@@ -61,7 +84,7 @@ PowerStatsPuller::PowerStatsPuller() : StatsPuller(android::util::ON_DEVICE_POWE
 bool PowerStatsPuller::PullInternal(vector<shared_ptr<LogEvent>>* data) {
     std::lock_guard<std::mutex> lock(gPowerStatsHalMutex);
 
-    if (!getPowerStatsHal()) {
+    if (!getPowerStatsHalLocked()) {
         ALOGE("power.stats Hal not loaded");
         return false;
     }

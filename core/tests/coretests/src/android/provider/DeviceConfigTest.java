@@ -18,15 +18,11 @@ package android.provider;
 
 import static android.provider.DeviceConfig.OnPropertyChangedListener;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.assertNull;
-import static junit.framework.Assert.fail;
+import static com.google.common.truth.Truth.assertThat;
 
 import android.app.ActivityThread;
 import android.content.ContentResolver;
 import android.os.Bundle;
-import android.os.SystemClock;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.InstrumentationRegistry;
@@ -37,8 +33,8 @@ import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.util.concurrent.Executor;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /** Tests that ensure appropriate settings are backed up. */
 @Presubmit
@@ -51,8 +47,6 @@ public class DeviceConfigTest {
     private static final String sValue = "value1";
     private static final long WAIT_FOR_PROPERTY_CHANGE_TIMEOUT_MILLIS = 2000; // 2 sec
 
-    private final Object mLock = new Object();
-
     @After
     public void cleanUp() {
         deleteViaContentProvider(sNamespace, sKey);
@@ -61,14 +55,14 @@ public class DeviceConfigTest {
     @Test
     public void getProperty_empty() {
         String result = DeviceConfig.getProperty(sNamespace, sKey);
-        assertNull(result);
+        assertThat(result).isNull();
     }
 
     @Test
     public void setAndGetProperty_sameNamespace() {
         DeviceConfig.setProperty(sNamespace, sKey, sValue, false);
         String result = DeviceConfig.getProperty(sNamespace, sKey);
-        assertEquals(sValue, result);
+        assertThat(result).isEqualTo(sValue);
     }
 
     @Test
@@ -76,7 +70,7 @@ public class DeviceConfigTest {
         String newNamespace = "namespace2";
         DeviceConfig.setProperty(sNamespace, sKey, sValue, false);
         String result = DeviceConfig.getProperty(newNamespace, sKey);
-        assertNull(result);
+        assertThat(result).isNull();
     }
 
     @Test
@@ -86,9 +80,9 @@ public class DeviceConfigTest {
         DeviceConfig.setProperty(sNamespace, sKey, sValue, false);
         DeviceConfig.setProperty(newNamespace, sKey, newValue, false);
         String result = DeviceConfig.getProperty(sNamespace, sKey);
-        assertEquals(sValue, result);
+        assertThat(result).isEqualTo(sValue);
         result = DeviceConfig.getProperty(newNamespace, sKey);
-        assertEquals(newValue, result);
+        assertThat(result).isEqualTo(newValue);
 
         // clean up
         deleteViaContentProvider(newNamespace, sKey);
@@ -100,59 +94,30 @@ public class DeviceConfigTest {
         DeviceConfig.setProperty(sNamespace, sKey, sValue, false);
         DeviceConfig.setProperty(sNamespace, sKey, newValue, false);
         String result = DeviceConfig.getProperty(sNamespace, sKey);
-        assertEquals(newValue, result);
+        assertThat(result).isEqualTo(newValue);
     }
 
     @Test
-    public void testListener() {
-        setPropertyAndAssertSuccessfulChange(sNamespace, sKey, sValue);
-    }
+    public void testListener() throws InterruptedException {
+        CountDownLatch countDownLatch = new CountDownLatch(1);
 
-    private void setPropertyAndAssertSuccessfulChange(String setNamespace, String setName,
-            String setValue) {
-        final AtomicBoolean success = new AtomicBoolean();
+        OnPropertyChangedListener changeListener = (namespace, name, value) -> {
+            assertThat(namespace).isEqualTo(sNamespace);
+            assertThat(name).isEqualTo(sKey);
+            assertThat(value).isEqualTo(sValue);
+            countDownLatch.countDown();
+        };
 
-        OnPropertyChangedListener changeListener = new OnPropertyChangedListener() {
-                    @Override
-                    public void onPropertyChanged(String namespace, String name, String value) {
-                        assertEquals(setNamespace, namespace);
-                        assertEquals(setName, name);
-                        assertEquals(setValue, value);
-                        success.set(true);
-
-                        synchronized (mLock) {
-                            mLock.notifyAll();
-                        }
-                    }
-                };
-        Executor executor = ActivityThread.currentApplication().getMainExecutor();
-        DeviceConfig.addOnPropertyChangedListener(setNamespace, executor, changeListener);
         try {
-            DeviceConfig.setProperty(setNamespace, setName, setValue, false);
-
-            final long startTimeMillis = SystemClock.uptimeMillis();
-            synchronized (mLock) {
-                while (true) {
-                    if (success.get()) {
-                        return;
-                    }
-                    final long elapsedTimeMillis = SystemClock.uptimeMillis() - startTimeMillis;
-                    if (elapsedTimeMillis >= WAIT_FOR_PROPERTY_CHANGE_TIMEOUT_MILLIS) {
-                        fail("Could not change setting for "
-                                + WAIT_FOR_PROPERTY_CHANGE_TIMEOUT_MILLIS + " ms");
-                    }
-                    final long remainingTimeMillis = WAIT_FOR_PROPERTY_CHANGE_TIMEOUT_MILLIS
-                            - elapsedTimeMillis;
-                    try {
-                        mLock.wait(remainingTimeMillis);
-                    } catch (InterruptedException ie) {
-                        /* ignore */
-                    }
-                }
-            }
+            DeviceConfig.addOnPropertyChangedListener(sNamespace,
+                    ActivityThread.currentApplication().getMainExecutor(), changeListener);
+            DeviceConfig.setProperty(sNamespace, sKey, sValue, false);
+            assertThat(countDownLatch.await(
+                    WAIT_FOR_PROPERTY_CHANGE_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS)).isTrue();
         } finally {
             DeviceConfig.removeOnPropertyChangedListener(changeListener);
         }
+
     }
 
     private static boolean deleteViaContentProvider(String namespace, String key) {
@@ -160,7 +125,7 @@ public class DeviceConfigTest {
         String compositeName = namespace + "/" + key;
         Bundle result = resolver.call(
                 DeviceConfig.CONTENT_URI, Settings.CALL_METHOD_DELETE_CONFIG, compositeName, null);
-        assertNotNull(result);
+        assertThat(result).isNotNull();
         return compositeName.equals(result.getString(Settings.NameValueTable.VALUE));
     }
 

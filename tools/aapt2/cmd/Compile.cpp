@@ -769,7 +769,10 @@ int CompileCommand::Action(const std::vector<std::string>& args) {
     auto collection = util::make_unique<io::FileCollection>();
 
     // Collect data from the path for each input file.
-    for (const std::string& arg : args) {
+    std::vector<std::string> sorted_args = args;
+    std::sort(sorted_args.begin(), sorted_args.end());
+
+    for (const std::string& arg : sorted_args) {
       collection->InsertFile(arg);
     }
 

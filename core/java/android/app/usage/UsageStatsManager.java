@@ -779,7 +779,7 @@ public final class UsageStatsManager {
             android.Manifest.permission.SUSPEND_APPS,
             android.Manifest.permission.OBSERVE_APP_USAGE})
     public void registerAppUsageLimitObserver(int observerId, @NonNull String[] observedEntities,
-            long timeLimit, @NonNull TimeUnit timeUnit, PendingIntent callbackIntent) {
+            long timeLimit, @NonNull TimeUnit timeUnit, @Nullable PendingIntent callbackIntent) {
         try {
             mService.registerAppUsageLimitObserver(observerId, observedEntities,
                     timeUnit.toMillis(timeLimit), callbackIntent, mContext.getOpPackageName());

@@ -20,8 +20,8 @@ cc_library_shared {
         "android_media_MediaScanner.cpp",
         "android_media_MediaSync.cpp",
         "android_media_ResampleInputStream.cpp",
+        "android_media_Streams.cpp",
         "android_media_SyncParams.cpp",
-        "android_media_Utils.cpp",
         "android_mtp_MtpDatabase.cpp",
         "android_mtp_MtpDevice.cpp",
         "android_mtp_MtpServer.cpp",
@@ -34,6 +34,7 @@ cc_library_shared {
         "libutils",
         "libbinder",
         "libmedia",
+        "libmedia_jni_utils",
         "libmedia_omx",
         "libmediametrics",
         "libmediadrm",
@@ -85,6 +86,36 @@ cc_library_shared {
 }
 
 cc_library_shared {
+    name: "libmedia_jni_utils",
+    srcs: [
+        "android_media_Utils.cpp",
+    ],
+
+    shared_libs: [
+        "liblog",
+        "libmedia_omx",
+        "libnativewindow",
+        "libui",
+        "libutils",
+        "android.hidl.token@1.0-utils",
+    ],
+
+    include_dirs: [
+        "system/media/camera/include",
+    ],
+
+    export_include_dirs: ["."],
+
+    cflags: [
+        "-Wall",
+        "-Werror",
+        "-Wno-error=deprecated-declarations",
+        "-Wunused",
+        "-Wunreachable-code",
+    ],
+}
+
+cc_library_shared {
     name: "libmedia2_jni",
 
     srcs: [
@@ -125,7 +156,6 @@ cc_library_shared {
         "libcrypto",
         "libcutils",
         "libjsoncpp",
-        "libmedia_helper",
         "libmedia_player2_util",
         "libmediaplayer2",
         "libmediaplayer2-protos",
@@ -133,7 +163,6 @@ cc_library_shared {
         "libmediautils",
         "libprocessgroup",
         "libprotobuf-cpp-lite",
-        "libstagefright",
         "libstagefright_esds",
         "libstagefright_foundation_without_imemory",
         "libstagefright_httplive",

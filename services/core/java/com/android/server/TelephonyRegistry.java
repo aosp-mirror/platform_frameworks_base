@@ -177,8 +177,6 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
     private ServiceState[] mServiceState;
 
-    private int[] mNetworkType;
-
     private int[] mVoiceActivationState;
 
     private int[] mDataActivationState;
@@ -212,6 +210,9 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
     private CallAttributes mCallAttributes = new CallAttributes(new PreciseCallState(),
             TelephonyManager.NETWORK_TYPE_UNKNOWN, new CallQuality());
+
+    // network type of the call associated with the mCallAttributes and mCallQuality
+    private int mCallNetworkType = TelephonyManager.NETWORK_TYPE_UNKNOWN;
 
     private int[] mSrvccState;
 
@@ -375,7 +376,6 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         mDataConnectionNetworkType = new int[numPhones];
         mCallIncomingNumber = new String[numPhones];
         mServiceState = new ServiceState[numPhones];
-        mNetworkType = new int[numPhones];
         mVoiceActivationState = new int[numPhones];
         mDataActivationState = new int[numPhones];
         mUserMobileDataState = new boolean[numPhones];
@@ -396,7 +396,6 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             mDataActivationState[i] = TelephonyManager.SIM_ACTIVATION_STATE_UNKNOWN;
             mCallIncomingNumber[i] =  "";
             mServiceState[i] =  new ServiceState();
-            mNetworkType[i] = mServiceState[i].getVoiceNetworkType();
             mSignalStrength[i] =  new SignalStrength();
             mUserMobileDataState[i] = false;
             mMessageWaiting[i] =  false;
@@ -998,21 +997,6 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             if (validatePhoneId(phoneId)) {
                 mServiceState[phoneId] = state;
 
-                boolean notifyCallAttributes = true;
-                if (mNetworkType[phoneId] != mServiceState[phoneId].getVoiceNetworkType()) {
-                    mNetworkType[phoneId] = state.getVoiceNetworkType();
-                    mCallAttributes = new CallAttributes(mPreciseCallState, mNetworkType[phoneId],
-                            mCallQuality);
-                } else {
-                    // No change to network type, so no need to notify call attributes
-                    notifyCallAttributes = false;
-                }
-
-                if (mCallQuality == null) {
-                    // No call quality reported yet, so no need to notify call attributes
-                    notifyCallAttributes = false;
-                }
-
                 for (Record r : mRecords) {
                     if (VDBG) {
                         log("notifyServiceStateForSubscriber: r=" + r + " subId=" + subId
@@ -1036,14 +1020,6 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                                         + " state=" + state);
                             }
                             r.callback.onServiceStateChanged(stateToSend);
-                        } catch (RemoteException ex) {
-                            mRemoveList.add(r.binder);
-                        }
-                    }
-                    if (notifyCallAttributes && r.matchPhoneStateListenerEvent(
-                                    PhoneStateListener.LISTEN_CALL_ATTRIBUTES_CHANGED)) {
-                        try {
-                            r.callback.onCallAttributesChanged(mCallAttributes);
                         } catch (RemoteException ex) {
                             mRemoveList.add(r.binder);
                         }
@@ -1574,7 +1550,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 log("notifyPreciseCallState: mCallQuality is null, skipping call attributes");
                 notifyCallAttributes = false;
             } else {
-                mCallAttributes = new CallAttributes(mPreciseCallState, mNetworkType[phoneId],
+                mCallAttributes = new CallAttributes(mPreciseCallState, mCallNetworkType,
                         mCallQuality);
             }
 
@@ -1840,16 +1816,16 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
     }
 
     @Override
-    public void notifyCallQualityChanged(CallQuality callQuality, int phoneId) {
+    public void notifyCallQualityChanged(CallQuality callQuality, int phoneId,
+            int callNetworkType) {
         if (!checkNotifyPermission("notifyCallQualityChanged()")) {
             return;
         }
 
         // merge CallQuality with PreciseCallState and network type
         mCallQuality = callQuality;
-        mCallAttributes = new CallAttributes(mPreciseCallState,
-                mNetworkType[phoneId],
-                callQuality);
+        mCallNetworkType = callNetworkType;
+        mCallAttributes = new CallAttributes(mPreciseCallState, callNetworkType, callQuality);
 
         synchronized (mRecords) {
             TelephonyManager tm = (TelephonyManager) mContext.getSystemService(
@@ -1886,7 +1862,6 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 pw.println("mCallState=" + mCallState[i]);
                 pw.println("mCallIncomingNumber=" + mCallIncomingNumber[i]);
                 pw.println("mServiceState=" + mServiceState[i]);
-                pw.println("mNetworkType=" + mNetworkType[i]);
                 pw.println("mVoiceActivationState= " + mVoiceActivationState[i]);
                 pw.println("mDataActivationState= " + mDataActivationState[i]);
                 pw.println("mUserMobileDataState= " + mUserMobileDataState[i]);
@@ -1900,6 +1875,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 pw.println("mImsCallDisconnectCause=" + mImsReasonInfo.get(i).toString());
                 pw.decreaseIndent();
             }
+            pw.println("mCallNetworkType=" + mCallNetworkType);
             pw.println("mPreciseDataConnectionState=" + mPreciseDataConnectionState);
             pw.println("mPreciseCallState=" + mPreciseCallState);
             pw.println("mCallDisconnectCause=" + mCallDisconnectCause);

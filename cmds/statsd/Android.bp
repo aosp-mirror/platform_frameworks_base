@@ -346,3 +346,9 @@ java_library {
         javacflags: ["-XepDisableAllChecks"],
     },
 }
+
+// Filegroup for statsd config proto definition.
+filegroup {
+    name: "statsd-config-proto-def",
+    srcs: ["src/statsd_config.proto"],
+}

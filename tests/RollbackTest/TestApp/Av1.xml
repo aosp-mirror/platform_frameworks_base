@@ -23,7 +23,6 @@
     <uses-sdk android:minSdkVersion="19" />
 
     <application android:label="Rollback Test App A v1">
-        <meta-data android:name="version" android:value="1" />
         <receiver android:name="com.android.tests.rollback.testapp.ProcessUserData"
                   android:exported="true" />
         <activity android:name="com.android.tests.rollback.testapp.MainActivity">

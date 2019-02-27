@@ -162,9 +162,9 @@ public final class Zygote {
     /**
      * The duration to wait before re-checking Zygote related system properties.
      *
-     * Five minutes in milliseconds.
+     * One minute in milliseconds.
      */
-    public static final long PROPERTY_CHECK_INTERVAL = 300000;
+    public static final long PROPERTY_CHECK_INTERVAL = 60000;
 
     /**
      * @hide for internal use only
@@ -236,14 +236,14 @@ public final class Zygote {
     public static int forkAndSpecialize(int uid, int gid, int[] gids, int runtimeFlags,
             int[][] rlimits, int mountExternal, String seInfo, String niceName, int[] fdsToClose,
             int[] fdsToIgnore, boolean startChildZygote, String instructionSet, String appDataDir,
-            String packageName, String[] packagesForUID, String[] visibleVolIDs, String sandboxId) {
+            String packageName, String[] packagesForUID, String sandboxId) {
         ZygoteHooks.preFork();
         // Resets nice priority for zygote process.
         resetNicePriority();
         int pid = nativeForkAndSpecialize(
                 uid, gid, gids, runtimeFlags, rlimits, mountExternal, seInfo, niceName, fdsToClose,
                 fdsToIgnore, startChildZygote, instructionSet, appDataDir, packageName,
-                packagesForUID, visibleVolIDs, sandboxId);
+                packagesForUID, sandboxId);
         // Enable tracing as soon as possible for the child process.
         if (pid == 0) {
             Trace.setTracingEnabled(true, runtimeFlags);
@@ -258,7 +258,7 @@ public final class Zygote {
     private static native int nativeForkAndSpecialize(int uid, int gid, int[] gids,
             int runtimeFlags, int[][] rlimits, int mountExternal, String seInfo, String niceName,
             int[] fdsToClose, int[] fdsToIgnore, boolean startChildZygote, String instructionSet,
-            String appDataDir, String packageName, String[] packagesForUID, String[] visibleVolIDs,
+            String appDataDir, String packageName, String[] packagesForUID,
             String sandboxId);
 
     /**
@@ -285,11 +285,11 @@ public final class Zygote {
     public static void specializeBlastula(int uid, int gid, int[] gids, int runtimeFlags,
             int[][] rlimits, int mountExternal, String seInfo, String niceName,
             boolean startChildZygote, String instructionSet, String appDataDir, String packageName,
-            String[] packagesForUID, String[] visibleVolIDs, String sandboxId) {
+            String[] packagesForUID, String sandboxId) {
 
         nativeSpecializeBlastula(uid, gid, gids, runtimeFlags, rlimits, mountExternal, seInfo,
                                  niceName, startChildZygote, instructionSet, appDataDir,
-                                 packageName, packagesForUID, visibleVolIDs, sandboxId);
+                                 packageName, packagesForUID, sandboxId);
 
         // Enable tracing as soon as possible for the child process.
         Trace.setTracingEnabled(true, runtimeFlags);
@@ -309,7 +309,7 @@ public final class Zygote {
     private static native void nativeSpecializeBlastula(int uid, int gid, int[] gids,
             int runtimeFlags, int[][] rlimits, int mountExternal, String seInfo, String niceName,
             boolean startChildZygote, String instructionSet, String appDataDir, String packageName,
-            String[] packagesForUID, String[] visibleVolIDs, String sandboxId);
+            String[] packagesForUID, String sandboxId);
 
     /**
      * Called to do any initialization before starting an application.
@@ -427,6 +427,12 @@ public final class Zygote {
                 defaultValue);
     }
 
+    protected static void emptyBlastulaPool() {
+        nativeEmptyBlastulaPool();
+    }
+
+    private static native void nativeEmptyBlastulaPool();
+
     /**
      * Returns the value of a system property converted to a boolean using specific logic.
      *
@@ -520,7 +526,7 @@ public final class Zygote {
         LocalSocket sessionSocket = null;
         DataOutputStream blastulaOutputStream = null;
         Credentials peerCredentials = null;
-        String[] argStrings = null;
+        ZygoteArguments args = null;
 
         while (true) {
             try {
@@ -533,24 +539,23 @@ public final class Zygote {
 
                 peerCredentials = sessionSocket.getPeerCredentials();
 
-                argStrings = readArgumentList(blastulaReader);
+                String[] argStrings = readArgumentList(blastulaReader);
 
                 if (argStrings != null) {
+                    args = new ZygoteArguments(argStrings);
+
+                    // TODO (chriswailes): Should this only be run for debug builds?
+                    validateBlastulaCommand(args);
                     break;
                 } else {
                     Log.e("Blastula", "Truncated command received.");
                     IoUtils.closeQuietly(sessionSocket);
                 }
-            } catch (IOException ioEx) {
-                Log.e("Blastula", "Failed to read command: " + ioEx.getMessage());
+            } catch (Exception ex) {
+                Log.e("Blastula", ex.getMessage());
                 IoUtils.closeQuietly(sessionSocket);
             }
         }
-
-        ZygoteArguments args = new ZygoteArguments(argStrings);
-
-        // TODO (chriswailes): Should this only be run for debug builds?
-        validateBlastulaCommand(args);
 
         applyUidSecurityPolicy(args, peerCredentials);
         applyDebuggerSystemProperty(args);
@@ -600,7 +605,7 @@ public final class Zygote {
                            args.mRuntimeFlags, rlimits, args.mMountExternal,
                            args.mSeInfo, args.mNiceName, args.mStartChildZygote,
                            args.mInstructionSet, args.mAppDataDir, args.mPackageName,
-                           args.mPackagesForUid, args.mVisibleVolIds, args.mSandboxId);
+                           args.mPackagesForUid, args.mSandboxId);
 
         if (args.mNiceName != null) {
             Process.setArgV0(args.mNiceName);
@@ -740,8 +745,8 @@ public final class Zygote {
 
         if (args.mInvokeWith != null && peerUid != 0
                 && (args.mRuntimeFlags & Zygote.DEBUG_ENABLE_JDWP) == 0) {
-            throw new ZygoteSecurityException("Peer is permitted to specify an"
-                + "explicit invoke-with wrapper command only for debuggable"
+            throw new ZygoteSecurityException("Peer is permitted to specify an "
+                + "explicit invoke-with wrapper command only for debuggable "
                 + "applications.");
         }
     }

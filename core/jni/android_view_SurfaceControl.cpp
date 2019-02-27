@@ -698,6 +698,25 @@ static jobjectArray nativeGetDisplayConfigs(JNIEnv* env, jclass clazz,
     return configArray;
 }
 
+static jboolean nativeSetAllowedDisplayConfigs(JNIEnv* env, jclass clazz,
+        jobject tokenObj, jintArray configArray) {
+    sp<IBinder> token(ibinderForJavaObject(env, tokenObj));
+    if (token == nullptr) return JNI_FALSE;
+
+    std::vector<int32_t> allowedConfigs;
+    jsize configArraySize = env->GetArrayLength(configArray);
+    allowedConfigs.reserve(configArraySize);
+
+    jint* configArrayElements = env->GetIntArrayElements(configArray, 0);
+    for (int i = 0; i < configArraySize; i++) {
+        allowedConfigs.push_back(configArrayElements[i]);
+    }
+    env->ReleaseIntArrayElements(configArray, configArrayElements, 0);
+
+    size_t result = SurfaceComposerClient::setAllowedDisplayConfigs(token, allowedConfigs);
+    return result == NO_ERROR ? JNI_TRUE : JNI_FALSE;
+}
+
 static jint nativeGetActiveConfig(JNIEnv* env, jclass clazz, jobject tokenObj) {
     sp<IBinder> token(ibinderForJavaObject(env, tokenObj));
     if (token == NULL) return -1;
@@ -1194,6 +1213,8 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeGetActiveConfig },
     {"nativeSetActiveConfig", "(Landroid/os/IBinder;I)Z",
             (void*)nativeSetActiveConfig },
+    {"nativeSetAllowedDisplayConfigs", "(Landroid/os/IBinder;[I)Z",
+            (void*)nativeSetAllowedDisplayConfigs },
     {"nativeGetDisplayColorModes", "(Landroid/os/IBinder;)[I",
             (void*)nativeGetDisplayColorModes},
     {"nativeGetDisplayNativePrimaries", "(Landroid/os/IBinder;)Landroid/view/SurfaceControl$DisplayPrimaries;",

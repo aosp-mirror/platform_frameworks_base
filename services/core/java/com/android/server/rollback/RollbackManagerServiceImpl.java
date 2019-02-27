@@ -23,6 +23,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
@@ -40,6 +41,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
+import android.os.SystemClock;
 import android.provider.DeviceConfig;
 import android.util.IntArray;
 import android.util.Log;
@@ -47,6 +49,7 @@ import android.util.SparseBooleanArray;
 import android.util.SparseLongArray;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.ArrayUtils;
 import com.android.server.LocalServices;
 import com.android.server.pm.Installer;
 
@@ -120,6 +123,13 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
     private final Installer mInstaller;
     private final RollbackPackageHealthObserver mPackageHealthObserver;
     private final AppDataRollbackHelper mAppDataRollbackHelper;
+
+    // This field stores the difference in Millis between the uptime (millis since device
+    // has booted) and current time (device wall clock) - it's used to update rollback data
+    // timestamps when the time is changed, by the user or by change of timezone.
+    // No need for guarding with lock because value is only accessed in handler thread.
+    private long  mRelativeBootTime = calculateRelativeBootTime();
+
 
     RollbackManagerServiceImpl(Context context) {
         mContext = context;
@@ -217,6 +227,8 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                 }
             }
         }, enableRollbackFilter, null, getHandler());
+
+        registerTimeChangeReceiver();
     }
 
     @Override
@@ -266,6 +278,45 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         getHandler().post(() ->
                 commitRollbackInternal(rollbackId, causePackages.getList(),
                     callerPackageName, statusReceiver));
+    }
+
+    private void registerTimeChangeReceiver() {
+        final BroadcastReceiver timeChangeIntentReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                final long oldRelativeBootTime = mRelativeBootTime;
+                mRelativeBootTime = calculateRelativeBootTime();
+                final long timeDifference = mRelativeBootTime - oldRelativeBootTime;
+
+                synchronized (mLock) {
+                    ensureRollbackDataLoadedLocked();
+
+                    Iterator<RollbackData> iter = mAvailableRollbacks.iterator();
+                    while (iter.hasNext()) {
+                        RollbackData data = iter.next();
+
+                        data.timestamp = data.timestamp.plusMillis(timeDifference);
+                        try {
+                            mRollbackStore.saveAvailableRollback(data);
+                        } catch (IOException ioe) {
+                            // TODO: figure out the right way to deal with this, especially if
+                            //  it fails for some data and succeeds for others.
+                            Log.e(TAG, "Unable to save rollback info for : " + data.rollbackId,
+                                    ioe);
+                        }
+                    }
+
+                }
+            }
+        };
+        final IntentFilter filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_TIME_CHANGED);
+        mContext.registerReceiver(timeChangeIntentReceiver, filter,
+                null /* broadcastPermission */, getHandler());
+    }
+
+    private static long calculateRelativeBootTime() {
+        return System.currentTimeMillis() - SystemClock.elapsedRealtime();
     }
 
     /**
@@ -362,20 +413,24 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                 int sessionId = packageInstaller.createSession(params);
                 PackageInstaller.Session session = packageInstaller.openSession(sessionId);
 
-                File packageCode = RollbackStore.getPackageCode(data, info.getPackageName());
-                if (packageCode == null) {
+                File[] packageCodePaths = RollbackStore.getPackageCodePaths(
+                        data, info.getPackageName());
+                if (packageCodePaths == null) {
                     sendFailure(statusReceiver, RollbackManager.STATUS_FAILURE,
-                            "Backup copy of package code inaccessible");
+                            "Backup copy of package inaccessible");
                     return;
                 }
 
-                try (ParcelFileDescriptor fd = ParcelFileDescriptor.open(packageCode,
-                        ParcelFileDescriptor.MODE_READ_ONLY)) {
-                    final long token = Binder.clearCallingIdentity();
-                    try {
-                        session.write(packageCode.getName(), 0, packageCode.length(), fd);
-                    } finally {
-                        Binder.restoreCallingIdentity(token);
+                for (File packageCodePath : packageCodePaths) {
+                    try (ParcelFileDescriptor fd = ParcelFileDescriptor.open(packageCodePath,
+                                ParcelFileDescriptor.MODE_READ_ONLY)) {
+                        final long token = Binder.clearCallingIdentity();
+                        try {
+                            session.write(packageCodePath.getName(), 0, packageCodePath.length(),
+                                    fd);
+                        } finally {
+                            Binder.restoreCallingIdentity(token);
+                        }
                     }
                 }
                 parentSession.addChildSessionId(sessionId);
@@ -434,7 +489,10 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             mAvailableRollbacks = null;
             mRecentlyExecutedRollbacks = null;
         }
-        getHandler().post(() -> ensureRollbackDataLoaded());
+        getHandler().post(() -> {
+            updateRollbackLifetimeDurationInMillis();
+            ensureRollbackDataLoaded();
+        });
     }
 
     @Override
@@ -950,7 +1008,13 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         }
 
         try {
-            RollbackStore.backupPackageCode(data, packageName, pkgInfo.applicationInfo.sourceDir);
+            ApplicationInfo appInfo = pkgInfo.applicationInfo;
+            RollbackStore.backupPackageCodePath(data, packageName, appInfo.sourceDir);
+            if (!ArrayUtils.isEmpty(appInfo.splitSourceDirs)) {
+                for (String sourceDir : appInfo.splitSourceDirs) {
+                    RollbackStore.backupPackageCodePath(data, packageName, sourceDir);
+                }
+            }
         } catch (IOException e) {
             Log.e(TAG, "Unable to copy package for rollback for " + packageName, e);
             return false;

@@ -22,6 +22,10 @@ import android.apex.ApexInfo;
 import android.apex.ApexInfoList;
 import android.apex.ApexSessionInfo;
 import android.apex.IApexService;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageParser;
 import android.content.pm.PackageParser.PackageParserException;
@@ -49,17 +53,29 @@ import java.util.stream.Collectors;
 class ApexManager {
     static final String TAG = "ApexManager";
     private final IApexService mApexService;
+    private final Context mContext;
     private final Object mLock = new Object();
     @GuardedBy("mLock")
     private Map<String, PackageInfo> mActivePackagesCache;
 
-    ApexManager() {
+    ApexManager(Context context) {
         try {
             mApexService = IApexService.Stub.asInterface(
                 ServiceManager.getServiceOrThrow("apexservice"));
         } catch (ServiceNotFoundException e) {
             throw new IllegalStateException("Required service apexservice not available");
         }
+        mContext = context;
+    }
+
+    void systemReady() {
+        mContext.registerReceiver(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                onBootCompleted();
+                mContext.unregisterReceiver(this);
+            }
+        }, new IntentFilter(Intent.ACTION_BOOT_COMPLETED));
     }
 
     private void populateActivePackagesCacheIfNeeded() {
@@ -207,6 +223,7 @@ class ApexManager {
      * @return true if APEX packages can be managed on this device, false otherwise.
      */
     boolean isApexSupported() {
+        populateActivePackagesCacheIfNeeded();
         // There is no system-wide property available to check if APEX are flattened and hence can't
         // be updated. In absence of such property, we assume that if we didn't index APEX packages
         // since they were flattened, no APEX management should be possible.
@@ -270,6 +287,12 @@ class ApexManager {
                     ipw.println("State: ACTIVATED");
                 } else if (si.isActivationFailed) {
                     ipw.println("State: ACTIVATION FAILED");
+                } else if (si.isSuccess) {
+                    ipw.println("State: SUCCESS");
+                } else if (si.isRollbackInProgress) {
+                    ipw.println("State: ROLLBACK IN PROGRESS");
+                } else if (si.isRolledBack) {
+                    ipw.println("State: ROLLED BACK");
                 }
                 ipw.decreaseIndent();
             }

@@ -2987,6 +2987,8 @@
   <java-symbol type="array" name="resolver_target_actions_pin" />
   <java-symbol type="array" name="resolver_target_actions_unpin" />
 
+  <java-symbol type="array" name="non_removable_euicc_slots" />
+
   <java-symbol type="string" name="install_carrier_app_notification_title" />
   <java-symbol type="string" name="install_carrier_app_notification_text" />
   <java-symbol type="string" name="install_carrier_app_notification_text_app_name" />
@@ -3404,6 +3406,7 @@
 
   <java-symbol type="string" name="config_dozeLongPressSensorType" />
   <java-symbol type="bool" name="config_dozeWakeLockScreenSensorAvailable" />
+  <java-symbol type="integer" name="config_dozeWakeLockScreenDebounce" />
 
   <java-symbol type="array" name="config_allowedGlobalInstantAppSettings" />
   <java-symbol type="array" name="config_allowedSystemInstantAppSettings" />

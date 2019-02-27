@@ -29,10 +29,9 @@
 
     <FrameLayout
         android:id="@+id/header_permission_wrapper"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:animateLayoutChanges="true"
-        android:background="@drawable/bubble_expanded_header_bg">
+        android:animateLayoutChanges="true">
 
         <LinearLayout
             android:id="@+id/header_layout"

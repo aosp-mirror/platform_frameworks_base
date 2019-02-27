@@ -364,11 +364,10 @@ public class AudioPolicy {
      * played.
      * @param uid UID of the application to affect.
      * @param devices list of devices to which the audio stream of the application may be routed.
-     * @return {@link AudioManager#SUCCESS} if the change was successful, {@link AudioManager#ERROR}
-     *          otherwise.
+     * @return true if the change was successful, false otherwise.
      */
     @SystemApi
-    public int setUidDeviceAffinity(int uid, @NonNull List<AudioDeviceInfo> devices) {
+    public boolean setUidDeviceAffinity(int uid, @NonNull List<AudioDeviceInfo> devices) {
         if (devices == null) {
             throw new IllegalArgumentException("Illegal null list of audio devices");
         }
@@ -393,10 +392,10 @@ public class AudioPolicy {
             try {
                 final int status = service.setUidDeviceAffinity(this.cb(),
                         uid, deviceTypes, deviceAdresses);
-                return status;
+                return (status == AudioManager.SUCCESS);
             } catch (RemoteException e) {
                 Log.e(TAG, "Dead object in setUidDeviceAffinity", e);
-                return AudioManager.ERROR;
+                return false;
             }
         }
     }
@@ -406,11 +405,10 @@ public class AudioPolicy {
      * Removes audio device affinity previously set by
      * {@link #setUidDeviceAffinity(int, java.util.List)}.
      * @param uid UID of the application affected.
-     * @return {@link AudioManager#SUCCESS} if the change was successful, {@link AudioManager#ERROR}
-     *          otherwise.
+     * @return true if the change was successful, false otherwise.
      */
     @SystemApi
-    public int removeUidDeviceAffinity(int uid) {
+    public boolean removeUidDeviceAffinity(int uid) {
         synchronized (mLock) {
             if (mStatus != POLICY_STATUS_REGISTERED) {
                 throw new IllegalStateException("Cannot use unregistered AudioPolicy");
@@ -418,10 +416,10 @@ public class AudioPolicy {
             final IAudioService service = getService();
             try {
                 final int status = service.removeUidDeviceAffinity(this.cb(), uid);
-                return status;
+                return (status == AudioManager.SUCCESS);
             } catch (RemoteException e) {
                 Log.e(TAG, "Dead object in removeUidDeviceAffinity", e);
-                return AudioManager.ERROR;
+                return false;
             }
         }
     }
@@ -682,7 +680,6 @@ public class AudioPolicy {
      *
      */
     public static abstract class AudioPolicyVolumeCallback {
-        /** @hide */
         public AudioPolicyVolumeCallback() {}
         /**
          * Called when volume key-related changes are triggered, on the key down event.
