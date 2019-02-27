@@ -71,6 +71,7 @@ import android.net.INetworkMonitorCallbacks;
 import android.net.INetworkPolicyListener;
 import android.net.INetworkPolicyManager;
 import android.net.INetworkStatsService;
+import android.net.ITetheringEventCallback;
 import android.net.InetAddresses;
 import android.net.IpPrefix;
 import android.net.LinkProperties;
@@ -3762,6 +3763,22 @@ public class ConnectivityService extends IConnectivityManager.Stub
             boolean showEntitlementUi, String callerPkg) {
         ConnectivityManager.enforceTetherChangePermission(mContext, callerPkg);
         mTethering.getLatestTetheringEntitlementResult(type, receiver, showEntitlementUi);
+    }
+
+    /** Register tethering event callback. */
+    @Override
+    public void registerTetheringEventCallback(ITetheringEventCallback callback,
+            String callerPkg) {
+        ConnectivityManager.enforceTetherChangePermission(mContext, callerPkg);
+        mTethering.registerTetheringEventCallback(callback);
+    }
+
+    /** Unregister tethering event callback. */
+    @Override
+    public void unregisterTetheringEventCallback(ITetheringEventCallback callback,
+            String callerPkg) {
+        ConnectivityManager.enforceTetherChangePermission(mContext, callerPkg);
+        mTethering.unregisterTetheringEventCallback(callback);
     }
 
     // Called when we lose the default network and have no replacement yet.
