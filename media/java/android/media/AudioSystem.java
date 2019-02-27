@@ -40,7 +40,7 @@ import java.util.Map;
  */
 public class AudioSystem
 {
-    private static final boolean DEBUG_VOLUME = true;
+    private static final boolean DEBUG_VOLUME = false;
 
     private static final String TAG = "AudioSystem";
     /* These values must be kept in sync with system/audio.h */
