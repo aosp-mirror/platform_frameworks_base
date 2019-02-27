@@ -4735,13 +4735,17 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * <p>String containing the ID of the underlying active physical camera.</p>
      * <p>The ID of the active physical camera that's backing the logical camera. All camera
      * streams and metadata that are not physical camera specific will be originating from this
-     * physical camera. This must be one of valid physical IDs advertised in the physicalIds
-     * static tag.</p>
+     * physical camera.</p>
      * <p>For a logical camera made up of physical cameras where each camera's lenses have
      * different characteristics, the camera device may choose to switch between the physical
      * cameras when application changes FOCAL_LENGTH or SCALER_CROP_REGION.
      * At the time of lens switch, this result metadata reflects the new active physical camera
      * ID.</p>
+     * <p>This key will be available if the camera device advertises this key via {@link android.hardware.camera2.CameraCharacteristics#getAvailableCaptureResultKeys }.
+     * When available, this must be one of valid physical IDs backing this logical multi-camera.
+     * If this key is not available for a logical multi-camera, the camera device implementation
+     * may still switch between different active physical cameras based on use case, but the
+     * current active physical camera information won't be available to the application.</p>
      * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      */
     @PublicKey
