@@ -6954,6 +6954,8 @@ public final class ActivityThread extends ClientTransactionHandler {
                 fd.setInt$(cr.openFileDescriptor(uri,
                         FileUtils.translateModePosixToString(mode)).detachFd());
                 return fd;
+            } catch (SecurityException e) {
+                throw new ErrnoException(e.getMessage(), OsConstants.EACCES);
             } catch (FileNotFoundException e) {
                 throw new ErrnoException(e.getMessage(), OsConstants.ENOENT);
             }
