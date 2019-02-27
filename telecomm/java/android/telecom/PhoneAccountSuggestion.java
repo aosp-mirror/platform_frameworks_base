@@ -18,8 +18,6 @@ package android.telecom;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
-import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -69,10 +67,15 @@ public final class PhoneAccountSuggestion implements Parcelable {
     private boolean mShouldAutoSelect;
 
     /**
-     * @hide
+     * Creates a new instance of {@link PhoneAccountSuggestion}. This constructor is intended for
+     * use by apps implementing a {@link PhoneAccountSuggestionService}, and generally should not be
+     * used by dialer apps other than for testing purposes.
+     *
+     * @param handle The {@link PhoneAccountHandle} for this suggestion.
+     * @param reason The reason for this suggestion
+     * @param shouldAutoSelect Whether the dialer should automatically place the call using this
+     *                         account. See {@link #shouldAutoSelect()}.
      */
-    @SystemApi
-    @TestApi
     public PhoneAccountSuggestion(@NonNull PhoneAccountHandle handle, @SuggestionReason int reason,
             boolean shouldAutoSelect) {
         this.mHandle = handle;
