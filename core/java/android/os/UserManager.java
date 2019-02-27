@@ -2655,11 +2655,16 @@ public class UserManager {
      * Removes a user and all associated data.
      *
      * @param user the user that needs to be removed.
+     * @return {@code true} if the user was successfully removed, {@code false} otherwise.
+     * @throws IllegalArgumentException if {@code user} is {@code null}
      * @hide
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
-    public boolean removeUser(UserHandle user) {
+    public boolean removeUser(@NonNull UserHandle user) {
+        if (user == null) {
+            throw new IllegalArgumentException("user cannot be null");
+        }
         return removeUser(user.getIdentifier());
     }
 

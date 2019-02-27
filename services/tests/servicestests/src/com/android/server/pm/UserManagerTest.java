@@ -185,6 +185,18 @@ public class UserManagerTest extends AndroidTestCase {
     }
 
     @MediumTest
+    public void testRemoveUserByHandle_ThrowsException() {
+        synchronized (mUserRemoveLock) {
+            try {
+                mUserManager.removeUser(null);
+                fail("Expected IllegalArgumentException on passing in a null UserHandle.");
+            } catch (IllegalArgumentException expected) {
+                // Do nothing - exception is expected.
+            }
+        }
+    }
+
+    @MediumTest
     public void testAddGuest() throws Exception {
         UserInfo userInfo1 = createUser("Guest 1", UserInfo.FLAG_GUEST);
         UserInfo userInfo2 = createUser("Guest 2", UserInfo.FLAG_GUEST);
