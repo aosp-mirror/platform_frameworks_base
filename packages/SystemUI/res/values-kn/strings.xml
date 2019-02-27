@@ -719,7 +719,7 @@
     <item msgid="586019486955594690">"ಬಲ-ಬಾಗುವಿಕೆ"</item>
   </string-array>
     <string name="menu_ime" msgid="4998010205321292416">"ಕೀಬೋರ್ಡ್ ಬದಲಾಯಿಸುವಿಕೆ"</string>
-    <string name="save" msgid="2311877285724540644">"ಉಳಿಸು"</string>
+    <string name="save" msgid="2311877285724540644">"ಉಳಿಸಿ"</string>
     <string name="reset" msgid="2448168080964209908">"ಮರುಹೊಂದಿಸು"</string>
     <string name="adjust_button_width" msgid="6138616087197632947">"ಬಟನ್ ಅಳತೆ ಹೊಂದಿಸು"</string>
     <string name="clipboard" msgid="1313879395099896312">"ಕ್ಲಿಪ್‌ಬೋರ್ಡ್"</string>

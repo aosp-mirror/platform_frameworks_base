@@ -1332,7 +1332,7 @@
     <string name="ime_action_go" msgid="8320845651737369027">"開始"</string>
     <string name="ime_action_search" msgid="658110271822807811">"搜尋"</string>
     <string name="ime_action_send" msgid="2316166556349314424">"傳送"</string>
-    <string name="ime_action_next" msgid="3138843904009813834">"下一頁"</string>
+    <string name="ime_action_next" msgid="3138843904009813834">"下一步"</string>
     <string name="ime_action_done" msgid="8971516117910934605">"完成"</string>
     <string name="ime_action_previous" msgid="1443550039250105948">"上一步"</string>
     <string name="ime_action_default" msgid="2840921885558045721">"執行"</string>

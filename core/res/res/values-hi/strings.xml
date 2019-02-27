@@ -511,7 +511,7 @@
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"पुन: प्रयास करें."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="7654382120628334248">"कोई फ़िंगरप्रिंट रजिस्टर नहीं किया गया है."</string>
     <string name="fingerprint_error_hw_not_present" msgid="5729436878065119329">"इस डिवाइस में फ़िंगरप्रिंट सेंसर नहीं है"</string>
-    <string name="fingerprint_name_template" msgid="5870957565512716938">"पहला फ़िगरप्रिंट <xliff:g id="FINGERID">%d</xliff:g>"</string>
+    <string name="fingerprint_name_template" msgid="5870957565512716938">"फ़िंगरप्रिंट <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"फ़िंगरप्रिंट आइकॉन"</string>
@@ -1511,7 +1511,7 @@
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", सुरक्षित"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"आकार भूल गए"</string>
-    <string name="kg_wrong_pattern" msgid="1850806070801358830">"गलत आकार"</string>
+    <string name="kg_wrong_pattern" msgid="1850806070801358830">"गलत पैटर्न डाला गया है"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"गलत पासवर्ड"</string>
     <string name="kg_wrong_pin" msgid="1131306510833563801">"गलत PIN"</string>
     <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="8790651267324125694">

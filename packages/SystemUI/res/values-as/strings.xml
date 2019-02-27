@@ -235,8 +235,8 @@
     <string name="accessibility_quick_settings_flashlight_changed_on" msgid="6531793301533894686">"ফ্লাশ্বলাইট অন কৰা হ’ল।"</string>
     <string name="accessibility_quick_settings_color_inversion_changed_off" msgid="4406577213290173911">"ৰং বিপৰীতকৰণ অফ কৰা হ’ল।"</string>
     <string name="accessibility_quick_settings_color_inversion_changed_on" msgid="6897462320184911126">"ৰং বিপৰীতকৰণ অন কৰা হ’ল।"</string>
-    <string name="accessibility_quick_settings_hotspot_changed_off" msgid="5004708003447561394">"ম’বাইল হ\'টস্প\'ট  অফ কৰা হ’ল।"</string>
-    <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2890951609226476206">"ম’বাইল হ\'টস্প\'ট  অন কৰা হ’ল।"</string>
+    <string name="accessibility_quick_settings_hotspot_changed_off" msgid="5004708003447561394">"ম’বাইল হটস্পট  অফ কৰা হ’ল।"</string>
+    <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2890951609226476206">"ম’বাইল হটস্পট  অন কৰা হ’ল।"</string>
     <string name="accessibility_casting_turned_off" msgid="1430668982271976172">"স্ক্ৰীণ কাষ্টিং বন্ধ কৰা হ’ল।"</string>
     <string name="accessibility_quick_settings_work_mode_off" msgid="7045417396436552890">"কৰ্মস্থান ম\'ড অফ হৈ আছে।"</string>
     <string name="accessibility_quick_settings_work_mode_on" msgid="7650588553988014341">"কৰ্মস্থান ম\'ড অন হৈ আছে।"</string>
@@ -327,7 +327,7 @@
     <string name="quick_settings_connected_battery_level" msgid="4136051440381328892">"সংযুক্ত, বেটাৰি <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="quick_settings_connecting" msgid="47623027419264404">"সংযোগ কৰি থকা হৈছে..."</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"টেডাৰ কৰি থকা হৈছে"</string>
-    <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"হ\'টস্প\'ট"</string>
+    <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"হটস্পট"</string>
     <string name="quick_settings_hotspot_secondary_label_transient" msgid="8010579363691405477">"অন কৰি থকা হৈছে…"</string>
     <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="5672131949987422420">"ডেটা সঞ্চয়কাৰী অন হৈ আছে"</string>
     <plurals name="quick_settings_hotspot_secondary_label_num_devices" formatted="false" msgid="2324635800672199428">
@@ -574,7 +574,7 @@
     <string name="alarm_template" msgid="3980063409350522735">"<xliff:g id="WHEN">%1$s</xliff:g> বজাত"</string>
     <string name="alarm_template_far" msgid="4242179982586714810">"<xliff:g id="WHEN">%1$s</xliff:g> বজাত"</string>
     <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"ক্ষিপ্ৰ ছেটিংসমূহ, <xliff:g id="TITLE">%s</xliff:g>।"</string>
-    <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"হ\'টস্প\'ট"</string>
+    <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"হটস্পট"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"কৰ্মস্থানৰ প্ৰ\'ফাইল"</string>
     <string name="tuner_warning_title" msgid="7094689930793031682">"কিছুমানৰ বাবে আমোদজনক হয় কিন্তু সকলোৰে বাবে নহয়"</string>
     <string name="tuner_warning" msgid="8730648121973575701">"System UI Tunerএ আপোনাক Android ব্যৱহাৰকাৰী ইণ্টাৰফেইচ সলনি কৰিবলৈ আৰু নিজৰ উপযোগিতা অনুসৰি ব্যৱহাৰ কৰিবলৈ অতিৰিক্ত সুবিধা প্ৰদান কৰে। এই পৰীক্ষামূলক সুবিধাসমূহ সলনি হ\'ব পাৰে, সেইবোৰে কাম নকৰিব পাৰে বা আগন্তুক সংস্কৰণসমূহত সেইবোৰ অন্তৰ্ভুক্ত কৰা নহ’ব পাৰে। সাৱধানেৰে আগবাঢ়ক।"</string>

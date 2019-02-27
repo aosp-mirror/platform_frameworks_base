@@ -333,6 +333,17 @@ public class ScheduleCalendarTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testMaybeSetNextAlarm_expiredOldAlarm() {
+        mScheduleInfo.exitAtAlarm = true;
+        mScheduleInfo.nextAlarm = 998;
+        mScheduleCalendar.setSchedule(mScheduleInfo);
+
+        mScheduleCalendar.maybeSetNextAlarm(1000, 1001);
+
+        assertEquals(1001, mScheduleInfo.nextAlarm);
+    }
+
+    @Test
     @FlakyTest
     public void testIsInSchedule_inScheduleOvernight() {
         Calendar cal = new GregorianCalendar();

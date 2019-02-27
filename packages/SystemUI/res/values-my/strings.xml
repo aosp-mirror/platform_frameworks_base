@@ -672,7 +672,7 @@
     <string name="keyboard_key_numpad_template" msgid="8729216555174634026">"ဂဏန်းကွက်<xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_shortcut_group_system" msgid="6472647649616541064">"စနစ်"</string>
     <string name="keyboard_shortcut_group_system_home" msgid="3054369431319891965">"ပင်မ"</string>
-    <string name="keyboard_shortcut_group_system_recents" msgid="3154851905021926744">"မကြာသေးခင်က"</string>
+    <string name="keyboard_shortcut_group_system_recents" msgid="3154851905021926744">"လတ်တလော"</string>
     <string name="keyboard_shortcut_group_system_back" msgid="2207004531216446378">"နောက်သို့"</string>
     <string name="keyboard_shortcut_group_system_notifications" msgid="8366964080041773224">"အကြောင်းကြားချက်များ"</string>
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4892255911160332762">"ကီးဘုတ် ဖြတ်လမ်းများ"</string>

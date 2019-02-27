@@ -740,7 +740,7 @@
   </string-array>
     <string name="menu_ime" msgid="4998010205321292416">"مفتاح تبديل لوحة المفاتيح"</string>
     <string name="save" msgid="2311877285724540644">"حفظ"</string>
-    <string name="reset" msgid="2448168080964209908">"إعادة تعيين"</string>
+    <string name="reset" msgid="2448168080964209908">"إعادة الضبط"</string>
     <string name="adjust_button_width" msgid="6138616087197632947">"ضبط عرض الزر"</string>
     <string name="clipboard" msgid="1313879395099896312">"الحافظة"</string>
     <string name="accessibility_key" msgid="5701989859305675896">"زر التنقل المخصص"</string>

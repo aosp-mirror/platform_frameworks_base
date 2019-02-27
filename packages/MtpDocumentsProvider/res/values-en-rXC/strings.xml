@@ -16,10 +16,10 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_label" msgid="6271216747302322594">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‎‏‏‏‎‎‎‎‎‏‏‏‏‏‎‏‎‏‏‎‎‏‏‎‎‏‏‏‏‏‎‎‎‏‎‎‎‏‏‎‏‏‏‏‏‎‎‎‎‎‎‏‏‎‏‎‎‎‏‎‎MTP Host‎‏‎‎‏‎"</string>
-    <string name="downloads_app_label" msgid="7120690641874849726">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‎‏‎‏‏‎‏‎‎‎‏‏‏‎‎‎‏‏‎‎‏‏‎‏‎‎‏‎‏‏‎‏‎‎‎‎‏‏‎‎‏‏‎‎‎‎‎‏‏‏‏‏‎‏‏‏‏‏‎‎Downloads‎‏‎‎‏‎"</string>
-    <string name="root_name" msgid="5819495383921089536">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‎‎‎‎‏‏‎‎‎‎‏‏‎‎‎‎‎‎‎‎‎‎‏‏‎‏‏‏‏‏‏‏‏‎‏‎‏‎‏‎‎‏‎‎‎‏‎‏‏‏‎‎‎‎‎‎‎‎‎‎‎‎‏‎‎‏‏‎<xliff:g id="DEVICE_MODEL">%1$s</xliff:g>‎‏‎‎‏‏‏‎ ‎‏‎‎‏‏‎<xliff:g id="STORAGE_NAME">%2$s</xliff:g>‎‏‎‎‏‏‏‎‎‏‎‎‏‎"</string>
-    <string name="accessing_notification_title" msgid="3030133609230917944">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‎‏‎‎‎‎‎‏‏‎‏‎‎‏‏‎‎‏‎‎‏‏‏‎‏‏‎‏‎‎‏‏‎‎‎‎‎‏‎‏‏‏‎‎‏‏‎‎‎‎‏‎‎‏‏‏‎‎‎‎Accessing files from ‎‏‎‎‏‏‎<xliff:g id="DEVICE_MODEL">%1$s</xliff:g>‎‏‎‎‏‏‏‎‎‏‎‎‏‎"</string>
-    <string name="error_busy_device" msgid="3997316850357386589">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‏‏‏‎‏‏‏‏‎‎‏‎‏‎‏‎‎‏‎‎‏‏‏‏‏‏‏‎‎‏‎‏‎‎‎‎‎‏‏‏‏‎‎‎‎‏‏‏‏‎‏‎‏‎‏‏‏‎‏‎The other device is busy. You can\'t transfer files until it\'s available.‎‏‎‎‏‎"</string>
-    <string name="error_locked_device" msgid="7557872102188356147">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‎‎‎‏‏‏‎‎‎‏‎‏‏‏‏‎‏‎‎‏‎‏‎‎‎‏‎‎‎‏‏‎‏‎‎‏‏‎‎‎‏‎‏‏‎‎‏‎‎‏‎‎‎‏‏‎‎‏‏‎No files found. The other device may be locked. If so, unlock it and try again.‎‏‎‎‏‎"</string>
+    <string name="app_label" msgid="6271216747302322594">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‎‏‏‏‎‎‎‎‎‏‏‏‏‏‎‏‎‏‏‎‎‏‏‎‎‏‏‏‏‏‎‎‎‏‎‎‎‏‏‎‏‏‏‏‏‎‎‎‎‎‎‏‏‎‏‎‎‎‏‎‎MTP Host‎‏‎‎‏‎"</string>
+    <string name="downloads_app_label" msgid="7120690641874849726">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‎‏‎‏‏‎‏‎‎‎‏‏‏‎‎‎‏‏‎‎‏‏‎‏‎‎‏‎‏‏‎‏‎‎‎‎‏‏‎‎‏‏‎‎‎‎‎‏‏‏‏‏‎‏‏‏‏‏‎‎Downloads‎‏‎‎‏‎"</string>
+    <string name="root_name" msgid="5819495383921089536">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‎‎‎‎‏‏‎‎‎‎‏‏‎‎‎‎‎‎‎‎‎‎‏‏‎‏‏‏‏‏‏‏‏‎‏‎‏‎‏‎‎‏‎‎‎‏‎‏‏‏‎‎‎‎‎‎‎‎‎‎‎‎‏‎‎‏‏‎<xliff:g id="DEVICE_MODEL">%1$s</xliff:g>‎‏‎‎‏‏‏‎ ‎‏‎‎‏‏‎<xliff:g id="STORAGE_NAME">%2$s</xliff:g>‎‏‎‎‏‏‏‎‎‏‎‎‏‎"</string>
+    <string name="accessing_notification_title" msgid="3030133609230917944">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‎‏‎‎‎‎‎‏‏‎‏‎‎‏‏‎‎‏‎‎‏‏‏‎‏‏‎‏‎‎‏‏‎‎‎‎‎‏‎‏‏‏‎‎‏‏‎‎‎‎‏‎‎‏‏‏‎‎‎‎Accessing files from ‎‏‎‎‏‏‎<xliff:g id="DEVICE_MODEL">%1$s</xliff:g>‎‏‎‎‏‏‏‎‎‏‎‎‏‎"</string>
+    <string name="error_busy_device" msgid="3997316850357386589">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‏‏‏‎‏‏‏‏‎‎‏‎‏‎‏‎‎‏‎‎‏‏‏‏‏‏‏‎‎‏‎‏‎‎‎‎‎‏‏‏‏‎‎‎‎‏‏‏‏‎‏‎‏‎‏‏‏‎‏‎The other device is busy. You can\'t transfer files until it\'s available.‎‏‎‎‏‎"</string>
+    <string name="error_locked_device" msgid="7557872102188356147">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‎‎‎‏‏‏‎‎‎‏‎‏‏‏‏‎‏‎‎‏‎‏‎‎‎‏‎‎‎‏‏‎‏‎‎‏‏‎‎‎‏‎‏‏‎‎‏‎‎‏‎‎‎‏‏‎‎‏‏‎No files found. The other device may be locked. If so, unlock it and try again.‎‏‎‎‏‎"</string>
 </resources>

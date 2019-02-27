@@ -779,7 +779,7 @@
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"<xliff:g id="ID_1">%s</xliff:g>-instellingen openen."</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Volgorde van instellingen bewerken."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"Pagina <xliff:g id="ID_1">%1$d</xliff:g> van <xliff:g id="ID_2">%2$d</xliff:g>"</string>
-    <string name="tuner_lock_screen" msgid="5755818559638850294">"Scherm vergrendelen"</string>
+    <string name="tuner_lock_screen" msgid="5755818559638850294">"Vergrendelingsscherm"</string>
     <string name="pip_phone_expand" msgid="5889780005575693909">"Uitvouwen"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Minimaliseren"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Sluiten"</string>

@@ -16,6 +16,7 @@ package com.android.server.slice;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import android.content.ContentProvider;
 import android.content.ContentResolver;
@@ -26,6 +27,7 @@ import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
+import android.util.Log;
 import android.util.Xml.Encoding;
 
 import com.android.server.UiServiceTestCase;
@@ -46,10 +48,12 @@ import java.io.IOException;
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
 public class SlicePermissionManagerTest extends UiServiceTestCase {
+    private static final String TAG = "SlicePerManTest";
 
     @Test
     public void testGrant() {
-        File sliceDir = new File(mContext.getDataDir(), "system/slices");
+        File sliceDir = new File(mContext.getCacheDir(), "testGrantSlices");
+        Log.v(TAG, "testGrant: slice permissions stored in " + sliceDir.getAbsolutePath());
         SlicePermissionManager permissions = new SlicePermissionManager(mContext,
                 TestableLooper.get(this).getLooper(), sliceDir);
         Uri uri = new Builder().scheme(ContentResolver.SCHEME_CONTENT)
@@ -59,11 +63,15 @@ public class SlicePermissionManagerTest extends UiServiceTestCase {
         permissions.grantSliceAccess("my.pkg", 0, "provider.pkg", 0, uri);
 
         assertTrue(permissions.hasPermission("my.pkg", 0, uri));
+
+        // Cleanup.
+        assertTrue(FileUtils.deleteContentsAndDir(sliceDir));
     }
 
     @Test
     public void testBackup() throws XmlPullParserException, IOException {
-        File sliceDir = new File(mContext.getDataDir(), "system/slices");
+        File sliceDir = new File(mContext.getCacheDir(), "testBackupSlices");
+        Log.v(TAG, "testBackup: slice permissions stored in " + sliceDir.getAbsolutePath());
         Uri uri = new Builder().scheme(ContentResolver.SCHEME_CONTENT)
                 .authority("authority")
                 .path("something").build();
@@ -90,7 +98,10 @@ public class SlicePermissionManagerTest extends UiServiceTestCase {
                 TestableLooper.get(this).getLooper());
         permissions.readRestore(parser);
 
-        assertTrue(permissions.hasFullAccess("com.android.mypkg", 10));
+        if (!permissions.hasFullAccess("com.android.mypkg", 10)) {
+            fail("com.android.mypkg@10 did not have full access. backup file: "
+                    + output.toString());
+        }
         assertTrue(permissions.hasPermission("com.android.otherpkg", 0,
                 ContentProvider.maybeAddUserId(uri, 1)));
         permissions.removePkg("com.android.lastpkg", 1);
@@ -102,8 +113,9 @@ public class SlicePermissionManagerTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testInvalid() throws Exception {
-        File sliceDir = new File(mContext.getCacheDir(), "slices-test");
+    public void testInvalid() {
+        File sliceDir = new File(mContext.getCacheDir(), "testInvalidSlices");
+        Log.v(TAG, "testInvalid: slice permissions stored in " + sliceDir.getAbsolutePath());
         if (!sliceDir.exists()) {
             sliceDir.mkdir();
         }
@@ -118,7 +130,8 @@ public class SlicePermissionManagerTest extends UiServiceTestCase {
 
             @Override
             public void writeTo(XmlSerializer out) throws IOException {
-                throw new RuntimeException("this doesn't work");
+                throw new RuntimeException("this RuntimeException inside junk.writeTo() "
+                        + "should be caught and suppressed by surrounding code");
             }
         };
 

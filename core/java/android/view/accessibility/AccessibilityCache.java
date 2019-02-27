@@ -418,28 +418,20 @@ public class AccessibilityCache {
      *
      * @param nodes The nodes in the hosting window.
      * @param rootNodeId The id of the root to evict.
-     *
-     * @return {@code true} if the cache was cleared
      */
-    private boolean clearSubTreeRecursiveLocked(LongSparseArray<AccessibilityNodeInfo> nodes,
+    private void clearSubTreeRecursiveLocked(LongSparseArray<AccessibilityNodeInfo> nodes,
             long rootNodeId) {
         AccessibilityNodeInfo current = nodes.get(rootNodeId);
         if (current == null) {
-            // The node isn't in the cache, but its descendents might be.
-            clear();
-            return true;
+            return;
         }
         nodes.remove(rootNodeId);
         final int childCount = current.getChildCount();
         for (int i = 0; i < childCount; i++) {
             final long childNodeId = current.getChildId(i);
-            if (clearSubTreeRecursiveLocked(nodes, childNodeId)) {
-                current.recycle();
-                return true;
-            }
+            clearSubTreeRecursiveLocked(nodes, childNodeId);
         }
         current.recycle();
-        return false;
     }
 
     /**

@@ -295,7 +295,7 @@
     <string name="quick_settings_rotation_locked_portrait_label" msgid="5102691921442135053">"直向"</string>
     <string name="quick_settings_rotation_locked_landscape_label" msgid="8553157770061178719">"橫向"</string>
     <string name="quick_settings_ime_label" msgid="7073463064369468429">"輸入法"</string>
-    <string name="quick_settings_location_label" msgid="5011327048748762257">"位置資訊"</string>
+    <string name="quick_settings_location_label" msgid="5011327048748762257">"定位"</string>
     <string name="quick_settings_location_off_label" msgid="7464544086507331459">"位置資訊已關閉"</string>
     <string name="quick_settings_media_device_label" msgid="1302906836372603762">"媒體裝置"</string>
     <string name="quick_settings_rssi_label" msgid="7725671335550695589">"RSSI"</string>

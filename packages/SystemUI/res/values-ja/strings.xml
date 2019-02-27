@@ -592,7 +592,7 @@
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"BluetoothをONにしますか？"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"タブレットでキーボードに接続するには、最初にBluetoothをONにする必要があります。"</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="6258074250948309715">"ONにする"</string>
-    <string name="show_silently" msgid="6841966539811264192">"通知をマナーモードで表示する"</string>
+    <string name="show_silently" msgid="6841966539811264192">"通知をポップアップで知らせる"</string>
     <string name="block" msgid="2734508760962682611">"通知をすべてブロックする"</string>
     <string name="do_not_silence" msgid="6878060322594892441">"音声で知らせる"</string>
     <string name="do_not_silence_block" msgid="4070647971382232311">"音声で知らせる / ブロックしない"</string>

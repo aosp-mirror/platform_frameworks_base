@@ -87,7 +87,7 @@
     <string name="NetworkPreferenceSwitchSummary" msgid="509327194863482733">"Prøv at skifte dit foretrukne netværk. Tryk for skifte."</string>
     <string name="EmergencyCallWarningTitle" msgid="813380189532491336">"Det er ikke muligt at foretage nødopkald"</string>
     <string name="EmergencyCallWarningSummary" msgid="1899692069750260619">"Det er ikke muligt at foretage nødopkald via Wi‑Fi"</string>
-    <string name="notification_channel_network_alert" msgid="4427736684338074967">"Notifikationer"</string>
+    <string name="notification_channel_network_alert" msgid="4427736684338074967">"Underretninger"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"Viderestilling af opkald"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Nødtilbagekaldstilstand"</string>
     <string name="notification_channel_mobile_data_status" msgid="4575131690860945836">"Status for mobildata"</string>
@@ -257,7 +257,7 @@
     <string name="notification_channel_network_available" msgid="4531717914138179517">"Tilgængeligt netværk"</string>
     <string name="notification_channel_vpn" msgid="8330103431055860618">"VPN-status"</string>
     <string name="notification_channel_device_admin" msgid="1568154104368069249">"Enhedsadministration"</string>
-    <string name="notification_channel_alerts" msgid="4496839309318519037">"Notifikationer"</string>
+    <string name="notification_channel_alerts" msgid="4496839309318519037">"Underretninger"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"Demo til udstilling i butik"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"USB-forbindelse"</string>
     <string name="notification_channel_heavy_weight_app" msgid="6218742927792852607">"Appen kører"</string>
@@ -331,7 +331,7 @@
     <string name="permlab_receiveMms" msgid="1821317344668257098">"modtage tekstbeskeder (mms)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Tillader, at appen kan modtage og behandle mms-beskeder. Det betyder, at appen kan overvåge eller slette de beskeder, der sendes til din enhed, uden at vise dem til dig."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"læse Cell Broadcast-meddelelser"</string>
-    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Tillader, at appen læser Cell Broadcast-meddelelser, der modtages af din enhed. I nogle områder sendes der Cell Broadcast-meddelelser for at advare om nødsituationer. Ondsindede apps kan forstyrre ydelsen eller driften af ​din ​enhed, når der modtages en Cell Broadcast-meddelelse om en nødsituation."</string>
+    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Tillader, at appen læser Cell Broadcast-underretninger, der modtages af din enhed. I nogle områder sendes der Cell Broadcast-underretninger for at advare om nødsituationer. Ondsindede apps kan forstyrre ydelsen eller driften af ​din ​enhed, når der modtages en Cell Broadcast-meddelelse om en nødsituation."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"læse feeds, jeg abonnerer på"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Tillader, at appen kan hente oplysninger om de feeds, der synkroniseres."</string>
     <string name="permlab_sendSms" msgid="7544599214260982981">"Send og se sms-beskeder"</string>

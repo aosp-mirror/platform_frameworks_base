@@ -1453,7 +1453,7 @@
     <string name="add_account_button_label" msgid="3611982894853435874">"Dodaj konto"</string>
     <string name="number_picker_increment_button" msgid="2412072272832284313">"Zwiększ"</string>
     <string name="number_picker_decrement_button" msgid="476050778386779067">"Zmniejsz"</string>
-    <string name="number_picker_increment_scroll_mode" msgid="5259126567490114216">"<xliff:g id="VALUE">%s</xliff:g> naciśnij i przytrzymaj."</string>
+    <string name="number_picker_increment_scroll_mode" msgid="5259126567490114216">"<xliff:g id="VALUE">%s</xliff:g> dotknij i przytrzymaj."</string>
     <string name="number_picker_increment_scroll_action" msgid="9101473045891835490">"Przesuń w górę, by zwiększyć, i w dół, by zmniejszyć."</string>
     <string name="time_picker_increment_minute_button" msgid="8865885114028614321">"Zmień minutę na późniejszą"</string>
     <string name="time_picker_decrement_minute_button" msgid="6246834937080684791">"Zmień minutę na wcześniejszą"</string>
