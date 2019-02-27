@@ -19,9 +19,10 @@ import static org.mockito.Mockito.when;
 
 import android.app.Fragment;
 import android.app.Instrumentation;
-import android.support.test.InstrumentationRegistry;
 import android.testing.BaseFragmentTest;
 import android.testing.DexmakerShareClassLoaderRule;
+
+import androidx.test.InstrumentationRegistry;
 
 import com.android.systemui.utils.leaks.LeakCheckedTest;
 import com.android.systemui.utils.leaks.LeakCheckedTest.SysuiLeakCheck;

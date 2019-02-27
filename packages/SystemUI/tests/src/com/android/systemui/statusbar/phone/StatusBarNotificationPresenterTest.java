@@ -26,12 +26,13 @@ import android.content.Context;
 import android.metrics.LogMaker;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
-import android.support.test.filters.SmallTest;
 import android.support.test.metricshelper.MetricsAsserts;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 import android.view.ViewGroup;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;

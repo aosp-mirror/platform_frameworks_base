@@ -30,10 +30,11 @@ import android.content.Intent;
 import android.graphics.drawable.Icon;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
-import android.support.test.InstrumentationRegistry;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.widget.RemoteViews;
+
+import androidx.test.InstrumentationRegistry;
 
 import com.android.systemui.R;
 import com.android.systemui.bubbles.BubblesTestActivity;

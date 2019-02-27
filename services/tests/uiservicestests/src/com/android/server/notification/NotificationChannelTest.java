@@ -24,9 +24,10 @@ import static junit.framework.Assert.assertNull;
 import android.app.NotificationChannel;
 import android.net.Uri;
 import android.os.Parcel;
-import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.util.Xml;
+
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.util.FastXmlSerializer;
 import com.android.server.UiServiceTestCase;

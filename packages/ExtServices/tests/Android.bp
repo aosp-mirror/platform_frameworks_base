@@ -14,10 +14,10 @@ android_test {
 
     static_libs: [
         "ExtServices-core",
-        "android-support-test",
-        "compatibility-device-util",
+        "androidx.test.rules",
+        "compatibility-device-util-axt",
         "mockito-target-minus-junit4",
-        "espresso-core",
+        "androidx.test.espresso.core",
         "truth-prebuilt",
         "testables",
         "testng",

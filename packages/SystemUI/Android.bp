@@ -113,7 +113,7 @@ android_library {
         "SystemUI-tags",
         "SystemUI-proto",
         "metrics-helper-lib",
-        "android-support-test",
+        "androidx.test.rules", "hamcrest-library",
         "mockito-target-inline-minus-junit4",
         "testables",
         "truth-prebuilt",

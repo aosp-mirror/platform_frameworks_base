@@ -1,28 +1,29 @@
 package com.android.systemui.statusbar.policy;
 
 
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.junit.Assert.fail;
 
 import android.media.MediaRouter;
 import android.media.projection.MediaProjectionInfo;
 import android.media.projection.MediaProjectionManager;
-import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.policy.CastController.Callback;
 
 import org.junit.Before;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.junit.Test;
 
 import java.util.ConcurrentModificationException;
 import java.util.concurrent.CountDownLatch;

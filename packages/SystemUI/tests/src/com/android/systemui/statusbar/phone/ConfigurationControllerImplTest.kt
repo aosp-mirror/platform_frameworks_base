@@ -14,7 +14,7 @@
 
 package com.android.systemui.statusbar.phone
 
-import android.support.test.filters.SmallTest
+import androidx.test.filters.SmallTest
 import android.testing.AndroidTestingRunner
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener

@@ -17,25 +17,27 @@
 package com.android.systemui.statusbar.phone;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.doReturn;
 
 import android.graphics.drawable.Drawable;
-import android.support.test.filters.SmallTest;
 import android.view.View;
-import com.android.systemui.statusbar.policy.KeyButtonDrawable;
+
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
+
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.statusbar.policy.KeyButtonDrawable;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import android.support.test.runner.AndroidJUnit4;
 
 /** atest NavigationBarContextTest */
 @SmallTest

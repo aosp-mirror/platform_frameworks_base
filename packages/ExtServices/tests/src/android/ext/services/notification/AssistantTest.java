@@ -44,10 +44,11 @@ import android.service.notification.NotificationListenerService.Ranking;
 import android.service.notification.NotificationListenerService.RankingMap;
 import android.service.notification.NotificationStats;
 import android.service.notification.StatusBarNotification;
-import android.support.test.InstrumentationRegistry;
 import android.test.ServiceTestCase;
 import android.testing.TestableContext;
 import android.util.AtomicFile;
+
+import androidx.test.InstrumentationRegistry;
 
 import com.android.internal.util.FastXmlSerializer;
 

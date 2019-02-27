@@ -17,7 +17,6 @@ package com.android.server.notification;
 
 import static android.service.notification.NotificationStats.DISMISSAL_PEEK;
 import static android.service.notification.NotificationStats.DISMISS_SENTIMENT_NEGATIVE;
-import static android.service.notification.NotificationStats.DISMISS_SENTIMENT_POSITIVE;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
@@ -25,8 +24,9 @@ import static junit.framework.Assert.assertTrue;
 
 import android.os.Parcel;
 import android.service.notification.NotificationStats;
-import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
+
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.UiServiceTestCase;
 

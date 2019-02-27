@@ -26,10 +26,11 @@ import android.app.RemoteInput;
 import android.content.Intent;
 import android.graphics.drawable.Icon;
 import android.service.notification.StatusBarNotification;
-import android.support.test.annotation.UiThreadTest;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
 import android.util.Pair;
+
+import androidx.test.annotation.UiThreadTest;
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
