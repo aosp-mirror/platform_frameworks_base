@@ -136,6 +136,8 @@ public class StorageManager {
     public static final String PROP_ISOLATED_STORAGE = "persist.sys.isolated_storage";
     /** {@hide} */
     public static final String PROP_ISOLATED_STORAGE_SNAPSHOT = "sys.isolated_storage_snapshot";
+    /** {@hide} */
+    public static final String PROP_LEGACY_GREYLIST = "persist.sys.legacy_greylist";
 
     /** {@hide} */
     public static final String PROP_FORCE_AUDIO = "persist.fw.force_audio";
@@ -233,6 +235,8 @@ public class StorageManager {
     public static final int DEBUG_ISOLATED_STORAGE_FORCE_ON = 1 << 6;
     /** {@hide} */
     public static final int DEBUG_ISOLATED_STORAGE_FORCE_OFF = 1 << 7;
+    /** {@hide} */
+    public static final int DEBUG_LEGACY_GREYLIST = 1 << 8;
 
     /** {@hide} */
     public static final int FLAG_STORAGE_DE = IInstalld.FLAG_STORAGE_DE;
