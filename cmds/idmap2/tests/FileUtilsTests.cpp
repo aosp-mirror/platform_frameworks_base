@@ -58,21 +58,15 @@ TEST(FileUtilsTests, FindFilesFindApkFilesRecursive) {
   });
   ASSERT_THAT(v, NotNull());
   ASSERT_EQ(v->size(), 10U);
-  ASSERT_EQ(
-      std::set<std::string>(v->begin(), v->end()),
-      std::set<std::string>(
-          {
-              root + "/target/target.apk",
-              root + "/target/target-no-overlayable.apk",
-              root + "/overlay/overlay.apk",
-              root + "/overlay/overlay-no-name.apk",
-              root + "/overlay/overlay-no-name-static.apk",
-              root + "/overlay/overlay-static-1.apk",
-              root + "/overlay/overlay-static-2.apk",
-              root + "/signature-overlay/signature-overlay.apk",
-              root + "/system-overlay/system-overlay.apk",
-              root + "/system-overlay-invalid/system-overlay-invalid.apk"
-          }));
+  ASSERT_EQ(std::set<std::string>(v->begin(), v->end()),
+            std::set<std::string>(
+                {root + "/target/target.apk", root + "/target/target-no-overlayable.apk",
+                 root + "/overlay/overlay.apk", root + "/overlay/overlay-no-name.apk",
+                 root + "/overlay/overlay-no-name-static.apk",
+                 root + "/overlay/overlay-static-1.apk", root + "/overlay/overlay-static-2.apk",
+                 root + "/signature-overlay/signature-overlay.apk",
+                 root + "/system-overlay/system-overlay.apk",
+                 root + "/system-overlay-invalid/system-overlay-invalid.apk"}));
 }
 
 TEST(FileUtilsTests, ReadFile) {

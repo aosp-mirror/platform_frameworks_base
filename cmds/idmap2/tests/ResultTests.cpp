@@ -32,28 +32,28 @@ struct Container {
 // Tests: Error
 
 TEST(ResultTests, ErrorTraits) {
-  ASSERT_TRUE(std::is_move_constructible<v2::Error>::value);
-  ASSERT_TRUE(std::is_move_assignable<v2::Error>::value);
-  ASSERT_TRUE(std::is_copy_constructible<v2::Error>::value);
-  ASSERT_TRUE(std::is_copy_assignable<v2::Error>::value);
+  ASSERT_TRUE(std::is_move_constructible<Error>::value);
+  ASSERT_TRUE(std::is_move_assignable<Error>::value);
+  ASSERT_TRUE(std::is_copy_constructible<Error>::value);
+  ASSERT_TRUE(std::is_copy_assignable<Error>::value);
 }
 
 TEST(ResultTests, ErrorCtorFormat) {
-  v2::Error e("%s=0x%08x", "resid", 0x7f010002);
+  Error e("%s=0x%08x", "resid", 0x7f010002);
   ASSERT_EQ(e.GetMessage(), "resid=0x7f010002");
 }
 
 TEST(ResultTests, ErrorPropagateParent) {
-  v2::Error e1("foo");
+  Error e1("foo");
   ASSERT_EQ(e1.GetMessage(), "foo");
 
-  v2::Error e2(e1, "bar");
+  Error e2(e1, "bar");
   ASSERT_EQ(e2.GetMessage(), "foo -> bar");
 
-  v2::Error e3(e2);  // NOLINT(performance-unnecessary-copy-initialization)
+  Error e3(e2);  // NOLINT(performance-unnecessary-copy-initialization)
   ASSERT_EQ(e3.GetMessage(), "foo -> bar");
 
-  v2::Error e4(e3, "%02d", 1);
+  Error e4(e3, "%02d", 1);
   ASSERT_EQ(e4.GetMessage(), "foo -> bar -> 01");
 }
 
@@ -61,13 +61,13 @@ TEST(ResultTests, ErrorPropagateParent) {
 
 // Result(const Result&)
 TEST(ResultTests, CopyConstructor) {
-  v2::Result<uint32_t> r1(42U);
+  Result<uint32_t> r1(42U);
 
-  v2::Result<uint32_t> r2(r1);
+  Result<uint32_t> r2(r1);
   ASSERT_TRUE(r2);
   ASSERT_EQ(*r2, 42U);
 
-  v2::Result<uint32_t> r3 = r2;
+  Result<uint32_t> r3 = r2;
   ASSERT_TRUE(r3);
   ASSERT_EQ(*r3, 42U);
 }
@@ -75,23 +75,23 @@ TEST(ResultTests, CopyConstructor) {
 // Result(const T&)
 TEST(ResultTests, Constructor) {
   uint32_t v = 42U;
-  v2::Result<uint32_t> r1(v);
+  Result<uint32_t> r1(v);
   ASSERT_TRUE(r1);
   ASSERT_EQ(*r1, 42U);
 
-  v2::Error e("foo");
-  v2::Result<uint32_t> r2(e);
+  Error e("foo");
+  Result<uint32_t> r2(e);
   ASSERT_FALSE(r2);
   ASSERT_EQ(r2.GetErrorMessage(), "foo");
 }
 
 // Result(const T&&)
 TEST(ResultTests, MoveConstructor) {
-  v2::Result<uint32_t> r1(42U);
+  Result<uint32_t> r1(42U);
   ASSERT_TRUE(r1);
   ASSERT_EQ(*r1, 42U);
 
-  v2::Result<uint32_t> r2(v2::Error("foo"));
+  Result<uint32_t> r2(Error("foo"));
   ASSERT_FALSE(r2);
   ASSERT_EQ(r2.GetErrorMessage(), "foo");
 }
@@ -99,52 +99,52 @@ TEST(ResultTests, MoveConstructor) {
 // operator=
 TEST(ResultTests, CopyAssignmentOperator) {
   // note: 'Result<...> r2 = r1;' calls the copy ctor
-  v2::Result<uint32_t> r1(42U);
-  v2::Result<uint32_t> r2(0U);
+  Result<uint32_t> r1(42U);
+  Result<uint32_t> r2(0U);
   r2 = r1;
   ASSERT_TRUE(r2);
   ASSERT_EQ(*r2, 42U);
 
-  v2::Result<uint32_t> r3(v2::Error("foo"));
+  Result<uint32_t> r3(Error("foo"));
   r2 = r3;
   ASSERT_FALSE(r2);
   ASSERT_EQ(r2.GetErrorMessage(), "foo");
 }
 
 TEST(ResultTests, MoveAssignmentOperator) {
-  v2::Result<uint32_t> r(0U);
-  r = v2::Result<uint32_t>(42U);
+  Result<uint32_t> r(0U);
+  r = Result<uint32_t>(42U);
   ASSERT_TRUE(r);
   ASSERT_EQ(*r, 42U);
 
-  r = v2::Result<uint32_t>(v2::Error("foo"));
+  r = Result<uint32_t>(Error("foo"));
   ASSERT_FALSE(r);
   ASSERT_EQ(r.GetErrorMessage(), "foo");
 }
 
 // operator bool()
 TEST(ResultTests, BoolOperator) {
-  v2::Result<uint32_t> r1(42U);
+  Result<uint32_t> r1(42U);
   ASSERT_TRUE(r1);
   ASSERT_EQ(*r1, 42U);
 
-  v2::Result<uint32_t> r2(v2::Error("foo"));
+  Result<uint32_t> r2(Error("foo"));
   ASSERT_FALSE(r2);
   ASSERT_EQ(r2.GetErrorMessage(), "foo");
 }
 
 // operator*
 TEST(ResultTests, IndirectionOperator) {
-  const v2::Result<uint32_t> r1(42U);
+  const Result<uint32_t> r1(42U);
   ASSERT_TRUE(r1);
   ASSERT_EQ(*r1, 42U);
 
-  const v2::Result<Container> r2(Container{42U});
+  const Result<Container> r2(Container{42U});
   ASSERT_TRUE(r2);
   const Container& c = *r2;
   ASSERT_EQ(c.value, 42U);
 
-  v2::Result<Container> r3(Container{42U});
+  Result<Container> r3(Container{42U});
   ASSERT_TRUE(r3);
   ASSERT_EQ((*r3).value, 42U);
   (*r3).value = 0U;
@@ -153,11 +153,11 @@ TEST(ResultTests, IndirectionOperator) {
 
 // operator->
 TEST(ResultTests, DereferenceOperator) {
-  const v2::Result<Container> r1(Container{42U});
+  const Result<Container> r1(Container{42U});
   ASSERT_TRUE(r1);
   ASSERT_EQ(r1->value, 42U);
 
-  v2::Result<Container> r2(Container{42U});
+  Result<Container> r2(Container{42U});
   ASSERT_TRUE(r2);
   ASSERT_EQ(r2->value, 42U);
   r2->value = 0U;
@@ -167,14 +167,14 @@ TEST(ResultTests, DereferenceOperator) {
 // Tests: intended use of Result<T>
 
 TEST(ResultTests, ResultTraits) {
-  ASSERT_TRUE(std::is_move_constructible<v2::Result<uint32_t>>::value);
-  ASSERT_TRUE(std::is_move_assignable<v2::Result<uint32_t>>::value);
-  ASSERT_TRUE(std::is_copy_constructible<v2::Result<uint32_t>>::value);
-  ASSERT_TRUE(std::is_copy_assignable<v2::Result<uint32_t>>::value);
+  ASSERT_TRUE(std::is_move_constructible<Result<uint32_t>>::value);
+  ASSERT_TRUE(std::is_move_assignable<Result<uint32_t>>::value);
+  ASSERT_TRUE(std::is_copy_constructible<Result<uint32_t>>::value);
+  ASSERT_TRUE(std::is_copy_assignable<Result<uint32_t>>::value);
 }
 
 TEST(ResultTests, UnitTypeResult) {
-  v2::Result<v2::Unit> r(v2::Unit{});
+  Result<Unit> r(Unit{});
   ASSERT_TRUE(r);
 }
 
@@ -220,16 +220,16 @@ TEST(ResultTests, ReferenceCount) {
   ASSERT_FALSE(std::is_copy_assignable<RefCountContainer>::value);
 
   RefCountData rc{0, 0, 0, 0};
-  { v2::Result<RefCountContainer> r(RefCountContainer{rc}); }
+  { Result<RefCountContainer> r(RefCountContainer{rc}); }
   ASSERT_EQ(rc.ctor, 1);
   ASSERT_EQ(rc.copy_ctor, 1);
   ASSERT_EQ(rc.move, 0);
   ASSERT_EQ(rc.dtor, 2);
 }
 
-v2::Result<Container> CreateContainer(bool succeed) {
+Result<Container> CreateContainer(bool succeed) {
   if (!succeed) {
-    return v2::Error("foo");
+    return Error("foo");
   }
   return Container{42U};
 }
@@ -245,10 +245,10 @@ TEST(ResultTests, FunctionReturn) {
   ASSERT_EQ(r2.GetError().GetMessage(), "foo");
 }
 
-v2::Result<Container> FailToCreateContainer() {
+Result<Container> FailToCreateContainer() {
   auto container = CreateContainer(false);
   if (!container) {
-    return v2::Error(container.GetError(), "bar");
+    return Error(container.GetError(), "bar");
   }
   return container;
 }
@@ -264,9 +264,9 @@ struct NoCopyContainer {
   DISALLOW_COPY_AND_ASSIGN(NoCopyContainer);
 };
 
-v2::Result<std::unique_ptr<NoCopyContainer>> CreateNoCopyContainer(bool succeed) {
+Result<std::unique_ptr<NoCopyContainer>> CreateNoCopyContainer(bool succeed) {
   if (!succeed) {
-    return v2::Error("foo");
+    return Error("foo");
   }
   std::unique_ptr<NoCopyContainer> p(new NoCopyContainer{0U});
   p->value = 42U;

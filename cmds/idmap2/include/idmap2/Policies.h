@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-#include <ostream>
 #include <string>
 #include <vector>
 
@@ -33,8 +32,7 @@ using PolicyBitmask = uint32_t;
 
 // Parses a the string representation of a set of policies into a bitmask. The format of the string
 // is the same as for the <policy> element.
-Result<PolicyBitmask> PoliciesToBitmask(const std::vector<std::string>& policies,
-                                        std::ostream& err);
+Result<PolicyBitmask> PoliciesToBitmask(const std::vector<std::string>& policies);
 
 }  // namespace android::idmap2
 

@@ -59,7 +59,10 @@ std::unique_ptr<const MemoryChunk> ZipFile::Uncompress(const std::string& entryP
 Result<uint32_t> ZipFile::Crc(const std::string& entryPath) const {
   ::ZipEntry entry;
   int32_t status = ::FindEntry(handle_, ::ZipString(entryPath.c_str()), &entry);
-  return status == 0 ? Result<uint32_t>(entry.crc32) : kResultError;
+  if (status != 0) {
+    return Error("failed to find zip entry %s", entryPath.c_str());
+  }
+  return entry.crc32;
 }
 
 }  // namespace android::idmap2

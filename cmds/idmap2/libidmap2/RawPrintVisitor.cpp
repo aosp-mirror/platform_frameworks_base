@@ -75,7 +75,7 @@ void RawPrintVisitor::visit(const IdmapData::TypeEntry& type_entry) {
                                             type_entry.GetEntryOffset() + i);
       const ResourceId overlay_resid =
           RESID(last_seen_package_id_, type_entry.GetOverlayTypeId(), entry);
-      Result<std::string> name;
+      Result<std::string> name(Error(""));
       if (target_package_loaded) {
         name = utils::ResToTypeEntryName(target_am_, target_resid);
       }

@@ -17,7 +17,6 @@
 #ifndef IDMAP2_INCLUDE_IDMAP2_RESULT_H_
 #define IDMAP2_INCLUDE_IDMAP2_RESULT_H_
 
-#include <optional>
 #include <string>
 #include <utility>
 #include <variant>
@@ -25,13 +24,6 @@
 #include "android-base/logging.h"  // CHECK
 
 namespace android::idmap2 {
-
-template <typename T>
-using Result = std::optional<T>;
-
-static constexpr std::nullopt_t kResultError = std::nullopt;
-
-namespace v2 {
 
 using Unit = std::monostate;
 
@@ -147,8 +139,6 @@ template <typename T>
 inline bool Result<T>::is_ok() const {
   return std::holds_alternative<T>(data_);
 }
-
-}  // namespace v2
 
 }  // namespace android::idmap2
 
