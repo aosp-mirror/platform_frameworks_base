@@ -61,6 +61,7 @@ import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.server.SystemService;
 
+import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
 /**
@@ -99,6 +100,7 @@ public class AttentionManagerService extends SystemService {
 
     @Override
     public void onStart() {
+        publishBinderService(Context.ATTENTION_SERVICE, new BinderService());
         publishLocalService(AttentionManagerInternal.class, new LocalService());
     }
 
@@ -324,17 +326,15 @@ public class AttentionManagerService extends SystemService {
         return null;
     }
 
-    private void dumpInternal(PrintWriter pw) {
-        if (!DumpUtils.checkDumpPermission(mContext, LOG_TAG, pw)) return;
-        IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ");
-        ipw.println("Attention Manager Service (dumpsys attention)\n");
+    private void dumpInternal(IndentingPrintWriter ipw) {
+        ipw.println("Attention Manager Service (dumpsys attention) state:\n");
 
         ipw.printPair("context", mContext);
-        pw.println();
+        ipw.println();
         synchronized (mLock) {
             int size = mUserStates.size();
             ipw.print("Number user states: ");
-            pw.println(size);
+            ipw.println(size);
             if (size > 0) {
                 ipw.increaseIndent();
                 for (int i = 0; i < size; i++) {
@@ -584,6 +584,17 @@ public class AttentionManagerService extends SystemService {
             if (Intent.ACTION_SCREEN_OFF.equals(intent.getAction())) {
                 cancelAndUnbindLocked(peekCurrentUserStateLocked());
             }
+        }
+    }
+
+    private final class BinderService extends Binder {
+        @Override
+        protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+            if (!DumpUtils.checkDumpPermission(mContext, LOG_TAG, pw)) {
+                return;
+            }
+
+            dumpInternal(new IndentingPrintWriter(pw, "  "));
         }
     }
 }
