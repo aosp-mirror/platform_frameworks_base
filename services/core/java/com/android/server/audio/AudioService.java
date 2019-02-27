@@ -5801,7 +5801,7 @@ public class AudioService extends IAudioService.Stub
     // - wired: logged before onSetWiredDeviceConnectionState() is executed
     // - A2DP: logged at reception of method call
     /*package*/ static final AudioEventLogger sDeviceLogger = new AudioEventLogger(
-            LOG_NB_EVENTS_DEVICE_CONNECTION, "wired/A2DP/hearing aid device connection BLABLI");
+            LOG_NB_EVENTS_DEVICE_CONNECTION, "wired/A2DP/hearing aid device connection");
 
     static final AudioEventLogger sForceUseLogger = new AudioEventLogger(
             LOG_NB_EVENTS_FORCE_USE,
