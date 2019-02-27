@@ -1050,4 +1050,7 @@
     <dimen name="bubble_pointer_margin">8dp</dimen>
     <!-- Height of the permission prompt shown with bubbles -->
     <dimen name="bubble_permission_height">120dp</dimen>
+
+    <!-- Size of the RAT type for CellularTile -->
+    <dimen name="celltile_rat_type_size">10sp</dimen>
 </resources>

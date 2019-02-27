@@ -25,7 +25,11 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.provider.Settings;
 import android.service.quicksettings.Tile;
+import android.text.SpannableString;
+import android.text.SpannableStringBuilder;
+import android.text.Spanned;
 import android.text.TextUtils;
+import android.text.style.TextAppearanceSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -188,7 +192,8 @@ public class CellularTile extends QSTileImpl<SignalState> {
             state.secondaryLabel = r.getString(R.string.status_bar_airplane);
         } else if (mobileDataEnabled) {
             state.state = Tile.STATE_ACTIVE;
-            state.secondaryLabel = getMobileDataSubscriptionName(cb);
+            state.secondaryLabel = appendMobileDataType(getMobileDataSubscriptionName(cb),
+                    cb.dataContentDescription);
         } else {
             state.state = Tile.STATE_INACTIVE;
             state.secondaryLabel = r.getString(R.string.cell_data_off);
@@ -205,6 +210,18 @@ public class CellularTile extends QSTileImpl<SignalState> {
         }
 
         state.contentDescription = state.label + ", " + contentDescriptionSuffix;
+    }
+
+    private CharSequence appendMobileDataType(CharSequence current, CharSequence dataType) {
+        if (TextUtils.isEmpty(dataType)) {
+            return current;
+        }
+        SpannableString type = new SpannableString(dataType);
+        SpannableStringBuilder builder = new SpannableStringBuilder(current);
+        builder.append(" ");
+        builder.append(type, new TextAppearanceSpan(mContext, R.style.TextAppearance_RATBadge),
+                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        return builder;
     }
 
     private CharSequence getMobileDataSubscriptionName(CallbackInfo cb) {
@@ -232,6 +249,7 @@ public class CellularTile extends QSTileImpl<SignalState> {
     private static final class CallbackInfo {
         boolean airplaneModeEnabled;
         CharSequence dataSubscriptionName;
+        CharSequence dataContentDescription;
         boolean activityIn;
         boolean activityOut;
         boolean noSim;
@@ -250,6 +268,7 @@ public class CellularTile extends QSTileImpl<SignalState> {
                 return;
             }
             mInfo.dataSubscriptionName = mController.getMobileDataNetworkName();
+            mInfo.dataContentDescription = (description != null) ? typeContentDescription : null;
             mInfo.activityIn = activityIn;
             mInfo.activityOut = activityOut;
             mInfo.roaming = roaming;
