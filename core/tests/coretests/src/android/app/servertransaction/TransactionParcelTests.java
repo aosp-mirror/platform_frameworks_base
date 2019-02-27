@@ -128,7 +128,7 @@ public class TransactionParcelTests {
     @Test
     public void testNewIntent() {
         // Write to parcel
-        NewIntentItem item = NewIntentItem.obtain(referrerIntentList(), true /* pause */);
+        NewIntentItem item = NewIntentItem.obtain(referrerIntentList());
         writeAndPrepareForReading(item);
 
         // Read from parcel and assert
