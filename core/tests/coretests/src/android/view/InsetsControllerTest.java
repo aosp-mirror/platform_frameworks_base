@@ -20,6 +20,7 @@ import static android.view.InsetsState.TYPE_IME;
 import static android.view.InsetsState.TYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.TYPE_TOP_BAR;
 
+import static android.view.WindowInsets.Type.topBar;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
@@ -48,6 +49,9 @@ import androidx.test.runner.AndroidJUnit4;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+
+import java.util.concurrent.CountDownLatch;
 
 @Presubmit
 @FlakyTest(detail = "Promote once confirmed non-flaky")
@@ -80,6 +84,8 @@ public class InsetsControllerTest {
                     new DisplayCutout(
                             Insets.of(10, 10, 10, 10), rect, rect, rect, rect),
                     rect, rect, SOFT_INPUT_ADJUST_RESIZE);
+            mController.onFrameChanged(new Rect(0, 0, 100, 100));
+            mController.getState().setDisplayFrame(new Rect(0, 0, 100, 100));
         });
         InstrumentationRegistry.getInstrumentation().waitForIdleSync();
     }
@@ -101,6 +107,19 @@ public class InsetsControllerTest {
     }
 
     @Test
+    public void testControlsRevoked_duringAnim() {
+        InsetsSourceControl control = new InsetsSourceControl(TYPE_TOP_BAR, mLeash, new Point());
+        mController.onControlsChanged(new InsetsSourceControl[] { control });
+
+        WindowInsetsAnimationControlListener mockListener =
+                mock(WindowInsetsAnimationControlListener.class);
+        mController.controlWindowInsetsAnimation(topBar(), mockListener);
+        verify(mockListener).onReady(any(), anyInt());
+        mController.onControlsChanged(new InsetsSourceControl[0]);
+        verify(mockListener).onCancelled();
+    }
+
+    @Test
     public void testFrameDoesntMatchDisplay() {
         mController.onFrameChanged(new Rect(0, 0, 100, 100));
         mController.getState().setDisplayFrame(new Rect(0, 0, 200, 200));
@@ -119,23 +138,20 @@ public class InsetsControllerTest {
         InsetsSourceControl ime = controls[2];
 
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            // since there is no focused view, forcefully make IME visible.
+            mController.applyImeVisibility(true /* setVisible */);
             mController.show(Type.all());
             // quickly jump to final state by cancelling it.
             mController.cancelExistingAnimation();
             assertTrue(mController.getSourceConsumer(navBar.getType()).isVisible());
             assertTrue(mController.getSourceConsumer(topBar.getType()).isVisible());
-            // no focused view, no IME.
-            assertFalse(mController.getSourceConsumer(ime.getType()).isVisible());
+            assertTrue(mController.getSourceConsumer(ime.getType()).isVisible());
 
+            mController.applyImeVisibility(false /* setVisible */);
             mController.hide(Type.all());
             mController.cancelExistingAnimation();
             assertFalse(mController.getSourceConsumer(navBar.getType()).isVisible());
             assertFalse(mController.getSourceConsumer(topBar.getType()).isVisible());
-            assertFalse(mController.getSourceConsumer(ime.getType()).isVisible());
-
-            mController.show(Type.ime());
-            mController.cancelExistingAnimation();
-            // no focused view, no IME.
             assertFalse(mController.getSourceConsumer(ime.getType()).isVisible());
         });
         InstrumentationRegistry.getInstrumentation().waitForIdleSync();
@@ -290,6 +306,35 @@ public class InsetsControllerTest {
             assertFalse(mController.getSourceConsumer(ime.getType()).isVisible());
         });
         InstrumentationRegistry.getInstrumentation().waitForIdleSync();
+    }
+
+    @Test
+    public void testAnimationEndState_controller() throws Exception {
+        InsetsSourceControl control = new InsetsSourceControl(TYPE_TOP_BAR, mLeash, new Point());
+        mController.onControlsChanged(new InsetsSourceControl[] { control });
+
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            WindowInsetsAnimationControlListener mockListener =
+                    mock(WindowInsetsAnimationControlListener.class);
+            mController.controlWindowInsetsAnimation(topBar(), mockListener);
+
+            ArgumentCaptor<WindowInsetsAnimationController> controllerCaptor =
+                    ArgumentCaptor.forClass(WindowInsetsAnimationController.class);
+            verify(mockListener).onReady(controllerCaptor.capture(), anyInt());
+            controllerCaptor.getValue().finish(0 /* shownTypes */);
+        });
+        waitUntilNextFrame();
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            assertFalse(mController.getSourceConsumer(TYPE_TOP_BAR).isVisible());
+        });
+        InstrumentationRegistry.getInstrumentation().waitForIdleSync();
+    }
+
+    private void waitUntilNextFrame() throws Exception {
+        final CountDownLatch latch = new CountDownLatch(1);
+        Choreographer.getMainThreadInstance().postCallback(Choreographer.CALLBACK_COMMIT,
+                latch::countDown, null /* token */);
+        latch.await();
     }
 
     private InsetsSourceControl[] prepareControls() {

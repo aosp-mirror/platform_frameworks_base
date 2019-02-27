@@ -129,6 +129,29 @@ public class InsetsAnimationControlImplTest {
         assertPosition(navParams.matrix, new Rect(400, 0, 500, 500), new Rect(460, 0, 560, 500));
     }
 
+    @Test
+    public void testFinishing() {
+        when(mMockController.getState()).thenReturn(mInsetsState);
+        mController.finish(sideBars());
+        mController.applyChangeInsets(mInsetsState);
+        assertFalse(mInsetsState.getSource(TYPE_TOP_BAR).isVisible());
+        assertTrue(mInsetsState.getSource(TYPE_NAVIGATION_BAR).isVisible());
+        assertEquals(Insets.of(0, 0, 100, 0), mController.getCurrentInsets());
+        verify(mMockController).notifyFinished(eq(mController), eq(sideBars()));
+    }
+
+    @Test
+    public void testCancelled() {
+        mController.onCancelled();
+        try {
+            mController.changeInsets(Insets.NONE);
+            fail("Expected exception to be thrown");
+        } catch (IllegalStateException ignored) {
+        }
+        verify(mMockListener).onCancelled();
+        mController.finish(sideBars());
+    }
+
     private void assertPosition(Matrix m, Rect original, Rect transformed) {
         RectF rect = new RectF(original);
         rect.offsetTo(0, 0);
