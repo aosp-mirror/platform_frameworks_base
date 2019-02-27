@@ -517,8 +517,10 @@ public class StagingManager {
     }
 
     private static boolean isApexSessionFailed(ApexSessionInfo apexSessionInfo) {
+        // isRollbackInProgress is included to cover the scenario, when a device is rebooted in
+        // during the rollback, and apexd fails to resume the rollback after reboot.
         return apexSessionInfo.isActivationFailed || apexSessionInfo.isUnknown
-                || apexSessionInfo.isRolledBack;
+                || apexSessionInfo.isRolledBack || apexSessionInfo.isRollbackInProgress;
     }
 
     @GuardedBy("mStagedSessions")
