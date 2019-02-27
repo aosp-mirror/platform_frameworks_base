@@ -145,6 +145,7 @@ import android.hardware.configstore.V1_0.OptionalBool;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManagerInternal;
 import android.hardware.input.InputManager;
+import android.hardware.input.InputManagerInternal;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
@@ -7434,7 +7435,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         new SurfaceControl.Transaction().syncInputWindows().apply(true);
 
-        return mInputManager.injectInputEvent(ev, mode);
+        return LocalServices.getService(InputManagerInternal.class).injectInputEvent(ev, mode);
     }
 
     private void waitForAnimationsToComplete() {
