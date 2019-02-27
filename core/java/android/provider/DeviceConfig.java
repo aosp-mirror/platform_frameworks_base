@@ -197,6 +197,7 @@ public final class DeviceConfig {
      */
     @SystemApi
     public interface MediaNative {
+        /** The flag namespace for media native features. */
         String NAMESPACE = "media_native";
     }
 
