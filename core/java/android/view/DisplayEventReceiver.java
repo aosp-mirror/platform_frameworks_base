@@ -156,6 +156,17 @@ public abstract class DisplayEventReceiver {
     }
 
     /**
+     * Called when a display config changed event is received.
+     *
+     * @param timestampNanos The timestamp of the event, in the {@link System#nanoTime()}
+     * timebase.
+     * @param physicalDisplayId Stable display ID that uniquely describes a (display, port) pair.
+     * @param configId The new config Id
+     */
+    public void onConfigChanged(long timestampNanos, long physicalDisplayId, int configId) {
+    }
+
+    /**
      * Schedules a single vertical sync pulse to be delivered when the next
      * display frame begins.
      */
@@ -182,4 +193,11 @@ public abstract class DisplayEventReceiver {
     private void dispatchHotplug(long timestampNanos, long physicalDisplayId, boolean connected) {
         onHotplug(timestampNanos, physicalDisplayId, connected);
     }
+
+    // Called from native code.
+    @SuppressWarnings("unused")
+    private void dispatchConfigChanged(long timestampNanos, long physicalDisplayId, int configId) {
+        onConfigChanged(timestampNanos, physicalDisplayId, configId);
+    }
+
 }
