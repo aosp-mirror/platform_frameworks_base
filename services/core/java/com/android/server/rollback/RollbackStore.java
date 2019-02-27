@@ -277,9 +277,9 @@ class RollbackStore {
     }
 
     /**
-     * Writes the metadata for an available rollback to persistent storage.
+     * Saves the rollback data to persistent storage.
      */
-    void saveAvailableRollback(RollbackData data) throws IOException {
+    void saveRollbackData(RollbackData data) throws IOException {
         try {
             JSONObject dataJson = new JSONObject();
             dataJson.put("info", rollbackInfoToJson(data.info));
@@ -298,10 +298,9 @@ class RollbackStore {
     }
 
     /**
-     * Removes all persistant storage associated with the given available
-     * rollback.
+     * Removes all persistant storage associated with the given rollback data.
      */
-    void deleteAvailableRollback(RollbackData data) {
+    void deleteRollbackData(RollbackData data) {
         removeFile(data.backupDir);
     }
 

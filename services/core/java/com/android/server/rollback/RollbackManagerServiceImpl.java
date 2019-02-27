@@ -296,7 +296,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
 
                         data.timestamp = data.timestamp.plusMillis(timeDifference);
                         try {
-                            mRollbackStore.saveAvailableRollback(data);
+                            mRollbackStore.saveRollbackData(data);
                         } catch (IOException ioe) {
                             // TODO: figure out the right way to deal with this, especially if
                             //  it fails for some data and succeeds for others.
@@ -536,7 +536,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
 
             for (RollbackData rd : changed) {
                 try {
-                    mRollbackStore.saveAvailableRollback(rd);
+                    mRollbackStore.saveRollbackData(rd);
                 } catch (IOException ioe) {
                     Log.e(TAG, "Unable to save rollback info for : "
                             + rd.info.getRollbackId(), ioe);
@@ -591,7 +591,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                             data.isAvailable = true;
                         }
                         try {
-                            mRollbackStore.saveAvailableRollback(data);
+                            mRollbackStore.saveRollbackData(data);
                         } catch (IOException ioe) {
                             Log.e(TAG, "Unable to save rollback info for : "
                                     + data.info.getRollbackId(), ioe);
@@ -902,7 +902,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                     info.getInstalledUsers().addAll(IntArray.wrap(installedUsers));
                     mAppDataRollbackHelper.snapshotAppData(rd.info.getRollbackId(), info);
                     try {
-                        mRollbackStore.saveAvailableRollback(rd);
+                        mRollbackStore.saveRollbackData(rd);
                     } catch (IOException ioe) {
                         // TODO: Hopefully this is okay because we will try
                         // again to save the rollback when the staged session
@@ -1058,7 +1058,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             // We've updated metadata about this rollback, so save it to flash.
             if (changedRollbackData) {
                 try {
-                    mRollbackStore.saveAvailableRollback(rollbackData);
+                    mRollbackStore.saveRollbackData(rollbackData);
                 } catch (IOException ioe) {
                     // TODO(narayan): What is the right thing to do here ? This isn't a fatal
                     // error, since it will only result in us trying to restore data again,
@@ -1137,7 +1137,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
 
             if (rd != null) {
                 try {
-                    mRollbackStore.saveAvailableRollback(rd);
+                    mRollbackStore.saveRollbackData(rd);
                 } catch (IOException ioe) {
                     Log.e(TAG, "Unable to save rollback info for : "
                             + rd.info.getRollbackId(), ioe);
@@ -1213,7 +1213,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                 try {
                     data.timestamp = Instant.now();
 
-                    mRollbackStore.saveAvailableRollback(data);
+                    mRollbackStore.saveRollbackData(data);
                     synchronized (mLock) {
                         // Note: There is a small window of time between when
                         // the session has been committed by the package
@@ -1356,6 +1356,6 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                         info, userId);
             }
         }
-        mRollbackStore.deleteAvailableRollback(rollbackData);
+        mRollbackStore.deleteRollbackData(rollbackData);
     }
 }
