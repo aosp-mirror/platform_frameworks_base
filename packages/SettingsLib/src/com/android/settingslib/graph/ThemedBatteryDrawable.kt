@@ -87,7 +87,8 @@ open class ThemedBatteryDrawable(private val context: Context, frameColor: Int) 
         invalidateSelf()
     }
 
-    open var criticalLevel: Int = 0
+    open var criticalLevel: Int = context.resources.getInteger(
+            com.android.internal.R.integer.config_criticalBatteryWarningLevel)
 
     var charging = false
         set(value) {
@@ -101,46 +102,40 @@ open class ThemedBatteryDrawable(private val context: Context, frameColor: Int) 
             postInvalidate()
         }
 
-    private val fillColorStrokePaint: Paint by lazy {
-        val p = Paint(Paint.ANTI_ALIAS_FLAG)
+    private val fillColorStrokePaint = Paint(Paint.ANTI_ALIAS_FLAG).also { p ->
         p.color = frameColor
         p.isDither = true
         p.strokeWidth = 5f
         p.style = Paint.Style.STROKE
         p.blendMode = BlendMode.SRC
         p.strokeMiter = 5f
-        p
+        p.strokeJoin = Paint.Join.ROUND
     }
 
-    private val fillColorStrokeProtection: Paint by lazy {
-        val p = Paint(Paint.ANTI_ALIAS_FLAG)
+    private val fillColorStrokeProtection = Paint(Paint.ANTI_ALIAS_FLAG).also { p ->
         p.isDither = true
         p.strokeWidth = 5f
         p.style = Paint.Style.STROKE
         p.blendMode = BlendMode.CLEAR
         p.strokeMiter = 5f
-        p
+        p.strokeJoin = Paint.Join.ROUND
     }
 
-    private val fillPaint: Paint by lazy {
-        val p = Paint(Paint.ANTI_ALIAS_FLAG)
+    private val fillPaint = Paint(Paint.ANTI_ALIAS_FLAG).also { p ->
         p.color = frameColor
         p.alpha = 255
         p.isDither = true
         p.strokeWidth = 0f
         p.style = Paint.Style.FILL_AND_STROKE
-        p
     }
 
     // Only used if dualTone is set to true
-    private val dualToneBackgroundFill: Paint by lazy {
-        val p = Paint(Paint.ANTI_ALIAS_FLAG)
+    private val dualToneBackgroundFill = Paint(Paint.ANTI_ALIAS_FLAG).also { p ->
         p.color = frameColor
         p.alpha = 255
         p.isDither = true
         p.strokeWidth = 0f
         p.style = Paint.Style.FILL_AND_STROKE
-        p
     }
 
     init {
@@ -164,9 +159,6 @@ open class ThemedBatteryDrawable(private val context: Context, frameColor: Int) 
         }
         levels.recycle()
         colors.recycle()
-
-        criticalLevel = context.resources.getInteger(
-                com.android.internal.R.integer.config_criticalBatteryWarningLevel)
 
         loadPaths()
     }
@@ -254,7 +246,7 @@ open class ThemedBatteryDrawable(private val context: Context, frameColor: Int) 
 
     private fun batteryColorForLevel(level: Int): Int {
         return when {
-            charging || powerSaveEnabled -> fillPaint.color
+            charging || powerSaveEnabled -> fillColor
             else -> getColorForLevel(level)
         }
     }
@@ -347,6 +339,9 @@ open class ThemedBatteryDrawable(private val context: Context, frameColor: Int) 
         backgroundColor = bgColor
         dualToneBackgroundFill.color = bgColor
 
+        // Also update the level color, since fillColor may have changed
+        levelColor = batteryColorForLevel(level)
+
         invalidateSelf()
     }
 
@@ -360,7 +355,7 @@ open class ThemedBatteryDrawable(private val context: Context, frameColor: Int) 
         if (b.isEmpty) {
             scaleMatrix.setScale(1f, 1f)
         } else {
-            scaleMatrix.setScale((b.right / Companion.WIDTH), (b.bottom / Companion.HEIGHT))
+            scaleMatrix.setScale((b.right / WIDTH), (b.bottom / HEIGHT))
         }
 
         perimeterPath.transform(scaleMatrix, scaledPerimeter)
@@ -368,6 +363,14 @@ open class ThemedBatteryDrawable(private val context: Context, frameColor: Int) 
         scaledFill.computeBounds(fillRect, true)
         boltPath.transform(scaleMatrix, scaledBolt)
         plusPath.transform(scaleMatrix, scaledPlus)
+
+        // It is expected that this view only ever scale by the same factor in each dimension, so
+        // just pick one to scale the strokeWidths
+        val scaledStrokeWidth =
+                Math.max(b.right / WIDTH * PROTECTION_STROKE_WIDTH, PROTECTION_MIN_STROKE_WIDTH)
+
+        fillColorStrokePaint.strokeWidth = scaledStrokeWidth
+        fillColorStrokeProtection.strokeWidth = scaledStrokeWidth
     }
 
     private fun loadPaths() {
@@ -400,5 +403,10 @@ open class ThemedBatteryDrawable(private val context: Context, frameColor: Int) 
         private const val WIDTH = 12f
         private const val HEIGHT = 20f
         private const val CRITICAL_LEVEL = 15
+        // On a 12x20 grid, how wide to make the fill protection stroke.
+        // Scales when our size changes
+        private const val PROTECTION_STROKE_WIDTH = 1.4f
+        // Arbitrarily chosen for visibility at small sizes
+        private const val PROTECTION_MIN_STROKE_WIDTH = 5f
     }
 }
