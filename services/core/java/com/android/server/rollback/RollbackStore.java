@@ -183,6 +183,25 @@ class RollbackStore {
         return ceSnapshotInodes;
     }
 
+    private static JSONObject rollbackInfoToJson(RollbackInfo rollback) throws JSONException {
+        JSONObject json = new JSONObject();
+        json.put("rollbackId", rollback.getRollbackId());
+        json.put("packages", toJson(rollback.getPackages()));
+        json.put("isStaged", rollback.isStaged());
+        json.put("causePackages", versionedPackagesToJson(rollback.getCausePackages()));
+        json.put("committedSessionId", rollback.getCommittedSessionId());
+        return json;
+    }
+
+    private static RollbackInfo rollbackInfoFromJson(JSONObject json) throws JSONException {
+        return new RollbackInfo(
+                json.getInt("rollbackId"),
+                packageRollbackInfosFromJson(json.getJSONArray("packages")),
+                json.getBoolean("isStaged"),
+                versionedPackagesFromJson(json.getJSONArray("causePackages")),
+                json.getInt("committedSessionId"));
+    }
+
     /**
      * Reads the list of recently executed rollbacks from persistent storage.
      */
@@ -197,17 +216,7 @@ class RollbackStore {
                 JSONObject object = new JSONObject(jsonString);
                 JSONArray array = object.getJSONArray("recentlyExecuted");
                 for (int i = 0; i < array.length(); ++i) {
-                    JSONObject element = array.getJSONObject(i);
-                    int rollbackId = element.getInt("rollbackId");
-                    List<PackageRollbackInfo> packages = packageRollbackInfosFromJson(
-                            element.getJSONArray("packages"));
-                    boolean isStaged = element.getBoolean("isStaged");
-                    List<VersionedPackage> causePackages = versionedPackagesFromJson(
-                            element.getJSONArray("causePackages"));
-                    int committedSessionId = element.getInt("committedSessionId");
-                    RollbackInfo rollback = new RollbackInfo(rollbackId, packages, isStaged,
-                            causePackages, committedSessionId);
-                    recentlyExecutedRollbacks.add(rollback);
+                    recentlyExecutedRollbacks.add(rollbackInfoFromJson(array.getJSONObject(i)));
                 }
             } catch (IOException | JSONException e) {
                 // TODO: What to do here? Surely we shouldn't just forget about
@@ -303,13 +312,7 @@ class RollbackStore {
 
             for (int i = 0; i < recentlyExecutedRollbacks.size(); ++i) {
                 RollbackInfo rollback = recentlyExecutedRollbacks.get(i);
-                JSONObject element = new JSONObject();
-                element.put("rollbackId", rollback.getRollbackId());
-                element.put("packages", toJson(rollback.getPackages()));
-                element.put("isStaged", rollback.isStaged());
-                element.put("causePackages", versionedPackagesToJson(rollback.getCausePackages()));
-                element.put("committedSessionId", rollback.getCommittedSessionId());
-                array.put(element);
+                array.put(rollbackInfoToJson(rollback));
             }
 
             PrintWriter pw = new PrintWriter(mRecentlyExecutedRollbacksFile);
@@ -325,17 +328,17 @@ class RollbackStore {
      * Reads the metadata for a rollback from the given directory.
      * @throws IOException in case of error reading the data.
      */
-    private RollbackData loadRollbackData(File backupDir) throws IOException {
+    private static RollbackData loadRollbackData(File backupDir) throws IOException {
         try {
             File rollbackJsonFile = new File(backupDir, "rollback.json");
             JSONObject dataJson = new JSONObject(
                     IoUtils.readFileAsString(rollbackJsonFile.getAbsolutePath()));
 
-            int rollbackId = dataJson.getInt("rollbackId");
-            int stagedSessionId = dataJson.getInt("stagedSessionId");
-            boolean isAvailable = dataJson.getBoolean("isAvailable");
-            RollbackData data = new RollbackData(rollbackId, backupDir,
-                    stagedSessionId, isAvailable);
+            RollbackData data = new RollbackData(
+                    dataJson.getInt("rollbackId"),
+                    backupDir,
+                    dataJson.getInt("stagedSessionId"),
+                    dataJson.getBoolean("isAvailable"));
             data.packages.addAll(packageRollbackInfosFromJson(dataJson.getJSONArray("packages")));
             data.timestamp = Instant.parse(dataJson.getString("timestamp"));
             data.apkSessionId = dataJson.getInt("apkSessionId");
@@ -346,20 +349,20 @@ class RollbackStore {
         }
     }
 
-    private JSONObject toJson(VersionedPackage pkg) throws JSONException {
+    private static JSONObject toJson(VersionedPackage pkg) throws JSONException {
         JSONObject json = new JSONObject();
         json.put("packageName", pkg.getPackageName());
         json.put("longVersionCode", pkg.getLongVersionCode());
         return json;
     }
 
-    private VersionedPackage versionedPackageFromJson(JSONObject json) throws JSONException {
+    private static VersionedPackage versionedPackageFromJson(JSONObject json) throws JSONException {
         String packageName = json.getString("packageName");
         long longVersionCode = json.getLong("longVersionCode");
         return new VersionedPackage(packageName, longVersionCode);
     }
 
-    private JSONObject toJson(PackageRollbackInfo info) throws JSONException {
+    private static JSONObject toJson(PackageRollbackInfo info) throws JSONException {
         JSONObject json = new JSONObject();
         json.put("versionRolledBackFrom", toJson(info.getVersionRolledBackFrom()));
         json.put("versionRolledBackTo", toJson(info.getVersionRolledBackTo()));
@@ -378,7 +381,8 @@ class RollbackStore {
         return json;
     }
 
-    private PackageRollbackInfo packageRollbackInfoFromJson(JSONObject json) throws JSONException {
+    private static PackageRollbackInfo packageRollbackInfoFromJson(JSONObject json)
+            throws JSONException {
         VersionedPackage versionRolledBackFrom = versionedPackageFromJson(
                 json.getJSONObject("versionRolledBackFrom"));
         VersionedPackage versionRolledBackTo = versionedPackageFromJson(
@@ -399,7 +403,7 @@ class RollbackStore {
                 pendingBackups, pendingRestores, isApex, installedUsers, ceSnapshotInodes);
     }
 
-    private JSONArray versionedPackagesToJson(List<VersionedPackage> packages)
+    private static JSONArray versionedPackagesToJson(List<VersionedPackage> packages)
             throws JSONException {
         JSONArray json = new JSONArray();
         for (VersionedPackage pkg : packages) {
@@ -408,7 +412,8 @@ class RollbackStore {
         return json;
     }
 
-    private List<VersionedPackage> versionedPackagesFromJson(JSONArray json) throws JSONException {
+    private static List<VersionedPackage> versionedPackagesFromJson(JSONArray json)
+            throws JSONException {
         List<VersionedPackage> packages = new ArrayList<>();
         for (int i = 0; i < json.length(); ++i) {
             packages.add(versionedPackageFromJson(json.getJSONObject(i)));
@@ -416,7 +421,7 @@ class RollbackStore {
         return packages;
     }
 
-    private JSONArray toJson(List<PackageRollbackInfo> infos) throws JSONException {
+    private static JSONArray toJson(List<PackageRollbackInfo> infos) throws JSONException {
         JSONArray json = new JSONArray();
         for (PackageRollbackInfo info : infos) {
             json.put(toJson(info));
@@ -424,7 +429,7 @@ class RollbackStore {
         return json;
     }
 
-    private List<PackageRollbackInfo> packageRollbackInfosFromJson(JSONArray json)
+    private static List<PackageRollbackInfo> packageRollbackInfosFromJson(JSONArray json)
             throws JSONException {
         List<PackageRollbackInfo> infos = new ArrayList<>();
         for (int i = 0; i < json.length(); ++i) {
