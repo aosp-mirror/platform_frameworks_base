@@ -4373,7 +4373,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             Slog.d(TAG, "relayoutVisibleWindow: " + this + " mAnimatingExit=true, mRemoveOnExit="
                     + mRemoveOnExit + ", mDestroying=" + mDestroying);
 
-            mWinAnimator.cancelExitAnimationForNextAnimationLocked();
+            // Cancel the existing exit animation for the next enter animation.
+            if (isSelfAnimating()) {
+                cancelAnimation();
+                destroySurfaceUnchecked();
+            }
             mAnimatingExit = false;
         }
         if (mDestroying) {

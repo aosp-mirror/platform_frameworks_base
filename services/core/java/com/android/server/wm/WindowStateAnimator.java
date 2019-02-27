@@ -248,14 +248,6 @@ class WindowStateAnimator {
         mWallpaperControllerLocked = win.getDisplayContent().mWallpaperController;
     }
 
-    void cancelExitAnimationForNextAnimationLocked() {
-        if (DEBUG_ANIM) Slog.d(TAG,
-                "cancelExitAnimationForNextAnimationLocked: " + mWin);
-
-        mWin.cancelAnimation();
-        mWin.destroySurfaceUnchecked();
-    }
-
     void onAnimationFinished() {
         // Done animating, clean up.
         if (DEBUG_ANIM) Slog.v(
