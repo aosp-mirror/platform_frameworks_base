@@ -35,6 +35,12 @@
 #endif
 #endif
 
+#ifdef __ANDROID__
+#define ANDROID_LOG(x) LOG(x)
+#else
+#define ANDROID_LOG(x) std::stringstream()
+#endif
+
 #include "androidfw/ResourceUtils.h"
 
 namespace android {
@@ -380,7 +386,8 @@ ApkAssetsCookie AssetManager2::FindEntry(uint32_t resid, uint16_t density_overri
 
   const uint8_t package_idx = package_ids_[package_id];
   if (package_idx == 0xff) {
-    LOG(ERROR) << base::StringPrintf("No package ID %02x found for ID 0x%08x.", package_id, resid);
+    ANDROID_LOG(ERROR) << base::StringPrintf("No package ID %02x found for ID 0x%08x.",
+                                             package_id, resid);
     return kInvalidCookie;
   }
 
