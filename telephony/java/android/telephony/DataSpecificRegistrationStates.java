@@ -1,5 +1,7 @@
 package android.telephony;
 
+import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -10,14 +12,17 @@ import java.util.Objects;
  * Class that stores information specific to data network registration.
  * @hide
  */
-public class DataSpecificRegistrationStates implements Parcelable{
+@SystemApi
+public final class DataSpecificRegistrationStates implements Parcelable{
     /**
+     * @hide
      * The maximum number of simultaneous Data Calls that
      * must be established using setupDataCall().
      */
     public final int maxDataCalls;
 
     /**
+     * @hide
      * Indicates if the use of dual connectivity with NR is restricted.
      * Reference: 3GPP TS 24.301 v15.03 section 9.3.3.12A.
      */
@@ -25,7 +30,7 @@ public class DataSpecificRegistrationStates implements Parcelable{
 
     /**
      * Indicates if NR is supported by the selected PLMN.
-     *
+     * @hide
      * {@code true} if the bit N is in the PLMN-InfoList-r15 is true and the selected PLMN is
      * present in plmn-IdentityList at position N.
      * Reference: 3GPP TS 36.331 v15.2.2 section 6.3.1 PLMN-InfoList-r15.
@@ -34,6 +39,7 @@ public class DataSpecificRegistrationStates implements Parcelable{
     public final boolean isNrAvailable;
 
     /**
+     * @hide
      * Indicates that if E-UTRA-NR Dual Connectivity (EN-DC) is supported by the primary serving
      * cell.
      *
@@ -47,8 +53,11 @@ public class DataSpecificRegistrationStates implements Parcelable{
     /**
      * Provides network support info for LTE VoPS and LTE Emergency bearer support
      */
-    public final LteVopsSupportInfo lteVopsSupportInfo;
+    private final LteVopsSupportInfo lteVopsSupportInfo;
 
+    /**
+     * @hide
+     */
     DataSpecificRegistrationStates(
             int maxDataCalls, boolean isDcNrRestricted, boolean isNrAvailable,
             boolean isEnDcAvailable, LteVopsSupportInfo lteVops) {
@@ -126,4 +135,12 @@ public class DataSpecificRegistrationStates implements Parcelable{
                     return new DataSpecificRegistrationStates[size];
                 }
             };
+
+    /**
+     * @return LteVopsSupportInfo
+     */
+    @NonNull
+    public LteVopsSupportInfo getLteVopsSupportInfo() {
+        return lteVopsSupportInfo;
+    }
 }

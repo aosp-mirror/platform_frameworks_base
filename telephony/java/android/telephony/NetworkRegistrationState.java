@@ -349,7 +349,7 @@ public class NetworkRegistrationState implements Parcelable {
     }
 
     /**
-     * @hide
+     * @return Data registration related info
      */
     @Nullable
     public DataSpecificRegistrationStates getDataSpecificStates() {
