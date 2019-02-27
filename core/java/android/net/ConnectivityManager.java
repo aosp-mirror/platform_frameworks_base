@@ -56,6 +56,7 @@ import android.util.ArrayMap;
 import android.util.Log;
 import android.util.SparseIntArray;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.telephony.ITelephony;
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.util.Preconditions;
@@ -2540,6 +2541,94 @@ public class ConnectivityManager {
             throw e.rethrowFromSystemServer();
         }
     }
+
+    /**
+     * Callback for use with {@link registerTetheringEventCallback} to find out tethering
+     * upstream status.
+     *
+     *@hide
+     */
+    @SystemApi
+    public abstract static class OnTetheringEventCallback {
+
+        /**
+         * Called when tethering upstream changed. This can be called multiple times and can be
+         * called any time.
+         *
+         * @param network the {@link Network} of tethering upstream. Null means tethering doesn't
+         * have any upstream.
+         */
+        public void onUpstreamChanged(@Nullable Network network) {}
+    }
+
+    @GuardedBy("mTetheringEventCallbacks")
+    private final ArrayMap<OnTetheringEventCallback, ITetheringEventCallback>
+            mTetheringEventCallbacks = new ArrayMap<>();
+
+    /**
+     * Start listening to tethering change events. Any new added callback will receive the last
+     * tethering status right away. If callback is registered when tethering loses its upstream or
+     * disabled, {@link OnTetheringEventCallback#onUpstreamChanged} will immediately be called
+     * with a null argument. The same callback object cannot be registered twice.
+     *
+     * @param executor the executor on which callback will be invoked.
+     * @param callback the callback to be called when tethering has change events.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.TETHER_PRIVILEGED)
+    public void registerTetheringEventCallback(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull final OnTetheringEventCallback callback) {
+        Preconditions.checkNotNull(callback, "OnTetheringEventCallback cannot be null.");
+
+        synchronized (mTetheringEventCallbacks) {
+            Preconditions.checkArgument(!mTetheringEventCallbacks.containsKey(callback),
+                    "callback was already registered.");
+            ITetheringEventCallback remoteCallback = new ITetheringEventCallback.Stub() {
+                @Override
+                public void onUpstreamChanged(Network network) throws RemoteException {
+                    Binder.withCleanCallingIdentity(() ->
+                            executor.execute(() -> {
+                                callback.onUpstreamChanged(network);
+                            }));
+                }
+            };
+            try {
+                String pkgName = mContext.getOpPackageName();
+                Log.i(TAG, "registerTetheringUpstreamCallback:" + pkgName);
+                mService.registerTetheringEventCallback(remoteCallback, pkgName);
+                mTetheringEventCallbacks.put(callback, remoteCallback);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Remove tethering event callback previously registered with
+     * {@link #registerTetheringEventCallback}.
+     *
+     * @param callback previously registered callback.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.TETHER_PRIVILEGED)
+    public void unregisterTetheringEventCallback(
+            @NonNull final OnTetheringEventCallback callback) {
+        synchronized (mTetheringEventCallbacks) {
+            ITetheringEventCallback remoteCallback = mTetheringEventCallbacks.remove(callback);
+            Preconditions.checkNotNull(remoteCallback, "callback was not registered.");
+            try {
+                String pkgName = mContext.getOpPackageName();
+                Log.i(TAG, "unregisterTetheringEventCallback:" + pkgName);
+                mService.unregisterTetheringEventCallback(remoteCallback, pkgName);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
 
     /**
      * Get the list of regular expressions that define any tetherable
