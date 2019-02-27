@@ -91,16 +91,6 @@ public final class SQLiteGlobal {
     }
 
     /**
-     * Returns true if compatibility WAL mode is supported. In this mode, only
-     * database journal mode is changed. Connection pool will use at most one connection.
-     */
-    public static boolean isCompatibilityWalSupported() {
-        return SystemProperties.getBoolean("debug.sqlite.compatibility_wal_supported",
-                Resources.getSystem().getBoolean(
-                        com.android.internal.R.bool.db_compatibility_wal_supported));
-    }
-
-    /**
      * Gets the journal size limit in bytes.
      */
     public static int getJournalSizeLimit() {
