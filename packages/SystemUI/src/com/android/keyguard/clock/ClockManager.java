@@ -60,6 +60,9 @@ import javax.inject.Singleton;
 @Singleton
 public final class ClockManager {
 
+    private static final String TAG = "ClockOptsProvider";
+    private static final String DEFAULT_CLOCK_ID = "default";
+
     private final List<ClockInfo> mClockInfos = new ArrayList<>();
     /**
      * Map from expected value stored in settings to supplier of custom clock face.
@@ -67,6 +70,7 @@ public final class ClockManager {
     private final Map<String, Supplier<ClockPlugin>> mClocks = new ArrayMap<>();
     @Nullable private ClockPlugin mCurrentClock;
 
+    private final LayoutInflater mLayoutInflater;
     private final ContentResolver mContentResolver;
     private final SettingsWrapper mSettingsWrapper;
     /**
@@ -122,11 +126,11 @@ public final class ClockManager {
 
         Resources res = context.getResources();
         mClockInfos.add(ClockInfo.builder()
-                .setName("default")
+                .setName(DEFAULT_CLOCK_ID)
                 .setTitle(res.getString(R.string.clock_title_default))
-                .setId("default")
+                .setId(DEFAULT_CLOCK_ID)
                 .setThumbnail(() -> BitmapFactory.decodeResource(res, R.drawable.default_thumbnail))
-                .setPreview(() -> BitmapFactory.decodeResource(res, R.drawable.default_preview))
+                .setPreview(() -> getClockPreview(DEFAULT_CLOCK_ID))
                 .build());
         mClockInfos.add(ClockInfo.builder()
                 .setName("bubble")
@@ -151,12 +155,15 @@ public final class ClockManager {
                 .build());
 
         LayoutInflater layoutInflater = injectionInflater.injectable(LayoutInflater.from(context));
+        mClocks.put(DEFAULT_CLOCK_ID,
+                () -> DefaultClockController.build(layoutInflater));
         mClocks.put(BubbleClockController.class.getName(),
                 () -> BubbleClockController.build(layoutInflater));
         mClocks.put(StretchAnalogClockController.class.getName(),
                 () -> StretchAnalogClockController.build(layoutInflater));
         mClocks.put(TypeClockController.class.getName(),
                 () -> TypeClockController.build(layoutInflater));
+        mLayoutInflater = layoutInflater;
 
         // Store the size of the display for generation of clock preview.
         DisplayMetrics dm = res.getDisplayMetrics();
@@ -218,6 +225,7 @@ public final class ClockManager {
      */
     @Nullable
     private Bitmap getClockPreview(String clockId) {
+        Bitmap bitmap = Bitmap.createBitmap(mWidth, mHeight, Config.ARGB_8888);
         Supplier<ClockPlugin> supplier = mClocks.get(clockId);
         if (supplier == null) {
             return null;
@@ -240,15 +248,13 @@ public final class ClockManager {
         plugin.dozeTimeTick();
 
         // Draw clock view hierarchy to canvas.
-        Bitmap bitmap = Bitmap.createBitmap(mWidth, mHeight, Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);
+        canvas.drawColor(Color.BLACK);
         dispatchVisibilityAggregated(clockView, true);
         clockView.measure(MeasureSpec.makeMeasureSpec(mWidth, MeasureSpec.EXACTLY),
                 MeasureSpec.makeMeasureSpec(mHeight, MeasureSpec.EXACTLY));
         clockView.layout(0, 0, mWidth, mHeight);
-        canvas.drawColor(Color.BLACK);
         clockView.draw(canvas);
-
         return bitmap;
     }
 
@@ -299,7 +305,11 @@ public final class ClockManager {
 
     private void reload() {
         mCurrentClock = getClockPlugin();
-        notifyClockChanged(mCurrentClock);
+        if (mCurrentClock instanceof DefaultClockController) {
+            notifyClockChanged(null);
+        } else {
+            notifyClockChanged(mCurrentClock);
+        }
     }
 
     private ClockPlugin getClockPlugin() {

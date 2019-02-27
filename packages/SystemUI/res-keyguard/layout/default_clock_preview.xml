@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    >
+    <TextClock
+        android:id="@+id/time"
+        style="@style/widget_big"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/date"
+        android:letterSpacing="0.03"
+        android:gravity="center_horizontal"
+        android:format12Hour="@string/keyguard_widget_12_hours_format"
+        android:format24Hour="@string/keyguard_widget_24_hours_format"
+        />
+
+    <TextClock
+        android:id="@+id/date"
+        style="@stype/widget_big"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:letterSpacing="0.03"
+        android:gravity="center_horizontal"
+        android:format12Hour="EEE, MMM d"
+        android:format24Hour="EEE, MMM d"
+        />
+</RelativeLayout>
