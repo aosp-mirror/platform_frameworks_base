@@ -2391,7 +2391,6 @@ public class Activity extends ContextThemeWrapper
                         mIntent.getIBinderExtra(AutofillManager.EXTRA_RESTORE_SESSION_TOKEN));
             }
         }
-        notifyContentCaptureManagerIfNeeded(CONTENT_CAPTURE_STOP);
         mEnterAnimationComplete = false;
     }
 
