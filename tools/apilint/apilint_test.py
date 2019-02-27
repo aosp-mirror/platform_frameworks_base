@@ -369,5 +369,21 @@ class V2ParserTests(unittest.TestCase):
         m = self._method('method @NonNull public @NonNull String @NonNull [] split(@NonNull String, int);')
         self.assertEquals('java.lang.String[]', m.typ)
 
+class PackageTests(unittest.TestCase):
+    def _package(self, raw):
+        return apilint.Package(123, raw, "blame")
+
+    def test_regular_package(self):
+        p = self._package("package an.pref.int {")
+        self.assertEquals('an.pref.int', p.name)
+
+    def test_annotation_package(self):
+        p = self._package("package @RestrictTo(a.b.C) an.pref.int {")
+        self.assertEquals('an.pref.int', p.name)
+
+    def test_multi_annotation_package(self):
+        p = self._package("package @Rt(a.b.L_G_P) @RestrictTo(a.b.C) an.pref.int {")
+        self.assertEquals('an.pref.int', p.name)
+
 if __name__ == "__main__":
     unittest.main()
