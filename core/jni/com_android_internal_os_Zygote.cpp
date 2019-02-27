@@ -1240,6 +1240,8 @@ static pid_t ForkCommon(JNIEnv* env, bool is_system_server,
 
     // Turn fdsan back on.
     android_fdsan_set_error_level(fdsan_error_level);
+  } else {
+    ALOGD("Forked child process %d", pid);
   }
 
   // We blocked SIGCHLD prior to a fork, we unblock it here.
