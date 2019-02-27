@@ -1,4 +1,3 @@
-# Per http://go/westworld-local-development#step3-test-atom-and-metric-locally-on-device ,
 # In one terminal:
 make statsd_testdrive
 ./out/host/linux-x86/bin/statsd_testdrive 122
