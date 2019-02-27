@@ -30,6 +30,7 @@ import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -223,7 +224,29 @@ public class DeviceConfigTest {
     }
 
     @Test
-    public void testListener() throws InterruptedException {
+    public void testListener_propertiesCallback() throws InterruptedException {
+        final CountDownLatch countDownLatch = new CountDownLatch(1);
+
+        OnPropertyChangedListener changeListener = new OnPropertyChangedListener() {
+            public void onPropertyChanged(String namespace, String name, String value) {
+                // ignore legacy callback
+            }
+
+            @Override
+            public void onPropertiesChanged(DeviceConfig.Properties properties) {
+                assertThat(properties.getNamespace()).isEqualTo(sNamespace);
+                assertThat(properties.getKeyset().size()).isEqualTo(1);
+                assertThat(properties.getKeyset()).contains(sKey);
+                assertThat(properties.getString(sKey, "default_value")).isEqualTo(sValue);
+                countDownLatch.countDown();
+            }
+        };
+
+        testListener(countDownLatch, changeListener);
+    }
+
+    @Test
+    public void testListener_legacyCallback() throws InterruptedException {
         CountDownLatch countDownLatch = new CountDownLatch(1);
 
         OnPropertyChangedListener changeListener = (namespace, name, value) -> {
@@ -233,16 +256,23 @@ public class DeviceConfigTest {
             countDownLatch.countDown();
         };
 
+        testListener(countDownLatch, changeListener);
+
+    }
+
+    private void testListener(CountDownLatch countDownLatch,
+            OnPropertyChangedListener changeListener) {
         try {
             DeviceConfig.addOnPropertyChangedListener(sNamespace,
                     ActivityThread.currentApplication().getMainExecutor(), changeListener);
             DeviceConfig.setProperty(sNamespace, sKey, sValue, false);
             assertThat(countDownLatch.await(
                     WAIT_FOR_PROPERTY_CHANGE_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS)).isTrue();
+        } catch (InterruptedException e) {
+            Assert.fail(e.getMessage());
         } finally {
             DeviceConfig.removeOnPropertyChangedListener(changeListener);
         }
-
     }
 
     private static boolean deleteViaContentProvider(String namespace, String key) {

@@ -1991,12 +1991,23 @@ package android.provider {
   }
 
   public static interface DeviceConfig.OnPropertyChangedListener {
+    method public default void onPropertiesChanged(@NonNull android.provider.DeviceConfig.Properties);
     method public void onPropertyChanged(String, String, String);
   }
 
   public static interface DeviceConfig.Privacy {
     field public static final String NAMESPACE = "privacy";
     field public static final String PROPERTY_LOCATION_ACCESS_CHECK_ENABLED = "location_access_check_enabled";
+  }
+
+  public static class DeviceConfig.Properties {
+    method public boolean getBoolean(@NonNull String, boolean);
+    method public float getFloat(@NonNull String, float);
+    method public int getInt(@NonNull String, int);
+    method @NonNull public java.util.Set<java.lang.String> getKeyset();
+    method public long getLong(@NonNull String, long);
+    method @NonNull public String getNamespace();
+    method @Nullable public String getString(@NonNull String, @Nullable String);
   }
 
   public final class MediaStore {
