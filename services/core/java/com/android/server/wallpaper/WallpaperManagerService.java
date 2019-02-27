@@ -756,27 +756,6 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
 
         @Override
         public void onDisplayAdded(int displayId) {
-            synchronized (mLock) {
-                if (mLastWallpaper != null) {
-                    if (supportsMultiDisplay(mLastWallpaper.connection)) {
-                        final WallpaperConnection.DisplayConnector connector =
-                                mLastWallpaper.connection.getDisplayConnectorOrCreate(displayId);
-                        if (connector == null) return;
-                        connector.connectLocked(mLastWallpaper.connection, mLastWallpaper);
-                        return;
-                    }
-                    // System wallpaper does not support multiple displays, attach this display to
-                    // the fallback wallpaper.
-                    if (mFallbackWallpaper != null) {
-                        final WallpaperConnection.DisplayConnector connector = mFallbackWallpaper
-                                .connection.getDisplayConnectorOrCreate(displayId);
-                        if (connector == null) return;
-                        connector.connectLocked(mFallbackWallpaper.connection, mFallbackWallpaper);
-                    } else {
-                        Slog.w(TAG, "No wallpaper can be added to the new display");
-                    }
-                }
-            }
         }
 
         @Override
@@ -1590,6 +1569,15 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         mDisplayManager.registerDisplayListener(mDisplayListener, null /* handler */);
         mMonitor = new MyPackageMonitor();
         mColorsChangedListeners = new SparseArray<>();
+
+        LocalServices.addService(WallpaperManagerInternal.class, new LocalService());
+    }
+
+    private final class LocalService extends WallpaperManagerInternal {
+        @Override
+        public void onDisplayReady(int displayId) {
+            onDisplayReadyInternal(displayId);
+        }
     }
 
     void initialize() {
@@ -2773,6 +2761,31 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 ? mLockWallpaperMap.get(userId)
                 : mWallpaperMap.get(userId);
         return (wallpaper != null) ? wallpaper.allowBackup : false;
+    }
+
+    private void onDisplayReadyInternal(int displayId) {
+        synchronized (mLock) {
+            if (mLastWallpaper == null) {
+                return;
+            }
+            if (supportsMultiDisplay(mLastWallpaper.connection)) {
+                final WallpaperConnection.DisplayConnector connector =
+                        mLastWallpaper.connection.getDisplayConnectorOrCreate(displayId);
+                if (connector == null) return;
+                connector.connectLocked(mLastWallpaper.connection, mLastWallpaper);
+                return;
+            }
+            // System wallpaper does not support multiple displays, attach this display to
+            // the fallback wallpaper.
+            if (mFallbackWallpaper != null) {
+                final WallpaperConnection.DisplayConnector connector = mFallbackWallpaper
+                        .connection.getDisplayConnectorOrCreate(displayId);
+                if (connector == null) return;
+                connector.connectLocked(mFallbackWallpaper.connection, mFallbackWallpaper);
+            } else {
+                Slog.w(TAG, "No wallpaper can be added to the new display");
+            }
+        }
     }
 
     private static JournaledFile makeJournaledFile(int userId) {
