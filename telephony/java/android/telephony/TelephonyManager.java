@@ -1355,6 +1355,26 @@ public class TelephonyManager {
      * Intent sent when an error occurs that debug tools should log and possibly take further
      * action such as capturing vendor-specific logs.
      *
+     * A privileged application that reads these events should take appropriate vendor-specific
+     * action to record the event and collect further information to assist in analysis, debugging,
+     * and resolution of any associated issue.
+     *
+     * <p>This event should not be used for generic logging or diagnostic monitoring purposes and
+     * should generally be sent at a low rate. Instead, this mechanism should be used for the
+     * framework to notify a debugging application that an event (such as a bug) has occured
+     * within the framework if that event should trigger the collection and preservation of other
+     * more detailed device state for debugging.
+     *
+     * <p>At most one application can receive these events and should register a receiver in
+     * in the application manifest. For performance reasons, if no application to receive these
+     * events is detected at boot, then these events will not be sent.
+     *
+     * <p>Each event will include an {@link EXTRA_DEBUG_EVENT_ID} that will uniquely identify the
+     * event that has occurred. Each event will be sent to the diagnostic monitor only once per
+     * boot cycle (as another optimization).
+     *
+     * @see #EXTRA_DEBUG_EVENT_ID
+     * @see #EXTRA_DEBUG_EVENT_DESCRIPTION
      * @hide
      */
     @SystemApi
@@ -1362,21 +1382,23 @@ public class TelephonyManager {
     public static final String ACTION_DEBUG_EVENT = "android.telephony.action.DEBUG_EVENT";
 
     /**
-     * An arbitrary ParcelUuid which should be consistent for each occurrence of the same event.
+     * An arbitrary ParcelUuid which should be consistent for each occurrence of a DebugEvent.
      *
-     * This field must be included in all events.
+     * This field must be included in all {@link ACTION_DEBUG_EVENT} events.
      *
+     * @see #ACTION_DEBUG_EVENT
      * @hide
      */
     @SystemApi
     public static final String EXTRA_DEBUG_EVENT_ID = "android.telephony.extra.DEBUG_EVENT_ID";
 
     /**
-     * A freeform string description of the event.
+     * A freeform string description of the DebugEvent.
      *
-     * This field is optional for all events and as a guideline should not exceed 80 characters
-     * and should be as short as possible to convey the essence of the event.
+     * This field is optional for all {@link ACTION_DEBUG_EVENT}s, as a guideline should not
+     * exceed 80 characters, and should be as short as possible to convey the essence of the event.
      *
+     * @see #ACTION_DEBUG_EVENT
      * @hide
      */
     @SystemApi
