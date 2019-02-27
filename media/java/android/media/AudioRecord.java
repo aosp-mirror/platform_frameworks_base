@@ -653,7 +653,16 @@ public class AudioRecord implements AudioRouting, MicrophoneDirection,
             AudioPolicy audioPolicy = new AudioPolicy.Builder(/*context=*/ null)
                     .setMediaProjection(projection)
                     .addMix(audioMix).build();
+
+            int error = AudioManager.registerAudioPolicyStatic(audioPolicy);
+            if (error != 0) {
+                throw new UnsupportedOperationException("Error: could not register audio policy");
+            }
+
             AudioRecord record = audioPolicy.createAudioRecordSink(audioMix);
+            if (record == null) {
+                throw new UnsupportedOperationException("Cannot create AudioRecord");
+            }
             record.unregisterAudioPolicyOnRelease(audioPolicy);
             return record;
         }
