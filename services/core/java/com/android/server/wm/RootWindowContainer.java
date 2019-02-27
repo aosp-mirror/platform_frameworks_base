@@ -193,8 +193,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     }
 
     DisplayContent getTopFocusedDisplayContent() {
-        return getDisplayContent(mTopFocusedDisplayId == INVALID_DISPLAY
-                ? DEFAULT_DISPLAY : mTopFocusedDisplayId);
+        final DisplayContent dc = getDisplayContent(mTopFocusedDisplayId);
+        return dc != null ? dc : getDisplayContent(DEFAULT_DISPLAY);
     }
 
     @Override
@@ -1043,6 +1043,15 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     @Override
     void scheduleAnimation() {
         mWmService.scheduleAnimationLocked();
+    }
+
+    @Override
+    protected void removeChild(DisplayContent dc) {
+        super.removeChild(dc);
+        if (mTopFocusedDisplayId == dc.getDisplayId()) {
+            mWmService.updateFocusedWindowLocked(
+                    UPDATE_FOCUS_NORMAL, true /* updateInputWindows */);
+        }
     }
 
     /**
