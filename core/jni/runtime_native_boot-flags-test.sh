@@ -172,14 +172,16 @@ function check_no_zygote_gc_runtime_option {
   done
 }
 
-# test_android_runtime_flag FLAG VALUE GC_RUNTIME_OPTION
-# ------------------------------------------------------
-# Test device configuration FLAG with VALUE. Check that GC_RUNTIME_OPTION is
-# passed as GC Runtime option by the zygote.
+# test_android_runtime_flag FLAG VALUE CHECK_EFFECT CHECK_NO_EFFECT
+# -----------------------------------------------------------------
+# Test device configuration FLAG with VALUE. CHECK_EFFECT and CHECK_NO_EFFECT
+# are functions that are passed a context as sole argument and that respectively
+# check the effect or the absence of effect of the flag.
 function test_android_runtime_flag {
   local flag=$1
   local value=$2
-  local gc_runtime_option=$3
+  local check_effect=$3
+  local check_no_effect=$4
 
   # Persistent system property (set after a reboot) associated with the device
   # configuration flag.
@@ -193,26 +195,26 @@ function test_android_runtime_flag {
   sleep 3
 
   # Check that both the device configuration flag and the associated system
-  # property are set, but that the zygote hasn't had the flag passed to it as a
-  # GC runtime option (as we haven't rebooted yet).
+  # property are set, but that flag has not produced an effect on the system (as
+  # we haven't rebooted yet).
   local context="Flag set, before reboot"
   check_device_config_flag "$context" "$flag" "$value"
   check_system_property "$context" "$prop" "$value"
-  check_no_zygote_gc_runtime_option "$context" "$gc_runtime_option"
+  $check_no_effect "$context"
 
   # Reboot device for the flag value to take effect.
   reboot_and_wait_for_device
   context="Flag set, after 1st reboot"
   check_device_config_flag "$context" "$flag" "$value"
   check_system_property "$context" "$prop" "$value"
-  check_zygote_gc_runtime_option "$context" "$gc_runtime_option"
+  $check_effect "$context"
 
   # Reboot device a second time and check that the state has persisted.
   reboot_and_wait_for_device
   context="Flag set, after 2nd reboot"
   check_device_config_flag "$context" "$flag" "$value"
   check_system_property "$context" "$prop" "$value"
-  check_zygote_gc_runtime_option "$context" "$gc_runtime_option"
+  $check_effect "$context"
 
   say "Unsetting device configuration flag..."
   adb shell device_config delete "$namespace" "$flag" >/dev/null
@@ -224,8 +226,12 @@ function test_android_runtime_flag {
   context="Flag unset, after 3rd reboot"
   check_no_device_config_flag "$context" "$flag"
   check_no_system_property "$context" "$prop"
-  check_no_zygote_gc_runtime_option "$context" "$gc_runtime_option"
+  $check_no_effect "$context"
 }
+
+
+# Pre-test actions.
+# =================
 
 # Enumerate Zygote processes.
 case $(adb shell getprop ro.zygote) in
@@ -235,8 +241,29 @@ case $(adb shell getprop ro.zygote) in
 esac
 
 # Test "enable_generational_cc" flag values.
-test_android_runtime_flag enable_generational_cc false nogenerational_cc
-test_android_runtime_flag enable_generational_cc true generational_cc
+# ==========================================
+
+function check_nogenerational_cc {
+  check_zygote_gc_runtime_option "$1" nogenerational_cc
+}
+function check_no_nogenerational_cc {
+  check_no_zygote_gc_runtime_option "$1" nogenerational_cc
+}
+
+function check_generational_cc {
+  check_zygote_gc_runtime_option "$1" generational_cc
+}
+function check_no_generational_cc {
+  check_no_zygote_gc_runtime_option "$1" generational_cc
+}
+
+test_android_runtime_flag \
+  enable_generational_cc false check_nogenerational_cc check_no_nogenerational_cc
+test_android_runtime_flag \
+  enable_generational_cc true check_generational_cc check_no_generational_cc
+
+# Post-test actions.
+# ==================
 
 if [[ "$exit_status" -eq 0 ]]; then
   banner "All tests passed."
