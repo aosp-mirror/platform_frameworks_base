@@ -1109,6 +1109,9 @@ def verify_builder(clazz):
     if not has_build:
         warn(clazz, None, None, "Missing build() method")
 
+    if "final" not in clazz.split:
+        error(clazz, None, None, "Builder should be final")
+
 
 def verify_aidl(clazz):
     """Catch people exposing raw AIDL."""
