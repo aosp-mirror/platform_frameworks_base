@@ -81,5 +81,13 @@ public final class SystemUiDeviceConfigFlags {
      */
     public static final String SSIN_MAX_NUM_ACTIONS = "ssin_max_num_actions";
 
+    // Flags related to media notifications
+
+    /**
+     * (boolean) If {@code true}, enables the seekbar in compact media notifications.
+     */
+    public static final String COMPACT_MEDIA_SEEKBAR_ENABLED =
+            "compact_media_notification_seekbar_enabled";
+
     private SystemUiDeviceConfigFlags() { }
 }
