@@ -231,6 +231,7 @@ import android.view.WindowManagerPolicyConstants.PointerEventListener;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.IResultReceiver;
 import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.policy.IShortcutService;
@@ -410,6 +411,14 @@ public class WindowManagerService extends IWindowManager.Stub
         @Override
         public void dumpCritical(FileDescriptor fd, PrintWriter pw, String[] args,
                 boolean asProto) {
+            // Bugreport dumps the trace 2x, 1x as proto and 1x as text. Save file to disk only 1x.
+            if (asProto && mWindowTracing.isEnabled()) {
+                mWindowTracing.stopTrace(null, false /* writeToFile */);
+                BackgroundThread.getHandler().post(() -> {
+                    mWindowTracing.writeTraceToFile();
+                    mWindowTracing.startTrace(null);
+                });
+            }
             doDump(fd, pw, new String[] {"-a"}, asProto);
         }
 
@@ -6176,9 +6185,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 return;
             } else if ("trace".equals(cmd)) {
                 dumpTraceStatus(pw);
-                synchronized (mGlobalLock) {
-                    mWindowTracing.writeTraceToFile();
-                }
                 return;
             } else {
                 // Dumping a single name?

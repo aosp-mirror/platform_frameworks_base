@@ -100,7 +100,20 @@ class WindowTracing {
         }
     }
 
+    /**
+     * Stops the trace and write the current buffer to disk
+     * @param pw Print writer
+     */
     void stopTrace(@Nullable PrintWriter pw) {
+        stopTrace(pw, true /* writeToFile */);
+    }
+
+    /**
+     * Stops the trace
+     * @param pw Print writer
+     * @param writeToFile If the current buffer should be written to disk or not
+     */
+    void stopTrace(@Nullable PrintWriter pw, boolean writeToFile) {
         if (IS_USER) {
             logAndPrintln(pw, "Error: Tracing is not supported on user builds.");
             return;
@@ -113,8 +126,10 @@ class WindowTracing {
                 logAndPrintln(pw, "ERROR: tracing was re-enabled while waiting for flush.");
                 throw new IllegalStateException("tracing enabled while waiting for flush.");
             }
-            writeTraceToFileLocked();
-            logAndPrintln(pw, "Trace written to " + mTraceFile + ".");
+            if (writeToFile) {
+                writeTraceToFileLocked();
+                logAndPrintln(pw, "Trace written to " + mTraceFile + ".");
+            }
         }
     }
 
