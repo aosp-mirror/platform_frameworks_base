@@ -17,6 +17,7 @@
 package android.media;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 
 /**
  * Structure of data source descriptor for sources using callback.
@@ -37,7 +38,7 @@ public class CallbackDataSourceDesc extends DataSourceDesc {
      * Return the DataSourceCallback of this data source.
      * @return the DataSourceCallback of this data source
      */
-    public DataSourceCallback getDataSourceCallback() {
+    public @NonNull DataSourceCallback getDataSourceCallback() {
         return mDataSourceCallback;
     }
 
@@ -70,7 +71,7 @@ public class CallbackDataSourceDesc extends DataSourceDesc {
          * @param dsd the {@link CallbackDataSourceDesc} object whose data will be reused
          * in the new Builder.
          */
-        public Builder(CallbackDataSourceDesc dsd) {
+        public Builder(@Nullable CallbackDataSourceDesc dsd) {
             super(dsd);
             if (dsd == null) {
                 return;  // use default
@@ -86,6 +87,11 @@ public class CallbackDataSourceDesc extends DataSourceDesc {
          * @return a new {@link CallbackDataSourceDesc} object
          */
         public @NonNull CallbackDataSourceDesc build() {
+            if (mDataSourceCallback == null) {
+                throw new IllegalStateException(
+                        "DataSourceCallback should not be null");
+            }
+
             CallbackDataSourceDesc dsd = new CallbackDataSourceDesc();
             super.build(dsd);
             dsd.mDataSourceCallback = mDataSourceCallback;

@@ -134,7 +134,7 @@ public final class MediaTimestamp
      * @hide
      */
     @SystemApi
-    public static class Builder {
+    public static final class Builder {
         long mMediaTimeUs;
         long mNanoTime;
         float mClockRate = 1.0f;

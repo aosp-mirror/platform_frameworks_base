@@ -155,7 +155,7 @@ public final class SubtitleData
      * @hide
      */
     @SystemApi
-    public static class Builder {
+    public static final class Builder {
         private int mTrackIndex;
         private long mStartTimeUs;
         private long mDurationUs;
