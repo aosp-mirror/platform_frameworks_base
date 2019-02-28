@@ -26,7 +26,9 @@ import android.os.Build;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.Consumer;
 
 /**
  * A view tree observer is used to register listeners that can be notified of global
@@ -57,6 +59,7 @@ public final class ViewTreeObserver {
     private CopyOnWriteArray<OnScrollChangedListener> mOnScrollChangedListeners;
     private CopyOnWriteArray<OnPreDrawListener> mOnPreDrawListeners;
     private CopyOnWriteArray<OnWindowShownListener> mOnWindowShownListeners;
+    private CopyOnWriteArray<Consumer<List<Rect>>> mGestureExclusionListeners;
 
     // These listeners cannot be mutated during dispatch
     private boolean mInDispatchOnDraw;
@@ -447,6 +450,14 @@ public final class ViewTreeObserver {
                 mOnWindowShownListeners.addAll(observer.mOnWindowShownListeners);
             } else {
                 mOnWindowShownListeners = observer.mOnWindowShownListeners;
+            }
+        }
+
+        if (observer.mGestureExclusionListeners != null) {
+            if (mGestureExclusionListeners != null) {
+                mGestureExclusionListeners.addAll(observer.mGestureExclusionListeners);
+            } else {
+                mGestureExclusionListeners = observer.mGestureExclusionListeners;
             }
         }
 
@@ -913,6 +924,35 @@ public final class ViewTreeObserver {
         mOnEnterAnimationCompleteListeners.remove(listener);
     }
 
+    /**
+     * Add a listener to be notified when the tree's <em>transformed</em> gesture exclusion rects
+     * change. This could be the result of an animation or other layout change, or a view calling
+     * {@link View#setSystemGestureExclusionRects(List)}.
+     *
+     * @param listener listener to add
+     * @see View#setSystemGestureExclusionRects(List)
+     */
+    public void addOnSystemGestureExclusionRectsChangedListener(Consumer<List<Rect>> listener) {
+        checkIsAlive();
+        if (mGestureExclusionListeners == null) {
+            mGestureExclusionListeners = new CopyOnWriteArray<>();
+        }
+        mGestureExclusionListeners.add(listener);
+    }
+
+    /**
+     * Unsubscribe the given listener from gesture exclusion rect changes.
+     * @see #addOnSystemGestureExclusionRectsChangedListener(Consumer)
+     * @see View#setSystemGestureExclusionRects(List)
+     */
+    public void removeOnSystemGestureExclusionRectsChangedListener(Consumer<List<Rect>> listener) {
+        checkIsAlive();
+        if (mGestureExclusionListeners == null) {
+            return;
+        }
+        mGestureExclusionListeners.remove(listener);
+    }
+
     private void checkIsAlive() {
         if (!mAlive) {
             throw new IllegalStateException("This ViewTreeObserver is not alive, call "
@@ -1174,6 +1214,21 @@ public final class ViewTreeObserver {
         if (listeners != null && !listeners.isEmpty()) {
             for (OnEnterAnimationCompleteListener listener : listeners) {
                 listener.onEnterAnimationComplete();
+            }
+        }
+    }
+
+    void dispatchOnSystemGestureExclusionRectsChanged(@NonNull List<Rect> rects) {
+        final CopyOnWriteArray<Consumer<List<Rect>>> listeners = mGestureExclusionListeners;
+        if (listeners != null && listeners.size() > 0) {
+            CopyOnWriteArray.Access<Consumer<List<Rect>>> access = listeners.start();
+            try {
+                final int count = access.size();
+                for (int i = 0; i < count; i++) {
+                    access.get(i).accept(rects);
+                }
+            } finally {
+                listeners.end();
             }
         }
     }

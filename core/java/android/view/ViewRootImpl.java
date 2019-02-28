@@ -605,6 +605,8 @@ public final class ViewRootImpl implements ViewParent,
 
     private final InsetsController mInsetsController = new InsetsController(this);
 
+    private final GestureExclusionTracker mGestureExclusionTracker = new GestureExclusionTracker();
+
     static final class SystemUiVisibilityInfo {
         int seq;
         int globalVisibility;
@@ -3977,6 +3979,20 @@ public final class ViewRootImpl implements ViewParent,
         return mAttachInfo.mAccessibilityFocusDrawable;
     }
 
+    void updateSystemGestureExclusionRectsForView(View view) {
+        mGestureExclusionTracker.updateRectsForView(view);
+        mHandler.sendEmptyMessage(MSG_SYSTEM_GESTURE_EXCLUSION_CHANGED);
+    }
+
+    void systemGestureExclusionChanged() {
+        final List<Rect> rectsForWindowManager = mGestureExclusionTracker.computeChangedRects();
+        if (rectsForWindowManager != null) {
+            // TODO Send to WM
+            mAttachInfo.mTreeObserver
+                    .dispatchOnSystemGestureExclusionRectsChanged(rectsForWindowManager);
+        }
+    }
+
     /**
      * Requests that the root render node is invalidated next time we perform a draw, such that
      * {@link WindowCallbacks#onPostDraw} gets called.
@@ -4433,35 +4449,36 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
-    private final static int MSG_INVALIDATE = 1;
-    private final static int MSG_INVALIDATE_RECT = 2;
-    private final static int MSG_DIE = 3;
-    private final static int MSG_RESIZED = 4;
-    private final static int MSG_RESIZED_REPORT = 5;
-    private final static int MSG_WINDOW_FOCUS_CHANGED = 6;
-    private final static int MSG_DISPATCH_INPUT_EVENT = 7;
-    private final static int MSG_DISPATCH_APP_VISIBILITY = 8;
-    private final static int MSG_DISPATCH_GET_NEW_SURFACE = 9;
-    private final static int MSG_DISPATCH_KEY_FROM_IME = 11;
-    private final static int MSG_DISPATCH_KEY_FROM_AUTOFILL = 12;
-    private final static int MSG_CHECK_FOCUS = 13;
-    private final static int MSG_CLOSE_SYSTEM_DIALOGS = 14;
-    private final static int MSG_DISPATCH_DRAG_EVENT = 15;
-    private final static int MSG_DISPATCH_DRAG_LOCATION_EVENT = 16;
-    private final static int MSG_DISPATCH_SYSTEM_UI_VISIBILITY = 17;
-    private final static int MSG_UPDATE_CONFIGURATION = 18;
-    private final static int MSG_PROCESS_INPUT_EVENTS = 19;
-    private final static int MSG_CLEAR_ACCESSIBILITY_FOCUS_HOST = 21;
-    private final static int MSG_INVALIDATE_WORLD = 22;
-    private final static int MSG_WINDOW_MOVED = 23;
-    private final static int MSG_SYNTHESIZE_INPUT_EVENT = 24;
-    private final static int MSG_DISPATCH_WINDOW_SHOWN = 25;
-    private final static int MSG_REQUEST_KEYBOARD_SHORTCUTS = 26;
-    private final static int MSG_UPDATE_POINTER_ICON = 27;
-    private final static int MSG_POINTER_CAPTURE_CHANGED = 28;
-    private final static int MSG_DRAW_FINISHED = 29;
-    private final static int MSG_INSETS_CHANGED = 30;
-    private final static int MSG_INSETS_CONTROL_CHANGED = 31;
+    private static final int MSG_INVALIDATE = 1;
+    private static final int MSG_INVALIDATE_RECT = 2;
+    private static final int MSG_DIE = 3;
+    private static final int MSG_RESIZED = 4;
+    private static final int MSG_RESIZED_REPORT = 5;
+    private static final int MSG_WINDOW_FOCUS_CHANGED = 6;
+    private static final int MSG_DISPATCH_INPUT_EVENT = 7;
+    private static final int MSG_DISPATCH_APP_VISIBILITY = 8;
+    private static final int MSG_DISPATCH_GET_NEW_SURFACE = 9;
+    private static final int MSG_DISPATCH_KEY_FROM_IME = 11;
+    private static final int MSG_DISPATCH_KEY_FROM_AUTOFILL = 12;
+    private static final int MSG_CHECK_FOCUS = 13;
+    private static final int MSG_CLOSE_SYSTEM_DIALOGS = 14;
+    private static final int MSG_DISPATCH_DRAG_EVENT = 15;
+    private static final int MSG_DISPATCH_DRAG_LOCATION_EVENT = 16;
+    private static final int MSG_DISPATCH_SYSTEM_UI_VISIBILITY = 17;
+    private static final int MSG_UPDATE_CONFIGURATION = 18;
+    private static final int MSG_PROCESS_INPUT_EVENTS = 19;
+    private static final int MSG_CLEAR_ACCESSIBILITY_FOCUS_HOST = 21;
+    private static final int MSG_INVALIDATE_WORLD = 22;
+    private static final int MSG_WINDOW_MOVED = 23;
+    private static final int MSG_SYNTHESIZE_INPUT_EVENT = 24;
+    private static final int MSG_DISPATCH_WINDOW_SHOWN = 25;
+    private static final int MSG_REQUEST_KEYBOARD_SHORTCUTS = 26;
+    private static final int MSG_UPDATE_POINTER_ICON = 27;
+    private static final int MSG_POINTER_CAPTURE_CHANGED = 28;
+    private static final int MSG_DRAW_FINISHED = 29;
+    private static final int MSG_INSETS_CHANGED = 30;
+    private static final int MSG_INSETS_CONTROL_CHANGED = 31;
+    private static final int MSG_SYSTEM_GESTURE_EXCLUSION_CHANGED = 32;
 
     final class ViewRootHandler extends Handler {
         @Override
@@ -4519,6 +4536,10 @@ public final class ViewRootImpl implements ViewParent,
                     return "MSG_DRAW_FINISHED";
                 case MSG_INSETS_CHANGED:
                     return "MSG_INSETS_CHANGED";
+                case MSG_INSETS_CONTROL_CHANGED:
+                    return "MSG_INSETS_CONTROL_CHANGED";
+                case MSG_SYSTEM_GESTURE_EXCLUSION_CHANGED:
+                    return "MSG_SYSTEM_GESTURE_EXCLUSION_CHANGED";
             }
             return super.getMessageName(message);
         }
@@ -4749,6 +4770,9 @@ public final class ViewRootImpl implements ViewParent,
                 } break;
                 case MSG_DRAW_FINISHED: {
                     pendingDrawFinished();
+                } break;
+                case MSG_SYSTEM_GESTURE_EXCLUSION_CHANGED: {
+                    systemGestureExclusionChanged();
                 } break;
             }
         }
