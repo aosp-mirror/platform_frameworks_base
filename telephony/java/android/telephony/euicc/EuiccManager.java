@@ -17,6 +17,7 @@ package android.telephony.euicc;
 
 import android.Manifest;
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
@@ -274,6 +275,7 @@ public class EuiccManager {
      *
      * @return an EuiccManager that uses the given card ID for all calls.
      */
+    @NonNull
     public EuiccManager createForCardId(int cardId) {
         return new EuiccManager(mContext, cardId);
     }
