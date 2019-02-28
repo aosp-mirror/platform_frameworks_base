@@ -17,6 +17,7 @@
 package android.app;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
@@ -387,6 +388,7 @@ public class StatusBarManager {
      * @hide
      */
     @SystemApi
+    @NonNull
     public DisableInfo getDisableInfo() {
         try {
             final int userId = Binder.getCallingUserHandle().getIdentifier();
