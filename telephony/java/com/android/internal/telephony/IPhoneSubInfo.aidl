@@ -60,6 +60,7 @@ interface IPhoneSubInfo {
     /**
      * Retrieves the unique sbuscriber ID, e.g., IMSI for GSM phones.
      */
+    @UnsupportedAppUsage
     String getSubscriberId(String callingPackage);
 
     /**
@@ -75,6 +76,7 @@ interface IPhoneSubInfo {
     /**
      * Retrieves the serial number of the ICC, if applicable.
      */
+    @UnsupportedAppUsage
     String getIccSerialNumber(String callingPackage);
 
     /**
