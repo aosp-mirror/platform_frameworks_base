@@ -20,7 +20,7 @@
     android:viewportHeight="70.0"
     android:viewportWidth="70.0">
     <path
-        android:fillColor="@color/car_accent"
+        android:fillColor="?android:attr/colorAccent"
         android:fillType="evenOdd"
         android:pathData="M4,0L66,0A4,4 0,0 1,70 4L70,66A4,4 0,0 1,66 70L4,70A4,4 0,0 1,0 66L0,4A4,4 0,0 1,4 0z"
         android:strokeColor="#00000000"

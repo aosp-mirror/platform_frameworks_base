@@ -92,6 +92,10 @@ public class CarStatusBar extends StatusBar implements
 
     @Override
     public void start() {
+        // get the provisioned state before calling the parent class since it's that flow that
+        // builds the nav bar
+        mDeviceProvisionedController = Dependency.get(DeviceProvisionedController.class);
+        mDeviceIsProvisioned = mDeviceProvisionedController.isDeviceProvisioned();
         super.start();
         mTaskStackListener = new TaskStackListenerImpl();
         mActivityManagerWrapper = ActivityManagerWrapper.getInstance();
@@ -105,8 +109,6 @@ public class CarStatusBar extends StatusBar implements
         mHvacController.connectToCarService();
 
         CarSystemUIFactory factory = SystemUIFactory.getInstance();
-        mDeviceProvisionedController = Dependency.get(DeviceProvisionedController.class);
-        mDeviceIsProvisioned = mDeviceProvisionedController.isDeviceProvisioned();
         if (!mDeviceIsProvisioned) {
             mDeviceProvisionedController.addCallback(
                     new DeviceProvisionedController.DeviceProvisionedListener() {
