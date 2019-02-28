@@ -394,7 +394,7 @@ void ValueMetricProducer::onConditionChangedLocked(const bool condition,
         invalidateCurrentBucket();
         // Something weird happened. If we received another event if the future, the condition might
         // be wrong.
-        mCondition = ConditionState::kUnknown;
+        mCondition = initialCondition(mConditionTrackerIndex);
     }
 
     // This part should alway be called.
