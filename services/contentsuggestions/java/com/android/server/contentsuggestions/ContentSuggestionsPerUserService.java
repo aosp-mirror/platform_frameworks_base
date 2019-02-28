@@ -80,12 +80,7 @@ public final class ContentSuggestionsPerUserService extends
     @Override // from PerUserSystemService
     protected boolean updateLocked(boolean disabled) {
         final boolean enabledChanged = super.updateLocked(disabled);
-        if (enabledChanged) {
-            if (!isEnabledLocked()) {
-                // Clear the remote service for the next call
-                mRemoteService = null;
-            }
-        }
+        updateRemoteServiceLocked();
         return enabledChanged;
     }
 
@@ -131,6 +126,15 @@ public final class ContentSuggestionsPerUserService extends
             service.notifyInteraction(requestId, bundle);
         }
     }
+
+    @GuardedBy("mLock")
+    private void updateRemoteServiceLocked() {
+        if (mRemoteService != null) {
+            mRemoteService.destroy();
+            mRemoteService = null;
+        }
+    }
+
 
     @GuardedBy("mLock")
     @Nullable
