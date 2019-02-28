@@ -2923,14 +2923,6 @@
 
     <bool name="config_networkSamplingWakesDevice">true</bool>
 
-    <!-- Home (non-roaming) values for CDMA roaming indicator.
-         Carriers can override this table by resource overlay. If not,
-         the default values come from 3GPP2 C.R1001 table
-         8.1-1. Enhanced Roaming Indicator Number Assignments -->
-    <string-array translatable="false" name="config_cdma_home_system">
-        <item>1</item>
-    </string-array>
-
     <!--From SmsMessage-->
     <!--Support decoding the user data payload as pack GSM 8-bit (a GSM alphabet
         string that's stored in 8-bit unpacked format) characters.-->
