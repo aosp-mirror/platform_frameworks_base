@@ -81,8 +81,7 @@ class BubbleTouchHandler implements View.OnTouchListener {
         // anything, collapse the stack.
         if (action == MotionEvent.ACTION_OUTSIDE || mTouchedView == null) {
             mStack.collapseStack();
-            cleanUpDismissTarget();
-            mTouchedView = null;
+            resetForNextGesture();
             return false;
         }
 
@@ -135,8 +134,7 @@ class BubbleTouchHandler implements View.OnTouchListener {
                 break;
 
             case MotionEvent.ACTION_CANCEL:
-                mTouchedView = null;
-                cleanUpDismissTarget();
+                resetForNextGesture();
                 break;
 
             case MotionEvent.ACTION_UP:
@@ -144,7 +142,7 @@ class BubbleTouchHandler implements View.OnTouchListener {
                 if (mInDismissTarget && isStack) {
                     mController.dismissStack();
                 } else if (mMovedEnough) {
-                    mVelocityTracker.computeCurrentVelocity(1000);
+                    mVelocityTracker.computeCurrentVelocity(/* maxVelocity */ 1000);
                     final float velX = mVelocityTracker.getXVelocity();
                     final float velY = mVelocityTracker.getYVelocity();
                     if (isStack) {
@@ -157,7 +155,7 @@ class BubbleTouchHandler implements View.OnTouchListener {
                             mController.removeBubble(((BubbleView) mTouchedView).getKey());
                         }
                     }
-                } else if (mTouchedView.equals(mStack.getExpandedBubbleView())) {
+                } else if (mTouchedView == mStack.getExpandedBubbleView()) {
                     mStack.collapseStack();
                 } else if (isStack) {
                     if (mStack.isExpanded()) {
@@ -169,15 +167,23 @@ class BubbleTouchHandler implements View.OnTouchListener {
                     mStack.setExpandedBubble(((BubbleView) mTouchedView).getKey());
                 }
 
-                cleanUpDismissTarget();
-                mVelocityTracker.recycle();
-                mVelocityTracker = null;
-                mTouchedView = null;
-                mMovedEnough = false;
+                resetForNextGesture();
                 break;
         }
 
         return true;
+    }
+
+    /** Clears all touch-related state. */
+    private void resetForNextGesture() {
+        cleanUpDismissTarget();
+        if (mVelocityTracker != null) {
+            mVelocityTracker.recycle();
+            mVelocityTracker = null;
+        }
+        mTouchedView = null;
+        mMovedEnough = false;
+        mInDismissTarget = false;
     }
 
     /**
