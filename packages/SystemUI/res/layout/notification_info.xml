@@ -178,6 +178,7 @@ asked for it -->
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
+                android:maxWidth="100dp"
                 style="@style/TextAppearance.NotificationInfo.Button"/>
 
             <LinearLayout
@@ -186,6 +187,7 @@ asked for it -->
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
                 android:layout_alignParentEnd="true"
+                android:maxWidth="200dp"
                 android:orientation="horizontal">
                 <TextView
                     android:id="@+id/deliver_silently"
@@ -195,6 +197,7 @@ asked for it -->
                     android:layout_centerVertical="true"
                     android:layout_marginStart="@dimen/notification_guts_button_horizontal_spacing"
                     android:paddingRight="24dp"
+                    android:maxWidth="125dp"
                     style="@style/TextAppearance.NotificationInfo.Button"/>
                 <TextView
                     android:id="@+id/block"
@@ -203,6 +206,7 @@ asked for it -->
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerVertical="true"
+                    android:maxWidth="75dp"
                     android:layout_marginStart="@dimen/notification_guts_button_horizontal_spacing"
                     style="@style/TextAppearance.NotificationInfo.Button"/>
                 <TextView
@@ -212,6 +216,7 @@ asked for it -->
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerVertical="true"
+                    android:maxWidth="75dp"
                     android:layout_marginStart="@dimen/notification_guts_button_horizontal_spacing"
                     style="@style/TextAppearance.NotificationInfo.Button"/>
             </LinearLayout>
