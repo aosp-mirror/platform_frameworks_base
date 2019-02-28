@@ -41,7 +41,6 @@ package android.app {
 
   public class Activity extends android.view.ContextThemeWrapper implements android.content.ComponentCallbacks2 android.view.KeyEvent.Callback android.view.LayoutInflater.Factory2 android.view.View.OnCreateContextMenuListener android.view.Window.Callback {
     method public void onMovedToDisplay(int, android.content.res.Configuration);
-    method public void setInheritShowWhenLocked(boolean);
   }
 
   public class ActivityManager {

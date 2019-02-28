@@ -2934,7 +2934,6 @@
         <public name="foregroundServiceType" />
         <public name="hasFragileUserData" />
         <public name="minAspectRatio" />
-        <!-- @hide @SystemApi -->
         <public name="inheritShowWhenLocked" />
         <public name="zygotePreloadName" />
         <public name="useEmbeddedDex" />

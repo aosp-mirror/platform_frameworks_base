@@ -8366,11 +8366,8 @@ public class Activity extends ContextThemeWrapper
      *                              screen when this activity has another activity behind it with
      *                              the showWhenLock attribute set; {@code false} otherwise.
      * @see #setShowWhenLocked(boolean)
-     * See android.R.attr#inheritShowWhenLocked
-     * @hide
+     * @see android.R.attr#inheritShowWhenLocked
      */
-    @SystemApi
-    @TestApi
     public void setInheritShowWhenLocked(boolean inheritShowWhenLocked) {
         try {
             ActivityTaskManager.getService().setInheritShowWhenLocked(
