@@ -15,6 +15,8 @@
  */
 package android.service.carrier;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.Service;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -71,7 +73,8 @@ public class CarrierMessagingClientService extends Service {
     }
 
     @Override
-    public final IBinder onBind(Intent intent) {
+    @NonNull
+    public final IBinder onBind(@Nullable Intent intent) {
         return mImpl.asBinder();
     }
 
