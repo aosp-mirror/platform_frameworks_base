@@ -27,6 +27,7 @@ import android.content.pm.ApplicationInfo;
  *
  * @see #instantiateApplication
  * @see #instantiateActivity
+ * @see #instantiateClassLoader
  * @see #instantiateService
  * @see #instantiateReceiver
  * @see #instantiateProvider
@@ -39,8 +40,10 @@ public class AppComponentFactory {
      * a custom class loader hierarchy.
      *
      * @param cl        The default classloader instantiated by platform.
+     * @param aInfo     Information about the application being loaded.
      */
-    public @NonNull ClassLoader instantiateClassLoader(@NonNull ClassLoader cl) {
+    public @NonNull ClassLoader instantiateClassLoader(@NonNull ClassLoader cl,
+            @NonNull ApplicationInfo aInfo) {
         return cl;
     }
 
@@ -131,19 +134,6 @@ public class AppComponentFactory {
             @NonNull String className)
             throws InstantiationException, IllegalAccessException, ClassNotFoundException {
         return (ContentProvider) cl.loadClass(className).newInstance();
-    }
-
-    private ApplicationInfo mApplicationInfo = null;
-
-    void setApplicationInfo(ApplicationInfo info) {
-        mApplicationInfo = info;
-    }
-
-    /**
-     * Returns the ApplicationInfo associated with this package.
-     */
-    public ApplicationInfo getApplicationInfo() {
-        return mApplicationInfo;
     }
 
     /**
