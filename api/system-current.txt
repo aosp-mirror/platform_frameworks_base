@@ -565,7 +565,7 @@ package android.app {
   }
 
   public class StatusBarManager {
-    method public android.app.StatusBarManager.DisableInfo getDisableInfo();
+    method @NonNull public android.app.StatusBarManager.DisableInfo getDisableInfo();
     method public void setDisabledForSetup(boolean);
   }
 
