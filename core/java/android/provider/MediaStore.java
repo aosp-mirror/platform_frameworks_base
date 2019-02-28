@@ -1299,6 +1299,7 @@ public final class MediaStore {
         /**
          * The content:// style URI for the internal storage.
          */
+        @NonNull
         public static final Uri INTERNAL_CONTENT_URI =
                 getContentUri("internal");
 
@@ -1306,6 +1307,7 @@ public final class MediaStore {
          * The content:// style URI for the "primary" external storage
          * volume.
          */
+        @NonNull
         public static final Uri EXTERNAL_CONTENT_URI =
                 getContentUri("external");
 
@@ -1330,13 +1332,13 @@ public final class MediaStore {
          * @param volumeName the name of the volume to get the URI for
          * @return the URI to the image media table on the given volume
          */
-        public static Uri getContentUri(String volumeName) {
+        public static @NonNull Uri getContentUri(@NonNull String volumeName) {
             return AUTHORITY_URI.buildUpon().appendPath(volumeName)
                     .appendPath("downloads").build();
         }
 
         /** @hide */
-        public static Uri getContentUriForPath(@NonNull String path) {
+        public static @NonNull Uri getContentUriForPath(@NonNull String path) {
             return getContentUri(getVolumeName(new File(path)));
         }
 
