@@ -15,6 +15,9 @@
  */
 package com.android.keyguard.clock;
 
+import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Paint.Style;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -31,32 +34,59 @@ import java.util.TimeZone;
 public class DefaultClockController implements ClockPlugin {
 
     /**
+     * Resources used to get title and thumbnail.
+     */
+    private final Resources mResources;
+
+    /**
+     * LayoutInflater used to inflate custom clock views.
+     */
+    private final LayoutInflater mLayoutInflater;
+
+    /**
      * Root view of preview.
      */
     private View mView;
+
     /**
      * Text clock in preview view hierarchy.
      */
     private TextView mTextTime;
-    private TextView mTextDate;
 
-    private DefaultClockController() {}
+    /**
+     * Date showing below time in preview view hierarchy.
+     */
+    private TextView mTextDate;
 
     /**
      * Create a DefaultClockController instance.
      *
      * @param inflater Inflater used to inflate custom clock views.
      */
-    public static DefaultClockController build(LayoutInflater inflater) {
-        DefaultClockController controller = new DefaultClockController();
-        controller.createViews(inflater);
-        return controller;
+    public DefaultClockController(Resources res, LayoutInflater inflater) {
+        mResources = res;
+        mLayoutInflater = inflater;
     }
 
-    private void createViews(LayoutInflater inflater) {
-        mView = inflater.inflate(R.layout.default_clock_preview, null);
+    private void createViews() {
+        mView = mLayoutInflater.inflate(R.layout.default_clock_preview, null);
         mTextTime = mView.findViewById(R.id.time);
         mTextDate = mView.findViewById(R.id.date);
+    }
+
+    @Override
+    public String getName() {
+        return "default";
+    }
+
+    @Override
+    public String getTitle() {
+        return mResources.getString(R.string.clock_title_default);
+    }
+
+    @Override
+    public Bitmap getThumbnail() {
+        return BitmapFactory.decodeResource(mResources, R.drawable.default_thumbnail);
     }
 
     @Override
@@ -66,6 +96,9 @@ public class DefaultClockController implements ClockPlugin {
 
     @Override
     public View getBigClockView() {
+        if (mView == null) {
+            createViews();
+        }
         return mView;
     }
 
@@ -82,7 +115,7 @@ public class DefaultClockController implements ClockPlugin {
     public void setColorPalette(boolean supportsDarkText, int[] colorPalette) {}
 
     @Override
-    public void dozeTimeTick() {
+    public void onTimeTick() {
     }
 
     @Override
