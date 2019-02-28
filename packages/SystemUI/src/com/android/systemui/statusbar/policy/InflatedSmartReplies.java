@@ -20,13 +20,17 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Notification;
 import android.app.RemoteInput;
+import android.content.Context;
 import android.os.Build;
 import android.util.Log;
 import android.util.Pair;
+import android.widget.Button;
 
 import com.android.internal.util.ArrayUtils;
+import com.android.systemui.statusbar.SmartReplyController;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -36,8 +40,63 @@ import java.util.List;
 public class InflatedSmartReplies {
     private static final String TAG = "InflatedSmartReplies";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
+    @Nullable private final SmartReplyView mSmartReplyView;
+    @Nullable private final List<Button> mSmartSuggestionButtons;
+    @NonNull private final SmartRepliesAndActions mSmartRepliesAndActions;
 
-    private InflatedSmartReplies() { }
+    private InflatedSmartReplies(
+            @Nullable SmartReplyView smartReplyView,
+            @Nullable List<Button> smartSuggestionButtons,
+            @NonNull SmartRepliesAndActions smartRepliesAndActions) {
+        mSmartReplyView = smartReplyView;
+        mSmartSuggestionButtons = smartSuggestionButtons;
+        mSmartRepliesAndActions = smartRepliesAndActions;
+    }
+
+    @Nullable public SmartReplyView getSmartReplyView() {
+        return mSmartReplyView;
+    }
+
+    @Nullable public List<Button> getSmartSuggestionButtons() {
+        return mSmartSuggestionButtons;
+    }
+
+    @NonNull public SmartRepliesAndActions getSmartRepliesAndActions() {
+        return mSmartRepliesAndActions;
+    }
+
+    /**
+     * Inflate a SmartReplyView and its smart suggestions.
+     */
+    public static InflatedSmartReplies inflate(
+            Context context,
+            NotificationEntry entry,
+            SmartReplyConstants smartReplyConstants,
+            SmartReplyController smartReplyController,
+            HeadsUpManager headsUpManager) {
+        SmartRepliesAndActions smartRepliesAndActions =
+                chooseSmartRepliesAndActions(smartReplyConstants, entry);
+        if (!shouldShowSmartReplyView(entry, smartRepliesAndActions)) {
+            return new InflatedSmartReplies(null /* smartReplyView */,
+                    null /* smartSuggestionButtons */, smartRepliesAndActions);
+        }
+
+        SmartReplyView smartReplyView = SmartReplyView.inflate(context);
+
+        List<Button> suggestionButtons = new ArrayList<>();
+        if (smartRepliesAndActions.smartReplies != null) {
+            suggestionButtons.addAll(smartReplyView.inflateRepliesFromRemoteInput(
+                    smartRepliesAndActions.smartReplies, smartReplyController, entry));
+        }
+        if (smartRepliesAndActions.smartActions != null) {
+            suggestionButtons.addAll(
+                    smartReplyView.inflateSmartActions(smartRepliesAndActions.smartActions,
+                            smartReplyController, entry, headsUpManager));
+        }
+
+        return new InflatedSmartReplies(smartReplyView, suggestionButtons,
+                smartRepliesAndActions);
+    }
 
     /**
      * Returns whether we should show the smart reply view and its smart suggestions.
