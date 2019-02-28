@@ -118,6 +118,8 @@
     <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS" />
     <uses-permission android:name="android.permission.MOUNT_FORMAT_FILESYSTEMS" />
     <uses-permission android:name="android.permission.MODIFY_PHONE_STATE" />
+    <!-- Shell only holds android.permission.NETWORK_SCAN in order to to enable CTS testing -->
+    <uses-permission android:name="android.permission.NETWORK_SCAN" />
     <uses-permission android:name="android.permission.REGISTER_CALL_PROVIDER" />
     <uses-permission android:name="android.permission.REGISTER_CONNECTION_MANAGER" />
     <uses-permission android:name="android.permission.REGISTER_SIM_SUBSCRIPTION" />
