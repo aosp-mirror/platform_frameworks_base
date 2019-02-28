@@ -3525,7 +3525,7 @@ package android.media {
     method public void stop();
   }
 
-  public static class HwAudioSource.Builder {
+  public static final class HwAudioSource.Builder {
     ctor public HwAudioSource.Builder();
     method @NonNull public android.media.HwAudioSource build();
     method @NonNull public android.media.HwAudioSource.Builder setAudioAttributes(@NonNull android.media.AudioAttributes);
