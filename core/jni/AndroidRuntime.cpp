@@ -174,7 +174,6 @@ extern int register_android_database_CursorWindow(JNIEnv* env);
 extern int register_android_database_SQLiteConnection(JNIEnv* env);
 extern int register_android_database_SQLiteGlobal(JNIEnv* env);
 extern int register_android_database_SQLiteDebug(JNIEnv* env);
-extern int register_android_nio_utils(JNIEnv* env);
 extern int register_android_os_Debug(JNIEnv* env);
 extern int register_android_os_GraphicsEnvironment(JNIEnv* env);
 extern int register_android_os_HidlSupport(JNIEnv* env);
@@ -1423,7 +1422,6 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_android_os_NativeHandle),
     REG_JNI(register_android_os_VintfObject),
     REG_JNI(register_android_os_VintfRuntimeInfo),
-    REG_JNI(register_android_nio_utils),
     REG_JNI(register_android_graphics_Canvas),
     // This needs to be before register_android_graphics_Graphics, or the latter
     // will not be able to find the jmethodID for ColorSpace.get().

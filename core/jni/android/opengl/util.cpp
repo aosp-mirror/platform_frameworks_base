@@ -773,54 +773,18 @@ static jint util_texSubImage2D(JNIEnv *env, jclass clazz,
  * ETC1 methods.
  */
 
-static jclass nioAccessClass;
-static jclass bufferClass;
-static jmethodID getBasePointerID;
-static jmethodID getBaseArrayID;
-static jmethodID getBaseArrayOffsetID;
-static jfieldID positionID;
-static jfieldID limitID;
-static jfieldID elementSizeShiftID;
-
-/* Cache method IDs each time the class is loaded. */
-
-static void
-nativeClassInitBuffer(JNIEnv *env)
-{
-    jclass nioAccessClassLocal = FindClassOrDie(env, "java/nio/NIOAccess");
-    nioAccessClass = MakeGlobalRefOrDie(env, nioAccessClassLocal);
-    getBasePointerID = GetStaticMethodIDOrDie(env, nioAccessClass,
-            "getBasePointer", "(Ljava/nio/Buffer;)J");
-    getBaseArrayID = GetStaticMethodIDOrDie(env, nioAccessClass,
-            "getBaseArray", "(Ljava/nio/Buffer;)Ljava/lang/Object;");
-    getBaseArrayOffsetID = GetStaticMethodIDOrDie(env, nioAccessClass,
-            "getBaseArrayOffset", "(Ljava/nio/Buffer;)I");
-
-    jclass bufferClassLocal = FindClassOrDie(env, "java/nio/Buffer");
-    bufferClass = MakeGlobalRefOrDie(env, bufferClassLocal);
-    positionID = GetFieldIDOrDie(env, bufferClass, "position", "I");
-    limitID = GetFieldIDOrDie(env, bufferClass, "limit", "I");
-    elementSizeShiftID = GetFieldIDOrDie(env, bufferClass, "_elementSizeShift", "I");
-}
-
 static void *
 getPointer(JNIEnv *_env, jobject buffer, jint *remaining)
 {
     jint position;
     jint limit;
     jint elementSizeShift;
-    jlong pointer;
-
-    position = _env->GetIntField(buffer, positionID);
-    limit = _env->GetIntField(buffer, limitID);
-    elementSizeShift = _env->GetIntField(buffer, elementSizeShiftID);
-    *remaining = (limit - position) << elementSizeShift;
-    pointer = _env->CallStaticLongMethod(nioAccessClass,
-            getBasePointerID, buffer);
+    jlong pointer = jniGetNioBufferFields(_env, buffer, &position, &limit, &elementSizeShift);
     if (pointer != 0L) {
-        return reinterpret_cast<void *>(pointer);
+        pointer += position << elementSizeShift;
     }
-    return NULL;
+    *remaining = (limit - position) << elementSizeShift;
+    return reinterpret_cast<void*>(pointer);
 }
 
 class BufferHelper {
@@ -1101,7 +1065,6 @@ static const ClassRegistrationInfo gClasses[] = {
 
 int register_android_opengl_classes(JNIEnv* env)
 {
-    nativeClassInitBuffer(env);
     int result = 0;
     for (int i = 0; i < NELEM(gClasses); i++) {
         const ClassRegistrationInfo* cri = &gClasses[i];

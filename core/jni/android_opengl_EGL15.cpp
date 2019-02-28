@@ -34,16 +34,6 @@ static jclass egldisplayClass;
 static jclass eglsurfaceClass;
 static jclass eglconfigClass;
 static jclass eglcontextClass;
-static jclass bufferClass;
-static jclass nioAccessClass;
-
-static jfieldID positionID;
-static jfieldID limitID;
-static jfieldID elementSizeShiftID;
-
-static jmethodID getBasePointerID;
-static jmethodID getBaseArrayID;
-static jmethodID getBaseArrayOffsetID;
 
 static jmethodID egldisplayGetHandleID;
 static jmethodID eglconfigGetHandleID;
@@ -115,24 +105,6 @@ nativeClassInit(JNIEnv *_env, jclass glImplClass)
     _env->SetStaticObjectField(eglClass, noSurfaceFieldID, eglNoSurfaceObject);
 
     // EGL 1.5 init
-    jclass nioAccessClassLocal = _env->FindClass("java/nio/NIOAccess");
-    nioAccessClass = (jclass) _env->NewGlobalRef(nioAccessClassLocal);
-
-    jclass bufferClassLocal = _env->FindClass("java/nio/Buffer");
-    bufferClass = (jclass) _env->NewGlobalRef(bufferClassLocal);
-
-    getBasePointerID = _env->GetStaticMethodID(nioAccessClass,
-            "getBasePointer", "(Ljava/nio/Buffer;)J");
-    getBaseArrayID = _env->GetStaticMethodID(nioAccessClass,
-            "getBaseArray", "(Ljava/nio/Buffer;)Ljava/lang/Object;");
-    getBaseArrayOffsetID = _env->GetStaticMethodID(nioAccessClass,
-            "getBaseArrayOffset", "(Ljava/nio/Buffer;)I");
-
-    positionID = _env->GetFieldID(bufferClass, "position", "I");
-    limitID = _env->GetFieldID(bufferClass, "limit", "I");
-    elementSizeShiftID =
-        _env->GetFieldID(bufferClass, "_elementSizeShift", "I");
-
     jclass eglimageClassLocal = _env->FindClass("android/opengl/EGLImage");
     eglimageClass = (jclass) _env->NewGlobalRef(eglimageClassLocal);
     jclass eglsyncClassLocal = _env->FindClass("android/opengl/EGLSync");
@@ -159,23 +131,17 @@ getPointer(JNIEnv *_env, jobject buffer, jarray *array, jint *remaining, jint *o
     jint elementSizeShift;
     jlong pointer;
 
-    position = _env->GetIntField(buffer, positionID);
-    limit = _env->GetIntField(buffer, limitID);
-    elementSizeShift = _env->GetIntField(buffer, elementSizeShiftID);
+    pointer = jniGetNioBufferFields(_env, buffer, &position, &limit, &elementSizeShift);
     *remaining = (limit - position) << elementSizeShift;
-    pointer = _env->CallStaticLongMethod(nioAccessClass,
-            getBasePointerID, buffer);
     if (pointer != 0L) {
-        *array = NULL;
+        *array = nullptr;
+        pointer += position << elementSizeShift;
         return reinterpret_cast<void*>(pointer);
     }
 
-    *array = (jarray) _env->CallStaticObjectMethod(nioAccessClass,
-            getBaseArrayID, buffer);
-    *offset = _env->CallStaticIntMethod(nioAccessClass,
-            getBaseArrayOffsetID, buffer);
-
-    return NULL;
+    *array = jniGetNioBufferBaseArray(_env, buffer);
+    *offset = jniGetNioBufferBaseArrayOffset(_env, buffer);
+    return nullptr;
 }
 
 static void
