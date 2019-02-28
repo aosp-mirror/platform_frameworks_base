@@ -16,6 +16,7 @@
 
 package android.widget;
 
+import android.annotation.IntRange;
 import android.annotation.UnsupportedAppUsage;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -130,7 +131,7 @@ public class ViewFlipper extends ViewAnimator {
      *            time in milliseconds
      */
     @android.view.RemotableViewMethod
-    public void setFlipInterval(int milliseconds) {
+    public void setFlipInterval(@IntRange(from = 0) int milliseconds) {
         mFlipInterval = milliseconds;
     }
 
@@ -140,6 +141,7 @@ public class ViewFlipper extends ViewAnimator {
      * @return delay time in milliseconds
      */
     @InspectableProperty
+    @IntRange(from = 0)
     public int getFlipInterval() {
         return mFlipInterval;
     }
