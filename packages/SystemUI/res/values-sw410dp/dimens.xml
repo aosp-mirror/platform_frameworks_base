@@ -23,7 +23,7 @@
     <dimen name="qs_detail_items_padding_top">16dp</dimen>
 
     <!-- Global actions grid -->
-    <dimen name="global_actions_grid_container_bottom_margin">16dp</dimen>
+    <dimen name="global_actions_grid_container_bottom_margin">4dp</dimen>
 
     <dimen name="global_actions_grid_vertical_padding">8dp</dimen>
     <dimen name="global_actions_grid_horizontal_padding">4dp</dimen>
@@ -35,7 +35,7 @@
 
     <dimen name="global_actions_grid_item_icon_width">24dp</dimen>
     <dimen name="global_actions_grid_item_icon_height">24dp</dimen>
-    <dimen name="global_actions_grid_item_icon_top_margin">16dp</dimen>
+    <dimen name="global_actions_grid_item_icon_top_margin">14dp</dimen>
     <dimen name="global_actions_grid_item_icon_side_margin">24dp</dimen>
     <dimen name="global_actions_grid_item_icon_bottom_margin">4dp</dimen>
 
