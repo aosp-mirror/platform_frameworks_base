@@ -352,11 +352,11 @@ package android.os {
   }
 
   public static final class StrictMode.ThreadPolicy.Builder {
-    method public android.os.StrictMode.ThreadPolicy.Builder penaltyListener(@NonNull android.os.StrictMode.OnThreadViolationListener, @NonNull java.util.concurrent.Executor);
+    method @NonNull public android.os.StrictMode.ThreadPolicy.Builder penaltyListener(@NonNull android.os.StrictMode.OnThreadViolationListener, @NonNull java.util.concurrent.Executor);
   }
 
   public static final class StrictMode.VmPolicy.Builder {
-    method public android.os.StrictMode.VmPolicy.Builder penaltyListener(@NonNull android.os.StrictMode.OnVmViolationListener, @NonNull java.util.concurrent.Executor);
+    method @NonNull public android.os.StrictMode.VmPolicy.Builder penaltyListener(@NonNull android.os.StrictMode.OnVmViolationListener, @NonNull java.util.concurrent.Executor);
   }
 
   public final class SystemClock {

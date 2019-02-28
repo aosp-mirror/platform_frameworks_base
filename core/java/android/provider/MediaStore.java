@@ -3176,7 +3176,7 @@ public final class MediaStore {
      * {@link MediaStore.Images.Media#getContentUri(String)} to query media at
      * that location.
      */
-    public static @NonNull Set<String> getAllVolumeNames(Context context) {
+    public static @NonNull Set<String> getAllVolumeNames(@NonNull Context context) {
         final StorageManager sm = context.getSystemService(StorageManager.class);
         final Set<String> volumeNames = new ArraySet<>();
         volumeNames.add(VOLUME_INTERNAL);
@@ -3350,7 +3350,7 @@ public final class MediaStore {
      *         if no equivalent was found.
      * @see #getMediaUri(Context, Uri)
      */
-    public static Uri getDocumentUri(Context context, Uri mediaUri) {
+    public static @Nullable Uri getDocumentUri(@NonNull Context context, @NonNull Uri mediaUri) {
         final ContentResolver resolver = context.getContentResolver();
         final List<UriPermission> uriPermissions = resolver.getPersistedUriPermissions();
 
@@ -3380,7 +3380,7 @@ public final class MediaStore {
      *         equivalent was found.
      * @see #getDocumentUri(Context, Uri)
      */
-    public static Uri getMediaUri(Context context, Uri documentUri) {
+    public static @Nullable Uri getMediaUri(@NonNull Context context, @NonNull Uri documentUri) {
         final ContentResolver resolver = context.getContentResolver();
         final List<UriPermission> uriPermissions = resolver.getPersistedUriPermissions();
 

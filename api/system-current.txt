@@ -5210,11 +5210,11 @@ package android.os {
   }
 
   public class Environment {
-    method public static java.io.File getOdmDirectory();
-    method public static java.io.File getOemDirectory();
-    method public static java.io.File getProductDirectory();
-    method public static java.io.File getProductServicesDirectory();
-    method public static java.io.File getVendorDirectory();
+    method @NonNull public static java.io.File getOdmDirectory();
+    method @NonNull public static java.io.File getOemDirectory();
+    method @NonNull public static java.io.File getProductDirectory();
+    method @NonNull public static java.io.File getProductServicesDirectory();
+    method @NonNull public static java.io.File getVendorDirectory();
   }
 
   public class HidlSupport {

@@ -89,7 +89,7 @@ public class SQLiteQueryBuilder {
      *
      * @return the list of tables being queried
      */
-    public String getTables() {
+    public @Nullable String getTables() {
         return mTables;
     }
 
@@ -101,7 +101,7 @@ public class SQLiteQueryBuilder {
      *
      * @param inTables the list of tables to query on
      */
-    public void setTables(String inTables) {
+    public void setTables(@Nullable String inTables) {
         mTables = inTables;
     }
 
@@ -170,7 +170,7 @@ public class SQLiteQueryBuilder {
      *
      * @param columnMap maps from the user column names to the database column names
      */
-    public void setProjectionMap(Map<String, String> columnMap) {
+    public void setProjectionMap(@Nullable Map<String, String> columnMap) {
         mProjectionMap = columnMap;
     }
 
@@ -178,7 +178,7 @@ public class SQLiteQueryBuilder {
      * Gets the projection map for the query, as last configured by
      * {@link #setProjectionMap(Map)}.
      */
-    public Map<String, String> getProjectionMap() {
+    public @Nullable Map<String, String> getProjectionMap() {
         return mProjectionMap;
     }
 
@@ -189,7 +189,7 @@ public class SQLiteQueryBuilder {
      *
      * @hide
      */
-    public void setProjectionGreylist(List<Pattern> projectionGreylist) {
+    public void setProjectionGreylist(@Nullable List<Pattern> projectionGreylist) {
         mProjectionGreylist = projectionGreylist;
     }
 
@@ -199,7 +199,7 @@ public class SQLiteQueryBuilder {
      *
      * @hide
      */
-    public List<Pattern> getProjectionGreylist() {
+    public @Nullable List<Pattern> getProjectionGreylist() {
         return mProjectionGreylist;
     }
 
@@ -210,7 +210,7 @@ public class SQLiteQueryBuilder {
      *
      * @param factory the factory to use.
      */
-    public void setCursorFactory(SQLiteDatabase.CursorFactory factory) {
+    public void setCursorFactory(@Nullable SQLiteDatabase.CursorFactory factory) {
         mFactory = factory;
     }
 
@@ -218,7 +218,7 @@ public class SQLiteQueryBuilder {
      * Sets the cursor factory to be used for the query, as last configured by
      * {@link #setCursorFactory(android.database.sqlite.SQLiteDatabase.CursorFactory)}.
      */
-    public SQLiteDatabase.CursorFactory getCursorFactory() {
+    public @Nullable SQLiteDatabase.CursorFactory getCursorFactory() {
         return mFactory;
     }
 

@@ -1416,8 +1416,8 @@ package android.os {
 
   public class Environment {
     method public static java.io.File buildPath(java.io.File, java.lang.String...);
-    method public static java.io.File getProductDirectory();
-    method public static java.io.File getStorageDirectory();
+    method @NonNull public static java.io.File getProductDirectory();
+    method @NonNull public static java.io.File getStorageDirectory();
   }
 
   public final class FileUtils {
@@ -1666,7 +1666,7 @@ package android.os {
   }
 
   public static final class StrictMode.ThreadPolicy.Builder {
-    method public android.os.StrictMode.ThreadPolicy.Builder detectExplicitGc();
+    method @NonNull public android.os.StrictMode.ThreadPolicy.Builder detectExplicitGc();
   }
 
   public static final class StrictMode.ViolationInfo implements android.os.Parcelable {
