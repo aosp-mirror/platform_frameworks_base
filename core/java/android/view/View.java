@@ -881,12 +881,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     private static boolean sAlwaysRemeasureExactly = false;
 
     /**
-     * Relax constraints around whether setLayoutParams() must be called after
-     * modifying the layout params.
-     */
-    private static boolean sLayoutParamsAlwaysChanged = false;
-
-    /**
      * Allow setForeground/setBackground to be called (and ignored) on a textureview,
      * without throwing
      */
@@ -5169,11 +5163,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             // LinearLayout measurement passes using EXACTLY and non-EXACTLY
             // modes, so we always need to run an additional EXACTLY pass.
             sAlwaysRemeasureExactly = targetSdkVersion <= Build.VERSION_CODES.M;
-
-            // Prior to N, layout params could change without requiring a
-            // subsequent call to setLayoutParams() and they would usually
-            // work. Partial layout breaks this assumption.
-            sLayoutParamsAlwaysChanged = targetSdkVersion <= Build.VERSION_CODES.M;
 
             // Prior to N, TextureView would silently ignore calls to setBackground/setForeground.
             // On N+, we throw, but that breaks compatibility with apps that use these methods.
@@ -17984,21 +17973,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     protected void damageInParent() {
         if (mParent != null && mAttachInfo != null) {
             mParent.onDescendantInvalidated(this, this);
-        }
-    }
-
-    /**
-     * Utility method to transform a given Rect by the current matrix of this view.
-     */
-    void transformRect(final Rect rect) {
-        if (!getMatrix().isIdentity()) {
-            RectF boundingRect = mAttachInfo.mTmpTransformRect;
-            boundingRect.set(rect);
-            getMatrix().mapRect(boundingRect);
-            rect.set((int) Math.floor(boundingRect.left),
-                    (int) Math.floor(boundingRect.top),
-                    (int) Math.ceil(boundingRect.right),
-                    (int) Math.ceil(boundingRect.bottom));
         }
     }
 
