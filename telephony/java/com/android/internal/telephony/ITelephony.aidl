@@ -1701,7 +1701,7 @@ interface ITelephony {
     /**
      * Modify the user's setting for whether or not 4G LTE is enabled.
      */
-    void setAdvancedCallingSetting(int subId, boolean isEnabled);
+    void setAdvancedCallingSettingEnabled(int subId, boolean isEnabled);
 
     /**
      * return true if the user's setting for VT is enabled for the subscription.
@@ -1711,7 +1711,7 @@ interface ITelephony {
     /**
      * Modify the user's setting for whether or not VT is available for the subscrption specified.
      */
-    void setVtSetting(int subId, boolean isEnabled);
+    void setVtSettingEnabled(int subId, boolean isEnabled);
 
     /**
      * return true if the user's setting for whether or not Voice over WiFi is currently enabled.
@@ -1721,7 +1721,7 @@ interface ITelephony {
     /**
      * sets the user's setting for Voice over WiFi enabled state.
      */
-    void setVoWiFiSetting(int subId, boolean isEnabled);
+    void setVoWiFiSettingEnabled(int subId, boolean isEnabled);
 
     /**
      * return true if the user's setting for Voice over WiFi while roaming is enabled.
@@ -1732,7 +1732,7 @@ interface ITelephony {
      * Sets the user's preference for whether or not Voice over WiFi is enabled for the current
      * subscription while roaming.
      */
-    void setVoWiFiRoamingSetting(int subId, boolean isEnabled);
+    void setVoWiFiRoamingSettingEnabled(int subId, boolean isEnabled);
 
     /**
      * Set the Voice over WiFi enabled state, but do not persist the setting.
