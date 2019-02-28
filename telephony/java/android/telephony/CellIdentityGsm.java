@@ -97,6 +97,12 @@ public final class CellIdentityGsm extends CellIdentity {
         return new CellIdentityGsm(this);
     }
 
+    /** @hide */
+    public CellIdentityGsm sanitizeLocationInfo() {
+        return new CellIdentityGsm(CellInfo.UNAVAILABLE, CellInfo.UNAVAILABLE, CellInfo.UNAVAILABLE,
+                CellInfo.UNAVAILABLE, mMccStr, mMncStr, mAlphaLong, mAlphaShort);
+    }
+
     /**
      * @return 3-digit Mobile Country Code, 0..999,
      *         {@link android.telephony.CellInfo#UNAVAILABLE UNAVAILABLE} if unavailable.
