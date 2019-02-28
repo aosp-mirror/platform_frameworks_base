@@ -224,7 +224,7 @@ class Class():
 
 
 class Package():
-    NAME = re.compile("package(?: .*)? ([A-Za-z.]+)")
+    NAME = re.compile("package(?: .*)? ([A-Za-z0-9.]+)")
 
     def __init__(self, line, raw, blame):
         self.line = line
