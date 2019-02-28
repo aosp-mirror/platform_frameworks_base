@@ -31,7 +31,6 @@ import com.android.server.PackageWatchdog.PackageHealthObserver;
 import com.android.server.PackageWatchdog.PackageHealthObserverImpact;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;
@@ -442,12 +441,9 @@ public class PackageWatchdogTest {
         assertEquals(0, observer2.mFailedPackages.size());
     }
 
-    // TODO: Unignore test after package failure is triggered on observer expiry with failing
-    // explicit health check
     /**
      * Test explicit health check status determines package failure or success on expiry
      */
-    @Ignore
     @Test
     public void testPackageFailureExplicitHealthCheck() throws Exception {
         PackageWatchdog watchdog = createWatchdog();

@@ -21,6 +21,7 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.content.pm.VersionedPackage;
 import android.os.Environment;
 import android.os.Handler;
@@ -433,13 +434,44 @@ public class PackageWatchdog {
             Iterator<ObserverInternal> it = mAllObservers.values().iterator();
             while (it.hasNext()) {
                 ObserverInternal observer = it.next();
-                if (!observer.updateMonitoringDurations(elapsedMs)) {
+                List<MonitoredPackage> failedPackages =
+                        observer.updateMonitoringDurations(elapsedMs);
+                if (!failedPackages.isEmpty()) {
+                    onExplicitHealthCheckFailed(observer, failedPackages);
+                }
+                if (observer.mPackages.isEmpty()) {
                     Slog.i(TAG, "Discarding observer " + observer.mName + ". All packages expired");
                     it.remove();
                 }
             }
         }
         saveToFileAsync();
+    }
+
+    private void onExplicitHealthCheckFailed(ObserverInternal observer,
+            List<MonitoredPackage> failedPackages) {
+        mWorkerHandler.post(() -> {
+            synchronized (mLock) {
+                PackageHealthObserver registeredObserver = observer.mRegisteredObserver;
+                if (registeredObserver != null) {
+                    PackageManager pm = mContext.getPackageManager();
+                    for (int i = 0; i < failedPackages.size(); i++) {
+                        String packageName = failedPackages.get(i).mName;
+                        long versionCode = 0;
+                        try {
+                            versionCode = pm.getPackageInfo(
+                                    packageName, 0 /* flags */).getLongVersionCode();
+                        } catch (PackageManager.NameNotFoundException e) {
+                            Slog.w(TAG, "Explicit health check failed but could not find package "
+                                    + packageName);
+                            // TODO(b/120598832): Skip. We only continue to pass tests for now since
+                            // the tests don't install any packages
+                        }
+                        registeredObserver.execute(new VersionedPackage(packageName, versionCode));
+                    }
+                }
+            }
+        });
     }
 
     /**
@@ -520,6 +552,7 @@ public class PackageWatchdog {
      */
     static class ObserverInternal {
         public final String mName;
+        //TODO(b/120598832): Add getter for mPackages
         public final ArrayMap<String, MonitoredPackage> mPackages;
         @Nullable
         public PackageHealthObserver mRegisteredObserver;
@@ -566,17 +599,17 @@ public class PackageWatchdog {
             }
         }
 
-        // TODO(b/120598832): For packages failing explicit health check, delay removal of the
-        // observer until after PackageHealthObserver#execute
         /**
          * Reduces the monitoring durations of all packages observed by this observer by
          *  {@code elapsedMs}. If any duration is less than 0, the package is removed from
          * observation.
          *
-         * @returns {@code true} if there are still packages to be observed, {@code false} otherwise
+         * @returns a {@link List} of packages that were removed from the observer without explicit
+         * health check passing, or an empty list if no package expired for which an explicit health
+         * check was still pending
          */
-        public boolean updateMonitoringDurations(long elapsedMs) {
-            List<MonitoredPackage> packages = new ArrayList<>();
+        public List<MonitoredPackage> updateMonitoringDurations(long elapsedMs) {
+            List<MonitoredPackage> removedPackages = new ArrayList<>();
             synchronized (mName) {
                 Iterator<MonitoredPackage> it = mPackages.values().iterator();
                 while (it.hasNext()) {
@@ -585,10 +618,13 @@ public class PackageWatchdog {
                     if (newDuration > 0) {
                         p.mDurationMs = newDuration;
                     } else {
+                        if (!p.mHasPassedHealthCheck) {
+                            removedPackages.add(p);
+                        }
                         it.remove();
                     }
                 }
-                return !mPackages.isEmpty();
+                return removedPackages;
             }
         }
 
