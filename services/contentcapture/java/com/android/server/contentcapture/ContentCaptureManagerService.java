@@ -43,6 +43,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.DeviceConfig;
 import android.provider.Settings;
+import android.service.contentcapture.ActivityEvent.ActivityEventType;
 import android.util.LocalLog;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
@@ -632,7 +633,7 @@ public final class ContentCaptureManagerService extends
         }
 
         @Override
-        public ContentCaptureOptions getOptionsForPackage(int userId, String packageName) {
+        public ContentCaptureOptions getOptionsForPackage(int userId, @NonNull String packageName) {
             synchronized (mLock) {
                 final ContentCapturePerUserService service = peekServiceForUserLocked(userId);
                 if (service != null) {
@@ -640,6 +641,17 @@ public final class ContentCaptureManagerService extends
                 }
             }
             return null;
+        }
+
+        @Override
+        public void notifyActivityEvent(int userId, @NonNull ComponentName activityComponent,
+                @ActivityEventType int eventType) {
+            synchronized (mLock) {
+                final ContentCapturePerUserService service = peekServiceForUserLocked(userId);
+                if (service != null) {
+                    service.onActivityEventLocked(activityComponent, eventType);
+                }
+            }
         }
     }
 }
