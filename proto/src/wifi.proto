@@ -527,6 +527,12 @@ message WifiLog {
 
   // List of NetworkSelectionExperimentDecisions stats for each experiment
   repeated NetworkSelectionExperimentDecisions network_selection_experiment_decisions_list = 140;
+
+  // Network Request API surface metrics.
+  optional WifiNetworkRequestApiLog wifi_network_request_api_log = 141;
+
+  // Network Suggestion API surface metrics.
+  optional WifiNetworkSuggestionApiLog wifi_network_suggestion_api_log = 142;
 }
 
 // Information that gets logged for every WiFi connection.
@@ -2340,4 +2346,40 @@ message NetworkSelectionExperimentDecisions {
   // Note that it is possible for the network selection to be different even when there only exists
   // a single network choice, since choosing not to connect to that network is a valid choice.
   repeated MapEntryInt32Int32 different_selection_num_choices_counter = 4;
+}
+
+// NetworkRequest API metrics.
+message WifiNetworkRequestApiLog {
+  // Number of requests via this API surface.
+  optional int32 num_request = 1;
+
+  // Histogram of requests via this API surface to number of networks matched in scan results.
+  optional HistogramBucketInt32 network_match_size_histogram = 2;
+
+  // Number of successful network connection from this API.
+  optional int32 num_connect_success = 3;
+
+  // Number of requests via this API surface that bypassed user approval.
+  optional int32 num_user_approval_bypass = 4;
+
+  // Number of requests via this API surface that was rejected by the user.
+  optional int32 num_user_reject = 5;
+
+  // Number of unique apps using this API surface.
+  optional int32 num_apps = 6;
+}
+
+// NetworkSuggestion API metrics.
+message WifiNetworkSuggestionApiLog {
+  // Number of modifications to their suggestions by apps.
+  optional int32 num_modification = 1;
+
+  // Number of successful network connection from app suggestions.
+  optional int32 num_connect_success = 2;
+
+  // Number of network connection failures from app suggestions.
+  optional int32 num_connect_failure = 3;
+
+  // Histogram for size of the network lists provided by various apps on the device.
+  repeated HistogramBucketInt32 network_list_size_histogram = 4;
 }
