@@ -2597,7 +2597,7 @@ public class SubscriptionManager {
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public void setPreferredDataSubscriptionId(int subId, boolean needValidation,
-            @NonNull @CallbackExecutor Executor executor, Consumer<Integer> callback) {
+            @Nullable @CallbackExecutor Executor executor, @Nullable  Consumer<Integer> callback) {
         if (VDBG) logd("[setPreferredDataSubscriptionId]+ subId:" + subId);
         try {
             ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
@@ -2606,10 +2606,11 @@ public class SubscriptionManager {
             ISetOpportunisticDataCallback callbackStub = new ISetOpportunisticDataCallback.Stub() {
                 @Override
                 public void onComplete(int result) {
+                    if (executor == null || callback == null) {
+                        return;
+                    }
                     Binder.withCleanCallingIdentity(() -> executor.execute(() -> {
-                        if (callback != null) {
-                            callback.accept(result);
-                        }
+                        callback.accept(result);
                     }));
                 }
             };
