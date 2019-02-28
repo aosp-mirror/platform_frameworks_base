@@ -6337,7 +6337,7 @@ package android.service.attention {
 
   public abstract class AttentionService extends android.app.Service {
     ctor public AttentionService();
-    method public final android.os.IBinder onBind(android.content.Intent);
+    method @Nullable public final android.os.IBinder onBind(@NonNull android.content.Intent);
     method public abstract void onCancelAttentionCheck(int);
     method public abstract void onCheckAttention(int, @NonNull android.service.attention.AttentionService.AttentionCallback);
     field public static final int ATTENTION_FAILURE_PREEMPTED = 2; // 0x2
