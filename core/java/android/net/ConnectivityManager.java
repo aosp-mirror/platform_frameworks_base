@@ -3668,7 +3668,8 @@ public class ConnectivityManager {
     /**
      * Registers to receive notifications about all networks which satisfy the given
      * {@link NetworkRequest}.  The callbacks will continue to be called until
-     * either the application exits or link #unregisterNetworkCallback(NetworkCallback)} is called.
+     * either the application exits or {@link #unregisterNetworkCallback(NetworkCallback)} is
+     * called.
      *
      * @param request {@link NetworkRequest} describing this request.
      * @param networkCallback The {@link NetworkCallback} that the system will call as suitable
@@ -3684,7 +3685,8 @@ public class ConnectivityManager {
     /**
      * Registers to receive notifications about all networks which satisfy the given
      * {@link NetworkRequest}.  The callbacks will continue to be called until
-     * either the application exits or link #unregisterNetworkCallback(NetworkCallback)} is called.
+     * either the application exits or {@link #unregisterNetworkCallback(NetworkCallback)} is
+     * called.
      *
      * @param request {@link NetworkRequest} describing this request.
      * @param networkCallback The {@link NetworkCallback} that the system will call as suitable
