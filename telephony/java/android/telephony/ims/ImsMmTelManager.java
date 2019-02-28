@@ -21,6 +21,7 @@ import android.Manifest;
 import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.content.Context;
@@ -199,7 +200,7 @@ public class ImsMmTelManager {
          *
          * @param info the {@link ImsReasonInfo} associated with why registration was disconnected.
          */
-        public void onUnregistered(ImsReasonInfo info) {
+        public void onUnregistered(@Nullable ImsReasonInfo info) {
         }
 
         /**
@@ -211,7 +212,7 @@ public class ImsMmTelManager {
          *         transport type that has failed to handover registration to.
          * @param info A {@link ImsReasonInfo} that identifies the reason for failure.
          */
-        public void onTechnologyChangeFailed(int imsTransportType, ImsReasonInfo info) {
+        public void onTechnologyChangeFailed(int imsTransportType, @Nullable ImsReasonInfo info) {
         }
 
         /**
@@ -223,7 +224,7 @@ public class ImsMmTelManager {
          *         subscription.
          * @hide
          */
-        public void onSubscriberAssociatedUriChanged(Uri[] uris) {
+        public void onSubscriberAssociatedUriChanged(@Nullable Uri[] uris) {
         }
 
         /**@hide*/
@@ -294,7 +295,7 @@ public class ImsMmTelManager {
          * @param capabilities The new availability of the capabilities.
          */
         public void onCapabilitiesStatusChanged(
-                MmTelFeature.MmTelCapabilities capabilities) {
+                @NonNull MmTelFeature.MmTelCapabilities capabilities) {
         }
 
         /**@hide*/
@@ -319,7 +320,7 @@ public class ImsMmTelManager {
      * @see android.telephony.SubscriptionManager#getActiveSubscriptionInfoList()
      * @throws IllegalArgumentException if the subscription is invalid.
      */
-    public static ImsMmTelManager createForSubscriptionId(int subId) {
+    public static @NonNull ImsMmTelManager createForSubscriptionId(int subId) {
         if (!SubscriptionManager.isValidSubscriptionId(subId)) {
             throw new IllegalArgumentException("Invalid subscription ID");
         }
@@ -357,7 +358,7 @@ public class ImsMmTelManager {
      * reason.
      */
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
-    public void registerImsRegistrationCallback(@CallbackExecutor Executor executor,
+    public void registerImsRegistrationCallback(@NonNull @CallbackExecutor Executor executor,
             @NonNull RegistrationCallback c) throws ImsException {
         if (c == null) {
             throw new IllegalArgumentException("Must include a non-null RegistrationCallback.");
