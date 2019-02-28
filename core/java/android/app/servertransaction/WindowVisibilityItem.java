@@ -34,7 +34,8 @@ public class WindowVisibilityItem extends ClientTransactionItem {
     @Override
     public void execute(ClientTransactionHandler client, IBinder token,
             PendingTransactionActions pendingActions) {
-        Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "activityShowWindow");
+        Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER,
+                mShowWindow ? "activityShowWindow" : "activityHideWindow");
         client.handleWindowVisibility(token, mShowWindow);
         Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
     }
