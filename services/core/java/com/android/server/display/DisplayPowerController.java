@@ -874,7 +874,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
         // If the brightness is already set then it's been overridden by something other than the
         // user, or is a temporary adjustment.
-        final boolean userInitiatedChange = brightness < 0
+        boolean userInitiatedChange = brightness < 0
                 && (autoBrightnessAdjustmentChanged || userSetBrightnessChanged);
 
         boolean hadUserBrightnessPoint = false;
@@ -1010,6 +1010,12 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             }
 
             if (!brightnessIsTemporary) {
+                if (userInitiatedChange && (mAutomaticBrightnessController == null
+                        || !mAutomaticBrightnessController.hasValidAmbientLux())) {
+                    // If we don't have a valid lux reading we can't report a valid
+                    // slider event so notify as if the system changed the brightness.
+                    userInitiatedChange = false;
+                }
                 notifyBrightnessChanged(brightness, userInitiatedChange, hadUserBrightnessPoint);
             }
 

@@ -288,6 +288,10 @@ class AutomaticBrightnessController {
         return mScreenAutoBrightness;
     }
 
+    public boolean hasValidAmbientLux() {
+        return mAmbientLuxValid;
+    }
+
     public float getAutomaticScreenBrightnessAdjustment() {
         return mBrightnessMapper.getAutoBrightnessAdjustment();
     }
@@ -648,9 +652,9 @@ class AutomaticBrightnessController {
                 mLightSensorWarmUpTimeConfig + mLightSensorEnableTime;
             if (time < timeWhenSensorWarmedUp) {
                 if (mLoggingEnabled) {
-                    Slog.d(TAG, "updateAmbientLux: Sensor not  ready yet: " +
-                            "time=" + time + ", " +
-                            "timeWhenSensorWarmedUp=" + timeWhenSensorWarmedUp);
+                    Slog.d(TAG, "updateAmbientLux: Sensor not ready yet: "
+                            + "time=" + time + ", "
+                            + "timeWhenSensorWarmedUp=" + timeWhenSensorWarmedUp);
                 }
                 mHandler.sendEmptyMessageAtTime(MSG_UPDATE_AMBIENT_LUX,
                         timeWhenSensorWarmedUp);
