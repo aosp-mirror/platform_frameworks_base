@@ -933,6 +933,27 @@ public final class ActiveServices {
         }
     }
 
+    /**
+     * Return the current foregroundServiceType of the ServiceRecord.
+     * @param className ComponentName of the Service class.
+     * @param token IBinder token.
+     * @return current foreground service type.
+     */
+    public int getForegroundServiceTypeLocked(ComponentName className, IBinder token) {
+        final int userId = UserHandle.getCallingUserId();
+        final long origId = Binder.clearCallingIdentity();
+        int ret = ServiceInfo.FOREGROUND_SERVICE_TYPE_NONE;
+        try {
+            ServiceRecord r = findServiceLocked(className, token, userId);
+            if (r != null) {
+                ret = r.foregroundServiceType;
+            }
+        } finally {
+            Binder.restoreCallingIdentity(origId);
+        }
+        return ret;
+    }
+
     boolean foregroundAppShownEnoughLocked(ActiveForegroundApp aa, long nowElapsed) {
         if (DEBUG_FOREGROUND_SERVICE) Slog.d(TAG, "Shown enough: pkg=" + aa.mPackageName + ", uid="
                 + aa.mUid);
