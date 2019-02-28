@@ -616,8 +616,15 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
             mExecutor = executor;
             mAuthenticationCallback = callback;
             final long sessionId = crypto != null ? crypto.getOpId() : 0;
-            mService.authenticate(mToken, sessionId, userId, mBiometricServiceReceiver,
-                    mContext.getOpPackageName(), mBundle);
+            if (BiometricManager.hasBiometrics(mContext)) {
+                mService.authenticate(mToken, sessionId, userId, mBiometricServiceReceiver,
+                        mContext.getOpPackageName(), mBundle);
+            } else {
+                mExecutor.execute(() -> {
+                    callback.onAuthenticationError(BiometricPrompt.BIOMETRIC_ERROR_HW_NOT_PRESENT,
+                            mContext.getString(R.string.biometric_error_hw_unavailable));
+                });
+            }
         } catch (RemoteException e) {
             Log.e(TAG, "Remote exception while authenticating", e);
             mExecutor.execute(() -> {
