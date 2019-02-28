@@ -37,6 +37,8 @@ import android.content.Intent;
 import android.media.audiopolicy.AudioPolicy;
 import android.media.audiopolicy.AudioPolicy.AudioPolicyFocusListener;
 import android.media.audiopolicy.AudioProductStrategies;
+import android.media.audiopolicy.AudioVolumeGroupChangeHandler;
+import android.media.audiopolicy.AudioVolumeGroups;
 import android.media.projection.MediaProjection;
 import android.media.session.MediaController;
 import android.media.session.MediaSession;
@@ -61,6 +63,7 @@ import android.util.Pair;
 import android.view.KeyEvent;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.Preconditions;
 
 import java.io.IOException;
 import java.lang.annotation.Retention;
@@ -90,6 +93,8 @@ public class AudioManager {
     private static final String TAG = "AudioManager";
     private static final boolean DEBUG = false;
     private static final AudioPortEventHandler sAudioPortEventHandler = new AudioPortEventHandler();
+    private static final AudioVolumeGroupChangeHandler sAudioAudioVolumeGroupChangedHandler =
+            new AudioVolumeGroupChangeHandler();
 
     /**
      * Broadcast intent, a hint for applications that audio is about to become
@@ -1158,6 +1163,93 @@ public class AudioManager {
         final IAudioService service = getService();
         try {
             service.setStreamVolume(streamType, index, flags, getContext().getOpPackageName());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Sets the volume index for a particular {@link AudioAttributes}.
+     * @param attr The {@link AudioAttributes} whose volume index should be set.
+     * @param index The volume index to set. See
+     *          {@link #getMaxVolumeIndexForAttributes(AudioAttributes)} for the largest valid value
+     *          {@link #getMinVolumeIndexForAttributes(AudioAttributes)} for the lowest valid value.
+     * @param flags One or more flags.
+     * @see #getMaxVolumeIndexForAttributes(AudioAttributes)
+     * @see #getMinVolumeIndexForAttributes(AudioAttributes)
+     * @see #isVolumeFixed()
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public void setVolumeIndexForAttributes(@NonNull AudioAttributes attr, int index, int flags) {
+        Preconditions.checkNotNull(attr, "attr must not be null");
+        final IAudioService service = getService();
+        try {
+            service.setVolumeIndexForAttributes(attr, index, flags,
+                                                getContext().getOpPackageName());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the current volume index for a particular {@link AudioAttributes}.
+     *
+     * @param attr The {@link AudioAttributes} whose volume index is returned.
+     * @return The current volume index for the stream.
+     * @see #getMaxVolumeIndexForAttributes(AudioAttributes)
+     * @see #getMinVolumeIndexForAttributes(AudioAttributes)
+     * @see #setVolumeForAttributes(AudioAttributes, int, int)
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public int getVolumeIndexForAttributes(@NonNull AudioAttributes attr) {
+        Preconditions.checkNotNull(attr, "attr must not be null");
+        final IAudioService service = getService();
+        try {
+            return service.getVolumeIndexForAttributes(attr);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the maximum volume index for a particular {@link AudioAttributes}.
+     *
+     * @param attr The {@link AudioAttributes} whose maximum volume index is returned.
+     * @return The maximum valid volume index for the {@link AudioAttributes}.
+     * @see #getVolumeIndexForAttributes(AudioAttributes)
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public int getMaxVolumeIndexForAttributes(@NonNull AudioAttributes attr) {
+        Preconditions.checkNotNull(attr, "attr must not be null");
+        final IAudioService service = getService();
+        try {
+            return service.getMaxVolumeIndexForAttributes(attr);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the minimum volume index for a particular {@link AudioAttributes}.
+     *
+     * @param attr The {@link AudioAttributes} whose minimum volume index is returned.
+     * @return The minimum valid volume index for the {@link AudioAttributes}.
+     * @see #getVolumeIndexForAttributes(AudioAttributes)
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public int getMinVolumeIndexForAttributes(@NonNull AudioAttributes attr) {
+        Preconditions.checkNotNull(attr, "attr must not be null");
+        final IAudioService service = getService();
+        try {
+            return service.getMinVolumeIndexForAttributes(attr);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -5246,6 +5338,65 @@ public class AudioManager {
         }
     }
 
+    /**
+     * @hide
+     * Introspection API to retrieve audio volume groups.
+     * When implementing {Car|Oem}AudioManager, use this method  to retrieve the collection of
+     * audio volume groups.
+     * @return a (possibly zero-length) array of
+     *         {@see android.media.audiopolicy.AudioVolumeGroups} objects.
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public @NonNull AudioVolumeGroups getAudioVolumeGroups() {
+        final IAudioService service = getService();
+        try {
+            return service.listAudioVolumeGroups();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     * Callback registered by client to be notified upon volume group change.
+     */
+    @SystemApi
+    public abstract static class VolumeGroupCallback {
+        /**
+         * Callback method called upon audio volume group change.
+         * @param group the group for which the volume has changed
+         */
+        public void onAudioVolumeGroupChanged(int group, int flags) {}
+    }
+
+   /**
+    * @hide
+    * Register an audio volume group change listener.
+    * @param callback the {@link VolumeGroupCallback} to register
+    */
+    @SystemApi
+    public void registerVolumeGroupCallback(
+            @NonNull Executor executor,
+            @NonNull VolumeGroupCallback callback) {
+        Preconditions.checkNotNull(executor, "executor must not be null");
+        Preconditions.checkNotNull(callback, "volume group change cb must not be null");
+        sAudioAudioVolumeGroupChangedHandler.init();
+        // TODO: make use of executor
+        sAudioAudioVolumeGroupChangedHandler.registerListener(callback);
+    }
+
+   /**
+    * @hide
+    * Unregister an audio volume group change listener.
+    * @param callback the {@link VolumeGroupCallback} to unregister
+    */
+    @SystemApi
+    public void unregisterVolumeGroupCallback(
+            @NonNull VolumeGroupCallback callback) {
+        Preconditions.checkNotNull(callback, "volume group change cb must not be null");
+        sAudioAudioVolumeGroupChangedHandler.unregisterListener(callback);
+    }
 
     //---------------------------------------------------------
     // Inner classes

@@ -157,32 +157,32 @@ public final class AudioProductStrategy implements Parcelable {
     /**
      * @hide
      * @param streamType legacy stream type used for volume operation only
-     * @return the {@link AudioAttributes} relevant for the given streamType.
-     *         If none is found, it builds the default attributes.
+     * @return the volume group id relevant for the given streamType.
+     *         If none is found, {@link AudioVolumeGroups#DEFAULT_VOLUME_GROUP} is returned.
      */
-    public int getGroupIdForLegacyStreamType(int streamType) {
+    public int getVolumeGroupIdForLegacyStreamType(int streamType) {
         for (final AudioAttributesGroup aag : mAudioAttributesGroups) {
             if (aag.supportsStreamType(streamType)) {
-                return aag.getGroupId();
+                return aag.getVolumeGroupId();
             }
         }
-        return DEFAULT_GROUP;
+        return AudioVolumeGroups.DEFAULT_VOLUME_GROUP;
     }
 
     /**
      * @hide
      * @param aa the {@link AudioAttributes} to be considered
-     * @return the group id associated with the given audio attributes if found,
-     *         default value otherwise.
+     * @return the volume group id associated with the given audio attributes if found,
+     *         {@link AudioVolumeGroups#DEFAULT_VOLUME_GROUP} otherwise.
      */
-    public int getGroupIdForAudioAttributes(@NonNull AudioAttributes aa) {
+    public int getVolumeGroupIdForAudioAttributes(@NonNull AudioAttributes aa) {
         Preconditions.checkNotNull(aa, "AudioAttributes must not be null");
         for (final AudioAttributesGroup aag : mAudioAttributesGroups) {
             if (aag.supportsAttributes(aa)) {
-                return aag.getGroupId();
+                return aag.getVolumeGroupId();
             }
         }
-        return DEFAULT_GROUP;
+        return AudioVolumeGroups.DEFAULT_VOLUME_GROUP;
     }
 
     @Override
@@ -266,15 +266,14 @@ public final class AudioProductStrategy implements Parcelable {
             && ((refFormattedTags.length() == 0) || refFormattedTags.equals(cliFormattedTags));
     }
 
-
     private static final class AudioAttributesGroup implements Parcelable {
-        private int mGroupId;
+        private int mVolumeGroupId;
         private int mLegacyStreamType;
         private final AudioAttributes[] mAudioAttributes;
 
-        AudioAttributesGroup(int groupId, int streamType,
+        AudioAttributesGroup(int volumeGroupId, int streamType,
                 @NonNull AudioAttributes[] audioAttributes) {
-            mGroupId = groupId;
+            mVolumeGroupId = volumeGroupId;
             mLegacyStreamType = streamType;
             mAudioAttributes = audioAttributes;
         }
@@ -286,7 +285,7 @@ public final class AudioProductStrategy implements Parcelable {
 
             AudioAttributesGroup thatAag = (AudioAttributesGroup) o;
 
-            return mGroupId == thatAag.mGroupId
+            return mVolumeGroupId == thatAag.mVolumeGroupId
                     && mLegacyStreamType == thatAag.mLegacyStreamType
                     && mAudioAttributes.equals(thatAag.mAudioAttributes);
         }
@@ -295,8 +294,8 @@ public final class AudioProductStrategy implements Parcelable {
             return mLegacyStreamType;
         }
 
-        public int getGroupId() {
-            return mGroupId;
+        public int getVolumeGroupId() {
+            return mVolumeGroupId;
         }
 
         public @NonNull AudioAttributes getAudioAttributes() {
@@ -331,7 +330,7 @@ public final class AudioProductStrategy implements Parcelable {
 
         @Override
         public void writeToParcel(@NonNull Parcel dest, int flags) {
-            dest.writeInt(mGroupId);
+            dest.writeInt(mVolumeGroupId);
             dest.writeInt(mLegacyStreamType);
             dest.writeInt(mAudioAttributes.length);
             for (AudioAttributes attributes : mAudioAttributes) {
@@ -343,14 +342,14 @@ public final class AudioProductStrategy implements Parcelable {
                 new Parcelable.Creator<AudioAttributesGroup>() {
                     @Override
                     public AudioAttributesGroup createFromParcel(@NonNull Parcel in) {
-                        int groupId = in.readInt();
+                        int volumeGroupId = in.readInt();
                         int streamType = in.readInt();
                         int nbAttributes = in.readInt();
                         AudioAttributes[] aa = new AudioAttributes[nbAttributes];
                         for (int index = 0; index < nbAttributes; index++) {
                             aa[index] = AudioAttributes.CREATOR.createFromParcel(in);
                         }
-                        return new AudioAttributesGroup(groupId, streamType, aa);
+                        return new AudioAttributesGroup(volumeGroupId, streamType, aa);
                     }
 
                     @Override
@@ -365,8 +364,8 @@ public final class AudioProductStrategy implements Parcelable {
             StringBuilder s = new StringBuilder();
             s.append("\n    Legacy Stream Type: ");
             s.append(Integer.toString(mLegacyStreamType));
-            s.append(" Group Id: ");
-            s.append(Integer.toString(mGroupId));
+            s.append(" Volume Group Id: ");
+            s.append(Integer.toString(mVolumeGroupId));
 
             for (AudioAttributes attribute : mAudioAttributes) {
                 s.append("\n    -");

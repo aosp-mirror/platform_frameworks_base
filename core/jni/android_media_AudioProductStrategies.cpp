@@ -57,7 +57,7 @@ static struct {
 static jclass gAudioAttributesGroupClass;
 static jmethodID gAudioAttributesGroupCstor;
 static struct {
-    jfieldID    mGroupId;
+    jfieldID    mVolumeGroupId;
     jfieldID    mLegacyStreamType;
     jfieldID    mAudioAttributes;
 } gAudioAttributesGroupsFields;
@@ -207,7 +207,7 @@ android_media_AudioSystem_getProductStrategyFromAudioAttributes(JNIEnv *env, job
     }
     product_strategy_t psId;
     status_t status = AudioSystem::getProductStrategyFromAudioAttributes(
-            AudioAttributes(*attributes.get()), psId);
+                AudioAttributes(*attributes.get()), psId);
     if (status != NO_ERROR) {
         return nativeToJavaStatus(status);
     }
@@ -249,8 +249,8 @@ int register_android_media_AudioProductStrategies(JNIEnv *env)
     gAudioAttributesGroupClass = MakeGlobalRefOrDie(env, audioAttributesGroupClass);
     gAudioAttributesGroupCstor = GetMethodIDOrDie(env, audioAttributesGroupClass, "<init>",
                                                   "(II[Landroid/media/AudioAttributes;)V");
-    gAudioAttributesGroupsFields.mGroupId = GetFieldIDOrDie(
-                env, audioAttributesGroupClass, "mGroupId", "I");
+    gAudioAttributesGroupsFields.mVolumeGroupId = GetFieldIDOrDie(
+                env, audioAttributesGroupClass, "mVolumeGroupId", "I");
     gAudioAttributesGroupsFields.mLegacyStreamType = GetFieldIDOrDie(
                 env, audioAttributesGroupClass, "mLegacyStreamType", "I");
     gAudioAttributesGroupsFields.mAudioAttributes = GetFieldIDOrDie(
