@@ -542,6 +542,9 @@ public abstract class BiometricServiceBase extends SystemService
                     + " failed to respond to cancel, starting client "
                     + (mPendingClient != null ? mPendingClient.getOwnerString() : "null"));
 
+            StatsLog.write(StatsLog.BIOMETRIC_SYSTEM_HEALTH_ISSUE_DETECTED,
+                    statsModality(), BiometricsProtoEnums.ISSUE_CANCEL_TIMED_OUT);
+
             mCurrentClient = null;
             startClient(mPendingClient, false);
         }
@@ -817,6 +820,7 @@ public abstract class BiometricServiceBase extends SystemService
         mHandler.post(() -> {
             ClientMonitor client = mCurrentClient;
             if (client instanceof EnrollClient && client.getToken() == token) {
+                if (DEBUG) Slog.v(getTag(), "Cancelling enrollment");
                 client.stop(client.getToken() == token);
             }
         });
