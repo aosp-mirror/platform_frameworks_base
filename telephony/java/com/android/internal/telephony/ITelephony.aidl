@@ -76,6 +76,7 @@ interface ITelephony {
      * @param number the number to be dialed. If null, this
      * would display the Dialer screen with no number pre-filled.
      */
+    @UnsupportedAppUsage
     void dial(String number);
 
     /**
@@ -83,6 +84,7 @@ interface ITelephony {
      * @param callingPackage The package making the call.
      * @param number the number to be called.
      */
+    @UnsupportedAppUsage
     void call(String callingPackage, String number);
 
     /**
@@ -98,6 +100,7 @@ interface ITelephony {
      * @param callingPackage the name of the package making the call.
      * @return returns true if the radio is on.
      */
+    @UnsupportedAppUsage
     boolean isRadioOnForSubscriber(int subId, String callingPackage);
 
     /**
@@ -105,6 +108,7 @@ interface ITelephony {
      * @param pin The pin to check.
      * @return whether the operation was a success.
      */
+    @UnsupportedAppUsage
     boolean supplyPin(String pin);
 
     /**
@@ -182,6 +186,7 @@ interface ITelephony {
      * @param dialString the MMI command to be executed.
      * @return true if MMI command is executed.
      */
+    @UnsupportedAppUsage
     boolean handlePinMmi(String dialString);
 
 
@@ -202,11 +207,13 @@ interface ITelephony {
      * @param subId user preferred subId.
      * @return true if MMI command is executed.
      */
+    @UnsupportedAppUsage
     boolean handlePinMmiForSubscriber(int subId, String dialString);
 
     /**
      * Toggles the radio on or off.
      */
+    @UnsupportedAppUsage
     void toggleRadioOnOff();
 
     /**
@@ -218,6 +225,7 @@ interface ITelephony {
     /**
      * Set the radio to on or off
      */
+    @UnsupportedAppUsage
     boolean setRadio(boolean turnOn);
 
     /**
@@ -234,6 +242,7 @@ interface ITelephony {
     /**
      * Request to update location information in service state
      */
+    @UnsupportedAppUsage
     void updateServiceLocation();
 
     /**
@@ -245,6 +254,7 @@ interface ITelephony {
     /**
      * Enable location update notifications.
      */
+    @UnsupportedAppUsage
     void enableLocationUpdates();
 
     /**
@@ -256,6 +266,7 @@ interface ITelephony {
     /**
      * Disable location update notifications.
      */
+    @UnsupportedAppUsage
     void disableLocationUpdates();
 
     /**
@@ -267,11 +278,13 @@ interface ITelephony {
     /**
      * Allow mobile data connections.
      */
+    @UnsupportedAppUsage
     boolean enableDataConnectivity();
 
     /**
      * Disallow mobile data connections.
      */
+    @UnsupportedAppUsage
     boolean disableDataConnectivity();
 
     /**
@@ -293,6 +306,7 @@ interface ITelephony {
      */
     List<NeighboringCellInfo> getNeighboringCellInfo(String callingPkg);
 
+     @UnsupportedAppUsage
      int getCallState();
 
     /**
@@ -300,7 +314,9 @@ interface ITelephony {
      */
      int getCallStateForSlot(int slotIndex);
 
+     @UnsupportedAppUsage
      int getDataActivity();
+     @UnsupportedAppUsage
      int getDataState();
 
     /**
@@ -308,6 +324,7 @@ interface ITelephony {
      * Returns TelephonyManager.PHONE_TYPE_CDMA if RILConstants.CDMA_PHONE
      * and TelephonyManager.PHONE_TYPE_GSM if RILConstants.GSM_PHONE
      */
+    @UnsupportedAppUsage
     int getActivePhoneType();
 
     /**
@@ -444,6 +461,7 @@ interface ITelephony {
      * Returns the network type for data transmission
      * Legacy call, permission-free
      */
+    @UnsupportedAppUsage
     int getNetworkType();
 
     /**
@@ -477,6 +495,7 @@ interface ITelephony {
     /**
      * Return true if an ICC card is present
      */
+    @UnsupportedAppUsage
     boolean hasIccCard();
 
     /**
@@ -557,6 +576,7 @@ interface ITelephony {
      *            successful iccOpenLogicalChannel.
      * @return true if the channel was closed successfully.
      */
+    @UnsupportedAppUsage
     boolean iccCloseLogicalChannel(int subId, int channel);
 
     /**
@@ -577,6 +597,7 @@ interface ITelephony {
      * @return The APDU response from the ICC card with the status appended at
      *            the end.
      */
+    @UnsupportedAppUsage
     String iccTransmitApduLogicalChannel(int subId, int channel, int cla, int instruction,
             int p1, int p2, int p3, String data);
 
@@ -829,6 +850,7 @@ interface ITelephony {
      *
      * @return true on enabled
      */
+    @UnsupportedAppUsage
     boolean getDataEnabled(int subId);
 
     /**
