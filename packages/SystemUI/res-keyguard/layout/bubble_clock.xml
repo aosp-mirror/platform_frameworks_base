@@ -42,15 +42,15 @@
   >
     <ImageView
         android:id="@+id/minute_hand"
-        android:layout_width="300dp"
-        android:layout_height="300dp"
+        android:layout_width="350dp"
+        android:layout_height="350dp"
         android:src="@drawable/bubble_minute_hand"
         android:tint="@color/bubbleMinuteHandColor"
     />
     <ImageView
         android:id="@+id/hour_hand"
-        android:layout_width="300dp"
-        android:layout_height="300dp"
+        android:layout_width="350dp"
+        android:layout_height="350dp"
         android:src="@drawable/bubble_hour_hand"
         android:tint="@color/bubbleHourHandColor"
     />
