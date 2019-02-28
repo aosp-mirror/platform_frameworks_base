@@ -617,11 +617,9 @@ public class BroadcastDispatcher {
      * Cancel all current deferrals; that is, make all currently-deferred broadcasts
      * immediately deliverable.  Used by the wait-for-broadcast-idle mechanism.
      */
-    public void cancelDeferrals() {
-        synchronized (mLock) {
-            zeroDeferralTimes(mAlarmBroadcasts);
-            zeroDeferralTimes(mDeferredBroadcasts);
-        }
+    public void cancelDeferralsLocked() {
+        zeroDeferralTimes(mAlarmBroadcasts);
+        zeroDeferralTimes(mDeferredBroadcasts);
     }
 
     private static void zeroDeferralTimes(ArrayList<Deferrals> list) {
