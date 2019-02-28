@@ -1842,6 +1842,7 @@ public final class Bitmap implements Parcelable {
      * @throws IllegalStateException if the bitmap's config is {@link Config#HARDWARE}
      *
      */
+    @NonNull
     public Color getColor(int x, int y) {
         checkRecycled("Can't call getColor() on a recycled bitmap");
         checkHardware("unable to getColor(), "
