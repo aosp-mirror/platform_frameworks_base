@@ -4524,7 +4524,7 @@ public class WifiManager {
     /**
      * @return true if this device supports Wi-Fi Enhanced Open (OWE)
      */
-    public boolean isOweSupported() {
+    public boolean isEnhancedOpenSupported() {
         return isFeatureSupported(WIFI_FEATURE_OWE);
     }
 
