@@ -38,9 +38,11 @@ import android.util.StatsLog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
+import com.android.server.am.SettingsToPropertiesMapper;
 import com.android.server.utils.FlagNamespaceUtils;
 
 import java.io.File;
+import java.util.Arrays;
 
 /**
  * Utilities to help rescue the system from crash loops. Callers are expected to
@@ -158,6 +160,7 @@ public class RescueParty {
      * opportunity to reset any settings depending on our rescue level.
      */
     public static void onSettingsProviderPublished(Context context) {
+        handleNativeRescuePartyResets();
         executeRescueLevel(context);
     }
 
@@ -174,6 +177,13 @@ public class RescueParty {
     @VisibleForTesting
     static long getElapsedRealtime() {
         return SystemClock.elapsedRealtime();
+    }
+
+    private static void handleNativeRescuePartyResets() {
+        if (SettingsToPropertiesMapper.isNativeFlagsResetPerformed()) {
+            FlagNamespaceUtils.resetDeviceConfig(Settings.RESET_MODE_TRUSTED_DEFAULTS,
+                    Arrays.asList(SettingsToPropertiesMapper.getResetNativeCategories()));
+        }
     }
 
     /**

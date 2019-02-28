@@ -19,6 +19,7 @@ package com.android.server.utils;
 import android.annotation.Nullable;
 import android.provider.DeviceConfig;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.RescueParty;
 
 import java.util.ArrayList;
@@ -41,20 +42,23 @@ public final class FlagNamespaceUtils {
     /**
      * Name of the special namespace in DeviceConfig table used for communicating resets.
      */
-    private static final String NAMESPACE_RESCUE_PARTY = "rescue_party_namespace";
+    @VisibleForTesting
+    public static final String NAMESPACE_RESCUE_PARTY = "rescue_party_namespace";
     /**
      * Flag in the {@link DeviceConfig} in {@link #NAMESPACE_RESCUE_PARTY}, holding all known {@link
      * DeviceConfig} namespaces, as a {@link #DELIMITER} separated String. It's updated after the
      * first time flags are written to the new namespace in the {@link DeviceConfig}.
      */
-    private static final String ALL_KNOWN_NAMESPACES_FLAG = "all_known_namespaces";
+    @VisibleForTesting
+    public static final String ALL_KNOWN_NAMESPACES_FLAG = "all_known_namespaces";
     /**
      * Flag in the {@link DeviceConfig} in {@link #NAMESPACE_RESCUE_PARTY} with integer counter
      * suffix added to it, holding {@link DeviceConfig} namespace value whose flags were recently
      * reset by the {@link RescueParty}. It's updated by {@link RescueParty} every time given
      * namespace flags are reset.
      */
-    private static final String RESET_PLATFORM_PACKAGE_FLAG = "reset_platform_package";
+    @VisibleForTesting
+    public static final String RESET_PLATFORM_PACKAGE_FLAG = "reset_platform_package";
     private static final String DELIMITER = ":";
     /**
      * Maximum value of the counter used in combination with {@link #RESET_PLATFORM_PACKAGE_FLAG}
@@ -97,11 +101,25 @@ public final class FlagNamespaceUtils {
      * Reset all namespaces in DeviceConfig with consumed resetMode.
      */
     public static void resetDeviceConfig(int resetMode) {
-        List<String> allKnownNamespaces = getAllKnownDeviceConfigNamespacesList();
-        for (String namespace : allKnownNamespaces) {
+        resetDeviceConfig(resetMode, getAllKnownDeviceConfigNamespacesList());
+    }
+
+    /**
+     * Reset all consumed namespaces in DeviceConfig with consumed resetMode.
+     */
+    public static void resetDeviceConfig(int resetMode, List<String> namespacesList) {
+        for (String namespace : namespacesList) {
             DeviceConfig.resetToDefaults(resetMode, namespace);
         }
-        addToKnownResetNamespaces(allKnownNamespaces);
+        addToKnownResetNamespaces(namespacesList);
+    }
+
+    /**
+     * Resets known reset namespaces flag counter for tests only.
+     */
+    @VisibleForTesting
+    public static void resetKnownResetNamespacesFlagCounterForTest() {
+        sKnownResetNamespacesFlagCounter = -1;
     }
 
     /**

@@ -35,9 +35,12 @@ import android.content.Context;
 import android.os.RecoverySystem;
 import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.provider.DeviceConfig;
 import android.provider.Settings;
 
 import com.android.dx.mockito.inline.extended.ExtendedMockito;
+import com.android.server.am.SettingsToPropertiesMapper;
+import com.android.server.utils.FlagNamespaceUtils;
 
 import org.junit.After;
 import org.junit.Before;
@@ -56,6 +59,10 @@ import java.util.HashMap;
 public class RescuePartyTest {
     private static final int PERSISTENT_APP_UID = 12;
     private static final long CURRENT_NETWORK_TIME_MILLIS = 0L;
+    private static final String FAKE_NATIVE_NAMESPACE1 = "native1";
+    private static final String FAKE_NATIVE_NAMESPACE2 = "native2";
+    private static final String[] FAKE_RESET_NATIVE_NAMESPACES =
+            {FAKE_NATIVE_NAMESPACE1, FAKE_NATIVE_NAMESPACE2};
 
     private MockitoSession mSession;
 
@@ -73,9 +80,11 @@ public class RescuePartyTest {
                 ExtendedMockito.mockitoSession().initMocks(
                         this)
                         .strictness(Strictness.LENIENT)
+                        .spyStatic(DeviceConfig.class)
                         .spyStatic(SystemProperties.class)
                         .spyStatic(Settings.Global.class)
                         .spyStatic(Settings.Secure.class)
+                        .spyStatic(SettingsToPropertiesMapper.class)
                         .spyStatic(RecoverySystem.class)
                         .spyStatic(RescueParty.class)
                         .startMocking();
@@ -121,8 +130,17 @@ public class RescuePartyTest {
                 }
         ).when(() -> SystemProperties.getLong(anyString(), anyLong()));
 
+        // Mock DeviceConfig
+        doAnswer((Answer<Boolean>) invocationOnMock -> true)
+                .when(() -> DeviceConfig.setProperty(anyString(), anyString(), anyString(),
+                        anyBoolean()));
+        doAnswer((Answer<Void>) invocationOnMock -> null)
+                .when(() -> DeviceConfig.resetToDefaults(anyInt(), anyString()));
+
+
         doReturn(CURRENT_NETWORK_TIME_MILLIS).when(() -> RescueParty.getElapsedRealtime());
         RescueParty.resetAllThresholds();
+        FlagNamespaceUtils.resetKnownResetNamespacesFlagCounterForTest();
 
         SystemProperties.set(RescueParty.PROP_RESCUE_LEVEL,
                 Integer.toString(RescueParty.LEVEL_NONE));
@@ -278,10 +296,32 @@ public class RescuePartyTest {
                 SystemProperties.getInt(RescueParty.PROP_RESCUE_LEVEL, RescueParty.LEVEL_NONE));
     }
 
+    @Test
+    public void testNativeRescuePartyResets() {
+        doReturn(true).when(() -> SettingsToPropertiesMapper.isNativeFlagsResetPerformed());
+        doReturn(FAKE_RESET_NATIVE_NAMESPACES).when(
+                () -> SettingsToPropertiesMapper.getResetNativeCategories());
+
+        RescueParty.onSettingsProviderPublished(mMockContext);
+
+        verify(() -> DeviceConfig.resetToDefaults(Settings.RESET_MODE_TRUSTED_DEFAULTS,
+                FAKE_NATIVE_NAMESPACE1));
+        verify(() -> DeviceConfig.resetToDefaults(Settings.RESET_MODE_TRUSTED_DEFAULTS,
+                FAKE_NATIVE_NAMESPACE2));
+
+        ExtendedMockito.verify(
+                () -> DeviceConfig.setProperty(FlagNamespaceUtils.NAMESPACE_RESCUE_PARTY,
+                        FlagNamespaceUtils.RESET_PLATFORM_PACKAGE_FLAG + 0,
+                        FAKE_NATIVE_NAMESPACE1, /*makeDefault=*/true));
+        ExtendedMockito.verify(
+                () -> DeviceConfig.setProperty(FlagNamespaceUtils.NAMESPACE_RESCUE_PARTY,
+                        FlagNamespaceUtils.RESET_PLATFORM_PACKAGE_FLAG + 1,
+                        FAKE_NATIVE_NAMESPACE2, /*makeDefault=*/true));
+    }
+
     private void verifySettingsResets(int resetMode) {
         verify(() -> Settings.Global.resetToDefaultsAsUser(mMockContentResolver, null,
-                resetMode,
-                UserHandle.USER_SYSTEM));
+                resetMode, UserHandle.USER_SYSTEM));
         verify(() -> Settings.Secure.resetToDefaultsAsUser(eq(mMockContentResolver), isNull(),
                 eq(resetMode), anyInt()));
     }
