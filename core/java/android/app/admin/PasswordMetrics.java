@@ -210,7 +210,7 @@ public class PasswordMetrics implements Parcelable {
         dest.writeInt(nonLetter);
     }
 
-    public static final Parcelable.Creator<PasswordMetrics> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<PasswordMetrics> CREATOR
             = new Parcelable.Creator<PasswordMetrics>() {
         public PasswordMetrics createFromParcel(Parcel in) {
             return new PasswordMetrics(in);

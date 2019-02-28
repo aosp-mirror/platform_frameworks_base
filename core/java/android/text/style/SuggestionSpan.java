@@ -344,7 +344,7 @@ public class SuggestionSpan extends CharacterStyle implements ParcelableSpan {
                 languageTag, localeStringForCompatibility});
     }
 
-    public static final Parcelable.Creator<SuggestionSpan> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<SuggestionSpan> CREATOR =
             new Parcelable.Creator<SuggestionSpan>() {
         @Override
         public SuggestionSpan createFromParcel(Parcel source) {

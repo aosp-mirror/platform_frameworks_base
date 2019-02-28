@@ -333,7 +333,7 @@ public final class CellSignalStrengthWcdma extends CellSignalStrength implements
 
     /** Implement the Parcelable interface */
     @SuppressWarnings("hiding")
-    public static final Parcelable.Creator<CellSignalStrengthWcdma> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<CellSignalStrengthWcdma> CREATOR =
             new Parcelable.Creator<CellSignalStrengthWcdma>() {
         @Override
         public CellSignalStrengthWcdma createFromParcel(Parcel in) {

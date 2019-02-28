@@ -133,7 +133,7 @@ public final class GnssMeasurementCorrections implements Parcelable {
         return 0;
     }
 
-    public static final Creator<GnssMeasurementCorrections> CREATOR =
+    public static final @android.annotation.NonNull Creator<GnssMeasurementCorrections> CREATOR =
             new Creator<GnssMeasurementCorrections>() {
                 @Override
                 public GnssMeasurementCorrections createFromParcel(Parcel parcel) {

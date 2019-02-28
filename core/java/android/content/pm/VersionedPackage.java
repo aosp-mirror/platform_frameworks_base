@@ -106,7 +106,7 @@ public final class VersionedPackage implements Parcelable {
         parcel.writeLong(mVersionCode);
     }
 
-    public static final Creator<VersionedPackage> CREATOR = new Creator<VersionedPackage>() {
+    public static final @android.annotation.NonNull Creator<VersionedPackage> CREATOR = new Creator<VersionedPackage>() {
         @Override
         public VersionedPackage createFromParcel(Parcel source) {
             return new VersionedPackage(source);

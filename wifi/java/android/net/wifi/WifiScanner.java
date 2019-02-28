@@ -310,7 +310,7 @@ public class WifiScanner {
         }
 
         /** Implement the Parcelable interface {@hide} */
-        public static final Creator<ScanSettings> CREATOR =
+        public static final @android.annotation.NonNull Creator<ScanSettings> CREATOR =
                 new Creator<ScanSettings>() {
                     public ScanSettings createFromParcel(Parcel in) {
                         ScanSettings settings = new ScanSettings();
@@ -453,7 +453,7 @@ public class WifiScanner {
         }
 
         /** Implement the Parcelable interface {@hide} */
-        public static final Creator<ScanData> CREATOR =
+        public static final @android.annotation.NonNull Creator<ScanData> CREATOR =
                 new Creator<ScanData>() {
                     public ScanData createFromParcel(Parcel in) {
                         int id = in.readInt();
@@ -505,7 +505,7 @@ public class WifiScanner {
         }
 
         /** Implement the Parcelable interface {@hide} */
-        public static final Creator<ParcelableScanData> CREATOR =
+        public static final @android.annotation.NonNull Creator<ParcelableScanData> CREATOR =
                 new Creator<ParcelableScanData>() {
                     public ParcelableScanData createFromParcel(Parcel in) {
                         int n = in.readInt();
@@ -553,7 +553,7 @@ public class WifiScanner {
         }
 
         /** Implement the Parcelable interface {@hide} */
-        public static final Creator<ParcelableScanResults> CREATOR =
+        public static final @android.annotation.NonNull Creator<ParcelableScanResults> CREATOR =
                 new Creator<ParcelableScanResults>() {
                     public ParcelableScanResults createFromParcel(Parcel in) {
                         int n = in.readInt();
@@ -684,7 +684,7 @@ public class WifiScanner {
         }
 
         /** Implement the Parcelable interface {@hide} */
-        public static final Creator<PnoSettings> CREATOR =
+        public static final @android.annotation.NonNull Creator<PnoSettings> CREATOR =
                 new Creator<PnoSettings>() {
                     public PnoSettings createFromParcel(Parcel in) {
                         PnoSettings settings = new PnoSettings();
@@ -1029,7 +1029,7 @@ public class WifiScanner {
         }
 
         /** Implement the Parcelable interface {@hide} */
-        public static final Creator<WifiChangeSettings> CREATOR =
+        public static final @android.annotation.NonNull Creator<WifiChangeSettings> CREATOR =
                 new Creator<WifiChangeSettings>() {
                     public WifiChangeSettings createFromParcel(Parcel in) {
                         return new WifiChangeSettings();
@@ -1140,7 +1140,7 @@ public class WifiScanner {
         }
 
         /** Implement the Parcelable interface {@hide} */
-        public static final Creator<HotlistSettings> CREATOR =
+        public static final @android.annotation.NonNull Creator<HotlistSettings> CREATOR =
                 new Creator<HotlistSettings>() {
                     public HotlistSettings createFromParcel(Parcel in) {
                         HotlistSettings settings = new HotlistSettings();
@@ -1373,7 +1373,7 @@ public class WifiScanner {
         }
 
         /** Implement the Parcelable interface {@hide} */
-        public static final Creator<OperationResult> CREATOR =
+        public static final @android.annotation.NonNull Creator<OperationResult> CREATOR =
                 new Creator<OperationResult>() {
                     public OperationResult createFromParcel(Parcel in) {
                         int reason = in.readInt();

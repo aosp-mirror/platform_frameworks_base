@@ -126,7 +126,7 @@ public final class EuiccProfileInfo implements Parcelable {
      */
     private final @Nullable UiccAccessRule[] mAccessRules;
 
-    public static final Creator<EuiccProfileInfo> CREATOR = new Creator<EuiccProfileInfo>() {
+    public static final @android.annotation.NonNull Creator<EuiccProfileInfo> CREATOR = new Creator<EuiccProfileInfo>() {
         @Override
         public EuiccProfileInfo createFromParcel(Parcel in) {
             return new EuiccProfileInfo(in);

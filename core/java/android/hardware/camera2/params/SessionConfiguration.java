@@ -134,7 +134,7 @@ public final class SessionConfiguration implements Parcelable {
         mOutputConfigurations = outConfigs;
     }
 
-    public static final Parcelable.Creator<SessionConfiguration> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<SessionConfiguration> CREATOR =
             new Parcelable.Creator<SessionConfiguration> () {
         @Override
         public SessionConfiguration createFromParcel(Parcel source) {

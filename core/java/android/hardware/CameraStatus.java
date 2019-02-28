@@ -47,7 +47,7 @@ public class CameraStatus implements Parcelable {
         status = in.readInt();
     }
 
-    public static final Parcelable.Creator<CameraStatus> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<CameraStatus> CREATOR =
             new Parcelable.Creator<CameraStatus>() {
         @Override
         public CameraStatus createFromParcel(Parcel in) {

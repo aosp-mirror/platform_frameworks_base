@@ -602,7 +602,7 @@ public class SubscriptionInfo implements Parcelable {
         return mIsGroupDisabled;
     }
 
-    public static final Parcelable.Creator<SubscriptionInfo> CREATOR = new Parcelable.Creator<SubscriptionInfo>() {
+    public static final @android.annotation.NonNull Parcelable.Creator<SubscriptionInfo> CREATOR = new Parcelable.Creator<SubscriptionInfo>() {
         @Override
         public SubscriptionInfo createFromParcel(Parcel source) {
             int id = source.readInt();

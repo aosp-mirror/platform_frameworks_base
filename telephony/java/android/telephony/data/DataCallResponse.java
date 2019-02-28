@@ -244,7 +244,7 @@ public final class DataCallResponse implements Parcelable {
         dest.writeInt(mMtu);
     }
 
-    public static final Parcelable.Creator<DataCallResponse> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<DataCallResponse> CREATOR =
             new Parcelable.Creator<DataCallResponse>() {
                 @Override
                 public DataCallResponse createFromParcel(Parcel source) {

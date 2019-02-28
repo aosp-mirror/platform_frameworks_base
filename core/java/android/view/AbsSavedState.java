@@ -80,7 +80,7 @@ public abstract class AbsSavedState implements Parcelable {
         dest.writeParcelable(mSuperState, flags);
     }
 
-    public static final Parcelable.Creator<AbsSavedState> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<AbsSavedState> CREATOR
             = new Parcelable.ClassLoaderCreator<AbsSavedState>() {
 
         @Override

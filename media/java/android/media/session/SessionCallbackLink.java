@@ -554,7 +554,7 @@ public final class SessionCallbackLink implements Parcelable {
         dest.writeStrongBinder(mISessionCallback.asBinder());
     }
 
-    public static final Parcelable.Creator<SessionCallbackLink> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<SessionCallbackLink> CREATOR =
             new Parcelable.Creator<SessionCallbackLink>() {
                 @Override
                 public SessionCallbackLink createFromParcel(Parcel in) {

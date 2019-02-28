@@ -483,7 +483,7 @@ public final class WifiNetworkSuggestion implements Parcelable {
         this.suggestorPackageName = suggestorPackageName;
     }
 
-    public static final Creator<WifiNetworkSuggestion> CREATOR =
+    public static final @android.annotation.NonNull Creator<WifiNetworkSuggestion> CREATOR =
             new Creator<WifiNetworkSuggestion>() {
                 @Override
                 public WifiNetworkSuggestion createFromParcel(Parcel in) {

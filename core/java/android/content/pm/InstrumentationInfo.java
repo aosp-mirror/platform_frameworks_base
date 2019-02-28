@@ -176,7 +176,7 @@ public class InstrumentationInfo extends PackageItemInfo implements Parcelable {
         dest.writeInt((functionalTest == false) ? 0 : 1);
     }
 
-    public static final Parcelable.Creator<InstrumentationInfo> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<InstrumentationInfo> CREATOR
             = new Parcelable.Creator<InstrumentationInfo>() {
         public InstrumentationInfo createFromParcel(Parcel source) {
             return new InstrumentationInfo(source);

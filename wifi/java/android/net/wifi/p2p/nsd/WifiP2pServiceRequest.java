@@ -266,7 +266,7 @@ public class WifiP2pServiceRequest implements Parcelable {
 
     /** Implement the Parcelable interface {@hide} */
     @UnsupportedAppUsage
-    public static final Creator<WifiP2pServiceRequest> CREATOR =
+    public static final @android.annotation.NonNull Creator<WifiP2pServiceRequest> CREATOR =
         new Creator<WifiP2pServiceRequest>() {
             public WifiP2pServiceRequest createFromParcel(Parcel in) {
                 int servType = in.readInt();

@@ -323,7 +323,7 @@ public class IncidentManager {
         /**
          * {@link Parcelable.Creator Creator} for {@link IncidentReport}.
          */
-        public static final Parcelable.Creator<IncidentReport> CREATOR = new Parcelable.Creator() {
+        public static final @android.annotation.NonNull Parcelable.Creator<IncidentReport> CREATOR = new Parcelable.Creator() {
             /**
              * @inheritDoc
              */

@@ -2025,7 +2025,7 @@ public final class Bitmap implements Parcelable {
                         x, y, width, height);
     }
 
-    public static final Parcelable.Creator<Bitmap> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<Bitmap> CREATOR
             = new Parcelable.Creator<Bitmap>() {
         /**
          * Rebuilds a bitmap previously stored with writeToParcel().

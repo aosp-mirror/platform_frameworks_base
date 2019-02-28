@@ -5144,7 +5144,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         /**
          * @see android.os.Parcelable.Creator
          */
-        public static final Parcelable.Creator<TouchDelegateInfo> CREATOR =
+        public static final @android.annotation.NonNull Parcelable.Creator<TouchDelegateInfo> CREATOR =
                 new Parcelable.Creator<TouchDelegateInfo>() {
             @Override
             public TouchDelegateInfo createFromParcel(Parcel parcel) {
@@ -5173,7 +5173,7 @@ public class AccessibilityNodeInfo implements Parcelable {
     /**
      * @see android.os.Parcelable.Creator
      */
-    public static final Parcelable.Creator<AccessibilityNodeInfo> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<AccessibilityNodeInfo> CREATOR =
             new Parcelable.Creator<AccessibilityNodeInfo>() {
         @Override
         public AccessibilityNodeInfo createFromParcel(Parcel parcel) {

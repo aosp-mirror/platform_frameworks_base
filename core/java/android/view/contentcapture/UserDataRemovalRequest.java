@@ -175,7 +175,7 @@ public final class UserDataRemovalRequest implements Parcelable {
         }
     }
 
-    public static final Parcelable.Creator<UserDataRemovalRequest> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<UserDataRemovalRequest> CREATOR =
             new Parcelable.Creator<UserDataRemovalRequest>() {
 
         @Override

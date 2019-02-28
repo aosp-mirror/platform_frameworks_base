@@ -736,7 +736,7 @@ public class WifiInfo implements Parcelable {
 
     /** Implement the Parcelable interface {@hide} */
     @UnsupportedAppUsage
-    public static final Creator<WifiInfo> CREATOR =
+    public static final @android.annotation.NonNull Creator<WifiInfo> CREATOR =
         new Creator<WifiInfo>() {
             public WifiInfo createFromParcel(Parcel in) {
                 WifiInfo info = new WifiInfo();

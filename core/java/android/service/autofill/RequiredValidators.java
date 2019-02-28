@@ -78,7 +78,7 @@ final class RequiredValidators extends InternalValidator {
         dest.writeParcelableArray(mValidators, flags);
     }
 
-    public static final Parcelable.Creator<RequiredValidators> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<RequiredValidators> CREATOR =
             new Parcelable.Creator<RequiredValidators>() {
         @Override
         public RequiredValidators createFromParcel(Parcel parcel) {

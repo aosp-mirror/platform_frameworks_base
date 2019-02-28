@@ -110,7 +110,7 @@ public final class AutofillOptions implements Parcelable {
         parcel.writeBoolean(augmentedEnabled);
     }
 
-    public static final Parcelable.Creator<AutofillOptions> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<AutofillOptions> CREATOR =
             new Parcelable.Creator<AutofillOptions>() {
 
                 @Override

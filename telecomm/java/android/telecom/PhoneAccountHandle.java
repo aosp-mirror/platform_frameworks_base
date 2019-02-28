@@ -156,7 +156,7 @@ public final class PhoneAccountHandle implements Parcelable {
         }
     }
 
-    public static final Creator<PhoneAccountHandle> CREATOR = new Creator<PhoneAccountHandle>() {
+    public static final @android.annotation.NonNull Creator<PhoneAccountHandle> CREATOR = new Creator<PhoneAccountHandle>() {
         @Override
         public PhoneAccountHandle createFromParcel(Parcel in) {
             return new PhoneAccountHandle(in);

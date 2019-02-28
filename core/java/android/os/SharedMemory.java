@@ -270,7 +270,7 @@ public final class SharedMemory implements Parcelable, Closeable {
         dest.writeFileDescriptor(mFileDescriptor);
     }
 
-    public static final Parcelable.Creator<SharedMemory> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<SharedMemory> CREATOR =
             new Parcelable.Creator<SharedMemory>() {
         @Override
         public SharedMemory createFromParcel(Parcel source) {

@@ -44,7 +44,7 @@ public class RcsGroupThreadNameChangedEventDescriptor extends RcsGroupThreadEven
                 mNewName);
     }
 
-    public static final Creator<RcsGroupThreadNameChangedEventDescriptor> CREATOR =
+    public static final @android.annotation.NonNull Creator<RcsGroupThreadNameChangedEventDescriptor> CREATOR =
             new Creator<RcsGroupThreadNameChangedEventDescriptor>() {
                 @Override
                 public RcsGroupThreadNameChangedEventDescriptor createFromParcel(Parcel in) {

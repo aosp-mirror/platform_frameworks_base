@@ -165,7 +165,7 @@ public final class Adjustment implements Parcelable {
         mUser = in.readInt();
     }
 
-    public static final Creator<Adjustment> CREATOR = new Creator<Adjustment>() {
+    public static final @android.annotation.NonNull Creator<Adjustment> CREATOR = new Creator<Adjustment>() {
         @Override
         public Adjustment createFromParcel(Parcel in) {
             return new Adjustment(in);

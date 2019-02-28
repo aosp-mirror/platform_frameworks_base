@@ -492,7 +492,7 @@ public class ApplicationErrorReport implements Parcelable {
             return 0;
         }
 
-        public static final Parcelable.Creator<ParcelableCrashInfo> CREATOR =
+        public static final @android.annotation.NonNull Parcelable.Creator<ParcelableCrashInfo> CREATOR =
                 new Parcelable.Creator<ParcelableCrashInfo>() {
                     @Override
                     public ParcelableCrashInfo createFromParcel(Parcel in) {
@@ -666,7 +666,7 @@ public class ApplicationErrorReport implements Parcelable {
         }
     }
 
-    public static final Parcelable.Creator<ApplicationErrorReport> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<ApplicationErrorReport> CREATOR
             = new Parcelable.Creator<ApplicationErrorReport>() {
         public ApplicationErrorReport createFromParcel(Parcel source) {
             return new ApplicationErrorReport(source);

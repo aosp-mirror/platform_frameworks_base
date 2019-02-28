@@ -206,7 +206,7 @@ public final class AutofillId implements Parcelable {
         }
     }
 
-    public static final Parcelable.Creator<AutofillId> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<AutofillId> CREATOR =
             new Parcelable.Creator<AutofillId>() {
         @Override
         public AutofillId createFromParcel(Parcel source) {

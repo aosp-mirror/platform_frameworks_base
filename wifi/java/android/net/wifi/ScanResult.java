@@ -751,7 +751,7 @@ public class ScanResult implements Parcelable {
 
     /** Implement the Parcelable interface {@hide} */
     @UnsupportedAppUsage
-    public static final Creator<ScanResult> CREATOR =
+    public static final @android.annotation.NonNull Creator<ScanResult> CREATOR =
         new Creator<ScanResult>() {
             public ScanResult createFromParcel(Parcel in) {
                 WifiSsid wifiSsid = null;

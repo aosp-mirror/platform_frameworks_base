@@ -356,7 +356,7 @@ public class LinkAddress implements Parcelable {
     /**
      * Implement the Parcelable interface.
      */
-    public static final Creator<LinkAddress> CREATOR =
+    public static final @android.annotation.NonNull Creator<LinkAddress> CREATOR =
         new Creator<LinkAddress>() {
             public LinkAddress createFromParcel(Parcel in) {
                 InetAddress address = null;

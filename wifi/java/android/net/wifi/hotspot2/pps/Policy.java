@@ -279,7 +279,7 @@ public final class Policy implements Parcelable {
             return true;
         }
 
-        public static final Creator<RoamingPartner> CREATOR =
+        public static final @android.annotation.NonNull Creator<RoamingPartner> CREATOR =
             new Creator<RoamingPartner>() {
                 @Override
                 public RoamingPartner createFromParcel(Parcel in) {
@@ -475,7 +475,7 @@ public final class Policy implements Parcelable {
         return true;
     }
 
-    public static final Creator<Policy> CREATOR =
+    public static final @android.annotation.NonNull Creator<Policy> CREATOR =
         new Creator<Policy>() {
             @Override
             public Policy createFromParcel(Parcel in) {

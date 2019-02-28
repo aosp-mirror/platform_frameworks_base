@@ -185,7 +185,7 @@ public final class ApfProgramEvent implements IpConnectivityLog.Event {
     }
 
     /** @hide */
-    public static final Parcelable.Creator<ApfProgramEvent> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<ApfProgramEvent> CREATOR
             = new Parcelable.Creator<ApfProgramEvent>() {
         public ApfProgramEvent createFromParcel(Parcel in) {
             return new ApfProgramEvent(in);

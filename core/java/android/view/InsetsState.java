@@ -386,7 +386,7 @@ public class InsetsState implements Parcelable {
         }
     }
 
-    public static final Creator<InsetsState> CREATOR = new Creator<InsetsState>() {
+    public static final @android.annotation.NonNull Creator<InsetsState> CREATOR = new Creator<InsetsState>() {
 
         public InsetsState createFromParcel(Parcel in) {
             return new InsetsState(in);

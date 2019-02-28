@@ -349,7 +349,7 @@ public abstract class AutofillFieldClassificationService extends Service {
             }
         }
 
-        public static final Creator<Scores> CREATOR = new Creator<Scores>() {
+        public static final @android.annotation.NonNull Creator<Scores> CREATOR = new Creator<Scores>() {
             @Override
             public Scores createFromParcel(Parcel parcel) {
                 return new Scores(parcel);

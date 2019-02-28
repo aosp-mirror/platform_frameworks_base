@@ -99,7 +99,7 @@ public class VoiceSpecificRegistrationStates implements Parcelable{
     }
 
 
-    public static final Parcelable.Creator<VoiceSpecificRegistrationStates> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<VoiceSpecificRegistrationStates> CREATOR =
             new Parcelable.Creator<VoiceSpecificRegistrationStates>() {
                 @Override
                 public VoiceSpecificRegistrationStates createFromParcel(Parcel source) {

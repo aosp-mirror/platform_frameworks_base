@@ -80,7 +80,7 @@ public final class TvContentRatingSystemInfo implements Parcelable {
      * Used to make this class parcelable.
      * @hide
      */
-    public static final Parcelable.Creator<TvContentRatingSystemInfo> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<TvContentRatingSystemInfo> CREATOR =
             new Parcelable.Creator<TvContentRatingSystemInfo>() {
         @Override
         public TvContentRatingSystemInfo createFromParcel(Parcel in) {

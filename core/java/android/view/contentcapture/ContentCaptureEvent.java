@@ -383,7 +383,7 @@ public final class ContentCaptureEvent implements Parcelable {
         }
     }
 
-    public static final Parcelable.Creator<ContentCaptureEvent> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<ContentCaptureEvent> CREATOR =
             new Parcelable.Creator<ContentCaptureEvent>() {
 
         @Override

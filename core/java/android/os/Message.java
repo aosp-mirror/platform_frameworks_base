@@ -595,7 +595,7 @@ public final class Message implements Parcelable {
         proto.end(messageToken);
     }
 
-    public static final Parcelable.Creator<Message> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<Message> CREATOR
             = new Parcelable.Creator<Message>() {
         public Message createFromParcel(Parcel source) {
             Message msg = Message.obtain();

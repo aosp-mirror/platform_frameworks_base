@@ -281,7 +281,7 @@ public final class EmergencyNumber implements Parcelable, Comparable<EmergencyNu
         dest.writeInt(mEmergencyCallRouting);
     }
 
-    public static final Parcelable.Creator<EmergencyNumber> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<EmergencyNumber> CREATOR =
             new Parcelable.Creator<EmergencyNumber>() {
                 @Override
                 public EmergencyNumber createFromParcel(Parcel in) {

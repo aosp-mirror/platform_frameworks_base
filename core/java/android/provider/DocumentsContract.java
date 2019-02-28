@@ -1794,7 +1794,7 @@ public final class DocumentsContract {
             return 0;
         }
 
-        public static final Creator<Path> CREATOR = new Creator<Path>() {
+        public static final @android.annotation.NonNull Creator<Path> CREATOR = new Creator<Path>() {
             @Override
             public Path createFromParcel(Parcel in) {
                 final String rootId = in.readString();

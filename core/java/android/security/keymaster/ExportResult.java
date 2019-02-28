@@ -34,7 +34,7 @@ public class ExportResult implements Parcelable {
     }
 
     @UnsupportedAppUsage
-    public static final Parcelable.Creator<ExportResult> CREATOR = new
+    public static final @android.annotation.NonNull Parcelable.Creator<ExportResult> CREATOR = new
             Parcelable.Creator<ExportResult>() {
                 public ExportResult createFromParcel(Parcel in) {
                     return new ExportResult(in);

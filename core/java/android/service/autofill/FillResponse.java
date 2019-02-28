@@ -658,7 +658,7 @@ public final class FillResponse implements Parcelable {
         parcel.writeInt(mRequestId);
     }
 
-    public static final Parcelable.Creator<FillResponse> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<FillResponse> CREATOR =
             new Parcelable.Creator<FillResponse>() {
         @Override
         public FillResponse createFromParcel(Parcel parcel) {

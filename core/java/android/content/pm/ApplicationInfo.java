@@ -1636,7 +1636,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         dest.writeString(zygotePreloadName);
     }
 
-    public static final Parcelable.Creator<ApplicationInfo> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<ApplicationInfo> CREATOR
             = new Parcelable.Creator<ApplicationInfo>() {
         public ApplicationInfo createFromParcel(Parcel source) {
             return new ApplicationInfo(source);

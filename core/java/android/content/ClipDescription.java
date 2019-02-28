@@ -380,7 +380,7 @@ public class ClipDescription implements Parcelable {
         mTimeStamp = in.readLong();
     }
 
-    public static final Parcelable.Creator<ClipDescription> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<ClipDescription> CREATOR =
         new Parcelable.Creator<ClipDescription>() {
 
             public ClipDescription createFromParcel(Parcel source) {

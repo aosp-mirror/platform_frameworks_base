@@ -124,7 +124,7 @@ public class Account implements Parcelable {
         dest.writeString(accessId);
     }
 
-    public static final Creator<Account> CREATOR = new Creator<Account>() {
+    public static final @android.annotation.NonNull Creator<Account> CREATOR = new Creator<Account>() {
         public Account createFromParcel(Parcel source) {
             return new Account(source);
         }

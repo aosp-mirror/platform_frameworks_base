@@ -1725,7 +1725,7 @@ public class LauncherApps {
             dest.writeStrongBinder(mInner.asBinder());
         }
 
-        public static final Creator<PinItemRequest> CREATOR =
+        public static final @android.annotation.NonNull Creator<PinItemRequest> CREATOR =
                 new Creator<PinItemRequest>() {
                     public PinItemRequest createFromParcel(Parcel source) {
                         return new PinItemRequest(source);
@@ -1785,7 +1785,7 @@ public class LauncherApps {
             mUsageRemaining = source.readLong();
         }
 
-        public static final Creator<AppUsageLimit> CREATOR = new Creator<AppUsageLimit>() {
+        public static final @android.annotation.NonNull Creator<AppUsageLimit> CREATOR = new Creator<AppUsageLimit>() {
             @Override
             public AppUsageLimit createFromParcel(Parcel source) {
                 return new AppUsageLimit(source);

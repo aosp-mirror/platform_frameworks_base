@@ -2163,7 +2163,7 @@ public abstract class NotificationListenerService extends Service {
             dest.writeParcelable(mRankingUpdate, flags);
         }
 
-        public static final Creator<RankingMap> CREATOR = new Creator<RankingMap>() {
+        public static final @android.annotation.NonNull Creator<RankingMap> CREATOR = new Creator<RankingMap>() {
             @Override
             public RankingMap createFromParcel(Parcel source) {
                 NotificationRankingUpdate rankingUpdate = source.readParcelable(null);

@@ -60,7 +60,7 @@ public class RssiPacketCountInfo implements Parcelable {
         return 0;
     }
 
-    public static final Parcelable.Creator<RssiPacketCountInfo> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<RssiPacketCountInfo> CREATOR =
             new Parcelable.Creator<RssiPacketCountInfo>() {
         @Override
         public RssiPacketCountInfo createFromParcel(Parcel in) {

@@ -48,7 +48,7 @@ public final class StreamingServiceInfo extends ServiceInfo implements Parcelabl
         super(names, className, locales, serviceId, start, end);
     }
 
-    public static final Parcelable.Creator<StreamingServiceInfo> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<StreamingServiceInfo> CREATOR =
             new Parcelable.Creator<StreamingServiceInfo>() {
         @Override
         public StreamingServiceInfo createFromParcel(Parcel source) {

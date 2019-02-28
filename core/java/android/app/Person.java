@@ -278,7 +278,7 @@ public final class Person implements Parcelable {
         }
     }
 
-    public static final Creator<Person> CREATOR = new Creator<Person>() {
+    public static final @android.annotation.NonNull Creator<Person> CREATOR = new Creator<Person>() {
         @Override
         public Person createFromParcel(Parcel in) {
             return new Person(in);

@@ -42,7 +42,7 @@ public class KeymasterArguments implements Parcelable {
     private List<KeymasterArgument> mArguments;
 
     @UnsupportedAppUsage
-    public static final Parcelable.Creator<KeymasterArguments> CREATOR = new
+    public static final @android.annotation.NonNull Parcelable.Creator<KeymasterArguments> CREATOR = new
             Parcelable.Creator<KeymasterArguments>() {
                 @Override
                 public KeymasterArguments createFromParcel(Parcel in) {

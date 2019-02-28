@@ -353,7 +353,7 @@ public final class ContentCaptureContext implements Parcelable {
         }
     }
 
-    public static final Parcelable.Creator<ContentCaptureContext> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<ContentCaptureContext> CREATOR =
             new Parcelable.Creator<ContentCaptureContext>() {
 
         @Override

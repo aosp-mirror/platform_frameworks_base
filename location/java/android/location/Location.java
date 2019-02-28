@@ -1084,7 +1084,7 @@ public class Location implements Parcelable {
         pw.println(prefix + toString());
     }
 
-    public static final Parcelable.Creator<Location> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<Location> CREATOR =
         new Parcelable.Creator<Location>() {
         @Override
         public Location createFromParcel(Parcel in) {

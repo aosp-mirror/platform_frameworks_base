@@ -722,7 +722,7 @@ public final class Rect implements Parcelable {
         out.writeInt(bottom);
     }
 
-    public static final Parcelable.Creator<Rect> CREATOR = new Parcelable.Creator<Rect>() {
+    public static final @android.annotation.NonNull Parcelable.Creator<Rect> CREATOR = new Parcelable.Creator<Rect>() {
         /**
          * Return a new rectangle from the data in the specified parcel.
          */

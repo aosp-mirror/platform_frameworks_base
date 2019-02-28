@@ -439,7 +439,7 @@ public final class ResponderLocation implements Parcelable {
         }
     }
 
-    public static final Creator<ResponderLocation> CREATOR = new Creator<ResponderLocation>() {
+    public static final @android.annotation.NonNull Creator<ResponderLocation> CREATOR = new Creator<ResponderLocation>() {
         @Override
         public ResponderLocation createFromParcel(Parcel in) {
             return new ResponderLocation(in);

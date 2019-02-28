@@ -272,7 +272,7 @@ public final class NotificationChannelGroup implements Parcelable {
         return record;
     }
 
-    public static final Creator<NotificationChannelGroup> CREATOR =
+    public static final @android.annotation.NonNull Creator<NotificationChannelGroup> CREATOR =
             new Creator<NotificationChannelGroup>() {
         @Override
         public NotificationChannelGroup createFromParcel(Parcel in) {

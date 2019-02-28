@@ -63,7 +63,7 @@ public class PasspointManagementObjectDefinition implements Parcelable {
     /**
      * Implement the Parcelable interface {@hide}
      */
-    public static final Creator<PasspointManagementObjectDefinition> CREATOR =
+    public static final @android.annotation.NonNull Creator<PasspointManagementObjectDefinition> CREATOR =
             new Creator<PasspointManagementObjectDefinition>() {
                 public PasspointManagementObjectDefinition createFromParcel(Parcel in) {
                     return new PasspointManagementObjectDefinition(

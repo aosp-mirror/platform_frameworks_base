@@ -87,7 +87,7 @@ public final class Characteristics implements Parcelable {
         return 0;
     }
 
-    public static final Creator<Characteristics> CREATOR =
+    public static final @android.annotation.NonNull Creator<Characteristics> CREATOR =
             new Creator<Characteristics>() {
                 @Override
                 public Characteristics createFromParcel(Parcel in) {

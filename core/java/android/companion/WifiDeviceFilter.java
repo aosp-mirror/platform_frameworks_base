@@ -98,7 +98,7 @@ public final class WifiDeviceFilter implements DeviceFilter<ScanResult> {
         return 0;
     }
 
-    public static final Creator<WifiDeviceFilter> CREATOR
+    public static final @android.annotation.NonNull Creator<WifiDeviceFilter> CREATOR
             = new Creator<WifiDeviceFilter>() {
         @Override
         public WifiDeviceFilter createFromParcel(Parcel in) {

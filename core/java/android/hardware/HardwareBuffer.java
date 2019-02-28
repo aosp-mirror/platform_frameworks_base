@@ -376,7 +376,7 @@ public final class HardwareBuffer implements Parcelable, AutoCloseable {
         nWriteHardwareBufferToParcel(mNativeObject, dest);
     }
 
-    public static final Parcelable.Creator<HardwareBuffer> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<HardwareBuffer> CREATOR =
             new Parcelable.Creator<HardwareBuffer>() {
         public HardwareBuffer createFromParcel(Parcel in) {
             long nativeObject = nReadHardwareBufferFromParcel(in);

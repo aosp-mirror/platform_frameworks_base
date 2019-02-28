@@ -184,7 +184,7 @@ public final class Insets implements Parcelable {
         out.writeInt(bottom);
     }
 
-    public static final Parcelable.Creator<Insets> CREATOR = new Parcelable.Creator<Insets>() {
+    public static final @android.annotation.NonNull Parcelable.Creator<Insets> CREATOR = new Parcelable.Creator<Insets>() {
         @Override
         public Insets createFromParcel(Parcel in) {
             return new Insets(in.readInt(), in.readInt(), in.readInt(), in.readInt());

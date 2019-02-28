@@ -498,7 +498,7 @@ public class ServiceState implements Parcelable {
         return 0;
     }
 
-    public static final Parcelable.Creator<ServiceState> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<ServiceState> CREATOR =
             new Parcelable.Creator<ServiceState>() {
         public ServiceState createFromParcel(Parcel in) {
             return new ServiceState(in);

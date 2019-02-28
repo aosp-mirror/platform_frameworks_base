@@ -112,7 +112,7 @@ public final class Vr2dDisplayProperties implements Parcelable {
         dest.writeInt(mRemovedFlags);
     }
 
-    public static final Parcelable.Creator<Vr2dDisplayProperties> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<Vr2dDisplayProperties> CREATOR
             = new Parcelable.Creator<Vr2dDisplayProperties>() {
         @Override
         public Vr2dDisplayProperties createFromParcel(Parcel source) {

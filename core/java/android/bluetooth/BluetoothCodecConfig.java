@@ -247,7 +247,7 @@ public final class BluetoothCodecConfig implements Parcelable {
         return 0;
     }
 
-    public static final Parcelable.Creator<BluetoothCodecConfig> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<BluetoothCodecConfig> CREATOR =
             new Parcelable.Creator<BluetoothCodecConfig>() {
                 public BluetoothCodecConfig createFromParcel(Parcel in) {
                     final int codecType = in.readInt();

@@ -2384,7 +2384,7 @@ public class Toolbar extends ViewGroup {
             out.writeInt(isOverflowOpen ? 1 : 0);
         }
 
-        public static final Creator<SavedState> CREATOR = new Creator<SavedState>() {
+        public static final @android.annotation.NonNull Creator<SavedState> CREATOR = new Creator<SavedState>() {
 
             @Override
             public SavedState createFromParcel(Parcel source) {

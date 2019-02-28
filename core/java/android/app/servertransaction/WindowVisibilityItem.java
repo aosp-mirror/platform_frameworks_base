@@ -76,7 +76,7 @@ public class WindowVisibilityItem extends ClientTransactionItem {
         mShowWindow = in.readBoolean();
     }
 
-    public static final Creator<WindowVisibilityItem> CREATOR =
+    public static final @android.annotation.NonNull Creator<WindowVisibilityItem> CREATOR =
             new Creator<WindowVisibilityItem>() {
         public WindowVisibilityItem createFromParcel(Parcel in) {
             return new WindowVisibilityItem(in);

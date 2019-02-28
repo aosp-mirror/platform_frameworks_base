@@ -621,7 +621,7 @@ public final class TvInputInfo implements Parcelable {
         return mService.serviceInfo.loadIcon(context.getPackageManager());
     }
 
-    public static final Parcelable.Creator<TvInputInfo> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<TvInputInfo> CREATOR =
             new Parcelable.Creator<TvInputInfo>() {
         @Override
         public TvInputInfo createFromParcel(Parcel in) {

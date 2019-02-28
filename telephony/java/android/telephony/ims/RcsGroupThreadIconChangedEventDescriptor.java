@@ -42,7 +42,7 @@ public class RcsGroupThreadIconChangedEventDescriptor extends RcsGroupThreadEven
                 new RcsParticipant(mOriginatingParticipantId), mNewIcon);
     }
 
-    public static final Creator<RcsGroupThreadIconChangedEventDescriptor> CREATOR =
+    public static final @android.annotation.NonNull Creator<RcsGroupThreadIconChangedEventDescriptor> CREATOR =
             new Creator<RcsGroupThreadIconChangedEventDescriptor>() {
                 @Override
                 public RcsGroupThreadIconChangedEventDescriptor createFromParcel(Parcel in) {

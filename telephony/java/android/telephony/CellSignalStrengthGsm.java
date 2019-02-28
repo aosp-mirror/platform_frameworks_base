@@ -226,7 +226,7 @@ public final class CellSignalStrengthGsm extends CellSignalStrength implements P
 
     /** Implement the Parcelable interface */
     @SuppressWarnings("hiding")
-    public static final Parcelable.Creator<CellSignalStrengthGsm> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<CellSignalStrengthGsm> CREATOR =
             new Parcelable.Creator<CellSignalStrengthGsm>() {
         @Override
         public CellSignalStrengthGsm createFromParcel(Parcel in) {

@@ -177,7 +177,7 @@ public final class Temperature implements Parcelable {
         p.writeInt(mStatus);
     }
 
-    public static final Parcelable.Creator<Temperature> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<Temperature> CREATOR =
             new Parcelable.Creator<Temperature>() {
                 @Override
                 public Temperature createFromParcel(Parcel p) {

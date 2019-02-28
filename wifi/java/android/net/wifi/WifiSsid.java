@@ -252,7 +252,7 @@ public class WifiSsid implements Parcelable {
 
     /** Implement the Parcelable interface {@hide} */
     @UnsupportedAppUsage
-    public static final Creator<WifiSsid> CREATOR =
+    public static final @android.annotation.NonNull Creator<WifiSsid> CREATOR =
         new Creator<WifiSsid>() {
             public WifiSsid createFromParcel(Parcel in) {
                 WifiSsid ssid = new WifiSsid();

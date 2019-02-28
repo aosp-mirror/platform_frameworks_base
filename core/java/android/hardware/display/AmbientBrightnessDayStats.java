@@ -121,7 +121,7 @@ public final class AmbientBrightnessDayStats implements Parcelable {
         mStats = source.createFloatArray();
     }
 
-    public static final Creator<AmbientBrightnessDayStats> CREATOR =
+    public static final @android.annotation.NonNull Creator<AmbientBrightnessDayStats> CREATOR =
             new Creator<AmbientBrightnessDayStats>() {
 
                 @Override

@@ -237,7 +237,7 @@ public abstract class InputEvent implements Parcelable {
         return 0;
     }
 
-    public static final Parcelable.Creator<InputEvent> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<InputEvent> CREATOR
             = new Parcelable.Creator<InputEvent>() {
         public InputEvent createFromParcel(Parcel in) {
             int token = in.readInt();

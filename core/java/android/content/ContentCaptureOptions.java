@@ -149,7 +149,7 @@ public final class ContentCaptureOptions implements Parcelable {
         parcel.writeArraySet(whitelistedComponents);
     }
 
-    public static final Parcelable.Creator<ContentCaptureOptions> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<ContentCaptureOptions> CREATOR =
             new Parcelable.Creator<ContentCaptureOptions>() {
 
                 @Override

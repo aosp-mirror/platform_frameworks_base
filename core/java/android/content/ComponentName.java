@@ -376,7 +376,7 @@ public final class ComponentName implements Parcelable, Cloneable, Comparable<Co
         return pkg != null ? new ComponentName(pkg, in) : null;
     }
 
-    public static final Parcelable.Creator<ComponentName> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<ComponentName> CREATOR
             = new Parcelable.Creator<ComponentName>() {
         public ComponentName createFromParcel(Parcel in) {
             return new ComponentName(in);

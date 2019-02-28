@@ -256,7 +256,7 @@ public final class LocaleList implements Parcelable {
         mStringRepresentation = sb.toString();
     }
 
-    public static final Parcelable.Creator<LocaleList> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<LocaleList> CREATOR
             = new Parcelable.Creator<LocaleList>() {
         @Override
         public LocaleList createFromParcel(Parcel source) {

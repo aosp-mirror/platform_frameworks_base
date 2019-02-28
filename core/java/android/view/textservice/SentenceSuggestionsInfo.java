@@ -129,7 +129,7 @@ public final class SentenceSuggestionsInfo implements Parcelable {
     /**
      * Used to make this class parcelable.
      */
-    public static final Parcelable.Creator<SentenceSuggestionsInfo> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<SentenceSuggestionsInfo> CREATOR
             = new Parcelable.Creator<SentenceSuggestionsInfo>() {
         @Override
         public SentenceSuggestionsInfo createFromParcel(Parcel source) {

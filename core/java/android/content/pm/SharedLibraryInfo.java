@@ -342,7 +342,7 @@ public final class SharedLibraryInfo implements Parcelable {
         }
     }
 
-    public static final Parcelable.Creator<SharedLibraryInfo> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<SharedLibraryInfo> CREATOR =
             new Parcelable.Creator<SharedLibraryInfo>() {
         public SharedLibraryInfo createFromParcel(Parcel source) {
             return new SharedLibraryInfo(source);

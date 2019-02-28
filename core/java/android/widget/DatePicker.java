@@ -791,7 +791,7 @@ public class DatePicker extends FrameLayout {
 
             @SuppressWarnings("all")
             // suppress unused and hiding
-            public static final Parcelable.Creator<SavedState> CREATOR = new Creator<SavedState>() {
+            public static final @android.annotation.NonNull Parcelable.Creator<SavedState> CREATOR = new Creator<SavedState>() {
 
                 public SavedState createFromParcel(Parcel in) {
                     return new SavedState(in);

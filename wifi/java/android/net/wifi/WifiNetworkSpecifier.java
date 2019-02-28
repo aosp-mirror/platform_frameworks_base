@@ -496,7 +496,7 @@ public final class WifiNetworkSpecifier extends NetworkSpecifier implements Parc
         this.requestorPackageName = requestorPackageName;
     }
 
-    public static final Creator<WifiNetworkSpecifier> CREATOR =
+    public static final @android.annotation.NonNull Creator<WifiNetworkSpecifier> CREATOR =
             new Creator<WifiNetworkSpecifier>() {
                 @Override
                 public WifiNetworkSpecifier createFromParcel(Parcel in) {

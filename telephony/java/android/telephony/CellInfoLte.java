@@ -179,7 +179,7 @@ public final class CellInfoLte extends CellInfo implements Parcelable {
     }
 
     /** Implement the Parcelable interface */
-    public static final Creator<CellInfoLte> CREATOR = new Creator<CellInfoLte>() {
+    public static final @android.annotation.NonNull Creator<CellInfoLte> CREATOR = new Creator<CellInfoLte>() {
         @Override
         public CellInfoLte createFromParcel(Parcel in) {
             in.readInt(); // Skip past token, we know what it is

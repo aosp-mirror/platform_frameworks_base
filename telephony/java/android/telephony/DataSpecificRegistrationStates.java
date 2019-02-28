@@ -123,7 +123,7 @@ public final class DataSpecificRegistrationStates implements Parcelable{
                 && this.lteVopsSupportInfo.equals(other.lteVopsSupportInfo);
     }
 
-    public static final Parcelable.Creator<DataSpecificRegistrationStates> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<DataSpecificRegistrationStates> CREATOR =
             new Parcelable.Creator<DataSpecificRegistrationStates>() {
                 @Override
                 public DataSpecificRegistrationStates createFromParcel(Parcel source) {

@@ -40,7 +40,7 @@ public final class WifiDisplay implements Parcelable {
 
     public static final WifiDisplay[] EMPTY_ARRAY = new WifiDisplay[0];
 
-    public static final Creator<WifiDisplay> CREATOR = new Creator<WifiDisplay>() {
+    public static final @android.annotation.NonNull Creator<WifiDisplay> CREATOR = new Creator<WifiDisplay>() {
         public WifiDisplay createFromParcel(Parcel in) {
             String deviceAddress = in.readString();
             String deviceName = in.readString();

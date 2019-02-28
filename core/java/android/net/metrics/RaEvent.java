@@ -97,7 +97,7 @@ public final class RaEvent implements IpConnectivityLog.Event {
     }
 
     /** @hide */
-    public static final Parcelable.Creator<RaEvent> CREATOR = new Parcelable.Creator<RaEvent>() {
+    public static final @android.annotation.NonNull Parcelable.Creator<RaEvent> CREATOR = new Parcelable.Creator<RaEvent>() {
         public RaEvent createFromParcel(Parcel in) {
             return new RaEvent(in);
         }

@@ -636,7 +636,7 @@ public final class UsageStats implements Parcelable {
         return bundle;
     }
 
-    public static final Creator<UsageStats> CREATOR = new Creator<UsageStats>() {
+    public static final @android.annotation.NonNull Creator<UsageStats> CREATOR = new Creator<UsageStats>() {
         @Override
         public UsageStats createFromParcel(Parcel in) {
             UsageStats stats = new UsageStats();

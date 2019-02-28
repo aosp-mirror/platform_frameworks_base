@@ -563,7 +563,7 @@ public final class PrinterInfo implements Parcelable {
         }
     }
 
-    public static final Parcelable.Creator<PrinterInfo> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<PrinterInfo> CREATOR =
             new Parcelable.Creator<PrinterInfo>() {
         @Override
         public PrinterInfo createFromParcel(Parcel parcel) {

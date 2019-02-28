@@ -81,7 +81,7 @@ public final class SelectionsRequest implements Parcelable {
         dest.writeBundle(mExtras);
     }
 
-    public static final Creator<SelectionsRequest> CREATOR =
+    public static final @android.annotation.NonNull Creator<SelectionsRequest> CREATOR =
             new Creator<SelectionsRequest>() {
         @Override
         public SelectionsRequest createFromParcel(Parcel source) {

@@ -765,7 +765,7 @@ public final class DisplayCutout {
             mInner = readCutoutFromParcel(in);
         }
 
-        public static final Creator<ParcelableWrapper> CREATOR = new Creator<ParcelableWrapper>() {
+        public static final @android.annotation.NonNull Creator<ParcelableWrapper> CREATOR = new Creator<ParcelableWrapper>() {
             @Override
             public ParcelableWrapper createFromParcel(Parcel in) {
                 return new ParcelableWrapper(readCutoutFromParcel(in));

@@ -85,7 +85,7 @@ public class WpsInfo implements Parcelable {
     }
 
     /** Implement the Parcelable interface */
-    public static final Creator<WpsInfo> CREATOR =
+    public static final @android.annotation.NonNull Creator<WpsInfo> CREATOR =
         new Creator<WpsInfo>() {
             public WpsInfo createFromParcel(Parcel in) {
                 WpsInfo config = new WpsInfo();

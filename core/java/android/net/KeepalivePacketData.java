@@ -105,7 +105,7 @@ public class KeepalivePacketData implements Parcelable {
     }
 
     /** Parcelable Creator */
-    public static final Parcelable.Creator<KeepalivePacketData> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<KeepalivePacketData> CREATOR =
             new Parcelable.Creator<KeepalivePacketData>() {
                 public KeepalivePacketData createFromParcel(Parcel in) {
                     return new KeepalivePacketData(in);

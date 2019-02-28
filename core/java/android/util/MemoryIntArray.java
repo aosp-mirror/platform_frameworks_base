@@ -235,7 +235,7 @@ public final class MemoryIntArray implements Parcelable, Closeable {
         return MAX_SIZE;
     }
 
-    public static final Parcelable.Creator<MemoryIntArray> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<MemoryIntArray> CREATOR =
             new Parcelable.Creator<MemoryIntArray>() {
         @Override
         public MemoryIntArray createFromParcel(Parcel parcel) {

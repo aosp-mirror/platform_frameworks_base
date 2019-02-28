@@ -27989,7 +27989,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             out.writeInt(mAutofillViewId);
         }
 
-        public static final Parcelable.Creator<BaseSavedState> CREATOR
+        public static final @android.annotation.NonNull Parcelable.Creator<BaseSavedState> CREATOR
                 = new Parcelable.ClassLoaderCreator<BaseSavedState>() {
             @Override
             public BaseSavedState createFromParcel(Parcel in) {

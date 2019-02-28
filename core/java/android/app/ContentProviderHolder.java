@@ -61,7 +61,7 @@ public class ContentProviderHolder implements Parcelable {
         dest.writeInt(noReleaseNeeded ? 1 : 0);
     }
 
-    public static final Parcelable.Creator<ContentProviderHolder> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<ContentProviderHolder> CREATOR
             = new Parcelable.Creator<ContentProviderHolder>() {
         @Override
         public ContentProviderHolder createFromParcel(Parcel source) {

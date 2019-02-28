@@ -205,7 +205,7 @@ public class StatusBarNotification implements Parcelable {
         return 0;
     }
 
-    public static final Parcelable.Creator<StatusBarNotification> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<StatusBarNotification> CREATOR
             = new Parcelable.Creator<StatusBarNotification>()
     {
         public StatusBarNotification createFromParcel(Parcel parcel)

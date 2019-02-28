@@ -109,7 +109,7 @@ public final class PrintJobId implements Parcelable {
         return new PrintJobId(string);
     }
 
-    public static final Parcelable.Creator<PrintJobId> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<PrintJobId> CREATOR =
             new Parcelable.Creator<PrintJobId>() {
         @Override
         public PrintJobId createFromParcel(Parcel parcel) {

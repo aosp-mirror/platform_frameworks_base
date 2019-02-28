@@ -428,7 +428,7 @@ public final class Credential implements Parcelable {
             return true;
         }
 
-        public static final Creator<UserCredential> CREATOR =
+        public static final @android.annotation.NonNull Creator<UserCredential> CREATOR =
             new Creator<UserCredential>() {
                 @Override
                 public UserCredential createFromParcel(Parcel in) {
@@ -599,7 +599,7 @@ public final class Credential implements Parcelable {
             return true;
         }
 
-        public static final Creator<CertificateCredential> CREATOR =
+        public static final @android.annotation.NonNull Creator<CertificateCredential> CREATOR =
             new Creator<CertificateCredential>() {
                 @Override
                 public CertificateCredential createFromParcel(Parcel in) {
@@ -770,7 +770,7 @@ public final class Credential implements Parcelable {
             return true;
         }
 
-        public static final Creator<SimCredential> CREATOR =
+        public static final @android.annotation.NonNull Creator<SimCredential> CREATOR =
             new Creator<SimCredential>() {
                 @Override
                 public SimCredential createFromParcel(Parcel in) {
@@ -1086,7 +1086,7 @@ public final class Credential implements Parcelable {
         return true;
     }
 
-    public static final Creator<Credential> CREATOR =
+    public static final @android.annotation.NonNull Creator<Credential> CREATOR =
         new Creator<Credential>() {
             @Override
             public Credential createFromParcel(Parcel in) {

@@ -33,7 +33,7 @@ public final class GpsBatteryStats implements Parcelable {
   private long mEnergyConsumedMaMs;
   private long[] mTimeInGpsSignalQualityLevel;
 
-  public static final Parcelable.Creator<GpsBatteryStats> CREATOR = new
+  public static final @android.annotation.NonNull Parcelable.Creator<GpsBatteryStats> CREATOR = new
       Parcelable.Creator<GpsBatteryStats>() {
         public GpsBatteryStats createFromParcel(Parcel in) {
           return new GpsBatteryStats(in);

@@ -76,7 +76,7 @@ public final class BluetoothActivityEnergyInfo implements Parcelable {
                 + " }";
     }
 
-    public static final Parcelable.Creator<BluetoothActivityEnergyInfo> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<BluetoothActivityEnergyInfo> CREATOR =
             new Parcelable.Creator<BluetoothActivityEnergyInfo>() {
                 public BluetoothActivityEnergyInfo createFromParcel(Parcel in) {
                     return new BluetoothActivityEnergyInfo(in);

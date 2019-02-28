@@ -119,7 +119,7 @@ public final class StatusHints implements Parcelable {
         out.writeParcelable(mExtras, 0);
     }
 
-    public static final Creator<StatusHints> CREATOR
+    public static final @android.annotation.NonNull Creator<StatusHints> CREATOR
             = new Creator<StatusHints>() {
         public StatusHints createFromParcel(Parcel in) {
             return new StatusHints(in);

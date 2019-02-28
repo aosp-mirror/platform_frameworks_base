@@ -1157,7 +1157,7 @@ public class GpsMeasurement implements Parcelable {
         mUsedInFix = value;
     }
 
-    public static final Creator<GpsMeasurement> CREATOR = new Creator<GpsMeasurement>() {
+    public static final @android.annotation.NonNull Creator<GpsMeasurement> CREATOR = new Creator<GpsMeasurement>() {
         @Override
         public GpsMeasurement createFromParcel(Parcel parcel) {
             GpsMeasurement gpsMeasurement = new GpsMeasurement();

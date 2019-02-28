@@ -93,7 +93,7 @@ public final class ImsSuppServiceNotification implements Parcelable {
         out.writeStringArray(history);
     }
 
-    public static final Creator<ImsSuppServiceNotification> CREATOR =
+    public static final @android.annotation.NonNull Creator<ImsSuppServiceNotification> CREATOR =
             new Creator<ImsSuppServiceNotification>() {
         @Override
         public ImsSuppServiceNotification createFromParcel(Parcel in) {

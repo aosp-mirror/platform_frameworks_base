@@ -111,7 +111,7 @@ public final class BatterySaverPolicyConfig implements Parcelable {
                 Math.min(in.readInt(), PowerManager.MAX_LOCATION_MODE));
     }
 
-    public static final Creator<BatterySaverPolicyConfig> CREATOR =
+    public static final @android.annotation.NonNull Creator<BatterySaverPolicyConfig> CREATOR =
             new Creator<BatterySaverPolicyConfig>() {
                 @Override
                 public BatterySaverPolicyConfig createFromParcel(Parcel in) {

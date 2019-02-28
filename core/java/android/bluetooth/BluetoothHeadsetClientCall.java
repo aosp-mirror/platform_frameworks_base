@@ -280,7 +280,7 @@ public final class BluetoothHeadsetClientCall implements Parcelable {
     /**
      * {@link Parcelable.Creator} interface implementation.
      */
-    public static final Parcelable.Creator<BluetoothHeadsetClientCall> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<BluetoothHeadsetClientCall> CREATOR =
             new Parcelable.Creator<BluetoothHeadsetClientCall>() {
                 @Override
                 public BluetoothHeadsetClientCall createFromParcel(Parcel in) {

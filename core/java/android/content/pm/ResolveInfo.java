@@ -445,7 +445,7 @@ public class ResolveInfo implements Parcelable {
         dest.writeInt(isInstantAppAvailable ? 1 : 0);
     }
 
-    public static final Creator<ResolveInfo> CREATOR
+    public static final @android.annotation.NonNull Creator<ResolveInfo> CREATOR
             = new Creator<ResolveInfo>() {
         public ResolveInfo createFromParcel(Parcel source) {
             return new ResolveInfo(source);

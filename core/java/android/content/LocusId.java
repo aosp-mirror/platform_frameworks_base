@@ -98,7 +98,7 @@ public final class LocusId implements Parcelable {
         dest.writeParcelable(mUri, flags);
     }
 
-    public static final Parcelable.Creator<LocusId> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<LocusId> CREATOR =
             new Parcelable.Creator<LocusId>() {
 
         @NonNull

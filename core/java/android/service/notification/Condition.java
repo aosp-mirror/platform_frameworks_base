@@ -227,7 +227,7 @@ public final class Condition implements Parcelable {
         return id != null && SCHEME.equals(id.getScheme()) && pkg.equals(id.getAuthority());
     }
 
-    public static final Parcelable.Creator<Condition> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<Condition> CREATOR
             = new Parcelable.Creator<Condition>() {
         @Override
         public Condition createFromParcel(Parcel source) {

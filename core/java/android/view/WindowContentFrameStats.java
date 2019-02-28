@@ -139,7 +139,7 @@ public final class WindowContentFrameStats extends FrameStats implements Parcela
         return builder.toString();
     }
 
-    public static final Parcelable.Creator<WindowContentFrameStats> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<WindowContentFrameStats> CREATOR =
             new Creator<WindowContentFrameStats>() {
                 @Override
                 public WindowContentFrameStats createFromParcel(Parcel parcel) {

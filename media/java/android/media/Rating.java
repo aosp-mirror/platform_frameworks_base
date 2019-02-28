@@ -116,7 +116,7 @@ public final class Rating implements Parcelable {
         dest.writeFloat(mRatingValue);
     }
 
-    public static final Parcelable.Creator<Rating> CREATOR = new Parcelable.Creator<Rating>() {
+    public static final @android.annotation.NonNull Parcelable.Creator<Rating> CREATOR = new Parcelable.Creator<Rating>() {
         /**
          * Rebuilds a Rating previously stored with writeToParcel().
          * @param p    Parcel object to read the Rating from

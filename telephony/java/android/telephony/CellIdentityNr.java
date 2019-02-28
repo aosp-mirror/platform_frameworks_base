@@ -161,7 +161,7 @@ public final class CellIdentityNr extends CellIdentity {
     }
 
     /** Implement the Parcelable interface */
-    public static final Creator<CellIdentityNr> CREATOR =
+    public static final @android.annotation.NonNull Creator<CellIdentityNr> CREATOR =
             new Creator<CellIdentityNr>() {
                 @Override
                 public CellIdentityNr createFromParcel(Parcel in) {

@@ -187,7 +187,7 @@ public final class BatchUpdates implements Parcelable {
         }
         dest.writeParcelable(mUpdates, flags);
     }
-    public static final Parcelable.Creator<BatchUpdates> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<BatchUpdates> CREATOR =
             new Parcelable.Creator<BatchUpdates>() {
         @Override
         public BatchUpdates createFromParcel(Parcel parcel) {

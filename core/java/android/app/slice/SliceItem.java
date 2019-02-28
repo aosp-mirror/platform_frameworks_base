@@ -378,7 +378,7 @@ public final class SliceItem implements Parcelable {
         throw new RuntimeException("Unsupported type " + type);
     }
 
-    public static final Creator<SliceItem> CREATOR = new Creator<SliceItem>() {
+    public static final @android.annotation.NonNull Creator<SliceItem> CREATOR = new Creator<SliceItem>() {
         @Override
         public SliceItem createFromParcel(Parcel in) {
             return new SliceItem(in);

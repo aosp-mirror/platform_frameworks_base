@@ -79,7 +79,7 @@ public final class CellInfoNr extends CellInfo {
         mCellSignalStrength.writeToParcel(dest, flags);
     }
 
-    public static final Creator<CellInfoNr> CREATOR = new Creator<CellInfoNr>() {
+    public static final @android.annotation.NonNull Creator<CellInfoNr> CREATOR = new Creator<CellInfoNr>() {
         @Override
         public CellInfoNr createFromParcel(Parcel in) {
             // Skip the type info.

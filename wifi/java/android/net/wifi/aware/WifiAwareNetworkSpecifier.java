@@ -167,7 +167,7 @@ public final class WifiAwareNetworkSpecifier extends NetworkSpecifier implements
         this.requestorUid = requestorUid;
     }
 
-    public static final Creator<WifiAwareNetworkSpecifier> CREATOR =
+    public static final @android.annotation.NonNull Creator<WifiAwareNetworkSpecifier> CREATOR =
             new Creator<WifiAwareNetworkSpecifier>() {
                 @Override
                 public WifiAwareNetworkSpecifier createFromParcel(Parcel in) {

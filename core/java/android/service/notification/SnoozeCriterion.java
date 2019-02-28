@@ -78,7 +78,7 @@ public final class SnoozeCriterion implements Parcelable {
         return mConfirmation;
     }
 
-    public static final Creator<SnoozeCriterion> CREATOR = new Creator<SnoozeCriterion>() {
+    public static final @android.annotation.NonNull Creator<SnoozeCriterion> CREATOR = new Creator<SnoozeCriterion>() {
         @Override
         public SnoozeCriterion createFromParcel(Parcel in) {
             return new SnoozeCriterion(in);

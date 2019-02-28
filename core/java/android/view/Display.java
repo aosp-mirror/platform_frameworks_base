@@ -1375,7 +1375,7 @@ public final class Display {
         }
 
         @SuppressWarnings("hiding")
-        public static final Parcelable.Creator<Mode> CREATOR
+        public static final @android.annotation.NonNull Parcelable.Creator<Mode> CREATOR
                 = new Parcelable.Creator<Mode>() {
             @Override
             public Mode createFromParcel(Parcel in) {
@@ -1504,7 +1504,7 @@ public final class Display {
             return hash;
         }
 
-        public static final Creator<HdrCapabilities> CREATOR = new Creator<HdrCapabilities>() {
+        public static final @android.annotation.NonNull Creator<HdrCapabilities> CREATOR = new Creator<HdrCapabilities>() {
             @Override
             public HdrCapabilities createFromParcel(Parcel source) {
                 return new HdrCapabilities(source);

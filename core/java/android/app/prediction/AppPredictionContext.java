@@ -101,7 +101,7 @@ public final class AppPredictionContext implements Parcelable {
     /**
      * @see Parcelable.Creator
      */
-    public static final Parcelable.Creator<AppPredictionContext> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<AppPredictionContext> CREATOR =
             new Parcelable.Creator<AppPredictionContext>() {
                 public AppPredictionContext createFromParcel(Parcel parcel) {
                     return new AppPredictionContext(parcel);

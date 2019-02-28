@@ -602,7 +602,7 @@ public class SecurityLog {
             dest.writeByteArray(mEvent.getBytes());
         }
 
-        public static final Parcelable.Creator<SecurityEvent> CREATOR =
+        public static final @android.annotation.NonNull Parcelable.Creator<SecurityEvent> CREATOR =
                 new Parcelable.Creator<SecurityEvent>() {
             @Override
             public SecurityEvent createFromParcel(Parcel source) {

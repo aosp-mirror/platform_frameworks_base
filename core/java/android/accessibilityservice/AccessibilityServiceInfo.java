@@ -1225,7 +1225,7 @@ public class AccessibilityServiceInfo implements Parcelable {
     /**
      * @see Parcelable.Creator
      */
-    public static final Parcelable.Creator<AccessibilityServiceInfo> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<AccessibilityServiceInfo> CREATOR =
             new Parcelable.Creator<AccessibilityServiceInfo>() {
         public AccessibilityServiceInfo createFromParcel(Parcel parcel) {
             AccessibilityServiceInfo info = new AccessibilityServiceInfo();

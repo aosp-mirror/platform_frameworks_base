@@ -3065,7 +3065,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
         return result.toString();
     }
 
-    public static final Parcelable.Creator<KeyEvent> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<KeyEvent> CREATOR
             = new Parcelable.Creator<KeyEvent>() {
         @Override
         public KeyEvent createFromParcel(Parcel in) {

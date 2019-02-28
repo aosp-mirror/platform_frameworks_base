@@ -550,7 +550,7 @@ public interface TextClassifier {
             return 0;
         }
 
-        public static final Parcelable.Creator<EntityConfig> CREATOR =
+        public static final @android.annotation.NonNull Parcelable.Creator<EntityConfig> CREATOR =
                 new Parcelable.Creator<EntityConfig>() {
                     @Override
                     public EntityConfig createFromParcel(Parcel in) {

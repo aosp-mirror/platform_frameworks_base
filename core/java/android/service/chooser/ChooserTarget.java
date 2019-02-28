@@ -202,7 +202,7 @@ public final class ChooserTarget implements Parcelable {
         dest.writeBundle(mIntentExtras);
     }
 
-    public static final Creator<ChooserTarget> CREATOR
+    public static final @android.annotation.NonNull Creator<ChooserTarget> CREATOR
             = new Creator<ChooserTarget>() {
         @Override
         public ChooserTarget createFromParcel(Parcel source) {

@@ -61,7 +61,7 @@ public final class NetworkScorerAppData implements Parcelable {
         return 0;
     }
 
-    public static final Creator<NetworkScorerAppData> CREATOR =
+    public static final @android.annotation.NonNull Creator<NetworkScorerAppData> CREATOR =
             new Creator<NetworkScorerAppData>() {
                 @Override
                 public NetworkScorerAppData createFromParcel(Parcel in) {

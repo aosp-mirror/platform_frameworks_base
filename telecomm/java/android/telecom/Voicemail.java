@@ -283,7 +283,7 @@ public class Voicemail implements Parcelable {
         dest.writeCharSequence(mTranscription);
     }
 
-    public static final Creator<Voicemail> CREATOR
+    public static final @android.annotation.NonNull Creator<Voicemail> CREATOR
             = new Creator<Voicemail>() {
         @Override
         public Voicemail createFromParcel(Parcel in) {

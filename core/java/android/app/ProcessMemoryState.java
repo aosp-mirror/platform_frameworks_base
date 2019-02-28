@@ -60,7 +60,7 @@ public final class ProcessMemoryState implements Parcelable {
         startTimeNanos = in.readLong();
     }
 
-    public static final Creator<ProcessMemoryState> CREATOR = new Creator<ProcessMemoryState>() {
+    public static final @android.annotation.NonNull Creator<ProcessMemoryState> CREATOR = new Creator<ProcessMemoryState>() {
         @Override
         public ProcessMemoryState createFromParcel(Parcel in) {
             return new ProcessMemoryState(in);

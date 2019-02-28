@@ -55,7 +55,7 @@ public final class MediaItem2 implements Parcelable {
      */
     public static final long POSITION_UNKNOWN = LONG_MAX;
 
-    public static final Parcelable.Creator<MediaItem2> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<MediaItem2> CREATOR =
             new Parcelable.Creator<MediaItem2>() {
                 @Override
                 public MediaItem2 createFromParcel(Parcel in) {

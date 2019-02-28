@@ -243,7 +243,7 @@ public class GpsNavigationMessage implements Parcelable {
         }
     }
 
-    public static final Creator<GpsNavigationMessage> CREATOR =
+    public static final @android.annotation.NonNull Creator<GpsNavigationMessage> CREATOR =
             new Creator<GpsNavigationMessage>() {
         @Override
         public GpsNavigationMessage createFromParcel(Parcel parcel) {

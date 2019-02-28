@@ -713,7 +713,7 @@ public final class ZenPolicy implements Parcelable {
         dest.writeInt(mPriorityMessages);
     }
 
-    public static final Parcelable.Creator<ZenPolicy> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<ZenPolicy> CREATOR =
             new Parcelable.Creator<ZenPolicy>() {
         @Override
         public ZenPolicy createFromParcel(Parcel source) {

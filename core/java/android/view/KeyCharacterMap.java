@@ -272,7 +272,7 @@ public class KeyCharacterMap implements Parcelable {
         sDeadKeyCache.put(combination, result);
     }
 
-    public static final Parcelable.Creator<KeyCharacterMap> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<KeyCharacterMap> CREATOR =
             new Parcelable.Creator<KeyCharacterMap>() {
         public KeyCharacterMap createFromParcel(Parcel in) {
             return new KeyCharacterMap(in);

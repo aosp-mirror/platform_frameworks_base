@@ -559,7 +559,7 @@ public final class CursorAnchorInfo implements Parcelable {
     /**
      * Used to make this class parcelable.
      */
-    public static final Parcelable.Creator<CursorAnchorInfo> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<CursorAnchorInfo> CREATOR
             = new Parcelable.Creator<CursorAnchorInfo>() {
         @Override
         public CursorAnchorInfo createFromParcel(Parcel source) {

@@ -129,7 +129,7 @@ public class RemoteAnimationAdapter implements Parcelable {
         dest.writeBoolean(mChangeNeedsSnapshot);
     }
 
-    public static final Creator<RemoteAnimationAdapter> CREATOR
+    public static final @android.annotation.NonNull Creator<RemoteAnimationAdapter> CREATOR
             = new Creator<RemoteAnimationAdapter>() {
         public RemoteAnimationAdapter createFromParcel(Parcel in) {
             return new RemoteAnimationAdapter(in);

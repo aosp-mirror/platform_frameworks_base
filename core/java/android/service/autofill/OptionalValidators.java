@@ -79,7 +79,7 @@ final class OptionalValidators extends InternalValidator {
         dest.writeParcelableArray(mValidators, flags);
     }
 
-    public static final Parcelable.Creator<OptionalValidators> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<OptionalValidators> CREATOR =
             new Parcelable.Creator<OptionalValidators>() {
         @Override
         public OptionalValidators createFromParcel(Parcel parcel) {

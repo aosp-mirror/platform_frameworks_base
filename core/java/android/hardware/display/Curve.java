@@ -37,7 +37,7 @@ public final class Curve implements Parcelable {
         return mY;
     }
 
-    public static final Creator<Curve> CREATOR = new Creator<Curve>() {
+    public static final @android.annotation.NonNull Creator<Curve> CREATOR = new Creator<Curve>() {
         public Curve createFromParcel(Parcel in) {
             float[] x = in.createFloatArray();
             float[] y = in.createFloatArray();

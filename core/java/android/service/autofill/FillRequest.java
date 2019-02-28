@@ -176,7 +176,7 @@ public final class FillRequest implements Parcelable {
         parcel.writeInt(mFlags);
     }
 
-    public static final Parcelable.Creator<FillRequest> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<FillRequest> CREATOR =
             new Parcelable.Creator<FillRequest>() {
         @Override
         public FillRequest createFromParcel(Parcel parcel) {

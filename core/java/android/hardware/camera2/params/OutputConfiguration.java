@@ -626,7 +626,7 @@ public final class OutputConfiguration implements Parcelable {
         return mSurfaceGroupId;
     }
 
-    public static final Parcelable.Creator<OutputConfiguration> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<OutputConfiguration> CREATOR =
             new Parcelable.Creator<OutputConfiguration>() {
         @Override
         public OutputConfiguration createFromParcel(Parcel source) {

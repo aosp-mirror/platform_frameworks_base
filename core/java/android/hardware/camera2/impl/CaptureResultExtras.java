@@ -30,7 +30,7 @@ public class CaptureResultExtras implements Parcelable {
     private int partialResultCount;
     private int errorStreamId;
 
-    public static final Parcelable.Creator<CaptureResultExtras> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<CaptureResultExtras> CREATOR =
             new Parcelable.Creator<CaptureResultExtras>() {
         @Override
         public CaptureResultExtras createFromParcel(Parcel in) {

@@ -1802,7 +1802,7 @@ public class Notification implements Parcelable
             out.writeInt(mIsContextual ? 1 : 0);
         }
 
-        public static final Parcelable.Creator<Action> CREATOR =
+        public static final @android.annotation.NonNull Parcelable.Creator<Action> CREATOR =
                 new Parcelable.Creator<Action>() {
             public Action createFromParcel(Parcel in) {
                 return new Action(in);
@@ -2731,7 +2731,7 @@ public class Notification implements Parcelable
     /**
      * Parcelable.Creator that instantiates Notification objects
      */
-    public static final Parcelable.Creator<Notification> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<Notification> CREATOR
             = new Parcelable.Creator<Notification>()
     {
         public Notification createFromParcel(Parcel parcel)
@@ -8567,7 +8567,7 @@ public class Notification implements Parcelable
             return (mFlags & FLAG_SUPPRESS_INITIAL_NOTIFICATION) != 0;
         }
 
-        public static final Parcelable.Creator<BubbleMetadata> CREATOR =
+        public static final @android.annotation.NonNull Parcelable.Creator<BubbleMetadata> CREATOR =
                 new Parcelable.Creator<BubbleMetadata>() {
 
                     @Override

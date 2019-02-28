@@ -98,7 +98,7 @@ public class OobData implements Parcelable {
         out.writeByteArray(mLeSecureConnectionsRandom);
     }
 
-    public static final Parcelable.Creator<OobData> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<OobData> CREATOR =
             new Parcelable.Creator<OobData>() {
         public OobData createFromParcel(Parcel in) {
             return new OobData(in);

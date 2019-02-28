@@ -96,7 +96,7 @@ public class CellConfigLte implements Parcelable {
         mIsEndcAvailable = in.readBoolean();
     }
 
-    public static final Creator<CellConfigLte> CREATOR = new Creator<CellConfigLte>() {
+    public static final @android.annotation.NonNull Creator<CellConfigLte> CREATOR = new Creator<CellConfigLte>() {
         @Override
         public CellConfigLte createFromParcel(Parcel in) {
             return new CellConfigLte(in);

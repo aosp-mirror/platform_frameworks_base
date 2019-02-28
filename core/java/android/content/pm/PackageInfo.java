@@ -489,7 +489,7 @@ public class PackageInfo implements Parcelable {
         dest.writeBoolean(isApex);
     }
 
-    public static final Parcelable.Creator<PackageInfo> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<PackageInfo> CREATOR
             = new Parcelable.Creator<PackageInfo>() {
         @Override
         public PackageInfo createFromParcel(Parcel source) {

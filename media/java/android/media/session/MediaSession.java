@@ -511,7 +511,7 @@ public final class MediaSession {
             return mControllerLink;
         }
 
-        public static final Parcelable.Creator<Token> CREATOR =
+        public static final @android.annotation.NonNull Parcelable.Creator<Token> CREATOR =
                 new Parcelable.Creator<Token>() {
             @Override
             public Token createFromParcel(Parcel in) {
@@ -789,7 +789,7 @@ public final class MediaSession {
             return 0;
         }
 
-        public static final Creator<MediaSession.QueueItem> CREATOR =
+        public static final @android.annotation.NonNull Creator<MediaSession.QueueItem> CREATOR =
                 new Creator<MediaSession.QueueItem>() {
 
             @Override

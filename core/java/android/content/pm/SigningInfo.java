@@ -124,7 +124,7 @@ public final class SigningInfo implements Parcelable {
         mSigningDetails.writeToParcel(dest, parcelableFlags);
     }
 
-    public static final Parcelable.Creator<SigningInfo> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<SigningInfo> CREATOR =
             new Parcelable.Creator<SigningInfo>() {
         @Override
         public SigningInfo createFromParcel(Parcel source) {

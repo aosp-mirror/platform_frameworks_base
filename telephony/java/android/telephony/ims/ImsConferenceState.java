@@ -135,7 +135,7 @@ public final class ImsConferenceState implements Parcelable {
         }
     }
 
-    public static final Creator<ImsConferenceState> CREATOR =
+    public static final @android.annotation.NonNull Creator<ImsConferenceState> CREATOR =
             new Creator<ImsConferenceState>() {
         @Override
         public ImsConferenceState createFromParcel(Parcel in) {

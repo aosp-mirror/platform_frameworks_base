@@ -43,7 +43,7 @@ public class RcsGroupThreadParticipantJoinedEventDescriptor extends RcsGroupThre
                 new RcsParticipant(mJoinedParticipantId));
     }
 
-    public static final Creator<RcsGroupThreadParticipantJoinedEventDescriptor> CREATOR =
+    public static final @android.annotation.NonNull Creator<RcsGroupThreadParticipantJoinedEventDescriptor> CREATOR =
             new Creator<RcsGroupThreadParticipantJoinedEventDescriptor>() {
                 @Override
                 public RcsGroupThreadParticipantJoinedEventDescriptor createFromParcel(Parcel in) {

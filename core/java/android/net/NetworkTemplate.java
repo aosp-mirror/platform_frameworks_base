@@ -482,7 +482,7 @@ public class NetworkTemplate implements Parcelable {
     }
 
     @UnsupportedAppUsage
-    public static final Creator<NetworkTemplate> CREATOR = new Creator<NetworkTemplate>() {
+    public static final @android.annotation.NonNull Creator<NetworkTemplate> CREATOR = new Creator<NetworkTemplate>() {
         @Override
         public NetworkTemplate createFromParcel(Parcel in) {
             return new NetworkTemplate(in);

@@ -44,7 +44,7 @@ public class RcsGroupThreadParticipantLeftEventDescriptor extends RcsGroupThread
                 new RcsParticipant(mLeavingParticipantId));
     }
 
-    public static final Parcelable.Creator<RcsGroupThreadParticipantLeftEventDescriptor> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<RcsGroupThreadParticipantLeftEventDescriptor> CREATOR =
             new Creator<RcsGroupThreadParticipantLeftEventDescriptor>() {
                 @Override
                 public RcsGroupThreadParticipantLeftEventDescriptor createFromParcel(Parcel in) {

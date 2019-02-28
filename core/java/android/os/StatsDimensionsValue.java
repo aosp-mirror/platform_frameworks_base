@@ -264,7 +264,7 @@ public final class StatsDimensionsValue implements Parcelable {
     /**
      * Parcelable Creator for StatsDimensionsValue.
      */
-    public static final Parcelable.Creator<StatsDimensionsValue> CREATOR = new
+    public static final @android.annotation.NonNull Parcelable.Creator<StatsDimensionsValue> CREATOR = new
             Parcelable.Creator<StatsDimensionsValue>() {
                 public StatsDimensionsValue createFromParcel(Parcel in) {
                     return new StatsDimensionsValue(in);

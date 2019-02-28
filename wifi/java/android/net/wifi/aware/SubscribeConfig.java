@@ -146,7 +146,7 @@ public final class SubscribeConfig implements Parcelable {
         dest.writeInt(mMaxDistanceMmSet ? 1 : 0);
     }
 
-    public static final Creator<SubscribeConfig> CREATOR = new Creator<SubscribeConfig>() {
+    public static final @android.annotation.NonNull Creator<SubscribeConfig> CREATOR = new Creator<SubscribeConfig>() {
         @Override
         public SubscribeConfig[] newArray(int size) {
             return new SubscribeConfig[size];

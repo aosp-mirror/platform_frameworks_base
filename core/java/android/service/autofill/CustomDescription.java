@@ -425,7 +425,7 @@ public final class CustomDescription implements Parcelable {
             dest.writeParcelableArray(values, flags);
         }
     }
-    public static final Parcelable.Creator<CustomDescription> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<CustomDescription> CREATOR =
             new Parcelable.Creator<CustomDescription>() {
         @Override
         public CustomDescription createFromParcel(Parcel parcel) {

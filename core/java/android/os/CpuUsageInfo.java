@@ -23,7 +23,7 @@ public final class CpuUsageInfo implements Parcelable {
     private long mActive;
     private long mTotal;
 
-    public static final Parcelable.Creator<CpuUsageInfo> CREATOR = new
+    public static final @android.annotation.NonNull Parcelable.Creator<CpuUsageInfo> CREATOR = new
             Parcelable.Creator<CpuUsageInfo>() {
                     public CpuUsageInfo createFromParcel(Parcel in) {
                         return new CpuUsageInfo(in);

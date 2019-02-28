@@ -289,7 +289,7 @@ public abstract class CellInfo implements Parcelable {
     }
 
     /** Implement the Parcelable interface */
-    public static final Creator<CellInfo> CREATOR = new Creator<CellInfo>() {
+    public static final @android.annotation.NonNull Creator<CellInfo> CREATOR = new Creator<CellInfo>() {
         @Override
         public CellInfo createFromParcel(Parcel in) {
                 int type = in.readInt();

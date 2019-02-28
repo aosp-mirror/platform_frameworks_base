@@ -2853,7 +2853,7 @@ public final class StrictMode {
             return 0;
         }
 
-        public static final Parcelable.Creator<ViolationInfo> CREATOR =
+        public static final @android.annotation.NonNull Parcelable.Creator<ViolationInfo> CREATOR =
                 new Parcelable.Creator<ViolationInfo>() {
                     @Override
                     public ViolationInfo createFromParcel(Parcel in) {

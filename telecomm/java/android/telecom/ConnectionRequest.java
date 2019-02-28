@@ -364,7 +364,7 @@ public final class ConnectionRequest implements Parcelable {
         return sb.toString();
     }
 
-    public static final Creator<ConnectionRequest> CREATOR = new Creator<ConnectionRequest> () {
+    public static final @android.annotation.NonNull Creator<ConnectionRequest> CREATOR = new Creator<ConnectionRequest> () {
         @Override
         public ConnectionRequest createFromParcel(Parcel source) {
             return new ConnectionRequest(source);

@@ -870,7 +870,7 @@ public class JobInfo implements Parcelable {
         out.writeInt(this.flags);
     }
 
-    public static final Creator<JobInfo> CREATOR = new Creator<JobInfo>() {
+    public static final @android.annotation.NonNull Creator<JobInfo> CREATOR = new Creator<JobInfo>() {
         @Override
         public JobInfo createFromParcel(Parcel in) {
             return new JobInfo(in);
@@ -963,7 +963,7 @@ public class JobInfo implements Parcelable {
             out.writeInt(mFlags);
         }
 
-        public static final Creator<TriggerContentUri> CREATOR = new Creator<TriggerContentUri>() {
+        public static final @android.annotation.NonNull Creator<TriggerContentUri> CREATOR = new Creator<TriggerContentUri>() {
             @Override
             public TriggerContentUri createFromParcel(Parcel in) {
                 return new TriggerContentUri(in);

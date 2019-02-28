@@ -95,7 +95,7 @@ public final class ConversationAction implements Parcelable {
     /** @hide **/
     public static final String TYPE_ADD_CONTACT = "add_contact";
 
-    public static final Creator<ConversationAction> CREATOR =
+    public static final @android.annotation.NonNull Creator<ConversationAction> CREATOR =
             new Creator<ConversationAction>() {
                 @Override
                 public ConversationAction createFromParcel(Parcel in) {

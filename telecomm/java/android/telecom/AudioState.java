@@ -133,7 +133,7 @@ public class AudioState implements Parcelable {
     /**
      * Responsible for creating AudioState objects for deserialized Parcels.
      */
-    public static final Parcelable.Creator<AudioState> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<AudioState> CREATOR =
             new Parcelable.Creator<AudioState> () {
 
         @Override

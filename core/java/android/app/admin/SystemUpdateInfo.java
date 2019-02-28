@@ -111,7 +111,7 @@ public final class SystemUpdateInfo implements Parcelable {
         return mSecurityPatchState;
     }
 
-    public static final Creator<SystemUpdateInfo> CREATOR =
+    public static final @android.annotation.NonNull Creator<SystemUpdateInfo> CREATOR =
             new Creator<SystemUpdateInfo>() {
                 @Override
                 public SystemUpdateInfo createFromParcel(Parcel in) {

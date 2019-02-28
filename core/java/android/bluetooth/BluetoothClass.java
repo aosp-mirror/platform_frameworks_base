@@ -94,7 +94,7 @@ public final class BluetoothClass implements Parcelable {
         return 0;
     }
 
-    public static final Parcelable.Creator<BluetoothClass> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<BluetoothClass> CREATOR =
             new Parcelable.Creator<BluetoothClass>() {
                 public BluetoothClass createFromParcel(Parcel in) {
                     return new BluetoothClass(in.readInt());

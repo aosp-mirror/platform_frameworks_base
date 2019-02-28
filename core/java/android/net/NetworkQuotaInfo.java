@@ -62,7 +62,7 @@ public class NetworkQuotaInfo implements Parcelable {
     }
 
     @UnsupportedAppUsage
-    public static final Creator<NetworkQuotaInfo> CREATOR = new Creator<NetworkQuotaInfo>() {
+    public static final @android.annotation.NonNull Creator<NetworkQuotaInfo> CREATOR = new Creator<NetworkQuotaInfo>() {
         @Override
         public NetworkQuotaInfo createFromParcel(Parcel in) {
             return new NetworkQuotaInfo(in);

@@ -89,7 +89,7 @@ public final class ParcelableUsbPort implements Parcelable {
         dest.writeBoolean(mSupportsEnableContaminantPresenceDetection);
     }
 
-    public static final Creator<ParcelableUsbPort> CREATOR =
+    public static final @android.annotation.NonNull Creator<ParcelableUsbPort> CREATOR =
             new Creator<ParcelableUsbPort>() {
                 @Override
                 public ParcelableUsbPort createFromParcel(Parcel in) {

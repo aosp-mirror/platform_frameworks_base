@@ -167,7 +167,7 @@ public final class MacAddress implements Parcelable {
         return 0;
     }
 
-    public static final Parcelable.Creator<MacAddress> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<MacAddress> CREATOR =
             new Parcelable.Creator<MacAddress>() {
                 public MacAddress createFromParcel(Parcel in) {
                     return new MacAddress(in.readLong());

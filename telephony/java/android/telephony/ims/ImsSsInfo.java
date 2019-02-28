@@ -275,7 +275,7 @@ public final class ImsSsInfo implements Parcelable {
         mProvisionStatus = in.readInt();
     }
 
-    public static final Creator<ImsSsInfo> CREATOR =
+    public static final @android.annotation.NonNull Creator<ImsSsInfo> CREATOR =
             new Creator<ImsSsInfo>() {
         @Override
         public ImsSsInfo createFromParcel(Parcel in) {

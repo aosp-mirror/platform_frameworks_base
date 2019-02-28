@@ -177,7 +177,7 @@ public class BluetoothGattDescriptor implements Parcelable {
         out.writeInt(mPermissions);
     }
 
-    public static final Parcelable.Creator<BluetoothGattDescriptor> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<BluetoothGattDescriptor> CREATOR =
             new Parcelable.Creator<BluetoothGattDescriptor>() {
         public BluetoothGattDescriptor createFromParcel(Parcel in) {
             return new BluetoothGattDescriptor(in);

@@ -106,7 +106,7 @@ public class SyncInfo implements Parcelable {
 
     /** @hide */
     @UnsupportedAppUsage
-    public static final Creator<SyncInfo> CREATOR = new Creator<SyncInfo>() {
+    public static final @android.annotation.NonNull Creator<SyncInfo> CREATOR = new Creator<SyncInfo>() {
         public SyncInfo createFromParcel(Parcel in) {
             return new SyncInfo(in);
         }

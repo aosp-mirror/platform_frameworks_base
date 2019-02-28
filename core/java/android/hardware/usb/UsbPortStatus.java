@@ -352,7 +352,7 @@ public final class UsbPortStatus implements Parcelable {
         dest.writeInt(mContaminantDetectionStatus);
     }
 
-    public static final Parcelable.Creator<UsbPortStatus> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<UsbPortStatus> CREATOR =
             new Parcelable.Creator<UsbPortStatus>() {
         @Override
         public UsbPortStatus createFromParcel(Parcel in) {

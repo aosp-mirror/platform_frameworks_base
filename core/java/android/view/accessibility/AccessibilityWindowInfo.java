@@ -770,7 +770,7 @@ public final class AccessibilityWindowInfo implements Parcelable {
         return changes;
     }
 
-    public static final Parcelable.Creator<AccessibilityWindowInfo> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<AccessibilityWindowInfo> CREATOR =
             new Creator<AccessibilityWindowInfo>() {
         @Override
         public AccessibilityWindowInfo createFromParcel(Parcel parcel) {

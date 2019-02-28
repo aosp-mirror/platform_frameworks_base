@@ -147,7 +147,7 @@ public final class KeyChainSnapshot implements Parcelable {
         return mEncryptedRecoveryKeyBlob;
     }
 
-    public static final Creator<KeyChainSnapshot> CREATOR =
+    public static final @android.annotation.NonNull Creator<KeyChainSnapshot> CREATOR =
             new Creator<KeyChainSnapshot>() {
         public KeyChainSnapshot createFromParcel(Parcel in) {
             return new KeyChainSnapshot(in);

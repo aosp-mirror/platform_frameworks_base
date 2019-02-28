@@ -242,7 +242,7 @@ public final class ImageTransformation extends InternalTransformation implements
         parcel.writeCharSequenceArray(contentDescriptions);
     }
 
-    public static final Parcelable.Creator<ImageTransformation> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<ImageTransformation> CREATOR =
             new Parcelable.Creator<ImageTransformation>() {
         @Override
         public ImageTransformation createFromParcel(Parcel parcel) {
