@@ -1639,13 +1639,12 @@ public class SyncManager {
             }
         }
 
-        if (syncOperation.isAppStandbyExempted()) {
-            final UsageStatsManagerInternal usmi = LocalServices.getService(
-                    UsageStatsManagerInternal.class);
-            if (usmi != null) {
-                usmi.reportExemptedSyncScheduled(syncOperation.owningPackage,
-                        UserHandle.getUserId(syncOperation.owningUid));
-            }
+        final UsageStatsManagerInternal usmi =
+                LocalServices.getService(UsageStatsManagerInternal.class);
+        if (usmi != null) {
+            usmi.reportSyncScheduled(syncOperation.owningPackage,
+                    UserHandle.getUserId(syncOperation.owningUid),
+                    syncOperation.isAppStandbyExempted());
         }
 
         getJobScheduler().scheduleAsPackage(b.build(), syncOperation.owningPackage,
