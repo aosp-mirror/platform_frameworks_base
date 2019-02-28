@@ -5826,7 +5826,12 @@ package android.provider {
 
   public final class DeviceConfig {
     method @RequiresPermission(android.Manifest.permission.READ_DEVICE_CONFIG) public static void addOnPropertyChangedListener(@NonNull String, @NonNull java.util.concurrent.Executor, @NonNull android.provider.DeviceConfig.OnPropertyChangedListener);
+    method @RequiresPermission(android.Manifest.permission.READ_DEVICE_CONFIG) public static boolean getBoolean(String, String, boolean);
+    method @RequiresPermission(android.Manifest.permission.READ_DEVICE_CONFIG) public static float getFloat(String, String, float);
+    method @RequiresPermission(android.Manifest.permission.READ_DEVICE_CONFIG) public static int getInt(String, String, int);
+    method @RequiresPermission(android.Manifest.permission.READ_DEVICE_CONFIG) public static long getLong(String, String, long);
     method @RequiresPermission(android.Manifest.permission.READ_DEVICE_CONFIG) public static String getProperty(String, String);
+    method @RequiresPermission(android.Manifest.permission.READ_DEVICE_CONFIG) public static String getString(String, String, String);
     method public static void removeOnPropertyChangedListener(android.provider.DeviceConfig.OnPropertyChangedListener);
     method @RequiresPermission(android.Manifest.permission.WRITE_DEVICE_CONFIG) public static void resetToDefaults(int, @Nullable String);
     method @RequiresPermission(android.Manifest.permission.WRITE_DEVICE_CONFIG) public static boolean setProperty(String, String, String, boolean);

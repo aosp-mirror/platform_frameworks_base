@@ -412,6 +412,100 @@ public final class DeviceConfig {
     }
 
     /**
+     * Look up the String value of a property for a particular namespace.
+     *
+     * @param namespace The namespace containing the property to look up.
+     * @param name      The name of the property to look up.
+     * @return the corresponding value, or defaultValue if none exists.
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    @RequiresPermission(READ_DEVICE_CONFIG)
+    public static String getString(String namespace, String name, String defaultValue) {
+        String value = getProperty(namespace, name);
+        return value != null ? value : defaultValue;
+    }
+
+    /**
+     * Look up the boolean value of a property for a particular namespace.
+     *
+     * @param namespace The namespace containing the property to look up.
+     * @param name      The name of the property to look up.
+     * @return the corresponding value, or defaultValue if none exists.
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    @RequiresPermission(READ_DEVICE_CONFIG)
+    public static boolean getBoolean(String namespace, String name, boolean defaultValue) {
+        String value = getProperty(namespace, name);
+        return value != null ? Boolean.parseBoolean(value) : defaultValue;
+    }
+
+    /**
+     * Look up the int value of a property for a particular namespace.
+     *
+     * @param namespace The namespace containing the property to look up.
+     * @param name      The name of the property to look up.
+     * @return the corresponding value, or defaultValue if either none exists or it does not parse.
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    @RequiresPermission(READ_DEVICE_CONFIG)
+    public static int getInt(String namespace, String name, int defaultValue) {
+        String value = getProperty(namespace, name);
+        try {
+            return Integer.parseInt(value);
+        } catch (NumberFormatException e) {
+            return defaultValue;
+        }
+    }
+
+    /**
+     * Look up the long value of a property for a particular namespace.
+     *
+     * @param namespace The namespace containing the property to look up.
+     * @param name      The name of the property to look up.
+     * @return the corresponding value, or defaultValue if either none exists or it does not parse.
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    @RequiresPermission(READ_DEVICE_CONFIG)
+    public static long getLong(String namespace, String name, long defaultValue) {
+        String value = getProperty(namespace, name);
+        try {
+            return Long.parseLong(value);
+        } catch (NumberFormatException e) {
+            return defaultValue;
+        }
+    }
+
+    /**
+     * Look up the float value of a property for a particular namespace.
+     *
+     * @param namespace The namespace containing the property to look up.
+     * @param name      The name of the property to look up.
+     * @return the corresponding value, or defaultValue if either none exists or it does not parse.
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    @RequiresPermission(READ_DEVICE_CONFIG)
+    public static float getFloat(String namespace, String name, float defaultValue) {
+        String value = getProperty(namespace, name);
+        try {
+            return Float.parseFloat(value);
+        } catch (NumberFormatException e) {
+            return defaultValue;
+        } catch (NullPointerException e) {
+            return defaultValue;
+        }
+    }
+
+    /**
      * Create a new property with the the provided name and value in the provided namespace, or
      * update the value of such a property if it already exists. The same name can exist in multiple
      * namespaces and might have different values in any or all namespaces.

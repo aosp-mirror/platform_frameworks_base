@@ -59,6 +59,131 @@ public class DeviceConfigTest {
     }
 
     @Test
+    public void getString_empty() {
+        final String default_value = "default_value";
+        final String result = DeviceConfig.getString(sNamespace, sKey, default_value);
+        assertThat(result).isEqualTo(default_value);
+    }
+
+    @Test
+    public void getString_nonEmpty() {
+        final String value = "new_value";
+        final String default_value = "default";
+        DeviceConfig.setProperty(sNamespace, sKey, value, false);
+
+        final String result = DeviceConfig.getString(sNamespace, sKey, default_value);
+        assertThat(result).isEqualTo(value);
+    }
+
+    @Test
+    public void getBoolean_empty() {
+        final boolean default_value = true;
+        final boolean result = DeviceConfig.getBoolean(sNamespace, sKey, default_value);
+        assertThat(result).isEqualTo(default_value);
+    }
+
+    @Test
+    public void getBoolean_valid() {
+        final boolean value = true;
+        final boolean default_value = false;
+        DeviceConfig.setProperty(sNamespace, sKey, String.valueOf(value), false);
+
+        final boolean result = DeviceConfig.getBoolean(sNamespace, sKey, default_value);
+        assertThat(result).isEqualTo(value);
+    }
+
+    @Test
+    public void getBoolean_invalid() {
+        final boolean default_value = true;
+        DeviceConfig.setProperty(sNamespace, sKey, "not_a_boolean", false);
+
+        final boolean result = DeviceConfig.getBoolean(sNamespace, sKey, default_value);
+        // Anything non-null other than case insensitive "true" parses to false.
+        assertThat(result).isFalse();
+    }
+
+    @Test
+    public void getInt_empty() {
+        final int default_value = 999;
+        final int result = DeviceConfig.getInt(sNamespace, sKey, default_value);
+        assertThat(result).isEqualTo(default_value);
+    }
+
+    @Test
+    public void getInt_valid() {
+        final int value = 123;
+        final int default_value = 999;
+        DeviceConfig.setProperty(sNamespace, sKey, String.valueOf(value), false);
+
+        final int result = DeviceConfig.getInt(sNamespace, sKey, default_value);
+        assertThat(result).isEqualTo(value);
+    }
+
+    @Test
+    public void getInt_invalid() {
+        final int default_value = 999;
+        DeviceConfig.setProperty(sNamespace, sKey, "not_an_int", false);
+
+        final int result = DeviceConfig.getInt(sNamespace, sKey, default_value);
+        // Failure to parse results in using the default value
+        assertThat(result).isEqualTo(default_value);
+    }
+
+    @Test
+    public void getLong_empty() {
+        final long default_value = 123456;
+        final long result = DeviceConfig.getLong(sNamespace, sKey, default_value);
+        assertThat(result).isEqualTo(default_value);
+    }
+
+    @Test
+    public void getLong_valid() {
+        final long value = 456789;
+        final long default_value = 123456;
+        DeviceConfig.setProperty(sNamespace, sKey, String.valueOf(value), false);
+
+        final long result = DeviceConfig.getLong(sNamespace, sKey, default_value);
+        assertThat(result).isEqualTo(value);
+    }
+
+    @Test
+    public void getLong_invalid() {
+        final long default_value = 123456;
+        DeviceConfig.setProperty(sNamespace, sKey, "not_a_long", false);
+
+        final long result = DeviceConfig.getLong(sNamespace, sKey, default_value);
+        // Failure to parse results in using the default value
+        assertThat(result).isEqualTo(default_value);
+    }
+
+    @Test
+    public void getFloat_empty() {
+        final float default_value = 123.456f;
+        final float result = DeviceConfig.getFloat(sNamespace, sKey, default_value);
+        assertThat(result).isEqualTo(default_value);
+    }
+
+    @Test
+    public void getFloat_valid() {
+        final float value = 456.789f;
+        final float default_value = 123.456f;
+        DeviceConfig.setProperty(sNamespace, sKey, String.valueOf(value), false);
+
+        final float result = DeviceConfig.getFloat(sNamespace, sKey, default_value);
+        assertThat(result).isEqualTo(value);
+    }
+
+    @Test
+    public void getFloat_invalid() {
+        final float default_value = 123.456f;
+        DeviceConfig.setProperty(sNamespace, sKey, "not_a_float", false);
+
+        final float result = DeviceConfig.getFloat(sNamespace, sKey, default_value);
+        // Failure to parse results in using the default value
+        assertThat(result).isEqualTo(default_value);
+    }
+
+    @Test
     public void setAndGetProperty_sameNamespace() {
         DeviceConfig.setProperty(sNamespace, sKey, sValue, false);
         String result = DeviceConfig.getProperty(sNamespace, sKey);
