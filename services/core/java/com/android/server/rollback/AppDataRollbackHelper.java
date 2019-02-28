@@ -166,7 +166,7 @@ public class AppDataRollbackHelper {
         List<RollbackData> rd = new ArrayList<>();
 
         for (RollbackData data : availableRollbacks) {
-            for (PackageRollbackInfo info : data.packages) {
+            for (PackageRollbackInfo info : data.info.getPackages()) {
                 final IntArray pendingBackupUsers = info.getPendingBackups();
                 if (pendingBackupUsers != null) {
                     final int idx = pendingBackupUsers.indexOf(userId);
@@ -246,13 +246,13 @@ public class AppDataRollbackHelper {
 
         if (!pendingBackupPackages.isEmpty()) {
             for (RollbackData data : pendingBackups) {
-                for (PackageRollbackInfo info : data.packages) {
+                for (PackageRollbackInfo info : data.info.getPackages()) {
                     final IntArray pendingBackupUsers = info.getPendingBackups();
                     final int idx = pendingBackupUsers.indexOf(userId);
                     if (idx != -1) {
                         try {
                             long ceSnapshotInode = mInstaller.snapshotAppData(info.getPackageName(),
-                                    userId, data.rollbackId, Installer.FLAG_STORAGE_CE);
+                                    userId, data.info.getRollbackId(), Installer.FLAG_STORAGE_CE);
                             info.putCeSnapshotInode(userId, ceSnapshotInode);
                             pendingBackupUsers.remove(idx);
                         } catch (InstallerException ie) {
