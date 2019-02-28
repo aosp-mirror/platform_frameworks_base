@@ -158,6 +158,7 @@ public abstract class ClientMonitor extends LoggableMonitor implements IBinder.D
      */
     public boolean onAcquired(int acquiredInfo, int vendorCode) {
         super.logOnAcquired(acquiredInfo, vendorCode, getTargetUserId());
+        if (DEBUG) Slog.v(getLogTag(), "Acquired: " + acquiredInfo + " " + vendorCode);
         try {
             if (mListener != null) {
                 mListener.onAcquired(getHalDeviceId(), acquiredInfo, vendorCode);
