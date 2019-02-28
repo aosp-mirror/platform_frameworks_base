@@ -23100,6 +23100,18 @@ public class PackageManagerService extends IPackageManager.Stub
             }
             return 0;
         }
+
+        @Override
+        public boolean[] isAudioPlaybackCaptureAllowed(String[] packageNames)
+                throws RemoteException {
+            int callingUser = UserHandle.getUserId(Binder.getCallingUid());
+            boolean[] results = new boolean[packageNames.length];
+            for (int i = results.length - 1; i >= 0; --i) {
+                ApplicationInfo appInfo = getApplicationInfo(packageNames[i], 0, callingUser);
+                results[i] = appInfo == null ? false : appInfo.isAudioPlaybackCaptureAllowed();
+            }
+            return results;
+        }
     }
 
     private class PackageManagerInternalImpl extends PackageManagerInternal {

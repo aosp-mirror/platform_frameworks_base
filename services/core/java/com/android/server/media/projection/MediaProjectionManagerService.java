@@ -16,17 +16,15 @@
 
 package com.android.server.media.projection;
 
-import com.android.server.Watchdog;
-
 import android.Manifest;
 import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.hardware.display.DisplayManager;
 import android.media.MediaRouter;
-import android.media.projection.IMediaProjectionManager;
 import android.media.projection.IMediaProjection;
 import android.media.projection.IMediaProjectionCallback;
+import android.media.projection.IMediaProjectionManager;
 import android.media.projection.IMediaProjectionWatcherCallback;
 import android.media.projection.MediaProjectionInfo;
 import android.media.projection.MediaProjectionManager;
@@ -41,6 +39,7 @@ import android.util.Slog;
 
 import com.android.internal.util.DumpUtils;
 import com.android.server.SystemService;
+import com.android.server.Watchdog;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -361,8 +360,9 @@ public final class MediaProjectionManagerService extends SystemService
 
         @Override // Binder call
         public boolean canProjectAudio() {
-            return mType == MediaProjectionManager.TYPE_MIRRORING ||
-                    mType == MediaProjectionManager.TYPE_PRESENTATION;
+            return mType == MediaProjectionManager.TYPE_MIRRORING
+                || mType == MediaProjectionManager.TYPE_PRESENTATION
+                || mType == MediaProjectionManager.TYPE_SCREEN_CAPTURE;
         }
 
         @Override // Binder call

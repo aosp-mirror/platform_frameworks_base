@@ -1667,6 +1667,9 @@
              This flag is turned on by default. <em>This attribute is usable only by system apps.
              </em> -->
         <attr name="allowClearUserDataOnFailedRestore"/>
+        <!-- If {@code true} the app's non sensitive audio can be capture by other apps.
+             The default value is true. -->
+        <attr name="allowAudioPlaybackCapture" format="boolean" />
     </declare-styleable>
     <!-- The <code>permission</code> tag declares a security permission that can be
          used to control access from other packages to specific components or

@@ -33,7 +33,7 @@ import com.android.internal.util.Preconditions;
  *  - played by apps that MUST be in the same user profile as the capturing app
  *    (eg work profile can not capture user profile apps and vice-versa).
  *  - played by apps that MUST NOT have in their manifest.xml the application
- *    attribute android:allowPlaybackCapture="false"
+ *    attribute android:allowAudioPlaybackCapture="false"
  *  - played by apps that MUST have a targetSdkVersion higher or equal to 29 (Q).
  *
  * <p>An example for creating a capture configuration for capturing all media playback:
