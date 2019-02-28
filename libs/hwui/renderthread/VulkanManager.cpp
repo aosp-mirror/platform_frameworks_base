@@ -254,10 +254,36 @@ void VulkanManager::setupDevice(GrVkExtensions& grExtensions, VkPhysicalDeviceFe
 
     float queuePriorities[1] = { 0.0 };
 
+    void* queueNextPtr = nullptr;
+
+    VkDeviceQueueGlobalPriorityCreateInfoEXT queuePriorityCreateInfo;
+
+    if (Properties::contextPriority != 0
+            && grExtensions.hasExtension(VK_EXT_GLOBAL_PRIORITY_EXTENSION_NAME, 2)) {
+        memset(&queuePriorityCreateInfo, 0, sizeof(VkDeviceQueueGlobalPriorityCreateInfoEXT));
+        queuePriorityCreateInfo.sType =
+            VK_STRUCTURE_TYPE_DEVICE_QUEUE_GLOBAL_PRIORITY_CREATE_INFO_EXT;
+        queuePriorityCreateInfo.pNext = nullptr;
+        switch (Properties::contextPriority) {
+            case EGL_CONTEXT_PRIORITY_LOW_IMG:
+                queuePriorityCreateInfo.globalPriority = VK_QUEUE_GLOBAL_PRIORITY_LOW_EXT;
+                break;
+            case EGL_CONTEXT_PRIORITY_MEDIUM_IMG:
+                queuePriorityCreateInfo.globalPriority = VK_QUEUE_GLOBAL_PRIORITY_MEDIUM_EXT;
+                break;
+            case EGL_CONTEXT_PRIORITY_HIGH_IMG:
+                queuePriorityCreateInfo.globalPriority = VK_QUEUE_GLOBAL_PRIORITY_HIGH_EXT;
+                break;
+            default:
+                LOG_ALWAYS_FATAL("Unsupported context priority");
+         }
+         queueNextPtr = &queuePriorityCreateInfo;
+    }
+
     const VkDeviceQueueCreateInfo queueInfo[2] = {
         {
             VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO, // sType
-            nullptr,                                    // pNext
+            queueNextPtr,                               // pNext
             0,                                          // VkDeviceQueueCreateFlags
             mGraphicsQueueIndex,                        // queueFamilyIndex
             1,                                          // queueCount
@@ -265,7 +291,7 @@ void VulkanManager::setupDevice(GrVkExtensions& grExtensions, VkPhysicalDeviceFe
         },
         {
             VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO, // sType
-            nullptr,                                    // pNext
+            queueNextPtr,                               // pNext
             0,                                          // VkDeviceQueueCreateFlags
             mPresentQueueIndex,                         // queueFamilyIndex
             1,                                          // queueCount
