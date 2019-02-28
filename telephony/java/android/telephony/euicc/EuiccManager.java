@@ -17,6 +17,7 @@ package android.telephony.euicc;
 
 import android.Manifest;
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
@@ -756,7 +757,7 @@ public class EuiccManager {
      */
     @RequiresPermission(Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS)
     public void updateSubscriptionNickname(
-            int subscriptionId, String nickname, PendingIntent callbackIntent) {
+            int subscriptionId, @Nullable String nickname, @NonNull PendingIntent callbackIntent) {
         if (!refreshCardIdIfUninitialized()) {
             sendUnavailableError(callbackIntent);
             return;
