@@ -3680,7 +3680,7 @@ package android.media.audiopolicy {
 
   public final class AudioVolumeGroup implements android.os.Parcelable {
     method public int describeContents();
-    method public java.util.List<android.media.AudioAttributes> getAudioAttributes();
+    method @NonNull public java.util.List<android.media.AudioAttributes> getAudioAttributes();
     method public int getId();
     method @NonNull public int[] getLegacyStreamTypes();
     method @NonNull public String name();
@@ -3692,7 +3692,7 @@ package android.media.audiopolicy {
     ctor public AudioVolumeGroups();
     method public int describeContents();
     method @Nullable public android.media.audiopolicy.AudioVolumeGroup getById(int);
-    method public java.util.Iterator<android.media.audiopolicy.AudioVolumeGroup> iterator();
+    method @NonNull public java.util.Iterator<android.media.audiopolicy.AudioVolumeGroup> iterator();
     method public int size();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.media.audiopolicy.AudioVolumeGroups> CREATOR;
