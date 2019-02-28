@@ -102,7 +102,7 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
 
         disableSyntheticPassword();
         mService.setLockCredential(password, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, null,
-                PASSWORD_QUALITY_ALPHABETIC, PRIMARY_USER_ID);
+                PASSWORD_QUALITY_ALPHABETIC, PRIMARY_USER_ID, false);
         long sid = mGateKeeperService.getSecureUserId(PRIMARY_USER_ID);
         final byte[] primaryStorageKey = mStorageManager.getUserUnlockToken(PRIMARY_USER_ID);
         enableSyntheticPassword();
@@ -127,7 +127,7 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
                 : PASSWORD_QUALITY_UNSPECIFIED;
         int type = password != null ? LockPatternUtils.CREDENTIAL_TYPE_PASSWORD
                 : LockPatternUtils.CREDENTIAL_TYPE_NONE;
-        mService.setLockCredential(password, type, null, quality, userId);
+        mService.setLockCredential(password, type, null, quality, userId, false);
     }
 
     public void testSyntheticPasswordChangeCredential() throws RemoteException {
@@ -137,7 +137,7 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         initializeCredentialUnderSP(password, PRIMARY_USER_ID);
         long sid = mGateKeeperService.getSecureUserId(PRIMARY_USER_ID);
         mService.setLockCredential(newPassword, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, password,
-                PASSWORD_QUALITY_ALPHABETIC, PRIMARY_USER_ID);
+                PASSWORD_QUALITY_ALPHABETIC, PRIMARY_USER_ID, false);
         assertEquals(VerifyCredentialResponse.RESPONSE_OK, mService.verifyCredential(
                 newPassword, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, 0, PRIMARY_USER_ID)
                         .getResponseCode());
@@ -166,12 +166,12 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         long sid = mGateKeeperService.getSecureUserId(PRIMARY_USER_ID);
         // clear password
         mService.setLockCredential(null, LockPatternUtils.CREDENTIAL_TYPE_NONE, password,
-                PASSWORD_QUALITY_UNSPECIFIED, PRIMARY_USER_ID);
+                PASSWORD_QUALITY_UNSPECIFIED, PRIMARY_USER_ID, false);
         assertEquals(0 ,mGateKeeperService.getSecureUserId(PRIMARY_USER_ID));
 
         // set a new password
         mService.setLockCredential(badPassword, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, null,
-                PASSWORD_QUALITY_ALPHABETIC, PRIMARY_USER_ID);
+                PASSWORD_QUALITY_ALPHABETIC, PRIMARY_USER_ID, false);
         assertEquals(VerifyCredentialResponse.RESPONSE_OK, mService.verifyCredential(
                 badPassword, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, 0, PRIMARY_USER_ID)
                         .getResponseCode());
@@ -186,7 +186,7 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
 
         initializeCredentialUnderSP(password, PRIMARY_USER_ID);
         mService.setLockCredential(badPassword, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, password,
-                PASSWORD_QUALITY_ALPHABETIC, PRIMARY_USER_ID);
+                PASSWORD_QUALITY_ALPHABETIC, PRIMARY_USER_ID, false);
         assertEquals(VerifyCredentialResponse.RESPONSE_OK, mService.verifyCredential(
                 badPassword, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, 0, PRIMARY_USER_ID)
                         .getResponseCode());
@@ -245,7 +245,7 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         final byte[] password = "getASyntheticPassword".getBytes();
         initializeCredentialUnderSP(password, PRIMARY_USER_ID);
         mService.setLockCredential(null, LockPatternUtils.CREDENTIAL_TYPE_NONE, password,
-                PASSWORD_QUALITY_UNSPECIFIED, PRIMARY_USER_ID);
+                PASSWORD_QUALITY_UNSPECIFIED, PRIMARY_USER_ID, false);
 
         reset(mAuthSecretService);
         mService.onUnlockUser(PRIMARY_USER_ID);
@@ -257,7 +257,7 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         final byte[] UnifiedPassword = "testManagedProfileUnifiedChallengeMigration-pwd".getBytes();
         disableSyntheticPassword();
         mService.setLockCredential(UnifiedPassword, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, null,
-                PASSWORD_QUALITY_ALPHABETIC, PRIMARY_USER_ID);
+                PASSWORD_QUALITY_ALPHABETIC, PRIMARY_USER_ID, false);
         mService.setSeparateProfileChallengeEnabled(MANAGED_PROFILE_USER_ID, false, null);
         final long primarySid = mGateKeeperService.getSecureUserId(PRIMARY_USER_ID);
         final long profileSid = mGateKeeperService.getSecureUserId(MANAGED_PROFILE_USER_ID);
@@ -294,9 +294,9 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
                 "testManagedProfileSeparateChallengeMigration-profile".getBytes();
         disableSyntheticPassword();
         mService.setLockCredential(primaryPassword, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, null,
-                PASSWORD_QUALITY_ALPHABETIC, PRIMARY_USER_ID);
+                PASSWORD_QUALITY_ALPHABETIC, PRIMARY_USER_ID, false);
         mService.setLockCredential(profilePassword, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, null,
-                PASSWORD_QUALITY_ALPHABETIC, MANAGED_PROFILE_USER_ID);
+                PASSWORD_QUALITY_ALPHABETIC, MANAGED_PROFILE_USER_ID, false);
         final long primarySid = mGateKeeperService.getSecureUserId(PRIMARY_USER_ID);
         final long profileSid = mGateKeeperService.getSecureUserId(MANAGED_PROFILE_USER_ID);
         final byte[] primaryStorageKey = mStorageManager.getUserUnlockToken(PRIMARY_USER_ID);
@@ -404,7 +404,7 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         assertTrue(mLocalService.isEscrowTokenActive(handle, PRIMARY_USER_ID));
 
         mService.setLockCredential(pattern, LockPatternUtils.CREDENTIAL_TYPE_PATTERN, password,
-                PASSWORD_QUALITY_SOMETHING, PRIMARY_USER_ID);
+                PASSWORD_QUALITY_SOMETHING, PRIMARY_USER_ID, false);
 
         mLocalService.setLockCredentialWithToken(newPassword,
                 LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, handle, token,
@@ -443,7 +443,7 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         // Set up pre-SP user password
         disableSyntheticPassword();
         mService.setLockCredential(password, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, null,
-                PASSWORD_QUALITY_ALPHABETIC, PRIMARY_USER_ID);
+                PASSWORD_QUALITY_ALPHABETIC, PRIMARY_USER_ID, false);
         enableSyntheticPassword();
 
         long handle = mLocalService.addEscrowToken(token, PRIMARY_USER_ID, null);
@@ -491,12 +491,12 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
     public void testgetHashFactorPrimaryUser() throws RemoteException {
         final byte[] password = "password".getBytes();
         mService.setLockCredential(password, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, null,
-                PASSWORD_QUALITY_ALPHABETIC, PRIMARY_USER_ID);
+                PASSWORD_QUALITY_ALPHABETIC, PRIMARY_USER_ID, false);
         final byte[] hashFactor = mService.getHashFactor(password, PRIMARY_USER_ID);
         assertNotNull(hashFactor);
 
         mService.setLockCredential(null, LockPatternUtils.CREDENTIAL_TYPE_NONE,
-                password, PASSWORD_QUALITY_UNSPECIFIED, PRIMARY_USER_ID);
+                password, PASSWORD_QUALITY_UNSPECIFIED, PRIMARY_USER_ID, false);
         final byte[] newHashFactor = mService.getHashFactor(null, PRIMARY_USER_ID);
         assertNotNull(newHashFactor);
         // Hash factor should never change after password change/removal
@@ -506,7 +506,7 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
     public void testgetHashFactorManagedProfileUnifiedChallenge() throws RemoteException {
         final byte[] pattern = "1236".getBytes();
         mService.setLockCredential(pattern, LockPatternUtils.CREDENTIAL_TYPE_PATTERN,
-                null, PASSWORD_QUALITY_SOMETHING, PRIMARY_USER_ID);
+                null, PASSWORD_QUALITY_SOMETHING, PRIMARY_USER_ID, false);
         mService.setSeparateProfileChallengeEnabled(MANAGED_PROFILE_USER_ID, false, null);
         assertNotNull(mService.getHashFactor(null, MANAGED_PROFILE_USER_ID));
     }
@@ -515,9 +515,9 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         final byte[] primaryPassword = "primary".getBytes();
         final byte[] profilePassword = "profile".getBytes();
         mService.setLockCredential(primaryPassword, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, null,
-                PASSWORD_QUALITY_ALPHABETIC, PRIMARY_USER_ID);
+                PASSWORD_QUALITY_ALPHABETIC, PRIMARY_USER_ID, false);
         mService.setLockCredential(profilePassword, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, null,
-                PASSWORD_QUALITY_ALPHABETIC, MANAGED_PROFILE_USER_ID);
+                PASSWORD_QUALITY_ALPHABETIC, MANAGED_PROFILE_USER_ID, false);
         assertNotNull(mService.getHashFactor(profilePassword, MANAGED_PROFILE_USER_ID));
     }
 

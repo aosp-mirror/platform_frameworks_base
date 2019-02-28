@@ -5133,11 +5133,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         final boolean result;
         try {
             if (token == null) {
+                // This is the legacy reset password for DPM. Here we want to be able to override
+                // the old device password without necessarily knowing it.
                 if (!TextUtils.isEmpty(password)) {
                     mLockPatternUtils.saveLockPassword(password.getBytes(), null, quality,
-                            userHandle);
+                            userHandle, /*allowUntrustedChange */true);
                 } else {
-                    mLockPatternUtils.clearLock(null, userHandle);
+                    mLockPatternUtils.clearLock(null, userHandle,
+                            /*allowUntrustedChange */ true);
                 }
                 result = true;
             } else {

@@ -1680,7 +1680,6 @@ Lcom/android/internal/widget/LockPatternUtils;->patternToHash(Ljava/util/List;)[
 Lcom/android/internal/widget/LockPatternUtils;->patternToString(Ljava/util/List;)Ljava/lang/String;
 Lcom/android/internal/widget/LockPatternUtils;->reportFailedPasswordAttempt(I)V
 Lcom/android/internal/widget/LockPatternUtils;->reportSuccessfulPasswordAttempt(I)V
-Lcom/android/internal/widget/LockPatternUtils;->saveLockPassword(Ljava/lang/String;Ljava/lang/String;II)V
 Lcom/android/internal/widget/LockPatternUtils;->setLockoutAttemptDeadline(II)J
 Lcom/android/internal/widget/LockPatternUtils;->setLong(Ljava/lang/String;JI)V
 Lcom/android/internal/widget/LockPatternUtils;->setOwnerInfo(Ljava/lang/String;I)V
