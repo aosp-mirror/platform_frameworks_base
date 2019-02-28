@@ -240,7 +240,7 @@ public abstract class VibrationEffect implements Parcelable {
      *
      * @return The desired effect.
      */
-    public static VibrationEffect createPrebaked(@EffectType int effectId) {
+    public static VibrationEffect createPredefined(@EffectType int effectId) {
         return get(effectId, true);
     }
 
