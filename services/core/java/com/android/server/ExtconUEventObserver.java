@@ -162,15 +162,6 @@ public abstract class ExtconUEventObserver extends UEventObserver {
     /** Does the {@link /sys/class/extcon} directory exist */
     public static boolean extconExists() {
         File extconDir = new File("/sys/class/extcon");
-        boolean retVal = extconDir.exists() && extconDir.isDirectory();
-        // TODO(b/124364409): return the correct value after selinux policy is updated.
-        if (retVal) {
-            Slog.w(TAG, extconDir + " exists " + extconDir.exists() + " isDir "
-                    + extconDir.isDirectory()
-                    + " but reporting it does not exist until selinux policies are updated."
-                    + " see b/124364409"
-            );
-        }
-        return false;
+        return extconDir.exists() && extconDir.isDirectory();
     }
 }
