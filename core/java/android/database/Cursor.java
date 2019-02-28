@@ -17,6 +17,7 @@
 package android.database;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.ContentResolver;
 import android.net.Uri;
 import android.os.Bundle;
@@ -473,7 +474,7 @@ public interface Cursor extends Closeable {
      * ContentResolver.registerContentObserver} to find out about changes to this Cursor's
      * data. May be null if no notification URI has been set.
      */
-    default List<Uri> getNotificationUris() {
+    default @Nullable List<Uri> getNotificationUris() {
         final Uri notifyUri = getNotificationUri();
         return notifyUri == null ? null : Arrays.asList(notifyUri);
     }
