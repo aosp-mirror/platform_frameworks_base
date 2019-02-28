@@ -47,10 +47,12 @@ interface IConnectivityManager
 {
     Network getActiveNetwork();
     Network getActiveNetworkForUid(int uid, boolean ignoreBlocked);
+    @UnsupportedAppUsage
     NetworkInfo getActiveNetworkInfo();
     NetworkInfo getActiveNetworkInfoForUid(int uid, boolean ignoreBlocked);
     NetworkInfo getNetworkInfo(int networkType);
     NetworkInfo getNetworkInfoForUid(in Network network, int uid, boolean ignoreBlocked);
+    @UnsupportedAppUsage
     NetworkInfo[] getAllNetworkInfo();
     Network getNetworkForType(int networkType);
     Network[] getAllNetworks();
@@ -58,12 +60,14 @@ interface IConnectivityManager
 
     boolean isNetworkSupported(int networkType);
 
+    @UnsupportedAppUsage
     LinkProperties getActiveLinkProperties();
     LinkProperties getLinkPropertiesForType(int networkType);
     LinkProperties getLinkProperties(in Network network);
 
     NetworkCapabilities getNetworkCapabilities(in Network network);
 
+    @UnsupportedAppUsage
     NetworkState[] getAllNetworkState();
 
     NetworkQuotaInfo getActiveNetworkQuotaInfo();
@@ -75,6 +79,7 @@ interface IConnectivityManager
 
     int untether(String iface, String callerPkg);
 
+    @UnsupportedAppUsage
     int getLastTetherError(String iface);
 
     boolean isTetheringSupported(String callerPkg);
@@ -84,16 +89,21 @@ interface IConnectivityManager
 
     void stopTethering(int type, String callerPkg);
 
+    @UnsupportedAppUsage
     String[] getTetherableIfaces();
 
+    @UnsupportedAppUsage
     String[] getTetheredIfaces();
 
+    @UnsupportedAppUsage
     String[] getTetheringErroredIfaces();
 
     String[] getTetheredDhcpRanges();
 
+    @UnsupportedAppUsage
     String[] getTetherableUsbRegexs();
 
+    @UnsupportedAppUsage
     String[] getTetherableWifiRegexs();
 
     String[] getTetherableBluetoothRegexs();
@@ -118,6 +128,7 @@ interface IConnectivityManager
 
     VpnConfig getVpnConfig(int userId);
 
+    @UnsupportedAppUsage
     void startLegacyVpn(in VpnProfile profile);
 
     LegacyVpnInfo getLegacyVpnInfo(int userId);
