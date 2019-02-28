@@ -60,11 +60,17 @@ public abstract class ContentSuggestionsService extends Service {
         @Override
         public void provideContextImage(int taskId, GraphicBuffer contextImage,
                 Bundle imageContextRequestExtras) {
+
+            Bitmap wrappedBuffer = null;
+            if (contextImage != null) {
+                wrappedBuffer = Bitmap.wrapHardwareBuffer(
+                        HardwareBuffer.createFromGraphicBuffer(contextImage), null);
+            }
+
             mHandler.sendMessage(
                     obtainMessage(ContentSuggestionsService::processContextImage,
                             ContentSuggestionsService.this, taskId,
-                            Bitmap.wrapHardwareBuffer(
-                                    HardwareBuffer.createFromGraphicBuffer(contextImage), null),
+                            wrappedBuffer,
                             imageContextRequestExtras));
         }
 
