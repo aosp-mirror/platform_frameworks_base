@@ -5528,8 +5528,9 @@ message ScheduledJobConstraintChanged {
     optional com.android.server.job.ConstraintEnum constraint = 3;
 
     enum State {
-        UNSATISFIED = 0;
-        SATISFIED = 1;
+        UNKNOWN = 0;
+        UNSATISFIED = 1;
+        SATISFIED = 2;
     }
     optional State state = 4;
 }
