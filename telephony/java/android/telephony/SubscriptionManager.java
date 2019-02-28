@@ -1270,7 +1270,7 @@ public class SubscriptionManager {
         if (!userVisibleOnly || activeList == null) {
             return activeList;
         } else {
-            return activeList.stream().filter(subInfo -> !shouldHideSubscription(subInfo))
+            return activeList.stream().filter(subInfo -> isSubscriptionVisible(subInfo))
                     .collect(Collectors.toList());
         }
     }
@@ -2867,32 +2867,27 @@ public class SubscriptionManager {
     }
 
     /**
-     * Whether system UI should hide a subscription. If it's a bundled opportunistic
-     * subscription, it shouldn't show up in anywhere in Settings app, dialer app,
-     * or status bar. Exception is if caller is carrier app, in which case they will
+     * Whether a subscription is visible to API caller. If it's a bundled opportunistic
+     * subscription, it should be hidden anywhere in Settings, dialer, status bar etc.
+     * Exception is if caller owns carrier privilege, in which case they will
      * want to see their own hidden subscriptions.
      *
      * @param info the subscriptionInfo to check against.
-     * @return true if this subscription should be hidden.
+     * @return true if this subscription should be visible to the API caller.
      *
-     * @hide
      */
-    public boolean shouldHideSubscription(SubscriptionInfo info) {
+    private boolean isSubscriptionVisible(SubscriptionInfo info) {
         if (info == null) return false;
 
-        // If hasCarrierPrivileges or canManageSubscription returns true, it means caller
-        // has carrier privilege.
-        boolean hasCarrierPrivilegePermission = (info.isEmbedded() && canManageSubscription(info))
-                || TelephonyManager.from(mContext).hasCarrierPrivileges(info.getSubscriptionId());
+        // If subscription is NOT grouped opportunistic subscription, it's visible.
+        if (TextUtils.isEmpty(info.getGroupUuid()) || !info.isOpportunistic()) return true;
 
-        return isInvisibleSubscription(info) && !hasCarrierPrivilegePermission;
-    }
-
-    /**
-     * @hide
-     */
-    public static boolean isInvisibleSubscription(SubscriptionInfo info) {
-        return info != null && !TextUtils.isEmpty(info.getGroupUuid()) && info.isOpportunistic();
+        // If the caller is the carrier app and owns the subscription, it should be visible
+        // to the caller.
+        boolean hasCarrierPrivilegePermission = TelephonyManager.from(mContext)
+                .hasCarrierPrivileges(info.getSubscriptionId())
+                || (info.isEmbedded() && canManageSubscription(info));
+        return hasCarrierPrivilegePermission;
     }
 
     /**
@@ -2920,7 +2915,7 @@ public class SubscriptionManager {
             for (SubscriptionInfo info : availableList) {
                 // Opportunistic subscriptions are considered invisible
                 // to users so they should never be returned.
-                if (isInvisibleSubscription(info)) continue;
+                if (!isSubscriptionVisible(info)) continue;
 
                 String groupUuid = info.getGroupUuid();
                 if (groupUuid == null) {
