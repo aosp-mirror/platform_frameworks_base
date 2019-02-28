@@ -271,6 +271,10 @@ package android.app {
     method public void onOpActiveChanged(int, int, String, boolean);
   }
 
+  public class DownloadManager {
+    field public static final String COLUMN_MEDIASTORE_URI = "mediastore_uri";
+  }
+
   public final class NotificationChannel implements android.os.Parcelable {
     method public boolean isImportanceLockedByOEM();
     method public void setImportanceLockedByOEM(boolean);
