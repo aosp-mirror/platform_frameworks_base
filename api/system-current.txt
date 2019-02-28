@@ -1906,12 +1906,12 @@ package android.hardware.display {
 
   public static class BrightnessConfiguration.Builder {
     ctor public BrightnessConfiguration.Builder(float[], float[]);
-    method public android.hardware.display.BrightnessConfiguration.Builder addCorrectionByCategory(int, @NonNull android.hardware.display.BrightnessCorrection);
-    method public android.hardware.display.BrightnessConfiguration.Builder addCorrectionByPackageName(@NonNull String, @NonNull android.hardware.display.BrightnessCorrection);
-    method public android.hardware.display.BrightnessConfiguration build();
+    method @NonNull public android.hardware.display.BrightnessConfiguration.Builder addCorrectionByCategory(int, @NonNull android.hardware.display.BrightnessCorrection);
+    method @NonNull public android.hardware.display.BrightnessConfiguration.Builder addCorrectionByPackageName(@NonNull String, @NonNull android.hardware.display.BrightnessCorrection);
+    method @NonNull public android.hardware.display.BrightnessConfiguration build();
     method public int getMaxCorrectionsByCategory();
     method public int getMaxCorrectionsByPackageName();
-    method public android.hardware.display.BrightnessConfiguration.Builder setDescription(@Nullable String);
+    method @NonNull public android.hardware.display.BrightnessConfiguration.Builder setDescription(@Nullable String);
   }
 
   public final class BrightnessCorrection implements android.os.Parcelable {
