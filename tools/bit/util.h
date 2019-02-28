@@ -79,5 +79,10 @@ void split_lines(vector<string>* result, const string& str);
 
 string read_file(const string& filename);
 
+bool is_executable(const string& filename);
+
+string dirname(const string& filename);
+string leafname(const string& filename);
+
 #endif // UTIL_H
 
