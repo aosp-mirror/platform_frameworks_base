@@ -245,7 +245,7 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
          *
          * @param requireConfirmation
          */
-        public Builder setRequireConfirmation(boolean requireConfirmation) {
+        @NonNull public Builder setRequireConfirmation(boolean requireConfirmation) {
             mBundle.putBoolean(KEY_REQUIRE_CONFIRMATION, requireConfirmation);
             return this;
         }
@@ -255,7 +255,8 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
          * option to authenticate with their device PIN, pattern, or password. Developers should
          * first check {@link KeyguardManager#isDeviceSecure()} before enabling this. If the device
          * is not secure, {@link BiometricPrompt#BIOMETRIC_ERROR_NO_DEVICE_CREDENTIAL} will be
-         * returned in {@link AuthenticationCallback#onAuthenticationError(int, CharSequence)}}
+         * returned in {@link AuthenticationCallback#onAuthenticationError(int, CharSequence)}}.
+         * Defaults to false.
          *
          * Note that {@link #setNegativeButton(CharSequence, Executor,
          * DialogInterface.OnClickListener)} should not be set if this is set to true.
@@ -264,7 +265,7 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
          *               credentials (PIN, pattern, or password).
          * @return
          */
-        public Builder setAllowDeviceCredential(boolean enable) {
+        @NonNull public Builder setAllowDeviceCredential(boolean enable) {
             mBundle.putBoolean(KEY_ALLOW_DEVICE_CREDENTIAL, enable);
             return this;
         }
