@@ -28,6 +28,7 @@ import static android.view.WindowInsets.Type.compatSystemInsets;
 import static android.view.WindowInsets.Type.indexOf;
 
 import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
@@ -700,7 +701,8 @@ public final class WindowInsets {
      * @return the inset insets
      */
     @NonNull
-    public WindowInsets inset(int left, int top, int right, int bottom) {
+    public WindowInsets inset(@IntRange(from = 0) int left, @IntRange(from = 0) int top,
+            @IntRange(from = 0) int right, @IntRange(from = 0) int bottom) {
         Preconditions.checkArgumentNonnegative(left);
         Preconditions.checkArgumentNonnegative(top);
         Preconditions.checkArgumentNonnegative(right);
@@ -794,7 +796,7 @@ public final class WindowInsets {
     /**
      * Builder for WindowInsets.
      */
-    public static class Builder {
+    public static final class Builder {
 
         private final Insets[] mTypeInsetsMap;
         private final Insets[] mTypeMaxInsetsMap;
@@ -821,7 +823,7 @@ public final class WindowInsets {
          *
          * @param insets the instance to initialize from.
          */
-        public Builder(WindowInsets insets) {
+        public Builder(@NonNull WindowInsets insets) {
             mTypeInsetsMap = insets.mTypeInsetsMap.clone();
             mTypeMaxInsetsMap = insets.mTypeMaxInsetsMap.clone();
             mTypeVisibilityMap = insets.mTypeVisibilityMap.clone();

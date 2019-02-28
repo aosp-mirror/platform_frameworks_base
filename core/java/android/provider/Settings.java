@@ -7483,6 +7483,7 @@ public final class Settings {
          * @hide
          */
         @SystemApi
+        @TestApi
         public static final String DOZE_ALWAYS_ON = "doze_always_on";
 
         private static final Validator DOZE_ALWAYS_ON_VALIDATOR = BOOLEAN_VALIDATOR;
@@ -11416,7 +11417,7 @@ public final class Settings {
         /**
          * Feature flag to enable or disable the activity starts logging feature.
          * Type: int (0 for false, 1 for true)
-         * Default: 0
+         * Default: 1
          * @hide
          */
         public static final String ACTIVITY_STARTS_LOGGING_ENABLED
@@ -14200,10 +14201,24 @@ public final class Settings {
          * Configuration flags for SQLite Compatibility WAL. Encoded as a key-value list, separated
          * by commas. E.g.: compatibility_wal_supported=true, wal_syncmode=OFF
          *
-         * Supported keys:
-         * compatibility_wal_supported      (boolean)
-         * wal_syncmode       (String)
-         * truncate_size      (int)
+         * Supported keys:<br/>
+         * <li>
+         * <ul> {@code legacy_compatibility_wal_enabled} : A {code boolean} flag that determines
+         * whether or not "compatibility WAL" mode is enabled by default. This is a legacy flag
+         * and is honoured on Android Q and higher. This flag will be removed in a future release.
+         * </ul>
+         * <ul> {@code wal_syncmode} : A {@code String} representing the synchronization mode to use
+         * when WAL is enabled, either via {@code legacy_compatibility_wal_enabled} or using the
+         * obsolete {@code compatibility_wal_supported} flag.
+         * </ul>
+         * <ul> {@code truncate_size} : A {@code int} flag that specifies the truncate size of the
+         * WAL journal.
+         * </ul>
+         * <ul> {@code compatibility_wal_supported} : A {code boolean} flag that specifies whether
+         * the legacy "compatibility WAL" mode is enabled by default. This flag is obsolete and is
+         * only supported on Android Pie.
+         * </ul>
+         * </li>
          *
          * @hide
          */

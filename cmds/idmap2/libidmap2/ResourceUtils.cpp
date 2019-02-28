@@ -33,10 +33,10 @@ using android::util::Utf16ToUtf8;
 
 namespace android::idmap2::utils {
 
-Result<std::string> WARN_UNUSED ResToTypeEntryName(const AssetManager2& am, ResourceId resid) {
+Result<std::string> ResToTypeEntryName(const AssetManager2& am, ResourceId resid) {
   AssetManager2::ResourceName name;
   if (!am.GetResourceName(resid, &name)) {
-    return {};
+    return Error("no resource 0x%08x in asset manager", resid);
   }
   std::string out;
   if (name.type != nullptr) {
@@ -50,36 +50,31 @@ Result<std::string> WARN_UNUSED ResToTypeEntryName(const AssetManager2& am, Reso
   } else {
     out += Utf16ToUtf8(StringPiece16(name.entry16, name.entry_len));
   }
-  return {out};
+  return out;
 }
 
 Result<OverlayManifestInfo> ExtractOverlayManifestInfo(const std::string& path,
-                                                       std::ostream& out_error,
                                                        bool assert_overlay) {
   std::unique_ptr<const ZipFile> zip = ZipFile::Open(path);
   if (!zip) {
-    out_error << "error: failed to open " << path << " as a zip file" << std::endl;
-    return kResultError;
+    return Error("failed to open %s as a zip file", path.c_str());
   }
 
   std::unique_ptr<const MemoryChunk> entry = zip->Uncompress("AndroidManifest.xml");
   if (!entry) {
-    out_error << "error: failed to uncompress AndroidManifest.xml from " << path << std::endl;
-    return kResultError;
+    return Error("failed to uncompress AndroidManifest.xml from %s", path.c_str());
   }
 
   std::unique_ptr<const Xml> xml = Xml::Create(entry->buf, entry->size);
   if (!xml) {
-    out_error << "error: failed to parse AndroidManifest.xml from " << path << std::endl;
-    return kResultError;
+    return Error("failed to parse AndroidManifest.xml from %s", path.c_str());
   }
 
   OverlayManifestInfo info{};
   const auto tag = xml->FindTag("overlay");
   if (!tag) {
     if (assert_overlay) {
-      out_error << "error: <overlay> missing from AndroidManifest.xml of " << path << std::endl;
-      return kResultError;
+      return Error("<overlay> missing from AndroidManifest.xml of %s", path.c_str());
     }
     return info;
   }
@@ -87,8 +82,7 @@ Result<OverlayManifestInfo> ExtractOverlayManifestInfo(const std::string& path,
   auto iter = tag->find("targetPackage");
   if (iter == tag->end()) {
     if (assert_overlay) {
-      out_error << "error: android:targetPackage missing from <overlay> of " << path << std::endl;
-      return kResultError;
+      return Error("android:targetPackage missing from <overlay> of %s", path.c_str());
     }
   } else {
     info.target_package = iter->second;

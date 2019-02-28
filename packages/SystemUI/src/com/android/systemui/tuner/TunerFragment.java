@@ -19,6 +19,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.DialogInterface;
+import android.hardware.display.AmbientDisplayConfiguration;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -29,7 +30,6 @@ import android.view.MenuItem;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragment;
 
-import com.android.internal.hardware.AmbientDisplayConfiguration;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.R;

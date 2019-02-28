@@ -759,11 +759,11 @@ void PointerController::fadeOutAndReleaseAllSpotsLocked() {
 
 void PointerController::loadResourcesLocked() REQUIRES(mLock) {
     mPolicy->loadPointerResources(&mResources, mLocked.viewport.displayId);
+    mPolicy->loadPointerIcon(&mLocked.pointerIcon, mLocked.viewport.displayId);
 
+    mLocked.additionalMouseResources.clear();
+    mLocked.animationResources.clear();
     if (mLocked.presentation == PRESENTATION_POINTER) {
-        mLocked.additionalMouseResources.clear();
-        mLocked.animationResources.clear();
-        mPolicy->loadPointerIcon(&mLocked.pointerIcon, mLocked.viewport.displayId);
         mPolicy->loadAdditionalMouseResources(&mLocked.additionalMouseResources,
                 &mLocked.animationResources, mLocked.viewport.displayId);
     }

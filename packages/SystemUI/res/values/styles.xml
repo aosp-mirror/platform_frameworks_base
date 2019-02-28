@@ -216,6 +216,12 @@
         <item name="android:fontFamily">@*android:string/config_bodyFontFamily</item>
     </style>
 
+    <!-- This is hard coded to be sans-serif-condensed to match the icons -->
+    <style name="TextAppearance.RATBadge" parent="@style/TextAppearance.QS.TileLabel.Secondary">
+        <item name="android:fontFamily">sans-serif-condensed</item>
+        <item name="android:textSize">@dimen/celltile_rat_type_size</item>
+    </style>
+
     <style name="TextAppearance.QS.CarrierInfo">
         <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
         <item name="android:textSize">@dimen/qs_carrier_info_text_size</item>

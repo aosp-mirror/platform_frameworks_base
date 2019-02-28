@@ -25,8 +25,7 @@
     <View
         android:id="@+id/bar_view"
         android:layout_width="8dp"
-        android:layout_height="wrap_content"
-        android:background="?android:attr/colorAccent"/>
+        android:layout_height="wrap_content"/>
 
     <ImageView
         android:id="@+id/icon_view"

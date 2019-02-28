@@ -17,7 +17,6 @@
 package android.ext.services.notification;
 
 import static android.ext.services.notification.AssistantSettings.DEFAULT_MAX_SUGGESTIONS;
-import static android.provider.DeviceConfig.NotificationAssistant;
 import static android.provider.DeviceConfig.setProperty;
 
 import static junit.framework.Assert.assertFalse;
@@ -30,11 +29,14 @@ import static org.mockito.Mockito.verify;
 import android.content.ContentResolver;
 import android.os.Handler;
 import android.os.Looper;
+import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 import android.support.test.uiautomator.UiDevice;
 import android.testing.TestableContext;
+
+import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 
 import org.junit.After;
 import org.junit.Before;
@@ -49,7 +51,7 @@ import java.io.IOException;
 @RunWith(AndroidJUnit4.class)
 public class AssistantSettingsTest {
     private static final String CLEAR_DEVICE_CONFIG_KEY_CMD =
-            "device_config delete " + NotificationAssistant.NAMESPACE;
+            "device_config delete " + DeviceConfig.NAMESPACE_SYSTEMUI;
 
     private static final int USER_ID = 5;
 
@@ -87,13 +89,13 @@ public class AssistantSettingsTest {
     @Test
     public void testGenerateRepliesDisabled() {
         setProperty(
-                NotificationAssistant.NAMESPACE,
-                NotificationAssistant.GENERATE_REPLIES,
+                DeviceConfig.NAMESPACE_SYSTEMUI,
+                SystemUiDeviceConfigFlags.NAS_GENERATE_REPLIES,
                 "false",
                 false /* makeDefault */);
         mAssistantSettings.onDeviceConfigPropertyChanged(
-                NotificationAssistant.NAMESPACE,
-                NotificationAssistant.GENERATE_REPLIES,
+                DeviceConfig.NAMESPACE_SYSTEMUI,
+                SystemUiDeviceConfigFlags.NAS_GENERATE_REPLIES,
                 "false");
 
         assertFalse(mAssistantSettings.mGenerateReplies);
@@ -102,13 +104,13 @@ public class AssistantSettingsTest {
     @Test
     public void testGenerateRepliesEnabled() {
         setProperty(
-                NotificationAssistant.NAMESPACE,
-                NotificationAssistant.GENERATE_REPLIES,
+                DeviceConfig.NAMESPACE_SYSTEMUI,
+                SystemUiDeviceConfigFlags.NAS_GENERATE_REPLIES,
                 "true",
                 false /* makeDefault */);
         mAssistantSettings.onDeviceConfigPropertyChanged(
-                NotificationAssistant.NAMESPACE,
-                NotificationAssistant.GENERATE_REPLIES,
+                DeviceConfig.NAMESPACE_SYSTEMUI,
+                SystemUiDeviceConfigFlags.NAS_GENERATE_REPLIES,
                 "true");
 
         assertTrue(mAssistantSettings.mGenerateReplies);
@@ -117,25 +119,25 @@ public class AssistantSettingsTest {
     @Test
     public void testGenerateRepliesEmptyFlag() {
         setProperty(
-                NotificationAssistant.NAMESPACE,
-                NotificationAssistant.GENERATE_REPLIES,
+                DeviceConfig.NAMESPACE_SYSTEMUI,
+                SystemUiDeviceConfigFlags.NAS_GENERATE_REPLIES,
                 "false",
                 false /* makeDefault */);
         mAssistantSettings.onDeviceConfigPropertyChanged(
-                NotificationAssistant.NAMESPACE,
-                NotificationAssistant.GENERATE_REPLIES,
+                DeviceConfig.NAMESPACE_SYSTEMUI,
+                SystemUiDeviceConfigFlags.NAS_GENERATE_REPLIES,
                 "false");
 
         assertFalse(mAssistantSettings.mGenerateReplies);
 
         setProperty(
-                NotificationAssistant.NAMESPACE,
-                NotificationAssistant.GENERATE_REPLIES,
+                DeviceConfig.NAMESPACE_SYSTEMUI,
+                SystemUiDeviceConfigFlags.NAS_GENERATE_REPLIES,
                 "",
                 false /* makeDefault */);
         mAssistantSettings.onDeviceConfigPropertyChanged(
-                NotificationAssistant.NAMESPACE,
-                NotificationAssistant.GENERATE_REPLIES,
+                DeviceConfig.NAMESPACE_SYSTEMUI,
+                SystemUiDeviceConfigFlags.NAS_GENERATE_REPLIES,
                 "");
 
         // Go back to the default value.
@@ -145,13 +147,13 @@ public class AssistantSettingsTest {
     @Test
     public void testGenerateActionsDisabled() {
         setProperty(
-                NotificationAssistant.NAMESPACE,
-                NotificationAssistant.GENERATE_ACTIONS,
+                DeviceConfig.NAMESPACE_SYSTEMUI,
+                SystemUiDeviceConfigFlags.NAS_GENERATE_ACTIONS,
                 "false",
                 false /* makeDefault */);
         mAssistantSettings.onDeviceConfigPropertyChanged(
-                NotificationAssistant.NAMESPACE,
-                NotificationAssistant.GENERATE_ACTIONS,
+                DeviceConfig.NAMESPACE_SYSTEMUI,
+                SystemUiDeviceConfigFlags.NAS_GENERATE_ACTIONS,
                 "false");
 
         assertFalse(mAssistantSettings.mGenerateActions);
@@ -160,13 +162,13 @@ public class AssistantSettingsTest {
     @Test
     public void testGenerateActionsEnabled() {
         setProperty(
-                NotificationAssistant.NAMESPACE,
-                NotificationAssistant.GENERATE_ACTIONS,
+                DeviceConfig.NAMESPACE_SYSTEMUI,
+                SystemUiDeviceConfigFlags.NAS_GENERATE_ACTIONS,
                 "true",
                 false /* makeDefault */);
         mAssistantSettings.onDeviceConfigPropertyChanged(
-                NotificationAssistant.NAMESPACE,
-                NotificationAssistant.GENERATE_ACTIONS,
+                DeviceConfig.NAMESPACE_SYSTEMUI,
+                SystemUiDeviceConfigFlags.NAS_GENERATE_ACTIONS,
                 "true");
 
         assertTrue(mAssistantSettings.mGenerateActions);
@@ -175,25 +177,25 @@ public class AssistantSettingsTest {
     @Test
     public void testGenerateActionsEmptyFlag() {
         setProperty(
-                NotificationAssistant.NAMESPACE,
-                NotificationAssistant.GENERATE_ACTIONS,
+                DeviceConfig.NAMESPACE_SYSTEMUI,
+                SystemUiDeviceConfigFlags.NAS_GENERATE_ACTIONS,
                 "false",
                 false /* makeDefault */);
         mAssistantSettings.onDeviceConfigPropertyChanged(
-                NotificationAssistant.NAMESPACE,
-                NotificationAssistant.GENERATE_ACTIONS,
+                DeviceConfig.NAMESPACE_SYSTEMUI,
+                SystemUiDeviceConfigFlags.NAS_GENERATE_ACTIONS,
                 "false");
 
         assertFalse(mAssistantSettings.mGenerateActions);
 
         setProperty(
-                NotificationAssistant.NAMESPACE,
-                NotificationAssistant.GENERATE_ACTIONS,
+                DeviceConfig.NAMESPACE_SYSTEMUI,
+                SystemUiDeviceConfigFlags.NAS_GENERATE_ACTIONS,
                 "",
                 false /* makeDefault */);
         mAssistantSettings.onDeviceConfigPropertyChanged(
-                NotificationAssistant.NAMESPACE,
-                NotificationAssistant.GENERATE_ACTIONS,
+                DeviceConfig.NAMESPACE_SYSTEMUI,
+                SystemUiDeviceConfigFlags.NAS_GENERATE_ACTIONS,
                 "");
 
         // Go back to the default value.
@@ -203,13 +205,13 @@ public class AssistantSettingsTest {
     @Test
     public void testMaxMessagesToExtract() {
         setProperty(
-                NotificationAssistant.NAMESPACE,
-                NotificationAssistant.MAX_MESSAGES_TO_EXTRACT,
+                DeviceConfig.NAMESPACE_SYSTEMUI,
+                SystemUiDeviceConfigFlags.NAS_MAX_MESSAGES_TO_EXTRACT,
                 "10",
                 false /* makeDefault */);
         mAssistantSettings.onDeviceConfigPropertyChanged(
-                NotificationAssistant.NAMESPACE,
-                NotificationAssistant.MAX_MESSAGES_TO_EXTRACT,
+                DeviceConfig.NAMESPACE_SYSTEMUI,
+                SystemUiDeviceConfigFlags.NAS_MAX_MESSAGES_TO_EXTRACT,
                 "10");
 
         assertEquals(10, mAssistantSettings.mMaxMessagesToExtract);
@@ -218,13 +220,13 @@ public class AssistantSettingsTest {
     @Test
     public void testMaxSuggestions() {
         setProperty(
-                NotificationAssistant.NAMESPACE,
-                NotificationAssistant.MAX_SUGGESTIONS,
+                DeviceConfig.NAMESPACE_SYSTEMUI,
+                SystemUiDeviceConfigFlags.NAS_MAX_SUGGESTIONS,
                 "5",
                 false /* makeDefault */);
         mAssistantSettings.onDeviceConfigPropertyChanged(
-                NotificationAssistant.NAMESPACE,
-                NotificationAssistant.MAX_SUGGESTIONS,
+                DeviceConfig.NAMESPACE_SYSTEMUI,
+                SystemUiDeviceConfigFlags.NAS_MAX_SUGGESTIONS,
                 "5");
 
         assertEquals(5, mAssistantSettings.mMaxSuggestions);
@@ -233,8 +235,8 @@ public class AssistantSettingsTest {
     @Test
     public void testMaxSuggestionsEmpty() {
         mAssistantSettings.onDeviceConfigPropertyChanged(
-                NotificationAssistant.NAMESPACE,
-                NotificationAssistant.MAX_SUGGESTIONS,
+                DeviceConfig.NAMESPACE_SYSTEMUI,
+                SystemUiDeviceConfigFlags.NAS_MAX_SUGGESTIONS,
                 "");
 
         assertEquals(DEFAULT_MAX_SUGGESTIONS, mAssistantSettings.mMaxSuggestions);
@@ -278,13 +280,14 @@ public class AssistantSettingsTest {
     private static void clearDeviceConfig() throws IOException {
         UiDevice uiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
         uiDevice.executeShellCommand(
-                CLEAR_DEVICE_CONFIG_KEY_CMD + " " + NotificationAssistant.GENERATE_ACTIONS);
+                CLEAR_DEVICE_CONFIG_KEY_CMD + " " + SystemUiDeviceConfigFlags.NAS_GENERATE_ACTIONS);
         uiDevice.executeShellCommand(
-                CLEAR_DEVICE_CONFIG_KEY_CMD + " " + NotificationAssistant.GENERATE_REPLIES);
+                CLEAR_DEVICE_CONFIG_KEY_CMD + " " + SystemUiDeviceConfigFlags.NAS_GENERATE_REPLIES);
         uiDevice.executeShellCommand(
-                CLEAR_DEVICE_CONFIG_KEY_CMD + " " + NotificationAssistant.MAX_MESSAGES_TO_EXTRACT);
+                CLEAR_DEVICE_CONFIG_KEY_CMD + " "
+                + SystemUiDeviceConfigFlags.NAS_MAX_MESSAGES_TO_EXTRACT);
         uiDevice.executeShellCommand(
-                CLEAR_DEVICE_CONFIG_KEY_CMD + " " + NotificationAssistant.MAX_SUGGESTIONS);
+                CLEAR_DEVICE_CONFIG_KEY_CMD + " " + SystemUiDeviceConfigFlags.NAS_MAX_SUGGESTIONS);
     }
 
 }

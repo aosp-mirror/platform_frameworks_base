@@ -165,6 +165,8 @@ cc_library_shared {
         "android_media_AudioTrack.cpp",
         "android_media_AudioAttributes.cpp",
         "android_media_AudioProductStrategies.cpp",
+        "android_media_AudioVolumeGroups.cpp",
+        "android_media_AudioVolumeGroupCallback.cpp",
         "android_media_DeviceCallback.cpp",
         "android_media_JetPlayer.cpp",
         "android_media_MediaMetricsJNI.cpp",

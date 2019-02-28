@@ -21,6 +21,7 @@ import static android.media.MediaConstants.KEY_PACKAGE_NAME;
 import static android.media.MediaConstants.KEY_PID;
 import static android.media.MediaConstants.KEY_PLAYBACK_ACTIVE;
 import static android.media.MediaConstants.KEY_SESSION2LINK;
+import static android.media.MediaConstants.KEY_TOKEN_EXTRAS;
 import static android.media.Session2Command.RESULT_ERROR_UNKNOWN_ERROR;
 import static android.media.Session2Command.RESULT_INFO_SKIPPED;
 import static android.media.Session2Token.TYPE_SESSION;
@@ -94,7 +95,8 @@ public class MediaSession2 implements AutoCloseable {
     private ForegroundServiceEventCallback mForegroundServiceEventCallback;
 
     MediaSession2(@NonNull Context context, @NonNull String id, PendingIntent sessionActivity,
-            @NonNull Executor callbackExecutor, @NonNull SessionCallback callback) {
+            @NonNull Executor callbackExecutor, @NonNull SessionCallback callback,
+            Bundle tokenExtras) {
         synchronized (MediaSession2.class) {
             if (SESSION_ID_LIST.contains(id)) {
                 throw new IllegalStateException("Session ID must be unique. ID=" + id);
@@ -109,7 +111,7 @@ public class MediaSession2 implements AutoCloseable {
         mCallback = callback;
         mSessionStub = new Session2Link(this);
         mSessionToken = new Session2Token(Process.myUid(), TYPE_SESSION, context.getPackageName(),
-                mSessionStub);
+                mSessionStub, tokenExtras);
         mSessionManager = (MediaSessionManager) mContext.getSystemService(
                 Context.MEDIA_SESSION_SERVICE);
         // NOTE: mResultHandler uses main looper, so this MUST NOT be blocked.
@@ -339,6 +341,7 @@ public class MediaSession2 implements AutoCloseable {
                 connectionResult.putParcelable(KEY_ALLOWED_COMMANDS,
                         controllerInfo.mAllowedCommands);
                 connectionResult.putBoolean(KEY_PLAYBACK_ACTIVE, isPlaybackActive());
+                connectionResult.putBundle(KEY_TOKEN_EXTRAS, mSessionToken.getExtras());
 
                 // Double check if session is still there, because close() can be called in
                 // another thread.
@@ -444,6 +447,7 @@ public class MediaSession2 implements AutoCloseable {
         private PendingIntent mSessionActivity;
         private Executor mCallbackExecutor;
         private SessionCallback mCallback;
+        private Bundle mExtras;
 
         /**
          * Creates a builder for {@link MediaSession2}.
@@ -507,6 +511,18 @@ public class MediaSession2 implements AutoCloseable {
         }
 
         /**
+         * Set extras for the session token.
+         *
+         * @return The Builder to allow chaining
+         * @see Session2Token#getExtras()
+         */
+        @NonNull
+        public Builder setExtras(@Nullable Bundle extras) {
+            mExtras = extras;
+            return this;
+        }
+
+        /**
          * Build {@link MediaSession2}.
          *
          * @return a new session
@@ -525,7 +541,7 @@ public class MediaSession2 implements AutoCloseable {
                 mId = "";
             }
             MediaSession2 session2 = new MediaSession2(mContext, mId, mSessionActivity,
-                    mCallbackExecutor, mCallback);
+                    mCallbackExecutor, mCallback, mExtras);
 
             // Notify framework about the newly create session after the constructor is finished.
             // Otherwise, framework may access the session before the initialization is finished.

@@ -27,6 +27,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
+import android.content.pm.ServiceInfo;
 import android.content.pm.ServiceInfo.ForegroundServiceType;
 import android.content.res.Configuration;
 import android.os.Build;
@@ -733,7 +734,7 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
    * {@link android.R.attr#foregroundServiceType} flags.
    * @throws IllegalArgumentException if param foregroundServiceType is not subset of manifest
    *     attribute {@link android.R.attr#foregroundServiceType}.
-   * @see {@link android.content.pm.ServiceInfo} for the set of FOREGROUND_SERVICE_TYPE flags.
+   * @see android.content.pm.ServiceInfo#FOREGROUND_SERVICE_TYPE_MANIFEST
    */
     public final void startForeground(int id, @NonNull Notification notification,
             @ForegroundServiceType int foregroundServiceType) {
@@ -772,6 +773,30 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
                     flags, 0);
         } catch (RemoteException ex) {
         }
+    }
+
+    /**
+     * If the service has become a foreground service by calling
+     * {@link #startForeground(int, Notification)}
+     * or {@link #startForeground(int, Notification, int)}, {@link #getForegroundServiceType()}
+     * returns the current foreground service type.
+     *
+     * <p>If there is no foregroundServiceType specified
+     * in manifest, {@link ServiceInfo#FOREGROUND_SERVICE_TYPE_NONE} is returned. </p>
+     *
+     * <p>If the service is not a foreground service,
+     * {@link ServiceInfo#FOREGROUND_SERVICE_TYPE_NONE} is returned.</p>
+     *
+     * @return current foreground service type flags.
+     */
+    public final @ForegroundServiceType int getForegroundServiceType() {
+        int ret = ServiceInfo.FOREGROUND_SERVICE_TYPE_NONE;
+        try {
+            ret = mActivityManager.getForegroundServiceType(
+                    new ComponentName(this, mClassName), mToken);
+        } catch (RemoteException ex) {
+        }
+        return ret;
     }
 
     /**

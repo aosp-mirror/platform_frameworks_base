@@ -205,6 +205,9 @@ class StorageManagerService extends IStorageManager.Stub
 
     private static final boolean ENABLE_ISOLATED_STORAGE = StorageManager.hasIsolatedStorage();
 
+    private static final boolean ENABLE_LEGACY_GREYLIST = SystemProperties
+            .getBoolean(StorageManager.PROP_LEGACY_GREYLIST, true);
+
     public static class Lifecycle extends SystemService {
         private StorageManagerService mStorageManagerService;
 
@@ -2289,7 +2292,26 @@ class StorageManagerService extends IStorageManager.Stub
                 refreshIsolatedStorageSettings();
 
                 // Perform hard reboot to kick policy into place
-                mContext.getSystemService(PowerManager.class).reboot(null);
+                mHandler.post(() -> {
+                    mContext.getSystemService(PowerManager.class).reboot(null);
+                });
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        if ((mask & StorageManager.DEBUG_LEGACY_GREYLIST) != 0) {
+            final boolean enabled = (flags & StorageManager.DEBUG_LEGACY_GREYLIST) != 0;
+
+            final long token = Binder.clearCallingIdentity();
+            try {
+                SystemProperties.set(StorageManager.PROP_LEGACY_GREYLIST,
+                        Boolean.toString(enabled));
+
+                // Perform hard reboot to kick policy into place
+                mHandler.post(() -> {
+                    mContext.getSystemService(PowerManager.class).reboot(null);
+                });
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -3675,16 +3697,17 @@ class StorageManagerService extends IStorageManager.Stub
             } else if (mPmInternal.isInstantApp(packageName, UserHandle.getUserId(uid))) {
                 return Zygote.MOUNT_EXTERNAL_NONE;
             } else {
-                // STOPSHIP: remove this temporary workaround once developers
-                // fix bugs where they're opening _data paths in native code
-                switch (packageName) {
-                    case "com.facebook.katana": // b/123996076
-                    case "jp.naver.line.android": // b/124767356
-                    case "com.mxtech.videoplayer.ad": // b/124531483
-                        return Zygote.MOUNT_EXTERNAL_LEGACY;
-                    default:
-                        return Zygote.MOUNT_EXTERNAL_WRITE;
+                if (ENABLE_LEGACY_GREYLIST) {
+                    // STOPSHIP: remove this temporary workaround once developers
+                    // fix bugs where they're opening _data paths in native code
+                    switch (packageName) {
+                        case "com.facebook.katana": // b/123996076
+                        case "jp.naver.line.android": // b/124767356
+                        case "com.mxtech.videoplayer.ad": // b/124531483
+                            return Zygote.MOUNT_EXTERNAL_LEGACY;
+                    }
                 }
+                return Zygote.MOUNT_EXTERNAL_WRITE;
             }
         } catch (RemoteException e) {
             // Should not happen

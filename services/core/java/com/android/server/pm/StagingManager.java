@@ -39,6 +39,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
+import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Slog;
@@ -68,15 +69,18 @@ public class StagingManager {
     private final PackageInstallerService mPi;
     private final PackageManagerService mPm;
     private final ApexManager mApexManager;
+    private final PowerManager mPowerManager;
     private final Handler mBgHandler;
 
     @GuardedBy("mStagedSessions")
     private final SparseArray<PackageInstallerSession> mStagedSessions = new SparseArray<>();
 
-    StagingManager(PackageManagerService pm, PackageInstallerService pi, ApexManager am) {
+    StagingManager(PackageManagerService pm, PackageInstallerService pi, ApexManager am,
+            Context context) {
         mPm = pm;
         mPi = pi;
         mApexManager = am;
+        mPowerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
         mBgHandler = BackgroundThread.getHandler();
     }
 
@@ -140,12 +144,40 @@ public class StagingManager {
     private boolean submitSessionToApexService(@NonNull PackageInstallerSession session,
                                                List<PackageInstallerSession> childSessions,
                                                ApexInfoList apexInfoList) {
-        return mApexManager.submitStagedSession(
+        boolean submittedToApexd = mApexManager.submitStagedSession(
                 session.sessionId,
                 childSessions != null
                         ? childSessions.stream().mapToInt(s -> s.sessionId).toArray() :
                         new int[]{},
                 apexInfoList);
+        if (!submittedToApexd) {
+            session.setStagedSessionFailed(
+                    SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
+                    "APEX staging failed, check logcat messages from apexd for more details.");
+            return false;
+        }
+        for (ApexInfo newPackage : apexInfoList.apexInfos) {
+            PackageInfo activePackage = mApexManager.getActivePackage(newPackage.packageName);
+            if (activePackage == null) {
+                continue;
+            }
+            long activeVersion = activePackage.applicationInfo.longVersionCode;
+            boolean allowsDowngrade = PackageManagerServiceUtils.isDowngradePermitted(
+                    session.params.installFlags, activePackage.applicationInfo.flags);
+            if (activeVersion > newPackage.versionCode && !allowsDowngrade) {
+                session.setStagedSessionFailed(
+                        SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
+                        "Downgrade of APEX package " + newPackage.packageName
+                                + " is not allowed. Active version: " + activeVersion
+                                + " attempted: " + newPackage.versionCode);
+
+                if (!mApexManager.abortActiveSession()) {
+                    Slog.e(TAG, "Failed to abort apex session " + session.sessionId);
+                }
+                return false;
+            }
+        }
+        return true;
     }
 
     private static boolean isApexSession(@NonNull PackageInstallerSession session) {
@@ -180,9 +212,7 @@ public class StagingManager {
         }
 
         if (!success) {
-            session.setStagedSessionFailed(
-                    SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
-                    "APEX staging failed, check logcat messages from apexd for more details.");
+            // submitSessionToApexService will populate error.
             return;
         }
 
@@ -286,6 +316,20 @@ public class StagingManager {
             session.setStagedSessionFailed(SessionInfo.STAGED_SESSION_ACTIVATION_FAILED,
                     "Staged installation of APKs failed. Check logcat messages for"
                         + "more information.");
+
+            if (!hasApex) {
+                return;
+            }
+
+            if (!mApexManager.abortActiveSession()) {
+                Slog.e(TAG, "Failed to abort APEXd session");
+            } else {
+                Slog.e(TAG,
+                        "Successfully aborted apexd session. Rebooting device in order to revert "
+                                + "to the previous state of APEXd.");
+                mPowerManager.reboot(null);
+            }
+
             return;
         }
 
@@ -473,8 +517,10 @@ public class StagingManager {
     }
 
     private static boolean isApexSessionFailed(ApexSessionInfo apexSessionInfo) {
+        // isRollbackInProgress is included to cover the scenario, when a device is rebooted in
+        // during the rollback, and apexd fails to resume the rollback after reboot.
         return apexSessionInfo.isActivationFailed || apexSessionInfo.isUnknown
-                || apexSessionInfo.isRolledBack;
+                || apexSessionInfo.isRolledBack || apexSessionInfo.isRollbackInProgress;
     }
 
     @GuardedBy("mStagedSessions")

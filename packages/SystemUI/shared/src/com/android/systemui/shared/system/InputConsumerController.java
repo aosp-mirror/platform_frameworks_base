@@ -27,26 +27,26 @@ import android.os.RemoteException;
 import android.util.Log;
 import android.view.BatchedInputEventReceiver;
 import android.view.Choreographer;
+import android.view.IWindowManager;
 import android.view.InputChannel;
 import android.view.InputEvent;
-import android.view.IWindowManager;
-import android.view.MotionEvent;
 import android.view.WindowManagerGlobal;
 
 import java.io.PrintWriter;
 
 /**
- * Manages the input consumer that allows the SystemUI to directly receive touch input.
+ * Manages the input consumer that allows the SystemUI to directly receive input.
  */
 public class InputConsumerController {
 
     private static final String TAG = InputConsumerController.class.getSimpleName();
 
     /**
-     * Listener interface for callers to subscribe to touch events.
+     * Listener interface for callers to subscribe to input events.
      */
-    public interface TouchListener {
-        boolean onTouchEvent(MotionEvent ev);
+    public interface InputListener {
+        /** Handles any input event. */
+        boolean onInputEvent(InputEvent ev);
     }
 
     /**
@@ -71,9 +71,8 @@ public class InputConsumerController {
         public void onInputEvent(InputEvent event) {
             boolean handled = true;
             try {
-                if (mListener != null && event instanceof MotionEvent) {
-                    MotionEvent ev = (MotionEvent) event;
-                    handled = mListener.onTouchEvent(ev);
+                if (mListener != null) {
+                    handled = mListener.onInputEvent(event);
                 }
             } finally {
                 finishInputEvent(event, handled);
@@ -86,7 +85,7 @@ public class InputConsumerController {
     private final String mName;
 
     private InputEventReceiver mInputEventReceiver;
-    private TouchListener mListener;
+    private InputListener mListener;
     private RegistrationListener mRegistrationListener;
 
     /**
@@ -115,9 +114,9 @@ public class InputConsumerController {
     }
 
     /**
-     * Sets the touch listener.
+     * Sets the input listener.
      */
-    public void setTouchListener(TouchListener listener) {
+    public void setInputListener(InputListener listener) {
         mListener = listener;
     }
 

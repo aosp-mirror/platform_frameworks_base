@@ -190,22 +190,30 @@ class LockSettingsShellCommand extends ShellCommand {
     }
 
     private void runSetPattern() {
-        mLockPatternUtils.saveLockPattern(stringToPattern(mNew), mOld, mCurrentUserId);
+        byte[] oldBytes = mOld != null ? mOld.getBytes() : null;
+        mLockPatternUtils.saveLockPattern(stringToPattern(mNew), oldBytes, mCurrentUserId);
         getOutPrintWriter().println("Pattern set to '" + mNew + "'");
     }
 
     private void runSetPassword() {
-        mLockPatternUtils.saveLockPassword(mNew, mOld, PASSWORD_QUALITY_ALPHABETIC, mCurrentUserId);
+        byte[] newBytes = mNew != null ? mNew.getBytes() : null;
+        byte[] oldBytes = mOld != null ? mOld.getBytes() : null;
+        mLockPatternUtils.saveLockPassword(newBytes, oldBytes, PASSWORD_QUALITY_ALPHABETIC,
+                mCurrentUserId);
         getOutPrintWriter().println("Password set to '" + mNew + "'");
     }
 
     private void runSetPin() {
-        mLockPatternUtils.saveLockPassword(mNew, mOld, PASSWORD_QUALITY_NUMERIC, mCurrentUserId);
+        byte[] newBytes = mNew != null ? mNew.getBytes() : null;
+        byte[] oldBytes = mOld != null ? mOld.getBytes() : null;
+        mLockPatternUtils.saveLockPassword(newBytes, oldBytes, PASSWORD_QUALITY_NUMERIC,
+                mCurrentUserId);
         getOutPrintWriter().println("Pin set to '" + mNew + "'");
     }
 
     private void runClear() {
-        mLockPatternUtils.clearLock(mOld, mCurrentUserId);
+        byte[] oldBytes = mOld != null ? mOld.getBytes() : null;
+        mLockPatternUtils.clearLock(oldBytes, mCurrentUserId);
         getOutPrintWriter().println("Lock credential cleared");
     }
 
@@ -232,7 +240,8 @@ class LockSettingsShellCommand extends ShellCommand {
             try {
                 final boolean result;
                 if (havePassword) {
-                    result = mLockPatternUtils.checkPassword(mOld, mCurrentUserId);
+                    byte[] passwordBytes = mOld != null ? mOld.getBytes() : null;
+                    result = mLockPatternUtils.checkPassword(passwordBytes, mCurrentUserId);
                 } else {
                     result = mLockPatternUtils.checkPattern(stringToPattern(mOld), mCurrentUserId);
                 }

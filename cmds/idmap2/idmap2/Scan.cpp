@@ -142,9 +142,9 @@ bool Scan(const std::vector<std::string>& args, std::ostream& out_error) {
   std::vector<InputOverlay> interesting_apks;
   for (const std::string& path : *apk_paths) {
     Result<OverlayManifestInfo> overlay_info =
-        ExtractOverlayManifestInfo(path, out_error,
-                                   /* assert_overlay */ false);
+        ExtractOverlayManifestInfo(path, /* assert_overlay */ false);
     if (!overlay_info) {
+      out_error << "error: " << overlay_info.GetErrorMessage() << std::endl;
       return false;
     }
 
@@ -163,9 +163,11 @@ bool Scan(const std::vector<std::string>& args, std::ostream& out_error) {
 
     PolicyBitmask fulfilled_policies;
     if (!override_policies.empty()) {
-      if (Result<PolicyBitmask> result = PoliciesToBitmask(override_policies, out_error)) {
-        fulfilled_policies = *result;
+      auto conv_result = PoliciesToBitmask(override_policies);
+      if (conv_result) {
+        fulfilled_policies = *conv_result;
       } else {
+        out_error << "error: " << conv_result.GetErrorMessage() << std::endl;
         return false;
       }
     } else {

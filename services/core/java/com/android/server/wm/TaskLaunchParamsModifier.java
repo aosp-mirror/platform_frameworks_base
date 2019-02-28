@@ -235,8 +235,7 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
         // STEP 2.3: Adjust launch parameters as needed for freeform display. We enforce the policy
         // that legacy (pre-D) apps and those apps that can't handle multiple screen density well
         // are forced to be maximized. The rest of this step is to define the default policy when
-        // there is no initial bounds or a fully resolved current params from callers. Right now we
-        // launch all possible tasks/activities that can handle freeform into freeform mode.
+        // there is no initial bounds or a fully resolved current params from callers.
         if (display.inFreeformWindowingMode()) {
             if (launchMode == WINDOWING_MODE_PINNED) {
                 if (DEBUG) appendLog("picture-in-picture");
@@ -247,17 +246,6 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
                 launchMode = WINDOWING_MODE_FULLSCREEN;
                 outParams.mBounds.setEmpty();
                 if (DEBUG) appendLog("forced-maximize");
-            } else if (fullyResolvedCurrentParam) {
-                // Don't adjust launch mode if that's inherited, except when we're launching an
-                // activity that should be forced to maximize.
-                if (DEBUG) appendLog("skip-adjustment-fully-resolved-params");
-            } else if (launchMode != WINDOWING_MODE_FREEFORM
-                    && (isNOrGreater(root) || isPreNResizeable(root))) {
-                // We're launching a pre-N and post-D activity that supports resizing, or a post-N
-                // activity. They can handle freeform nicely so launch them in freeform.
-                // Use undefined because we know we're in a freeform display.
-                launchMode = WINDOWING_MODE_UNDEFINED;
-                if (DEBUG) appendLog("should-be-freeform");
             }
         } else {
             if (DEBUG) appendLog("non-freeform-display");
@@ -441,10 +429,6 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
         return !root.isResizeable();
     }
 
-    private boolean isNOrGreater(@NonNull ActivityRecord root) {
-        return root.appInfo.targetSdkVersion >= Build.VERSION_CODES.N;
-    }
-
     /**
      * Resolves activity requested orientation to 4 categories:
      * 1) {@link ActivityInfo#SCREEN_ORIENTATION_LOCKED} indicating app wants to lock down
@@ -483,10 +467,6 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
         }
 
         return orientation;
-    }
-
-    private boolean isPreNResizeable(ActivityRecord root) {
-        return root.appInfo.targetSdkVersion < Build.VERSION_CODES.N && root.isResizeable();
     }
 
     private void cascadeBounds(@NonNull Rect srcBounds, @NonNull ActivityDisplay display,

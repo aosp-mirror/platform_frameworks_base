@@ -88,6 +88,9 @@ import android.media.audiofx.AudioEffect;
 import android.media.audiopolicy.AudioMix;
 import android.media.audiopolicy.AudioPolicy;
 import android.media.audiopolicy.AudioPolicyConfig;
+import android.media.audiopolicy.AudioProductStrategies;
+import android.media.audiopolicy.AudioVolumeGroup;
+import android.media.audiopolicy.AudioVolumeGroups;
 import android.media.audiopolicy.IAudioPolicyCallback;
 import android.media.projection.IMediaProjection;
 import android.media.projection.IMediaProjectionManager;
@@ -127,6 +130,7 @@ import android.widget.Toast;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.DumpUtils;
+import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
 import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
@@ -273,6 +277,11 @@ public class AudioService extends IAudioService.Stub
     }
 
     private SettingsObserver mSettingsObserver;
+
+    /** @see AudioProductStrategies */
+    private static AudioProductStrategies sAudioProductStrategies;
+    /** @see AudioVolumeGroups */
+    private static AudioVolumeGroups sAudioVolumeGroups;
 
     private int mMode = AudioSystem.MODE_NORMAL;
     // protects mRingerMode
@@ -623,6 +632,9 @@ public class AudioService extends IAudioService.Stub
 
         mVibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
         mHasVibrator = mVibrator == null ? false : mVibrator.hasVibrator();
+
+        sAudioProductStrategies = new AudioProductStrategies();
+        sAudioVolumeGroups = new AudioVolumeGroups();
 
         // Initialize volume
         int maxCallVolume = SystemProperties.getInt("ro.config.vc_call_vol_steps", -1);
@@ -986,6 +998,22 @@ public class AudioService extends IAudioService.Stub
                 }
             }
         }
+    }
+
+    /**
+     * @return the {@link android.media.audiopolicy.AudioProductStrategies} discovered from the
+     * platform configuration file.
+     */
+    public @NonNull AudioProductStrategies getAudioProductStrategies() {
+        return sAudioProductStrategies;
+    }
+
+    /**
+     * @return the {@link android.media.audiopolicy.AudioVolumeGroups} discovered from the
+     * platform configuration file.
+     */
+    public @NonNull AudioVolumeGroups listAudioVolumeGroups() {
+        return sAudioVolumeGroups;
     }
 
     private void checkAllAliasStreamVolumes() {
@@ -1876,6 +1904,62 @@ public class AudioService extends IAudioService.Stub
         }
         // setting non-zero volume for a muted stream unmutes the stream and vice versa
         mStreamStates[stream].mute(index == 0);
+    }
+
+    private void enforceModifyAudioRoutingPermission() {
+        if (mContext.checkCallingPermission(
+                    android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Missing MODIFY_AUDIO_ROUTING permission");
+        }
+    }
+
+    /** @see AudioManager#setVolumeIndexForAttributes(attr, int, int) */
+    public void setVolumeIndexForAttributes(@NonNull AudioAttributes attr, int index, int flags,
+                                            String callingPackage) {
+        enforceModifyAudioRoutingPermission();
+        Preconditions.checkNotNull(attr, "attr must not be null");
+        // @todo not hold the caller context, post message
+        int stream = sAudioProductStrategies.getLegacyStreamTypeForAudioAttributes(attr);
+        final int device = getDeviceForStream(stream);
+
+        int oldIndex = AudioSystem.getVolumeIndexForAttributes(attr, device);
+
+        AudioSystem.setVolumeIndexForAttributes(attr, index, device);
+
+        final int volumeGroup = sAudioProductStrategies.getVolumeGroupIdForAttributes(attr);
+        final AudioVolumeGroup avg = sAudioVolumeGroups.getById(volumeGroup);
+        if (avg == null) {
+            return;
+        }
+        for (final int groupedStream : avg.getLegacyStreamTypes()) {
+            setStreamVolume(stream, index, flags, callingPackage, callingPackage,
+                            Binder.getCallingUid());
+        }
+    }
+
+    /** @see AudioManager#getVolumeIndexForAttributes(attr) */
+    public int getVolumeIndexForAttributes(@NonNull AudioAttributes attr) {
+        enforceModifyAudioRoutingPermission();
+        Preconditions.checkNotNull(attr, "attr must not be null");
+        int stream = sAudioProductStrategies.getLegacyStreamTypeForAudioAttributes(attr);
+        final int device = getDeviceForStream(stream);
+
+        return AudioSystem.getVolumeIndexForAttributes(attr, device);
+    }
+
+    /** @see AudioManager#getMaxVolumeIndexForAttributes(attr) */
+    public int getMaxVolumeIndexForAttributes(@NonNull AudioAttributes attr) {
+        enforceModifyAudioRoutingPermission();
+        Preconditions.checkNotNull(attr, "attr must not be null");
+        return AudioSystem.getMaxVolumeIndexForAttributes(attr);
+    }
+
+    /** @see AudioManager#getMinVolumeIndexForAttributes(attr) */
+    public int getMinVolumeIndexForAttributes(@NonNull AudioAttributes attr) {
+        enforceModifyAudioRoutingPermission();
+        Preconditions.checkNotNull(attr, "attr must not be null");
+        return AudioSystem.getMinVolumeIndexForAttributes(attr);
     }
 
     /** @see AudioManager#setStreamVolume(int, int, int) */
@@ -5787,7 +5871,7 @@ public class AudioService extends IAudioService.Stub
     // - wired: logged before onSetWiredDeviceConnectionState() is executed
     // - A2DP: logged at reception of method call
     /*package*/ static final AudioEventLogger sDeviceLogger = new AudioEventLogger(
-            LOG_NB_EVENTS_DEVICE_CONNECTION, "wired/A2DP/hearing aid device connection BLABLI");
+            LOG_NB_EVENTS_DEVICE_CONNECTION, "wired/A2DP/hearing aid device connection");
 
     static final AudioEventLogger sForceUseLogger = new AudioEventLogger(
             LOG_NB_EVENTS_FORCE_USE,

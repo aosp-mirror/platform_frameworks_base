@@ -24,6 +24,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
@@ -88,6 +89,7 @@ public final class Session2Token implements Parcelable {
     private final String mServiceName;
     private final Session2Link mSessionLink;
     private final ComponentName mComponentName;
+    private final Bundle mExtras;
 
     /**
      * Constructor for the token with type {@link #TYPE_SESSION_SERVICE}.
@@ -116,15 +118,18 @@ public final class Session2Token implements Parcelable {
         mUid = uid;
         mType = TYPE_SESSION_SERVICE;
         mSessionLink = null;
+        mExtras = null;
     }
 
-    Session2Token(int uid, int type, String packageName, Session2Link sessionLink) {
+    Session2Token(int uid, int type, String packageName, Session2Link sessionLink,
+            Bundle tokenExtras) {
         mUid = uid;
         mType = type;
         mPackageName = packageName;
         mServiceName = null;
         mComponentName = null;
         mSessionLink = sessionLink;
+        mExtras = tokenExtras;
     }
 
     Session2Token(Parcel in) {
@@ -134,6 +139,7 @@ public final class Session2Token implements Parcelable {
         mServiceName = in.readString();
         mSessionLink = in.readParcelable(null);
         mComponentName = ComponentName.unflattenFromString(in.readString());
+        mExtras = in.readBundle();
     }
 
     @Override
@@ -144,6 +150,7 @@ public final class Session2Token implements Parcelable {
         dest.writeString(mServiceName);
         dest.writeParcelable(mSessionLink, flags);
         dest.writeString(mComponentName == null ? "" : mComponentName.flattenToString());
+        dest.writeBundle(mExtras);
     }
 
     @Override
@@ -205,6 +212,14 @@ public final class Session2Token implements Parcelable {
      */
     public @TokenType int getType() {
         return mType;
+    }
+
+    /**
+     * @return extras of the token
+     */
+    @Nullable
+    public Bundle getExtras() {
+        return mExtras;
     }
 
     Session2Link getSessionLink() {

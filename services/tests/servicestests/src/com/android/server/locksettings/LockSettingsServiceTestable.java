@@ -133,12 +133,12 @@ public class LockSettingsServiceTestable extends LockSettingsService {
     }
 
     @Override
-    protected void tieProfileLockToParent(int userId, String password) {
-        mStorage.writeChildProfileLock(userId, password.getBytes());
+    protected void tieProfileLockToParent(int userId, byte[] password) {
+        mStorage.writeChildProfileLock(userId, password);
     }
 
     @Override
-    protected String getDecryptedPasswordForTiedProfile(int userId) throws FileNotFoundException,
+    protected byte[] getDecryptedPasswordForTiedProfile(int userId) throws FileNotFoundException,
             KeyPermanentlyInvalidatedException {
         byte[] storedData = mStorage.readChildProfileLock(userId);
         if (storedData == null) {
@@ -151,7 +151,7 @@ public class LockSettingsServiceTestable extends LockSettingsService {
         } catch (RemoteException e) {
             // shouldn't happen.
         }
-        return new String(storedData);
+        return storedData;
     }
 
 }

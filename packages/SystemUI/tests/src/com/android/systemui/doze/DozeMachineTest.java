@@ -38,11 +38,11 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.hardware.display.AmbientDisplayConfiguration;
 import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.UiThreadTest;
 
-import com.android.internal.hardware.AmbientDisplayConfiguration;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.util.wakelock.WakeLockFake;
 

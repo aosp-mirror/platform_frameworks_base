@@ -285,7 +285,7 @@ message Atom {
         CategorySize category_size = 10028;
         ProcStats proc_stats = 10029;
         BatteryVoltage battery_voltage = 10030;
-        NumBiometricsEnrolled num_fingerprints_enrolled = 10031;
+        NumFingerprintsEnrolled num_fingerprints_enrolled = 10031;
         DiskIo disk_io = 10032;
         PowerProfile power_profile = 10033;
         ProcStatsPkgProc proc_stats_pkg_proc = 10034;
@@ -302,7 +302,7 @@ message Atom {
         BatteryCycleCount battery_cycle_count = 10045;
         DebugElapsedClock debug_elapsed_clock = 10046;
         DebugFailingElapsedClock debug_failing_elapsed_clock = 10047;
-        NumBiometricsEnrolled num_faces_enrolled = 10048;
+        NumFacesEnrolled num_faces_enrolled = 10048;
         RoleHolder role_holder = 10049;
         DangerousPermissionState dangerous_permission_state = 10050;
         TrainInfo train_info = 10051;
@@ -4127,14 +4127,26 @@ message DiskIo {
  *
  * Pulled from StatsCompanionService, which queries <Biometric>Manager.
  */
-message NumBiometricsEnrolled {
+message NumFingerprintsEnrolled {
     // The associated user. Eg: 0 for owners, 10+ for others.
     // Defined in android/os/UserHandle.java
     optional int32 user = 1;
     // Number of fingerprints registered to that user.
-    optional int32 num_enrolled = 2;
+    optional int32 num_fingerprints_enrolled = 2;
 }
 
+/**
+ * Pulls the number of faces for each user.
+ *
+ * Pulled from StatsCompanionService, which queries <Biometric>Manager.
+ */
+message NumFacesEnrolled {
+    // The associated user. Eg: 0 for owners, 10+ for others.
+    // Defined in android/os/UserHandle.java
+    optional int32 user = 1;
+    // Number of faces registered to that user.
+    optional int32 num_faces_enrolled = 2;
+}
 /**
  * A mapping of role holder -> role
  */

@@ -259,8 +259,17 @@ public class WifiScanner {
          * {@hide}
          */
         @SystemApi
-        @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
         public boolean ignoreLocationSettings;
+        /**
+         * This scan request will be hidden from app-ops noting for location information. This
+         * should only be used by FLP/NLP module on the device which is using the scan results to
+         * compute results for behalf on their clients. FLP/NLP module using this flag should ensure
+         * that they note in app-ops the eventual delivery of location information computed using
+         * these results to their client .
+         * {@hide}
+         */
+        @SystemApi
+        public boolean hideFromAppOps;
 
         /** Implement the Parcelable interface {@hide} */
         public int describeContents() {
@@ -279,6 +288,7 @@ public class WifiScanner {
             dest.writeInt(isPnoScan ? 1 : 0);
             dest.writeInt(type);
             dest.writeInt(ignoreLocationSettings ? 1 : 0);
+            dest.writeInt(hideFromAppOps ? 1 : 0);
             if (channels != null) {
                 dest.writeInt(channels.length);
                 for (int i = 0; i < channels.length; i++) {
@@ -314,6 +324,7 @@ public class WifiScanner {
                         settings.isPnoScan = in.readInt() == 1;
                         settings.type = in.readInt();
                         settings.ignoreLocationSettings = in.readInt() == 1;
+                        settings.hideFromAppOps = in.readInt() == 1;
                         int num_channels = in.readInt();
                         settings.channels = new ChannelSpec[num_channels];
                         for (int i = 0; i < num_channels; i++) {

@@ -752,7 +752,6 @@
   <java-symbol type="string" name="date_time" />
   <java-symbol type="string" name="date_time_set" />
   <java-symbol type="string" name="date_time_done" />
-  <java-symbol type="bool" name="db_compatibility_wal_supported" />
   <java-symbol type="string" name="db_default_journal_mode" />
   <java-symbol type="string" name="db_default_sync_mode" />
   <java-symbol type="string" name="db_wal_sync_mode" />
@@ -3197,6 +3196,11 @@
   <java-symbol type="raw" name="fallback_categories" />
 
   <java-symbol type="string" name="config_icon_mask" />
+  <java-symbol type="string" name="config_batterymeterPerimeterPath" />
+  <java-symbol type="string" name="config_batterymeterFillMask" />
+  <java-symbol type="string" name="config_batterymeterBoltPath" />
+  <java-symbol type="string" name="config_batterymeterPowersavePath" />
+  <java-symbol type="bool" name="config_batterymeterDualTone" />
 
   <!-- Accessibility Shortcut -->
   <java-symbol type="string" name="accessibility_shortcut_warning_dialog_title" />

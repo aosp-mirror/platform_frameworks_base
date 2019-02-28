@@ -28,7 +28,6 @@
 #include "idmap2/FileUtils.h"
 #include "idmap2/Idmap.h"
 #include "idmap2/Policies.h"
-#include "idmap2/Result.h"
 #include "idmap2/SysTrace.h"
 
 using android::ApkAssets;
@@ -38,7 +37,6 @@ using android::idmap2::Idmap;
 using android::idmap2::PoliciesToBitmask;
 using android::idmap2::PolicyBitmask;
 using android::idmap2::PolicyFlags;
-using android::idmap2::Result;
 using android::idmap2::utils::kIdmapFilePermissionMask;
 using android::idmap2::utils::UidHasWriteAccessToPath;
 
@@ -77,9 +75,11 @@ bool Create(const std::vector<std::string>& args, std::ostream& out_error) {
   }
 
   PolicyBitmask fulfilled_policies = 0;
-  if (auto result = PoliciesToBitmask(policies, out_error)) {
-    fulfilled_policies |= *result;
+  auto conv_result = PoliciesToBitmask(policies);
+  if (conv_result) {
+    fulfilled_policies |= *conv_result;
   } else {
+    out_error << "error: " << conv_result.GetErrorMessage() << std::endl;
     return false;
   }
 

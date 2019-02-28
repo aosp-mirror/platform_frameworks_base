@@ -59,6 +59,5 @@ public class FooterPreference extends Preference {
         setIcon(R.drawable.ic_info_outline_24);
         setKey(KEY_FOOTER);
         setOrder(ORDER_FOOTER);
-        setSelectable(false);
     }
 }

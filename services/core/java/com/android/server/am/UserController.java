@@ -2214,7 +2214,11 @@ class UserController implements Handler.Callback {
         void startUserWidgets(int userId) {
             AppWidgetManagerInternal awm = LocalServices.getService(AppWidgetManagerInternal.class);
             if (awm != null) {
-                awm.unlockUser(userId);
+                // Out of band, because this is called during a sequence with
+                // sensitive cross-service lock management
+                FgThread.getHandler().post(() -> {
+                    awm.unlockUser(userId);
+                });
             }
         }
 

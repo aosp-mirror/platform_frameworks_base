@@ -196,7 +196,7 @@ public class Input extends BaseCommand {
             int repeatCount = 0;
 
             KeyEvent event = new KeyEvent(now, now, KeyEvent.ACTION_DOWN, keyCode, repeatCount,
-                    0 /*metaState*/, KeyCharacterMap.VIRTUAL_KEYBOARD, 0 /*scancode*/, 0/*flags*/,
+                    0 /*metaState*/, KeyCharacterMap.VIRTUAL_KEYBOARD, 0 /*scancode*/, 0 /*flags*/,
                     inputSource);
             event.setDisplayId(displayId);
 

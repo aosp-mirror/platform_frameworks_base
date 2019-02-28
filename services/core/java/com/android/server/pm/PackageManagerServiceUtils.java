@@ -32,6 +32,7 @@ import android.annotation.Nullable;
 import android.app.AppGlobals;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfoLite;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageParser;
@@ -793,6 +794,36 @@ public class PackageManagerServiceUtils {
             Slog.w(TAG, "Failed to calculate installed size: " + e);
             return -1;
         }
+    }
+
+    /**
+     * Checks whenever downgrade of an app is permitted.
+     *
+     * @param installFlags flags of the current install.
+     * @param applicationFlags flags of the currently installed version of the app.
+     * @return {@code true} if downgrade is permitted according to the {@code installFlags} and
+     *         {@code applicationFlags}.
+     */
+    public static boolean isDowngradePermitted(int installFlags, int applicationFlags) {
+        // If installed, the package will get access to data left on the device by its
+        // predecessor. As a security measure, this is permited only if this is not a
+        // version downgrade or if the predecessor package is marked as debuggable and
+        // a downgrade is explicitly requested.
+        //
+        // On debuggable platform builds, downgrades are permitted even for
+        // non-debuggable packages to make testing easier. Debuggable platform builds do
+        // not offer security guarantees and thus it's OK to disable some security
+        // mechanisms to make debugging/testing easier on those builds. However, even on
+        // debuggable builds downgrades of packages are permitted only if requested via
+        // installFlags. This is because we aim to keep the behavior of debuggable
+        // platform builds as close as possible to the behavior of non-debuggable
+        // platform builds.
+        final boolean downgradeRequested =
+                (installFlags & PackageManager.INSTALL_ALLOW_DOWNGRADE) != 0;
+        final boolean packageDebuggable =
+                (applicationFlags
+                        & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
+        return (downgradeRequested) && ((Build.IS_DEBUGGABLE) || (packageDebuggable));
     }
 
     /**

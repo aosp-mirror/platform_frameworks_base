@@ -29,8 +29,8 @@ import android.util.Slog;
 
 import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
-import com.android.server.display.ColorDisplayService;
-import com.android.server.display.ColorDisplayService.ColorDisplayServiceInternal;
+import com.android.server.display.color.ColorDisplayService;
+import com.android.server.display.color.ColorDisplayService.ColorDisplayServiceInternal;
 import com.android.server.display.whitebalance.DisplayWhiteBalanceController.Callbacks;
 
 import java.io.PrintWriter;

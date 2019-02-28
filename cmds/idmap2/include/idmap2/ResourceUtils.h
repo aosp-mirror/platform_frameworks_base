@@ -18,10 +18,8 @@
 #define IDMAP2_INCLUDE_IDMAP2_RESOURCEUTILS_H_
 
 #include <optional>
-#include <ostream>
 #include <string>
 
-#include "android-base/macros.h"
 #include "androidfw/AssetManager2.h"
 
 #include "idmap2/Idmap.h"
@@ -38,10 +36,9 @@ struct OverlayManifestInfo {
 };
 
 Result<OverlayManifestInfo> ExtractOverlayManifestInfo(const std::string& path,
-                                                       std::ostream& out_error,
                                                        bool assert_overlay = true);
 
-Result<std::string> WARN_UNUSED ResToTypeEntryName(const AssetManager2& am, ResourceId resid);
+Result<std::string> ResToTypeEntryName(const AssetManager2& am, ResourceId resid);
 
 }  // namespace android::idmap2::utils
 

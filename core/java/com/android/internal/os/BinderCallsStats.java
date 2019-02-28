@@ -568,7 +568,7 @@ public class BinderCallsStats implements BinderInternal.Observer {
     }
 
     /**
-     * Aggregated data by uid/class/method to be sent through WestWorld.
+     * Aggregated data by uid/class/method to be sent through statsd.
      */
     public static class ExportedCallStat {
         public int callingUid;

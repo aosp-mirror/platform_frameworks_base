@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.display;
+package com.android.server.display.color;
 
 import static com.google.common.truth.Truth.assertWithMessage;
 
@@ -70,7 +70,7 @@ public class ColorDisplayServiceTest {
 
     private MockTwilightManager mTwilightManager;
 
-    private ColorDisplayService mColorDisplayService;
+    private ColorDisplayService mCds;
     private ColorDisplayService.BinderService mBinderService;
 
     @BeforeClass
@@ -96,17 +96,17 @@ public class ColorDisplayServiceTest {
         mTwilightManager = new MockTwilightManager();
         LocalServices.addService(TwilightManager.class, mTwilightManager);
 
-        mColorDisplayService = new ColorDisplayService(mContext);
-        mBinderService = mColorDisplayService.new BinderService();
+        mCds = new ColorDisplayService(mContext);
+        mBinderService = mCds.new BinderService();
         LocalServices.addService(ColorDisplayService.ColorDisplayServiceInternal.class,
-                        mColorDisplayService.new ColorDisplayServiceInternal());
+                mCds.new ColorDisplayServiceInternal());
     }
 
     @After
     public void tearDown() {
         LocalServices.removeServiceForTest(TwilightManager.class);
 
-        mColorDisplayService = null;
+        mCds = null;
 
         mTwilightManager = null;
 
@@ -1003,7 +1003,7 @@ public class ColorDisplayServiceTest {
 
         /* Since we are using FakeSettingsProvider which could not trigger observer change,
          * force an update here.*/
-        mColorDisplayService.updateDisplayWhiteBalanceStatus();
+        mCds.updateDisplayWhiteBalanceStatus();
         assertDwbActive(false);
     }
 
@@ -1015,12 +1015,12 @@ public class ColorDisplayServiceTest {
         setAutoModeTwilight(-120 /* sunsetOffset */, -60 /* sunriseOffset */);
         setActivated(true /* activated */, -30 /* lastActivatedTimeOffset */);
 
-        mColorDisplayService.updateDisplayWhiteBalanceStatus();
+        mCds.updateDisplayWhiteBalanceStatus();
         assertDwbActive(false);
 
         /* Disable nightlight */
         setActivated(false /* activated */, -30 /* lastActivatedTimeOffset */);
-        mColorDisplayService.updateDisplayWhiteBalanceStatus();
+        mCds.updateDisplayWhiteBalanceStatus();
         assertDwbActive(true);
     }
 
@@ -1031,48 +1031,48 @@ public class ColorDisplayServiceTest {
         startService();
         mBinderService.setColorMode(ColorDisplayManager.COLOR_MODE_NATURAL);
 
-        mColorDisplayService.updateDisplayWhiteBalanceStatus();
+        mCds.updateDisplayWhiteBalanceStatus();
         assertDwbActive(true);
     }
 
     @Test
     public void displayWhiteBalance_setTemperatureOverMax() {
-        int max = mColorDisplayService.mDisplayWhiteBalanceTintController.mTemperatureMax;
+        int max = mCds.mDisplayWhiteBalanceTintController.mTemperatureMax;
 
         ColorDisplayService.ColorDisplayServiceInternal cdsInternal = LocalServices.getService(
-                        ColorDisplayService.ColorDisplayServiceInternal.class);
-        cdsInternal.setDisplayWhiteBalanceColorTemperature(max+1);
+                ColorDisplayService.ColorDisplayServiceInternal.class);
+        cdsInternal.setDisplayWhiteBalanceColorTemperature(max + 1);
 
         assertWithMessage("Unexpected temperature set")
-                .that(mColorDisplayService.mDisplayWhiteBalanceTintController.mCurrentColorTemperature)
+                .that(mCds.mDisplayWhiteBalanceTintController.mCurrentColorTemperature)
                 .isEqualTo(max);
     }
 
     @Test
     public void displayWhiteBalance_setTemperatureBelowMin() {
-        int min = mColorDisplayService.mDisplayWhiteBalanceTintController.mTemperatureMin;
+        int min = mCds.mDisplayWhiteBalanceTintController.mTemperatureMin;
 
         ColorDisplayService.ColorDisplayServiceInternal cdsInternal = LocalServices.getService(
-                        ColorDisplayService.ColorDisplayServiceInternal.class);
+                ColorDisplayService.ColorDisplayServiceInternal.class);
         cdsInternal.setDisplayWhiteBalanceColorTemperature(min - 1);
 
         assertWithMessage("Unexpected temperature set")
-                .that(mColorDisplayService.mDisplayWhiteBalanceTintController.mCurrentColorTemperature)
+                .that(mCds.mDisplayWhiteBalanceTintController.mCurrentColorTemperature)
                 .isEqualTo(min);
     }
 
     @Test
     public void displayWhiteBalance_setValidTemperature() {
-        int min = mColorDisplayService.mDisplayWhiteBalanceTintController.mTemperatureMin;
-        int max = mColorDisplayService.mDisplayWhiteBalanceTintController.mTemperatureMax;
+        int min = mCds.mDisplayWhiteBalanceTintController.mTemperatureMin;
+        int max = mCds.mDisplayWhiteBalanceTintController.mTemperatureMax;
         int valToSet = (min + max) / 2;
 
         ColorDisplayService.ColorDisplayServiceInternal cdsInternal = LocalServices.getService(
-                        ColorDisplayService.ColorDisplayServiceInternal.class);
+                ColorDisplayService.ColorDisplayServiceInternal.class);
         cdsInternal.setDisplayWhiteBalanceColorTemperature(valToSet);
 
         assertWithMessage("Unexpected temperature set")
-                .that(mColorDisplayService.mDisplayWhiteBalanceTintController.mCurrentColorTemperature)
+                .that(mCds.mDisplayWhiteBalanceTintController.mCurrentColorTemperature)
                 .isEqualTo(valToSet);
     }
 
@@ -1171,14 +1171,14 @@ public class ColorDisplayServiceTest {
     }
 
     /**
-     * Convenience method to start {@link #mColorDisplayService}.
+     * Convenience method to start {@link #mCds}.
      */
     private void startService() {
         Secure.putIntForUser(mContext.getContentResolver(), Secure.USER_SETUP_COMPLETE, 1, mUserId);
 
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
-            mColorDisplayService.onBootPhase(SystemService.PHASE_BOOT_COMPLETED);
-            mColorDisplayService.onStartUser(mUserId);
+            mCds.onBootPhase(SystemService.PHASE_BOOT_COMPLETED);
+            mCds.onStartUser(mUserId);
         });
     }
 
@@ -1224,7 +1224,7 @@ public class ColorDisplayServiceTest {
      */
     private void assertDwbActive(boolean enabled) {
         assertWithMessage("Incorrect Display White Balance state")
-                .that(mColorDisplayService.mDisplayWhiteBalanceTintController.isActivated())
+                .that(mCds.mDisplayWhiteBalanceTintController.isActivated())
                 .isEqualTo(enabled);
     }
 

@@ -144,8 +144,10 @@ public final class AudioProductStrategies implements Iterable<AudioProductStrate
      * @hide
      * @param aa the {@link AudioAttributes} for which stream type is requested
      * @return the legacy stream type relevant for the given {@link AudioAttributes}.
-     *         If the product strategy is not associated to any stream, it returns STREAM_MUSIC.
-     *         If no product strategy supports the stream type, it returns STREAM_MUSIC.
+     *         If the product strategy is not associated to any stream, it returns
+     *         {@link AudioSystem#STREAM_MUSIC}.
+     *         If no product strategy supports the stream type, it returns
+     *         {@link AudioSystem#STREAM_MUSIC}.
      */
     @SystemApi
     public int getLegacyStreamTypeForAudioAttributes(@NonNull AudioAttributes aa) {
@@ -165,6 +167,62 @@ public final class AudioProductStrategies implements Iterable<AudioProductStrate
         return AudioSystem.STREAM_MUSIC;
     }
 
+    /**
+     * @hide
+     * @param aa the {@link AudioAttributes} to be considered
+     * @return {@link AudioProductStrategy} supporting the given {@link AudioAttributes}.
+     *         null is returned if no match with given attributes.
+     */
+    @SystemApi
+    @Nullable
+    public AudioProductStrategy getProductStrategyForAudioAttributes(@NonNull AudioAttributes aa) {
+        Preconditions.checkNotNull(aa, "attributes must not be null");
+        int productStrategyId =  native_get_product_strategies_from_audio_attributes(aa);
+        if (productStrategyId < 0) {
+            Log.w(TAG, "no strategy found for Attributes " + aa.toString());
+            return null;
+        }
+        return getById(productStrategyId);
+    }
+
+   /**
+    * @hide
+    * @param attributes the {@link AudioAttributes} to be considered
+    * @return volume group associated to the given {@link AudioAttributes}.
+    *         If no group supports the given {@link AudioAttributes}, it returns the volume group
+    *         for the default attributes.
+    *         If no group supports the default attributes, it returns {@link #DEFAULT_VOLUME_GROUP}
+    */
+    @SystemApi
+    public int getVolumeGroupIdForAttributes(@NonNull AudioAttributes attributes) {
+        Preconditions.checkNotNull(attributes, "attributes must not be null");
+        int volumeGroupId = getVolumeGroupIdForAttributesInt(attributes);
+        if (volumeGroupId != AudioVolumeGroups.DEFAULT_VOLUME_GROUP) {
+            return volumeGroupId;
+        }
+        // The default volume group is the one hosted by default product strategy, i.e.
+        // supporting Default Attributes
+        return getVolumeGroupIdForAttributesInt(AudioProductStrategy.sDefaultAttributes);
+    }
+
+   /**
+    * @hide
+    * @param streamType to be considered
+    * @return volume group associated to the given stream type.
+    */
+    @SystemApi
+    public int getVolumeGroupIdForLegacyStreamType(int streamType) {
+        for (final AudioProductStrategy productStrategy : this) {
+            int volumeGroupId = productStrategy.getVolumeGroupIdForLegacyStreamType(streamType);
+            if (volumeGroupId != AudioVolumeGroups.DEFAULT_VOLUME_GROUP) {
+                return volumeGroupId;
+            }
+        }
+        // The default volume group is the one hosted by default product strategy, i.e.
+        // supporting Default Attributes
+        return getVolumeGroupIdForAttributesInt(AudioProductStrategy.sDefaultAttributes);
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -176,6 +234,21 @@ public final class AudioProductStrategies implements Iterable<AudioProductStrate
         for (final AudioProductStrategy productStrategy : this) {
             productStrategy.writeToParcel(dest, flags);
         }
+    }
+
+    /**
+     * @param attributes to be considered
+     * @return volume group associated to the given {@link AudioAttributes}.
+     */
+    private int getVolumeGroupIdForAttributesInt(@NonNull AudioAttributes attributes) {
+        Preconditions.checkNotNull(attributes, "attributes must not be null");
+        for (final AudioProductStrategy productStrategy : this) {
+            int volumeGroupId = productStrategy.getVolumeGroupIdForAudioAttributes(attributes);
+            if (volumeGroupId != AudioVolumeGroups.DEFAULT_VOLUME_GROUP) {
+                return volumeGroupId;
+            }
+        }
+        return AudioVolumeGroups.DEFAULT_VOLUME_GROUP;
     }
 
     public static final Parcelable.Creator<AudioProductStrategies> CREATOR =
@@ -198,4 +271,7 @@ public final class AudioProductStrategies implements Iterable<AudioProductStrate
 
     private static native int native_list_audio_product_strategies(
             ArrayList<AudioProductStrategy> strategies);
+
+    private static native int native_get_product_strategies_from_audio_attributes(
+            AudioAttributes attributes);
 }

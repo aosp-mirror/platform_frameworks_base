@@ -37,6 +37,7 @@ import android.os.RemoteException;
 import android.util.Log;
 import android.util.Size;
 import android.view.IPinnedStackController;
+import android.view.InputEvent;
 import android.view.MotionEvent;
 import android.view.ViewConfiguration;
 import android.view.accessibility.AccessibilityEvent;
@@ -206,7 +207,7 @@ public class PipTouchHandler {
         mEnableDimissDragToEdge = res.getBoolean(R.bool.config_pipEnableDismissDragToEdge);
 
         // Register the listener for input consumer touch events
-        inputConsumerController.setTouchListener(this::handleTouchEvent);
+        inputConsumerController.setInputListener(this::handleTouchEvent);
         inputConsumerController.setRegistrationListener(this::onRegistrationChanged);
         onRegistrationChanged(inputConsumerController.isRegistered());
     }
@@ -370,11 +371,16 @@ public class PipTouchHandler {
                 mMovementBounds, true /* allowMenuTimeout */, willResizeMenu());
     }
 
-    private boolean handleTouchEvent(MotionEvent ev) {
+    private boolean handleTouchEvent(InputEvent inputEvent) {
+        // Skip any non motion events
+        if (!(inputEvent instanceof MotionEvent)) {
+            return true;
+        }
         // Skip touch handling until we are bound to the controller
         if (mPinnedStackController == null) {
             return true;
         }
+        MotionEvent ev = (MotionEvent) inputEvent;
 
         // Update the touch state
         mTouchState.onTouchEvent(ev);

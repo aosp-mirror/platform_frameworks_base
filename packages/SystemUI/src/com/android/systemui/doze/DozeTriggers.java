@@ -27,6 +27,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.hardware.display.AmbientDisplayConfiguration;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.os.UserHandle;
@@ -34,7 +35,6 @@ import android.text.format.Formatter;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.hardware.AmbientDisplayConfiguration;
 import com.android.internal.util.Preconditions;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.statusbar.phone.DozeParameters;
@@ -238,9 +238,6 @@ public class DozeTriggers implements DozeMachine.Part {
             case DOZE:
             case DOZE_AOD:
                 mDozeSensors.setProxListening(newState != DozeMachine.State.DOZE);
-                if (oldState != DozeMachine.State.INITIALIZED) {
-                    mDozeSensors.reregisterAllSensors();
-                }
                 mDozeSensors.setListening(true);
                 if (newState == DozeMachine.State.DOZE_AOD && !sWakeDisplaySensorState) {
                     onWakeScreen(false, newState);

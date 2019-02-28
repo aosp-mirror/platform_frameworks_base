@@ -16,6 +16,7 @@
 
 package android.net.wifi;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.annotation.UnsupportedAppUsage;
@@ -41,6 +42,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.HashMap;
@@ -337,6 +340,90 @@ public class WifiConfiguration implements Parcelable {
         public static final int ENABLED = 2;
 
         public static final String[] strings = { "current", "disabled", "enabled" };
+    }
+
+    /**
+     * Security types we support.
+     */
+    /** @hide */
+    public static final int SECURITY_TYPE_OPEN = 0;
+    /** @hide */
+    public static final int SECURITY_TYPE_WEP = 1;
+    /** @hide */
+    public static final int SECURITY_TYPE_PSK = 2;
+    /** @hide */
+    public static final int SECURITY_TYPE_EAP = 3;
+    /** @hide */
+    public static final int SECURITY_TYPE_SAE = 4;
+    /** @hide */
+    public static final int SECURITY_TYPE_EAP_SUITE_B = 5;
+    /** @hide */
+    public static final int SECURITY_TYPE_OWE = 6;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = { "SECURITY_TYPE_" }, value = {
+            SECURITY_TYPE_OPEN,
+            SECURITY_TYPE_WEP,
+            SECURITY_TYPE_PSK,
+            SECURITY_TYPE_EAP,
+            SECURITY_TYPE_SAE,
+            SECURITY_TYPE_EAP_SUITE_B,
+            SECURITY_TYPE_OWE
+    })
+    public @interface SecurityType {}
+
+    /**
+     * @hide
+     * Set security params (sets the various bitsets exposed in WifiConfiguration).
+     *
+     * @param securityType One of the security types from {@link SecurityType}.
+     */
+    public void setSecurityParams(@SecurityType int securityType) {
+        // Clear all the bitsets.
+        allowedKeyManagement.clear();
+        allowedProtocols.clear();
+        allowedAuthAlgorithms.clear();
+        allowedPairwiseCiphers.clear();
+        allowedGroupCiphers.clear();
+        allowedGroupManagementCiphers.clear();
+        allowedSuiteBCiphers.clear();
+
+        switch (securityType) {
+            case SECURITY_TYPE_OPEN:
+                allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
+                break;
+            case SECURITY_TYPE_WEP:
+                allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
+                allowedAuthAlgorithms.set(WifiConfiguration.AuthAlgorithm.OPEN);
+                allowedAuthAlgorithms.set(WifiConfiguration.AuthAlgorithm.SHARED);
+                break;
+            case SECURITY_TYPE_PSK:
+                allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
+                break;
+            case SECURITY_TYPE_EAP:
+                allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_EAP);
+                allowedKeyManagement.set(WifiConfiguration.KeyMgmt.IEEE8021X);
+                break;
+            case SECURITY_TYPE_SAE:
+                allowedKeyManagement.set(WifiConfiguration.KeyMgmt.SAE);
+                requirePMF = true;
+                break;
+            case SECURITY_TYPE_EAP_SUITE_B:
+                allowedKeyManagement.set(WifiConfiguration.KeyMgmt.SUITE_B_192);
+                allowedGroupCiphers.set(WifiConfiguration.GroupCipher.GCMP_256);
+                allowedGroupManagementCiphers.set(WifiConfiguration.GroupMgmtCipher.BIP_GMAC_256);
+                allowedSuiteBCiphers.set(WifiConfiguration.SuiteBCipher.ECDHE_ECDSA);
+                allowedSuiteBCiphers.set(WifiConfiguration.SuiteBCipher.ECDHE_RSA);
+                requirePMF = true;
+                break;
+            case SECURITY_TYPE_OWE:
+                allowedKeyManagement.set(WifiConfiguration.KeyMgmt.OWE);
+                requirePMF = true;
+                break;
+            default:
+                throw new IllegalArgumentException("unknown security type " + securityType);
+        }
     }
 
     /** @hide */

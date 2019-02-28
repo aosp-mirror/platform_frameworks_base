@@ -19,6 +19,7 @@ package android.database.sqlite;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import android.content.Context;
 import android.database.DatabaseUtils;
@@ -54,44 +55,52 @@ public class SQLiteCompatibilityWalFlagsTest {
     @Test
     public void testParseConfig() {
         SQLiteCompatibilityWalFlags.init("");
-        assertFalse(SQLiteCompatibilityWalFlags.areFlagsSet());
-
         SQLiteCompatibilityWalFlags.init(null);
-        assertFalse(SQLiteCompatibilityWalFlags.areFlagsSet());
 
-        SQLiteCompatibilityWalFlags.init("compatibility_wal_supported=false,wal_syncmode=OFF");
-        assertTrue(SQLiteCompatibilityWalFlags.areFlagsSet());
-        assertFalse(SQLiteCompatibilityWalFlags.isCompatibilityWalSupported());
-        assertEquals("OFF", SQLiteCompatibilityWalFlags.getWALSyncMode());
+        // Ensure that legacy compatibility wal isn't turned on by the old flag.
+        SQLiteCompatibilityWalFlags.init("compatibility_wal_supported=true,wal_syncmode=OFF");
+        assertFalse(SQLiteCompatibilityWalFlags.isLegacyCompatibilityWalEnabled());
+        try {
+            SQLiteCompatibilityWalFlags.getWALSyncMode();
+            fail();
+        } catch (IllegalStateException expected) {
+        }
         assertEquals(-1, SQLiteCompatibilityWalFlags.getTruncateSize());
+
 
         SQLiteCompatibilityWalFlags.init("wal_syncmode=VALUE");
-        assertTrue(SQLiteCompatibilityWalFlags.areFlagsSet());
-        assertEquals(SQLiteGlobal.isCompatibilityWalSupported(),
-                SQLiteCompatibilityWalFlags.isCompatibilityWalSupported());
-        assertEquals("VALUE", SQLiteCompatibilityWalFlags.getWALSyncMode());
+        assertFalse(SQLiteCompatibilityWalFlags.isLegacyCompatibilityWalEnabled());
         assertEquals(-1, SQLiteCompatibilityWalFlags.getTruncateSize());
+        try {
+            SQLiteCompatibilityWalFlags.getWALSyncMode();
+            fail();
+        } catch (IllegalStateException expected) {
+        }
 
-        SQLiteCompatibilityWalFlags.init("compatibility_wal_supported=true");
-        assertTrue(SQLiteCompatibilityWalFlags.areFlagsSet());
+        SQLiteCompatibilityWalFlags.init("legacy_compatibility_wal_enabled=true");
+        assertTrue(SQLiteCompatibilityWalFlags.isLegacyCompatibilityWalEnabled());
         assertEquals(SQLiteGlobal.getWALSyncMode(),
                 SQLiteCompatibilityWalFlags.getWALSyncMode());
-        assertTrue(SQLiteCompatibilityWalFlags.isCompatibilityWalSupported());
-        assertEquals(-1, SQLiteCompatibilityWalFlags.getTruncateSize());
+
+        SQLiteCompatibilityWalFlags.init(
+                "legacy_compatibility_wal_enabled=true,wal_syncmode=VALUE");
+        assertTrue(SQLiteCompatibilityWalFlags.isLegacyCompatibilityWalEnabled());
+        assertEquals("VALUE", SQLiteCompatibilityWalFlags.getWALSyncMode());
 
         SQLiteCompatibilityWalFlags.init("truncate_size=1024");
         assertEquals(1024, SQLiteCompatibilityWalFlags.getTruncateSize());
 
         SQLiteCompatibilityWalFlags.reset();
         SQLiteCompatibilityWalFlags.init("Invalid value");
-        assertFalse(SQLiteCompatibilityWalFlags.areFlagsSet());
+        assertFalse(SQLiteCompatibilityWalFlags.isLegacyCompatibilityWalEnabled());
     }
 
     @Test
     public void testApplyFlags() {
         Context ctx = InstrumentationRegistry.getContext();
 
-        SQLiteCompatibilityWalFlags.init("compatibility_wal_supported=true,wal_syncmode=NORMAL");
+        SQLiteCompatibilityWalFlags.init(
+                "legacy_compatibility_wal_enabled=true,wal_syncmode=NORMAL");
         mDatabase = SQLiteDatabase
                 .openOrCreateDatabase(ctx.getDatabasePath("SQLiteCompatibilityWalFlagsTest"), null);
         String journalMode = DatabaseUtils.stringForQuery(mDatabase, "PRAGMA journal_mode", null);
@@ -100,5 +109,22 @@ public class SQLiteCompatibilityWalFlagsTest {
         assertEquals("Normal mode (1) is expected", "1", syncMode);
     }
 
+    @Test
+    public void testApplyFlags_thenDisableWriteAheadLogging() {
+        Context ctx = InstrumentationRegistry.getContext();
 
+        SQLiteCompatibilityWalFlags.init(
+                "legacy_compatibility_wal_enabled=true,wal_syncmode=FULL");
+        mDatabase = SQLiteDatabase
+                .openOrCreateDatabase(ctx.getDatabasePath("SQLiteCompatibilityWalFlagsTest"), null);
+
+        mDatabase.disableWriteAheadLogging();
+        String journalMode = DatabaseUtils.stringForQuery(mDatabase, "PRAGMA journal_mode", null);
+        assertEquals(SQLiteGlobal.getDefaultJournalMode(), journalMode.toUpperCase());
+        String syncMode = DatabaseUtils.stringForQuery(mDatabase, "PRAGMA synchronous", null);
+        // TODO: This is the old behaviour and seems incorrect. The specified wal_syncmode was only
+        // intended to be used if the database is in WAL mode, and we should revert to the global
+        // default sync mode if WAL is disabled.
+        assertEquals("Normal mode (2) is expected", "2", syncMode);
+    }
 }

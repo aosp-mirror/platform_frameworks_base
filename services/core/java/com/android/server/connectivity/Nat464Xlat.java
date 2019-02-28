@@ -18,19 +18,24 @@ package com.android.server.connectivity;
 
 import android.net.ConnectivityManager;
 import android.net.INetd;
+import android.net.InetAddresses;
 import android.net.InterfaceConfiguration;
+import android.net.IpPrefix;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
 import android.net.NetworkInfo;
 import android.net.RouteInfo;
 import android.os.INetworkManagementService;
 import android.os.RemoteException;
+import android.os.ServiceSpecificException;
 import android.util.Slog;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.net.BaseNetworkObserver;
 
 import java.net.Inet4Address;
+import java.net.Inet6Address;
 import java.util.Objects;
 
 /**
@@ -67,15 +72,16 @@ public class Nat464Xlat extends BaseNetworkObserver {
     private final NetworkAgentInfo mNetwork;
 
     private enum State {
-        IDLE,       // start() not called. Base iface and stacked iface names are null.
-        STARTING,   // start() called. Base iface and stacked iface names are known.
-        RUNNING,    // start() called, and the stacked iface is known to be up.
-        STOPPING;   // stop() called, this Nat464Xlat is still registered as a network observer for
-                    // the stacked interface.
+        IDLE,         // start() not called. Base iface and stacked iface names are null.
+        DISCOVERING,  // same as IDLE, except prefix discovery in progress.
+        STARTING,     // start() called. Base iface and stacked iface names are known.
+        RUNNING,      // start() called, and the stacked iface is known to be up.
     }
 
+    private IpPrefix mNat64Prefix;
     private String mBaseIface;
     private String mIface;
+    private Inet6Address mIPv6Address;
     private State mState = State.IDLE;
 
     public Nat464Xlat(NetworkAgentInfo nai, INetd netd, INetworkManagementService nmService) {
@@ -85,20 +91,51 @@ public class Nat464Xlat extends BaseNetworkObserver {
     }
 
     /**
-     * Determines whether a network requires clat.
+     * Whether to attempt 464xlat on this network. This is true for an IPv6-only network that is
+     * currently connected and where the NetworkAgent has not disabled 464xlat. It is the signal to
+     * enable NAT64 prefix discovery.
+     *
      * @param network the NetworkAgentInfo corresponding to the network.
      * @return true if the network requires clat, false otherwise.
      */
-    public static boolean requiresClat(NetworkAgentInfo nai) {
+    @VisibleForTesting
+    protected static boolean requiresClat(NetworkAgentInfo nai) {
         // TODO: migrate to NetworkCapabilities.TRANSPORT_*.
         final boolean supported = ArrayUtils.contains(NETWORK_TYPES, nai.networkInfo.getType());
         final boolean connected = ArrayUtils.contains(NETWORK_STATES, nai.networkInfo.getState());
-        // We only run clat on networks that don't have a native IPv4 address.
-        final boolean hasIPv4Address =
-                (nai.linkProperties != null) && nai.linkProperties.hasIPv4Address();
-        final boolean skip464xlat =
-                (nai.netMisc() != null) && nai.netMisc().skip464xlat;
-        return supported && connected && !hasIPv4Address && !skip464xlat;
+
+        // Only run clat on networks that have a global IPv6 address and don't have a native IPv4
+        // address.
+        LinkProperties lp = nai.linkProperties;
+        final boolean isIpv6OnlyNetwork = (lp != null) && lp.hasGlobalIPv6Address()
+                && !lp.hasIPv4Address();
+
+        // If the network tells us it doesn't use clat, respect that.
+        final boolean skip464xlat = (nai.netMisc() != null) && nai.netMisc().skip464xlat;
+
+        return supported && connected && isIpv6OnlyNetwork && !skip464xlat;
+    }
+
+    /**
+     * Whether the clat demon should be started on this network now. This is true if requiresClat is
+     * true and a NAT64 prefix has been discovered.
+     *
+     * @param nai the NetworkAgentInfo corresponding to the network.
+     * @return true if the network should start clat, false otherwise.
+     */
+    @VisibleForTesting
+    protected static boolean shouldStartClat(NetworkAgentInfo nai) {
+        LinkProperties lp = nai.linkProperties;
+        return requiresClat(nai) && lp != null && lp.getNat64Prefix() != null;
+    }
+
+    /**
+     * @return true if we have started prefix discovery and not yet stopped it (regardless of
+     * whether it is still running or has succeeded).
+     * A true result corresponds to internal states DISCOVERING, STARTING and RUNNING.
+     */
+    public boolean isPrefixDiscoveryStarted() {
+        return mState == State.DISCOVERING || isStarted();
     }
 
     /**
@@ -106,7 +143,7 @@ public class Nat464Xlat extends BaseNetworkObserver {
      * A true result corresponds to internal states STARTING and RUNNING.
      */
     public boolean isStarted() {
-        return mState != State.IDLE;
+        return (mState == State.STARTING || mState == State.RUNNING);
     }
 
     /**
@@ -124,32 +161,31 @@ public class Nat464Xlat extends BaseNetworkObserver {
     }
 
     /**
-     * @return true if clatd has been stopped.
-     */
-    public boolean isStopping() {
-        return mState == State.STOPPING;
-    }
-
-    /**
      * Start clatd, register this Nat464Xlat as a network observer for the stacked interface,
      * and set internal state.
      */
     private void enterStartingState(String baseIface) {
         try {
             mNMService.registerObserver(this);
-        } catch(RemoteException e) {
-            Slog.e(TAG,
-                    "startClat: Can't register interface observer for clat on " + mNetwork.name());
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Can't register interface observer for clat on " + mNetwork.name());
             return;
         }
+
+        String addrStr = null;
         try {
-            mNetd.clatdStart(baseIface);
-        } catch(RemoteException|IllegalStateException e) {
-            Slog.e(TAG, "Error starting clatd on " + baseIface, e);
+            addrStr = mNetd.clatdStart(baseIface, mNat64Prefix.toString());
+        } catch (RemoteException | ServiceSpecificException e) {
+            Slog.e(TAG, "Error starting clatd on " + baseIface + ": " + e);
         }
         mIface = CLAT_PREFIX + baseIface;
         mBaseIface = baseIface;
         mState = State.STARTING;
+        try {
+            mIPv6Address = (Inet6Address) InetAddresses.parseNumericAddress(addrStr);
+        } catch (ClassCastException | IllegalArgumentException | NullPointerException e) {
+            Slog.e(TAG, "Invalid IPv6 address " + addrStr);
+        }
     }
 
     /**
@@ -161,37 +197,27 @@ public class Nat464Xlat extends BaseNetworkObserver {
     }
 
     /**
-     * Stop clatd, and turn ND offload on if it had been turned off.
-     */
-    private void enterStoppingState() {
-        try {
-            mNetd.clatdStop(mBaseIface);
-        } catch(RemoteException|IllegalStateException e) {
-            Slog.e(TAG, "Error stopping clatd on " + mBaseIface, e);
-        }
-
-        mState = State.STOPPING;
-    }
-
-    /**
      * Unregister as a base observer for the stacked interface, and clear internal state.
      */
-    private void enterIdleState() {
+    private void leaveStartedState() {
         try {
             mNMService.unregisterObserver(this);
-        } catch(RemoteException|IllegalStateException e) {
-            Slog.e(TAG, "Error unregistering clatd observer on " + mBaseIface, e);
+        } catch (RemoteException | IllegalStateException e) {
+            Slog.e(TAG, "Error unregistering clatd observer on " + mBaseIface + ": " + e);
         }
-
         mIface = null;
         mBaseIface = null;
         mState = State.IDLE;
+        if (requiresClat(mNetwork)) {
+            mState = State.DISCOVERING;
+        } else {
+            stopPrefixDiscovery();
+            mState = State.IDLE;
+        }
     }
 
-    /**
-     * Starts the clat daemon.
-     */
-    public void start() {
+    @VisibleForTesting
+    protected void start() {
         if (isStarted()) {
             Slog.e(TAG, "startClat: already started");
             return;
@@ -212,20 +238,82 @@ public class Nat464Xlat extends BaseNetworkObserver {
         enterStartingState(baseIface);
     }
 
-    /**
-     * Stops the clat daemon.
-     */
-    public void stop() {
+    @VisibleForTesting
+    protected void stop() {
         if (!isStarted()) {
+            Slog.e(TAG, "stopClat: already stopped");
             return;
         }
-        Slog.i(TAG, "Stopping clatd on " + mBaseIface);
 
-        boolean wasStarting = isStarting();
-        enterStoppingState();
-        if (wasStarting) {
-            enterIdleState();
+        Slog.i(TAG, "Stopping clatd on " + mBaseIface);
+        try {
+            mNetd.clatdStop(mBaseIface);
+        } catch (RemoteException | ServiceSpecificException e) {
+            Slog.e(TAG, "Error stopping clatd on " + mBaseIface + ": " + e);
         }
+
+        String iface = mIface;
+        boolean wasRunning = isRunning();
+
+        // Change state before updating LinkProperties. handleUpdateLinkProperties ends up calling
+        // fixupLinkProperties, and if at that time the state is still RUNNING, fixupLinkProperties
+        // would wrongly inform ConnectivityService that there is still a stacked interface.
+        leaveStartedState();
+
+        if (wasRunning) {
+            LinkProperties lp = new LinkProperties(mNetwork.linkProperties);
+            lp.removeStackedLink(iface);
+            mNetwork.connService().handleUpdateLinkProperties(mNetwork, lp);
+        }
+    }
+
+    private void startPrefixDiscovery() {
+        try {
+            mNetd.resolverStartPrefix64Discovery(getNetId());
+            mState = State.DISCOVERING;
+        } catch (RemoteException | ServiceSpecificException e) {
+            Slog.e(TAG, "Error starting prefix discovery on netId " + getNetId() + ": " + e);
+        }
+    }
+
+    private void stopPrefixDiscovery() {
+        try {
+            mNetd.resolverStopPrefix64Discovery(getNetId());
+        } catch (RemoteException | ServiceSpecificException e) {
+            Slog.e(TAG, "Error stopping prefix discovery on netId " + getNetId() + ": " + e);
+        }
+    }
+
+    /**
+     * Starts/stops NAT64 prefix discovery and clatd as necessary.
+     */
+    public void update() {
+        // TODO: turn this class into a proper StateMachine. // http://b/126113090
+        if (requiresClat(mNetwork)) {
+            if (!isPrefixDiscoveryStarted()) {
+                startPrefixDiscovery();
+            } else if (shouldStartClat(mNetwork)) {
+                // NAT64 prefix detected. Start clatd.
+                // TODO: support the NAT64 prefix changing after it's been discovered. There is no
+                // need to support this at the moment because it cannot happen without changes to
+                // the Dns64Configuration code in netd.
+                start();
+            } else {
+                // NAT64 prefix removed. Stop clatd and go back into DISCOVERING state.
+                stop();
+            }
+        } else {
+            // Network no longer requires clat. Stop clat and prefix discovery.
+            if (isStarted()) {
+                stop();
+            } else if (isPrefixDiscoveryStarted()) {
+                leaveStartedState();
+            }
+        }
+    }
+
+    public void setNat64Prefix(IpPrefix nat64Prefix) {
+        mNat64Prefix = nat64Prefix;
     }
 
     /**
@@ -234,6 +322,8 @@ public class Nat464Xlat extends BaseNetworkObserver {
      * has no idea that 464xlat is running on top of it.
      */
     public void fixupLinkProperties(LinkProperties oldLp, LinkProperties lp) {
+        lp.setNat64Prefix(mNat64Prefix);
+
         if (!isRunning()) {
             return;
         }
@@ -272,7 +362,7 @@ public class Nat464Xlat extends BaseNetworkObserver {
         try {
             InterfaceConfiguration config = mNMService.getInterfaceConfig(iface);
             return config.getLinkAddress();
-        } catch(RemoteException|IllegalStateException e) {
+        } catch (RemoteException | IllegalStateException e) {
             Slog.e(TAG, "Error getting link properties: " + e);
             return null;
         }
@@ -282,6 +372,20 @@ public class Nat464Xlat extends BaseNetworkObserver {
      * Adds stacked link on base link and transitions to RUNNING state.
      */
     private void handleInterfaceLinkStateChanged(String iface, boolean up) {
+        // TODO: if we call start(), then stop(), then start() again, and the
+        // interfaceLinkStateChanged notification for the first start is delayed past the first
+        // stop, then the code becomes out of sync with system state and will behave incorrectly.
+        //
+        // This is not trivial to fix because:
+        // 1. It is not guaranteed that start() will eventually result in the interface coming up,
+        //    because there could be an error starting clat (e.g., if the interface goes down before
+        //    the packet socket can be bound).
+        // 2. If start is called multiple times, there is nothing in the interfaceLinkStateChanged
+        //    notification that says which start() call the interface was created by.
+        //
+        // Once this code is converted to StateMachine, it will be possible to use deferMessage to
+        // ensure it stays in STARTING state until the interfaceLinkStateChanged notification fires,
+        // and possibly use a timeout (or provide some guarantees at the lower layer) to address #1.
         if (!isStarting() || !up || !Objects.equals(mIface, iface)) {
             return;
         }
@@ -307,20 +411,16 @@ public class Nat464Xlat extends BaseNetworkObserver {
         if (!Objects.equals(mIface, iface)) {
             return;
         }
-        if (!isRunning() && !isStopping()) {
+        if (!isRunning()) {
             return;
         }
 
         Slog.i(TAG, "interface " + iface + " removed");
-        if (!isStopping()) {
-            // Ensure clatd is stopped if stop() has not been called: this likely means that clatd
-            // has crashed.
-            enterStoppingState();
-        }
-        enterIdleState();
-        LinkProperties lp = new LinkProperties(mNetwork.linkProperties);
-        lp.removeStackedLink(iface);
-        mNetwork.connService().handleUpdateLinkProperties(mNetwork, lp);
+        // If we're running, and the interface was removed, then we didn't call stop(), and it's
+        // likely that clatd crashed. Ensure we call stop() so we can start clatd again. Calling
+        // stop() will also update LinkProperties, and if clatd crashed, the LinkProperties update
+        // will cause ConnectivityService to call start() again.
+        stop();
     }
 
     @Override
@@ -336,5 +436,10 @@ public class Nat464Xlat extends BaseNetworkObserver {
     @Override
     public String toString() {
         return "mBaseIface: " + mBaseIface + ", mIface: " + mIface + ", mState: " + mState;
+    }
+
+    @VisibleForTesting
+    protected int getNetId() {
+        return mNetwork.network.netId;
     }
 }

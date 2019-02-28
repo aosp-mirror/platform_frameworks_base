@@ -573,6 +573,81 @@ android_media_AudioSystem_getStreamVolumeIndex(JNIEnv *env,
 }
 
 static jint
+android_media_AudioSystem_setVolumeIndexForAttributes(JNIEnv *env,
+                                                      jobject thiz,
+                                                      jobject jaa,
+                                                      jint index,
+                                                      jint device)
+{
+    // read the AudioAttributes values
+    JNIAudioAttributeHelper::UniqueAaPtr paa = JNIAudioAttributeHelper::makeUnique();
+    jint jStatus = JNIAudioAttributeHelper::nativeFromJava(env, jaa, paa.get());
+    if (jStatus != (jint)AUDIO_JAVA_SUCCESS) {
+        return jStatus;
+    }
+    return (jint) check_AudioSystem_Command(
+            AudioSystem::setVolumeIndexForAttributes(*(paa.get()), index, (audio_devices_t)device));
+}
+
+static jint
+android_media_AudioSystem_getVolumeIndexForAttributes(JNIEnv *env,
+                                                      jobject thiz,
+                                                      jobject jaa,
+                                                      jint device)
+{
+    // read the AudioAttributes values
+    JNIAudioAttributeHelper::UniqueAaPtr paa = JNIAudioAttributeHelper::makeUnique();
+    jint jStatus = JNIAudioAttributeHelper::nativeFromJava(env, jaa, paa.get());
+    if (jStatus != (jint)AUDIO_JAVA_SUCCESS) {
+        return jStatus;
+    }
+    int index;
+    if (AudioSystem::getVolumeIndexForAttributes(*(paa.get()), index, (audio_devices_t)device)
+            != NO_ERROR) {
+        index = -1;
+    }
+    return (jint) index;
+}
+
+static jint
+android_media_AudioSystem_getMinVolumeIndexForAttributes(JNIEnv *env,
+                                                         jobject thiz,
+                                                         jobject jaa)
+{
+    // read the AudioAttributes values
+    JNIAudioAttributeHelper::UniqueAaPtr paa = JNIAudioAttributeHelper::makeUnique();
+    jint jStatus = JNIAudioAttributeHelper::nativeFromJava(env, jaa, paa.get());
+    if (jStatus != (jint)AUDIO_JAVA_SUCCESS) {
+        return jStatus;
+    }
+    int index;
+    if (AudioSystem::getMinVolumeIndexForAttributes(*(paa.get()), index)
+            != NO_ERROR) {
+        index = -1;
+    }
+    return (jint) index;
+}
+
+static jint
+android_media_AudioSystem_getMaxVolumeIndexForAttributes(JNIEnv *env,
+                                                         jobject thiz,
+                                                         jobject jaa)
+{
+    // read the AudioAttributes values
+    JNIAudioAttributeHelper::UniqueAaPtr paa = JNIAudioAttributeHelper::makeUnique();
+    jint jStatus = JNIAudioAttributeHelper::nativeFromJava(env, jaa, paa.get());
+    if (jStatus != (jint)AUDIO_JAVA_SUCCESS) {
+        return jStatus;
+    }
+    int index;
+    if (AudioSystem::getMaxVolumeIndexForAttributes(*(paa.get()), index)
+            != NO_ERROR) {
+        index = -1;
+    }
+    return (jint) index;
+}
+
+static jint
 android_media_AudioSystem_setMasterVolume(JNIEnv *env, jobject thiz, jfloat value)
 {
     return (jint) check_AudioSystem_Command(AudioSystem::setMasterVolume(value));
@@ -2172,6 +2247,10 @@ static const JNINativeMethod gMethods[] = {
     {"initStreamVolume",    "(III)I",   (void *)android_media_AudioSystem_initStreamVolume},
     {"setStreamVolumeIndex","(III)I",   (void *)android_media_AudioSystem_setStreamVolumeIndex},
     {"getStreamVolumeIndex","(II)I",    (void *)android_media_AudioSystem_getStreamVolumeIndex},
+    {"setVolumeIndexForAttributes","(Landroid/media/AudioAttributes;II)I",   (void *)android_media_AudioSystem_setVolumeIndexForAttributes},
+    {"getVolumeIndexForAttributes","(Landroid/media/AudioAttributes;I)I",    (void *)android_media_AudioSystem_getVolumeIndexForAttributes},
+    {"getMinVolumeIndexForAttributes","(Landroid/media/AudioAttributes;)I",    (void *)android_media_AudioSystem_getMinVolumeIndexForAttributes},
+    {"getMaxVolumeIndexForAttributes","(Landroid/media/AudioAttributes;)I",    (void *)android_media_AudioSystem_getMaxVolumeIndexForAttributes},
     {"setMasterVolume",     "(F)I",     (void *)android_media_AudioSystem_setMasterVolume},
     {"getMasterVolume",     "()F",      (void *)android_media_AudioSystem_getMasterVolume},
     {"setMasterMute",       "(Z)I",     (void *)android_media_AudioSystem_setMasterMute},

@@ -18,12 +18,12 @@ package com.android.systemui.doze;
 
 import static junit.framework.TestCase.assertEquals;
 
+import android.hardware.display.AmbientDisplayConfiguration;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
-import com.android.internal.hardware.AmbientDisplayConfiguration;
 import com.android.systemui.SysuiTestCase;
 
 import org.junit.Before;

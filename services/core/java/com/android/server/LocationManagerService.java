@@ -337,7 +337,7 @@ public class LocationManagerService extends ILocationManager.Stub {
                     @Override
                     public void onChange(boolean selfChange) {
                         synchronized (mLock) {
-                            onProviderAllowedChangedLocked(true);
+                            onProviderAllowedChangedLocked();
                         }
                     }
                 }, UserHandle.USER_ALL);
@@ -436,6 +436,10 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     @GuardedBy("mLock")
     private void onLocationModeChangedLocked(boolean broadcast) {
+        if (D) {
+            Log.d(TAG, "location enabled is now " + isLocationEnabled());
+        }
+
         for (LocationProvider p : mProviders) {
             p.onLocationModeChangedLocked();
         }
@@ -448,15 +452,9 @@ public class LocationManagerService extends ILocationManager.Stub {
     }
 
     @GuardedBy("mLock")
-    private void onProviderAllowedChangedLocked(boolean broadcast) {
+    private void onProviderAllowedChangedLocked() {
         for (LocationProvider p : mProviders) {
             p.onAllowedChangedLocked();
-        }
-
-        if (broadcast) {
-            mContext.sendBroadcastAsUser(
-                    new Intent(LocationManager.PROVIDERS_CHANGED_ACTION),
-                    UserHandle.ALL);
         }
     }
 
@@ -827,6 +825,10 @@ public class LocationManagerService extends ILocationManager.Stub {
             return;
         }
 
+        if (D) {
+            Log.d(TAG, "foreground user is changing to " + userId);
+        }
+
         // let providers know the current user is on the way out before changing the user
         for (LocationProvider p : mProviders) {
             p.onUserChangingLocked();
@@ -839,7 +841,12 @@ public class LocationManagerService extends ILocationManager.Stub {
 
         // if the user changes, per-user settings may also have changed
         onLocationModeChangedLocked(false);
-        onProviderAllowedChangedLocked(false);
+        onProviderAllowedChangedLocked();
+
+        // always force useability to be rechecked, even if no per-user settings have changed
+        for (LocationProvider p : mProviders) {
+            p.onUseableChangedLocked(false);
+        }
     }
 
     private class LocationProvider implements AbstractLocationProvider.LocationProviderManager {
@@ -891,9 +898,13 @@ public class LocationManagerService extends ILocationManager.Stub {
         public void attachLocked(AbstractLocationProvider provider) {
             checkNotNull(provider);
             checkState(mProvider == null);
-            mProvider = provider;
 
-            onUseableChangedLocked();
+            if (D) {
+                Log.d(TAG, mName + " provider attached");
+            }
+
+            mProvider = provider;
+            onUseableChangedLocked(false);
         }
 
         public String getName() {
@@ -1054,26 +1065,12 @@ public class LocationManagerService extends ILocationManager.Stub {
                         return;
                     }
 
-                    mEnabled = enabled;
-
-                    // update provider allowed settings to reflect enabled status
-                    if (mIsManagedBySettings) {
-                        if (mEnabled && !mAllowed) {
-                            Settings.Secure.putStringForUser(
-                                    mContext.getContentResolver(),
-                                    Settings.Secure.LOCATION_PROVIDERS_ALLOWED,
-                                    "+" + mName,
-                                    mCurrentUserId);
-                        } else if (!mEnabled && mAllowed) {
-                            Settings.Secure.putStringForUser(
-                                    mContext.getContentResolver(),
-                                    Settings.Secure.LOCATION_PROVIDERS_ALLOWED,
-                                    "-" + mName,
-                                    mCurrentUserId);
-                        }
+                    if (D) {
+                        Log.d(TAG, mName + " provider enabled is now " + mEnabled);
                     }
 
-                    onUseableChangedLocked();
+                    mEnabled = enabled;
+                    onUseableChangedLocked(false);
                 }
             });
         }
@@ -1091,41 +1088,28 @@ public class LocationManagerService extends ILocationManager.Stub {
 
         @GuardedBy("mLock")
         public void onLocationModeChangedLocked() {
-            onUseableChangedLocked();
-        }
-
-        private boolean isAllowed() {
-            return isAllowedForUser(mCurrentUserId);
-        }
-
-        private boolean isAllowedForUser(int userId) {
-            String allowedProviders = Settings.Secure.getStringForUser(
-                    mContext.getContentResolver(),
-                    Settings.Secure.LOCATION_PROVIDERS_ALLOWED,
-                    userId);
-            return TextUtils.delimitedStringContains(allowedProviders, ',', mName);
+            onUseableChangedLocked(false);
         }
 
         @GuardedBy("mLock")
         public void onAllowedChangedLocked() {
             if (mIsManagedBySettings) {
-                boolean allowed = isAllowed();
+                String allowedProviders = Settings.Secure.getStringForUser(
+                        mContext.getContentResolver(),
+                        Settings.Secure.LOCATION_PROVIDERS_ALLOWED,
+                        mCurrentUserId);
+                boolean allowed = TextUtils.delimitedStringContains(allowedProviders, ',', mName);
+
                 if (allowed == mAllowed) {
                     return;
                 }
-                mAllowed = allowed;
 
-                // make a best effort to keep the setting matching the real enabled state of the
-                // provider so that legacy applications aren't broken.
-                if (mAllowed && !mEnabled) {
-                    Settings.Secure.putStringForUser(
-                            mContext.getContentResolver(),
-                            Settings.Secure.LOCATION_PROVIDERS_ALLOWED,
-                            "-" + mName,
-                            mCurrentUserId);
+                if (D) {
+                    Log.d(TAG, mName + " provider allowed is now " + mAllowed);
                 }
 
-                onUseableChangedLocked();
+                mAllowed = allowed;
+                onUseableChangedLocked(true);
             }
         }
 
@@ -1140,16 +1124,48 @@ public class LocationManagerService extends ILocationManager.Stub {
         }
 
         @GuardedBy("mLock")
-        public void onUseableChangedLocked() {
+        private boolean isUseableIgnoringAllowedLocked() {
+            return mProvider != null && mProviders.contains(this) && isLocationEnabled()
+                    && mEnabled;
+        }
+
+        @GuardedBy("mLock")
+        public void onUseableChangedLocked(boolean isAllowedChanged) {
             // if any property that contributes to "useability" here changes state, it MUST result
             // in a direct or indrect call to onUseableChangedLocked. this allows the provider to
             // guarantee that it will always eventually reach the correct state.
-            boolean useable = mProvider != null
-                    && mProviders.contains(this) && isLocationEnabled() && mAllowed && mEnabled;
+            boolean useableIgnoringAllowed = isUseableIgnoringAllowedLocked();
+            boolean useable = useableIgnoringAllowed && mAllowed;
+
+            // update deprecated provider allowed settings for backwards compatibility, and do this
+            // even if there is no change in overall useability state. this may result in trying to
+            // overwrite the same value, but Settings handles deduping this.
+            if (mIsManagedBySettings) {
+                // a "-" change derived from the allowed setting should not be overwritten, but a
+                // "+" change should be corrected if necessary
+                if (useableIgnoringAllowed && !isAllowedChanged) {
+                    Settings.Secure.putStringForUser(
+                            mContext.getContentResolver(),
+                            Settings.Secure.LOCATION_PROVIDERS_ALLOWED,
+                            "+" + mName,
+                            mCurrentUserId);
+                } else if (!useableIgnoringAllowed) {
+                    Settings.Secure.putStringForUser(
+                            mContext.getContentResolver(),
+                            Settings.Secure.LOCATION_PROVIDERS_ALLOWED,
+                            "-" + mName,
+                            mCurrentUserId);
+                }
+            }
+
             if (useable == mUseable) {
                 return;
             }
             mUseable = useable;
+
+            if (D) {
+                Log.d(TAG, mName + " provider useable is now " + mUseable);
+            }
 
             if (!mUseable) {
                 // If any provider has been disabled, clear all last locations for all
@@ -1160,6 +1176,10 @@ public class LocationManagerService extends ILocationManager.Stub {
             }
 
             updateProviderUseableLocked(this);
+
+            mContext.sendBroadcastAsUser(
+                    new Intent(LocationManager.PROVIDERS_CHANGED_ACTION),
+                    UserHandle.ALL);
         }
 
         @GuardedBy("mLock")
@@ -1720,7 +1740,7 @@ public class LocationManagerService extends ILocationManager.Stub {
         mProviders.add(provider);
 
         provider.onAllowedChangedLocked();  // allowed state may change while provider was inactive
-        provider.onUseableChangedLocked();
+        provider.onUseableChangedLocked(false);
     }
 
     @GuardedBy("mLock")
@@ -1728,7 +1748,7 @@ public class LocationManagerService extends ILocationManager.Stub {
         if (mProviders.remove(provider)) {
             long identity = Binder.clearCallingIdentity();
             try {
-                provider.onUseableChangedLocked();
+                provider.onUseableChangedLocked(false);
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
@@ -2113,7 +2133,6 @@ public class LocationManagerService extends ILocationManager.Stub {
             }
         }
 
-        if (D) Log.d(TAG, "provider request: " + provider + " " + providerRequest);
         provider.setRequestLocked(providerRequest, worksource);
     }
 
@@ -2507,7 +2526,6 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     @Override
     public Location getLastLocation(LocationRequest r, String packageName) {
-        if (D) Log.d(TAG, "getLastLocation: " + r);
         synchronized (mLock) {
             LocationRequest request = r != null ? r : DEFAULT_LOCATION_REQUEST;
             int allowedResolutionLevel = getCallerAllowedResolutionLevel();
@@ -2643,33 +2661,33 @@ public class LocationManagerService extends ILocationManager.Stub {
         synchronized (mLock) {
             checkResolutionLevelIsSufficientForProviderUseLocked(allowedResolutionLevel,
                     request.getProvider());
-            // Require that caller can manage given document
-            boolean callerHasLocationHardwarePermission =
-                    mContext.checkCallingPermission(android.Manifest.permission.LOCATION_HARDWARE)
-                            == PERMISSION_GRANTED;
-            LocationRequest sanitizedRequest = createSanitizedRequest(request,
+        }
+        // Require that caller can manage given document
+        boolean callerHasLocationHardwarePermission =
+                mContext.checkCallingPermission(android.Manifest.permission.LOCATION_HARDWARE)
+                        == PERMISSION_GRANTED;
+        LocationRequest sanitizedRequest = createSanitizedRequest(request,
+                allowedResolutionLevel,
+                callerHasLocationHardwarePermission);
+
+        if (D) {
+            Log.d(TAG, "requestGeofence: " + sanitizedRequest + " " + geofence + " " + intent);
+        }
+
+        // geo-fence manager uses the public location API, need to clear identity
+        int uid = Binder.getCallingUid();
+        if (UserHandle.getUserId(uid) != UserHandle.USER_SYSTEM) {
+            // temporary measure until geofences work for secondary users
+            Log.w(TAG, "proximity alerts are currently available only to the primary user");
+            return;
+        }
+        long identity = Binder.clearCallingIdentity();
+        try {
+            mGeofenceManager.addFence(sanitizedRequest, geofence, intent,
                     allowedResolutionLevel,
-                    callerHasLocationHardwarePermission);
-
-            if (D) {
-                Log.d(TAG, "requestGeofence: " + sanitizedRequest + " " + geofence + " " + intent);
-            }
-
-            // geo-fence manager uses the public location API, need to clear identity
-            int uid = Binder.getCallingUid();
-            if (UserHandle.getUserId(uid) != UserHandle.USER_SYSTEM) {
-                // temporary measure until geofences work for secondary users
-                Log.w(TAG, "proximity alerts are currently available only to the primary user");
-                return;
-            }
-            long identity = Binder.clearCallingIdentity();
-            try {
-                mGeofenceManager.addFence(sanitizedRequest, geofence, intent,
-                        allowedResolutionLevel,
-                        uid, packageName);
-            } finally {
-                Binder.restoreCallingIdentity(identity);
-            }
+                    uid, packageName);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
         }
     }
 

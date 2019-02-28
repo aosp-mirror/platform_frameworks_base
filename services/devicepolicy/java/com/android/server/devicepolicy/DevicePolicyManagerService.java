@@ -5046,7 +5046,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             if (quality == DevicePolicyManager.PASSWORD_QUALITY_MANAGED) {
                 quality = PASSWORD_QUALITY_UNSPECIFIED;
             }
-            final PasswordMetrics metrics = PasswordMetrics.computeForPassword(password);
+            // TODO(b/120484642): remove getBytes() below
+            final PasswordMetrics metrics = PasswordMetrics.computeForPassword(password.getBytes());
             final int realQuality = metrics.quality;
             if (realQuality < quality
                     && quality != DevicePolicyManager.PASSWORD_QUALITY_COMPLEX) {
@@ -5133,16 +5134,22 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         try {
             if (token == null) {
                 if (!TextUtils.isEmpty(password)) {
-                    mLockPatternUtils.saveLockPassword(password, null, quality, userHandle);
+                    mLockPatternUtils.saveLockPassword(password.getBytes(), null, quality,
+                            userHandle);
                 } else {
                     mLockPatternUtils.clearLock(null, userHandle);
                 }
                 result = true;
             } else {
-                result = mLockPatternUtils.setLockCredentialWithToken(password,
-                        TextUtils.isEmpty(password) ? LockPatternUtils.CREDENTIAL_TYPE_NONE
-                                : LockPatternUtils.CREDENTIAL_TYPE_PASSWORD,
-                        quality, tokenHandle, token, userHandle);
+                if (!TextUtils.isEmpty(password)) {
+                    result = mLockPatternUtils.setLockCredentialWithToken(password.getBytes(),
+                            LockPatternUtils.CREDENTIAL_TYPE_PASSWORD,
+                            quality, tokenHandle, token, userHandle);
+                } else {
+                    result = mLockPatternUtils.setLockCredentialWithToken(null,
+                            LockPatternUtils.CREDENTIAL_TYPE_NONE,
+                            quality, tokenHandle, token, userHandle);
+                }
             }
             boolean requireEntry = (flags & DevicePolicyManager.RESET_PASSWORD_REQUIRE_ENTRY) != 0;
             if (requireEntry) {

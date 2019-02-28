@@ -969,6 +969,11 @@ public class SettingsProvider extends ContentProvider {
                 try {
                     synchronized (mLock) {
                         Setting setting = getSecureSetting(
+                                Settings.Secure.LOCATION_MODE, userId);
+                        updateSecureSetting(Settings.Secure.LOCATION_MODE,
+                                setting != null ? setting.getValue() : null, null,
+                                true, userId, true);
+                        setting = getSecureSetting(
                                 Settings.Secure.LOCATION_PROVIDERS_ALLOWED, userId);
                         updateSecureSetting(Settings.Secure.LOCATION_PROVIDERS_ALLOWED,
                                 setting != null ? setting.getValue() : null, null,
@@ -4229,23 +4234,18 @@ public class SettingsProvider extends ContentProvider {
                         final Setting locationProvidersAllowed = secureSettings.getSettingLocked(
                                 Secure.LOCATION_PROVIDERS_ALLOWED);
 
-                        String defLocationMode = Integer.toString(
-                                !TextUtils.isEmpty(locationProvidersAllowed.getValue())
-                                        ? Secure.LOCATION_MODE_ON
-                                        : Secure.LOCATION_MODE_OFF);
+                        final int defLocationMode;
+                        if (locationProvidersAllowed.isNull()) {
+                            defLocationMode = getContext().getResources().getInteger(
+                                    R.integer.def_location_mode);
+                        } else {
+                            defLocationMode =
+                                    !TextUtils.isEmpty(locationProvidersAllowed.getValue())
+                                            ? Secure.LOCATION_MODE_ON
+                                            : Secure.LOCATION_MODE_OFF;
+                        }
                         secureSettings.insertSettingLocked(
-                                Secure.LOCATION_MODE, defLocationMode,
-                                null, true, SettingsState.SYSTEM_PACKAGE_NAME);
-
-                        // also reset LOCATION_PROVIDERS_ALLOWED back to the default value - this
-                        // setting is now only for debug/test purposes, and will likely be removed
-                        // in a later release. LocationManagerService is responsible for adjusting
-                        // these settings to the proper state.
-
-                        String defLocationProvidersAllowed = getContext().getResources().getString(
-                                R.string.def_location_providers_allowed);
-                        secureSettings.insertSettingLocked(
-                                Secure.LOCATION_PROVIDERS_ALLOWED, defLocationProvidersAllowed,
+                                Secure.LOCATION_MODE, Integer.toString(defLocationMode),
                                 null, true, SettingsState.SYSTEM_PACKAGE_NAME);
                     }
 
