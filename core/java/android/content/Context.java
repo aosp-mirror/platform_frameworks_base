@@ -770,6 +770,7 @@ public abstract class Context {
      * <p>
      * This is not generally intended for third party application developers.
      */
+    @NonNull
     public String getOpPackageName() {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
     }
@@ -1741,7 +1742,8 @@ public abstract class Context {
      */
     @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
     @SystemApi
-    public void startActivityAsUser(@RequiresPermission Intent intent, UserHandle user) {
+    public void startActivityAsUser(@RequiresPermission @NonNull Intent intent,
+            @NonNull UserHandle user) {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
     }
 
@@ -2981,7 +2983,7 @@ public abstract class Context {
      *
      * @see #bindService
      */
-    public boolean bindIsolatedService(@RequiresPermission Intent service,
+    public boolean bindIsolatedService(@RequiresPermission @NonNull Intent service,
             @NonNull ServiceConnection conn, @BindServiceFlags int flags,
             @NonNull String instanceName) {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
