@@ -49,6 +49,7 @@ import java.util.LinkedList;
 public final class FillContext implements Parcelable {
     private final int mRequestId;
     private final @NonNull AssistStructure mStructure;
+    private final @NonNull AutofillId mFocusedId;
 
     /**
      * Lookup table AutofillId->ViewNode to speed up {@link #findViewNodesByAutofillIds}
@@ -58,13 +59,15 @@ public final class FillContext implements Parcelable {
 
 
     /** @hide */
-    public FillContext(int requestId, @NonNull AssistStructure structure) {
+    public FillContext(int requestId, @NonNull AssistStructure structure,
+            @NonNull AutofillId autofillId) {
         mRequestId = requestId;
         mStructure = structure;
+        mFocusedId = autofillId;
     }
 
     private FillContext(Parcel parcel) {
-        this(parcel.readInt(), parcel.readParcelable(null));
+        this(parcel.readInt(), parcel.readParcelable(null), parcel.readParcelable(null));
     }
 
     /**
@@ -82,15 +85,24 @@ public final class FillContext implements Parcelable {
     /**
      * @return The screen content.
      */
+    @NonNull
     public AssistStructure getStructure() {
         return mStructure;
+    }
+
+    /**
+     * @return the AutofillId of the view that triggered autofill.
+     */
+    @NonNull
+    public AutofillId getFocusedId() {
+        return mFocusedId;
     }
 
     @Override
     public String toString() {
         if (!sDebug)  return super.toString();
 
-        return "FillContext [reqId=" + mRequestId + "]";
+        return "FillContext [reqId=" + mRequestId + ", focusedId=" + mFocusedId + "]";
     }
 
     @Override
@@ -102,6 +114,7 @@ public final class FillContext implements Parcelable {
     public void writeToParcel(Parcel parcel, int flags) {
         parcel.writeInt(mRequestId);
         parcel.writeParcelable(mStructure, flags);
+        parcel.writeParcelable(mFocusedId, flags);
     }
 
     /**
@@ -180,11 +193,13 @@ public final class FillContext implements Parcelable {
     public static final Parcelable.Creator<FillContext> CREATOR =
             new Parcelable.Creator<FillContext>() {
         @Override
+        @NonNull
         public FillContext createFromParcel(Parcel parcel) {
             return new FillContext(parcel);
         }
 
         @Override
+        @NonNull
         public FillContext[] newArray(int size) {
             return new FillContext[size];
         }
