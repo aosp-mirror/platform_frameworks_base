@@ -3056,81 +3056,75 @@ package android.location {
 
   public final class GnssMeasurementCorrections implements android.os.Parcelable {
     method public int describeContents();
-    method public double getAltitudeMeters();
-    method public double getHorizontalPositionUncertaintyMeters();
-    method public double getLatitudeDegrees();
-    method public double getLongitudeDegrees();
-    method @Nullable public java.util.List<android.location.GnssSingleSatCorrection> getSingleSatelliteCorrectionList();
-    method public long getToaGpsNanosecondsOfWeek();
-    method public double getVerticalPositionUncertaintyMeters();
-    method public void writeToParcel(android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.location.GnssMeasurementCorrections> CREATOR;
+    method @FloatRange(from=-1000.0F, to=10000.0f) public double getAltitudeMeters();
+    method @FloatRange(from=0.0f) public double getHorizontalPositionUncertaintyMeters();
+    method @FloatRange(from=-90.0F, to=90.0f) public double getLatitudeDegrees();
+    method @FloatRange(from=-180.0F, to=180.0f) public double getLongitudeDegrees();
+    method @NonNull public java.util.List<android.location.GnssSingleSatCorrection> getSingleSatelliteCorrectionList();
+    method @IntRange(from=0) public long getToaGpsNanosecondsOfWeek();
+    method @FloatRange(from=0.0f) public double getVerticalPositionUncertaintyMeters();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.location.GnssMeasurementCorrections> CREATOR;
   }
 
   public static final class GnssMeasurementCorrections.Builder {
     ctor public GnssMeasurementCorrections.Builder();
-    method public android.location.GnssMeasurementCorrections build();
-    method public android.location.GnssMeasurementCorrections.Builder setAltitudeMeters(double);
-    method public android.location.GnssMeasurementCorrections.Builder setHorizontalPositionUncertaintyMeters(double);
-    method public android.location.GnssMeasurementCorrections.Builder setLatitudeDegrees(double);
-    method public android.location.GnssMeasurementCorrections.Builder setLongitudeDegrees(double);
-    method public android.location.GnssMeasurementCorrections.Builder setSingleSatelliteCorrectionList(@Nullable java.util.List<android.location.GnssSingleSatCorrection>);
-    method public android.location.GnssMeasurementCorrections.Builder setToaGpsNanosecondsOfWeek(long);
-    method public android.location.GnssMeasurementCorrections.Builder setVerticalPositionUncertaintyMeters(double);
+    method @NonNull public android.location.GnssMeasurementCorrections build();
+    method @NonNull public android.location.GnssMeasurementCorrections.Builder setAltitudeMeters(@FloatRange(from=-1000.0F, to=10000.0f) double);
+    method @NonNull public android.location.GnssMeasurementCorrections.Builder setHorizontalPositionUncertaintyMeters(@FloatRange(from=0.0f) double);
+    method @NonNull public android.location.GnssMeasurementCorrections.Builder setLatitudeDegrees(@FloatRange(from=-90.0F, to=90.0f) double);
+    method @NonNull public android.location.GnssMeasurementCorrections.Builder setLongitudeDegrees(@FloatRange(from=-180.0F, to=180.0f) double);
+    method @NonNull public android.location.GnssMeasurementCorrections.Builder setSingleSatelliteCorrectionList(@NonNull java.util.List<android.location.GnssSingleSatCorrection>);
+    method @NonNull public android.location.GnssMeasurementCorrections.Builder setToaGpsNanosecondsOfWeek(@IntRange(from=0) long);
+    method @NonNull public android.location.GnssMeasurementCorrections.Builder setVerticalPositionUncertaintyMeters(@FloatRange(from=0.0f) double);
   }
 
   public final class GnssReflectingPlane implements android.os.Parcelable {
     method public int describeContents();
-    method public double getAltitudeMeters();
-    method public double getAzimuthDegrees();
-    method public double getLatitudeDegrees();
-    method public double getLongitudeDegrees();
-    method public void writeToParcel(android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.location.GnssReflectingPlane> CREATOR;
+    method @FloatRange(from=-1000.0F, to=10000.0f) public double getAltitudeMeters();
+    method @FloatRange(from=0.0f, to=360.0f) public double getAzimuthDegrees();
+    method @FloatRange(from=-90.0F, to=90.0f) public double getLatitudeDegrees();
+    method @FloatRange(from=-180.0F, to=180.0f) public double getLongitudeDegrees();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.location.GnssReflectingPlane> CREATOR;
   }
 
   public static final class GnssReflectingPlane.Builder {
     ctor public GnssReflectingPlane.Builder();
-    method public android.location.GnssReflectingPlane build();
-    method public android.location.GnssReflectingPlane.Builder setAltitudeMeters(double);
-    method public android.location.GnssReflectingPlane.Builder setAzimuthDegrees(double);
-    method public android.location.GnssReflectingPlane.Builder setLatitudeDegrees(double);
-    method public android.location.GnssReflectingPlane.Builder setLongitudeDegrees(double);
+    method @NonNull public android.location.GnssReflectingPlane build();
+    method @NonNull public android.location.GnssReflectingPlane.Builder setAltitudeMeters(@FloatRange(from=-1000.0F, to=10000.0f) double);
+    method @NonNull public android.location.GnssReflectingPlane.Builder setAzimuthDegrees(@FloatRange(from=0.0f, to=360.0f) double);
+    method @NonNull public android.location.GnssReflectingPlane.Builder setLatitudeDegrees(@FloatRange(from=-90.0F, to=90.0f) double);
+    method @NonNull public android.location.GnssReflectingPlane.Builder setLongitudeDegrees(@FloatRange(from=-180.0F, to=180.0f) double);
   }
 
   public final class GnssSingleSatCorrection implements android.os.Parcelable {
     method public int describeContents();
-    method public float getCarrierFrequencyHz();
+    method @FloatRange(from=0.0f, fromInclusive=false) public float getCarrierFrequencyHz();
     method public int getConstellationType();
-    method public float getExcessPathLengthMeters();
-    method public float getExcessPathLengthUncertaintyMeters();
+    method @FloatRange(from=0.0f) public float getExcessPathLengthMeters();
+    method @FloatRange(from=0.0f) public float getExcessPathLengthUncertaintyMeters();
     method @FloatRange(from=0.0f, to=1.0f) public float getProbabilityLineOfSight();
     method @Nullable public android.location.GnssReflectingPlane getReflectingPlane();
-    method public int getSatelliteId();
-    method public int getSingleSatelliteCorrectionFlags();
+    method @IntRange(from=0) public int getSatelliteId();
     method public boolean hasExcessPathLength();
     method public boolean hasExcessPathLengthUncertainty();
     method public boolean hasReflectingPlane();
     method public boolean hasValidSatelliteLineOfSight();
-    method public void writeToParcel(android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.location.GnssSingleSatCorrection> CREATOR;
-    field public static final int HAS_EXCESS_PATH_LENGTH_MASK = 2; // 0x2
-    field public static final int HAS_EXCESS_PATH_LENGTH_UNC_MASK = 4; // 0x4
-    field public static final int HAS_PROB_SAT_IS_LOS_MASK = 1; // 0x1
-    field public static final int HAS_REFLECTING_PLANE_MASK = 8; // 0x8
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.location.GnssSingleSatCorrection> CREATOR;
   }
 
   public static final class GnssSingleSatCorrection.Builder {
     ctor public GnssSingleSatCorrection.Builder();
-    method public android.location.GnssSingleSatCorrection build();
-    method public android.location.GnssSingleSatCorrection.Builder setCarrierFrequencyHz(float);
-    method public android.location.GnssSingleSatCorrection.Builder setConstellationType(int);
-    method public android.location.GnssSingleSatCorrection.Builder setExcessPathLengthMeters(float);
-    method public android.location.GnssSingleSatCorrection.Builder setExcessPathLengthUncertaintyMeters(float);
-    method public android.location.GnssSingleSatCorrection.Builder setProbabilityLineOfSight(@FloatRange(from=0.0f, to=1.0f) float);
-    method public android.location.GnssSingleSatCorrection.Builder setReflectingPlane(android.location.GnssReflectingPlane);
-    method public android.location.GnssSingleSatCorrection.Builder setSatelliteId(int);
-    method public android.location.GnssSingleSatCorrection.Builder setSingleSatelliteCorrectionFlags(int);
+    method @NonNull public android.location.GnssSingleSatCorrection build();
+    method @NonNull public android.location.GnssSingleSatCorrection.Builder setCarrierFrequencyHz(@FloatRange(from=0.0f, fromInclusive=false) float);
+    method @NonNull public android.location.GnssSingleSatCorrection.Builder setConstellationType(int);
+    method @NonNull public android.location.GnssSingleSatCorrection.Builder setExcessPathLengthMeters(@FloatRange(from=0.0f) float);
+    method @NonNull public android.location.GnssSingleSatCorrection.Builder setExcessPathLengthUncertaintyMeters(@FloatRange(from=0.0f) float);
+    method @NonNull public android.location.GnssSingleSatCorrection.Builder setProbabilityLineOfSight(@FloatRange(from=0.0f, to=1.0f) float);
+    method @NonNull public android.location.GnssSingleSatCorrection.Builder setReflectingPlane(@Nullable android.location.GnssReflectingPlane);
+    method @NonNull public android.location.GnssSingleSatCorrection.Builder setSatelliteId(@IntRange(from=0) int);
   }
 
   public class GpsClock implements android.os.Parcelable {

@@ -16,10 +16,15 @@
 
 package android.location;
 
+import android.annotation.FloatRange;
+import android.annotation.IntRange;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
+
+import com.android.internal.util.Preconditions;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -35,37 +40,44 @@ import java.util.List;
 public final class GnssMeasurementCorrections implements Parcelable {
 
     /** Represents latitude in degrees at which the corrections are computed. */
-    private double mLatitudeDegrees;
+    @FloatRange(from = -90.0f, to = 90.0f)
+    private final double mLatitudeDegrees;
     /** Represents longitude in degrees at which the corrections are computed. */
-    private double mLongitudeDegrees;
+    @FloatRange(from = -180.0f, to = 180.0f)
+    private final double mLongitudeDegrees;
     /**
      * Represents altitude in meters above the WGS 84 reference ellipsoid at which the corrections
      * are computed.
      */
-    private double mAltitudeMeters;
+    @FloatRange(from = -1000.0, to = 10000.0f)
+    private final double mAltitudeMeters;
     /**
      * Represents the horizontal uncertainty (68% confidence) in meters on the device position at
      * which the corrections are provided.
      *
      * <p> This value is useful for example to judge how accurate the provided corrections are.
      */
-    private double mHorizontalPositionUncertaintyMeters;
+    @FloatRange(from = 0.0f)
+    private final double mHorizontalPositionUncertaintyMeters;
     /**
      * Represents the vertical uncertainty (68% confidence) in meters on the device position at
      * which the corrections are provided.
      *
      * <p> This value is useful for example to judge how accurate the provided corrections are.
      */
-    private double mVerticalPositionUncertaintyMeters;
+    @FloatRange(from = 0.0f)
+    private final double mVerticalPositionUncertaintyMeters;
 
     /** Time Of Applicability, GPS time of week in nanoseconds. */
-    private long mToaGpsNanosecondsOfWeek;
+    @IntRange(from = 0)
+    private final long mToaGpsNanosecondsOfWeek;
 
     /**
      * A set of {@link GnssSingleSatCorrection} each containing measurement corrections for a
      * satellite in view.
      */
-    private @Nullable List<GnssSingleSatCorrection> mSingleSatCorrectionList;
+    @NonNull
+    private final List<GnssSingleSatCorrection> mSingleSatCorrectionList;
 
     private GnssMeasurementCorrections(Builder builder) {
         mLatitudeDegrees = builder.mLatitudeDegrees;
@@ -74,19 +86,19 @@ public final class GnssMeasurementCorrections implements Parcelable {
         mHorizontalPositionUncertaintyMeters = builder.mHorizontalPositionUncertaintyMeters;
         mVerticalPositionUncertaintyMeters = builder.mVerticalPositionUncertaintyMeters;
         mToaGpsNanosecondsOfWeek = builder.mToaGpsNanosecondsOfWeek;
-        mSingleSatCorrectionList =
-                builder.mSingleSatCorrectionList == null
-                        ? null
-                        : Collections.unmodifiableList(
-                                new ArrayList<>(builder.mSingleSatCorrectionList));
+        final List<GnssSingleSatCorrection> singleSatCorrList =  builder.mSingleSatCorrectionList;
+        Preconditions.checkArgument(singleSatCorrList != null && !singleSatCorrList.isEmpty());
+        mSingleSatCorrectionList = Collections.unmodifiableList(new ArrayList<>(singleSatCorrList));
     }
 
     /** Gets the latitude in degrees at which the corrections are computed. */
+    @FloatRange(from = -90.0f, to = 90.0f)
     public double getLatitudeDegrees() {
         return mLatitudeDegrees;
     }
 
     /** Gets the longitude in degrees at which the corrections are computed. */
+    @FloatRange(from = -180.0f, to = 180.0f)
     public double getLongitudeDegrees() {
         return mLongitudeDegrees;
     }
@@ -95,6 +107,7 @@ public final class GnssMeasurementCorrections implements Parcelable {
      * Gets the altitude in meters above the WGS 84 reference ellipsoid at which the corrections are
      * computed.
      */
+    @FloatRange(from = -1000.0f, to = 10000.0f)
     public double getAltitudeMeters() {
         return mAltitudeMeters;
     }
@@ -103,6 +116,7 @@ public final class GnssMeasurementCorrections implements Parcelable {
      * Gets the horizontal uncertainty (68% confidence) in meters on the device position at
      * which the corrections are provided.
      */
+    @FloatRange(from = 0.0f)
     public double getHorizontalPositionUncertaintyMeters() {
         return mHorizontalPositionUncertaintyMeters;
     }
@@ -111,11 +125,13 @@ public final class GnssMeasurementCorrections implements Parcelable {
      * Gets the vertical uncertainty (68% confidence) in meters on the device position at
      * which the corrections are provided.
      */
+    @FloatRange(from = 0.0f)
     public double getVerticalPositionUncertaintyMeters() {
         return mVerticalPositionUncertaintyMeters;
     }
 
     /** Gets the time of applicability, GPS time of week in nanoseconds. */
+    @IntRange(from = 0)
     public long getToaGpsNanosecondsOfWeek() {
         return mToaGpsNanosecondsOfWeek;
     }
@@ -124,7 +140,8 @@ public final class GnssMeasurementCorrections implements Parcelable {
      * Gets a set of {@link GnssSingleSatCorrection} each containing measurement corrections for a
      * satellite in view
      */
-    public @Nullable List<GnssSingleSatCorrection> getSingleSatelliteCorrectionList() {
+    @NonNull
+    public List<GnssSingleSatCorrection> getSingleSatelliteCorrectionList() {
         return mSingleSatCorrectionList;
     }
 
@@ -133,10 +150,11 @@ public final class GnssMeasurementCorrections implements Parcelable {
         return 0;
     }
 
-    public static final @android.annotation.NonNull Creator<GnssMeasurementCorrections> CREATOR =
+    public static final Creator<GnssMeasurementCorrections> CREATOR =
             new Creator<GnssMeasurementCorrections>() {
                 @Override
-                public GnssMeasurementCorrections createFromParcel(Parcel parcel) {
+                @NonNull
+                public GnssMeasurementCorrections createFromParcel(@NonNull Parcel parcel) {
                     final GnssMeasurementCorrections.Builder gnssMeasurementCorrectons =
                             new Builder()
                                     .setLatitudeDegrees(parcel.readDouble())
@@ -148,7 +166,7 @@ public final class GnssMeasurementCorrections implements Parcelable {
                     List<GnssSingleSatCorrection> singleSatCorrectionList = new ArrayList<>();
                     parcel.readTypedList(singleSatCorrectionList, GnssSingleSatCorrection.CREATOR);
                     gnssMeasurementCorrectons.setSingleSatelliteCorrectionList(
-                            singleSatCorrectionList.isEmpty() ? null : singleSatCorrectionList);
+                            singleSatCorrectionList);
                     return gnssMeasurementCorrectons.build();
                 }
 
@@ -177,7 +195,7 @@ public final class GnssMeasurementCorrections implements Parcelable {
     }
 
     @Override
-    public void writeToParcel(Parcel parcel, int flags) {
+    public void writeToParcel(@NonNull Parcel parcel, int flags) {
         parcel.writeDouble(mLatitudeDegrees);
         parcel.writeDouble(mLongitudeDegrees);
         parcel.writeDouble(mAltitudeMeters);
@@ -199,16 +217,18 @@ public final class GnssMeasurementCorrections implements Parcelable {
         private double mHorizontalPositionUncertaintyMeters;
         private double mVerticalPositionUncertaintyMeters;
         private long mToaGpsNanosecondsOfWeek;
-        private List<GnssSingleSatCorrection> mSingleSatCorrectionList;
+        @Nullable private List<GnssSingleSatCorrection> mSingleSatCorrectionList;
 
         /** Sets the latitude in degrees at which the corrections are computed. */
-        public Builder setLatitudeDegrees(double latitudeDegrees) {
+        @NonNull public Builder setLatitudeDegrees(
+                @FloatRange(from = -90.0f, to = 90.0f) double latitudeDegrees) {
             mLatitudeDegrees = latitudeDegrees;
             return this;
         }
 
         /** Sets the longitude in degrees at which the corrections are computed. */
-        public Builder setLongitudeDegrees(double longitudeDegrees) {
+        @NonNull public Builder setLongitudeDegrees(
+                @FloatRange(from = -180.0f, to = 180.0f) double longitudeDegrees) {
             mLongitudeDegrees = longitudeDegrees;
             return this;
         }
@@ -217,7 +237,8 @@ public final class GnssMeasurementCorrections implements Parcelable {
          * Sets the altitude in meters above the WGS 84 reference ellipsoid at which the corrections
          * are computed.
          */
-        public Builder setAltitudeMeters(double altitudeMeters) {
+        @NonNull public Builder setAltitudeMeters(
+                @FloatRange(from = -1000.0f, to = 10000.0f) double altitudeMeters) {
             mAltitudeMeters = altitudeMeters;
             return this;
         }
@@ -227,8 +248,8 @@ public final class GnssMeasurementCorrections implements Parcelable {
          * Sets the horizontal uncertainty (68% confidence) in meters on the device position at
          * which the corrections are provided.
          */
-        public Builder setHorizontalPositionUncertaintyMeters(
-                double horizontalPositionUncertaintyMeters) {
+        @NonNull public Builder setHorizontalPositionUncertaintyMeters(
+                @FloatRange(from = 0.0f) double horizontalPositionUncertaintyMeters) {
             mHorizontalPositionUncertaintyMeters = horizontalPositionUncertaintyMeters;
             return this;
         }
@@ -237,14 +258,15 @@ public final class GnssMeasurementCorrections implements Parcelable {
          * Sets the vertical uncertainty (68% confidence) in meters on the device position at which
          * the corrections are provided.
          */
-        public Builder setVerticalPositionUncertaintyMeters(
-                double verticalPositionUncertaintyMeters) {
+        @NonNull public Builder setVerticalPositionUncertaintyMeters(
+                @FloatRange(from = 0.0f) double verticalPositionUncertaintyMeters) {
             mVerticalPositionUncertaintyMeters = verticalPositionUncertaintyMeters;
             return this;
         }
 
         /** Sets the time of applicability, GPS time of week in nanoseconds. */
-        public Builder setToaGpsNanosecondsOfWeek(long toaGpsNanosecondsOfWeek) {
+        @NonNull public Builder setToaGpsNanosecondsOfWeek(
+                @IntRange(from = 0) long toaGpsNanosecondsOfWeek) {
             mToaGpsNanosecondsOfWeek = toaGpsNanosecondsOfWeek;
             return this;
         }
@@ -253,19 +275,14 @@ public final class GnssMeasurementCorrections implements Parcelable {
          * Sets a the list of {@link GnssSingleSatCorrection} containing measurement corrections for
          * a satellite in view
          */
-        public Builder setSingleSatelliteCorrectionList(
-                @Nullable List<GnssSingleSatCorrection> singleSatCorrectionList) {
-            if (singleSatCorrectionList == null) {
-                mSingleSatCorrectionList = null;
-            } else {
-                mSingleSatCorrectionList =
-                        Collections.unmodifiableList(new ArrayList<>(singleSatCorrectionList));
-            }
+        @NonNull public Builder setSingleSatelliteCorrectionList(
+                @NonNull List<GnssSingleSatCorrection> singleSatCorrectionList) {
+            mSingleSatCorrectionList = singleSatCorrectionList;
             return this;
         }
 
         /** Builds a {@link GnssMeasurementCorrections} instance as specified by this builder. */
-        public GnssMeasurementCorrections build() {
+        @NonNull public GnssMeasurementCorrections build() {
             return new GnssMeasurementCorrections(this);
         }
     }
