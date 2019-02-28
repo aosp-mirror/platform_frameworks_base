@@ -2482,7 +2482,6 @@
   <java-symbol type="attr" name="lightRadius" />
   <java-symbol type="attr" name="ambientShadowAlpha" />
   <java-symbol type="attr" name="spotShadowAlpha" />
-  <java-symbol type="array" name="config_cdma_home_system" />
   <java-symbol type="bool" name="config_sms_decode_gsm_8bit_data" />
   <java-symbol type="dimen" name="text_size_small_material" />
   <java-symbol type="attr" name="checkMarkGravity" />
