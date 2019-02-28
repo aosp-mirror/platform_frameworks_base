@@ -16,6 +16,7 @@
 
 package android.telephony.ims;
 
+import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.os.RemoteException;
 import android.telephony.CallQuality;
@@ -606,7 +607,7 @@ public class ImsCallSessionListener {
      *
      * @param profile updated ImsStreamMediaProfile
      */
-    public void callSessionRttAudioIndicatorChanged(ImsStreamMediaProfile profile) {
+    public void callSessionRttAudioIndicatorChanged(@NonNull ImsStreamMediaProfile profile) {
         try {
             mListener.callSessionRttAudioIndicatorChanged(profile);
         } catch (RemoteException e) {
