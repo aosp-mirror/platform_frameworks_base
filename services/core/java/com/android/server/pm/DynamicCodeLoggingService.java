@@ -61,7 +61,7 @@ public class DynamicCodeLoggingService extends JobService {
     private static final Pattern EXECUTE_NATIVE_AUDIT_PATTERN =
             Pattern.compile(".*\\bavc: granted \\{ execute(?:_no_trans|) \\} .*"
                     + "\\bpath=(?:\"([^\" ]*)\"|([0-9A-F]+)) .*"
-                    + "\\bscontext=u:r:untrusted_app_2(?:5|7):.*"
+                    + "\\bscontext=u:r:untrusted_app(?:_25|_27)?:.*"
                     + "\\btcontext=u:object_r:app_data_file:.*"
                     + "\\btclass=file\\b.*");
 

@@ -235,6 +235,34 @@ public final class DynamicCodeLoggerIntegrationTests {
     }
 
     @Test
+    public void testGeneratesEvents_spoofed_validFile_untrustedApp() throws Exception {
+        File privateCopyFile = privateFile("spoofed2");
+
+        String expectedContentHash = copyAndHashResource(
+                "/DynamicCodeLoggerNativeExecutable", privateCopyFile);
+
+        EventLog.writeEvent(EventLog.getTagCode("auditd"),
+                "type=1400 avc: granted { execute_no_trans } "
+                        + "path=\"" + privateCopyFile + "\" "
+                        + "scontext=u:r:untrusted_app: "
+                        + "tcontext=u:object_r:app_data_file: "
+                        + "tclass=file ");
+
+        String expectedNameHash =
+                "3E57AA59249154C391316FDCF07C1D499C26A564E4D305833CCD9A98ED895AC9";
+
+        // Run the job to scan generated audit log entries
+        runDynamicCodeLoggingJob(AUDIT_WATCHING_JOB_ID);
+
+        // And then make sure we log events about it
+        long previousEventNanos = mostRecentEventTimeNanos();
+        runDynamicCodeLoggingJob(IDLE_LOGGING_JOB_ID);
+
+        assertDclLoggedSince(previousEventNanos, DCL_NATIVE_SUBTAG,
+                expectedNameHash, expectedContentHash);
+    }
+
+    @Test
     public void testGeneratesEvents_spoofed_pathTraversal() throws Exception {
         File privateDir = privateFile("x").getParentFile();
 
