@@ -21,6 +21,7 @@ import android.content.ComponentName;
 
 /** @hide */
 oneway interface IServiceConnection {
+    @UnsupportedAppUsage
     void connected(in ComponentName name, IBinder service, boolean dead);
 }
 

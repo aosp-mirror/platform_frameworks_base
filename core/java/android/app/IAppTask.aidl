@@ -23,6 +23,7 @@ import android.os.Bundle;
 /** @hide */
 interface IAppTask {
     void finishAndRemoveTask();
+    @UnsupportedAppUsage
     ActivityManager.RecentTaskInfo getTaskInfo();
     void moveToFront();
     int startActivity(IBinder whoThread, String callingPackage,

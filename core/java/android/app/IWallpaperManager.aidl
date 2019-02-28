@@ -55,11 +55,13 @@ interface IWallpaperManager {
     /**
      * Set the live wallpaper. This only affects the system wallpaper.
      */
+    @UnsupportedAppUsage
     void setWallpaperComponent(in ComponentName name);
 
     /**
      * Get the wallpaper for a given user.
      */
+    @UnsupportedAppUsage
     ParcelFileDescriptor getWallpaper(String callingPkg, IWallpaperManagerCallback cb, int which,
             out Bundle outParams, int userId);
 
@@ -73,6 +75,7 @@ interface IWallpaperManager {
      * information about that wallpaper.  Otherwise, if it is a static image,
      * simply return null.
      */
+    @UnsupportedAppUsage
     WallpaperInfo getWallpaperInfo(int userId);
 
     /**
@@ -83,6 +86,7 @@ interface IWallpaperManager {
     /**
      * Return whether the current system wallpaper has the given name.
      */
+    @UnsupportedAppUsage
     boolean hasNamedWallpaper(String name);
 
     /**
@@ -94,11 +98,13 @@ interface IWallpaperManager {
     /**
      * Returns the desired minimum width for the wallpaper in a particular display.
      */
+    @UnsupportedAppUsage
     int getWidthHint(int displayId);
 
     /**
      * Returns the desired minimum height for the wallpaper in a particular display.
      */
+    @UnsupportedAppUsage
     int getHeightHint(int displayId);
 
     /**
