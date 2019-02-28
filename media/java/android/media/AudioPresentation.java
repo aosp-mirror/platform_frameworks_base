@@ -45,6 +45,9 @@ import java.util.Objects;
  * accessibility, end point mastering and dialogue enhancement. An audio presentation may also have
  * a set of description labels in different languages to help the user to make an informed
  * selection.
+ *
+ * Applications that parse media streams and extract presentation information on their own
+ * can create instances of AudioPresentation by using {@link AudioPresentation.Builder} class.
  */
 public final class AudioPresentation {
     private final int mPresentationId;
@@ -66,7 +69,7 @@ public final class AudioPresentation {
     private final boolean mAudioDescriptionAvailable;
     private final boolean mSpokenSubtitlesAvailable;
     private final boolean mDialogueEnhancementAvailable;
-    private final Map<ULocale, String> mLabels;
+    private final Map<ULocale, CharSequence> mLabels;
 
     /**
      * No preferred reproduction channel layout.
@@ -131,7 +134,7 @@ public final class AudioPresentation {
                              boolean audioDescriptionAvailable,
                              boolean spokenSubtitlesAvailable,
                              boolean dialogueEnhancementAvailable,
-                             @NonNull Map<ULocale, String> labels) {
+                             @NonNull Map<ULocale, CharSequence> labels) {
         mPresentationId = presentationId;
         mProgramId = programId;
         mLanguage = language;
@@ -139,7 +142,7 @@ public final class AudioPresentation {
         mAudioDescriptionAvailable = audioDescriptionAvailable;
         mSpokenSubtitlesAvailable = spokenSubtitlesAvailable;
         mDialogueEnhancementAvailable = dialogueEnhancementAvailable;
-        mLabels = new HashMap<ULocale, String>(labels);
+        mLabels = new HashMap<ULocale, CharSequence>(labels);
     }
 
     /**
@@ -164,14 +167,14 @@ public final class AudioPresentation {
      * or ISO 639-2/T could be used.
      */
     public Map<Locale, String> getLabels() {
-        Map<Locale, String> localeLabels = new HashMap<Locale, String>();
-        for (Map.Entry<ULocale, String> entry : mLabels.entrySet()) {
-            localeLabels.put(entry.getKey().toLocale(), entry.getValue());
+        Map<Locale, String> localeLabels = new HashMap<Locale, String>(mLabels.size());
+        for (Map.Entry<ULocale, CharSequence> entry : mLabels.entrySet()) {
+            localeLabels.put(entry.getKey().toLocale(), entry.getValue().toString());
         }
         return localeLabels;
     }
 
-    private Map<ULocale, String> getULabels() {
+    private Map<ULocale, CharSequence> getULabels() {
         return mLabels;
     }
 
@@ -273,7 +276,7 @@ public final class AudioPresentation {
     /**
      * A builder class for creating {@link AudioPresentation} objects.
      */
-    public static class Builder {
+    public static final class Builder {
         private final int mPresentationId;
         private int mProgramId = UNKNOWN_ID;
         private ULocale mLanguage = new ULocale("");
@@ -281,13 +284,13 @@ public final class AudioPresentation {
         private boolean mAudioDescriptionAvailable = false;
         private boolean mSpokenSubtitlesAvailable = false;
         private boolean mDialogueEnhancementAvailable = false;
-        private Map<ULocale, String> mLabels = new HashMap<ULocale, String>();
+        private Map<ULocale, CharSequence> mLabels = new HashMap<ULocale, CharSequence>();
 
         /**
          * Create a {@link Builder}. Any field that should be included in the
          * {@link AudioPresentation} must be added.
          *
-         * @param presentationId the presentation ID of this audio presentation
+         * @param presentationId The presentation ID of this audio presentation.
          */
         public Builder(int presentationId) {
             mPresentationId = presentationId;
@@ -295,7 +298,7 @@ public final class AudioPresentation {
         /**
          * Sets the ProgramId to which this audio presentation refers.
          *
-         * @param programId
+         * @param programId The program ID to be decoded.
          */
         public @NonNull Builder setProgramId(int programId) {
             mProgramId = programId;
@@ -304,9 +307,9 @@ public final class AudioPresentation {
         /**
          * Sets the language information of the audio presentation.
          *
-         * @param language code
+         * @param language Locale corresponding to ISO 639-1/639-2 language code.
          */
-        public @NonNull Builder setLocale(ULocale language) {
+        public @NonNull Builder setLocale(@NonNull ULocale language) {
             mLanguage = language;
             return this;
         }
@@ -339,17 +342,17 @@ public final class AudioPresentation {
         /**
          * Sets locale / text label pairs describing the presentation.
          *
-         * @param labels
+         * @param labels Text label indexed by its locale corresponding to the language code.
          */
-        public @NonNull Builder setLabels(@NonNull Map<ULocale, String> labels) {
-            mLabels = new HashMap<ULocale, String>(labels);
+        public @NonNull Builder setLabels(@NonNull Map<ULocale, CharSequence> labels) {
+            mLabels = new HashMap<ULocale, CharSequence>(labels);
             return this;
         }
 
         /**
          * Indicate whether the presentation contains audio description for the visually impaired.
          *
-         * @param audioDescriptionAvailable
+         * @param audioDescriptionAvailable Audio description for the visually impaired.
          */
         public @NonNull Builder setHasAudioDescription(boolean audioDescriptionAvailable) {
             mAudioDescriptionAvailable = audioDescriptionAvailable;
@@ -359,7 +362,7 @@ public final class AudioPresentation {
         /**
          * Indicate whether the presentation contains spoken subtitles for the visually impaired.
          *
-         * @param spokenSubtitlesAvailable
+         * @param spokenSubtitlesAvailable Spoken subtitles for the visually impaired.
          */
         public @NonNull Builder setHasSpokenSubtitles(boolean spokenSubtitlesAvailable) {
             mSpokenSubtitlesAvailable = spokenSubtitlesAvailable;
@@ -369,7 +372,7 @@ public final class AudioPresentation {
         /**
          * Indicate whether the presentation supports dialogue enhancement.
          *
-         * @param dialogueEnhancementAvailable
+         * @param dialogueEnhancementAvailable Dialogue enhancement.
          */
         public @NonNull Builder setHasDialogueEnhancement(boolean dialogueEnhancementAvailable) {
             mDialogueEnhancementAvailable = dialogueEnhancementAvailable;
