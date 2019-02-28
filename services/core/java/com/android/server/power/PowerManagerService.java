@@ -715,6 +715,15 @@ public final class PowerManagerService extends SystemService
         NativeWrapper createNativeWrapper() {
             return new NativeWrapper();
         }
+
+        WirelessChargerDetector createWirelessChargerDetector(
+                SensorManager sensorManager, SuspendBlocker suspendBlocker, Handler handler) {
+            return new WirelessChargerDetector(sensorManager, suspendBlocker, handler);
+        }
+
+        AmbientDisplayConfiguration createAmbientDisplayConfiguration(Context context) {
+            return new AmbientDisplayConfiguration(context);
+        }
     }
 
     final Constants mConstants;
@@ -747,7 +756,7 @@ public final class PowerManagerService extends SystemService
         mHandlerThread.start();
         mHandler = new PowerManagerHandler(mHandlerThread.getLooper());
         mConstants = new Constants(mHandler);
-        mAmbientDisplayConfiguration = new AmbientDisplayConfiguration(mContext);
+        mAmbientDisplayConfiguration = mInjector.createAmbientDisplayConfiguration(context);
         mAttentionDetector = new AttentionDetector(this::onUserAttention, mLock);
 
         mBatterySavingStats = new BatterySavingStats(mLock);
@@ -833,7 +842,7 @@ public final class PowerManagerService extends SystemService
                     mInjector.createSuspendBlocker(this, "PowerManagerService.Broadcasts"),
                     mPolicy);
 
-            mWirelessChargerDetector = new WirelessChargerDetector(sensorManager,
+            mWirelessChargerDetector = mInjector.createWirelessChargerDetector(sensorManager,
                     mInjector.createSuspendBlocker(
                             this, "PowerManagerService.WirelessChargerDetector"),
                     mHandler);
@@ -932,7 +941,8 @@ public final class PowerManagerService extends SystemService
         mContext.registerReceiver(new DockReceiver(), filter, null, mHandler);
     }
 
-    private void readConfigurationLocked() {
+    @VisibleForTesting
+    void readConfigurationLocked() {
         final Resources resources = mContext.getResources();
 
         mDecoupleHalAutoSuspendModeFromDisplayConfig = resources.getBoolean(
@@ -3865,7 +3875,8 @@ public final class PowerManagerService extends SystemService
         return workSource != null ? new WorkSource(workSource) : null;
     }
 
-    private final class BatteryReceiver extends BroadcastReceiver {
+    @VisibleForTesting
+    final class BatteryReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
             synchronized (mLock) {
@@ -3883,7 +3894,8 @@ public final class PowerManagerService extends SystemService
         }
     }
 
-    private final class UserSwitchedReceiver extends BroadcastReceiver {
+    @VisibleForTesting
+    final class UserSwitchedReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
             synchronized (mLock) {
