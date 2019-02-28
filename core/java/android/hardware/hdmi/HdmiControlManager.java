@@ -19,6 +19,7 @@ package android.hardware.hdmi;
 import static com.android.internal.os.RoSystemProperties.PROPERTY_HDMI_IS_DEVICE_HDMI_CEC_SWITCH;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresFeature;
 import android.annotation.RequiresPermission;
@@ -456,7 +457,7 @@ public final class HdmiControlManager {
      * @hide
      */
     @SystemApi
-    public void powerOffRemoteDevice(HdmiDeviceInfo deviceInfo) {
+    public void powerOffRemoteDevice(@NonNull HdmiDeviceInfo deviceInfo) {
         Preconditions.checkNotNull(deviceInfo);
         try {
             mService.powerOffRemoteDevice(
@@ -495,7 +496,7 @@ public final class HdmiControlManager {
      * @hide
      */
     @SystemApi
-    public void requestRemoteDeviceToBecomeActiveSource(HdmiDeviceInfo deviceInfo) {
+    public void requestRemoteDeviceToBecomeActiveSource(@NonNull HdmiDeviceInfo deviceInfo) {
         Preconditions.checkNotNull(deviceInfo);
         try {
             mService.askRemoteDeviceToBecomeActiveSource(deviceInfo.getPhysicalAddress());
@@ -566,7 +567,7 @@ public final class HdmiControlManager {
      * @hide
      */
     @SystemApi
-    public boolean isRemoteDeviceConnected(HdmiDeviceInfo targetDevice) {
+    public boolean isRemoteDeviceConnected(@NonNull HdmiDeviceInfo targetDevice) {
         Preconditions.checkNotNull(targetDevice);
         mPhysicalAddress = getPhysicalAddress();
         if (mPhysicalAddress == INVALID_PHYSICAL_ADDRESS) {
