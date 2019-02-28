@@ -2354,7 +2354,7 @@ message WifiNetworkRequestApiLog {
   optional int32 num_request = 1;
 
   // Histogram of requests via this API surface to number of networks matched in scan results.
-  optional HistogramBucketInt32 network_match_size_histogram = 2;
+  repeated HistogramBucketInt32 network_match_size_histogram = 2;
 
   // Number of successful network connection from this API.
   optional int32 num_connect_success = 3;
