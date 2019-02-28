@@ -141,6 +141,13 @@ public class TaskStackChangeListeners extends TaskStackListener {
     }
 
     @Override
+    public void onActivityLaunchOnSecondaryDisplayRerouted(RunningTaskInfo taskInfo,
+            int requestedDisplayId) throws RemoteException {
+        mHandler.obtainMessage(H.ON_ACTIVITY_LAUNCH_ON_SECONDARY_DISPLAY_REROUTED,
+                 requestedDisplayId, 0 /* unused */, taskInfo).sendToTarget();
+    }
+
+    @Override
     public void onTaskProfileLocked(int taskId, int userId) throws RemoteException {
         mHandler.obtainMessage(H.ON_TASK_PROFILE_LOCKED, taskId, userId).sendToTarget();
     }
@@ -189,6 +196,7 @@ public class TaskStackChangeListeners extends TaskStackListener {
         private static final int ON_TASK_REMOVED = 13;
         private static final int ON_TASK_MOVED_TO_FRONT = 14;
         private static final int ON_ACTIVITY_REQUESTED_ORIENTATION_CHANGE = 15;
+        private static final int ON_ACTIVITY_LAUNCH_ON_SECONDARY_DISPLAY_REROUTED = 16;
 
 
         public H(Looper looper) {
@@ -267,6 +275,14 @@ public class TaskStackChangeListeners extends TaskStackListener {
                         for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
                             mTaskStackListeners.get(i)
                                     .onActivityLaunchOnSecondaryDisplayFailed(info);
+                        }
+                        break;
+                    }
+                    case ON_ACTIVITY_LAUNCH_ON_SECONDARY_DISPLAY_REROUTED: {
+                        final RunningTaskInfo info = (RunningTaskInfo) msg.obj;
+                        for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
+                            mTaskStackListeners.get(i)
+                                .onActivityLaunchOnSecondaryDisplayRerouted(info);
                         }
                         break;
                     }

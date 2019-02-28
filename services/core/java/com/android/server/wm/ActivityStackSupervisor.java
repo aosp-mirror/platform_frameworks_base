@@ -2351,6 +2351,9 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                 // Suppress the warning toast if the preferredDisplay was set to singleTask.
                 // The singleTaskInstance displays will only contain one task and any attempt to
                 // launch new task will re-route to the default display.
+                mService.getTaskChangeNotificationController()
+                        .notifyActivityLaunchOnSecondaryDisplayRerouted(task.getTaskInfo(),
+                                preferredDisplayId);
                 return;
             }
 
