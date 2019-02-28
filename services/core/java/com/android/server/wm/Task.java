@@ -330,7 +330,7 @@ class Task extends WindowContainer<AppWindowToken> implements ConfigurationConta
         // No one in higher hierarchy handles this request, let's adjust our bounds to fulfill
         // it if possible.
         // TODO: Move to TaskRecord after unification is done.
-        if (mTaskRecord != null) {
+        if (mTaskRecord != null && mTaskRecord.getParent() != null) {
             mTaskRecord.onConfigurationChanged(mTaskRecord.getParent().getConfiguration());
             return true;
         }
