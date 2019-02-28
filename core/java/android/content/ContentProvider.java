@@ -209,9 +209,10 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
      * @hide
      */
     class Transport extends ContentProviderNative {
-        AppOpsManager mAppOpsManager = null;
-        int mReadOp = AppOpsManager.OP_NONE;
-        int mWriteOp = AppOpsManager.OP_NONE;
+        volatile AppOpsManager mAppOpsManager = null;
+        volatile int mReadOp = AppOpsManager.OP_NONE;
+        volatile int mWriteOp = AppOpsManager.OP_NONE;
+        volatile ContentInterface mInterface = ContentProvider.this;
 
         ContentProvider getContentProvider() {
             return ContentProvider.this;
@@ -245,9 +246,11 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
                 Cursor cursor;
                 final String original = setCallingPackage(callingPkg);
                 try {
-                    cursor = ContentProvider.this.query(
+                    cursor = mInterface.query(
                             uri, projection, queryArgs,
                             CancellationSignal.fromTransport(cancellationSignal));
+                } catch (RemoteException e) {
+                    throw e.rethrowAsRuntimeException();
                 } finally {
                     setCallingPackage(original);
                 }
@@ -261,9 +264,11 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
             Trace.traceBegin(TRACE_TAG_DATABASE, "query");
             final String original = setCallingPackage(callingPkg);
             try {
-                return ContentProvider.this.query(
+                return mInterface.query(
                         uri, projection, queryArgs,
                         CancellationSignal.fromTransport(cancellationSignal));
+            } catch (RemoteException e) {
+                throw e.rethrowAsRuntimeException();
             } finally {
                 setCallingPackage(original);
                 Trace.traceEnd(TRACE_TAG_DATABASE);
@@ -277,7 +282,9 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
             uri = maybeGetUriWithoutUserId(uri);
             Trace.traceBegin(TRACE_TAG_DATABASE, "getType");
             try {
-                return ContentProvider.this.getType(uri);
+                return mInterface.getType(uri);
+            } catch (RemoteException e) {
+                throw e.rethrowAsRuntimeException();
             } finally {
                 Trace.traceEnd(TRACE_TAG_DATABASE);
             }
@@ -299,7 +306,9 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
             Trace.traceBegin(TRACE_TAG_DATABASE, "insert");
             final String original = setCallingPackage(callingPkg);
             try {
-                return maybeAddUserId(ContentProvider.this.insert(uri, initialValues), userId);
+                return maybeAddUserId(mInterface.insert(uri, initialValues), userId);
+            } catch (RemoteException e) {
+                throw e.rethrowAsRuntimeException();
             } finally {
                 setCallingPackage(original);
                 Trace.traceEnd(TRACE_TAG_DATABASE);
@@ -316,7 +325,9 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
             Trace.traceBegin(TRACE_TAG_DATABASE, "bulkInsert");
             final String original = setCallingPackage(callingPkg);
             try {
-                return ContentProvider.this.bulkInsert(uri, initialValues);
+                return mInterface.bulkInsert(uri, initialValues);
+            } catch (RemoteException e) {
+                throw e.rethrowAsRuntimeException();
             } finally {
                 setCallingPackage(original);
                 Trace.traceEnd(TRACE_TAG_DATABASE);
@@ -357,7 +368,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
             Trace.traceBegin(TRACE_TAG_DATABASE, "applyBatch");
             final String original = setCallingPackage(callingPkg);
             try {
-                ContentProviderResult[] results = ContentProvider.this.applyBatch(authority,
+                ContentProviderResult[] results = mInterface.applyBatch(authority,
                         operations);
                 if (results != null) {
                     for (int i = 0; i < results.length ; i++) {
@@ -368,6 +379,8 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
                     }
                 }
                 return results;
+            } catch (RemoteException e) {
+                throw e.rethrowAsRuntimeException();
             } finally {
                 setCallingPackage(original);
                 Trace.traceEnd(TRACE_TAG_DATABASE);
@@ -384,7 +397,9 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
             Trace.traceBegin(TRACE_TAG_DATABASE, "delete");
             final String original = setCallingPackage(callingPkg);
             try {
-                return ContentProvider.this.delete(uri, selection, selectionArgs);
+                return mInterface.delete(uri, selection, selectionArgs);
+            } catch (RemoteException e) {
+                throw e.rethrowAsRuntimeException();
             } finally {
                 setCallingPackage(original);
                 Trace.traceEnd(TRACE_TAG_DATABASE);
@@ -402,7 +417,9 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
             Trace.traceBegin(TRACE_TAG_DATABASE, "update");
             final String original = setCallingPackage(callingPkg);
             try {
-                return ContentProvider.this.update(uri, values, selection, selectionArgs);
+                return mInterface.update(uri, values, selection, selectionArgs);
+            } catch (RemoteException e) {
+                throw e.rethrowAsRuntimeException();
             } finally {
                 setCallingPackage(original);
                 Trace.traceEnd(TRACE_TAG_DATABASE);
@@ -419,8 +436,10 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
             Trace.traceBegin(TRACE_TAG_DATABASE, "openFile");
             final String original = setCallingPackage(callingPkg);
             try {
-                return ContentProvider.this.openFile(
+                return mInterface.openFile(
                         uri, mode, CancellationSignal.fromTransport(cancellationSignal));
+            } catch (RemoteException e) {
+                throw e.rethrowAsRuntimeException();
             } finally {
                 setCallingPackage(original);
                 Trace.traceEnd(TRACE_TAG_DATABASE);
@@ -437,8 +456,10 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
             Trace.traceBegin(TRACE_TAG_DATABASE, "openAssetFile");
             final String original = setCallingPackage(callingPkg);
             try {
-                return ContentProvider.this.openAssetFile(
+                return mInterface.openAssetFile(
                         uri, mode, CancellationSignal.fromTransport(cancellationSignal));
+            } catch (RemoteException e) {
+                throw e.rethrowAsRuntimeException();
             } finally {
                 setCallingPackage(original);
                 Trace.traceEnd(TRACE_TAG_DATABASE);
@@ -453,7 +474,9 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
             Trace.traceBegin(TRACE_TAG_DATABASE, "call");
             final String original = setCallingPackage(callingPkg);
             try {
-                return ContentProvider.this.call(authority, method, arg, extras);
+                return mInterface.call(authority, method, arg, extras);
+            } catch (RemoteException e) {
+                throw e.rethrowAsRuntimeException();
             } finally {
                 setCallingPackage(original);
                 Trace.traceEnd(TRACE_TAG_DATABASE);
@@ -467,7 +490,9 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
             uri = maybeGetUriWithoutUserId(uri);
             Trace.traceBegin(TRACE_TAG_DATABASE, "getStreamTypes");
             try {
-                return ContentProvider.this.getStreamTypes(uri, mimeTypeFilter);
+                return mInterface.getStreamTypes(uri, mimeTypeFilter);
+            } catch (RemoteException e) {
+                throw e.rethrowAsRuntimeException();
             } finally {
                 Trace.traceEnd(TRACE_TAG_DATABASE);
             }
@@ -483,8 +508,10 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
             Trace.traceBegin(TRACE_TAG_DATABASE, "openTypedAssetFile");
             final String original = setCallingPackage(callingPkg);
             try {
-                return ContentProvider.this.openTypedAssetFile(
+                return mInterface.openTypedAssetFile(
                         uri, mimeType, opts, CancellationSignal.fromTransport(cancellationSignal));
+            } catch (RemoteException e) {
+                throw e.rethrowAsRuntimeException();
             } finally {
                 setCallingPackage(original);
                 Trace.traceEnd(TRACE_TAG_DATABASE);
@@ -507,7 +534,9 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
             Trace.traceBegin(TRACE_TAG_DATABASE, "canonicalize");
             final String original = setCallingPackage(callingPkg);
             try {
-                return maybeAddUserId(ContentProvider.this.canonicalize(uri), userId);
+                return maybeAddUserId(mInterface.canonicalize(uri), userId);
+            } catch (RemoteException e) {
+                throw e.rethrowAsRuntimeException();
             } finally {
                 setCallingPackage(original);
                 Trace.traceEnd(TRACE_TAG_DATABASE);
@@ -525,7 +554,9 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
             Trace.traceBegin(TRACE_TAG_DATABASE, "uncanonicalize");
             final String original = setCallingPackage(callingPkg);
             try {
-                return maybeAddUserId(ContentProvider.this.uncanonicalize(uri), userId);
+                return maybeAddUserId(mInterface.uncanonicalize(uri), userId);
+            } catch (RemoteException e) {
+                throw e.rethrowAsRuntimeException();
             } finally {
                 setCallingPackage(original);
                 Trace.traceEnd(TRACE_TAG_DATABASE);
@@ -543,7 +574,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
             Trace.traceBegin(TRACE_TAG_DATABASE, "refresh");
             final String original = setCallingPackage(callingPkg);
             try {
-                return ContentProvider.this.refresh(uri, args,
+                return mInterface.refresh(uri, args,
                         CancellationSignal.fromTransport(cancellationSignal));
             } finally {
                 setCallingPackage(original);
@@ -984,6 +1015,15 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
     /** @hide */
     public AppOpsManager getAppOpsManager() {
         return mTransport.mAppOpsManager;
+    }
+
+    /** @hide */
+    public final void setTransportLoggingEnabled(boolean enabled) {
+        if (enabled) {
+            mTransport.mInterface = new LoggingContentInterface(getClass().getSimpleName(), this);
+        } else {
+            mTransport.mInterface = this;
+        }
     }
 
     /**
