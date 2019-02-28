@@ -2267,7 +2267,7 @@
 
     <!-- If the sensor that wakes up the lock screen is available or not. -->
     <bool name="config_dozeWakeLockScreenSensorAvailable">false</bool>
-    <integer name="config_dozeWakeLockScreenDebounce">3000</integer>
+    <integer name="config_dozeWakeLockScreenDebounce">1500</integer>
 
     <!-- Control whether the always on display mode is available. This should only be enabled on
          devices where the display has been tuned to be power efficient in DOZE and/or DOZE_SUSPEND
