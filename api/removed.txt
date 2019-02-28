@@ -282,10 +282,36 @@ package android.hardware {
 
 package android.location {
 
+  @Deprecated public final class GpsStatus {
+    method public int getMaxSatellites();
+    method public Iterable<android.location.GpsSatellite> getSatellites();
+    method public int getTimeToFirstFix();
+    field public static final int GPS_EVENT_FIRST_FIX = 3; // 0x3
+    field public static final int GPS_EVENT_SATELLITE_STATUS = 4; // 0x4
+    field public static final int GPS_EVENT_STARTED = 1; // 0x1
+    field public static final int GPS_EVENT_STOPPED = 2; // 0x2
+  }
+
+  @Deprecated public static interface GpsStatus.Listener {
+    method public void onGpsStatusChanged(int);
+  }
+
+  @Deprecated public static interface GpsStatus.NmeaListener {
+    method public void onNmeaReceived(long, String);
+  }
+
   public class Location implements android.os.Parcelable {
     method @Deprecated public void removeBearingAccuracy();
     method @Deprecated public void removeSpeedAccuracy();
     method @Deprecated public void removeVerticalAccuracy();
+  }
+
+  public class LocationManager {
+    method @Deprecated @RequiresPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) public boolean addGpsStatusListener(android.location.GpsStatus.Listener);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) public boolean addNmeaListener(android.location.GpsStatus.NmeaListener);
+    method @Deprecated @Nullable @RequiresPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) public android.location.GpsStatus getGpsStatus(@Nullable android.location.GpsStatus);
+    method @Deprecated public void removeGpsStatusListener(android.location.GpsStatus.Listener);
+    method @Deprecated public void removeNmeaListener(android.location.GpsStatus.NmeaListener);
   }
 
 }

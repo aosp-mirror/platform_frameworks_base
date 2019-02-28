@@ -3364,57 +3364,53 @@ package android.location {
   }
 
   public class LocationManager {
-    method @Deprecated public boolean addGpsMeasurementListener(android.location.GpsMeasurementsEvent.Listener);
-    method @Deprecated public boolean addGpsNavigationMessageListener(android.location.GpsNavigationMessageEvent.Listener);
     method @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public void flushGnssBatch();
     method @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public int getGnssBatchSize();
     method public int getGnssCapabilities();
     method @Nullable public String getLocationControllerExtraPackage();
     method @RequiresPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) public void injectGnssMeasurementCorrections(@NonNull android.location.GnssMeasurementCorrections);
     method public boolean isLocationControllerExtraPackageEnabled();
-    method public boolean isLocationEnabledForUser(android.os.UserHandle);
-    method public boolean isProviderEnabledForUser(String, android.os.UserHandle);
-    method public boolean isProviderPackage(String);
-    method @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public boolean registerGnssBatchedLocationCallback(long, boolean, android.location.BatchedLocationCallback, android.os.Handler);
-    method @Deprecated public void removeGpsMeasurementListener(android.location.GpsMeasurementsEvent.Listener);
-    method @Deprecated public void removeGpsNavigationMessageListener(android.location.GpsNavigationMessageEvent.Listener);
-    method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void requestLocationUpdates(android.location.LocationRequest, android.location.LocationListener, android.os.Looper);
-    method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void requestLocationUpdates(android.location.LocationRequest, android.app.PendingIntent);
-    method @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public void setLocationControllerExtraPackage(String);
+    method public boolean isLocationEnabledForUser(@NonNull android.os.UserHandle);
+    method public boolean isProviderEnabledForUser(@NonNull String, @NonNull android.os.UserHandle);
+    method public boolean isProviderPackage(@NonNull String);
+    method @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public boolean registerGnssBatchedLocationCallback(long, boolean, @NonNull android.location.BatchedLocationCallback, @Nullable android.os.Handler);
+    method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void requestLocationUpdates(@NonNull android.location.LocationRequest, @NonNull android.location.LocationListener, @Nullable android.os.Looper);
+    method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void requestLocationUpdates(@NonNull android.location.LocationRequest, @NonNull android.app.PendingIntent);
+    method @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public void setLocationControllerExtraPackage(@NonNull String);
     method @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public void setLocationControllerExtraPackageEnabled(boolean);
-    method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void setLocationEnabledForUser(boolean, android.os.UserHandle);
-    method @Deprecated @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public boolean setProviderEnabledForUser(String, boolean, android.os.UserHandle);
-    method @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public boolean unregisterGnssBatchedLocationCallback(android.location.BatchedLocationCallback);
+    method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void setLocationEnabledForUser(boolean, @NonNull android.os.UserHandle);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public boolean setProviderEnabledForUser(@NonNull String, boolean, @NonNull android.os.UserHandle);
+    method @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public boolean unregisterGnssBatchedLocationCallback(@NonNull android.location.BatchedLocationCallback);
   }
 
   public final class LocationRequest implements android.os.Parcelable {
-    method public static android.location.LocationRequest create();
-    method public static android.location.LocationRequest createFromDeprecatedCriteria(android.location.Criteria, long, float, boolean);
-    method public static android.location.LocationRequest createFromDeprecatedProvider(String, long, float, boolean);
+    method @NonNull public static android.location.LocationRequest create();
+    method @NonNull public static android.location.LocationRequest createFromDeprecatedCriteria(@NonNull android.location.Criteria, long, float, boolean);
+    method @NonNull public static android.location.LocationRequest createFromDeprecatedProvider(@NonNull String, long, float, boolean);
     method public int describeContents();
     method public long getExpireAt();
     method public long getFastestInterval();
     method public boolean getHideFromAppOps();
     method public long getInterval();
     method public int getNumUpdates();
-    method public String getProvider();
+    method @NonNull public String getProvider();
     method public int getQuality();
     method public float getSmallestDisplacement();
-    method public android.os.WorkSource getWorkSource();
+    method @Nullable public android.os.WorkSource getWorkSource();
     method public boolean isLocationSettingsIgnored();
     method public boolean isLowPowerMode();
-    method public android.location.LocationRequest setExpireAt(long);
-    method public android.location.LocationRequest setExpireIn(long);
-    method public android.location.LocationRequest setFastestInterval(long);
+    method @NonNull public android.location.LocationRequest setExpireAt(long);
+    method @NonNull public android.location.LocationRequest setExpireIn(long);
+    method @NonNull public android.location.LocationRequest setFastestInterval(long);
     method public void setHideFromAppOps(boolean);
-    method public android.location.LocationRequest setInterval(long);
-    method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public android.location.LocationRequest setLocationSettingsIgnored(boolean);
-    method public android.location.LocationRequest setLowPowerMode(boolean);
-    method public android.location.LocationRequest setNumUpdates(int);
-    method public android.location.LocationRequest setProvider(String);
-    method public android.location.LocationRequest setQuality(int);
-    method public android.location.LocationRequest setSmallestDisplacement(float);
-    method public void setWorkSource(android.os.WorkSource);
+    method @NonNull public android.location.LocationRequest setInterval(long);
+    method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) @NonNull public android.location.LocationRequest setLocationSettingsIgnored(boolean);
+    method @NonNull public android.location.LocationRequest setLowPowerMode(boolean);
+    method @NonNull public android.location.LocationRequest setNumUpdates(int);
+    method @NonNull public android.location.LocationRequest setProvider(@NonNull String);
+    method @NonNull public android.location.LocationRequest setQuality(int);
+    method @NonNull public android.location.LocationRequest setSmallestDisplacement(float);
+    method public void setWorkSource(@Nullable android.os.WorkSource);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final int ACCURACY_BLOCK = 102; // 0x66
     field public static final int ACCURACY_CITY = 104; // 0x68

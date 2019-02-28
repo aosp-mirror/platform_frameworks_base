@@ -936,16 +936,16 @@ package android.location {
   }
 
   public class LocationManager {
-    method public String[] getBackgroundThrottlingWhitelist();
-    method public String[] getIgnoreSettingsWhitelist();
+    method @NonNull public String[] getBackgroundThrottlingWhitelist();
+    method @NonNull public String[] getIgnoreSettingsWhitelist();
     method @NonNull public java.util.List<android.location.LocationRequest> getTestProviderCurrentRequests(String);
-    method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void requestLocationUpdates(android.location.LocationRequest, android.location.LocationListener, android.os.Looper);
-    method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void requestLocationUpdates(android.location.LocationRequest, android.app.PendingIntent);
-    method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void setLocationEnabledForUser(boolean, android.os.UserHandle);
+    method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void requestLocationUpdates(@NonNull android.location.LocationRequest, @NonNull android.location.LocationListener, @Nullable android.os.Looper);
+    method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void requestLocationUpdates(@NonNull android.location.LocationRequest, @NonNull android.app.PendingIntent);
+    method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void setLocationEnabledForUser(boolean, @NonNull android.os.UserHandle);
   }
 
   public final class LocationRequest implements android.os.Parcelable {
-    method public static android.location.LocationRequest create();
+    method @NonNull public static android.location.LocationRequest create();
     method public int describeContents();
     method public long getExpireAt();
     method public long getFastestInterval();
@@ -953,14 +953,14 @@ package android.location {
     method public int getNumUpdates();
     method public int getQuality();
     method public boolean isLocationSettingsIgnored();
-    method public android.location.LocationRequest setExpireAt(long);
-    method public android.location.LocationRequest setExpireIn(long);
-    method public android.location.LocationRequest setFastestInterval(long);
-    method public android.location.LocationRequest setInterval(long);
-    method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public android.location.LocationRequest setLocationSettingsIgnored(boolean);
-    method public android.location.LocationRequest setNumUpdates(int);
-    method public android.location.LocationRequest setProvider(String);
-    method public android.location.LocationRequest setQuality(int);
+    method @NonNull public android.location.LocationRequest setExpireAt(long);
+    method @NonNull public android.location.LocationRequest setExpireIn(long);
+    method @NonNull public android.location.LocationRequest setFastestInterval(long);
+    method @NonNull public android.location.LocationRequest setInterval(long);
+    method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) @NonNull public android.location.LocationRequest setLocationSettingsIgnored(boolean);
+    method @NonNull public android.location.LocationRequest setNumUpdates(int);
+    method @NonNull public android.location.LocationRequest setProvider(@NonNull String);
+    method @NonNull public android.location.LocationRequest setQuality(int);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final int ACCURACY_BLOCK = 102; // 0x66
     field public static final int ACCURACY_CITY = 104; // 0x68
