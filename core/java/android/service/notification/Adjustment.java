@@ -15,6 +15,7 @@
  */
 package android.service.notification;
 
+import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.app.Notification;
 import android.os.Bundle;
@@ -132,8 +133,9 @@ public final class Adjustment implements Parcelable {
      * @param explanation A human-readable justification for the adjustment.
      * @param userHandle User handle for for whose the adjustments will be applied.
      */
-    public Adjustment(String pkg, String key, Bundle signals, CharSequence explanation,
-            UserHandle userHandle) {
+    public Adjustment(@NonNull String pkg, @NonNull String key, @NonNull Bundle signals,
+            @NonNull CharSequence explanation,
+            @NonNull UserHandle userHandle) {
         mPackage = pkg;
         mKey = key;
         mSignals = signals;
@@ -177,19 +179,19 @@ public final class Adjustment implements Parcelable {
         }
     };
 
-    public String getPackage() {
+    public @NonNull String getPackage() {
         return mPackage;
     }
 
-    public String getKey() {
+    public @NonNull String getKey() {
         return mKey;
     }
 
-    public CharSequence getExplanation() {
+    public @NonNull CharSequence getExplanation() {
         return mExplanation;
     }
 
-    public Bundle getSignals() {
+    public @NonNull Bundle getSignals() {
         return mSignals;
     }
 
@@ -199,7 +201,7 @@ public final class Adjustment implements Parcelable {
         return mUser;
     }
 
-    public UserHandle getUserHandle() {
+    public @NonNull UserHandle getUserHandle() {
         return UserHandle.of(mUser);
     }
 

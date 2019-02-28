@@ -465,7 +465,7 @@ public class NotificationManager {
      *        show the user. Must not be null.
      */
     public void notifyAsPackage(@NonNull String targetPackage, @NonNull String tag, int id,
-            Notification notification) {
+            @NonNull Notification notification) {
         INotificationManager service = getService();
         String sender = mContext.getPackageName();
 
@@ -638,7 +638,7 @@ public class NotificationManager {
      *
      * See {@link #setNotificationDelegate(String)}.
      */
-    public boolean canNotifyAsPackage(String pkg) {
+    public boolean canNotifyAsPackage(@NonNull String pkg) {
         INotificationManager service = getService();
         try {
             return service.canNotifyAsPackage(mContext.getPackageName(), pkg);
@@ -1008,7 +1008,7 @@ public class NotificationManager {
      * @param id The id of the rule whose state should change
      * @param condition The new state of this rule
      */
-    public void setAutomaticZenRuleState(String id, Condition condition) {
+    public void setAutomaticZenRuleState(@NonNull String id, @NonNull Condition condition) {
         INotificationManager service = getService();
         try {
             service.setAutomaticZenRuleState(id, condition);
@@ -1169,7 +1169,7 @@ public class NotificationManager {
      * TODO: STOPSHIP: Add correct intent
      * {@link android.provider.Settings#ACTION_MANAGE_DEFAULT_APPS_SETTINGS}.
      */
-    public boolean isNotificationAssistantAccessGranted(ComponentName assistant) {
+    public boolean isNotificationAssistantAccessGranted(@NonNull ComponentName assistant) {
         INotificationManager service = getService();
         try {
             return service.isNotificationAssistantAccessGranted(assistant);
