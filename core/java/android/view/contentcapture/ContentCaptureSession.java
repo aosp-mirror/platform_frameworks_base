@@ -208,6 +208,7 @@ public abstract class ContentCaptureSession implements AutoCloseable {
     /**
      * Gets the id used to identify this session.
      */
+    @NonNull
     public final ContentCaptureSessionId getContentCaptureSessionId() {
         if (mContentCaptureSessionId == null) {
             mContentCaptureSessionId = new ContentCaptureSessionId(mId);

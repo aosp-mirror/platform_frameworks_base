@@ -101,12 +101,14 @@ public final class LocusId implements Parcelable {
     public static final Parcelable.Creator<LocusId> CREATOR =
             new Parcelable.Creator<LocusId>() {
 
+        @NonNull
         @Override
         public LocusId createFromParcel(Parcel source) {
             final Uri uri = source.readParcelable(null);
             return new LocusId(uri);
         }
 
+        @NonNull
         @Override
         public LocusId[] newArray(int size) {
             return new LocusId[size];

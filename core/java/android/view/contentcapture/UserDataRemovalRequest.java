@@ -121,6 +121,7 @@ public final class UserDataRemovalRequest implements Parcelable {
          *
          * @return this builder
          */
+        @NonNull
         public Builder addLocusId(@NonNull LocusId locusId, boolean recursive) {
             throwIfDestroyed();
             Preconditions.checkState(!mForEverything, "Already is for everything");
@@ -178,11 +179,13 @@ public final class UserDataRemovalRequest implements Parcelable {
             new Parcelable.Creator<UserDataRemovalRequest>() {
 
         @Override
+        @NonNull
         public UserDataRemovalRequest createFromParcel(Parcel parcel) {
             return new UserDataRemovalRequest(parcel);
         }
 
         @Override
+        @NonNull
         public UserDataRemovalRequest[] newArray(int size) {
             return new UserDataRemovalRequest[size];
         }
