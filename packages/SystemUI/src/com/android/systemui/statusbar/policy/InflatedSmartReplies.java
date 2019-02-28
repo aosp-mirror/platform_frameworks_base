@@ -21,12 +21,18 @@ import android.annotation.Nullable;
 import android.app.Notification;
 import android.app.RemoteInput;
 import android.content.Context;
+import android.content.Intent;
+import android.content.pm.ResolveInfo;
 import android.os.Build;
 import android.util.Log;
 import android.util.Pair;
 import android.widget.Button;
 
 import com.android.internal.util.ArrayUtils;
+import com.android.systemui.Dependency;
+import com.android.systemui.shared.system.ActivityManagerWrapper;
+import com.android.systemui.shared.system.DevicePolicyManagerWrapper;
+import com.android.systemui.shared.system.PackageManagerWrapper;
 import com.android.systemui.statusbar.SmartReplyController;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
@@ -191,11 +197,44 @@ public class InflatedSmartReplies {
             boolean useSmartActions = !ArrayUtils.isEmpty(entry.systemGeneratedSmartActions)
                     && notification.getAllowSystemGeneratedContextualActions();
             if (useSmartActions) {
+                List<Notification.Action> systemGeneratedActions =
+                        entry.systemGeneratedSmartActions;
+                // Filter actions if we're in kiosk-mode - we don't care about screen pinning mode,
+                // since notifications aren't shown there anyway.
+                ActivityManagerWrapper activityManagerWrapper =
+                        Dependency.get(ActivityManagerWrapper.class);
+                if (activityManagerWrapper.isLockTaskKioskModeActive()) {
+                    systemGeneratedActions = filterWhiteListedLockTaskApps(systemGeneratedActions);
+                }
                 smartActions = new SmartReplyView.SmartActions(
-                        entry.systemGeneratedSmartActions, true /* fromAssistant */);
+                        systemGeneratedActions, true /* fromAssistant */);
             }
         }
         return new SmartRepliesAndActions(smartReplies, smartActions);
+    }
+
+    /**
+     * Filter actions so that only actions pointing to whitelisted apps are allowed.
+     * This filtering is only meaningful when in lock-task mode.
+     */
+    private static List<Notification.Action> filterWhiteListedLockTaskApps(
+            List<Notification.Action> actions) {
+        PackageManagerWrapper packageManagerWrapper = Dependency.get(PackageManagerWrapper.class);
+        DevicePolicyManagerWrapper devicePolicyManagerWrapper =
+                Dependency.get(DevicePolicyManagerWrapper.class);
+        List<Notification.Action> filteredActions = new ArrayList<>();
+        for (Notification.Action action : actions) {
+            if (action.actionIntent == null) continue;
+            Intent intent = action.actionIntent.getIntent();
+            //  Only allow actions that are explicit (implicit intents are not handled in lock-task
+            //  mode), and link to whitelisted apps.
+            ResolveInfo resolveInfo = packageManagerWrapper.resolveActivity(intent, 0 /* flags */);
+            if (resolveInfo != null && devicePolicyManagerWrapper.isLockTaskPermitted(
+                    resolveInfo.activityInfo.packageName)) {
+                filteredActions.add(action);
+            }
+        }
+        return filteredActions;
     }
 
     /**

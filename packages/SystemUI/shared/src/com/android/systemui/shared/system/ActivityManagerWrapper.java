@@ -16,6 +16,7 @@
 
 package com.android.systemui.shared.system;
 
+import static android.app.ActivityManager.LOCK_TASK_MODE_LOCKED;
 import static android.app.ActivityManager.LOCK_TASK_MODE_NONE;
 import static android.app.ActivityManager.LOCK_TASK_MODE_PINNED;
 import static android.app.ActivityManager.RECENT_IGNORE_UNAVAILABLE;
@@ -458,6 +459,17 @@ public class ActivityManagerWrapper {
     public boolean isLockToAppActive() {
         try {
             return ActivityTaskManager.getService().getLockTaskModeState() != LOCK_TASK_MODE_NONE;
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
+    /**
+     * @return whether lock task mode is active in kiosk-mode (not screen pinning).
+     */
+    public boolean isLockTaskKioskModeActive() {
+        try {
+            return ActivityTaskManager.getService().getLockTaskModeState() == LOCK_TASK_MODE_LOCKED;
         } catch (RemoteException e) {
             return false;
         }

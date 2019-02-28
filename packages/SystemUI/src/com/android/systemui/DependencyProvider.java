@@ -41,6 +41,9 @@ import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.systemui.plugins.PluginInitializerImpl;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.shared.plugins.PluginManagerImpl;
+import com.android.systemui.shared.system.ActivityManagerWrapper;
+import com.android.systemui.shared.system.DevicePolicyManagerWrapper;
+import com.android.systemui.shared.system.PackageManagerWrapper;
 import com.android.systemui.statusbar.NavigationBarController;
 import com.android.systemui.statusbar.phone.AutoHideController;
 import com.android.systemui.statusbar.phone.ConfigurationControllerImpl;
@@ -180,5 +183,23 @@ public class DependencyProvider {
     public AutoHideController provideAutoHideController(Context context,
             @Named(MAIN_HANDLER_NAME) Handler mainHandler) {
         return new AutoHideController(context, mainHandler);
+    }
+
+    @Singleton
+    @Provides
+    public ActivityManagerWrapper provideActivityManagerWrapper() {
+        return ActivityManagerWrapper.getInstance();
+    }
+
+    @Singleton
+    @Provides
+    public DevicePolicyManagerWrapper provideDevicePolicyManagerWrapper() {
+        return DevicePolicyManagerWrapper.getInstance();
+    }
+
+    @Singleton
+    @Provides
+    public PackageManagerWrapper providePackageManagerWrapper() {
+        return PackageManagerWrapper.getInstance();
     }
 }
