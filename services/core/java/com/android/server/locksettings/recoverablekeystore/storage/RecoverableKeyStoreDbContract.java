@@ -20,6 +20,8 @@ import android.provider.BaseColumns;
 
 /**
  * Contract for recoverable key database. Describes the tables present.
+ *
+ * Make sure that {@code removeUserFromAllKnownTables} is updated, when new table is added.
  */
 class RecoverableKeyStoreDbContract {
     /**
@@ -91,6 +93,11 @@ class RecoverableKeyStoreDbContract {
          * is used to wrap recoverable keys on disk.
          */
         static final String COLUMN_NAME_PLATFORM_KEY_GENERATION_ID = "platform_key_generation_id";
+
+        /**
+         * Serial number for the user which can not be reused. Default value is {@code -1}.
+         */
+        static final String COLUMN_NAME_USER_SERIAL_NUMBER = "user_serial_number";
     }
 
     /**

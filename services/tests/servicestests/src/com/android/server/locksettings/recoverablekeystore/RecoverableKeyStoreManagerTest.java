@@ -59,6 +59,7 @@ import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.locksettings.recoverablekeystore.storage.ApplicationKeyStorage;
+import com.android.server.locksettings.recoverablekeystore.storage.CleanupManager;
 import com.android.server.locksettings.recoverablekeystore.storage.RecoverableKeyStoreDb;
 import com.android.server.locksettings.recoverablekeystore.storage.RecoverySessionStorage;
 import com.android.server.locksettings.recoverablekeystore.storage.RecoverySnapshotStorage;
@@ -154,6 +155,7 @@ public class RecoverableKeyStoreManagerTest {
     @Mock private KeyguardManager mKeyguardManager;
     @Mock private PlatformKeyManager mPlatformKeyManager;
     @Mock private ApplicationKeyStorage mApplicationKeyStorage;
+    @Mock private CleanupManager mCleanupManager;
     @Spy private TestOnlyInsecureCertificateHelper mTestOnlyInsecureCertificateHelper;
 
     private RecoverableKeyStoreDb mRecoverableKeyStoreDb;
@@ -191,7 +193,8 @@ public class RecoverableKeyStoreManagerTest {
                 mMockListenersStorage,
                 mPlatformKeyManager,
                 mApplicationKeyStorage,
-                mTestOnlyInsecureCertificateHelper);
+                mTestOnlyInsecureCertificateHelper,
+                mCleanupManager);
     }
 
     @After

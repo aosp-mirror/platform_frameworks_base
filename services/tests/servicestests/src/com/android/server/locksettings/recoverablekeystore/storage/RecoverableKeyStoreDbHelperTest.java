@@ -51,6 +51,7 @@ public class RecoverableKeyStoreDbHelperTest {
     private static final long TEST_LAST_SYNCED_AT = 1517990732000L;
     private static final int TEST_RECOVERY_STATUS = 3;
     private static final int TEST_PLATFORM_KEY_GENERATION_ID = 11;
+    private static final int TEST_USER_SERIAL_NUMBER = 15;
     private static final int TEST_SNAPSHOT_VERSION = 31;
     private static final int TEST_SHOULD_CREATE_SNAPSHOT = 1;
     private static final byte[] TEST_PUBLIC_KEY = "test-public-key".getBytes(UTF_8);
@@ -234,5 +235,14 @@ public class RecoverableKeyStoreDbHelperTest {
 
         assertThat(mDatabase.replace(KeysEntry.TABLE_NAME, /*nullColumnHack=*/ null, values))
                 .isGreaterThan(-1L);
+
+        // User serial number column was added when upgrading from v5 to v6
+        values = new ContentValues();
+        values.put(UserMetadataEntry.COLUMN_NAME_USER_ID, TEST_USER_ID);
+        values.put(UserMetadataEntry.COLUMN_NAME_USER_SERIAL_NUMBER, TEST_USER_SERIAL_NUMBER);
+        assertThat(
+                mDatabase.replace(UserMetadataEntry.TABLE_NAME, /*nullColumnHack=*/ null, values))
+                .isGreaterThan(-1L);
     }
+
 }
