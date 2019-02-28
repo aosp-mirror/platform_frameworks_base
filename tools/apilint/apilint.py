@@ -196,8 +196,10 @@ class Class():
 
             if "implements" in raw:
                 self.implements = raw[raw.index("implements")+1]
+                self.implements_all = [self.implements]
             else:
                 self.implements = None
+                self.implements_all = []
         else:
             raise ValueError("Unknown signature format: " + sig_format)
 
@@ -364,12 +366,12 @@ class V2LineParser(object):
         self.parse_matching_paren("<", ">")
         extends = self.parse_extends()
         clazz.extends = extends[0] if extends else None
-        implements = self.parse_implements()
-        clazz.implements = implements[0] if implements else None
+        clazz.implements_all = self.parse_implements()
         # The checks assume that interfaces are always found in implements, which isn't true for
         # subinterfaces.
-        if not implements and "interface" in clazz.split:
-            clazz.implements = clazz.extends
+        if not clazz.implements_all and "interface" in clazz.split:
+            clazz.implements_all = [clazz.extends]
+        clazz.implements = clazz.implements_all[0] if clazz.implements_all else None
         self.parse_token("{")
         self.parse_eof()
 
@@ -1249,6 +1251,7 @@ def verify_boolean(clazz):
 def verify_collections(clazz):
     """Verifies that collection types are interfaces."""
     if clazz.fullname == "android.os.Bundle": return
+    if clazz.fullname == "android.os.Parcel": return
 
     bad = ["java.util.Vector", "java.util.LinkedList", "java.util.ArrayList", "java.util.Stack",
            "java.util.HashMap", "java.util.HashSet", "android.util.ArraySet", "android.util.ArrayMap"]
@@ -1284,9 +1287,9 @@ def verify_exception(clazz):
                 error(clazz, m, "S1", "Methods must not throw generic exceptions")
 
             if t in ["android.os.RemoteException"]:
-                if clazz.name == "android.content.ContentProviderClient": continue
-                if clazz.name == "android.os.Binder": continue
-                if clazz.name == "android.os.IBinder": continue
+                if clazz.fullname == "android.content.ContentProviderClient": continue
+                if clazz.fullname == "android.os.Binder": continue
+                if clazz.fullname == "android.os.IBinder": continue
 
                 error(clazz, m, "FW9", "Methods calling into system server should rethrow RemoteException as RuntimeException")
 
@@ -1653,8 +1656,8 @@ def verify_units(clazz):
 
 def verify_closable(clazz):
     """Verifies that classes are AutoClosable."""
-    if clazz.implements == "java.lang.AutoCloseable": return
-    if clazz.implements == "java.io.Closeable": return
+    if "java.lang.AutoCloseable" in clazz.implements_all: return
+    if "java.io.Closeable" in clazz.implements_all: return
 
     for m in clazz.methods:
         if len(m.args) > 0: continue
@@ -1853,6 +1856,9 @@ def verify_clone(clazz):
 
 def verify_pfd(clazz):
     """Verify that android APIs use PFD over FD."""
+    if clazz.fullname == "android.os.FileUtils" or clazz.fullname == "android.system.Os":
+        return
+
     examine = clazz.ctors + clazz.methods
     for m in examine:
         if m.typ == "java.io.FileDescriptor":
