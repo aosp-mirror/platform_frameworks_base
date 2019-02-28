@@ -682,6 +682,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see CaptureRequest#COLOR_CORRECTION_ABERRATION_MODE
      */
     @PublicKey
+    @NonNull
     public static final Key<int[]> COLOR_CORRECTION_AVAILABLE_ABERRATION_MODES =
             new Key<int[]>("android.colorCorrection.availableAberrationModes", int[].class);
 
@@ -700,6 +701,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see CaptureRequest#CONTROL_AE_ANTIBANDING_MODE
      */
     @PublicKey
+    @NonNull
     public static final Key<int[]> CONTROL_AE_AVAILABLE_ANTIBANDING_MODES =
             new Key<int[]>("android.control.aeAvailableAntibandingModes", int[].class);
 
@@ -725,6 +727,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see CaptureRequest#CONTROL_AE_MODE
      */
     @PublicKey
+    @NonNull
     public static final Key<int[]> CONTROL_AE_AVAILABLE_MODES =
             new Key<int[]>("android.control.aeAvailableModes", int[].class);
 
@@ -764,6 +767,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see CaptureRequest#CONTROL_AE_TARGET_FPS_RANGE
      */
     @PublicKey
+    @NonNull
     public static final Key<android.util.Range<Integer>[]> CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES =
             new Key<android.util.Range<Integer>[]>("android.control.aeAvailableTargetFpsRanges", new TypeReference<android.util.Range<Integer>[]>() {{ }});
 
@@ -784,6 +788,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see CaptureRequest#CONTROL_AE_EXPOSURE_COMPENSATION
      */
     @PublicKey
+    @NonNull
     public static final Key<android.util.Range<Integer>> CONTROL_AE_COMPENSATION_RANGE =
             new Key<android.util.Range<Integer>>("android.control.aeCompensationRange", new TypeReference<android.util.Range<Integer>>() {{ }});
 
@@ -801,6 +806,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see CaptureRequest#CONTROL_AE_EXPOSURE_COMPENSATION
      */
     @PublicKey
+    @NonNull
     public static final Key<Rational> CONTROL_AE_COMPENSATION_STEP =
             new Key<Rational>("android.control.aeCompensationStep", Rational.class);
 
@@ -825,6 +831,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see CameraCharacteristics#LENS_INFO_MINIMUM_FOCUS_DISTANCE
      */
     @PublicKey
+    @NonNull
     public static final Key<int[]> CONTROL_AF_AVAILABLE_MODES =
             new Key<int[]>("android.control.afAvailableModes", int[].class);
 
@@ -848,6 +855,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see CaptureRequest#CONTROL_MODE
      */
     @PublicKey
+    @NonNull
     public static final Key<int[]> CONTROL_AVAILABLE_EFFECTS =
             new Key<int[]>("android.control.availableEffects", int[].class);
 
@@ -871,6 +879,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see CameraCharacteristics#STATISTICS_INFO_MAX_FACE_COUNT
      */
     @PublicKey
+    @NonNull
     public static final Key<int[]> CONTROL_AVAILABLE_SCENE_MODES =
             new Key<int[]>("android.control.availableSceneModes", int[].class);
 
@@ -885,6 +894,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see CaptureRequest#CONTROL_VIDEO_STABILIZATION_MODE
      */
     @PublicKey
+    @NonNull
     public static final Key<int[]> CONTROL_AVAILABLE_VIDEO_STABILIZATION_MODES =
             new Key<int[]>("android.control.availableVideoStabilizationModes", int[].class);
 
@@ -909,6 +919,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see CaptureRequest#CONTROL_AWB_MODE
      */
     @PublicKey
+    @NonNull
     public static final Key<int[]> CONTROL_AWB_AVAILABLE_MODES =
             new Key<int[]>("android.control.awbAvailableModes", int[].class);
 
@@ -945,6 +956,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see CaptureRequest#CONTROL_AE_REGIONS
      */
     @PublicKey
+    @NonNull
     @SyntheticKey
     public static final Key<Integer> CONTROL_MAX_REGIONS_AE =
             new Key<Integer>("android.control.maxRegionsAe", int.class);
@@ -961,6 +973,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see CaptureRequest#CONTROL_AWB_REGIONS
      */
     @PublicKey
+    @NonNull
     @SyntheticKey
     public static final Key<Integer> CONTROL_MAX_REGIONS_AWB =
             new Key<Integer>("android.control.maxRegionsAwb", int.class);
@@ -977,6 +990,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see CaptureRequest#CONTROL_AF_REGIONS
      */
     @PublicKey
+    @NonNull
     @SyntheticKey
     public static final Key<Integer> CONTROL_MAX_REGIONS_AF =
             new Key<Integer>("android.control.maxRegionsAf", int.class);
@@ -1025,7 +1039,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * normal capture session, or it will cause request error.</p>
      * <p><b>Range of valid values:</b><br></p>
      * <p>For each configuration, the fps_max &gt;= 120fps.</p>
-     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      * <p><b>Limited capability</b> -
      * Present on all camera devices that report being at least {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED HARDWARE_LEVEL_LIMITED} devices in the
      * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
@@ -1046,6 +1060,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see CaptureRequest#CONTROL_AE_LOCK
      */
     @PublicKey
+    @NonNull
     public static final Key<Boolean> CONTROL_AE_LOCK_AVAILABLE =
             new Key<Boolean>("android.control.aeLockAvailable", boolean.class);
 
@@ -1058,6 +1073,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see CaptureRequest#CONTROL_AWB_LOCK
      */
     @PublicKey
+    @NonNull
     public static final Key<Boolean> CONTROL_AWB_LOCK_AVAILABLE =
             new Key<Boolean>("android.control.awbLockAvailable", boolean.class);
 
@@ -1074,6 +1090,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see CaptureRequest#CONTROL_MODE
      */
     @PublicKey
+    @NonNull
     public static final Key<int[]> CONTROL_AVAILABLE_MODES =
             new Key<int[]>("android.control.availableModes", int[].class);
 
@@ -1088,12 +1105,13 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * present, and if a device does not support post RAW sensitivity boost, it will
      * list <code>(100, 100)</code> in this key.</p>
      * <p><b>Units</b>: ISO arithmetic units, the same as {@link CaptureRequest#SENSOR_SENSITIVITY android.sensor.sensitivity}</p>
-     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      *
      * @see CaptureRequest#CONTROL_POST_RAW_SENSITIVITY_BOOST
      * @see CaptureRequest#SENSOR_SENSITIVITY
      */
     @PublicKey
+    @NonNull
     public static final Key<android.util.Range<Integer>> CONTROL_POST_RAW_SENSITIVITY_BOOST_RANGE =
             new Key<android.util.Range<Integer>>("android.control.postRawSensitivityBoostRange", new TypeReference<android.util.Range<Integer>>() {{ }});
 
@@ -1105,7 +1123,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * list FAST.</p>
      * <p><b>Range of valid values:</b><br>
      * Any value listed in {@link CaptureRequest#EDGE_MODE android.edge.mode}</p>
-     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      * <p><b>Full capability</b> -
      * Present on all camera devices that report being {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_FULL HARDWARE_LEVEL_FULL} devices in the
      * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
@@ -1114,6 +1132,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
      */
     @PublicKey
+    @NonNull
     public static final Key<int[]> EDGE_AVAILABLE_EDGE_MODES =
             new Key<int[]>("android.edge.availableEdgeModes", int[].class);
 
@@ -1126,6 +1145,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * This key is available on all devices.</p>
      */
     @PublicKey
+    @NonNull
     public static final Key<Boolean> FLASH_INFO_AVAILABLE =
             new Key<Boolean>("android.flash.info.available", boolean.class);
 
@@ -1135,11 +1155,12 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>FULL mode camera devices will always support FAST.</p>
      * <p><b>Range of valid values:</b><br>
      * Any value listed in {@link CaptureRequest#HOT_PIXEL_MODE android.hotPixel.mode}</p>
-     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      *
      * @see CaptureRequest#HOT_PIXEL_MODE
      */
     @PublicKey
+    @NonNull
     public static final Key<int[]> HOT_PIXEL_AVAILABLE_HOT_PIXEL_MODES =
             new Key<int[]>("android.hotPixel.availableHotPixelModes", int[].class);
 
@@ -1167,6 +1188,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see CaptureRequest#JPEG_THUMBNAIL_SIZE
      */
     @PublicKey
+    @NonNull
     public static final Key<android.util.Size[]> JPEG_AVAILABLE_THUMBNAIL_SIZES =
             new Key<android.util.Size[]>("android.jpeg.availableThumbnailSizes", android.util.Size[].class);
 
@@ -1178,7 +1200,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>If the camera device supports a variable aperture, the aperture values
      * in this list will be sorted in ascending order.</p>
      * <p><b>Units</b>: The aperture f-number</p>
-     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      * <p><b>Full capability</b> -
      * Present on all camera devices that report being {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_FULL HARDWARE_LEVEL_FULL} devices in the
      * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
@@ -1187,6 +1209,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see CaptureRequest#LENS_APERTURE
      */
     @PublicKey
+    @NonNull
     public static final Key<float[]> LENS_INFO_AVAILABLE_APERTURES =
             new Key<float[]>("android.lens.info.availableApertures", float[].class);
 
@@ -1199,7 +1222,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p><b>Units</b>: Exposure value (EV)</p>
      * <p><b>Range of valid values:</b><br></p>
      * <p>Values are &gt;= 0</p>
-     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      * <p><b>Full capability</b> -
      * Present on all camera devices that report being {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_FULL HARDWARE_LEVEL_FULL} devices in the
      * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
@@ -1208,6 +1231,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see CaptureRequest#LENS_FILTER_DENSITY
      */
     @PublicKey
+    @NonNull
     public static final Key<float[]> LENS_INFO_AVAILABLE_FILTER_DENSITIES =
             new Key<float[]>("android.lens.info.availableFilterDensities", float[].class);
 
@@ -1226,6 +1250,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see CaptureRequest#LENS_FOCAL_LENGTH
      */
     @PublicKey
+    @NonNull
     public static final Key<float[]> LENS_INFO_AVAILABLE_FOCAL_LENGTHS =
             new Key<float[]>("android.lens.info.availableFocalLengths", float[].class);
 
@@ -1236,7 +1261,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * contain only OFF.</p>
      * <p><b>Range of valid values:</b><br>
      * Any value listed in {@link CaptureRequest#LENS_OPTICAL_STABILIZATION_MODE android.lens.opticalStabilizationMode}</p>
-     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      * <p><b>Limited capability</b> -
      * Present on all camera devices that report being at least {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED HARDWARE_LEVEL_LIMITED} devices in the
      * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
@@ -1245,6 +1270,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see CaptureRequest#LENS_OPTICAL_STABILIZATION_MODE
      */
     @PublicKey
+    @NonNull
     public static final Key<int[]> LENS_INFO_AVAILABLE_OPTICAL_STABILIZATION =
             new Key<int[]>("android.lens.info.availableOpticalStabilization", int[].class);
 
@@ -1256,7 +1282,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p><b>Range of valid values:</b><br>
      * If lens is fixed focus, &gt;= 0. If lens has focuser unit, the value is
      * within <code>(0.0f, {@link CameraCharacteristics#LENS_INFO_MINIMUM_FOCUS_DISTANCE android.lens.info.minimumFocusDistance}]</code></p>
-     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      * <p><b>Limited capability</b> -
      * Present on all camera devices that report being at least {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED HARDWARE_LEVEL_LIMITED} devices in the
      * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
@@ -1267,6 +1293,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see CameraCharacteristics#LENS_INFO_MINIMUM_FOCUS_DISTANCE
      */
     @PublicKey
+    @NonNull
     public static final Key<Float> LENS_INFO_HYPERFOCAL_DISTANCE =
             new Key<Float>("android.lens.info.hyperfocalDistance", float.class);
 
@@ -1278,7 +1305,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p><b>Units</b>: See {@link CameraCharacteristics#LENS_INFO_FOCUS_DISTANCE_CALIBRATION android.lens.info.focusDistanceCalibration} for details</p>
      * <p><b>Range of valid values:</b><br>
      * &gt;= 0</p>
-     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      * <p><b>Limited capability</b> -
      * Present on all camera devices that report being at least {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED HARDWARE_LEVEL_LIMITED} devices in the
      * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
@@ -1288,6 +1315,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see CameraCharacteristics#LENS_INFO_FOCUS_DISTANCE_CALIBRATION
      */
     @PublicKey
+    @NonNull
     public static final Key<Float> LENS_INFO_MINIMUM_FOCUS_DISTANCE =
             new Key<Float>("android.lens.info.minimumFocusDistance", float.class);
 
@@ -1297,7 +1325,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * must be smaller than 64x64.</p>
      * <p><b>Range of valid values:</b><br>
      * Both values &gt;= 1</p>
-     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      * <p><b>Full capability</b> -
      * Present on all camera devices that report being {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_FULL HARDWARE_LEVEL_FULL} devices in the
      * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
@@ -1329,7 +1357,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *   <li>{@link #LENS_INFO_FOCUS_DISTANCE_CALIBRATION_APPROXIMATE APPROXIMATE}</li>
      *   <li>{@link #LENS_INFO_FOCUS_DISTANCE_CALIBRATION_CALIBRATED CALIBRATED}</li>
      * </ul></p>
-     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      * <p><b>Limited capability</b> -
      * Present on all camera devices that report being at least {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED HARDWARE_LEVEL_LIMITED} devices in the
      * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
@@ -1344,6 +1372,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see #LENS_INFO_FOCUS_DISTANCE_CALIBRATION_CALIBRATED
      */
     @PublicKey
+    @NonNull
     public static final Key<Integer> LENS_INFO_FOCUS_DISTANCE_CALIBRATION =
             new Key<Integer>("android.lens.info.focusDistanceCalibration", int.class);
 
@@ -1362,6 +1391,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see #LENS_FACING_EXTERNAL
      */
     @PublicKey
+    @NonNull
     public static final Key<Integer> LENS_FACING =
             new Key<Integer>("android.lens.facing", int.class);
 
@@ -1396,10 +1426,11 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *  <code>p'</code> is in the camera-oriented coordinate system.</p>
      * <p><b>Units</b>:
      * Quaternion coefficients</p>
-     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      * <p><b>Permission {@link android.Manifest.permission#CAMERA } is needed to access this property</b></p>
      */
     @PublicKey
+    @NonNull
     public static final Key<float[]> LENS_POSE_ROTATION =
             new Key<float[]>("android.lens.poseRotation", float[].class);
 
@@ -1432,7 +1463,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * the center of the primary gyroscope on the device. The axis definitions are the same as
      * with PRIMARY_CAMERA.</p>
      * <p><b>Units</b>: Meters</p>
-     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      * <p><b>Permission {@link android.Manifest.permission#CAMERA } is needed to access this property</b></p>
      *
      * @see CameraCharacteristics#LENS_DISTORTION
@@ -1441,6 +1472,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see CameraCharacteristics#LENS_POSE_ROTATION
      */
     @PublicKey
+    @NonNull
     public static final Key<float[]> LENS_POSE_TRANSLATION =
             new Key<float[]>("android.lens.poseTranslation", float[].class);
 
@@ -1504,7 +1536,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * Pixels in the
      * {@link CameraCharacteristics#SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE android.sensor.info.preCorrectionActiveArraySize}
      * coordinate system.</p>
-     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      * <p><b>Permission {@link android.Manifest.permission#CAMERA } is needed to access this property</b></p>
      *
      * @see CameraCharacteristics#LENS_DISTORTION
@@ -1514,6 +1546,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see CameraCharacteristics#SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE
      */
     @PublicKey
+    @NonNull
     public static final Key<float[]> LENS_INTRINSIC_CALIBRATION =
             new Key<float[]>("android.lens.intrinsicCalibration", float[].class);
 
@@ -1548,7 +1581,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>The distortion model used is the Brown-Conrady model.</p>
      * <p><b>Units</b>:
      * Unitless coefficients.</p>
-     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      * <p><b>Permission {@link android.Manifest.permission#CAMERA } is needed to access this property</b></p>
      *
      * @see CameraCharacteristics#LENS_INTRINSIC_CALIBRATION
@@ -1561,6 +1594,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      */
     @Deprecated
     @PublicKey
+    @NonNull
     public static final Key<float[]> LENS_RADIAL_DISTORTION =
             new Key<float[]>("android.lens.radialDistortion", float[].class);
 
@@ -1573,7 +1607,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *   <li>{@link #LENS_POSE_REFERENCE_PRIMARY_CAMERA PRIMARY_CAMERA}</li>
      *   <li>{@link #LENS_POSE_REFERENCE_GYROSCOPE GYROSCOPE}</li>
      * </ul></p>
-     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      * <p><b>Permission {@link android.Manifest.permission#CAMERA } is needed to access this property</b></p>
      *
      * @see CameraCharacteristics#LENS_POSE_TRANSLATION
@@ -1581,6 +1615,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see #LENS_POSE_REFERENCE_GYROSCOPE
      */
     @PublicKey
+    @NonNull
     public static final Key<Integer> LENS_POSE_REFERENCE =
             new Key<Integer>("android.lens.poseReference", int.class);
 
@@ -1615,13 +1650,14 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>The distortion model used is the Brown-Conrady model.</p>
      * <p><b>Units</b>:
      * Unitless coefficients.</p>
-     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      * <p><b>Permission {@link android.Manifest.permission#CAMERA } is needed to access this property</b></p>
      *
      * @see CameraCharacteristics#LENS_INTRINSIC_CALIBRATION
      * @see CameraCharacteristics#LENS_RADIAL_DISTORTION
      */
     @PublicKey
+    @NonNull
     public static final Key<float[]> LENS_DISTORTION =
             new Key<float[]>("android.lens.distortion", float[].class);
 
@@ -1634,7 +1670,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>Legacy-capability camera devices will only support FAST mode.</p>
      * <p><b>Range of valid values:</b><br>
      * Any value listed in {@link CaptureRequest#NOISE_REDUCTION_MODE android.noiseReduction.mode}</p>
-     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      * <p><b>Limited capability</b> -
      * Present on all camera devices that report being at least {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED HARDWARE_LEVEL_LIMITED} devices in the
      * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
@@ -1643,6 +1679,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see CaptureRequest#NOISE_REDUCTION_MODE
      */
     @PublicKey
+    @NonNull
     public static final Key<int[]> NOISE_REDUCTION_AVAILABLE_NOISE_REDUCTION_MODES =
             new Key<int[]>("android.noiseReduction.availableNoiseReductionModes", int[].class);
 
@@ -1655,7 +1692,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * future versions of camera service. This quirk will stop
      * working at that point; DO NOT USE without careful
      * consideration of future support.</p>
-     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      * @deprecated
      * <p>Not used in HALv3 or newer; replaced by better partials mechanism</p>
 
@@ -1728,6 +1765,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP
      */
     @PublicKey
+    @NonNull
     @SyntheticKey
     public static final Key<Integer> REQUEST_MAX_NUM_OUTPUT_RAW =
             new Key<Integer>("android.request.maxNumOutputRaw", int.class);
@@ -1764,6 +1802,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP
      */
     @PublicKey
+    @NonNull
     @SyntheticKey
     public static final Key<Integer> REQUEST_MAX_NUM_OUTPUT_PROC =
             new Key<Integer>("android.request.maxNumOutputProc", int.class);
@@ -1790,6 +1829,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP
      */
     @PublicKey
+    @NonNull
     @SyntheticKey
     public static final Key<Integer> REQUEST_MAX_NUM_OUTPUT_PROC_STALLING =
             new Key<Integer>("android.request.maxNumOutputProcStalling", int.class);
@@ -1809,7 +1849,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * should be JPEG.</p>
      * <p><b>Range of valid values:</b><br></p>
      * <p>0 or 1.</p>
-     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      * <p><b>Full capability</b> -
      * Present on all camera devices that report being {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_FULL HARDWARE_LEVEL_FULL} devices in the
      * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
@@ -1817,6 +1857,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
      */
     @PublicKey
+    @NonNull
     public static final Key<Integer> REQUEST_MAX_NUM_INPUT_STREAMS =
             new Key<Integer>("android.request.maxNumInputStreams", int.class);
 
@@ -1841,6 +1882,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see CaptureResult#REQUEST_PIPELINE_DEPTH
      */
     @PublicKey
+    @NonNull
     public static final Key<Byte> REQUEST_PIPELINE_MAX_DEPTH =
             new Key<Byte>("android.request.pipelineMaxDepth", byte.class);
 
@@ -1861,9 +1903,10 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * partial results.</p>
      * <p><b>Range of valid values:</b><br>
      * &gt;= 1</p>
-     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      */
     @PublicKey
+    @NonNull
     public static final Key<Integer> REQUEST_PARTIAL_RESULT_COUNT =
             new Key<Integer>("android.request.partialResultCount", int.class);
 
@@ -1923,6 +1966,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see #REQUEST_AVAILABLE_CAPABILITIES_SECURE_IMAGE_DATA
      */
     @PublicKey
+    @NonNull
     public static final Key<int[]> REQUEST_AVAILABLE_CAPABILITIES =
             new Key<int[]>("android.request.availableCapabilities", int[].class);
 
@@ -2036,7 +2080,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * {@link CaptureRequest.Builder#getPhysicalCameraKey }. Capture requests that contain
      * individual physical device requests must be built via
      * {@link android.hardware.camera2.CameraDevice#createCaptureRequest(int, Set)}.</p>
-     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      * <p><b>Limited capability</b> -
      * Present on all camera devices that report being at least {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED HARDWARE_LEVEL_LIMITED} devices in the
      * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
@@ -2067,7 +2111,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * camera device for output streams.</p>
      * <p>All camera devices will support JPEG and YUV_420_888 formats.</p>
      * <p>When set to YUV_420_888, application can access the YUV420 data directly.</p>
-     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      * @deprecated
      * <p>Not used in HALv3 or newer</p>
 
@@ -2089,7 +2133,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p><b>Units</b>: Nanoseconds</p>
      * <p><b>Range of valid values:</b><br>
      * TODO: Remove property.</p>
-     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      * @deprecated
      * <p>Not used in HALv3 or newer</p>
 
@@ -2105,7 +2149,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * sensor maximum resolution (defined by {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize}).</p>
      * <p><b>Range of valid values:</b><br>
      * TODO: Remove property.</p>
-     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      *
      * @see CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE
      * @deprecated
@@ -2135,6 +2179,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see CaptureRequest#SCALER_CROP_REGION
      */
     @PublicKey
+    @NonNull
     public static final Key<Float> SCALER_AVAILABLE_MAX_DIGITAL_ZOOM =
             new Key<Float>("android.scaler.availableMaxDigitalZoom", float.class);
 
@@ -2148,7 +2193,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>When multiple streams are configured, the minimum frame duration will
      * be &gt;= max(individual stream min durations).</p>
      * <p><b>Units</b>: Nanoseconds</p>
-     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      * @deprecated
      * <p>Not used in HALv3 or newer</p>
 
@@ -2172,7 +2217,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * can provide.</p>
      * <p>Please reference the documentation for the image data destination to
      * check if it limits the maximum size for image data.</p>
-     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      * @deprecated
      * <p>Not used in HALv3 or newer</p>
 
@@ -2257,7 +2302,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * </tr>
      * </tbody>
      * </table>
-     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      *
      * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
      * @see CameraCharacteristics#REQUEST_MAX_NUM_INPUT_STREAMS
@@ -2551,6 +2596,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE
      */
     @PublicKey
+    @NonNull
     @SyntheticKey
     public static final Key<android.hardware.camera2.params.StreamConfigurationMap> SCALER_STREAM_CONFIGURATION_MAP =
             new Key<android.hardware.camera2.params.StreamConfigurationMap>("android.scaler.streamConfigurationMap", android.hardware.camera2.params.StreamConfigurationMap.class);
@@ -2579,6 +2625,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see #SCALER_CROPPING_TYPE_FREEFORM
      */
     @PublicKey
+    @NonNull
     public static final Key<Integer> SCALER_CROPPING_TYPE =
             new Key<Integer>("android.scaler.croppingType", int.class);
 
@@ -2591,7 +2638,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * power and performance efficient for specific use cases. For more information about
      * retrieving the suggestions see
      * {@link android.hardware.camera2.CameraCharacteristics#getRecommendedStreamConfigurationMap }.</p>
-     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      * @hide
      */
     public static final Key<android.hardware.camera2.params.RecommendedStreamConfiguration[]> SCALER_AVAILABLE_RECOMMENDED_STREAM_CONFIGURATIONS =
@@ -2607,7 +2654,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * If set, the information will be available in the ZERO_SHUTTER_LAG recommended stream
      * configuration see
      * {@link android.hardware.camera2.CameraCharacteristics#getRecommendedStreamConfigurationMap }.</p>
-     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      * @hide
      */
     public static final Key<android.hardware.camera2.params.ReprocessFormatsMap> SCALER_AVAILABLE_RECOMMENDED_INPUT_OUTPUT_FORMATS_MAP =
@@ -2634,7 +2681,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * physical camera not independently exposed in
      * {@link android.hardware.camera2.CameraManager#getCameraIdList } or is not backward
      * compatible.</p>
-     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      * <p><b>Limited capability</b> -
      * Present on all camera devices that report being at least {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED HARDWARE_LEVEL_LIMITED} devices in the
      * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
@@ -2642,6 +2689,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
      */
     @PublicKey
+    @NonNull
     @SyntheticKey
     public static final Key<android.hardware.camera2.params.MandatoryStreamCombination[]> SCALER_MANDATORY_STREAM_COMBINATIONS =
             new Key<android.hardware.camera2.params.MandatoryStreamCombination[]>("android.scaler.mandatoryStreamCombinations", android.hardware.camera2.params.MandatoryStreamCombination[].class);
@@ -2681,6 +2729,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see CameraCharacteristics#SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE
      */
     @PublicKey
+    @NonNull
     public static final Key<android.graphics.Rect> SENSOR_INFO_ACTIVE_ARRAY_SIZE =
             new Key<android.graphics.Rect>("android.sensor.info.activeArraySize", android.graphics.Rect.class);
 
@@ -2691,7 +2740,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * as defined in ISO 12232:2006.</p>
      * <p><b>Range of valid values:</b><br>
      * Min &lt;= 100, Max &gt;= 800</p>
-     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      * <p><b>Full capability</b> -
      * Present on all camera devices that report being {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_FULL HARDWARE_LEVEL_FULL} devices in the
      * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
@@ -2700,6 +2749,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see CaptureRequest#SENSOR_SENSITIVITY
      */
     @PublicKey
+    @NonNull
     public static final Key<android.util.Range<Integer>> SENSOR_INFO_SENSITIVITY_RANGE =
             new Key<android.util.Range<Integer>>("android.sensor.info.sensitivityRange", new TypeReference<android.util.Range<Integer>>() {{ }});
 
@@ -2718,7 +2768,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *   <li>{@link #SENSOR_INFO_COLOR_FILTER_ARRANGEMENT_MONO MONO}</li>
      *   <li>{@link #SENSOR_INFO_COLOR_FILTER_ARRANGEMENT_NIR NIR}</li>
      * </ul></p>
-     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      * <p><b>Full capability</b> -
      * Present on all camera devices that report being {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_FULL HARDWARE_LEVEL_FULL} devices in the
      * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
@@ -2733,6 +2783,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see #SENSOR_INFO_COLOR_FILTER_ARRANGEMENT_NIR
      */
     @PublicKey
+    @NonNull
     public static final Key<Integer> SENSOR_INFO_COLOR_FILTER_ARRANGEMENT =
             new Key<Integer>("android.sensor.info.colorFilterArrangement", int.class);
 
@@ -2744,7 +2795,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * The minimum exposure time will be less than 100 us. For FULL
      * capability devices ({@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} == FULL),
      * the maximum exposure time will be greater than 100ms.</p>
-     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      * <p><b>Full capability</b> -
      * Present on all camera devices that report being {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_FULL HARDWARE_LEVEL_FULL} devices in the
      * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
@@ -2753,6 +2804,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see CaptureRequest#SENSOR_EXPOSURE_TIME
      */
     @PublicKey
+    @NonNull
     public static final Key<android.util.Range<Long>> SENSOR_INFO_EXPOSURE_TIME_RANGE =
             new Key<android.util.Range<Long>>("android.sensor.info.exposureTimeRange", new TypeReference<android.util.Range<Long>>() {{ }});
 
@@ -2768,7 +2820,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p><b>Range of valid values:</b><br>
      * For FULL capability devices
      * ({@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} == FULL), at least 100ms.</p>
-     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      * <p><b>Full capability</b> -
      * Present on all camera devices that report being {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_FULL HARDWARE_LEVEL_FULL} devices in the
      * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
@@ -2777,6 +2829,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see CaptureRequest#SENSOR_FRAME_DURATION
      */
     @PublicKey
+    @NonNull
     public static final Key<Long> SENSOR_INFO_MAX_FRAME_DURATION =
             new Key<Long>("android.sensor.info.maxFrameDuration", long.class);
 
@@ -2791,6 +2844,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see CameraCharacteristics#SENSOR_INFO_PIXEL_ARRAY_SIZE
      */
     @PublicKey
+    @NonNull
     public static final Key<android.util.SizeF> SENSOR_INFO_PHYSICAL_SIZE =
             new Key<android.util.SizeF>("android.sensor.info.physicalSize", android.util.SizeF.class);
 
@@ -2816,6 +2870,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see CameraCharacteristics#SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE
      */
     @PublicKey
+    @NonNull
     public static final Key<android.util.Size> SENSOR_INFO_PIXEL_ARRAY_SIZE =
             new Key<android.util.Size>("android.sensor.info.pixelArraySize", android.util.Size.class);
 
@@ -2837,13 +2892,14 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * by the camera device, which provides more accurate white level values.</p>
      * <p><b>Range of valid values:</b><br>
      * &gt; 255 (8-bit output)</p>
-     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      *
      * @see CameraCharacteristics#SENSOR_BLACK_LEVEL_PATTERN
      * @see CaptureResult#SENSOR_DYNAMIC_WHITE_LEVEL
      * @see CaptureRequest#SENSOR_SENSITIVITY
      */
     @PublicKey
+    @NonNull
     public static final Key<Integer> SENSOR_INFO_WHITE_LEVEL =
             new Key<Integer>("android.sensor.info.whiteLevel", int.class);
 
@@ -2863,6 +2919,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see #SENSOR_INFO_TIMESTAMP_SOURCE_REALTIME
      */
     @PublicKey
+    @NonNull
     public static final Key<Integer> SENSOR_INFO_TIMESTAMP_SOURCE =
             new Key<Integer>("android.sensor.info.timestampSource", int.class);
 
@@ -2875,11 +2932,12 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * See {@link CameraCharacteristics#REQUEST_MAX_NUM_OUTPUT_RAW android.request.maxNumOutputRaw} for a list of RAW image formats.</p>
      * <p>This key will be <code>null</code> for all devices do not report this information.
      * Devices with RAW capability will always report this information in this key.</p>
-     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      *
      * @see CameraCharacteristics#REQUEST_MAX_NUM_OUTPUT_RAW
      */
     @PublicKey
+    @NonNull
     public static final Key<Boolean> SENSOR_INFO_LENS_SHADING_APPLIED =
             new Key<Boolean>("android.sensor.info.lensShadingApplied", boolean.class);
 
@@ -2945,6 +3003,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see CameraCharacteristics#SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE
      */
     @PublicKey
+    @NonNull
     public static final Key<android.graphics.Rect> SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE =
             new Key<android.graphics.Rect>("android.sensor.info.preCorrectionActiveArraySize", android.graphics.Rect.class);
 
@@ -2986,7 +3045,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *   <li>{@link #SENSOR_REFERENCE_ILLUMINANT1_D50 D50}</li>
      *   <li>{@link #SENSOR_REFERENCE_ILLUMINANT1_ISO_STUDIO_TUNGSTEN ISO_STUDIO_TUNGSTEN}</li>
      * </ul></p>
-     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      * <p><b>Permission {@link android.Manifest.permission#CAMERA } is needed to access this property</b></p>
      *
      * @see CameraCharacteristics#SENSOR_CALIBRATION_TRANSFORM1
@@ -3014,6 +3073,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see #SENSOR_REFERENCE_ILLUMINANT1_ISO_STUDIO_TUNGSTEN
      */
     @PublicKey
+    @NonNull
     public static final Key<Integer> SENSOR_REFERENCE_ILLUMINANT1 =
             new Key<Integer>("android.sensor.referenceIlluminant1", int.class);
 
@@ -3030,7 +3090,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * the camera device has RAW capability.</p>
      * <p><b>Range of valid values:</b><br>
      * Any value listed in {@link CameraCharacteristics#SENSOR_REFERENCE_ILLUMINANT1 android.sensor.referenceIlluminant1}</p>
-     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      * <p><b>Permission {@link android.Manifest.permission#CAMERA } is needed to access this property</b></p>
      *
      * @see CameraCharacteristics#SENSOR_CALIBRATION_TRANSFORM2
@@ -3039,6 +3099,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see CameraCharacteristics#SENSOR_REFERENCE_ILLUMINANT1
      */
     @PublicKey
+    @NonNull
     public static final Key<Byte> SENSOR_REFERENCE_ILLUMINANT2 =
             new Key<Byte>("android.sensor.referenceIlluminant2", byte.class);
 
@@ -3055,12 +3116,13 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * ({@link CameraCharacteristics#SENSOR_REFERENCE_ILLUMINANT1 android.sensor.referenceIlluminant1}).</p>
      * <p>Starting from Android Q, this key will not be present for a MONOCHROME camera, even if
      * the camera device has RAW capability.</p>
-     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      * <p><b>Permission {@link android.Manifest.permission#CAMERA } is needed to access this property</b></p>
      *
      * @see CameraCharacteristics#SENSOR_REFERENCE_ILLUMINANT1
      */
     @PublicKey
+    @NonNull
     public static final Key<android.hardware.camera2.params.ColorSpaceTransform> SENSOR_CALIBRATION_TRANSFORM1 =
             new Key<android.hardware.camera2.params.ColorSpaceTransform>("android.sensor.calibrationTransform1", android.hardware.camera2.params.ColorSpaceTransform.class);
 
@@ -3080,12 +3142,13 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * illuminant is present.</p>
      * <p>Starting from Android Q, this key will not be present for a MONOCHROME camera, even if
      * the camera device has RAW capability.</p>
-     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      * <p><b>Permission {@link android.Manifest.permission#CAMERA } is needed to access this property</b></p>
      *
      * @see CameraCharacteristics#SENSOR_REFERENCE_ILLUMINANT2
      */
     @PublicKey
+    @NonNull
     public static final Key<android.hardware.camera2.params.ColorSpaceTransform> SENSOR_CALIBRATION_TRANSFORM2 =
             new Key<android.hardware.camera2.params.ColorSpaceTransform>("android.sensor.calibrationTransform2", android.hardware.camera2.params.ColorSpaceTransform.class);
 
@@ -3106,12 +3169,13 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * (i.e. no chromatic adaptation will be applied by this transform).</p>
      * <p>Starting from Android Q, this key will not be present for a MONOCHROME camera, even if
      * the camera device has RAW capability.</p>
-     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      * <p><b>Permission {@link android.Manifest.permission#CAMERA } is needed to access this property</b></p>
      *
      * @see CameraCharacteristics#SENSOR_REFERENCE_ILLUMINANT1
      */
     @PublicKey
+    @NonNull
     public static final Key<android.hardware.camera2.params.ColorSpaceTransform> SENSOR_COLOR_TRANSFORM1 =
             new Key<android.hardware.camera2.params.ColorSpaceTransform>("android.sensor.colorTransform1", android.hardware.camera2.params.ColorSpaceTransform.class);
 
@@ -3134,12 +3198,13 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * illuminant is present.</p>
      * <p>Starting from Android Q, this key will not be present for a MONOCHROME camera, even if
      * the camera device has RAW capability.</p>
-     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      * <p><b>Permission {@link android.Manifest.permission#CAMERA } is needed to access this property</b></p>
      *
      * @see CameraCharacteristics#SENSOR_REFERENCE_ILLUMINANT2
      */
     @PublicKey
+    @NonNull
     public static final Key<android.hardware.camera2.params.ColorSpaceTransform> SENSOR_COLOR_TRANSFORM2 =
             new Key<android.hardware.camera2.params.ColorSpaceTransform>("android.sensor.colorTransform2", android.hardware.camera2.params.ColorSpaceTransform.class);
 
@@ -3158,12 +3223,13 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * CIE XYZ colorspace.</p>
      * <p>Starting from Android Q, this key will not be present for a MONOCHROME camera, even if
      * the camera device has RAW capability.</p>
-     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      * <p><b>Permission {@link android.Manifest.permission#CAMERA } is needed to access this property</b></p>
      *
      * @see CameraCharacteristics#SENSOR_REFERENCE_ILLUMINANT1
      */
     @PublicKey
+    @NonNull
     public static final Key<android.hardware.camera2.params.ColorSpaceTransform> SENSOR_FORWARD_MATRIX1 =
             new Key<android.hardware.camera2.params.ColorSpaceTransform>("android.sensor.forwardMatrix1", android.hardware.camera2.params.ColorSpaceTransform.class);
 
@@ -3184,12 +3250,13 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * illuminant is present.</p>
      * <p>Starting from Android Q, this key will not be present for a MONOCHROME camera, even if
      * the camera device has RAW capability.</p>
-     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      * <p><b>Permission {@link android.Manifest.permission#CAMERA } is needed to access this property</b></p>
      *
      * @see CameraCharacteristics#SENSOR_REFERENCE_ILLUMINANT2
      */
     @PublicKey
+    @NonNull
     public static final Key<android.hardware.camera2.params.ColorSpaceTransform> SENSOR_FORWARD_MATRIX2 =
             new Key<android.hardware.camera2.params.ColorSpaceTransform>("android.sensor.forwardMatrix2", android.hardware.camera2.params.ColorSpaceTransform.class);
 
@@ -3215,7 +3282,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>For a MONOCHROME camera device, all of the 2x2 channels must have the same values.</p>
      * <p><b>Range of valid values:</b><br>
      * &gt;= 0 for each.</p>
-     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      *
      * @see CaptureResult#SENSOR_DYNAMIC_BLACK_LEVEL
      * @see CameraCharacteristics#SENSOR_INFO_COLOR_FILTER_ARRANGEMENT
@@ -3224,6 +3291,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see CaptureRequest#SENSOR_SENSITIVITY
      */
     @PublicKey
+    @NonNull
     public static final Key<android.hardware.camera2.params.BlackLevelPattern> SENSOR_BLACK_LEVEL_PATTERN =
             new Key<android.hardware.camera2.params.BlackLevelPattern>("android.sensor.blackLevelPattern", android.hardware.camera2.params.BlackLevelPattern.class);
 
@@ -3234,7 +3302,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * equal to this, all applied gain must be analog. For
      * values above this, the gain applied can be a mix of analog and
      * digital.</p>
-     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      * <p><b>Full capability</b> -
      * Present on all camera devices that report being {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_FULL HARDWARE_LEVEL_FULL} devices in the
      * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
@@ -3243,6 +3311,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see CaptureRequest#SENSOR_SENSITIVITY
      */
     @PublicKey
+    @NonNull
     public static final Key<Integer> SENSOR_MAX_ANALOG_SENSITIVITY =
             new Key<Integer>("android.sensor.maxAnalogSensitivity", int.class);
 
@@ -3258,6 +3327,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>This key is available on all devices.</p>
      */
     @PublicKey
+    @NonNull
     public static final Key<Integer> SENSOR_ORIENTATION =
             new Key<Integer>("android.sensor.orientation", int.class);
 
@@ -3267,11 +3337,12 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>Defaults to OFF, and always includes OFF if defined.</p>
      * <p><b>Range of valid values:</b><br>
      * Any value listed in {@link CaptureRequest#SENSOR_TEST_PATTERN_MODE android.sensor.testPatternMode}</p>
-     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      *
      * @see CaptureRequest#SENSOR_TEST_PATTERN_MODE
      */
     @PublicKey
+    @NonNull
     public static final Key<int[]> SENSOR_AVAILABLE_TEST_PATTERN_MODES =
             new Key<int[]>("android.sensor.availableTestPatternModes", int[].class);
 
@@ -3291,13 +3362,14 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * black level of each captured raw images.</p>
      * <p>When this key is reported, the {@link CaptureResult#SENSOR_DYNAMIC_BLACK_LEVEL android.sensor.dynamicBlackLevel} and
      * {@link CaptureResult#SENSOR_DYNAMIC_WHITE_LEVEL android.sensor.dynamicWhiteLevel} will also be reported.</p>
-     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      *
      * @see CameraCharacteristics#SENSOR_BLACK_LEVEL_PATTERN
      * @see CaptureResult#SENSOR_DYNAMIC_BLACK_LEVEL
      * @see CaptureResult#SENSOR_DYNAMIC_WHITE_LEVEL
      */
     @PublicKey
+    @NonNull
     public static final Key<android.graphics.Rect[]> SENSOR_OPTICAL_BLACK_REGIONS =
             new Key<android.graphics.Rect[]>("android.sensor.opticalBlackRegions", android.graphics.Rect[].class);
 
@@ -3314,6 +3386,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see CaptureRequest#SHADING_MODE
      */
     @PublicKey
+    @NonNull
     public static final Key<int[]> SHADING_AVAILABLE_MODES =
             new Key<int[]>("android.shading.availableModes", int[].class);
 
@@ -3328,6 +3401,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see CaptureRequest#STATISTICS_FACE_DETECT_MODE
      */
     @PublicKey
+    @NonNull
     public static final Key<int[]> STATISTICS_INFO_AVAILABLE_FACE_DETECT_MODES =
             new Key<int[]>("android.statistics.info.availableFaceDetectModes", int[].class);
 
@@ -3341,6 +3415,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>This key is available on all devices.</p>
      */
     @PublicKey
+    @NonNull
     public static final Key<Integer> STATISTICS_INFO_MAX_FACE_COUNT =
             new Key<Integer>("android.statistics.info.maxFaceCount", int.class);
 
@@ -3352,11 +3427,12 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>ON is always supported on devices with the RAW capability.</p>
      * <p><b>Range of valid values:</b><br>
      * Any value listed in {@link CaptureRequest#STATISTICS_HOT_PIXEL_MAP_MODE android.statistics.hotPixelMapMode}</p>
-     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      *
      * @see CaptureRequest#STATISTICS_HOT_PIXEL_MAP_MODE
      */
     @PublicKey
+    @NonNull
     public static final Key<boolean[]> STATISTICS_INFO_AVAILABLE_HOT_PIXEL_MAP_MODES =
             new Key<boolean[]>("android.statistics.info.availableHotPixelMapModes", boolean[].class);
 
@@ -3369,11 +3445,12 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * LEGACY mode devices will always only support OFF.</p>
      * <p><b>Range of valid values:</b><br>
      * Any value listed in {@link CaptureRequest#STATISTICS_LENS_SHADING_MAP_MODE android.statistics.lensShadingMapMode}</p>
-     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      *
      * @see CaptureRequest#STATISTICS_LENS_SHADING_MAP_MODE
      */
     @PublicKey
+    @NonNull
     public static final Key<int[]> STATISTICS_INFO_AVAILABLE_LENS_SHADING_MAP_MODES =
             new Key<int[]>("android.statistics.info.availableLensShadingMapModes", int[].class);
 
@@ -3384,11 +3461,12 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * contain only OFF.</p>
      * <p><b>Range of valid values:</b><br>
      * Any value listed in {@link CaptureRequest#STATISTICS_OIS_DATA_MODE android.statistics.oisDataMode}</p>
-     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      *
      * @see CaptureRequest#STATISTICS_OIS_DATA_MODE
      */
     @PublicKey
+    @NonNull
     public static final Key<int[]> STATISTICS_INFO_AVAILABLE_OIS_DATA_MODES =
             new Key<int[]>("android.statistics.info.availableOisDataModes", int[].class);
 
@@ -3401,7 +3479,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>The output curves in the result metadata may have a different number
      * of points than the input curves, and will represent the actual
      * hardware curves used as closely as possible when linearly interpolated.</p>
-     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      * <p><b>Full capability</b> -
      * Present on all camera devices that report being {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_FULL HARDWARE_LEVEL_FULL} devices in the
      * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
@@ -3410,6 +3488,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see CaptureRequest#TONEMAP_CURVE
      */
     @PublicKey
+    @NonNull
     public static final Key<Integer> TONEMAP_MAX_CURVE_POINTS =
             new Key<Integer>("android.tonemap.maxCurvePoints", int.class);
 
@@ -3425,7 +3504,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>This includes all FULL level devices.</p>
      * <p><b>Range of valid values:</b><br>
      * Any value listed in {@link CaptureRequest#TONEMAP_MODE android.tonemap.mode}</p>
-     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      * <p><b>Full capability</b> -
      * Present on all camera devices that report being {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_FULL HARDWARE_LEVEL_FULL} devices in the
      * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
@@ -3434,6 +3513,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see CaptureRequest#TONEMAP_MODE
      */
     @PublicKey
+    @NonNull
     public static final Key<int[]> TONEMAP_AVAILABLE_TONE_MAP_MODES =
             new Key<int[]>("android.tonemap.availableToneMapModes", int[].class);
 
@@ -3443,7 +3523,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <ul>
      *   <li>{@link #LED_AVAILABLE_LEDS_TRANSMIT TRANSMIT}</li>
      * </ul></p>
-     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      * @see #LED_AVAILABLE_LEDS_TRANSMIT
      * @hide
      */
@@ -3534,6 +3614,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see #INFO_SUPPORTED_HARDWARE_LEVEL_EXTERNAL
      */
     @PublicKey
+    @NonNull
     public static final Key<Integer> INFO_SUPPORTED_HARDWARE_LEVEL =
             new Key<Integer>("android.info.supportedHardwareLevel", int.class);
 
@@ -3543,9 +3624,10 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>This can be used in {@link android.media.ExifInterface#TAG_IMAGE_DESCRIPTION TAG_IMAGE_DESCRIPTION}
      * in jpeg EXIF. This key may be absent if no version information is available on the
      * device.</p>
-     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      */
     @PublicKey
+    @NonNull
     public static final Key<String> INFO_VERSION =
             new Key<String>("android.info.version", String.class);
 
@@ -3572,6 +3654,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see #SYNC_MAX_LATENCY_UNKNOWN
      */
     @PublicKey
+    @NonNull
     public static final Key<Integer> SYNC_MAX_LATENCY =
             new Key<Integer>("android.sync.maxLatency", int.class);
 
@@ -3598,7 +3681,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p><b>Units</b>: Number of frames.</p>
      * <p><b>Range of valid values:</b><br>
      * &lt;= 4</p>
-     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      * <p><b>Limited capability</b> -
      * Present on all camera devices that report being at least {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED HARDWARE_LEVEL_LIMITED} devices in the
      * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
@@ -3607,6 +3690,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
      */
     @PublicKey
+    @NonNull
     public static final Key<Integer> REPROCESS_MAX_CAPTURE_STALL =
             new Key<Integer>("android.reprocess.maxCaptureStall", int.class);
 
@@ -3625,7 +3709,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * the format in this list as <code>(HAL_PIXEL_FORMAT_BLOB,
      * android.depth.maxDepthSamples, 1, OUTPUT)</code> in addition to
      * the entries for HAL_PIXEL_FORMAT_Y16.</p>
-     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      * <p><b>Limited capability</b> -
      * Present on all camera devices that report being at least {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED HARDWARE_LEVEL_LIMITED} devices in the
      * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
@@ -3650,7 +3734,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * android.scaler.availableStallDurations for more details about
      * calculating the max frame rate.</p>
      * <p><b>Units</b>: (format, width, height, ns) x n</p>
-     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      * <p><b>Limited capability</b> -
      * Present on all camera devices that report being at least {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED HARDWARE_LEVEL_LIMITED} devices in the
      * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
@@ -3674,7 +3758,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>All depth output stream formats may have a nonzero stall
      * duration.</p>
      * <p><b>Units</b>: (format, width, height, ns) x n</p>
-     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      * <p><b>Limited capability</b> -
      * Present on all camera devices that report being at least {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED HARDWARE_LEVEL_LIMITED} devices in the
      * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
@@ -3697,7 +3781,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * need to emit a specific pattern or wavelength of light to
      * measure depth values, which causes the color image to be
      * corrupted during depth measurement.</p>
-     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      * <p><b>Limited capability</b> -
      * Present on all camera devices that report being at least {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED HARDWARE_LEVEL_LIMITED} devices in the
      * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
@@ -3705,6 +3789,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
      */
     @PublicKey
+    @NonNull
     public static final Key<Boolean> DEPTH_DEPTH_IS_EXCLUSIVE =
             new Key<Boolean>("android.depth.depthIsExclusive", boolean.class);
 
@@ -3717,7 +3802,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * power and performance efficient for specific use cases. For more information about
      * retrieving the suggestions see
      * {@link android.hardware.camera2.CameraCharacteristics#getRecommendedStreamConfigurationMap }.</p>
-     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      * @hide
      */
     public static final Key<android.hardware.camera2.params.RecommendedStreamConfiguration[]> DEPTH_AVAILABLE_RECOMMENDED_DEPTH_STREAM_CONFIGURATIONS =
@@ -3736,7 +3821,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * the same aspect ratio can have dynamic depth dataspace
      * stream configuration. {@link CameraCharacteristics#DEPTH_DEPTH_IS_EXCLUSIVE android.depth.depthIsExclusive} also
      * needs to be set to FALSE.</p>
-     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      *
      * @see CameraCharacteristics#DEPTH_DEPTH_IS_EXCLUSIVE
      * @hide
@@ -3755,7 +3840,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>The minimum frame duration of a stream (of a particular format, size)
      * is the same regardless of whether the stream is input or output.</p>
      * <p><b>Units</b>: (format, width, height, ns) x n</p>
-     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      * @hide
      */
     public static final Key<android.hardware.camera2.params.StreamConfigurationDuration[]> DEPTH_AVAILABLE_DYNAMIC_DEPTH_MIN_FRAME_DURATIONS =
@@ -3770,7 +3855,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>All dynamic depth output streams may have a nonzero stall
      * duration.</p>
      * <p><b>Units</b>: (format, width, height, ns) x n</p>
-     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      * @hide
      */
     public static final Key<android.hardware.camera2.params.StreamConfigurationDuration[]> DEPTH_AVAILABLE_DYNAMIC_DEPTH_STALL_DURATIONS =
@@ -3785,7 +3870,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * value of this tag will be ['2', '\0', '3', '\0'].</p>
      * <p>The number of physical camera IDs must be no less than 2.</p>
      * <p><b>Units</b>: UTF-8 null-terminated string</p>
-     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      * <p><b>Limited capability</b> -
      * Present on all camera devices that report being at least {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED HARDWARE_LEVEL_LIMITED} devices in the
      * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
@@ -3811,7 +3896,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *   <li>{@link #LOGICAL_MULTI_CAMERA_SENSOR_SYNC_TYPE_APPROXIMATE APPROXIMATE}</li>
      *   <li>{@link #LOGICAL_MULTI_CAMERA_SENSOR_SYNC_TYPE_CALIBRATED CALIBRATED}</li>
      * </ul></p>
-     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      * <p><b>Limited capability</b> -
      * Present on all camera devices that report being at least {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED HARDWARE_LEVEL_LIMITED} devices in the
      * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
@@ -3821,6 +3906,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see #LOGICAL_MULTI_CAMERA_SENSOR_SYNC_TYPE_CALIBRATED
      */
     @PublicKey
+    @NonNull
     public static final Key<Integer> LOGICAL_MULTI_CAMERA_SENSOR_SYNC_TYPE =
             new Key<Integer>("android.logicalMultiCamera.sensorSyncType", int.class);
 
@@ -3831,11 +3917,12 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * All devices that support this API will list both FAST and HIGH_QUALITY.</p>
      * <p><b>Range of valid values:</b><br>
      * Any value listed in {@link CaptureRequest#DISTORTION_CORRECTION_MODE android.distortionCorrection.mode}</p>
-     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      *
      * @see CaptureRequest#DISTORTION_CORRECTION_MODE
      */
     @PublicKey
+    @NonNull
     public static final Key<int[]> DISTORTION_CORRECTION_AVAILABLE_MODES =
             new Key<int[]>("android.distortionCorrection.availableModes", int[].class);
 
@@ -3849,7 +3936,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * image format as required by the device's hardware level and capabilities.</p>
      * <p>All the static, control, and dynamic metadata tags related to JPEG apply to HEIC formats.
      * Configuring JPEG and HEIC streams at the same time is not supported.</p>
-     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      * <p><b>Limited capability</b> -
      * Present on all camera devices that report being at least {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED HARDWARE_LEVEL_LIMITED} devices in the
      * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
@@ -3872,7 +3959,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * android.scaler.availableStallDurations for more details about
      * calculating the max frame rate.</p>
      * <p><b>Units</b>: (format, width, height, ns) x n</p>
-     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      * <p><b>Limited capability</b> -
      * Present on all camera devices that report being at least {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED HARDWARE_LEVEL_LIMITED} devices in the
      * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
@@ -3896,7 +3983,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>All HEIC output stream formats may have a nonzero stall
      * duration.</p>
      * <p><b>Units</b>: (format, width, height, ns) x n</p>
-     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      * <p><b>Limited capability</b> -
      * Present on all camera devices that report being at least {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED HARDWARE_LEVEL_LIMITED} devices in the
      * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
@@ -3910,6 +3997,9 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
     /*~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~
      * End generated code
      *~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~O@*/
+
+
+
 
 
 
