@@ -29,6 +29,8 @@ struct Module
     vector<string> classes;
     vector<string> paths;
     vector<string> installed;
+
+    bool HasClass(const string& cl);
 };
 
 /**
