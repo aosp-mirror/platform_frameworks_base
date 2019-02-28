@@ -5836,17 +5836,15 @@ package android.provider {
     method @RequiresPermission(android.Manifest.permission.WRITE_DEVICE_CONFIG) public static void resetToDefaults(int, @Nullable String);
     method @RequiresPermission(android.Manifest.permission.WRITE_DEVICE_CONFIG) public static boolean setProperty(String, String, String, boolean);
     field public static final String NAMESPACE_ACTIVITY_MANAGER = "activity_manager";
+    field public static final String NAMESPACE_ACTIVITY_MANAGER_NATIVE_BOOT = "activity_manager_native_boot";
     field public static final String NAMESPACE_AUTOFILL = "autofill";
     field public static final String NAMESPACE_CONTENT_CAPTURE = "content_capture";
     field public static final String NAMESPACE_GAME_DRIVER = "game_driver";
     field public static final String NAMESPACE_INPUT_NATIVE_BOOT = "input_native_boot";
+    field public static final String NAMESPACE_MEDIA_NATIVE = "media_native";
     field public static final String NAMESPACE_NETD_NATIVE = "netd_native";
+    field public static final String NAMESPACE_RUNTIME_NATIVE_BOOT = "runtime_native_boot";
     field public static final String NAMESPACE_SYSTEMUI = "systemui";
-  }
-
-  public static interface DeviceConfig.ActivityManagerNativeBoot {
-    field public static final String NAMESPACE = "activity_manager_native_boot";
-    field public static final String OFFLOAD_QUEUE_ENABLED = "offload_queue_enabled";
   }
 
   public static interface DeviceConfig.AttentionManagerService {
@@ -5865,10 +5863,6 @@ package android.provider {
     field public static final String ATTENTION_ENABLED = "attention_enabled";
     field public static final String ATTENTION_SETTINGS = "attention_settings";
     field public static final String NAMESPACE = "intelligence_attention";
-  }
-
-  public static interface DeviceConfig.MediaNative {
-    field public static final String NAMESPACE = "media_native";
   }
 
   public static interface DeviceConfig.OnPropertyChangedListener {
@@ -5895,10 +5889,6 @@ package android.provider {
 
   public static interface DeviceConfig.RuntimeNative {
     field public static final String NAMESPACE = "runtime_native";
-  }
-
-  public static interface DeviceConfig.RuntimeNativeBoot {
-    field public static final String NAMESPACE = "runtime_native_boot";
   }
 
   public static interface DeviceConfig.Scheduler {
