@@ -206,6 +206,8 @@ public class SystemConfig {
     // associate with any other apps, but does not limit what apps B can associate with.
     final ArrayMap<String, ArraySet<String>> mAllowedAssociations = new ArrayMap<>();
 
+    private final ArraySet<String> mBugreportWhitelistedPackages = new ArraySet<>();
+
     public static SystemConfig getInstance() {
         synchronized (SystemConfig.class) {
             if (sInstance == null) {
@@ -337,6 +339,10 @@ public class SystemConfig {
 
     public ArrayMap<String, ArraySet<String>> getAllowedAssociations() {
         return mAllowedAssociations;
+    }
+
+    public ArraySet<String> getBugreportWhitelistedPackages() {
+        return mBugreportWhitelistedPackages;
     }
 
     SystemConfig() {
@@ -923,6 +929,15 @@ public class SystemConfig {
                             logNotAllowedInPartition(name, permFile, parser);
                         }
                         XmlUtils.skipCurrentTag(parser);
+                    } break;
+                    case "bugreport-whitelisted": {
+                        String pkgname = parser.getAttributeValue(null, "package");
+                        if (pkgname == null) {
+                            Slog.w(TAG, "<" + name + "> without package in " + permFile
+                                    + " at " + parser.getPositionDescription());
+                        } else {
+                            mBugreportWhitelistedPackages.add(pkgname);
+                        }
                     } break;
                     default: {
                         Slog.w(TAG, "Tag " + name + " is unknown in "
