@@ -16,15 +16,6 @@
 
 package com.android.server.am;
 
-import static android.provider.DeviceConfig.ActivityManager.KEY_COMPACT_ACTION_1;
-import static android.provider.DeviceConfig.ActivityManager.KEY_COMPACT_ACTION_2;
-import static android.provider.DeviceConfig.ActivityManager.KEY_COMPACT_STATSD_SAMPLE_RATE;
-import static android.provider.DeviceConfig.ActivityManager.KEY_COMPACT_THROTTLE_1;
-import static android.provider.DeviceConfig.ActivityManager.KEY_COMPACT_THROTTLE_2;
-import static android.provider.DeviceConfig.ActivityManager.KEY_COMPACT_THROTTLE_3;
-import static android.provider.DeviceConfig.ActivityManager.KEY_COMPACT_THROTTLE_4;
-import static android.provider.DeviceConfig.ActivityManager.KEY_USE_COMPACTION;
-
 import static com.android.server.am.ActivityManagerService.Injector;
 import static com.android.server.am.AppCompactor.compactActionIntToString;
 
@@ -117,28 +108,28 @@ public final class AppCompactorTest {
         // When the DeviceConfig already has a flag value stored (note this test will need to
         // change if the default value changes from false).
         assertThat(AppCompactor.DEFAULT_USE_COMPACTION).isFalse();
-        DeviceConfig.setProperty(DeviceConfig.ActivityManager.NAMESPACE,
-                KEY_USE_COMPACTION, "true", false);
-        DeviceConfig.setProperty(DeviceConfig.ActivityManager.NAMESPACE,
-                KEY_COMPACT_ACTION_1,
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                AppCompactor.KEY_USE_COMPACTION, "true", false);
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                AppCompactor.KEY_COMPACT_ACTION_1,
                 Integer.toString((AppCompactor.DEFAULT_COMPACT_ACTION_1 + 1 % 4) + 1), false);
-        DeviceConfig.setProperty(DeviceConfig.ActivityManager.NAMESPACE,
-                KEY_COMPACT_ACTION_2,
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                AppCompactor.KEY_COMPACT_ACTION_2,
                 Integer.toString((AppCompactor.DEFAULT_COMPACT_ACTION_2 + 1 % 4) + 1), false);
-        DeviceConfig.setProperty(DeviceConfig.ActivityManager.NAMESPACE,
-                KEY_COMPACT_THROTTLE_1,
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                AppCompactor.KEY_COMPACT_THROTTLE_1,
                 Long.toString(AppCompactor.DEFAULT_COMPACT_THROTTLE_1 + 1), false);
-        DeviceConfig.setProperty(DeviceConfig.ActivityManager.NAMESPACE,
-                KEY_COMPACT_THROTTLE_2,
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                AppCompactor.KEY_COMPACT_THROTTLE_2,
                 Long.toString(AppCompactor.DEFAULT_COMPACT_THROTTLE_2 + 1), false);
-        DeviceConfig.setProperty(DeviceConfig.ActivityManager.NAMESPACE,
-                KEY_COMPACT_THROTTLE_3,
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                AppCompactor.KEY_COMPACT_THROTTLE_3,
                 Long.toString(AppCompactor.DEFAULT_COMPACT_THROTTLE_3 + 1), false);
-        DeviceConfig.setProperty(DeviceConfig.ActivityManager.NAMESPACE,
-                KEY_COMPACT_THROTTLE_4,
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                AppCompactor.KEY_COMPACT_THROTTLE_4,
                 Long.toString(AppCompactor.DEFAULT_COMPACT_THROTTLE_4 + 1), false);
-        DeviceConfig.setProperty(DeviceConfig.ActivityManager.NAMESPACE,
-                KEY_COMPACT_STATSD_SAMPLE_RATE,
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                AppCompactor.KEY_COMPACT_STATSD_SAMPLE_RATE,
                 Float.toString(AppCompactor.DEFAULT_STATSD_SAMPLE_RATE + 0.1f), false);
 
         // Then calling init will read and set that flag.
@@ -169,8 +160,8 @@ public final class AppCompactorTest {
         // When we call init and change some the flag value...
         mCompactorUnderTest.init();
         mCountDown = new CountDownLatch(1);
-        DeviceConfig.setProperty(DeviceConfig.ActivityManager.NAMESPACE,
-                KEY_USE_COMPACTION, "true", false);
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                AppCompactor.KEY_USE_COMPACTION, "true", false);
         assertThat(mCountDown.await(5, TimeUnit.SECONDS)).isTrue();
 
         // Then that new flag value is updated in the implementation.
@@ -179,8 +170,8 @@ public final class AppCompactorTest {
 
         // And again, setting the flag the other way.
         mCountDown = new CountDownLatch(1);
-        DeviceConfig.setProperty(DeviceConfig.ActivityManager.NAMESPACE,
-                KEY_USE_COMPACTION, "false", false);
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                AppCompactor.KEY_USE_COMPACTION, "false", false);
         assertThat(mCountDown.await(5, TimeUnit.SECONDS)).isTrue();
         assertThat(mCompactorUnderTest.useCompaction()).isFalse();
     }
@@ -193,8 +184,8 @@ public final class AppCompactorTest {
 
         // When we push an invalid flag value...
         mCountDown = new CountDownLatch(1);
-        DeviceConfig.setProperty(DeviceConfig.ActivityManager.NAMESPACE,
-                KEY_USE_COMPACTION, "foobar", false);
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                AppCompactor.KEY_USE_COMPACTION, "foobar", false);
         assertThat(mCountDown.await(5, TimeUnit.SECONDS)).isTrue();
 
         // Then we set the default.
@@ -212,11 +203,11 @@ public final class AppCompactorTest {
         for (int i = 1; i < 5; i++) {
             mCountDown = new CountDownLatch(2);
             int expectedSome = (AppCompactor.DEFAULT_COMPACT_ACTION_1 + i) % 4 + 1;
-            DeviceConfig.setProperty(DeviceConfig.ActivityManager.NAMESPACE,
-                    KEY_COMPACT_ACTION_1, Integer.toString(expectedSome), false);
+            DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                    AppCompactor.KEY_COMPACT_ACTION_1, Integer.toString(expectedSome), false);
             int expectedFull = (AppCompactor.DEFAULT_COMPACT_ACTION_2 + i) % 4 + 1;
-            DeviceConfig.setProperty(DeviceConfig.ActivityManager.NAMESPACE,
-                    KEY_COMPACT_ACTION_2, Integer.toString(expectedFull), false);
+            DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                    AppCompactor.KEY_COMPACT_ACTION_2, Integer.toString(expectedFull), false);
             assertThat(mCountDown.await(5, TimeUnit.SECONDS)).isTrue();
 
             // Then the updates are reflected in the flags.
@@ -233,10 +224,10 @@ public final class AppCompactorTest {
 
         // When we override new values for the compaction action with bad values ...
         mCountDown = new CountDownLatch(2);
-        DeviceConfig.setProperty(DeviceConfig.ActivityManager.NAMESPACE,
-                KEY_COMPACT_ACTION_1, "foo", false);
-        DeviceConfig.setProperty(DeviceConfig.ActivityManager.NAMESPACE,
-                KEY_COMPACT_ACTION_2, "foo", false);
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                AppCompactor.KEY_COMPACT_ACTION_1, "foo", false);
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                AppCompactor.KEY_COMPACT_ACTION_2, "foo", false);
         assertThat(mCountDown.await(5, TimeUnit.SECONDS)).isTrue();
 
         // Then the default values are reflected in the flag
@@ -246,10 +237,10 @@ public final class AppCompactorTest {
                 compactActionIntToString(AppCompactor.DEFAULT_COMPACT_ACTION_2));
 
         mCountDown = new CountDownLatch(2);
-        DeviceConfig.setProperty(DeviceConfig.ActivityManager.NAMESPACE,
-                KEY_COMPACT_ACTION_1, "", false);
-        DeviceConfig.setProperty(DeviceConfig.ActivityManager.NAMESPACE,
-                KEY_COMPACT_ACTION_2, "", false);
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                AppCompactor.KEY_COMPACT_ACTION_1, "", false);
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                AppCompactor.KEY_COMPACT_ACTION_2, "", false);
         assertThat(mCountDown.await(5, TimeUnit.SECONDS)).isTrue();
 
         assertThat(mCompactorUnderTest.mCompactActionSome).isEqualTo(
@@ -264,17 +255,17 @@ public final class AppCompactorTest {
 
         // When we override new reasonable throttle values after init...
         mCountDown = new CountDownLatch(4);
-        DeviceConfig.setProperty(DeviceConfig.ActivityManager.NAMESPACE,
-                KEY_COMPACT_THROTTLE_1,
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                AppCompactor.KEY_COMPACT_THROTTLE_1,
                 Long.toString(AppCompactor.DEFAULT_COMPACT_THROTTLE_1 + 1), false);
-        DeviceConfig.setProperty(DeviceConfig.ActivityManager.NAMESPACE,
-                KEY_COMPACT_THROTTLE_2,
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                AppCompactor.KEY_COMPACT_THROTTLE_2,
                 Long.toString(AppCompactor.DEFAULT_COMPACT_THROTTLE_2 + 1), false);
-        DeviceConfig.setProperty(DeviceConfig.ActivityManager.NAMESPACE,
-                KEY_COMPACT_THROTTLE_3,
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                AppCompactor.KEY_COMPACT_THROTTLE_3,
                 Long.toString(AppCompactor.DEFAULT_COMPACT_THROTTLE_3 + 1), false);
-        DeviceConfig.setProperty(DeviceConfig.ActivityManager.NAMESPACE,
-                KEY_COMPACT_THROTTLE_4,
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                AppCompactor.KEY_COMPACT_THROTTLE_4,
                 Long.toString(AppCompactor.DEFAULT_COMPACT_THROTTLE_4 + 1), false);
         assertThat(mCountDown.await(5, TimeUnit.SECONDS)).isTrue();
 
@@ -296,8 +287,8 @@ public final class AppCompactorTest {
 
         // When one of the throttles is overridden with a bad value...
         mCountDown = new CountDownLatch(1);
-        DeviceConfig.setProperty(DeviceConfig.ActivityManager.NAMESPACE,
-                KEY_COMPACT_THROTTLE_1, "foo", false);
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                AppCompactor.KEY_COMPACT_THROTTLE_1, "foo", false);
         // Then all the throttles have the defaults set.
         assertThat(mCountDown.await(5, TimeUnit.SECONDS)).isTrue();
         assertThat(mCompactorUnderTest.mCompactThrottleSomeSome).isEqualTo(
@@ -311,8 +302,8 @@ public final class AppCompactorTest {
 
         // Repeat for each of the throttle keys.
         mCountDown = new CountDownLatch(1);
-        DeviceConfig.setProperty(DeviceConfig.ActivityManager.NAMESPACE,
-                KEY_COMPACT_THROTTLE_2, "foo", false);
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                AppCompactor.KEY_COMPACT_THROTTLE_2, "foo", false);
         assertThat(mCountDown.await(5, TimeUnit.SECONDS)).isTrue();
         assertThat(mCompactorUnderTest.mCompactThrottleSomeSome).isEqualTo(
                 AppCompactor.DEFAULT_COMPACT_THROTTLE_1);
@@ -324,8 +315,8 @@ public final class AppCompactorTest {
                 AppCompactor.DEFAULT_COMPACT_THROTTLE_4);
 
         mCountDown = new CountDownLatch(1);
-        DeviceConfig.setProperty(DeviceConfig.ActivityManager.NAMESPACE,
-                KEY_COMPACT_THROTTLE_3, "foo", false);
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                AppCompactor.KEY_COMPACT_THROTTLE_3, "foo", false);
         assertThat(mCountDown.await(5, TimeUnit.SECONDS)).isTrue();
         assertThat(mCompactorUnderTest.mCompactThrottleSomeSome).isEqualTo(
                 AppCompactor.DEFAULT_COMPACT_THROTTLE_1);
@@ -337,8 +328,8 @@ public final class AppCompactorTest {
                 AppCompactor.DEFAULT_COMPACT_THROTTLE_4);
 
         mCountDown = new CountDownLatch(1);
-        DeviceConfig.setProperty(DeviceConfig.ActivityManager.NAMESPACE,
-                KEY_COMPACT_THROTTLE_4, "foo", false);
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                AppCompactor.KEY_COMPACT_THROTTLE_4, "foo", false);
         assertThat(mCountDown.await(5, TimeUnit.SECONDS)).isTrue();
         assertThat(mCompactorUnderTest.mCompactThrottleSomeSome).isEqualTo(
                 AppCompactor.DEFAULT_COMPACT_THROTTLE_1);
@@ -356,8 +347,8 @@ public final class AppCompactorTest {
 
         // When we override mStatsdSampleRate with a reasonable values ...
         mCountDown = new CountDownLatch(1);
-        DeviceConfig.setProperty(DeviceConfig.ActivityManager.NAMESPACE,
-                KEY_COMPACT_STATSD_SAMPLE_RATE,
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                AppCompactor.KEY_COMPACT_STATSD_SAMPLE_RATE,
                 Float.toString(AppCompactor.DEFAULT_STATSD_SAMPLE_RATE + 0.1f), false);
         assertThat(mCountDown.await(5, TimeUnit.SECONDS)).isTrue();
 
@@ -373,8 +364,8 @@ public final class AppCompactorTest {
 
         // When we override mStatsdSampleRate with a reasonable values ...
         mCountDown = new CountDownLatch(1);
-        DeviceConfig.setProperty(DeviceConfig.ActivityManager.NAMESPACE,
-                KEY_COMPACT_STATSD_SAMPLE_RATE, "foo", false);
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                AppCompactor.KEY_COMPACT_STATSD_SAMPLE_RATE, "foo", false);
         assertThat(mCountDown.await(5, TimeUnit.SECONDS)).isTrue();
 
         // Then that override is reflected in the compactor.
@@ -389,8 +380,8 @@ public final class AppCompactorTest {
 
         // When we override mStatsdSampleRate with an value outside of [0..1]...
         mCountDown = new CountDownLatch(1);
-        DeviceConfig.setProperty(DeviceConfig.ActivityManager.NAMESPACE,
-                KEY_COMPACT_STATSD_SAMPLE_RATE,
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                AppCompactor.KEY_COMPACT_STATSD_SAMPLE_RATE,
                 Float.toString(-1.0f), false);
         assertThat(mCountDown.await(5, TimeUnit.SECONDS)).isTrue();
 
@@ -398,8 +389,8 @@ public final class AppCompactorTest {
         assertThat(mCompactorUnderTest.mStatsdSampleRate).isEqualTo(0.0f);
 
         mCountDown = new CountDownLatch(1);
-        DeviceConfig.setProperty(DeviceConfig.ActivityManager.NAMESPACE,
-                KEY_COMPACT_STATSD_SAMPLE_RATE,
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                AppCompactor.KEY_COMPACT_STATSD_SAMPLE_RATE,
                 Float.toString(1.01f), false);
         assertThat(mCountDown.await(5, TimeUnit.SECONDS)).isTrue();
 
