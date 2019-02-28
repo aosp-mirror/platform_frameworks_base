@@ -78,7 +78,12 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
         Preconditions.checkNotNull(bugreportFd);
         Preconditions.checkNotNull(listener);
         validateBugreportMode(bugreportMode);
-        ensureIsPrimaryUser();
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            ensureIsPrimaryUser();
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
 
         int callingUid = Binder.getCallingUid();
         mAppOps.checkPackage(callingUid, callingPackage);
