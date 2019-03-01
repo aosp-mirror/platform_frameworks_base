@@ -2,8 +2,9 @@ package android.testing;
 
 import android.content.ContentProvider;
 import android.content.IContentProvider;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.filters.SmallTest;
+
+import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.SmallTest;
 
 import org.junit.Assert;
 import org.junit.Before;

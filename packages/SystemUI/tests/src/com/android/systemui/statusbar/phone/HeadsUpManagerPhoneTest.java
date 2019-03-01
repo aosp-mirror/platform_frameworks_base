@@ -21,10 +21,11 @@ import static junit.framework.Assert.assertTrue;
 
 import static org.mockito.Mockito.when;
 
-import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.View;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.systemui.statusbar.AlertingNotificationManager;
 import com.android.systemui.statusbar.AlertingNotificationManagerTest;

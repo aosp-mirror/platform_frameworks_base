@@ -22,11 +22,12 @@ import static org.mockito.Mockito.when;
 
 import android.animation.ObjectAnimator;
 import android.content.Context;
-import android.support.test.annotation.UiThreadTest;
-import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
+
+import androidx.test.annotation.UiThreadTest;
+import androidx.test.filters.SmallTest;
 
 import com.android.systemui.statusbar.NotificationTestHelper;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;

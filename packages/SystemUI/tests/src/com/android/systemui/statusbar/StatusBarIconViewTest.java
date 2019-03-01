@@ -38,8 +38,9 @@ import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.Icon;
 import android.os.UserHandle;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
+
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.util.ContrastColorUtil;

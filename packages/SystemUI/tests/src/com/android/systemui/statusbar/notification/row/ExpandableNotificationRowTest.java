@@ -38,13 +38,14 @@ import static org.mockito.Mockito.when;
 
 import android.app.AppOpsManager;
 import android.app.NotificationChannel;
-import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 import android.util.ArraySet;
 import android.view.NotificationHeaderView;
 import android.view.View;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;

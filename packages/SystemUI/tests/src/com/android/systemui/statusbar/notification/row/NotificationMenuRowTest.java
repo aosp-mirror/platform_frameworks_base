@@ -27,12 +27,13 @@ import static org.mockito.Mockito.when;
 
 import android.app.NotificationChannel;
 import android.service.notification.StatusBarNotification;
-import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 import android.testing.ViewUtils;
 import android.view.ViewGroup;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;

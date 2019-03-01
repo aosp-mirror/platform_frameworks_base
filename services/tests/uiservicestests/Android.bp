@@ -17,7 +17,7 @@ android_test {
         "services.net",
         "services.usage",
         "guava",
-        "android-support-test",
+        "androidx.test.rules", "hamcrest-library",
         "mockito-target-inline-minus-junit4",
         "platform-test-annotations",
         "hamcrest-library",

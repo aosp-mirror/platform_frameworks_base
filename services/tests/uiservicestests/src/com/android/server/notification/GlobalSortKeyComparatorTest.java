@@ -16,17 +16,15 @@
 package com.android.server.notification;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.eq;
 
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
-import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
+
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.UiServiceTestCase;
 

@@ -40,11 +40,12 @@ import static org.mockito.Mockito.verify;
 
 import android.content.Context;
 import android.content.res.Resources;
-import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
 import android.view.MotionEvent;
 import android.view.View;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;

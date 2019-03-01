@@ -23,11 +23,9 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.argThat;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
@@ -37,30 +35,28 @@ import android.content.pm.StringParceledListSlice;
 import android.content.pm.UserInfo;
 import android.net.ConnectivityManager;
 import android.net.ConnectivityManager.NetworkCallback;
-import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.UserManager;
 import android.security.IKeyChainService;
-import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
 
-import com.android.systemui.statusbar.policy.SecurityController.SecurityControllerCallback;
-import com.android.systemui.SysuiTestCase;
+import androidx.test.runner.AndroidJUnit4;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-import java.util.List;
+import com.android.systemui.SysuiTestCase;
+import com.android.systemui.statusbar.policy.SecurityController.SecurityControllerCallback;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)

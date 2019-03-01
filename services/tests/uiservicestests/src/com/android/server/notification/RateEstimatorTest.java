@@ -15,16 +15,18 @@
  */
 package com.android.server.notification;
 
-import android.support.test.runner.AndroidJUnit4;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import android.test.suitebuilder.annotation.SmallTest;
+
+import androidx.test.runner.AndroidJUnit4;
+
+import com.android.server.UiServiceTestCase;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertFalse;
-
-import com.android.server.UiServiceTestCase;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)

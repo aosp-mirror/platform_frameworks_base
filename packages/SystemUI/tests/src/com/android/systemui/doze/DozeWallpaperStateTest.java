@@ -24,7 +24,8 @@ import static org.mockito.Mockito.when;
 
 import android.app.IWallpaperManager;
 import android.os.RemoteException;
-import android.support.test.filters.SmallTest;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;

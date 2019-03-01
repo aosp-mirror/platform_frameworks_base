@@ -28,13 +28,13 @@ import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
 
 import android.os.SystemClock;
-import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.view.View;
 import android.widget.FrameLayout;
 
 import androidx.dynamicanimation.animation.DynamicAnimation;
 import androidx.dynamicanimation.animation.SpringForce;
+import androidx.test.filters.SmallTest;
 
 import com.google.android.collect.Sets;
 

@@ -34,14 +34,13 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import static java.lang.Thread.sleep;
-
 import android.content.Intent;
 import android.metrics.LogMaker;
-import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.Dependency;
@@ -60,6 +59,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatcher;
 import org.mockito.Captor;
 import org.mockito.MockitoAnnotations;
+
+import static java.lang.Thread.sleep;
 
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper

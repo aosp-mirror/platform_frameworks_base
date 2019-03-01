@@ -39,13 +39,14 @@ import android.graphics.drawable.Icon;
 import android.os.Process;
 import android.service.notification.NotificationAssistantService;
 import android.service.notification.StatusBarNotification;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.runner.AndroidJUnit4;
 import android.view.textclassifier.ConversationAction;
 import android.view.textclassifier.ConversationActions;
 import android.view.textclassifier.TextClassificationManager;
 import android.view.textclassifier.TextClassifier;
 import android.view.textclassifier.TextClassifierEvent;
+
+import androidx.test.InstrumentationRegistry;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.google.common.truth.FailureStrategy;
 import com.google.common.truth.Subject;

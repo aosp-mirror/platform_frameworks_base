@@ -16,18 +16,17 @@
 
 package com.android.keyguard;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-
 import android.content.Context;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
 import android.test.UiThreadTest;
-import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.View;
+
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.systemui.SysuiTestCase;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)

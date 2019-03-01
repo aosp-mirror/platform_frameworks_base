@@ -16,19 +16,19 @@ package com.android;
 
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 
 import android.content.pm.PackageManager;
-import android.support.test.filters.LargeTest;
-import android.support.test.filters.MediumTest;
-import android.support.test.filters.SmallTest;
-import android.support.test.internal.runner.ClassPathScanner;
-import android.support.test.internal.runner.ClassPathScanner.ChainedClassNameFilter;
-import android.support.test.internal.runner.ClassPathScanner.ExternalClassNameFilter;
 import android.testing.AndroidTestingRunner;
 import android.text.TextUtils;
 import android.util.Log;
+
+import androidx.test.filters.LargeTest;
+import androidx.test.filters.MediumTest;
+import androidx.test.filters.SmallTest;
+import androidx.test.internal.runner.ClassPathScanner;
+import androidx.test.internal.runner.ClassPathScanner.ChainedClassNameFilter;
+import androidx.test.internal.runner.ClassPathScanner.ExternalClassNameFilter;
 
 import com.android.systemui.SysuiBaseFragmentTest;
 import com.android.systemui.SysuiTestCase;

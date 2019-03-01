@@ -24,10 +24,11 @@ import static org.mockito.Mockito.verify;
 import android.hardware.display.ColorDisplayManager;
 import android.hardware.display.NightDisplayListener;
 import android.os.Handler;
-import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.qs.AutoAddTracker;

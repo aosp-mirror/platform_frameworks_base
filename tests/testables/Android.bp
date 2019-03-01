@@ -25,7 +25,7 @@ java_library {
     libs: [
         "android.test.runner",
         "android.test.mock",
-        "android-support-test",
+        "androidx.test.rules",
         "mockito-target-inline-minus-junit4",
     ],
 

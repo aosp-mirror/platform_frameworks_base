@@ -31,10 +31,11 @@ import android.os.Handler;
 import android.os.Looper;
 import android.provider.DeviceConfig;
 import android.provider.Settings;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.runner.AndroidJUnit4;
 import android.support.test.uiautomator.UiDevice;
 import android.testing.TestableContext;
+
+import androidx.test.InstrumentationRegistry;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 

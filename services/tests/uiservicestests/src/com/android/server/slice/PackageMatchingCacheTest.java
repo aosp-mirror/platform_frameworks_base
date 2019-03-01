@@ -21,9 +21,10 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.server.UiServiceTestCase;
 import com.android.server.slice.SliceManagerService.PackageMatchingCache;
