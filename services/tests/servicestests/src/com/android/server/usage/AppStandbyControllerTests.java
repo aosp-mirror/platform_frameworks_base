@@ -61,7 +61,6 @@ import android.util.ArraySet;
 import android.view.Display;
 
 import androidx.test.InstrumentationRegistry;
-import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
@@ -323,6 +322,8 @@ public class AppStandbyControllerTests {
         private boolean mOnParole = false;
         private CountDownLatch mLatch;
         private long mLastParoleChangeTime;
+        private boolean mIsExpecting = false;
+        private boolean mExpectedParoleState;
 
         public boolean getParoleState() {
             synchronized (this) {
@@ -333,6 +334,15 @@ public class AppStandbyControllerTests {
         public void rearmLatch() {
             synchronized (this) {
                 mLatch = new CountDownLatch(1);
+                mIsExpecting = false;
+            }
+        }
+
+        public void rearmLatch(boolean expectedParoleState) {
+            synchronized (this) {
+                mLatch = new CountDownLatch(1);
+                mIsExpecting = true;
+                mExpectedParoleState = expectedParoleState;
             }
         }
 
@@ -358,7 +368,9 @@ public class AppStandbyControllerTests {
                 if (mLatch != null && mLatch.getCount() > 0) {
                     mOnParole = isParoleOn;
                     mLastParoleChangeTime = getCurrentTime();
-                    mLatch.countDown();
+                    if (!mIsExpecting || isParoleOn == mExpectedParoleState) {
+                        mLatch.countDown();
+                    }
                 }
             }
         }
@@ -417,17 +429,23 @@ public class AppStandbyControllerTests {
     }
 
     @Test
-    @FlakyTest(bugId = 119774928)
     public void testEnabledState() throws Exception {
         TestParoleListener paroleListener = new TestParoleListener();
+        paroleListener.rearmLatch(true);
         mController.addListener(paroleListener);
         long lastUpdateTime;
 
         // Test that listeners are notified if enabled changes when the device is not in parole.
         setChargingState(mController, false);
 
-        // Start off not enabled. Device is effectively on permanent parole.
+        // Start off not enabled. Device is effectively in permanent parole.
         setAppIdleEnabled(mController, false);
+        // Since AppStandbyController uses a handler to notify listeners of a state change, there is
+        // some inherent latency between changing the state and getting the notification. We need to
+        // wait until the paroleListener has been notified that parole is on before continuing with
+        // the test.
+        paroleListener.awaitOnLatch(STABLE_CHARGING_THRESHOLD * 3 / 2);
+        assertTrue(paroleListener.mOnParole);
 
         // Enable controller
         paroleListener.rearmLatch();
