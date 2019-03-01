@@ -207,6 +207,7 @@ public class IpSecService extends IIpSecService.Stub {
                     mBinder.linkToDeath(this, 0);
                 } catch (RemoteException e) {
                     binderDied();
+                    e.rethrowFromSystemServer();
                 }
             }
         }
