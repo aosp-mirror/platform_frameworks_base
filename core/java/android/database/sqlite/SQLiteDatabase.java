@@ -2655,26 +2655,24 @@ public final class SQLiteDatabase extends SQLiteClosable {
              * Sets the maximum number of milliseconds that SQLite connection is allowed to be idle
              * before it is closed and removed from the pool.
              *
-             * <p>DO NOT USE this method unless you fully understand the implication
-             * of what it does.
-             * A connection timeout allows the system to internally close a connection to a SQLite
-             * database after a given timeout.
-             * This is good for reducing app's memory consumption, but it has
-             * side effects that are hard to predict. For example, SQLite internally maintains
-             * a lot of "per-connection" states that apps can typically modify with a {@code PRAGMA}
-             * statement, and such states will be reset once the connection is closed.
-             * The system does not provide a callback that would allow apps to
-             * reconfigure a newly created connection and thus there's no way to re-configure
-             * connections when they're re-made internally. Do not use it unless you're sure
-             * your app uses no per-connection states.
+             * <p><b>DO NOT USE</b> this method.
+             * This feature has negative side effects that are very hard to foresee.
+             * <p>A connection timeout allows the system to internally close a connection to
+             * a SQLite database after a given timeout, which is good for reducing app's memory
+             * consumption.
+             * <b>However</b> the side effect is it <b>will reset all of SQLite's per-connection
+             * states</b>, which are typically modified with a {@code PRAGMA} statement, and
+             * these states <b>will not be restored</b> when a connection is re-established
+             * internally, and the system does not provide a callback for an app to reconfigure a
+             * connection.
+             * This feature may only be used if an app relies on none of such per-connection states.
              *
              * @param idleConnectionTimeoutMs timeout in milliseconds. Use {@link Long#MAX_VALUE}
              * to allow unlimited idle connections.
              *
              * @see SQLiteOpenHelper#setIdleConnectionTimeout(long)
              *
-             * @deprecated DO NOT USE this method unless you fully understand the implication
-             * of what it does.
+             * @deprecated DO NOT USE this method. See the javadoc for the details.
              */
             @NonNull
             @Deprecated
