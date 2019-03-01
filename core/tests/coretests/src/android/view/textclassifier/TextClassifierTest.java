@@ -468,6 +468,34 @@ public class TextClassifierTest {
         Truth.assertThat(actionIntent.getData()).isEqualTo(Uri.parse("https://www.android.com"));
     }
 
+    @Test
+    public void testSuggestConversationActions_copy() {
+        if (isTextClassifierDisabled()) return;
+        ConversationActions.Message message =
+                new ConversationActions.Message.Builder(
+                        ConversationActions.Message.PERSON_USER_OTHERS)
+                        .setText("Authentication code: 12345")
+                        .build();
+        TextClassifier.EntityConfig typeConfig =
+                new TextClassifier.EntityConfig.Builder().includeTypesFromTextClassifier(false)
+                        .setIncludedTypes(
+                                Collections.singletonList(ConversationAction.TYPE_COPY))
+                        .build();
+        ConversationActions.Request request =
+                new ConversationActions.Request.Builder(Collections.singletonList(message))
+                        .setMaxSuggestions(1)
+                        .setTypeConfig(typeConfig)
+                        .build();
+
+        ConversationActions conversationActions = mClassifier.suggestConversationActions(request);
+        Truth.assertThat(conversationActions.getConversationActions()).hasSize(1);
+        ConversationAction conversationAction = conversationActions.getConversationActions().get(0);
+        Truth.assertThat(conversationAction.getType()).isEqualTo(ConversationAction.TYPE_COPY);
+        Truth.assertThat(conversationAction.getTextReply()).isAnyOf(null, "");
+        Truth.assertThat(conversationAction.getAction()).isNull();
+        String code = ExtrasUtils.getCopyText(conversationAction.getExtras());
+        Truth.assertThat(code).isEqualTo("12345");
+    }
 
     private boolean isTextClassifierDisabled() {
         return mClassifier == null || mClassifier == TextClassifier.NO_OP;

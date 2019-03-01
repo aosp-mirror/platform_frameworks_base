@@ -92,10 +92,15 @@ public final class ConversationAction implements Parcelable {
      */
     public static final String TYPE_SHARE_LOCATION = "share_location";
 
+    // TODO: Make this public API
     /** @hide **/
     public static final String TYPE_ADD_CONTACT = "add_contact";
 
-    public static final @android.annotation.NonNull Creator<ConversationAction> CREATOR =
+    // TODO: Make this public API
+    /** @hide **/
+    public static final String TYPE_COPY = "copy";
+
+    public static final @NonNull Creator<ConversationAction> CREATOR =
             new Creator<ConversationAction>() {
                 @Override
                 public ConversationAction createFromParcel(Parcel in) {

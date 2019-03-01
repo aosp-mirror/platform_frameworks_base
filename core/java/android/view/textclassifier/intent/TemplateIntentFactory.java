@@ -41,6 +41,9 @@ import java.util.List;
 public final class TemplateIntentFactory {
     private static final String TAG = TextClassifier.DEFAULT_LOG_TAG;
 
+    /**
+     * Constructs and returns a list of {@link LabeledIntent} based on the given templates.
+     */
     @Nullable
     public List<LabeledIntent> create(
             @NonNull RemoteActionTemplate[] remoteActionTemplates) {
@@ -108,11 +111,14 @@ public final class TemplateIntentFactory {
                 }
             }
         }
-        intent.putExtras(createExtras(remoteActionTemplate.extras));
+        intent.putExtras(nameVariantsToBundle(remoteActionTemplate.extras));
         return intent;
     }
 
-    private static Bundle createExtras(NamedVariant[] namedVariants) {
+    /**
+     * Converts an array of {@link NamedVariant} to a Bundle and returns it.
+     */
+    public static Bundle nameVariantsToBundle(@Nullable NamedVariant[] namedVariants) {
         if (namedVariants == null) {
             return Bundle.EMPTY;
         }
@@ -142,7 +148,8 @@ public final class TemplateIntentFactory {
                     break;
                 default:
                     Log.w(TAG,
-                            "Unsupported type found in createExtras : " + namedVariant.getType());
+                            "Unsupported type found in nameVariantsToBundle : "
+                                    + namedVariant.getType());
             }
         }
         return bundle;

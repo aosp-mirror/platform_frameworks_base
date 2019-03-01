@@ -193,6 +193,7 @@ public final class TextClassificationConstants {
                     .add(ConversationAction.TYPE_VIEW_CALENDAR)
                     .add(ConversationAction.TYPE_VIEW_MAP)
                     .add(ConversationAction.TYPE_ADD_CONTACT)
+                    .add(ConversationAction.TYPE_COPY)
                     .toString();
     /**
      * < 0  : Not set. Use value from LangId model.

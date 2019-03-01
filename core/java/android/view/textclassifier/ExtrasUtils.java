@@ -29,6 +29,7 @@ import java.util.ArrayList;
  */
 public final class ExtrasUtils {
 
+    private static final String ENTITIES_EXTRAS = "entities-extras";
     private static final String ACTION_INTENT = "action-intent";
     private static final String ACTIONS_INTENTS = "actions-intents";
     private static final String FOREIGN_LANGUAGE = "foreign-language";
@@ -91,6 +92,30 @@ public final class ExtrasUtils {
     @Nullable
     public static Intent getActionIntent(Bundle container) {
         return container.getParcelable(ACTION_INTENT);
+    }
+
+    /**
+     * Stores {@code entities} information in TextClassifier response object's extras
+     * {@code container}.
+     *
+     * @see {@link #getCopyText(Bundle)}
+     */
+    public static void putEntitiesExtras(Bundle container, @Nullable Bundle entitiesExtras) {
+        container.putParcelable(ENTITIES_EXTRAS, entitiesExtras);
+    }
+
+    /**
+     * Returns {@code entities} information contained in a TextClassifier response object.
+     *
+     * @see {@link #putEntitiesExtras(Bundle, Bundle)}
+     */
+    @Nullable
+    public static String getCopyText(Bundle container) {
+        Bundle entitiesExtras = container.getParcelable(ENTITIES_EXTRAS);
+        if (entitiesExtras == null) {
+            return null;
+        }
+        return entitiesExtras.getString("text");
     }
 
     /**
