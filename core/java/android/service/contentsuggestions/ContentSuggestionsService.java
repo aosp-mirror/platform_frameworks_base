@@ -52,6 +52,10 @@ public abstract class ContentSuggestionsService extends Service {
 
     /**
      * The action for the intent used to define the content suggestions service.
+     *
+     * <p>To be supported, the service must also require the
+     *      * {@link android.Manifest.permission#BIND_CONTENT_SUGGESTIONS_SERVICE} permission so
+     *      * that other applications can not abuse it.
      */
     public static final String SERVICE_INTERFACE =
             "android.service.contentsuggestions.ContentSuggestionsService";
