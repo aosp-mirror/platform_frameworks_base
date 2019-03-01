@@ -45,7 +45,7 @@ public final class WifiNetworkSpecifier extends NetworkSpecifier implements Parc
     /**
      * Builder used to create {@link WifiNetworkSpecifier} objects.
      */
-    public static class Builder {
+    public static final class Builder {
         private static final String MATCH_ALL_SSID_PATTERN_PATH = ".*";
         private static final String MATCH_EMPTY_SSID_PATTERN_PATH = "";
         private static final Pair<MacAddress, MacAddress> MATCH_NO_BSSID_PATTERN1 =
@@ -115,7 +115,7 @@ public final class WifiNetworkSpecifier extends NetworkSpecifier implements Parc
          *                    string pattern to use for matching the network's SSID.
          * @return Instance of {@link Builder} to enable chaining of the builder method.
          */
-        public Builder setSsidPattern(@NonNull PatternMatcher ssidPattern) {
+        public @NonNull Builder setSsidPattern(@NonNull PatternMatcher ssidPattern) {
             checkNotNull(ssidPattern);
             mSsidPatternMatcher = ssidPattern;
             return this;
@@ -133,7 +133,7 @@ public final class WifiNetworkSpecifier extends NetworkSpecifier implements Parc
          * @return Instance of {@link Builder} to enable chaining of the builder method.
          * @throws IllegalArgumentException if the SSID is not valid unicode.
          */
-        public Builder setSsid(@NonNull String ssid) {
+        public @NonNull Builder setSsid(@NonNull String ssid) {
             checkNotNull(ssid);
             final CharsetEncoder unicodeEncoder = StandardCharsets.UTF_8.newEncoder();
             if (!unicodeEncoder.canEncode(ssid)) {
@@ -155,7 +155,7 @@ public final class WifiNetworkSpecifier extends NetworkSpecifier implements Parc
          * @param mask Mask for BSSID pattern.
          * @return Instance of {@link Builder} to enable chaining of the builder method.
          */
-        public Builder setBssidPattern(
+        public @NonNull Builder setBssidPattern(
                 @NonNull MacAddress baseAddress, @NonNull MacAddress mask) {
             checkNotNull(baseAddress, mask);
             mBssidPatternMatcher = Pair.create(baseAddress, mask);
@@ -174,7 +174,7 @@ public final class WifiNetworkSpecifier extends NetworkSpecifier implements Parc
          * @param bssid BSSID of the network.
          * @return Instance of {@link Builder} to enable chaining of the builder method.
          */
-        public Builder setBssid(@NonNull MacAddress bssid) {
+        public @NonNull Builder setBssid(@NonNull MacAddress bssid) {
             checkNotNull(bssid);
             mBssidPatternMatcher = Pair.create(bssid, MATCH_EXACT_BSSID_PATTERN_MASK);
             return this;
@@ -185,7 +185,7 @@ public final class WifiNetworkSpecifier extends NetworkSpecifier implements Parc
          *
          * @return Instance of {@link Builder} to enable chaining of the builder method.
          */
-        public Builder setIsEnhancedOpen() {
+        public @NonNull Builder setIsEnhancedOpen() {
             mIsEnhancedOpen = true;
             return this;
         }
@@ -198,7 +198,7 @@ public final class WifiNetworkSpecifier extends NetworkSpecifier implements Parc
          * @return Instance of {@link Builder} to enable chaining of the builder method.
          * @throws IllegalArgumentException if the passphrase is not ASCII encodable.
          */
-        public Builder setWpa2Passphrase(@NonNull String passphrase) {
+        public @NonNull Builder setWpa2Passphrase(@NonNull String passphrase) {
             checkNotNull(passphrase);
             final CharsetEncoder asciiEncoder = StandardCharsets.US_ASCII.newEncoder();
             if (!asciiEncoder.canEncode(passphrase)) {
@@ -216,7 +216,7 @@ public final class WifiNetworkSpecifier extends NetworkSpecifier implements Parc
          * @return Instance of {@link Builder} to enable chaining of the builder method.
          * @throws IllegalArgumentException if the passphrase is not ASCII encodable.
          */
-        public Builder setWpa3Passphrase(@NonNull String passphrase) {
+        public @NonNull Builder setWpa3Passphrase(@NonNull String passphrase) {
             checkNotNull(passphrase);
             final CharsetEncoder asciiEncoder = StandardCharsets.US_ASCII.newEncoder();
             if (!asciiEncoder.canEncode(passphrase)) {
@@ -233,7 +233,7 @@ public final class WifiNetworkSpecifier extends NetworkSpecifier implements Parc
          * @param enterpriseConfig Instance of {@link WifiEnterpriseConfig}.
          * @return Instance of {@link Builder} to enable chaining of the builder method.
          */
-        public Builder setWpa2EnterpriseConfig(
+        public @NonNull Builder setWpa2EnterpriseConfig(
                 @NonNull WifiEnterpriseConfig enterpriseConfig) {
             checkNotNull(enterpriseConfig);
             mWpa2EnterpriseConfig = new WifiEnterpriseConfig(enterpriseConfig);
@@ -247,7 +247,7 @@ public final class WifiNetworkSpecifier extends NetworkSpecifier implements Parc
          * @param enterpriseConfig Instance of {@link WifiEnterpriseConfig}.
          * @return Instance of {@link Builder} to enable chaining of the builder method.
          */
-        public Builder setWpa3EnterpriseConfig(
+        public @NonNull Builder setWpa3EnterpriseConfig(
                 @NonNull WifiEnterpriseConfig enterpriseConfig) {
             checkNotNull(enterpriseConfig);
             mWpa3EnterpriseConfig = new WifiEnterpriseConfig(enterpriseConfig);
@@ -263,11 +263,10 @@ public final class WifiNetworkSpecifier extends NetworkSpecifier implements Parc
          *
          * @return Instance of {@link Builder} to enable chaining of the builder method.
          */
-        public Builder setIsHiddenSsid() {
+        public @NonNull Builder setIsHiddenSsid() {
             mIsHiddenSSID = true;
             return this;
         }
-
 
         private void setSecurityParamsInWifiConfiguration(
                 @NonNull WifiConfiguration configuration) {
@@ -409,7 +408,7 @@ public final class WifiNetworkSpecifier extends NetworkSpecifier implements Parc
          * @return Instance of {@link NetworkSpecifier}.
          * @throws IllegalStateException on invalid params set.
          */
-        public NetworkSpecifier build() {
+        public @NonNull NetworkSpecifier build() {
             if (!hasSetAnyPattern()) {
                 throw new IllegalStateException("one of setSsidPattern/setSsid/setBssidPattern/"
                         + "setBssid should be invoked for specifier");
@@ -496,7 +495,7 @@ public final class WifiNetworkSpecifier extends NetworkSpecifier implements Parc
         this.requestorPackageName = requestorPackageName;
     }
 
-    public static final @android.annotation.NonNull Creator<WifiNetworkSpecifier> CREATOR =
+    public static final @NonNull Creator<WifiNetworkSpecifier> CREATOR =
             new Creator<WifiNetworkSpecifier>() {
                 @Override
                 public WifiNetworkSpecifier createFromParcel(Parcel in) {
