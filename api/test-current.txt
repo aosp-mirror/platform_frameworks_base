@@ -626,8 +626,8 @@ package android.net {
 
   public class LinkAddress implements android.os.Parcelable {
     ctor public LinkAddress(java.net.InetAddress, int, int, int);
-    ctor public LinkAddress(java.net.InetAddress, int);
-    ctor public LinkAddress(String);
+    ctor public LinkAddress(@NonNull java.net.InetAddress, int);
+    ctor public LinkAddress(@NonNull String);
     ctor public LinkAddress(String, int, int);
     method public boolean isGlobalPreferred();
     method public boolean isIPv4();

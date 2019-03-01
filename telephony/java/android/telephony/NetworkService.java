@@ -26,6 +26,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
+import android.telephony.NetworkRegistrationState.Domain;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -99,11 +100,12 @@ public abstract class NetworkService extends Service {
 
         /**
          * API to get network registration state. The result will be passed to the callback.
-         * @param domain
-         * @param callback
+         * @param domain Network domain
+         * @param callback The callback for reporting network registration state
          * @return SIM slot id the network service associated with.
          */
-        public void getNetworkRegistrationState(int domain, NetworkServiceCallback callback) {
+        public void getNetworkRegistrationState(@Domain int domain,
+                                                @NonNull NetworkServiceCallback callback) {
             callback.onGetNetworkRegistrationStateComplete(
                     NetworkServiceCallback.RESULT_ERROR_UNSUPPORTED, null);
         }
