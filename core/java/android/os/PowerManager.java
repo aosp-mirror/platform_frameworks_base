@@ -694,9 +694,11 @@ public final class PowerManager {
             ServiceType.BATTERY_STATS,
             ServiceType.DATA_SAVER,
             ServiceType.FORCE_ALL_APPS_STANDBY,
+            ServiceType.FORCE_BACKGROUND_CHECK,
             ServiceType.OPTIONAL_SENSORS,
             ServiceType.AOD,
             ServiceType.QUICK_DOZE,
+            ServiceType.NIGHT_MODE,
     })
     public @interface ServiceType {
         int NULL = 0;
