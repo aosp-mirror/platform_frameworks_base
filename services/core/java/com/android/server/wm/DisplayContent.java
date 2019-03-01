@@ -30,6 +30,7 @@ import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.FLAG_PRIVATE;
+import static android.view.Display.FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.InsetsState.TYPE_IME;
 import static android.view.Surface.ROTATION_0;
@@ -4904,10 +4905,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      * @see Display#FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS
      */
     boolean supportsSystemDecorations() {
-        // TODO(b/114338689): Read the setting from DisplaySettings.
-        return mDisplay.supportsSystemDecorations()
+        return mWmService.mDisplayWindowSettings.shouldShowSystemDecorsLocked(this)
+                || (mDisplay.getFlags() & FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS) != 0
                 // TODO (b/111363427): Remove this and set the new FLAG_SHOULD_SHOW_LAUNCHER flag
-                // (b/114338689) whenever vr 2d display id is set.
+                // whenever vr 2d display id is set.
                 || mDisplayId == mWmService.mVr2dDisplayId
                 || mWmService.mForceDesktopModeOnExternalDisplays;
     }

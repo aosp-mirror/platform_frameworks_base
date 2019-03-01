@@ -474,4 +474,9 @@ public abstract class WindowManagerInternal {
      * Return the display Id for given window.
      */
     public abstract int getDisplayIdForWindow(IBinder windowToken);
+
+    /**
+     * Checks whether this display should support showing system decorations.
+     */
+    public abstract boolean shouldShowSystemDecorOnDisplay(int displayId);
 }
