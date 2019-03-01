@@ -175,9 +175,9 @@ public class AppTimeLimitControllerTests {
     /** Verify app usage limit observer is added */
     @Test
     public void testAppUsageLimitObserver_AddObserver() {
-        addAppUsageLimitObserver(OBS_ID1, GROUP1, TIME_30_MIN);
+        addAppUsageLimitObserver(OBS_ID1, GROUP1, TIME_30_MIN, TIME_30_MIN);
         assertTrue("Observer wasn't added", hasAppUsageLimitObserver(UID, OBS_ID1));
-        addAppUsageLimitObserver(OBS_ID2, GROUP_GAME, TIME_30_MIN);
+        addAppUsageLimitObserver(OBS_ID2, GROUP_GAME, TIME_30_MIN, TIME_30_MIN);
         assertTrue("Observer wasn't added", hasAppUsageLimitObserver(UID, OBS_ID2));
         assertTrue("Observer wasn't added", hasAppUsageLimitObserver(UID, OBS_ID1));
     }
@@ -203,7 +203,7 @@ public class AppTimeLimitControllerTests {
     /** Verify app usage limit observer is removed */
     @Test
     public void testAppUsageLimitObserver_RemoveObserver() {
-        addAppUsageLimitObserver(OBS_ID1, GROUP1, TIME_30_MIN);
+        addAppUsageLimitObserver(OBS_ID1, GROUP1, TIME_30_MIN, TIME_30_MIN);
         assertTrue("Observer wasn't added", hasAppUsageLimitObserver(UID, OBS_ID1));
         mController.removeAppUsageLimitObserver(UID, OBS_ID1, USER_ID);
         assertFalse("Observer wasn't removed", hasAppUsageLimitObserver(UID, OBS_ID1));
@@ -290,9 +290,9 @@ public class AppTimeLimitControllerTests {
     /** Re-adding an observer should result in only one copy */
     @Test
     public void testAppUsageLimitObserver_ObserverReAdd() {
-        addAppUsageLimitObserver(OBS_ID1, GROUP1, TIME_30_MIN);
+        addAppUsageLimitObserver(OBS_ID1, GROUP1, TIME_30_MIN, TIME_30_MIN);
         assertTrue("Observer wasn't added", hasAppUsageLimitObserver(UID, OBS_ID1));
-        addAppUsageLimitObserver(OBS_ID1, GROUP1, TIME_10_MIN);
+        addAppUsageLimitObserver(OBS_ID1, GROUP1, TIME_10_MIN, TIME_10_MIN);
         assertTrue("Observer wasn't added",
                 getAppUsageLimitObserver(UID, OBS_ID1).getTimeLimitMs() == TIME_10_MIN);
         mController.removeAppUsageLimitObserver(UID, OBS_ID1, USER_ID);
@@ -304,7 +304,7 @@ public class AppTimeLimitControllerTests {
     public void testAllObservers_ExclusiveObserverIds() {
         addAppUsageObserver(OBS_ID1, GROUP1, TIME_10_MIN);
         addUsageSessionObserver(OBS_ID1, GROUP1, TIME_30_MIN, TIME_1_MIN);
-        addAppUsageLimitObserver(OBS_ID1, GROUP1, TIME_10_MIN);
+        addAppUsageLimitObserver(OBS_ID1, GROUP1, TIME_10_MIN, TIME_10_MIN);
         assertTrue("Observer wasn't added", hasAppUsageObserver(UID, OBS_ID1));
         assertTrue("Observer wasn't added", hasUsageSessionObserver(UID, OBS_ID1));
         assertTrue("Observer wasn't added", hasAppUsageLimitObserver(UID, OBS_ID1));
@@ -396,7 +396,7 @@ public class AppTimeLimitControllerTests {
     @Test
     public void testAppUsageLimitObserver_Accumulation() throws Exception {
         setTime(0L);
-        addAppUsageLimitObserver(OBS_ID1, GROUP1, TIME_30_MIN);
+        addAppUsageLimitObserver(OBS_ID1, GROUP1, TIME_30_MIN, TIME_30_MIN);
         startUsage(PKG_SOC1);
         // Add 10 mins
         setTime(TIME_10_MIN);
@@ -456,7 +456,7 @@ public class AppTimeLimitControllerTests {
     @Test
     public void testAppUsageLimitObserver_TimeoutOtherApp() throws Exception {
         setTime(0L);
-        addAppUsageLimitObserver(OBS_ID1, GROUP1, 4_000L);
+        addAppUsageLimitObserver(OBS_ID1, GROUP1, 4_000L, 4_000L);
         startUsage(PKG_SOC2);
         assertFalse(mLimitReachedLatch.await(6_000L, TimeUnit.MILLISECONDS));
         setTime(6_000L);
@@ -498,7 +498,7 @@ public class AppTimeLimitControllerTests {
     @Test
     public void testAppUsageLimitObserver_Timeout() throws Exception {
         setTime(0L);
-        addAppUsageLimitObserver(OBS_ID1, GROUP1, 4_000L);
+        addAppUsageLimitObserver(OBS_ID1, GROUP1, 4_000L, 4_000L);
         startUsage(PKG_SOC1);
         setTime(6_000L);
         assertTrue(mLimitReachedLatch.await(6_000L, TimeUnit.MILLISECONDS));
@@ -551,7 +551,7 @@ public class AppTimeLimitControllerTests {
         setTime(TIME_10_MIN);
         startUsage(PKG_GAME1);
         setTime(TIME_30_MIN);
-        addAppUsageLimitObserver(OBS_ID2, GROUP_GAME, TIME_30_MIN);
+        addAppUsageLimitObserver(OBS_ID2, GROUP_GAME, TIME_30_MIN, TIME_30_MIN);
         setTime(TIME_30_MIN + TIME_10_MIN);
         stopUsage(PKG_GAME1);
         assertFalse(mLimitReachedLatch.await(1_000L, TimeUnit.MILLISECONDS));
@@ -612,7 +612,7 @@ public class AppTimeLimitControllerTests {
         startUsage(PKG_SOC1);
         setTime(TIME_10_MIN);
         // 10 second time limit
-        addAppUsageLimitObserver(OBS_ID1, GROUP_SOC, 10_000L);
+        addAppUsageLimitObserver(OBS_ID1, GROUP_SOC, 10_000L, 10_000L);
         setTime(TIME_10_MIN + 5_000L);
         // Shouldn't call back in 6 seconds
         assertFalse(mLimitReachedLatch.await(6_000L, TimeUnit.MILLISECONDS));
@@ -692,23 +692,23 @@ public class AppTimeLimitControllerTests {
     public void testAppUsageLimitObserver_MaxObserverLimit() throws Exception {
         boolean receivedException = false;
         int ANOTHER_UID = UID + 1;
-        addAppUsageLimitObserver(OBS_ID1, GROUP1, TIME_30_MIN);
-        addAppUsageLimitObserver(OBS_ID2, GROUP1, TIME_30_MIN);
-        addAppUsageLimitObserver(OBS_ID3, GROUP1, TIME_30_MIN);
-        addAppUsageLimitObserver(OBS_ID4, GROUP1, TIME_30_MIN);
-        addAppUsageLimitObserver(OBS_ID5, GROUP1, TIME_30_MIN);
-        addAppUsageLimitObserver(OBS_ID6, GROUP1, TIME_30_MIN);
-        addAppUsageLimitObserver(OBS_ID7, GROUP1, TIME_30_MIN);
-        addAppUsageLimitObserver(OBS_ID8, GROUP1, TIME_30_MIN);
-        addAppUsageLimitObserver(OBS_ID9, GROUP1, TIME_30_MIN);
-        addAppUsageLimitObserver(OBS_ID10, GROUP1, TIME_30_MIN);
+        addAppUsageLimitObserver(OBS_ID1, GROUP1, TIME_30_MIN, TIME_30_MIN);
+        addAppUsageLimitObserver(OBS_ID2, GROUP1, TIME_30_MIN, TIME_30_MIN);
+        addAppUsageLimitObserver(OBS_ID3, GROUP1, TIME_30_MIN, TIME_30_MIN);
+        addAppUsageLimitObserver(OBS_ID4, GROUP1, TIME_30_MIN, TIME_30_MIN);
+        addAppUsageLimitObserver(OBS_ID5, GROUP1, TIME_30_MIN, TIME_30_MIN);
+        addAppUsageLimitObserver(OBS_ID6, GROUP1, TIME_30_MIN, TIME_30_MIN);
+        addAppUsageLimitObserver(OBS_ID7, GROUP1, TIME_30_MIN, TIME_30_MIN);
+        addAppUsageLimitObserver(OBS_ID8, GROUP1, TIME_30_MIN, TIME_30_MIN);
+        addAppUsageLimitObserver(OBS_ID9, GROUP1, TIME_30_MIN, TIME_30_MIN);
+        addAppUsageLimitObserver(OBS_ID10, GROUP1, TIME_30_MIN, TIME_30_MIN);
         // Readding an observer should not cause an IllegalStateException
-        addAppUsageLimitObserver(OBS_ID5, GROUP1, TIME_30_MIN);
+        addAppUsageLimitObserver(OBS_ID5, GROUP1, TIME_30_MIN, TIME_30_MIN);
         // Adding an observer for a different uid shouldn't cause an IllegalStateException
         mController.addAppUsageLimitObserver(
-                ANOTHER_UID, OBS_ID11, GROUP1, TIME_30_MIN, null, USER_ID);
+                ANOTHER_UID, OBS_ID11, GROUP1, TIME_30_MIN, TIME_30_MIN, null, USER_ID);
         try {
-            addAppUsageLimitObserver(OBS_ID11, GROUP1, TIME_30_MIN);
+            addAppUsageLimitObserver(OBS_ID11, GROUP1, TIME_30_MIN, TIME_30_MIN);
         } catch (IllegalStateException ise) {
             receivedException = true;
         }
@@ -748,9 +748,9 @@ public class AppTimeLimitControllerTests {
     public void testAppUsageLimitObserver_MinimumTimeLimit() throws Exception {
         boolean receivedException = false;
         // adding an observer with a one minute time limit should not cause an exception
-        addAppUsageLimitObserver(OBS_ID1, GROUP1, MIN_TIME_LIMIT);
+        addAppUsageLimitObserver(OBS_ID1, GROUP1, MIN_TIME_LIMIT, MIN_TIME_LIMIT);
         try {
-            addAppUsageLimitObserver(OBS_ID1, GROUP1, MIN_TIME_LIMIT - 1);
+            addAppUsageLimitObserver(OBS_ID1, GROUP1, MIN_TIME_LIMIT - 1, MIN_TIME_LIMIT - 1);
         } catch (IllegalArgumentException iae) {
             receivedException = true;
         }
@@ -807,7 +807,7 @@ public class AppTimeLimitControllerTests {
     @Test
     public void testAppUsageLimitObserver_ConcurrentUsage() throws Exception {
         setTime(0L);
-        addAppUsageLimitObserver(OBS_ID1, GROUP1, TIME_30_MIN);
+        addAppUsageLimitObserver(OBS_ID1, GROUP1, TIME_30_MIN, TIME_30_MIN);
         AppTimeLimitController.UsageGroup group = getAppUsageLimitObserver(UID, OBS_ID1);
         startUsage(PKG_SOC1);
         // Add 10 mins
@@ -967,7 +967,7 @@ public class AppTimeLimitControllerTests {
     /** Verify app usage limit observer added correctly reports its total usage limit */
     @Test
     public void testAppUsageLimitObserver_GetTotalUsageLimit() {
-        addAppUsageLimitObserver(OBS_ID1, GROUP1, TIME_30_MIN);
+        addAppUsageLimitObserver(OBS_ID1, GROUP1, TIME_30_MIN, TIME_30_MIN);
         AppTimeLimitController.AppUsageLimitGroup group = getAppUsageLimitObserver(UID, OBS_ID1);
         assertNotNull("Observer wasn't added", group);
         assertEquals("Observer didn't correctly report total usage limit",
@@ -978,7 +978,7 @@ public class AppTimeLimitControllerTests {
     @Test
     public void testAppUsageLimitObserver_GetUsageRemaining() {
         setTime(0L);
-        addAppUsageLimitObserver(OBS_ID1, GROUP1, TIME_30_MIN);
+        addAppUsageLimitObserver(OBS_ID1, GROUP1, TIME_30_MIN, TIME_30_MIN);
         startUsage(PKG_SOC1);
         setTime(TIME_10_MIN);
         stopUsage(PKG_SOC1);
@@ -993,8 +993,8 @@ public class AppTimeLimitControllerTests {
      */
     @Test
     public void testAppUsageLimitObserver_GetAppUsageLimit() {
-        addAppUsageLimitObserver(OBS_ID1, GROUP1, TIME_30_MIN);
-        addAppUsageLimitObserver(OBS_ID2, GROUP_SOC, TIME_10_MIN);
+        addAppUsageLimitObserver(OBS_ID1, GROUP1, TIME_30_MIN, TIME_30_MIN);
+        addAppUsageLimitObserver(OBS_ID2, GROUP_SOC, TIME_10_MIN, TIME_10_MIN);
         UsageStatsManagerInternal.AppUsageLimitData group = getAppUsageLimit(PKG_SOC1);
         assertEquals("Observer with the smallest usage limit remaining wasn't returned",
                 TIME_10_MIN, group.getTotalUsageLimit());
@@ -1006,8 +1006,8 @@ public class AppTimeLimitControllerTests {
     @Test
     public void testAppUsageLimitObserver_GetAppUsageLimitUsed() {
         setTime(0L);
-        addAppUsageLimitObserver(OBS_ID1, GROUP1, TIME_30_MIN);
-        addAppUsageLimitObserver(OBS_ID2, GROUP_SOC, TIME_10_MIN);
+        addAppUsageLimitObserver(OBS_ID1, GROUP1, TIME_30_MIN, TIME_30_MIN);
+        addAppUsageLimitObserver(OBS_ID2, GROUP_SOC, TIME_10_MIN, TIME_10_MIN);
         startUsage(PKG_GAME1);
         setTime(TIME_10_MIN * 2 + TIME_1_MIN);
         stopUsage(PKG_GAME1);
@@ -1024,8 +1024,8 @@ public class AppTimeLimitControllerTests {
     @Test
     public void testAppUsageLimitObserver_GetAppUsageLimitAllUsed() {
         setTime(0L);
-        addAppUsageLimitObserver(OBS_ID1, GROUP1, TIME_30_MIN);
-        addAppUsageLimitObserver(OBS_ID2, GROUP_SOC, TIME_10_MIN);
+        addAppUsageLimitObserver(OBS_ID1, GROUP1, TIME_30_MIN, TIME_30_MIN);
+        addAppUsageLimitObserver(OBS_ID2, GROUP_SOC, TIME_10_MIN, TIME_10_MIN);
         startUsage(PKG_SOC1);
         setTime(TIME_10_MIN);
         stopUsage(PKG_SOC1);
@@ -1035,10 +1035,21 @@ public class AppTimeLimitControllerTests {
                 0L, group.getUsageRemaining());
     }
 
+    /** Verify that a limit of 0 is not allowed. */
+    @Test
+    public void testAppUsageLimitObserver_ZeroTimeLimitIsNotAllowed() {
+        try {
+            addAppUsageLimitObserver(OBS_ID1, GROUP1, 0, 0);
+            fail("timeLimit of 0 should not be allowed.");
+        } catch (IllegalArgumentException expected) {
+            // Exception expected.
+        }
+    }
+
     /** Verify that a limit of 0 is allowed for the special case of re-registering an observer. */
     @Test
-    public void testAppUsageLimitObserver_ZeroTimeLimitIsAllowed() {
-        addAppUsageLimitObserver(OBS_ID1, GROUP1, 0);
+    public void testAppUsageLimitObserver_ZeroTimeRemainingIsAllowed() {
+        addAppUsageLimitObserver(OBS_ID1, GROUP1, TIME_1_MIN, 0);
         AppTimeLimitController.AppUsageLimitGroup group = getAppUsageLimitObserver(UID, OBS_ID1);
         assertNotNull("Observer wasn't added", group);
         assertEquals("Usage remaining was not 0.", 0, group.getUsageRemaining());
@@ -1066,8 +1077,10 @@ public class AppTimeLimitControllerTests {
                 null, null, USER_ID);
     }
 
-    private void addAppUsageLimitObserver(int observerId, String[] packages, long timeLimit) {
-        mController.addAppUsageLimitObserver(UID, observerId, packages, timeLimit, null, USER_ID);
+    private void addAppUsageLimitObserver(int observerId, String[] packages, long timeLimit,
+            long timeRemaining) {
+        mController.addAppUsageLimitObserver(UID, observerId, packages, timeLimit, timeRemaining,
+                null, USER_ID);
     }
 
     /** Is there still an app usage observer by that id */

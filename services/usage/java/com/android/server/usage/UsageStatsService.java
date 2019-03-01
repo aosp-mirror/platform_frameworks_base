@@ -1399,7 +1399,8 @@ public class UsageStatsService extends SystemService implements
 
         @Override
         public void registerAppUsageLimitObserver(int observerId, String[] packages,
-                long timeLimitMs, PendingIntent callbackIntent, String callingPackage) {
+                long timeLimitMs, long timeRemainingMs, PendingIntent callbackIntent,
+                String callingPackage) {
             if (!hasPermissions(callingPackage,
                     Manifest.permission.SUSPEND_APPS, Manifest.permission.OBSERVE_APP_USAGE)) {
                 throw new SecurityException("Caller doesn't have both SUSPEND_APPS and "
@@ -1409,7 +1410,11 @@ public class UsageStatsService extends SystemService implements
             if (packages == null || packages.length == 0) {
                 throw new IllegalArgumentException("Must specify at least one package");
             }
-            if (callbackIntent == null && timeLimitMs != 0L) {
+            if (timeRemainingMs > timeLimitMs) {
+                throw new IllegalArgumentException(
+                        "Remaining time can't be greater than total time.");
+            }
+            if (callbackIntent == null && timeRemainingMs != 0L) {
                 throw new NullPointerException("callbackIntent can't be null");
             }
             final int callingUid = Binder.getCallingUid();
@@ -1417,7 +1422,7 @@ public class UsageStatsService extends SystemService implements
             final long token = Binder.clearCallingIdentity();
             try {
                 UsageStatsService.this.registerAppUsageLimitObserver(callingUid, observerId,
-                        packages, timeLimitMs, callbackIntent, userId);
+                        packages, timeLimitMs, timeRemainingMs, callbackIntent, userId);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -1545,9 +1550,9 @@ public class UsageStatsService extends SystemService implements
     }
 
     void registerAppUsageLimitObserver(int callingUid, int observerId, String[] packages,
-            long timeLimitMs, PendingIntent callbackIntent, int userId) {
-        mAppTimeLimit.addAppUsageLimitObserver(callingUid, observerId, packages, timeLimitMs,
-                callbackIntent, userId);
+            long timeLimitMs, long timeRemainingMs, PendingIntent callbackIntent, int userId) {
+        mAppTimeLimit.addAppUsageLimitObserver(callingUid, observerId, packages,
+                timeLimitMs, timeRemainingMs, callbackIntent, userId);
     }
 
     void unregisterAppUsageLimitObserver(int callingUid, int observerId, int userId) {
