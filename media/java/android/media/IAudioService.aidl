@@ -228,10 +228,10 @@ interface IAudioService {
 
     oneway void playerHasOpPlayAudio(in int piid, in boolean hasOpPlayAudio);
 
-    int setBluetoothHearingAidDeviceConnectionState(in BluetoothDevice device,
+    void setBluetoothHearingAidDeviceConnectionState(in BluetoothDevice device,
             int state, boolean suppressNoisyIntent, int musicDevice);
 
-    int setBluetoothA2dpDeviceConnectionStateSuppressNoisyIntent(in BluetoothDevice device,
+    void setBluetoothA2dpDeviceConnectionStateSuppressNoisyIntent(in BluetoothDevice device,
             int state, int profile, boolean suppressNoisyIntent, int a2dpVolume);
 
     oneway void setFocusRequestResultFromExtPolicy(in AudioFocusInfo afi, int requestResult,

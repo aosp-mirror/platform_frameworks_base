@@ -426,7 +426,7 @@ public class BtHelper {
         final BluetoothDevice btDevice = deviceList.get(0);
         final @BluetoothProfile.BtProfileState int state =
                 mHearingAid.getConnectionState(btDevice);
-        mDeviceBroker.setBluetoothHearingAidDeviceConnectionState(
+        mDeviceBroker.postBluetoothHearingAidDeviceConnectionState(
                 btDevice, state,
                 /*suppressNoisyIntent*/ false,
                 /*musicDevice*/ android.media.AudioSystem.DEVICE_NONE,
