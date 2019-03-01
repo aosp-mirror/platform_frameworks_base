@@ -124,7 +124,7 @@ Result<uint32_t> GetCrc(const ZipFile& zip) {
   const Result<uint32_t> b = zip.Crc("AndroidManifest.xml");
   return a && b
              ? Result<uint32_t>(*a ^ *b)
-             : Error("Couldn't get CRC for \"%s\"", a ? "AndroidManifest.xml" : "resources.arsc");
+             : Error("failed to get CRC for \"%s\"", a ? "AndroidManifest.xml" : "resources.arsc");
 }
 
 }  // namespace
@@ -244,15 +244,13 @@ std::string Idmap::CanonicalIdmapPathFor(const std::string& absolute_dir,
   return absolute_dir + "/" + copy + "@idmap";
 }
 
-std::unique_ptr<const Idmap> Idmap::FromBinaryStream(std::istream& stream,
-                                                     std::ostream& out_error) {
+Result<std::unique_ptr<const Idmap>> Idmap::FromBinaryStream(std::istream& stream) {
   SYSTRACE << "Idmap::FromBinaryStream";
   std::unique_ptr<Idmap> idmap(new Idmap());
 
   idmap->header_ = IdmapHeader::FromBinaryStream(stream);
   if (!idmap->header_) {
-    out_error << "error: failed to parse idmap header" << std::endl;
-    return nullptr;
+    return Error("failed to parse idmap header");
   }
 
   // idmap version 0x01 does not specify the number of data blocks that follow
@@ -260,13 +258,12 @@ std::unique_ptr<const Idmap> Idmap::FromBinaryStream(std::istream& stream,
   for (int i = 0; i < 1; i++) {
     std::unique_ptr<const IdmapData> data = IdmapData::FromBinaryStream(stream);
     if (!data) {
-      out_error << "error: failed to parse data block " << i << std::endl;
-      return nullptr;
+      return Error("failed to parse data block %d", i);
     }
     idmap->data_.push_back(std::move(data));
   }
 
-  return std::move(idmap);
+  return {std::move(idmap)};
 }
 
 std::string ConcatPolicies(const std::vector<std::string>& policies) {
@@ -323,63 +320,56 @@ Result<Unit> CheckOverlayable(const LoadedPackage& target_package,
   return Result<Unit>({});
 }
 
-std::unique_ptr<const Idmap> Idmap::FromApkAssets(
-    const std::string& target_apk_path, const ApkAssets& target_apk_assets,
-    const std::string& overlay_apk_path, const ApkAssets& overlay_apk_assets,
-    const PolicyBitmask& fulfilled_policies, bool enforce_overlayable, std::ostream& out_error) {
+Result<std::unique_ptr<const Idmap>> Idmap::FromApkAssets(const std::string& target_apk_path,
+                                                          const ApkAssets& target_apk_assets,
+                                                          const std::string& overlay_apk_path,
+                                                          const ApkAssets& overlay_apk_assets,
+                                                          const PolicyBitmask& fulfilled_policies,
+                                                          bool enforce_overlayable) {
   SYSTRACE << "Idmap::FromApkAssets";
   AssetManager2 target_asset_manager;
   if (!target_asset_manager.SetApkAssets({&target_apk_assets}, true, false)) {
-    out_error << "error: failed to create target asset manager" << std::endl;
-    return nullptr;
+    return Error("failed to create target asset manager");
   }
 
   AssetManager2 overlay_asset_manager;
   if (!overlay_asset_manager.SetApkAssets({&overlay_apk_assets}, true, false)) {
-    out_error << "error: failed to create overlay asset manager" << std::endl;
-    return nullptr;
+    return Error("failed to create overlay asset manager");
   }
 
   const LoadedArsc* target_arsc = target_apk_assets.GetLoadedArsc();
   if (target_arsc == nullptr) {
-    out_error << "error: failed to load target resources.arsc" << std::endl;
-    return nullptr;
+    return Error("failed to load target resources.arsc");
   }
 
   const LoadedArsc* overlay_arsc = overlay_apk_assets.GetLoadedArsc();
   if (overlay_arsc == nullptr) {
-    out_error << "error: failed to load overlay resources.arsc" << std::endl;
-    return nullptr;
+    return Error("failed to load overlay resources.arsc");
   }
 
   const LoadedPackage* target_pkg = GetPackageAtIndex0(*target_arsc);
   if (target_pkg == nullptr) {
-    out_error << "error: failed to load target package from resources.arsc" << std::endl;
-    return nullptr;
+    return Error("failed to load target package from resources.arsc");
   }
 
   const LoadedPackage* overlay_pkg = GetPackageAtIndex0(*overlay_arsc);
   if (overlay_pkg == nullptr) {
-    out_error << "error: failed to load overlay package from resources.arsc" << std::endl;
-    return nullptr;
+    return Error("failed to load overlay package from resources.arsc");
   }
 
   const std::unique_ptr<const ZipFile> target_zip = ZipFile::Open(target_apk_path);
   if (!target_zip) {
-    out_error << "error: failed to open target as zip" << std::endl;
-    return nullptr;
+    return Error("failed to open target as zip");
   }
 
   const std::unique_ptr<const ZipFile> overlay_zip = ZipFile::Open(overlay_apk_path);
   if (!overlay_zip) {
-    out_error << "error: failed to open overlay as zip" << std::endl;
-    return nullptr;
+    return Error("failed to open overlay as zip");
   }
 
   auto overlay_info = utils::ExtractOverlayManifestInfo(overlay_apk_path);
   if (!overlay_info) {
-    out_error << "error: " << overlay_info.GetErrorMessage() << std::endl;
-    return nullptr;
+    return overlay_info.GetError();
   }
 
   std::unique_ptr<IdmapHeader> header(new IdmapHeader());
@@ -388,30 +378,26 @@ std::unique_ptr<const Idmap> Idmap::FromApkAssets(
 
   Result<uint32_t> crc = GetCrc(*target_zip);
   if (!crc) {
-    out_error << "error: failed to get zip crc for target" << std::endl;
-    return nullptr;
+    return Error(crc.GetError(), "failed to get zip CRC for target");
   }
   header->target_crc_ = *crc;
 
   crc = GetCrc(*overlay_zip);
   if (!crc) {
-    out_error << "error: failed to get zip crc for overlay" << std::endl;
-    return nullptr;
+    return Error(crc.GetError(), "failed to get zip CRC for overlay");
   }
   header->overlay_crc_ = *crc;
 
   if (target_apk_path.size() > sizeof(header->target_path_)) {
-    out_error << "error: target apk path \"" << target_apk_path << "\" longer that maximum size "
-              << sizeof(header->target_path_) << std::endl;
-    return nullptr;
+    return Error("target apk path \"%s\" longer than maximum size %zu", target_apk_path.c_str(),
+                 sizeof(header->target_path_));
   }
   memset(header->target_path_, 0, sizeof(header->target_path_));
   memcpy(header->target_path_, target_apk_path.data(), target_apk_path.size());
 
   if (overlay_apk_path.size() > sizeof(header->overlay_path_)) {
-    out_error << "error: overlay apk path \"" << overlay_apk_path << "\" longer that maximum size "
-              << sizeof(header->overlay_path_) << std::endl;
-    return nullptr;
+    return Error("overlay apk path \"%s\" longer than maximum size %zu", target_apk_path.c_str(),
+                 sizeof(header->target_path_));
   }
   memset(header->overlay_path_, 0, sizeof(header->overlay_path_));
   memcpy(header->overlay_path_, overlay_apk_path.data(), overlay_apk_path.size());
@@ -451,9 +437,8 @@ std::unique_ptr<const Idmap> Idmap::FromApkAssets(
   }
 
   if (matching_resources.Map().empty()) {
-    out_error << "overlay \"" << overlay_apk_path << "\" does not successfully overlay any resource"
-              << std::endl;
-    return nullptr;
+    return Error("overlay \"%s\" does not successfully overlay any resource",
+                 overlay_apk_path.c_str());
   }
 
   // encode idmap data
@@ -484,7 +469,7 @@ std::unique_ptr<const Idmap> Idmap::FromApkAssets(
 
   idmap->data_.push_back(std::move(data));
 
-  return std::move(idmap);
+  return {std::move(idmap)};
 }
 
 void IdmapHeader::accept(Visitor* v) const {

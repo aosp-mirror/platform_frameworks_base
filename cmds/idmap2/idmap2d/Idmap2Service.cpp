@@ -138,12 +138,10 @@ Status Idmap2Service::createIdmap(const std::string& target_apk_path,
     return error("failed to load apk " + overlay_apk_path);
   }
 
-  std::stringstream err;
-  const std::unique_ptr<const Idmap> idmap =
-      Idmap::FromApkAssets(target_apk_path, *target_apk, overlay_apk_path, *overlay_apk,
-                           policy_bitmask, enforce_overlayable, err);
+  const auto idmap = Idmap::FromApkAssets(target_apk_path, *target_apk, overlay_apk_path,
+                                          *overlay_apk, policy_bitmask, enforce_overlayable);
   if (!idmap) {
-    return error(err.str());
+    return error(idmap.GetErrorMessage());
   }
 
   umask(kIdmapFilePermissionMask);
@@ -152,7 +150,7 @@ Status Idmap2Service::createIdmap(const std::string& target_apk_path,
     return error("failed to open idmap path " + idmap_path);
   }
   BinaryStreamVisitor visitor(fout);
-  idmap->accept(&visitor);
+  (*idmap)->accept(&visitor);
   fout.close();
   if (fout.fail()) {
     return error("failed to write to idmap path " + idmap_path);

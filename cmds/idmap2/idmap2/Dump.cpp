@@ -49,20 +49,19 @@ Result<Unit> Dump(const std::vector<std::string>& args) {
   if (!opts_ok) {
     return opts_ok.GetError();
   }
-  std::stringstream stream;
   std::ifstream fin(idmap_path);
-  const std::unique_ptr<const Idmap> idmap = Idmap::FromBinaryStream(fin, stream);
+  const auto idmap = Idmap::FromBinaryStream(fin);
   fin.close();
   if (!idmap) {
-    return Error("failed to load idmap: %s", stream.str().c_str());
+    return Error(idmap.GetError(), "failed to load idmap");
   }
 
   if (verbose) {
     RawPrintVisitor visitor(std::cout);
-    idmap->accept(&visitor);
+    (*idmap)->accept(&visitor);
   } else {
     PrettyPrintVisitor visitor(std::cout);
-    idmap->accept(&visitor);
+    (*idmap)->accept(&visitor);
   }
 
   return Unit{};
