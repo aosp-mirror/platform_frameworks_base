@@ -58,6 +58,8 @@ struct AttributionNodeInternal {
 
 struct InstallTrainInfo {
     int64_t trainVersionCode;
+    std::string trainName;
+    int32_t status;
     std::vector<uint8_t> experimentIds;
 };
 /**

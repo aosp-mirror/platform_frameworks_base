@@ -44,7 +44,8 @@ public:
     /**
      * Writes train info.
      */
-    static bool writeTrainInfo(int64_t trainVersionCode, const std::vector<uint8_t>& experimentIds);
+    static bool writeTrainInfo(int64_t trainVersionCode, const std::string& trainName,
+                               int32_t status, const std::vector<uint8_t>& experimentIds);
 
     /**
      * Reads train info.
