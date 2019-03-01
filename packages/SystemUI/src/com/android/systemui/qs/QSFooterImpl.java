@@ -521,16 +521,7 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
                     }
                 }
             } else {
-                // If there are sims ready but there are not the same number of carrier names as
-                // subscription ids, just show the full text in the first slot
-                mInfos[0].visible = true;
-                mCarrierTexts[0].setText(info.carrierText);
-                mCarrierGroups[0].setVisibility(View.VISIBLE);
-                for (int i = 1; i < SIM_SLOTS; i++) {
-                    mInfos[i].visible = false;
-                    mCarrierTexts[i].setText("");
-                    mCarrierGroups[i].setVisibility(View.GONE);
-                }
+                Log.e(TAG, "Carrier information arrays not of same length");
             }
         } else {
             mInfos[0].visible = false;
@@ -612,8 +603,10 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
             // Only show marquee when visible
             if (visibility == VISIBLE) {
                 setEllipsize(TextUtils.TruncateAt.MARQUEE);
+                setSelected(true);
             } else {
                 setEllipsize(TextUtils.TruncateAt.END);
+                setSelected(false);
             }
         }
     }
