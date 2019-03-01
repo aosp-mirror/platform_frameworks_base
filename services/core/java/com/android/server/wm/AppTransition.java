@@ -86,6 +86,7 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.ResourceId;
 import android.content.res.Resources;
+import android.content.res.Resources.NotFoundException;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -123,6 +124,7 @@ import android.view.animation.ScaleAnimation;
 import android.view.animation.TranslateAnimation;
 
 import com.android.internal.R;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.DumpUtils.Dump;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.AttributeCache;
@@ -558,19 +560,19 @@ public class AppTransition implements Dump {
         }
         resId = updateToTranslucentAnimIfNeeded(resId, transit);
         if (ResourceId.isValid(resId)) {
-            return AnimationUtils.loadAnimation(context, resId);
+            return loadAnimationSafely(context, resId);
         }
         return null;
     }
 
-    Animation loadAnimationRes(LayoutParams lp, int resId) {
+    private Animation loadAnimationRes(LayoutParams lp, int resId) {
         Context context = mContext;
         if (ResourceId.isValid(resId)) {
             AttributeCache.Entry ent = getCachedAnimations(lp);
             if (ent != null) {
                 context = ent.context;
             }
-            return AnimationUtils.loadAnimation(context, resId);
+            return loadAnimationSafely(context, resId);
         }
         return null;
     }
@@ -579,10 +581,20 @@ public class AppTransition implements Dump {
         if (ResourceId.isValid(resId)) {
             AttributeCache.Entry ent = getCachedAnimations(packageName, resId);
             if (ent != null) {
-                return AnimationUtils.loadAnimation(ent.context, resId);
+                return loadAnimationSafely(ent.context, resId);
             }
         }
         return null;
+    }
+
+    @VisibleForTesting
+    Animation loadAnimationSafely(Context context, int resId) {
+        try {
+            return AnimationUtils.loadAnimation(context, resId);
+        } catch (NotFoundException e) {
+            Slog.w(TAG, "Unable to load animation resource", e);
+            return null;
+        }
     }
 
     private int updateToTranslucentAnimIfNeeded(int anim, int transit) {
