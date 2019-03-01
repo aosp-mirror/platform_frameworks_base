@@ -1036,8 +1036,8 @@ public class AccessPoint implements Comparable<AccessPoint> {
     public void startOsuProvisioning() {
         mContext.getSystemService(WifiManager.class).startSubscriptionProvisioning(
                 mOsuProvider,
-                new AccessPointProvisioningCallback(),
-                ThreadUtils.getUiThreadHandler()
+                mContext.getMainExecutor(),
+                new AccessPointProvisioningCallback()
         );
     }
 
