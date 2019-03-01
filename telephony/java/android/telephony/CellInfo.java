@@ -40,6 +40,11 @@ public abstract class CellInfo implements Parcelable {
     public static final int UNAVAILABLE = Integer.MAX_VALUE;
 
     /**
+     * This value indicates that the long field is unreported.
+     */
+    public static final long UNAVAILABLE_LONG = Long.MAX_VALUE;
+
+    /**
      * Cell identity type
      * @hide
      */
