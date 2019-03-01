@@ -3477,7 +3477,7 @@ public final class ViewRootImpl implements ViewParent,
                 usingAsyncReport = true;
                 final Handler handler = mAttachInfo.mHandler;
                 mAttachInfo.mThreadedRenderer.setFrameCompleteCallback((long frameNr) ->
-                        handler.post(() -> {
+                        handler.postAtFrontOfQueue(() -> {
                             // TODO: Use the frame number
                             pendingDrawFinished();
                             if (commitCallbacks != null) {
@@ -3489,7 +3489,7 @@ public final class ViewRootImpl implements ViewParent,
             } else if (commitCallbacks != null && commitCallbacks.size() > 0) {
                 final Handler handler = mAttachInfo.mHandler;
                 mAttachInfo.mThreadedRenderer.setFrameCompleteCallback((long frameNr) ->
-                        handler.post(() -> {
+                        handler.postAtFrontOfQueue(() -> {
                             for (int i = 0; i < commitCallbacks.size(); i++) {
                                 commitCallbacks.get(i).run();
                             }
