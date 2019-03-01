@@ -1556,9 +1556,6 @@ Landroid/telephony/SmsCbMessage;->getServiceCategory()I
 Landroid/telephony/SmsCbMessage;->isCmasMessage()Z
 Landroid/telephony/SmsCbMessage;->isEmergencyMessage()Z
 Landroid/telephony/TelephonyManager$MultiSimVariants;->values()[Landroid/telephony/TelephonyManager$MultiSimVariants;
-Landroid/test/AndroidTestCase;->getTestContext()Landroid/content/Context;
-Landroid/test/AndroidTestCase;->setTestContext(Landroid/content/Context;)V
-Landroid/test/InstrumentationTestCase;->runMethod(Ljava/lang/reflect/Method;I)V
 Landroid/util/Singleton;-><init>()V
 Landroid/util/XmlPullAttributes;-><init>(Lorg/xmlpull/v1/XmlPullParser;)V
 Landroid/util/XmlPullAttributes;->mParser:Lorg/xmlpull/v1/XmlPullParser;
@@ -4596,9 +4593,6 @@ Lgov/nist/javax/sip/address/SipUri;->setParameter(Ljava/lang/String;Ljava/lang/S
 Lgov/nist/javax/sip/address/SipUri;->setUserParam(Ljava/lang/String;)V
 Lgov/nist/javax/sip/parser/URLParser;-><init>(Ljava/lang/String;)V
 Lgov/nist/javax/sip/parser/URLParser;->sipURL(Z)Lgov/nist/javax/sip/address/SipUri;
-Ljunit/framework/TestCase;->fName:Ljava/lang/String;
-Ljunit/framework/TestSuite;->isPublicTestMethod(Ljava/lang/reflect/Method;)Z
-Ljunit/framework/TestSuite;->isTestMethod(Ljava/lang/reflect/Method;)Z
 Lorg/apache/xalan/extensions/ExpressionContext;->getContextNode()Lorg/w3c/dom/Node;
 Lorg/apache/xalan/extensions/ExpressionContext;->getErrorListener()Ljavax/xml/transform/ErrorListener;
 Lorg/apache/xalan/extensions/ExpressionContext;->getVariableOrParam(Lorg/apache/xml/utils/QName;)Lorg/apache/xpath/objects/XObject;
