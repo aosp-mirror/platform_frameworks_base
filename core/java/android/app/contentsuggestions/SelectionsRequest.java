@@ -118,7 +118,7 @@ public final class SelectionsRequest implements Parcelable {
         /**
          * Sets the request extras.
          */
-        public Builder setExtras(@NonNull Bundle extras) {
+        public @NonNull Builder setExtras(@NonNull Bundle extras) {
             mExtras = extras;
             return this;
         }
@@ -126,7 +126,7 @@ public final class SelectionsRequest implements Parcelable {
         /**
          * Sets the request interest point.
          */
-        public Builder setInterestPoint(@NonNull Point interestPoint) {
+        public @NonNull Builder setInterestPoint(@NonNull Point interestPoint) {
             mInterestPoint = interestPoint;
             return this;
         }
@@ -134,7 +134,7 @@ public final class SelectionsRequest implements Parcelable {
         /**
          * Builds a new request instance.
          */
-        public SelectionsRequest build() {
+        public @NonNull SelectionsRequest build() {
             return new SelectionsRequest(mTaskId, mInterestPoint, mExtras);
         }
     }

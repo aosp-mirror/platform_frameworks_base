@@ -944,8 +944,8 @@ package android.app.contentsuggestions {
 
   public static final class ClassificationsRequest.Builder {
     ctor public ClassificationsRequest.Builder(@NonNull java.util.List<android.app.contentsuggestions.ContentSelection>);
-    method public android.app.contentsuggestions.ClassificationsRequest build();
-    method public android.app.contentsuggestions.ClassificationsRequest.Builder setExtras(@NonNull android.os.Bundle);
+    method @NonNull public android.app.contentsuggestions.ClassificationsRequest build();
+    method @NonNull public android.app.contentsuggestions.ClassificationsRequest.Builder setExtras(@NonNull android.os.Bundle);
   }
 
   public final class ContentClassification implements android.os.Parcelable {
@@ -992,9 +992,9 @@ package android.app.contentsuggestions {
 
   public static final class SelectionsRequest.Builder {
     ctor public SelectionsRequest.Builder(int);
-    method public android.app.contentsuggestions.SelectionsRequest build();
-    method public android.app.contentsuggestions.SelectionsRequest.Builder setExtras(@NonNull android.os.Bundle);
-    method public android.app.contentsuggestions.SelectionsRequest.Builder setInterestPoint(@NonNull android.graphics.Point);
+    method @NonNull public android.app.contentsuggestions.SelectionsRequest build();
+    method @NonNull public android.app.contentsuggestions.SelectionsRequest.Builder setExtras(@NonNull android.os.Bundle);
+    method @NonNull public android.app.contentsuggestions.SelectionsRequest.Builder setInterestPoint(@NonNull android.graphics.Point);
   }
 
 }

@@ -103,7 +103,7 @@ public final class ClassificationsRequest implements Parcelable {
         /**
          * Sets the request extras.
          */
-        public Builder setExtras(@NonNull Bundle extras) {
+        public @NonNull Builder setExtras(@NonNull Bundle extras) {
             mExtras = extras;
             return this;
         }
@@ -111,7 +111,7 @@ public final class ClassificationsRequest implements Parcelable {
         /**
          * Builds a new request instance.
          */
-        public ClassificationsRequest build() {
+        public @NonNull ClassificationsRequest build() {
             return new ClassificationsRequest(mSelections, mExtras);
         }
     }
