@@ -17,17 +17,16 @@
 package com.android.server.pm;
 
 import android.app.AlarmManager;
-import android.app.UiAutomation;
 import android.content.Context;
 import android.os.Environment;
 import android.os.ParcelFileDescriptor;
 import android.os.SystemProperties;
 import android.os.storage.StorageManager;
-import android.support.test.InstrumentationRegistry;
 import android.util.Log;
 
+import androidx.test.InstrumentationRegistry;
+
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
