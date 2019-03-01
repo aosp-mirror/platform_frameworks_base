@@ -20,6 +20,7 @@ import static android.app.admin.SystemUpdatePolicy.ValidationFailedException.ERR
 import static android.app.admin.SystemUpdatePolicy.ValidationFailedException.ERROR_DUPLICATE_OR_OVERLAP;
 import static android.app.admin.SystemUpdatePolicy.ValidationFailedException.ERROR_NEW_FREEZE_PERIOD_TOO_CLOSE;
 import static android.app.admin.SystemUpdatePolicy.ValidationFailedException.ERROR_NEW_FREEZE_PERIOD_TOO_LONG;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -27,9 +28,9 @@ import static org.junit.Assert.fail;
 import android.app.admin.FreezePeriod;
 import android.app.admin.SystemUpdatePolicy;
 import android.os.Parcel;
-import android.support.test.runner.AndroidJUnit4;
-import android.util.Pair;
 import android.util.Xml;
+
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.util.FastXmlSerializer;
 
@@ -49,7 +50,6 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-
 
 /**
  * Unit tests for {@link android.app.admin.SystemUpdatePolicy}.

@@ -15,22 +15,20 @@
 package com.android.systemui.util;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
-import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.net.Uri;
 import android.provider.Settings;
-import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.util.ArraySet;
+
+import androidx.test.runner.AndroidJUnit4;
+
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.util.NotificationChannels;
 

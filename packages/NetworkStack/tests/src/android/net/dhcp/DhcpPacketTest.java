@@ -48,8 +48,9 @@ import android.net.DhcpResults;
 import android.net.LinkAddress;
 import android.net.NetworkUtils;
 import android.net.metrics.DhcpErrorEvent;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
+
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.util.HexDump;
 
@@ -324,7 +325,7 @@ public class DhcpPacketTest {
     @Test
     public void testOffer1() throws Exception {
         // TODO: Turn all of these into golden files. This will probably require using
-        // android.support.test.InstrumentationRegistry for obtaining a Context object
+        // androidx.test.InstrumentationRegistry for obtaining a Context object
         // to read such golden files, along with an appropriate Android.mk.
         final ByteBuffer packet = ByteBuffer.wrap(HexDump.hexStringToByteArray(
             // IP header.

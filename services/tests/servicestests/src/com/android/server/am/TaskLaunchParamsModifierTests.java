@@ -16,31 +16,24 @@
 
 package com.android.server.am;
 
-import android.content.pm.ActivityInfo.WindowLayout;
-import android.graphics.Rect;
-import android.platform.test.annotations.Presubmit;
-import android.support.test.filters.MediumTest;
-import android.support.test.runner.AndroidJUnit4;
-
-import android.view.Gravity;
-
-import org.junit.runner.RunWith;
-import org.junit.Before;
-import org.junit.Test;
-
-import org.mockito.invocation.InvocationOnMock;
-
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 
 import static com.android.server.am.LaunchParamsController.LaunchParamsModifier.RESULT_CONTINUE;
 
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.doAnswer;
 import static org.junit.Assert.assertEquals;
 
+import android.content.pm.ActivityInfo.WindowLayout;
+import android.graphics.Rect;
+import android.platform.test.annotations.Presubmit;
+import android.view.Gravity;
+
+import androidx.test.filters.MediumTest;
+import androidx.test.runner.AndroidJUnit4;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 /**
  * Tests for exercising resizing task bounds.

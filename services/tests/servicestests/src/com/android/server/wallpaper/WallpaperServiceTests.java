@@ -24,9 +24,10 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
 import android.service.wallpaper.WallpaperService;
-import android.support.test.annotation.UiThreadTest;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
+
+import androidx.test.annotation.UiThreadTest;
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

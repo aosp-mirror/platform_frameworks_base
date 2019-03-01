@@ -24,9 +24,10 @@ import static org.mockito.Mockito.when;
 
 import android.content.ContentResolver;
 import android.provider.Settings.Global;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
 import android.test.mock.MockContext;
+
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.google.common.base.Objects;
 

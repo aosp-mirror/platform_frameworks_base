@@ -24,8 +24,9 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.utils.hardware.FakeSensorManager;

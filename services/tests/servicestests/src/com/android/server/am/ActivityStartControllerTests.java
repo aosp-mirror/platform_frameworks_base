@@ -19,23 +19,24 @@ package com.android.server.am;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 
-import android.content.Intent;
-import android.platform.test.annotations.Presubmit;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
-
-import com.android.server.am.ActivityStackSupervisor.PendingActivityLaunch;
-import com.android.server.am.ActivityStarter.Factory;
-
-import org.junit.runner.RunWith;
-import org.junit.Test;
-
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
+import android.content.Intent;
+import android.platform.test.annotations.Presubmit;
+
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
+
+import com.android.server.am.ActivityStackSupervisor.PendingActivityLaunch;
+import com.android.server.am.ActivityStarter.Factory;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.util.Random;
 

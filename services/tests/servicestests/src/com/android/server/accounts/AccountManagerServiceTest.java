@@ -17,6 +17,7 @@
 package com.android.server.accounts;
 
 import static android.database.sqlite.SQLiteDatabase.deleteDatabase;
+
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
@@ -25,7 +26,6 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.nullable;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -35,11 +35,10 @@ import android.accounts.AccountManagerInternal;
 import android.accounts.CantAddAccountActivity;
 import android.accounts.IAccountManagerResponse;
 import android.app.AppOpsManager;
+import android.app.INotificationManager;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.DevicePolicyManagerInternal;
-import android.app.INotificationManager;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -68,7 +67,6 @@ import android.test.mock.MockContext;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.util.Log;
 
-import com.android.frameworks.servicestests.R;
 import com.android.server.LocalServices;
 
 import org.mockito.ArgumentCaptor;
@@ -91,7 +89,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
-
 /**
  * Tests for {@link AccountManagerService}.
  * <p>Run with:<pre>
@@ -99,7 +96,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * adb install -r ${OUT}/data/app/FrameworksServicesTests/FrameworksServicesTests.apk
  * adb shell am instrument -w -e package com.android.server.accounts \
  * com.android.frameworks.servicestests\
- * /android.support.test.runner.AndroidJUnitRunner
+ * /androidx.test.runner.AndroidJUnitRunner
  * </pre>
  */
 public class AccountManagerServiceTest extends AndroidTestCase {

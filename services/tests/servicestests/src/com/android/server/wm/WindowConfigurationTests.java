@@ -16,17 +16,6 @@
 
 package com.android.server.wm;
 
-import org.junit.Test;
-
-import android.app.WindowConfiguration;
-import android.content.res.Configuration;
-import android.graphics.Rect;
-import android.platform.test.annotations.Presubmit;
-import android.support.test.filters.FlakyTest;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
-import android.view.DisplayInfo;
-
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
@@ -34,9 +23,21 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOW_CONFIG_APP_BOUNDS;
 import static android.app.WindowConfiguration.WINDOW_CONFIG_WINDOWING_MODE;
 import static android.content.pm.ActivityInfo.CONFIG_WINDOW_CONFIGURATION;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertTrue;
+
+import android.app.WindowConfiguration;
+import android.content.res.Configuration;
+import android.graphics.Rect;
+import android.platform.test.annotations.Presubmit;
+import android.view.DisplayInfo;
+
+import androidx.test.filters.FlakyTest;
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
+
+import org.junit.Test;
 
 /**
  * Test class to for {@link android.app.WindowConfiguration}.

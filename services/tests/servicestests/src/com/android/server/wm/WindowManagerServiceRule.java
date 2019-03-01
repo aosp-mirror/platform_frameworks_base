@@ -33,8 +33,9 @@ import android.content.Context;
 import android.hardware.display.DisplayManagerInternal;
 import android.os.PowerManagerInternal;
 import android.os.PowerSaveState;
-import android.support.test.InstrumentationRegistry;
 import android.view.InputChannel;
+
+import androidx.test.InstrumentationRegistry;
 
 import com.android.server.LocalServices;
 import com.android.server.input.InputManagerService;

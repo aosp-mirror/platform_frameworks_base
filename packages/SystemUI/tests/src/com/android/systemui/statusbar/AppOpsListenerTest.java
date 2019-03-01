@@ -23,9 +23,10 @@ import static org.mockito.Mockito.when;
 import android.app.AppOpsManager;
 import android.os.Handler;
 import android.os.Looper;
-import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.systemui.ForegroundServiceController;
 import com.android.systemui.SysuiTestCase;

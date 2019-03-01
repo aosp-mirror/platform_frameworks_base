@@ -20,6 +20,7 @@ import static android.security.keystore.recovery.KeyChainProtectionParams.TYPE_L
 import static android.security.keystore.recovery.KeyChainProtectionParams.UI_FORMAT_PASSWORD;
 import static android.security.keystore.recovery.KeyChainProtectionParams.UI_FORMAT_PATTERN;
 import static android.security.keystore.recovery.KeyChainProtectionParams.UI_FORMAT_PIN;
+
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PASSWORD;
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PATTERN;
 
@@ -31,7 +32,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
@@ -50,9 +50,10 @@ import android.security.keystore.recovery.KeyDerivationParams;
 import android.security.keystore.recovery.RecoveryController;
 import android.security.keystore.recovery.TrustedRootCertificates;
 import android.security.keystore.recovery.WrappedApplicationKey;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
+
+import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.locksettings.recoverablekeystore.storage.RecoverableKeyStoreDb;
 import com.android.server.locksettings.recoverablekeystore.storage.RecoverySnapshotStorage;

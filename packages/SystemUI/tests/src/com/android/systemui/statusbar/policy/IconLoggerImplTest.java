@@ -31,13 +31,13 @@ import static org.mockito.Mockito.when;
 
 import static java.lang.Thread.sleep;
 
-import android.metrics.LogMaker;
-import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.MessageHandler;
 import android.testing.TestableLooper.RunWithLooper;
 import android.util.Log;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.SysuiTestCase;
@@ -45,7 +45,6 @@ import com.android.systemui.SysuiTestCase;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentMatcher;
 
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper

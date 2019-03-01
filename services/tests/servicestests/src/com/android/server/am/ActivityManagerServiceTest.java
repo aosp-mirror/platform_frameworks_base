@@ -28,6 +28,7 @@ import static android.app.ActivityManager.PROCESS_STATE_RECEIVER;
 import static android.app.ActivityManager.PROCESS_STATE_SERVICE;
 import static android.app.ActivityManager.PROCESS_STATE_TOP;
 import static android.util.DebugUtils.valueToString;
+
 import static com.android.server.am.ActivityManagerInternalTest.CustomThread;
 import static com.android.server.am.ActivityManagerService.DISPATCH_UIDS_CHANGED_UI_MSG;
 import static com.android.server.am.ActivityManagerService.Injector;
@@ -62,10 +63,11 @@ import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
-import android.support.test.filters.FlakyTest;
-import android.support.test.filters.MediumTest;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
+
+import androidx.test.filters.FlakyTest;
+import androidx.test.filters.MediumTest;
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.os.BatteryStatsImpl;
 import com.android.server.AppOpsService;
@@ -99,7 +101,7 @@ import java.util.function.Function;
  * Install: adb install -r \
  *     ${ANDROID_PRODUCT_OUT}/data/app/FrameworksServicesTests/FrameworksServicesTests.apk
  * Run: adb shell am instrument -e class com.android.server.am.ActivityManagerServiceTest -w \
- *     com.android.frameworks.servicestests/android.support.test.runner.AndroidJUnitRunner
+ *     com.android.frameworks.servicestests/androidx.test.runner.AndroidJUnitRunner
  */
 @SmallTest
 @FlakyTest(bugId = 113616538)

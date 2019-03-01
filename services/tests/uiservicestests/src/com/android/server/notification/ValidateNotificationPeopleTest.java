@@ -15,23 +15,24 @@
  */
 package com.android.server.notification;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+
 import android.app.Notification;
 import android.app.Person;
 import android.os.Bundle;
-import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.text.SpannableString;
 
-import java.util.ArrayList;
-import java.util.Arrays;
+import androidx.test.runner.AndroidJUnit4;
+
+import com.android.server.UiServiceTestCase;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertEquals;
-
-import com.android.server.UiServiceTestCase;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)

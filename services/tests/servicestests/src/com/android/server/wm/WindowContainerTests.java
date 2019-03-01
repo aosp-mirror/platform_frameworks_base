@@ -16,20 +16,6 @@
 
 package com.android.server.wm;
 
-import android.support.test.filters.FlakyTest;
-import android.view.SurfaceControl;
-import android.view.SurfaceSession;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-
-import android.content.res.Configuration;
-import android.graphics.Rect;
-import android.platform.test.annotations.Presubmit;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
-
-import java.util.Comparator;
-
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
@@ -44,7 +30,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyFloat;
 import static org.mockito.Mockito.eq;
@@ -52,6 +37,21 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+
+import android.content.res.Configuration;
+import android.graphics.Rect;
+import android.platform.test.annotations.Presubmit;
+import android.view.SurfaceControl;
+import android.view.SurfaceSession;
+
+import androidx.test.filters.FlakyTest;
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
+import java.util.Comparator;
 
 /**
  * Test class for {@link WindowContainer}.

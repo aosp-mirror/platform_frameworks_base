@@ -29,8 +29,9 @@ import android.annotation.Nullable;
 import android.net.LinkAddress;
 import android.net.dhcp.DhcpServingParams.InvalidParameterException;
 import android.net.shared.Inet4AddressUtils;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
+
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
 import org.junit.Test;

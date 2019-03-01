@@ -27,7 +27,7 @@ android_test {
         "services.net",
         "services.usage",
         "guava",
-        "android-support-test",
+        "androidx.test.rules",
         "mockito-target-minus-junit4",
         "platform-test-annotations",
         "ShortcutManagerTestUtils",
@@ -85,7 +85,7 @@ java_library {
         "utils/**/*.java",
     ],
     static_libs: [
-        "android-support-test",
+        "androidx.test.rules",
         "mockito-target-minus-junit4",
     ],
     libs: [

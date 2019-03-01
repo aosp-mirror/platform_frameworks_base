@@ -17,8 +17,9 @@
 package com.android.server.pm;
 
 import android.content.pm.PackageParser;
-import android.support.test.runner.AndroidJUnit4;
 import android.util.Log;
+
+import androidx.test.runner.AndroidJUnit4;
 
 import junit.framework.Assert;
 

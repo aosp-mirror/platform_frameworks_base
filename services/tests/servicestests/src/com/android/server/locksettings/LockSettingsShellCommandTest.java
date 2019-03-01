@@ -29,24 +29,20 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import static java.io.FileDescriptor.*;
-
 import android.app.ActivityManager;
 import android.content.Context;
 import android.os.Binder;
-import android.os.Debug;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.ResultReceiver;
 import android.os.ShellCallback;
 import android.platform.test.annotations.Presubmit;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
+
+import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.widget.LockPatternUtils;
-
-import junit.framework.Assert;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -54,7 +50,9 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.io.FileDescriptor;
+import static java.io.FileDescriptor.err;
+import static java.io.FileDescriptor.in;
+import static java.io.FileDescriptor.out;
 
 /**
  * Test class for {@link LockSettingsShellCommand}.
