@@ -6030,11 +6030,10 @@ package android.telephony {
   }
 
   public class NetworkRegistrationState implements android.os.Parcelable {
-    ctor public NetworkRegistrationState(int, int, int, int, int, boolean, int[], @Nullable android.telephony.CellIdentity);
-    ctor protected NetworkRegistrationState(android.os.Parcel);
+    ctor public NetworkRegistrationState(int, int, int, int, int, boolean, @NonNull int[], @Nullable android.telephony.CellIdentity);
     method public int describeContents();
     method public int getAccessNetworkTechnology();
-    method public int[] getAvailableServices();
+    method @NonNull public int[] getAvailableServices();
     method public android.telephony.CellIdentity getCellIdentity();
     method @Nullable public android.telephony.DataSpecificRegistrationStates getDataSpecificStates();
     method public int getDomain();
@@ -6061,9 +6060,25 @@ package android.telephony {
     field public static final int SERVICE_TYPE_VOICE = 1; // 0x1
   }
 
+  public static class NetworkRegistrationState.Builder {
+    ctor public NetworkRegistrationState.Builder();
+    method @NonNull public android.telephony.NetworkRegistrationState build();
+    method @NonNull public android.telephony.NetworkRegistrationState.Builder setAccessNetworkTechnology(int);
+    method @NonNull public android.telephony.NetworkRegistrationState.Builder setAvailableServices(@NonNull int[]);
+    method @NonNull public android.telephony.NetworkRegistrationState.Builder setCellIdentity(@Nullable android.telephony.CellIdentity);
+    method @NonNull public android.telephony.NetworkRegistrationState.Builder setDomain(int);
+    method @NonNull public android.telephony.NetworkRegistrationState.Builder setEmergencyOnly(boolean);
+    method @NonNull public android.telephony.NetworkRegistrationState.Builder setNrStatus(int);
+    method @NonNull public android.telephony.NetworkRegistrationState.Builder setRegState(int);
+    method @NonNull public android.telephony.NetworkRegistrationState.Builder setRejectCause(int);
+    method @NonNull public android.telephony.NetworkRegistrationState.Builder setRoamingType(int);
+    method @NonNull public android.telephony.NetworkRegistrationState.Builder setTransportType(int);
+  }
+
   public abstract class NetworkService extends android.app.Service {
     ctor public NetworkService();
-    method protected abstract android.telephony.NetworkService.NetworkServiceProvider createNetworkServiceProvider(int);
+    method public android.os.IBinder onBind(android.content.Intent);
+    method public abstract android.telephony.NetworkService.NetworkServiceProvider onCreateNetworkServiceProvider(int);
     field public static final String NETWORK_SERVICE_INTERFACE = "android.telephony.NetworkService";
   }
 
@@ -6071,7 +6086,7 @@ package android.telephony {
     ctor public NetworkService.NetworkServiceProvider(int);
     method public abstract void close();
     method public void getNetworkRegistrationState(int, @NonNull android.telephony.NetworkServiceCallback);
-    method public final int getSlotId();
+    method public final int getSlotIndex();
     method public final void notifyNetworkRegistrationStateChanged();
   }
 
@@ -6549,7 +6564,8 @@ package android.telephony.data {
 
   public abstract class DataService extends android.app.Service {
     ctor public DataService();
-    method public abstract android.telephony.data.DataService.DataServiceProvider createDataServiceProvider(int);
+    method public android.os.IBinder onBind(android.content.Intent);
+    method public abstract android.telephony.data.DataService.DataServiceProvider onCreateDataServiceProvider(int);
     field public static final String DATA_SERVICE_INTERFACE = "android.telephony.data.DataService";
     field public static final int REQUEST_REASON_HANDOVER = 3; // 0x3
     field public static final int REQUEST_REASON_NORMAL = 1; // 0x1
@@ -6561,7 +6577,7 @@ package android.telephony.data {
     method public abstract void close();
     method public void deactivateDataCall(int, int, @Nullable android.telephony.data.DataServiceCallback);
     method public void getDataCallList(@NonNull android.telephony.data.DataServiceCallback);
-    method public final int getSlotId();
+    method public final int getSlotIndex();
     method public final void notifyDataCallListChanged(java.util.List<android.telephony.data.DataCallResponse>);
     method public void setDataProfile(@NonNull java.util.List<android.telephony.data.DataProfile>, boolean, @Nullable android.telephony.data.DataServiceCallback);
     method public void setInitialAttachApn(@NonNull android.telephony.data.DataProfile, boolean, @Nullable android.telephony.data.DataServiceCallback);

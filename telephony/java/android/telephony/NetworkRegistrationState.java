@@ -17,11 +17,13 @@
 package android.telephony;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.telephony.AccessNetworkConstants.TransportType;
+import android.telephony.TelephonyManager.NetworkType;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -140,6 +142,7 @@ public class NetworkRegistrationState implements Parcelable {
     @ServiceState.RoamingType
     private int mRoamingType;
 
+    @NetworkType
     private int mAccessNetworkTechnology;
 
     @NRStatus
@@ -149,6 +152,7 @@ public class NetworkRegistrationState implements Parcelable {
 
     private final boolean mEmergencyOnly;
 
+    @ServiceType
     private final int[] mAvailableServices;
 
     @Nullable
@@ -167,9 +171,8 @@ public class NetworkRegistrationState implements Parcelable {
      * @param regState Network registration state. Must be one of the {@link RegState}. For
      * {@link TransportType#WLAN} transport, only {@link #REG_STATE_HOME} and
      * {@link #REG_STATE_NOT_REG_NOT_SEARCHING} are valid states.
-     * @param accessNetworkTechnology Access network technology. Must be one of TelephonyManager
-     * NETWORK_TYPE_XXXX. For {@link TransportType#WLAN} transport, set to
-     * {@link TelephonyManager#NETWORK_TYPE_IWLAN}.
+     * @param accessNetworkTechnology Access network technology.For {@link TransportType#WLAN}
+     * transport, set to {@link TelephonyManager#NETWORK_TYPE_IWLAN}.
      * @param rejectCause Reason for denial if the registration state is {@link #REG_STATE_DENIED}.
      * Depending on {@code accessNetworkTechnology}, the values are defined in 3GPP TS 24.008
      * 10.5.3.6 for UMTS, 3GPP TS 24.301 9.9.3.9 for LTE, and 3GPP2 A.S0001 6.2.2.44 for CDMA. If
@@ -182,8 +185,9 @@ public class NetworkRegistrationState implements Parcelable {
      * information is not available.
      */
     public NetworkRegistrationState(@Domain int domain, int transportType, @RegState int regState,
-                                    int accessNetworkTechnology, int rejectCause,
-                                    boolean emergencyOnly, int[] availableServices,
+                                    @NetworkType int accessNetworkTechnology, int rejectCause,
+                                    boolean emergencyOnly,
+                                    @NonNull @ServiceType int[] availableServices,
                                     @Nullable CellIdentity cellIdentity) {
         mDomain = domain;
         mTransportType = transportType;
@@ -230,7 +234,7 @@ public class NetworkRegistrationState implements Parcelable {
         updateNrStatus(mDataSpecificStates);
     }
 
-    protected NetworkRegistrationState(Parcel source) {
+    private NetworkRegistrationState(Parcel source) {
         mDomain = source.readInt();
         mTransportType = source.readInt();
         mRegState = source.readInt();
@@ -309,25 +313,29 @@ public class NetworkRegistrationState implements Parcelable {
     /**
      * @return List of available service types.
      */
+    @NonNull
+    @ServiceType
     public int[] getAvailableServices() { return mAvailableServices; }
 
     /**
-     * @return The access network technology {@link TelephonyManager.NetworkType}.
+     * @return The access network technology {@link NetworkType}.
      */
-    public @TelephonyManager.NetworkType int getAccessNetworkTechnology() {
+    public @NetworkType int getAccessNetworkTechnology() {
         return mAccessNetworkTechnology;
     }
 
     /**
-     * override the access network technology {@link TelephonyManager.NetworkType} e.g, rat ratchet.
+     * override the access network technology {@link NetworkType} e.g, rat ratchet.
      * @hide
      */
-    public void setAccessNetworkTechnology(@TelephonyManager.NetworkType int tech) {
+    public void setAccessNetworkTechnology(@NetworkType int tech) {
         mAccessNetworkTechnology = tech;
     }
 
     /**
-     * @return Network reject cause
+     * @return Reason for denial if the registration state is {@link #REG_STATE_DENIED}.
+     * Depending on {@code accessNetworkTechnology}, the values are defined in 3GPP TS 24.008
+     * 10.5.3.6 for UMTS, 3GPP TS 24.301 9.9.3.9 for LTE, and 3GPP2 A.S0001 6.2.2.44 for CDMA
      */
     public int getRejectCause() {
         return mRejectCause;
@@ -538,5 +546,193 @@ public class NetworkRegistrationState implements Parcelable {
         NetworkRegistrationState result = new NetworkRegistrationState(p);
         p.recycle();
         return result;
+    }
+
+    /**
+     * Provides a convenient way to set the fields of a {@link NetworkRegistrationState} when
+     * creating a new instance.
+     *
+     * <p>The example below shows how you might create a new {@code NetworkRegistrationState}:
+     *
+     * <pre><code>
+     *
+     * NetworkRegistrationState nrs = new NetworkRegistrationState.Builder()
+     *     .setApnTypeBitmask(ApnSetting.TYPE_DEFAULT | ApnSetting.TYPE_MMS)
+     *     .setApnName("apn.example.com")
+     *     .setEntryName("Example Carrier APN")
+     *     .setMmsc(Uri.parse("http://mms.example.com:8002"))
+     *     .setMmsProxyAddress(mmsProxy)
+     *     .setMmsProxyPort(8799)
+     *     .build();
+     * </code></pre>
+     */
+    public static class Builder{
+        @Domain
+        private int mDomain;
+
+        private int mTransportType;
+
+        @RegState
+        private int mRegState;
+
+        @ServiceState.RoamingType
+        private int mRoamingType;
+
+        @NetworkType
+        private int mAccessNetworkTechnology;
+
+        @NRStatus
+        private int mNrStatus;
+
+        private int mRejectCause;
+
+        private boolean mEmergencyOnly;
+
+        @ServiceType
+        private int[] mAvailableServices;
+
+        @Nullable
+        private CellIdentity mCellIdentity;
+
+        /**
+         * Default constructor for Builder.
+         */
+        public Builder() {}
+
+        /**
+         * Set the network domain.
+         *
+         * @param domain Network domain.
+         *
+         * @return The same instance of the builder.
+         */
+        public @NonNull Builder setDomain(@Domain int domain) {
+            mDomain = domain;
+            return this;
+        }
+
+        /**
+         * Set the transport type.
+         *
+         * @param transportType Transport type.
+         *
+         * @return The same instance of the builder.
+         */
+        public @NonNull Builder setTransportType(int transportType) {
+            mTransportType = transportType;
+            return this;
+        }
+
+        /**
+         * Set the registration state.
+         *
+         * @param regState The registration state.
+         *
+         * @return The same instance of the builder.
+         */
+        public @NonNull Builder setRegState(@RegState int regState) {
+            mRegState = regState;
+            return this;
+        }
+
+        /**
+         * Set the roaming type.
+         *
+         * @param roamingType Roaming type.
+         *
+         * @return The same instance of the builder.
+         */
+        public @NonNull Builder setRoamingType(@ServiceState.RoamingType int roamingType) {
+            mRoamingType = roamingType;
+            return this;
+        }
+
+        /**
+         * Set tne access network technology.
+         *
+         * @return The same instance of the builder.
+         *
+         * @param accessNetworkTechnology The access network technology
+         */
+        public @NonNull Builder setAccessNetworkTechnology(
+                @NetworkType int accessNetworkTechnology) {
+            mAccessNetworkTechnology = accessNetworkTechnology;
+            return this;
+        }
+
+        /**
+         * Set the 5G NR connection status.
+         *
+         * @param nrStatus 5G NR connection status.
+         *
+         * @return The same instance of the builder.
+         */
+        public @NonNull Builder setNrStatus(@NRStatus int nrStatus) {
+            mNrStatus = nrStatus;
+            return this;
+        }
+
+        /**
+         * Set the network reject cause.
+         *
+         * @param rejectCause Reason for denial if the registration state is
+         * {@link #REG_STATE_DENIED}.Depending on {@code accessNetworkTechnology}, the values are
+         * defined in 3GPP TS 24.008 10.5.3.6 for UMTS, 3GPP TS 24.301 9.9.3.9 for LTE, and 3GPP2
+         * A.S0001 6.2.2.44 for CDMA. If the reject cause is not supported or unknown, set it to 0.
+         *
+         * @return The same instance of the builder.
+         */
+        public @NonNull Builder setRejectCause(int rejectCause) {
+            mRejectCause = rejectCause;
+            return this;
+        }
+
+        /**
+         * Set emergency only.
+         *
+         * @param emergencyOnly True if this network registration is for emergency use only.
+         *
+         * @return The same instance of the builder.
+         */
+        public @NonNull Builder setEmergencyOnly(boolean emergencyOnly) {
+            mEmergencyOnly = emergencyOnly;
+            return this;
+        }
+
+        /**
+         * Set the available services.
+         *
+         * @param availableServices Available services.
+         *
+         * @return The same instance of the builder.
+         */
+        public @NonNull Builder setAvailableServices(
+                @NonNull @ServiceType int[] availableServices) {
+            mAvailableServices = availableServices;
+            return this;
+        }
+
+        /**
+         * Set the cell identity.
+         *
+         * @param cellIdentity The cell identity.
+         *
+         * @return The same instance of the builder.
+         */
+        public @NonNull Builder setCellIdentity(@Nullable CellIdentity cellIdentity) {
+            mCellIdentity = cellIdentity;
+            return this;
+        }
+
+        /**
+         * Build the NetworkRegistrationState.
+         *
+         * @return the NetworkRegistrationState object.
+         */
+        public @NonNull NetworkRegistrationState build() {
+            return new NetworkRegistrationState(mDomain, mTransportType, mRegState,
+                    mAccessNetworkTechnology, mRejectCause, mEmergencyOnly, mAvailableServices,
+                    mCellIdentity);
+        }
     }
 }
