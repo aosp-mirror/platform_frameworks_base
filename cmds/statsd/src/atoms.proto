@@ -149,7 +149,7 @@ message Atom {
         WTFOccurred wtf_occurred = 80;
         LowMemReported low_mem_reported = 81;
         GenericAtom generic_atom = 82;
-        KeyValuePairsAtom key_value_pairs_atom = 83;
+        KeyValuePairsAtom key_value_pairs_atom = 83 [(allow_from_any_uid) = true];
         VibratorStateChanged vibrator_state_changed = 84;
         DeferredJobStatsReported deferred_job_stats_reported = 85;
         ThermalThrottlingStateChanged thermal_throttling = 86;
