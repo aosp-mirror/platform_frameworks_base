@@ -55,7 +55,7 @@ public class LooperStatsService extends Binder {
     private static final String DEBUG_SYS_LOOPER_STATS_ENABLED =
             "debug.sys.looper_stats_enabled";
     private static final int DEFAULT_SAMPLING_INTERVAL = 1000;
-    private static final int DEFAULT_ENTRIES_SIZE_CAP = 2000;
+    private static final int DEFAULT_ENTRIES_SIZE_CAP = 1500;
     private static final boolean DEFAULT_ENABLED = true;
     private static final boolean DEFAULT_TRACK_SCREEN_INTERACTIVE = false;
 
