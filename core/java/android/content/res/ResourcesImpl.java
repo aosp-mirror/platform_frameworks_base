@@ -1507,6 +1507,7 @@ public class ResourcesImpl {
          * @param explicitStyleRes A resource identifier of an explicit style resource.
          * @return ordered list of resource ID that are considered when resolving attribute values.
          */
+        @Nullable
         public int[] getAttributeResolutionStack(@AttrRes int defStyleAttr,
                 @StyleRes int defStyleRes, @StyleRes int explicitStyleRes) {
             synchronized (mKey) {
