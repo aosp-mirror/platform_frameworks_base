@@ -164,6 +164,7 @@ public final class TextClassifierImpl implements TextClassifier {
             if (string.length() > 0
                     && rangeLength <= mSettings.getSuggestSelectionMaxRangeLength()) {
                 final String localesString = concatenateLocales(request.getDefaultLocales());
+                final String detectLanguageTags = detectLanguageTagsFromText(request.getText());
                 final ZonedDateTime refTime = ZonedDateTime.now();
                 final AnnotatorModel annotatorImpl =
                         getAnnotatorImpl(request.getDefaultLocales());
@@ -175,7 +176,7 @@ public final class TextClassifierImpl implements TextClassifier {
                 } else {
                     final int[] startEnd = annotatorImpl.suggestSelection(
                             string, request.getStartIndex(), request.getEndIndex(),
-                            new AnnotatorModel.SelectionOptions(localesString));
+                            new AnnotatorModel.SelectionOptions(localesString, detectLanguageTags));
                     start = startEnd[0];
                     end = startEnd[1];
                 }
@@ -189,7 +190,8 @@ public final class TextClassifierImpl implements TextClassifier {
                                     new AnnotatorModel.ClassificationOptions(
                                             refTime.toInstant().toEpochMilli(),
                                             refTime.getZone().getId(),
-                                            localesString),
+                                            localesString,
+                                            detectLanguageTags),
                                     // Passing null here to suppress intent generation
                                     // TODO: Use an explicit flag to suppress it.
                                     /* appContext */ null,
@@ -227,6 +229,7 @@ public final class TextClassifierImpl implements TextClassifier {
             final String string = request.getText().toString();
             if (string.length() > 0 && rangeLength <= mSettings.getClassifyTextMaxRangeLength()) {
                 final String localesString = concatenateLocales(request.getDefaultLocales());
+                final String detectLanguageTags = detectLanguageTagsFromText(request.getText());
                 final ZonedDateTime refTime = request.getReferenceTime() != null
                         ? request.getReferenceTime() : ZonedDateTime.now();
                 final AnnotatorModel.ClassificationResult[] results =
@@ -236,9 +239,10 @@ public final class TextClassifierImpl implements TextClassifier {
                                         new AnnotatorModel.ClassificationOptions(
                                                 refTime.toInstant().toEpochMilli(),
                                                 refTime.getZone().getId(),
-                                                localesString),
+                                                localesString,
+                                                detectLanguageTags),
                                         mContext,
-                                        getResourceLocaleString()
+                                        getResourceLocalesString()
                                 );
                 if (results.length > 0) {
                     return createClassificationResult(
@@ -276,6 +280,8 @@ public final class TextClassifierImpl implements TextClassifier {
                     ? request.getEntityConfig().resolveEntityListModifications(
                     getEntitiesForHints(request.getEntityConfig().getHints()))
                     : mSettings.getEntityListDefault();
+            final String localesString = concatenateLocales(request.getDefaultLocales());
+            final String detectLanguageTags = detectLanguageTagsFromText(request.getText());
             final AnnotatorModel annotatorImpl =
                     getAnnotatorImpl(request.getDefaultLocales());
             final AnnotatorModel.AnnotatedSpan[] annotations =
@@ -284,7 +290,8 @@ public final class TextClassifierImpl implements TextClassifier {
                             new AnnotatorModel.AnnotationOptions(
                                     refTime.toInstant().toEpochMilli(),
                                     refTime.getZone().getId(),
-                                    concatenateLocales(request.getDefaultLocales())));
+                                    localesString,
+                                    detectLanguageTags));
             for (AnnotatorModel.AnnotatedSpan span : annotations) {
                 final AnnotatorModel.ClassificationResult[] results =
                         span.getClassification();
@@ -386,8 +393,8 @@ public final class TextClassifierImpl implements TextClassifier {
                 return mFallback.suggestConversationActions(request);
             }
             ActionsSuggestionsModel.ConversationMessage[] nativeMessages =
-                    ActionsSuggestionsHelper.toNativeMessages(request.getConversation(),
-                            this::detectLanguageTagsFromText);
+                    ActionsSuggestionsHelper.toNativeMessages(
+                            request.getConversation(), this::detectLanguageTagsFromText);
             if (nativeMessages.length == 0) {
                 return mFallback.suggestConversationActions(request);
             }
@@ -399,7 +406,7 @@ public final class TextClassifierImpl implements TextClassifier {
                             nativeConversation,
                             null,
                             mContext,
-                            getResourceLocaleString());
+                            getResourceLocalesString());
             return createConversationActionResult(request, nativeSuggestions);
         } catch (Throwable t) {
             // Avoid throwing from this method. Log the error.
@@ -463,19 +470,28 @@ public final class TextClassifierImpl implements TextClassifier {
 
     @Nullable
     private String detectLanguageTagsFromText(CharSequence text) {
+        if (!mSettings.isDetectLanguagesFromTextEnabled()) {
+            return null;
+        }
+        final float threshold = getLangIdThreshold();
+        if (threshold < 0 || threshold > 1) {
+            Log.w(LOG_TAG,
+                    "[detectLanguageTagsFromText] unexpected threshold is found: " + threshold);
+            return null;
+        }
         TextLanguage.Request request = new TextLanguage.Request.Builder(text).build();
         TextLanguage textLanguage = detectLanguage(request);
         int localeHypothesisCount = textLanguage.getLocaleHypothesisCount();
         List<String> languageTags = new ArrayList<>();
         for (int i = 0; i < localeHypothesisCount; i++) {
             ULocale locale = textLanguage.getLocale(i);
-            if (textLanguage.getConfidenceScore(locale) < getForeignLanguageThreshold()) {
+            if (textLanguage.getConfidenceScore(locale) < threshold) {
                 break;
             }
             languageTags.add(locale.toLanguageTag());
         }
         if (languageTags.isEmpty()) {
-            return LocaleList.getDefault().toLanguageTags();
+            return null;
         }
         return String.join(",", languageTags);
     }
@@ -644,10 +660,14 @@ public final class TextClassifierImpl implements TextClassifier {
     // TODO: Consider making this public API.
     @Nullable
     private Bundle detectForeignLanguage(String text) {
+        if (!mSettings.isTranslateInClassificationEnabled()) {
+            return null;
+        }
         try {
-            final float threshold = getForeignLanguageThreshold();
-            if (threshold > 1) {
-                Log.v(LOG_TAG, "Foreign language detection disabled.");
+            final float threshold = getLangIdThreshold();
+            if (threshold < 0 || threshold > 1) {
+                Log.w(LOG_TAG,
+                        "[detectForeignLanguage] unexpected threshold is found: " + threshold);
                 return null;
             }
 
@@ -686,11 +706,11 @@ public final class TextClassifierImpl implements TextClassifier {
         return null;
     }
 
-    private float getForeignLanguageThreshold() {
+    private float getLangIdThreshold() {
         try {
             return mSettings.getLangIdThresholdOverride() >= 0
                     ? mSettings.getLangIdThresholdOverride()
-                    : getLangIdImpl().getTranslateThreshold();
+                    : getLangIdImpl().getLangIdThreshold();
         } catch (FileNotFoundException e) {
             final float defaultThreshold = 0.5f;
             Log.v(LOG_TAG, "Using default foreign language threshold: " + defaultThreshold);
@@ -746,15 +766,14 @@ public final class TextClassifierImpl implements TextClassifier {
     }
 
     /**
-     * Returns the locale string for the current resources configuration.
+     * Returns the locales string for the current resources configuration.
      */
-    private String getResourceLocaleString() {
-        // TODO: Pass the locale list once it is supported in native side.
+    private String getResourceLocalesString() {
         try {
-            return mContext.getResources().getConfiguration().getLocales().get(0).toLanguageTag();
+            return mContext.getResources().getConfiguration().getLocales().toLanguageTags();
         } catch (NullPointerException e) {
             // NPE is unexpected. Erring on the side of caution.
-            return LocaleList.getDefault().get(0).toLanguageTag();
+            return LocaleList.getDefault().toLanguageTags();
         }
     }
 }

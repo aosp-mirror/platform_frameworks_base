@@ -215,7 +215,7 @@ public class ActionsSuggestionsHelperTest {
             long referenceTimeInMsUtc) {
         assertThat(nativeMessage.getText()).isEqualTo(text.toString());
         assertThat(nativeMessage.getUserId()).isEqualTo(userId);
-        assertThat(nativeMessage.getLocales()).isEqualTo(LOCALE_TAG);
+        assertThat(nativeMessage.getDetectedTextLanguageTags()).isEqualTo(LOCALE_TAG);
         assertThat(nativeMessage.getReferenceTimeMsUtc()).isEqualTo(referenceTimeInMsUtc);
     }
 }

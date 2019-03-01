@@ -61,6 +61,7 @@ public class LegacyIntentFactoryTest {
                         null,
                         null,
                         null,
+                        null,
                         null);
 
         List<LabeledIntent> intents = mLegacyIntentFactory.create(
@@ -85,6 +86,7 @@ public class LegacyIntentFactoryTest {
                 new AnnotatorModel.ClassificationResult(
                         TextClassifier.TYPE_DICTIONARY,
                         1.0f,
+                        null,
                         null,
                         null,
                         null,
