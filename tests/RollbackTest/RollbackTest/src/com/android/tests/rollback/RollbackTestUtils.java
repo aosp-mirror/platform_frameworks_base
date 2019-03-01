@@ -17,6 +17,7 @@
 package com.android.tests.rollback;
 
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -27,12 +28,15 @@ import android.content.pm.VersionedPackage;
 import android.content.rollback.PackageRollbackInfo;
 import android.content.rollback.RollbackInfo;
 import android.content.rollback.RollbackManager;
+import android.os.Handler;
+import android.os.HandlerThread;
 import android.support.test.InstrumentationRegistry;
 import android.util.Log;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -391,6 +395,55 @@ class RollbackTestUtils {
             }
         } catch (InterruptedException e) {
             throw new AssertionError(e);
+        }
+    }
+
+    private static final String NO_RESPONSE = "NO RESPONSE";
+
+    /**
+     * Calls into the test app to process user data.
+     * Asserts if the user data could not be processed or was version
+     * incompatible with the previously processed user data.
+     */
+    static void processUserData(String packageName) {
+        Intent intent = new Intent();
+        intent.setComponent(new ComponentName(packageName,
+                    "com.android.tests.rollback.testapp.ProcessUserData"));
+        Context context = InstrumentationRegistry.getContext();
+
+        HandlerThread handlerThread = new HandlerThread("RollbackTestHandlerThread");
+        handlerThread.start();
+
+        // It can sometimes take a while after rollback before the app will
+        // receive this broadcast, so try a few times in a loop.
+        String result = NO_RESPONSE;
+        for (int i = 0; result.equals(NO_RESPONSE) && i < 5; ++i) {
+            BlockingQueue<String> resultQueue = new LinkedBlockingQueue<>();
+            context.sendOrderedBroadcast(intent, null, new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    if (getResultCode() == 1) {
+                        resultQueue.add("OK");
+                    } else {
+                        // If the test app doesn't receive the broadcast or
+                        // fails to set the result data, then getResultData
+                        // here returns the initial NO_RESPONSE data passed to
+                        // the sendOrderedBroadcast call.
+                        resultQueue.add(getResultData());
+                    }
+                }
+            }, new Handler(handlerThread.getLooper()), 0, NO_RESPONSE, null);
+
+            try {
+                result = resultQueue.take();
+            } catch (InterruptedException e) {
+                throw new AssertionError(e);
+            }
+        }
+
+        handlerThread.quit();
+        if (!"OK".equals(result)) {
+            fail(result);
         }
     }
 }
