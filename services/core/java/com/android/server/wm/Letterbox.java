@@ -236,6 +236,7 @@ public class Letterbox {
                     .setFlags(HIDDEN).setColorLayer().build();
             mSurface.setLayer(-1);
             mSurface.setColor(new float[]{0, 0, 0});
+            mSurface.setColorSpaceAgnostic(true);
         }
 
         void attachInput(WindowState win) {
