@@ -116,6 +116,66 @@ public class EuiccManager {
             "android.telephony.euicc.action.RESOLVE_ERROR";
 
     /**
+     * Intent action sent by system apps (such as the Settings app) to the Telephony framework to
+     * enable or disable a subscription. Must be accompanied with {@link #EXTRA_SUBSCRIPTION_ID} and
+     * {@link #EXTRA_ENABLE_SUBSCRIPTION}.
+     *
+     * <p>Unlike {@link #switchToSubscription(int, PendingIntent)}, using this action allows the
+     * underlying eUICC service (i.e. the LPA app) to control the UI experience during this
+     * operation. The action is received by the Telephony framework, which in turn selects and
+     * launches an appropriate LPA activity to present UI to the user. For example, the activity may
+     * show a confirmation dialog, a progress dialog, or an error dialog when necessary.
+     *
+     * <p>The launched activity will immediately finish with
+     * {@link android.app.Activity#RESULT_CANCELED} if {@link #isEnabled} is false.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String ACTION_TOGGLE_SUBSCRIPTION_PRIVILEGED =
+            "android.telephony.euicc.action.TOGGLE_SUBSCRIPTION_PRIVILEGED";
+
+    /**
+     * Intent action sent by system apps (such as the Settings app) to the Telephony framework to
+     * delete a subscription. Must be accompanied with {@link #EXTRA_SUBSCRIPTION_ID}.
+     *
+     * <p>Unlike {@link #deleteSubscription(int, PendingIntent)}, using this action allows the
+     * underlying eUICC service (i.e. the LPA app) to control the UI experience during this
+     * operation. The action is received by the Telephony framework, which in turn selects and
+     * launches an appropriate LPA activity to present UI to the user. For example, the activity may
+     * show a confirmation dialog, a progress dialog, or an error dialog when necessary.
+     *
+     * <p>The launched activity will immediately finish with
+     * {@link android.app.Activity#RESULT_CANCELED} if {@link #isEnabled} is false.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String ACTION_DELETE_SUBSCRIPTION_PRIVILEGED =
+            "android.telephony.euicc.action.DELETE_SUBSCRIPTION_PRIVILEGED";
+
+    /**
+     * Intent action sent by system apps (such as the Settings app) to the Telephony framework to
+     * rename a subscription. Must be accompanied with {@link #EXTRA_SUBSCRIPTION_ID} and
+     * {@link #EXTRA_SUBSCRIPTION_NICKNAME}.
+     *
+     * <p>Unlike {@link #updateSubscriptionNickname(int, String, PendingIntent)}, using this action
+     * allows the the underlying eUICC service (i.e. the LPA app) to control the UI experience
+     * during this operation. The action is received by the Telephony framework, which in turn
+     * selects and launches an appropriate LPA activity to present UI to the user. For example, the
+     * activity may show a confirmation dialog, a progress dialog, or an error dialog when
+     * necessary.
+     *
+     * <p>The launched activity will immediately finish with
+     * {@link android.app.Activity#RESULT_CANCELED} if {@link #isEnabled} is false.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String ACTION_RENAME_SUBSCRIPTION_PRIVILEGED =
+            "android.telephony.euicc.action.RENAME_SUBSCRIPTION_PRIVILEGED";
+
+    /**
      * Result code for an operation indicating that the operation succeeded.
      */
     public static final int EMBEDDED_SUBSCRIPTION_RESULT_OK = 0;
@@ -193,6 +253,37 @@ public class EuiccManager {
      */
     public static final String EXTRA_FORCE_PROVISION =
             "android.telephony.euicc.extra.FORCE_PROVISION";
+
+    /**
+     * Key for an extra set on privileged actions {@link #ACTION_TOGGLE_SUBSCRIPTION_PRIVILEGED},
+     * {@link #ACTION_DELETE_SUBSCRIPTION_PRIVILEGED}, and
+     * {@link #ACTION_RENAME_SUBSCRIPTION_PRIVILEGED} providing the ID of the targeted subscription.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_SUBSCRIPTION_ID =
+            "android.telephony.euicc.extra.SUBSCRIPTION_ID";
+
+    /**
+     * Key for an extra set on {@link #ACTION_TOGGLE_SUBSCRIPTION_PRIVILEGED} providing a boolean
+     * value of whether to enable or disable the targeted subscription.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_ENABLE_SUBSCRIPTION =
+            "android.telephony.euicc.extra.ENABLE_SUBSCRIPTION";
+
+    /**
+     * Key for an extra set on {@link #ACTION_RENAME_SUBSCRIPTION_PRIVILEGED} providing a new
+     * nickname for the targeted subscription.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_SUBSCRIPTION_NICKNAME =
+            "android.telephony.euicc.extra.SUBSCRIPTION_NICKNAME";
 
     /**
      * Optional meta-data attribute for a carrier app providing an icon to use to represent the
