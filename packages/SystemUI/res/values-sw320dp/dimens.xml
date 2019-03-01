@@ -15,9 +15,8 @@
   ~ limitations under the License
   -->
 <resources>
-
     <!-- Global actions grid -->
-    <dimen name="global_actions_grid_container_bottom_margin">16dp</dimen>
+    <dimen name="global_actions_grid_container_bottom_margin">4dp</dimen>
 
     <dimen name="global_actions_grid_vertical_padding">0dp</dimen>
     <dimen name="global_actions_grid_horizontal_padding">3dp</dimen>
@@ -29,7 +28,7 @@
 
     <dimen name="global_actions_grid_item_icon_width">18dp</dimen>
     <dimen name="global_actions_grid_item_icon_height">18dp</dimen>
-    <dimen name="global_actions_grid_item_icon_top_margin">12dp</dimen>
+    <dimen name="global_actions_grid_item_icon_top_margin">10dp</dimen>
     <dimen name="global_actions_grid_item_icon_side_margin">22dp</dimen>
     <dimen name="global_actions_grid_item_icon_bottom_margin">4dp</dimen>
 
