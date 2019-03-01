@@ -131,10 +131,10 @@ public class RescueParty {
     }
 
     /**
-     * Take note of a persistent app crash. If we notice too many of these
+     * Take note of a persistent app or apex module crash. If we notice too many of these
      * events happening in rapid succession, we'll send out a rescue party.
      */
-    public static void notePersistentAppCrash(Context context, int uid) {
+    public static void noteAppCrash(Context context, int uid) {
         if (isDisabled()) return;
         Threshold t = sApps.get(uid);
         if (t == null) {
@@ -245,14 +245,14 @@ public class RescueParty {
         Exception res = null;
         final ContentResolver resolver = context.getContentResolver();
         try {
-            Settings.Global.resetToDefaultsAsUser(resolver, null, mode, UserHandle.USER_SYSTEM);
-        } catch (Exception e) {
-            res = new RuntimeException("Failed to reset global settings", e);
-        }
-        try {
             FlagNamespaceUtils.resetDeviceConfig(mode);
         } catch (Exception e) {
             res = new RuntimeException("Failed to reset config settings", e);
+        }
+        try {
+            Settings.Global.resetToDefaultsAsUser(resolver, null, mode, UserHandle.USER_SYSTEM);
+        } catch (Exception e) {
+            res = new RuntimeException("Failed to reset global settings", e);
         }
         for (int userId : getAllUserIds()) {
             try {
