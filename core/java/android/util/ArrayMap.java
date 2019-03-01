@@ -19,6 +19,9 @@ package android.util;
 import libcore.util.EmptyArray;
 
 import android.annotation.UnsupportedAppUsage;
+
+import com.android.internal.util.ArrayUtils;
+
 import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.Map;
@@ -816,7 +819,7 @@ public final class ArrayMap<K, V> implements Map<K, V> {
             buffer.append('=');
             Object value = valueAt(i);
             if (value != this) {
-                buffer.append(value);
+                buffer.append(ArrayUtils.deepToString(value));
             } else {
                 buffer.append("(this Map)");
             }
