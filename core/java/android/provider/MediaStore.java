@@ -146,6 +146,8 @@ public final class MediaStore {
     public static final String RETRANSLATE_CALL = "update_titles";
 
     /** {@hide} */
+    public static final String GET_VERSION_CALL = "get_version";
+    /** {@hide} */
     public static final String GET_DOCUMENT_URI_CALL = "get_document_uri";
     /** {@hide} */
     public static final String GET_MEDIA_URI_CALL = "get_media_uri";
@@ -3318,21 +3320,41 @@ public final class MediaStore {
     public static final String MEDIA_IGNORE_FILENAME = ".nomedia";
 
     /**
-     * Get the media provider's version.
-     * Applications that import data from the media provider into their own caches
-     * can use this to detect that the media provider changed, and reimport data
-     * as needed. No other assumptions should be made about the meaning of the version.
-     * @param context Context to use for performing the query.
-     * @return A version string, or null if the version could not be determined.
+     * Return an opaque version string describing the {@link MediaStore} state.
+     * <p>
+     * Applications that import data from {@link MediaStore} into their own
+     * caches can use this to detect that {@link MediaStore} has undergone
+     * substantial changes, and that data should be rescanned.
+     * <p>
+     * No other assumptions should be made about the meaning of the version.
+     * <p>
+     * This method returns the version for {@link MediaStore#VOLUME_EXTERNAL};
+     * to obtain a version for a different volume, use
+     * {@link #getVersion(Context, String)}.
      */
-    public static String getVersion(Context context) {
-        final Uri uri = AUTHORITY_URI.buildUpon().appendPath("none").appendPath("version").build();
-        try (Cursor c = context.getContentResolver().query(uri, null, null, null, null)) {
-            if (c.moveToFirst()) {
-                return c.getString(0);
-            }
+    public static @NonNull String getVersion(@NonNull Context context) {
+        return getVersion(context, VOLUME_EXTERNAL);
+    }
+
+    /**
+     * Return an opaque version string describing the {@link MediaStore} state.
+     * <p>
+     * Applications that import data from {@link MediaStore} into their own
+     * caches can use this to detect that {@link MediaStore} has undergone
+     * substantial changes, and that data should be rescanned.
+     * <p>
+     * No other assumptions should be made about the meaning of the version.
+     */
+    public static @NonNull String getVersion(@NonNull Context context, @NonNull String volumeName) {
+        final ContentResolver resolver = context.getContentResolver();
+        try (ContentProviderClient client = resolver.acquireContentProviderClient(AUTHORITY)) {
+            final Bundle in = new Bundle();
+            in.putString(Intent.EXTRA_TEXT, volumeName);
+            final Bundle out = client.call(GET_VERSION_CALL, null, in);
+            return out.getString(Intent.EXTRA_TEXT);
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
         }
-        return null;
     }
 
     /**
