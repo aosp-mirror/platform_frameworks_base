@@ -19,9 +19,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
-import android.view.autofill.AutofillId;
-
-import java.util.List;
 
 /**
  * Response to a {@link FillRequest}.
@@ -63,23 +60,11 @@ public final class FillResponse {
          *
          * @return this builder
          */
+        @NonNull
         public Builder setFillWindow(@NonNull FillWindow fillWindow) {
             // TODO(b/123100712): check not null / unit test / throw exception if FillWindow not
             // updated yet
             mFillWindow = fillWindow;
-            return this;
-        }
-
-        /**
-         * Tells the Android System that the given {@code ids} should not trigger further
-         * {@link FillRequest requests} when focused.
-         *
-         * @param ids ids of the fields that should be ignored
-         *
-         * @return this builder
-         */
-        public Builder setIgnoredIds(@NonNull List<AutofillId> ids) {
-            // TODO(b/123100695): implement / check not null / unit test
             return this;
         }
 
@@ -95,6 +80,7 @@ public final class FillResponse {
          *
          * @return A built response.
          */
+        @NonNull
         public FillResponse build() {
             // TODO(b/123100712): check conditions / add unit test
             return new FillResponse(this);

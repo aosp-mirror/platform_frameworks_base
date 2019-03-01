@@ -351,7 +351,7 @@ public interface WebViewProvider {
         }
 
         default void onProvideContentCaptureStructure(
-                @SuppressWarnings("unused") android.view.ViewStructure structure,
+                @NonNull @SuppressWarnings("unused") android.view.ViewStructure structure,
                 @SuppressWarnings("unused") int flags) {
         }
 

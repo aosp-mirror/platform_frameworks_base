@@ -100,11 +100,13 @@ public final class ContentCaptureSessionId implements Parcelable {
             new Parcelable.Creator<ContentCaptureSessionId>() {
 
         @Override
+        @NonNull
         public ContentCaptureSessionId createFromParcel(Parcel parcel) {
             return new ContentCaptureSessionId(parcel.readString());
         }
 
         @Override
+        @NonNull
         public ContentCaptureSessionId[] newArray(int size) {
             return new ContentCaptureSessionId[size];
         }

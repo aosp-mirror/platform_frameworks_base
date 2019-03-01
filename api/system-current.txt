@@ -6393,9 +6393,8 @@ package android.service.autofill.augmented {
 
   public static final class FillResponse.Builder {
     ctor public FillResponse.Builder();
-    method public android.service.autofill.augmented.FillResponse build();
-    method public android.service.autofill.augmented.FillResponse.Builder setFillWindow(@NonNull android.service.autofill.augmented.FillWindow);
-    method public android.service.autofill.augmented.FillResponse.Builder setIgnoredIds(@NonNull java.util.List<android.view.autofill.AutofillId>);
+    method @NonNull public android.service.autofill.augmented.FillResponse build();
+    method @NonNull public android.service.autofill.augmented.FillResponse.Builder setFillWindow(@NonNull android.service.autofill.augmented.FillWindow);
   }
 
   public final class FillWindow implements java.lang.AutoCloseable {
@@ -6443,9 +6442,9 @@ package android.service.contentcapture {
 
   public final class SnapshotData implements android.os.Parcelable {
     method public int describeContents();
-    method public android.app.assist.AssistContent getAssistContent();
-    method public android.os.Bundle getAssistData();
-    method public android.app.assist.AssistStructure getAssistStructure();
+    method @Nullable public android.app.assist.AssistContent getAssistContent();
+    method @NonNull public android.os.Bundle getAssistData();
+    method @NonNull public android.app.assist.AssistStructure getAssistStructure();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.service.contentcapture.SnapshotData> CREATOR;
   }
@@ -9836,7 +9835,7 @@ package android.webkit {
     method public default void onMovedToDisplay(int, android.content.res.Configuration);
     method public void onOverScrolled(int, int, boolean, boolean);
     method public default void onProvideAutofillVirtualStructure(android.view.ViewStructure, int);
-    method public default void onProvideContentCaptureStructure(android.view.ViewStructure, int);
+    method public default void onProvideContentCaptureStructure(@NonNull android.view.ViewStructure, int);
     method public void onProvideVirtualStructure(android.view.ViewStructure);
     method public void onScrollChanged(int, int, int, int);
     method public void onSizeChanged(int, int, int, int);
