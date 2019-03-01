@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.view.textclassifier;
+package android.view.textclassifier.intent;
 
 import static java.time.temporal.ChronoUnit.MILLIS;
 
@@ -29,6 +29,8 @@ import android.os.UserManager;
 import android.provider.Browser;
 import android.provider.CalendarContract;
 import android.provider.ContactsContract;
+import android.view.textclassifier.Log;
+import android.view.textclassifier.TextClassifier;
 
 import com.google.android.textclassifier.AnnotatorModel;
 
@@ -44,13 +46,13 @@ import java.util.concurrent.TimeUnit;
  * Creates intents based on the classification type.
  * @hide
  */
-public final class LegacyIntentFactory implements IntentFactory {
+public final class LegacyClassificationIntentFactory implements ClassificationIntentFactory {
 
-    private static final String TAG = "LegacyIntentFactory";
+    private static final String TAG = "LegacyClassificationIntentFactory";
     private static final long MIN_EVENT_FUTURE_MILLIS = TimeUnit.MINUTES.toMillis(5);
     private static final long DEFAULT_EVENT_DURATION = TimeUnit.HOURS.toMillis(1);
 
-    public LegacyIntentFactory() {}
+    public LegacyClassificationIntentFactory() {}
 
     @NonNull
     @Override
@@ -96,7 +98,7 @@ public final class LegacyIntentFactory implements IntentFactory {
                 break;
         }
         if (foreignText) {
-            IntentFactory.insertTranslateAction(actions, context, text);
+            ClassificationIntentFactory.insertTranslateAction(actions, context, text);
         }
         actions.forEach(
                 action -> action.intent.putExtra(TextClassifier.EXTRA_FROM_TEXT_CLASSIFIER, true));

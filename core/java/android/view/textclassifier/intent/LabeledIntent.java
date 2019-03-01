@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.view.textclassifier;
+package android.view.textclassifier.intent;
 
 import android.annotation.Nullable;
 import android.app.PendingIntent;
@@ -25,6 +25,8 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.graphics.drawable.Icon;
 import android.text.TextUtils;
+import android.view.textclassifier.Log;
+import android.view.textclassifier.TextClassification;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;

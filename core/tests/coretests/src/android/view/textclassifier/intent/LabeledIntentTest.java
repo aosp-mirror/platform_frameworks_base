@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.view.textclassifier;
+package android.view.textclassifier.intent;
 
 import static com.google.common.truth.Truth.assertThat;
 

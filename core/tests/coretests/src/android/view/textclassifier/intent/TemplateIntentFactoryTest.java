@@ -13,12 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.view.textclassifier;
+package android.view.textclassifier.intent;
 
 import static com.google.common.truth.Truth.assertThat;
 
 import android.content.Intent;
 import android.net.Uri;
+import android.view.textclassifier.TextClassifier;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;

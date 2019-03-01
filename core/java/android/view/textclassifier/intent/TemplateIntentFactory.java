@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.view.textclassifier;
+package android.view.textclassifier.intent;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -21,15 +21,15 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.view.textclassifier.Log;
+import android.view.textclassifier.TextClassifier;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.ArrayUtils;
 
 import com.google.android.textclassifier.NamedVariant;
 import com.google.android.textclassifier.RemoteActionTemplate;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -41,11 +41,11 @@ import java.util.List;
 public final class TemplateIntentFactory {
     private static final String TAG = TextClassifier.DEFAULT_LOG_TAG;
 
-    @NonNull
+    @Nullable
     public List<LabeledIntent> create(
-            @Nullable RemoteActionTemplate[] remoteActionTemplates) {
-        if (ArrayUtils.isEmpty(remoteActionTemplates)) {
-            return Collections.emptyList();
+            @NonNull RemoteActionTemplate[] remoteActionTemplates) {
+        if (remoteActionTemplates.length == 0) {
+            return new ArrayList<>();
         }
         final List<LabeledIntent> labeledIntents = new ArrayList<>();
         for (RemoteActionTemplate remoteActionTemplate : remoteActionTemplates) {
