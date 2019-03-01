@@ -1,11 +1,8 @@
 //########################################################################
 // Build FrameworksNetTests package
 //########################################################################
-
-android_test {
-    name: "FrameworksNetTests",
-    // Include all test java files.
-    srcs: ["java/**/*.java"],
+java_defaults {
+    name: "FrameworksNetTests-jni-defaults",
     static_libs: [
         "frameworks-base-testutils",
         "framework-protos",
@@ -20,6 +17,52 @@ android_test {
         "android.test.base",
         "android.test.mock",
     ],
+    jni_libs: [
+        "ld-android",
+        "libartbase",
+        "libbacktrace",
+        "libbase",
+        "libbinder",
+        "libbinderthreadstate",
+        "libbpf",
+        "libbpf_android",
+        "libc++",
+        "libcrypto",
+        "libcutils",
+        "libdexfile",
+        "libdl_android",
+        "libhidl-gen-utils",
+        "libhidlbase",
+        "libhidltransport",
+        "libhwbinder",
+        "libjsoncpp",
+        "liblog",
+        "liblzma",
+        "libnativehelper",
+        "libnetdbpf",
+        "libnetdutils",
+        "libpackagelistparser",
+        "libpcre2",
+        "libprocessgroup",
+        "libselinux",
+        "libui",
+        "libutils",
+        "libvintf",
+        "libvndksupport",
+        "libtinyxml2",
+        "libunwindstack",
+        "libutilscallstack",
+        "libziparchive",
+        "libz",
+        "netd_aidl_interface-cpp",
+        "libnetworkstatsfactorytestjni",
+    ],
+}
+
+android_test {
+    name: "FrameworksNetTests",
+    defaults: ["FrameworksNetTests-jni-defaults"],
+    srcs: ["java/**/*.java"],
     platform_apis: true,
     test_suites: ["device-tests"],
     certificate: "platform",

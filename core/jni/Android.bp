@@ -196,7 +196,6 @@ cc_library_shared {
         "android_content_res_Configuration.cpp",
         "android_animation_PropertyValuesHolder.cpp",
         "android_security_Scrypt.cpp",
-        "com_android_internal_net_NetworkStatsFactory.cpp",
         "com_android_internal_os_ClassLoaderFactory.cpp",
         "com_android_internal_os_FuseAppLoop.cpp",
         "com_android_internal_os_Zygote.cpp",
