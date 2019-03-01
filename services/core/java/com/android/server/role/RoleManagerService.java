@@ -743,6 +743,25 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
                 return false;
             }
         }
+
+        @Override
+        public void setDefaultBrowserAsync(@Nullable String packageName, @UserIdInt int userId) {
+            IRoleManagerCallback callback = new IRoleManagerCallback.Stub() {
+                @Override
+                public void onSuccess() {}
+                @Override
+                public void onFailure() {
+                    Slog.e(LOG_TAG, "Failed to set default browser: " + packageName);
+                }
+            };
+            if (packageName != null) {
+                getOrCreateControllerService(userId).onAddRoleHolder(RoleManager.ROLE_BROWSER,
+                        packageName, 0, callback);
+            } else {
+                getOrCreateControllerService(userId).onClearRoleHolders(RoleManager.ROLE_BROWSER, 0,
+                        callback);
+            }
+        }
     }
 
     private class DefaultHomeProvider implements PackageManagerInternal.DefaultHomeProvider {

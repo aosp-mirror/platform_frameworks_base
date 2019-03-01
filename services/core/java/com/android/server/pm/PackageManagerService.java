@@ -1935,7 +1935,7 @@ public class PackageManagerService extends IPackageManager.Stub
                             final PackageSetting pkgSetting = mSettings.mPackages.get(packageName);
                             if (pkgSetting.getInstallReason(userId)
                                     != PackageManager.INSTALL_REASON_DEVICE_RESTORE) {
-                                setDefaultBrowserPackageName(null, userId);
+                                setDefaultBrowserAsyncLPw(null, userId);
                             }
                         }
 
@@ -13685,6 +13685,23 @@ public class PackageManagerService extends IPackageManager.Stub
             }
         }
         return true;
+    }
+
+    private void setDefaultBrowserAsyncLPw(@Nullable String packageName, @UserIdInt int userId) {
+        if (userId == UserHandle.USER_ALL) {
+            return;
+        }
+        if (mDefaultBrowserProvider == null) {
+            Slog.e(TAG, "mDefaultBrowserProvider is null");
+            return;
+        }
+        mDefaultBrowserProvider.setDefaultBrowserAsync(packageName, userId);
+        if (packageName != null) {
+            synchronized (mPackages) {
+                mDefaultPermissionPolicy.grantDefaultPermissionsToDefaultBrowser(packageName,
+                        userId);
+            }
+        }
     }
 
     @Override
