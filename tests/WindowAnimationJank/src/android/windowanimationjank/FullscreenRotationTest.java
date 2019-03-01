@@ -17,8 +17,9 @@
 package android.windowanimationjank;
 
 import android.os.Bundle;
-import android.support.test.jank.JankTest;
-import android.support.test.jank.GfxMonitor;
+
+import androidx.test.jank.GfxMonitor;
+import androidx.test.jank.JankTest;
 
 /**
  * Detect janks during screen rotation for full-screen activity. Periodically change

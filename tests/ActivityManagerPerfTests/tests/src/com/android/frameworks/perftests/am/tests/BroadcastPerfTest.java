@@ -17,8 +17,9 @@
 package com.android.frameworks.perftests.am.tests;
 
 import android.content.Intent;
-import android.support.test.filters.LargeTest;
-import android.support.test.runner.AndroidJUnit4;
+
+import androidx.test.filters.LargeTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.frameworks.perftests.am.util.Constants;
 

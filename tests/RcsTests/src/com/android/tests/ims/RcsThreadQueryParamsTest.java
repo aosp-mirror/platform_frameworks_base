@@ -21,9 +21,10 @@ import static android.telephony.ims.RcsThreadQueryParams.THREAD_TYPE_GROUP;
 import static com.google.common.truth.Truth.assertThat;
 
 import android.os.Parcel;
-import android.support.test.runner.AndroidJUnit4;
 import android.telephony.ims.RcsParticipant;
 import android.telephony.ims.RcsThreadQueryParams;
+
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

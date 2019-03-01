@@ -28,7 +28,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import android.mtp.MtpConstants;
-import android.support.test.runner.AndroidJUnit4;
+
+import androidx.test.runner.AndroidJUnit4;
 
 import libcore.net.MimeUtils;
 

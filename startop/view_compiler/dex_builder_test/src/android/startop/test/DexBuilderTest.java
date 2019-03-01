@@ -14,17 +14,13 @@
 
 package android.startop.test;
 
-import android.content.Context;
-import android.support.test.InstrumentationRegistry;
-import com.google.common.io.ByteStreams;
-import dalvik.system.InMemoryDexClassLoader;
 import dalvik.system.PathClassLoader;
-import java.io.InputStream;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.nio.ByteBuffer;
+
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 // Adding tests here requires changes in several other places. See README.md in
 // the view_compiler directory for more information.

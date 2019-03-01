@@ -25,10 +25,11 @@ import static com.google.common.truth.Truth.assertThat;
 
 import android.graphics.Rect;
 import android.platform.helpers.IAppHelper;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.filters.LargeTest;
-import android.support.test.runner.AndroidJUnit4;
 import android.util.Rational;
+
+import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.LargeTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
 import org.junit.Test;

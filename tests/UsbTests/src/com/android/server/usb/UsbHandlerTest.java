@@ -31,11 +31,11 @@ import android.hardware.usb.UsbManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.os.UserHandle;
 import android.provider.Settings;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
+
+import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.FgThread;
 

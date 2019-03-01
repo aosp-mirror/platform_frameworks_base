@@ -12,7 +12,7 @@ LOCAL_PRIVATE_PLATFORM_APIS := true
 LOCAL_CERTIFICATE := platform
 LOCAL_JAVA_LIBRARIES := android.test.base
 
-LOCAL_STATIC_JAVA_LIBRARIES := compatibility-device-util android-support-test
+LOCAL_STATIC_JAVA_LIBRARIES := compatibility-device-util-axt androidx.test.rules
 
 include $(BUILD_PACKAGE)
 

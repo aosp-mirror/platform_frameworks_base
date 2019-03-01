@@ -19,9 +19,10 @@ import static com.google.common.truth.Truth.assertThat;
 
 import android.net.Uri;
 import android.os.Parcel;
-import android.support.test.runner.AndroidJUnit4;
 import android.telephony.ims.RcsGroupThreadIconChangedEvent;
 import android.telephony.ims.RcsGroupThreadIconChangedEventDescriptor;
+
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

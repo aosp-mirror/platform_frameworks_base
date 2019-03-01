@@ -19,7 +19,7 @@ import subprocess
 import sys
 
 INSTRUMENTED_PACKAGE_RUNNER = ('com.android.frameworks.servicestests/'
-                               'android.support.test.runner.AndroidJUnitRunner')
+                               'androidx.test.runner.AndroidJUnitRunner')
 
 PACKAGE_WHITELIST = (
     "com.android.server",
