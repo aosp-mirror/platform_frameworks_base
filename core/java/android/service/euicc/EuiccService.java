@@ -101,9 +101,22 @@ public abstract class EuiccService extends Service {
      */
     public static final String ACTION_MANAGE_EMBEDDED_SUBSCRIPTIONS =
             "android.service.euicc.action.MANAGE_EMBEDDED_SUBSCRIPTIONS";
+
     /** @see android.telephony.euicc.EuiccManager#ACTION_PROVISION_EMBEDDED_SUBSCRIPTION */
     public static final String ACTION_PROVISION_EMBEDDED_SUBSCRIPTION =
             "android.service.euicc.action.PROVISION_EMBEDDED_SUBSCRIPTION";
+
+    /** @see android.telephony.euicc.EuiccManager#ACTION_TOGGLE_SUBSCRIPTION_PRIVILEGED */
+    public static final String ACTION_TOGGLE_SUBSCRIPTION_PRIVILEGED =
+            "android.service.euicc.action.TOGGLE_SUBSCRIPTION_PRIVILEGED";
+
+    /** @see android.telephony.euicc.EuiccManager#ACTION_DELETE_SUBSCRIPTION_PRIVILEGED */
+    public static final String ACTION_DELETE_SUBSCRIPTION_PRIVILEGED =
+            "android.service.euicc.action.DELETE_SUBSCRIPTION_PRIVILEGED";
+
+    /** @see android.telephony.euicc.EuiccManager#ACTION_RENAME_SUBSCRIPTION_PRIVILEGED */
+    public static final String ACTION_RENAME_SUBSCRIPTION_PRIVILEGED =
+            "android.service.euicc.action.RENAME_SUBSCRIPTION_PRIVILEGED";
 
     // LUI resolution actions. These are called by the platform to resolve errors in situations that
     // require user interaction.
