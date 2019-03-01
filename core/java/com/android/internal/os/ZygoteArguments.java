@@ -205,6 +205,12 @@ class ZygoteArguments {
     int mHiddenApiAccessLogSampleRate = -1;
 
     /**
+     * Sampling rate for logging hidden API accesses to statslog. This is sent to the
+     * pre-forked zygote at boot time, or when it changes, via --hidden-api-statslog-sampling-rate.
+     */
+    int mHiddenApiAccessStatslogSampleRate = -1;
+
+    /**
      * Constructs instance and parses args
      *
      * @param args zygote command-line args
@@ -389,6 +395,15 @@ class ZygoteArguments {
                 } catch (NumberFormatException nfe) {
                     throw new IllegalArgumentException(
                         "Invalid log sampling rate: " + rateStr, nfe);
+                }
+                expectRuntimeArgs = false;
+            } else if (arg.startsWith("--hidden-api-statslog-sampling-rate=")) {
+                String rateStr = arg.substring(arg.indexOf('=') + 1);
+                try {
+                    mHiddenApiAccessStatslogSampleRate = Integer.parseInt(rateStr);
+                } catch (NumberFormatException nfe) {
+                    throw new IllegalArgumentException(
+                        "Invalid statslog sampling rate: " + rateStr, nfe);
                 }
                 expectRuntimeArgs = false;
             } else if (arg.startsWith("--package-name=")) {

@@ -37,6 +37,7 @@ import android.system.ErrnoException;
 import android.system.Os;
 import android.system.StructPollfd;
 import android.util.Log;
+import android.util.StatsLog;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
@@ -192,9 +193,11 @@ class ZygoteConnection {
             return handleApiBlacklistExemptions(zygoteServer, parsedArgs.mApiBlacklistExemptions);
         }
 
-        if (parsedArgs.mHiddenApiAccessLogSampleRate != -1) {
+        if (parsedArgs.mHiddenApiAccessLogSampleRate != -1
+                || parsedArgs.mHiddenApiAccessStatslogSampleRate != -1) {
             return handleHiddenApiAccessLogSampleRate(zygoteServer,
-                    parsedArgs.mHiddenApiAccessLogSampleRate);
+                    parsedArgs.mHiddenApiAccessLogSampleRate,
+                    parsedArgs.mHiddenApiAccessStatslogSampleRate);
         }
 
         if (parsedArgs.mPermittedCapabilities != 0 || parsedArgs.mEffectiveCapabilities != 0) {
@@ -396,9 +399,11 @@ class ZygoteConnection {
         private final MetricsLogger mMetricsLogger = new MetricsLogger();
         private static HiddenApiUsageLogger sInstance = new HiddenApiUsageLogger();
         private int mHiddenApiAccessLogSampleRate = 0;
+        private int mHiddenApiAccessStatslogSampleRate = 0;
 
-        public static void setHiddenApiAccessLogSampleRate(int sampleRate) {
+        public static void setHiddenApiAccessLogSampleRates(int sampleRate, int newSampleRate) {
             sInstance.mHiddenApiAccessLogSampleRate = sampleRate;
+            sInstance.mHiddenApiAccessStatslogSampleRate = newSampleRate;
         }
 
         public static HiddenApiUsageLogger getInstance() {
@@ -409,6 +414,9 @@ class ZygoteConnection {
                 int accessMethod, boolean accessDenied) {
             if (sampledValue < mHiddenApiAccessLogSampleRate) {
                 logUsage(packageName, signature, accessMethod, accessDenied);
+            }
+            if (sampledValue < mHiddenApiAccessStatslogSampleRate) {
+                newLogUsage(signature, accessMethod, accessDenied);
             }
         }
 
@@ -439,6 +447,27 @@ class ZygoteConnection {
             }
             mMetricsLogger.write(logMaker);
         }
+
+        private void newLogUsage(String signature, int accessMethod, boolean accessDenied) {
+            int accessMethodProto = StatsLog.HIDDEN_API_USED__ACCESS_METHOD__NONE;
+            switch(accessMethod) {
+                case HiddenApiUsageLogger.ACCESS_METHOD_NONE:
+                    accessMethodProto = StatsLog.HIDDEN_API_USED__ACCESS_METHOD__NONE;
+                    break;
+                case HiddenApiUsageLogger.ACCESS_METHOD_REFLECTION:
+                    accessMethodProto = StatsLog.HIDDEN_API_USED__ACCESS_METHOD__REFLECTION;
+                    break;
+                case HiddenApiUsageLogger.ACCESS_METHOD_JNI:
+                    accessMethodProto = StatsLog.HIDDEN_API_USED__ACCESS_METHOD__JNI;
+                    break;
+                case HiddenApiUsageLogger.ACCESS_METHOD_LINKING:
+                    accessMethodProto = StatsLog.HIDDEN_API_USED__ACCESS_METHOD__LINKING;
+                    break;
+            }
+            int uid = Process.myUid();
+            StatsLog.write(StatsLog.HIDDEN_API_USED, uid, signature,
+                                   accessMethodProto, accessDenied);
+        }
     }
 
     /**
@@ -450,15 +479,18 @@ class ZygoteConnection {
      * a Runnable object that must be returned to ZygoteServer.runSelectLoop to be invoked.
      *
      * @param zygoteServer  The server object that received the request
-     * @param samplingRate  The new sample rate
+     * @param samplingRate  The new sample rate for regular logging
+     * @param statsdSamplingRate  The new sample rate for statslog logging
      * @return A Runnable object representing a new app in any blastulas spawned from here; the
      *         zygote process will always receive a null value from this function.
      */
     private Runnable handleHiddenApiAccessLogSampleRate(ZygoteServer zygoteServer,
-            int samplingRate) {
+            int samplingRate, int statsdSamplingRate) {
         return stateChangeWithBlastulaPoolReset(zygoteServer, () -> {
-            ZygoteInit.setHiddenApiAccessLogSampleRate(samplingRate);
-            HiddenApiUsageLogger.setHiddenApiAccessLogSampleRate(samplingRate);
+            int maxSamplingRate = Math.max(samplingRate, statsdSamplingRate);
+            ZygoteInit.setHiddenApiAccessLogSampleRate(maxSamplingRate);
+            HiddenApiUsageLogger.setHiddenApiAccessLogSampleRates(samplingRate,
+                    statsdSamplingRate);
             ZygoteInit.setHiddenApiUsageLogger(HiddenApiUsageLogger.getInstance());
         });
     }

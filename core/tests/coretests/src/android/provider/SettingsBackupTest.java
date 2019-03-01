@@ -287,6 +287,7 @@ public class SettingsBackupTest {
                     Settings.Global.HDMI_SYSTEM_AUDIO_CONTROL_ENABLED,
                     Settings.Global.HEADS_UP_NOTIFICATIONS_ENABLED,
                     Settings.Global.HIDDEN_API_ACCESS_LOG_SAMPLING_RATE,
+                    Settings.Global.HIDDEN_API_ACCESS_STATSLOG_SAMPLING_RATE,
                     Settings.Global.HIDDEN_API_POLICY,
                     Settings.Global.HIDE_ERROR_DIALOGS,
                     Settings.Global.HTTP_PROXY,

@@ -645,6 +645,9 @@ public final class Zygote {
         } else if (args.mHiddenApiAccessLogSampleRate != -1) {
             throw new IllegalArgumentException(
                 BLASTULA_ERROR_PREFIX + "--hidden-api-log-sampling-rate=");
+        } else if (args.mHiddenApiAccessStatslogSampleRate != -1) {
+            throw new IllegalArgumentException(
+                BLASTULA_ERROR_PREFIX + "--hidden-api-statslog-sampling-rate=");
         } else if (args.mInvokeWith != null) {
             throw new IllegalArgumentException(BLASTULA_ERROR_PREFIX + "--invoke-with");
         } else if (args.mPermittedCapabilities != 0 || args.mEffectiveCapabilities != 0) {
