@@ -174,6 +174,18 @@ public final class DexoptUtils {
     }
 
     /**
+     * Creates the class loader context for the given shared library.
+     */
+    public static String getClassLoaderContext(SharedLibraryInfo info) {
+        String sharedLibrariesContext = "";
+        if (info.getDependencies() != null) {
+            sharedLibrariesContext = encodeSharedLibraries(info.getDependencies());
+        }
+        return encodeClassLoader(
+                "", SHARED_LIBRARY_LOADER_TYPE, sharedLibrariesContext);
+    }
+
+    /**
      * Recursive method to generate the class loader context dependencies for the split with the
      * given index. {@param classLoaderContexts} acts as an accumulator. Upton return
      * {@code classLoaderContexts[index]} will contain the split dependency.

@@ -333,6 +333,20 @@ public class DexoptUtilsTest {
     }
 
     @Test
+    public void testSharedLibraryContext() {
+        SharedLibraryInfo sharedLibrary =
+                createMockSharedLibrary(new String[] {"a.dex", "b.dex"}).get(0);
+        String context = DexoptUtils.getClassLoaderContext(sharedLibrary);
+        assertEquals("PCL[]", context);
+
+        SharedLibraryInfo otherSharedLibrary =
+                createMockSharedLibrary(new String[] {"c.dex"}).get(0);
+        otherSharedLibrary.addDependency(sharedLibrary);
+        context = DexoptUtils.getClassLoaderContext(otherSharedLibrary);
+        assertEquals("PCL[]{PCL[a.dex:b.dex]}", context);
+    }
+
+    @Test
     public void testProcessContextForDexLoad() {
         List<String> classLoaders = Arrays.asList(
                 DELEGATE_LAST_CLASS_LOADER_NAME,
