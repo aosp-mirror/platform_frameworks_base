@@ -5,4 +5,10 @@
 #
 base=/system
 export CLASSPATH=$base/framework/hid.jar
+
+# Preload the native portion libhidcommand_jni.so to bypass the dependency
+# checks in the Java classloader, which prohibit dependencies that aren't
+# listed in system/core/rootdir/etc/public.libraries.android.txt.
+export LD_PRELOAD=libhidcommand_jni.so
+
 exec app_process $base/bin com.android.commands.hid.Hid "$@"
