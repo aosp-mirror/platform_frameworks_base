@@ -27,6 +27,7 @@ import android.content.pm.UserInfo;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.util.Log;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.LargeTest;
@@ -126,6 +127,47 @@ public class UserLifecycleTests {
             mRunner.pauseTiming();
             switchUser(startUser);
             removeUser(userInfo.id);
+            mRunner.resumeTiming();
+        }
+    }
+
+    /** Tests switching to an already-created, but no-longer-running, user. */
+    @Test
+    public void switchUser_stopped() throws Exception {
+        while (mRunner.keepRunning()) {
+            mRunner.pauseTiming();
+            final int startUser = mAm.getCurrentUser();
+            final int testUser = initializeNewUserAndSwitchBack(/* stopNewUser */ true);
+            final CountDownLatch latch = new CountDownLatch(1);
+            registerBroadcastReceiver(Intent.ACTION_USER_UNLOCKED, latch, testUser);
+            mRunner.resumeTiming();
+
+            mAm.switchUser(testUser);
+            boolean success = latch.await(TIMEOUT_IN_SECOND, TimeUnit.SECONDS);
+
+            mRunner.pauseTiming();
+            attestTrue("Failed to achieve 2nd ACTION_USER_UNLOCKED for user " + testUser, success);
+            switchUser(startUser);
+            removeUser(testUser);
+            mRunner.resumeTiming();
+        }
+    }
+
+    /** Tests switching to an already-created already-running non-owner user. */
+    @Test
+    public void switchUser_running() throws Exception {
+        while (mRunner.keepRunning()) {
+            mRunner.pauseTiming();
+            final int startUser = mAm.getCurrentUser();
+            final int testUser = initializeNewUserAndSwitchBack(/* stopNewUser */ false);
+            mRunner.resumeTiming();
+
+            switchUser(testUser);
+
+            mRunner.pauseTiming();
+            attestTrue("Failed to switch to user " + testUser, mAm.isUserRunning(testUser));
+            switchUser(startUser);
+            removeUser(testUser);
             mRunner.resumeTiming();
         }
     }
@@ -262,6 +304,35 @@ public class UserLifecycleTests {
         latch.await(TIMEOUT_IN_SECOND, TimeUnit.SECONDS);
     }
 
+    /**
+     * Creates a user and waits for its ACTION_USER_UNLOCKED.
+     * Then switches to back to the original user and waits for its switchUser() to finish.
+     *
+     * @param stopNewUser whether to stop the new user after switching to otherUser.
+     * @return userId of the newly created user.
+     */
+    private int initializeNewUserAndSwitchBack(boolean stopNewUser) throws Exception {
+        final int origUser = mAm.getCurrentUser();
+        // First, create and switch to testUser, waiting for its ACTION_USER_UNLOCKED
+        final int testUser = mUm.createUser("TestUser", 0).id;
+        final CountDownLatch latch1 = new CountDownLatch(1);
+        registerBroadcastReceiver(Intent.ACTION_USER_UNLOCKED, latch1, testUser);
+        mAm.switchUser(testUser);
+        attestTrue("Failed to achieve initial ACTION_USER_UNLOCKED for user " + testUser,
+                latch1.await(TIMEOUT_IN_SECOND, TimeUnit.SECONDS));
+
+        // Second, switch back to origUser, waiting merely for switchUser() to finish
+        switchUser(origUser);
+        attestTrue("Didn't switch back to user, " + origUser, origUser == mAm.getCurrentUser());
+
+        if (stopNewUser) {
+            stopUser(testUser, true);
+            attestFalse("Failed to stop user " + testUser, mAm.isUserRunning(testUser));
+        }
+
+        return testUser;
+    }
+
     private void registerUserSwitchObserver(final CountDownLatch switchLatch,
             final CountDownLatch bootCompleteLatch, final int userId) throws Exception {
         ActivityManager.getService().registerUserSwitchObserver(
@@ -312,5 +383,15 @@ public class UserLifecycleTests {
         if (mUm.getUserInfo(userId) != null) {
             mUsersToRemove.add(userId);
         }
+    }
+
+    private void attestTrue(String message, boolean attestion) {
+        if (!attestion) {
+            Log.w(TAG, message);
+        }
+    }
+
+    private void attestFalse(String message, boolean attestion) {
+        attestTrue(message, !attestion);
     }
 }
