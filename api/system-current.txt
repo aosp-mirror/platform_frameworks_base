@@ -4965,8 +4965,8 @@ package android.net.wifi.hotspot2 {
 
   public final class OsuProvider implements android.os.Parcelable {
     method public int describeContents();
-    method public String getFriendlyName();
-    method public android.net.Uri getServerUri();
+    method @Nullable public String getFriendlyName();
+    method @Nullable public android.net.Uri getServerUri();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.hotspot2.OsuProvider> CREATOR;
   }
