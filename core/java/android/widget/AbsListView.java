@@ -2821,7 +2821,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      * @attr ref android.R.styleable#AbsListView_drawSelectorOnTop
      */
     @InspectableProperty
-    public boolean getDrawSelectorOnTop() {
+    public boolean isDrawSelectorOnTop() {
         return mDrawSelectorOnTop;
     }
 
