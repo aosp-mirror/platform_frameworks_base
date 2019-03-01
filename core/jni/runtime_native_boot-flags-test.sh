@@ -139,35 +139,33 @@ function find_zygote_runtime_option {
   adb logcat -d -s "$zygote" | grep -q -e "option\[[0-9]\+\]=$runtime_option"
 }
 
-# check_zygote_gc_runtime_option CONTEXT VALUE
-# --------------------------------------------
-# Check that all zygote processes are passed device configuration flag VALUE as
-# GC runtime option. Use CONTEXT in logging.
-function check_zygote_gc_runtime_option {
+# check_zygote_runtime_option CONTEXT RUNTIME_OPTION
+# --------------------------------------------------
+# Check that all zygote processes are passed RUNTIME_OPTION as runtime option. Use
+# CONTEXT in logging.
+function check_zygote_runtime_option {
   local context=$1
-  local value=$2
+  local runtime_option=$2
 
   say \
-    "[$context] Check that all zygote processes are passed the flag value as a GC runtime option..."
-  local runtime_option="-Xgc:$value"
+    "[$context] Check that all zygote processes are passed \`$runtime_option\` as runtime option..."
   for zygote in $zygotes; do
-    find_zygote_runtime_option "$zygote" "$runtime_option"\
+    find_zygote_runtime_option "$zygote" "$runtime_option" \
       || fail "Found no \`$runtime_option\` among runtime options passed to \`$zygote\`"
   done
 }
 
-# check_no_zygote_gc_runtime_option CONTEXT VALUE
-# -----------------------------------------------
-# Check that no zygote process is passed device configuration flag VALUE as GC
-# runtime option.  Use CONTEXT in logging.
-function check_no_zygote_gc_runtime_option {
+# check_no_zygote_runtime_option CONTEXT RUNTIME_OPTION
+# -----------------------------------------------------
+# Check that no zygote process is passed RUNTIME_OPTION as runtime option.  Use
+# CONTEXT in logging.
+function check_no_zygote_runtime_option {
   local context=$1
-  local value=$2
+  local runtime_option=$2
 
-  say "[$context] Check no zygote process is passed the flag value as a GC runtime option..."
-  local runtime_option="-Xgc:$value"
+  say "[$context] Check that no zygote process is passed \`$runtime_option\` as runtime option..."
   for zygote in $zygotes; do
-    find_zygote_runtime_option "$zygote" "$runtime_option"\
+    find_zygote_runtime_option "$zygote" "$runtime_option" \
       && fail "Found \`$runtime_option\` among runtime options passed to \`$zygote\`"
   done
 }
@@ -270,17 +268,17 @@ esac
 # ==========================================
 
 function check_nogenerational_cc {
-  check_zygote_gc_runtime_option "$1" nogenerational_cc
+  check_zygote_runtime_option "$1" "-Xgc:nogenerational_cc"
 }
 function check_no_nogenerational_cc {
-  check_no_zygote_gc_runtime_option "$1" nogenerational_cc
+  check_no_zygote_runtime_option "$1" "-Xgc:nogenerational_cc"
 }
 
 function check_generational_cc {
-  check_zygote_gc_runtime_option "$1" generational_cc
+  check_zygote_runtime_option "$1" "-Xgc:generational_cc"
 }
 function check_no_generational_cc {
-  check_no_zygote_gc_runtime_option "$1" generational_cc
+  check_no_zygote_runtime_option "$1" "-Xgc:generational_cc"
 }
 
 test_android_runtime_flag \
