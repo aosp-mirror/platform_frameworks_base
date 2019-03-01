@@ -1270,11 +1270,13 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     static final class ProcessChangeItem {
         static final int CHANGE_ACTIVITIES = 1<<0;
+        static final int CHANGE_FOREGROUND_SERVICES = 1<<1;
         int changes;
         int uid;
         int pid;
         int processState;
         boolean foregroundActivities;
+        int foregroundServiceTypes;
     }
 
     static final class UidObserverRegistration {
@@ -3076,6 +3078,13 @@ public class ActivityManagerService extends IActivityManager.Stub
                             observer.onForegroundActivitiesChanged(item.pid, item.uid,
                                     item.foregroundActivities);
                         }
+                        if ((item.changes & ProcessChangeItem.CHANGE_FOREGROUND_SERVICES) != 0) {
+                            if (DEBUG_PROCESS_OBSERVERS) Slog.i(TAG_PROCESS_OBSERVERS,
+                                    "FOREGROUND SERVICES CHANGED pid=" + item.pid + " uid="
+                                            + item.uid + ": " + item.foregroundServiceTypes);
+                            observer.onForegroundServicesChanged(item.pid, item.uid,
+                                    item.foregroundServiceTypes);
+                        }
                     }
                 } catch (RemoteException e) {
                 }
@@ -3088,6 +3097,47 @@ public class ActivityManagerService extends IActivityManager.Stub
                 mAvailProcessChanges.add(mActiveProcessChanges[j]);
             }
         }
+    }
+
+    @GuardedBy("this")
+    ProcessChangeItem enqueueProcessChangeItemLocked(int uid, int pid) {
+        int i = mPendingProcessChanges.size()-1;
+        ActivityManagerService.ProcessChangeItem item = null;
+        while (i >= 0) {
+            item = mPendingProcessChanges.get(i);
+            if (item.pid == pid) {
+                if (DEBUG_PROCESS_OBSERVERS) Slog.i(TAG_PROCESS_OBSERVERS,
+                        "Re-using existing item: " + item);
+                break;
+            }
+            i--;
+        }
+
+        if (i < 0) {
+            // No existing item in pending changes; need a new one.
+            final int NA = mAvailProcessChanges.size();
+            if (NA > 0) {
+                item = mAvailProcessChanges.remove(NA-1);
+                if (DEBUG_PROCESS_OBSERVERS) Slog.i(TAG_PROCESS_OBSERVERS,
+                        "Retrieving available item: " + item);
+            } else {
+                item = new ActivityManagerService.ProcessChangeItem();
+                if (DEBUG_PROCESS_OBSERVERS) Slog.i(TAG_PROCESS_OBSERVERS,
+                        "Allocating new item: " + item);
+            }
+            item.changes = 0;
+            item.pid = pid;
+            item.uid = uid;
+            if (mPendingProcessChanges.size() == 0) {
+                if (DEBUG_PROCESS_OBSERVERS) Slog.i(TAG_PROCESS_OBSERVERS,
+                        "*** Enqueueing dispatch processes changed!");
+                mUiHandler.obtainMessage(DISPATCH_PROCESSES_CHANGED_UI_MSG)
+                        .sendToTarget();
+            }
+            mPendingProcessChanges.add(item);
+        }
+
+        return item;
     }
 
     private void dispatchProcessDied(int pid, int uid) {
@@ -16256,11 +16306,12 @@ public class ActivityManagerService extends IActivityManager.Stub
     @GuardedBy("this")
     final void updateProcessForegroundLocked(ProcessRecord proc, boolean isForeground,
             int fgServiceTypes, boolean oomAdj) {
+        proc.setHasForegroundServices(isForeground, fgServiceTypes);
+
         final boolean hasFgServiceLocationType =
                 (fgServiceTypes & ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION) != 0;
         if (isForeground != proc.hasForegroundServices()
                 || proc.hasLocationForegroundServices() != hasFgServiceLocationType) {
-            proc.setHasForegroundServices(isForeground, fgServiceTypes);
             ArrayList<ProcessRecord> curProcs = mForegroundPackages.get(proc.info.packageName,
                     proc.info.uid);
             if (isForeground) {
@@ -16288,6 +16339,13 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (oomAdj) {
                 updateOomAdjLocked();
             }
+        }
+
+        if (proc.getForegroundServiceTypes() != fgServiceTypes) {
+            proc.setReportedForegroundServiceTypes(fgServiceTypes);
+            ProcessChangeItem item = enqueueProcessChangeItemLocked(proc.info.uid, proc.pid);
+            item.changes = ProcessChangeItem.CHANGE_FOREGROUND_SERVICES;
+            item.foregroundServiceTypes = fgServiceTypes;
         }
     }
 
@@ -18076,6 +18134,34 @@ public class ActivityManagerService extends IActivityManager.Stub
         @Override
         public void prepareForPossibleShutdown() {
             ActivityManagerService.this.prepareForPossibleShutdown();
+        }
+
+        @Override
+        public boolean hasRunningForegroundService(int uid, int foregroundServicetype) {
+            synchronized (ActivityManagerService.this) {
+                for (int i = 0; i < mProcessList.mLruProcesses.size(); i++) {
+                    final ProcessRecord pr = mProcessList.mLruProcesses.get(i);
+                    if (pr.uid != uid) {
+                        continue;
+                    }
+
+                    if ((pr.getForegroundServiceTypes() & foregroundServicetype) != 0) {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        @Override
+        public void registerProcessObserver(IProcessObserver processObserver) {
+            ActivityManagerService.this.registerProcessObserver(processObserver);
+        }
+
+        @Override
+        public void unregisterProcessObserver(IProcessObserver processObserver) {
+            ActivityManagerService.this.unregisterProcessObserver(processObserver);
         }
     }
 

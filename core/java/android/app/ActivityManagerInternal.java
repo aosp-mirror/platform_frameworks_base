@@ -337,4 +337,21 @@ public abstract class ActivityManagerInternal {
      * like persisting database etc.
      */
     public abstract void prepareForPossibleShutdown();
+
+    /**
+     * Returns {@code true} if {@code uid} is running a foreground service of a specific
+     * {@code foregroundServiceType}.
+     */
+    public abstract boolean hasRunningForegroundService(int uid, int foregroundServiceType);
+
+    /**
+     * Registers the specified {@code processObserver} to be notified of future changes to
+     * process state.
+     */
+    public abstract void registerProcessObserver(IProcessObserver processObserver);
+
+    /**
+     * Unregisters the specified {@code processObserver}.
+     */
+    public abstract void unregisterProcessObserver(IProcessObserver processObserver);
 }
