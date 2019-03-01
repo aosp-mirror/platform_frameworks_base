@@ -793,11 +793,11 @@ public class NotificationContentView extends FrameLayout {
     }
 
     public int getMaxHeight() {
-        if (mContainingNotification.isOnAmbient() && getShowingAmbientView() != null) {
-            return getShowingAmbientView().getHeight();
-        } else if (mExpandedChild != null) {
+        if (mExpandedChild != null) {
             return getViewHeight(VISIBLE_TYPE_EXPANDED)
                     + getExtraRemoteInputHeight(mExpandedRemoteInput);
+        } else if (mContainingNotification.isOnAmbient() && getShowingAmbientView() != null) {
+            return getShowingAmbientView().getHeight();
         } else if (mIsHeadsUp && mHeadsUpChild != null && !mContainingNotification.isOnKeyguard()) {
             return getViewHeight(VISIBLE_TYPE_HEADSUP)
                     + getExtraRemoteInputHeight(mHeadsUpRemoteInput);
@@ -1113,15 +1113,6 @@ public class NotificationContentView extends FrameLayout {
      * @return one of the static enum types in this view, calculated form the current state
      */
     public int calculateVisibleType() {
-        if (mContainingNotification.isOnAmbient()) {
-            if (mIsChildInGroup && mAmbientSingleLineChild != null) {
-                return VISIBLE_TYPE_AMBIENT_SINGLELINE;
-            } else if (mAmbientChild != null) {
-                return VISIBLE_TYPE_AMBIENT;
-            } else {
-                return VISIBLE_TYPE_CONTRACTED;
-            }
-        }
         if (mUserExpanding) {
             int height = !mIsChildInGroup || isGroupExpanded()
                     || mContainingNotification.isExpanded(true /* allowOnKeyguard */)
@@ -1152,8 +1143,10 @@ public class NotificationContentView extends FrameLayout {
         if (!noExpandedChild && viewHeight == getViewHeight(VISIBLE_TYPE_EXPANDED)) {
             return VISIBLE_TYPE_EXPANDED;
         }
+        boolean onAmbient = mContainingNotification.isOnAmbient();
         if (!mUserExpanding && mIsChildInGroup && !isGroupExpanded()) {
-            return VISIBLE_TYPE_SINGLELINE;
+            return onAmbient ? VISIBLE_TYPE_AMBIENT_SINGLELINE
+                    : VISIBLE_TYPE_SINGLELINE;
         }
 
         if ((mIsHeadsUp || mHeadsUpAnimatingAway) && mHeadsUpChild != null
@@ -1164,11 +1157,13 @@ public class NotificationContentView extends FrameLayout {
                 return VISIBLE_TYPE_EXPANDED;
             }
         } else {
+            int collapsedType = onAmbient && mAmbientChild != null ? VISIBLE_TYPE_AMBIENT :
+                    VISIBLE_TYPE_CONTRACTED;
             if (noExpandedChild || (mContractedChild != null
-                    && viewHeight <= getViewHeight(VISIBLE_TYPE_CONTRACTED)
+                    && viewHeight <= getViewHeight(collapsedType)
                     && (!mIsChildInGroup || isGroupExpanded()
                             || !mContainingNotification.isExpanded(true /* allowOnKeyguard */)))) {
-                return VISIBLE_TYPE_CONTRACTED;
+                return collapsedType;
             } else {
                 return VISIBLE_TYPE_EXPANDED;
             }

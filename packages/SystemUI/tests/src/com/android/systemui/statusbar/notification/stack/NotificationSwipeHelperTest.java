@@ -212,7 +212,7 @@ public class NotificationSwipeHelperTest extends SysuiTestCase {
 
     @Test
     public void testDismissChild_notExpanded() {
-        when(mCallback.isExpanded()).thenReturn(false);
+        when(mCallback.shouldDismissQuickly()).thenReturn(false);
         doNothing().when(mSwipeHelper).superDismissChild(mView, 0, false);
         doNothing().when(mSwipeHelper).handleMenuCoveredOrDismissed();
 

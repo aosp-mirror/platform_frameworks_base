@@ -215,6 +215,11 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private boolean mIsAmbientPulsing;
 
     /**
+     * Happens when the notification was pulsing before and goes away to ensure smooth animations.
+     */
+    private boolean mAmbientGoingAway;
+
+    /**
      * Whether or not the notification should be redacted on the lock screen, i.e has sensitive
      * content which should be redacted on the lock screen.
      */
@@ -721,8 +726,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         }
     }
 
-    public boolean isAmbientPulsing() {
-        return mIsAmbientPulsing;
+    @Override
+    public boolean showingAmbientPulsing() {
+        return mIsAmbientPulsing || mAmbientGoingAway;
     }
 
     public void setAmbientPulsing(boolean isAmbientPulsing) {
@@ -3004,9 +3010,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
     @Override
     public boolean isAboveShelf() {
-        return !isOnKeyguard()
+        return showingAmbientPulsing() || (!isOnKeyguard()
                 && (mIsPinned || mHeadsupDisappearRunning || (mIsHeadsUp && mAboveShelf)
-                || mExpandAnimationRunning || mChildIsExpanding);
+                || mExpandAnimationRunning || mChildIsExpanding));
     }
 
     public void setOnAmbient(boolean onAmbient) {
@@ -3159,6 +3165,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                 row.startChildAnimation(properties);
             }
         }
+    }
+
+    public void setAmbientGoingAway(boolean goingAway) {
+        mAmbientGoingAway = goingAway;
     }
 
     @VisibleForTesting

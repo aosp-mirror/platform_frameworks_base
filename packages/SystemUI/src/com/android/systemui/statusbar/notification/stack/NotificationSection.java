@@ -228,4 +228,67 @@ class NotificationSection {
         return (mBottomAnimator == null && mCurrentBounds.bottom == bottom)
                 || (mBottomAnimator != null && mEndAnimationRect.bottom == bottom);
     }
+
+    /**
+     * Update the bounds of this section based on it's views
+     *
+     * @param minTopPosition the minimum position that the top needs to have
+     * @param minBottomPosition the minimum position that the bottom needs to have
+     * @return the position of the new bottom
+     */
+    public int updateBounds(int minTopPosition, int minBottomPosition,
+            boolean shiftBackgroundWithFirst) {
+        int top = minTopPosition;
+        int bottom = minTopPosition;
+        ActivatableNotificationView firstView = getFirstVisibleChild();
+        if (firstView != null) {
+            // Round Y up to avoid seeing the background during animation
+            int finalTranslationY = (int) Math.ceil(ViewState.getFinalTranslationY(firstView));
+            // TODO: look into the already animating part
+            int newTop;
+            if (isTargetTop(finalTranslationY)) {
+                // we're ending up at the same location as we are now, let's just skip the
+                // animation
+                newTop = finalTranslationY;
+            } else {
+                newTop = (int) Math.ceil(firstView.getTranslationY());
+            }
+            top = Math.max(newTop, top);
+            if (firstView.showingAmbientPulsing()) {
+                // If we're pulsing, the notification can actually go below!
+                bottom = Math.max(bottom, finalTranslationY
+                        + ExpandableViewState.getFinalActualHeight(firstView));
+                if (shiftBackgroundWithFirst) {
+                    mBounds.left += Math.max(firstView.getTranslation(), 0);
+                }
+            }
+        }
+        top = Math.max(minTopPosition, top);
+        ActivatableNotificationView lastView = getLastVisibleChild();
+        if (lastView != null) {
+            float finalTranslationY = ViewState.getFinalTranslationY(lastView);
+            int finalHeight = ExpandableViewState.getFinalActualHeight(lastView);
+            // Round Y down to avoid seeing the background during animation
+            int finalBottom = (int) Math.floor(
+                    finalTranslationY + finalHeight - lastView.getClipBottomAmount());
+            int newBottom;
+            if (isTargetBottom(finalBottom)) {
+                // we're ending up at the same location as we are now, lets just skip the animation
+                newBottom = finalBottom;
+            } else {
+                newBottom = (int) (lastView.getTranslationY() + lastView.getActualHeight()
+                        - lastView.getClipBottomAmount());
+                // The background can never be lower than the end of the last view
+                minBottomPosition = (int) Math.min(
+                        lastView.getTranslationY() + lastView.getActualHeight(),
+                        minBottomPosition);
+            }
+            bottom = Math.max(bottom, Math.max(newBottom, minBottomPosition));
+        }
+        bottom = Math.max(top, bottom);
+        mBounds.top = top;
+        mBounds.bottom = bottom;
+        return bottom;
+    }
+
 }

@@ -408,8 +408,20 @@ public class FalsingManager implements SensorEventListener, StateListener {
         mDataCollector.onNotificatonStartDraggingDown();
     }
 
+    public void onStartExpandingFromPulse() {
+        if (FalsingLog.ENABLED) {
+            FalsingLog.i("onStartExpandingFromPulse", "");
+        }
+        mHumanInteractionClassifier.setType(Classifier.PULSE_EXPAND);
+        mDataCollector.onStartExpandingFromPulse();
+    }
+
     public void onNotificatonStopDraggingDown() {
         mDataCollector.onNotificatonStopDraggingDown();
+    }
+
+    public void onExpansionFromPulseStopped() {
+        mDataCollector.onExpansionFromPulseStopped();
     }
 
     public void onNotificationDismissed() {
