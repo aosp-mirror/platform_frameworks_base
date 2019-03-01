@@ -394,8 +394,10 @@ public final class DeviceConfig {
     /**
      * Look up the String value of a property for a particular namespace.
      *
-     * @param namespace The namespace containing the property to look up.
-     * @param name      The name of the property to look up.
+     * @param namespace    The namespace containing the property to look up.
+     * @param name         The name of the property to look up.
+     * @param defaultValue The value to return if the property does not exist or has no non-null
+     *                     value.
      * @return the corresponding value, or defaultValue if none exists.
      * @hide
      */
@@ -412,6 +414,8 @@ public final class DeviceConfig {
      *
      * @param namespace The namespace containing the property to look up.
      * @param name      The name of the property to look up.
+     * @param defaultValue The value to return if the property does not exist or has no non-null
+     *                     value.
      * @return the corresponding value, or defaultValue if none exists.
      * @hide
      */
@@ -428,6 +432,8 @@ public final class DeviceConfig {
      *
      * @param namespace The namespace containing the property to look up.
      * @param name      The name of the property to look up.
+     * @param defaultValue The value to return if the property does not exist, has no non-null
+     *                     value, or fails to parse into an int.
      * @return the corresponding value, or defaultValue if either none exists or it does not parse.
      * @hide
      */
@@ -448,6 +454,8 @@ public final class DeviceConfig {
      *
      * @param namespace The namespace containing the property to look up.
      * @param name      The name of the property to look up.
+     * @param defaultValue The value to return if the property does not exist, has no non-null
+     *                     value, or fails to parse into a long.
      * @return the corresponding value, or defaultValue if either none exists or it does not parse.
      * @hide
      */
@@ -468,6 +476,8 @@ public final class DeviceConfig {
      *
      * @param namespace The namespace containing the property to look up.
      * @param name      The name of the property to look up.
+     * @param defaultValue The value to return if the property does not exist, has no non-null
+     *                     value, or fails to parse into a float.
      * @return the corresponding value, or defaultValue if either none exists or it does not parse.
      * @hide
      */
