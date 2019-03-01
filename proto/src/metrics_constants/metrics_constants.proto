@@ -253,6 +253,13 @@ message MetricsEvent {
     MANAGED_PROFILE = 2;
   }
 
+  // Subtypes for showing direct sharing targets
+  enum DirectShareTargetPreviousState {
+    PREVIOUSLY_UNKNOWN = 0;
+    PREVIOUSLY_HIDDEN = 1;
+    PREVIOUSLY_VISIBLE = 2;
+  }
+
   // Known visual elements: views or controls.
   enum View {
     // Unknown view
