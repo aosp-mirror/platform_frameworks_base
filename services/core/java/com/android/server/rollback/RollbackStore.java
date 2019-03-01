@@ -404,7 +404,7 @@ class RollbackStore {
 
     private static String rollbackStateToString(@RollbackData.RollbackState int state) {
         switch (state) {
-            case RollbackData.ROLLBACK_STATE_PENDING_AVAILABLE: return "pending_available";
+            case RollbackData.ROLLBACK_STATE_ENABLING: return "enabling";
             case RollbackData.ROLLBACK_STATE_AVAILABLE: return "available";
             case RollbackData.ROLLBACK_STATE_COMMITTED: return "committed";
         }
@@ -414,7 +414,7 @@ class RollbackStore {
     private static @RollbackData.RollbackState int rollbackStateFromString(String state)
             throws ParseException {
         switch (state) {
-            case "pending_available": return RollbackData.ROLLBACK_STATE_PENDING_AVAILABLE;
+            case "enabling": return RollbackData.ROLLBACK_STATE_ENABLING;
             case "available": return RollbackData.ROLLBACK_STATE_AVAILABLE;
             case "committed": return RollbackData.ROLLBACK_STATE_COMMITTED;
         }

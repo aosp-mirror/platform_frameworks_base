@@ -45,7 +45,7 @@ import org.mockito.Mockito;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
+import java.util.Set;
 
 @RunWith(JUnit4.class)
 public class AppDataRollbackHelperTest {
@@ -249,7 +249,7 @@ public class AppDataRollbackHelperTest {
         dataForRestore.info.getPackages().add(pendingRestore);
         dataForRestore.info.getPackages().add(wasRecentlyRestored);
 
-        List<RollbackData> changed = helper.commitPendingBackupAndRestoreForUser(37,
+        Set<RollbackData> changed = helper.commitPendingBackupAndRestoreForUser(37,
                 Arrays.asList(dataWithPendingBackup, dataWithRecentRestore, dataForDifferentUser,
                     dataForRestore));
         InOrder inOrder = Mockito.inOrder(installer);
@@ -265,10 +265,10 @@ public class AppDataRollbackHelperTest {
         assertEquals(53, pendingBackup.getCeSnapshotInodes().get(37));
 
         // Check that changed returns correct RollbackData.
-        // TODO: Figure out what this should return.
-        // assertEquals(2, changed.size());
-        // assertEquals(dataWithPendingBackup, changed.get(0));
-        // assertEquals(dataWithRecentRestore, changed.get(1));
+        assertEquals(3, changed.size());
+        assertTrue(changed.contains(dataWithPendingBackup));
+        assertTrue(changed.contains(dataWithRecentRestore));
+        assertTrue(changed.contains(dataForRestore));
 
         // Check that restore was performed.
         inOrder.verify(installer).restoreAppDataSnapshot(

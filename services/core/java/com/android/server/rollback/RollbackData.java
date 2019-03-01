@@ -32,7 +32,7 @@ import java.util.ArrayList;
  */
 class RollbackData {
     @IntDef(flag = true, prefix = { "ROLLBACK_STATE_" }, value = {
-            ROLLBACK_STATE_PENDING_AVAILABLE,
+            ROLLBACK_STATE_ENABLING,
             ROLLBACK_STATE_AVAILABLE,
             ROLLBACK_STATE_COMMITTED,
     })
@@ -40,10 +40,10 @@ class RollbackData {
     @interface RollbackState {}
 
     /**
-     * The (staged) rollback will become available once the session with
-     * stagedSessionId has been applied after a reboot.
+     * The rollback is in the process of being enabled. It is not yet
+     * available for use.
      */
-    static final int ROLLBACK_STATE_PENDING_AVAILABLE = 0;
+    static final int ROLLBACK_STATE_ENABLING = 0;
 
     /**
      * The rollback is currently available.
@@ -82,7 +82,7 @@ class RollbackData {
 
     /**
      * The current state of the rollback.
-     * PENDING_AVAILABLE, AVAILABLE, or COMMITTED.
+     * ENABLING, AVAILABLE, or COMMITTED.
      */
     public @RollbackState int state;
 
@@ -114,7 +114,7 @@ class RollbackData {
                 /* committedSessionId */ -1);
         this.backupDir = backupDir;
         this.stagedSessionId = stagedSessionId;
-        this.state = ROLLBACK_STATE_PENDING_AVAILABLE;
+        this.state = ROLLBACK_STATE_ENABLING;
         this.timestamp = Instant.now();
     }
 

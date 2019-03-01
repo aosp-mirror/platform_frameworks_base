@@ -29,9 +29,11 @@ import com.android.server.pm.Installer.InstallerException;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Encapsulates the logic for initiating userdata snapshots and rollbacks via installd.
@@ -214,9 +216,9 @@ public class AppDataRollbackHelper {
      * backups updates corresponding {@code changedRollbackData} with a mapping from {@code userId}
      * to a inode of theirs CE user data snapshot.
      *
-     * @return a list {@code RollbackData} that have been changed and should be stored on disk.
+     * @return the set of {@code RollbackData} that have been changed and should be stored on disk.
      */
-    public List<RollbackData> commitPendingBackupAndRestoreForUser(int userId,
+    public Set<RollbackData> commitPendingBackupAndRestoreForUser(int userId,
             List<RollbackData> rollbacks) {
 
         final Map<String, PackageRollbackInfo> pendingBackupPackages = new HashMap<>();
@@ -283,7 +285,7 @@ public class AppDataRollbackHelper {
             }
         }
 
-        final List<RollbackData> changed = pendingBackups;
+        final Set<RollbackData> changed = new HashSet<>(pendingBackups);
         changed.addAll(pendingRestores);
         return changed;
     }

@@ -64,6 +64,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
@@ -416,7 +417,18 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                             int status = result.getIntExtra(PackageInstaller.EXTRA_STATUS,
                                     PackageInstaller.STATUS_FAILURE);
                             if (status != PackageInstaller.STATUS_SUCCESS) {
+                                // Committing the rollback failed, but we
+                                // still have all the info we need to try
+                                // rolling back again, so restore the rollback
+                                // state to how it was before we tried
+                                // committing.
+                                // TODO: Should we just kill this rollback if
+                                // commit failed? Why would we expect commit
+                                // not to fail again?
                                 synchronized (mLock) {
+                                    // TODO: Could this cause a rollback to be
+                                    // resurrected if it should otherwise have
+                                    // expired by now?
                                     data.state = RollbackData.ROLLBACK_STATE_AVAILABLE;
                                     data.restoreUserDataInProgress = false;
                                 }
@@ -509,7 +521,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                 rollbacks = new ArrayList<>(mRollbacks);
             }
 
-            final List<RollbackData> changed =
+            final Set<RollbackData> changed =
                     mAppDataRollbackHelper.commitPendingBackupAndRestoreForUser(userId, rollbacks);
 
             for (RollbackData rd : changed) {
@@ -540,14 +552,14 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         getHandler().post(() -> {
             // Check to see if any rollback-enabled staged sessions or staged
             // rollback sessions been applied.
-            List<RollbackData> pendingAvailable = new ArrayList<>();
+            List<RollbackData> enabling = new ArrayList<>();
             List<RollbackData> restoreInProgress = new ArrayList<>();
             synchronized (mLock) {
                 ensureRollbackDataLoadedLocked();
                 for (RollbackData data : mRollbacks) {
                     if (data.isStaged()) {
-                        if (data.state == RollbackData.ROLLBACK_STATE_PENDING_AVAILABLE) {
-                            pendingAvailable.add(data);
+                        if (data.state == RollbackData.ROLLBACK_STATE_ENABLING) {
+                            enabling.add(data);
                         } else if (data.restoreUserDataInProgress) {
                             restoreInProgress.add(data);
                         }
@@ -555,10 +567,11 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                 }
             }
 
-            for (RollbackData data : pendingAvailable) {
+            for (RollbackData data : enabling) {
                 PackageInstaller installer = mContext.getPackageManager().getPackageInstaller();
                 PackageInstaller.SessionInfo session = installer.getSessionInfo(
                         data.stagedSessionId);
+                // TODO: What if session is null?
                 if (session != null) {
                     if (session.isStagedSessionApplied()) {
                         makeRollbackAvailable(data);
@@ -576,12 +589,12 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                 PackageInstaller installer = mContext.getPackageManager().getPackageInstaller();
                 PackageInstaller.SessionInfo session = installer.getSessionInfo(
                         data.stagedSessionId);
+                // TODO: What if session is null?
                 if (session != null) {
                     if (session.isStagedSessionApplied() || session.isStagedSessionFailed()) {
                         synchronized (mLock) {
                             data.restoreUserDataInProgress = false;
                         }
-                        mRollbackStore.deletePackageCodePaths(data);
                         saveRollbackData(data);
                     }
                 }
@@ -640,8 +653,9 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             Iterator<RollbackData> iter = mRollbacks.iterator();
             while (iter.hasNext()) {
                 RollbackData data = iter.next();
+                // TODO: Should we remove rollbacks in the ENABLING state here?
                 if (data.state == RollbackData.ROLLBACK_STATE_AVAILABLE
-                        || data.state == RollbackData.ROLLBACK_STATE_PENDING_AVAILABLE) {
+                        || data.state == RollbackData.ROLLBACK_STATE_ENABLING) {
                     for (PackageRollbackInfo info : data.info.getPackages()) {
                         if (info.getPackageName().equals(packageName)
                                 && !packageVersionsEqual(
