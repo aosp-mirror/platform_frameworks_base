@@ -72,7 +72,7 @@ public final class MessagePdu implements Parcelable {
     /**
      * Constructs a {@link MessagePdu} from a {@link Parcel}.
      */
-    public static final Parcelable.Creator<MessagePdu> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<MessagePdu> CREATOR
             = new Parcelable.Creator<MessagePdu>() {
                 @Override
                 public MessagePdu createFromParcel(Parcel source) {

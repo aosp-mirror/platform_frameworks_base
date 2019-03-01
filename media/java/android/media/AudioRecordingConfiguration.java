@@ -317,7 +317,7 @@ public final class AudioRecordingConfiguration implements Parcelable {
         return new ArrayList<AudioEffect.Descriptor>(Arrays.asList(mDeviceEffects));
     }
 
-    public static final Parcelable.Creator<AudioRecordingConfiguration> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<AudioRecordingConfiguration> CREATOR
             = new Parcelable.Creator<AudioRecordingConfiguration>() {
         /**
          * Rebuilds an AudioRecordingConfiguration previously stored with writeToParcel().

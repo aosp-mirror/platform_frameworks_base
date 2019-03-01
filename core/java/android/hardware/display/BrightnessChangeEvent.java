@@ -153,7 +153,7 @@ public final class BrightnessChangeEvent implements Parcelable {
         colorSampleDuration = source.readLong();
     }
 
-    public static final Creator<BrightnessChangeEvent> CREATOR =
+    public static final @android.annotation.NonNull Creator<BrightnessChangeEvent> CREATOR =
             new Creator<BrightnessChangeEvent>() {
                 public BrightnessChangeEvent createFromParcel(Parcel source) {
                     return new BrightnessChangeEvent(source);

@@ -30,7 +30,7 @@ public class KeymasterBlob implements Parcelable {
         this.blob = blob;
     }
     @UnsupportedAppUsage
-    public static final Parcelable.Creator<KeymasterBlob> CREATOR = new
+    public static final @android.annotation.NonNull Parcelable.Creator<KeymasterBlob> CREATOR = new
             Parcelable.Creator<KeymasterBlob>() {
                 public KeymasterBlob createFromParcel(Parcel in) {
                     return new KeymasterBlob(in);

@@ -227,7 +227,7 @@ public class DropBoxManager {
             return (mFlags & IS_GZIPPED) != 0 ? new GZIPInputStream(is) : is;
         }
 
-        public static final Parcelable.Creator<Entry> CREATOR = new Parcelable.Creator() {
+        public static final @android.annotation.NonNull Parcelable.Creator<Entry> CREATOR = new Parcelable.Creator() {
             public Entry[] newArray(int size) { return new Entry[size]; }
             public Entry createFromParcel(Parcel in) {
                 String tag = in.readString();

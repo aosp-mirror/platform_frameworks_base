@@ -271,7 +271,7 @@ public final class SpellCheckerSubtype implements Parcelable {
         dest.writeInt(mSubtypeId);
     }
 
-    public static final Parcelable.Creator<SpellCheckerSubtype> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<SpellCheckerSubtype> CREATOR
             = new Parcelable.Creator<SpellCheckerSubtype>() {
         @Override
         public SpellCheckerSubtype createFromParcel(Parcel source) {

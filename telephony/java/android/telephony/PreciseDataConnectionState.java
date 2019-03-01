@@ -158,7 +158,7 @@ public final class PreciseDataConnectionState implements Parcelable {
         out.writeInt(mFailCause);
     }
 
-    public static final Parcelable.Creator<PreciseDataConnectionState> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<PreciseDataConnectionState> CREATOR
             = new Parcelable.Creator<PreciseDataConnectionState>() {
 
         public PreciseDataConnectionState createFromParcel(Parcel in) {

@@ -44,7 +44,7 @@ public class AppTransitionAnimationSpec implements Parcelable {
         dest.writeParcelable(buffer, 0);
     }
 
-    public static final Parcelable.Creator<AppTransitionAnimationSpec> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<AppTransitionAnimationSpec> CREATOR
             = new Parcelable.Creator<AppTransitionAnimationSpec>() {
         public AppTransitionAnimationSpec createFromParcel(Parcel in) {
             return new AppTransitionAnimationSpec(in);

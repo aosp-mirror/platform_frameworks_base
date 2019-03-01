@@ -72,7 +72,7 @@ public class GeofenceHardwareMonitorEvent implements Parcelable {
         return mLocation;
     }
 
-    public static final Creator<GeofenceHardwareMonitorEvent> CREATOR =
+    public static final @android.annotation.NonNull Creator<GeofenceHardwareMonitorEvent> CREATOR =
             new Creator<GeofenceHardwareMonitorEvent>() {
                 @Override
                 public GeofenceHardwareMonitorEvent createFromParcel(Parcel source) {

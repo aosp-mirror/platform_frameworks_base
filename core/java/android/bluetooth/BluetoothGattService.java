@@ -165,7 +165,7 @@ public class BluetoothGattService implements Parcelable {
         out.writeTypedList(includedServices);
     }
 
-    public static final Parcelable.Creator<BluetoothGattService> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<BluetoothGattService> CREATOR =
             new Parcelable.Creator<BluetoothGattService>() {
         public BluetoothGattService createFromParcel(Parcel in) {
             return new BluetoothGattService(in);

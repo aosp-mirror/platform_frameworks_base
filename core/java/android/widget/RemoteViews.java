@@ -3783,7 +3783,7 @@ public class RemoteViews implements Parcelable, Filter {
     /**
      * Parcelable.Creator that instantiates RemoteViews objects
      */
-    public static final Parcelable.Creator<RemoteViews> CREATOR = new Parcelable.Creator<RemoteViews>() {
+    public static final @android.annotation.NonNull Parcelable.Creator<RemoteViews> CREATOR = new Parcelable.Creator<RemoteViews>() {
         public RemoteViews createFromParcel(Parcel parcel) {
             return new RemoteViews(parcel);
         }

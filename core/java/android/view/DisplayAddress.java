@@ -109,7 +109,7 @@ public abstract class DisplayAddress implements Parcelable {
             mPhysicalDisplayId = physicalDisplayId;
         }
 
-        public static final Parcelable.Creator<Physical> CREATOR =
+        public static final @android.annotation.NonNull Parcelable.Creator<Physical> CREATOR =
                 new Parcelable.Creator<Physical>() {
                     @Override
                     public Physical createFromParcel(Parcel in) {
@@ -153,7 +153,7 @@ public abstract class DisplayAddress implements Parcelable {
             mMacAddress = macAddress;
         }
 
-        public static final Parcelable.Creator<Network> CREATOR =
+        public static final @android.annotation.NonNull Parcelable.Creator<Network> CREATOR =
                 new Parcelable.Creator<Network>() {
                     @Override
                     public Network createFromParcel(Parcel in) {

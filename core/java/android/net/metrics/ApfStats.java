@@ -264,7 +264,7 @@ public final class ApfStats implements IpConnectivityLog.Event {
     }
 
     /** @hide */
-    public static final Parcelable.Creator<ApfStats> CREATOR = new Parcelable.Creator<ApfStats>() {
+    public static final @android.annotation.NonNull Parcelable.Creator<ApfStats> CREATOR = new Parcelable.Creator<ApfStats>() {
         public ApfStats createFromParcel(Parcel in) {
             return new ApfStats(in);
         }

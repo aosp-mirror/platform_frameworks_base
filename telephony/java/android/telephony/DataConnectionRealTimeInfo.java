@@ -92,7 +92,7 @@ public class DataConnectionRealTimeInfo implements Parcelable {
         out.writeInt(mDcPowerState);
     }
 
-    public static final Parcelable.Creator<DataConnectionRealTimeInfo> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<DataConnectionRealTimeInfo> CREATOR
             = new Parcelable.Creator<DataConnectionRealTimeInfo>() {
 
         @Override

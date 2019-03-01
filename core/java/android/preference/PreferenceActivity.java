@@ -518,7 +518,7 @@ public abstract class PreferenceActivity extends ListActivity implements
             readFromParcel(in);
         }
 
-        public static final Creator<Header> CREATOR = new Creator<Header>() {
+        public static final @android.annotation.NonNull Creator<Header> CREATOR = new Creator<Header>() {
             public Header createFromParcel(Parcel source) {
                 return new Header(source);
             }

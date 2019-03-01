@@ -561,7 +561,7 @@ public final class RemoteInput implements Parcelable {
         out.writeArraySet(mAllowedDataTypes);
     }
 
-    public static final Creator<RemoteInput> CREATOR = new Creator<RemoteInput>() {
+    public static final @android.annotation.NonNull Creator<RemoteInput> CREATOR = new Creator<RemoteInput>() {
         @Override
         public RemoteInput createFromParcel(Parcel in) {
             return new RemoteInput(in);

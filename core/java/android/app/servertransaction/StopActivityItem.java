@@ -95,7 +95,7 @@ public class StopActivityItem extends ActivityLifecycleItem {
         mConfigChanges = in.readInt();
     }
 
-    public static final Creator<StopActivityItem> CREATOR =
+    public static final @android.annotation.NonNull Creator<StopActivityItem> CREATOR =
             new Creator<StopActivityItem>() {
         public StopActivityItem createFromParcel(Parcel in) {
             return new StopActivityItem(in);

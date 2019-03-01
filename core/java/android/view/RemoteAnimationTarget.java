@@ -255,7 +255,7 @@ public class RemoteAnimationTarget implements Parcelable {
         proto.end(token);
     }
 
-    public static final Creator<RemoteAnimationTarget> CREATOR
+    public static final @android.annotation.NonNull Creator<RemoteAnimationTarget> CREATOR
             = new Creator<RemoteAnimationTarget>() {
         public RemoteAnimationTarget createFromParcel(Parcel in) {
             return new RemoteAnimationTarget(in);

@@ -3021,7 +3021,7 @@ public class UserManager {
             userRestrictionSource = in.readInt();
         }
 
-        public static final Creator<EnforcingUser> CREATOR = new Creator<EnforcingUser>() {
+        public static final @android.annotation.NonNull Creator<EnforcingUser> CREATOR = new Creator<EnforcingUser>() {
             @Override
             public EnforcingUser createFromParcel(Parcel in) {
                 return new EnforcingUser(in);

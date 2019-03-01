@@ -74,7 +74,7 @@ public class MergedConfiguration implements Parcelable {
         return 0;
     }
 
-    public static final Creator<MergedConfiguration> CREATOR = new Creator<MergedConfiguration>() {
+    public static final @android.annotation.NonNull Creator<MergedConfiguration> CREATOR = new Creator<MergedConfiguration>() {
         @Override
         public MergedConfiguration createFromParcel(Parcel in) {
             return new MergedConfiguration(in);

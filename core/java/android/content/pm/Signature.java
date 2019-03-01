@@ -262,7 +262,7 @@ public class Signature implements Parcelable {
         dest.writeByteArray(mSignature);
     }
 
-    public static final Parcelable.Creator<Signature> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<Signature> CREATOR
             = new Parcelable.Creator<Signature>() {
         public Signature createFromParcel(Parcel source) {
             return new Signature(source);

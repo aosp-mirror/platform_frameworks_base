@@ -535,7 +535,7 @@ public abstract class PlayerBase {
             dest.writeStrongBinder(mIPlayer == null ? null : mIPlayer.asBinder());
         }
 
-        public static final Parcelable.Creator<PlayerIdCard> CREATOR
+        public static final @android.annotation.NonNull Parcelable.Creator<PlayerIdCard> CREATOR
         = new Parcelable.Creator<PlayerIdCard>() {
             /**
              * Rebuilds an PlayerIdCard previously stored with writeToParcel().

@@ -167,7 +167,7 @@ public final class WifiUsabilityStatsEntry implements Parcelable {
     }
 
     /** Implement the Parcelable interface */
-    public static final Creator<WifiUsabilityStatsEntry> CREATOR =
+    public static final @android.annotation.NonNull Creator<WifiUsabilityStatsEntry> CREATOR =
             new Creator<WifiUsabilityStatsEntry>() {
         public WifiUsabilityStatsEntry createFromParcel(Parcel in) {
             return new WifiUsabilityStatsEntry(

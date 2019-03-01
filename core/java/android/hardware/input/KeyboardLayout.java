@@ -39,7 +39,7 @@ public final class KeyboardLayout implements Parcelable,
     private final int mVendorId;
     private final int mProductId;
 
-    public static final Parcelable.Creator<KeyboardLayout> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<KeyboardLayout> CREATOR =
             new Parcelable.Creator<KeyboardLayout>() {
         public KeyboardLayout createFromParcel(Parcel source) {
             return new KeyboardLayout(source);

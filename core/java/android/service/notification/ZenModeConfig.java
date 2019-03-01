@@ -921,7 +921,7 @@ public class ZenModeConfig implements Parcelable {
         }
     }
 
-    public static final Parcelable.Creator<ZenModeConfig> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<ZenModeConfig> CREATOR
             = new Parcelable.Creator<ZenModeConfig>() {
         @Override
         public ZenModeConfig createFromParcel(Parcel source) {
@@ -1860,7 +1860,7 @@ public class ZenModeConfig implements Parcelable {
                     || condition.state == Condition.STATE_UNKNOWN);
         }
 
-        public static final Parcelable.Creator<ZenRule> CREATOR
+        public static final @android.annotation.NonNull Parcelable.Creator<ZenRule> CREATOR
                 = new Parcelable.Creator<ZenRule>() {
             @Override
             public ZenRule createFromParcel(Parcel source) {

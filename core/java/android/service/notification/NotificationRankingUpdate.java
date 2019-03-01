@@ -119,7 +119,7 @@ public class NotificationRankingUpdate implements Parcelable {
         out.writeBooleanArray(mCanBubble);
     }
 
-    public static final Parcelable.Creator<NotificationRankingUpdate> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<NotificationRankingUpdate> CREATOR
             = new Parcelable.Creator<NotificationRankingUpdate>() {
         public NotificationRankingUpdate createFromParcel(Parcel parcel) {
             return new NotificationRankingUpdate(parcel);

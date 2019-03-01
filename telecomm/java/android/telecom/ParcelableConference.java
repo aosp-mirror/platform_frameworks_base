@@ -134,7 +134,7 @@ public final class ParcelableConference implements Parcelable {
         return mExtras;
     }
 
-    public static final Parcelable.Creator<ParcelableConference> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<ParcelableConference> CREATOR =
             new Parcelable.Creator<ParcelableConference> () {
         @Override
         public ParcelableConference createFromParcel(Parcel source) {

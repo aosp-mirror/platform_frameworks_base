@@ -72,7 +72,7 @@ public final class ConnectEvent extends NetworkEvent implements Parcelable {
                 mPackageName);
     }
 
-    public static final Parcelable.Creator<ConnectEvent> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<ConnectEvent> CREATOR
             = new Parcelable.Creator<ConnectEvent>() {
         @Override
         public ConnectEvent createFromParcel(Parcel in) {

@@ -1896,7 +1896,7 @@ public class IntentFilter implements Parcelable {
         }
     }
 
-    public static final Parcelable.Creator<IntentFilter> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<IntentFilter> CREATOR
             = new Parcelable.Creator<IntentFilter>() {
         public IntentFilter createFromParcel(Parcel source) {
             return new IntentFilter(source);

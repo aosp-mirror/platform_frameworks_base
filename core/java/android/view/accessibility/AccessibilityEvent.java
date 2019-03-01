@@ -1430,7 +1430,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
     /**
      * @see Parcelable.Creator
      */
-    public static final Parcelable.Creator<AccessibilityEvent> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<AccessibilityEvent> CREATOR =
             new Parcelable.Creator<AccessibilityEvent>() {
         public AccessibilityEvent createFromParcel(Parcel parcel) {
             AccessibilityEvent event = AccessibilityEvent.obtain();

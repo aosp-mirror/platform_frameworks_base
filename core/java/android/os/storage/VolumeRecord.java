@@ -130,7 +130,7 @@ public class VolumeRecord implements Parcelable {
     }
 
     @UnsupportedAppUsage
-    public static final Creator<VolumeRecord> CREATOR = new Creator<VolumeRecord>() {
+    public static final @android.annotation.NonNull Creator<VolumeRecord> CREATOR = new Creator<VolumeRecord>() {
         @Override
         public VolumeRecord createFromParcel(Parcel in) {
             return new VolumeRecord(in);

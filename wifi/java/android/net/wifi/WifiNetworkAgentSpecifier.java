@@ -74,7 +74,7 @@ public final class WifiNetworkAgentSpecifier extends NetworkSpecifier implements
     /**
      * @hide
      */
-    public static final Creator<WifiNetworkAgentSpecifier> CREATOR =
+    public static final @android.annotation.NonNull Creator<WifiNetworkAgentSpecifier> CREATOR =
             new Creator<WifiNetworkAgentSpecifier>() {
                 @Override
                 public WifiNetworkAgentSpecifier createFromParcel(@NonNull Parcel in) {

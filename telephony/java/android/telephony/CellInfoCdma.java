@@ -156,7 +156,7 @@ public final class CellInfoCdma extends CellInfo implements Parcelable {
     }
 
     /** Implement the Parcelable interface */
-    public static final Creator<CellInfoCdma> CREATOR = new Creator<CellInfoCdma>() {
+    public static final @android.annotation.NonNull Creator<CellInfoCdma> CREATOR = new Creator<CellInfoCdma>() {
         @Override
         public CellInfoCdma createFromParcel(Parcel in) {
             in.readInt(); // Skip past token, we know what it is

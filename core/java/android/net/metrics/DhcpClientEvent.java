@@ -98,7 +98,7 @@ public final class DhcpClientEvent implements IpConnectivityLog.Event {
     }
 
     /** @hide */
-    public static final Parcelable.Creator<DhcpClientEvent> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<DhcpClientEvent> CREATOR
         = new Parcelable.Creator<DhcpClientEvent>() {
         public DhcpClientEvent createFromParcel(Parcel in) {
             return new DhcpClientEvent(in);

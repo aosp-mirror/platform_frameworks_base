@@ -237,7 +237,7 @@ public class NetworkPolicy implements Parcelable, Comparable<NetworkPolicy> {
     }
 
     @UnsupportedAppUsage
-    public static final Creator<NetworkPolicy> CREATOR = new Creator<NetworkPolicy>() {
+    public static final @android.annotation.NonNull Creator<NetworkPolicy> CREATOR = new Creator<NetworkPolicy>() {
         @Override
         public NetworkPolicy createFromParcel(Parcel in) {
             return new NetworkPolicy(in);

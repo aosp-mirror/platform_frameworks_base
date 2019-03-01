@@ -234,7 +234,7 @@ public final class PlaybackParams implements Parcelable {
         return mSpeed;
     }
 
-    public static final Parcelable.Creator<PlaybackParams> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<PlaybackParams> CREATOR =
             new Parcelable.Creator<PlaybackParams>() {
                 @Override
                 public PlaybackParams createFromParcel(Parcel in) {

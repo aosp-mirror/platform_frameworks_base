@@ -431,7 +431,7 @@ public final class StorageVolume implements Parcelable {
         pw.decreaseIndent();
     }
 
-    public static final Creator<StorageVolume> CREATOR = new Creator<StorageVolume>() {
+    public static final @android.annotation.NonNull Creator<StorageVolume> CREATOR = new Creator<StorageVolume>() {
         @Override
         public StorageVolume createFromParcel(Parcel in) {
             return new StorageVolume(in);

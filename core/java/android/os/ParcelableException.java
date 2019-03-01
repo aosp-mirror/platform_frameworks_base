@@ -76,7 +76,7 @@ public final class ParcelableException extends RuntimeException implements Parce
         writeToParcel(dest, getCause());
     }
 
-    public static final Creator<ParcelableException> CREATOR = new Creator<ParcelableException>() {
+    public static final @android.annotation.NonNull Creator<ParcelableException> CREATOR = new Creator<ParcelableException>() {
         @Override
         public ParcelableException createFromParcel(Parcel source) {
             return new ParcelableException(readFromParcel(source));

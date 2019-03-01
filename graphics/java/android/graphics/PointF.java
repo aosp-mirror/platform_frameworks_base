@@ -130,7 +130,7 @@ public class PointF implements Parcelable {
         out.writeFloat(y);
     }
 
-    public static final Parcelable.Creator<PointF> CREATOR = new Parcelable.Creator<PointF>() {
+    public static final @android.annotation.NonNull Parcelable.Creator<PointF> CREATOR = new Parcelable.Creator<PointF>() {
         /**
          * Return a new point from the data in the specified parcel.
          */

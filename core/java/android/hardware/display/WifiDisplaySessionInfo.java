@@ -36,7 +36,7 @@ public final class WifiDisplaySessionInfo implements Parcelable {
     private final String mPassphrase;
     private final String mIP;
 
-    public static final Creator<WifiDisplaySessionInfo> CREATOR =
+    public static final @android.annotation.NonNull Creator<WifiDisplaySessionInfo> CREATOR =
             new Creator<WifiDisplaySessionInfo>() {
         @Override
         public WifiDisplaySessionInfo createFromParcel(Parcel in) {

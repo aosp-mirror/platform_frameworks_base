@@ -384,7 +384,7 @@ package android.app {
     method @NonNull public String getOpName();
     method public long getRejectCount(int);
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.app.AppOpsManager.HistoricalOp> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.AppOpsManager.HistoricalOp> CREATOR;
   }
 
   public static final class AppOpsManager.HistoricalOps implements android.os.Parcelable {
@@ -395,7 +395,7 @@ package android.app {
     method @Nullable public android.app.AppOpsManager.HistoricalUidOps getUidOps(int);
     method @NonNull public android.app.AppOpsManager.HistoricalUidOps getUidOpsAt(int);
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.app.AppOpsManager.HistoricalOps> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.AppOpsManager.HistoricalOps> CREATOR;
   }
 
   public static final class AppOpsManager.HistoricalOpsRequest {
@@ -416,7 +416,7 @@ package android.app {
     method public int getOpCount();
     method @NonNull public String getPackageName();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.app.AppOpsManager.HistoricalPackageOps> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.AppOpsManager.HistoricalPackageOps> CREATOR;
   }
 
   public static final class AppOpsManager.HistoricalUidOps implements android.os.Parcelable {
@@ -426,7 +426,7 @@ package android.app {
     method @NonNull public android.app.AppOpsManager.HistoricalPackageOps getPackageOpsAt(int);
     method public int getUid();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.app.AppOpsManager.HistoricalUidOps> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.AppOpsManager.HistoricalUidOps> CREATOR;
   }
 
   public static final class AppOpsManager.OpEntry implements android.os.Parcelable {
@@ -444,7 +444,7 @@ package android.app {
     method public int getProxyUid();
     method public boolean isRunning();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.app.AppOpsManager.OpEntry> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.AppOpsManager.OpEntry> CREATOR;
   }
 
   public static final class AppOpsManager.PackageOps implements android.os.Parcelable {
@@ -453,7 +453,7 @@ package android.app {
     method public String getPackageName();
     method public int getUid();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.app.AppOpsManager.PackageOps> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.AppOpsManager.PackageOps> CREATOR;
   }
 
   public class BroadcastOptions {
@@ -588,7 +588,7 @@ package android.app {
     method public int getRemovedFlags();
     method public int getWidth();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.app.Vr2dDisplayProperties> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.Vr2dDisplayProperties> CREATOR;
     field public static final int FLAG_VIRTUAL_DISPLAY_ENABLED = 1; // 0x1
   }
 
@@ -833,7 +833,7 @@ package android.app.backup {
     ctor public BackupProgress(long, long);
     method public int describeContents();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.app.backup.BackupProgress> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.backup.BackupProgress> CREATOR;
     field public final long bytesExpected;
     field public final long bytesTransferred;
   }
@@ -891,7 +891,7 @@ package android.app.backup {
     method public int getDataType();
     method public String getPackageName();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.app.backup.RestoreDescription> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.backup.RestoreDescription> CREATOR;
     field public static final android.app.backup.RestoreDescription NO_MORE_PACKAGES;
     field public static final int TYPE_FULL_STREAM = 2; // 0x2
     field public static final int TYPE_KEY_VALUE = 1; // 0x1
@@ -918,7 +918,7 @@ package android.app.backup {
     ctor public RestoreSet(String, String, long);
     method public int describeContents();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.app.backup.RestoreSet> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.backup.RestoreSet> CREATOR;
     field public String device;
     field public String name;
     field public long token;
@@ -939,7 +939,7 @@ package android.app.contentsuggestions {
     method @Nullable public android.os.Bundle getExtras();
     method @NonNull public java.util.List<android.app.contentsuggestions.ContentSelection> getSelections();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.app.contentsuggestions.ClassificationsRequest> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.contentsuggestions.ClassificationsRequest> CREATOR;
   }
 
   public static final class ClassificationsRequest.Builder {
@@ -954,7 +954,7 @@ package android.app.contentsuggestions {
     method @NonNull public android.os.Bundle getExtras();
     method @NonNull public String getId();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.app.contentsuggestions.ContentClassification> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.contentsuggestions.ContentClassification> CREATOR;
   }
 
   public final class ContentSelection implements android.os.Parcelable {
@@ -963,7 +963,7 @@ package android.app.contentsuggestions {
     method @NonNull public android.os.Bundle getExtras();
     method @NonNull public String getId();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.app.contentsuggestions.ContentSelection> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.contentsuggestions.ContentSelection> CREATOR;
   }
 
   public final class ContentSuggestionsManager {
@@ -987,7 +987,7 @@ package android.app.contentsuggestions {
     method @Nullable public android.graphics.Point getInterestPoint();
     method public int getTaskId();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.app.contentsuggestions.SelectionsRequest> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.contentsuggestions.SelectionsRequest> CREATOR;
   }
 
   public static final class SelectionsRequest.Builder {
@@ -1016,7 +1016,7 @@ package android.app.prediction {
     method public int getPredictedTargetCount();
     method public String getUiSurface();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.app.prediction.AppPredictionContext> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.prediction.AppPredictionContext> CREATOR;
   }
 
   public static final class AppPredictionContext.Builder {
@@ -1034,7 +1034,7 @@ package android.app.prediction {
   public final class AppPredictionSessionId implements android.os.Parcelable {
     method public int describeContents();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.app.prediction.AppPredictionSessionId> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.prediction.AppPredictionSessionId> CREATOR;
   }
 
   public final class AppPredictor {
@@ -1062,7 +1062,7 @@ package android.app.prediction {
     method @Nullable public android.content.pm.ShortcutInfo getShortcutInfo();
     method @NonNull public android.os.UserHandle getUser();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.app.prediction.AppTarget> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.prediction.AppTarget> CREATOR;
   }
 
   public final class AppTargetEvent implements android.os.Parcelable {
@@ -1074,7 +1074,7 @@ package android.app.prediction {
     field public static final int ACTION_DISMISS = 2; // 0x2
     field public static final int ACTION_LAUNCH = 1; // 0x1
     field public static final int ACTION_PIN = 3; // 0x3
-    field public static final android.os.Parcelable.Creator<android.app.prediction.AppTargetEvent> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.prediction.AppTargetEvent> CREATOR;
   }
 
   public static final class AppTargetEvent.Builder {
@@ -1087,7 +1087,7 @@ package android.app.prediction {
     ctor public AppTargetId(@NonNull String);
     method public int describeContents();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.app.prediction.AppTargetId> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.prediction.AppTargetId> CREATOR;
   }
 
 }
@@ -1130,7 +1130,7 @@ package android.app.usage {
     method public android.app.usage.UsageStats getUsageStats();
     method public String getVolumeUuid();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.app.usage.CacheQuotaHint> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.usage.CacheQuotaHint> CREATOR;
     field public static final long QUOTA_NOT_SET = -1L; // 0xffffffffffffffffL
   }
 
@@ -1277,7 +1277,7 @@ package android.bluetooth.le {
     method public int getOffset();
     method public int getType();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.bluetooth.le.ResultStorageDescriptor> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.bluetooth.le.ResultStorageDescriptor> CREATOR;
   }
 
   public final class ScanSettings implements android.os.Parcelable {
@@ -1445,7 +1445,7 @@ package android.content.om {
     method public int describeContents();
     method public boolean isEnabled();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.content.om.OverlayInfo> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.content.om.OverlayInfo> CREATOR;
     field public final String category;
     field public final String packageName;
     field public final String targetPackageName;
@@ -1484,7 +1484,7 @@ package android.content.pm {
     method @NonNull public android.graphics.drawable.Drawable loadIcon(@NonNull android.content.pm.PackageManager);
     method @NonNull public CharSequence loadLabel(@NonNull android.content.pm.PackageManager);
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.content.pm.InstantAppInfo> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.content.pm.InstantAppInfo> CREATOR;
   }
 
   public final class InstantAppIntentFilter implements android.os.Parcelable {
@@ -1493,7 +1493,7 @@ package android.content.pm {
     method public java.util.List<android.content.IntentFilter> getFilters();
     method public String getSplitName();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.content.pm.InstantAppIntentFilter> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.content.pm.InstantAppIntentFilter> CREATOR;
   }
 
   public final class InstantAppResolveInfo implements android.os.Parcelable {
@@ -1511,7 +1511,7 @@ package android.content.pm {
     method @Deprecated public int getVersionCode();
     method public boolean shouldLetInstallerDecide();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.content.pm.InstantAppResolveInfo> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.content.pm.InstantAppResolveInfo> CREATOR;
   }
 
   public static final class InstantAppResolveInfo.InstantAppDigest implements android.os.Parcelable {
@@ -1520,7 +1520,7 @@ package android.content.pm {
     method public byte[][] getDigestBytes();
     method public int[] getDigestPrefix();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.content.pm.InstantAppResolveInfo.InstantAppDigest> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.content.pm.InstantAppResolveInfo.InstantAppDigest> CREATOR;
     field public static final android.content.pm.InstantAppResolveInfo.InstantAppDigest UNDEFINED;
   }
 
@@ -1530,7 +1530,7 @@ package android.content.pm {
     method public String getPackageName();
     method public int getStatus();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.content.pm.IntentFilterVerificationInfo> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.content.pm.IntentFilterVerificationInfo> CREATOR;
   }
 
   public class PackageInstaller {
@@ -1728,13 +1728,13 @@ package android.content.pm {
     method public android.content.pm.ShortcutInfo getShortcutInfo();
     method public android.content.ComponentName getTargetComponent();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.content.pm.ShortcutManager.ShareShortcutInfo> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.content.pm.ShortcutManager.ShareShortcutInfo> CREATOR;
   }
 
   public final class SuspendDialogInfo implements android.os.Parcelable {
     method public int describeContents();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.content.pm.SuspendDialogInfo> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.content.pm.SuspendDialogInfo> CREATOR;
   }
 
   public static final class SuspendDialogInfo.Builder {
@@ -1778,7 +1778,7 @@ package android.content.pm.permission {
     method @Deprecated public boolean isGranted();
     method @Deprecated public boolean isStandard();
     method @Deprecated public void writeToParcel(android.os.Parcel, int);
-    field @Deprecated public static final android.os.Parcelable.Creator<android.content.pm.permission.RuntimePermissionPresentationInfo> CREATOR;
+    field @Deprecated @NonNull public static final android.os.Parcelable.Creator<android.content.pm.permission.RuntimePermissionPresentationInfo> CREATOR;
   }
 
 }
@@ -1791,7 +1791,7 @@ package android.content.rollback {
     method public android.content.pm.VersionedPackage getVersionRolledBackFrom();
     method public android.content.pm.VersionedPackage getVersionRolledBackTo();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.content.rollback.PackageRollbackInfo> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.content.rollback.PackageRollbackInfo> CREATOR;
   }
 
   public final class RollbackInfo implements android.os.Parcelable {
@@ -1802,7 +1802,7 @@ package android.content.rollback {
     method public int getRollbackId();
     method public boolean isStaged();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.content.rollback.RollbackInfo> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.content.rollback.RollbackInfo> CREATOR;
   }
 
   public final class RollbackManager {
@@ -1872,13 +1872,13 @@ package android.hardware.display {
     method public java.time.LocalDate getLocalDate();
     method public float[] getStats();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.hardware.display.AmbientBrightnessDayStats> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.display.AmbientBrightnessDayStats> CREATOR;
   }
 
   public final class BrightnessChangeEvent implements android.os.Parcelable {
     method public int describeContents();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.hardware.display.BrightnessChangeEvent> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.display.BrightnessChangeEvent> CREATOR;
     field public final float batteryLevel;
     field public final float brightness;
     field public final long colorSampleDuration;
@@ -1901,7 +1901,7 @@ package android.hardware.display {
     method @Nullable public android.hardware.display.BrightnessCorrection getCorrectionByPackageName(@NonNull String);
     method public android.util.Pair<float[],float[]> getCurve();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.hardware.display.BrightnessConfiguration> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.display.BrightnessConfiguration> CREATOR;
   }
 
   public static class BrightnessConfiguration.Builder {
@@ -1919,7 +1919,7 @@ package android.hardware.display {
     method @NonNull public static android.hardware.display.BrightnessCorrection createScaleAndTranslateLog(float, float);
     method public int describeContents();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.hardware.display.BrightnessCorrection> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.display.BrightnessCorrection> CREATOR;
   }
 
   public final class ColorDisplayManager {
@@ -2096,7 +2096,7 @@ package android.hardware.hdmi {
     method public boolean isSourceType();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final int ADDR_INTERNAL = 0; // 0x0
-    field public static final android.os.Parcelable.Creator<android.hardware.hdmi.HdmiDeviceInfo> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.hdmi.HdmiDeviceInfo> CREATOR;
     field public static final int DEVICE_AUDIO_SYSTEM = 5; // 0x5
     field public static final int DEVICE_INACTIVE = -1; // 0xffffffff
     field public static final int DEVICE_PLAYBACK = 4; // 0x4
@@ -2116,7 +2116,7 @@ package android.hardware.hdmi {
     method public int getPort();
     method public boolean isConnected();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.hardware.hdmi.HdmiHotplugEvent> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.hdmi.HdmiHotplugEvent> CREATOR;
   }
 
   public final class HdmiPlaybackClient extends android.hardware.hdmi.HdmiClient {
@@ -2144,7 +2144,7 @@ package android.hardware.hdmi {
     method public boolean isCecSupported();
     method public boolean isMhlSupported();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.hardware.hdmi.HdmiPortInfo> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.hdmi.HdmiPortInfo> CREATOR;
     field public static final int PORT_INPUT = 0; // 0x0
     field public static final int PORT_OUTPUT = 1; // 0x1
   }
@@ -2307,7 +2307,7 @@ package android.hardware.location {
     method public int getToolchainVersion();
     method public String getVendor();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.hardware.location.ContextHubInfo> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.location.ContextHubInfo> CREATOR;
   }
 
   public class ContextHubIntentEvent {
@@ -2368,7 +2368,7 @@ package android.hardware.location {
     method @Deprecated public void setMsgType(int);
     method @Deprecated public void setVersion(int);
     method @Deprecated public void writeToParcel(android.os.Parcel, int);
-    field @Deprecated public static final android.os.Parcelable.Creator<android.hardware.location.ContextHubMessage> CREATOR;
+    field @Deprecated @NonNull public static final android.os.Parcelable.Creator<android.hardware.location.ContextHubMessage> CREATOR;
   }
 
   public class ContextHubTransaction<T> {
@@ -2456,7 +2456,7 @@ package android.hardware.location {
     method public int getMonitoringType();
     method public int getSourceTechnologies();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.hardware.location.GeofenceHardwareMonitorEvent> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.location.GeofenceHardwareMonitorEvent> CREATOR;
   }
 
   public final class GeofenceHardwareRequest {
@@ -2486,7 +2486,7 @@ package android.hardware.location {
     method public boolean isReadable();
     method public boolean isWritable();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.hardware.location.MemoryRegion> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.location.MemoryRegion> CREATOR;
   }
 
   @Deprecated public class NanoApp implements android.os.Parcelable {
@@ -2515,7 +2515,7 @@ package android.hardware.location {
     method @Deprecated public void setOutputEvents(int[]);
     method @Deprecated public void setPublisher(String);
     method @Deprecated public void writeToParcel(android.os.Parcel, int);
-    field @Deprecated public static final android.os.Parcelable.Creator<android.hardware.location.NanoApp> CREATOR;
+    field @Deprecated @NonNull public static final android.os.Parcelable.Creator<android.hardware.location.NanoApp> CREATOR;
   }
 
   public final class NanoAppBinary implements android.os.Parcelable {
@@ -2534,7 +2534,7 @@ package android.hardware.location {
     method public boolean isEncrypted();
     method public boolean isSigned();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.hardware.location.NanoAppBinary> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.location.NanoAppBinary> CREATOR;
   }
 
   @Deprecated public class NanoAppFilter implements android.os.Parcelable {
@@ -2543,7 +2543,7 @@ package android.hardware.location {
     method @Deprecated public boolean testMatch(android.hardware.location.NanoAppInstanceInfo);
     method @Deprecated public void writeToParcel(android.os.Parcel, int);
     field @Deprecated public static final int APP_ANY = -1; // 0xffffffff
-    field @Deprecated public static final android.os.Parcelable.Creator<android.hardware.location.NanoAppFilter> CREATOR;
+    field @Deprecated @NonNull public static final android.os.Parcelable.Creator<android.hardware.location.NanoAppFilter> CREATOR;
     field @Deprecated public static final int FLAGS_VERSION_ANY = -1; // 0xffffffff
     field @Deprecated public static final int FLAGS_VERSION_GREAT_THAN = 2; // 0x2
     field @Deprecated public static final int FLAGS_VERSION_LESS_THAN = 4; // 0x4
@@ -2567,7 +2567,7 @@ package android.hardware.location {
     method @Deprecated @NonNull public int[] getOutputEvents();
     method @Deprecated public String getPublisher();
     method @Deprecated public void writeToParcel(android.os.Parcel, int);
-    field @Deprecated public static final android.os.Parcelable.Creator<android.hardware.location.NanoAppInstanceInfo> CREATOR;
+    field @Deprecated @NonNull public static final android.os.Parcelable.Creator<android.hardware.location.NanoAppInstanceInfo> CREATOR;
   }
 
   public final class NanoAppMessage implements android.os.Parcelable {
@@ -2579,7 +2579,7 @@ package android.hardware.location {
     method public long getNanoAppId();
     method public boolean isBroadcastMessage();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.hardware.location.NanoAppMessage> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.location.NanoAppMessage> CREATOR;
   }
 
   public final class NanoAppState implements android.os.Parcelable {
@@ -2589,7 +2589,7 @@ package android.hardware.location {
     method public long getNanoAppVersion();
     method public boolean isEnabled();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.hardware.location.NanoAppState> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.location.NanoAppState> CREATOR;
   }
 
 }
@@ -2602,7 +2602,7 @@ package android.hardware.radio {
     method public int getType();
     method @NonNull public java.util.Map<java.lang.String,java.lang.String> getVendorInfo();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.hardware.radio.Announcement> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.radio.Announcement> CREATOR;
     field public static final int TYPE_EMERGENCY = 1; // 0x1
     field public static final int TYPE_EVENT = 6; // 0x6
     field public static final int TYPE_MISC = 8; // 0x8
@@ -2637,7 +2637,7 @@ package android.hardware.radio {
     method @NonNull public java.util.Set<java.lang.Integer> getIdentifierTypes();
     method @NonNull public java.util.Set<android.hardware.radio.ProgramSelector.Identifier> getIdentifiers();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.hardware.radio.ProgramList.Filter> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.radio.ProgramList.Filter> CREATOR;
   }
 
   public abstract static class ProgramList.ListCallback {
@@ -2663,7 +2663,7 @@ package android.hardware.radio {
     method @Deprecated @NonNull public long[] getVendorIds();
     method @NonNull public android.hardware.radio.ProgramSelector withSecondaryPreferred(@NonNull android.hardware.radio.ProgramSelector.Identifier);
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.hardware.radio.ProgramSelector> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.radio.ProgramSelector> CREATOR;
     field public static final int IDENTIFIER_TYPE_AMFM_FREQUENCY = 1; // 0x1
     field public static final int IDENTIFIER_TYPE_DAB_ENSEMBLE = 6; // 0x6
     field public static final int IDENTIFIER_TYPE_DAB_FREQUENCY = 8; // 0x8
@@ -2702,7 +2702,7 @@ package android.hardware.radio {
     method @android.hardware.radio.ProgramSelector.IdentifierType public int getType();
     method public long getValue();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.hardware.radio.ProgramSelector.Identifier> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.radio.ProgramSelector.Identifier> CREATOR;
   }
 
   @IntDef(prefix={"IDENTIFIER_TYPE_"}, value={android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_INVALID, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_AMFM_FREQUENCY, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_RDS_PI, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_HD_STATION_ID_EXT, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_HD_SUBCHANNEL, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_HD_STATION_NAME, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_DAB_SID_EXT, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_DAB_SIDECC, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_DAB_ENSEMBLE, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_DAB_SCID, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_DAB_FREQUENCY, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_DRMO_SERVICE_ID, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_DRMO_FREQUENCY, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_DRMO_MODULATION, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_SXM_SERVICE_ID, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_SXM_CHANNEL}) @IntRange(from=android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_VENDOR_START, to=android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_VENDOR_END) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface ProgramSelector.IdentifierType {
@@ -2751,7 +2751,7 @@ package android.hardware.radio {
 
   public static class RadioManager.AmBandConfig extends android.hardware.radio.RadioManager.BandConfig {
     method public boolean getStereo();
-    field public static final android.os.Parcelable.Creator<android.hardware.radio.RadioManager.AmBandConfig> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.radio.RadioManager.AmBandConfig> CREATOR;
   }
 
   public static class RadioManager.AmBandConfig.Builder {
@@ -2763,7 +2763,7 @@ package android.hardware.radio {
 
   public static class RadioManager.AmBandDescriptor extends android.hardware.radio.RadioManager.BandDescriptor {
     method public boolean isStereoSupported();
-    field public static final android.os.Parcelable.Creator<android.hardware.radio.RadioManager.AmBandDescriptor> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.radio.RadioManager.AmBandDescriptor> CREATOR;
   }
 
   @IntDef(prefix={"BAND_"}, value={android.hardware.radio.RadioManager.BAND_INVALID, android.hardware.radio.RadioManager.BAND_AM, android.hardware.radio.RadioManager.BAND_FM, android.hardware.radio.RadioManager.BAND_AM_HD, android.hardware.radio.RadioManager.BAND_FM_HD}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface RadioManager.Band {
@@ -2777,7 +2777,7 @@ package android.hardware.radio {
     method public int getType();
     method public int getUpperLimit();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.hardware.radio.RadioManager.BandConfig> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.radio.RadioManager.BandConfig> CREATOR;
   }
 
   public static class RadioManager.BandDescriptor implements android.os.Parcelable {
@@ -2790,7 +2790,7 @@ package android.hardware.radio {
     method public boolean isAmBand();
     method public boolean isFmBand();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.hardware.radio.RadioManager.BandDescriptor> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.radio.RadioManager.BandDescriptor> CREATOR;
   }
 
   public static class RadioManager.FmBandConfig extends android.hardware.radio.RadioManager.BandConfig {
@@ -2799,7 +2799,7 @@ package android.hardware.radio {
     method public boolean getRds();
     method public boolean getStereo();
     method public boolean getTa();
-    field public static final android.os.Parcelable.Creator<android.hardware.radio.RadioManager.FmBandConfig> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.radio.RadioManager.FmBandConfig> CREATOR;
   }
 
   public static class RadioManager.FmBandConfig.Builder {
@@ -2819,7 +2819,7 @@ package android.hardware.radio {
     method public boolean isRdsSupported();
     method public boolean isStereoSupported();
     method public boolean isTaSupported();
-    field public static final android.os.Parcelable.Creator<android.hardware.radio.RadioManager.FmBandDescriptor> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.radio.RadioManager.FmBandDescriptor> CREATOR;
   }
 
   public static class RadioManager.ModuleProperties implements android.os.Parcelable {
@@ -2842,7 +2842,7 @@ package android.hardware.radio {
     method public boolean isProgramIdentifierSupported(@android.hardware.radio.ProgramSelector.IdentifierType int);
     method public boolean isProgramTypeSupported(@android.hardware.radio.ProgramSelector.ProgramType int);
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.hardware.radio.RadioManager.ModuleProperties> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.radio.RadioManager.ModuleProperties> CREATOR;
   }
 
   public static class RadioManager.ProgramInfo implements android.os.Parcelable {
@@ -2864,7 +2864,7 @@ package android.hardware.radio {
     method public boolean isTrafficProgram();
     method public boolean isTuned();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.hardware.radio.RadioManager.ProgramInfo> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.radio.RadioManager.ProgramInfo> CREATOR;
   }
 
   public final class RadioMetadata implements android.os.Parcelable {
@@ -2877,7 +2877,7 @@ package android.hardware.radio {
     method public java.util.Set<java.lang.String> keySet();
     method public int size();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.hardware.radio.RadioMetadata> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.radio.RadioMetadata> CREATOR;
     field public static final String METADATA_KEY_ALBUM = "android.hardware.radio.metadata.ALBUM";
     field public static final String METADATA_KEY_ART = "android.hardware.radio.metadata.ART";
     field public static final String METADATA_KEY_ARTIST = "android.hardware.radio.metadata.ARTIST";
@@ -2915,7 +2915,7 @@ package android.hardware.radio {
     method public int getTimezoneOffsetMinutes();
     method public long getUtcEpochSeconds();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.hardware.radio.RadioMetadata.Clock> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.radio.RadioMetadata.Clock> CREATOR;
   }
 
   public abstract class RadioTuner {
@@ -3015,7 +3015,7 @@ package android.hardware.usb {
     method public boolean isConnected();
     method public boolean isRoleCombinationSupported(int, int);
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.hardware.usb.UsbPortStatus> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.usb.UsbPortStatus> CREATOR;
     field public static final int DATA_ROLE_DEVICE = 2; // 0x2
     field public static final int DATA_ROLE_HOST = 1; // 0x1
     field public static final int DATA_ROLE_NONE = 0; // 0x0
@@ -3048,7 +3048,7 @@ package android.location {
     method public long getToaGpsNanosecondsOfWeek();
     method public double getVerticalPositionUncertaintyMeters();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.location.GnssMeasurementCorrections> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.location.GnssMeasurementCorrections> CREATOR;
   }
 
   public static final class GnssMeasurementCorrections.Builder {
@@ -3070,7 +3070,7 @@ package android.location {
     method public double getLatitudeDegrees();
     method public double getLongitudeDegrees();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.location.GnssReflectingPlane> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.location.GnssReflectingPlane> CREATOR;
   }
 
   public static final class GnssReflectingPlane.Builder {
@@ -3097,7 +3097,7 @@ package android.location {
     method public boolean hasReflectingPlane();
     method public boolean hasValidSatelliteLineOfSight();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.location.GnssSingleSatCorrection> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.location.GnssSingleSatCorrection> CREATOR;
     field public static final int HAS_EXCESS_PATH_LENGTH_MASK = 2; // 0x2
     field public static final int HAS_EXCESS_PATH_LENGTH_UNC_MASK = 4; // 0x4
     field public static final int HAS_PROB_SAT_IS_LOS_MASK = 1; // 0x1
@@ -3154,7 +3154,7 @@ package android.location {
     method public void setTimeUncertaintyInNs(double);
     method public void setType(byte);
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.location.GpsClock> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.location.GpsClock> CREATOR;
     field public static final byte TYPE_GPS_TIME = 2; // 0x2
     field public static final byte TYPE_LOCAL_HW_TIME = 1; // 0x1
     field public static final byte TYPE_UNKNOWN = 0; // 0x0
@@ -3266,7 +3266,7 @@ package android.location {
     field public static final short ADR_STATE_RESET = 2; // 0x2
     field public static final short ADR_STATE_UNKNOWN = 0; // 0x0
     field public static final short ADR_STATE_VALID = 1; // 0x1
-    field public static final android.os.Parcelable.Creator<android.location.GpsMeasurement> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.location.GpsMeasurement> CREATOR;
     field public static final byte LOSS_OF_LOCK_CYCLE_SLIP = 2; // 0x2
     field public static final byte LOSS_OF_LOCK_OK = 1; // 0x1
     field public static final byte LOSS_OF_LOCK_UNKNOWN = 0; // 0x0
@@ -3287,7 +3287,7 @@ package android.location {
     method @NonNull public android.location.GpsClock getClock();
     method @NonNull public java.util.Collection<android.location.GpsMeasurement> getMeasurements();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.location.GpsMeasurementsEvent> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.location.GpsMeasurementsEvent> CREATOR;
     field public static final int STATUS_GPS_LOCATION_DISABLED = 2; // 0x2
     field public static final int STATUS_NOT_SUPPORTED = 0; // 0x0
     field public static final int STATUS_READY = 1; // 0x1
@@ -3315,7 +3315,7 @@ package android.location {
     method public void setSubmessageId(short);
     method public void setType(byte);
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.location.GpsNavigationMessage> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.location.GpsNavigationMessage> CREATOR;
     field public static final short STATUS_PARITY_PASSED = 1; // 0x1
     field public static final short STATUS_PARITY_REBUILT = 2; // 0x2
     field public static final short STATUS_UNKNOWN = 0; // 0x0
@@ -3331,7 +3331,7 @@ package android.location {
     method public int describeContents();
     method @NonNull public android.location.GpsNavigationMessage getNavigationMessage();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.location.GpsNavigationMessageEvent> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.location.GpsNavigationMessageEvent> CREATOR;
     field public static int STATUS_GPS_LOCATION_DISABLED;
     field public static int STATUS_NOT_SUPPORTED;
     field public static int STATUS_READY;
@@ -3404,7 +3404,7 @@ package android.location {
     field public static final int ACCURACY_BLOCK = 102; // 0x66
     field public static final int ACCURACY_CITY = 104; // 0x68
     field public static final int ACCURACY_FINE = 100; // 0x64
-    field public static final android.os.Parcelable.Creator<android.location.LocationRequest> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.location.LocationRequest> CREATOR;
     field public static final int POWER_HIGH = 203; // 0xcb
     field public static final int POWER_LOW = 201; // 0xc9
     field public static final int POWER_NONE = 200; // 0xc8
@@ -3440,7 +3440,7 @@ package android.media {
     method public int getLossReceived();
     method @NonNull public String getPackageName();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.media.AudioFocusInfo> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.media.AudioFocusInfo> CREATOR;
   }
 
   public final class AudioFocusRequest {
@@ -3666,7 +3666,7 @@ package android.media.audiopolicy {
     method public java.util.Iterator<android.media.audiopolicy.AudioProductStrategy> iterator();
     method public int size();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.media.audiopolicy.AudioProductStrategies> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.media.audiopolicy.AudioProductStrategies> CREATOR;
   }
 
   public final class AudioProductStrategy implements android.os.Parcelable {
@@ -3675,7 +3675,7 @@ package android.media.audiopolicy {
     method public int getId();
     method @NonNull public String name();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.media.audiopolicy.AudioProductStrategy> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.media.audiopolicy.AudioProductStrategy> CREATOR;
   }
 
   public final class AudioVolumeGroup implements android.os.Parcelable {
@@ -3831,7 +3831,7 @@ package android.media.tv {
     field public static final int CABLE_CONNECTION_STATUS_CONNECTED = 1; // 0x1
     field public static final int CABLE_CONNECTION_STATUS_DISCONNECTED = 2; // 0x2
     field public static final int CABLE_CONNECTION_STATUS_UNKNOWN = 0; // 0x0
-    field public static final android.os.Parcelable.Creator<android.media.tv.TvInputHardwareInfo> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.media.tv.TvInputHardwareInfo> CREATOR;
     field public static final int TV_INPUT_TYPE_COMPONENT = 6; // 0x6
     field public static final int TV_INPUT_TYPE_COMPOSITE = 3; // 0x3
     field public static final int TV_INPUT_TYPE_DISPLAY_PORT = 10; // 0xa
@@ -3939,7 +3939,7 @@ package android.media.tv {
     method public int getStreamId();
     method public int getType();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.media.tv.TvStreamConfig> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.media.tv.TvStreamConfig> CREATOR;
     field public static final int STREAM_TYPE_BUFFER_PRODUCER = 2; // 0x2
     field public static final int STREAM_TYPE_INDEPENDENT_VIDEO_SOURCE = 1; // 0x1
   }
@@ -4136,7 +4136,7 @@ package android.net {
     ctor public NetworkKey(android.net.WifiKey);
     method public int describeContents();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.net.NetworkKey> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.net.NetworkKey> CREATOR;
     field public static final int TYPE_WIFI = 1; // 0x1
     field public final int type;
     field public final android.net.WifiKey wifiKey;
@@ -4187,7 +4187,7 @@ package android.net {
     method public byte lookupScore(int);
     method public byte lookupScore(int, boolean);
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.net.RssiCurve> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.net.RssiCurve> CREATOR;
     field public final int activeNetworkRssiBoost;
     field public final int bucketWidth;
     field public final byte[] rssiBuckets;
@@ -4204,7 +4204,7 @@ package android.net {
     field public static final String ATTRIBUTES_KEY_BADGING_CURVE = "android.net.attributes.key.BADGING_CURVE";
     field public static final String ATTRIBUTES_KEY_HAS_CAPTIVE_PORTAL = "android.net.attributes.key.HAS_CAPTIVE_PORTAL";
     field public static final String ATTRIBUTES_KEY_RANKING_SCORE_OFFSET = "android.net.attributes.key.RANKING_SCORE_OFFSET";
-    field public static final android.os.Parcelable.Creator<android.net.ScoredNetwork> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.net.ScoredNetwork> CREATOR;
     field @Nullable public final android.os.Bundle attributes;
     field public final boolean meteredHint;
     field public final android.net.NetworkKey networkKey;
@@ -4226,7 +4226,7 @@ package android.net {
     method public void setGateway(java.net.InetAddress);
     method public void setIpAddress(android.net.LinkAddress);
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.net.StaticIpConfiguration> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.net.StaticIpConfiguration> CREATOR;
   }
 
   public class TrafficStats {
@@ -4250,7 +4250,7 @@ package android.net {
     ctor public WifiKey(String, String);
     method public int describeContents();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.net.WifiKey> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.net.WifiKey> CREATOR;
     field public final String bssid;
     field public final String ssid;
   }
@@ -4593,7 +4593,7 @@ package android.net.wifi {
     ctor @Deprecated public RttManager.ResponderConfig();
     method @Deprecated public int describeContents();
     method @Deprecated public void writeToParcel(android.os.Parcel, int);
-    field @Deprecated public static final android.os.Parcelable.Creator<android.net.wifi.RttManager.ResponderConfig> CREATOR;
+    field @Deprecated @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.RttManager.ResponderConfig> CREATOR;
     field @Deprecated public int centerFreq0;
     field @Deprecated public int centerFreq1;
     field @Deprecated public int channelWidth;
@@ -4787,7 +4787,7 @@ package android.net.wifi {
     ctor public WifiNetworkConnectionStatistics(android.net.wifi.WifiNetworkConnectionStatistics);
     method public int describeContents();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.net.wifi.WifiNetworkConnectionStatistics> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.WifiNetworkConnectionStatistics> CREATOR;
     field public int numConnection;
     field public int numUsage;
   }
@@ -4914,7 +4914,7 @@ package android.net.wifi {
   public final class WifiUsabilityStatsEntry implements android.os.Parcelable {
     method public int describeContents();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.net.wifi.WifiUsabilityStatsEntry> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.WifiUsabilityStatsEntry> CREATOR;
     field public static final int PROBE_STATUS_FAILURE = 3; // 0x3
     field public static final int PROBE_STATUS_NO_PROBE = 1; // 0x1
     field public static final int PROBE_STATUS_SUCCESS = 2; // 0x2
@@ -4969,7 +4969,7 @@ package android.net.wifi.hotspot2 {
     method public String getFriendlyName();
     method public android.net.Uri getServerUri();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.net.wifi.hotspot2.OsuProvider> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.hotspot2.OsuProvider> CREATOR;
   }
 
   public abstract class ProvisioningCallback {
@@ -5039,7 +5039,7 @@ package android.net.wifi.rtt {
     field public static final int CHANNEL_WIDTH_40MHZ = 1; // 0x1
     field public static final int CHANNEL_WIDTH_80MHZ = 2; // 0x2
     field public static final int CHANNEL_WIDTH_80MHZ_PLUS_MHZ = 4; // 0x4
-    field public static final android.os.Parcelable.Creator<android.net.wifi.rtt.ResponderConfig> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.rtt.ResponderConfig> CREATOR;
     field public static final int PREAMBLE_HT = 1; // 0x1
     field public static final int PREAMBLE_LEGACY = 0; // 0x0
     field public static final int PREAMBLE_VHT = 2; // 0x2
@@ -5121,7 +5121,7 @@ package android.os {
     method public boolean getForceBackgroundCheck();
     method public int getLocationMode();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.os.BatterySaverPolicyConfig> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.os.BatterySaverPolicyConfig> CREATOR;
   }
 
   public static final class BatterySaverPolicyConfig.Builder {
@@ -5382,7 +5382,7 @@ package android.os {
     method public long getPrivacyPolicy();
     method public long getTimestamp();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.os.IncidentManager.IncidentReport> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.os.IncidentManager.IncidentReport> CREATOR;
   }
 
   public static class IncidentManager.PendingReport {
@@ -5406,7 +5406,7 @@ package android.os {
     method public void setAll(boolean);
     method public void setPrivacyPolicy(int);
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.os.IncidentReportArgs> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.os.IncidentReportArgs> CREATOR;
   }
 
   public final class LocaleList implements android.os.Parcelable {
@@ -5460,7 +5460,7 @@ package android.os {
     method public int describeContents();
     method public void sendResult(@Nullable android.os.Bundle);
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.os.RemoteCallback> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.os.RemoteCallback> CREATOR;
   }
 
   public static interface RemoteCallback.OnResultListener {
@@ -5486,7 +5486,7 @@ package android.os {
     method public boolean isValueType(int);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final int BOOLEAN_VALUE_TYPE = 5; // 0x5
-    field public static final android.os.Parcelable.Creator<android.os.StatsDimensionsValue> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.os.StatsDimensionsValue> CREATOR;
     field public static final int FLOAT_VALUE_TYPE = 6; // 0x6
     field public static final int INT_VALUE_TYPE = 3; // 0x3
     field public static final int LONG_VALUE_TYPE = 4; // 0x4
@@ -5615,7 +5615,7 @@ package android.os {
     method public android.os.UserHandle getUserHandle();
     method @android.os.UserManager.UserRestrictionSource public int getUserRestrictionSource();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.os.UserManager.EnforcingUser> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.os.UserManager.EnforcingUser> CREATOR;
   }
 
   @IntDef(flag=true, prefix={"RESTRICTION_"}, value={android.os.UserManager.RESTRICTION_NOT_SET, android.os.UserManager.RESTRICTION_SOURCE_SYSTEM, android.os.UserManager.RESTRICTION_SOURCE_DEVICE_OWNER, android.os.UserManager.RESTRICTION_SOURCE_PROFILE_OWNER}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface UserManager.UserRestrictionSource {
@@ -5632,7 +5632,7 @@ package android.os {
     method public String getAttributionTag();
     method public int getAttributionUid();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.os.WorkSource.WorkChain> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.os.WorkSource.WorkChain> CREATOR;
   }
 
 }
@@ -5698,7 +5698,7 @@ package android.permission {
     method public boolean isGranted();
     method public boolean isStandard();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.permission.RuntimePermissionPresentationInfo> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.permission.RuntimePermissionPresentationInfo> CREATOR;
   }
 
   public final class RuntimePermissionUsageInfo implements android.os.Parcelable {
@@ -5707,7 +5707,7 @@ package android.permission {
     method public int getAppAccessCount();
     method @NonNull public CharSequence getName();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.permission.RuntimePermissionUsageInfo> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.permission.RuntimePermissionUsageInfo> CREATOR;
   }
 
 }
@@ -5761,7 +5761,7 @@ package android.printservice {
     method public int describeContents();
     method @NonNull public android.content.ComponentName getComponentName();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.printservice.PrintServiceInfo> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.printservice.PrintServiceInfo> CREATOR;
   }
 
 }
@@ -5778,7 +5778,7 @@ package android.printservice.recommendation {
     method public CharSequence getPackageName();
     method public boolean recommendsMultiVendorService();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.printservice.recommendation.RecommendationInfo> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.printservice.recommendation.RecommendationInfo> CREATOR;
   }
 
   public abstract class RecommendationService extends android.app.Service {
@@ -6204,7 +6204,7 @@ package android.security.keystore.recovery {
     method @NonNull public byte[] getSecret();
     method public int getUserSecretType();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.security.keystore.recovery.KeyChainProtectionParams> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.security.keystore.recovery.KeyChainProtectionParams> CREATOR;
     field public static final int TYPE_LOCKSCREEN = 100; // 0x64
     field public static final int UI_FORMAT_PASSWORD = 2; // 0x2
     field public static final int UI_FORMAT_PATTERN = 3; // 0x3
@@ -6231,7 +6231,7 @@ package android.security.keystore.recovery {
     method @NonNull public java.security.cert.CertPath getTrustedHardwareCertPath();
     method @NonNull public java.util.List<android.security.keystore.recovery.WrappedApplicationKey> getWrappedApplicationKeys();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.security.keystore.recovery.KeyChainSnapshot> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.security.keystore.recovery.KeyChainSnapshot> CREATOR;
   }
 
   public final class KeyDerivationParams implements android.os.Parcelable {
@@ -6244,7 +6244,7 @@ package android.security.keystore.recovery {
     method public void writeToParcel(android.os.Parcel, int);
     field public static final int ALGORITHM_SCRYPT = 2; // 0x2
     field public static final int ALGORITHM_SHA256 = 1; // 0x1
-    field public static final android.os.Parcelable.Creator<android.security.keystore.recovery.KeyDerivationParams> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.security.keystore.recovery.KeyDerivationParams> CREATOR;
   }
 
   public class LockScreenRequiredException extends java.security.GeneralSecurityException {
@@ -6292,7 +6292,7 @@ package android.security.keystore.recovery {
     method @NonNull public byte[] getEncryptedKeyMaterial();
     method @Nullable public byte[] getMetadata();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.security.keystore.recovery.WrappedApplicationKey> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.security.keystore.recovery.WrappedApplicationKey> CREATOR;
   }
 
   public static class WrappedApplicationKey.Builder {
@@ -6446,7 +6446,7 @@ package android.service.contentcapture {
     method @NonNull public android.os.Bundle getAssistData();
     method @NonNull public android.app.assist.AssistStructure getAssistStructure();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.service.contentcapture.SnapshotData> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.service.contentcapture.SnapshotData> CREATOR;
   }
 
 }
@@ -6473,7 +6473,7 @@ package android.service.euicc {
     method public int getResolvableErrors();
     method public int getResult();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.service.euicc.DownloadSubscriptionResult> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.service.euicc.DownloadSubscriptionResult> CREATOR;
   }
 
   public final class EuiccProfileInfo implements android.os.Parcelable {
@@ -6490,7 +6490,7 @@ package android.service.euicc {
     method public boolean hasPolicyRule(@android.service.euicc.EuiccProfileInfo.PolicyRule int);
     method public boolean hasPolicyRules();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.service.euicc.EuiccProfileInfo> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.service.euicc.EuiccProfileInfo> CREATOR;
     field public static final int POLICY_RULE_DELETE_AFTER_DISABLING = 4; // 0x4
     field public static final int POLICY_RULE_DO_NOT_DELETE = 2; // 0x2
     field public static final int POLICY_RULE_DO_NOT_DISABLE = 1; // 0x1
@@ -6581,7 +6581,7 @@ package android.service.euicc {
     method @Nullable public java.util.List<android.telephony.euicc.DownloadableSubscription> getDownloadableSubscriptions();
     method public int getResult();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.service.euicc.GetDefaultDownloadableSubscriptionListResult> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.service.euicc.GetDefaultDownloadableSubscriptionListResult> CREATOR;
   }
 
   public final class GetDownloadableSubscriptionMetadataResult implements android.os.Parcelable {
@@ -6590,7 +6590,7 @@ package android.service.euicc {
     method @Nullable public android.telephony.euicc.DownloadableSubscription getDownloadableSubscription();
     method public int getResult();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.service.euicc.GetDownloadableSubscriptionMetadataResult> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.service.euicc.GetDownloadableSubscriptionMetadataResult> CREATOR;
   }
 
   public final class GetEuiccProfileInfoListResult implements android.os.Parcelable {
@@ -6600,7 +6600,7 @@ package android.service.euicc {
     method @Nullable public java.util.List<android.service.euicc.EuiccProfileInfo> getProfiles();
     method public int getResult();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.service.euicc.GetEuiccProfileInfoListResult> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.service.euicc.GetEuiccProfileInfoListResult> CREATOR;
   }
 
 }
@@ -6626,7 +6626,7 @@ package android.service.notification {
     method public CharSequence getExplanation();
     method public String getId();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.service.notification.SnoozeCriterion> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.service.notification.SnoozeCriterion> CREATOR;
   }
 
 }
@@ -6698,7 +6698,7 @@ package android.service.resolver {
     method public void setSelectProbability(float);
     method public void setTimeSpentScore(float);
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.service.resolver.ResolverTarget> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.service.resolver.ResolverTarget> CREATOR;
   }
 
 }
@@ -6714,7 +6714,7 @@ package android.service.settings.suggestions {
     method public CharSequence getSummary();
     method public CharSequence getTitle();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.service.settings.suggestions.Suggestion> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.service.settings.suggestions.Suggestion> CREATOR;
     field public static final int FLAG_HAS_BUTTON = 1; // 0x1
   }
 
@@ -6828,7 +6828,7 @@ package android.telecom {
     method @Deprecated public int getSupportedRouteMask();
     method @Deprecated public boolean isMuted();
     method @Deprecated public void writeToParcel(android.os.Parcel, int);
-    field @Deprecated public static final android.os.Parcelable.Creator<android.telecom.AudioState> CREATOR;
+    field @Deprecated @NonNull public static final android.os.Parcelable.Creator<android.telecom.AudioState> CREATOR;
     field @Deprecated public static final int ROUTE_BLUETOOTH = 2; // 0x2
     field @Deprecated public static final int ROUTE_EARPIECE = 1; // 0x1
     field @Deprecated public static final int ROUTE_SPEAKER = 8; // 0x8
@@ -6886,7 +6886,7 @@ package android.telecom {
     field public static final int CALLTYPE_OUTGOING = 2; // 0x2
     field public static final int CALLTYPE_UNKNOWN = 0; // 0x0
     field public static final int CDMA_PHONE = 1; // 0x1
-    field public static final android.os.Parcelable.Creator<android.telecom.ParcelableCallAnalytics> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.telecom.ParcelableCallAnalytics> CREATOR;
     field public static final int GSM_PHONE = 2; // 0x2
     field public static final int IMS_PHONE = 4; // 0x4
     field public static final long MILLIS_IN_1_SECOND = 1000L; // 0x3e8L
@@ -6910,7 +6910,7 @@ package android.telecom {
     field public static final int BLOCK_CHECK_FINISHED = 105; // 0x69
     field public static final int BLOCK_CHECK_INITIATED = 104; // 0x68
     field public static final int CONFERENCE_WITH = 300; // 0x12c
-    field public static final android.os.Parcelable.Creator<android.telecom.ParcelableCallAnalytics.AnalyticsEvent> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.telecom.ParcelableCallAnalytics.AnalyticsEvent> CREATOR;
     field public static final int CS_BOUND = 6; // 0x6
     field public static final int DIRECT_TO_VM_FINISHED = 103; // 0x67
     field public static final int DIRECT_TO_VM_INITIATED = 102; // 0x66
@@ -6950,7 +6950,7 @@ package android.telecom {
     field public static final int ACCEPT_TIMING = 0; // 0x0
     field public static final int BIND_CS_TIMING = 6; // 0x6
     field public static final int BLOCK_CHECK_FINISHED_TIMING = 9; // 0x9
-    field public static final android.os.Parcelable.Creator<android.telecom.ParcelableCallAnalytics.EventTiming> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.telecom.ParcelableCallAnalytics.EventTiming> CREATOR;
     field public static final int DIRECT_TO_VM_FINISHED_TIMING = 8; // 0x8
     field public static final int DISCONNECT_TIMING = 2; // 0x2
     field public static final int FILTERING_COMPLETED_TIMING = 10; // 0xa
@@ -7023,7 +7023,7 @@ package android.telecom {
     method public java.util.List<android.telecom.ParcelableCallAnalytics> getCallAnalytics();
     method public java.util.List<android.telecom.TelecomAnalytics.SessionTiming> getSessionTimings();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.telecom.TelecomAnalytics> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.telecom.TelecomAnalytics> CREATOR;
   }
 
   public static final class TelecomAnalytics.SessionTiming implements android.os.Parcelable {
@@ -7032,7 +7032,7 @@ package android.telecom {
     method public Integer getKey();
     method public long getTime();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.telecom.TelecomAnalytics.SessionTiming> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.telecom.TelecomAnalytics.SessionTiming> CREATOR;
     field public static final int CSW_ADD_CONFERENCE_CALL = 108; // 0x6c
     field public static final int CSW_HANDLE_CREATE_CONNECTION_COMPLETE = 100; // 0x64
     field public static final int CSW_REMOVE_CALL = 106; // 0x6a
@@ -7097,7 +7097,7 @@ package android.telephony {
     method public int getNetworkType();
     method public android.telephony.PreciseCallState getPreciseCallState();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.telephony.CallAttributes> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.CallAttributes> CREATOR;
   }
 
   public final class CallQuality implements android.os.Parcelable {
@@ -7121,7 +7121,7 @@ package android.telephony {
     field public static final int CALL_QUALITY_GOOD = 1; // 0x1
     field public static final int CALL_QUALITY_NOT_AVAILABLE = 5; // 0x5
     field public static final int CALL_QUALITY_POOR = 3; // 0x3
-    field public static final android.os.Parcelable.Creator<android.telephony.CallQuality> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.CallQuality> CREATOR;
   }
 
   public class CarrierConfigManager {
@@ -7142,7 +7142,7 @@ package android.telephony {
     method public void writeToParcel(android.os.Parcel, int);
     field public static final int CARRIER_RESTRICTION_DEFAULT_ALLOWED = 1; // 0x1
     field public static final int CARRIER_RESTRICTION_DEFAULT_NOT_ALLOWED = 0; // 0x0
-    field public static final android.os.Parcelable.Creator<android.telephony.CarrierRestrictionRules> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.CarrierRestrictionRules> CREATOR;
     field public static final int MULTISIM_POLICY_NONE = 0; // 0x0
     field public static final int MULTISIM_POLICY_ONE_VALID_SIM_MUST_BE_PRESENT = 1; // 0x1
   }
@@ -7503,7 +7503,7 @@ package android.telephony {
     method public int describeContents();
     method @NonNull public android.telephony.LteVopsSupportInfo getLteVopsSupportInfo();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.telephony.DataSpecificRegistrationStates> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.DataSpecificRegistrationStates> CREATOR;
   }
 
   public final class DisconnectCause {
@@ -7589,7 +7589,7 @@ package android.telephony {
     method public int getEmcBearerSupport();
     method public int getVopsSupport();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.telephony.LteVopsSupportInfo> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.LteVopsSupportInfo> CREATOR;
     field public static final int LTE_STATUS_NOT_AVAILABLE = 1; // 0x1
     field public static final int LTE_STATUS_NOT_SUPPORTED = 3; // 0x3
     field public static final int LTE_STATUS_SUPPORTED = 2; // 0x2
@@ -7623,7 +7623,7 @@ package android.telephony {
     method public boolean isEmergencyEnabled();
     method public boolean isRoaming();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.telephony.NetworkRegistrationState> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.NetworkRegistrationState> CREATOR;
     field public static final int DOMAIN_CS = 1; // 0x1
     field public static final int DOMAIN_PS = 2; // 0x2
     field public static final int REG_STATE_DENIED = 3; // 0x3
@@ -7680,7 +7680,7 @@ package android.telephony {
     method public int describeContents();
     method public boolean matches(String);
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.telephony.PhoneNumberRange> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.PhoneNumberRange> CREATOR;
   }
 
   public class PhoneStateListener {
@@ -7708,7 +7708,7 @@ package android.telephony {
     method public int getForegroundCallState();
     method public int getRingingCallState();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.telephony.PreciseCallState> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.PreciseCallState> CREATOR;
     field public static final int PRECISE_CALL_STATE_ACTIVE = 1; // 0x1
     field public static final int PRECISE_CALL_STATE_ALERTING = 4; // 0x4
     field public static final int PRECISE_CALL_STATE_DIALING = 3; // 0x3
@@ -7728,7 +7728,7 @@ package android.telephony {
     method public int getDataConnectionFailCause();
     method public int getDataConnectionState();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.telephony.PreciseDataConnectionState> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.PreciseDataConnectionState> CREATOR;
   }
 
   public final class PreciseDisconnectCause {
@@ -7913,7 +7913,7 @@ package android.telephony {
     method public int getMinTime();
     method public int getSampleCount();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.telephony.TelephonyHistogram> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.TelephonyHistogram> CREATOR;
     field public static final int TELEPHONY_CATEGORY_RIL = 1; // 0x1
   }
 
@@ -8054,7 +8054,7 @@ package android.telephony {
     method public String getCertificateHexString();
     method @Nullable public String getPackageName();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.telephony.UiccAccessRule> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.UiccAccessRule> CREATOR;
   }
 
   public class UiccSlotInfo implements android.os.Parcelable {
@@ -8072,7 +8072,7 @@ package android.telephony {
     field public static final int CARD_STATE_INFO_ERROR = 3; // 0x3
     field public static final int CARD_STATE_INFO_PRESENT = 2; // 0x2
     field public static final int CARD_STATE_INFO_RESTRICTED = 4; // 0x4
-    field public static final android.os.Parcelable.Creator<android.telephony.UiccSlotInfo> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.UiccSlotInfo> CREATOR;
   }
 
   public abstract class VisualVoicemailService extends android.app.Service {
@@ -8100,7 +8100,7 @@ package android.telephony.data {
     method public int getStatus();
     method public int getSuggestedRetryTime();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.telephony.data.DataCallResponse> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.data.DataCallResponse> CREATOR;
   }
 
   public final class DataProfile implements android.os.Parcelable {
@@ -8279,7 +8279,7 @@ package android.telephony.euicc {
     method public String getTargetAddr();
     method public void writeToParcel(android.os.Parcel, int);
     field @android.telephony.euicc.EuiccNotification.Event public static final int ALL_EVENTS = 15; // 0xf
-    field public static final android.os.Parcelable.Creator<android.telephony.euicc.EuiccNotification> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.euicc.EuiccNotification> CREATOR;
     field public static final int EVENT_DELETE = 8; // 0x8
     field public static final int EVENT_DISABLE = 4; // 0x4
     field public static final int EVENT_ENABLE = 2; // 0x2
@@ -8294,7 +8294,7 @@ package android.telephony.euicc {
     method public int findIndex(@android.service.euicc.EuiccProfileInfo.PolicyRule int, android.service.carrier.CarrierIdentifier);
     method public boolean hasPolicyRuleFlag(int, @android.telephony.euicc.EuiccRulesAuthTable.PolicyRuleFlag int);
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.telephony.euicc.EuiccRulesAuthTable> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.euicc.EuiccRulesAuthTable> CREATOR;
     field public static final int POLICY_RULE_FLAG_CONSENT_REQUIRED = 1; // 0x1
   }
 
@@ -8328,7 +8328,7 @@ package android.telephony.ims {
     field public static final int CDIV_CF_REASON_NOT_REACHABLE = 3; // 0x3
     field public static final int CDIV_CF_REASON_NO_REPLY = 2; // 0x2
     field public static final int CDIV_CF_REASON_UNCONDITIONAL = 0; // 0x0
-    field public static final android.os.Parcelable.Creator<android.telephony.ims.ImsCallForwardInfo> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.ims.ImsCallForwardInfo> CREATOR;
     field public static final int STATUS_ACTIVE = 1; // 0x1
     field public static final int STATUS_NOT_ACTIVE = 0; // 0x0
     field public static final int TYPE_OF_ADDRESS_INTERNATIONAL = 145; // 0x91
@@ -8389,7 +8389,7 @@ package android.telephony.ims {
     field public static final int CALL_TYPE_VT_NODIR = 7; // 0x7
     field public static final int CALL_TYPE_VT_RX = 6; // 0x6
     field public static final int CALL_TYPE_VT_TX = 5; // 0x5
-    field public static final android.os.Parcelable.Creator<android.telephony.ims.ImsCallProfile> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.ims.ImsCallProfile> CREATOR;
     field public static final int DIALSTRING_NORMAL = 0; // 0x0
     field public static final int DIALSTRING_SS_CONF = 1; // 0x1
     field public static final int DIALSTRING_USSD = 2; // 0x2
@@ -8461,7 +8461,7 @@ package android.telephony.ims {
     method public int describeContents();
     method public static int getConnectionStateForStatus(String);
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.telephony.ims.ImsConferenceState> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.ims.ImsConferenceState> CREATOR;
     field public static final String DISPLAY_TEXT = "display-text";
     field public static final String ENDPOINT = "endpoint";
     field public static final String SIP_STATUS_CODE = "sipstatuscode";
@@ -8505,7 +8505,7 @@ package android.telephony.ims {
     method public void writeToParcel(android.os.Parcel, int);
     field public static final int CALL_STATE_CONFIRMED = 1; // 0x1
     field public static final int CALL_STATE_TERMINATED = 2; // 0x2
-    field public static final android.os.Parcelable.Creator<android.telephony.ims.ImsExternalCallState> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.ims.ImsExternalCallState> CREATOR;
   }
 
   public class ImsMmTelManager {
@@ -8725,7 +8725,7 @@ package android.telephony.ims {
     field public static final int CODE_UT_SS_MODIFIED_TO_SS = 824; // 0x338
     field public static final int CODE_UT_SS_MODIFIED_TO_USSD = 823; // 0x337
     field public static final int CODE_WIFI_LOST = 1407; // 0x57f
-    field public static final android.os.Parcelable.Creator<android.telephony.ims.ImsReasonInfo> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.ims.ImsReasonInfo> CREATOR;
     field public static final int EXTRA_CODE_CALL_RETRY_BY_SETTINGS = 3; // 0x3
     field public static final int EXTRA_CODE_CALL_RETRY_NORMAL = 1; // 0x1
     field public static final int EXTRA_CODE_CALL_RETRY_SILENT_REDIAL = 2; // 0x2
@@ -8766,7 +8766,7 @@ package android.telephony.ims {
     method public boolean isTypeInterrogation();
     method public boolean isTypeUnConditional();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.telephony.ims.ImsSsData> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.ims.ImsSsData> CREATOR;
     field public static final int RESULT_SUCCESS = 0; // 0x0
     field public static final int SERVICE_CLASS_DATA = 2; // 0x2
     field public static final int SERVICE_CLASS_DATA_CIRCUIT_ASYNC = 32; // 0x20
@@ -8838,7 +8838,7 @@ package android.telephony.ims {
     field public static final int CLIR_STATUS_TEMPORARILY_ALLOWED = 4; // 0x4
     field public static final int CLIR_STATUS_TEMPORARILY_RESTRICTED = 3; // 0x3
     field public static final int CLIR_STATUS_UNKNOWN = 2; // 0x2
-    field public static final android.os.Parcelable.Creator<android.telephony.ims.ImsSsInfo> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.ims.ImsSsInfo> CREATOR;
     field public static final int DISABLED = 0; // 0x0
     field public static final int ENABLED = 1; // 0x1
     field public static final int NOT_REGISTERED = -1; // 0xffffffff
@@ -8891,7 +8891,7 @@ package android.telephony.ims {
     field public static final int AUDIO_QUALITY_GSM_HR = 10; // 0xa
     field public static final int AUDIO_QUALITY_NONE = 0; // 0x0
     field public static final int AUDIO_QUALITY_QCELP13K = 3; // 0x3
-    field public static final android.os.Parcelable.Creator<android.telephony.ims.ImsStreamMediaProfile> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.ims.ImsStreamMediaProfile> CREATOR;
     field public static final int DIRECTION_INACTIVE = 0; // 0x0
     field public static final int DIRECTION_INVALID = -1; // 0xffffffff
     field public static final int DIRECTION_RECEIVE = 1; // 0x1
@@ -8911,7 +8911,7 @@ package android.telephony.ims {
     ctor public ImsSuppServiceNotification(int, int, int, int, String, String[]);
     method public int describeContents();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.telephony.ims.ImsSuppServiceNotification> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.ims.ImsSuppServiceNotification> CREATOR;
     field public final int code;
     field public final String[] history;
     field public final int index;
@@ -8988,7 +8988,7 @@ package android.telephony.ims.feature {
     method public java.util.List<android.telephony.ims.feature.CapabilityChangeRequest.CapabilityPair> getCapabilitiesToDisable();
     method public java.util.List<android.telephony.ims.feature.CapabilityChangeRequest.CapabilityPair> getCapabilitiesToEnable();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.telephony.ims.feature.CapabilityChangeRequest> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.ims.feature.CapabilityChangeRequest> CREATOR;
   }
 
   public static class CapabilityChangeRequest.CapabilityPair {
@@ -9150,7 +9150,7 @@ package android.telephony.ims.stub {
     method public int describeContents();
     method public java.util.Set<android.telephony.ims.stub.ImsFeatureConfiguration.FeatureSlotPair> getServiceFeatures();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.telephony.ims.stub.ImsFeatureConfiguration> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.ims.stub.ImsFeatureConfiguration> CREATOR;
   }
 
   public static class ImsFeatureConfiguration.Builder {
@@ -9263,7 +9263,7 @@ package android.telephony.mbms {
     method public android.net.Uri getContentUri();
     method public android.net.Uri getFilePathUri();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.telephony.mbms.UriPathPair> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.mbms.UriPathPair> CREATOR;
   }
 
 }
@@ -9441,7 +9441,7 @@ package android.view.contentcapture {
     method public int getType();
     method @Nullable public android.view.contentcapture.ViewNode getViewNode();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.view.contentcapture.ContentCaptureEvent> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.view.contentcapture.ContentCaptureEvent> CREATOR;
     field public static final int TYPE_CONTEXT_UPDATED = 6; // 0x6
     field public static final int TYPE_SESSION_PAUSED = 8; // 0x8
     field public static final int TYPE_SESSION_RESUMED = 7; // 0x7
@@ -9863,7 +9863,7 @@ package android.webkit {
     ctor public WebViewProviderInfo(String, String, boolean, boolean, String[]);
     method public int describeContents();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.webkit.WebViewProviderInfo> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.webkit.WebViewProviderInfo> CREATOR;
     field public final boolean availableByDefault;
     field public final String description;
     field public final boolean isFallback;

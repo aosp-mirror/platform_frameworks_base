@@ -108,7 +108,7 @@ public final class Announcement implements Parcelable {
         return 0;
     }
 
-    public static final Parcelable.Creator<Announcement> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<Announcement> CREATOR =
             new Parcelable.Creator<Announcement>() {
         public Announcement createFromParcel(Parcel in) {
             return new Announcement(in);

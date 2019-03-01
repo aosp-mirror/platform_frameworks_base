@@ -186,7 +186,7 @@ public abstract class CellIdentity implements Parcelable {
     }
 
     /** Implement the Parcelable interface */
-    public static final Creator<CellIdentity> CREATOR =
+    public static final @android.annotation.NonNull Creator<CellIdentity> CREATOR =
             new Creator<CellIdentity>() {
                 @Override
                 public CellIdentity createFromParcel(Parcel in) {

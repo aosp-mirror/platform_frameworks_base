@@ -331,7 +331,7 @@ public class NeighboringCellInfo implements Parcelable
         dest.writeInt(mNetworkType);
     }
 
-    public static final Parcelable.Creator<NeighboringCellInfo> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<NeighboringCellInfo> CREATOR
     = new Parcelable.Creator<NeighboringCellInfo>() {
         public NeighboringCellInfo createFromParcel(Parcel in) {
             return new NeighboringCellInfo(in);

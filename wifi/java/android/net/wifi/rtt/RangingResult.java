@@ -349,7 +349,7 @@ public final class RangingResult implements Parcelable {
         dest.writeLong(mTimestamp);
     }
 
-    public static final Creator<RangingResult> CREATOR = new Creator<RangingResult>() {
+    public static final @android.annotation.NonNull Creator<RangingResult> CREATOR = new Creator<RangingResult>() {
         @Override
         public RangingResult[] newArray(int size) {
             return new RangingResult[size];

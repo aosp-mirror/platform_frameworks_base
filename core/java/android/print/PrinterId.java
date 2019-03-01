@@ -124,7 +124,7 @@ public final class PrinterId implements Parcelable {
         return builder.toString();
     }
 
-    public static final Parcelable.Creator<PrinterId> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<PrinterId> CREATOR =
             new Creator<PrinterId>() {
         @Override
         public PrinterId createFromParcel(Parcel parcel) {

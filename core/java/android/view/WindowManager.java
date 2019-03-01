@@ -2724,7 +2724,7 @@ public interface WindowManager extends ViewManager {
             out.writeLong(hideTimeoutMilliseconds);
         }
 
-        public static final Parcelable.Creator<LayoutParams> CREATOR
+        public static final @android.annotation.NonNull Parcelable.Creator<LayoutParams> CREATOR
                     = new Parcelable.Creator<LayoutParams>() {
             public LayoutParams createFromParcel(Parcel in) {
                 return new LayoutParams(in);

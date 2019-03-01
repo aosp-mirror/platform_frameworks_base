@@ -54,7 +54,7 @@ public final class Face extends BiometricAuthenticator.Identifier {
         out.writeLong(getDeviceId());
     }
 
-    public static final Parcelable.Creator<Face> CREATOR = new Parcelable.Creator<Face>() {
+    public static final @android.annotation.NonNull Parcelable.Creator<Face> CREATOR = new Parcelable.Creator<Face>() {
             public Face createFromParcel(Parcel in) {
                 return new Face(in);
             }

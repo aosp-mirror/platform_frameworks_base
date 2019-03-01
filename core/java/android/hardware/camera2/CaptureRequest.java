@@ -493,7 +493,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
         return HashCodeHelpers.hashCodeGeneric(mPhysicalCameraSettings, mSurfaceSet, mUserTag);
     }
 
-    public static final Parcelable.Creator<CaptureRequest> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<CaptureRequest> CREATOR =
             new Parcelable.Creator<CaptureRequest>() {
         @Override
         public CaptureRequest createFromParcel(Parcel in) {

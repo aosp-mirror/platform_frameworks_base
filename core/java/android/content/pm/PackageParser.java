@@ -6408,7 +6408,7 @@ public class PackageParser {
             this.pastSigningCertificates = in.createTypedArray(Signature.CREATOR);
         }
 
-        public static final Creator<SigningDetails> CREATOR = new Creator<SigningDetails>() {
+        public static final @android.annotation.NonNull Creator<SigningDetails> CREATOR = new Creator<SigningDetails>() {
             @Override
             public SigningDetails createFromParcel(Parcel source) {
                 if (source.readBoolean()) {

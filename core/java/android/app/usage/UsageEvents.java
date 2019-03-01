@@ -880,7 +880,7 @@ public final class UsageEvents implements Parcelable {
         dest.writeBlob(data.marshall());
     }
 
-    public static final Creator<UsageEvents> CREATOR = new Creator<UsageEvents>() {
+    public static final @android.annotation.NonNull Creator<UsageEvents> CREATOR = new Creator<UsageEvents>() {
         @Override
         public UsageEvents createFromParcel(Parcel source) {
             return new UsageEvents(source);

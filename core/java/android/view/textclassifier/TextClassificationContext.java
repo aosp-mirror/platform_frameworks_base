@@ -141,7 +141,7 @@ public final class TextClassificationContext implements Parcelable {
         mWidgetVersion = in.readString();
     }
 
-    public static final Parcelable.Creator<TextClassificationContext> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<TextClassificationContext> CREATOR =
             new Parcelable.Creator<TextClassificationContext>() {
                 @Override
                 public TextClassificationContext createFromParcel(Parcel parcel) {

@@ -83,7 +83,7 @@ public final class AppTargetId implements Parcelable {
     /**
      * @see Creator
      */
-    public static final Creator<AppTargetId> CREATOR =
+    public static final @android.annotation.NonNull Creator<AppTargetId> CREATOR =
             new Creator<AppTargetId>() {
                 public AppTargetId createFromParcel(Parcel parcel) {
                     return new AppTargetId(parcel);

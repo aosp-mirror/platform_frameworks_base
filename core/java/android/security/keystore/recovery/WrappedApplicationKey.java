@@ -143,7 +143,7 @@ public final class WrappedApplicationKey implements Parcelable {
         return mMetadata;
     }
 
-    public static final Parcelable.Creator<WrappedApplicationKey> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<WrappedApplicationKey> CREATOR =
             new Parcelable.Creator<WrappedApplicationKey>() {
                 public WrappedApplicationKey createFromParcel(Parcel in) {
                     return new WrappedApplicationKey(in);

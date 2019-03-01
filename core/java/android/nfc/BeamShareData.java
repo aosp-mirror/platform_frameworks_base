@@ -42,7 +42,7 @@ public final class BeamShareData implements Parcelable {
         dest.writeInt(this.flags);
     }
 
-    public static final Parcelable.Creator<BeamShareData> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<BeamShareData> CREATOR =
             new Parcelable.Creator<BeamShareData>() {
         @Override
         public BeamShareData createFromParcel(Parcel source) {

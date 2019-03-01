@@ -643,7 +643,7 @@ public final class SelectionEvent implements Parcelable {
                 mSessionId, mStart, mEnd, mSmartStart, mSmartEnd);
     }
 
-    public static final Creator<SelectionEvent> CREATOR = new Creator<SelectionEvent>() {
+    public static final @android.annotation.NonNull Creator<SelectionEvent> CREATOR = new Creator<SelectionEvent>() {
         @Override
         public SelectionEvent createFromParcel(Parcel in) {
             return new SelectionEvent(in);

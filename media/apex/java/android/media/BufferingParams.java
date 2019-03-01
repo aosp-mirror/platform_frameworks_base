@@ -167,7 +167,7 @@ public final class BufferingParams implements Parcelable {
         mResumePlaybackMarkMs = in.readInt();
     }
 
-    public static final Parcelable.Creator<BufferingParams> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<BufferingParams> CREATOR =
             new Parcelable.Creator<BufferingParams>() {
                 @Override
                 public BufferingParams createFromParcel(Parcel in) {

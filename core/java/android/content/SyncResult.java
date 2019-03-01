@@ -235,7 +235,7 @@ public final class SyncResult implements Parcelable {
         stats.clear();
     }
 
-    public static final Creator<SyncResult> CREATOR = new Creator<SyncResult>() {
+    public static final @android.annotation.NonNull Creator<SyncResult> CREATOR = new Creator<SyncResult>() {
         public SyncResult createFromParcel(Parcel in) {
             return new SyncResult(in);
         }

@@ -1829,7 +1829,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         seq = source.readInt();
     }
 
-    public static final Parcelable.Creator<Configuration> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<Configuration> CREATOR
             = new Parcelable.Creator<Configuration>() {
         public Configuration createFromParcel(Parcel source) {
             return new Configuration(source);

@@ -75,7 +75,7 @@ public final class AppPredictionSessionId implements Parcelable {
     /**
      * @see Parcelable.Creator
      */
-    public static final Parcelable.Creator<AppPredictionSessionId> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<AppPredictionSessionId> CREATOR =
             new Parcelable.Creator<AppPredictionSessionId>() {
                 public AppPredictionSessionId createFromParcel(Parcel parcel) {
                     return new AppPredictionSessionId(parcel);

@@ -180,7 +180,7 @@ public final class TextLinks implements Parcelable {
         dest.writeBundle(mExtras);
     }
 
-    public static final Parcelable.Creator<TextLinks> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<TextLinks> CREATOR =
             new Parcelable.Creator<TextLinks>() {
                 @Override
                 public TextLinks createFromParcel(Parcel in) {
@@ -315,7 +315,7 @@ public final class TextLinks implements Parcelable {
             return new TextLink(start, end, entityConfidence, extras, null /* urlSpan */);
         }
 
-        public static final Parcelable.Creator<TextLink> CREATOR =
+        public static final @android.annotation.NonNull Parcelable.Creator<TextLink> CREATOR =
                 new Parcelable.Creator<TextLink>() {
                     @Override
                     public TextLink createFromParcel(Parcel in) {
@@ -528,7 +528,7 @@ public final class TextLinks implements Parcelable {
             return request;
         }
 
-        public static final Parcelable.Creator<Request> CREATOR =
+        public static final @android.annotation.NonNull Parcelable.Creator<Request> CREATOR =
                 new Parcelable.Creator<Request>() {
                     @Override
                     public Request createFromParcel(Parcel in) {

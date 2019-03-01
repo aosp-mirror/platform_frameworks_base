@@ -111,7 +111,7 @@ public final class DateTransformation extends InternalTransformation implements
         parcel.writeSerializable(mDateFormat);
     }
 
-    public static final Parcelable.Creator<DateTransformation> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<DateTransformation> CREATOR =
             new Parcelable.Creator<DateTransformation>() {
         @Override
         public DateTransformation createFromParcel(Parcel parcel) {

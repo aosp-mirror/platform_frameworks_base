@@ -180,7 +180,7 @@ public class LabeledIntent extends Intent {
         mIcon = in.readInt();
     }
     
-    public static final Creator<LabeledIntent> CREATOR
+    public static final @android.annotation.NonNull Creator<LabeledIntent> CREATOR
             = new Creator<LabeledIntent>() {
         public LabeledIntent createFromParcel(Parcel source) {
             return new LabeledIntent(source);

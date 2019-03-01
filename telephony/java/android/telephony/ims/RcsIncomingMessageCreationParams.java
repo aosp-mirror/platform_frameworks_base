@@ -152,7 +152,7 @@ public final class RcsIncomingMessageCreationParams extends RcsMessageCreationPa
         return mSenderParticipantId;
     }
 
-    public static final Creator<RcsIncomingMessageCreationParams> CREATOR =
+    public static final @android.annotation.NonNull Creator<RcsIncomingMessageCreationParams> CREATOR =
             new Creator<RcsIncomingMessageCreationParams>() {
                 @Override
                 public RcsIncomingMessageCreationParams createFromParcel(Parcel in) {

@@ -2074,7 +2074,7 @@ public class AssistStructure implements Parcelable {
         }
 
         @SuppressWarnings("hiding")
-        public static final Creator<HtmlInfoNode> CREATOR = new Creator<HtmlInfoNode>() {
+        public static final @android.annotation.NonNull Creator<HtmlInfoNode> CREATOR = new Creator<HtmlInfoNode>() {
             @Override
             public HtmlInfoNode createFromParcel(Parcel parcel) {
                 // Always go through the builder to ensure the data ingested by
@@ -2430,7 +2430,7 @@ public class AssistStructure implements Parcelable {
         }
     }
 
-    public static final Parcelable.Creator<AssistStructure> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<AssistStructure> CREATOR
             = new Parcelable.Creator<AssistStructure>() {
         @Override
         public AssistStructure createFromParcel(Parcel in) {

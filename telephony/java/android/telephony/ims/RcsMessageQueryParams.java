@@ -330,7 +330,7 @@ public final class RcsMessageQueryParams implements Parcelable {
         mThreadId = in.readInt();
     }
 
-    public static final Creator<RcsMessageQueryParams> CREATOR =
+    public static final @android.annotation.NonNull Creator<RcsMessageQueryParams> CREATOR =
             new Creator<RcsMessageQueryParams>() {
                 @Override
                 public RcsMessageQueryParams createFromParcel(Parcel in) {

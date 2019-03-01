@@ -423,7 +423,7 @@ public final class WallpaperInfo implements Parcelable {
     /**
      * Used to make this class parcelable.
      */
-    public static final Parcelable.Creator<WallpaperInfo> CREATOR = new Parcelable.Creator<WallpaperInfo>() {
+    public static final @android.annotation.NonNull Parcelable.Creator<WallpaperInfo> CREATOR = new Parcelable.Creator<WallpaperInfo>() {
         public WallpaperInfo createFromParcel(Parcel source) {
             return new WallpaperInfo(source);
         }

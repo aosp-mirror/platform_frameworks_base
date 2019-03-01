@@ -208,7 +208,7 @@ public final class CharSequenceTransformation extends InternalTransformation imp
         parcel.writeStringArray(substs);
     }
 
-    public static final Parcelable.Creator<CharSequenceTransformation> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<CharSequenceTransformation> CREATOR =
             new Parcelable.Creator<CharSequenceTransformation>() {
         @Override
         public CharSequenceTransformation createFromParcel(Parcel parcel) {

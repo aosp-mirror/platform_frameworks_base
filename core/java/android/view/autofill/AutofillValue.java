@@ -241,7 +241,7 @@ public final class AutofillValue implements Parcelable {
         }
     }
 
-    public static final Parcelable.Creator<AutofillValue> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<AutofillValue> CREATOR =
             new Parcelable.Creator<AutofillValue>() {
         @Override
         public AutofillValue createFromParcel(Parcel source) {

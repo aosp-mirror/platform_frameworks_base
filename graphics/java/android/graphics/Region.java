@@ -345,7 +345,7 @@ public class Region implements Parcelable {
 
     //////////////////////////////////////////////////////////////////////////
     
-    public static final Parcelable.Creator<Region> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<Region> CREATOR
         = new Parcelable.Creator<Region>() {
             /**
             * Rebuild a Region previously stored with writeToParcel().

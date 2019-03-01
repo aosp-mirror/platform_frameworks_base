@@ -46,7 +46,7 @@ public final class CellularBatteryStats implements Parcelable {
   private long[] mTxTimeMs;
   private long mMonitoredRailChargeConsumedMaMs;
 
-  public static final Parcelable.Creator<CellularBatteryStats> CREATOR = new
+  public static final @android.annotation.NonNull Parcelable.Creator<CellularBatteryStats> CREATOR = new
       Parcelable.Creator<CellularBatteryStats>() {
         public CellularBatteryStats createFromParcel(Parcel in) {
           return new CellularBatteryStats(in);

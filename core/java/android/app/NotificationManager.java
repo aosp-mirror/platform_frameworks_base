@@ -1842,7 +1842,7 @@ public class NotificationManager {
             }
         }
 
-        public static final Parcelable.Creator<Policy> CREATOR = new Parcelable.Creator<Policy>() {
+        public static final @android.annotation.NonNull Parcelable.Creator<Policy> CREATOR = new Parcelable.Creator<Policy>() {
             @Override
             public Policy createFromParcel(Parcel in) {
                 return new Policy(in);

@@ -32,7 +32,7 @@ package android.app {
     method public int describeContents();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final int CONTENTS_FILE_DESCRIPTOR = 1; // 0x1
-    field public static final android.os.Parcelable.Creator<android.app.PictureInPictureArgs> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.PictureInPictureArgs> CREATOR;
     field public static final int PARCELABLE_WRITE_RETURN_VALUE = 1; // 0x1
   }
 

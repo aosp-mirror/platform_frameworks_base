@@ -115,7 +115,7 @@ public class ExtractedText implements Parcelable {
     /**
      * Used to make this class parcelable.
      */
-    public static final Parcelable.Creator<ExtractedText> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<ExtractedText> CREATOR
             = new Parcelable.Creator<ExtractedText>() {
                 public ExtractedText createFromParcel(Parcel source) {
                     ExtractedText res = new ExtractedText();

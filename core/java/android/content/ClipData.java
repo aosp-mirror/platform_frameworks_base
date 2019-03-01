@@ -1176,7 +1176,7 @@ public class ClipData implements Parcelable {
         }
     }
 
-    public static final Parcelable.Creator<ClipData> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<ClipData> CREATOR =
         new Parcelable.Creator<ClipData>() {
 
             @Override

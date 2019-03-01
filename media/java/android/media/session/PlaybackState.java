@@ -480,7 +480,7 @@ public final class PlaybackState implements Parcelable {
         return mExtras;
     }
 
-    public static final Parcelable.Creator<PlaybackState> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<PlaybackState> CREATOR =
             new Parcelable.Creator<PlaybackState>() {
         @Override
         public PlaybackState createFromParcel(Parcel in) {
@@ -534,7 +534,7 @@ public final class PlaybackState implements Parcelable {
             return 0;
         }
 
-        public static final Parcelable.Creator<PlaybackState.CustomAction> CREATOR =
+        public static final @android.annotation.NonNull Parcelable.Creator<PlaybackState.CustomAction> CREATOR =
                 new Parcelable.Creator<PlaybackState.CustomAction>() {
 
                     @Override

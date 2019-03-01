@@ -166,7 +166,7 @@ public class PermissionGroupInfo extends PackageItemInfo implements Parcelable {
         dest.writeInt(priority);
     }
 
-    public static final Creator<PermissionGroupInfo> CREATOR =
+    public static final @android.annotation.NonNull Creator<PermissionGroupInfo> CREATOR =
             new Creator<PermissionGroupInfo>() {
         public PermissionGroupInfo createFromParcel(Parcel source) {
             return new PermissionGroupInfo(source);

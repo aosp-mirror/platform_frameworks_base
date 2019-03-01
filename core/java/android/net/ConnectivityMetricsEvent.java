@@ -51,7 +51,7 @@ public final class ConnectivityMetricsEvent implements Parcelable {
     }
 
     /** Implement the Parcelable interface */
-    public static final Parcelable.Creator<ConnectivityMetricsEvent> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<ConnectivityMetricsEvent> CREATOR
             = new Parcelable.Creator<ConnectivityMetricsEvent> (){
         public ConnectivityMetricsEvent createFromParcel(Parcel source) {
             return new ConnectivityMetricsEvent(source);

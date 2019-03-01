@@ -139,7 +139,7 @@ public final class AdvertiseSettings implements Parcelable {
         dest.writeInt(mAdvertiseTimeoutMillis);
     }
 
-    public static final Parcelable.Creator<AdvertiseSettings> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<AdvertiseSettings> CREATOR =
             new Creator<AdvertiseSettings>() {
                 @Override
                 public AdvertiseSettings[] newArray(int size) {

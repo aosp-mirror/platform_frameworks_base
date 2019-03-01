@@ -204,7 +204,7 @@ public class ClientTransaction implements Parcelable, ObjectPoolItem {
         }
     }
 
-    public static final Creator<ClientTransaction> CREATOR =
+    public static final @android.annotation.NonNull Creator<ClientTransaction> CREATOR =
             new Creator<ClientTransaction>() {
         public ClientTransaction createFromParcel(Parcel in) {
             return new ClientTransaction(in);

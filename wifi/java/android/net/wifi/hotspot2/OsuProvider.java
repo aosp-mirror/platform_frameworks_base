@@ -256,7 +256,7 @@ public final class OsuProvider implements Parcelable {
                 + " mIcon=" + mIcon;
     }
 
-    public static final Creator<OsuProvider> CREATOR =
+    public static final @android.annotation.NonNull Creator<OsuProvider> CREATOR =
             new Creator<OsuProvider>() {
                 @Override
                 public OsuProvider createFromParcel(Parcel in) {

@@ -215,7 +215,7 @@ public final class GnssSingleSatCorrection implements Parcelable {
         return 0;
     }
 
-    public static final Creator<GnssSingleSatCorrection> CREATOR =
+    public static final @android.annotation.NonNull Creator<GnssSingleSatCorrection> CREATOR =
             new Creator<GnssSingleSatCorrection>() {
                 @Override
                 public GnssSingleSatCorrection createFromParcel(Parcel parcel) {

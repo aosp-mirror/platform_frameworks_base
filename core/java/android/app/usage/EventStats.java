@@ -160,7 +160,7 @@ public final class EventStats implements Parcelable {
         dest.writeInt(mCount);
     }
 
-    public static final Creator<EventStats> CREATOR = new Creator<EventStats>() {
+    public static final @android.annotation.NonNull Creator<EventStats> CREATOR = new Creator<EventStats>() {
         @Override
         public EventStats createFromParcel(Parcel in) {
             EventStats stats = new EventStats();

@@ -545,7 +545,7 @@ public abstract class CompoundButton extends Button implements Checkable {
         }
 
         @SuppressWarnings("hiding")
-        public static final Parcelable.Creator<SavedState> CREATOR =
+        public static final @android.annotation.NonNull Parcelable.Creator<SavedState> CREATOR =
                 new Parcelable.Creator<SavedState>() {
             @Override
             public SavedState createFromParcel(Parcel in) {

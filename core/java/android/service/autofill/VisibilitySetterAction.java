@@ -147,7 +147,7 @@ public final class VisibilitySetterAction extends InternalOnClickAction implemen
         parcel.writeSparseIntArray(mVisibilities);
     }
 
-    public static final Parcelable.Creator<VisibilitySetterAction> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<VisibilitySetterAction> CREATOR =
             new Parcelable.Creator<VisibilitySetterAction>() {
 
         @NonNull

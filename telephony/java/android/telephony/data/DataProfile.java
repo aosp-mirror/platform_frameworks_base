@@ -284,7 +284,7 @@ public final class DataProfile implements Parcelable {
     }
 
     /** @hide */
-    public static final Parcelable.Creator<DataProfile> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<DataProfile> CREATOR =
             new Parcelable.Creator<DataProfile>() {
         @Override
         public DataProfile createFromParcel(Parcel source) {

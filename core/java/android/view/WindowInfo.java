@@ -176,7 +176,7 @@ public class WindowInfo implements Parcelable {
         hasFlagWatchOutsideTouch = false;
     }
 
-    public static final Parcelable.Creator<WindowInfo> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<WindowInfo> CREATOR =
             new Creator<WindowInfo>() {
         @Override
         public WindowInfo createFromParcel(Parcel parcel) {

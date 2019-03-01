@@ -216,7 +216,7 @@ public class AssistContent implements Parcelable {
         writeToParcelInternal(dest, flags);
     }
 
-    public static final Parcelable.Creator<AssistContent> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<AssistContent> CREATOR
             = new Parcelable.Creator<AssistContent>() {
         public AssistContent createFromParcel(Parcel in) {
             return new AssistContent(in);

@@ -237,7 +237,7 @@ public final class ParcelableConnection implements Parcelable {
                 .toString();
     }
 
-    public static final Parcelable.Creator<ParcelableConnection> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<ParcelableConnection> CREATOR =
             new Parcelable.Creator<ParcelableConnection> () {
         @Override
         public ParcelableConnection createFromParcel(Parcel source) {

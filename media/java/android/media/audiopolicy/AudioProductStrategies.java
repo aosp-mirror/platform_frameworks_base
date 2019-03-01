@@ -251,7 +251,7 @@ public final class AudioProductStrategies implements Iterable<AudioProductStrate
         return AudioVolumeGroups.DEFAULT_VOLUME_GROUP;
     }
 
-    public static final Parcelable.Creator<AudioProductStrategies> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<AudioProductStrategies> CREATOR =
             new Parcelable.Creator<AudioProductStrategies>() {
                 @Override
                 public AudioProductStrategies createFromParcel(@NonNull Parcel in) {

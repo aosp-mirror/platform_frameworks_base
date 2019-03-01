@@ -636,7 +636,7 @@ public final class InputMethodSubtype implements Parcelable {
         dest.writeInt(mIsAsciiCapable ? 1 : 0);
     }
 
-    public static final Parcelable.Creator<InputMethodSubtype> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<InputMethodSubtype> CREATOR
             = new Parcelable.Creator<InputMethodSubtype>() {
         @Override
         public InputMethodSubtype createFromParcel(Parcel source) {

@@ -261,7 +261,7 @@ public final class SuspendDialogInfo implements Parcelable {
         mNeutralButtonTextResId = b.mNeutralButtonTextResId;
     }
 
-    public static final Creator<SuspendDialogInfo> CREATOR = new Creator<SuspendDialogInfo>() {
+    public static final @android.annotation.NonNull Creator<SuspendDialogInfo> CREATOR = new Creator<SuspendDialogInfo>() {
         @Override
         public SuspendDialogInfo createFromParcel(Parcel source) {
             return new SuspendDialogInfo(source);

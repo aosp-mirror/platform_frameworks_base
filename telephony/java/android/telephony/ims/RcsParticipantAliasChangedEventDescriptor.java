@@ -45,7 +45,7 @@ public class RcsParticipantAliasChangedEventDescriptor extends RcsEventDescripto
                 mTimestamp, new RcsParticipant(mParticipantId), mNewAlias);
     }
 
-    public static final Creator<RcsParticipantAliasChangedEventDescriptor> CREATOR =
+    public static final @android.annotation.NonNull Creator<RcsParticipantAliasChangedEventDescriptor> CREATOR =
             new Creator<RcsParticipantAliasChangedEventDescriptor>() {
                 @Override
                 public RcsParticipantAliasChangedEventDescriptor createFromParcel(Parcel in) {

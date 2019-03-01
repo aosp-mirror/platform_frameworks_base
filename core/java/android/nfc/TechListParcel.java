@@ -47,7 +47,7 @@ public class TechListParcel implements Parcelable {
         }
     }
 
-    public static final Creator<TechListParcel> CREATOR = new Creator<TechListParcel>() {
+    public static final @android.annotation.NonNull Creator<TechListParcel> CREATOR = new Creator<TechListParcel>() {
         @Override
         public TechListParcel createFromParcel(Parcel source) {
             int count = source.readInt();

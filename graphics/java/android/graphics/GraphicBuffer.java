@@ -279,7 +279,7 @@ public class GraphicBuffer implements Parcelable {
     }
 
     @UnsupportedAppUsage
-    public static final Parcelable.Creator<GraphicBuffer> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<GraphicBuffer> CREATOR =
             new Parcelable.Creator<GraphicBuffer>() {
         public GraphicBuffer createFromParcel(Parcel in) {
             int width = in.readInt();

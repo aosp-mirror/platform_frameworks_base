@@ -279,7 +279,7 @@ public final class RcsParticipantQueryParams implements Parcelable {
         mThreadId = in.readInt();
     }
 
-    public static final Creator<RcsParticipantQueryParams> CREATOR =
+    public static final @android.annotation.NonNull Creator<RcsParticipantQueryParams> CREATOR =
             new Creator<RcsParticipantQueryParams>() {
                 @Override
                 public RcsParticipantQueryParams createFromParcel(Parcel in) {

@@ -71,7 +71,7 @@ public final class ChangedPackages implements Parcelable {
         return mPackageNames;
     }
 
-    public static final Parcelable.Creator<ChangedPackages> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<ChangedPackages> CREATOR =
             new Parcelable.Creator<ChangedPackages>() {
         public ChangedPackages createFromParcel(Parcel in) {
             return new ChangedPackages(in);

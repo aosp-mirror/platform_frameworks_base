@@ -1050,7 +1050,7 @@ public final class MediaController {
             dest.writeParcelable(mAudioAttrs, flags);
         }
 
-        public static final Parcelable.Creator<PlaybackInfo> CREATOR =
+        public static final @android.annotation.NonNull Parcelable.Creator<PlaybackInfo> CREATOR =
                 new Parcelable.Creator<PlaybackInfo>() {
             @Override
             public PlaybackInfo createFromParcel(Parcel in) {

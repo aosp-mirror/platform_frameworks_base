@@ -29,7 +29,7 @@ import android.telephony.euicc.DownloadableSubscription;
 @SystemApi
 public final class GetDownloadableSubscriptionMetadataResult implements Parcelable {
 
-    public static final Creator<GetDownloadableSubscriptionMetadataResult> CREATOR =
+    public static final @android.annotation.NonNull Creator<GetDownloadableSubscriptionMetadataResult> CREATOR =
             new Creator<GetDownloadableSubscriptionMetadataResult>() {
         @Override
         public GetDownloadableSubscriptionMetadataResult createFromParcel(Parcel in) {

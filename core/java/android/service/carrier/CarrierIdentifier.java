@@ -35,7 +35,7 @@ import java.util.Objects;
 public class CarrierIdentifier implements Parcelable {
 
     /** Used to create a {@link CarrierIdentifier} from a {@link Parcel}. */
-    public static final Creator<CarrierIdentifier> CREATOR = new Creator<CarrierIdentifier>() {
+    public static final @android.annotation.NonNull Creator<CarrierIdentifier> CREATOR = new Creator<CarrierIdentifier>() {
             @Override
         public CarrierIdentifier createFromParcel(Parcel parcel) {
             return new CarrierIdentifier(parcel);

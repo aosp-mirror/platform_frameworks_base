@@ -113,7 +113,7 @@ public class ConfigurationInfo implements Parcelable {
         dest.writeInt(reqGlEsVersion);
     }
 
-    public static final Creator<ConfigurationInfo> CREATOR =
+    public static final @android.annotation.NonNull Creator<ConfigurationInfo> CREATOR =
         new Creator<ConfigurationInfo>() {
         public ConfigurationInfo createFromParcel(Parcel source) {
             return new ConfigurationInfo(source);

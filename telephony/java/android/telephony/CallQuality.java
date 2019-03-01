@@ -333,7 +333,7 @@ public final class CallQuality implements Parcelable {
         dest.writeInt(mCodecType);
     }
 
-    public static final Parcelable.Creator<CallQuality> CREATOR = new Parcelable.Creator() {
+    public static final @android.annotation.NonNull Parcelable.Creator<CallQuality> CREATOR = new Parcelable.Creator() {
         public CallQuality createFromParcel(Parcel in) {
             return new CallQuality(in);
         }

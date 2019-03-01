@@ -190,7 +190,7 @@ public final class FillContext implements Parcelable {
         return foundNodes;
     }
 
-    public static final Parcelable.Creator<FillContext> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<FillContext> CREATOR =
             new Parcelable.Creator<FillContext>() {
         @Override
         @NonNull

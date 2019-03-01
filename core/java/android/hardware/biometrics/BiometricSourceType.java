@@ -37,7 +37,7 @@ public enum BiometricSourceType implements Parcelable {
         dest.writeString(name());
     }
 
-    public static final Creator<BiometricSourceType> CREATOR = new Creator<BiometricSourceType>() {
+    public static final @android.annotation.NonNull Creator<BiometricSourceType> CREATOR = new Creator<BiometricSourceType>() {
         @Override
         public BiometricSourceType createFromParcel(final Parcel source) {
             return BiometricSourceType.valueOf(source.readString());

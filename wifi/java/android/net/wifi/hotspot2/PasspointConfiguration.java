@@ -600,7 +600,7 @@ public final class PasspointConfiguration implements Parcelable {
         return true;
     }
 
-    public static final Creator<PasspointConfiguration> CREATOR =
+    public static final @android.annotation.NonNull Creator<PasspointConfiguration> CREATOR =
         new Creator<PasspointConfiguration>() {
             @Override
             public PasspointConfiguration createFromParcel(Parcel in) {

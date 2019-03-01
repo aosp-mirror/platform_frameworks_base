@@ -136,7 +136,7 @@ public class AudioPolicyConfig implements Parcelable {
         }
     }
 
-    public static final Parcelable.Creator<AudioPolicyConfig> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<AudioPolicyConfig> CREATOR
             = new Parcelable.Creator<AudioPolicyConfig>() {
         /**
          * Rebuilds an AudioPolicyConfig previously stored with writeToParcel().

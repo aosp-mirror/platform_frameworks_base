@@ -361,7 +361,7 @@ public final class PointerIcon implements Parcelable {
         return mType;
     }
 
-    public static final Parcelable.Creator<PointerIcon> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<PointerIcon> CREATOR
             = new Parcelable.Creator<PointerIcon>() {
         public PointerIcon createFromParcel(Parcel in) {
             int type = in.readInt();

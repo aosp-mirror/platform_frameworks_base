@@ -304,7 +304,7 @@ public final class AutomaticZenRule implements Parcelable {
                 configurationActivity, mZenPolicy, mModified, creationTime);
     }
 
-    public static final Parcelable.Creator<AutomaticZenRule> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<AutomaticZenRule> CREATOR
             = new Parcelable.Creator<AutomaticZenRule>() {
         @Override
         public AutomaticZenRule createFromParcel(Parcel source) {

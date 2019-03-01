@@ -101,7 +101,7 @@ public final class DnsEvent extends NetworkEvent implements Parcelable {
                 mIpAddressesCount, mTimestamp, mPackageName);
     }
 
-    public static final Parcelable.Creator<DnsEvent> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<DnsEvent> CREATOR
             = new Parcelable.Creator<DnsEvent>() {
         @Override
         public DnsEvent createFromParcel(Parcel in) {

@@ -446,7 +446,7 @@ public class AppWidgetProviderInfo implements Parcelable {
     /**
      * Parcelable.Creator that instantiates AppWidgetProviderInfo objects
      */
-    public static final Parcelable.Creator<AppWidgetProviderInfo> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<AppWidgetProviderInfo> CREATOR
             = new Parcelable.Creator<AppWidgetProviderInfo>()
     {
         public AppWidgetProviderInfo createFromParcel(Parcel parcel)

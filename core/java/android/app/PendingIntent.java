@@ -1208,7 +1208,7 @@ public final class PendingIntent implements Parcelable {
 
     }
 
-    public static final Parcelable.Creator<PendingIntent> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<PendingIntent> CREATOR
             = new Parcelable.Creator<PendingIntent>() {
         public PendingIntent createFromParcel(Parcel in) {
             IBinder target = in.readStrongBinder();

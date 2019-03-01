@@ -344,7 +344,7 @@ public class JobParameters implements Parcelable {
         dest.writeString(debugStopReason);
     }
 
-    public static final Creator<JobParameters> CREATOR = new Creator<JobParameters>() {
+    public static final @android.annotation.NonNull Creator<JobParameters> CREATOR = new Creator<JobParameters>() {
         @Override
         public JobParameters createFromParcel(Parcel in) {
             return new JobParameters(in);

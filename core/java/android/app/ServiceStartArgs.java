@@ -58,7 +58,7 @@ public class ServiceStartArgs implements Parcelable {
         }
     }
 
-    public static final Parcelable.Creator<ServiceStartArgs> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<ServiceStartArgs> CREATOR
             = new Parcelable.Creator<ServiceStartArgs>() {
         public ServiceStartArgs createFromParcel(Parcel in) {
             return new ServiceStartArgs(in);

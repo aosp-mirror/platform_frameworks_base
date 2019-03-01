@@ -500,7 +500,7 @@ public final class VoiceInteractor {
                 dest.writeBundle(mExtras);
             }
 
-            public static final Parcelable.Creator<Option> CREATOR
+            public static final @android.annotation.NonNull Parcelable.Creator<Option> CREATOR
                     = new Parcelable.Creator<Option>() {
                 public Option createFromParcel(Parcel in) {
                     return new Option(in);
@@ -869,7 +869,7 @@ public final class VoiceInteractor {
             dest.writeCharSequence(mVisualPrompt);
         }
 
-        public static final Creator<Prompt> CREATOR
+        public static final @android.annotation.NonNull Creator<Prompt> CREATOR
                 = new Creator<Prompt>() {
             public Prompt createFromParcel(Parcel in) {
                 return new Prompt(in);

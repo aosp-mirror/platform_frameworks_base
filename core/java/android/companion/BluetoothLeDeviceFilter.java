@@ -247,7 +247,7 @@ public final class BluetoothLeDeviceFilter implements DeviceFilter<ScanResult> {
                 '}';
     }
 
-    public static final Creator<BluetoothLeDeviceFilter> CREATOR
+    public static final @android.annotation.NonNull Creator<BluetoothLeDeviceFilter> CREATOR
             = new Creator<BluetoothLeDeviceFilter>() {
         @Override
         public BluetoothLeDeviceFilter createFromParcel(Parcel in) {

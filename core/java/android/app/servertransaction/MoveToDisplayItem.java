@@ -83,7 +83,7 @@ public class MoveToDisplayItem extends ClientTransactionItem {
         mConfiguration = in.readTypedObject(Configuration.CREATOR);
     }
 
-    public static final Creator<MoveToDisplayItem> CREATOR = new Creator<MoveToDisplayItem>() {
+    public static final @android.annotation.NonNull Creator<MoveToDisplayItem> CREATOR = new Creator<MoveToDisplayItem>() {
         public MoveToDisplayItem createFromParcel(Parcel in) {
             return new MoveToDisplayItem(in);
         }

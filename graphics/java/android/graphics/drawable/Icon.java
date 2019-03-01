@@ -840,7 +840,7 @@ public final class Icon implements Parcelable {
         dest.writeInt(PorterDuff.modeToInt(mTintMode));
     }
 
-    public static final Parcelable.Creator<Icon> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<Icon> CREATOR
             = new Parcelable.Creator<Icon>() {
         public Icon createFromParcel(Parcel in) {
             return new Icon(in);

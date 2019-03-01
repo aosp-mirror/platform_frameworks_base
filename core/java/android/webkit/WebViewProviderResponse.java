@@ -30,7 +30,7 @@ public final class WebViewProviderResponse implements Parcelable {
     }
 
     // aidl stuff
-    public static final Parcelable.Creator<WebViewProviderResponse> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<WebViewProviderResponse> CREATOR =
         new Parcelable.Creator<WebViewProviderResponse>() {
             public WebViewProviderResponse createFromParcel(Parcel in) {
                 return new WebViewProviderResponse(in);

@@ -214,7 +214,7 @@ final public class JobWorkItem implements Parcelable {
         out.writeInt(mWorkId);
     }
 
-    public static final Parcelable.Creator<JobWorkItem> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<JobWorkItem> CREATOR
             = new Parcelable.Creator<JobWorkItem>() {
         public JobWorkItem createFromParcel(Parcel in) {
             return new JobWorkItem(in);

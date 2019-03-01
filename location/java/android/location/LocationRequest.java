@@ -669,7 +669,7 @@ public final class LocationRequest implements Parcelable {
         }
     }
 
-    public static final Parcelable.Creator<LocationRequest> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<LocationRequest> CREATOR =
             new Parcelable.Creator<LocationRequest>() {
                 @Override
                 public LocationRequest createFromParcel(Parcel in) {

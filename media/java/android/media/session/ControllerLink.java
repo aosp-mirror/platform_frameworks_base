@@ -40,7 +40,7 @@ import java.util.Objects;
  * @hide
  */
 public final class ControllerLink implements Parcelable {
-    public static final Parcelable.Creator<ControllerLink> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<ControllerLink> CREATOR =
             new Parcelable.Creator<ControllerLink>() {
                 @Override
                 public ControllerLink createFromParcel(Parcel in) {

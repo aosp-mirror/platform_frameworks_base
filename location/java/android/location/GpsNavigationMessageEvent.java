@@ -84,7 +84,7 @@ public class GpsNavigationMessageEvent implements Parcelable {
         return mNavigationMessage;
     }
 
-    public static final Creator<GpsNavigationMessageEvent> CREATOR =
+    public static final @android.annotation.NonNull Creator<GpsNavigationMessageEvent> CREATOR =
             new Creator<GpsNavigationMessageEvent>() {
                 @Override
                 public GpsNavigationMessageEvent createFromParcel(Parcel in) {

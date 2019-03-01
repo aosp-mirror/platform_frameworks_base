@@ -71,7 +71,7 @@ public final class ContentSelection implements Parcelable {
         dest.writeBundle(mExtras);
     }
 
-    public static final Creator<ContentSelection> CREATOR =
+    public static final @android.annotation.NonNull Creator<ContentSelection> CREATOR =
             new Creator<ContentSelection>() {
         @Override
         public ContentSelection createFromParcel(Parcel source) {

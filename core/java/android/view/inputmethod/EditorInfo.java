@@ -585,7 +585,7 @@ public class EditorInfo implements InputType, Parcelable {
     /**
      * Used to make this class parcelable.
      */
-    public static final Parcelable.Creator<EditorInfo> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<EditorInfo> CREATOR =
             new Parcelable.Creator<EditorInfo>() {
                 public EditorInfo createFromParcel(Parcel source) {
                     EditorInfo res = new EditorInfo();

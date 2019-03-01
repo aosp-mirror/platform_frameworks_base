@@ -1135,7 +1135,7 @@ public class AlarmManager {
             dest.writeParcelable(mShowIntent, flags);
         }
 
-        public static final Creator<AlarmClockInfo> CREATOR = new Creator<AlarmClockInfo>() {
+        public static final @android.annotation.NonNull Creator<AlarmClockInfo> CREATOR = new Creator<AlarmClockInfo>() {
             @Override
             public AlarmClockInfo createFromParcel(Parcel in) {
                 return new AlarmClockInfo(in);

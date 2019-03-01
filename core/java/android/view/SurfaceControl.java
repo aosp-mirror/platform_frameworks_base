@@ -819,7 +819,7 @@ public final class SurfaceControl implements Parcelable {
         proto.end(token);
     }
 
-    public static final Creator<SurfaceControl> CREATOR
+    public static final @android.annotation.NonNull Creator<SurfaceControl> CREATOR
             = new Creator<SurfaceControl>() {
         public SurfaceControl createFromParcel(Parcel in) {
             return new SurfaceControl(in);

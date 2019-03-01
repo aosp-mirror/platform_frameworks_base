@@ -123,7 +123,7 @@ public final class RollbackInfo implements Parcelable {
         out.writeInt(mCommittedSessionId);
     }
 
-    public static final Parcelable.Creator<RollbackInfo> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<RollbackInfo> CREATOR =
             new Parcelable.Creator<RollbackInfo>() {
         public RollbackInfo createFromParcel(Parcel in) {
             return new RollbackInfo(in);

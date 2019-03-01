@@ -95,7 +95,7 @@ public final class VolumePolicy implements Parcelable {
         dest.writeInt(vibrateToSilentDebounce);
     }
 
-    public static final Parcelable.Creator<VolumePolicy> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<VolumePolicy> CREATOR
             = new Parcelable.Creator<VolumePolicy>() {
         @Override
         public VolumePolicy createFromParcel(Parcel p) {

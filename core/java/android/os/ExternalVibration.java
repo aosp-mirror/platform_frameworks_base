@@ -156,7 +156,7 @@ public class ExternalVibration implements Parcelable {
         return 0;
     }
 
-    public static final Parcelable.Creator<ExternalVibration> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<ExternalVibration> CREATOR =
             new Parcelable.Creator<ExternalVibration>() {
                 @Override
                 public ExternalVibration createFromParcel(Parcel in) {

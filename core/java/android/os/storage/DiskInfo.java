@@ -198,7 +198,7 @@ public class DiskInfo implements Parcelable {
     }
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
-    public static final Creator<DiskInfo> CREATOR = new Creator<DiskInfo>() {
+    public static final @android.annotation.NonNull Creator<DiskInfo> CREATOR = new Creator<DiskInfo>() {
         @Override
         public DiskInfo createFromParcel(Parcel in) {
             return new DiskInfo(in);

@@ -213,7 +213,7 @@ public final class NdefMessage implements Parcelable {
         dest.writeTypedArray(mRecords, flags);
     }
 
-    public static final Parcelable.Creator<NdefMessage> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<NdefMessage> CREATOR =
             new Parcelable.Creator<NdefMessage>() {
         @Override
         public NdefMessage createFromParcel(Parcel in) {

@@ -101,7 +101,7 @@ public final class RuntimePermissionPresentationInfo implements Parcelable {
         parcel.writeInt(mFlags);
     }
 
-    public static final Creator<RuntimePermissionPresentationInfo> CREATOR =
+    public static final @android.annotation.NonNull Creator<RuntimePermissionPresentationInfo> CREATOR =
             new Creator<RuntimePermissionPresentationInfo>() {
         public RuntimePermissionPresentationInfo createFromParcel(Parcel source) {
             return new RuntimePermissionPresentationInfo(source);

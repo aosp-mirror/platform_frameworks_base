@@ -37,7 +37,7 @@ public final class Session2Link implements Parcelable {
     private static final String TAG = "Session2Link";
     private static final boolean DEBUG = MediaSession2.DEBUG;
 
-    public static final Parcelable.Creator<Session2Link> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<Session2Link> CREATOR =
             new Parcelable.Creator<Session2Link>() {
                 @Override
                 public Session2Link createFromParcel(Parcel in) {

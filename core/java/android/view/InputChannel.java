@@ -35,7 +35,7 @@ public final class InputChannel implements Parcelable {
     private static final boolean DEBUG = false;
     
     @UnsupportedAppUsage
-    public static final Parcelable.Creator<InputChannel> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<InputChannel> CREATOR
             = new Parcelable.Creator<InputChannel>() {
         public InputChannel createFromParcel(Parcel source) {
             InputChannel result = new InputChannel();

@@ -551,7 +551,7 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
         return (protectionLevel & PermissionInfo.PROTECTION_FLAG_APPOP) != 0;
     }
 
-    public static final Creator<PermissionInfo> CREATOR =
+    public static final @android.annotation.NonNull Creator<PermissionInfo> CREATOR =
         new Creator<PermissionInfo>() {
         @Override
         public PermissionInfo createFromParcel(Parcel source) {

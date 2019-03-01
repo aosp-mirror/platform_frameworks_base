@@ -1345,7 +1345,7 @@ public class ActivityManager {
             mIconFilename = source.readInt() > 0 ? source.readString() : null;
         }
 
-        public static final Creator<TaskDescription> CREATOR
+        public static final @android.annotation.NonNull Creator<TaskDescription> CREATOR
                 = new Creator<TaskDescription>() {
             public TaskDescription createFromParcel(Parcel source) {
                 return new TaskDescription(source);
@@ -1431,7 +1431,7 @@ public class ActivityManager {
             super.writeToParcel(dest, flags);
         }
 
-        public static final Creator<RecentTaskInfo> CREATOR
+        public static final @android.annotation.NonNull Creator<RecentTaskInfo> CREATOR
                 = new Creator<RecentTaskInfo>() {
             public RecentTaskInfo createFromParcel(Parcel source) {
                 return new RecentTaskInfo(source);
@@ -1601,7 +1601,7 @@ public class ActivityManager {
             super.writeToParcel(dest, flags);
         }
 
-        public static final Creator<RunningTaskInfo> CREATOR = new Creator<RunningTaskInfo>() {
+        public static final @android.annotation.NonNull Creator<RunningTaskInfo> CREATOR = new Creator<RunningTaskInfo>() {
             public RunningTaskInfo createFromParcel(Parcel source) {
                 return new RunningTaskInfo(source);
             }
@@ -1936,7 +1936,7 @@ public class ActivityManager {
                     + " mIsTranslucent=" + mIsTranslucent;
         }
 
-        public static final Creator<TaskSnapshot> CREATOR = new Creator<TaskSnapshot>() {
+        public static final @android.annotation.NonNull Creator<TaskSnapshot> CREATOR = new Creator<TaskSnapshot>() {
             public TaskSnapshot createFromParcel(Parcel source) {
                 return new TaskSnapshot(source);
             }
@@ -2177,7 +2177,7 @@ public class ActivityManager {
             clientLabel = source.readInt();
         }
 
-        public static final Creator<RunningServiceInfo> CREATOR = new Creator<RunningServiceInfo>() {
+        public static final @android.annotation.NonNull Creator<RunningServiceInfo> CREATOR = new Creator<RunningServiceInfo>() {
             public RunningServiceInfo createFromParcel(Parcel source) {
                 return new RunningServiceInfo(source);
             }
@@ -2309,7 +2309,7 @@ public class ActivityManager {
             foregroundAppThreshold = source.readLong();
         }
 
-        public static final Creator<MemoryInfo> CREATOR
+        public static final @android.annotation.NonNull Creator<MemoryInfo> CREATOR
                 = new Creator<MemoryInfo>() {
             public MemoryInfo createFromParcel(Parcel source) {
                 return new MemoryInfo(source);
@@ -2440,7 +2440,7 @@ public class ActivityManager {
             configuration.readFromParcel(source);
         }
 
-        public static final Creator<StackInfo> CREATOR = new Creator<StackInfo>() {
+        public static final @android.annotation.NonNull Creator<StackInfo> CREATOR = new Creator<StackInfo>() {
             @Override
             public StackInfo createFromParcel(Parcel source) {
                 return new StackInfo(source);
@@ -2646,7 +2646,7 @@ public class ActivityManager {
             stackTrace = source.readString();
         }
 
-        public static final Creator<ProcessErrorStateInfo> CREATOR =
+        public static final @android.annotation.NonNull Creator<ProcessErrorStateInfo> CREATOR =
                 new Creator<ProcessErrorStateInfo>() {
             public ProcessErrorStateInfo createFromParcel(Parcel source) {
                 return new ProcessErrorStateInfo(source);
@@ -3110,7 +3110,7 @@ public class ActivityManager {
             lastActivityTime = source.readLong();
         }
 
-        public static final Creator<RunningAppProcessInfo> CREATOR =
+        public static final @android.annotation.NonNull Creator<RunningAppProcessInfo> CREATOR =
             new Creator<RunningAppProcessInfo>() {
             public RunningAppProcessInfo createFromParcel(Parcel source) {
                 return new RunningAppProcessInfo(source);

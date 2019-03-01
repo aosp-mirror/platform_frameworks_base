@@ -431,7 +431,7 @@ public final class GnssClock implements Parcelable {
         mHardwareClockDiscontinuityCount = value;
     }
 
-    public static final Creator<GnssClock> CREATOR = new Creator<GnssClock>() {
+    public static final @android.annotation.NonNull Creator<GnssClock> CREATOR = new Creator<GnssClock>() {
         @Override
         public GnssClock createFromParcel(Parcel parcel) {
             GnssClock gpsClock = new GnssClock();

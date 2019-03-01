@@ -517,7 +517,7 @@ public final class FillEventHistory implements Parcelable {
         }
     }
 
-    public static final Parcelable.Creator<FillEventHistory> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<FillEventHistory> CREATOR =
             new Parcelable.Creator<FillEventHistory>() {
                 @Override
                 public FillEventHistory createFromParcel(Parcel parcel) {

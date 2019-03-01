@@ -260,7 +260,7 @@ public final class WallpaperColors implements Parcelable {
         mColorHints = colorHints;
     }
 
-    public static final Creator<WallpaperColors> CREATOR = new Creator<WallpaperColors>() {
+    public static final @android.annotation.NonNull Creator<WallpaperColors> CREATOR = new Creator<WallpaperColors>() {
         @Override
         public WallpaperColors createFromParcel(Parcel in) {
             return new WallpaperColors(in);

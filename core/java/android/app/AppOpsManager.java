@@ -1984,7 +1984,7 @@ public class AppOpsManager {
             }
         }
 
-        public static final Creator<PackageOps> CREATOR = new Creator<PackageOps>() {
+        public static final @android.annotation.NonNull Creator<PackageOps> CREATOR = new Creator<PackageOps>() {
             @Override public PackageOps createFromParcel(Parcel source) {
                 return new PackageOps(source);
             }
@@ -2192,7 +2192,7 @@ public class AppOpsManager {
             mProxyPackageName = source.readString();
         }
 
-        public static final Creator<OpEntry> CREATOR = new Creator<OpEntry>() {
+        public static final @android.annotation.NonNull Creator<OpEntry> CREATOR = new Creator<OpEntry>() {
             @Override public OpEntry createFromParcel(Parcel source) {
                 return new OpEntry(source);
             }
@@ -2725,7 +2725,7 @@ public class AppOpsManager {
                     + mBeginTimeMillis + " to:" + mEndTimeMillis + "]";
         }
 
-        public static final Creator<HistoricalOps> CREATOR = new Creator<HistoricalOps>() {
+        public static final @android.annotation.NonNull Creator<HistoricalOps> CREATOR = new Creator<HistoricalOps>() {
             @Override
             public @NonNull HistoricalOps createFromParcel(@NonNull Parcel parcel) {
                 return new HistoricalOps(parcel);
@@ -2935,7 +2935,7 @@ public class AppOpsManager {
         }
 
 
-        public static final Creator<HistoricalUidOps> CREATOR = new Creator<HistoricalUidOps>() {
+        public static final @android.annotation.NonNull Creator<HistoricalUidOps> CREATOR = new Creator<HistoricalUidOps>() {
             @Override
             public @NonNull HistoricalUidOps createFromParcel(@NonNull Parcel parcel) {
                 return new HistoricalUidOps(parcel);
@@ -3167,7 +3167,7 @@ public class AppOpsManager {
             return op;
         }
 
-        public static final Creator<HistoricalPackageOps> CREATOR =
+        public static final @android.annotation.NonNull Creator<HistoricalPackageOps> CREATOR =
                 new Creator<HistoricalPackageOps>() {
             @Override
             public @NonNull HistoricalPackageOps createFromParcel(@NonNull Parcel parcel) {
@@ -3589,7 +3589,7 @@ public class AppOpsManager {
             }
         }
 
-        public static final Creator<HistoricalOp> CREATOR = new Creator<HistoricalOp>() {
+        public static final @android.annotation.NonNull Creator<HistoricalOp> CREATOR = new Creator<HistoricalOp>() {
             @Override
             public @NonNull HistoricalOp createFromParcel(@NonNull Parcel source) {
                 return new HistoricalOp(source);

@@ -71,7 +71,7 @@ public class ContentProviderResult implements Parcelable {
         return 0;
     }
 
-    public static final Creator<ContentProviderResult> CREATOR =
+    public static final @android.annotation.NonNull Creator<ContentProviderResult> CREATOR =
             new Creator<ContentProviderResult>() {
         public ContentProviderResult createFromParcel(Parcel source) {
             return new ContentProviderResult(source);

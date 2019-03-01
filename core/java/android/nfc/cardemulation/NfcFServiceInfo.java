@@ -289,7 +289,7 @@ public final class NfcFServiceInfo implements Parcelable {
         dest.writeString(mT3tPmm);
     };
 
-    public static final Parcelable.Creator<NfcFServiceInfo> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<NfcFServiceInfo> CREATOR =
             new Parcelable.Creator<NfcFServiceInfo>() {
         @Override
         public NfcFServiceInfo createFromParcel(Parcel source) {

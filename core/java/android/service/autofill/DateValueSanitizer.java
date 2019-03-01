@@ -108,7 +108,7 @@ public final class DateValueSanitizer extends InternalSanitizer implements Sanit
         parcel.writeSerializable(mDateFormat);
     }
 
-    public static final Parcelable.Creator<DateValueSanitizer> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<DateValueSanitizer> CREATOR =
             new Parcelable.Creator<DateValueSanitizer>() {
         @Override
         public DateValueSanitizer createFromParcel(Parcel parcel) {

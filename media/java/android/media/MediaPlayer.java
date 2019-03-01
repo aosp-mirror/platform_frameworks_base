@@ -2519,7 +2519,7 @@ public class MediaPlayer extends PlayerBase
          * Used to read a TrackInfo from a Parcel.
          */
         @UnsupportedAppUsage
-        static final Parcelable.Creator<TrackInfo> CREATOR
+        static final @android.annotation.NonNull Parcelable.Creator<TrackInfo> CREATOR
                 = new Parcelable.Creator<TrackInfo>() {
                     @Override
                     public TrackInfo createFromParcel(Parcel in) {

@@ -198,7 +198,7 @@ public final class BrightnessConfiguration implements Parcelable {
                 && Objects.equals(mDescription, other.mDescription);
     }
 
-    public static final Creator<BrightnessConfiguration> CREATOR =
+    public static final @android.annotation.NonNull Creator<BrightnessConfiguration> CREATOR =
             new Creator<BrightnessConfiguration>() {
         public BrightnessConfiguration createFromParcel(Parcel in) {
             float[] lux = in.createFloatArray();

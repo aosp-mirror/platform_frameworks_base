@@ -47,7 +47,7 @@ public class ActivityRecognitionEvent implements Parcelable {
         return mTimestampNs;
     }
 
-    public static final Creator<ActivityRecognitionEvent> CREATOR =
+    public static final @android.annotation.NonNull Creator<ActivityRecognitionEvent> CREATOR =
             new Creator<ActivityRecognitionEvent>() {
         @Override
         public ActivityRecognitionEvent createFromParcel(Parcel source) {

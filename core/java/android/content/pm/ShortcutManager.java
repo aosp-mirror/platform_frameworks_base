@@ -624,7 +624,7 @@ public class ShortcutManager {
             dest.writeParcelable(mTargetComponent, flags);
         }
 
-        public static final Parcelable.Creator<ShareShortcutInfo> CREATOR =
+        public static final @android.annotation.NonNull Parcelable.Creator<ShareShortcutInfo> CREATOR =
                 new Parcelable.Creator<ShareShortcutInfo>() {
                     public ShareShortcutInfo createFromParcel(Parcel in) {
                         return new ShareShortcutInfo(in);

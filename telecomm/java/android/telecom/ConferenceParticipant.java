@@ -86,7 +86,7 @@ public class ConferenceParticipant implements Parcelable {
     /**
      * Responsible for creating {@code ConferenceParticipant} objects for deserialized Parcels.
      */
-    public static final Parcelable.Creator<ConferenceParticipant> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<ConferenceParticipant> CREATOR =
             new Parcelable.Creator<ConferenceParticipant>() {
 
                 @Override

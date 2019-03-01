@@ -122,7 +122,7 @@ final class FragmentState implements Parcelable {
         dest.writeBundle(mSavedFragmentState);
     }
 
-    public static final Parcelable.Creator<FragmentState> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<FragmentState> CREATOR =
             new Parcelable.Creator<FragmentState>() {
                 @Override
                 public FragmentState createFromParcel(Parcel in) {

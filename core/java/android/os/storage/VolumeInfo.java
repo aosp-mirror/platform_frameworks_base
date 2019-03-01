@@ -527,7 +527,7 @@ public class VolumeInfo implements Parcelable {
     }
 
     @UnsupportedAppUsage
-    public static final Creator<VolumeInfo> CREATOR = new Creator<VolumeInfo>() {
+    public static final @android.annotation.NonNull Creator<VolumeInfo> CREATOR = new Creator<VolumeInfo>() {
         @Override
         public VolumeInfo createFromParcel(Parcel in) {
             return new VolumeInfo(in);

@@ -134,7 +134,7 @@ public class AuthenticatorDescription implements Parcelable {
     }
 
     /** Used to create the object from a parcel. */
-    public static final Creator<AuthenticatorDescription> CREATOR =
+    public static final @android.annotation.NonNull Creator<AuthenticatorDescription> CREATOR =
             new Creator<AuthenticatorDescription>() {
         /** @inheritDoc */
         public AuthenticatorDescription createFromParcel(Parcel source) {

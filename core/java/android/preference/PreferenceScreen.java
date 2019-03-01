@@ -315,7 +315,7 @@ public final class PreferenceScreen extends PreferenceGroup implements AdapterVi
             super(superState);
         }
 
-        public static final Parcelable.Creator<SavedState> CREATOR =
+        public static final @android.annotation.NonNull Parcelable.Creator<SavedState> CREATOR =
                 new Parcelable.Creator<SavedState>() {
             public SavedState createFromParcel(Parcel in) {
                 return new SavedState(in);

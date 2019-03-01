@@ -69,7 +69,7 @@ public final class StringNetworkSpecifier extends NetworkSpecifier implements Pa
         dest.writeString(specifier);
     }
 
-    public static final Parcelable.Creator<StringNetworkSpecifier> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<StringNetworkSpecifier> CREATOR =
             new Parcelable.Creator<StringNetworkSpecifier>() {
         public StringNetworkSpecifier createFromParcel(Parcel in) {
             return new StringNetworkSpecifier(in.readString());

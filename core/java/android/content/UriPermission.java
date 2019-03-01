@@ -103,7 +103,7 @@ public final class UriPermission implements Parcelable {
         dest.writeLong(mPersistedTime);
     }
 
-    public static final Creator<UriPermission> CREATOR = new Creator<UriPermission>() {
+    public static final @android.annotation.NonNull Creator<UriPermission> CREATOR = new Creator<UriPermission>() {
         @Override
         public UriPermission createFromParcel(Parcel source) {
             return new UriPermission(source);

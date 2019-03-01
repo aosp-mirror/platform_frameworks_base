@@ -46,7 +46,7 @@ public final class WifiBatteryStats implements Parcelable {
   private long[] mTimeInRxSignalStrengthLevelMs;
   private long mMonitoredRailChargeConsumedMaMs;
 
-  public static final Parcelable.Creator<WifiBatteryStats> CREATOR = new
+  public static final @android.annotation.NonNull Parcelable.Creator<WifiBatteryStats> CREATOR = new
       Parcelable.Creator<WifiBatteryStats>() {
         public WifiBatteryStats createFromParcel(Parcel in) {
           return new WifiBatteryStats(in);

@@ -914,7 +914,7 @@ public final class PhoneAccount implements Parcelable {
         out.writeInt(mSupportedAudioRoutes);
     }
 
-    public static final Creator<PhoneAccount> CREATOR
+    public static final @android.annotation.NonNull Creator<PhoneAccount> CREATOR
             = new Creator<PhoneAccount>() {
         @Override
         public PhoneAccount createFromParcel(Parcel in) {

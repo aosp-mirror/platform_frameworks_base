@@ -165,7 +165,7 @@ public final class EuiccNotification implements Parcelable {
         mData = source.createByteArray();
     }
 
-    public static final Creator<EuiccNotification> CREATOR =
+    public static final @android.annotation.NonNull Creator<EuiccNotification> CREATOR =
             new Creator<EuiccNotification>() {
                 @Override
                 public EuiccNotification createFromParcel(Parcel source) {

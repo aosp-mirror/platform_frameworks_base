@@ -1410,7 +1410,7 @@ public class ApnSetting implements Parcelable {
             0, 0, 0, 0, mvnoType, null, apnSetId, carrierId);
     }
 
-    public static final Parcelable.Creator<ApnSetting> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<ApnSetting> CREATOR =
             new Parcelable.Creator<ApnSetting>() {
                 @Override
                 public ApnSetting createFromParcel(Parcel in) {

@@ -76,7 +76,7 @@ public final class RangingRequest implements Parcelable {
         dest.writeList(mRttPeers);
     }
 
-    public static final Creator<RangingRequest> CREATOR = new Creator<RangingRequest>() {
+    public static final @android.annotation.NonNull Creator<RangingRequest> CREATOR = new Creator<RangingRequest>() {
         @Override
         public RangingRequest[] newArray(int size) {
             return new RangingRequest[size];

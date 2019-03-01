@@ -217,7 +217,7 @@ public class ServiceInfo extends ComponentInfo
         dest.writeInt(mForegroundServiceType);
     }
 
-    public static final Creator<ServiceInfo> CREATOR =
+    public static final @android.annotation.NonNull Creator<ServiceInfo> CREATOR =
         new Creator<ServiceInfo>() {
         public ServiceInfo createFromParcel(Parcel source) {
             return new ServiceInfo(source);

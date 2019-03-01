@@ -85,7 +85,7 @@ public abstract class NetworkEvent implements Parcelable {
         return 0;
     }
 
-    public static final Parcelable.Creator<NetworkEvent> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<NetworkEvent> CREATOR
             = new Parcelable.Creator<NetworkEvent>() {
         public NetworkEvent createFromParcel(Parcel in) {
             final int initialPosition = in.dataPosition();

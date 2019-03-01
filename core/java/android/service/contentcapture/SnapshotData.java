@@ -93,7 +93,7 @@ public final class SnapshotData implements Parcelable {
         parcel.writeParcelable(mAssistContent, flags);
     }
 
-    public static final Creator<SnapshotData> CREATOR =
+    public static final @android.annotation.NonNull Creator<SnapshotData> CREATOR =
             new Creator<SnapshotData>() {
 
         @Override

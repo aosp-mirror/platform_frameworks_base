@@ -855,7 +855,7 @@ public class Intent implements Parcelable, Cloneable {
         /**
          * Used to read a ShortcutIconResource from a Parcel.
          */
-        public static final Parcelable.Creator<ShortcutIconResource> CREATOR =
+        public static final @android.annotation.NonNull Parcelable.Creator<ShortcutIconResource> CREATOR =
             new Parcelable.Creator<ShortcutIconResource>() {
 
                 public ShortcutIconResource createFromParcel(Parcel source) {
@@ -10344,7 +10344,7 @@ public class Intent implements Parcelable, Cloneable {
         out.writeBundle(mExtras);
     }
 
-    public static final Parcelable.Creator<Intent> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<Intent> CREATOR
             = new Parcelable.Creator<Intent>() {
         public Intent createFromParcel(Parcel in) {
             return new Intent(in);

@@ -43,7 +43,7 @@ public final class ParcelablePeerHandle extends PeerHandle implements Parcelable
         dest.writeInt(peerId);
     }
 
-    public static final Creator<ParcelablePeerHandle> CREATOR =
+    public static final @android.annotation.NonNull Creator<ParcelablePeerHandle> CREATOR =
             new Creator<ParcelablePeerHandle>() {
                 @Override
                 public ParcelablePeerHandle[] newArray(int size) {

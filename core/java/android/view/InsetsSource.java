@@ -151,7 +151,7 @@ public class InsetsSource implements Parcelable {
         dest.writeBoolean(mVisible);
     }
 
-    public static final Creator<InsetsSource> CREATOR = new Creator<InsetsSource>() {
+    public static final @android.annotation.NonNull Creator<InsetsSource> CREATOR = new Creator<InsetsSource>() {
 
         public InsetsSource createFromParcel(Parcel in) {
             return new InsetsSource(in);

@@ -148,7 +148,7 @@ public class ProfilerInfo implements Parcelable {
         proto.end(token);
     }
 
-    public static final Parcelable.Creator<ProfilerInfo> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<ProfilerInfo> CREATOR =
             new Parcelable.Creator<ProfilerInfo>() {
                 @Override
                 public ProfilerInfo createFromParcel(Parcel in) {

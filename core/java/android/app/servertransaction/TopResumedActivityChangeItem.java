@@ -97,7 +97,7 @@ public class TopResumedActivityChangeItem extends ClientTransactionItem {
         mOnTop = in.readBoolean();
     }
 
-    public static final Creator<TopResumedActivityChangeItem> CREATOR =
+    public static final @android.annotation.NonNull Creator<TopResumedActivityChangeItem> CREATOR =
             new Creator<TopResumedActivityChangeItem>() {
                 public TopResumedActivityChangeItem createFromParcel(Parcel in) {
                     return new TopResumedActivityChangeItem(in);

@@ -435,7 +435,7 @@ public final class UserData implements FieldClassificationUserData, Parcelable {
         parcel.writeMap(mCategoryArgs);
     }
 
-    public static final Parcelable.Creator<UserData> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<UserData> CREATOR =
             new Parcelable.Creator<UserData>() {
         @Override
         public UserData createFromParcel(Parcel parcel) {
