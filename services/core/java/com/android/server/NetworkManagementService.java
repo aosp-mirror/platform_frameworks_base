@@ -89,10 +89,10 @@ import android.util.StatsLog;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IBatteryStats;
-import com.android.internal.net.NetworkStatsFactory;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.HexDump;
 import com.android.internal.util.Preconditions;
+import com.android.server.net.NetworkStatsFactory;
 
 import com.google.android.collect.Maps;
 
