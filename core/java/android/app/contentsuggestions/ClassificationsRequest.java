@@ -54,10 +54,10 @@ public final class ClassificationsRequest implements Parcelable {
     }
 
     /**
-     * Return the request extras or {@code null} if there are none.
+     * Return the request extras, can be an empty bundle.
      */
-    public @Nullable Bundle getExtras() {
-        return mExtras;
+    public @NonNull Bundle getExtras() {
+        return mExtras == null ? new Bundle() : mExtras;
     }
 
     @Override

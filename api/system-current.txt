@@ -936,7 +936,7 @@ package android.app.contentsuggestions {
 
   public final class ClassificationsRequest implements android.os.Parcelable {
     method public int describeContents();
-    method @Nullable public android.os.Bundle getExtras();
+    method @NonNull public android.os.Bundle getExtras();
     method @NonNull public java.util.List<android.app.contentsuggestions.ContentSelection> getSelections();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.contentsuggestions.ClassificationsRequest> CREATOR;
@@ -983,7 +983,7 @@ package android.app.contentsuggestions {
 
   public final class SelectionsRequest implements android.os.Parcelable {
     method public int describeContents();
-    method @Nullable public android.os.Bundle getExtras();
+    method @NonNull public android.os.Bundle getExtras();
     method @Nullable public android.graphics.Point getInterestPoint();
     method public int getTaskId();
     method public void writeToParcel(android.os.Parcel, int);
