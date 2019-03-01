@@ -17,6 +17,7 @@
 package com.android.systemui.shared.recents;
 
 import android.graphics.Rect;
+import android.os.Bundle;
 import android.view.MotionEvent;
 
 /**
@@ -82,4 +83,13 @@ interface ISystemUiProxy {
      */
     boolean supportsRoundedCornersOnWindows() = 11;
 
+    /**
+     * Proxies the assistant gesture's progress started from navigation bar.
+     */
+    void onAssistantProgress(float progress) = 12;
+
+    /**
+     * Start the assistant.
+     */
+    void startAssistant(in Bundle bundle) = 13;
 }
