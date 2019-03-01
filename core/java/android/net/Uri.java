@@ -402,7 +402,7 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
                 }
                 return builder.toString();
             } else if (scheme.equalsIgnoreCase("http") || scheme.equalsIgnoreCase("https")
-                    || scheme.equalsIgnoreCase("ftp")) {
+                    || scheme.equalsIgnoreCase("ftp") || scheme.equalsIgnoreCase("rtsp")) {
                 ssp = "//" + ((getHost() != null) ? getHost() : "")
                         + ((getPort() != -1) ? (":" + getPort()) : "")
                         + "/...";
