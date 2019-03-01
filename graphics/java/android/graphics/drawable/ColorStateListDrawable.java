@@ -17,6 +17,7 @@ package android.graphics.drawable;
 
 import android.annotation.IntRange;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.pm.ActivityInfo;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
@@ -40,14 +41,14 @@ public class ColorStateListDrawable extends Drawable implements Drawable.Callbac
         initializeColorDrawable();
     }
 
-    public ColorStateListDrawable(ColorStateList colorStateList) {
+    public ColorStateListDrawable(@NonNull ColorStateList colorStateList) {
         mState = new ColorStateListDrawableState();
         initializeColorDrawable();
         setColorStateList(colorStateList);
     }
 
     @Override
-    public void draw(Canvas canvas) {
+    public void draw(@NonNull Canvas canvas) {
         mColorDrawable.draw(canvas);
     }
 
@@ -73,7 +74,7 @@ public class ColorStateListDrawable extends Drawable implements Drawable.Callbac
     }
 
     @Override
-    public void applyTheme(Resources.Theme t) {
+    public void applyTheme(@NonNull Resources.Theme t) {
         super.applyTheme(t);
 
         if (mState.mColor != null) {
@@ -106,26 +107,26 @@ public class ColorStateListDrawable extends Drawable implements Drawable.Callbac
     }
 
     @Override
-    public void setTintList(ColorStateList tint) {
+    public void setTintList(@Nullable ColorStateList tint) {
         mState.mTint = tint;
         mColorDrawable.setTintList(tint);
         onStateChange(getState());
     }
 
     @Override
-    public void setTintMode(PorterDuff.Mode tintMode) {
+    public void setTintMode(@NonNull PorterDuff.Mode tintMode) {
         mState.mTintMode = tintMode;
         mColorDrawable.setTintMode(tintMode);
         onStateChange(getState());
     }
 
     @Override
-    public ColorFilter getColorFilter() {
+    public @Nullable ColorFilter getColorFilter() {
         return mColorDrawable.getColorFilter();
     }
 
     @Override
-    public void setColorFilter(ColorFilter colorFilter) {
+    public void setColorFilter(@Nullable ColorFilter colorFilter) {
         mColorDrawable.setColorFilter(colorFilter);
     }
 
@@ -156,28 +157,28 @@ public class ColorStateListDrawable extends Drawable implements Drawable.Callbac
     }
 
     @Override
-    public void invalidateDrawable(Drawable who) {
+    public void invalidateDrawable(@NonNull Drawable who) {
         if (who == mColorDrawable && getCallback() != null) {
             getCallback().invalidateDrawable(this);
         }
     }
 
     @Override
-    public void scheduleDrawable(Drawable who, Runnable what, long when) {
+    public void scheduleDrawable(@NonNull Drawable who, @NonNull Runnable what, long when) {
         if (who == mColorDrawable && getCallback() != null) {
             getCallback().scheduleDrawable(this, what, when);
         }
     }
 
     @Override
-    public void unscheduleDrawable(Drawable who, Runnable what) {
+    public void unscheduleDrawable(@NonNull Drawable who, @NonNull Runnable what) {
         if (who == mColorDrawable && getCallback() != null) {
             getCallback().unscheduleDrawable(this, what);
         }
     }
 
     @Override
-    public ConstantState getConstantState() {
+    public @NonNull ConstantState getConstantState() {
         mState.mChangingConfigurations = mState.mChangingConfigurations
                 | (getChangingConfigurations() & ~mState.getChangingConfigurations());
         return mState;
@@ -203,7 +204,7 @@ public class ColorStateListDrawable extends Drawable implements Drawable.Callbac
     }
 
     @Override
-    public Drawable mutate() {
+    public @NonNull Drawable mutate() {
         if (!mMutated && super.mutate() == this) {
             mState = new ColorStateListDrawableState(mState);
             mMutated = true;
@@ -226,7 +227,7 @@ public class ColorStateListDrawable extends Drawable implements Drawable.Callbac
      *
      * @param colorStateList A color state list to attach.
      */
-    public void setColorStateList(ColorStateList colorStateList) {
+    public void setColorStateList(@NonNull ColorStateList colorStateList) {
         mState.mColor = colorStateList;
         onStateChange(getState());
     }
@@ -278,7 +279,7 @@ public class ColorStateListDrawable extends Drawable implements Drawable.Callbac
         }
     }
 
-    private ColorStateListDrawable(ColorStateListDrawableState state) {
+    private ColorStateListDrawable(@NonNull ColorStateListDrawableState state) {
         mState = state;
         initializeColorDrawable();
     }
