@@ -39,17 +39,14 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/monitoring_title_device_owned"
-                style="@style/TextAppearance.DeviceManagementDialog.Title"
-                android:textColor="?android:attr/textColorPrimary"
+                style="@style/DeviceManagementDialogTitle"
                 android:paddingBottom="@dimen/qs_footer_dialog_subtitle_padding"
             />
             <TextView
                 android:id="@+id/device_management_warning"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@null"
-                style="@android:style/TextAppearance.Material.Subhead"
-                android:textColor="?android:attr/textColorPrimary"
+                android:textAppearance="@style/TextAppearance.DeviceManagementDialog.Content"
             />
         </LinearLayout>
 
@@ -64,17 +61,14 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/monitoring_subtitle_ca_certificate"
-                style="@style/TextAppearance.DeviceManagementDialog.Title"
-                android:textColor="?android:attr/textColorPrimary"
+                style="@style/DeviceManagementDialogTitle"
                 android:paddingBottom="@dimen/qs_footer_dialog_subtitle_padding"
             />
             <TextView
                 android:id="@+id/ca_certs_warning"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@null"
-                style="@android:style/TextAppearance.Material.Subhead"
-                android:textColor="?android:attr/textColorPrimary"
+                android:textAppearance="@style/TextAppearance.DeviceManagementDialog.Content"
             />
         </LinearLayout>
 
@@ -89,17 +83,14 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/monitoring_subtitle_network_logging"
-                style="@style/TextAppearance.DeviceManagementDialog.Title"
-                android:textColor="?android:attr/textColorPrimary"
+                style="@style/DeviceManagementDialogTitle"
                 android:paddingBottom="@dimen/qs_footer_dialog_subtitle_padding"
             />
             <TextView
                 android:id="@+id/network_logging_warning"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@null"
-                style="@android:style/TextAppearance.Material.Subhead"
-                android:textColor="?android:attr/textColorPrimary"
+                android:textAppearance="@style/TextAppearance.DeviceManagementDialog.Content"
             />
         </LinearLayout>
 
@@ -114,17 +105,14 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/monitoring_subtitle_vpn"
-                style="@style/TextAppearance.DeviceManagementDialog.Title"
-                android:textColor="?android:attr/textColorPrimary"
+                style="@style/DeviceManagementDialogTitle"
                 android:paddingBottom="@dimen/qs_footer_dialog_subtitle_padding"
             />
             <TextView
                 android:id="@+id/vpn_warning"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@null"
-                style="@android:style/TextAppearance.Material.Subhead"
-                android:textColor="?android:attr/textColorPrimary"
+                android:textAppearance="@style/TextAppearance.DeviceManagementDialog.Content"
             />
         </LinearLayout>
     </LinearLayout>
