@@ -1068,7 +1068,7 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
         }
 
         // Get and cache advanced capabilities
-        final boolean isOweSupported = mWifiManager.isOweSupported();
+        final boolean isOweSupported = mWifiManager.isEnhancedOpenSupported();
         final boolean isSaeSupported = mWifiManager.isWpa3SaeSupported();
         final boolean isSuiteBSupported = mWifiManager.isWpa3SuiteBSupported();
 
