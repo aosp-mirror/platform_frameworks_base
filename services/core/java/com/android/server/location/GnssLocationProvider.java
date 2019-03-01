@@ -351,8 +351,8 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     // The WorkSource associated with the most recent client request (i.e, most recent call to
     // setRequest).
     private WorkSource mWorkSource = null;
-    // True if gps should be disabled (used to support battery saver mode in settings).
-    private boolean mDisableGps = false;
+    // True if gps should be disabled because of PowerManager controls
+    private boolean mDisableGpsForPowerManager = false;
 
     /**
      * Properties loaded from PROPERTIES_FILE.
@@ -525,18 +525,19 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
 
     private void updateLowPowerMode() {
         // Disable GPS if we are in device idle mode.
-        boolean disableGps = mPowerManager.isDeviceIdleMode();
+        boolean disableGpsForPowerManager = mPowerManager.isDeviceIdleMode();
         final PowerSaveState result =
                 mPowerManager.getPowerSaveState(ServiceType.LOCATION);
         switch (result.locationMode) {
             case PowerManager.LOCATION_MODE_GPS_DISABLED_WHEN_SCREEN_OFF:
             case PowerManager.LOCATION_MODE_ALL_DISABLED_WHEN_SCREEN_OFF:
                 // If we are in battery saver mode and the screen is off, disable GPS.
-                disableGps |= result.batterySaverEnabled && !mPowerManager.isInteractive();
+                disableGpsForPowerManager |=
+                        result.batterySaverEnabled && !mPowerManager.isInteractive();
                 break;
         }
-        if (disableGps != mDisableGps) {
-            mDisableGps = disableGps;
+        if (disableGpsForPowerManager != mDisableGpsForPowerManager) {
+            mDisableGpsForPowerManager = disableGpsForPowerManager;
             updateEnabled();
             updateRequirements();
         }
@@ -933,11 +934,19 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
 
     private void updateEnabled() {
         synchronized (mLock) {
-            boolean enabled =
-                    ((mProviderRequest != null && mProviderRequest.reportLocation
-                            && mProviderRequest.locationSettingsIgnored) || (
-                            mContext.getSystemService(LocationManager.class).isLocationEnabled()
-                                    && !mDisableGps)) && !mShutdown;
+            // Generally follow location setting
+            boolean enabled = mContext.getSystemService(LocationManager.class).isLocationEnabled();
+
+            // ... but disable if PowerManager overrides
+            enabled &= !mDisableGpsForPowerManager;
+
+            // .. but enable anyway, if there's an active settings-ignored request (e.g. ELS)
+            enabled |= (mProviderRequest != null && mProviderRequest.reportLocation
+                            && mProviderRequest.locationSettingsIgnored);
+
+            // ... and, finally, disable anyway, if device is being shut down
+            enabled &= !mShutdown;
+
             if (enabled == mEnabled) {
                 return;
             }
@@ -2118,7 +2127,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
                 .append(mGnssMeasurementsProvider.isRegistered()).append('\n');
         s.append("  mGnssNavigationMessageProvider.isRegistered()=")
                 .append(mGnssNavigationMessageProvider.isRegistered()).append('\n');
-        s.append("  mDisableGps (battery saver mode)=").append(mDisableGps).append('\n');
+        s.append("  mDisableGpsForPowerManager=").append(mDisableGpsForPowerManager).append('\n');
         s.append("  mEngineCapabilities=0x").append(Integer.toHexString(mEngineCapabilities));
         s.append(" ( ");
         if (hasCapability(GPS_CAPABILITY_SCHEDULING)) s.append("SCHEDULING ");
