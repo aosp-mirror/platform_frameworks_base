@@ -30,6 +30,7 @@ import android.os.Parcelable;
 import android.util.Log;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -78,11 +79,12 @@ public class BluetoothDeviceFilterUtils {
 
     static boolean matchesServiceUuid(ParcelUuid serviceUuid, ParcelUuid serviceUuidMask,
             BluetoothDevice device) {
+        ParcelUuid[] uuids = device.getUuids();
         final boolean result = serviceUuid == null ||
                 ScanFilter.matchesServiceUuids(
                         serviceUuid,
                         serviceUuidMask,
-                        Arrays.asList(device.getUuids()));
+                        uuids == null ? Collections.emptyList() : Arrays.asList(uuids));
         if (DEBUG) debugLogMatchResult(result, device, serviceUuid);
         return result;
     }
