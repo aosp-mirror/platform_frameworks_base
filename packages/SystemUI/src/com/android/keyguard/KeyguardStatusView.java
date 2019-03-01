@@ -27,7 +27,6 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.text.format.DateFormat;
-import android.util.ArraySet;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Slog;
@@ -41,8 +40,6 @@ import androidx.core.graphics.ColorUtils;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.systemui.Dependency;
 import com.android.systemui.statusbar.policy.ConfigurationController;
-
-import com.google.android.collect.Sets;
 
 import java.util.Locale;
 import java.util.TimeZone;
@@ -63,7 +60,6 @@ public class KeyguardStatusView extends GridLayout implements
     private Runnable mPendingMarqueeStart;
     private Handler mHandler;
 
-    private ArraySet<View> mVisibleInDoze;
     private boolean mPulsing;
     private float mDarkAmount = 0;
     private int mTextColor;
@@ -175,7 +171,6 @@ public class KeyguardStatusView extends GridLayout implements
         }
         mOwnerInfo = findViewById(R.id.owner_info);
         mKeyguardSlice = findViewById(R.id.keyguard_status_area);
-        mVisibleInDoze = Sets.newArraySet(mClockView, mKeyguardSlice);
         mTextColor = mClockView.getCurrentTextColor();
 
         mKeyguardSlice.setContentChangeListener(this::onSliceContentChanged);
@@ -348,7 +343,6 @@ public class KeyguardStatusView extends GridLayout implements
         }
 
         final int blendedTextColor = ColorUtils.blendARGB(mTextColor, Color.WHITE, mDarkAmount);
-        updateDozeVisibleViews();
         mKeyguardSlice.setDarkAmount(mDarkAmount);
         mClockView.setTextColor(blendedTextColor);
     }
@@ -372,13 +366,6 @@ public class KeyguardStatusView extends GridLayout implements
             return;
         }
         mPulsing = pulsing;
-        updateDozeVisibleViews();
-    }
-
-    private void updateDozeVisibleViews() {
-        for (View child : mVisibleInDoze) {
-            child.setAlpha(mDarkAmount == 1 && mPulsing ? 0.8f : 1);
-        }
     }
 
     private boolean shouldShowLogout() {
