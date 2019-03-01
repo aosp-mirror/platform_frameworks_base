@@ -372,7 +372,12 @@ public class AppStandbyController {
 
             mSystemServicesReady = true;
 
-            if (mPendingInitializeDefaults) {
+            boolean userFileExists;
+            synchronized (mAppIdleLock) {
+                userFileExists = mAppIdleHistory.userFileExists(UserHandle.USER_SYSTEM);
+            }
+
+            if (mPendingInitializeDefaults || !userFileExists) {
                 initializeDefaultsForSystemApps(UserHandle.USER_SYSTEM);
             }
 
@@ -1411,6 +1416,8 @@ public class AppStandbyController {
                             elapsedRealtime + mSystemUpdateUsageTimeoutMillis);
                 }
             }
+            // Immediately persist defaults to disk
+            mAppIdleHistory.writeAppIdleTimes(userId);
         }
     }
 

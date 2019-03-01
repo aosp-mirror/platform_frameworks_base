@@ -508,6 +508,16 @@ public class AppIdleHistory {
                 Integer.toString(userId)), APP_IDLE_FILENAME);
     }
 
+
+    /**
+     * Check if App Idle File exists on disk
+     * @param userId
+     * @return true if file exists
+     */
+    public boolean userFileExists(int userId) {
+        return getUserFile(userId).exists();
+    }
+
     private void readAppIdleTimes(int userId, ArrayMap<String, AppUsageHistory> userHistory) {
         FileInputStream fis = null;
         try {
