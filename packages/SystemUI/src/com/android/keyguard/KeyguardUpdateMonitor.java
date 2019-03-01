@@ -196,6 +196,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private static KeyguardUpdateMonitor sInstance;
 
     private final Context mContext;
+    private final boolean mIsPrimaryUser;
     HashMap<Integer, SimData> mSimDatas = new HashMap<Integer, SimData>();
     HashMap<Integer, ServiceState> mServiceStates = new HashMap<Integer, ServiceState>();
 
@@ -1530,6 +1531,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
 
         ActivityManagerWrapper.getInstance().registerTaskStackListener(mTaskStackListener);
         mUserManager = context.getSystemService(UserManager.class);
+        mIsPrimaryUser = mUserManager.isPrimaryUser();
         mDevicePolicyManager = context.getSystemService(DevicePolicyManager.class);
         mLogoutEnabled = mDevicePolicyManager.isLogoutEnabled();
         updateAirplaneModeState();
@@ -1608,21 +1610,26 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     }
 
     private boolean shouldListenForFingerprint() {
-        return (mKeyguardIsVisible || !mDeviceInteractive ||
+        // Only listen if this KeyguardUpdateMonitor belongs to the primary user. There is an
+        // instance of KeyguardUpdateMonitor for each user but KeyguardUpdateMonitor is user-aware.
+        final boolean shouldListen = (mKeyguardIsVisible || !mDeviceInteractive ||
                 (mBouncer && !mKeyguardGoingAway) || mGoingToSleep ||
                 shouldListenForFingerprintAssistant() || (mKeyguardOccluded && mIsDreaming))
                 && !mSwitchingUser && !isFingerprintDisabled(getCurrentUser())
-                && !mKeyguardGoingAway && !mFingerprintLockedOut;
+                && !mKeyguardGoingAway && !mFingerprintLockedOut && mIsPrimaryUser;
+        return shouldListen;
     }
 
     private boolean shouldListenForFace() {
         final boolean awakeKeyguard = mKeyguardIsVisible && mDeviceInteractive && !mGoingToSleep;
         final int user = getCurrentUser();
-
+        // Only listen if this KeyguardUpdateMonitor belongs to the primary user. There is an
+        // instance of KeyguardUpdateMonitor for each user but KeyguardUpdateMonitor is user-aware.
         return (mBouncer || mAuthInterruptActive || awakeKeyguard || shouldListenForFaceAssistant())
                 && !mSwitchingUser && !getUserCanSkipBouncer(user) && !isFaceDisabled(user)
                 && !mKeyguardGoingAway && !mFaceLockedOut && mFaceSettingEnabledForUser
-                && mUserManager.isUserUnlocked(user);
+                && mUserManager.isUserUnlocked(user)
+                && mIsPrimaryUser;
     }
 
 

@@ -106,6 +106,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         when(mFaceManager.hasEnrolledTemplates()).thenReturn(true);
         when(mFaceManager.hasEnrolledTemplates(anyInt())).thenReturn(true);
         when(mUserManager.isUserUnlocked(anyInt())).thenReturn(true);
+        when(mUserManager.isPrimaryUser()).thenReturn(true);
         when(mStrongAuthTracker.isUnlockingWithBiometricAllowed()).thenReturn(true);
         context.addMockSystemService(TrustManager.class, mTrustManager);
         context.addMockSystemService(FingerprintManager.class, mFingerprintManager);
