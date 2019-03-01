@@ -56,7 +56,7 @@ public final class ProviderRequest implements Parcelable {
      * low power fast interval request.
      */
     @UnsupportedAppUsage
-    public List<LocationRequest> locationRequests = new ArrayList<LocationRequest>();
+    public final List<LocationRequest> locationRequests = new ArrayList<>();
 
     @UnsupportedAppUsage
     public ProviderRequest() {

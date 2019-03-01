@@ -9635,6 +9635,7 @@ public final class Settings {
          * when user location settings are off), for emergency purposes.
          * @hide
          */
+        @TestApi
         public static final String LOCATION_IGNORE_SETTINGS_PACKAGE_WHITELIST =
                 "location_ignore_settings_package_whitelist";
 
