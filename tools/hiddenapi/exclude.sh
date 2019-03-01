@@ -9,6 +9,7 @@ LOCAL_DIR="$( dirname ${BASH_SOURCE} )"
 LIBCORE_PACKAGES="\
   android.icu \
   android.system \
+  android.test \
   com.android.bouncycastle \
   com.android.conscrypt \
   com.android.i18n.phonenumbers \
@@ -17,6 +18,7 @@ LIBCORE_PACKAGES="\
   dalvik \
   java \
   javax \
+  junit \
   libcore \
   org.apache.harmony \
   org.json \
