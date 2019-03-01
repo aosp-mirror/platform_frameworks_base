@@ -15,6 +15,9 @@
  */
 package com.android.keyguard.clock;
 
+import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Paint.Style;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -29,6 +32,16 @@ import java.util.TimeZone;
  * Controller for Stretch clock that can appear on lock screen and AOD.
  */
 public class StretchAnalogClockController implements ClockPlugin {
+
+    /**
+     * Resources used to get title and thumbnail.
+     */
+    private final Resources mResources;
+
+    /**
+     * LayoutInflater used to inflate custom clock views.
+     */
+    private final LayoutInflater mLayoutInflater;
 
     /**
      * Custom clock shown on AOD screen and behind stack scroller on lock.
@@ -48,25 +61,22 @@ public class StretchAnalogClockController implements ClockPlugin {
      */
     private CrossFadeDarkController mDarkController;
 
-    private StretchAnalogClockController() { }
-
     /**
      * Create a BubbleClockController instance.
      *
      * @param layoutInflater Inflater used to inflate custom clock views.
      */
-    public static StretchAnalogClockController build(LayoutInflater layoutInflater) {
-        StretchAnalogClockController controller = new StretchAnalogClockController();
-        controller.createViews(layoutInflater);
-        return controller;
+    public StretchAnalogClockController(Resources res, LayoutInflater inflater) {
+        mResources = res;
+        mLayoutInflater = inflater;
     }
 
-    private void createViews(LayoutInflater layoutInflater) {
-        mBigClockView = layoutInflater.inflate(R.layout.stretchanalog_clock, null);
+    private void createViews() {
+        mBigClockView = mLayoutInflater.inflate(R.layout.stretchanalog_clock, null);
         mAnalogClock = mBigClockView.findViewById(R.id.analog_clock);
         mDigitalClock = mBigClockView.findViewById(R.id.digital_clock);
 
-        mView = layoutInflater.inflate(R.layout.digital_clock, null);
+        mView = mLayoutInflater.inflate(R.layout.digital_clock, null);
         mLockClock = mView.findViewById(R.id.lock_screen_clock);
         mLockClock.setVisibility(View.GONE);
 
@@ -74,12 +84,33 @@ public class StretchAnalogClockController implements ClockPlugin {
     }
 
     @Override
+    public String getName() {
+        return "stretch";
+    }
+
+    @Override
+    public String getTitle() {
+        return mResources.getString(R.string.clock_title_stretch);
+    }
+
+    @Override
+    public Bitmap getThumbnail() {
+        return BitmapFactory.decodeResource(mResources, R.drawable.stretch_thumbnail);
+    }
+
+    @Override
     public View getView() {
+        if (mView == null) {
+            createViews();
+        }
         return mView;
     }
 
     @Override
     public View getBigClockView() {
+        if (mBigClockView == null) {
+            createViews();
+        }
         return mBigClockView;
     }
 
@@ -103,7 +134,7 @@ public class StretchAnalogClockController implements ClockPlugin {
     }
 
     @Override
-    public void dozeTimeTick() {
+    public void onTimeTick() {
         mAnalogClock.onTimeChanged();
     }
 

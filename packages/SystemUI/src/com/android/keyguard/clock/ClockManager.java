@@ -23,7 +23,6 @@ import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.os.Handler;
@@ -31,6 +30,7 @@ import android.os.Looper;
 import android.provider.Settings;
 import android.util.ArrayMap;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.MeasureSpec;
@@ -39,17 +39,19 @@ import android.view.ViewGroup;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.colorextraction.ColorExtractor;
-import com.android.keyguard.R;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.dock.DockManager.DockEventListener;
 import com.android.systemui.plugins.ClockPlugin;
+import com.android.systemui.plugins.PluginListener;
+import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.util.InjectionInflationController;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Supplier;
+import java.util.concurrent.Callable;
+import java.util.concurrent.FutureTask;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -67,23 +69,42 @@ public final class ClockManager {
     /**
      * Map from expected value stored in settings to supplier of custom clock face.
      */
-    private final Map<String, Supplier<ClockPlugin>> mClocks = new ArrayMap<>();
+    private final Map<String, ClockPlugin> mClocks = new ArrayMap<>();
     @Nullable private ClockPlugin mCurrentClock;
 
-    private final LayoutInflater mLayoutInflater;
     private final ContentResolver mContentResolver;
     private final SettingsWrapper mSettingsWrapper;
+    private final Handler mMainHandler = new Handler(Looper.getMainLooper());
+
     /**
      * Observe settings changes to know when to switch the clock face.
      */
     private final ContentObserver mContentObserver =
-            new ContentObserver(new Handler(Looper.getMainLooper())) {
+            new ContentObserver(mMainHandler) {
                 @Override
                 public void onChange(boolean selfChange) {
                     super.onChange(selfChange);
                     reload();
                 }
             };
+
+    private final PluginListener<ClockPlugin> mClockPluginListener =
+            new PluginListener<ClockPlugin>() {
+                @Override
+                public void onPluginConnected(ClockPlugin plugin, Context pluginContext) {
+                    addClockPlugin(plugin);
+                    reload();
+                }
+
+                @Override
+                public void onPluginDisconnected(ClockPlugin plugin) {
+                    removeClockPlugin(plugin);
+                    reload();
+                }
+            };
+
+    private final PluginManager mPluginManager;
+
     /**
      * Observe changes to dock state to know when to switch the clock face.
      */
@@ -111,59 +132,29 @@ public final class ClockManager {
 
     @Inject
     public ClockManager(Context context, InjectionInflationController injectionInflater,
-            @Nullable DockManager dockManager, SysuiColorExtractor colorExtractor) {
-        this(context, injectionInflater, dockManager, colorExtractor, context.getContentResolver(),
-                new SettingsWrapper(context.getContentResolver()));
+            PluginManager pluginManager, @Nullable DockManager dockManager,
+            SysuiColorExtractor colorExtractor) {
+        this(context, injectionInflater, pluginManager, dockManager, colorExtractor,
+                context.getContentResolver(), new SettingsWrapper(context.getContentResolver()));
     }
 
     ClockManager(Context context, InjectionInflationController injectionInflater,
-            @Nullable DockManager dockManager, SysuiColorExtractor colorExtractor,
-            ContentResolver contentResolver, SettingsWrapper settingsWrapper) {
+            PluginManager pluginManager, @Nullable DockManager dockManager,
+            SysuiColorExtractor colorExtractor, ContentResolver contentResolver,
+            SettingsWrapper settingsWrapper) {
+        mPluginManager = pluginManager;
         mDockManager = dockManager;
         mColorExtractor = colorExtractor;
         mContentResolver = contentResolver;
         mSettingsWrapper = settingsWrapper;
 
         Resources res = context.getResources();
-        mClockInfos.add(ClockInfo.builder()
-                .setName(DEFAULT_CLOCK_ID)
-                .setTitle(res.getString(R.string.clock_title_default))
-                .setId(DEFAULT_CLOCK_ID)
-                .setThumbnail(() -> BitmapFactory.decodeResource(res, R.drawable.default_thumbnail))
-                .setPreview(() -> getClockPreview(DEFAULT_CLOCK_ID))
-                .build());
-        mClockInfos.add(ClockInfo.builder()
-                .setName("bubble")
-                .setTitle(res.getString(R.string.clock_title_bubble))
-                .setId(BubbleClockController.class.getName())
-                .setThumbnail(() -> BitmapFactory.decodeResource(res, R.drawable.bubble_thumbnail))
-                .setPreview(() -> getClockPreview(BubbleClockController.class.getName()))
-                .build());
-        mClockInfos.add(ClockInfo.builder()
-                .setName("stretch")
-                .setTitle(res.getString(R.string.clock_title_stretch))
-                .setId(StretchAnalogClockController.class.getName())
-                .setThumbnail(() -> BitmapFactory.decodeResource(res, R.drawable.stretch_thumbnail))
-                .setPreview(() -> getClockPreview(StretchAnalogClockController.class.getName()))
-                .build());
-        mClockInfos.add(ClockInfo.builder()
-                .setName("type")
-                .setTitle(res.getString(R.string.clock_title_type))
-                .setId(TypeClockController.class.getName())
-                .setThumbnail(() -> BitmapFactory.decodeResource(res, R.drawable.type_thumbnail))
-                .setPreview(() -> getClockPreview(TypeClockController.class.getName()))
-                .build());
-
         LayoutInflater layoutInflater = injectionInflater.injectable(LayoutInflater.from(context));
-        mClocks.put(DEFAULT_CLOCK_ID,
-                () -> DefaultClockController.build(layoutInflater));
-        mClocks.put(BubbleClockController.class.getName(),
-                () -> BubbleClockController.build(layoutInflater));
-        mClocks.put(StretchAnalogClockController.class.getName(),
-                () -> StretchAnalogClockController.build(layoutInflater));
-        mClocks.put(TypeClockController.class.getName(),
-                () -> TypeClockController.build(layoutInflater));
-        mLayoutInflater = layoutInflater;
+
+        addClockPlugin(new DefaultClockController(res, layoutInflater));
+        addClockPlugin(new BubbleClockController(res, layoutInflater));
+        addClockPlugin(new StretchAnalogClockController(res, layoutInflater));
+        addClockPlugin(new TypeClockController(res, layoutInflater));
 
         // Store the size of the display for generation of clock preview.
         DisplayMetrics dm = res.getDisplayMetrics();
@@ -218,6 +209,29 @@ public final class ClockManager {
         return mContentObserver;
     }
 
+    private void addClockPlugin(ClockPlugin plugin) {
+        final String id = plugin.getClass().getName();
+        mClocks.put(plugin.getClass().getName(), plugin);
+        mClockInfos.add(ClockInfo.builder()
+                .setName(plugin.getName())
+                .setTitle(plugin.getTitle())
+                .setId(id)
+                .setThumbnail(() -> plugin.getThumbnail())
+                .setPreview(() -> getClockPreview(id))
+                .build());
+    }
+
+    private void removeClockPlugin(ClockPlugin plugin) {
+        final String id = plugin.getClass().getName();
+        mClocks.remove(id);
+        for (int i = 0; i < mClockInfos.size(); i++) {
+            if (id.equals(mClockInfos.get(i).getId())) {
+                mClockInfos.remove(i);
+                break;
+            }
+        }
+    }
+
     /**
      * Generate a realistic preview of a clock face.
      * @param clockId ID of clock to use for preview, should be obtained from {@link getClockInfos}.
@@ -225,37 +239,54 @@ public final class ClockManager {
      */
     @Nullable
     private Bitmap getClockPreview(String clockId) {
-        Bitmap bitmap = Bitmap.createBitmap(mWidth, mHeight, Config.ARGB_8888);
-        Supplier<ClockPlugin> supplier = mClocks.get(clockId);
-        if (supplier == null) {
+        FutureTask<Bitmap> task = new FutureTask<>(new Callable<Bitmap>() {
+            @Override
+            public Bitmap call() {
+                Bitmap bitmap = Bitmap.createBitmap(mWidth, mHeight, Config.ARGB_8888);
+                ClockPlugin plugin = mClocks.get(clockId);
+                if (plugin == null) {
+                    return null;
+                }
+
+                // Use the big clock view for the preview
+                View clockView = plugin.getBigClockView();
+                if (clockView == null) {
+                    return null;
+                }
+
+                // Initialize state of plugin before generating preview.
+                plugin.setDarkAmount(1f);
+                plugin.setTextColor(Color.WHITE);
+
+                ColorExtractor.GradientColors colors = mColorExtractor.getColors(
+                        WallpaperManager.FLAG_LOCK, true);
+                plugin.setColorPalette(colors.supportsDarkText(), colors.getColorPalette());
+                plugin.onTimeTick();
+
+                // Draw clock view hierarchy to canvas.
+                Canvas canvas = new Canvas(bitmap);
+                canvas.drawColor(Color.BLACK);
+                dispatchVisibilityAggregated(clockView, true);
+                clockView.measure(MeasureSpec.makeMeasureSpec(mWidth, MeasureSpec.EXACTLY),
+                        MeasureSpec.makeMeasureSpec(mHeight, MeasureSpec.EXACTLY));
+                clockView.layout(0, 0, mWidth, mHeight);
+                clockView.draw(canvas);
+                return bitmap;
+            }
+        });
+
+        if (Looper.myLooper() == Looper.getMainLooper()) {
+            task.run();
+        } else {
+            mMainHandler.post(task);
+        }
+
+        try {
+            return task.get();
+        } catch (Exception e) {
+            Log.e(TAG, "Error completing task", e);
             return null;
         }
-        ClockPlugin plugin = supplier.get();
-
-        // Use the big clock view for the preview
-        View clockView = plugin.getBigClockView();
-        if (clockView == null) {
-            return null;
-        }
-
-        // Initialize state of plugin before generating preview.
-        plugin.setDarkAmount(1f);
-        plugin.setTextColor(Color.WHITE);
-
-        ColorExtractor.GradientColors colors = mColorExtractor.getColors(WallpaperManager.FLAG_LOCK,
-                true);
-        plugin.setColorPalette(colors.supportsDarkText(), colors.getColorPalette());
-        plugin.dozeTimeTick();
-
-        // Draw clock view hierarchy to canvas.
-        Canvas canvas = new Canvas(bitmap);
-        canvas.drawColor(Color.BLACK);
-        dispatchVisibilityAggregated(clockView, true);
-        clockView.measure(MeasureSpec.makeMeasureSpec(mWidth, MeasureSpec.EXACTLY),
-                MeasureSpec.makeMeasureSpec(mHeight, MeasureSpec.EXACTLY));
-        clockView.layout(0, 0, mWidth, mHeight);
-        clockView.draw(canvas);
-        return bitmap;
     }
 
     private void dispatchVisibilityAggregated(View view, boolean isVisible) {
@@ -285,6 +316,7 @@ public final class ClockManager {
     }
 
     private void register() {
+        mPluginManager.addPluginListener(mClockPluginListener, ClockPlugin.class, true);
         mContentResolver.registerContentObserver(
                 Settings.Secure.getUriFor(Settings.Secure.LOCK_SCREEN_CUSTOM_CLOCK_FACE),
                 false, mContentObserver);
@@ -297,6 +329,7 @@ public final class ClockManager {
     }
 
     private void unregister() {
+        mPluginManager.removePluginListener(mClockPluginListener);
         mContentResolver.unregisterContentObserver(mContentObserver);
         if (mDockManager != null) {
             mDockManager.removeListener(mDockEventListener);
@@ -317,21 +350,15 @@ public final class ClockManager {
         if (mIsDocked) {
             final String name = mSettingsWrapper.getDockedClockFace();
             if (name != null) {
-                Supplier<ClockPlugin> supplier = mClocks.get(name);
-                if (supplier != null) {
-                    plugin = supplier.get();
-                    if (plugin != null) {
-                        return plugin;
-                    }
+                plugin = mClocks.get(name);
+                if (plugin != null) {
+                    return plugin;
                 }
             }
         }
         final String name = mSettingsWrapper.getLockScreenCustomClockFace();
         if (name != null) {
-            Supplier<ClockPlugin> supplier = mClocks.get(name);
-            if (supplier != null) {
-                plugin = supplier.get();
-            }
+            plugin = mClocks.get(name);
         }
         return plugin;
     }

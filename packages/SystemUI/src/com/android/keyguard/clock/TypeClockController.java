@@ -15,6 +15,9 @@
  */
 package com.android.keyguard.clock;
 
+import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Paint.Style;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -28,6 +31,16 @@ import java.util.TimeZone;
  * Plugin for a custom Typographic clock face that displays the time in words.
  */
 public class TypeClockController implements ClockPlugin {
+
+    /**
+     * Resources used to get title and thumbnail.
+     */
+    private final Resources mResources;
+
+    /**
+     * LayoutInflater used to inflate custom clock views.
+     */
+    private final LayoutInflater mLayoutInflater;
 
     /**
      * Custom clock shown on AOD screen and behind stack scroller on lock.
@@ -45,36 +58,54 @@ public class TypeClockController implements ClockPlugin {
      */
     private CrossFadeDarkController mDarkController;
 
-    private TypeClockController() {}
-
     /**
      * Create a TypeClockController instance.
      *
      * @param inflater Inflater used to inflate custom clock views.
      */
-    public static TypeClockController build(LayoutInflater inflater) {
-        TypeClockController controller = new TypeClockController();
-        controller.createViews(inflater);
-        return controller;
+    TypeClockController(Resources res, LayoutInflater inflater) {
+        mResources = res;
+        mLayoutInflater = inflater;
     }
 
-    private void createViews(LayoutInflater inflater) {
-        mView = inflater.inflate(R.layout.type_clock, null);
+    private void createViews() {
+        mView = mLayoutInflater.inflate(R.layout.type_clock, null);
         mTypeClock = mView.findViewById(R.id.type_clock);
 
         // For now, this view is used to hide the default digital clock.
         // Need better transition to lock screen.
-        mLockClockContainer = inflater.inflate(R.layout.digital_clock, null);
+        mLockClockContainer = mLayoutInflater.inflate(R.layout.digital_clock, null);
         mLockClockContainer.setVisibility(View.GONE);
     }
 
     @Override
+    public String getName() {
+        return "type";
+    }
+
+    @Override
+    public String getTitle() {
+        return mResources.getString(R.string.clock_title_type);
+    }
+
+    @Override
+    public Bitmap getThumbnail() {
+        return BitmapFactory.decodeResource(mResources, R.drawable.type_thumbnail);
+    }
+
+    @Override
     public View getView() {
+        if (mLockClockContainer == null) {
+            createViews();
+        }
         return mLockClockContainer;
     }
 
     @Override
     public View getBigClockView() {
+        if (mView == null) {
+            createViews();
+        }
         return mView;
     }
 
@@ -96,7 +127,7 @@ public class TypeClockController implements ClockPlugin {
     }
 
     @Override
-    public void dozeTimeTick() {
+    public void onTimeTick() {
         mTypeClock.onTimeChanged();
     }
 

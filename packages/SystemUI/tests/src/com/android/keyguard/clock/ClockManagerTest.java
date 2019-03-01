@@ -31,6 +31,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.dock.DockManagerFake;
+import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.util.InjectionInflationController;
 
 import org.junit.After;
@@ -52,6 +53,7 @@ public final class ClockManagerTest extends SysuiTestCase {
     private ContentObserver mContentObserver;
     private DockManagerFake mFakeDockManager;
     @Mock InjectionInflationController mMockInjectionInflationController;
+    @Mock PluginManager mMockPluginManager;
     @Mock SysuiColorExtractor mMockColorExtractor;
     @Mock ContentResolver mMockContentResolver;
     @Mock SettingsWrapper mMockSettingsWrapper;
@@ -66,7 +68,8 @@ public final class ClockManagerTest extends SysuiTestCase {
 
         mFakeDockManager = new DockManagerFake();
         mClockManager = new ClockManager(getContext(), mMockInjectionInflationController,
-                mFakeDockManager, mMockColorExtractor, mMockContentResolver, mMockSettingsWrapper);
+                mMockPluginManager, mFakeDockManager, mMockColorExtractor, mMockContentResolver,
+                mMockSettingsWrapper);
 
         mClockManager.addOnClockChangedListener(mMockListener);
         mContentObserver = mClockManager.getContentObserver();

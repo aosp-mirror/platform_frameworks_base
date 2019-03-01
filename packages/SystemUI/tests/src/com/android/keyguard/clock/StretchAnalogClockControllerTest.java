@@ -17,6 +17,7 @@ package com.android.keyguard.clock;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import android.content.res.Resources;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
@@ -40,8 +41,9 @@ public final class StretchAnalogClockControllerTest extends SysuiTestCase {
 
     @Before
     public void setUp() {
+        Resources res = getContext().getResources();
         LayoutInflater layoutInflater = LayoutInflater.from(getContext());
-        mClockController = StretchAnalogClockController.build(layoutInflater);
+        mClockController = new StretchAnalogClockController(res, layoutInflater);
     }
 
     @Test

@@ -279,7 +279,7 @@ public class KeyguardClockSwitch extends RelativeLayout {
      */
     public void dozeTimeTick() {
         if (mClockPlugin != null) {
-            mClockPlugin.dozeTimeTick();
+            mClockPlugin.onTimeTick();
         }
     }
 
