@@ -21,6 +21,7 @@ import static android.media.MediaRouter.ROUTE_TYPE_REMOTE_DISPLAY;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.media.projection.MediaProjectionInfo;
 import android.provider.Settings;
 import android.service.quicksettings.Tile;
 import android.util.Log;
@@ -125,7 +126,30 @@ public class CastTile extends QSTileImpl<BooleanState> {
             });
             return;
         }
-        showDetail(true);
+
+        CastDevice activeProjection = getActiveDeviceMediaProjection();
+        if (activeProjection == null) {
+            showDetail(true);
+        } else {
+            mController.stopCasting(activeProjection);
+        }
+    }
+
+    private CastDevice getActiveDeviceMediaProjection() {
+        CastDevice activeDevice = null;
+        for (CastDevice device : mController.getCastDevices()) {
+            if (device.state == CastDevice.STATE_CONNECTED
+                    || device.state == CastDevice.STATE_CONNECTING) {
+                activeDevice = device;
+                break;
+            }
+        }
+
+        if (activeDevice != null && activeDevice.tag instanceof MediaProjectionInfo) {
+            return activeDevice;
+        }
+
+        return null;
     }
 
     @Override
