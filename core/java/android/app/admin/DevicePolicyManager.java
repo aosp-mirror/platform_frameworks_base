@@ -59,7 +59,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
-import android.os.ParcelableException;
 import android.os.PersistableBundle;
 import android.os.Process;
 import android.os.RemoteCallback;
@@ -1453,7 +1452,7 @@ public class DevicePolicyManager {
      * Constant for {@link #getPasswordComplexity()}: password satisfies one of the following:
      * <ul>
      * <li>PIN with <b>no</b> repeating (4444) or ordered (1234, 4321, 2468) sequences, length at
-     * least 4
+     * least 8
      * <li>alphabetic, length at least 6
      * <li>alphanumeric, length at least 6
      * </ul>
