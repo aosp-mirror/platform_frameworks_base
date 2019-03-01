@@ -2803,7 +2803,7 @@ public class RemoteViews implements Parcelable, Filter {
      * @param viewId The id of the view that will trigger the {@link RemoteResponse} when clicked
      * @param response The {@link RemoteResponse} to send when user clicks
      */
-    public void setOnClickResponse(int viewId, RemoteResponse response) {
+    public void setOnClickResponse(int viewId, @NonNull RemoteResponse response) {
         addAction(new SetOnClickResponse(viewId, response));
     }
 
@@ -3926,7 +3926,8 @@ public class RemoteViews implements Parcelable, Filter {
          *
          * @param pendingIntent The {@link PendingIntent} to send as part of the response
          */
-        public static RemoteResponse fromPendingIntent(PendingIntent pendingIntent) {
+        @NonNull
+        public static RemoteResponse fromPendingIntent(@NonNull PendingIntent pendingIntent) {
             RemoteResponse response = new RemoteResponse();
             response.mPendingIntent = pendingIntent;
             return response;
@@ -3957,7 +3958,8 @@ public class RemoteViews implements Parcelable, Filter {
          * @see RemoteViews#setOnClickFillInIntent(int, Intent)
          * @return
          */
-        public static RemoteResponse fromFillInIntent(Intent fillIntent) {
+        @NonNull
+        public static RemoteResponse fromFillInIntent(@NonNull Intent fillIntent) {
             RemoteResponse response = new RemoteResponse();
             response.mFillIntent = fillIntent;
             return response;
@@ -3974,7 +3976,8 @@ public class RemoteViews implements Parcelable, Filter {
          *
          * @see ActivityOptions#makeSceneTransitionAnimation(Activity, Pair[])
          */
-        public RemoteResponse addSharedElement(int viewId, String sharedElementName) {
+        @NonNull
+        public RemoteResponse addSharedElement(int viewId, @NonNull String sharedElementName) {
             if (mViewIds == null) {
                 mViewIds = new IntArray();
                 mElementNames = new ArrayList<>();
