@@ -2784,6 +2784,8 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
 
         getDisplayContent().mAppTransition.notifyAppTransitionFinishedLocked(token);
         scheduleAnimation();
+
+        mActivityRecord.onAnimationFinished();
     }
 
     @Override
