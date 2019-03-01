@@ -1969,10 +1969,10 @@ package android.hardware.hdmi {
     method @Nullable public android.hardware.hdmi.HdmiPlaybackClient getPlaybackClient();
     method @Nullable public android.hardware.hdmi.HdmiSwitchClient getSwitchClient();
     method @Nullable public android.hardware.hdmi.HdmiTvClient getTvClient();
-    method public boolean isRemoteDeviceConnected(android.hardware.hdmi.HdmiDeviceInfo);
-    method public void powerOffRemoteDevice(android.hardware.hdmi.HdmiDeviceInfo);
+    method public boolean isRemoteDeviceConnected(@NonNull android.hardware.hdmi.HdmiDeviceInfo);
+    method public void powerOffRemoteDevice(@NonNull android.hardware.hdmi.HdmiDeviceInfo);
     method @RequiresPermission(android.Manifest.permission.HDMI_CEC) public void removeHotplugEventListener(android.hardware.hdmi.HdmiControlManager.HotplugEventListener);
-    method public void requestRemoteDeviceToBecomeActiveSource(android.hardware.hdmi.HdmiDeviceInfo);
+    method public void requestRemoteDeviceToBecomeActiveSource(@NonNull android.hardware.hdmi.HdmiDeviceInfo);
     method @RequiresPermission(android.Manifest.permission.HDMI_CEC) public void setStandbyMode(boolean);
     field public static final String ACTION_OSD_MESSAGE = "android.hardware.hdmi.action.OSD_MESSAGE";
     field public static final int AVR_VOLUME_MUTED = 101; // 0x65
