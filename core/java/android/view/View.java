@@ -5972,7 +5972,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     @NonNull
     public List<Integer> getAttributeResolutionStack(@AttrRes int attribute) {
         ArrayList<Integer> stack = new ArrayList<>();
-        if (!sDebugViewAttributes) {
+        if (!sDebugViewAttributes || mAttributeResolutionStacks == null) {
             return stack;
         }
         if (mSourceLayoutId != ID_NULL) {
@@ -6004,7 +6004,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     @NonNull
     public Map<Integer, Integer> getAttributeSourceResourceMap() {
         HashMap<Integer, Integer> map = new HashMap<>();
-        if (!sDebugViewAttributes) {
+        if (!sDebugViewAttributes || mAttributeSourceResId == null) {
             return map;
         }
         for (int i = 0; i < mAttributeSourceResId.size(); i++) {
