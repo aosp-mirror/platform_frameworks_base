@@ -20,6 +20,7 @@ import static android.system.OsConstants.AF_INET;
 import static android.system.OsConstants.AF_INET6;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.UnsupportedAppUsage;
@@ -479,7 +480,8 @@ public class VpnService extends Service {
          * system-managed dialogs and notifications. This is recommended
          * not required.
          */
-        public Builder setSession(String session) {
+        @NonNull
+        public Builder setSession(@NonNull String session) {
             mConfig.session = session;
             return this;
         }
@@ -489,7 +491,8 @@ public class VpnService extends Service {
          * configure the VPN connection. If it is not set, the button
          * to configure will not be shown in system-managed dialogs.
          */
-        public Builder setConfigureIntent(PendingIntent intent) {
+        @NonNull
+        public Builder setConfigureIntent(@NonNull PendingIntent intent) {
             mConfig.configureIntent = intent;
             return this;
         }
@@ -501,6 +504,7 @@ public class VpnService extends Service {
          *
          * @throws IllegalArgumentException if the value is not positive.
          */
+        @NonNull
         public Builder setMtu(int mtu) {
             if (mtu <= 0) {
                 throw new IllegalArgumentException("Bad mtu");
@@ -513,6 +517,7 @@ public class VpnService extends Service {
          * Sets an HTTP proxy for the VPN network. This proxy is only a recommendation
          * and it is possible that some apps will ignore it.
          */
+        @NonNull
         public Builder setHttpProxy(@NonNull ProxyInfo proxyInfo) {
             mConfig.proxyInfo = proxyInfo;
             return this;
@@ -528,7 +533,8 @@ public class VpnService extends Service {
          *
          * @throws IllegalArgumentException if the address is invalid.
          */
-        public Builder addAddress(InetAddress address, int prefixLength) {
+        @NonNull
+        public Builder addAddress(@NonNull InetAddress address, int prefixLength) {
             check(address, prefixLength);
 
             if (address.isAnyLocalAddress()) {
@@ -550,7 +556,8 @@ public class VpnService extends Service {
          * @throws IllegalArgumentException if the address is invalid.
          * @see #addAddress(InetAddress, int)
          */
-        public Builder addAddress(String address, int prefixLength) {
+        @NonNull
+        public Builder addAddress(@NonNull String address, int prefixLength) {
             return addAddress(InetAddress.parseNumericAddress(address), prefixLength);
         }
 
@@ -563,7 +570,8 @@ public class VpnService extends Service {
          *
          * @throws IllegalArgumentException if the route is invalid.
          */
-        public Builder addRoute(InetAddress address, int prefixLength) {
+        @NonNull
+        public Builder addRoute(@NonNull InetAddress address, int prefixLength) {
             check(address, prefixLength);
 
             int offset = prefixLength / 8;
@@ -591,7 +599,8 @@ public class VpnService extends Service {
          * @throws IllegalArgumentException if the route is invalid.
          * @see #addRoute(InetAddress, int)
          */
-        public Builder addRoute(String address, int prefixLength) {
+        @NonNull
+        public Builder addRoute(@NonNull String address, int prefixLength) {
             return addRoute(InetAddress.parseNumericAddress(address), prefixLength);
         }
 
@@ -605,7 +614,8 @@ public class VpnService extends Service {
          *
          * @throws IllegalArgumentException if the address is invalid.
          */
-        public Builder addDnsServer(InetAddress address) {
+        @NonNull
+        public Builder addDnsServer(@NonNull InetAddress address) {
             if (address.isLoopbackAddress() || address.isAnyLocalAddress()) {
                 throw new IllegalArgumentException("Bad address");
             }
@@ -627,14 +637,16 @@ public class VpnService extends Service {
          * @throws IllegalArgumentException if the address is invalid.
          * @see #addDnsServer(InetAddress)
          */
-        public Builder addDnsServer(String address) {
+        @NonNull
+        public Builder addDnsServer(@NonNull String address) {
             return addDnsServer(InetAddress.parseNumericAddress(address));
         }
 
         /**
          * Add a search domain to the DNS resolver.
          */
-        public Builder addSearchDomain(String domain) {
+        @NonNull
+        public Builder addSearchDomain(@NonNull String domain) {
             if (mConfig.searchDomains == null) {
                 mConfig.searchDomains = new ArrayList<String>();
             }
@@ -660,6 +672,7 @@ public class VpnService extends Service {
          *
          * @return this {@link Builder} object to facilitate chaining of method calls.
          */
+        @NonNull
         public Builder allowFamily(int family) {
             if (family == AF_INET) {
                 mConfig.allowIPv4 = true;
@@ -703,7 +716,8 @@ public class VpnService extends Service {
          *
          * @return this {@link Builder} object to facilitate chaining method calls.
          */
-        public Builder addAllowedApplication(String packageName)
+        @NonNull
+        public Builder addAllowedApplication(@NonNull String packageName)
                 throws PackageManager.NameNotFoundException {
             if (mConfig.disallowedApplications != null) {
                 throw new UnsupportedOperationException("addDisallowedApplication already called");
@@ -735,7 +749,8 @@ public class VpnService extends Service {
          *
          * @return this {@link Builder} object to facilitate chaining method calls.
          */
-        public Builder addDisallowedApplication(String packageName)
+        @NonNull
+        public Builder addDisallowedApplication(@NonNull String packageName)
                 throws PackageManager.NameNotFoundException {
             if (mConfig.allowedApplications != null) {
                 throw new UnsupportedOperationException("addAllowedApplication already called");
@@ -758,6 +773,7 @@ public class VpnService extends Service {
          *
          * @return this {@link Builder} object to facilitate chaining of method calls.
          */
+        @NonNull
         public Builder allowBypass() {
             mConfig.allowBypass = true;
             return this;
@@ -772,6 +788,7 @@ public class VpnService extends Service {
          *
          * @return this {@link Builder} object to facilitate chaining method calls.
          */
+        @NonNull
         public Builder setBlocking(boolean blocking) {
             mConfig.blocking = blocking;
             return this;
@@ -786,7 +803,8 @@ public class VpnService extends Service {
          *
          * @return this {@link Builder} object to facilitate chaining method calls.
          */
-        public Builder setUnderlyingNetworks(Network[] networks) {
+        @NonNull
+        public Builder setUnderlyingNetworks(@Nullable Network[] networks) {
             mConfig.underlyingNetworks = networks != null ? networks.clone() : null;
             return this;
         }
@@ -807,6 +825,7 @@ public class VpnService extends Service {
          * @see #setUnderlyingNetworks(Networks[])
          * @see ConnectivityManager#isActiveNetworkMetered()
          */
+        @NonNull
         public Builder setMetered(boolean isMetered) {
             mConfig.isMetered = isMetered;
             return this;
@@ -855,6 +874,7 @@ public class VpnService extends Service {
          *         in {@code AndroidManifest.xml}.
          * @see VpnService
          */
+        @Nullable
         public ParcelFileDescriptor establish() {
             mConfig.addresses = mAddresses;
             mConfig.routes = mRoutes;
