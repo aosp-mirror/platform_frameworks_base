@@ -76,7 +76,10 @@ public abstract class EnrollClient extends ClientMonitor {
         }
         mMetricsLogger.action(mMetrics.actionBiometricEnroll());
         try {
-            getListener().onEnrollResult(identifier, remaining);
+            final BiometricServiceBase.ServiceListener listener = getListener();
+            if (listener != null) {
+                listener.onEnrollResult(identifier, remaining);
+            }
             return remaining == 0;
         } catch (RemoteException e) {
             Slog.w(getLogTag(), "Failed to notify EnrollResult:", e);
