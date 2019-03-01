@@ -5667,7 +5667,7 @@ package android.permission {
   public abstract class PermissionControllerService extends android.app.Service {
     ctor public PermissionControllerService();
     method public final void attachBaseContext(android.content.Context);
-    method public final android.os.IBinder onBind(android.content.Intent);
+    method @NonNull public final android.os.IBinder onBind(android.content.Intent);
     method public abstract int onCountPermissionApps(@NonNull java.util.List<java.lang.String>, int);
     method @NonNull public abstract java.util.List<android.permission.RuntimePermissionPresentationInfo> onGetAppPermissions(@NonNull String);
     method @NonNull public abstract java.util.List<android.permission.RuntimePermissionUsageInfo> onGetPermissionUsages(boolean, long);

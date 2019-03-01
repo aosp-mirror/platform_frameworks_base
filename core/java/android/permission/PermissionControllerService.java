@@ -197,7 +197,7 @@ public abstract class PermissionControllerService extends Service {
             @NonNull String permission, @PermissionGrantState int grantState);
 
     @Override
-    public final IBinder onBind(Intent intent) {
+    public final @NonNull IBinder onBind(Intent intent) {
         return new IPermissionController.Stub() {
             @Override
             public void revokeRuntimePermissions(
