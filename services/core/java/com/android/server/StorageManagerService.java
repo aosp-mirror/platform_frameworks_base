@@ -2983,7 +2983,9 @@ class StorageManagerService extends IStorageManager.Stub
 
     @Override
     public void mkdirs(String callingPkg, String appPath) {
-        final int userId = UserHandle.getUserId(Binder.getCallingUid());
+        final int callingPid = Binder.getCallingPid();
+        final int callingUid = Binder.getCallingUid();
+        final int userId = UserHandle.getUserId(callingUid);
         final UserEnvironment userEnv = new UserEnvironment(userId);
         final String propertyName = "sys.user." + userId + ".ce_available";
 
@@ -3001,7 +3003,7 @@ class StorageManagerService extends IStorageManager.Stub
         // Validate that reported package name belongs to caller
         final AppOpsManager appOps = (AppOpsManager) mContext.getSystemService(
                 Context.APP_OPS_SERVICE);
-        appOps.checkPackage(Binder.getCallingUid(), callingPkg);
+        appOps.checkPackage(callingUid, callingPkg);
 
         File appFile = null;
         try {
@@ -3020,11 +3022,13 @@ class StorageManagerService extends IStorageManager.Stub
                 appPath = appPath + "/";
             }
 
+            final String systemPath = translateAppToSystem(appPath, callingPid, callingUid);
+
             try {
-                mVold.mkdirs(appPath);
+                mVold.mkdirs(systemPath);
                 return;
             } catch (Exception e) {
-                throw new IllegalStateException("Failed to prepare " + appPath + ": " + e);
+                throw new IllegalStateException("Failed to prepare " + systemPath + ": " + e);
             }
         }
 
