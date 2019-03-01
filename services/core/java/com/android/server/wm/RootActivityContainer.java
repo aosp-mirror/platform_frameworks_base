@@ -175,12 +175,6 @@ class RootActivityContainer extends ConfigurationContainer
     private ActivityDisplay mDefaultDisplay;
     private final SparseArray<IntArray> mDisplayAccessUIDs = new SparseArray<>();
 
-    /**
-     * Cached value of the topmost resumed activity in the system. Updated when new activity is
-     * resumed.
-     */
-    private ActivityRecord mTopResumedActivity;
-
     /** The current user */
     int mCurrentUser;
     /** Stack id of the front stack when user switched, indexed by userId. */
@@ -1155,23 +1149,6 @@ class RootActivityContainer extends ConfigurationContainer
         return result;
     }
 
-    void updateTopResumedActivityIfNeeded() {
-        final ActivityRecord prevTopActivity = mTopResumedActivity;
-        final ActivityStack topStack = getTopDisplayFocusedStack();
-        if (topStack == null || topStack.mResumedActivity == prevTopActivity) {
-            return;
-        }
-        // Clear previous top state
-        if (prevTopActivity != null) {
-            prevTopActivity.scheduleTopResumedActivityChanged(false /* onTop */);
-        }
-        // Update the current top activity
-        mTopResumedActivity = topStack.mResumedActivity;
-        if (mTopResumedActivity != null) {
-            mTopResumedActivity.scheduleTopResumedActivityChanged(true /* onTop */);
-        }
-    }
-
     void applySleepTokens(boolean applyToStacks) {
         for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
             // Set the sleeping state of the display.
@@ -1434,7 +1411,7 @@ class RootActivityContainer extends ConfigurationContainer
             mActivityDisplays.remove(display);
             mActivityDisplays.add(position, display);
         }
-        updateTopResumedActivityIfNeeded();
+        mStackSupervisor.updateTopResumedActivityIfNeeded();
     }
 
     @VisibleForTesting
