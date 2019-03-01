@@ -58,6 +58,7 @@ android_library {
         "androidx.arch.core_core-runtime",
         "androidx.lifecycle_lifecycle-extensions",
         "androidx.dynamicanimation_dynamicanimation",
+        "iconloader_base",
         "SystemUI-tags",
         "SystemUI-proto",
         "dagger2-2.19",
