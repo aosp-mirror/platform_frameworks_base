@@ -18,7 +18,8 @@ package com.android.server.pm;
 
 import android.content.IIntentReceiver;
 import android.os.Bundle;
-import android.support.test.runner.AndroidJUnit4;
+
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.After;
 import org.junit.Assert;

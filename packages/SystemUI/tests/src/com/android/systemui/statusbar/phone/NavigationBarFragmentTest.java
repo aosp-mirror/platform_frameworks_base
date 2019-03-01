@@ -19,23 +19,22 @@ import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.os.Looper;
-import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.LeakCheck.Tracker;
+import android.testing.TestableLooper.RunWithLooper;
 import android.view.Display;
 import android.view.WindowManager;
+import android.view.accessibility.AccessibilityManager.AccessibilityServicesStateChangeListener;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.systemui.Dependency;
-
 import com.android.systemui.OverviewProxyService;
 import com.android.systemui.SysuiBaseFragmentTest;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
-
-import android.testing.TestableLooper.RunWithLooper;
-import android.view.accessibility.AccessibilityManager.AccessibilityServicesStateChangeListener;
 
 import org.junit.Before;
 import org.junit.Test;

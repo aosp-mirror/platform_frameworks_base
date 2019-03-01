@@ -17,24 +17,26 @@
 package com.android.server.locksettings.recoverablekeystore.storage;
 
 import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import android.content.Context;
+import android.security.keystore.recovery.RecoveryController;
+
+import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
+
+import com.android.server.locksettings.recoverablekeystore.TestData;
+import com.android.server.locksettings.recoverablekeystore.WrappedKey;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import android.content.Context;
-import android.security.keystore.recovery.RecoveryController;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
-
-import com.android.server.locksettings.recoverablekeystore.TestData;
-import com.android.server.locksettings.recoverablekeystore.WrappedKey;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;

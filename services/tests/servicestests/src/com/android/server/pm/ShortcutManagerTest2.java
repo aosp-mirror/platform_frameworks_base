@@ -50,8 +50,6 @@ import com.android.server.pm.ShortcutUser.PackageWithUser;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.io.Writer;
 import java.util.Locale;
 
@@ -62,7 +60,7 @@ import java.util.Locale;
  adb install \
  -r -g ${ANDROID_PRODUCT_OUT}/data/app/FrameworksServicesTests/FrameworksServicesTests.apk &&
  adb shell am instrument -e class com.android.server.pm.ShortcutManagerTest2 \
- -w com.android.frameworks.servicestests/android.support.test.runner.AndroidJUnitRunner
+ -w com.android.frameworks.servicestests/androidx.test.runner.AndroidJUnitRunner
  */
 @SmallTest
 public class ShortcutManagerTest2 extends BaseShortcutManagerTest {

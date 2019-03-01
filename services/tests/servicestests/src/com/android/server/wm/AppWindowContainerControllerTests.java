@@ -16,25 +16,27 @@
 
 package com.android.server.wm;
 
-import android.support.test.filters.FlakyTest;
-import org.junit.Test;
-
-import android.platform.test.annotations.Presubmit;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
-
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.content.res.Configuration.EMPTY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
+import android.platform.test.annotations.Presubmit;
+
+import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.FlakyTest;
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
+
 import com.android.server.wm.WindowTestUtils.TestTaskWindowContainerController;
+
+import org.junit.Test;
 
 /**
  * Test class for {@link AppWindowContainerController}.

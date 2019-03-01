@@ -18,14 +18,16 @@ package com.android.server.utils;
 
 import static com.android.server.utils.PriorityDump.dump;
 
-import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertSame;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.same;
 import static org.mockito.Mockito.verify;
 
 import android.platform.test.annotations.Presubmit;
-import android.support.test.filters.SmallTest;
+
+import androidx.test.filters.SmallTest;
+
 import com.android.server.utils.PriorityDump.PriorityDumper;
 
 import org.junit.Before;

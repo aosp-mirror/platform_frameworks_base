@@ -17,27 +17,24 @@
 package com.android.server;
 
 import static junit.framework.Assert.*;
+
 import static org.mockito.Mockito.*;
 
 import android.hardware.health.V2_0.IHealth;
 import android.hidl.manager.V1_0.IServiceManager;
 import android.hidl.manager.V1_0.IServiceNotification;
-import android.os.RemoteException;
-import android.support.test.filters.SmallTest;
 import android.test.AndroidTestCase;
-import android.util.Slog;
+
+import androidx.test.filters.SmallTest;
+
+import org.mockito.ArgumentMatcher;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.mockito.invocation.InvocationOnMock;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.NoSuchElementException;
-
-import org.junit.runner.RunWith;
-import org.mockito.ArgumentMatcher;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.mockito.Spy;
-import org.mockito.invocation.InvocationOnMock;
-
 
 public class BatteryServiceTest extends AndroidTestCase {
 

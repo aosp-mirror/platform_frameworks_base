@@ -30,10 +30,11 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.UserHandle;
 import android.os.UserManagerInternal;
-import android.support.annotation.NonNull;
 import android.test.mock.MockContext;
 import android.util.ArrayMap;
 import android.util.ExceptionUtils;
+
+import androidx.annotation.NonNull;
 
 import com.android.internal.util.FunctionalUtils;
 

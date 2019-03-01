@@ -19,8 +19,9 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.TestLooperManager;
-import android.support.test.runner.AndroidJUnitRunner;
 import android.util.Log;
+
+import androidx.test.runner.AndroidJUnitRunner;
 
 import java.util.ArrayList;
 

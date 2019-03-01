@@ -27,9 +27,10 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 import android.app.Notification;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
-import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.widget.RemoteViews;
+
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;

@@ -21,8 +21,9 @@ import static org.junit.Assert.assertTrue;
 
 import android.app.ActivityManagerInternal;
 import android.os.SystemClock;
-import android.support.test.filters.MediumTest;
-import android.support.test.runner.AndroidJUnit4;
+
+import androidx.test.filters.MediumTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -43,7 +44,7 @@ import org.mockito.MockitoAnnotations;
  * Install: adb install -r \
  *     ${ANDROID_PRODUCT_OUT}/data/app/FrameworksServicesTests/FrameworksServicesTests.apk
  * Run: adb shell am instrument -e class com.android.server.am.ActivityManagerInternalTest -w \
- *     com.android.frameworks.servicestests/android.support.test.runner.AndroidJUnitRunner
+ *     com.android.frameworks.servicestests/androidx.test.runner.AndroidJUnitRunner
  */
 @RunWith(AndroidJUnit4.class)
 public class ActivityManagerInternalTest {

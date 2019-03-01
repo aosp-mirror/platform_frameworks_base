@@ -34,13 +34,11 @@ import android.content.ContextWrapper;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Matrix;
-import android.graphics.Path;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.os.IBinder;
 import android.os.UserHandle;
-import android.support.test.InstrumentationRegistry;
 import android.testing.TestableResources;
 import android.util.Pair;
 import android.view.Display;
@@ -52,6 +50,8 @@ import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.IAccessibilityManager;
+
+import androidx.test.InstrumentationRegistry;
 
 import com.android.server.policy.keyguard.KeyguardServiceDelegate;
 import com.android.server.wm.DisplayFrames;

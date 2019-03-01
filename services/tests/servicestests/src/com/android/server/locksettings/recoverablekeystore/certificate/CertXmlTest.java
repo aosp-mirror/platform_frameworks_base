@@ -21,16 +21,16 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.testng.Assert.assertThrows;
 import static org.testng.Assert.expectThrows;
 
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
-
-import java.security.cert.CertPath;
-import java.security.cert.X509Certificate;
-import java.util.List;
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.security.cert.CertPath;
+import java.security.cert.X509Certificate;
+import java.util.List;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)

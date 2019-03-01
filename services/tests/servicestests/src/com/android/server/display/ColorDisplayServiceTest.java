@@ -16,6 +16,10 @@
 
 package com.android.server.display;
 
+import static com.google.common.truth.Truth.assertWithMessage;
+
+import static org.mockito.Mockito.doReturn;
+
 import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.AlarmManager;
@@ -26,9 +30,10 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.provider.Settings.Secure;
 import android.provider.Settings.System;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.runner.AndroidJUnit4;
 import android.test.mock.MockContentResolver;
+
+import androidx.test.InstrumentationRegistry;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.app.ColorDisplayController;
 import com.android.internal.util.test.FakeSettingsProvider;
@@ -37,23 +42,21 @@ import com.android.server.SystemService;
 import com.android.server.twilight.TwilightListener;
 import com.android.server.twilight.TwilightManager;
 import com.android.server.twilight.TwilightState;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.Calendar;
 import java.util.HashMap;
-import java.time.LocalTime;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-
-import static com.google.common.truth.Truth.assertWithMessage;
-import static org.mockito.Mockito.doReturn;
 
 @RunWith(AndroidJUnit4.class)
 public class ColorDisplayServiceTest {

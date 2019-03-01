@@ -16,20 +16,14 @@
 
 package com.android.server.am;
 
-import android.app.ActivityOptions;
-import android.content.pm.ActivityInfo.WindowLayout;
-import android.platform.test.annotations.Presubmit;
-import android.support.test.filters.MediumTest;
-import android.support.test.runner.AndroidJUnit4;
-
-import com.android.server.am.LaunchParamsController.LaunchParams;
-import org.junit.runner.RunWith;
-import org.junit.Before;
-import org.junit.Test;
-
-import com.android.server.am.LaunchParamsController.LaunchParamsModifier;
-
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
+
+import static com.android.server.am.LaunchParamsController.LaunchParamsModifier.RESULT_CONTINUE;
+import static com.android.server.am.LaunchParamsController.LaunchParamsModifier.RESULT_DONE;
+import static com.android.server.am.LaunchParamsController.LaunchParamsModifier.RESULT_SKIP;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.doNothing;
@@ -40,12 +34,19 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import static com.android.server.am.LaunchParamsController.LaunchParamsModifier.RESULT_DONE;
-import static com.android.server.am.LaunchParamsController.LaunchParamsModifier.RESULT_CONTINUE;
-import static com.android.server.am.LaunchParamsController.LaunchParamsModifier.RESULT_SKIP;
+import android.app.ActivityOptions;
+import android.content.pm.ActivityInfo.WindowLayout;
+import android.platform.test.annotations.Presubmit;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
+import androidx.test.filters.MediumTest;
+import androidx.test.runner.AndroidJUnit4;
+
+import com.android.server.am.LaunchParamsController.LaunchParams;
+import com.android.server.am.LaunchParamsController.LaunchParamsModifier;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 /**
  * Tests for exercising {@link LaunchParamsController}.
