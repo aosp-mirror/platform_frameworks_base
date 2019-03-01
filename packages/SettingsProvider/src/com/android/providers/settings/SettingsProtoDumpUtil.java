@@ -1974,6 +1974,9 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Secure.LOCATION_CHANGER,
                 SecureSettingsProto.Location.CHANGER);
+        dumpSetting(s, p,
+                Settings.Secure.LOCATION_PERMISSIONS_UPGRADE_TO_Q_MODE,
+                SecureSettingsProto.Location.PERMISSIONS_UPGRADE_TO_Q_MODE);
         p.end(locationToken);
 
         final long locationAccessCheckToken = p.start(SecureSettingsProto.LOCATION_ACCESS_CHECK);

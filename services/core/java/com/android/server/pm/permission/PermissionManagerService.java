@@ -74,6 +74,7 @@ import android.os.storage.StorageManagerInternal;
 import android.permission.PermissionControllerManager;
 import android.permission.PermissionManager;
 import android.permission.PermissionManagerInternal;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -2272,17 +2273,16 @@ public class PermissionManagerService {
         }
     }
 
-    private void updateAllPermissions(String volumeUuid, int oldSdkVersion,
-            Collection<PackageParser.Package> allPackages, PermissionCallback callback) {
-        boolean sdkUpdated = oldSdkVersion < Build.VERSION.SDK_INT;
-
+    private void updateAllPermissions(String volumeUuid, boolean sdkUpdated,
+            boolean updatePermissionsOnPreQUpdate, Collection<PackageParser.Package> allPackages,
+            PermissionCallback callback) {
         final int flags = UPDATE_PERMISSIONS_ALL |
                 (sdkUpdated
                         ? UPDATE_PERMISSIONS_REPLACE_PKG | UPDATE_PERMISSIONS_REPLACE_ALL
                         : 0);
         updatePermissions(null, null, volumeUuid, flags, allPackages, callback);
 
-        if (oldSdkVersion < Build.VERSION_CODES.Q) {
+        if (updatePermissionsOnPreQUpdate) {
             final int[] userIds = UserManagerService.getInstance().getUserIds();
 
             for (PackageParser.Package pkg : allPackages) {
@@ -2301,6 +2301,12 @@ public class PermissionManagerService {
                     final BasePermission bp = mSettings.getPermissionLocked(permName);
 
                     for (int userId : userIds) {
+                        if (Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                                Settings.Secure.LOCATION_PERMISSIONS_UPGRADE_TO_Q_MODE, 0, userId)
+                                != 0) {
+                            continue;
+                        }
+
                         final PermissionState permState = permsState.getRuntimePermissionState(
                                 permName, userId);
 
@@ -2777,10 +2783,11 @@ public class PermissionManagerService {
                     packageName, pkg, replaceGrant, allPackages, callback);
         }
         @Override
-        public void updateAllPermissions(String volumeUuid, int oldSdkVersion,
-                Collection<PackageParser.Package> allPackages, PermissionCallback callback) {
+        public void updateAllPermissions(String volumeUuid, boolean sdkUpdated,
+                boolean updatePermissionsOnPreQUpdate, Collection<PackageParser.Package> allPackages,
+                PermissionCallback callback) {
             PermissionManagerService.this.updateAllPermissions(
-                    volumeUuid, oldSdkVersion, allPackages, callback);
+                    volumeUuid, sdkUpdated, updatePermissionsOnPreQUpdate, allPackages, callback);
         }
         @Override
         public String[] getAppOpPermissionPackages(String permName) {
