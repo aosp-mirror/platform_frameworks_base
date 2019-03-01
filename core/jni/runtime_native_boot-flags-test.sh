@@ -297,11 +297,14 @@ function check_no_default_boot_image {
   check_no_android_runtime_message "$1" "$default_boot_image_message"
 }
 
-apex_boot_image_message="Using Apex boot image: '-Ximage:/system/framework/apex.art'"
+apex_boot_image_option="-Ximage:/system/framework/apex.art"
+apex_boot_image_message="Using Apex boot image: '$apex_boot_image_option'"
 function check_apex_boot_image {
+  check_zygote_runtime_option "$1" "$apex_boot_image_option"
   check_android_runtime_message "$1" "$apex_boot_image_message"
 }
 function check_no_apex_boot_image {
+  check_no_zygote_runtime_option "$1" "$apex_boot_image_option"
   check_no_android_runtime_message "$1" "$apex_boot_image_message"
 }
 
