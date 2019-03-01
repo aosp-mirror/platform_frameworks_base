@@ -18,9 +18,10 @@ package com.android.systemui.statusbar.notification
 
 import android.animation.ObjectAnimator
 import android.util.FloatProperty
-import android.view.animation.Interpolator
 import com.android.systemui.Interpolators
+import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.AmbientPulseManager
+import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator
@@ -30,8 +31,9 @@ import javax.inject.Singleton
 
 @Singleton
 class NotificationWakeUpCoordinator @Inject constructor(
-        private val mAmbientPulseManager: AmbientPulseManager)
-    : AmbientPulseManager.OnAmbientChangedListener {
+        private val mAmbientPulseManager: AmbientPulseManager,
+        private val mStatusBarStateController: StatusBarStateController)
+    : AmbientPulseManager.OnAmbientChangedListener, StatusBarStateController.StateListener {
 
     private val mNotificationVisibility
             = object : FloatProperty<NotificationWakeUpCoordinator>("notificationVisibility") {
@@ -60,6 +62,7 @@ class NotificationWakeUpCoordinator @Inject constructor(
 
     init {
         mAmbientPulseManager.addListener(this)
+        mStatusBarStateController.addCallback(this)
     }
 
     fun setStackScroller(stackScroller: NotificationStackScrollLayout) {
@@ -75,6 +78,12 @@ class NotificationWakeUpCoordinator @Inject constructor(
                                                     increaseSpeed: Boolean) {
         mNotificationsVisibleForExpansion = visible
         updateNotificationVisibility(animate, increaseSpeed)
+        if (!visible && mNotificationsVisible) {
+            // If we stopped expanding and we're still visible because we had a pulse that hasn't
+            // times out, let's release them all to make sure were not stuck in a state where
+            // notifications are visible
+            mAmbientPulseManager.releaseAllImmediately()
+        }
     }
 
     private fun updateNotificationVisibility(animate: Boolean, increaseSpeed: Boolean) {
@@ -102,12 +111,17 @@ class NotificationWakeUpCoordinator @Inject constructor(
         }
     }
 
-    fun setDozeAmount(linearAmount: Float, interpolatedAmount: Float) {
-        mLinearDozeAmount = linearAmount
-        mDozeAmount = interpolatedAmount
+    override fun onDozeAmountChanged(linear: Float, eased: Float) {
+        if (linear != 1.0f && linear != 0.0f
+                && (mLinearDozeAmount == 0.0f || mLinearDozeAmount == 1.0f)) {
+            // Let's notify the scroller that an animation started
+            notifyAnimationStart(mLinearDozeAmount == 1.0f)
+        }
+        mLinearDozeAmount = linear
+        mDozeAmount = eased
         mStackScroller.setDozeAmount(mDozeAmount)
         updateDarkAmount()
-        if (linearAmount == 0.0f) {
+        if (linear == 0.0f) {
             setNotificationsVisible(visible = false, animate = false, increaseSpeed = false);
             setNotificationsVisibleForExpansion(visible = false, animate = false,
                     increaseSpeed = false)
@@ -148,7 +162,7 @@ class NotificationWakeUpCoordinator @Inject constructor(
     }
 
     fun getWakeUpHeight() : Float {
-        return mStackScroller.wakeUpHeight
+        return mStackScroller.pulseHeight
     }
 
     private fun updateDarkAmount() {
@@ -161,12 +175,9 @@ class NotificationWakeUpCoordinator @Inject constructor(
         mStackScroller.notifyDarkAnimationStart(!awake)
     }
 
-    fun setDozing(dozing: Boolean, animate: Boolean) {
-        if (dozing) {
+    override fun onDozingChanged(isDozing: Boolean) {
+        if (isDozing) {
             setNotificationsVisible(visible = false, animate = false, increaseSpeed = false)
-        }
-        if (animate) {
-            notifyAnimationStart(!dozing)
         }
     }
 

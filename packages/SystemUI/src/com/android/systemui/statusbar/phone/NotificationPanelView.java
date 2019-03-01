@@ -2836,7 +2836,6 @@ public class NotificationPanelView extends PanelView implements
 
         final float darkAmount = dozing ? 1 : 0;
         mStatusBarStateController.setDozeAmount(darkAmount, animate);
-        mWakeUpCoordinator.setDozing(mDozing, animate);
     }
 
     @Override
@@ -2847,7 +2846,6 @@ public class NotificationPanelView extends PanelView implements
         mKeyguardStatusView.setDarkAmount(mInterpolatedDarkAmount);
         mKeyguardBottomArea.setDarkAmount(mInterpolatedDarkAmount);
         positionClockAndNotifications();
-        mWakeUpCoordinator.setDozeAmount(mLinearDarkAmount, mInterpolatedDarkAmount);
     }
 
     public void setPulsing(boolean pulsing) {

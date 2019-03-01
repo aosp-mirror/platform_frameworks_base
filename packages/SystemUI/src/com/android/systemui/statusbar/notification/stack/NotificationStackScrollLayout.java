@@ -583,12 +583,15 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         }
     }
 
-    public float getWakeUpHeight() {
+    /**
+     * @return the height at which we will wake up when pulsing
+     */
+    public float getPulseHeight() {
         ActivatableNotificationView firstChild = getFirstChildWithBackground();
         if (firstChild != null) {
             return firstChild.getCollapsedHeight();
         }
-        return 0;
+        return 0f;
     }
 
     @Override
@@ -5651,7 +5654,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     }
 
     public void wakeUpFromPulse() {
-        setPulseHeight(getWakeUpHeight());
+        setPulseHeight(getPulseHeight());
         // Let's place the hidden views at the end of the pulsing notification to make sure we have
         // a smooth animation
         boolean firstVisibleView = true;

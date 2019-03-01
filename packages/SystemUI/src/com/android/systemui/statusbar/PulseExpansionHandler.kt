@@ -48,6 +48,10 @@ import kotlin.math.max
 class PulseExpansionHandler @Inject
 constructor(context: Context,
             private val mWakeUpCoordinator: NotificationWakeUpCoordinator) : Gefingerpoken {
+    companion object {
+        private val RUBBERBAND_FACTOR_STATIC = 0.25f
+        private val SPRING_BACK_ANIMATION_LENGTH_MS = 375
+    }
     private val mPowerManager: PowerManager?
     private var mShadeController: ShadeController? = null
 
@@ -264,11 +268,5 @@ constructor(context: Context,
 
     interface ExpansionCallback {
         fun setEmptyDragAmount(amount: Float)
-    }
-
-    companion object {
-        private val RUBBERBAND_FACTOR_STATIC = 0.25f
-
-        private val SPRING_BACK_ANIMATION_LENGTH_MS = 375
     }
 }
