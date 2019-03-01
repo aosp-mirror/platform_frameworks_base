@@ -81,7 +81,8 @@ public final class CellIdentityNr extends CellIdentity {
     /**
      * Get the NR Cell Identity.
      *
-     * @return The NR Cell Identity in range [0, 68719476735] or Long.MAX_VALUE if unknown.
+     * @return The 36-bit NR Cell Identity in range [0, 68719476735] or
+     *         {@link CellInfo#UNAVAILABLE_LONG} if unknown.
      */
     public long getNci() {
         return mNci;
