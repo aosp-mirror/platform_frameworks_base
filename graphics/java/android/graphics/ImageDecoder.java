@@ -59,6 +59,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.annotation.Retention;
 import java.nio.ByteBuffer;
+import java.util.Locale;
+import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -834,6 +836,39 @@ public final class ImageDecoder implements AutoCloseable {
             close();
         } finally {
             super.finalize();
+        }
+    }
+
+    /**
+     * Return if the given MIME type is a supported file format that can be
+     * decoded by this class. This can be useful to determine if a file can be
+     * decoded directly, or if it needs to be converted into a more general
+     * format using an API like {@link ContentResolver#openTypedAssetFile}.
+     */
+    public static boolean isMimeTypeSupported(@NonNull String mimeType) {
+        Objects.requireNonNull(mimeType);
+        switch (mimeType.toLowerCase(Locale.US)) {
+            case "image/png":
+            case "image/jpeg":
+            case "image/webp":
+            case "image/gif":
+            case "image/heif":
+            case "image/bmp":
+            case "image/x-ico":
+            case "image/vnd.wap.wbmp":
+            case "image/x-sony-arw":
+            case "image/x-canon-cr2":
+            case "image/x-adobe-dng":
+            case "image/x-nikon-nef":
+            case "image/x-nikon-nrw":
+            case "image/x-olympus-orf":
+            case "image/x-fuji-raf":
+            case "image/x-panasonic-rw2":
+            case "image/x-pentax-pef":
+            case "image/x-samsung-srw":
+                return true;
+            default:
+                return false;
         }
     }
 
