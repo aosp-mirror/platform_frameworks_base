@@ -7688,7 +7688,7 @@ package android.telephony {
     method @RequiresPermission("android.permission.READ_PRECISE_PHONE_STATE") public void onCallDisconnectCauseChanged(int, int);
     method @RequiresPermission("android.permission.READ_PRECISE_PHONE_STATE") public void onImsCallDisconnectCauseChanged(@NonNull android.telephony.ims.ImsReasonInfo);
     method @RequiresPermission("android.permission.READ_PRECISE_PHONE_STATE") public void onPreciseCallStateChanged(@NonNull android.telephony.PreciseCallState);
-    method @RequiresPermission("android.permission.READ_PRECISE_PHONE_STATE") public void onPreciseDataConnectionStateChanged(android.telephony.PreciseDataConnectionState);
+    method @RequiresPermission("android.permission.READ_PRECISE_PHONE_STATE") public void onPreciseDataConnectionStateChanged(@NonNull android.telephony.PreciseDataConnectionState);
     method public void onRadioPowerStateChanged(int);
     method public void onSrvccStateChanged(int);
     method public void onVoiceActivationStateChanged(int);
@@ -7723,7 +7723,7 @@ package android.telephony {
 
   public final class PreciseDataConnectionState implements android.os.Parcelable {
     method public int describeContents();
-    method public String getDataConnectionApn();
+    method @Nullable public String getDataConnectionApn();
     method public int getDataConnectionApnTypeBitMask();
     method public int getDataConnectionFailCause();
     method public int getDataConnectionState();
@@ -7878,17 +7878,17 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setDefaultSmsSubId(int);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setPreferredDataSubscriptionId(int, boolean, @NonNull java.util.concurrent.Executor, java.util.function.Consumer<java.lang.Integer>);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean setSubscriptionEnabled(int, boolean);
-    field public static final android.net.Uri ADVANCED_CALLING_ENABLED_CONTENT_URI;
+    field @NonNull public static final android.net.Uri ADVANCED_CALLING_ENABLED_CONTENT_URI;
     field public static final int PROFILE_CLASS_DEFAULT = -1; // 0xffffffff
     field public static final int PROFILE_CLASS_OPERATIONAL = 2; // 0x2
     field public static final int PROFILE_CLASS_PROVISIONING = 1; // 0x1
     field public static final int PROFILE_CLASS_TESTING = 0; // 0x0
     field public static final int PROFILE_CLASS_UNSET = -1; // 0xffffffff
-    field public static final android.net.Uri VT_ENABLED_CONTENT_URI;
-    field public static final android.net.Uri WFC_ENABLED_CONTENT_URI;
-    field public static final android.net.Uri WFC_MODE_CONTENT_URI;
-    field public static final android.net.Uri WFC_ROAMING_ENABLED_CONTENT_URI;
-    field public static final android.net.Uri WFC_ROAMING_MODE_CONTENT_URI;
+    field @NonNull public static final android.net.Uri VT_ENABLED_CONTENT_URI;
+    field @NonNull public static final android.net.Uri WFC_ENABLED_CONTENT_URI;
+    field @NonNull public static final android.net.Uri WFC_MODE_CONTENT_URI;
+    field @NonNull public static final android.net.Uri WFC_ROAMING_ENABLED_CONTENT_URI;
+    field @NonNull public static final android.net.Uri WFC_ROAMING_MODE_CONTENT_URI;
   }
 
   public static class SubscriptionPlan.Builder {

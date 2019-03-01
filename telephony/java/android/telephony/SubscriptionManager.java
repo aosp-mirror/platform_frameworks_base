@@ -154,6 +154,7 @@ public class SubscriptionManager {
      * {@link Uri#withAppendedPath(Uri, String)}.
      * @hide
      */
+    @NonNull
     @SystemApi
     public static final Uri WFC_ENABLED_CONTENT_URI = Uri.withAppendedPath(CONTENT_URI, "wfc");
 
@@ -172,6 +173,7 @@ public class SubscriptionManager {
      * {@link Uri#withAppendedPath(Uri, String)}.
      * @hide
      */
+    @NonNull
     @SystemApi
     public static final Uri ADVANCED_CALLING_ENABLED_CONTENT_URI = Uri.withAppendedPath(
             CONTENT_URI, "advanced_calling");
@@ -189,6 +191,7 @@ public class SubscriptionManager {
      * {@link Uri#withAppendedPath(Uri, String)}.
      * @hide
      */
+    @NonNull
     @SystemApi
     public static final Uri WFC_MODE_CONTENT_URI = Uri.withAppendedPath(CONTENT_URI, "wfc_mode");
 
@@ -205,6 +208,7 @@ public class SubscriptionManager {
      * {@link Uri#withAppendedPath(Uri, String)}.
      * @hide
      */
+    @NonNull
     @SystemApi
     public static final Uri WFC_ROAMING_MODE_CONTENT_URI = Uri.withAppendedPath(
             CONTENT_URI, "wfc_roaming_mode");
@@ -223,6 +227,7 @@ public class SubscriptionManager {
      * {@link Uri#withAppendedPath(Uri, String)}.
      * @hide
      */
+    @NonNull
     @SystemApi
     public static final Uri VT_ENABLED_CONTENT_URI = Uri.withAppendedPath(
             CONTENT_URI, "vt_enabled");
@@ -240,6 +245,7 @@ public class SubscriptionManager {
      * {@link Uri#withAppendedPath(Uri, String)}.
      * @hide
      */
+    @NonNull
     @SystemApi
     public static final Uri WFC_ROAMING_ENABLED_CONTENT_URI = Uri.withAppendedPath(
             CONTENT_URI, "wfc_roaming_enabled");

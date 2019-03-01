@@ -609,7 +609,7 @@ public class PhoneStateListener {
     @RequiresPermission((android.Manifest.permission.READ_PRECISE_PHONE_STATE))
     @SystemApi
     public void onPreciseDataConnectionStateChanged(
-            PreciseDataConnectionState dataConnectionState) {
+            @NonNull PreciseDataConnectionState dataConnectionState) {
         // default implementation empty
     }
 

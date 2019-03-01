@@ -17,6 +17,7 @@
 package android.provider;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
@@ -4340,6 +4341,7 @@ public final class Telephony {
          * @param subscriptionId the subscriptionId to receive updates on
          * @return the Uri used to observe precise carrier identity changes
          */
+        @NonNull
         public static Uri getPreciseCarrierIdUriForSubscriptionId(int subscriptionId) {
             return Uri.withAppendedPath(Uri.withAppendedPath(CONTENT_URI, "precise"),
                     String.valueOf(subscriptionId));
