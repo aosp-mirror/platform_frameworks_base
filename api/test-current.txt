@@ -667,7 +667,7 @@ package android.content.pm {
     field public static final int PROTECTION_FLAG_SYSTEM_TEXT_CLASSIFIER = 65536; // 0x10000
     field public static final int PROTECTION_FLAG_VENDOR_PRIVILEGED = 32768; // 0x8000
     field public static final int PROTECTION_FLAG_WELLBEING = 131072; // 0x20000
-    field public String backgroundPermission;
+    field @Nullable public final String backgroundPermission;
   }
 
   public final class ShortcutInfo implements android.os.Parcelable {

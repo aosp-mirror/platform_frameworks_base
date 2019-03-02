@@ -17,6 +17,9 @@
 package android.content.pm;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.annotation.StringRes;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
@@ -300,7 +303,7 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
      * The group this permission is a part of, as per
      * {@link android.R.attr#permissionGroup}.
      */
-    public String group;
+    public @Nullable String group;
 
     /**
      * Flag for {@link #flags}, corresponding to <code>costsMoney</code>
@@ -322,18 +325,27 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
      */
     public static final int FLAG_INSTALLED = 1<<30;
 
+    /** @hide */
+    @IntDef(flag = true, prefix = { "FLAG_" }, value = {
+            FLAG_COSTS_MONEY,
+            FLAG_INSTALLED,
+            FLAG_REMOVED
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Flags {}
+
     /**
      * Additional flags about this permission as given by
      * {@link android.R.attr#permissionFlags}.
      */
-    public int flags;
+    public @Flags int flags;
 
     /**
      * A string resource identifier (in the package's resources) of this
      * permission's description.  From the "description" attribute or,
      * if not set, 0.
      */
-    public int descriptionRes;
+    public @StringRes int descriptionRes;
 
     /**
      * A string resource identifier (in the package's resources) used to request the permissions.
@@ -342,7 +354,7 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
      * @hide
      */
     @SystemApi
-    public int requestRes;
+    public @StringRes int requestRes;
 
     /**
      * Some permissions only grant access while the app is in foreground. Some of these permissions
@@ -357,7 +369,7 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
      */
     @SystemApi
     @TestApi
-    public String backgroundPermission;
+    public final @Nullable String backgroundPermission;
 
     /**
      * The description string provided in the AndroidManifest file, if any.  You
@@ -365,7 +377,7 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
      * is in a resource.  You probably want
      * {@link PermissionInfo#loadDescription} instead.
      */
-    public CharSequence nonLocalizedDescription;
+    public @Nullable CharSequence nonLocalizedDescription;
 
     /** @hide */
     public static int fixProtectionLevel(int level) {
@@ -383,7 +395,7 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
 
     /** @hide */
     @UnsupportedAppUsage
-    public static String protectionToString(int level) {
+    public static @NonNull String protectionToString(int level) {
         String protLevel = "????";
         switch (level & PROTECTION_MASK_BASE) {
             case PermissionInfo.PROTECTION_DANGEROUS:
@@ -456,10 +468,26 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
         return protLevel;
     }
 
-    public PermissionInfo() {
+    /**
+     * @hide
+     */
+    public PermissionInfo(@Nullable String backgroundPermission) {
+        this.backgroundPermission = backgroundPermission;
     }
 
-    public PermissionInfo(PermissionInfo orig) {
+    /**
+     * @deprecated Should only be created by the system.
+     */
+    @Deprecated
+    public PermissionInfo() {
+        this((String) null);
+    }
+
+    /**
+     * @deprecated Should only be created by the system.
+     */
+    @Deprecated
+    public PermissionInfo(@NonNull PermissionInfo orig) {
         super(orig);
         protectionLevel = orig.protectionLevel;
         flags = orig.flags;
@@ -481,7 +509,7 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
      * @return Returns a CharSequence containing the permission's description.
      * If there is no description, null is returned.
      */
-    public CharSequence loadDescription(PackageManager pm) {
+    public @Nullable CharSequence loadDescription(@NonNull PackageManager pm) {
         if (nonLocalizedDescription != null) {
             return nonLocalizedDescription;
         }
@@ -551,7 +579,7 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
         return (protectionLevel & PermissionInfo.PROTECTION_FLAG_APPOP) != 0;
     }
 
-    public static final @android.annotation.NonNull Creator<PermissionInfo> CREATOR =
+    public static final @NonNull Creator<PermissionInfo> CREATOR =
         new Creator<PermissionInfo>() {
         @Override
         public PermissionInfo createFromParcel(Parcel source) {
