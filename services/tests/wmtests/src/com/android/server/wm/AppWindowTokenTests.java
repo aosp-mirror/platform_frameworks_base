@@ -489,7 +489,9 @@ public class AppWindowTokenTests extends WindowTestsBase {
         mTask.setBounds(taskBounds);
 
         mTask.setWindowingMode(WINDOWING_MODE_FREEFORM);
-        assertTransitionAnimationPositionAndBounds(taskBounds.left, taskBounds.top, stackBounds);
+        final Rect taskBoundsSize = new Rect(taskBounds);
+        taskBoundsSize.offsetTo(0, 0);
+        assertTransitionAnimationPositionAndBounds(taskBounds.left, taskBounds.top, taskBoundsSize);
 
         mTask.setWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
         assertTransitionAnimationPositionAndBounds(stackBounds.left, stackBounds.top, stackBounds);

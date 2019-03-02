@@ -1747,7 +1747,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     }
 
     boolean isInChangeTransition() {
-        return mTransitChangeLeash != null || isChangeTransition(mTransit);
+        return mTransitChangeLeash != null || AppTransition.isChangeTransit(mTransit);
     }
 
     @VisibleForTesting
@@ -2458,14 +2458,12 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         final Task task = getTask();
         if (task != null && task.inFreeformWindowingMode()) {
             task.getRelativeDisplayedPosition(outPosition);
+            task.getBounds(outBounds);
         } else if (stack != null) {
             stack.getRelativeDisplayedPosition(outPosition);
-        }
-
-        // Always use stack bounds in order to have the ability to animate outside the task region.
-        // It also needs to be consistent when {@link #mNeedsAnimationBoundsLayer} is set that crops
-        // according to the bounds.
-        if (stack != null) {
+            // Use stack bounds in order to have the ability to animate outside the task region.
+            // Needs to be consistent when {@link #mNeedsAnimationBoundsLayer} is set that crops
+            // according to the bounds.
             stack.getBounds(outBounds);
         }
         // We have the relative position so the local position can be removed from bounds.
@@ -2482,10 +2480,6 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
             }
         }
         return getBounds();
-    }
-
-    private static boolean isChangeTransition(int transit) {
-        return transit == TRANSIT_TASK_CHANGE_WINDOWING_MODE;
     }
 
     boolean applyAnimationLocked(WindowManager.LayoutParams lp, int transit, boolean enter,
@@ -2509,7 +2503,8 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
             AnimationAdapter thumbnailAdapter = null;
             getAnimationBounds(mTmpPoint, mTmpRect);
 
-            boolean isChanging = isChangeTransition(transit) && enter;
+            final boolean isChanging = AppTransition.isChangeTransit(transit) && enter
+                    && getDisplayContent().mChangingApps.contains(this);
 
             // Delaying animation start isn't compatible with remote animations at all.
             if (getDisplayContent().mAppTransition.getRemoteAnimationController() != null
