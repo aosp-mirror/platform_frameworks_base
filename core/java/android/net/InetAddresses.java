@@ -16,6 +16,8 @@
 
 package android.net;
 
+import android.annotation.NonNull;
+
 import libcore.net.InetAddressUtils;
 
 import java.net.InetAddress;
@@ -40,7 +42,7 @@ public class InetAddresses {
      * @param address the address to parse.
      * @return true if the supplied address is numeric, false otherwise.
      */
-    public static boolean isNumericAddress(String address) {
+    public static boolean isNumericAddress(@NonNull String address) {
         return InetAddressUtils.isNumericAddress(address);
     }
 
@@ -57,7 +59,7 @@ public class InetAddresses {
      * @return an {@link InetAddress} instance corresponding to the address.
      * @throws IllegalArgumentException if {@code address} is not a numeric address.
      */
-    public static InetAddress parseNumericAddress(String address) {
+    public static @NonNull InetAddress parseNumericAddress(@NonNull String address) {
         return InetAddressUtils.parseNumericAddress(address);
     }
 }
