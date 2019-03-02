@@ -252,7 +252,7 @@ message Atom {
     }
 
     // Pulled events will start at field 10000.
-    // Next: 10048
+    // Next: 10056
     oneof pulled {
         WifiBytesTransfer wifi_bytes_transfer = 10000;
         WifiBytesTransferByFgBg wifi_bytes_transfer_by_fg_bg = 10001;
@@ -308,6 +308,8 @@ message Atom {
         TrainInfo train_info = 10051;
         TimeZoneDataInfo time_zone_data_info = 10052;
         SDCardInfo sdcard_info = 10053;
+        GpuStatsGlobalInfo gpu_stats_global_info = 10054;
+        GpuStatsAppInfo gpu_stats_app_info = 10055;
     }
 
     // DO NOT USE field numbers above 100,000 in AOSP.
@@ -5687,4 +5689,56 @@ message AssistGestureProgressReported {
 message TimeZoneDataInfo {
     // A version identifier for the data set on device. e.g. "2018i"
     optional string tzdb_version = 1;
+}
+
+/*
+ * Logs the GPU stats global health information.
+ *
+ * Logged from:
+ *   frameworks/native/services/gpuservice/gpustats/
+ */
+message GpuStatsGlobalInfo {
+    // Package name of the gpu driver.
+    optional string driver_package_name = 1;
+
+    // Version name of the gpu driver.
+    optional string driver_version_name = 2;
+
+    // Version code of the gpu driver.
+    optional int64 driver_version_code = 3;
+
+    // Build time of the gpu driver in UTC as seconds since January 1, 1970.
+    optional int64 driver_build_time = 4;
+
+    // Total count of the gl driver gets loaded.
+    optional int64 gl_loading_count = 5;
+
+    // Total count of the gl driver fails to be loaded.
+    optional int64 gl_loading_failure_count = 6;
+
+    // Total count of the Vulkan driver gets loaded.
+    optional int64 vk_loading_count = 7;
+
+    // Total count of the Vulkan driver fails to be loaded.
+    optional int64 vk_loading_failure_count = 8;
+}
+
+/*
+ * Logs the GPU stats per app health information.
+ *
+ * Logged from:
+ *   frameworks/native/services/gpuservice/gpustats/
+ */
+message GpuStatsAppInfo {
+    // Package name of the application that loads the gpu driver.
+    optional string app_package_name = 1;
+
+    // Version code of the gpu driver this app loads.
+    optional int64 driver_version_code = 2;
+
+    // List of all the gl driver loading times for this app.
+    repeated int64 gl_driver_loading_time = 3;
+
+    // List of all the Vulkan driver laoding times for this app.
+    repeated int64 vk_driver_loading_time = 4;
 }
