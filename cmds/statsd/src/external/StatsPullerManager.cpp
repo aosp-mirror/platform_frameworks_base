@@ -27,6 +27,7 @@
 #include "../logd/LogEvent.h"
 #include "../stats_log_util.h"
 #include "../statscompanion_util.h"
+#include "GpuStatsPuller.h"
 #include "PowerStatsPuller.h"
 #include "ResourceHealthManagerPuller.h"
 #include "StatsCallbackPuller.h"
@@ -240,6 +241,9 @@ std::map<int, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
         // SDCardInfo
         {android::util::SDCARD_INFO,
          {.puller = new StatsCompanionServicePuller(android::util::SDCARD_INFO)}},
+        // GpuStatsGlobalInfo
+        {android::util::GPU_STATS_GLOBAL_INFO,
+         {.puller = new GpuStatsPuller(android::util::GPU_STATS_GLOBAL_INFO)}},
 };
 
 StatsPullerManager::StatsPullerManager() : mNextPullTimeNs(NO_ALARM_UPDATE) {
