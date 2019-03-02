@@ -26,4 +26,3 @@ LOCAL_STATIC_ANDROID_LIBRARIES += \
     androidx.legacy_legacy-preference-v14 \
     SettingsLib
 
-LOCAL_RESOURCE_DIR += $(call my-dir)/res
