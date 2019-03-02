@@ -327,7 +327,8 @@
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"‏Wi-Fi פועל"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"‏אין רשתות Wi-Fi זמינות"</string>
     <string name="quick_settings_wifi_secondary_label_transient" msgid="7748206246119760554">"ההפעלה מתבצעת…"</string>
-    <string name="quick_settings_cast_title" msgid="7709016546426454729">"Cast"</string>
+    <!-- no translation found for quick_settings_cast_title (6954684227605751758) -->
+    <skip />
     <string name="quick_settings_casting" msgid="6601710681033353316">"מעביר"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"מכשיר ללא שם"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"מוכן להעביר"</string>
@@ -443,7 +444,8 @@
     <string name="battery_saver_notification_title" msgid="8614079794522291840">"תכונת החיסכון בסוללה פועלת"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"מפחית את הביצועים ונתונים ברקע"</string>
     <string name="battery_saver_notification_action_text" msgid="132118784269455533">"כיבוי תכונת החיסכון בסוללה"</string>
-    <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> יתחיל להקליט את כל התוכן המוצג במסך שלך."</string>
+    <string name="media_projection_dialog_text" msgid="1443042478990422751">"באמצעות <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>, יתחיל תיעוד של כל מה שמופיע במסך, כולל התראות, סיסמאות, תמונות, הודעות ופרטי תשלום."</string>
+    <string name="media_projection_dialog_title" msgid="7574971526813630219">"האם להתיר ל-<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> לצלם את המסך או לבצע העברה שלו?"</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"אל תציג שוב"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"נקה הכל"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"ניהול"</string>
@@ -816,14 +818,17 @@
     <string name="pip_notification_message" msgid="5619512781514343311">"אם אינך רוצה שהתכונה הזו תשמש את <xliff:g id="NAME">%s</xliff:g>, יש להקיש כדי לפתוח את ההגדרות ולכבות את התכונה."</string>
     <string name="pip_play" msgid="1417176722760265888">"הפעל"</string>
     <string name="pip_pause" msgid="8881063404466476571">"השהה"</string>
-    <string name="pip_skip_to_next" msgid="1948440006726306284">"ברצוני לדלג אל הבא"</string>
-    <string name="pip_skip_to_prev" msgid="1955311326688637914">"ברצוני לדלג אל הקודם"</string>
+    <string name="pip_skip_to_next" msgid="1948440006726306284">"אפשר לדלג אל הבא"</string>
+    <string name="pip_skip_to_prev" msgid="1955311326688637914">"אפשר לדלג אל הקודם"</string>
     <string name="thermal_shutdown_title" msgid="4458304833443861111">"הטלפון כבה עקב התחממות"</string>
     <string name="thermal_shutdown_message" msgid="9006456746902370523">"הטלפון פועל כרגיל עכשיו"</string>
     <string name="thermal_shutdown_dialog_message" msgid="566347880005304139">"הטלפון שלך התחמם יותר מדי וכבה כדי להתקרר. הטלפון פועל כרגיל עכשיו.\n\nייתכן שהטלפון יתחמם יותר מדי אם:\n	• תשתמש באפליקציות עתירות משאבים (כגון משחקים, אפליקציות וידאו או אפליקציות ניווט)\n	• תוריד או תעלה קבצים גדולים\n	• תשתמש בטלפון בטמפרטורות גבוהות"</string>
     <string name="high_temp_title" msgid="4589508026407318374">"הטלפון מתחמם"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"חלק מהתכונות מוגבלות כל עוד הטלפון מתקרר"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"קירור הטלפון ייעשה באופן אוטומטי. תוכל עדיין להשתמש בטלפון, אבל ייתכן שהוא יפעל לאט יותר.\n\nהטלפון יחזור לפעול כרגיל לאחר שיתקרר."</string>
+    <string name="high_temp_alarm_title" msgid="442812040762745210">"יש לנתק את המטען"</string>
+    <string name="high_temp_alarm_notify_message" msgid="1802871059489414932">"יש בעיה עם טעינת מכשיר זה. יש לנתק את מתאם המתח בזהירות כיוון שייתכן שהכבל חם."</string>
+    <string name="high_temp_alarm_help_care_steps" msgid="3631075329318070726">"לצפייה בשלבי הטיפול"</string>
     <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"קיצור דרך שמאלי"</string>
     <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"קיצור דרך ימני"</string>
     <string name="lockscreen_unlock_left" msgid="2043092136246951985">"קיצור דרך שמאלי גם מבטל נעילה"</string>

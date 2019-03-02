@@ -325,7 +325,8 @@
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"Imewasha Wi-Fi"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Hakuna mitandao ya Wi-Fi inayopatikana"</string>
     <string name="quick_settings_wifi_secondary_label_transient" msgid="7748206246119760554">"Inawasha..."</string>
-    <string name="quick_settings_cast_title" msgid="7709016546426454729">"Tuma"</string>
+    <!-- no translation found for quick_settings_cast_title (6954684227605751758) -->
+    <skip />
     <string name="quick_settings_casting" msgid="6601710681033353316">"Inatuma"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Kifaa hakina jina"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"Tayari kutuma"</string>
@@ -437,7 +438,8 @@
     <string name="battery_saver_notification_title" msgid="8614079794522291840">"Kiokoa Betri kimewashwa"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Hupunguza utendaji na data ya chini chini"</string>
     <string name="battery_saver_notification_action_text" msgid="132118784269455533">"Zima Kiokoa Betri"</string>
-    <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> itaanza kupiga picha kila kitu kinachoonyeshwa kwenye skrini yako."</string>
+    <string name="media_projection_dialog_text" msgid="1443042478990422751">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> itaanza kurekodi kila kitu kwenye skrini ikiwa ni pamoja na arifa, manenosiri, picha, ujumbe na maelezo ya malipo."</string>
+    <string name="media_projection_dialog_title" msgid="7574971526813630219">"Ungependa kuruhusu <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> irekodi au kutuma kwenye skrini yako?"</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Usionyeshe tena"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Futa zote"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"Dhibiti"</string>
@@ -814,6 +816,9 @@
     <string name="high_temp_title" msgid="4589508026407318374">"Joto la simu linaongezeka"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"Baadhi ya vipengele havitatumika kwenye simu wakati inapoa"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"Simu yako itajaribu kupoa kiotomatiki. Bado unaweza kutumia simu yako, lakini huenda ikafanya kazi polepole. \n\nPindi simu yako itakapopoa, itaendelea kufanya kazi kama kawaida."</string>
+    <string name="high_temp_alarm_title" msgid="442812040762745210">"Chomoa chaja"</string>
+    <string name="high_temp_alarm_notify_message" msgid="1802871059489414932">"Kuna tatizo la kuchaji kifaa hiki. Chomoa adapta ya nishati na uwe mwangalifu, huenda kebo ni moto."</string>
+    <string name="high_temp_alarm_help_care_steps" msgid="3631075329318070726">"Angalia hatua za ulinzi"</string>
     <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"Njia ya mkato ya kushoto"</string>
     <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"Njia ya mkato ya kulia"</string>
     <string name="lockscreen_unlock_left" msgid="2043092136246951985">"Njia ya mkato ya kushoto pia inafungua"</string>

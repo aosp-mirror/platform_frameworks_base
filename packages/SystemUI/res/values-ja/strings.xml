@@ -325,7 +325,8 @@
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"Wi-Fi: ON"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Wi-Fiネットワークを利用できません"</string>
     <string name="quick_settings_wifi_secondary_label_transient" msgid="7748206246119760554">"ON にしています…"</string>
-    <string name="quick_settings_cast_title" msgid="7709016546426454729">"キャスト"</string>
+    <!-- no translation found for quick_settings_cast_title (6954684227605751758) -->
+    <skip />
     <string name="quick_settings_casting" msgid="6601710681033353316">"キャストしています"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"名前のないデバイス"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"キャスト準備完了"</string>
@@ -437,7 +438,8 @@
     <string name="battery_saver_notification_title" msgid="8614079794522291840">"バッテリー セーバー ON"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"パフォーマンスとバックグラウンドデータを制限します"</string>
     <string name="battery_saver_notification_action_text" msgid="132118784269455533">"バッテリー セーバーを OFF"</string>
-    <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>で、画面に表示されているコンテンツのキャプチャを開始します。"</string>
+    <string name="media_projection_dialog_text" msgid="1443042478990422751">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>で、画面上のすべての内容（通知、パスワード、写真、メッセージ、支払い情報など）の取得が開始されます。"</string>
+    <string name="media_projection_dialog_title" msgid="7574971526813630219">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>に画面の記録やキャストを許可しますか？"</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"次回から表示しない"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"すべて消去"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"管理"</string>
@@ -814,6 +816,9 @@
     <string name="high_temp_title" msgid="4589508026407318374">"スマートフォンの温度が上昇中"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"スマートフォンのクールダウン中は一部の機能が制限されます"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"スマートフォンは自動的にクールダウンを行います。その間もスマートフォンを使用できますが、動作が遅くなる可能性があります。\n\nクールダウンが完了すると、通常どおり動作します。"</string>
+    <string name="high_temp_alarm_title" msgid="442812040762745210">"充電器を電源から外してください"</string>
+    <string name="high_temp_alarm_notify_message" msgid="1802871059489414932">"このデバイスの充電中に問題が発生しました。電源アダプターを電源から外してください。ケーブルが熱くなっている可能性がありますのでご注意ください。"</string>
+    <string name="high_temp_alarm_help_care_steps" msgid="3631075329318070726">"取り扱いに関する手順をご覧ください"</string>
     <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"左ショートカット"</string>
     <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"右ショートカット"</string>
     <string name="lockscreen_unlock_left" msgid="2043092136246951985">"左ショートカットでもロックを解除"</string>

@@ -325,7 +325,8 @@
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"Wi-Fi បានបើក"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"គ្មានបណ្តាញ Wi-Fi ទេ"</string>
     <string name="quick_settings_wifi_secondary_label_transient" msgid="7748206246119760554">"កំពុង​បើក..."</string>
-    <string name="quick_settings_cast_title" msgid="7709016546426454729">"ភ្ជាប់"</string>
+    <!-- no translation found for quick_settings_cast_title (6954684227605751758) -->
+    <skip />
     <string name="quick_settings_casting" msgid="6601710681033353316">"ការ​ចាត់​ថ្នាក់"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"ឧបករណ៍​​ដែល​មិន​មាន​ឈ្មោះ"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"ត្រៀម​រួចរាល់​ដើម្បី​ចាត់​ថ្នាក់"</string>
@@ -437,7 +438,8 @@
     <string name="battery_saver_notification_title" msgid="8614079794522291840">"កម្មវិធីសន្សំថ្មបានបើក"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"ការ​បន្ថយ​ការ​ប្រតិបត្តិ និង​ទិន្នន័យ​ផ្ទៃ​ខាងក្រោយ"</string>
     <string name="battery_saver_notification_action_text" msgid="132118784269455533">"បិទ​កម្មវិធី​សន្សំ​ថ្ម"</string>
-    <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> នឹង​ចាប់ផ្ដើម​ចាប់​យក​អ្វីៗ​គ្រប់យ៉ាង​ដែល​បង្ហាញ​លើ​អេក្រង់​របស់​អ្នក។"</string>
+    <string name="media_projection_dialog_text" msgid="1443042478990422751">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> នឹង​ចាប់ផ្ដើម​ថត​អ្វីគ្រប់យ៉ាង​នៅលើ​អេក្រង់​របស់អ្នក រួមទាំង​ការជូន​ដំណឹង ពាក្យ​សម្ងាត់ រូប​ថត សារ និង​ព័ត៌មាន​ពីការទូទាត់ផងដែរ។"</string>
+    <string name="media_projection_dialog_title" msgid="7574971526813630219">"អនុញ្ញាត​ឱ្យ <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ថត ឬ​បញ្ជូន​អេក្រង់​របស់អ្នក?"</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"កុំ​បង្ហាញ​ម្ដងទៀត"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"សម្អាត​ទាំងអស់"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"គ្រប់គ្រង"</string>
@@ -814,6 +816,9 @@
     <string name="high_temp_title" msgid="4589508026407318374">"ទូរសព្ទ​នេះ​កំពុង​កើន​កម្តៅ"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"មុខងារ​មួយ​ចំនួន​នឹង​មិន​អាច​ប្រើ​បាន​ពេញលេញ​នោះ​ទេ ខណៈពេល​ដែល​ទូរសព្ទ​កំពុង​បញ្ចុះ​កម្តៅ"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"ទូរសព្ទ​របស់អ្នក​នឹង​ព្យាយាម​បញ្ចុះ​កម្តៅ​ដោយ​ស្វ័យប្រវត្តិ។ អ្នក​នៅតែ​អាច​ប្រើ​ទូរសព្ទ​របស់អ្នក​បាន​ដដែល​ ប៉ុន្តែ​វា​នឹង​ដំណើរ​ការ​យឺត​ជាង​មុន។\n\nបន្ទាប់​ពី​ទូរសព្ទ​របស់អ្នក​ត្រជាក់​ជាង​មុន​ហើយ វា​នឹង​ដំណើរការ​ដូច​ធម្មតា។"</string>
+    <string name="high_temp_alarm_title" msgid="442812040762745210">"ផ្ដាច់ឆ្នាំងសាក"</string>
+    <string name="high_temp_alarm_notify_message" msgid="1802871059489414932">"មាន​បញ្ហា​ក្នុងការសាកថ្ម​ឧបករណ៍​នេះ។ សូមផ្ដាច់​ឆ្នាំងសាក ហើយ​ប្រុងប្រយ័ត្ន ដោយសារ​ខ្សែ​អាចមាន​កម្ដៅ​ក្ដៅ។"</string>
+    <string name="high_temp_alarm_help_care_steps" msgid="3631075329318070726">"មើលជំហាន​ថែទាំ"</string>
     <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"ផ្លូវកាត់​ខាង​ឆ្វេង"</string>
     <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"ផ្លូវកាត់​ខាង​ស្តាំ"</string>
     <string name="lockscreen_unlock_left" msgid="2043092136246951985">"ផ្លូវកាត់​ខាង​ឆ្វេង​ក៏​ដោះសោ​ដែរ"</string>

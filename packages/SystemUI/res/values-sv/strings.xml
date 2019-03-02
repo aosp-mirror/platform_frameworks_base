@@ -325,7 +325,8 @@
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"Wi-Fi är aktiverat"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Det finns inga tillgängliga Wi-Fi-nätverk"</string>
     <string name="quick_settings_wifi_secondary_label_transient" msgid="7748206246119760554">"Aktiverar …"</string>
-    <string name="quick_settings_cast_title" msgid="7709016546426454729">"Casta"</string>
+    <!-- no translation found for quick_settings_cast_title (6954684227605751758) -->
+    <skip />
     <string name="quick_settings_casting" msgid="6601710681033353316">"Castar"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Namnlös enhet"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"Redo att casta"</string>
@@ -437,7 +438,8 @@
     <string name="battery_saver_notification_title" msgid="8614079794522291840">"Batterisparläget är aktiverat"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Minskar prestanda och bakgrundsdata"</string>
     <string name="battery_saver_notification_action_text" msgid="132118784269455533">"Inaktivera batterisparläget"</string>
-    <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> tar en bild av allt som visas på skärmen."</string>
+    <string name="media_projection_dialog_text" msgid="1443042478990422751">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> börjar spela in allt på skärmen, inklusive aviseringar, lösenord, foton, meddelanden och betalningsuppgifter."</string>
+    <string name="media_projection_dialog_title" msgid="7574971526813630219">"Vill du tillåta att <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> spelar in eller castar skärmen?"</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Visa inte igen"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Rensa alla"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"Hantera"</string>
@@ -814,6 +816,9 @@
     <string name="high_temp_title" msgid="4589508026407318374">"Mobilen börjar bli varm"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"Vissa funktioner är begränsade medan mobilen svalnar"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"Mobilen försöker svalna automatiskt. Du kan fortfarande använda mobilen, men den kan vara långsammare än vanligt.\n\nMobilen fungerar som vanligt när den har svalnat."</string>
+    <string name="high_temp_alarm_title" msgid="442812040762745210">"Koppla ur laddaren"</string>
+    <string name="high_temp_alarm_notify_message" msgid="1802871059489414932">"Det går inte att ladda denna enhet. Koppla ur nätadaptern, men var försiktig eftersom kabeln kan vara varm."</string>
+    <string name="high_temp_alarm_help_care_steps" msgid="3631075329318070726">"Visa alla skötselråd"</string>
     <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"Vänster genväg"</string>
     <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"Höger genväg"</string>
     <string name="lockscreen_unlock_left" msgid="2043092136246951985">"Lås även upp enheten med vänster genväg"</string>

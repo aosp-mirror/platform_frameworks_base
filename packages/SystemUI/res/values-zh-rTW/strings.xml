@@ -325,7 +325,8 @@
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"已開啟 Wi-Fi"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"沒有 Wi-Fi 網路"</string>
     <string name="quick_settings_wifi_secondary_label_transient" msgid="7748206246119760554">"開啟中…"</string>
-    <string name="quick_settings_cast_title" msgid="7709016546426454729">"投放"</string>
+    <!-- no translation found for quick_settings_cast_title (6954684227605751758) -->
+    <skip />
     <string name="quick_settings_casting" msgid="6601710681033353316">"投放"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"未命名的裝置"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"可以開始投放了"</string>
@@ -437,7 +438,8 @@
     <string name="battery_saver_notification_title" msgid="8614079794522291840">"節約耗電量模式已開啟"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"降低效能並限制背景數據傳輸"</string>
     <string name="battery_saver_notification_action_text" msgid="132118784269455533">"關閉節約耗電量模式"</string>
-    <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> 將開始擷取你的螢幕上顯示的內容。"</string>
+    <string name="media_projection_dialog_text" msgid="1443042478990422751">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> 會開始擷取畫面上的所有內容 (包含通知、密碼、相片、訊息和付款資訊)。"</string>
+    <string name="media_projection_dialog_title" msgid="7574971526813630219">"要允許 <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> 錄製或投放你的畫面嗎？"</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"不要再顯示"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"全部清除"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"管理"</string>
@@ -814,6 +816,9 @@
     <string name="high_temp_title" msgid="4589508026407318374">"手機變熱"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"手機降溫時，部分功能會受限"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"手機會自動嘗試降溫。你仍可繼續使用手機，但是手機的運作速度可能會較慢。\n\n手機降溫完畢後，就會恢復正常的運作速度。"</string>
+    <string name="high_temp_alarm_title" msgid="442812040762745210">"拔除充電器"</string>
+    <string name="high_temp_alarm_notify_message" msgid="1802871059489414932">"為這個裝置充電時發生問題。這可能是因為傳輸線過熱所致，請拔除電源變壓器並採取處理措施。"</string>
+    <string name="high_temp_alarm_help_care_steps" msgid="3631075329318070726">"查看處理步驟"</string>
     <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"向左快速鍵"</string>
     <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"向右快速鍵"</string>
     <string name="lockscreen_unlock_left" msgid="2043092136246951985">"向左快速鍵可一併解鎖裝置"</string>
