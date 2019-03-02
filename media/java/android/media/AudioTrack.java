@@ -17,7 +17,9 @@
 package android.media;
 
 import android.annotation.CallbackExecutor;
+import android.annotation.FloatRange;
 import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
@@ -389,6 +391,14 @@ public class AudioTrack extends PlayerBase
      * Indicates whether the track is intended to play in offload mode.
      */
     private boolean mOffloaded = false;
+    /**
+     * When offloaded track: delay for decoder in frames
+     */
+    private int mOffloadDelayFrames = 0;
+    /**
+     * When offloaded track: padding for decoder in frames
+     */
+    private int mOffloadPaddingFrames = 0;
 
     //--------------------------------
     // Used exclusively by native code
@@ -827,7 +837,7 @@ public class AudioTrack extends PlayerBase
          * @return the same Builder instance.
          * @throws IllegalArgumentException
          */
-        public @NonNull Builder setBufferSizeInBytes(int bufferSizeInBytes)
+        public @NonNull Builder setBufferSizeInBytes(@IntRange(from = 0) int bufferSizeInBytes)
                 throws IllegalArgumentException {
             if (bufferSizeInBytes <= 0) {
                 throw new IllegalArgumentException("Invalid buffer size " + bufferSizeInBytes);
@@ -865,7 +875,7 @@ public class AudioTrack extends PlayerBase
          * @return the same Builder instance.
          * @throws IllegalArgumentException
          */
-        public @NonNull Builder setSessionId(int sessionId)
+        public @NonNull Builder setSessionId(@IntRange(from = 1) int sessionId)
                 throws IllegalArgumentException {
             if ((sessionId != AudioManager.AUDIO_SESSION_ID_GENERATE) && (sessionId < 1)) {
                 throw new IllegalArgumentException("Invalid audio session ID " + sessionId);
@@ -1007,7 +1017,8 @@ public class AudioTrack extends PlayerBase
      * @param paddingInFrames number of frames to be ignored at the end of the stream. A value of 0
      *     of 0 indicates no delay is to be applied.
      */
-    public void setOffloadDelayPadding(int delayInFrames, int paddingInFrames) {
+    public void setOffloadDelayPadding(@IntRange(from = 0) int delayInFrames,
+            @IntRange(from = 0) int paddingInFrames) {
         if (paddingInFrames < 0) {
             throw new IllegalArgumentException("Illegal negative padding");
         }
@@ -1020,7 +1031,45 @@ public class AudioTrack extends PlayerBase
         if (mState == STATE_UNINITIALIZED) {
             throw new IllegalStateException("Uninitialized track");
         }
+        mOffloadDelayFrames = delayInFrames;
+        mOffloadPaddingFrames = paddingInFrames;
         native_set_delay_padding(delayInFrames, paddingInFrames);
+    }
+
+    /**
+     * Return the decoder delay of an offloaded track, expressed in frames, previously set with
+     * {@link #setOffloadDelayPadding(int, int)}, or 0 if it was never modified.
+     * <p>This delay indicates the number of frames to be ignored at the beginning of the stream.
+     * This value can only be queried on a track successfully initialized with
+     * {@link AudioTrack.Builder#setOffloadedPlayback(boolean)}.
+     * @return decoder delay expressed in frames.
+     */
+    public @IntRange(from = 0) int getOffloadDelay() {
+        if (!mOffloaded) {
+            throw new IllegalStateException("Illegal query of delay on non-offloaded track");
+        }
+        if (mState == STATE_UNINITIALIZED) {
+            throw new IllegalStateException("Illegal query of delay on uninitialized track");
+        }
+        return mOffloadDelayFrames;
+    }
+
+    /**
+     * Return the decoder padding of an offloaded track, expressed in frames, previously set with
+     * {@link #setOffloadDelayPadding(int, int)}, or 0 if it was never modified.
+     * <p>This padding indicates the number of frames to be ignored at the end of the stream.
+     * This value can only be queried on a track successfully initialized with
+     * {@link AudioTrack.Builder#setOffloadedPlayback(boolean)}.
+     * @return decoder padding expressed in frames.
+     */
+    public @IntRange(from = 0) int getOffloadPadding() {
+        if (!mOffloaded) {
+            throw new IllegalStateException("Illegal query of padding on non-offloaded track");
+        }
+        if (mState == STATE_UNINITIALIZED) {
+            throw new IllegalStateException("Illegal query of padding on uninitialized track");
+        }
+        return mOffloadPaddingFrames;
     }
 
     /**
@@ -1037,6 +1086,15 @@ public class AudioTrack extends PlayerBase
             throw new IllegalStateException("Uninitialized track");
         }
         native_set_eos();
+    }
+
+    /**
+     * Returns whether the track was built with {@link Builder#setOffloadedPlayback(boolean)} set
+     * to {@code true}.
+     * @return true if the track is using offloaded playback.
+     */
+    public boolean isOffloadedPlayback() {
+        return mOffloaded;
     }
 
     /**
@@ -1491,7 +1549,7 @@ public class AudioTrack extends PlayerBase
      * @return current size in frames of the <code>AudioTrack</code> buffer.
      * @throws IllegalStateException if track is not initialized.
      */
-    public int getBufferSizeInFrames() {
+    public @IntRange (from = 0) int getBufferSizeInFrames() {
         return native_get_buffer_size_frames();
     }
 
@@ -1518,7 +1576,7 @@ public class AudioTrack extends PlayerBase
      *    {@link #ERROR_BAD_VALUE}, {@link #ERROR_INVALID_OPERATION}
      * @throws IllegalStateException if track is not initialized.
      */
-    public int setBufferSizeInFrames(int bufferSizeInFrames) {
+    public int setBufferSizeInFrames(@IntRange (from = 0) int bufferSizeInFrames) {
         if (mDataLoadMode == MODE_STATIC || mState == STATE_UNINITIALIZED) {
             return ERROR_INVALID_OPERATION;
         }
@@ -1547,7 +1605,7 @@ public class AudioTrack extends PlayerBase
      *  @return maximum size in frames of the <code>AudioTrack</code> buffer.
      *  @throws IllegalStateException if track is not initialized.
      */
-    public int getBufferCapacityInFrames() {
+    public @IntRange (from = 0) int getBufferCapacityInFrames() {
         return native_get_buffer_capacity_frames();
     }
 
@@ -2054,7 +2112,7 @@ public class AudioTrack extends PlayerBase
      * @return error code or success, see {@link #SUCCESS}, {@link #ERROR_BAD_VALUE},
      *    {@link #ERROR_INVALID_OPERATION}
      */
-    public int setPlaybackHeadPosition(int positionInFrames) {
+    public int setPlaybackHeadPosition(@IntRange (from = 0) int positionInFrames) {
         if (mDataLoadMode == MODE_STREAM || mState == STATE_UNINITIALIZED ||
                 getPlayState() == PLAYSTATE_PLAYING) {
             return ERROR_INVALID_OPERATION;
@@ -2096,7 +2154,8 @@ public class AudioTrack extends PlayerBase
      * @return error code or success, see {@link #SUCCESS}, {@link #ERROR_BAD_VALUE},
      *    {@link #ERROR_INVALID_OPERATION}
      */
-    public int setLoopPoints(int startInFrames, int endInFrames, int loopCount) {
+    public int setLoopPoints(@IntRange (from = 0) int startInFrames,
+            @IntRange (from = 0) int endInFrames, @IntRange (from = -1) int loopCount) {
         if (mDataLoadMode == MODE_STREAM || mState == STATE_UNINITIALIZED ||
                 getPlayState() == PLAYSTATE_PLAYING) {
             return ERROR_INVALID_OPERATION;
@@ -2849,7 +2908,7 @@ public class AudioTrack extends PlayerBase
      * @return error code or success, see {@link #SUCCESS},
      *    {@link #ERROR_INVALID_OPERATION}, {@link #ERROR}
      */
-    public int setAuxEffectSendLevel(float level) {
+    public int setAuxEffectSendLevel(@FloatRange(from = 0.0) float level) {
         if (mState == STATE_UNINITIALIZED) {
             return ERROR_INVALID_OPERATION;
         }
@@ -3095,21 +3154,21 @@ public class AudioTrack extends PlayerBase
          * gets invalidated by the system to prevent any other offload.
          * @param track the {@link AudioTrack} on which the event happened.
          */
-        public void onTearDown(AudioTrack track) { }
+        public void onTearDown(@NonNull AudioTrack track) { }
         /**
          * Called when all the buffers of an offloaded track that were queued in the audio system
          * (e.g. the combination of the Android audio framework and the device's audio hardware)
          * have been played after {@link AudioTrack#stop()} has been called.
          * @param track the {@link AudioTrack} on which the event happened.
          */
-        public void onPresentationEnded(AudioTrack track) { }
+        public void onPresentationEnded(@NonNull AudioTrack track) { }
         /**
          * Called when more audio data can be written without blocking on an offloaded track.
          * @param track the {@link AudioTrack} on which the event happened.
          * @param sizeInFrames the number of frames available to write without blocking.
          *   Note that the frame size of a compressed stream is 1 byte.
          */
-        public void onDataRequest(AudioTrack track, int sizeInFrames) { }
+        public void onDataRequest(@NonNull AudioTrack track, int sizeInFrames) { }
     }
 
     /**
