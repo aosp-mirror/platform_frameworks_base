@@ -103,8 +103,8 @@ class ZygoteArguments {
     /**
      *
      */
-    boolean mBlastulaPoolEnabled;
-    boolean mBlastulaPoolStatusSpecified = false;
+    boolean mUsapPoolEnabled;
+    boolean mUsapPoolStatusSpecified = false;
 
     /**
      * from all --rlimit=r,c,m
@@ -418,9 +418,9 @@ class ZygoteArguments {
                     throw new IllegalArgumentException("Duplicate arg specified");
                 }
                 mSandboxId = arg.substring(arg.indexOf('=') + 1);
-            } else if (arg.startsWith("--blastula-pool-enabled=")) {
-                mBlastulaPoolStatusSpecified = true;
-                mBlastulaPoolEnabled = Boolean.parseBoolean(arg.substring(arg.indexOf('=') + 1));
+            } else if (arg.startsWith("--usap-pool-enabled=")) {
+                mUsapPoolStatusSpecified = true;
+                mUsapPoolEnabled = Boolean.parseBoolean(arg.substring(arg.indexOf('=') + 1));
                 expectRuntimeArgs = false;
             } else {
                 break;

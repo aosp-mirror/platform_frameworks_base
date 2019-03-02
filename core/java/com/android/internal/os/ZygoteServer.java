@@ -51,39 +51,40 @@ class ZygoteServer {
     public static final String TAG = "ZygoteServer";
 
     /**
-     * The maximim value that will be accepted from the BLASTULA_POOL_SIZE_MAX device property.
-     * is a mirror of BLASTULA_POOL_MAX_LIMIT found in com_android_internal_os_Zygote.cpp.
+     * The maximim value that will be accepted from the USAP_POOL_SIZE_MAX device property.
+     * is a mirror of USAP_POOL_MAX_LIMIT found in com_android_internal_os_Zygote.cpp.
      */
-    private static final int BLASTULA_POOL_SIZE_MAX_LIMIT = 100;
+    private static final int USAP_POOL_SIZE_MAX_LIMIT = 100;
 
     /**
-     * The minimum value that will be accepted from the BLASTULA_POOL_SIZE_MIN device property.
+     * The minimum value that will be accepted from the USAP_POOL_SIZE_MIN device property.
      */
-    private static final int BLASTULA_POOL_SIZE_MIN_LIMIT = 1;
+    private static final int USAP_POOL_SIZE_MIN_LIMIT = 1;
 
-    /** The default value used for the BLASTULA_POOL_SIZE_MAX device property */
-    private static final String BLASTULA_POOL_SIZE_MAX_DEFAULT = "10";
+    /** The default value used for the USAP_POOL_SIZE_MAX device property */
+    private static final String USAP_POOL_SIZE_MAX_DEFAULT = "10";
 
-    /** The default value used for the BLASTULA_POOL_SIZE_MIN device property */
-    private static final String BLASTULA_POOL_SIZE_MIN_DEFAULT = "1";
+    /** The default value used for the USAP_POOL_SIZE_MIN device property */
+    private static final String USAP_POOL_SIZE_MIN_DEFAULT = "1";
 
     /**
-     * Indicates if this Zygote server can support a blastula pool.  Currently this should only be
-     * true for the primary and secondary Zygotes, and not the App Zygotes or the WebView Zygote.
+     * Indicates if this Zygote server can support a unspecialized app process pool.  Currently this
+     * should only be true for the primary and secondary Zygotes, and not the App Zygotes or the
+     * WebView Zygote.
      *
      * TODO (chriswailes): Make this an explicit argument to the constructor
      */
 
-    private final boolean mBlastulaPoolSupported;
+    private final boolean mUsapPoolSupported;
 
     /**
-     * If the blastula pool should be created and used to start applications.
+     * If the unspecialized app process pool should be created and used to start applications.
      *
-     * Setting this value to false will disable the creation, maintenance, and use of the blastula
-     * pool.  When the blastula pool is disabled the application lifecycle will be identical to
+     * Setting this value to false will disable the creation, maintenance, and use of the USAP
+     * pool.  When the USAP pool is disabled the application lifecycle will be identical to
      * previous versions of Android.
      */
-    private boolean mBlastulaPoolEnabled = false;
+    private boolean mUsapPoolEnabled = false;
 
     /**
      * Listening socket that accepts new server connections.
@@ -91,15 +92,15 @@ class ZygoteServer {
     private LocalServerSocket mZygoteSocket;
 
     /**
-     * The name of the blastula socket to use if the blastula pool is enabled.
+     * The name of the unspecialized app process pool socket to use if the USAP pool is enabled.
      */
-    private LocalServerSocket mBlastulaPoolSocket;
+    private LocalServerSocket mUsapPoolSocket;
 
     /**
      * File descriptor used for communication between the signal handler and the ZygoteServer poll
      * loop.
      * */
-    private FileDescriptor mBlastulaPoolEventFD;
+    private FileDescriptor mUsapPoolEventFD;
 
     /**
      * Whether or not mZygoteSocket's underlying FD should be closed directly.
@@ -116,62 +117,61 @@ class ZygoteServer {
     private boolean mIsForkChild;
 
     /**
-     * The runtime-adjustable maximum Blastula pool size.
+     * The runtime-adjustable maximum USAP pool size.
      */
-    private int mBlastulaPoolSizeMax = 0;
+    private int mUsapPoolSizeMax = 0;
 
     /**
-     * The runtime-adjustable minimum Blastula pool size.
+     * The runtime-adjustable minimum USAP pool size.
      */
-    private int mBlastulaPoolSizeMin = 0;
+    private int mUsapPoolSizeMin = 0;
 
     /**
-     * The runtime-adjustable value used to determine when to re-fill the
-     * blastula pool.  The pool will be re-filled when
-     * (sBlastulaPoolMax - gBlastulaPoolCount) >= sBlastulaPoolRefillThreshold.
+     * The runtime-adjustable value used to determine when to re-fill the USAP pool.  The pool will
+     * be re-filled when (mUsapPoolMax - gUsapPoolCount) >= sUsapPoolRefillThreshold.
      */
-    private int mBlastulaPoolRefillThreshold = 0;
+    private int mUsapPoolRefillThreshold = 0;
 
     ZygoteServer() {
-        mBlastulaPoolEventFD = null;
+        mUsapPoolEventFD = null;
         mZygoteSocket = null;
-        mBlastulaPoolSocket = null;
+        mUsapPoolSocket = null;
 
-        mBlastulaPoolSupported = false;
+        mUsapPoolSupported = false;
     }
 
     /**
-     * Initialize the Zygote server with the Zygote server socket, blastula pool server socket,
-     * and blastula pool event FD.
+     * Initialize the Zygote server with the Zygote server socket, USAP pool server socket, and USAP
+     * pool event FD.
      *
      * @param isPrimaryZygote  If this is the primary Zygote or not.
      */
     ZygoteServer(boolean isPrimaryZygote) {
-        mBlastulaPoolEventFD = Zygote.getBlastulaPoolEventFD();
+        mUsapPoolEventFD = Zygote.getUsapPoolEventFD();
 
         if (isPrimaryZygote) {
             mZygoteSocket = Zygote.createManagedSocketFromInitSocket(Zygote.PRIMARY_SOCKET_NAME);
-            mBlastulaPoolSocket =
+            mUsapPoolSocket =
                     Zygote.createManagedSocketFromInitSocket(
-                            Zygote.BLASTULA_POOL_PRIMARY_SOCKET_NAME);
+                            Zygote.USAP_POOL_PRIMARY_SOCKET_NAME);
         } else {
             mZygoteSocket = Zygote.createManagedSocketFromInitSocket(Zygote.SECONDARY_SOCKET_NAME);
-            mBlastulaPoolSocket =
+            mUsapPoolSocket =
                     Zygote.createManagedSocketFromInitSocket(
-                            Zygote.BLASTULA_POOL_SECONDARY_SOCKET_NAME);
+                            Zygote.USAP_POOL_SECONDARY_SOCKET_NAME);
         }
 
-        fetchBlastulaPoolPolicyProps();
+        fetchUsapPoolPolicyProps();
 
-        mBlastulaPoolSupported = true;
+        mUsapPoolSupported = true;
     }
 
     void setForkChild() {
         mIsForkChild = true;
     }
 
-    public boolean isBlastulaPoolEnabled() {
-        return mBlastulaPoolEnabled;
+    public boolean isUsapPoolEnabled() {
+        return mUsapPoolEnabled;
     }
 
     /**
@@ -240,95 +240,95 @@ class ZygoteServer {
         return mZygoteSocket.getFileDescriptor();
     }
 
-    private void fetchBlastulaPoolPolicyProps() {
-        if (mBlastulaPoolSupported) {
-            final String blastulaPoolSizeMaxPropString =
+    private void fetchUsapPoolPolicyProps() {
+        if (mUsapPoolSupported) {
+            final String usapPoolSizeMaxPropString =
                     Zygote.getSystemProperty(
-                            DeviceConfig.RuntimeNative.BLASTULA_POOL_SIZE_MAX,
-                            BLASTULA_POOL_SIZE_MAX_DEFAULT);
+                            DeviceConfig.RuntimeNative.USAP_POOL_SIZE_MAX,
+                            USAP_POOL_SIZE_MAX_DEFAULT);
 
-            if (!blastulaPoolSizeMaxPropString.isEmpty()) {
-                mBlastulaPoolSizeMax =
+            if (!usapPoolSizeMaxPropString.isEmpty()) {
+                mUsapPoolSizeMax =
                         Integer.min(
-                                Integer.parseInt(blastulaPoolSizeMaxPropString),
-                                BLASTULA_POOL_SIZE_MAX_LIMIT);
+                                Integer.parseInt(usapPoolSizeMaxPropString),
+                                USAP_POOL_SIZE_MAX_LIMIT);
             }
 
-            final String blastulaPoolSizeMinPropString =
+            final String usapPoolSizeMinPropString =
                     Zygote.getSystemProperty(
-                            DeviceConfig.RuntimeNative.BLASTULA_POOL_SIZE_MIN,
-                            BLASTULA_POOL_SIZE_MIN_DEFAULT);
+                            DeviceConfig.RuntimeNative.USAP_POOL_SIZE_MIN,
+                            USAP_POOL_SIZE_MIN_DEFAULT);
 
-            if (!blastulaPoolSizeMinPropString.isEmpty()) {
-                mBlastulaPoolSizeMin =
+            if (!usapPoolSizeMinPropString.isEmpty()) {
+                mUsapPoolSizeMin =
                         Integer.max(
-                                Integer.parseInt(blastulaPoolSizeMinPropString),
-                                BLASTULA_POOL_SIZE_MIN_LIMIT);
+                                Integer.parseInt(usapPoolSizeMinPropString),
+                                USAP_POOL_SIZE_MIN_LIMIT);
             }
 
-            final String blastulaPoolRefillThresholdPropString =
+            final String usapPoolRefillThresholdPropString =
                     Zygote.getSystemProperty(
-                            DeviceConfig.RuntimeNative.BLASTULA_POOL_REFILL_THRESHOLD,
-                            Integer.toString(mBlastulaPoolSizeMax / 2));
+                            DeviceConfig.RuntimeNative.USAP_POOL_REFILL_THRESHOLD,
+                            Integer.toString(mUsapPoolSizeMax / 2));
 
-            if (!blastulaPoolRefillThresholdPropString.isEmpty()) {
-                mBlastulaPoolRefillThreshold =
+            if (!usapPoolRefillThresholdPropString.isEmpty()) {
+                mUsapPoolRefillThreshold =
                         Integer.min(
-                                Integer.parseInt(blastulaPoolRefillThresholdPropString),
-                                mBlastulaPoolSizeMax);
+                                Integer.parseInt(usapPoolRefillThresholdPropString),
+                                mUsapPoolSizeMax);
             }
         }
     }
 
     private long mLastPropCheckTimestamp = 0;
 
-    private void fetchBlastulaPoolPolicyPropsWithMinInterval() {
+    private void fetchUsapPoolPolicyPropsWithMinInterval() {
         final long currentTimestamp = SystemClock.elapsedRealtime();
 
         if (currentTimestamp - mLastPropCheckTimestamp >= Zygote.PROPERTY_CHECK_INTERVAL) {
-            fetchBlastulaPoolPolicyProps();
+            fetchUsapPoolPolicyProps();
             mLastPropCheckTimestamp = currentTimestamp;
         }
     }
 
     /**
-     * Checks to see if the current policy says that pool should be refilled, and spawns new
-     * blastulas if necessary.
+     * Checks to see if the current policy says that pool should be refilled, and spawns new USAPs
+     * if necessary.
      *
      * @param sessionSocketRawFDs  Anonymous session sockets that are currently open
-     * @return In the Zygote process this function will always return null; in blastula processes
-     *         this function will return a Runnable object representing the new application that is
-     *         passed up from blastulaMain.
+     * @return In the Zygote process this function will always return null; in unspecialized app
+     *         processes this function will return a Runnable object representing the new
+     *         application that is passed up from usapMain.
      */
 
-    Runnable fillBlastulaPool(int[] sessionSocketRawFDs) {
-        Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "Zygote:FillBlastulaPool");
+    Runnable fillUsapPool(int[] sessionSocketRawFDs) {
+        Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "Zygote:FillUsapPool");
 
-        int blastulaPoolCount = Zygote.getBlastulaPoolCount();
-        int numBlastulasToSpawn = mBlastulaPoolSizeMax - blastulaPoolCount;
+        int usapPoolCount = Zygote.getUsapPoolCount();
+        int numUsapsToSpawn = mUsapPoolSizeMax - usapPoolCount;
 
-        if (blastulaPoolCount < mBlastulaPoolSizeMin
-                || numBlastulasToSpawn >= mBlastulaPoolRefillThreshold) {
+        if (usapPoolCount < mUsapPoolSizeMin
+                || numUsapsToSpawn >= mUsapPoolRefillThreshold) {
 
             // Disable some VM functionality and reset some system values
             // before forking.
             ZygoteHooks.preFork();
             Zygote.resetNicePriority();
 
-            while (blastulaPoolCount++ < mBlastulaPoolSizeMax) {
-                Runnable caller = Zygote.forkBlastula(mBlastulaPoolSocket, sessionSocketRawFDs);
+            while (usapPoolCount++ < mUsapPoolSizeMax) {
+                Runnable caller = Zygote.forkUsap(mUsapPoolSocket, sessionSocketRawFDs);
 
                 if (caller != null) {
                     return caller;
                 }
             }
 
-            // Re-enable runtime services for the Zygote.  Blastula services
-            // are re-enabled in specializeBlastula.
+            // Re-enable runtime services for the Zygote.  Services for unspecialized app process
+            // are re-enabled in specializeAppProcess.
             ZygoteHooks.postForkCommon();
 
             Log.i("zygote",
-                    "Filled the blastula pool. New blastulas: " + numBlastulasToSpawn);
+                    "Filled the USAP pool. New USAPs: " + numUsapsToSpawn);
         }
 
         Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
@@ -337,23 +337,23 @@ class ZygoteServer {
     }
 
     /**
-     * Empty or fill the blastula pool as dictated by the current and new blastula pool statuses.
+     * Empty or fill the USAP pool as dictated by the current and new USAP pool statuses.
      */
-    Runnable setBlastulaPoolStatus(boolean newStatus, LocalSocket sessionSocket) {
-        if (!mBlastulaPoolSupported) {
+    Runnable setUsapPoolStatus(boolean newStatus, LocalSocket sessionSocket) {
+        if (!mUsapPoolSupported) {
             Log.w(TAG,
-                    "Attempting to enable a blastula pool for a Zygote that doesn't support it.");
+                    "Attempting to enable a USAP pool for a Zygote that doesn't support it.");
             return null;
-        } else if (mBlastulaPoolEnabled == newStatus) {
+        } else if (mUsapPoolEnabled == newStatus) {
             return null;
         }
 
-        mBlastulaPoolEnabled = newStatus;
+        mUsapPoolEnabled = newStatus;
 
         if (newStatus) {
-            return fillBlastulaPool(new int[]{ sessionSocket.getFileDescriptor().getInt$() });
+            return fillUsapPool(new int[]{ sessionSocket.getFileDescriptor().getInt$() });
         } else {
-            Zygote.emptyBlastulaPool();
+            Zygote.emptyUsapPool();
             return null;
         }
     }
@@ -371,25 +371,25 @@ class ZygoteServer {
         peers.add(null);
 
         while (true) {
-            fetchBlastulaPoolPolicyPropsWithMinInterval();
+            fetchUsapPoolPolicyPropsWithMinInterval();
 
-            int[] blastulaPipeFDs = null;
+            int[] usapPipeFDs = null;
             StructPollfd[] pollFDs = null;
 
             // Allocate enough space for the poll structs, taking into account
-            // the state of the blastula pool for this Zygote (could be a
+            // the state of the USAP pool for this Zygote (could be a
             // regular Zygote, a WebView Zygote, or an AppZygote).
-            if (mBlastulaPoolEnabled) {
-                blastulaPipeFDs = Zygote.getBlastulaPipeFDs();
-                pollFDs = new StructPollfd[socketFDs.size() + 1 + blastulaPipeFDs.length];
+            if (mUsapPoolEnabled) {
+                usapPipeFDs = Zygote.getUsapPipeFDs();
+                pollFDs = new StructPollfd[socketFDs.size() + 1 + usapPipeFDs.length];
             } else {
                 pollFDs = new StructPollfd[socketFDs.size()];
             }
 
             /*
-             * For reasons of correctness the blastula pool pipe and event FDs
+             * For reasons of correctness the USAP pool pipe and event FDs
              * must be processed before the session and server sockets.  This
-             * is to ensure that the blastula pool accounting information is
+             * is to ensure that the USAP pool accounting information is
              * accurate when handling other requests like API blacklist
              * exemptions.
              */
@@ -402,17 +402,17 @@ class ZygoteServer {
                 ++pollIndex;
             }
 
-            final int blastulaPoolEventFDIndex = pollIndex;
+            final int usapPoolEventFDIndex = pollIndex;
 
-            if (mBlastulaPoolEnabled) {
+            if (mUsapPoolEnabled) {
                 pollFDs[pollIndex] = new StructPollfd();
-                pollFDs[pollIndex].fd = mBlastulaPoolEventFD;
+                pollFDs[pollIndex].fd = mUsapPoolEventFD;
                 pollFDs[pollIndex].events = (short) POLLIN;
                 ++pollIndex;
 
-                for (int blastulaPipeFD : blastulaPipeFDs) {
+                for (int usapPipeFD : usapPipeFDs) {
                     FileDescriptor managedFd = new FileDescriptor();
-                    managedFd.setInt$(blastulaPipeFD);
+                    managedFd.setInt$(usapPipeFD);
 
                     pollFDs[pollIndex] = new StructPollfd();
                     pollFDs[pollIndex].fd = managedFd;
@@ -427,7 +427,7 @@ class ZygoteServer {
                 throw new RuntimeException("poll failed", ex);
             }
 
-            boolean blastulaPoolFDRead = false;
+            boolean usapPoolFDRead = false;
 
             while (--pollIndex >= 0) {
                 if ((pollFDs[pollIndex].revents & POLLIN) == 0) {
@@ -441,7 +441,7 @@ class ZygoteServer {
                     peers.add(newPeer);
                     socketFDs.add(newPeer.getFileDescriptor());
 
-                } else if (pollIndex < blastulaPoolEventFDIndex) {
+                } else if (pollIndex < usapPoolEventFDIndex) {
                     // Session socket accepted from the Zygote server socket
 
                     try {
@@ -502,56 +502,56 @@ class ZygoteServer {
                         mIsForkChild = false;
                     }
                 } else {
-                    // Either the blastula pool event FD or a blastula reporting pipe.
+                    // Either the USAP pool event FD or a USAP reporting pipe.
 
-                    // If this is the event FD the payload will be the number of blastulas removed.
-                    // If this is a reporting pipe FD the payload will be the PID of the blastula
+                    // If this is the event FD the payload will be the number of USAPs removed.
+                    // If this is a reporting pipe FD the payload will be the PID of the USAP
                     // that was just specialized.
                     long messagePayload = -1;
 
                     try {
-                        byte[] buffer = new byte[Zygote.BLASTULA_MANAGEMENT_MESSAGE_BYTES];
+                        byte[] buffer = new byte[Zygote.USAP_MANAGEMENT_MESSAGE_BYTES];
                         int readBytes = Os.read(pollFDs[pollIndex].fd, buffer, 0, buffer.length);
 
-                        if (readBytes == Zygote.BLASTULA_MANAGEMENT_MESSAGE_BYTES) {
+                        if (readBytes == Zygote.USAP_MANAGEMENT_MESSAGE_BYTES) {
                             DataInputStream inputStream =
                                     new DataInputStream(new ByteArrayInputStream(buffer));
 
                             messagePayload = inputStream.readLong();
                         } else {
-                            Log.e(TAG, "Incomplete read from blastula management FD of size "
+                            Log.e(TAG, "Incomplete read from USAP management FD of size "
                                     + readBytes);
                             continue;
                         }
                     } catch (Exception ex) {
-                        if (pollIndex == blastulaPoolEventFDIndex) {
-                            Log.e(TAG, "Failed to read from blastula pool event FD: "
+                        if (pollIndex == usapPoolEventFDIndex) {
+                            Log.e(TAG, "Failed to read from USAP pool event FD: "
                                     + ex.getMessage());
                         } else {
-                            Log.e(TAG, "Failed to read from blastula reporting pipe: "
+                            Log.e(TAG, "Failed to read from USAP reporting pipe: "
                                     + ex.getMessage());
                         }
 
                         continue;
                     }
 
-                    if (pollIndex > blastulaPoolEventFDIndex) {
-                        Zygote.removeBlastulaTableEntry((int) messagePayload);
+                    if (pollIndex > usapPoolEventFDIndex) {
+                        Zygote.removeUsapTableEntry((int) messagePayload);
                     }
 
-                    blastulaPoolFDRead = true;
+                    usapPoolFDRead = true;
                 }
             }
 
-            // Check to see if the blastula pool needs to be refilled.
-            if (blastulaPoolFDRead) {
+            // Check to see if the USAP pool needs to be refilled.
+            if (usapPoolFDRead) {
                 int[] sessionSocketRawFDs =
                         socketFDs.subList(1, socketFDs.size())
                                 .stream()
                                 .mapToInt(fd -> fd.getInt$())
                                 .toArray();
 
-                final Runnable command = fillBlastulaPool(sessionSocketRawFDs);
+                final Runnable command = fillUsapPool(sessionSocketRawFDs);
 
                 if (command != null) {
                     return command;
