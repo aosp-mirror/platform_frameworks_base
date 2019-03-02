@@ -325,7 +325,8 @@
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"Функцията за Wi-Fi е включена"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Няма налични Wi-Fi мрежи"</string>
     <string name="quick_settings_wifi_secondary_label_transient" msgid="7748206246119760554">"Включва се..."</string>
-    <string name="quick_settings_cast_title" msgid="7709016546426454729">"Предаване"</string>
+    <!-- no translation found for quick_settings_cast_title (6954684227605751758) -->
+    <skip />
     <string name="quick_settings_casting" msgid="6601710681033353316">"Предава се"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Устройство без име"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"Готово за предаване"</string>
@@ -437,7 +438,8 @@
     <string name="battery_saver_notification_title" msgid="8614079794522291840">"Режимът за запазване на батерията е включен"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Намалява ефективността и данните на заден план"</string>
     <string name="battery_saver_notification_action_text" msgid="132118784269455533">"Изключване на режима за запазване на батерията"</string>
-    <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ще започне да заснема всичко, което се показва на екрана ви."</string>
+    <string name="media_projection_dialog_text" msgid="1443042478990422751">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ще започне да записва всичко на екрана ви, включително известията, паролите, снимките, съобщенията и данните за плащане."</string>
+    <string name="media_projection_dialog_title" msgid="7574971526813630219">"Да се разреши ли на <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> да записва или предава екрана ви?"</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Да не се показва отново"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Изчистване на всички"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"Управление"</string>
@@ -814,6 +816,9 @@
     <string name="high_temp_title" msgid="4589508026407318374">"Телефонът загрява"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"Някои функции са ограничени, докато телефонът се охлажда"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"Телефонът ви автоматично ще направи опит за охлаждане. Пак можете да го използвате, но той може да работи по-бавно.\n\nСлед като се охлади, ще работи нормално."</string>
+    <string name="high_temp_alarm_title" msgid="442812040762745210">"Изключете зарядното устройство"</string>
+    <string name="high_temp_alarm_notify_message" msgid="1802871059489414932">"При зареждането на това устройство възникна проблем. Изключете захранващия адаптер и внимавайте, тъй като кабелът може да е топъл."</string>
+    <string name="high_temp_alarm_help_care_steps" msgid="3631075329318070726">"Вижте стъпките, които да предприемете"</string>
     <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"Ляв пряк път"</string>
     <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"Десен пряк път"</string>
     <string name="lockscreen_unlock_left" msgid="2043092136246951985">"Левият пряк път също служи за отключване"</string>

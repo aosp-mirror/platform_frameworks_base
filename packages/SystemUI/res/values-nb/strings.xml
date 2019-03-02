@@ -325,7 +325,8 @@
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"Wi-Fi er på"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Ingen tilgjengelige Wi-Fi-nettverk"</string>
     <string name="quick_settings_wifi_secondary_label_transient" msgid="7748206246119760554">"Slår på …"</string>
-    <string name="quick_settings_cast_title" msgid="7709016546426454729">"Cast"</string>
+    <!-- no translation found for quick_settings_cast_title (6954684227605751758) -->
+    <skip />
     <string name="quick_settings_casting" msgid="6601710681033353316">"Casting"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Enhet uten navn"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"Klar til å caste"</string>
@@ -437,7 +438,8 @@
     <string name="battery_saver_notification_title" msgid="8614079794522291840">"Batterisparing er på"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Reduserer ytelsen og begrenser bakgrunnsdataene"</string>
     <string name="battery_saver_notification_action_text" msgid="132118784269455533">"Slå av batterisparing"</string>
-    <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> tar opp alt som vies på skjermen din."</string>
+    <string name="media_projection_dialog_text" msgid="1443042478990422751">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> begynner å ta opp alt på skjermen din, inkludert varsler, passord, bilder, meldinger og betalingsopplysninger."</string>
+    <string name="media_projection_dialog_title" msgid="7574971526813630219">"Vil du tillate at <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> tar opp eller caster skjermen din?"</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Ikke vis igjen"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Fjern alt"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"Administrer"</string>
@@ -814,6 +816,9 @@
     <string name="high_temp_title" msgid="4589508026407318374">"Telefonen begynner å bli varm"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"Enkelte funksjoner er begrenset mens telefonen kjøles ned"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"Telefonen din kommer til å prøve å kjøle seg ned automatisk. Du kan fremdeles bruke telefonen, men den kjører muligens saktere.\n\nTelefonen kommer til å kjøre som normalt, når den har kjølt seg ned."</string>
+    <string name="high_temp_alarm_title" msgid="442812040762745210">"Koble fra laderen"</string>
+    <string name="high_temp_alarm_notify_message" msgid="1802871059489414932">"Det oppsto et problem med lading av enheten. Koble fra strømadapteren, og vær forsiktig, kabelen kan være varm."</string>
+    <string name="high_temp_alarm_help_care_steps" msgid="3631075329318070726">"Se vedlikeholdstrinnene"</string>
     <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"Venstre hurtigtast"</string>
     <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"Høyre hurtigtast"</string>
     <string name="lockscreen_unlock_left" msgid="2043092136246951985">"Venstre hurtigtast låser også opp"</string>

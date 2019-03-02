@@ -329,7 +329,8 @@
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"‏تم تشغيل Wi-Fi"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"‏لا تتوفر أي شبكة Wi-Fi"</string>
     <string name="quick_settings_wifi_secondary_label_transient" msgid="7748206246119760554">"جارٍ التفعيل…"</string>
-    <string name="quick_settings_cast_title" msgid="7709016546426454729">"الإرسال"</string>
+    <!-- no translation found for quick_settings_cast_title (6954684227605751758) -->
+    <skip />
     <string name="quick_settings_casting" msgid="6601710681033353316">"جارٍ الإرسال"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"جهاز لا يحمل اسمًا"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"جاهز للإرسال"</string>
@@ -449,7 +450,8 @@
     <string name="battery_saver_notification_title" msgid="8614079794522291840">"تم تفعيل ميزة توفير شحن البطارية"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"لخفض مستوى الأداء وبيانات الخلفية"</string>
     <string name="battery_saver_notification_action_text" msgid="132118784269455533">"إيقاف ميزة توفير شحن البطارية"</string>
-    <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> سيبدأ التقاط كل شيء يتم عرضه على الشاشة."</string>
+    <string name="media_projection_dialog_text" msgid="1443042478990422751">"سيبدأ <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> في التقاط كل ما يظهر على شاشتك بما في ذلك الإشعارات وكلمات المرور والصور والرسائل ومعلومات الدفع."</string>
+    <string name="media_projection_dialog_title" msgid="7574971526813630219">"هل تريد السماح لـ <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> بتسجيل شاشتك أو إرسال محتواها؟"</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"عدم الإظهار مرة أخرى"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"محو الكل"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"إدارة"</string>
@@ -834,6 +836,9 @@
     <string name="high_temp_title" msgid="4589508026407318374">"تزداد درجة حرارة الهاتف"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"يتم تقييد عمل بعض الميزات إلى أن تنخفض درجة حرارة الهاتف"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"سيحاول الهاتف تخفيض درجة حرارته تلقائيًا. سيظل بإمكانك استخدام هاتفك، ولكن قد يعمل بشكل أبطأ.\n\nبعد أن تنخفض درجة حرارة الهاتف، سيستعيد سرعته المعتادة."</string>
+    <string name="high_temp_alarm_title" msgid="442812040762745210">"فصل الشاحن"</string>
+    <string name="high_temp_alarm_notify_message" msgid="1802871059489414932">"هناك مشكلة في شحن هذا الجهاز. يُرجى فصل محوِّل الطاقة بحرص لأن الكابل قد يكون ساخنًا."</string>
+    <string name="high_temp_alarm_help_care_steps" msgid="3631075329318070726">"الاطّلاع على خطوات العناية"</string>
     <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"اختصار اليسار"</string>
     <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"اختصار اليمين"</string>
     <string name="lockscreen_unlock_left" msgid="2043092136246951985">"اختصار اليسار يلغي أيضًا تأمين"</string>

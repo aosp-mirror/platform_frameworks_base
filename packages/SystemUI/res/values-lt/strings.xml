@@ -327,7 +327,8 @@
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"„Wi-Fi“ įjungtas"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Nėra jokių pasiekiamų „Wi-Fi“ tinklų"</string>
     <string name="quick_settings_wifi_secondary_label_transient" msgid="7748206246119760554">"Įjungiama…"</string>
-    <string name="quick_settings_cast_title" msgid="7709016546426454729">"Perdavimas"</string>
+    <!-- no translation found for quick_settings_cast_title (6954684227605751758) -->
+    <skip />
     <string name="quick_settings_casting" msgid="6601710681033353316">"Perduodama"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Įrenginys be pavadinimo"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"Paruošta perduoti"</string>
@@ -443,7 +444,8 @@
     <string name="battery_saver_notification_title" msgid="8614079794522291840">"Akumuliatoriaus tausojimo priemonė įjungta"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Sumažinamas našumas ir foninių duomenų naudojimas"</string>
     <string name="battery_saver_notification_action_text" msgid="132118784269455533">"Išjungti Akumuliatoriaus tausojimo priemonę"</string>
-    <string name="media_projection_dialog_text" msgid="3071431025448218928">"„<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>“ pradės fiksuoti viską, kas rodoma jūsų ekrane."</string>
+    <string name="media_projection_dialog_text" msgid="1443042478990422751">"„<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>“ pradės fiksuoti visą ekrane rodomą turinį, įskaitant informacinius pranešimus, slaptažodžius, nuotraukas, pranešimus ir mokėjimo informaciją."</string>
+    <string name="media_projection_dialog_title" msgid="7574971526813630219">"Leisti „<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>“ įrašyti arba perduoti ekrano turinį?"</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Daugiau neberodyti"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Viską išvalyti"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"Tvarkyti"</string>
@@ -824,6 +826,9 @@
     <string name="high_temp_title" msgid="4589508026407318374">"Telefonas kaista"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"Kai kurios funkcijos gali neveikti, kol telefonas vėsta"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"Telefonas automatiškai bandys atvėsti. Telefoną vis tiek galėsite naudoti, tačiau jis gali veikti lėčiau.\n\nKai telefonas atvės, jis veiks įprastai."</string>
+    <string name="high_temp_alarm_title" msgid="442812040762745210">"Atjunkite kroviklį"</string>
+    <string name="high_temp_alarm_notify_message" msgid="1802871059489414932">"Įkraunant šį įrenginį iškilo problema. Atjunkite maitinimo adapterį. Būkite atsargūs, nes laidas gali būti įkaitęs."</string>
+    <string name="high_temp_alarm_help_care_steps" msgid="3631075329318070726">"Žr. priežiūros veiksmus"</string>
     <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"Spartusis klavišas kairėje"</string>
     <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"Spartusis klavišas dešinėje"</string>
     <string name="lockscreen_unlock_left" msgid="2043092136246951985">"Spartusis klavišas kairėje taip pat atrakina"</string>

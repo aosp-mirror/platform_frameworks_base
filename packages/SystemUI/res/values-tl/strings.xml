@@ -325,7 +325,8 @@
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"Naka-on Ang Wi-Fi"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Walang available na mga Wi-Fi network"</string>
     <string name="quick_settings_wifi_secondary_label_transient" msgid="7748206246119760554">"Ino-on…"</string>
-    <string name="quick_settings_cast_title" msgid="7709016546426454729">"I-cast"</string>
+    <!-- no translation found for quick_settings_cast_title (6954684227605751758) -->
+    <skip />
     <string name="quick_settings_casting" msgid="6601710681033353316">"Nagka-cast"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Walang pangalang device"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"Handang mag-cast"</string>
@@ -437,7 +438,8 @@
     <string name="battery_saver_notification_title" msgid="8614079794522291840">"Naka-on ang Pangtipid sa Baterya"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Binabawasan ang performance at data sa background"</string>
     <string name="battery_saver_notification_action_text" msgid="132118784269455533">"I-off ang Pangtipid sa Baterya"</string>
-    <string name="media_projection_dialog_text" msgid="3071431025448218928">"Sisimulan ng i-capture ng <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ang lahat ng ipinapakita sa iyong screen."</string>
+    <string name="media_projection_dialog_text" msgid="1443042478990422751">"Magsisimula ang <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> na i-capture ang lahat sa iyong screen kasama ang mga notification, password, larawan, mensahe at impormasyon sa pagbabayad."</string>
+    <string name="media_projection_dialog_title" msgid="7574971526813630219">"Payagan ang <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> na i-record o i-cast ang iyong screen?"</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Huwag ipakitang muli"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"I-clear lahat"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"Pamahalaan"</string>
@@ -814,6 +816,9 @@
     <string name="high_temp_title" msgid="4589508026407318374">"Umiinit ang telepono"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"Limitado ang ilang feature habang nagku-cool down ang telepono"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"Awtomatikong susubukan ng iyong telepono na mag-cool down. Magagamit mo pa rin ang iyong telepono, ngunit maaaring mas mabagal ang paggana nito.\n\nKapag nakapag-cool down na ang iyong telepono, gagana na ito nang normal."</string>
+    <string name="high_temp_alarm_title" msgid="442812040762745210">"Hugutin ang charger"</string>
+    <string name="high_temp_alarm_notify_message" msgid="1802871059489414932">"May isyu sa pag-charge ng device na ito. Hugutin ang power adapter at mag-ingat dahil maaaring mainit ang cable."</string>
+    <string name="high_temp_alarm_help_care_steps" msgid="3631075329318070726">"Tingnan ang mga hakbang sa pangangalaga"</string>
     <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"Kaliwang shortcut"</string>
     <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"Kanang shortcut"</string>
     <string name="lockscreen_unlock_left" msgid="2043092136246951985">"Ina-unlock din ng kaliwang shortcut ang"</string>

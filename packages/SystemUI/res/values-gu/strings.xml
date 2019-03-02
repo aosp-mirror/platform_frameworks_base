@@ -325,7 +325,8 @@
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"વાઇ-ફાઇ ચાલુ"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"કોઈ વાઇ-ફાઇ નેટવર્ક્સ ઉપલબ્ધ નથી"</string>
     <string name="quick_settings_wifi_secondary_label_transient" msgid="7748206246119760554">"ચાલુ કરી રહ્યાં છીએ…"</string>
-    <string name="quick_settings_cast_title" msgid="7709016546426454729">"કાસ્ટ કરો"</string>
+    <!-- no translation found for quick_settings_cast_title (6954684227605751758) -->
+    <skip />
     <string name="quick_settings_casting" msgid="6601710681033353316">"કાસ્ટ કરી રહ્યાં છે"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"અનામાંકિત ઉપકરણ"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"કાસ્ટ કરવા માટે તૈયાર"</string>
@@ -437,7 +438,8 @@
     <string name="battery_saver_notification_title" msgid="8614079794522291840">"બૅટરી સેવર ચાલુ છે"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"પ્રદર્શન અને બૅકગ્રાઉન્ડ ડેટા ઘટાડે છે"</string>
     <string name="battery_saver_notification_action_text" msgid="132118784269455533">"બૅટરી સેવર બંધ કરો"</string>
-    <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> તમારી સ્ક્રીન પર જે પ્રદર્શિત થાય છે તે દરેક વસ્તુને કેપ્ચર કરવાનું પ્રારંભ કરશે."</string>
+    <string name="media_projection_dialog_text" msgid="1443042478990422751">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>, નોટિફિકેશન, પાસવર્ડ, ફોટા, સંદેશા અને ચુકવણીની માહિતી સહિત તમારી સ્ક્રીન પર રહેલી દરેક વસ્તુને કૅપ્ચર કરવાનું શરૂ કરશે."</string>
+    <string name="media_projection_dialog_title" msgid="7574971526813630219">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>ને તમારી સ્ક્રીનને રેકોર્ડ અથવા કાસ્ટ કરવાની મંજૂરી આપીએ?"</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"ફરીથી બતાવશો નહીં"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"બધુ સાફ કરો"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"મેનેજ કરો"</string>
@@ -814,6 +816,9 @@
     <string name="high_temp_title" msgid="4589508026407318374">"ફોન ગરમ થઈ રહ્યો છે"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"ફોન ઠંડો થાય ત્યાં સુધી કેટલીક સુવિધાઓ મર્યાદિત હોય છે"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"તમારો ફોન આપમેળે ઠંડો થવાનો પ્રયાસ કરશે. તમે હજી પણ તમારા ફોનનો ઉપયોગ કરી શકો છો, પરંતુ તે કદાચ થોડો ધીમો ચાલે.\n\nતમારો ફોન ઠંડો થઈ જવા પર, તે સામાન્ય રીતે ચાલશે."</string>
+    <string name="high_temp_alarm_title" msgid="442812040762745210">"ચાર્જરને અનપ્લગ કરો"</string>
+    <string name="high_temp_alarm_notify_message" msgid="1802871059489414932">"આ ડિવાઇસને ચાર્જ કરવામાં કોઈ સમસ્યા છે. પાવર અડૅપ્ટર અનપ્લગ કરો અને કાળજી લેજો કદાચ કેબલ થોડો ગરમ થયો હોઈ શકે છે."</string>
+    <string name="high_temp_alarm_help_care_steps" msgid="3631075329318070726">"સારસંભાળના પગલાં જુઓ"</string>
     <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"ડાબો શૉર્ટકટ"</string>
     <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"જમણો શૉર્ટકટ"</string>
     <string name="lockscreen_unlock_left" msgid="2043092136246951985">"ડાબો શૉર્ટકટ પણ અનલૉક કરે છે"</string>

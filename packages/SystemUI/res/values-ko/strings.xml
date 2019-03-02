@@ -325,7 +325,8 @@
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"Wi-Fi 사용"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"사용 가능한 Wi-Fi 네트워크 없음"</string>
     <string name="quick_settings_wifi_secondary_label_transient" msgid="7748206246119760554">"켜는 중..."</string>
-    <string name="quick_settings_cast_title" msgid="7709016546426454729">"전송"</string>
+    <!-- no translation found for quick_settings_cast_title (6954684227605751758) -->
+    <skip />
     <string name="quick_settings_casting" msgid="6601710681033353316">"전송 중"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"이름이 없는 기기"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"전송 준비 완료"</string>
@@ -437,7 +438,8 @@
     <string name="battery_saver_notification_title" msgid="8614079794522291840">"절전 모드 사용 중"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"성능 및 백그라운드 데이터를 줄입니다."</string>
     <string name="battery_saver_notification_action_text" msgid="132118784269455533">"절전 모드 사용 중지"</string>
-    <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>에서 화면에 표시된 모든 것을 캡처하기 시작합니다."</string>
+    <string name="media_projection_dialog_text" msgid="1443042478990422751">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>이(가) 알림, 비밀번호, 사진, 메시지, 결제 정보를 비롯한 화면의 모든 내용을 캡처하기 시작합니다."</string>
+    <string name="media_projection_dialog_title" msgid="7574971526813630219">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>이(가) 화면을 녹화하거나 전송하도록 허용하시겠습니까?"</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"다시 표시 안함"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"모두 지우기"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"관리"</string>
@@ -814,6 +816,9 @@
     <string name="high_temp_title" msgid="4589508026407318374">"휴대전화 온도가 높음"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"휴대전화 온도를 낮추는 동안 일부 기능이 제한됩니다."</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"휴대전화 온도를 자동으로 낮추려고 시도합니다. 휴대전화를 계속 사용할 수는 있지만 작동이 느려질 수도 있습니다.\n\n휴대전화 온도가 낮아지면 정상적으로 작동됩니다."</string>
+    <string name="high_temp_alarm_title" msgid="442812040762745210">"충전기를 연결 해제하세요"</string>
+    <string name="high_temp_alarm_notify_message" msgid="1802871059489414932">"기기를 충전하는 중에 문제가 발생했습니다. 케이블이 뜨거울 수 있으므로 주의하여 전원 어댑터를 분리하세요."</string>
+    <string name="high_temp_alarm_help_care_steps" msgid="3631075329318070726">"취해야 할 조치 확인"</string>
     <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"왼쪽 바로가기"</string>
     <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"오른쪽 바로가기"</string>
     <string name="lockscreen_unlock_left" msgid="2043092136246951985">"왼쪽 바로가기도 잠금 해제 가능"</string>

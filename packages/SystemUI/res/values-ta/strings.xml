@@ -325,7 +325,8 @@
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"வைஃபை இயக்கத்தில்"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"வைஃபை நெட்வொர்க்குகள் இல்லை"</string>
     <string name="quick_settings_wifi_secondary_label_transient" msgid="7748206246119760554">"ஆன் செய்கிறது…"</string>
-    <string name="quick_settings_cast_title" msgid="7709016546426454729">"Cast"</string>
+    <!-- no translation found for quick_settings_cast_title (6954684227605751758) -->
+    <skip />
     <string name="quick_settings_casting" msgid="6601710681033353316">"அனுப்புகிறது"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"பெயரிடப்படாத சாதனம்"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"திரையிடத் தயார்"</string>
@@ -437,7 +438,10 @@
     <string name="battery_saver_notification_title" msgid="8614079794522291840">"பேட்டரி சேமிப்பான் ஆன் செய்யப்பட்டுள்ளது"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"செயல்திறனையும் பின்புல டேட்டா உபயோகத்தையும் குறைக்கிறது"</string>
     <string name="battery_saver_notification_action_text" msgid="132118784269455533">"பேட்டரி சேமிப்பானை ஆஃப் செய்"</string>
-    <string name="media_projection_dialog_text" msgid="3071431025448218928">"திரையில் காட்டப்படும் அனைத்தையும் <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> படமெடுக்கும்."</string>
+    <!-- no translation found for media_projection_dialog_text (1443042478990422751) -->
+    <skip />
+    <!-- no translation found for media_projection_dialog_title (7574971526813630219) -->
+    <skip />
     <string name="media_projection_remember_text" msgid="3103510882172746752">"மீண்டும் காட்டாதே"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"எல்லாவற்றையும் அழி"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"அறிவிப்புகளை நிர்வகி"</string>
@@ -814,6 +818,10 @@
     <string name="high_temp_title" msgid="4589508026407318374">"மொபைல் சூடாகிறது"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"மொபைலின் வெப்ப அளவு குறையும் போது, சில அம்சங்களைப் பயன்படுத்த முடியாது"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"உங்கள் மொபைலின் வெப்ப அளவு தானாகவே குறையும். தொடர்ந்து நீங்கள் மொபைலைப் பயன்படுத்தலாம், ஆனால் அதன் வேகம் குறைவாக இருக்கக்கூடும்.\n\nமொபைலின் வெப்ப அளவு குறைந்தவுடன், அது இயல்பு நிலையில் இயங்கும்."</string>
+    <string name="high_temp_alarm_title" msgid="442812040762745210">"சார்ஜரைத் துண்டிக்கவும்"</string>
+    <!-- no translation found for high_temp_alarm_notify_message (1802871059489414932) -->
+    <skip />
+    <string name="high_temp_alarm_help_care_steps" msgid="3631075329318070726">"மேலும் விவரங்களுக்கு இதைப் பார்க்கவும்"</string>
     <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"இடப்புற ஷார்ட்கட்"</string>
     <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"வலப்புற ஷார்ட்கட்"</string>
     <string name="lockscreen_unlock_left" msgid="2043092136246951985">"இடப்புற ஷார்ட்கட் மூலமாகவும் திறக்கும்"</string>

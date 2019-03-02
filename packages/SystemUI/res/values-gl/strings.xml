@@ -325,7 +325,8 @@
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"Wifi activada"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Non hai redes wifi dispoñibles"</string>
     <string name="quick_settings_wifi_secondary_label_transient" msgid="7748206246119760554">"Activando…"</string>
-    <string name="quick_settings_cast_title" msgid="7709016546426454729">"Emisión"</string>
+    <!-- no translation found for quick_settings_cast_title (6954684227605751758) -->
+    <skip />
     <string name="quick_settings_casting" msgid="6601710681033353316">"Emitindo"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Dispositivo sen nome"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"Listo para emitir"</string>
@@ -437,7 +438,8 @@
     <string name="battery_saver_notification_title" msgid="8614079794522291840">"A función Aforro de batería está activada"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Reduce o rendemento e os datos en segundo plano"</string>
     <string name="battery_saver_notification_action_text" msgid="132118784269455533">"Desactivar a función Aforro de batería"</string>
-    <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> comezará a capturar todo o que apareza na túa pantalla."</string>
+    <string name="media_projection_dialog_text" msgid="1443042478990422751">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> empezará a capturar todo o que aparece na túa pantalla, incluídas as notificacións, os contrasinais, as fotos, as mensaxes e a información de pago."</string>
+    <string name="media_projection_dialog_title" msgid="7574971526813630219">"Queres permitir que <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> grave ou emita a túa pantalla?"</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Non mostrar outra vez"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Eliminar todas"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"Xestionar"</string>
@@ -814,6 +816,9 @@
     <string name="high_temp_title" msgid="4589508026407318374">"O teléfono está quentando"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"O uso dalgunhas funcións é limitado mentres o teléfono arrefría"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"O teléfono tentará arrefriar automaticamente. Podes utilizalo, pero é probable que funcione máis lento.\n\nUnha vez que arrefríe, funcionará con normalidade."</string>
+    <string name="high_temp_alarm_title" msgid="442812040762745210">"Desconecta o cargador"</string>
+    <string name="high_temp_alarm_notify_message" msgid="1802871059489414932">"Produciuse un problema ao cargar este dispositivo. Desconecta o adaptador de corrente e ten coidado porque o cable pode estar quente."</string>
+    <string name="high_temp_alarm_help_care_steps" msgid="3631075329318070726">"Ver pasos de mantemento"</string>
     <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"Atallo á esquerda"</string>
     <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"Atallo á dereita"</string>
     <string name="lockscreen_unlock_left" msgid="2043092136246951985">"O atallo á esquerda tamén desbloquea o dispositivo"</string>

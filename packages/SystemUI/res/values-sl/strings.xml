@@ -327,7 +327,8 @@
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"Wi-Fi je vklopljen."</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Na voljo ni nobeno omrežje Wi-Fi"</string>
     <string name="quick_settings_wifi_secondary_label_transient" msgid="7748206246119760554">"Vklapljanje …"</string>
-    <string name="quick_settings_cast_title" msgid="7709016546426454729">"Predvajanje"</string>
+    <!-- no translation found for quick_settings_cast_title (6954684227605751758) -->
+    <skip />
     <string name="quick_settings_casting" msgid="6601710681033353316">"Predvajanje"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Neimenovana naprava"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"Pripravljeno za predvajanje"</string>
@@ -443,7 +444,8 @@
     <string name="battery_saver_notification_title" msgid="8614079794522291840">"Varčevanje z energijo akumulatorja je vklopljeno"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Omeji zmogljivost delovanja in prenos podatkov v ozadju"</string>
     <string name="battery_saver_notification_action_text" msgid="132118784269455533">"Izklop varčevanja z energijo akumulatorja"</string>
-    <string name="media_projection_dialog_text" msgid="3071431025448218928">"Aplikacija <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> bo začela zajemati vse, kar je prikazano na zaslonu."</string>
+    <string name="media_projection_dialog_text" msgid="1443042478990422751">"Aplikacija <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> bo začela zajemati vse podatke na zaslonu, vključno z obvestili, gesli, fotografijami, sporočili in podatki o plačilih."</string>
+    <string name="media_projection_dialog_title" msgid="7574971526813630219">"Ali aplikaciji <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> dovolite snemanje ali predvajanje zaslona?"</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Tega ne prikaži več"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Izbriši vse"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"Upravljanje"</string>
@@ -824,6 +826,9 @@
     <string name="high_temp_title" msgid="4589508026407318374">"Telefon se segreva"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"Nekatere funkcije bodo med ohlajanjem omejene."</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"Telefon se bo samodejno poskusil ohladiti. Še naprej ga lahko uporabljate, vendar bo morda deloval počasneje.\n\nKo se telefon ohladi, bo zopet deloval kot običajno."</string>
+    <string name="high_temp_alarm_title" msgid="442812040762745210">"Odklopite polnilnik"</string>
+    <string name="high_temp_alarm_notify_message" msgid="1802871059489414932">"Pri polnjenju te naprave je prišlo do težave. Previdno odklopite napajalnik, ker se je kabel morda segrel."</string>
+    <string name="high_temp_alarm_help_care_steps" msgid="3631075329318070726">"Oglejte si navodila za ukrepanje"</string>
     <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"Leva bližnjica"</string>
     <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"Desna bližnjica"</string>
     <string name="lockscreen_unlock_left" msgid="2043092136246951985">"Levo bližnjico uporabi tudi za odklepanje"</string>

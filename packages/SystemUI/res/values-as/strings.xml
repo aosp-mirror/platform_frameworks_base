@@ -325,7 +325,8 @@
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"ৱাই-ফাই অন হৈ আছে"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"কোনো ৱাই-ফাই নেটৱৰ্ক নাই"</string>
     <string name="quick_settings_wifi_secondary_label_transient" msgid="7748206246119760554">"অন কৰি থকা হৈছে…"</string>
-    <string name="quick_settings_cast_title" msgid="7709016546426454729">"কাষ্ট"</string>
+    <!-- no translation found for quick_settings_cast_title (6954684227605751758) -->
+    <skip />
     <string name="quick_settings_casting" msgid="6601710681033353316">"কাষ্টিং"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"নাম নথকা ডিভাইচ"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"কাষ্টৰ বাবে সাজু"</string>
@@ -437,7 +438,8 @@
     <string name="battery_saver_notification_title" msgid="8614079794522291840">"বেটাৰি সঞ্চয়কাৰী অন হৈ আছে"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"কাৰ্যদক্ষতা আৰু নেপথ্য ডেটা হ্ৰাস কৰে"</string>
     <string name="battery_saver_notification_action_text" msgid="132118784269455533">"বেটাৰি সঞ্চয়কাৰী অফ কৰক"</string>
-    <string name="media_projection_dialog_text" msgid="3071431025448218928">"আপোনাৰ স্ক্ৰীণত প্ৰদৰ্শন হোৱা সকলো <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> কেপশ্বাৰ কৰা আৰম্ভ কৰিব।"</string>
+    <string name="media_projection_dialog_text" msgid="1443042478990422751">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>এ আপোনাৰ স্ক্ৰীণত প্ৰদৰ্শন হোৱা জাননী, পাছৱৰ্ড, ফট’, বাৰ্তা আৰু পৰিশোধ সম্পৰ্কীয় তথ্য আদিকে ধৰি সকলো কেপশ্বাৰ কৰিবলৈ আৰম্ভ কৰিব।"</string>
+    <string name="media_projection_dialog_title" msgid="7574971526813630219">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>ক আপোনাৰ স্ক্ৰীণ ৰেকৰ্ড বা কাষ্ট কৰিবলৈ অনুমতি দিবনে?"</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"পুনৰাই নেদেখুৱাব"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"সকলো মচক"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"পৰিচালনা"</string>
@@ -814,6 +816,9 @@
     <string name="high_temp_title" msgid="4589508026407318374">"ফ\'নটো গৰম হ\'বলৈ ধৰিছে"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"ফ\'নটো ঠাণ্ডা হৈ থকা সময়ত কিছুমান সুবিধা উপলব্ধ নহ’ব"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"আপোনাৰ ফ\'নটোৱে নিজে নিজে ঠাণ্ডা হ\'বলৈ স্বয়ংক্ৰিয়ভাৱে চেষ্টা কৰিব। আপুনি ফ\'নটো ব্যৱহাৰ কৰি থাকিব পাৰে কিন্তু ই লাহে লাহে চলিব পাৰে।\n\nফ\'নটো সম্পূৰ্ণভাৱে ঠাণ্ডা হোৱাৰ পিছত ই আগৰ নিচিনাকৈয়েই চলিব।"</string>
+    <string name="high_temp_alarm_title" msgid="442812040762745210">"চ্চার্জাৰ আনপ্লাগ কৰক"</string>
+    <string name="high_temp_alarm_notify_message" msgid="1802871059489414932">"এই ডিভাইচটো চ্চার্জ কৰোঁতে কিবা সমস্যা হৈছে। পাৱাৰ এডাপ্টাৰটো আনপ্লাগ কৰক, কেব’লডাল গৰম হ’ব পাৰে গতিকে সাবধান হ’ব।"</string>
+    <string name="high_temp_alarm_help_care_steps" msgid="3631075329318070726">"যত্ন লোৱাৰ পদক্ষেপসমূহ চাওক"</string>
     <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"বাওঁ শ্বৰ্টকাট"</string>
     <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"সোঁ শ্বৰ্টকাট"</string>
     <string name="lockscreen_unlock_left" msgid="2043092136246951985">"বাওঁ শ্বৰ্টকাটটোৱেও আনলক কৰিব"</string>
