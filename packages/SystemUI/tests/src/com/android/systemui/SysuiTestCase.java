@@ -23,10 +23,11 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.MessageQueue;
 import android.os.ParcelFileDescriptor;
-import android.support.test.InstrumentationRegistry;
 import android.testing.DexmakerShareClassLoaderRule;
 import android.testing.LeakCheck;
 import android.util.Log;
+
+import androidx.test.InstrumentationRegistry;
 
 import com.android.keyguard.KeyguardUpdateMonitor;
 

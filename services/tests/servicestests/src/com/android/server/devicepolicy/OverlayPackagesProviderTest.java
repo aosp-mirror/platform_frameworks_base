@@ -33,10 +33,11 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.res.Resources;
 import android.os.RemoteException;
-import android.support.test.InstrumentationRegistry;
 import android.test.AndroidTestCase;
 import android.test.mock.MockPackageManager;
 import android.view.inputmethod.InputMethodInfo;
+
+import androidx.test.InstrumentationRegistry;
 
 import com.android.internal.R;
 import com.android.internal.view.IInputMethodManager;

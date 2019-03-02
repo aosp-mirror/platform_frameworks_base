@@ -28,7 +28,7 @@ import android.test.suitebuilder.annotation.SmallTest;
  -w com.android.frameworks.servicestests
 
 
- -w com.android.frameworks.servicestests/android.support.test.runner.AndroidJUnitRunner
+ -w com.android.frameworks.servicestests/androidx.test.runner.AndroidJUnitRunner
  */
 @SmallTest
 public class DevicePolicyConstantsTest extends AndroidTestCase {

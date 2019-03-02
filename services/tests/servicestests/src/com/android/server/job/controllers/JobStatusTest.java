@@ -21,7 +21,8 @@ import static org.junit.Assert.assertEquals;
 import android.app.job.JobInfo;
 import android.content.ComponentName;
 import android.os.SystemClock;
-import android.support.test.runner.AndroidJUnit4;
+
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.job.JobSchedulerService;
 

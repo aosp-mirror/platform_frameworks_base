@@ -20,8 +20,8 @@ import static com.android.systemui.tuner.TunablePadding.FLAG_END;
 import static com.android.systemui.tuner.TunablePadding.FLAG_START;
 
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -36,13 +36,14 @@ import static org.mockito.Mockito.when;
 import android.app.Fragment;
 import android.content.res.Configuration;
 import android.os.Handler;
-import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 import android.view.Display;
 import android.view.View;
 import android.view.WindowManager;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.systemui.R.dimen;
 import com.android.systemui.ScreenDecorations.TunablePaddingTagListener;

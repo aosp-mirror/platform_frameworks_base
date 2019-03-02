@@ -18,16 +18,15 @@ package com.android.systemui.doze;
 
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.IWallpaperManager;
 import android.os.RemoteException;
-import android.support.test.filters.SmallTest;
 
-import com.android.keyguard.KeyguardUpdateMonitor;
+import androidx.test.filters.SmallTest;
+
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.phone.DozeParameters;
 

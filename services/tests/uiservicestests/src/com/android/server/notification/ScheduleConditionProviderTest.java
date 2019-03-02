@@ -10,10 +10,10 @@ import android.net.Uri;
 import android.service.notification.Condition;
 import android.service.notification.ScheduleCalendar;
 import android.service.notification.ZenModeConfig;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.server.UiServiceTestCase;
 

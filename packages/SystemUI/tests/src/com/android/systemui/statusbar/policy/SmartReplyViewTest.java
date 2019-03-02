@@ -33,13 +33,14 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.service.notification.StatusBarNotification;
-import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.keyguard.KeyguardHostView.OnDismissAction;
 import com.android.systemui.R;
@@ -48,14 +49,14 @@ import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.SmartReplyController;
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil;
 
-import java.util.concurrent.atomic.AtomicReference;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.util.concurrent.atomic.AtomicReference;
 
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper

@@ -16,26 +16,25 @@
 
 package com.android.systemui.qs;
 
-import android.content.Context;
-import android.graphics.drawable.Drawable;
-import android.support.test.filters.SmallTest;
-import android.testing.AndroidTestingRunner;
-import android.testing.TestableLooper.RunWithLooper;
-import com.android.systemui.SysuiTestCase;
-import com.android.systemui.plugins.qs.QSTile.SlashState;
-import com.android.systemui.qs.tileimpl.SlashImageView;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.content.Context;
+import android.graphics.drawable.Drawable;
+import android.testing.AndroidTestingRunner;
+import android.testing.TestableLooper.RunWithLooper;
+
+import androidx.test.filters.SmallTest;
+
+import com.android.systemui.SysuiTestCase;
+import com.android.systemui.plugins.qs.QSTile.SlashState;
+import com.android.systemui.qs.tileimpl.SlashImageView;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)

@@ -16,12 +16,17 @@
 
 package com.android.server.pm;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import android.content.pm.UserInfo;
 import android.os.Looper;
 import android.os.UserManagerInternal;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.runner.AndroidJUnit4;
-import android.support.test.filters.MediumTest;
+
+import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.MediumTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.LocalServices;
 
@@ -31,17 +36,13 @@ import org.junit.runner.RunWith;
 
 import java.util.LinkedHashSet;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 /**
  * <p>Run with:<pre>
  * m FrameworksServicesTests &&
  * adb install \
  * -r out/target/product/hammerhead/data/app/FrameworksServicesTests/FrameworksServicesTests.apk &&
  * adb shell am instrument -e class com.android.server.pm.UserManagerServiceIdRecyclingTest \
- * -w com.android.frameworks.servicestests/android.support.test.runner.AndroidJUnitRunner
+ * -w com.android.frameworks.servicestests/androidx.test.runner.AndroidJUnitRunner
  * </pre>
  */
 @RunWith(AndroidJUnit4.class)

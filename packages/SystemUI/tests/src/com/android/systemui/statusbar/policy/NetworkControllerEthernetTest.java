@@ -1,7 +1,8 @@
 package com.android.systemui.statusbar.policy;
 
+import static junit.framework.Assert.assertEquals;
+
 import android.net.NetworkCapabilities;
-import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
@@ -12,8 +13,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
-
-import static junit.framework.Assert.assertEquals;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)

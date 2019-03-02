@@ -29,11 +29,12 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 
 import android.content.Context;
 import android.platform.test.annotations.Presubmit;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.filters.SmallTest;
-import android.support.test.filters.FlakyTest;
-import android.support.test.runner.AndroidJUnit4;
 import android.util.proto.ProtoOutputStream;
+
+import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.FlakyTest;
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.util.Preconditions;
 import com.android.server.wm.WindowManagerTraceProto;

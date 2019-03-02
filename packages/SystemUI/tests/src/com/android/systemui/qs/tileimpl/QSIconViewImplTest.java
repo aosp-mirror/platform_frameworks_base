@@ -21,13 +21,13 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.content.res.ColorStateList;
 import android.graphics.drawable.Drawable;
 import android.service.quicksettings.Tile;
-import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.UiThreadTest;
 import android.widget.ImageView;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.qs.QSTile.Icon;
@@ -36,7 +36,6 @@ import com.android.systemui.plugins.qs.QSTile.State;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentMatcher;
 
 @RunWith(AndroidTestingRunner.class)
 @UiThreadTest

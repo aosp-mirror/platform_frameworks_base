@@ -17,7 +17,8 @@
 package com.android.server.locksettings.recoverablekeystore.certificate;
 
 import android.content.Context;
-import android.support.test.InstrumentationRegistry;
+
+import androidx.test.InstrumentationRegistry;
 
 import com.google.common.io.ByteStreams;
 

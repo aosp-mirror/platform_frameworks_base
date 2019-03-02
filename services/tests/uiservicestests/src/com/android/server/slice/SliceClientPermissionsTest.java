@@ -24,14 +24,15 @@ import static org.mockito.Mockito.verify;
 
 import android.content.ContentResolver;
 import android.net.Uri;
-import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
 import android.util.Xml.Encoding;
 
+import androidx.test.filters.SmallTest;
+
 import com.android.server.UiServiceTestCase;
-import com.android.server.slice.SlicePermissionManager.PkgUser;
 import com.android.server.slice.SliceClientPermissions.SliceAuthority;
+import com.android.server.slice.SlicePermissionManager.PkgUser;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

@@ -37,7 +37,7 @@ import static org.mockito.Mockito.*;
  adb install \
  -r -g ${ANDROID_PRODUCT_OUT}/data/app/FrameworksServicesTests/FrameworksServicesTests.apk &&
  adb shell am instrument -e class com.android.server.pm.ShortcutManagerTest10 \
- -w com.android.frameworks.servicestests/android.support.test.runner.AndroidJUnitRunner
+ -w com.android.frameworks.servicestests/androidx.test.runner.AndroidJUnitRunner
  */
 @SmallTest
 public class ShortcutManagerTest10 extends BaseShortcutManagerTest {

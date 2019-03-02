@@ -19,15 +19,12 @@ package com.android.server.webkit;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.Signature;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.MediumTest;
 import android.util.Base64;
 import android.webkit.UserPackage;
@@ -35,16 +32,16 @@ import android.webkit.WebViewFactory;
 import android.webkit.WebViewProviderInfo;
 import android.webkit.WebViewProviderResponse;
 
+import androidx.test.InstrumentationRegistry;
+import androidx.test.runner.AndroidJUnit4;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import org.mockito.ArgumentMatcher;
-import org.mockito.Mockito;
 import org.mockito.Matchers;
+import org.mockito.Mockito;
 
-import java.lang.Integer;
 import java.util.concurrent.CountDownLatch;
-
 
 /**
  * Tests for WebViewUpdateService

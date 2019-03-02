@@ -19,8 +19,8 @@ package com.android.systemui.statusbar;
 import static android.app.AppOpsManager.OP_CAMERA;
 import static android.app.AppOpsManager.OP_RECORD_AUDIO;
 import static android.app.AppOpsManager.OP_SYSTEM_ALERT_WINDOW;
-
 import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_NEGATIVE;
+
 import static junit.framework.Assert.assertNotNull;
 
 import static org.junit.Assert.assertEquals;
@@ -32,10 +32,10 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.app.INotificationManager;
 import android.app.Notification;
@@ -47,11 +47,12 @@ import android.os.Binder;
 import android.os.Handler;
 import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
-import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.util.ArraySet;
 import android.view.View;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
@@ -63,11 +64,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoRule;
 import org.mockito.junit.MockitoJUnit;
-
-import java.util.HashSet;
-import java.util.Set;
+import org.mockito.junit.MockitoRule;
 
 /**
  * Tests for {@link NotificationGutsManager}.
