@@ -399,6 +399,7 @@
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"Ընդհանուր\nլուռ վիճակը"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"Միայն\nկարևորները"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"Միայն\nզարթուցիչ"</string>
+    <string name="keyguard_indication_charging_time_wireless" msgid="5376059837186496558">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Անլար լիցքավորում (մնացել է <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>)"</string>
     <string name="keyguard_indication_charging_time" msgid="2056340799276374421">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Լիցքավորում (մնացել է <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="7767562163577492332">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Արագ լիցքավորում (մնացել է <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="3769655133567307069">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Դանդաղ լիցքավորում (մնացել է <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
@@ -601,7 +602,7 @@
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"Անջատել"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"Ծանուցումների ընդլայնված կառավարման օգնությամբ կարող եք յուրաքանչյուր հավելվածի ծանուցումների համար նշանակել կարևորության աստիճան՝ 0-5 սահմաններում: \n\n"<b>"5-րդ աստիճան"</b>" \n- Ցուցադրել ծանուցումների ցանկի վերևում \n- Թույլատրել լիաէկրան ընդհատումները \n- Միշտ ցուցադրել կարճ ծանուցումները \n\n"<b>"4-րդ աստիճան"</b>" \n- Արգելել լիաէկրան ընդհատումները \n- Միշտ ցուցադրել կարճ ծանուցումները \n\n"<b>"3-րդ աստիճան"</b>" \n- Արգելել լիաէկրան ընդհատումները \n- Արգելել կարճ ծանուցումների ցուցադրումը \n\n"<b>"2-րդ աստիճան"</b>" \n- Արգելել լիաէկրան ընդհատումները \n- Արգելել կարճ ծանուցումների ցուցադրումը \n- Անջատել ձայնը և թրթռումը \n\n"<b>"1-ին աստիճան"</b>" \n- Արգելել լիաէկրան ընդհատումները \n- Արգելել կարճ ծանուցումների ցուցադրումը \n- Անջատել ձայնը և թրթռումը \n- Չցուցադրել կողպէկրանում և կարգավիճակի գոտում \n- Ցուցադրել ծանուցումների ցանկի ներքևում \n\n"<b>"0-րդ աստիճան"</b>\n"- Արգելափակել հավելվածի բոլոր ծանուցումները"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Ծանուցումներ"</string>
-    <string name="notification_channel_disabled" msgid="344536703863700565">"Դուք այլևս չեք ստանա այս ծանուցումները"</string>
+    <string name="notification_channel_disabled" msgid="344536703863700565">"Այլևս չեք ստանա նման ծանուցումներ"</string>
     <string name="notification_channel_minimized" msgid="1664411570378910931">"Այս ծանուցումները կծալվեն:"</string>
     <string name="inline_blocking_helper" msgid="3055064577771478591">"Դուք սովորաբար փակում եք այս ծանուցումները: \nՇարունակե՞լ ցուցադրել դրանք:"</string>
     <string name="inline_keep_showing" msgid="8945102997083836858">"Ցուցադրե՞լ այս ծանուցումները։"</string>

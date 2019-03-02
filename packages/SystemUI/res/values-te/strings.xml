@@ -46,7 +46,7 @@
     <string name="battery_saver_start_action" msgid="8187820911065797519">"బ్యాటరీ సేవర్‌ను ఆన్ చేయండి"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"సెట్టింగ్‌లు"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
-    <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"స్క్రీన్‌ను స్వయంచాలకంగా తిప్పండి"</string>
+    <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"స్క్రీన్ ఆటో-రొటేట్‌"</string>
     <string name="status_bar_settings_mute_label" msgid="554682549917429396">"మ్యూట్"</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"స్వయంచాలకం"</string>
     <string name="status_bar_settings_notifications" msgid="397146176280905137">"నోటిఫికేషన్‌లు"</string>
@@ -289,7 +289,7 @@
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="4551281899312150640">"ఆన్ చేస్తోంది…"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"ప్రకాశం"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"స్వయంచాలకంగా తిప్పడం"</string>
-    <string name="accessibility_quick_settings_rotation" msgid="4231661040698488779">"స్క్రీన్‌ను స్వయంచాలకంగా తిప్పు"</string>
+    <string name="accessibility_quick_settings_rotation" msgid="4231661040698488779">"స్క్రీన్ ఆటో-రొటేట్‌"</string>
     <string name="accessibility_quick_settings_rotation_value" msgid="8187398200140760213">"<xliff:g id="ID_1">%s</xliff:g> మోడ్"</string>
     <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"తిప్పడం లాక్ చేయబడింది"</string>
     <string name="quick_settings_rotation_locked_portrait_label" msgid="5102691921442135053">"పోర్ట్రెయిట్"</string>
@@ -399,6 +399,7 @@
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"మొత్తం\nనిశ్శబ్దం"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"ప్రాధాన్యమైనవి\nమాత్రమే"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"అలారాలు\nమాత్రమే"</string>
+    <string name="keyguard_indication_charging_time_wireless" msgid="5376059837186496558">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • వైర్‌లెస్‌గా ఛార్జ్ అవుతోంది (పూర్తి కావడానికి <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>)"</string>
     <string name="keyguard_indication_charging_time" msgid="2056340799276374421">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • ఛార్జ్ అవుతోంది (పూర్తి కావడానికి <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="7767562163577492332">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • వేగంగా ఛార్జ్ అవుతోంది (పూర్తి కావడానికి <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="3769655133567307069">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • నెమ్మదిగా ఛార్జ్ అవుతోంది (పూర్తి కావడానికి <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
