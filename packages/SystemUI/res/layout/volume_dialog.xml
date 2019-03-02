@@ -98,5 +98,27 @@
             </FrameLayout>
         </LinearLayout>
 
+        <FrameLayout
+            android:id="@+id/odi_captions"
+            android:layout_width="@dimen/volume_dialog_caption_size"
+            android:layout_height="@dimen/volume_dialog_caption_size"
+            android:layout_marginTop="@dimen/volume_dialog_spacer"
+            android:translationZ="@dimen/volume_dialog_elevation"
+            android:layout_gravity="right"
+            android:clipToPadding="false"
+            android:visibility="gone"
+            android:background="@drawable/rounded_bg_full">
+            <com.android.keyguard.AlphaOptimizedImageButton
+                android:id="@+id/odi_captions_icon"
+                android:src="@drawable/ic_volume_odi_captions_disabled"
+                style="@style/VolumeButtons"
+                android:background="@drawable/rounded_ripple"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:tint="@color/accent_tint_color_selector"
+                android:layout_gravity="center"
+                android:soundEffectsEnabled="false" />
+        </FrameLayout>
+
     </LinearLayout>
 </FrameLayout>
