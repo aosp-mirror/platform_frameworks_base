@@ -196,6 +196,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private static KeyguardUpdateMonitor sInstance;
 
     private final Context mContext;
+    private final boolean mIsPrimaryUser;
     HashMap<Integer, SimData> mSimDatas = new HashMap<Integer, SimData>();
     HashMap<Integer, ServiceState> mServiceStates = new HashMap<Integer, ServiceState>();
 
@@ -242,8 +243,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private boolean mIsDreaming;
     private final DevicePolicyManager mDevicePolicyManager;
     private boolean mLogoutEnabled;
-    private boolean mFingerprintLockedOut;
-    private boolean mFaceLockedOut;
 
     /**
      * Short delay before restarting biometric authentication after a successful try
@@ -648,11 +647,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
             }
         }
 
-        if (msgId == FingerprintManager.FINGERPRINT_ERROR_LOCKOUT
-                || msgId == FingerprintManager.FINGERPRINT_ERROR_LOCKOUT_PERMANENT) {
-            mFingerprintLockedOut = true;
-        }
-
         if (msgId == FingerprintManager.FINGERPRINT_ERROR_LOCKOUT_PERMANENT) {
             mLockPatternUtils.requireStrongAuth(
                     LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_LOCKOUT,
@@ -668,7 +662,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     }
 
     private void handleFingerprintLockoutReset() {
-        mFingerprintLockedOut = false;
         updateFingerprintListeningState();
     }
 
@@ -806,11 +799,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
             }
         }
 
-        if (msgId == FaceManager.FACE_ERROR_LOCKOUT
-                || msgId == FaceManager.FACE_ERROR_LOCKOUT_PERMANENT) {
-            mFaceLockedOut = true;
-        }
-
         if (msgId == FaceManager.FACE_ERROR_LOCKOUT_PERMANENT) {
             mLockPatternUtils.requireStrongAuth(
                     LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_LOCKOUT,
@@ -827,7 +815,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     }
 
     private void handleFaceLockoutReset() {
-        mFaceLockedOut = false;
         updateFaceListeningState();
     }
 
@@ -1530,6 +1517,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
 
         ActivityManagerWrapper.getInstance().registerTaskStackListener(mTaskStackListener);
         mUserManager = context.getSystemService(UserManager.class);
+        mIsPrimaryUser = mUserManager.isPrimaryUser();
         mDevicePolicyManager = context.getSystemService(DevicePolicyManager.class);
         mLogoutEnabled = mDevicePolicyManager.isLogoutEnabled();
         updateAirplaneModeState();
@@ -1608,21 +1596,25 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     }
 
     private boolean shouldListenForFingerprint() {
-        return (mKeyguardIsVisible || !mDeviceInteractive ||
+        // Only listen if this KeyguardUpdateMonitor belongs to the primary user. There is an
+        // instance of KeyguardUpdateMonitor for each user but KeyguardUpdateMonitor is user-aware.
+        final boolean shouldListen = (mKeyguardIsVisible || !mDeviceInteractive ||
                 (mBouncer && !mKeyguardGoingAway) || mGoingToSleep ||
                 shouldListenForFingerprintAssistant() || (mKeyguardOccluded && mIsDreaming))
                 && !mSwitchingUser && !isFingerprintDisabled(getCurrentUser())
-                && !mKeyguardGoingAway && !mFingerprintLockedOut;
+                && !mKeyguardGoingAway && mIsPrimaryUser;
+        return shouldListen;
     }
 
     private boolean shouldListenForFace() {
         final boolean awakeKeyguard = mKeyguardIsVisible && mDeviceInteractive && !mGoingToSleep;
         final int user = getCurrentUser();
-
+        // Only listen if this KeyguardUpdateMonitor belongs to the primary user. There is an
+        // instance of KeyguardUpdateMonitor for each user but KeyguardUpdateMonitor is user-aware.
         return (mBouncer || mAuthInterruptActive || awakeKeyguard || shouldListenForFaceAssistant())
                 && !mSwitchingUser && !getUserCanSkipBouncer(user) && !isFaceDisabled(user)
-                && !mKeyguardGoingAway && !mFaceLockedOut && mFaceSettingEnabledForUser
-                && mUserManager.isUserUnlocked(user);
+                && !mKeyguardGoingAway && mFaceSettingEnabledForUser
+                && mUserManager.isUserUnlocked(user) && mIsPrimaryUser;
     }
 
 
