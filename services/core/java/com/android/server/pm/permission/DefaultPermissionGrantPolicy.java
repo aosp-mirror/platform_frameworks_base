@@ -1473,6 +1473,13 @@ public final class DefaultPermissionGrantPolicy {
                 if (packageExceptions == null) {
                     // The package must be on the system image
                     PackageInfo packageInfo = getSystemPackageInfo(packageName);
+
+                    if (packageInfo == null) {
+                        Log.w(TAG, "No such package:" + packageName);
+                        XmlUtils.skipCurrentTag(parser);
+                        continue;
+                    }
+
                     if (!isSystemPackage(packageInfo)) {
                         Log.w(TAG, "Unknown system package:" + packageName);
                         XmlUtils.skipCurrentTag(parser);
