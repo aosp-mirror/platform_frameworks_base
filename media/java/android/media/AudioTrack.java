@@ -3580,41 +3580,49 @@ public class AudioTrack extends PlayerBase
     {
         private MetricsConstants() {}
 
-        /**
-         * Key to extract the Stream Type for this track
-         * from the {@link AudioTrack#getMetrics} return value.
-         * The value is a String.
-         */
-        public static final String STREAMTYPE = "android.media.audiotrack.streamtype";
+        // MM_PREFIX is slightly different than TAG, used to avoid cut-n-paste errors.
+        private static final String MM_PREFIX = "android.media.audiotrack.";
 
         /**
-         * Key to extract the Content Type for this track
+         * Key to extract the stream type for this track
          * from the {@link AudioTrack#getMetrics} return value.
-         * The value is a String.
+         * This value may not exist in API level {@link android.os.Build.VERSION_CODES#P}.
+         * The value is a {@code String}.
          */
-        public static final String CONTENTTYPE = "android.media.audiotrack.type";
+        public static final String STREAMTYPE = MM_PREFIX + "streamtype";
 
         /**
-         * Key to extract the Content Type for this track
+         * Key to extract the attribute content type for this track
          * from the {@link AudioTrack#getMetrics} return value.
-         * The value is a String.
+         * The value is a {@code String}.
          */
-        public static final String USAGE = "android.media.audiotrack.usage";
+        public static final String CONTENTTYPE = MM_PREFIX + "type";
+
+        /**
+         * Key to extract the attribute usage for this track
+         * from the {@link AudioTrack#getMetrics} return value.
+         * The value is a {@code String}.
+         */
+        public static final String USAGE = MM_PREFIX + "usage";
 
         /**
          * Key to extract the sample rate for this track in Hz
          * from the {@link AudioTrack#getMetrics} return value.
-         * The value is an integer.
+         * The value is an {@code int}.
+         * @deprecated This does not work. Use {@link AudioTrack#getSampleRate()} instead.
          */
+        @Deprecated
         public static final String SAMPLERATE = "android.media.audiorecord.samplerate";
 
         /**
-         * Key to extract the channel mask information for this track
+         * Key to extract the native channel mask information for this track
          * from the {@link AudioTrack#getMetrics} return value.
          *
-         * The value is a Long integer.
+         * The value is a {@code long}.
+         * @deprecated This does not work. Use {@link AudioTrack#getFormat()} and read from
+         * the returned format instead.
          */
+        @Deprecated
         public static final String CHANNELMASK = "android.media.audiorecord.channelmask";
-
     }
 }
