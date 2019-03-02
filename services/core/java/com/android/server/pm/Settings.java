@@ -979,7 +979,7 @@ public final class Settings {
             // Try to revoke as an install permission which is for all users.
             // The package is gone - no need to keep flags for applying policy.
             permissionsState.updatePermissionFlags(bp, userId,
-                    PackageManager.MASK_PERMISSION_FLAGS, 0);
+                    PackageManager.MASK_PERMISSION_FLAGS_ALL, 0);
 
             if (permissionsState.revokeInstallPermission(bp) ==
                     PermissionsState.PERMISSION_OPERATION_SUCCESS_GIDS_CHANGED) {
@@ -2165,7 +2165,7 @@ public final class Settings {
                         XmlUtils.skipCurrentTag(parser);
                     } else {
                         permissionsState.updatePermissionFlags(bp, UserHandle.USER_ALL,
-                                PackageManager.MASK_PERMISSION_FLAGS, flags);
+                                PackageManager.MASK_PERMISSION_FLAGS_ALL, flags);
                     }
                 } else {
                     if (permissionsState.revokeInstallPermission(bp) ==
@@ -2174,7 +2174,7 @@ public final class Settings {
                         XmlUtils.skipCurrentTag(parser);
                     } else {
                         permissionsState.updatePermissionFlags(bp, UserHandle.USER_ALL,
-                                PackageManager.MASK_PERMISSION_FLAGS, flags);
+                                PackageManager.MASK_PERMISSION_FLAGS_ALL, flags);
                     }
                 }
             } else {
@@ -5240,7 +5240,7 @@ public final class Settings {
                 if (bp != null) {
                     permissionsState.revokeRuntimePermission(bp, userId);
                     permissionsState.updatePermissionFlags(bp, userId,
-                            PackageManager.MASK_PERMISSION_FLAGS, 0);
+                            PackageManager.MASK_PERMISSION_FLAGS_ALL, 0);
                 }
             }
         }
@@ -5354,10 +5354,10 @@ public final class Settings {
                         if (granted) {
                             permissionsState.grantRuntimePermission(bp, userId);
                             permissionsState.updatePermissionFlags(bp, userId,
-                                        PackageManager.MASK_PERMISSION_FLAGS, flags);
+                                        PackageManager.MASK_PERMISSION_FLAGS_ALL, flags);
                         } else {
                             permissionsState.updatePermissionFlags(bp, userId,
-                                    PackageManager.MASK_PERMISSION_FLAGS, flags);
+                                    PackageManager.MASK_PERMISSION_FLAGS_ALL, flags);
                         }
 
                     } break;
