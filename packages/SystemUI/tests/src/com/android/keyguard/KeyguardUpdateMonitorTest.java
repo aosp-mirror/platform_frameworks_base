@@ -321,16 +321,6 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     }
 
     @Test
-    public void testNeverAuthenticates_whenFaceLockout() {
-        mKeyguardUpdateMonitor.mFaceAuthenticationCallback
-                .onAuthenticationError(FaceManager.FACE_ERROR_LOCKOUT, "lockout");
-        mKeyguardUpdateMonitor.sendKeyguardBouncerChanged(true);
-        mTestableLooper.processAllMessages();
-
-        verify(mFaceManager, never()).authenticate(any(), any(), anyInt(), any(), any());
-    }
-
-    @Test
     public void testOnFaceAuthenticated_skipsFaceWhenAuthenticated() {
         mKeyguardUpdateMonitor.onFaceAuthenticated(KeyguardUpdateMonitor.getCurrentUser());
         mKeyguardUpdateMonitor.sendKeyguardBouncerChanged(true);

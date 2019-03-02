@@ -243,8 +243,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private boolean mIsDreaming;
     private final DevicePolicyManager mDevicePolicyManager;
     private boolean mLogoutEnabled;
-    private boolean mFingerprintLockedOut;
-    private boolean mFaceLockedOut;
 
     /**
      * Short delay before restarting biometric authentication after a successful try
@@ -649,11 +647,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
             }
         }
 
-        if (msgId == FingerprintManager.FINGERPRINT_ERROR_LOCKOUT
-                || msgId == FingerprintManager.FINGERPRINT_ERROR_LOCKOUT_PERMANENT) {
-            mFingerprintLockedOut = true;
-        }
-
         if (msgId == FingerprintManager.FINGERPRINT_ERROR_LOCKOUT_PERMANENT) {
             mLockPatternUtils.requireStrongAuth(
                     LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_LOCKOUT,
@@ -669,7 +662,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     }
 
     private void handleFingerprintLockoutReset() {
-        mFingerprintLockedOut = false;
         updateFingerprintListeningState();
     }
 
@@ -807,11 +799,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
             }
         }
 
-        if (msgId == FaceManager.FACE_ERROR_LOCKOUT
-                || msgId == FaceManager.FACE_ERROR_LOCKOUT_PERMANENT) {
-            mFaceLockedOut = true;
-        }
-
         if (msgId == FaceManager.FACE_ERROR_LOCKOUT_PERMANENT) {
             mLockPatternUtils.requireStrongAuth(
                     LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_LOCKOUT,
@@ -828,7 +815,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     }
 
     private void handleFaceLockoutReset() {
-        mFaceLockedOut = false;
         updateFaceListeningState();
     }
 
@@ -1616,7 +1602,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                 (mBouncer && !mKeyguardGoingAway) || mGoingToSleep ||
                 shouldListenForFingerprintAssistant() || (mKeyguardOccluded && mIsDreaming))
                 && !mSwitchingUser && !isFingerprintDisabled(getCurrentUser())
-                && !mKeyguardGoingAway && !mFingerprintLockedOut && mIsPrimaryUser;
+                && !mKeyguardGoingAway && mIsPrimaryUser;
         return shouldListen;
     }
 
@@ -1627,9 +1613,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         // instance of KeyguardUpdateMonitor for each user but KeyguardUpdateMonitor is user-aware.
         return (mBouncer || mAuthInterruptActive || awakeKeyguard || shouldListenForFaceAssistant())
                 && !mSwitchingUser && !getUserCanSkipBouncer(user) && !isFaceDisabled(user)
-                && !mKeyguardGoingAway && !mFaceLockedOut && mFaceSettingEnabledForUser
-                && mUserManager.isUserUnlocked(user)
-                && mIsPrimaryUser;
+                && !mKeyguardGoingAway && mFaceSettingEnabledForUser
+                && mUserManager.isUserUnlocked(user) && mIsPrimaryUser;
     }
 
 
