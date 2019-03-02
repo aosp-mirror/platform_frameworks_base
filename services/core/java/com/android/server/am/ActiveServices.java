@@ -2211,7 +2211,7 @@ public final class ActiveServices {
                 return new ServiceLookupResult(null, r.permission);
             } else if (r.permission != null && callingPackage != null) {
                 final int opCode = AppOpsManager.permissionToOpCode(r.permission);
-                if (opCode != AppOpsManager.OP_NONE && mAm.mAppOpsService.noteOperation(
+                if (opCode != AppOpsManager.OP_NONE && mAm.mAppOpsService.checkOperation(
                         opCode, callingUid, callingPackage) != AppOpsManager.MODE_ALLOWED) {
                     Slog.w(TAG, "Appop Denial: Accessing service " + r.shortInstanceName
                             + " from pid=" + callingPid
