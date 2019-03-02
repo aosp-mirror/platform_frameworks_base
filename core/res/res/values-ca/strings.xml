@@ -263,7 +263,7 @@
     <string name="notification_channel_vpn" msgid="8330103431055860618">"Estat de la VPN"</string>
     <string name="notification_channel_device_admin" msgid="1568154104368069249">"Administració del dispositiu"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Alertes"</string>
-    <string name="notification_channel_retail_mode" msgid="6088920674914038779">"Demostració comercial"</string>
+    <string name="notification_channel_retail_mode" msgid="6088920674914038779">"Demostració per a botigues"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"Connexió USB"</string>
     <string name="notification_channel_heavy_weight_app" msgid="6218742927792852607">"S\'està executant una aplicació"</string>
     <string name="notification_channel_foreground_service" msgid="3931987440602669158">"Aplicacions que consumeixen bateria"</string>
@@ -308,15 +308,18 @@
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telèfon"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"fer i gestionar trucades"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"Vols permetre que &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; faci trucades i les gestioni?"</string>
-    <string name="permgrouplab_sensors" msgid="416037179223226722">"Sensors corporals"</string>
+    <!-- no translation found for permgrouplab_sensors (4838614103153567532) -->
+    <skip />
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"accedir a les dades del sensor sobre els signes vitals"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"Vols permetre que &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; accedeixi a les dades del sensor de constants vitals?"</string>
     <string name="permgrouplab_aural" msgid="965607064083134896">"Música"</string>
     <string name="permgroupdesc_aural" msgid="4870189506255958055">"accedir a la teva música"</string>
     <string name="permgrouprequest_aural" msgid="6787926123071735620">"Vols permetre que &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; accedeixi a la teva música?"</string>
-    <string name="permgrouplab_visual" msgid="8030190588123857921">"Fotos i vídeos"</string>
+    <!-- no translation found for permgrouplab_visual (6477382108771145134) -->
+    <skip />
     <string name="permgroupdesc_visual" msgid="3415827902566663546">"accedir a les teves fotos i als teus vídeos"</string>
-    <string name="permgrouprequest_visual" msgid="6907523945030290376">"Vols permetre que &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; accedeixi a les teves fotos i als teus vídeos?"</string>
+    <!-- no translation found for permgrouprequest_visual (3043752127595243314) -->
+    <skip />
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Recuperar el contingut de la finestra"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Inspecciona el contingut d\'una finestra amb què estàs interaccionant."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Activar Exploració tàctil"</string>
@@ -1396,8 +1399,7 @@
     <string name="ext_media_init_action" msgid="7952885510091978278">"Configura"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Expulsa"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"Explora"</string>
-    <!-- no translation found for ext_media_seamless_action (6575980560886881233) -->
-    <skip />
+    <string name="ext_media_seamless_action" msgid="6575980560886881233">"Canvia la sortida"</string>
     <string name="ext_media_missing_title" msgid="620980315821543904">"No es detecta <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_missing_message" msgid="4012389235250987930">"Torna a inserir el dispositiu"</string>
     <string name="ext_media_move_specific_title" msgid="1471100343872375842">"S\'està desplaçant l\'aplicació <xliff:g id="NAME">%s</xliff:g>"</string>
@@ -1611,6 +1613,8 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Superposa #<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g> x <xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", segur"</string>
+    <string name="activity_starter_block_bg_activity_starts_permissive" msgid="5692097903712956720">"A les futures compilacions de Q, es bloquejarà aquest inici d\'activitat en segon pla del paquet <xliff:g id="PACKAGENAME">%1$s</xliff:g>. Ves a go/q-bg-block."</string>
+    <string name="activity_starter_block_bg_activity_starts_enforcing" msgid="8299522481076404353">"S\'ha bloquejat l\'inici d\'activitat en segon pla del paquet <xliff:g id="PACKAGENAME">%1$s</xliff:g>. Ves a go/q-bg-block."</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"He oblidat el patró"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Patró incorrecte"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"Contrasenya incorrecta"</string>
@@ -1996,6 +2000,24 @@
     <string name="dynamic_mode_notification_channel_name" msgid="2348803891571320452">"Notificació d\'informació del mode de rutina"</string>
     <string name="dynamic_mode_notification_title" msgid="508815255807182035">"És possible que la bateria s\'esgoti abans de la càrrega habitual"</string>
     <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"S\'ha activat l\'estalvi de bateria per allargar-ne la durada"</string>
+    <string name="mime_type_folder" msgid="7111951698626315204">"Carpeta"</string>
+    <string name="mime_type_apk" msgid="5518003630972506900">"Aplicació per a Android"</string>
+    <string name="mime_type_generic" msgid="6833871596845900027">"Fitxer"</string>
+    <string name="mime_type_generic_ext" msgid="8450275970061657174">"Fitxer <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
+    <string name="mime_type_audio" msgid="6289777657172050926">"Àudio"</string>
+    <string name="mime_type_audio_ext" msgid="3270880987725816210">"Àudio <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
+    <string name="mime_type_video" msgid="4093025777317307426">"Vídeo"</string>
+    <string name="mime_type_video_ext" msgid="5643771615714173159">"Vídeo <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
+    <string name="mime_type_image" msgid="3144284451605236371">"Imatge"</string>
+    <string name="mime_type_image_ext" msgid="1514613218742736590">"Imatge <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
+    <string name="mime_type_compressed" msgid="1645486037074943257">"Arxiu"</string>
+    <string name="mime_type_compressed_ext" msgid="4232293058067801528">"Arxiu <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
+    <string name="mime_type_document" msgid="1596838147256375966">"Document"</string>
+    <string name="mime_type_document_ext" msgid="6327266601345501281">"Document <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
+    <string name="mime_type_spreadsheet" msgid="2639138255207123557">"Full de càlcul"</string>
+    <string name="mime_type_spreadsheet_ext" msgid="5508653032786106725">"Full de càlcul <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
+    <string name="mime_type_presentation" msgid="6145604688774787357">"Presentació"</string>
+    <string name="mime_type_presentation_ext" msgid="2982650207774823437">"Presentació <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
     <string name="car_loading_profile" msgid="3545132581795684027">"S\'està carregant"</string>
     <plurals name="file_count" formatted="false" msgid="1628600959752419449">
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> i <xliff:g id="COUNT_3">%d</xliff:g> fitxers més</item>

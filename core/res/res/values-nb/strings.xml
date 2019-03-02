@@ -308,15 +308,18 @@
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefon"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"ring og administrer anrop"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"Vil du la &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ringe og administrere telefonsamtaler?"</string>
-    <string name="permgrouplab_sensors" msgid="416037179223226722">"Kroppssensorer"</string>
+    <!-- no translation found for permgrouplab_sensors (4838614103153567532) -->
+    <skip />
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"få tilgang til sensordata om de vitale tegnene dine"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"Vil du gi &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; tilgang til sensordata om de vitale tegnene dine?"</string>
     <string name="permgrouplab_aural" msgid="965607064083134896">"Musikk"</string>
     <string name="permgroupdesc_aural" msgid="4870189506255958055">"få tilgang til musikken din"</string>
     <string name="permgrouprequest_aural" msgid="6787926123071735620">"Vil du gi &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; tilgang til musikken din?"</string>
-    <string name="permgrouplab_visual" msgid="8030190588123857921">"Bilder og videoer"</string>
+    <!-- no translation found for permgrouplab_visual (6477382108771145134) -->
+    <skip />
     <string name="permgroupdesc_visual" msgid="3415827902566663546">"få tilgang til bildene og videoene dine"</string>
-    <string name="permgrouprequest_visual" msgid="6907523945030290376">"Vil du gi &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; tilgang til bildene og videoene dine?"</string>
+    <!-- no translation found for permgrouprequest_visual (3043752127595243314) -->
+    <skip />
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"hente innhold i vinduer"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Appen analyserer innholdet i vinduer du samhandler med."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"slå på berøringsutforsking"</string>
@@ -1396,8 +1399,7 @@
     <string name="ext_media_init_action" msgid="7952885510091978278">"Konfigurer"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Løs ut"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"Utforsk"</string>
-    <!-- no translation found for ext_media_seamless_action (6575980560886881233) -->
-    <skip />
+    <string name="ext_media_seamless_action" msgid="6575980560886881233">"Bytt utenhet"</string>
     <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> mangler"</string>
     <string name="ext_media_missing_message" msgid="4012389235250987930">"Sett inn enheten på nytt"</string>
     <string name="ext_media_move_specific_title" msgid="1471100343872375842">"Flytter <xliff:g id="NAME">%s</xliff:g>"</string>
@@ -1611,6 +1613,8 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Overlegg #<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g> x <xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", sikker"</string>
+    <string name="activity_starter_block_bg_activity_starts_permissive" msgid="5692097903712956720">"Denne bakgrunnsaktiviteten som starter fra <xliff:g id="PACKAGENAME">%1$s</xliff:g>, blir blokkert i fremtidige Q-delversjoner. Se go/q-bg-block."</string>
+    <string name="activity_starter_block_bg_activity_starts_enforcing" msgid="8299522481076404353">"Bakgrunnsaktivitet som starter fra <xliff:g id="PACKAGENAME">%1$s</xliff:g>, er blokkert. Se go/q-bg-block."</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Har du glemt mønsteret?"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Feil mønster"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"Feil passord"</string>
@@ -1996,6 +2000,24 @@
     <string name="dynamic_mode_notification_channel_name" msgid="2348803891571320452">"Varsel med informasjon om rutinemodus"</string>
     <string name="dynamic_mode_notification_title" msgid="508815255807182035">"Batteriet kan gå tomt før den vanlige ladingen"</string>
     <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"Batterisparing er aktivert for å forlenge batterilevetiden"</string>
+    <string name="mime_type_folder" msgid="7111951698626315204">"Mappe"</string>
+    <string name="mime_type_apk" msgid="5518003630972506900">"Android-app"</string>
+    <string name="mime_type_generic" msgid="6833871596845900027">"Fil"</string>
+    <string name="mime_type_generic_ext" msgid="8450275970061657174">"<xliff:g id="EXTENSION">%1$s</xliff:g>-fil"</string>
+    <string name="mime_type_audio" msgid="6289777657172050926">"Lyd"</string>
+    <string name="mime_type_audio_ext" msgid="3270880987725816210">"<xliff:g id="EXTENSION">%1$s</xliff:g>-lyd"</string>
+    <string name="mime_type_video" msgid="4093025777317307426">"Video"</string>
+    <string name="mime_type_video_ext" msgid="5643771615714173159">"<xliff:g id="EXTENSION">%1$s</xliff:g>-video"</string>
+    <string name="mime_type_image" msgid="3144284451605236371">"Bilde"</string>
+    <string name="mime_type_image_ext" msgid="1514613218742736590">"<xliff:g id="EXTENSION">%1$s</xliff:g>-bilde"</string>
+    <string name="mime_type_compressed" msgid="1645486037074943257">"Arkiv"</string>
+    <string name="mime_type_compressed_ext" msgid="4232293058067801528">"<xliff:g id="EXTENSION">%1$s</xliff:g>-arkiv"</string>
+    <string name="mime_type_document" msgid="1596838147256375966">"Dokument"</string>
+    <string name="mime_type_document_ext" msgid="6327266601345501281">"<xliff:g id="EXTENSION">%1$s</xliff:g>-dokument"</string>
+    <string name="mime_type_spreadsheet" msgid="2639138255207123557">"Regneark"</string>
+    <string name="mime_type_spreadsheet_ext" msgid="5508653032786106725">"<xliff:g id="EXTENSION">%1$s</xliff:g>-regneark"</string>
+    <string name="mime_type_presentation" msgid="6145604688774787357">"Presentasjon"</string>
+    <string name="mime_type_presentation_ext" msgid="2982650207774823437">"<xliff:g id="EXTENSION">%1$s</xliff:g>-presentasjon"</string>
     <string name="car_loading_profile" msgid="3545132581795684027">"Laster inn"</string>
     <plurals name="file_count" formatted="false" msgid="1628600959752419449">
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> filer</item>
