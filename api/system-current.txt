@@ -1691,9 +1691,9 @@ package android.content.pm {
   }
 
   public class PermissionGroupInfo extends android.content.pm.PackageItemInfo implements android.os.Parcelable {
-    field @StringRes public int backgroundRequestDetailResourceId;
-    field @StringRes public int backgroundRequestResourceId;
-    field @StringRes public int requestDetailResourceId;
+    field @StringRes public final int backgroundRequestDetailResourceId;
+    field @StringRes public final int backgroundRequestResourceId;
+    field @StringRes public final int requestDetailResourceId;
     field @StringRes public int requestRes;
   }
 
