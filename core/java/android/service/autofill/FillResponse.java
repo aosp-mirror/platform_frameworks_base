@@ -272,7 +272,8 @@ public final class FillResponse implements Parcelable {
          *
          * @see android.app.PendingIntent#getIntentSender()
          */
-        public @NonNull Builder setAuthentication(@NonNull AutofillId[] ids,
+        @NonNull
+        public Builder setAuthentication(@NonNull AutofillId[] ids,
                 @Nullable IntentSender authentication, @Nullable RemoteViews presentation) {
             throwIfDestroyed();
             throwIfDisableAutofillCalled();
@@ -298,6 +299,7 @@ public final class FillResponse implements Parcelable {
          * <p>This is typically used when the service cannot autofill the view; for example, a
          * text field representing the result of a Captcha challenge.
          */
+        @NonNull
         public Builder setIgnoredIds(AutofillId...ids) {
             throwIfDestroyed();
             mIgnoredIds = ids;
@@ -318,7 +320,8 @@ public final class FillResponse implements Parcelable {
          *
          * @return This builder.
          */
-        public @NonNull Builder addDataset(@Nullable Dataset dataset) {
+        @NonNull
+        public Builder addDataset(@Nullable Dataset dataset) {
             throwIfDestroyed();
             throwIfDisableAutofillCalled();
             if (dataset == null) {
@@ -359,6 +362,7 @@ public final class FillResponse implements Parcelable {
          * @param clientState The custom client state.
          * @return This builder.
          */
+        @NonNull
         public Builder setClientState(@Nullable Bundle clientState) {
             throwIfDestroyed();
             throwIfDisableAutofillCalled();
@@ -379,6 +383,7 @@ public final class FillResponse implements Parcelable {
          * already called.
          * @throws NullPointerException if {@code ids} or any element on it is {@code null}.
          */
+        @NonNull
         public Builder setFieldClassificationIds(@NonNull AutofillId... ids) {
             throwIfDestroyed();
             throwIfDisableAutofillCalled();
@@ -398,6 +403,7 @@ public final class FillResponse implements Parcelable {
          *
          * @return This builder.
          */
+        @NonNull
         public Builder setFlags(@FillResponseFlags int flags) {
             throwIfDestroyed();
             mFlags = Preconditions.checkFlagsArgument(flags,
@@ -437,6 +443,7 @@ public final class FillResponse implements Parcelable {
          *       {@link #setSaveInfo(SaveInfo)}, {@link #setClientState(Bundle)}, or
          *       {@link #setFieldClassificationIds(AutofillId...)} was already called.
          */
+        @NonNull
         public Builder disableAutofill(long duration) {
             throwIfDestroyed();
             if (duration <= 0) {
@@ -475,6 +482,7 @@ public final class FillResponse implements Parcelable {
          * already set for this builder.
          */
         // TODO(b/69796626): make it sticky / update javadoc
+        @NonNull
         public Builder setHeader(@NonNull RemoteViews header) {
             throwIfDestroyed();
             throwIfAuthenticationCalled();
@@ -506,6 +514,7 @@ public final class FillResponse implements Parcelable {
          * requires authentication}.
          */
         // TODO(b/69796626): make it sticky / update javadoc
+        @NonNull
         public Builder setFooter(@NonNull RemoteViews footer) {
             throwIfDestroyed();
             throwIfAuthenticationCalled();
@@ -524,6 +533,7 @@ public final class FillResponse implements Parcelable {
          * {@link #setAuthentication(AutofillId[], IntentSender, RemoteViews)
          * requires authentication}.
          */
+        @NonNull
         public Builder setUserData(@NonNull UserData userData) {
             throwIfDestroyed();
             throwIfAuthenticationCalled();
@@ -548,6 +558,7 @@ public final class FillResponse implements Parcelable {
          *
          * @return A built response.
          */
+        @NonNull
         public FillResponse build() {
             throwIfDestroyed();
             if (mAuthentication == null && mDatasets == null && mSaveInfo == null

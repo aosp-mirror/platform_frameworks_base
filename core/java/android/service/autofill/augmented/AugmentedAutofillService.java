@@ -253,6 +253,7 @@ public abstract class AugmentedAutofillService extends Service {
     }
 
     @Override
+    /** @hide */
     protected final void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         if (mAutofillProxies != null) {
             final int size = mAutofillProxies.size();
