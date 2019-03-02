@@ -308,15 +308,18 @@
     <string name="permgrouplab_phone" msgid="5229115638567440675">"ଫୋନ୍‍"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"ଫୋନ୍‍ କଲ୍‍ କରେ ଏବଂ ପରିଚାଳନା କରେ"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;କୁ ଫୋନ୍‍ କଲ୍‍ କରିବାକୁ ତଥା ପରିଚାଳନା କରିବାକୁ ଅନୁମତି ଦେବେ କି?"</string>
-    <string name="permgrouplab_sensors" msgid="416037179223226722">"ବଡୀ ସେନ୍ସର୍"</string>
+    <!-- no translation found for permgrouplab_sensors (4838614103153567532) -->
+    <skip />
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"ଆପଣଙ୍କ ଗୁରୁତପୂର୍ଣ୍ଣ ସଂକେତଗୁଡ଼ିକ ବିଷୟରେ ସେନ୍ସର୍‍ ଡାଟା ଆକ୍ସେସ୍‍ କରେ"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;କୁ ଆପଣଙ୍କ ଗୁରୁତ୍ୱପୂର୍ଣ୍ଣ ଲକ୍ଷଣଗୁଡ଼ିକ ବିଷୟରେ ସେନ୍ସର୍‍ ଡାଟା ଆକ୍ସେସ୍‍ କରିବା ପାଇଁ ଅନୁମତି ଦେବେ କି?"</string>
     <string name="permgrouplab_aural" msgid="965607064083134896">"ସଙ୍ଗୀତ"</string>
     <string name="permgroupdesc_aural" msgid="4870189506255958055">"ଆପଣଙ୍କ ସଙ୍ଗୀତ ଆକ୍ସେସ୍‍ କରନ୍ତୁ"</string>
     <string name="permgrouprequest_aural" msgid="6787926123071735620">"ଆପଣଙ୍କ ସଙ୍ଗୀତକୁ ଆକ୍ସେସ୍‍ କରିବାକୁ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;କୁ ଅନୁମତି ଦେବେ କି?"</string>
-    <string name="permgrouplab_visual" msgid="8030190588123857921">"ଫଟୋ ଏବଂ ଭିଡିଓ"</string>
+    <!-- no translation found for permgrouplab_visual (6477382108771145134) -->
+    <skip />
     <string name="permgroupdesc_visual" msgid="3415827902566663546">"ଆପଣଙ୍କ ଫଟୋ ଏବଂ ଭିଡିଓ ଆକ୍ସେସ୍‍ କରନ୍ତୁ"</string>
-    <string name="permgrouprequest_visual" msgid="6907523945030290376">"ଆପଣଙ୍କ ଫଟୋ ଏବଂ ଭିଡିଓକୁ Allow &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ଆକ୍ସେସ୍‍ କରିବାକୁ ଅନୁମତି ଦେବେ କି?"</string>
+    <!-- no translation found for permgrouprequest_visual (3043752127595243314) -->
+    <skip />
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"ୱିଣ୍ଡୋ କଣ୍ଟେଣ୍ଟ ହାସଲ କରନ୍ତୁ"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"ଆପଣ କାମ କରୁଥିବା ୱିଣ୍ଡୋର କଣ୍ଟେଣ୍ଟକୁ ଯାଞ୍ଚ କରନ୍ତୁ।"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"ସ୍ପର୍ଶ ଦ୍ୱାରା ଏକ୍ସପ୍ଲୋର୍‍ ଅନ୍‍ କରନ୍ତୁ"</string>
@@ -1397,8 +1400,7 @@
     <string name="ext_media_init_action" msgid="7952885510091978278">"ସେଟ୍ ଅପ୍ କରନ୍ତୁ"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"ବାହାର କରନ୍ତୁ"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"ଖୋଜନ୍ତୁ"</string>
-    <!-- no translation found for ext_media_seamless_action (6575980560886881233) -->
-    <skip />
+    <string name="ext_media_seamless_action" msgid="6575980560886881233">"ଆଉଟ୍‌ପୁଟ୍ ସ୍ୱିଚ୍‌ କରନ୍ତୁ"</string>
     <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> ନାହିଁ"</string>
     <string name="ext_media_missing_message" msgid="4012389235250987930">"ଡିଭାଇସ୍‌କୁ ପୁଣି ଭର୍ତ୍ତି କରନ୍ତୁ"</string>
     <string name="ext_media_move_specific_title" msgid="1471100343872375842">"<xliff:g id="NAME">%s</xliff:g> ନିଆଯାଉଛି"</string>
@@ -1612,6 +1614,10 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"ପ୍ରାୟତଃ #<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", ସୁରକ୍ଷିତ"</string>
+    <!-- no translation found for activity_starter_block_bg_activity_starts_permissive (5692097903712956720) -->
+    <skip />
+    <!-- no translation found for activity_starter_block_bg_activity_starts_enforcing (8299522481076404353) -->
+    <skip />
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"ପାଟର୍ନ ଭୁଲି ଯାଇଛନ୍ତି"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"ଭୁଲ ପାଟର୍ନ"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"ଭୁଲ ପାସ୍‌ୱର୍ଡ"</string>
@@ -1997,6 +2003,42 @@
     <string name="dynamic_mode_notification_channel_name" msgid="2348803891571320452">"ନିୟମିତ ମୋଡ୍‍ ସୂଚନା ବିଜ୍ଞପ୍ତି"</string>
     <string name="dynamic_mode_notification_title" msgid="508815255807182035">"ସାଧାରଣ ଭାବରେ ଚାର୍ଜ୍ କରିବା ପୂର୍ବରୁ ବ୍ୟାଟେରୀ ସରିଯାଇପାରେ"</string>
     <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"ବ୍ୟାଟେରୀର ସମୟକୁ ବଢ଼ାଇବା ପାଇଁ ବ୍ୟଟେରୀ ସେଭର୍‍କୁ କାର୍ଯ୍ୟକାରୀ କରାଯାଇଛି"</string>
+    <!-- no translation found for mime_type_folder (7111951698626315204) -->
+    <skip />
+    <!-- no translation found for mime_type_apk (5518003630972506900) -->
+    <skip />
+    <!-- no translation found for mime_type_generic (6833871596845900027) -->
+    <skip />
+    <!-- no translation found for mime_type_generic_ext (8450275970061657174) -->
+    <skip />
+    <!-- no translation found for mime_type_audio (6289777657172050926) -->
+    <skip />
+    <!-- no translation found for mime_type_audio_ext (3270880987725816210) -->
+    <skip />
+    <!-- no translation found for mime_type_video (4093025777317307426) -->
+    <skip />
+    <!-- no translation found for mime_type_video_ext (5643771615714173159) -->
+    <skip />
+    <!-- no translation found for mime_type_image (3144284451605236371) -->
+    <skip />
+    <!-- no translation found for mime_type_image_ext (1514613218742736590) -->
+    <skip />
+    <!-- no translation found for mime_type_compressed (1645486037074943257) -->
+    <skip />
+    <!-- no translation found for mime_type_compressed_ext (4232293058067801528) -->
+    <skip />
+    <!-- no translation found for mime_type_document (1596838147256375966) -->
+    <skip />
+    <!-- no translation found for mime_type_document_ext (6327266601345501281) -->
+    <skip />
+    <!-- no translation found for mime_type_spreadsheet (2639138255207123557) -->
+    <skip />
+    <!-- no translation found for mime_type_spreadsheet_ext (5508653032786106725) -->
+    <skip />
+    <!-- no translation found for mime_type_presentation (6145604688774787357) -->
+    <skip />
+    <!-- no translation found for mime_type_presentation_ext (2982650207774823437) -->
+    <skip />
     <string name="car_loading_profile" msgid="3545132581795684027">"ଲୋଡ୍ ହେଉଛି"</string>
     <plurals name="file_count" formatted="false" msgid="1628600959752419449">
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g>ଟି ଫାଇଲ୍</item>

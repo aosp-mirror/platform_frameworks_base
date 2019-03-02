@@ -274,7 +274,7 @@
     <string name="safeMode" msgid="2788228061547930246">"Mode sécurisé"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Système Android"</string>
     <string name="user_owner_label" msgid="8836124313744349203">"Passer au profil personnel"</string>
-    <string name="managed_profile_label" msgid="8947929265267690522">"Passer au profil professionnel"</string>
+    <string name="managed_profile_label" msgid="8947929265267690522">"Passer au profil pro"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Contacts"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"accéder à vos contacts"</string>
     <string name="permgrouprequest_contacts" msgid="6032805601881764300">"Permettre à &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; d\'accéder à vos contacts ?"</string>
@@ -308,15 +308,18 @@
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Téléphone"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"effectuer et gérer des appels téléphoniques"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"Permettre à &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; de passer et gérer des appels téléphoniques ?"</string>
-    <string name="permgrouplab_sensors" msgid="416037179223226722">"Capteurs corporels"</string>
+    <!-- no translation found for permgrouplab_sensors (4838614103153567532) -->
+    <skip />
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"accéder aux données des capteurs relatives à vos signes vitaux"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"Permettre à &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; d\'accéder aux données des capteurs relatives à vos signes vitaux ?"</string>
     <string name="permgrouplab_aural" msgid="965607064083134896">"Musique"</string>
     <string name="permgroupdesc_aural" msgid="4870189506255958055">"accéder à votre musique"</string>
     <string name="permgrouprequest_aural" msgid="6787926123071735620">"Autoriser &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; à accéder à votre musique ?"</string>
-    <string name="permgrouplab_visual" msgid="8030190588123857921">"Photos et vidéos"</string>
+    <!-- no translation found for permgrouplab_visual (6477382108771145134) -->
+    <skip />
     <string name="permgroupdesc_visual" msgid="3415827902566663546">"accéder à vos photos et vos vidéos"</string>
-    <string name="permgrouprequest_visual" msgid="6907523945030290376">"Autoriser &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; à accéder à vos photos et vidéos ?"</string>
+    <!-- no translation found for permgrouprequest_visual (3043752127595243314) -->
+    <skip />
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Récupérer le contenu d\'une fenêtre"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Inspecte le contenu d\'une fenêtre avec laquelle vous interagissez."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Activer la fonctionnalité Explorer au toucher"</string>
@@ -1396,8 +1399,7 @@
     <string name="ext_media_init_action" msgid="7952885510091978278">"Configurer"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Éjecter"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"Parcourir"</string>
-    <!-- no translation found for ext_media_seamless_action (6575980560886881233) -->
-    <skip />
+    <string name="ext_media_seamless_action" msgid="6575980560886881233">"Changer de sortie"</string>
     <string name="ext_media_missing_title" msgid="620980315821543904">"Mémoire de stockage \"<xliff:g id="NAME">%s</xliff:g>\" manquante"</string>
     <string name="ext_media_missing_message" msgid="4012389235250987930">"Insérez le périphérique"</string>
     <string name="ext_media_move_specific_title" msgid="1471100343872375842">"Transfert de l\'application <xliff:g id="NAME">%s</xliff:g>"</string>
@@ -1611,6 +1613,8 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Superposition n° <xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g> : <xliff:g id="WIDTH">%2$d</xliff:g> x <xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", sécurisé"</string>
+    <string name="activity_starter_block_bg_activity_starts_permissive" msgid="5692097903712956720">"Le démarrage de cette activité en arrière-plan de <xliff:g id="PACKAGENAME">%1$s</xliff:g> sera bloqué dans les prochaines builds Q. Voir go/q-bg-block."</string>
+    <string name="activity_starter_block_bg_activity_starts_enforcing" msgid="8299522481076404353">"Le démarrage de l\'activité en arrière-plan de <xliff:g id="PACKAGENAME">%1$s</xliff:g> a été bloqué. Voir go/q-bg-block."</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"J\'ai oublié le schéma"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Schéma incorrect."</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"Mot de passe incorrect."</string>
@@ -1996,6 +2000,24 @@
     <string name="dynamic_mode_notification_channel_name" msgid="2348803891571320452">"Notification d\'information du mode Routine"</string>
     <string name="dynamic_mode_notification_title" msgid="508815255807182035">"Vous risquez d\'être à court de batterie plus tôt que prévu"</string>
     <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"Économiseur de batterie activé pour prolonger l\'autonomie"</string>
+    <string name="mime_type_folder" msgid="7111951698626315204">"Dossier"</string>
+    <string name="mime_type_apk" msgid="5518003630972506900">"Application Android"</string>
+    <string name="mime_type_generic" msgid="6833871596845900027">"Fichier"</string>
+    <string name="mime_type_generic_ext" msgid="8450275970061657174">"Fichier <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
+    <string name="mime_type_audio" msgid="6289777657172050926">"Audio"</string>
+    <string name="mime_type_audio_ext" msgid="3270880987725816210">"Audio <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
+    <string name="mime_type_video" msgid="4093025777317307426">"Vidéo"</string>
+    <string name="mime_type_video_ext" msgid="5643771615714173159">"Vidéo <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
+    <string name="mime_type_image" msgid="3144284451605236371">"Image"</string>
+    <string name="mime_type_image_ext" msgid="1514613218742736590">"Image <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
+    <string name="mime_type_compressed" msgid="1645486037074943257">"Archive"</string>
+    <string name="mime_type_compressed_ext" msgid="4232293058067801528">"Archive <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
+    <string name="mime_type_document" msgid="1596838147256375966">"Document"</string>
+    <string name="mime_type_document_ext" msgid="6327266601345501281">"Document <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
+    <string name="mime_type_spreadsheet" msgid="2639138255207123557">"Feuille de calcul"</string>
+    <string name="mime_type_spreadsheet_ext" msgid="5508653032786106725">"Feuille de calcul <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
+    <string name="mime_type_presentation" msgid="6145604688774787357">"Présentation"</string>
+    <string name="mime_type_presentation_ext" msgid="2982650207774823437">"Présentation <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
     <string name="car_loading_profile" msgid="3545132581795684027">"Chargement…"</string>
     <plurals name="file_count" formatted="false" msgid="1628600959752419449">
       <item quantity="one"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> fichier</item>

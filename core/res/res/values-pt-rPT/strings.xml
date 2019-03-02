@@ -308,15 +308,15 @@
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telemóvel"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"fazer e gerir chamadas"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"Pretende permitir que a aplicação &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; faça e gira chamadas telefónicas?"</string>
-    <string name="permgrouplab_sensors" msgid="416037179223226722">"Sensores de corpo"</string>
+    <string name="permgrouplab_sensors" msgid="4838614103153567532">"Sensores de corpo"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"aceder a dados do sensor acerca dos seus sinais vitais"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"Pretende permitir que a aplicação &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; aceda aos dados do sensor acerca dos seus sinais vitais?"</string>
     <string name="permgrouplab_aural" msgid="965607064083134896">"Música"</string>
     <string name="permgroupdesc_aural" msgid="4870189506255958055">"aceder à sua música"</string>
     <string name="permgrouprequest_aural" msgid="6787926123071735620">"Pretende permitir que a aplicação &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; aceda à sua música?"</string>
-    <string name="permgrouplab_visual" msgid="8030190588123857921">"Fotos e vídeos"</string>
+    <string name="permgrouplab_visual" msgid="6477382108771145134">"Fotos e vídeos"</string>
     <string name="permgroupdesc_visual" msgid="3415827902566663546">"aceder aos seus vídeos e fotos"</string>
-    <string name="permgrouprequest_visual" msgid="6907523945030290376">"Pretende permitir que a aplicação &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; aceda às suas fotos e vídeos?"</string>
+    <string name="permgrouprequest_visual" msgid="3043752127595243314">"Pretende permitir que a aplicação &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; aceda aos seus vídeos e fotos, incluindo localizações etiquetadas?"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Obter conteúdo da janela"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Inspecionar o conteúdo de uma janela com a qual está a interagir."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Ativar Explorar Através do Toque"</string>
@@ -1396,8 +1396,7 @@
     <string name="ext_media_init_action" msgid="7952885510091978278">"Configurar"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Ejetar"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"Explorar"</string>
-    <!-- no translation found for ext_media_seamless_action (6575980560886881233) -->
-    <skip />
+    <string name="ext_media_seamless_action" msgid="6575980560886881233">"Saída do interruptor"</string>
     <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> em falta"</string>
     <string name="ext_media_missing_message" msgid="4012389235250987930">"Volte a inserir o dispositivo."</string>
     <string name="ext_media_move_specific_title" msgid="1471100343872375842">"A mover <xliff:g id="NAME">%s</xliff:g>"</string>
@@ -1611,6 +1610,8 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Sobreposição #<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> ppp"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", protegido"</string>
+    <string name="activity_starter_block_bg_activity_starts_permissive" msgid="5692097903712956720">"Este início da atividade em segundo plano do pacote <xliff:g id="PACKAGENAME">%1$s</xliff:g> será bloqueado em compilações Q futuras. Aceda a go/q-bg-block."</string>
+    <string name="activity_starter_block_bg_activity_starts_enforcing" msgid="8299522481076404353">"Início da atividade em segundo plano do pacote <xliff:g id="PACKAGENAME">%1$s</xliff:g> bloqueado. Aceda a go/q-bg-block."</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Esqueceu-se da Sequência"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Sequência Incorreta"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"Palavra-passe Incorreta"</string>
@@ -1996,6 +1997,24 @@
     <string name="dynamic_mode_notification_channel_name" msgid="2348803891571320452">"Notificação de informações do Modo rotina"</string>
     <string name="dynamic_mode_notification_title" msgid="508815255807182035">"Pode ficar sem bateria antes do carregamento habitual"</string>
     <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"Poupança de bateria ativada para prolongar a duração da bateria"</string>
+    <string name="mime_type_folder" msgid="7111951698626315204">"Pasta"</string>
+    <string name="mime_type_apk" msgid="5518003630972506900">"Aplicação para Android"</string>
+    <string name="mime_type_generic" msgid="6833871596845900027">"Ficheiro"</string>
+    <string name="mime_type_generic_ext" msgid="8450275970061657174">"Ficheiro <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
+    <string name="mime_type_audio" msgid="6289777657172050926">"Áudio"</string>
+    <string name="mime_type_audio_ext" msgid="3270880987725816210">"Áudio <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
+    <string name="mime_type_video" msgid="4093025777317307426">"Vídeo"</string>
+    <string name="mime_type_video_ext" msgid="5643771615714173159">"Vídeo <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
+    <string name="mime_type_image" msgid="3144284451605236371">"Imagem"</string>
+    <string name="mime_type_image_ext" msgid="1514613218742736590">"Imagem <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
+    <string name="mime_type_compressed" msgid="1645486037074943257">"Arquivo"</string>
+    <string name="mime_type_compressed_ext" msgid="4232293058067801528">"Arquivo <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
+    <string name="mime_type_document" msgid="1596838147256375966">"Documento"</string>
+    <string name="mime_type_document_ext" msgid="6327266601345501281">"Documento <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
+    <string name="mime_type_spreadsheet" msgid="2639138255207123557">"Folha de cálculo"</string>
+    <string name="mime_type_spreadsheet_ext" msgid="5508653032786106725">"Folha de cálculo <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
+    <string name="mime_type_presentation" msgid="6145604688774787357">"Apresentação"</string>
+    <string name="mime_type_presentation_ext" msgid="2982650207774823437">"Apresentação <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
     <string name="car_loading_profile" msgid="3545132581795684027">"A carregar…"</string>
     <plurals name="file_count" formatted="false" msgid="1628600959752419449">
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> ficheiros</item>

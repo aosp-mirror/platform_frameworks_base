@@ -308,15 +308,18 @@
     <string name="permgrouplab_phone" msgid="5229115638567440675">"फ़ोन"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"फ़ोन कॉल करने और उन्हें प्रबंधित करने की अनुमति दें"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; को फ़ोन कॉल करने और उन्हें प्रबंधित करने की अनुमति दें?"</string>
-    <string name="permgrouplab_sensors" msgid="416037179223226722">"शरीर संवेदक"</string>
+    <!-- no translation found for permgrouplab_sensors (4838614103153567532) -->
+    <skip />
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"अपने महत्वपूर्ण संकेतों के बारे में सेंसर डेटा को ऐक्सेस करें"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; को अपने स्वास्थ्य से जुड़ी ज़रूरी जानकारी इस्तेमाल करने की अनुमति देना चाहते हैं?"</string>
     <string name="permgrouplab_aural" msgid="965607064083134896">"संगीत"</string>
     <string name="permgroupdesc_aural" msgid="4870189506255958055">"अपना संगीत संग्रह एक्सेस करने दें"</string>
     <string name="permgrouprequest_aural" msgid="6787926123071735620">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; को अपना संगीत एक्सेस करने दें?"</string>
-    <string name="permgrouplab_visual" msgid="8030190588123857921">"फ़ोटो और वीडियो"</string>
+    <!-- no translation found for permgrouplab_visual (6477382108771145134) -->
+    <skip />
     <string name="permgroupdesc_visual" msgid="3415827902566663546">"अपने फ़ोटो और वीडियो एक्सेस करने दें"</string>
-    <string name="permgrouprequest_visual" msgid="6907523945030290376">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; को अपने फ़ोटो और वीडियो एक्सेस करने दें?"</string>
+    <!-- no translation found for permgrouprequest_visual (3043752127595243314) -->
+    <skip />
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"विंडो की सामग्री वापस पाएं"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"उस विंडो की सामग्री की जाँच करें, जिसका आप इस्तेमाल कर रहे हैं."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"छूकर, किसी चीज़ से जुड़ी जानकारी सुनने की सुविधा चालू करें"</string>
@@ -510,7 +513,7 @@
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"अपना स्‍क्रीन लॉक अक्षम करें"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"ऐप्स को कीलॉक और कोई भी संबद्ध पासवर्ड सुरक्षा अक्षम करने देता है. उदाहरण के लिए, इनकमिंग फ़ोन कॉल प्राप्त करते समय फ़ोन, कीलॉक को अक्षम कर देता है, फिर कॉल समाप्त होने पर कीलॉक को पुन: सक्षम कर देता है."</string>
     <string name="permlab_requestScreenLockComplexity" msgid="7028982116060987169">"जानें कि स्क्रीन लॉक कितना मुश्किल है"</string>
-    <string name="permdesc_requestScreenLockComplexity" msgid="2806396846128185677">"यह मंज़ूरी मिलने के बाद ऐप्लिकेशन जान पाता है कि स्क्रीन लॉक कितना मुश्किल (बहुत ज़्यादा, मध्यम, कम या बिल्कुल नहीं) है. इस स्तर से यह पता चलता है कि स्क्रीन लॉक कितना लंबा या किस तरह का है. ऐप्लिकेशन उपयोगकर्ताओं को यह सुझाव भी दे सकता है कि वे स्क्रीन लॉक को एक तय स्तर तक अपडेट करें. मगर उपयोगकर्ता बेझिझक इसे अनदेखा करके आगे बढ़ सकते हैं. ध्यान दें कि स्क्रीन लॉक को सादे टेक्स्ट में सेव नहीं किया जाता है इसलिए ऐप्लिकेशन को बिल्कुल सही पासवर्ड पता नहीं होता."</string>
+    <string name="permdesc_requestScreenLockComplexity" msgid="2806396846128185677">"यह मंज़ूरी मिलने के बाद ऐप्लिकेशन जान पाता है कि स्क्रीन लॉक कितना मुश्किल (बहुत ज़्यादा, मध्यम, कम या बिल्कुल नहीं) है. इस स्तर से यह पता चलता है कि स्क्रीन लॉक कितना लंबा या किस तरह का है. ऐप्लिकेशन उपयोगकर्ताओं को यह सुझाव भी दे सकता है कि वे स्क्रीन लॉक को एक तय स्तर तक अपडेट करें. हालांकि, उपयोगकर्ता बेझिझक इसे अनदेखा करके आगे बढ़ सकते हैं. ध्यान दें कि स्क्रीन लॉक को सादे टेक्स्ट में सेव नहीं किया जाता है इसलिए ऐप्लिकेशन को बिल्कुल सही पासवर्ड पता नहीं होता."</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"बायोमीट्रिक हार्डवेयर इस्तेमाल करने दें"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"पुष्टि के लिए, ऐप्लिकेशन को बायोमीट्रिक हार्डवेयर इस्तेमाल करने की मंज़ूरी दें"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"उंगली की छाप के लिए हार्डवेयर को प्रबंधित करें"</string>
@@ -536,8 +539,7 @@
     <string name="biometric_error_user_canceled" msgid="2260175018114348727">"प्रमाणीकरण रद्द किया गया"</string>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"पहचान नहीं हो पाई"</string>
     <string name="biometric_error_canceled" msgid="349665227864885880">"प्रमाणीकरण रद्द किया गया"</string>
-    <!-- no translation found for biometric_error_device_not_secured (6583143098363528349) -->
-    <skip />
+    <string name="biometric_error_device_not_secured" msgid="6583143098363528349">"पिन, पैटर्न या पासवर्ड सेट नहीं है"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"आंशिक फ़िंगरप्रिंट की पहचान की गई. कृपया पुनः प्रयास करें."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"फ़िंगरप्रिंट संसाधित नहीं हो सका. कृपया पुन: प्रयास करें."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"फ़िंगरप्रिंट सेंसर गंदा है. कृपया साफ़ करें और फिर कोशिश करें."</string>
@@ -557,8 +559,7 @@
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"बहुत अधिक कोशिशें. फ़िंगरप्रिंट सेंसर अक्षम है."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"पुन: प्रयास करें."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="7654382120628334248">"कोई फ़िंगरप्रिंट रजिस्टर नहीं किया गया है."</string>
-    <!-- no translation found for fingerprint_error_hw_not_present (409523969613176352) -->
-    <skip />
+    <string name="fingerprint_error_hw_not_present" msgid="409523969613176352">"इस डिवाइस में फ़िंगरप्रिंट सेंसर नहीं है."</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"फ़िंगरप्रिंट <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -578,22 +579,14 @@
     <string name="face_acquired_too_left" msgid="2712489669456176505">"कृपया डिवाइस को चेहरे के बाईं ओर ले जाएं."</string>
     <string name="face_acquired_poor_gaze" msgid="8344973502980415859">"कृपया सेंसर की ओर देखें."</string>
     <string name="face_acquired_not_detected" msgid="5707782294589511391">"चेहरे की पहचान नहीं हो पाई."</string>
-    <!-- no translation found for face_acquired_too_much_motion (470381210701463822) -->
-    <skip />
-    <!-- no translation found for face_acquired_recalibrate (8077949502893707539) -->
-    <skip />
-    <!-- no translation found for face_acquired_too_different (5553210341111255124) -->
-    <skip />
-    <!-- no translation found for face_acquired_too_similar (1508776858407646460) -->
-    <skip />
-    <!-- no translation found for face_acquired_pan_too_extreme (8203001424525231680) -->
-    <skip />
-    <!-- no translation found for face_acquired_tilt_too_extreme (7641326344460439970) -->
-    <skip />
-    <!-- no translation found for face_acquired_roll_too_extreme (1444829237745898619) -->
-    <skip />
-    <!-- no translation found for face_acquired_obscured (3055077697850272097) -->
-    <skip />
+    <string name="face_acquired_too_much_motion" msgid="470381210701463822">"डिवाइस बहुत ज़्यादा हिल रहा है."</string>
+    <string name="face_acquired_recalibrate" msgid="8077949502893707539">"कृपया फिर से अपने चेहरे की पहचान कराएं."</string>
+    <string name="face_acquired_too_different" msgid="5553210341111255124">"यह चेहरा किसी और का है."</string>
+    <string name="face_acquired_too_similar" msgid="1508776858407646460">"चेहरा काफ़ी मिलता-जुलता है, कृपया अपना पोज़ बदलें."</string>
+    <string name="face_acquired_pan_too_extreme" msgid="8203001424525231680">"कृपया कैमरे की तरफ़ सीधा देखें."</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="7641326344460439970">"कृपया कैमरे की तरफ़ सीधा देखें."</string>
+    <string name="face_acquired_roll_too_extreme" msgid="1444829237745898619">"कृपया अपना सिर सीधा करें, दाएं-बाएं न झुकाएं"</string>
+    <string name="face_acquired_obscured" msgid="3055077697850272097">"चेहरा साफ़ नहीं दिख रहा. कृपया रोशनी बढ़ाएं."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="6255891785768984615">"चेहरे की पहचान करने वाला हार्डवेयर मौजूद नहीं है."</string>
@@ -605,8 +598,7 @@
     <string name="face_error_lockout_permanent" msgid="8198354656746088890">"कई बार कोशिश की. चेहरा पहचानने की सुविधा बंद हुई."</string>
     <string name="face_error_unable_to_process" msgid="238761109287767270">"फिर से कोशिश करें."</string>
     <string name="face_error_not_enrolled" msgid="9166792142679691323">"कोई चेहरा रजिस्टर नहीं किया गया है."</string>
-    <!-- no translation found for face_error_hw_not_present (916085883581450331) -->
-    <skip />
+    <string name="face_error_hw_not_present" msgid="916085883581450331">"इस डिवाइस में चेहरे की पहचान करने वाला सेंसर नहीं है."</string>
     <string name="face_name_template" msgid="7004562145809595384">"चेहरा <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1407,8 +1399,7 @@
     <string name="ext_media_init_action" msgid="7952885510091978278">"सेट करें"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"निकालें"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"एक्सप्लोर करें"</string>
-    <!-- no translation found for ext_media_seamless_action (6575980560886881233) -->
-    <skip />
+    <string name="ext_media_seamless_action" msgid="6575980560886881233">"आउटपुट बदलें"</string>
     <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> गुम है"</string>
     <string name="ext_media_missing_message" msgid="4012389235250987930">"डिवाइस को दोबारा लगाएं"</string>
     <string name="ext_media_move_specific_title" msgid="1471100343872375842">"<xliff:g id="NAME">%s</xliff:g> को ले जाया जा रहा है"</string>
@@ -1622,6 +1613,10 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"ओवरले #<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", सुरक्षित"</string>
+    <!-- no translation found for activity_starter_block_bg_activity_starts_permissive (5692097903712956720) -->
+    <skip />
+    <!-- no translation found for activity_starter_block_bg_activity_starts_enforcing (8299522481076404353) -->
+    <skip />
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"आकार भूल गए"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"गलत पैटर्न डाला गया है"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"गलत पासवर्ड"</string>
@@ -2007,6 +2002,42 @@
     <string name="dynamic_mode_notification_channel_name" msgid="2348803891571320452">"रूटीन मोड जानकारी की सूचना"</string>
     <string name="dynamic_mode_notification_title" msgid="508815255807182035">"बैटरी आम तौर पर जितने समय चलती है, उससे पहले खत्म हो सकती है"</string>
     <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"बैटरी लाइफ़ बढ़ाने के लिए \'बैटरी सेवर\' चालू हो गया है"</string>
+    <!-- no translation found for mime_type_folder (7111951698626315204) -->
+    <skip />
+    <!-- no translation found for mime_type_apk (5518003630972506900) -->
+    <skip />
+    <!-- no translation found for mime_type_generic (6833871596845900027) -->
+    <skip />
+    <!-- no translation found for mime_type_generic_ext (8450275970061657174) -->
+    <skip />
+    <!-- no translation found for mime_type_audio (6289777657172050926) -->
+    <skip />
+    <!-- no translation found for mime_type_audio_ext (3270880987725816210) -->
+    <skip />
+    <!-- no translation found for mime_type_video (4093025777317307426) -->
+    <skip />
+    <!-- no translation found for mime_type_video_ext (5643771615714173159) -->
+    <skip />
+    <!-- no translation found for mime_type_image (3144284451605236371) -->
+    <skip />
+    <!-- no translation found for mime_type_image_ext (1514613218742736590) -->
+    <skip />
+    <!-- no translation found for mime_type_compressed (1645486037074943257) -->
+    <skip />
+    <!-- no translation found for mime_type_compressed_ext (4232293058067801528) -->
+    <skip />
+    <!-- no translation found for mime_type_document (1596838147256375966) -->
+    <skip />
+    <!-- no translation found for mime_type_document_ext (6327266601345501281) -->
+    <skip />
+    <!-- no translation found for mime_type_spreadsheet (2639138255207123557) -->
+    <skip />
+    <!-- no translation found for mime_type_spreadsheet_ext (5508653032786106725) -->
+    <skip />
+    <!-- no translation found for mime_type_presentation (6145604688774787357) -->
+    <skip />
+    <!-- no translation found for mime_type_presentation_ext (2982650207774823437) -->
+    <skip />
     <string name="car_loading_profile" msgid="3545132581795684027">"प्राेफ़ाइल लोड हो रही है"</string>
     <plurals name="file_count" formatted="false" msgid="1628600959752419449">
       <item quantity="one"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> फ़ाइलें</item>

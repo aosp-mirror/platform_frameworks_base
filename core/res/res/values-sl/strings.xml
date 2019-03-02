@@ -314,15 +314,18 @@
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefon"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"opravljanje in upravljanje telefonskih klicev"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"Želite aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; omogočiti opravljanje in upravljanje telefonskih klicev?"</string>
-    <string name="permgrouplab_sensors" msgid="416037179223226722">"Tipala telesnih funkcij"</string>
+    <!-- no translation found for permgrouplab_sensors (4838614103153567532) -->
+    <skip />
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"dostop do podatkov tipala o vaših vitalnih znakih"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"Želite aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; omogočiti dostop do podatkov tipala o vitalnih znakih?"</string>
     <string name="permgrouplab_aural" msgid="965607064083134896">"Glasba"</string>
     <string name="permgroupdesc_aural" msgid="4870189506255958055">"dostop do glasbe"</string>
     <string name="permgrouprequest_aural" msgid="6787926123071735620">"Želite aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; omogočiti dostop do glasbe?"</string>
-    <string name="permgrouplab_visual" msgid="8030190588123857921">"Fotografije in videoposnetki"</string>
+    <!-- no translation found for permgrouplab_visual (6477382108771145134) -->
+    <skip />
     <string name="permgroupdesc_visual" msgid="3415827902566663546">"dostop do fotografij in videoposnetkov"</string>
-    <string name="permgrouprequest_visual" msgid="6907523945030290376">"Želite aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; omogočiti dostop do fotografij in videoposnetkov?"</string>
+    <!-- no translation found for permgrouprequest_visual (3043752127595243314) -->
+    <skip />
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Pridobiti vsebino okna"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Preverjanje vsebine okna, ki ga uporabljate."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Vklopiti raziskovanje z dotikom"</string>
@@ -1440,8 +1443,7 @@
     <string name="ext_media_init_action" msgid="7952885510091978278">"Nastavi"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Izvrzite"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"Raziščite"</string>
-    <!-- no translation found for ext_media_seamless_action (6575980560886881233) -->
-    <skip />
+    <string name="ext_media_seamless_action" msgid="6575980560886881233">"Preklopite izhod"</string>
     <string name="ext_media_missing_title" msgid="620980315821543904">"Ni shrambe <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_missing_message" msgid="4012389235250987930">"Znova vstavite napravo"</string>
     <string name="ext_media_move_specific_title" msgid="1471100343872375842">"Premikanje aplikacije <xliff:g id="NAME">%s</xliff:g>"</string>
@@ -1657,6 +1659,8 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Prekrivanje #<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g> x <xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> pik na palec"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", varen"</string>
+    <string name="activity_starter_block_bg_activity_starts_permissive" msgid="5692097903712956720">"Ta zagon dejavnosti v ozadju za paket <xliff:g id="PACKAGENAME">%1$s</xliff:g> bo blokiran v prihodnjih različicah Androida Q. Obiščite go/q-bg-block."</string>
+    <string name="activity_starter_block_bg_activity_starts_enforcing" msgid="8299522481076404353">"Zagon dejavnosti v ozadju za paket <xliff:g id="PACKAGENAME">%1$s</xliff:g> je bil blokiran. Obiščite go/q-bg-block."</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Pozabljen vzorec"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Napačen vzorec"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"Napačno geslo"</string>
@@ -2066,6 +2070,24 @@
     <string name="dynamic_mode_notification_channel_name" msgid="2348803891571320452">"Rutinsko informativno obvestilo o načinu delovanja"</string>
     <string name="dynamic_mode_notification_title" msgid="508815255807182035">"Akumulator se bo morda izpraznil, preden ga običajno priključite na polnjenje"</string>
     <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"Vklopilo se je varčevanje z energijo akumulatorja za podaljšanje časa delovanja akumulatorja"</string>
+    <string name="mime_type_folder" msgid="7111951698626315204">"Mapa"</string>
+    <string name="mime_type_apk" msgid="5518003630972506900">"Aplikacija za Android"</string>
+    <string name="mime_type_generic" msgid="6833871596845900027">"Datoteka"</string>
+    <string name="mime_type_generic_ext" msgid="8450275970061657174">"Datoteka <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
+    <string name="mime_type_audio" msgid="6289777657172050926">"Zvočna datoteka"</string>
+    <string name="mime_type_audio_ext" msgid="3270880987725816210">"Zvočna datoteka <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
+    <string name="mime_type_video" msgid="4093025777317307426">"Videoposnetek"</string>
+    <string name="mime_type_video_ext" msgid="5643771615714173159">"Videoposnetek <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
+    <string name="mime_type_image" msgid="3144284451605236371">"Slika"</string>
+    <string name="mime_type_image_ext" msgid="1514613218742736590">"Slika <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
+    <string name="mime_type_compressed" msgid="1645486037074943257">"Arhiv"</string>
+    <string name="mime_type_compressed_ext" msgid="4232293058067801528">"Arhivska datoteka <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
+    <string name="mime_type_document" msgid="1596838147256375966">"Dokument"</string>
+    <string name="mime_type_document_ext" msgid="6327266601345501281">"Dokument <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
+    <string name="mime_type_spreadsheet" msgid="2639138255207123557">"Preglednica"</string>
+    <string name="mime_type_spreadsheet_ext" msgid="5508653032786106725">"Preglednica <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
+    <string name="mime_type_presentation" msgid="6145604688774787357">"Predstavitev"</string>
+    <string name="mime_type_presentation_ext" msgid="2982650207774823437">"Predstavitev <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
     <string name="car_loading_profile" msgid="3545132581795684027">"Nalaganje"</string>
     <plurals name="file_count" formatted="false" msgid="1628600959752419449">
       <item quantity="one"><xliff:g id="FILE_NAME_2">%s</xliff:g> in še <xliff:g id="COUNT_3">%d</xliff:g> datoteka</item>

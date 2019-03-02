@@ -308,15 +308,18 @@
     <string name="permgrouplab_phone" msgid="5229115638567440675">"ໂທລະສັບ"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"ໂທ ແລະ​ຈັດ​ການ​ການ​ໂທ​ລະ​ສັບ"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"ອະນຸຍາດ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ໃຫ້ໂທ ແລະ ຈັດການການໂທບໍ?"</string>
-    <string name="permgrouplab_sensors" msgid="416037179223226722">"ເຊັນ​ເຊີ​ຮ່າງ​ກາຍ"</string>
+    <!-- no translation found for permgrouplab_sensors (4838614103153567532) -->
+    <skip />
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"ເຂົ້າ​ຫາ​ຂໍ້​ມູນ​ເຊັນ​ເຊີ​ກ່ຽວ​ກັບ​ສັນ​ຍານ​ຊີບ​ຂອງ​ທ່ານ"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"ອະນຸຍາດ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ໃຫ້ເຂົ້າເຖິງຂໍ້ມູນເຊັນເຊີກ່ຽວກັບສັນຍານຊີບຂອງທ່ານບໍ?"</string>
     <string name="permgrouplab_aural" msgid="965607064083134896">"ເພງ"</string>
     <string name="permgroupdesc_aural" msgid="4870189506255958055">"ເຂົ້າເຖິງເພງຂອງທ່ານ"</string>
     <string name="permgrouprequest_aural" msgid="6787926123071735620">"ອະນຸຍາດ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ໃຫ້ເຂົ້າເຖິງເພງຂອງທ່ານບໍ?"</string>
-    <string name="permgrouplab_visual" msgid="8030190588123857921">"ຮູບພາບ ແລະ ວິດີໂອ"</string>
+    <!-- no translation found for permgrouplab_visual (6477382108771145134) -->
+    <skip />
     <string name="permgroupdesc_visual" msgid="3415827902566663546">"ເຂົ້າເຖິງຮູບພາບ ແລະ ວິດີໂອຂອງທ່ານ"</string>
-    <string name="permgrouprequest_visual" msgid="6907523945030290376">"ອະນຸຍາດ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ໃຫ້ເຂົ້າເຖິງຮູບພາບ ແລະ ວິດີໂອຂອງທ່ານບໍ?"</string>
+    <!-- no translation found for permgrouprequest_visual (3043752127595243314) -->
+    <skip />
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"ດຶງຂໍ້ມູນເນື້ອຫາໃນໜ້າຈໍ"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"ກວດກາເນື້ອຫາຂອງໜ້າຈໍທີ່ທ່ານກຳລັງມີປະຕິສຳພັນນຳ."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"ເປີດໃຊ້ \"ການສຳຫຼວດໂດຍສຳຜັດ\""</string>
@@ -1396,8 +1399,7 @@
     <string name="ext_media_init_action" msgid="7952885510091978278">"ຕິດ​ຕັ້ງ"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"ເອົາອອກ"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"ຄົ້ນຫາ"</string>
-    <!-- no translation found for ext_media_seamless_action (6575980560886881233) -->
-    <skip />
+    <string name="ext_media_seamless_action" msgid="6575980560886881233">"ສະຫຼັບການສົ່ງຂໍ້ມູນອອກ"</string>
     <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> ຂາດ​ໄປ"</string>
     <string name="ext_media_missing_message" msgid="4012389235250987930">"ໃສ່ອຸປະກອນອີກຄັ້ງ"</string>
     <string name="ext_media_move_specific_title" msgid="1471100343872375842">"ກຳ​ລັງ​ຍ້າຍ <xliff:g id="NAME">%s</xliff:g>"</string>
@@ -1611,6 +1613,8 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"ການວາງຊ້ອນ #<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", ປອດໄພ"</string>
+    <string name="activity_starter_block_bg_activity_starts_permissive" msgid="5692097903712956720">"ການເລີ່ມການເຄື່ອນໄຫວໃນພື້ນຫຼັງນີ້ຈາກ <xliff:g id="PACKAGENAME">%1$s</xliff:g> ຈະຖືກບລັອກໄວ້ໃນ Q ເວີຊັນອະນາຄົດ. ກະລຸນາເບິ່ງ go/q-bg-block."</string>
+    <string name="activity_starter_block_bg_activity_starts_enforcing" msgid="8299522481076404353">"ການເຄື່ອນໄຫວພື້ນຫຼັງເລີ່ມຈາກ <xliff:g id="PACKAGENAME">%1$s</xliff:g> ຖືກບລັອກໄວ້ແລ້ວ. ກະລຸນາເບິ່ງ go/q-bg-block."</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"ລືມຮູບແບບປົດລັອກ?"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"ຮູບແບບຜິດ"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"ລະຫັດຜ່ານບໍ່ຖືກຕ້ອງ"</string>
@@ -1996,6 +2000,24 @@
     <string name="dynamic_mode_notification_channel_name" msgid="2348803891571320452">"ການແຈ້ງເຕືອນຂໍ້ມູນໂໝດກິດຈະວັດປະຈຳວັນ"</string>
     <string name="dynamic_mode_notification_title" msgid="508815255807182035">"ແບັດເຕີຣີອາດໝົດກ່ອນການສາກຕາມປົກກະຕິ"</string>
     <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"ເປີດຕົວປະຢັດແບັດເຕີຣີເພື່ອຂະຫຍາຍອາຍຸແບັດເຕີຣີ"</string>
+    <string name="mime_type_folder" msgid="7111951698626315204">"ໂຟນເດີ"</string>
+    <string name="mime_type_apk" msgid="5518003630972506900">"ແອັບພລິເຄຊັນ Android"</string>
+    <string name="mime_type_generic" msgid="6833871596845900027">"ໄຟລ໌"</string>
+    <string name="mime_type_generic_ext" msgid="8450275970061657174">"ໄຟລ໌ <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
+    <string name="mime_type_audio" msgid="6289777657172050926">"ສຽງ"</string>
+    <string name="mime_type_audio_ext" msgid="3270880987725816210">"ສຽງ <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
+    <string name="mime_type_video" msgid="4093025777317307426">"ວິດີໂອ"</string>
+    <string name="mime_type_video_ext" msgid="5643771615714173159">"ວິດີໂອ <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
+    <string name="mime_type_image" msgid="3144284451605236371">"ຮູບພາບ"</string>
+    <string name="mime_type_image_ext" msgid="1514613218742736590">"ຮູບພາບ <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
+    <string name="mime_type_compressed" msgid="1645486037074943257">"ແຟ້ມຈັດເກັບ"</string>
+    <string name="mime_type_compressed_ext" msgid="4232293058067801528">"ແຟມຈັດເກັບ <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
+    <string name="mime_type_document" msgid="1596838147256375966">"ເອກະສານ"</string>
+    <string name="mime_type_document_ext" msgid="6327266601345501281">"ເອກະສານ <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
+    <string name="mime_type_spreadsheet" msgid="2639138255207123557">"ສະເປຣດຊີດ"</string>
+    <string name="mime_type_spreadsheet_ext" msgid="5508653032786106725">"ສະເປຣດຊີດ <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
+    <string name="mime_type_presentation" msgid="6145604688774787357">"ພຣີເຊັນເທເຊິນ"</string>
+    <string name="mime_type_presentation_ext" msgid="2982650207774823437">"ພຣີເຊັນເທເຊິນ <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
     <string name="car_loading_profile" msgid="3545132581795684027">"ກຳລັງໂຫລດ"</string>
     <plurals name="file_count" formatted="false" msgid="1628600959752419449">
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> ໄຟລ໌</item>

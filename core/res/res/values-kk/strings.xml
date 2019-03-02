@@ -308,15 +308,18 @@
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Телефон"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"қоңырау шалу және телефон қоңырауларын басқару"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; қолданбасына қоңыраулар шалуға және басқаруға рұқсат берілсін бе?"</string>
-    <string name="permgrouplab_sensors" msgid="416037179223226722">"Дене датчиктері"</string>
+    <!-- no translation found for permgrouplab_sensors (4838614103153567532) -->
+    <skip />
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"ағза күйінің көрсеткіштері туралы сенсор деректеріне қатынасу"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; қолданбасына негізгі физиологиялық көрсеткіштерді көрсететін сенсорлық деректерді пайдалануға рұқсат берілсін бе?"</string>
     <string name="permgrouplab_aural" msgid="965607064083134896">"Музыка"</string>
     <string name="permgroupdesc_aural" msgid="4870189506255958055">"музыка мазмұнына кіру"</string>
     <string name="permgrouprequest_aural" msgid="6787926123071735620">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; қолданбасына музыка мазмұнына кіруге рұқсат етілсін бе?"</string>
-    <string name="permgrouplab_visual" msgid="8030190588123857921">"Суреттер және бейнелер"</string>
+    <!-- no translation found for permgrouplab_visual (6477382108771145134) -->
+    <skip />
     <string name="permgroupdesc_visual" msgid="3415827902566663546">"суреттер мен бейнелерге кіру"</string>
-    <string name="permgrouprequest_visual" msgid="6907523945030290376">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; қолданбасына суреттер мен бейнелерге кіруге рұқсат етілсін бе?"</string>
+    <!-- no translation found for permgrouprequest_visual (3043752127595243314) -->
+    <skip />
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Терезе мазмұнын оқып отыру"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Ашық тұрған терезе мазмұнын тексеру."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Explore by Touch функциясын қосу"</string>
@@ -510,7 +513,7 @@
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"экран бекітпесін істен шығару"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Қолданбаларға кілтперне және басқа кілтсөзге қатысты қауіпсіздік шараларын өшіру мүмкіндігін береді. Мысалы, телефон кіріс қоңырауларын алғанда кілтпернені өшіреді және қоңырау аяқталғанда қайта қосады."</string>
     <string name="permlab_requestScreenLockComplexity" msgid="7028982116060987169">"экранды құлыптау күрделілігін сұрау"</string>
-    <string name="permdesc_requestScreenLockComplexity" msgid="2806396846128185677">"Қолданбаға экранды құлыптаудың күрделілік деңгейін (жоғары, орташа, төмен немесе жоқ), соның ішінде ұзақтығы мен түрін анықтауға мүмкіндік береді. Сонымен қатар қолданба пайдаланушыларға экранды құлыптауды белгілі бір деңгейге жаңартуды ұсынады. Бірақ бұл ұсыныстарды елемеуге болады. Экранды құлыптау қарапайым мәтін түрінде сақталмайтынын және қолданбаға белгісіз болатынын ескеріңіз."</string>
+    <string name="permdesc_requestScreenLockComplexity" msgid="2806396846128185677">"Қолданбаға экранды құлыптаудың күрделілік деңгейін (жоғары, орташа, төмен немесе жоқ), соның ішінде ұзақтығы мен түрін анықтауға мүмкіндік береді. Сонымен қатар қолданба пайдаланушыларға құлыпты белгілі бір деңгейге жаңартуды ұсынады. Бірақ бұл ұсыныстарды елемеуге болады. Экран құлпы қарапайым мәтін түрінде сақталмайтынын және құпия сөз қолданбаға белгісіз болатынын ескеріңіз."</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"биометрикалық жабдықты пайдалану"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"Аутентификациялау үшін қолданбаға биометрикалық жабдықты пайдалануға рұқсат береді"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"саусақ ізі жабдығын басқару"</string>
@@ -1397,8 +1400,7 @@
     <string name="ext_media_init_action" msgid="7952885510091978278">"Реттеу"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Шығару"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"Зерттеу"</string>
-    <!-- no translation found for ext_media_seamless_action (6575980560886881233) -->
-    <skip />
+    <string name="ext_media_seamless_action" msgid="6575980560886881233">"Шығысты ауыстыру"</string>
     <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> жоқ"</string>
     <string name="ext_media_missing_message" msgid="4012389235250987930">"Құрылғыны қайта салыңыз"</string>
     <string name="ext_media_move_specific_title" msgid="1471100343872375842">"<xliff:g id="NAME">%s</xliff:g> тасымалдануда"</string>
@@ -1612,6 +1614,8 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"№<xliff:g id="ID">%1$d</xliff:g> қабаттама"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", қауіпсіз"</string>
+    <string name="activity_starter_block_bg_activity_starts_permissive" msgid="5692097903712956720">"<xliff:g id="PACKAGENAME">%1$s</xliff:g> сайтындағы фондық әрекеттерге болашақ Q құрамаларында тыйым салынады. go/q-bg-block бетін қараңыз."</string>
+    <string name="activity_starter_block_bg_activity_starts_enforcing" msgid="8299522481076404353">"<xliff:g id="PACKAGENAME">%1$s</xliff:g> сайтындағы фондық әрекеттерге тыйым салынған. go/q-bg-block бетін қараңыз."</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Кескінді ұмытып қалу"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Қате өрнек"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"Қате кілтсөз"</string>
@@ -1997,6 +2001,24 @@
     <string name="dynamic_mode_notification_channel_name" msgid="2348803891571320452">"Режим туралы хабарландыру"</string>
     <string name="dynamic_mode_notification_title" msgid="508815255807182035">"Батарея заряды азаюы мүмкін"</string>
     <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"Батарея ұзаққа жетуі үшін, Battery Saver іске қосылды"</string>
+    <string name="mime_type_folder" msgid="7111951698626315204">"Қалта"</string>
+    <string name="mime_type_apk" msgid="5518003630972506900">"Android қолданбасы"</string>
+    <string name="mime_type_generic" msgid="6833871596845900027">"Файл"</string>
+    <string name="mime_type_generic_ext" msgid="8450275970061657174">"<xliff:g id="EXTENSION">%1$s</xliff:g> файлы"</string>
+    <string name="mime_type_audio" msgid="6289777657172050926">"Аудио"</string>
+    <string name="mime_type_audio_ext" msgid="3270880987725816210">"<xliff:g id="EXTENSION">%1$s</xliff:g> аудиофайлы"</string>
+    <string name="mime_type_video" msgid="4093025777317307426">"Бейне"</string>
+    <string name="mime_type_video_ext" msgid="5643771615714173159">"<xliff:g id="EXTENSION">%1$s</xliff:g> бейнесі"</string>
+    <string name="mime_type_image" msgid="3144284451605236371">"Сурет"</string>
+    <string name="mime_type_image_ext" msgid="1514613218742736590">"<xliff:g id="EXTENSION">%1$s</xliff:g> суреті"</string>
+    <string name="mime_type_compressed" msgid="1645486037074943257">"Мұрағат"</string>
+    <string name="mime_type_compressed_ext" msgid="4232293058067801528">"<xliff:g id="EXTENSION">%1$s</xliff:g> мұрағаты"</string>
+    <string name="mime_type_document" msgid="1596838147256375966">"Құжат"</string>
+    <string name="mime_type_document_ext" msgid="6327266601345501281">"<xliff:g id="EXTENSION">%1$s</xliff:g> құжаты"</string>
+    <string name="mime_type_spreadsheet" msgid="2639138255207123557">"Электрондық кесте"</string>
+    <string name="mime_type_spreadsheet_ext" msgid="5508653032786106725">"<xliff:g id="EXTENSION">%1$s</xliff:g> электрондық кестесі"</string>
+    <string name="mime_type_presentation" msgid="6145604688774787357">"Презентация"</string>
+    <string name="mime_type_presentation_ext" msgid="2982650207774823437">"<xliff:g id="EXTENSION">%1$s</xliff:g> презентациясы"</string>
     <string name="car_loading_profile" msgid="3545132581795684027">"Жүктелуде"</string>
     <plurals name="file_count" formatted="false" msgid="1628600959752419449">
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> файл</item>

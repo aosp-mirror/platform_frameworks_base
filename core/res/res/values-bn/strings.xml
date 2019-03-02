@@ -308,15 +308,18 @@
     <string name="permgrouplab_phone" msgid="5229115638567440675">"ফোন"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"ফোন কলগুলি এবং পরিচালনা"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;-কে কল করতে এবং কল পরিচালনা করতে দেবেন?"</string>
-    <string name="permgrouplab_sensors" msgid="416037179223226722">"বডি সেন্সরগুলি"</string>
+    <!-- no translation found for permgrouplab_sensors (4838614103153567532) -->
+    <skip />
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"আপনার অত্যাবশ্যক লক্ষণগুলির সম্পর্কে সেন্সর ডেটা অ্যাক্সেস করে"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;-কে সেন্সর থেকে আপনার ভাইটাল সাইনের ডেটা অ্যাক্সেস করতে দেবেন?"</string>
     <string name="permgrouplab_aural" msgid="965607064083134896">"মিউজিক"</string>
     <string name="permgroupdesc_aural" msgid="4870189506255958055">"আপনার মিউজিকে অ্যাক্সেস করুন"</string>
     <string name="permgrouprequest_aural" msgid="6787926123071735620">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;-কে আপনার মিউজিকে অ্যাক্সেস দেবেন?"</string>
-    <string name="permgrouplab_visual" msgid="8030190588123857921">"ফটো ও ভিডিও"</string>
+    <!-- no translation found for permgrouplab_visual (6477382108771145134) -->
+    <skip />
     <string name="permgroupdesc_visual" msgid="3415827902566663546">"আপনার ফটো ও ভিডিও অ্যাক্সেস করুন"</string>
-    <string name="permgrouprequest_visual" msgid="6907523945030290376">"আপনার ফটো ও ভিডিওতে &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;-কে অ্যাক্সেস দেবেন?"</string>
+    <!-- no translation found for permgrouprequest_visual (3043752127595243314) -->
+    <skip />
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"উইন্ডোর কন্টেন্ট পুনরুদ্ধার করে"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"ব্যবহার করছেন এমন একটি উইন্ডোর কন্টেন্ট নিরীক্ষণ করে৷"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"স্পর্শের মাধ্যমে অন্বেষণ করা চালু করুন"</string>
@@ -1612,6 +1615,8 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"আচ্ছাদন #<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", নিরাপদ"</string>
+    <string name="activity_starter_block_bg_activity_starts_permissive" msgid="5692097903712956720">"<xliff:g id="PACKAGENAME">%1$s</xliff:g> থেকে শুরু হওয়া ব্যাকগ্রাউন্ড অ্যাক্টিভিটি ভবিষ্যত কিউ বিল্ডে ব্লক করা হবে। go/q-bg-block দেখুন।"</string>
+    <string name="activity_starter_block_bg_activity_starts_enforcing" msgid="8299522481076404353">"<xliff:g id="PACKAGENAME">%1$s</xliff:g> থেকে শুরু হওয়া ব্যাকগ্রাউন্ড অ্যাক্টিভিটি ব্লক করা হয়েছে। go/q-bg-block দেখুন।"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"প্যাটার্ন ভুলে গেছেন"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"ভুল প্যাটার্ন"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"ভুল পাসওয়ার্ড"</string>
@@ -1997,6 +2002,24 @@
     <string name="dynamic_mode_notification_channel_name" msgid="2348803891571320452">"রুটিন মোডের তথ্য সংক্রান্ত বিজ্ঞপ্তি"</string>
     <string name="dynamic_mode_notification_title" msgid="508815255807182035">"সাধারণত যখন চার্জ দেন, তার আগে চার্জ শেষ হয়ে যেতে পারে"</string>
     <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"ডিভাইস বেশিক্ষণ চালু রাখতে ব্যাটারি সেভার চালু করা হয়েছে"</string>
+    <string name="mime_type_folder" msgid="7111951698626315204">"ফোল্ডার"</string>
+    <string name="mime_type_apk" msgid="5518003630972506900">"Android অ্যাপ্লিকেশন"</string>
+    <string name="mime_type_generic" msgid="6833871596845900027">"ফাইল"</string>
+    <string name="mime_type_generic_ext" msgid="8450275970061657174">"<xliff:g id="EXTENSION">%1$s</xliff:g> ফাইল"</string>
+    <string name="mime_type_audio" msgid="6289777657172050926">"অডিও"</string>
+    <string name="mime_type_audio_ext" msgid="3270880987725816210">"<xliff:g id="EXTENSION">%1$s</xliff:g> অডিও"</string>
+    <string name="mime_type_video" msgid="4093025777317307426">"ভিডিও"</string>
+    <string name="mime_type_video_ext" msgid="5643771615714173159">"<xliff:g id="EXTENSION">%1$s</xliff:g> ভিডিও"</string>
+    <string name="mime_type_image" msgid="3144284451605236371">"ছবি"</string>
+    <string name="mime_type_image_ext" msgid="1514613218742736590">"<xliff:g id="EXTENSION">%1$s</xliff:g> ছবি"</string>
+    <string name="mime_type_compressed" msgid="1645486037074943257">"আর্কাইভ"</string>
+    <string name="mime_type_compressed_ext" msgid="4232293058067801528">"<xliff:g id="EXTENSION">%1$s</xliff:g> আর্কাইভ"</string>
+    <string name="mime_type_document" msgid="1596838147256375966">"ডকুমেন্ট"</string>
+    <string name="mime_type_document_ext" msgid="6327266601345501281">"<xliff:g id="EXTENSION">%1$s</xliff:g> ডকুমেন্ট"</string>
+    <string name="mime_type_spreadsheet" msgid="2639138255207123557">"স্প্রেডশীট"</string>
+    <string name="mime_type_spreadsheet_ext" msgid="5508653032786106725">"<xliff:g id="EXTENSION">%1$s</xliff:g> স্প্রেডশীট"</string>
+    <string name="mime_type_presentation" msgid="6145604688774787357">"উপস্থাপনা"</string>
+    <string name="mime_type_presentation_ext" msgid="2982650207774823437">"<xliff:g id="EXTENSION">%1$s</xliff:g> উপস্থাপনা"</string>
     <string name="car_loading_profile" msgid="3545132581795684027">"লোড হচ্ছে"</string>
     <plurals name="file_count" formatted="false" msgid="1628600959752419449">
       <item quantity="one"><xliff:g id="FILE_NAME_2">%s</xliff:g> এবং আরও <xliff:g id="COUNT_3">%d</xliff:g>টি ফাইল</item>

@@ -308,15 +308,18 @@
     <string name="permgrouplab_phone" msgid="5229115638567440675">"ఫోన్"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"ఫోన్ కాల్‌లు చేయడం మరియు నిర్వహించడం"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"ఫోన్ కాల్‌లు చేయడానికి మరియు నిర్వహించడానికి &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ని అనుమతించాలా?"</string>
-    <string name="permgrouplab_sensors" msgid="416037179223226722">"శరీర సెన్సార్‌లు"</string>
+    <!-- no translation found for permgrouplab_sensors (4838614103153567532) -->
+    <skip />
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"మీ అత్యంత కీలకమైన గుర్తుల గురించి సెన్సార్ డేటాని యాక్సెస్ చేస్తుంది"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"మీ అత్యంత కీలకమైన గుర్తుల గురించి సెన్సార్ డేటాని యాక్సెస్ చేయడానికి &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ని అనుమతించాలా?"</string>
     <string name="permgrouplab_aural" msgid="965607064083134896">"సంగీతం"</string>
     <string name="permgroupdesc_aural" msgid="4870189506255958055">"మీ సంగీతాన్ని యాక్సెస్ చేయండి"</string>
     <string name="permgrouprequest_aural" msgid="6787926123071735620">"మీ సంగీతాన్ని యాక్సెస్ చేయడానికి &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ని అనుమతించాలా?"</string>
-    <string name="permgrouplab_visual" msgid="8030190588123857921">"ఫోటోలు &amp; వీడియోలు"</string>
+    <!-- no translation found for permgrouplab_visual (6477382108771145134) -->
+    <skip />
     <string name="permgroupdesc_visual" msgid="3415827902566663546">"మీ ఫోటోలను &amp; వీడియోలను యాక్సెస్ చేయండి"</string>
-    <string name="permgrouprequest_visual" msgid="6907523945030290376">"మీ ఫోటోలు &amp; వీడియోలు యాక్సెస్ చేయడానికి &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ని అనుమతించాలా?"</string>
+    <!-- no translation found for permgrouprequest_visual (3043752127595243314) -->
+    <skip />
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"విండో కంటెంట్‍ను తిరిగి పొందుతుంది"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"మీరు పరస్పర చర్య చేస్తున్న విండో కంటెంట్‌‍ను పరిశీలిస్తుంది."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"తాకడం ద్వారా విశ్లేషణను ప్రారంభిస్తుంది"</string>
@@ -1397,8 +1400,7 @@
     <string name="ext_media_init_action" msgid="7952885510091978278">"సెటప్ చేయండి"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"తొలగించు"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"విశ్లేషించు"</string>
-    <!-- no translation found for ext_media_seamless_action (6575980560886881233) -->
-    <skip />
+    <string name="ext_media_seamless_action" msgid="6575980560886881233">"అవుట్‌పుట్ మార్చండి"</string>
     <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> కనుగొనబడటం లేదు"</string>
     <string name="ext_media_missing_message" msgid="4012389235250987930">"పరికరాన్ని మళ్లీ చొప్పించండి"</string>
     <string name="ext_media_move_specific_title" msgid="1471100343872375842">"<xliff:g id="NAME">%s</xliff:g>ని తరలిస్తోంది"</string>
@@ -1612,6 +1614,8 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"అతివ్యాప్తి #<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", సురక్షితం"</string>
+    <string name="activity_starter_block_bg_activity_starts_permissive" msgid="5692097903712956720">"<xliff:g id="PACKAGENAME">%1$s</xliff:g> నుండి ప్రారంభం అయ్యే నేపథ్య కార్యకలాపం భవిష్యత్తు Q బిల్డ్‌లలో బ్లాక్ చేయబడుతుంది. go/q-bg-block చూడండి."</string>
+    <string name="activity_starter_block_bg_activity_starts_enforcing" msgid="8299522481076404353">"<xliff:g id="PACKAGENAME">%1$s</xliff:g> నుండి ప్రారంభం అయ్యే నేపథ్య కార్యకలాపం బ్లాక్ చేయబడింది. go/q-bg-block చూడండి."</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"నమూనాను మర్చిపోయాను"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"ఆకృతి తప్పు"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"పాస్‌వర్డ్ తప్పు"</string>
@@ -1997,6 +2001,24 @@
     <string name="dynamic_mode_notification_channel_name" msgid="2348803891571320452">"రొటీన్ మోడ్ సమాచార నోటిఫికేషన్"</string>
     <string name="dynamic_mode_notification_title" msgid="508815255807182035">"మామూలుగా ఛార్జ్ చేసేలోపు బ్యాటరీ ఖాళీ కావచ్చు"</string>
     <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"బ్యాటరీ జీవితకాలాన్ని పెంచడానికి బ్యాటరీ సేవర్ యాక్టివేట్ చేయబడింది"</string>
+    <string name="mime_type_folder" msgid="7111951698626315204">"ఫోల్డర్"</string>
+    <string name="mime_type_apk" msgid="5518003630972506900">"Android అప్లికేషన్"</string>
+    <string name="mime_type_generic" msgid="6833871596845900027">"ఫైల్"</string>
+    <string name="mime_type_generic_ext" msgid="8450275970061657174">"<xliff:g id="EXTENSION">%1$s</xliff:g> ఫైల్"</string>
+    <string name="mime_type_audio" msgid="6289777657172050926">"ఆడియో"</string>
+    <string name="mime_type_audio_ext" msgid="3270880987725816210">"<xliff:g id="EXTENSION">%1$s</xliff:g> ఆడియో"</string>
+    <string name="mime_type_video" msgid="4093025777317307426">"వీడియో"</string>
+    <string name="mime_type_video_ext" msgid="5643771615714173159">"<xliff:g id="EXTENSION">%1$s</xliff:g> వీడియో"</string>
+    <string name="mime_type_image" msgid="3144284451605236371">"చిత్రం"</string>
+    <string name="mime_type_image_ext" msgid="1514613218742736590">"<xliff:g id="EXTENSION">%1$s</xliff:g> చిత్రం"</string>
+    <string name="mime_type_compressed" msgid="1645486037074943257">"ఆర్కైవ్"</string>
+    <string name="mime_type_compressed_ext" msgid="4232293058067801528">"<xliff:g id="EXTENSION">%1$s</xliff:g> ఆర్కైవ్"</string>
+    <string name="mime_type_document" msgid="1596838147256375966">"పత్రం"</string>
+    <string name="mime_type_document_ext" msgid="6327266601345501281">"<xliff:g id="EXTENSION">%1$s</xliff:g> పత్రం"</string>
+    <string name="mime_type_spreadsheet" msgid="2639138255207123557">"స్ప్రెడ్‌షీట్"</string>
+    <string name="mime_type_spreadsheet_ext" msgid="5508653032786106725">"<xliff:g id="EXTENSION">%1$s</xliff:g> స్ప్రెడ్‌షీట్"</string>
+    <string name="mime_type_presentation" msgid="6145604688774787357">"ప్రదర్శన"</string>
+    <string name="mime_type_presentation_ext" msgid="2982650207774823437">"<xliff:g id="EXTENSION">%1$s</xliff:g> ప్రదర్శన"</string>
     <string name="car_loading_profile" msgid="3545132581795684027">"లోడవుతోంది"</string>
     <plurals name="file_count" formatted="false" msgid="1628600959752419449">
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> ఫైల్‌లు</item>

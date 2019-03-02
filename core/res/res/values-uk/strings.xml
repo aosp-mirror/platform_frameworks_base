@@ -314,15 +314,18 @@
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Телефон"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"телефонувати та керувати дзвінками"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"Дозволити додатку &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; здійснювати телефонні дзвінки та керувати ними?"</string>
-    <string name="permgrouplab_sensors" msgid="416037179223226722">"Датчики на тілі"</string>
+    <!-- no translation found for permgrouplab_sensors (4838614103153567532) -->
+    <skip />
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"отримувати доступ до інформації датчиків про ваші життєві показники"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"Надати додатку &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; доступ до життєвих показників із датчиків?"</string>
     <string name="permgrouplab_aural" msgid="965607064083134896">"Музика"</string>
     <string name="permgroupdesc_aural" msgid="4870189506255958055">"доступ до музики"</string>
     <string name="permgrouprequest_aural" msgid="6787926123071735620">"Надати додатку &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; доступ до музики?"</string>
-    <string name="permgrouplab_visual" msgid="8030190588123857921">"Фото й відео"</string>
+    <!-- no translation found for permgrouplab_visual (6477382108771145134) -->
+    <skip />
     <string name="permgroupdesc_visual" msgid="3415827902566663546">"доступ до фото й відео"</string>
-    <string name="permgrouprequest_visual" msgid="6907523945030290376">"Надати додатку &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; доступ до фото й відео?"</string>
+    <!-- no translation found for permgrouprequest_visual (3043752127595243314) -->
+    <skip />
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Отримувати вміст вікна"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Перевіряти вміст вікна, з яким ви взаємодієте."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Увімкнути функцію дослідження дотиком"</string>
@@ -515,8 +518,8 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Дозволяє програмі обмінюватися даними з тегами, картками та читачами екрана Near Field Communication (NFC)."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"вимикати блокування екрана"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Дозволяє програмі вимикати блокування клавіатури та будь-який пов’язаний паролем захист. Наприклад: телефон вимикає блокування клавіатури під час отримання вхідного дзвінка, після закінчення якого блокування клавіатури відновлюється."</string>
-    <string name="permlab_requestScreenLockComplexity" msgid="7028982116060987169">"запит складності пароля для блокування екрана"</string>
-    <string name="permdesc_requestScreenLockComplexity" msgid="2806396846128185677">"Дає додатку змогу визначати рівень складності пароля для блокування екрана (високий, середній, низький або нульовий). Враховуються кількість символів і тип блокування. Додаток також може пропонувати користувачам підвищити рівень складності пароля для блокування екрана, але цю пропозицію можна ігнорувати. Примітка: оскільки пароль зашифрований, додаток його не знає."</string>
+    <string name="permlab_requestScreenLockComplexity" msgid="7028982116060987169">"запит складності способу блокування екрана"</string>
+    <string name="permdesc_requestScreenLockComplexity" msgid="2806396846128185677">"Дозволяє додатку визначати рівень складності способу блокування екрана (високий, середній, низький або нульовий). Враховуються кількість символів і тип блокування. Додаток також може пропонувати користувачам вибрати складніший тип блокування екрана, але це не обов’язково робити. Примітка: оскільки пароль зашифрований, додаток його не знає."</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"використовувати біометричне апаратне забезпечення"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"Додаток може використовувати біометричне апаратне забезпечення для автентифікації"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"керувати апаратним забезпеченням для цифрових відбитків"</string>
@@ -1657,6 +1660,8 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Накладання №<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>х<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", безпечний"</string>
+    <string name="activity_starter_block_bg_activity_starts_permissive" msgid="5692097903712956720">"Активність пакета <xliff:g id="PACKAGENAME">%1$s</xliff:g> у фоновому режимі буде заблоковано в майбутніх складаннях Q. Докладнішу інформацію наведено на сторінці go/q-bg-block."</string>
+    <string name="activity_starter_block_bg_activity_starts_enforcing" msgid="8299522481076404353">"Активність додатка <xliff:g id="PACKAGENAME">%1$s</xliff:g> у фоновому режимі заблоковано. Докладнішу інформацію наведено на сторінці go/q-bg-block."</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Не пам’ятаю ключ"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Неправильний ключ"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"Неправильний пароль"</string>
@@ -2066,6 +2071,24 @@
     <string name="dynamic_mode_notification_channel_name" msgid="2348803891571320452">"Сповіщення про послідовнсть дій"</string>
     <string name="dynamic_mode_notification_title" msgid="508815255807182035">"Акумулятор може розрядитися раніше ніж зазвичай"</string>
     <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"Режим економії заряду акумулятора активовано для збільшення часу його роботи"</string>
+    <string name="mime_type_folder" msgid="7111951698626315204">"Папка"</string>
+    <string name="mime_type_apk" msgid="5518003630972506900">"Додаток Android"</string>
+    <string name="mime_type_generic" msgid="6833871596845900027">"Файл"</string>
+    <string name="mime_type_generic_ext" msgid="8450275970061657174">"Файл у форматі <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
+    <string name="mime_type_audio" msgid="6289777657172050926">"Аудіо"</string>
+    <string name="mime_type_audio_ext" msgid="3270880987725816210">"Аудіо у форматі <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
+    <string name="mime_type_video" msgid="4093025777317307426">"Відео"</string>
+    <string name="mime_type_video_ext" msgid="5643771615714173159">"Відео у форматі <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
+    <string name="mime_type_image" msgid="3144284451605236371">"Зображення"</string>
+    <string name="mime_type_image_ext" msgid="1514613218742736590">"Зображення у форматі <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
+    <string name="mime_type_compressed" msgid="1645486037074943257">"Архів"</string>
+    <string name="mime_type_compressed_ext" msgid="4232293058067801528">"Архів у форматі <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
+    <string name="mime_type_document" msgid="1596838147256375966">"Документ"</string>
+    <string name="mime_type_document_ext" msgid="6327266601345501281">"Документ у форматі <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
+    <string name="mime_type_spreadsheet" msgid="2639138255207123557">"Таблиця"</string>
+    <string name="mime_type_spreadsheet_ext" msgid="5508653032786106725">"Таблиця у форматі <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
+    <string name="mime_type_presentation" msgid="6145604688774787357">"Презентація"</string>
+    <string name="mime_type_presentation_ext" msgid="2982650207774823437">"Презентація у форматі <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
     <string name="car_loading_profile" msgid="3545132581795684027">"Завантаження"</string>
     <plurals name="file_count" formatted="false" msgid="1628600959752419449">
       <item quantity="one"><xliff:g id="FILE_NAME_2">%s</xliff:g> і ще <xliff:g id="COUNT_3">%d</xliff:g> файл</item>
