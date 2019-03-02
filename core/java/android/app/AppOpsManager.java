@@ -4375,8 +4375,7 @@ public class AppOpsManager {
     }
 
     /**
-     * Like {@link #noteProxyOp(String, String)} but instead
-     * of throwing a {@link SecurityException} it returns {@link #MODE_ERRORED}.
+     * Like {@link #noteProxyOpNoThrow(String, String)} but allows to specify the proxied uid.
      *
      * <p>This API requires package with the {@code proxiedPackageName} to belong to
      * {@code proxiedUid}.
@@ -4385,10 +4384,7 @@ public class AppOpsManager {
      * @param proxiedPackageName The package to note the op for or {@code null} if the op should be
      *                           noted for the "android" package
      * @param proxiedUid The uid the package belongs to
-     *
-     * @hide
      */
-    @SystemApi
     public int noteProxyOpNoThrow(@NonNull String op, @Nullable String proxiedPackageName,
             int proxiedUid) {
         return noteProxyOpNoThrow(strOpToOp(op), proxiedPackageName, proxiedUid);
