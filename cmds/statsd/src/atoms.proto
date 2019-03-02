@@ -1568,6 +1568,7 @@ message WatchdogRollbackOccurred {
         ROLLBACK_INITIATE = 1;
         ROLLBACK_SUCCESS = 2;
         ROLLBACK_FAILURE = 3;
+        ROLLBACK_ROOT_TRIGGERED = 4;
     }
     optional RollbackType rollback_type = 1;
 
