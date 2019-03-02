@@ -16,6 +16,7 @@
 
 package android.telephony.mbms.vendor;
 
+import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.app.Service;
@@ -187,7 +188,7 @@ public class MbmsGroupCallServiceBase extends Service {
      *
      * May throw an {@link IllegalArgumentException} or a {@link SecurityException}, which
      * will be intercepted and passed to the app as
-     * {@link MbmsErrors.InitializationErrors#ERROR_UNABLE_TO_INITIALIZE}
+     * {@link MbmsErrors.InitializationErrtrors#ERROR_UNABLE_TO_INITIALIZE}
      *
      * May return any value from {@link MbmsErrors.InitializationErrors}
      * or {@link MbmsErrors#SUCCESS}. Non-successful error codes will be passed to the app via
@@ -196,7 +197,7 @@ public class MbmsGroupCallServiceBase extends Service {
      * @param callback The callback to use to communicate with the app.
      * @param subscriptionId The subscription ID to use.
      */
-    public int initialize(MbmsGroupCallSessionCallback callback, int subscriptionId)
+    public int initialize(@NonNull MbmsGroupCallSessionCallback callback, int subscriptionId)
             throws RemoteException {
         throw new UnsupportedOperationException("Not implemented");
     }
@@ -215,8 +216,8 @@ public class MbmsGroupCallServiceBase extends Service {
      * @param callback The callback object on which the app wishes to receive updates.
      * @return Any error in {@link MbmsErrors.GeneralErrors}
      */
-    public int startGroupCall(int subscriptionId, long tmgi, List<Integer> saiList,
-            List<Integer> frequencyList, GroupCallCallback callback) {
+    public int startGroupCall(int subscriptionId, long tmgi, @NonNull List<Integer> saiList,
+            @NonNull List<Integer> frequencyList, @NonNull GroupCallCallback callback) {
         throw new UnsupportedOperationException("Not implemented");
     }
 
@@ -241,8 +242,8 @@ public class MbmsGroupCallServiceBase extends Service {
      * @param saiList New list of SAIs that the call is available on.
      * @param frequencyList New list of frequencies that the call is available on.
      */
-    public void updateGroupCall(int subscriptionId, long tmgi, List<Integer> saiList,
-            List<Integer> frequencyList) {
+    public void updateGroupCall(int subscriptionId, long tmgi, @NonNull List<Integer> saiList,
+            @NonNull List<Integer> frequencyList) {
         throw new UnsupportedOperationException("Not implemented");
     }
 

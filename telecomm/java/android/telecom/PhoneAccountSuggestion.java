@@ -17,6 +17,7 @@
 package android.telecom;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.os.Parcel;
@@ -72,7 +73,7 @@ public final class PhoneAccountSuggestion implements Parcelable {
      */
     @SystemApi
     @TestApi
-    public PhoneAccountSuggestion(PhoneAccountHandle handle, @SuggestionReason int reason,
+    public PhoneAccountSuggestion(@NonNull PhoneAccountHandle handle, @SuggestionReason int reason,
             boolean shouldAutoSelect) {
         this.mHandle = handle;
         this.mReason = reason;
@@ -101,7 +102,7 @@ public final class PhoneAccountSuggestion implements Parcelable {
     /**
      * @return The {@link PhoneAccountHandle} for this suggestion.
      */
-    public PhoneAccountHandle getPhoneAccountHandle() {
+    @NonNull public PhoneAccountHandle getPhoneAccountHandle() {
         return mHandle;
     }
 
