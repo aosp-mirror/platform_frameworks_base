@@ -2321,7 +2321,7 @@ package android.telecom {
   }
 
   public final class PhoneAccountSuggestion implements android.os.Parcelable {
-    ctor public PhoneAccountSuggestion(android.telecom.PhoneAccountHandle, int, boolean);
+    ctor public PhoneAccountSuggestion(@NonNull android.telecom.PhoneAccountHandle, int, boolean);
   }
 
   public class PhoneAccountSuggestionService extends android.app.Service {
@@ -2440,12 +2440,12 @@ package android.telephony.mbms.vendor {
   public class MbmsGroupCallServiceBase extends android.app.Service {
     ctor public MbmsGroupCallServiceBase();
     method public void dispose(int) throws android.os.RemoteException;
-    method public int initialize(android.telephony.mbms.MbmsGroupCallSessionCallback, int) throws android.os.RemoteException;
+    method public int initialize(@NonNull android.telephony.mbms.MbmsGroupCallSessionCallback, int) throws android.os.RemoteException;
     method public void onAppCallbackDied(int, int);
     method public android.os.IBinder onBind(android.content.Intent);
-    method public int startGroupCall(int, long, java.util.List<java.lang.Integer>, java.util.List<java.lang.Integer>, android.telephony.mbms.GroupCallCallback);
+    method public int startGroupCall(int, long, @NonNull java.util.List<java.lang.Integer>, @NonNull java.util.List<java.lang.Integer>, @NonNull android.telephony.mbms.GroupCallCallback);
     method public void stopGroupCall(int, long);
-    method public void updateGroupCall(int, long, java.util.List<java.lang.Integer>, java.util.List<java.lang.Integer>);
+    method public void updateGroupCall(int, long, @NonNull java.util.List<java.lang.Integer>, @NonNull java.util.List<java.lang.Integer>);
   }
 
   public class MbmsStreamingServiceBase extends android.os.Binder {
