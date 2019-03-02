@@ -21,8 +21,6 @@ import android.annotation.Nullable;
 import android.app.ActivityThread;
 import android.app.AppOpsManager;
 import android.content.Context;
-import android.media.VolumeShaper;
-import android.os.Binder;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -35,7 +33,6 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IAppOpsCallback;
 import com.android.internal.app.IAppOpsService;
 
-import java.lang.IllegalArgumentException;
 import java.lang.ref.WeakReference;
 import java.util.Objects;
 
@@ -578,9 +575,11 @@ public abstract class PlayerBase {
      * to qualify audio playback.
      * @param streamType the stream type to check
      * @throws IllegalArgumentException
+     * @deprecated This method is not intended to be used by applications.
      */
-    public static void deprecateStreamTypeForPlayback(int streamType, String className,
-            String opName) throws IllegalArgumentException {
+    @java.lang.Deprecated
+    public static void deprecateStreamTypeForPlayback(int streamType, @NonNull String className,
+            @NonNull String opName) throws IllegalArgumentException {
         // STREAM_ACCESSIBILITY was introduced at the same time the use of stream types
         // for audio playback was deprecated, so it is not allowed at all to qualify a playback
         // use case
