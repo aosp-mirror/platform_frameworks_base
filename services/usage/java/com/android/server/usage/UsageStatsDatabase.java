@@ -27,6 +27,7 @@ import android.util.Slog;
 import android.util.TimeUtils;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.IndentingPrintWriter;
 
 import libcore.io.IoUtils;
 
@@ -1245,5 +1246,37 @@ public class UsageStatsDatabase {
             }
         }
         directory.delete();
+    }
+
+    /**
+     * print total number and list of stats files for each interval type.
+     * @param pw
+     */
+    public void dump(IndentingPrintWriter pw, boolean compact) {
+        synchronized (mLock) {
+            pw.println("UsageStatsDatabase:");
+            pw.increaseIndent();
+            for (int i = 0; i < mSortedStatFiles.length; i++) {
+                final TimeSparseArray<AtomicFile> files = mSortedStatFiles[i];
+                final int size = files.size();
+                pw.print(UserUsageStatsService.intervalToString(i));
+                pw.print(" stats files: ");
+                pw.print(size);
+                pw.println(", sorted list of files:");
+                pw.increaseIndent();
+                for (int f = 0; f < size; f++) {
+                    final long fileName = files.keyAt(f);
+                    if (compact) {
+                        pw.print(UserUsageStatsService.formatDateTime(fileName, false));
+                    } else {
+                        pw.printPair(Long.toString(fileName),
+                                UserUsageStatsService.formatDateTime(fileName, true));
+                    }
+                    pw.println();
+                }
+                pw.decreaseIndent();
+            }
+            pw.decreaseIndent();
+        }
     }
 }
