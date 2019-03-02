@@ -209,7 +209,7 @@
     <string name="oem_unlock_enable" msgid="6040763321967327691">"OEM-Entsperrung"</string>
     <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"Bootloader-Entsperrung zulassen"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="4802157344812385674">"OEM-Entsperrung zulassen?"</string>
-    <string name="confirm_enable_oem_unlock_text" msgid="5517144575601647022">"Achtung: Die Geräteschutzfunktionen funktionieren auf diesem Gerät nicht, solange diese Einstellung aktiviert ist."</string>
+    <string name="confirm_enable_oem_unlock_text" msgid="5517144575601647022">"Achtung: Der Geräteschutz funktioniert auf diesem Gerät nicht, solange diese Einstellung aktiviert ist."</string>
     <string name="mock_location_app" msgid="7966220972812881854">"App für simulierte Standorte auswählen"</string>
     <string name="mock_location_app_not_set" msgid="809543285495344223">"Keine App für simulierte Standorte eingerichtet"</string>
     <string name="mock_location_app_set" msgid="8966420655295102685">"App für simulierte Standorte: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
