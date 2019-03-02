@@ -1945,10 +1945,6 @@ public class DisplayPolicy {
                     } else {
                         vf.set(cf);
                     }
-
-                    // EXPERIMENT TODO(b/113952590): Remove once experiment in bug is completed
-                    mExperiments.offsetWindowFramesForNavBar(mNavigationBarPosition, win);
-                    // EXPERIMENT END
                 }
             } else if (layoutInScreen || (sysUiFl
                     & (View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
