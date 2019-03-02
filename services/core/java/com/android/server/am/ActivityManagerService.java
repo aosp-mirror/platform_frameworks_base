@@ -5121,6 +5121,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                                 String data, Bundle extras, boolean ordered,
                                 boolean sticky, int sendingUser) {
                             synchronized (ActivityManagerService.this) {
+                                mOomAdjuster.mAppCompact.compactAllSystem();
                                 requestPssAllProcsLocked(SystemClock.uptimeMillis(), true, false);
                             }
                         }
@@ -8614,6 +8615,10 @@ public class ActivityManagerService extends IActivityManager.Stub
         synchronized (this) {
             final long now = SystemClock.uptimeMillis();
             final long timeSinceLastIdle = now - mLastIdleTime;
+
+            // Compact all non-zygote processes to freshen up the page cache.
+            mOomAdjuster.mAppCompact.compactAllSystem();
+
             final long lowRamSinceLastIdle = getLowRamTimeSinceIdle(now);
             mLastIdleTime = now;
             mLowRamTimeSinceLastIdle = 0;

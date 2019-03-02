@@ -92,6 +92,7 @@ public final class AppCompactor {
     static final int COMPACT_PROCESS_PERSISTENT = 3;
     static final int COMPACT_PROCESS_BFGS = 4;
     static final int COMPACT_PROCESS_MSG = 1;
+    static final int COMPACT_SYSTEM_MSG = 2;
 
     /**
      * This thread must be moved to the system background cpuset.
@@ -263,6 +264,16 @@ public final class AppCompactor {
         return (app.lastCompactTime == 0
                 || (now - app.lastCompactTime) > mCompactThrottleBFGS);
     }
+
+    @GuardedBy("mAm")
+    void compactAllSystem() {
+        if (mUseCompaction) {
+            mCompactionHandler.sendMessage(mCompactionHandler.obtainMessage(
+                                              COMPACT_SYSTEM_MSG));
+        }
+    }
+
+    private native void compactSystem();
 
     /**
      * Reads the flag value from DeviceConfig to determine whether app compaction
@@ -497,6 +508,13 @@ public final class AppCompactor {
                         // nothing to do, presumably the process died
                         Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
                     }
+                    break;
+                }
+                case COMPACT_SYSTEM_MSG: {
+                    Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "compactSystem");
+                    compactSystem();
+                    Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+                    break;
                 }
             }
         }
