@@ -3168,7 +3168,8 @@ public class AudioTrack extends PlayerBase
          * @param sizeInFrames the number of frames available to write without blocking.
          *   Note that the frame size of a compressed stream is 1 byte.
          */
-        public void onDataRequest(@NonNull AudioTrack track, int sizeInFrames) { }
+        public void onDataRequest(@NonNull AudioTrack track, @IntRange(from = 0) int sizeInFrames) {
+        }
     }
 
     /**
