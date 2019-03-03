@@ -411,6 +411,7 @@
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"كتم الصوت\nتمامًا"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"الأولوية \nفقط"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"التنبيهات\nفقط"</string>
+    <string name="keyguard_indication_charging_time_wireless" msgid="5376059837186496558">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • جارٍ الشحن لاسلكيًا (يتبقى <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> على اكتمال الشحن)"</string>
     <string name="keyguard_indication_charging_time" msgid="2056340799276374421">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • جارٍ الشحن (يتبقى <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> حتى الامتلاء)"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="7767562163577492332">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • جارٍ الشحن سريعًا (يتبقى <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> حتى الامتلاء)"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="3769655133567307069">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • جارٍ الشحن ببطء (يتبقى <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> حتى الامتلاء)"</string>
