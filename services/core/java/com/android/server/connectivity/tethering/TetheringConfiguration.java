@@ -67,11 +67,6 @@ public class TetheringConfiguration {
 
     private static final String[] EMPTY_STRING_ARRAY = new String[0];
 
-    @VisibleForTesting
-    public static final int DUN_NOT_REQUIRED = 0;
-    public static final int DUN_REQUIRED = 1;
-    public static final int DUN_UNSPECIFIED = 2;
-
     // Default ranges used for the legacy DHCP server.
     // USB is  192.168.42.1 and 255.255.255.0
     // Wifi is 192.168.43.1 and 255.255.255.0
@@ -90,7 +85,6 @@ public class TetheringConfiguration {
     public final String[] tetherableUsbRegexs;
     public final String[] tetherableWifiRegexs;
     public final String[] tetherableBluetoothRegexs;
-    public final int dunCheck;
     public final boolean isDunRequired;
     public final boolean chooseUpstreamAutomatically;
     public final Collection<Integer> preferredUpstreamIfaceTypes;
@@ -116,12 +110,10 @@ public class TetheringConfiguration {
         tetherableWifiRegexs = getResourceStringArray(res, config_tether_wifi_regexs);
         tetherableBluetoothRegexs = getResourceStringArray(res, config_tether_bluetooth_regexs);
 
-        dunCheck = checkDunRequired(ctx);
-        configLog.log("DUN check returned: " + dunCheckString(dunCheck));
+        isDunRequired = checkDunRequired(ctx);
 
         chooseUpstreamAutomatically = getResourceBoolean(res, config_tether_upstream_automatic);
-        preferredUpstreamIfaceTypes = getUpstreamIfaceTypes(res, dunCheck);
-        isDunRequired = preferredUpstreamIfaceTypes.contains(TYPE_MOBILE_DUN);
+        preferredUpstreamIfaceTypes = getUpstreamIfaceTypes(res, isDunRequired);
 
         legacyDhcpRanges = getLegacyDhcpRanges(res);
         defaultIPv4DNS = copy(DEFAULT_IPV4_DNS);
@@ -230,53 +222,43 @@ public class TetheringConfiguration {
         return upstreamNames;
     }
 
-    public static int checkDunRequired(Context ctx) {
+    /** Check whether dun is required. */
+    public static boolean checkDunRequired(Context ctx) {
         final TelephonyManager tm = (TelephonyManager) ctx.getSystemService(TELEPHONY_SERVICE);
-        return (tm != null) ? tm.getTetherApnRequired() : DUN_UNSPECIFIED;
+        return (tm != null) ? tm.getTetherApnRequired() : false;
     }
 
-    private static String dunCheckString(int dunCheck) {
-        switch (dunCheck) {
-            case DUN_NOT_REQUIRED: return "DUN_NOT_REQUIRED";
-            case DUN_REQUIRED:     return "DUN_REQUIRED";
-            case DUN_UNSPECIFIED:  return "DUN_UNSPECIFIED";
-            default:
-                return String.format("UNKNOWN (%s)", dunCheck);
-        }
-    }
-
-    private static Collection<Integer> getUpstreamIfaceTypes(Resources res, int dunCheck) {
+    private static Collection<Integer> getUpstreamIfaceTypes(Resources res, boolean dunRequired) {
         final int[] ifaceTypes = res.getIntArray(config_tether_upstream_types);
         final ArrayList<Integer> upstreamIfaceTypes = new ArrayList<>(ifaceTypes.length);
         for (int i : ifaceTypes) {
             switch (i) {
                 case TYPE_MOBILE:
                 case TYPE_MOBILE_HIPRI:
-                    if (dunCheck == DUN_REQUIRED) continue;
+                    if (dunRequired) continue;
                     break;
                 case TYPE_MOBILE_DUN:
-                    if (dunCheck == DUN_NOT_REQUIRED) continue;
+                    if (!dunRequired) continue;
                     break;
             }
             upstreamIfaceTypes.add(i);
         }
 
         // Fix up upstream interface types for DUN or mobile. NOTE: independent
-        // of the value of |dunCheck|, cell data of one form or another is
+        // of the value of |dunRequired|, cell data of one form or another is
         // *always* an upstream, regardless of the upstream interface types
         // specified by configuration resources.
-        if (dunCheck == DUN_REQUIRED) {
+        if (dunRequired) {
             appendIfNotPresent(upstreamIfaceTypes, TYPE_MOBILE_DUN);
-        } else if (dunCheck == DUN_NOT_REQUIRED) {
-            appendIfNotPresent(upstreamIfaceTypes, TYPE_MOBILE);
-            appendIfNotPresent(upstreamIfaceTypes, TYPE_MOBILE_HIPRI);
         } else {
-            // Fix upstream interface types for case DUN_UNSPECIFIED.
             // Do not modify if a cellular interface type is already present in the
             // upstream interface types. Add TYPE_MOBILE and TYPE_MOBILE_HIPRI if no
             // cellular interface types are found in the upstream interface types.
-            if (!(containsOneOf(upstreamIfaceTypes,
-                    TYPE_MOBILE_DUN, TYPE_MOBILE, TYPE_MOBILE_HIPRI))) {
+            // This preserves backwards compatibility and prevents the DUN and default
+            // mobile types incorrectly appearing together, which could happen on
+            // previous releases in the common case where checkDunRequired returned
+            // DUN_UNSPECIFIED.
+            if (!containsOneOf(upstreamIfaceTypes, TYPE_MOBILE, TYPE_MOBILE_HIPRI)) {
                 upstreamIfaceTypes.add(TYPE_MOBILE);
                 upstreamIfaceTypes.add(TYPE_MOBILE_HIPRI);
             }

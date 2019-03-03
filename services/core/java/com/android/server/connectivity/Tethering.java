@@ -289,8 +289,8 @@ public class Tethering extends BaseNetworkObserver {
     }
 
     private void maybeUpdateConfiguration() {
-        final int dunCheck = TetheringConfiguration.checkDunRequired(mContext);
-        if (dunCheck == mConfig.dunCheck) return;
+        final boolean isDunRequired = TetheringConfiguration.checkDunRequired(mContext);
+        if (isDunRequired == mConfig.isDunRequired) return;
         updateConfiguration();
     }
 
