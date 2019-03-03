@@ -477,22 +477,16 @@
              - the return value of TelephonyManager.getTetherApnRequired()
                determines how the array is further modified:
 
-                   * DUN_REQUIRED
-                     TYPE_MOBILE is removed (if present)
-                     TYPE_MOBILE_HIPRI is removed (if present)
-                     TYPE_MOBILE_DUN is appended (if not already present)
+                   * TRUE (DUN REQUIRED).
+                     TYPE_MOBILE is removed (if present).
+                     TYPE_MOBILE_HIPRI is removed (if present).
+                     TYPE_MOBILE_DUN is appended (if not already present).
 
-                   * DUN_NOT_REQUIRED
-                     TYPE_MOBILE_DUN is removed (if present)
-                     TYPE_MOBILE is appended (if not already present)
-                     TYPE_MOBILE_HIPRI is appended (if not already present)
-
-                   * DUN_UNSPECIFIED
-                     if any of TYPE_MOBILE{,_DUN,_HIPRI} are present:
-                         change nothing
-                     else:
-                         TYPE_MOBILE is appended
-                         TYPE_MOBILE_HIPRI is appended
+                   * FALSE (DUN NOT REQUIRED).
+                     TYPE_MOBILE_DUN is removed (if present).
+                     If both of TYPE_MOBILE{,_HIPRI} are not present:
+                        TYPE_MOBILE is appended.
+                        TYPE_MOBILE_HIPRI is appended.
 
          For other changes applied to this list, now and in the future, see
          com.android.server.connectivity.tethering.TetheringConfiguration.
