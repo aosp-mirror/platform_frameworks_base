@@ -1566,6 +1566,7 @@ public class TelephonyManager {
      * Returns the Type Allocation Code from the IMEI. Return null if Type Allocation Code is not
      * available.
      */
+    @Nullable
     public String getTypeAllocationCode() {
         return getTypeAllocationCode(getSlotIndex());
     }
@@ -1576,6 +1577,7 @@ public class TelephonyManager {
      *
      * @param slotIndex of which Type Allocation Code is returned
      */
+    @Nullable
     public String getTypeAllocationCode(int slotIndex) {
         ITelephony telephony = getITelephony();
         if (telephony == null) return null;
@@ -1636,6 +1638,7 @@ public class TelephonyManager {
      * Returns the Manufacturer Code from the MEID. Return null if Manufacturer Code is not
      * available.
      */
+    @Nullable
     public String getManufacturerCode() {
         return getManufacturerCode(getSlotIndex());
     }
@@ -1646,6 +1649,7 @@ public class TelephonyManager {
      *
      * @param slotIndex of which Type Allocation Code is returned
      */
+    @Nullable
     public String getManufacturerCode(int slotIndex) {
         ITelephony telephony = getITelephony();
         if (telephony == null) return null;
@@ -6005,6 +6009,7 @@ public class TelephonyManager {
      * @return IMS Service Table or null if not present or not loaded
      * @hide
      */
+    @Nullable
     @SystemApi
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public String getIsimIst() {
