@@ -22,6 +22,7 @@ import android.annotation.SuppressAutoDoc;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
@@ -560,6 +561,7 @@ public class TelecomManager {
      *
      * @hide
      */
+    @TestApi
     @SystemApi
     public static final int TTY_MODE_OFF = 0;
 
@@ -569,6 +571,7 @@ public class TelecomManager {
      *
      * @hide
      */
+    @TestApi
     @SystemApi
     public static final int TTY_MODE_FULL = 1;
 
@@ -579,6 +582,7 @@ public class TelecomManager {
      *
      * @hide
      */
+    @TestApi
     @SystemApi
     public static final int TTY_MODE_HCO = 2;
 
@@ -589,6 +593,7 @@ public class TelecomManager {
      *
      * @hide
      */
+    @TestApi
     @SystemApi
     public static final int TTY_MODE_VCO = 3;
 
@@ -827,6 +832,7 @@ public class TelecomManager {
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    @TestApi
     @SystemApi
     public void setUserSelectedOutgoingPhoneAccount(PhoneAccountHandle accountHandle) {
         try {
@@ -1527,6 +1533,7 @@ public class TelecomManager {
      * @hide
      */
     @SystemApi
+    @TestApi
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public @TtyMode int getCurrentTtyMode() {
         try {
@@ -1975,6 +1982,7 @@ public class TelecomManager {
      * @hide
      */
     @SystemApi
+    @TestApi
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public boolean isInEmergencyCall() {
         try {
