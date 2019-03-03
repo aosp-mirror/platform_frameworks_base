@@ -17,6 +17,8 @@
 package android.telephony;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
@@ -1760,6 +1762,7 @@ public class ServiceState implements Parcelable {
      * @return List of {@link NetworkRegistrationState}
      * @hide
      */
+    @NonNull
     @SystemApi
     public List<NetworkRegistrationState> getNetworkRegistrationStates() {
         synchronized (mNetworkRegistrationStates) {
@@ -1776,6 +1779,7 @@ public class ServiceState implements Parcelable {
      *
      * @deprecated Use {@link #getNetworkRegistrationStatesFromTransportType(int)}
      */
+    @NonNull
     @Deprecated
     @SystemApi
     public List<NetworkRegistrationState> getNetworkRegistrationStates(int transportType) {
@@ -1789,6 +1793,7 @@ public class ServiceState implements Parcelable {
      * @return List of {@link NetworkRegistrationState}
      * @hide
      */
+    @NonNull
     @SystemApi
     public List<NetworkRegistrationState> getNetworkRegistrationStatesForTransportType(
             int transportType) {
@@ -1812,6 +1817,7 @@ public class ServiceState implements Parcelable {
      * @return List of {@link NetworkRegistrationState}
      * @hide
      */
+    @NonNull
     @SystemApi
     public List<NetworkRegistrationState> getNetworkRegistrationStatesForDomain(
             @Domain int domain) {
@@ -1838,6 +1844,7 @@ public class ServiceState implements Parcelable {
      *
      * @deprecated Use {@link #getNetworkRegistrationState(int, int)}
      */
+    @Nullable
     @Deprecated
     @SystemApi
     public NetworkRegistrationState getNetworkRegistrationStates(@Domain int domain,
@@ -1854,6 +1861,7 @@ public class ServiceState implements Parcelable {
      * @hide
      *
      */
+    @Nullable
     @SystemApi
     public NetworkRegistrationState getNetworkRegistrationState(@Domain int domain,
                                                                 int transportType) {
