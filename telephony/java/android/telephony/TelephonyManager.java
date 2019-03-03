@@ -6907,14 +6907,12 @@ public class TelephonyManager {
     }
 
     /**
-     * Check TETHER_DUN_REQUIRED and TETHER_DUN_APN settings, net.tethering.noprovisioning
-     * SystemProperty to decide whether DUN APN is required for
-     * tethering.
+     * Check whether DUN APN is required for tethering.
      *
-     * @return 0: Not required. 1: required. 2: Not set.
+     * @return {@code true} if DUN APN is required for tethering.
      * @hide
      */
-    public int getTetherApnRequired() {
+    public boolean getTetherApnRequired() {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null)
@@ -6924,7 +6922,7 @@ public class TelephonyManager {
         } catch (NullPointerException ex) {
             Rlog.e(TAG, "hasMatchedTetherApnSetting NPE", ex);
         }
-        return 2;
+        return false;
     }
 
 
