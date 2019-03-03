@@ -16,6 +16,7 @@
 
 package android.net.wifi.hotspot2;
 
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.graphics.drawable.Icon;
 import android.net.Uri;
@@ -156,7 +157,7 @@ public final class OsuProvider implements Parcelable {
      *
      * @return String matching the default locale, null otherwise
      */
-    public String getFriendlyName() {
+    public @Nullable String getFriendlyName() {
         if (mFriendlyNames == null || mFriendlyNames.isEmpty()) return null;
         String lang = Locale.getDefault().getLanguage();
         String friendlyName = mFriendlyNames.get(lang);
@@ -180,7 +181,7 @@ public final class OsuProvider implements Parcelable {
         return mServiceDescription;
     }
 
-    public Uri getServerUri() {
+    public @Nullable Uri getServerUri() {
         return mServerUri;
     }
 
