@@ -51,10 +51,11 @@ import android.net.dhcp.DhcpServer.Clock;
 import android.net.dhcp.DhcpServer.Dependencies;
 import android.net.util.SharedLog;
 import android.os.HandlerThread;
-import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
+
+import androidx.test.filters.SmallTest;
 
 import org.junit.After;
 import org.junit.Before;

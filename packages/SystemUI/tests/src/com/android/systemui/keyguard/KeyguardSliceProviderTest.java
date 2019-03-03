@@ -30,7 +30,6 @@ import android.content.ContentResolver;
 import android.media.MediaMetadata;
 import android.net.Uri;
 import android.provider.Settings;
-import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
@@ -41,6 +40,7 @@ import androidx.slice.SliceProvider;
 import androidx.slice.SliceSpecs;
 import androidx.slice.builders.ListBuilder;
 import androidx.slice.core.SliceQuery;
+import androidx.test.filters.SmallTest;
 
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.SysuiTestCase;

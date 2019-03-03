@@ -147,7 +147,7 @@ public class MemoryRegion implements Parcelable{
         mIsExecutable = source.readInt() != 0;
     }
 
-    public static final Parcelable.Creator<MemoryRegion> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<MemoryRegion> CREATOR
             = new Parcelable.Creator<MemoryRegion>() {
         public MemoryRegion createFromParcel(Parcel in) {
             return new MemoryRegion(in);

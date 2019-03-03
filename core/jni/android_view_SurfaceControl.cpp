@@ -717,6 +717,29 @@ static jboolean nativeSetAllowedDisplayConfigs(JNIEnv* env, jclass clazz,
     return result == NO_ERROR ? JNI_TRUE : JNI_FALSE;
 }
 
+static jintArray nativeGetAllowedDisplayConfigs(JNIEnv* env, jclass clazz, jobject tokenObj) {
+    sp<IBinder> token(ibinderForJavaObject(env, tokenObj));
+    if (token == nullptr) return JNI_FALSE;
+
+    std::vector<int32_t> allowedConfigs;
+    size_t result = SurfaceComposerClient::getAllowedDisplayConfigs(token, &allowedConfigs);
+    if (result != NO_ERROR) {
+        return nullptr;
+    }
+
+    jintArray allowedConfigsArray = env->NewIntArray(allowedConfigs.size());
+    if (allowedConfigsArray == nullptr) {
+        jniThrowException(env, "java/lang/OutOfMemoryError", NULL);
+        return nullptr;
+    }
+    jint* allowedConfigsArrayValues = env->GetIntArrayElements(allowedConfigsArray, 0);
+    for (size_t i = 0; i < allowedConfigs.size(); i++) {
+        allowedConfigsArrayValues[i] = static_cast<jint>(allowedConfigs[i]);
+    }
+    env->ReleaseIntArrayElements(allowedConfigsArray, allowedConfigsArrayValues, 0);
+    return allowedConfigsArray;
+}
+
 static jint nativeGetActiveConfig(JNIEnv* env, jclass clazz, jobject tokenObj) {
     sp<IBinder> token(ibinderForJavaObject(env, tokenObj));
     if (token == NULL) return -1;
@@ -1215,6 +1238,8 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeSetActiveConfig },
     {"nativeSetAllowedDisplayConfigs", "(Landroid/os/IBinder;[I)Z",
             (void*)nativeSetAllowedDisplayConfigs },
+    {"nativeGetAllowedDisplayConfigs", "(Landroid/os/IBinder;)[I",
+            (void*)nativeGetAllowedDisplayConfigs },
     {"nativeGetDisplayColorModes", "(Landroid/os/IBinder;)[I",
             (void*)nativeGetDisplayColorModes},
     {"nativeGetDisplayNativePrimaries", "(Landroid/os/IBinder;)Landroid/view/SurfaceControl$DisplayPrimaries;",

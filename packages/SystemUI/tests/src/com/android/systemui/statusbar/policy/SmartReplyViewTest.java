@@ -37,13 +37,14 @@ import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.service.notification.StatusBarNotification;
-import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
@@ -113,7 +114,7 @@ public class SmartReplyViewTest extends SysuiTestCase {
         mDependency.injectTestDependency(SmartReplyConstants.class, mConstants);
 
         mContainer = new View(mContext, null);
-        mView = SmartReplyView.inflate(mContext, null);
+        mView = SmartReplyView.inflate(mContext);
 
         // Any number of replies are fine.
         when(mConstants.getMinNumSystemGeneratedReplies()).thenReturn(0);
@@ -402,17 +403,18 @@ public class SmartReplyViewTest extends SysuiTestCase {
     }
 
     private void setSmartReplies(CharSequence[] choices) {
-        setSmartReplies(choices, false /* fromAssistant */);
+        mView.resetSmartSuggestions(mContainer);
+        List<Button> replyButtons = inflateSmartReplies(choices, false /* fromAssistant */);
+        mView.addPreInflatedButtons(replyButtons);
     }
 
-    private void setSmartReplies(CharSequence[] choices, boolean fromAssistant) {
+    private List<Button> inflateSmartReplies(CharSequence[] choices, boolean fromAssistant) {
         PendingIntent pendingIntent = PendingIntent.getBroadcast(mContext, 0,
                 new Intent(TEST_ACTION), 0);
         RemoteInput input = new RemoteInput.Builder(TEST_RESULT_KEY).setChoices(choices).build();
         SmartReplyView.SmartReplies smartReplies =
                 new SmartReplyView.SmartReplies(choices, input, pendingIntent, fromAssistant);
-        mView.resetSmartSuggestions(mContainer);
-        mView.addRepliesFromRemoteInput(smartReplies, mLogger, mEntry);
+        return mView.inflateRepliesFromRemoteInput(smartReplies, mLogger, mEntry);
     }
 
     private Notification.Action createAction(String actionTitle) {
@@ -431,11 +433,12 @@ public class SmartReplyViewTest extends SysuiTestCase {
 
     private void setSmartActions(String[] actionTitles) {
         mView.resetSmartSuggestions(mContainer);
-        mView.addSmartActions(
+        List<Button> actions = mView.inflateSmartActions(
                 new SmartReplyView.SmartActions(createActions(actionTitles), false),
                 mLogger,
                 mEntry,
                 mHeadsUpManager);
+        mView.addPreInflatedButtons(actions);
     }
 
     private void setSmartRepliesAndActions(CharSequence[] choices, String[] actionTitles) {
@@ -444,12 +447,14 @@ public class SmartReplyViewTest extends SysuiTestCase {
 
     private void setSmartRepliesAndActions(
             CharSequence[] choices, String[] actionTitles, boolean fromAssistant) {
-        setSmartReplies(choices, fromAssistant);
-        mView.addSmartActions(
+        mView.resetSmartSuggestions(mContainer);
+        List<Button> smartSuggestions = inflateSmartReplies(choices, fromAssistant);
+        smartSuggestions.addAll(mView.inflateSmartActions(
                 new SmartReplyView.SmartActions(createActions(actionTitles), fromAssistant),
                 mLogger,
                 mEntry,
-                mHeadsUpManager);
+                mHeadsUpManager));
+        mView.addPreInflatedButtons(smartSuggestions);
     }
 
     private ViewGroup buildExpectedView(CharSequence[] choices, int lineCount) {
@@ -485,8 +490,8 @@ public class SmartReplyViewTest extends SysuiTestCase {
         SmartReplyView.SmartReplies smartReplies =
                 new SmartReplyView.SmartReplies(choices, null, null, false);
         for (int i = 0; i < choices.length; ++i) {
-            Button current = mView.inflateReplyButton(mContext, mView, i, smartReplies,
-                    null, null);
+            Button current = SmartReplyView.inflateReplyButton(mView, mContext, i, smartReplies,
+                    null /* SmartReplyController */, null /* NotificationEntry */);
             current.setPadding(paddingHorizontal, current.getPaddingTop(), paddingHorizontal,
                     current.getPaddingBottom());
             if (previous != null) {
@@ -752,7 +757,7 @@ public class SmartReplyViewTest extends SysuiTestCase {
     }
 
     private Button inflateActionButton(Notification.Action action) {
-        return mView.inflateActionButton(getContext(), mView, 0,
+        return SmartReplyView.inflateActionButton(mView, getContext(), 0,
                 new SmartReplyView.SmartActions(Collections.singletonList(action), false),
                 mLogger, mEntry, mHeadsUpManager);
     }

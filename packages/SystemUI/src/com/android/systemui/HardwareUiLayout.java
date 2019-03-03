@@ -63,6 +63,9 @@ public class HardwareUiLayout extends MultiListLayout implements Tunable {
 
     public HardwareUiLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
+        // Manually re-initialize mRotation to portrait-mode, since this view must always
+        // be constructed in portrait mode and rotated into the correct initial position.
+        mRotation = ROTATION_NONE;
         updateSettings();
     }
 
@@ -172,6 +175,10 @@ public class HardwareUiLayout extends MultiListLayout implements Tunable {
                 mSeparatedView.setBackground(mSeparatedViewBackground);
                 updateEdgeMargin(mEdgeBleed ? 0 : getEdgePadding());
                 mOldHeight = mList.getMeasuredHeight();
+
+                // Must be called to initialize view rotation correctly.
+                // Requires LayoutParams, hence why this isn't called during the constructor.
+                updateRotation();
             } else {
                 return;
             }
@@ -189,7 +196,18 @@ public class HardwareUiLayout extends MultiListLayout implements Tunable {
         mSwapOrientation = swapOrientation;
     }
 
-    @Override
+    private void updateRotation() {
+        int rotation = RotationUtils.getRotation(getContext());
+        if (rotation != mRotation) {
+            rotate(mRotation, rotation);
+            mRotation = rotation;
+        }
+    }
+
+    /**
+     *  Requires LayoutParams to be set to work correctly, and therefore must be run after after
+     *  the HardwareUILayout has been added to the view hierarchy.
+     */
     protected void rotate(int from, int to) {
         super.rotate(from, to);
         if (from != ROTATION_NONE && to != ROTATION_NONE) {

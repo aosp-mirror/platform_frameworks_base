@@ -31,10 +31,11 @@ import android.app.AppOpsManager;
 import android.app.Notification;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
-import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.util.ArraySet;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.ForegroundServiceController;

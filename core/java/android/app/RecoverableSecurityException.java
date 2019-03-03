@@ -190,7 +190,7 @@ public final class RecoverableSecurityException extends SecurityException implem
         mUserAction.writeToParcel(dest, flags);
     }
 
-    public static final Creator<RecoverableSecurityException> CREATOR =
+    public static final @android.annotation.NonNull Creator<RecoverableSecurityException> CREATOR =
             new Creator<RecoverableSecurityException>() {
         @Override
         public RecoverableSecurityException createFromParcel(Parcel source) {

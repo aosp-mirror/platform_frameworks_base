@@ -74,7 +74,7 @@ public final class RecoveryCertPath implements Parcelable {
         mEncodedCertPath = in.createByteArray();
     }
 
-    public static final Parcelable.Creator<RecoveryCertPath> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<RecoveryCertPath> CREATOR =
             new Parcelable.Creator<RecoveryCertPath>() {
         public RecoveryCertPath createFromParcel(Parcel in) {
             return new RecoveryCertPath(in);

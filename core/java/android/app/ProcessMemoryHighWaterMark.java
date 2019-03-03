@@ -40,7 +40,7 @@ public final class ProcessMemoryHighWaterMark implements Parcelable {
         rssHighWaterMarkInBytes = in.readLong();
     }
 
-    public static final Creator<ProcessMemoryHighWaterMark> CREATOR =
+    public static final @android.annotation.NonNull Creator<ProcessMemoryHighWaterMark> CREATOR =
             new Creator<ProcessMemoryHighWaterMark>() {
                 @Override
                 public ProcessMemoryHighWaterMark createFromParcel(Parcel in) {

@@ -30,7 +30,11 @@ import com.android.internal.R;
 
 /**
  * The {@code ZoomControls} class displays a simple set of controls used for zooming and
- * provides callbacks to register for events. */
+ * provides callbacks to register for events.
+ * @deprecated This functionality and UI is better handled with custom views and layouts
+ * rather than a dedicated zoom-control widget
+ */
+@Deprecated
 @Widget
 public class ZoomControls extends LinearLayout {
 

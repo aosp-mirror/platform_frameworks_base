@@ -1,6 +1,6 @@
 package com.android.systemui.statusbar.phone
 
-import android.support.test.filters.SmallTest
+import androidx.test.filters.SmallTest
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.LayoutInflater

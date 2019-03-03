@@ -176,6 +176,7 @@ public final class CustomDescription implements Parcelable {
          * by the Android System.
          * @throws IllegalStateException if {@link #build()} was already called.
          */
+        @NonNull
         public Builder addChild(int id, @NonNull Transformation transformation) {
             throwIfDestroyed();
             Preconditions.checkArgument((transformation instanceof InternalTransformation),
@@ -270,6 +271,7 @@ public final class CustomDescription implements Parcelable {
          * by the Android System.
          * @throws IllegalStateException if {@link #build()} was already called.
          */
+        @NonNull
         public Builder batchUpdate(@NonNull Validator condition, @NonNull BatchUpdates updates) {
             throwIfDestroyed();
             Preconditions.checkArgument((condition instanceof InternalValidator),
@@ -323,6 +325,7 @@ public final class CustomDescription implements Parcelable {
          * by the Android System.
          * @throws IllegalStateException if {@link #build()} was already called.
          */
+        @NonNull
         public Builder addOnClickAction(int id, @NonNull OnClickAction action) {
             throwIfDestroyed();
             Preconditions.checkArgument((action instanceof InternalOnClickAction),
@@ -338,6 +341,7 @@ public final class CustomDescription implements Parcelable {
         /**
          * Creates a new {@link CustomDescription} instance.
          */
+        @NonNull
         public CustomDescription build() {
             throwIfDestroyed();
             mDestroyed = true;
@@ -425,7 +429,7 @@ public final class CustomDescription implements Parcelable {
             dest.writeParcelableArray(values, flags);
         }
     }
-    public static final Parcelable.Creator<CustomDescription> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<CustomDescription> CREATOR =
             new Parcelable.Creator<CustomDescription>() {
         @Override
         public CustomDescription createFromParcel(Parcel parcel) {

@@ -337,10 +337,34 @@ public final class ConnectionRequest implements Parcelable {
                 mAddress == null
                         ? Uri.EMPTY
                         : Connection.toLogSafePhoneNumber(mAddress.toString()),
-                mExtras == null ? "" : mExtras);
+                bundleToString(mExtras));
     }
 
-    public static final Creator<ConnectionRequest> CREATOR = new Creator<ConnectionRequest> () {
+    private static String bundleToString(Bundle extras){
+        if (extras == null) {
+            return "";
+        }
+        StringBuilder sb = new StringBuilder();
+        sb.append("Bundle[");
+        for (String key : extras.keySet()) {
+            sb.append(key);
+            sb.append("=");
+            switch (key) {
+                case TelecomManager.EXTRA_INCOMING_CALL_ADDRESS:
+                case TelecomManager.EXTRA_UNKNOWN_CALL_HANDLE:
+                    sb.append(Log.pii(extras.get(key)));
+                    break;
+                default:
+                    sb.append(extras.get(key));
+                    break;
+            }
+            sb.append(", ");
+        }
+        sb.append("]");
+        return sb.toString();
+    }
+
+    public static final @android.annotation.NonNull Creator<ConnectionRequest> CREATOR = new Creator<ConnectionRequest> () {
         @Override
         public ConnectionRequest createFromParcel(Parcel source) {
             return new ConnectionRequest(source);

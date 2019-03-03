@@ -561,7 +561,7 @@ public class RectF implements Parcelable {
         out.writeFloat(bottom);
     }
     
-    public static final Parcelable.Creator<RectF> CREATOR = new Parcelable.Creator<RectF>() {
+    public static final @android.annotation.NonNull Parcelable.Creator<RectF> CREATOR = new Parcelable.Creator<RectF>() {
         /**
          * Return a new rectangle from the data in the specified parcel.
          */

@@ -118,7 +118,8 @@ class AppWindowThumbnail implements Animatable {
         anim.scaleCurrentDuration(mAppToken.mWmService.getTransitionAnimationScaleLocked());
         mSurfaceAnimator.startAnimation(t, new LocalAnimationAdapter(
                 new WindowAnimationSpec(anim, position,
-                        mAppToken.getDisplayContent().mAppTransition.canSkipFirstFrame()),
+                        mAppToken.getDisplayContent().mAppTransition.canSkipFirstFrame(),
+                        mAppToken.mWmService.mWindowCornerRadius),
                 mAppToken.mWmService.mSurfaceAnimationRunner), false /* hidden */);
     }
 

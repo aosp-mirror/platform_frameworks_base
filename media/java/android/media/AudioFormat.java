@@ -1096,7 +1096,7 @@ public final class AudioFormat implements Parcelable {
             );
     }
 
-    public static final Parcelable.Creator<AudioFormat> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<AudioFormat> CREATOR =
             new Parcelable.Creator<AudioFormat>() {
         public AudioFormat createFromParcel(Parcel p) {
             return new AudioFormat(p);

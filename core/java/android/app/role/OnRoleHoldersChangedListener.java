@@ -18,6 +18,7 @@ package android.app.role;
 
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.os.UserHandle;
 
 /**
@@ -26,6 +27,7 @@ import android.os.UserHandle;
  * @hide
  */
 @SystemApi
+@TestApi
 public interface OnRoleHoldersChangedListener {
 
     /**

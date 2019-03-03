@@ -16,6 +16,8 @@
 
 package android.telephony;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.UnsupportedAppUsage;
 import android.net.LinkProperties;
@@ -24,6 +26,7 @@ import android.os.Parcelable;
 import android.telephony.data.ApnSetting;
 
 import java.util.Objects;
+
 
 /**
  * Contains precise data connection state.
@@ -119,6 +122,7 @@ public final class PreciseDataConnectionState implements Parcelable {
     /**
      * Returns APN {@link ApnSetting} of this data connection.
      */
+    @Nullable
     public String getDataConnectionApn() {
         return mAPN;
     }
@@ -154,7 +158,7 @@ public final class PreciseDataConnectionState implements Parcelable {
         out.writeInt(mFailCause);
     }
 
-    public static final Parcelable.Creator<PreciseDataConnectionState> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<PreciseDataConnectionState> CREATOR
             = new Parcelable.Creator<PreciseDataConnectionState>() {
 
         public PreciseDataConnectionState createFromParcel(Parcel in) {

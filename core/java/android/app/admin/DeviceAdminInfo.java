@@ -525,7 +525,7 @@ public final class DeviceAdminInfo implements Parcelable {
     /**
      * Used to make this class parcelable.
      */
-    public static final Parcelable.Creator<DeviceAdminInfo> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<DeviceAdminInfo> CREATOR =
             new Parcelable.Creator<DeviceAdminInfo>() {
         public DeviceAdminInfo createFromParcel(Parcel source) {
             return new DeviceAdminInfo(source);

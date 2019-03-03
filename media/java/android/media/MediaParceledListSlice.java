@@ -185,7 +185,7 @@ public class MediaParceledListSlice<T extends Parcelable> implements Parcelable 
         return contents;
     }
 
-    public static final Parcelable.Creator<MediaParceledListSlice> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<MediaParceledListSlice> CREATOR =
             new Parcelable.Creator<MediaParceledListSlice>() {
         @Override
         public MediaParceledListSlice createFromParcel(Parcel in) {

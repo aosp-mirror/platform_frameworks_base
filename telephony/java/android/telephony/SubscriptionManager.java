@@ -63,14 +63,17 @@ import com.android.internal.telephony.ISetOpportunisticDataCallback;
 import com.android.internal.telephony.ISub;
 import com.android.internal.telephony.ITelephonyRegistry;
 import com.android.internal.telephony.PhoneConstants;
+import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -151,6 +154,7 @@ public class SubscriptionManager {
      * {@link Uri#withAppendedPath(Uri, String)}.
      * @hide
      */
+    @NonNull
     @SystemApi
     public static final Uri WFC_ENABLED_CONTENT_URI = Uri.withAppendedPath(CONTENT_URI, "wfc");
 
@@ -169,6 +173,7 @@ public class SubscriptionManager {
      * {@link Uri#withAppendedPath(Uri, String)}.
      * @hide
      */
+    @NonNull
     @SystemApi
     public static final Uri ADVANCED_CALLING_ENABLED_CONTENT_URI = Uri.withAppendedPath(
             CONTENT_URI, "advanced_calling");
@@ -186,6 +191,7 @@ public class SubscriptionManager {
      * {@link Uri#withAppendedPath(Uri, String)}.
      * @hide
      */
+    @NonNull
     @SystemApi
     public static final Uri WFC_MODE_CONTENT_URI = Uri.withAppendedPath(CONTENT_URI, "wfc_mode");
 
@@ -202,6 +208,7 @@ public class SubscriptionManager {
      * {@link Uri#withAppendedPath(Uri, String)}.
      * @hide
      */
+    @NonNull
     @SystemApi
     public static final Uri WFC_ROAMING_MODE_CONTENT_URI = Uri.withAppendedPath(
             CONTENT_URI, "wfc_roaming_mode");
@@ -220,6 +227,7 @@ public class SubscriptionManager {
      * {@link Uri#withAppendedPath(Uri, String)}.
      * @hide
      */
+    @NonNull
     @SystemApi
     public static final Uri VT_ENABLED_CONTENT_URI = Uri.withAppendedPath(
             CONTENT_URI, "vt_enabled");
@@ -237,6 +245,7 @@ public class SubscriptionManager {
      * {@link Uri#withAppendedPath(Uri, String)}.
      * @hide
      */
+    @NonNull
     @SystemApi
     public static final Uri WFC_ROAMING_ENABLED_CONTENT_URI = Uri.withAppendedPath(
             CONTENT_URI, "wfc_roaming_enabled");
@@ -1066,7 +1075,8 @@ public class SubscriptionManager {
      * @param listener that is to be unregistered.
      */
     public void removeOnOpportunisticSubscriptionsChangedListener(
-            OnOpportunisticSubscriptionsChangedListener listener) {
+            @NonNull OnOpportunisticSubscriptionsChangedListener listener) {
+        Preconditions.checkNotNull(listener, "listener cannot be null");
         String pkgForDebug = mContext != null ? mContext.getOpPackageName() : "<unknown>";
         if (DBG) {
             logd("unregister OnOpportunisticSubscriptionsChangedListener pkgForDebug="
@@ -1260,7 +1270,7 @@ public class SubscriptionManager {
         if (!userVisibleOnly || activeList == null) {
             return activeList;
         } else {
-            return activeList.stream().filter(subInfo -> !shouldHideSubscription(subInfo))
+            return activeList.stream().filter(subInfo -> isSubscriptionVisible(subInfo))
                     .collect(Collectors.toList());
         }
     }
@@ -2682,7 +2692,8 @@ public class SubscriptionManager {
      *  @param callbackIntent pending intent that will be sent after operation is done.
      */
     @RequiresPermission(android.Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS)
-    public void switchToSubscription(int subId, PendingIntent callbackIntent) {
+    public void switchToSubscription(int subId, @NonNull PendingIntent callbackIntent) {
+        Preconditions.checkNotNull(callbackIntent, "callbackIntent cannot be null");
         EuiccManager euiccManager = new EuiccManager(mContext);
         euiccManager.switchToSubscription(subId, callbackIntent);
     }
@@ -2856,32 +2867,27 @@ public class SubscriptionManager {
     }
 
     /**
-     * Whether system UI should hide a subscription. If it's a bundled opportunistic
-     * subscription, it shouldn't show up in anywhere in Settings app, dialer app,
-     * or status bar. Exception is if caller is carrier app, in which case they will
+     * Whether a subscription is visible to API caller. If it's a bundled opportunistic
+     * subscription, it should be hidden anywhere in Settings, dialer, status bar etc.
+     * Exception is if caller owns carrier privilege, in which case they will
      * want to see their own hidden subscriptions.
      *
      * @param info the subscriptionInfo to check against.
-     * @return true if this subscription should be hidden.
+     * @return true if this subscription should be visible to the API caller.
      *
-     * @hide
      */
-    public boolean shouldHideSubscription(SubscriptionInfo info) {
+    private boolean isSubscriptionVisible(SubscriptionInfo info) {
         if (info == null) return false;
 
-        // If hasCarrierPrivileges or canManageSubscription returns true, it means caller
-        // has carrier privilege.
-        boolean hasCarrierPrivilegePermission = (info.isEmbedded() && canManageSubscription(info))
-                || TelephonyManager.from(mContext).hasCarrierPrivileges(info.getSubscriptionId());
+        // If subscription is NOT grouped opportunistic subscription, it's visible.
+        if (TextUtils.isEmpty(info.getGroupUuid()) || !info.isOpportunistic()) return true;
 
-        return isInvisibleSubscription(info) && !hasCarrierPrivilegePermission;
-    }
-
-    /**
-     * @hide
-     */
-    public static boolean isInvisibleSubscription(SubscriptionInfo info) {
-        return info != null && !TextUtils.isEmpty(info.getGroupUuid()) && info.isOpportunistic();
+        // If the caller is the carrier app and owns the subscription, it should be visible
+        // to the caller.
+        boolean hasCarrierPrivilegePermission = TelephonyManager.from(mContext)
+                .hasCarrierPrivileges(info.getSubscriptionId())
+                || (info.isEmbedded() && canManageSubscription(info));
+        return hasCarrierPrivilegePermission;
     }
 
     /**
@@ -2900,8 +2906,33 @@ public class SubscriptionManager {
         if (availableList == null) {
             return null;
         } else {
-            return availableList.stream().filter(subInfo -> !shouldHideSubscription(subInfo))
-                    .collect(Collectors.toList());
+            // Multiple subscriptions in a group should only have one representative.
+            // It should be the current active primary subscription if any, or any
+            // primary subscription.
+            List<SubscriptionInfo> selectableList = new ArrayList<>();
+            Map<String, SubscriptionInfo> groupMap = new HashMap<>();
+
+            for (SubscriptionInfo info : availableList) {
+                // Opportunistic subscriptions are considered invisible
+                // to users so they should never be returned.
+                if (!isSubscriptionVisible(info)) continue;
+
+                String groupUuid = info.getGroupUuid();
+                if (groupUuid == null) {
+                    // Doesn't belong to any group. Add in the list.
+                    selectableList.add(info);
+                } else if (!groupMap.containsKey(groupUuid)
+                        || (groupMap.get(groupUuid).getSimSlotIndex() == INVALID_SIM_SLOT_INDEX
+                        && info.getSimSlotIndex() != INVALID_SIM_SLOT_INDEX)) {
+                    // If it belongs to a group that has never been recorded or it's the current
+                    // active subscription, add it in the list.
+                    selectableList.remove(groupMap.get(groupUuid));
+                    selectableList.add(info);
+                    groupMap.put(groupUuid, info);
+                }
+
+            }
+            return selectableList;
         }
     }
 

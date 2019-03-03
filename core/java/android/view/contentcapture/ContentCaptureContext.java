@@ -214,6 +214,7 @@ public final class ContentCaptureContext implements Parcelable {
     /**
      * Helper that creates a {@link ContentCaptureContext} associated with the given {@code uri}.
      */
+    @NonNull
     public static ContentCaptureContext forLocusId(@NonNull Uri uri) {
         return new Builder(new LocusId(uri)).build();
     }
@@ -269,6 +270,7 @@ public final class ContentCaptureContext implements Parcelable {
          *
          * @return the built {@code ContentCaptureContext}
          */
+        @NonNull
         public ContentCaptureContext build() {
             throwIfDestroyed();
             mDestroyed = true;
@@ -351,10 +353,11 @@ public final class ContentCaptureContext implements Parcelable {
         }
     }
 
-    public static final Parcelable.Creator<ContentCaptureContext> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<ContentCaptureContext> CREATOR =
             new Parcelable.Creator<ContentCaptureContext>() {
 
         @Override
+        @NonNull
         public ContentCaptureContext createFromParcel(Parcel parcel) {
             final boolean hasClientContext = parcel.readInt() == 1;
 
@@ -383,6 +386,7 @@ public final class ContentCaptureContext implements Parcelable {
         }
 
         @Override
+        @NonNull
         public ContentCaptureContext[] newArray(int size) {
             return new ContentCaptureContext[size];
         }

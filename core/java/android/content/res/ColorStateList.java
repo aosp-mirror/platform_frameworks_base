@@ -727,7 +727,7 @@ public class ColorStateList extends ComplexColor implements Parcelable {
         dest.writeIntArray(mColors);
     }
 
-    public static final Parcelable.Creator<ColorStateList> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<ColorStateList> CREATOR =
             new Parcelable.Creator<ColorStateList>() {
         @Override
         public ColorStateList[] newArray(int size) {

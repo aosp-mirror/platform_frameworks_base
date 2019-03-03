@@ -632,7 +632,7 @@ public final class MediaMetadata implements Parcelable {
         return EDITOR_KEY_MAPPING.get(editorKey, null);
     }
 
-    public static final Parcelable.Creator<MediaMetadata> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<MediaMetadata> CREATOR =
             new Parcelable.Creator<MediaMetadata>() {
                 @Override
                 public MediaMetadata createFromParcel(Parcel in) {

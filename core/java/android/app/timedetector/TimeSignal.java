@@ -33,7 +33,7 @@ import java.util.Objects;
  */
 public final class TimeSignal implements Parcelable {
 
-    public static final Parcelable.Creator<TimeSignal> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<TimeSignal> CREATOR =
             new Parcelable.Creator<TimeSignal>() {
                 public TimeSignal createFromParcel(Parcel in) {
                     return TimeSignal.createFromParcel(in);

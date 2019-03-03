@@ -275,7 +275,7 @@ public final class PictureInPictureParams implements Parcelable {
         }
     }
 
-    public static final Creator<PictureInPictureParams> CREATOR =
+    public static final @android.annotation.NonNull Creator<PictureInPictureParams> CREATOR =
             new Creator<PictureInPictureParams>() {
                 public PictureInPictureParams createFromParcel(Parcel in) {
                     return new PictureInPictureParams(in);

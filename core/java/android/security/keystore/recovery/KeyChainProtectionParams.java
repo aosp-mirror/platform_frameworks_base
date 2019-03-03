@@ -236,7 +236,7 @@ public final class KeyChainProtectionParams implements Parcelable {
         Arrays.fill(mSecret, (byte) 0);
     }
 
-    public static final Parcelable.Creator<KeyChainProtectionParams> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<KeyChainProtectionParams> CREATOR =
             new Parcelable.Creator<KeyChainProtectionParams>() {
         public KeyChainProtectionParams createFromParcel(Parcel in) {
             return new KeyChainProtectionParams(in);

@@ -276,7 +276,7 @@ public final class RcsThreadQueryParams implements Parcelable {
         mIsAscending = in.readByte() == 1;
     }
 
-    public static final Creator<RcsThreadQueryParams> CREATOR =
+    public static final @android.annotation.NonNull Creator<RcsThreadQueryParams> CREATOR =
             new Creator<RcsThreadQueryParams>() {
                 @Override
                 public RcsThreadQueryParams createFromParcel(Parcel in) {

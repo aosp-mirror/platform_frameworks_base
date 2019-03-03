@@ -99,7 +99,7 @@ public class ZygoteInit {
     private static final String ABI_LIST_ARG = "--abi-list=";
 
     // TODO (chriswailes): Re-name this --zygote-socket-name= and then add a
-    // --blastula-socket-name parameter.
+    // --usap-socket-name parameter.
     private static final String SOCKET_NAME_ARG = "--socket-name=";
 
     /**

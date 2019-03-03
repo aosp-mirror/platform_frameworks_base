@@ -128,7 +128,7 @@ public class ResumeActivityItem extends ActivityLifecycleItem {
         mIsForward = in.readBoolean();
     }
 
-    public static final Creator<ResumeActivityItem> CREATOR =
+    public static final @android.annotation.NonNull Creator<ResumeActivityItem> CREATOR =
             new Creator<ResumeActivityItem>() {
         public ResumeActivityItem createFromParcel(Parcel in) {
             return new ResumeActivityItem(in);

@@ -85,6 +85,12 @@ public abstract class TaskStackListener extends ITaskStackListener.Stub {
     }
 
     @Override
+    @UnsupportedAppUsage
+    public void onActivityLaunchOnSecondaryDisplayRerouted(ActivityManager.RunningTaskInfo taskInfo,
+            int requestedDisplayId) throws RemoteException {
+    }
+
+    @Override
     public void onTaskCreated(int taskId, ComponentName componentName) throws RemoteException {
     }
 

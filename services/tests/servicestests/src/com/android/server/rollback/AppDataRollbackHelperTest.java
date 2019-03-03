@@ -31,7 +31,6 @@ import static org.mockito.Mockito.when;
 import android.content.pm.VersionedPackage;
 import android.content.rollback.PackageRollbackInfo;
 import android.content.rollback.PackageRollbackInfo.RestoreInfo;
-import android.content.rollback.RollbackInfo;
 import android.util.IntArray;
 import android.util.SparseLongArray;
 
@@ -46,8 +45,7 @@ import org.mockito.Mockito;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.Set;
 
 @RunWith(JUnit4.class)
 public class AppDataRollbackHelperTest {
@@ -236,24 +234,24 @@ public class AppDataRollbackHelperTest {
         wasRecentlyRestored.getPendingRestores().add(
                 new RestoreInfo(73 /* userId */, 239 /* appId*/, "seInfo"));
 
-        RollbackData dataWithPendingBackup = new RollbackData(101, new File("/does/not/exist"), -1,
-                true);
-        dataWithPendingBackup.packages.add(pendingBackup);
+        RollbackData dataWithPendingBackup = new RollbackData(101, new File("/does/not/exist"), -1);
+        dataWithPendingBackup.info.getPackages().add(pendingBackup);
 
         RollbackData dataWithRecentRestore = new RollbackData(17239, new File("/does/not/exist"),
-                -1, true);
-        dataWithRecentRestore.packages.add(wasRecentlyRestored);
+                -1);
+        dataWithRecentRestore.info.getPackages().add(wasRecentlyRestored);
 
         RollbackData dataForDifferentUser = new RollbackData(17239, new File("/does/not/exist"),
-                -1, true);
-        dataForDifferentUser.packages.add(ignoredInfo);
+                -1);
+        dataForDifferentUser.info.getPackages().add(ignoredInfo);
 
-        RollbackInfo rollbackInfo = new RollbackInfo(17239,
-                Arrays.asList(pendingRestore, wasRecentlyRestored), false);
+        RollbackData dataForRestore = new RollbackData(17239, new File("/does/not/exist"), -1);
+        dataForRestore.info.getPackages().add(pendingRestore);
+        dataForRestore.info.getPackages().add(wasRecentlyRestored);
 
-        List<RollbackData> changed = helper.commitPendingBackupAndRestoreForUser(37,
-                Arrays.asList(dataWithPendingBackup, dataWithRecentRestore, dataForDifferentUser),
-                Collections.singletonList(rollbackInfo));
+        Set<RollbackData> changed = helper.commitPendingBackupAndRestoreForUser(37,
+                Arrays.asList(dataWithPendingBackup, dataWithRecentRestore, dataForDifferentUser,
+                    dataForRestore));
         InOrder inOrder = Mockito.inOrder(installer);
 
         // Check that pending backup and restore for the same package mutually destroyed each other.
@@ -267,9 +265,10 @@ public class AppDataRollbackHelperTest {
         assertEquals(53, pendingBackup.getCeSnapshotInodes().get(37));
 
         // Check that changed returns correct RollbackData.
-        assertEquals(2, changed.size());
-        assertEquals(dataWithPendingBackup, changed.get(0));
-        assertEquals(dataWithRecentRestore, changed.get(1));
+        assertEquals(3, changed.size());
+        assertTrue(changed.contains(dataWithPendingBackup));
+        assertTrue(changed.contains(dataWithRecentRestore));
+        assertTrue(changed.contains(dataForRestore));
 
         // Check that restore was performed.
         inOrder.verify(installer).restoreAppDataSnapshot(

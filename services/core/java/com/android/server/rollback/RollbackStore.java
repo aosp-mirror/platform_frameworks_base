@@ -35,6 +35,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Files;
+import java.text.ParseException;
 import java.time.Instant;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
@@ -47,60 +48,44 @@ class RollbackStore {
     private static final String TAG = "RollbackManager";
 
     // Assuming the rollback data directory is /data/rollback, we use the
-    // following directory structure to store persisted data for available and
-    // recently executed rollbacks:
+    // following directory structure to store persisted data for rollbacks:
     //   /data/rollback/
-    //      available/
-    //          XXX/
-    //              rollback.json
-    //              com.package.A/
-    //                  base.apk
-    //              com.package.B/
-    //                  base.apk
-    //          YYY/
-    //              rollback.json
-    //              com.package.C/
-    //                  base.apk
-    //      recently_executed.json
+    //       XXX/
+    //           rollback.json
+    //           com.package.A/
+    //               base.apk
+    //           com.package.B/
+    //               base.apk
+    //       YYY/
+    //           rollback.json
     //
     // * XXX, YYY are the rollbackIds for the corresponding rollbacks.
-    // * rollback.json contains all relevant metadata for the rollback. This
-    //   file is not written until the rollback is made available.
+    // * rollback.json contains all relevant metadata for the rollback.
     //
     // TODO: Use AtomicFile for all the .json files?
     private final File mRollbackDataDir;
-    private final File mAvailableRollbacksDir;
-    private final File mRecentlyExecutedRollbacksFile;
 
     RollbackStore(File rollbackDataDir) {
         mRollbackDataDir = rollbackDataDir;
-        mAvailableRollbacksDir = new File(mRollbackDataDir, "available");
-        mRecentlyExecutedRollbacksFile = new File(mRollbackDataDir, "recently_executed.json");
     }
 
     /**
-     * Reads the list of available rollbacks from persistent storage.
+     * Reads the rollback data from persistent storage.
      */
-    List<RollbackData> loadAvailableRollbacks() {
-        List<RollbackData> availableRollbacks = new ArrayList<>();
-        mAvailableRollbacksDir.mkdirs();
-        for (File rollbackDir : mAvailableRollbacksDir.listFiles()) {
+    List<RollbackData> loadAllRollbackData() {
+        List<RollbackData> rollbacks = new ArrayList<>();
+        mRollbackDataDir.mkdirs();
+        for (File rollbackDir : mRollbackDataDir.listFiles()) {
             if (rollbackDir.isDirectory()) {
                 try {
-                    RollbackData data = loadRollbackData(rollbackDir);
-                    availableRollbacks.add(data);
+                    rollbacks.add(loadRollbackData(rollbackDir));
                 } catch (IOException e) {
-                    // Note: Deleting the rollbackDir here will cause pending
-                    // rollbacks to be deleted. This should only ever happen
-                    // if reloadPersistedData is called while there are
-                    // pending rollbacks. The reloadPersistedData method is
-                    // currently only for testing, so that should be okay.
                     Log.e(TAG, "Unable to read rollback data at " + rollbackDir, e);
                     removeFile(rollbackDir);
                 }
             }
         }
-        return availableRollbacks;
+        return rollbacks;
     }
 
     /**
@@ -183,54 +168,42 @@ class RollbackStore {
         return ceSnapshotInodes;
     }
 
-    /**
-     * Reads the list of recently executed rollbacks from persistent storage.
-     */
-    List<RollbackInfo> loadRecentlyExecutedRollbacks() {
-        List<RollbackInfo> recentlyExecutedRollbacks = new ArrayList<>();
-        if (mRecentlyExecutedRollbacksFile.exists()) {
-            try {
-                // TODO: How to cope with changes to the format of this file from
-                // when RollbackStore is updated in the future?
-                String jsonString = IoUtils.readFileAsString(
-                        mRecentlyExecutedRollbacksFile.getAbsolutePath());
-                JSONObject object = new JSONObject(jsonString);
-                JSONArray array = object.getJSONArray("recentlyExecuted");
-                for (int i = 0; i < array.length(); ++i) {
-                    JSONObject element = array.getJSONObject(i);
-                    int rollbackId = element.getInt("rollbackId");
-                    List<PackageRollbackInfo> packages = packageRollbackInfosFromJson(
-                            element.getJSONArray("packages"));
-                    boolean isStaged = element.getBoolean("isStaged");
-                    List<VersionedPackage> causePackages = versionedPackagesFromJson(
-                            element.getJSONArray("causePackages"));
-                    int committedSessionId = element.getInt("committedSessionId");
-                    RollbackInfo rollback = new RollbackInfo(rollbackId, packages, isStaged,
-                            causePackages, committedSessionId);
-                    recentlyExecutedRollbacks.add(rollback);
-                }
-            } catch (IOException | JSONException e) {
-                // TODO: What to do here? Surely we shouldn't just forget about
-                // everything after the point of exception?
-                Log.e(TAG, "Failed to read recently executed rollbacks", e);
-            }
-        }
+    private static JSONObject rollbackInfoToJson(RollbackInfo rollback) throws JSONException {
+        JSONObject json = new JSONObject();
+        json.put("rollbackId", rollback.getRollbackId());
+        json.put("packages", toJson(rollback.getPackages()));
+        json.put("isStaged", rollback.isStaged());
+        json.put("causePackages", versionedPackagesToJson(rollback.getCausePackages()));
+        json.put("committedSessionId", rollback.getCommittedSessionId());
+        return json;
+    }
 
-        return recentlyExecutedRollbacks;
+    private static RollbackInfo rollbackInfoFromJson(JSONObject json) throws JSONException {
+        return new RollbackInfo(
+                json.getInt("rollbackId"),
+                packageRollbackInfosFromJson(json.getJSONArray("packages")),
+                json.getBoolean("isStaged"),
+                versionedPackagesFromJson(json.getJSONArray("causePackages")),
+                json.getInt("committedSessionId"));
     }
 
     /**
-     * Creates a new RollbackData instance with backupDir assigned.
+     * Creates a new RollbackData instance for a non-staged rollback with
+     * backupDir assigned.
      */
-    RollbackData createAvailableRollback(int rollbackId) throws IOException {
-        File backupDir = new File(mAvailableRollbacksDir, Integer.toString(rollbackId));
-        return new RollbackData(rollbackId, backupDir, -1, true);
+    RollbackData createNonStagedRollback(int rollbackId) throws IOException {
+        File backupDir = new File(mRollbackDataDir, Integer.toString(rollbackId));
+        return new RollbackData(rollbackId, backupDir, -1);
     }
 
-    RollbackData createPendingStagedRollback(int rollbackId, int stagedSessionId)
+    /**
+     * Creates a new RollbackData instance for a staged rollback with
+     * backupDir assigned.
+     */
+    RollbackData createStagedRollback(int rollbackId, int stagedSessionId)
             throws IOException {
-        File backupDir = new File(mAvailableRollbacksDir, Integer.toString(rollbackId));
-        return new RollbackData(rollbackId, backupDir, stagedSessionId, false);
+        File backupDir = new File(mRollbackDataDir, Integer.toString(rollbackId));
+        return new RollbackData(rollbackId, backupDir, stagedSessionId);
     }
 
     /**
@@ -263,17 +236,28 @@ class RollbackStore {
     }
 
     /**
-     * Writes the metadata for an available rollback to persistent storage.
+     * Deletes all backed up apks and apex files associated with the given
+     * rollback.
      */
-    void saveAvailableRollback(RollbackData data) throws IOException {
+    static void deletePackageCodePaths(RollbackData data) {
+        for (PackageRollbackInfo info : data.info.getPackages()) {
+            File targetDir = new File(data.backupDir, info.getPackageName());
+            removeFile(targetDir);
+        }
+    }
+
+    /**
+     * Saves the rollback data to persistent storage.
+     */
+    void saveRollbackData(RollbackData data) throws IOException {
         try {
             JSONObject dataJson = new JSONObject();
-            dataJson.put("rollbackId", data.rollbackId);
-            dataJson.put("packages", toJson(data.packages));
+            dataJson.put("info", rollbackInfoToJson(data.info));
             dataJson.put("timestamp", data.timestamp.toString());
             dataJson.put("stagedSessionId", data.stagedSessionId);
-            dataJson.put("isAvailable", data.isAvailable);
+            dataJson.put("state", rollbackStateToString(data.state));
             dataJson.put("apkSessionId", data.apkSessionId);
+            dataJson.put("restoreUserDataInProgress", data.restoreUserDataInProgress);
 
             PrintWriter pw = new PrintWriter(new File(data.backupDir, "rollback.json"));
             pw.println(dataJson.toString());
@@ -284,80 +268,49 @@ class RollbackStore {
     }
 
     /**
-     * Removes all persistant storage associated with the given available
-     * rollback.
+     * Removes all persistant storage associated with the given rollback data.
      */
-    void deleteAvailableRollback(RollbackData data) {
+    void deleteRollbackData(RollbackData data) {
         removeFile(data.backupDir);
-    }
-
-    /**
-     * Writes the list of recently executed rollbacks to storage.
-     */
-    void saveRecentlyExecutedRollbacks(List<RollbackInfo> recentlyExecutedRollbacks) {
-        try {
-            JSONObject json = new JSONObject();
-            JSONArray array = new JSONArray();
-            json.put("recentlyExecuted", array);
-
-            for (int i = 0; i < recentlyExecutedRollbacks.size(); ++i) {
-                RollbackInfo rollback = recentlyExecutedRollbacks.get(i);
-                JSONObject element = new JSONObject();
-                element.put("rollbackId", rollback.getRollbackId());
-                element.put("packages", toJson(rollback.getPackages()));
-                element.put("isStaged", rollback.isStaged());
-                element.put("causePackages", versionedPackagesToJson(rollback.getCausePackages()));
-                element.put("committedSessionId", rollback.getCommittedSessionId());
-                array.put(element);
-            }
-
-            PrintWriter pw = new PrintWriter(mRecentlyExecutedRollbacksFile);
-            pw.println(json.toString());
-            pw.close();
-        } catch (IOException | JSONException e) {
-            // TODO: What to do here?
-            Log.e(TAG, "Failed to save recently executed rollbacks", e);
-        }
     }
 
     /**
      * Reads the metadata for a rollback from the given directory.
      * @throws IOException in case of error reading the data.
      */
-    private RollbackData loadRollbackData(File backupDir) throws IOException {
+    private static RollbackData loadRollbackData(File backupDir) throws IOException {
         try {
             File rollbackJsonFile = new File(backupDir, "rollback.json");
             JSONObject dataJson = new JSONObject(
                     IoUtils.readFileAsString(rollbackJsonFile.getAbsolutePath()));
 
-            int rollbackId = dataJson.getInt("rollbackId");
-            int stagedSessionId = dataJson.getInt("stagedSessionId");
-            boolean isAvailable = dataJson.getBoolean("isAvailable");
-            RollbackData data = new RollbackData(rollbackId, backupDir,
-                    stagedSessionId, isAvailable);
-            data.packages.addAll(packageRollbackInfosFromJson(dataJson.getJSONArray("packages")));
-            data.timestamp = Instant.parse(dataJson.getString("timestamp"));
-            data.apkSessionId = dataJson.getInt("apkSessionId");
-            return data;
-        } catch (JSONException | DateTimeParseException e) {
+            return new RollbackData(
+                    rollbackInfoFromJson(dataJson.getJSONObject("info")),
+                    backupDir,
+                    Instant.parse(dataJson.getString("timestamp")),
+                    dataJson.getInt("stagedSessionId"),
+                    rollbackStateFromString(dataJson.getString("state")),
+                    dataJson.getInt("apkSessionId"),
+                    dataJson.getBoolean("restoreUserDataInProgress"));
+        } catch (JSONException | DateTimeParseException | ParseException e) {
             throw new IOException(e);
         }
     }
 
-    private JSONObject toJson(VersionedPackage pkg) throws JSONException {
+    private static JSONObject toJson(VersionedPackage pkg) throws JSONException {
         JSONObject json = new JSONObject();
         json.put("packageName", pkg.getPackageName());
         json.put("longVersionCode", pkg.getLongVersionCode());
         return json;
     }
 
-    private VersionedPackage versionedPackageFromJson(JSONObject json) throws JSONException {
+    private static VersionedPackage versionedPackageFromJson(JSONObject json) throws JSONException {
         String packageName = json.getString("packageName");
         long longVersionCode = json.getLong("longVersionCode");
         return new VersionedPackage(packageName, longVersionCode);
     }
 
-    private JSONObject toJson(PackageRollbackInfo info) throws JSONException {
+    private static JSONObject toJson(PackageRollbackInfo info) throws JSONException {
         JSONObject json = new JSONObject();
         json.put("versionRolledBackFrom", toJson(info.getVersionRolledBackFrom()));
         json.put("versionRolledBackTo", toJson(info.getVersionRolledBackTo()));
@@ -376,7 +329,8 @@ class RollbackStore {
         return json;
     }
 
-    private PackageRollbackInfo packageRollbackInfoFromJson(JSONObject json) throws JSONException {
+    private static PackageRollbackInfo packageRollbackInfoFromJson(JSONObject json)
+            throws JSONException {
         VersionedPackage versionRolledBackFrom = versionedPackageFromJson(
                 json.getJSONObject("versionRolledBackFrom"));
         VersionedPackage versionRolledBackTo = versionedPackageFromJson(
@@ -397,7 +351,7 @@ class RollbackStore {
                 pendingBackups, pendingRestores, isApex, installedUsers, ceSnapshotInodes);
     }
 
-    private JSONArray versionedPackagesToJson(List<VersionedPackage> packages)
+    private static JSONArray versionedPackagesToJson(List<VersionedPackage> packages)
             throws JSONException {
         JSONArray json = new JSONArray();
         for (VersionedPackage pkg : packages) {
@@ -406,7 +360,8 @@ class RollbackStore {
         return json;
     }
 
-    private List<VersionedPackage> versionedPackagesFromJson(JSONArray json) throws JSONException {
+    private static List<VersionedPackage> versionedPackagesFromJson(JSONArray json)
+            throws JSONException {
         List<VersionedPackage> packages = new ArrayList<>();
         for (int i = 0; i < json.length(); ++i) {
             packages.add(versionedPackageFromJson(json.getJSONObject(i)));
@@ -414,7 +369,7 @@ class RollbackStore {
         return packages;
     }
 
-    private JSONArray toJson(List<PackageRollbackInfo> infos) throws JSONException {
+    private static JSONArray toJson(List<PackageRollbackInfo> infos) throws JSONException {
         JSONArray json = new JSONArray();
         for (PackageRollbackInfo info : infos) {
             json.put(toJson(info));
@@ -422,7 +377,7 @@ class RollbackStore {
         return json;
     }
 
-    private List<PackageRollbackInfo> packageRollbackInfosFromJson(JSONArray json)
+    private static List<PackageRollbackInfo> packageRollbackInfosFromJson(JSONArray json)
             throws JSONException {
         List<PackageRollbackInfo> infos = new ArrayList<>();
         for (int i = 0; i < json.length(); ++i) {
@@ -436,7 +391,7 @@ class RollbackStore {
      * If the file is a directory, its contents are deleted as well.
      * Has no effect if the directory does not exist.
      */
-    private void removeFile(File file) {
+    private static void removeFile(File file) {
         if (file.isDirectory()) {
             for (File child : file.listFiles()) {
                 removeFile(child);
@@ -445,5 +400,24 @@ class RollbackStore {
         if (file.exists()) {
             file.delete();
         }
+    }
+
+    private static String rollbackStateToString(@RollbackData.RollbackState int state) {
+        switch (state) {
+            case RollbackData.ROLLBACK_STATE_ENABLING: return "enabling";
+            case RollbackData.ROLLBACK_STATE_AVAILABLE: return "available";
+            case RollbackData.ROLLBACK_STATE_COMMITTED: return "committed";
+        }
+        throw new AssertionError("Invalid rollback state: " + state);
+    }
+
+    private static @RollbackData.RollbackState int rollbackStateFromString(String state)
+            throws ParseException {
+        switch (state) {
+            case "enabling": return RollbackData.ROLLBACK_STATE_ENABLING;
+            case "available": return RollbackData.ROLLBACK_STATE_AVAILABLE;
+            case "committed": return RollbackData.ROLLBACK_STATE_COMMITTED;
+        }
+        throw new ParseException("Invalid rollback state: " + state, 0);
     }
 }

@@ -31,16 +31,21 @@ import com.android.internal.statusbar.NotificationVisibility;
 /** @hide */
 interface IStatusBarService
 {
+    @UnsupportedAppUsage
     void expandNotificationsPanel();
+    @UnsupportedAppUsage
     void collapsePanels();
     void togglePanel();
+    @UnsupportedAppUsage
     void disable(int what, IBinder token, String pkg);
     void disableForUser(int what, IBinder token, String pkg, int userId);
     void disable2(int what, IBinder token, String pkg);
     void disable2ForUser(int what, IBinder token, String pkg, int userId);
     int[] getDisableFlags(IBinder token, int userId);
     void setIcon(String slot, String iconPackage, int iconId, int iconLevel, String contentDescription);
+    @UnsupportedAppUsage
     void setIconVisibility(String slot, boolean visible);
+    @UnsupportedAppUsage
     void removeIcon(String slot);
     // TODO(b/117478341): support back button change when IME is showing on a external display.
     void setImeWindowStatus(in IBinder token, int vis, int backDisposition,
@@ -87,6 +92,7 @@ interface IStatusBarService
     void addTile(in ComponentName tile);
     void remTile(in ComponentName tile);
     void clickTile(in ComponentName tile);
+    @UnsupportedAppUsage
     void handleSystemKey(in int key);
 
     /**

@@ -231,7 +231,7 @@ class NotificationSwipeHelper extends SwipeHelper
     public void dismissChild(final View view, float velocity,
             boolean useAccelerateInterpolator) {
         superDismissChild(view, velocity, useAccelerateInterpolator);
-        if (mCallback.isExpanded()) {
+        if (mCallback.shouldDismissQuickly()) {
             // We don't want to quick-dismiss when it's a heads up as this might lead to closing
             // of the panel early.
             mCallback.handleChildViewDismissed(view);
@@ -418,7 +418,11 @@ class NotificationSwipeHelper extends SwipeHelper
     }
 
     public interface NotificationCallback extends SwipeHelper.Callback{
-        boolean isExpanded();
+        /**
+         * @return if the view should be dismissed as soon as the touch is released, otherwise its
+         *         removed when the animation finishes.
+         */
+        boolean shouldDismissQuickly();
 
         void handleChildViewDismissed(View view);
 

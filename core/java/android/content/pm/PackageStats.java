@@ -79,7 +79,7 @@ public class PackageStats implements Parcelable {
     /** Size of the package's OBBs placed on external media. */
     public long externalObbSize;
 
-    public static final Parcelable.Creator<PackageStats> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<PackageStats> CREATOR
             = new Parcelable.Creator<PackageStats>() {
         public PackageStats createFromParcel(Parcel in) {
             return new PackageStats(in);

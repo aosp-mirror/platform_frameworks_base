@@ -125,7 +125,7 @@ public class ContextHubMessage implements Parcelable {
         out.writeByteArray(mData);
     }
 
-    public static final Parcelable.Creator<ContextHubMessage> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<ContextHubMessage> CREATOR
             = new Parcelable.Creator<ContextHubMessage>() {
         public ContextHubMessage createFromParcel(Parcel in) {
             return new ContextHubMessage(in);

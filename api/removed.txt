@@ -32,7 +32,7 @@ package android.app {
     method public int describeContents();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final int CONTENTS_FILE_DESCRIPTOR = 1; // 0x1
-    field public static final android.os.Parcelable.Creator<android.app.PictureInPictureArgs> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.PictureInPictureArgs> CREATOR;
     field public static final int PARCELABLE_WRITE_RETURN_VALUE = 1; // 0x1
   }
 
@@ -352,11 +352,11 @@ package android.os {
   }
 
   public static final class StrictMode.ThreadPolicy.Builder {
-    method public android.os.StrictMode.ThreadPolicy.Builder penaltyListener(@NonNull android.os.StrictMode.OnThreadViolationListener, @NonNull java.util.concurrent.Executor);
+    method @NonNull public android.os.StrictMode.ThreadPolicy.Builder penaltyListener(@NonNull android.os.StrictMode.OnThreadViolationListener, @NonNull java.util.concurrent.Executor);
   }
 
   public static final class StrictMode.VmPolicy.Builder {
-    method public android.os.StrictMode.VmPolicy.Builder penaltyListener(@NonNull android.os.StrictMode.OnVmViolationListener, @NonNull java.util.concurrent.Executor);
+    method @NonNull public android.os.StrictMode.VmPolicy.Builder penaltyListener(@NonNull android.os.StrictMode.OnVmViolationListener, @NonNull java.util.concurrent.Executor);
   }
 
   public final class SystemClock {
@@ -508,6 +508,8 @@ package android.provider {
   }
 
   public final class MediaStore {
+    method @Deprecated @NonNull public static android.net.Uri createPending(@NonNull android.content.Context, @NonNull android.provider.MediaStore.PendingParams);
+    method @Deprecated @NonNull public static android.provider.MediaStore.PendingSession openPending(@NonNull android.content.Context, @NonNull android.net.Uri);
     method @Deprecated @NonNull public static android.net.Uri setIncludeTrashed(@NonNull android.net.Uri);
     method @Deprecated public static void trash(@NonNull android.content.Context, @NonNull android.net.Uri);
     method @Deprecated public static void trash(@NonNull android.content.Context, @NonNull android.net.Uri, long);
@@ -515,9 +517,25 @@ package android.provider {
   }
 
   public static interface MediaStore.MediaColumns extends android.provider.BaseColumns {
-    field @Deprecated public static final String DATE_EXPIRES = "date_expires";
     field @Deprecated public static final String HASH = "_hash";
     field @Deprecated public static final String IS_TRASHED = "is_trashed";
+  }
+
+  @Deprecated public static class MediaStore.PendingParams {
+    ctor public MediaStore.PendingParams(@NonNull android.net.Uri, @NonNull String, @NonNull String);
+    method public void setDownloadUri(@Nullable android.net.Uri);
+    method public void setPrimaryDirectory(@Nullable String);
+    method public void setRefererUri(@Nullable android.net.Uri);
+    method public void setSecondaryDirectory(@Nullable String);
+  }
+
+  @Deprecated public static class MediaStore.PendingSession implements java.lang.AutoCloseable {
+    method public void abandon();
+    method public void close();
+    method public void notifyProgress(@IntRange(from=0, to=100) int);
+    method @NonNull public android.os.ParcelFileDescriptor open() throws java.io.FileNotFoundException;
+    method @NonNull public java.io.OutputStream openOutputStream() throws java.io.FileNotFoundException;
+    method @NonNull public android.net.Uri publish();
   }
 
   public static final class Settings.Global extends android.provider.Settings.NameValueTable {

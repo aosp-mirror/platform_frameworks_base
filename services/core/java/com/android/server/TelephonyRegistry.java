@@ -1455,7 +1455,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         synchronized (mRecords) {
             mPreciseDataConnectionState = new PreciseDataConnectionState(
                     TelephonyManager.DATA_UNKNOWN,TelephonyManager.NETWORK_TYPE_UNKNOWN,
-                    ApnSetting.getApnTypesBitmaskFromString(apnType), "", null,
+                    ApnSetting.getApnTypesBitmaskFromString(apnType), null, null,
                     DataFailCause.NONE);
             for (Record r : mRecords) {
                 if (r.matchPhoneStateListenerEvent(
@@ -1471,7 +1471,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         }
         broadcastDataConnectionFailed(apnType, subId);
         broadcastPreciseDataConnectionStateChanged(TelephonyManager.DATA_UNKNOWN,
-                TelephonyManager.NETWORK_TYPE_UNKNOWN, apnType, "", null,
+                TelephonyManager.NETWORK_TYPE_UNKNOWN, apnType, null, null,
                 DataFailCause.NONE);
     }
 

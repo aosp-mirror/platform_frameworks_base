@@ -71,7 +71,7 @@ public final class ContentClassification implements Parcelable {
         dest.writeBundle(mExtras);
     }
 
-    public static final Creator<ContentClassification> CREATOR =
+    public static final @android.annotation.NonNull Creator<ContentClassification> CREATOR =
             new Creator<ContentClassification>() {
         @Override
         public ContentClassification createFromParcel(Parcel source) {

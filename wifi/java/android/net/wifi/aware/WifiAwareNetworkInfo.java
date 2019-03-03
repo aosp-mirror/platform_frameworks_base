@@ -116,7 +116,7 @@ public final class WifiAwareNetworkInfo implements TransportInfo, Parcelable {
         dest.writeInt(mTransportProtocol);
     }
 
-    public static final Creator<WifiAwareNetworkInfo> CREATOR =
+    public static final @android.annotation.NonNull Creator<WifiAwareNetworkInfo> CREATOR =
             new Creator<WifiAwareNetworkInfo>() {
                 @Override
                 public WifiAwareNetworkInfo createFromParcel(Parcel in) {

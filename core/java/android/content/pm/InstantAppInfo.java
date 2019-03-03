@@ -136,7 +136,7 @@ public final class InstantAppInfo implements Parcelable {
         parcel.writeParcelable(mApplicationInfo, flags);
     }
 
-    public static final Creator<InstantAppInfo> CREATOR =
+    public static final @android.annotation.NonNull Creator<InstantAppInfo> CREATOR =
             new Creator<InstantAppInfo>() {
         @Override
         public InstantAppInfo createFromParcel(Parcel parcel) {

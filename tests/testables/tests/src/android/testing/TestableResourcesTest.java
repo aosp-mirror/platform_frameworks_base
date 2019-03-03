@@ -21,8 +21,9 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
 import android.content.res.Resources;
-import android.support.test.InstrumentationRegistry;
 import android.test.suitebuilder.annotation.SmallTest;
+
+import androidx.test.InstrumentationRegistry;
 
 import com.android.testables.R;
 

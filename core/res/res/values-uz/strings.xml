@@ -308,15 +308,18 @@
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefon"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"telefon qo‘ng‘iroqlarini amalga oshirish va boshqarish"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; uchun telefon chaqiruvlarini amalga oshirish va boshqarishga ruxsat berilsinmi?"</string>
-    <string name="permgrouplab_sensors" msgid="416037179223226722">"Tana sezgichlari"</string>
+    <!-- no translation found for permgrouplab_sensors (4838614103153567532) -->
+    <skip />
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"organizm holati haqidagi sezgich ma’lumotlariga kirish"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; uchun organizm holati haqidagi sezgichlar axborotlariga ruxsat berilsinmi?"</string>
     <string name="permgrouplab_aural" msgid="965607064083134896">"Musiqa"</string>
     <string name="permgroupdesc_aural" msgid="4870189506255958055">"musiqaga kirish"</string>
     <string name="permgrouprequest_aural" msgid="6787926123071735620">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; uchun musiqangizga kirishga ruxsat berilsinmi?"</string>
-    <string name="permgrouplab_visual" msgid="8030190588123857921">"Surat va videolar"</string>
+    <!-- no translation found for permgrouplab_visual (6477382108771145134) -->
+    <skip />
     <string name="permgroupdesc_visual" msgid="3415827902566663546">"surat va videolarga kirish"</string>
-    <string name="permgrouprequest_visual" msgid="6907523945030290376">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; uchun surat va videolaringizga kirishga ruxsat berilsinmi?"</string>
+    <!-- no translation found for permgrouprequest_visual (3043752127595243314) -->
+    <skip />
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Oynadagi kontentni o‘qiydi"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Joriy oynadagi kontent mazmunini aniqlaydi."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Teginib o‘rganish xizmatini yoqadi"</string>
@@ -1397,8 +1400,7 @@
     <string name="ext_media_init_action" msgid="7952885510091978278">"Sozlash"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Chiqarish"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"O‘rganish"</string>
-    <!-- no translation found for ext_media_seamless_action (6575980560886881233) -->
-    <skip />
+    <string name="ext_media_seamless_action" msgid="6575980560886881233">"Audio chiqishni almashtirish"</string>
     <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> topilmadi"</string>
     <string name="ext_media_missing_message" msgid="4012389235250987930">"Qurilmani yana ulang"</string>
     <string name="ext_media_move_specific_title" msgid="1471100343872375842">"<xliff:g id="NAME">%s</xliff:g> ko‘chirib o‘tkazilmoqda"</string>
@@ -1612,6 +1614,8 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Tasvir uzatish #<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", xavfsiz"</string>
+    <string name="activity_starter_block_bg_activity_starts_permissive" msgid="5692097903712956720">"Keyingi Android Q nashrlarida fondagi ushbu <xliff:g id="PACKAGENAME">%1$s</xliff:g> jarayoni bloklanadi. Batafsil: go/q-bg-block."</string>
+    <string name="activity_starter_block_bg_activity_starts_enforcing" msgid="8299522481076404353">"Fondagi <xliff:g id="PACKAGENAME">%1$s</xliff:g> jarayoni bloklandi. Batafsil: go/q-bg-block."</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Grafik kalit esimdan chiqdi"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Grafik kalit xato"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"Parol noto‘g‘ri"</string>
@@ -1997,6 +2001,24 @@
     <string name="dynamic_mode_notification_channel_name" msgid="2348803891571320452">"Kun tartibi rejimi haqidagi bildirishnoma"</string>
     <string name="dynamic_mode_notification_title" msgid="508815255807182035">"Batareya quvvati odatdagidan ertaroq tugashi mumkin"</string>
     <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"Batareya quvvati uzoqroq ishlashi uchun Tejamkor rejim yoqildi"</string>
+    <string name="mime_type_folder" msgid="7111951698626315204">"Jild"</string>
+    <string name="mime_type_apk" msgid="5518003630972506900">"Android ilova"</string>
+    <string name="mime_type_generic" msgid="6833871596845900027">"Fayl"</string>
+    <string name="mime_type_generic_ext" msgid="8450275970061657174">"<xliff:g id="EXTENSION">%1$s</xliff:g> fayl"</string>
+    <string name="mime_type_audio" msgid="6289777657172050926">"Audio"</string>
+    <string name="mime_type_audio_ext" msgid="3270880987725816210">"<xliff:g id="EXTENSION">%1$s</xliff:g> audio"</string>
+    <string name="mime_type_video" msgid="4093025777317307426">"Video"</string>
+    <string name="mime_type_video_ext" msgid="5643771615714173159">"<xliff:g id="EXTENSION">%1$s</xliff:g> video"</string>
+    <string name="mime_type_image" msgid="3144284451605236371">"Rasm"</string>
+    <string name="mime_type_image_ext" msgid="1514613218742736590">"<xliff:g id="EXTENSION">%1$s</xliff:g> rasm"</string>
+    <string name="mime_type_compressed" msgid="1645486037074943257">"Arxiv"</string>
+    <string name="mime_type_compressed_ext" msgid="4232293058067801528">"<xliff:g id="EXTENSION">%1$s</xliff:g> arxiv"</string>
+    <string name="mime_type_document" msgid="1596838147256375966">"Hujjat"</string>
+    <string name="mime_type_document_ext" msgid="6327266601345501281">"<xliff:g id="EXTENSION">%1$s</xliff:g> hujjat"</string>
+    <string name="mime_type_spreadsheet" msgid="2639138255207123557">"Jadval"</string>
+    <string name="mime_type_spreadsheet_ext" msgid="5508653032786106725">"<xliff:g id="EXTENSION">%1$s</xliff:g> jadval"</string>
+    <string name="mime_type_presentation" msgid="6145604688774787357">"Taqdimot"</string>
+    <string name="mime_type_presentation_ext" msgid="2982650207774823437">"<xliff:g id="EXTENSION">%1$s</xliff:g> taqdimot"</string>
     <string name="car_loading_profile" msgid="3545132581795684027">"Yuklanmoqda"</string>
     <plurals name="file_count" formatted="false" msgid="1628600959752419449">
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> ta fayl</item>

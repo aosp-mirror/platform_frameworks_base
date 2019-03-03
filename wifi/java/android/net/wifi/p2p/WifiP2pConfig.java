@@ -193,7 +193,7 @@ public class WifiP2pConfig implements Parcelable {
     }
 
     /** Implement the Parcelable interface */
-    public static final Creator<WifiP2pConfig> CREATOR =
+    public static final @android.annotation.NonNull Creator<WifiP2pConfig> CREATOR =
         new Creator<WifiP2pConfig>() {
             public WifiP2pConfig createFromParcel(Parcel in) {
                 WifiP2pConfig config = new WifiP2pConfig();

@@ -103,8 +103,8 @@ class ZygoteArguments {
     /**
      *
      */
-    boolean mBlastulaPoolEnabled;
-    boolean mBlastulaPoolStatusSpecified = false;
+    boolean mUsapPoolEnabled;
+    boolean mUsapPoolStatusSpecified = false;
 
     /**
      * from all --rlimit=r,c,m
@@ -203,6 +203,12 @@ class ZygoteArguments {
      * pre-forked zygote at boot time, or when it changes, via --hidden-api-log-sampling-rate.
      */
     int mHiddenApiAccessLogSampleRate = -1;
+
+    /**
+     * Sampling rate for logging hidden API accesses to statslog. This is sent to the
+     * pre-forked zygote at boot time, or when it changes, via --hidden-api-statslog-sampling-rate.
+     */
+    int mHiddenApiAccessStatslogSampleRate = -1;
 
     /**
      * Constructs instance and parses args
@@ -391,6 +397,15 @@ class ZygoteArguments {
                         "Invalid log sampling rate: " + rateStr, nfe);
                 }
                 expectRuntimeArgs = false;
+            } else if (arg.startsWith("--hidden-api-statslog-sampling-rate=")) {
+                String rateStr = arg.substring(arg.indexOf('=') + 1);
+                try {
+                    mHiddenApiAccessStatslogSampleRate = Integer.parseInt(rateStr);
+                } catch (NumberFormatException nfe) {
+                    throw new IllegalArgumentException(
+                        "Invalid statslog sampling rate: " + rateStr, nfe);
+                }
+                expectRuntimeArgs = false;
             } else if (arg.startsWith("--package-name=")) {
                 if (mPackageName != null) {
                     throw new IllegalArgumentException("Duplicate arg specified");
@@ -403,9 +418,9 @@ class ZygoteArguments {
                     throw new IllegalArgumentException("Duplicate arg specified");
                 }
                 mSandboxId = arg.substring(arg.indexOf('=') + 1);
-            } else if (arg.startsWith("--blastula-pool-enabled=")) {
-                mBlastulaPoolStatusSpecified = true;
-                mBlastulaPoolEnabled = Boolean.parseBoolean(arg.substring(arg.indexOf('=') + 1));
+            } else if (arg.startsWith("--usap-pool-enabled=")) {
+                mUsapPoolStatusSpecified = true;
+                mUsapPoolEnabled = Boolean.parseBoolean(arg.substring(arg.indexOf('=') + 1));
                 expectRuntimeArgs = false;
             } else {
                 break;

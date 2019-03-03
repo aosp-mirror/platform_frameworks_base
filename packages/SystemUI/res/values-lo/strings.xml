@@ -325,7 +325,8 @@
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"Wi-Fi ເປີດ"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"ບໍ່​ມີ​ເຄືອ​ຂ່າຍ Wi-Fi ຢູ່"</string>
     <string name="quick_settings_wifi_secondary_label_transient" msgid="7748206246119760554">"ກຳລັງເປີດ..."</string>
-    <string name="quick_settings_cast_title" msgid="7709016546426454729">"ການສົ່ງສັນຍານ"</string>
+    <!-- no translation found for quick_settings_cast_title (6954684227605751758) -->
+    <skip />
     <string name="quick_settings_casting" msgid="6601710681033353316">"​ກຳ​ລັງ​ສົ່ງ​ສັນ​ຍານ"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"​ອຸ​ປະ​ກອນບໍ່​ມີ​ຊື່"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"​ພ້ອ​ມ​ສົ່ງ​ສັນ​ຍານ​ແລ້ວ"</string>
@@ -437,7 +438,8 @@
     <string name="battery_saver_notification_title" msgid="8614079794522291840">"ຕົວປະຢັດແບັດເຕີຣີເປີດຢູ່"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"ຫຼຸດ​ປະ​ສິ​ທິ​ພາບ​ແລະ​ການ​ນຳ​ໃຊ້​ຂໍ້​ມູນ​ພື້ນຫຼັງ"</string>
     <string name="battery_saver_notification_action_text" msgid="132118784269455533">"ປິດຕົວປະຢັດແບັດເຕີຣີ"</string>
-    <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ​ຈະ​ເລີ່ມ​ບັນ​ທຶກ​ທຸກ​ຢ່າງ​ທີ່​ສະ​ແດງ​ຜົນ​ໃນ​ໜ້າ​ຈໍ​ທ່ານ."</string>
+    <string name="media_projection_dialog_text" msgid="1443042478990422751">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ຈະເລີ່ມບັນທຶກທຸກຢ່າງຢູ່ໜ້າຈໍຂອງທ່ານ ຮວມທັງການແຈ້ງເຕືອນ, ລະຫັດຜ່ານ, ຮູບພາບ, ຂໍ້ຄວາມ ແລະ ຂໍ້ມູນການຈ່າຍເງິນ."</string>
+    <string name="media_projection_dialog_title" msgid="7574971526813630219">"ອະນຸຍາດໃຫ້ <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ບັນທຶກ ຫຼື ສົ່ງສັນຍານໜ້າຈໍຂອງທ່ານບໍ?"</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"ບໍ່​ຕ້ອງ​ສະ​ແດງ​ອີກ"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"ລຶບລ້າງທັງໝົດ"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"ຈັດການ"</string>
@@ -814,6 +816,9 @@
     <string name="high_temp_title" msgid="4589508026407318374">"ໂທລະສັບກຳລັງຮ້ອນຂຶ້ນ"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"ຄຸນສົມບັດບາງຢ່າງຖືກຈຳກັດໄວ້ເນື່ອງໃນເວລາຫຼຸດອຸນຫະພູມຂອງໂທລະສັບ"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"ໂທລະສັບຂອງທ່ານຈະພະຍາຍາມລົດອຸນຫະພູມລົງ. ທ່ານຍັງຄົງສາມາດໃຊ້ໂທລະສັບຂອງທ່ານໄດ້ຢູ່, ແຕ່ມັນຈະເຮັດວຽກຊ້າລົງ.\n\nເມື່ອໂທລະສັບຂອງທ່ານບໍ່ຮ້ອນຫຼາຍແລ້ວ, ມັນຈະກັບມາເຮັດວຽກຕາມປົກກະຕິ."</string>
+    <string name="high_temp_alarm_title" msgid="442812040762745210">"ຖອດສາຍສາກອອກ"</string>
+    <string name="high_temp_alarm_notify_message" msgid="1802871059489414932">"ເກີດບັນຫາໃນການສາກໄຟອຸປະກອນນີ້. ກະລຸນາຖອດສາຍສາກອອກ ແລະ ລະວັງເນື່ອງຈາກສາຍອາດຈະຍັງອຸ່ນຢູ່."</string>
+    <string name="high_temp_alarm_help_care_steps" msgid="3631075329318070726">"ເບິ່ງຂັ້ນຕອນການເບິ່ງແຍງ"</string>
     <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"ປຸ່ມລັດຊ້າຍ"</string>
     <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"ປຸ່ມລັດຂວາ"</string>
     <string name="lockscreen_unlock_left" msgid="2043092136246951985">"ປຸ່ມລັດຊ້າຍປົດລັອກນຳ"</string>

@@ -32,7 +32,7 @@ public class KeyCharacteristics implements Parcelable {
     public KeymasterArguments swEnforced;
     public KeymasterArguments hwEnforced;
 
-    public static final Parcelable.Creator<KeyCharacteristics> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<KeyCharacteristics> CREATOR =
             new Parcelable.Creator<KeyCharacteristics>() {
                 @Override
                 public KeyCharacteristics createFromParcel(Parcel in) {

@@ -51,6 +51,18 @@ make_cache_filename(const string& outDir)
     return filename + "/.bit_cache";
 }
 
+bool
+Module::HasClass(const string& cl)
+{
+    for (vector<string>::const_iterator c = classes.begin(); c != classes.end(); c++) {
+        if (*c == cl) {
+            return true;
+        }
+    }
+    return false;
+}
+
+
 BuildVars::BuildVars(const string& outDir, const string& buildProduct,
         const string& buildVariant, const string& buildType)
     :m_filename(),

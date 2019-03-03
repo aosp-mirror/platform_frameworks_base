@@ -43,7 +43,7 @@ import java.util.regex.Pattern;
  */
 @SystemApi
 public final class PhoneNumberRange implements Parcelable {
-    public static final Creator<PhoneNumberRange> CREATOR = new Creator<PhoneNumberRange>() {
+    public static final @android.annotation.NonNull Creator<PhoneNumberRange> CREATOR = new Creator<PhoneNumberRange>() {
         @Override
         public PhoneNumberRange createFromParcel(Parcel in) {
             return new PhoneNumberRange(in);
@@ -149,7 +149,7 @@ public final class PhoneNumberRange implements Parcelable {
      * @param number A phone number, with or without separators or a country code.
      * @return {@code true} if the number matches, {@code false} otherwise.
      */
-    public boolean matches(String number) {
+    public boolean matches(@NonNull String number) {
         // Check the prefix, make sure it matches either with or without the country code.
         String normalizedNumber = number.replaceAll("[^0-9]", "");
         String prefixWithCountryCode = mCountryCode + mPrefix;

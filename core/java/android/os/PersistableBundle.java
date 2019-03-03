@@ -212,7 +212,7 @@ public final class PersistableBundle extends BaseBundle implements Cloneable, Pa
         }
     }
 
-    public static final Parcelable.Creator<PersistableBundle> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<PersistableBundle> CREATOR =
             new Parcelable.Creator<PersistableBundle>() {
                 @Override
                 public PersistableBundle createFromParcel(Parcel in) {

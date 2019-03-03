@@ -329,7 +329,8 @@
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"WLAN an"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Keine WLANs verfügbar"</string>
     <string name="quick_settings_wifi_secondary_label_transient" msgid="7748206246119760554">"Wird aktiviert…"</string>
-    <string name="quick_settings_cast_title" msgid="7709016546426454729">"Streamen"</string>
+    <!-- no translation found for quick_settings_cast_title (6954684227605751758) -->
+    <skip />
     <string name="quick_settings_casting" msgid="6601710681033353316">"Wird übertragen"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Unbenanntes Gerät"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"Startklar"</string>
@@ -441,7 +442,8 @@
     <string name="battery_saver_notification_title" msgid="8614079794522291840">"Energiesparmodus ist aktiviert"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Reduzierung der Leistung und Hintergrunddaten"</string>
     <string name="battery_saver_notification_action_text" msgid="132118784269455533">"Energiesparmodus deaktivieren"</string>
-    <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> nimmt alle auf deinem Bildschirm angezeigten Aktivitäten auf."</string>
+    <string name="media_projection_dialog_text" msgid="1443042478990422751">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> beginnt damit, alles auf deinem Bildschirm zu erfassen, z. B. Benachrichtigungen, Passwörter, Fotos, Nachrichten und Zahlungsinformationen."</string>
+    <string name="media_projection_dialog_title" msgid="7574971526813630219">"Darf <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> deinen Bildschirm aufzeichnen oder streamen?"</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Nicht mehr anzeigen"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Alle löschen"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"Verwalten"</string>
@@ -818,6 +820,9 @@
     <string name="high_temp_title" msgid="4589508026407318374">"Smartphone wird warm"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"Einige Funktionen sind während der Abkühlphase des Smartphones eingeschränkt"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"Dein Smartphone kühlt sich automatisch ab. Du kannst dein Smartphone weiterhin nutzen, aber es reagiert möglicherweise langsamer.\n\nSobald dein Smartphone abgekühlt ist, funktioniert es wieder normal."</string>
+    <string name="high_temp_alarm_title" msgid="442812040762745210">"Ladegerät vom Stromnetz trennen"</string>
+    <string name="high_temp_alarm_notify_message" msgid="1802871059489414932">"Beim Laden dieses Geräts ist ein Problem aufgetreten. Trenne das Netzteil vom Stromnetz. Sei dabei vorsichtig, denn das Netzteil oder das Kabel könnte heiß sein."</string>
+    <string name="high_temp_alarm_help_care_steps" msgid="3631075329318070726">"Schritte zur Fehlerbehebung ansehen"</string>
     <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"Linke Verknüpfung"</string>
     <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"Rechte Verknüpfung"</string>
     <string name="lockscreen_unlock_left" msgid="2043092136246951985">"Linke Verknüpfung entsperrt außerdem"</string>

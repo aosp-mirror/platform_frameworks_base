@@ -70,7 +70,7 @@ public final class VisibilitySetterAction extends InternalOnClickAction implemen
     /**
      * Builder for {@link VisibilitySetterAction} objects.
      */
-    public static class Builder {
+    public static final class Builder {
         private final SparseIntArray mVisibilities = new SparseIntArray();
         private boolean mDestroyed;
 
@@ -96,6 +96,7 @@ public final class VisibilitySetterAction extends InternalOnClickAction implemen
          * @throws IllegalArgumentException if visibility is not one of {@link View#VISIBLE},
          * {@link View#INVISIBLE}, or {@link View#GONE}.
          */
+        @NonNull
         public Builder setVisibility(@IdRes int id, @Visibility int visibility) {
             throwIfDestroyed();
             switch (visibility) {
@@ -111,6 +112,7 @@ public final class VisibilitySetterAction extends InternalOnClickAction implemen
         /**
          * Creates a new {@link VisibilitySetterAction} instance.
          */
+        @NonNull
         public VisibilitySetterAction build() {
             throwIfDestroyed();
             mDestroyed = true;
@@ -145,8 +147,10 @@ public final class VisibilitySetterAction extends InternalOnClickAction implemen
         parcel.writeSparseIntArray(mVisibilities);
     }
 
-    public static final Parcelable.Creator<VisibilitySetterAction> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<VisibilitySetterAction> CREATOR =
             new Parcelable.Creator<VisibilitySetterAction>() {
+
+        @NonNull
         @Override
         public VisibilitySetterAction createFromParcel(Parcel parcel) {
             // Always go through the builder to ensure the data ingested by
@@ -165,6 +169,7 @@ public final class VisibilitySetterAction extends InternalOnClickAction implemen
             return builder == null ? null : builder.build();
         }
 
+        @NonNull
         @Override
         public VisibilitySetterAction[] newArray(int size) {
             return new VisibilitySetterAction[size];

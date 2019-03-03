@@ -207,6 +207,7 @@ public abstract class Animation implements Cloneable {
     private float mScaleFactor = 1f;
 
     private boolean mShowWallpaper;
+    private boolean mHasRoundedCorners;
 
     private boolean mMore = true;
     private boolean mOneMoreTime = true;
@@ -263,6 +264,8 @@ public abstract class Animation implements Cloneable {
                 a.getBoolean(com.android.internal.R.styleable.Animation_detachWallpaper, false));
         setShowWallpaper(
                 a.getBoolean(com.android.internal.R.styleable.Animation_showWallpaper, false));
+        setHasRoundedCorners(
+                a.getBoolean(com.android.internal.R.styleable.Animation_hasRoundedCorners, false));
 
         final int resID = a.getResourceId(com.android.internal.R.styleable.Animation_interpolator, 0);
 
@@ -678,6 +681,19 @@ public abstract class Animation implements Cloneable {
     }
 
     /**
+     * If this is a window animation, the window will have rounded corners matching the display
+     * corner radius.
+     *
+     * @param hasRoundedCorners Whether the window should have rounded corners or not.
+     * @attr ref android.R.styleable#Animation_hasRoundedCorners
+     * @see com.android.internal.policy.ScreenDecorationsUtils#getWindowCornerRadius(Resources)
+     * @hide
+     */
+    public void setHasRoundedCorners(boolean hasRoundedCorners) {
+        mHasRoundedCorners = hasRoundedCorners;
+    }
+
+    /**
      * Gets the acceleration curve type for this animation.
      *
      * @return the {@link Interpolator} associated to this animation
@@ -801,6 +817,16 @@ public abstract class Animation implements Cloneable {
      */
     public boolean getShowWallpaper() {
         return mShowWallpaper;
+    }
+
+    /**
+     * @return if a window animation should have rounded corners or not.
+     *
+     * @attr ref android.R.styleable#Animation_hasRoundedCorners
+     * @hide
+     */
+    public boolean hasRoundedCorners() {
+        return mHasRoundedCorners;
     }
 
     /**

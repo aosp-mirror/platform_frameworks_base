@@ -32,10 +32,13 @@ import android.attention.AttentionManagerInternal;
 import android.os.PowerManager;
 import android.os.PowerManagerInternal;
 import android.os.SystemClock;
+import android.os.UserHandle;
+import android.provider.Settings;
 import android.service.attention.AttentionService;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -49,6 +52,7 @@ public class AttentionDetectorTest extends AndroidTestCase {
     private TestableAttentionDetector mAttentionDetector;
     private long mAttentionTimeout;
     private long mNextDimming;
+    private int mIsSettingEnabled;
 
     @Before
     public void setUp() {
@@ -59,6 +63,20 @@ public class AttentionDetectorTest extends AndroidTestCase {
         mAttentionDetector.onWakefulnessChangeStarted(PowerManagerInternal.WAKEFULNESS_AWAKE);
         mAttentionDetector.setAttentionServiceSupported(true);
         mNextDimming = SystemClock.uptimeMillis() + 3000L;
+
+        // Save the existing state.
+        mIsSettingEnabled = Settings.System.getIntForUser(getContext().getContentResolver(),
+                Settings.System.ADAPTIVE_SLEEP, 0, UserHandle.USER_CURRENT);
+
+        Settings.System.putIntForUser(getContext().getContentResolver(),
+                Settings.System.ADAPTIVE_SLEEP, 1, UserHandle.USER_CURRENT);
+        mAttentionDetector.updateEnabledFromSettings(getContext());
+    }
+
+    @After
+    public void tearDown() {
+        Settings.System.putIntForUser(getContext().getContentResolver(),
+                Settings.System.ADAPTIVE_SLEEP, mIsSettingEnabled, UserHandle.USER_CURRENT);
     }
 
     @Test
@@ -66,6 +84,16 @@ public class AttentionDetectorTest extends AndroidTestCase {
         long when = registerAttention();
         verify(mAttentionManagerInternal).checkAttention(anyInt(), anyLong(), any());
         assertThat(when).isLessThan(mNextDimming);
+    }
+
+    @Test
+    public void testOnUserActivity_doesntCheckIfNotEnabled() {
+        Settings.System.putIntForUser(getContext().getContentResolver(),
+                Settings.System.ADAPTIVE_SLEEP, 0, UserHandle.USER_CURRENT);
+        mAttentionDetector.updateEnabledFromSettings(getContext());
+        long when = registerAttention();
+        verify(mAttentionManagerInternal, never()).checkAttention(anyInt(), anyLong(), any());
+        assertThat(mNextDimming).isEqualTo(when);
     }
 
     @Test

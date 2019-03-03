@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.view.DisplayCutout.BOUNDS_POSITION_TOP;
 import static android.view.DisplayCutout.fromBoundingRect;
@@ -41,6 +42,7 @@ import com.android.server.wm.utils.WmDisplayCutout;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 /**
  * Tests for the {@link WindowState#computeFrameLw} method and other window frame machinery.
@@ -78,14 +80,19 @@ public class WindowFrameTests extends WindowTestsBase {
     }
 
     private static class TaskWithBounds extends Task {
-        final Rect mBounds;
+        Rect mBounds;
         final Rect mOverrideDisplayedBounds = new Rect();
         boolean mFullscreenForTest = true;
 
         TaskWithBounds(TaskStack stack, WindowManagerService wm, Rect bounds) {
             super(0, stack, 0, wm, 0, false, new TaskDescription(), null);
-            mBounds = bounds;
             setBounds(bounds);
+        }
+
+        @Override
+        public int setBounds(Rect bounds) {
+            mBounds = bounds;
+            return super.setBounds(bounds);
         }
 
         @Override
@@ -511,6 +518,66 @@ public class WindowFrameTests extends WindowTestsBase {
         assertEquals(w.getWmDisplayCutout().getDisplayCutout().getSafeInsetBottom(), 0);
         assertEquals(w.getWmDisplayCutout().getDisplayCutout().getSafeInsetLeft(), 0);
         assertEquals(w.getWmDisplayCutout().getDisplayCutout().getSafeInsetRight(), 0);
+    }
+
+    @Test
+    public void testFreeformContentInsets() {
+        // fullscreen task doesn't use bounds for computeFrame
+        final Task task = new TaskWithBounds(mStubStack, mWm, null);
+        WindowState w = createWindow(task, MATCH_PARENT, MATCH_PARENT);
+        w.mAttrs.gravity = Gravity.LEFT | Gravity.TOP;
+        task.setWindowingMode(WINDOWING_MODE_FREEFORM);
+        ((TaskWithBounds) task).mFullscreenForTest = false;
+        w.setWindowingMode(WINDOWING_MODE_FREEFORM);
+
+        DisplayContent dc = mWm.getDefaultDisplayContentLocked();
+        dc.mInputMethodTarget = w;
+        WindowState mockIme = mock(WindowState.class);
+        Mockito.doReturn(true).when(mockIme).isVisibleNow();
+        dc.mInputMethodWindow = mockIme;
+
+        // With no insets or system decor all the frames incoming from PhoneWindowManager
+        // are identical.
+        final Rect pf = new Rect(0, 0, 1000, 800);
+        final Rect df = pf;
+        final Rect of = df;
+        final Rect cf = new Rect(pf);
+        cf.bottom -= 400;
+        final Rect vf = new Rect(cf);
+        final Rect sf = new Rect(pf);
+        final Rect dcf = pf;
+
+        // First check that it only gets moved up enough to show window.
+        final Rect winRect = new Rect(200, 200, 300, 500);
+
+        task.setBounds(winRect);
+        w.setBounds(winRect);
+        w.getWindowFrames().setFrames(pf, df, of, cf, vf, dcf, sf, mEmptyRect);
+        w.computeFrameLw();
+
+        final Rect expected = new Rect(winRect.left, cf.bottom - winRect.height(),
+                winRect.right, cf.bottom);
+        assertEquals(expected, w.getFrameLw());
+        assertEquals(expected, w.getContentFrameLw());
+        assertEquals(expected, w.getVisibleFrameLw());
+
+        // Now check that it won't get moved beyond the top and then has appropriate insets
+        winRect.bottom = 600;
+        task.setBounds(winRect);
+        w.setBounds(winRect);
+        w.getWindowFrames().setFrames(pf, df, of, cf, vf, dcf, sf, mEmptyRect);
+        w.computeFrameLw();
+
+        assertFrame(w, winRect.left, 0, winRect.right, winRect.height());
+        expected.top = 0;
+        expected.bottom = cf.bottom;
+        assertContentFrame(w, expected);
+        assertVisibleFrame(w, expected);
+
+        // Check that it's moved back without ime insets
+        w.getWindowFrames().setFrames(pf, df, of, pf, pf, dcf, sf, mEmptyRect);
+        w.computeFrameLw();
+        assertEquals(winRect, w.getFrameLw());
     }
 
     private WindowStateWithTask createWindow(Task task, int width, int height) {

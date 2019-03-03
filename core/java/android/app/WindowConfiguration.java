@@ -239,7 +239,7 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
     }
 
     /** @hide */
-    public static final Creator<WindowConfiguration> CREATOR = new Creator<WindowConfiguration>() {
+    public static final @android.annotation.NonNull Creator<WindowConfiguration> CREATOR = new Creator<WindowConfiguration>() {
         @Override
         public WindowConfiguration createFromParcel(Parcel in) {
             return new WindowConfiguration(in);

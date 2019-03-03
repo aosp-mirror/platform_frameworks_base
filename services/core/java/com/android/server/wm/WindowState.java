@@ -842,6 +842,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // The offset from the layout containing frame to the actual containing frame.
         final int layoutXDiff;
         final int layoutYDiff;
+        final WindowState imeWin = mWmService.mRoot.getCurrentInputMethodWindow();
+        final boolean isImeTarget =
+                imeWin != null && imeWin.isVisibleNow() && isInputMethodTarget();
         if (inFullscreenContainer || layoutInParentFrame()) {
             // We use the parent frame as the containing frame for fullscreen and child windows
             mWindowFrames.mContainingFrame.set(mWindowFrames.mParentFrame);
@@ -861,15 +864,19 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 mWindowFrames.mContainingFrame.bottom =
                         mWindowFrames.mContainingFrame.top + frozen.height();
             }
-            final WindowState imeWin = mWmService.mRoot.getCurrentInputMethodWindow();
             // IME is up and obscuring this window. Adjust the window position so it is visible.
-            if (imeWin != null && imeWin.isVisibleNow() && isInputMethodTarget()) {
-                if (inFreeformWindowingMode() && mWindowFrames.mContainingFrame.bottom
-                        > mWindowFrames.mContentFrame.bottom) {
-                    // In freeform we want to move the top up directly.
-                    // TODO: Investigate why this is contentFrame not parentFrame.
-                    mWindowFrames.mContainingFrame.top -= mWindowFrames.mContainingFrame.bottom
-                            - mWindowFrames.mContentFrame.bottom;
+            if (isImeTarget) {
+                if (inFreeformWindowingMode()) {
+                    // Push the freeform window up to make room for the IME. However, don't push
+                    // it up past the top of the screen.
+                    final int bottomOverlap = mWindowFrames.mContainingFrame.bottom
+                            - mWindowFrames.mVisibleFrame.bottom;
+                    if (bottomOverlap > 0) {
+                        final int distanceToTop = Math.max(mWindowFrames.mContainingFrame.top
+                                - mWindowFrames.mDisplayFrame.top, 0);
+                        int offs = Math.min(bottomOverlap, distanceToTop);
+                        mWindowFrames.mContainingFrame.top -= offs;
+                    }
                 } else if (!inPinnedWindowingMode() && mWindowFrames.mContainingFrame.bottom
                         > mWindowFrames.mParentFrame.bottom) {
                     // But in docked we want to behave like fullscreen and behave as if the task
@@ -955,9 +962,21 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             final int left = Math.max(limitFrame.left + minVisibleWidth - width,
                     Math.min( mWindowFrames.mFrame.left, limitFrame.right - minVisibleWidth));
             mWindowFrames.mFrame.set(left, top, left + width, top + height);
+            final int visBottom = mWindowFrames.mVisibleFrame.bottom;
+            final int contentBottom = mWindowFrames.mContentFrame.bottom;
             mWindowFrames.mContentFrame.set( mWindowFrames.mFrame);
             mWindowFrames.mVisibleFrame.set(mWindowFrames.mContentFrame);
             mWindowFrames.mStableFrame.set(mWindowFrames.mContentFrame);
+            if (isImeTarget && inFreeformWindowingMode()) {
+                // After displacing a freeform window to make room for the ime, any part of
+                // the window still covered by IME should be inset.
+                if (contentBottom + layoutYDiff < mWindowFrames.mContentFrame.bottom) {
+                    mWindowFrames.mContentFrame.bottom = contentBottom + layoutYDiff;
+                }
+                if (visBottom + layoutYDiff < mWindowFrames.mVisibleFrame.bottom) {
+                    mWindowFrames.mVisibleFrame.bottom = visBottom + layoutYDiff;
+                }
+            }
         } else if (mAttrs.type == TYPE_DOCK_DIVIDER) {
             dc.getDockedDividerController().positionDockedStackedDivider(mWindowFrames.mFrame);
             mWindowFrames.mContentFrame.set(mWindowFrames.mFrame);
@@ -4458,7 +4477,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         anim.restrictDuration(MAX_ANIMATION_DURATION);
         anim.scaleCurrentDuration(mWmService.getWindowAnimationScaleLocked());
         final AnimationAdapter adapter = new LocalAnimationAdapter(
-                new WindowAnimationSpec(anim, mSurfacePosition, false /* canSkipFirstFrame */),
+                new WindowAnimationSpec(anim, mSurfacePosition, false /* canSkipFirstFrame */,
+                        mWmService.mWindowCornerRadius),
                 mWmService.mSurfaceAnimationRunner);
         startAnimation(mPendingTransaction, adapter);
         commitPendingTransaction();

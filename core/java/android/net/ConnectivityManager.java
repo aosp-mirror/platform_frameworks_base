@@ -3684,7 +3684,8 @@ public class ConnectivityManager {
     /**
      * Registers to receive notifications about all networks which satisfy the given
      * {@link NetworkRequest}.  The callbacks will continue to be called until
-     * either the application exits or link #unregisterNetworkCallback(NetworkCallback)} is called.
+     * either the application exits or {@link #unregisterNetworkCallback(NetworkCallback)} is
+     * called.
      *
      * @param request {@link NetworkRequest} describing this request.
      * @param networkCallback The {@link NetworkCallback} that the system will call as suitable
@@ -3700,7 +3701,8 @@ public class ConnectivityManager {
     /**
      * Registers to receive notifications about all networks which satisfy the given
      * {@link NetworkRequest}.  The callbacks will continue to be called until
-     * either the application exits or link #unregisterNetworkCallback(NetworkCallback)} is called.
+     * either the application exits or {@link #unregisterNetworkCallback(NetworkCallback)} is
+     * called.
      *
      * @param request {@link NetworkRequest} describing this request.
      * @param networkCallback The {@link NetworkCallback} that the system will call as suitable
@@ -4291,6 +4293,8 @@ public class ConnectivityManager {
      * @return {@code uid} if the connection is found and the app has permission to observe it
      * (e.g., if it is associated with the calling VPN app's tunnel) or
      * {@link android.os.Process#INVALID_UID} if the connection is not found.
+     * Throws {@link SecurityException} if the caller is not the active VPN for the current user.
+     * Throws {@link IllegalArgumentException} if an unsupported protocol is requested.
      */
     public int getConnectionOwnerUid(int protocol, @NonNull InetSocketAddress local,
             @NonNull InetSocketAddress remote) {

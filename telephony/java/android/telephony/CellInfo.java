@@ -40,6 +40,11 @@ public abstract class CellInfo implements Parcelable {
     public static final int UNAVAILABLE = Integer.MAX_VALUE;
 
     /**
+     * This value indicates that the long field is unreported.
+     */
+    public static final long UNAVAILABLE_LONG = Long.MAX_VALUE;
+
+    /**
      * Cell identity type
      * @hide
      */
@@ -284,7 +289,7 @@ public abstract class CellInfo implements Parcelable {
     }
 
     /** Implement the Parcelable interface */
-    public static final Creator<CellInfo> CREATOR = new Creator<CellInfo>() {
+    public static final @android.annotation.NonNull Creator<CellInfo> CREATOR = new Creator<CellInfo>() {
         @Override
         public CellInfo createFromParcel(Parcel in) {
                 int type = in.readInt();

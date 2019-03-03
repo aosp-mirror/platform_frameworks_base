@@ -308,15 +308,18 @@
     <string name="permgrouplab_phone" msgid="5229115638567440675">"ફોન"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"ફોન કૉલ કરો અને સંચાલિત કરો"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ને ફોન કૉલ કરવાની અને તેને મેનેજ કરવાની મંજૂરી આપીએ?"</string>
-    <string name="permgrouplab_sensors" msgid="416037179223226722">"બોડી સેન્સર્સ"</string>
+    <!-- no translation found for permgrouplab_sensors (4838614103153567532) -->
+    <skip />
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"તમારા મહત્વપૂર્ણ ચિહ્નો વિશે સેન્સર ડેટા ઍક્સેસ કરો"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ને તમારી મહત્વપૂર્ણ સહી વિશેના સેન્સર ડેટાને ઍક્સેસ કરવાની મંજૂરી આપીએ?"</string>
     <string name="permgrouplab_aural" msgid="965607064083134896">"સંગીત"</string>
     <string name="permgroupdesc_aural" msgid="4870189506255958055">"તમારા સંગીતને ઍક્સેસ કરો"</string>
     <string name="permgrouprequest_aural" msgid="6787926123071735620">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ને તમારા સંગીતમાં ઍક્સેસ કરવાની મંજૂરી આપવી છે?"</string>
-    <string name="permgrouplab_visual" msgid="8030190588123857921">"ફોટો અને વિડિઓ"</string>
+    <!-- no translation found for permgrouplab_visual (6477382108771145134) -->
+    <skip />
     <string name="permgroupdesc_visual" msgid="3415827902566663546">"તમારા ફોટો &amp; વિડિઓ ઍક્સેસ કરો"</string>
-    <string name="permgrouprequest_visual" msgid="6907523945030290376">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ને તમારા ફોટો &amp; વિડિઓમાં ઍક્સેસ કરવાની મંજૂરી આપવી છે?"</string>
+    <!-- no translation found for permgrouprequest_visual (3043752127595243314) -->
+    <skip />
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"વિંડો કન્ટેન્ટ પુનઃપ્રાપ્ત કરો"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"તમે જેની સાથે ક્રિયા-પ્રતિક્રિયા કરી રહ્યાં છો તે વિંડોનું કન્ટેન્ટ તપાસો."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"સ્પર્શ કરીને શોધખોળ કરવું ચાલુ કરો"</string>
@@ -1397,8 +1400,7 @@
     <string name="ext_media_init_action" msgid="7952885510091978278">"સેટ કરો"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"બહાર કાઢો"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"અન્વેષણ કરો"</string>
-    <!-- no translation found for ext_media_seamless_action (6575980560886881233) -->
-    <skip />
+    <string name="ext_media_seamless_action" msgid="6575980560886881233">"આઉટપુટ સ્વિચ કરો"</string>
     <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> ખૂટે છે"</string>
     <string name="ext_media_missing_message" msgid="4012389235250987930">"ફરીથી ઉપકરણ દાખલ કરો"</string>
     <string name="ext_media_move_specific_title" msgid="1471100343872375842">"<xliff:g id="NAME">%s</xliff:g> ખસેડી રહ્યાં છીએ"</string>
@@ -1612,6 +1614,8 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"#<xliff:g id="ID">%1$d</xliff:g> ઓવરલે કરો"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", સુરક્ષિત"</string>
+    <string name="activity_starter_block_bg_activity_starts_permissive" msgid="5692097903712956720">"<xliff:g id="PACKAGENAME">%1$s</xliff:g>માંથી શરૂ થયેલી આ બૅકગ્રાઉન્ડ પ્રવૃત્તિને ભાવિ Q બિલ્ડમાં બ્લૉક કરવામાં આવશે. go/q-bg-block જુઓ."</string>
+    <string name="activity_starter_block_bg_activity_starts_enforcing" msgid="8299522481076404353">"<xliff:g id="PACKAGENAME">%1$s</xliff:g>માંથી શરૂ થયેલી બૅકગ્રાઉન્ડ પ્રવૃત્તિ બ્લૉક કરી છે. go/q-bg-block જુઓ."</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"પૅટર્ન ભૂલી ગયાં"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"ખોટી પૅટર્ન"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"ખોટો પાસવર્ડ"</string>
@@ -1997,6 +2001,24 @@
     <string name="dynamic_mode_notification_channel_name" msgid="2348803891571320452">"રૂટિન મોડની માહિતીનું નોટિફિકેશન"</string>
     <string name="dynamic_mode_notification_title" msgid="508815255807182035">"સામાન્ય રીતે ચાર્જ કરવાના સમય પહેલાં બૅટરી સમાપ્ત થઈ શકે છે"</string>
     <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"બૅટરી આવરદા વધારવા માટે બૅટરી સેવર ચાલુ કર્યું"</string>
+    <string name="mime_type_folder" msgid="7111951698626315204">"ફોલ્ડર"</string>
+    <string name="mime_type_apk" msgid="5518003630972506900">"Android ઍપ"</string>
+    <string name="mime_type_generic" msgid="6833871596845900027">"ફાઇલ"</string>
+    <string name="mime_type_generic_ext" msgid="8450275970061657174">"<xliff:g id="EXTENSION">%1$s</xliff:g> ફાઇલ"</string>
+    <string name="mime_type_audio" msgid="6289777657172050926">"ઑડિયો"</string>
+    <string name="mime_type_audio_ext" msgid="3270880987725816210">"<xliff:g id="EXTENSION">%1$s</xliff:g> ઑડિયો"</string>
+    <string name="mime_type_video" msgid="4093025777317307426">"વીડિયો"</string>
+    <string name="mime_type_video_ext" msgid="5643771615714173159">"<xliff:g id="EXTENSION">%1$s</xliff:g> વીડિઓ"</string>
+    <string name="mime_type_image" msgid="3144284451605236371">"છબી"</string>
+    <string name="mime_type_image_ext" msgid="1514613218742736590">"<xliff:g id="EXTENSION">%1$s</xliff:g> છબી"</string>
+    <string name="mime_type_compressed" msgid="1645486037074943257">"આર્કાઇવ"</string>
+    <string name="mime_type_compressed_ext" msgid="4232293058067801528">"<xliff:g id="EXTENSION">%1$s</xliff:g> આર્કાઇવ"</string>
+    <string name="mime_type_document" msgid="1596838147256375966">"દસ્તાવેજ"</string>
+    <string name="mime_type_document_ext" msgid="6327266601345501281">"<xliff:g id="EXTENSION">%1$s</xliff:g> દસ્તાવેજ"</string>
+    <string name="mime_type_spreadsheet" msgid="2639138255207123557">"સ્પ્રેડશીટ"</string>
+    <string name="mime_type_spreadsheet_ext" msgid="5508653032786106725">"<xliff:g id="EXTENSION">%1$s</xliff:g> સ્પ્રેડશીટ"</string>
+    <string name="mime_type_presentation" msgid="6145604688774787357">"પ્રસ્તુતિ"</string>
+    <string name="mime_type_presentation_ext" msgid="2982650207774823437">"<xliff:g id="EXTENSION">%1$s</xliff:g> પ્રસ્તુતિ"</string>
     <string name="car_loading_profile" msgid="3545132581795684027">"લોડિંગ"</string>
     <plurals name="file_count" formatted="false" msgid="1628600959752419449">
       <item quantity="one"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> ફાઇલ</item>

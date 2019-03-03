@@ -53,7 +53,7 @@ public class PositionListenerActivity extends Activity {
         MyPositionReporter(Context c) {
             super(c);
             mNode = new RenderNode("positionListener");
-            mNode.requestPositionUpdates(this);
+            mNode.addPositionUpdateListener(this);
             setTextAlignment(TEXT_ALIGNMENT_VIEW_START);
         }
 

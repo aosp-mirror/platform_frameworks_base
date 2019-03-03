@@ -88,7 +88,7 @@ public final class CorrectionInfo implements Parcelable {
     /**
      * Used to make this class parcelable.
      */
-    public static final Parcelable.Creator<CorrectionInfo> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<CorrectionInfo> CREATOR =
             new Parcelable.Creator<CorrectionInfo>() {
                 public CorrectionInfo createFromParcel(Parcel source) {
                     return new CorrectionInfo(source);

@@ -17,9 +17,11 @@ package android.app.servertransaction;
 
 import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
 
+import android.app.ActivityTaskManager;
 import android.app.ClientTransactionHandler;
 import android.os.IBinder;
 import android.os.Parcel;
+import android.os.RemoteException;
 import android.os.Trace;
 
 /**
@@ -36,6 +38,26 @@ public class TopResumedActivityChangeItem extends ClientTransactionItem {
         Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "topResumedActivityChangeItem");
         client.handleTopResumedActivityChanged(token, mOnTop, "topResumedActivityChangeItem");
         Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
+    }
+
+    @Override
+    public void postExecute(ClientTransactionHandler client, IBinder token,
+            PendingTransactionActions pendingActions) {
+        if (mOnTop) {
+            return;
+        }
+
+        // The loss of top resumed state can always be reported immediately in postExecute
+        // because only three cases are possible:
+        // 1. Activity is in RESUMED state now and it just handled the callback in #execute().
+        // 2. Activity wasn't RESUMED yet, which means that it didn't receive the top state yet.
+        // 3. Activity is PAUSED or in other lifecycle state after PAUSED. In this case top resumed
+        // state loss was already called right before pausing.
+        try {
+            ActivityTaskManager.getService().activityTopResumedStateLost();
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
     }
 
 
@@ -75,7 +97,7 @@ public class TopResumedActivityChangeItem extends ClientTransactionItem {
         mOnTop = in.readBoolean();
     }
 
-    public static final Creator<TopResumedActivityChangeItem> CREATOR =
+    public static final @android.annotation.NonNull Creator<TopResumedActivityChangeItem> CREATOR =
             new Creator<TopResumedActivityChangeItem>() {
                 public TopResumedActivityChangeItem createFromParcel(Parcel in) {
                     return new TopResumedActivityChangeItem(in);

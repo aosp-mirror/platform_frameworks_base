@@ -55,7 +55,7 @@ public final class Fingerprint extends BiometricAuthenticator.Identifier {
         out.writeInt(mGroupId);
     }
 
-    public static final Parcelable.Creator<Fingerprint> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<Fingerprint> CREATOR
             = new Parcelable.Creator<Fingerprint>() {
         public Fingerprint createFromParcel(Parcel in) {
             return new Fingerprint(in);

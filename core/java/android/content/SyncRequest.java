@@ -122,7 +122,7 @@ public class SyncRequest implements Parcelable {
         return mSyncRunTimeSecs;
     }
 
-    public static final Creator<SyncRequest> CREATOR = new Creator<SyncRequest>() {
+    public static final @android.annotation.NonNull Creator<SyncRequest> CREATOR = new Creator<SyncRequest>() {
 
         @Override
         public SyncRequest createFromParcel(Parcel in) {

@@ -22,11 +22,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.service.quicksettings.Tile;
-import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
 import androidx.lifecycle.LifecycleOwner;
+import androidx.test.filters.SmallTest;
 
 import com.android.systemui.Dependency;
 import com.android.systemui.SysuiTestCase;
@@ -45,7 +45,6 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.HashSet;
 import java.util.Set;
-
 
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper

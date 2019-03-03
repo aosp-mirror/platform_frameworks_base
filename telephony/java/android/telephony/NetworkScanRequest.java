@@ -267,7 +267,7 @@ public final class NetworkScanRequest implements Parcelable {
                 + (mMccMncs.hashCode() * 59));
     }
 
-    public static final Creator<NetworkScanRequest> CREATOR =
+    public static final @android.annotation.NonNull Creator<NetworkScanRequest> CREATOR =
             new Creator<NetworkScanRequest>() {
                 @Override
                 public NetworkScanRequest createFromParcel(Parcel in) {

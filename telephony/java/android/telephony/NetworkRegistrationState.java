@@ -509,7 +509,7 @@ public class NetworkRegistrationState implements Parcelable {
         }
     }
 
-    public static final Parcelable.Creator<NetworkRegistrationState> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<NetworkRegistrationState> CREATOR =
             new Parcelable.Creator<NetworkRegistrationState>() {
         @Override
         public NetworkRegistrationState createFromParcel(Parcel source) {

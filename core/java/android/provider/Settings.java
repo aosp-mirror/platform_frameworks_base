@@ -9635,6 +9635,7 @@ public final class Settings {
          * when user location settings are off), for emergency purposes.
          * @hide
          */
+        @TestApi
         public static final String LOCATION_IGNORE_SETTINGS_PACKAGE_WHITELIST =
                 "location_ignore_settings_package_whitelist";
 
@@ -13376,13 +13377,22 @@ public final class Settings {
                 "hidden_api_blacklist_exemptions";
 
         /**
-         * Sampling rate for hidden API access event logs, as an integer in the range 0 to 0x10000
-         * inclusive.
+         * Sampling rate for hidden API access event logs with libmetricslogger, as an integer in
+         * the range 0 to 0x10000 inclusive.
          *
          * @hide
          */
         public static final String HIDDEN_API_ACCESS_LOG_SAMPLING_RATE =
                 "hidden_api_access_log_sampling_rate";
+
+        /**
+         * Sampling rate for hidden API access event logging with statslog, as an integer in the
+         * range 0 to 0x10000 inclusive.
+         *
+         * @hide
+         */
+        public static final String HIDDEN_API_ACCESS_STATSLOG_SAMPLING_RATE =
+                "hidden_api_access_statslog_sampling_rate";
 
         /**
          * Hidden API enforcement policy for apps.

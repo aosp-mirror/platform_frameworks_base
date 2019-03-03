@@ -36,7 +36,7 @@ import java.util.List;
  * @hide
  */
 public final class SessionLink implements Parcelable {
-    public static final Parcelable.Creator<SessionLink> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<SessionLink> CREATOR =
             new Parcelable.Creator<SessionLink>() {
                 @Override
                 public SessionLink createFromParcel(Parcel in) {

@@ -103,6 +103,16 @@ public class KernelCpuThreadReader {
     private static final int ID_ERROR = -1;
 
     /**
+     * Thread ID used when reporting CPU used by other threads
+     */
+    private static final int OTHER_THREADS_ID = -1;
+
+    /**
+     * Thread name used when reporting CPU used by other threads
+     */
+    private static final String OTHER_THREADS_NAME = "__OTHER_THREADS";
+
+    /**
      * When checking whether to report data for a thread, we check the UID of the thread's owner
      * against this predicate
      */
@@ -140,9 +150,10 @@ public class KernelCpuThreadReader {
     /**
      * Create with a path where `proc` is mounted. Used primarily for testing
      *
-     * @param procPath where `proc` is mounted (to find, see {@code mount | grep ^proc})
+     * @param procPath               where `proc` is mounted (to find, see {@code mount | grep
+     *                               ^proc})
      * @param initialTimeInStatePath where the initial {@code time_in_state} file exists to define
-     * format
+     *                               format
      */
     @VisibleForTesting
     public KernelCpuThreadReader(
@@ -250,8 +261,8 @@ public class KernelCpuThreadReader {
      * Read all of the CPU usage statistics for each child thread of a process
      *
      * @param processPath the {@code /proc} path of the thread
-     * @param processId the ID of the process
-     * @param uid the ID of the user who owns the process
+     * @param processId   the ID of the process
+     * @param uid         the ID of the user who owns the process
      * @return process CPU usage containing usage of all child threads. Null if the process exited
      * and its {@code proc} directory was removed while collecting information
      */
@@ -263,14 +274,24 @@ public class KernelCpuThreadReader {
                     + " and user ID " + uid);
         }
 
+        int[] filteredThreadsCpuUsage = null;
         final Path allThreadsPath = processPath.resolve("task");
         final ArrayList<ThreadCpuUsage> threadCpuUsages = new ArrayList<>();
         try (DirectoryStream<Path> threadPaths = Files.newDirectoryStream(allThreadsPath)) {
             for (Path threadDirectory : threadPaths) {
                 ThreadCpuUsage threadCpuUsage = getThreadCpuUsage(threadDirectory);
-                if (threadCpuUsage != null) {
-                    threadCpuUsages.add(threadCpuUsage);
+                if (threadCpuUsage == null) {
+                    continue;
                 }
+                if (mMinimumTotalCpuUsageMillis < totalCpuUsage(threadCpuUsage.usageTimesMillis)) {
+                    if (filteredThreadsCpuUsage == null) {
+                        filteredThreadsCpuUsage = new int[mFrequenciesKhz.length];
+                    }
+                    filteredThreadsCpuUsage =
+                            sumCpuUsage(filteredThreadsCpuUsage, threadCpuUsage.usageTimesMillis);
+                    continue;
+                }
+                threadCpuUsages.add(threadCpuUsage);
             }
         } catch (IOException e) {
             // Expected when a process finishes
@@ -280,6 +301,12 @@ public class KernelCpuThreadReader {
         // If we found no threads, then the process has exited while we were reading from it
         if (threadCpuUsages.isEmpty()) {
             return null;
+        }
+
+        // Add the filtered out thread CPU usage under an "other threads" ThreadCpuUsage
+        if (filteredThreadsCpuUsage != null) {
+            threadCpuUsages.add(new ThreadCpuUsage(
+                    OTHER_THREADS_ID, OTHER_THREADS_NAME, filteredThreadsCpuUsage));
         }
 
         if (DEBUG) {
@@ -368,15 +395,6 @@ public class KernelCpuThreadReader {
         }
         int[] cpuUsages = mFrequencyBucketCreator.getBucketedValues(cpuUsagesLong);
 
-        // Check if the total CPU usage below the threshold
-        int totalCpuUsage = 0;
-        for (int i = 0; i < cpuUsages.length; i++) {
-            totalCpuUsage += cpuUsages[i];
-        }
-        if (totalCpuUsage < mMinimumTotalCpuUsageMillis) {
-            return null;
-        }
-
         return new ThreadCpuUsage(threadId, threadName, cpuUsages);
     }
 
@@ -424,6 +442,28 @@ public class KernelCpuThreadReader {
     }
 
     /**
+     * Get the sum of all CPU usage across all frequencies
+     */
+    private static int totalCpuUsage(int[] cpuUsage) {
+        int total = 0;
+        for (int i = 0; i < cpuUsage.length; i++) {
+            total += cpuUsage[i];
+        }
+        return total;
+    }
+
+    /**
+     * Add two CPU frequency usages together
+     */
+    private static int[] sumCpuUsage(int[] a, int[] b) {
+        int[] summed = new int[a.length];
+        for (int i = 0; i < a.length; i++) {
+            summed[i] = a[i] + b[i];
+        }
+        return summed;
+    }
+
+    /**
      * Puts frequencies and usage times into buckets
      */
     @VisibleForTesting
@@ -440,7 +480,7 @@ public class KernelCpuThreadReader {
          * Buckets based of a list of frequencies
          *
          * @param frequencies the frequencies to base buckets off
-         * @param numBuckets how many buckets to create
+         * @param numBuckets  how many buckets to create
          */
         @VisibleForTesting
         public FrequencyBucketCreator(long[] frequencies, int numBuckets) {

@@ -325,7 +325,7 @@ public final class MidiDeviceInfo implements Parcelable {
                 ",mIsPrivate=" + mIsPrivate);
     }
 
-    public static final Parcelable.Creator<MidiDeviceInfo> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<MidiDeviceInfo> CREATOR =
         new Parcelable.Creator<MidiDeviceInfo>() {
         public MidiDeviceInfo createFromParcel(Parcel in) {
             // Needs to be kept in sync with code in MidiDeviceInfo.cpp

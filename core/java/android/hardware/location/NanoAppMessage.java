@@ -134,7 +134,7 @@ public final class NanoAppMessage implements Parcelable {
         out.writeByteArray(mMessageBody);
     }
 
-    public static final Creator<NanoAppMessage> CREATOR =
+    public static final @android.annotation.NonNull Creator<NanoAppMessage> CREATOR =
             new Creator<NanoAppMessage>() {
                 @Override
                 public NanoAppMessage createFromParcel(Parcel in) {

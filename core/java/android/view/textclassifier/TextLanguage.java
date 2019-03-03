@@ -43,7 +43,7 @@ import java.util.Map;
  */
 public final class TextLanguage implements Parcelable {
 
-    public static final Creator<TextLanguage> CREATOR = new Creator<TextLanguage>() {
+    public static final @android.annotation.NonNull Creator<TextLanguage> CREATOR = new Creator<TextLanguage>() {
         @Override
         public TextLanguage createFromParcel(Parcel in) {
             return readFromParcel(in);
@@ -212,7 +212,7 @@ public final class TextLanguage implements Parcelable {
      */
     public static final class Request implements Parcelable {
 
-        public static final Creator<Request> CREATOR = new Creator<Request>() {
+        public static final @android.annotation.NonNull Creator<Request> CREATOR = new Creator<Request>() {
             @Override
             public Request createFromParcel(Parcel in) {
                 return readFromParcel(in);

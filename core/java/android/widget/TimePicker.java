@@ -552,7 +552,7 @@ public class TimePicker extends FrameLayout {
             }
 
             @SuppressWarnings({"unused", "hiding"})
-            public static final Creator<SavedState> CREATOR = new Creator<SavedState>() {
+            public static final @android.annotation.NonNull Creator<SavedState> CREATOR = new Creator<SavedState>() {
                 public SavedState createFromParcel(Parcel in) {
                     return new SavedState(in);
                 }

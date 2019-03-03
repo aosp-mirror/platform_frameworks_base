@@ -21,15 +21,20 @@ import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.keyguard.KeyguardStatusView;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.statusbar.AmbientPulseManager;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
+import com.android.systemui.statusbar.PulseExpansionHandler;
+import com.android.systemui.statusbar.StatusBarStateControllerImpl;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
+import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ZenModeController;
@@ -65,7 +70,12 @@ public class NotificationPanelViewTest extends SysuiTestCase {
         mDependency.injectMockDependency(NotificationLockscreenUserManager.class);
         mDependency.injectMockDependency(ConfigurationController.class);
         mDependency.injectMockDependency(ZenModeController.class);
-        mNotificationPanelView = new TestableNotificationPanelView();
+        NotificationWakeUpCoordinator coordinator =
+                new NotificationWakeUpCoordinator(
+                        new AmbientPulseManager(mContext),
+                        new StatusBarStateControllerImpl());
+        PulseExpansionHandler expansionHandler = new PulseExpansionHandler(mContext, coordinator);
+        mNotificationPanelView = new TestableNotificationPanelView(coordinator, expansionHandler);
     }
 
     @Test
@@ -92,8 +102,9 @@ public class NotificationPanelViewTest extends SysuiTestCase {
     }
 
     private class TestableNotificationPanelView extends NotificationPanelView {
-        TestableNotificationPanelView() {
-            super(NotificationPanelViewTest.this.mContext, null);
+        TestableNotificationPanelView(NotificationWakeUpCoordinator coordinator,
+                PulseExpansionHandler expansionHandler) {
+            super(NotificationPanelViewTest.this.mContext, null, coordinator, expansionHandler);
             mNotificationStackScroller = mNotificationStackScrollLayout;
             mKeyguardStatusView = NotificationPanelViewTest.this.mKeyguardStatusView;
             mKeyguardStatusBar = NotificationPanelViewTest.this.mKeyguardStatusBar;

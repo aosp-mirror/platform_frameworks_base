@@ -84,6 +84,7 @@ public class StagedRollbackTest {
 
         RollbackTestUtils.install("RollbackTestAppAv1.apk", false);
         assertEquals(1, RollbackTestUtils.getInstalledVersion(TEST_APP_A));
+        RollbackTestUtils.processUserData(TEST_APP_A);
 
         RollbackTestUtils.installStaged(true, "RollbackTestAppAv2.apk");
 
@@ -98,6 +99,7 @@ public class StagedRollbackTest {
     @Test
     public void testApkOnlyCommitRollback() throws Exception {
         assertEquals(2, RollbackTestUtils.getInstalledVersion(TEST_APP_A));
+        RollbackTestUtils.processUserData(TEST_APP_A);
 
         RollbackManager rm = RollbackTestUtils.getRollbackManager();
         RollbackInfo rollback = getUniqueRollbackInfoForPackage(
@@ -129,6 +131,7 @@ public class StagedRollbackTest {
     @Test
     public void testApkOnlyConfirmRollback() throws Exception {
         assertEquals(1, RollbackTestUtils.getInstalledVersion(TEST_APP_A));
+        RollbackTestUtils.processUserData(TEST_APP_A);
 
         RollbackManager rm = RollbackTestUtils.getRollbackManager();
         RollbackInfo rollback = getUniqueRollbackInfoForPackage(

@@ -265,7 +265,7 @@ public final class InputContentInfo implements Parcelable {
     /**
      * Used to make this class parcelable.
      */
-    public static final Parcelable.Creator<InputContentInfo> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<InputContentInfo> CREATOR
             = new Parcelable.Creator<InputContentInfo>() {
         @Override
         public InputContentInfo createFromParcel(Parcel source) {

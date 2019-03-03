@@ -92,7 +92,7 @@ public class NewIntentItem extends ClientTransactionItem {
         mIntents = in.createTypedArrayList(ReferrerIntent.CREATOR);
     }
 
-    public static final Parcelable.Creator<NewIntentItem> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<NewIntentItem> CREATOR =
             new Parcelable.Creator<NewIntentItem>() {
         public NewIntentItem createFromParcel(Parcel in) {
             return new NewIntentItem(in);

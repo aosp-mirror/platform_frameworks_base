@@ -132,6 +132,7 @@ message KeyguardControllerProto {
 
     optional bool keyguard_showing = 1;
     repeated KeyguardOccludedProto keyguard_occluded_states= 2;
+    optional bool aod_showing = 3;
 }
 
 message KeyguardOccludedProto {

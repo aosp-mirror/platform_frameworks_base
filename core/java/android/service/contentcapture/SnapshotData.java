@@ -60,6 +60,7 @@ public final class SnapshotData implements Parcelable {
     /**
      * Returns the assist data for this snapshot.
      */
+    @NonNull
     public Bundle getAssistData() {
         return mAssistData;
     }
@@ -67,6 +68,7 @@ public final class SnapshotData implements Parcelable {
     /**
      * Returns the assist structure for this snapshot.
      */
+    @NonNull
     public AssistStructure getAssistStructure() {
         return mAssistStructure;
     }
@@ -74,6 +76,7 @@ public final class SnapshotData implements Parcelable {
     /**
      * Returns the assist context for this snapshot.
      */
+    @Nullable
     public AssistContent getAssistContent() {
         return mAssistContent;
     }
@@ -90,15 +93,17 @@ public final class SnapshotData implements Parcelable {
         parcel.writeParcelable(mAssistContent, flags);
     }
 
-    public static final Creator<SnapshotData> CREATOR =
+    public static final @android.annotation.NonNull Creator<SnapshotData> CREATOR =
             new Creator<SnapshotData>() {
 
         @Override
+        @NonNull
         public SnapshotData createFromParcel(@NonNull Parcel parcel) {
             return new SnapshotData(parcel);
         }
 
         @Override
+        @NonNull
         public SnapshotData[] newArray(int size) {
             return new SnapshotData[size];
         }

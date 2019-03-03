@@ -101,7 +101,7 @@ public final class NetworkEvent implements IpConnectivityLog.Event {
     }
 
     /** @hide */
-    public static final Parcelable.Creator<NetworkEvent> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<NetworkEvent> CREATOR
         = new Parcelable.Creator<NetworkEvent>() {
         public NetworkEvent createFromParcel(Parcel in) {
             return new NetworkEvent(in);

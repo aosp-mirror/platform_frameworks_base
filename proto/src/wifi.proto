@@ -527,6 +527,12 @@ message WifiLog {
 
   // List of NetworkSelectionExperimentDecisions stats for each experiment
   repeated NetworkSelectionExperimentDecisions network_selection_experiment_decisions_list = 140;
+
+  // Network Request API surface metrics.
+  optional WifiNetworkRequestApiLog wifi_network_request_api_log = 141;
+
+  // Network Suggestion API surface metrics.
+  optional WifiNetworkSuggestionApiLog wifi_network_suggestion_api_log = 142;
 }
 
 // Information that gets logged for every WiFi connection.
@@ -654,6 +660,26 @@ message ConnectionEvent {
     HLF_UNWANTED = 4;
   }
 
+  // Level 2 failure reason.
+  enum Level2FailureReason {
+
+    // Unknown default
+    FAILURE_REASON_UNKNOWN = 0;
+
+    // The reason code if there is no error during authentication. It could
+    // also imply that there no authentication in progress.
+    AUTH_FAILURE_NONE = 1;
+
+    // The reason code if there was a timeout authenticating.
+    AUTH_FAILURE_TIMEOUT = 2;
+
+    // The reason code if there was a wrong password while authenticating.
+    AUTH_FAILURE_WRONG_PSWD = 3;
+
+    // The reason code if there was EAP failure while authenticating.
+    AUTH_FAILURE_EAP_FAILURE = 4;
+  }
+
   // Entity that recommended connecting to this network.
   enum ConnectionNominator {
     // Unknown nominator
@@ -722,6 +748,10 @@ message ConnectionEvent {
 
   // The currently running network selector when this connection event occurred.
   optional int32 network_selector_experiment_id = 12;
+
+  // Breakdown of level_2_failure_code with more detailed reason.
+  optional Level2FailureReason level_2_failure_reason = 13
+          [default = FAILURE_REASON_UNKNOWN];
 }
 
 // Number of occurrences of a specific RSSI poll rssi value
@@ -2340,4 +2370,40 @@ message NetworkSelectionExperimentDecisions {
   // Note that it is possible for the network selection to be different even when there only exists
   // a single network choice, since choosing not to connect to that network is a valid choice.
   repeated MapEntryInt32Int32 different_selection_num_choices_counter = 4;
+}
+
+// NetworkRequest API metrics.
+message WifiNetworkRequestApiLog {
+  // Number of requests via this API surface.
+  optional int32 num_request = 1;
+
+  // Histogram of requests via this API surface to number of networks matched in scan results.
+  repeated HistogramBucketInt32 network_match_size_histogram = 2;
+
+  // Number of successful network connection from this API.
+  optional int32 num_connect_success = 3;
+
+  // Number of requests via this API surface that bypassed user approval.
+  optional int32 num_user_approval_bypass = 4;
+
+  // Number of requests via this API surface that was rejected by the user.
+  optional int32 num_user_reject = 5;
+
+  // Number of unique apps using this API surface.
+  optional int32 num_apps = 6;
+}
+
+// NetworkSuggestion API metrics.
+message WifiNetworkSuggestionApiLog {
+  // Number of modifications to their suggestions by apps.
+  optional int32 num_modification = 1;
+
+  // Number of successful network connection from app suggestions.
+  optional int32 num_connect_success = 2;
+
+  // Number of network connection failures from app suggestions.
+  optional int32 num_connect_failure = 3;
+
+  // Histogram for size of the network lists provided by various apps on the device.
+  repeated HistogramBucketInt32 network_list_size_histogram = 4;
 }

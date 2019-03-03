@@ -1032,7 +1032,7 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
         }
     }
 
-    public static final Parcelable.Creator<ParcelFileDescriptor> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<ParcelFileDescriptor> CREATOR
             = new Parcelable.Creator<ParcelFileDescriptor>() {
         @Override
         public ParcelFileDescriptor createFromParcel(Parcel in) {

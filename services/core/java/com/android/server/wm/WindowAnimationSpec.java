@@ -17,10 +17,10 @@
 package com.android.server.wm;
 
 import static com.android.server.wm.AnimationAdapter.STATUS_BAR_TRANSITION_DURATION;
-import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_AFTER_ANIM;
-import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_NONE;
 import static com.android.server.wm.AnimationSpecProto.WINDOW;
 import static com.android.server.wm.WindowAnimationSpecProto.ANIMATION;
+import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_AFTER_ANIM;
+import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_NONE;
 
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -51,18 +51,22 @@ public class WindowAnimationSpec implements AnimationSpec {
     private final Rect mStackBounds = new Rect();
     private int mStackClipMode;
     private final Rect mTmpRect = new Rect();
+    private final float mWindowCornerRadius;
 
-    public WindowAnimationSpec(Animation animation, Point position, boolean canSkipFirstFrame)  {
+    public WindowAnimationSpec(Animation animation, Point position, boolean canSkipFirstFrame,
+            float windowCornerRadius)  {
         this(animation, position, null /* stackBounds */, canSkipFirstFrame, STACK_CLIP_NONE,
-                false /* isAppAnimation */);
+                false /* isAppAnimation */, windowCornerRadius);
     }
 
     public WindowAnimationSpec(Animation animation, Point position, Rect stackBounds,
-            boolean canSkipFirstFrame, int stackClipMode, boolean isAppAnimation) {
+            boolean canSkipFirstFrame, int stackClipMode, boolean isAppAnimation,
+            float windowCornerRadius) {
         mAnimation = animation;
         if (position != null) {
             mPosition.set(position.x, position.y);
         }
+        mWindowCornerRadius = windowCornerRadius;
         mCanSkipFirstFrame = canSkipFirstFrame;
         mIsAppAnimation = isAppAnimation;
         mStackClipMode = stackClipMode;
@@ -100,6 +104,9 @@ public class WindowAnimationSpec implements AnimationSpec {
             mTmpRect.set(mStackBounds);
             mTmpRect.intersect(tmp.transformation.getClipRect());
             t.setWindowCrop(leash, mTmpRect);
+        }
+        if (mAnimation.hasRoundedCorners() && mWindowCornerRadius > 0) {
+            t.setCornerRadius(leash, mWindowCornerRadius);
         }
     }
 

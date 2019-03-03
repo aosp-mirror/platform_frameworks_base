@@ -125,7 +125,7 @@ public final class Suggestion implements Parcelable {
         mPendingIntent = in.readParcelable(PendingIntent.class.getClassLoader());
     }
 
-    public static final Creator<Suggestion> CREATOR = new Creator<Suggestion>() {
+    public static final @android.annotation.NonNull Creator<Suggestion> CREATOR = new Creator<Suggestion>() {
         @Override
         public Suggestion createFromParcel(Parcel in) {
             return new Suggestion(in);

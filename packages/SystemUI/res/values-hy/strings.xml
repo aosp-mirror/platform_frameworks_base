@@ -325,7 +325,8 @@
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"Wi-Fi-ը միացված է"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Հասանելի Wi-Fi ցանցեր չկան"</string>
     <string name="quick_settings_wifi_secondary_label_transient" msgid="7748206246119760554">"Միացում…"</string>
-    <string name="quick_settings_cast_title" msgid="7709016546426454729">"Հեռարձակում"</string>
+    <!-- no translation found for quick_settings_cast_title (6954684227605751758) -->
+    <skip />
     <string name="quick_settings_casting" msgid="6601710681033353316">"Հեռարձակում"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Անանուն սարք"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"Պատրաստ է հեռարձակման"</string>
@@ -437,7 +438,8 @@
     <string name="battery_saver_notification_title" msgid="8614079794522291840">"Մարտկոցի տնտեսումը միացված է"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Նվազեցնում է ծանրաբեռնվածությունը և ֆոնային տվյալները"</string>
     <string name="battery_saver_notification_action_text" msgid="132118784269455533">"Անջատել մարտկոցի տնտեսումը"</string>
-    <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ծրագիրը կսկսի հավաքել այն ամենն ինչ ցուցադրվում է ձեր էկրանին:"</string>
+    <string name="media_projection_dialog_text" msgid="1443042478990422751">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>-ը կլուսանկարի ամենը, ինչ հայտնվի սարքի էկրանին, այդ թվում՝ ծանուցումներ, գաղտնաբառեր, լուսանկարներ, հաղորդագրություններ և վճարային տվյալներ։"</string>
+    <string name="media_projection_dialog_title" msgid="7574971526813630219">"Թույլատրե՞լ <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>-ին տեսագրել կամ հեռարձակել ձեր էկրանը"</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Այլևս ցույց չտալ"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Մաքրել բոլորը"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"Կառավարել"</string>
@@ -606,7 +608,7 @@
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"Անջատել"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"Ծանուցումների ընդլայնված կառավարման օգնությամբ կարող եք յուրաքանչյուր հավելվածի ծանուցումների համար նշանակել կարևորության աստիճան՝ 0-5 սահմաններում: \n\n"<b>"5-րդ աստիճան"</b>" \n- Ցուցադրել ծանուցումների ցանկի վերևում \n- Թույլատրել լիաէկրան ընդհատումները \n- Միշտ ցուցադրել կարճ ծանուցումները \n\n"<b>"4-րդ աստիճան"</b>" \n- Արգելել լիաէկրան ընդհատումները \n- Միշտ ցուցադրել կարճ ծանուցումները \n\n"<b>"3-րդ աստիճան"</b>" \n- Արգելել լիաէկրան ընդհատումները \n- Արգելել կարճ ծանուցումների ցուցադրումը \n\n"<b>"2-րդ աստիճան"</b>" \n- Արգելել լիաէկրան ընդհատումները \n- Արգելել կարճ ծանուցումների ցուցադրումը \n- Անջատել ձայնը և թրթռումը \n\n"<b>"1-ին աստիճան"</b>" \n- Արգելել լիաէկրան ընդհատումները \n- Արգելել կարճ ծանուցումների ցուցադրումը \n- Անջատել ձայնը և թրթռումը \n- Չցուցադրել կողպէկրանում և կարգավիճակի գոտում \n- Ցուցադրել ծանուցումների ցանկի ներքևում \n\n"<b>"0-րդ աստիճան"</b>\n"- Արգելափակել հավելվածի բոլոր ծանուցումները"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Ծանուցումներ"</string>
-    <string name="notification_channel_disabled" msgid="344536703863700565">"Դուք այլևս չեք ստանա այս ծանուցումները"</string>
+    <string name="notification_channel_disabled" msgid="344536703863700565">"Այլևս չեք ստանա նման ծանուցումներ"</string>
     <string name="notification_channel_minimized" msgid="1664411570378910931">"Այս ծանուցումները կծալվեն:"</string>
     <string name="notification_channel_silenced" msgid="2877199534497961942">"Այս ծանուցումները կցուցադրվեն առանց ձայնի"</string>
     <string name="notification_channel_unsilenced" msgid="4790904571552394137">"Այս ծանուցումները կցուցադրվեն զգուշացումով"</string>
@@ -814,6 +816,9 @@
     <string name="high_temp_title" msgid="4589508026407318374">"Հեռախոսը տաքանում է"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"Հովանալու ընթացքում հեռախոսի որոշ գործառույթներ սահմանափակ են"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"Ձեր հեռախոսն ավտոմատ կերպով կփորձի hովանալ: Կարող եք շարունակել օգտագործել հեռախոսը, սակայն հնարավոր է, որ այն ավելի դանդաղ աշխատի:\n\nՀովանալուց հետո հեռախոսը կաշխատի կանոնավոր կերպով:"</string>
+    <string name="high_temp_alarm_title" msgid="442812040762745210">"Անջատեք լիցքավորիչը հոսանքից"</string>
+    <string name="high_temp_alarm_notify_message" msgid="1802871059489414932">"Չհաջողվեց լիցքավորել սարքը: Անջատեք հոսանքի ադապտերը և ուշադիր եղեք՝ մալուխը կարող է տաքացած լինել:"</string>
+    <string name="high_temp_alarm_help_care_steps" msgid="3631075329318070726">"Քայլեր գերտաքացման ահազանգի դեպքում"</string>
     <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"Ձախ դյուրանցում"</string>
     <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"Աջ դյուրանցում"</string>
     <string name="lockscreen_unlock_left" msgid="2043092136246951985">"Ձախ դյուրանցումը նաև ապակողպում է"</string>

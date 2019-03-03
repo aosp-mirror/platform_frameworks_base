@@ -22,7 +22,8 @@ import android.app.PendingIntent;
 import android.app.RemoteInput;
 import android.content.Intent;
 import android.graphics.drawable.Icon;
-import android.support.test.filters.SmallTest;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.internal.R;
 import com.android.systemui.SysuiTestCase;

@@ -108,7 +108,7 @@ public final class SliceSpec implements Parcelable {
         return String.format("SliceSpec{%s,%d}", mType, mRevision);
     }
 
-    public static final Creator<SliceSpec> CREATOR = new Creator<SliceSpec>() {
+    public static final @android.annotation.NonNull Creator<SliceSpec> CREATOR = new Creator<SliceSpec>() {
         @Override
         public SliceSpec createFromParcel(Parcel source) {
             return new SliceSpec(source);

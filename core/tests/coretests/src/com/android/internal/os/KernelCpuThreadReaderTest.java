@@ -218,6 +218,51 @@ public class KernelCpuThreadReaderTest {
 
     }
 
+    @Test
+    public void testReader_otherThreads() throws IOException {
+        final Path processPath = mProcDirectory.toPath().resolve("self");
+        setupDirectory(
+                processPath,
+                new int[]{1, 2, 3},
+                "process",
+                new String[]{"thread1", "thread2", "thread3"},
+                new int[]{1000, 2000},
+                new int[][]{{0, 100}, {10, 0}, {0, 300}});
+        final KernelCpuThreadReader kernelCpuThreadReader = new KernelCpuThreadReader(
+                8,
+                i -> true,
+                2000,
+                mProcDirectory.toPath(),
+                processPath.resolve("task/1/time_in_state"),
+                new KernelCpuThreadReader.Injector() {
+                    @Override
+                    public int myPid() {
+                        return 1000;
+                    }
+
+                    @Override
+                    public int myUid() {
+                        return 0;
+                    }
+
+                    @Override
+                    public int getUidForPid(int pid) {
+                        return 0;
+                    }
+                });
+        checkResults(
+                kernelCpuThreadReader.getCurrentProcessCpuUsage(),
+                kernelCpuThreadReader.getCpuFrequenciesKhz(),
+                0,
+                1000,
+                new int[]{-1, 3},
+                "process",
+                new String[]{"__OTHER_THREADS", "thread3"},
+                new int[]{1000, 2000},
+                new int[][]{{100, 1000}, {0, 3000}}
+        );
+    }
+
     private void setupDirectory(Path processPath, int[] threadIds, String processName,
             String[] threadNames, int[] cpuFrequencies, int[][] cpuTimes) throws IOException {
         // Make /proc/$PID
@@ -259,6 +304,7 @@ public class KernelCpuThreadReaderTest {
         assertEquals(processId, processCpuUsage.processId);
         assertEquals(uid, processCpuUsage.uid);
         assertEquals(processName, processCpuUsage.processName);
+        assertEquals(threadIds.length, processCpuUsage.threadCpuUsages.size());
 
         // Sort the thread CPU usages to compare with test case
         final ArrayList<KernelCpuThreadReader.ThreadCpuUsage> threadCpuUsages =

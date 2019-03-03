@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.notification.stack;
 
 import android.annotation.Nullable;
 import android.content.Context;
+import android.util.MathUtils;
 import android.view.View;
 
 import com.android.systemui.Dependency;
@@ -39,6 +40,7 @@ import java.util.List;
 public class AmbientState {
 
     private static final int NO_SECTION_BOUNDARY = -1;
+    private static final float MAX_PULSE_HEIGHT = 100000f;
 
     private ArrayList<ExpandableView> mDraggedViews = new ArrayList<>();
     private int mScrollY;
@@ -79,6 +81,8 @@ public class AmbientState {
     private ExpandableNotificationRow mExpandingNotification;
     private float mDarkAmount;
     private boolean mAppearing;
+    private float mPulseHeight = MAX_PULSE_HEIGHT;
+    private float mDozeAmount = 0.0f;
 
     public AmbientState(Context context) {
         mSectionBoundaryIndices.add(NO_SECTION_BOUNDARY);
@@ -181,6 +185,10 @@ public class AmbientState {
 
     /** Dark ratio of the status bar **/
     public void setDarkAmount(float darkAmount) {
+        if (darkAmount == 1.0f && mDarkAmount != darkAmount) {
+            // Whenever we are fully dark, let's reset the pulseHeight again
+            mPulseHeight = MAX_PULSE_HEIGHT;
+        }
         mDarkAmount = darkAmount;
     }
 
@@ -279,7 +287,28 @@ public class AmbientState {
     }
 
     public int getInnerHeight() {
-        return Math.max(Math.min(mLayoutHeight, mMaxLayoutHeight) - mTopPadding, mLayoutMinHeight);
+        return getInnerHeight(false /* ignorePulseHeight */);
+    }
+
+    /**
+     * @param ignorePulseHeight ignore the pulse height for this request
+     * @return the inner height of the algorithm.
+     */
+    public int getInnerHeight(boolean ignorePulseHeight) {
+        if (mDozeAmount == 1.0f && !isPulseExpanding()) {
+            return mShelf.getHeight();
+        }
+        int height = Math.max(mLayoutMinHeight,
+                Math.min(mLayoutHeight, mMaxLayoutHeight) - mTopPadding);
+        if (ignorePulseHeight) {
+            return height;
+        }
+        float pulseHeight = Math.min(mPulseHeight, (float) height);
+        return (int) MathUtils.lerp(height, pulseHeight, mDozeAmount);
+    }
+
+    public boolean isPulseExpanding() {
+        return mPulseHeight != MAX_PULSE_HEIGHT && mDozeAmount != 0.0f && mDarkAmount != 1.0f;
     }
 
     public boolean isShadeExpanded() {
@@ -425,19 +454,6 @@ public class AmbientState {
     }
 
     /**
-     * Similar to the normal is above shelf logic but doesn't allow it to be above in AOD1.
-     *
-     * @param expandableView the view to check
-     */
-    public boolean isAboveShelf(ExpandableView expandableView) {
-        if (!(expandableView instanceof ExpandableNotificationRow)) {
-            return expandableView.isAboveShelf();
-        }
-        ExpandableNotificationRow row = (ExpandableNotificationRow) expandableView;
-        return row.isAboveShelf() && !isDozingAndNotPulsing(row);
-    }
-
-    /**
      * @return whether a view is dozing and not pulsing right now
      */
     public boolean isDozingAndNotPulsing(ExpandableView view) {
@@ -487,5 +503,27 @@ public class AmbientState {
 
     public boolean isAppearing() {
         return mAppearing;
+    }
+
+    public void setPulseHeight(float height) {
+        mPulseHeight = height;
+    }
+
+    public void setDozeAmount(float dozeAmount) {
+        if (dozeAmount != mDozeAmount) {
+            mDozeAmount = dozeAmount;
+            if (dozeAmount == 0.0f || dozeAmount == 1.0f) {
+                // We woke all the way up, let's reset the pulse height
+                mPulseHeight = MAX_PULSE_HEIGHT;
+            }
+        }
+    }
+
+    /**
+     * Is the device fully awake, which is different from not tark at all when there are pulsing
+     * notifications.
+     */
+    public boolean isFullyAwake() {
+        return mDozeAmount == 0.0f;
     }
 }

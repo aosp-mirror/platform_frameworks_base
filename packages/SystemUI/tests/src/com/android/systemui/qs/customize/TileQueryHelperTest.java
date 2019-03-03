@@ -31,12 +31,13 @@ import static org.mockito.Mockito.when;
 
 import android.content.pm.PackageManager;
 import android.provider.Settings;
-import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 import android.text.TextUtils;
 import android.util.ArraySet;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.systemui.Dependency;
 import com.android.systemui.R;

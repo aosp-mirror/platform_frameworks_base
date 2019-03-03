@@ -117,7 +117,7 @@ public final class LteVopsSupportInfo implements Parcelable {
                 + " mEmcBearerSupport = " + mEmcBearerSupport);
     }
 
-    public static final Creator<LteVopsSupportInfo> CREATOR =
+    public static final @android.annotation.NonNull Creator<LteVopsSupportInfo> CREATOR =
             new Creator<LteVopsSupportInfo>() {
         @Override
         public LteVopsSupportInfo createFromParcel(Parcel in) {

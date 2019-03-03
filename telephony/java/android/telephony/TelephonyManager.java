@@ -1355,12 +1355,7 @@ public class TelephonyManager {
      */
     public static final String EXTRA_RECOVERY_ACTION = "recoveryAction";
 
-    /**
-     * The max value for the timeout passed in {@link #requestNumberVerification}.
-     * @hide
-     */
-    @SystemApi
-    public static final long MAX_NUMBER_VERIFICATION_TIMEOUT_MILLIS = 60000;
+    private static final long MAX_NUMBER_VERIFICATION_TIMEOUT_MILLIS = 60000;
 
     /**
      * Intent sent when an error occurs that debug tools should log and possibly take further
@@ -2025,6 +2020,15 @@ public class TelephonyManager {
         }
         Rlog.d(TAG, "/proc/cmdline=" + cmdline);
         return cmdline;
+    }
+
+    /**
+     * @return The max value for the timeout passed in {@link #requestNumberVerification}.
+     * @hide
+     */
+    @SystemApi
+    public static long getMaxNumberVerificationTimeoutMillis() {
+        return MAX_NUMBER_VERIFICATION_TIMEOUT_MILLIS;
     }
 
     /** Kernel command line */
@@ -3249,6 +3253,7 @@ public class TelephonyManager {
      * the caller does not have adequate permissions for that card.
      */
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @NonNull
     public List<UiccCardInfo> getUiccCardsInfo() {
         try {
             ITelephony telephony = getITelephony();
@@ -4494,6 +4499,7 @@ public class TelephonyManager {
      * {@link android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE READ_PRIVILEGED_PHONE_STATE}
      * @hide
      */
+    @Nullable
     @SystemApi
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public String getIsimDomain() {
@@ -5742,8 +5748,8 @@ public class TelephonyManager {
      *
      * @hide
      * @param range The range of phone numbers the caller expects a phone call from.
-     * @param timeoutMillis The amount of time to wait for such a call, or
-     *                      {@link #MAX_NUMBER_VERIFICATION_TIMEOUT_MILLIS}, whichever is lesser.
+     * @param timeoutMillis The amount of time to wait for such a call, or the value of
+     *                      {@link #getMaxNumberVerificationTimeoutMillis()}, whichever is lesser.
      * @param executor The {@link Executor} that callbacks should be executed on.
      * @param callback The callback to use for delivering results.
      */
@@ -9070,6 +9076,7 @@ public class TelephonyManager {
      * @return Application ID for specified app type or {@code null} if no uicc or error.
      * @hide
      */
+    @Nullable
     @SystemApi
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public String getAidForAppType(@UiccAppType int appType) {

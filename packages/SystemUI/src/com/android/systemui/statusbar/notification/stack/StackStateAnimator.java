@@ -419,32 +419,6 @@ public class StackStateAnimator {
                 ExpandableNotificationRow row = (ExpandableNotificationRow) event.mChangingView;
                 row.prepareExpansionChanged();
             } else if (event.animationType == NotificationStackScrollLayout
-                    .AnimationEvent.ANIMATION_TYPE_PULSE_APPEAR) {
-                ExpandableViewState viewState = changingView.getViewState();
-                if (viewState != null) {
-                    mTmpState.copyFrom(viewState);
-                    mTmpState.yTranslation += mPulsingAppearingTranslation;
-                    mTmpState.alpha = 0;
-                    mTmpState.applyToView(changingView);
-
-                    mTmpState.copyFrom(mShelf.getViewState());
-                    mTmpState.applyToView(mShelf);
-                }
-            } else if (event.animationType == NotificationStackScrollLayout
-                    .AnimationEvent.ANIMATION_TYPE_PULSE_DISAPPEAR) {
-                ExpandableViewState viewState = changingView.getViewState();
-                if (viewState != null) {
-                    viewState.alpha = 0;
-                    // We want to animate the alpha away before the view starts translating,
-                    // otherwise everything will overlap and look xtra ugly.
-                    float originalYTranslation = viewState.yTranslation;
-                    viewState.yTranslation = changingView.getTranslationY();
-                    mAnimationFilter.animateAlpha = true;
-                    mAnimationProperties.duration = ANIMATION_DURATION_PULSE_APPEAR / 2;
-                    viewState.animateTo(changingView, mAnimationProperties);
-                    viewState.yTranslation = originalYTranslation;
-                }
-            } else if (event.animationType == NotificationStackScrollLayout
                     .AnimationEvent.ANIMATION_TYPE_HEADS_UP_APPEAR) {
                 // This item is added, initialize it's properties.
                 ExpandableViewState viewState = changingView.getViewState();

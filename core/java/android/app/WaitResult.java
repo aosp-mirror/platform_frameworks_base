@@ -86,7 +86,7 @@ public class WaitResult implements Parcelable {
         dest.writeInt(launchState);
     }
 
-    public static final Parcelable.Creator<WaitResult> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<WaitResult> CREATOR
             = new Parcelable.Creator<WaitResult>() {
         @Override
         public WaitResult createFromParcel(Parcel source) {

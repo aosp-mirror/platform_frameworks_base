@@ -756,7 +756,7 @@ public final class TextClassification implements Parcelable {
             return request;
         }
 
-        public static final Parcelable.Creator<Request> CREATOR =
+        public static final @android.annotation.NonNull Parcelable.Creator<Request> CREATOR =
                 new Parcelable.Creator<Request>() {
                     @Override
                     public Request createFromParcel(Parcel in) {
@@ -785,7 +785,7 @@ public final class TextClassification implements Parcelable {
         dest.writeBundle(mExtras);
     }
 
-    public static final Parcelable.Creator<TextClassification> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<TextClassification> CREATOR =
             new Parcelable.Creator<TextClassification>() {
                 @Override
                 public TextClassification createFromParcel(Parcel in) {

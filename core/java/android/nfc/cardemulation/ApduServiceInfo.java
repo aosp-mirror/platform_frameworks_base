@@ -540,7 +540,7 @@ public final class ApduServiceInfo implements Parcelable {
     };
 
     @UnsupportedAppUsage
-    public static final Parcelable.Creator<ApduServiceInfo> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<ApduServiceInfo> CREATOR =
             new Parcelable.Creator<ApduServiceInfo>() {
         @Override
         public ApduServiceInfo createFromParcel(Parcel source) {

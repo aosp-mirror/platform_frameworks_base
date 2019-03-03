@@ -139,7 +139,7 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
          * @param title
          * @return
          */
-        public Builder setTitle(@NonNull CharSequence title) {
+        @NonNull public Builder setTitle(@NonNull CharSequence title) {
             mBundle.putCharSequence(KEY_TITLE, title);
             return this;
         }
@@ -150,7 +150,7 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
          * @hide
          */
         @RequiresPermission(USE_BIOMETRIC_INTERNAL)
-        public Builder setUseDefaultTitle() {
+        @NonNull public Builder setUseDefaultTitle() {
             mBundle.putBoolean(KEY_USE_DEFAULT_TITLE, true);
             return this;
         }
@@ -160,7 +160,7 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
          * @param subtitle
          * @return
          */
-        public Builder setSubtitle(@NonNull CharSequence subtitle) {
+        @NonNull public Builder setSubtitle(@NonNull CharSequence subtitle) {
             mBundle.putCharSequence(KEY_SUBTITLE, subtitle);
             return this;
         }
@@ -170,7 +170,7 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
          * @param description
          * @return
          */
-        public Builder setDescription(@NonNull CharSequence description) {
+        @NonNull public Builder setDescription(@NonNull CharSequence description) {
             mBundle.putCharSequence(KEY_DESCRIPTION, description);
             return this;
         }
@@ -182,7 +182,7 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
          * @return
          * @hide
          */
-        public Builder setPositiveButton(@NonNull CharSequence text,
+        @NonNull public Builder setPositiveButton(@NonNull CharSequence text,
                 @NonNull @CallbackExecutor Executor executor,
                 @NonNull DialogInterface.OnClickListener listener) {
             if (TextUtils.isEmpty(text)) {
@@ -210,7 +210,7 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
          * @param text
          * @return
          */
-        public Builder setNegativeButton(@NonNull CharSequence text,
+        @NonNull public Builder setNegativeButton(@NonNull CharSequence text,
                 @NonNull @CallbackExecutor Executor executor,
                 @NonNull DialogInterface.OnClickListener listener) {
             if (TextUtils.isEmpty(text)) {
@@ -245,7 +245,7 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
          *
          * @param requireConfirmation
          */
-        public Builder setRequireConfirmation(boolean requireConfirmation) {
+        @NonNull public Builder setRequireConfirmation(boolean requireConfirmation) {
             mBundle.putBoolean(KEY_REQUIRE_CONFIRMATION, requireConfirmation);
             return this;
         }
@@ -255,7 +255,8 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
          * option to authenticate with their device PIN, pattern, or password. Developers should
          * first check {@link KeyguardManager#isDeviceSecure()} before enabling this. If the device
          * is not secure, {@link BiometricPrompt#BIOMETRIC_ERROR_NO_DEVICE_CREDENTIAL} will be
-         * returned in {@link AuthenticationCallback#onAuthenticationError(int, CharSequence)}}
+         * returned in {@link AuthenticationCallback#onAuthenticationError(int, CharSequence)}}.
+         * Defaults to false.
          *
          * Note that {@link #setNegativeButton(CharSequence, Executor,
          * DialogInterface.OnClickListener)} should not be set if this is set to true.
@@ -264,7 +265,7 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
          *               credentials (PIN, pattern, or password).
          * @return
          */
-        public Builder setAllowDeviceCredential(boolean enable) {
+        @NonNull public Builder setAllowDeviceCredential(boolean enable) {
             mBundle.putBoolean(KEY_ALLOW_DEVICE_CREDENTIAL, enable);
             return this;
         }
@@ -274,7 +275,7 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
          * @return a {@link BiometricPrompt}
          * @throws IllegalArgumentException if any of the required fields are not set.
          */
-        public BiometricPrompt build() {
+        @NonNull public BiometricPrompt build() {
             final CharSequence title = mBundle.getCharSequence(KEY_TITLE);
             final CharSequence negative = mBundle.getCharSequence(KEY_NEGATIVE_TEXT);
             final boolean useDefaultTitle = mBundle.getBoolean(KEY_USE_DEFAULT_TITLE);
@@ -616,8 +617,15 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
             mExecutor = executor;
             mAuthenticationCallback = callback;
             final long sessionId = crypto != null ? crypto.getOpId() : 0;
-            mService.authenticate(mToken, sessionId, userId, mBiometricServiceReceiver,
-                    mContext.getOpPackageName(), mBundle);
+            if (BiometricManager.hasBiometrics(mContext)) {
+                mService.authenticate(mToken, sessionId, userId, mBiometricServiceReceiver,
+                        mContext.getOpPackageName(), mBundle);
+            } else {
+                mExecutor.execute(() -> {
+                    callback.onAuthenticationError(BiometricPrompt.BIOMETRIC_ERROR_HW_NOT_PRESENT,
+                            mContext.getString(R.string.biometric_error_hw_unavailable));
+                });
+            }
         } catch (RemoteException e) {
             Log.e(TAG, "Remote exception while authenticating", e);
             mExecutor.execute(() -> {

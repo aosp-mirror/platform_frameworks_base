@@ -200,7 +200,7 @@ public final class AudioProductStrategy implements Parcelable {
         }
     }
 
-    public static final Parcelable.Creator<AudioProductStrategy> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<AudioProductStrategy> CREATOR =
             new Parcelable.Creator<AudioProductStrategy>() {
                 @Override
                 public AudioProductStrategy createFromParcel(@NonNull Parcel in) {
@@ -338,7 +338,7 @@ public final class AudioProductStrategy implements Parcelable {
             }
         }
 
-        public static final Parcelable.Creator<AudioAttributesGroup> CREATOR =
+        public static final @android.annotation.NonNull Parcelable.Creator<AudioAttributesGroup> CREATOR =
                 new Parcelable.Creator<AudioAttributesGroup>() {
                     @Override
                     public AudioAttributesGroup createFromParcel(@NonNull Parcel in) {

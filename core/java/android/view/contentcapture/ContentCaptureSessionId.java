@@ -96,15 +96,17 @@ public final class ContentCaptureSessionId implements Parcelable {
         parcel.writeString(mValue);
     }
 
-    public static final Parcelable.Creator<ContentCaptureSessionId> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<ContentCaptureSessionId> CREATOR =
             new Parcelable.Creator<ContentCaptureSessionId>() {
 
         @Override
+        @NonNull
         public ContentCaptureSessionId createFromParcel(Parcel parcel) {
             return new ContentCaptureSessionId(parcel.readString());
         }
 
         @Override
+        @NonNull
         public ContentCaptureSessionId[] newArray(int size) {
             return new ContentCaptureSessionId[size];
         }

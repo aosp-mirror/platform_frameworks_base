@@ -21,6 +21,7 @@ import static android.media.MediaRouter.ROUTE_TYPE_REMOTE_DISPLAY;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.media.projection.MediaProjectionInfo;
 import android.provider.Settings;
 import android.service.quicksettings.Tile;
 import android.util.Log;
@@ -125,7 +126,30 @@ public class CastTile extends QSTileImpl<BooleanState> {
             });
             return;
         }
-        showDetail(true);
+
+        CastDevice activeProjection = getActiveDeviceMediaProjection();
+        if (activeProjection == null) {
+            showDetail(true);
+        } else {
+            mController.stopCasting(activeProjection);
+        }
+    }
+
+    private CastDevice getActiveDeviceMediaProjection() {
+        CastDevice activeDevice = null;
+        for (CastDevice device : mController.getCastDevices()) {
+            if (device.state == CastDevice.STATE_CONNECTED
+                    || device.state == CastDevice.STATE_CONNECTING) {
+                activeDevice = device;
+                break;
+            }
+        }
+
+        if (activeDevice != null && activeDevice.tag instanceof MediaProjectionInfo) {
+            return activeDevice;
+        }
+
+        return null;
     }
 
     @Override
@@ -161,21 +185,23 @@ public class CastTile extends QSTileImpl<BooleanState> {
         for (CastDevice device : devices) {
             if (device.state == CastDevice.STATE_CONNECTED) {
                 state.value = true;
-                state.label = getDeviceName(device);
+                state.secondaryLabel = getDeviceName(device);
                 state.contentDescription = state.contentDescription + "," +
                         mContext.getString(R.string.accessibility_cast_name, state.label);
             } else if (device.state == CastDevice.STATE_CONNECTING) {
                 connecting = true;
             }
         }
-        if (!state.value && connecting) {
-            state.label = mContext.getString(R.string.quick_settings_connecting);
+        if (connecting && !state.value) {
+            state.secondaryLabel = mContext.getString(R.string.quick_settings_connecting);
         }
         state.icon = ResourceIcon.get(state.value ? R.drawable.ic_qs_cast_on
                 : R.drawable.ic_qs_cast_off);
-        if (mWifiConnected) {
+        if (mWifiConnected || state.value) {
             state.state = state.value ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
-            state.secondaryLabel = "";
+            if (!state.value) {
+                state.secondaryLabel = "";
+            }
             state.contentDescription = state.contentDescription + ","
                     + mContext.getString(R.string.accessibility_quick_settings_open_details);
             state.expandedAccessibilityClassName = Button.class.getName();

@@ -21,6 +21,7 @@
 #include "statslog.h"
 
 #include <binder/IPCThreadState.h>
+#include <private/android_filesystem_config.h>
 
 namespace android {
 namespace os {
@@ -202,140 +203,11 @@ LogEvent::LogEvent(const string& trainName, int64_t trainVersionCode, bool requi
 }
 
 LogEvent::LogEvent(int64_t wallClockTimestampNs, int64_t elapsedTimestampNs,
-                   const SpeakerImpedance& speakerImpedance) {
-    mLogdTimestampNs = wallClockTimestampNs;
-    mElapsedTimestampNs = elapsedTimestampNs;
-    mTagId = android::util::SPEAKER_IMPEDANCE_REPORTED;
-
-    mValues.push_back(
-            FieldValue(Field(mTagId, getSimpleField(1)), Value(speakerImpedance.speakerLocation)));
-    mValues.push_back(
-            FieldValue(Field(mTagId, getSimpleField(2)), Value(speakerImpedance.milliOhms)));
-}
-
-LogEvent::LogEvent(int64_t wallClockTimestampNs, int64_t elapsedTimestampNs,
-                   const HardwareFailed& hardwareFailed) {
-    mLogdTimestampNs = wallClockTimestampNs;
-    mElapsedTimestampNs = elapsedTimestampNs;
-    mTagId = android::util::HARDWARE_FAILED;
-
-    mValues.push_back(FieldValue(Field(mTagId, getSimpleField(1)),
-                                 Value(int32_t(hardwareFailed.hardwareType))));
-    mValues.push_back(
-            FieldValue(Field(mTagId, getSimpleField(2)), Value(hardwareFailed.hardwareLocation)));
-    mValues.push_back(
-            FieldValue(Field(mTagId, getSimpleField(3)), Value(int32_t(hardwareFailed.errorCode))));
-}
-
-LogEvent::LogEvent(int64_t wallClockTimestampNs, int64_t elapsedTimestampNs,
-                   const PhysicalDropDetected& physicalDropDetected) {
-    mLogdTimestampNs = wallClockTimestampNs;
-    mElapsedTimestampNs = elapsedTimestampNs;
-    mTagId = android::util::PHYSICAL_DROP_DETECTED;
-
-    mValues.push_back(FieldValue(Field(mTagId, getSimpleField(1)),
-                                 Value(int32_t(physicalDropDetected.confidencePctg))));
-    mValues.push_back(
-            FieldValue(Field(mTagId, getSimpleField(2)), Value(physicalDropDetected.accelPeak)));
-    mValues.push_back(FieldValue(Field(mTagId, getSimpleField(3)),
-                                 Value(physicalDropDetected.freefallDuration)));
-}
-
-LogEvent::LogEvent(int64_t wallClockTimestampNs, int64_t elapsedTimestampNs,
-                   const ChargeCycles& chargeCycles) {
-    mLogdTimestampNs = wallClockTimestampNs;
-    mElapsedTimestampNs = elapsedTimestampNs;
-    mTagId = android::util::CHARGE_CYCLES_REPORTED;
-
-    for (size_t i = 0; i < chargeCycles.cycleBucket.size(); i++) {
-        mValues.push_back(FieldValue(Field(mTagId, getSimpleField(i + 1)),
-                                     Value(chargeCycles.cycleBucket[i])));
-    }
-}
-
-LogEvent::LogEvent(int64_t wallClockTimestampNs, int64_t elapsedTimestampNs,
-                   const BatteryHealthSnapshotArgs& batteryHealthSnapshotArgs) {
-    mLogdTimestampNs = wallClockTimestampNs;
-    mElapsedTimestampNs = elapsedTimestampNs;
-    mTagId = android::util::BATTERY_HEALTH_SNAPSHOT;
-
-    mValues.push_back(FieldValue(Field(mTagId, getSimpleField(1)),
-                                 Value(int32_t(batteryHealthSnapshotArgs.type))));
-    mValues.push_back(FieldValue(Field(mTagId, getSimpleField(2)),
-                                 Value(batteryHealthSnapshotArgs.temperatureDeciC)));
-    mValues.push_back(FieldValue(Field(mTagId, getSimpleField(3)),
-                                 Value(batteryHealthSnapshotArgs.voltageMicroV)));
-    mValues.push_back(FieldValue(Field(mTagId, getSimpleField(4)),
-                                 Value(batteryHealthSnapshotArgs.currentMicroA)));
-    mValues.push_back(FieldValue(Field(mTagId, getSimpleField(5)),
-                                 Value(batteryHealthSnapshotArgs.openCircuitVoltageMicroV)));
-    mValues.push_back(FieldValue(Field(mTagId, getSimpleField(6)),
-                                 Value(batteryHealthSnapshotArgs.resistanceMicroOhm)));
-    mValues.push_back(FieldValue(Field(mTagId, getSimpleField(7)),
-                                 Value(batteryHealthSnapshotArgs.levelPercent)));
-}
-
-LogEvent::LogEvent(int64_t wallClockTimestampNs, int64_t elapsedTimestampNs, const SlowIo& slowIo) {
-    mLogdTimestampNs = wallClockTimestampNs;
-    mElapsedTimestampNs = elapsedTimestampNs;
-    mTagId = android::util::SLOW_IO;
-
-    int pos[] = {1};
-    mValues.push_back(
-            FieldValue(Field(mTagId, getSimpleField(1)), Value(int32_t(slowIo.operation))));
-    pos[0]++;
-    mValues.push_back(FieldValue(Field(mTagId, getSimpleField(2)), Value(slowIo.count)));
-}
-
-LogEvent::LogEvent(int64_t wallClockTimestampNs, int64_t elapsedTimestampNs,
-                   const SpeechDspStat& speechDspStat) {
-    mLogdTimestampNs = wallClockTimestampNs;
-    mElapsedTimestampNs = elapsedTimestampNs;
-    mTagId = android::util::SPEECH_DSP_STAT_REPORTED;
-
-    mValues.push_back(FieldValue(Field(mTagId, getSimpleField(1)),
-                                 Value(speechDspStat.totalUptimeMillis)));
-    mValues.push_back(FieldValue(Field(mTagId, getSimpleField(2)),
-                                 Value(speechDspStat.totalDowntimeMillis)));
-    mValues.push_back(FieldValue(Field(mTagId, getSimpleField(3)),
-                                 Value(speechDspStat.totalCrashCount)));
-    mValues.push_back(FieldValue(Field(mTagId, getSimpleField(4)),
-                                 Value(speechDspStat.totalRecoverCount)));
-}
-
-LogEvent::LogEvent(int64_t wallClockTimestampNs, int64_t elapsedTimestampNs,
-                   const BatteryCausedShutdown& batteryCausedShutdown) {
-    mLogdTimestampNs = wallClockTimestampNs;
-    mElapsedTimestampNs = elapsedTimestampNs;
-    mTagId = android::util::BATTERY_CAUSED_SHUTDOWN;
-
-    mValues.push_back(FieldValue(Field(mTagId, getSimpleField(1)),
-                                 Value(batteryCausedShutdown.voltageMicroV)));
-}
-
-LogEvent::LogEvent(int64_t wallClockTimestampNs, int64_t elapsedTimestampNs,
-                   const UsbPortOverheatEvent& usbPortOverheatEvent) {
-    mLogdTimestampNs = wallClockTimestampNs;
-    mElapsedTimestampNs = elapsedTimestampNs;
-    mTagId = android::util::USB_PORT_OVERHEAT_EVENT_REPORTED;
-
-    mValues.push_back(FieldValue(Field(mTagId, getSimpleField(1)),
-                                 Value(usbPortOverheatEvent.plugTemperatureDeciC)));
-    mValues.push_back(FieldValue(Field(mTagId, getSimpleField(2)),
-                                 Value(usbPortOverheatEvent.maxTemperatureDeciC)));
-    mValues.push_back(FieldValue(Field(mTagId, getSimpleField(3)),
-                                 Value(usbPortOverheatEvent.timeToOverheat)));
-    mValues.push_back(FieldValue(Field(mTagId, getSimpleField(4)),
-                                 Value(usbPortOverheatEvent.timeToHysteresis)));
-    mValues.push_back(FieldValue(Field(mTagId, getSimpleField(5)),
-                                 Value(usbPortOverheatEvent.timeToInactive)));
-}
-
-LogEvent::LogEvent(int64_t wallClockTimestampNs, int64_t elapsedTimestampNs,
                    const VendorAtom& vendorAtom) {
     mLogdTimestampNs = wallClockTimestampNs;
     mElapsedTimestampNs = elapsedTimestampNs;
     mTagId = vendorAtom.atomId;
+    mLogUid = AID_STATSD;
 
     mValues.push_back(
             FieldValue(Field(mTagId, getSimpleField(1)), Value(vendorAtom.reverseDomainName)));

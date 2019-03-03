@@ -15,17 +15,20 @@
  */
 package com.android.systemui.qs.external;
 
+import static junit.framework.Assert.assertEquals;
+
 import android.content.res.ColorStateList;
 import android.service.quicksettings.Tile;
-import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
+
+import androidx.test.runner.AndroidJUnit4;
+
+import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import com.android.systemui.R;
-
-import static junit.framework.Assert.assertEquals;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)

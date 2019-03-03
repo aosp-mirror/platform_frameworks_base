@@ -694,9 +694,11 @@ public final class PowerManager {
             ServiceType.BATTERY_STATS,
             ServiceType.DATA_SAVER,
             ServiceType.FORCE_ALL_APPS_STANDBY,
+            ServiceType.FORCE_BACKGROUND_CHECK,
             ServiceType.OPTIONAL_SENSORS,
             ServiceType.AOD,
             ServiceType.QUICK_DOZE,
+            ServiceType.NIGHT_MODE,
     })
     public @interface ServiceType {
         int NULL = 0;
@@ -762,8 +764,14 @@ public final class PowerManager {
      */
     public static final int LOCATION_MODE_FOREGROUND_ONLY = 3;
 
+    /**
+     * In this mode, location will not be turned off, but LocationManager will throttle all
+     * requests to providers when the device is non-interactive.
+     */
+    public static final int LOCATION_MODE_THROTTLE_REQUESTS_WHEN_SCREEN_OFF = 4;
+
     static final int MIN_LOCATION_MODE = LOCATION_MODE_NO_CHANGE;
-    static final int MAX_LOCATION_MODE = LOCATION_MODE_FOREGROUND_ONLY;
+    static final int MAX_LOCATION_MODE = LOCATION_MODE_THROTTLE_REQUESTS_WHEN_SCREEN_OFF;
 
     /**
      * @hide
@@ -774,8 +782,27 @@ public final class PowerManager {
             LOCATION_MODE_GPS_DISABLED_WHEN_SCREEN_OFF,
             LOCATION_MODE_ALL_DISABLED_WHEN_SCREEN_OFF,
             LOCATION_MODE_FOREGROUND_ONLY,
+            LOCATION_MODE_THROTTLE_REQUESTS_WHEN_SCREEN_OFF,
     })
     public @interface LocationPowerSaveMode {}
+
+    /** @hide */
+    public static String locationPowerSaveModeToString(@LocationPowerSaveMode int mode) {
+        switch (mode) {
+            case LOCATION_MODE_NO_CHANGE:
+                return "NO_CHANGE";
+            case LOCATION_MODE_GPS_DISABLED_WHEN_SCREEN_OFF:
+                return "GPS_DISABLED_WHEN_SCREEN_OFF";
+            case LOCATION_MODE_ALL_DISABLED_WHEN_SCREEN_OFF:
+                return "ALL_DISABLED_WHEN_SCREEN_OFF";
+            case LOCATION_MODE_FOREGROUND_ONLY:
+                return "FOREGROUND_ONLY";
+            case LOCATION_MODE_THROTTLE_REQUESTS_WHEN_SCREEN_OFF:
+                return "THROTTLE_REQUESTS_WHEN_SCREEN_OFF";
+            default:
+                return Integer.toString(mode);
+        }
+    }
 
     final Context mContext;
     final IPowerManager mService;

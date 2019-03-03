@@ -268,7 +268,7 @@ public class MediaDescription implements Parcelable {
         return mTitle + ", " + mSubtitle + ", " + mDescription;
     }
 
-    public static final Parcelable.Creator<MediaDescription> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<MediaDescription> CREATOR =
             new Parcelable.Creator<MediaDescription>() {
                 @Override
                 public MediaDescription createFromParcel(Parcel in) {

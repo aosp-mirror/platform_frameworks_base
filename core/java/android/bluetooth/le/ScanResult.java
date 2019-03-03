@@ -338,7 +338,7 @@ public final class ScanResult implements Parcelable {
                 + ", periodicAdvertisingInterval=" + mPeriodicAdvertisingInterval + '}';
     }
 
-    public static final Parcelable.Creator<ScanResult> CREATOR = new Creator<ScanResult>() {
+    public static final @android.annotation.NonNull Parcelable.Creator<ScanResult> CREATOR = new Creator<ScanResult>() {
         @Override
         public ScanResult createFromParcel(Parcel source) {
             return new ScanResult(source);

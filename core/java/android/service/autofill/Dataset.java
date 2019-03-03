@@ -500,7 +500,7 @@ public final class Dataset implements Parcelable {
         parcel.writeString(mId);
     }
 
-    public static final Creator<Dataset> CREATOR = new Creator<Dataset>() {
+    public static final @android.annotation.NonNull Creator<Dataset> CREATOR = new Creator<Dataset>() {
         @Override
         public Dataset createFromParcel(Parcel parcel) {
             // Always go through the builder to ensure the data ingested by
@@ -572,7 +572,7 @@ public final class Dataset implements Parcelable {
         }
 
         @SuppressWarnings("hiding")
-        public static final Creator<DatasetFieldFilter> CREATOR =
+        public static final @android.annotation.NonNull Creator<DatasetFieldFilter> CREATOR =
                 new Creator<DatasetFieldFilter>() {
 
             @Override

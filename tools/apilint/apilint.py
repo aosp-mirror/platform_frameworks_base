@@ -79,6 +79,7 @@ class Field():
                 self.value = raw[3].strip(';"')
             else:
                 self.value = None
+            self.annotations = []
 
         self.ident = "-".join((self.typ, self.name, self.value or ""))
 
@@ -87,6 +88,18 @@ class Field():
 
     def __repr__(self):
         return self.raw
+
+
+class Argument(object):
+
+    __slots__ = ["type", "annotations", "name", "default"]
+
+    def __init__(self, type):
+        self.type = type
+        self.annotations = []
+        self.name = None
+        self.default = None
+
 
 class Method():
     def __init__(self, clazz, line, raw, blame, sig_format = 1):
@@ -118,21 +131,24 @@ class Method():
             self.name = raw[1]
 
             # parse args
-            self.args = []
+            self.detailed_args = []
             for arg in re.split(",\s*", raw_args):
                 arg = re.split("\s", arg)
                 # ignore annotations for now
                 arg = [ a for a in arg if not a.startswith("@") ]
                 if len(arg[0]) > 0:
-                    self.args.append(arg[0])
+                    self.detailed_args.append(Argument(arg[0]))
 
             # parse throws
             self.throws = []
             for throw in re.split(",\s*", raw_throws):
                 self.throws.append(throw)
+
+            self.annotations = []
         else:
             raise ValueError("Unknown signature format: " + sig_format)
 
+        self.args = map(lambda a: a.type, self.detailed_args)
         self.ident = "-".join((self.typ, self.name, "-".join(self.args)))
 
     def sig_matches(self, typ, name, args):
@@ -312,10 +328,10 @@ class V2LineParser(object):
         method.split = []
         kind = self.parse_one_of("ctor", "method")
         method.split.append(kind)
-        annotations = self.parse_annotations()
+        method.annotations = self.parse_annotations()
         method.split.extend(self.parse_modifiers())
         self.parse_matching_paren("<", ">")
-        if "@Deprecated" in annotations:
+        if "@Deprecated" in method.annotations:
             method.split.append("deprecated")
         if kind == "ctor":
             method.typ = "ctor"
@@ -325,7 +341,7 @@ class V2LineParser(object):
         method.name = self.parse_name()
         method.split.append(method.name)
         self.parse_token("(")
-        method.args = self.parse_args()
+        method.detailed_args = self.parse_args()
         self.parse_token(")")
         method.throws = self.parse_throws()
         if "@interface" in method.clazz.split:
@@ -360,8 +376,8 @@ class V2LineParser(object):
     def parse_into_field(self, field):
         kind = self.parse_one_of(*V2LineParser.FIELD_KINDS)
         field.split = [kind]
-        annotations = self.parse_annotations()
-        if "@Deprecated" in annotations:
+        field.annotations = self.parse_annotations()
+        if "@Deprecated" in field.annotations:
             field.split.append("deprecated")
         field.split.extend(self.parse_modifiers())
         field.typ = self.parse_type()
@@ -488,15 +504,16 @@ class V2LineParser(object):
 
     def parse_arg(self):
         self.parse_if("vararg")  # kotlin vararg
-        self.parse_annotations()
-        type = self.parse_arg_type()
+        annotations = self.parse_annotations()
+        arg = Argument(self.parse_arg_type())
+        arg.annotations = annotations
         l = self.lookahead()
         if l != "," and l != ")":
             if self.lookahead() != '=':
-                self.parse_token()  # kotlin argument name
+                arg.name = self.parse_token()  # kotlin argument name
             if self.parse_if('='): # kotlin default value
-                self.parse_expression()
-        return type
+                arg.default = self.parse_expression()
+        return arg
 
     def parse_expression(self):
         while not self.lookahead() in [')', ',', ';']:
@@ -593,7 +610,7 @@ def _parse_stream_to_generator(f):
     blame = None
     sig_format = 1
 
-    re_blame = re.compile("^([a-z0-9]{7,}) \(<([^>]+)>.+?\) (.+?)$")
+    re_blame = re.compile(r"^(\^?[a-z0-9]{7,}) \(<([^>]+)>.+?\) (.+?)$")
 
     field_prefixes = map(lambda kind: "    %s" % (kind,), V2LineParser.FIELD_KINDS)
     def startsWithFieldPrefix(raw):
@@ -608,11 +625,13 @@ def _parse_stream_to_generator(f):
         match = re_blame.match(raw)
         if match is not None:
             blame = match.groups()[0:2]
+            if blame[0].startswith("^"):  # Outside of blame range
+              blame = None
             raw = match.groups()[2]
         else:
             blame = None
 
-        if line == 1 and raw.startswith("// Signature format: "):
+        if line == 1 and V2Tokenizer.SIGNATURE_PREFIX in raw:
             sig_format_string = raw[len(V2Tokenizer.SIGNATURE_PREFIX):]
             if sig_format_string in ["2.0", "3.0"]:
                 sig_format = 2
@@ -1108,6 +1127,9 @@ def verify_builder(clazz):
 
     if not has_build:
         warn(clazz, None, None, "Missing build() method")
+
+    if "final" not in clazz.split:
+        error(clazz, None, None, "Builder should be final")
 
 
 def verify_aidl(clazz):
@@ -1868,6 +1890,35 @@ def verify_numbers(clazz):
             if arg in discouraged:
                 warn(clazz, m, "FW12", "Should avoid odd sized primitives; use int instead")
 
+PRIMITIVES = {"void", "int", "float", "boolean", "short", "char", "byte", "long", "double"}
+
+def verify_nullability(clazz):
+    """Catches missing nullability annotations"""
+
+    for f in clazz.fields:
+        if f.value is not None and 'static' in f.split and 'final' in f.split:
+            continue  # Nullability of constants can be inferred.
+        if f.typ not in PRIMITIVES and not has_nullability(f.annotations):
+            error(clazz, f, "M12", "Field must be marked either @NonNull or @Nullable")
+
+    for c in clazz.ctors:
+        verify_nullability_args(clazz, c)
+
+    for m in clazz.methods:
+        if m.name == "writeToParcel" or m.name == "onReceive":
+            continue  # Parcelable.writeToParcel() and BroadcastReceiver.onReceive() are not yet annotated
+
+        if m.typ not in PRIMITIVES and not has_nullability(m.annotations):
+            error(clazz, m, "M12", "Return value must be marked either @NonNull or @Nullable")
+        verify_nullability_args(clazz, m)
+
+def verify_nullability_args(clazz, m):
+    for i, arg in enumerate(m.detailed_args):
+        if arg.type not in PRIMITIVES and not has_nullability(arg.annotations):
+            error(clazz, m, "M12", "Argument %d must be marked either @NonNull or @Nullable" % (i+1,))
+
+def has_nullability(annotations):
+    return "@NonNull" in annotations or "@Nullable" in annotations
 
 def verify_singleton(clazz):
     """Catch singleton objects with constructors."""
@@ -1956,6 +2007,7 @@ def examine_clazz(clazz):
     verify_pfd(clazz)
     verify_numbers(clazz)
     verify_singleton(clazz)
+    verify_nullability(clazz)
 
 
 def examine_stream(stream, base_stream=None, in_classes_with_base=[], out_classes_with_base=None):

@@ -62,7 +62,7 @@ public final class Time implements Parcelable {
         return LocalTime.of(mHour, mMinute, mSecond, mNano);
     }
 
-    public static final Parcelable.Creator<Time> CREATOR = new Parcelable.Creator<Time>() {
+    public static final @android.annotation.NonNull Parcelable.Creator<Time> CREATOR = new Parcelable.Creator<Time>() {
 
         @Override
         public Time createFromParcel(Parcel source) {

@@ -18,11 +18,11 @@ package com.android.server.wm;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
-import static android.content.ActivityInfoProto.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD;
@@ -42,12 +42,16 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
+import static org.mockito.Mockito.verify;
 
 import android.content.res.Configuration;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
+import android.view.Display;
 import android.view.Surface;
 import android.view.WindowManager;
 
@@ -55,6 +59,7 @@ import androidx.test.filters.SmallTest;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 /**
  * Tests for the {@link AppWindowToken} class.
@@ -329,6 +334,46 @@ public class AppWindowTokenTests extends WindowTestsBase {
 
         // Reset display frozen state
         mWm.mDisplayFrozen = false;
+    }
+
+    @Test
+    public void testReportOrientationChangeOnVisibilityChange() {
+        synchronized (mWm.mGlobalLock) {
+            mToken.setOrientation(SCREEN_ORIENTATION_LANDSCAPE);
+
+            mDisplayContent.getDisplayRotation().setFixedToUserRotation(
+                    DisplayRotation.FIXED_TO_USER_ROTATION_ENABLED);
+
+            doReturn(Configuration.ORIENTATION_LANDSCAPE).when(mToken.mActivityRecord)
+                    .getRequestedConfigurationOrientation();
+
+            mTask.mTaskRecord = Mockito.mock(TaskRecord.class, RETURNS_DEEP_STUBS);
+            mToken.commitVisibility(null, false /* visible */, TRANSIT_UNSET,
+                    true /* performLayout */, false /* isVoiceInteraction */);
+        }
+
+        verify(mTask.mTaskRecord).onConfigurationChanged(any(Configuration.class));
+    }
+
+    @Test
+    public void testReportOrientationChangeOnOpeningClosingAppChange() {
+        synchronized (mWm.mGlobalLock) {
+            mToken.setOrientation(SCREEN_ORIENTATION_LANDSCAPE);
+
+            mDisplayContent.getDisplayRotation().setFixedToUserRotation(
+                    DisplayRotation.FIXED_TO_USER_ROTATION_ENABLED);
+            mDisplayContent.getDisplayInfo().state = Display.STATE_ON;
+            mDisplayContent.prepareAppTransition(WindowManager.TRANSIT_ACTIVITY_CLOSE,
+                    false /* alwaysKeepCurrent */, 0 /* flags */, true /* forceOverride */);
+
+            doReturn(Configuration.ORIENTATION_LANDSCAPE).when(mToken.mActivityRecord)
+                    .getRequestedConfigurationOrientation();
+
+            mTask.mTaskRecord = Mockito.mock(TaskRecord.class, RETURNS_DEEP_STUBS);
+            mToken.setVisibility(false, false);
+        }
+
+        verify(mTask.mTaskRecord).onConfigurationChanged(any(Configuration.class));
     }
 
     @Test

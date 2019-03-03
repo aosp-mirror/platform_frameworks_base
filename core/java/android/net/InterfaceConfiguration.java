@@ -194,7 +194,7 @@ public class InterfaceConfiguration implements Parcelable {
         }
     }
 
-    public static final Creator<InterfaceConfiguration> CREATOR = new Creator<
+    public static final @android.annotation.NonNull Creator<InterfaceConfiguration> CREATOR = new Creator<
             InterfaceConfiguration>() {
         public InterfaceConfiguration createFromParcel(Parcel in) {
             InterfaceConfiguration info = new InterfaceConfiguration();

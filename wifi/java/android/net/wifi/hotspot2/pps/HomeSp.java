@@ -345,7 +345,7 @@ public final class HomeSp implements Parcelable {
         return true;
     }
 
-    public static final Creator<HomeSp> CREATOR =
+    public static final @android.annotation.NonNull Creator<HomeSp> CREATOR =
         new Creator<HomeSp>() {
             @Override
             public HomeSp createFromParcel(Parcel in) {

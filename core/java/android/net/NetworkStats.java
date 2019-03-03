@@ -1153,7 +1153,7 @@ public class NetworkStats implements Parcelable {
     }
 
     @UnsupportedAppUsage
-    public static final Creator<NetworkStats> CREATOR = new Creator<NetworkStats>() {
+    public static final @android.annotation.NonNull Creator<NetworkStats> CREATOR = new Creator<NetworkStats>() {
         @Override
         public NetworkStats createFromParcel(Parcel in) {
             return new NetworkStats(in);

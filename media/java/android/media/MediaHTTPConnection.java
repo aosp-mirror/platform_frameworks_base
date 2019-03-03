@@ -37,7 +37,6 @@ import java.net.URL;
 import java.net.UnknownServiceException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /** @hide */
 public class MediaHTTPConnection extends IMediaHTTPConnection.Stub {
@@ -67,7 +66,6 @@ public class MediaHTTPConnection extends IMediaHTTPConnection.Stub {
     // from com.squareup.okhttp.internal.http
     private final static int HTTP_TEMP_REDIRECT = 307;
     private final static int MAX_REDIRECTS = 20;
-    private AtomicBoolean mIsConnected = new AtomicBoolean(false);
 
     @UnsupportedAppUsage
     public MediaHTTPConnection() {
@@ -91,7 +89,6 @@ public class MediaHTTPConnection extends IMediaHTTPConnection.Stub {
             mAllowCrossDomainRedirect = true;
             mURL = new URL(uri);
             mHeaders = convertHeaderStringToMap(headers);
-            mIsConnected.set(true);
         } catch (MalformedURLException e) {
             return null;
         }
@@ -142,14 +139,7 @@ public class MediaHTTPConnection extends IMediaHTTPConnection.Stub {
     @Override
     @UnsupportedAppUsage
     public void disconnect() {
-        if (mIsConnected.getAndSet(false)) {
-            (new Thread() {
-                @Override
-                public void run() {
-                    teardownConnection();
-                }
-            }).start();
-        }
+        teardownConnection();
         mHeaders = null;
         mURL = null;
     }
@@ -334,14 +324,7 @@ public class MediaHTTPConnection extends IMediaHTTPConnection.Stub {
     @Override
     @UnsupportedAppUsage
     public int readAt(long offset, int size) {
-        if (!mIsConnected.get()) {
-            return -1;
-        }
-        int result = native_readAt(offset, size);
-        if (!mIsConnected.get()) {
-            return -1;
-        }
-        return result;
+        return native_readAt(offset, size);
     }
 
     private int readAt(long offset, byte[] data, int size) {

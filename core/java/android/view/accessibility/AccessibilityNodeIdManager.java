@@ -45,7 +45,9 @@ public final class AccessibilityNodeIdManager {
      * @param id The accessibilityViewId of the view.
      */
     public void registerViewWithId(View view, int id) {
-        mIdsToViews.append(id, view);
+        synchronized (mIdsToViews) {
+            mIdsToViews.append(id, view);
+        }
     }
 
     /**
@@ -53,7 +55,9 @@ public final class AccessibilityNodeIdManager {
      * @param id The id returned from registerView when the view as first associated.
      */
     public void unregisterViewWithId(int id) {
-        mIdsToViews.remove(id);
+        synchronized (mIdsToViews) {
+            mIdsToViews.remove(id);
+        }
     }
 
     /**
@@ -62,7 +66,10 @@ public final class AccessibilityNodeIdManager {
      * @return The view.
      */
     public View findView(int id) {
-        final View view = mIdsToViews.get(id);
+        View view = null;
+        synchronized (mIdsToViews) {
+            view = mIdsToViews.get(id);
+        }
         return view != null && view.includeForAccessibility() ? view : null;
     }
 }

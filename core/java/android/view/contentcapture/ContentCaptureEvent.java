@@ -383,10 +383,11 @@ public final class ContentCaptureEvent implements Parcelable {
         }
     }
 
-    public static final Parcelable.Creator<ContentCaptureEvent> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<ContentCaptureEvent> CREATOR =
             new Parcelable.Creator<ContentCaptureEvent>() {
 
         @Override
+        @NonNull
         public ContentCaptureEvent createFromParcel(Parcel parcel) {
             final String sessionId = parcel.readString();
             final int type = parcel.readInt();
@@ -415,6 +416,7 @@ public final class ContentCaptureEvent implements Parcelable {
         }
 
         @Override
+        @NonNull
         public ContentCaptureEvent[] newArray(int size) {
             return new ContentCaptureEvent[size];
         }

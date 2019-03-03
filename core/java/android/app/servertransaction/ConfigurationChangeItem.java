@@ -78,7 +78,7 @@ public class ConfigurationChangeItem extends ClientTransactionItem {
         mConfiguration = in.readTypedObject(Configuration.CREATOR);
     }
 
-    public static final Creator<ConfigurationChangeItem> CREATOR =
+    public static final @android.annotation.NonNull Creator<ConfigurationChangeItem> CREATOR =
             new Creator<ConfigurationChangeItem>() {
         public ConfigurationChangeItem createFromParcel(Parcel in) {
             return new ConfigurationChangeItem(in);

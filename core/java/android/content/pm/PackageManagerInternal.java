@@ -160,6 +160,14 @@ public abstract class PackageManagerInternal {
          * @return whether the default browser was successfully set.
          */
         boolean setDefaultBrowser(@Nullable String packageName, @UserIdInt int userId);
+
+        /**
+         * Set the package name of the default browser asynchronously.
+         *
+         * @param packageName package name of the default browser, or {@code null} to remove
+         * @param userId the user id
+         */
+        void setDefaultBrowserAsync(@Nullable String packageName, @UserIdInt int userId);
     }
 
     /**

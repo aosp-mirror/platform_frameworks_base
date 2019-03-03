@@ -1509,7 +1509,7 @@ public final class GnssMeasurement implements Parcelable {
         }
     }
 
-    public static final Creator<GnssMeasurement> CREATOR = new Creator<GnssMeasurement>() {
+    public static final @android.annotation.NonNull Creator<GnssMeasurement> CREATOR = new Creator<GnssMeasurement>() {
         @Override
         public GnssMeasurement createFromParcel(Parcel parcel) {
             GnssMeasurement gnssMeasurement = new GnssMeasurement();

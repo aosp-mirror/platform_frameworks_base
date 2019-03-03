@@ -191,7 +191,7 @@ public final class ControllerCallbackLink implements Parcelable {
         dest.writeStrongBinder(mIControllerCallback.asBinder());
     }
 
-    public static final Parcelable.Creator<ControllerCallbackLink> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<ControllerCallbackLink> CREATOR =
             new Parcelable.Creator<ControllerCallbackLink>() {
         @Override
         public ControllerCallbackLink createFromParcel(Parcel in) {

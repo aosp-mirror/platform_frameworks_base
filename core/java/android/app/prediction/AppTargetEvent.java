@@ -122,7 +122,7 @@ public final class AppTargetEvent implements Parcelable {
     /**
      * @see Creator
      */
-    public static final Creator<AppTargetEvent> CREATOR =
+    public static final @android.annotation.NonNull Creator<AppTargetEvent> CREATOR =
             new Creator<AppTargetEvent>() {
                 public AppTargetEvent createFromParcel(Parcel parcel) {
                     return new AppTargetEvent(parcel);

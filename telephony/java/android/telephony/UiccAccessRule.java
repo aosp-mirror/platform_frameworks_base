@@ -47,7 +47,7 @@ public final class UiccAccessRule implements Parcelable {
 
     private static final int ENCODING_VERSION = 1;
 
-    public static final Creator<UiccAccessRule> CREATOR = new Creator<UiccAccessRule>() {
+    public static final @android.annotation.NonNull Creator<UiccAccessRule> CREATOR = new Creator<UiccAccessRule>() {
         @Override
         public UiccAccessRule createFromParcel(Parcel in) {
             return new UiccAccessRule(in);

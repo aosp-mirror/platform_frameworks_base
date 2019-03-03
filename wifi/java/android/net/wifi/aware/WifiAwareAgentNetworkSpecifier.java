@@ -77,7 +77,7 @@ public class WifiAwareAgentNetworkSpecifier extends NetworkSpecifier implements 
         dest.writeArray(mNetworkSpecifiers.toArray());
     }
 
-    public static final Creator<WifiAwareAgentNetworkSpecifier> CREATOR =
+    public static final @android.annotation.NonNull Creator<WifiAwareAgentNetworkSpecifier> CREATOR =
             new Creator<WifiAwareAgentNetworkSpecifier>() {
                 @Override
                 public WifiAwareAgentNetworkSpecifier createFromParcel(Parcel in) {
@@ -210,7 +210,7 @@ public class WifiAwareAgentNetworkSpecifier extends NetworkSpecifier implements 
             dest.writeBlob(mData);
         }
 
-        public static final Creator<ByteArrayWrapper> CREATOR =
+        public static final @android.annotation.NonNull Creator<ByteArrayWrapper> CREATOR =
                 new Creator<ByteArrayWrapper>() {
                     @Override
                     public ByteArrayWrapper createFromParcel(Parcel in) {

@@ -131,7 +131,7 @@ public final class NotificationStats implements Parcelable {
         return 0;
     }
 
-    public static final Creator<NotificationStats> CREATOR = new Creator<NotificationStats>() {
+    public static final @android.annotation.NonNull Creator<NotificationStats> CREATOR = new Creator<NotificationStats>() {
         @Override
         public NotificationStats createFromParcel(Parcel in) {
             return new NotificationStats(in);

@@ -24,7 +24,7 @@ import android.content.pm.UserInfo
 import android.os.Handler
 import android.os.UserHandle
 import android.os.UserManager
-import android.support.test.filters.SmallTest
+import androidx.test.filters.SmallTest
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.testing.TestableLooper.RunWithLooper

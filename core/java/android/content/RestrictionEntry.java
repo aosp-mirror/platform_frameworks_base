@@ -531,7 +531,7 @@ public class RestrictionEntry implements Parcelable {
         dest.writeParcelableArray(mRestrictions, 0);
     }
 
-    public static final Creator<RestrictionEntry> CREATOR = new Creator<RestrictionEntry>() {
+    public static final @android.annotation.NonNull Creator<RestrictionEntry> CREATOR = new Creator<RestrictionEntry>() {
         public RestrictionEntry createFromParcel(Parcel source) {
             return new RestrictionEntry(source);
         }

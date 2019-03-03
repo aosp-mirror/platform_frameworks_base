@@ -308,15 +308,18 @@
     <string name="permgrouplab_phone" msgid="5229115638567440675">"ទូរសព្ទ"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"ហៅទូរស័ព្ទ និងគ្រប់គ្រងការហៅទូរស័ព្ទ"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"អនុញ្ញាតឱ្យ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; គ្រប់គ្រង និង​ធ្វើការហៅទូរសព្ទ?"</string>
-    <string name="permgrouplab_sensors" msgid="416037179223226722">"ឧបករណ៍ចាប់សញ្ញារាងកាយ"</string>
+    <!-- no translation found for permgrouplab_sensors (4838614103153567532) -->
+    <skip />
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"ចូលដំណើរការទិន្នន័យឧបករណ៍ចាប់សញ្ញាអំពីស្ថានភាពសុខភាពរបស់អ្នក"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"អនុញ្ញាតឱ្យ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ចូលប្រើ​ទិន្នន័យឧបករណ៍ចាប់សញ្ញាអំពីស្ថានភាពសុខភាពរបស់អ្នក?"</string>
     <string name="permgrouplab_aural" msgid="965607064083134896">"តន្ត្រី"</string>
     <string name="permgroupdesc_aural" msgid="4870189506255958055">"ចូលប្រើ​តន្ត្រី​របស់អ្នក"</string>
     <string name="permgrouprequest_aural" msgid="6787926123071735620">"អនុញ្ញាត​ឱ្យ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ចូលប្រើ​តន្រ្តី​របស់​អ្នក?"</string>
-    <string name="permgrouplab_visual" msgid="8030190588123857921">"រូបថត និង​វីដេអូ"</string>
+    <!-- no translation found for permgrouplab_visual (6477382108771145134) -->
+    <skip />
     <string name="permgroupdesc_visual" msgid="3415827902566663546">"ចូលប្រើ​រូបថត និង​វីដេអូ​របស់អ្នក"</string>
-    <string name="permgrouprequest_visual" msgid="6907523945030290376">"អនុញ្ញាត​ឱ្យ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ចូលប្រើ​រូបថត និង​វីដេអូ​របស់​អ្នក?"</string>
+    <!-- no translation found for permgrouprequest_visual (3043752127595243314) -->
+    <skip />
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"ទាញយក​ខ្លឹមសារ​វិនដូ"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"ពិនិត្យ​ខ្លឹមសារវិនដូ​ដែល​អ្នក​កំពុង​ទាក់ទង​ជា​មួយ។"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"បើក​ការ​រក​មើល​​ដោយ​ប៉ះ"</string>
@@ -510,7 +513,7 @@
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"បិទ​ការ​ចាក់​សោ​អេក្រង់​របស់​អ្នក"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"ឲ្យ​កម្មវិធី​បិទ​ការ​ចាក់សោ​សុវត្ថិភាព​ពាក្យ​សម្ងាត់​ដែល​បាន​ភ្ជាប់​ណា​មួយ។ ​ឧទាហរណ៍​ត្រឹមត្រូវ​​​នៃ​ការ​បិទ​ទូរស័ព្ទ​ពេល​ទទួលការ​ហៅ​ចូល បន្ទាប់​ម​បើក​សោ​ពេល​ការ​ហៅ​បាន​បញ្ចប់។"</string>
     <string name="permlab_requestScreenLockComplexity" msgid="7028982116060987169">"ស្នើ​សុំកម្រិត​​ស្មុគស្មាញ​នៃការចាក់សោអេក្រង់"</string>
-    <string name="permdesc_requestScreenLockComplexity" msgid="2806396846128185677">"អនុញ្ញាតឱ្យ​កម្មវិធី​រៀនអំពី​កម្រិតស្មុគស្មាញ​ការនៃការចាក់សោអេក្រង់ (ខ្ពស់ មធ្យម​ ទាប ឬគ្មាន) ដែល​បញ្ជាក់អំពី​​ប្រវែង និងប្រភេទ​នៃការចាក់សោអេក្រង់។ កម្មវិធី​នេះ​ក៏​អាច​ណែនាំឱ្យ​អ្នកប្រើប្រាស់​ធ្វើបច្ចុប្បន្នភាព​ការចាក់សោ​អេក្រង់​ទៅកម្រិតជាក់លាក់​ផងដែរ ប៉ុន្តែ​អ្នកប្រើប្រាស់​អាច​មិនអើពើនឹង​ការណែនាំនេះ​ដោយសេរី។ សូម​ចំណាំថា ការចាក់សោអេក្រង់​មិន​ត្រូវបាន​រក្សាទុក​ជាអត្ថបទ​ធម្មតាទេ ដូច្នេះ​កម្មវិធីនេះ​មិន​ស្គាល់​ពាក្យសម្ងាត់​ពិតប្រាកដ​ឡើយ។"</string>
+    <string name="permdesc_requestScreenLockComplexity" msgid="2806396846128185677">"អនុញ្ញាតឱ្យ​កម្មវិធី​រៀនអំពី​កម្រិតស្មុគស្មាញ​នៃការចាក់សោអេក្រង់ (ខ្ពស់ មធ្យម​ ទាប ឬគ្មាន) ដែល​បញ្ជាក់អំពី​​ចន្លោះប្រវែងដែលអាចមាន និងប្រភេទ​នៃការចាក់សោអេក្រង់។ កម្មវិធី​នេះ​ក៏​អាច​ណែនាំឱ្យ​អ្នកប្រើប្រាស់​ធ្វើបច្ចុប្បន្នភាព​ការចាក់សោ​អេក្រង់​ទៅកម្រិតជាក់លាក់​ផងដែរ ប៉ុន្តែ​អ្នកប្រើប្រាស់​អាច​មិនអើពើនឹង​ការណែនាំនេះ​ដោយសេរី។ សូម​ចំណាំថា ការចាក់សោអេក្រង់​មិន​ត្រូវបាន​រក្សាទុក​ជាអត្ថបទ​ធម្មតាទេ ដូច្នេះ​កម្មវិធីនេះ​មិន​ស្គាល់​ពាក្យសម្ងាត់​ពិតប្រាកដ​ឡើយ។"</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"ប្រើ​ឧបករណ៍​ស្កេន​ស្នាមម្រាមដៃ"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"អនុញ្ញាត​ឱ្យ​កម្មវិធី​ប្រើ​ឧបករណ៍​ស្កេន​ស្នាមម្រាមដៃ​សម្រាប់​ការផ្ទៀងផ្ទាត់"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"គ្រប់គ្រងផ្នែករឹងស្នាមម្រាមដៃ"</string>
@@ -1398,8 +1401,7 @@
     <string name="ext_media_init_action" msgid="7952885510091978278">"ដំឡើង"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"ដកចេញ"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"រុករក"</string>
-    <!-- no translation found for ext_media_seamless_action (6575980560886881233) -->
-    <skip />
+    <string name="ext_media_seamless_action" msgid="6575980560886881233">"លទ្ធផល Switch"</string>
     <string name="ext_media_missing_title" msgid="620980315821543904">"បាត់ <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_missing_message" msgid="4012389235250987930">"បញ្ចូល​ឧបករណ៍​ម្តងទៀត"</string>
     <string name="ext_media_move_specific_title" msgid="1471100343872375842">"កំពុងផ្លាស់ទី <xliff:g id="NAME">%s</xliff:g>"</string>
@@ -1613,6 +1615,8 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"#<xliff:g id="ID">%1$d</xliff:g> ត្រួត​គ្នា"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", សុវត្ថិភាព"</string>
+    <string name="activity_starter_block_bg_activity_starts_permissive" msgid="5692097903712956720">"មុខងារចាប់ផ្ដើម​សកម្មភាព​នៅផ្ទៃខាងក្រោយ​ពី <xliff:g id="PACKAGENAME">%1$s</xliff:g> នេះ​នឹងត្រូវ​ទប់ស្កាត់​នៅក្នុង​កំណែបង្កើត Q នាពេលអនាគត។ សូមមើល go/q-bg-block ។"</string>
+    <string name="activity_starter_block_bg_activity_starts_enforcing" msgid="8299522481076404353">"បានទប់ស្កាត់​មុខងារចាប់ផ្ដើម​សកម្មភាព​នៅផ្ទៃខាងក្រោយ​ពី <xliff:g id="PACKAGENAME">%1$s</xliff:g> ។ សូមមើល go/q-bg-block ។"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"ភ្លេច​​លំនាំ"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"លំនាំ​មិន​ត្រឹមត្រូវ"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"ពាក្យ​សម្ងាត់​មិន​ត្រឹមត្រូវ"</string>
@@ -1998,6 +2002,24 @@
     <string name="dynamic_mode_notification_channel_name" msgid="2348803891571320452">"ការ​ជូនដំណឹង​ព័ត៌មាន​របស់​មុខងារ​ទម្លាប់"</string>
     <string name="dynamic_mode_notification_title" msgid="508815255807182035">"ថ្ម​អាច​នឹង​អស់ មុនពេល​សាកថ្មធម្មតា"</string>
     <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"បាន​បើក​ដំណើរការកម្មវិធី​សន្សំ​ថ្ម ដើម្បីបង្កើនកម្រិត​ថាមពល​​ថ្ម"</string>
+    <string name="mime_type_folder" msgid="7111951698626315204">"ថត"</string>
+    <string name="mime_type_apk" msgid="5518003630972506900">"​កម្មវិធី Android"</string>
+    <string name="mime_type_generic" msgid="6833871596845900027">"ឯកសារ"</string>
+    <string name="mime_type_generic_ext" msgid="8450275970061657174">"​ឯកសារ <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
+    <string name="mime_type_audio" msgid="6289777657172050926">"សំឡេង"</string>
+    <string name="mime_type_audio_ext" msgid="3270880987725816210">"សំឡេង ​<xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
+    <string name="mime_type_video" msgid="4093025777317307426">"វីដេអូ​"</string>
+    <string name="mime_type_video_ext" msgid="5643771615714173159">"វីដេអូ <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
+    <string name="mime_type_image" msgid="3144284451605236371">"រូបភាព"</string>
+    <string name="mime_type_image_ext" msgid="1514613218742736590">"រូបភាព <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
+    <string name="mime_type_compressed" msgid="1645486037074943257">"បណ្ណសារ​"</string>
+    <string name="mime_type_compressed_ext" msgid="4232293058067801528">"បណ្ណសារ​ <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
+    <string name="mime_type_document" msgid="1596838147256375966">"ឯកសារ​"</string>
+    <string name="mime_type_document_ext" msgid="6327266601345501281">"ឯកសារ <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
+    <string name="mime_type_spreadsheet" msgid="2639138255207123557">"បញ្ជី​"</string>
+    <string name="mime_type_spreadsheet_ext" msgid="5508653032786106725">"បញ្ជី​ <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
+    <string name="mime_type_presentation" msgid="6145604688774787357">"បទ​បង្ហាញ"</string>
+    <string name="mime_type_presentation_ext" msgid="2982650207774823437">"បទបង្ហាញ​ <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
     <string name="car_loading_profile" msgid="3545132581795684027">"កំពុងផ្ទុក"</string>
     <plurals name="file_count" formatted="false" msgid="1628600959752419449">
       <item quantity="other">ឯកសារ <xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g></item>

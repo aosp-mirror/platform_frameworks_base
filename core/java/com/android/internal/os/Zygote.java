@@ -126,8 +126,8 @@ public final class Zygote {
     /** Read-write external storage should be mounted instead of package sandbox */
     public static final int MOUNT_EXTERNAL_FULL = IVold.REMOUNT_MODE_FULL;
 
-    /** Number of bytes sent to the Zygote over blastula pipes or the pool event FD */
-    public static final int BLASTULA_MANAGEMENT_MESSAGE_BYTES = 8;
+    /** Number of bytes sent to the Zygote over USAP pipes or the pool event FD */
+    public static final int USAP_MANAGEMENT_MESSAGE_BYTES = 8;
 
     /**
      * An extraArg passed when a zygote process is forking a child-zygote, specifying a name
@@ -187,12 +187,12 @@ public final class Zygote {
     /**
      * @hide for internal use only
      */
-    public static final String BLASTULA_POOL_PRIMARY_SOCKET_NAME = "blastula_pool";
+    public static final String USAP_POOL_PRIMARY_SOCKET_NAME = "usap_pool_primary";
 
     /**
      * @hide for internal use only
      */
-    public static final String BLASTULA_POOL_SECONDARY_SOCKET_NAME = "blastula_pool_secondary";
+    public static final String USAP_POOL_SECONDARY_SOCKET_NAME = "usap_pool_secondary";
 
     private Zygote() {}
 
@@ -262,7 +262,7 @@ public final class Zygote {
             String sandboxId);
 
     /**
-     * Specialize a Blastula instance.  The current VM must have been started
+     * Specialize an unspecialized app process.  The current VM must have been started
      * with the -Xzygote flag.
      *
      * @param uid  The UNIX uid that the new process should setuid() to before spawning any threads
@@ -282,12 +282,11 @@ public final class Zygote {
      * @param instructionSet null-ok  The instruction set to use.
      * @param appDataDir null-ok  The data directory of the app.
      */
-    public static void specializeBlastula(int uid, int gid, int[] gids, int runtimeFlags,
+    public static void specializeAppProcess(int uid, int gid, int[] gids, int runtimeFlags,
             int[][] rlimits, int mountExternal, String seInfo, String niceName,
             boolean startChildZygote, String instructionSet, String appDataDir, String packageName,
             String[] packagesForUID, String sandboxId) {
-
-        nativeSpecializeBlastula(uid, gid, gids, runtimeFlags, rlimits, mountExternal, seInfo,
+        nativeSpecializeAppProcess(uid, gid, gids, runtimeFlags, rlimits, mountExternal, seInfo,
                                  niceName, startChildZygote, instructionSet, appDataDir,
                                  packageName, packagesForUID, sandboxId);
 
@@ -306,7 +305,7 @@ public final class Zygote {
         ZygoteHooks.postForkCommon();
     }
 
-    private static native void nativeSpecializeBlastula(int uid, int gid, int[] gids,
+    private static native void nativeSpecializeAppProcess(int uid, int gid, int[] gids,
             int runtimeFlags, int[][] rlimits, int mountExternal, String seInfo, String niceName,
             boolean startChildZygote, String instructionSet, String appDataDir, String packageName,
             String[] packagesForUID, String sandboxId);
@@ -427,11 +426,11 @@ public final class Zygote {
                 defaultValue);
     }
 
-    protected static void emptyBlastulaPool() {
-        nativeEmptyBlastulaPool();
+    protected static void emptyUsapPool() {
+        nativeEmptyUsapPool();
     }
 
-    private static native void nativeEmptyBlastulaPool();
+    private static native void nativeEmptyUsapPool();
 
     /**
      * Returns the value of a system property converted to a boolean using specific logic.
@@ -454,105 +453,105 @@ public final class Zygote {
     }
 
     /**
-     * @return Number of blastulas currently in the pool
+     * @return Number of unspecialized app processes currently in the pool
      */
-    static int getBlastulaPoolCount() {
-        return nativeGetBlastulaPoolCount();
+    static int getUsapPoolCount() {
+        return nativeGetUsapPoolCount();
     }
 
-    private static native int nativeGetBlastulaPoolCount();
+    private static native int nativeGetUsapPoolCount();
 
     /**
      * @return The event FD used for communication between the signal handler and the ZygoteServer
      *         poll loop
      */
-    static FileDescriptor getBlastulaPoolEventFD() {
+    static FileDescriptor getUsapPoolEventFD() {
         FileDescriptor fd = new FileDescriptor();
-        fd.setInt$(nativeGetBlastulaPoolEventFD());
+        fd.setInt$(nativeGetUsapPoolEventFD());
 
         return fd;
     }
 
-    private static native int nativeGetBlastulaPoolEventFD();
+    private static native int nativeGetUsapPoolEventFD();
 
     /**
-     * Fork a new blastula process from the zygote
+     * Fork a new unspecialized app process from the zygote
      *
      * @param sessionSocketRawFDs  Anonymous session sockets that are currently open
-     * @return In the Zygote process this function will always return null; in blastula processes
-     *         this function will return a Runnable object representing the new application that is
-     *         passed up from blastulaMain.
+     * @return In the Zygote process this function will always return null; in unspecialized app
+     *         processes this function will return a Runnable object representing the new
+     *         application that is passed up from usapMain.
      */
-    static Runnable forkBlastula(LocalServerSocket blastulaPoolSocket,
-                                 int[] sessionSocketRawFDs) {
+    static Runnable forkUsap(LocalServerSocket usapPoolSocket,
+                             int[] sessionSocketRawFDs) {
         FileDescriptor[] pipeFDs = null;
 
         try {
             pipeFDs = Os.pipe2(O_CLOEXEC);
         } catch (ErrnoException errnoEx) {
-            throw new IllegalStateException("Unable to create blastula pipe.", errnoEx);
+            throw new IllegalStateException("Unable to create USAP pipe.", errnoEx);
         }
 
         int pid =
-                nativeForkBlastula(pipeFDs[0].getInt$(), pipeFDs[1].getInt$(), sessionSocketRawFDs);
+                nativeForkUsap(pipeFDs[0].getInt$(), pipeFDs[1].getInt$(), sessionSocketRawFDs);
 
         if (pid == 0) {
             IoUtils.closeQuietly(pipeFDs[0]);
-            return blastulaMain(blastulaPoolSocket, pipeFDs[1]);
+            return usapMain(usapPoolSocket, pipeFDs[1]);
         } else {
             // The read-end of the pipe will be closed by the native code.
-            // See removeBlastulaTableEntry();
+            // See removeUsapTableEntry();
             IoUtils.closeQuietly(pipeFDs[1]);
             return null;
         }
     }
 
-    private static native int nativeForkBlastula(int readPipeFD,
+    private static native int nativeForkUsap(int readPipeFD,
                                                  int writePipeFD,
                                                  int[] sessionSocketRawFDs);
 
     /**
-     * This function is used by blastulas to wait for specialization requests from the system
-     * server.
+     * This function is used by unspecialized app processes to wait for specialization requests from
+     * the system server.
      *
      * @param writePipe  The write end of the reporting pipe used to communicate with the poll loop
      *                   of the ZygoteServer.
      * @return A runnable oject representing the new application.
      */
-    private static Runnable blastulaMain(LocalServerSocket blastulaPoolSocket,
-                                         FileDescriptor writePipe) {
+    private static Runnable usapMain(LocalServerSocket usapPoolSocket,
+                                     FileDescriptor writePipe) {
         final int pid = Process.myPid();
 
         LocalSocket sessionSocket = null;
-        DataOutputStream blastulaOutputStream = null;
+        DataOutputStream usapOutputStream = null;
         Credentials peerCredentials = null;
         ZygoteArguments args = null;
 
         while (true) {
             try {
-                sessionSocket = blastulaPoolSocket.accept();
+                sessionSocket = usapPoolSocket.accept();
 
-                BufferedReader blastulaReader =
+                BufferedReader usapReader =
                         new BufferedReader(new InputStreamReader(sessionSocket.getInputStream()));
-                blastulaOutputStream =
+                usapOutputStream =
                         new DataOutputStream(sessionSocket.getOutputStream());
 
                 peerCredentials = sessionSocket.getPeerCredentials();
 
-                String[] argStrings = readArgumentList(blastulaReader);
+                String[] argStrings = readArgumentList(usapReader);
 
                 if (argStrings != null) {
                     args = new ZygoteArguments(argStrings);
 
                     // TODO (chriswailes): Should this only be run for debug builds?
-                    validateBlastulaCommand(args);
+                    validateUsapCommand(args);
                     break;
                 } else {
-                    Log.e("Blastula", "Truncated command received.");
+                    Log.e("USAP", "Truncated command received.");
                     IoUtils.closeQuietly(sessionSocket);
                 }
             } catch (Exception ex) {
-                Log.e("Blastula", ex.getMessage());
+                Log.e("USAP", ex.getMessage());
                 IoUtils.closeQuietly(sessionSocket);
             }
         }
@@ -571,29 +570,29 @@ public final class Zygote {
         try {
             // Used by ZygoteProcess.zygoteSendArgsAndGetResult to fill in a
             // Process.ProcessStartResult object.
-            blastulaOutputStream.writeInt(pid);
+            usapOutputStream.writeInt(pid);
         } catch (IOException ioEx) {
-            Log.e("Blastula", "Failed to write response to session socket: " + ioEx.getMessage());
+            Log.e("USAP", "Failed to write response to session socket: " + ioEx.getMessage());
             System.exit(-1);
         } finally {
             IoUtils.closeQuietly(sessionSocket);
-            IoUtils.closeQuietly(blastulaPoolSocket);
+            IoUtils.closeQuietly(usapPoolSocket);
         }
 
         try {
             ByteArrayOutputStream buffer =
-                    new ByteArrayOutputStream(Zygote.BLASTULA_MANAGEMENT_MESSAGE_BYTES);
+                    new ByteArrayOutputStream(Zygote.USAP_MANAGEMENT_MESSAGE_BYTES);
             DataOutputStream outputStream = new DataOutputStream(buffer);
 
-            // This is written as a long so that the blastula reporting pipe and blastula pool
-            // event FD handlers in ZygoteServer.runSelectLoop can be unified.  These two cases
-            // should both send/receive 8 bytes.
+            // This is written as a long so that the USAP reporting pipe and USAP pool event FD
+            // handlers in ZygoteServer.runSelectLoop can be unified.  These two cases should both
+            // send/receive 8 bytes.
             outputStream.writeLong(pid);
             outputStream.flush();
 
             Os.write(writePipe, buffer.toByteArray(), 0, buffer.size());
         } catch (Exception ex) {
-            Log.e("Blastula",
+            Log.e("USAP",
                     String.format("Failed to write PID (%d) to pipe (%d): %s",
                             pid, writePipe.getInt$(), ex.getMessage()));
             System.exit(-1);
@@ -601,7 +600,7 @@ public final class Zygote {
             IoUtils.closeQuietly(writePipe);
         }
 
-        specializeBlastula(args.mUid, args.mGid, args.mGids,
+        specializeAppProcess(args.mUid, args.mGid, args.mGids,
                            args.mRuntimeFlags, rlimits, args.mMountExternal,
                            args.mSeInfo, args.mNiceName, args.mStartChildZygote,
                            args.mInstructionSet, args.mAppDataDir, args.mPackageName,
@@ -619,34 +618,37 @@ public final class Zygote {
                                      null /* classLoader */);
     }
 
-    private static final String BLASTULA_ERROR_PREFIX = "Invalid command to blastula: ";
+    private static final String USAP_ERROR_PREFIX = "Invalid command to USAP: ";
 
     /**
-     * Checks a set of zygote arguments to see if they can be handled by a blastula.  Throws an
+     * Checks a set of zygote arguments to see if they can be handled by a USAP.  Throws an
      * exception if an invalid arugment is encountered.
      * @param args  The arguments to test
      */
-    private static void validateBlastulaCommand(ZygoteArguments args) {
+    private static void validateUsapCommand(ZygoteArguments args) {
         if (args.mAbiListQuery) {
-            throw new IllegalArgumentException(BLASTULA_ERROR_PREFIX + "--query-abi-list");
+            throw new IllegalArgumentException(USAP_ERROR_PREFIX + "--query-abi-list");
         } else if (args.mPidQuery) {
-            throw new IllegalArgumentException(BLASTULA_ERROR_PREFIX + "--get-pid");
+            throw new IllegalArgumentException(USAP_ERROR_PREFIX + "--get-pid");
         } else if (args.mPreloadDefault) {
-            throw new IllegalArgumentException(BLASTULA_ERROR_PREFIX + "--preload-default");
+            throw new IllegalArgumentException(USAP_ERROR_PREFIX + "--preload-default");
         } else if (args.mPreloadPackage != null) {
-            throw new IllegalArgumentException(BLASTULA_ERROR_PREFIX + "--preload-package");
+            throw new IllegalArgumentException(USAP_ERROR_PREFIX + "--preload-package");
         } else if (args.mPreloadApp != null) {
-            throw new IllegalArgumentException(BLASTULA_ERROR_PREFIX + "--preload-app");
+            throw new IllegalArgumentException(USAP_ERROR_PREFIX + "--preload-app");
         } else if (args.mStartChildZygote) {
-            throw new IllegalArgumentException(BLASTULA_ERROR_PREFIX + "--start-child-zygote");
+            throw new IllegalArgumentException(USAP_ERROR_PREFIX + "--start-child-zygote");
         } else if (args.mApiBlacklistExemptions != null) {
             throw new IllegalArgumentException(
-                BLASTULA_ERROR_PREFIX + "--set-api-blacklist-exemptions");
+                USAP_ERROR_PREFIX + "--set-api-blacklist-exemptions");
         } else if (args.mHiddenApiAccessLogSampleRate != -1) {
             throw new IllegalArgumentException(
-                BLASTULA_ERROR_PREFIX + "--hidden-api-log-sampling-rate=");
+                    USAP_ERROR_PREFIX + "--hidden-api-log-sampling-rate=");
+        } else if (args.mHiddenApiAccessStatslogSampleRate != -1) {
+            throw new IllegalArgumentException(
+                    USAP_ERROR_PREFIX + "--hidden-api-statslog-sampling-rate=");
         } else if (args.mInvokeWith != null) {
-            throw new IllegalArgumentException(BLASTULA_ERROR_PREFIX + "--invoke-with");
+            throw new IllegalArgumentException(USAP_ERROR_PREFIX + "--invoke-with");
         } else if (args.mPermittedCapabilities != 0 || args.mEffectiveCapabilities != 0) {
             throw new ZygoteSecurityException("Client may not specify capabilities: "
                 + "permitted=0x" + Long.toHexString(args.mPermittedCapabilities)
@@ -655,25 +657,25 @@ public final class Zygote {
     }
 
     /**
-     * @return  Raw file descriptors for the read-end of blastula reporting pipes.
+     * @return  Raw file descriptors for the read-end of USAP reporting pipes.
      */
-    protected static int[] getBlastulaPipeFDs() {
-        return nativeGetBlastulaPipeFDs();
+    protected static int[] getUsapPipeFDs() {
+        return nativeGetUsapPipeFDs();
     }
 
-    private static native int[] nativeGetBlastulaPipeFDs();
+    private static native int[] nativeGetUsapPipeFDs();
 
     /**
-     * Remove the blastula table entry for the provided process ID.
+     * Remove the USAP table entry for the provided process ID.
      *
-     * @param blastulaPID  Process ID of the entry to remove
+     * @param usapPID  Process ID of the entry to remove
      * @return True if the entry was removed; false if it doesn't exist
      */
-    protected static boolean removeBlastulaTableEntry(int blastulaPID) {
-        return nativeRemoveBlastulaTableEntry(blastulaPID);
+    protected static boolean removeUsapTableEntry(int usapPID) {
+        return nativeRemoveUsapTableEntry(usapPID);
     }
 
-    private static native boolean nativeRemoveBlastulaTableEntry(int blastulaPID);
+    private static native boolean nativeRemoveUsapTableEntry(int usapPID);
 
     /**
      * uid 1000 (Process.SYSTEM_UID) may specify any uid &gt; 1000 in normal

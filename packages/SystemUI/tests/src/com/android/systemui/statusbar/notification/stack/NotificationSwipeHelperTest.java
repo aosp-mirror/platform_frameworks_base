@@ -31,11 +31,12 @@ import android.animation.Animator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.os.Handler;
 import android.service.notification.StatusBarNotification;
-import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.MotionEvent;
 import android.view.View;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SwipeHelper;
 import com.android.systemui.SysuiTestCase;
@@ -211,7 +212,7 @@ public class NotificationSwipeHelperTest extends SysuiTestCase {
 
     @Test
     public void testDismissChild_notExpanded() {
-        when(mCallback.isExpanded()).thenReturn(false);
+        when(mCallback.shouldDismissQuickly()).thenReturn(false);
         doNothing().when(mSwipeHelper).superDismissChild(mView, 0, false);
         doNothing().when(mSwipeHelper).handleMenuCoveredOrDismissed();
 

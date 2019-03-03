@@ -79,7 +79,7 @@ public class PipModeChangeItem extends ClientTransactionItem {
         mOverrideConfig = in.readTypedObject(Configuration.CREATOR);
     }
 
-    public static final Creator<PipModeChangeItem> CREATOR =
+    public static final @android.annotation.NonNull Creator<PipModeChangeItem> CREATOR =
             new Creator<PipModeChangeItem>() {
         public PipModeChangeItem createFromParcel(Parcel in) {
             return new PipModeChangeItem(in);

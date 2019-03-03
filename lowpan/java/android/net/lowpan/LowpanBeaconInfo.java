@@ -208,7 +208,7 @@ public class LowpanBeaconInfo implements Parcelable {
     }
 
     /** Implement the Parcelable interface. */
-    public static final Creator<LowpanBeaconInfo> CREATOR =
+    public static final @android.annotation.NonNull Creator<LowpanBeaconInfo> CREATOR =
             new Creator<LowpanBeaconInfo>() {
                 public LowpanBeaconInfo createFromParcel(Parcel in) {
                     Builder builder = new Builder();

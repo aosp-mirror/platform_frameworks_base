@@ -209,7 +209,7 @@ public class RssiCurve implements Parcelable {
         return sb.toString();
     }
 
-    public static final Creator<RssiCurve> CREATOR =
+    public static final @android.annotation.NonNull Creator<RssiCurve> CREATOR =
             new Creator<RssiCurve>() {
                 @Override
                 public RssiCurve createFromParcel(Parcel in) {

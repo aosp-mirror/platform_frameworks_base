@@ -335,7 +335,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 if (mContexts == null) {
                     mContexts = new ArrayList<>(1);
                 }
-                mContexts.add(new FillContext(requestId, structure));
+                mContexts.add(new FillContext(requestId, structure, mCurrentViewId));
 
                 cancelCurrentRequestLocked();
 

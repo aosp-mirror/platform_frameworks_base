@@ -529,7 +529,6 @@ public final class MediaStore {
      *
      * @see MediaColumns#IS_PENDING
      * @see MediaStore#setIncludePending(Uri)
-     * @see MediaStore#createPending(Context, PendingParams)
      */
     public static @NonNull Uri setIncludePending(@NonNull Uri uri) {
         return setIncludePending(uri.buildUpon()).build();
@@ -586,7 +585,9 @@ public final class MediaStore {
      * @see MediaColumns#IS_PENDING
      * @see MediaStore#setIncludePending(Uri)
      * @see MediaStore#createPending(Context, PendingParams)
+     * @removed
      */
+    @Deprecated
     public static @NonNull Uri createPending(@NonNull Context context,
             @NonNull PendingParams params) {
         return context.getContentResolver().insert(params.insertUri, params.insertValues);
@@ -599,14 +600,19 @@ public final class MediaStore {
      *
      * @param uri token which was previously returned from
      *            {@link #createPending(Context, PendingParams)}.
+     * @removed
      */
+    @Deprecated
     public static @NonNull PendingSession openPending(@NonNull Context context, @NonNull Uri uri) {
         return new PendingSession(context, uri);
     }
 
     /**
      * Parameters that describe a pending media item.
+     *
+     * @removed
      */
+    @Deprecated
     public static class PendingParams {
         /** {@hide} */
         public final Uri insertUri;
@@ -711,7 +717,10 @@ public final class MediaStore {
      * expected to have a short lifetime, and owners should either
      * {@link PendingSession#publish()} or {@link PendingSession#abandon()} a
      * pending item within a few hours after first creating it.
+     *
+     * @removed
      */
+    @Deprecated
     public static class PendingSession implements AutoCloseable {
         /** {@hide} */
         private final Context mContext;
@@ -976,9 +985,7 @@ public final class MediaStore {
          * Flag indicating if a media item is pending, and still being inserted
          * by its owner.
          *
-         * @see MediaColumns#IS_PENDING
          * @see MediaStore#setIncludePending(Uri)
-         * @see MediaStore#createPending(Context, PendingParams)
          */
         @Column(Cursor.FIELD_TYPE_INTEGER)
         public static final String IS_PENDING = "is_pending";
@@ -998,12 +1005,8 @@ public final class MediaStore {
 
         /**
          * The time the media item should be considered expired. Typically only
-         * meaningful in the context of {@link #IS_PENDING} or
-         * {@link #IS_TRASHED}.
-         *
-         * @removed
+         * meaningful in the context of {@link #IS_PENDING}.
          */
-        @Deprecated
         @CurrentTimeSecondsLong
         @Column(Cursor.FIELD_TYPE_INTEGER)
         public static final String DATE_EXPIRES = "date_expires";
@@ -1030,8 +1033,6 @@ public final class MediaStore {
         /**
          * The primary directory name this media exists under. The value may be
          * {@code NULL} if the media doesn't have a primary directory name.
-         *
-         * @see PendingParams#setPrimaryDirectory(String)
          */
         @Column(Cursor.FIELD_TYPE_STRING)
         public static final String PRIMARY_DIRECTORY = "primary_directory";
@@ -1039,8 +1040,6 @@ public final class MediaStore {
         /**
          * The secondary directory name this media exists under. The value may
          * be {@code NULL} if the media doesn't have a secondary directory name.
-         *
-         * @see PendingParams#setSecondaryDirectory(String)
          */
         @Column(Cursor.FIELD_TYPE_STRING)
         public static final String SECONDARY_DIRECTORY = "secondary_directory";
@@ -1292,12 +1291,7 @@ public final class MediaStore {
     }
 
     /**
-     * Container for downloaded files.
-     *
-     * <p>
-     * Querying for downloads from this table will return files contributed via
-     * {@link PendingSession} and also ones which were downloaded using
-     * {@link android.app.DownloadManager} APIs.
+     * Collection of downloaded items.
      */
     public static final class Downloads implements DownloadColumns {
         private Downloads() {}
@@ -1305,6 +1299,7 @@ public final class MediaStore {
         /**
          * The content:// style URI for the internal storage.
          */
+        @NonNull
         public static final Uri INTERNAL_CONTENT_URI =
                 getContentUri("internal");
 
@@ -1312,6 +1307,7 @@ public final class MediaStore {
          * The content:// style URI for the "primary" external storage
          * volume.
          */
+        @NonNull
         public static final Uri EXTERNAL_CONTENT_URI =
                 getContentUri("external");
 
@@ -1336,13 +1332,13 @@ public final class MediaStore {
          * @param volumeName the name of the volume to get the URI for
          * @return the URI to the image media table on the given volume
          */
-        public static Uri getContentUri(String volumeName) {
+        public static @NonNull Uri getContentUri(@NonNull String volumeName) {
             return AUTHORITY_URI.buildUpon().appendPath(volumeName)
                     .appendPath("downloads").build();
         }
 
         /** @hide */
-        public static Uri getContentUriForPath(@NonNull String path) {
+        public static @NonNull Uri getContentUriForPath(@NonNull String path) {
             return getContentUri(getVolumeName(new File(path)));
         }
 
@@ -1620,9 +1616,9 @@ public final class MediaStore {
              * @param name The name of the image
              * @param description The description of the image
              * @return The URL to the newly created image
-             * @deprecated inserting of images should be performed through
-             *             {@link MediaStore#createPending(Context, PendingParams)},
-             *             which offers richer control over lifecycle.
+             * @deprecated inserting of images should be performed using
+             *             {@link MediaColumns#IS_PENDING}, which offers richer
+             *             control over lifecycle.
              */
             @Deprecated
             public static final String insertImage(ContentResolver cr, String imagePath,
@@ -1651,9 +1647,9 @@ public final class MediaStore {
              * @param description The description of the image
              * @return The URL to the newly created image, or <code>null</code> if the image failed to be stored
              *              for any reason.
-             * @deprecated inserting of images should be performed through
-             *             {@link MediaStore#createPending(Context, PendingParams)},
-             *             which offers richer control over lifecycle.
+             * @deprecated inserting of images should be performed using
+             *             {@link MediaColumns#IS_PENDING}, which offers richer
+             *             control over lifecycle.
              */
             @Deprecated
             public static final String insertImage(ContentResolver cr, Bitmap source,
@@ -3180,7 +3176,7 @@ public final class MediaStore {
      * {@link MediaStore.Images.Media#getContentUri(String)} to query media at
      * that location.
      */
-    public static @NonNull Set<String> getAllVolumeNames(Context context) {
+    public static @NonNull Set<String> getAllVolumeNames(@NonNull Context context) {
         final StorageManager sm = context.getSystemService(StorageManager.class);
         final Set<String> volumeNames = new ArraySet<>();
         volumeNames.add(VOLUME_INTERNAL);
@@ -3354,7 +3350,7 @@ public final class MediaStore {
      *         if no equivalent was found.
      * @see #getMediaUri(Context, Uri)
      */
-    public static Uri getDocumentUri(Context context, Uri mediaUri) {
+    public static @Nullable Uri getDocumentUri(@NonNull Context context, @NonNull Uri mediaUri) {
         final ContentResolver resolver = context.getContentResolver();
         final List<UriPermission> uriPermissions = resolver.getPersistedUriPermissions();
 
@@ -3384,7 +3380,7 @@ public final class MediaStore {
      *         equivalent was found.
      * @see #getDocumentUri(Context, Uri)
      */
-    public static Uri getMediaUri(Context context, Uri documentUri) {
+    public static @Nullable Uri getMediaUri(@NonNull Context context, @NonNull Uri documentUri) {
         final ContentResolver resolver = context.getContentResolver();
         final List<UriPermission> uriPermissions = resolver.getPersistedUriPermissions();
 

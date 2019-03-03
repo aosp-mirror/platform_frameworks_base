@@ -3756,6 +3756,12 @@ public class PackageParser {
             ai.privateFlags |= ApplicationInfo.PRIVATE_FLAG_ALLOW_CLEAR_USER_DATA_ON_FAILED_RESTORE;
         }
 
+        if (sa.getBoolean(
+                R.styleable.AndroidManifestApplication_allowAudioPlaybackCapture,
+                owner.applicationInfo.targetSdkVersion >= Build.VERSION_CODES.Q)) {
+            ai.privateFlags |= ApplicationInfo.PRIVATE_FLAG_ALLOW_AUDIO_PLAYBACK_CAPTURE;
+        }
+
         ai.maxAspectRatio = sa.getFloat(R.styleable.AndroidManifestApplication_maxAspectRatio, 0);
         ai.minAspectRatio = sa.getFloat(R.styleable.AndroidManifestApplication_minAspectRatio, 0);
 
@@ -6402,7 +6408,7 @@ public class PackageParser {
             this.pastSigningCertificates = in.createTypedArray(Signature.CREATOR);
         }
 
-        public static final Creator<SigningDetails> CREATOR = new Creator<SigningDetails>() {
+        public static final @android.annotation.NonNull Creator<SigningDetails> CREATOR = new Creator<SigningDetails>() {
             @Override
             public SigningDetails createFromParcel(Parcel source) {
                 if (source.readBoolean()) {
@@ -8438,6 +8444,21 @@ public class PackageParser {
     public static PackageInfo generatePackageInfoFromApex(File apexFile, boolean collectCerts)
             throws PackageParserException {
         PackageInfo pi = new PackageInfo();
+        int parseFlags = 0;
+        if (collectCerts) {
+            parseFlags |= PARSE_COLLECT_CERTIFICATES;
+            try {
+                if (apexFile.getCanonicalPath().startsWith("/system")) {
+                    // Don't need verify the APK integrity of APEXes on /system, just like
+                    // we don't do that for APKs.
+                    // TODO(b/126514108): we may be able to do this for APEXes on /data as well.
+                    parseFlags |= PARSE_IS_SYSTEM_DIR;
+                }
+            } catch (IOException e) {
+                throw new PackageParserException(INSTALL_PARSE_FAILED_UNEXPECTED_EXCEPTION,
+                        "Failed to get path for " + apexFile.getPath(), e);
+            }
+        }
 
         // TODO(b/123086053) properly fill in the ApplicationInfo with data from AndroidManifest
         // Add ApplicationInfo to the PackageInfo.
@@ -8452,8 +8473,7 @@ public class PackageParser {
 
         // TODO(b/123052859): We should avoid these repeated calls to parseApkLite each time
         // we want to generate information for APEX modules.
-        PackageParser.ApkLite apk = PackageParser.parseApkLite(apexFile,
-            collectCerts ? PackageParser.PARSE_COLLECT_CERTIFICATES : 0);
+        PackageParser.ApkLite apk = PackageParser.parseApkLite(apexFile, parseFlags);
 
         pi.packageName = apk.packageName;
         ai.packageName = apk.packageName;

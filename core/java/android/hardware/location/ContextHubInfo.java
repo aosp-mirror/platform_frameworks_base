@@ -345,7 +345,7 @@ public class ContextHubInfo implements Parcelable {
         out.writeTypedArray(mMemoryRegions, flags);
     }
 
-    public static final Parcelable.Creator<ContextHubInfo> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<ContextHubInfo> CREATOR
             = new Parcelable.Creator<ContextHubInfo>() {
         public ContextHubInfo createFromParcel(Parcel in) {
             return new ContextHubInfo(in);

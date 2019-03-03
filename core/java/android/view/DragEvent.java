@@ -528,7 +528,7 @@ public class DragEvent implements Parcelable {
     /**
      * A container for creating a DragEvent from a Parcel.
      */
-    public static final Parcelable.Creator<DragEvent> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<DragEvent> CREATOR =
         new Parcelable.Creator<DragEvent>() {
         public DragEvent createFromParcel(Parcel in) {
             DragEvent event = DragEvent.obtain();

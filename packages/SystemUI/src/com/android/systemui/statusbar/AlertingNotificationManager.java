@@ -237,7 +237,8 @@ public abstract class AlertingNotificationManager implements NotificationLifetim
      */
     protected boolean canRemoveImmediately(String key) {
         AlertEntry alertEntry = mAlertEntries.get(key);
-        return alertEntry == null || alertEntry.wasShownLongEnough();
+        return alertEntry == null || alertEntry.wasShownLongEnough()
+                || alertEntry.mEntry.isRowDismissed();
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////

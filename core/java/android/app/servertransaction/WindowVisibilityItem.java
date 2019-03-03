@@ -34,7 +34,8 @@ public class WindowVisibilityItem extends ClientTransactionItem {
     @Override
     public void execute(ClientTransactionHandler client, IBinder token,
             PendingTransactionActions pendingActions) {
-        Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "activityShowWindow");
+        Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER,
+                mShowWindow ? "activityShowWindow" : "activityHideWindow");
         client.handleWindowVisibility(token, mShowWindow);
         Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
     }
@@ -75,7 +76,7 @@ public class WindowVisibilityItem extends ClientTransactionItem {
         mShowWindow = in.readBoolean();
     }
 
-    public static final Creator<WindowVisibilityItem> CREATOR =
+    public static final @android.annotation.NonNull Creator<WindowVisibilityItem> CREATOR =
             new Creator<WindowVisibilityItem>() {
         public WindowVisibilityItem createFromParcel(Parcel in) {
             return new WindowVisibilityItem(in);

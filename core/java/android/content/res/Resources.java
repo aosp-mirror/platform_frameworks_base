@@ -1782,10 +1782,16 @@ public class Resources {
          * @param explicitStyleRes A resource identifier of an explicit style resource.
          * @return ordered list of resource ID that are considered when resolving attribute values.
          */
+        @NonNull
         public int[] getAttributeResolutionStack(@AttrRes int defStyleAttr,
                 @StyleRes int defStyleRes, @StyleRes int explicitStyleRes) {
-            return mThemeImpl.getAttributeResolutionStack(
+            int[] stack = mThemeImpl.getAttributeResolutionStack(
                     defStyleAttr, defStyleRes, explicitStyleRes);
+            if (stack == null) {
+                return new int[0];
+            } else {
+                return stack;
+            }
         }
     }
 

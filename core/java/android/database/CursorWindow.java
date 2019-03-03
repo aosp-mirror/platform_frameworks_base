@@ -709,7 +709,7 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
         }
     }
 
-    public static final Parcelable.Creator<CursorWindow> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<CursorWindow> CREATOR
             = new Parcelable.Creator<CursorWindow>() {
         public CursorWindow createFromParcel(Parcel source) {
             return new CursorWindow(source);

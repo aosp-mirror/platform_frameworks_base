@@ -78,7 +78,7 @@ public class BatchedScanResult implements Parcelable {
     }
 
     /** Implement the Parcelable interface {@hide} */
-    public static final Creator<BatchedScanResult> CREATOR =
+    public static final @android.annotation.NonNull Creator<BatchedScanResult> CREATOR =
         new Creator<BatchedScanResult>() {
             public BatchedScanResult createFromParcel(Parcel in) {
                 BatchedScanResult result = new BatchedScanResult();

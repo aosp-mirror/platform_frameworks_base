@@ -60,7 +60,7 @@ public final class Session2Command implements Parcelable {
      */
     public static final int RESULT_ERROR_UNKNOWN_ERROR = -1;
 
-    public static final Parcelable.Creator<Session2Command> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<Session2Command> CREATOR =
             new Parcelable.Creator<Session2Command>() {
                 @Override
                 public Session2Command createFromParcel(Parcel in) {

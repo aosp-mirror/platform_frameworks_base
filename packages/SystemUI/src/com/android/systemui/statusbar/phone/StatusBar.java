@@ -184,6 +184,7 @@ import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.NotificationViewHierarchyManager;
+import com.android.systemui.statusbar.PulseExpansionHandler;
 import com.android.systemui.statusbar.ScrimView;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
@@ -195,6 +196,7 @@ import com.android.systemui.statusbar.notification.NotificationClicker;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationInterruptionStateProvider;
 import com.android.systemui.statusbar.notification.NotificationListController;
+import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationRowBinderImpl;
@@ -363,6 +365,10 @@ public class StatusBar extends SystemUI implements DemoMode,
     protected StatusBarIconController mIconController;
     @Inject
     InjectionInflationController mInjectionInflater;
+    @Inject
+    PulseExpansionHandler mPulseExpansionHandler;
+    @Inject
+    NotificationWakeUpCoordinator mWakeUpCoordinator;
 
     // expanded notifications
     protected NotificationPanelView mNotificationPanel; // the sliding/resizing panel within the notification window
@@ -1079,7 +1085,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     @Override
     public boolean isDozing() {
-        return mDozing && mNotificationPanel.isFullyDark();
+        return mDozing;
     }
 
     @Override
@@ -2965,7 +2971,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mHandler.removeMessages(MSG_LAUNCH_TRANSITION_TIMEOUT);
         if (mUserSwitcherController != null && mUserSwitcherController.useFullscreenUserSwitcher()) {
             mStatusBarStateController.setState(StatusBarState.FULLSCREEN_USER_SWITCHER);
-        } else {
+        } else if (!mPulseExpansionHandler.isWakingToShadeLocked()){
             mStatusBarStateController.setState(StatusBarState.KEYGUARD);
         }
         updatePanelExpansionForKeyguard();
@@ -3588,12 +3594,19 @@ public class StatusBar extends SystemUI implements DemoMode,
         @Override
         public void onStartedWakingUp() {
             mDeviceInteractive = true;
+            mWakeUpCoordinator.setWakingUp(true);
             mAmbientPulseManager.releaseAllImmediately();
             mVisualStabilityManager.setScreenOn(true);
             updateNotificationPanelTouchState();
             updateVisibleToUser();
             updateIsKeyguard();
             mDozeServiceHost.stopDozing();
+            mPulseExpansionHandler.onStartedWakingUp();
+        }
+
+        @Override
+        public void onFinishedWakingUp() {
+            mWakeUpCoordinator.setWakingUp(false);
         }
     };
 
@@ -3896,6 +3909,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                         mKeyguardUpdateMonitor.onAuthInterruptDetected(pulsing /* active */);
                     }
                     updateScrimController();
+                    mPulseExpansionHandler.setPulsing(pulsing);
                 }
             }, reason);
             // DozeScrimController is in pulse state, now let's ask ScrimController to start

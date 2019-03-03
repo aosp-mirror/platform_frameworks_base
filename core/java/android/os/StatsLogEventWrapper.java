@@ -54,7 +54,7 @@ public final class StatsLogEventWrapper implements Parcelable {
     /**
      * Boilerplate for Parcel.
      */
-    public static final Parcelable.Creator<StatsLogEventWrapper> CREATOR = new
+    public static final @android.annotation.NonNull Parcelable.Creator<StatsLogEventWrapper> CREATOR = new
             Parcelable.Creator<StatsLogEventWrapper>() {
                 public StatsLogEventWrapper createFromParcel(Parcel in) {
                     return new StatsLogEventWrapper(in);

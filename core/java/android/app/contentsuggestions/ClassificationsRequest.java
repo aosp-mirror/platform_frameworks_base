@@ -71,7 +71,7 @@ public final class ClassificationsRequest implements Parcelable {
         dest.writeBundle(mExtras);
     }
 
-    public static final Creator<ClassificationsRequest> CREATOR =
+    public static final @android.annotation.NonNull Creator<ClassificationsRequest> CREATOR =
             new Creator<ClassificationsRequest>() {
         @Override
         public ClassificationsRequest createFromParcel(Parcel source) {

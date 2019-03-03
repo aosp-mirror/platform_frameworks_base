@@ -93,7 +93,7 @@ public final class RegexValidator extends InternalValidator implements Validator
         parcel.writeSerializable(mRegex);
     }
 
-    public static final Parcelable.Creator<RegexValidator> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<RegexValidator> CREATOR =
             new Parcelable.Creator<RegexValidator>() {
         @Override
         public RegexValidator createFromParcel(Parcel parcel) {

@@ -380,6 +380,20 @@ public class DataCollector implements SensorEventListener {
         addEvent(PhoneEvent.ON_NOTIFICATION_START_DRAGGING_DOWN);
     }
 
+    public void onStartExpandingFromPulse() {
+        if (DEBUG) {
+            Log.d(TAG, "onStartExpandingFromPulse");
+        }
+        // TODO: maybe add event
+    }
+
+    public void onExpansionFromPulseStopped() {
+        if (DEBUG) {
+            Log.d(TAG, "onExpansionFromPulseStopped");
+        }
+        // TODO: maybe add event
+    }
+
     public void onNotificatonStopDraggingDown() {
         if (DEBUG) {
             Log.d(TAG, "onNotificationStopDraggingDown");

@@ -139,7 +139,7 @@ public class Point implements Parcelable {
         protoOutputStream.end(token);
     }
 
-    public static final Parcelable.Creator<Point> CREATOR = new Parcelable.Creator<Point>() {
+    public static final @android.annotation.NonNull Parcelable.Creator<Point> CREATOR = new Parcelable.Creator<Point>() {
         /**
          * Return a new point from the data in the specified parcel.
          */

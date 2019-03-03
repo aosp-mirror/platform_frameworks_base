@@ -134,7 +134,7 @@ public final class ModuleInfo implements Parcelable {
         mHidden = source.readBoolean();
     }
 
-    public static final Parcelable.Creator<ModuleInfo> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<ModuleInfo> CREATOR =
             new Parcelable.Creator<ModuleInfo>() {
         public ModuleInfo createFromParcel(Parcel source) {
             return new ModuleInfo(source);

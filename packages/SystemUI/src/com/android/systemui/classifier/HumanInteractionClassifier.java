@@ -128,7 +128,8 @@ public class HumanInteractionClassifier extends Classifier {
         // sent to the classifiers until the finger moves far enough. When the finger if lifted
         // up, the last MotionEvent which was far enough from the finger is set as the final
         // MotionEvent and sent to the Classifiers.
-        if (mCurrentType == Classifier.NOTIFICATION_DRAG_DOWN) {
+        if (mCurrentType == Classifier.NOTIFICATION_DRAG_DOWN
+                || mCurrentType == Classifier.PULSE_EXPAND) {
             mBufferedEvents.add(MotionEvent.obtain(event));
             Point pointEnd = new Point(event.getX() / mDpi, event.getY() / mDpi);
 

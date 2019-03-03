@@ -190,7 +190,7 @@ public final class AudioFocusInfo implements Parcelable {
         return true;
     }
 
-    public static final Parcelable.Creator<AudioFocusInfo> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<AudioFocusInfo> CREATOR
             = new Parcelable.Creator<AudioFocusInfo>() {
 
         public AudioFocusInfo createFromParcel(Parcel in) {

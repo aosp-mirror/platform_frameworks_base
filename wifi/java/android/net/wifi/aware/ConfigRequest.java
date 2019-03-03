@@ -112,7 +112,7 @@ public final class ConfigRequest implements Parcelable {
         dest.writeIntArray(mDiscoveryWindowInterval);
     }
 
-    public static final Creator<ConfigRequest> CREATOR = new Creator<ConfigRequest>() {
+    public static final @android.annotation.NonNull Creator<ConfigRequest> CREATOR = new Creator<ConfigRequest>() {
         @Override
         public ConfigRequest[] newArray(int size) {
             return new ConfigRequest[size];

@@ -21,7 +21,6 @@ import static android.Manifest.permission.CONFIGURE_DISPLAY_COLOR_MODE;
 import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
-import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.app.KeyguardManager;
 import android.content.res.CompatibilityInfo;
@@ -231,7 +230,6 @@ public final class Display {
      * bar, navigation bar, home activity or IME.
      * </p>
      *
-     * @see #supportsSystemDecorations
      * @hide
      */
     // TODO (b/114338689): Remove the flag and use IWindowManager#setShouldShowSystemDecors
@@ -907,18 +905,6 @@ public final class Display {
     }
 
     /**
-     * Returns whether this display should support showing system decorations.
-     *
-     * @see #FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS
-     * @hide
-     */
-    @TestApi
-    // TODO (b/114338689): Remove the method and use IWindowManager#shouldShowSystemDecors
-    public boolean supportsSystemDecorations() {
-        return (mDisplayInfo.flags & FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS) != 0;
-    }
-
-    /**
      * Returns the display's HDR capabilities.
      *
      * @see #isHdr()
@@ -1375,7 +1361,7 @@ public final class Display {
         }
 
         @SuppressWarnings("hiding")
-        public static final Parcelable.Creator<Mode> CREATOR
+        public static final @android.annotation.NonNull Parcelable.Creator<Mode> CREATOR
                 = new Parcelable.Creator<Mode>() {
             @Override
             public Mode createFromParcel(Parcel in) {
@@ -1504,7 +1490,7 @@ public final class Display {
             return hash;
         }
 
-        public static final Creator<HdrCapabilities> CREATOR = new Creator<HdrCapabilities>() {
+        public static final @android.annotation.NonNull Creator<HdrCapabilities> CREATOR = new Creator<HdrCapabilities>() {
             @Override
             public HdrCapabilities createFromParcel(Parcel source) {
                 return new HdrCapabilities(source);

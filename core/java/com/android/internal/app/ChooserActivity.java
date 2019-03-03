@@ -135,7 +135,7 @@ public class ChooserActivity extends ResolverActivity {
      * {@link AppPredictionManager} will be queried for direct share targets.
      */
     // TODO(b/123089490): Replace with system flag
-    private static final boolean USE_PREDICTION_MANAGER_FOR_DIRECT_TARGETS = false;
+    private static final boolean USE_PREDICTION_MANAGER_FOR_DIRECT_TARGETS = true;
     // TODO(b/123088566) Share these in a better way.
     private static final String APP_PREDICTION_SHARE_UI_SURFACE = "share";
     public static final String LAUNCH_LOCATON_DIRECT_SHARE = "direct_share";

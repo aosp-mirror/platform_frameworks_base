@@ -113,7 +113,7 @@ public class FusedBatchOptions implements Parcelable {
     /*
      * Method definitions to support Parcelable operations.
      */
-    public static final Parcelable.Creator<FusedBatchOptions> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<FusedBatchOptions> CREATOR =
             new Parcelable.Creator<FusedBatchOptions>() {
         @Override
         public FusedBatchOptions createFromParcel(Parcel parcel) {

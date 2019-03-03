@@ -1314,7 +1314,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
         }
     }
 
-    public static final Parcelable.Creator<ActivityInfo> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<ActivityInfo> CREATOR
             = new Parcelable.Creator<ActivityInfo>() {
         public ActivityInfo createFromParcel(Parcel source) {
             return new ActivityInfo(source);

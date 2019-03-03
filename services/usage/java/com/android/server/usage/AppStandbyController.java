@@ -35,6 +35,7 @@ import static android.app.usage.UsageStatsManager.REASON_SUB_USAGE_SLICE_PINNED_
 import static android.app.usage.UsageStatsManager.REASON_SUB_USAGE_SYNC_ADAPTER;
 import static android.app.usage.UsageStatsManager.REASON_SUB_USAGE_SYSTEM_INTERACTION;
 import static android.app.usage.UsageStatsManager.REASON_SUB_USAGE_SYSTEM_UPDATE;
+import static android.app.usage.UsageStatsManager.REASON_SUB_USAGE_UNEXEMPTED_SYNC_SCHEDULED;
 import static android.app.usage.UsageStatsManager.REASON_SUB_USAGE_USER_INTERACTION;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_ACTIVE;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_EXEMPTED;
@@ -197,7 +198,7 @@ public class AppStandbyController {
     static final int MSG_ONE_TIME_CHECK_IDLE_STATES = 10;
     /** Check the state of one app: arg1 = userId, arg2 = uid, obj = (String) packageName */
     static final int MSG_CHECK_PACKAGE_IDLE_STATE = 11;
-    static final int MSG_REPORT_EXEMPTED_SYNC_SCHEDULED = 12;
+    static final int MSG_REPORT_SYNC_SCHEDULED = 12;
     static final int MSG_REPORT_EXEMPTED_SYNC_START = 13;
     static final int MSG_UPDATE_STABLE_CHARGING= 14;
 
@@ -231,6 +232,10 @@ public class AppStandbyController {
      * Maximum time an exempted sync should keep the buckets elevated, when sync is started.
      */
     long mExemptedSyncStartTimeoutMillis;
+    /**
+     * Maximum time an unexempted sync should keep the buckets elevated, when sync is scheduled
+     */
+    long mUnexemptedSyncScheduledTimeoutMillis;
     /** Maximum time a system interaction should keep the buckets elevated. */
     long mSystemInteractionTimeoutMillis;
     /** The length of time phone must be charging before considered stable enough to run jobs  */
@@ -444,6 +449,25 @@ public class AppStandbyController {
                     elapsedRealtime + durationMillis);
             maybeInformListeners(packageName, userId, elapsedRealtime,
                     appUsage.currentBucket, appUsage.bucketingReason, false);
+        }
+    }
+
+    void reportUnexemptedSyncScheduled(String packageName, int userId) {
+        if (!mAppIdleEnabled) return;
+
+        final long elapsedRealtime = mInjector.elapsedRealtime();
+        synchronized (mAppIdleLock) {
+            final int currentBucket =
+                    mAppIdleHistory.getAppStandbyBucket(packageName, userId, elapsedRealtime);
+            if (currentBucket == STANDBY_BUCKET_NEVER) {
+                // Bring the app out of the never bucket
+                AppUsageHistory appUsage = mAppIdleHistory.reportUsage(packageName, userId,
+                        STANDBY_BUCKET_WORKING_SET, REASON_SUB_USAGE_UNEXEMPTED_SYNC_SCHEDULED,
+                        0,
+                        elapsedRealtime + mUnexemptedSyncScheduledTimeoutMillis);
+                maybeInformListeners(packageName, userId, elapsedRealtime,
+                        appUsage.currentBucket, appUsage.bucketingReason, false);
+            }
         }
     }
 
@@ -1423,8 +1447,8 @@ public class AppStandbyController {
                 .sendToTarget();
     }
 
-    void postReportExemptedSyncScheduled(String packageName, int userId) {
-        mHandler.obtainMessage(MSG_REPORT_EXEMPTED_SYNC_SCHEDULED, userId, 0, packageName)
+    void postReportSyncScheduled(String packageName, int userId, boolean exempted) {
+        mHandler.obtainMessage(MSG_REPORT_SYNC_SCHEDULED, userId, exempted ? 1 : 0, packageName)
                 .sendToTarget();
     }
 
@@ -1491,6 +1515,9 @@ public class AppStandbyController {
         pw.println();
         pw.print("  mExemptedSyncStartTimeoutMillis=");
         TimeUtils.formatDuration(mExemptedSyncStartTimeoutMillis, pw);
+        pw.println();
+        pw.print("  mUnexemptedSyncScheduledTimeoutMillis=");
+        TimeUtils.formatDuration(mUnexemptedSyncScheduledTimeoutMillis, pw);
         pw.println();
 
         pw.print("  mSystemUpdateUsageTimeoutMillis=");
@@ -1706,8 +1733,13 @@ public class AppStandbyController {
                             mInjector.elapsedRealtime());
                     break;
 
-                case MSG_REPORT_EXEMPTED_SYNC_SCHEDULED:
-                    reportExemptedSyncScheduled((String) msg.obj, msg.arg1);
+                case MSG_REPORT_SYNC_SCHEDULED:
+                    final boolean exempted = msg.arg1 > 0 ? true : false;
+                    if (exempted) {
+                        reportExemptedSyncScheduled((String) msg.obj, msg.arg1);
+                    } else {
+                        reportUnexemptedSyncScheduled((String) msg.obj, msg.arg1);
+                    }
                     break;
 
                 case MSG_REPORT_EXEMPTED_SYNC_START:
@@ -1799,12 +1831,14 @@ public class AppStandbyController {
                 "system_update_usage_duration";
         private static final String KEY_PREDICTION_TIMEOUT = "prediction_timeout";
         private static final String KEY_SYNC_ADAPTER_HOLD_DURATION = "sync_adapter_duration";
-        private static final String KEY_EXEMPTED_SYNC_SCHEDULED_NON_DOZE_HOLD_DURATION
-                = "exempted_sync_scheduled_nd_duration";
-        private static final String KEY_EXEMPTED_SYNC_SCHEDULED_DOZE_HOLD_DURATION
-                = "exempted_sync_scheduled_d_duration";
-        private static final String KEY_EXEMPTED_SYNC_START_HOLD_DURATION
-                = "exempted_sync_start_duration";
+        private static final String KEY_EXEMPTED_SYNC_SCHEDULED_NON_DOZE_HOLD_DURATION =
+                "exempted_sync_scheduled_nd_duration";
+        private static final String KEY_EXEMPTED_SYNC_SCHEDULED_DOZE_HOLD_DURATION =
+                "exempted_sync_scheduled_d_duration";
+        private static final String KEY_EXEMPTED_SYNC_START_HOLD_DURATION =
+                "exempted_sync_start_duration";
+        private static final String KEY_UNEXEMPTED_SYNC_SCHEDULED_HOLD_DURATION =
+                "unexempted_sync_scheduled_duration";
         private static final String KEY_SYSTEM_INTERACTION_HOLD_DURATION =
                 "system_interaction_duration";
         private static final String KEY_STABLE_CHARGING_THRESHOLD = "stable_charging_threshold";
@@ -1816,6 +1850,7 @@ public class AppStandbyController {
         public static final long DEFAULT_EXEMPTED_SYNC_SCHEDULED_NON_DOZE_TIMEOUT = 10 * ONE_MINUTE;
         public static final long DEFAULT_EXEMPTED_SYNC_SCHEDULED_DOZE_TIMEOUT = 4 * ONE_HOUR;
         public static final long DEFAULT_EXEMPTED_SYNC_START_TIMEOUT = 10 * ONE_MINUTE;
+        public static final long DEFAULT_UNEXEMPTED_SYNC_SCHEDULED_TIMEOUT = 10 * ONE_MINUTE;
         public static final long DEFAULT_STABLE_CHARGING_THRESHOLD = 10 * ONE_MINUTE;
 
         private final KeyValueListParser mParser = new KeyValueListParser(',');
@@ -1883,42 +1918,47 @@ public class AppStandbyController {
                         ELAPSED_TIME_THRESHOLDS);
                 mCheckIdleIntervalMillis = Math.min(mAppStandbyElapsedThresholds[1] / 4,
                         COMPRESS_TIME ? ONE_MINUTE : 4 * 60 * ONE_MINUTE); // 4 hours
-                mStrongUsageTimeoutMillis = mParser.getDurationMillis
-                        (KEY_STRONG_USAGE_HOLD_DURATION,
+                mStrongUsageTimeoutMillis = mParser.getDurationMillis(
+                        KEY_STRONG_USAGE_HOLD_DURATION,
                                 COMPRESS_TIME ? ONE_MINUTE : DEFAULT_STRONG_USAGE_TIMEOUT);
-                mNotificationSeenTimeoutMillis = mParser.getDurationMillis
-                        (KEY_NOTIFICATION_SEEN_HOLD_DURATION,
+                mNotificationSeenTimeoutMillis = mParser.getDurationMillis(
+                        KEY_NOTIFICATION_SEEN_HOLD_DURATION,
                                 COMPRESS_TIME ? 12 * ONE_MINUTE : DEFAULT_NOTIFICATION_TIMEOUT);
-                mSystemUpdateUsageTimeoutMillis = mParser.getDurationMillis
-                        (KEY_SYSTEM_UPDATE_HOLD_DURATION,
+                mSystemUpdateUsageTimeoutMillis = mParser.getDurationMillis(
+                        KEY_SYSTEM_UPDATE_HOLD_DURATION,
                                 COMPRESS_TIME ? 2 * ONE_MINUTE : DEFAULT_SYSTEM_UPDATE_TIMEOUT);
-                mPredictionTimeoutMillis = mParser.getDurationMillis
-                        (KEY_PREDICTION_TIMEOUT,
+                mPredictionTimeoutMillis = mParser.getDurationMillis(
+                        KEY_PREDICTION_TIMEOUT,
                                 COMPRESS_TIME ? 10 * ONE_MINUTE : DEFAULT_PREDICTION_TIMEOUT);
-                mSyncAdapterTimeoutMillis = mParser.getDurationMillis
-                        (KEY_SYNC_ADAPTER_HOLD_DURATION,
+                mSyncAdapterTimeoutMillis = mParser.getDurationMillis(
+                        KEY_SYNC_ADAPTER_HOLD_DURATION,
                                 COMPRESS_TIME ? ONE_MINUTE : DEFAULT_SYNC_ADAPTER_TIMEOUT);
 
-                mExemptedSyncScheduledNonDozeTimeoutMillis = mParser.getDurationMillis
-                        (KEY_EXEMPTED_SYNC_SCHEDULED_NON_DOZE_HOLD_DURATION,
+                mExemptedSyncScheduledNonDozeTimeoutMillis = mParser.getDurationMillis(
+                        KEY_EXEMPTED_SYNC_SCHEDULED_NON_DOZE_HOLD_DURATION,
                                 COMPRESS_TIME ? (ONE_MINUTE / 2)
                                         : DEFAULT_EXEMPTED_SYNC_SCHEDULED_NON_DOZE_TIMEOUT);
 
-                mExemptedSyncScheduledDozeTimeoutMillis = mParser.getDurationMillis
-                        (KEY_EXEMPTED_SYNC_SCHEDULED_DOZE_HOLD_DURATION,
+                mExemptedSyncScheduledDozeTimeoutMillis = mParser.getDurationMillis(
+                        KEY_EXEMPTED_SYNC_SCHEDULED_DOZE_HOLD_DURATION,
                                 COMPRESS_TIME ? ONE_MINUTE
                                         : DEFAULT_EXEMPTED_SYNC_SCHEDULED_DOZE_TIMEOUT);
 
-                mExemptedSyncStartTimeoutMillis = mParser.getDurationMillis
-                        (KEY_EXEMPTED_SYNC_START_HOLD_DURATION,
+                mExemptedSyncStartTimeoutMillis = mParser.getDurationMillis(
+                        KEY_EXEMPTED_SYNC_START_HOLD_DURATION,
                                 COMPRESS_TIME ? ONE_MINUTE
                                         : DEFAULT_EXEMPTED_SYNC_START_TIMEOUT);
 
-                mSystemInteractionTimeoutMillis = mParser.getDurationMillis
-                        (KEY_SYSTEM_INTERACTION_HOLD_DURATION,
+                mUnexemptedSyncScheduledTimeoutMillis = mParser.getDurationMillis(
+                        KEY_EXEMPTED_SYNC_SCHEDULED_DOZE_HOLD_DURATION,
+                                COMPRESS_TIME ? ONE_MINUTE
+                                        : DEFAULT_UNEXEMPTED_SYNC_SCHEDULED_TIMEOUT); // TODO
+
+                mSystemInteractionTimeoutMillis = mParser.getDurationMillis(
+                        KEY_SYSTEM_INTERACTION_HOLD_DURATION,
                                 COMPRESS_TIME ? ONE_MINUTE : DEFAULT_SYSTEM_INTERACTION_TIMEOUT);
-                mStableChargingThresholdMillis = mParser.getDurationMillis
-                        (KEY_STABLE_CHARGING_THRESHOLD,
+                mStableChargingThresholdMillis = mParser.getDurationMillis(
+                        KEY_STABLE_CHARGING_THRESHOLD,
                                 COMPRESS_TIME ? ONE_MINUTE : DEFAULT_STABLE_CHARGING_THRESHOLD);
             }
 

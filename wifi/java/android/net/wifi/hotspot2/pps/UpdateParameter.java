@@ -378,7 +378,7 @@ public final class UpdateParameter implements Parcelable {
         return true;
     }
 
-    public static final Creator<UpdateParameter> CREATOR =
+    public static final @android.annotation.NonNull Creator<UpdateParameter> CREATOR =
         new Creator<UpdateParameter>() {
             @Override
             public UpdateParameter createFromParcel(Parcel in) {

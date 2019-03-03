@@ -83,7 +83,7 @@ public final class InputDeviceIdentifier implements Parcelable {
         return Objects.hash(mDescriptor, mVendorId, mProductId);
     }
 
-    public static final Parcelable.Creator<InputDeviceIdentifier> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<InputDeviceIdentifier> CREATOR =
             new Parcelable.Creator<InputDeviceIdentifier>() {
 
         @Override

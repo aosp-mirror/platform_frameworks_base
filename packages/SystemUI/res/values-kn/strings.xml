@@ -325,7 +325,8 @@
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"ವೈ-ಫೈ ಆನ್ ಆಗಿದೆ"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"ಯಾವುದೇ ವೈ-ಫೈ ನೆಟ್‌ವರ್ಕ್‌ಗಳು ಲಭ್ಯವಿಲ್ಲ"</string>
     <string name="quick_settings_wifi_secondary_label_transient" msgid="7748206246119760554">"ಆನ್ ಮಾಡಲಾಗುತ್ತಿದೆ..."</string>
-    <string name="quick_settings_cast_title" msgid="7709016546426454729">"ಬಿತ್ತರಿಸುವಿಕೆ"</string>
+    <!-- no translation found for quick_settings_cast_title (6954684227605751758) -->
+    <skip />
     <string name="quick_settings_casting" msgid="6601710681033353316">"ಬಿತ್ತರಿಸಲಾಗುತ್ತಿದೆ"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"ಹೆಸರಿಸದಿರುವ ಸಾಧನ"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"ಬಿತ್ತರಿಸಲು ಸಿದ್ದವಾಗಿದೆ"</string>
@@ -437,7 +438,8 @@
     <string name="battery_saver_notification_title" msgid="8614079794522291840">"ಬ್ಯಾಟರಿ ರಕ್ಷಕ ಆನ್ ಆಗಿದೆ"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"ಕಾರ್ಯಕ್ಷಮತೆ ಮತ್ತು ಹಿನ್ನೆಲೆ ಡೇಟಾವನ್ನು ಕಡಿಮೆ ಮಾಡುತ್ತದೆ"</string>
     <string name="battery_saver_notification_action_text" msgid="132118784269455533">"ಬ್ಯಾಟರಿ ಸೇವರ್‌ ಆಫ್ ಮಾಡಿ"</string>
-    <string name="media_projection_dialog_text" msgid="3071431025448218928">"ನಿಮ್ಮ ಪರದೆಯ ಮೇಲೆ ಪ್ರದರ್ಶಿಸಲಾಗುವ ಎಲ್ಲವನ್ನೂ <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ಯು ಸೆರೆಹಿಡಿಯಲು ಪ್ರಾರಂಭಿಸುತ್ತದೆ."</string>
+    <string name="media_projection_dialog_text" msgid="1443042478990422751">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ನಿಮ್ಮ ಪರದೆಯಲ್ಲಿರುವ - ಅಧಿಸೂಚನೆಗಳು, ಕರೆಗಳು, ಪಾಸ್‌ವರ್ಡ್‌ಗಳು ಸೇರಿದಂತೆ ಪ್ರತಿಯೊಂದನ್ನೂ ಕ್ಯಾಪ್ಚರ್ ಮಾಡುತ್ತದೆ."</string>
+    <string name="media_projection_dialog_title" msgid="7574971526813630219">"ರೆಕಾರ್ಡ್ ಮಾಡಲು ಅಥವಾ ನಿಮ್ಮ ಸ್ಕ್ರೀನ್ ಅನ್ನು ಬಿತ್ತರಿಸಲು <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ಅನ್ನು ಅನುಮತಿಸುವುದೇ?"</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"ಮತ್ತೊಮ್ಮೆ ತೋರಿಸದಿರು"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"ಎಲ್ಲವನ್ನೂ ತೆರವುಗೊಳಿಸು"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"ನಿರ್ವಹಿಸಿ"</string>
@@ -814,6 +816,9 @@
     <string name="high_temp_title" msgid="4589508026407318374">"ಫೋನ್ ಬಿಸಿಯಾಗುತ್ತಿದೆ"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"ಫೋನ್ ತಣ್ಣಗಾಗುವವರೆಗೂ ಕೆಲವು ವೈಶಿಷ್ಟ್ಯಗಳನ್ನು ಸೀಮಿತಗೊಳಿಸುತ್ತದೆ"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"ನಿಮ್ಮ ಫೋನ್ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ತಣ್ಣಗಾಗಲು ಪ್ರಯತ್ನಿಸುತ್ತದೆ. ನಿಮ್ಮ ಫೋನ್ ಅನ್ನು ನೀವು ಈಗಲೂ ಬಳಸಬಹುದಾಗಿರುತ್ತದೆ, ಆದರೆ ಇದು ನಿಧಾನವಾಗಿರಬಹುದು.\n\nಒಮ್ಮೆ ನಿಮ್ಮ ಫೋನ್ ತಣ್ಣಗಾದ ನಂತರ ಇದು ಸಾಮಾನ್ಯ ರೀತಿಯಲ್ಲಿ ಕಾರ್ಯನಿರ್ವಹಿಸುತ್ತದೆ."</string>
+    <string name="high_temp_alarm_title" msgid="442812040762745210">"ಚಾರ್ಜರ್ ಅನ್‌ಪ್ಲಗ್ ಮಾಡಿ"</string>
+    <string name="high_temp_alarm_notify_message" msgid="1802871059489414932">"ಈ ಸಾಧನವನ್ನು ಚಾರ್ಜ್ ಮಾಡುತ್ತಿರುವಾಗ ಸಮಸ್ಯೆ ಎದುರಾಗಿದೆ. ಪವರ್ ಅಡಾಪ್ಟರ್ ಅನ್ನು ಅನ್‌ಪ್ಲಗ್ ಮಾಡಿ ಮತ್ತು ಕೇಬಲ್ ಬೆಚ್ಚಗಿರಬೇಕೆಂದು ಜಾಗ್ರತೆ ವಹಿಸಿ."</string>
+    <string name="high_temp_alarm_help_care_steps" msgid="3631075329318070726">"ಕಾಳಜಿ ಹಂತಗಳನ್ನು ನೋಡಿ"</string>
     <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"ಎಡ ಶಾರ್ಟ್‌ಕಟ್"</string>
     <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"ಬಲ ಶಾರ್ಟ್‌ಕಟ್"</string>
     <string name="lockscreen_unlock_left" msgid="2043092136246951985">"ಎಡ ಶಾರ್ಟ್‌ಕಟ್ ಕೂಡ ಅನ್‌ಲಾಕ್ ಮಾಡುತ್ತದೆ"</string>

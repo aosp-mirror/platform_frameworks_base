@@ -45,7 +45,7 @@ public final class DistroFormatVersion implements Parcelable {
         mMinorVersion = Utils.validateVersion("minor", minorVersion);
     }
 
-    public static final Creator<DistroFormatVersion> CREATOR = new Creator<DistroFormatVersion>() {
+    public static final @android.annotation.NonNull Creator<DistroFormatVersion> CREATOR = new Creator<DistroFormatVersion>() {
         public DistroFormatVersion createFromParcel(Parcel in) {
             int majorVersion = in.readInt();
             int minorVersion = in.readInt();

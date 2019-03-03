@@ -34,7 +34,7 @@ public final class Controller2Link implements Parcelable {
     private static final String TAG = "Controller2Link";
     private static final boolean DEBUG = MediaController2.DEBUG;
 
-    public static final Parcelable.Creator<Controller2Link> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<Controller2Link> CREATOR =
             new Parcelable.Creator<Controller2Link>() {
                 @Override
                 public Controller2Link createFromParcel(Parcel in) {

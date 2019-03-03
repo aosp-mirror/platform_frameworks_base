@@ -281,7 +281,7 @@ public final class CallIdentification implements Parcelable {
     /**
      * Responsible for creating CallIdentification objects for deserialized Parcels.
      */
-    public static final Parcelable.Creator<CallIdentification> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<CallIdentification> CREATOR =
             new Parcelable.Creator<CallIdentification> () {
 
                 @Override

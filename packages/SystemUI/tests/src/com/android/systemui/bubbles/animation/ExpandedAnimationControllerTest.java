@@ -21,12 +21,12 @@ import static org.junit.Assert.assertEquals;
 import android.content.res.Resources;
 import android.graphics.Point;
 import android.graphics.PointF;
-import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.view.View;
 import android.widget.FrameLayout;
 
 import androidx.dynamicanimation.animation.DynamicAnimation;
+import androidx.test.filters.SmallTest;
 
 import com.android.systemui.R;
 

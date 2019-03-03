@@ -35,7 +35,7 @@ import java.util.Arrays;
 // TODO: Comprehensive javadoc.
 public final class TextClassifierEvent implements Parcelable {
 
-    public static final Creator<TextClassifierEvent> CREATOR = new Creator<TextClassifierEvent>() {
+    public static final @android.annotation.NonNull Creator<TextClassifierEvent> CREATOR = new Creator<TextClassifierEvent>() {
         @Override
         public TextClassifierEvent createFromParcel(Parcel in) {
             return readFromParcel(in);

@@ -54,7 +54,7 @@ public final class ConnectionInfo implements Parcelable {
         out.writeInt(remote.getPort());
     }
 
-    public static final Creator<ConnectionInfo> CREATOR = new Creator<ConnectionInfo>() {
+    public static final @android.annotation.NonNull Creator<ConnectionInfo> CREATOR = new Creator<ConnectionInfo>() {
         public ConnectionInfo createFromParcel(Parcel in) {
             int protocol = in.readInt();
             InetAddress localAddress;

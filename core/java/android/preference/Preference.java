@@ -2108,7 +2108,7 @@ public class Preference implements Comparable<Preference> {
             super(superState);
         }
 
-        public static final Parcelable.Creator<BaseSavedState> CREATOR =
+        public static final @android.annotation.NonNull Parcelable.Creator<BaseSavedState> CREATOR =
                 new Parcelable.Creator<BaseSavedState>() {
                     public BaseSavedState createFromParcel(Parcel in) {
                         return new BaseSavedState(in);

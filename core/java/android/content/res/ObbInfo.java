@@ -88,7 +88,7 @@ public class ObbInfo implements Parcelable {
         dest.writeByteArray(salt);
     }
 
-    public static final Parcelable.Creator<ObbInfo> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<ObbInfo> CREATOR
             = new Parcelable.Creator<ObbInfo>() {
         public ObbInfo createFromParcel(Parcel source) {
             return new ObbInfo(source);

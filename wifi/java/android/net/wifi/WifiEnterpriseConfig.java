@@ -226,7 +226,7 @@ public class WifiEnterpriseConfig implements Parcelable {
         ParcelUtil.writeCertificates(dest, mClientCertificateChain);
     }
 
-    public static final Creator<WifiEnterpriseConfig> CREATOR =
+    public static final @android.annotation.NonNull Creator<WifiEnterpriseConfig> CREATOR =
             new Creator<WifiEnterpriseConfig>() {
                 @Override
                 public WifiEnterpriseConfig createFromParcel(Parcel in) {

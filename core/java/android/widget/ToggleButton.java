@@ -16,6 +16,7 @@
 
 package android.widget;
 
+import android.annotation.FloatRange;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
@@ -129,6 +130,7 @@ public class ToggleButton extends CompoundButton {
      * @return the alpha value, 0.0-1.0
      */
     @InspectableProperty
+    @FloatRange(from = 0.0, to = 1.0)
     public float getDisabledAlpha() {
         return mDisabledAlpha;
     }

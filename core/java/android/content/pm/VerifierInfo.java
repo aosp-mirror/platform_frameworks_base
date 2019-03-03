@@ -72,7 +72,7 @@ public class VerifierInfo implements Parcelable {
         dest.writeSerializable(publicKey);
     }
 
-    public static final Parcelable.Creator<VerifierInfo> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<VerifierInfo> CREATOR
             = new Parcelable.Creator<VerifierInfo>() {
         public VerifierInfo createFromParcel(Parcel source) {
             return new VerifierInfo(source);

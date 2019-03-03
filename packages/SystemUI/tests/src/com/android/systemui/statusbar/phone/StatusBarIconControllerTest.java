@@ -22,11 +22,12 @@ import static junit.framework.Assert.assertTrue;
 
 import static org.mockito.Mockito.mock;
 
-import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.systemui.plugins.DarkIconDispatcher;

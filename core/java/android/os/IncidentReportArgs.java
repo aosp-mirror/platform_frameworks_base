@@ -93,7 +93,7 @@ public final class IncidentReportArgs implements Parcelable {
         mPrivacyPolicy = in.readInt();
     }
 
-    public static final Parcelable.Creator<IncidentReportArgs> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<IncidentReportArgs> CREATOR
             = new Parcelable.Creator<IncidentReportArgs>() {
         public IncidentReportArgs createFromParcel(Parcel in) {
             return new IncidentReportArgs(in);

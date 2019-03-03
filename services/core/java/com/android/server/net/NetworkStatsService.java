@@ -82,7 +82,6 @@ import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.net.DataUsageRequest;
-import android.net.IConnectivityManager;
 import android.net.INetworkManagementEventObserver;
 import android.net.INetworkStatsService;
 import android.net.INetworkStatsSession;
@@ -196,8 +195,6 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
     private final boolean mUseBpfTrafficStats;
 
-    private IConnectivityManager mConnManager;
-
     @VisibleForTesting
     public static final String ACTION_NETWORK_STATS_POLL =
             "com.android.server.action.NETWORK_STATS_POLL";
@@ -259,6 +256,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     private final ArrayMap<String, NetworkIdentitySet> mActiveUidIfaces = new ArrayMap<>();
 
     /** Current default active iface. */
+    @GuardedBy("mStatsLock")
     private String mActiveIface;
 
     /** Set of any ifaces associated with mobile networks since boot. */
@@ -268,6 +266,10 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     /** Set of all ifaces currently used by traffic that does not explicitly specify a Network. */
     @GuardedBy("mStatsLock")
     private Network[] mDefaultNetworks = new Network[0];
+
+    /** Set containing info about active VPNs and their underlying networks. */
+    @GuardedBy("mStatsLock")
+    private VpnInfo[] mVpnInfos = new VpnInfo[0];
 
     private final DropBoxNonMonotonicObserver mNonMonotonicObserver =
             new DropBoxNonMonotonicObserver();
@@ -380,10 +382,6 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     void setHandler(Handler handler, Handler.Callback callback) {
         mHandler = handler;
         mHandlerCallback = callback;
-    }
-
-    public void bindConnectivityManager(IConnectivityManager connManager) {
-        mConnManager = checkNotNull(connManager, "missing IConnectivityManager");
     }
 
     public void systemReady() {
@@ -864,13 +862,17 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     }
 
     @Override
-    public void forceUpdateIfaces(Network[] defaultNetworks) {
+    public void forceUpdateIfaces(
+            Network[] defaultNetworks,
+            VpnInfo[] vpnArray,
+            NetworkState[] networkStates,
+            String activeIface) {
         mContext.enforceCallingOrSelfPermission(READ_NETWORK_USAGE_HISTORY, TAG);
         assertBandwidthControlEnabled();
 
         final long token = Binder.clearCallingIdentity();
         try {
-            updateIfaces(defaultNetworks);
+            updateIfaces(defaultNetworks, vpnArray, networkStates, activeIface);
         } finally {
             Binder.restoreCallingIdentity(token);
         }
@@ -1134,11 +1136,17 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         }
     };
 
-    private void updateIfaces(Network[] defaultNetworks) {
+    private void updateIfaces(
+            Network[] defaultNetworks,
+            VpnInfo[] vpnArray,
+            NetworkState[] networkStates,
+            String activeIface) {
         synchronized (mStatsLock) {
             mWakeLock.acquire();
             try {
-                updateIfacesLocked(defaultNetworks);
+                mVpnInfos = vpnArray;
+                mActiveIface = activeIface;
+                updateIfacesLocked(defaultNetworks, networkStates);
             } finally {
                 mWakeLock.release();
             }
@@ -1152,7 +1160,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
      * {@link NetworkIdentitySet}.
      */
     @GuardedBy("mStatsLock")
-    private void updateIfacesLocked(Network[] defaultNetworks) {
+    private void updateIfacesLocked(Network[] defaultNetworks, NetworkState[] states) {
         if (!mSystemReady) return;
         if (LOGV) Slog.v(TAG, "updateIfacesLocked()");
 
@@ -1163,18 +1171,6 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         // poll, but only persist network stats to keep codepath fast. UID stats
         // will be persisted during next alarm poll event.
         performPollLocked(FLAG_PERSIST_NETWORK);
-
-        final NetworkState[] states;
-        final LinkProperties activeLink;
-        try {
-            states = mConnManager.getAllNetworkState();
-            activeLink = mConnManager.getActiveLinkProperties();
-        } catch (RemoteException e) {
-            // ignored; service lives in system_server
-            return;
-        }
-
-        mActiveIface = activeLink != null ? activeLink.getInterfaceName() : null;
 
         // Rebuild active interfaces based on connected networks
         mActiveIfaces.clear();
@@ -1287,7 +1283,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         Trace.traceEnd(TRACE_TAG_NETWORK);
 
         // For per-UID stats, pass the VPN info so VPN traffic is reattributed to responsible apps.
-        VpnInfo[] vpnArray = mConnManager.getAllVpnInfo();
+        VpnInfo[] vpnArray = mVpnInfos;
         Trace.traceBegin(TRACE_TAG_NETWORK, "recordUid");
         mUidRecorder.recordSnapshotLocked(uidSnapshot, mActiveUidIfaces, vpnArray, currentTime);
         Trace.traceEnd(TRACE_TAG_NETWORK);

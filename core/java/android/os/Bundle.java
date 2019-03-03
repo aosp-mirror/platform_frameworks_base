@@ -1196,7 +1196,7 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
         }
     }
 
-    public static final Parcelable.Creator<Bundle> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<Bundle> CREATOR =
         new Parcelable.Creator<Bundle>() {
         @Override
         public Bundle createFromParcel(Parcel in) {

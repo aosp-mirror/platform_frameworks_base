@@ -658,9 +658,10 @@ class UserUsageStatsService {
             pw.println(" stats");
             printIntervalStats(pw, mCurrentStats[interval], !compact, true, pkg);
         }
+        mDatabase.dump(pw, compact);
     }
 
-    private String formatDateTime(long dateTime, boolean pretty) {
+    static String formatDateTime(long dateTime, boolean pretty) {
         if (pretty) {
             return "\"" + sDateFormat.format(dateTime)+ "\"";
         }
@@ -888,7 +889,7 @@ class UserUsageStatsService {
         pw.decreaseIndent();
     }
 
-    private static String intervalToString(int interval) {
+    public static String intervalToString(int interval) {
         switch (interval) {
             case INTERVAL_DAILY:
                 return "daily";

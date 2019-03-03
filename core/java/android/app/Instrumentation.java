@@ -52,6 +52,7 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.ViewConfiguration;
 import android.view.Window;
+import android.view.WindowManagerGlobal;
 
 import com.android.internal.content.ReferrerIntent;
 
@@ -1102,8 +1103,11 @@ public class Instrumentation {
         if ((event.getSource() & InputDevice.SOURCE_CLASS_POINTER) == 0) {
             event.setSource(InputDevice.SOURCE_TOUCHSCREEN);
         }
-        InputManager.getInstance().injectInputEvent(event,
-                InputManager.INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH);
+        try {
+            WindowManagerGlobal.getWindowManagerService().injectInputAfterTransactionsApplied(event,
+                    InputManager.INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH);
+        } catch (RemoteException e) {
+        }
     }
 
     /**

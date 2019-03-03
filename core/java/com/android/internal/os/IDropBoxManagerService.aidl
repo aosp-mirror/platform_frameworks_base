@@ -37,5 +37,6 @@ interface IDropBoxManagerService {
     boolean isTagEnabled(String tag);
 
     /** @see DropBoxManager#getNextEntry */
+    @UnsupportedAppUsage
     DropBoxManager.Entry getNextEntry(String tag, long millis, String packageName);
 }

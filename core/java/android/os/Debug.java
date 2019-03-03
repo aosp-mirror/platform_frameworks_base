@@ -859,7 +859,7 @@ public final class Debug
             otherStats = source.createIntArray();
         }
 
-        public static final Creator<MemoryInfo> CREATOR = new Creator<MemoryInfo>() {
+        public static final @android.annotation.NonNull Creator<MemoryInfo> CREATOR = new Creator<MemoryInfo>() {
             public MemoryInfo createFromParcel(Parcel source) {
                 return new MemoryInfo(source);
             }

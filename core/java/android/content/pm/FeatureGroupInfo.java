@@ -49,7 +49,7 @@ public final class FeatureGroupInfo implements Parcelable {
         dest.writeTypedArray(features, flags);
     }
 
-    public static final Creator<FeatureGroupInfo> CREATOR = new Creator<FeatureGroupInfo>() {
+    public static final @android.annotation.NonNull Creator<FeatureGroupInfo> CREATOR = new Creator<FeatureGroupInfo>() {
         @Override
         public FeatureGroupInfo createFromParcel(Parcel source) {
             FeatureGroupInfo group = new FeatureGroupInfo();

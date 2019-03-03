@@ -101,7 +101,7 @@ public final class SaveRequest implements Parcelable {
         parcel.writeStringList(mDatasetIds);
     }
 
-    public static final Creator<SaveRequest> CREATOR =
+    public static final @android.annotation.NonNull Creator<SaveRequest> CREATOR =
             new Creator<SaveRequest>() {
         @Override
         public SaveRequest createFromParcel(Parcel parcel) {

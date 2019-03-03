@@ -194,7 +194,7 @@ public class TcpKeepalivePacketData extends KeepalivePacketData implements Parce
     }
 
     /** Parcelable Creator. */
-    public static final Parcelable.Creator<TcpKeepalivePacketData> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<TcpKeepalivePacketData> CREATOR =
             new Parcelable.Creator<TcpKeepalivePacketData>() {
                 public TcpKeepalivePacketData createFromParcel(Parcel in) {
                     return new TcpKeepalivePacketData(in);

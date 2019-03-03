@@ -19,13 +19,13 @@ package com.android.systemui.bubbles.animation;
 import static org.junit.Assert.assertEquals;
 
 import android.graphics.PointF;
-import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.view.View;
 import android.widget.FrameLayout;
 
 import androidx.dynamicanimation.animation.DynamicAnimation;
 import androidx.dynamicanimation.animation.SpringForce;
+import androidx.test.filters.SmallTest;
 
 import com.android.systemui.R;
 

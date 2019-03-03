@@ -133,7 +133,7 @@ public class UsbEndpoint implements Parcelable {
                 ",mMaxPacketSize=" + mMaxPacketSize + ",mInterval=" + mInterval +"]";
     }
 
-    public static final Parcelable.Creator<UsbEndpoint> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<UsbEndpoint> CREATOR =
         new Parcelable.Creator<UsbEndpoint>() {
         public UsbEndpoint createFromParcel(Parcel in) {
             int address = in.readInt();

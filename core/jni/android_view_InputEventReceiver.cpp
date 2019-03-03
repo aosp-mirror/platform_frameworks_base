@@ -23,10 +23,9 @@
 #include <nativehelper/JNIHelp.h>
 
 #include <android_runtime/AndroidRuntime.h>
-#include <utils/Log.h>
+#include <log/log.h>
 #include <utils/Looper.h>
 #include <utils/Vector.h>
-#include <utils/threads.h>
 #include <input/InputTransport.h>
 #include "android_os_MessageQueue.h"
 #include "android_view_InputChannel.h"

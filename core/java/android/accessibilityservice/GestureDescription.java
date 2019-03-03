@@ -455,7 +455,7 @@ public final class GestureDescription {
             dest.writeFloat(mY);
         }
 
-        public static final Parcelable.Creator<TouchPoint> CREATOR
+        public static final @android.annotation.NonNull Parcelable.Creator<TouchPoint> CREATOR
                 = new Parcelable.Creator<TouchPoint>() {
             public TouchPoint createFromParcel(Parcel in) {
                 return new TouchPoint(in);
@@ -509,7 +509,7 @@ public final class GestureDescription {
             dest.writeParcelableArray(touchPoints, flags);
         }
 
-        public static final Parcelable.Creator<GestureStep> CREATOR
+        public static final @android.annotation.NonNull Parcelable.Creator<GestureStep> CREATOR
                 = new Parcelable.Creator<GestureStep>() {
             public GestureStep createFromParcel(Parcel in) {
                 return new GestureStep(in);

@@ -19,19 +19,17 @@ package com.android.tests.rollback;
 import static com.android.tests.rollback.RollbackTestUtils.assertPackageRollbackInfoEquals;
 import static com.android.tests.rollback.RollbackTestUtils.assertRollbackInfoEquals;
 import static com.android.tests.rollback.RollbackTestUtils.getUniqueRollbackInfoForPackage;
+import static com.android.tests.rollback.RollbackTestUtils.processUserData;
 
 import android.Manifest;
 import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.VersionedPackage;
 import android.content.rollback.RollbackInfo;
 import android.content.rollback.RollbackManager;
-import android.os.Handler;
-import android.os.HandlerThread;
 import android.provider.DeviceConfig;
 import android.support.test.InstrumentationRegistry;
 import android.util.Log;
@@ -47,7 +45,6 @@ import org.junit.runners.JUnit4;
 
 import java.util.Collections;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.TimeUnit;
 
@@ -424,52 +421,6 @@ public class RollbackTest {
                         rm.getAvailableRollbacks(), TEST_APP_A));
         } finally {
             RollbackTestUtils.dropShellPermissionIdentity();
-        }
-    }
-
-    private static final String NO_RESPONSE = "NO RESPONSE";
-
-    // Calls into the test app to process user data.
-    // Asserts if the user data could not be processed or was version
-    // incompatible with the previously processed user data.
-    private void processUserData(String packageName) throws Exception {
-        Intent intent = new Intent();
-        intent.setComponent(new ComponentName(packageName,
-                    "com.android.tests.rollback.testapp.ProcessUserData"));
-        Context context = InstrumentationRegistry.getContext();
-
-        HandlerThread handlerThread = new HandlerThread("RollbackTestHandlerThread");
-        handlerThread.start();
-
-        // It can sometimes take a while after rollback before the app will
-        // receive this broadcast, so try a few times in a loop.
-        String result = NO_RESPONSE;
-        for (int i = 0; result.equals(NO_RESPONSE) && i < 5; ++i) {
-            BlockingQueue<String> resultQueue = new LinkedBlockingQueue<>();
-            context.sendOrderedBroadcast(intent, null, new BroadcastReceiver() {
-                @Override
-                public void onReceive(Context context, Intent intent) {
-                    if (getResultCode() == 1) {
-                        resultQueue.add("OK");
-                    } else {
-                        // If the test app doesn't receive the broadcast or
-                        // fails to set the result data, then getResultData
-                        // here returns the initial NO_RESPONSE data passed to
-                        // the sendOrderedBroadcast call.
-                        resultQueue.add(getResultData());
-                    }
-                }
-            }, new Handler(handlerThread.getLooper()), 0, NO_RESPONSE, null);
-
-            result = resultQueue.poll(10, TimeUnit.SECONDS);
-            if (result == null) {
-                result = "ProcessUserData broadcast timed out";
-            }
-        }
-
-        handlerThread.quit();
-        if (!"OK".equals(result)) {
-            fail(result);
         }
     }
 

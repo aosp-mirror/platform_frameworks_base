@@ -41,7 +41,7 @@ public class HealthStatsParceler implements Parcelable {
     private HealthStatsWriter mWriter;
     private HealthStats mHealthStats;
 
-    public static final Parcelable.Creator<HealthStatsParceler> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<HealthStatsParceler> CREATOR
             = new Parcelable.Creator<HealthStatsParceler>() {
         public HealthStatsParceler createFromParcel(Parcel in) {
             return new HealthStatsParceler(in);

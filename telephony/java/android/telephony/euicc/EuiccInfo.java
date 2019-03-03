@@ -30,7 +30,7 @@ import android.os.Parcelable;
 // own APIs guarded with appropriate permission checks.
 public final class EuiccInfo implements Parcelable {
 
-    public static final Creator<EuiccInfo> CREATOR =
+    public static final @android.annotation.NonNull Creator<EuiccInfo> CREATOR =
             new Creator<EuiccInfo>() {
                 @Override
                 public EuiccInfo createFromParcel(Parcel in) {

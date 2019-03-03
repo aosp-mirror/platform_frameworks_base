@@ -266,6 +266,7 @@ public final class UserData implements FieldClassificationUserData, Parcelable {
          *
          * @return this builder
          */
+        @NonNull
         public Builder setFieldClassificationAlgorithm(@Nullable String name,
                 @Nullable Bundle args) {
             throwIfDestroyed();
@@ -291,6 +292,7 @@ public final class UserData implements FieldClassificationUserData, Parcelable {
          *
          * @return this builder
          */
+        @NonNull
         public Builder setFieldClassificationAlgorithmForCategory(@NonNull String categoryId,
                 @Nullable String name, @Nullable Bundle args) {
             throwIfDestroyed();
@@ -333,6 +335,7 @@ public final class UserData implements FieldClassificationUserData, Parcelable {
          *       {@link UserData#getMaxValueLength()}</li>
          * </ul>
          */
+        @NonNull
         public Builder add(@NonNull String value, @NonNull String categoryId) {
             throwIfDestroyed();
             checkNotEmpty("categoryId", categoryId);
@@ -386,6 +389,7 @@ public final class UserData implements FieldClassificationUserData, Parcelable {
          *
          * @return The built dataset.
          */
+        @NonNull
         public UserData build() {
             throwIfDestroyed();
             mDestroyed = true;
@@ -435,7 +439,7 @@ public final class UserData implements FieldClassificationUserData, Parcelable {
         parcel.writeMap(mCategoryArgs);
     }
 
-    public static final Parcelable.Creator<UserData> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<UserData> CREATOR =
             new Parcelable.Creator<UserData>() {
         @Override
         public UserData createFromParcel(Parcel parcel) {

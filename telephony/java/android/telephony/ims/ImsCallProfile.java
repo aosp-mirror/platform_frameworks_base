@@ -583,7 +583,7 @@ public final class ImsCallProfile implements Parcelable {
         mHasKnownUserIntentEmergency = in.readBoolean();
     }
 
-    public static final Creator<ImsCallProfile> CREATOR = new Creator<ImsCallProfile>() {
+    public static final @android.annotation.NonNull Creator<ImsCallProfile> CREATOR = new Creator<ImsCallProfile>() {
         @Override
         public ImsCallProfile createFromParcel(Parcel in) {
             return new ImsCallProfile(in);

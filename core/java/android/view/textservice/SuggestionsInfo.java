@@ -162,7 +162,7 @@ public final class SuggestionsInfo implements Parcelable {
     /**
      * Used to make this class parcelable.
      */
-    public static final Parcelable.Creator<SuggestionsInfo> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<SuggestionsInfo> CREATOR
             = new Parcelable.Creator<SuggestionsInfo>() {
         @Override
         public SuggestionsInfo createFromParcel(Parcel source) {

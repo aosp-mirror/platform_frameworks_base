@@ -280,7 +280,7 @@ public class Gesture implements Parcelable {
         return gesture;
     }
 
-    public static final Parcelable.Creator<Gesture> CREATOR = new Parcelable.Creator<Gesture>() {
+    public static final @android.annotation.NonNull Parcelable.Creator<Gesture> CREATOR = new Parcelable.Creator<Gesture>() {
         public Gesture createFromParcel(Parcel in) {
             Gesture gesture = null;
             final long gestureID = in.readLong();

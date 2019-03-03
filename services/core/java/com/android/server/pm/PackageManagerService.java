@@ -1935,7 +1935,7 @@ public class PackageManagerService extends IPackageManager.Stub
                             final PackageSetting pkgSetting = mSettings.mPackages.get(packageName);
                             if (pkgSetting.getInstallReason(userId)
                                     != PackageManager.INSTALL_REASON_DEVICE_RESTORE) {
-                                setDefaultBrowserPackageName(null, userId);
+                                setDefaultBrowserAsyncLPw(null, userId);
                             }
                         }
 
@@ -9404,18 +9404,27 @@ public class PackageManagerService extends IPackageManager.Stub
         // at boot, or background job), the passed 'targetCompilerFilter' stays the same,
         // and the first package that uses the library will dexopt it. The
         // others will see that the compiled code for the library is up to date.
-        Collection<PackageParser.Package> deps = findSharedNonSystemLibraries(p);
+        Collection<SharedLibraryInfo> deps = findSharedLibraries(p);
         final String[] instructionSets = getAppDexInstructionSets(p.applicationInfo);
         if (!deps.isEmpty()) {
             DexoptOptions libraryOptions = new DexoptOptions(options.getPackageName(),
                     options.getCompilationReason(), options.getCompilerFilter(),
                     options.getSplitName(),
                     options.getFlags() | DexoptOptions.DEXOPT_AS_SHARED_LIBRARY);
-            for (PackageParser.Package depPackage : deps) {
-                // TODO: Analyze and investigate if we (should) profile libraries.
-                pdo.performDexOpt(depPackage, instructionSets,
-                        getOrCreateCompilerPackageStats(depPackage),
-                    mDexManager.getPackageUseInfoOrDefault(depPackage.packageName), libraryOptions);
+            for (SharedLibraryInfo info : deps) {
+                PackageParser.Package depPackage = null;
+                synchronized (mPackages) {
+                    depPackage = mPackages.get(info.getPackageName());
+                }
+                if (depPackage != null) {
+                    // TODO: Analyze and investigate if we (should) profile libraries.
+                    pdo.performDexOpt(depPackage, instructionSets,
+                            getOrCreateCompilerPackageStats(depPackage),
+                            mDexManager.getPackageUseInfoOrDefault(depPackage.packageName),
+                            libraryOptions);
+                } else {
+                    pdo.performDexOpt(info, instructionSets, libraryOptions);
+                }
             }
         }
         return pdo.performDexOpt(p, instructionSets,
@@ -9461,63 +9470,48 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
-    List<PackageParser.Package> findSharedNonSystemLibraries(PackageParser.Package p) {
-        if (p.usesLibraries != null || p.usesOptionalLibraries != null
-                || p.usesStaticLibraries != null) {
-            ArrayList<PackageParser.Package> retValue = new ArrayList<>();
+    private static List<SharedLibraryInfo> findSharedLibraries(PackageParser.Package p) {
+        if (p.usesLibraryInfos != null) {
+            ArrayList<SharedLibraryInfo> retValue = new ArrayList<>();
             Set<String> collectedNames = new HashSet<>();
-            findSharedNonSystemLibrariesRecursive(p, retValue, collectedNames);
-
-            retValue.remove(p);
-
+            for (SharedLibraryInfo info : p.usesLibraryInfos) {
+                findSharedLibrariesRecursive(info, retValue, collectedNames);
+            }
             return retValue;
         } else {
             return Collections.emptyList();
         }
     }
 
-    private void findSharedNonSystemLibrariesRecursive(PackageParser.Package p,
-            ArrayList<PackageParser.Package> collected, Set<String> collectedNames) {
-        if (!collectedNames.contains(p.packageName)) {
-            collectedNames.add(p.packageName);
-            collected.add(p);
+    private static void findSharedLibrariesRecursive(SharedLibraryInfo info,
+            ArrayList<SharedLibraryInfo> collected, Set<String> collectedNames) {
+        if (!collectedNames.contains(info.getName())) {
+            collectedNames.add(info.getName());
+            collected.add(info);
 
-            if (p.usesLibraries != null) {
-                findSharedNonSystemLibrariesRecursive(p.usesLibraries,
-                        null, collected, collectedNames);
-            }
-            if (p.usesOptionalLibraries != null) {
-                findSharedNonSystemLibrariesRecursive(p.usesOptionalLibraries,
-                        null, collected, collectedNames);
-            }
-            if (p.usesStaticLibraries != null) {
-                findSharedNonSystemLibrariesRecursive(p.usesStaticLibraries,
-                        p.usesStaticLibrariesVersions, collected, collectedNames);
+            if (info.getDependencies() != null) {
+                for (SharedLibraryInfo dep : info.getDependencies()) {
+                    findSharedLibrariesRecursive(dep, collected, collectedNames);
+                }
             }
         }
     }
 
-    private void findSharedNonSystemLibrariesRecursive(ArrayList<String> libs, long[] versions,
-            ArrayList<PackageParser.Package> collected, Set<String> collectedNames) {
-        final int libNameCount = libs.size();
-        for (int i = 0; i < libNameCount; i++) {
-            String libName = libs.get(i);
-            long version = (versions != null && versions.length == libNameCount)
-                    ? versions[i] : PackageManager.VERSION_CODE_HIGHEST;
-            PackageParser.Package libPkg = findSharedNonSystemLibrary(libName, version);
-            if (libPkg != null) {
-                findSharedNonSystemLibrariesRecursive(libPkg, collected, collectedNames);
+    List<PackageParser.Package> findSharedNonSystemLibraries(PackageParser.Package pkg) {
+        List<SharedLibraryInfo> deps = findSharedLibraries(pkg);
+        if (!deps.isEmpty()) {
+            ArrayList<PackageParser.Package> retValue = new ArrayList<>();
+            synchronized (mPackages) {
+                for (SharedLibraryInfo info : deps) {
+                    PackageParser.Package depPackage = mPackages.get(info.getPackageName());
+                    if (depPackage != null) {
+                        retValue.add(depPackage);
+                    }
+                }
             }
-        }
-    }
-
-    private PackageParser.Package findSharedNonSystemLibrary(String name, long version) {
-        synchronized (mPackages) {
-            SharedLibraryInfo libraryInfo = getSharedLibraryInfoLPr(name, version);
-            if (libraryInfo != null) {
-                return mPackages.get(libraryInfo.getPackageName());
-            }
-            return null;
+            return retValue;
+        } else {
+            return Collections.emptyList();
         }
     }
 
@@ -13685,6 +13679,23 @@ public class PackageManagerService extends IPackageManager.Stub
             }
         }
         return true;
+    }
+
+    private void setDefaultBrowserAsyncLPw(@Nullable String packageName, @UserIdInt int userId) {
+        if (userId == UserHandle.USER_ALL) {
+            return;
+        }
+        if (mDefaultBrowserProvider == null) {
+            Slog.e(TAG, "mDefaultBrowserProvider is null");
+            return;
+        }
+        mDefaultBrowserProvider.setDefaultBrowserAsync(packageName, userId);
+        if (packageName != null) {
+            synchronized (mPackages) {
+                mDefaultPermissionPolicy.grantDefaultPermissionsToDefaultBrowser(packageName,
+                        userId);
+            }
+        }
     }
 
     @Override
@@ -23099,6 +23110,18 @@ public class PackageManagerService extends IPackageManager.Stub
             } catch (Exception e) {
             }
             return 0;
+        }
+
+        @Override
+        public boolean[] isAudioPlaybackCaptureAllowed(String[] packageNames)
+                throws RemoteException {
+            int callingUser = UserHandle.getUserId(Binder.getCallingUid());
+            boolean[] results = new boolean[packageNames.length];
+            for (int i = results.length - 1; i >= 0; --i) {
+                ApplicationInfo appInfo = getApplicationInfo(packageNames[i], 0, callingUser);
+                results[i] = appInfo == null ? false : appInfo.isAudioPlaybackCaptureAllowed();
+            }
+            return results;
         }
     }
 

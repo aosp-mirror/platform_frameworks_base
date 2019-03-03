@@ -158,7 +158,7 @@ public final class ProviderInfo extends ComponentInfo
         out.writeInt(isSyncable ? 1 : 0);
     }
 
-    public static final Parcelable.Creator<ProviderInfo> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<ProviderInfo> CREATOR
             = new Parcelable.Creator<ProviderInfo>() {
         public ProviderInfo createFromParcel(Parcel in) {
             return new ProviderInfo(in);

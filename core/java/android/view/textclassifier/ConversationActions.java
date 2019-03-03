@@ -44,7 +44,7 @@ import java.util.List;
  */
 public final class ConversationActions implements Parcelable {
 
-    public static final Creator<ConversationActions> CREATOR =
+    public static final @android.annotation.NonNull Creator<ConversationActions> CREATOR =
             new Creator<ConversationActions>() {
                 @Override
                 public ConversationActions createFromParcel(Parcel in) {
@@ -175,7 +175,7 @@ public final class ConversationActions implements Parcelable {
             return 0;
         }
 
-        public static final Creator<Message> CREATOR =
+        public static final @android.annotation.NonNull Creator<Message> CREATOR =
                 new Creator<Message>() {
                     @Override
                     public Message createFromParcel(Parcel in) {
@@ -367,7 +367,7 @@ public final class ConversationActions implements Parcelable {
             return 0;
         }
 
-        public static final Creator<Request> CREATOR =
+        public static final @android.annotation.NonNull Creator<Request> CREATOR =
                 new Creator<Request>() {
                     @Override
                     public Request createFromParcel(Parcel in) {

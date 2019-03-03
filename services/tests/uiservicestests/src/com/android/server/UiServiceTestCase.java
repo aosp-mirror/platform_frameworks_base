@@ -16,14 +16,14 @@ package com.android.server;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 import android.content.pm.PackageManagerInternal;
 import android.net.Uri;
 import android.os.Build;
-import android.support.test.InstrumentationRegistry;
 import android.testing.TestableContext;
+
+import androidx.test.InstrumentationRegistry;
 
 import com.android.server.uri.UriGrantsManagerInternal;
 

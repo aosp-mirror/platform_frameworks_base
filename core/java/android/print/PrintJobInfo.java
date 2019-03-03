@@ -881,7 +881,7 @@ public final class PrintJobInfo implements Parcelable {
         }
     }
 
-    public static final Parcelable.Creator<PrintJobInfo> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<PrintJobInfo> CREATOR =
             new Creator<PrintJobInfo>() {
         @Override
         public PrintJobInfo createFromParcel(Parcel parcel) {

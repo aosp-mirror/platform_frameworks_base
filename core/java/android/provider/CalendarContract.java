@@ -183,6 +183,22 @@ public final class CalendarContract {
     public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY);
 
     /**
+     * The content:// style URL for the top-level cross-profile calendar uris.
+     * {@link android.database.ContentObserver} for this URL in the primary profile will be
+     * notified when there is a change in the managed profile calendar provider.
+     *
+     * @see Events#ENTERPRISE_CONTENT_URI
+     * @see Calendars#ENTERPRISE_CONTENT_URI
+     * @see Instances#ENTERPRISE_CONTENT_URI
+     * @see Instances#ENTERPRISE_CONTENT_BY_DAY_URI
+     * @see Instances#ENTERPRISE_CONTENT_SEARCH_URI
+     * @see Instances#ENTERPRISE_CONTENT_SEARCH_BY_DAY_URI
+     * @hide
+     */
+    public static final Uri ENTERPRISE_CONTENT_URI = Uri.parse(
+            "content://" + AUTHORITY + "/enterprise");
+
+    /**
      * An optional insert, update or delete URI parameter that allows the caller
      * to specify that it is a sync adapter. The default value is false. If set
      * to true, the modified row is not marked as "dirty" (needs to be synced)

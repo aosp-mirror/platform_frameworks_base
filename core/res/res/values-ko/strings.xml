@@ -308,15 +308,18 @@
     <string name="permgrouplab_phone" msgid="5229115638567440675">"전화"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"전화 걸기 및 관리"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;에서 전화를 걸고 관리하도록 허용하시겠습니까?"</string>
-    <string name="permgrouplab_sensors" msgid="416037179223226722">"인체 감지 센서"</string>
+    <!-- no translation found for permgrouplab_sensors (4838614103153567532) -->
+    <skip />
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"생체 신호에 관한 센서 데이터에 액세스"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;에서 생체 신호에 관한 센서 데이터에 액세스하도록 허용하시겠습니까?"</string>
     <string name="permgrouplab_aural" msgid="965607064083134896">"음악"</string>
     <string name="permgroupdesc_aural" msgid="4870189506255958055">"음악에 액세스"</string>
     <string name="permgrouprequest_aural" msgid="6787926123071735620">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;에서 내 음악에 액세스하도록 허용하시겠습니까?"</string>
-    <string name="permgrouplab_visual" msgid="8030190588123857921">"사진 및 동영상"</string>
+    <!-- no translation found for permgrouplab_visual (6477382108771145134) -->
+    <skip />
     <string name="permgroupdesc_visual" msgid="3415827902566663546">"사진 및 동영상에 액세스"</string>
-    <string name="permgrouprequest_visual" msgid="6907523945030290376">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;에서 내 사진 및 동영상에 액세스하도록 허용하시겠습니까?"</string>
+    <!-- no translation found for permgrouprequest_visual (3043752127595243314) -->
+    <skip />
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"창 콘텐츠 가져오기"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"상호작용 중인 창의 콘텐츠를 검사합니다."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"터치하여 탐색 사용"</string>
@@ -1611,6 +1614,8 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"<xliff:g id="ID">%1$d</xliff:g>번째 오버레이"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", 보안"</string>
+    <string name="activity_starter_block_bg_activity_starts_permissive" msgid="5692097903712956720">"<xliff:g id="PACKAGENAME">%1$s</xliff:g>의 백그라운드 활동 시작은 향후 Q 빌드에서 차단됩니다. go/q-bg-block을 참조하세요."</string>
+    <string name="activity_starter_block_bg_activity_starts_enforcing" msgid="8299522481076404353">"<xliff:g id="PACKAGENAME">%1$s</xliff:g>의 백그라운드 활동 시작이 차단되었습니다. go/q-bg-block을 참조하세요."</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"패턴을 잊음"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"잘못된 패턴"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"잘못된 비밀번호"</string>
@@ -1996,6 +2001,24 @@
     <string name="dynamic_mode_notification_channel_name" msgid="2348803891571320452">"루틴 모드 정보 알림"</string>
     <string name="dynamic_mode_notification_title" msgid="508815255807182035">"평소에 충전하는 시간 전에 배터리가 소진될 수 있습니다."</string>
     <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"배터리 수명을 연장하기 위해 배터리 세이버가 활성화되었습니다."</string>
+    <string name="mime_type_folder" msgid="7111951698626315204">"폴더"</string>
+    <string name="mime_type_apk" msgid="5518003630972506900">"Android 애플리케이션"</string>
+    <string name="mime_type_generic" msgid="6833871596845900027">"파일"</string>
+    <string name="mime_type_generic_ext" msgid="8450275970061657174">"<xliff:g id="EXTENSION">%1$s</xliff:g> 파일"</string>
+    <string name="mime_type_audio" msgid="6289777657172050926">"오디오"</string>
+    <string name="mime_type_audio_ext" msgid="3270880987725816210">"<xliff:g id="EXTENSION">%1$s</xliff:g> 오디오"</string>
+    <string name="mime_type_video" msgid="4093025777317307426">"동영상"</string>
+    <string name="mime_type_video_ext" msgid="5643771615714173159">"<xliff:g id="EXTENSION">%1$s</xliff:g> 동영상"</string>
+    <string name="mime_type_image" msgid="3144284451605236371">"이미지"</string>
+    <string name="mime_type_image_ext" msgid="1514613218742736590">"<xliff:g id="EXTENSION">%1$s</xliff:g> 이미지"</string>
+    <string name="mime_type_compressed" msgid="1645486037074943257">"보관 파일"</string>
+    <string name="mime_type_compressed_ext" msgid="4232293058067801528">"<xliff:g id="EXTENSION">%1$s</xliff:g> 보관 파일"</string>
+    <string name="mime_type_document" msgid="1596838147256375966">"문서"</string>
+    <string name="mime_type_document_ext" msgid="6327266601345501281">"<xliff:g id="EXTENSION">%1$s</xliff:g> 문서"</string>
+    <string name="mime_type_spreadsheet" msgid="2639138255207123557">"스프레드시트"</string>
+    <string name="mime_type_spreadsheet_ext" msgid="5508653032786106725">"<xliff:g id="EXTENSION">%1$s</xliff:g> 스프레드시트"</string>
+    <string name="mime_type_presentation" msgid="6145604688774787357">"프레젠테이션"</string>
+    <string name="mime_type_presentation_ext" msgid="2982650207774823437">"<xliff:g id="EXTENSION">%1$s</xliff:g> 프레젠테이션"</string>
     <string name="car_loading_profile" msgid="3545132581795684027">"로드 중"</string>
     <plurals name="file_count" formatted="false" msgid="1628600959752419449">
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> 및 파일 <xliff:g id="COUNT_3">%d</xliff:g>개</item>

@@ -64,7 +64,7 @@ public final class RcsOutgoingMessageCreationParams extends RcsMessageCreationPa
         super(in);
     }
 
-    public static final Creator<RcsOutgoingMessageCreationParams> CREATOR =
+    public static final @android.annotation.NonNull Creator<RcsOutgoingMessageCreationParams> CREATOR =
             new Creator<RcsOutgoingMessageCreationParams>() {
                 @Override
                 public RcsOutgoingMessageCreationParams createFromParcel(Parcel in) {

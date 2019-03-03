@@ -229,7 +229,7 @@ public final class Tile implements Parcelable {
         mContentDescription = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);
     }
 
-    public static final Creator<Tile> CREATOR = new Creator<Tile>() {
+    public static final @android.annotation.NonNull Creator<Tile> CREATOR = new Creator<Tile>() {
         @Override
         public Tile createFromParcel(Parcel source) {
             return new Tile(source);

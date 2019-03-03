@@ -35,7 +35,7 @@ public class OperationResult implements Parcelable {
     public final KeymasterArguments outParams;
 
     @UnsupportedAppUsage
-    public static final Parcelable.Creator<OperationResult> CREATOR = new
+    public static final @android.annotation.NonNull Parcelable.Creator<OperationResult> CREATOR = new
             Parcelable.Creator<OperationResult>() {
                 @Override
                 public OperationResult createFromParcel(Parcel in) {

@@ -776,7 +776,7 @@ public final class SaveInfo implements Parcelable {
         parcel.writeInt(mFlags);
     }
 
-    public static final Parcelable.Creator<SaveInfo> CREATOR = new Parcelable.Creator<SaveInfo>() {
+    public static final @android.annotation.NonNull Parcelable.Creator<SaveInfo> CREATOR = new Parcelable.Creator<SaveInfo>() {
         @Override
         public SaveInfo createFromParcel(Parcel parcel) {
 

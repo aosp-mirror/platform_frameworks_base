@@ -944,7 +944,7 @@ public class Spinner extends AbsSpinner implements OnClickListener {
             out.writeByte((byte) (showDropdown ? 1 : 0));
         }
 
-        public static final Parcelable.Creator<SavedState> CREATOR =
+        public static final @android.annotation.NonNull Parcelable.Creator<SavedState> CREATOR =
                 new Parcelable.Creator<SavedState>() {
             public SavedState createFromParcel(Parcel in) {
                 return new SavedState(in);

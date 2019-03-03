@@ -160,6 +160,7 @@ public final class SurfaceControl implements Parcelable {
     private static native boolean nativeSetActiveConfig(IBinder displayToken, int id);
     private static native boolean nativeSetAllowedDisplayConfigs(IBinder displayToken,
                                                                  int[] allowedConfigs);
+    private static native int[] nativeGetAllowedDisplayConfigs(IBinder displayToken);
     private static native int[] nativeGetDisplayColorModes(IBinder displayToken);
     private static native SurfaceControl.DisplayPrimaries nativeGetDisplayNativePrimaries(
             IBinder displayToken);
@@ -818,7 +819,7 @@ public final class SurfaceControl implements Parcelable {
         proto.end(token);
     }
 
-    public static final Creator<SurfaceControl> CREATOR
+    public static final @android.annotation.NonNull Creator<SurfaceControl> CREATOR
             = new Creator<SurfaceControl>() {
         public SurfaceControl createFromParcel(Parcel in) {
             return new SurfaceControl(in);
@@ -1533,6 +1534,16 @@ public final class SurfaceControl implements Parcelable {
         }
 
         return nativeSetAllowedDisplayConfigs(displayToken, allowedConfigs);
+    }
+
+    /**
+     * @hide
+     */
+    public static int[] getAllowedDisplayConfigs(IBinder displayToken) {
+        if (displayToken == null) {
+            throw new IllegalArgumentException("displayToken must not be null");
+        }
+        return nativeGetAllowedDisplayConfigs(displayToken);
     }
 
     /**

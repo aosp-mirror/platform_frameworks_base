@@ -481,10 +481,26 @@ public interface WindowManager extends ViewManager {
      *
      * @param displayId The id of the display.
      * @param shouldShow Indicates that the display should show system decors.
+     * @see #shouldShowSystemDecors(int)
      * @hide
      */
     @TestApi
     default void setShouldShowSystemDecors(int displayId, boolean shouldShow) {
+    }
+
+    /**
+     * Checks if the display supports showing system decors.
+     * <p>
+     * System decors include status bar, navigation bar, launcher.
+     * </p>
+     *
+     * @param displayId The id of the display.
+     * @see #setShouldShowSystemDecors(int, boolean)
+     * @hide
+     */
+    @TestApi
+    default boolean shouldShowSystemDecors(int displayId) {
+        return false;
     }
 
     /**
@@ -2724,7 +2740,7 @@ public interface WindowManager extends ViewManager {
             out.writeLong(hideTimeoutMilliseconds);
         }
 
-        public static final Parcelable.Creator<LayoutParams> CREATOR
+        public static final @android.annotation.NonNull Parcelable.Creator<LayoutParams> CREATOR
                     = new Parcelable.Creator<LayoutParams>() {
             public LayoutParams createFromParcel(Parcel in) {
                 return new LayoutParams(in);

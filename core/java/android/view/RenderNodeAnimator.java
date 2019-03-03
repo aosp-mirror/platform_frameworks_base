@@ -336,6 +336,7 @@ public class RenderNodeAnimator extends Animator {
         return mUnscaledStartDelay;
     }
 
+    @UnsupportedAppUsage
     @Override
     public RenderNodeAnimator setDuration(long duration) {
         checkMutable();

@@ -146,7 +146,7 @@ public final class BluetoothDeviceFilter implements DeviceFilter<BluetoothDevice
         return 0;
     }
 
-    public static final Creator<BluetoothDeviceFilter> CREATOR
+    public static final @android.annotation.NonNull Creator<BluetoothDeviceFilter> CREATOR
             = new Creator<BluetoothDeviceFilter>() {
         @Override
         public BluetoothDeviceFilter createFromParcel(Parcel in) {

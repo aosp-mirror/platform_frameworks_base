@@ -280,7 +280,7 @@ public final class SystemUpdatePolicy implements Parcelable {
             dest.writeString(getMessage());
         }
 
-        public static final Parcelable.Creator<ValidationFailedException> CREATOR =
+        public static final @android.annotation.NonNull Parcelable.Creator<ValidationFailedException> CREATOR =
                 new Parcelable.Creator<ValidationFailedException>() {
             @Override
             public ValidationFailedException createFromParcel(Parcel source) {
@@ -710,7 +710,7 @@ public final class SystemUpdatePolicy implements Parcelable {
         }
     }
 
-    public static final Parcelable.Creator<SystemUpdatePolicy> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<SystemUpdatePolicy> CREATOR =
             new Parcelable.Creator<SystemUpdatePolicy>() {
 
                 @Override

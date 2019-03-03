@@ -158,6 +158,7 @@ import com.android.server.policy.WindowManagerPolicy.ScreenOnListener;
 import com.android.server.policy.WindowManagerPolicy.WindowManagerFuncs;
 import com.android.server.policy.WindowOrientationListener;
 import com.android.server.statusbar.StatusBarManagerInternal;
+import com.android.server.wallpaper.WallpaperManagerInternal;
 import com.android.server.wm.utils.InsetUtils;
 
 import java.io.PrintWriter;
@@ -535,7 +536,7 @@ public class DisplayPolicy {
             }
         } else {
             mHasStatusBar = false;
-            mHasNavigationBar = mDisplayContent.getDisplay().supportsSystemDecorations();
+            mHasNavigationBar = mDisplayContent.supportsSystemDecorations();
         }
     }
 
@@ -1944,10 +1945,6 @@ public class DisplayPolicy {
                     } else {
                         vf.set(cf);
                     }
-
-                    // EXPERIMENT TODO(b/113952590): Remove once experiment in bug is completed
-                    mExperiments.offsetWindowFramesForNavBar(mNavigationBarPosition, win);
-                    // EXPERIMENT END
                 }
             } else if (layoutInScreen || (sysUiFl
                     & (View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
@@ -2605,7 +2602,11 @@ public class DisplayPolicy {
     }
 
     void notifyDisplayReady() {
-        mHandler.post(() -> getStatusBarManagerInternal().onDisplayReady(getDisplayId()));
+        mHandler.post(() -> {
+            final int displayId = getDisplayId();
+            getStatusBarManagerInternal().onDisplayReady(displayId);
+            LocalServices.getService(WallpaperManagerInternal.class).onDisplayReady(displayId);
+        });
     }
 
     /**

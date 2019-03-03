@@ -146,7 +146,7 @@ public class MagnificationSpec implements Parcelable {
         offsetY = parcel.readFloat();
     }
 
-    public static final Creator<MagnificationSpec> CREATOR = new Creator<MagnificationSpec>() {
+    public static final @android.annotation.NonNull Creator<MagnificationSpec> CREATOR = new Creator<MagnificationSpec>() {
         @Override
         public MagnificationSpec[] newArray(int size) {
             return new MagnificationSpec[size];

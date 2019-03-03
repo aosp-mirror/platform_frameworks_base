@@ -67,7 +67,7 @@ public class GeocoderParams implements Parcelable {
         return mPackageName;
     }
 
-    public static final Parcelable.Creator<GeocoderParams> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<GeocoderParams> CREATOR =
         new Parcelable.Creator<GeocoderParams>() {
         public GeocoderParams createFromParcel(Parcel in) {
             GeocoderParams gp = new GeocoderParams();

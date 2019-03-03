@@ -193,7 +193,7 @@ public final class ParcelableKeyGenParameterSpec implements Parcelable {
                 unlockedDeviceRequired);
     }
 
-    public static final Creator<ParcelableKeyGenParameterSpec> CREATOR = new Creator<ParcelableKeyGenParameterSpec>() {
+    public static final @android.annotation.NonNull Creator<ParcelableKeyGenParameterSpec> CREATOR = new Creator<ParcelableKeyGenParameterSpec>() {
         @Override
         public ParcelableKeyGenParameterSpec createFromParcel(Parcel in) {
             return new ParcelableKeyGenParameterSpec(in);

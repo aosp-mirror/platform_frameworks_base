@@ -397,7 +397,7 @@ public final class InputDevice implements Parcelable {
 
     private static final int MAX_RANGES = 1000;
 
-    public static final Parcelable.Creator<InputDevice> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<InputDevice> CREATOR =
             new Parcelable.Creator<InputDevice>() {
         public InputDevice createFromParcel(Parcel in) {
             return new InputDevice(in);

@@ -367,7 +367,7 @@ public final class PrintDocumentInfo implements Parcelable {
         }
     }
 
-    public static final Parcelable.Creator<PrintDocumentInfo> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<PrintDocumentInfo> CREATOR =
             new Creator<PrintDocumentInfo>() {
         @Override
         public PrintDocumentInfo createFromParcel(Parcel parcel) {

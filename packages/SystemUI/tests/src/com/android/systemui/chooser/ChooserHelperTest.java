@@ -29,8 +29,9 @@ import android.app.Activity;
 import android.app.ActivityTaskManager;
 import android.content.Intent;
 import android.os.Binder;
-import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
+
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.systemui.SysuiTestCase;
 

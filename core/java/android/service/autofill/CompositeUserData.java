@@ -191,7 +191,7 @@ public final class CompositeUserData implements FieldClassificationUserData, Par
         parcel.writeParcelable(mPackageUserData, 0);
     }
 
-    public static final Parcelable.Creator<CompositeUserData> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<CompositeUserData> CREATOR =
             new Parcelable.Creator<CompositeUserData>() {
                 @Override
                 public CompositeUserData createFromParcel(Parcel parcel) {

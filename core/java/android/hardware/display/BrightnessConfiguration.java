@@ -198,7 +198,7 @@ public final class BrightnessConfiguration implements Parcelable {
                 && Objects.equals(mDescription, other.mDescription);
     }
 
-    public static final Creator<BrightnessConfiguration> CREATOR =
+    public static final @android.annotation.NonNull Creator<BrightnessConfiguration> CREATOR =
             new Creator<BrightnessConfiguration>() {
         public BrightnessConfiguration createFromParcel(Parcel in) {
             float[] lux = in.createFloatArray();
@@ -444,6 +444,7 @@ public final class BrightnessConfiguration implements Parcelable {
          *      {@link #getMaxCorrectionsByPackageName}).
          *
          */
+        @NonNull
         public Builder addCorrectionByPackageName(@NonNull String packageName,
                 @NonNull BrightnessCorrection correction) {
             Objects.requireNonNull(packageName, "packageName must not be null");
@@ -472,6 +473,7 @@ public final class BrightnessConfiguration implements Parcelable {
          *      {@link #getMaxCorrectionsByCategory}).
          *
          */
+        @NonNull
         public Builder addCorrectionByCategory(@ApplicationInfo.Category int category,
                 @NonNull BrightnessCorrection correction) {
             Objects.requireNonNull(correction, "correction must not be null");
@@ -488,6 +490,7 @@ public final class BrightnessConfiguration implements Parcelable {
          * @param description brief text describing the curve pushed. It maybe truncated
          *                    and will not be displayed in the UI
          */
+        @NonNull
         public Builder setDescription(@Nullable String description) {
             mDescription = description;
             return this;
@@ -496,6 +499,7 @@ public final class BrightnessConfiguration implements Parcelable {
         /**
          * Builds the {@link BrightnessConfiguration}.
          */
+        @NonNull
         public BrightnessConfiguration build() {
             if (mCurveLux == null || mCurveNits == null) {
                 throw new IllegalStateException("A curve must be set!");

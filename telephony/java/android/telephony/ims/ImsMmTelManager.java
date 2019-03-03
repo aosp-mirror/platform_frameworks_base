@@ -139,7 +139,7 @@ public class ImsMmTelManager {
                 if (mLocalCallback == null) return;
 
                 Binder.withCleanCallingIdentity(() ->
-                        mExecutor.execute(() -> mLocalCallback.onDeregistered(info)));
+                        mExecutor.execute(() -> mLocalCallback.onUnregistered(info)));
             }
 
             @Override
@@ -199,7 +199,7 @@ public class ImsMmTelManager {
          *
          * @param info the {@link ImsReasonInfo} associated with why registration was disconnected.
          */
-        public void onDeregistered(ImsReasonInfo info) {
+        public void onUnregistered(ImsReasonInfo info) {
         }
 
         /**
@@ -485,7 +485,7 @@ public class ImsMmTelManager {
      * @see android.telephony.CarrierConfigManager#KEY_HIDE_ENHANCED_4G_LTE_BOOL
      * @see android.telephony.CarrierConfigManager#KEY_ENHANCED_4G_LTE_ON_BY_DEFAULT_BOOL
      * @see android.telephony.CarrierConfigManager#KEY_CARRIER_VOLTE_AVAILABLE_BOOL
-     * @see #setAdvancedCallingSetting(boolean)
+     * @see #setAdvancedCallingSettingEnabled(boolean)
      * @return true if the user's setting for advanced calling is enabled, false otherwise.
      */
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
@@ -519,9 +519,9 @@ public class ImsMmTelManager {
      * @see #isAdvancedCallingSettingEnabled()
      */
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
-    public void setAdvancedCallingSetting(boolean isEnabled) {
+    public void setAdvancedCallingSettingEnabled(boolean isEnabled) {
         try {
-            getITelephony().setAdvancedCallingSetting(mSubId, isEnabled);
+            getITelephony().setAdvancedCallingSettingEnabled(mSubId, isEnabled);
             return;
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
@@ -589,7 +589,7 @@ public class ImsMmTelManager {
     /**
      * The user's setting for whether or not they have enabled the "Video Calling" setting.
      * @return true if the user’s “Video Calling” setting is currently enabled.
-     * @see #setVtSetting(boolean)
+     * @see #setVtSettingEnabled(boolean)
      */
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public boolean isVtSettingEnabled() {
@@ -605,9 +605,9 @@ public class ImsMmTelManager {
      * @see #isVtSettingEnabled()
      */
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
-    public void setVtSetting(boolean isEnabled) {
+    public void setVtSettingEnabled(boolean isEnabled) {
         try {
-            getITelephony().setVtSetting(mSubId, isEnabled);
+            getITelephony().setVtSettingEnabled(mSubId, isEnabled);
             return;
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
@@ -616,7 +616,7 @@ public class ImsMmTelManager {
 
     /**
      * @return true if the user's setting for Voice over WiFi is enabled and false if it is not.
-     * @see #setVoWiFiSetting(boolean)
+     * @see #setVoWiFiSettingEnabled(boolean)
      */
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public boolean isVoWiFiSettingEnabled() {
@@ -633,9 +633,9 @@ public class ImsMmTelManager {
      * @see #isVoWiFiSettingEnabled()
      */
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
-    public void setVoWiFiSetting(boolean isEnabled) {
+    public void setVoWiFiSettingEnabled(boolean isEnabled) {
         try {
-            getITelephony().setVoWiFiSetting(mSubId, isEnabled);
+            getITelephony().setVoWiFiSettingEnabled(mSubId, isEnabled);
             return;
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
@@ -645,7 +645,7 @@ public class ImsMmTelManager {
     /**
      * @return true if the user's setting for Voice over WiFi while roaming is enabled, false
      * if disabled.
-     * @see #setVoWiFiRoamingSetting(boolean)
+     * @see #setVoWiFiRoamingSettingEnabled(boolean)
      */
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public boolean isVoWiFiRoamingSettingEnabled() {
@@ -663,9 +663,9 @@ public class ImsMmTelManager {
      * @see #isVoWiFiRoamingSettingEnabled()
      */
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
-    public void setVoWiFiRoamingSetting(boolean isEnabled) {
+    public void setVoWiFiRoamingSettingEnabled(boolean isEnabled) {
         try {
-            getITelephony().setVoWiFiRoamingSetting(mSubId, isEnabled);
+            getITelephony().setVoWiFiRoamingSettingEnabled(mSubId, isEnabled);
             return;
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
@@ -682,7 +682,7 @@ public class ImsMmTelManager {
      * - {@link #WIFI_MODE_WIFI_ONLY}
      * - {@link #WIFI_MODE_CELLULAR_PREFERRED}
      * - {@link #WIFI_MODE_WIFI_PREFERRED}
-     * @see #setVoWiFiSetting(boolean)
+     * @see #setVoWiFiSettingEnabled(boolean)
      */
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
     public void setVoWiFiNonPersistent(boolean isCapable, int mode) {
@@ -700,7 +700,7 @@ public class ImsMmTelManager {
      * - {@link #WIFI_MODE_WIFI_ONLY}
      * - {@link #WIFI_MODE_CELLULAR_PREFERRED}
      * - {@link #WIFI_MODE_WIFI_PREFERRED}
-     * @see #setVoWiFiSetting(boolean)
+     * @see #setVoWiFiSettingEnabled(boolean)
      */
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public @WiFiCallingMode int getVoWiFiModeSetting() {
@@ -739,7 +739,7 @@ public class ImsMmTelManager {
      *     - {@link #WIFI_MODE_WIFI_ONLY}
      *     - {@link #WIFI_MODE_CELLULAR_PREFERRED}
      *     - {@link #WIFI_MODE_WIFI_PREFERRED}
-     * @see #setVoWiFiRoamingSetting(boolean)
+     * @see #setVoWiFiRoamingSettingEnabled(boolean)
      */
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public @WiFiCallingMode int getVoWiFiRoamingModeSetting() {

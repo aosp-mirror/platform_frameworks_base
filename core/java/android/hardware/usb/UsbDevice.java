@@ -300,7 +300,7 @@ public class UsbDevice implements Parcelable {
         return builder.toString();
     }
 
-    public static final Parcelable.Creator<UsbDevice> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<UsbDevice> CREATOR =
         new Parcelable.Creator<UsbDevice>() {
         public UsbDevice createFromParcel(Parcel in) {
             String name = in.readString();

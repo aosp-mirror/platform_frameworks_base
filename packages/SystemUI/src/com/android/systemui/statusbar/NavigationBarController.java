@@ -110,9 +110,7 @@ public class NavigationBarController implements DisplayListener, Callbacks {
      * @param display the display to add navigation bar on.
      */
     private void createNavigationBar(Display display) {
-        if (display == null
-                || (display.getDisplayId() != DEFAULT_DISPLAY
-                        && !display.supportsSystemDecorations())) {
+        if (display == null) {
             return;
         }
 

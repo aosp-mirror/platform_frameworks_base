@@ -55,6 +55,15 @@ public final class DeviceConfig {
     public static final Uri CONTENT_URI = Uri.parse("content://" + Settings.AUTHORITY + "/config");
 
     /**
+     * Namespace for activity manager related features. These features will be applied
+     * immediately upon change.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String NAMESPACE_ACTIVITY_MANAGER = "activity_manager";
+
+    /**
      * Namespace for all Game Driver features.
      *
      * @hide
@@ -136,32 +145,32 @@ public final class DeviceConfig {
          */
 
         /**
-         * If {@code true}, enables the blastula pool feature.
+         * If {@code true}, enables the unspecialized app process (USAP) pool feature.
          *
          * @hide for internal use only
          */
-        String BLASTULA_POOL_ENABLED = "blastula_pool_enabled";
+        String USAP_POOL_ENABLED = "usap_pool_enabled";
 
         /**
-         * The maximum number of processes to keep in the blastula pool.
+         * The maximum number of processes to keep in the USAP pool.
          *
          * @hide for internal use only
          */
-        String BLASTULA_POOL_SIZE_MAX = "blastula_pool_size_max";
+        String USAP_POOL_SIZE_MAX = "usap_pool_size_max";
 
         /**
-         * The minimum number of processes to keep in the blastula pool.
+         * The minimum number of processes to keep in the USAP pool.
          *
          * @hide for internal use only
          */
-        String BLASTULA_POOL_SIZE_MIN = "blastula_pool_size_min";
+        String USAP_POOL_SIZE_MIN = "usap_pool_size_min";
 
         /**
          * The threshold used to determine if the pool should be refilled.
          *
          * @hide for internal use only
          */
-        String BLASTULA_POOL_REFILL_THRESHOLD = "blastula_refill_threshold";
+        String USAP_POOL_REFILL_THRESHOLD = "usap_refill_threshold";
     }
 
     /**
@@ -281,35 +290,6 @@ public final class DeviceConfig {
     }
 
     /**
-     * Namespace for activity manager related features. These features will be applied
-     * immediately upon change.
-     *
-     * @hide
-     */
-    @SystemApi
-    public interface ActivityManager {
-        String NAMESPACE = "activity_manager";
-
-        /**
-         * App compaction flags. See {@link com.android.server.am.AppCompactor}.
-         */
-        String KEY_USE_COMPACTION = "use_compaction";
-        String KEY_COMPACT_ACTION_1 = "compact_action_1";
-        String KEY_COMPACT_ACTION_2 = "compact_action_2";
-        String KEY_COMPACT_THROTTLE_1 = "compact_throttle_1";
-        String KEY_COMPACT_THROTTLE_2 = "compact_throttle_2";
-        String KEY_COMPACT_THROTTLE_3 = "compact_throttle_3";
-        String KEY_COMPACT_THROTTLE_4 = "compact_throttle_4";
-        String KEY_COMPACT_STATSD_SAMPLE_RATE = "compact_statsd_sample_rate";
-
-        /**
-         * Maximum number of cached processes. See
-         * {@link com.android.server.am.ActivityManagerConstants}.
-         */
-        String KEY_MAX_CACHED_PROCESSES = "max_cached_processes";
-    }
-
-    /**
      * Namespace for {@link AttentionManagerService} related features.
      *
      * @hide
@@ -409,6 +389,110 @@ public final class DeviceConfig {
         ContentResolver contentResolver = ActivityThread.currentApplication().getContentResolver();
         String compositeName = createCompositeName(namespace, name);
         return Settings.Config.getString(contentResolver, compositeName);
+    }
+
+    /**
+     * Look up the String value of a property for a particular namespace.
+     *
+     * @param namespace    The namespace containing the property to look up.
+     * @param name         The name of the property to look up.
+     * @param defaultValue The value to return if the property does not exist or has no non-null
+     *                     value.
+     * @return the corresponding value, or defaultValue if none exists.
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    @RequiresPermission(READ_DEVICE_CONFIG)
+    public static String getString(String namespace, String name, String defaultValue) {
+        String value = getProperty(namespace, name);
+        return value != null ? value : defaultValue;
+    }
+
+    /**
+     * Look up the boolean value of a property for a particular namespace.
+     *
+     * @param namespace The namespace containing the property to look up.
+     * @param name      The name of the property to look up.
+     * @param defaultValue The value to return if the property does not exist or has no non-null
+     *                     value.
+     * @return the corresponding value, or defaultValue if none exists.
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    @RequiresPermission(READ_DEVICE_CONFIG)
+    public static boolean getBoolean(String namespace, String name, boolean defaultValue) {
+        String value = getProperty(namespace, name);
+        return value != null ? Boolean.parseBoolean(value) : defaultValue;
+    }
+
+    /**
+     * Look up the int value of a property for a particular namespace.
+     *
+     * @param namespace The namespace containing the property to look up.
+     * @param name      The name of the property to look up.
+     * @param defaultValue The value to return if the property does not exist, has no non-null
+     *                     value, or fails to parse into an int.
+     * @return the corresponding value, or defaultValue if either none exists or it does not parse.
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    @RequiresPermission(READ_DEVICE_CONFIG)
+    public static int getInt(String namespace, String name, int defaultValue) {
+        String value = getProperty(namespace, name);
+        try {
+            return Integer.parseInt(value);
+        } catch (NumberFormatException e) {
+            return defaultValue;
+        }
+    }
+
+    /**
+     * Look up the long value of a property for a particular namespace.
+     *
+     * @param namespace The namespace containing the property to look up.
+     * @param name      The name of the property to look up.
+     * @param defaultValue The value to return if the property does not exist, has no non-null
+     *                     value, or fails to parse into a long.
+     * @return the corresponding value, or defaultValue if either none exists or it does not parse.
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    @RequiresPermission(READ_DEVICE_CONFIG)
+    public static long getLong(String namespace, String name, long defaultValue) {
+        String value = getProperty(namespace, name);
+        try {
+            return Long.parseLong(value);
+        } catch (NumberFormatException e) {
+            return defaultValue;
+        }
+    }
+
+    /**
+     * Look up the float value of a property for a particular namespace.
+     *
+     * @param namespace The namespace containing the property to look up.
+     * @param name      The name of the property to look up.
+     * @param defaultValue The value to return if the property does not exist, has no non-null
+     *                     value, or fails to parse into a float.
+     * @return the corresponding value, or defaultValue if either none exists or it does not parse.
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    @RequiresPermission(READ_DEVICE_CONFIG)
+    public static float getFloat(String namespace, String name, float defaultValue) {
+        String value = getProperty(namespace, name);
+        try {
+            return Float.parseFloat(value);
+        } catch (NumberFormatException e) {
+            return defaultValue;
+        } catch (NullPointerException e) {
+            return defaultValue;
+        }
     }
 
     /**

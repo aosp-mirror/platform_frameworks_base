@@ -38,7 +38,7 @@
     <string name="battery_saver_start_action" msgid="8187820911065797519">"బ్యాటరీ సేవర్‌ను ఆన్ చేయండి"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"సెట్టింగ్‌లు"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
-    <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"స్క్రీన్‌ను స్వయంచాలకంగా తిప్పండి"</string>
+    <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"స్క్రీన్ ఆటో-రొటేట్‌"</string>
     <string name="status_bar_settings_mute_label" msgid="554682549917429396">"మ్యూట్"</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"స్వయంచాలకం"</string>
     <string name="status_bar_settings_notifications" msgid="397146176280905137">"నోటిఫికేషన్‌లు"</string>
@@ -302,7 +302,7 @@
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="4551281899312150640">"ఆన్ చేస్తోంది…"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"ప్రకాశం"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"స్వయంచాలకంగా తిప్పడం"</string>
-    <string name="accessibility_quick_settings_rotation" msgid="4231661040698488779">"స్క్రీన్‌ను స్వయంచాలకంగా తిప్పు"</string>
+    <string name="accessibility_quick_settings_rotation" msgid="4231661040698488779">"స్క్రీన్ ఆటో-రొటేట్‌"</string>
     <string name="accessibility_quick_settings_rotation_value" msgid="8187398200140760213">"<xliff:g id="ID_1">%s</xliff:g> మోడ్"</string>
     <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"తిప్పడం లాక్ చేయబడింది"</string>
     <string name="quick_settings_rotation_locked_portrait_label" msgid="5102691921442135053">"పోర్ట్రెయిట్"</string>
@@ -325,7 +325,8 @@
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"Wi-Fi ఆన్‌లో ఉంది"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Wi-Fi నెట్‌వర్క్‌లు ఏవీ అందుబాటులో లేవు"</string>
     <string name="quick_settings_wifi_secondary_label_transient" msgid="7748206246119760554">"ఆన్ చేస్తోంది…"</string>
-    <string name="quick_settings_cast_title" msgid="7709016546426454729">"ప్రసారం"</string>
+    <!-- no translation found for quick_settings_cast_title (6954684227605751758) -->
+    <skip />
     <string name="quick_settings_casting" msgid="6601710681033353316">"ప్రసారం చేస్తోంది"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"పేరులేని పరికరం"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"ప్రసారం చేయడానికి సిద్ధంగా ఉంది"</string>
@@ -437,7 +438,8 @@
     <string name="battery_saver_notification_title" msgid="8614079794522291840">"బ్యాటరీ సేవర్ ఆన్‌లో ఉంది"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"పనితీరుని మరియు నేపథ్య డేటాను తగ్గిస్తుంది"</string>
     <string name="battery_saver_notification_action_text" msgid="132118784269455533">"బ్యాటరీ సేవర్‌ను ఆఫ్ చేయండి"</string>
-    <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> మీ స్క్రీన్‌పై కనిపించే ప్రతిదాన్ని క్యాప్చర్ చేయడం ప్రారంభిస్తుంది."</string>
+    <string name="media_projection_dialog_text" msgid="1443042478990422751">"నోటిఫికేషన్‌లు, పాస్‌వర్డ్‌లు, ఫోటోలు, సందేశాలు మరియు చెల్లింపు సమాచారంతో సహా <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> మీ స్క్రీన్‌లోని ప్రతి సమాచారాన్నీ క్యాప్చర్ చేయడం ప్రారంభిస్తుంది."</string>
+    <string name="media_projection_dialog_title" msgid="7574971526813630219">"మీ స్క్రీన్‌ను రికార్డ్ లేదా క్యాస్ట్ చేయడానికి <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>ను అనుమతించాలా?"</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"మళ్లీ చూపవద్దు"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"అన్నీ క్లియర్ చేయండి"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"నిర్వహించండి"</string>
@@ -814,6 +816,9 @@
     <string name="high_temp_title" msgid="4589508026407318374">"ఫోన్ వేడెక్కుతోంది"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"ఫోన్‌ను చల్లబరిచే క్రమంలో కొన్ని లక్షణాలు పరిమితం చేయబడ్డాయి"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"మీ ఫోన్ స్వయంచాలకంగా చల్లబడటానికి ప్రయత్నిస్తుంది. మీరు ఇప్పటికీ మీ ఫోన్‌ను ఉపయోగించవచ్చు, కానీ దాని పనితీరు నెమ్మదిగా ఉండవచ్చు.\n\nమీ ఫోన్ చల్లబడిన తర్వాత, అది సాధారణ రీతిలో పని చేస్తుంది."</string>
+    <string name="high_temp_alarm_title" msgid="442812040762745210">"ప్లగ్ నుండి ఛార్జర్‌ తీసివేయండి"</string>
+    <string name="high_temp_alarm_notify_message" msgid="1802871059489414932">"ఈ పరికరాన్ని ఛార్జ్ చేయడంలో సమస్య ఉంది. పవర్ అడాప్టర్‌ను ప్లగ్ నుండి తీసివేసి, కేబుల్ ఏమైనా వేడిగా అయితే తగిన జాగ్రత్తలు తీసుకోండి."</string>
+    <string name="high_temp_alarm_help_care_steps" msgid="3631075329318070726">"తీసుకోవాల్సిన జాగ్రత్తలు ఏమిటో చూడండి"</string>
     <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"ఎడమవైపు షార్ట్‌కట్"</string>
     <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"కుడివైపు షార్ట్‌కట్"</string>
     <string name="lockscreen_unlock_left" msgid="2043092136246951985">"ఎడమవైపు షార్ట్‌కట్ కూడా అన్‌లాక్ చేస్తుంది"</string>

@@ -18,5 +18,6 @@ package android.service.euicc;
 
 /** @hide */
 oneway interface IDeleteSubscriptionCallback {
+    @UnsupportedAppUsage
     void onComplete(int result);
 }

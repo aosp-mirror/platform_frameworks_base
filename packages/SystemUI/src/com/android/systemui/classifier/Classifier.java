@@ -32,6 +32,7 @@ public abstract class Classifier {
     public static final int RIGHT_AFFORDANCE = 6;
     public static final int GENERIC = 7;
     public static final int BOUNCER_UNLOCK = 8;
+    public static final int PULSE_EXPAND = 9;
 
     /**
      * Contains all the information about touch events from which the classifier can query

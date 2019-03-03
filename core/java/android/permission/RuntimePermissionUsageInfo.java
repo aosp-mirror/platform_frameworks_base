@@ -83,7 +83,7 @@ public final class RuntimePermissionUsageInfo implements Parcelable {
         parcel.writeInt(mNumUsers);
     }
 
-    public static final Creator<RuntimePermissionUsageInfo> CREATOR =
+    public static final @android.annotation.NonNull Creator<RuntimePermissionUsageInfo> CREATOR =
             new Creator<RuntimePermissionUsageInfo>() {
         public RuntimePermissionUsageInfo createFromParcel(Parcel source) {
             return new RuntimePermissionUsageInfo(source);

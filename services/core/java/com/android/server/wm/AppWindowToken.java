@@ -582,6 +582,8 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                     }
                 }
             }
+            // Changes in opening apps and closing apps may cause orientation change.
+            reportDescendantOrientationChangeIfNeeded();
             return;
         }
 
@@ -729,9 +731,29 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                 }
                 SurfaceControl.closeTransaction();
             }
+
+            // Visibility changes may cause orientation request change.
+            reportDescendantOrientationChangeIfNeeded();
         }
 
         return delayed;
+    }
+
+    private void reportDescendantOrientationChangeIfNeeded() {
+        // Orientation request is exposed only when we're visible. Therefore visibility change
+        // will change requested orientation. Notify upward the hierarchy ladder to adjust
+        // configuration. This is important to cases where activities with incompatible
+        // orientations launch, or user goes back from an activity of bi-orientation to an
+        // activity with specified orientation.
+        if (mActivityRecord.getRequestedConfigurationOrientation() == getConfiguration().orientation
+                || getOrientationIgnoreVisibility() == SCREEN_ORIENTATION_UNSET) {
+            return;
+        }
+
+        final IBinder freezeToken =
+                mActivityRecord.mayFreezeScreenLocked(mActivityRecord.app)
+                        ? mActivityRecord.appToken : null;
+        onDescendantOrientationChanged(freezeToken, mActivityRecord);
     }
 
     /**
@@ -2526,7 +2548,8 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                             new WindowAnimationSpec(a, mTmpPoint, mTmpRect,
                                     getDisplayContent().mAppTransition.canSkipFirstFrame(),
                                     appStackClipMode,
-                                    true /* isAppAnimation */),
+                                    true /* isAppAnimation */,
+                                    mWmService.mWindowCornerRadius),
                             mWmService.mSurfaceAnimationRunner);
                     if (a.getZAdjustment() == Animation.ZORDER_TOP) {
                         mNeedsZBoost = true;

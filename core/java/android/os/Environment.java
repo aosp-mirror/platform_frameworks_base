@@ -16,6 +16,7 @@
 
 package android.os;
 
+import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.app.admin.DevicePolicyManager;
@@ -155,13 +156,13 @@ public class Environment {
      * Return root of the "system" partition holding the core Android OS.
      * Always present and mounted read-only.
      */
-    public static File getRootDirectory() {
+    public static @NonNull File getRootDirectory() {
         return DIR_ANDROID_ROOT;
     }
 
     /** {@hide} */
     @TestApi
-    public static File getStorageDirectory() {
+    public static @NonNull File getStorageDirectory() {
         return DIR_ANDROID_STORAGE;
     }
 
@@ -172,7 +173,7 @@ public class Environment {
      * @hide
      */
     @SystemApi
-    public static File getOemDirectory() {
+    public static @NonNull File getOemDirectory() {
         return DIR_OEM_ROOT;
     }
 
@@ -183,7 +184,7 @@ public class Environment {
      * @hide
      */
     @SystemApi
-    public static File getOdmDirectory() {
+    public static @NonNull File getOdmDirectory() {
         return DIR_ODM_ROOT;
     }
 
@@ -193,7 +194,7 @@ public class Environment {
      * @hide
      */
     @SystemApi
-    public static File getVendorDirectory() {
+    public static @NonNull File getVendorDirectory() {
         return DIR_VENDOR_ROOT;
     }
 
@@ -205,7 +206,7 @@ public class Environment {
      */
     @SystemApi
     @TestApi
-    public static File getProductDirectory() {
+    public static @NonNull File getProductDirectory() {
         return DIR_PRODUCT_ROOT;
     }
 
@@ -216,7 +217,7 @@ public class Environment {
      * @hide
      */
     @SystemApi
-    public static File getProductServicesDirectory() {
+    public static @NonNull File getProductServicesDirectory() {
         return DIR_PRODUCT_SERVICES_ROOT;
     }
 

@@ -15,6 +15,8 @@
  */
 package android.telephony;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -32,7 +34,7 @@ public final class UiccCardInfo implements Parcelable {
     private final int mSlotIndex;
     private final boolean mIsRemovable;
 
-    public static final Creator<UiccCardInfo> CREATOR = new Creator<UiccCardInfo>() {
+    public static final @android.annotation.NonNull Creator<UiccCardInfo> CREATOR = new Creator<UiccCardInfo>() {
         @Override
         public UiccCardInfo createFromParcel(Parcel in) {
             return new UiccCardInfo(in);
@@ -104,6 +106,7 @@ public final class UiccCardInfo implements Parcelable {
      * Note that this field may be omitted if the caller does not have the correct permissions
      * (see {@link TelephonyManager#getUiccCardsInfo()}).
      */
+    @Nullable
     public String getEid() {
         if (!mIsEuicc) {
             return null;
@@ -117,6 +120,7 @@ public final class UiccCardInfo implements Parcelable {
      * Note that this field may be omitted if the caller does not have the correct permissions
      * (see {@link TelephonyManager#getUiccCardsInfo()}).
      */
+    @Nullable
     public String getIccId() {
         return mIccId;
     }
@@ -129,11 +133,12 @@ public final class UiccCardInfo implements Parcelable {
     }
 
     /**
-     * Returns a copy of the UiccCardinfo with the clears the EID and ICCID set to null. These
-     * values are generally private and require carrier privileges to view.
+     * Returns a copy of the UiccCardinfo with the EID and ICCID set to null. These values are
+     * generally private and require carrier privileges to view.
      *
      * @hide
      */
+    @NonNull
     public UiccCardInfo getUnprivileged() {
         return new UiccCardInfo(mIsEuicc, mCardId, null, null, mSlotIndex, mIsRemovable);
     }

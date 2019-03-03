@@ -16,7 +16,8 @@
 package com.android.systemui.volume;
 
 import android.media.MediaMetadata;
-import android.support.test.filters.SmallTest;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 

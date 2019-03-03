@@ -120,7 +120,7 @@ public final class BrightnessCorrection implements Parcelable {
         return mImplementation.hashCode();
     }
 
-    public static final Creator<BrightnessCorrection> CREATOR =
+    public static final @android.annotation.NonNull Creator<BrightnessCorrection> CREATOR =
             new Creator<BrightnessCorrection>() {
                 public BrightnessCorrection createFromParcel(Parcel in) {
                     final int type = in.readInt();

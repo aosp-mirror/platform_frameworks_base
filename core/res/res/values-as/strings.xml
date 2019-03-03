@@ -308,15 +308,18 @@
     <string name="permgrouplab_phone" msgid="5229115638567440675">"ফ’ন"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"ফ\'ন কল কৰিব আৰু পৰিচলনা কৰিব পাৰে"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ক ফ\'ন কল কৰিবলৈ আৰু পৰিচালনা কৰিবলৈ অনুমতি দিবনে?"</string>
-    <string name="permgrouplab_sensors" msgid="416037179223226722">"শৰীৰৰ ছেন্সৰসমূহ"</string>
+    <!-- no translation found for permgrouplab_sensors (4838614103153567532) -->
+    <skip />
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"আপোনাৰ দেহৰ গুৰুত্বপূৰ্ণ অংগসমূহৰ অৱস্থাৰ বিষয়ে ছেন্সৰৰ ডেটা লাভ কৰিব পাৰে"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ক আপোনাৰ দেহৰ গুৰুত্বপূৰ্ণ অংগসমূহৰ অৱস্থাৰ বিষয়ে ছেন্সৰৰ ডেটা লাভ কৰিবলৈ অনুমতি দিবনে?"</string>
     <string name="permgrouplab_aural" msgid="965607064083134896">"সংগীত"</string>
     <string name="permgroupdesc_aural" msgid="4870189506255958055">"আপোনাৰ সংগীত এক্সেছ কৰিবলৈ"</string>
     <string name="permgrouprequest_aural" msgid="6787926123071735620">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ক আপোনাৰ সংগীত এক্সেছ কৰিবলৈ দিবনে?"</string>
-    <string name="permgrouplab_visual" msgid="8030190588123857921">"ফট’ আৰু ভিডিঅ’"</string>
+    <!-- no translation found for permgrouplab_visual (6477382108771145134) -->
+    <skip />
     <string name="permgroupdesc_visual" msgid="3415827902566663546">"আপোনাৰ ফট’ আৰু ভিডিঅ’সমূহ এক্সেছ কৰিবলৈ"</string>
-    <string name="permgrouprequest_visual" msgid="6907523945030290376">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ক আপোনাৰ ফট’ আৰু ভিডিঅ’সমূহ এক্সেছ কৰিবলৈ দিবনে?"</string>
+    <!-- no translation found for permgrouprequest_visual (3043752127595243314) -->
+    <skip />
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"ৱিণ্ড’ সমল বিচাৰি উলিওৱাৰ"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"আপুনি চাই থকা ৱিণ্ড’খনৰ সমল পৰীক্ষা কৰাৰ।"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"স্পৰ্শৰ দ্বাৰা অন্বেষণ কৰাৰ সুবিধা অন কৰাৰ"</string>
@@ -536,8 +539,7 @@
     <string name="biometric_error_user_canceled" msgid="2260175018114348727">"বিশ্বাসযোগ্যতাৰ প্ৰমাণীকৰণ বাতিল কৰা হৈছে"</string>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"চিনাক্ত কৰিব পৰা নাই"</string>
     <string name="biometric_error_canceled" msgid="349665227864885880">"বিশ্বাসযোগ্যতাৰ প্ৰমাণীকৰণ বাতিল কৰা হৈছে"</string>
-    <!-- no translation found for biometric_error_device_not_secured (6583143098363528349) -->
-    <skip />
+    <string name="biometric_error_device_not_secured" msgid="6583143098363528349">"কোনো পিন, আৰ্হি বা পাছৱৰ্ড ছেট কৰা নাই"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"ফিংগাৰপ্ৰিণ্ট আংশিকভাৱে চিনাক্ত কৰা হৈছে। অনুগ্ৰহ কৰি আকৌ চেষ্টা কৰক৷"</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"ফিগাৰপ্ৰিণ্টৰ প্ৰক্ৰিয়া সম্পাদন কৰিবপৰা নগ\'ল। অনুগ্ৰহ কৰি আকৌ চেষ্টা কৰক৷"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"ফিংগাৰপ্ৰিণ্ট ছেন্সৰটো লেতেৰা হৈ আছে। অনুগ্ৰহ কৰি পৰিষ্কাৰ কৰি আকৌ চেষ্টা কৰক।"</string>
@@ -557,8 +559,7 @@
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"অত্যধিক প্ৰয়াস। ফিংগাৰপ্ৰিণ্ট ছেন্সৰ অক্ষম কৰা হ’ল।"</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"আকৌ চেষ্টা কৰক।"</string>
     <string name="fingerprint_error_no_fingerprints" msgid="7654382120628334248">"কোনো ফিংগাৰপ্ৰিণ্ট যোগ কৰা নহ\'ল।"</string>
-    <!-- no translation found for fingerprint_error_hw_not_present (409523969613176352) -->
-    <skip />
+    <string name="fingerprint_error_hw_not_present" msgid="409523969613176352">"এই ডিভাইচটোত ফিংগাৰপ্ৰিণ্ট ছেন্সৰ নাই।"</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"<xliff:g id="FINGERID">%d</xliff:g> আঙুলি"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -578,22 +579,14 @@
     <string name="face_acquired_too_left" msgid="2712489669456176505">"অনুগ্ৰহ কৰি ছেন্সৰটো বাওঁফাললৈ নিয়ক।"</string>
     <string name="face_acquired_poor_gaze" msgid="8344973502980415859">"অনুগ্ৰহ কৰি ছেন্সৰটোলৈ চাওক।"</string>
     <string name="face_acquired_not_detected" msgid="5707782294589511391">"কোনো মুখমণ্ডল চিনাক্ত কৰিব পৰা নগ’ল।"</string>
-    <!-- no translation found for face_acquired_too_much_motion (470381210701463822) -->
-    <skip />
-    <!-- no translation found for face_acquired_recalibrate (8077949502893707539) -->
-    <skip />
-    <!-- no translation found for face_acquired_too_different (5553210341111255124) -->
-    <skip />
-    <!-- no translation found for face_acquired_too_similar (1508776858407646460) -->
-    <skip />
-    <!-- no translation found for face_acquired_pan_too_extreme (8203001424525231680) -->
-    <skip />
-    <!-- no translation found for face_acquired_tilt_too_extreme (7641326344460439970) -->
-    <skip />
-    <!-- no translation found for face_acquired_roll_too_extreme (1444829237745898619) -->
-    <skip />
-    <!-- no translation found for face_acquired_obscured (3055077697850272097) -->
-    <skip />
+    <string name="face_acquired_too_much_motion" msgid="470381210701463822">"বেছি লৰচৰ কৰি আছে।"</string>
+    <string name="face_acquired_recalibrate" msgid="8077949502893707539">"আপোনাৰ মুখমণ্ডল পুনৰ পঞ্জীয়ন কৰক।"</string>
+    <string name="face_acquired_too_different" msgid="5553210341111255124">"অন্য মুখমণ্ডল চিনাক্ত কৰা হৈছে।"</string>
+    <string name="face_acquired_too_similar" msgid="1508776858407646460">"একে ধৰণৰ হৈছে, অনুগ্ৰহ কৰি আপোনাৰ প’জটো সলনি কৰক।"</string>
+    <string name="face_acquired_pan_too_extreme" msgid="8203001424525231680">"অনুগ্ৰহ কৰি পোনে পোনে কেমেৰালৈ চাওক।"</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="7641326344460439970">"অনুগ্ৰহ কৰি পোনে পোনে কেমেৰালৈ চাওক।"</string>
+    <string name="face_acquired_roll_too_extreme" msgid="1444829237745898619">"অনুগ্ৰহ কৰি আপোনাৰ মূৰটো উলম্বভাৱে চিধা কৰক।"</string>
+    <string name="face_acquired_obscured" msgid="3055077697850272097">"আপোনাৰ মুখমণ্ডলৰপৰা আৱৰণ আঁতৰাওক।"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="6255891785768984615">"মুখমণ্ডলৰ হাৰ্ডৱেৰ উপলব্ধ নহয়।"</string>
@@ -605,8 +598,7 @@
     <string name="face_error_lockout_permanent" msgid="8198354656746088890">"অত্যধিক প্ৰয়াস। মুখমণ্ডলৰ জৰিয়তে সত্যাপন অক্ষম কৰা হ’ল।"</string>
     <string name="face_error_unable_to_process" msgid="238761109287767270">"আকৌ চেষ্টা কৰক।"</string>
     <string name="face_error_not_enrolled" msgid="9166792142679691323">"কোনো মুখমণ্ডল যোগ কৰা নহ’ল।"</string>
-    <!-- no translation found for face_error_hw_not_present (916085883581450331) -->
-    <skip />
+    <string name="face_error_hw_not_present" msgid="916085883581450331">"এই ডিভাইচটোত মুখমণ্ডল সত্যাপন ছেন্সৰ নাই।"</string>
     <string name="face_name_template" msgid="7004562145809595384">"মুখমণ্ডল <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1408,8 +1400,7 @@
     <string name="ext_media_init_action" msgid="7952885510091978278">"ছেট আপ কৰক"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"বাহিৰ কৰক"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"অন্বেষণ কৰক"</string>
-    <!-- no translation found for ext_media_seamless_action (6575980560886881233) -->
-    <skip />
+    <string name="ext_media_seamless_action" msgid="6575980560886881233">"আউটপুট সলনি কৰক"</string>
     <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> উপলব্ধ নহয়"</string>
     <string name="ext_media_missing_message" msgid="4012389235250987930">"ডিভাইচ আকৌ ভৰাওক"</string>
     <string name="ext_media_move_specific_title" msgid="1471100343872375842">"<xliff:g id="NAME">%s</xliff:g>ক স্থানান্তৰ কৰি থকা হৈছে"</string>
@@ -1623,6 +1614,8 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"অ\'ভাৰলে\' #<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", সুৰক্ষিত"</string>
+    <string name="activity_starter_block_bg_activity_starts_permissive" msgid="5692097903712956720">"<xliff:g id="PACKAGENAME">%1$s</xliff:g>ৰ পৰা নেপথ্যত আৰম্ভ হোৱা এই কাৰ্যকলাপটো ভবিষ্যতে কিউ বিল্ডত অৱৰোধ কৰা হ’ব। go/q-bg-block চাওক"</string>
+    <string name="activity_starter_block_bg_activity_starts_enforcing" msgid="8299522481076404353">"<xliff:g id="PACKAGENAME">%1$s</xliff:g>ৰ পৰা নেপথ্যত আৰম্ভ হোৱা কাৰ্যকলাপ অৱৰোধ কৰা হৈছে। go/q-bg-block চাওক"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"আৰ্হি পাহৰিলেনে"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"ভুল আৰ্হি"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"ভুল পাছৱৰ্ড"</string>
@@ -2008,6 +2001,24 @@
     <string name="dynamic_mode_notification_channel_name" msgid="2348803891571320452">"ৰুটিন ম’ডৰ তথ্য জাননী"</string>
     <string name="dynamic_mode_notification_title" msgid="508815255807182035">"চ্চাৰ্জ কৰাৰ সচৰাচৰ সময়ৰ আগতেই বেটাৰি শেষ হ’ব পাৰে"</string>
     <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"বেটাৰিৰ খৰচ কমাবলৈ বেটাৰি সঞ্চয়কাৰী অন কৰা হৈছে"</string>
+    <string name="mime_type_folder" msgid="7111951698626315204">"ফ’ল্ডাৰ"</string>
+    <string name="mime_type_apk" msgid="5518003630972506900">"Android এপ্লিকেশ্বন"</string>
+    <string name="mime_type_generic" msgid="6833871596845900027">"ফাইল"</string>
+    <string name="mime_type_generic_ext" msgid="8450275970061657174">"<xliff:g id="EXTENSION">%1$s</xliff:g> ফাইল"</string>
+    <string name="mime_type_audio" msgid="6289777657172050926">"অডিঅ’"</string>
+    <string name="mime_type_audio_ext" msgid="3270880987725816210">"<xliff:g id="EXTENSION">%1$s</xliff:g> অডিঅ’"</string>
+    <string name="mime_type_video" msgid="4093025777317307426">"ভিডিঅ’"</string>
+    <string name="mime_type_video_ext" msgid="5643771615714173159">"<xliff:g id="EXTENSION">%1$s</xliff:g> ভিডিঅ’"</string>
+    <string name="mime_type_image" msgid="3144284451605236371">"ছবি"</string>
+    <string name="mime_type_image_ext" msgid="1514613218742736590">"<xliff:g id="EXTENSION">%1$s</xliff:g> ছবি"</string>
+    <string name="mime_type_compressed" msgid="1645486037074943257">"আৰ্কাইভ"</string>
+    <string name="mime_type_compressed_ext" msgid="4232293058067801528">"<xliff:g id="EXTENSION">%1$s</xliff:g> আৰ্কাইভ"</string>
+    <string name="mime_type_document" msgid="1596838147256375966">"নথি"</string>
+    <string name="mime_type_document_ext" msgid="6327266601345501281">"<xliff:g id="EXTENSION">%1$s</xliff:g> নথি"</string>
+    <string name="mime_type_spreadsheet" msgid="2639138255207123557">"স্প্ৰেডশ্বীট"</string>
+    <string name="mime_type_spreadsheet_ext" msgid="5508653032786106725">"<xliff:g id="EXTENSION">%1$s</xliff:g> স্প্ৰেডশ্বীট"</string>
+    <string name="mime_type_presentation" msgid="6145604688774787357">"উপস্থাপন"</string>
+    <string name="mime_type_presentation_ext" msgid="2982650207774823437">"<xliff:g id="EXTENSION">%1$s</xliff:g> উপস্থাপন"</string>
     <string name="car_loading_profile" msgid="3545132581795684027">"ল’ড হৈ আছে"</string>
     <plurals name="file_count" formatted="false" msgid="1628600959752419449">
       <item quantity="one"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g>টা ফাইল</item>

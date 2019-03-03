@@ -808,7 +808,7 @@ public final class MediaBrowser {
             return sb.toString();
         }
 
-        public static final Parcelable.Creator<MediaItem> CREATOR =
+        public static final @android.annotation.NonNull Parcelable.Creator<MediaItem> CREATOR =
                 new Parcelable.Creator<MediaItem>() {
                     @Override
                     public MediaItem createFromParcel(Parcel in) {

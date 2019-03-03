@@ -534,7 +534,7 @@ public final class ProgramSelector implements Parcelable {
         return 0;
     }
 
-    public static final Parcelable.Creator<ProgramSelector> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<ProgramSelector> CREATOR =
             new Parcelable.Creator<ProgramSelector>() {
         public ProgramSelector createFromParcel(Parcel in) {
             return new ProgramSelector(in);
@@ -632,7 +632,7 @@ public final class ProgramSelector implements Parcelable {
             return 0;
         }
 
-        public static final Parcelable.Creator<Identifier> CREATOR =
+        public static final @android.annotation.NonNull Parcelable.Creator<Identifier> CREATOR =
                 new Parcelable.Creator<Identifier>() {
             public Identifier createFromParcel(Parcel in) {
                 return new Identifier(in);

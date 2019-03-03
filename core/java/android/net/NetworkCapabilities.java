@@ -1442,7 +1442,7 @@ public final class NetworkCapabilities implements Parcelable {
         dest.writeString(mSSID);
     }
 
-    public static final Creator<NetworkCapabilities> CREATOR =
+    public static final @android.annotation.NonNull Creator<NetworkCapabilities> CREATOR =
         new Creator<NetworkCapabilities>() {
             @Override
             public NetworkCapabilities createFromParcel(Parcel in) {

@@ -571,6 +571,12 @@ public final class NotificationEntry {
         if (row != null) row.setHeadsUp(shouldHeadsUp);
     }
 
+
+    public void setAmbientGoingAway(boolean goingAway) {
+        if (row != null) row.setAmbientGoingAway(goingAway);
+    }
+
+
     public boolean mustStayOnScreen() {
         return row != null && row.mustStayOnScreen();
     }

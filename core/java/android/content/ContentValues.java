@@ -497,7 +497,7 @@ public final class ContentValues implements Parcelable {
         return mMap.keySet();
     }
 
-    public static final Parcelable.Creator<ContentValues> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<ContentValues> CREATOR =
             new Parcelable.Creator<ContentValues>() {
         @Override
         public ContentValues createFromParcel(Parcel in) {

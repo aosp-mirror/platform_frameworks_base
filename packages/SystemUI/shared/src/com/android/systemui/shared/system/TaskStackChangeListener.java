@@ -48,6 +48,21 @@ public abstract class TaskStackChangeListener {
         onActivityLaunchOnSecondaryDisplayFailed();
     }
 
+    /**
+     * @see #onActivityLaunchOnSecondaryDisplayRerouted(RunningTaskInfo taskInfo)
+     */
+    public void onActivityLaunchOnSecondaryDisplayRerouted() { }
+
+    /**
+     * Called when an activity was requested to be launched on a secondary display but was rerouted
+     * to default display.
+     *
+     * @param taskInfo info about the Activity's task
+     */
+    public void onActivityLaunchOnSecondaryDisplayRerouted(RunningTaskInfo taskInfo) {
+        onActivityLaunchOnSecondaryDisplayRerouted();
+    }
+
     public void onTaskProfileLocked(int taskId, int userId) { }
     public void onTaskCreated(int taskId, ComponentName componentName) { }
     public void onTaskRemoved(int taskId) { }

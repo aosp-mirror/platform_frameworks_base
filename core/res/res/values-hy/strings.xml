@@ -308,15 +308,18 @@
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Հեռախոս"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"կատարել զանգեր և կառավարել զանգերը"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"Թույլ տա՞լ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; հավելվածին կատարել հեռախոսազանգեր և կառավարել դրանք:"</string>
-    <string name="permgrouplab_sensors" msgid="416037179223226722">"Մարմնի սենսորներ"</string>
+    <!-- no translation found for permgrouplab_sensors (4838614103153567532) -->
+    <skip />
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"օգտագործել սենսորների տվյալները ձեր օրգանիզմի վիճակի մասին"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"Թույլ տա՞լ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; հավելվածին սենսորից ստանալ ձեր կենսագործունեության հիմնական տվյալները:"</string>
     <string name="permgrouplab_aural" msgid="965607064083134896">"Երաժշտություն"</string>
     <string name="permgroupdesc_aural" msgid="4870189506255958055">"երաժշտության հասանելիություն"</string>
     <string name="permgrouprequest_aural" msgid="6787926123071735620">"Հասանելի դարձնե՞լ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; հավելվածին ձեր երաժշտությունը:"</string>
-    <string name="permgrouplab_visual" msgid="8030190588123857921">"Լուսանկարներ և տեսանյութեր"</string>
+    <!-- no translation found for permgrouplab_visual (6477382108771145134) -->
+    <skip />
     <string name="permgroupdesc_visual" msgid="3415827902566663546">"լուսանկարների և տեսանյութերի հասանելիություն"</string>
-    <string name="permgrouprequest_visual" msgid="6907523945030290376">"Հասանելի դարձնե՞լ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; հավելվածին ձեր լուսանկարներն ու տեսանյութերը։"</string>
+    <!-- no translation found for permgrouprequest_visual (3043752127595243314) -->
+    <skip />
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Առբերել պատուհանի բովանդակությունը"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Վերլուծել գործող պատուհանի բովանդակությունը"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Միացնել Հպման միջոցով հետազոտումը"</string>
@@ -1611,6 +1614,8 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Վերածածկ #<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>. <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> կմվ"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", անվտանգ"</string>
+    <string name="activity_starter_block_bg_activity_starts_permissive" msgid="5692097903712956720">"Ֆոնային ռեժիմում <xliff:g id="PACKAGENAME">%1$s</xliff:g>-ի աշխատանքի գործարկումը կարգելափակվի հաջորդ Q կառուցումներում։ Տես այստեղ՝ go/q-bg-block։"</string>
+    <string name="activity_starter_block_bg_activity_starts_enforcing" msgid="8299522481076404353">"Ֆոնային ռեժիմում <xliff:g id="PACKAGENAME">%1$s</xliff:g>-ի աշխատանքի գործարկումն արգելափակվեց։ Տես այստեղ՝ go/q-bg-block։"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Մոռացել եմ սխեման"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Սխալ սխեմա"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"Սխալ գաղտնաբառ"</string>
@@ -1996,6 +2001,24 @@
     <string name="dynamic_mode_notification_channel_name" msgid="2348803891571320452">"Ծանուցում լիցքավորման մասին"</string>
     <string name="dynamic_mode_notification_title" msgid="508815255807182035">"Մարտկոցի լիցքը կարող է սովորականից շուտ սպառվել"</string>
     <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"Մարտկոցի կյանքը երկարացնելու համար ակտիվացվել է մարտկոցի տնտեսման ռեժիմը"</string>
+    <string name="mime_type_folder" msgid="7111951698626315204">"Պանակ"</string>
+    <string name="mime_type_apk" msgid="5518003630972506900">"Android հավելված"</string>
+    <string name="mime_type_generic" msgid="6833871596845900027">"Ֆայլ"</string>
+    <string name="mime_type_generic_ext" msgid="8450275970061657174">"<xliff:g id="EXTENSION">%1$s</xliff:g> ֆայլ"</string>
+    <string name="mime_type_audio" msgid="6289777657172050926">"Աուդիո ֆայլ"</string>
+    <string name="mime_type_audio_ext" msgid="3270880987725816210">"<xliff:g id="EXTENSION">%1$s</xliff:g> աուդիո ֆայլ"</string>
+    <string name="mime_type_video" msgid="4093025777317307426">"Տեսանյութ"</string>
+    <string name="mime_type_video_ext" msgid="5643771615714173159">"<xliff:g id="EXTENSION">%1$s</xliff:g> տեսանյութ"</string>
+    <string name="mime_type_image" msgid="3144284451605236371">"Պատկեր"</string>
+    <string name="mime_type_image_ext" msgid="1514613218742736590">"<xliff:g id="EXTENSION">%1$s</xliff:g> պատկեր"</string>
+    <string name="mime_type_compressed" msgid="1645486037074943257">"Արխիվ"</string>
+    <string name="mime_type_compressed_ext" msgid="4232293058067801528">"<xliff:g id="EXTENSION">%1$s</xliff:g> արխիվ"</string>
+    <string name="mime_type_document" msgid="1596838147256375966">"Փաստաթուղթ"</string>
+    <string name="mime_type_document_ext" msgid="6327266601345501281">"<xliff:g id="EXTENSION">%1$s</xliff:g> փաստաթուղթ"</string>
+    <string name="mime_type_spreadsheet" msgid="2639138255207123557">"Աղյուսակ"</string>
+    <string name="mime_type_spreadsheet_ext" msgid="5508653032786106725">"<xliff:g id="EXTENSION">%1$s</xliff:g> աղյուսակ"</string>
+    <string name="mime_type_presentation" msgid="6145604688774787357">"Ներկայացում"</string>
+    <string name="mime_type_presentation_ext" msgid="2982650207774823437">"<xliff:g id="EXTENSION">%1$s</xliff:g> ներկայացում"</string>
     <string name="car_loading_profile" msgid="3545132581795684027">"Բեռնում"</string>
     <plurals name="file_count" formatted="false" msgid="1628600959752419449">
       <item quantity="one"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> ֆայլ</item>

@@ -91,7 +91,7 @@ public final class CivicLocation implements Parcelable {
         mCivicAddressElements = in.readSparseArray(this.getClass().getClassLoader());
     }
 
-    public static final Creator<CivicLocation> CREATOR = new Creator<CivicLocation>() {
+    public static final @android.annotation.NonNull Creator<CivicLocation> CREATOR = new Creator<CivicLocation>() {
         @Override
         public CivicLocation createFromParcel(Parcel in) {
             return new CivicLocation(in);

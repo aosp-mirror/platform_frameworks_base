@@ -68,7 +68,7 @@ public final class InstantAppIntentFilter implements Parcelable {
         out.writeList(mFilters);
     }
 
-    public static final Parcelable.Creator<InstantAppIntentFilter> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<InstantAppIntentFilter> CREATOR
             = new Parcelable.Creator<InstantAppIntentFilter>() {
         @Override
         public InstantAppIntentFilter createFromParcel(Parcel in) {

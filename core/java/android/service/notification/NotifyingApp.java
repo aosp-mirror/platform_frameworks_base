@@ -74,7 +74,7 @@ public final class NotifyingApp implements Parcelable, Comparable<NotifyingApp> 
         return this;
     }
 
-    public static final Creator<NotifyingApp> CREATOR = new Creator<NotifyingApp>() {
+    public static final @android.annotation.NonNull Creator<NotifyingApp> CREATOR = new Creator<NotifyingApp>() {
         @Override
         public NotifyingApp createFromParcel(Parcel in) {
             return new NotifyingApp(in);

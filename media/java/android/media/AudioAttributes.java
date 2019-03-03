@@ -877,7 +877,7 @@ public final class AudioAttributes implements Parcelable {
         }
     }
 
-    public static final Parcelable.Creator<AudioAttributes> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<AudioAttributes> CREATOR
             = new Parcelable.Creator<AudioAttributes>() {
         /**
          * Rebuilds an AudioAttributes previously stored with writeToParcel().

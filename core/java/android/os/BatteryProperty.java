@@ -67,7 +67,7 @@ public class BatteryProperty implements Parcelable {
         p.writeLong(mValueLong);
     }
 
-    public static final Parcelable.Creator<BatteryProperty> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<BatteryProperty> CREATOR
         = new Parcelable.Creator<BatteryProperty>() {
         public BatteryProperty createFromParcel(Parcel p) {
             return new BatteryProperty(p);

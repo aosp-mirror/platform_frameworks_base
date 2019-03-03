@@ -13,6 +13,7 @@
  */
 package com.android.systemui.plugins;
 
+import android.graphics.Bitmap;
 import android.graphics.Paint.Style;
 import android.view.View;
 
@@ -21,13 +22,30 @@ import com.android.systemui.plugins.annotations.ProvidesInterface;
 import java.util.TimeZone;
 
 /**
- * This plugin is used to replace main clock in keyguard.
+ * Plugin used to replace main clock in keyguard.
  */
 @ProvidesInterface(action = ClockPlugin.ACTION, version = ClockPlugin.VERSION)
 public interface ClockPlugin extends Plugin {
 
     String ACTION = "com.android.systemui.action.PLUGIN_CLOCK";
-    int VERSION = 1;
+    int VERSION = 2;
+
+    /**
+     * Get the name of the clock face.
+     *
+     * This name should not be translated.
+     */
+    String getName();
+
+    /**
+     * Get the title of the clock face to be shown in the picker app.
+     */
+    String getTitle();
+
+    /**
+     * Get thumbnail of clock face to be shown in the picker app.
+     */
+    Bitmap getThumbnail();
 
     /**
      * Get clock view.
@@ -62,18 +80,22 @@ public interface ClockPlugin extends Plugin {
     default void setColorPalette(boolean supportsDarkText, int[] colors) {}
 
     /**
-     * Notifies that time tick alarm from doze service fired.
-     */
-    default void dozeTimeTick() {}
-
-    /**
      * Set the amount (ratio) that the device has transitioned to doze.
      * @param darkAmount Amount of transition to doze: 1f for doze and 0f for awake.
      */
     default void setDarkAmount(float darkAmount) {}
 
     /**
+     * Notifies that time tick alarm from doze service fired.
+     *
+     * Implement this method instead of registering a broadcast listener for TIME_TICK.
+     */
+    default void onTimeTick() {}
+
+    /**
      * Notifies that the time zone has changed.
+     *
+     * Implement this method instead of registering a broadcast listener for TIME_ZONE_CHANGED.
      */
     default void onTimeZoneChanged(TimeZone timeZone) {}
 

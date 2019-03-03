@@ -38,7 +38,7 @@ import com.android.internal.util.Preconditions;
  */
 public final class DownloadableSubscription implements Parcelable {
 
-    public static final Creator<DownloadableSubscription> CREATOR =
+    public static final @android.annotation.NonNull Creator<DownloadableSubscription> CREATOR =
             new Creator<DownloadableSubscription>() {
                 @Override
                 public DownloadableSubscription createFromParcel(Parcel in) {

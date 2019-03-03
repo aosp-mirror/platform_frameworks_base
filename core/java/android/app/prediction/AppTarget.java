@@ -183,7 +183,7 @@ public final class AppTarget implements Parcelable {
     /**
      * @see Parcelable.Creator
      */
-    public static final Parcelable.Creator<AppTarget> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<AppTarget> CREATOR =
             new Parcelable.Creator<AppTarget>() {
                 public AppTarget createFromParcel(Parcel parcel) {
                     return new AppTarget(parcel);

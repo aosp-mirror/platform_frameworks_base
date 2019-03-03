@@ -84,7 +84,7 @@ public class Surface implements Parcelable {
     private static native int nativeSetSharedBufferModeEnabled(long nativeObject, boolean enabled);
     private static native int nativeSetAutoRefreshEnabled(long nativeObject, boolean enabled);
 
-    public static final Parcelable.Creator<Surface> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<Surface> CREATOR =
             new Parcelable.Creator<Surface>() {
         @Override
         public Surface createFromParcel(Parcel source) {

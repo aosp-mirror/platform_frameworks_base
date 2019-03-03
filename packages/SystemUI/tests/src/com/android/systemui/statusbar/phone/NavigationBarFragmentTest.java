@@ -22,13 +22,14 @@ import android.app.Fragment;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Looper;
-import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.LeakCheck.Tracker;
 import android.testing.TestableLooper.RunWithLooper;
 import android.view.Display;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager.AccessibilityServicesStateChangeListener;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.Dependency;

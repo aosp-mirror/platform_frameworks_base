@@ -942,7 +942,7 @@ public final class NotificationChannel implements Parcelable {
         return sb.toString();
     }
 
-    public static final Creator<NotificationChannel> CREATOR = new Creator<NotificationChannel>() {
+    public static final @android.annotation.NonNull Creator<NotificationChannel> CREATOR = new Creator<NotificationChannel>() {
         @Override
         public NotificationChannel createFromParcel(Parcel in) {
             return new NotificationChannel(in);

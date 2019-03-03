@@ -215,7 +215,7 @@ public class UsbAccessory implements Parcelable {
                             ", mSerialNumberReader=" + mSerialNumberReader + "]";
     }
 
-    public static final Parcelable.Creator<UsbAccessory> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<UsbAccessory> CREATOR =
         new Parcelable.Creator<UsbAccessory>() {
         public UsbAccessory createFromParcel(Parcel in) {
             String manufacturer = in.readString();

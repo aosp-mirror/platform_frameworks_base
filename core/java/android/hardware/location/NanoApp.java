@@ -359,7 +359,7 @@ public class NanoApp implements Parcelable {
         out.writeByteArray(mAppBinary);
     }
 
-    public static final Parcelable.Creator<NanoApp> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<NanoApp> CREATOR
             = new Parcelable.Creator<NanoApp>() {
         public NanoApp createFromParcel(Parcel in) {
             return new NanoApp(in);

@@ -130,7 +130,7 @@ public class PauseActivityItem extends ActivityLifecycleItem {
         mDontReport = in.readBoolean();
     }
 
-    public static final Creator<PauseActivityItem> CREATOR =
+    public static final @android.annotation.NonNull Creator<PauseActivityItem> CREATOR =
             new Creator<PauseActivityItem>() {
         public PauseActivityItem createFromParcel(Parcel in) {
             return new PauseActivityItem(in);

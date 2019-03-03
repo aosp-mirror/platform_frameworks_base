@@ -81,6 +81,16 @@ oneway interface ITaskStackListener {
             int requestedDisplayId);
 
     /**
+     * Called when an activity was requested to be launched on a secondary display but was rerouted
+     * to default display.
+     *
+     * @param taskInfo info about the Activity's task
+     * @param requestedDisplayId the id of the requested launch display
+     */
+    void onActivityLaunchOnSecondaryDisplayRerouted(in ActivityManager.RunningTaskInfo taskInfo,
+                int requestedDisplayId);
+
+    /**
      * Called when a task is added.
      *
      * @param taskId id of the task.

@@ -270,7 +270,7 @@ public final class LocationRequest implements Parcelable {
      * Set the quality of the request.
      *
      * <p>Use with a accuracy constant such as {@link #ACCURACY_FINE}, or a power
-     * constant such as {@link #POWER_LOW}. You cannot request both and accuracy and
+     * constant such as {@link #POWER_LOW}. You cannot request both accuracy and
      * power, only one or the other can be specified. The system will then
      * maximize accuracy or minimize power as appropriate.
      *
@@ -384,10 +384,8 @@ public final class LocationRequest implements Parcelable {
      *
      * @param locationSettingsIgnored Whether to ignore location settings
      * @return the same object, so that setters can be chained
-     * @hide
      */
     @RequiresPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
-    @SystemApi
     public LocationRequest setLocationSettingsIgnored(boolean locationSettingsIgnored) {
         mLocationSettingsIgnored = locationSettingsIgnored;
         return this;
@@ -395,10 +393,7 @@ public final class LocationRequest implements Parcelable {
 
     /**
      * Returns true if location settings will be ignored in order to satisfy this request.
-     *
-     * @hide
      */
-    @SystemApi
     public boolean isLocationSettingsIgnored() {
         return mLocationSettingsIgnored;
     }
@@ -558,9 +553,6 @@ public final class LocationRequest implements Parcelable {
         }
     }
 
-
-    /** @hide */
-    @SystemApi
     public LocationRequest setProvider(String provider) {
         checkProvider(provider);
         mProvider = provider;
@@ -669,7 +661,7 @@ public final class LocationRequest implements Parcelable {
         }
     }
 
-    public static final Parcelable.Creator<LocationRequest> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<LocationRequest> CREATOR =
             new Parcelable.Creator<LocationRequest>() {
                 @Override
                 public LocationRequest createFromParcel(Parcel in) {

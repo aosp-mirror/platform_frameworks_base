@@ -289,7 +289,7 @@ public class UserInfo implements Parcelable {
     }
 
     @UnsupportedAppUsage
-    public static final Parcelable.Creator<UserInfo> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<UserInfo> CREATOR
             = new Parcelable.Creator<UserInfo>() {
         public UserInfo createFromParcel(Parcel source) {
             return new UserInfo(source);

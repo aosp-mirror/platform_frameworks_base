@@ -145,7 +145,7 @@ public final class AvailableNetworkInfo implements Parcelable {
         return Objects.hash(mSubId, mPriority, mMccMncs);
     }
 
-    public static final Parcelable.Creator<AvailableNetworkInfo> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<AvailableNetworkInfo> CREATOR =
             new Creator<AvailableNetworkInfo>() {
                 @Override
                 public AvailableNetworkInfo createFromParcel(Parcel in) {

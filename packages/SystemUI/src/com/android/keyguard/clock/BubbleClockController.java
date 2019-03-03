@@ -15,6 +15,9 @@
  */
 package com.android.keyguard.clock;
 
+import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Paint.Style;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -29,6 +32,16 @@ import java.util.TimeZone;
  * Controller for Bubble clock that can appear on lock screen and AOD.
  */
 public class BubbleClockController implements ClockPlugin {
+
+    /**
+     * Resources used to get title and thumbnail.
+     */
+    private final Resources mResources;
+
+    /**
+     * LayoutInflater used to inflate custom clock views.
+     */
+    private final LayoutInflater mLayoutInflater;
 
     /**
      * Custom clock shown on AOD screen and behind stack scroller on lock.
@@ -48,25 +61,22 @@ public class BubbleClockController implements ClockPlugin {
      */
     private CrossFadeDarkController mDarkController;
 
-    private BubbleClockController() { }
-
     /**
      * Create a BubbleClockController instance.
      *
      * @param layoutInflater Inflater used to inflate custom clock views.
      */
-    public static BubbleClockController build(LayoutInflater layoutInflater) {
-        BubbleClockController controller = new BubbleClockController();
-        controller.createViews(layoutInflater);
-        return controller;
+    public BubbleClockController(Resources res, LayoutInflater inflater) {
+        mResources = res;
+        mLayoutInflater = inflater;
     }
 
-    private void createViews(LayoutInflater layoutInflater) {
-        mView = layoutInflater.inflate(R.layout.bubble_clock, null);
+    private void createViews() {
+        mView = mLayoutInflater.inflate(R.layout.bubble_clock, null);
         mDigitalClock = (TextClock) mView.findViewById(R.id.digital_clock);
         mAnalogClock = (ImageClock) mView.findViewById(R.id.analog_clock);
 
-        mLockClockContainer = layoutInflater.inflate(R.layout.digital_clock, null);
+        mLockClockContainer = mLayoutInflater.inflate(R.layout.digital_clock, null);
         mLockClock = (TextClock) mLockClockContainer.findViewById(R.id.lock_screen_clock);
         mLockClock.setVisibility(View.GONE);
 
@@ -74,12 +84,33 @@ public class BubbleClockController implements ClockPlugin {
     }
 
     @Override
+    public String getName() {
+        return "bubble";
+    }
+
+    @Override
+    public String getTitle() {
+        return mResources.getString(R.string.clock_title_bubble);
+    }
+
+    @Override
+    public Bitmap getThumbnail() {
+        return BitmapFactory.decodeResource(mResources, R.drawable.bubble_thumbnail);
+    }
+
+    @Override
     public View getView() {
+        if (mLockClockContainer == null) {
+            createViews();
+        }
         return mLockClockContainer;
     }
 
     @Override
     public View getBigClockView() {
+        if (mView == null) {
+            createViews();
+        }
         return mView;
     }
 
@@ -103,13 +134,13 @@ public class BubbleClockController implements ClockPlugin {
     }
 
     @Override
-    public void dozeTimeTick() {
-        mAnalogClock.onTimeChanged();
+    public void setDarkAmount(float darkAmount) {
+        mDarkController.setDarkAmount(darkAmount);
     }
 
     @Override
-    public void setDarkAmount(float darkAmount) {
-        mDarkController.setDarkAmount(darkAmount);
+    public void onTimeTick() {
+        mAnalogClock.onTimeChanged();
     }
 
     @Override

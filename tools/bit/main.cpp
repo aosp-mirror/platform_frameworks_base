@@ -33,6 +33,8 @@
 
 using namespace std;
 
+#define NATIVE_TESTS "NATIVE_TESTS"
+
 /**
  * An entry from the command line for something that will be built, installed,
  * and/or tested.
@@ -132,6 +134,32 @@ InstallApk::InstallApk(const string& filename, bool always)
 {
 }
 
+struct PushedFile
+{
+    TrackedFile file;
+    string dest;
+
+    PushedFile();
+    PushedFile(const PushedFile& that);
+    PushedFile(const string& filename, const string& dest);
+    ~PushedFile() {};
+};
+
+PushedFile::PushedFile()
+{
+}
+
+PushedFile::PushedFile(const PushedFile& that)
+    :file(that.file),
+     dest(that.dest)
+{
+}
+
+PushedFile::PushedFile(const string& f, const string& d)
+    :file(f),
+     dest(d)
+{
+}
 
 /**
  * Record for an test that is going to be launched.
@@ -658,12 +686,14 @@ run_phases(vector<Target*> targets, const Options& options)
     }
 
     // Figure out whether we need to sync the system and which apks to install
-    string systemPath = buildOut + "/target/product/" + buildDevice + "/system/";
-    string dataPath = buildOut + "/target/product/" + buildDevice + "/data/";
+    string deviceTargetPath = buildOut + "/target/product/" + buildDevice;
+    string systemPath = deviceTargetPath + "/system/";
+    string dataPath = deviceTargetPath + "/data/";
     bool syncSystem = false;
     bool alwaysSyncSystem = false;
     vector<string> systemFiles;
     vector<InstallApk> installApks;
+    vector<PushedFile> pushedFiles;
     for (size_t i=0; i<targets.size(); i++) {
         Target* target = targets[i];
         if (target->install) {
@@ -687,6 +717,11 @@ run_phases(vector<Target*> targets, const Options& options)
                     installApks.push_back(InstallApk(file, !target->build));
                     continue;
                 }
+                // If it's a native test module, push it.
+                if (target->module.HasClass(NATIVE_TESTS) && starts_with(file, dataPath)) {
+                    string installedPath(file.c_str() + deviceTargetPath.length());
+                    pushedFiles.push_back(PushedFile(file, installedPath));
+                }
             }
         }
     }
@@ -699,6 +734,13 @@ run_phases(vector<Target*> targets, const Options& options)
         print_info("System files:");
         for (size_t i=0; i<systemFiles.size(); i++) {
             printf("  %s\n", systemFiles[i].c_str());
+        }
+    }
+    if (pushedFiles.size() > 0){
+        print_info("Files to push:");
+        for (size_t i=0; i<pushedFiles.size(); i++) {
+            printf("  %s\n", pushedFiles[i].file.filename.c_str());
+            printf("    --> %s\n", pushedFiles[i].dest.c_str());
         }
     }
     if (installApks.size() > 0){
@@ -784,6 +826,25 @@ run_phases(vector<Target*> targets, const Options& options)
         }
     }
 
+    // Push files
+    if (pushedFiles.size() > 0) {
+        print_status("Pushing files");
+        for (size_t i=0; i<pushedFiles.size(); i++) {
+            const PushedFile& pushed = pushedFiles[i];
+            string dir = dirname(pushed.dest);
+            if (dir.length() == 0 || dir == "/") {
+                // This isn't really a file inside the data directory. Just skip it.
+                continue;
+            }
+            // TODO: if (!apk.file.fileInfo.exists || apk.file.HasChanged())
+            err = run_adb("shell", "mkdir", "-p", dir.c_str(), NULL);
+            check_error(err);
+            err = run_adb("push", pushed.file.filename.c_str(), pushed.dest.c_str());
+            check_error(err);
+            // pushed.installed = true;
+        }
+    }
+
     // Install APKs
     if (installApks.size() > 0) {
         print_status("Installing APKs");
@@ -803,6 +864,74 @@ run_phases(vector<Target*> targets, const Options& options)
     //
     // Actions
     //
+
+    // Whether there have been any tests run, so we can print a summary.
+    bool testsRun = false;
+
+    // Run the native tests.
+    // TODO: We don't have a good way of running these and capturing the output of
+    // them live.  It'll take some work.  On the other hand, if they're gtest tests,
+    // the output of gtest is not completely insane like the text output of the
+    // instrumentation tests.  So for now, we'll just live with that.
+    for (size_t i=0; i<targets.size(); i++) {
+        Target* target = targets[i];
+        if (target->test && target->module.HasClass(NATIVE_TESTS)) {
+            // We don't have a clear signal from the build system which of the installed
+            // files is actually the test, so we guess by looking for one with the same
+            // leaf name as the module that is executable.
+            for (size_t j=0; j<target->module.installed.size(); j++) {
+                string filename = target->module.installed[j];
+                if (!starts_with(filename, dataPath)) {
+                    // Native tests go into the data directory.
+                    continue;
+                }
+                if (leafname(filename) != target->module.name) {
+                    // This isn't the test executable.
+                    continue;
+                }
+                if (!is_executable(filename)) {
+                    continue;
+                }
+                string installedPath(filename.c_str() + deviceTargetPath.length());
+                printf("the magic one is: %s\n", filename.c_str());
+                printf("  and it's installed at: %s\n", installedPath.c_str());
+
+                // Convert bit-style actions to gtest test filter arguments
+                if (target->actions.size() > 0) {
+                    testsRun = true;
+                    target->testActionCount++;
+                    bool runAll = false;
+                    string filterArg("--gtest_filter=");
+                    for (size_t k=0; k<target->actions.size(); k++) {
+                        string actionString = target->actions[k];
+                        if (actionString == "*") {
+                            runAll = true;
+                        } else {
+                            filterArg += actionString;
+                            if (k != target->actions.size()-1) {
+                                // We would otherwise have to worry about this condition
+                                // being true, and appending an extra ':', but we know that
+                                // if the extra action is "*", then we'll just run all and
+                                // won't use filterArg anyway, so just keep this condition
+                                // simple.
+                                filterArg += ':';
+                            }
+                        }
+                    }
+                    if (runAll) {
+                        err = run_adb("shell", installedPath.c_str(), NULL);
+                    } else {
+                        err = run_adb("shell", installedPath.c_str(), filterArg.c_str(), NULL);
+                    }
+                    if (err == 0) {
+                        target->testPassCount++;
+                    } else {
+                        target->testFailCount++;
+                    }
+                }
+            }
+        }
+    }
 
     // Inspect the apks, and figure out what is an activity and what needs a test runner
     bool printedInspecting = false;
@@ -872,6 +1001,7 @@ run_phases(vector<Target*> targets, const Options& options)
     TestResults testResults;
     if (testActions.size() > 0) {
         print_status("Running tests");
+        testsRun = true;
         for (size_t i=0; i<testActions.size(); i++) {
             TestAction& action = testActions[i];
             testResults.SetCurrentAction(&action);
@@ -969,7 +1099,7 @@ run_phases(vector<Target*> targets, const Options& options)
 
     // Tests
     bool hasErrors = false;
-    if (testActions.size() > 0) {
+    if (testsRun) {
         printf("%sRan tests:%s\n", g_escapeBold, g_escapeEndColor);
         size_t maxNameLength = 0;
         for (size_t i=0; i<targets.size(); i++) {

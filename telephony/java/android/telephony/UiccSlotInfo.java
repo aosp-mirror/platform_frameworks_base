@@ -63,7 +63,7 @@ public class UiccSlotInfo implements Parcelable {
     private final boolean mIsExtendedApduSupported;
     private final boolean mIsRemovable;
 
-    public static final Creator<UiccSlotInfo> CREATOR = new Creator<UiccSlotInfo>() {
+    public static final @android.annotation.NonNull Creator<UiccSlotInfo> CREATOR = new Creator<UiccSlotInfo>() {
         @Override
         public UiccSlotInfo createFromParcel(Parcel in) {
             return new UiccSlotInfo(in);

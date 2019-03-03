@@ -68,7 +68,7 @@ public final class MediaRouterClientState implements Parcelable {
         return "MediaRouterClientState{ routes=" + routes.toString() + " }";
     }
 
-    public static final Parcelable.Creator<MediaRouterClientState> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<MediaRouterClientState> CREATOR =
             new Parcelable.Creator<MediaRouterClientState>() {
         @Override
         public MediaRouterClientState createFromParcel(Parcel in) {
@@ -180,7 +180,7 @@ public final class MediaRouterClientState implements Parcelable {
         }
 
         @SuppressWarnings("hiding")
-        public static final Parcelable.Creator<RouteInfo> CREATOR =
+        public static final @android.annotation.NonNull Parcelable.Creator<RouteInfo> CREATOR =
                 new Parcelable.Creator<RouteInfo>() {
             @Override
             public RouteInfo createFromParcel(Parcel in) {

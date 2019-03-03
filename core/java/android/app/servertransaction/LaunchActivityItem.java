@@ -148,7 +148,7 @@ public class LaunchActivityItem extends ClientTransactionItem {
                 in.readTypedObject(ProfilerInfo.CREATOR));
     }
 
-    public static final Creator<LaunchActivityItem> CREATOR =
+    public static final @android.annotation.NonNull Creator<LaunchActivityItem> CREATOR =
             new Creator<LaunchActivityItem>() {
         public LaunchActivityItem createFromParcel(Parcel in) {
             return new LaunchActivityItem(in);

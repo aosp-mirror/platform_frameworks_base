@@ -28,6 +28,8 @@ import android.util.Slog;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import java.io.PrintWriter;
 
 /**
@@ -70,7 +72,8 @@ import java.io.PrintWriter;
  * sensor to detect this case.
  * </p>
  */
-final class WirelessChargerDetector {
+@VisibleForTesting
+public class WirelessChargerDetector {
     private static final String TAG = "WirelessChargerDetector";
     private static final boolean DEBUG = false;
 

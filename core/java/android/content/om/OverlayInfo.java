@@ -264,7 +264,7 @@ public final class OverlayInfo implements Parcelable {
         dest.writeBoolean(isStatic);
     }
 
-    public static final Parcelable.Creator<OverlayInfo> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<OverlayInfo> CREATOR =
             new Parcelable.Creator<OverlayInfo>() {
         @Override
         public OverlayInfo createFromParcel(Parcel source) {

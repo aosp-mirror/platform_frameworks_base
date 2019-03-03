@@ -92,7 +92,7 @@ public class DestroyActivityItem extends ActivityLifecycleItem {
         mConfigChanges = in.readInt();
     }
 
-    public static final Creator<DestroyActivityItem> CREATOR =
+    public static final @android.annotation.NonNull Creator<DestroyActivityItem> CREATOR =
             new Creator<DestroyActivityItem>() {
         public DestroyActivityItem createFromParcel(Parcel in) {
             return new DestroyActivityItem(in);

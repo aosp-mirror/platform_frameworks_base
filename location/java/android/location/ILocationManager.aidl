@@ -85,6 +85,7 @@ interface ILocationManager
     boolean stopGnssBatch();
     boolean injectLocation(in Location location);
 
+    @UnsupportedAppUsage
     List<String> getAllProviders();
     List<String> getProviders(in Criteria criteria, boolean enabledOnly);
     String getBestProvider(in Criteria criteria, boolean enabledOnly);
@@ -102,6 +103,7 @@ interface ILocationManager
     void removeTestProvider(String provider, String opPackageName);
     void setTestProviderLocation(String provider, in Location loc, String opPackageName);
     void setTestProviderEnabled(String provider, boolean enabled, String opPackageName);
+    List<LocationRequest> getTestProviderCurrentRequests(String provider, String opPackageName);
 
     // --- deprecated ---
     void setTestProviderStatus(String provider, int status, in Bundle extras, long updateTime,

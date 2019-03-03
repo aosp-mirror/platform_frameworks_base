@@ -1639,6 +1639,9 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
     @Override
     public void onRootViewScrollYChanged(int rootScrollY) {
         mRootScrollY = rootScrollY;
+        if (mDecorCaptionView != null) {
+            mDecorCaptionView.onRootViewScrollYChanged(rootScrollY);
+        }
         updateColorViewTranslations();
     }
 

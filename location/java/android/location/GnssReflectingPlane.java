@@ -76,7 +76,7 @@ public final class GnssReflectingPlane implements Parcelable {
         return 0;
     }
 
-    public static final Creator<GnssReflectingPlane> CREATOR =
+    public static final @android.annotation.NonNull Creator<GnssReflectingPlane> CREATOR =
             new Creator<GnssReflectingPlane>() {
                 @Override
                 public GnssReflectingPlane createFromParcel(Parcel parcel) {
