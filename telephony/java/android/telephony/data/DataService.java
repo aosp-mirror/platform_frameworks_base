@@ -152,8 +152,9 @@ public abstract class DataService extends Service {
          * @param callback The result callback for this request. Null if the client does not care
          *        about the result.
          */
-        public void setupDataCall(int accessNetworkType, DataProfile dataProfile, boolean isRoaming,
-                                  boolean allowRoaming, @SetupDataReason int reason,
+        public void setupDataCall(int accessNetworkType, @NonNull DataProfile dataProfile,
+                                  boolean isRoaming, boolean allowRoaming,
+                                  @SetupDataReason int reason,
                                   @Nullable LinkProperties linkProperties,
                                   @Nullable DataServiceCallback callback) {
             // The default implementation is to return unsupported.
@@ -192,7 +193,7 @@ public abstract class DataService extends Service {
          * @param callback The result callback for this request. Null if the client does not care
          *        about the result.
          */
-        public void setInitialAttachApn(DataProfile dataProfile, boolean isRoaming,
+        public void setInitialAttachApn(@NonNull DataProfile dataProfile, boolean isRoaming,
                                         @Nullable DataServiceCallback callback) {
             // The default implementation is to return unsupported.
             if (callback != null) {
@@ -211,7 +212,7 @@ public abstract class DataService extends Service {
          * @param callback The result callback for this request. Null if the client does not care
          *        about the result.
          */
-        public void setDataProfile(List<DataProfile> dps, boolean isRoaming,
+        public void setDataProfile(@NonNull List<DataProfile> dps, boolean isRoaming,
                                    @Nullable DataServiceCallback callback) {
             // The default implementation is to return unsupported.
             if (callback != null) {
