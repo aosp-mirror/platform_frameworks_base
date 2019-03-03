@@ -4075,8 +4075,8 @@ package android.net {
 
   public class LinkAddress implements android.os.Parcelable {
     ctor public LinkAddress(java.net.InetAddress, int, int, int);
-    ctor public LinkAddress(java.net.InetAddress, int);
-    ctor public LinkAddress(String);
+    ctor public LinkAddress(@NonNull java.net.InetAddress, int);
+    ctor public LinkAddress(@NonNull String);
     ctor public LinkAddress(String, int, int);
     method public boolean isGlobalPreferred();
     method public boolean isIPv4();
@@ -7647,7 +7647,7 @@ package android.telephony {
   public abstract class NetworkService.NetworkServiceProvider implements java.lang.AutoCloseable {
     ctor public NetworkService.NetworkServiceProvider(int);
     method public abstract void close();
-    method public void getNetworkRegistrationState(int, android.telephony.NetworkServiceCallback);
+    method public void getNetworkRegistrationState(int, @NonNull android.telephony.NetworkServiceCallback);
     method public final int getSlotId();
     method public final void notifyNetworkRegistrationStateChanged();
   }
@@ -7828,12 +7828,12 @@ package android.telephony {
   }
 
   public class ServiceState implements android.os.Parcelable {
-    method public android.telephony.NetworkRegistrationState getNetworkRegistrationState(int, int);
-    method public java.util.List<android.telephony.NetworkRegistrationState> getNetworkRegistrationStates();
-    method @Deprecated public java.util.List<android.telephony.NetworkRegistrationState> getNetworkRegistrationStates(int);
-    method @Deprecated public android.telephony.NetworkRegistrationState getNetworkRegistrationStates(int, int);
-    method public java.util.List<android.telephony.NetworkRegistrationState> getNetworkRegistrationStatesForDomain(int);
-    method public java.util.List<android.telephony.NetworkRegistrationState> getNetworkRegistrationStatesForTransportType(int);
+    method @Nullable public android.telephony.NetworkRegistrationState getNetworkRegistrationState(int, int);
+    method @NonNull public java.util.List<android.telephony.NetworkRegistrationState> getNetworkRegistrationStates();
+    method @Deprecated @NonNull public java.util.List<android.telephony.NetworkRegistrationState> getNetworkRegistrationStates(int);
+    method @Deprecated @Nullable public android.telephony.NetworkRegistrationState getNetworkRegistrationStates(int, int);
+    method @NonNull public java.util.List<android.telephony.NetworkRegistrationState> getNetworkRegistrationStatesForDomain(int);
+    method @NonNull public java.util.List<android.telephony.NetworkRegistrationState> getNetworkRegistrationStatesForTransportType(int);
     field public static final int ROAMING_TYPE_DOMESTIC = 2; // 0x2
     field public static final int ROAMING_TYPE_INTERNATIONAL = 3; // 0x3
     field public static final int ROAMING_TYPE_NOT_ROAMING = 0; // 0x0
@@ -8141,9 +8141,9 @@ package android.telephony.data {
     method public void getDataCallList(@NonNull android.telephony.data.DataServiceCallback);
     method public final int getSlotId();
     method public final void notifyDataCallListChanged(java.util.List<android.telephony.data.DataCallResponse>);
-    method public void setDataProfile(java.util.List<android.telephony.data.DataProfile>, boolean, @Nullable android.telephony.data.DataServiceCallback);
-    method public void setInitialAttachApn(android.telephony.data.DataProfile, boolean, @Nullable android.telephony.data.DataServiceCallback);
-    method public void setupDataCall(int, android.telephony.data.DataProfile, boolean, boolean, int, @Nullable android.net.LinkProperties, @Nullable android.telephony.data.DataServiceCallback);
+    method public void setDataProfile(@NonNull java.util.List<android.telephony.data.DataProfile>, boolean, @Nullable android.telephony.data.DataServiceCallback);
+    method public void setInitialAttachApn(@NonNull android.telephony.data.DataProfile, boolean, @Nullable android.telephony.data.DataServiceCallback);
+    method public void setupDataCall(int, @NonNull android.telephony.data.DataProfile, boolean, boolean, int, @Nullable android.net.LinkProperties, @Nullable android.telephony.data.DataServiceCallback);
   }
 
   public class DataServiceCallback {
@@ -8162,7 +8162,7 @@ package android.telephony.data {
 
   public abstract class QualifiedNetworksService extends android.app.Service {
     ctor public QualifiedNetworksService();
-    method public abstract android.telephony.data.QualifiedNetworksService.NetworkAvailabilityUpdater createNetworkAvailabilityUpdater(int);
+    method @NonNull public abstract android.telephony.data.QualifiedNetworksService.NetworkAvailabilityUpdater createNetworkAvailabilityUpdater(int);
     field public static final String QUALIFIED_NETWORKS_SERVICE_INTERFACE = "android.telephony.data.QualifiedNetworksService";
   }
 
@@ -8170,7 +8170,7 @@ package android.telephony.data {
     ctor public QualifiedNetworksService.NetworkAvailabilityUpdater(int);
     method public abstract void close();
     method public final int getSlotIndex();
-    method public final void updateQualifiedNetworkTypes(int, int[]);
+    method public final void updateQualifiedNetworkTypes(int, @Nullable int[]);
   }
 
 }
