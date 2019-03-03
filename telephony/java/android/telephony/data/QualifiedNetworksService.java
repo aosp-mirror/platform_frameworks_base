@@ -16,6 +16,8 @@
 
 package android.telephony.data;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.app.Service;
 import android.content.Intent;
@@ -132,7 +134,7 @@ public abstract class QualifiedNetworksService extends Service {
          * for data setup.
          */
         public final void updateQualifiedNetworkTypes(@ApnType int apnTypes,
-                                                      int[] qualifiedNetworkTypes) {
+                                                      @Nullable int[] qualifiedNetworkTypes) {
             mHandler.obtainMessage(QNS_UPDATE_QUALIFIED_NETWORKS, mSlotIndex, apnTypes,
                     qualifiedNetworkTypes).sendToTarget();
         }
@@ -233,6 +235,7 @@ public abstract class QualifiedNetworksService extends Service {
      * @param slotIndex SIM slot index the qualified networks service associated with.
      * @return Qualified networks service instance
      */
+    @NonNull
     public abstract NetworkAvailabilityUpdater createNetworkAvailabilityUpdater(int slotIndex);
 
     /** @hide */

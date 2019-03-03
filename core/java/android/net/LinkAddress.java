@@ -25,6 +25,7 @@ import static android.system.OsConstants.RT_SCOPE_LINK;
 import static android.system.OsConstants.RT_SCOPE_SITE;
 import static android.system.OsConstants.RT_SCOPE_UNIVERSE;
 
+import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
@@ -177,7 +178,7 @@ public class LinkAddress implements Parcelable {
      */
     @SystemApi
     @TestApi
-    public LinkAddress(InetAddress address, int prefixLength) {
+    public LinkAddress(@NonNull InetAddress address, int prefixLength) {
         this(address, prefixLength, 0, 0);
         this.scope = scopeForUnicastAddress(address);
     }
@@ -196,12 +197,12 @@ public class LinkAddress implements Parcelable {
     /**
      * Constructs a new {@code LinkAddress} from a string such as "192.0.2.5/24" or
      * "2001:db8::1/64". The flags are set to zero and the scope is determined from the address.
-     * @param string The string to parse.
+     * @param address The string to parse.
      * @hide
      */
     @SystemApi
     @TestApi
-    public LinkAddress(String address) {
+    public LinkAddress(@NonNull String address) {
         this(address, 0, 0);
         this.scope = scopeForUnicastAddress(this.address);
     }
@@ -209,7 +210,7 @@ public class LinkAddress implements Parcelable {
     /**
      * Constructs a new {@code LinkAddress} from a string such as "192.0.2.5/24" or
      * "2001:db8::1/64", with the specified flags and scope.
-     * @param string The string to parse.
+     * @param address The string to parse.
      * @param flags The address flags.
      * @param scope The address scope.
      * @hide
