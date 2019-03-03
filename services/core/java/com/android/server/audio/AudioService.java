@@ -6387,7 +6387,28 @@ public class AudioService extends IAudioService.Stub
         return mProjectionService;
     }
 
-    public void unregisterAudioPolicyAsync(IAudioPolicyCallback pcb) {
+    /**
+     * See {@link AudioManager#unregisterAudioPolicyAsync(AudioPolicy)}
+     * Declared oneway
+     * @param pcb nullable because on service interface
+     */
+    public void unregisterAudioPolicyAsync(@Nullable IAudioPolicyCallback pcb) {
+        unregisterAudioPolicy(pcb);
+    }
+
+    /**
+     * See {@link AudioManager#unregisterAudioPolicy(AudioPolicy)}
+     * @param pcb nullable because on service interface
+     */
+    public void unregisterAudioPolicy(@Nullable IAudioPolicyCallback pcb) {
+        if (pcb == null) {
+            return;
+        }
+        unregisterAudioPolicyInt(pcb);
+    }
+
+
+    private void unregisterAudioPolicyInt(@NonNull IAudioPolicyCallback pcb) {
         mDynPolicyLogger.log((new AudioEventLogger.StringEvent("unregisterAudioPolicyAsync for "
                 + pcb.asBinder()).printLog(TAG)));
         synchronized (mAudioPolicies) {

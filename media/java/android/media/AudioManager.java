@@ -3309,6 +3309,7 @@ public class AudioManager {
 
     /**
      * @hide
+     * Unregisters an {@link AudioPolicy} asynchronously.
      * @param policy the non-null {@link AudioPolicy} to unregister.
      */
     @SystemApi
@@ -3324,6 +3325,27 @@ public class AudioManager {
         final IAudioService service = getService();
         try {
             service.unregisterAudioPolicyAsync(policy.cb());
+            policy.setRegistration(null);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     * Unregisters an {@link AudioPolicy} synchronously.
+     * This method also invalidates all {@link AudioRecord} and {@link AudioTrack} objects
+     * associated with mixes of this policy.
+     * @param policy the non-null {@link AudioPolicy} to unregister.
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public void unregisterAudioPolicy(@NonNull AudioPolicy policy) {
+        Preconditions.checkNotNull(policy, "Illegal null AudioPolicy argument");
+        final IAudioService service = getService();
+        try {
+            policy.invalidateCaptorsAndInjectors();
+            service.unregisterAudioPolicy(policy.cb());
             policy.setRegistration(null);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
