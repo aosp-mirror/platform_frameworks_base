@@ -64,6 +64,7 @@ import android.util.proto.ProtoOutputStream;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.XmlUtils;
+import com.android.internal.util.function.TriPredicate;
 import com.android.server.notification.NotificationManagerService.DumpFilter;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -360,7 +361,7 @@ abstract public class ManagedServices {
 
     public void readXml(
             XmlPullParser parser,
-            Predicate<String> allowedManagedServicePackages,
+            TriPredicate<String, Integer, String> allowedManagedServicePackages,
             boolean forRestore,
             int userId)
             throws XmlPullParserException, IOException {
@@ -383,8 +384,8 @@ abstract public class ManagedServices {
                     final boolean isPrimary =
                             XmlUtils.readBooleanAttribute(parser, ATT_IS_PRIMARY, true);
                     readExtraAttributes(tag, parser, resolvedUserId);
-                    if (allowedManagedServicePackages == null ||
-                            allowedManagedServicePackages.test(getPackageName(approved))) {
+                    if (allowedManagedServicePackages == null || allowedManagedServicePackages.test(
+                            getPackageName(approved), resolvedUserId, getRequiredPermission())) {
                         if (mUm.getUserInfo(resolvedUserId) != null) {
                             addApprovedList(approved, resolvedUserId, isPrimary);
                         }
@@ -401,6 +402,8 @@ abstract public class ManagedServices {
      */
     protected void readExtraAttributes(String tag, XmlPullParser parser, int userId)
             throws IOException {}
+
+    protected abstract String getRequiredPermission();
 
     private void loadAllowedComponentsFromSettings() {
         for (UserInfo user : mUm.getUsers()) {

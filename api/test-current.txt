@@ -2320,7 +2320,38 @@ package android.service.notification {
   }
 
   public abstract class NotificationListenerService extends android.app.Service {
-    method public void onNotificationRemoved(android.service.notification.StatusBarNotification, android.service.notification.NotificationListenerService.RankingMap, android.service.notification.NotificationStats, int);
+    method public void onNotificationRemoved(@NonNull android.service.notification.StatusBarNotification, @NonNull android.service.notification.NotificationListenerService.RankingMap, @NonNull android.service.notification.NotificationStats, int);
+  }
+
+  public final class NotificationStats implements android.os.Parcelable {
+    ctor public NotificationStats();
+    method public int describeContents();
+    method public int getDismissalSentiment();
+    method public int getDismissalSurface();
+    method public boolean hasDirectReplied();
+    method public boolean hasExpanded();
+    method public boolean hasInteracted();
+    method public boolean hasSeen();
+    method public boolean hasSnoozed();
+    method public boolean hasViewedSettings();
+    method public void setDirectReplied();
+    method public void setDismissalSentiment(int);
+    method public void setDismissalSurface(int);
+    method public void setExpanded();
+    method public void setSeen();
+    method public void setSnoozed();
+    method public void setViewedSettings();
+    method public void writeToParcel(android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.service.notification.NotificationStats> CREATOR;
+    field public static final int DISMISSAL_AOD = 2; // 0x2
+    field public static final int DISMISSAL_NOT_DISMISSED = -1; // 0xffffffff
+    field public static final int DISMISSAL_OTHER = 0; // 0x0
+    field public static final int DISMISSAL_PEEK = 1; // 0x1
+    field public static final int DISMISSAL_SHADE = 3; // 0x3
+    field public static final int DISMISS_SENTIMENT_NEGATIVE = 0; // 0x0
+    field public static final int DISMISS_SENTIMENT_NEUTRAL = 1; // 0x1
+    field public static final int DISMISS_SENTIMENT_POSITIVE = 2; // 0x2
+    field public static final int DISMISS_SENTIMENT_UNKNOWN = -1000; // 0xfffffc18
   }
 
   public final class SnoozeCriterion implements android.os.Parcelable {

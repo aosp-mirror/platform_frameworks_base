@@ -205,6 +205,7 @@ import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
+import com.android.internal.util.function.TriPredicate;
 import com.android.server.DeviceIdleController;
 import com.android.server.EventLogTags;
 import com.android.server.IoThread;
@@ -432,7 +433,7 @@ public class NotificationManagerService extends SystemService {
     private boolean mIsAutomotive;
 
     private MetricsLogger mMetricsLogger;
-    private Predicate<String> mAllowedManagedServicePackages;
+    private TriPredicate<String, Integer, String> mAllowedManagedServicePackages;
 
     private static class Archive {
         final int mBufferSize;
@@ -3614,7 +3615,8 @@ public class NotificationManagerService extends SystemService {
             checkCallerIsSystemOrShell();
             final long identity = Binder.clearCallingIdentity();
             try {
-                if (mAllowedManagedServicePackages.test(pkg)) {
+                if (mAllowedManagedServicePackages.test(
+                        pkg, userId, mConditionProviders.getRequiredPermission())) {
                     mConditionProviders.setPackageOrComponentEnabled(
                             pkg, userId, true, granted);
 
@@ -3771,7 +3773,8 @@ public class NotificationManagerService extends SystemService {
             checkCallerIsSystemOrShell();
             final long identity = Binder.clearCallingIdentity();
             try {
-                if (mAllowedManagedServicePackages.test(listener.getPackageName())) {
+                if (mAllowedManagedServicePackages.test(
+                        listener.getPackageName(), userId, mListeners.getRequiredPermission())) {
                     mConditionProviders.setPackageOrComponentEnabled(listener.flattenToString(),
                             userId, false, granted);
                     mListeners.setPackageOrComponentEnabled(listener.flattenToString(),
@@ -4022,7 +4025,8 @@ public class NotificationManagerService extends SystemService {
             }
             return;
         }
-        if (mAllowedManagedServicePackages.test(assistant.getPackageName())) {
+        if (mAllowedManagedServicePackages.test(assistant.getPackageName(), userId,
+                mAssistants.getRequiredPermission())) {
             mConditionProviders.setPackageOrComponentEnabled(assistant.flattenToString(),
                     userId, false, granted);
             mAssistants.setPackageOrComponentEnabled(assistant.flattenToString(),
@@ -7084,7 +7088,7 @@ public class NotificationManagerService extends SystemService {
     }
 
     @VisibleForTesting
-    boolean canUseManagedServices(String pkg) {
+    boolean canUseManagedServices(String pkg, Integer userId, String requiredPermission) {
         boolean canUseManagedServices = !mActivityManager.isLowRamDevice()
                 || mPackageManagerClient.hasSystemFeature(PackageManager.FEATURE_WATCH);
 
@@ -7092,6 +7096,17 @@ public class NotificationManagerService extends SystemService {
                 R.array.config_allowedManagedServicesOnLowRamDevices)) {
             if (whitelisted.equals(pkg)) {
                 canUseManagedServices = true;
+            }
+        }
+
+        if (requiredPermission != null) {
+            try {
+                if (mPackageManager.checkPermission(requiredPermission, pkg, userId)
+                    != PackageManager.PERMISSION_GRANTED) {
+                    canUseManagedServices = false;
+                }
+            } catch (RemoteException e) {
+                Log.e(TAG, "can't talk to pm", e);
             }
         }
 
@@ -7177,6 +7192,12 @@ public class NotificationManagerService extends SystemService {
             // force rebind the assistant, as it might be keeping its own state in user locked
             // storage
             rebindServices(true, user);
+        }
+
+        @Override
+        protected String getRequiredPermission() {
+            // only signature/privileged apps can be bound
+            return android.Manifest.permission.REQUEST_NOTIFICATION_ASSISTANT_SERVICE;
         }
 
         protected void onNotificationsSeenLocked(ArrayList<NotificationRecord> records) {
@@ -7484,6 +7505,11 @@ public class NotificationManagerService extends SystemService {
                 updateEffectsSuppressorLocked();
             }
             mLightTrimListeners.remove(removed);
+        }
+
+        @Override
+        protected String getRequiredPermission() {
+            return null;
         }
 
         @GuardedBy("mNotificationLock")
