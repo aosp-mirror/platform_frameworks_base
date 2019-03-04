@@ -267,12 +267,6 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
      */
     private final SparseIntArray mCurTaskIdForUser = new SparseIntArray(20);
 
-    /** List of activities that are waiting for a new activity to become visible before completing
-     * whatever operation they are supposed to do. */
-    // TODO: Remove mActivitiesWaitingForVisibleActivity list and just remove activity from
-    // mStoppingActivities when something else comes up.
-    final ArrayList<ActivityRecord> mActivitiesWaitingForVisibleActivity = new ArrayList<>();
-
     /** List of processes waiting to find out when a specific activity becomes visible. */
     private final ArrayList<WaitInfo> mWaitingForActivityVisible = new ArrayList<>();
 
@@ -550,7 +544,6 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         // This could happen, for example, if we are trimming activities
         // down to the max limit while they are still waiting to finish.
         mFinishingActivities.remove(r);
-        mActivitiesWaitingForVisibleActivity.remove(r);
 
         for (int i = mWaitingForActivityVisible.size() - 1; i >= 0; --i) {
             if (mWaitingForActivityVisible.get(i).matches(r.mActivityComponent)) {
@@ -2142,28 +2135,27 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         final boolean nowVisible = mRootActivityContainer.allResumedActivitiesVisible();
         for (int activityNdx = mStoppingActivities.size() - 1; activityNdx >= 0; --activityNdx) {
             ActivityRecord s = mStoppingActivities.get(activityNdx);
-            boolean waitingVisible = mActivitiesWaitingForVisibleActivity.contains(s);
+
+            final boolean animating = s.mAppWindowToken.isSelfAnimating();
+
             if (DEBUG_STATES) Slog.v(TAG, "Stopping " + s + ": nowVisible=" + nowVisible
-                    + " waitingVisible=" + waitingVisible + " finishing=" + s.finishing);
-            if (waitingVisible && nowVisible) {
-                mActivitiesWaitingForVisibleActivity.remove(s);
-                waitingVisible = false;
-                if (s.finishing) {
-                    // If this activity is finishing, it is sitting on top of
-                    // everyone else but we now know it is no longer needed...
-                    // so get rid of it.  Otherwise, we need to go through the
-                    // normal flow and hide it once we determine that it is
-                    // hidden by the activities in front of it.
-                    if (DEBUG_STATES) Slog.v(TAG, "Before stopping, can hide: " + s);
-                    s.setVisibility(false);
-                }
+                    + " animating=" + animating + " finishing=" + s.finishing);
+            if (nowVisible && s.finishing) {
+
+                // If this activity is finishing, it is sitting on top of
+                // everyone else but we now know it is no longer needed...
+                // so get rid of it.  Otherwise, we need to go through the
+                // normal flow and hide it once we determine that it is
+                // hidden by the activities in front of it.
+                if (DEBUG_STATES) Slog.v(TAG, "Before stopping, can hide: " + s);
+                s.setVisibility(false);
             }
             if (remove) {
                 final ActivityStack stack = s.getActivityStack();
                 final boolean shouldSleepOrShutDown = stack != null
                         ? stack.shouldSleepOrShutDownActivities()
                         : mService.isSleepingOrShuttingDownLocked();
-                if (!waitingVisible || shouldSleepOrShutDown) {
+                if (!animating || shouldSleepOrShutDown) {
                     if (!processPausingActivities && s.isState(PAUSING)) {
                         // Defer processing pausing activities in this iteration and reschedule
                         // a delayed idle to reprocess it again
@@ -2178,9 +2170,6 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                     }
                     stops.add(s);
 
-                    // Make sure to remove it in all cases in case we entered this block with
-                    // shouldSleepOrShutDown
-                    mActivitiesWaitingForVisibleActivity.remove(s);
                     mStoppingActivities.remove(activityNdx);
                 }
             }

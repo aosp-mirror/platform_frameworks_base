@@ -2016,8 +2016,7 @@ class RootActivityContainer extends ConfigurationContainer
                 final ActivityStack stack = display.getChildAt(stackNdx);
                 final ActivityRecord r = stack.getResumedActivity();
                 if (r != null) {
-                    if (!r.nowVisible
-                            || mStackSupervisor.mActivitiesWaitingForVisibleActivity.contains(r)) {
+                    if (!r.nowVisible) {
                         return false;
                     }
                     foundResumed = true;
@@ -2345,10 +2344,6 @@ class RootActivityContainer extends ConfigurationContainer
         printed |= dumpHistoryList(fd, pw, mStackSupervisor.mStoppingActivities, "  ",
                 "Stop", false, !dumpAll,
                 false, dumpPackage, true, "  Activities waiting to stop:", null);
-        printed |= dumpHistoryList(fd, pw,
-                mStackSupervisor.mActivitiesWaitingForVisibleActivity, "  ", "Wait",
-                false, !dumpAll, false, dumpPackage, true,
-                "  Activities waiting for another to become visible:", null);
         printed |= dumpHistoryList(fd, pw, mStackSupervisor.mGoingToSleepActivities,
                 "  ", "Sleep", false, !dumpAll,
                 false, dumpPackage, true, "  Activities waiting to sleep:", null);
