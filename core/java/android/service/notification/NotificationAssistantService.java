@@ -20,8 +20,8 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SdkConstant;
-import android.annotation.SystemApi;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.admin.DevicePolicyManager;
@@ -90,7 +90,7 @@ public abstract class NotificationAssistantService extends NotificationListenerS
     }
 
     @Override
-    public final IBinder onBind(Intent intent) {
+    public final @NonNull IBinder onBind(@Nullable Intent intent) {
         if (mWrapper == null) {
             mWrapper = new NotificationAssistantServiceWrapper();
         }
@@ -126,8 +126,8 @@ public abstract class NotificationAssistantService extends NotificationListenerS
      * @param channel the channel the notification was posted to
      * @return an adjustment or null to take no action, within 100ms.
      */
-    public Adjustment onNotificationEnqueued(StatusBarNotification sbn,
-            NotificationChannel channel) {
+    public @Nullable Adjustment onNotificationEnqueued(@NonNull StatusBarNotification sbn,
+            @NonNull NotificationChannel channel) {
         return onNotificationEnqueued(sbn);
     }
 
@@ -155,8 +155,9 @@ public abstract class NotificationAssistantService extends NotificationListenerS
      * @param reason see {@link #REASON_LISTENER_CANCEL}, etc.
      */
     @Override
-    public void onNotificationRemoved(StatusBarNotification sbn, RankingMap rankingMap,
-            NotificationStats stats, int reason) {
+    public void onNotificationRemoved(@NonNull StatusBarNotification sbn,
+            @NonNull RankingMap rankingMap,
+            @NonNull NotificationStats stats, int reason) {
         onNotificationRemoved(sbn, rankingMap, reason);
     }
 
@@ -164,7 +165,7 @@ public abstract class NotificationAssistantService extends NotificationListenerS
      * Implement this to know when a user has seen notifications, as triggered by
      * {@link #setNotificationsShown(String[])}.
      */
-    public void onNotificationsSeen(List<String> keys) {
+    public void onNotificationsSeen(@NonNull List<String> keys) {
 
     }
 
@@ -211,7 +212,7 @@ public abstract class NotificationAssistantService extends NotificationListenerS
      *
      * @param adjustment the adjustment with an explanation
      */
-    public final void adjustNotification(Adjustment adjustment) {
+    public final void adjustNotification(@NonNull Adjustment adjustment) {
         if (!isBound()) return;
         try {
             getNotificationInterface().applyAdjustmentFromAssistant(mWrapper, adjustment);
@@ -228,7 +229,7 @@ public abstract class NotificationAssistantService extends NotificationListenerS
      *
      * @param adjustments a list of adjustments with explanations
      */
-    public final void adjustNotifications(List<Adjustment> adjustments) {
+    public final void adjustNotifications(@NonNull List<Adjustment> adjustments) {
         if (!isBound()) return;
         try {
             getNotificationInterface().applyAdjustmentsFromAssistant(mWrapper, adjustments);

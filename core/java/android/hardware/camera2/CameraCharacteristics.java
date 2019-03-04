@@ -297,10 +297,10 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>Each key is only listed once in the list. The order of the keys is undefined.</p>
      *
      * @return List of camera characteristic keys that require the
-     *         {@link android.Manifest.permission#CAMERA} permission. The list can be null in case
+     *         {@link android.Manifest.permission#CAMERA} permission. The list can be empty in case
      *         there are no currently present keys that need additional permission.
      */
-    public List<Key<?>> getKeysNeedingPermission() {
+    public @NonNull List<Key<?>> getKeysNeedingPermission() {
         if (mKeysNeedingPermission == null) {
             Object crKey = CameraCharacteristics.Key.class;
             Class<CameraCharacteristics.Key<?>> crKeyTyped =
@@ -308,7 +308,9 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
 
             int[] filterTags = get(REQUEST_CHARACTERISTIC_KEYS_NEEDING_PERMISSION);
             if (filterTags == null) {
-                return null;
+                mKeysNeedingPermission = Collections.unmodifiableList(
+                        new ArrayList<CameraCharacteristics.Key<?>> ());
+                return mKeysNeedingPermission;
             }
             mKeysNeedingPermission =
                 getAvailableKeyList(CameraCharacteristics.class, crKeyTyped, filterTags,
