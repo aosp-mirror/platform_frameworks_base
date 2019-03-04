@@ -3532,7 +3532,7 @@
   <java-symbol type="string" name="harmful_app_warning_title" />
   <java-symbol type="layout" name="harmful_app_warning_dialog" />
 
-  <java-symbol type="string" name="config_defaultAssistantAccessPackage" />
+  <java-symbol type="string" name="config_defaultAssistantAccessComponent" />
 
   <java-symbol type="bool" name="config_supportBluetoothPersistedState" />
 

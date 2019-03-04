@@ -22,6 +22,7 @@ android_test {
         "platform-test-annotations",
         "hamcrest-library",
         "testables",
+        "truth-prebuilt",
     ],
 
     libs: [

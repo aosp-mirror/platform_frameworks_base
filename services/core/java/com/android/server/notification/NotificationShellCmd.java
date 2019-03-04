@@ -58,6 +58,8 @@ public class NotificationShellCmd extends ShellCommand {
             + "  disallow_dnd PACKAGE [user_id (current user if not specified)]\n"
             + "  suspend_package PACKAGE\n"
             + "  unsuspend_package PACKAGE\n"
+            + "  reset_assistant_user_set [user_id (current user if not specified)]\n"
+            + "  get_approved_assistant [user_id (current user if not specified)]\n"
             + "  post [--help | flags] TAG TEXT";
 
     private static final String NOTIFY_USAGE =
@@ -199,8 +201,29 @@ public class NotificationShellCmd extends ShellCommand {
                     mDirectService.simulatePackageDistractionBroadcast(
                             Integer.parseInt(getNextArgRequired()),
                             getNextArgRequired().split(","));
+                    break;
                 }
-                break;
+                case "reset_assistant_user_set": {
+                    int userId = ActivityManager.getCurrentUser();
+                    if (peekNextArg() != null) {
+                        userId = Integer.parseInt(getNextArgRequired());
+                    }
+                    mDirectService.resetAssistantUserSet(userId);
+                    break;
+                }
+                case "get_approved_assistant": {
+                    int userId = ActivityManager.getCurrentUser();
+                    if (peekNextArg() != null) {
+                        userId = Integer.parseInt(getNextArgRequired());
+                    }
+                    ComponentName approvedAssistant = mDirectService.getApprovedAssistant(userId);
+                    if (approvedAssistant == null) {
+                        pw.println("null");
+                    } else {
+                        pw.println(approvedAssistant.flattenToString());
+                    }
+                    break;
+                }
                 case "post":
                 case "notify":
                     doNotify(pw);

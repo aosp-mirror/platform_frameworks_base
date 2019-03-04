@@ -333,6 +333,7 @@ abstract public class ManagedServices {
                         out.attribute(null, ATT_APPROVED_LIST, allowedItems);
                         out.attribute(null, ATT_USER_ID, Integer.toString(approvedUserId));
                         out.attribute(null, ATT_IS_PRIMARY, Boolean.toString(isPrimary));
+                        writeExtraAttributes(out, approvedUserId);
                         out.endTag(null, TAG_MANAGED_SERVICES);
 
                         if (!forBackup && isPrimary) {
@@ -345,9 +346,13 @@ abstract public class ManagedServices {
                 }
             }
         }
-
         out.endTag(null, getConfig().xmlTag);
     }
+
+    /**
+     * Writes extra xml attributes to {@link #TAG_MANAGED_SERVICES} tag.
+     */
+    protected void writeExtraAttributes(XmlSerializer out, int userId) throws IOException {}
 
     protected void migrateToXml() {
         loadAllowedComponentsFromSettings();
@@ -377,7 +382,7 @@ abstract public class ManagedServices {
                             ? userId : XmlUtils.readIntAttribute(parser, ATT_USER_ID, 0);
                     final boolean isPrimary =
                             XmlUtils.readBooleanAttribute(parser, ATT_IS_PRIMARY, true);
-
+                    readExtraAttributes(tag, parser, resolvedUserId);
                     if (allowedManagedServicePackages == null ||
                             allowedManagedServicePackages.test(getPackageName(approved))) {
                         if (mUm.getUserInfo(resolvedUserId) != null) {
@@ -390,6 +395,12 @@ abstract public class ManagedServices {
         }
         rebindServices(false, USER_ALL);
     }
+
+    /**
+     * Read extra attributes in the {@link #TAG_MANAGED_SERVICES} tag.
+     */
+    protected void readExtraAttributes(String tag, XmlPullParser parser, int userId)
+            throws IOException {}
 
     private void loadAllowedComponentsFromSettings() {
         for (UserInfo user : mUm.getUsers()) {

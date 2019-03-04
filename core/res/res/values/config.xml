@@ -3698,8 +3698,8 @@
 
     <string translatable="false" name="config_batterySaverDeviceSpecificConfig"></string>
 
-    <!-- Package name that should be granted Notification Assistant access -->
-    <string name="config_defaultAssistantAccessPackage" translatable="false">android.ext.services</string>
+    <!-- Component name that should be granted Notification Assistant access -->
+    <string name="config_defaultAssistantAccessComponent" translatable="false">android.ext.services/android.ext.services.notification.Assistant</string>
 
     <bool name="config_supportBluetoothPersistedState">true</bool>
 
