@@ -88,7 +88,7 @@ public interface LineHeightSpan extends ParagraphStyle, WrapTogetherSpan {
         /**
          * Constructor called from {@link TextUtils} to restore the span from a parcel
          */
-        public Standard(Parcel src) {
+        public Standard(@NonNull Parcel src) {
             mHeight = src.readInt();
         }
 
