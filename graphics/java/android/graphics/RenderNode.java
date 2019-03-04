@@ -62,7 +62,7 @@ import java.lang.annotation.RetentionPolicy;
  *
  * <h3>Creating a RenderNode</h3>
  * <pre class="prettyprint">
- *     RenderNode renderNode = RenderNode.create("myRenderNode");
+ *     RenderNode renderNode = new RenderNode("myRenderNode");
  *     renderNode.setLeftTopRightBottom(0, 0, 50, 50); // Set the size to 50x50
  *     RecordingCanvas canvas = renderNode.beginRecording();
  *     try {
@@ -106,7 +106,7 @@ import java.lang.annotation.RetentionPolicy;
  *
  * <pre class="prettyprint">
  *     private void createDisplayList() {
- *         mRenderNode = RenderNode.create("MyRenderNode");
+ *         mRenderNode = new RenderNode("MyRenderNode");
  *         mRenderNode.setLeftTopRightBottom(0, 0, width, height);
  *         RecordingCanvas canvas = mRenderNode.beginRecording();
  *         try {
