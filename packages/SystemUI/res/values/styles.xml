@@ -239,9 +239,18 @@
         <item name="android:fontFamily">@*android:string/config_bodyFontFamily</item>
     </style>
 
-    <style name="TextAppearance.DeviceManagementDialog.Title" parent="@android:style/TextAppearance.DeviceDefault.DialogWindowTitle">
-        <item name="android:gravity">center</item>
+    <style name="TextAppearance.DeviceManagementDialog">
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
     </style>
+
+    <style name="TextAppearance.DeviceManagementDialog.Title" parent="@android:style/TextAppearance.DeviceDefault.DialogWindowTitle"/>
+
+    <style name="DeviceManagementDialogTitle">
+        <item name="android:gravity">center</item>
+        <item name="android:textAppearance">@style/TextAppearance.DeviceManagementDialog.Title</item>
+    </style>
+
+    <style name="TextAppearance.DeviceManagementDialog.Content" parent="@*android:style/TextAppearance.DeviceDefault.Subhead"/>
 
     <style name="BaseBrightnessDialogContainer" parent="@style/Theme.SystemUI">
         <item name="android:layout_width">match_parent</item>
