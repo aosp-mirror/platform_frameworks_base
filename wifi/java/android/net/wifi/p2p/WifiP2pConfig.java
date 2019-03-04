@@ -266,7 +266,7 @@ public class WifiP2pConfig implements Parcelable {
          * @return The builder to facilitate chaining
          *         {@code builder.setXXX(..).setXXX(..)}.
          */
-        public Builder setNetworkName(String networkName) {
+        public @NonNull Builder setNetworkName(@NonNull String networkName) {
             if (TextUtils.isEmpty(networkName)) {
                 throw new IllegalArgumentException(
                         "network name must be non-empty.");
@@ -292,7 +292,7 @@ public class WifiP2pConfig implements Parcelable {
          * @return The builder to facilitate chaining
          *         {@code builder.setXXX(..).setXXX(..)}.
          */
-        public Builder setPassphrase(String passphrase) {
+        public @NonNull Builder setPassphrase(@NonNull String passphrase) {
             if (TextUtils.isEmpty(passphrase)) {
                 throw new IllegalArgumentException(
                         "passphrase must be non-empty.");
