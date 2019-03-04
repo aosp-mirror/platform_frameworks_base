@@ -44,7 +44,7 @@ public final class CallIdentification implements Parcelable {
      * A {@link CallScreeningService} uses this class to create new instances of
      * {@link CallIdentification} for a screened call.
      */
-    public static class Builder {
+    public final static class Builder {
         private CharSequence mName;
         private CharSequence mDescription;
         private CharSequence mDetails;
@@ -67,7 +67,7 @@ public final class CallIdentification implements Parcelable {
          * @param callIdAppName The app name.
          * @hide
          */
-        public Builder(String callIdPackageName, CharSequence callIdAppName) {
+        public Builder(@NonNull String callIdPackageName, @NonNull CharSequence callIdAppName) {
             mPackageName = callIdPackageName;
             mAppName = callIdAppName;
         }
@@ -80,7 +80,7 @@ public final class CallIdentification implements Parcelable {
          * @param name The name associated with the call, or {@code null} if none is provided.
          * @return Builder instance.
          */
-        public Builder setName(@Nullable CharSequence name) {
+        public @NonNull Builder setName(@Nullable CharSequence name) {
             mName = name;
             return this;
         }
@@ -97,7 +97,7 @@ public final class CallIdentification implements Parcelable {
          * @param description The call description, or {@code null} if none is provided.
          * @return Builder instance.
          */
-        public Builder setDescription(@Nullable CharSequence description) {
+        public @NonNull Builder setDescription(@Nullable CharSequence description) {
             mDescription = description;
             return this;
         }
@@ -114,7 +114,8 @@ public final class CallIdentification implements Parcelable {
          * @param details The call details, or {@code null} if none is provided.
          * @return Builder instance.
          */
-        public Builder setDetails(@Nullable CharSequence details) {
+
+        public @NonNull Builder setDetails(@Nullable CharSequence details) {
             mDetails = details;
             return this;
         }
@@ -127,7 +128,7 @@ public final class CallIdentification implements Parcelable {
          * @param photo The photo associated with the call, or {@code null} if none was provided.
          * @return Builder instance.
          */
-        public Builder setPhoto(@Nullable Icon photo) {
+        public @NonNull Builder setPhoto(@Nullable Icon photo) {
             mPhoto = photo;
             return this;
         }
@@ -141,7 +142,7 @@ public final class CallIdentification implements Parcelable {
          * @param nuisanceConfidence The nuisance confidence.
          * @return The builder.
          */
-        public Builder setNuisanceConfidence(@NuisanceConfidence int nuisanceConfidence) {
+        public @NonNull Builder setNuisanceConfidence(@NuisanceConfidence int nuisanceConfidence) {
             mNuisanceConfidence = nuisanceConfidence;
             return this;
         }
@@ -152,7 +153,7 @@ public final class CallIdentification implements Parcelable {
          *
          * @return {@link CallIdentification} instance.
          */
-        public CallIdentification build() {
+        public @NonNull CallIdentification build() {
             return new CallIdentification(mName, mDescription, mDetails, mPhoto,
                     mNuisanceConfidence, mPackageName, mAppName);
         }
