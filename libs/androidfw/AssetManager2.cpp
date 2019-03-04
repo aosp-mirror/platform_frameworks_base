@@ -1052,6 +1052,8 @@ void AssetManager2::RebuildFilterList(bool filter_incompatible_configs) {
 }
 
 void AssetManager2::InvalidateCaches(uint32_t diff) {
+  cached_bag_resid_stacks_.clear();
+
   if (diff == 0xffffffffu) {
     // Everything must go.
     cached_bags_.clear();
