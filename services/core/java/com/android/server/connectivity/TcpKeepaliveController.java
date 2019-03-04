@@ -16,10 +16,12 @@
 package com.android.server.connectivity;
 
 import static android.net.SocketKeepalive.DATA_RECEIVED;
+import static android.net.SocketKeepalive.ERROR_HARDWARE_UNSUPPORTED;
 import static android.net.SocketKeepalive.ERROR_INVALID_SOCKET;
 import static android.net.SocketKeepalive.ERROR_SOCKET_NOT_IDLE;
 import static android.os.MessageQueue.OnFileDescriptorEventListener.EVENT_ERROR;
 import static android.os.MessageQueue.OnFileDescriptorEventListener.EVENT_INPUT;
+import static android.system.OsConstants.ENOPROTOOPT;
 import static android.system.OsConstants.FIONREAD;
 import static android.system.OsConstants.IPPROTO_TCP;
 import static android.system.OsConstants.TIOCOUTQ;
@@ -179,12 +181,13 @@ public class TcpKeepaliveController {
             trw = NetworkUtils.getTcpRepairWindow(fd);
         } catch (ErrnoException e) {
             Log.e(TAG, "Exception reading TCP state from socket", e);
-            try {
-                Os.setsockoptInt(fd, IPPROTO_TCP, TCP_REPAIR, TCP_REPAIR_OFF);
-            } catch (ErrnoException ex) {
-                Log.e(TAG, "Exception while turning off repair mode due to exception", ex);
+            if (e.errno == ENOPROTOOPT) {
+                // ENOPROTOOPT may happen in kernel version lower than 4.8.
+                // Treat it as ERROR_HARDWARE_UNSUPPORTED.
+                throw new InvalidSocketException(ERROR_HARDWARE_UNSUPPORTED, e);
+            } else {
+                throw new InvalidSocketException(ERROR_INVALID_SOCKET, e);
             }
-            throw new InvalidSocketException(ERROR_INVALID_SOCKET, e);
         } finally {
             dropAllIncomingPackets(fd, false);
         }
