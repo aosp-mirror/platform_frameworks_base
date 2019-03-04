@@ -2165,7 +2165,7 @@ public class DevicePolicyManager {
          * reported back to the IT admin to be read.
          */
         public void onInstallUpdateError(
-                @InstallUpdateCallbackErrorConstants int errorCode, String errorMessage) {
+                @InstallUpdateCallbackErrorConstants int errorCode, @NonNull String errorMessage) {
         }
     }
 
