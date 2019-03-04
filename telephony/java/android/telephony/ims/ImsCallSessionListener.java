@@ -16,6 +16,7 @@
 
 package android.telephony.ims;
 
+import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.os.RemoteException;
 import android.telephony.CallQuality;
@@ -619,7 +620,7 @@ public class ImsCallSessionListener {
      *
      * @param callQuality The new call quality
      */
-    public void callQualityChanged(CallQuality callQuality) {
+    public void callQualityChanged(@NonNull CallQuality callQuality) {
         try {
             mListener.callQualityChanged(callQuality);
         } catch (RemoteException e) {
