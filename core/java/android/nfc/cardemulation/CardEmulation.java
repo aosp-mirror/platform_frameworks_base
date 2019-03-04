@@ -16,6 +16,7 @@
 
 package android.nfc.cardemulation;
 
+import android.annotation.NonNull;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.app.Activity;
@@ -359,7 +360,7 @@ public final class CardEmulation {
      * @param service The component name of the service
      * @return whether the registration was successful.
      */
-    public boolean unsetOffHostForService(ComponentName service) {
+    public boolean unsetOffHostForService(@NonNull ComponentName service) {
         NfcAdapter adapter = NfcAdapter.getDefaultAdapter(mContext);
         if (adapter == null) {
             return false;
@@ -405,7 +406,8 @@ public final class CardEmulation {
      * @param offHostSecureElement Secure Element to register the AID to
      * @return whether the registration was successful.
      */
-    public boolean setOffHostForService(ComponentName service, String offHostSecureElement) {
+    public boolean setOffHostForService(@NonNull ComponentName service,
+            @NonNull String offHostSecureElement) {
         boolean validSecureElement = false;
 
         NfcAdapter adapter = NfcAdapter.getDefaultAdapter(mContext);
