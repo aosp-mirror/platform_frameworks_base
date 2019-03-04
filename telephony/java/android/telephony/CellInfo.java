@@ -22,7 +22,6 @@ import android.annotation.UnsupportedAppUsage;
 import android.hardware.radio.V1_4.CellInfo.Info;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.SystemClock;
 
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -320,9 +319,9 @@ public abstract class CellInfo implements Parcelable {
     }
 
     /** @hide */
-    protected CellInfo(android.hardware.radio.V1_4.CellInfo ci) {
+    protected CellInfo(android.hardware.radio.V1_4.CellInfo ci, long timeStamp) {
         this.mRegistered = ci.isRegistered;
-        this.mTimeStamp = SystemClock.elapsedRealtimeNanos();
+        this.mTimeStamp = timeStamp;
         this.mCellConnectionStatus = ci.connectionStatus;
     }
 
@@ -353,14 +352,14 @@ public abstract class CellInfo implements Parcelable {
     }
 
     /** @hide */
-    public static CellInfo create(android.hardware.radio.V1_4.CellInfo ci) {
+    public static CellInfo create(android.hardware.radio.V1_4.CellInfo ci, long timeStamp) {
         if (ci == null) return null;
         switch (ci.info.getDiscriminator()) {
-            case Info.hidl_discriminator.gsm: return new CellInfoGsm(ci);
-            case Info.hidl_discriminator.cdma: return new CellInfoCdma(ci);
-            case Info.hidl_discriminator.lte: return new CellInfoLte(ci);
-            case Info.hidl_discriminator.wcdma: return new CellInfoWcdma(ci);
-            case Info.hidl_discriminator.tdscdma: return new CellInfoTdscdma(ci);
+            case Info.hidl_discriminator.gsm: return new CellInfoGsm(ci, timeStamp);
+            case Info.hidl_discriminator.cdma: return new CellInfoCdma(ci, timeStamp);
+            case Info.hidl_discriminator.lte: return new CellInfoLte(ci, timeStamp);
+            case Info.hidl_discriminator.wcdma: return new CellInfoWcdma(ci, timeStamp);
+            case Info.hidl_discriminator.tdscdma: return new CellInfoTdscdma(ci, timeStamp);
             default: return null;
         }
     }
