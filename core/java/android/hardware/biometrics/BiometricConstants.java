@@ -128,7 +128,7 @@ public interface BiometricConstants {
 
     /**
      * The device does not have pin, pattern, or password set up. See
-     * {@link BiometricPrompt.Builder#setAllowDeviceCredential(boolean)} and
+     * {@link BiometricPrompt.Builder#setDeviceCredentialAllowed(boolean)} and
      * {@link KeyguardManager#isDeviceSecure()}
      */
     int BIOMETRIC_ERROR_NO_DEVICE_CREDENTIAL = 14;
