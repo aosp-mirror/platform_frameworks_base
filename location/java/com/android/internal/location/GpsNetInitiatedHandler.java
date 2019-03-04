@@ -118,8 +118,8 @@ public class GpsNetInitiatedHandler {
     static private boolean mIsHexInput = true;
 
     // End time of emergency call, and extension, if set
-    private long mCallEndElapsedRealtimeMillis = 0;
-    private long mEmergencyExtensionMillis = 0;
+    private volatile long mCallEndElapsedRealtimeMillis = 0;
+    private volatile long mEmergencyExtensionMillis = 0;
 
     public static class GpsNiNotification
     {
@@ -242,8 +242,9 @@ public class GpsNetInitiatedHandler {
      */
     public boolean getInEmergency() {
         boolean isInEmergencyExtension =
-                (SystemClock.elapsedRealtime() - mCallEndElapsedRealtimeMillis) <
-                        mEmergencyExtensionMillis;
+                (mCallEndElapsedRealtimeMillis > 0)
+                && ((SystemClock.elapsedRealtime() - mCallEndElapsedRealtimeMillis)
+                        < mEmergencyExtensionMillis);
         boolean isInEmergencyCallback = mTelephonyManager.getEmergencyCallbackMode();
         return mIsInEmergencyCall || isInEmergencyCallback || isInEmergencyExtension;
     }

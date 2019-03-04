@@ -601,12 +601,11 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         // while IO initialization and registration is delegated to our internal handler
         // this approach is just fine because events are posted to our handler anyway
         mGnssConfiguration = new GnssConfiguration(mContext);
-        sendMessage(INITIALIZE_HANDLER, 0, null);
-
-        // Create a GPS net-initiated handler.
+        // Create a GPS net-initiated handler (also needed by handleInitialize)
         mNIHandler = new GpsNetInitiatedHandler(context,
                 mNetInitiatedListener,
                 mSuplEsEnabled);
+        sendMessage(INITIALIZE_HANDLER, 0, null);
 
         mGnssStatusListenerHelper = new GnssStatusListenerHelper(mContext, mHandler) {
             @Override
