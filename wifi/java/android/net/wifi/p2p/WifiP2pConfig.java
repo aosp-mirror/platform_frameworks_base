@@ -81,10 +81,16 @@ public class WifiP2pConfig implements Parcelable {
     public @interface GroupOperatingBandType {}
 
     /**
-     * Recognized Group Owner required band.
+     * Allow the system to pick the operating frequency from all supported bands.
      */
     public static final int GROUP_OWNER_BAND_AUTO = 0;
+    /**
+     * Allow the system to pick the operating frequency from the 2.4 GHz band.
+     */
     public static final int GROUP_OWNER_BAND_2GHZ = 1;
+    /**
+     * Allow the system to pick the operating frequency from the 5 GHz band.
+     */
     public static final int GROUP_OWNER_BAND_5GHZ = 2;
 
     /**
