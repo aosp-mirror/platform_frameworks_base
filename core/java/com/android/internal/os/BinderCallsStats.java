@@ -54,7 +54,7 @@ public class BinderCallsStats implements BinderInternal.Observer {
     public static final int PERIODIC_SAMPLING_INTERVAL_DEFAULT = 1000;
     public static final boolean DEFAULT_TRACK_SCREEN_INTERACTIVE = false;
     public static final boolean DEFAULT_TRACK_DIRECT_CALLING_UID = true;
-    public static final int MAX_BINDER_CALL_STATS_COUNT_DEFAULT = 5000;
+    public static final int MAX_BINDER_CALL_STATS_COUNT_DEFAULT = 1500;
     private static final String DEBUG_ENTRY_PREFIX = "__DEBUG_";
 
     private static class OverflowBinder extends Binder {}
