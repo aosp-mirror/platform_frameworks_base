@@ -7148,13 +7148,13 @@ package android.telephony {
   }
 
   public final class CarrierRestrictionRules implements android.os.Parcelable {
+    method @NonNull public java.util.List<java.lang.Boolean> areCarrierIdentifiersAllowed(@NonNull java.util.List<android.service.carrier.CarrierIdentifier>);
     method public int describeContents();
     method @NonNull public java.util.List<android.service.carrier.CarrierIdentifier> getAllowedCarriers();
     method public int getDefaultCarrierRestriction();
     method @NonNull public java.util.List<android.service.carrier.CarrierIdentifier> getExcludedCarriers();
     method public int getMultiSimPolicy();
     method public boolean isAllCarriersAllowed();
-    method public java.util.List<java.lang.Boolean> isCarrierIdentifiersAllowed(@NonNull java.util.List<android.service.carrier.CarrierIdentifier>);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final int CARRIER_RESTRICTION_DEFAULT_ALLOWED = 1; // 0x1
     field public static final int CARRIER_RESTRICTION_DEFAULT_NOT_ALLOWED = 0; // 0x0
@@ -7163,13 +7163,13 @@ package android.telephony {
     field public static final int MULTISIM_POLICY_ONE_VALID_SIM_MUST_BE_PRESENT = 1; // 0x1
   }
 
-  public static class CarrierRestrictionRules.Builder {
-    method public android.telephony.CarrierRestrictionRules build();
-    method public android.telephony.CarrierRestrictionRules.Builder setAllCarriersAllowed();
-    method public android.telephony.CarrierRestrictionRules.Builder setAllowedCarriers(java.util.List<android.service.carrier.CarrierIdentifier>);
-    method public android.telephony.CarrierRestrictionRules.Builder setDefaultCarrierRestriction(int);
-    method public android.telephony.CarrierRestrictionRules.Builder setExcludedCarriers(java.util.List<android.service.carrier.CarrierIdentifier>);
-    method public android.telephony.CarrierRestrictionRules.Builder setMultiSimPolicy(int);
+  public static final class CarrierRestrictionRules.Builder {
+    method @NonNull public android.telephony.CarrierRestrictionRules build();
+    method @NonNull public android.telephony.CarrierRestrictionRules.Builder setAllCarriersAllowed();
+    method @NonNull public android.telephony.CarrierRestrictionRules.Builder setAllowedCarriers(@NonNull java.util.List<android.service.carrier.CarrierIdentifier>);
+    method @NonNull public android.telephony.CarrierRestrictionRules.Builder setDefaultCarrierRestriction(int);
+    method @NonNull public android.telephony.CarrierRestrictionRules.Builder setExcludedCarriers(@NonNull java.util.List<android.service.carrier.CarrierIdentifier>);
+    method @NonNull public android.telephony.CarrierRestrictionRules.Builder setMultiSimPolicy(int);
   }
 
   public final class DataFailCause {
