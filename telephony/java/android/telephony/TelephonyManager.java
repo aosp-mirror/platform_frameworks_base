@@ -10367,12 +10367,6 @@ public class TelephonyManager {
     @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public void switchMultiSimConfig(int numOfSims) {
-        //only proceed if multi-sim is not restricted
-        if (!isMultisimSupported()) {
-            Rlog.e(TAG, "switchMultiSimConfig not possible. It is restricted or not supported.");
-            return;
-        }
-
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
