@@ -32,6 +32,7 @@ oneway interface ISyncAdapter {
      *
      * @param cb If called back with {@code false} accounts are not synced.
      */
+    @UnsupportedAppUsage
     void onUnsyncableAccount(ISyncAdapterUnsyncableAccountCallback cb);
 
     /**
@@ -44,6 +45,7 @@ oneway interface ISyncAdapter {
      * @param account the account that should be synced
      * @param extras SyncAdapter-specific parameters
      */
+    @UnsupportedAppUsage
     void startSync(ISyncContext syncContext, String authority,
       in Account account, in Bundle extras);
 
@@ -52,5 +54,6 @@ oneway interface ISyncAdapter {
      * after the ISyncContext.onFinished() for that sync was called.
      * @param syncContext the ISyncContext that was passed to {@link #startSync}
      */
+    @UnsupportedAppUsage
     void cancelSync(ISyncContext syncContext);
 }
