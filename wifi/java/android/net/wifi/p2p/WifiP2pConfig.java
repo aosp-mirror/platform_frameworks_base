@@ -333,7 +333,7 @@ public class WifiP2pConfig implements Parcelable {
          * @return The builder to facilitate chaining
          *         {@code builder.setXXX(..).setXXX(..)}.
          */
-        public Builder setGroupOperatingBand(@GroupOwnerBandType int band) {
+        public @NonNull Builder setGroupOperatingBand(@GroupOwnerBandType int band) {
             switch (band) {
                 case GROUP_OWNER_BAND_AUTO:
                 case GROUP_OWNER_BAND_2GHZ:
@@ -374,7 +374,7 @@ public class WifiP2pConfig implements Parcelable {
          * @return The builder to facilitate chaining
          *         {@code builder.setXXX(..).setXXX(..)}.
          */
-        public Builder setGroupOperatingFrequency(int frequency) {
+        public @NonNull Builder setGroupOperatingFrequency(int frequency) {
             if (frequency < 0) {
                 throw new IllegalArgumentException(
                     "Invalid group operating frequency!");
