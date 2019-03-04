@@ -173,7 +173,7 @@ public final class ImsSsInfo implements Parcelable {
     /**
      * Builds {@link ImsSsInfo} instances, which may include optional parameters.
      */
-    public static class Builder {
+    public static final class Builder {
 
         private final ImsSsInfo mImsSsInfo;
 
@@ -304,7 +304,7 @@ public final class ImsSsInfo implements Parcelable {
     /**
      * @return The Incoming Communication Barring (ICB) number.
      */
-    public String getIncomingCommunicationBarringNumber() {
+    public @Nullable String getIncomingCommunicationBarringNumber() {
         return mIcbNum;
     }
 
