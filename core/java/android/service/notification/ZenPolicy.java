@@ -17,6 +17,7 @@
 package android.service.notification;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.os.Parcel;
@@ -378,14 +379,14 @@ public final class ZenPolicy implements Parcelable {
         /**
          * Builds the current ZenPolicy.
          */
-        public ZenPolicy build() {
+        public @NonNull ZenPolicy build() {
             return mZenPolicy.copy();
         }
 
         /**
          * Allows all notifications to bypass DND and unmutes all streams.
          */
-        public Builder allowAllSounds() {
+        public @NonNull Builder allowAllSounds() {
             for (int i = 0; i < mZenPolicy.mPriorityCategories.size(); i++) {
                 mZenPolicy.mPriorityCategories.set(i, STATE_ALLOW);
             }
@@ -401,7 +402,7 @@ public final class ZenPolicy implements Parcelable {
          * {@link NotificationChannel#canBypassDnd can bypass DND}. If no channels can bypass DND,
          * the ringer stream is also muted.
          */
-        public Builder disallowAllSounds() {
+        public @NonNull Builder disallowAllSounds() {
             for (int i = 0; i < mZenPolicy.mPriorityCategories.size(); i++) {
                 mZenPolicy.mPriorityCategories.set(i, STATE_DISALLOW);
             }
@@ -413,7 +414,7 @@ public final class ZenPolicy implements Parcelable {
         /**
          * Allows notifications intercepted by DND to show on all surfaces when DND is active.
          */
-        public Builder showAllVisualEffects() {
+        public @NonNull Builder showAllVisualEffects() {
             for (int i = 0; i < mZenPolicy.mVisualEffects.size(); i++) {
                 mZenPolicy.mVisualEffects.set(i, STATE_ALLOW);
             }
@@ -423,7 +424,7 @@ public final class ZenPolicy implements Parcelable {
         /**
          * Disallows notifications intercepted by DND from showing when DND is active.
          */
-        public Builder hideAllVisualEffects() {
+        public @NonNull Builder hideAllVisualEffects() {
             for (int i = 0; i < mZenPolicy.mVisualEffects.size(); i++) {
                 mZenPolicy.mVisualEffects.set(i, STATE_DISALLOW);
             }
@@ -435,7 +436,7 @@ public final class ZenPolicy implements Parcelable {
          * unset categories will default to the current applied policy.
          * @hide
          */
-        public Builder unsetPriorityCategory(@PriorityCategory int category) {
+        public @NonNull Builder unsetPriorityCategory(@PriorityCategory int category) {
             mZenPolicy.mPriorityCategories.set(category, STATE_UNSET);
 
             if (category == PRIORITY_CATEGORY_MESSAGES) {
@@ -452,7 +453,7 @@ public final class ZenPolicy implements Parcelable {
          * unset effects will default to the current applied policy.
          * @hide
          */
-        public Builder unsetVisualEffect(@VisualEffect int effect) {
+        public @NonNull Builder unsetVisualEffect(@VisualEffect int effect) {
             mZenPolicy.mVisualEffects.set(effect, STATE_UNSET);
             return this;
         }
@@ -461,7 +462,7 @@ public final class ZenPolicy implements Parcelable {
          * Whether to allow notifications with category {@link Notification#CATEGORY_REMINDER}
          * to play sounds and visually appear or to intercept them when DND is active.
          */
-        public Builder allowReminders(boolean allow) {
+        public @NonNull Builder allowReminders(boolean allow) {
             mZenPolicy.mPriorityCategories.set(PRIORITY_CATEGORY_REMINDERS,
                     allow ? STATE_ALLOW : STATE_DISALLOW);
             return this;
@@ -471,7 +472,7 @@ public final class ZenPolicy implements Parcelable {
          * Whether to allow notifications with category {@link Notification#CATEGORY_EVENT}
          * to play sounds and visually appear or to intercept them when DND is active.
          */
-        public Builder allowEvents(boolean allow) {
+        public @NonNull Builder allowEvents(boolean allow) {
             mZenPolicy.mPriorityCategories.set(PRIORITY_CATEGORY_EVENTS,
                     allow ? STATE_ALLOW : STATE_DISALLOW);
             return this;
@@ -483,7 +484,7 @@ public final class ZenPolicy implements Parcelable {
          * them when DND is active.
          * @param audienceType message senders that are allowed to bypass DND
          */
-        public Builder allowMessages(@PeopleType int audienceType) {
+        public @NonNull Builder allowMessages(@PeopleType int audienceType) {
             if (audienceType == STATE_UNSET) {
                 return unsetPriorityCategory(PRIORITY_CATEGORY_MESSAGES);
             }
@@ -507,7 +508,7 @@ public final class ZenPolicy implements Parcelable {
          * them when DND is active.
          * @param audienceType callers that are allowed to bypass DND
          */
-        public Builder allowCalls(@PeopleType int audienceType) {
+        public @NonNull  Builder allowCalls(@PeopleType int audienceType) {
             if (audienceType == STATE_UNSET) {
                 return unsetPriorityCategory(PRIORITY_CATEGORY_CALLS);
             }
@@ -530,7 +531,7 @@ public final class ZenPolicy implements Parcelable {
          * {@link Notification#CATEGORY_CALL} that have recently called
          * to play sounds and visually appear.
          */
-        public Builder allowRepeatCallers(boolean allow) {
+        public @NonNull Builder allowRepeatCallers(boolean allow) {
             mZenPolicy.mPriorityCategories.set(PRIORITY_CATEGORY_REPEAT_CALLERS,
                     allow ? STATE_ALLOW : STATE_DISALLOW);
             return this;
@@ -542,7 +543,7 @@ public final class ZenPolicy implements Parcelable {
          * to play sounds and visually appear or to intercept them when DND is active.
          * Disallowing alarms will mute the alarm stream when DND is active.
          */
-        public Builder allowAlarms(boolean allow) {
+        public @NonNull Builder allowAlarms(boolean allow) {
             mZenPolicy.mPriorityCategories.set(PRIORITY_CATEGORY_ALARMS,
                     allow ? STATE_ALLOW : STATE_DISALLOW);
             return this;
@@ -553,7 +554,7 @@ public final class ZenPolicy implements Parcelable {
          * appear or to intercept them when DND is active.
          * Disallowing media will mute the media stream when DND is active.
          */
-        public Builder allowMedia(boolean allow) {
+        public @NonNull Builder allowMedia(boolean allow) {
             mZenPolicy.mPriorityCategories.set(PRIORITY_CATEGORY_MEDIA,
                     allow ? STATE_ALLOW : STATE_DISALLOW);
             return this;
@@ -563,7 +564,7 @@ public final class ZenPolicy implements Parcelable {
          * Whether to allow system sounds to play when DND is active.
          * Disallowing system sounds will mute the system stream when DND is active.
          */
-        public Builder allowSystem(boolean allow) {
+        public @NonNull Builder allowSystem(boolean allow) {
             mZenPolicy.mPriorityCategories.set(PRIORITY_CATEGORY_SYSTEM,
                     allow ? STATE_ALLOW : STATE_DISALLOW);
             return this;
@@ -573,7 +574,7 @@ public final class ZenPolicy implements Parcelable {
          * Whether to allow {@link PriorityCategory} sounds to play when DND is active.
          * @hide
          */
-        public Builder allowCategory(@PriorityCategory int category, boolean allow) {
+        public @NonNull Builder allowCategory(@PriorityCategory int category, boolean allow) {
             switch (category) {
                 case PRIORITY_CATEGORY_ALARMS:
                     allowAlarms(allow);
@@ -601,7 +602,7 @@ public final class ZenPolicy implements Parcelable {
          * Whether {@link Notification#fullScreenIntent full screen intents} that are intercepted
          * by DND are shown.
          */
-        public Builder showFullScreenIntent(boolean show) {
+        public @NonNull Builder showFullScreenIntent(boolean show) {
             mZenPolicy.mVisualEffects.set(VISUAL_EFFECT_FULL_SCREEN_INTENT,
                     show ? STATE_ALLOW : STATE_DISALLOW);
             return this;
@@ -611,7 +612,7 @@ public final class ZenPolicy implements Parcelable {
          * Whether {@link NotificationChannel#shouldShowLights() notification lights} from
          * notifications intercepted by DND are blocked.
          */
-        public Builder showLights(boolean show) {
+        public @NonNull Builder showLights(boolean show) {
             mZenPolicy.mVisualEffects.set(VISUAL_EFFECT_LIGHTS,
                     show ? STATE_ALLOW : STATE_DISALLOW);
             return this;
@@ -620,7 +621,7 @@ public final class ZenPolicy implements Parcelable {
         /**
          * Whether notifications intercepted by DND are prevented from peeking.
          */
-        public Builder showPeeking(boolean show) {
+        public @NonNull Builder showPeeking(boolean show) {
             mZenPolicy.mVisualEffects.set(VISUAL_EFFECT_PEEK,
                     show ? STATE_ALLOW : STATE_DISALLOW);
             return this;
@@ -630,7 +631,7 @@ public final class ZenPolicy implements Parcelable {
          * Whether notifications intercepted by DND are prevented from appearing in the status bar
          * on devices that support status bars.
          */
-        public Builder showStatusBarIcons(boolean show) {
+        public @NonNull Builder showStatusBarIcons(boolean show) {
             mZenPolicy.mVisualEffects.set(VISUAL_EFFECT_STATUS_BAR,
                     show ? STATE_ALLOW : STATE_DISALLOW);
             return this;
@@ -640,7 +641,7 @@ public final class ZenPolicy implements Parcelable {
          * Whether {@link NotificationChannel#canShowBadge() badges} from
          * notifications intercepted by DND are allowed on devices that support badging.
          */
-        public Builder showBadges(boolean show) {
+        public @NonNull Builder showBadges(boolean show) {
             mZenPolicy.mVisualEffects.set(VISUAL_EFFECT_BADGE,
                     show ? STATE_ALLOW : STATE_DISALLOW);
             return this;
@@ -650,7 +651,7 @@ public final class ZenPolicy implements Parcelable {
          * Whether notification intercepted by DND are prevented from appearing on ambient displays
          * on devices that support ambient display.
          */
-        public Builder showInAmbientDisplay(boolean show) {
+        public @NonNull Builder showInAmbientDisplay(boolean show) {
             mZenPolicy.mVisualEffects.set(VISUAL_EFFECT_AMBIENT,
                     show ? STATE_ALLOW : STATE_DISALLOW);
             return this;
@@ -661,7 +662,7 @@ public final class ZenPolicy implements Parcelable {
          * list views like the notification shade or lockscreen on devices that support those
          * views.
          */
-        public Builder showInNotificationList(boolean show) {
+        public @NonNull Builder showInNotificationList(boolean show) {
             mZenPolicy.mVisualEffects.set(VISUAL_EFFECT_NOTIFICATION_LIST,
                     show ? STATE_ALLOW : STATE_DISALLOW);
             return this;
@@ -672,7 +673,7 @@ public final class ZenPolicy implements Parcelable {
          * {@link VisualEffect}
          * @hide
          */
-        public Builder showVisualEffect(@VisualEffect int effect, boolean show) {
+        public @NonNull Builder showVisualEffect(@VisualEffect int effect, boolean show) {
             switch (effect) {
                 case VISUAL_EFFECT_FULL_SCREEN_INTENT:
                     showFullScreenIntent(show);
@@ -1001,7 +1002,7 @@ public final class ZenPolicy implements Parcelable {
      * Makes deep copy of this ZenPolicy.
      * @hide
      */
-    public ZenPolicy copy() {
+    public @NonNull ZenPolicy copy() {
         final Parcel parcel = Parcel.obtain();
         try {
             writeToParcel(parcel, 0);
