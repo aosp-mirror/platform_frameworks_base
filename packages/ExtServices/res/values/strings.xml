@@ -24,4 +24,10 @@
         <item>EDIT_DISTANCE</item>
         <item>EXACT_MATCH</item>
     </string-array>
+
+    <!-- Action chip to copy a one time code to the user's clipboard [CHAR LIMIT=NONE]-->
+    <string name="copy_code_desc">Copy \u201c<xliff:g id="code" example="12345">%1$s</xliff:g>\u201c</string>
+    <!-- Toast to display when text is copied to the device clipboard [CHAR LIMIT=64]-->
+    <string name="code_copied_to_clipboard">Code copied</string>
+
 </resources>
