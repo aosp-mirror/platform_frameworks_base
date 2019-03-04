@@ -40,6 +40,7 @@ oneway interface IPermissionController {
     void getPermissionUsages(boolean countSystem, long numMillis, in RemoteCallback callback);
     void isApplicationQualifiedForRole(String roleName, String packageName,
             in RemoteCallback callback);
+    void isRoleVisible(String roleName, in RemoteCallback callback);
     void setRuntimePermissionGrantStateByDeviceAdmin(String callerPackageName, String packageName,
             String permission, int grantState, in RemoteCallback callback);
 }

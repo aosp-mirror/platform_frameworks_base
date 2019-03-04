@@ -5689,6 +5689,7 @@ package android.permission {
     method @NonNull public abstract java.util.List<android.permission.RuntimePermissionUsageInfo> onGetPermissionUsages(boolean, long);
     method public abstract void onGetRuntimePermissionsBackup(@NonNull android.os.UserHandle, @NonNull java.io.OutputStream);
     method public abstract boolean onIsApplicationQualifiedForRole(@NonNull String, @NonNull String);
+    method public abstract boolean onIsRoleVisible(@NonNull String);
     method @BinderThread public abstract boolean onRestoreDelayedRuntimePermissionsBackup(@NonNull String, @NonNull android.os.UserHandle);
     method @BinderThread public abstract void onRestoreRuntimePermissionsBackup(@NonNull android.os.UserHandle, @NonNull java.io.InputStream);
     method public abstract void onRevokeRuntimePermission(@NonNull String, @NonNull String);
