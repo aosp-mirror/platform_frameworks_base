@@ -16,6 +16,7 @@
 
 package android.util;
 
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsProvider;
@@ -126,7 +127,7 @@ public class DocumentsStatsLog {
      *
      * @param packageName
      */
-    public static void logPickerLaunchedFrom(String packageName) {
+    public static void logPickerLaunchedFrom(@Nullable String packageName) {
         StatsLog.write(StatsLog.DOCS_UI_PICKER_LAUNCHED_FROM_REPORTED, packageName);
     }
 

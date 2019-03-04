@@ -9363,7 +9363,7 @@ package android.util {
     method public static void logFileOperationFailure(int, int);
     method public static void logFilePick(int, long, int, boolean, int, int, int);
     method public static void logInvalidScopedAccessRequest(int);
-    method public static void logPickerLaunchedFrom(String);
+    method public static void logPickerLaunchedFrom(@Nullable String);
     method public static void logRootVisited(int, int);
     method public static void logSearchMode(int);
     method public static void logSearchType(int);
