@@ -19,7 +19,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.content.ContentValues;
 import android.database.Cursor;
-import android.hardware.radio.V1_0.ApnTypes;
+import android.hardware.radio.V1_4.ApnTypes;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -79,7 +79,7 @@ public class ApnSetting implements Parcelable {
      * APN type for all APNs.
      * @hide
      */
-    public static final int TYPE_ALL = ApnTypes.ALL;
+    public static final int TYPE_ALL = ApnTypes.ALL | ApnTypes.MCX;
     /** APN type for default data traffic. */
     public static final int TYPE_DEFAULT = ApnTypes.DEFAULT | ApnTypes.HIPRI;
     /** APN type for MMS traffic. */
@@ -103,6 +103,8 @@ public class ApnSetting implements Parcelable {
      * for access to carrier services in an emergency call situation.
      */
     public static final int TYPE_EMERGENCY = ApnTypes.EMERGENCY;
+    /** APN type for MCX (Mission Critical Service) where X can be PTT/Video/Data */
+    public static final int TYPE_MCX = ApnTypes.MCX;
 
     /** @hide */
     @IntDef(flag = true, prefix = { "TYPE_" }, value = {
@@ -115,7 +117,8 @@ public class ApnSetting implements Parcelable {
         TYPE_IMS,
         TYPE_CBS,
         TYPE_IA,
-        TYPE_EMERGENCY
+        TYPE_EMERGENCY,
+        TYPE_MCX
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ApnType {}
@@ -206,6 +209,7 @@ public class ApnSetting implements Parcelable {
         APN_TYPE_STRING_MAP.put("cbs", TYPE_CBS);
         APN_TYPE_STRING_MAP.put("ia", TYPE_IA);
         APN_TYPE_STRING_MAP.put("emergency", TYPE_EMERGENCY);
+        APN_TYPE_STRING_MAP.put("mcx", TYPE_MCX);
         APN_TYPE_INT_MAP = new ArrayMap<Integer, String>();
         APN_TYPE_INT_MAP.put(TYPE_DEFAULT, "default");
         APN_TYPE_INT_MAP.put(TYPE_MMS, "mms");
@@ -217,6 +221,7 @@ public class ApnSetting implements Parcelable {
         APN_TYPE_INT_MAP.put(TYPE_CBS, "cbs");
         APN_TYPE_INT_MAP.put(TYPE_IA, "ia");
         APN_TYPE_INT_MAP.put(TYPE_EMERGENCY, "emergency");
+        APN_TYPE_INT_MAP.put(TYPE_MCX, "mcx");
 
         PROTOCOL_STRING_MAP = new ArrayMap<String, Integer>();
         PROTOCOL_STRING_MAP.put("IP", PROTOCOL_IP);
@@ -1833,7 +1838,7 @@ public class ApnSetting implements Parcelable {
          * {@link ApnSetting} built from this builder otherwise.
          */
         public ApnSetting build() {
-            if ((mApnTypeBitmask & ApnTypes.ALL) == 0 || TextUtils.isEmpty(mApnName)
+            if ((mApnTypeBitmask & TYPE_ALL) == 0 || TextUtils.isEmpty(mApnName)
                 || TextUtils.isEmpty(mEntryName)) {
                 return null;
             }
