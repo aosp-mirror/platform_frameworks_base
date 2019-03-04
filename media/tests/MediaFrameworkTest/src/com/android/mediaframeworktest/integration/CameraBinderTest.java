@@ -309,6 +309,10 @@ public class CameraBinderTest extends AndroidTestCase {
             Log.v(TAG, String.format("Camera %s has torch status changed to 0x%x",
                     cameraId, status));
         }
+        @Override
+        public void onCameraAccessPrioritiesChanged() {
+            Log.v(TAG, "Camera access permission change");
+        }
     }
 
     /**
