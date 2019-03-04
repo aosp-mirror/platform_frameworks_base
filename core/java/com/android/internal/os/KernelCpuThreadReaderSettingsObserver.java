@@ -57,14 +57,14 @@ public class KernelCpuThreadReaderSettingsObserver extends ContentObserver {
      * List of UIDs to report data for
      */
     private static final String COLLECTED_UIDS_SETTINGS_KEY = "collected_uids";
-    private static final String COLLECTED_UIDS_DEFAULT = "1000-1000";
+    private static final String COLLECTED_UIDS_DEFAULT = "0-0;1000-1000";
 
     /**
      * Minimum total CPU usage to report
      */
     private static final String MINIMUM_TOTAL_CPU_USAGE_MILLIS_SETTINGS_KEY =
             "minimum_total_cpu_usage_millis";
-    private static final int MINIMUM_TOTAL_CPU_USAGE_MILLIS_DEFAULT = 0;
+    private static final int MINIMUM_TOTAL_CPU_USAGE_MILLIS_DEFAULT = 10000;
 
     private final Context mContext;
 

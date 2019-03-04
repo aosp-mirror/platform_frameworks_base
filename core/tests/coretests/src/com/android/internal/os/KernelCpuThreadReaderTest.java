@@ -518,6 +518,17 @@ public class KernelCpuThreadReaderTest {
     }
 
     @Test
+    public void testUidPredicate_zero() {
+        KernelCpuThreadReaderSettingsObserver.UidPredicate uidPredicate =
+                KernelCpuThreadReaderSettingsObserver.UidPredicate.fromString("0-0");
+        assertTrue(uidPredicate.test(0));
+        assertFalse(uidPredicate.test(1));
+        assertFalse(uidPredicate.test(2000));
+        assertFalse(uidPredicate.test(10000));
+        assertFalse(uidPredicate.test(-100));
+    }
+
+    @Test
     public void testUidPredicate_emptyRangeString() {
         assertThrows(
                 NumberFormatException.class,
