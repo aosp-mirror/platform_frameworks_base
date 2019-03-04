@@ -3321,6 +3321,17 @@ public final class Settings {
                         ColorDisplayManager.COLOR_MODE_AUTOMATIC);
 
         /**
+         * The user selected peak refresh rate in frames per second.
+         *
+         * If this isn't set, the system falls back to a device specific default.
+         * @hide
+         */
+        public static final String PEAK_REFRESH_RATE = "peak_refresh_rate";
+
+        private static final Validator PEAK_REFRESH_RATE_VALIDATOR =
+                new SettingsValidators.InclusiveFloatRangeValidator(24f, Float.MAX_VALUE);
+
+        /**
          * The amount of time in milliseconds before the device goes to sleep or begins
          * to dream after a period of inactivity.  This value is also known as the
          * user activity timeout period since the screen isn't necessarily turned off

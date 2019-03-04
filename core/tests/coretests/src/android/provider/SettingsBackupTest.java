@@ -92,7 +92,8 @@ public class SettingsBackupTest {
                     Settings.System.VOLUME_SYSTEM, // deprecated since API 2?
                     Settings.System.VOLUME_VOICE, // deprecated since API 2?
                     Settings.System.WHEN_TO_MAKE_WIFI_CALLS, // bug?
-                    Settings.System.WINDOW_ORIENTATION_LISTENER_LOG // used for debugging only
+                    Settings.System.WINDOW_ORIENTATION_LISTENER_LOG, // used for debugging only
+                    Settings.System.PEAK_REFRESH_RATE // depends on hardware capabilities
                     );
 
     private static final Set<String> BACKUP_BLACKLISTED_GLOBAL_SETTINGS =
