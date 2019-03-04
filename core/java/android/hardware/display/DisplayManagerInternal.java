@@ -187,14 +187,6 @@ public abstract class DisplayManagerInternal {
     public abstract void setDisplayAccessUIDs(SparseArray<IntArray> displayAccessUIDs);
 
     /**
-     * Check if specified UID's content is present on display and should be granted access to it.
-     *
-     * @param uid UID to be checked.
-     * @param displayId id of the display where presence of the content is checked.
-     * */
-    public abstract boolean isUidPresentOnDisplay(int uid, int displayId);
-
-    /**
      * Persist brightness slider events and ambient brightness stats.
      */
     public abstract void persistBrightnessTrackerState();

@@ -1689,8 +1689,9 @@ public final class DisplayManagerService extends SystemService {
          * Returns information about the specified logical display.
          *
          * @param displayId The logical display id.
-         * @return The logical display info, or null if the display does not exist.  The
-         * returned object must be treated as immutable.
+         * @return The logical display info, return {@code null} if the display does not exist or
+         * the calling UID isn't present on the display.  The returned object must be treated as
+         * immutable.
          */
         @Override // Binder call
         public DisplayInfo getDisplayInfo(int displayId) {
@@ -1712,6 +1713,16 @@ public final class DisplayManagerService extends SystemService {
             final long token = Binder.clearCallingIdentity();
             try {
                 return getDisplayIdsInternal(callingUid);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override // Binder call
+        public boolean isUidPresentOnDisplay(int uid, int displayId) {
+            final long token = Binder.clearCallingIdentity();
+            try {
+                return isUidPresentOnDisplayInternal(uid, displayId);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -2382,11 +2393,6 @@ public final class DisplayManagerService extends SystemService {
         @Override
         public void setDisplayAccessUIDs(SparseArray<IntArray> newDisplayAccessUIDs) {
             setDisplayAccessUIDsInternal(newDisplayAccessUIDs);
-        }
-
-        @Override
-        public boolean isUidPresentOnDisplay(int uid, int displayId) {
-            return isUidPresentOnDisplayInternal(uid, displayId);
         }
 
         @Override

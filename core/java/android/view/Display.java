@@ -21,6 +21,7 @@ import static android.Manifest.permission.CONFIGURE_DISPLAY_COLOR_MODE;
 import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.app.KeyguardManager;
 import android.content.res.CompatibilityInfo;
@@ -1096,16 +1097,19 @@ public final class Display {
      * Returns true if the specified UID has access to this display.
      * @hide
      */
+    @TestApi
     public boolean hasAccess(int uid) {
-        return Display.hasAccess(uid, mFlags, mOwnerUid);
+        return hasAccess(uid, mFlags, mOwnerUid, mDisplayId);
     }
 
     /** @hide */
-    public static boolean hasAccess(int uid, int flags, int ownerUid) {
+    public static boolean hasAccess(int uid, int flags, int ownerUid, int displayId) {
         return (flags & Display.FLAG_PRIVATE) == 0
                 || uid == ownerUid
                 || uid == Process.SYSTEM_UID
-                || uid == 0;
+                || uid == 0
+                // Check if the UID is present on given display.
+                || DisplayManagerGlobal.getInstance().isUidPresentOnDisplay(uid, displayId);
     }
 
     /**

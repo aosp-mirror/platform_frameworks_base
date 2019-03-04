@@ -2732,6 +2732,10 @@ package android.view {
     field public static final int CALLBACK_ANIMATION = 1; // 0x1
   }
 
+  public final class Display {
+    method public boolean hasAccess(int);
+  }
+
   public class FocusFinder {
     method public static void sort(android.view.View[], int, int, android.view.ViewGroup, boolean);
   }
