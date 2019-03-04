@@ -5707,7 +5707,7 @@ package android.permission {
   }
 
   public final class RuntimePermissionPresentationInfo implements android.os.Parcelable {
-    ctor public RuntimePermissionPresentationInfo(CharSequence, boolean, boolean);
+    ctor public RuntimePermissionPresentationInfo(@NonNull CharSequence, boolean, boolean);
     method public int describeContents();
     method @NonNull public CharSequence getLabel();
     method public boolean isGranted();
