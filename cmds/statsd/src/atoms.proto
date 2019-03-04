@@ -5759,7 +5759,7 @@ message TimeZoneDataInfo {
     optional string tzdb_version = 1;
 }
 
-/*
+/**
  * Logs the GPU stats global health information.
  *
  * Logged from:
@@ -5791,22 +5791,34 @@ message GpuStatsGlobalInfo {
     optional int64 vk_loading_failure_count = 8;
 }
 
-/*
+/**
+ * GPU driver loading time info.
+ */
+message GpuDriverLoadingTime {
+    // List of all the driver loading times for this app. The list size is
+    // capped at 50.
+    repeated int64 driver_loading_time = 1;
+}
+
+/**
  * Logs the GPU stats per app health information.
  *
  * Logged from:
  *   frameworks/native/services/gpuservice/gpustats/
  */
 message GpuStatsAppInfo {
-    // Package name of the application that loads the gpu driver.
+    // Package name of the application that loads the gpu driver. Total number
+    // of different packages is capped at 100.
     optional string app_package_name = 1;
 
     // Version code of the gpu driver this app loads.
     optional int64 driver_version_code = 2;
 
-    // List of all the gl driver loading times for this app.
-    repeated int64 gl_driver_loading_time = 3;
+    // gl driver loading time info.
+    optional GpuDriverLoadingTime gl_driver_loading_time = 3
+            [(android.os.statsd.log_mode) = MODE_BYTES];
 
-    // List of all the Vulkan driver laoding times for this app.
-    repeated int64 vk_driver_loading_time = 4;
+    // Vulkan driver loading time info.
+    optional GpuDriverLoadingTime vk_driver_loading_time = 4
+            [(android.os.statsd.log_mode) = MODE_BYTES];
 }
