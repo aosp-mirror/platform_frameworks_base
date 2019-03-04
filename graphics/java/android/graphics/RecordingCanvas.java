@@ -166,7 +166,9 @@ public final class RecordingCanvas extends DisplayListCanvas {
      * @param drawGLFunction A native function pointer
      *
      * @hide
+     * @deprecated Use {@link #drawWebViewFunctor(int)}
      */
+    @Deprecated
     public void callDrawGLFunction2(long drawGLFunction) {
         nCallDrawGLFunction(mNativeCanvasWrapper, drawGLFunction, null);
     }
@@ -184,7 +186,9 @@ public final class RecordingCanvas extends DisplayListCanvas {
      * canvas's display list has been released.
      *
      * @hide
+     * @deprecated Use {@link #drawWebViewFunctor(int)}
      */
+    @Deprecated
     public void drawGLFunctor2(long drawGLFunctor, @Nullable Runnable releasedCallback) {
         nCallDrawGLFunction(mNativeCanvasWrapper, drawGLFunctor, releasedCallback);
     }

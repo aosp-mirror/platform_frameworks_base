@@ -79,7 +79,10 @@ public final class WebViewDelegate {
     /**
      * Returns {@code true} if the draw GL functor can be invoked (see {@link #invokeDrawGlFunctor})
      * and {@code false} otherwise.
+     *
+     * @deprecated Use {@link #drawWebViewFunctor(Canvas, int)}
      */
+    @Deprecated
     public boolean canInvokeDrawGlFunctor(View containerView) {
         return true;
     }
@@ -90,7 +93,9 @@ public final class WebViewDelegate {
      *
      * @param nativeDrawGLFunctor the pointer to the native functor that implements
      *        system/core/include/utils/Functor.h
+     * @deprecated Use {@link #drawWebViewFunctor(Canvas, int)}
      */
+    @Deprecated
     public void invokeDrawGlFunctor(View containerView, long nativeDrawGLFunctor,
             boolean waitForCompletion) {
         ViewRootImpl.invokeFunctor(nativeDrawGLFunctor, waitForCompletion);
@@ -105,7 +110,9 @@ public final class WebViewDelegate {
      * @param nativeDrawGLFunctor the pointer to the native functor that implements
      *        system/core/include/utils/Functor.h
      * @throws IllegalArgumentException if the canvas is not hardware accelerated
+     * @deprecated Use {@link #drawWebViewFunctor(Canvas, int)}
      */
+    @Deprecated
     public void callDrawGlFunction(Canvas canvas, long nativeDrawGLFunctor) {
         if (!(canvas instanceof RecordingCanvas)) {
             // Canvas#isHardwareAccelerated() is only true for subclasses of HardwareCanvas.
@@ -126,7 +133,9 @@ public final class WebViewDelegate {
      * @param releasedRunnable Called when this nativeDrawGLFunctor is no longer referenced by this
      *        canvas, so is safe to be destroyed.
      * @throws IllegalArgumentException if the canvas is not hardware accelerated
+     * @deprecated Use {@link #drawWebViewFunctor(Canvas, int)}
      */
+    @Deprecated
     public void callDrawGlFunction(@NonNull Canvas canvas, long nativeDrawGLFunctor,
             @Nullable Runnable releasedRunnable) {
         if (!(canvas instanceof RecordingCanvas)) {
@@ -139,7 +148,7 @@ public final class WebViewDelegate {
 
     /**
      * Call webview draw functor. See API in draw_fn.h.
-     * @param canvas a hardware accelerated canvas (see {@link Canvas#isHardwareAccelerated()}).
+     * @param canvas a {@link RecordingCanvas}.
      * @param functor created by AwDrawFn_CreateFunctor in draw_fn.h.
      */
     public void drawWebViewFunctor(@NonNull Canvas canvas, int functor) {
@@ -156,7 +165,9 @@ public final class WebViewDelegate {
      *
      * @param nativeDrawGLFunctor the pointer to the native functor that implements
      *        system/core/include/utils/Functor.h
+     * @deprecated Use {@link #drawWebViewFunctor(Canvas, int)}
      */
+    @Deprecated
     public void detachDrawGlFunctor(View containerView, long nativeDrawGLFunctor) {
         ViewRootImpl viewRootImpl = containerView.getViewRootImpl();
         if (nativeDrawGLFunctor != 0 && viewRootImpl != null) {
