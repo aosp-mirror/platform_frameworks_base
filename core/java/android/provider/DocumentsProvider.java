@@ -487,10 +487,12 @@ public abstract class DocumentsProvider extends ContentProvider {
      * @see DocumentsContract#EXTRA_LOADING
      */
     @SuppressWarnings("unused")
+    @Nullable
     public Cursor queryRecentDocuments(
-            String rootId, String[] projection, @Nullable Bundle queryArgs,
-            @Nullable CancellationSignal signal)
-            throws FileNotFoundException {
+            @NonNull String rootId, @Nullable String[] projection, @Nullable Bundle queryArgs,
+            @Nullable CancellationSignal signal) throws FileNotFoundException {
+        Preconditions.checkNotNull(rootId, "rootId can not be null");
+
         Cursor c = queryRecentDocuments(rootId, projection);
         Bundle extras = new Bundle();
         c.setExtras(extras);
@@ -697,8 +699,9 @@ public abstract class DocumentsProvider extends ContentProvider {
      * @see DocumentsContract#EXTRA_ERROR
      */
     @SuppressWarnings("unused")
-    public Cursor querySearchDocuments(@NonNull String rootId, @Nullable String[] projection,
-            @NonNull Bundle queryArgs) throws FileNotFoundException {
+    @Nullable
+    public Cursor querySearchDocuments(@NonNull String rootId,
+            @Nullable String[] projection, @NonNull Bundle queryArgs) throws FileNotFoundException {
         Preconditions.checkNotNull(rootId, "rootId can not be null");
         Preconditions.checkNotNull(queryArgs, "queryArgs can not be null");
         return querySearchDocuments(rootId, DocumentsContract.getSearchDocumentsQuery(queryArgs),

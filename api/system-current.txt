@@ -5929,8 +5929,8 @@ package android.provider {
   }
 
   public final class DocumentsContract {
-    method public static boolean isManageMode(android.net.Uri);
-    method public static android.net.Uri setManageMode(android.net.Uri);
+    method public static boolean isManageMode(@NonNull android.net.Uri);
+    method @NonNull public static android.net.Uri setManageMode(@NonNull android.net.Uri);
     field public static final String ACTION_DOCUMENT_ROOT_SETTINGS = "android.provider.action.DOCUMENT_ROOT_SETTINGS";
     field public static final String ACTION_MANAGE_DOCUMENT = "android.provider.action.MANAGE_DOCUMENT";
     field public static final String EXTRA_SHOW_ADVANCED = "android.provider.extra.SHOW_ADVANCED";
