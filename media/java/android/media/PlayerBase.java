@@ -571,13 +571,12 @@ public abstract class PlayerBase {
     // Utilities
 
     /**
+     * @hide
      * Use to generate warning or exception in legacy code paths that allowed passing stream types
      * to qualify audio playback.
      * @param streamType the stream type to check
      * @throws IllegalArgumentException
-     * @deprecated This method is not intended to be used by applications.
      */
-    @java.lang.Deprecated
     public static void deprecateStreamTypeForPlayback(int streamType, @NonNull String className,
             @NonNull String opName) throws IllegalArgumentException {
         // STREAM_ACCESSIBILITY was introduced at the same time the use of stream types
