@@ -27,6 +27,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Handler;
 import android.provider.Settings;
+import android.service.quicksettings.Tile;
 import android.service.quicksettings.TileService;
 import android.text.TextUtils;
 import android.util.ArraySet;
@@ -166,7 +167,8 @@ public class TileQueryHelper {
                 icon.mutate();
                 icon.setTint(mContext.getColor(android.R.color.white));
                 CharSequence label = info.serviceInfo.loadLabel(pm);
-                addTile(spec, icon, label != null ? label.toString() : "null", appLabel);
+                createStateAndAddTile(spec, icon, label != null ? label.toString() : "null",
+                        appLabel);
             }
 
             notifyTilesChanged(true);
@@ -207,9 +209,10 @@ public class TileQueryHelper {
         mSpecs.add(spec);
     }
 
-    private void addTile(
+    private void createStateAndAddTile(
             String spec, Drawable drawable, CharSequence label, CharSequence appLabel) {
         QSTile.State state = new QSTile.State();
+        state.state = Tile.STATE_INACTIVE;
         state.label = label;
         state.contentDescription = label;
         state.icon = new DrawableIcon(drawable);
