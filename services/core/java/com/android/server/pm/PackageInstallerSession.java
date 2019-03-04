@@ -510,6 +510,13 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
     }
 
+    /** {@hide} */
+    boolean isCommitted() {
+        synchronized (mLock) {
+            return mCommitted;
+        }
+    }
+
     @GuardedBy("mLock")
     private void assertPreparedAndNotSealedLocked(String cookie) {
         assertPreparedAndNotCommittedOrDestroyedLocked(cookie);
@@ -1064,7 +1071,13 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     private void handleCommit() {
         if (params.isStaged) {
-            mStagingManager.commitSession(this);
+            try {
+                mStagingManager.commitSession(this);
+            } catch (StagingManager.AlreadyInProgressStagedSessionException e) {
+                dispatchSessionFinished(
+                        PackageManager.INSTALL_FAILED_OTHER_STAGED_SESSION_IN_PROGRESS,
+                        e.getMessage(), null);
+            }
             destroyInternal();
             dispatchSessionFinished(PackageManager.INSTALL_SUCCEEDED, "Session staged", null);
             return;
