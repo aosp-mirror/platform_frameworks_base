@@ -114,6 +114,7 @@ public class DynamicAndroidInstallationService extends Service
     private NotificationManager mNM;
 
     private long mSystemSize;
+    private long mUserdataSize;
     private long mInstalledSize;
     private boolean mJustCancelledByUser;
 
@@ -220,9 +221,11 @@ public class DynamicAndroidInstallationService extends Service
 
         String url = intent.getStringExtra(DynamicAndroidClient.KEY_SYSTEM_URL);
         mSystemSize = intent.getLongExtra(DynamicAndroidClient.KEY_SYSTEM_SIZE, 0);
-        long userdata = intent.getLongExtra(DynamicAndroidClient.KEY_USERDATA_SIZE, 0);
+        mUserdataSize = intent.getLongExtra(DynamicAndroidClient.KEY_USERDATA_SIZE, 0);
 
-        mInstallTask = new InstallationAsyncTask(url, mSystemSize, userdata, mDynAndroid, this);
+        mInstallTask = new InstallationAsyncTask(
+                url, mSystemSize, mUserdataSize, mDynAndroid, this);
+
         mInstallTask.execute();
 
         // start fore ground
@@ -332,8 +335,8 @@ public class DynamicAndroidInstallationService extends Service
             case STATUS_IN_PROGRESS:
                 builder.setContentText(getString(R.string.notification_install_inprogress));
 
-                int max = (int) Math.max(mSystemSize >> 20, 1);
-                int progress = (int) mInstalledSize >> 20;
+                int max = (int) Math.max((mSystemSize + mUserdataSize) >> 20, 1);
+                int progress = (int) (mInstalledSize >> 20);
 
                 builder.setProgress(max, progress, false);
 
