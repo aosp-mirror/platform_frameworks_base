@@ -357,7 +357,7 @@ public class WifiP2pConfig implements Parcelable {
         }
 
         /**
-         * Specify the frequency to use for creating the group or joining the group.
+         * Specify the frequency, in MHz, to use for creating the group or joining the group.
          * <p>
          * When creating a group as Group Owner using {@link WifiP2pManager#createGroup(
          * WifiP2pManager.Channel, WifiP2pConfig, WifiP2pManager.ActionListener)},
