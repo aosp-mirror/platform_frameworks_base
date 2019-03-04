@@ -17,6 +17,8 @@
 package android.net.wifi.p2p;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
 import android.net.MacAddress;
 import android.net.wifi.WpsInfo;
@@ -240,7 +242,7 @@ public class WifiP2pConfig implements Parcelable {
          * @return The builder to facilitate chaining
          *         {@code builder.setXXX(..).setXXX(..)}.
          */
-        public Builder setDeviceAddress(MacAddress deviceAddress) {
+        public @NonNull Builder setDeviceAddress(@Nullable MacAddress deviceAddress) {
             if (deviceAddress == null) {
                 mDeviceAddress = MAC_ANY_ADDRESS;
             } else {
@@ -391,7 +393,7 @@ public class WifiP2pConfig implements Parcelable {
          * @return The builder to facilitate chaining
          *         {@code builder.setXXX(..).setXXX(..)}.
          */
-        public Builder enablePersistentMode(boolean persistent) {
+        public @NonNull Builder enablePersistentMode(boolean persistent) {
             if (persistent) {
                 mNetId = WifiP2pGroup.PERSISTENT_NET_ID;
             } else {
@@ -404,7 +406,7 @@ public class WifiP2pConfig implements Parcelable {
          * Build {@link WifiP2pConfig} given the current requests made on the builder.
          * @return {@link WifiP2pConfig} constructed based on builder method calls.
          */
-        public WifiP2pConfig build() {
+        public @NonNull WifiP2pConfig build() {
             if (TextUtils.isEmpty(mNetworkName)) {
                 throw new IllegalStateException(
                         "network name must be non-empty.");
