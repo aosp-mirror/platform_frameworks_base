@@ -172,7 +172,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.ParcelFileDescriptor;
-import android.os.ParcelableException;
 import android.os.PersistableBundle;
 import android.os.PowerManager;
 import android.os.PowerManagerInternal;
@@ -5338,8 +5337,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
      */
     @Override
     public long getRequiredStrongAuthTimeout(ComponentName who, int userId, boolean parent) {
-        if (!mHasFeature || !mLockPatternUtils.hasSecureLockScreen()) {
+        if (!mHasFeature) {
             return DevicePolicyManager.DEFAULT_STRONG_AUTH_TIMEOUT_MS;
+        }
+        if (!mLockPatternUtils.hasSecureLockScreen()) {
+            // No strong auth timeout on devices not supporting the
+            // {@link PackageManager#FEATURE_SECURE_LOCK_SCREEN} feature
+            return 0;
         }
         enforceFullCrossUsersPermission(userId);
         synchronized (getLockObject()) {
