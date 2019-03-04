@@ -10,7 +10,6 @@
     android:gravity="bottom|center"
     android:clipChildren="false"
 >
-
     <LinearLayout
         android:layout_height="wrap_content"
         android:layout_width="match_parent"
@@ -35,14 +34,13 @@
             android:gravity="center"
             android:translationZ="@dimen/global_actions_translate"
         />
-
         <!-- Grid of action items -->
         <com.android.systemui.globalactions.ListGridLayout
             android:id="@android:id/list"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layoutDirection="rtl"
+            android:orientation="vertical"
+            android:gravity="right"
             android:layout_marginRight="@dimen/global_actions_grid_side_margin"
             android:translationZ="@dimen/global_actions_translate"
             android:paddingLeft="@dimen/global_actions_grid_horizontal_padding"
@@ -55,19 +53,19 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:visibility="gone"
-                android:orientation="vertical"
+                android:layoutDirection="locale"
             />
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:visibility="gone"
-                android:orientation="vertical"
+                android:layoutDirection="locale"
             />
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:visibility="gone"
-                android:orientation="vertical"
+                android:layoutDirection="locale"
             />
         </com.android.systemui.globalactions.ListGridLayout>
     </LinearLayout>
