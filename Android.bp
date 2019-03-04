@@ -1687,3 +1687,11 @@ droidstubs {
         },
     },
 }
+
+// Creates an index of AIDL methods; used for adding UnsupportedAppUsage
+// annotations to private apis
+aidl_mapping {
+    name: "framework-aidl-mappings",
+    srcs: [":framework-defaults"],
+    output: "framework-aidl-mappings.txt"
+}
