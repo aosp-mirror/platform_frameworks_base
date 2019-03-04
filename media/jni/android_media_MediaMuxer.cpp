@@ -18,7 +18,7 @@
 #define LOG_TAG "MediaMuxer-JNI"
 #include <utils/Log.h>
 
-#include "android_media_Utils.h"
+#include "android_media_Streams.h"
 #include "android_runtime/AndroidRuntime.h"
 #include "jni.h"
 #include <nativehelper/JNIHelp.h>
