@@ -579,9 +579,9 @@ public class GradientDrawable extends Drawable {
      * The default value for this property is {@code false}.
      * <p>
      * <strong>Note</strong>: This property corresponds to the
-     * {@code android:useLevel} attribute on the inner {@code &lt;gradient&gt;}
+     * {@code android:useLevel} attribute on the inner {@code <gradient>}
      * tag, NOT the {@code android:useLevel} attribute on the outer
-     * {@code &lt;shape&gt;} tag. For example,
+     * {@code <shape>} tag. For example,
      * <pre>{@code
      * <shape ...>
      *     <gradient
