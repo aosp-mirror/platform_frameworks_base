@@ -2287,4 +2287,7 @@ enum PageId {
 
     // OPEN: Accessibility detail settings (android.settings.ACCESSIBILITY_DETAILS_SETTINGS intent)
     ACCESSIBILITY_DETAILS_SETTINGS = 1682;
+
+    // Open: Settings will show the conditional when Grayscale mode is on
+    SETTINGS_CONDITION_GRAYSCALE_MODE = 1683;
 }
