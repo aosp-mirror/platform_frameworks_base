@@ -193,7 +193,7 @@ public class HardwareRenderer {
      *
      * @param name The debug name to use for this HardwareRenderer instance
      */
-    public void setName(String name) {
+    public void setName(@NonNull String name) {
         nSetName(mNativeProxy, name);
     }
 
@@ -330,7 +330,7 @@ public class HardwareRenderer {
          *
          * @return this instance
          */
-        public FrameRenderRequest setVsyncTime(long vsyncTime) {
+        public @NonNull FrameRenderRequest setVsyncTime(long vsyncTime) {
             mFrameInfo.setVsync(vsyncTime, vsyncTime);
             mFrameInfo.addFlags(FrameInfo.FLAG_SURFACE_CANVAS);
             return this;
@@ -351,7 +351,7 @@ public class HardwareRenderer {
          *
          * @return this instance
          */
-        public FrameRenderRequest setFrameCommitCallback(@NonNull Executor executor,
+        public @NonNull FrameRenderRequest setFrameCommitCallback(@NonNull Executor executor,
                 @NonNull Runnable frameCommitCallback) {
             setFrameCompleteCallback(frameNr -> executor.execute(frameCommitCallback));
             return this;
@@ -372,7 +372,7 @@ public class HardwareRenderer {
          *                   completion.
          * @return this instance
          */
-        public FrameRenderRequest setWaitForPresent(boolean shouldWait) {
+        public @NonNull FrameRenderRequest setWaitForPresent(boolean shouldWait) {
             mWaitForPresent = shouldWait;
             return this;
         }
@@ -406,7 +406,7 @@ public class HardwareRenderer {
      * @return An instance of {@link FrameRenderRequest}. The instance may be reused for every
      * frame, so the caller should not hold onto it for longer than a single render request.
      */
-    public FrameRenderRequest createRenderRequest() {
+    public @NonNull FrameRenderRequest createRenderRequest() {
         mRenderRequest.reset();
         return mRenderRequest;
     }
