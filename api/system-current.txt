@@ -8450,7 +8450,7 @@ package android.telephony.ims {
     method public void callSessionResumeFailed(android.telephony.ims.ImsReasonInfo);
     method public void callSessionResumeReceived(android.telephony.ims.ImsCallProfile);
     method public void callSessionResumed(android.telephony.ims.ImsCallProfile);
-    method public void callSessionRttAudioIndicatorChanged(android.telephony.ims.ImsStreamMediaProfile);
+    method public void callSessionRttAudioIndicatorChanged(@NonNull android.telephony.ims.ImsStreamMediaProfile);
     method public void callSessionRttMessageReceived(String);
     method public void callSessionRttModifyRequestReceived(android.telephony.ims.ImsCallProfile);
     method public void callSessionRttModifyResponseReceived(int);
@@ -8754,12 +8754,12 @@ package android.telephony.ims {
   public final class ImsSsData implements android.os.Parcelable {
     ctor public ImsSsData(int, int, int, int, int);
     method public int describeContents();
-    method public android.telephony.ims.ImsCallForwardInfo[] getCallForwardInfo();
+    method @Nullable public java.util.List<android.telephony.ims.ImsCallForwardInfo> getCallForwardInfo();
     method public int getRequestType();
     method public int getResult();
     method public int getServiceClass();
     method public int getServiceType();
-    method @NonNull public android.telephony.ims.ImsSsInfo[] getSuppServiceInfo();
+    method @NonNull public java.util.List<android.telephony.ims.ImsSsInfo> getSuppServiceInfo();
     method public int getTeleserviceType();
     method public boolean isTypeBarring();
     method public boolean isTypeCf();
@@ -8819,11 +8819,11 @@ package android.telephony.ims {
     field public static final int SS_WAIT = 12; // 0xc
   }
 
-  public static class ImsSsData.Builder {
+  public static final class ImsSsData.Builder {
     ctor public ImsSsData.Builder(int, int, int, int, int);
     method @NonNull public android.telephony.ims.ImsSsData build();
-    method @NonNull public android.telephony.ims.ImsSsData.Builder setCallForwardingInfo(@NonNull android.telephony.ims.ImsCallForwardInfo[]);
-    method @NonNull public android.telephony.ims.ImsSsData.Builder setSuppServiceInfo(@NonNull android.telephony.ims.ImsSsInfo[]);
+    method @NonNull public android.telephony.ims.ImsSsData.Builder setCallForwardingInfo(@NonNull java.util.List<android.telephony.ims.ImsCallForwardInfo>);
+    method @NonNull public android.telephony.ims.ImsSsData.Builder setSuppServiceInfo(@NonNull java.util.List<android.telephony.ims.ImsSsInfo>);
   }
 
   public final class ImsSsInfo implements android.os.Parcelable {
@@ -8832,7 +8832,7 @@ package android.telephony.ims {
     method public int getClirInterrogationStatus();
     method public int getClirOutgoingState();
     method @Deprecated public String getIcbNum();
-    method public String getIncomingCommunicationBarringNumber();
+    method @Nullable public String getIncomingCommunicationBarringNumber();
     method public int getProvisionStatus();
     method public int getStatus();
     method public void writeToParcel(android.os.Parcel, int);
@@ -8853,7 +8853,7 @@ package android.telephony.ims {
     field public static final int SERVICE_PROVISIONING_UNKNOWN = -1; // 0xffffffff
   }
 
-  public static class ImsSsInfo.Builder {
+  public static final class ImsSsInfo.Builder {
     ctor public ImsSsInfo.Builder(int);
     method @NonNull public android.telephony.ims.ImsSsInfo build();
     method @NonNull public android.telephony.ims.ImsSsInfo.Builder setClirInterrogationStatus(int);

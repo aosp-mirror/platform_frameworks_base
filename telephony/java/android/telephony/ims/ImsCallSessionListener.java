@@ -607,7 +607,7 @@ public class ImsCallSessionListener {
      *
      * @param profile updated ImsStreamMediaProfile
      */
-    public void callSessionRttAudioIndicatorChanged(ImsStreamMediaProfile profile) {
+    public void callSessionRttAudioIndicatorChanged(@NonNull ImsStreamMediaProfile profile) {
         try {
             mListener.callSessionRttAudioIndicatorChanged(profile);
         } catch (RemoteException e) {
