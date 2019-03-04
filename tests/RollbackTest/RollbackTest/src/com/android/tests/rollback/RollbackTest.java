@@ -21,6 +21,11 @@ import static com.android.tests.rollback.RollbackTestUtils.assertRollbackInfoEqu
 import static com.android.tests.rollback.RollbackTestUtils.getUniqueRollbackInfoForPackage;
 import static com.android.tests.rollback.RollbackTestUtils.processUserData;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
+
 import android.Manifest;
 import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
@@ -31,13 +36,9 @@ import android.content.pm.VersionedPackage;
 import android.content.rollback.RollbackInfo;
 import android.content.rollback.RollbackManager;
 import android.provider.DeviceConfig;
-import android.support.test.InstrumentationRegistry;
 import android.util.Log;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.fail;
+import androidx.test.InstrumentationRegistry;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

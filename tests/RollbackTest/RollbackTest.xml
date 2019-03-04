@@ -20,7 +20,7 @@
     </target_preparer>
     <test class="com.android.tradefed.testtype.AndroidJUnitTest" >
         <option name="package" value="com.android.tests.rollback" />
-        <option name="runner" value="android.support.test.runner.AndroidJUnitRunner" />
+        <option name="runner" value="androidx.test.runner.AndroidJUnitRunner" />
 
         <!-- Exclude the StagedRollbackTest tests, which needs to be specially
              driven from the StagedRollbackTest host test -->

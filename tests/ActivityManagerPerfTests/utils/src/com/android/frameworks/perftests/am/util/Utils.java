@@ -19,9 +19,10 @@ package com.android.frameworks.perftests.am.util;
 import android.content.Intent;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
-import android.support.test.InstrumentationRegistry;
 import android.support.test.uiautomator.UiDevice;
 import android.util.Log;
+
+import androidx.test.InstrumentationRegistry;
 
 import java.io.IOException;
 

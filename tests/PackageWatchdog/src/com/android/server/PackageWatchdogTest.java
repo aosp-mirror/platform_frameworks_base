@@ -24,7 +24,8 @@ import static org.junit.Assert.assertTrue;
 
 import android.content.pm.VersionedPackage;
 import android.os.test.TestLooper;
-import android.support.test.InstrumentationRegistry;
+
+import androidx.test.InstrumentationRegistry;
 
 import com.android.server.PackageWatchdog.PackageHealthObserver;
 import com.android.server.PackageWatchdog.PackageHealthObserverImpact;

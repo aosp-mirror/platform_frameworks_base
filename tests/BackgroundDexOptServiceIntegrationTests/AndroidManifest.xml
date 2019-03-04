@@ -34,7 +34,7 @@
     </application>
 
     <instrumentation
-        android:name="android.support.test.runner.AndroidJUnitRunner"
+        android:name="androidx.test.runner.AndroidJUnitRunner"
         android:targetPackage="com.android.frameworks.bgdexopttest"
         android:label="Integration test for BackgroundDexOptService" />
 </manifest>

@@ -21,7 +21,7 @@ LOCAL_MODULE_TAGS := tests
 LOCAL_SRC_FILES := $(call all-java-files-under, src)
 
 LOCAL_STATIC_JAVA_LIBRARIES := \
-    android-support-test
+    androidx.test.rules hamcrest-library
 
 LOCAL_PACKAGE_NAME := KeystoreTests
 LOCAL_PRIVATE_PLATFORM_APIS := true

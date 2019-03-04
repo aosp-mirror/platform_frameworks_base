@@ -18,9 +18,7 @@ package com.android.server.wm.flicker.monitor;
 
 import static com.android.server.wm.flicker.AutomationUtils.wakeUpAndGoToHomeScreen;
 
-import static com.google.common.truth.Truth.assertThat;
-
-import android.support.test.InstrumentationRegistry;
+import androidx.test.InstrumentationRegistry;
 
 import org.junit.Before;
 import org.junit.Ignore;

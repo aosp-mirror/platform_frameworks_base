@@ -43,7 +43,7 @@ android_test {
     sdk_version: "current",
     data: [":generate_dex_testcases", ":generate_compiled_layout1", ":generate_compiled_layout2"],
     static_libs: [
-        "android-support-test",
+        "androidx.test.rules",
         "guava",
     ],
     manifest: "AndroidManifest.xml",

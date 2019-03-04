@@ -24,7 +24,7 @@ LOCAL_SRC_FILES := $(call all-subdir-java-files)
 
 LOCAL_STATIC_JAVA_LIBRARIES := \
     frameworks-base-testutils \
-    android-support-test \
+    androidx.test.rules \
     mockito-target-inline-minus-junit4 \
     platform-test-annotations \
     services.core \

@@ -30,13 +30,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.RemoteException;
 import android.platform.helpers.IAppHelper;
-import android.support.test.InstrumentationRegistry;
 import android.support.test.uiautomator.By;
 import android.support.test.uiautomator.UiDevice;
 import android.support.test.uiautomator.UiObject2;
 import android.support.test.uiautomator.Until;
 import android.util.Rational;
 import android.view.Surface;
+
+import androidx.test.InstrumentationRegistry;
 
 import com.android.server.wm.flicker.TransitionRunner.TransitionBuilder;
 

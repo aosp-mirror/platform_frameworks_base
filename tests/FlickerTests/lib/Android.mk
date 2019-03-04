@@ -24,7 +24,7 @@ LOCAL_CERTIFICATE := platform
 LOCAL_PRIVATE_PLATFORM_APIS := true
 LOCAL_SRC_FILES := $(call all-java-files-under, src)
 LOCAL_STATIC_JAVA_LIBRARIES := \
-   ub-janktesthelper \
+   androidx.test.janktesthelper \
    cts-amwm-util \
    platformprotosnano \
    layersprotosnano \
@@ -41,7 +41,7 @@ LOCAL_SRC_FILES := src/com/android/server/wm/flicker/AutomationUtils.java \
     src/com/android/server/wm/flicker/WindowUtils.java
 LOCAL_STATIC_JAVA_LIBRARIES := sysui-helper \
     launcher-helper-lib \
-    compatibility-device-util
+    compatibility-device-util-axt
 
 include $(BUILD_STATIC_JAVA_LIBRARY)
 
