@@ -17,6 +17,7 @@ package android.telephony.ims;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -24,6 +25,9 @@ import android.telephony.Rlog;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Provides STK Call Control Supplementary Service information.
@@ -260,13 +264,13 @@ public final class ImsSsData implements Parcelable {
     public final int result;
 
     private int[] mSsInfo;
-    private ImsCallForwardInfo[] mCfInfo;
-    private ImsSsInfo[] mImsSsInfo;
+    private List<ImsCallForwardInfo> mCfInfo;
+    private List<ImsSsInfo> mImsSsInfo;
 
     /**
      * Builder for optional ImsSsData parameters.
      */
-    public static class Builder {
+    public static final class Builder {
         private ImsSsData mImsSsData;
 
         /**
@@ -301,7 +305,7 @@ public final class ImsSsData implements Parcelable {
          * Set the array of {@link ImsSsInfo}s that are associated with this supplementary service
          * data.
          */
-        public @NonNull Builder setSuppServiceInfo(@NonNull ImsSsInfo[] imsSsInfos) {
+        public @NonNull Builder setSuppServiceInfo(@NonNull List<ImsSsInfo> imsSsInfos) {
             mImsSsData.mImsSsInfo = imsSsInfos;
             return this;
         }
@@ -311,7 +315,7 @@ public final class ImsSsData implements Parcelable {
          * service data.
          */
         public @NonNull Builder setCallForwardingInfo(
-                @NonNull ImsCallForwardInfo[] imsCallForwardInfos) {
+                @NonNull List<ImsCallForwardInfo> imsCallForwardInfos) {
             mImsSsData.mCfInfo = imsCallForwardInfos;
             return this;
         }
@@ -360,8 +364,8 @@ public final class ImsSsData implements Parcelable {
         serviceClass = in.readInt();
         result = in.readInt();
         mSsInfo = in.createIntArray();
-        mCfInfo = (ImsCallForwardInfo[])in.readParcelableArray(this.getClass().getClassLoader());
-        mImsSsInfo = (ImsSsInfo[])in.readParcelableArray(this.getClass().getClassLoader());
+        mCfInfo = in.readParcelableList(new ArrayList<>(), this.getClass().getClassLoader());
+        mImsSsInfo = in.readParcelableList(new ArrayList<>(), this.getClass().getClassLoader());
     }
 
     public static final Creator<ImsSsData> CREATOR = new Creator<ImsSsData>() {
@@ -384,8 +388,8 @@ public final class ImsSsData implements Parcelable {
         out.writeInt(getServiceClass());
         out.writeInt(getResult());
         out.writeIntArray(mSsInfo);
-        out.writeParcelableArray(mCfInfo, 0);
-        out.writeParcelableArray(mImsSsInfo, 0);
+        out.writeParcelableList(mCfInfo, 0);
+        out.writeParcelableList(mImsSsInfo, 0);
     }
 
     @Override
@@ -500,12 +504,12 @@ public final class ImsSsData implements Parcelable {
 
     /** @hide */
     public void setImsSpecificSuppServiceInfo(ImsSsInfo[] imsSsInfo) {
-        mImsSsInfo = imsSsInfo;
+        mImsSsInfo = Arrays.asList(imsSsInfo);
     }
 
     /** @hide */
     public void setCallForwardingInfo(ImsCallForwardInfo[] cfInfo) {
-        mCfInfo = cfInfo;
+        mCfInfo = Arrays.asList(cfInfo);
     }
 
     /**
@@ -524,7 +528,7 @@ public final class ImsSsData implements Parcelable {
 
 
         int[] result = new int[2];
-        if (mImsSsInfo == null || mImsSsInfo.length == 0) {
+        if (mImsSsInfo == null || mImsSsInfo.size() == 0) {
             Rlog.e(TAG, "getSuppServiceInfoCompat: Could not parse mImsSsInfo, returning empty "
                     + "int[]");
             return result;
@@ -535,26 +539,26 @@ public final class ImsSsData implements Parcelable {
         if (isTypeClir()) {
             // Assume there will only be one ImsSsInfo.
             // contains {"n","m"} parameters
-            result[0] = mImsSsInfo[0].getClirOutgoingState();
-            result[1] = mImsSsInfo[0].getClirInterrogationStatus();
+            result[0] = mImsSsInfo.get(0).getClirOutgoingState();
+            result[1] = mImsSsInfo.get(0).getClirInterrogationStatus();
             return result;
         }
         // COLR 7.31
         if (isTypeColr()) {
-            result[0] = mImsSsInfo[0].getProvisionStatus();
+            result[0] = mImsSsInfo.get(0).getProvisionStatus();
         }
         // Facility Lock CLCK 7.4 (for call barring), CLIP 7.6, COLP 7.8, as well as any
         // other result, just return the status for the "n" parameter and provisioning status for
         // "m" as the default.
-        result[0] = mImsSsInfo[0].getStatus();
-        result[1] = mImsSsInfo[0].getProvisionStatus();
+        result[0] = mImsSsInfo.get(0).getStatus();
+        result[1] = mImsSsInfo.get(0).getProvisionStatus();
         return result;
     }
 
     /**
      * @return an array of {@link ImsSsInfo}s associated with this supplementary service data.
      */
-    public @NonNull ImsSsInfo[] getSuppServiceInfo() {
+    public @NonNull List<ImsSsInfo> getSuppServiceInfo() {
         return mImsSsInfo;
     }
 
@@ -562,7 +566,7 @@ public final class ImsSsData implements Parcelable {
      * @return an array of {@link ImsCallForwardInfo}s associated with this supplementary service
      * data.
      **/
-    public ImsCallForwardInfo[] getCallForwardInfo() {
+    public @Nullable List<ImsCallForwardInfo> getCallForwardInfo() {
         return mCfInfo;
     }
 
