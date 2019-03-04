@@ -18589,7 +18589,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             @FlagMap(target = FADING_EDGE_VERTICAL, name = "vertical"),
             @FlagMap(target = FADING_EDGE_HORIZONTAL, name = "horizontal")
     })
-    int getFadingEdge() {
+    public int getFadingEdge() {
         return mViewFlags & FADING_EDGE_MASK;
     }
 
@@ -18600,7 +18600,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @hide
      */
     @InspectableProperty
-    int getFadingEdgeLength() {
+    public int getFadingEdgeLength() {
         if (mScrollCache != null && (mViewFlags & FADING_EDGE_MASK) != FADING_EDGE_NONE) {
             return mScrollCache.fadingEdgeLength;
         }
