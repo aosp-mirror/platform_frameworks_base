@@ -142,7 +142,6 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
 
     // these need to match ElapsedRealtimeFlags enum in types.hal
     private static final int ELAPSED_REALTIME_HAS_TIMESTAMP_NS = 1;
-    private static final int ELAPSED_REALTIME_HAS_TIME_UNCERTAINTY_NS = 2;
 
     // IMPORTANT - the GPS_DELETE_* symbols here must match GnssAidingData enum in IGnss.hal
     private static final int GPS_DELETE_EPHEMERIS = 0x0001;
@@ -769,18 +768,15 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         float bearingAccuracyDegrees = location.getBearingAccuracyDegrees();
         long timestamp = location.getTime();
 
-        int elapsedRealtimeFlags = ELAPSED_REALTIME_HAS_TIMESTAMP_NS
-                | (location.hasElapsedRealtimeUncertaintyNanos()
-                        ? ELAPSED_REALTIME_HAS_TIME_UNCERTAINTY_NS : 0);
+        int elapsedRealtimeFlags = ELAPSED_REALTIME_HAS_TIMESTAMP_NS;
         long elapsedRealtimeNanos = location.getElapsedRealtimeNanos();
-        long elapsedRealtimeUncertaintyNanos = location.getElapsedRealtimeUncertaintyNanos();
 
         native_inject_best_location(
                 gnssLocationFlags, latitudeDegrees, longitudeDegrees,
                 altitudeMeters, speedMetersPerSec, bearingDegrees,
                 horizontalAccuracyMeters, verticalAccuracyMeters,
                 speedAccuracyMetersPerSecond, bearingAccuracyDegrees, timestamp,
-                elapsedRealtimeFlags, elapsedRealtimeNanos, elapsedRealtimeUncertaintyNanos);
+                elapsedRealtimeFlags, elapsedRealtimeNanos);
     }
 
     /** Returns true if the location request is too frequent. */
@@ -2174,8 +2170,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
             double altitudeMeters, float speedMetersPerSec, float bearingDegrees,
             float horizontalAccuracyMeters, float verticalAccuracyMeters,
             float speedAccuracyMetersPerSecond, float bearingAccuracyDegrees,
-            long timestamp, int elapsedRealtimeFlags, long elapsedRealtimeNanos,
-            long elapsedRealtimeUncertaintyNanos);
+            long timestamp, int elapsedRealtimeFlags, long elapsedRealtimeNanos);
 
     private native void native_inject_location(double latitude, double longitude, float accuracy);
 
