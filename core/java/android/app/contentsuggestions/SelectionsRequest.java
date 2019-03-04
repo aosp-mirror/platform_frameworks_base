@@ -63,10 +63,10 @@ public final class SelectionsRequest implements Parcelable {
     }
 
     /**
-     * Return the request extras or {@code null} if there aren't any.
+     * Return the request extras, may be an empty bundle if there aren't any.
      */
-    public @Nullable Bundle getExtras() {
-        return mExtras;
+    public @NonNull Bundle getExtras() {
+        return mExtras == null ? new Bundle() : mExtras;
     }
 
     @Override
