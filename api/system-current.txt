@@ -6423,8 +6423,8 @@ package android.service.carrier {
 
   public abstract class ApnService extends android.app.Service {
     ctor public ApnService();
-    method public android.os.IBinder onBind(android.content.Intent);
-    method @WorkerThread public abstract java.util.List<android.content.ContentValues> onRestoreApns(int);
+    method @NonNull public android.os.IBinder onBind(@Nullable android.content.Intent);
+    method @WorkerThread @NonNull public abstract java.util.List<android.content.ContentValues> onRestoreApns(int);
   }
 
 }
@@ -7096,12 +7096,12 @@ package android.telephony {
     field public static final int WWAN = 1; // 0x1
   }
 
-  public class CallAttributes implements android.os.Parcelable {
-    ctor public CallAttributes(android.telephony.PreciseCallState, int, android.telephony.CallQuality);
+  public final class CallAttributes implements android.os.Parcelable {
+    ctor public CallAttributes(@NonNull android.telephony.PreciseCallState, int, @NonNull android.telephony.CallQuality);
     method public int describeContents();
-    method public android.telephony.CallQuality getCallQuality();
+    method @NonNull public android.telephony.CallQuality getCallQuality();
     method public int getNetworkType();
-    method public android.telephony.PreciseCallState getPreciseCallState();
+    method @NonNull public android.telephony.PreciseCallState getPreciseCallState();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.telephony.CallAttributes> CREATOR;
   }
@@ -8425,7 +8425,7 @@ package android.telephony.ims {
   }
 
   public class ImsCallSessionListener {
-    method public void callQualityChanged(android.telephony.CallQuality);
+    method public void callQualityChanged(@NonNull android.telephony.CallQuality);
     method public void callSessionConferenceExtendFailed(android.telephony.ims.ImsReasonInfo);
     method public void callSessionConferenceExtendReceived(android.telephony.ims.stub.ImsCallSessionImplBase, android.telephony.ims.ImsCallProfile);
     method public void callSessionConferenceExtended(android.telephony.ims.stub.ImsCallSessionImplBase, android.telephony.ims.ImsCallProfile);
