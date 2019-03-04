@@ -148,6 +148,7 @@ public class KeyguardClockSwitch extends RelativeLayout {
         Dependency.get(StatusBarStateController.class).removeCallback(mStateListener);
         Dependency.get(SysuiColorExtractor.class)
             .removeOnColorsChangedListener(mColorsListener);
+        setClockPlugin(null);
     }
 
     private void setClockPlugin(ClockPlugin plugin) {
