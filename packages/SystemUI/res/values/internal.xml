@@ -18,6 +18,5 @@
     <dimen name="status_bar_height">@*android:dimen/status_bar_height</dimen>
     <dimen name="navigation_bar_height">@*android:dimen/navigation_bar_height</dimen>
     <dimen name="navigation_bar_height_car_mode">@*android:dimen/navigation_bar_height_car_mode</dimen>
-    <color name="screen_pinning_primary_text">@*android:color/primary_text_default_material_light</color>
 </resources>
 
