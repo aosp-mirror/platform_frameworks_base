@@ -18,30 +18,28 @@ package android.net.netlink;
 
 import static android.net.netlink.NetlinkSocket.DEFAULT_RECV_BUFSIZE;
 import static android.system.OsConstants.NETLINK_ROUTE;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import android.net.netlink.NetlinkSocket;
 import android.net.netlink.RtNetlinkNeighborMessage;
-import android.net.netlink.StructNdMsg;
 import android.net.netlink.StructNlMsgHdr;
-import android.support.test.runner.AndroidJUnit4;
-import android.support.test.filters.SmallTest;
-import android.system.ErrnoException;
 import android.system.NetlinkSocketAddress;
 import android.system.Os;
-import android.util.Log;
+
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
+
 import libcore.io.IoUtils;
 
-import java.io.InterruptedIOException;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
 import java.io.FileDescriptor;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-
-import org.junit.runner.RunWith;
-import org.junit.Test;
-
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest

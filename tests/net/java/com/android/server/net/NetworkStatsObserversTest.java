@@ -17,7 +17,6 @@
 package com.android.server.net;
 
 import static android.net.ConnectivityManager.TYPE_MOBILE;
-import static android.net.ConnectivityManager.TYPE_WIFI;
 import static android.net.NetworkStats.DEFAULT_NETWORK_NO;
 import static android.net.NetworkStats.DEFAULT_NETWORK_YES;
 import static android.net.NetworkStats.METERED_NO;
@@ -33,11 +32,8 @@ import static com.android.internal.util.TestUtils.waitForIdleHandler;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.isA;
-import static org.mockito.Mockito.when;
 
 import android.app.usage.NetworkStatsManager;
 import android.net.DataUsageRequest;
@@ -49,22 +45,17 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
-import android.os.Message;
 import android.os.Messenger;
 import android.os.Process;
 import android.os.UserHandle;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
 import android.telephony.TelephonyManager;
 import android.util.ArrayMap;
 
-import com.android.internal.net.VpnInfo;
-import com.android.server.net.NetworkStatsService;
-import com.android.server.net.NetworkStatsServiceTest.LatchedHandler;
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
-import java.util.ArrayList;
-import java.util.Objects;
-import java.util.List;
+import com.android.internal.net.VpnInfo;
+import com.android.server.net.NetworkStatsServiceTest.LatchedHandler;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -72,6 +63,8 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+
+import java.util.Objects;
 
 /**
  * Tests for {@link NetworkStatsObservers}.

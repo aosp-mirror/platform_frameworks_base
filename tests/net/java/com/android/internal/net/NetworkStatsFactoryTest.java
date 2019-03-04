@@ -24,32 +24,35 @@ import static android.net.NetworkStats.SET_DEFAULT;
 import static android.net.NetworkStats.SET_FOREGROUND;
 import static android.net.NetworkStats.TAG_NONE;
 import static android.net.NetworkStats.UID_ALL;
+
 import static com.android.server.NetworkManagementSocketTagger.kernelToTag;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import android.content.res.Resources;
 import android.net.NetworkStats;
 import android.net.TrafficStats;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
+
+import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.frameworks.tests.net.R;
+
+import libcore.io.IoUtils;
+import libcore.io.Streams;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.InputStream;
 import java.io.OutputStream;
-
-import libcore.io.IoUtils;
-import libcore.io.Streams;
-
-import org.junit.runner.RunWith;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
 
 /**
  * Tests for {@link NetworkStatsFactory}.
