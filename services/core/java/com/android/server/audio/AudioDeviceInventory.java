@@ -578,7 +578,7 @@ public final class AudioDeviceInventory {
         return mCurAudioRoutes;
     }
 
-    /*package*/ int setBluetoothA2dpDeviceConnectionState(
+    /*package*/ void setBluetoothA2dpDeviceConnectionState(
             @NonNull BluetoothDevice device, @AudioService.BtProfileConnectionState int state,
             int profile, boolean suppressNoisyIntent, int musicDevice, int a2dpVolume) {
         int delay;
@@ -614,46 +614,50 @@ public final class AudioDeviceInventory {
                         delay);
             }
         }
-        return delay;
     }
 
     /*package*/ int handleBluetoothA2dpActiveDeviceChange(
             @NonNull BluetoothDevice device,
             @AudioService.BtProfileConnectionState int state, int profile,
             boolean suppressNoisyIntent, int a2dpVolume) {
-        if (state == BluetoothProfile.STATE_DISCONNECTED) {
-            return setBluetoothA2dpDeviceConnectionState(device, state, profile,
-                    suppressNoisyIntent, AudioSystem.DEVICE_NONE, a2dpVolume);
-        }
-        // state == BluetoothProfile.STATE_CONNECTED
-        synchronized (mConnectedDevices) {
-            for (int i = 0; i < mConnectedDevices.size(); i++) {
-                final DeviceInfo deviceInfo = mConnectedDevices.valueAt(i);
-                if (deviceInfo.mDeviceType != AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP) {
-                    continue;
-                }
-                // If A2DP device exists, this is either an active device change or
-                // device config change
-                final String existingDevicekey = mConnectedDevices.keyAt(i);
-                final String deviceName = device.getName();
-                final String address = device.getAddress();
-                final String newDeviceKey = DeviceInfo.makeDeviceListKey(
-                        AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP, address);
-                int a2dpCodec = mDeviceBroker.getA2dpCodec(device);
-                // Device not equal to existing device, active device change
-                if (!TextUtils.equals(existingDevicekey, newDeviceKey)) {
-                    mConnectedDevices.remove(existingDevicekey);
-                    mConnectedDevices.put(newDeviceKey, new DeviceInfo(
-                            AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP, deviceName,
-                            address, a2dpCodec));
-                    mDeviceBroker.postA2dpActiveDeviceChange(
-                            new BtHelper.BluetoothA2dpDeviceInfo(
-                                    device, a2dpVolume, a2dpCodec));
-                    return 0;
-                } else {
-                    // Device config change for existing device
-                    mDeviceBroker.postBluetoothA2dpDeviceConfigChange(device);
-                    return 0;
+        // method was added by QC but never used, and now conflicts with async behavior of
+        // handleBluetoothA2dpDeviceConfigChange and
+        // setBluetoothA2dpDeviceConnectionStateSuppressNoisyIntent
+        if (false) {
+            if (state == BluetoothProfile.STATE_DISCONNECTED) {
+                setBluetoothA2dpDeviceConnectionState(device, state, profile,
+                        suppressNoisyIntent, AudioSystem.DEVICE_NONE, a2dpVolume);
+            }
+            // state == BluetoothProfile.STATE_CONNECTED
+            synchronized (mConnectedDevices) {
+                for (int i = 0; i < mConnectedDevices.size(); i++) {
+                    final DeviceInfo deviceInfo = mConnectedDevices.valueAt(i);
+                    if (deviceInfo.mDeviceType != AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP) {
+                        continue;
+                    }
+                    // If A2DP device exists, this is either an active device change or
+                    // device config change
+                    final String existingDevicekey = mConnectedDevices.keyAt(i);
+                    final String deviceName = device.getName();
+                    final String address = device.getAddress();
+                    final String newDeviceKey = DeviceInfo.makeDeviceListKey(
+                            AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP, address);
+                    int a2dpCodec = mDeviceBroker.getA2dpCodec(device);
+                    // Device not equal to existing device, active device change
+                    if (!TextUtils.equals(existingDevicekey, newDeviceKey)) {
+                        mConnectedDevices.remove(existingDevicekey);
+                        mConnectedDevices.put(newDeviceKey, new DeviceInfo(
+                                AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP, deviceName,
+                                address, a2dpCodec));
+                        mDeviceBroker.postA2dpActiveDeviceChange(
+                                new BtHelper.BluetoothA2dpDeviceInfo(
+                                        device, a2dpVolume, a2dpCodec));
+                        return 0;
+                    } else {
+                        // Device config change for existing device
+                        mDeviceBroker.postBluetoothA2dpDeviceConfigChange(device);
+                        return 0;
+                    }
                 }
             }
         }

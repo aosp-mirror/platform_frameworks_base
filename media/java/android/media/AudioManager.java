@@ -4068,6 +4068,10 @@ public class AudioManager {
      /**
      * Indicate Hearing Aid connection state change and eventually suppress
      * the {@link AudioManager.ACTION_AUDIO_BECOMING_NOISY} intent.
+     * This operation is asynchronous but its execution will still be sequentially scheduled
+     * relative to calls to {@link #setBluetoothA2dpDeviceConnectionStateSuppressNoisyIntent(
+     * * BluetoothDevice, int, int, boolean, int)} and
+     * and {@link #handleBluetoothA2dpDeviceConfigChange(BluetoothDevice)}.
      * @param device Bluetooth device connected/disconnected
      * @param state new connection state (BluetoothProfile.STATE_xxx)
      * @param musicDevice Default get system volume for the connecting device.
@@ -4075,27 +4079,27 @@ public class AudioManager {
      * {@link android.bluetooth.BluetoothProfile.HEARING_AID})
      * @param suppressNoisyIntent if true the
      * {@link AudioManager.ACTION_AUDIO_BECOMING_NOISY} intent will not be sent.
-     * @return a delay in ms that the caller should wait before broadcasting
-     * BluetoothHearingAid.ACTION_CONNECTION_STATE_CHANGED intent.
      * {@hide}
      */
-    public int setBluetoothHearingAidDeviceConnectionState(
+    public void setBluetoothHearingAidDeviceConnectionState(
                 BluetoothDevice device, int state, boolean suppressNoisyIntent,
                 int musicDevice) {
         final IAudioService service = getService();
-        int delay = 0;
         try {
-            delay = service.setBluetoothHearingAidDeviceConnectionState(device,
+            service.setBluetoothHearingAidDeviceConnectionState(device,
                 state, suppressNoisyIntent, musicDevice);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
-        return delay;
     }
 
      /**
      * Indicate A2DP source or sink connection state change and eventually suppress
      * the {@link AudioManager.ACTION_AUDIO_BECOMING_NOISY} intent.
+     * This operation is asynchronous but its execution will still be sequentially scheduled
+     * relative to calls to {@link #setBluetoothHearingAidDeviceConnectionState(BluetoothDevice,
+     * int, boolean, int)} and
+     * {@link #handleBluetoothA2dpDeviceConfigChange(BluetoothDevice)}.
      * @param device Bluetooth device connected/disconnected
      * @param state  new connection state, {@link BluetoothProfile#STATE_CONNECTED}
      *     or {@link BluetoothProfile#STATE_DISCONNECTED}
@@ -4105,26 +4109,27 @@ public class AudioManager {
      * {@link android.bluetooth.BluetoothProfile.A2DP_SINK})
      * @param suppressNoisyIntent if true the
      * {@link AudioManager.ACTION_AUDIO_BECOMING_NOISY} intent will not be sent.
-     * @return a delay in ms that the caller should wait before broadcasting
-     * BluetoothA2dp.ACTION_CONNECTION_STATE_CHANGED intent.
      * {@hide}
      */
-    public int setBluetoothA2dpDeviceConnectionStateSuppressNoisyIntent(
+    public void setBluetoothA2dpDeviceConnectionStateSuppressNoisyIntent(
             BluetoothDevice device, int state,
             int profile, boolean suppressNoisyIntent, int a2dpVolume) {
         final IAudioService service = getService();
-        int delay = 0;
         try {
-            delay = service.setBluetoothA2dpDeviceConnectionStateSuppressNoisyIntent(device,
+            service.setBluetoothA2dpDeviceConnectionStateSuppressNoisyIntent(device,
                 state, profile, suppressNoisyIntent, a2dpVolume);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
-        return delay;
     }
 
      /**
      * Indicate A2DP device configuration has changed.
+     * This operation is asynchronous but its execution will still be sequentially scheduled
+     * relative to calls to
+     * {@link #setBluetoothA2dpDeviceConnectionStateSuppressNoisyIntent(BluetoothDevice, int, int,
+     * boolean, int)} and
+     * {@link #setBluetoothHearingAidDeviceConnectionState(BluetoothDevice, int, boolean, int)}
      * @param device Bluetooth device whose configuration has changed.
      * {@hide}
      */
