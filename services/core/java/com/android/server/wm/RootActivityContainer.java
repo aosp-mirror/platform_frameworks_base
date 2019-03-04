@@ -362,6 +362,8 @@ class RootActivityContainer extends ConfigurationContainer
         if (displayId == DEFAULT_DISPLAY) {
             homeIntent = mService.getHomeIntent();
             aInfo = resolveHomeActivity(userId, homeIntent);
+        } else if (!mService.mSupportsMultiDisplay) {
+            return false;
         } else {
             Pair<ActivityInfo, Intent> info = resolveSecondaryHomeActivity(userId, displayId);
             aInfo = info.first;
@@ -542,6 +544,11 @@ class RootActivityContainer extends ConfigurationContainer
                 && displayId == mService.mVr2dDisplayId)) {
             // No restrictions to default display or vr 2d display.
             return true;
+        }
+
+        if (displayId != DEFAULT_DISPLAY && !mService.mSupportsMultiDisplay) {
+            // Can't launch home on secondary display if device not support multi-display.
+            return false;
         }
 
         final boolean deviceProvisioned = Settings.Global.getInt(
