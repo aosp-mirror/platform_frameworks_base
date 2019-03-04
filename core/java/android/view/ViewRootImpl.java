@@ -2372,6 +2372,9 @@ public final class ViewRootImpl implements ViewParent,
                     mAttachInfo.mOutsets.set(mPendingOutsets);
                     mApplyInsetsRequested = false;
                     dispatchApplyInsets(host);
+                    // We applied insets so force contentInsetsChanged to ensure the
+                    // hierarchy is measured below.
+                    contentInsetsChanged = true;
                 }
                 if (visibleInsetsChanged) {
                     mAttachInfo.mVisibleInsets.set(mPendingVisibleInsets);
