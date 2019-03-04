@@ -16,6 +16,7 @@
 
 package android.net.http;
 
+import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.os.Bundle;
@@ -252,7 +253,7 @@ public class SslCertificate {
      * @return The {@code X509Certificate} used to create this {@code SslCertificate} or
      * {@code null} if no certificate was provided.
      */
-    public X509Certificate getX509Certificate() {
+    public @Nullable X509Certificate getX509Certificate() {
         return mX509Certificate;
     }
 
