@@ -17,6 +17,7 @@
 package android.media;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
 
@@ -106,7 +107,7 @@ public class FileDataSourceDesc extends DataSourceDesc {
      * Return the ParcelFileDescriptor of this data source.
      * @return the ParcelFileDescriptor of this data source
      */
-    public ParcelFileDescriptor getParcelFileDescriptor() {
+    public @NonNull ParcelFileDescriptor getParcelFileDescriptor() {
         return mPFD;
     }
 
@@ -159,7 +160,7 @@ public class FileDataSourceDesc extends DataSourceDesc {
          * @param dsd the {@link FileDataSourceDesc} object whose data will be reused
          * in the new Builder.
          */
-        public Builder(FileDataSourceDesc dsd) {
+        public Builder(@Nullable FileDataSourceDesc dsd) {
             super(dsd);
             if (dsd == null) {
                 return;  // use default

@@ -51,7 +51,7 @@ public class UriDataSourceDesc extends DataSourceDesc {
      * Return the Uri of this data source.
      * @return the Uri of this data source
      */
-    public Uri getUri() {
+    public @NonNull Uri getUri() {
         return mUri;
     }
 
@@ -59,7 +59,7 @@ public class UriDataSourceDesc extends DataSourceDesc {
      * Return the Uri headers of this data source.
      * @return the Uri headers of this data source
      */
-    public Map<String, String> getHeaders() {
+    public @Nullable Map<String, String> getHeaders() {
         if (mHeader == null) {
             return null;
         }
@@ -70,7 +70,7 @@ public class UriDataSourceDesc extends DataSourceDesc {
      * Return the Uri cookies of this data source.
      * @return the Uri cookies of this data source
      */
-    public List<HttpCookie> getCookies() {
+    public @Nullable List<HttpCookie> getCookies() {
         if (mCookies == null) {
             return null;
         }
@@ -81,7 +81,7 @@ public class UriDataSourceDesc extends DataSourceDesc {
      * Return the Context used for resolving the Uri of this data source.
      * @return the Context used for resolving the Uri of this data source
      */
-    public Context getContext() {
+    public @NonNull Context getContext() {
         return mContext;
     }
 
@@ -117,7 +117,7 @@ public class UriDataSourceDesc extends DataSourceDesc {
          * @param dsd the {@link UriDataSourceDesc} object whose data will be reused
          * in the new Builder.
          */
-        public Builder(UriDataSourceDesc dsd) {
+        public Builder(@Nullable UriDataSourceDesc dsd) {
             super(dsd);
             if (dsd == null) {
                 return;  // use default
@@ -136,6 +136,11 @@ public class UriDataSourceDesc extends DataSourceDesc {
          * @return a new {@link UriDataSourceDesc} object
          */
         public @NonNull UriDataSourceDesc build() {
+            if (mUri == null || mContext == null) {
+                throw new IllegalStateException(
+                        "Uri and Context should not be null");
+            }
+
             UriDataSourceDesc dsd = new UriDataSourceDesc();
             super.build(dsd);
             dsd.mUri = mUri;
