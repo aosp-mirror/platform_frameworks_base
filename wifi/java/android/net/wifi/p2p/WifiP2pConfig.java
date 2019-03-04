@@ -78,7 +78,7 @@ public class WifiP2pConfig implements Parcelable {
         GROUP_OWNER_BAND_5GHZ
     })
     @Retention(RetentionPolicy.SOURCE)
-    public @interface GroupOwnerBandType {}
+    public @interface GroupOperatingBandType {}
 
     /**
      * Recognized Group Owner required band.
@@ -333,7 +333,7 @@ public class WifiP2pConfig implements Parcelable {
          * @return The builder to facilitate chaining
          *         {@code builder.setXXX(..).setXXX(..)}.
          */
-        public @NonNull Builder setGroupOperatingBand(@GroupOwnerBandType int band) {
+        public @NonNull Builder setGroupOperatingBand(@GroupOperatingBandType int band) {
             switch (band) {
                 case GROUP_OWNER_BAND_AUTO:
                 case GROUP_OWNER_BAND_2GHZ:
