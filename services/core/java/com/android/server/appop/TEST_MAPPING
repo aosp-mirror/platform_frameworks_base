@@ -1,0 +1,21 @@
+{
+    "presubmit": [
+        {
+            "name": "CtsAppOpsTestCases"
+        },
+        {
+            "name": "FrameworksServicesTests",
+            "options": [
+                {
+                    "include-filter": "com.android.server.appop.AppOpsUpgradeTest"
+                },
+                {
+                    "include-filter": "com.android.server.appop.AppOpsServiceTest"
+                },
+                {
+                    "include-filter": "com.android.server.appop.AppOpsActiveWatcherTest"
+                }
+            ]
+        }
+    ]
+}

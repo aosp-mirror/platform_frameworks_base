@@ -21,6 +21,9 @@ import com.android.internal.util.GrowingArrayUtils;
 
 import libcore.util.EmptyArray;
 
+import java.util.Arrays;
+import java.util.Objects;
+
 /**
  * SparseArray mapping longs to Objects.  Unlike a normal array of Objects,
  * there can be gaps in the indices.  It is intended to be more memory efficient

@@ -43,6 +43,8 @@ import android.os.SystemProperties;
 import android.os.UserManager;
 import android.provider.Settings;
 import android.util.ArrayMap;
+import android.util.LongSparseArray;
+import android.util.LongSparseLongArray;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
@@ -55,8 +57,10 @@ import com.android.internal.app.IAppOpsService;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.Preconditions;
 
+import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
@@ -64,9 +68,11 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  * API for interacting with "application operation" tracking.
@@ -227,7 +233,7 @@ public class AppOpsManager {
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(flag = true, prefix = { "UID_STATE_" }, value = {
+    @IntDef(prefix = { "UID_STATE_" }, value = {
             UID_STATE_PERSISTENT,
             UID_STATE_TOP,
             UID_STATE_FOREGROUND_SERVICE_LOCATION,
@@ -239,78 +245,322 @@ public class AppOpsManager {
     public @interface UidState {}
 
     /**
-     * Invalid UID state.
-     * @hide
-     */
-    public static final int UID_STATE_INVALID = -1;
-
-    /**
-     * Metrics about an op when its uid is persistent.
+     * Uid state: The UID is a foreground persistent app.
      * @hide
      */
     @TestApi
     @SystemApi
-    public static final int UID_STATE_PERSISTENT = 0;
+    public static final int UID_STATE_PERSISTENT = 100;
 
     /**
-     * Metrics about an op when its uid is at the top.
+     * Uid state: The UID is top foreground app.
      * @hide
      */
     @TestApi
     @SystemApi
-    public static final int UID_STATE_TOP = 1;
+    public static final int UID_STATE_TOP = 200;
 
     /**
-     * Metrics about an op when its uid is running a foreground service with location type.
+     * Uid state: The UID is running a foreground service of location type.
      * @hide
      */
     @TestApi
     @SystemApi
-    public static final int UID_STATE_FOREGROUND_SERVICE_LOCATION = 2;
+    public static final int UID_STATE_FOREGROUND_SERVICE_LOCATION = 300;
 
     /**
-     * Metrics about an op when its uid is running a foreground service.
+     * Uid state: The UID is running a foreground service.
      * @hide
      */
     @TestApi
     @SystemApi
-    public static final int UID_STATE_FOREGROUND_SERVICE = 3;
+    public static final int UID_STATE_FOREGROUND_SERVICE = 400;
 
     /**
-     * Last UID state in which we don't restrict what an op can do.
+     * The max, which is min priority, UID state for which any app op
+     * would be considered as performed in the foreground.
      * @hide
      */
-    public static final int UID_STATE_LAST_NON_RESTRICTED = UID_STATE_FOREGROUND_SERVICE_LOCATION;
+    public static final int UID_STATE_MAX_LAST_NON_RESTRICTED = UID_STATE_FOREGROUND_SERVICE;
 
     /**
-     * Metrics about an op when its uid is in the foreground for any other reasons.
-     * @hide
-     */
-    @TestApi
-    @SystemApi
-    public static final int UID_STATE_FOREGROUND = 4;
-
-    /**
-     * Metrics about an op when its uid is in the background for any reason.
+     * Uid state: The UID is a foreground app.
      * @hide
      */
     @TestApi
     @SystemApi
-    public static final int UID_STATE_BACKGROUND = 5;
+    public static final int UID_STATE_FOREGROUND = 500;
 
     /**
-     * Metrics about an op when its uid is cached.
+     * Uid state: The UID is a background app.
      * @hide
      */
     @TestApi
     @SystemApi
-    public static final int UID_STATE_CACHED = 6;
+    public static final int UID_STATE_BACKGROUND = 600;
 
     /**
-     * Number of uid states we track.
+     * Uid state: The UID is a cached app.
      * @hide
      */
-    public static final int _NUM_UID_STATE = 7;
+    @TestApi
+    @SystemApi
+    public static final int UID_STATE_CACHED = 700;
+
+    /**
+     * Uid state: The UID state with the highest priority.
+     * @hide
+     */
+    public static final int MAX_PRIORITY_UID_STATE = UID_STATE_PERSISTENT;
+
+    /**
+     * Uid state: The UID state with the lowest priority.
+     * @hide
+     */
+    public static final int MIN_PRIORITY_UID_STATE = UID_STATE_CACHED;
+
+    /**
+     * Resolves the first unrestricted state given an app op. Location is
+     * special as we want to allow its access only if a dedicated location
+     * foreground service is running. For other ops we consider any foreground
+     * service as a foreground state.
+     *
+     * @param op The op to resolve.
+     * @return The last restricted UID state.
+     *
+     * @hide
+     */
+    public static int resolveFirstUnrestrictedUidState(int op) {
+        switch (op) {
+            case OP_FINE_LOCATION:
+            case OP_COARSE_LOCATION: {
+                return UID_STATE_FOREGROUND_SERVICE_LOCATION;
+            }
+        }
+        return UID_STATE_FOREGROUND_SERVICE;
+    }
+
+    /**
+     * Resolves the last restricted state given an app op. Location is
+     * special as we want to allow its access only if a dedicated location
+     * foreground service is running. For other ops we consider any foreground
+     * service as a foreground state.
+     *
+     * @param op The op to resolve.
+     * @return The last restricted UID state.
+     *
+     * @hide
+     */
+    public static int resolveLastRestrictedUidState(int op) {
+        switch (op) {
+            case OP_FINE_LOCATION:
+            case OP_COARSE_LOCATION: {
+                return UID_STATE_FOREGROUND_SERVICE;
+            }
+        }
+        return UID_STATE_FOREGROUND;
+    }
+
+    /** @hide Note: Keep these sorted */
+    public static final int[] UID_STATES = {
+            UID_STATE_PERSISTENT,
+            UID_STATE_TOP,
+            UID_STATE_FOREGROUND_SERVICE_LOCATION,
+            UID_STATE_FOREGROUND_SERVICE,
+            UID_STATE_FOREGROUND,
+            UID_STATE_BACKGROUND,
+            UID_STATE_CACHED
+    };
+
+    /** @hide */
+    public static String getUidStateName(@UidState int uidState) {
+        switch (uidState) {
+            case UID_STATE_PERSISTENT:
+                return "pers";
+            case UID_STATE_TOP:
+                return "top";
+            case UID_STATE_FOREGROUND_SERVICE_LOCATION:
+                return "fgsvcl";
+            case UID_STATE_FOREGROUND_SERVICE:
+                return "fgsvc";
+            case UID_STATE_FOREGROUND:
+                return "fg";
+            case UID_STATE_BACKGROUND:
+                return "bg";
+            case UID_STATE_CACHED:
+                return "cch";
+            default:
+                return "unknown";
+        }
+    }
+
+    /**
+     * Flag: non proxy operations. These are operations
+     * performed on behalf of the app itself and not on behalf of
+     * another one.
+     *
+     * @hide
+     */
+    @TestApi
+    @SystemApi
+    public static final int OP_FLAG_SELF = 0x1;
+
+    /**
+     * Flag: trusted proxy operations. These are operations
+     * performed on behalf of another app by a trusted app.
+     * Which is work a trusted app blames on another app.
+     *
+     * @hide
+     */
+    @TestApi
+    @SystemApi
+    public static final int OP_FLAG_TRUSTED_PROXY = 0x2;
+
+    /**
+     * Flag: untrusted proxy operations. These are operations
+     * performed on behalf of another app by an untrusted app.
+     * Which is work an untrusted app blames on another app.
+     *
+     * @hide
+     */
+    @TestApi
+    @SystemApi
+    public static final int OP_FLAG_UNTRUSTED_PROXY = 0x4;
+
+    /**
+     * Flag: trusted proxied operations. These are operations
+     * performed by a trusted other app on behalf of an app.
+     * Which is work an app was blamed for by a trusted app.
+     *
+     * @hide
+     */
+    @TestApi
+    @SystemApi
+    public static final int OP_FLAG_TRUSTED_PROXIED = 0x8;
+
+    /**
+     * Flag: untrusted proxied operations. These are operations
+     * performed by an untrusted other app on behalf of an app.
+     * Which is work an app was blamed for by an untrusted app.
+     *
+     * @hide
+     */
+    @TestApi
+    @SystemApi
+    public static final int OP_FLAG_UNTRUSTED_PROXIED = 0x10;
+
+    /**
+     * Flags: all operations. These include operations matched
+     * by {@link #OP_FLAG_SELF}, {@link #OP_FLAG_TRUSTED_PROXIED},
+     * {@link #OP_FLAG_UNTRUSTED_PROXIED}, {@link #OP_FLAG_TRUSTED_PROXIED},
+     * {@link #OP_FLAG_UNTRUSTED_PROXIED}.
+     *
+     * @hide
+     */
+    @TestApi
+    @SystemApi
+    public static final int OP_FLAGS_ALL =
+            OP_FLAG_SELF
+                | OP_FLAG_TRUSTED_PROXY
+                | OP_FLAG_UNTRUSTED_PROXY
+                | OP_FLAG_TRUSTED_PROXIED
+                | OP_FLAG_UNTRUSTED_PROXIED;
+
+    /**
+     * Flags: all trusted operations which is ones either the app did {@link #OP_FLAG_SELF},
+     * or it was blamed for by a trusted app {@link #OP_FLAG_TRUSTED_PROXIED}, or ones the
+     * app if untrusted blamed on other apps {@link #OP_FLAG_UNTRUSTED_PROXY}.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int OP_FLAGS_ALL_TRUSTED = AppOpsManager.OP_FLAG_SELF
+        | AppOpsManager.OP_FLAG_UNTRUSTED_PROXY
+        | AppOpsManager.OP_FLAG_TRUSTED_PROXIED;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(flag = true, prefix = { "FLAG_" }, value = {
+            OP_FLAG_SELF,
+            OP_FLAG_TRUSTED_PROXY,
+            OP_FLAG_UNTRUSTED_PROXY,
+            OP_FLAG_TRUSTED_PROXIED,
+            OP_FLAG_UNTRUSTED_PROXIED
+    })
+    public @interface OpFlags {}
+
+
+    /** @hide */
+    public static final String getFlagName(@OpFlags int flag) {
+        switch (flag) {
+            case OP_FLAG_SELF:
+                return "s";
+            case OP_FLAG_TRUSTED_PROXY:
+                return "tp";
+            case OP_FLAG_UNTRUSTED_PROXY:
+                return "up";
+            case OP_FLAG_TRUSTED_PROXIED:
+                return "tpd";
+            case OP_FLAG_UNTRUSTED_PROXIED:
+                return "upd";
+            default:
+                return "unknown";
+        }
+    }
+
+    private static final int UID_STATE_OFFSET = 31;
+    private static final int FLAGS_MASK = 0xFFFFFFFF;
+
+    /**
+     * Key for a data bucket storing app op state. The bucket
+     * is composed of the uid state and state flags. This way
+     * we can query data for given uid state and a set of flags where
+     * the flags control which type of data to get. For example,
+     * one can get the ops an app did on behalf of other apps
+     * while in the background.
+     *
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @Target({ElementType.METHOD, ElementType.PARAMETER, ElementType.FIELD})
+    public @interface DataBucketKey {
+    }
+
+    /** @hide */
+    public static String keyToString(@DataBucketKey long key) {
+        final int uidState = extractUidStateFromKey(key);
+        final int flags = extractFlagsFromKey(key);
+        return "[" + getUidStateName(uidState) + "-" + flagsToString(flags) + "]";
+    }
+
+    /** @hide */
+    public static @DataBucketKey long makeKey(@UidState int uidState, @OpFlags int flags) {
+        return ((long) uidState << UID_STATE_OFFSET) | flags;
+    }
+
+    /** @hide */
+    public static int extractUidStateFromKey(@DataBucketKey long key) {
+        return (int) (key >> UID_STATE_OFFSET);
+    }
+
+    /** @hide */
+    public static int extractFlagsFromKey(@DataBucketKey long key) {
+        return (int) (key & FLAGS_MASK);
+    }
+
+    /** @hide */
+    public static String flagsToString(@OpFlags int flags) {
+        final StringBuilder flagsBuilder = new StringBuilder();
+        while (flags != 0) {
+            final int flag = 1 << Integer.numberOfTrailingZeros(flags);
+            flags &= ~flag;
+            if (flagsBuilder.length() > 0) {
+                flagsBuilder.append('|');
+            }
+            flagsBuilder.append(getFlagName(flag));
+        }
+        return flagsBuilder.toString();
+    }
 
     // when adding one of these:
     //  - increment _NUM_OP
@@ -551,7 +801,7 @@ public class AppOpsManager {
     @UnsupportedAppUsage
     public static final int OP_MANAGE_IPSEC_TUNNELS = 75;
     /** @hide Any app start foreground service. */
-    @UnsupportedAppUsage
+    @TestApi
     public static final int OP_START_FOREGROUND = 76;
     /** @hide */
     @UnsupportedAppUsage
@@ -1947,14 +2197,23 @@ public class AppOpsManager {
             mEntries = entries;
         }
 
-        public String getPackageName() {
+        /**
+         * @return The name of the package.
+         */
+        public @NonNull String getPackageName() {
             return mPackageName;
         }
 
+        /**
+         * @return The uid of the package.
+         */
         public int getUid() {
             return mUid;
         }
 
+        /**
+         * @return The ops of the package.
+         */
         public List<OpEntry> getOps() {
             return mEntries;
         }
@@ -1999,57 +2258,59 @@ public class AppOpsManager {
      * Class holding the information about one unique operation of an application.
      * @hide
      */
+    @TestApi
+    @Immutable
     @SystemApi
     public static final class OpEntry implements Parcelable {
         private final int mOp;
-        private final @Mode int mMode;
-        private final long[] mTimes;
-        private final long[] mRejectTimes;
-        private final int mDuration;
-        private final int mProxyUid;
         private final boolean mRunning;
-        private final String mProxyPackageName;
+        private final @Mode int mMode;
+        private final @Nullable LongSparseLongArray mAccessTimes;
+        private final @Nullable LongSparseLongArray mRejectTimes;
+        private final @Nullable LongSparseLongArray mDurations;
+        private final @Nullable LongSparseLongArray mProxyUids;
+        private final @Nullable LongSparseArray<String> mProxyPackageNames;
 
         /**
          * @hide
          */
-        public OpEntry(int op, @Mode int mode, long time, long rejectTime, int duration,
-                int proxyUid, String proxyPackage) {
+        public OpEntry(int op, boolean running, @Mode int mode,
+                @Nullable LongSparseLongArray accessTimes, @Nullable LongSparseLongArray rejectTimes,
+                @Nullable LongSparseLongArray durations, @Nullable LongSparseLongArray proxyUids,
+                @Nullable LongSparseArray<String> proxyPackageNames) {
             mOp = op;
-            mMode = mode;
-            mTimes = new long[_NUM_UID_STATE];
-            mRejectTimes = new long[_NUM_UID_STATE];
-            mTimes[0] = time;
-            mRejectTimes[0] = rejectTime;
-            mDuration = duration;
-            mRunning = duration == -1;
-            mProxyUid = proxyUid;
-            mProxyPackageName = proxyPackage;
-        }
-
-        /**
-         * @hide
-         */
-        public OpEntry(int op, @Mode int mode, long[] times, long[] rejectTimes, int duration,
-                boolean running, int proxyUid, String proxyPackage) {
-            mOp = op;
-            mMode = mode;
-            mTimes = new long[_NUM_UID_STATE];
-            mRejectTimes = new long[_NUM_UID_STATE];
-            System.arraycopy(times, 0, mTimes, 0, _NUM_UID_STATE);
-            System.arraycopy(rejectTimes, 0, mRejectTimes, 0, _NUM_UID_STATE);
-            mDuration = duration;
             mRunning = running;
-            mProxyUid = proxyUid;
-            mProxyPackageName = proxyPackage;
+            mMode = mode;
+            mAccessTimes = accessTimes;
+            mRejectTimes = rejectTimes;
+            mDurations = durations;
+            mProxyUids = proxyUids;
+            mProxyPackageNames = proxyPackageNames;
         }
 
         /**
          * @hide
          */
-        public OpEntry(int op, @Mode int mode, long[] times, long[] rejectTimes, int duration,
-                int proxyUid, String proxyPackage) {
-            this(op, mode, times, rejectTimes, duration, duration == -1, proxyUid, proxyPackage);
+        public OpEntry(int op, @Mode int mode) {
+            mOp = op;
+            mMode = mode;
+            mRunning = false;
+            mAccessTimes = null;
+            mRejectTimes = null;
+            mDurations = null;
+            mProxyUids = null;
+            mProxyPackageNames = null;
+        }
+
+        /**
+         * Returns all keys for which we have mapped state in any of the data buckets -
+         * access time, reject time, duration.
+         * @hide */
+        public @Nullable LongSparseArray<Object> collectKeys() {
+            LongSparseArray<Object> result = AppOpsManager.collectKeys(mAccessTimes, null);
+            result = AppOpsManager.collectKeys(mRejectTimes, result);
+            result = AppOpsManager.collectKeys(mDurations, result);
+            return result;
         }
 
         /**
@@ -2061,14 +2322,14 @@ public class AppOpsManager {
         }
 
         /**
-         * Return this entry's op string name, such as {@link #OPSTR_COARSE_LOCATION}.
+         * @return This entry's op string name, such as {@link #OPSTR_COARSE_LOCATION}.
          */
-        public String getOpStr() {
+        public @NonNull String getOpStr() {
             return sOpToString[mOp];
         }
 
         /**
-         * Return this entry's current mode, such as {@link #MODE_ALLOWED}.
+         * @return this entry's current mode, such as {@link #MODE_ALLOWED}.
          */
         public @Mode int getMode() {
             return mMode;
@@ -2079,89 +2340,331 @@ public class AppOpsManager {
          */
         @UnsupportedAppUsage
         public long getTime() {
-            return maxTime(mTimes, 0, _NUM_UID_STATE);
+            return getLastAccessTime(OP_FLAGS_ALL);
         }
 
         /**
-         * Return the last wall clock time this op was accessed by the app.
+         * Return the last wall clock time in milliseconds this op was accessed.
+         *
+         * @param flags The flags which are any combination of
+         * {@link #OP_FLAG_SELF}, {@link #OP_FLAG_TRUSTED_PROXY},
+         * {@link #OP_FLAG_UNTRUSTED_PROXY}, {@link #OP_FLAG_TRUSTED_PROXIED},
+         * {@link #OP_FLAG_UNTRUSTED_PROXIED}. You can use {@link #OP_FLAGS_ALL}
+         * for any flag.
+         * @return the last access time in milliseconds since
+         * epoch start (January 1, 1970 00:00:00.000 GMT - Gregorian).
+         *
+         * @see #getLastAccessForegroundTime(int)
+         * @see #getLastAccessBackgroundTime(int)
+         * @see #getLastAccessTime(int, int, int)
          */
-        public long getLastAccessTime() {
-            return maxTime(mTimes, 0, _NUM_UID_STATE);
+        public long getLastAccessTime(@OpFlags int flags) {
+            return maxForFlagsInStates(mAccessTimes, MAX_PRIORITY_UID_STATE,
+                    MIN_PRIORITY_UID_STATE, flags);
         }
 
         /**
-         * Return the last wall clock time this op was accessed by the app while in the foreground.
+         * Return the last wall clock time in milliseconds this op was accessed
+         * by the app while in the foreground.
+         *
+         * @param flags The flags which are any combination of
+         * {@link #OP_FLAG_SELF}, {@link #OP_FLAG_TRUSTED_PROXY},
+         * {@link #OP_FLAG_UNTRUSTED_PROXY}, {@link #OP_FLAG_TRUSTED_PROXIED},
+         * {@link #OP_FLAG_UNTRUSTED_PROXIED}. You can use {@link #OP_FLAGS_ALL}
+         * for any flag.
+         * @return the last foreground access time in milliseconds since
+         * epoch start (January 1, 1970 00:00:00.000 GMT - Gregorian).
+         *
+         * @see #getLastAccessBackgroundTime(int)
+         * @see #getLastAccessTime(int)
+         * @see #getLastAccessTime(int, int, int)
          */
-        public long getLastAccessForegroundTime() {
-            return maxTime(mTimes, UID_STATE_PERSISTENT, UID_STATE_LAST_NON_RESTRICTED + 1);
+        public long getLastAccessForegroundTime(@OpFlags int flags) {
+            return maxForFlagsInStates(mAccessTimes, MAX_PRIORITY_UID_STATE,
+                    resolveFirstUnrestrictedUidState(mOp), flags);
         }
 
         /**
-         * Return the last wall clock time this op was accessed by the app while in the background.
+         * Return the last wall clock time in milliseconds this op was accessed
+         * by the app while in the background.
+         *
+         * @param flags The flags which are any combination of
+         * {@link #OP_FLAG_SELF}, {@link #OP_FLAG_TRUSTED_PROXY},
+         * {@link #OP_FLAG_UNTRUSTED_PROXY}, {@link #OP_FLAG_TRUSTED_PROXIED},
+         * {@link #OP_FLAG_UNTRUSTED_PROXIED}. You can use {@link #OP_FLAGS_ALL}
+         * for any flag.
+         * @return the last foreground access time in milliseconds since
+         * epoch start (January 1, 1970 00:00:00.000 GMT - Gregorian).
+         *
+         * @see #getLastAccessForegroundTime(int)
+         * @see #getLastAccessTime(int)
+         * @see #getLastAccessTime(int, int, int)
          */
-        public long getLastAccessBackgroundTime() {
-            return maxTime(mTimes, UID_STATE_LAST_NON_RESTRICTED + 1, _NUM_UID_STATE);
+        public long getLastAccessBackgroundTime(@OpFlags int flags) {
+            return maxForFlagsInStates(mAccessTimes, resolveLastRestrictedUidState(mOp),
+                    MIN_PRIORITY_UID_STATE, flags);
         }
 
         /**
-         * @hide
+         * Return the last wall clock time  in milliseconds this op was accessed
+         * by the app for a given range of UID states.
+         *
+         * @param fromUidState The UID state for which to query. Could be one of
+         * {@link #UID_STATE_PERSISTENT}, {@link #UID_STATE_TOP},
+         * {@link #UID_STATE_FOREGROUND_SERVICE}, {@link #UID_STATE_FOREGROUND},
+         * {@link #UID_STATE_BACKGROUND}, {@link #UID_STATE_CACHED}.
+         * @param toUidState The UID state for which to query.
+         * @param flags The flags which are any combination of
+         * {@link #OP_FLAG_SELF}, {@link #OP_FLAG_TRUSTED_PROXY},
+         * {@link #OP_FLAG_UNTRUSTED_PROXY}, {@link #OP_FLAG_TRUSTED_PROXIED},
+         * {@link #OP_FLAG_UNTRUSTED_PROXIED}. You can use {@link #OP_FLAGS_ALL}
+         * for any flag.
+         *
+         * @return the last foreground access time in milliseconds since
+         * epoch start (January 1, 1970 00:00:00.000 GMT - Gregorian).
+         *
+         * @see #getLastAccessForegroundTime(int)
+         * @see #getLastAccessBackgroundTime(int)
+         * @see #getLastAccessTime(int)
          */
-        public long getLastTimeFor(int uidState) {
-            return mTimes[uidState];
+        public long getLastAccessTime(@UidState int fromUidState, @UidState int toUidState,
+                @OpFlags int flags) {
+            return maxForFlagsInStates(mAccessTimes, fromUidState, toUidState, flags);
         }
 
         /**
          * @hide
          */
         public long getRejectTime() {
-            return maxTime(mRejectTimes, 0, _NUM_UID_STATE);
+            return getLastRejectTime(OP_FLAGS_ALL);
         }
 
         /**
-         * Return the last wall clock time the app made an attempt to access this op but
-         * was rejected.
+         * Return the last wall clock time in milliseconds the app made an attempt
+         * to access this op but was rejected.
+         *
+         * @param flags The flags which are any combination of
+         * {@link #OP_FLAG_SELF}, {@link #OP_FLAG_TRUSTED_PROXY},
+         * {@link #OP_FLAG_UNTRUSTED_PROXY}, {@link #OP_FLAG_TRUSTED_PROXIED},
+         * {@link #OP_FLAG_UNTRUSTED_PROXIED}. You can use {@link #OP_FLAGS_ALL}
+         * for any flag.
+         * @return the last reject time in milliseconds since
+         * epoch start (January 1, 1970 00:00:00.000 GMT - Gregorian).
+         *
+         * @see #getLastRejectBackgroundTime(int)
+         * @see #getLastRejectForegroundTime(int)
+         * @see #getLastRejectTime(int, int, int)
          */
-        public long getLastRejectTime() {
-            return maxTime(mRejectTimes, 0, _NUM_UID_STATE);
+        public long getLastRejectTime(@OpFlags int flags) {
+            return maxForFlagsInStates(mRejectTimes, MAX_PRIORITY_UID_STATE,
+                    MIN_PRIORITY_UID_STATE, flags);
         }
 
         /**
-         * Return the last wall clock time the app made an attempt to access this op while in
-         * the foreground but was rejected.
+         * Return the last wall clock time in milliseconds the app made an attempt
+         * to access this op while in the foreground but was rejected.
+         *
+         * @param flags The flags which are any combination of
+         * {@link #OP_FLAG_SELF}, {@link #OP_FLAG_TRUSTED_PROXY},
+         * {@link #OP_FLAG_UNTRUSTED_PROXY}, {@link #OP_FLAG_TRUSTED_PROXIED},
+         * {@link #OP_FLAG_UNTRUSTED_PROXIED}. You can use {@link #OP_FLAGS_ALL}
+         * for any flag.
+         * @return the last foreground reject time in milliseconds since
+         * epoch start (January 1, 1970 00:00:00.000 GMT - Gregorian).
+         *
+         * @see #getLastRejectBackgroundTime(int)
+         * @see #getLastRejectTime(int, int, int)
+         * @see #getLastRejectTime(int)
          */
-        public long getLastRejectForegroundTime() {
-            return maxTime(mRejectTimes, UID_STATE_PERSISTENT, UID_STATE_LAST_NON_RESTRICTED + 1);
+        public long getLastRejectForegroundTime(@OpFlags int flags) {
+            return maxForFlagsInStates(mRejectTimes, MAX_PRIORITY_UID_STATE,
+                    resolveFirstUnrestrictedUidState(mOp), flags);
         }
 
         /**
-         * Return the last wall clock time the app made an attempt to access this op while in
-         * the background but was rejected.
+         * Return the last wall clock time in milliseconds the app made an attempt
+         * to access this op while in the background but was rejected.
+         *
+         * @param flags The flags which are any combination of
+         * {@link #OP_FLAG_SELF}, {@link #OP_FLAG_TRUSTED_PROXY},
+         * {@link #OP_FLAG_UNTRUSTED_PROXY}, {@link #OP_FLAG_TRUSTED_PROXIED},
+         * {@link #OP_FLAG_UNTRUSTED_PROXIED}. You can use {@link #OP_FLAGS_ALL}
+         * for any flag.
+         * @return the last background reject time in milliseconds since
+         * epoch start (January 1, 1970 00:00:00.000 GMT - Gregorian).
+         *
+         * @see #getLastRejectForegroundTime(int)
+         * @see #getLastRejectTime(int, int, int)
+         * @see #getLastRejectTime(int)
          */
-        public long getLastRejectBackgroundTime() {
-            return maxTime(mRejectTimes, UID_STATE_LAST_NON_RESTRICTED + 1, _NUM_UID_STATE);
+        public long getLastRejectBackgroundTime(@OpFlags int flags) {
+            return maxForFlagsInStates(mRejectTimes, resolveLastRestrictedUidState(mOp),
+                    MIN_PRIORITY_UID_STATE, flags);
         }
 
         /**
-         * @hide
+         * Return the last wall clock time state in milliseconds the app made an
+         * attempt to access this op for a given range of UID states.
+         *
+         * @param fromUidState The UID state from which to query. Could be one of
+         * {@link #UID_STATE_PERSISTENT}, {@link #UID_STATE_TOP},
+         * {@link #UID_STATE_FOREGROUND_SERVICE}, {@link #UID_STATE_FOREGROUND},
+         * {@link #UID_STATE_BACKGROUND}, {@link #UID_STATE_CACHED}.
+         * @param toUidState The UID state to which to query.
+         * @param flags The flags which are any combination of
+         * {@link #OP_FLAG_SELF}, {@link #OP_FLAG_TRUSTED_PROXY},
+         * {@link #OP_FLAG_UNTRUSTED_PROXY}, {@link #OP_FLAG_TRUSTED_PROXIED},
+         * {@link #OP_FLAG_UNTRUSTED_PROXIED}. You can use {@link #OP_FLAGS_ALL}
+         * for any flag.
+         * @return the last foreground access time in milliseconds since
+         * epoch start (January 1, 1970 00:00:00.000 GMT - Gregorian).
+         *
+         * @see #getLastRejectForegroundTime(int)
+         * @see #getLastRejectBackgroundTime(int)
+         * @see #getLastRejectTime(int)
          */
-        public long getLastRejectTimeFor(int uidState) {
-            return mRejectTimes[uidState];
+        public long getLastRejectTime(@UidState int fromUidState, @UidState int toUidState,
+                @OpFlags int flags) {
+            return maxForFlagsInStates(mRejectTimes, fromUidState, toUidState, flags);
         }
 
+        /**
+         * @return Whether the operation is running.
+         */
         public boolean isRunning() {
             return mRunning;
         }
 
-        public int getDuration() {
-            return mDuration;
+        /**
+         * @return The duration of the operation in milliseconds.
+         */
+        public long getDuration() {
+            return getLastDuration(MAX_PRIORITY_UID_STATE, MIN_PRIORITY_UID_STATE, OP_FLAGS_ALL);
         }
 
+        /**
+         * Return the duration in milliseconds the app accessed this op while
+         * in the foreground.
+         *
+         * @param flags The flags which are any combination of
+         * {@link #OP_FLAG_SELF}, {@link #OP_FLAG_TRUSTED_PROXY},
+         * {@link #OP_FLAG_UNTRUSTED_PROXY}, {@link #OP_FLAG_TRUSTED_PROXIED},
+         * {@link #OP_FLAG_UNTRUSTED_PROXIED}. You can use {@link #OP_FLAGS_ALL}
+         * for any flag.
+         * @return the foreground access duration in milliseconds.
+         *
+         * @see #getLastBackgroundDuration(int)
+         * @see #getLastDuration(int, int, int)
+         */
+        public long getLastForegroundDuration(@OpFlags int flags) {
+            return sumForFlagsInStates(mDurations, MAX_PRIORITY_UID_STATE,
+                    resolveFirstUnrestrictedUidState(mOp), flags);
+        }
+
+        /**
+         * Return the duration in milliseconds the app accessed this op while
+         * in the background.
+         *
+         * @param flags The flags which are any combination of
+         * {@link #OP_FLAG_SELF}, {@link #OP_FLAG_TRUSTED_PROXY},
+         * {@link #OP_FLAG_UNTRUSTED_PROXY}, {@link #OP_FLAG_TRUSTED_PROXIED},
+         * {@link #OP_FLAG_UNTRUSTED_PROXIED}. You can use {@link #OP_FLAGS_ALL}
+         * for any flag.
+         * @return the background access duration in milliseconds.
+         *
+         * @see #getLastForegroundDuration(int)
+         * @see #getLastDuration(int, int, int)
+         */
+        public long getLastBackgroundDuration(@OpFlags int flags) {
+            return sumForFlagsInStates(mDurations, resolveLastRestrictedUidState(mOp),
+                    MIN_PRIORITY_UID_STATE, flags);
+        }
+
+        /**
+         * Return the duration in milliseconds the app accessed this op for
+         * a given range of UID states.
+         *
+         * @param fromUidState The UID state for which to query. Could be one of
+         * {@link #UID_STATE_PERSISTENT}, {@link #UID_STATE_TOP},
+         * {@link #UID_STATE_FOREGROUND_SERVICE}, {@link #UID_STATE_FOREGROUND},
+         * {@link #UID_STATE_BACKGROUND}, {@link #UID_STATE_CACHED}.
+         * @param toUidState The UID state for which to query.
+         * @param flags The flags which are any combination of
+         * {@link #OP_FLAG_SELF}, {@link #OP_FLAG_TRUSTED_PROXY},
+         * {@link #OP_FLAG_UNTRUSTED_PROXY}, {@link #OP_FLAG_TRUSTED_PROXIED},
+         * {@link #OP_FLAG_UNTRUSTED_PROXIED}. You can use {@link #OP_FLAGS_ALL}
+         * for any flag.
+         * @return the access duration in milliseconds.
+         */
+        public long getLastDuration(@UidState int fromUidState, @UidState int toUidState,
+                @OpFlags int flags) {
+            return sumForFlagsInStates(mDurations, fromUidState, toUidState, flags);
+        }
+
+        /**
+         * Gets the UID of the app that performed the op on behalf of this app and
+         * as a result blamed the op on this app or {@link Process#INVALID_UID} if
+         * there is no proxy.
+         *
+         * @return The proxy UID.
+         */
         public int getProxyUid() {
-            return  mProxyUid;
+            return (int) findFirstNonNegativeForFlagsInStates(mDurations,
+                    MAX_PRIORITY_UID_STATE, MIN_PRIORITY_UID_STATE, OP_FLAGS_ALL);
         }
 
-        public String getProxyPackageName() {
-            return mProxyPackageName;
+        /**
+         * Gets the UID of the app that performed the op on behalf of this app and
+         * as a result blamed the op on this app or {@link Process#INVALID_UID} if
+         * there is no proxy.
+         *
+         * @param uidState The UID state for which to query. Could be one of
+         * {@link #UID_STATE_PERSISTENT}, {@link #UID_STATE_TOP},
+         * {@link #UID_STATE_FOREGROUND_SERVICE}, {@link #UID_STATE_FOREGROUND},
+         * {@link #UID_STATE_BACKGROUND}, {@link #UID_STATE_CACHED}.
+         * @param flags The flags which are any combination of
+         * {@link #OP_FLAG_SELF}, {@link #OP_FLAG_TRUSTED_PROXY},
+         * {@link #OP_FLAG_UNTRUSTED_PROXY}, {@link #OP_FLAG_TRUSTED_PROXIED},
+         * {@link #OP_FLAG_UNTRUSTED_PROXIED}. You can use {@link #OP_FLAGS_ALL}
+         * for any flag.
+         *
+         * @return The proxy UID.
+         */
+        public int getProxyUid(@UidState int uidState, @OpFlags int flags) {
+            return (int) findFirstNonNegativeForFlagsInStates(mDurations,
+                    uidState, uidState, flags);
+        }
+
+        /**
+         * Gets the package name of the app that performed the op on behalf of this
+         * app and as a result blamed the op on this app or {@code null}
+         * if there is no proxy.
+         *
+         * @return The proxy package name.
+         */
+        public @Nullable String getProxyPackageName() {
+            return findFirstNonNullForFlagsInStates(mProxyPackageNames, MAX_PRIORITY_UID_STATE,
+                    MIN_PRIORITY_UID_STATE, OP_FLAGS_ALL);
+        }
+
+        /**
+         * Gets the package name of the app that performed the op on behalf of this
+         * app and as a result blamed the op on this app for a UID state or
+         * {@code null} if there is no proxy.
+         *
+         * @param uidState The UID state for which to query. Could be one of
+         * {@link #UID_STATE_PERSISTENT}, {@link #UID_STATE_TOP},
+         * {@link #UID_STATE_FOREGROUND_SERVICE}, {@link #UID_STATE_FOREGROUND},
+         * {@link #UID_STATE_BACKGROUND}, {@link #UID_STATE_CACHED}.
+         * @param flags The flags which are any combination of
+         * {@link #OP_FLAG_SELF}, {@link #OP_FLAG_TRUSTED_PROXY},
+         * {@link #OP_FLAG_UNTRUSTED_PROXY}, {@link #OP_FLAG_TRUSTED_PROXIED},
+         * {@link #OP_FLAG_UNTRUSTED_PROXIED}. You can use {@link #OP_FLAGS_ALL}
+         * for any flag.
+         * @return The proxy package name.
+         */
+        public @Nullable String getProxyPackageName(@UidState int uidState, @OpFlags int flags) {
+            return findFirstNonNullForFlagsInStates(mProxyPackageNames, uidState, uidState, flags);
         }
 
         @Override
@@ -2173,23 +2676,23 @@ public class AppOpsManager {
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeInt(mOp);
             dest.writeInt(mMode);
-            dest.writeLongArray(mTimes);
-            dest.writeLongArray(mRejectTimes);
-            dest.writeInt(mDuration);
             dest.writeBoolean(mRunning);
-            dest.writeInt(mProxyUid);
-            dest.writeString(mProxyPackageName);
+            writeLongSparseLongArrayToParcel(mAccessTimes, dest);
+            writeLongSparseLongArrayToParcel(mRejectTimes, dest);
+            writeLongSparseLongArrayToParcel(mDurations, dest);
+            writeLongSparseLongArrayToParcel(mProxyUids, dest);
+            writeLongSparseStringArrayToParcel(mProxyPackageNames, dest);
         }
 
         OpEntry(Parcel source) {
             mOp = source.readInt();
             mMode = source.readInt();
-            mTimes = source.createLongArray();
-            mRejectTimes = source.createLongArray();
-            mDuration = source.readInt();
             mRunning = source.readBoolean();
-            mProxyUid = source.readInt();
-            mProxyPackageName = source.readString();
+            mAccessTimes = readLongSparseLongArrayFromParcel(source);
+            mRejectTimes = readLongSparseLongArrayFromParcel(source);
+            mDurations = readLongSparseLongArrayFromParcel(source);
+            mProxyUids = readLongSparseLongArrayFromParcel(source);
+            mProxyPackageNames = readLongSparseStringArrayFromParcel(source);
         }
 
         public static final @android.annotation.NonNull Creator<OpEntry> CREATOR = new Creator<OpEntry>() {
@@ -2226,14 +2729,17 @@ public class AppOpsManager {
         private final @Nullable List<String> mOpNames;
         private final long mBeginTimeMillis;
         private final long mEndTimeMillis;
+        private final @OpFlags int mFlags;
 
         private HistoricalOpsRequest(int uid, @Nullable String packageName,
-                @Nullable List<String> opNames, long beginTimeMillis, long endTimeMillis) {
+                @Nullable List<String> opNames, long beginTimeMillis, long endTimeMillis,
+                @OpFlags int flags) {
             mUid = uid;
             mPackageName = packageName;
             mOpNames = opNames;
             mBeginTimeMillis = beginTimeMillis;
             mEndTimeMillis = endTimeMillis;
+            mFlags = flags;
         }
 
         /**
@@ -2249,6 +2755,7 @@ public class AppOpsManager {
             private @Nullable List<String> mOpNames;
             private final long mBeginTimeMillis;
             private final long mEndTimeMillis;
+            private @OpFlags int mFlags = OP_FLAGS_ALL;
 
             /**
              * Creates a new builder.
@@ -2311,11 +2818,28 @@ public class AppOpsManager {
             }
 
             /**
+             * Sets the op flags to query for. The flags specify the type of
+             * op data being queried.
+             *
+             * @param flags The flags which are any combination of
+             * {@link #OP_FLAG_SELF}, {@link #OP_FLAG_TRUSTED_PROXY},
+             * {@link #OP_FLAG_UNTRUSTED_PROXY}, {@link #OP_FLAG_TRUSTED_PROXIED},
+             * {@link #OP_FLAG_UNTRUSTED_PROXIED}. You can use {@link #OP_FLAGS_ALL}
+             * for any flag.
+             * @return This builder.
+             */
+            public @NonNull Builder setFlags(@OpFlags int flags) {
+                Preconditions.checkFlagsArgument(flags, OP_FLAGS_ALL);
+                mFlags = flags;
+                return this;
+            }
+
+            /**
              * @return a new {@link HistoricalOpsRequest}.
              */
             public @NonNull HistoricalOpsRequest build() {
                 return new HistoricalOpsRequest(mUid, mPackageName, mOpNames,
-                        mBeginTimeMillis, mEndTimeMillis);
+                        mBeginTimeMillis, mEndTimeMillis, mFlags);
             }
         }
     }
@@ -2521,25 +3045,25 @@ public class AppOpsManager {
         /** @hide */
         @TestApi
         public void increaseAccessCount(int opCode, int uid, @NonNull String packageName,
-                @UidState int uidState, long increment) {
+                @UidState int uidState,  @OpFlags int flags, long increment) {
             getOrCreateHistoricalUidOps(uid).increaseAccessCount(opCode,
-                    packageName, uidState, increment);
+                    packageName, uidState, flags, increment);
         }
 
         /** @hide */
         @TestApi
         public void increaseRejectCount(int opCode, int uid, @NonNull String packageName,
-                @UidState int uidState, long increment) {
+                @UidState int uidState, @OpFlags int flags, long increment) {
             getOrCreateHistoricalUidOps(uid).increaseRejectCount(opCode,
-                    packageName, uidState, increment);
+                    packageName, uidState, flags, increment);
         }
 
         /** @hide */
         @TestApi
         public void increaseAccessDuration(int opCode, int uid, @NonNull String packageName,
-                @UidState int uidState, long increment) {
+                @UidState int uidState, @OpFlags int flags, long increment) {
             getOrCreateHistoricalUidOps(uid).increaseAccessDuration(opCode,
-                    packageName, uidState, increment);
+                    packageName, uidState, flags, increment);
         }
 
         /** @hide */
@@ -2834,21 +3358,21 @@ public class AppOpsManager {
         }
 
         private void increaseAccessCount(int opCode, @NonNull String packageName,
-                @UidState int uidState, long increment) {
+                @UidState int uidState, @OpFlags int flags, long increment) {
             getOrCreateHistoricalPackageOps(packageName).increaseAccessCount(
-                    opCode, uidState, increment);
+                    opCode, uidState, flags, increment);
         }
 
         private void increaseRejectCount(int opCode, @NonNull String packageName,
-                @UidState int uidState, long increment) {
+                @UidState int uidState,  @OpFlags int flags, long increment) {
             getOrCreateHistoricalPackageOps(packageName).increaseRejectCount(
-                    opCode, uidState, increment);
+                    opCode, uidState, flags, increment);
         }
 
         private void increaseAccessDuration(int opCode, @NonNull String packageName,
-                @UidState int uidState, long increment) {
+                @UidState int uidState, @OpFlags int flags, long increment) {
             getOrCreateHistoricalPackageOps(packageName).increaseAccessDuration(
-                    opCode, uidState, increment);
+                    opCode, uidState, flags, increment);
         }
 
         /**
@@ -3070,16 +3594,19 @@ public class AppOpsManager {
             return true;
         }
 
-        private void increaseAccessCount(int opCode, @UidState int uidState, long increment) {
-            getOrCreateHistoricalOp(opCode).increaseAccessCount(uidState, increment);
+        private void increaseAccessCount(int opCode, @UidState int uidState,
+                @OpFlags int flags, long increment) {
+            getOrCreateHistoricalOp(opCode).increaseAccessCount(uidState, flags, increment);
         }
 
-        private void increaseRejectCount(int opCode, @UidState int uidState, long increment) {
-            getOrCreateHistoricalOp(opCode).increaseRejectCount(uidState, increment);
+        private void increaseRejectCount(int opCode, @UidState int uidState,
+                @OpFlags int flags, long increment) {
+            getOrCreateHistoricalOp(opCode).increaseRejectCount(uidState, flags, increment);
         }
 
-        private void increaseAccessDuration(int opCode, @UidState int uidState, long increment) {
-            getOrCreateHistoricalOp(opCode).increaseAccessDuration(uidState, increment);
+        private void increaseAccessDuration(int opCode, @UidState int uidState,
+                @OpFlags int flags, long increment) {
+            getOrCreateHistoricalOp(opCode).increaseAccessDuration(uidState, flags, increment);
         }
 
         /**
@@ -3095,7 +3622,6 @@ public class AppOpsManager {
          * Gets number historical app ops.
          *
          * @return The number historical app ops.
-         *
          * @see #getOpAt(int)
          */
         public int getOpCount() {
@@ -3109,9 +3635,7 @@ public class AppOpsManager {
          * Gets the historical op at a given index.
          *
          * @param index The index to lookup.
-         *
          * @return The op at the given index.
-         *
          * @see #getOpCount()
          */
         public @NonNull HistoricalOp getOpAt(int index) {
@@ -3125,7 +3649,6 @@ public class AppOpsManager {
          * Gets the historical entry for a given op name.
          *
          * @param opName The op name.
-         *
          * @return The historical entry for that op name.
          */
         public @Nullable HistoricalOp getOp(@NonNull String opName) {
@@ -3219,39 +3742,33 @@ public class AppOpsManager {
     @SystemApi
     public static final class HistoricalOp implements Parcelable {
         private final int mOp;
-        private @Nullable long[] mAccessCount;
-        private @Nullable long[] mRejectCount;
-        private @Nullable long[] mAccessDuration;
+        private @Nullable LongSparseLongArray mAccessCount;
+        private @Nullable LongSparseLongArray mRejectCount;
+        private @Nullable LongSparseLongArray mAccessDuration;
 
         /** @hide */
         public HistoricalOp(int op) {
             mOp = op;
-            mAccessCount = new long[_NUM_UID_STATE];
-            mRejectCount = new long[_NUM_UID_STATE];
-            mAccessDuration = new long[_NUM_UID_STATE];
         }
 
         private HistoricalOp(@NonNull HistoricalOp other) {
             mOp = other.mOp;
             if (other.mAccessCount != null) {
-                System.arraycopy(other.mAccessCount, 0, getOrCreateAccessCount(),
-                        0, other.mAccessCount.length);
+                mAccessCount = other.mAccessCount.clone();
             }
             if (other.mRejectCount != null) {
-                System.arraycopy(other.mRejectCount, 0, getOrCreateRejectCount(),
-                        0, other.mRejectCount.length);
+                mRejectCount = other.mRejectCount.clone();
             }
             if (other.mAccessDuration != null) {
-                System.arraycopy(other.mAccessDuration, 0, getOrCreateAccessDuration(),
-                        0, other.mAccessDuration.length);
+                mAccessDuration = other.mAccessDuration.clone();
             }
         }
 
         private HistoricalOp(@NonNull Parcel parcel) {
             mOp = parcel.readInt();
-            mAccessCount = parcel.createLongArray();
-            mRejectCount = parcel.createLongArray();
-            mAccessDuration = parcel.createLongArray();
+            mAccessCount = readLongSparseLongArrayFromParcel(parcel);
+            mRejectCount = readLongSparseLongArrayFromParcel(parcel);
+            mAccessDuration = readLongSparseLongArrayFromParcel(parcel);
         }
 
         private void filter(double scaleFactor) {
@@ -3266,90 +3783,64 @@ public class AppOpsManager {
                     && !hasData(mAccessDuration);
         }
 
-        private boolean hasData(@NonNull long[] array) {
-            for (long value : array) {
-                if (value != 0) {
-                    return true;
-                }
-            }
-            return false;
+        private boolean hasData(@NonNull LongSparseLongArray array) {
+            return (array != null && array.size() > 0);
         }
 
         private @Nullable HistoricalOp splice(double fractionToRemove) {
-            HistoricalOp splice = null;
-            if (mAccessCount != null) {
-                for (int i = 0; i < _NUM_UID_STATE; i++) {
-                    final long spliceAccessCount = Math.round(
-                            mAccessCount[i] * fractionToRemove);
-                    if (spliceAccessCount > 0) {
-                        if (splice == null) {
-                            splice = new HistoricalOp(mOp);
-                        }
-                        splice.getOrCreateAccessCount()[i] = spliceAccessCount;
-                        mAccessCount[i] -= spliceAccessCount;
-                    }
-                }
-            }
-
-            if (mRejectCount != null) {
-                for (int i = 0; i < _NUM_UID_STATE; i++) {
-                    final long spliceRejectCount = Math.round(
-                            mRejectCount[i] * fractionToRemove);
-
-                    if (spliceRejectCount > 0) {
-                        if (splice == null) {
-                            splice = new HistoricalOp(mOp);
-                        }
-                        splice.getOrCreateRejectCount()[i] = spliceRejectCount;
-                        mRejectCount[i] -= spliceRejectCount;
-                    }
-                }
-            }
-
-            if (mAccessDuration != null) {
-                for (int i = 0; i < _NUM_UID_STATE; i++) {
-                    final long spliceAccessDuration =  Math.round(
-                            mAccessDuration[i] * fractionToRemove);
-                    if (spliceAccessDuration > 0) {
-                        if (splice == null) {
-                            splice = new HistoricalOp(mOp);
-                        }
-                        splice.getOrCreateAccessDuration()[i] = spliceAccessDuration;
-                        mAccessDuration[i] -= spliceAccessDuration;
-                    }
-                }
-            }
+            final HistoricalOp splice = new HistoricalOp(mOp);
+            splice(mAccessCount, splice::getOrCreateAccessCount, fractionToRemove);
+            splice(mRejectCount, splice::getOrCreateRejectCount, fractionToRemove);
+            splice(mAccessDuration, splice::getOrCreateAccessDuration, fractionToRemove);
             return splice;
         }
 
+        private static void splice(@Nullable LongSparseLongArray sourceContainer,
+                @NonNull Supplier<LongSparseLongArray> destContainerProvider,
+                    double fractionToRemove) {
+            if (sourceContainer != null) {
+                final int size = sourceContainer.size();
+                for (int i = 0; i < size; i++) {
+                    final long key = sourceContainer.keyAt(i);
+                    final long value = sourceContainer.valueAt(i);
+                    final long removedFraction = Math.round(value * fractionToRemove);
+                    if (removedFraction > 0) {
+                        destContainerProvider.get().put(key, removedFraction);
+                        sourceContainer.put(key, value - removedFraction);
+                    }
+                }
+            }
+        }
+
         private void merge(@NonNull HistoricalOp other) {
-            if (other.mAccessCount != null) {
-                for (int i = 0; i < _NUM_UID_STATE; i++) {
-                    getOrCreateAccessCount()[i] += other.mAccessCount[i];
-                }
-            }
-            if (other.mRejectCount != null) {
-                for (int i = 0; i < _NUM_UID_STATE; i++) {
-                    getOrCreateRejectCount()[i] += other.mRejectCount[i];
-                }
-            }
-            if (other.mAccessDuration != null) {
-                for (int i = 0; i < _NUM_UID_STATE; i++) {
-                    getOrCreateAccessDuration()[i] += other.mAccessDuration[i];
-                }
-            }
+            merge(this::getOrCreateAccessCount, other.mAccessCount);
+            merge(this::getOrCreateRejectCount, other.mRejectCount);
+            merge(this::getOrCreateAccessDuration, other.mAccessDuration);
         }
 
-        private void increaseAccessCount(@UidState int uidState, long increment) {
-            getOrCreateAccessCount()[uidState] += increment;
+        private void increaseAccessCount(@UidState int uidState, @OpFlags int flags,
+                long increment) {
+            increaseCount(getOrCreateAccessCount(), uidState, flags, increment);
         }
 
-        private void increaseRejectCount(@UidState int uidState, long increment) {
-            getOrCreateRejectCount()[uidState] += increment;
+        private void increaseRejectCount(@UidState int uidState, @OpFlags int flags,
+                long increment) {
+            increaseCount(getOrCreateRejectCount(), uidState, flags, increment);
         }
 
-        private void increaseAccessDuration(@UidState int uidState, long increment) {
-            getOrCreateAccessDuration()[uidState] += increment;
+        private void increaseAccessDuration(@UidState int uidState, @OpFlags int flags,
+                long increment) {
+            increaseCount(getOrCreateAccessDuration(), uidState, flags, increment);
+        }
+
+        private void increaseCount(@NonNull LongSparseLongArray counts,
+                @UidState int uidState, @OpFlags int flags, long increment) {
+            while (flags != 0) {
+                final int flag = 1 << Integer.numberOfTrailingZeros(flags);
+                flags &= ~flag;
+                final long key = makeKey(uidState, flag);
+                counts.put(key, counts.get(key) + increment);
+            }
         }
 
         /**
@@ -3369,154 +3860,186 @@ public class AppOpsManager {
         /**
          * Gets the number times the op was accessed (performed) in the foreground.
          *
+         * @param flags The flags which are any combination of
+         * {@link #OP_FLAG_SELF}, {@link #OP_FLAG_TRUSTED_PROXY},
+         * {@link #OP_FLAG_UNTRUSTED_PROXY}, {@link #OP_FLAG_TRUSTED_PROXIED},
+         * {@link #OP_FLAG_UNTRUSTED_PROXIED}. You can use {@link #OP_FLAGS_ALL}
+         * for any flag.
          * @return The times the op was accessed in the foreground.
          *
-         * @see #getBackgroundAccessCount()
-         * @see #getAccessCount(int)
+         * @see #getBackgroundAccessCount(int)
+         * @see #getAccessCount(int, int, int)
          */
-        public long getForegroundAccessCount() {
-            if (mAccessCount == null) {
-                return 0;
-            }
-            return sum(mAccessCount, UID_STATE_PERSISTENT, UID_STATE_LAST_NON_RESTRICTED + 1);
+        public long getForegroundAccessCount(@OpFlags int flags) {
+            return sumForFlagsInStates(mAccessCount, MAX_PRIORITY_UID_STATE,
+                    resolveFirstUnrestrictedUidState(mOp), flags);
         }
 
         /**
          * Gets the number times the op was accessed (performed) in the background.
          *
+         * @param flags The flags which are any combination of
+         * {@link #OP_FLAG_SELF}, {@link #OP_FLAG_TRUSTED_PROXY},
+         * {@link #OP_FLAG_UNTRUSTED_PROXY}, {@link #OP_FLAG_TRUSTED_PROXIED},
+         * {@link #OP_FLAG_UNTRUSTED_PROXIED}. You can use {@link #OP_FLAGS_ALL}
+         * for any flag.
          * @return The times the op was accessed in the background.
          *
-         * @see #getForegroundAccessCount()
-         * @see #getAccessCount(int)
+         * @see #getForegroundAccessCount(int)
+         * @see #getAccessCount(int, int, int)
          */
-        public long getBackgroundAccessCount() {
-            if (mAccessCount == null) {
-                return 0;
-            }
-            return sum(mAccessCount, UID_STATE_LAST_NON_RESTRICTED + 1, _NUM_UID_STATE);
+        public long getBackgroundAccessCount(@OpFlags int flags) {
+            return sumForFlagsInStates(mAccessCount, resolveLastRestrictedUidState(mOp),
+                    MIN_PRIORITY_UID_STATE, flags);
         }
 
         /**
-         * Gets the number times the op was accessed (performed) for a given uid state.
+         * Gets the number times the op was accessed (performed) for a
+         * range of uid states.
          *
-         * @param uidState The UID state for which to query. Could be one of
+         * @param fromUidState The UID state from which to query. Could be one of
          * {@link #UID_STATE_PERSISTENT}, {@link #UID_STATE_TOP},
          * {@link #UID_STATE_FOREGROUND_SERVICE_LOCATION},
          * {@link #UID_STATE_FOREGROUND_SERVICE}, {@link #UID_STATE_FOREGROUND},
          * {@link #UID_STATE_BACKGROUND}, {@link #UID_STATE_CACHED}.
+         * @param toUidState The UID state to which to query.
+         * @param flags The flags which are any combination of
+         * {@link #OP_FLAG_SELF}, {@link #OP_FLAG_TRUSTED_PROXY},
+         * {@link #OP_FLAG_UNTRUSTED_PROXY}, {@link #OP_FLAG_TRUSTED_PROXIED},
+         * {@link #OP_FLAG_UNTRUSTED_PROXIED}. You can use {@link #OP_FLAGS_ALL}
+         * for any flag.
          *
          * @return The times the op was accessed for the given UID state.
          *
-         * @see #getForegroundAccessCount()
-         * @see #getBackgroundAccessCount()
+         * @see #getForegroundAccessCount(int)
+         * @see #getBackgroundAccessCount(int)
          */
-        public long getAccessCount(@UidState int uidState) {
-            if (mAccessCount == null) {
-                return 0;
-            }
-            return mAccessCount[uidState];
+        public long getAccessCount(@UidState int fromUidState, @UidState int toUidState,
+                @OpFlags int flags) {
+            return sumForFlagsInStates(mAccessCount, fromUidState, toUidState, flags);
         }
 
         /**
          * Gets the number times the op was rejected in the foreground.
          *
+         * @param flags The flags which are any combination of
+         * {@link #OP_FLAG_SELF}, {@link #OP_FLAG_TRUSTED_PROXY},
+         * {@link #OP_FLAG_UNTRUSTED_PROXY}, {@link #OP_FLAG_TRUSTED_PROXIED},
+         * {@link #OP_FLAG_UNTRUSTED_PROXIED}. You can use {@link #OP_FLAGS_ALL}
+         * for any flag.
          * @return The times the op was rejected in the foreground.
          *
-         * @see #getBackgroundRejectCount()
-         * @see #getRejectCount(int)
+         * @see #getBackgroundRejectCount(int)
+         * @see #getRejectCount(int, int, int)
          */
-        public long getForegroundRejectCount() {
-            if (mRejectCount == null) {
-                return 0;
-            }
-            return sum(mRejectCount, UID_STATE_PERSISTENT, UID_STATE_LAST_NON_RESTRICTED + 1);
+        public long getForegroundRejectCount(@OpFlags int flags) {
+            return sumForFlagsInStates(mRejectCount, MAX_PRIORITY_UID_STATE,
+                    resolveFirstUnrestrictedUidState(mOp), flags);
         }
 
         /**
          * Gets the number times the op was rejected in the background.
          *
+         * @param flags The flags which are any combination of
+         * {@link #OP_FLAG_SELF}, {@link #OP_FLAG_TRUSTED_PROXY},
+         * {@link #OP_FLAG_UNTRUSTED_PROXY}, {@link #OP_FLAG_TRUSTED_PROXIED},
+         * {@link #OP_FLAG_UNTRUSTED_PROXIED}. You can use {@link #OP_FLAGS_ALL}
+         * for any flag.
          * @return The times the op was rejected in the background.
          *
-         * @see #getForegroundRejectCount()
-         * @see #getRejectCount(int)
+         * @see #getForegroundRejectCount(int)
+         * @see #getRejectCount(int, int, int)
          */
-        public long getBackgroundRejectCount() {
-            if (mRejectCount == null) {
-                return 0;
-            }
-            return sum(mRejectCount, UID_STATE_LAST_NON_RESTRICTED + 1, _NUM_UID_STATE);
+        public long getBackgroundRejectCount(@OpFlags int flags) {
+            return sumForFlagsInStates(mRejectCount, resolveLastRestrictedUidState(mOp),
+                    MIN_PRIORITY_UID_STATE, flags);
         }
 
         /**
-         * Gets the number times the op was rejected for a given uid state.
+         * Gets the number times the op was rejected for a given range of UID states.
          *
-         * @param uidState The UID state for which to query. Could be one of
+         * @param fromUidState The UID state from which to query. Could be one of
          * {@link #UID_STATE_PERSISTENT}, {@link #UID_STATE_TOP},
          * {@link #UID_STATE_FOREGROUND_SERVICE_LOCATION},
          * {@link #UID_STATE_FOREGROUND_SERVICE}, {@link #UID_STATE_FOREGROUND},
          * {@link #UID_STATE_BACKGROUND}, {@link #UID_STATE_CACHED}.
+         * @param toUidState The UID state to which to query.
+         * @param flags The flags which are any combination of
+         * {@link #OP_FLAG_SELF}, {@link #OP_FLAG_TRUSTED_PROXY},
+         * {@link #OP_FLAG_UNTRUSTED_PROXY}, {@link #OP_FLAG_TRUSTED_PROXIED},
+         * {@link #OP_FLAG_UNTRUSTED_PROXIED}. You can use {@link #OP_FLAGS_ALL}
+         * for any flag.
          *
          * @return The times the op was rejected for the given UID state.
          *
-         * @see #getForegroundRejectCount()
-         * @see #getBackgroundRejectCount()
+         * @see #getForegroundRejectCount(int)
+         * @see #getBackgroundRejectCount(int)
          */
-        public long getRejectCount(@UidState int uidState) {
-            if (mRejectCount == null) {
-                return 0;
-            }
-            return mRejectCount[uidState];
+        public long getRejectCount(@UidState int fromUidState, @UidState int toUidState,
+                @OpFlags int flags) {
+            return sumForFlagsInStates(mRejectCount, fromUidState, toUidState, flags);
         }
 
         /**
          * Gets the total duration the app op was accessed (performed) in the foreground.
          *
+         * @param flags The flags which are any combination of
+         * {@link #OP_FLAG_SELF}, {@link #OP_FLAG_TRUSTED_PROXY},
+         * {@link #OP_FLAG_UNTRUSTED_PROXY}, {@link #OP_FLAG_TRUSTED_PROXIED},
+         * {@link #OP_FLAG_UNTRUSTED_PROXIED}. You can use {@link #OP_FLAGS_ALL}
+         * for any flag.
          * @return The total duration the app op was accessed in the foreground.
          *
-         * @see #getBackgroundAccessDuration()
-         * @see #getAccessDuration(int)
+         * @see #getBackgroundAccessDuration(int)
+         * @see #getAccessDuration(int, int, int)
          */
-        public long getForegroundAccessDuration() {
-            if (mAccessDuration == null) {
-                return 0;
-            }
-            return sum(mAccessDuration, UID_STATE_PERSISTENT, UID_STATE_LAST_NON_RESTRICTED + 1);
+        public long getForegroundAccessDuration(@OpFlags int flags) {
+            return sumForFlagsInStates(mAccessDuration, MAX_PRIORITY_UID_STATE,
+                    resolveFirstUnrestrictedUidState(mOp), flags);
         }
 
         /**
          * Gets the total duration the app op was accessed (performed) in the background.
          *
+         * @param flags The flags which are any combination of
+         * {@link #OP_FLAG_SELF}, {@link #OP_FLAG_TRUSTED_PROXY},
+         * {@link #OP_FLAG_UNTRUSTED_PROXY}, {@link #OP_FLAG_TRUSTED_PROXIED},
+         * {@link #OP_FLAG_UNTRUSTED_PROXIED}. You can use {@link #OP_FLAGS_ALL}
+         * for any flag.
          * @return The total duration the app op was accessed in the background.
          *
-         * @see #getForegroundAccessDuration()
-         * @see #getAccessDuration(int)
+         * @see #getForegroundAccessDuration(int)
+         * @see #getAccessDuration(int, int, int)
          */
-        public long getBackgroundAccessDuration() {
-            if (mAccessDuration == null) {
-                return 0;
-            }
-            return sum(mAccessDuration, UID_STATE_LAST_NON_RESTRICTED + 1, _NUM_UID_STATE);
+        public long getBackgroundAccessDuration(@OpFlags int flags) {
+            return sumForFlagsInStates(mAccessDuration, resolveLastRestrictedUidState(mOp),
+                    MIN_PRIORITY_UID_STATE, flags);
         }
 
         /**
-         * Gets the total duration the app op was accessed (performed) for a given UID state.
+         * Gets the total duration the app op was accessed (performed) for a given
+         * range of UID states.
          *
-         * @param uidState The UID state for which to query. Could be one of
+         * @param fromUidState The UID state from which to query. Could be one of
          * {@link #UID_STATE_PERSISTENT}, {@link #UID_STATE_TOP},
          * {@link #UID_STATE_FOREGROUND_SERVICE_LOCATION},
          * {@link #UID_STATE_FOREGROUND_SERVICE}, {@link #UID_STATE_FOREGROUND},
          * {@link #UID_STATE_BACKGROUND}, {@link #UID_STATE_CACHED}.
+         * @param toUidState The UID state from which to query.
+         * @param flags The flags which are any combination of
+         * {@link #OP_FLAG_SELF}, {@link #OP_FLAG_TRUSTED_PROXY},
+         * {@link #OP_FLAG_UNTRUSTED_PROXY}, {@link #OP_FLAG_TRUSTED_PROXIED},
+         * {@link #OP_FLAG_UNTRUSTED_PROXIED}. You can use {@link #OP_FLAGS_ALL}
+         * for any flag.
          *
          * @return The total duration the app op was accessed for the given UID state.
          *
-         * @see #getForegroundAccessDuration()
-         * @see #getBackgroundAccessDuration()
+         * @see #getForegroundAccessDuration(int)
+         * @see #getBackgroundAccessDuration(int)
          */
-        public long getAccessDuration(@UidState int uidState) {
-            if (mAccessDuration == null) {
-                return 0;
-            }
-            return mAccessDuration[uidState];
+        public long getAccessDuration(@UidState int fromUidState, @UidState int toUidState,
+                @OpFlags int flags) {
+            return sumForFlagsInStates(mAccessDuration, fromUidState, toUidState, flags);
         }
 
         @Override
@@ -3527,79 +4050,10 @@ public class AppOpsManager {
         @Override
         public void writeToParcel(Parcel parcel, int flags) {
             parcel.writeInt(mOp);
-            parcel.writeLongArray(mAccessCount);
-            parcel.writeLongArray(mRejectCount);
-            parcel.writeLongArray(mAccessDuration);
+            writeLongSparseLongArrayToParcel(mAccessCount, parcel);
+            writeLongSparseLongArrayToParcel(mRejectCount, parcel);
+            writeLongSparseLongArrayToParcel(mAccessDuration, parcel);
         }
-
-        private void accept(@NonNull HistoricalOpsVisitor visitor) {
-            visitor.visitHistoricalOp(this);
-        }
-
-        private @NonNull long[] getOrCreateAccessCount() {
-            if (mAccessCount == null) {
-                mAccessCount = new long[_NUM_UID_STATE];
-            }
-            return mAccessCount;
-        }
-
-        private @NonNull long[] getOrCreateRejectCount() {
-            if (mRejectCount == null) {
-                mRejectCount = new long[_NUM_UID_STATE];
-            }
-            return mRejectCount;
-        }
-
-        private @NonNull long[] getOrCreateAccessDuration() {
-            if (mAccessDuration == null) {
-                mAccessDuration = new long[_NUM_UID_STATE];
-            }
-            return mAccessDuration;
-        }
-
-        /**
-         *
-         * Computes the sum given the start and end index.
-         *
-         * @param counts The data array.
-         * @param start The start index (inclusive)
-         * @param end The end index (exclusive)
-         * @return The sum.
-         */
-        private static long sum(@NonNull long[] counts, int start, int end) {
-            long totalCount = 0;
-            for (int i = start; i < end; i++) {
-                totalCount += counts[i];
-            }
-            return totalCount;
-        }
-
-        /**
-         * Multiplies the entries in the array with the passed in scale factor and
-         * rounds the result at up 0.5 boundary.
-         *
-         * @param data The data to scale.
-         * @param scaleFactor The scale factor.
-         */
-        private static void scale(@NonNull long[] data, double scaleFactor) {
-            if (data != null) {
-                for (int i = 0; i < _NUM_UID_STATE; i++) {
-                    data[i] = (long) HistoricalOps.round((double) data[i] * scaleFactor);
-                }
-            }
-        }
-
-        public static final @android.annotation.NonNull Creator<HistoricalOp> CREATOR = new Creator<HistoricalOp>() {
-            @Override
-            public @NonNull HistoricalOp createFromParcel(@NonNull Parcel source) {
-                return new HistoricalOp(source);
-            }
-
-            @Override
-            public @NonNull HistoricalOp[] newArray(int size) {
-                return new HistoricalOp[size];
-            }
-        };
 
         @Override
         public boolean equals(Object obj) {
@@ -3613,23 +4067,201 @@ public class AppOpsManager {
             if (mOp != other.mOp) {
                 return false;
             }
-            if (!Arrays.equals(mAccessCount, other.mAccessCount)) {
+            if (!Objects.equals(mAccessCount, other.mAccessCount)) {
                 return false;
             }
-            if (!Arrays.equals(mRejectCount, other.mRejectCount)) {
+            if (!Objects.equals(mRejectCount, other.mRejectCount)) {
                 return false;
             }
-            return Arrays.equals(mAccessDuration, other.mAccessDuration);
+            return Objects.equals(mAccessDuration, other.mAccessDuration);
         }
 
         @Override
         public int hashCode() {
             int result = mOp;
-            result = 31 * result + Arrays.hashCode(mAccessCount);
-            result = 31 * result + Arrays.hashCode(mRejectCount);
-            result = 31 * result + Arrays.hashCode(mAccessDuration);
+            result = 31 * result + Objects.hashCode(mAccessCount);
+            result = 31 * result + Objects.hashCode(mRejectCount);
+            result = 31 * result + Objects.hashCode(mAccessDuration);
             return result;
         }
+
+        private void accept(@NonNull HistoricalOpsVisitor visitor) {
+            visitor.visitHistoricalOp(this);
+        }
+
+        private @NonNull LongSparseLongArray getOrCreateAccessCount() {
+            if (mAccessCount == null) {
+                mAccessCount = new LongSparseLongArray();
+            }
+            return mAccessCount;
+        }
+
+        private @NonNull LongSparseLongArray getOrCreateRejectCount() {
+            if (mRejectCount == null) {
+                mRejectCount = new LongSparseLongArray();
+            }
+            return mRejectCount;
+        }
+
+        private @NonNull LongSparseLongArray getOrCreateAccessDuration() {
+            if (mAccessDuration == null) {
+                mAccessDuration = new LongSparseLongArray();
+            }
+            return mAccessDuration;
+        }
+
+        /**
+         * Multiplies the entries in the array with the passed in scale factor and
+         * rounds the result at up 0.5 boundary.
+         *
+         * @param data The data to scale.
+         * @param scaleFactor The scale factor.
+         */
+        private static void scale(@NonNull LongSparseLongArray data, double scaleFactor) {
+            if (data != null) {
+                final int size = data.size();
+                for (int i = 0; i < size; i++) {
+                    data.put(data.keyAt(i), (long) HistoricalOps.round(
+                            (double) data.valueAt(i) * scaleFactor));
+                }
+            }
+        }
+
+        /**
+         * Merges two arrays while lazily acquiring the destination.
+         *
+         * @param thisSupplier The destination supplier.
+         * @param other The array to merge in.
+         */
+        private static void merge(@NonNull Supplier<LongSparseLongArray> thisSupplier,
+                @Nullable LongSparseLongArray other) {
+            if (other != null) {
+                final int otherSize = other.size();
+                for (int i = 0; i < otherSize; i++) {
+                    final LongSparseLongArray that = thisSupplier.get();
+                    final long otherKey = other.keyAt(i);
+                    final long otherValue = other.valueAt(i);
+                    that.put(otherKey, that.get(otherKey) + otherValue);
+                }
+            }
+        }
+
+        /** @hide */
+        public @Nullable LongSparseArray<Object> collectKeys() {
+            LongSparseArray<Object> result = AppOpsManager.collectKeys(mAccessCount,
+                null /*result*/);
+            result = AppOpsManager.collectKeys(mRejectCount, result);
+            result = AppOpsManager.collectKeys(mAccessDuration, result);
+            return result;
+        }
+
+        public static final @android.annotation.NonNull Creator<HistoricalOp> CREATOR =
+                new Creator<HistoricalOp>() {
+            @Override
+            public @NonNull HistoricalOp createFromParcel(@NonNull Parcel source) {
+                return new HistoricalOp(source);
+            }
+
+            @Override
+            public @NonNull HistoricalOp[] newArray(int size) {
+                return new HistoricalOp[size];
+            }
+        };
+    }
+
+    /**
+     * Computes the sum of the counts for the given flags in between the begin and
+     * end UID states.
+     *
+     * @param counts The data array.
+     * @param beginUidState The beginning UID state (exclusive).
+     * @param endUidState The end UID state.
+     * @param flags The UID flags.
+     * @return The sum.
+     */
+    private static long sumForFlagsInStates(@Nullable LongSparseLongArray counts,
+            @UidState int beginUidState, @UidState int endUidState, @OpFlags int flags) {
+        if (counts == null) {
+            return 0;
+        }
+        long sum = 0;
+        while (flags != 0) {
+            final int flag = 1 << Integer.numberOfTrailingZeros(flags);
+            flags &= ~flag;
+            for (int uidState : UID_STATES) {
+                if (uidState < beginUidState || uidState > endUidState) {
+                    continue;
+                }
+                final long key = makeKey(uidState, flag);
+                sum += counts.get(key);
+            }
+        }
+        return sum;
+    }
+
+    /**
+     * Finds the first non-negative value for the given flags in between the begin and
+     * end UID states.
+     *
+     * @param counts The data array.
+     * @param flags The UID flags.
+     * @param beginUidState The beginning UID state (exclusive).
+     * @param endUidState The end UID state.
+     * @return The non-negative value or -1.
+     */
+    private static long findFirstNonNegativeForFlagsInStates(@Nullable LongSparseLongArray counts,
+            @OpFlags int flags, @UidState int beginUidState, @UidState int endUidState) {
+        if (counts == null) {
+            return -1;
+        }
+        while (flags != 0) {
+            final int flag = 1 << Integer.numberOfTrailingZeros(flags);
+            flags &= ~flag;
+            for (int uidState : UID_STATES) {
+                if (uidState < beginUidState || uidState > endUidState) {
+                    continue;
+                }
+                final long key = makeKey(uidState, flag);
+                final long value = counts.get(key);
+                if (value >= 0) {
+                    return value;
+                }
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * Finds the first non-null value for the given flags in between the begin and
+     * end UID states.
+     *
+     * @param counts The data array.
+     * @param flags The UID flags.
+     * @param beginUidState The beginning UID state (exclusive).
+     * @param endUidState The end UID state.
+     * @return The non-negative value or -1.
+     */
+    private static @Nullable String findFirstNonNullForFlagsInStates(
+            @Nullable LongSparseArray<String> counts, @OpFlags int flags,
+            @UidState int beginUidState, @UidState int endUidState) {
+        if (counts == null) {
+            return null;
+        }
+        while (flags != 0) {
+            final int flag = 1 << Integer.numberOfTrailingZeros(flags);
+            flags &= ~flag;
+            for (int uidState : UID_STATES) {
+                if (uidState < beginUidState || uidState > endUidState) {
+                    continue;
+                }
+                final long key = makeKey(uidState, flag);
+                final String value = counts.get(key);
+                if (value != null) {
+                    return value;
+                }
+            }
+        }
+        return null;
     }
 
     /**
@@ -3800,7 +4432,7 @@ public class AppOpsManager {
         Preconditions.checkNotNull(callback, "callback cannot be null");
         try {
             mService.getHistoricalOps(request.mUid, request.mPackageName, request.mOpNames,
-                    request.mBeginTimeMillis, request.mEndTimeMillis,
+                    request.mBeginTimeMillis, request.mEndTimeMillis, request.mFlags,
                     new RemoteCallback((result) -> {
                 final HistoricalOps ops = result.getParcelable(KEY_HISTORICAL_OPS);
                 final long identity = Binder.clearCallingIdentity();
@@ -3840,7 +4472,7 @@ public class AppOpsManager {
         try {
             mService.getHistoricalOpsFromDiskRaw(request.mUid, request.mPackageName,
                     request.mOpNames, request.mBeginTimeMillis, request.mEndTimeMillis,
-                    new RemoteCallback((result) -> {
+                    request.mFlags, new RemoteCallback((result) -> {
                 final HistoricalOps ops = result.getParcelable(KEY_HISTORICAL_OPS);
                 final long identity = Binder.clearCallingIdentity();
                 try {
@@ -4310,7 +4942,20 @@ public class AppOpsManager {
      * Like {@link #checkOp} but returns the <em>raw</em> mode associated with the op.
      * Does not throw a security exception, does not translate {@link #MODE_FOREGROUND}.
      */
-    public int unsafeCheckOpRaw(String op, int uid, String packageName) {
+    public int unsafeCheckOpRaw(@NonNull String op, int uid, String packageName) {
+        try {
+            return mService.checkOperationRaw(strOpToOp(op), uid, packageName);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Like {@link #unsafeCheckOpNoThrow(String, int, String)} but returns the <em>raw</em>
+     * mode associated with the op. Does not throw a security exception, does not translate
+     * {@link #MODE_FOREGROUND}.
+     */
+    public int unsafeCheckOpRawNoThrow(@NonNull String op, int uid, @NonNull String packageName) {
         try {
             return mService.checkOperationRaw(strOpToOp(op), uid, packageName);
         } catch (RemoteException e) {
@@ -4899,16 +5544,110 @@ public class AppOpsManager {
     }
 
     /**
-     * @hide
+     * Computes the max for the given flags in between the begin and
+     * end UID states.
+     *
+     * @param counts The data array.
+     * @param flags The UID flags.
+     * @param beginUidState The beginning UID state (exclusive).
+     * @param endUidState The end UID state.
+     * @return The sum.
      */
-    public static long maxTime(long[] times, int start, int end) {
-        long time = 0;
-        for (int i = start; i < end; i++) {
-            if (times[i] > time) {
-                time = times[i];
+    private static long maxForFlagsInStates(@Nullable LongSparseLongArray counts,
+            @UidState int beginUidState, @UidState int endUidState,
+            @OpFlags int flags) {
+        if (counts == null) {
+            return 0;
+        }
+        long max = 0;
+        while (flags != 0) {
+            final int flag = 1 << Integer.numberOfTrailingZeros(flags);
+            flags &= ~flag;
+            for (int uidState : UID_STATES) {
+                if (uidState < beginUidState || uidState > endUidState) {
+                    continue;
+                }
+                final long key = makeKey(uidState, flag);
+                max = Math.max(max, counts.get(key));
             }
         }
-        return time;
+        return max;
+    }
+
+
+    private static void writeLongSparseLongArrayToParcel(
+            @Nullable LongSparseLongArray array, @NonNull Parcel parcel) {
+        if (array != null) {
+            final int size = array.size();
+            parcel.writeInt(size);
+            for (int i = 0; i < size; i++) {
+                parcel.writeLong(array.keyAt(i));
+                parcel.writeLong(array.valueAt(i));
+            }
+        } else {
+            parcel.writeInt(-1);
+        }
+    }
+
+    private static @Nullable LongSparseLongArray readLongSparseLongArrayFromParcel(
+            @NonNull Parcel parcel) {
+        final int size = parcel.readInt();
+        if (size < 0) {
+            return null;
+        }
+        final LongSparseLongArray array = new LongSparseLongArray(size);
+        for (int i = 0; i < size; i++) {
+            array.append(parcel.readLong(), parcel.readLong());
+        }
+        return array;
+    }
+
+    private static void writeLongSparseStringArrayToParcel(
+            @Nullable LongSparseArray<String> array, @NonNull Parcel parcel) {
+        if (array != null) {
+            final int size = array.size();
+            parcel.writeInt(size);
+            for (int i = 0; i < size; i++) {
+                parcel.writeLong(array.keyAt(i));
+                parcel.writeString(array.valueAt(i));
+            }
+        } else {
+            parcel.writeInt(-1);
+        }
+    }
+
+    private static @Nullable LongSparseArray<String> readLongSparseStringArrayFromParcel(
+            @NonNull Parcel parcel) {
+        final int size = parcel.readInt();
+        if (size < 0) {
+            return null;
+        }
+        final LongSparseArray<String> array = new LongSparseArray<>(size);
+        for (int i = 0; i < size; i++) {
+            array.append(parcel.readLong(), parcel.readString());
+        }
+        return array;
+    }
+
+    /**
+     * Collects the keys from an array to the result creating the result if needed.
+     *
+     * @param array The array whose keys to collect.
+     * @param result The optional result store collected keys.
+     * @return The result collected keys array.
+     */
+    private static LongSparseArray<Object> collectKeys(@Nullable LongSparseLongArray array,
+            @Nullable LongSparseArray<Object> result) {
+        if (array != null) {
+            if (result == null) {
+                result = new LongSparseArray<>();
+            }
+            final int accessSize = array.size();
+            for (int i = 0; i < accessSize; i++) {
+                result.put(array.keyAt(i), null);
+            }
+        }
+        return result;
     }
 
     /** @hide */

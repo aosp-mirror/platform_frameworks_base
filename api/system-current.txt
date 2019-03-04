@@ -362,27 +362,34 @@ package android.app {
     field public static final String OPSTR_WRITE_ICC_SMS = "android:write_icc_sms";
     field public static final String OPSTR_WRITE_SMS = "android:write_sms";
     field public static final String OPSTR_WRITE_WALLPAPER = "android:write_wallpaper";
-    field public static final int UID_STATE_BACKGROUND = 5; // 0x5
-    field public static final int UID_STATE_CACHED = 6; // 0x6
-    field public static final int UID_STATE_FOREGROUND = 4; // 0x4
-    field public static final int UID_STATE_FOREGROUND_SERVICE = 3; // 0x3
-    field public static final int UID_STATE_FOREGROUND_SERVICE_LOCATION = 2; // 0x2
-    field public static final int UID_STATE_PERSISTENT = 0; // 0x0
-    field public static final int UID_STATE_TOP = 1; // 0x1
+    field public static final int OP_FLAGS_ALL = 31; // 0x1f
+    field public static final int OP_FLAGS_ALL_TRUSTED = 13; // 0xd
+    field public static final int OP_FLAG_SELF = 1; // 0x1
+    field public static final int OP_FLAG_TRUSTED_PROXIED = 8; // 0x8
+    field public static final int OP_FLAG_TRUSTED_PROXY = 2; // 0x2
+    field public static final int OP_FLAG_UNTRUSTED_PROXIED = 16; // 0x10
+    field public static final int OP_FLAG_UNTRUSTED_PROXY = 4; // 0x4
+    field public static final int UID_STATE_BACKGROUND = 600; // 0x258
+    field public static final int UID_STATE_CACHED = 700; // 0x2bc
+    field public static final int UID_STATE_FOREGROUND = 500; // 0x1f4
+    field public static final int UID_STATE_FOREGROUND_SERVICE = 400; // 0x190
+    field public static final int UID_STATE_FOREGROUND_SERVICE_LOCATION = 300; // 0x12c
+    field public static final int UID_STATE_PERSISTENT = 100; // 0x64
+    field public static final int UID_STATE_TOP = 200; // 0xc8
   }
 
   public static final class AppOpsManager.HistoricalOp implements android.os.Parcelable {
     method public int describeContents();
-    method public long getAccessCount(int);
-    method public long getAccessDuration(int);
-    method public long getBackgroundAccessCount();
-    method public long getBackgroundAccessDuration();
-    method public long getBackgroundRejectCount();
-    method public long getForegroundAccessCount();
-    method public long getForegroundAccessDuration();
-    method public long getForegroundRejectCount();
+    method public long getAccessCount(int, int, int);
+    method public long getAccessDuration(int, int, int);
+    method public long getBackgroundAccessCount(int);
+    method public long getBackgroundAccessDuration(int);
+    method public long getBackgroundRejectCount(int);
+    method public long getForegroundAccessCount(int);
+    method public long getForegroundAccessDuration(int);
+    method public long getForegroundRejectCount(int);
     method @NonNull public String getOpName();
-    method public long getRejectCount(int);
+    method public long getRejectCount(int, int, int);
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.AppOpsManager.HistoricalOp> CREATOR;
   }
@@ -404,6 +411,7 @@ package android.app {
   public static final class AppOpsManager.HistoricalOpsRequest.Builder {
     ctor public AppOpsManager.HistoricalOpsRequest.Builder(long, long);
     method @NonNull public android.app.AppOpsManager.HistoricalOpsRequest build();
+    method @NonNull public android.app.AppOpsManager.HistoricalOpsRequest.Builder setFlags(int);
     method @NonNull public android.app.AppOpsManager.HistoricalOpsRequest.Builder setOpNames(@Nullable java.util.List<java.lang.String>);
     method @NonNull public android.app.AppOpsManager.HistoricalOpsRequest.Builder setPackageName(@Nullable String);
     method @NonNull public android.app.AppOpsManager.HistoricalOpsRequest.Builder setUid(int);
@@ -431,17 +439,24 @@ package android.app {
 
   public static final class AppOpsManager.OpEntry implements android.os.Parcelable {
     method public int describeContents();
-    method public int getDuration();
-    method public long getLastAccessBackgroundTime();
-    method public long getLastAccessForegroundTime();
-    method public long getLastAccessTime();
-    method public long getLastRejectBackgroundTime();
-    method public long getLastRejectForegroundTime();
-    method public long getLastRejectTime();
+    method public long getDuration();
+    method public long getLastAccessBackgroundTime(int);
+    method public long getLastAccessForegroundTime(int);
+    method public long getLastAccessTime(int);
+    method public long getLastAccessTime(int, int, int);
+    method public long getLastBackgroundDuration(int);
+    method public long getLastDuration(int, int, int);
+    method public long getLastForegroundDuration(int);
+    method public long getLastRejectBackgroundTime(int);
+    method public long getLastRejectForegroundTime(int);
+    method public long getLastRejectTime(int);
+    method public long getLastRejectTime(int, int, int);
     method public int getMode();
-    method public String getOpStr();
-    method public String getProxyPackageName();
+    method @NonNull public String getOpStr();
+    method @Nullable public String getProxyPackageName();
+    method @Nullable public String getProxyPackageName(int, int);
     method public int getProxyUid();
+    method public int getProxyUid(int, int);
     method public boolean isRunning();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.AppOpsManager.OpEntry> CREATOR;
@@ -450,7 +465,7 @@ package android.app {
   public static final class AppOpsManager.PackageOps implements android.os.Parcelable {
     method public int describeContents();
     method public java.util.List<android.app.AppOpsManager.OpEntry> getOps();
-    method public String getPackageName();
+    method @NonNull public String getPackageName();
     method public int getUid();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.AppOpsManager.PackageOps> CREATOR;

@@ -1,18 +1,37 @@
 {
-  "imports": [
-    {
-      "path": "frameworks/base/services/core/java/com/android/server/am"
-    },
-    {
-      "path": "frameworks/base/services/core/java/com/android/server/wm"
-    }
-  ],
-  "presubmit": [
-      {
-        "name": "CtsFragmentTestCases"
-      },
-      {
-        "name": "CtsFragmentTestCasesSdk26"
-      }
-  ]
+    "imports": [
+        {
+            "path": "frameworks/base/services/core/java/com/android/server/am"
+        },
+        {
+            "path": "frameworks/base/services/core/java/com/android/server/wm"
+        }
+    ],
+    "presubmit": [
+        {
+            "name": "CtsFragmentTestCases"
+        },
+        {
+            "name": "CtsFragmentTestCasesSdk26"
+        },
+        {
+            "file_patterns": ["(/|^)AppOpsManager.java"],
+            "name": "CtsAppOpsTestCases"
+        },
+        {
+            "file_patterns": ["(/|^)AppOpsManager.java"],
+            "name": "FrameworksServicesTests",
+            "options": [
+                {
+                    "include-filter": "com.android.server.appop.AppOpsUpgradeTest"
+                },
+                {
+                    "include-filter": "com.android.server.appop.AppOpsServiceTest"
+                },
+                {
+                    "include-filter": "com.android.server.appop.AppOpsActiveWatcherTest"
+                }
+            ]
+        }
+    ]
 }
