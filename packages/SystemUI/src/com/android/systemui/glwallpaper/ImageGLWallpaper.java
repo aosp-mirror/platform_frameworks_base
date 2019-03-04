@@ -50,7 +50,7 @@ class ImageGLWallpaper {
 
     static final String A_POSITION = "aPosition";
     static final String A_TEXTURE_COORDINATES = "aTextureCoordinates";
-    static final String U_CENTER_REVEAL = "uCenterReveal";
+    static final String U_PER85 = "uPer85";
     static final String U_REVEAL = "uReveal";
     static final String U_AOD2OPACITY = "uAod2Opacity";
     static final String U_TEXTURE = "uTexture";
@@ -87,7 +87,7 @@ class ImageGLWallpaper {
     private int mAttrPosition;
     private int mAttrTextureCoordinates;
     private int mUniAod2Opacity;
-    private int mUniCenterReveal;
+    private int mUniPer85;
     private int mUniReveal;
     private int mUniTexture;
     private int mTextureId;
@@ -131,7 +131,7 @@ class ImageGLWallpaper {
 
     private void setupUniforms() {
         mUniAod2Opacity = mProgram.getUniformHandle(U_AOD2OPACITY);
-        mUniCenterReveal = mProgram.getUniformHandle(U_CENTER_REVEAL);
+        mUniPer85 = mProgram.getUniformHandle(U_PER85);
         mUniReveal = mProgram.getUniformHandle(U_REVEAL);
         mUniTexture = mProgram.getUniformHandle(U_TEXTURE);
     }
@@ -144,8 +144,8 @@ class ImageGLWallpaper {
                 return mAttrTextureCoordinates;
             case U_AOD2OPACITY:
                 return mUniAod2Opacity;
-            case U_CENTER_REVEAL:
-                return mUniCenterReveal;
+            case U_PER85:
+                return mUniPer85;
             case U_REVEAL:
                 return mUniReveal;
             case U_TEXTURE:
