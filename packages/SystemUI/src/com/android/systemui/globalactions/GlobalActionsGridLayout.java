@@ -17,6 +17,7 @@
 package com.android.systemui.globalactions;
 
 import android.content.Context;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,6 +25,9 @@ import android.view.ViewGroup;
 import com.android.systemui.HardwareBgDrawable;
 import com.android.systemui.MultiListLayout;
 import com.android.systemui.util.leak.RotationUtils;
+
+import java.util.ArrayList;
+import java.util.Locale;
 
 /**
  * Grid-based implementation of the button layout created by the global actions dialog.
@@ -55,10 +59,55 @@ public class GlobalActionsGridLayout extends MultiListLayout {
         }
     }
 
-    @Override
+    /**
+     * Sets the number of items expected to be rendered in the list container. This allows the
+     * layout to correctly determine which parent containers will be used for items before they have
+     * beenadded to the layout.
+     * @param count The number of items expected.
+     */
     public void setExpectedListItemCount(int count) {
-        mExpectedListItemCount = count;
         getListView().setExpectedCount(count);
+    }
+
+    @Override
+    public void onUpdateList() {
+        removeAllItems();
+        ArrayList<GlobalActionsDialog.Action> separatedActions =
+                mAdapter.getSeparatedItems(mSeparated);
+        ArrayList<GlobalActionsDialog.Action> listActions = mAdapter.getListItems(mSeparated);
+        setExpectedListItemCount(listActions.size());
+        int rotation = RotationUtils.getRotation(mContext);
+
+        boolean reverse = false; // should we add items to parents in the reverse order?
+        if (rotation == RotationUtils.ROTATION_NONE
+                || rotation == RotationUtils.ROTATION_SEASCAPE) {
+            reverse = !reverse; // if we're in portrait or seascape, reverse items
+        }
+        if (TextUtils.getLayoutDirectionFromLocale(Locale.getDefault())
+                == View.LAYOUT_DIRECTION_RTL) {
+            reverse = !reverse; // if we're in an RTL language, reverse items (again)
+        }
+
+        for (int i = 0; i < mAdapter.getCount(); i++) {
+            Object action = mAdapter.getItem(i);
+            int separatedIndex = separatedActions.indexOf(action);
+            ViewGroup parent;
+            if (separatedIndex != -1) {
+                parent = getParentView(true, separatedIndex, rotation);
+            } else {
+                int listIndex = listActions.indexOf(action);
+                parent = getParentView(false, listIndex, rotation);
+            }
+            View v = mAdapter.getView(i, null, parent);
+            final int pos = i;
+            v.setOnClickListener(view -> mAdapter.onClickItem(pos));
+            v.setOnLongClickListener(view -> mAdapter.onLongClickItem(pos));
+            if (reverse) {
+                parent.addView(v, 0); // reverse order of items
+            } else {
+                parent.addView(v);
+            }
+        }
     }
 
     @Override
@@ -83,7 +132,6 @@ public class GlobalActionsGridLayout extends MultiListLayout {
         }
     }
 
-    @Override
     public ViewGroup getParentView(boolean separated, int index, int rotation) {
         if (separated) {
             return getSeparatedView();

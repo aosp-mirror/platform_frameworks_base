@@ -18,7 +18,6 @@ package com.android.systemui.globalactions;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
@@ -39,6 +38,7 @@ import android.widget.LinearLayout;
  */
 
 public class ListGridLayout extends LinearLayout {
+    private static final String TAG = "ListGridLayout";
     private int mExpectedCount;
     private int mRows;
     private int mColumns;
@@ -103,12 +103,10 @@ public class ListGridLayout extends LinearLayout {
                 setSublistVisibility(i, false);
             }
         }
-
     }
 
     private void setSublistVisibility(int index, boolean visible) {
         View subList = getChildAt(index);
-        Log.d("ListGrid", "index: " + index  + ", visibility: "  + visible);
         if (subList != null) {
             subList.setVisibility(visible ? View.VISIBLE : View.GONE);
         }
