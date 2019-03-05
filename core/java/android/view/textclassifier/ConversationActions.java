@@ -109,6 +109,7 @@ public final class ConversationActions implements Parcelable {
          *
          * @see Builder#Builder(Person)
          */
+        @NonNull
         public static final Person PERSON_USER_SELF =
                 new Person.Builder()
                         .setKey("text-classifier-conversation-actions-user-self")
@@ -123,6 +124,7 @@ public final class ConversationActions implements Parcelable {
          *
          * @see Builder#Builder(Person)
          */
+        @NonNull
         public static final Person PERSON_USER_OTHERS =
                 new Person.Builder()
                         .setKey("text-classifier-conversation-actions-user-others")
@@ -465,6 +467,7 @@ public final class ConversationActions implements Parcelable {
              * Sets the hints to help text classifier to generate actions. It could be used to help
              * text classifier to infer what types of actions the caller may be interested in.
              */
+            @NonNull
             public Builder setHints(@Nullable @Hint List<String> hints) {
                 mHints = hints;
                 return this;
