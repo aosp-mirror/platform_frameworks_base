@@ -17,11 +17,12 @@
 package com.android.server.wm.flicker;
 
 import android.platform.helpers.IAppHelper;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.runner.AndroidJUnit4;
 import android.support.test.uiautomator.UiDevice;
 import android.util.Rational;
 import android.view.Surface;
+
+import androidx.test.InstrumentationRegistry;
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Ignore;
 import org.junit.Test;

@@ -721,6 +721,7 @@ public abstract class PackageManager {
             INSTALL_VIRTUAL_PRELOAD,
             INSTALL_APEX,
             INSTALL_ENABLE_ROLLBACK,
+            INSTALL_RESPECT_ALLOW_DOWNGRADE,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface InstallFlags {}
@@ -864,6 +865,15 @@ public abstract class PackageManager {
      * @hide
      */
     public static final int INSTALL_DISABLE_VERIFICATION = 0x00080000;
+
+    /**
+     * Flag parameter for {@link #installPackage} to indicate that
+     * {@link #INSTALL_ALLOW_DOWNGRADE} should be respected.
+     *
+     * @hide
+     */
+    // TODO(b/127322579): rename
+    public static final int INSTALL_RESPECT_ALLOW_DOWNGRADE = 0x00100000;
 
     /** @hide */
     @IntDef(flag = true, prefix = { "DONT_KILL_APP" }, value = {

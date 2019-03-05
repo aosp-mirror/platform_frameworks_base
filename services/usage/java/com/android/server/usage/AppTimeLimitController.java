@@ -511,8 +511,10 @@ public class AppTimeLimitController {
 
     class AppUsageLimitGroup extends UsageGroup {
         public AppUsageLimitGroup(UserData user, ObserverAppData observerApp, int observerId,
-                String[] observed, long timeLimitMs, PendingIntent limitReachedCallback) {
+                String[] observed, long timeLimitMs, long timeRemainingMs,
+                PendingIntent limitReachedCallback) {
             super(user, observerApp, observerId, observed, timeLimitMs, limitReachedCallback);
+            mUsageTimeMs = timeLimitMs - timeRemainingMs;
         }
 
         @Override
@@ -839,9 +841,9 @@ public class AppTimeLimitController {
      * Existing app usage limit observer with the same observerId will be removed.
      */
     public void addAppUsageLimitObserver(int requestingUid, int observerId, String[] observed,
-            long timeLimit, PendingIntent callbackIntent, @UserIdInt int userId) {
-        // Allow the special case of the limit being 0, but with no callback.
-        if (timeLimit != 0L && timeLimit < getMinTimeLimit()) {
+            long timeLimit, long timeRemaining, PendingIntent callbackIntent,
+            @UserIdInt int userId) {
+        if (timeLimit < getMinTimeLimit()) {
             throw new IllegalArgumentException("Time limit must be >= " + getMinTimeLimit());
         }
         synchronized (mLock) {
@@ -859,7 +861,7 @@ public class AppTimeLimitController {
                         "Too many app usage observers added by uid " + requestingUid);
             }
             group = new AppUsageLimitGroup(user, observerApp, observerId, observed, timeLimit,
-                    timeLimit == 0L ? null : callbackIntent);
+                    timeRemaining, timeRemaining == 0L ? null : callbackIntent);
             observerApp.appUsageLimitGroups.append(observerId, group);
 
             if (DEBUG) {

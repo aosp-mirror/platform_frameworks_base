@@ -30,7 +30,6 @@ import android.content.pm.PackageManager;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.RemoteException;
-import android.support.test.InstrumentationRegistry;
 import android.support.test.launcherhelper.LauncherStrategyFactory;
 import android.support.test.uiautomator.By;
 import android.support.test.uiautomator.BySelector;
@@ -42,6 +41,8 @@ import android.util.Log;
 import android.util.Rational;
 import android.view.View;
 import android.view.ViewConfiguration;
+
+import androidx.test.InstrumentationRegistry;
 
 /**
  * Collection of UI Automation helper functions.

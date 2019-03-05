@@ -3688,4 +3688,6 @@
   <java-symbol type="string" name="mime_type_spreadsheet_ext" />
   <java-symbol type="string" name="mime_type_presentation" />
   <java-symbol type="string" name="mime_type_presentation_ext" />
+
+  <java-symbol type="integer" name="config_defaultPeakRefreshRate" />
 </resources>

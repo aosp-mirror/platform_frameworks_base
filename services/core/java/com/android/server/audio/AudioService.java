@@ -4041,7 +4041,10 @@ public class AudioService extends IAudioService.Stub
     @Retention(RetentionPolicy.SOURCE)
     public @interface BtProfileConnectionState {}
 
-    public int setBluetoothHearingAidDeviceConnectionState(
+    /**
+     * See AudioManager.setBluetoothHearingAidDeviceConnectionState()
+     */
+    public void setBluetoothHearingAidDeviceConnectionState(
             @NonNull BluetoothDevice device, @BtProfileConnectionState int state,
             boolean suppressNoisyIntent, int musicDevice)
     {
@@ -4053,14 +4056,14 @@ public class AudioService extends IAudioService.Stub
             throw new IllegalArgumentException("Illegal BluetoothProfile state for device "
                     + " (dis)connection, got " + state);
         }
-        return mDeviceBroker.setBluetoothHearingAidDeviceConnectionState(
+        mDeviceBroker.postBluetoothHearingAidDeviceConnectionState(
                 device, state, suppressNoisyIntent, musicDevice, "AudioService");
     }
 
     /**
      * See AudioManager.setBluetoothA2dpDeviceConnectionStateSuppressNoisyIntent()
      */
-    public int setBluetoothA2dpDeviceConnectionStateSuppressNoisyIntent(
+    public void setBluetoothA2dpDeviceConnectionStateSuppressNoisyIntent(
             @NonNull BluetoothDevice device, @AudioService.BtProfileConnectionState int state,
             int profile, boolean suppressNoisyIntent, int a2dpVolume) {
         if (device == null) {
@@ -4071,7 +4074,7 @@ public class AudioService extends IAudioService.Stub
             throw new IllegalArgumentException("Illegal BluetoothProfile state for device "
                     + " (dis)connection, got " + state);
         }
-        return mDeviceBroker.setBluetoothA2dpDeviceConnectionStateSuppressNoisyIntent(device, state,
+        mDeviceBroker.postBluetoothA2dpDeviceConnectionStateSuppressNoisyIntent(device, state,
                 profile, suppressNoisyIntent, a2dpVolume);
     }
 
@@ -4094,6 +4097,9 @@ public class AudioService extends IAudioService.Stub
     public int handleBluetoothA2dpActiveDeviceChange(
             BluetoothDevice device, int state, int profile, boolean suppressNoisyIntent,
             int a2dpVolume) {
+        // FIXME method was added by @a8439e2 but never used, and now conflicts with async behavior
+        //   of handleBluetoothA2dpDeviceConfigChange and
+        //   setBluetoothA2dpDeviceConnectionStateSuppressNoisyIntent
         if (device == null) {
             throw new IllegalArgumentException("Illegal null device");
         }

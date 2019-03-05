@@ -64,12 +64,14 @@ public final class DeviceConfig {
     public static final String NAMESPACE_ACTIVITY_MANAGER = "activity_manager";
 
     /**
-     * Namespace for all Game Driver features.
+     * Namespace for all activity manager related features that are used at the native level.
+     * These features are applied at reboot.
      *
      * @hide
      */
     @SystemApi
-    public static final String NAMESPACE_GAME_DRIVER = "game_driver";
+    public static final String NAMESPACE_ACTIVITY_MANAGER_NATIVE_BOOT =
+            "activity_manager_native_boot";
 
     /**
      * Namespace for autofill feature that provides suggestions across all apps when
@@ -92,6 +94,14 @@ public final class DeviceConfig {
     public static final String NAMESPACE_CONTENT_CAPTURE = "content_capture";
 
     /**
+     * Namespace for all Game Driver features.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String NAMESPACE_GAME_DRIVER = "game_driver";
+
+    /**
      * Namespace for all input-related features that are used at the native level.
      * These features are applied at reboot.
      *
@@ -101,12 +111,29 @@ public final class DeviceConfig {
     public static final String NAMESPACE_INPUT_NATIVE_BOOT = "input_native_boot";
 
     /**
+     * Namespace for all media native related features.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String NAMESPACE_MEDIA_NATIVE = "media_native";
+
+    /**
      * Namespace for all netd related features.
      *
      * @hide
      */
     @SystemApi
     public static final String NAMESPACE_NETD_NATIVE = "netd_native";
+
+    /**
+     * Namespace for all runtime native boot related features. Boot in this case refers to the
+     * fact that the properties only take affect after rebooting the device.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String NAMESPACE_RUNTIME_NATIVE_BOOT = "runtime_native_boot";
 
     /**
      * Namespace for System UI related features.
@@ -171,40 +198,6 @@ public final class DeviceConfig {
          * @hide for internal use only
          */
         String USAP_POOL_REFILL_THRESHOLD = "usap_refill_threshold";
-    }
-
-    /**
-     * Namespace for all runtime native boot related features. Boot in this case refers to the
-     * fact that the properties only take affect after rebooting the device.
-     *
-     * @hide
-     */
-    @SystemApi
-    public interface RuntimeNativeBoot {
-        String NAMESPACE = "runtime_native_boot";
-    }
-
-    /**
-     * Namespace for all media native related features.
-     *
-     * @hide
-     */
-    @SystemApi
-    public interface MediaNative {
-        /** The flag namespace for media native features. */
-        String NAMESPACE = "media_native";
-    }
-
-    /**
-     * Namespace for all activity manager related features that are used at the native level.
-     * These features are applied at reboot.
-     *
-     * @hide
-     */
-    @SystemApi
-    public interface ActivityManagerNativeBoot {
-        String NAMESPACE = "activity_manager_native_boot";
-        String OFFLOAD_QUEUE_ENABLED = "offload_queue_enabled";
     }
 
     /**

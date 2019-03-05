@@ -29,7 +29,7 @@ java_library {
 
       // test android dependencies
       "platform-test-annotations",
-      "android-support-test",
+      "androidx.test.rules",
       // test framework dependencies
       "mockito-target-inline-minus-junit4",
       // "mockito-target-minus-junit4",

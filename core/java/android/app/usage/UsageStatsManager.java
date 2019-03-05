@@ -35,6 +35,7 @@ import android.util.ArrayMap;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -738,6 +739,23 @@ public final class UsageStatsManager {
     }
 
     /**
+     * @deprecated use
+     * {@link #registerAppUsageLimitObserver(int, String[], Duration, Duration, PendingIntent)}.
+     *
+     * @removed
+     * @hide
+     */
+    @Deprecated
+    @UnsupportedAppUsage
+    // STOPSHIP b/126917290: remove this method once ag/6591106 is merged and it's not being used.
+    public void registerAppUsageLimitObserver(int observerId, @NonNull String[] observedEntities,
+            long timeLimit, @NonNull TimeUnit timeUnit, @Nullable PendingIntent callbackIntent) {
+        final Duration timeLimitDuration = Duration.ofMillis(timeUnit.toMillis(timeLimit));
+        registerAppUsageLimitObserver(observerId, observedEntities,
+                timeLimitDuration, timeLimitDuration, callbackIntent);
+    }
+
+    /**
      * Register a usage limit observer that receives a callback on the provided intent when the
      * sum of usages of apps and tokens in the provided {@code observedEntities} array exceeds the
      * {@code timeLimit} specified. The structure of a token is a {@link String} with the reporting
@@ -759,19 +777,21 @@ public final class UsageStatsManager {
      * @see android.content.pm.LauncherApps#getAppUsageLimit
      *
      * @param observerId A unique id associated with the group of apps to be monitored. There can
-     *                  be multiple groups with common packages and different time limits.
+     *                   be multiple groups with common packages and different time limits.
      * @param observedEntities The list of packages and token to observe for usage time. Cannot be
      *                         null and must include at least one package or token.
      * @param timeLimit The total time the set of apps can be in the foreground before the
-     *                  callbackIntent is delivered. Must be at least one minute. Note: a limit of
-     *                  0 can be set to indicate that the user has already exhausted the limit for
-     *                  a group, in which case, the given {@code callbackIntent} will be ignored.
-     * @param timeUnit The unit for time specified in {@code timeLimit}. Cannot be null.
+     *                  {@code callbackIntent} is delivered. Must be at least one minute.
+     * @param timeRemaining The remaining time the set of apps can be in the foreground before the
+     *                      {@code callbackIntent} is delivered. Must be greater than
+     *                      {@code timeLimit}. Note: a limit of 0 can be set to indicate that the
+     *                      user has already exhausted the limit for a group, in which case,
+     *                      the given {@code callbackIntent} will be ignored.
      * @param callbackIntent The PendingIntent that will be dispatched when the usage limit is
      *                       exceeded by the group of apps. The delivered Intent will also contain
      *                       the extras {@link #EXTRA_OBSERVER_ID}, {@link #EXTRA_TIME_LIMIT} and
      *                       {@link #EXTRA_TIME_USED}. Cannot be {@code null} unless the observer is
-     *                       being registered with a {@code timeLimit} of 0.
+     *                       being registered with a {@code timeRemaining} of 0.
      * @throws SecurityException if the caller doesn't have both SUSPEND_APPS and OBSERVE_APP_USAGE
      *                           permissions.
      * @hide
@@ -781,10 +801,12 @@ public final class UsageStatsManager {
             android.Manifest.permission.SUSPEND_APPS,
             android.Manifest.permission.OBSERVE_APP_USAGE})
     public void registerAppUsageLimitObserver(int observerId, @NonNull String[] observedEntities,
-            long timeLimit, @NonNull TimeUnit timeUnit, @Nullable PendingIntent callbackIntent) {
+            @NonNull Duration timeLimit, @NonNull Duration timeRemaining,
+            @Nullable PendingIntent callbackIntent) {
         try {
             mService.registerAppUsageLimitObserver(observerId, observedEntities,
-                    timeUnit.toMillis(timeLimit), callbackIntent, mContext.getOpPackageName());
+                    timeLimit.toMillis(), timeRemaining.toMillis(), callbackIntent,
+                    mContext.getOpPackageName());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

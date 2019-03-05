@@ -16,28 +16,28 @@
 
 package com.android.server.usb;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.Resources.NotFoundException;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
+
+import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.usb.descriptors.UsbDescriptorParser;
-import com.android.server.usb.descriptors.UsbDeviceDescriptor;
-import com.google.common.io.ByteStreams;
 
-import java.io.InputStream;
-import java.io.IOException;
-import java.lang.Exception;
+import com.google.common.io.ByteStreams;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * Tests for {@link com.android.server.usb.descriptors.UsbDescriptorParser}

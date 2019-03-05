@@ -14,12 +14,14 @@
 
 package com.google.android.startop.iorap
 
-import android.net.Uri
 import android.os.ServiceManager
-import android.support.test.filters.MediumTest
+import androidx.test.filters.MediumTest
 import org.junit.Test
-import org.junit.Ignore
-import org.mockito.Mockito.*
+import org.mockito.Mockito.argThat
+import org.mockito.Mockito.eq
+import org.mockito.Mockito.inOrder
+import org.mockito.Mockito.spy
+import org.mockito.Mockito.timeout
 
 // @Ignore("Test is disabled until iorapd is added to init and there's selinux policies for it")
 @MediumTest
@@ -27,7 +29,7 @@ class IIorapIntegrationTest {
     /**
      * @throws ServiceManager.ServiceNotFoundException if iorapd service could not be found
      */
-    private val iorapService : IIorap by lazy {
+    private val iorapService: IIorap by lazy {
         // TODO: connect to 'iorapd.stub' which doesn't actually do any work other than reply.
         IIorap.Stub.asInterface(ServiceManager.getServiceOrThrow("iorapd"))
 
@@ -39,7 +41,7 @@ class IIorapIntegrationTest {
 
     // A dummy binder stub implementation is required to use with mockito#spy.
     // Mockito overrides the methods at runtime and tracks how methods were invoked.
-    open class DummyTaskListener : ITaskListener.Stub()  {
+    open class DummyTaskListener : ITaskListener.Stub() {
         // Note: make parameters nullable to avoid the kotlin IllegalStateExceptions
         // from using the mockito matchers (eq, argThat, etc).
         override fun onProgress(requestId: RequestId?, result: TaskResult?) {
@@ -49,7 +51,7 @@ class IIorapIntegrationTest {
         }
     }
 
-    private fun testAnyMethod(func : (RequestId) -> Unit) {
+    private fun testAnyMethod(func: (RequestId) -> Unit) {
         val taskListener = spy(DummyTaskListener())!!
 
         try {
@@ -68,14 +70,13 @@ class IIorapIntegrationTest {
 
             // The "stub" behavior of iorapd is that every request immediately gets a response of
             //   BEGAN,ONGOING,COMPLETED
-            inOrder.verify(taskListener, timeout(100)).
-                  onProgress(eq(requestId), argThat { it!!.state == TaskResult.STATE_BEGAN })
-            inOrder.verify(taskListener, timeout(100)).
-                  onProgress(eq(requestId), argThat { it!!.state == TaskResult.STATE_ONGOING })
-            inOrder.verify(taskListener, timeout(100)).
-                  onComplete(eq(requestId), argThat { it!!.state == TaskResult.STATE_COMPLETED })
+            inOrder.verify(taskListener, timeout(100))
+                .onProgress(eq(requestId), argThat { it!!.state == TaskResult.STATE_BEGAN })
+            inOrder.verify(taskListener, timeout(100))
+                .onProgress(eq(requestId), argThat { it!!.state == TaskResult.STATE_ONGOING })
+            inOrder.verify(taskListener, timeout(100))
+                .onComplete(eq(requestId), argThat { it!!.state == TaskResult.STATE_COMPLETED })
             inOrder.verifyNoMoreInteractions()
-
         } finally {
             // iorapService.setTaskListener(null)
             // FIXME: null is broken, C++ side sees a non-null object.
@@ -96,7 +97,7 @@ class IIorapIntegrationTest {
 
     @Test
     fun testOnAppIntentEvent() {
-        testAnyMethod { requestId : RequestId ->
+        testAnyMethod { requestId: RequestId ->
             iorapService.onAppIntentEvent(requestId, AppIntentEvent.createDefaultIntentChanged(
                     ActivityInfo("dont care", "dont care"),
                     ActivityInfo("dont care 2", "dont care 2")))
@@ -105,7 +106,7 @@ class IIorapIntegrationTest {
 
     @Test
     fun testOnSystemServiceEvent() {
-        testAnyMethod { requestId : RequestId ->
+        testAnyMethod { requestId: RequestId ->
             iorapService.onSystemServiceEvent(requestId,
                     SystemServiceEvent(SystemServiceEvent.TYPE_START))
         }
@@ -113,9 +114,9 @@ class IIorapIntegrationTest {
 
     @Test
     fun testOnSystemServiceUserEvent() {
-        testAnyMethod { requestId : RequestId ->
+        testAnyMethod { requestId: RequestId ->
             iorapService.onSystemServiceUserEvent(requestId,
-                    SystemServiceUserEvent(SystemServiceUserEvent.TYPE_START_USER,0))
+                    SystemServiceUserEvent(SystemServiceUserEvent.TYPE_START_USER, 0))
         }
     }
 }

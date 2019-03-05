@@ -14,12 +14,14 @@
 
 package com.android.systemui.qs.customize;
 
+import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.atLeastOnce;
@@ -29,8 +31,13 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.Manifest;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.content.pm.ServiceInfo;
 import android.provider.Settings;
+import android.service.quicksettings.Tile;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
@@ -48,7 +55,9 @@ import com.android.systemui.qs.QSTileHost;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -68,6 +77,8 @@ public class TileQueryHelperTest extends SysuiTestCase {
     private static final String STOCK_TILES = "wifi,dnd,cell,battery";
     private static final String ALL_TILES = "wifi,dnd,nfc,cell,battery";
     private static final Set<String> FACTORY_TILES = new ArraySet<>();
+    private static final String TEST_PKG = "test_pkg";
+    private static final String TEST_CLS = "test_cls";
 
     static {
         FACTORY_TILES.addAll(Arrays.asList(
@@ -82,6 +93,8 @@ public class TileQueryHelperTest extends SysuiTestCase {
     private QSTileHost mQSTileHost;
     @Mock
     private PackageManager mPackageManager;
+    @Captor
+    private ArgumentCaptor<List<TileQueryHelper.TileInfo>> mCaptor;
 
     private QSTile.State mState;
     private TestableLooper mBGLooper;
@@ -154,8 +167,6 @@ public class TileQueryHelperTest extends SysuiTestCase {
 
     @Test
     public void testQueryTiles_correctTilesAndOrderOnlyStockTiles() {
-        ArgumentCaptor<List<TileQueryHelper.TileInfo>> captor = ArgumentCaptor.forClass(List.class);
-
         Settings.Secure.putString(mContext.getContentResolver(), Settings.Secure.QS_TILES,
                 ONLY_STOCK_TILES);
         mContext.getOrCreateTestableResources().addOverride(R.string.quick_settings_tiles_stock,
@@ -166,9 +177,9 @@ public class TileQueryHelperTest extends SysuiTestCase {
         mBGLooper.processAllMessages();
         waitForIdleSync(Dependency.get(Dependency.MAIN_HANDLER));
 
-        verify(mListener, atLeastOnce()).onTilesChanged(captor.capture());
+        verify(mListener, atLeastOnce()).onTilesChanged(mCaptor.capture());
         List<String> specs = new ArrayList<>();
-        for (TileQueryHelper.TileInfo t : captor.getValue()) {
+        for (TileQueryHelper.TileInfo t : mCaptor.getValue()) {
             specs.add(t.spec);
         }
         String tiles = TextUtils.join(",", specs);
@@ -177,8 +188,6 @@ public class TileQueryHelperTest extends SysuiTestCase {
 
     @Test
     public void testQueryTiles_correctTilesAndOrderOtherFactoryTiles() {
-        ArgumentCaptor<List<TileQueryHelper.TileInfo>> captor = ArgumentCaptor.forClass(List.class);
-
         Settings.Secure.putString(mContext.getContentResolver(), Settings.Secure.QS_TILES,
                 CURRENT_TILES);
         mContext.getOrCreateTestableResources().addOverride(R.string.quick_settings_tiles_stock,
@@ -189,9 +198,9 @@ public class TileQueryHelperTest extends SysuiTestCase {
         mBGLooper.processAllMessages();
         waitForIdleSync(Dependency.get(Dependency.MAIN_HANDLER));
 
-        verify(mListener, atLeastOnce()).onTilesChanged(captor.capture());
+        verify(mListener, atLeastOnce()).onTilesChanged(mCaptor.capture());
         List<String> specs = new ArrayList<>();
-        for (TileQueryHelper.TileInfo t : captor.getValue()) {
+        for (TileQueryHelper.TileInfo t : mCaptor.getValue()) {
             specs.add(t.spec);
         }
         String tiles = TextUtils.join(",", specs);
@@ -200,8 +209,6 @@ public class TileQueryHelperTest extends SysuiTestCase {
 
     @Test
     public void testQueryTiles_otherTileNotIncluded() {
-        ArgumentCaptor<List<TileQueryHelper.TileInfo>> captor = ArgumentCaptor.forClass(List.class);
-
         Settings.Secure.putString(mContext.getContentResolver(), Settings.Secure.QS_TILES,
                 WITH_OTHER_TILES);
         mContext.getOrCreateTestableResources().addOverride(R.string.quick_settings_tiles_stock,
@@ -212,12 +219,41 @@ public class TileQueryHelperTest extends SysuiTestCase {
         mBGLooper.processAllMessages();
         waitForIdleSync(Dependency.get(Dependency.MAIN_HANDLER));
 
-        verify(mListener, atLeastOnce()).onTilesChanged(captor.capture());
+        verify(mListener, atLeastOnce()).onTilesChanged(mCaptor.capture());
         List<String> specs = new ArrayList<>();
-        for (TileQueryHelper.TileInfo t : captor.getValue()) {
+        for (TileQueryHelper.TileInfo t : mCaptor.getValue()) {
             specs.add(t.spec);
         }
         assertFalse(specs.contains("other"));
+    }
+
+    @Test
+    public void testThirdPartyTilesInactive() {
+        ResolveInfo resolveInfo = new ResolveInfo();
+        ServiceInfo serviceInfo = mock(ServiceInfo.class, Answers.RETURNS_MOCKS);
+        resolveInfo.serviceInfo = serviceInfo;
+        serviceInfo.packageName = TEST_PKG;
+        serviceInfo.name = TEST_CLS;
+        serviceInfo.icon = R.drawable.android;
+        serviceInfo.permission = Manifest.permission.BIND_QUICK_SETTINGS_TILE;
+        serviceInfo.applicationInfo = mock(ApplicationInfo.class, Answers.RETURNS_MOCKS);
+        serviceInfo.applicationInfo.icon = R.drawable.android;
+        List<ResolveInfo> list = new ArrayList<>();
+        list.add(resolveInfo);
+        when(mPackageManager.queryIntentServicesAsUser(any(), anyInt(), anyInt())).thenReturn(list);
+
+        Settings.Secure.putString(mContext.getContentResolver(), Settings.Secure.QS_TILES, "");
+        mContext.getOrCreateTestableResources().addOverride(R.string.quick_settings_tiles_stock,
+                "");
+
+        mTileQueryHelper.queryTiles(mQSTileHost);
+        mBGLooper.processAllMessages();
+        waitForIdleSync(Dependency.get(Dependency.MAIN_HANDLER));
+
+        verify(mListener, atLeastOnce()).onTilesChanged(mCaptor.capture());
+        List<TileQueryHelper.TileInfo> tileInfos = mCaptor.getValue();
+        assertEquals(1, tileInfos.size());
+        assertEquals(Tile.STATE_INACTIVE, tileInfos.get(0).state.state);
     }
 
     @Test

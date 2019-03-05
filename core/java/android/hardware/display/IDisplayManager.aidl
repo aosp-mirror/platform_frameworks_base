@@ -34,6 +34,8 @@ interface IDisplayManager {
     DisplayInfo getDisplayInfo(int displayId);
     int[] getDisplayIds();
 
+    boolean isUidPresentOnDisplay(int uid, int displayId);
+
     void registerCallback(in IDisplayManagerCallback callback);
 
     // Requires CONFIGURE_WIFI_DISPLAY permission.

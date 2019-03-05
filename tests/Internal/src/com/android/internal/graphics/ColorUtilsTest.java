@@ -16,12 +16,13 @@
 
 package com.android.internal.graphics;
 
+import static org.junit.Assert.assertTrue;
+
 import android.graphics.Color;
-import android.support.test.filters.SmallTest;
+
+import androidx.test.filters.SmallTest;
 
 import org.junit.Test;
-
-import static org.junit.Assert.assertTrue;
 
 @SmallTest
 public class ColorUtilsTest {

@@ -20,6 +20,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
+
+import android.processor.view.inspector.InspectableClassModel.Accessor;
 import android.processor.view.inspector.InspectableClassModel.IntEnumEntry;
 import android.processor.view.inspector.InspectableClassModel.IntFlagEntry;
 import android.processor.view.inspector.InspectableClassModel.Property;
@@ -86,7 +88,7 @@ public class InspectionCompanionGeneratorTest {
 
     @Test
     public void testNoAttributeId() {
-        final Property property = new Property(
+        final Property property = addProperty(
                 "noAttributeProperty",
                 "getNoAttributeProperty",
                 Property.Type.INT);
@@ -98,19 +100,18 @@ public class InspectionCompanionGeneratorTest {
 
     @Test
     public void testSuppliedAttributeId() {
-        final Property property = new Property(
+        final Property property = addProperty(
                 "suppliedAttributeProperty",
                 "getSuppliedAttributeProperty",
                 Property.Type.INT);
         property.setAttributeId(0xdecafbad);
-        mModel.putProperty(property);
 
         assertGeneratedFileEquals("SuppliedAttributeId");
     }
 
     @Test
     public void testIntEnum() {
-        final Property property = new Property(
+        final Property property = addProperty(
                 "intEnumProperty",
                 "getIntEnumProperty",
                 Property.Type.INT_ENUM);
@@ -127,7 +128,7 @@ public class InspectionCompanionGeneratorTest {
 
     @Test
     public void testIntFlag() {
-        final Property property = new Property(
+        final Property property = addProperty(
                 "intFlag",
                 "getIntFlag",
                 Property.Type.INT_FLAG);
@@ -139,13 +140,21 @@ public class InspectionCompanionGeneratorTest {
                 new IntFlagEntry("WARP", 0x4)
         ));
 
-        mModel.putProperty(property);
-
         assertGeneratedFileEquals("IntFlag");
     }
 
+    @Test
+    public void testFieldProperty() {
+        mModel.putProperty(new Property(
+                "fieldProperty",
+                Accessor.ofField("fieldProperty"),
+                Property.Type.INT));
+
+        assertGeneratedFileEquals("FieldProperty");
+    }
+
     private Property addProperty(String name, String getter, Property.Type type) {
-        final Property property = new Property(name, getter, type);
+        final Property property = new Property(name, Accessor.ofGetter(getter), type);
         mModel.putProperty(property);
         return property;
     }

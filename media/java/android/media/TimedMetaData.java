@@ -104,7 +104,7 @@ public final class TimedMetaData {
      * @hide
      */
     @SystemApi
-    public static class Builder {
+    public static final class Builder {
         private long mTimestampUs;
         private byte[] mMetaData = new byte[0];
 

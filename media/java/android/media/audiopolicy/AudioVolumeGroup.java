@@ -77,7 +77,7 @@ public final class AudioVolumeGroup implements Parcelable {
     /**
      * @return List of {@link AudioAttributes} involved in this {@link AudioVolumeGroup}.
      */
-    public List<AudioAttributes> getAudioAttributes() {
+    public @NonNull List<AudioAttributes> getAudioAttributes() {
         return Arrays.asList(mAudioAttributes);
     }
 

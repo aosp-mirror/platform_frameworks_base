@@ -165,7 +165,7 @@ public class HwAudioSource extends PlayerBase {
      * If the audio attributes are not set with {@link #setAudioAttributes(AudioAttributes)},
      * attributes comprising {@link AudioAttributes#USAGE_MEDIA} will be used.
      */
-    public static class Builder {
+    public static final class Builder {
         private AudioAttributes mAudioAttributes;
         private AudioDeviceInfo mAudioDeviceInfo;
 

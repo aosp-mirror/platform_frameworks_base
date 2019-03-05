@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -86,20 +87,98 @@ public final class InspectableClassModel {
     }
 
     /**
+     * Represents a way to access a property, either a getter or a field.
+     */
+    public static final class Accessor {
+        private final String mName;
+        private final Type mType;
+
+        /**
+         * Construct an accessor for a field.
+         *
+         * @param name The name of the field
+         * @return The new accessor
+         * @see Type#FIELD
+         */
+        static Accessor ofField(String name) {
+            return new Accessor(name, Type.FIELD);
+        }
+
+        /**
+         * Construct an accessor for a getter.
+         *
+         * @param name The name of the getter
+         * @return The new accessor
+         * @see Type#GETTER
+         */
+        static Accessor ofGetter(String name) {
+            return new Accessor(name, Type.GETTER);
+        }
+
+        public Accessor(String name, Type type) {
+            mName = Objects.requireNonNull(name, "Accessor name must not be null");
+            mType = Objects.requireNonNull(type, "Accessor type must not be null");
+        }
+
+        public String getName() {
+            return mName;
+        }
+
+        public Type getType() {
+            return mType;
+        }
+
+        /**
+         * Get the invocation of this accessor.
+         *
+         * Example: {@code "getValue()"} for a getter or {@code "valueField"} for a field.
+         *
+         * @return A string representing the invocation of this accessor
+         */
+        public String invocation() {
+            switch (mType) {
+                case FIELD:
+                    return mName;
+                case GETTER:
+                    return String.format("%s()", mName);
+                default:
+                    throw new NoSuchElementException(
+                            String.format("No such accessor type %s", mType));
+            }
+        }
+
+        public enum Type {
+            /**
+             * A property accessed by a public field.
+             *
+             * @see #ofField(String)
+             */
+            FIELD,
+
+            /**
+             * A property accessed by a public getter method.
+             *
+             * @see #ofGetter(String)
+             */
+            GETTER
+        }
+    }
+
+    /**
      * Model an inspectable property
      */
     public static final class Property {
         private final String mName;
-        private final String mGetter;
+        private final Accessor mAccessor;
         private final Type mType;
         private boolean mAttributeIdInferrableFromR = true;
         private int mAttributeId = 0;
         private List<IntEnumEntry> mIntEnumEntries;
         private List<IntFlagEntry> mIntFlagEntries;
 
-        public Property(String name, String getter, Type type) {
+        public Property(String name, Accessor accessor, Type type) {
             mName = Objects.requireNonNull(name, "Name must not be null");
-            mGetter = Objects.requireNonNull(getter, "Getter must not be null");
+            mAccessor = Objects.requireNonNull(accessor, "Accessor must not be null");
             mType = Objects.requireNonNull(type, "Type must not be null");
         }
 
@@ -129,8 +208,8 @@ public final class InspectableClassModel {
             return mName;
         }
 
-        public String getGetter() {
-            return mGetter;
+        public Accessor getAccessor() {
+            return mAccessor;
         }
 
         public Type getType() {

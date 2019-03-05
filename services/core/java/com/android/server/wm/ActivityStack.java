@@ -701,6 +701,14 @@ class ActivityStack extends ConfigurationContainer {
      */
     void setWindowingMode(int preferredWindowingMode, boolean animate, boolean showRecents,
             boolean enteringSplitScreenMode, boolean deferEnsuringVisibility, boolean creating) {
+        mWindowManager.inSurfaceTransaction(() -> setWindowingModeInSurfaceTransaction(
+                preferredWindowingMode, animate, showRecents, enteringSplitScreenMode,
+                deferEnsuringVisibility, creating));
+    }
+
+    private void setWindowingModeInSurfaceTransaction(int preferredWindowingMode, boolean animate,
+            boolean showRecents, boolean enteringSplitScreenMode, boolean deferEnsuringVisibility,
+            boolean creating) {
         final int currentMode = getWindowingMode();
         final int currentOverrideMode = getRequestedOverrideWindowingMode();
         final ActivityDisplay display = getDisplay();
@@ -744,7 +752,7 @@ class ActivityStack extends ConfigurationContainer {
                 // warning toast about it.
                 mService.getTaskChangeNotificationController().notifyActivityDismissingDockedStack();
                 final ActivityStack primarySplitStack = display.getSplitScreenPrimaryStack();
-                primarySplitStack.setWindowingMode(WINDOWING_MODE_UNDEFINED,
+                primarySplitStack.setWindowingModeInSurfaceTransaction(WINDOWING_MODE_UNDEFINED,
                         false /* animate */, false /* showRecents */,
                         false /* enteringSplitScreenMode */, true /* deferEnsuringVisibility */,
                         primarySplitStack == this ? creating : false);
@@ -1799,10 +1807,6 @@ class ActivityStack extends ConfigurationContainer {
             } else if (prev.hasProcess()) {
                 if (DEBUG_PAUSE) Slog.v(TAG_PAUSE, "Enqueue pending stop if needed: " + prev
                         + " wasStopping=" + wasStopping + " visible=" + prev.visible);
-                if (mStackSupervisor.mActivitiesWaitingForVisibleActivity.remove(prev)) {
-                    if (DEBUG_SWITCH || DEBUG_PAUSE) Slog.v(TAG_PAUSE,
-                            "Complete pause, no longer waiting: " + prev);
-                }
                 if (prev.deferRelaunchUntilPaused) {
                     // Complete the deferred relaunch that was waiting for pause to complete.
                     if (DEBUG_PAUSE) Slog.v(TAG_PAUSE, "Re-launching after pause: " + prev);
@@ -1882,16 +1886,6 @@ class ActivityStack extends ConfigurationContainer {
     private void addToStopping(ActivityRecord r, boolean scheduleIdle, boolean idleDelayed) {
         if (!mStackSupervisor.mStoppingActivities.contains(r)) {
             mStackSupervisor.mStoppingActivities.add(r);
-
-            // Some activity is waiting for another activity to become visible before it's being
-            // stopped, which means that we also want to wait with stopping this one to avoid
-            // flickers.
-            if (!mStackSupervisor.mActivitiesWaitingForVisibleActivity.isEmpty()
-                    && !mStackSupervisor.mActivitiesWaitingForVisibleActivity.contains(r)) {
-                if (DEBUG_SWITCH) Slog.i(TAG_SWITCH, "adding to waiting visible activity=" + r
-                        + " existing=" + mStackSupervisor.mActivitiesWaitingForVisibleActivity);
-                mStackSupervisor.mActivitiesWaitingForVisibleActivity.add(r);
-            }
         }
 
         // If we already have a few activities waiting to stop, then give up
@@ -2707,7 +2701,6 @@ class ActivityStack extends ConfigurationContainer {
         mStackSupervisor.mStoppingActivities.remove(next);
         mStackSupervisor.mGoingToSleepActivities.remove(next);
         next.sleeping = false;
-        mStackSupervisor.mActivitiesWaitingForVisibleActivity.remove(next);
 
         if (DEBUG_SWITCH) Slog.v(TAG_SWITCH, "Resuming " + next);
 
@@ -2716,11 +2709,6 @@ class ActivityStack extends ConfigurationContainer {
             if (DEBUG_SWITCH || DEBUG_PAUSE || DEBUG_STATES) Slog.v(TAG_PAUSE,
                     "resumeTopActivityLocked: Skip resume: some activity pausing.");
 
-            // Adding previous activity to the waiting visible list, or it would be stopped
-            // before top activity being visible.
-            if (prev != null && !next.nowVisible) {
-                mStackSupervisor.mActivitiesWaitingForVisibleActivity.add(prev);
-            }
             return false;
         }
 
@@ -2796,35 +2784,27 @@ class ActivityStack extends ConfigurationContainer {
             mLastNoHistoryActivity = null;
         }
 
-        if (prev != null && prev != next) {
-            if (!mStackSupervisor.mActivitiesWaitingForVisibleActivity.contains(prev)
-                    && !next.nowVisible) {
-                mStackSupervisor.mActivitiesWaitingForVisibleActivity.add(prev);
+        if (prev != null && prev != next && next.nowVisible) {
+
+            // The next activity is already visible, so hide the previous
+            // activity's windows right now so we can show the new one ASAP.
+            // We only do this if the previous is finishing, which should mean
+            // it is on top of the one being resumed so hiding it quickly
+            // is good.  Otherwise, we want to do the normal route of allowing
+            // the resumed activity to be shown so we can decide if the
+            // previous should actually be hidden depending on whether the
+            // new one is found to be full-screen or not.
+            if (prev.finishing) {
+                prev.setVisibility(false);
                 if (DEBUG_SWITCH) Slog.v(TAG_SWITCH,
-                        "Resuming top, waiting visible to hide: " + prev);
+                        "Not waiting for visible to hide: " + prev
+                        + ", nowVisible=" + next.nowVisible);
             } else {
-                // The next activity is already visible, so hide the previous
-                // activity's windows right now so we can show the new one ASAP.
-                // We only do this if the previous is finishing, which should mean
-                // it is on top of the one being resumed so hiding it quickly
-                // is good.  Otherwise, we want to do the normal route of allowing
-                // the resumed activity to be shown so we can decide if the
-                // previous should actually be hidden depending on whether the
-                // new one is found to be full-screen or not.
-                if (prev.finishing) {
-                    prev.setVisibility(false);
-                    if (DEBUG_SWITCH) Slog.v(TAG_SWITCH,
-                            "Not waiting for visible to hide: " + prev + ", waitingVisible="
-                            + mStackSupervisor.mActivitiesWaitingForVisibleActivity.contains(prev)
-                            + ", nowVisible=" + next.nowVisible);
-                } else {
-                    if (DEBUG_SWITCH) Slog.v(TAG_SWITCH,
-                            "Previous already visible but still waiting to hide: " + prev
-                            + ", waitingVisible="
-                            + mStackSupervisor.mActivitiesWaitingForVisibleActivity.contains(prev)
-                            + ", nowVisible=" + next.nowVisible);
-                }
+                if (DEBUG_SWITCH) Slog.v(TAG_SWITCH,
+                        "Previous already visible but still waiting to hide: " + prev
+                        + ", nowVisible=" + next.nowVisible);
             }
+
         }
 
         // Launching this app's activity, make sure the app is no longer
@@ -4081,9 +4061,6 @@ class ActivityStack extends ConfigurationContainer {
         dc.prepareAppTransition(transit, false);
         r.setVisibility(false);
         dc.executeAppTransition();
-        if (!mStackSupervisor.mActivitiesWaitingForVisibleActivity.contains(r)) {
-            mStackSupervisor.mActivitiesWaitingForVisibleActivity.add(r);
-        }
     }
 
     static final int FINISH_IMMEDIATELY = 0;
@@ -4119,7 +4096,6 @@ class ActivityStack extends ConfigurationContainer {
         // make sure the record is cleaned out of other places.
         mStackSupervisor.mStoppingActivities.remove(r);
         mStackSupervisor.mGoingToSleepActivities.remove(r);
-        mStackSupervisor.mActivitiesWaitingForVisibleActivity.remove(r);
         final ActivityState prevState = r.getState();
         if (DEBUG_STATES) Slog.v(TAG_STATES, "Moving to FINISHING: " + r);
 
@@ -4725,8 +4701,6 @@ class ActivityStack extends ConfigurationContainer {
                 "mStoppingActivities");
         removeHistoryRecordsForAppLocked(mStackSupervisor.mGoingToSleepActivities, app,
                 "mGoingToSleepActivities");
-        removeHistoryRecordsForAppLocked(mStackSupervisor.mActivitiesWaitingForVisibleActivity, app,
-                "mActivitiesWaitingForVisibleActivity");
         removeHistoryRecordsForAppLocked(mStackSupervisor.mFinishingActivities, app,
                 "mFinishingActivities");
 

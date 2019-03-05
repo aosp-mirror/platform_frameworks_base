@@ -20,9 +20,10 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Point;
 import android.graphics.Rect;
-import android.support.test.InstrumentationRegistry;
 import android.view.Surface;
 import android.view.WindowManager;
+
+import androidx.test.InstrumentationRegistry;
 
 /**
  * Helper functions to retrieve system window sizes and positions.

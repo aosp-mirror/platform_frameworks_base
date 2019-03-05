@@ -67,7 +67,7 @@ LOCAL_CERTIFICATE := shared
 LOCAL_SRC_FILES := $(call all-java-files-under, src/com/android/server/pm)
 
 LOCAL_STATIC_JAVA_LIBRARIES := \
-    android-support-test \
+    androidx.test.rules \
     truth-prebuilt \
 
 # Include both versions of the .so if we have 2 arch

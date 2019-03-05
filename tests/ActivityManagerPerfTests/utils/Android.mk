@@ -23,7 +23,7 @@ LOCAL_SRC_FILES := \
     src/com/android/frameworks/perftests/am/util/ITimeReceiverCallback.aidl
 
 LOCAL_STATIC_JAVA_LIBRARIES := \
-    android-support-test \
+    androidx.test.rules \
     junit \
     ub-uiautomator
 

@@ -138,9 +138,19 @@ abstract class DisplayDevice {
     }
 
     /**
-     * Sets the mode, if supported.
+     * Sets the display modes the system is allowed to switch between, roughly ordered by
+     * preference.
+     *
+     * Not all display devices will automatically switch between modes, so it's important that the
+     * most-desired modes are at the beginning of the allowed array.
      */
-    public void requestDisplayModesLocked(int colorMode, int modeId) {
+    public void setAllowedDisplayModesLocked(int[] modes) {
+    }
+
+    /**
+     * Sets the requested color mode.
+     */
+    public void setRequestedColorModeLocked(int colorMode) {
     }
 
     public void onOverlayChangedLocked() {

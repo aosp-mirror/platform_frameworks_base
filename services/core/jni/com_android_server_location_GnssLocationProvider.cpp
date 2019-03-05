@@ -491,10 +491,6 @@ static jobject translateGnssLocation(JNIEnv* env,
         SET(ElapsedRealtimeNanos, location.elapsedRealtime.timestampNs);
     }
 
-    if (flags & ElapsedRealtimeFlags::HAS_TIME_UNCERTAINTY_NS) {
-        SET(ElapsedUncertaintyRealtimeNanos, location.elapsedRealtime.timeUncertaintyNs);
-    }
-
     return object.get();
 }
 
@@ -525,8 +521,7 @@ static GnssLocation_V2_0 createGnssLocation_V2_0(
         jdouble altitudeMeters, jfloat speedMetersPerSec, jfloat bearingDegrees,
         jfloat horizontalAccuracyMeters, jfloat verticalAccuracyMeters,
         jfloat speedAccuracyMetersPerSecond, jfloat bearingAccuracyDegrees,
-        jlong timestamp, jint elapsedRealtimeFlags, jlong elapsedRealtimeNanos,
-        jlong elapsedRealtimeUncertaintyNanos) {
+        jlong timestamp, jint elapsedRealtimeFlags, jlong elapsedRealtimeNanos) {
     GnssLocation_V2_0 location;
     location.v1_0 = createGnssLocation_V1_0(
             gnssLocationFlags, latitudeDegrees, longitudeDegrees, altitudeMeters,
@@ -536,7 +531,6 @@ static GnssLocation_V2_0 createGnssLocation_V2_0(
 
     location.elapsedRealtime.flags = static_cast<uint16_t>(elapsedRealtimeFlags);
     location.elapsedRealtime.timestampNs = static_cast<uint64_t>(elapsedRealtimeNanos);
-    location.elapsedRealtime.timeUncertaintyNs = static_cast<uint64_t>(elapsedRealtimeUncertaintyNanos);
 
     return location;
 }
@@ -1893,8 +1887,7 @@ static void android_location_GnssLocationProvider_inject_best_location(
         jfloat bearingAccuracyDegrees,
         jlong timestamp,
         jint elapsedRealtimeFlags,
-        jlong elapsedRealtimeNanos,
-        jlong elapsedRealtimeUncertaintyNanos) {
+        jlong elapsedRealtimeNanos) {
     if (gnssHal_V2_0 != nullptr) {
         GnssLocation_V2_0 location = createGnssLocation_V2_0(
                 gnssLocationFlags,
@@ -1909,8 +1902,7 @@ static void android_location_GnssLocationProvider_inject_best_location(
                 bearingAccuracyDegrees,
                 timestamp,
                 elapsedRealtimeFlags,
-                elapsedRealtimeNanos,
-                elapsedRealtimeUncertaintyNanos);
+                elapsedRealtimeNanos);
         auto result = gnssHal_V2_0->injectBestLocation_2_0(location);
 
         if (!result.isOk() || !result) {
@@ -2821,7 +2813,7 @@ static const JNINativeMethod sMethods[] = {
             android_location_GnssLocationProvider_read_nmea)},
     {"native_inject_time", "(JJI)V", reinterpret_cast<void *>(
             android_location_GnssLocationProvider_inject_time)},
-    {"native_inject_best_location", "(IDDDFFFFFFJIJJ)V", reinterpret_cast<void *>(
+    {"native_inject_best_location", "(IDDDFFFFFFJIJ)V", reinterpret_cast<void *>(
             android_location_GnssLocationProvider_inject_best_location)},
     {"native_inject_location", "(DDF)V", reinterpret_cast<void *>(
             android_location_GnssLocationProvider_inject_location)},

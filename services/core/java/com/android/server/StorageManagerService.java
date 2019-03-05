@@ -1727,7 +1727,8 @@ class StorageManagerService extends IStorageManager.Stub
         final List<AppOpsManager.PackageOps> pkgs = manager.getOpsForPackage(uid, packageName, ops);
         for (AppOpsManager.PackageOps pkg : CollectionUtils.emptyIfNull(pkgs)) {
             for (AppOpsManager.OpEntry op : CollectionUtils.emptyIfNull(pkg.getOps())) {
-                maxTime = Math.max(maxTime, op.getLastAccessTime());
+                maxTime = Math.max(maxTime, op.getLastAccessTime(
+                    AppOpsManager.OP_FLAGS_ALL_TRUSTED));
             }
         }
         return maxTime;

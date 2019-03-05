@@ -143,6 +143,7 @@ public final class NetworkCapabilities implements Parcelable {
             NET_CAPABILITY_NOT_CONGESTED,
             NET_CAPABILITY_NOT_SUSPENDED,
             NET_CAPABILITY_OEM_PAID,
+            NET_CAPABILITY_MCX
     })
     public @interface NetCapability { }
 
@@ -297,8 +298,14 @@ public final class NetworkCapabilities implements Parcelable {
     @SystemApi
     public static final int NET_CAPABILITY_OEM_PAID = 22;
 
+    /**
+     * Indicates this is a network that has the ability to reach a carrier's Mission Critical
+     * servers.
+     */
+    public static final int NET_CAPABILITY_MCX = 23;
+
     private static final int MIN_NET_CAPABILITY = NET_CAPABILITY_MMS;
-    private static final int MAX_NET_CAPABILITY = NET_CAPABILITY_OEM_PAID;
+    private static final int MAX_NET_CAPABILITY = NET_CAPABILITY_MCX;
 
     /**
      * Network capabilities that are expected to be mutable, i.e., can change while a particular
@@ -346,7 +353,8 @@ public final class NetworkCapabilities implements Parcelable {
             (1 << NET_CAPABILITY_IA) |
             (1 << NET_CAPABILITY_IMS) |
             (1 << NET_CAPABILITY_RCS) |
-            (1 << NET_CAPABILITY_XCAP);
+            (1 << NET_CAPABILITY_XCAP) |
+            (1 << NET_CAPABILITY_MCX);
 
     /**
      * Capabilities that force network to be restricted.
@@ -1614,6 +1622,7 @@ public final class NetworkCapabilities implements Parcelable {
             case NET_CAPABILITY_NOT_CONGESTED:  return "NOT_CONGESTED";
             case NET_CAPABILITY_NOT_SUSPENDED:  return "NOT_SUSPENDED";
             case NET_CAPABILITY_OEM_PAID:       return "OEM_PAID";
+            case NET_CAPABILITY_MCX:            return "MCX";
             default:                            return Integer.toString(capability);
         }
     }

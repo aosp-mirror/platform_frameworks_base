@@ -167,13 +167,13 @@ public final class DisplayManagerService extends SystemService {
     private static final int MSG_DELIVER_DISPLAY_EVENT = 3;
     private static final int MSG_REQUEST_TRAVERSAL = 4;
     private static final int MSG_UPDATE_VIEWPORT = 5;
-    private static final int MSG_REGISTER_BRIGHTNESS_TRACKER = 6;
-    private static final int MSG_LOAD_BRIGHTNESS_CONFIGURATION = 7;
+    private static final int MSG_LOAD_BRIGHTNESS_CONFIGURATION = 6;
 
     private final Context mContext;
     private final DisplayManagerHandler mHandler;
     private final Handler mUiHandler;
     private final DisplayAdapterListener mDisplayAdapterListener;
+    private final DisplayModeDirector mDisplayModeDirector;
     private WindowManagerInternal mWindowManagerInternal;
     private InputManagerInternal mInputManagerInternal;
     private IMediaProjectionManager mProjectionService;
@@ -310,6 +310,7 @@ public final class DisplayManagerService extends SystemService {
         mHandler = new DisplayManagerHandler(DisplayThread.get().getLooper());
         mUiHandler = UiThread.getHandler();
         mDisplayAdapterListener = new DisplayAdapterListener();
+        mDisplayModeDirector = new DisplayModeDirector(context, mHandler);
         mSingleDisplayDemoMode = SystemProperties.getBoolean("persist.demo.singledisplay", false);
         Resources resources = mContext.getResources();
         mDefaultDisplayDefaultColorMode = mContext.getResources().getInteger(
@@ -322,7 +323,7 @@ public final class DisplayManagerService extends SystemService {
         mMinimumBrightnessCurve = new Curve(lux, nits);
         mMinimumBrightnessSpline = Spline.createSpline(lux, nits);
 
-        PowerManager pm = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
+        PowerManager pm = mContext.getSystemService(PowerManager.class);
         mGlobalDisplayBrightness = pm.getDefaultScreenBrightnessSetting();
         mCurrentUserId = UserHandle.USER_SYSTEM;
         ColorSpace[] colorSpaces = SurfaceControl.getCompositionColorSpaces();
@@ -347,9 +348,9 @@ public final class DisplayManagerService extends SystemService {
         // adapter is up so that we have it's configuration. We could load it lazily, but since
         // we're going to have to read it in eventually we may as well do it here rather than after
         // we've waited for the display to register itself with us.
-		synchronized(mSyncRoot) {
-			mPersistentDataStore.loadIfNeeded();
-			loadStableDisplayValuesLocked();
+        synchronized (mSyncRoot) {
+            mPersistentDataStore.loadIfNeeded();
+            loadStableDisplayValuesLocked();
         }
         mHandler.sendEmptyMessage(MSG_REGISTER_DEFAULT_DISPLAY_ADAPTERS);
 
@@ -417,8 +418,10 @@ public final class DisplayManagerService extends SystemService {
             mOnlyCore = onlyCore;
         }
 
+        mDisplayModeDirector.setListener(new AllowedDisplayModeObserver());
+        mDisplayModeDirector.start();
+
         mHandler.sendEmptyMessage(MSG_REGISTER_ADDITIONAL_DISPLAY_ADAPTERS);
-        mHandler.sendEmptyMessage(MSG_REGISTER_BRIGHTNESS_TRACKER);
     }
 
     @VisibleForTesting
@@ -1194,13 +1197,8 @@ public final class DisplayManagerService extends SystemService {
                 requestedModeId = display.getDisplayInfoLocked().findDefaultModeByRefreshRate(
                         requestedRefreshRate);
             }
-            if (display.getRequestedModeIdLocked() != requestedModeId) {
-                if (DEBUG) {
-                    Slog.d(TAG, "Display " + displayId + " switching to mode " + requestedModeId);
-                }
-                display.setRequestedModeIdLocked(requestedModeId);
-                scheduleTraversalLocked(inTraversal);
-            }
+            mDisplayModeDirector.getAppRequestObserver().setAppRequestedMode(
+                    displayId, requestedModeId);
         }
     }
 
@@ -1317,6 +1315,28 @@ public final class DisplayManagerService extends SystemService {
             return null;
         }
         return SurfaceControl.getDisplayedContentSample(token, maxFrames, timestamp);
+    }
+
+    private void onAllowedDisplayModesChangedInternal() {
+        boolean changed = false;
+        synchronized (mSyncRoot) {
+            final int count = mLogicalDisplays.size();
+            for (int i = 0; i < count; i++) {
+                LogicalDisplay display = mLogicalDisplays.valueAt(i);
+                int displayId = mLogicalDisplays.keyAt(i);
+                int[] allowedModes = mDisplayModeDirector.getAllowedModes(displayId);
+                // Note that order is important here since not all display devices are capable of
+                // automatically switching, so we do actually want to check for equality and not
+                // just equivalent contents (regardless of order).
+                if (!Arrays.equals(allowedModes, display.getAllowedDisplayModesLocked())) {
+                    display.setAllowedDisplayModesLocked(allowedModes);
+                    changed = true;
+                }
+            }
+            if (changed) {
+                scheduleTraversalLocked(false);
+            }
+        }
     }
 
     private void clearViewportsLocked() {
@@ -1518,6 +1538,9 @@ public final class DisplayManagerService extends SystemService {
                 display.dumpLocked(ipw);
             }
 
+            pw.println();
+            mDisplayModeDirector.dump(pw);
+
             final int callbackCount = mCallbacks.size();
             pw.println();
             pw.println("Callbacks: size=" + callbackCount);
@@ -1689,8 +1712,9 @@ public final class DisplayManagerService extends SystemService {
          * Returns information about the specified logical display.
          *
          * @param displayId The logical display id.
-         * @return The logical display info, or null if the display does not exist.  The
-         * returned object must be treated as immutable.
+         * @return The logical display info, return {@code null} if the display does not exist or
+         * the calling UID isn't present on the display.  The returned object must be treated as
+         * immutable.
          */
         @Override // Binder call
         public DisplayInfo getDisplayInfo(int displayId) {
@@ -1712,6 +1736,16 @@ public final class DisplayManagerService extends SystemService {
             final long token = Binder.clearCallingIdentity();
             try {
                 return getDisplayIdsInternal(callingUid);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override // Binder call
+        public boolean isUidPresentOnDisplay(int uid, int displayId) {
+            final long token = Binder.clearCallingIdentity();
+            try {
+                return isUidPresentOnDisplayInternal(uid, displayId);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -2385,11 +2419,6 @@ public final class DisplayManagerService extends SystemService {
         }
 
         @Override
-        public boolean isUidPresentOnDisplay(int uid, int displayId) {
-            return isUidPresentOnDisplayInternal(uid, displayId);
-        }
-
-        @Override
         public void persistBrightnessTrackerState() {
             synchronized (mSyncRoot) {
                 mDisplayPowerController.persistBrightnessTrackerState();
@@ -2424,5 +2453,11 @@ public final class DisplayManagerService extends SystemService {
             return getDisplayedContentSampleInternal(displayId, maxFrames, timestamp);
         }
 
+    }
+
+    class AllowedDisplayModeObserver implements DisplayModeDirector.Listener {
+        public void onAllowedDisplayModesChanged() {
+            onAllowedDisplayModesChangedInternal();
+        }
     }
 }

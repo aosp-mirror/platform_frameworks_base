@@ -476,6 +476,26 @@ public final class PermissionControllerManager {
     }
 
     /**
+     * Check whether a role should be visible to user.
+     *
+     * @param roleName name of the role to check for
+     * @param executor Executor on which to invoke the callback
+     * @param callback Callback to receive the result
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.MANAGE_ROLE_HOLDERS)
+    public void isRoleVisible(@NonNull String roleName,
+            @NonNull @CallbackExecutor Executor executor, @NonNull Consumer<Boolean> callback) {
+        checkStringNotEmpty(roleName);
+        checkNotNull(executor);
+        checkNotNull(callback);
+
+        mRemoteService.scheduleRequest(new PendingIsRoleVisibleRequest(mRemoteService, roleName,
+                executor, callback));
+    }
+
+    /**
      * A connection to the remote service
      */
     static final class RemoteService extends
@@ -1219,6 +1239,57 @@ public final class PermissionControllerManager {
                         mPackageName, mRemoteCallback);
             } catch (RemoteException e) {
                 Log.e(TAG, "Error checking whether application qualifies for role", e);
+            }
+        }
+    }
+
+    /**
+     * Request for {@link #isRoleVisible}.
+     */
+    private static final class PendingIsRoleVisibleRequest extends
+            AbstractRemoteService.PendingRequest<RemoteService, IPermissionController> {
+
+        private final @NonNull String mRoleName;
+        private final @NonNull Consumer<Boolean> mCallback;
+
+        private final @NonNull RemoteCallback mRemoteCallback;
+
+        private PendingIsRoleVisibleRequest(@NonNull RemoteService service,
+                @NonNull String roleName, @NonNull @CallbackExecutor Executor executor,
+                @NonNull Consumer<Boolean> callback) {
+            super(service);
+
+            mRoleName = roleName;
+            mCallback = callback;
+
+            mRemoteCallback = new RemoteCallback(result -> executor.execute(() -> {
+                long token = Binder.clearCallingIdentity();
+                try {
+                    boolean visible;
+                    if (result != null) {
+                        visible = result.getBoolean(KEY_RESULT);
+                    } else {
+                        visible = false;
+                    }
+                    callback.accept(visible);
+                } finally {
+                    Binder.restoreCallingIdentity(token);
+                    finish();
+                }
+            }), null);
+        }
+
+        @Override
+        protected void onTimeout(RemoteService remoteService) {
+            mCallback.accept(false);
+        }
+
+        @Override
+        public void run() {
+            try {
+                getService().getServiceInterface().isRoleVisible(mRoleName, mRemoteCallback);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Error checking whether role should be visible", e);
             }
         }
     }

@@ -25,10 +25,11 @@ import static com.android.server.wm.flicker.WindowUtils.getStatusBarPosition;
 import static com.android.server.wm.flicker.WmTraceSubject.assertThat;
 
 import android.graphics.Rect;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.filters.LargeTest;
 import android.util.Log;
 import android.view.Surface;
+
+import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.LargeTest;
 
 import org.junit.Before;
 import org.junit.Test;

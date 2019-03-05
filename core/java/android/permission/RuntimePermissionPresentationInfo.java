@@ -21,6 +21,8 @@ import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.android.internal.util.Preconditions;
+
 /**
  * This class contains information about how a runtime permission
  * is to be presented in the UI. A single runtime permission
@@ -35,7 +37,7 @@ public final class RuntimePermissionPresentationInfo implements Parcelable {
     private static final int FLAG_GRANTED = 1 << 0;
     private static final int FLAG_STANDARD = 1 << 1;
 
-    private final CharSequence mLabel;
+    private final @NonNull CharSequence mLabel;
     private final int mFlags;
 
     /**
@@ -45,8 +47,10 @@ public final class RuntimePermissionPresentationInfo implements Parcelable {
      * @param granted Whether the permission is granted.
      * @param standard Whether this is a platform-defined permission.
      */
-    public RuntimePermissionPresentationInfo(CharSequence label,
+    public RuntimePermissionPresentationInfo(@NonNull CharSequence label,
             boolean granted, boolean standard) {
+        Preconditions.checkNotNull(label);
+
         mLabel = label;
         int flags = 0;
         if (granted) {
@@ -56,11 +60,6 @@ public final class RuntimePermissionPresentationInfo implements Parcelable {
             flags |= FLAG_STANDARD;
         }
         mFlags = flags;
-    }
-
-    private RuntimePermissionPresentationInfo(Parcel parcel) {
-        mLabel = parcel.readCharSequence();
-        mFlags = parcel.readInt();
     }
 
     /**
@@ -97,10 +96,14 @@ public final class RuntimePermissionPresentationInfo implements Parcelable {
         parcel.writeInt(mFlags);
     }
 
-    public static final @android.annotation.NonNull Creator<RuntimePermissionPresentationInfo> CREATOR =
+    public static final @NonNull Creator<RuntimePermissionPresentationInfo> CREATOR =
             new Creator<RuntimePermissionPresentationInfo>() {
         public RuntimePermissionPresentationInfo createFromParcel(Parcel source) {
-            return new RuntimePermissionPresentationInfo(source);
+            CharSequence label = source.readCharSequence();
+            int flags = source.readInt();
+
+            return new RuntimePermissionPresentationInfo(label, (flags & FLAG_GRANTED) != 0,
+                    (flags & FLAG_STANDARD) != 0);
         }
 
         public RuntimePermissionPresentationInfo[] newArray(int size) {

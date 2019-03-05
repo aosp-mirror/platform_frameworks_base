@@ -41,6 +41,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -196,8 +197,8 @@ public class UsageStatsActivity extends ListActivity {
                     intent.setPackage(getPackageName());
                     intent.putExtra(EXTRA_KEY_TIMEOUT, true);
                     mUsageStatsManager.registerAppUsageLimitObserver(1, packages,
-                            60, TimeUnit.SECONDS, PendingIntent.getActivity(UsageStatsActivity.this,
-                                    1, intent, 0));
+                            Duration.ofSeconds(60), Duration.ofSeconds(60),
+                            PendingIntent.getActivity(UsageStatsActivity.this, 1, intent, 0));
                 }
             }
         });

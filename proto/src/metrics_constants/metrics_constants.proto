@@ -253,6 +253,13 @@ message MetricsEvent {
     MANAGED_PROFILE = 2;
   }
 
+  // Subtypes for showing direct sharing targets
+  enum DirectShareTargetPreviousState {
+    PREVIOUSLY_UNKNOWN = 0;
+    PREVIOUSLY_HIDDEN = 1;
+    PREVIOUSLY_VISIBLE = 2;
+  }
+
   // Known visual elements: views or controls.
   enum View {
     // Unknown view
@@ -7064,6 +7071,12 @@ message MetricsEvent {
     ACTION_ATCSCUC = 1680;
 
     ACTION_ATCHNUC = 1681;
+
+    // OPEN: Accessibility detail settings (android.settings.ACCESSIBILITY_DETAILS_SETTINGS intent)
+    ACCESSIBILITY_DETAILS_SETTINGS = 1682;
+
+    // Open: Settings will show the conditional when Grayscale mode is on
+    SETTINGS_CONDITION_GRAYSCALE_MODE = 1683;
 
     // ---- End Q Constants, all Q constants go above this line ----
     // Add new aosp constants above this line.

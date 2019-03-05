@@ -32,7 +32,7 @@ import com.android.server.locksettings.recoverablekeystore.storage.RecoverableKe
 class RecoverableKeyStoreDbHelper extends SQLiteOpenHelper {
     private static final String TAG = "RecoverableKeyStoreDbHp";
 
-    static final int DATABASE_VERSION = 5;
+    static final int DATABASE_VERSION = 6; // Added user id serial number.
     private static final String DATABASE_NAME = "recoverablekeystore.db";
 
     private static final String SQL_CREATE_KEYS_ENTRY =
@@ -54,7 +54,8 @@ class RecoverableKeyStoreDbHelper extends SQLiteOpenHelper {
             "CREATE TABLE " + UserMetadataEntry.TABLE_NAME + "( "
                     + UserMetadataEntry._ID + " INTEGER PRIMARY KEY,"
                     + UserMetadataEntry.COLUMN_NAME_USER_ID + " INTEGER UNIQUE,"
-                    + UserMetadataEntry.COLUMN_NAME_PLATFORM_KEY_GENERATION_ID + " INTEGER)";
+                    + UserMetadataEntry.COLUMN_NAME_PLATFORM_KEY_GENERATION_ID + " INTEGER,"
+                    + UserMetadataEntry.COLUMN_NAME_USER_SERIAL_NUMBER + " INTEGER DEFAULT -1)";
 
     private static final String SQL_CREATE_RECOVERY_SERVICE_METADATA_ENTRY =
             "CREATE TABLE " + RecoveryServiceMetadataEntry.TABLE_NAME + " ("
@@ -141,6 +142,11 @@ class RecoverableKeyStoreDbHelper extends SQLiteOpenHelper {
             oldVersion = 5;
         }
 
+        if (oldVersion < 6 && newVersion >= 6) {
+            upgradeDbForVersion6(db);
+            oldVersion = 6;
+        }
+
         if (oldVersion != newVersion) {
             Log.e(TAG, "Failed to update recoverablekeystore database to the most recent version");
         }
@@ -177,6 +183,15 @@ class RecoverableKeyStoreDbHelper extends SQLiteOpenHelper {
         // adds a column to store the metadata for application keys
         addColumnToTable(db, KeysEntry.TABLE_NAME,
                 KeysEntry.COLUMN_NAME_KEY_METADATA, "BLOB", /*defaultStr=*/ null);
+    }
+
+    private void upgradeDbForVersion6(SQLiteDatabase db) {
+        Log.d(TAG, "Updating recoverable keystore database to version 6");
+        // adds a column to store the user serial number
+        addColumnToTable(db, UserMetadataEntry.TABLE_NAME,
+                UserMetadataEntry.COLUMN_NAME_USER_SERIAL_NUMBER,
+                "INTEGER DEFAULT -1",
+                 /*defaultStr=*/ null);
     }
 
     private static void addColumnToTable(

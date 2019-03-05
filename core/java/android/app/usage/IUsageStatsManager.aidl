@@ -28,8 +28,10 @@ import java.util.Map;
  * {@hide}
  */
 interface IUsageStatsManager {
+    @UnsupportedAppUsage
     ParceledListSlice queryUsageStats(int bucketType, long beginTime, long endTime,
             String callingPackage);
+    @UnsupportedAppUsage
     ParceledListSlice queryConfigurationStats(int bucketType, long beginTime, long endTime,
             String callingPackage);
     ParceledListSlice queryEventStats(int bucketType, long beginTime, long endTime,
@@ -38,7 +40,9 @@ interface IUsageStatsManager {
     UsageEvents queryEventsForPackage(long beginTime, long endTime, String callingPackage);
     UsageEvents queryEventsForUser(long beginTime, long endTime, int userId, String callingPackage);
     UsageEvents queryEventsForPackageForUser(long beginTime, long endTime, int userId, String pkg, String callingPackage);
+    @UnsupportedAppUsage
     void setAppInactive(String packageName, boolean inactive, int userId);
+    @UnsupportedAppUsage
     boolean isAppInactive(String packageName, int userId);
     void whitelistAppTemporarily(String packageName, long duration, int userId);
     void onCarrierPrivilegedAppsChanged();
@@ -56,7 +60,7 @@ interface IUsageStatsManager {
             in PendingIntent sessionEndCallbackIntent, String callingPackage);
     void unregisterUsageSessionObserver(int sessionObserverId, String callingPackage);
     void registerAppUsageLimitObserver(int observerId, in String[] packages, long timeLimitMs,
-            in PendingIntent callback, String callingPackage);
+            long timeRemainingMs, in PendingIntent callback, String callingPackage);
     void unregisterAppUsageLimitObserver(int observerId, String callingPackage);
     void reportUsageStart(in IBinder activity, String token, String callingPackage);
     void reportPastUsageStart(in IBinder activity, String token, long timeAgoMs,

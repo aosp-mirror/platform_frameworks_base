@@ -21,9 +21,10 @@ import static com.android.server.wm.flicker.AutomationUtils.setDefaultWait;
 import static com.google.common.truth.Truth.assertWithMessage;
 
 import android.platform.helpers.IAppHelper;
-import android.support.test.InstrumentationRegistry;
 import android.support.test.uiautomator.UiDevice;
 import android.util.Log;
+
+import androidx.test.InstrumentationRegistry;
 
 import com.android.server.wm.flicker.TransitionRunner.TransitionResult;
 

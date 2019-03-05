@@ -1566,6 +1566,7 @@ public class TelephonyManager {
      * Returns the Type Allocation Code from the IMEI. Return null if Type Allocation Code is not
      * available.
      */
+    @Nullable
     public String getTypeAllocationCode() {
         return getTypeAllocationCode(getSlotIndex());
     }
@@ -1576,6 +1577,7 @@ public class TelephonyManager {
      *
      * @param slotIndex of which Type Allocation Code is returned
      */
+    @Nullable
     public String getTypeAllocationCode(int slotIndex) {
         ITelephony telephony = getITelephony();
         if (telephony == null) return null;
@@ -1636,6 +1638,7 @@ public class TelephonyManager {
      * Returns the Manufacturer Code from the MEID. Return null if Manufacturer Code is not
      * available.
      */
+    @Nullable
     public String getManufacturerCode() {
         return getManufacturerCode(getSlotIndex());
     }
@@ -1646,6 +1649,7 @@ public class TelephonyManager {
      *
      * @param slotIndex of which Type Allocation Code is returned
      */
+    @Nullable
     public String getManufacturerCode(int slotIndex) {
         ITelephony telephony = getITelephony();
         if (telephony == null) return null;
@@ -2797,8 +2801,8 @@ public class TelephonyManager {
      * (see {@link #hasCarrierPrivileges}).
      * <p>
      * These "secret codes" are used to activate developer menus by dialing certain codes.
-     * And they are of the form {@code *#*#&lt;code&gt;#*#*}. The intent will have the data
-     * URI: {@code android_secret_code://&lt;code&gt;}. It is possible that a manifest
+     * And they are of the form {@code *#*#<code>#*#*}. The intent will have the data
+     * URI: {@code android_secret_code://<code>}. It is possible that a manifest
      * receiver would be woken up even if it is not currently running.
      * <p>
      * It is supposed to replace {@link android.provider.Telephony.Sms.Intents#SECRET_CODE_ACTION}
@@ -6005,6 +6009,7 @@ public class TelephonyManager {
      * @return IMS Service Table or null if not present or not loaded
      * @hide
      */
+    @Nullable
     @SystemApi
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public String getIsimIst() {
@@ -10367,12 +10372,6 @@ public class TelephonyManager {
     @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public void switchMultiSimConfig(int numOfSims) {
-        //only proceed if multi-sim is not restricted
-        if (!isMultisimSupported()) {
-            Rlog.e(TAG, "switchMultiSimConfig not possible. It is restricted or not supported.");
-            return;
-        }
-
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {

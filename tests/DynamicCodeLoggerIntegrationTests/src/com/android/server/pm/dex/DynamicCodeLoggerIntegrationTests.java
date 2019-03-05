@@ -24,10 +24,11 @@ import android.content.Context;
 import android.os.Build;
 import android.os.ParcelFileDescriptor;
 import android.os.SystemClock;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.filters.LargeTest;
 import android.util.EventLog;
 import android.util.EventLog.Event;
+
+import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.LargeTest;
 
 import dalvik.system.DexClassLoader;
 

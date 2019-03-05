@@ -16,6 +16,8 @@
 
 package android.service.carrier;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.WorkerThread;
 import android.app.Service;
@@ -60,7 +62,8 @@ public abstract class ApnService extends Service {
     };
 
     @Override
-    public IBinder onBind(Intent intent) {
+    @NonNull
+    public IBinder onBind(@Nullable Intent intent) {
         return mBinder;
     }
 
@@ -73,5 +76,6 @@ public abstract class ApnService extends Service {
      * subId.
      */
     @WorkerThread
+    @NonNull
     public abstract List<ContentValues> onRestoreApns(int subId);
 }

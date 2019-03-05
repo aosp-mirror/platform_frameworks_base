@@ -2935,6 +2935,13 @@
     <permission android:name="android.permission.TEMPORARY_ENABLE_ACCESSIBILITY"
         android:protectionLevel="signature" />
 
+    <!-- @SystemApi Allows an application to launch detail settings activity of a particular
+         accessibility service.
+         <p>Not for use by third-party applications.
+         @hide -->
+    <permission android:name="android.permission.OPEN_ACCESSIBILITY_DETAILS_SETTINGS"
+        android:protectionLevel="signature|installer" />
+
     <!-- @SystemApi Allows an application to watch and control how activities are
          started globally in the system.  Only for is in debugging
          (usually the monkey command).
@@ -4438,14 +4445,22 @@
          @hide -->
     <permission android:name="android.permission.RECEIVE_DEVICE_CUSTOMIZATION_READY"
         android:protectionLevel="signature|preinstalled" />
+
     <!-- @SystemApi Allows wallpaper to be rendered in ambient mode.
          @hide -->
     <permission android:name="android.permission.AMBIENT_WALLPAPER"
                 android:protectionLevel="signature|preinstalled" />
+
     <!-- @SystemApi Allows sensor privacy to be modified.
          @hide -->
     <permission android:name="android.permission.MANAGE_SENSOR_PRIVACY"
                 android:protectionLevel="signature" />
+
+    <!-- @SystemApi Allows an activity to replace the app name and icon displayed in share targets
+         in the sharesheet for the Q-release and later.
+         @hide  <p>Not for use by third-party applications.</p> -->
+    <permission android:name="android.permission.SUBSTITUTE_SHARE_TARGET_APP_NAME_AND_ICON"
+                android:protectionLevel="signature|privileged" />
 
     <application android:process="system"
                  android:persistent="true"

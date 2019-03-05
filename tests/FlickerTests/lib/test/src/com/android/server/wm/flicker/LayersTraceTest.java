@@ -26,8 +26,9 @@ import static org.junit.Assert.fail;
 import android.content.Context;
 import android.graphics.Point;
 import android.graphics.Rect;
-import android.support.test.InstrumentationRegistry;
 import android.view.WindowManager;
+
+import androidx.test.InstrumentationRegistry;
 
 import org.junit.Test;
 

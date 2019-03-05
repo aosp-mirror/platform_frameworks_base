@@ -16,6 +16,7 @@
 
 package android.processor.view.inspector;
 
+
 import android.processor.view.inspector.InspectableClassModel.IntEnumEntry;
 import android.processor.view.inspector.InspectableClassModel.IntFlagEntry;
 import android.processor.view.inspector.InspectableClassModel.Property;
@@ -268,10 +269,10 @@ public final class InspectionCompanionGenerator {
 
         for (PropertyIdField propertyIdField : propertyIdFields) {
             builder.addStatement(
-                    "propertyReader.read$L($N, node.$L())",
+                    "propertyReader.read$L($N, node.$L)",
                     methodSuffixForPropertyType(propertyIdField.mProperty.getType()),
                     propertyIdField.mFieldSpec,
-                    propertyIdField.mProperty.getGetter());
+                    propertyIdField.mProperty.getAccessor().invocation());
         }
 
         return builder.build();

@@ -48,6 +48,9 @@ import com.android.systemui.power.PowerUI;
 import com.android.systemui.privacy.PrivacyItemController;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.shared.plugins.PluginManager;
+import com.android.systemui.shared.system.ActivityManagerWrapper;
+import com.android.systemui.shared.system.DevicePolicyManagerWrapper;
+import com.android.systemui.shared.system.PackageManagerWrapper;
 import com.android.systemui.statusbar.AmbientPulseManager;
 import com.android.systemui.statusbar.NavigationBarController;
 import com.android.systemui.statusbar.NotificationListener;
@@ -285,6 +288,9 @@ public class Dependency extends SystemUI {
     @Nullable
     @Inject @Named(LEAK_REPORT_EMAIL_NAME) Lazy<String> mLeakReportEmail;
     @Inject Lazy<ClockManager> mClockManager;
+    @Inject Lazy<ActivityManagerWrapper> mActivityManagerWrapper;
+    @Inject Lazy<DevicePolicyManagerWrapper> mDevicePolicyManagerWrapper;
+    @Inject Lazy<PackageManagerWrapper> mPackageManagerWrapper;
 
     @Inject
     public Dependency() {
@@ -452,6 +458,9 @@ public class Dependency extends SystemUI {
                 mForegroundServiceNotificationListener::get);
         mProviders.put(ClockManager.class, mClockManager::get);
         mProviders.put(PrivacyItemController.class, mPrivacyItemController::get);
+        mProviders.put(ActivityManagerWrapper.class, mActivityManagerWrapper::get);
+        mProviders.put(DevicePolicyManagerWrapper.class, mDevicePolicyManagerWrapper::get);
+        mProviders.put(PackageManagerWrapper.class, mPackageManagerWrapper::get);
 
 
         // TODO(b/118592525): to support multi-display , we start to add something which is

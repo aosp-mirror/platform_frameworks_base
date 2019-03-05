@@ -445,7 +445,7 @@ public final class BroadcastQueue {
         final long elapsed = finishTime - r.receiverTime;
         r.state = BroadcastRecord.IDLE;
         if (state == BroadcastRecord.IDLE) {
-            Slog.w(TAG, "finishReceiver [" + mQueueName + "] called but state is IDLE");
+            Slog.w(TAG_BROADCAST, "finishReceiver [" + mQueueName + "] called but state is IDLE");
         }
         if (r.allowBackgroundActivityStarts && r.curApp != null) {
             if (elapsed > mConstants.ALLOW_BG_ACTIVITY_START_TIMEOUT) {
@@ -478,12 +478,13 @@ public final class BroadcastQueue {
         if (!r.timeoutExempt) {
             if (mConstants.SLOW_TIME > 0 && elapsed > mConstants.SLOW_TIME) {
                 if (DEBUG_BROADCAST_DEFERRAL) {
-                    Slog.i(TAG, "Broadcast receiver was slow: " + receiver + " br=" + r);
+                    Slog.i(TAG_BROADCAST, "Broadcast receiver " + (r.nextReceiver - 1)
+                            + " was slow: " + receiver + " br=" + r);
                 }
                 if (r.curApp != null) {
                     mDispatcher.startDeferring(r.curApp.uid);
                 } else {
-                    Slog.d(TAG, "finish receiver curApp is null? " + r);
+                    Slog.d(TAG_BROADCAST, "finish receiver curApp is null? " + r);
                 }
             }
         } else {
@@ -796,9 +797,7 @@ public final class BroadcastQueue {
                     skipReceiverLocked(r);
                 }
             } else {
-                if (r.receiverTime == 0) {
-                    r.receiverTime = SystemClock.uptimeMillis();
-                }
+                r.receiverTime = SystemClock.uptimeMillis();
                 maybeAddAllowBackgroundActivityStartsToken(filter.receiverList.app, r);
                 performReceiveLocked(filter.receiverList.app, filter.receiverList.receiver,
                         new Intent(r.intent), r.resultCode, r.resultData,
@@ -1083,16 +1082,19 @@ public final class BroadcastQueue {
                         if (newCount == 0) {
                             // done!  clear out this record's bookkeeping and deliver
                             if (DEBUG_BROADCAST_DEFERRAL) {
-                                Slog.i(TAG, "Sending broadcast completion for split token "
-                                        + r.splitToken);
+                                Slog.i(TAG_BROADCAST,
+                                        "Sending broadcast completion for split token "
+                                        + r.splitToken + " : " + r.intent.getAction());
                             }
                             mSplitRefcounts.delete(r.splitToken);
                         } else {
                             // still have some split broadcast records in flight; update refcount
                             // and hold off on the callback
                             if (DEBUG_BROADCAST_DEFERRAL) {
-                                Slog.i(TAG, "Result refcount " + newCount + " for split token "
-                                        + r.splitToken + " - not sending completion yet");
+                                Slog.i(TAG_BROADCAST,
+                                        "Result refcount now " + newCount + " for split token "
+                                        + r.splitToken + " : " + r.intent.getAction()
+                                        + " - not sending completion yet");
                             }
                             sendResult = false;
                             mSplitRefcounts.put(r.splitToken, newCount);
@@ -1155,7 +1157,7 @@ public final class BroadcastQueue {
                     BroadcastRecord defer;
                     if (r.nextReceiver + 1 == numReceivers) {
                         if (DEBUG_BROADCAST_DEFERRAL) {
-                            Slog.i(TAG, "Sole receiver of " + r
+                            Slog.i(TAG_BROADCAST, "Sole receiver of " + r
                                     + " is under deferral; setting aside and proceeding");
                         }
                         defer = r;
@@ -1185,15 +1187,25 @@ public final class BroadcastQueue {
                                 // first split of this record; refcount for 'r' and 'deferred'
                                 r.splitToken = defer.splitToken = nextSplitTokenLocked();
                                 mSplitRefcounts.put(r.splitToken, 2);
+                                if (DEBUG_BROADCAST_DEFERRAL) {
+                                    Slog.i(TAG_BROADCAST,
+                                            "Broadcast needs split refcount; using new token "
+                                            + r.splitToken);
+                                }
                             } else {
                                 // new split from an already-refcounted situation; increment count
                                 final int curCount = mSplitRefcounts.get(token);
                                 if (DEBUG_BROADCAST_DEFERRAL) {
                                     if (curCount == 0) {
-                                        Slog.wtf(TAG, "Split refcount is zero with token for " + r);
+                                        Slog.wtf(TAG_BROADCAST,
+                                                "Split refcount is zero with token for " + r);
                                     }
                                 }
                                 mSplitRefcounts.put(token, curCount + 1);
+                                if (DEBUG_BROADCAST_DEFERRAL) {
+                                    Slog.i(TAG_BROADCAST, "New split count for token " + token
+                                            + " is " + (curCount + 1));
+                                }
                             }
                         }
                     }
@@ -1529,7 +1541,7 @@ public final class BroadcastQueue {
         if (skip) {
             if (DEBUG_BROADCAST)  Slog.v(TAG_BROADCAST,
                     "Skipping delivery of ordered [" + mQueueName + "] "
-                    + r + " for whatever reason");
+                    + r + " for reason described above");
             r.delivery[recIdx] = BroadcastRecord.DELIVERY_SKIPPED;
             r.receiver = null;
             r.curFilter = null;

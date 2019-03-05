@@ -1343,6 +1343,7 @@ public class PackageInstaller {
          */
         public boolean areHiddenOptionsSet() {
             return (installFlags & (PackageManager.INSTALL_ALLOW_DOWNGRADE
+                    | PackageManager.INSTALL_RESPECT_ALLOW_DOWNGRADE
                     | PackageManager.INSTALL_DONT_KILL_APP
                     | PackageManager.INSTALL_INSTANT_APP
                     | PackageManager.INSTALL_FULL_APP

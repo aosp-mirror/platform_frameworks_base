@@ -17,6 +17,7 @@
 package android.media;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 
 /**
  * Base class of data source descriptor.
@@ -64,7 +65,7 @@ public class DataSourceDesc {
      * Return the media Id of data source.
      * @return the media Id of data source
      */
-    public String getMediaId() {
+    public @Nullable String getMediaId() {
         return mMediaId;
     }
 
@@ -149,7 +150,7 @@ public class DataSourceDesc {
          * @param mediaId the media Id of this data source
          * @return the same Builder instance.
          */
-        public @NonNull T setMediaId(String mediaId) {
+        public @NonNull T setMediaId(@Nullable String mediaId) {
             mMediaId = mediaId;
             return (T) this;
         }

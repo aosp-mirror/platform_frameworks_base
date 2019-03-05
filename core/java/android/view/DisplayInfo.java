@@ -58,6 +58,11 @@ public final class DisplayInfo implements Parcelable {
     public int type;
 
     /**
+     * Logical display identifier.
+     */
+    public int displayId;
+
+    /**
      * Display address, or null if none.
      * Interpretation varies by display type.
      */
@@ -305,6 +310,7 @@ public final class DisplayInfo implements Parcelable {
                 && layerStack == other.layerStack
                 && flags == other.flags
                 && type == other.type
+                && displayId == other.displayId
                 && Objects.equals(address, other.address)
                 && Objects.equals(uniqueId, other.uniqueId)
                 && appWidth == other.appWidth
@@ -346,6 +352,7 @@ public final class DisplayInfo implements Parcelable {
         layerStack = other.layerStack;
         flags = other.flags;
         type = other.type;
+        displayId = other.displayId;
         address = other.address;
         name = other.name;
         uniqueId = other.uniqueId;
@@ -385,6 +392,7 @@ public final class DisplayInfo implements Parcelable {
         layerStack = source.readInt();
         flags = source.readInt();
         type = source.readInt();
+        displayId = source.readInt();
         address = source.readParcelable(null);
         name = source.readString();
         appWidth = source.readInt();
@@ -432,6 +440,7 @@ public final class DisplayInfo implements Parcelable {
         dest.writeInt(layerStack);
         dest.writeInt(this.flags);
         dest.writeInt(type);
+        dest.writeInt(displayId);
         dest.writeParcelable(address, flags);
         dest.writeString(name);
         dest.writeInt(appWidth);
@@ -579,7 +588,7 @@ public final class DisplayInfo implements Parcelable {
      * Returns true if the specified UID has access to this display.
      */
     public boolean hasAccess(int uid) {
-        return Display.hasAccess(uid, flags, ownerUid);
+        return Display.hasAccess(uid, flags, ownerUid, displayId);
     }
 
     private void getMetricsWithSize(DisplayMetrics outMetrics, CompatibilityInfo compatInfo,
@@ -610,6 +619,8 @@ public final class DisplayInfo implements Parcelable {
         StringBuilder sb = new StringBuilder();
         sb.append("DisplayInfo{\"");
         sb.append(name);
+        sb.append(", displayId ");
+        sb.append(displayId);
         sb.append("\", uniqueId \"");
         sb.append(uniqueId);
         sb.append("\", app ");

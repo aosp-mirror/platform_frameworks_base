@@ -16,6 +16,11 @@
 
 package com.android.tests.rollback;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
+
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -30,13 +35,9 @@ import android.content.rollback.RollbackInfo;
 import android.content.rollback.RollbackManager;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.support.test.InstrumentationRegistry;
 import android.util.Log;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.fail;
+import androidx.test.InstrumentationRegistry;
 
 import java.io.IOException;
 import java.io.InputStream;

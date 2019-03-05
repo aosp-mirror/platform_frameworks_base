@@ -70,7 +70,7 @@ public final class AudioVolumeGroups implements Iterable<AudioVolumeGroup>, Parc
      * Returns an {@link Iterator}
      */
     @Override
-    public Iterator<AudioVolumeGroup> iterator() {
+    public @NonNull Iterator<AudioVolumeGroup> iterator() {
         return mAudioVolumeGroupList.iterator();
     }
 

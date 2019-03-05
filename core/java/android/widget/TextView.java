@@ -12744,7 +12744,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * return value may not be the same as the one TextView uses if the View's layout direction is
      * not resolved or detached from parent root view.
      */
-    public TextDirectionHeuristic getTextDirectionHeuristic() {
+    public @NonNull TextDirectionHeuristic getTextDirectionHeuristic() {
         if (hasPasswordTransformationMethod()) {
             // passwords fields should be LTR
             return TextDirectionHeuristics.LTR;

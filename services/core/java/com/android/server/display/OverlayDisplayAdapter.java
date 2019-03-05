@@ -16,9 +16,6 @@
 
 package com.android.server.display;
 
-import com.android.internal.util.DumpUtils;
-import com.android.internal.util.IndentingPrintWriter;
-
 import android.content.Context;
 import android.database.ContentObserver;
 import android.graphics.SurfaceTexture;
@@ -31,6 +28,9 @@ import android.view.Display;
 import android.view.Gravity;
 import android.view.Surface;
 import android.view.SurfaceControl;
+
+import com.android.internal.util.DumpUtils;
+import com.android.internal.util.IndentingPrintWriter;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -315,7 +315,16 @@ final class OverlayDisplayAdapter extends DisplayAdapter {
         }
 
         @Override
-        public void requestDisplayModesLocked(int color, int id) {
+        public void setAllowedDisplayModesLocked(int[] modes) {
+            final int id;
+            if (modes.length > 0) {
+                // The allowed modes should be ordered by preference, so just use the first mode
+                // here.
+                id = modes[0];
+            } else {
+                // If we don't have any allowed modes, just use the default mode.
+                id = 0;
+            }
             int index = -1;
             if (id == 0) {
                 // Use the default.

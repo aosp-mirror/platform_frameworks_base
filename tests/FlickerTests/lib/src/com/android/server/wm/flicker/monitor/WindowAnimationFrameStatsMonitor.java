@@ -25,7 +25,7 @@ import android.view.FrameStats;
 /**
  * Monitors {@link android.view.WindowAnimationFrameStats} to detect janky frames.
  *
- * Adapted from {@link android.support.test.jank.internal.WindowAnimationFrameStatsMonitorImpl}
+ * Adapted from {@link androidx.test.jank.internal.WindowAnimationFrameStatsMonitorImpl}
  * using the same threshold to determine jank.
  */
 public class WindowAnimationFrameStatsMonitor implements ITransitionMonitor {

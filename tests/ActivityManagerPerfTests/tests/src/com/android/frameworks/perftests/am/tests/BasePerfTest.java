@@ -21,7 +21,8 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.perftests.utils.ManualBenchmarkState;
 import android.perftests.utils.PerfManualStatusReporter;
-import android.support.test.InstrumentationRegistry;
+
+import androidx.test.InstrumentationRegistry;
 
 import com.android.frameworks.perftests.am.util.TargetPackageUtils;
 import com.android.frameworks.perftests.am.util.TimeReceiver;

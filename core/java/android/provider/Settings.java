@@ -308,6 +308,22 @@ public final class Settings {
             "android.settings.ACCESSIBILITY_SETTINGS";
 
     /**
+     * Activity Action: Show detail settings of a particular accessibility service.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you safeguard against this.
+     * <p>
+     * Input: {@link Intent#EXTRA_COMPONENT_NAME} must specify the accessibility service component
+     * name to be shown.
+     * <p>
+     * Output: Nothing.
+     * @hide
+     **/
+    @SystemApi
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_ACCESSIBILITY_DETAILS_SETTINGS =
+            "android.settings.ACCESSIBILITY_DETAILS_SETTINGS";
+
+    /**
      * Activity Action: Show settings to control access to usage information.
      * <p>
      * In some cases, a matching Activity may not exist, so ensure you
@@ -3303,6 +3319,17 @@ public final class Settings {
                 new SettingsValidators.InclusiveIntegerRangeValidator(
                         ColorDisplayManager.COLOR_MODE_NATURAL,
                         ColorDisplayManager.COLOR_MODE_AUTOMATIC);
+
+        /**
+         * The user selected peak refresh rate in frames per second.
+         *
+         * If this isn't set, the system falls back to a device specific default.
+         * @hide
+         */
+        public static final String PEAK_REFRESH_RATE = "peak_refresh_rate";
+
+        private static final Validator PEAK_REFRESH_RATE_VALIDATOR =
+                new SettingsValidators.InclusiveFloatRangeValidator(24f, Float.MAX_VALUE);
 
         /**
          * The amount of time in milliseconds before the device goes to sleep or begins

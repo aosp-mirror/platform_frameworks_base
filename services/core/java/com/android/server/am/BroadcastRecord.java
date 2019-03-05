@@ -332,7 +332,6 @@ final class BroadcastRecord extends Binder {
                 }
                 splitReceivers.add(o);
                 receivers.remove(i);
-                break;
             } else {
                 i++;
             }
@@ -350,6 +349,7 @@ final class BroadcastRecord extends Binder {
                 resultData, resultExtras, ordered, sticky, initialSticky, userId,
                 allowBackgroundActivityStarts, timeoutExempt);
 
+        split.splitToken = this.splitToken;
         return split;
     }
 

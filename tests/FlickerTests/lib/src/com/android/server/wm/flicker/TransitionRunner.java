@@ -18,8 +18,9 @@ package com.android.server.wm.flicker;
 
 import android.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
-import android.support.test.InstrumentationRegistry;
 import android.util.Log;
+
+import androidx.test.InstrumentationRegistry;
 
 import com.android.server.wm.flicker.monitor.ITransitionMonitor;
 import com.android.server.wm.flicker.monitor.LayersTraceMonitor;

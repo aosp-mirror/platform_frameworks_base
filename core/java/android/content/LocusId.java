@@ -16,7 +16,6 @@
 package android.content;
 
 import android.annotation.NonNull;
-import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -34,28 +33,28 @@ import java.io.PrintWriter;
 // TODO(b/123577059): make sure this is well documented and understandable
 public final class LocusId implements Parcelable {
 
-    private final Uri mUri;
+    private final String mId;
 
     /**
      * Default constructor.
      */
-    public LocusId(@NonNull Uri uri) {
-        mUri = Preconditions.checkNotNull(uri);
+    public LocusId(@NonNull String id) {
+        mId = Preconditions.checkNotNull(id);
     }
 
     /**
-     * Gets the {@code uri} associated with the locus.
+     * Gets the {@code id} associated with the locus.
      */
     @NonNull
-    public Uri getUri() {
-        return mUri;
+    public String getId() {
+        return mId;
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((mUri == null) ? 0 : mUri.hashCode());
+        result = prime * result + ((mId == null) ? 0 : mId.hashCode());
         return result;
     }
 
@@ -65,26 +64,27 @@ public final class LocusId implements Parcelable {
         if (obj == null) return false;
         if (getClass() != obj.getClass()) return false;
         final LocusId other = (LocusId) obj;
-        if (mUri == null) {
-            if (other.mUri != null) return false;
+        if (mId == null) {
+            if (other.mId != null) return false;
         } else {
-            if (!mUri.equals(other.mUri)) return false;
+            if (!mId.equals(other.mId)) return false;
         }
         return true;
     }
 
     @Override
     public String toString() {
-        return "LocusId[uri=" + getSanitizedUri() + "]";
+        return "LocusId[" + getSanitizedId() + "]";
     }
 
     /** @hide */
     public void dump(@NonNull PrintWriter pw) {
-        pw.print("uri:"); pw.println(getSanitizedUri());
+        pw.print("id:"); pw.println(getSanitizedId());
     }
 
-    private String getSanitizedUri() {
-        final int size = mUri.toString().length();
+    @NonNull
+    private String getSanitizedId() {
+        final int size = mId.length();
         return size + "_chars";
     }
 
@@ -94,8 +94,8 @@ public final class LocusId implements Parcelable {
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeParcelable(mUri, flags);
+    public void writeToParcel(Parcel parcel, int flags) {
+        parcel.writeString(mId);
     }
 
     public static final @android.annotation.NonNull Parcelable.Creator<LocusId> CREATOR =
@@ -103,9 +103,8 @@ public final class LocusId implements Parcelable {
 
         @NonNull
         @Override
-        public LocusId createFromParcel(Parcel source) {
-            final Uri uri = source.readParcelable(null);
-            return new LocusId(uri);
+        public LocusId createFromParcel(Parcel parcel) {
+            return new LocusId(parcel.readString());
         }
 
         @NonNull

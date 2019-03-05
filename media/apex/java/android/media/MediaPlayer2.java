@@ -344,7 +344,7 @@ public class MediaPlayer2 implements AutoCloseable
      * to free the resources. If not released, too many MediaPlayer2 instances may
      * result in an exception.</p>
      */
-    public MediaPlayer2(Context context) {
+    public MediaPlayer2(@NonNull Context context) {
         mGuard.open("close");
 
         mContext = context;
@@ -488,7 +488,7 @@ public class MediaPlayer2 implements AutoCloseable
      * @return a token which can be used to cancel the operation later with {@link #cancelCommand}.
      */
     // This is an asynchronous call.
-    public Object play() {
+    public @NonNull Object play() {
         return addTask(new Task(CALL_COMPLETED_PLAY, false) {
             @Override
             void process() {
@@ -508,7 +508,7 @@ public class MediaPlayer2 implements AutoCloseable
      * @return a token which can be used to cancel the operation later with {@link #cancelCommand}.
      */
     // This is an asynchronous call.
-    public Object prepare() {
+    public @NonNull Object prepare() {
         return addTask(new Task(CALL_COMPLETED_PREPARE, true) {
             @Override
             void process() {
@@ -524,7 +524,7 @@ public class MediaPlayer2 implements AutoCloseable
      * @return a token which can be used to cancel the operation later with {@link #cancelCommand}.
      */
     // This is an asynchronous call.
-    public Object pause() {
+    public @NonNull Object pause() {
         return addTask(new Task(CALL_COMPLETED_PAUSE, false) {
             @Override
             void process() {
@@ -542,7 +542,7 @@ public class MediaPlayer2 implements AutoCloseable
      * @return a token which can be used to cancel the operation later with {@link #cancelCommand}.
      */
     // This is an asynchronous call.
-    public Object skipToNext() {
+    public @NonNull Object skipToNext() {
         return addTask(new Task(CALL_COMPLETED_SKIP_TO_NEXT, false) {
             @Override
             void process() {
@@ -700,7 +700,7 @@ public class MediaPlayer2 implements AutoCloseable
      * @return a token which can be used to cancel the operation later with {@link #cancelCommand}.
      */
     // This is an asynchronous call.
-    public Object setAudioAttributes(@NonNull AudioAttributes attributes) {
+    public @NonNull Object setAudioAttributes(@NonNull AudioAttributes attributes) {
         return addTask(new Task(CALL_COMPLETED_SET_AUDIO_ATTRIBUTES, false) {
             @Override
             void process() {
@@ -735,7 +735,7 @@ public class MediaPlayer2 implements AutoCloseable
      * @return a token which can be used to cancel the operation later with {@link #cancelCommand}.
      */
     // This is an asynchronous call.
-    public Object setDataSource(@NonNull DataSourceDesc dsd) {
+    public @NonNull Object setDataSource(@NonNull DataSourceDesc dsd) {
         return addTask(new Task(CALL_COMPLETED_SET_DATA_SOURCE, false) {
             @Override
             void process() throws IOException {
@@ -768,7 +768,7 @@ public class MediaPlayer2 implements AutoCloseable
      * @return a token which can be used to cancel the operation later with {@link #cancelCommand}.
      */
     // This is an asynchronous call.
-    public Object setNextDataSource(@NonNull DataSourceDesc dsd) {
+    public @NonNull Object setNextDataSource(@NonNull DataSourceDesc dsd) {
         return addTask(new Task(CALL_COMPLETED_SET_NEXT_DATA_SOURCE, false) {
             @Override
             void process() {
@@ -791,7 +791,7 @@ public class MediaPlayer2 implements AutoCloseable
      * @return a token which can be used to cancel the operation later with {@link #cancelCommand}.
      */
     // This is an asynchronous call.
-    public Object setNextDataSources(@NonNull List<DataSourceDesc> dsds) {
+    public @NonNull Object setNextDataSources(@NonNull List<DataSourceDesc> dsds) {
         return addTask(new Task(CALL_COMPLETED_SET_NEXT_DATA_SOURCES, false) {
             @Override
             void process() {
@@ -853,7 +853,7 @@ public class MediaPlayer2 implements AutoCloseable
      * @return a token which can be used to cancel the operation later with {@link #cancelCommand}.
      */
     // This is an asynchronous call.
-    public Object clearNextDataSources() {
+    public @NonNull Object clearNextDataSources() {
         return addTask(new Task(CALL_COMPLETED_CLEAR_NEXT_DATA_SOURCES, false) {
             @Override
             void process() {
@@ -1194,7 +1194,7 @@ public class MediaPlayer2 implements AutoCloseable
      * @return a token which can be used to cancel the operation later with {@link #cancelCommand}.
      */
     // This is an asynchronous call.
-    public Object loopCurrent(boolean loop) {
+    public @NonNull Object loopCurrent(boolean loop) {
         return addTask(new Task(CALL_COMPLETED_LOOP_CURRENT, false) {
             @Override
             void process() {
@@ -1216,7 +1216,7 @@ public class MediaPlayer2 implements AutoCloseable
      * @return a token which can be used to cancel the operation later with {@link #cancelCommand}.
      */
     // This is an asynchronous call.
-    public Object setPlayerVolume(float volume) {
+    public @NonNull Object setPlayerVolume(float volume) {
         return addTask(new Task(CALL_COMPLETED_SET_PLAYER_VOLUME, false) {
             @Override
             void process() {
@@ -1257,7 +1257,7 @@ public class MediaPlayer2 implements AutoCloseable
      * @return a token which can be used to cancel the operation later with {@link #cancelCommand}.
      */
     // This is an asynchronous call.
-    public Object notifyWhenCommandLabelReached(@NonNull Object label) {
+    public @NonNull Object notifyWhenCommandLabelReached(@NonNull Object label) {
         return addTask(new Task(CALL_COMPLETED_NOTIFY_WHEN_COMMAND_LABEL_REACHED, false) {
             @Override
             void process() {
@@ -1285,7 +1285,7 @@ public class MediaPlayer2 implements AutoCloseable
      * @param sh the SurfaceHolder to use for video display
      * @return a token which can be used to cancel the operation later with {@link #cancelCommand}.
      */
-    public Object setDisplay(SurfaceHolder sh) {
+    public @NonNull Object setDisplay(@Nullable SurfaceHolder sh) {
         return addTask(new Task(CALL_COMPLETED_SET_DISPLAY, false) {
             @Override
             void process() {
@@ -1321,7 +1321,7 @@ public class MediaPlayer2 implements AutoCloseable
      * @return a token which can be used to cancel the operation later with {@link #cancelCommand}.
      */
     // This is an asynchronous call.
-    public Object setSurface(Surface surface) {
+    public @NonNull Object setSurface(@Nullable Surface surface) {
         return addTask(new Task(CALL_COMPLETED_SET_SURFACE, false) {
             @Override
             void process() {
@@ -1355,7 +1355,7 @@ public class MediaPlayer2 implements AutoCloseable
      * @see android.os.PowerManager
      */
     // This is an asynchronous call.
-    public Object setWakeLock(@NonNull PowerManager.WakeLock wakeLock) {
+    public @NonNull Object setWakeLock(@NonNull PowerManager.WakeLock wakeLock) {
         return addTask(new Task(CALL_COMPLETED_SET_WAKE_LOCK, false) {
             @Override
             void process() {
@@ -1390,7 +1390,7 @@ public class MediaPlayer2 implements AutoCloseable
      * @return a token which can be used to cancel the operation later with {@link #cancelCommand}.
      */
     // This is an asynchronous call.
-    public Object setScreenOnWhilePlaying(boolean screenOn) {
+    public @NonNull Object setScreenOnWhilePlaying(boolean screenOn) {
         return addTask(new Task(CALL_COMPLETED_SET_SCREEN_ON_WHILE_PLAYING, false) {
             @Override
             void process() {
@@ -1466,7 +1466,7 @@ public class MediaPlayer2 implements AutoCloseable
      */
     // This is a synchronous call.
     @Override
-    public boolean setPreferredDevice(AudioDeviceInfo deviceInfo) {
+    public boolean setPreferredDevice(@Nullable AudioDeviceInfo deviceInfo) {
         boolean status = native_setPreferredDevice(deviceInfo);
         if (status) {
             synchronized (this) {
@@ -1483,7 +1483,7 @@ public class MediaPlayer2 implements AutoCloseable
      * is not guaranteed to correspond to the actual device being used for playback.
      */
     @Override
-    public AudioDeviceInfo getPreferredDevice() {
+    public @Nullable AudioDeviceInfo getPreferredDevice() {
         synchronized (this) {
             return mPreferredDevice;
         }
@@ -1496,7 +1496,7 @@ public class MediaPlayer2 implements AutoCloseable
      * selected device when the player was last active.
      */
     @Override
-    public native AudioDeviceInfo getRoutedDevice();
+    public @Nullable native AudioDeviceInfo getRoutedDevice();
 
     /**
      * Adds an {@link AudioRouting.OnRoutingChangedListener} to receive notifications of routing
@@ -1508,8 +1508,8 @@ public class MediaPlayer2 implements AutoCloseable
      */
     // This is a synchronous call.
     @Override
-    public void addOnRoutingChangedListener(AudioRouting.OnRoutingChangedListener listener,
-            Handler handler) {
+    public void addOnRoutingChangedListener(@NonNull AudioRouting.OnRoutingChangedListener listener,
+            @Nullable Handler handler) {
         if (listener == null) {
             throw new IllegalArgumentException("addOnRoutingChangedListener: listener is NULL");
         }
@@ -1527,7 +1527,8 @@ public class MediaPlayer2 implements AutoCloseable
      */
     // This is a synchronous call.
     @Override
-    public void removeOnRoutingChangedListener(AudioRouting.OnRoutingChangedListener listener) {
+    public void removeOnRoutingChangedListener(
+            @NonNull AudioRouting.OnRoutingChangedListener listener) {
         if (listener == null) {
             throw new IllegalArgumentException("removeOnRoutingChangedListener: listener is NULL");
         }
@@ -1547,7 +1548,7 @@ public class MediaPlayer2 implements AutoCloseable
      * notification {@code EventCallback.onVideoSizeChanged} when the size
      * is available.
      */
-    public Size getVideoSize() {
+    public @NonNull Size getVideoSize() {
         return mVideoSize;
     }
 
@@ -1560,7 +1561,7 @@ public class MediaPlayer2 implements AutoCloseable
      *
      * Additional vendor-specific fields may also be present in the return value.
      */
-    public PersistableBundle getMetrics() {
+    public @Nullable PersistableBundle getMetrics() {
         PersistableBundle bundle = native_getMetrics();
         return bundle;
     }
@@ -1592,7 +1593,7 @@ public class MediaPlayer2 implements AutoCloseable
      */
     // TODO: make it public when ready
     // This is an asynchronous call.
-    Object setBufferingParams(@NonNull BufferingParams params) {
+    @NonNull Object setBufferingParams(@NonNull BufferingParams params) {
         return addTask(new Task(CALL_COMPLETED_SET_BUFFERING_PARAMS, false) {
             @Override
             void process() {
@@ -1614,7 +1615,7 @@ public class MediaPlayer2 implements AutoCloseable
      * @return a token which can be used to cancel the operation later with {@link #cancelCommand}.
      */
     // This is an asynchronous call.
-    public Object setPlaybackParams(@NonNull PlaybackParams params) {
+    public @NonNull Object setPlaybackParams(@NonNull PlaybackParams params) {
         return addTask(new Task(CALL_COMPLETED_SET_PLAYBACK_PARAMS, false) {
             @Override
             void process() {
@@ -1642,7 +1643,7 @@ public class MediaPlayer2 implements AutoCloseable
      * @return a token which can be used to cancel the operation later with {@link #cancelCommand}.
      */
     // This is an asynchronous call.
-    public Object setSyncParams(@NonNull SyncParams params) {
+    public @NonNull Object setSyncParams(@NonNull SyncParams params) {
         return addTask(new Task(CALL_COMPLETED_SET_SYNC_PARAMS, false) {
             @Override
             void process() {
@@ -1671,7 +1672,7 @@ public class MediaPlayer2 implements AutoCloseable
      * @return a token which can be used to cancel the operation later with {@link #cancelCommand}.
      */
     // This is an asynchronous call.
-    public Object seekTo(long msec) {
+    public @NonNull Object seekTo(long msec) {
         return seekTo(msec, SEEK_PREVIOUS_SYNC /* mode */);
     }
 
@@ -1745,7 +1746,7 @@ public class MediaPlayer2 implements AutoCloseable
      * @return a token which can be used to cancel the operation later with {@link #cancelCommand}.
      */
     // This is an asynchronous call.
-    public Object seekTo(long msec, @SeekMode int mode) {
+    public @NonNull Object seekTo(long msec, @SeekMode int mode) {
         return addTask(new Task(CALL_COMPLETED_SEEK_TO, true) {
             @Override
             void process() {
@@ -1846,7 +1847,7 @@ public class MediaPlayer2 implements AutoCloseable
      * @return a token which can be used to cancel the operation later with {@link #cancelCommand}.
      */
     // This is an asynchronous call.
-    public Object setAudioSessionId(int sessionId) {
+    public @NonNull Object setAudioSessionId(int sessionId) {
         final AudioTrack dummyAudioTrack = new AudioTrack(AudioManager.STREAM_MUSIC, 44100,
                     AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT, 2,
                     AudioTrack.MODE_STATIC, sessionId);
@@ -1887,7 +1888,7 @@ public class MediaPlayer2 implements AutoCloseable
      * @return a token which can be used to cancel the operation later with {@link #cancelCommand}.
      */
     // This is an asynchronous call.
-    public Object attachAuxEffect(int effectId) {
+    public @NonNull Object attachAuxEffect(int effectId) {
         return addTask(new Task(CALL_COMPLETED_ATTACH_AUX_EFFECT, false) {
             @Override
             void process() {
@@ -1912,7 +1913,7 @@ public class MediaPlayer2 implements AutoCloseable
      * @return a token which can be used to cancel the operation later with {@link #cancelCommand}.
      */
     // This is an asynchronous call.
-    public Object setAuxEffectSendLevel(float level) {
+    public @NonNull Object setAuxEffectSendLevel(float level) {
         return addTask(new Task(CALL_COMPLETED_SET_AUX_EFFECT_SEND_LEVEL, false) {
             @Override
             void process() {
@@ -1984,7 +1985,7 @@ public class MediaPlayer2 implements AutoCloseable
          * When the language is unknown or could not be determined,
          * ISO-639-2 language code, "und", is returned.
          */
-        public String getLanguage() {
+        public @Nullable String getLanguage() {
             String language = mFormat.getString(MediaFormat.KEY_LANGUAGE);
             return language == null ? "und" : language;
         }
@@ -1993,7 +1994,7 @@ public class MediaPlayer2 implements AutoCloseable
          * Gets the {@link MediaFormat} of the track.  If the format is
          * unknown or could not be determined, null is returned.
          */
-        public MediaFormat getFormat() {
+        public @Nullable MediaFormat getFormat() {
             if (mTrackType == MEDIA_TRACK_TYPE_TIMEDTEXT
                     || mTrackType == MEDIA_TRACK_TYPE_SUBTITLE) {
                 return mFormat;
@@ -2201,7 +2202,7 @@ public class MediaPlayer2 implements AutoCloseable
      * @see MediaPlayer2#getTrackInfo()
      */
     // This is an asynchronous call.
-    public Object selectTrack(int index) {
+    public @NonNull Object selectTrack(int index) {
         return selectTrack(getCurrentDataSource(), index);
     }
 
@@ -2235,7 +2236,7 @@ public class MediaPlayer2 implements AutoCloseable
      * @see MediaPlayer2#getTrackInfo(DataSourceDesc)
      */
     // This is an asynchronous call.
-    public Object selectTrack(@NonNull DataSourceDesc dsd, int index) {
+    public @NonNull Object selectTrack(@NonNull DataSourceDesc dsd, int index) {
         return addTask(new Task(CALL_COMPLETED_SELECT_TRACK, false) {
             @Override
             void process() {
@@ -2257,7 +2258,7 @@ public class MediaPlayer2 implements AutoCloseable
      * @see MediaPlayer2#getTrackInfo()
      */
     // This is an asynchronous call.
-    public Object deselectTrack(int index) {
+    public @NonNull Object deselectTrack(int index) {
         return deselectTrack(getCurrentDataSource(), index);
     }
 
@@ -2277,7 +2278,7 @@ public class MediaPlayer2 implements AutoCloseable
      * @see MediaPlayer2#getTrackInfo(DataSourceDesc)
      */
     // This is an asynchronous call.
-    public Object deselectTrack(@NonNull DataSourceDesc dsd, int index) {
+    public @NonNull Object deselectTrack(@NonNull DataSourceDesc dsd, int index) {
         return addTask(new Task(CALL_COMPLETED_DESELECT_TRACK, false) {
             @Override
             void process() {
@@ -2928,7 +2929,7 @@ public class MediaPlayer2 implements AutoCloseable
      * @param eventCallback the callback to be unregistered
      */
     // This is a synchronous call.
-    public void unregisterEventCallback(EventCallback eventCallback) {
+    public void unregisterEventCallback(@NonNull EventCallback eventCallback) {
         synchronized (mEventCbLock) {
             for (Pair<Executor, EventCallback> cb : mEventCallbackRecords) {
                 if (cb.second == eventCallback) {
@@ -3850,7 +3851,7 @@ public class MediaPlayer2 implements AutoCloseable
      */
     // This is an asynchronous call.
     @TestApi
-    public Object prepareDrm(@NonNull DataSourceDesc dsd, @NonNull UUID uuid) {
+    public @NonNull Object prepareDrm(@NonNull DataSourceDesc dsd, @NonNull UUID uuid) {
         return addTask(newPrepareDrmTask(dsd, uuid));
     }
 

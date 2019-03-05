@@ -17,6 +17,8 @@
 
 package android.media;
 
+import android.annotation.NonNull;
+
 import java.io.Closeable;
 import java.io.IOException;
 
@@ -49,7 +51,7 @@ public abstract class DataSourceCallback implements Closeable {
      * @throws IOException on fatal errors.
      * @return the number of bytes read, or -1 if end of stream is reached.
      */
-    public abstract int readAt(long position, byte[] buffer, int offset, int size)
+    public abstract int readAt(long position, @NonNull byte[] buffer, int offset, int size)
             throws IOException;
 
     /**

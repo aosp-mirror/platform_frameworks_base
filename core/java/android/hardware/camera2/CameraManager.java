@@ -678,6 +678,31 @@ public final class CameraManager {
         public void onCameraUnavailable(@NonNull String cameraId) {
             // default empty implementation
         }
+
+        /**
+         * Notify registered clients about a change in the camera access priorities.
+         *
+         * <p>Notification that camera access priorities have changed and the camera may
+         * now be openable. An application that was previously denied camera access due to
+         * a higher-priority user already using the camera, or that was disconnected from an
+         * active camera session due to a higher-priority user trying to open the camera,
+         * should try to open the camera again if it still wants to use it.  Note that
+         * multiple applications may receive this callback at the same time, and only one of
+         * them will succeed in opening the camera in practice, depending on exact access
+         * priority levels and timing. This method is useful in cases where multiple
+         * applications may be in the resumed state at the same time, and the user switches
+         * focus between them, or if the current camera-using application moves between
+         * full-screen and Picture-in-Picture (PiP) states. In such cases, the camera
+         * available/unavailable callbacks will not be invoked, but another application may
+         * now have higher priority for camera access than the current camera-using
+         * application.</p>
+         *
+         * <p>The default implementation of this method does nothing.</p>
+         *
+         */
+        public void onCameraAccessPrioritiesChanged() {
+            // default empty implementation
+        }
     }
 
     /**
@@ -1098,6 +1123,22 @@ public final class CameraManager {
             }
         }
 
+        private void postSingleAccessPriorityChangeUpdate(final AvailabilityCallback callback,
+                final Executor executor) {
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                executor.execute(
+                    new Runnable() {
+                        @Override
+                        public void run() {
+                            callback.onCameraAccessPrioritiesChanged();
+                        }
+                    });
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
         private void postSingleUpdate(final AvailabilityCallback callback, final Executor executor,
                 final String id, final int status) {
             if (isAvailable(status)) {
@@ -1344,6 +1385,19 @@ public final class CameraManager {
         public void onTorchStatusChanged(int status, String cameraId) throws RemoteException {
             synchronized (mLock) {
                 onTorchStatusChangedLocked(status, cameraId);
+            }
+        }
+
+        @Override
+        public void onCameraAccessPrioritiesChanged() {
+            synchronized (mLock) {
+                final int callbackCount = mCallbackMap.size();
+                for (int i = 0; i < callbackCount; i++) {
+                    Executor executor = mCallbackMap.valueAt(i);
+                    final AvailabilityCallback callback = mCallbackMap.keyAt(i);
+
+                    postSingleAccessPriorityChangeUpdate(callback, executor);
+                }
             }
         }
 

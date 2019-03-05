@@ -85,7 +85,7 @@ public final class AudioProductStrategies implements Iterable<AudioProductStrate
      * Returns an {@link Iterator}
      */
     @Override
-    public Iterator<AudioProductStrategy> iterator() {
+    public @NonNull Iterator<AudioProductStrategy> iterator() {
         return mAudioProductStrategyList.iterator();
     }
 

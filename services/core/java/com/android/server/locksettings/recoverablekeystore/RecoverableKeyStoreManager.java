@@ -53,6 +53,7 @@ import com.android.server.locksettings.recoverablekeystore.certificate.CertValid
 import com.android.server.locksettings.recoverablekeystore.certificate.CertXml;
 import com.android.server.locksettings.recoverablekeystore.certificate.SigXml;
 import com.android.server.locksettings.recoverablekeystore.storage.ApplicationKeyStorage;
+import com.android.server.locksettings.recoverablekeystore.storage.CleanupManager;
 import com.android.server.locksettings.recoverablekeystore.storage.RecoverableKeyStoreDb;
 import com.android.server.locksettings.recoverablekeystore.storage.RecoverySessionStorage;
 import com.android.server.locksettings.recoverablekeystore.storage.RecoverySnapshotStorage;
@@ -100,6 +101,7 @@ public class RecoverableKeyStoreManager {
     private final PlatformKeyManager mPlatformKeyManager;
     private final ApplicationKeyStorage mApplicationKeyStorage;
     private final TestOnlyInsecureCertificateHelper mTestCertHelper;
+    private final CleanupManager mCleanupManager;
 
     /**
      * Returns a new or existing instance.
@@ -122,16 +124,24 @@ public class RecoverableKeyStoreManager {
                 throw new ServiceSpecificException(ERROR_SERVICE_INTERNAL_ERROR, e.getMessage());
             }
 
+            RecoverySnapshotStorage snapshotStorage =
+                    RecoverySnapshotStorage.newInstance();
+            CleanupManager cleanupManager = CleanupManager.getInstance(
+                    context.getApplicationContext(),
+                    snapshotStorage,
+                    db,
+                    applicationKeyStorage);
             mInstance = new RecoverableKeyStoreManager(
                     context.getApplicationContext(),
                     db,
                     new RecoverySessionStorage(),
                     Executors.newSingleThreadExecutor(),
-                    RecoverySnapshotStorage.newInstance(),
+                    snapshotStorage,
                     new RecoverySnapshotListenersStorage(),
                     platformKeyManager,
                     applicationKeyStorage,
-                    new TestOnlyInsecureCertificateHelper());
+                    new TestOnlyInsecureCertificateHelper(),
+                    cleanupManager);
         }
         return mInstance;
     }
@@ -146,7 +156,8 @@ public class RecoverableKeyStoreManager {
             RecoverySnapshotListenersStorage listenersStorage,
             PlatformKeyManager platformKeyManager,
             ApplicationKeyStorage applicationKeyStorage,
-            TestOnlyInsecureCertificateHelper TestOnlyInsecureCertificateHelper) {
+            TestOnlyInsecureCertificateHelper testOnlyInsecureCertificateHelper,
+            CleanupManager cleanupManager) {
         mContext = context;
         mDatabase = recoverableKeyStoreDb;
         mRecoverySessionStorage = recoverySessionStorage;
@@ -155,8 +166,10 @@ public class RecoverableKeyStoreManager {
         mSnapshotStorage = snapshotStorage;
         mPlatformKeyManager = platformKeyManager;
         mApplicationKeyStorage = applicationKeyStorage;
-        mTestCertHelper = TestOnlyInsecureCertificateHelper;
-
+        mTestCertHelper = testOnlyInsecureCertificateHelper;
+        mCleanupManager = cleanupManager;
+        // Clears data for removed users.
+        mCleanupManager.verifyKnownUsers();
         try {
             mRecoverableKeyGenerator = RecoverableKeyGenerator.newInstance(mDatabase);
         } catch (NoSuchAlgorithmException e) {
@@ -955,6 +968,9 @@ public class RecoverableKeyStoreManager {
         mContext.enforceCallingOrSelfPermission(
                 Manifest.permission.RECOVER_KEYSTORE,
                 "Caller " + Binder.getCallingUid() + " doesn't have RecoverKeyStore permission.");
+        int userId = UserHandle.getCallingUserId();
+        int uid = Binder.getCallingUid();
+        mCleanupManager.registerRecoveryAgent(userId, uid);
     }
 
     private boolean publicKeysMatch(PublicKey publicKey, byte[] vaultParams) {
