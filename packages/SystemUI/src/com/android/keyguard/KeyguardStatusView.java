@@ -41,6 +41,8 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.systemui.Dependency;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.Locale;
 import java.util.TimeZone;
 
@@ -287,6 +289,24 @@ public class KeyguardStatusView extends GridLayout implements
     @Override
     public boolean hasOverlappingRendering() {
         return false;
+    }
+
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        pw.println("KeyguardStatusView:");
+        pw.println("  mOwnerInfo: " + (mOwnerInfo == null
+                ? "null" : mOwnerInfo.getVisibility() == VISIBLE));
+        pw.println("  mPulsing: " + mPulsing);
+        pw.println("  mDarkAmount: " + mDarkAmount);
+        pw.println("  mTextColor: " + Integer.toHexString(mTextColor));
+        if (mLogoutView != null) {
+            pw.println("  logout visible: " + (mLogoutView.getVisibility() == VISIBLE));
+        }
+        if (mClockView != null) {
+            mClockView.dump(fd, pw, args);
+        }
+        if (mKeyguardSlice != null) {
+            mKeyguardSlice.dump(fd, pw, args);
+        }
     }
 
     // DateFormat.getBestDateTimePattern is extremely expensive, and refresh is called often.
