@@ -338,7 +338,7 @@ public final class RenderNode {
      * @see #endRecording()
      * @see #hasDisplayList()
      */
-    public RecordingCanvas beginRecording(int width, int height) {
+    public @NonNull RecordingCanvas beginRecording(int width, int height) {
         if (mCurrentRecordingCanvas != null) {
             throw new IllegalStateException(
                     "Recording currently in progress - missing #endRecording() call?");
@@ -358,7 +358,7 @@ public final class RenderNode {
      * @see #endRecording()
      * @see #hasDisplayList()
      */
-    public RecordingCanvas beginRecording() {
+    public @NonNull RecordingCanvas beginRecording() {
         return beginRecording(nGetWidth(mNativeRenderNode), nGetHeight(mNativeRenderNode));
     }
 
@@ -1285,7 +1285,7 @@ public final class RenderNode {
      * @param position The position rectangle in pixels
      * @return True if the value changed, false if the new value was the same as the previous value.
      */
-    public boolean setPosition(Rect position) {
+    public boolean setPosition(@NonNull Rect position) {
         return nSetLeftTopRightBottom(mNativeRenderNode,
                 position.left, position.top, position.right, position.bottom);
     }
