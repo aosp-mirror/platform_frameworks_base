@@ -27,6 +27,8 @@ import android.provider.DeviceConfig;
 import android.provider.DeviceConfig.OnPropertyChangedListener;
 import android.provider.Settings;
 import android.text.TextUtils;
+import android.text.TextUtils.SimpleStringSplitter;
+import android.util.ArraySet;
 import android.util.KeyValueListParser;
 import android.util.Slog;
 
@@ -235,6 +237,8 @@ final class ActivityManagerConstants extends ContentObserver {
     // Controlled by Settings.Global.BACKGROUND_ACTIVITY_STARTS_ENABLED
     volatile boolean mFlagBackgroundActivityStartsEnabled;
 
+    volatile ArraySet<String> mPackageNamesWhitelistedForBgActivityStarts = new ArraySet<>();
+
     private final ActivityManagerService mService;
     private ContentResolver mResolver;
     private final KeyValueListParser mParser = new KeyValueListParser(',');
@@ -273,6 +277,10 @@ final class ActivityManagerConstants extends ContentObserver {
                 Settings.Global.getUriFor(
                         Settings.Global.BACKGROUND_ACTIVITY_STARTS_ENABLED);
 
+    private static final Uri BACKGROUND_ACTIVITY_STARTS_PACKAGE_NAMES_WHITELIST_URI =
+                Settings.Global.getUriFor(
+                        Settings.Global.BACKGROUND_ACTIVITY_STARTS_PACKAGE_NAMES_WHITELIST);
+
     private final OnPropertyChangedListener mOnDeviceConfigChangedListener =
             new OnPropertyChangedListener() {
                 @Override
@@ -293,9 +301,12 @@ final class ActivityManagerConstants extends ContentObserver {
         mResolver.registerContentObserver(ACTIVITY_MANAGER_CONSTANTS_URI, false, this);
         mResolver.registerContentObserver(ACTIVITY_STARTS_LOGGING_ENABLED_URI, false, this);
         mResolver.registerContentObserver(BACKGROUND_ACTIVITY_STARTS_ENABLED_URI, false, this);
+        mResolver.registerContentObserver(BACKGROUND_ACTIVITY_STARTS_PACKAGE_NAMES_WHITELIST_URI,
+                false, this);
         updateConstants();
         updateActivityStartsLoggingEnabled();
         updateBackgroundActivityStartsEnabled();
+        updateBackgroundActivityStartsPackageNamesWhitelist();
         DeviceConfig.addOnPropertyChangedListener(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                 ActivityThread.currentApplication().getMainExecutor(),
                 mOnDeviceConfigChangedListener);
@@ -325,6 +336,8 @@ final class ActivityManagerConstants extends ContentObserver {
             updateActivityStartsLoggingEnabled();
         } else if (BACKGROUND_ACTIVITY_STARTS_ENABLED_URI.equals(uri)) {
             updateBackgroundActivityStartsEnabled();
+        } else if (BACKGROUND_ACTIVITY_STARTS_PACKAGE_NAMES_WHITELIST_URI.equals(uri)) {
+            updateBackgroundActivityStartsPackageNamesWhitelist();
         }
     }
 
@@ -412,6 +425,21 @@ final class ActivityManagerConstants extends ContentObserver {
     private void updateBackgroundActivityStartsEnabled() {
         mFlagBackgroundActivityStartsEnabled = Settings.Global.getInt(mResolver,
                 Settings.Global.BACKGROUND_ACTIVITY_STARTS_ENABLED, 1) == 1;
+    }
+
+    private void updateBackgroundActivityStartsPackageNamesWhitelist() {
+        final String setting = Settings.Global.getString(mResolver,
+                Settings.Global.BACKGROUND_ACTIVITY_STARTS_PACKAGE_NAMES_WHITELIST);
+        if (TextUtils.isEmpty(setting)) {
+            return;
+        }
+        ArraySet<String> newSet = new ArraySet<>();
+        SimpleStringSplitter splitter = new SimpleStringSplitter(':');
+        splitter.setString(setting);
+        while (splitter.hasNext()) {
+            newSet.add(splitter.next());
+        }
+        mPackageNamesWhitelistedForBgActivityStarts = newSet;
     }
 
     private void updateMaxCachedProcesses() {

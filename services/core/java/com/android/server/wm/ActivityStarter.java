@@ -1009,6 +1009,12 @@ class ActivityStarter {
         if (mService.isDeviceOwner(callingPackage)) {
             return false;
         }
+        // don't abort if the callingPackage is temporarily whitelisted
+        if (mService.isPackageNameWhitelistedForBgActivityStarts(callingPackage)) {
+            Slog.w(TAG, "Background activity start for " + callingPackage
+                    + " temporarily whitelisted. This will not be supported in future Q builds.");
+            return false;
+        }
         // anything that has fallen through would currently be aborted
         Slog.w(TAG, "Background activity start [callingPackage: " + callingPackage
                 + "; callingUid: " + callingUid
