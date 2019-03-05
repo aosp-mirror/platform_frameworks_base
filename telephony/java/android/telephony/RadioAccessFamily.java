@@ -22,6 +22,7 @@ import android.hardware.radio.V1_4.CellInfo.Info;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.telephony.TelephonyManager.PrefNetworkMode;
 
 import com.android.internal.telephony.RILConstants;
 
@@ -170,7 +171,8 @@ public class RadioAccessFamily implements Parcelable {
     };
 
     @UnsupportedAppUsage
-    public static int getRafFromNetworkType(int type) {
+    @TelephonyManager.NetworkTypeBitMask
+    public static int getRafFromNetworkType(@PrefNetworkMode int type) {
         switch (type) {
             case RILConstants.NETWORK_MODE_WCDMA_PREF:
                 return GSM | WCDMA;
@@ -279,6 +281,7 @@ public class RadioAccessFamily implements Parcelable {
     }
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
+    @PrefNetworkMode
     public static int getNetworkTypeFromRaf(int raf) {
         raf = getAdjustedRaf(raf);
 
