@@ -867,6 +867,7 @@
         android:label="@string/permgrouplab_visual"
         android:description="@string/permgroupdesc_visual"
         android:request="@string/permgrouprequest_visual"
+        android:requestDetail="@string/permgrouprequestdetail_visual"
         android:priority="920" />
 
     <!-- Allows an application to read the user's shared images collection. -->
