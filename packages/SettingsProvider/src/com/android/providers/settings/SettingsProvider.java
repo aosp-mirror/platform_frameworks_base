@@ -3237,7 +3237,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 174;
+            private static final int SETTINGS_VERSION = 175;
 
             private final int mUserId;
 
@@ -4268,6 +4268,24 @@ public class SettingsProvider extends ContentProvider {
                     }
 
                     currentVersion = 174;
+                }
+
+                if (currentVersion == 174) {
+                    // Version 174: Set the default value for Global Settings: APPLY_RAMPING_RINGER
+
+                    final SettingsState globalSettings = getGlobalSettingsLocked();
+
+                    Setting currentRampingRingerSetting = globalSettings.getSettingLocked(
+                            Settings.Global.APPLY_RAMPING_RINGER);
+                    if (currentRampingRingerSetting.isNull()) {
+                        globalSettings.insertSettingLocked(
+                                Settings.Global.APPLY_RAMPING_RINGER,
+                                getContext().getResources().getBoolean(
+                                        R.bool.def_apply_ramping_ringer) ? "1" : "0", null,
+                                true, SettingsState.SYSTEM_PACKAGE_NAME);
+                    }
+
+                    currentVersion = 175;
                 }
 
                 // vXXX: Add new settings above this point.

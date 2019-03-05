@@ -117,7 +117,6 @@ public class SettingsBackupTest {
                     Settings.Global.ANOMALY_CONFIG_VERSION,
                     Settings.Global.APN_DB_UPDATE_CONTENT_URL,
                     Settings.Global.APN_DB_UPDATE_METADATA_URL,
-                    Settings.Global.APPLY_RAMPING_RINGER,
                     Settings.Global.APP_BINDING_CONSTANTS,
                     Settings.Global.APP_IDLE_CONSTANTS,
                     Settings.Global.APP_OPS_CONSTANTS,
