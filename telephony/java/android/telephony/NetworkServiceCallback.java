@@ -17,6 +17,7 @@
 package android.telephony;
 
 import android.annotation.IntDef;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.os.RemoteException;
 import android.telephony.NetworkService.NetworkServiceProvider;
@@ -75,7 +76,8 @@ public class NetworkServiceCallback {
      *                {@link NetworkServiceCallback#RESULT_ERROR_UNSUPPORTED}
      * @param state The state information to be returned to callback.
      */
-    public void onGetNetworkRegistrationStateComplete(int result, NetworkRegistrationState state) {
+    public void onGetNetworkRegistrationStateComplete(int result,
+                                                      @Nullable NetworkRegistrationState state) {
         INetworkServiceCallback callback = mCallback.get();
         if (callback != null) {
             try {

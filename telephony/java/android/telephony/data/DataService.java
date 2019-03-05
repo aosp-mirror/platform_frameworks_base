@@ -457,6 +457,7 @@ public abstract class DataService extends Service {
      * @param slotIndex SIM slot id the data service associated with.
      * @return Data service object
      */
+    @Nullable
     public abstract DataServiceProvider onCreateDataServiceProvider(int slotIndex);
 
     @Override

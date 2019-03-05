@@ -17,6 +17,7 @@
 package android.telephony;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.app.Service;
 import android.content.Intent;
@@ -232,6 +233,7 @@ public abstract class NetworkService extends Service {
      * @param slotIndex SIM slot id the network service associated with.
      * @return Network service object
      */
+    @Nullable
     public abstract NetworkServiceProvider onCreateNetworkServiceProvider(int slotIndex);
 
     @Override
