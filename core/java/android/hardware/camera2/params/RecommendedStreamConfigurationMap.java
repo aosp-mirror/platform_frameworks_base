@@ -21,6 +21,7 @@ import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.graphics.ImageFormat;
+import android.graphics.ImageFormat.Format;
 import android.graphics.PixelFormat;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraDevice;
@@ -214,7 +215,7 @@ public final class RecommendedStreamConfigurationMap {
      *
      * @return a non-modifiable set of Integer formats
      */
-    public @Nullable Set<Integer> getValidOutputFormatsForInput(int inputFormat) {
+    public @Nullable Set<Integer> getValidOutputFormatsForInput(@Format int inputFormat) {
         return getUnmodifiableIntegerSet(mRecommendedMap.getValidOutputFormatsForInput(
                     inputFormat));
     }
@@ -250,7 +251,7 @@ public final class RecommendedStreamConfigurationMap {
      * @param format a format from {@link #getInputFormats}
      * @return a non-modifiable set of sizes, or {@code null} if the format was not available.
      */
-    public @Nullable Set<Size> getInputSizes(int format) {
+    public @Nullable Set<Size> getInputSizes(@Format int format) {
         return getUnmodifiableSizeSet(mRecommendedMap.getInputSizes(format));
     }
 
@@ -272,7 +273,7 @@ public final class RecommendedStreamConfigurationMap {
      *          if the image format was not a defined named constant
      *          from either {@link ImageFormat} or {@link PixelFormat}
      */
-    public boolean isOutputSupportedFor(int format) {
+    public boolean isOutputSupportedFor(@Format int format) {
         return mRecommendedMap.isOutputSupportedFor(format);
     }
 
@@ -288,7 +289,7 @@ public final class RecommendedStreamConfigurationMap {
      * @return  a non-modifiable set of supported sizes,
      *          or {@code null} if the {@code format} is not a supported output
      */
-    public @Nullable Set<Size> getOutputSizes(int format) {
+    public @Nullable Set<Size> getOutputSizes(@Format int format) {
         return getUnmodifiableSizeSet(mRecommendedMap.getOutputSizes(format));
     }
 
@@ -372,7 +373,7 @@ public final class RecommendedStreamConfigurationMap {
      * @return a non-modifiable set of supported slower high-resolution sizes, or {@code null} if
      *         the BURST_CAPTURE capability is not supported
      */
-    public @Nullable Set<Size> getHighResolutionOutputSizes(int format) {
+    public @Nullable Set<Size> getHighResolutionOutputSizes(@Format int format) {
         return getUnmodifiableSizeSet(mRecommendedMap.getHighResolutionOutputSizes(format));
     }
 
@@ -392,7 +393,8 @@ public final class RecommendedStreamConfigurationMap {
      *
      * @throws IllegalArgumentException if {@code format} or {@code size} was not supported
      */
-    public @IntRange(from = 0) long getOutputMinFrameDuration(int format, @NonNull Size size) {
+    public @IntRange(from = 0) long getOutputMinFrameDuration(@Format int format,
+            @NonNull Size size) {
         return mRecommendedMap.getOutputMinFrameDuration(format, size);
     }
 
@@ -409,7 +411,7 @@ public final class RecommendedStreamConfigurationMap {
      *
      * @throws IllegalArgumentException if {@code format} or {@code size} was not supported
      */
-    public @IntRange(from = 0) long getOutputStallDuration(int format, @NonNull Size size) {
+    public @IntRange(from = 0) long getOutputStallDuration(@Format int format, @NonNull Size size) {
         return mRecommendedMap.getOutputStallDuration(format, size);
     }
 
@@ -425,7 +427,7 @@ public final class RecommendedStreamConfigurationMap {
      *          a non-modifiable set of supported sizes for {@link ImageFormat#PRIVATE} format,
      *          or {@code null} if the {@code klass} is not a supported output.
      */
-    public <T> @Nullable Set<Size> getOutputSizes(@NonNull Class<T> klass) {
+    public @Nullable <T> Set<Size> getOutputSizes(@NonNull Class<T> klass) {
         if (mSupportsPrivate) {
             return getUnmodifiableSizeSet(mRecommendedMap.getOutputSizes(klass));
         }
@@ -448,7 +450,7 @@ public final class RecommendedStreamConfigurationMap {
      *
      * @throws IllegalArgumentException if {@code klass} or {@code size} was not supported
      */
-    public <T> @IntRange(from = 0) long getOutputMinFrameDuration(@NonNull final Class<T> klass,
+    public @IntRange(from = 0) <T> long getOutputMinFrameDuration(@NonNull final Class<T> klass,
             @NonNull final Size size) {
         if (mSupportsPrivate) {
             return mRecommendedMap.getOutputMinFrameDuration(klass, size);
@@ -471,7 +473,7 @@ public final class RecommendedStreamConfigurationMap {
      *
      * @throws IllegalArgumentException if {@code klass} or {@code size} was not supported
      */
-    public <T> @IntRange(from = 0) long getOutputStallDuration(@NonNull final Class<T> klass,
+    public @IntRange(from = 0) <T> long getOutputStallDuration(@NonNull final Class<T> klass,
             @NonNull final Size size) {
         if (mSupportsPrivate) {
             return mRecommendedMap.getOutputStallDuration(klass, size);
