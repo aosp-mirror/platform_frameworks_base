@@ -4969,7 +4969,7 @@ package android.net.wifi.aware {
     method @Deprecated public android.net.NetworkSpecifier createNetworkSpecifierPmk(@NonNull android.net.wifi.aware.PeerHandle, @NonNull byte[]);
   }
 
-  public static class WifiAwareManager.NetworkSpecifierBuilder {
+  public static final class WifiAwareManager.NetworkSpecifierBuilder {
     method @NonNull public android.net.wifi.aware.WifiAwareManager.NetworkSpecifierBuilder setPmk(@NonNull byte[]);
   }
 
