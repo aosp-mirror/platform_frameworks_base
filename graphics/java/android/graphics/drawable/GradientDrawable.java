@@ -17,9 +17,11 @@
 package android.graphics.drawable;
 
 import android.annotation.ColorInt;
+import android.annotation.FloatRange;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.Px;
 import android.annotation.UnsupportedAppUsage;
 import android.content.pm.ActivityInfo.Config;
 import android.content.res.ColorStateList;
@@ -670,7 +672,7 @@ public class GradientDrawable extends Drawable {
      * @see #mutate()
      * @see #setColor(int)
      */
-    public void setColors(@ColorInt int[] colors) {
+    public void setColors(@Nullable @ColorInt int[] colors) {
         setColors(colors, null);
     }
 
@@ -690,7 +692,7 @@ public class GradientDrawable extends Drawable {
      * @see #mutate()
      * @see #setColors(int[])
      */
-    public void setColors(@ColorInt int[] colors, @Nullable float[] offsets) {
+    public void setColors(@Nullable @ColorInt int[] colors, @Nullable float[] offsets) {
         mGradientState.setGradientColors(colors);
         mGradientState.mPositions = offsets;
         mGradientIsDirty = true;
@@ -877,7 +879,11 @@ public class GradientDrawable extends Drawable {
      * @see #getInnerRadiusRatio()
      * @attr ref android.R.styleable#GradientDrawable_innerRadiusRatio
      */
-    public void setInnerRadiusRatio(float innerRadiusRatio) {
+    public void setInnerRadiusRatio(
+            @FloatRange(from = 0.0f, fromInclusive = false) float innerRadiusRatio) {
+        if (innerRadiusRatio <= 0) {
+            throw new IllegalArgumentException("Ratio must be greater than zero");
+        }
         mGradientState.mInnerRadiusRatio = innerRadiusRatio;
         mPathIsDirty = true;
         invalidateSelf();
@@ -899,7 +905,7 @@ public class GradientDrawable extends Drawable {
      * @see #getInnerRadius()
      * @attr ref android.R.styleable#GradientDrawable_innerRadius
      */
-    public void setInnerRadius(int innerRadius) {
+    public void setInnerRadius(@Px int innerRadius) {
         mGradientState.mInnerRadius = innerRadius;
         mPathIsDirty = true;
         invalidateSelf();
@@ -911,7 +917,7 @@ public class GradientDrawable extends Drawable {
      * @see #setInnerRadius(int)
      * @attr ref android.R.styleable#GradientDrawable_innerRadius
      */
-    public int getInnerRadius() {
+    public @Px int getInnerRadius() {
         return mGradientState.mInnerRadius;
     }
 
@@ -921,7 +927,11 @@ public class GradientDrawable extends Drawable {
      * @see #getThicknessRatio()
      * @attr ref android.R.styleable#GradientDrawable_thicknessRatio
      */
-    public void setThicknessRatio(float thicknessRatio) {
+    public void setThicknessRatio(
+            @FloatRange(from = 0.0f, fromInclusive = false) float thicknessRatio) {
+        if (thicknessRatio <= 0) {
+            throw new IllegalArgumentException("Ratio must be greater than zero");
+        }
         mGradientState.mThicknessRatio = thicknessRatio;
         mPathIsDirty = true;
         invalidateSelf();
@@ -942,7 +952,7 @@ public class GradientDrawable extends Drawable {
      *
      * @attr ref android.R.styleable#GradientDrawable_thickness
      */
-    public void setThickness(int thickness) {
+    public void setThickness(@Px int thickness) {
         mGradientState.mThickness = thickness;
         mPathIsDirty = true;
         invalidateSelf();
@@ -954,7 +964,7 @@ public class GradientDrawable extends Drawable {
      * @see #setThickness(int)
      * @attr ref android.R.styleable#GradientDrawable_thickness
      */
-    public int getThickness() {
+    public @Px int getThickness() {
         return mGradientState.mThickness;
     }
 
@@ -970,7 +980,7 @@ public class GradientDrawable extends Drawable {
      * @attr ref android.R.styleable#GradientDrawablePadding_right
      * @attr ref android.R.styleable#GradientDrawablePadding_bottom
      */
-    public void setPadding(int left, int top, int right, int bottom) {
+    public void setPadding(@Px int left, @Px int top, @Px int right, @Px int bottom) {
         if (mGradientState.mPadding == null) {
             mGradientState.mPadding = new Rect();
         }
