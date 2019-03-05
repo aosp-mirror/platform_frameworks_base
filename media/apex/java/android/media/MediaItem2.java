@@ -245,7 +245,7 @@ public final class MediaItem2 implements Parcelable {
     /**
      * Builder for {@link MediaItem2}.
      */
-    public static class Builder {
+    public static final class Builder {
         @SuppressWarnings("WeakerAccess") /* synthetic access */
         MediaMetadata mMetadata;
         @SuppressWarnings("WeakerAccess") /* synthetic access */
