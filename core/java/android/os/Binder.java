@@ -653,7 +653,8 @@ public class Binder implements IBinder {
          *
          * @return an object that will be passed back to #onTransactEnded (or null).
          */
-        Object onTransactStarted(IBinder binder, int transactionCode);
+        @Nullable
+        Object onTransactStarted(@NonNull IBinder binder, int transactionCode);
 
         /**
          * Called after onTranact (even when an exception is thrown).

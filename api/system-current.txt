@@ -5174,7 +5174,7 @@ package android.os {
 
   public static interface Binder.ProxyTransactListener {
     method public void onTransactEnded(@Nullable Object);
-    method public Object onTransactStarted(android.os.IBinder, int);
+    method @Nullable public Object onTransactStarted(@NonNull android.os.IBinder, int);
   }
 
   public class BugreportManager {
