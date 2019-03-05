@@ -1799,7 +1799,7 @@ class ActivityStarter {
             }
         }
 
-        mNotTop = (mLaunchFlags & FLAG_ACTIVITY_PREVIOUS_IS_TOP) != 0 ? r : null;
+        mNotTop = (mLaunchFlags & FLAG_ACTIVITY_PREVIOUS_IS_TOP) != 0 ? sourceRecord : null;
 
         mInTask = inTask;
         // In some flows in to this function, we retrieve the task record and hold on to it
