@@ -19,7 +19,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.android.networkstack"
           android:sharedUserId="android.uid.networkstack"
-          android:versionCode="10"
+          android:versionCode="11"
           android:versionName="Q-initial">
     <uses-sdk android:minSdkVersion="28" android:targetSdkVersion="28" />
     <uses-permission android:name="android.permission.INTERNET" />
