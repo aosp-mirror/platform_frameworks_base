@@ -324,6 +324,12 @@ message IncidentdDetails {
     EXPLICIT = 1;
   }
   optional Destination dest = 2;
+
+  // Package name of the incident report receiver.
+  optional string receiver_pkg = 3;
+
+  // Class name of the incident report receiver.
+  optional string receiver_cls = 4;
 }
 
 message PerfettoDetails {

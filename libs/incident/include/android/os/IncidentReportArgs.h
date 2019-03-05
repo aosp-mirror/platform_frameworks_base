@@ -47,12 +47,16 @@ public:
     void setAll(bool all);
     void setDest(int dest);
     void addSection(int section);
+    void setReceiverPkg(const string& pkg);
+    void setReceiverCls(const string& cls);
     void addHeader(const vector<uint8_t>& headerProto);
 
     inline bool all() const { return mAll; }
     bool containsSection(int section) const;
     inline int dest() const { return mDest; }
     inline const set<int>& sections() const { return mSections; }
+    inline const String16& receiverPkg() const { return mReceiverPkg; }
+    inline const String16& receiverCls() const { return mReceiverCls; }
     inline const vector<vector<uint8_t>>& headers() const { return mHeaders; }
 
     void merge(const IncidentReportArgs& that);
@@ -62,6 +66,8 @@ private:
     vector<vector<uint8_t>> mHeaders;
     bool mAll;
     int mDest;
+    String16 mReceiverPkg;
+    String16 mReceiverCls;
 };
 
 }
