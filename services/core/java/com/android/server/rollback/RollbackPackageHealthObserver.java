@@ -26,6 +26,8 @@ import android.content.pm.VersionedPackage;
 import android.content.rollback.PackageRollbackInfo;
 import android.content.rollback.RollbackInfo;
 import android.content.rollback.RollbackManager;
+import android.os.Environment;
+import android.os.FileUtils;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.PowerManager;
@@ -39,6 +41,12 @@ import com.android.server.PackageWatchdog;
 import com.android.server.PackageWatchdog.PackageHealthObserver;
 import com.android.server.PackageWatchdog.PackageHealthObserverImpact;
 
+import libcore.io.IoUtils;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Collections;
 import java.util.List;
 
@@ -50,14 +58,19 @@ import java.util.List;
 public final class RollbackPackageHealthObserver implements PackageHealthObserver {
     private static final String TAG = "RollbackPackageHealthObserver";
     private static final String NAME = "rollback-observer";
-    private Context mContext;
-    private Handler mHandler;
+    private static final int INVALID_ROLLBACK_ID = -1;
+    private final Context mContext;
+    private final Handler mHandler;
+    private final File mLastStagedRollbackIdFile;
 
     RollbackPackageHealthObserver(Context context) {
         mContext = context;
         HandlerThread handlerThread = new HandlerThread("RollbackPackageHealthObserver");
         handlerThread.start();
         mHandler = handlerThread.getThreadHandler();
+        File dataDir = new File(Environment.getDataDirectory(), "rollback-observer");
+        dataDir.mkdirs();
+        mLastStagedRollbackIdFile = new File(dataDir, "last-staged-rollback-id");
         PackageWatchdog.getInstance(mContext).registerHealthObserver(this);
     }
 
@@ -112,15 +125,19 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
                 int status = result.getIntExtra(RollbackManager.EXTRA_STATUS,
                         RollbackManager.STATUS_FAILURE);
                 if (status == RollbackManager.STATUS_SUCCESS) {
-                    StatsLog.write(StatsLog.WATCHDOG_ROLLBACK_OCCURRED,
-                            StatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_SUCCESS,
-                            moduleMetadataPackage.getPackageName(),
-                            moduleMetadataPackage.getVersionCode());
                     if (rollback.isStaged()) {
                         int rollbackId = rollback.getRollbackId();
                         BroadcastReceiver listener =
-                                listenForStagedSessionReady(rollbackManager, rollbackId);
-                        handleStagedSessionChange(rollbackManager, rollbackId, listener);
+                                listenForStagedSessionReady(rollbackManager, rollbackId,
+                                        moduleMetadataPackage);
+                        handleStagedSessionChange(rollbackManager, rollbackId, listener,
+                                moduleMetadataPackage);
+                    } else {
+                        StatsLog.write(StatsLog.WATCHDOG_ROLLBACK_OCCURRED,
+                                StatsLog
+                                .WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_SUCCESS,
+                                moduleMetadataPackage.getPackageName(),
+                                moduleMetadataPackage.getVersionCode());
                     }
                 } else {
                     StatsLog.write(StatsLog.WATCHDOG_ROLLBACK_OCCURRED,
@@ -152,6 +169,71 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
         PackageWatchdog.getInstance(mContext).startObservingHealth(this, packages, durationMs);
     }
 
+    /** Verifies the rollback state after a reboot. */
+    public void onBootCompleted() {
+        int rollbackId = popLastStagedRollbackId();
+        if (rollbackId == INVALID_ROLLBACK_ID) {
+            // No staged rollback before reboot
+            return;
+        }
+
+        RollbackManager rollbackManager = mContext.getSystemService(RollbackManager.class);
+        PackageInstaller packageInstaller = mContext.getPackageManager().getPackageInstaller();
+        RollbackInfo rollback = null;
+        for (RollbackInfo info : rollbackManager.getRecentlyCommittedRollbacks()) {
+            if (rollbackId == info.getRollbackId()) {
+                rollback = info;
+                break;
+            }
+        }
+
+        if (rollback == null) {
+            Slog.e(TAG, "rollback info not found for last staged rollback: " + rollbackId);
+            return;
+        }
+
+        String moduleMetadataPackageName = getModuleMetadataPackageName();
+        if (moduleMetadataPackageName == null) {
+            // Only log mainline staged rollbacks
+            return;
+        }
+
+        // Use the version of the metadata package that was installed before
+        // we rolled back for logging purposes.
+        VersionedPackage moduleMetadataPackage = null;
+        for (PackageRollbackInfo packageRollback : rollback.getPackages()) {
+            if (moduleMetadataPackageName.equals(packageRollback.getPackageName())) {
+                moduleMetadataPackage = packageRollback.getVersionRolledBackFrom();
+                break;
+            }
+        }
+
+        if (moduleMetadataPackage == null) {
+            // Only log mainline staged rollbacks
+            return;
+        }
+
+        int sessionId = rollback.getCommittedSessionId();
+        PackageInstaller.SessionInfo sessionInfo = packageInstaller.getSessionInfo(sessionId);
+        if (sessionInfo == null) {
+            Slog.e(TAG, "On boot completed, could not load session id " + sessionId);
+            return;
+        }
+        if (sessionInfo.isStagedSessionApplied()) {
+            StatsLog.write(StatsLog.WATCHDOG_ROLLBACK_OCCURRED,
+                    StatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_SUCCESS,
+                    moduleMetadataPackage.getPackageName(),
+                    moduleMetadataPackage.getVersionCode());
+        } else if (sessionInfo.isStagedSessionReady()) {
+            // TODO: What do for staged session ready but not applied
+        } else {
+            StatsLog.write(StatsLog.WATCHDOG_ROLLBACK_OCCURRED,
+                    StatsLog.WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_FAILURE,
+                    moduleMetadataPackage.getPackageName(),
+                    moduleMetadataPackage.getVersionCode());
+        }
+    }
+
     private Pair<RollbackInfo, Boolean> getAvailableRollback(RollbackManager rollbackManager,
             VersionedPackage failedPackage, VersionedPackage moduleMetadataPackage) {
         for (RollbackInfo rollback : rollbackManager.getAvailableRollbacks()) {
@@ -174,10 +256,18 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
         return null;
     }
 
-    private VersionedPackage getModuleMetadataPackage() {
+    private String getModuleMetadataPackageName() {
         String packageName = mContext.getResources().getString(
                 R.string.config_defaultModuleMetadataProvider);
         if (TextUtils.isEmpty(packageName)) {
+            return null;
+        }
+        return packageName;
+    }
+
+    private VersionedPackage getModuleMetadataPackage() {
+        String packageName = getModuleMetadataPackageName();
+        if (packageName == null) {
             return null;
         }
 
@@ -191,12 +281,12 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
     }
 
     private BroadcastReceiver listenForStagedSessionReady(RollbackManager rollbackManager,
-            int rollbackId) {
+            int rollbackId, VersionedPackage moduleMetadataPackage) {
         BroadcastReceiver sessionUpdatedReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 handleStagedSessionChange(rollbackManager,
-                        rollbackId, this /* BroadcastReceiver */);
+                        rollbackId, this /* BroadcastReceiver */, moduleMetadataPackage);
             }
         };
         IntentFilter sessionUpdatedFilter =
@@ -206,7 +296,7 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
     }
 
     private void handleStagedSessionChange(RollbackManager rollbackManager, int rollbackId,
-            BroadcastReceiver listener) {
+            BroadcastReceiver listener, VersionedPackage moduleMetadataPackage) {
         PackageInstaller packageInstaller =
                 mContext.getPackageManager().getPackageInstaller();
         List<RollbackInfo> recentRollbacks =
@@ -220,11 +310,52 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
                         packageInstaller.getSessionInfo(sessionId);
                 if (sessionInfo.isStagedSessionReady()) {
                     mContext.unregisterReceiver(listener);
+                    saveLastStagedRollbackId(rollbackId);
+                    StatsLog.write(StatsLog.WATCHDOG_ROLLBACK_OCCURRED,
+                            StatsLog
+                            .WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_BOOT_TRIGGERED,
+                            moduleMetadataPackage.getPackageName(),
+                            moduleMetadataPackage.getVersionCode());
                     mContext.getSystemService(PowerManager.class).reboot("Rollback staged install");
                 } else if (sessionInfo.isStagedSessionFailed()) {
+                    StatsLog.write(StatsLog.WATCHDOG_ROLLBACK_OCCURRED,
+                            StatsLog
+                            .WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_FAILURE,
+                            moduleMetadataPackage.getPackageName(),
+                            moduleMetadataPackage.getVersionCode());
                     mContext.unregisterReceiver(listener);
                 }
             }
         }
+    }
+
+    private void saveLastStagedRollbackId(int stagedRollbackId) {
+        try {
+            FileOutputStream fos = new FileOutputStream(mLastStagedRollbackIdFile);
+            PrintWriter pw = new PrintWriter(fos);
+            pw.println(stagedRollbackId);
+            pw.flush();
+            FileUtils.sync(fos);
+            pw.close();
+        } catch (IOException e) {
+            Slog.e(TAG, "Failed to save last staged rollback id", e);
+            mLastStagedRollbackIdFile.delete();
+        }
+    }
+
+    private int popLastStagedRollbackId() {
+        int rollbackId = INVALID_ROLLBACK_ID;
+        if (!mLastStagedRollbackIdFile.exists()) {
+            return rollbackId;
+        }
+
+        try {
+            rollbackId = Integer.parseInt(
+                    IoUtils.readFileAsString(mLastStagedRollbackIdFile.getAbsolutePath()).trim());
+        } catch (IOException | NumberFormatException e) {
+            Slog.e(TAG, "Failed to retrieve last staged rollback id", e);
+        }
+        mLastStagedRollbackIdFile.delete();
+        return rollbackId;
     }
 }
