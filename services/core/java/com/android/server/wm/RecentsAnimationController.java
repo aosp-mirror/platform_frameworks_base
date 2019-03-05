@@ -29,6 +29,7 @@ import static com.android.server.wm.ActivityTaskManagerInternal.APP_TRANSITION_R
 import static com.android.server.wm.AnimationAdapterProto.REMOTE;
 import static com.android.server.wm.RemoteAnimationAdapterWrapperProto.TARGET;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_RECENTS_ANIMATIONS;
+import static com.android.server.wm.WindowManagerInternal.AppTransitionListener;
 
 import android.annotation.IntDef;
 import android.app.ActivityManager.TaskSnapshot;
@@ -92,6 +93,8 @@ public class RecentsAnimationController implements DeathRecipient {
     private final Runnable mFailsafeRunnable = () ->
             cancelAnimation(REORDER_MOVE_TO_ORIGINAL_POSITION, "failSafeRunnable");
 
+    final Object mLock = new Object();
+
     // The recents component app token that is shown behind the visibile tasks
     private AppWindowToken mTargetAppToken;
     private int mTargetActivityType;
@@ -116,6 +119,27 @@ public class RecentsAnimationController implements DeathRecipient {
     private final Rect mTmpRect = new Rect();
 
     private boolean mLinkedToDeathOfRunner;
+
+    private boolean mCancelWithDeferredScreenshot;
+
+    private boolean mCancelOnNextTransitionStart;
+
+    /**
+     * Animates the screenshot of task that used to be controlled by RecentsAnimation.
+     * @see {@link #cancelOnNextTransitionStart}
+     */
+    SurfaceAnimator mRecentScreenshotAnimator;
+
+    final AppTransitionListener mAppTransitionListener = new AppTransitionListener() {
+        @Override
+        public int onAppTransitionStartingLocked(int transit, long duration,
+                long statusBarAnimationStartTime, long statusBarAnimationDuration) {
+            onTransitionStart();
+            mService.mRoot.getDisplayContent(mDisplayId).mAppTransition
+                    .unregisterListener(this);
+            return 0;
+        }
+    };
 
     public interface RecentsAnimationCallbacks {
         void onAnimationFinished(@ReorderMode int reorderMode, boolean runSychronously);
@@ -245,6 +269,23 @@ public class RecentsAnimationController implements DeathRecipient {
                 Binder.restoreCallingIdentity(token);
             }
         }
+
+        @Override
+        public void setCancelWithDeferredScreenshot(boolean screenshot) {
+            synchronized (mLock) {
+                setCancelWithDeferredScreenshotLocked(screenshot);
+            }
+        }
+
+        @Override
+        public void cleanupScreenshot() {
+            synchronized (mLock) {
+                if (mRecentScreenshotAnimator != null) {
+                    mRecentScreenshotAnimator.cancelAnimation();
+                    mRecentScreenshotAnimator = null;
+                }
+            }
+        }
     };
 
     /**
@@ -273,6 +314,7 @@ public class RecentsAnimationController implements DeathRecipient {
     @VisibleForTesting
     void initialize(DisplayContent dc, int targetActivityType, SparseBooleanArray recentTaskIds) {
         mTargetActivityType = targetActivityType;
+        dc.mAppTransition.registerListenerLocked(mAppTransitionListener);
 
         // Make leashes for each of the visible/target tasks and add it to the recents animation to
         // be started
@@ -416,15 +458,20 @@ public class RecentsAnimationController implements DeathRecipient {
     }
 
     void cancelAnimation(@ReorderMode int reorderMode, String reason) {
-        cancelAnimation(reorderMode, false /* runSynchronously */, reason);
+        cancelAnimation(reorderMode, false /* runSynchronously */, false /*screenshot */, reason);
     }
 
     void cancelAnimationSynchronously(@ReorderMode int reorderMode, String reason) {
-        cancelAnimation(reorderMode, true /* runSynchronously */, reason);
+        cancelAnimation(reorderMode, true /* runSynchronously */, false /* screenshot */, reason);
+    }
+
+    void cancelAnimationWithScreenShot() {
+        cancelAnimation(REORDER_KEEP_IN_PLACE, true /* sync */, true /* screenshot */,
+                "stackOrderChanged");
     }
 
     private void cancelAnimation(@ReorderMode int reorderMode, boolean runSynchronously,
-            String reason) {
+            boolean screenshot, String reason) {
         if (DEBUG_RECENTS_ANIMATIONS) Slog.d(TAG, "cancelAnimation(): reason=" + reason
                 + " runSynchronously=" + runSynchronously);
         synchronized (mService.getWindowManagerLock()) {
@@ -435,14 +482,67 @@ public class RecentsAnimationController implements DeathRecipient {
             mService.mH.removeCallbacks(mFailsafeRunnable);
             mCanceled = true;
             try {
-                mRunner.onAnimationCanceled();
+                if (screenshot) {
+                    // Screen shot previous task when next task starts transition.
+                    final Task task = mPendingAnimations.get(0).mTask;
+                    screenshotRecentTask(task, reorderMode, runSynchronously);
+                    mRunner.onAnimationCanceled(true /* deferredWithScreenshot */);
+                    return;
+                }
+                mRunner.onAnimationCanceled(false /* deferredWithScreenshot */);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Failed to cancel recents animation", e);
             }
+            // Clean up and return to the previous app
+            mCallbacks.onAnimationFinished(reorderMode, runSynchronously);
+        }
+    }
+
+    /**
+     * Cancel recents animation when the next app transition starts.
+     * <p>
+     * When we cancel the recents animation due to a stack order change, we can't just cancel it
+     * immediately as it would lead to a flicker in Launcher if we just remove the task from the
+     * leash. Instead we screenshot the previous task and replace the child of the leash with the
+     * screenshot, so that Launcher can still control the leash lifecycle & make the next app
+     * transition animate smoothly without flickering.
+     */
+    void cancelOnNextTransitionStart() {
+        mCancelOnNextTransitionStart = true;
+    }
+
+    void setCancelWithDeferredScreenshotLocked(boolean screenshot) {
+        mCancelWithDeferredScreenshot = screenshot;
+    }
+
+    boolean shouldCancelWithDeferredScreenshot() {
+        return mCancelWithDeferredScreenshot;
+    }
+
+    void onTransitionStart() {
+        if (mCanceled) {
+            return;
         }
 
-        // Clean up and return to the previous app
-        mCallbacks.onAnimationFinished(reorderMode, runSynchronously);
+        if (mCancelOnNextTransitionStart) {
+            mCancelOnNextTransitionStart = false;
+            cancelAnimationWithScreenShot();
+        }
+    }
+
+    void screenshotRecentTask(Task task, @ReorderMode int reorderMode, boolean runSynchronously) {
+        final TaskScreenshotAnimatable animatable = TaskScreenshotAnimatable.create(task);
+        if (animatable != null) {
+            mRecentScreenshotAnimator = new SurfaceAnimator(
+                    animatable,
+                    () -> {
+                        if (DEBUG_RECENTS_ANIMATIONS) {
+                            Slog.d(TAG, "mRecentScreenshotAnimator finish");
+                        }
+                        mCallbacks.onAnimationFinished(reorderMode, runSynchronously);
+                    }, mService);
+            mRecentScreenshotAnimator.transferAnimation(task.mSurfaceAnimator);
+        }
     }
 
     void cleanupAnimation(@ReorderMode int reorderMode) {
@@ -464,6 +564,12 @@ public class RecentsAnimationController implements DeathRecipient {
         unlinkToDeathOfRunner();
         mRunner = null;
         mCanceled = true;
+
+        // Make sure previous animator has cleaned-up.
+        if (mRecentScreenshotAnimator != null) {
+            mRecentScreenshotAnimator.cancelAnimation();
+            mRecentScreenshotAnimator = null;
+        }
 
         // Update the input windows after the animation is complete
         final InputMonitor inputMonitor =

@@ -666,7 +666,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
             }
         }
 
-        if (isReallyAnimating()) {
+        if (isSelfAnimating()) {
             delayed = true;
         } else {
 
@@ -2435,6 +2435,12 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         final boolean isSplitScreenPrimary =
                 getWindowingMode() == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
         final boolean allowSplitScreenPrimaryAnimation = transit != TRANSIT_WALLPAPER_OPEN;
+
+        // Don't animate when the task runs recents animation.
+        final RecentsAnimationController controller = mWmService.getRecentsAnimationController();
+        if (controller != null && controller.isAnimatingTask(getTask())) {
+            return false;
+        }
 
         // We animate always if it's not split screen primary, and only some special cases in split
         // screen primary because it causes issues with stack clipping when we run an un-minimize
