@@ -334,7 +334,7 @@ public class RescuePartyTest {
 
     private void notePersistentAppCrash(int numTimes) {
         for (int i = 0; i < numTimes; i++) {
-            RescueParty.notePersistentAppCrash(mMockContext, PERSISTENT_APP_UID);
+            RescueParty.noteAppCrash(mMockContext, PERSISTENT_APP_UID);
         }
     }
 }
