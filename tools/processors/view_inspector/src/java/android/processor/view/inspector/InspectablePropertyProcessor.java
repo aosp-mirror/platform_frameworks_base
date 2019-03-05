@@ -78,6 +78,54 @@ public final class InspectablePropertyProcessor implements ModelProcessor {
             "androidx.annotation.ColorLong"};
 
     /**
+     * Set of android and androidx annotation qualified names of resource ID annotations.
+     */
+    private static final String[] RESOURCE_ID_ANNOTATION_NAMES = {
+            "android.annotation.AnimatorRes",
+            "android.annotation.AnimRes",
+            "android.annotation.AnyRes",
+            "android.annotation.ArrayRes",
+            "android.annotation.BoolRes",
+            "android.annotation.DimenRes",
+            "android.annotation.DrawableRes",
+            "android.annotation.FontRes",
+            "android.annotation.IdRes",
+            "android.annotation.IntegerRes",
+            "android.annotation.InterpolatorRes",
+            "android.annotation.LayoutRes",
+            "android.annotation.MenuRes",
+            "android.annotation.NavigationRes",
+            "android.annotation.PluralsRes",
+            "android.annotation.RawRes",
+            "android.annotation.StringRes",
+            "android.annotation.StyleableRes",
+            "android.annotation.StyleRes",
+            "android.annotation.TransitionRes",
+            "android.annotation.XmlRes",
+            "androidx.annotation.AnimatorRes",
+            "androidx.annotation.AnimRes",
+            "androidx.annotation.AnyRes",
+            "androidx.annotation.ArrayRes",
+            "androidx.annotation.BoolRes",
+            "androidx.annotation.DimenRes",
+            "androidx.annotation.DrawableRes",
+            "androidx.annotation.FontRes",
+            "androidx.annotation.IdRes",
+            "androidx.annotation.IntegerRes",
+            "androidx.annotation.InterpolatorRes",
+            "androidx.annotation.LayoutRes",
+            "androidx.annotation.MenuRes",
+            "androidx.annotation.NavigationRes",
+            "androidx.annotation.PluralsRes",
+            "androidx.annotation.RawRes",
+            "androidx.annotation.StringRes",
+            "androidx.annotation.StyleableRes",
+            "androidx.annotation.StyleRes",
+            "androidx.annotation.TransitionRes",
+            "androidx.annotation.XmlRes"
+    };
+
+    /**
      * @param annotationQualifiedName The qualified name of the annotation to process
      * @param processingEnv           The processing environment from the parent processor
      */
@@ -264,7 +312,6 @@ public final class InspectablePropertyProcessor implements ModelProcessor {
         final Property.Type accessorType =
                 convertTypeMirrorToPropertyType(extractReturnOrFieldType(accessor), accessor);
 
-        final boolean hasColor = hasColorAnnotation(accessor);
         final Optional<AnnotationValue> enumMapping =
                 mAnnotationUtils.valueByName("enumMapping", annotation);
         final Optional<AnnotationValue> flagMapping =
@@ -291,8 +338,12 @@ public final class InspectablePropertyProcessor implements ModelProcessor {
             });
         }
 
+
         switch (valueType) {
             case "INFERRED":
+                final boolean hasColor = hasColorAnnotation(accessor);
+                final boolean hasResourceId = hasResourceIdAnnotation(accessor);
+
                 if (hasColor) {
                     enumMapping.ifPresent(value -> {
                         throw new ProcessingException(
@@ -308,7 +359,30 @@ public final class InspectablePropertyProcessor implements ModelProcessor {
                                 annotation,
                                 value);
                     });
+                    if (hasResourceId) {
+                        throw new ProcessingException(
+                                "Cannot infer type, both color and resource ID annotations "
+                                        + "are present.",
+                                accessor,
+                                annotation);
+                    }
                     return Property.Type.COLOR;
+                } else if (hasResourceId) {
+                    enumMapping.ifPresent(value -> {
+                        throw new ProcessingException(
+                                "Cannot use enumMapping on a resource ID type.",
+                                accessor,
+                                annotation,
+                                value);
+                    });
+                    flagMapping.ifPresent(value -> {
+                        throw new ProcessingException(
+                                "Cannot use flagMapping on a resource ID type.",
+                                accessor,
+                                annotation,
+                                value);
+                    });
+                    return Property.Type.RESOURCE_ID;
                 } else if (enumMapping.isPresent()) {
                     flagMapping.ifPresent(value -> {
                         throw new ProcessingException(
@@ -346,6 +420,8 @@ public final class InspectablePropertyProcessor implements ModelProcessor {
             case "INT_FLAG":
                 requirePackedIntToBeInt("IntFlag", accessorType, accessor, annotation);
                 return Property.Type.INT_FLAG;
+            case "RESOURCE_ID":
+                return Property.Type.RESOURCE_ID;
             default:
                 throw new ProcessingException(
                         String.format("Unknown value type enumeration value: %s", valueType),
@@ -471,6 +547,24 @@ public final class InspectablePropertyProcessor implements ModelProcessor {
             default:
                 return false;
         }
+    }
+
+    /**
+     * Determine if a getter or a field is annotated with a resource ID annotation.
+     *
+     * @param accessor The getter or field to query
+     * @return True if the accessor is an integer and has a resource ID annotation, false otherwise
+     */
+    private boolean hasResourceIdAnnotation(Element accessor) {
+        if (unboxType(extractReturnOrFieldType(accessor)) == TypeKind.INT) {
+            for (String name : RESOURCE_ID_ANNOTATION_NAMES) {
+                if (mAnnotationUtils.hasAnnotation(accessor, name)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     /**
