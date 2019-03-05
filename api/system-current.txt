@@ -6187,8 +6187,8 @@ package android.security.keystore {
   }
 
   public class DeviceIdAttestationException extends java.lang.Exception {
-    ctor public DeviceIdAttestationException(String);
-    ctor public DeviceIdAttestationException(String, Throwable);
+    ctor public DeviceIdAttestationException(@Nullable String);
+    ctor public DeviceIdAttestationException(@Nullable String, @Nullable Throwable);
   }
 
 }
