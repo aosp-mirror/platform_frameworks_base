@@ -6832,12 +6832,12 @@ public class TelephonyManager {
      * app has carrier privileges (see {@link #hasCarrierPrivileges}).
      *
      * @param subId the id of the subscription to set the preferred network type for.
-     * @param networkType the preferred network type, defined in RILConstants.java.
+     * @param networkType the preferred network type
      * @return true on success; false on any failure.
      * @hide
      */
     @UnsupportedAppUsage
-    public boolean setPreferredNetworkType(int subId, int networkType) {
+    public boolean setPreferredNetworkType(int subId, @PrefNetworkMode int networkType) {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
