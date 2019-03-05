@@ -31,6 +31,7 @@ import android.annotation.SystemApi;
 import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.Intent;
+import android.content.LocusId;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -77,6 +78,7 @@ import android.view.Gravity;
 import android.view.NotificationHeaderView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.contentcapture.ContentCaptureContext;
 import android.widget.ProgressBar;
 import android.widget.RemoteViews;
 
@@ -1271,6 +1273,7 @@ public class Notification implements Parcelable
     private long mTimeout;
 
     private String mShortcutId;
+    private LocusId mLocusId;
     private CharSequence mSettingsText;
 
     private BubbleMetadata mBubbleMetadata;
@@ -2267,6 +2270,10 @@ public class Notification implements Parcelable
             mShortcutId = parcel.readString();
         }
 
+        if (parcel.readInt() != 0) {
+            mLocusId = LocusId.CREATOR.createFromParcel(parcel);
+        }
+
         mBadgeIcon = parcel.readInt();
 
         if (parcel.readInt() != 0) {
@@ -2390,6 +2397,7 @@ public class Notification implements Parcelable
         that.mChannelId = this.mChannelId;
         that.mTimeout = this.mTimeout;
         that.mShortcutId = this.mShortcutId;
+        that.mLocusId = this.mLocusId;
         that.mBadgeIcon = this.mBadgeIcon;
         that.mSettingsText = this.mSettingsText;
         that.mGroupAlertBehavior = this.mGroupAlertBehavior;
@@ -2701,6 +2709,13 @@ public class Notification implements Parcelable
         if (mShortcutId != null) {
             parcel.writeInt(1);
             parcel.writeString(mShortcutId);
+        } else {
+            parcel.writeInt(0);
+        }
+
+        if (mLocusId != null) {
+            parcel.writeInt(1);
+            mLocusId.writeToParcel(parcel, 0);
         } else {
             parcel.writeInt(0);
         }
@@ -3018,6 +3033,10 @@ public class Notification implements Parcelable
             sb.append(" publicVersion=");
             sb.append(publicVersion.toString());
         }
+        if (this.mLocusId != null) {
+            sb.append(" locusId=");
+            sb.append(this.mLocusId); // LocusId.toString() is PII safe.
+        }
         sb.append(")");
         return sb.toString();
     }
@@ -3120,6 +3139,16 @@ public class Notification implements Parcelable
         return mShortcutId;
     }
 
+    /**
+     * Gets the {@link LocusId} associated with this notification.
+     *
+     * <p>Used by the device's intelligence services to correlate objects (such as
+     * {@link ShortcutInfo} and {@link ContentCaptureContext}) that are correlated.
+     */
+    @Nullable
+    public LocusId getLocusId() {
+        return mLocusId;
+    }
 
     /**
      * Returns the settings text provided to {@link Builder#setSettingsText(CharSequence)}.
@@ -3474,6 +3503,19 @@ public class Notification implements Parcelable
         @NonNull
         public Builder setShortcutId(String shortcutId) {
             mN.mShortcutId = shortcutId;
+            return this;
+        }
+
+        /**
+         * Sets the {@link LocusId} associated with this notification.
+         *
+         * <p>This method should be called when the {@link LocusId} is used in other places (such
+         * as {@link ShortcutInfo} and {@link ContentCaptureContext}) so the device's intelligence
+         * services can correlate them.
+         */
+        @NonNull
+        public Builder setLocusId(@Nullable LocusId locusId) {
+            mN.mLocusId = locusId;
             return this;
         }
 

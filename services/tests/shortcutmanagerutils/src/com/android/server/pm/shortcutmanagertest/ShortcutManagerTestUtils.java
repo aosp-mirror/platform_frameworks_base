@@ -36,6 +36,7 @@ import static org.mockito.Mockito.verify;
 import android.app.Instrumentation;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.LocusId;
 import android.content.pm.LauncherApps;
 import android.content.pm.LauncherApps.Callback;
 import android.content.pm.ShortcutInfo;
@@ -367,6 +368,10 @@ public class ShortcutManagerTestUtils {
             ret.add(converter.apply(v));
         }
         return ret;
+    }
+
+    public static LocusId locusId(String id) {
+        return new LocusId(id);
     }
 
     public static void resetAll(Collection<?> mocks) {
