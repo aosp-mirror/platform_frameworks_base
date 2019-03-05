@@ -24,6 +24,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.security.keystore.recovery.RecoveryController;
 import android.text.TextUtils;
+import android.util.ArrayMap;
 import android.util.Log;
 
 import com.android.server.locksettings.recoverablekeystore.TestOnlyInsecureCertificateHelper;
@@ -261,7 +262,7 @@ public class RecoverableKeyStoreDb {
      *
      * @hide
      */
-    public Map<String, WrappedKey> getAllKeys(int userId, int recoveryAgentUid,
+    public @NonNull Map<String, WrappedKey> getAllKeys(int userId, int recoveryAgentUid,
             int platformKeyGenerationId) {
         SQLiteDatabase db = mKeyStoreDbHelper.getReadableDatabase();
         String[] projection = {
@@ -333,6 +334,58 @@ public class RecoverableKeyStoreDb {
         if (result != -1) {
             invalidateKeysWithOldGenerationId(userId, generationId);
         }
+        return result;
+    }
+
+    /**
+     * Returns serial numbers associated with all known users.
+     * -1 is used for uninitialized serial numbers.
+     *
+     * See {@code UserHandle.getSerialNumberForUser}.
+     * @return Map from userId to serial numbers.
+     */
+    public @NonNull Map<Integer, Long> getUserSerialNumbers() {
+        SQLiteDatabase db = mKeyStoreDbHelper.getReadableDatabase();
+        String[] projection = {
+                UserMetadataEntry.COLUMN_NAME_USER_ID,
+                UserMetadataEntry.COLUMN_NAME_USER_SERIAL_NUMBER};
+        String selection = null; // get all rows.
+        String[] selectionArguments = {};
+
+        try (
+            Cursor cursor = db.query(
+                UserMetadataEntry.TABLE_NAME,
+                projection,
+                selection,
+                selectionArguments,
+                /*groupBy=*/ null,
+                /*having=*/ null,
+                /*orderBy=*/ null)
+        ) {
+            Map<Integer, Long> serialNumbers = new ArrayMap<>();
+            while (cursor.moveToNext()) {
+                int userId = cursor.getInt(
+                        cursor.getColumnIndexOrThrow(UserMetadataEntry.COLUMN_NAME_USER_ID));
+                long serialNumber = cursor.getLong(cursor.getColumnIndexOrThrow(
+                        UserMetadataEntry.COLUMN_NAME_USER_SERIAL_NUMBER));
+                serialNumbers.put(userId, serialNumber);
+            }
+            return serialNumbers;
+        }
+    }
+
+    /**
+     * Sets the {@code serialNumber} for the user {@code userId}.
+     *
+     * @return The primary key of the inserted row, or -1 if failed.
+     */
+    public long setUserSerialNumber(int userId, long serialNumber) {
+        SQLiteDatabase db = mKeyStoreDbHelper.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(UserMetadataEntry.COLUMN_NAME_USER_ID, userId);
+        values.put(UserMetadataEntry.COLUMN_NAME_USER_SERIAL_NUMBER, serialNumber);
+        long result = db.replace(
+                UserMetadataEntry.TABLE_NAME, /*nullColumnHack=*/ null, values);
         return result;
     }
 
@@ -424,8 +477,7 @@ public class RecoverableKeyStoreDb {
      */
     @Nullable
     public Long getRecoveryServiceCertSerial(int userId, int uid, @NonNull String rootAlias) {
-        return getLong(userId, uid, rootAlias,
-                RecoveryServiceMetadataEntry.COLUMN_NAME_CERT_SERIAL);
+        return getLong(userId, uid, rootAlias, RootOfTrustEntry.COLUMN_NAME_CERT_SERIAL);
     }
 
     /**
@@ -441,7 +493,7 @@ public class RecoverableKeyStoreDb {
      */
     public long setRecoveryServiceCertSerial(int userId, int uid, @NonNull String rootAlias,
             long serial) {
-        return setLong(userId, uid, rootAlias, RecoveryServiceMetadataEntry.COLUMN_NAME_CERT_SERIAL,
+        return setLong(userId, uid, rootAlias, RootOfTrustEntry.COLUMN_NAME_CERT_SERIAL,
                 serial);
     }
 
@@ -457,8 +509,7 @@ public class RecoverableKeyStoreDb {
      */
     @Nullable
     public CertPath getRecoveryServiceCertPath(int userId, int uid, @NonNull String rootAlias) {
-        byte[] bytes = getBytes(userId, uid, rootAlias,
-                RecoveryServiceMetadataEntry.COLUMN_NAME_CERT_PATH);
+        byte[] bytes = getBytes(userId, uid, rootAlias, RootOfTrustEntry.COLUMN_NAME_CERT_PATH);
         if (bytes == null) {
             return null;
         }
@@ -489,7 +540,7 @@ public class RecoverableKeyStoreDb {
         if (certPath.getCertificates().size() == 0) {
             throw new CertificateEncodingException("No certificate contained in the cert path.");
         }
-        return setBytes(userId, uid, rootAlias, RecoveryServiceMetadataEntry.COLUMN_NAME_CERT_PATH,
+        return setBytes(userId, uid, rootAlias, RootOfTrustEntry.COLUMN_NAME_CERT_PATH,
                 certPath.getEncoded(CERT_PATH_ENCODING));
     }
 
@@ -1189,6 +1240,63 @@ public class RecoverableKeyStoreDb {
                 RootOfTrustEntry.TABLE_NAME, values, selection, selectionArguments);
     }
 
+    /**
+     * Removes all entries for given {@code userId}.
+     */
+    public void removeUserFromAllTables(int userId) {
+        removeUserFromKeysTable(userId);
+        removeUserFromUserMetadataTable(userId);
+        removeUserFromRecoveryServiceMetadataTable(userId);
+        removeUserFromRootOfTrustTable(userId);
+    }
+
+    /**
+     * Removes all entries for given userId from Keys table.
+     *
+     * @return {@code true} if deleted a row.
+     */
+    private boolean removeUserFromKeysTable(int userId) {
+        SQLiteDatabase db = mKeyStoreDbHelper.getWritableDatabase();
+        String selection = KeysEntry.COLUMN_NAME_USER_ID + " = ?";
+        String[] selectionArgs = {Integer.toString(userId)};
+        return db.delete(KeysEntry.TABLE_NAME, selection, selectionArgs) > 0;
+    }
+
+    /**
+     * Removes all entries for given userId from UserMetadata table.
+     *
+     * @return {@code true} if deleted a row.
+     */
+    private boolean removeUserFromUserMetadataTable(int userId) {
+        SQLiteDatabase db = mKeyStoreDbHelper.getWritableDatabase();
+        String selection = UserMetadataEntry.COLUMN_NAME_USER_ID + " = ?";
+        String[] selectionArgs = {Integer.toString(userId)};
+        return db.delete(UserMetadataEntry.TABLE_NAME, selection, selectionArgs) > 0;
+    }
+
+    /**
+     * Removes all entries for given userId from RecoveryServiceMetadata table.
+     *
+     * @return {@code true} if deleted a row.
+     */
+    private boolean removeUserFromRecoveryServiceMetadataTable(int userId) {
+        SQLiteDatabase db = mKeyStoreDbHelper.getWritableDatabase();
+        String selection = RecoveryServiceMetadataEntry.COLUMN_NAME_USER_ID + " = ?";
+        String[] selectionArgs = {Integer.toString(userId)};
+        return db.delete(RecoveryServiceMetadataEntry.TABLE_NAME, selection, selectionArgs) > 0;
+    }
+
+    /**
+     * Removes all entries for given userId from RootOfTrust table.
+     *
+     * @return {@code true} if deleted a row.
+     */
+    private boolean removeUserFromRootOfTrustTable(int userId) {
+        SQLiteDatabase db = mKeyStoreDbHelper.getWritableDatabase();
+        String selection = RootOfTrustEntry.COLUMN_NAME_USER_ID + " = ?";
+        String[] selectionArgs = {Integer.toString(userId)};
+        return db.delete(RootOfTrustEntry.TABLE_NAME, selection, selectionArgs) > 0;
+    }
 
     /**
      * Creates an empty row in the recovery service metadata table if such a row doesn't exist for
