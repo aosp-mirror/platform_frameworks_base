@@ -81,6 +81,16 @@ IncidentReportArgs::writeToParcel(Parcel* out) const
         return err;
     }
 
+    err = out->writeString16(mReceiverPkg);
+    if (err != NO_ERROR) {
+        return err;
+    }
+
+    err = out->writeString16(mReceiverCls);
+    if (err != NO_ERROR) {
+        return err;
+    }
+
     return NO_ERROR;
 }
 
@@ -134,6 +144,9 @@ IncidentReportArgs::readFromParcel(const Parcel* in)
     }
     mDest = dest;
 
+    mReceiverPkg = in->readString16();
+    mReceiverCls = in->readString16();
+
     return OK;
 }
 
@@ -158,6 +171,18 @@ IncidentReportArgs::addSection(int section)
     if (!mAll) {
         mSections.insert(section);
     }
+}
+
+void
+IncidentReportArgs::setReceiverPkg(const string& pkg)
+{
+    mReceiverPkg = String16(pkg.c_str());
+}
+
+void
+IncidentReportArgs::setReceiverCls(const string& cls)
+{
+    mReceiverCls = String16(cls.c_str());
 }
 
 void

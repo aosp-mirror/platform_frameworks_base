@@ -162,6 +162,10 @@ bool GenerateIncidentReport(const IncidentdDetails& config, int64_t rule_id, int
     }
     incidentReport.setDest(dest);
 
+    incidentReport.setReceiverPkg(config.receiver_pkg());
+
+    incidentReport.setReceiverCls(config.receiver_cls());
+
     sp<IIncidentManager> service = interface_cast<IIncidentManager>(
             defaultServiceManager()->getService(android::String16("incident")));
     if (service == nullptr) {
