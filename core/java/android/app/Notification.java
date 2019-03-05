@@ -1629,6 +1629,7 @@ public class Notification implements Parcelable
              *
              * @see Notification.Action#extras
              */
+            @NonNull
             public Builder addExtras(Bundle extras) {
                 if (extras != null) {
                     mExtras.putAll(extras);
@@ -1652,6 +1653,7 @@ public class Notification implements Parcelable
              * @param remoteInput a {@link RemoteInput} to add to the action
              * @return this object for method chaining
              */
+            @NonNull
             public Builder addRemoteInput(RemoteInput remoteInput) {
                 if (mRemoteInputs == null) {
                     mRemoteInputs = new ArrayList<RemoteInput>();
@@ -1669,6 +1671,7 @@ public class Notification implements Parcelable
              * @return this object for method chaining
              * The default value is {@code true}
              */
+            @NonNull
             public Builder setAllowGeneratedReplies(boolean allowGeneratedReplies) {
                 mAllowGeneratedReplies = allowGeneratedReplies;
                 return this;
@@ -1682,6 +1685,7 @@ public class Notification implements Parcelable
              * {@code SEMANTIC_ACTION_} prefixes
              * @return this object for method chaining
              */
+            @NonNull
             public Builder setSemanticAction(@SemanticAction int semanticAction) {
                 mSemanticAction = semanticAction;
                 return this;
@@ -1692,6 +1696,7 @@ public class Notification implements Parcelable
              * dependent on the notification message body. An example of a contextual action could
              * be an action opening a map application with an address shown in the notification.
              */
+            @NonNull
             public Builder setContextual(boolean isContextual) {
                 mIsContextual = isContextual;
                 return this;
@@ -1701,6 +1706,7 @@ public class Notification implements Parcelable
              * Apply an extender to this action builder. Extenders may be used to add
              * metadata or change options on this builder.
              */
+            @NonNull
             public Builder extend(Extender extender) {
                 extender.extend(this);
                 return this;
@@ -1728,6 +1734,7 @@ public class Notification implements Parcelable
              * object.
              * @return the built action
              */
+            @NonNull
             public Action build() {
                 checkContextualActionNullFields();
 
