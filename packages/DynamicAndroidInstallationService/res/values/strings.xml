@@ -13,7 +13,7 @@
     <string name="keyguard_description">Please enter your password and continue to AndroidOnTap installation</string>
 
     <!-- Displayed on notification: DynAndroid installation is completed [CHAR LIMIT=128] -->
-    <string name="notification_install_completed">Installation is completed, you can reboot into the new installed system now.</string>
+    <string name="notification_install_completed">New system is ready, you can reboot into it or discard it.</string>
     <!-- Displayed on notification: DynAndroid installation is in progress [CHAR LIMIT=128] -->
     <string name="notification_install_inprogress">Installation is in progress.</string>
     <!-- Displayed on notification: DynAndroid installation is in progress [CHAR LIMIT=128] -->
@@ -30,4 +30,6 @@
     <!-- Action on notification: Reboot to AndroidOnTap [CHAR LIMIT=16] -->
     <string name="notification_action_reboot_to_dynandroid">Reboot</string>
 
+    <!-- Toast when installed AndroidOnTap is discarded [CHAR LIMIT=64] -->
+    <string name="toast_dynandroid_discarded">Installed AndroidOnTap is discarded.</string>
 </resources>
