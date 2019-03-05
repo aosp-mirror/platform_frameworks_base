@@ -8112,19 +8112,19 @@ package android.telephony.data {
   }
 
   public final class DataProfile implements android.os.Parcelable {
-    method public String getApn();
+    method @NonNull public String getApn();
     method public int getAuthType();
     method public int getBearerBitmap();
     method public int getMaxConns();
     method public int getMaxConnsTime();
     method public int getMtu();
-    method public String getPassword();
+    method @Nullable public String getPassword();
     method public int getProfileId();
     method public int getProtocol();
     method public int getRoamingProtocol();
     method public int getSupportedApnTypesBitmap();
     method public int getType();
-    method public String getUserName();
+    method @Nullable public String getUserName();
     method public int getWaitTime();
     method public boolean isEnabled();
     method public boolean isPersistent();
