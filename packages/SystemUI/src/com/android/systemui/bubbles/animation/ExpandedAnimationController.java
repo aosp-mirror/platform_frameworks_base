@@ -49,11 +49,8 @@ public class ExpandedAnimationController
     /** How much to scale down bubbles when they're animating in/out. */
     private static final float ANIMATE_SCALE_PERCENT = 0.5f;
 
-    /**
-     * The stack position from which the bubbles were expanded. Saved in {@link #expandFromStack}
-     * and used to return to stack form in {@link #collapseBackToStack}.
-     */
-    private PointF mExpandedFrom;
+    /** The stack position to collapse back to in {@link #collapseBackToStack}. */
+    private PointF mCollapseToPoint;
 
     /** Horizontal offset between bubbles, which we need to know to re-stack them. */
     private float mStackOffsetPx;
@@ -106,8 +103,8 @@ public class ExpandedAnimationController
      *
      * @return The y-value to which the bubbles were expanded, in case that's useful.
      */
-    public float expandFromStack(PointF expandedFrom, Runnable after) {
-        mExpandedFrom = expandedFrom;
+    public float expandFromStack(PointF collapseTo, Runnable after) {
+        mCollapseToPoint = collapseTo;
 
         // How much to translate the next bubble, so that it is not overlapping the previous one.
         float translateNextBubbleXBy = mBubblePaddingPx;
@@ -123,10 +120,11 @@ public class ExpandedAnimationController
     /** Animate collapsing the bubbles back to their stacked position. */
     public void collapseBackToStack(Runnable after) {
         // Stack to the left if we're going to the left, or right if not.
-        final float sideMultiplier = mLayout.isFirstChildXLeftOfCenter(mExpandedFrom.x) ? -1 : 1;
+        final float sideMultiplier = mLayout.isFirstChildXLeftOfCenter(mCollapseToPoint.x) ? -1 : 1;
         for (int i = 0; i < mLayout.getChildCount(); i++) {
             mLayout.animatePositionForChildAtIndex(
-                    i, mExpandedFrom.x + (sideMultiplier * i * mStackOffsetPx), mExpandedFrom.y);
+                    i,
+                    mCollapseToPoint.x + (sideMultiplier * i * mStackOffsetPx), mCollapseToPoint.y);
         }
 
         runAfterTranslationsEnd(after);
