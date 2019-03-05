@@ -4463,6 +4463,11 @@
          @hide -->
     <permission android:name="android.permission.MANAGE_SENSOR_PRIVACY"
                 android:protectionLevel="signature" />
+    <!-- @SystemApi Permission that protects the {@link Intent#ACTION_REVIEW_ACCESSIBILITY_SERVICES}
+         intent.
+         @hide -->
+    <permission android:name="android.permission.REVIEW_ACCESSIBILITY_SERVICES"
+                android:protectionLevel="signature" />
 
     <!-- @SystemApi Allows an activity to replace the app name and icon displayed in share targets
          in the sharesheet for the Q-release and later.
