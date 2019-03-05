@@ -618,7 +618,7 @@ public class AudioRecord implements AudioRouting, MicrophoneDirection,
          * @throws IllegalStateException if called in conjunction with {@link #setAudioSource(int)}.
          * @throws NullPointerException if {@code config} is null.
          */
-        public Builder setAudioPlaybackCaptureConfig(
+        public @NonNull Builder setAudioPlaybackCaptureConfig(
                 @NonNull AudioPlaybackCaptureConfiguration config) {
             Preconditions.checkNotNull(
                     config, "Illegal null AudioPlaybackCaptureConfiguration argument");
@@ -647,7 +647,7 @@ public class AudioRecord implements AudioRouting, MicrophoneDirection,
             return this;
         }
 
-        private AudioRecord buildAudioPlaybackCaptureRecord() {
+        private @NonNull AudioRecord buildAudioPlaybackCaptureRecord() {
             AudioMix audioMix = mAudioPlaybackCaptureConfiguration.createAudioMix(mFormat);
             MediaProjection projection = mAudioPlaybackCaptureConfiguration.getMediaProjection();
             AudioPolicy audioPolicy = new AudioPolicy.Builder(/*context=*/ null)

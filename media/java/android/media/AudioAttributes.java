@@ -630,7 +630,7 @@ public final class AudioAttributes implements Parcelable {
          *                     true to allow apps to capture the audio
          * @return the same Builder instance
          */
-        public Builder setAllowCapture(boolean allowCapture) {
+        public @NonNull Builder setAllowCapture(boolean allowCapture) {
             if (allowCapture) {
                 mFlags &= ~FLAG_NO_CAPTURE;
             } else {
