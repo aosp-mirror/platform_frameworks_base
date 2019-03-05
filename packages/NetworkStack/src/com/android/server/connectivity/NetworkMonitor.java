@@ -32,6 +32,7 @@ import static android.net.metrics.ValidationProbeEvent.DNS_SUCCESS;
 import static android.net.metrics.ValidationProbeEvent.PROBE_FALLBACK;
 import static android.net.metrics.ValidationProbeEvent.PROBE_PRIVDNS;
 import static android.net.util.NetworkStackUtils.isEmpty;
+import static android.provider.Settings.Global.DATA_STALL_EVALUATION_TYPE_DNS;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -128,9 +129,8 @@ public class NetworkMonitor extends StateMachine {
     private static final int DEFAULT_DATA_STALL_MIN_EVALUATE_TIME_MS = 60 * 1000;
     private static final int DEFAULT_DATA_STALL_VALID_DNS_TIME_THRESHOLD_MS = 30 * 60 * 1000;
 
-    private static final int DATA_STALL_EVALUATION_TYPE_DNS = 1;
     private static final int DEFAULT_DATA_STALL_EVALUATION_TYPES =
-            (1 << DATA_STALL_EVALUATION_TYPE_DNS);
+            DATA_STALL_EVALUATION_TYPE_DNS;
     // Reevaluate it as intending to increase the number. Larger log size may cause statsd
     // log buffer bust and have stats log lost.
     private static final int DEFAULT_DNS_LOG_SIZE = 20;
@@ -1772,7 +1772,7 @@ public class NetworkMonitor extends StateMachine {
     }
 
     private boolean dataStallEvaluateTypeEnabled(int type) {
-        return (mDataStallEvaluationType & (1 << type)) != 0;
+        return (mDataStallEvaluationType & type) != 0;
     }
 
     @VisibleForTesting
@@ -1792,7 +1792,7 @@ public class NetworkMonitor extends StateMachine {
         }
 
         // Check dns signal. Suspect it may be a data stall if both :
-        // 1. The number of consecutive DNS query timeouts > mConsecutiveDnsTimeoutThreshold.
+        // 1. The number of consecutive DNS query timeouts >= mConsecutiveDnsTimeoutThreshold.
         // 2. Those consecutive DNS queries happened in the last mValidDataStallDnsTimeThreshold ms.
         if (dataStallEvaluateTypeEnabled(DATA_STALL_EVALUATION_TYPE_DNS)) {
             if (mDnsStallDetector.isDataStallSuspected(mConsecutiveDnsTimeoutThreshold,
