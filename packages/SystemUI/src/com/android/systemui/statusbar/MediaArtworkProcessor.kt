@@ -51,8 +51,15 @@ class MediaArtworkProcessor @Inject constructor() {
         val renderScript = RenderScript.create(context)
         val rect = Rect(0, 0, artwork.width, artwork.height)
         MathUtils.fitRect(rect, Math.max(mTmpSize.x / DOWNSAMPLE, mTmpSize.y / DOWNSAMPLE))
-        val inBitmap = Bitmap.createScaledBitmap(artwork, rect.width(), rect.height(),
+        var inBitmap = Bitmap.createScaledBitmap(artwork, rect.width(), rect.height(),
                 true /* filter */)
+        // Render script blurs only support ARGB_8888, we need a conversion if we got a
+        // different bitmap config.
+        if (inBitmap.config != Bitmap.Config.ARGB_8888) {
+            val oldIn = inBitmap
+            inBitmap = oldIn.copy(Bitmap.Config.ARGB_8888, false /* isMutable */)
+            oldIn.recycle()
+        }
         val input = Allocation.createFromBitmap(renderScript, inBitmap,
                 Allocation.MipmapControl.MIPMAP_NONE, Allocation.USAGE_GRAPHICS_TEXTURE)
         val outBitmap = Bitmap.createBitmap(inBitmap.width, inBitmap.height,
