@@ -24,7 +24,6 @@ import android.app.TaskInfo;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.LocusId;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -212,11 +211,11 @@ public final class ContentCaptureContext implements Parcelable {
     }
 
     /**
-     * Helper that creates a {@link ContentCaptureContext} associated with the given {@code uri}.
+     * Helper that creates a {@link ContentCaptureContext} associated with the given {@code id}.
      */
     @NonNull
-    public static ContentCaptureContext forLocusId(@NonNull Uri uri) {
-        return new Builder(new LocusId(uri)).build();
+    public static ContentCaptureContext forLocusId(@NonNull String id) {
+        return new Builder(new LocusId(id)).build();
     }
 
     /**

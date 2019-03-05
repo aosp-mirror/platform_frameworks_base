@@ -15,6 +15,7 @@
  */
 package android.view.contentcapture;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.app.ActivityThread;
 import android.content.LocusId;
@@ -24,6 +25,8 @@ import android.util.IntArray;
 
 import com.android.internal.util.Preconditions;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,6 +35,19 @@ import java.util.List;
  * some context.
  */
 public final class UserDataRemovalRequest implements Parcelable {
+
+    /**
+     * When set, service should use the {@link LocusId#getId()} as prefix for the data to be
+     * removed.
+     */
+    public static final int FLAG_IS_PREFIX = 0x1;
+
+    /** @hide */
+    @IntDef(prefix = { "FLAG" }, flag = true, value = {
+            FLAG_IS_PREFIX
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    @interface Flags {}
 
     private final String mPackageName;
 
@@ -46,7 +62,7 @@ public final class UserDataRemovalRequest implements Parcelable {
             mLocusIdRequests = new ArrayList<>(size);
             for (int i = 0; i < size; i++) {
                 mLocusIdRequests.add(new LocusIdRequest(builder.mLocusIds.get(i),
-                        builder.mRecursive.get(i) == 1));
+                        builder.mFlags.get(i)));
             }
         }
     }
@@ -59,7 +75,7 @@ public final class UserDataRemovalRequest implements Parcelable {
             mLocusIdRequests = new ArrayList<>(size);
             for (int i = 0; i < size; i++) {
                 mLocusIdRequests.add(new LocusIdRequest((LocusId) parcel.readValue(null),
-                        parcel.readBoolean()));
+                        parcel.readInt()));
             }
         }
     }
@@ -94,7 +110,7 @@ public final class UserDataRemovalRequest implements Parcelable {
 
         private boolean mForEverything;
         private ArrayList<LocusId> mLocusIds;
-        private IntArray mRecursive;
+        private IntArray mFlags;
 
         private boolean mDestroyed;
 
@@ -116,24 +132,24 @@ public final class UserDataRemovalRequest implements Parcelable {
          * Request service to remove data associated with a given {@link LocusId}.
          *
          * @param locusId the {@link LocusId} being requested to be removed.
-         * @param recursive whether it should remove the data associated with just the
-         * {@code LocusId} or its tree of descendants.
+         * @param flags either {@link UserDataRemovalRequest#FLAG_IS_PREFIX} or {@code 0}
          *
          * @return this builder
          */
         @NonNull
-        public Builder addLocusId(@NonNull LocusId locusId, boolean recursive) {
+        public Builder addLocusId(@NonNull LocusId locusId, @Flags int flags) {
             throwIfDestroyed();
             Preconditions.checkState(!mForEverything, "Already is for everything");
             Preconditions.checkNotNull(locusId);
+            // felipeal: check flags
 
             if (mLocusIds == null) {
                 mLocusIds = new ArrayList<>();
-                mRecursive = new IntArray();
+                mFlags = new IntArray();
             }
 
             mLocusIds.add(locusId);
-            mRecursive.add(recursive ? 1 : 0);
+            mFlags.add(flags);
             return this;
         }
 
@@ -144,7 +160,8 @@ public final class UserDataRemovalRequest implements Parcelable {
         public UserDataRemovalRequest build() {
             throwIfDestroyed();
 
-            Preconditions.checkState(mForEverything || mLocusIds != null);
+            Preconditions.checkState(mForEverything || mLocusIds != null,
+                    "must call either #forEverything() or add one #addLocusId()");
 
             mDestroyed = true;
             return new UserDataRemovalRequest(this);
@@ -170,7 +187,7 @@ public final class UserDataRemovalRequest implements Parcelable {
             for (int i = 0; i < size; i++) {
                 final LocusIdRequest request = mLocusIdRequests.get(i);
                 parcel.writeValue(request.getLocusId());
-                parcel.writeBoolean(request.isRecursive());
+                parcel.writeInt(request.getFlags());
             }
         }
     }
@@ -196,11 +213,11 @@ public final class UserDataRemovalRequest implements Parcelable {
      */
     public final class LocusIdRequest {
         private final @NonNull LocusId mLocusId;
-        private final boolean mRecursive;
+        private final @Flags int mFlags;
 
-        private LocusIdRequest(@NonNull LocusId locusId, boolean recursive) {
+        private LocusIdRequest(@NonNull LocusId locusId, @Flags int flags) {
             this.mLocusId = locusId;
-            this.mRecursive = recursive;
+            this.mFlags = flags;
         }
 
         /**
@@ -212,12 +229,13 @@ public final class UserDataRemovalRequest implements Parcelable {
         }
 
         /**
-         * Checks whether the request is to remove just the data associated with the {@link LocusId}
-         *  per se, or also its descendants.
+         * Gets the flags associates with request.
+         *
+         * @return either {@link UserDataRemovalRequest#FLAG_IS_PREFIX} or {@code 0}.
          */
         @NonNull
-        public boolean isRecursive() {
-            return mRecursive;
+        public @Flags int getFlags() {
+            return mFlags;
         }
     }
 }
