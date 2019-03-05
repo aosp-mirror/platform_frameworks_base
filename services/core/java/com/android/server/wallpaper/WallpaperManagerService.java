@@ -474,7 +474,13 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         int wallpaperId;
 
         if (wallpaper.equals(mFallbackWallpaper)) {
-            extractDefaultImageWallpaperColors();
+            synchronized (mLock) {
+                if (mFallbackWallpaper.primaryColors != null) return;
+            }
+            final WallpaperColors colors = extractDefaultImageWallpaperColors();
+            synchronized (mLock) {
+                mFallbackWallpaper.primaryColors = colors;
+            }
             return;
         }
 
@@ -499,23 +505,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             }
         } else if (defaultImageWallpaper) {
             // There is no crop and source file because this is default image wallpaper.
-            try (final InputStream is =
-                         WallpaperManager.openDefaultWallpaper(mContext, FLAG_SYSTEM)) {
-                if (is != null) {
-                    try {
-                        final BitmapFactory.Options options = new BitmapFactory.Options();
-                        final Bitmap bitmap = BitmapFactory.decodeStream(is, null, options);
-                        if (bitmap != null) {
-                            colors = WallpaperColors.fromBitmap(bitmap);
-                            bitmap.recycle();
-                        }
-                    } catch (OutOfMemoryError e) {
-                        Slog.w(TAG, "Can't decode default wallpaper stream", e);
-                    }
-                }
-            } catch (IOException e) {
-                Slog.w(TAG, "Can't close default wallpaper stream", e);
-            }
+            colors = extractDefaultImageWallpaperColors();
         }
 
         if (colors == null) {
@@ -535,37 +525,41 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         }
     }
 
-    private void extractDefaultImageWallpaperColors() {
+    private WallpaperColors extractDefaultImageWallpaperColors() {
+        if (DEBUG) Slog.d(TAG, "Extract default image wallpaper colors");
+
         synchronized (mLock) {
-            if (mFallbackWallpaper.primaryColors != null) return;
+            if (mCacheDefaultImageWallpaperColors != null) return mCacheDefaultImageWallpaperColors;
         }
 
-        if (DEBUG) Slog.d(TAG, "Extract default image wallpaper colors");
         WallpaperColors colors = null;
-        final InputStream is = WallpaperManager.openDefaultWallpaper(mContext, FLAG_SYSTEM);
-        if (is != null) {
-            try {
-                final BitmapFactory.Options options = new BitmapFactory.Options();
-                final Bitmap bitmap = BitmapFactory.decodeStream(is, null, options);
-                if (bitmap != null) {
-                    colors = WallpaperColors.fromBitmap(bitmap);
-                    bitmap.recycle();
-                }
-            } catch (OutOfMemoryError e) {
-                Slog.w(TAG, "Can't decode default wallpaper stream", e);
-            } finally {
-                IoUtils.closeQuietly(is);
+        try (InputStream is = WallpaperManager.openDefaultWallpaper(mContext, FLAG_SYSTEM)) {
+            if (is == null) {
+                Slog.w(TAG, "Can't open default wallpaper stream");
+                return null;
             }
+
+            final BitmapFactory.Options options = new BitmapFactory.Options();
+            final Bitmap bitmap = BitmapFactory.decodeStream(is, null, options);
+            if (bitmap != null) {
+                colors = WallpaperColors.fromBitmap(bitmap);
+                bitmap.recycle();
+            }
+        } catch (OutOfMemoryError e) {
+            Slog.w(TAG, "Can't decode default wallpaper stream", e);
+        } catch (IOException e) {
+            Slog.w(TAG, "Can't close default wallpaper stream", e);
         }
 
         if (colors == null) {
             Slog.e(TAG, "Extract default image wallpaper colors failed");
-            return;
+        } else {
+            synchronized (mLock) {
+                mCacheDefaultImageWallpaperColors = colors;
+            }
         }
 
-        synchronized (mLock) {
-            mFallbackWallpaper.primaryColors = colors;
-        }
+        return colors;
     }
 
     /**
@@ -813,6 +807,12 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
      * built-in wallpapers.
      */
     private final ComponentName mImageWallpaper;
+
+    /**
+     * Default image wallpaper shall never changed after system service started, caching it when we
+     * first read the image file.
+     */
+    private WallpaperColors mCacheDefaultImageWallpaperColors;
 
     /**
      * Name of the default wallpaper component; might be different from mImageWallpaper
