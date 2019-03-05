@@ -1682,19 +1682,6 @@ public final class SystemServer {
         mSystemServiceManager.startService(StatsCompanionService.Lifecycle.class);
         traceEnd();
 
-        if (safeMode) {
-            traceBeginAndSlog("EnterSafeModeAndDisableJitCompilation");
-            mActivityManagerService.enterSafeMode();
-            // Disable the JIT for the system_server process
-            VMRuntime.getRuntime().disableJitCompilation();
-            traceEnd();
-        } else {
-            // Enable the JIT for the system_server process
-            traceBeginAndSlog("StartJitCompilation");
-            VMRuntime.getRuntime().startJitCompilation();
-            traceEnd();
-        }
-
         // MMS service broker
         traceBeginAndSlog("StartMmsService");
         mmsService = mSystemServiceManager.startService(MmsServiceBroker.class);
