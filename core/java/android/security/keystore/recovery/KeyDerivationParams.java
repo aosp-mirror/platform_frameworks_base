@@ -140,7 +140,7 @@ public final class KeyDerivationParams implements Parcelable {
         return mMemoryDifficulty;
     }
 
-    public static final @android.annotation.NonNull Parcelable.Creator<KeyDerivationParams> CREATOR =
+    public static final @NonNull Parcelable.Creator<KeyDerivationParams> CREATOR =
             new Parcelable.Creator<KeyDerivationParams>() {
         public KeyDerivationParams createFromParcel(Parcel in) {
                 return new KeyDerivationParams(in);
