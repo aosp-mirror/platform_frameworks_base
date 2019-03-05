@@ -728,8 +728,8 @@ public class BatterySaverPolicy extends ContentObserver {
                     !defaultPolicy.enableDataSaver);
             boolean enableFirewall = !parser.getBoolean(KEY_ACTIVATE_FIREWALL_DISABLED,
                     !defaultPolicy.enableFirewall);
-            boolean enableNightMode = !parser.getBoolean(KEY_ENABLE_NIGHT_MODE,
-                    !defaultPolicy.enableNightMode);
+            boolean enableNightMode = parser.getBoolean(KEY_ENABLE_NIGHT_MODE,
+                    defaultPolicy.enableNightMode);
             boolean enableQuickDoze = parser.getBoolean(KEY_QUICK_DOZE_ENABLED,
                     defaultPolicy.enableQuickDoze);
             boolean forceAllAppsStandby = parser.getBoolean(KEY_FORCE_ALL_APPS_STANDBY,

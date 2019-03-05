@@ -58,6 +58,7 @@ public class BatterySaverPolicyTest extends AndroidTestCase {
             + "fullbackup_deferred=true,"
             + "keyvaluebackup_deferred=false,"
             + "gps_mode=0," // LOCATION_MODE_NO_CHANGE
+            + "enable_night_mode=false,"
             + "quick_doze_enabled=true";
     private static final String BATTERY_SAVER_INCORRECT_CONSTANTS = "vi*,!=,,true";
 
@@ -234,6 +235,10 @@ public class BatterySaverPolicyTest extends AndroidTestCase {
         final PowerSaveState quickDozeState = mBatterySaverPolicy.getBatterySaverPolicy(
                 ServiceType.QUICK_DOZE);
         assertThat(quickDozeState.batterySaverEnabled).isTrue();
+
+        final PowerSaveState nightModeState = mBatterySaverPolicy.getBatterySaverPolicy(
+                ServiceType.NIGHT_MODE);
+        assertThat(nightModeState.batterySaverEnabled).isFalse();
     }
 
     @SmallTest
