@@ -5602,7 +5602,6 @@ package android.os {
   }
 
   public class UserManager {
-    method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.INTERACT_ACROSS_USERS}, conditional=true) public boolean canSwitchUsers();
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public void clearSeedAccountData();
     method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public android.os.UserHandle getProfileParent(@NonNull android.os.UserHandle);
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public String getSeedAccountName();
@@ -5612,6 +5611,7 @@ package android.os {
     method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public android.graphics.Bitmap getUserIcon();
     method @Deprecated @android.os.UserManager.UserRestrictionSource @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public int getUserRestrictionSource(String, android.os.UserHandle);
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public java.util.List<android.os.UserManager.EnforcingUser> getUserRestrictionSources(String, android.os.UserHandle);
+    method @RequiresPermission(allOf={android.Manifest.permission.READ_PHONE_STATE, android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.INTERACT_ACROSS_USERS}, conditional=true) public int getUserSwitchability();
     method public boolean hasRestrictedProfiles();
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public boolean isAdminUser();
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public boolean isGuestUser();
@@ -5629,6 +5629,10 @@ package android.os {
     field public static final int RESTRICTION_SOURCE_DEVICE_OWNER = 2; // 0x2
     field public static final int RESTRICTION_SOURCE_PROFILE_OWNER = 4; // 0x4
     field public static final int RESTRICTION_SOURCE_SYSTEM = 1; // 0x1
+    field public static final int SWITCHABILITY_STATUS_OK = 0; // 0x0
+    field public static final int SWITCHABILITY_STATUS_SYSTEM_USER_LOCKED = 4; // 0x4
+    field public static final int SWITCHABILITY_STATUS_USER_IN_CALL = 1; // 0x1
+    field public static final int SWITCHABILITY_STATUS_USER_SWITCH_DISALLOWED = 2; // 0x2
   }
 
   public static final class UserManager.EnforcingUser implements android.os.Parcelable {
