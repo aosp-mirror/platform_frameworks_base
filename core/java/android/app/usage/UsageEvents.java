@@ -254,18 +254,32 @@ public final class UsageEvents implements Parcelable {
         public static final int FLUSH_TO_DISK = 25;
 
         /**
-         * An event type denoting that the device underwent a shutdown process.
+         * An event type denoting that the Android runtime underwent a shutdown process.
          * A DEVICE_SHUTDOWN event should be treated as if all started activities and foreground
          * services are now stopped and no explicit {@link #ACTIVITY_STOPPED} and
          * {@link #FOREGROUND_SERVICE_STOP} events will be generated for them.
+         *
+         * <p>The DEVICE_SHUTDOWN timestamp is actually the last time UsageStats database is
+         * persisted before the actual shutdown. Events (if there are any) between this timestamp
+         * and the actual shutdown is not persisted in the database. So any open events without
+         * matching close events between DEVICE_SHUTDOWN and {@link #DEVICE_STARTUP} should be
+         * ignored because the closing time is unknown.</p>
          */
         public static final int DEVICE_SHUTDOWN = 26;
+
+        /**
+         * An event type denoting that the Android runtime started up. This could be after a
+         * shutdown or a runtime restart. Any open events without matching close events between
+         * {@link #DEVICE_SHUTDOWN} and DEVICE_STARTUP should be ignored because the closing time is
+         * unknown.
+         */
+        public static final int DEVICE_STARTUP = 27;
 
         /**
          * Keep in sync with the greatest event type value.
          * @hide
          */
-        public static final int MAX_EVENT_TYPE = 26;
+        public static final int MAX_EVENT_TYPE = 27;
 
         /** @hide */
         public static final int FLAG_IS_PACKAGE_INSTANT_APP = 1 << 0;
