@@ -64,6 +64,8 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.util.wakelock.KeepAwakeAnimationListener;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -174,6 +176,7 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
             if (mContentChangeListener != null) {
                 mContentChangeListener.run();
             }
+            Trace.endSection();
             return;
         }
 
@@ -373,6 +376,17 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
         }
         onChanged(slice);
         Trace.endSection();
+    }
+
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        pw.println("KeyguardSliceView:");
+        pw.println("  mClickActions: " + mClickActions);
+        pw.println("  mTitle: " + (mTitle == null ? "null" : mTitle.getVisibility() == VISIBLE));
+        pw.println("  mRow: " + (mRow == null ? "null" : mRow.getVisibility() == VISIBLE));
+        pw.println("  mTextColor: " + Integer.toHexString(mTextColor));
+        pw.println("  mDarkAmount: " + mDarkAmount);
+        pw.println("  mSlice: " + mSlice);
+        pw.println("  mHasHeader: " + mHasHeader);
     }
 
     public static class Row extends LinearLayout {

@@ -20,9 +20,6 @@ import static com.android.systemui.SysUiServiceProvider.getComponent;
 import static com.android.systemui.statusbar.notification.ActivityLaunchAnimator.ExpandAnimationParameters;
 import static com.android.systemui.util.InjectionInflationController.VIEW_CONTEXT;
 
-
-import static com.android.systemui.util.InjectionInflationController.VIEW_CONTEXT;
-
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
@@ -2955,6 +2952,9 @@ public class NotificationPanelView extends PanelView implements
         super.dump(fd, pw, args);
         if (mKeyguardStatusBar != null) {
             mKeyguardStatusBar.dump(fd, pw, args);
+        }
+        if (mKeyguardStatusView != null) {
+            mKeyguardStatusView.dump(fd, pw, args);
         }
     }
 
