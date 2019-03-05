@@ -8017,9 +8017,9 @@ public final class Settings {
 
         /**
          * Whether or not face unlock always requires user confirmation, meaning {@link
-         * android.hardware.biometrics.BiometricPrompt.Builder#setRequireConfirmation(boolean)}
+         * android.hardware.biometrics.BiometricPrompt.Builder#setConfirmationRequired(boolean)}
          * is always 'true'. This overrides the behavior that apps choose in the
-         * setRequireConfirmation API.
+         * setConfirmationRequired API.
          * @hide
          */
         public static final String FACE_UNLOCK_ALWAYS_REQUIRE_CONFIRMATION =
