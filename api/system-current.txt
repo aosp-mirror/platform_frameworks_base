@@ -3536,6 +3536,7 @@ package android.media {
   }
 
   public class HwAudioSource {
+    method public boolean isPlaying();
     method public void start();
     method public void stop();
   }
