@@ -20,9 +20,11 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemService;
 import android.annotation.UnsupportedAppUsage;
+import android.app.ActivityThread;
 import android.content.Context;
 import android.database.ContentObserver;
 import android.os.ServiceManager;
+import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.service.textclassifier.TextClassifierService;
 import android.view.textclassifier.TextClassifier.TextClassifierType;
@@ -195,6 +197,7 @@ public final class TextClassificationManager {
             if (mSettingsObserver != null) {
                 getApplicationContext().getContentResolver()
                         .unregisterContentObserver(mSettingsObserver);
+                DeviceConfig.removeOnPropertyChangedListener(mSettingsObserver);
             }
         } finally {
             super.finalize();
@@ -277,7 +280,8 @@ public final class TextClassificationManager {
         }
     }
 
-    private static final class SettingsObserver extends ContentObserver {
+    private static final class SettingsObserver extends ContentObserver
+            implements DeviceConfig.OnPropertyChangedListener {
 
         private final WeakReference<TextClassificationManager> mTcm;
 
@@ -288,10 +292,23 @@ public final class TextClassificationManager {
                     Settings.Global.getUriFor(Settings.Global.TEXT_CLASSIFIER_CONSTANTS),
                     false /* notifyForDescendants */,
                     this);
+            DeviceConfig.addOnPropertyChangedListener(
+                    DeviceConfig.NAMESPACE_TEXTCLASSIFIER,
+                    ActivityThread.currentApplication().getMainExecutor(),
+                    this);
         }
 
         @Override
         public void onChange(boolean selfChange) {
+            invalidateSettings();
+        }
+
+        @Override
+        public void onPropertyChanged(String namespace, String name, String value) {
+            invalidateSettings();
+        }
+
+        private void invalidateSettings() {
             final TextClassificationManager tcm = mTcm.get();
             if (tcm != null) {
                 tcm.invalidate();
