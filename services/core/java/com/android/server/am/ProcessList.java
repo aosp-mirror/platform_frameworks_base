@@ -249,6 +249,10 @@ public final class ProcessList {
     // Threshold of number of cached+empty where we consider memory critical.
     static final int TRIM_LOW_THRESHOLD = 5;
 
+    // If true, then we pass the flag to ART to load the app image startup cache.
+    private static final String PROPERTY_USE_APP_IMAGE_STARTUP_CACHE =
+            "persist.device_config.runtime_native.use_app_image_startup_cache";
+
     // Low Memory Killer Daemon command codes.
     // These must be kept in sync with the definitions in lmkd.c
     //
@@ -1557,6 +1561,13 @@ public final class ProcessList {
                     throw new IllegalStateException("Invalid API policy: " + policy);
                 }
                 runtimeFlags |= policyBits;
+            }
+
+            String useAppImageCache = SystemProperties.get(
+                    PROPERTY_USE_APP_IMAGE_STARTUP_CACHE, "");
+            // Property defaults to true currently.
+            if (!TextUtils.isEmpty(useAppImageCache) && !useAppImageCache.equals("false")) {
+                runtimeFlags |= Zygote.USE_APP_IMAGE_STARTUP_CACHE;
             }
 
             String invokeWith = null;
