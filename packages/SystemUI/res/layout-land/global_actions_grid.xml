@@ -10,14 +10,12 @@
     android:gravity="top|right"
     android:clipChildren="false"
 >
-
     <LinearLayout
         android:layout_height="match_parent"
         android:layout_width="wrap_content"
         android:gravity="top|right"
         android:padding="0dp"
         android:orientation="vertical"
-        android:layoutDirection="ltr"
         android:layout_marginRight="@dimen/global_actions_grid_container_bottom_margin"
     >
         <!-- Grid of action items -->
@@ -26,7 +24,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:layoutDirection="ltr"
             android:layout_marginTop="@dimen/global_actions_grid_side_margin"
             android:translationZ="@dimen/global_actions_translate"
             android:paddingLeft="@dimen/global_actions_grid_horizontal_padding"
@@ -39,25 +36,21 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:visibility="gone"
-                android:layoutDirection="ltr"
-                android:orientation="horizontal"
+                android:layoutDirection="locale"
             />
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:visibility="gone"
-                android:layoutDirection="ltr"
-                android:orientation="horizontal"
+                android:layoutDirection="locale"
             />
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:visibility="gone"
-                android:layoutDirection="ltr"
-                android:orientation="horizontal"
+                android:layoutDirection="locale"
             />
         </com.android.systemui.globalactions.ListGridLayout>
-
         <!-- For separated items-->
         <LinearLayout
             android:id="@+id/separated_button"
