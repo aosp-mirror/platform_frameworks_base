@@ -425,14 +425,14 @@ public class SubscriptionInfo implements Parcelable {
     /**
      * @return The MCC, as a string.
      */
-    public String getMccString() {
+    public @Nullable String getMccString() {
         return this.mMcc;
     }
 
     /**
      * @return The MNC, as a string.
      */
-    public String getMncString() {
+    public @Nullable String getMncString() {
         return this.mMnc;
     }
 
