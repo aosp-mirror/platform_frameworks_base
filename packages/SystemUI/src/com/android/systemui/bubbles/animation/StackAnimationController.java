@@ -440,6 +440,10 @@ public class StackAnimationController extends
             DynamicAnimation.ViewProperty property, SpringForce spring,
             float vel, float finalPosition) {
 
+        if (mLayout.getChildCount() == 0) {
+            return;
+        }
+
         Log.d(TAG, String.format("Springing %s to final position %f.",
                 PhysicsAnimationLayout.getReadablePropertyName(property),
                 finalPosition));
@@ -489,7 +493,7 @@ public class StackAnimationController extends
 
         @Override
         public float getValue(StackAnimationController controller) {
-            return mProperty.getValue(mLayout.getChildAt(0));
+            return mLayout.getChildCount() > 0 ? mProperty.getValue(mLayout.getChildAt(0)) : 0;
         }
 
         @Override
