@@ -18475,7 +18475,12 @@ public class ActivityManagerService extends IActivityManager.Stub
         public int checkPermission(String permName, String pkgName, int userId,
                 TriFunction<String, String, Integer, Integer> superImpl) {
             if (mTargetPackageName.equals(pkgName) && isTargetPermission(permName)) {
-                return superImpl.apply(permName, "com.android.shell", userId);
+                final long identity = Binder.clearCallingIdentity();
+                try {
+                    return superImpl.apply(permName, "com.android.shell", userId);
+                } finally {
+                    Binder.restoreCallingIdentity(identity);
+                }
             }
             return superImpl.apply(permName, pkgName, userId);
         }
@@ -18484,7 +18489,12 @@ public class ActivityManagerService extends IActivityManager.Stub
         public int checkUidPermission(String permName, int uid,
                 BiFunction<String, Integer, Integer> superImpl) {
             if (uid == mTargetUid  && isTargetPermission(permName)) {
-                return superImpl.apply(permName, Process.SHELL_UID);
+                final long identity = Binder.clearCallingIdentity();
+                try {
+                    return superImpl.apply(permName, Process.SHELL_UID);
+                } finally {
+                    Binder.restoreCallingIdentity(identity);
+                }
             }
             return superImpl.apply(permName, uid);
         }
