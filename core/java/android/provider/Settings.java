@@ -10665,7 +10665,7 @@ public final class Settings {
 
         /**
          * Setting to enable the Wi-Fi link probing.
-         * Disabled by default, and setting it to 1 will enable it.
+         * Enabled by default, and setting it to 0 will disable it.
          * The value is boolean (0 or 1).
          * @hide
          */
