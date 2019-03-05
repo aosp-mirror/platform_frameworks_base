@@ -45,6 +45,7 @@ import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.StringRes;
 import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityTaskManager;
@@ -3260,10 +3261,21 @@ public class PackageParser {
     private boolean parsePermissionGroup(Package owner, int flags, Resources res,
             XmlResourceParser parser, String[] outError)
             throws XmlPullParserException, IOException {
-        PermissionGroup perm = new PermissionGroup(owner);
-
         TypedArray sa = res.obtainAttributes(parser,
                 com.android.internal.R.styleable.AndroidManifestPermissionGroup);
+
+        int requestDetailResourceId = sa.getResourceId(
+                com.android.internal.R.styleable.AndroidManifestPermissionGroup_requestDetail, 0);
+        int backgroundRequestResourceId = sa.getResourceId(
+                com.android.internal.R.styleable.AndroidManifestPermissionGroup_backgroundRequest,
+                0);
+        int backgroundRequestDetailResourceId = sa.getResourceId(
+                com.android.internal.R.styleable
+                        .AndroidManifestPermissionGroup_backgroundRequestDetail, 0);
+
+        PermissionGroup perm = new PermissionGroup(owner, requestDetailResourceId,
+                backgroundRequestResourceId, backgroundRequestDetailResourceId);
+
         if (!parsePackageItemInfo(owner, perm.info, outError,
                 "<permission-group>", sa, true /*nameRequired*/,
                 com.android.internal.R.styleable.AndroidManifestPermissionGroup_name,
@@ -3282,14 +3294,6 @@ public class PackageParser {
                 0);
         perm.info.requestRes = sa.getResourceId(
                 com.android.internal.R.styleable.AndroidManifestPermissionGroup_request, 0);
-        perm.info.requestDetailResourceId = sa.getResourceId(
-                com.android.internal.R.styleable.AndroidManifestPermissionGroup_requestDetail, 0);
-        perm.info.backgroundRequestResourceId = sa.getResourceId(
-                com.android.internal.R.styleable.AndroidManifestPermissionGroup_backgroundRequest,
-                0);
-        perm.info.backgroundRequestDetailResourceId = sa.getResourceId(
-                com.android.internal.R.styleable
-                        .AndroidManifestPermissionGroup_backgroundRequestDetail, 0);
         perm.info.flags = sa.getInt(
                 com.android.internal.R.styleable.AndroidManifestPermissionGroup_permissionGroupFlags, 0);
         perm.info.priority = sa.getInt(
@@ -7676,9 +7680,12 @@ public class PackageParser {
         @UnsupportedAppUsage
         public final PermissionGroupInfo info;
 
-        public PermissionGroup(Package _owner) {
-            super(_owner);
-            info = new PermissionGroupInfo();
+        public PermissionGroup(Package owner, @StringRes int requestDetailResourceId,
+                @StringRes int backgroundRequestResourceId,
+                @StringRes int backgroundRequestDetailResourceId) {
+            super(owner);
+            info = new PermissionGroupInfo(requestDetailResourceId, backgroundRequestResourceId,
+                    backgroundRequestDetailResourceId);
         }
 
         public PermissionGroup(Package _owner, PermissionGroupInfo _info) {
