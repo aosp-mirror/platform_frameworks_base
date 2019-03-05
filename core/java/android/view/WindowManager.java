@@ -1777,6 +1777,13 @@ public interface WindowManager extends ViewManager {
         public static final int PRIVATE_FLAG_STATUS_FORCE_SHOW_NAVIGATION = 0x00800000;
 
         /**
+         * Flag to indicate that the window is color space agnostic, and the color can be
+         * interpreted to any color space.
+         * @hide
+         */
+        public static final int PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC = 0x01000000;
+
+        /**
          * An internal annotation for flags that can be specified to {@link #softInputMode}.
          *
          * @hide
@@ -1876,7 +1883,11 @@ public interface WindowManager extends ViewManager {
                 @ViewDebug.FlagToString(
                         mask = PRIVATE_FLAG_STATUS_FORCE_SHOW_NAVIGATION,
                         equals = PRIVATE_FLAG_STATUS_FORCE_SHOW_NAVIGATION,
-                        name = "STATUS_FORCE_SHOW_NAVIGATION")
+                        name = "STATUS_FORCE_SHOW_NAVIGATION"),
+                @ViewDebug.FlagToString(
+                        mask = PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC,
+                        equals = PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC,
+                        name = "COLOR_SPACE_AGNOSTIC")
         })
         @TestApi
         public int privateFlags;

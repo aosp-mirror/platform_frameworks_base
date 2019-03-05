@@ -471,6 +471,7 @@ public class ScreenDecorations extends SystemUI implements Tunable {
             lp.width = WRAP_CONTENT;
             lp.height = MATCH_PARENT;
         }
+        lp.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC;
         return lp;
     }
 
