@@ -37,9 +37,11 @@ public final class LocusId implements Parcelable {
 
     /**
      * Default constructor.
+     *
+     * @throws IllegalArgumentException if {@code id} is empty or {@code null}.
      */
     public LocusId(@NonNull String id) {
-        mId = Preconditions.checkNotNull(id);
+        mId = Preconditions.checkStringNotEmpty(id, "id cannot be empty");
     }
 
     /**
