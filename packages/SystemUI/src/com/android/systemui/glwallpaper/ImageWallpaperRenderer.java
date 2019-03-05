@@ -93,13 +93,13 @@ public class ImageWallpaperRenderer implements GLSurfaceView.Renderer,
 
     @Override
     public void onDrawFrame(GL10 gl) {
-        float threshold = mImageProcessHelper.getPercentile85();
+        float per85 = mImageProcessHelper.getPercentile85();
         float reveal = mImageRevealHelper.getReveal();
 
         glClear(GL_COLOR_BUFFER_BIT);
 
         glUniform1f(mWallpaper.getHandle(ImageGLWallpaper.U_AOD2OPACITY), 1);
-        glUniform1f(mWallpaper.getHandle(ImageGLWallpaper.U_CENTER_REVEAL), threshold);
+        glUniform1f(mWallpaper.getHandle(ImageGLWallpaper.U_PER85), per85);
         glUniform1f(mWallpaper.getHandle(ImageGLWallpaper.U_REVEAL), reveal);
 
         mWallpaper.useTexture();
