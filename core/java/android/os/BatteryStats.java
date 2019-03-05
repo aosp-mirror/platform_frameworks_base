@@ -4761,6 +4761,9 @@ public abstract class BatteryStats implements Parcelable {
         sb.append(")");
         pw.println(sb.toString());
 
+        printControllerActivity(pw, sb, prefix, CELLULAR_CONTROLLER_NAME,
+                getModemControllerActivity(), which);
+
         pw.print("     Cellular data received: "); pw.println(formatBytesLocked(mobileRxTotalBytes));
         pw.print("     Cellular data sent: "); pw.println(formatBytesLocked(mobileTxTotalBytes));
         pw.print("     Cellular packets received: "); pw.println(mobileRxTotalPackets);
@@ -4818,9 +4821,6 @@ public abstract class BatteryStats implements Parcelable {
         if (!didOne) sb.append(" (no activity)");
         pw.println(sb.toString());
 
-        printControllerActivity(pw, sb, prefix, CELLULAR_CONTROLLER_NAME,
-            getModemControllerActivity(), which);
-
         pw.print(prefix);
         sb.setLength(0);
         sb.append(prefix);
@@ -4836,6 +4836,9 @@ public abstract class BatteryStats implements Parcelable {
         sb.append("("); sb.append(formatRatioLocked(wifiActiveTime, whichBatteryRealtime));
         sb.append(")");
         pw.println(sb.toString());
+
+        printControllerActivity(pw, sb, prefix, WIFI_CONTROLLER_NAME,
+                getWifiControllerActivity(), which);
 
         pw.print("     Wifi data received: "); pw.println(formatBytesLocked(wifiRxTotalBytes));
         pw.print("     Wifi data sent: "); pw.println(formatBytesLocked(wifiTxTotalBytes));
@@ -4914,9 +4917,6 @@ public abstract class BatteryStats implements Parcelable {
         if (!didOne) sb.append(" (no activity)");
         pw.println(sb.toString());
 
-        printControllerActivity(pw, sb, prefix, WIFI_CONTROLLER_NAME,
-            getWifiControllerActivity(), which);
-
         pw.print(prefix);
         sb.setLength(0);
         sb.append(prefix);
@@ -4949,8 +4949,10 @@ public abstract class BatteryStats implements Parcelable {
             pw.print(prefix);
             sb.setLength(0);
             sb.append(prefix);
-            sb.append("     Battery Drain (mAh): ");
-            sb.append(Double.toString(((double) gpsBatteryDrainMaMs)/(3600 * 1000)));
+            sb.append("     GPS Battery Drain: ");
+            sb.append(new DecimalFormat("#.##").format(
+                    ((double) gpsBatteryDrainMaMs) / (3600 * 1000)));
+            sb.append("mAh");
             pw.println(sb.toString());
         }
 
