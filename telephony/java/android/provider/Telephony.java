@@ -3765,6 +3765,42 @@ public final class Telephony {
          */
         public static final String CARRIER_ID = "carrier_id";
 
+        /**
+         * The skip 464xlat flag. Flag works as follows.
+         * {@link #SKIP_464XLAT_DEFAULT}: the APN will skip only APN is IMS and no internet.
+         * {@link #SKIP_464XLAT_DISABLE}: the APN will NOT skip 464xlat
+         * {@link #SKIP_464XLAT_ENABLE}: the APN will skip 464xlat
+         * <p>Type: INTEGER</p>
+         *
+         * @hide
+         */
+        public static final String SKIP_464XLAT = "skip_464xlat";
+
+        /**
+         * Possible value for the {@link #SKIP_464XLAT} field.
+         * <p>Type: INTEGER</p>
+         *
+         * @hide
+         */
+        public static final int SKIP_464XLAT_DEFAULT = -1;
+
+        /**
+         * Possible value for the {@link #SKIP_464XLAT} field.
+         * <p>Type: INTEGER</p>
+         *
+         * @hide
+         */
+        public static final int SKIP_464XLAT_DISABLE = 0;
+
+        /**
+         * Possible value for the {@link #SKIP_464XLAT} field.
+         * <p>Type: INTEGER</p>
+         *
+         * @hide
+         */
+        public static final int SKIP_464XLAT_ENABLE = 1;
+
+
         /** @hide */
         @IntDef({
                 UNEDITED,
@@ -3775,6 +3811,16 @@ public final class Telephony {
         })
         @Retention(RetentionPolicy.SOURCE)
         public @interface EditStatus {}
+
+        /** @hide */
+        @IntDef({
+                SKIP_464XLAT_DEFAULT,
+                SKIP_464XLAT_DISABLE,
+                SKIP_464XLAT_ENABLE,
+        })
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface Skip464XlatStatus {}
+
     }
 
     /**
