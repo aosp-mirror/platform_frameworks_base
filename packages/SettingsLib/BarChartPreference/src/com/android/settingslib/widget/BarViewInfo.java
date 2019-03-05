@@ -34,6 +34,7 @@ public class BarViewInfo implements Comparable<BarViewInfo> {
     private View.OnClickListener mClickListener;
     @StringRes
     private int mSummary;
+    private @Nullable CharSequence mContentDescription;
     // A number indicates this bar's height. The larger number shows a higher bar view.
     private int mHeight;
     // A real height of bar view.
@@ -45,11 +46,14 @@ public class BarViewInfo implements Comparable<BarViewInfo> {
      * @param icon      The icon of bar view.
      * @param barHeight The height of bar view. Larger number shows a higher bar view.
      * @param summary   The string resource id for summary.
+     * @param contentDescription Optional text that briefly describes the contents of the icon.
      */
-    public BarViewInfo(Drawable icon, @IntRange(from = 0) int barHeight, @StringRes int summary) {
+    public BarViewInfo(Drawable icon, @IntRange(from = 0) int barHeight, @StringRes int summary,
+            @Nullable CharSequence contentDescription) {
         mIcon = icon;
         mHeight = barHeight;
         mSummary = summary;
+        mContentDescription = contentDescription;
     }
 
     /**
@@ -89,6 +93,10 @@ public class BarViewInfo implements Comparable<BarViewInfo> {
     @StringRes
     int getSummary() {
         return mSummary;
+    }
+
+    public @Nullable CharSequence getContentDescription() {
+        return mContentDescription;
     }
 
     void setNormalizedHeight(@IntRange(from = 0) int barHeight) {
