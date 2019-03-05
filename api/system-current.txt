@@ -726,30 +726,29 @@ package android.app.usage {
 package android.bluetooth {
 
   public final class BluetoothAdapter {
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean addOnMetadataChangedListener(@NonNull android.bluetooth.BluetoothDevice, @NonNull java.util.concurrent.Executor, @NonNull android.bluetooth.BluetoothAdapter.OnMetadataChangedListener);
     method public boolean disableBLE();
     method public boolean enableBLE();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN) public boolean enableNoAutoConnect();
     method public boolean isBleScanAlwaysAvailable();
     method public boolean isLeEnabled();
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean registerMetadataListener(android.bluetooth.BluetoothDevice, android.bluetooth.BluetoothAdapter.MetadataListener, android.os.Handler);
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean unregisterMetadataListener(android.bluetooth.BluetoothDevice);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean removeOnMetadataChangedListener(@NonNull android.bluetooth.BluetoothDevice, @NonNull android.bluetooth.BluetoothAdapter.OnMetadataChangedListener);
     field public static final String ACTION_BLE_STATE_CHANGED = "android.bluetooth.adapter.action.BLE_STATE_CHANGED";
     field public static final String ACTION_REQUEST_BLE_SCAN_ALWAYS_AVAILABLE = "android.bluetooth.adapter.action.REQUEST_BLE_SCAN_ALWAYS_AVAILABLE";
   }
 
-  public abstract static class BluetoothAdapter.MetadataListener {
-    ctor public BluetoothAdapter.MetadataListener();
-    method public void onMetadataChanged(android.bluetooth.BluetoothDevice, int, String);
+  public static interface BluetoothAdapter.OnMetadataChangedListener {
+    method public void onMetadataChanged(@NonNull android.bluetooth.BluetoothDevice, int, @Nullable byte[]);
   }
 
   public final class BluetoothDevice implements android.os.Parcelable {
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN) public boolean cancelBondProcess();
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public String getMetadata(int);
+    method @Nullable @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public byte[] getMetadata(int);
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH) public boolean isConnected();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH) public boolean isEncrypted();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean isInSilenceMode();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN) public boolean removeBond();
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean setMetadata(int, String);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean setMetadata(int, @NonNull byte[]);
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean setPhonebookAccessPermission(int);
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean setSilenceMode(boolean);
     field public static final int ACCESS_ALLOWED = 1; // 0x1
@@ -759,21 +758,21 @@ package android.bluetooth {
     field public static final int METADATA_COMPANION_APP = 4; // 0x4
     field public static final int METADATA_ENHANCED_SETTINGS_UI_URI = 16; // 0x10
     field public static final int METADATA_HARDWARE_VERSION = 3; // 0x3
-    field public static final int METADATA_IS_UNTHETHERED_HEADSET = 6; // 0x6
+    field public static final int METADATA_IS_UNTETHERED_HEADSET = 6; // 0x6
     field public static final int METADATA_MAIN_ICON = 5; // 0x5
     field public static final int METADATA_MANUFACTURER_NAME = 0; // 0x0
     field public static final int METADATA_MAX_LENGTH = 2048; // 0x800
     field public static final int METADATA_MODEL_NAME = 1; // 0x1
     field public static final int METADATA_SOFTWARE_VERSION = 2; // 0x2
-    field public static final int METADATA_UNTHETHERED_CASE_BATTERY = 12; // 0xc
-    field public static final int METADATA_UNTHETHERED_CASE_CHARGING = 15; // 0xf
-    field public static final int METADATA_UNTHETHERED_CASE_ICON = 9; // 0x9
-    field public static final int METADATA_UNTHETHERED_LEFT_BATTERY = 10; // 0xa
-    field public static final int METADATA_UNTHETHERED_LEFT_CHARGING = 13; // 0xd
-    field public static final int METADATA_UNTHETHERED_LEFT_ICON = 7; // 0x7
-    field public static final int METADATA_UNTHETHERED_RIGHT_BATTERY = 11; // 0xb
-    field public static final int METADATA_UNTHETHERED_RIGHT_CHARGING = 14; // 0xe
-    field public static final int METADATA_UNTHETHERED_RIGHT_ICON = 8; // 0x8
+    field public static final int METADATA_UNTETHERED_CASE_BATTERY = 12; // 0xc
+    field public static final int METADATA_UNTETHERED_CASE_CHARGING = 15; // 0xf
+    field public static final int METADATA_UNTETHERED_CASE_ICON = 9; // 0x9
+    field public static final int METADATA_UNTETHERED_LEFT_BATTERY = 10; // 0xa
+    field public static final int METADATA_UNTETHERED_LEFT_CHARGING = 13; // 0xd
+    field public static final int METADATA_UNTETHERED_LEFT_ICON = 7; // 0x7
+    field public static final int METADATA_UNTETHERED_RIGHT_BATTERY = 11; // 0xb
+    field public static final int METADATA_UNTETHERED_RIGHT_CHARGING = 14; // 0xe
+    field public static final int METADATA_UNTETHERED_RIGHT_ICON = 8; // 0x8
   }
 
   public final class BluetoothHeadset implements android.bluetooth.BluetoothProfile {
