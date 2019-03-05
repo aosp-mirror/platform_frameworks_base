@@ -3983,6 +3983,9 @@
     <!-- Whether or not to enable automatic heap dumps for the system server on debuggable builds. -->
     <bool name="config_debugEnableAutomaticSystemServerHeapDumps">false</bool>
 
+    <!-- Trigger a heap dump if the system server pss usage exceeds this threshold. 400 MB -->
+    <integer name="config_debugSystemServerPssThresholdBytes">419430400</integer>
+
     <!-- See DropBoxManagerService.
          The minimum period in milliseconds between broadcasts for entries with low priority
          dropbox tags. -->

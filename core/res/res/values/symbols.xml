@@ -3225,6 +3225,7 @@
   <java-symbol type="bool" name="config_batterymeterDualTone" />
 
   <java-symbol type="bool" name="config_debugEnableAutomaticSystemServerHeapDumps" />
+  <java-symbol type="integer" name="config_debugSystemServerPssThresholdBytes" />
 
   <!-- Accessibility Shortcut -->
   <java-symbol type="string" name="accessibility_shortcut_warning_dialog_title" />
