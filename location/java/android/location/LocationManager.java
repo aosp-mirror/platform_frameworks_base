@@ -170,17 +170,6 @@ public class LocationManager {
     public static final String KEY_LOCATION_CHANGED = "location";
 
     /**
-     * Broadcast intent action indicating that the GPS has either been
-     * enabled or disabled. An intent extra provides this state as a boolean,
-     * where {@code true} means enabled.
-     * @see #EXTRA_GPS_ENABLED
-     *
-     * @hide
-     */
-    public static final String GPS_ENABLED_CHANGE_ACTION =
-        "android.location.GPS_ENABLED_CHANGE";
-
-    /**
      * Broadcast intent action when the set of enabled location providers changes. To check the
      * status of a provider, use {@link #isProviderEnabled(String)}.
      */
@@ -204,26 +193,6 @@ public class LocationManager {
      */
     @Deprecated
     public static final String MODE_CHANGING_ACTION = "com.android.settings.location.MODE_CHANGING";
-
-    /**
-     * Broadcast intent action indicating that the GPS has either started or
-     * stopped receiving GPS fixes. An intent extra provides this state as a
-     * boolean, where {@code true} means that the GPS is actively receiving fixes.
-     * @see #EXTRA_GPS_ENABLED
-     *
-     * @hide
-     */
-    public static final String GPS_FIX_CHANGE_ACTION =
-        "android.location.GPS_FIX_CHANGE";
-
-    /**
-     * The lookup key for a boolean that indicates whether GPS is enabled or
-     * disabled. {@code true} means GPS is enabled. Retrieve it with
-     * {@link android.content.Intent#getBooleanExtra(String,boolean)}.
-     *
-     * @hide
-     */
-    public static final String EXTRA_GPS_ENABLED = "enabled";
 
     /**
      * Broadcast intent action indicating that a high power location requests

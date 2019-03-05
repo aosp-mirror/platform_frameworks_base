@@ -398,10 +398,8 @@
 
     <protected-broadcast android:name="android.intent.action.SUB_DEFAULT_CHANGED" />
 
-    <protected-broadcast android:name="android.location.GPS_ENABLED_CHANGE" />
     <protected-broadcast android:name="android.location.PROVIDERS_CHANGED" />
     <protected-broadcast android:name="android.location.MODE_CHANGED" />
-    <protected-broadcast android:name="android.location.GPS_FIX_CHANGE" />
     <protected-broadcast android:name="android.net.proxy.PAC_REFRESH" />
 
     <protected-broadcast android:name="android.telecom.action.DEFAULT_DIALER_CHANGED" />
