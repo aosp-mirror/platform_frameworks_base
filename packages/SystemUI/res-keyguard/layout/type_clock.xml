@@ -21,10 +21,10 @@
   >
   <com.android.keyguard.clock.TypographicClock
       android:id="@+id/type_clock"
-      android:orientation="vertical"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      android:paddingLeft="50dp"
+      android:paddingStart="50dp"
+      android:textAlignment="viewStart"
       style="@style/widget_big"
       android:textSize="40dp"
       />
