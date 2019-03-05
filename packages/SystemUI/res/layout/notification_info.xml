@@ -44,7 +44,7 @@
             android:id="@+id/pkgname"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAppearance="@*android:style/TextAppearance.Material.Notification.Info"
+            android:textAppearance="@*android:style/TextAppearance.DeviceDefault.Notification.Info"
             android:layout_marginStart="3dp"
             android:layout_marginEnd="2dp"
             android:singleLine="true"
@@ -54,7 +54,7 @@
             android:id="@+id/pkg_divider"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAppearance="@*android:style/TextAppearance.Material.Notification.Info"
+            android:textAppearance="@*android:style/TextAppearance.DeviceDefault.Notification.Info"
             android:layout_marginStart="2dp"
             android:layout_marginEnd="2dp"
             android:text="@*android:string/notification_header_divider_symbol"
@@ -64,7 +64,7 @@
             android:id="@+id/delegate_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAppearance="@*android:style/TextAppearance.Material.Notification.Info"
+            android:textAppearance="@*android:style/TextAppearance.DeviceDefault.Notification.Info"
             android:layout_marginStart="2dp"
             android:layout_marginEnd="2dp"
             android:ellipsize="end"
@@ -129,7 +129,7 @@ asked for it -->
                     android:id="@+id/group_name"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textAppearance="@*android:style/TextAppearance.Material.Notification.Title"
+                    android:textAppearance="@*android:style/TextAppearance.DeviceDefault.Notification.Title"
                     android:layout_marginStart="2dp"
                     android:layout_marginEnd="2dp"
                     android:ellipsize="end"
@@ -139,7 +139,7 @@ asked for it -->
                     android:id="@+id/pkg_group_divider"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textAppearance="@*android:style/TextAppearance.Material.Notification.Title"
+                    android:textAppearance="@*android:style/TextAppearance.DeviceDefault.Notification.Title"
                     android:layout_marginStart="2dp"
                     android:layout_marginEnd="2dp"
                     android:text="@*android:string/notification_header_divider_symbol"
@@ -151,7 +151,7 @@ asked for it -->
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    style="@android:style/TextAppearance.Material.Notification.Title"
+                    style="@*android:style/TextAppearance.DeviceDefault.Notification.Title"
                     android:layout_toEndOf="@id/pkg_group_divider"/>
             </RelativeLayout>
             <!-- Question prompt -->
@@ -159,7 +159,7 @@ asked for it -->
                 android:id="@+id/block_prompt"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                style="@android:style/TextAppearance.Material.Notification" />
+                style="@*android:style/TextAppearance.DeviceDefault.Notification" />
         </LinearLayout>
 
         <!-- Settings and Done buttons -->
