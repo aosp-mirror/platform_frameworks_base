@@ -6473,10 +6473,14 @@ package android.service.contentsuggestions {
 
   public abstract class ContentSuggestionsService extends android.app.Service {
     ctor public ContentSuggestionsService();
-    method public abstract void classifyContentSelections(@NonNull android.app.contentsuggestions.ClassificationsRequest, @NonNull android.app.contentsuggestions.ContentSuggestionsManager.ClassificationsCallback);
-    method public abstract void notifyInteraction(@NonNull String, @NonNull android.os.Bundle);
-    method public abstract void processContextImage(int, @Nullable android.graphics.Bitmap, @NonNull android.os.Bundle);
-    method public abstract void suggestContentSelections(@NonNull android.app.contentsuggestions.SelectionsRequest, @NonNull android.app.contentsuggestions.ContentSuggestionsManager.SelectionsCallback);
+    method @Deprecated public void classifyContentSelections(@NonNull android.app.contentsuggestions.ClassificationsRequest, @NonNull android.app.contentsuggestions.ContentSuggestionsManager.ClassificationsCallback);
+    method @Deprecated public void notifyInteraction(@NonNull String, @NonNull android.os.Bundle);
+    method public void onClassifyContentSelections(@NonNull android.app.contentsuggestions.ClassificationsRequest, @NonNull android.app.contentsuggestions.ContentSuggestionsManager.ClassificationsCallback);
+    method public void onNotifyInteraction(@NonNull String, @NonNull android.os.Bundle);
+    method public void onProcessContextImage(int, @Nullable android.graphics.Bitmap, @NonNull android.os.Bundle);
+    method public void onSuggestContentSelections(@NonNull android.app.contentsuggestions.SelectionsRequest, @NonNull android.app.contentsuggestions.ContentSuggestionsManager.SelectionsCallback);
+    method @Deprecated public void processContextImage(int, @Nullable android.graphics.Bitmap, @NonNull android.os.Bundle);
+    method @Deprecated public void suggestContentSelections(@NonNull android.app.contentsuggestions.SelectionsRequest, @NonNull android.app.contentsuggestions.ContentSuggestionsManager.SelectionsCallback);
     field public static final String SERVICE_INTERFACE = "android.service.contentsuggestions.ContentSuggestionsService";
   }
 

@@ -54,8 +54,8 @@ public abstract class ContentSuggestionsService extends Service {
      * The action for the intent used to define the content suggestions service.
      *
      * <p>To be supported, the service must also require the
-     *      * {@link android.Manifest.permission#BIND_CONTENT_SUGGESTIONS_SERVICE} permission so
-     *      * that other applications can not abuse it.
+     * * {@link android.Manifest.permission#BIND_CONTENT_SUGGESTIONS_SERVICE} permission so
+     * * that other applications can not abuse it.
      */
     public static final String SERVICE_INTERFACE =
             "android.service.contentsuggestions.ContentSuggestionsService";
@@ -72,7 +72,7 @@ public abstract class ContentSuggestionsService extends Service {
             }
 
             mHandler.sendMessage(
-                    obtainMessage(ContentSuggestionsService::processContextImage,
+                    obtainMessage(ContentSuggestionsService::onProcessContextImage,
                             ContentSuggestionsService.this, taskId,
                             wrappedBuffer,
                             imageContextRequestExtras));
@@ -81,7 +81,8 @@ public abstract class ContentSuggestionsService extends Service {
         @Override
         public void suggestContentSelections(SelectionsRequest request,
                 ISelectionsCallback callback) {
-            mHandler.sendMessage(obtainMessage(ContentSuggestionsService::suggestContentSelections,
+            mHandler.sendMessage(obtainMessage(
+                    ContentSuggestionsService::onSuggestContentSelections,
                     ContentSuggestionsService.this, request, wrapSelectionsCallback(callback)));
 
         }
@@ -89,14 +90,15 @@ public abstract class ContentSuggestionsService extends Service {
         @Override
         public void classifyContentSelections(ClassificationsRequest request,
                 IClassificationsCallback callback) {
-            mHandler.sendMessage(obtainMessage(ContentSuggestionsService::classifyContentSelections,
+            mHandler.sendMessage(obtainMessage(
+                    ContentSuggestionsService::onClassifyContentSelections,
                     ContentSuggestionsService.this, request, wrapClassificationCallback(callback)));
         }
 
         @Override
         public void notifyInteraction(String requestId, Bundle interaction) {
             mHandler.sendMessage(
-                    obtainMessage(ContentSuggestionsService::notifyInteraction,
+                    obtainMessage(ContentSuggestionsService::onNotifyInteraction,
                             ContentSuggestionsService.this, requestId, interaction));
         }
     };
@@ -122,25 +124,41 @@ public abstract class ContentSuggestionsService extends Service {
      * Called by the system to provide the snapshot for the task associated with the given
      * {@param taskId}.
      */
-    public abstract void processContextImage(
-            int taskId, @Nullable Bitmap contextImage, @NonNull Bundle extras);
+    public void onProcessContextImage(
+            int taskId, @Nullable Bitmap contextImage, @NonNull Bundle extras) {
+        // TODO(b/127532182): remove after next prebuilt drop.
+        processContextImage(taskId, contextImage, extras);
+    }
 
     /**
-     * Called by a client app to make a request for content selections.
+     * Content selections have been request through {@link ContentSuggestionsManager}, implementer
+     * should reply on the callback with selections.
      */
-    public abstract void suggestContentSelections(@NonNull SelectionsRequest request,
-            @NonNull ContentSuggestionsManager.SelectionsCallback callback);
+    public void onSuggestContentSelections(@NonNull SelectionsRequest request,
+            @NonNull ContentSuggestionsManager.SelectionsCallback callback) {
+        // TODO(b/127532182): remove after next prebuilt drop.
+        suggestContentSelections(request, callback);
+    }
 
     /**
-     * Called by a client app to classify the provided content selections.
+     * Content classifications have been request through {@link ContentSuggestionsManager},
+     * implementer should reply on the callback with classifications.
      */
-    public abstract void classifyContentSelections(@NonNull ClassificationsRequest request,
-            @NonNull ContentSuggestionsManager.ClassificationsCallback callback);
+    public void onClassifyContentSelections(@NonNull ClassificationsRequest request,
+            @NonNull ContentSuggestionsManager.ClassificationsCallback callback) {
+        // TODO(b/127532182): remove after next prebuilt drop.
+        classifyContentSelections(request, callback);
+    }
 
     /**
-     * Called by a client app to report an interaction.
+     * User interactions have been reported through {@link ContentSuggestionsManager}, implementer
+     * should handle those interactions.
      */
-    public abstract void notifyInteraction(@NonNull String requestId, @NonNull Bundle interaction);
+    public void onNotifyInteraction(
+            @NonNull String requestId, @NonNull Bundle interaction) {
+        // TODO(b/127532182): remove after next prebuilt drop.
+        notifyInteraction(requestId, interaction);
+    }
 
     private ContentSuggestionsManager.SelectionsCallback wrapSelectionsCallback(
             ISelectionsCallback callback) {
@@ -162,5 +180,41 @@ public abstract class ContentSuggestionsService extends Service {
                 Slog.e(TAG, "Error sending result: " + e);
             }
         });
+    }
+
+
+    /**
+     * For temporary compat reason, remove with b/127532182
+     * @deprecated
+     */
+    @Deprecated
+    public void processContextImage(
+            int taskId, @Nullable Bitmap contextImage, @NonNull Bundle extras) {
+    }
+
+    /**
+     * For temporary compat reason, remove with b/127532182
+     * @deprecated
+     */
+    @Deprecated
+    public void suggestContentSelections(@NonNull SelectionsRequest request,
+            @NonNull ContentSuggestionsManager.SelectionsCallback callback) {
+    }
+
+    /**
+     * For temporary compat reason, remove with b/127532182
+     * @deprecated
+     */
+    @Deprecated
+    public void classifyContentSelections(@NonNull ClassificationsRequest request,
+            @NonNull ContentSuggestionsManager.ClassificationsCallback callback) {
+    }
+
+    /**
+     * For temporary compat reason, remove with b/127532182
+     * @deprecated
+     */
+    @Deprecated
+    public void notifyInteraction(@NonNull String requestId, @NonNull Bundle interaction) {
     }
 }
