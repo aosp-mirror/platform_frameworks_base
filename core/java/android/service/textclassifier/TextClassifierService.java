@@ -17,6 +17,7 @@
 package android.service.textclassifier;
 
 import android.Manifest;
+import android.annotation.MainThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
@@ -27,8 +28,12 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
+import android.os.Bundle;
 import android.os.CancellationSignal;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
+import android.os.Parcelable;
 import android.os.RemoteException;
 import android.text.TextUtils;
 import android.util.Slog;
@@ -45,6 +50,10 @@ import android.view.textclassifier.TextLinks;
 import android.view.textclassifier.TextSelection;
 
 import com.android.internal.util.Preconditions;
+
+import java.lang.ref.WeakReference;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Abstract base class for the TextClassifier service.
@@ -68,6 +77,11 @@ import com.android.internal.util.Preconditions;
  *     </intent-filter>
  * </service>}</pre>
  *
+ * <p>From {@link android.os.Build.VERSION_CODES#Q} onward, all callbacks are called on the main
+ * thread. Prior to Q, there is no guarantee on what thread the callback will happen. You should
+ * make sure the callbacks are executed in your desired thread by using a executor, a handler or
+ * something else along the line.
+ *
  * @see TextClassifier
  * @hide
  */
@@ -85,201 +99,102 @@ public abstract class TextClassifierService extends Service {
     public static final String SERVICE_INTERFACE =
             "android.service.textclassifier.TextClassifierService";
 
+    /** @hide **/
+    private static final String KEY_RESULT = "key_result";
+
+    private final Handler mMainThreadHandler = new Handler(Looper.getMainLooper(), null, true);
+    private final ExecutorService mSingleThreadExecutor = Executors.newSingleThreadExecutor();
+
     private final ITextClassifierService.Stub mBinder = new ITextClassifierService.Stub() {
 
         // TODO(b/72533911): Implement cancellation signal
         @NonNull private final CancellationSignal mCancellationSignal = new CancellationSignal();
 
-        /** {@inheritDoc} */
         @Override
         public void onSuggestSelection(
                 TextClassificationSessionId sessionId,
-                TextSelection.Request request, ITextSelectionCallback callback) {
+                TextSelection.Request request, ITextClassifierCallback callback) {
             Preconditions.checkNotNull(request);
             Preconditions.checkNotNull(callback);
-            TextClassifierService.this.onSuggestSelection(
-                    sessionId, request, mCancellationSignal,
-                    new Callback<TextSelection>() {
-                        @Override
-                        public void onSuccess(TextSelection result) {
-                            try {
-                                callback.onSuccess(result);
-                            } catch (RemoteException e) {
-                                Slog.d(LOG_TAG, "Error calling callback");
-                            }
-                        }
+            mMainThreadHandler.post(() -> TextClassifierService.this.onSuggestSelection(
+                    sessionId, request, mCancellationSignal, new ProxyCallback<>(callback)));
 
-                        @Override
-                        public void onFailure(CharSequence error) {
-                            try {
-                                if (callback.asBinder().isBinderAlive()) {
-                                    callback.onFailure();
-                                }
-                            } catch (RemoteException e) {
-                                Slog.d(LOG_TAG, "Error calling callback");
-                            }
-                        }
-                    });
         }
 
-        /** {@inheritDoc} */
         @Override
         public void onClassifyText(
                 TextClassificationSessionId sessionId,
-                TextClassification.Request request, ITextClassificationCallback callback) {
+                TextClassification.Request request, ITextClassifierCallback callback) {
             Preconditions.checkNotNull(request);
             Preconditions.checkNotNull(callback);
-            TextClassifierService.this.onClassifyText(
-                    sessionId, request, mCancellationSignal,
-                    new Callback<TextClassification>() {
-                        @Override
-                        public void onSuccess(TextClassification result) {
-                            try {
-                                callback.onSuccess(result);
-                            } catch (RemoteException e) {
-                                Slog.d(LOG_TAG, "Error calling callback");
-                            }
-                        }
-
-                        @Override
-                        public void onFailure(CharSequence error) {
-                            try {
-                                callback.onFailure();
-                            } catch (RemoteException e) {
-                                Slog.d(LOG_TAG, "Error calling callback");
-                            }
-                        }
-                    });
+            mMainThreadHandler.post(() -> TextClassifierService.this.onClassifyText(
+                    sessionId, request, mCancellationSignal, new ProxyCallback<>(callback)));
         }
 
-        /** {@inheritDoc} */
         @Override
         public void onGenerateLinks(
                 TextClassificationSessionId sessionId,
-                TextLinks.Request request, ITextLinksCallback callback) {
+                TextLinks.Request request, ITextClassifierCallback callback) {
             Preconditions.checkNotNull(request);
             Preconditions.checkNotNull(callback);
-            TextClassifierService.this.onGenerateLinks(
-                    sessionId, request,
-                    mCancellationSignal,
-                    new Callback<TextLinks>() {
-                        @Override
-                        public void onSuccess(TextLinks result) {
-                            try {
-                                callback.onSuccess(result);
-                            } catch (RemoteException e) {
-                                Slog.d(LOG_TAG, "Error calling callback");
-                            }
-                        }
-
-                        @Override
-                        public void onFailure(CharSequence error) {
-                            try {
-                                callback.onFailure();
-                            } catch (RemoteException e) {
-                                Slog.d(LOG_TAG, "Error calling callback");
-                            }
-                        }
-                    });
+            mMainThreadHandler.post(() -> TextClassifierService.this.onGenerateLinks(
+                    sessionId, request, mCancellationSignal, new ProxyCallback<>(callback)));
         }
 
-        /** {@inheritDoc} */
         @Override
         public void onSelectionEvent(
                 TextClassificationSessionId sessionId,
                 SelectionEvent event) {
             Preconditions.checkNotNull(event);
-            TextClassifierService.this.onSelectionEvent(sessionId, event);
+            mMainThreadHandler.post(
+                    () -> TextClassifierService.this.onSelectionEvent(sessionId, event));
         }
 
-        /** {@inheritDoc} */
         @Override
         public void onTextClassifierEvent(
                 TextClassificationSessionId sessionId,
                 TextClassifierEvent event) {
             Preconditions.checkNotNull(event);
-            TextClassifierService.this.onTextClassifierEvent(sessionId, event);
+            mMainThreadHandler.post(
+                    () -> TextClassifierService.this.onTextClassifierEvent(sessionId, event));
         }
 
-        /** {@inheritDoc} */
         @Override
         public void onDetectLanguage(
                 TextClassificationSessionId sessionId,
                 TextLanguage.Request request,
-                ITextLanguageCallback callback) {
+                ITextClassifierCallback callback) {
             Preconditions.checkNotNull(request);
             Preconditions.checkNotNull(callback);
-            TextClassifierService.this.onDetectLanguage(
-                    sessionId,
-                    request,
-                    mCancellationSignal,
-                    new Callback<TextLanguage>() {
-                        @Override
-                        public void onSuccess(TextLanguage result) {
-                            try {
-                                callback.onSuccess(result);
-                            } catch (RemoteException e) {
-                                Slog.d(LOG_TAG, "Error calling callback");
-                            }
-                        }
-
-                        @Override
-                        public void onFailure(CharSequence error) {
-                            try {
-                                callback.onFailure();
-                            } catch (RemoteException e) {
-                                Slog.d(LOG_TAG, "Error calling callback");
-                            }
-                        };
-                    });
+            mMainThreadHandler.post(() -> TextClassifierService.this.onDetectLanguage(
+                    sessionId, request, mCancellationSignal, new ProxyCallback<>(callback)));
         }
 
-        /** {@inheritDoc} */
         @Override
         public void onSuggestConversationActions(
                 TextClassificationSessionId sessionId,
                 ConversationActions.Request request,
-                IConversationActionsCallback callback) {
+                ITextClassifierCallback callback) {
             Preconditions.checkNotNull(request);
             Preconditions.checkNotNull(callback);
-            TextClassifierService.this.onSuggestConversationActions(
-                    sessionId,
-                    request,
-                    mCancellationSignal,
-                    new Callback<ConversationActions>() {
-                        @Override
-                        public void onSuccess(ConversationActions result) {
-                            try {
-                                callback.onSuccess(result);
-                            } catch (RemoteException e) {
-                                Slog.d(LOG_TAG, "Error calling callback");
-                            }
-                        }
-
-                        @Override
-                        public void onFailure(CharSequence error) {
-                            try {
-                                callback.onFailure();
-                            } catch (RemoteException e) {
-                                Slog.d(LOG_TAG, "Error calling callback");
-                            }
-                        }
-                    });
+            mMainThreadHandler.post(() -> TextClassifierService.this.onSuggestConversationActions(
+                    sessionId, request, mCancellationSignal, new ProxyCallback<>(callback)));
         }
 
-        /** {@inheritDoc} */
         @Override
         public void onCreateTextClassificationSession(
                 TextClassificationContext context, TextClassificationSessionId sessionId) {
             Preconditions.checkNotNull(context);
             Preconditions.checkNotNull(sessionId);
-            TextClassifierService.this.onCreateTextClassificationSession(context, sessionId);
+            mMainThreadHandler.post(
+                    () -> TextClassifierService.this.onCreateTextClassificationSession(
+                            context, sessionId));
         }
 
-        /** {@inheritDoc} */
         @Override
         public void onDestroyTextClassificationSession(TextClassificationSessionId sessionId) {
-            TextClassifierService.this.onDestroyTextClassificationSession(sessionId);
+            mMainThreadHandler.post(
+                    () -> TextClassifierService.this.onDestroyTextClassificationSession(sessionId));
         }
     };
 
@@ -301,6 +216,7 @@ public abstract class TextClassifierService extends Service {
      * @param cancellationSignal object to watch for canceling the current operation
      * @param callback the callback to return the result to
      */
+    @MainThread
     public abstract void onSuggestSelection(
             @Nullable TextClassificationSessionId sessionId,
             @NonNull TextSelection.Request request,
@@ -316,6 +232,7 @@ public abstract class TextClassifierService extends Service {
      * @param cancellationSignal object to watch for canceling the current operation
      * @param callback the callback to return the result to
      */
+    @MainThread
     public abstract void onClassifyText(
             @Nullable TextClassificationSessionId sessionId,
             @NonNull TextClassification.Request request,
@@ -331,6 +248,7 @@ public abstract class TextClassifierService extends Service {
      * @param cancellationSignal object to watch for canceling the current operation
      * @param callback the callback to return the result to
      */
+    @MainThread
     public abstract void onGenerateLinks(
             @Nullable TextClassificationSessionId sessionId,
             @NonNull TextLinks.Request request,
@@ -345,12 +263,14 @@ public abstract class TextClassifierService extends Service {
      * @param cancellationSignal object to watch for canceling the current operation
      * @param callback the callback to return the result to
      */
+    @MainThread
     public void onDetectLanguage(
             @Nullable TextClassificationSessionId sessionId,
             @NonNull TextLanguage.Request request,
             @NonNull CancellationSignal cancellationSignal,
             @NonNull Callback<TextLanguage> callback) {
-        callback.onSuccess(getLocalTextClassifier().detectLanguage(request));
+        mSingleThreadExecutor.submit(() ->
+                callback.onSuccess(getLocalTextClassifier().detectLanguage(request)));
     }
 
     /**
@@ -361,12 +281,14 @@ public abstract class TextClassifierService extends Service {
      * @param cancellationSignal object to watch for canceling the current operation
      * @param callback the callback to return the result to
      */
+    @MainThread
     public void onSuggestConversationActions(
             @Nullable TextClassificationSessionId sessionId,
             @NonNull ConversationActions.Request request,
             @NonNull CancellationSignal cancellationSignal,
             @NonNull Callback<ConversationActions> callback) {
-        callback.onSuccess(getLocalTextClassifier().suggestConversationActions(request));
+        mSingleThreadExecutor.submit(() ->
+                callback.onSuccess(getLocalTextClassifier().suggestConversationActions(request)));
     }
 
     /**
@@ -383,6 +305,7 @@ public abstract class TextClassifierService extends Service {
      *      instead
      */
     @Deprecated
+    @MainThread
     public void onSelectionEvent(
             @Nullable TextClassificationSessionId sessionId, @NonNull SelectionEvent event) {}
 
@@ -396,6 +319,7 @@ public abstract class TextClassifierService extends Service {
      * @param sessionId the session id
      * @param event the TextClassifier event
      */
+    @MainThread
     public void onTextClassifierEvent(
             @Nullable TextClassificationSessionId sessionId, @NonNull TextClassifierEvent event) {}
 
@@ -405,6 +329,7 @@ public abstract class TextClassifierService extends Service {
      * @param context the text classification context
      * @param sessionId the session's Id
      */
+    @MainThread
     public void onCreateTextClassificationSession(
             @NonNull TextClassificationContext context,
             @NonNull TextClassificationSessionId sessionId) {}
@@ -414,6 +339,7 @@ public abstract class TextClassifierService extends Service {
      *
      * @param sessionId the id of the session to destroy
      */
+    @MainThread
     public void onDestroyTextClassificationSession(
             @NonNull TextClassificationSessionId sessionId) {}
 
@@ -439,6 +365,11 @@ public abstract class TextClassifierService extends Service {
             return tcm.getTextClassifier(TextClassifier.LOCAL);
         }
         return TextClassifier.NO_OP;
+    }
+
+    /** @hide **/
+    public static <T extends Parcelable> T getResponse(Bundle bundle) {
+        return bundle.getParcelable(KEY_RESULT);
     }
 
     /**
@@ -493,5 +424,45 @@ public abstract class TextClassifierService extends Service {
                 Manifest.permission.BIND_TEXTCLASSIFIER_SERVICE,
                 si.permission));
         return null;
+    }
+
+    /**
+     * Forwards the callback result to a wrapped binder callback.
+     */
+    private static final class ProxyCallback<T extends Parcelable> implements Callback<T> {
+        private WeakReference<ITextClassifierCallback> mTextClassifierCallback;
+
+        private ProxyCallback(ITextClassifierCallback textClassifierCallback) {
+            mTextClassifierCallback =
+                    new WeakReference<>(Preconditions.checkNotNull(textClassifierCallback));
+        }
+
+        @Override
+        public void onSuccess(T result) {
+            ITextClassifierCallback callback = mTextClassifierCallback.get();
+            if (callback == null) {
+                return;
+            }
+            try {
+                Bundle bundle = new Bundle(1);
+                bundle.putParcelable(KEY_RESULT, result);
+                callback.onSuccess(bundle);
+            } catch (RemoteException e) {
+                Slog.d(LOG_TAG, "Error calling callback");
+            }
+        }
+
+        @Override
+        public void onFailure(CharSequence error) {
+            ITextClassifierCallback callback = mTextClassifierCallback.get();
+            if (callback == null) {
+                return;
+            }
+            try {
+                callback.onFailure();
+            } catch (RemoteException e) {
+                Slog.d(LOG_TAG, "Error calling callback");
+            }
+        }
     }
 }
