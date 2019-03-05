@@ -3073,6 +3073,15 @@ public abstract class PackageManager {
     public static final int FLAG_PERMISSION_USER_SENSITIVE_WHEN_DENIED =  1 << 9;
 
     /**
+     * Permission flag: The permission should not be shown in the UI.
+     *
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    public static final int FLAG_PERMISSION_HIDDEN =  1 << 10;
+
+    /**
      * Mask for all permission flags present in Android P
      *
      * @deprecated This constant does not contain useful information and should never have been
@@ -3090,7 +3099,7 @@ public abstract class PackageManager {
      *
      * @hide
      */
-    public static final int MASK_PERMISSION_FLAGS_ALL = 0x3FF;
+    public static final int MASK_PERMISSION_FLAGS_ALL = 0x7FF;
 
     /**
      * Injected activity in app that forwards user to setting activity of that app.
@@ -3801,6 +3810,7 @@ public abstract class PackageManager {
             FLAG_PERMISSION_GRANTED_BY_DEFAULT,
             FLAG_PERMISSION_USER_SENSITIVE_WHEN_GRANTED,
             FLAG_PERMISSION_USER_SENSITIVE_WHEN_DENIED,
+            FLAG_PERMISSION_HIDDEN,
             /*
             FLAG_PERMISSION_REVOKE_WHEN_REQUESED
             */
@@ -6594,6 +6604,7 @@ public abstract class PackageManager {
             case FLAG_PERMISSION_REVOKE_WHEN_REQUESTED: return "REVOKE_WHEN_REQUESTED";
             case FLAG_PERMISSION_USER_SENSITIVE_WHEN_GRANTED: return "USER_SENSITIVE_WHEN_GRANTED";
             case FLAG_PERMISSION_USER_SENSITIVE_WHEN_DENIED: return "USER_SENSITIVE_WHEN_DENIED";
+            case FLAG_PERMISSION_HIDDEN: return "HIDDEN";
             default: return Integer.toString(flag);
         }
     }

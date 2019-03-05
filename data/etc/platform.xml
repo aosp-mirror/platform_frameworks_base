@@ -202,22 +202,34 @@
         <new-permission name="android.permission.ACCESS_BACKGROUND_LOCATION" />
     </split-permission>
 
-    <!-- Apps holding either the legacy READ or WRITE permissions will inherit
-         the ability to <em>read</em> new typed permissions in the Q release; they
-         won't gain the ability to <em>write</em> that content. -->
-    <!-- STOPSHIP(b/112545973): change targetSdk to Q when SDK version finalised -->
+    <!-- STOPSHIP: change targetSdk to Q when SDK version finalised -->
+    <!-- Old apps might not understand the modern permission model, hence their view needs to be expanded -->
     <split-permission name="android.permission.READ_EXTERNAL_STORAGE"
                       targetSdk="10000">
         <new-permission name="android.permission.READ_MEDIA_AUDIO" />
         <new-permission name="android.permission.READ_MEDIA_VIDEO" />
         <new-permission name="android.permission.READ_MEDIA_IMAGES" />
     </split-permission>
-    <!-- STOPSHIP(b/112545973): change targetSdk to Q when SDK version finalised -->
+    <!-- STOPSHIP: change targetSdk to Q when SDK version finalised -->
     <split-permission name="android.permission.WRITE_EXTERNAL_STORAGE"
                       targetSdk="10000">
         <new-permission name="android.permission.READ_MEDIA_AUDIO" />
         <new-permission name="android.permission.READ_MEDIA_VIDEO" />
         <new-permission name="android.permission.READ_MEDIA_IMAGES" />
+    </split-permission>
+
+    <!-- An app using the typed media permissions might be grandfathered and then uses the old storage model -->
+    <split-permission name="android.permission.READ_MEDIA_AUDIO">
+        <new-permission name="android.permission.READ_EXTERNAL_STORAGE" />
+        <new-permission name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    </split-permission>
+    <split-permission name="android.permission.READ_MEDIA_VIDEO">
+        <new-permission name="android.permission.READ_EXTERNAL_STORAGE" />
+        <new-permission name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    </split-permission>
+    <split-permission name="android.permission.READ_MEDIA_IMAGES">
+        <new-permission name="android.permission.READ_EXTERNAL_STORAGE" />
+        <new-permission name="android.permission.WRITE_EXTERNAL_STORAGE" />
     </split-permission>
 
     <!-- This is a list of all the libraries available for application

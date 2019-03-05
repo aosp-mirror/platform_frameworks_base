@@ -48,7 +48,6 @@ import android.util.LongSparseLongArray;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
-
 import com.android.internal.annotations.Immutable;
 import com.android.internal.app.IAppOpsActiveCallback;
 import com.android.internal.app.IAppOpsCallback;
@@ -1098,6 +1097,8 @@ public class AppOpsManager {
     /** @hide Write media of image type. */
     public static final String OPSTR_WRITE_MEDIA_IMAGES = "android:write_media_images";
     /** @hide Has a legacy (non-isolated) view of storage. */
+    @TestApi
+    @SystemApi
     public static final String OPSTR_LEGACY_STORAGE = "android:legacy_storage";
     /** @hide Interact with accessibility. */
     @SystemApi
