@@ -68,7 +68,14 @@ public abstract class NotificationAssistantService extends NotificationListenerS
     @Retention(SOURCE)
     @IntDef({SOURCE_FROM_APP, SOURCE_FROM_ASSISTANT})
     public @interface Source {}
+
+    /**
+     * To indicate an adjustment is from an app.
+     */
     public static final int SOURCE_FROM_APP = 0;
+    /**
+     * To indicate an adjustment is from a {@link NotificationAssistantService}.
+     */
     public static final int SOURCE_FROM_ASSISTANT = 1;
 
     /**
