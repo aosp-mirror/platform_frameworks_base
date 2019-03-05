@@ -71,12 +71,14 @@ public final class AutofillOptions implements Parcelable {
      * Returns whether activity is whitelisted for augmented autofill.
      */
     public boolean isAugmentedAutofillEnabled(@NonNull Context context) {
+        if (!augmentedAutofillEnabled) return false;
+
         final ContentCaptureClient contentCaptureClient = context.getContentCaptureClient();
         if (contentCaptureClient == null) return false;
 
         final ComponentName component = contentCaptureClient.contentCaptureClientGetComponentName();
-        return augmentedAutofillEnabled && (whitelistedActivitiesForAugmentedAutofill == null
-                || whitelistedActivitiesForAugmentedAutofill.contains(component));
+        return whitelistedActivitiesForAugmentedAutofill == null
+                || whitelistedActivitiesForAugmentedAutofill.contains(component);
     }
 
     /**

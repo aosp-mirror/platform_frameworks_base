@@ -46,7 +46,17 @@ public class WhitelistHelperTest {
     private ComponentName mComponentDifferentPkg = new ComponentName(mPackage2, "class3");
 
     @Test
-    public void testWhitelistHelper_invalidArguments() {
+    public void testSetWhitelist_emptyArguments() {
+        assertThrows(IllegalArgumentException.class,
+                () -> mWhitelistHelper.setWhitelist(new ArraySet<>(), null));
+        assertThrows(IllegalArgumentException.class,
+                () -> mWhitelistHelper.setWhitelist(null, new ArraySet<>()));
+        assertThrows(IllegalArgumentException.class,
+                () -> mWhitelistHelper.setWhitelist(new ArraySet<>(), new ArraySet<>()));
+    }
+
+    @Test
+    public void testWhitelistHelper_nullArguments() {
         assertThrows(NullPointerException.class,
                 () -> mWhitelistHelper.isWhitelisted((String) null));
         assertThrows(NullPointerException.class,

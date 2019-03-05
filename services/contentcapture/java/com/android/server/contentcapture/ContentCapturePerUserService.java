@@ -275,6 +275,9 @@ final class ContentCapturePerUserService
         return mWhitelistHelper.isWhitelisted(componentName);
     }
 
+    /**
+     * @throws IllegalArgumentException if packages or components are empty.
+     */
     private void setWhitelist(@Nullable List<String> packages,
             @Nullable List<ComponentName> components) {
         // TODO(b/122595322): add CTS test for when it's null

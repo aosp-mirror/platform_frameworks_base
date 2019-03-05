@@ -49,11 +49,18 @@ public final class WhitelistHelper {
      *
      * @param packageNames packages to be whitelisted.
      * @param components activities to be whitelisted.
+     *
+     * @throws IllegalArgumentException if packages or components are empty.
      */
     public void setWhitelist(@Nullable ArraySet<String> packageNames,
             @Nullable ArraySet<ComponentName> components) {
         mWhitelistedPackages = null;
         if (packageNames == null && components == null) return;
+
+        if ((packageNames != null && packageNames.isEmpty())
+                || (components != null && components.isEmpty())) {
+            throw new IllegalArgumentException("Packages or Components cannot be empty.");
+        }
 
         mWhitelistedPackages = new ArrayMap<>();
 
