@@ -52,8 +52,9 @@ public class RcsOutgoingMessageDelivery {
      */
     @WorkerThread
     public void setDeliveredTimestamp(long deliveredTimestamp) throws RcsMessageStoreException {
-        mRcsControllerCall.callWithNoReturn(iRcs -> iRcs.setOutgoingDeliveryDeliveredTimestamp(
-                mRcsOutgoingMessageId, mRecipientId, deliveredTimestamp));
+        mRcsControllerCall.callWithNoReturn(
+                (iRcs, callingPackage) -> iRcs.setOutgoingDeliveryDeliveredTimestamp(
+                        mRcsOutgoingMessageId, mRecipientId, deliveredTimestamp, callingPackage));
     }
 
     /**
@@ -64,8 +65,9 @@ public class RcsOutgoingMessageDelivery {
      */
     @WorkerThread
     public long getDeliveredTimestamp() throws RcsMessageStoreException {
-        return mRcsControllerCall.call(iRcs -> iRcs.getOutgoingDeliveryDeliveredTimestamp(
-                mRcsOutgoingMessageId, mRecipientId));
+        return mRcsControllerCall.call(
+                (iRcs, callingPackage) -> iRcs.getOutgoingDeliveryDeliveredTimestamp(
+                        mRcsOutgoingMessageId, mRecipientId, callingPackage));
     }
 
     /**
@@ -77,8 +79,9 @@ public class RcsOutgoingMessageDelivery {
      */
     @WorkerThread
     public void setSeenTimestamp(long seenTimestamp) throws RcsMessageStoreException {
-        mRcsControllerCall.callWithNoReturn(iRcs -> iRcs.setOutgoingDeliverySeenTimestamp(
-                mRcsOutgoingMessageId, mRecipientId, seenTimestamp));
+        mRcsControllerCall.callWithNoReturn(
+                (iRcs, callingPackage) -> iRcs.setOutgoingDeliverySeenTimestamp(
+                        mRcsOutgoingMessageId, mRecipientId, seenTimestamp, callingPackage));
     }
 
     /**
@@ -90,7 +93,8 @@ public class RcsOutgoingMessageDelivery {
     @WorkerThread
     public long getSeenTimestamp() throws RcsMessageStoreException {
         return mRcsControllerCall.call(
-                iRcs -> iRcs.getOutgoingDeliverySeenTimestamp(mRcsOutgoingMessageId, mRecipientId));
+                (iRcs, callingPackage) -> iRcs.getOutgoingDeliverySeenTimestamp(
+                        mRcsOutgoingMessageId, mRecipientId, callingPackage));
     }
 
     /**
@@ -102,8 +106,9 @@ public class RcsOutgoingMessageDelivery {
      */
     @WorkerThread
     public void setStatus(@RcsMessage.RcsMessageStatus int status) throws RcsMessageStoreException {
-        mRcsControllerCall.callWithNoReturn(iRcs -> iRcs.setOutgoingDeliveryStatus(
-                mRcsOutgoingMessageId, mRecipientId, status));
+        mRcsControllerCall.callWithNoReturn(
+                (iRcs, callingPackage) -> iRcs.setOutgoingDeliveryStatus(
+                        mRcsOutgoingMessageId, mRecipientId, status, callingPackage));
     }
 
     /**
@@ -113,7 +118,8 @@ public class RcsOutgoingMessageDelivery {
     @WorkerThread
     public @RcsMessage.RcsMessageStatus int getStatus() throws RcsMessageStoreException {
         return mRcsControllerCall.call(
-                iRcs -> iRcs.getOutgoingDeliveryStatus(mRcsOutgoingMessageId, mRecipientId));
+                (iRcs, callingPackage) -> iRcs.getOutgoingDeliveryStatus(mRcsOutgoingMessageId,
+                        mRecipientId, callingPackage));
     }
 
     /**

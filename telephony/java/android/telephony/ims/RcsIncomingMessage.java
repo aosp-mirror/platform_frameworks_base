@@ -40,7 +40,8 @@ public class RcsIncomingMessage extends RcsMessage {
     @WorkerThread
     public void setArrivalTimestamp(long arrivalTimestamp) throws RcsMessageStoreException {
         mRcsControllerCall.callWithNoReturn(
-                iRcs -> iRcs.setMessageArrivalTimestamp(mId, true, arrivalTimestamp));
+                (iRcs, callingPackage) -> iRcs.setMessageArrivalTimestamp(mId, true,
+                        arrivalTimestamp, callingPackage));
     }
 
     /**
@@ -50,7 +51,9 @@ public class RcsIncomingMessage extends RcsMessage {
      */
     @WorkerThread
     public long getArrivalTimestamp() throws RcsMessageStoreException {
-        return mRcsControllerCall.call(iRcs -> iRcs.getMessageArrivalTimestamp(mId, true));
+        return mRcsControllerCall.call(
+                (iRcs, callingPackage) -> iRcs.getMessageArrivalTimestamp(mId, true,
+                        callingPackage));
     }
 
     /**
@@ -63,7 +66,8 @@ public class RcsIncomingMessage extends RcsMessage {
     @WorkerThread
     public void setSeenTimestamp(long notifiedTimestamp) throws RcsMessageStoreException {
         mRcsControllerCall.callWithNoReturn(
-                iRcs -> iRcs.setMessageSeenTimestamp(mId, true, notifiedTimestamp));
+                (iRcs, callingPackage) -> iRcs.setMessageSeenTimestamp(mId, true, notifiedTimestamp,
+                        callingPackage));
     }
 
     /**
@@ -73,7 +77,8 @@ public class RcsIncomingMessage extends RcsMessage {
      */
     @WorkerThread
     public long getSeenTimestamp() throws RcsMessageStoreException {
-        return mRcsControllerCall.call(iRcs -> iRcs.getMessageSeenTimestamp(mId, true));
+        return mRcsControllerCall.call(
+                (iRcs, callingPackage) -> iRcs.getMessageSeenTimestamp(mId, true, callingPackage));
     }
 
     /**
@@ -84,7 +89,8 @@ public class RcsIncomingMessage extends RcsMessage {
     public RcsParticipant getSenderParticipant() throws RcsMessageStoreException {
         return new RcsParticipant(
                 mRcsControllerCall,
-                mRcsControllerCall.call(iRcs -> iRcs.getSenderParticipant(mId)));
+                mRcsControllerCall.call(
+                        (iRcs, callingPackage) -> iRcs.getSenderParticipant(mId, callingPackage)));
     }
 
     /**
