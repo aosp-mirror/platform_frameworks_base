@@ -285,6 +285,14 @@ public class NetworkRegistrationState implements Parcelable {
     }
 
     /**
+     * @hide
+     * @return {@code true} if in service.
+     */
+    public boolean isInService() {
+        return mRegState == REG_STATE_HOME || mRegState == REG_STATE_ROAMING;
+    }
+
+    /**
      * Set {@link ServiceState.RoamingType roaming type}. This could override
      * roaming type based on resource overlay or carrier config.
      * @hide
