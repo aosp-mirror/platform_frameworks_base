@@ -16,15 +16,16 @@
 
 package com.android.server.voiceinteraction;
 
-import static com.android.server.wm.ActivityTaskManagerInternal.ASSIST_KEY_CONTENT;
-import static com.android.server.wm.ActivityTaskManagerInternal.ASSIST_KEY_DATA;
-import static com.android.server.wm.ActivityTaskManagerInternal.ASSIST_KEY_STRUCTURE;
 import static android.app.AppOpsManager.OP_ASSIST_SCREENSHOT;
 import static android.app.AppOpsManager.OP_ASSIST_STRUCTURE;
 import static android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION;
 import static android.content.Intent.FLAG_GRANT_WRITE_URI_PERMISSION;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_VOICE_INTERACTION;
+
+import static com.android.server.wm.ActivityTaskManagerInternal.ASSIST_KEY_CONTENT;
+import static com.android.server.wm.ActivityTaskManagerInternal.ASSIST_KEY_DATA;
+import static com.android.server.wm.ActivityTaskManagerInternal.ASSIST_KEY_STRUCTURE;
 
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
@@ -256,7 +257,10 @@ final class VoiceInteractionSessionConnection implements ServiceConnection,
             final Bundle assistData = data.getBundle(ASSIST_KEY_DATA);
             final AssistStructure structure = data.getParcelable(ASSIST_KEY_STRUCTURE);
             final AssistContent content = data.getParcelable(ASSIST_KEY_CONTENT);
-            final int uid = data.getInt(Intent.EXTRA_ASSIST_UID, -1);
+            int uid = -1;
+            if (assistData != null) {
+                uid = assistData.getInt(Intent.EXTRA_ASSIST_UID, -1);
+            }
             if (uid >= 0 && content != null) {
                 Intent intent = content.getIntent();
                 if (intent != null) {
