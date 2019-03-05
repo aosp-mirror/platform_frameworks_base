@@ -616,7 +616,7 @@ enum Action {
     // OS: Q
     ACTION_PANEL_INTERACTION = 1658;
 
-    // ACTION: Show Contextual homepage, log latency in loading cards
+    // ACTION: Show Contextual homepage. Log total loading latency.
     ACTION_CONTEXTUAL_HOME_SHOW = 1662;
 
     // ACTION: Contextual card displays
@@ -649,6 +649,15 @@ enum Action {
     ACTION_ATCSCUC = 1680;
 
     ACTION_ATCHNUC = 1681;
+
+    // ACTION: Individual contextual card loading time
+    ACTION_CONTEXTUAL_CARD_LOAD = 1684;
+
+    //ACTION: Contextual card loading timeout
+    ACTION_CONTEXTUAL_CARD_LOAD_TIMEOUT = 1685;
+
+    //ACTION: Log result for each card's eligibility check
+    ACTION_CONTEXTUAL_CARD_ELIGIBILITY = 1686;
 }
 
 /**
