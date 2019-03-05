@@ -5867,6 +5867,8 @@ package android.provider {
     field public static final String NAMESPACE_INTELLIGENCE_ATTENTION = "intelligence_attention";
     field public static final String NAMESPACE_MEDIA_NATIVE = "media_native";
     field public static final String NAMESPACE_NETD_NATIVE = "netd_native";
+    field public static final String NAMESPACE_RUNTIME = "runtime";
+    field public static final String NAMESPACE_RUNTIME_NATIVE = "runtime_native";
     field public static final String NAMESPACE_RUNTIME_NATIVE_BOOT = "runtime_native_boot";
     field public static final String NAMESPACE_SYSTEMUI = "systemui";
     field public static final String NAMESPACE_TEXTCLASSIFIER = "textclassifier";
@@ -5907,15 +5909,6 @@ package android.provider {
     field public static final String ENABLE_ROLLBACK_TIMEOUT = "enable_rollback_timeout";
     field public static final String NAMESPACE = "rollback";
     field public static final String ROLLBACK_LIFETIME_IN_MILLIS = "rollback_lifetime_in_millis";
-  }
-
-  public static interface DeviceConfig.Runtime {
-    field public static final String NAMESPACE = "runtime";
-    field public static final String USE_PRECOMPILED_LAYOUT = "view.precompiled_layout_enabled";
-  }
-
-  public static interface DeviceConfig.RuntimeNative {
-    field public static final String NAMESPACE = "runtime_native";
   }
 
   public static interface DeviceConfig.Scheduler {

@@ -21,12 +21,12 @@ import android.annotation.Nullable;
 import android.content.pm.ApplicationInfo;
 import android.net.LocalSocket;
 import android.net.LocalSocketAddress;
-import android.provider.DeviceConfig;
 import android.util.Log;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.Zygote;
+import com.android.internal.os.ZygoteConfig;
 
 import java.io.BufferedWriter;
 import java.io.DataInputStream;
@@ -659,16 +659,13 @@ public class ZygoteProcess {
     private boolean fetchUsapPoolEnabledProp() {
         boolean origVal = mUsapPoolEnabled;
 
-        final String propertyString =
-                Zygote.getConfigurationProperty(
-                        DeviceConfig.RuntimeNative.USAP_POOL_ENABLED,
-                        USAP_POOL_ENABLED_DEFAULT);
+        final String propertyString = Zygote.getConfigurationProperty(
+                ZygoteConfig.USAP_POOL_ENABLED, USAP_POOL_ENABLED_DEFAULT);
 
         if (!propertyString.isEmpty()) {
-            mUsapPoolEnabled =
-                    Zygote.getConfigurationPropertyBoolean(
-                            DeviceConfig.RuntimeNative.USAP_POOL_ENABLED,
-                            Boolean.parseBoolean(USAP_POOL_ENABLED_DEFAULT));
+            mUsapPoolEnabled = Zygote.getConfigurationPropertyBoolean(
+                    ZygoteConfig.USAP_POOL_ENABLED,
+                    Boolean.parseBoolean(USAP_POOL_ENABLED_DEFAULT));
         }
 
         if (origVal != mUsapPoolEnabled) {
