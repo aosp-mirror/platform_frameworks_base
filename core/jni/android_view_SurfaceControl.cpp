@@ -463,6 +463,13 @@ static void nativeSetColorTransform(JNIEnv* env, jclass clazz, jlong transaction
     transaction->setColorTransform(surfaceControl, matrix, translation);
 }
 
+static void nativeSetColorSpaceAgnostic(JNIEnv* env, jclass clazz, jlong transactionObj,
+        jlong nativeObject, jboolean agnostic) {
+    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
+    SurfaceControl* const surfaceControl = reinterpret_cast<SurfaceControl*>(nativeObject);
+    transaction->setColorSpaceAgnostic(surfaceControl, agnostic);
+}
+
 static void nativeSetWindowCrop(JNIEnv* env, jclass clazz, jlong transactionObj,
         jlong nativeObject,
         jint l, jint t, jint r, jint b) {
@@ -1206,6 +1213,8 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeSetMatrix },
     {"nativeSetColorTransform", "(JJ[F[F)V",
             (void*)nativeSetColorTransform },
+    {"nativeSetColorSpaceAgnostic", "(JJZ)V",
+            (void*)nativeSetColorSpaceAgnostic },
     {"nativeSetFlags", "(JJII)V",
             (void*)nativeSetFlags },
     {"nativeSetWindowCrop", "(JJIIII)V",
