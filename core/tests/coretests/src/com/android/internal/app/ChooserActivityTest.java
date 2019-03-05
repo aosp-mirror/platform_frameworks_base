@@ -740,6 +740,7 @@ public class ChooserActivityTest {
         Intent sendIntent = new Intent();
         sendIntent.setAction(Intent.ACTION_SEND);
         sendIntent.putExtra(Intent.EXTRA_TEXT, "testing intent sending");
+        sendIntent.setType("text/plain");
         return sendIntent;
     }
 

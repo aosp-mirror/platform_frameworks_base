@@ -5340,4 +5340,8 @@
         <item quantity="one"><xliff:g id="file_name">%s</xliff:g> + <xliff:g id="count">%d</xliff:g> file</item>
         <item quantity="other"><xliff:g id="file_name">%s</xliff:g> + <xliff:g id="count">%d</xliff:g> files</item>
     </plurals>
+
+    <!-- ChooserActivity - No direct share targets are available. [CHAR LIMIT=NONE] -->
+    <string name="chooser_no_direct_share_targets">Direct share not available</string>
+
 </resources>

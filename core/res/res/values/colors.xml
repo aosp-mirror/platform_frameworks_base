@@ -215,4 +215,6 @@
     <!-- Magnifier -->
     <color name="default_magnifier_color_overlay">#00FFFFFF</color>
 
+    <color name="chooser_row_divider">#1f000000</color>
+
 </resources>
