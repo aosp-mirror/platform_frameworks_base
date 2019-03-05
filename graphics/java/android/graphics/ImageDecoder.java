@@ -853,6 +853,7 @@ public final class ImageDecoder implements AutoCloseable {
             case "image/webp":
             case "image/gif":
             case "image/heif":
+            case "image/heic":
             case "image/bmp":
             case "image/x-ico":
             case "image/vnd.wap.wbmp":
