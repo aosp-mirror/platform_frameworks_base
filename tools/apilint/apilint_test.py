@@ -242,6 +242,10 @@ class V2ParserTests(unittest.TestCase):
         cls = self._cls("class Class {")
         return apilint.Field(cls, 1, raw, '', sig_format=2)
 
+    def test_parse_package(self):
+        pkg = apilint.Package(999, "package wifi.p2p {", None)
+        self.assertEquals("wifi.p2p", pkg.name)
+
     def test_class(self):
         cls = self._cls("@Deprecated @IntRange(from=1, to=2) public static abstract class Some.Name extends Super<Class> implements Interface<Class> {")
         self.assertTrue('deprecated' in cls.split)
