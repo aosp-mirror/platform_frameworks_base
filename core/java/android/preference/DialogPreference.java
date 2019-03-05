@@ -342,16 +342,31 @@ public abstract class DialogPreference extends Preference implements
         dialog.show();
     }
 
+    /**
+     * Get the DecorView.
+     * @return the DecorView for the current dialog window, if it exists.
+     * If the window does not exist, null is returned.
+     */
+    private View getDecorView() {
+        if (mDialog != null && mDialog.getWindow() != null) {
+            return mDialog.getWindow().getDecorView();
+        }
+        return null;
+    }
+
     void postDismiss() {
         removeDismissCallbacks();
-        View decorView = mDialog.getWindow().getDecorView();
-        decorView.post(mDismissRunnable);
+        View decorView = getDecorView();
+        if (decorView != null) {
+            // If decorView is null, dialog was already dismissed
+            decorView.post(mDismissRunnable);
+        }
     }
 
     private void removeDismissCallbacks() {
-        if (mDialog != null && mDialog.getWindow() != null
-                && mDialog.getWindow().getDecorView() != null) {
-            mDialog.getWindow().getDecorView().removeCallbacks(mDismissRunnable);
+        View decorView = getDecorView();
+        if (decorView != null) {
+            decorView.removeCallbacks(mDismissRunnable);
         }
     }
 
