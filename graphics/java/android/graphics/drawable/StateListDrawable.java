@@ -256,7 +256,7 @@ public class StateListDrawable extends DrawableContainer {
      * @see #getStateCount()
      * @see #getStateDrawable(int)
      */
-    public int[] getStateSet(int index) {
+    public @NonNull int[] getStateSet(int index) {
         return mStateListState.mStateSets[index];
     }
 
@@ -268,7 +268,7 @@ public class StateListDrawable extends DrawableContainer {
      * @see #getStateCount()
      * @see #getStateSet(int)
      */
-    public Drawable getStateDrawable(int index) {
+    public @Nullable Drawable getStateDrawable(int index) {
         return mStateListState.getChild(index);
     }
 
@@ -280,7 +280,7 @@ public class StateListDrawable extends DrawableContainer {
      * @see #getStateDrawable(int)
      * @see #getStateSet(int)
      */
-    public int findStateDrawableIndex(int[] stateSet) {
+    public int findStateDrawableIndex(@NonNull int[] stateSet) {
         return mStateListState.indexOfStateSet(stateSet);
     }
 
