@@ -2299,4 +2299,7 @@ enum PageId {
 
     // Open: Settings will show the conditional when Grayscale mode is on
     SETTINGS_CONDITION_GRAYSCALE_MODE = 1683;
+
+    // Panel for Wifi
+    PANEL_WIFI = 1687;
 }
