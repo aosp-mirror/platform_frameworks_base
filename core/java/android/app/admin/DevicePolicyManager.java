@@ -59,7 +59,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
-import android.os.ParcelableException;
 import android.os.PersistableBundle;
 import android.os.Process;
 import android.os.RemoteCallback;
@@ -10588,18 +10587,18 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Whitelists a set of packages that are allowed to access cross-profile calendar APIs.
+     * Allows a set of packages to access cross-profile calendar APIs.
      *
      * <p>Called by a profile owner of a managed profile.
      *
-     * <p>Calling with a null value for the set disables the restriction so that all packages
-     * are allowed to access cross-profile calendar APIs. Calling with an empty set disallows
-     * all packages from accessing cross-profile calendar APIs. If this method isn't called,
-     * no package will be allowed to access cross-profile calendar APIs by default.
+     * <p>Calling with a {@code null} value for the set disables the restriction so that all
+     * packages are allowed to access cross-profile calendar APIs. Calling with an empty set
+     * disallows all packages from accessing cross-profile calendar APIs. If this method isn't
+     * called, no package is allowed to access cross-profile calendar APIs by default.
      *
-     * @param admin which {@link DeviceAdminReceiver} this request is associated with.
-     * @param packageNames set of packages to be whitelisted.
-     * @throws SecurityException if {@code admin} is not a profile owner.
+     * @param admin which {@link DeviceAdminReceiver} this request is associated with
+     * @param packageNames set of packages to be whitelisted
+     * @throws SecurityException if {@code admin} is not a profile owner
      *
      * @see #getCrossProfileCalendarPackages(ComponentName)
      */
@@ -10617,15 +10616,15 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Gets a set of package names that are whitelisted to access cross-profile calendar APIs.
+     * Gets a set of package names that are allowed to access cross-profile calendar APIs.
      *
      * <p>Called by a profile owner of a managed profile.
      *
-     * @param admin which {@link DeviceAdminReceiver} this request is associated with.
-     * @return the set of names of packages that were previously whitelisted via
+     * @param admin which {@link DeviceAdminReceiver} this request is associated with
+     * @return the set of names of packages that were previously allowed via
      * {@link #setCrossProfileCalendarPackages(ComponentName, Set)}, or an
-     * empty set if none have been whitelisted.
-     * @throws SecurityException if {@code admin} is not a profile owner.
+     * empty set if none have been allowed
+     * @throws SecurityException if {@code admin} is not a profile owner
      *
      * @see #setCrossProfileCalendarPackages(ComponentName, Set)
      */
@@ -10655,8 +10654,8 @@ public class DevicePolicyManager {
      * that user, and get a {@link DevicePolicyManager} from this context.
      *
      * @param packageName the name of the package
-     * @return {@code true} if the package is allowed to access cross-profile calendar APIs.
-     * {@code false} otherwise.
+     * @return {@code true} if the package is allowed to access cross-profile calendar APIs,
+     * {@code false} otherwise
      *
      * @see #setCrossProfileCalendarPackages(ComponentName, Set)
      * @see #getCrossProfileCalendarPackages(ComponentName)
@@ -10676,15 +10675,15 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Gets a set of package names that are whitelisted to access cross-profile calendar APIs.
+     * Gets a set of package names that are allowed to access cross-profile calendar APIs.
      *
      * <p>To query for a specific user, use
      * {@link Context#createPackageContextAsUser(String, int, UserHandle)} to create a context for
      * that user, and get a {@link DevicePolicyManager} from this context.
      *
-     * @return the set of names of packages that were previously whitelisted via
+     * @return the set of names of packages that were previously allowed via
      * {@link #setCrossProfileCalendarPackages(ComponentName, Set)}, or an
-     * empty set if none have been whitelisted.
+     * empty set if none have been allowed
      *
      * @see #setCrossProfileCalendarPackages(ComponentName, Set)
      * @see #getCrossProfileCalendarPackages(ComponentName)
@@ -10776,12 +10775,12 @@ public class DevicePolicyManager {
     /**
      * Starts an activity to view calendar events in the managed profile.
      *
-     * @param eventId the id of the event to be viewed.
-     * @param start the start time of the event.
-     * @param end the end time of the event.
-     * @param allDay if the event is an all-day event.
+     * @param eventId the id of the event to be viewed
+     * @param start the start time of the event
+     * @param end the end time of the event
+     * @param allDay if the event is an all-day event
      * @param flags flags to be set for the intent
-     * @return {@code true} if the activity is started successfully. {@code false} otherwise.
+     * @return {@code true} if the activity is started successfully, {@code false} otherwise
      *
      * @see CalendarContract#startViewCalendarEventInManagedProfile(Context, String, long, long,
      * long, boolean, int)
