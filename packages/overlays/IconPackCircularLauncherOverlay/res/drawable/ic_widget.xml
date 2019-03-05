@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Copyright (C) 2019 The Android Open Source Project
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+
+    <path
+        android:fillColor="#000000"
+        android:pathData="M11,5c0-1.1-0.9-2-2-2H5C3.9,3,3,3.9,3,5v4c0,1.1,0.9,2,2,2h4c1.1,0,2-0.9,2-2V5z M9.5,9c0,0.28-0.22,0.5-0.5,0.5H5 C4.72,9.5,4.5,9.28,4.5,9V5c0-0.28,0.22-0.5,0.5-0.5h4c0.28,0,0.5,0.22,0.5,0.5V9z" />
+    <path
+        android:fillColor="#000000"
+        android:pathData="M9,13H5c-1.1,0-2,0.9-2,2v4c0,1.1,0.9,2,2,2h4c1.1,0,2-0.9,2-2v-4C11,13.9,10.1,13,9,13z M9.5,19c0,0.28-0.22,0.5-0.5,0.5 H5c-0.28,0-0.5-0.22-0.5-0.5v-4c0-0.28,0.22-0.5,0.5-0.5h4c0.28,0,0.5,0.22,0.5,0.5V19z" />
+    <path
+        android:fillColor="#000000"
+        android:pathData="M19,13h-4c-1.1,0-2,0.9-2,2v4c0,1.1,0.9,2,2,2h4c1.1,0,2-0.9,2-2v-4C21,13.9,20.1,13,19,13z M19.5,19 c0,0.28-0.22,0.5-0.5,0.5h-4c-0.28,0-0.5-0.22-0.5-0.5v-4c0-0.28,0.22-0.5,0.5-0.5h4c0.28,0,0.5,0.22,0.5,0.5V19z" />
+    <path
+        android:fillColor="#000000"
+        android:pathData="M18.41,2.76c-0.39-0.39-0.9-0.59-1.41-0.59s-1.02,0.2-1.41,0.59l-2.83,2.83c-0.78,0.78-0.78,2.05,0,2.83l2.83,2.83 c0.39,0.39,0.9,0.59,1.41,0.59s1.02-0.2,1.41-0.59l2.83-2.83c0.78-0.78,0.78-2.05,0-2.83L18.41,2.76z M20.18,7.35l-2.83,2.83 c-0.13,0.13-0.28,0.15-0.35,0.15s-0.23-0.02-0.35-0.15l-2.83-2.83C13.69,7.23,13.67,7.08,13.67,7s0.02-0.23,0.15-0.35l2.83-2.83 c0.13-0.13,0.28-0.15,0.35-0.15s0.23,0.02,0.35,0.15l2.83,2.83c0.13,0.13,0.15,0.28,0.15,0.35S20.31,7.23,20.18,7.35z" />
+</vector>
