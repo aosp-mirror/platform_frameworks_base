@@ -9637,16 +9637,16 @@ package android.webkit {
 
   public final class WebViewDelegate {
     method public void addWebViewAssetPath(android.content.Context);
-    method public void callDrawGlFunction(android.graphics.Canvas, long);
-    method public void callDrawGlFunction(@NonNull android.graphics.Canvas, long, @Nullable Runnable);
-    method public boolean canInvokeDrawGlFunctor(android.view.View);
-    method public void detachDrawGlFunctor(android.view.View, long);
+    method @Deprecated public void callDrawGlFunction(android.graphics.Canvas, long);
+    method @Deprecated public void callDrawGlFunction(@NonNull android.graphics.Canvas, long, @Nullable Runnable);
+    method @Deprecated public boolean canInvokeDrawGlFunctor(android.view.View);
+    method @Deprecated public void detachDrawGlFunctor(android.view.View, long);
     method public void drawWebViewFunctor(@NonNull android.graphics.Canvas, int);
     method public android.app.Application getApplication();
     method public String getDataDirectorySuffix();
     method public String getErrorString(android.content.Context, int);
     method public int getPackageId(android.content.res.Resources, String);
-    method public void invokeDrawGlFunctor(android.view.View, long, boolean);
+    method @Deprecated public void invokeDrawGlFunctor(android.view.View, long, boolean);
     method public boolean isMultiProcessEnabled();
     method public boolean isTraceTagEnabled();
     method public void setOnTraceEnabledChangeListener(android.webkit.WebViewDelegate.OnTraceEnabledChangeListener);
