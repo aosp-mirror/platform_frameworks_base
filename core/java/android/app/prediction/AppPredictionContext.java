@@ -15,6 +15,7 @@
  */
 package android.app.prediction;
 
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
@@ -49,18 +50,19 @@ public final class AppPredictionContext implements Parcelable {
         mExtras = extras;
     }
 
-    private AppPredictionContext(Parcel parcel) {
+    private AppPredictionContext(@NonNull Parcel parcel) {
         mUiSurface = parcel.readString();
         mPredictedTargetCount = parcel.readInt();
         mPackageName = parcel.readString();
         mExtras = parcel.readBundle();
     }
 
+    @NonNull
     public String getUiSurface() {
         return mUiSurface;
     }
 
-    public int getPredictedTargetCount() {
+    public @IntRange(from = 0) int getPredictedTargetCount() {
         return mPredictedTargetCount;
     }
 
@@ -91,7 +93,7 @@ public final class AppPredictionContext implements Parcelable {
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeString(mUiSurface);
         dest.writeInt(mPredictedTargetCount);
         dest.writeString(mPackageName);
@@ -144,7 +146,8 @@ public final class AppPredictionContext implements Parcelable {
         /**
          * Sets the number of prediction targets as a hint.
          */
-        public Builder setPredictedTargetCount(int predictedTargetCount) {
+        @NonNull
+        public Builder setPredictedTargetCount(@IntRange(from = 0) int predictedTargetCount) {
             mPredictedTargetCount = predictedTargetCount;
             return this;
         }
@@ -152,7 +155,8 @@ public final class AppPredictionContext implements Parcelable {
         /**
          * Sets the UI surface.
          */
-        public Builder setUiSurface(@Nullable String uiSurface) {
+        @NonNull
+        public Builder setUiSurface(@NonNull String uiSurface) {
             mUiSurface = uiSurface;
             return this;
         }
@@ -160,6 +164,7 @@ public final class AppPredictionContext implements Parcelable {
         /**
          * Sets the extras.
          */
+        @NonNull
         public Builder setExtras(@Nullable Bundle extras) {
             mExtras = extras;
             return this;
@@ -168,6 +173,7 @@ public final class AppPredictionContext implements Parcelable {
         /**
          * Builds a new context instance.
          */
+        @NonNull
         public AppPredictionContext build() {
             return new AppPredictionContext(mUiSurface, mPredictedTargetCount, mPackageName,
                     mExtras);

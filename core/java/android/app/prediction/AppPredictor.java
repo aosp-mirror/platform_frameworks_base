@@ -94,7 +94,7 @@ public final class AppPredictor {
             mPredictionManager.createPredictionSession(predictionContext, mSessionId);
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to create predictor", e);
-            return;
+            e.rethrowAsRuntimeException();
         }
 
         mCloseGuard.open("close");
@@ -112,6 +112,7 @@ public final class AppPredictor {
             mPredictionManager.notifyAppTargetEvent(mSessionId, event);
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to notify app target event", e);
+            e.rethrowAsRuntimeException();
         }
     }
 
@@ -129,6 +130,7 @@ public final class AppPredictor {
                     new ParceledListSlice<>(targetIds));
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to notify location shown event", e);
+            e.rethrowAsRuntimeException();
         }
     }
 
@@ -155,6 +157,7 @@ public final class AppPredictor {
             mRegisteredCallbacks.put(callback, callbackWrapper);
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to register for prediction updates", e);
+            e.rethrowAsRuntimeException();
         }
     }
 
@@ -176,6 +179,7 @@ public final class AppPredictor {
             mPredictionManager.unregisterPredictionUpdates(mSessionId, callbackWrapper);
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to unregister for prediction updates", e);
+            e.rethrowAsRuntimeException();
         }
     }
 
@@ -194,6 +198,7 @@ public final class AppPredictor {
             mPredictionManager.requestPredictionUpdate(mSessionId);
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to request prediction update", e);
+            e.rethrowAsRuntimeException();
         }
     }
 
@@ -213,14 +218,13 @@ public final class AppPredictor {
                     new CallbackWrapper(callbackExecutor, callback));
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to sort targets", e);
+            e.rethrowAsRuntimeException();
         }
     }
 
     /**
      * Destroys the client and unregisters the callback. Any method on this class after this call
      * with throw {@link IllegalStateException}.
-     *
-     * TODO(b/111701043): Add state check in other methods.
      */
     public void destroy() {
         if (!mIsClosed.getAndSet(true)) {
@@ -231,6 +235,7 @@ public final class AppPredictor {
                 mPredictionManager.onDestroyPredictionSession(mSessionId);
             } catch (RemoteException e) {
                 Log.e(TAG, "Failed to notify app target event", e);
+                e.rethrowAsRuntimeException();
             }
         } else {
             throw new IllegalStateException("This client has already been destroyed.");

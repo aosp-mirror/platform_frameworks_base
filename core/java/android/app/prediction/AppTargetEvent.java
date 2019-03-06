@@ -84,7 +84,7 @@ public final class AppTargetEvent implements Parcelable {
     /**
      * Returns the launch location.
      */
-    @NonNull
+    @Nullable
     public String getLaunchLocation() {
         return mLocation;
     }
@@ -92,8 +92,7 @@ public final class AppTargetEvent implements Parcelable {
     /**
      * Returns the action type.
      */
-    @NonNull
-    public int getAction() {
+    public @ActionType int getAction() {
         return mAction;
     }
 
@@ -152,7 +151,8 @@ public final class AppTargetEvent implements Parcelable {
         /**
          * Sets the launch location.
          */
-        public Builder setLaunchLocation(String location) {
+        @NonNull
+        public Builder setLaunchLocation(@Nullable String location) {
             mLocation = location;
             return this;
         }
@@ -160,6 +160,7 @@ public final class AppTargetEvent implements Parcelable {
         /**
          * Builds a new event instance.
          */
+        @NonNull
         public AppTargetEvent build() {
             return new AppTargetEvent(mTarget, mLocation, mAction);
         }

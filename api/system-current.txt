@@ -1030,22 +1030,22 @@ package android.app.prediction {
     method public int describeContents();
     method @Nullable public android.os.Bundle getExtras();
     method @NonNull public String getPackageName();
-    method public int getPredictedTargetCount();
-    method public String getUiSurface();
-    method public void writeToParcel(android.os.Parcel, int);
+    method @IntRange(from=0) public int getPredictedTargetCount();
+    method @NonNull public String getUiSurface();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.prediction.AppPredictionContext> CREATOR;
   }
 
   public static final class AppPredictionContext.Builder {
     ctor public AppPredictionContext.Builder(@NonNull android.content.Context);
-    method public android.app.prediction.AppPredictionContext build();
-    method public android.app.prediction.AppPredictionContext.Builder setExtras(@Nullable android.os.Bundle);
-    method public android.app.prediction.AppPredictionContext.Builder setPredictedTargetCount(int);
-    method public android.app.prediction.AppPredictionContext.Builder setUiSurface(@Nullable String);
+    method @NonNull public android.app.prediction.AppPredictionContext build();
+    method @NonNull public android.app.prediction.AppPredictionContext.Builder setExtras(@Nullable android.os.Bundle);
+    method @NonNull public android.app.prediction.AppPredictionContext.Builder setPredictedTargetCount(@IntRange(from=0) int);
+    method @NonNull public android.app.prediction.AppPredictionContext.Builder setUiSurface(@NonNull String);
   }
 
   public final class AppPredictionManager {
-    method public android.app.prediction.AppPredictor createAppPredictionSession(@NonNull android.app.prediction.AppPredictionContext);
+    method @NonNull public android.app.prediction.AppPredictor createAppPredictionSession(@NonNull android.app.prediction.AppPredictionContext);
   }
 
   public final class AppPredictionSessionId implements android.os.Parcelable {
@@ -1075,7 +1075,7 @@ package android.app.prediction {
     method @Nullable public String getClassName();
     method @NonNull public android.app.prediction.AppTargetId getId();
     method @NonNull public String getPackageName();
-    method public int getRank();
+    method @IntRange(from=0) public int getRank();
     method @Nullable public android.content.pm.ShortcutInfo getShortcutInfo();
     method @NonNull public android.os.UserHandle getUser();
     method public void writeToParcel(android.os.Parcel, int);
@@ -1084,8 +1084,8 @@ package android.app.prediction {
 
   public final class AppTargetEvent implements android.os.Parcelable {
     method public int describeContents();
-    method @NonNull public int getAction();
-    method @NonNull public String getLaunchLocation();
+    method public int getAction();
+    method @Nullable public String getLaunchLocation();
     method @Nullable public android.app.prediction.AppTarget getTarget();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final int ACTION_DISMISS = 2; // 0x2
@@ -1096,8 +1096,8 @@ package android.app.prediction {
 
   public static final class AppTargetEvent.Builder {
     ctor public AppTargetEvent.Builder(@Nullable android.app.prediction.AppTarget, int);
-    method public android.app.prediction.AppTargetEvent build();
-    method public android.app.prediction.AppTargetEvent.Builder setLaunchLocation(String);
+    method @NonNull public android.app.prediction.AppTargetEvent build();
+    method @NonNull public android.app.prediction.AppTargetEvent.Builder setLaunchLocation(@Nullable String);
   }
 
   public final class AppTargetId implements android.os.Parcelable {
@@ -1754,9 +1754,9 @@ package android.content.pm {
 
   public static final class ShortcutManager.ShareShortcutInfo implements android.os.Parcelable {
     method public int describeContents();
-    method public android.content.pm.ShortcutInfo getShortcutInfo();
-    method public android.content.ComponentName getTargetComponent();
-    method public void writeToParcel(android.os.Parcel, int);
+    method @NonNull public android.content.pm.ShortcutInfo getShortcutInfo();
+    method @NonNull public android.content.ComponentName getTargetComponent();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.content.pm.ShortcutManager.ShareShortcutInfo> CREATOR;
   }
 
@@ -6324,7 +6324,7 @@ package android.service.appprediction {
   public abstract class AppPredictionService extends android.app.Service {
     ctor public AppPredictionService();
     method @MainThread public abstract void onAppTargetEvent(@NonNull android.app.prediction.AppPredictionSessionId, @NonNull android.app.prediction.AppTargetEvent);
-    method public final android.os.IBinder onBind(android.content.Intent);
+    method @NonNull public final android.os.IBinder onBind(@NonNull android.content.Intent);
     method public void onCreatePredictionSession(@NonNull android.app.prediction.AppPredictionContext, @NonNull android.app.prediction.AppPredictionSessionId);
     method @MainThread public void onDestroyPredictionSession(@NonNull android.app.prediction.AppPredictionSessionId);
     method @MainThread public abstract void onLocationShown(@NonNull android.app.prediction.AppPredictionSessionId, @NonNull String, @NonNull java.util.List<android.app.prediction.AppTargetId>);

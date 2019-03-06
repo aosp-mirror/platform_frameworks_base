@@ -15,6 +15,7 @@
  */
 package android.app.prediction;
 
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
@@ -134,14 +135,19 @@ public final class AppTarget implements Parcelable {
      * Sets the rank of the for the target.
      * @hide
      */
-    public void setRank(int rank) {
+    public void setRank(@IntRange(from = 0) int rank) {
+        if (rank < 0) {
+            throw new IllegalArgumentException("rank cannot be a negative value");
+        }
         mRank = rank;
     }
 
     /**
-     * Returns the rank for the target.
+     * Returns the rank for the target. Rank of an AppTarget is a non-negative integer that
+     * represents the importance of this target compared to other candidate targets. A smaller value
+     * means higher importance in the list.
      */
-    public int getRank() {
+    public @IntRange(from = 0) int getRank() {
         return mRank;
     }
 
