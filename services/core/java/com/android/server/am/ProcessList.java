@@ -2863,6 +2863,15 @@ public final class ProcessList {
                     pos--;
                 }
                 mLruProcesses.add(pos, app);
+                if (pos == mLruProcessActivityStart) {
+                    mLruProcessActivityStart++;
+                }
+                if (pos == mLruProcessServiceStart) {
+                    // Unless {@code #hasService} is implemented, currently the starting position
+                    // for activity and service are the same, so the incoming position may equal to
+                    // the starting position of service.
+                    mLruProcessServiceStart++;
+                }
                 // If this process is part of a group, need to pull up any other processes
                 // in that group to be with it.
                 int endIndex = pos - 1;
