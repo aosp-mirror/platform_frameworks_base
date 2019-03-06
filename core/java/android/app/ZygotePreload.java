@@ -15,6 +15,7 @@
  */
 package android.app;
 
+import android.annotation.NonNull;
 import android.content.pm.ApplicationInfo;
 
 /**
@@ -27,8 +28,7 @@ import android.content.pm.ApplicationInfo;
  * {@link android.R.styleable#AndroidManifestService_useAppZygote android:useAppZygote} attribute
  * of the &lt;service&gt; tag set to <code>true</code>.
  *
- * Note that this implementations of this class must provide a default constructor with no
- * arguments.
+ * Note that implementations of this class must provide a default constructor with no arguments.
  */
 public interface ZygotePreload {
     /**
@@ -38,5 +38,5 @@ public interface ZygotePreload {
      *
      * @param appInfo The ApplicationInfo object belonging to the application
      */
-    void doPreload(ApplicationInfo appInfo);
+    void doPreload(@NonNull ApplicationInfo appInfo);
 }
