@@ -118,7 +118,7 @@ public class WifiStatusTracker extends ConnectivityManager.NetworkCallback {
                 mWifiInfo = mWifiManager.getConnectionInfo();
                 if (mWifiInfo != null) {
                     if (mWifiInfo.isPasspointAp() || mWifiInfo.isOsuAp()) {
-                        ssid = mWifiInfo.getProviderFriendlyName();
+                        ssid = mWifiInfo.getPasspointProviderFriendlyName();
                     } else {
                         ssid = getValidSsid(mWifiInfo);
                     }
