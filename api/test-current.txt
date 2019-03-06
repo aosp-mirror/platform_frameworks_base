@@ -995,7 +995,7 @@ package android.os {
     method public final void putInt64Array(long, long[]);
     method public final void putInt8(long, byte);
     method public final void putInt8Array(long, byte[]);
-    method public final void putNativeHandle(long, android.os.NativeHandle);
+    method public final void putNativeHandle(long, @Nullable android.os.NativeHandle);
     method public final void putString(long, String);
     method public static Boolean[] wrapArray(@NonNull boolean[]);
     method public static Long[] wrapArray(@NonNull long[]);
@@ -1015,7 +1015,7 @@ package android.os {
     method public final double readDouble();
     method public final java.util.ArrayList<java.lang.Double> readDoubleVector();
     method public final android.os.HwBlob readEmbeddedBuffer(long, long, long, boolean);
-    method public final android.os.NativeHandle readEmbeddedNativeHandle(long, long);
+    method @Nullable public final android.os.NativeHandle readEmbeddedNativeHandle(long, long);
     method public final float readFloat();
     method public final java.util.ArrayList<java.lang.Float> readFloatVector();
     method public final short readInt16();
@@ -1026,8 +1026,8 @@ package android.os {
     method public final java.util.ArrayList<java.lang.Long> readInt64Vector();
     method public final byte readInt8();
     method public final java.util.ArrayList<java.lang.Byte> readInt8Vector();
-    method public final android.os.NativeHandle readNativeHandle();
-    method public final java.util.ArrayList<android.os.NativeHandle> readNativeHandleVector();
+    method @Nullable public final android.os.NativeHandle readNativeHandle();
+    method @NonNull public final java.util.ArrayList<android.os.NativeHandle> readNativeHandleVector();
     method public final String readString();
     method public final java.util.ArrayList<java.lang.String> readStringVector();
     method public final android.os.IHwBinder readStrongBinder();
@@ -1051,8 +1051,8 @@ package android.os {
     method public final void writeInt8(byte);
     method public final void writeInt8Vector(java.util.ArrayList<java.lang.Byte>);
     method public final void writeInterfaceToken(String);
-    method public final void writeNativeHandle(android.os.NativeHandle);
-    method public final void writeNativeHandleVector(java.util.ArrayList<android.os.NativeHandle>);
+    method public final void writeNativeHandle(@Nullable android.os.NativeHandle);
+    method public final void writeNativeHandleVector(@NonNull java.util.ArrayList<android.os.NativeHandle>);
     method public final void writeStatus(int);
     method public final void writeString(String);
     method public final void writeStringVector(java.util.ArrayList<java.lang.String>);
@@ -1102,10 +1102,10 @@ package android.os {
     ctor public NativeHandle(@NonNull java.io.FileDescriptor, boolean);
     ctor public NativeHandle(@NonNull java.io.FileDescriptor[], @NonNull int[], boolean);
     method public void close() throws java.io.IOException;
-    method public android.os.NativeHandle dup() throws java.io.IOException;
-    method public java.io.FileDescriptor getFileDescriptor();
-    method public java.io.FileDescriptor[] getFileDescriptors();
-    method public int[] getInts();
+    method @NonNull public android.os.NativeHandle dup() throws java.io.IOException;
+    method @NonNull public java.io.FileDescriptor getFileDescriptor();
+    method @NonNull public java.io.FileDescriptor[] getFileDescriptors();
+    method @NonNull public int[] getInts();
     method public boolean hasSingleFileDescriptor();
   }
 
