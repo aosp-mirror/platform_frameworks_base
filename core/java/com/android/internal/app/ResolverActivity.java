@@ -28,6 +28,7 @@ import android.app.ActivityThread;
 import android.app.VoiceInteractor.PickOptionRequest;
 import android.app.VoiceInteractor.PickOptionRequest.Option;
 import android.app.VoiceInteractor.Prompt;
+import android.app.role.RoleManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -645,10 +646,18 @@ public class ResolverActivity extends Activity {
 
     private void showSettingsForSelected(int which, boolean hasIndexBeenFiltered) {
         ResolveInfo ri = mAdapter.resolveInfoForPosition(which, hasIndexBeenFiltered);
-        Intent in = new Intent().setAction(Settings.ACTION_APP_OPEN_BY_DEFAULT_SETTINGS)
-                .setData(Uri.fromParts("package", ri.activityInfo.packageName, null))
-                .addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT);
-        startActivity(in);
+        Intent intent = new Intent();
+        // For browsers, we open the Default Browser page
+        // For regular apps, we open the Open by Default page
+        if (ri.handleAllWebDataURI) {
+            intent.setAction(Intent.ACTION_MANAGE_DEFAULT_APP)
+                    .putExtra(Intent.EXTRA_ROLE_NAME, RoleManager.ROLE_BROWSER);
+        } else {
+            intent.setAction(Settings.ACTION_APP_OPEN_BY_DEFAULT_SETTINGS)
+                    .setData(Uri.fromParts("package", ri.activityInfo.packageName, null))
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT);
+        }
+        startActivity(intent);
     }
 
     public void startSelected(int which, boolean always, boolean hasIndexBeenFiltered) {
