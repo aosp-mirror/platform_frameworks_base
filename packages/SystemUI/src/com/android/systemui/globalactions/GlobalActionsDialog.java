@@ -90,6 +90,7 @@ import com.android.systemui.MultiListLayout;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.plugins.GlobalActions.GlobalActionsManager;
 import com.android.systemui.plugins.GlobalActionsPanelPlugin;
+import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ExtensionController;
 import com.android.systemui.statusbar.policy.ExtensionController.Extension;
@@ -1534,7 +1535,7 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             View panelView = initializePanel();
             if (panelView == null) {
                 mBackgroundDrawable = new GradientDrawable(context);
-                mScrimAlpha = 0.7f;
+                mScrimAlpha = ScrimController.GRADIENT_SCRIM_ALPHA;
             } else {
                 mBackgroundDrawable = context.getDrawable(
                         com.android.systemui.R.drawable.global_action_panel_scrim);
