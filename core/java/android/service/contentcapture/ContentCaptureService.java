@@ -37,7 +37,6 @@ import android.os.Looper;
 import android.os.RemoteException;
 import android.service.autofill.AutofillService;
 import android.util.ArrayMap;
-import android.util.ArraySet;
 import android.util.Log;
 import android.util.Slog;
 import android.view.contentcapture.ContentCaptureContext;
@@ -165,19 +164,6 @@ public abstract class ContentCaptureService extends Service {
         }
         Log.w(TAG, "Tried to bind to wrong intent (should be " + SERVICE_INTERFACE + ": " + intent);
         return null;
-    }
-
-    /**
-     * @deprecated use {@link #setContentCaptureWhitelist(Set, Set)} instead
-     */
-    @Deprecated
-    public final void setContentCaptureWhitelist(@Nullable List<String> packages,
-            @Nullable List<ComponentName> activities) {
-        setContentCaptureWhitelist(toSet(packages), toSet(activities));
-    }
-
-    private <T> ArraySet<T> toSet(@Nullable List<T> set) {
-        return set == null ? null : new ArraySet<T>(set);
     }
 
     /**

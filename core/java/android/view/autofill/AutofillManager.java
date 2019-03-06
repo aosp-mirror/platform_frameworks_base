@@ -1827,22 +1827,6 @@ public final class AutofillManager {
     }
 
     /**
-     * @deprecated use {@link #setAugmentedAutofillWhitelist(Set, Set)} instead.
-     * @hide
-     */
-    @SystemApi
-    @TestApi
-    @Deprecated
-    public void setAugmentedAutofillWhitelist(@Nullable List<String> packages,
-            @Nullable List<ComponentName> activities) {
-        setAugmentedAutofillWhitelist(toSet(packages), toSet(activities));
-    }
-
-    private <T> ArraySet<T> toSet(@Nullable List<T> set) {
-        return set == null ? null : new ArraySet<T>(set);
-    }
-
-    /**
      * Explicitly limits augmented autofill to the given packages and activities.
      *
      * <p>To reset the whitelist, call it passing {@code null} to both arguments.
