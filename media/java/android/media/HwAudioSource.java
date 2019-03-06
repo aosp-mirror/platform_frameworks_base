@@ -129,10 +129,19 @@ public class HwAudioSource extends PlayerBase {
      * Starts the playback from {@link AudioDeviceInfo}.
      */
     public void start() {
+        Preconditions.checkState(!isPlaying(), "HwAudioSource is currently playing");
         baseStart();
         mNativeHandle = AudioSystem.startAudioSource(
                 mAudioDeviceInfo.getPort().activeConfig(),
                 mAudioAttributes);
+    }
+
+    /**
+     * Checks whether the HwAudioSource player is playing.
+     * @return true if currently playing, false otherwise
+     */
+    public boolean isPlaying() {
+        return mNativeHandle != 0;
     }
 
     /**
