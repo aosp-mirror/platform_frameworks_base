@@ -61,6 +61,7 @@ interface IWebViewUpdateService {
     /**
      * Used by DevelopmentSetting to get the name of the WebView provider currently in use.
      */
+    @UnsupportedAppUsage
     String getCurrentWebViewPackageName();
 
     /**
@@ -72,6 +73,7 @@ interface IWebViewUpdateService {
      * Used by Settings to determine whether a certain package can be enabled/disabled by the user -
      * the package should not be modifiable in this way if it is a fallback package.
      */
+    @UnsupportedAppUsage
     boolean isFallbackPackage(String packageName);
 
     /**

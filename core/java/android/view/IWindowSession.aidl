@@ -49,6 +49,7 @@ interface IWindowSession {
     int addToDisplayWithoutInputChannel(IWindow window, int seq, in WindowManager.LayoutParams attrs,
             in int viewVisibility, in int layerStackId, out Rect outContentInsets,
             out Rect outStableInsets);
+    @UnsupportedAppUsage
     void remove(IWindow window);
 
     /**
@@ -123,6 +124,7 @@ interface IWindowSession {
      * completely transparent, allowing it to work with the surface flinger
      * to optimize compositing of this part of the window.
      */
+    @UnsupportedAppUsage
     void setTransparentRegion(IWindow window, in Region region);
 
     /**
@@ -144,11 +146,15 @@ interface IWindowSession {
      */
     void getDisplayFrame(IWindow window, out Rect outDisplayFrame);
 
+    @UnsupportedAppUsage
     void finishDrawing(IWindow window);
 
+    @UnsupportedAppUsage
     void setInTouchMode(boolean showFocus);
+    @UnsupportedAppUsage
     boolean getInTouchMode();
 
+    @UnsupportedAppUsage
     boolean performHapticFeedback(IWindow window, int effectId, boolean always);
 
     /**
@@ -167,6 +173,7 @@ interface IWindowSession {
      * @param data Data transferred by drag and drop
      * @return Token of drag operation which will be passed to cancelDragAndDrop.
      */
+    @UnsupportedAppUsage
     IBinder performDrag(IWindow window, int flags, in SurfaceControl surface, int touchSource,
             float touchX, float touchY, float thumbCenterX, float thumbCenterY, in ClipData data);
 
