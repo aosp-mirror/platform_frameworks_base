@@ -61,7 +61,8 @@ class PrivacyItemController @Inject constructor(
 
     @VisibleForTesting
     internal var privacyList = emptyList<PrivacyItem>()
-        get() = field.toList() // Provides a shallow copy of the list
+        @Synchronized get() = field.toList() // Returns a shallow copy of the list
+        @Synchronized set
 
     private val userManager = context.getSystemService(UserManager::class.java)
     private var currentUserIds = emptyList<Int>()
@@ -71,7 +72,8 @@ class PrivacyItemController @Inject constructor(
     private val callbacks = mutableListOf<WeakReference<Callback>>()
 
     private val notifyChanges = Runnable {
-        callbacks.forEach { it.get()?.privacyChanged(privacyList) }
+        val list = privacyList
+        callbacks.forEach { it.get()?.privacyChanged(list) }
     }
 
     private val updateListAndNotifyChanges = Runnable {
@@ -157,8 +159,10 @@ class PrivacyItemController @Inject constructor(
     }
 
     private fun updatePrivacyList() {
-        privacyList = currentUserIds.flatMap { appOpsController.getActiveAppOpsForUser(it) }
+
+        val list = currentUserIds.flatMap { appOpsController.getActiveAppOpsForUser(it) }
                 .mapNotNull { toPrivacyItem(it) }.distinct()
+        privacyList = list
     }
 
     private fun toPrivacyItem(appOpItem: AppOpItem): PrivacyItem? {
