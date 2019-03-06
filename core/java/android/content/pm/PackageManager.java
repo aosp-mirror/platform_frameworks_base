@@ -710,7 +710,7 @@ public abstract class PackageManager {
             INSTALL_INTERNAL,
             INSTALL_FROM_ADB,
             INSTALL_ALL_USERS,
-            INSTALL_ALLOW_DOWNGRADE,
+            INSTALL_REQUEST_DOWNGRADE,
             INSTALL_GRANT_RUNTIME_PERMISSIONS,
             INSTALL_FORCE_VOLUME_UUID,
             INSTALL_FORCE_PERMISSION_PROMPT,
@@ -721,7 +721,7 @@ public abstract class PackageManager {
             INSTALL_VIRTUAL_PRELOAD,
             INSTALL_APEX,
             INSTALL_ENABLE_ROLLBACK,
-            INSTALL_RESPECT_ALLOW_DOWNGRADE,
+            INSTALL_ALLOW_DOWNGRADE,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface InstallFlags {}
@@ -768,14 +768,21 @@ public abstract class PackageManager {
     public static final int INSTALL_ALL_USERS = 0x00000040;
 
     /**
-     * Flag parameter for {@link #installPackage} to indicate that it is okay
-     * to install an update to an app where the newly installed app has a lower
-     * version code than the currently installed app. This is permitted only if
-     * the currently installed app is marked debuggable.
+     * Flag parameter for {@link #installPackage} to indicate that an upgrade to a lower version
+     * of a package than currently installed has been requested.
+     *
+     * <p>Note that this flag doesn't guarantee that downgrade will be performed. That decision
+     * depends
+     * on whenever:
+     * <ul>
+     * <li>An app is debuggable.
+     * <li>Or a build is debuggable.
+     * <li>Or {@link #INSTALL_ALLOW_DOWNGRADE} is set.
+     * </ul>
      *
      * @hide
      */
-    public static final int INSTALL_ALLOW_DOWNGRADE = 0x00000080;
+    public static final int INSTALL_REQUEST_DOWNGRADE = 0x00000080;
 
     /**
      * Flag parameter for {@link #installPackage} to indicate that all runtime
@@ -868,12 +875,11 @@ public abstract class PackageManager {
 
     /**
      * Flag parameter for {@link #installPackage} to indicate that
-     * {@link #INSTALL_ALLOW_DOWNGRADE} should be respected.
+     * {@link #INSTALL_REQUEST_DOWNGRADE} should be allowed.
      *
      * @hide
      */
-    // TODO(b/127322579): rename
-    public static final int INSTALL_RESPECT_ALLOW_DOWNGRADE = 0x00100000;
+    public static final int INSTALL_ALLOW_DOWNGRADE = 0x00100000;
 
     /** @hide */
     @IntDef(flag = true, prefix = { "DONT_KILL_APP" }, value = {

@@ -820,9 +820,9 @@ public class PackageManagerServiceUtils {
         // platform builds.
         //
         // In case of user builds, downgrade is permitted only for the system server initiated
-        // sessions. This is enforced by INSTALL_RESPECT_ALLOW_DOWNGRADE flag parameter.
+        // sessions. This is enforced by INSTALL_ALLOW_DOWNGRADE flag parameter.
         final boolean downgradeRequested =
-                (installFlags & PackageManager.INSTALL_ALLOW_DOWNGRADE) != 0;
+                (installFlags & PackageManager.INSTALL_REQUEST_DOWNGRADE) != 0;
         if (!downgradeRequested) {
             return false;
         }
@@ -832,7 +832,7 @@ public class PackageManagerServiceUtils {
         if (isDebuggable) {
             return true;
         }
-        return (installFlags & PackageManager.INSTALL_RESPECT_ALLOW_DOWNGRADE) != 0;
+        return (installFlags & PackageManager.INSTALL_ALLOW_DOWNGRADE) != 0;
     }
 
     /**

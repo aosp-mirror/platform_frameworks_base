@@ -1559,23 +1559,25 @@ package android.content.pm {
 
   public static class PackageInstaller.SessionInfo implements android.os.Parcelable {
     method public boolean getAllocateAggressive();
-    method public boolean getAllowDowngrade();
+    method @Deprecated public boolean getAllowDowngrade();
     method public boolean getDontKillApp();
     method @Nullable public String[] getGrantedRuntimePermissions();
     method public boolean getInstallAsFullApp(boolean);
     method public boolean getInstallAsInstantApp(boolean);
     method public boolean getInstallAsVirtualPreload();
+    method public boolean getRequestDowngrade();
   }
 
   public static class PackageInstaller.SessionParams implements android.os.Parcelable {
     method @RequiresPermission(android.Manifest.permission.ALLOCATE_AGGRESSIVE) public void setAllocateAggressive(boolean);
-    method public void setAllowDowngrade(boolean);
+    method @Deprecated public void setAllowDowngrade(boolean);
     method public void setDontKillApp(boolean);
     method public void setEnableRollback();
     method @RequiresPermission(android.Manifest.permission.INSTALL_GRANT_RUNTIME_PERMISSIONS) public void setGrantedRuntimePermissions(String[]);
     method @RequiresPermission(android.Manifest.permission.INSTALL_PACKAGES) public void setInstallAsApex();
     method public void setInstallAsInstantApp(boolean);
     method public void setInstallAsVirtualPreload();
+    method public void setRequestDowngrade(boolean);
     method @RequiresPermission(android.Manifest.permission.INSTALL_PACKAGES) public void setStaged();
   }
 

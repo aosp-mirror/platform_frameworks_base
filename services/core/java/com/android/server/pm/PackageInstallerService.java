@@ -482,9 +482,9 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         }
 
         if (callingUid == Process.SYSTEM_UID) {
-            params.installFlags |= PackageManager.INSTALL_RESPECT_ALLOW_DOWNGRADE;
+            params.installFlags |= PackageManager.INSTALL_ALLOW_DOWNGRADE;
         } else {
-            params.installFlags &= ~PackageManager.INSTALL_RESPECT_ALLOW_DOWNGRADE;
+            params.installFlags &= ~PackageManager.INSTALL_ALLOW_DOWNGRADE;
         }
 
         boolean isApex = (params.installFlags & PackageManager.INSTALL_APEX) != 0;
