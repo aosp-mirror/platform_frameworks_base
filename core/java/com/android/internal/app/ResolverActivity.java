@@ -195,7 +195,7 @@ public class ResolverActivity extends Activity {
                 com.android.internal.R.string.whichHomeApplicationNamed,
                 com.android.internal.R.string.whichHomeApplicationLabel);
 
-        // SpR.id.buttonecial titles for BROWSABLE components
+        // titles for layout that deals with http(s) intents
         public static final int BROWSABLE_TITLE_RES =
                 com.android.internal.R.string.whichGiveAccessToApplication;
         public static final int BROWSABLE_NAMED_TITLE_RES =
@@ -303,7 +303,7 @@ public class ResolverActivity extends Activity {
 
         mUseLayoutForBrowsables = getTargetIntent() == null
                 ? false
-                : getTargetIntent().hasCategory(Intent.CATEGORY_BROWSABLE);
+                : isHttpSchemeAndViewAction(getTargetIntent());
 
         // We don't want to support Always Use if browsable layout is being used,
         // as to mitigate Intent Capturing vulnerability
@@ -474,8 +474,8 @@ public class ResolverActivity extends Activity {
         final boolean named = mAdapter.getFilteredPosition() >= 0;
         if (title == ActionTitle.DEFAULT && defaultTitleRes != 0) {
             return getString(defaultTitleRes);
-        } else if (intent.hasCategory(Intent.CATEGORY_BROWSABLE)) {
-            // If the Intent is BROWSABLE then we need to warn the user that
+        } else if (isHttpSchemeAndViewAction(intent)) {
+            // If the Intent's scheme is http(s) then we need to warn the user that
             // they're giving access for the activity to open URLs from this specific host
             return named
                     ? getString(ActionTitle.BROWSABLE_NAMED_TITLE_RES, intent.getData().getHost(),
@@ -582,6 +582,12 @@ public class ResolverActivity extends Activity {
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
         resetButtonBar();
+    }
+
+    private boolean isHttpSchemeAndViewAction(Intent intent) {
+        return (IntentFilter.SCHEME_HTTP.equals(intent.getScheme())
+                || IntentFilter.SCHEME_HTTPS.equals(intent.getScheme()))
+                && Intent.ACTION_VIEW.equals(intent.getAction());
     }
 
     private boolean hasManagedProfile() {
