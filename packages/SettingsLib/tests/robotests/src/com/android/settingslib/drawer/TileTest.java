@@ -9,7 +9,11 @@ import static com.android.settingslib.drawer.TileUtils.PROFILE_PRIMARY;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.ResolveInfo;
 import android.os.Bundle;
 
 import org.junit.Before;
@@ -17,17 +21,22 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
+import org.robolectric.shadow.api.Shadow;
+import org.robolectric.shadows.ShadowPackageManager;
 
 @RunWith(RobolectricTestRunner.class)
 public class TileTest {
 
+    private Context mContext;
     private ActivityInfo mActivityInfo;
     private Tile mTile;
 
     @Before
     public void setUp() {
+        mContext = RuntimeEnvironment.application;
         mActivityInfo = new ActivityInfo();
-        mActivityInfo.packageName = RuntimeEnvironment.application.getPackageName();
+        mActivityInfo.applicationInfo = new ApplicationInfo();
+        mActivityInfo.packageName = mContext.getPackageName();
         mActivityInfo.name = "abc";
         mActivityInfo.icon = com.android.internal.R.drawable.ic_plus;
         mActivityInfo.metaData = new Bundle();
@@ -142,5 +151,22 @@ public class TileTest {
         final Tile tile = new Tile(mActivityInfo, "category");
 
         assertThat(tile.getOrder()).isEqualTo(1);
+    }
+
+    @Test
+    public void getTitle_shouldEnsureMetadataNotStale() {
+        final ResolveInfo info = new ResolveInfo();
+        info.activityInfo = mActivityInfo;
+        final ShadowPackageManager spm = Shadow.extract(mContext.getPackageManager());
+        spm.addResolveInfoForIntent(
+                new Intent().setClassName(mActivityInfo.packageName, mActivityInfo.name), info);
+
+        final Tile tile = new Tile(mActivityInfo, "category");
+        final long staleTimeStamp = -10000;
+        tile.mLastUpdateTime = staleTimeStamp;
+
+        tile.getTitle(RuntimeEnvironment.application);
+
+        assertThat(tile.mLastUpdateTime).isNotEqualTo(staleTimeStamp);
     }
 }
