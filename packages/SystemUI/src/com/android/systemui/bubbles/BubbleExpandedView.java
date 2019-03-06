@@ -528,7 +528,9 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
     /**
      * Removes and releases an ActivityView if one was previously created for this bubble.
      */
-    public void destroyActivityView() {
+    public void cleanUpExpandedState() {
+        removeView(mNotifRow);
+
         if (mActivityView == null) {
             return;
         }
