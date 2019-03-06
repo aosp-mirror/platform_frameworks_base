@@ -17,6 +17,7 @@
 package android.os;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 
@@ -241,7 +242,7 @@ public class HwBlob {
      * @param x a {@link NativeHandle} instance to write
      * @throws IndexOutOfBoundsException when [offset, offset + sizeof(jobject)] is out of range
      */
-    public native final void putNativeHandle(long offset, NativeHandle x);
+    public native final void putNativeHandle(long offset, @Nullable NativeHandle x);
 
     /**
      * Put a boolean array contiguously at an offset in the blob.
