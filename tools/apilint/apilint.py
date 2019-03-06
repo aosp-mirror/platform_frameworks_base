@@ -170,6 +170,7 @@ class Class():
         self.ctors = []
         self.fields = []
         self.methods = []
+        self.annotations = []
 
         if sig_format == 2:
             V2LineParser(raw).parse_into_class(self)
@@ -353,8 +354,8 @@ class V2LineParser(object):
 
     def parse_into_class(self, clazz):
         clazz.split = []
-        annotations = self.parse_annotations()
-        if "@Deprecated" in annotations:
+        clazz.annotations = self.parse_annotations()
+        if "@Deprecated" in clazz.annotations:
             clazz.split.append("deprecated")
         clazz.split.extend(self.parse_modifiers())
         kind = self.parse_one_of("class", "interface", "@interface", "enum")
@@ -1997,6 +1998,16 @@ def verify_nullability_args(clazz, m):
 
 def has_nullability(annotations):
     return "@NonNull" in annotations or "@Nullable" in annotations
+
+
+@verifier
+def verify_intdef(clazz):
+    """intdefs must be @hide, because the constant names cannot be stored in
+       the stubs (only the values are, which is not useful)"""
+    if "@interface" not in clazz.split:
+        return
+    if "@IntDef" in clazz.annotations or "@LongDef" in clazz.annotations:
+        error(clazz, None, None, "@IntDef and @LongDef annotations must be @hide")
 
 
 @verifier
