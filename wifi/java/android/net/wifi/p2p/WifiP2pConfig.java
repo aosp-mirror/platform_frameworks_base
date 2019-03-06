@@ -257,7 +257,9 @@ public class WifiP2pConfig implements Parcelable {
          * <p>
          * A network name shall begin with "DIRECT-xy". x and y are selected
          * from the following character set: upper case letters, lower case
-         * letters and numbers.
+         * letters and numbers. Any byte values allowed for an SSID according to
+         * IEEE802.11-2012 [1] may be included after the string "DIRECT-xy"
+         * (including none).
          * <p>
          *     Must be called - an empty network name or an network name
          *     not conforming to the P2P Group ID naming rule is not valid.
@@ -286,6 +288,9 @@ public class WifiP2pConfig implements Parcelable {
         /**
          * Specify the passphrase for creating or joining a group.
          * <p>
+         * The passphrase must be an ASCII string whose length is between 8
+         * and 63.
+         * <p>
          *     Must be called - an empty passphrase is not valid.
          *
          * @param passphrase the passphrase of a group.
@@ -296,6 +301,10 @@ public class WifiP2pConfig implements Parcelable {
             if (TextUtils.isEmpty(passphrase)) {
                 throw new IllegalArgumentException(
                         "passphrase must be non-empty.");
+            }
+            if (passphrase.length() < 8 || passphrase.length() > 63) {
+                throw new IllegalArgumentException(
+                        "The length of a passphrase must be between 8 and 63.");
             }
             mPassphrase = passphrase;
             return this;
