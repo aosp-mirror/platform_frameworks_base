@@ -522,27 +522,6 @@ public class ContrastColorUtil {
         return ColorUtilsFromCompat.LABToColor(result[0], result[1], result[2]);
     }
 
-    public static int resolveAmbientColor(Context context, int notificationColor) {
-        final int resolvedColor = notificationColor == Notification.COLOR_DEFAULT
-                ? context.getColor(com.android.internal.R.color.notification_default_color_dark)
-                : notificationColor;
-
-        int color = resolvedColor;
-        color = ContrastColorUtil.ensureTextContrastOnBlack(color);
-
-        if (color != resolvedColor) {
-            if (DEBUG){
-                Log.w(TAG, String.format(
-                        "Ambient contrast of notification for %s is %s (over black)"
-                                + " by changing #%s to #%s",
-                        context.getPackageName(),
-                        ContrastColorUtil.contrastChange(resolvedColor, color, Color.BLACK),
-                        Integer.toHexString(resolvedColor), Integer.toHexString(color)));
-            }
-        }
-        return color;
-    }
-
     public static int resolvePrimaryColor(Context context, int backgroundColor,
                                           boolean defaultBackgroundIsDark) {
         boolean useDark = shouldUseDark(backgroundColor, defaultBackgroundIsDark);

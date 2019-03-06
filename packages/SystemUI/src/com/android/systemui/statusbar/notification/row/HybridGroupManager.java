@@ -36,7 +36,6 @@ import com.android.systemui.statusbar.notification.NotificationUtils;
 public class HybridGroupManager {
 
     private final Context mContext;
-    private final NotificationDozeHelper mDozer;
     private final ViewGroup mParent;
 
     private float mOverflowNumberSize;
@@ -47,7 +46,6 @@ public class HybridGroupManager {
     public HybridGroupManager(Context ctx, ViewGroup parent) {
         mContext = ctx;
         mParent = parent;
-        mDozer = new NotificationDozeHelper();
         initDimens();
     }
 
@@ -89,12 +87,6 @@ public class HybridGroupManager {
     }
 
     public HybridNotificationView bindFromNotification(HybridNotificationView reusableView,
-            Notification notification) {
-        return bindFromNotificationWithStyle(reusableView, notification,
-                R.style.HybridNotification);
-    }
-
-    public HybridNotificationView bindAmbientFromNotification(HybridNotificationView reusableView,
             Notification notification) {
         return bindFromNotificationWithStyle(reusableView, notification,
                 R.style.HybridNotification);
@@ -146,16 +138,5 @@ public class HybridGroupManager {
                 reusableView.getPaddingBottom());
         updateOverFlowNumberColor(reusableView);
         return reusableView;
-    }
-
-    public TextView bindOverflowNumberAmbient(TextView titleView, Notification notification,
-            int number) {
-        String text = mContext.getResources().getString(
-                R.string.notification_group_overflow_indicator_ambient,
-                resolveTitle(notification), number);
-        if (!text.equals(titleView.getText())) {
-            titleView.setText(text);
-        }
-        return titleView;
     }
 }
