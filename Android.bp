@@ -1048,6 +1048,7 @@ java_library {
         "core/java/android/os/HidlSupport.java",
         "core/java/android/annotation/IntDef.java",
         "core/java/android/annotation/NonNull.java",
+        "core/java/android/annotation/Nullable.java",
         "core/java/android/annotation/SystemApi.java",
         "core/java/android/annotation/TestApi.java",
         "core/java/android/os/HwBinder.java",
