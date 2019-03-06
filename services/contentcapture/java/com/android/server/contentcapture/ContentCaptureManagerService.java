@@ -89,11 +89,11 @@ public final class ContentCaptureManagerService extends
     private ActivityManagerInternal mAm;
 
     /**
-     * Users disabled by {@link android.provider.Settings.Secure#CONTENT_CAPTURE_ENABLED}.
+     * Users disabled by {@link android.provider.Settings.Secure#CONTENT_CAPTURE_ENABLED}
      */
     @GuardedBy("mLock")
     @Nullable
-    private SparseBooleanArray mDisabledUsers;
+    private SparseBooleanArray mDisabledBySettings;
 
     /**
      * Global kill-switch based on value defined by
@@ -130,18 +130,18 @@ public final class ContentCaptureManagerService extends
             mRequestsHistory = null;
         }
 
-        // Sets which services are disabled
+        // Sets which services are disabled by settings
         final UserManager um = getContext().getSystemService(UserManager.class);
         final List<UserInfo> users = um.getUsers();
         for (int i = 0; i < users.size(); i++) {
             final int userId = users.get(i).id;
-            final boolean disabled = mDisabledByDeviceConfig || isDisabledBySettings(userId);
+            final boolean disabled = !isEnabledBySettings(userId);
             if (disabled) {
-                Slog.i(mTag, "user " + userId + " disabled by settings or device config");
-                if (mDisabledUsers == null) {
-                    mDisabledUsers = new SparseBooleanArray(1);
+                Slog.i(mTag, "user " + userId + " disabled by settings");
+                if (mDisabledBySettings == null) {
+                    mDisabledBySettings = new SparseBooleanArray(1);
                 }
-                mDisabledUsers.put(userId, true);
+                mDisabledBySettings.put(userId, true);
             }
         }
     }
@@ -187,7 +187,8 @@ public final class ContentCaptureManagerService extends
     protected void onSettingsChanged(@UserIdInt int userId, @NonNull String property) {
         switch (property) {
             case Settings.Secure.CONTENT_CAPTURE_ENABLED:
-                setContentCaptureFeatureEnabledFromSettings(userId);
+                setContentCaptureFeatureEnabledBySettingsForUser(userId,
+                        isEnabledBySettings(userId));
                 return;
             default:
                 Slog.w(mTag, "Unexpected property (" + property + "); updating cache instead");
@@ -201,31 +202,13 @@ public final class ContentCaptureManagerService extends
     }
 
     private boolean isDisabledBySettingsLocked(@UserIdInt int userId) {
-        return mDisabledUsers != null && mDisabledUsers.get(userId);
+        return mDisabledBySettings != null && mDisabledBySettings.get(userId);
     }
 
-    private void setContentCaptureFeatureEnabledFromSettings(@UserIdInt int userId) {
-        setContentCaptureFeatureEnabledForUser(userId, !isDisabledBySettings(userId));
-    }
-
-    private boolean isDisabledBySettings(@UserIdInt int userId) {
-        final String property = Settings.Secure.CONTENT_CAPTURE_ENABLED;
-        final String value = Settings.Secure.getStringForUser(getContext().getContentResolver(),
-                property, userId);
-        if (value == null) {
-            if (verbose) {
-                Slog.v(mTag, "isDisabledBySettings(): assuming false as '" + property
-                        + "' is not set");
-            }
-            return false;
-        }
-
-        try {
-            return !Boolean.valueOf(value);
-        } catch (Exception e) {
-            Slog.w(mTag, "Invalid value for property " + property + ": " + value);
-        }
-        return false;
+    private boolean isEnabledBySettings(@UserIdInt int userId) {
+        final boolean enabled = Settings.Secure.getIntForUser(getContext().getContentResolver(),
+                Settings.Secure.CONTENT_CAPTURE_ENABLED, 1, userId) == 1 ? true : false;
+        return enabled;
     }
 
     private void onDeviceConfigChange(@NonNull String key, @Nullable String value) {
@@ -331,12 +314,13 @@ public final class ContentCaptureManagerService extends
         }
     }
 
-    private void setContentCaptureFeatureEnabledForUser(@UserIdInt int userId, boolean enabled) {
+    private void setContentCaptureFeatureEnabledBySettingsForUser(@UserIdInt int userId,
+            boolean enabled) {
         synchronized (mLock) {
-            if (mDisabledUsers == null) {
-                mDisabledUsers = new SparseBooleanArray();
+            if (mDisabledBySettings == null) {
+                mDisabledBySettings = new SparseBooleanArray();
             }
-            final boolean alreadyEnabled = !mDisabledUsers.get(userId);
+            final boolean alreadyEnabled = !mDisabledBySettings.get(userId);
             if (!(enabled ^ alreadyEnabled)) {
                 if (debug) {
                     Slog.d(mTag, "setContentCaptureFeatureEnabledForUser(): already " + enabled);
@@ -346,13 +330,14 @@ public final class ContentCaptureManagerService extends
             if (enabled) {
                 Slog.i(mTag, "setContentCaptureFeatureEnabled(): enabling service for user "
                         + userId);
-                mDisabledUsers.delete(userId);
+                mDisabledBySettings.delete(userId);
             } else {
                 Slog.i(mTag, "setContentCaptureFeatureEnabled(): disabling service for user "
                         + userId);
-                mDisabledUsers.put(userId, true);
+                mDisabledBySettings.put(userId, true);
             }
-            updateCachedServiceLocked(userId, !enabled);
+            final boolean disabled = !enabled || mDisabledByDeviceConfig;
+            updateCachedServiceLocked(userId, disabled);
         }
     }
 
@@ -472,7 +457,7 @@ public final class ContentCaptureManagerService extends
 
         final String prefix2 = prefix + "  ";
 
-        pw.print(prefix); pw.print("Disabled users: "); pw.println(mDisabledUsers);
+        pw.print(prefix); pw.print("Users disabled by Settings: "); pw.println(mDisabledBySettings);
         pw.print(prefix); pw.println("DeviceConfig Settings: ");
         pw.print(prefix2); pw.print("disabled: "); pw.println(mDisabledByDeviceConfig);
         pw.print(prefix2); pw.print("loggingLevel: "); pw.println(mDevCfgLoggingLevel);
