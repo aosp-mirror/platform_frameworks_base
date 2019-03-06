@@ -21,12 +21,14 @@ import static com.android.internal.util.ContrastColorUtil.satisfiesTextContrast;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.Intent;
+import android.content.LocusId;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Icon;
 import android.media.session.MediaSession;
@@ -318,6 +320,27 @@ public class NotificationTest {
         assertEquals(
                 Notification.Action.SEMANTIC_ACTION_DELETE,
                 action.clone().getSemanticAction());
+    }
+
+    @Test
+    public void testBuilder_setLocusId() {
+        LocusId locusId = new LocusId("4815162342");
+        Notification notification = new Notification.Builder(mContext, "whatever")
+                .setLocusId(locusId).build();
+        assertEquals(locusId, notification.getLocusId());
+
+        Notification clone = writeAndReadParcelable(notification);
+        assertEquals(locusId, clone.getLocusId());
+    }
+
+    @Test
+    public void testBuilder_setLocusId_null() {
+        Notification notification = new Notification.Builder(mContext, "whatever")
+                .setLocusId(null).build();
+        assertNull(notification.getLocusId());
+
+        Notification clone = writeAndReadParcelable(notification);
+        assertNull(clone.getLocusId());
     }
 
     private Notification.Builder getMediaNotification() {

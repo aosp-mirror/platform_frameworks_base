@@ -22,11 +22,13 @@ import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.annotation.UserIdInt;
+import android.app.Notification;
 import android.app.Person;
 import android.app.TaskStackBuilder;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.LocusId;
 import android.content.pm.LauncherApps.ShortcutQuery;
 import android.content.res.Resources;
 import android.content.res.Resources.NotFoundException;
@@ -41,6 +43,7 @@ import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Log;
+import android.view.contentcapture.ContentCaptureContext;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
@@ -354,6 +357,9 @@ public final class ShortcutInfo implements Parcelable {
     @Nullable
     private Person[] mPersons;
 
+    @Nullable
+    private LocusId mLocusId;
+
     private int mRank;
 
     /**
@@ -415,6 +421,8 @@ public final class ShortcutInfo implements Parcelable {
         }
         mRank = b.mRank;
         mExtras = b.mExtras;
+        mLocusId = b.mLocusId;
+
         updateTimestamp();
     }
 
@@ -521,6 +529,7 @@ public final class ShortcutInfo implements Parcelable {
         mFlags = source.mFlags;
         mLastChangedTimestamp = source.mLastChangedTimestamp;
         mDisabledReason = source.mDisabledReason;
+        mLocusId = source.mLocusId;
 
         // Just always keep it since it's cheep.
         mIconResId = source.mIconResId;
@@ -876,6 +885,10 @@ public final class ShortcutInfo implements Parcelable {
         if (source.mExtras != null) {
             mExtras = source.mExtras;
         }
+
+        if (source.mLocusId != null) {
+            mLocusId = source.mLocusId;
+        }
     }
 
     /**
@@ -941,6 +954,8 @@ public final class ShortcutInfo implements Parcelable {
 
         private PersistableBundle mExtras;
 
+        private LocusId mLocusId;
+
         /**
          * Old style constructor.
          * @hide
@@ -970,6 +985,19 @@ public final class ShortcutInfo implements Parcelable {
         public Builder(Context context, String id) {
             mContext = context;
             mId = Preconditions.checkStringNotEmpty(id, "id cannot be empty");
+        }
+
+        /**
+         * Sets the {@link LocusId} associated with this shortcut.
+         *
+         * <p>This method should be called when the {@link LocusId} is used in other places (such
+         * as {@link Notification} and {@link ContentCaptureContext}) so the device's intelligence
+         * services can correlate them.
+         */
+        @NonNull
+        public Builder setLocusId(@NonNull LocusId locusId) {
+            mLocusId = Preconditions.checkNotNull(locusId, "locusId cannot be null");
+            return this;
         }
 
         /**
@@ -1292,6 +1320,17 @@ public final class ShortcutInfo implements Parcelable {
     @NonNull
     public String getId() {
         return mId;
+    }
+
+    /**
+     * Gets the {@link LocusId} associated with this shortcut.
+     *
+     * <p>Used by the device's intelligence services to correlate objects (such as
+     * {@link Notification} and {@link ContentCaptureContext}) that are correlated.
+     */
+    @Nullable
+    public LocusId getLocusId() {
+        return mLocusId;
     }
 
     /**
@@ -1999,6 +2038,7 @@ public final class ShortcutInfo implements Parcelable {
         }
 
         mPersons = source.readParcelableArray(cl, Person.class);
+        mLocusId = source.readParcelable(cl);
     }
 
     @Override
@@ -2048,6 +2088,7 @@ public final class ShortcutInfo implements Parcelable {
         }
 
         dest.writeParcelableArray(mPersons, flags);
+        dest.writeParcelable(mLocusId, flags);
     }
 
     public static final @android.annotation.NonNull Creator<ShortcutInfo> CREATOR =
@@ -2263,6 +2304,10 @@ public final class ShortcutInfo implements Parcelable {
             sb.append(mBitmapPath);
         }
 
+        if (mLocusId != null) {
+            sb.append("locusId="); sb.append(mLocusId); // LocusId.toString() is PII-safe.
+        }
+
         sb.append("}");
         return sb.toString();
     }
@@ -2276,7 +2321,7 @@ public final class ShortcutInfo implements Parcelable {
             Set<String> categories, Intent[] intentsWithExtras, int rank, PersistableBundle extras,
             long lastChangedTimestamp,
             int flags, int iconResId, String iconResName, String bitmapPath, int disabledReason,
-            Person[] persons) {
+            Person[] persons, LocusId locusId) {
         mUserId = userId;
         mId = id;
         mPackageName = packageName;
@@ -2303,5 +2348,6 @@ public final class ShortcutInfo implements Parcelable {
         mBitmapPath = bitmapPath;
         mDisabledReason = disabledReason;
         mPersons = persons;
+        mLocusId = locusId;
     }
 }
