@@ -41,6 +41,8 @@ import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.Log;
 
+import androidx.annotation.VisibleForTesting;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -58,6 +60,8 @@ public class Tile implements Parcelable {
      */
     public ArrayList<UserHandle> userHandle = new ArrayList<>();
 
+    @VisibleForTesting
+    long mLastUpdateTime;
     private final String mActivityPackage;
     private final String mActivityName;
     private final Intent mIntent;
@@ -157,6 +161,7 @@ public class Tile implements Parcelable {
      */
     public CharSequence getTitle(Context context) {
         CharSequence title = null;
+        ensureMetadataNotStale(context);
         final PackageManager packageManager = context.getPackageManager();
         if (mMetaData.containsKey(META_DATA_PREFERENCE_TITLE)) {
             if (mMetaData.get(META_DATA_PREFERENCE_TITLE) instanceof Integer) {
@@ -207,6 +212,7 @@ public class Tile implements Parcelable {
         if (mSummaryOverride != null) {
             return mSummaryOverride;
         }
+        ensureMetadataNotStale(context);
         CharSequence summary = null;
         final PackageManager packageManager = context.getPackageManager();
         if (mMetaData != null) {
@@ -248,6 +254,7 @@ public class Tile implements Parcelable {
         if (!hasKey()) {
             return null;
         }
+        ensureMetadataNotStale(context);
         if (mMetaData.get(META_DATA_PREFERENCE_KEYHINT) instanceof Integer) {
             return context.getResources().getString(mMetaData.getInt(META_DATA_PREFERENCE_KEYHINT));
         } else {
@@ -268,7 +275,7 @@ public class Tile implements Parcelable {
         if (context == null || mMetaData == null) {
             return null;
         }
-
+        ensureMetadataNotStale(context);
         int iconResId = mMetaData.getInt(META_DATA_PREFERENCE_ICON);
         // Set the icon
         if (iconResId == 0) {
@@ -294,11 +301,34 @@ public class Tile implements Parcelable {
                 && mMetaData.containsKey(TileUtils.META_DATA_PREFERENCE_ICON_TINTABLE)) {
             return mMetaData.getBoolean(TileUtils.META_DATA_PREFERENCE_ICON_TINTABLE);
         }
+        ensureMetadataNotStale(context);
         final String pkgName = context.getPackageName();
         // If this drawable is coming from outside Settings, tint it to match the color.
         final ActivityInfo activityInfo = getActivityInfo(context);
         return activityInfo != null
                 && !TextUtils.equals(pkgName, activityInfo.packageName);
+    }
+
+    /**
+     * Ensures metadata is not stale for this tile.
+     */
+    private void ensureMetadataNotStale(Context context) {
+        final PackageManager pm = context.getApplicationContext().getPackageManager();
+
+        try {
+            final long lastUpdateTime = pm.getPackageInfo(mActivityPackage,
+                    PackageManager.GET_META_DATA).lastUpdateTime;
+            if (lastUpdateTime == mLastUpdateTime) {
+                // All good. Do nothing
+                return;
+            }
+            // App has been updated since we load metadata last time. Reload metadata.
+            mActivityInfo = null;
+            getActivityInfo(context);
+            mLastUpdateTime = lastUpdateTime;
+        } catch (PackageManager.NameNotFoundException e) {
+            Log.d(TAG, "Can't find package, probably uninstalled.");
+        }
     }
 
     private ActivityInfo getActivityInfo(Context context) {
@@ -309,6 +339,7 @@ public class Tile implements Parcelable {
                     pm.queryIntentActivities(intent, PackageManager.GET_META_DATA);
             if (infoList != null && !infoList.isEmpty()) {
                 mActivityInfo = infoList.get(0).activityInfo;
+                mMetaData = mActivityInfo.metaData;
             }
         }
         return mActivityInfo;
