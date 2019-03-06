@@ -41,6 +41,7 @@ interface IRecentsAnimationController {
      * the home activity should be moved to the top. Otherwise, the home activity is hidden and the
      * user is returned to the app.
      */
+    @UnsupportedAppUsage
     void finish(boolean moveHomeToTop);
 
     /**
@@ -50,6 +51,7 @@ interface IRecentsAnimationController {
      * may register the recents animation input consumer prior to starting the recents animation
      * and then enable it mid-animation to start receiving touch events.
      */
+    @UnsupportedAppUsage
     void setInputConsumerEnabled(boolean enabled);
 
     /**
@@ -58,6 +60,7 @@ interface IRecentsAnimationController {
     * they can control the SystemUI flags, otherwise the SystemUI flags from home activity will be
     * taken.
     */
+    @UnsupportedAppUsage
     void setAnimationTargetsBehindSystemBars(boolean behindSystemBars);
 
     /**

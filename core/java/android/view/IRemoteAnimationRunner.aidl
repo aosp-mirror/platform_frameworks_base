@@ -33,6 +33,7 @@ oneway interface IRemoteAnimationRunner {
      * @param apps The list of apps to animate.
      * @param finishedCallback The callback to invoke when the animation is finished.
      */
+    @UnsupportedAppUsage
     void onAnimationStart(in RemoteAnimationTarget[] apps,
             in IRemoteAnimationFinishedCallback finishedCallback);
 
@@ -40,5 +41,6 @@ oneway interface IRemoteAnimationRunner {
      * Called when the animation was cancelled. From this point on, any updates onto the leashes
      * won't have any effect anymore.
      */
+    @UnsupportedAppUsage
     void onAnimationCancelled();
 }
