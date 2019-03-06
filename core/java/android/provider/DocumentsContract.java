@@ -1252,7 +1252,8 @@ public final class DocumentsContract {
      * {@hide}
      */
     @SystemApi
-    public static Uri setManageMode(Uri uri) {
+    public static @NonNull Uri setManageMode(@NonNull Uri uri) {
+        Preconditions.checkNotNull(uri, "uri can not be null");
         return uri.buildUpon().appendQueryParameter(PARAM_MANAGE, "true").build();
     }
 
@@ -1262,7 +1263,8 @@ public final class DocumentsContract {
      * {@hide}
      */
     @SystemApi
-    public static boolean isManageMode(Uri uri) {
+    public static boolean isManageMode(@NonNull Uri uri) {
+        Preconditions.checkNotNull(uri, "uri can not be null");
         return uri.getBooleanQueryParameter(PARAM_MANAGE, false);
     }
 
