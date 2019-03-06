@@ -98,7 +98,7 @@ public final class MediaStore {
     /** The authority for the media provider */
     public static final String AUTHORITY = "media";
     /** A content:// style uri to the authority for the media provider */
-    public static final Uri AUTHORITY_URI = Uri.parse("content://" + AUTHORITY);
+    public static final @NonNull Uri AUTHORITY_URI = Uri.parse("content://" + AUTHORITY);
 
     /**
      * Volume name used for content on "internal" storage of device. This
