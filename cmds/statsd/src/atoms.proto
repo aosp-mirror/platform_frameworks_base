@@ -3005,6 +3005,9 @@ message LmkKillOccurred {
 
     // The elapsed real time of start of the process.
     optional int64 process_start_time_nanos = 9;
+
+    // Min oom adj score considered by lmkd.
+    optional int32 min_oom_score = 10;
 }
 
 /*
