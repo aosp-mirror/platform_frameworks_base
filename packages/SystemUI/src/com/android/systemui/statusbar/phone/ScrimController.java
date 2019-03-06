@@ -114,6 +114,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
     private final DozeParameters mDozeParameters;
     private final AlarmTimeout mTimeTicker;
     private final KeyguardVisibilityCallback mKeyguardVisibilityCallback;
+    private final Handler mHandler;
 
     private final SysuiColorExtractor mColorExtractor;
     private GradientColors mLockColors;
@@ -174,8 +175,9 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
         mKeyguardVisibilityCallback = new KeyguardVisibilityCallback();
         mKeyguardUpdateMonitor.registerCallback(mKeyguardVisibilityCallback);
         mScrimBehindAlphaResValue = mContext.getResources().getFloat(R.dimen.scrim_behind_alpha);
+        mHandler = getHandler();
         mTimeTicker = new AlarmTimeout(alarmManager, this::onHideWallpaperTimeout,
-                "hide_aod_wallpaper", new Handler());
+                "hide_aod_wallpaper", mHandler);
         mWakeLock = createWakeLock();
         // Scrim alpha is initially set to the value on the resource but might be changed
         // to make sure that text on top of it is legible.
@@ -253,8 +255,8 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
             mScrimBehind.removeCallbacks(mPendingFrameCallback);
             mPendingFrameCallback = null;
         }
-        if (getHandler().hasCallbacks(mBlankingTransitionRunnable)) {
-            getHandler().removeCallbacks(mBlankingTransitionRunnable);
+        if (mHandler.hasCallbacks(mBlankingTransitionRunnable)) {
+            mHandler.removeCallbacks(mBlankingTransitionRunnable);
             mBlankingTransitionRunnable = null;
         }
 
@@ -768,7 +770,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
             if (DEBUG) {
                 Log.d(TAG, "Fading out scrims with delay: " + delay);
             }
-            getHandler().postDelayed(mBlankingTransitionRunnable, delay);
+            mHandler.postDelayed(mBlankingTransitionRunnable, delay);
         };
         doOnTheNextFrame(mPendingFrameCallback);
     }
@@ -786,7 +788,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
 
     @VisibleForTesting
     protected Handler getHandler() {
-        return Handler.getMain();
+        return new Handler();
     }
 
     public int getBackgroundColor() {
@@ -821,8 +823,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
 
     @VisibleForTesting
     protected WakeLock createWakeLock() {
-         return new DelayedWakeLock(getHandler(),
-                WakeLock.createPartial(mContext, "Scrims"));
+        return new DelayedWakeLock(mHandler, WakeLock.createPartial(mContext, "Scrims"));
     }
 
     @Override
@@ -853,12 +854,11 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
      */
     public void onScreenTurnedOn() {
         mScreenOn = true;
-        final Handler handler = getHandler();
-        if (handler.hasCallbacks(mBlankingTransitionRunnable)) {
+        if (mHandler.hasCallbacks(mBlankingTransitionRunnable)) {
             if (DEBUG) {
                 Log.d(TAG, "Shorter blanking because screen turned on. All good.");
             }
-            handler.removeCallbacks(mBlankingTransitionRunnable);
+            mHandler.removeCallbacks(mBlankingTransitionRunnable);
             mBlankingTransitionRunnable.run();
         }
     }
