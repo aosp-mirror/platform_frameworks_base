@@ -528,7 +528,9 @@ public class BubbleStackView extends FrameLayout {
             if (shouldExpand) {
                 mBubbleContainer.setController(mExpandedAnimationController);
                 mExpandedAnimationController.expandFromStack(
-                        mStackAnimationController.getStackPosition(),
+                        /* collapseTo */
+                        mStackAnimationController.getStackPositionAlongNearestHorizontalEdge(),
+                        /* after */
                         () -> {
                             updatePointerPosition();
                             updateAfter.run();

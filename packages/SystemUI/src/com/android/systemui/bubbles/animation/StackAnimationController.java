@@ -134,6 +134,18 @@ public class StackAnimationController extends
     }
 
     /**
+     * Where the stack would be if it were snapped to the nearest horizontal edge (left or right).
+     */
+    public PointF getStackPositionAlongNearestHorizontalEdge() {
+        final PointF stackPos = getStackPosition();
+        final boolean onLeft = mLayout.isFirstChildXLeftOfCenter(stackPos.x);
+        final RectF bounds = getAllowableStackPositionRegion();
+
+        stackPos.x = onLeft ? bounds.left : bounds.right;
+        return stackPos;
+    }
+
+    /**
      * Flings the first bubble along the given property's axis, using the provided configuration
      * values. When the animation ends - either by hitting the min/max, or by friction sufficiently
      * reducing momentum - a SpringAnimation takes over to snap the bubble to the given final
