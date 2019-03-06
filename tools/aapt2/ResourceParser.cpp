@@ -206,15 +206,6 @@ class SegmentNode : public Node {
   }
 };
 
-// A chunk of text in the XML string within a CDATA tags.
-class CdataSegmentNode : public SegmentNode {
- public:
-
-  void Build(StringBuilder* builder) const override {
-    builder->AppendText(data, /* preserve_spaces */ true);
-  }
-};
-
 // A tag that will be encoded into the final flattened string. Tags like <b> or <i>.
 class SpanNode : public Node {
  public:
@@ -251,7 +242,6 @@ bool ResourceParser::FlattenXmlSubtree(
   std::vector<Node*> node_stack;
   node_stack.push_back(&root);
 
-  bool cdata_block = false;
   bool saw_span_node = false;
   SegmentNode* first_segment = nullptr;
   SegmentNode* last_segment = nullptr;
@@ -262,12 +252,9 @@ bool ResourceParser::FlattenXmlSubtree(
 
     // First take care of any SegmentNodes that should be created.
     if (event == xml::XmlPullParser::Event::kStartElement
-        || event == xml::XmlPullParser::Event::kEndElement
-        || event == xml::XmlPullParser::Event::kCdataStart
-        || event == xml::XmlPullParser::Event::kCdataEnd) {
+        || event == xml::XmlPullParser::Event::kEndElement) {
       if (!current_text.empty()) {
-        std::unique_ptr<SegmentNode> segment_node = (cdata_block)
-            ? util::make_unique<CdataSegmentNode>() : util::make_unique<SegmentNode>();
+        auto segment_node = util::make_unique<SegmentNode>();
         segment_node->data = std::move(current_text);
 
         last_segment = node_stack.back()->AddChild(std::move(segment_node));
@@ -344,16 +331,6 @@ bool ResourceParser::FlattenXmlSubtree(
           untranslatable_start_depth = {};
         }
       } break;
-
-      case xml::XmlPullParser::Event::kCdataStart: {
-        cdata_block = true;
-        break;
-      }
-
-      case xml::XmlPullParser::Event::kCdataEnd: {
-        cdata_block = false;
-        break;
-      }
 
       default:
         // ignore.
