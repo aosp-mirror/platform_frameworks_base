@@ -1966,8 +1966,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         } catch (RemoteException ex) {
             Slog.w(TAG, "unable to clear GK secure user id");
         }
-        UserInfo userInfo = mUserManager.getUserInfo(userId);
-        if (unknownUser || userInfo == null || userInfo.isManagedProfile()) {
+        if (unknownUser || mUserManager.getUserInfo(userId).isManagedProfile()) {
             removeKeystoreProfileKey(userId);
         }
     }
