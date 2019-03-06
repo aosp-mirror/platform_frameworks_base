@@ -67,6 +67,7 @@ import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityEvent;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.BaseAdapter;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
 import android.widget.TextView;
@@ -88,8 +89,10 @@ import com.android.systemui.Interpolators;
 import com.android.systemui.MultiListLayout;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.plugins.GlobalActions.GlobalActionsManager;
-import com.android.systemui.statusbar.phone.ScrimController;
+import com.android.systemui.plugins.GlobalActionsPanelPlugin;
 import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.systemui.statusbar.policy.ExtensionController;
+import com.android.systemui.statusbar.policy.ExtensionController.Extension;
 import com.android.systemui.util.EmergencyDialerConstants;
 import com.android.systemui.util.leak.RotationUtils;
 import com.android.systemui.volume.SystemUIInterpolators.LogAccelerateInterpolator;
@@ -161,6 +164,8 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     private final ScreenshotHelper mScreenshotHelper;
     private final ScreenRecordHelper mScreenRecordHelper;
 
+    private final Extension<GlobalActionsPanelPlugin> mPanelExtension;
+
     /**
      * @param context everything needs a context :(
      */
@@ -204,6 +209,11 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         mScreenRecordHelper = new ScreenRecordHelper(context);
 
         Dependency.get(ConfigurationController.class).addCallback(this);
+
+        mPanelExtension = Dependency.get(ExtensionController.class)
+            .newExtension(GlobalActionsPanelPlugin.class)
+            .withPlugin(GlobalActionsPanelPlugin.class)
+            .build();
     }
 
     /**
@@ -399,8 +409,16 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             }
             return false;
         };
+        GlobalActionsPanelPlugin.PanelViewController panelViewController =
+                mPanelExtension.get() != null
+                        ? mPanelExtension.get().onPanelShown(() -> {
+                            if (mDialog != null) {
+                                mDialog.dismiss();
+                            }
+                        })
+                        : null;
         ActionsDialog dialog = new ActionsDialog(mContext, this, mAdapter, onItemLongClickListener,
-                mSeparatedEmergencyButtonEnabled);
+                mSeparatedEmergencyButtonEnabled, panelViewController);
         dialog.setCanceledOnTouchOutside(false); // Handled by the custom class.
         dialog.setKeyguardShowing(mKeyguardShowing);
 
@@ -1470,20 +1488,22 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         private MultiListLayout mGlobalActionsLayout;
         private final OnClickListener mClickListener;
         private final OnItemLongClickListener mLongClickListener;
-        private final GradientDrawable mGradientDrawable;
+        private final Drawable mBackgroundDrawable;
         private final ColorExtractor mColorExtractor;
+        private final GlobalActionsPanelPlugin.PanelViewController mPanelController;
         private boolean mKeyguardShowing;
         private boolean mShouldDisplaySeparatedButton;
         private boolean mShowing;
+        private final float mScrimAlpha;
 
         public ActionsDialog(Context context, OnClickListener clickListener, MyAdapter adapter,
-                OnItemLongClickListener longClickListener, boolean shouldDisplaySeparatedButton) {
+                OnItemLongClickListener longClickListener, boolean shouldDisplaySeparatedButton,
+                GlobalActionsPanelPlugin.PanelViewController plugin) {
             super(context, com.android.systemui.R.style.Theme_SystemUI_Dialog_GlobalActions);
             mContext = context;
             mAdapter = adapter;
             mClickListener = clickListener;
             mLongClickListener = longClickListener;
-            mGradientDrawable = new GradientDrawable(mContext);
             mColorExtractor = Dependency.get(SysuiColorExtractor.class);
             mShouldDisplaySeparatedButton = shouldDisplaySeparatedButton;
 
@@ -1504,12 +1524,46 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                     | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
                     | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
                     | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED);
-            window.setBackgroundDrawable(mGradientDrawable);
             window.setType(WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY);
 
             initializeLayout();
 
             setTitle(R.string.global_actions);
+
+            mPanelController = plugin;
+            View panelView = initializePanel();
+            if (panelView == null) {
+                mBackgroundDrawable = new GradientDrawable(context);
+                mScrimAlpha = 0.7f;
+            } else {
+                mBackgroundDrawable = context.getDrawable(
+                        com.android.systemui.R.drawable.global_action_panel_scrim);
+                mScrimAlpha = 1f;
+                addContentView(
+                        panelView,
+                        new ViewGroup.LayoutParams(
+                                ViewGroup.LayoutParams.MATCH_PARENT,
+                                ViewGroup.LayoutParams.MATCH_PARENT));
+            }
+            window.setBackgroundDrawable(mBackgroundDrawable);
+        }
+
+        private View initializePanel() {
+            if (isPanelEnabled(mContext) && mPanelController != null) {
+                View panelView = mPanelController.getPanelContent();
+                if (panelView != null) {
+                    FrameLayout panelContainer = new FrameLayout(mContext);
+                    FrameLayout.LayoutParams panelParams =
+                            new FrameLayout.LayoutParams(
+                                    FrameLayout.LayoutParams.MATCH_PARENT,
+                                    FrameLayout.LayoutParams.WRAP_CONTENT);
+                    panelParams.topMargin = mContext.getResources().getDimensionPixelSize(
+                            com.android.systemui.R.dimen.global_actions_panel_top_margin);
+                    panelContainer.addView(panelView, panelParams);
+                    return panelContainer;
+                }
+            }
+            return null;
         }
 
         private void initializeLayout() {
@@ -1528,6 +1582,11 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                 }
             });
             mGlobalActionsLayout.setRotationListener(this::onRotate);
+        }
+
+        private boolean isPanelEnabled(Context context) {
+            return FeatureFlagUtils.isEnabled(
+                    context, FeatureFlagUtils.GLOBAL_ACTIONS_PANEL_ENABLED);
         }
 
         private int getGlobalActionsLayoutId(Context context) {
@@ -1590,13 +1649,18 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             super.onStart();
             updateList();
 
-            Point displaySize = new Point();
-            mContext.getDisplay().getRealSize(displaySize);
-            mColorExtractor.addOnColorsChangedListener(this);
-            mGradientDrawable.setScreenSize(displaySize.x, displaySize.y);
-            GradientColors colors = mColorExtractor.getColors(mKeyguardShowing ?
-                    WallpaperManager.FLAG_LOCK : WallpaperManager.FLAG_SYSTEM);
-            updateColors(colors, false /* animate */);
+            if (mBackgroundDrawable instanceof GradientDrawable) {
+                Point displaySize = new Point();
+                mContext.getDisplay().getRealSize(displaySize);
+                mColorExtractor.addOnColorsChangedListener(this);
+                ((GradientDrawable) mBackgroundDrawable)
+                        .setScreenSize(displaySize.x, displaySize.y);
+                GradientColors colors = mColorExtractor.getColors(
+                        mKeyguardShowing
+                                ? WallpaperManager.FLAG_LOCK
+                                : WallpaperManager.FLAG_SYSTEM);
+                updateColors(colors, false /* animate */);
+            }
         }
 
         /**
@@ -1605,11 +1669,14 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
          * @param animate Interpolates gradient if true, just sets otherwise.
          */
         private void updateColors(GradientColors colors, boolean animate) {
-            mGradientDrawable.setColors(colors, animate);
+            if (!(mBackgroundDrawable instanceof GradientDrawable)) {
+                return;
+            }
+            ((GradientDrawable) mBackgroundDrawable).setColors(colors, animate);
             View decorView = getWindow().getDecorView();
             if (colors.supportsDarkText()) {
                 decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR |
-                    View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+                        View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
             } else {
                 decorView.setSystemUiVisibility(0);
             }
@@ -1625,7 +1692,7 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         public void show() {
             super.show();
             mShowing = true;
-            mGradientDrawable.setAlpha(0);
+            mBackgroundDrawable.setAlpha(0);
             mGlobalActionsLayout.setTranslationX(getAnimTranslation());
             mGlobalActionsLayout.setAlpha(0);
             mGlobalActionsLayout.animate()
@@ -1635,8 +1702,8 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                     .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
                     .setUpdateListener(animation -> {
                         int alpha = (int) ((Float) animation.getAnimatedValue()
-                                * ScrimController.GRADIENT_SCRIM_ALPHA * 255);
-                        mGradientDrawable.setAlpha(alpha);
+                                * mScrimAlpha * 255);
+                        mBackgroundDrawable.setAlpha(alpha);
                     })
                     .start();
         }
@@ -1653,14 +1720,17 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                     .alpha(0)
                     .translationX(getAnimTranslation())
                     .setDuration(300)
-                    .withEndAction(() -> super.dismiss())
+                    .withEndAction(super::dismiss)
                     .setInterpolator(new LogAccelerateInterpolator())
                     .setUpdateListener(animation -> {
                         int alpha = (int) ((1f - (Float) animation.getAnimatedValue())
-                                * ScrimController.GRADIENT_SCRIM_ALPHA * 255);
-                        mGradientDrawable.setAlpha(alpha);
+                                * mScrimAlpha * 255);
+                        mBackgroundDrawable.setAlpha(alpha);
                     })
                     .start();
+            if (mPanelController != null) {
+                mPanelController.onDismissed();
+            }
         }
 
         void dismissImmediately() {
