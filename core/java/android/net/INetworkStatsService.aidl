@@ -31,6 +31,7 @@ import com.android.internal.net.VpnInfo;
 interface INetworkStatsService {
 
     /** Start a statistics query session. */
+    @UnsupportedAppUsage
     INetworkStatsSession openSession();
 
     /** Start a statistics query session. If calling package is profile or device owner then it is
@@ -39,9 +40,11 @@ interface INetworkStatsService {
      *  PACKAGE_USAGE_STATS permission is always checked. If PACKAGE_USAGE_STATS is not granted
      *  READ_NETWORK_USAGE_STATS is checked for.
      */
+    @UnsupportedAppUsage
     INetworkStatsSession openSessionForUsageStats(int flags, String callingPackage);
 
     /** Return data layer snapshot of UID network usage. */
+    @UnsupportedAppUsage
     NetworkStats getDataLayerSnapshotForUid(int uid);
 
     /** Get a detailed snapshot of stats since boot for all UIDs.
@@ -54,6 +57,7 @@ interface INetworkStatsService {
     NetworkStats getDetailedUidStats(in String[] requiredIfaces);
 
     /** Return set of any ifaces associated with mobile networks since boot. */
+    @UnsupportedAppUsage
     String[] getMobileIfaces();
 
     /** Increment data layer count of operations performed for UID and tag. */
@@ -66,6 +70,7 @@ interface INetworkStatsService {
          in NetworkState[] networkStates,
          in String activeIface);
     /** Force update of statistics. */
+    @UnsupportedAppUsage
     void forceUpdate();
 
     /** Registers a callback on data usage. */

@@ -31,9 +31,11 @@ import android.telephony.SubscriptionPlan;
 interface INetworkPolicyManager {
 
     /** Control UID policies. */
+    @UnsupportedAppUsage
     void setUidPolicy(int uid, int policy);
     void addUidPolicy(int uid, int policy);
     void removeUidPolicy(int uid, int policy);
+    @UnsupportedAppUsage
     int getUidPolicy(int uid);
     int[] getUidsWithPolicy(int policy);
 
@@ -41,14 +43,18 @@ interface INetworkPolicyManager {
     void unregisterListener(INetworkPolicyListener listener);
 
     /** Control network policies atomically. */
+    @UnsupportedAppUsage
     void setNetworkPolicies(in NetworkPolicy[] policies);
     NetworkPolicy[] getNetworkPolicies(String callingPackage);
 
     /** Snooze limit on policy matching given template. */
+    @UnsupportedAppUsage
     void snoozeLimit(in NetworkTemplate template);
 
     /** Control if background data is restricted system-wide. */
+    @UnsupportedAppUsage
     void setRestrictBackground(boolean restrictBackground);
+    @UnsupportedAppUsage
     boolean getRestrictBackground();
 
     /** Callback used to change internal state on tethering */
@@ -64,6 +70,7 @@ interface INetworkPolicyManager {
     void setDeviceIdleMode(boolean enabled);
     void setWifiMeteredOverride(String networkId, int meteredOverride);
 
+    @UnsupportedAppUsage
     NetworkQuotaInfo getNetworkQuotaInfo(in NetworkState state);
 
     SubscriptionPlan[] getSubscriptionPlans(int subId, String callingPackage);
