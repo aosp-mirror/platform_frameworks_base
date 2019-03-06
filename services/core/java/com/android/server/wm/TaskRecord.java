@@ -202,13 +202,6 @@ class TaskRecord extends ConfigurationContainer {
     // Do not move the stack as a part of reparenting
     static final int REPARENT_LEAVE_STACK_IN_PLACE = 2;
 
-    // The height/width divide used when fitting a task within a bounds with method
-    // {@link #fitWithinBounds}.
-    // We always want the task to to be visible in the bounds without affecting its size when
-    // fitting. To make sure this is the case, we don't adjust the task left or top side pass
-    // the input bounds right or bottom side minus the width or height divided by this value.
-    private static final int FIT_WITHIN_BOUNDS_DIVIDER = 3;
-
     /**
      * The factory used to create {@link TaskRecord}. This allows OEM subclass {@link TaskRecord}.
      */
@@ -1932,35 +1925,33 @@ class TaskRecord extends ConfigurationContainer {
      *
      * @param bounds Bounds to be adjusted.
      * @param stackBounds Bounds within which the other bounds should remain.
+     * @param overlapPxX The amount of px required to be visible in the X dimension.
+     * @param overlapPxY The amount of px required to be visible in the Y dimension.
      */
-    private static void fitWithinBounds(Rect bounds, Rect stackBounds) {
+    private static void fitWithinBounds(Rect bounds, Rect stackBounds, int overlapPxX,
+            int overlapPxY) {
         if (stackBounds == null || stackBounds.isEmpty() || stackBounds.contains(bounds)) {
             return;
         }
 
-        if (bounds.left < stackBounds.left || bounds.right > stackBounds.right) {
-            final int maxRight = stackBounds.right
-                    - (stackBounds.width() / FIT_WITHIN_BOUNDS_DIVIDER);
-            int horizontalDiff = stackBounds.left - bounds.left;
-            if ((horizontalDiff < 0 && bounds.left >= maxRight)
-                    || (bounds.left + horizontalDiff >= maxRight)) {
-                horizontalDiff = maxRight - bounds.left;
-            }
-            bounds.left += horizontalDiff;
-            bounds.right += horizontalDiff;
+        // For each side of the parent (eg. left), check if the opposing side of the window (eg.
+        // right) is at least overlap pixels away. If less, offset the window by that difference.
+        int horizontalDiff = 0;
+        // If window is smaller than overlap, use it's smallest dimension instead
+        int overlapLR = Math.min(overlapPxX, bounds.width());
+        if (bounds.right < (stackBounds.left + overlapLR)) {
+            horizontalDiff = overlapLR - (bounds.right - stackBounds.left);
+        } else if (bounds.left > (stackBounds.right - overlapLR)) {
+            horizontalDiff = -(overlapLR - (stackBounds.right - bounds.left));
         }
-
-        if (bounds.top < stackBounds.top || bounds.bottom > stackBounds.bottom) {
-            final int maxBottom = stackBounds.bottom
-                    - (stackBounds.height() / FIT_WITHIN_BOUNDS_DIVIDER);
-            int verticalDiff = stackBounds.top - bounds.top;
-            if ((verticalDiff < 0 && bounds.top >= maxBottom)
-                    || (bounds.top + verticalDiff >= maxBottom)) {
-                verticalDiff = maxBottom - bounds.top;
-            }
-            bounds.top += verticalDiff;
-            bounds.bottom += verticalDiff;
+        int verticalDiff = 0;
+        int overlapTB = Math.min(overlapPxY, bounds.width());
+        if (bounds.bottom < (stackBounds.top + overlapTB)) {
+            verticalDiff = overlapTB - (bounds.bottom - stackBounds.top);
+        } else if (bounds.top > (stackBounds.bottom - overlapTB)) {
+            verticalDiff = -(overlapTB - (stackBounds.bottom - bounds.top));
         }
+        bounds.offset(horizontalDiff, verticalDiff);
     }
 
     /**
@@ -2230,7 +2221,11 @@ class TaskRecord extends ConfigurationContainer {
         adjustForMinimalTaskDimensions(outOverrideBounds, mTmpBounds);
         if (windowingMode == WINDOWING_MODE_FREEFORM) {
             // by policy, make sure the window remains within parent somewhere
-            fitWithinBounds(outOverrideBounds, newParentConfig.windowConfiguration.getBounds());
+            final float density =
+                    ((float) newParentConfig.densityDpi) / DisplayMetrics.DENSITY_DEFAULT;
+            fitWithinBounds(outOverrideBounds, newParentConfig.windowConfiguration.getBounds(),
+                    (int) (density * WindowState.MINIMUM_VISIBLE_WIDTH_IN_DP),
+                    (int) (density * WindowState.MINIMUM_VISIBLE_HEIGHT_IN_DP));
         }
         computeConfigResourceOverrides(getResolvedOverrideConfiguration(), newParentConfig);
     }

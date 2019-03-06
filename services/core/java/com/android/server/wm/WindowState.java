@@ -942,29 +942,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // Make sure the content and visible frames are inside of the
         // final window frame.
         if (windowsAreFloating && !mWindowFrames.mFrame.isEmpty()) {
-            // For pinned workspace the frame isn't limited in any particular
-            // way since SystemUI controls the bounds. For freeform however
-            // we want to keep things inside the content frame.
-            final Rect limitFrame = task.inPinnedWindowingMode() ? mWindowFrames.mFrame
-                    : mWindowFrames.mContentFrame;
-            // Keep the frame out of the blocked system area, limit it in size to the content area
-            // and make sure that there is always a minimum visible so that the user can drag it
-            // into a usable area..
-            final int height = Math.min(mWindowFrames.mFrame.height(), limitFrame.height());
-            final int width = Math.min(limitFrame.width(), mWindowFrames.mFrame.width());
-            final DisplayMetrics displayMetrics = getDisplayContent().getDisplayMetrics();
-            final int minVisibleHeight = Math.min(height, WindowManagerService.dipToPixel(
-                    MINIMUM_VISIBLE_HEIGHT_IN_DP, displayMetrics));
-            final int minVisibleWidth = Math.min(width, WindowManagerService.dipToPixel(
-                    MINIMUM_VISIBLE_WIDTH_IN_DP, displayMetrics));
-            final int top = Math.max(limitFrame.top,
-                    Math.min( mWindowFrames.mFrame.top, limitFrame.bottom - minVisibleHeight));
-            final int left = Math.max(limitFrame.left + minVisibleWidth - width,
-                    Math.min( mWindowFrames.mFrame.left, limitFrame.right - minVisibleWidth));
-            mWindowFrames.mFrame.set(left, top, left + width, top + height);
             final int visBottom = mWindowFrames.mVisibleFrame.bottom;
             final int contentBottom = mWindowFrames.mContentFrame.bottom;
-            mWindowFrames.mContentFrame.set( mWindowFrames.mFrame);
+            mWindowFrames.mContentFrame.set(mWindowFrames.mFrame);
             mWindowFrames.mVisibleFrame.set(mWindowFrames.mContentFrame);
             mWindowFrames.mStableFrame.set(mWindowFrames.mContentFrame);
             if (isImeTarget && inFreeformWindowingMode()) {
