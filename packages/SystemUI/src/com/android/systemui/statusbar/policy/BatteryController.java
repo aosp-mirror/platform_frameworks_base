@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.policy;
 
+import android.annotation.Nullable;
+
 import com.android.systemui.DemoMode;
 import com.android.systemui.Dumpable;
 import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback;
@@ -78,6 +80,6 @@ public interface BatteryController extends DemoMode, Dumpable,
          * The callback
          * @param estimate the estimate
          */
-        void onBatteryRemainingEstimateRetrieved(String estimate);
+        void onBatteryRemainingEstimateRetrieved(@Nullable String estimate);
     }
 }
