@@ -18,6 +18,11 @@ package com.android.internal.app;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import android.annotation.IntDef;
 import android.app.Activity;
 import android.app.ActivityManager;
@@ -90,6 +95,8 @@ import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
+import android.view.animation.AccelerateInterpolator;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.AbsListView;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
@@ -152,11 +159,17 @@ public class ChooserActivity extends ResolverActivity {
     private static final boolean USE_SHORTCUT_MANAGER_FOR_DIRECT_TARGETS = true;
     private static final boolean USE_CHOOSER_TARGET_SERVICE_FOR_DIRECT_TARGETS = true;
 
+    /**
+     * The transition time between placeholders for direct share to a message
+     * indicating that non are available.
+     */
+    private static final int NO_DIRECT_SHARE_ANIM_IN_MILLIS = 200;
+
     // TODO(b/121287224): Re-evaluate this limit
     private static final int SHARE_TARGET_QUERY_PACKAGE_LIMIT = 20;
 
     private static final int QUERY_TARGET_SERVICE_LIMIT = 5;
-    private static final int WATCHDOG_TIMEOUT_MILLIS = 2000;
+    private static final int WATCHDOG_TIMEOUT_MILLIS = 3000;
 
     private Bundle mReplacementExtras;
     private IntentSender mChosenComponentSender;
@@ -172,6 +185,8 @@ public class ChooserActivity extends ResolverActivity {
 
     private ChooserListAdapter mChooserListAdapter;
     private ChooserRowAdapter mChooserRowAdapter;
+    private Drawable mChooserRowLayer;
+    private int mChooserRowServiceSpacing;
 
     private SharedPreferences mPinnedSharedPrefs;
     private static final float PINNED_TARGET_SCORE_BOOST = 1000.f;
@@ -220,7 +235,6 @@ public class ChooserActivity extends ResolverActivity {
                     sri.connection.destroy();
                     mServiceConnections.remove(sri.connection);
                     if (mServiceConnections.isEmpty()) {
-                        mChooserHandler.removeMessages(CHOOSER_TARGET_SERVICE_WATCHDOG_TIMEOUT);
                         sendVoiceChoicesIfNeeded();
                         mChooserListAdapter.setShowServiceTargets(true);
                     }
@@ -230,8 +244,12 @@ public class ChooserActivity extends ResolverActivity {
                     if (DEBUG) {
                         Log.d(TAG, "CHOOSER_TARGET_SERVICE_WATCHDOG_TIMEOUT; unbinding services");
                     }
+                    if (isDestroyed()) {
+                        break;
+                    }
                     unbindRemainingServices();
                     sendVoiceChoicesIfNeeded();
+                    mChooserListAdapter.completeServiceTargetLoading();
                     mChooserListAdapter.setShowServiceTargets(true);
                     break;
 
@@ -399,11 +417,17 @@ public class ChooserActivity extends ResolverActivity {
                     .setExtras(extras)
                     .build());
             mAppPredictorCallback = resultList -> {
+                if (isFinishing() || isDestroyed()) {
+                    return;
+                }
                 final List<DisplayResolveInfo> driList =
                         getDisplayResolveInfos(mChooserListAdapter);
                 final List<ShortcutManager.ShareShortcutInfo> shareShortcutInfos =
                         new ArrayList<>();
                 for (AppTarget appTarget : resultList) {
+                    if (appTarget.getShortcutInfo() == null) {
+                        continue;
+                    }
                     shareShortcutInfos.add(new ShortcutManager.ShareShortcutInfo(
                             appTarget.getShortcutInfo(),
                             new ComponentName(
@@ -413,6 +437,10 @@ public class ChooserActivity extends ResolverActivity {
             };
             mAppPredictor.registerPredictionUpdates(this.getMainExecutor(), mAppPredictorCallback);
         }
+
+        mChooserRowLayer = getResources().getDrawable(R.drawable.chooser_row_layer_list, null);
+        mChooserRowServiceSpacing = getResources()
+                                        .getDimensionPixelSize(R.dimen.chooser_service_spacing);
 
         if (DEBUG) {
             Log.d(TAG, "System Time Cost is " + systemCost);
@@ -919,6 +947,10 @@ public class ChooserActivity extends ResolverActivity {
 
     @Override
     protected boolean onTargetSelected(TargetInfo target, boolean alwaysCheck) {
+        if (target instanceof NotSelectableTargetInfo) {
+            return false;
+        }
+
         if (mRefinementIntentSender != null) {
             final Intent fillIn = new Intent();
             final List<Intent> sourceIntents = target.getAllSourceIntents();
@@ -1064,14 +1096,14 @@ public class ChooserActivity extends ResolverActivity {
             }
         }
 
-        if (!mServiceConnections.isEmpty()) {
-            if (DEBUG) {
-                Log.d(TAG, "queryTargets setting watchdog timer for "
-                        + WATCHDOG_TIMEOUT_MILLIS + "ms");
-            }
-            mChooserHandler.sendEmptyMessageDelayed(CHOOSER_TARGET_SERVICE_WATCHDOG_TIMEOUT,
-                    WATCHDOG_TIMEOUT_MILLIS);
-        } else {
+        if (DEBUG) {
+            Log.d(TAG, "queryTargets setting watchdog timer for "
+                    + WATCHDOG_TIMEOUT_MILLIS + "ms");
+        }
+        mChooserHandler.sendEmptyMessageDelayed(CHOOSER_TARGET_SERVICE_WATCHDOG_TIMEOUT,
+                WATCHDOG_TIMEOUT_MILLIS);
+
+        if (mServiceConnections.isEmpty()) {
             sendVoiceChoicesIfNeeded();
         }
     }
@@ -1213,7 +1245,6 @@ public class ChooserActivity extends ResolverActivity {
             conn.destroy();
         }
         mServiceConnections.clear();
-        mChooserHandler.removeMessages(CHOOSER_TARGET_SERVICE_WATCHDOG_TIMEOUT);
     }
 
     public void onSetupVoiceInteraction() {
@@ -1420,7 +1451,93 @@ public class ChooserActivity extends ResolverActivity {
         return null;
     }
 
-    final class ChooserTargetInfo implements TargetInfo {
+    interface ChooserTargetInfo extends TargetInfo {
+        float getModifiedScore();
+
+        ChooserTarget getChooserTarget();
+    }
+
+    /**
+      * Distinguish between targets that selectable by the user, vs those that are
+      * placeholders for the system while information is loading in an async manner.
+      */
+    abstract class NotSelectableTargetInfo implements ChooserTargetInfo {
+
+        public Intent getResolvedIntent() {
+            return null;
+        }
+
+        public ComponentName getResolvedComponentName() {
+            return null;
+        }
+
+        public boolean start(Activity activity, Bundle options) {
+            return false;
+        }
+
+        public boolean startAsCaller(ResolverActivity activity, Bundle options, int userId) {
+            return false;
+        }
+
+        public boolean startAsUser(Activity activity, Bundle options, UserHandle user) {
+            return false;
+        }
+
+        public ResolveInfo getResolveInfo() {
+            return null;
+        }
+
+        public CharSequence getDisplayLabel() {
+            return null;
+        }
+
+        public CharSequence getExtendedInfo() {
+            return null;
+        }
+
+        public Drawable getBadgeIcon() {
+            return null;
+        }
+
+        public CharSequence getBadgeContentDescription() {
+            return null;
+        }
+
+        public TargetInfo cloneFilledIn(Intent fillInIntent, int flags) {
+            return null;
+        }
+
+        public List<Intent> getAllSourceIntents() {
+            return null;
+        }
+
+        public boolean isPinned() {
+            return false;
+        }
+
+        public float getModifiedScore() {
+            return 0.1f;
+        }
+
+        public ChooserTarget getChooserTarget() {
+            return null;
+        }
+    }
+
+    final class PlaceHolderTargetInfo extends NotSelectableTargetInfo {
+        public Drawable getDisplayIcon() {
+            return getDrawable(R.drawable.resolver_icon_placeholder);
+        }
+    }
+
+
+    final class EmptyTargetInfo extends NotSelectableTargetInfo {
+        public Drawable getDisplayIcon() {
+            return null;
+        }
+    }
+
+    final class SelectableTargetInfo implements ChooserTargetInfo {
         private final DisplayResolveInfo mSourceInfo;
         private final ResolveInfo mBackupResolveInfo;
         private final ChooserTarget mChooserTarget;
@@ -1431,7 +1548,7 @@ public class ChooserActivity extends ResolverActivity {
         private final int mFillInFlags;
         private final float mModifiedScore;
 
-        public ChooserTargetInfo(DisplayResolveInfo sourceInfo, ChooserTarget chooserTarget,
+        SelectableTargetInfo(DisplayResolveInfo sourceInfo, ChooserTarget chooserTarget,
                 float modifiedScore) {
             mSourceInfo = sourceInfo;
             mChooserTarget = chooserTarget;
@@ -1460,7 +1577,7 @@ public class ChooserActivity extends ResolverActivity {
             mFillInFlags = 0;
         }
 
-        private ChooserTargetInfo(ChooserTargetInfo other, Intent fillInIntent, int flags) {
+        private SelectableTargetInfo(SelectableTargetInfo other, Intent fillInIntent, int flags) {
             mSourceInfo = other.mSourceInfo;
             mBackupResolveInfo = other.mBackupResolveInfo;
             mChooserTarget = other.mChooserTarget;
@@ -1616,7 +1733,7 @@ public class ChooserActivity extends ResolverActivity {
 
         @Override
         public TargetInfo cloneFilledIn(Intent fillInIntent, int flags) {
-            return new ChooserTargetInfo(this, fillInIntent, flags);
+            return new SelectableTargetInfo(this, fillInIntent, flags);
         }
 
         @Override
@@ -1644,7 +1761,9 @@ public class ChooserActivity extends ResolverActivity {
         private static final int MAX_SERVICE_TARGETS = 4;
         private static final int MAX_TARGETS_PER_SERVICE = 2;
 
-        private final List<ChooserTargetInfo> mServiceTargets = new ArrayList<>();
+        // Reserve spots for incoming direct share targets by adding placeholders
+        private ChooserTargetInfo mPlaceHolderTargetInfo = new PlaceHolderTargetInfo();
+        private List<ChooserTargetInfo> mServiceTargets;
         private final List<TargetInfo> mCallerTargets = new ArrayList<>();
         private boolean mShowServiceTargets;
 
@@ -1662,6 +1781,8 @@ public class ChooserActivity extends ResolverActivity {
             // we want to separate them into a different section.
             super(context, payloadIntents, null, rList, launchedFromUid, filterLastUsed,
                     resolverListController);
+
+            mServiceTargets = createPlaceHolders();
 
             if (initialIntents != null) {
                 final PackageManager pm = getPackageManager();
@@ -1713,6 +1834,14 @@ public class ChooserActivity extends ResolverActivity {
                             ri.loadLabel(pm), null, ii));
                 }
             }
+        }
+
+        private List<ChooserTargetInfo> createPlaceHolders() {
+            List<ChooserTargetInfo> list = new ArrayList<>();
+            for (int i = 0; i < MAX_SERVICE_TARGETS; i++) {
+                list.add(mPlaceHolderTargetInfo);
+            }
+            return list;
         }
 
         @Override
@@ -1770,22 +1899,33 @@ public class ChooserActivity extends ResolverActivity {
 
         @Override
         public int getCount() {
-            return super.getCount() + getServiceTargetCount() + getCallerTargetCount();
+            return super.getCount() + getSelectableServiceTargetCount() + getCallerTargetCount();
         }
 
         @Override
         public int getUnfilteredCount() {
-            return super.getUnfilteredCount() + getServiceTargetCount() + getCallerTargetCount();
+            return super.getUnfilteredCount() + getSelectableServiceTargetCount()
+                    + getCallerTargetCount();
         }
 
         public int getCallerTargetCount() {
             return mCallerTargets.size();
         }
 
-        public int getServiceTargetCount() {
-            if (!mShowServiceTargets) {
-                return 0;
+        /**
+          * Filter out placeholders and non-selectable service targets
+          */
+        public int getSelectableServiceTargetCount() {
+            int count = 0;
+            for (ChooserTargetInfo info : mServiceTargets) {
+                if (info instanceof SelectableTargetInfo) {
+                    count++;
+                }
             }
+            return count;
+        }
+
+        public int getServiceTargetCount() {
             return Math.min(mServiceTargets.size(), MAX_SERVICE_TARGETS);
         }
 
@@ -1831,7 +1971,8 @@ public class ChooserActivity extends ResolverActivity {
             }
             offset += callerTargetCount;
 
-            final int serviceTargetCount = getServiceTargetCount();
+            final int serviceTargetCount = filtered ? getServiceTargetCount() :
+                                               getSelectableServiceTargetCount();
             if (position - offset < serviceTargetCount) {
                 return mServiceTargets.get(position - offset);
             }
@@ -1850,8 +1991,14 @@ public class ChooserActivity extends ResolverActivity {
             if (mTargetsNeedPruning && targets.size() > 0) {
                 // First proper update since we got an onListRebuilt() with (transient) 0 items.
                 // Clear out the target list and rebuild.
-                mServiceTargets.clear();
+                mServiceTargets = createPlaceHolders();
                 mTargetsNeedPruning = false;
+
+                // Add back any app-supplied direct share targets that may have been
+                // wiped by this clear
+                if (mCallerChooserTargets != null) {
+                    addServiceResults(null, Lists.newArrayList(mCallerChooserTargets));
+                }
             }
 
             final float parentScore = getScore(origTarget);
@@ -1867,7 +2014,7 @@ public class ChooserActivity extends ResolverActivity {
                     // This incents ChooserTargetServices to define what's truly better.
                     targetScore = lastScore * 0.95f;
                 }
-                insertServiceTarget(new ChooserTargetInfo(origTarget, target, targetScore));
+                insertServiceTarget(new SelectableTargetInfo(origTarget, target, targetScore));
 
                 if (DEBUG) {
                     Log.d(TAG, " => " + target.toString() + " score=" + targetScore
@@ -1905,11 +2052,33 @@ public class ChooserActivity extends ResolverActivity {
             }
         }
 
+        /**
+         * Calling this marks service target loading complete, and will attempt to no longer
+         * update the direct share area.
+         */
+        public void completeServiceTargetLoading() {
+            mServiceTargets.removeIf(o -> o instanceof PlaceHolderTargetInfo);
+
+            if (mServiceTargets.isEmpty()) {
+                mServiceTargets.add(new EmptyTargetInfo());
+            }
+            notifyDataSetChanged();
+        }
+
         private void insertServiceTarget(ChooserTargetInfo chooserTargetInfo) {
+            // Avoid inserting any potentially late results
+            if (mServiceTargets.size() == 1
+                    && mServiceTargets.get(0) instanceof EmptyTargetInfo) {
+                return;
+            }
+
             final float newScore = chooserTargetInfo.getModifiedScore();
             for (int i = 0, N = mServiceTargets.size(); i < N; i++) {
                 final ChooserTargetInfo serviceTarget = mServiceTargets.get(i);
-                if (newScore > serviceTarget.getModifiedScore()) {
+                if (serviceTarget == null) {
+                    mServiceTargets.set(i, chooserTargetInfo);
+                    return;
+                } else if (newScore > serviceTarget.getModifiedScore()) {
                     mServiceTargets.add(i, chooserTargetInfo);
                     return;
                 }
@@ -1968,7 +2137,7 @@ public class ChooserActivity extends ResolverActivity {
 
         // There can be at most one row of service targets.
         public int getServiceTargetRowCount() {
-            return (int) mChooserListAdapter.getServiceTargetCount() == 0 ? 0 : 1;
+            return 1;
         }
 
         @Override
@@ -2054,55 +2223,78 @@ public class ChooserActivity extends ResolverActivity {
             final int start = getFirstRowPosition(rowPosition);
             final int startType = mChooserListAdapter.getPositionTargetType(start);
 
+            final int lastStartType = mChooserListAdapter.getPositionTargetType(
+                    getFirstRowPosition(rowPosition - 1));
+
+            if (startType != lastStartType || rowPosition == 0) {
+                holder.row.setBackground(mChooserRowLayer);
+                setVertPadding(holder, mChooserRowServiceSpacing, 0);
+            } else {
+                holder.row.setBackground(null);
+                setVertPadding(holder, 0, 0);
+            }
+
             int end = start + mColumnCount - 1;
             while (mChooserListAdapter.getPositionTargetType(end) != startType && end >= start) {
                 end--;
             }
 
-            if (startType == ChooserListAdapter.TARGET_SERVICE) {
-                int nextStartType = mChooserListAdapter.getPositionTargetType(
-                        getFirstRowPosition(rowPosition + 1));
-                int serviceSpacing = holder.row.getContext().getResources()
-                        .getDimensionPixelSize(R.dimen.chooser_service_spacing);
-                if (rowPosition == 0 && nextStartType != ChooserListAdapter.TARGET_SERVICE) {
-                    // if the row is the only row for target service
-                    setVertPadding(holder, 0, 0);
-                } else {
-                    int top = rowPosition == 0 ? serviceSpacing : 0;
-                    if (nextStartType != ChooserListAdapter.TARGET_SERVICE) {
-                        setVertPadding(holder, top, serviceSpacing);
-                    } else {
-                        setVertPadding(holder, top, 0);
-                    }
-                }
-            } else {
-                holder.row.setBackgroundColor(Color.TRANSPARENT);
-                int lastStartType = mChooserListAdapter.getPositionTargetType(
-                        getFirstRowPosition(rowPosition - 1));
-                if (lastStartType == ChooserListAdapter.TARGET_SERVICE || rowPosition == 0) {
-                    int serviceSpacing = holder.row.getContext().getResources()
-                            .getDimensionPixelSize(R.dimen.chooser_service_spacing);
-                    setVertPadding(holder, serviceSpacing, 0);
-                } else {
-                    setVertPadding(holder, 0, 0);
-                }
-            }
+            if (end == start && mChooserListAdapter.getItem(start) instanceof EmptyTargetInfo) {
+                final TextView textView = holder.row.findViewById(R.id.chooser_row_text_option);
 
-            final int oldHeight = holder.row.getLayoutParams().height;
-            holder.row.getLayoutParams().height = Math.max(1, holder.measuredRowHeight);
-            if (holder.row.getLayoutParams().height != oldHeight) {
-                holder.row.requestLayout();
+                if (textView.getVisibility() != View.VISIBLE) {
+                    textView.setAlpha(0.0f);
+                    textView.setVisibility(View.VISIBLE);
+                    textView.setText(R.string.chooser_no_direct_share_targets);
+
+                    ValueAnimator fadeAnim = ObjectAnimator.ofFloat(textView, "alpha", 0.0f, 1.0f);
+                    fadeAnim.setInterpolator(new DecelerateInterpolator(1.0f));
+
+                    float translationInPx = getResources().getDimensionPixelSize(
+                            R.dimen.chooser_row_text_option_translate);
+                    textView.setTranslationY(translationInPx);
+                    ValueAnimator translateAnim = ObjectAnimator.ofFloat(textView, "translationY",
+                            0.0f);
+                    translateAnim.setInterpolator(new DecelerateInterpolator(1.0f));
+
+                    AnimatorSet animSet = new AnimatorSet();
+                    animSet.setDuration(NO_DIRECT_SHARE_ANIM_IN_MILLIS);
+                    animSet.setStartDelay(NO_DIRECT_SHARE_ANIM_IN_MILLIS);
+                    animSet.playTogether(fadeAnim, translateAnim);
+                    animSet.start();
+                }
             }
 
             for (int i = 0; i < mColumnCount; i++) {
                 final View v = holder.cells[i];
                 if (start + i <= end) {
-                    v.setVisibility(View.VISIBLE);
+                    setCellVisibility(holder, i, View.VISIBLE);
                     holder.itemIndices[i] = start + i;
                     mChooserListAdapter.bindView(holder.itemIndices[i], v);
                 } else {
-                    v.setVisibility(View.INVISIBLE);
+                    setCellVisibility(holder, i, View.INVISIBLE);
                 }
+            }
+        }
+
+        private void setCellVisibility(RowViewHolder holder, int i, int visibility) {
+            final View v = holder.cells[i];
+            if (visibility == View.VISIBLE) {
+                holder.cellVisibility[i] = true;
+                v.setVisibility(visibility);
+                v.setAlpha(1.0f);
+            } else if (visibility == View.INVISIBLE && holder.cellVisibility[i]) {
+                holder.cellVisibility[i] = false;
+
+                ValueAnimator fadeAnim = ObjectAnimator.ofFloat(v, "alpha", 1.0f, 0f);
+                fadeAnim.setDuration(NO_DIRECT_SHARE_ANIM_IN_MILLIS);
+                fadeAnim.setInterpolator(new AccelerateInterpolator(1.0f));
+                fadeAnim.addListener(new AnimatorListenerAdapter() {
+                    public void onAnimationEnd(Animator animation) {
+                        v.setVisibility(View.INVISIBLE);
+                    }
+                });
+                fadeAnim.start();
             }
         }
 
@@ -2132,14 +2324,16 @@ public class ChooserActivity extends ResolverActivity {
     }
 
     static class RowViewHolder {
-        final View[] cells;
-        final ViewGroup row;
+        public final View[] cells;
+        public final boolean [] cellVisibility;
+        public final ViewGroup row;
         int measuredRowHeight;
         int[] itemIndices;
 
         public RowViewHolder(ViewGroup row, int cellCount) {
             this.row = row;
             this.cells = new View[cellCount];
+            this.cellVisibility = new boolean[cellCount];
             this.itemIndices = new int[cellCount];
         }
 
@@ -2217,8 +2411,6 @@ public class ChooserActivity extends ResolverActivity {
                 mChooserActivity.unbindService(this);
                 mChooserActivity.mServiceConnections.remove(this);
                 if (mChooserActivity.mServiceConnections.isEmpty()) {
-                    mChooserActivity.mChooserHandler.removeMessages(
-                            CHOOSER_TARGET_SERVICE_WATCHDOG_TIMEOUT);
                     mChooserActivity.sendVoiceChoicesIfNeeded();
                 }
                 mConnectedComponent = null;
