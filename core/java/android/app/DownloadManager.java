@@ -1158,6 +1158,7 @@ public class DownloadManager {
      * @param ids the IDs of the downloads
      * @hide
      */
+    @UnsupportedAppUsage
     public void restartDownload(long... ids) {
         Cursor cursor = query(new Query().setFilterById(ids));
         try {
