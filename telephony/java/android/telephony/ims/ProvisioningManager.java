@@ -153,7 +153,7 @@ public class ProvisioningManager {
          * @param item the IMS provisioning key constant, as defined by the OEM.
          * @param value the new String value of the IMS configuration constant.
          */
-        public void onProvisioningStringChanged(int item, String value) {
+        public void onProvisioningStringChanged(int item, @NonNull String value) {
             // Base Implementation
         }
 
