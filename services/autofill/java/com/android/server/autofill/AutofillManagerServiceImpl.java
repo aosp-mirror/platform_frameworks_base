@@ -72,6 +72,7 @@ import android.view.autofill.IAutoFillManagerClient;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.infra.WhitelistHelper;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.server.LocalServices;
@@ -173,10 +174,10 @@ final class AutofillManagerServiceImpl
     private ServiceInfo mRemoteAugmentedAutofillServiceInfo;
 
     /**
-     * List of packages that are whitelisted to be trigger augmented autofill.
+     * List of packages/activities that are whitelisted to be trigger augmented autofill.
      */
     @GuardedBy("mLock")
-    private final ArraySet<String> mWhitelistedAugmentAutofillPackages = new ArraySet<>();
+    private final WhitelistHelper mAugmentedWhitelistHelper = new WhitelistHelper();
 
     AutofillManagerServiceImpl(AutofillManagerService master, Object lock,
             LocalLog uiLatencyHistory, LocalLog wtfHistory, int userId, AutoFillUI ui,
@@ -905,13 +906,8 @@ final class AutofillManagerServiceImpl
             pw.println(mRemoteAugmentedAutofillServiceInfo);
         }
 
-        final int whitelistSize = mWhitelistedAugmentAutofillPackages.size();
-        pw.print(prefix); pw.print("Packages whitelisted for augmented autofill: ");
-        pw.println(whitelistSize);
-        for (int i = 0; i < whitelistSize; i++) {
-            final String whitelistedPkg = mWhitelistedAugmentAutofillPackages.valueAt(i);
-            pw.print(prefix2); pw.print(i + 1); pw.print(": "); pw.println(whitelistedPkg);
-        }
+        pw.print(prefix); pw.print("augmented autofill whitelist: ");
+        mAugmentedWhitelistHelper.dump(prefix2, "Whitelist", pw);
 
         pw.print(prefix); pw.print("Field classification enabled: ");
             pw.println(isFieldClassificationEnabledLocked());
@@ -1129,9 +1125,8 @@ final class AutofillManagerServiceImpl
             Slog.v(TAG, "setAugmentedAutofillWhitelistLocked(packages=" + packages + ", activities="
                     + activities + ")");
         }
-        whitelistForAugmentedAutofillPackages(packages);
+        whitelistForAugmentedAutofillPackages(packages, activities);
 
-        // TODO(b/123100824): whitelist activities as well
         // TODO(b/122858578): log metrics
         return true;
     }
@@ -1171,28 +1166,30 @@ final class AutofillManagerServiceImpl
 
     @GuardedBy("mLock")
     boolean isWhitelistedForAugmentedAutofillLocked(@NonNull ComponentName componentName) {
-        // TODO(b/122595322): need to check whitelisted activities as well.
-        final String packageName = componentName.getPackageName();
-        return mWhitelistedAugmentAutofillPackages.contains(packageName);
+        return mAugmentedWhitelistHelper.isWhitelisted(componentName);
     }
 
     @GuardedBy("mLock")
     void setAugmentedAutofillWhitelistLocked(@NonNull AutofillOptions options,
             @NonNull String packageName) {
-        // TODO(b/122595322): need to setwhitelisted activities as well.
-        options.augmentedEnabled = mWhitelistedAugmentAutofillPackages.contains(packageName);
+        options.augmentedAutofillEnabled = mAugmentedWhitelistHelper.isWhitelisted(packageName);
+        options.whitelistedActivitiesForAugmentedAutofill = mAugmentedWhitelistHelper
+                .getWhitelistedComponents(packageName);
     }
 
-    private void whitelistForAugmentedAutofillPackages(@NonNull List<String> packages) {
+    /**
+     *
+     * @throws IllegalArgumentException if packages or components are empty.
+     */
+    private void whitelistForAugmentedAutofillPackages(@Nullable List<String> packages,
+            @Nullable List<ComponentName> components) {
         // TODO(b/123100824): add CTS test for when it's null
         synchronized (mLock) {
-            if (packages == null) {
-                if (mMaster.verbose) Slog.v(TAG, "clearing all whitelisted augmented packages");
-                mWhitelistedAugmentAutofillPackages.clear();
-            } else {
-                if (mMaster.verbose) Slog.v(TAG, "whitelisting augmented packages: " + packages);
-                mWhitelistedAugmentAutofillPackages.addAll(packages);
+            if (mMaster.verbose) {
+                Slog.v(TAG, "whitelisting packages: " + packages + "and activities: " + components);
             }
+            mAugmentedWhitelistHelper.setWhitelist(new ArraySet<>(packages),
+                    new ArraySet<>(components));
             mRemoteAugmentedAutofillService = getRemoteAugmentedAutofillServiceLocked();
         }
     }

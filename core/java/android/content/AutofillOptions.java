@@ -16,12 +16,15 @@
 package android.content;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.app.ActivityThread;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.ArraySet;
 import android.util.Log;
 import android.view.autofill.AutofillManager;
+import android.view.contentcapture.ContentCaptureManager.ContentCaptureClient;
 
 import java.io.PrintWriter;
 
@@ -51,12 +54,31 @@ public final class AutofillOptions implements Parcelable {
     /**
      * Whether package is whitelisted for augmented autofill.
      */
-    public boolean augmentedEnabled;
-    // TODO(b/123100824): add (optional) list of activities
+    public boolean augmentedAutofillEnabled;
+
+    /**
+     * List of whitelisted activities.
+     */
+    @Nullable
+    public ArraySet<ComponentName> whitelistedActivitiesForAugmentedAutofill;
 
     public AutofillOptions(int loggingLevel, boolean compatModeEnabled) {
         this.loggingLevel = loggingLevel;
         this.compatModeEnabled = compatModeEnabled;
+    }
+
+    /**
+     * Returns whether activity is whitelisted for augmented autofill.
+     */
+    public boolean isAugmentedAutofillEnabled(@NonNull Context context) {
+        if (!augmentedAutofillEnabled) return false;
+
+        final ContentCaptureClient contentCaptureClient = context.getContentCaptureClient();
+        if (contentCaptureClient == null) return false;
+
+        final ComponentName component = contentCaptureClient.contentCaptureClientGetComponentName();
+        return whitelistedActivitiesForAugmentedAutofill == null
+                || whitelistedActivitiesForAugmentedAutofill.contains(component);
     }
 
     /**
@@ -78,7 +100,7 @@ public final class AutofillOptions implements Parcelable {
 
         final AutofillOptions options = new AutofillOptions(
                 AutofillManager.FLAG_ADD_CLIENT_VERBOSE, /* compatModeAllowed= */ true);
-        options.augmentedEnabled = true;
+        options.augmentedAutofillEnabled = true;
         // Always log, as it's used by test only
         Log.i(TAG, "forWhitelistingItself(" + packageName + "): " + options);
 
@@ -87,15 +109,19 @@ public final class AutofillOptions implements Parcelable {
 
     @Override
     public String toString() {
-        return "AutofillOptions [loggingLevel=" + loggingLevel + ", compatMode="
-                + compatModeEnabled + ", augmentedEnabled=" + augmentedEnabled + "]";
+        return "AutofillOptions [loggingLevel=" + loggingLevel + ", compatMode=" + compatModeEnabled
+                + ", augmentedAutofillEnabled=" + augmentedAutofillEnabled + "]";
     }
 
     /** @hide */
     public void dumpShort(@NonNull PrintWriter pw) {
         pw.print("logLvl="); pw.print(loggingLevel);
         pw.print(", compatMode="); pw.print(compatModeEnabled);
-        pw.print(", augmented="); pw.print(augmentedEnabled);
+        pw.print(", augmented="); pw.print(augmentedAutofillEnabled);
+        if (whitelistedActivitiesForAugmentedAutofill != null) {
+            pw.print(", whitelistedActivitiesForAugmentedAutofill=");
+            pw.print(whitelistedActivitiesForAugmentedAutofill);
+        }
     }
 
     @Override
@@ -107,7 +133,8 @@ public final class AutofillOptions implements Parcelable {
     public void writeToParcel(Parcel parcel, int flags) {
         parcel.writeInt(loggingLevel);
         parcel.writeBoolean(compatModeEnabled);
-        parcel.writeBoolean(augmentedEnabled);
+        parcel.writeBoolean(augmentedAutofillEnabled);
+        parcel.writeArraySet(whitelistedActivitiesForAugmentedAutofill);
     }
 
     public static final @android.annotation.NonNull Parcelable.Creator<AutofillOptions> CREATOR =
@@ -118,7 +145,9 @@ public final class AutofillOptions implements Parcelable {
                     final int loggingLevel = parcel.readInt();
                     final boolean compatMode = parcel.readBoolean();
                     final AutofillOptions options = new AutofillOptions(loggingLevel, compatMode);
-                    options.augmentedEnabled = parcel.readBoolean();
+                    options.augmentedAutofillEnabled = parcel.readBoolean();
+                    options.whitelistedActivitiesForAugmentedAutofill =
+                            (ArraySet<ComponentName>) parcel.readArraySet(null);
                     return options;
                 }
 

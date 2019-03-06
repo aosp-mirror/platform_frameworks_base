@@ -127,6 +127,7 @@ import android.view.autofill.AutofillPopupWindow;
 import android.view.autofill.IAutofillWindowPresenter;
 import android.view.contentcapture.ContentCaptureContext;
 import android.view.contentcapture.ContentCaptureManager;
+import android.view.contentcapture.ContentCaptureManager.ContentCaptureClient;
 import android.widget.AdapterView;
 import android.widget.Toast;
 import android.widget.Toolbar;
@@ -717,7 +718,7 @@ public class Activity extends ContextThemeWrapper
         Window.Callback, KeyEvent.Callback,
         OnCreateContextMenuListener, ComponentCallbacks2,
         Window.OnWindowDismissedCallback, WindowControllerCallback,
-        AutofillManager.AutofillClient {
+        AutofillManager.AutofillClient, ContentCaptureManager.ContentCaptureClient {
     private static final String TAG = "Activity";
     private static final boolean DEBUG_LIFECYCLE = false;
 
@@ -1116,6 +1117,12 @@ public class Activity extends ContextThemeWrapper
     /** @hide */
     @Override
     public final AutofillClient getAutofillClient() {
+        return this;
+    }
+
+    /** @hide */
+    @Override
+    public final ContentCaptureClient getContentCaptureClient() {
         return this;
     }
 
@@ -6461,6 +6468,12 @@ public class Activity extends ContextThemeWrapper
     /** @hide */
     @Override
     public final ComponentName autofillClientGetComponentName() {
+        return getComponentName();
+    }
+
+    /** @hide */
+    @Override
+    public final ComponentName contentCaptureClientGetComponentName() {
         return getComponentName();
     }
 

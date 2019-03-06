@@ -193,6 +193,15 @@ public final class ContentCaptureManager {
     private MainContentCaptureSession mMainSession;
 
     /** @hide */
+    public interface ContentCaptureClient {
+        /**
+         * Gets the component name of the client.
+         */
+        @NonNull
+        ComponentName contentCaptureClientGetComponentName();
+    }
+
+    /** @hide */
     public ContentCaptureManager(@NonNull Context context,
             @NonNull IContentCaptureManager service, @NonNull ContentCaptureOptions options) {
         mContext = Preconditions.checkNotNull(context, "context cannot be null");

@@ -563,11 +563,13 @@ package android.content {
     ctor public AutofillOptions(int, boolean);
     method public int describeContents();
     method public static android.content.AutofillOptions forWhitelistingItself();
+    method public boolean isAugmentedAutofillEnabled(@NonNull android.content.Context);
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.content.AutofillOptions> CREATOR;
-    field public boolean augmentedEnabled;
+    field public boolean augmentedAutofillEnabled;
     field public final boolean compatModeEnabled;
     field public final int loggingLevel;
+    field @Nullable public android.util.ArraySet<android.content.ComponentName> whitelistedActivitiesForAugmentedAutofill;
   }
 
   public final class ContentCaptureOptions implements android.os.Parcelable {
