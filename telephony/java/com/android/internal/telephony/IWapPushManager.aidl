@@ -30,6 +30,7 @@ interface IWapPushManager {
      * Returns true if inserting the information is successfull. Inserting the duplicated
      * record in the application ID table is not allowed. Use update/delete method.
      */
+    @UnsupportedAppUsage
     boolean addPackage(String x_app_id, String content_type,
             String package_name, String class_name,
             int app_type, boolean need_signature, boolean further_processing);
@@ -38,6 +39,7 @@ interface IWapPushManager {
      * Updates receiver application that is last added.
      * Returns true if updating the information is successfull.
      */
+    @UnsupportedAppUsage
     boolean updatePackage(String x_app_id, String content_type,
             String package_name, String class_name,
             int app_type, boolean need_signature, boolean further_processing);
@@ -46,6 +48,7 @@ interface IWapPushManager {
      * Delites receiver application information.
      * Returns true if deleting is successfull.
      */
+    @UnsupportedAppUsage
     boolean deletePackage(String x_app_id, String content_type,
                             String package_name, String class_name);
 }

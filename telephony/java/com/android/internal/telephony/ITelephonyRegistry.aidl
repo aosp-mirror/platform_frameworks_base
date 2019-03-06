@@ -38,9 +38,11 @@ interface ITelephonyRegistry {
             IOnSubscriptionsChangedListener callback);
     void removeOnSubscriptionsChangedListener(String pkg,
             IOnSubscriptionsChangedListener callback);
+    @UnsupportedAppUsage
     void listen(String pkg, IPhoneStateListener callback, int events, boolean notifyNow);
     void listenForSubscriber(in int subId, String pkg, IPhoneStateListener callback, int events,
             boolean notifyNow);
+    @UnsupportedAppUsage
     void notifyCallState(int state, String incomingNumber);
     void notifyCallStateForPhoneId(in int phoneId, in int subId, int state, String incomingNumber);
     void notifyServiceStateForPhoneId(in int phoneId, in int subId, in ServiceState state);
@@ -57,11 +59,13 @@ interface ITelephonyRegistry {
     void notifyDataConnectionForSubscriber(int subId, int state, boolean isDataConnectivityPossible,
             String apn, String apnType, in LinkProperties linkProperties,
             in NetworkCapabilities networkCapabilities, int networkType, boolean roaming);
+    @UnsupportedAppUsage
     void notifyDataConnectionFailed(String apnType);
     void notifyDataConnectionFailedForSubscriber(int subId, String apnType);
     void notifyCellLocation(in Bundle cellLocation);
     void notifyCellLocationForSubscriber(in int subId, in Bundle cellLocation);
     void notifyOtaspChanged(in int otaspMode);
+    @UnsupportedAppUsage
     void notifyCellInfo(in List<CellInfo> cellInfo);
     void notifyPhysicalChannelConfiguration(in List<PhysicalChannelConfig> configs);
     void notifyPhysicalChannelConfigurationForSubscriber(in int subId,
