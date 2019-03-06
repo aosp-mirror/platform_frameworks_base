@@ -358,7 +358,7 @@ public final class ZenPolicy implements Parcelable {
      * Provides a convenient way to set the various fields of a {@link ZenPolicy}.  If a field
      * is not set, it is (@link STATE_UNSET} and will not change the current set policy.
      */
-    public static class Builder {
+    public static final class Builder {
         private ZenPolicy mZenPolicy;
 
         public Builder() {
