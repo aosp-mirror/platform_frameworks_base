@@ -8506,7 +8506,7 @@ package android.telephony.ims {
   public class ImsException extends java.lang.Exception {
     ctor public ImsException(@Nullable String);
     ctor public ImsException(@Nullable String, int);
-    ctor public ImsException(@Nullable String, int, Throwable);
+    ctor public ImsException(@Nullable String, int, @Nullable Throwable);
     method public int getCode();
     field public static final int CODE_ERROR_SERVICE_UNAVAILABLE = 1; // 0x1
     field public static final int CODE_ERROR_UNSPECIFIED = 0; // 0x0
@@ -8514,13 +8514,13 @@ package android.telephony.ims {
   }
 
   public final class ImsExternalCallState implements android.os.Parcelable {
-    ctor public ImsExternalCallState(String, android.net.Uri, android.net.Uri, boolean, int, int, boolean);
+    ctor public ImsExternalCallState(@NonNull String, @NonNull android.net.Uri, @Nullable android.net.Uri, boolean, int, int, boolean);
     method public int describeContents();
-    method public android.net.Uri getAddress();
+    method @NonNull public android.net.Uri getAddress();
     method public int getCallId();
     method public int getCallState();
     method public int getCallType();
-    method public android.net.Uri getLocalAddress();
+    method @Nullable public android.net.Uri getLocalAddress();
     method public boolean isCallHeld();
     method public boolean isCallPullable();
     method public void writeToParcel(android.os.Parcel, int);
@@ -8530,7 +8530,7 @@ package android.telephony.ims {
   }
 
   public class ImsMmTelManager {
-    method public static android.telephony.ims.ImsMmTelManager createForSubscriptionId(int);
+    method @NonNull public static android.telephony.ims.ImsMmTelManager createForSubscriptionId(int);
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public int getVoWiFiModeSetting();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public int getVoWiFiRoamingModeSetting();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isAdvancedCallingSettingEnabled();
@@ -8539,7 +8539,7 @@ package android.telephony.ims {
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isVoWiFiRoamingSettingEnabled();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isVoWiFiSettingEnabled();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isVtSettingEnabled();
-    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void registerImsRegistrationCallback(java.util.concurrent.Executor, @NonNull android.telephony.ims.ImsMmTelManager.RegistrationCallback) throws android.telephony.ims.ImsException;
+    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void registerImsRegistrationCallback(@NonNull java.util.concurrent.Executor, @NonNull android.telephony.ims.ImsMmTelManager.RegistrationCallback) throws android.telephony.ims.ImsException;
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void registerMmTelCapabilityCallback(@NonNull java.util.concurrent.Executor, @NonNull android.telephony.ims.ImsMmTelManager.CapabilityCallback) throws android.telephony.ims.ImsException;
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setAdvancedCallingSettingEnabled(boolean);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setRttCapabilitySetting(boolean);
@@ -8558,15 +8558,15 @@ package android.telephony.ims {
 
   public static class ImsMmTelManager.CapabilityCallback {
     ctor public ImsMmTelManager.CapabilityCallback();
-    method public void onCapabilitiesStatusChanged(android.telephony.ims.feature.MmTelFeature.MmTelCapabilities);
+    method public void onCapabilitiesStatusChanged(@NonNull android.telephony.ims.feature.MmTelFeature.MmTelCapabilities);
   }
 
   public static class ImsMmTelManager.RegistrationCallback {
     ctor public ImsMmTelManager.RegistrationCallback();
     method public void onRegistered(int);
     method public void onRegistering(int);
-    method public void onTechnologyChangeFailed(int, android.telephony.ims.ImsReasonInfo);
-    method public void onUnregistered(android.telephony.ims.ImsReasonInfo);
+    method public void onTechnologyChangeFailed(int, @Nullable android.telephony.ims.ImsReasonInfo);
+    method public void onUnregistered(@Nullable android.telephony.ims.ImsReasonInfo);
   }
 
   public final class ImsReasonInfo implements android.os.Parcelable {
@@ -8975,14 +8975,14 @@ package android.telephony.ims {
   }
 
   public class ProvisioningManager {
-    method public static android.telephony.ims.ProvisioningManager createForSubscriptionId(int);
+    method @NonNull public static android.telephony.ims.ProvisioningManager createForSubscriptionId(int);
     method @WorkerThread @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public int getProvisioningIntValue(int);
     method @WorkerThread @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean getProvisioningStatusForCapability(@android.telephony.ims.feature.MmTelFeature.MmTelCapabilities.MmTelCapability int, int);
-    method @WorkerThread @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public String getProvisioningStringValue(int);
-    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void registerProvisioningChangedCallback(java.util.concurrent.Executor, @NonNull android.telephony.ims.ProvisioningManager.Callback) throws android.telephony.ims.ImsException;
+    method @Nullable @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) @WorkerThread public String getProvisioningStringValue(int);
+    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void registerProvisioningChangedCallback(@NonNull java.util.concurrent.Executor, @NonNull android.telephony.ims.ProvisioningManager.Callback) throws android.telephony.ims.ImsException;
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) @WorkerThread public int setProvisioningIntValue(int, int);
     method @WorkerThread @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setProvisioningStatusForCapability(@android.telephony.ims.feature.MmTelFeature.MmTelCapabilities.MmTelCapability int, int, boolean);
-    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) @WorkerThread public int setProvisioningStringValue(int, String);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) @WorkerThread public int setProvisioningStringValue(int, @NonNull String);
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void unregisterProvisioningChangedCallback(@NonNull android.telephony.ims.ProvisioningManager.Callback);
     field public static final int KEY_VOICE_OVER_WIFI_MODE_OVERRIDE = 27; // 0x1b
     field public static final int KEY_VOICE_OVER_WIFI_ROAMING_ENABLED_OVERRIDE = 26; // 0x1a
