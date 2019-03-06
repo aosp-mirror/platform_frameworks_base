@@ -99,6 +99,8 @@ public final class NativeHandle implements Closeable {
      * @return a boolean value
      */
     public boolean hasSingleFileDescriptor() {
+        checkOpen();
+
         return mFds.length == 1 && mInts.length == 0;
     }
 
@@ -108,7 +110,7 @@ public final class NativeHandle implements Closeable {
      * If this method is called, this must also be explicitly closed with
      * {@link #close()}.
      */
-    public NativeHandle dup() throws java.io.IOException {
+    public @NonNull NativeHandle dup() throws java.io.IOException {
         FileDescriptor[] fds = new FileDescriptor[mFds.length];
         try {
             for (int i = 0; i < mFds.length; i++) {
@@ -123,6 +125,12 @@ public final class NativeHandle implements Closeable {
         return new NativeHandle(fds, mInts, true /*own*/);
     }
 
+    private void checkOpen() {
+        if (mFds == null) {
+            throw new IllegalStateException("NativeHandle is invalidated after close.");
+        }
+    }
+
     /**
      * Closes the file descriptors if they are owned by this object.
      *
@@ -130,19 +138,20 @@ public final class NativeHandle implements Closeable {
      */
     @Override
     public void close() throws java.io.IOException {
-        if (!mOwn) {
-            return;
-        }
+        checkOpen();
 
-        try {
-            for (FileDescriptor fd : mFds) {
-                Os.close(fd);
+        if (mOwn) {
+            try {
+                for (FileDescriptor fd : mFds) {
+                    Os.close(fd);
+                }
+            } catch (ErrnoException e) {
+                e.rethrowAsIOException();
             }
-        } catch (ErrnoException e) {
-            e.rethrowAsIOException();
+
+            mOwn = false;
         }
 
-        mOwn = false;
         mFds = null;
         mInts = null;
     }
@@ -154,7 +163,9 @@ public final class NativeHandle implements Closeable {
      * @throws IllegalStateException if this object contains either zero or
      *         more than one file descriptor, or a non-empty data stream.
      */
-    public FileDescriptor getFileDescriptor() {
+    public @NonNull FileDescriptor getFileDescriptor() {
+        checkOpen();
+
         if (!hasSingleFileDescriptor()) {
             throw new IllegalStateException(
                     "NativeHandle is not single file descriptor. Contents must"
@@ -171,6 +182,8 @@ public final class NativeHandle implements Closeable {
      * @hide
      */
     private int[] getFdsAsIntArray() {
+        checkOpen();
+
         int numFds = mFds.length;
         int[] fds = new int[numFds];
 
@@ -182,11 +195,13 @@ public final class NativeHandle implements Closeable {
     }
 
     /**
-     * Fetch file descriptors.
+     * Fetch file descriptors
      *
      * @return the fds.
      */
-    public FileDescriptor[] getFileDescriptors() {
+    public @NonNull FileDescriptor[] getFileDescriptors() {
+        checkOpen();
+
         return mFds;
     }
 
@@ -195,7 +210,9 @@ public final class NativeHandle implements Closeable {
      *
      * @return the opaque data stream.
      */
-    public int[] getInts() {
+    public @NonNull int[] getInts() {
+        checkOpen();
+
         return mInts;
     }
 }
