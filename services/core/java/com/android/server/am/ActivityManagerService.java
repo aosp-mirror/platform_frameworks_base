@@ -3949,11 +3949,12 @@ public class ActivityManagerService extends IActivityManager.Stub
         final long callingId = Binder.clearCallingIdentity();
         try {
             synchronized (this) {
-                mProcessList.killAllBackgroundProcessesLocked();
-
+                // Allow memory level to go down (the flag needs to be set before updating oom adj)
+                // because this method is also used to simulate low memory.
                 mAllowLowerMemLevel = true;
+                mProcessList.killPackageProcessesLocked(null /* packageName */, -1 /* appId */,
+                        UserHandle.USER_ALL, ProcessList.CACHED_APP_MIN_ADJ, "kill all background");
 
-                updateOomAdjLocked();
                 doLowMemReportIfNeededLocked(null);
             }
         } finally {
