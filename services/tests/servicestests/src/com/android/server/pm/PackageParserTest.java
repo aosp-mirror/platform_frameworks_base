@@ -455,7 +455,7 @@ public class PackageParserTest {
         pkg.splitPrivateFlags = new int[] { 100 };
         pkg.applicationInfo = new ApplicationInfo();
 
-        pkg.permissions.add(new PackageParser.Permission(pkg));
+        pkg.permissions.add(new PackageParser.Permission(pkg, (String) null));
         pkg.permissionGroups.add(new PackageParser.PermissionGroup(pkg, ID_NULL, ID_NULL, ID_NULL));
 
         final PackageParser.ParseComponentArgs dummy = new PackageParser.ParseComponentArgs(
