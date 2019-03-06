@@ -16,7 +16,6 @@
 
 package android.security.keystore;
 
-import libcore.util.EmptyArray;
 import android.security.Credentials;
 import android.security.GateKeeper;
 import android.security.KeyStore;
@@ -29,6 +28,8 @@ import android.security.keystore.KeyProtection;
 import android.security.keystore.SecureKeyImportUnavailableException;
 import android.security.keystore.WrappedKeyEntry;
 import android.util.Log;
+
+import libcore.util.EmptyArray;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -115,7 +116,14 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
 
         final Certificate[] caList;
 
-        final byte[] caBytes = mKeyStore.get(Credentials.CA_CERTIFICATE + alias, mUid);
+        // Suppress the key not found warning for this call. It seems that this error is exclusively
+        // being thrown when there is a self signed certificate chain, so when the keystore service
+        // attempts to query for the CA details, it obviously fails to find them and returns a
+        // key not found exception. This is WAI, and throwing a stack trace here can be very
+        // misleading since the trace is not clear.
+        final byte[] caBytes = mKeyStore.get(Credentials.CA_CERTIFICATE + alias,
+                                             mUid,
+                                             true /* suppressKeyNotFoundWarning */);
         if (caBytes != null) {
             final Collection<X509Certificate> caChain = toCertificates(caBytes);
 
