@@ -1443,6 +1443,10 @@ package android.telecom {
     method public android.telecom.Connection getPrimaryConnection();
   }
 
+  public final class PhoneAccountSuggestion implements android.os.Parcelable {
+    ctor public PhoneAccountSuggestion(@NonNull android.telecom.PhoneAccountHandle, int, boolean);
+  }
+
   public class PhoneAccountSuggestionService extends android.app.Service {
     ctor public PhoneAccountSuggestionService();
     method public void onAccountSuggestionRequest(@NonNull String);
