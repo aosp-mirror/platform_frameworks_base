@@ -17623,6 +17623,16 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
+        public void killProcess(String processName, int uid, String reason) {
+            synchronized (ActivityManagerService.this) {
+                final ProcessRecord proc = getProcessRecordLocked(processName, uid,
+                        true /* keepIfLarge */);
+                mProcessList.removeProcessLocked(proc, false /* callerWillRestart */,
+                        true /* allowRestart */, reason);
+            }
+        }
+
+        @Override
         public boolean hasRunningActivity(int uid, @Nullable String packageName) {
             if (packageName == null) return false;
 
