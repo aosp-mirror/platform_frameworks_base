@@ -950,6 +950,8 @@
     <string name="power_discharge_by_only">Should last until about <xliff:g id="time">%1$s</xliff:g></string>
     <!-- [CHAR_LIMIT=100] Label for estimated time that phone will run out of battery -->
     <string name="power_discharge_by_only_short">Until <xliff:g id="time" example="12 PM">%1$s</xliff:g></string>
+    <!-- [CHAR_LIMIT=100] Extend the battery life past a certain time -->
+    <string name="power_suggestion_extend_battery">Extend battery life past <xliff:g id="time" example="12 PM">%1$s</xliff:g></string>
 
     <!-- [CHAR_LIMIT=60] label for estimated remaining duration of battery when under a certain amount -->
     <string name="power_remaining_less_than_duration_only">Less than <xliff:g id="threshold">%1$s</xliff:g> remaining</string>
