@@ -32,16 +32,82 @@ using testing::Contains;
 TEST(StorageManagerTest, TrainInfoReadWriteTest) {
     InstallTrainInfo trainInfo;
     trainInfo.trainVersionCode = 12345;
+    trainInfo.trainName = "This is a train name #)$(&&$";
+    trainInfo.status = 1;
     const char* expIds = "test_ids";
     trainInfo.experimentIds.assign(expIds, expIds + strlen(expIds));
 
-    StorageManager::writeTrainInfo(trainInfo.trainVersionCode, trainInfo.experimentIds);
+    bool result;
 
-    InstallTrainInfo result;
-    StorageManager::readTrainInfo(result);
-    EXPECT_EQ(trainInfo.trainVersionCode, result.trainVersionCode);
-    EXPECT_EQ(trainInfo.experimentIds.size(), result.experimentIds.size());
-    EXPECT_EQ(trainInfo.experimentIds, result.experimentIds);
+    result = StorageManager::writeTrainInfo(trainInfo.trainVersionCode, trainInfo.trainName,
+                                            trainInfo.status, trainInfo.experimentIds);
+
+    EXPECT_TRUE(result);
+
+    InstallTrainInfo trainInfoResult;
+    result = StorageManager::readTrainInfo(trainInfoResult);
+    EXPECT_TRUE(result);
+
+    EXPECT_EQ(trainInfo.trainVersionCode, trainInfoResult.trainVersionCode);
+    EXPECT_EQ(trainInfo.trainName.size(), trainInfoResult.trainName.size());
+    EXPECT_EQ(trainInfo.trainName, trainInfoResult.trainName);
+    EXPECT_EQ(trainInfo.status, trainInfoResult.status);
+    EXPECT_EQ(trainInfo.experimentIds.size(), trainInfoResult.experimentIds.size());
+    EXPECT_EQ(trainInfo.experimentIds, trainInfoResult.experimentIds);
+}
+
+TEST(StorageManagerTest, TrainInfoReadWriteEmptyTrainNameTest) {
+    InstallTrainInfo trainInfo;
+    trainInfo.trainVersionCode = 12345;
+    trainInfo.trainName = "";
+    trainInfo.status = 1;
+    const char* expIds = "test_ids";
+    trainInfo.experimentIds.assign(expIds, expIds + strlen(expIds));
+
+    bool result;
+
+    result = StorageManager::writeTrainInfo(trainInfo.trainVersionCode, trainInfo.trainName,
+                                            trainInfo.status, trainInfo.experimentIds);
+
+    EXPECT_TRUE(result);
+
+    InstallTrainInfo trainInfoResult;
+    result = StorageManager::readTrainInfo(trainInfoResult);
+    EXPECT_TRUE(result);
+
+    EXPECT_EQ(trainInfo.trainVersionCode, trainInfoResult.trainVersionCode);
+    EXPECT_EQ(trainInfo.trainName.size(), trainInfoResult.trainName.size());
+    EXPECT_EQ(trainInfo.trainName, trainInfoResult.trainName);
+    EXPECT_EQ(trainInfo.status, trainInfoResult.status);
+    EXPECT_EQ(trainInfo.experimentIds.size(), trainInfoResult.experimentIds.size());
+    EXPECT_EQ(trainInfo.experimentIds, trainInfoResult.experimentIds);
+}
+
+TEST(StorageManagerTest, TrainInfoReadWriteTrainNameSizeOneTest) {
+    InstallTrainInfo trainInfo;
+    trainInfo.trainVersionCode = 12345;
+    trainInfo.trainName = "{";
+    trainInfo.status = 1;
+    const char* expIds = "test_ids";
+    trainInfo.experimentIds.assign(expIds, expIds + strlen(expIds));
+
+    bool result;
+
+    result = StorageManager::writeTrainInfo(trainInfo.trainVersionCode, trainInfo.trainName,
+                                            trainInfo.status, trainInfo.experimentIds);
+
+    EXPECT_TRUE(result);
+
+    InstallTrainInfo trainInfoResult;
+    result = StorageManager::readTrainInfo(trainInfoResult);
+    EXPECT_TRUE(result);
+
+    EXPECT_EQ(trainInfo.trainVersionCode, trainInfoResult.trainVersionCode);
+    EXPECT_EQ(trainInfo.trainName.size(), trainInfoResult.trainName.size());
+    EXPECT_EQ(trainInfo.trainName, trainInfoResult.trainName);
+    EXPECT_EQ(trainInfo.status, trainInfoResult.status);
+    EXPECT_EQ(trainInfo.experimentIds.size(), trainInfoResult.experimentIds.size());
+    EXPECT_EQ(trainInfo.experimentIds, trainInfoResult.experimentIds);
 }
 
 }  // namespace statsd

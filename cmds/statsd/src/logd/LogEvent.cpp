@@ -238,9 +238,12 @@ LogEvent::LogEvent(int64_t wallClockTimestampNs, int64_t elapsedTimestampNs,
     mLogdTimestampNs = wallClockTimestampNs;
     mElapsedTimestampNs = elapsedTimestampNs;
     mTagId = android::util::TRAIN_INFO;
+
     mValues.push_back(
             FieldValue(Field(mTagId, getSimpleField(1)), Value(trainInfo.trainVersionCode)));
     mValues.push_back(FieldValue(Field(mTagId, getSimpleField(2)), Value(trainInfo.experimentIds)));
+    mValues.push_back(FieldValue(Field(mTagId, getSimpleField(3)), Value(trainInfo.trainName)));
+    mValues.push_back(FieldValue(Field(mTagId, getSimpleField(4)), Value(trainInfo.status)));
 }
 
 LogEvent::LogEvent(int32_t tagId, int64_t timestampNs) : LogEvent(tagId, timestampNs, 0) {}
