@@ -31,14 +31,21 @@ import com.android.internal.location.ProviderRequest;
  * @hide
  */
 interface ILocationProvider {
+    @UnsupportedAppUsage
     void enable();
+    @UnsupportedAppUsage
     void disable();
 
+    @UnsupportedAppUsage
     void setRequest(in ProviderRequest request, in WorkSource ws);
 
     // --- deprecated (but still supported) ---
+    @UnsupportedAppUsage
     ProviderProperties getProperties();
+    @UnsupportedAppUsage
     int getStatus(out Bundle extras);
+    @UnsupportedAppUsage
     long getStatusUpdateTime();
+    @UnsupportedAppUsage
     boolean sendExtraCommand(String command, inout Bundle extras);
 }
