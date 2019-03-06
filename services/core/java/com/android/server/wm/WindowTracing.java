@@ -98,6 +98,7 @@ class WindowTracing {
             mBuffer.resetBuffer();
             mEnabled = mEnabledLockFree = true;
         }
+        log("trace.enable");
     }
 
     void stopTrace(@Nullable PrintWriter pw) {
