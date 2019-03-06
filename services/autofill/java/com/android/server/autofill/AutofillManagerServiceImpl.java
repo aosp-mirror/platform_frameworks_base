@@ -906,8 +906,7 @@ final class AutofillManagerServiceImpl
             pw.println(mRemoteAugmentedAutofillServiceInfo);
         }
 
-        pw.print(prefix); pw.print("augmented autofill whitelist: ");
-        mAugmentedWhitelistHelper.dump(prefix2, "Whitelist", pw);
+        mAugmentedWhitelistHelper.dump(prefix, "Augmented autofill whitelist", pw);
 
         pw.print(prefix); pw.print("Field classification enabled: ");
             pw.println(isFieldClassificationEnabledLocked());
@@ -1103,6 +1102,7 @@ final class AutofillManagerServiceImpl
                 }
                 mRemoteAugmentedAutofillService.destroy();
                 mRemoteAugmentedAutofillService = null;
+                mRemoteAugmentedAutofillServiceInfo = null;
             }
 
             mRemoteAugmentedAutofillService = getRemoteAugmentedAutofillServiceLocked();
@@ -1188,8 +1188,7 @@ final class AutofillManagerServiceImpl
             if (mMaster.verbose) {
                 Slog.v(TAG, "whitelisting packages: " + packages + "and activities: " + components);
             }
-            mAugmentedWhitelistHelper.setWhitelist(new ArraySet<>(packages),
-                    new ArraySet<>(components));
+            mAugmentedWhitelistHelper.setWhitelist(packages, components);
             mRemoteAugmentedAutofillService = getRemoteAugmentedAutofillServiceLocked();
         }
     }
