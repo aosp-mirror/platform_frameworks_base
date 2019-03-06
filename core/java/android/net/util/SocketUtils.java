@@ -19,6 +19,8 @@ package android.net.util;
 import static android.system.OsConstants.SOL_SOCKET;
 import static android.system.OsConstants.SO_BINDTODEVICE;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.net.MacAddress;
@@ -49,7 +51,7 @@ public class SocketUtils {
      *
      * <p>Data sent through the socket will go directly to the underlying network, ignoring VPNs.
      */
-    public static void bindSocketToInterface(FileDescriptor socket, String iface)
+    public static void bindSocketToInterface(@NonNull FileDescriptor socket, @NonNull String iface)
             throws ErrnoException {
         // SO_BINDTODEVICE actually takes a string. This works because the first member
         // of struct ifreq is a NULL-terminated interface name.
@@ -75,7 +77,7 @@ public class SocketUtils {
     /**
      * Make a socket address that packet socket can send packets to.
      */
-    public static SocketAddress makePacketSocketAddress(int ifIndex, byte[] hwAddr) {
+    public static SocketAddress makePacketSocketAddress(int ifIndex, @NonNull byte[] hwAddr) {
         return new PacketSocketAddress(ifIndex, hwAddr);
     }
 
@@ -83,45 +85,21 @@ public class SocketUtils {
      * Set an option on a socket that takes a time value argument.
      */
     public static void setSocketTimeValueOption(
-            FileDescriptor fd, int level, int option, long millis) throws ErrnoException {
+            @NonNull FileDescriptor fd, int level, int option, long millis) throws ErrnoException {
         Os.setsockoptTimeval(fd, level, option, StructTimeval.fromMillis(millis));
-    }
-
-    /**
-     * Bind a socket to the specified address.
-     */
-    public static void bindSocket(FileDescriptor fd, SocketAddress addr)
-            throws ErrnoException, SocketException {
-        Os.bind(fd, addr);
-    }
-
-    /**
-     * Connect a socket to the specified address.
-     */
-    public static void connectSocket(FileDescriptor fd, SocketAddress addr)
-            throws ErrnoException, SocketException {
-        Os.connect(fd, addr);
-    }
-
-    /**
-     * Send a message on a socket, using the specified SocketAddress.
-     */
-    public static void sendTo(FileDescriptor fd, byte[] bytes, int byteOffset, int byteCount,
-            int flags, SocketAddress addr) throws ErrnoException, SocketException {
-        Os.sendto(fd, bytes, byteOffset, byteCount, flags, addr);
     }
 
     /**
      * @see IoBridge#closeAndSignalBlockedThreads(FileDescriptor)
      */
-    public static void closeSocket(FileDescriptor fd) throws IOException {
+    public static void closeSocket(@Nullable FileDescriptor fd) throws IOException {
         IoBridge.closeAndSignalBlockedThreads(fd);
     }
 
     /**
      * Attaches a socket filter that accepts DHCP packets to the given socket.
      */
-    public static void attachDhcpFilter(FileDescriptor fd) throws SocketException {
+    public static void attachDhcpFilter(@NonNull FileDescriptor fd) throws SocketException {
         NetworkUtils.attachDhcpFilter(fd);
     }
 
@@ -130,7 +108,8 @@ public class SocketUtils {
      * @param fd the socket's {@link FileDescriptor}.
      * @param packetType the hardware address type, one of ARPHRD_*.
      */
-    public static void attachRaFilter(FileDescriptor fd, int packetType) throws SocketException {
+    public static void attachRaFilter(@NonNull FileDescriptor fd, int packetType)
+            throws SocketException {
         NetworkUtils.attachRaFilter(fd, packetType);
     }
 
@@ -142,7 +121,7 @@ public class SocketUtils {
      * @param fd the socket's {@link FileDescriptor}.
      * @param packetType the hardware address type, one of ARPHRD_*.
      */
-    public static void attachControlPacketFilter(FileDescriptor fd, int packetType)
+    public static void attachControlPacketFilter(@NonNull FileDescriptor fd, int packetType)
             throws SocketException {
         NetworkUtils.attachControlPacketFilter(fd, packetType);
     }
@@ -150,8 +129,8 @@ public class SocketUtils {
     /**
      * Add an entry into the ARP cache.
      */
-    public static void addArpEntry(Inet4Address ipv4Addr, MacAddress ethAddr, String ifname,
-            FileDescriptor fd) throws IOException {
+    public static void addArpEntry(@NonNull Inet4Address ipv4Addr, @NonNull MacAddress ethAddr,
+            @NonNull String ifname, @NonNull FileDescriptor fd) throws IOException {
         NetworkUtils.addArpEntry(ipv4Addr, ethAddr, ifname, fd);
     }
 

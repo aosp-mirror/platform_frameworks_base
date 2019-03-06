@@ -109,7 +109,7 @@ public class NetlinkSocket {
     }
 
     public static void connectToKernel(FileDescriptor fd) throws ErrnoException, SocketException {
-        SocketUtils.connectSocket(fd, makeNetlinkSocketAddress(0, 0));
+        Os.connect(fd, makeNetlinkSocketAddress(0, 0));
     }
 
     private static void checkTimeout(long timeoutMs) {
