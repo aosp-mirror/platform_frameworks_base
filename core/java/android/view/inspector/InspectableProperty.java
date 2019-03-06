@@ -233,6 +233,17 @@ public @interface InspectableProperty {
          * @hide
          */
         @TestApi
-        GRAVITY
+        GRAVITY,
+
+        /**
+         * Value is a resource ID
+         *
+         * This type is inferred from the presence of a resource ID annotation such as
+         * {@link android.annotation.AnyRes}.
+         *
+         * @hide
+         */
+        @TestApi
+        RESOURCE_ID
     }
 }

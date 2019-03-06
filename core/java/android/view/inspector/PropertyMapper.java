@@ -157,6 +157,16 @@ public interface PropertyMapper {
             @NonNull IntEnumMapping mapping);
 
     /**
+     * Map a string name to an integer ID for an attribute that contains resource IDs.
+     *
+     * @param name The name of the property
+     * @param attributeId If the property is from an XML attribute, the resource ID of the property
+     * @return An integer ID for the property
+     * @throws PropertyConflictException If the property name is already mapped as another type.
+     */
+    int mapResourceId(@NonNull String name, @AttrRes int attributeId);
+
+    /**
      * Map a string name to an integer ID for a flag set packed into an int property.
      *
      * @param name The name of the property

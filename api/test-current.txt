@@ -3061,6 +3061,7 @@ package android.view.inspector {
     enum_constant public static final android.view.inspector.InspectableProperty.ValueType INT_ENUM;
     enum_constant public static final android.view.inspector.InspectableProperty.ValueType INT_FLAG;
     enum_constant public static final android.view.inspector.InspectableProperty.ValueType NONE;
+    enum_constant public static final android.view.inspector.InspectableProperty.ValueType RESOURCE_ID;
   }
 
 }

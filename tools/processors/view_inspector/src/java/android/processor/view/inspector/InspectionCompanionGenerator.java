@@ -446,6 +446,8 @@ public final class InspectionCompanionGenerator {
                 return "IntEnum";
             case INT_FLAG:
                 return "IntFlag";
+            case RESOURCE_ID:
+                return "ResourceId";
             default:
                 throw new NoSuchElementException(String.format("No such property type, %s", type));
         }
