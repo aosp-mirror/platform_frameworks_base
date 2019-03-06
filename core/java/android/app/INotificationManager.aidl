@@ -40,15 +40,19 @@ import android.service.notification.ZenModeConfig;
 /** {@hide} */
 interface INotificationManager
 {
+    @UnsupportedAppUsage
     void cancelAllNotifications(String pkg, int userId);
 
     void clearData(String pkg, int uid, boolean fromApp);
+    @UnsupportedAppUsage
     void enqueueToast(String pkg, ITransientNotification callback, int duration);
+    @UnsupportedAppUsage
     void cancelToast(String pkg, ITransientNotification callback);
     void finishToken(String pkg, ITransientNotification callback);
 
     void enqueueNotificationWithTag(String pkg, String opPkg, String tag, int id,
             in Notification notification, int userId);
+    @UnsupportedAppUsage
     void cancelNotificationWithTag(String pkg, String tag, int id, int userId);
 
     void setShowBadge(String pkg, int uid, boolean showBadge);
@@ -61,6 +65,7 @@ interface INotificationManager
      */
     void setNotificationsEnabledWithImportanceLockForPackage(String pkg, int uid, boolean enabled);
 
+    @UnsupportedAppUsage
     boolean areNotificationsEnabledForPackage(String pkg, int uid);
     boolean areNotificationsEnabled(String pkg);
     int getPackageImportance(String pkg);
@@ -143,7 +148,9 @@ interface INotificationManager
     List<String> getEnabledNotificationListenerPackages();
     List<ComponentName> getEnabledNotificationListeners(int userId);
 
+    @UnsupportedAppUsage
     int getZenMode();
+    @UnsupportedAppUsage
     ZenModeConfig getZenModeConfig();
     oneway void setZenMode(int mode, in Uri conditionId, String reason);
     oneway void notifyConditions(String pkg, in IConditionProvider provider, in Condition[] conditions);
