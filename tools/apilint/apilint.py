@@ -1262,6 +1262,19 @@ def verify_collections(clazz):
             if arg in bad:
                 error(clazz, m, "CL2", "Argument is concrete collection; must be higher-level interface")
 
+def verify_uris(clazz):
+    bad = ["java.net.URL", "java.net.URI", "android.net.URL"]
+
+    for f in clazz.fields:
+        if f.typ in bad:
+            error(clazz, f, None, "Field must be android.net.Uri instead of " + f.typ)
+
+    for m in clazz.methods + clazz.ctors:
+        if m.typ in bad:
+            error(clazz, m, None, "Must return android.net.Uri instead of " + m.typ)
+        for arg in m.args:
+            if arg in bad:
+                error(clazz, m, None, "Argument must take android.net.Uri instead of " + arg)
 
 def verify_flags(clazz):
     """Verifies that flags are non-overlapping."""
@@ -1982,6 +1995,7 @@ def examine_clazz(clazz):
     verify_layering(clazz)
     verify_boolean(clazz)
     verify_collections(clazz)
+    verify_uris(clazz)
     verify_flags(clazz)
     verify_exception(clazz)
     if not ALLOW_GOOGLE: verify_google(clazz)
