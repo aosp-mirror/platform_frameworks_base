@@ -214,7 +214,7 @@ public class SignalStrength implements Parcelable {
      * @see android.telephony#CellSignalStrengthCdma
      * @see android.telephony#CellSignalStrengthGsm
      */
-    public @NonNull List<CellSignalStrength> getCellSignalStrengths() {
+    @NonNull public List<CellSignalStrength> getCellSignalStrengths() {
         return getCellSignalStrengths(CellSignalStrength.class);
     }
 
@@ -240,7 +240,7 @@ public class SignalStrength implements Parcelable {
      * @see android.telephony#CellSignalStrengthCdma
      * @see android.telephony#CellSignalStrengthGsm
      */
-    public <T extends CellSignalStrength> @NonNull List<T> getCellSignalStrengths(
+    @NonNull public <T extends CellSignalStrength> List<T> getCellSignalStrengths(
             @NonNull Class<T> clazz) {
         List<T> cssList = new ArrayList<>(2); // Usually have 2 or fewer elems
         if (mLte.isValid() && clazz.isAssignableFrom(CellSignalStrengthLte.class)) {
