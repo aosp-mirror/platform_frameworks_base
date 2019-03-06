@@ -881,7 +881,7 @@ final class AccessibilityController {
                 }
 
                 public void releaseSurface() {
-                    mSurfaceControl.release();
+                    mSurfaceControl.remove();
                     mSurface.release();
                 }
 
