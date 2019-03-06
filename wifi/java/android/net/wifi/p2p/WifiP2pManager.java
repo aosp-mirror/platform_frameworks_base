@@ -816,7 +816,7 @@ public class WifiP2pManager {
          * The requested {@link android.net.wifi.p2p.WifiP2pDevice} is available.
          * @param wifiP2pDevice Wi-Fi p2p {@link android.net.wifi.p2p.WifiP2pDevice}
          */
-        void onDeviceInfoAvailable(WifiP2pDevice wifiP2pDevice);
+        void onDeviceInfoAvailable(@Nullable WifiP2pDevice wifiP2pDevice);
     }
 
     /**
