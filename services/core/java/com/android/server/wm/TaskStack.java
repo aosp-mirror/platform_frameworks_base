@@ -303,17 +303,6 @@ public class TaskStack extends WindowContainer<Task> implements
         return super.getBounds();
     }
 
-    /** Return true if the current bound can get outputted to the rest of the system as-is. */
-    private boolean useCurrentBounds() {
-        if (matchParentBounds()
-                || !inSplitScreenSecondaryWindowingMode()
-                || mDisplayContent == null
-                || mDisplayContent.getSplitScreenPrimaryStackIgnoringVisibility() != null) {
-            return true;
-        }
-        return false;
-    }
-
     @Override
     public void getBounds(Rect bounds) {
         bounds.set(getBounds());
@@ -321,22 +310,15 @@ public class TaskStack extends WindowContainer<Task> implements
 
     @Override
     public Rect getBounds() {
-        if (useCurrentBounds()) {
-            // If we're currently adjusting for IME or minimized docked stack, we use the adjusted
-            // bounds; otherwise, no need to adjust the output bounds if fullscreen or the docked
-            // stack is visible since it is already what we want to represent to the rest of the
-            // system.
-            if (!mAdjustedBounds.isEmpty()) {
-                return mAdjustedBounds;
-            } else {
-                return super.getBounds();
-            }
-        }
-
-        // The bounds has been adjusted to accommodate for a docked stack, but the docked stack
-        // is not currently visible. Go ahead a represent it as fullscreen to the rest of the
+        // If we're currently adjusting for IME or minimized docked stack, we use the adjusted
+        // bounds; otherwise, no need to adjust the output bounds if fullscreen or the docked
+        // stack is visible since it is already what we want to represent to the rest of the
         // system.
-        return mDisplayContent.getBounds();
+        if (!mAdjustedBounds.isEmpty()) {
+            return mAdjustedBounds;
+        } else {
+            return super.getBounds();
+        }
     }
 
     /**
@@ -1425,13 +1407,7 @@ public class TaskStack extends WindowContainer<Task> implements
 
     @Override
     boolean fillsParent() {
-        if (useCurrentBounds()) {
-            return matchParentBounds();
-        }
-        // The bounds has been adjusted to accommodate for a docked stack, but the docked stack
-        // is not currently visible. Go ahead a represent it as fullscreen to the rest of the
-        // system.
-        return true;
+        return matchParentBounds();
     }
 
     @Override
@@ -1516,7 +1492,7 @@ public class TaskStack extends WindowContainer<Task> implements
 
         for (int i = mChildren.size() - 1; i >= 0; --i) {
             final Task task = mChildren.get(i);
-            if (task.isFullscreen()) {
+            if (task.getWindowingMode() == WINDOWING_MODE_FULLSCREEN) {
                 results.searchDone = true;
                 return;
             }

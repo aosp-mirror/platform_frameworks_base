@@ -19,6 +19,7 @@ package com.android.server.wm;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.view.DisplayCutout.BOUNDS_POSITION_TOP;
 import static android.view.DisplayCutout.fromBoundingRect;
 import static android.view.WindowManager.LayoutParams.MATCH_PARENT;
@@ -27,7 +28,6 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 
-import android.app.ActivityManager.TaskDescription;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
@@ -54,23 +54,15 @@ import org.mockito.Mockito;
 @Presubmit
 public class WindowFrameTests extends WindowTestsBase {
 
-    private WindowToken mWindowToken;
     private final IWindow mIWindow = new TestIWindow();
     private final Rect mEmptyRect = new Rect();
 
-    static class WindowStateWithTask extends WindowState {
-        final Task mTask;
+    static class FrameTestWindowState extends WindowState {
         boolean mDockedResizingForTest = false;
-        WindowStateWithTask(WindowManagerService wm, IWindow iWindow, WindowToken windowToken,
-                WindowManager.LayoutParams attrs, Task t) {
+        FrameTestWindowState(WindowManagerService wm, IWindow iWindow, WindowToken windowToken,
+                WindowManager.LayoutParams attrs) {
             super(wm, mock(Session.class), iWindow, windowToken, null, 0, 0, attrs, 0, 0,
                     false /* ownerCanAddInternalSystemWindow */);
-            mTask = t;
-        }
-
-        @Override
-        Task getTask() {
-            return mTask;
         }
 
         @Override
@@ -79,52 +71,10 @@ public class WindowFrameTests extends WindowTestsBase {
         }
     }
 
-    private static class TaskWithBounds extends Task {
-        Rect mBounds;
-        final Rect mOverrideDisplayedBounds = new Rect();
-        boolean mFullscreenForTest = true;
-
-        TaskWithBounds(TaskStack stack, WindowManagerService wm, Rect bounds) {
-            super(0, stack, 0, wm, 0, false, new TaskDescription(), null);
-            setBounds(bounds);
-        }
-
-        @Override
-        public int setBounds(Rect bounds) {
-            mBounds = bounds;
-            return super.setBounds(bounds);
-        }
-
-        @Override
-        public Rect getBounds() {
-            return mBounds;
-        }
-
-        @Override
-        public void getBounds(Rect out) {
-            out.set(mBounds);
-        }
-
-        @Override
-        public void getRequestedOverrideBounds(Rect outBounds) {
-            outBounds.set(mBounds);
-        }
-        @Override
-        Rect getOverrideDisplayedBounds() {
-            return mOverrideDisplayedBounds;
-        }
-        @Override
-        boolean isFullscreen() {
-            return mFullscreenForTest;
-        }
-    }
-
     TaskStack mStubStack;
 
     @Before
     public void setUp() throws Exception {
-        mWindowToken = createAppWindowToken(mWm.getDefaultDisplayContentLocked(),
-                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
         mStubStack = mock(TaskStack.class);
     }
 
@@ -168,7 +118,8 @@ public class WindowFrameTests extends WindowTestsBase {
                 expectedRect.bottom);
     }
 
-    private void assertPolicyCrop(WindowStateWithTask w, int left, int top, int right, int bottom) {
+    private void assertPolicyCrop(
+            FrameTestWindowState w, int left, int top, int right, int bottom) {
         Rect policyCrop = new Rect();
         w.calculatePolicyCrop(policyCrop);
         assertRect(policyCrop, left, top, right, bottom);
@@ -177,8 +128,7 @@ public class WindowFrameTests extends WindowTestsBase {
     @Test
     public void testLayoutInFullscreenTaskInsets() {
         // fullscreen task doesn't use bounds for computeFrame
-        final Task task = new TaskWithBounds(mStubStack, mWm, null);
-        WindowState w = createWindow(task, MATCH_PARENT, MATCH_PARENT);
+        WindowState w = createWindow(MATCH_PARENT, MATCH_PARENT);
         w.mAttrs.gravity = Gravity.LEFT | Gravity.TOP;
 
         final int bottomContentInset = 100;
@@ -235,8 +185,7 @@ public class WindowFrameTests extends WindowTestsBase {
     @Test
     public void testLayoutInFullscreenTaskNoInsets() {
         // fullscreen task doesn't use bounds for computeFrame
-        final Task task = new TaskWithBounds(mStubStack, mWm, null);
-        WindowState w = createWindow(task, MATCH_PARENT, MATCH_PARENT);
+        WindowState w = createWindow(MATCH_PARENT, MATCH_PARENT);
         w.mAttrs.gravity = Gravity.LEFT | Gravity.TOP;
 
         // With no insets or system decor all the frames incoming from PhoneWindowManager
@@ -323,9 +272,11 @@ public class WindowFrameTests extends WindowTestsBase {
         final int taskRight = logicalWidth / 4 * 3;
         final int taskBottom = logicalHeight / 4 * 3;
         final Rect taskBounds = new Rect(taskLeft, taskTop, taskRight, taskBottom);
-        final TaskWithBounds task = new TaskWithBounds(mStubStack, mWm, taskBounds);
-        task.mFullscreenForTest = false;
-        WindowState w = createWindow(task, MATCH_PARENT, MATCH_PARENT);
+        WindowState w = createWindow(MATCH_PARENT, MATCH_PARENT);
+        final Task task = w.getTask();
+        // Use split-screen because it is non-fullscreen, but also not floating
+        task.setWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
+        task.setBounds(taskBounds);
         w.mAttrs.gravity = Gravity.LEFT | Gravity.TOP;
 
         final Rect pf = new Rect(0, 0, logicalWidth, logicalHeight);
@@ -359,8 +310,8 @@ public class WindowFrameTests extends WindowTestsBase {
         final int insetTop = logicalHeight / 5;
         final int insetRight = insetLeft + (taskRight - taskLeft);
         final int insetBottom = insetTop + (taskBottom - taskTop);
-        task.mOverrideDisplayedBounds.set(taskBounds);
-        task.mBounds.set(insetLeft, insetTop, insetRight, insetBottom);
+        task.setOverrideDisplayedBounds(taskBounds);
+        task.setBounds(insetLeft, insetTop, insetRight, insetBottom);
         windowFrames.setFrames(pf, pf, pf, cf, cf, pf, cf, mEmptyRect);
         w.computeFrameLw();
         assertFrame(w, taskLeft, taskTop, taskRight, taskBottom);
@@ -373,8 +324,7 @@ public class WindowFrameTests extends WindowTestsBase {
 
     @Test
     public void testCalculatePolicyCrop() {
-        final WindowStateWithTask w = createWindow(
-                new TaskWithBounds(mStubStack, mWm, null), MATCH_PARENT, MATCH_PARENT);
+        final FrameTestWindowState w = createWindow(MATCH_PARENT, MATCH_PARENT);
         w.mAttrs.gravity = Gravity.LEFT | Gravity.TOP;
 
         final DisplayInfo displayInfo = w.getDisplayContent().getDisplayInfo();
@@ -439,9 +389,11 @@ public class WindowFrameTests extends WindowTestsBase {
         final int taskRight = logicalWidth / 4 * 3;
         final int taskBottom = logicalHeight / 4 * 3;
         final Rect taskBounds = new Rect(taskLeft, taskTop, taskRight, taskBottom);
-        final TaskWithBounds task = new TaskWithBounds(mStubStack, mWm, taskBounds);
-        task.mFullscreenForTest = false;
-        WindowState w = createWindow(task, MATCH_PARENT, MATCH_PARENT);
+        WindowState w = createWindow(MATCH_PARENT, MATCH_PARENT);
+        final Task task = w.getTask();
+        // Use split-screen because it is non-fullscreen, but also not floating
+        task.setWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
+        task.setBounds(taskBounds);
         w.mAttrs.gravity = Gravity.LEFT | Gravity.TOP;
 
         final Rect pf = new Rect(0, 0, logicalWidth, logicalHeight);
@@ -461,7 +413,8 @@ public class WindowFrameTests extends WindowTestsBase {
         config.windowConfiguration.setBounds(cf);
         w.mAppToken.onRequestedOverrideConfigurationChanged(config);
         pf.set(0, 0, logicalWidth, logicalHeight);
-        task.mFullscreenForTest = true;
+        task.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
+        task.setBounds(null);
         windowFrames.setFrames(pf, pf, pf, cf, cf, pf, cf, mEmptyRect);
         w.computeFrameLw();
         assertFrame(w, cf.left, cf.top, cf.right, cf.bottom);
@@ -472,8 +425,7 @@ public class WindowFrameTests extends WindowTestsBase {
     @Test
     public void testDisplayCutout() {
         // Regular fullscreen task and window
-        final Task task = new TaskWithBounds(mStubStack, mWm, null);
-        WindowState w = createWindow(task, MATCH_PARENT, MATCH_PARENT);
+        WindowState w = createWindow(MATCH_PARENT, MATCH_PARENT);
         w.mAttrs.gravity = Gravity.LEFT | Gravity.TOP;
 
         final Rect pf = new Rect(0, 0, 1000, 2000);
@@ -496,11 +448,10 @@ public class WindowFrameTests extends WindowTestsBase {
     @Test
     public void testDisplayCutout_tempDisplayedBounds() {
         // Regular fullscreen task and window
-        final TaskWithBounds task = new TaskWithBounds(mStubStack, mWm,
-                new Rect(0, 0, 1000, 2000));
-        task.mFullscreenForTest = false;
+        WindowState w = createWindow(MATCH_PARENT, MATCH_PARENT);
+        final Task task = w.getTask();
+        task.setBounds(new Rect(0, 0, 1000, 2000));
         task.setOverrideDisplayedBounds(new Rect(0, -500, 1000, 1500));
-        WindowState w = createWindow(task, MATCH_PARENT, MATCH_PARENT);
         w.mAttrs.gravity = Gravity.LEFT | Gravity.TOP;
 
         final Rect pf = new Rect(0, -500, 1000, 1500);
@@ -523,12 +474,10 @@ public class WindowFrameTests extends WindowTestsBase {
     @Test
     public void testFreeformContentInsets() {
         // fullscreen task doesn't use bounds for computeFrame
-        final Task task = new TaskWithBounds(mStubStack, mWm, null);
-        WindowState w = createWindow(task, MATCH_PARENT, MATCH_PARENT);
+        WindowState w = createWindow(MATCH_PARENT, MATCH_PARENT);
+        final Task task = w.getTask();
         w.mAttrs.gravity = Gravity.LEFT | Gravity.TOP;
         task.setWindowingMode(WINDOWING_MODE_FREEFORM);
-        ((TaskWithBounds) task).mFullscreenForTest = false;
-        w.setWindowingMode(WINDOWING_MODE_FREEFORM);
 
         DisplayContent dc = mWm.getDefaultDisplayContentLocked();
         dc.mInputMethodTarget = w;
@@ -551,7 +500,6 @@ public class WindowFrameTests extends WindowTestsBase {
         final Rect winRect = new Rect(200, 200, 300, 500);
 
         task.setBounds(winRect);
-        w.setBounds(winRect);
         w.getWindowFrames().setFrames(pf, df, of, cf, vf, dcf, sf, mEmptyRect);
         w.computeFrameLw();
 
@@ -580,11 +528,16 @@ public class WindowFrameTests extends WindowTestsBase {
         assertEquals(winRect, w.getFrameLw());
     }
 
-    private WindowStateWithTask createWindow(Task task, int width, int height) {
+    private FrameTestWindowState createWindow(int width, int height) {
         final WindowManager.LayoutParams attrs = new WindowManager.LayoutParams(TYPE_APPLICATION);
         attrs.width = width;
         attrs.height = height;
 
-        return new WindowStateWithTask(mWm, mIWindow, mWindowToken, attrs, task);
+        AppWindowToken token = createAppWindowToken(mWm.getDefaultDisplayContentLocked(),
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
+
+        FrameTestWindowState ws = new FrameTestWindowState(mWm, mIWindow, token, attrs);
+        token.addWindow(ws);
+        return ws;
     }
 }

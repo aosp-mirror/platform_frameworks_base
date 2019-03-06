@@ -16,8 +16,6 @@
 
 package com.android.server.wm;
 
-import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
-import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
@@ -48,7 +46,6 @@ import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.verify;
 
 import android.content.res.Configuration;
-import android.graphics.Point;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
 import android.view.Display;
@@ -477,34 +474,6 @@ public class AppWindowTokenTests extends WindowTestsBase {
         // Assert that the bottom window now has the starting window.
         assertNoStartingWindow(tokenTop);
         assertHasStartingWindow(tokenBottom);
-    }
-
-    @Test
-    public void testTransitionAnimationPositionAndBounds() {
-        final Rect stackBounds = new Rect(
-                0/* left */, 0 /* top */, 1000 /* right */, 1000 /* bottom */);
-        final Rect taskBounds = new Rect(
-                100/* left */, 200 /* top */, 600 /* right */, 600 /* bottom */);
-        mStack.setBounds(stackBounds);
-        mTask.setBounds(taskBounds);
-
-        mTask.setWindowingMode(WINDOWING_MODE_FREEFORM);
-        final Rect taskBoundsSize = new Rect(taskBounds);
-        taskBoundsSize.offsetTo(0, 0);
-        assertTransitionAnimationPositionAndBounds(taskBounds.left, taskBounds.top, taskBoundsSize);
-
-        mTask.setWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
-        assertTransitionAnimationPositionAndBounds(stackBounds.left, stackBounds.top, stackBounds);
-    }
-
-    private void assertTransitionAnimationPositionAndBounds(int expectedX, int expectedY,
-            Rect expectedBounds) {
-        final Point outPosition = new Point();
-        final Rect outBounds = new Rect();
-        mToken.getAnimationBounds(outPosition, outBounds);
-        assertEquals(expectedX, outPosition.x);
-        assertEquals(expectedY, outPosition.y);
-        assertEquals(expectedBounds, outBounds);
     }
 
     private void assertHasStartingWindow(AppWindowToken atoken) {

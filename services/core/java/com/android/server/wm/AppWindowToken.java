@@ -1979,7 +1979,14 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                 mLetterbox.attachInput(w);
             }
             getPosition(mTmpPoint);
-            mLetterbox.layout(getParent().getBounds(), w.getFrameLw(), mTmpPoint);
+            // Get the bounds of the "space-to-fill". We union the Task and the Stack bounds here
+            // to handle both split window (where task-bounds can be larger) and orientation
+            // letterbox (where the task is letterboxed within stack).
+            Rect spaceToFill = getTask().getBounds();
+            if (getStack() != null) {
+                spaceToFill.union(getStack().getBounds());
+            }
+            mLetterbox.layout(spaceToFill, w.getFrameLw(), mTmpPoint);
         } else if (mLetterbox != null) {
             mLetterbox.hide();
         }
@@ -2448,28 +2455,6 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         return boundsLayer;
     }
 
-    /** Get position and crop region of animation. */
-    @VisibleForTesting
-    void getAnimationBounds(Point outPosition, Rect outBounds) {
-        outPosition.set(0, 0);
-        outBounds.setEmpty();
-
-        final TaskStack stack = getStack();
-        final Task task = getTask();
-        if (task != null && task.inFreeformWindowingMode()) {
-            task.getRelativeDisplayedPosition(outPosition);
-            task.getBounds(outBounds);
-        } else if (stack != null) {
-            stack.getRelativeDisplayedPosition(outPosition);
-            // Use stack bounds in order to have the ability to animate outside the task region.
-            // Needs to be consistent when {@link #mNeedsAnimationBoundsLayer} is set that crops
-            // according to the bounds.
-            stack.getBounds(outBounds);
-        }
-        // We have the relative position so the local position can be removed from bounds.
-        outBounds.offsetTo(0, 0);
-    }
-
     @Override
     Rect getDisplayedBounds() {
         final Task task = getTask();
@@ -2501,7 +2486,12 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         if (okToAnimate()) {
             final AnimationAdapter adapter;
             AnimationAdapter thumbnailAdapter = null;
-            getAnimationBounds(mTmpPoint, mTmpRect);
+
+            // Separate position and size for use in animators. Use task-bounds for now so
+            // that activity-level letterbox (maxAspectRatio) is included in the animation.
+            mTmpRect.set(getTask() != null ? getTask().getBounds() : getBounds());
+            mTmpPoint.set(mTmpRect.left, mTmpRect.top);
+            mTmpRect.offsetTo(0, 0);
 
             final boolean isChanging = AppTransition.isChangeTransit(transit) && enter
                     && getDisplayContent().mChangingApps.contains(this);
