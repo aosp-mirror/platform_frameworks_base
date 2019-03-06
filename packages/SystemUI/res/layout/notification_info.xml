@@ -174,7 +174,7 @@ asked for it -->
             android:clipToPadding="false">
             <TextView
                 android:id="@+id/done"
-                android:text="@string/inline_done_button"
+                android:text="@string/inline_ok_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
@@ -191,7 +191,7 @@ asked for it -->
                 android:orientation="horizontal">
                 <TextView
                     android:id="@+id/deliver_silently"
-                    android:text="@string/inline_deliver_silently_button"
+                    android:text="@string/inline_silent_button_silent"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerVertical="true"
