@@ -17,6 +17,7 @@
 package android.os;
 
 import android.annotation.AppIdInt;
+import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.annotation.UserIdInt;
@@ -40,7 +41,7 @@ public final class UserHandle implements Parcelable {
     /** @hide A user handle to indicate all users on the device */
     @SystemApi
     @TestApi
-    public static final UserHandle ALL = new UserHandle(USER_ALL);
+    public static final @NonNull UserHandle ALL = new UserHandle(USER_ALL);
 
     /** @hide A user id to indicate the currently active user */
     public static final @UserIdInt int USER_CURRENT = -2;
@@ -48,7 +49,7 @@ public final class UserHandle implements Parcelable {
     /** @hide A user handle to indicate the current user of the device */
     @SystemApi
     @TestApi
-    public static final UserHandle CURRENT = new UserHandle(USER_CURRENT);
+    public static final @NonNull UserHandle CURRENT = new UserHandle(USER_CURRENT);
 
     /** @hide A user id to indicate that we would like to send to the current
      *  user, but if this is calling from a user process then we will send it
@@ -58,7 +59,7 @@ public final class UserHandle implements Parcelable {
     /** @hide A user handle to indicate that we would like to send to the current
      *  user, but if this is calling from a user process then we will send it
      *  to the caller's user instead of failing with a security exception */
-    public static final UserHandle CURRENT_OR_SELF = new UserHandle(USER_CURRENT_OR_SELF);
+    public static final @NonNull UserHandle CURRENT_OR_SELF = new UserHandle(USER_CURRENT_OR_SELF);
 
     /** @hide An undefined user id */
     public static final @UserIdInt int USER_NULL = -10000;
@@ -77,7 +78,7 @@ public final class UserHandle implements Parcelable {
      * check the target user's flag {@link android.content.pm.UserInfo#isAdmin}.
      */
     @Deprecated
-    public static final UserHandle OWNER = new UserHandle(USER_OWNER);
+    public static final @NonNull UserHandle OWNER = new UserHandle(USER_OWNER);
 
     /** @hide A user id constant to indicate the "system" user of the device */
     public static final @UserIdInt int USER_SYSTEM = 0;
@@ -88,7 +89,7 @@ public final class UserHandle implements Parcelable {
     /** @hide A user handle to indicate the "system" user of the device */
     @SystemApi
     @TestApi
-    public static final UserHandle SYSTEM = new UserHandle(USER_SYSTEM);
+    public static final @NonNull UserHandle SYSTEM = new UserHandle(USER_SYSTEM);
 
     /**
      * @hide Enable multi-user related side effects. Set this to false if

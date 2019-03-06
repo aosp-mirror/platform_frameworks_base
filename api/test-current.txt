@@ -1752,9 +1752,9 @@ package android.os {
     method public static int getAppId(int);
     method public int getIdentifier();
     method public static boolean isApp(int);
-    field public static final android.os.UserHandle ALL;
-    field public static final android.os.UserHandle CURRENT;
-    field public static final android.os.UserHandle SYSTEM;
+    field @NonNull public static final android.os.UserHandle ALL;
+    field @NonNull public static final android.os.UserHandle CURRENT;
+    field @NonNull public static final android.os.UserHandle SYSTEM;
   }
 
   public class UserManager {
