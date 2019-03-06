@@ -23,6 +23,7 @@ import android.view.ViewGroup;
 
 import com.android.systemui.HardwareBgDrawable;
 import com.android.systemui.MultiListLayout;
+import com.android.systemui.util.leak.RotationUtils;
 
 /**
  * Grid-based implementation of the button layout created by the global actions dialog.
@@ -83,11 +84,18 @@ public class GlobalActionsGridLayout extends MultiListLayout {
     }
 
     @Override
-    public ViewGroup getParentView(boolean separated, int index, boolean reverseOrder) {
+    public ViewGroup getParentView(boolean separated, int index, int rotation) {
         if (separated) {
             return getSeparatedView();
         } else {
-            return getListView().getParentView(index, reverseOrder);
+            switch (rotation) {
+                case RotationUtils.ROTATION_LANDSCAPE:
+                    return getListView().getParentView(index, false, true);
+                case RotationUtils.ROTATION_SEASCAPE:
+                    return getListView().getParentView(index, true, true);
+                default:
+                    return getListView().getParentView(index, false, false);
+            }
         }
     }
 
@@ -96,6 +104,6 @@ public class GlobalActionsGridLayout extends MultiListLayout {
      */
     @Override
     public void setDivisionView(View v) {
-
+        // do nothing
     }
 }

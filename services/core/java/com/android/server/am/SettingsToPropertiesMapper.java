@@ -16,6 +16,7 @@
 
 package com.android.server.am;
 
+import android.annotation.NonNull;
 import android.content.ContentResolver;
 import android.database.ContentObserver;
 import android.net.Uri;
@@ -167,7 +168,7 @@ public class SettingsToPropertiesMapper {
      * booting.
      * @return
      */
-    public static String[] getResetNativeCategories() {
+    public static @NonNull String[] getResetNativeCategories() {
         if (!isNativeFlagsResetPerformed()) {
             return new String[0];
         }

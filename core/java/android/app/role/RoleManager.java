@@ -187,6 +187,7 @@ public final class RoleManager {
      * @hide
      */
     @SystemApi
+    @TestApi
     public static final int MANAGE_HOLDERS_FLAG_DONT_KILL_APP = 1;
 
     /**

@@ -57,12 +57,12 @@ public abstract class MultiListLayout extends LinearLayout {
      * @param separated Whether or not this index refers to a position in the separated or list
      *                  container.
      * @param index The index of the item within the container.
-     * @param reverse If the MultiListLayout contains sub-lists within the list container, reverse
-     *                the order that they are filled.
+     * @param rotation Specifies the rotation of the device, which is used in some cases to
+     *                 determine child ordering.
      * @return The parent ViewGroup which will be used to contain the specified item
      * after it has been added to the layout.
      */
-    public abstract ViewGroup getParentView(boolean separated, int index, boolean reverse);
+    public abstract ViewGroup getParentView(boolean separated, int index, int rotation);
 
     /**
      * Sets the divided view, which may have a differently-colored background.

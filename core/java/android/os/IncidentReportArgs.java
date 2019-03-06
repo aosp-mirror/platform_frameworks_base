@@ -36,6 +36,8 @@ public final class IncidentReportArgs implements Parcelable {
     private final ArrayList<byte[]> mHeaders = new ArrayList<byte[]>();
     private boolean mAll;
     private int mPrivacyPolicy;
+    private String mReceiverPkg;
+    private String mReceiverCls;
 
     /**
      * Construct an incident report args with no fields.
@@ -73,6 +75,10 @@ public final class IncidentReportArgs implements Parcelable {
         }
 
         out.writeInt(mPrivacyPolicy);
+
+        out.writeString(mReceiverPkg);
+
+        out.writeString(mReceiverCls);
     }
 
     public void readFromParcel(Parcel in) {
@@ -91,6 +97,10 @@ public final class IncidentReportArgs implements Parcelable {
         }
 
         mPrivacyPolicy = in.readInt();
+
+        mReceiverPkg = in.readString();
+
+        mReceiverCls = in.readString();
     }
 
     public static final @android.annotation.NonNull Parcelable.Creator<IncidentReportArgs> CREATOR
@@ -126,6 +136,8 @@ public final class IncidentReportArgs implements Parcelable {
         sb.append(mHeaders.size());
         sb.append(" headers), ");
         sb.append("privacy: ").append(mPrivacyPolicy);
+        sb.append("receiver pkg: ").append(mReceiverPkg);
+        sb.append("receiver cls: ").append(mReceiverCls);
         return sb.toString();
     }
 

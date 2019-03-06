@@ -399,6 +399,28 @@ class WindowSurfaceController {
         }
     }
 
+    void setColorSpaceAgnostic(boolean agnostic) {
+        if (SHOW_TRANSACTIONS) {
+            logSurface("isColorSpaceAgnostic=" + agnostic, null);
+        }
+
+        if (mSurfaceControl == null) {
+            return;
+        }
+        if (SHOW_LIGHT_TRANSACTIONS) {
+            Slog.i(TAG, ">>> OPEN TRANSACTION setColorSpaceAgnosticLocked");
+        }
+        mService.openSurfaceTransaction();
+        try {
+            mSurfaceControl.setColorSpaceAgnostic(agnostic);
+        } finally {
+            mService.closeSurfaceTransaction("setColorSpaceAgnostic");
+            if (SHOW_LIGHT_TRANSACTIONS) {
+                Slog.i(TAG, "<<< CLOSE TRANSACTION setColorSpaceAgnosticLocked");
+            }
+        }
+    }
+
     void getContainerRect(Rect rect) {
         mAnimator.getContainerRect(rect);
     }

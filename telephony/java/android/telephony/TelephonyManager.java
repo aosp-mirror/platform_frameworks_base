@@ -81,6 +81,7 @@ import com.android.internal.telephony.CellNetworkScanResult;
 import com.android.internal.telephony.INumberVerificationCallback;
 import com.android.internal.telephony.IOns;
 import com.android.internal.telephony.IPhoneSubInfo;
+import com.android.internal.telephony.ISetOpportunisticDataCallback;
 import com.android.internal.telephony.ITelephony;
 import com.android.internal.telephony.ITelephonyRegistry;
 import com.android.internal.telephony.OperatorInfo;
@@ -98,6 +99,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -6861,12 +6863,12 @@ public class TelephonyManager {
      * app has carrier privileges (see {@link #hasCarrierPrivileges}).
      *
      * @param subId the id of the subscription to set the preferred network type for.
-     * @param networkType the preferred network type, defined in RILConstants.java.
+     * @param networkType the preferred network type
      * @return true on success; false on any failure.
      * @hide
      */
     @UnsupportedAppUsage
-    public boolean setPreferredNetworkType(int subId, int networkType) {
+    public boolean setPreferredNetworkType(int subId, @PrefNetworkMode int networkType) {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
@@ -10185,21 +10187,40 @@ public class TelephonyManager {
      * @param subId which opportunistic subscription
      * {@link SubscriptionManager#getOpportunisticSubscriptions} is preferred for cellular data.
      * Pass {@link SubscriptionManager#DEFAULT_SUBSCRIPTION_ID} to unset the preference
-     * @return true if request is accepted, else false.
+     * @param needValidation whether validation is needed before switch happens.
+     * @param executor The executor of where the callback will execute.
+     * @param callback Callback will be triggered once it succeeds or failed.
+     *                 See {@link TelephonyManager.SetOpportunisticSubscriptionResult}
+     *                 for more details. Pass null if don't care about the result.
      *
      */
-    public boolean setPreferredOpportunisticDataSubscription(int subId) {
+    public void setPreferredOpportunisticDataSubscription(int subId, boolean needValidation,
+            @Nullable @CallbackExecutor Executor executor, @Nullable Consumer<Integer> callback) {
         String pkgForDebug = mContext != null ? mContext.getOpPackageName() : "<unknown>";
         try {
             IOns iOpportunisticNetworkService = getIOns();
-            if (iOpportunisticNetworkService != null) {
-                return iOpportunisticNetworkService
-                        .setPreferredDataSubscriptionId(subId, pkgForDebug);
+            if (iOpportunisticNetworkService == null) {
+                return;
             }
+            ISetOpportunisticDataCallback callbackStub = new ISetOpportunisticDataCallback.Stub() {
+                @Override
+                public void onComplete(int result) {
+                    if (executor == null || callback == null) {
+                        return;
+                    }
+                    Binder.withCleanCallingIdentity(() -> executor.execute(() -> {
+                        callback.accept(result);
+                    }));
+                }
+            };
+
+            iOpportunisticNetworkService
+                    .setPreferredDataSubscriptionId(subId, needValidation, callbackStub,
+                            pkgForDebug);
         } catch (RemoteException ex) {
             Rlog.e(TAG, "setPreferredDataSubscriptionId RemoteException", ex);
         }
-        return false;
+        return;
     }
 
     /**
@@ -10366,6 +10387,10 @@ public class TelephonyManager {
      * <p>Requires Permission:
      * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE} or that the
      * calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
+     *
+     * Note: with only carrier privileges, it is not allowed to switch from multi-sim
+     * to single-sim
+     *
      * @param numOfSims number of live SIMs we want to switch to
      * @throws android.os.RemoteException
      */

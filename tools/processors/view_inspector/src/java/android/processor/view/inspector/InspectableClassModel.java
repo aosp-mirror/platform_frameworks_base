@@ -308,7 +308,10 @@ public final class InspectableClassModel {
              * @see android.view.inspector.IntFlagMapping
              * @see IntFlagEntry
              */
-            INT_FLAG
+            INT_FLAG,
+
+            /** A resource ID */
+            RESOURCE_ID
         }
     }
 

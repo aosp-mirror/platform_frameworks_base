@@ -132,6 +132,7 @@ public class SettingsBackupTest {
                     Settings.Global.AUTOFILL_MAX_VISIBLE_DATASETS,
                     Settings.Global.AUTOMATIC_POWER_SAVER_MODE,
                     Settings.Global.BACKGROUND_ACTIVITY_STARTS_ENABLED,
+                    Settings.Global.BACKGROUND_ACTIVITY_STARTS_PACKAGE_NAMES_WHITELIST,
                     Settings.Global.BATTERY_CHARGING_STATE_UPDATE_DELAY,
                     Settings.Global.BROADCAST_BG_CONSTANTS,
                     Settings.Global.BROADCAST_FG_CONSTANTS,

@@ -34,6 +34,8 @@ import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.ModuleInfo;
+import android.content.pm.PackageManager;
 import android.content.pm.VersionedPackage;
 import android.net.Uri;
 import android.os.Binder;
@@ -406,15 +408,29 @@ class AppErrors {
         }
 
         if (r != null) {
-            if (r.isPersistent()) {
-                // If a persistent app is stuck in a crash loop, the device isn't very
-                // usable, so we want to consider sending out a rescue party.
-                RescueParty.notePersistentAppCrash(mContext, r.uid);
-            } else {
-                // If a non-persistent app is stuck in crash loop, we want to inform
-                // the package watchdog, maybe an update or experiment can be rolled back.
-                mPackageWatchdog.onPackageFailure(r.getPackageListWithVersionCode());
+            boolean isApexModule = false;
+            try {
+                for (String androidPackage : r.getPackageList()) {
+                    ModuleInfo moduleInfo = mContext.getPackageManager().getModuleInfo(
+                            androidPackage, /*flags=*/ 0);
+                    if (moduleInfo != null) {
+                        isApexModule = true;
+                        break;
+                    }
+                }
+            } catch (IllegalStateException | PackageManager.NameNotFoundException e) {
+                // Call to PackageManager#getModuleInfo() can result in NameNotFoundException or
+                // IllegalStateException. In case they are thrown, there isn't much we can do
+                // other than proceed with app crash handling.
             }
+
+            if (r.isPersistent() || isApexModule) {
+                // If a persistent app or apex module is stuck in a crash loop, the device isn't
+                // very usable, so we want to consider sending out a rescue party.
+                RescueParty.noteAppCrash(mContext, r.uid);
+            }
+
+            mPackageWatchdog.onPackageFailure(r.getPackageListWithVersionCode());
         }
 
         final int relaunchReason = r != null

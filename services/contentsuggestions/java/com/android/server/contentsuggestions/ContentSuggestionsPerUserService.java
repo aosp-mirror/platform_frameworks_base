@@ -16,6 +16,7 @@
 
 package com.android.server.contentsuggestions;
 
+import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
@@ -72,6 +73,13 @@ public final class ContentSuggestionsPerUserService extends
         } catch (RemoteException e) {
             throw new PackageManager.NameNotFoundException(
                     "Could not get service for " + serviceComponent);
+        }
+        if (!Manifest.permission.BIND_CONTENT_SUGGESTIONS_SERVICE.equals(si.permission)) {
+            Slog.w(TAG, "ContentSuggestionsService from '" + si.packageName
+                    + "' does not require permission "
+                    + Manifest.permission.BIND_CONTENT_SUGGESTIONS_SERVICE);
+            throw new SecurityException("Service does not require permission "
+                    + Manifest.permission.BIND_CONTENT_SUGGESTIONS_SERVICE);
         }
         return si;
     }

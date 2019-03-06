@@ -792,7 +792,7 @@ public class LauncherApps {
      *
      * @return an {@link AppUsageLimit} object describing the app time limit containing
      * the given package with the smallest time remaining, or {@code null} if none exist.
-     * @throws SecurityException when the caller is not the active launcher.
+     * @throws SecurityException when the caller is not the recents app.
      */
     @Nullable
     public LauncherApps.AppUsageLimit getAppUsageLimit(@NonNull String packageName,

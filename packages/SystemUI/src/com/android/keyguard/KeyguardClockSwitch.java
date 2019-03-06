@@ -1,6 +1,7 @@
 package com.android.keyguard;
 
 import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ValueAnimator;
 import android.app.WallpaperManager;
@@ -31,6 +32,9 @@ import com.android.systemui.plugins.ClockPlugin;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.StatusBarState;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
+import java.util.Arrays;
 import java.util.TimeZone;
 
 /**
@@ -333,6 +337,19 @@ public class KeyguardClockSwitch extends RelativeLayout {
         return mStateListener;
     }
 
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        pw.println("KeyguardClockSwitch:");
+        pw.println("  mClockPlugin: " + mClockPlugin);
+        pw.println("  mClockView: " + mClockView);
+        pw.println("  mSmallClockFrame: " + mSmallClockFrame);
+        pw.println("  mBigClockContainer: " + mBigClockContainer);
+        pw.println("  mKeyguardStatusArea: " + mKeyguardStatusArea);
+        pw.println("  mDarkAmount: " + mDarkAmount);
+        pw.println("  mShowingHeader: " + mShowingHeader);
+        pw.println("  mSupportsDarkText: " + mSupportsDarkText);
+        pw.println("  mColorPalette: " + Arrays.toString(mColorPalette));
+    }
+
     /**
      * Special layout transition that scales the clock view as its bounds change, to make it look
      * like the text is shrinking.
@@ -372,10 +389,22 @@ public class KeyguardClockSwitch extends RelativeLayout {
                 boundsAnimator.addUpdateListener(animation -> {
                     float scale = MathUtils.lerp(startScale, 1f /* stop */,
                             animation.getAnimatedFraction());
-                    mClockView.setPivotX(mClockView.getWidth() / 2);
+                    mClockView.setPivotX(mClockView.getWidth() / 2f);
                     mClockView.setPivotY(0);
                     mClockView.setScaleX(scale);
                     mClockView.setScaleY(scale);
+                });
+                boundsAnimator.addListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animator) {
+                        mClockView.setScaleX(1f);
+                        mClockView.setScaleY(1f);
+                    }
+
+                    @Override
+                    public void onAnimationCancel(Animator animator) {
+                        onAnimationEnd(animator);
+                    }
                 });
             }
 

@@ -16,18 +16,15 @@
 
 package android.app;
 
-import static android.app.NotificationManager.INTERRUPTION_FILTER_PRIORITY;
-
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.NotificationManager.InterruptionFilter;
 import android.content.ComponentName;
-import android.content.Intent;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.service.notification.ZenPolicy;
 import android.service.notification.Condition;
-
-import com.android.internal.util.Preconditions;
+import android.service.notification.ZenPolicy;
 
 import java.util.Objects;
 
@@ -92,8 +89,9 @@ public final class AutomaticZenRule implements Parcelable {
      *               action ({@link Condition#STATE_TRUE}).
      * @param enabled Whether the rule is enabled.
      */
-    public AutomaticZenRule(String name, ComponentName owner, ComponentName configurationActivity,
-            Uri conditionId, ZenPolicy policy, int interruptionFilter, boolean enabled) {
+    public AutomaticZenRule(@NonNull String name, @Nullable ComponentName owner,
+            @Nullable ComponentName configurationActivity, @NonNull Uri conditionId,
+            @Nullable ZenPolicy policy, int interruptionFilter, boolean enabled) {
         this.name = name;
         this.owner = owner;
         this.configurationActivity = configurationActivity;

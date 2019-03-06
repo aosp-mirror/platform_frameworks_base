@@ -8017,9 +8017,9 @@ public final class Settings {
 
         /**
          * Whether or not face unlock always requires user confirmation, meaning {@link
-         * android.hardware.biometrics.BiometricPrompt.Builder#setRequireConfirmation(boolean)}
+         * android.hardware.biometrics.BiometricPrompt.Builder#setConfirmationRequired(boolean)}
          * is always 'true'. This overrides the behavior that apps choose in the
-         * setRequireConfirmation API.
+         * setConfirmationRequired API.
          * @hide
          */
         public static final String FACE_UNLOCK_ALWAYS_REQUIRE_CONFIRMATION =
@@ -11451,6 +11451,15 @@ public final class Settings {
          */
         public static final String BACKGROUND_ACTIVITY_STARTS_ENABLED =
                 "background_activity_starts_enabled";
+
+        /**
+         * The packages temporarily whitelisted to be able so start activities from background.
+         * The list of packages is {@code ":"} colon delimited.
+         *
+         * @hide
+         */
+        public static final String BACKGROUND_ACTIVITY_STARTS_PACKAGE_NAMES_WHITELIST =
+                "background_activity_starts_package_names_whitelist";
 
         /**
          * @hide

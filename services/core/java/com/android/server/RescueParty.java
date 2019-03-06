@@ -38,9 +38,11 @@ import android.util.StatsLog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
+import com.android.server.am.SettingsToPropertiesMapper;
 import com.android.server.utils.FlagNamespaceUtils;
 
 import java.io.File;
+import java.util.Arrays;
 
 /**
  * Utilities to help rescue the system from crash loops. Callers are expected to
@@ -129,10 +131,10 @@ public class RescueParty {
     }
 
     /**
-     * Take note of a persistent app crash. If we notice too many of these
+     * Take note of a persistent app or apex module crash. If we notice too many of these
      * events happening in rapid succession, we'll send out a rescue party.
      */
-    public static void notePersistentAppCrash(Context context, int uid) {
+    public static void noteAppCrash(Context context, int uid) {
         if (isDisabled()) return;
         Threshold t = sApps.get(uid);
         if (t == null) {
@@ -158,6 +160,7 @@ public class RescueParty {
      * opportunity to reset any settings depending on our rescue level.
      */
     public static void onSettingsProviderPublished(Context context) {
+        handleNativeRescuePartyResets();
         executeRescueLevel(context);
     }
 
@@ -174,6 +177,13 @@ public class RescueParty {
     @VisibleForTesting
     static long getElapsedRealtime() {
         return SystemClock.elapsedRealtime();
+    }
+
+    private static void handleNativeRescuePartyResets() {
+        if (SettingsToPropertiesMapper.isNativeFlagsResetPerformed()) {
+            FlagNamespaceUtils.resetDeviceConfig(Settings.RESET_MODE_TRUSTED_DEFAULTS,
+                    Arrays.asList(SettingsToPropertiesMapper.getResetNativeCategories()));
+        }
     }
 
     /**
@@ -235,14 +245,14 @@ public class RescueParty {
         Exception res = null;
         final ContentResolver resolver = context.getContentResolver();
         try {
-            Settings.Global.resetToDefaultsAsUser(resolver, null, mode, UserHandle.USER_SYSTEM);
-        } catch (Exception e) {
-            res = new RuntimeException("Failed to reset global settings", e);
-        }
-        try {
             FlagNamespaceUtils.resetDeviceConfig(mode);
         } catch (Exception e) {
             res = new RuntimeException("Failed to reset config settings", e);
+        }
+        try {
+            Settings.Global.resetToDefaultsAsUser(resolver, null, mode, UserHandle.USER_SYSTEM);
+        } catch (Exception e) {
+            res = new RuntimeException("Failed to reset global settings", e);
         }
         for (int userId : getAllUserIds()) {
             try {

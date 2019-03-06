@@ -62,7 +62,7 @@ import java.lang.annotation.RetentionPolicy;
  *
  * <h3>Creating a RenderNode</h3>
  * <pre class="prettyprint">
- *     RenderNode renderNode = RenderNode.create("myRenderNode");
+ *     RenderNode renderNode = new RenderNode("myRenderNode");
  *     renderNode.setLeftTopRightBottom(0, 0, 50, 50); // Set the size to 50x50
  *     RecordingCanvas canvas = renderNode.beginRecording();
  *     try {
@@ -106,7 +106,7 @@ import java.lang.annotation.RetentionPolicy;
  *
  * <pre class="prettyprint">
  *     private void createDisplayList() {
- *         mRenderNode = RenderNode.create("MyRenderNode");
+ *         mRenderNode = new RenderNode("MyRenderNode");
  *         mRenderNode.setLeftTopRightBottom(0, 0, width, height);
  *         RecordingCanvas canvas = mRenderNode.beginRecording();
  *         try {
@@ -338,7 +338,7 @@ public final class RenderNode {
      * @see #endRecording()
      * @see #hasDisplayList()
      */
-    public RecordingCanvas beginRecording(int width, int height) {
+    public @NonNull RecordingCanvas beginRecording(int width, int height) {
         if (mCurrentRecordingCanvas != null) {
             throw new IllegalStateException(
                     "Recording currently in progress - missing #endRecording() call?");
@@ -358,7 +358,7 @@ public final class RenderNode {
      * @see #endRecording()
      * @see #hasDisplayList()
      */
-    public RecordingCanvas beginRecording() {
+    public @NonNull RecordingCanvas beginRecording() {
         return beginRecording(nGetWidth(mNativeRenderNode), nGetHeight(mNativeRenderNode));
     }
 
@@ -1285,7 +1285,7 @@ public final class RenderNode {
      * @param position The position rectangle in pixels
      * @return True if the value changed, false if the new value was the same as the previous value.
      */
-    public boolean setPosition(Rect position) {
+    public boolean setPosition(@NonNull Rect position) {
         return nSetLeftTopRightBottom(mNativeRenderNode,
                 position.left, position.top, position.right, position.bottom);
     }

@@ -1870,7 +1870,10 @@ public final class BroadcastQueue {
     // Used by wait-for-broadcast-idle : fast-forward all current deferrals to
     // be immediately deliverable.
     void cancelDeferrals() {
-        mDispatcher.cancelDeferrals();
+        synchronized (mService) {
+            mDispatcher.cancelDeferralsLocked();
+            scheduleBroadcastsLocked();
+        }
     }
 
     String describeState() {

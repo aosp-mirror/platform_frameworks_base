@@ -69,6 +69,11 @@ public final class TestNode$$InspectionCompanion implements InspectionCompanion<
     private int mObjectId;
 
     /**
+     * Property ID of {@code resourceId}.
+     */
+    private int mResourceIdId;
+
+    /**
      * Property ID of {@code short}.
      */
     private int mShortId;
@@ -85,6 +90,7 @@ public final class TestNode$$InspectionCompanion implements InspectionCompanion<
         mIntId = propertyMapper.mapInt("int", R.attr.int);
         mLongId = propertyMapper.mapLong("long", R.attr.long);
         mObjectId = propertyMapper.mapObject("object", R.attr.object);
+        mResourceIdId = propertyMapper.mapResourceId("resourceId", R.attr.resourceId);
         mShortId = propertyMapper.mapShort("short", R.attr.short);
         mPropertiesMapped = true;
     }
@@ -104,6 +110,7 @@ public final class TestNode$$InspectionCompanion implements InspectionCompanion<
         propertyReader.readInt(mIntId, node.getInt());
         propertyReader.readLong(mLongId, node.getLong());
         propertyReader.readObject(mObjectId, node.getObject());
+        propertyReader.readResourceId(mResourceIdId, node.getResourceId());
         propertyReader.readShort(mShortId, node.getShort());
     }
 }

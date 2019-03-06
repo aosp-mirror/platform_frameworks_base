@@ -15,6 +15,8 @@
  */
 package com.android.server.pm;
 
+import static android.content.res.Resources.ID_NULL;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
@@ -454,7 +456,7 @@ public class PackageParserTest {
         pkg.applicationInfo = new ApplicationInfo();
 
         pkg.permissions.add(new PackageParser.Permission(pkg));
-        pkg.permissionGroups.add(new PackageParser.PermissionGroup(pkg));
+        pkg.permissionGroups.add(new PackageParser.PermissionGroup(pkg, ID_NULL, ID_NULL, ID_NULL));
 
         final PackageParser.ParseComponentArgs dummy = new PackageParser.ParseComponentArgs(
                 pkg, new String[1], 0, 0, 0, 0, 0, 0, null, 0, 0, 0);

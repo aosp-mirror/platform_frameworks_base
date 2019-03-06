@@ -226,7 +226,7 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
 
         String percentage = NumberFormat.getPercentInstance().format((double) mLevel / 100.0);
         return PowerUtil.getBatteryRemainingShortStringFormatted(
-                mContext, mEstimate.estimateMillis);
+                mContext, mEstimate.getEstimateMillis());
     }
 
     private void updateEstimateInBackground() {

@@ -21,6 +21,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
+import android.app.AlarmManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -61,6 +62,17 @@ class RollbackTestUtils {
             throw new AssertionError("Failed to get RollbackManager");
         }
         return rm;
+    }
+
+    private static void setTime(long millis) {
+        Context context = InstrumentationRegistry.getContext();
+        AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        am.setTime(millis);
+    }
+
+    static void forwardTimeBy(long offsetMillis) {
+        setTime(System.currentTimeMillis() + offsetMillis);
+        Log.i(TAG, "Forwarded time on device by " + offsetMillis + " millis");
     }
 
     /**

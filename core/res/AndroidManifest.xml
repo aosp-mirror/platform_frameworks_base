@@ -2002,12 +2002,12 @@
 
     <!-- Must be required by a {@link android.telecom.PhoneAccountSuggestionService},
          to ensure that only the system can bind to it.
-         <p>Protection level: signature|privileged
+         <p>Protection level: signature
          @SystemApi
          @hide
     -->
     <permission android:name="android.permission.BIND_PHONE_ACCOUNT_SUGGESTION_SERVICE"
-        android:protectionLevel="signature|privileged" />
+        android:protectionLevel="signature" />
 
     <!-- Must be required by a {@link android.telecom.CallRedirectionService},
          to ensure that only the system can bind to it.
@@ -3137,6 +3137,14 @@
          <p>Protection level: signature
     -->
     <permission android:name="android.permission.BIND_CONTENT_CAPTURE_SERVICE"
+                android:protectionLevel="signature" />
+
+    <!-- Must be required by a android.service.contentsuggestions.ContentSuggestionsService,
+         to ensure that only the system can bind to it.
+         @SystemApi @hide This is not a third-party API (intended for OEMs and system apps).
+         <p>Protection level: signature
+    -->
+    <permission android:name="android.permission.BIND_CONTENT_SUGGESTIONS_SERVICE"
                 android:protectionLevel="signature" />
 
     <!-- Must be required by a android.service.autofill.augmented.AugmentedAutofillService,
@@ -4454,6 +4462,11 @@
     <!-- @SystemApi Allows sensor privacy to be modified.
          @hide -->
     <permission android:name="android.permission.MANAGE_SENSOR_PRIVACY"
+                android:protectionLevel="signature" />
+    <!-- @SystemApi Permission that protects the {@link Intent#ACTION_REVIEW_ACCESSIBILITY_SERVICES}
+         intent.
+         @hide -->
+    <permission android:name="android.permission.REVIEW_ACCESSIBILITY_SERVICES"
                 android:protectionLevel="signature" />
 
     <!-- @SystemApi Allows an activity to replace the app name and icon displayed in share targets

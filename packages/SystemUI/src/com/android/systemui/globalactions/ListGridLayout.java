@@ -62,11 +62,11 @@ public class ListGridLayout extends LinearLayout {
     /**
      * Get the parent view associated with the item which should be placed at the given position.
      */
-    public ViewGroup getParentView(int index, boolean reverseSublists) {
+    public ViewGroup getParentView(int index, boolean reverseSublists, boolean swapRowsAndColumns) {
         if (mRows == 0) {
             return null;
         }
-        int column = getParentViewIndex(index, reverseSublists);
+        int column = getParentViewIndex(index, reverseSublists, swapRowsAndColumns);
         return (ViewGroup) getChildAt(column);
     }
 
@@ -74,13 +74,18 @@ public class ListGridLayout extends LinearLayout {
         return getChildCount() - (index + 1);
     }
 
-    private int getParentViewIndex(int index, boolean reverseSublists) {
-        int column = (int) Math.floor(index / mRows);
-        int columnCount = getChildCount();
-        if (reverseSublists) {
-            column = reverseSublistIndex(column);
+    private int getParentViewIndex(int index, boolean reverseSublists, boolean swapRowsAndColumns) {
+        int sublistIndex;
+        ViewGroup row;
+        if (swapRowsAndColumns) {
+            sublistIndex = (int) Math.floor(index / mRows);
+        } else {
+            sublistIndex = index % mRows;
         }
-        return column;
+        if (reverseSublists) {
+            sublistIndex = reverseSublistIndex(sublistIndex);
+        }
+        return sublistIndex;
     }
 
     /**

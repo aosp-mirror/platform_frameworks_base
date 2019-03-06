@@ -36,6 +36,7 @@ java_library {
 android_app {
     name: "NetworkStack",
     sdk_version: "system_current",
+    min_sdk_version: "28",
     certificate: "networkstack",
     privileged: true,
     static_libs: [

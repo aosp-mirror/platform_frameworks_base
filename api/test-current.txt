@@ -523,6 +523,7 @@ package android.app.role {
     method @RequiresPermission("android.permission.MANAGE_ROLE_HOLDERS") public void removeRoleHolderAsUser(@NonNull String, @NonNull String, int, @NonNull android.os.UserHandle, @NonNull java.util.concurrent.Executor, @NonNull android.app.role.RoleManagerCallback);
     method @RequiresPermission("com.android.permissioncontroller.permission.MANAGE_ROLES_FROM_CONTROLLER") public boolean removeRoleHolderFromController(@NonNull String, @NonNull String);
     method @RequiresPermission("com.android.permissioncontroller.permission.MANAGE_ROLES_FROM_CONTROLLER") public void setRoleNamesFromController(@NonNull java.util.List<java.lang.String>);
+    field public static final int MANAGE_HOLDERS_FLAG_DONT_KILL_APP = 1; // 0x1
   }
 
   public interface RoleManagerCallback {
@@ -2353,10 +2354,6 @@ package android.telecom {
     method public android.telecom.Connection getPrimaryConnection();
   }
 
-  public final class PhoneAccountSuggestion implements android.os.Parcelable {
-    ctor public PhoneAccountSuggestion(@NonNull android.telecom.PhoneAccountHandle, int, boolean);
-  }
-
   public class PhoneAccountSuggestionService extends android.app.Service {
     ctor public PhoneAccountSuggestionService();
     method public void onAccountSuggestionRequest(@NonNull String);
@@ -2845,7 +2842,7 @@ package android.view {
     field public static final int ACCESSIBILITY_TITLE_CHANGED = 33554432; // 0x2000000
     field public static final int PRIVATE_FLAG_NO_MOVE_ANIMATION = 64; // 0x40
     field public CharSequence accessibilityTitle;
-    field @android.view.ViewDebug.ExportedProperty(flagMapping={@android.view.ViewDebug.FlagToString(mask=0x1, equals=0x1, name="FAKE_HARDWARE_ACCELERATED"), @android.view.ViewDebug.FlagToString(mask=0x2, equals=0x2, name="FORCE_HARDWARE_ACCELERATED"), @android.view.ViewDebug.FlagToString(mask=0x4, equals=0x4, name="WANTS_OFFSET_NOTIFICATIONS"), @android.view.ViewDebug.FlagToString(mask=0x10, equals=0x10, name="SHOW_FOR_ALL_USERS"), @android.view.ViewDebug.FlagToString(mask=android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION, equals=android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION, name="NO_MOVE_ANIMATION"), @android.view.ViewDebug.FlagToString(mask=0x80, equals=0x80, name="COMPATIBLE_WINDOW"), @android.view.ViewDebug.FlagToString(mask=0x100, equals=0x100, name="SYSTEM_ERROR"), @android.view.ViewDebug.FlagToString(mask=0x200, equals=0x200, name="INHERIT_TRANSLUCENT_DECOR"), @android.view.ViewDebug.FlagToString(mask=0x400, equals=0x400, name="KEYGUARD"), @android.view.ViewDebug.FlagToString(mask=0x800, equals=0x800, name="DISABLE_WALLPAPER_TOUCH_EVENTS"), @android.view.ViewDebug.FlagToString(mask=0x1000, equals=0x1000, name="FORCE_STATUS_BAR_VISIBLE_TRANSPARENT"), @android.view.ViewDebug.FlagToString(mask=0x2000, equals=0x2000, name="PRESERVE_GEOMETRY"), @android.view.ViewDebug.FlagToString(mask=0x4000, equals=0x4000, name="FORCE_DECOR_VIEW_VISIBILITY"), @android.view.ViewDebug.FlagToString(mask=0x8000, equals=0x8000, name="WILL_NOT_REPLACE_ON_RELAUNCH"), @android.view.ViewDebug.FlagToString(mask=0x10000, equals=0x10000, name="LAYOUT_CHILD_WINDOW_IN_PARENT_FRAME"), @android.view.ViewDebug.FlagToString(mask=0x20000, equals=0x20000, name="FORCE_DRAW_STATUS_BAR_BACKGROUND"), @android.view.ViewDebug.FlagToString(mask=0x40000, equals=0x40000, name="SUSTAINED_PERFORMANCE_MODE"), @android.view.ViewDebug.FlagToString(mask=0x80000, equals=0x80000, name="HIDE_NON_SYSTEM_OVERLAY_WINDOWS"), @android.view.ViewDebug.FlagToString(mask=0x100000, equals=0x100000, name="IS_ROUNDED_CORNERS_OVERLAY"), @android.view.ViewDebug.FlagToString(mask=0x400000, equals=0x400000, name="IS_SCREEN_DECOR"), @android.view.ViewDebug.FlagToString(mask=0x800000, equals=0x800000, name="STATUS_FORCE_SHOW_NAVIGATION")}) public int privateFlags;
+    field @android.view.ViewDebug.ExportedProperty(flagMapping={@android.view.ViewDebug.FlagToString(mask=0x1, equals=0x1, name="FAKE_HARDWARE_ACCELERATED"), @android.view.ViewDebug.FlagToString(mask=0x2, equals=0x2, name="FORCE_HARDWARE_ACCELERATED"), @android.view.ViewDebug.FlagToString(mask=0x4, equals=0x4, name="WANTS_OFFSET_NOTIFICATIONS"), @android.view.ViewDebug.FlagToString(mask=0x10, equals=0x10, name="SHOW_FOR_ALL_USERS"), @android.view.ViewDebug.FlagToString(mask=android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION, equals=android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION, name="NO_MOVE_ANIMATION"), @android.view.ViewDebug.FlagToString(mask=0x80, equals=0x80, name="COMPATIBLE_WINDOW"), @android.view.ViewDebug.FlagToString(mask=0x100, equals=0x100, name="SYSTEM_ERROR"), @android.view.ViewDebug.FlagToString(mask=0x200, equals=0x200, name="INHERIT_TRANSLUCENT_DECOR"), @android.view.ViewDebug.FlagToString(mask=0x400, equals=0x400, name="KEYGUARD"), @android.view.ViewDebug.FlagToString(mask=0x800, equals=0x800, name="DISABLE_WALLPAPER_TOUCH_EVENTS"), @android.view.ViewDebug.FlagToString(mask=0x1000, equals=0x1000, name="FORCE_STATUS_BAR_VISIBLE_TRANSPARENT"), @android.view.ViewDebug.FlagToString(mask=0x2000, equals=0x2000, name="PRESERVE_GEOMETRY"), @android.view.ViewDebug.FlagToString(mask=0x4000, equals=0x4000, name="FORCE_DECOR_VIEW_VISIBILITY"), @android.view.ViewDebug.FlagToString(mask=0x8000, equals=0x8000, name="WILL_NOT_REPLACE_ON_RELAUNCH"), @android.view.ViewDebug.FlagToString(mask=0x10000, equals=0x10000, name="LAYOUT_CHILD_WINDOW_IN_PARENT_FRAME"), @android.view.ViewDebug.FlagToString(mask=0x20000, equals=0x20000, name="FORCE_DRAW_STATUS_BAR_BACKGROUND"), @android.view.ViewDebug.FlagToString(mask=0x40000, equals=0x40000, name="SUSTAINED_PERFORMANCE_MODE"), @android.view.ViewDebug.FlagToString(mask=0x80000, equals=0x80000, name="HIDE_NON_SYSTEM_OVERLAY_WINDOWS"), @android.view.ViewDebug.FlagToString(mask=0x100000, equals=0x100000, name="IS_ROUNDED_CORNERS_OVERLAY"), @android.view.ViewDebug.FlagToString(mask=0x400000, equals=0x400000, name="IS_SCREEN_DECOR"), @android.view.ViewDebug.FlagToString(mask=0x800000, equals=0x800000, name="STATUS_FORCE_SHOW_NAVIGATION"), @android.view.ViewDebug.FlagToString(mask=0x1000000, equals=0x1000000, name="COLOR_SPACE_AGNOSTIC")}) public int privateFlags;
   }
 
 }
@@ -3060,6 +3057,7 @@ package android.view.inspector {
     enum_constant public static final android.view.inspector.InspectableProperty.ValueType INT_ENUM;
     enum_constant public static final android.view.inspector.InspectableProperty.ValueType INT_FLAG;
     enum_constant public static final android.view.inspector.InspectableProperty.ValueType NONE;
+    enum_constant public static final android.view.inspector.InspectableProperty.ValueType RESOURCE_ID;
   }
 
 }

@@ -16,6 +16,7 @@
 
 package com.android.dynandroid;
 
+import android.gsi.GsiProgress;
 import android.os.AsyncTask;
 import android.os.DynamicAndroidManager;
 import android.util.Log;
@@ -63,8 +64,6 @@ class InstallationAsyncTask extends AsyncTask<String, Long, Integer> {
     private final InstallStatusListener mListener;
     private DynamicAndroidManager.Session mInstallationSession;
 
-    private long mInstalledSize;
-    private long mReportedInstalledSize;
     private int mResult = NO_RESULT;
 
     private InputStream mStream;
@@ -89,8 +88,40 @@ class InstallationAsyncTask extends AsyncTask<String, Long, Integer> {
         Log.d(TAG, "Start doInBackground(), URL: " + mUrl);
 
         try {
-            // call start in background
-            mInstallationSession = mDynamicAndroid.startInstallation(mSystemSize, mUserdataSize);
+            long installedSize = 0;
+            long reportedInstalledSize = 0;
+
+            long minStepToReport = (mSystemSize + mUserdataSize) / 100;
+
+            // init input stream before calling startInstallation(), which takes 90 seconds.
+            initInputStream();
+
+            Thread thread = new Thread(() -> {
+                mInstallationSession =
+                        mDynamicAndroid.startInstallation(mSystemSize, mUserdataSize);
+            });
+
+
+            thread.start();
+
+            while (thread.isAlive()) {
+                if (isCancelled()) {
+                    boolean aborted = mDynamicAndroid.abort();
+                    Log.d(TAG, "Called DynamicAndroidManager.abort(), result = " + aborted);
+                    return RESULT_OK;
+                }
+
+                GsiProgress progress = mDynamicAndroid.getInstallationProgress();
+                installedSize = progress.bytes_processed;
+
+                if (installedSize > reportedInstalledSize + minStepToReport) {
+                    publishProgress(installedSize);
+                    reportedInstalledSize = installedSize;
+                }
+
+                Thread.sleep(10);
+            }
+
 
             if (mInstallationSession == null) {
                 Log.e(TAG, "Failed to start installation with requested size: "
@@ -99,12 +130,11 @@ class InstallationAsyncTask extends AsyncTask<String, Long, Integer> {
                 return RESULT_ERROR_IO;
             }
 
-            initInputStream();
+            installedSize = mUserdataSize;
 
             byte[] bytes = new byte[READ_BUFFER_SIZE];
 
             int numBytesRead;
-            long minStepToReport = mSystemSize / 100;
 
             Log.d(TAG, "Start installation loop");
             while ((numBytesRead = mStream.read(bytes, 0, READ_BUFFER_SIZE)) != -1) {
@@ -119,11 +149,11 @@ class InstallationAsyncTask extends AsyncTask<String, Long, Integer> {
                     throw new IOException("Failed write() to DynamicAndroid");
                 }
 
-                mInstalledSize += numBytesRead;
+                installedSize += numBytesRead;
 
-                if (mInstalledSize > mReportedInstalledSize + minStepToReport) {
-                    publishProgress(mInstalledSize);
-                    mReportedInstalledSize = mInstalledSize;
+                if (installedSize > reportedInstalledSize + minStepToReport) {
+                    publishProgress(installedSize);
+                    reportedInstalledSize = installedSize;
                 }
             }
 

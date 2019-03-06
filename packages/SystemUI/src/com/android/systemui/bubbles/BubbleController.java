@@ -582,12 +582,9 @@ public class BubbleController implements BubbleExpandedView.OnBubbleBlockedListe
                 int displayRotation) throws RemoteException {}
 
         @Override
-        public void onImeVisibilityChanged(boolean imeVisible, int imeHeight)
-                throws RemoteException {
-            if (mStackView != null) {
-                mStackView.post(() -> {
-                    mStackView.onImeVisibilityChanged(imeVisible, imeHeight);
-                });
+        public void onImeVisibilityChanged(boolean imeVisible, int imeHeight) {
+            if (mStackView != null && mStackView.getBubbleCount() > 0) {
+                mStackView.post(() -> mStackView.onImeVisibilityChanged(imeVisible, imeHeight));
             }
         }
 

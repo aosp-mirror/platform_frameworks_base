@@ -379,6 +379,83 @@ public class RollbackTest {
             // Check that the data has expired after the expiration time (with a buffer of 1 second)
             Thread.sleep(expirationTime / 2);
             assertNull(getUniqueRollbackInfoForPackage(rm.getAvailableRollbacks(), TEST_APP_A));
+
+        } finally {
+            DeviceConfig.setProperty(DeviceConfig.Rollback.BOOT_NAMESPACE,
+                    DeviceConfig.Rollback.ROLLBACK_LIFETIME_IN_MILLIS,
+                    Long.toString(defaultExpirationTime), false /* makeDefault*/);
+            RollbackTestUtils.dropShellPermissionIdentity();
+        }
+    }
+
+    /**
+     * Test that changing time on device does not affect the duration of time that we keep
+     * rollback available
+     */
+    @Test
+    public void testTimeChangeDoesNotAffectLifetime() throws Exception {
+        long expirationTime = TimeUnit.SECONDS.toMillis(30);
+        long defaultExpirationTime = TimeUnit.HOURS.toMillis(48);
+        RollbackManager rm = RollbackTestUtils.getRollbackManager();
+
+        try {
+            RollbackTestUtils.adoptShellPermissionIdentity(
+                    Manifest.permission.INSTALL_PACKAGES,
+                    Manifest.permission.DELETE_PACKAGES,
+                    Manifest.permission.MANAGE_ROLLBACKS,
+                    Manifest.permission.WRITE_DEVICE_CONFIG,
+                    Manifest.permission.SET_TIME);
+
+            DeviceConfig.setProperty(DeviceConfig.Rollback.BOOT_NAMESPACE,
+                    DeviceConfig.Rollback.ROLLBACK_LIFETIME_IN_MILLIS,
+                    Long.toString(expirationTime), false /* makeDefault*/);
+
+            // Pull the new expiration time from DeviceConfig
+            rm.reloadPersistedData();
+
+            // Install app A with rollback enabled
+            RollbackTestUtils.uninstall(TEST_APP_A);
+            RollbackTestUtils.install("RollbackTestAppAv1.apk", false);
+            RollbackTestUtils.install("RollbackTestAppAv2.apk", true);
+            assertEquals(2, RollbackTestUtils.getInstalledVersion(TEST_APP_A));
+
+            Thread.sleep(expirationTime / 2);
+
+            // Install app B with rollback enabled
+            RollbackTestUtils.uninstall(TEST_APP_B);
+            RollbackTestUtils.install("RollbackTestAppBv1.apk", false);
+            RollbackTestUtils.install("RollbackTestAppBv2.apk", true);
+            assertEquals(2, RollbackTestUtils.getInstalledVersion(TEST_APP_B));
+            // 1 second buffer
+            Thread.sleep(1000);
+
+            try {
+                // Change the time
+                RollbackTestUtils.forwardTimeBy(expirationTime);
+
+                // 1 second buffer to allow Rollback Manager to handle time change before loading
+                // persisted data
+                Thread.sleep(1000);
+
+                // Load timestamps from storage
+                rm.reloadPersistedData();
+
+                // Wait until rollback for app A has expired
+                // This will trigger an expiration run that should expire app A but not B
+                Thread.sleep(expirationTime / 2);
+                assertNull(getUniqueRollbackInfoForPackage(rm.getAvailableRollbacks(), TEST_APP_A));
+
+                // Rollback for app B should not be expired
+                RollbackInfo rollback = getUniqueRollbackInfoForPackage(
+                        rm.getAvailableRollbacks(), TEST_APP_B);
+                assertRollbackInfoEquals(TEST_APP_B, 2, 1, rollback);
+
+                // Wait until rollback for app B has expired
+                Thread.sleep(expirationTime / 2);
+                assertNull(getUniqueRollbackInfoForPackage(rm.getAvailableRollbacks(), TEST_APP_B));
+            } finally {
+                RollbackTestUtils.forwardTimeBy(-expirationTime);
+            }
         } finally {
             DeviceConfig.setProperty(DeviceConfig.Rollback.BOOT_NAMESPACE,
                     DeviceConfig.Rollback.ROLLBACK_LIFETIME_IN_MILLIS,

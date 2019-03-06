@@ -90,7 +90,7 @@ public class HardwareUiLayout extends MultiListLayout implements Tunable {
     }
 
     @Override
-    public ViewGroup getParentView(boolean separated, int index, boolean reverse) {
+    public ViewGroup getParentView(boolean separated, int index, int rotation) {
         if (separated) {
             return getSeparatedView();
         } else {

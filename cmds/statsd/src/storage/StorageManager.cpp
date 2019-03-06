@@ -95,8 +95,8 @@ void StorageManager::writeFile(const char* file, const void* buffer, int numByte
     close(fd);
 }
 
-bool StorageManager::writeTrainInfo(int64_t trainVersionCode,
-                                    const std::vector<uint8_t>& experimentIds) {
+bool StorageManager::writeTrainInfo(int64_t trainVersionCode, const std::string& trainName,
+                                    int32_t status, const std::vector<uint8_t>& experimentIds) {
     std::lock_guard<std::mutex> lock(sTrainInfoMutex);
 
     deleteAllFiles(TRAIN_INFO_DIR);
@@ -109,7 +109,34 @@ bool StorageManager::writeTrainInfo(int64_t trainVersionCode,
         return false;
     }
 
-    size_t result = write(fd, experimentIds.data(), experimentIds.size());
+    size_t result;
+
+    // Write # of bytes in trainName to file
+    const size_t trainNameSize = trainName.size();
+    const size_t trainNameSizeByteCount = sizeof(trainNameSize);
+    result = write(fd, (uint8_t*)&trainNameSize, trainNameSizeByteCount);
+    if (result != trainNameSizeByteCount) {
+        VLOG("Failed to write %s", file_name.c_str());
+        return false;
+    }
+
+    // Write trainName to file
+    result = write(fd, trainName.c_str(), trainNameSize);
+    if (result != trainNameSize) {
+        VLOG("Failed to write %s", file_name.c_str());
+        return false;
+    }
+
+    // Write status to file
+    const size_t statusByteCount = sizeof(status);
+    result = write(fd, (uint8_t*)&status, statusByteCount);
+    if (result != statusByteCount) {
+        VLOG("Failed to write %s", file_name.c_str());
+        return false;
+    }
+
+    // Write experimentIds to file
+    result = write(fd, experimentIds.data(), experimentIds.size());
     if (result == experimentIds.size()) {
         VLOG("Successfully wrote %s", file_name.c_str());
     } else {
@@ -150,7 +177,27 @@ bool StorageManager::readTrainInfo(InstallTrainInfo& trainInfo) {
             string str;
             if (android::base::ReadFdToString(fd, &str)) {
                 close(fd);
-                std::copy(str.begin(), str.end(), std::back_inserter(trainInfo.experimentIds));
+
+                auto it = str.begin();
+
+                // Read # of bytes taken by trainName in the file
+                size_t trainNameSize;
+                const size_t trainNameSizeByteCount = sizeof(trainNameSize);
+                std::copy_n(it, trainNameSizeByteCount, &trainNameSize);
+                it += trainNameSizeByteCount;
+
+                // Read trainName
+                std::copy_n(it, trainNameSize, std::back_inserter(trainInfo.trainName));
+                it += trainNameSize;
+
+                // Read status
+                const size_t statusByteCount = sizeof(trainInfo.status);
+                std::copy_n(it, statusByteCount, &trainInfo.status);
+                it += statusByteCount;
+
+                // Read experimentIds
+                std::copy(it, str.end(), std::back_inserter(trainInfo.experimentIds));
+
                 VLOG("Read train info file successful: %s", fullPath.c_str());
                 return true;
             }

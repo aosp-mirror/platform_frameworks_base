@@ -96,6 +96,7 @@ import com.android.systemui.volume.SystemUIInterpolators.LogAccelerateInterpolat
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Helper to show the global actions dialog.  Each item is an {@link Action} that
@@ -1546,33 +1547,40 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             ArrayList<Action> listActions = mAdapter.getListActions(mShouldDisplaySeparatedButton);
             mGlobalActionsLayout.setExpectedListItemCount(listActions.size());
             mGlobalActionsLayout.setExpectedSeparatedItemCount(separatedActions.size());
+            int rotation = RotationUtils.getRotation(mContext);
+
+            boolean reverse = false; // should we add items to parents in the reverse order?
+            if (isGridEnabled(mContext)) {
+                if (rotation == RotationUtils.ROTATION_NONE
+                        || rotation == RotationUtils.ROTATION_SEASCAPE) {
+                    reverse = !reverse; // if we're in portrait or seascape, reverse items
+                }
+                if (TextUtils.getLayoutDirectionFromLocale(Locale.getDefault())
+                        == View.LAYOUT_DIRECTION_RTL) {
+                    reverse = !reverse; // if we're in an RTL language, reverse items (again)
+                }
+            }
 
             for (int i = 0; i < mAdapter.getCount(); i++) {
                 Action action = mAdapter.getItem(i);
                 int separatedIndex = separatedActions.indexOf(action);
                 ViewGroup parent;
                 if (separatedIndex != -1) {
-                    parent = mGlobalActionsLayout.getParentView(true, separatedIndex, false);
+                    parent = mGlobalActionsLayout.getParentView(true, separatedIndex, rotation);
                 } else {
-                    boolean reverse = false;
-
-                    // If we're using the grid layout and we're in seascape, reverse the order
-                    // of sublists to make sure they render in the correct positions,
-                    // since we can't reverse vertical LinearLayouts through the layout xml.
-
-                    if (isGridEnabled(mContext) && RotationUtils.getRotation(mContext)
-                            == RotationUtils.ROTATION_SEASCAPE) {
-                        reverse = true;
-                    }
                     int listIndex = listActions.indexOf(action);
-                    parent = mGlobalActionsLayout.getParentView(false, listIndex, reverse);
+                    parent = mGlobalActionsLayout.getParentView(false, listIndex, rotation);
                 }
                 View v = mAdapter.getView(i, null, parent);
                 final int pos = i;
                 v.setOnClickListener(view -> mClickListener.onClick(this, pos));
                 v.setOnLongClickListener(view ->
                         mLongClickListener.onItemLongClick(null, v, pos, 0));
-                parent.addView(v);
+                if (reverse) {
+                    parent.addView(v, 0); // reverse order of items
+                } else {
+                    parent.addView(v);
+                }
             }
         }
 

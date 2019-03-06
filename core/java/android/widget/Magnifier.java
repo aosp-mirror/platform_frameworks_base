@@ -1116,7 +1116,7 @@ public final class Magnifier {
     /**
      * Builder class for {@link Magnifier} objects.
      */
-    public static class Builder {
+    public static final class Builder {
         private @NonNull View mView;
         private @Px @IntRange(from = 0) int mWidth;
         private @Px @IntRange(from = 0) int mHeight;

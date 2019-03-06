@@ -1210,20 +1210,22 @@ Status StatsService::sendBinaryPushStateChangedAtom(const android::String16& tra
                     (long long)expId);
     }
 
-    vector<uint8_t> buffer;
-    buffer.resize(proto.size());
+    vector<uint8_t> experimentIdsProtoBuffer;
+    experimentIdsProtoBuffer.resize(proto.size());
     size_t pos = 0;
     auto iter = proto.data();
     while (iter.readBuffer() != NULL) {
         size_t toRead = iter.currentToRead();
-        std::memcpy(&(buffer[pos]), iter.readBuffer(), toRead);
+        std::memcpy(&(experimentIdsProtoBuffer[pos]), iter.readBuffer(), toRead);
         pos += toRead;
         iter.rp()->move(toRead);
     }
-    LogEvent event(std::string(String8(trainName).string()), trainVersionCode, requiresStaging,
-                   rollbackEnabled, requiresLowLatencyMonitor, state, buffer, userId);
+
+    std::string trainNameUtf8 = std::string(String8(trainName).string());
+    LogEvent event(trainNameUtf8, trainVersionCode, requiresStaging, rollbackEnabled,
+                   requiresLowLatencyMonitor, state, experimentIdsProtoBuffer, userId);
     mProcessor->OnLogEvent(&event);
-    StorageManager::writeTrainInfo(trainVersionCode, buffer);
+    StorageManager::writeTrainInfo(trainVersionCode, trainNameUtf8, state, experimentIdsProtoBuffer);
     return Status::ok();
 }
 

@@ -82,6 +82,7 @@ public class InspectionCompanionGeneratorTest {
         addProperty("object", "getObject", Property.Type.OBJECT);
         addProperty("color", "getColor", Property.Type.COLOR);
         addProperty("gravity", "getGravity", Property.Type.GRAVITY);
+        addProperty("resourceId", "getResourceId", Property.Type.RESOURCE_ID);
 
         assertGeneratedFileEquals("SimpleProperties");
     }

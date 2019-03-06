@@ -25,6 +25,7 @@ package android {
     field public static final String BIND_AUGMENTED_AUTOFILL_SERVICE = "android.permission.BIND_AUGMENTED_AUTOFILL_SERVICE";
     field @Deprecated public static final String BIND_CONNECTION_SERVICE = "android.permission.BIND_CONNECTION_SERVICE";
     field public static final String BIND_CONTENT_CAPTURE_SERVICE = "android.permission.BIND_CONTENT_CAPTURE_SERVICE";
+    field public static final String BIND_CONTENT_SUGGESTIONS_SERVICE = "android.permission.BIND_CONTENT_SUGGESTIONS_SERVICE";
     field public static final String BIND_DIRECTORY_SEARCH = "android.permission.BIND_DIRECTORY_SEARCH";
     field public static final String BIND_EUICC_SERVICE = "android.permission.BIND_EUICC_SERVICE";
     field public static final String BIND_IMS_SERVICE = "android.permission.BIND_IMS_SERVICE";
@@ -163,6 +164,7 @@ package android {
     field public static final String RESET_PASSWORD = "android.permission.RESET_PASSWORD";
     field public static final String RESTRICTED_VR_ACCESS = "android.permission.RESTRICTED_VR_ACCESS";
     field public static final String RETRIEVE_WINDOW_CONTENT = "android.permission.RETRIEVE_WINDOW_CONTENT";
+    field public static final String REVIEW_ACCESSIBILITY_SERVICES = "android.permission.REVIEW_ACCESSIBILITY_SERVICES";
     field public static final String REVOKE_RUNTIME_PERMISSIONS = "android.permission.REVOKE_RUNTIME_PERMISSIONS";
     field public static final String SCORE_NETWORKS = "android.permission.SCORE_NETWORKS";
     field public static final String SEND_DEVICE_CUSTOMIZATION_READY = "android.permission.SEND_DEVICE_CUSTOMIZATION_READY";
@@ -1413,7 +1415,7 @@ package android.content {
     field public static final String ACTION_PRE_BOOT_COMPLETED = "android.intent.action.PRE_BOOT_COMPLETED";
     field public static final String ACTION_QUERY_PACKAGE_RESTART = "android.intent.action.QUERY_PACKAGE_RESTART";
     field public static final String ACTION_RESOLVE_INSTANT_APP_PACKAGE = "android.intent.action.RESOLVE_INSTANT_APP_PACKAGE";
-    field public static final String ACTION_REVIEW_ACCESSIBILITY_SERVICES = "android.intent.action.REVIEW_ACCESSIBILITY_SERVICES";
+    field @RequiresPermission(android.Manifest.permission.REVIEW_ACCESSIBILITY_SERVICES) public static final String ACTION_REVIEW_ACCESSIBILITY_SERVICES = "android.intent.action.REVIEW_ACCESSIBILITY_SERVICES";
     field @RequiresPermission(android.Manifest.permission.GRANT_RUNTIME_PERMISSIONS) public static final String ACTION_REVIEW_APP_PERMISSION_USAGE = "android.intent.action.REVIEW_APP_PERMISSION_USAGE";
     field public static final String ACTION_REVIEW_PERMISSIONS = "android.intent.action.REVIEW_PERMISSIONS";
     field public static final String ACTION_REVIEW_PERMISSION_USAGE = "android.intent.action.REVIEW_PERMISSION_USAGE";
@@ -1707,9 +1709,9 @@ package android.content.pm {
   }
 
   public class PermissionGroupInfo extends android.content.pm.PackageItemInfo implements android.os.Parcelable {
-    field @StringRes public int backgroundRequestDetailResourceId;
-    field @StringRes public int backgroundRequestResourceId;
-    field @StringRes public int requestDetailResourceId;
+    field @StringRes public final int backgroundRequestDetailResourceId;
+    field @StringRes public final int backgroundRequestResourceId;
+    field @StringRes public final int requestDetailResourceId;
     field @StringRes public int requestRes;
   }
 
@@ -3537,6 +3539,7 @@ package android.media {
   }
 
   public class HwAudioSource {
+    method public boolean isPlaying();
     method public void start();
     method public void stop();
   }
@@ -6763,15 +6766,15 @@ package android.service.textclassifier {
     method public static android.view.textclassifier.TextClassifier getDefaultTextClassifierImplementation(@NonNull android.content.Context);
     method @Deprecated public final android.view.textclassifier.TextClassifier getLocalTextClassifier();
     method @Nullable public final android.os.IBinder onBind(android.content.Intent);
-    method public abstract void onClassifyText(@Nullable android.view.textclassifier.TextClassificationSessionId, @NonNull android.view.textclassifier.TextClassification.Request, @NonNull android.os.CancellationSignal, @NonNull android.service.textclassifier.TextClassifierService.Callback<android.view.textclassifier.TextClassification>);
-    method public void onCreateTextClassificationSession(@NonNull android.view.textclassifier.TextClassificationContext, @NonNull android.view.textclassifier.TextClassificationSessionId);
-    method public void onDestroyTextClassificationSession(@NonNull android.view.textclassifier.TextClassificationSessionId);
-    method public void onDetectLanguage(@Nullable android.view.textclassifier.TextClassificationSessionId, @NonNull android.view.textclassifier.TextLanguage.Request, @NonNull android.os.CancellationSignal, @NonNull android.service.textclassifier.TextClassifierService.Callback<android.view.textclassifier.TextLanguage>);
-    method public abstract void onGenerateLinks(@Nullable android.view.textclassifier.TextClassificationSessionId, @NonNull android.view.textclassifier.TextLinks.Request, @NonNull android.os.CancellationSignal, @NonNull android.service.textclassifier.TextClassifierService.Callback<android.view.textclassifier.TextLinks>);
-    method @Deprecated public void onSelectionEvent(@Nullable android.view.textclassifier.TextClassificationSessionId, @NonNull android.view.textclassifier.SelectionEvent);
-    method public void onSuggestConversationActions(@Nullable android.view.textclassifier.TextClassificationSessionId, @NonNull android.view.textclassifier.ConversationActions.Request, @NonNull android.os.CancellationSignal, @NonNull android.service.textclassifier.TextClassifierService.Callback<android.view.textclassifier.ConversationActions>);
-    method public abstract void onSuggestSelection(@Nullable android.view.textclassifier.TextClassificationSessionId, @NonNull android.view.textclassifier.TextSelection.Request, @NonNull android.os.CancellationSignal, @NonNull android.service.textclassifier.TextClassifierService.Callback<android.view.textclassifier.TextSelection>);
-    method public void onTextClassifierEvent(@Nullable android.view.textclassifier.TextClassificationSessionId, @NonNull android.view.textclassifier.TextClassifierEvent);
+    method @MainThread public abstract void onClassifyText(@Nullable android.view.textclassifier.TextClassificationSessionId, @NonNull android.view.textclassifier.TextClassification.Request, @NonNull android.os.CancellationSignal, @NonNull android.service.textclassifier.TextClassifierService.Callback<android.view.textclassifier.TextClassification>);
+    method @MainThread public void onCreateTextClassificationSession(@NonNull android.view.textclassifier.TextClassificationContext, @NonNull android.view.textclassifier.TextClassificationSessionId);
+    method @MainThread public void onDestroyTextClassificationSession(@NonNull android.view.textclassifier.TextClassificationSessionId);
+    method @MainThread public void onDetectLanguage(@Nullable android.view.textclassifier.TextClassificationSessionId, @NonNull android.view.textclassifier.TextLanguage.Request, @NonNull android.os.CancellationSignal, @NonNull android.service.textclassifier.TextClassifierService.Callback<android.view.textclassifier.TextLanguage>);
+    method @MainThread public abstract void onGenerateLinks(@Nullable android.view.textclassifier.TextClassificationSessionId, @NonNull android.view.textclassifier.TextLinks.Request, @NonNull android.os.CancellationSignal, @NonNull android.service.textclassifier.TextClassifierService.Callback<android.view.textclassifier.TextLinks>);
+    method @Deprecated @MainThread public void onSelectionEvent(@Nullable android.view.textclassifier.TextClassificationSessionId, @NonNull android.view.textclassifier.SelectionEvent);
+    method @MainThread public void onSuggestConversationActions(@Nullable android.view.textclassifier.TextClassificationSessionId, @NonNull android.view.textclassifier.ConversationActions.Request, @NonNull android.os.CancellationSignal, @NonNull android.service.textclassifier.TextClassifierService.Callback<android.view.textclassifier.ConversationActions>);
+    method @MainThread public abstract void onSuggestSelection(@Nullable android.view.textclassifier.TextClassificationSessionId, @NonNull android.view.textclassifier.TextSelection.Request, @NonNull android.os.CancellationSignal, @NonNull android.service.textclassifier.TextClassifierService.Callback<android.view.textclassifier.TextSelection>);
+    method @MainThread public void onTextClassifierEvent(@Nullable android.view.textclassifier.TextClassificationSessionId, @NonNull android.view.textclassifier.TextClassifierEvent);
     field public static final String SERVICE_INTERFACE = "android.service.textclassifier.TextClassifierService";
   }
 
@@ -6996,10 +6999,6 @@ package android.telecom {
 
   public final class PhoneAccount implements android.os.Parcelable {
     field public static final int CAPABILITY_MULTI_USER = 32; // 0x20
-  }
-
-  public final class PhoneAccountSuggestion implements android.os.Parcelable {
-    ctor public PhoneAccountSuggestion(@NonNull android.telecom.PhoneAccountHandle, int, boolean);
   }
 
   public class PhoneAccountSuggestionService extends android.app.Service {
@@ -7616,12 +7615,11 @@ package android.telephony {
   }
 
   public class NetworkRegistrationState implements android.os.Parcelable {
-    ctor public NetworkRegistrationState(int, int, int, int, int, boolean, int[], @Nullable android.telephony.CellIdentity);
-    ctor protected NetworkRegistrationState(android.os.Parcel);
+    ctor public NetworkRegistrationState(int, int, int, int, int, boolean, @NonNull int[], @Nullable android.telephony.CellIdentity);
     method public int describeContents();
     method public int getAccessNetworkTechnology();
-    method public int[] getAvailableServices();
-    method public android.telephony.CellIdentity getCellIdentity();
+    method @NonNull public int[] getAvailableServices();
+    method @Nullable public android.telephony.CellIdentity getCellIdentity();
     method @Nullable public android.telephony.DataSpecificRegistrationStates getDataSpecificStates();
     method public int getDomain();
     method public int getRegState();
@@ -7647,9 +7645,25 @@ package android.telephony {
     field public static final int SERVICE_TYPE_VOICE = 1; // 0x1
   }
 
+  public static class NetworkRegistrationState.Builder {
+    ctor public NetworkRegistrationState.Builder();
+    method @NonNull public android.telephony.NetworkRegistrationState build();
+    method @NonNull public android.telephony.NetworkRegistrationState.Builder setAccessNetworkTechnology(int);
+    method @NonNull public android.telephony.NetworkRegistrationState.Builder setAvailableServices(@NonNull int[]);
+    method @NonNull public android.telephony.NetworkRegistrationState.Builder setCellIdentity(@Nullable android.telephony.CellIdentity);
+    method @NonNull public android.telephony.NetworkRegistrationState.Builder setDomain(int);
+    method @NonNull public android.telephony.NetworkRegistrationState.Builder setEmergencyOnly(boolean);
+    method @NonNull public android.telephony.NetworkRegistrationState.Builder setNrStatus(int);
+    method @NonNull public android.telephony.NetworkRegistrationState.Builder setRegState(int);
+    method @NonNull public android.telephony.NetworkRegistrationState.Builder setRejectCause(int);
+    method @NonNull public android.telephony.NetworkRegistrationState.Builder setRoamingType(int);
+    method @NonNull public android.telephony.NetworkRegistrationState.Builder setTransportType(int);
+  }
+
   public abstract class NetworkService extends android.app.Service {
     ctor public NetworkService();
-    method protected abstract android.telephony.NetworkService.NetworkServiceProvider createNetworkServiceProvider(int);
+    method public android.os.IBinder onBind(android.content.Intent);
+    method @Nullable public abstract android.telephony.NetworkService.NetworkServiceProvider onCreateNetworkServiceProvider(int);
     field public static final String NETWORK_SERVICE_INTERFACE = "android.telephony.NetworkService";
   }
 
@@ -7657,12 +7671,12 @@ package android.telephony {
     ctor public NetworkService.NetworkServiceProvider(int);
     method public abstract void close();
     method public void getNetworkRegistrationState(int, @NonNull android.telephony.NetworkServiceCallback);
-    method public final int getSlotId();
+    method public final int getSlotIndex();
     method public final void notifyNetworkRegistrationStateChanged();
   }
 
   public class NetworkServiceCallback {
-    method public void onGetNetworkRegistrationStateComplete(int, android.telephony.NetworkRegistrationState);
+    method public void onGetNetworkRegistrationStateComplete(int, @Nullable android.telephony.NetworkRegistrationState);
     field public static final int RESULT_ERROR_BUSY = 3; // 0x3
     field public static final int RESULT_ERROR_FAILED = 5; // 0x5
     field public static final int RESULT_ERROR_ILLEGAL_STATE = 4; // 0x4
@@ -7884,7 +7898,7 @@ package android.telephony {
     method public void requestEmbeddedSubscriptionInfoListRefresh(int);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setDefaultDataSubId(int);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setDefaultSmsSubId(int);
-    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setPreferredDataSubscriptionId(int, boolean, @NonNull java.util.concurrent.Executor, java.util.function.Consumer<java.lang.Integer>);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setPreferredDataSubscriptionId(int, boolean, @Nullable java.util.concurrent.Executor, @Nullable java.util.function.Consumer<java.lang.Integer>);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean setSubscriptionEnabled(int, boolean);
     field @NonNull public static final android.net.Uri ADVANCED_CALLING_ENABLED_CONTENT_URI;
     field public static final int PROFILE_CLASS_DEFAULT = -1; // 0xffffffff
@@ -8094,7 +8108,6 @@ package android.telephony.data {
 
   public final class DataCallResponse implements android.os.Parcelable {
     ctor public DataCallResponse(int, int, int, int, int, @Nullable String, @Nullable java.util.List<android.net.LinkAddress>, @Nullable java.util.List<java.net.InetAddress>, @Nullable java.util.List<java.net.InetAddress>, @Nullable java.util.List<java.lang.String>, int);
-    ctor public DataCallResponse(android.os.Parcel);
     method public int describeContents();
     method public int getActive();
     method @NonNull public java.util.List<android.net.LinkAddress> getAddresses();
@@ -8112,19 +8125,19 @@ package android.telephony.data {
   }
 
   public final class DataProfile implements android.os.Parcelable {
-    method public String getApn();
+    method @NonNull public String getApn();
     method public int getAuthType();
     method public int getBearerBitmap();
     method public int getMaxConns();
     method public int getMaxConnsTime();
     method public int getMtu();
-    method public String getPassword();
+    method @Nullable public String getPassword();
     method public int getProfileId();
     method public int getProtocol();
     method public int getRoamingProtocol();
     method public int getSupportedApnTypesBitmap();
     method public int getType();
-    method public String getUserName();
+    method @Nullable public String getUserName();
     method public int getWaitTime();
     method public boolean isEnabled();
     method public boolean isPersistent();
@@ -8136,7 +8149,8 @@ package android.telephony.data {
 
   public abstract class DataService extends android.app.Service {
     ctor public DataService();
-    method public abstract android.telephony.data.DataService.DataServiceProvider createDataServiceProvider(int);
+    method public android.os.IBinder onBind(android.content.Intent);
+    method @Nullable public abstract android.telephony.data.DataService.DataServiceProvider onCreateDataServiceProvider(int);
     field public static final String DATA_SERVICE_INTERFACE = "android.telephony.data.DataService";
     field public static final int REQUEST_REASON_HANDOVER = 3; // 0x3
     field public static final int REQUEST_REASON_NORMAL = 1; // 0x1
@@ -8148,7 +8162,7 @@ package android.telephony.data {
     method public abstract void close();
     method public void deactivateDataCall(int, int, @Nullable android.telephony.data.DataServiceCallback);
     method public void getDataCallList(@NonNull android.telephony.data.DataServiceCallback);
-    method public final int getSlotId();
+    method public final int getSlotIndex();
     method public final void notifyDataCallListChanged(java.util.List<android.telephony.data.DataCallResponse>);
     method public void setDataProfile(@NonNull java.util.List<android.telephony.data.DataProfile>, boolean, @Nullable android.telephony.data.DataServiceCallback);
     method public void setInitialAttachApn(@NonNull android.telephony.data.DataProfile, boolean, @Nullable android.telephony.data.DataServiceCallback);
@@ -8156,12 +8170,12 @@ package android.telephony.data {
   }
 
   public class DataServiceCallback {
-    method public void onDataCallListChanged(java.util.List<android.telephony.data.DataCallResponse>);
+    method public void onDataCallListChanged(@NonNull java.util.List<android.telephony.data.DataCallResponse>);
     method public void onDeactivateDataCallComplete(int);
-    method public void onGetDataCallListComplete(int, java.util.List<android.telephony.data.DataCallResponse>);
+    method public void onGetDataCallListComplete(int, @NonNull java.util.List<android.telephony.data.DataCallResponse>);
     method public void onSetDataProfileComplete(int);
     method public void onSetInitialAttachApnComplete(int);
-    method public void onSetupDataCallComplete(int, android.telephony.data.DataCallResponse);
+    method public void onSetupDataCallComplete(int, @Nullable android.telephony.data.DataCallResponse);
     field public static final int RESULT_ERROR_BUSY = 3; // 0x3
     field public static final int RESULT_ERROR_ILLEGAL_STATE = 4; // 0x4
     field public static final int RESULT_ERROR_INVALID_ARG = 2; // 0x2
@@ -9635,16 +9649,16 @@ package android.webkit {
 
   public final class WebViewDelegate {
     method public void addWebViewAssetPath(android.content.Context);
-    method public void callDrawGlFunction(android.graphics.Canvas, long);
-    method public void callDrawGlFunction(@NonNull android.graphics.Canvas, long, @Nullable Runnable);
-    method public boolean canInvokeDrawGlFunctor(android.view.View);
-    method public void detachDrawGlFunctor(android.view.View, long);
+    method @Deprecated public void callDrawGlFunction(android.graphics.Canvas, long);
+    method @Deprecated public void callDrawGlFunction(@NonNull android.graphics.Canvas, long, @Nullable Runnable);
+    method @Deprecated public boolean canInvokeDrawGlFunctor(android.view.View);
+    method @Deprecated public void detachDrawGlFunctor(android.view.View, long);
     method public void drawWebViewFunctor(@NonNull android.graphics.Canvas, int);
     method public android.app.Application getApplication();
     method public String getDataDirectorySuffix();
     method public String getErrorString(android.content.Context, int);
     method public int getPackageId(android.content.res.Resources, String);
-    method public void invokeDrawGlFunctor(android.view.View, long, boolean);
+    method @Deprecated public void invokeDrawGlFunctor(android.view.View, long, boolean);
     method public boolean isMultiProcessEnabled();
     method public boolean isTraceTagEnabled();
     method public void setOnTraceEnabledChangeListener(android.webkit.WebViewDelegate.OnTraceEnabledChangeListener);

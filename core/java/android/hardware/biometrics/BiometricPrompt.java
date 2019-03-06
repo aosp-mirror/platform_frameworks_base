@@ -204,7 +204,7 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
          * "Cancel" button, but may be also used to show an alternative method for authentication,
          * such as screen that asks for a backup password.
          *
-         * Note that this should not be set if {@link #setAllowDeviceCredential(boolean)
+         * Note that this should not be set if {@link #setDeviceCredentialAllowed(boolean)}(boolean)
          * is set to true.
          *
          * @param text
@@ -245,7 +245,7 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
          *
          * @param requireConfirmation
          */
-        @NonNull public Builder setRequireConfirmation(boolean requireConfirmation) {
+        @NonNull public Builder setConfirmationRequired(boolean requireConfirmation) {
             mBundle.putBoolean(KEY_REQUIRE_CONFIRMATION, requireConfirmation);
             return this;
         }
@@ -261,12 +261,12 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
          * Note that {@link #setNegativeButton(CharSequence, Executor,
          * DialogInterface.OnClickListener)} should not be set if this is set to true.
          *
-         * @param enable When true, the prompt will fall back to ask for the user's device
+         * @param allowed When true, the prompt will fall back to ask for the user's device
          *               credentials (PIN, pattern, or password).
          * @return
          */
-        @NonNull public Builder setAllowDeviceCredential(boolean enable) {
-            mBundle.putBoolean(KEY_ALLOW_DEVICE_CREDENTIAL, enable);
+        @NonNull public Builder setDeviceCredentialAllowed(boolean allowed) {
+            mBundle.putBoolean(KEY_ALLOW_DEVICE_CREDENTIAL, allowed);
             return this;
         }
 

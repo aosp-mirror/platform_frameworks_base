@@ -599,6 +599,8 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                     }
                 }
             }
+
+            mPackageHealthObserver.onBootCompleted();
         });
     }
 

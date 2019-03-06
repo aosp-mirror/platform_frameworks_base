@@ -1176,7 +1176,7 @@ public class LocationManagerService extends ILocationManager.Stub {
 
         @GuardedBy("mLock")
         public boolean isUseableForUserLocked(int userId) {
-            return userId == mCurrentUserId && mUseable;
+            return isCurrentProfileLocked(userId) && mUseable;
         }
 
         @GuardedBy("mLock")

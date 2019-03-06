@@ -487,6 +487,8 @@ class WindowStateAnimator {
             mSurfaceController = new WindowSurfaceController(mSession.mSurfaceSession,
                     attrs.getTitle().toString(), width, height, format, flags, this,
                     windowType, ownerUid);
+            mSurfaceController.setColorSpaceAgnostic((attrs.privateFlags
+                    & WindowManager.LayoutParams.PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC) != 0);
 
             setOffsetPositionForStackResize(false);
             mSurfaceFormat = format;
@@ -1256,6 +1258,13 @@ class WindowStateAnimator {
             return;
         }
         mSurfaceController.setSecure(isSecure);
+    }
+
+    void setColorSpaceAgnosticLocked(boolean agnostic) {
+        if (mSurfaceController == null) {
+            return;
+        }
+        mSurfaceController.setColorSpaceAgnostic(agnostic);
     }
 
     /**

@@ -196,8 +196,10 @@ class Class():
 
             if "implements" in raw:
                 self.implements = raw[raw.index("implements")+1]
+                self.implements_all = [self.implements]
             else:
                 self.implements = None
+                self.implements_all = []
         else:
             raise ValueError("Unknown signature format: " + sig_format)
 
@@ -224,7 +226,7 @@ class Class():
 
 
 class Package():
-    NAME = re.compile("package(?: .*)? ([A-Za-z.]+)")
+    NAME = re.compile("package(?: .*)? ([A-Za-z0-9.]+)")
 
     def __init__(self, line, raw, blame):
         self.line = line
@@ -364,12 +366,12 @@ class V2LineParser(object):
         self.parse_matching_paren("<", ">")
         extends = self.parse_extends()
         clazz.extends = extends[0] if extends else None
-        implements = self.parse_implements()
-        clazz.implements = implements[0] if implements else None
+        clazz.implements_all = self.parse_implements()
         # The checks assume that interfaces are always found in implements, which isn't true for
         # subinterfaces.
-        if not implements and "interface" in clazz.split:
-            clazz.implements = clazz.extends
+        if not clazz.implements_all and "interface" in clazz.split:
+            clazz.implements_all = [clazz.extends]
+        clazz.implements = clazz.implements_all[0] if clazz.implements_all else None
         self.parse_token("{")
         self.parse_eof()
 
@@ -761,6 +763,14 @@ def notice(clazz):
     noticed[clazz.fullname] = hash(clazz)
 
 
+verifiers = {}
+
+def verifier(f):
+    verifiers[f.__name__] = f
+    return f
+
+
+@verifier
 def verify_constants(clazz):
     """All static final constants must be FOO_NAME style."""
     if re.match("android\.R\.[a-z]+", clazz.fullname): return
@@ -778,13 +788,13 @@ def verify_constants(clazz):
             if f.typ in req and f.value is None:
                 error(clazz, f, None, "All constants must be defined at compile time")
 
-
+@verifier
 def verify_enums(clazz):
     """Enums are bad, mmkay?"""
     if clazz.extends == "java.lang.Enum" or "enum" in clazz.split:
         error(clazz, None, "F5", "Enums are not allowed")
 
-
+@verifier
 def verify_class_names(clazz):
     """Try catching malformed class names like myMtp or MTPUser."""
     if clazz.fullname.startswith("android.opengl"): return
@@ -799,6 +809,7 @@ def verify_class_names(clazz):
         error(clazz, None, None, "Don't expose your implementation details")
 
 
+@verifier
 def verify_method_names(clazz):
     """Try catching malformed method names, like Foo() or getMTU()."""
     if clazz.fullname.startswith("android.opengl"): return
@@ -812,9 +823,9 @@ def verify_method_names(clazz):
             error(clazz, m, "S1", "Method name must start with lowercase char")
 
 
+@verifier
 def verify_callbacks(clazz):
     """Verify Callback classes.
-    All callback classes must be abstract.
     All methods must follow onFoo() naming style."""
     if clazz.fullname == "android.speech.tts.SynthesisCallback": return
 
@@ -824,14 +835,12 @@ def verify_callbacks(clazz):
         warn(clazz, None, "L1", "Class should be named FooCallback")
 
     if clazz.name.endswith("Callback"):
-        if "interface" in clazz.split:
-            error(clazz, None, "CL3", "Callbacks must be abstract class to enable extension in future API levels")
-
         for m in clazz.methods:
             if not re.match("on[A-Z][a-z]*", m.name):
                 error(clazz, m, "L1", "Callback method names must be onFoo() style")
 
 
+@verifier
 def verify_listeners(clazz):
     """Verify Listener classes.
     All Listener classes must be interface.
@@ -853,6 +862,7 @@ def verify_listeners(clazz):
                 error(clazz, m, "L1", "Single listener method name must match class name")
 
 
+@verifier
 def verify_actions(clazz):
     """Verify intent actions.
     All action names must be named ACTION_FOO.
@@ -884,6 +894,7 @@ def verify_actions(clazz):
                         error(clazz, f, "C4", "Inconsistent action value; expected '%s'" % (expected))
 
 
+@verifier
 def verify_extras(clazz):
     """Verify intent extras.
     All extra names must be named EXTRA_FOO.
@@ -914,6 +925,7 @@ def verify_extras(clazz):
                         error(clazz, f, "C4", "Inconsistent extra value; expected '%s'" % (expected))
 
 
+@verifier
 def verify_equals(clazz):
     """Verify that equals() and hashCode() must be overridden together."""
     eq = False
@@ -926,6 +938,7 @@ def verify_equals(clazz):
         error(clazz, None, "M8", "Must override both equals and hashCode; missing one")
 
 
+@verifier
 def verify_parcelable(clazz):
     """Verify that Parcelable objects aren't hiding required bits."""
     if clazz.implements == "android.os.Parcelable":
@@ -944,6 +957,7 @@ def verify_parcelable(clazz):
                 error(clazz, c, "FW3", "Parcelable inflation is exposed through CREATOR, not raw constructors")
 
 
+@verifier
 def verify_protected(clazz):
     """Verify that no protected methods or fields are allowed."""
     for m in clazz.methods:
@@ -955,6 +969,7 @@ def verify_protected(clazz):
             error(clazz, f, "M7", "Protected fields not allowed; must be public")
 
 
+@verifier
 def verify_fields(clazz):
     """Verify that all exposed fields are final.
     Exposed fields must follow myName style.
@@ -1000,6 +1015,7 @@ def verify_fields(clazz):
                 error(clazz, f, "C2", "Constants must be marked static final")
 
 
+@verifier
 def verify_register(clazz):
     """Verify parity of registration methods.
     Callback objects use register/unregister methods.
@@ -1033,6 +1049,7 @@ def verify_register(clazz):
                 error(clazz, m, "L3", "Listener methods should be named add/remove")
 
 
+@verifier
 def verify_sync(clazz):
     """Verify synchronized methods aren't exposed."""
     for m in clazz.methods:
@@ -1040,6 +1057,7 @@ def verify_sync(clazz):
             error(clazz, m, "M5", "Internal locks must not be exposed")
 
 
+@verifier
 def verify_intent_builder(clazz):
     """Verify that Intent builders are createFooIntent() style."""
     if clazz.name == "Intent": return
@@ -1052,6 +1070,7 @@ def verify_intent_builder(clazz):
                 warn(clazz, m, "FW1", "Methods creating an Intent should be named createFooIntent()")
 
 
+@verifier
 def verify_helper_classes(clazz):
     """Verify that helper classes are named consistently with what they extend.
     All developer extendable methods should be named onFoo()."""
@@ -1100,6 +1119,7 @@ def verify_helper_classes(clazz):
                     warn(clazz, m, None, "If implemented by developer, should be named onFoo(); otherwise consider marking final")
 
 
+@verifier
 def verify_builder(clazz):
     """Verify builder classes.
     Methods should return the builder to enable chaining."""
@@ -1132,12 +1152,14 @@ def verify_builder(clazz):
         error(clazz, None, None, "Builder should be final")
 
 
+@verifier
 def verify_aidl(clazz):
     """Catch people exposing raw AIDL."""
     if clazz.extends == "android.os.Binder" or clazz.implements == "android.os.IInterface":
         error(clazz, None, None, "Raw AIDL interfaces must not be exposed")
 
 
+@verifier
 def verify_internal(clazz):
     """Catch people exposing internal classes."""
     if clazz.pkg.name.startswith("com.android"):
@@ -1172,6 +1194,7 @@ LAYERING_PACKAGE_RANKING = layering_build_ranking([
     "android.util"
 ])
 
+@verifier
 def verify_layering(clazz):
     """Catch package layering violations.
     For example, something in android.os depending on android.app."""
@@ -1206,6 +1229,7 @@ def verify_layering(clazz):
                 warn(clazz, m, "FW6", "Method argument type violates package layering")
 
 
+@verifier
 def verify_boolean(clazz):
     """Verifies that boolean accessors are named correctly.
     For example, hasFoo() and setHasFoo()."""
@@ -1246,9 +1270,11 @@ def verify_boolean(clazz):
                 error_if_exists(sets, m.name, expected, "has" + target)
 
 
+@verifier
 def verify_collections(clazz):
     """Verifies that collection types are interfaces."""
     if clazz.fullname == "android.os.Bundle": return
+    if clazz.fullname == "android.os.Parcel": return
 
     bad = ["java.util.Vector", "java.util.LinkedList", "java.util.ArrayList", "java.util.Stack",
            "java.util.HashMap", "java.util.HashSet", "android.util.ArraySet", "android.util.ArrayMap"]
@@ -1260,6 +1286,23 @@ def verify_collections(clazz):
                 error(clazz, m, "CL2", "Argument is concrete collection; must be higher-level interface")
 
 
+@verifier
+def verify_uris(clazz):
+    bad = ["java.net.URL", "java.net.URI", "android.net.URL"]
+
+    for f in clazz.fields:
+        if f.typ in bad:
+            error(clazz, f, None, "Field must be android.net.Uri instead of " + f.typ)
+
+    for m in clazz.methods + clazz.ctors:
+        if m.typ in bad:
+            error(clazz, m, None, "Must return android.net.Uri instead of " + m.typ)
+        for arg in m.args:
+            if arg in bad:
+                error(clazz, m, None, "Argument must take android.net.Uri instead of " + arg)
+
+
+@verifier
 def verify_flags(clazz):
     """Verifies that flags are non-overlapping."""
     known = collections.defaultdict(int)
@@ -1276,6 +1319,7 @@ def verify_flags(clazz):
             known[scope] |= val
 
 
+@verifier
 def verify_exception(clazz):
     """Verifies that methods don't throw generic exceptions."""
     for m in clazz.methods:
@@ -1284,17 +1328,19 @@ def verify_exception(clazz):
                 error(clazz, m, "S1", "Methods must not throw generic exceptions")
 
             if t in ["android.os.RemoteException"]:
-                if clazz.name == "android.content.ContentProviderClient": continue
-                if clazz.name == "android.os.Binder": continue
-                if clazz.name == "android.os.IBinder": continue
+                if clazz.fullname == "android.content.ContentProviderClient": continue
+                if clazz.fullname == "android.os.Binder": continue
+                if clazz.fullname == "android.os.IBinder": continue
 
                 error(clazz, m, "FW9", "Methods calling into system server should rethrow RemoteException as RuntimeException")
 
             if len(m.args) == 0 and t in ["java.lang.IllegalArgumentException", "java.lang.NullPointerException"]:
                 warn(clazz, m, "S1", "Methods taking no arguments should throw IllegalStateException")
 
+
 GOOGLE_IGNORECASE = re.compile("google", re.IGNORECASE)
 
+# Not marked as @verifier, because it is only conditionally applied.
 def verify_google(clazz):
     """Verifies that APIs never reference Google."""
 
@@ -1307,6 +1353,7 @@ def verify_google(clazz):
                 error(clazz, t, None, "Must never reference Google")
 
 
+@verifier
 def verify_bitset(clazz):
     """Verifies that we avoid using heavy BitSet."""
 
@@ -1322,6 +1369,7 @@ def verify_bitset(clazz):
                 error(clazz, m, None, "Argument type must not be heavy BitSet")
 
 
+@verifier
 def verify_manager(clazz):
     """Verifies that FooManager is only obtained from Context."""
 
@@ -1335,6 +1383,7 @@ def verify_manager(clazz):
             error(clazz, m, None, "Managers must always be obtained from Context")
 
 
+@verifier
 def verify_boxed(clazz):
     """Verifies that methods avoid boxed primitives."""
 
@@ -1357,6 +1406,7 @@ def verify_boxed(clazz):
                 error(clazz, m, "M11", "Must avoid boxed primitives")
 
 
+@verifier
 def verify_static_utils(clazz):
     """Verifies that helper classes can't be constructed."""
     if clazz.fullname.startswith("android.opengl"): return
@@ -1376,6 +1426,7 @@ def verify_static_utils(clazz):
         error(clazz, None, None, "Fully-static utility classes must not have constructor")
 
 
+# @verifier  # Disabled for now
 def verify_overload_args(clazz):
     """Verifies that method overloads add new arguments at the end."""
     if clazz.fullname.startswith("android.opengl"): return
@@ -1416,6 +1467,7 @@ def verify_overload_args(clazz):
                 error(clazz, m, "M2", "Expected consistent argument ordering between overloads: %s..." % (", ".join(locked_sig)))
 
 
+@verifier
 def verify_callback_handlers(clazz):
     """Verifies that methods adding listener/callback have overload
     for specifying delivery thread."""
@@ -1467,6 +1519,7 @@ def verify_callback_handlers(clazz):
             warn(clazz, f, "L1", "Registration methods should have overload that accepts delivery Executor")
 
 
+@verifier
 def verify_context_first(clazz):
     """Verifies that methods accepting a Context keep it the first argument."""
     examine = clazz.ctors + clazz.methods
@@ -1479,6 +1532,7 @@ def verify_context_first(clazz):
                 error(clazz, m, "M3", "ContentResolver is distinct, so it must be the first argument")
 
 
+@verifier
 def verify_listener_last(clazz):
     """Verifies that methods accepting a Listener or Callback keep them as last arguments."""
     examine = clazz.ctors + clazz.methods
@@ -1492,6 +1546,7 @@ def verify_listener_last(clazz):
                 warn(clazz, m, "M3", "Listeners should always be at end of argument list")
 
 
+@verifier
 def verify_resource_names(clazz):
     """Verifies that resource names have consistent case."""
     if not re.match("android\.R\.[a-z]+", clazz.fullname): return
@@ -1523,6 +1578,7 @@ def verify_resource_names(clazz):
             error(clazz, f, "C7", "Expected resource name in this class to be FooBar_Baz style")
 
 
+@verifier
 def verify_files(clazz):
     """Verifies that methods accepting File also accept streams."""
 
@@ -1544,6 +1600,7 @@ def verify_files(clazz):
             warn(clazz, m, "M10", "Methods accepting File should also accept FileDescriptor or streams")
 
 
+@verifier
 def verify_manager_list(clazz):
     """Verifies that managers return List<? extends Parcelable> instead of arrays."""
 
@@ -1554,6 +1611,7 @@ def verify_manager_list(clazz):
             warn(clazz, m, None, "Methods should return List<? extends Parcelable> instead of Parcelable[] to support ParceledListSlice under the hood")
 
 
+@verifier
 def verify_abstract_inner(clazz):
     """Verifies that abstract inner classes are static."""
 
@@ -1562,6 +1620,7 @@ def verify_abstract_inner(clazz):
             warn(clazz, None, None, "Abstract inner classes should be static to improve testability")
 
 
+@verifier
 def verify_runtime_exceptions(clazz):
     """Verifies that runtime exceptions aren't listed in throws."""
 
@@ -1606,6 +1665,7 @@ def verify_runtime_exceptions(clazz):
                 error(clazz, m, None, "Methods must not mention RuntimeException subclasses in throws clauses")
 
 
+@verifier
 def verify_error(clazz):
     """Verifies that we always use Exception instead of Error."""
     if not clazz.extends: return
@@ -1615,6 +1675,7 @@ def verify_error(clazz):
         error(clazz, None, None, "Exceptions must be named FooException")
 
 
+@verifier
 def verify_units(clazz):
     """Verifies that we use consistent naming for units."""
 
@@ -1651,10 +1712,11 @@ def verify_units(clazz):
             error(clazz, m, None, "Percentage must use ints")
 
 
+@verifier
 def verify_closable(clazz):
     """Verifies that classes are AutoClosable."""
-    if clazz.implements == "java.lang.AutoCloseable": return
-    if clazz.implements == "java.io.Closeable": return
+    if "java.lang.AutoCloseable" in clazz.implements_all: return
+    if "java.io.Closeable" in clazz.implements_all: return
 
     for m in clazz.methods:
         if len(m.args) > 0: continue
@@ -1663,6 +1725,7 @@ def verify_closable(clazz):
             return
 
 
+@verifier
 def verify_member_name_not_kotlin_keyword(clazz):
     """Prevent method names which are keywords in Kotlin."""
 
@@ -1688,6 +1751,7 @@ def verify_member_name_not_kotlin_keyword(clazz):
             error(clazz, f, None, "Field name must not be a Kotlin keyword")
 
 
+@verifier
 def verify_method_name_not_kotlin_operator(clazz):
     """Warn about method names which become operators in Kotlin."""
 
@@ -1737,6 +1801,7 @@ def verify_method_name_not_kotlin_operator(clazz):
             unique_binary_op(m, m.name[:-6])  # Remove 'Assign' suffix
 
 
+@verifier
 def verify_collections_over_arrays(clazz):
     """Warn that [] should be Collections."""
 
@@ -1752,6 +1817,7 @@ def verify_collections_over_arrays(clazz):
                 warn(clazz, m, None, "Method argument should be Collection<> (or subclass) instead of raw array")
 
 
+@verifier
 def verify_user_handle(clazz):
     """Methods taking UserHandle should be ForUser or AsUser."""
     if clazz.name.endswith("Listener") or clazz.name.endswith("Callback") or clazz.name.endswith("Callbacks"): return
@@ -1776,6 +1842,7 @@ def verify_user_handle(clazz):
                  "or 'queryFooForUser'")
 
 
+@verifier
 def verify_params(clazz):
     """Parameter classes should be 'Params'."""
     if clazz.name.endswith("Params"): return
@@ -1791,6 +1858,7 @@ def verify_params(clazz):
             error(clazz, None, None, "Classes holding a set of parameters should be called 'FooParams'")
 
 
+@verifier
 def verify_services(clazz):
     """Service name should be FOO_BAR_SERVICE = 'foo_bar'."""
     if clazz.fullname != "android.content.Context": return
@@ -1804,6 +1872,7 @@ def verify_services(clazz):
                 error(clazz, f, "C4", "Inconsistent service value; expected '%s'" % (expected))
 
 
+@verifier
 def verify_tense(clazz):
     """Verify tenses of method names."""
     if clazz.fullname.startswith("android.opengl"): return
@@ -1813,6 +1882,7 @@ def verify_tense(clazz):
             warn(clazz, m, None, "Unexpected tense; probably meant 'enabled'")
 
 
+@verifier
 def verify_icu(clazz):
     """Verifies that richer ICU replacements are used."""
     better = {
@@ -1844,6 +1914,7 @@ def verify_icu(clazz):
                 warn(clazz, m, None, "Type %s should be replaced with richer ICU type %s" % (arg, better[arg]))
 
 
+@verifier
 def verify_clone(clazz):
     """Verify that clone() isn't implemented; see EJ page 61."""
     for m in clazz.methods:
@@ -1851,8 +1922,12 @@ def verify_clone(clazz):
             error(clazz, m, None, "Provide an explicit copy constructor instead of implementing clone()")
 
 
+@verifier
 def verify_pfd(clazz):
     """Verify that android APIs use PFD over FD."""
+    if clazz.fullname == "android.os.FileUtils" or clazz.fullname == "android.system.Os":
+        return
+
     examine = clazz.ctors + clazz.methods
     for m in examine:
         if m.typ == "java.io.FileDescriptor":
@@ -1869,6 +1944,7 @@ def verify_pfd(clazz):
             error(clazz, f, "FW11", "Must use ParcelFileDescriptor")
 
 
+@verifier
 def verify_numbers(clazz):
     """Discourage small numbers types like short and byte."""
 
@@ -1890,8 +1966,10 @@ def verify_numbers(clazz):
             if arg in discouraged:
                 warn(clazz, m, "FW12", "Should avoid odd sized primitives; use int instead")
 
+
 PRIMITIVES = {"void", "int", "float", "boolean", "short", "char", "byte", "long", "double"}
 
+@verifier
 def verify_nullability(clazz):
     """Catches missing nullability annotations"""
 
@@ -1920,6 +1998,8 @@ def verify_nullability_args(clazz, m):
 def has_nullability(annotations):
     return "@NonNull" in annotations or "@Nullable" in annotations
 
+
+@verifier
 def verify_singleton(clazz):
     """Catch singleton objects with constructors."""
 
@@ -1954,60 +2034,10 @@ def examine_clazz(clazz):
 
     if not is_interesting(clazz): return
 
-    verify_constants(clazz)
-    verify_enums(clazz)
-    verify_class_names(clazz)
-    verify_method_names(clazz)
-    verify_callbacks(clazz)
-    verify_listeners(clazz)
-    verify_actions(clazz)
-    verify_extras(clazz)
-    verify_equals(clazz)
-    verify_parcelable(clazz)
-    verify_protected(clazz)
-    verify_fields(clazz)
-    verify_register(clazz)
-    verify_sync(clazz)
-    verify_intent_builder(clazz)
-    verify_helper_classes(clazz)
-    verify_builder(clazz)
-    verify_aidl(clazz)
-    verify_internal(clazz)
-    verify_layering(clazz)
-    verify_boolean(clazz)
-    verify_collections(clazz)
-    verify_flags(clazz)
-    verify_exception(clazz)
+    for v in verifiers.itervalues():
+        v(clazz)
+
     if not ALLOW_GOOGLE: verify_google(clazz)
-    verify_bitset(clazz)
-    verify_manager(clazz)
-    verify_boxed(clazz)
-    verify_static_utils(clazz)
-    # verify_overload_args(clazz)
-    verify_callback_handlers(clazz)
-    verify_context_first(clazz)
-    verify_listener_last(clazz)
-    verify_resource_names(clazz)
-    verify_files(clazz)
-    verify_manager_list(clazz)
-    verify_abstract_inner(clazz)
-    verify_runtime_exceptions(clazz)
-    verify_error(clazz)
-    verify_units(clazz)
-    verify_closable(clazz)
-    verify_member_name_not_kotlin_keyword(clazz)
-    verify_method_name_not_kotlin_operator(clazz)
-    verify_collections_over_arrays(clazz)
-    verify_user_handle(clazz)
-    verify_params(clazz)
-    verify_services(clazz)
-    verify_tense(clazz)
-    verify_icu(clazz)
-    verify_clone(clazz)
-    verify_pfd(clazz)
-    verify_numbers(clazz)
-    verify_singleton(clazz)
-    verify_nullability(clazz)
 
 
 def examine_stream(stream, base_stream=None, in_classes_with_base=[], out_classes_with_base=None):

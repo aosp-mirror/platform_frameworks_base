@@ -72,7 +72,7 @@ public final class AudioPlaybackCaptureConfiguration {
      *
      * @param audioFormat The format in which to capture the audio.
      */
-    AudioMix createAudioMix(AudioFormat audioFormat) {
+    @NonNull AudioMix createAudioMix(@NonNull AudioFormat audioFormat) {
         return new AudioMix.Builder(mAudioMixingRule)
                 .setFormat(audioFormat)
                 .setRouteFlags(AudioMix.ROUTE_FLAG_LOOP_BACK | AudioMix.ROUTE_FLAG_RENDER)
@@ -123,7 +123,7 @@ public final class AudioPlaybackCaptureConfiguration {
          * @throws IllegalStateException if called in conjunction with
          *     {@link #excludeUsage(AudioAttributes)}.
          */
-        public Builder addMatchingUsage(@NonNull AudioAttributes audioAttributes) {
+        public @NonNull Builder addMatchingUsage(@NonNull AudioAttributes audioAttributes) {
             Preconditions.checkNotNull(audioAttributes);
             Preconditions.checkState(
                     mUsageMatchType != MATCH_TYPE_EXCLUSIVE, ERROR_MESSAGE_MISMATCHED_RULES);
@@ -141,7 +141,7 @@ public final class AudioPlaybackCaptureConfiguration {
          *
          * @throws IllegalStateException if called in conjunction with {@link #excludeUid(int)}.
          */
-        public Builder addMatchingUid(int uid) {
+        public @NonNull Builder addMatchingUid(int uid) {
             Preconditions.checkState(
                     mUidMatchType != MATCH_TYPE_EXCLUSIVE, ERROR_MESSAGE_MISMATCHED_RULES);
             mAudioMixingRuleBuilder.addMixRule(AudioMixingRule.RULE_MATCH_UID, uid);
@@ -158,7 +158,7 @@ public final class AudioPlaybackCaptureConfiguration {
          * @throws IllegalStateException if called in conjunction with
          *     {@link #addMatchingUsage(AudioAttributes)}.
          */
-        public Builder excludeUsage(@NonNull AudioAttributes audioAttributes) {
+        public @NonNull Builder excludeUsage(@NonNull AudioAttributes audioAttributes) {
             Preconditions.checkNotNull(audioAttributes);
             Preconditions.checkState(
                     mUsageMatchType != MATCH_TYPE_INCLUSIVE, ERROR_MESSAGE_MISMATCHED_RULES);
@@ -176,7 +176,7 @@ public final class AudioPlaybackCaptureConfiguration {
          *
          * @throws IllegalStateException if called in conjunction with {@link #addMatchingUid(int)}.
          */
-        public Builder excludeUid(int uid) {
+        public @NonNull Builder excludeUid(int uid) {
             Preconditions.checkState(
                     mUidMatchType != MATCH_TYPE_INCLUSIVE, ERROR_MESSAGE_MISMATCHED_RULES);
             mAudioMixingRuleBuilder.excludeMixRule(AudioMixingRule.RULE_MATCH_UID, uid);
@@ -189,7 +189,7 @@ public final class AudioPlaybackCaptureConfiguration {
          *
          * @throws UnsupportedOperationException if the parameters set are incompatible.
          */
-        public AudioPlaybackCaptureConfiguration build() {
+        public @NonNull AudioPlaybackCaptureConfiguration build() {
             return new AudioPlaybackCaptureConfiguration(mAudioMixingRuleBuilder.build(),
                                                          mProjection);
         }
