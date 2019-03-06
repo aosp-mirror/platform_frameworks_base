@@ -492,7 +492,6 @@ final class ActivityManagerShellCommand extends ShellCommand {
             final long endTime = SystemClock.uptimeMillis();
             PrintWriter out = mWaitOption ? pw : getErrPrintWriter();
             boolean launched = false;
-            boolean hotLaunch = false;
             switch (res) {
                 case ActivityManager.START_SUCCESS:
                     launched = true;
@@ -518,8 +517,6 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     break;
                 case ActivityManager.START_TASK_TO_FRONT:
                     launched = true;
-                    //TODO(b/120981435) remove special case
-                    hotLaunch = true;
                     out.println(
                             "Warning: Activity not started, its current "
                                     + "task has been brought to the front");
@@ -567,9 +564,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     result.who = intent.getComponent();
                 }
                 pw.println("Status: " + (result.timeout ? "timeout" : "ok"));
-                final @WaitResult.LaunchState int launchState =
-                        hotLaunch ? WaitResult.LAUNCH_STATE_HOT : result.launchState;
-                pw.println("LaunchState: " + launchStateToString(launchState));
+                pw.println("LaunchState: " + launchStateToString(result.launchState));
                 if (result.who != null) {
                     pw.println("Activity: " + result.who.flattenToShortString());
                 }
