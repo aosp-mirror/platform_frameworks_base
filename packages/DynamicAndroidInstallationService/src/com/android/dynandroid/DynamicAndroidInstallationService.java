@@ -278,9 +278,14 @@ public class DynamicAndroidInstallationService extends Service
         }
 
         if (!mInstallTask.commit()) {
-            // TODO: b/123673280 better UI response
             Log.e(TAG, "Failed to commit installation because of native runtime error.");
             mNM.cancel(NOTIFICATION_ID);
+
+            Toast.makeText(this,
+                    getString(R.string.toast_failed_to_reboot_to_dynandroid),
+                    Toast.LENGTH_LONG).show();
+
+            mDynAndroid.remove();
 
             return;
         }
