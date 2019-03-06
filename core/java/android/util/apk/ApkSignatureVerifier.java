@@ -397,15 +397,18 @@ public class ApkSignatureVerifier {
     /**
      * @return the verity root hash in the Signing Block.
      */
-    public static byte[] getVerityRootHash(String apkPath)
-            throws IOException, SignatureNotFoundException, SecurityException {
+    public static byte[] getVerityRootHash(String apkPath) throws IOException, SecurityException {
         // first try v3
         try {
             return ApkSignatureSchemeV3Verifier.getVerityRootHash(apkPath);
         } catch (SignatureNotFoundException e) {
             // try older version
         }
-        return ApkSignatureSchemeV2Verifier.getVerityRootHash(apkPath);
+        try {
+            return ApkSignatureSchemeV2Verifier.getVerityRootHash(apkPath);
+        } catch (SignatureNotFoundException e) {
+            return null;
+        }
     }
 
     /**
