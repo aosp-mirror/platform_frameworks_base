@@ -39,6 +39,7 @@ import java.util.Calendar;
  */
 public class DozeUi implements DozeMachine.Part {
 
+    private static final String TAG = "DozeUi";
     private static final long TIME_TICK_DEADLINE_MILLIS = 90 * 1000; // 1.5min
     private final Context mContext;
     private final DozeHost mHost;
@@ -93,6 +94,10 @@ public class DozeUi implements DozeMachine.Part {
                 new DozeHost.PulseCallback() {
                     @Override
                     public void onPulseStarted() {
+                        if (mMachine.getState() != DozeMachine.State.DOZE_REQUEST_PULSE) {
+                            Log.w(TAG, "Pulse was cancelled before it could have been started");
+                            return;
+                        }
                         mMachine.requestState(DozeMachine.State.DOZE_PULSING);
                     }
 
