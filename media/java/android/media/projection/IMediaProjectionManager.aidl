@@ -24,6 +24,7 @@ import android.os.IBinder;
 
 /** {@hide} */
 interface IMediaProjectionManager {
+    @UnsupportedAppUsage
     boolean hasProjectionPermission(int uid, String packageName);
     IMediaProjection createProjection(int uid, String packageName, int type,
             boolean permanentGrant);
