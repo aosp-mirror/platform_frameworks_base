@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 The Android Open Source Project
+ * Copyright (C) 2019 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,12 @@
  * limitations under the License.
  */
 
-package android.rolecontrollerservice;
+package android.app.role;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.app.Service;
-import android.app.role.IRoleManagerCallback;
-import android.app.role.RoleManager;
-import android.app.role.RoleManagerCallback;
 import android.content.Intent;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -48,17 +45,21 @@ public abstract class RoleControllerService extends Service {
     private static final String LOG_TAG = RoleControllerService.class.getSimpleName();
 
     /**
-     * The {@link Intent} that must be declared as handled by the service. The service should also
-     * require the {@link android.Manifest.permission#BIND_ROLE_CONTROLLER_SERVICE} permission so
-     * that other applications can not abuse it.
+     * The {@link Intent} that must be declared as handled by the service.
      */
-    public static final String SERVICE_INTERFACE =
-            "android.rolecontrollerservice.RoleControllerService";
+    public static final String SERVICE_INTERFACE = "android.app.role.RoleControllerService";
 
     @Nullable
     @Override
     public final IBinder onBind(@Nullable Intent intent) {
-        return new IRoleControllerService.Stub() {
+        return new IRoleController.Stub() {
+
+            @Override
+            public void onGrantDefaultRoles(IRoleManagerCallback callback) {
+                Preconditions.checkNotNull(callback, "callback cannot be null");
+                RoleControllerService.this.onGrantDefaultRoles(new RoleManagerCallbackDelegate(
+                        callback));
+            }
 
             @Override
             public void onAddRoleHolder(String roleName, String packageName, int flags,
@@ -92,18 +93,21 @@ public abstract class RoleControllerService extends Service {
             }
 
             @Override
-            public void onGrantDefaultRoles(IRoleManagerCallback callback) {
-                Preconditions.checkNotNull(callback, "callback cannot be null");
-                RoleControllerService.this.onGrantDefaultRoles(new RoleManagerCallbackDelegate(
-                        callback));
-            }
-
-            @Override
             public void onSmsKillSwitchToggled(boolean smsRestrictionEnabled) {
                 RoleControllerService.this.onSmsKillSwitchToggled(smsRestrictionEnabled);
             }
         };
     }
+
+    /**
+     * Called by system to grant default permissions and roles.
+     * <p>
+     * This is typically when creating a new user or upgrading either system or
+     * permission controller package
+     *
+     * @param callback the callback for whether this call is successful
+     */
+    public abstract void onGrantDefaultRoles(@NonNull RoleManagerCallback callback);
 
     /**
      * Add a specific application to the holders of a role. If the role is exclusive, the previous
@@ -153,20 +157,10 @@ public abstract class RoleControllerService extends Service {
     /**
      * Cleanup appop/permissions state in response to sms kill switch toggle
      *
-     * @param smsRestrictionEnabled whether kill switch was turned on
+     * @param enabled whether kill switch was turned on
      */
     //STOPSHIP: remove this api before shipping a final version
-    public abstract void onSmsKillSwitchToggled(boolean smsRestrictionEnabled);
-
-    /**
-     * Called by system to grant default permissions and roles.
-     * <p>
-     * This is typically when creating a new user or upgrading either system or
-     * permission controller package
-     *
-     * @param callback the callback for whether this call is successful
-     */
-    public abstract void onGrantDefaultRoles(@NonNull RoleManagerCallback callback);
+    public abstract void onSmsKillSwitchToggled(boolean enabled);
 
     private static class RoleManagerCallbackDelegate implements RoleManagerCallback {
 

@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
-package android.rolecontrollerservice;
+package android.app.role;
 
 import android.app.role.IRoleManagerCallback;
 
 /**
  * @hide
  */
-oneway interface IRoleControllerService {
+oneway interface IRoleController {
+
+    void onGrantDefaultRoles(in IRoleManagerCallback callback);
 
     void onAddRoleHolder(in String roleName, in String packageName, int flags,
                          in IRoleManagerCallback callback);
@@ -31,7 +33,5 @@ oneway interface IRoleControllerService {
 
     void onClearRoleHolders(in String roleName, int flags, in IRoleManagerCallback callback);
 
-    void onGrantDefaultRoles(in IRoleManagerCallback callback);
-
-    void onSmsKillSwitchToggled(boolean smsRestrictionEnabled);
+    void onSmsKillSwitchToggled(boolean enabled);
 }

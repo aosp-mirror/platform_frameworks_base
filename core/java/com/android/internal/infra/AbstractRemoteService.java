@@ -28,7 +28,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.IBinder.DeathRecipient;
 import android.os.IInterface;
-import android.os.Looper;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
@@ -114,14 +113,14 @@ public abstract class AbstractRemoteService<S extends AbstractRemoteService<S, I
     // NOTE: must be package-protected so this class is not extended outside
     AbstractRemoteService(@NonNull Context context, @NonNull String serviceInterface,
             @NonNull ComponentName componentName, int userId, @NonNull VultureCallback<S> callback,
-            boolean bindInstantServiceAllowed, boolean verbose) {
+            @NonNull Handler handler, boolean bindInstantServiceAllowed, boolean verbose) {
         mContext = context;
         mVultureCallback = callback;
         mVerbose = verbose;
         mComponentName = componentName;
         mIntent = new Intent(serviceInterface).setComponent(mComponentName);
         mUserId = userId;
-        mHandler = new Handler(Looper.getMainLooper());
+        mHandler = new Handler(handler.getLooper());
         mBindInstantServiceAllowed = bindInstantServiceAllowed;
     }
 

@@ -19,6 +19,7 @@ package com.android.internal.infra;
 import android.annotation.NonNull;
 import android.content.ComponentName;
 import android.content.Context;
+import android.os.Handler;
 import android.os.IInterface;
 import android.util.Slog;
 
@@ -42,10 +43,10 @@ public abstract class AbstractSinglePendingRequestRemoteService<S
 
     public AbstractSinglePendingRequestRemoteService(@NonNull Context context,
             @NonNull String serviceInterface, @NonNull ComponentName componentName, int userId,
-            @NonNull VultureCallback<S> callback, boolean bindInstantServiceAllowed,
-            boolean verbose) {
-        super(context, serviceInterface, componentName, userId, callback, bindInstantServiceAllowed,
-                verbose);
+            @NonNull VultureCallback<S> callback, @NonNull Handler handler,
+            boolean bindInstantServiceAllowed, boolean verbose) {
+        super(context, serviceInterface, componentName, userId, callback, handler,
+                bindInstantServiceAllowed, verbose);
     }
 
     @Override // from AbstractRemoteService

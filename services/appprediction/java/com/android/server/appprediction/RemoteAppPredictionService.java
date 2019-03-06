@@ -46,7 +46,8 @@ public class RemoteAppPredictionService extends
             ComponentName componentName, int userId,
             RemoteAppPredictionServiceCallbacks callback, boolean bindInstantServiceAllowed,
             boolean verbose) {
-        super(context, serviceInterface, componentName, userId, callback, bindInstantServiceAllowed,
+        super(context, serviceInterface, componentName, userId, callback,
+                context.getMainThreadHandler(), bindInstantServiceAllowed,
                 verbose, /* initialCapacity= */ 1);
     }
 

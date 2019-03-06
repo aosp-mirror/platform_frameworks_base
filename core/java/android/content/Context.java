@@ -3176,6 +3176,7 @@ public abstract class Context {
             RESTRICTIONS_SERVICE,
             APP_OPS_SERVICE,
             ROLE_SERVICE,
+            //@hide ROLE_CONTROLLER_SERVICE,
             CAMERA_SERVICE,
             PRINT_SERVICE,
             CONSUMER_IR_SERVICE,
@@ -4283,6 +4284,16 @@ public abstract class Context {
      * @see android.app.role.RoleManager
      */
     public static final String ROLE_SERVICE = "role";
+
+    /**
+     * Official published name of the (internal) role controller service.
+     *
+     * @see #getSystemService(String)
+     * @see android.app.role.RoleControllerService
+     *
+     * @hide
+     */
+    public static final String ROLE_CONTROLLER_SERVICE = "role_controller";
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a

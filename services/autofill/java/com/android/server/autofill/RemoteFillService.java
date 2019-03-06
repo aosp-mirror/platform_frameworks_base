@@ -64,7 +64,7 @@ final class RemoteFillService
     RemoteFillService(Context context, ComponentName componentName, int userId,
             FillServiceCallbacks callbacks, boolean bindInstantServiceAllowed) {
         super(context, AutofillService.SERVICE_INTERFACE, componentName, userId, callbacks,
-                bindInstantServiceAllowed, sVerbose);
+                context.getMainThreadHandler(), bindInstantServiceAllowed, sVerbose);
         mCallbacks = callbacks;
     }
 
