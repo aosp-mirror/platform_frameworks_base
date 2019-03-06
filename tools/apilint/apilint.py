@@ -1974,7 +1974,9 @@ def verify_nullability(clazz):
     """Catches missing nullability annotations"""
 
     for f in clazz.fields:
-        if f.value is not None and 'static' in f.split and 'final' in f.split:
+        if "enum_constant" in f.split:
+            continue  # Enum constants are never null
+        if f.value is not None and 'final' in f.split:
             continue  # Nullability of constants can be inferred.
         if f.typ not in PRIMITIVES and not has_nullability(f.annotations):
             error(clazz, f, "M12", "Field must be marked either @NonNull or @Nullable")
@@ -1983,8 +1985,12 @@ def verify_nullability(clazz):
         verify_nullability_args(clazz, c)
 
     for m in clazz.methods:
-        if m.name == "writeToParcel" or m.name == "onReceive":
-            continue  # Parcelable.writeToParcel() and BroadcastReceiver.onReceive() are not yet annotated
+        if m.name == "writeToParcel" or m.name == "onReceive" or m.name == "onBind":
+            continue  # Parcelable.writeToParcel(), BroadcastReceiver.onReceive(), and Service.onBind() are not yet annotated
+
+        if (m.name == "equals" and m.args == ["java.lang.Object"] or
+                m.name == "toString" and m.args == []):
+            continue  # Nullability of equals and toString is implicit.
 
         if m.typ not in PRIMITIVES and not has_nullability(m.annotations):
             error(clazz, m, "M12", "Return value must be marked either @NonNull or @Nullable")
