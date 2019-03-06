@@ -17,6 +17,8 @@
 package android.telephony.data;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.net.LinkProperties;
 import android.os.RemoteException;
@@ -74,7 +76,8 @@ public class DataServiceCallback {
      * @param result The result code. Must be one of the {@link ResultCode}.
      * @param response Setup data call response.
      */
-    public void onSetupDataCallComplete(@ResultCode int result, DataCallResponse response) {
+    public void onSetupDataCallComplete(@ResultCode int result,
+                                        @Nullable DataCallResponse response) {
         IDataServiceCallback callback = mCallback.get();
         if (callback != null) {
             try {
@@ -141,10 +144,11 @@ public class DataServiceCallback {
      * DataServiceCallback)}.
      *
      * @param result The result code. Must be one of the {@link ResultCode}.
-     * @param dataCallList List of the current active data connection.
+     * @param dataCallList List of the current active data connection. If no data call is presented,
+     * set it to an empty list.
      */
     public void onGetDataCallListComplete(@ResultCode int result,
-                                          List<DataCallResponse> dataCallList) {
+                                          @NonNull List<DataCallResponse> dataCallList) {
         IDataServiceCallback callback = mCallback.get();
         if (callback != null) {
             try {
@@ -156,11 +160,12 @@ public class DataServiceCallback {
     }
 
     /**
-     * Called to indicate that data connection list changed.
+     * Called to indicate that data connection list changed. If no data call is presented, set it to
+     * an empty list.
      *
      * @param dataCallList List of the current active data connection.
      */
-    public void onDataCallListChanged(List<DataCallResponse> dataCallList) {
+    public void onDataCallListChanged(@NonNull List<DataCallResponse> dataCallList) {
         IDataServiceCallback callback = mCallback.get();
         if (callback != null) {
             try {
