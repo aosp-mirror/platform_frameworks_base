@@ -19,6 +19,8 @@ package android.telephony.data;
 import static android.telephony.data.ApnSetting.ProtocolType;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.os.Build;
 import android.os.Parcel;
@@ -158,6 +160,7 @@ public final class DataProfile implements Parcelable {
     /**
      * @return The APN to establish data connection.
      */
+    @NonNull
     public String getApn() { return mApn; }
 
     /**
@@ -173,11 +176,13 @@ public final class DataProfile implements Parcelable {
     /**
      * @return The username for APN. Can be null.
      */
+    @Nullable
     public String getUserName() { return mUserName; }
 
     /**
      * @return The password for APN. Can be null.
      */
+    @Nullable
     public String getPassword() { return mPassword; }
 
     /**
