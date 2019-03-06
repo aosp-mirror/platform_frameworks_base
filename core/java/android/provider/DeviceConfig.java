@@ -323,18 +323,40 @@ public final class DeviceConfig {
      */
     @SystemApi
     public interface Rollback {
+
+        /**
+         * Namespace for flags that can be changed immediately after becoming available on device.
+         */
         String NAMESPACE = "rollback";
 
+        /**
+         * Namespace for flags that can be changed only after reboot.
+         */
         String BOOT_NAMESPACE = "rollback_boot";
 
         /**
-         * Timeout in milliseconds for enabling package rollback.
+         * Timeout duration in milliseconds for enabling package rollback. If we fail to enable
+         * rollback within that period, the install will proceed without rollback enabled.
+         *
+         * <p>If flag value is negative, the default value will be assigned.
+         *
+         * Flag type: {@code long}
+         * Namespace: Rollback.NAMESPACE
          */
         String ENABLE_ROLLBACK_TIMEOUT = "enable_rollback_timeout";
 
-       /**
-        * The lifetime duration of rollback packages in millis
-        */
+        /**
+         * Lifetime duration of rollback packages in millis. A rollback will be available for
+         * at most that duration of time after a package is installed with
+         * {@link PackageInstaller.SessionParams#setEnableRollback()}.
+         *
+         * <p>If flag value is negative, the default value will be assigned.
+         *
+         * @see RollbackManager
+         *
+         * Flag type: {@code long}
+         * Namespace: Rollback.BOOT_NAMESPACE
+         */
         String ROLLBACK_LIFETIME_IN_MILLIS = "rollback_lifetime_in_millis";
     }
 
