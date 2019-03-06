@@ -20,6 +20,7 @@ import static android.net.CaptivePortal.APP_RETURN_DISMISSED;
 import static android.net.INetworkMonitor.NETWORK_TEST_RESULT_INVALID;
 import static android.net.INetworkMonitor.NETWORK_TEST_RESULT_VALID;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET;
+import static android.provider.Settings.Global.DATA_STALL_EVALUATION_TYPE_DNS;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
@@ -114,7 +115,6 @@ public class NetworkMonitorTest {
     private static final String TEST_OTHER_FALLBACK_URL = "http://otherfallback.google.com/gen_204";
     private static final String TEST_MCCMNC = "123456";
 
-    private static final int DATA_STALL_EVALUATION_TYPE_DNS = 1;
     private static final int RETURN_CODE_DNS_SUCCESS = 0;
     private static final int RETURN_CODE_DNS_TIMEOUT = 255;
     private static final int DEFAULT_DNS_TIMEOUT_THRESHOLD = 5;
@@ -186,7 +186,7 @@ public class NetworkMonitorTest {
         when(mCm.getNetworkCapabilities(any())).thenReturn(METERED_CAPABILITIES);
 
         setMinDataStallEvaluateInterval(500);
-        setDataStallEvaluationType(1 << DATA_STALL_EVALUATION_TYPE_DNS);
+        setDataStallEvaluationType(DATA_STALL_EVALUATION_TYPE_DNS);
         setValidDataStallDnsTimeThreshold(500);
         setConsecutiveDnsTimeoutThreshold(5);
     }
