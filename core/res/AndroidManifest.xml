@@ -1839,12 +1839,12 @@
 
     <!-- Must be required by a {@link android.telecom.PhoneAccountSuggestionService},
          to ensure that only the system can bind to it.
-         <p>Protection level: signature
+         <p>Protection level: signature|privileged
          @SystemApi
          @hide
     -->
     <permission android:name="android.permission.BIND_PHONE_ACCOUNT_SUGGESTION_SERVICE"
-        android:protectionLevel="signature" />
+        android:protectionLevel="signature|privileged" />
 
     <!-- Must be required by a {@link android.telecom.CallRedirectionService},
          to ensure that only the system can bind to it.
