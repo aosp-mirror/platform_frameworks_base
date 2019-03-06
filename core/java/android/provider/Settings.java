@@ -11917,22 +11917,24 @@ public final class Settings {
          * entity_list_default use ":" as delimiter for values. Ex:
          *
          * <pre>
-         * smart_linkify_enabled                    (boolean)
-         * system_textclassifier_enabled            (boolean)
-         * model_dark_launch_enabled                (boolean)
-         * smart_selection_enabled                  (boolean)
-         * smart_text_share_enabled                 (boolean)
-         * smart_linkify_enabled                    (boolean)
-         * smart_select_animation_enabled           (boolean)
-         * suggest_selection_max_range_length       (int)
-         * classify_text_max_range_length           (int)
-         * generate_links_max_text_length           (int)
-         * generate_links_log_sample_rate           (int)
-         * entity_list_default                      (String[])
-         * entity_list_not_editable                 (String[])
-         * entity_list_editable                     (String[])
-         * lang_id_threshold_override               (float)
-         * template_intent_factory_enabled          (boolean)
+         * smart_linkify_enabled                            (boolean)
+         * system_textclassifier_enabled                    (boolean)
+         * model_dark_launch_enabled                        (boolean)
+         * smart_selection_enabled                          (boolean)
+         * smart_text_share_enabled                         (boolean)
+         * smart_linkify_enabled                            (boolean)
+         * smart_select_animation_enabled                   (boolean)
+         * suggest_selection_max_range_length               (int)
+         * classify_text_max_range_length                   (int)
+         * generate_links_max_text_length                   (int)
+         * generate_links_log_sample_rate                   (int)
+         * entity_list_default                              (String[])
+         * entity_list_not_editable                         (String[])
+         * entity_list_editable                             (String[])
+         * in_app_conversation_action_types_default         (String[])
+         * notification_conversation_action_types_default   (String[])
+         * lang_id_threshold_override                       (float)
+         * template_intent_factory_enabled                  (boolean)
          * </pre>
          *
          * <p>
@@ -14587,6 +14589,14 @@ public final class Settings {
          */
         public static final String BATTERY_CHARGING_STATE_UPDATE_DELAY =
                 "battery_charging_state_update_delay";
+
+        /**
+         * A serialized string of params that will be loaded into a text classifier action model.
+         *
+         * @hide
+         */
+        public static final String TEXT_CLASSIFIER_ACTION_MODEL_PARAMS =
+                "text_classifier_action_model_params";
     }
 
     /**

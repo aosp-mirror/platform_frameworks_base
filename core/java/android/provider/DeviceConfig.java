@@ -144,6 +144,14 @@ public final class DeviceConfig {
     public static final String NAMESPACE_SYSTEMUI = "systemui";
 
     /**
+     * Namespace for TextClassifier related features.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String NAMESPACE_TEXTCLASSIFIER = "textclassifier";
+
+    /**
      * Namespace for all runtime related features.
      *
      * @hide

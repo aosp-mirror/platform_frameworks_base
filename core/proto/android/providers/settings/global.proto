@@ -1043,7 +1043,9 @@ message GlobalSettingsProto {
 
     optional SettingProto app_ops_constants = 148 [ (android.privacy).dest = DEST_AUTOMATIC ];
 
+    optional SettingProto text_classifier_action_model_params = 145 [ (android.privacy).dest = DEST_AUTOMATIC ];
+
     // Please insert fields in alphabetical order and group them into messages
     // if possible (to avoid reaching the method limit).
-    // Next tag = 145 then 149; // (145 was removed)
+    // Next tag = 149;
 }
