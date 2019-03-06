@@ -1227,6 +1227,7 @@ package android.provider {
     field public static final String CAPTIVE_PORTAL_USE_HTTPS = "captive_portal_use_https";
     field public static final String DATA_STALL_CONSECUTIVE_DNS_TIMEOUT_THRESHOLD = "data_stall_consecutive_dns_timeout_threshold";
     field public static final String DATA_STALL_EVALUATION_TYPE = "data_stall_evaluation_type";
+    field public static final int DATA_STALL_EVALUATION_TYPE_DNS = 1; // 0x1
     field public static final String DATA_STALL_MIN_EVALUATE_INTERVAL = "data_stall_min_evaluate_interval";
     field public static final String DATA_STALL_VALID_DNS_TIME_THRESHOLD = "data_stall_valid_dns_time_threshold";
     field public static final String HIDDEN_API_BLACKLIST_EXEMPTIONS = "hidden_api_blacklist_exemptions";
