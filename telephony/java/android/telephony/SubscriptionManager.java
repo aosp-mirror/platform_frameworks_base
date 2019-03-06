@@ -2706,7 +2706,8 @@ public class SubscriptionManager {
      *  1) Even if it's active, it will be dormant most of the time. The modem will not try
      *     to scan or camp until it knows an available network is nearby to save power.
      *  2) Telephony relies on system app or carrier input to notify nearby available networks.
-     *     See {@link TelephonyManager#updateAvailableNetworks(List)} for more information.
+     *     See {@link TelephonyManager#updateAvailableNetworks(List, Executor, Consumer)}
+     *     for more information.
      *  3) In multi-SIM devices, when the network is nearby and camped, system may automatically
      *     switch internet data between it and default data subscription, based on carrier
      *     recommendation and its signal strength and metered-ness, etc.
