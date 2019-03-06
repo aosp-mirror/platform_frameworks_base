@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright (C) 2019 The Android Open Source Project
+
+         Licensed under the Apache License, Version 2.0 (the "License");
+         you may not use this file except in compliance with the License.
+         You may obtain a copy of the License at
+
+                    http://www.apache.org/licenses/LICENSE-2.0
+
+         Unless required by applicable law or agreed to in writing, software
+         distributed under the License is distributed on an "AS IS" BASIS,
+         WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+         See the License for the specific language governing permissions and
+         limitations under the License.
+-->
+<!-- TODO: define a targetNamespace. Note that it will break retrocompatibility -->
+<xs:schema version="2.0"
+           elementFormDefault="qualified"
+           attributeFormDefault="unqualified"
+           xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <xs:element name="permissions">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="group" type="group" maxOccurs="unbounded"/>
+                <xs:element name="permission" type="permission" maxOccurs="unbounded"/>
+                <xs:element name="assign-permission" type="assign-permission" maxOccurs="unbounded"/>
+                <xs:element name="split-permission" type="split-permission" maxOccurs="unbounded"/>
+                <xs:element name="library" type="library" maxOccurs="unbounded"/>
+                <xs:element name="feature" type="feature" maxOccurs="unbounded"/>
+                <xs:element name="unavailable-feature" type="unavailable-feature" maxOccurs="unbounded"/>
+                <xs:element name="allow-in-power-save-except-idle" type="allow-in-power-save-except-idle" maxOccurs="unbounded"/>
+                <xs:element name="allow-in-power-save" type="allow-in-power-save" maxOccurs="unbounded"/>
+                <xs:element name="allow-in-data-usage-save" type="allow-in-data-usage-save" maxOccurs="unbounded"/>
+                <xs:element name="allow-unthrottled-location" type="allow-unthrottled-location" maxOccurs="unbounded"/>
+                <xs:element name="allow-ignore-location-settings" type="allow-ignore-location-settings" maxOccurs="unbounded"/>
+                <xs:element name="allow-implicit-broadcast" type="allow-implicit-broadcast" maxOccurs="unbounded"/>
+                <xs:element name="app-link" type="app-link" maxOccurs="unbounded"/>
+                <xs:element name="system-user-whitelisted-app" type="system-user-whitelisted-app" maxOccurs="unbounded"/>
+                <xs:element name="system-user-blacklisted-app" type="system-user-blacklisted-app" maxOccurs="unbounded"/>
+                <xs:element name="default-enabled-vr-app" type="default-enabled-vr-app" maxOccurs="unbounded"/>
+                <xs:element name="backup-transport-whitelisted-service" type="backup-transport-whitelisted-service" maxOccurs="unbounded"/>
+                <xs:element name="disabled-until-used-preinstalled-carrier-associated-app" type="disabled-until-used-preinstalled-carrier-associated-app" maxOccurs="unbounded"/>
+                <xs:element name="disabled-until-used-preinstalled-carrier-app" type="disabled-until-used-preinstalled-carrier-app" maxOccurs="unbounded"/>
+                <xs:element name="privapp-permissions" type="privapp-permissions" maxOccurs="unbounded"/>
+                <xs:element name="oem-permissions" type="oem-permissions" maxOccurs="unbounded"/>
+                <xs:element name="hidden-api-whitelisted-app" type="hidden-api-whitelisted-app" maxOccurs="unbounded"/>
+                <xs:element name="allow-association" type="allow-association" maxOccurs="unbounded"/>
+                <xs:element name="bugreport-whitelisted" type="bugreport-whitelisted" maxOccurs="unbounded"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:complexType name="group">
+        <xs:attribute name="gid" type="xs:int"/>
+    </xs:complexType>
+    <xs:complexType name="permission">
+        <xs:attribute name="name" type="xs:string"/>
+    </xs:complexType>
+    <xs:complexType name="assign-permission">
+        <xs:attribute name="name" type="xs:string"/>
+        <xs:attribute name="uid" type="xs:int"/>
+    </xs:complexType>
+    <xs:complexType name="split-permission">
+        <xs:attribute name="name" type="xs:string"/>
+        <xs:attribute name="targetSdk" type="xs:int"/>
+        <xs:sequence>
+            <xs:element name="library" maxOccurs="unbounded">
+                <xs:complexType>
+                    <xs:attribute name="name" type="xs:string"/>
+                </xs:complexType>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="library">
+        <xs:attribute name="name" type="xs:string"/>
+        <xs:attribute name="file" type="xs:string"/>
+        <xs:attribute name="dependency" type="xs:string"/>
+    </xs:complexType>
+    <xs:complexType name="feature">
+        <xs:attribute name="name" type="xs:string"/>
+        <xs:attribute name="notLowRam" type="xs:string"/>
+    </xs:complexType>
+    <xs:complexType name="unavailable-feature">
+        <xs:attribute name="name" type="xs:string"/>
+    </xs:complexType>
+    <xs:complexType name="allow-in-power-save-except-idle">
+        <xs:attribute name="package" type="xs:string"/>
+    </xs:complexType>
+    <xs:complexType name="allow-in-power-save">
+        <xs:attribute name="package" type="xs:string"/>
+    </xs:complexType>
+    <xs:complexType name="allow-in-data-usage-save">
+        <xs:attribute name="package" type="xs:string"/>
+    </xs:complexType>
+    <xs:complexType name="allow-unthrottled-location">
+        <xs:attribute name="package" type="xs:string"/>
+    </xs:complexType>
+    <xs:complexType name="allow-ignore-location-settings">
+        <xs:attribute name="package" type="xs:string"/>
+    </xs:complexType>
+    <xs:complexType name="allow-implicit-broadcast">
+        <xs:attribute name="action" type="xs:string"/>
+    </xs:complexType>
+    <xs:complexType name="app-link">
+        <xs:attribute name="package" type="xs:string"/>
+    </xs:complexType>
+    <xs:complexType name="system-user-whitelisted-app">
+        <xs:attribute name="package" type="xs:string"/>
+    </xs:complexType>
+    <xs:complexType name="system-user-blacklisted-app">
+        <xs:attribute name="package" type="xs:string"/>
+    </xs:complexType>
+    <xs:complexType name="default-enabled-vr-app">
+        <xs:attribute name="package" type="xs:string"/>
+        <xs:attribute name="class" type="xs:string"/>
+    </xs:complexType>
+    <xs:complexType name="backup-transport-whitelisted-service">
+        <xs:attribute name="service" type="xs:string"/>
+    </xs:complexType>
+    <xs:complexType name="disabled-until-used-preinstalled-carrier-associated-app">
+        <xs:attribute name="package" type="xs:string"/>
+        <xs:attribute name="carrierAppPackage" type="xs:string"/>
+    </xs:complexType>
+    <xs:complexType name="disabled-until-used-preinstalled-carrier-app">
+        <xs:attribute name="package" type="xs:string"/>
+    </xs:complexType>
+    <xs:complexType name="privapp-permissions">
+        <xs:attribute name="package" type="xs:string"/>
+        <xs:sequence>
+            <xs:element name="permission" maxOccurs="unbounded">
+                <xs:complexType>
+                    <xs:attribute name="name" type="xs:string"/>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="deny-permission" maxOccurs="unbounded">
+                <xs:complexType>
+                    <xs:attribute name="name" type="xs:string"/>
+                </xs:complexType>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="oem-permissions">
+        <xs:attribute name="package" type="xs:string"/>
+        <xs:sequence>
+            <xs:element name="permission" maxOccurs="unbounded">
+                <xs:complexType>
+                    <xs:attribute name="name" type="xs:string"/>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="deny-permission" maxOccurs="unbounded">
+                <xs:complexType>
+                    <xs:attribute name="name" type="xs:string"/>
+                </xs:complexType>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="hidden-api-whitelisted-app">
+        <xs:attribute name="package" type="xs:string"/>
+    </xs:complexType>
+    <xs:complexType name="allow-association">
+        <xs:attribute name="target" type="xs:string"/>
+        <xs:attribute name="allowed" type="xs:string"/>
+    </xs:complexType>
+    <xs:complexType name="bugreport-whitelisted">
+        <xs:attribute name="package" type="xs:string"/>
+    </xs:complexType>
+</xs:schema>
