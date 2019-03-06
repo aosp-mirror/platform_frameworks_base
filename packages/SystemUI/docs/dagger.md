@@ -13,39 +13,47 @@ TODO: Add some links.
 ## State of the world
 
 Dagger 2 has been turned on for SystemUI and a early first pass has been taken
-for converting everything in Dependency.java to use Dagger. Since a lot of
-SystemUI depends on Dependency, stubs have been added to Dependency to proxy
-any gets through to the instances provided by dagger, this will allow migration
-of SystemUI through a number of CLs.
+for converting everything in [Dependency.java](packages/systemui/src/com/android/systemui/Dependency.java)
+to use Dagger. Since a lot of SystemUI depends on Dependency, stubs have been added to Dependency 
+to proxy any gets through to the instances provided by dagger, this will allow migration of SystemUI 
+through a number of CLs.
 
 ### How it works in SystemUI
 
 For the classes that we're using in Dependency and are switching to dagger, the
-equivalent dagger version is using @Singleton and only having one instance.
+equivalent dagger version is using `@Singleton` and therefore only has one instance.
 To have the single instance span all of SystemUI and be easily accessible for
-other components, there is a single root Component that exists that generates
-these. The component lives in SystemUIFactory and is called SystemUIRootComponent.
+other components, there is a single root `@Component` that exists that generates
+these. The component lives in [SystemUIFactory](packages/systemui/src/com/android/systemui/SystemUIFactory.java)
+and is called `SystemUIRootComponent`.
 
 ```java
+
 @Singleton
-@Component(modules = {SystemUIFactory.class, DependencyProvider.class, ContextHolder.class})
+@Component(modules = {SystemUIFactory.class, DependencyProvider.class, DependencyBinder.class,
+        ContextHolder.class})
 public interface SystemUIRootComponent {
     @Singleton
     Dependency.DependencyInjector createDependency();
 }
 ```
 
-The root modules are what provides the global singleton dependencies across
-SystemUI. ContextHolder is just a wrapper that provides a context.
-SystemUIFactory @Provide dependencies that need to be overridden by SystemUI
-variants (like other form factors). DependencyBinder creates the mapping from
-interfaces to implementation classes. DependencyProvider provides or binds any
-remaining depedencies required.
+The root component is composed of root modules, which in turn provide the global singleton 
+dependencies across all of SystemUI.
+
+- `ContextHolder` is just a wrapper that provides a context.
+
+- `SystemUIFactory` `@Provides` dependencies that need to be overridden by SystemUI
+variants (like other form factors e.g. Car). 
+
+- `DependencyBinder` creates the mapping from interfaces to implementation classes. 
+
+- `DependencyProvider` provides or binds any remaining depedencies required.
 
 ### Adding injection to a new SystemUI object
 
-Anything that depends on any @Singleton provider from SystemUIRootComponent
-should be declared as a Subcomponent of the root component, this requires
+Anything that depends on any `@Singleton` provider from SystemUIRootComponent
+should be declared as an `@Subcomponent` of the root component, this requires
 declaring your own interface for generating your own modules or just the
 object you need injected. The subcomponent also needs to be added to
 SystemUIRootComponent in SystemUIFactory so it can be acquired.
@@ -57,7 +65,7 @@ public interface SystemUIRootComponent {
 }
 
 public class Dependency extends SystemUI {
-  ...
+  //...
 +  @Subcomponent
 +  public interface DependencyInjector {
 +      Dependency createSystemUI();
@@ -65,9 +73,9 @@ public class Dependency extends SystemUI {
 }
 ```
 
-For objects that extend SystemUI and require injection, you can define an
+For objects which extend SystemUI and require injection, you can define an
 injector that creates the injected object for you. This other class should
-be referenced in @string/config_systemUIServiceComponents.
+be referenced in [@string/config_systemUIServiceComponents](packages/SystemUI/res/values/config.xml).
 
 ```java
 public static class DependencyCreator implements Injector {
@@ -82,7 +90,7 @@ public static class DependencyCreator implements Injector {
 
 ### Adding a new injectable object
 
-First tag the constructor with @Inject. Also tag it with @Singleton if only one
+First tag the constructor with `@Inject`. Also tag it with `@Singleton` if only one
 instance should be created.
 
 ```java
@@ -97,14 +105,14 @@ public class SomethingController {
 ```
 
 If you have an interface class and an implementation class, dagger needs to know
-how to map it. The simplest way to do this is to add a provides method to
-DependencyProvider.
+how to map it. The simplest way to do this is to add an `@Provides` method to
+DependencyProvider. The type of the return value tells dagger which dependency it's providing.
 
 ```java
 public class DependencyProvider {
-  ...
+  //...
   @Singleton
-  @Provide
+  @Provides
   public SomethingController provideSomethingController(Context context,
       @Named(MAIN_HANDLER_NAME) Handler mainHandler) {
     return new SomethingControllerImpl(context, mainHandler);
@@ -118,11 +126,11 @@ to the following diff.
 
 ```java
 public class Dependency {
-  ...
+  //...
   @Inject Lazy<SomethingController> mSomethingController;
-  ...
+  //...
   public void start() {
-    ...
+    //...
     mProviders.put(SomethingController.class, mSomethingController::get);
   }
 }
@@ -192,7 +200,7 @@ the @Named view context.
 ```java
 public CustomView(@Named(VIEW_CONTEXT) Context themedViewContext, AttributeSet attrs,
         OtherCustomDependency something) {
-    ...
+    //...
 }
 ```
 
