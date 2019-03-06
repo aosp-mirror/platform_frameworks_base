@@ -5803,6 +5803,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                         setImportantForAutofill(a.getInt(attr, IMPORTANT_FOR_AUTOFILL_AUTO));
                     }
                     break;
+                case R.styleable.View_importantForContentCapture:
+                    if (a.peekValue(attr) != null) {
+                        setImportantForContentCapture(a.getInt(attr,
+                                IMPORTANT_FOR_CONTENT_CAPTURE_AUTO));
+                    }
                 case R.styleable.View_defaultFocusHighlightEnabled:
                     if (a.peekValue(attr) != null) {
                         setDefaultFocusHighlightEnabled(a.getBoolean(attr, true));
