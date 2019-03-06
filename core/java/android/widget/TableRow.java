@@ -26,6 +26,7 @@ import android.view.View;
 import android.view.ViewDebug;
 import android.view.ViewGroup;
 import android.view.ViewHierarchyEncoder;
+import android.view.inspector.InspectableProperty;
 
 /**
  * <p>A layout that arranges its children horizontally. A TableRow should
@@ -398,12 +399,14 @@ public class TableRow extends LinearLayout {
          * <p>The column index of the cell represented by the widget.</p>
          */
         @ViewDebug.ExportedProperty(category = "layout")
+        @InspectableProperty(name = "layout_column")
         public int column;
 
         /**
          * <p>The number of columns the widgets spans over.</p>
          */
         @ViewDebug.ExportedProperty(category = "layout")
+        @InspectableProperty(name = "layout_span")
         public int span;
 
         private static final int LOCATION = 0;
