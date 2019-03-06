@@ -4656,9 +4656,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     private int handleShellCommandEnableDisableInputMethod(
             @NonNull ShellCommand shellCommand, boolean enabled) {
         final String id = shellCommand.getNextArgRequired();
-
         final boolean previouslyEnabled;
         synchronized (mMethodMap) {
+            if (!userHasDebugPriv(mSettings.getCurrentUserId(), shellCommand)) {
+                return ShellCommandResult.SUCCESS;
+            }
             previouslyEnabled = setInputMethodEnabledLocked(id, enabled);
         }
         final PrintWriter pr = shellCommand.getOutPrintWriter();
@@ -4680,6 +4682,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     private int handleShellCommandSetInputMethod(@NonNull ShellCommand shellCommand) {
         final String id = shellCommand.getNextArgRequired();
         synchronized (mMethodMap) {
+            if (!userHasDebugPriv(mSettings.getCurrentUserId(), shellCommand)) {
+                return ShellCommandResult.SUCCESS;
+            }
             setInputMethodLocked(id, NOT_A_SUBTYPE_ID);
         }
         final PrintWriter pr = shellCommand.getOutPrintWriter();
@@ -4698,6 +4703,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     @ShellCommandResult
     private int handleShellCommandResetInputMethod(@NonNull ShellCommand shellCommand) {
         synchronized (mMethodMap) {
+            if (!userHasDebugPriv(mSettings.getCurrentUserId(), shellCommand)) {
+                return ShellCommandResult.SUCCESS;
+            }
             final String nextIme;
             final List<InputMethodInfo> nextEnabledImes;
             hideCurrentInputLocked(0, null);
@@ -4733,6 +4741,22 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             }
             return ShellCommandResult.SUCCESS;
         }
+    }
+
+    /**
+     * @param userId the actual user handle obtained by {@link UserHandle#getIdentifier()}
+     * and *not* pseudo ids like {@link UserHandle#USER_ALL etc}.
+     * @return {@code true} if userId has debugging privileges.
+     * i.e. {@link UserManager#DISALLOW_DEBUGGING_FEATURES} is {@code false}.
+     */
+    private boolean userHasDebugPriv(int userId, final ShellCommand shellCommand) {
+        if (mUserManager.hasUserRestriction(
+                UserManager.DISALLOW_DEBUGGING_FEATURES, UserHandle.of(userId))) {
+            shellCommand.getErrPrintWriter().println("User #" + userId
+                    + " is restricted with DISALLOW_DEBUGGING_FEATURES.");
+            return false;
+        }
+        return true;
     }
 
     private static final class InputMethodPrivilegedOperationsImpl
