@@ -280,6 +280,15 @@ public class StatusBarWindowController implements Callback, Dumpable, Configurat
         }
     }
 
+    private void applyStatusBarColorSpaceAgnosticFlag(State state) {
+        if (!isExpanded(state)) {
+            mLpChanged.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC;
+        } else {
+            mLpChanged.privateFlags &=
+                    ~WindowManager.LayoutParams.PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC;
+        }
+    }
+
     private void apply(State state) {
         applyKeyguardFlags(state);
         applyForceStatusBarVisibleFlag(state);
@@ -294,6 +303,7 @@ public class StatusBarWindowController implements Callback, Dumpable, Configurat
         applyBrightness(state);
         applyHasTopUi(state);
         applyNotTouchable(state);
+        applyStatusBarColorSpaceAgnosticFlag(state);
         if (mLp != null && mLp.copyFrom(mLpChanged) != 0) {
             mWindowManager.updateViewLayout(mStatusBarView, mLp);
         }

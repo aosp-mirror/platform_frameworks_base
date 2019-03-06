@@ -990,6 +990,7 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
         lp.setTitle("NavigationBar" + context.getDisplayId());
         lp.accessibilityTitle = context.getString(R.string.nav_bar);
         lp.windowAnimations = 0;
+        lp.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC;
 
         View navigationBarView = LayoutInflater.from(context).inflate(
                 R.layout.navigation_bar_window, null);
