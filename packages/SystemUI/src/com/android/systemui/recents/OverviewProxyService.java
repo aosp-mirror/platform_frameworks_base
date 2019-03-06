@@ -20,6 +20,7 @@ import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
 import static android.view.MotionEvent.ACTION_CANCEL;
 import static android.view.MotionEvent.ACTION_DOWN;
 import static android.view.MotionEvent.ACTION_UP;
+import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON;
 
 import static com.android.systemui.shared.system.NavigationBarCompat.FLAG_DISABLE_SWIPE_UP;
 import static com.android.systemui.shared.system.NavigationBarCompat.FLAG_SHOW_OVERVIEW_BUTTON;
@@ -36,6 +37,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.res.Resources;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.Binder;
@@ -46,7 +48,6 @@ import android.os.Looper;
 import android.os.PatternMatcher;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import android.provider.Settings;
 import android.util.Log;
 import android.view.InputChannel;
 import android.view.MotionEvent;
@@ -589,11 +590,11 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
 
     private int getDefaultInteractionFlags() {
         // If there is no settings available use device default or get it from settings
-        final boolean defaultState = getSwipeUpDefaultValue();
-        final boolean swipeUpEnabled = getSwipeUpSettingAvailable()
-                ? getSwipeUpEnabledFromSettings(defaultState)
-                : defaultState;
-        return swipeUpEnabled ? 0 : DEFAULT_DISABLE_SWIPE_UP_STATE;
+        int navBarMode = Resources.getSystem().getInteger(
+                com.android.internal.R.integer.config_navBarInteractionMode);
+        return navBarMode == NAV_BAR_MODE_3BUTTON
+                ? DEFAULT_DISABLE_SWIPE_UP_STATE
+                : 0;
     }
 
     private void notifyBackButtonAlphaChanged(float alpha, boolean animate) {
@@ -638,21 +639,6 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
                 ActivityManagerWrapper.getInstance().getCurrentUserId()) != null;
     }
 
-    private boolean getSwipeUpDefaultValue() {
-        return mContext.getResources()
-                .getBoolean(com.android.internal.R.bool.config_swipe_up_gesture_default);
-    }
-
-    private boolean getSwipeUpSettingAvailable() {
-        return mContext.getResources()
-                .getBoolean(com.android.internal.R.bool.config_swipe_up_gesture_setting_available);
-    }
-
-    private boolean getSwipeUpEnabledFromSettings(boolean defaultValue) {
-        return Settings.Secure.getInt(mContext.getContentResolver(),
-                Settings.Secure.SWIPE_UP_TO_SWITCH_APPS_ENABLED, defaultValue ? 1 : 0) == 1;
-    }
-
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.println(TAG_OPS + " state:");
@@ -666,10 +652,9 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         pw.print("  quickStepIntent="); pw.println(mQuickStepIntent);
         pw.print("  quickStepIntentResolved="); pw.println(isEnabled());
 
-        final boolean swipeUpDefaultValue = getSwipeUpDefaultValue();
-        final boolean swipeUpEnabled = getSwipeUpEnabledFromSettings(swipeUpDefaultValue);
-        pw.print("  swipeUpSetting="); pw.println(swipeUpEnabled);
-        pw.print("  swipeUpSettingDefault="); pw.println(swipeUpDefaultValue);
+        int navBarMode = Resources.getSystem().getInteger(
+                com.android.internal.R.integer.config_navBarInteractionMode);
+        pw.print("  navBarMode="); pw.println(navBarMode);
     }
 
     public interface OverviewProxyListener {
