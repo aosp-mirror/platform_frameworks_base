@@ -32,6 +32,7 @@ import android.hardware.biometrics.IBiometricServiceLockoutResetCallback;
 import android.hardware.biometrics.IBiometricServiceReceiverInternal;
 import android.hardware.biometrics.face.V1_0.IBiometricsFace;
 import android.hardware.biometrics.face.V1_0.IBiometricsFaceClientCallback;
+import android.hardware.biometrics.face.V1_0.OptionalBool;
 import android.hardware.biometrics.face.V1_0.Status;
 import android.hardware.face.Face;
 import android.hardware.face.FaceManager;
@@ -54,7 +55,6 @@ import com.android.server.SystemServerInitThreadPool;
 import com.android.server.biometrics.AuthenticationClient;
 import com.android.server.biometrics.BiometricServiceBase;
 import com.android.server.biometrics.BiometricUtils;
-import com.android.server.biometrics.ClientMonitor;
 import com.android.server.biometrics.EnumerateClient;
 import com.android.server.biometrics.Metrics;
 import com.android.server.biometrics.RemovalClient;
@@ -385,38 +385,61 @@ public class FaceService extends BiometricServiceBase {
         }
 
         @Override
-        public int setFeature(int feature, boolean enabled, final byte[] token) {
+        public boolean setFeature(int feature, boolean enabled, final byte[] token) {
             checkPermission(MANAGE_BIOMETRIC);
+
+            if (!FaceService.this.hasEnrolledBiometrics(mCurrentUserId)) {
+                Slog.e(TAG, "No enrolled biometrics while setting feature: " + feature);
+                return false;
+            }
 
             final ArrayList<Byte> byteToken = new ArrayList<>();
             for (int i = 0; i < token.length; i++) {
                 byteToken.add(token[i]);
             }
 
-            int result;
-            try {
-                result = mDaemon != null ? mDaemon.setFeature(feature, enabled, byteToken)
-                        : Status.INTERNAL_ERROR;
-            } catch (RemoteException e) {
-                Slog.e(getTag(), "Unable to set feature: " + feature + " to enabled:" + enabled,
-                        e);
-                result = Status.INTERNAL_ERROR;
-            }
+            // TODO: Support multiple faces
+            final int faceId = getFirstTemplateForUser(mCurrentUserId);
 
-            return result;
+            if (mDaemon != null) {
+                try {
+                    return mDaemon.setFeature(feature, enabled, byteToken, faceId) == Status.OK;
+                } catch (RemoteException e) {
+                    Slog.e(getTag(), "Unable to set feature: " + feature + " to enabled:" + enabled,
+                            e);
+                }
+            }
+            return false;
         }
 
         @Override
         public boolean getFeature(int feature) {
             checkPermission(MANAGE_BIOMETRIC);
 
-            boolean result = true;
-            try {
-                result = mDaemon != null ? mDaemon.getFeature(feature) : true;
-            } catch (RemoteException e) {
-                Slog.e(getTag(), "Unable to getRequireAttention", e);
+            // This should ideally return tri-state, but the user isn't shown settings unless
+            // they are enrolled so it's fine for now.
+            if (!FaceService.this.hasEnrolledBiometrics(mCurrentUserId)) {
+                Slog.e(TAG, "No enrolled biometrics while getting feature: " + feature);
+                return false;
             }
-            return result;
+
+            // TODO: Support multiple faces
+            final int faceId = getFirstTemplateForUser(mCurrentUserId);
+
+            if (mDaemon != null) {
+                try {
+                    OptionalBool result = mDaemon.getFeature(feature, faceId);
+                    if (result.status == Status.OK) {
+                        return result.value;
+                    } else {
+                        // Same tri-state comment applies here.
+                        return false;
+                    }
+                } catch (RemoteException e) {
+                    Slog.e(getTag(), "Unable to getRequireAttention", e);
+                }
+            }
+            return false;
         }
 
         @Override
@@ -430,6 +453,15 @@ public class FaceService extends BiometricServiceBase {
                     Slog.e(getTag(), "Unable to send userActivity", e);
                 }
             }
+        }
+
+        // TODO: Support multiple faces
+        private int getFirstTemplateForUser(int user) {
+            final List<Face> faces = FaceService.this.getEnrolledTemplates(user);
+            if (!faces.isEmpty()) {
+                return faces.get(0).getBiometricId();
+            }
+            return 0;
         }
     }
 

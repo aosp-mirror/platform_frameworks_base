@@ -286,14 +286,15 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
      * @hide
      */
     @RequiresPermission(MANAGE_BIOMETRIC)
-    public void setFeature(int feature, boolean enabled, byte[] token) {
+    public boolean setFeature(int feature, boolean enabled, byte[] token) {
         if (mService != null) {
             try {
-                mService.setFeature(feature, enabled, token);
+                return mService.setFeature(feature, enabled, token);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
         }
+        return false;
     }
 
     /**
