@@ -144,10 +144,17 @@ class ReceiverRestrictedContext extends ContextWrapper {
     }
 
     @Override
-    public boolean bindIsolatedService(Intent service, ServiceConnection conn, int flags,
-            String instanceName) {
+    public boolean bindService(
+          Intent service, int flags, Executor executor, ServiceConnection conn) {
         throw new ReceiverCallNotAllowedException(
-                "BroadcastReceiver components are not allowed to bind to services");
+            "BroadcastReceiver components are not allowed to bind to services");
+    }
+
+    @Override
+    public boolean bindIsolatedService(Intent service, int flags, String instanceName,
+            Executor executor, ServiceConnection conn) {
+        throw new ReceiverCallNotAllowedException(
+            "BroadcastReceiver components are not allowed to bind to services");
     }
 }
 
@@ -1638,28 +1645,34 @@ class ContextImpl extends Context {
     }
 
     @Override
-    public boolean bindService(Intent service, ServiceConnection conn,
-            int flags) {
+    public boolean bindService(Intent service, ServiceConnection conn, int flags) {
         warnIfCallingFromSystemProcess();
-        return bindServiceCommon(service, conn, flags, null, mMainThread.getHandler(), getUser());
+        return bindServiceCommon(service, conn, flags, null, mMainThread.getHandler(), null,
+                getUser());
     }
 
     @Override
-    public boolean bindIsolatedService(Intent service, ServiceConnection conn,
-            int flags, String instanceName) {
+    public boolean bindService(
+            Intent service, int flags, Executor executor, ServiceConnection conn) {
+        warnIfCallingFromSystemProcess();
+        return bindServiceCommon(service, conn, flags, null, null, executor, getUser());
+    }
+
+    @Override
+    public boolean bindIsolatedService(Intent service, int flags, String instanceName,
+            Executor executor, ServiceConnection conn) {
         warnIfCallingFromSystemProcess();
         if (instanceName == null) {
             throw new NullPointerException("null instanceName");
         }
-        return bindServiceCommon(service, conn, flags, instanceName, mMainThread.getHandler(),
-                getUser());
+        return bindServiceCommon(service, conn, flags, instanceName, null, executor, getUser());
     }
 
     /** @hide */
     @Override
     public boolean bindServiceAsUser(Intent service, ServiceConnection conn, int flags,
             UserHandle user) {
-        return bindServiceCommon(service, conn, flags, null, mMainThread.getHandler(), user);
+        return bindServiceCommon(service, conn, flags, null, mMainThread.getHandler(), null, user);
     }
 
     /** @hide */
@@ -1669,7 +1682,7 @@ class ContextImpl extends Context {
         if (handler == null) {
             throw new IllegalArgumentException("handler must not be null.");
         }
-        return bindServiceCommon(service, conn, flags, null, handler, user);
+        return bindServiceCommon(service, conn, flags, null, handler, null, user);
     }
 
     /** @hide */
@@ -1692,15 +1705,21 @@ class ContextImpl extends Context {
     }
 
     private boolean bindServiceCommon(Intent service, ServiceConnection conn, int flags,
-            String instanceName, Handler
-            handler, UserHandle user) {
+            String instanceName, Handler handler, Executor executor, UserHandle user) {
         // Keep this in sync with DevicePolicyManager.bindDeviceAdminServiceAsUser.
         IServiceConnection sd;
         if (conn == null) {
             throw new IllegalArgumentException("connection is null");
         }
+        if (handler != null && executor != null) {
+            throw new IllegalArgumentException("Handler and Executor both supplied");
+        }
         if (mPackageInfo != null) {
-            sd = mPackageInfo.getServiceDispatcher(conn, getOuterContext(), handler, flags);
+            if (executor != null) {
+                sd = mPackageInfo.getServiceDispatcher(conn, getOuterContext(), executor, flags);
+            } else {
+                sd = mPackageInfo.getServiceDispatcher(conn, getOuterContext(), handler, flags);
+            }
         } else {
             throw new RuntimeException("Not supported in system context");
         }
