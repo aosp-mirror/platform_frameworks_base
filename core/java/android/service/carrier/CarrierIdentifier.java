@@ -54,7 +54,7 @@ public class CarrierIdentifier implements Parcelable {
     private @Nullable String mGid1;
     private @Nullable String mGid2;
     private int mCarrierId = TelephonyManager.UNKNOWN_CARRIER_ID;
-    private int mPreciseCarrierId = TelephonyManager.UNKNOWN_CARRIER_ID;
+    private int mSpecificCarrierId = TelephonyManager.UNKNOWN_CARRIER_ID;
 
     public CarrierIdentifier(String mcc, String mnc, @Nullable String spn, @Nullable String imsi,
             @Nullable String gid1, @Nullable String gid2) {
@@ -71,12 +71,12 @@ public class CarrierIdentifier implements Parcelable {
      * @param gid2 group id level 2
      * @param carrierid carrier unique identifier {@link TelephonyManager#getSimCarrierId()}, used
      *                  to uniquely identify the carrier and look up the carrier configurations.
-     * @param preciseCarrierId precise carrier identifier
-     * {@link TelephonyManager#getSimPreciseCarrierId()}
+     * @param specificCarrierId specific carrier identifier
+     * {@link TelephonyManager#getSimSpecificCarrierId()}
      */
     public CarrierIdentifier(String mcc, String mnc, @Nullable String spn,
                              @Nullable String imsi, @Nullable String gid1, @Nullable String gid2,
-                             int carrierid, int preciseCarrierId) {
+                             int carrierid, int specificCarrierId) {
         mMcc = mcc;
         mMnc = mnc;
         mSpn = spn;
@@ -84,7 +84,7 @@ public class CarrierIdentifier implements Parcelable {
         mGid1 = gid1;
         mGid2 = gid2;
         mCarrierId = carrierid;
-        mPreciseCarrierId = preciseCarrierId;
+        mSpecificCarrierId = specificCarrierId;
     }
 
     /**
@@ -161,11 +161,17 @@ public class CarrierIdentifier implements Parcelable {
     }
 
     /**
-     * Returns the precise carrier id.
-     * @see TelephonyManager#getSimPreciseCarrierId()
+     * A specific carrier ID returns the fine-grained carrier ID of the current subscription.
+     * It can represent the fact that a carrier may be in effect an aggregation of other carriers
+     * (ie in an MVNO type scenario) where each of these specific carriers which are used to make
+     * up the actual carrier service may have different carrier configurations.
+     * A specific carrier ID could also be used, for example, in a scenario where a carrier requires
+     * different carrier configuration for different service offering such as a prepaid plan.
+     *
+     * @see TelephonyManager#getSimSpecificCarrierId()
      */
-    public int getPreciseCarrierId() {
-        return mPreciseCarrierId;
+    public int getSpecificCarrierId() {
+        return mSpecificCarrierId;
     }
 
     @Override
@@ -185,12 +191,12 @@ public class CarrierIdentifier implements Parcelable {
                 && Objects.equals(mGid1, that.mGid1)
                 && Objects.equals(mGid2, that.mGid2)
                 && Objects.equals(mCarrierId, that.mCarrierId)
-                && Objects.equals(mPreciseCarrierId, that.mPreciseCarrierId);
+                && Objects.equals(mSpecificCarrierId, that.mSpecificCarrierId);
     }
 
     @Override
     public int hashCode(){
-        return Objects.hash(mMcc, mMnc, mSpn, mImsi, mGid1, mGid2, mCarrierId, mPreciseCarrierId);
+        return Objects.hash(mMcc, mMnc, mSpn, mImsi, mGid1, mGid2, mCarrierId, mSpecificCarrierId);
     }
 
     @Override
@@ -207,7 +213,7 @@ public class CarrierIdentifier implements Parcelable {
         out.writeString(mGid1);
         out.writeString(mGid2);
         out.writeInt(mCarrierId);
-        out.writeInt(mPreciseCarrierId);
+        out.writeInt(mSpecificCarrierId);
     }
 
     @Override
@@ -220,7 +226,7 @@ public class CarrierIdentifier implements Parcelable {
               + ",gid1=" + mGid1
               + ",gid2=" + mGid2
               + ",carrierid=" + mCarrierId
-              + ",mPreciseCarrierId=" + mPreciseCarrierId
+              + ",specificCarrierId=" + mSpecificCarrierId
               + "}";
     }
 
@@ -233,7 +239,7 @@ public class CarrierIdentifier implements Parcelable {
         mGid1 = in.readString();
         mGid2 = in.readString();
         mCarrierId = in.readInt();
-        mPreciseCarrierId = in.readInt();
+        mSpecificCarrierId = in.readInt();
     }
 
     /** @hide */
