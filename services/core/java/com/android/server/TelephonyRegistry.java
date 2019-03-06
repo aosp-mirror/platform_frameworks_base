@@ -1549,6 +1549,13 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 log("notifyPreciseCallState: mCallQuality is null, skipping call attributes");
                 notifyCallAttributes = false;
             } else {
+                // If the precise call state is no longer active, reset the call network type and
+                // call quality.
+                if (mPreciseCallState.getForegroundCallState()
+                        != PreciseCallState.PRECISE_CALL_STATE_ACTIVE) {
+                    mCallNetworkType = TelephonyManager.NETWORK_TYPE_UNKNOWN;
+                    mCallQuality = new CallQuality();
+                }
                 mCallAttributes = new CallAttributes(mPreciseCallState, mCallNetworkType,
                         mCallQuality);
             }
