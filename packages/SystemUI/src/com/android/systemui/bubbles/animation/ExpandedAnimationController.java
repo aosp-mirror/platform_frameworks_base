@@ -266,8 +266,8 @@ public class ExpandedAnimationController
     @Override
     SpringForce getSpringForce(DynamicAnimation.ViewProperty property, View view) {
         return new SpringForce()
-                .setStiffness(SpringForce.STIFFNESS_LOW)
-                .setDampingRatio(SpringForce.DAMPING_RATIO_LOW_BOUNCY);
+                .setDampingRatio(SpringForce.DAMPING_RATIO_LOW_BOUNCY)
+                .setStiffness(SpringForce.STIFFNESS_LOW);
     }
 
     @Override
