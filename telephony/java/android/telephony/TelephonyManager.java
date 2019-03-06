@@ -10317,6 +10317,10 @@ public class TelephonyManager {
      * <p>Requires Permission:
      * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE} or that the
      * calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
+     *
+     * Note: with only carrier privileges, it is not allowed to switch from multi-sim
+     * to single-sim
+     *
      * @param numOfSims number of live SIMs we want to switch to
      * @throws android.os.RemoteException
      */
