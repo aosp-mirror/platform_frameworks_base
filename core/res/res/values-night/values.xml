@@ -24,6 +24,7 @@
         <item name="colorError">@color/error_color_device_default_dark</item>
         <item name="colorControlNormal">?attr/textColorPrimary</item>
         <item name="alertDialogTheme">@style/Theme.DeviceDefault.Dialog.Alert</item>
+        <item name="forceDarkAllowed">false</item>
 
         <!-- QS panel background -->
         <item name="colorBackgroundFloating">@color/black</item>
