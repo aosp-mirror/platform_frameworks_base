@@ -2705,7 +2705,7 @@ public class UserManager {
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
-    public void setUserName(String name) {
+    public void setUserName(@Nullable String name) {
         setUserName(getUserHandle(), name);
     }
 
@@ -2732,7 +2732,7 @@ public class UserManager {
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
-    public void setUserIcon(Bitmap icon) {
+    public void setUserIcon(@NonNull Bitmap icon) {
         setUserIcon(getUserHandle(), icon);
     }
 
@@ -2772,7 +2772,7 @@ public class UserManager {
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
-    public Bitmap getUserIcon() {
+    public @Nullable Bitmap getUserIcon() {
         return getUserIcon(getUserHandle());
     }
 
