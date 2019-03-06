@@ -2130,7 +2130,7 @@ public class PackageInstaller {
          * Text description of the error code returned by {@code getStagedSessionErrorCode}, or
          * empty string if no error was encountered.
          */
-        public String getStagedSessionErrorMessage() {
+        public @NonNull String getStagedSessionErrorMessage() {
             checkSessionIsStaged();
             return mStagedSessionErrorMessage;
         }
