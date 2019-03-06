@@ -17,6 +17,7 @@
 package android.os;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.content.ContentResolver;
@@ -240,6 +241,7 @@ public abstract class VibrationEffect implements Parcelable {
      *
      * @return The desired effect.
      */
+    @NonNull
     public static VibrationEffect createPredefined(@EffectType int effectId) {
         return get(effectId, true);
     }
