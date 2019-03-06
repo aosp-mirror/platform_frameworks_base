@@ -144,6 +144,16 @@ public final class Call {
     public static final String EXTRA_LAST_EMERGENCY_CALLBACK_TIME_MILLIS =
             "android.telecom.extra.LAST_EMERGENCY_CALLBACK_TIME_MILLIS";
 
+
+    /**
+     * Extra key used to indicate whether a {@link CallScreeningService} has requested to silence
+     * the ringtone for a call.  If the {@link InCallService} declares
+     * {@link TelecomManager#METADATA_IN_CALL_SERVICE_RINGING} in its manifest, it should not
+     * play a ringtone for an incoming call with this extra key set.
+     */
+    public static final String EXTRA_SILENT_RINGING_REQUESTED =
+            "android.telecom.extra.SILENT_RINGING_REQUESTED";
+
     /**
      * Call event sent from a {@link Call} via {@link #sendCallEvent(String, Bundle)} to inform
      * Telecom that the user has requested that the current {@link Call} should be handed over
