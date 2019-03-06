@@ -113,7 +113,8 @@ public class BarChartPreferenceTest {
         final BarChartInfo barChartInfo = new BarChartInfo.Builder()
                 .setTitle(R.string.debug_app)
                 .setDetails(R.string.debug_app)
-                .addBarViewInfo(new BarViewInfo(mIcon, 10 /* barNumber */, R.string.debug_app))
+                .addBarViewInfo(
+                        new BarViewInfo(mIcon, 10 /* barNumber */, R.string.debug_app, null))
                 .build();
 
         mPreference.initializeBarChart(barChartInfo);
@@ -128,7 +129,8 @@ public class BarChartPreferenceTest {
         // We don't call BarChartInfo.Builder#setDetails yet.
         final BarChartInfo barChartInfo = new BarChartInfo.Builder()
                 .setTitle(R.string.debug_app)
-                .addBarViewInfo(new BarViewInfo(mIcon, 10 /* barNumber */, R.string.debug_app))
+                .addBarViewInfo(
+                        new BarViewInfo(mIcon, 10 /* barNumber */, R.string.debug_app, null))
                 .build();
 
         mPreference.initializeBarChart(barChartInfo);
@@ -144,7 +146,8 @@ public class BarChartPreferenceTest {
                 .setDetails(R.string.debug_app)
                 .setDetailsOnClickListener(v -> {
                 })
-                .addBarViewInfo(new BarViewInfo(mIcon, 10 /* barNumber */, R.string.debug_app))
+                .addBarViewInfo(
+                        new BarViewInfo(mIcon, 10 /* barNumber */, R.string.debug_app, null))
                 .build();
 
         mPreference.initializeBarChart(barChartInfo);
@@ -157,7 +160,7 @@ public class BarChartPreferenceTest {
     @Test
     public void setBarViewInfos_oneBarViewInfoSet_shouldShowOneBarView() {
         final BarViewInfo[] barViewsInfo = new BarViewInfo[]{
-                new BarViewInfo(mIcon, 10 /* barNumber */, R.string.debug_app)
+                new BarViewInfo(mIcon, 10 /* barNumber */, R.string.debug_app, null)
         };
 
         mPreference.initializeBarChart(mBarChartInfo);
@@ -175,8 +178,8 @@ public class BarChartPreferenceTest {
     @Test
     public void setBarViewInfos_twoBarViewInfosSet_shouldShowTwoBarViews() {
         final BarViewInfo[] barViewsInfo = new BarViewInfo[]{
-                new BarViewInfo(mIcon, 20 /* barNumber */, R.string.debug_app),
-                new BarViewInfo(mIcon, 10 /* barNumber */, R.string.debug_app)
+                new BarViewInfo(mIcon, 20 /* barNumber */, R.string.debug_app, null),
+                new BarViewInfo(mIcon, 10 /* barNumber */, R.string.debug_app, null)
         };
 
         mPreference.initializeBarChart(mBarChartInfo);
@@ -195,9 +198,9 @@ public class BarChartPreferenceTest {
     @Test
     public void setBarViewInfos_threeBarViewInfosSet_shouldShowThreeBarViews() {
         final BarViewInfo[] barViewsInfo = new BarViewInfo[]{
-                new BarViewInfo(mIcon, 20 /* barNumber */, R.string.debug_app),
-                new BarViewInfo(mIcon, 10 /* barNumber */, R.string.debug_app),
-                new BarViewInfo(mIcon, 5 /* barNumber */, R.string.debug_app)
+                new BarViewInfo(mIcon, 20 /* barNumber */, R.string.debug_app, null),
+                new BarViewInfo(mIcon, 10 /* barNumber */, R.string.debug_app, null),
+                new BarViewInfo(mIcon, 5 /* barNumber */, R.string.debug_app, null)
         };
 
         mPreference.initializeBarChart(mBarChartInfo);
@@ -217,10 +220,10 @@ public class BarChartPreferenceTest {
     @Test
     public void setBarViewInfos_fourBarViewInfosSet_shouldShowFourBarViews() {
         final BarViewInfo[] barViewsInfo = new BarViewInfo[]{
-                new BarViewInfo(mIcon, 20 /* barNumber */, R.string.debug_app),
-                new BarViewInfo(mIcon, 10 /* barNumber */, R.string.debug_app),
-                new BarViewInfo(mIcon, 5 /* barNumber */, R.string.debug_app),
-                new BarViewInfo(mIcon, 2 /* barNumber */, R.string.debug_app),
+                new BarViewInfo(mIcon, 20 /* barNumber */, R.string.debug_app, null),
+                new BarViewInfo(mIcon, 10 /* barNumber */, R.string.debug_app, null),
+                new BarViewInfo(mIcon, 5 /* barNumber */, R.string.debug_app, null),
+                new BarViewInfo(mIcon, 2 /* barNumber */, R.string.debug_app, null),
         };
 
         mPreference.initializeBarChart(mBarChartInfo);
@@ -242,11 +245,11 @@ public class BarChartPreferenceTest {
         thrown.expect(IllegalStateException.class);
 
         final BarViewInfo[] barViewsInfo = new BarViewInfo[]{
-                new BarViewInfo(mIcon, 30 /* barNumber */, R.string.debug_app),
-                new BarViewInfo(mIcon, 50 /* barNumber */, R.string.debug_app),
-                new BarViewInfo(mIcon, 5 /* barNumber */, R.string.debug_app),
-                new BarViewInfo(mIcon, 10 /* barNumber */, R.string.debug_app),
-                new BarViewInfo(mIcon, 70 /* barNumber */, R.string.debug_app),
+                new BarViewInfo(mIcon, 30 /* barNumber */, R.string.debug_app, null),
+                new BarViewInfo(mIcon, 50 /* barNumber */, R.string.debug_app, null),
+                new BarViewInfo(mIcon, 5 /* barNumber */, R.string.debug_app, null),
+                new BarViewInfo(mIcon, 10 /* barNumber */, R.string.debug_app, null),
+                new BarViewInfo(mIcon, 70 /* barNumber */, R.string.debug_app, null),
         };
 
         mPreference.setBarViewInfos(barViewsInfo);
@@ -255,10 +258,10 @@ public class BarChartPreferenceTest {
     @Test
     public void setBarViewInfos_barViewInfosSet_shouldBeSortedInDescending() {
         final BarViewInfo[] barViewsInfo = new BarViewInfo[]{
-                new BarViewInfo(mIcon, 30 /* barNumber */, R.string.debug_app),
-                new BarViewInfo(mIcon, 50 /* barNumber */, R.string.debug_app),
-                new BarViewInfo(mIcon, 5 /* barNumber */, R.string.debug_app),
-                new BarViewInfo(mIcon, 10 /* barNumber */, R.string.debug_app),
+                new BarViewInfo(mIcon, 30 /* barNumber */, R.string.debug_app, null),
+                new BarViewInfo(mIcon, 50 /* barNumber */, R.string.debug_app, null),
+                new BarViewInfo(mIcon, 5 /* barNumber */, R.string.debug_app, null),
+                new BarViewInfo(mIcon, 10 /* barNumber */, R.string.debug_app, null),
         };
 
         mPreference.initializeBarChart(mBarChartInfo);
@@ -278,7 +281,7 @@ public class BarChartPreferenceTest {
     @Test
     public void setBarViewInfos_validBarViewSummarySet_barViewShouldShowSummary() {
         final BarViewInfo[] barViewsInfo = new BarViewInfo[]{
-                new BarViewInfo(mIcon, 10 /* barNumber */, R.string.debug_app),
+                new BarViewInfo(mIcon, 10 /* barNumber */, R.string.debug_app, null),
         };
 
         mPreference.initializeBarChart(mBarChartInfo);
@@ -291,7 +294,8 @@ public class BarChartPreferenceTest {
 
     @Test
     public void setBarViewInfos_clickListenerForBarViewSet_barViewShouldHaveClickListener() {
-        final BarViewInfo viewInfo = new BarViewInfo(mIcon, 30 /* barNumber */, R.string.debug_app);
+        final BarViewInfo viewInfo = new BarViewInfo(mIcon, 30 /* barNumber */, R.string.debug_app,
+                null);
         viewInfo.setClickListener(v -> {
         });
         final BarViewInfo[] barViewsInfo = new BarViewInfo[]{viewInfo};
@@ -306,7 +310,8 @@ public class BarChartPreferenceTest {
 
     @Test
     public void onBindViewHolder_loadingStateIsTrue_shouldHideAllViews() {
-        final BarViewInfo viewInfo = new BarViewInfo(mIcon, 30 /* barNumber */, R.string.debug_app);
+        final BarViewInfo viewInfo = new BarViewInfo(mIcon, 30 /* barNumber */, R.string.debug_app,
+                null);
         viewInfo.setClickListener(v -> {
         });
         final BarViewInfo[] barViewsInfo = new BarViewInfo[]{viewInfo};
@@ -322,7 +327,8 @@ public class BarChartPreferenceTest {
 
     @Test
     public void onBindViewHolder_loadingStateIsFalse_shouldInitAnyView() {
-        final BarViewInfo viewInfo = new BarViewInfo(mIcon, 30 /* barNumber */, R.string.debug_app);
+        final BarViewInfo viewInfo = new BarViewInfo(mIcon, 30 /* barNumber */, R.string.debug_app,
+                null);
         viewInfo.setClickListener(v -> {
         });
         final BarViewInfo[] barViewsInfo = new BarViewInfo[]{viewInfo};

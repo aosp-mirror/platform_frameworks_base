@@ -74,6 +74,7 @@ public class BarView extends LinearLayout {
         // For now, we use the bar number as title.
         mBarTitle.setText(Integer.toString(barViewInfo.getHeight()));
         mBarSummary.setText(barViewInfo.getSummary());
+        mIcon.setContentDescription(barViewInfo.getContentDescription());
     }
 
     @VisibleForTesting

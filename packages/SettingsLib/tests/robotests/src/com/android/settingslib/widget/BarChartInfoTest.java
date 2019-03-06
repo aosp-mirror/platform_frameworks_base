@@ -72,7 +72,8 @@ public class BarChartInfoTest {
         final BarViewInfo barViewInfo = new BarViewInfo(
                 null /* icon */,
                 50,
-                mTitle);
+                mTitle,
+                null);
 
         final BarChartInfo mBarChartInfo = new BarChartInfo.Builder()
                 .setTitle(mTitle)
@@ -91,7 +92,8 @@ public class BarChartInfoTest {
         final BarViewInfo barViewInfo = new BarViewInfo(
                 null /* icon */,
                 50,
-                mTitle);
+                mTitle,
+                null);
         final BarChartInfo mBarChartInfo = new BarChartInfo.Builder()
                 .setTitle(mTitle)
                 .setDetails(mDetails)
@@ -113,7 +115,8 @@ public class BarChartInfoTest {
         final BarViewInfo barViewInfo = new BarViewInfo(
                 null /* icon */,
                 50,
-                mTitle);
+                mTitle,
+                null);
         new BarChartInfo.Builder()
                 .setTitle(mTitle)
                 .setDetails(mDetails)
