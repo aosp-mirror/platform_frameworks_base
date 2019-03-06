@@ -826,7 +826,6 @@ def verify_method_names(clazz):
 @verifier
 def verify_callbacks(clazz):
     """Verify Callback classes.
-    All callback classes must be abstract.
     All methods must follow onFoo() naming style."""
     if clazz.fullname == "android.speech.tts.SynthesisCallback": return
 
@@ -836,9 +835,6 @@ def verify_callbacks(clazz):
         warn(clazz, None, "L1", "Class should be named FooCallback")
 
     if clazz.name.endswith("Callback"):
-        if "interface" in clazz.split:
-            error(clazz, None, "CL3", "Callbacks must be abstract class to enable extension in future API levels")
-
         for m in clazz.methods:
             if not re.match("on[A-Z][a-z]*", m.name):
                 error(clazz, m, "L1", "Callback method names must be onFoo() style")
