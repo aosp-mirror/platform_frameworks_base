@@ -281,6 +281,15 @@ class ManifestVisitor : public BaseVisitor {
             AddClass(node->line_number, result.value(), "");
           }
         }
+
+        attr = node->FindAttribute(xml::kSchemaAndroid, "zygotePreloadName");
+        if (attr) {
+          Maybe<std::string> result = util::GetFullyQualifiedClassName(package_, attr->value);
+          if (result) {
+            AddClass(node->line_number, result.value(), "");
+          }
+        }
+
         if (main_dex_only_) {
           xml::Attribute* default_process = node->FindAttribute(xml::kSchemaAndroid, "process");
           if (default_process) {
