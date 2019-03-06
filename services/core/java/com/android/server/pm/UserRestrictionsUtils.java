@@ -120,6 +120,7 @@ public class UserRestrictionsUtils {
             UserManager.DISALLOW_UNMUTE_DEVICE,
             UserManager.DISALLOW_AUTOFILL,
             UserManager.DISALLOW_CONTENT_CAPTURE,
+            UserManager.DISALLOW_CONTENT_SUGGESTIONS,
             UserManager.DISALLOW_USER_SWITCH,
             UserManager.DISALLOW_UNIFIED_PASSWORD,
             UserManager.DISALLOW_CONFIG_LOCATION,
