@@ -19,6 +19,7 @@ package android.telephony.ims;
 import android.Manifest;
 import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.WorkerThread;
@@ -177,7 +178,7 @@ public class ProvisioningManager {
      * @see android.telephony.SubscriptionManager#getActiveSubscriptionInfoList()
      * @throws IllegalArgumentException if the subscription is invalid.
      */
-    public static ProvisioningManager createForSubscriptionId(int subId) {
+    public static @NonNull ProvisioningManager createForSubscriptionId(int subId) {
         if (!SubscriptionManager.isValidSubscriptionId(subId)) {
             throw new IllegalArgumentException("Invalid subscription ID");
         }
@@ -206,7 +207,7 @@ public class ProvisioningManager {
      * reason.
      */
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
-    public void registerProvisioningChangedCallback(@CallbackExecutor Executor executor,
+    public void registerProvisioningChangedCallback(@NonNull @CallbackExecutor Executor executor,
             @NonNull Callback callback) throws ImsException {
         callback.setExecutor(executor);
         try {
@@ -271,7 +272,7 @@ public class ProvisioningManager {
      */
     @WorkerThread
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
-    public String getProvisioningStringValue(int key) {
+    public @Nullable String getProvisioningStringValue(int key) {
         try {
             return getITelephony().getImsProvisioningString(mSubId, key);
         } catch (RemoteException e) {
@@ -313,7 +314,7 @@ public class ProvisioningManager {
     @WorkerThread
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
     public @ImsConfigImplBase.SetConfigResult int setProvisioningStringValue(int key,
-            String value) {
+            @NonNull String value) {
         try {
             return getITelephony().setImsProvisioningString(mSubId, key, value);
         } catch (RemoteException e) {
@@ -333,6 +334,7 @@ public class ProvisioningManager {
      * @see CarrierConfigManager#KEY_CARRIER_VOLTE_PROVISIONING_REQUIRED_BOOL
      * @param isProvisioned true if the device is provisioned for UT over IMS, false otherwise.
      */
+    @WorkerThread
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
     public void setProvisioningStatusForCapability(
             @MmTelFeature.MmTelCapabilities.MmTelCapability int capability,
@@ -359,6 +361,7 @@ public class ProvisioningManager {
      * provisioning, false if the capability does require provisioning and has not been
      * provisioned yet.
      */
+    @WorkerThread
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public boolean getProvisioningStatusForCapability(
             @MmTelFeature.MmTelCapabilities.MmTelCapability int capability,
