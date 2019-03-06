@@ -26,6 +26,7 @@ import android.util.Log;
 import com.android.internal.util.Preconditions;
 
 import java.io.PrintWriter;
+import java.util.List;
 
 /**
  * Helper class for keeping track of whitelisted packages/activities.
@@ -90,6 +91,18 @@ public final class WhitelistHelper {
     }
 
     /**
+     * Helper to use {@link #setWhitelist(ArraySet, ArraySet)} with {@link List Lists}.
+     */
+    public void setWhitelist(@Nullable List<String> packageNames,
+            @Nullable List<ComponentName> components) {
+        final ArraySet<String> packageNamesSet = packageNames == null ? null
+                : new ArraySet<>(packageNames);
+        final ArraySet<ComponentName> componentssSet = components == null ? null
+                : new ArraySet<>(components);
+        setWhitelist(packageNamesSet, componentssSet);
+    }
+
+    /**
      * Returns {@code true} if the entire package is whitelisted.
      */
     public boolean isWhitelisted(@NonNull String packageName) {
@@ -141,13 +154,14 @@ public final class WhitelistHelper {
             return;
         }
 
+        final String prefix2 = prefix + "  ";
         final int size = mWhitelistedPackages.size();
         pw.print(prefix); pw.print(message); pw.print(": "); pw.print(size);
         pw.println(" packages");
         for (int i = 0; i < mWhitelistedPackages.size(); i++) {
             final String packageName = mWhitelistedPackages.keyAt(i);
             final ArraySet<ComponentName> components = mWhitelistedPackages.valueAt(i);
-            pw.print(prefix); pw.print(i); pw.print("."); pw.print(packageName); pw.print(": ");
+            pw.print(prefix2); pw.print(i); pw.print("."); pw.print(packageName); pw.print(": ");
             if (components == null) {
                 pw.println("(whole package)");
                 continue;

@@ -283,9 +283,10 @@ final class ContentCapturePerUserService
         // TODO(b/122595322): add CTS test for when it's null
         synchronized (mLock) {
             if (mMaster.verbose) {
-                Slog.v(TAG, "whitelisting packages: " + packages + "and activities: " + components);
+                Slog.v(TAG, "whitelisting packages: " + packages + " and activities: "
+                        + components);
             }
-            mWhitelistHelper.setWhitelist(new ArraySet<>(packages), new ArraySet<>(components));
+            mWhitelistHelper.setWhitelist(packages, components);
         }
     }
 
@@ -441,7 +442,7 @@ final class ContentCapturePerUserService
             mRemoteService.dump(prefix2, pw);
         }
 
-        pw.print(prefix); pw.print("Whitelist: "); pw.println(mWhitelistHelper);
+        mWhitelistHelper.dump(prefix, "Whitelist", pw);
 
         if (mSessions.isEmpty()) {
             pw.print(prefix); pw.println("no sessions");
