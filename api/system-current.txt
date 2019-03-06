@@ -6221,10 +6221,10 @@ package android.security.keystore.recovery {
   public static class KeyChainProtectionParams.Builder {
     ctor public KeyChainProtectionParams.Builder();
     method @NonNull public android.security.keystore.recovery.KeyChainProtectionParams build();
-    method public android.security.keystore.recovery.KeyChainProtectionParams.Builder setKeyDerivationParams(@NonNull android.security.keystore.recovery.KeyDerivationParams);
-    method public android.security.keystore.recovery.KeyChainProtectionParams.Builder setLockScreenUiFormat(int);
-    method public android.security.keystore.recovery.KeyChainProtectionParams.Builder setSecret(@NonNull byte[]);
-    method public android.security.keystore.recovery.KeyChainProtectionParams.Builder setUserSecretType(int);
+    method @NonNull public android.security.keystore.recovery.KeyChainProtectionParams.Builder setKeyDerivationParams(@NonNull android.security.keystore.recovery.KeyDerivationParams);
+    method @NonNull public android.security.keystore.recovery.KeyChainProtectionParams.Builder setLockScreenUiFormat(int);
+    method @NonNull public android.security.keystore.recovery.KeyChainProtectionParams.Builder setSecret(@NonNull byte[]);
+    method @NonNull public android.security.keystore.recovery.KeyChainProtectionParams.Builder setUserSecretType(int);
   }
 
   public final class KeyChainSnapshot implements android.os.Parcelable {
@@ -6305,9 +6305,9 @@ package android.security.keystore.recovery {
   public static class WrappedApplicationKey.Builder {
     ctor public WrappedApplicationKey.Builder();
     method @NonNull public android.security.keystore.recovery.WrappedApplicationKey build();
-    method public android.security.keystore.recovery.WrappedApplicationKey.Builder setAlias(@NonNull String);
-    method public android.security.keystore.recovery.WrappedApplicationKey.Builder setEncryptedKeyMaterial(@NonNull byte[]);
-    method public android.security.keystore.recovery.WrappedApplicationKey.Builder setMetadata(@Nullable byte[]);
+    method @NonNull public android.security.keystore.recovery.WrappedApplicationKey.Builder setAlias(@NonNull String);
+    method @NonNull public android.security.keystore.recovery.WrappedApplicationKey.Builder setEncryptedKeyMaterial(@NonNull byte[]);
+    method @NonNull public android.security.keystore.recovery.WrappedApplicationKey.Builder setMetadata(@Nullable byte[]);
   }
 
 }

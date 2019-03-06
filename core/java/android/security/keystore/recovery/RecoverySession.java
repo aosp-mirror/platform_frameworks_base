@@ -193,7 +193,7 @@ public class RecoverySession implements AutoCloseable {
      *
      * @hide
      */
-    String getSessionId() {
+    @NonNull String getSessionId() {
         return mSessionId;
     }
 
