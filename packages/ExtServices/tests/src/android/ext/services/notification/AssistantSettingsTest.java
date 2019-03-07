@@ -120,7 +120,7 @@ public class AssistantSettingsTest {
     }
 
     @Test
-    public void testGenerateRepliesEmptyFlag() {
+    public void testGenerateRepliesNullFlag() {
         runWithShellPermissionIdentity(() -> setProperty(
                 DeviceConfig.NAMESPACE_SYSTEMUI,
                 SystemUiDeviceConfigFlags.NAS_GENERATE_REPLIES,
@@ -136,12 +136,12 @@ public class AssistantSettingsTest {
         runWithShellPermissionIdentity(() -> setProperty(
                 DeviceConfig.NAMESPACE_SYSTEMUI,
                 SystemUiDeviceConfigFlags.NAS_GENERATE_REPLIES,
-                "",
+                null,
                 false /* makeDefault */));
         mAssistantSettings.onDeviceConfigPropertyChanged(
                 DeviceConfig.NAMESPACE_SYSTEMUI,
                 SystemUiDeviceConfigFlags.NAS_GENERATE_REPLIES,
-                "");
+                null);
 
         // Go back to the default value.
         assertTrue(mAssistantSettings.mGenerateReplies);
@@ -178,7 +178,7 @@ public class AssistantSettingsTest {
     }
 
     @Test
-    public void testGenerateActionsEmptyFlag() {
+    public void testGenerateActionsNullFlag() {
         runWithShellPermissionIdentity(() -> setProperty(
                 DeviceConfig.NAMESPACE_SYSTEMUI,
                 SystemUiDeviceConfigFlags.NAS_GENERATE_ACTIONS,
@@ -194,12 +194,12 @@ public class AssistantSettingsTest {
         runWithShellPermissionIdentity(() -> setProperty(
                 DeviceConfig.NAMESPACE_SYSTEMUI,
                 SystemUiDeviceConfigFlags.NAS_GENERATE_ACTIONS,
-                "",
+                null,
                 false /* makeDefault */));
         mAssistantSettings.onDeviceConfigPropertyChanged(
                 DeviceConfig.NAMESPACE_SYSTEMUI,
                 SystemUiDeviceConfigFlags.NAS_GENERATE_ACTIONS,
-                "");
+                null);
 
         // Go back to the default value.
         assertTrue(mAssistantSettings.mGenerateActions);
