@@ -127,8 +127,7 @@ public class AttentionManagerService extends SystemService {
     }
 
     private boolean isServiceEnabled() {
-        final String enabled = DeviceConfig.getProperty(NAMESPACE, SERVICE_ENABLED);
-        return enabled == null ? DEFAULT_SERVICE_ENABLED : "true".equals(enabled);
+        return DeviceConfig.getBoolean(NAMESPACE, SERVICE_ENABLED, DEFAULT_SERVICE_ENABLED);
     }
 
     /**
