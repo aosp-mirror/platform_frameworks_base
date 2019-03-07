@@ -22,6 +22,8 @@ import android.os.Bundle;
  * @hide
  */
 oneway interface IAccountManagerResponse {
+    @UnsupportedAppUsage
     void onResult(in Bundle value);
+    @UnsupportedAppUsage
     void onError(int errorCode, String errorMessage);
 }

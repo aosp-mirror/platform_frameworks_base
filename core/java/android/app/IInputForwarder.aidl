@@ -25,5 +25,6 @@ import android.view.InputEvent;
  * @hide
  */
 interface IInputForwarder {
+    @UnsupportedAppUsage
     boolean forwardEvent(in InputEvent event);
 }
