@@ -230,11 +230,8 @@ public final class AppCompactor {
      */
     @GuardedBy("mPhenotypeFlagLock")
     private void updateUseCompaction() {
-        String useCompactionFlag =
-                DeviceConfig.getProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
-                    KEY_USE_COMPACTION);
-        mUseCompaction = TextUtils.isEmpty(useCompactionFlag)
-                ? DEFAULT_USE_COMPACTION : Boolean.parseBoolean(useCompactionFlag);
+        mUseCompaction = DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                    KEY_USE_COMPACTION, DEFAULT_USE_COMPACTION);
         if (mUseCompaction && !mCompactionThread.isAlive()) {
             mCompactionThread.start();
             mCompactionHandler = new MemCompactionHandler();
@@ -243,28 +240,11 @@ public final class AppCompactor {
 
     @GuardedBy("mPhenotypeFlagLock")
     private void updateCompactionActions() {
-        String compactAction1Flag =
-                DeviceConfig.getProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
-                        KEY_COMPACT_ACTION_1);
-        String compactAction2Flag =
-                DeviceConfig.getProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
-                        KEY_COMPACT_ACTION_2);
+        int compactAction1 = DeviceConfig.getInt(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                KEY_COMPACT_ACTION_1, DEFAULT_COMPACT_ACTION_1);
 
-        int compactAction1 = DEFAULT_COMPACT_ACTION_1;
-        try {
-            compactAction1 = TextUtils.isEmpty(compactAction1Flag)
-                    ? DEFAULT_COMPACT_ACTION_1 : Integer.parseInt(compactAction1Flag);
-        } catch (NumberFormatException e) {
-          // Do nothing, leave default.
-        }
-
-        int compactAction2 = DEFAULT_COMPACT_ACTION_2;
-        try {
-            compactAction2 = TextUtils.isEmpty(compactAction2Flag)
-                    ? DEFAULT_COMPACT_ACTION_2 : Integer.parseInt(compactAction2Flag);
-        } catch (NumberFormatException e) {
-            // Do nothing, leave default.
-        }
+        int compactAction2 = DeviceConfig.getInt(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                KEY_COMPACT_ACTION_2, DEFAULT_COMPACT_ACTION_2);
 
         mCompactActionSome = compactActionIntToString(compactAction1);
         mCompactActionFull = compactActionIntToString(compactAction2);
@@ -312,14 +292,8 @@ public final class AppCompactor {
 
     @GuardedBy("mPhenotypeFlagLock")
     private void updateStatsdSampleRate() {
-        String sampleRateFlag = DeviceConfig.getProperty(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
-                KEY_COMPACT_STATSD_SAMPLE_RATE);
-        try {
-            mStatsdSampleRate = TextUtils.isEmpty(sampleRateFlag)
-                    ? DEFAULT_STATSD_SAMPLE_RATE : Float.parseFloat(sampleRateFlag);
-        } catch (NumberFormatException e) {
-            mStatsdSampleRate = DEFAULT_STATSD_SAMPLE_RATE;
-        }
+        mStatsdSampleRate = DeviceConfig.getFloat(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                KEY_COMPACT_STATSD_SAMPLE_RATE, DEFAULT_STATSD_SAMPLE_RATE);
         mStatsdSampleRate = Math.min(1.0f, Math.max(0.0f, mStatsdSampleRate));
     }
 
