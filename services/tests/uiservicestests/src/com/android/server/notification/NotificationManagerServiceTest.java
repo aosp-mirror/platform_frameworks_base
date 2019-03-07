@@ -3660,7 +3660,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 .thenReturn(new String[] {"a", "b", "c"});
         when(mContext.getResources()).thenReturn(mResources);
 
-        assertEquals(false, mService.canUseManagedServices(null));
+        assertEquals(false, mService.canUseManagedServices(null, 0, null));
     }
 
     @Test
@@ -3671,7 +3671,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 .thenReturn(new String[] {"a", "b", "c"});
         when(mContext.getResources()).thenReturn(mResources);
 
-        assertEquals(true, mService.canUseManagedServices("b"));
+        assertEquals(true, mService.canUseManagedServices("b", 0, null));
     }
 
     @Test
@@ -3682,7 +3682,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 .thenReturn(new String[] {"a", "b", "c"});
         when(mContext.getResources()).thenReturn(mResources);
 
-        assertEquals(false, mService.canUseManagedServices("d"));
+        assertEquals(false, mService.canUseManagedServices("d", 0, null));
     }
 
     @Test
@@ -3693,7 +3693,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 .thenReturn(new String[] {"a", "b", "c"});
         when(mContext.getResources()).thenReturn(mResources);
 
-        assertEquals(true, mService.canUseManagedServices("d"));
+        assertEquals(true, mService.canUseManagedServices("d", 0, null));
     }
 
     @Test
@@ -3704,7 +3704,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 .thenReturn(new String[] {"a", "b", "c"});
         when(mContext.getResources()).thenReturn(mResources);
 
-        assertEquals(true, mService.canUseManagedServices("d"));
+        assertEquals(true, mService.canUseManagedServices("d", 0 , null));
     }
 
     @Test
@@ -3715,7 +3715,28 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 .thenReturn(new String[] {"a", "b", "c"});
         when(mContext.getResources()).thenReturn(mResources);
 
-        assertEquals(true, mService.canUseManagedServices("d"));
+        assertEquals(true, mService.canUseManagedServices("d", 0, null));
+    }
+
+    @Test
+    public void testCanUseManagedServices_hasPermission() throws Exception {
+        when(mPackageManager.checkPermission("perm", "pkg", 0))
+                .thenReturn(PackageManager.PERMISSION_GRANTED);
+
+        assertEquals(true, mService.canUseManagedServices("pkg", 0, "perm"));
+    }
+
+    @Test
+    public void testCanUseManagedServices_noPermission() throws Exception {
+        when(mPackageManager.checkPermission("perm", "pkg", 0))
+                .thenReturn(PackageManager.PERMISSION_DENIED);
+
+        assertEquals(false, mService.canUseManagedServices("pkg", 0, "perm"));
+    }
+
+    @Test
+    public void testCanUseManagedServices_permDoesNotMatter() {
+        assertEquals(true, mService.canUseManagedServices("pkg", 0, null));
     }
 
     @Test

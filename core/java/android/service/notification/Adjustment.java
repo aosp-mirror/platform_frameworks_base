@@ -32,7 +32,10 @@ import android.os.UserHandle;
  * realizes on the notification rankings.
  *
  * Notifications affected by the Adjustment will be re-ranked if necessary.
+ *
+ * @hide
  */
+@SystemApi
 public final class Adjustment implements Parcelable {
     private final String mPackage;
     private final String mKey;

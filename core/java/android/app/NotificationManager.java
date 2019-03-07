@@ -1168,7 +1168,9 @@ public class NotificationManager {
      * matches the system intent action
      * TODO: STOPSHIP: Add correct intent
      * {@link android.provider.Settings#ACTION_MANAGE_DEFAULT_APPS_SETTINGS}.
+     * @hide
      */
+    @SystemApi
     public boolean isNotificationAssistantAccessGranted(@NonNull ComponentName assistant) {
         INotificationManager service = getService();
         try {

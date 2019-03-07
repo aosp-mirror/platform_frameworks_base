@@ -22,6 +22,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
+import android.annotation.SystemApi;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.admin.DevicePolicyManager;
@@ -60,7 +61,9 @@ import java.util.List;
  * <p>
  *     All callbacks are called on the main thread.
  * </p>
+ * @hide
  */
+@SystemApi
 public abstract class NotificationAssistantService extends NotificationListenerService {
     private static final String TAG = "NotificationAssistants";
 
@@ -112,8 +115,8 @@ public abstract class NotificationAssistantService extends NotificationListenerS
      * @param sbn the notification to snooze
      * @param snoozeCriterionId the {@link SnoozeCriterion#getId()} representing a device context.
      */
-    abstract public void onNotificationSnoozedUntilContext(StatusBarNotification sbn,
-            String snoozeCriterionId);
+    abstract public void onNotificationSnoozedUntilContext(@NonNull StatusBarNotification sbn,
+            @NonNull String snoozeCriterionId);
 
     /**
      * A notification was posted by an app. Called before post.
@@ -124,7 +127,7 @@ public abstract class NotificationAssistantService extends NotificationListenerS
      * @param sbn the new notification
      * @return an adjustment or null to take no action, within 100ms.
      */
-    abstract public Adjustment onNotificationEnqueued(StatusBarNotification sbn);
+    abstract public @Nullable Adjustment onNotificationEnqueued(@NonNull StatusBarNotification sbn);
 
     /**
      * A notification was posted by an app. Called before post.
@@ -255,7 +258,7 @@ public abstract class NotificationAssistantService extends NotificationListenerS
      * notification.
      * @param key The key of the notification to snooze
      */
-    public final void unsnoozeNotification(String key) {
+    public final void unsnoozeNotification(@NonNull String key) {
         if (!isBound()) return;
         try {
             getNotificationInterface().unsnoozeNotificationFromAssistant(mWrapper, key);

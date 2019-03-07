@@ -3966,6 +3966,13 @@
     <permission android:name="android.permission.UPDATE_LOCK"
         android:protectionLevel="signature|privileged" />
 
+    <!-- @SystemApi Allows an application the opportunity to become a
+         {@link android.service.notification.NotificationAssistantService}.
+         User permission is still required before access is granted.
+         @hide -->
+    <permission android:name="android.permission.REQUEST_NOTIFICATION_ASSISTANT_SERVICE"
+                android:protectionLevel="signature|privileged" />
+
     <!-- @SystemApi @TestApi Allows an application to read the current set of notifications, including
          any metadata and intents attached.
          @hide -->

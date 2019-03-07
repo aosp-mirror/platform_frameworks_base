@@ -192,6 +192,11 @@ public class ConditionProviders extends ManagedServices {
         return true;
     }
 
+    @Override
+    protected String getRequiredPermission() {
+        return null;
+    }
+
     public ManagedServiceInfo checkServiceToken(IConditionProvider provider) {
         synchronized(mMutex) {
             return checkServiceTokenLocked(provider);

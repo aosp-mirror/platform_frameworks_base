@@ -161,6 +161,7 @@ package android {
     field public static final String REMOTE_DISPLAY_PROVIDER = "android.permission.REMOTE_DISPLAY_PROVIDER";
     field public static final String REMOVE_DRM_CERTIFICATES = "android.permission.REMOVE_DRM_CERTIFICATES";
     field public static final String REMOVE_TASKS = "android.permission.REMOVE_TASKS";
+    field public static final String REQUEST_NOTIFICATION_ASSISTANT_SERVICE = "android.permission.REQUEST_NOTIFICATION_ASSISTANT_SERVICE";
     field public static final String RESET_PASSWORD = "android.permission.RESET_PASSWORD";
     field public static final String RESTRICTED_VR_ACCESS = "android.permission.RESTRICTED_VR_ACCESS";
     field public static final String RETRIEVE_WINDOW_CONTENT = "android.permission.RETRIEVE_WINDOW_CONTENT";
@@ -547,6 +548,7 @@ package android.app {
   public class NotificationManager {
     method @Nullable public android.content.ComponentName getAllowedNotificationAssistant();
     method @Nullable public android.content.ComponentName getAllowedNotificationAssistantForUser(android.os.UserHandle);
+    method public boolean isNotificationAssistantAccessGranted(@NonNull android.content.ComponentName);
     method public void setNotificationAssistantAccessGranted(android.content.ComponentName, boolean);
     method public void setNotificationAssistantAccessGrantedForUser(android.content.ComponentName, android.os.UserHandle, boolean);
   }
@@ -6621,13 +6623,78 @@ package android.service.notification {
 
   public final class Adjustment implements android.os.Parcelable {
     ctor public Adjustment(String, String, android.os.Bundle, CharSequence, int);
+    ctor public Adjustment(@NonNull String, @NonNull String, @NonNull android.os.Bundle, @NonNull CharSequence, @NonNull android.os.UserHandle);
     ctor protected Adjustment(android.os.Parcel);
+    method public int describeContents();
+    method @NonNull public CharSequence getExplanation();
+    method @NonNull public String getKey();
+    method @NonNull public String getPackage();
+    method @NonNull public android.os.Bundle getSignals();
     method public int getUser();
+    method @NonNull public android.os.UserHandle getUserHandle();
+    method public void writeToParcel(android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.service.notification.Adjustment> CREATOR;
+    field public static final String KEY_CONTEXTUAL_ACTIONS = "key_contextual_actions";
+    field public static final String KEY_IMPORTANCE = "key_importance";
     field public static final String KEY_PEOPLE = "key_people";
+    field public static final String KEY_SNOOZE_CRITERIA = "key_snooze_criteria";
+    field public static final String KEY_TEXT_REPLIES = "key_text_replies";
+    field public static final String KEY_USER_SENTIMENT = "key_user_sentiment";
+  }
+
+  public abstract class NotificationAssistantService extends android.service.notification.NotificationListenerService {
+    ctor public NotificationAssistantService();
+    method public final void adjustNotification(@NonNull android.service.notification.Adjustment);
+    method public final void adjustNotifications(@NonNull java.util.List<android.service.notification.Adjustment>);
+    method public void onActionInvoked(@NonNull String, @NonNull android.app.Notification.Action, int);
+    method @NonNull public final android.os.IBinder onBind(@Nullable android.content.Intent);
+    method public void onNotificationDirectReplied(@NonNull String);
+    method @Nullable public abstract android.service.notification.Adjustment onNotificationEnqueued(@NonNull android.service.notification.StatusBarNotification);
+    method @Nullable public android.service.notification.Adjustment onNotificationEnqueued(@NonNull android.service.notification.StatusBarNotification, @NonNull android.app.NotificationChannel);
+    method public void onNotificationExpansionChanged(@NonNull String, boolean, boolean);
+    method public abstract void onNotificationSnoozedUntilContext(@NonNull android.service.notification.StatusBarNotification, @NonNull String);
+    method public void onNotificationsSeen(@NonNull java.util.List<java.lang.String>);
+    method public void onSuggestedReplySent(@NonNull String, @NonNull CharSequence, int);
+    method public final void unsnoozeNotification(@NonNull String);
+    field public static final String SERVICE_INTERFACE = "android.service.notification.NotificationAssistantService";
+    field public static final int SOURCE_FROM_APP = 0; // 0x0
+    field public static final int SOURCE_FROM_ASSISTANT = 1; // 0x1
+  }
+
+  public abstract class NotificationListenerService extends android.app.Service {
+    method public void onNotificationRemoved(@NonNull android.service.notification.StatusBarNotification, @NonNull android.service.notification.NotificationListenerService.RankingMap, @NonNull android.service.notification.NotificationStats, int);
   }
 
   public final class NotificationStats implements android.os.Parcelable {
+    ctor public NotificationStats();
     ctor protected NotificationStats(android.os.Parcel);
+    method public int describeContents();
+    method public int getDismissalSentiment();
+    method public int getDismissalSurface();
+    method public boolean hasDirectReplied();
+    method public boolean hasExpanded();
+    method public boolean hasInteracted();
+    method public boolean hasSeen();
+    method public boolean hasSnoozed();
+    method public boolean hasViewedSettings();
+    method public void setDirectReplied();
+    method public void setDismissalSentiment(int);
+    method public void setDismissalSurface(int);
+    method public void setExpanded();
+    method public void setSeen();
+    method public void setSnoozed();
+    method public void setViewedSettings();
+    method public void writeToParcel(android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.service.notification.NotificationStats> CREATOR;
+    field public static final int DISMISSAL_AOD = 2; // 0x2
+    field public static final int DISMISSAL_NOT_DISMISSED = -1; // 0xffffffff
+    field public static final int DISMISSAL_OTHER = 0; // 0x0
+    field public static final int DISMISSAL_PEEK = 1; // 0x1
+    field public static final int DISMISSAL_SHADE = 3; // 0x3
+    field public static final int DISMISS_SENTIMENT_NEGATIVE = 0; // 0x0
+    field public static final int DISMISS_SENTIMENT_NEUTRAL = 1; // 0x1
+    field public static final int DISMISS_SENTIMENT_POSITIVE = 2; // 0x2
+    field public static final int DISMISS_SENTIMENT_UNKNOWN = -1000; // 0xfffffc18
   }
 
   public final class SnoozeCriterion implements android.os.Parcelable {
