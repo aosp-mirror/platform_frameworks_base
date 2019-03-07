@@ -10301,7 +10301,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @see #setImportantForAccessibility(int)
      */
     @RemotableViewMethod
-    public void setAccessibilityTraversalBefore(int beforeId) {
+    public void setAccessibilityTraversalBefore(@IdRes int beforeId) {
         if (mAccessibilityTraversalBeforeId == beforeId) {
             return;
         }
@@ -10318,6 +10318,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @see #setAccessibilityTraversalBefore(int)
      */
+    @IdRes
     @InspectableProperty
     public int getAccessibilityTraversalBefore() {
         return mAccessibilityTraversalBeforeId;
@@ -10346,7 +10347,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @see #setImportantForAccessibility(int)
      */
     @RemotableViewMethod
-    public void setAccessibilityTraversalAfter(int afterId) {
+    public void setAccessibilityTraversalAfter(@IdRes int afterId) {
         if (mAccessibilityTraversalAfterId == afterId) {
             return;
         }
@@ -10363,6 +10364,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @see #setAccessibilityTraversalAfter(int)
      */
+    @IdRes
     @InspectableProperty
     public int getAccessibilityTraversalAfter() {
         return mAccessibilityTraversalAfterId;
@@ -10374,6 +10376,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @return The labeled view id.
      */
+    @IdRes
     @ViewDebug.ExportedProperty(category = "accessibility")
     @InspectableProperty
     public int getLabelFor() {
@@ -10595,6 +10598,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @attr ref android.R.styleable#View_nextFocusLeft
      */
+    @IdRes
     @InspectableProperty(name = "nextFocusLeft")
     public int getNextFocusLeftId() {
         return mNextFocusLeftId;
@@ -10607,7 +10611,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @attr ref android.R.styleable#View_nextFocusLeft
      */
-    public void setNextFocusLeftId(int nextFocusLeftId) {
+    public void setNextFocusLeftId(@IdRes int nextFocusLeftId) {
         mNextFocusLeftId = nextFocusLeftId;
     }
 
@@ -10617,6 +10621,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @attr ref android.R.styleable#View_nextFocusRight
      */
+    @IdRes
     @InspectableProperty(name = "nextFocusRight")
     public int getNextFocusRightId() {
         return mNextFocusRightId;
@@ -10629,7 +10634,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @attr ref android.R.styleable#View_nextFocusRight
      */
-    public void setNextFocusRightId(int nextFocusRightId) {
+    public void setNextFocusRightId(@IdRes int nextFocusRightId) {
         mNextFocusRightId = nextFocusRightId;
     }
 
@@ -10639,6 +10644,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @attr ref android.R.styleable#View_nextFocusUp
      */
+    @IdRes
     @InspectableProperty(name = "nextFocusUp")
     public int getNextFocusUpId() {
         return mNextFocusUpId;
@@ -10651,7 +10657,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @attr ref android.R.styleable#View_nextFocusUp
      */
-    public void setNextFocusUpId(int nextFocusUpId) {
+    public void setNextFocusUpId(@IdRes int nextFocusUpId) {
         mNextFocusUpId = nextFocusUpId;
     }
 
@@ -10661,6 +10667,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @attr ref android.R.styleable#View_nextFocusDown
      */
+    @IdRes
     @InspectableProperty(name = "nextFocusDown")
     public int getNextFocusDownId() {
         return mNextFocusDownId;
@@ -10673,7 +10680,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @attr ref android.R.styleable#View_nextFocusDown
      */
-    public void setNextFocusDownId(int nextFocusDownId) {
+    public void setNextFocusDownId(@IdRes int nextFocusDownId) {
         mNextFocusDownId = nextFocusDownId;
     }
 
@@ -10683,6 +10690,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @attr ref android.R.styleable#View_nextFocusForward
      */
+    @IdRes
     @InspectableProperty(name = "nextFocusForward")
     public int getNextFocusForwardId() {
         return mNextFocusForwardId;
@@ -10695,7 +10703,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @attr ref android.R.styleable#View_nextFocusForward
      */
-    public void setNextFocusForwardId(int nextFocusForwardId) {
+    public void setNextFocusForwardId(@IdRes int nextFocusForwardId) {
         mNextFocusForwardId = nextFocusForwardId;
     }
 
@@ -10706,6 +10714,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @attr ref android.R.styleable#View_nextClusterForward
      */
+    @IdRes
     @InspectableProperty(name = "nextClusterForward")
     public int getNextClusterForwardId() {
         return mNextClusterForwardId;
@@ -10718,7 +10727,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @attr ref android.R.styleable#View_nextClusterForward
      */
-    public void setNextClusterForwardId(int nextClusterForwardId) {
+    public void setNextClusterForwardId(@IdRes int nextClusterForwardId) {
         mNextClusterForwardId = nextClusterForwardId;
     }
 
