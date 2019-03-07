@@ -789,7 +789,7 @@
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Minimieren"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Schließen"</string>
     <string name="pip_phone_settings" msgid="8080777499521528521">"Einstellungen"</string>
-    <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Zum Schließen nach unten ziehen"</string>
+    <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Zum Verwerfen nach unten ziehen"</string>
     <string name="pip_menu_title" msgid="4707292089961887657">"Menü"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> ist in Bild im Bild"</string>
     <string name="pip_notification_message" msgid="5619512781514343311">"Wenn du nicht möchtest, dass <xliff:g id="NAME">%s</xliff:g> diese Funktion verwendet, tippe, um die Einstellungen zu öffnen und die Funktion zu deaktivieren."</string>
