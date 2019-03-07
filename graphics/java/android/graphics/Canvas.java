@@ -2018,8 +2018,8 @@ public class Canvas extends BaseCanvas {
      * @param paint The paint used to draw the double roundRect
      */
     @Override
-    public void drawDoubleRoundRect(@NonNull RectF outer, float[] outerRadii,
-            @NonNull RectF inner, float[] innerRadii, @NonNull Paint paint) {
+    public void drawDoubleRoundRect(@NonNull RectF outer, @NonNull float[] outerRadii,
+            @NonNull RectF inner, @NonNull float[] innerRadii, @NonNull Paint paint) {
         super.drawDoubleRoundRect(outer, outerRadii, inner, innerRadii, paint);
     }
 
