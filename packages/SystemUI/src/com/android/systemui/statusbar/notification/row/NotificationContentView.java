@@ -328,22 +328,10 @@ public class NotificationContentView extends FrameLayout {
             if (mExpandedChild != null
                     && mExpandedWrapper.getNotificationHeader() != null) {
                 NotificationHeaderView expandedHeader = mExpandedWrapper.getNotificationHeader();
-                int expandedSize = expandedHeader.getMeasuredWidth()
-                        - expandedHeader.getPaddingEnd();
-                int collapsedSize = contractedHeader.getMeasuredWidth()
-                        - expandedHeader.getPaddingEnd();
-                if (expandedSize != collapsedSize) {
-                    int paddingEnd = contractedHeader.getMeasuredWidth() - expandedSize;
-                    contractedHeader.setPadding(
-                            contractedHeader.isLayoutRtl()
-                                    ? paddingEnd
-                                    : contractedHeader.getPaddingLeft(),
-                            contractedHeader.getPaddingTop(),
-                            contractedHeader.isLayoutRtl()
-                                    ? contractedHeader.getPaddingLeft()
-                                    : paddingEnd,
-                            contractedHeader.getPaddingBottom());
-                    contractedHeader.setShowWorkBadgeAtEnd(true);
+
+                int headerTextMargin = expandedHeader.getHeaderTextMarginEnd();
+                if (headerTextMargin != contractedHeader.getHeaderTextMarginEnd()) {
+                    contractedHeader.setHeaderTextMarginEnd(headerTextMargin);
                     return true;
                 }
             } else {

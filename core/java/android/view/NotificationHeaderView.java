@@ -67,6 +67,7 @@ public class NotificationHeaderView extends ViewGroup {
     private boolean mExpanded;
     private boolean mShowExpandButtonAtEnd;
     private boolean mShowWorkBadgeAtEnd;
+    private int mHeaderTextMarginEnd;
     private Drawable mBackground;
     private boolean mEntireHeaderClickable;
     private boolean mExpandOnlyOnButton;
@@ -133,7 +134,8 @@ public class NotificationHeaderView extends ViewGroup {
                 MeasureSpec.AT_MOST);
         int wrapContentHeightSpec = MeasureSpec.makeMeasureSpec(givenHeight,
                 MeasureSpec.AT_MOST);
-        int totalWidth = getPaddingStart() + getPaddingEnd();
+        int totalWidth = getPaddingStart();
+        int iconWidth = getPaddingEnd();
         for (int i = 0; i < getChildCount(); i++) {
             final View child = getChildAt(i);
             if (child.getVisibility() == GONE) {
@@ -146,10 +148,19 @@ public class NotificationHeaderView extends ViewGroup {
             int childHeightSpec = getChildMeasureSpec(wrapContentHeightSpec,
                     lp.topMargin + lp.bottomMargin, lp.height);
             child.measure(childWidthSpec, childHeightSpec);
-            totalWidth += lp.leftMargin + lp.rightMargin + child.getMeasuredWidth();
+            if ((child == mExpandButton && mShowExpandButtonAtEnd)
+                    || child == mProfileBadge
+                    || child == mAppOps) {
+                iconWidth += lp.leftMargin + lp.rightMargin + child.getMeasuredWidth();
+            } else {
+                totalWidth += lp.leftMargin + lp.rightMargin + child.getMeasuredWidth();
+            }
         }
-        if (totalWidth > givenWidth) {
-            int overFlow = totalWidth - givenWidth;
+
+        // Ensure that there is at least enough space for the icons
+        int endMargin = Math.max(mHeaderTextMarginEnd, iconWidth);
+        if (totalWidth > givenWidth - endMargin) {
+            int overFlow = totalWidth - givenWidth + endMargin;
             // We are overflowing, lets shrink the app name first
             overFlow = shrinkViewForOverflow(wrapContentHeightSpec, overFlow, mAppName,
                     mChildMinWidth);
@@ -161,6 +172,7 @@ public class NotificationHeaderView extends ViewGroup {
             shrinkViewForOverflow(wrapContentHeightSpec, overFlow, mSecondaryHeaderText,
                     0);
         }
+        totalWidth += getPaddingEnd();
         mTotalWidth = Math.min(totalWidth, givenWidth);
         setMeasuredDimension(givenWidth, givenHeight);
     }
@@ -381,6 +393,26 @@ public class NotificationHeaderView extends ViewGroup {
 
     public CachingIconView getIcon() {
         return mIcon;
+    }
+
+    /**
+     * Sets the margin end for the text portion of the header, excluding right-aligned elements
+     * @param headerTextMarginEnd margin size
+     */
+    @RemotableViewMethod
+    public void setHeaderTextMarginEnd(int headerTextMarginEnd) {
+        if (mHeaderTextMarginEnd != headerTextMarginEnd) {
+            mHeaderTextMarginEnd = headerTextMarginEnd;
+            requestLayout();
+        }
+    }
+
+    /**
+     * Get the current margin end value for the header text
+     * @return margin size
+     */
+    public int getHeaderTextMarginEnd() {
+        return mHeaderTextMarginEnd;
     }
 
     public class HeaderTouchListener implements View.OnTouchListener {
