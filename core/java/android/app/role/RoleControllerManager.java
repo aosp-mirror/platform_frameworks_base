@@ -52,11 +52,6 @@ public class RoleControllerManager {
 
     private static final String LOG_TAG = RoleControllerManager.class.getSimpleName();
 
-    /**
-     * The key for retrieving the result from a bundle.
-     */
-    public static final String KEY_RESULT = "android.app.role.RoleControllerManager.key.RESULT";
-
     private static final Object sRemoteServicesLock = new Object();
     /**
      * Global remote services (per user) used by all {@link RoleControllerManager managers}.
@@ -90,35 +85,37 @@ public class RoleControllerManager {
     }
 
     /**
-     * @see RoleControllerService#onGrantDefaultRoles(RoleManagerCallback)
+     * @see RoleControllerService#onGrantDefaultRoles()
      */
-    public void onGrantDefaultRoles(@NonNull IRoleManagerCallback callback) {
-        mRemoteService.scheduleRequest(new OnGrantDefaultRolesRequest(mRemoteService, callback));
+    public void grantDefaultRoles(@NonNull @CallbackExecutor Executor executor,
+            @NonNull Consumer<Boolean> callback) {
+        mRemoteService.scheduleRequest(new GrantDefaultRolesRequest(mRemoteService, executor,
+                callback));
     }
 
     /**
-     * @see RoleControllerService#onAddRoleHolder(String, String, int, RoleManagerCallback)
+     * @see RoleControllerService#onAddRoleHolder(String, String, int)
      */
     public void onAddRoleHolder(@NonNull String roleName, @NonNull String packageName,
-            @RoleManager.ManageHoldersFlags int flags, @NonNull IRoleManagerCallback callback) {
+            @RoleManager.ManageHoldersFlags int flags, @NonNull RemoteCallback callback) {
         mRemoteService.scheduleRequest(new OnAddRoleHolderRequest(mRemoteService, roleName,
                 packageName, flags, callback));
     }
 
     /**
-     * @see RoleControllerService#onRemoveRoleHolder(String, String, int, RoleManagerCallback)
+     * @see RoleControllerService#onRemoveRoleHolder(String, String, int)
      */
     public void onRemoveRoleHolder(@NonNull String roleName, @NonNull String packageName,
-            @RoleManager.ManageHoldersFlags int flags, @NonNull IRoleManagerCallback callback) {
+            @RoleManager.ManageHoldersFlags int flags, @NonNull RemoteCallback callback) {
         mRemoteService.scheduleRequest(new OnRemoveRoleHolderRequest(mRemoteService, roleName,
                 packageName, flags, callback));
     }
 
     /**
-     * @see RoleControllerService#onClearRoleHolders(String, int, RoleManagerCallback)
+     * @see RoleControllerService#onClearRoleHolders(String, int)
      */
     public void onClearRoleHolders(@NonNull String roleName,
-            @RoleManager.ManageHoldersFlags int flags, @NonNull IRoleManagerCallback callback) {
+            @RoleManager.ManageHoldersFlags int flags, @NonNull RemoteCallback callback) {
         mRemoteService.scheduleRequest(new OnClearRoleHoldersRequest(mRemoteService, roleName,
                 flags, callback));
     }
@@ -210,68 +207,55 @@ public class RoleControllerManager {
     }
 
     /**
-     * Request for {@link #onGrantDefaultRoles(IRoleManagerCallback)}.
+     * Request for {@link #grantDefaultRoles(Executor, Consumer)}.
      */
-    private static final class OnGrantDefaultRolesRequest
+    private static final class GrantDefaultRolesRequest
             extends AbstractRemoteService.PendingRequest<RemoteService, IRoleController> {
 
         @NonNull
-        private final IRoleManagerCallback mCallback;
+        private final Executor mExecutor;
+        @NonNull
+        private final Consumer<Boolean> mCallback;
 
         @NonNull
-        private final IRoleManagerCallback mRemoteCallback;
+        private final RemoteCallback mRemoteCallback;
 
-        private OnGrantDefaultRolesRequest(@NonNull RemoteService service,
-                @NonNull IRoleManagerCallback callback) {
+        private GrantDefaultRolesRequest(@NonNull RemoteService service,
+                @NonNull @CallbackExecutor Executor executor, @NonNull Consumer<Boolean> callback) {
             super(service);
 
+            mExecutor = executor;
             mCallback = callback;
 
-            mRemoteCallback = new IRoleManagerCallback.Stub() {
-                @Override
-                public void onSuccess() throws RemoteException {
-                    long token = Binder.clearCallingIdentity();
-                    try {
-                        mCallback.onSuccess();
-                    } finally {
-                        Binder.restoreCallingIdentity(token);
-                        finish();
-                    }
+            mRemoteCallback = new RemoteCallback(result -> mExecutor.execute(() -> {
+                long token = Binder.clearCallingIdentity();
+                try {
+                    boolean successful = result != null;
+                    mCallback.accept(successful);
+                } finally {
+                    Binder.restoreCallingIdentity(token);
+                    finish();
                 }
-                @Override
-                public void onFailure() throws RemoteException {
-                    long token = Binder.clearCallingIdentity();
-                    try {
-                        mCallback.onSuccess();
-                    } finally {
-                        Binder.restoreCallingIdentity(token);
-                        finish();
-                    }
-                }
-            };
+            }));
         }
 
         @Override
         protected void onTimeout(@NonNull RemoteService remoteService) {
-            try {
-                mCallback.onFailure();
-            } catch (RemoteException e) {
-                Log.e(LOG_TAG, "Error calling onFailure() on callback", e);
-            }
+            mExecutor.execute(() -> mCallback.accept(false));
         }
 
         @Override
         public void run() {
             try {
-                getService().getServiceInterface().onGrantDefaultRoles(mRemoteCallback);
+                getService().getServiceInterface().grantDefaultRoles(mRemoteCallback);
             } catch (RemoteException e) {
-                Log.e(LOG_TAG, "Error calling onGrantDefaultRoles()", e);
+                Log.e(LOG_TAG, "Error calling grantDefaultRoles()", e);
             }
         }
     }
 
     /**
-     * Request for {@link #onAddRoleHolder(String, String, int, IRoleManagerCallback)}.
+     * Request for {@link #onAddRoleHolder(String, String, int, RemoteCallback)}.
      */
     private static final class OnAddRoleHolderRequest
             extends AbstractRemoteService.PendingRequest<RemoteService, IRoleController> {
@@ -283,14 +267,14 @@ public class RoleControllerManager {
         @RoleManager.ManageHoldersFlags
         private final int mFlags;
         @NonNull
-        private final IRoleManagerCallback mCallback;
+        private final RemoteCallback mCallback;
 
         @NonNull
-        private final IRoleManagerCallback mRemoteCallback;
+        private final RemoteCallback mRemoteCallback;
 
         private OnAddRoleHolderRequest(@NonNull RemoteService service, @NonNull String roleName,
                 @NonNull String packageName, @RoleManager.ManageHoldersFlags int flags,
-                @NonNull IRoleManagerCallback callback) {
+                @NonNull RemoteCallback callback) {
             super(service);
 
             mRoleName = roleName;
@@ -298,37 +282,20 @@ public class RoleControllerManager {
             mFlags = flags;
             mCallback = callback;
 
-            mRemoteCallback = new IRoleManagerCallback.Stub() {
-                @Override
-                public void onSuccess() throws RemoteException {
-                    long token = Binder.clearCallingIdentity();
-                    try {
-                        mCallback.onSuccess();
-                    } finally {
-                        Binder.restoreCallingIdentity(token);
-                        finish();
-                    }
+            mRemoteCallback = new RemoteCallback(result -> {
+                long token = Binder.clearCallingIdentity();
+                try {
+                    mCallback.sendResult(result);
+                } finally {
+                    Binder.restoreCallingIdentity(token);
+                    finish();
                 }
-                @Override
-                public void onFailure() throws RemoteException {
-                    long token = Binder.clearCallingIdentity();
-                    try {
-                        mCallback.onSuccess();
-                    } finally {
-                        Binder.restoreCallingIdentity(token);
-                        finish();
-                    }
-                }
-            };
+            });
         }
 
         @Override
         protected void onTimeout(@NonNull RemoteService remoteService) {
-            try {
-                mCallback.onFailure();
-            } catch (RemoteException e) {
-                Log.e(LOG_TAG, "Error calling onFailure() on callback", e);
-            }
+            mCallback.sendResult(null);
         }
 
         @Override
@@ -343,7 +310,7 @@ public class RoleControllerManager {
     }
 
     /**
-     * Request for {@link #onRemoveRoleHolder(String, String, int, IRoleManagerCallback)}.
+     * Request for {@link #onRemoveRoleHolder(String, String, int, RemoteCallback)}.
      */
     private static final class OnRemoveRoleHolderRequest
             extends AbstractRemoteService.PendingRequest<RemoteService, IRoleController> {
@@ -355,14 +322,14 @@ public class RoleControllerManager {
         @RoleManager.ManageHoldersFlags
         private final int mFlags;
         @NonNull
-        private final IRoleManagerCallback mCallback;
+        private final RemoteCallback mCallback;
 
         @NonNull
-        private final IRoleManagerCallback mRemoteCallback;
+        private final RemoteCallback mRemoteCallback;
 
         private OnRemoveRoleHolderRequest(@NonNull RemoteService service, @NonNull String roleName,
                 @NonNull String packageName, @RoleManager.ManageHoldersFlags int flags,
-                @NonNull IRoleManagerCallback callback) {
+                @NonNull RemoteCallback callback) {
             super(service);
 
             mRoleName = roleName;
@@ -370,37 +337,20 @@ public class RoleControllerManager {
             mFlags = flags;
             mCallback = callback;
 
-            mRemoteCallback = new IRoleManagerCallback.Stub() {
-                @Override
-                public void onSuccess() throws RemoteException {
-                    long token = Binder.clearCallingIdentity();
-                    try {
-                        mCallback.onSuccess();
-                    } finally {
-                        Binder.restoreCallingIdentity(token);
-                        finish();
-                    }
+            mRemoteCallback = new RemoteCallback(result -> {
+                long token = Binder.clearCallingIdentity();
+                try {
+                    mCallback.sendResult(result);
+                } finally {
+                    Binder.restoreCallingIdentity(token);
+                    finish();
                 }
-                @Override
-                public void onFailure() throws RemoteException {
-                    long token = Binder.clearCallingIdentity();
-                    try {
-                        mCallback.onSuccess();
-                    } finally {
-                        Binder.restoreCallingIdentity(token);
-                        finish();
-                    }
-                }
-            };
+            });
         }
 
         @Override
         protected void onTimeout(@NonNull RemoteService remoteService) {
-            try {
-                mCallback.onFailure();
-            } catch (RemoteException e) {
-                Log.e(LOG_TAG, "Error calling onFailure() on callback", e);
-            }
+            mCallback.sendResult(null);
         }
 
         @Override
@@ -415,7 +365,7 @@ public class RoleControllerManager {
     }
 
     /**
-     * Request for {@link #onClearRoleHolders(String, int, IRoleManagerCallback)}.
+     * Request for {@link #onClearRoleHolders(String, int, RemoteCallback)}.
      */
     private static final class OnClearRoleHoldersRequest
             extends AbstractRemoteService.PendingRequest<RemoteService, IRoleController> {
@@ -425,50 +375,33 @@ public class RoleControllerManager {
         @RoleManager.ManageHoldersFlags
         private final int mFlags;
         @NonNull
-        private final IRoleManagerCallback mCallback;
+        private final RemoteCallback mCallback;
 
         @NonNull
-        private final IRoleManagerCallback mRemoteCallback;
+        private final RemoteCallback mRemoteCallback;
 
         private OnClearRoleHoldersRequest(@NonNull RemoteService service, @NonNull String roleName,
-                @RoleManager.ManageHoldersFlags int flags, @NonNull IRoleManagerCallback callback) {
+                @RoleManager.ManageHoldersFlags int flags, @NonNull RemoteCallback callback) {
             super(service);
 
             mRoleName = roleName;
             mFlags = flags;
             mCallback = callback;
 
-            mRemoteCallback = new IRoleManagerCallback.Stub() {
-                @Override
-                public void onSuccess() throws RemoteException {
-                    long token = Binder.clearCallingIdentity();
-                    try {
-                        mCallback.onSuccess();
-                    } finally {
-                        Binder.restoreCallingIdentity(token);
-                        finish();
-                    }
+            mRemoteCallback = new RemoteCallback(result -> {
+                long token = Binder.clearCallingIdentity();
+                try {
+                    mCallback.sendResult(result);
+                } finally {
+                    Binder.restoreCallingIdentity(token);
+                    finish();
                 }
-                @Override
-                public void onFailure() throws RemoteException {
-                    long token = Binder.clearCallingIdentity();
-                    try {
-                        mCallback.onSuccess();
-                    } finally {
-                        Binder.restoreCallingIdentity(token);
-                        finish();
-                    }
-                }
-            };
+            });
         }
 
         @Override
         protected void onTimeout(@NonNull RemoteService remoteService) {
-            try {
-                mCallback.onFailure();
-            } catch (RemoteException e) {
-                Log.e(LOG_TAG, "Error calling onFailure() on callback", e);
-            }
+            mCallback.sendResult(null);
         }
 
         @Override
@@ -535,7 +468,7 @@ public class RoleControllerManager {
             mRemoteCallback = new RemoteCallback(result -> mExecutor.execute(() -> {
                 long token = Binder.clearCallingIdentity();
                 try {
-                    boolean qualified = result != null && result.getBoolean(KEY_RESULT);
+                    boolean qualified = result != null;
                     mCallback.accept(qualified);
                 } finally {
                     Binder.restoreCallingIdentity(token);
@@ -587,7 +520,7 @@ public class RoleControllerManager {
             mRemoteCallback = new RemoteCallback(result -> mExecutor.execute(() -> {
                 long token = Binder.clearCallingIdentity();
                 try {
-                    boolean visible = result != null && result.getBoolean(KEY_RESULT);
+                    boolean visible = result != null;
                     mCallback.accept(visible);
                 } finally {
                     Binder.restoreCallingIdentity(token);

@@ -19,7 +19,7 @@ package com.android.server.role;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.role.IRoleManager;
-import android.app.role.IRoleManagerCallback;
+import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.ShellCommand;
 import android.os.UserHandle;
@@ -38,30 +38,29 @@ class RoleManagerShellCommand extends ShellCommand {
         mRoleManager = roleManager;
     }
 
-    private class Callback extends IRoleManagerCallback.Stub {
+    private class CallbackFuture extends CompletableFuture<Void> {
 
         @NonNull
-        private final CompletableFuture<Void> mResult = new CompletableFuture<>();
+        public RemoteCallback createCallback() {
+            return new RemoteCallback(result -> {
+                boolean successful = result != null;
+                if (successful) {
+                    complete(null);
+                } else {
+                    completeExceptionally(new RuntimeException("Failed"));
+                }
+            });
+        }
 
         public int waitForResult() {
             try {
-                mResult.get(5, TimeUnit.SECONDS);
+                get(5, TimeUnit.SECONDS);
                 return 0;
             } catch (Exception e) {
                 getErrPrintWriter().println("Error: see logcat for details.\n"
                         + Log.getStackTraceString(e));
                 return -1;
             }
-        }
-
-        @Override
-        public void onSuccess() {
-            mResult.complete(null);
-        }
-
-        @Override
-        public void onFailure() {
-            mResult.completeExceptionally(new RuntimeException("Failed"));
         }
     }
 
@@ -112,9 +111,10 @@ class RoleManagerShellCommand extends ShellCommand {
         String packageName = getNextArgRequired();
         int flags = getFlagsMaybe();
 
-        Callback callback = new Callback();
-        mRoleManager.addRoleHolderAsUser(roleName, packageName, flags, userId, callback);
-        return callback.waitForResult();
+        CallbackFuture future = new CallbackFuture();
+        mRoleManager.addRoleHolderAsUser(roleName, packageName, flags, userId,
+                future.createCallback());
+        return future.waitForResult();
     }
 
     private int runRemoveRoleHolder() throws RemoteException {
@@ -123,9 +123,10 @@ class RoleManagerShellCommand extends ShellCommand {
         String packageName = getNextArgRequired();
         int flags = getFlagsMaybe();
 
-        Callback callback = new Callback();
-        mRoleManager.removeRoleHolderAsUser(roleName, packageName, flags, userId, callback);
-        return callback.waitForResult();
+        CallbackFuture future = new CallbackFuture();
+        mRoleManager.removeRoleHolderAsUser(roleName, packageName, flags, userId,
+                future.createCallback());
+        return future.waitForResult();
     }
 
     private int runClearRoleHolders() throws RemoteException {
@@ -133,9 +134,9 @@ class RoleManagerShellCommand extends ShellCommand {
         String roleName = getNextArgRequired();
         int flags = getFlagsMaybe();
 
-        Callback callback = new Callback();
-        mRoleManager.clearRoleHoldersAsUser(roleName, flags, userId, callback);
-        return callback.waitForResult();
+        CallbackFuture future = new CallbackFuture();
+        mRoleManager.clearRoleHoldersAsUser(roleName, flags, userId, future.createCallback());
+        return future.waitForResult();
     }
 
     @Override

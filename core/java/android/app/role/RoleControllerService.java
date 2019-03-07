@@ -20,16 +20,20 @@ import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.annotation.WorkerThread;
 import android.app.Service;
 import android.content.Intent;
+import android.os.Binder;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.IBinder;
+import android.os.Process;
 import android.os.RemoteCallback;
-import android.os.RemoteException;
 import android.os.UserHandle;
-import android.util.Log;
 
 import com.android.internal.util.Preconditions;
+import com.android.internal.util.function.pooled.PooledLambda;
 
 import java.util.concurrent.Executor;
 
@@ -45,12 +49,29 @@ import java.util.concurrent.Executor;
 @SystemApi
 public abstract class RoleControllerService extends Service {
 
-    private static final String LOG_TAG = RoleControllerService.class.getSimpleName();
-
     /**
      * The {@link Intent} that must be declared as handled by the service.
      */
     public static final String SERVICE_INTERFACE = "android.app.role.RoleControllerService";
+
+    private HandlerThread mWorkerThread;
+    private Handler mWorkerHandler;
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+
+        mWorkerThread = new HandlerThread(RoleControllerService.class.getSimpleName());
+        mWorkerThread.start();
+        mWorkerHandler = new Handler(mWorkerThread.getLooper());
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        mWorkerThread.quitSafely();
+    }
 
     @Nullable
     @Override
@@ -58,46 +79,72 @@ public abstract class RoleControllerService extends Service {
         return new IRoleController.Stub() {
 
             @Override
-            public void onGrantDefaultRoles(IRoleManagerCallback callback) {
+            public void grantDefaultRoles(RemoteCallback callback) {
+                enforceCallerSystemUid("grantDefaultRoles");
+
                 Preconditions.checkNotNull(callback, "callback cannot be null");
-                RoleControllerService.this.onGrantDefaultRoles(new RoleManagerCallbackDelegate(
+
+                mWorkerHandler.sendMessage(PooledLambda.obtainMessage(
+                        RoleControllerService::grantDefaultRoles, RoleControllerService.this,
                         callback));
             }
 
             @Override
             public void onAddRoleHolder(String roleName, String packageName, int flags,
-                    IRoleManagerCallback callback) {
+                    RemoteCallback callback) {
+                enforceCallerSystemUid("onAddRoleHolder");
+
                 Preconditions.checkStringNotEmpty(roleName, "roleName cannot be null or empty");
                 Preconditions.checkStringNotEmpty(packageName,
                         "packageName cannot be null or empty");
                 Preconditions.checkNotNull(callback, "callback cannot be null");
-                RoleControllerService.this.onAddRoleHolder(roleName, packageName, flags,
-                        new RoleManagerCallbackDelegate(callback));
+
+                mWorkerHandler.sendMessage(PooledLambda.obtainMessage(
+                        RoleControllerService::onAddRoleHolder, RoleControllerService.this,
+                        roleName, packageName, flags, callback));
             }
 
             @Override
             public void onRemoveRoleHolder(String roleName, String packageName, int flags,
-                    IRoleManagerCallback callback) {
+                    RemoteCallback callback) {
+                enforceCallerSystemUid("onRemoveRoleHolder");
+
                 Preconditions.checkStringNotEmpty(roleName, "roleName cannot be null or empty");
                 Preconditions.checkStringNotEmpty(packageName,
                         "packageName cannot be null or empty");
                 Preconditions.checkNotNull(callback, "callback cannot be null");
-                RoleControllerService.this.onRemoveRoleHolder(roleName, packageName, flags,
-                        new RoleManagerCallbackDelegate(callback));
+
+                mWorkerHandler.sendMessage(PooledLambda.obtainMessage(
+                        RoleControllerService::onRemoveRoleHolder, RoleControllerService.this,
+                        roleName, packageName, flags, callback));
             }
 
             @Override
-            public void onClearRoleHolders(String roleName, int flags,
-                    IRoleManagerCallback callback) {
+            public void onClearRoleHolders(String roleName, int flags, RemoteCallback callback) {
+                enforceCallerSystemUid("onClearRoleHolders");
+
                 Preconditions.checkStringNotEmpty(roleName, "roleName cannot be null or empty");
                 Preconditions.checkNotNull(callback, "callback cannot be null");
-                RoleControllerService.this.onClearRoleHolders(roleName, flags,
-                        new RoleManagerCallbackDelegate(callback));
+
+                mWorkerHandler.sendMessage(PooledLambda.obtainMessage(
+                        RoleControllerService::onClearRoleHolders, RoleControllerService.this,
+                        roleName, flags, callback));
             }
 
             @Override
-            public void onSmsKillSwitchToggled(boolean smsRestrictionEnabled) {
-                RoleControllerService.this.onSmsKillSwitchToggled(smsRestrictionEnabled);
+            public void onSmsKillSwitchToggled(boolean enabled) {
+                enforceCallerSystemUid("onSmsKillSwitchToggled");
+
+                mWorkerHandler.sendMessage(PooledLambda.obtainMessage(
+                        RoleControllerService::onSmsKillSwitchToggled, RoleControllerService.this,
+                        enabled));
+            }
+
+            private void enforceCallerSystemUid(@NonNull String methodName) {
+                if (Binder.getCallingUid() != Process.SYSTEM_UID) {
+                    throw new SecurityException("Only the system process can call " + methodName
+                            + "()");
+                }
             }
 
             @Override
@@ -111,9 +158,7 @@ public abstract class RoleControllerService extends Service {
                 Preconditions.checkNotNull(callback, "callback cannot be null");
 
                 boolean qualified = onIsApplicationQualifiedForRole(roleName, packageName);
-                Bundle result = new Bundle();
-                result.putBoolean(RoleControllerManager.KEY_RESULT, qualified);
-                callback.sendResult(result);
+                callback.sendResult(qualified ? Bundle.EMPTY : null);
             }
 
             @Override
@@ -124,11 +169,32 @@ public abstract class RoleControllerService extends Service {
                 Preconditions.checkNotNull(callback, "callback cannot be null");
 
                 boolean visible = onIsRoleVisible(roleName);
-                Bundle result = new Bundle();
-                result.putBoolean(RoleControllerManager.KEY_RESULT, visible);
-                callback.sendResult(result);
+                callback.sendResult(visible ? Bundle.EMPTY : null);
             }
         };
+    }
+
+    private void grantDefaultRoles(@NonNull RemoteCallback callback) {
+        boolean successful = onGrantDefaultRoles();
+        callback.sendResult(successful ? Bundle.EMPTY : null);
+    }
+
+    private void onAddRoleHolder(@NonNull String roleName, @NonNull String packageName,
+            @RoleManager.ManageHoldersFlags int flags, @NonNull RemoteCallback callback) {
+        boolean successful = onAddRoleHolder(roleName, packageName, flags);
+        callback.sendResult(successful ? Bundle.EMPTY : null);
+    }
+
+    private void onRemoveRoleHolder(@NonNull String roleName, @NonNull String packageName,
+            @RoleManager.ManageHoldersFlags int flags, @NonNull RemoteCallback callback) {
+        boolean successful = onRemoveRoleHolder(roleName, packageName, flags);
+        callback.sendResult(successful ? Bundle.EMPTY : null);
+    }
+
+    private void onClearRoleHolders(@NonNull String roleName,
+            @RoleManager.ManageHoldersFlags int flags, @NonNull RemoteCallback callback) {
+        boolean successful = onClearRoleHolders(roleName, flags);
+        callback.sendResult(successful ? Bundle.EMPTY : null);
     }
 
     /**
@@ -137,9 +203,10 @@ public abstract class RoleControllerService extends Service {
      * This is typically when creating a new user or upgrading either system or
      * permission controller package
      *
-     * @param callback the callback for whether this call is successful
+     * @return whether this call was successful
      */
-    public abstract void onGrantDefaultRoles(@NonNull RoleManagerCallback callback);
+    @WorkerThread
+    public abstract boolean onGrantDefaultRoles();
 
     /**
      * Add a specific application to the holders of a role. If the role is exclusive, the previous
@@ -151,13 +218,15 @@ public abstract class RoleControllerService extends Service {
      * @param roleName the name of the role to add the role holder for
      * @param packageName the package name of the application to add to the role holders
      * @param flags optional behavior flags
-     * @param callback the callback for whether this call is successful
+     *
+     * @return whether this call was successful
      *
      * @see RoleManager#addRoleHolderAsUser(String, String, int, UserHandle, Executor,
-     *      RoleManagerCallback)
+     *      RemoteCallback)
      */
-    public abstract void onAddRoleHolder(@NonNull String roleName, @NonNull String packageName,
-            @RoleManager.ManageHoldersFlags int flags, @NonNull RoleManagerCallback callback);
+    @WorkerThread
+    public abstract boolean onAddRoleHolder(@NonNull String roleName, @NonNull String packageName,
+            @RoleManager.ManageHoldersFlags int flags);
 
     /**
      * Remove a specific application from the holders of a role.
@@ -165,26 +234,29 @@ public abstract class RoleControllerService extends Service {
      * @param roleName the name of the role to remove the role holder for
      * @param packageName the package name of the application to remove from the role holders
      * @param flags optional behavior flags
-     * @param callback the callback for whether this call is successful
+     *
+     * @return whether this call was successful
      *
      * @see RoleManager#removeRoleHolderAsUser(String, String, int, UserHandle, Executor,
-     *      RoleManagerCallback)
+     *      RemoteCallback)
      */
-    public abstract void onRemoveRoleHolder(@NonNull String roleName, @NonNull String packageName,
-            @RoleManager.ManageHoldersFlags int flags, @NonNull RoleManagerCallback callback);
+    @WorkerThread
+    public abstract boolean onRemoveRoleHolder(@NonNull String roleName,
+            @NonNull String packageName, @RoleManager.ManageHoldersFlags int flags);
 
     /**
      * Remove all holders of a role.
      *
      * @param roleName the name of the role to remove role holders for
      * @param flags optional behavior flags
-     * @param callback the callback for whether this call is successful
      *
-     * @see RoleManager#clearRoleHoldersAsUser(String, int, UserHandle, Executor,
-     *      RoleManagerCallback)
+     * @return whether this call was successful
+     *
+     * @see RoleManager#clearRoleHoldersAsUser(String, int, UserHandle, Executor, RemoteCallback)
      */
-    public abstract void onClearRoleHolders(@NonNull String roleName,
-            @RoleManager.ManageHoldersFlags int flags, @NonNull RoleManagerCallback callback);
+    @WorkerThread
+    public abstract boolean onClearRoleHolders(@NonNull String roleName,
+            @RoleManager.ManageHoldersFlags int flags);
 
     /**
      * Cleanup appop/permissions state in response to sms kill switch toggle
@@ -192,6 +264,7 @@ public abstract class RoleControllerService extends Service {
      * @param enabled whether kill switch was turned on
      */
     //STOPSHIP: remove this api before shipping a final version
+    @WorkerThread
     public abstract void onSmsKillSwitchToggled(boolean enabled);
 
     /**
@@ -213,31 +286,4 @@ public abstract class RoleControllerService extends Service {
      * @return whether the role should be visible to user
      */
     public abstract boolean onIsRoleVisible(@NonNull String roleName);
-
-    private static class RoleManagerCallbackDelegate implements RoleManagerCallback {
-
-        private IRoleManagerCallback mCallback;
-
-        RoleManagerCallbackDelegate(IRoleManagerCallback callback) {
-            mCallback = callback;
-        }
-
-        @Override
-        public void onSuccess() {
-            try {
-                mCallback.onSuccess();
-            } catch (RemoteException e) {
-                Log.e(LOG_TAG, "Error calling onSuccess() callback");
-            }
-        }
-
-        @Override
-        public void onFailure() {
-            try {
-                mCallback.onFailure();
-            } catch (RemoteException e) {
-                Log.e(LOG_TAG, "Error calling onFailure() callback");
-            }
-        }
-    }
 }

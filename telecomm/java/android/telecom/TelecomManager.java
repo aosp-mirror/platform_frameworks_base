@@ -25,7 +25,6 @@ import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
-import android.app.role.RoleManagerCallback;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -1221,8 +1220,8 @@ public class TelecomManager {
      *
      * @hide
      * @deprecated Use
-     * {@link android.app.role.RoleManager#addRoleHolderAsUser(String, String, UserHandle, Executor,
-     * RoleManagerCallback)} instead.
+     * {@link android.app.role.RoleManager#addRoleHolderAsUser(String, String, int, UserHandle,
+     * Executor, java.util.function.Consumer)} instead.
      */
     @SystemApi
     @Deprecated

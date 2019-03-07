@@ -19,7 +19,6 @@ package com.android.internal.telephony;
 import android.Manifest.permission;
 import android.app.AppOpsManager;
 import android.app.role.RoleManager;
-import android.app.role.RoleManagerCallback;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -51,9 +50,11 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.function.Consumer;
 
 /**
  * Class for managing the primary application that we will deliver SMS/MMS messages to
@@ -634,12 +635,19 @@ public final class SmsApplication {
             }
 
             // Update the setting.
-            RoleManagerCallback.Future res = new RoleManagerCallback.Future();
+            CompletableFuture<Void> future = new CompletableFuture<>();
+            Consumer<Boolean> callback = successful -> {
+                if (successful) {
+                    future.complete(null);
+                } else {
+                    future.completeExceptionally(new RuntimeException());
+                }
+            };
             context.getSystemService(RoleManager.class).addRoleHolderAsUser(
                     RoleManager.ROLE_SMS, applicationData.mPackageName, 0, UserHandle.of(userId),
-                    AsyncTask.THREAD_POOL_EXECUTOR, res);
+                    AsyncTask.THREAD_POOL_EXECUTOR, callback);
             try {
-                res.get(5, TimeUnit.SECONDS);
+                future.get(5, TimeUnit.SECONDS);
             } catch (InterruptedException | ExecutionException | TimeoutException e) {
                 Log.e(LOG_TAG, "Exception while adding sms role holder " + applicationData, e);
                 return;
