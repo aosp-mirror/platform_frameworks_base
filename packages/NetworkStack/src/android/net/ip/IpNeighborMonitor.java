@@ -34,7 +34,6 @@ import android.net.netlink.StructNdMsg;
 import android.net.util.NetworkStackUtils;
 import android.net.util.PacketReader;
 import android.net.util.SharedLog;
-import android.net.util.SocketUtils;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.system.ErrnoException;
@@ -150,7 +149,7 @@ public class IpNeighborMonitor extends PacketReader {
 
         try {
             fd = Os.socket(AF_NETLINK, SOCK_DGRAM | SOCK_NONBLOCK, NETLINK_ROUTE);
-            SocketUtils.bindSocket(fd, makeNetlinkSocketAddress(0, OsConstants.RTMGRP_NEIGH));
+            Os.bind(fd, makeNetlinkSocketAddress(0, OsConstants.RTMGRP_NEIGH));
             NetlinkSocket.connectToKernel(fd);
 
             if (VDBG) {
