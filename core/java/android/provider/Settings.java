@@ -8011,6 +8011,16 @@ public final class Settings {
                 BOOLEAN_VALIDATOR;
 
         /**
+         * Whether or not face unlock dismisses the keyguard.
+         * @hide
+         */
+        public static final String FACE_UNLOCK_DISMISSES_KEYGUARD =
+                "face_unlock_dismisses_keyguard";
+
+        private static final Validator FACE_UNLOCK_DISMISSES_KEYGUARD_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
+        /**
          * Whether or not face unlock is allowed for apps (through BiometricPrompt).
          * @hide
          */
@@ -8684,6 +8694,7 @@ public final class Settings {
             NFC_PAYMENT_DEFAULT_COMPONENT,
             AUTOMATIC_STORAGE_MANAGER_DAYS_TO_RETAIN,
             FACE_UNLOCK_KEYGUARD_ENABLED,
+            FACE_UNLOCK_DISMISSES_KEYGUARD,
             FACE_UNLOCK_APP_ENABLED,
             FACE_UNLOCK_ALWAYS_REQUIRE_CONFIRMATION,
             ASSIST_GESTURE_ENABLED,
@@ -8845,6 +8856,8 @@ public final class Settings {
             VALIDATORS.put(AUTOMATIC_STORAGE_MANAGER_DAYS_TO_RETAIN,
                     AUTOMATIC_STORAGE_MANAGER_DAYS_TO_RETAIN_VALIDATOR);
             VALIDATORS.put(FACE_UNLOCK_KEYGUARD_ENABLED, FACE_UNLOCK_KEYGUARD_ENABLED_VALIDATOR);
+            VALIDATORS.put(FACE_UNLOCK_DISMISSES_KEYGUARD,
+                    FACE_UNLOCK_DISMISSES_KEYGUARD_VALIDATOR);
             VALIDATORS.put(FACE_UNLOCK_APP_ENABLED, FACE_UNLOCK_APP_ENABLED_VALIDATOR);
             VALIDATORS.put(FACE_UNLOCK_ALWAYS_REQUIRE_CONFIRMATION,
                     FACE_UNLOCK_ALWAYS_REQUIRE_CONFIRMATION_VALIDATOR);
