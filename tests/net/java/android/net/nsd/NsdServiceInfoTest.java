@@ -24,19 +24,17 @@ import static org.junit.Assert.fail;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.StrictMode;
-import android.net.nsd.NsdServiceInfo;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
-import android.util.Log;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.Arrays;
+import java.util.Map;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest

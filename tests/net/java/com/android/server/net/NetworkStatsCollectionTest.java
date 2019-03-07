@@ -26,11 +26,12 @@ import static android.net.NetworkTemplate.buildTemplateMobileAll;
 import static android.os.Process.myUid;
 import static android.text.format.DateUtils.HOUR_IN_MILLIS;
 import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
+
+import static com.android.server.net.NetworkStatsCollection.multiplySafe;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
-
-import static com.android.server.net.NetworkStatsCollection.multiplySafe;
 
 import android.content.res.Resources;
 import android.net.ConnectivityManager;
@@ -40,19 +41,25 @@ import android.net.NetworkStatsHistory;
 import android.net.NetworkTemplate;
 import android.os.Process;
 import android.os.UserHandle;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
 import android.telephony.SubscriptionPlan;
 import android.telephony.TelephonyManager;
 import android.test.MoreAsserts;
 import android.text.format.DateUtils;
 import android.util.RecurrenceRule;
 
+import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
+
 import com.android.frameworks.tests.net.R;
 
 import libcore.io.IoUtils;
 import libcore.io.Streams;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -67,11 +74,6 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
-
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
 
 /**
  * Tests for {@link NetworkStatsCollection}.

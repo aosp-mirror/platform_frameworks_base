@@ -27,8 +27,9 @@ import android.net.LinkAddress;
 import android.net.Network;
 import android.net.StaticIpConfiguration;
 import android.net.apf.ApfCapabilities;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
+
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
 import org.junit.Test;
