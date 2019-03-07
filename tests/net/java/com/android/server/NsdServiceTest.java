@@ -22,23 +22,25 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.timeout;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.content.ContentResolver;
+import android.content.Context;
+import android.net.nsd.NsdManager;
+import android.net.nsd.NsdServiceInfo;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
-import android.content.Context;
-import android.content.ContentResolver;
-import android.net.nsd.NsdManager;
-import android.net.nsd.NsdServiceInfo;
+
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
+
 import com.android.server.NsdService.DaemonConnection;
 import com.android.server.NsdService.DaemonConnectionSupplier;
 import com.android.server.NsdService.NativeCallbackReceiver;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

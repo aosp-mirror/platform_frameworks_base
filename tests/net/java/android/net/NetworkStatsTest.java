@@ -19,6 +19,7 @@ package android.net;
 import static android.net.NetworkStats.DEFAULT_NETWORK_ALL;
 import static android.net.NetworkStats.DEFAULT_NETWORK_NO;
 import static android.net.NetworkStats.DEFAULT_NETWORK_YES;
+import static android.net.NetworkStats.IFACE_ALL;
 import static android.net.NetworkStats.INTERFACES_ALL;
 import static android.net.NetworkStats.METERED_ALL;
 import static android.net.NetworkStats.METERED_NO;
@@ -26,31 +27,30 @@ import static android.net.NetworkStats.METERED_YES;
 import static android.net.NetworkStats.ROAMING_ALL;
 import static android.net.NetworkStats.ROAMING_NO;
 import static android.net.NetworkStats.ROAMING_YES;
-import static android.net.NetworkStats.SET_DEFAULT;
-import static android.net.NetworkStats.SET_FOREGROUND;
+import static android.net.NetworkStats.SET_ALL;
 import static android.net.NetworkStats.SET_DBG_VPN_IN;
 import static android.net.NetworkStats.SET_DBG_VPN_OUT;
-import static android.net.NetworkStats.SET_ALL;
-import static android.net.NetworkStats.IFACE_ALL;
+import static android.net.NetworkStats.SET_DEFAULT;
+import static android.net.NetworkStats.SET_FOREGROUND;
 import static android.net.NetworkStats.TAG_ALL;
 import static android.net.NetworkStats.TAG_NONE;
 import static android.net.NetworkStats.UID_ALL;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
-import android.net.NetworkStats.Entry;
 import android.os.Process;
-import android.support.test.runner.AndroidJUnit4;
-import android.support.test.filters.SmallTest;
 import android.util.ArrayMap;
+
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.google.android.collect.Sets;
 
-import java.util.HashSet;
-
-import org.junit.runner.RunWith;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+
+import java.util.HashSet;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest

@@ -37,8 +37,9 @@ import android.net.NetworkMisc;
 import android.os.Handler;
 import android.os.INetworkManagementService;
 import android.os.test.TestLooper;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
+
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.ConnectivityService;
 
