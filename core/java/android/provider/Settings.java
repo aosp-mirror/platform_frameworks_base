@@ -5758,7 +5758,11 @@ public final class Settings {
                 "autofill_user_data_min_value_length";
 
         /**
-         * Defines whether Content Capture is enabled  for the user.
+         * Defines whether Content Capture is enabled for the user.
+         *
+         * <p>Type: {@code int} ({@code 0} for disabled, {@code 1} for enabled).
+         * <p>Default: enabled
+         *
          * @hide
          */
         @TestApi

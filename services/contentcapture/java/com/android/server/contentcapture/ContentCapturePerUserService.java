@@ -494,7 +494,7 @@ final class ContentCapturePerUserService
             final long token = Binder.clearCallingIdentity();
             try {
                 Settings.Secure.putStringForUser(getContext().getContentResolver(),
-                        Settings.Secure.CONTENT_CAPTURE_ENABLED, "false", mUserId);
+                        Settings.Secure.CONTENT_CAPTURE_ENABLED, "0", mUserId);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
