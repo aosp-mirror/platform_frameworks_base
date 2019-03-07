@@ -3792,10 +3792,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
      * if it's really needed.
      */
     @Override
-    public void getLatestTetheringEntitlementValue(int type, ResultReceiver receiver,
+    public void getLatestTetheringEntitlementResult(int type, ResultReceiver receiver,
             boolean showEntitlementUi, String callerPkg) {
         ConnectivityManager.enforceTetherChangePermission(mContext, callerPkg);
-        mTethering.getLatestTetheringEntitlementValue(type, receiver, showEntitlementUi);
+        mTethering.getLatestTetheringEntitlementResult(type, receiver, showEntitlementUi);
     }
 
     // Called when we lose the default network and have no replacement yet.

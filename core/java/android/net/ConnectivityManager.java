@@ -2681,12 +2681,39 @@ public class ConnectivityManager {
         }
     }
 
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(value = {
+            TETHER_ERROR_NO_ERROR,
+            TETHER_ERROR_PROVISION_FAILED,
+            TETHER_ERROR_ENTITLEMENT_UNKONWN,
+    })
+    public @interface EntitlementResultCode {
+    }
+
     /**
-     * Callback for use with {@link #getLatestTetheringEntitlementValue} to find out whether
+     * Callback for use with {@link #getLatestTetheringEntitlementResult} to find out whether
      * entitlement succeeded.
      * @hide
      */
     @SystemApi
+    public interface OnTetheringEntitlementResultListener  {
+        /**
+         * Called to notify entitlement result.
+         *
+         * @param resultCode an int value of entitlement result. It may be one of
+         *         {@link #TETHER_ERROR_NO_ERROR},
+         *         {@link #TETHER_ERROR_PROVISION_FAILED}, or
+         *         {@link #TETHER_ERROR_ENTITLEMENT_UNKONWN}.
+         */
+        void onEntitlementResult(@EntitlementResultCode int resultCode);
+    }
+
+    /**
+     * @removed
+     * @deprecated This API would be removed when all of caller has been updated.
+     * */
+    @Deprecated
     public abstract static class TetheringEntitlementValueListener  {
         /**
          * Called to notify entitlement result.
@@ -2712,14 +2739,43 @@ public class ConnectivityManager {
      *         {@link #TETHERING_USB}, or
      *         {@link #TETHERING_BLUETOOTH}.
      * @param showEntitlementUi a boolean indicating whether to run UI-based entitlement check.
-     * @param listener an {@link TetheringEntitlementValueListener} which will be called to notify
-     *         the caller of the result of entitlement check. The listener may be called zero or
-     *         one time.
-     * @param handler {@link Handler} to specify the thread upon which the listener will be invoked.
+     * @param executor the executor on which callback will be invoked.
+     * @param listener an {@link OnTetheringEntitlementResultListener} which will be called to
+     *         notify the caller of the result of entitlement check. The listener may be called zero
+     *         or one time.
      * {@hide}
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.TETHER_PRIVILEGED)
+    public void getLatestTetheringEntitlementResult(int type, boolean showEntitlementUi,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull final OnTetheringEntitlementResultListener listener) {
+        Preconditions.checkNotNull(listener, "TetheringEntitlementResultListener cannot be null.");
+        ResultReceiver wrappedListener = new ResultReceiver(null) {
+            @Override
+            protected void onReceiveResult(int resultCode, Bundle resultData) {
+                Binder.withCleanCallingIdentity(() ->
+                            executor.execute(() -> {
+                                listener.onEntitlementResult(resultCode);
+                            }));
+            }
+        };
+
+        try {
+            String pkgName = mContext.getOpPackageName();
+            Log.i(TAG, "getLatestTetheringEntitlementResult:" + pkgName);
+            mService.getLatestTetheringEntitlementResult(type, wrappedListener,
+                    showEntitlementUi, pkgName);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @removed
+     * @deprecated This API would be removed when all of caller has been updated.
+     * */
+    @Deprecated
     public void getLatestTetheringEntitlementValue(int type, boolean showEntitlementUi,
             @NonNull final TetheringEntitlementValueListener listener, @Nullable Handler handler) {
         Preconditions.checkNotNull(listener, "TetheringEntitlementValueListener cannot be null.");
@@ -2733,7 +2789,7 @@ public class ConnectivityManager {
         try {
             String pkgName = mContext.getOpPackageName();
             Log.i(TAG, "getLatestTetheringEntitlementValue:" + pkgName);
-            mService.getLatestTetheringEntitlementValue(type, wrappedListener,
+            mService.getLatestTetheringEntitlementResult(type, wrappedListener,
                     showEntitlementUi, pkgName);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
