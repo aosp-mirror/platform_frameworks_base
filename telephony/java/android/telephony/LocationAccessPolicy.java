@@ -174,22 +174,22 @@ public final class LocationAccessPolicy {
         boolean hasManifestPermission = checkManifestPermission(context, query.callingPid,
                 query.callingUid, permissionToCheck);
 
-        int appOpMode = context.getSystemService(AppOpsManager.class)
-                .noteOpNoThrow(AppOpsManager.permissionToOpCode(permissionToCheck),
-                        query.callingUid, query.callingPackage);
-
-        if (hasManifestPermission && appOpMode == AppOpsManager.MODE_ALLOWED) {
-            // If the app did everything right, return without logging.
-            return LocationPermissionResult.ALLOWED;
-        }
-
-        // If the app has the manifest permission but not the app-op permission, it means that
-        // it's aware of the requirement and the user denied permission explicitly. If we see
-        // this, don't let any of the overrides happen.
         if (hasManifestPermission) {
-            Log.i(TAG, query.callingPackage + " is aware of " + locationTypeForLog + " but the"
-                    + " app-ops permission is specifically denied.");
-            return appOpsModeToPermissionResult(appOpMode);
+            // Only check the app op if the app has the permission.
+            int appOpMode = context.getSystemService(AppOpsManager.class)
+                    .noteOpNoThrow(AppOpsManager.permissionToOpCode(permissionToCheck),
+                            query.callingUid, query.callingPackage);
+            if (appOpMode == AppOpsManager.MODE_ALLOWED) {
+                // If the app did everything right, return without logging.
+                return LocationPermissionResult.ALLOWED;
+            } else {
+                // If the app has the manifest permission but not the app-op permission, it means
+                // that it's aware of the requirement and the user denied permission explicitly.
+                // If we see this, don't let any of the overrides happen.
+                Log.i(TAG, query.callingPackage + " is aware of " + locationTypeForLog + " but the"
+                        + " app-ops permission is specifically denied.");
+                return appOpsModeToPermissionResult(appOpMode);
+            }
         }
 
         int minSdkVersion = Manifest.permission.ACCESS_FINE_LOCATION.equals(permissionToCheck)
