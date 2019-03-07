@@ -545,6 +545,7 @@ package android.app {
   }
 
   public class NotificationManager {
+    method @NonNull public java.util.List<java.lang.String> getAllowedAssistantCapabilities();
     method @Nullable public android.content.ComponentName getAllowedNotificationAssistant();
     method public boolean isNotificationAssistantAccessGranted(@NonNull android.content.ComponentName);
     method public void setNotificationAssistantAccessGranted(@Nullable android.content.ComponentName, boolean);
@@ -6646,6 +6647,7 @@ package android.service.notification {
     method public final void adjustNotifications(@NonNull java.util.List<android.service.notification.Adjustment>);
     method public void onActionInvoked(@NonNull String, @NonNull android.app.Notification.Action, int);
     method @NonNull public final android.os.IBinder onBind(@Nullable android.content.Intent);
+    method public void onCapabilitiesChanged();
     method public void onNotificationDirectReplied(@NonNull String);
     method @Nullable public abstract android.service.notification.Adjustment onNotificationEnqueued(@NonNull android.service.notification.StatusBarNotification);
     method @Nullable public android.service.notification.Adjustment onNotificationEnqueued(@NonNull android.service.notification.StatusBarNotification, @NonNull android.app.NotificationChannel);

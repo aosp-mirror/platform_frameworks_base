@@ -25,6 +25,7 @@ import android.annotation.SdkConstant;
 import android.annotation.SystemApi;
 import android.app.Notification;
 import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -141,7 +142,6 @@ public abstract class NotificationAssistantService extends NotificationListenerS
         return onNotificationEnqueued(sbn);
     }
 
-
     /**
      * Implement this method to learn when notifications are removed, how they were interacted with
      * before removal, and why they were removed.
@@ -213,6 +213,15 @@ public abstract class NotificationAssistantService extends NotificationListenerS
      */
     public void onActionInvoked(@NonNull String key, @NonNull Notification.Action action,
             @Source int source) {
+    }
+
+    /**
+     * Implement this to know when a user has changed which features of
+     * their notifications the assistant can modify.
+     * <p> Query {@link NotificationManager#getAllowedAssistantCapabilities()} to see what
+     * {@link Adjustment adjustments} you are currently allowed to make.</p>
+     */
+    public void onCapabilitiesChanged() {
     }
 
     /**
