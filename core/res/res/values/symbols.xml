@@ -3643,6 +3643,9 @@
   <!-- For Secondary Launcher -->
   <java-symbol type="string" name="config_secondaryHomeComponent" />
 
+  <java-symbol type="string" name="battery_saver_notification_channel_name" />
+  <java-symbol type="string" name="battery_saver_sticky_disabled_notification_title" />
+  <java-symbol type="string" name="battery_saver_sticky_disabled_notification_summary" />
   <java-symbol type="string" name="dynamic_mode_notification_channel_name" />
   <java-symbol type="string" name="dynamic_mode_notification_title" />
   <java-symbol type="string" name="dynamic_mode_notification_summary" />

@@ -17,6 +17,8 @@ package com.android.server.power.batterysaver;
 
 import static com.android.server.power.batterysaver.BatterySaverController.reasonToString;
 
+import android.annotation.NonNull;
+import android.annotation.StringRes;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -91,7 +93,9 @@ import java.io.PrintWriter;
 public class BatterySaverStateMachine {
     private static final String TAG = "BatterySaverStateMachine";
     private static final String DYNAMIC_MODE_NOTIF_CHANNEL_ID = "dynamic_mode_notification";
+    private static final String BATTERY_SAVER_NOTIF_CHANNEL_ID = "battery_saver_channel";
     private static final int DYNAMIC_MODE_NOTIFICATION_ID = 1992;
+    private static final int STICKY_AUTO_DISABLED_NOTIFICATION_ID = 1993;
     private final Object mLock;
 
     private static final boolean DEBUG = BatterySaverPolicy.DEBUG;
@@ -446,6 +450,10 @@ public class BatterySaverStateMachine {
             runOnBgThreadLazy(mThresholdChangeLogger, 2000);
         }
 
+        if (!mSettingBatterySaverStickyAutoDisableEnabled) {
+            hideStickyDisabledNotification();
+        }
+
         if (enabledChanged) {
             final String reason = batterySaverEnabled
                     ? "Global.low_power changed to 1" : "Global.low_power changed to 0";
@@ -577,14 +585,17 @@ public class BatterySaverStateMachine {
                         }
                         enableBatterySaverLocked(/*enable*/ true, /*manual*/ true,
                                 BatterySaverController.REASON_MANUAL_ON);
+                        hideStickyDisabledNotification();
                         mState = STATE_MANUAL_ON;
                     } else if (isAutomaticModeActiveLocked() && isInAutomaticLowZoneLocked()) {
                         enableBatterySaverLocked(/*enable*/ true, /*manual*/ false,
                                 BatterySaverController.REASON_PERCENTAGE_AUTOMATIC_ON);
+                        hideStickyDisabledNotification();
                         mState = STATE_AUTOMATIC_ON;
                     } else if (isDynamicModeActiveLocked() && isInDynamicLowZoneLocked()) {
                         enableBatterySaverLocked(/*enable*/ true, /*manual*/ false,
                                 BatterySaverController.REASON_DYNAMIC_POWER_SAVINGS_AUTOMATIC_ON);
+                        hideStickyDisabledNotification();
                         mState = STATE_AUTOMATIC_ON;
                     }
                 }
@@ -678,6 +689,7 @@ public class BatterySaverStateMachine {
                         mBatterySaverStickyBehaviourDisabled || !mSettingBatterySaverEnabledSticky;
                 if (isStickyDisabled || shouldTurnOffSticky) {
                     setStickyActive(false);
+                    triggerStickyDisabledNotification();
                     mState = STATE_OFF;
                 } else if (!mIsPowered) {
                     // Re-enable BS.
@@ -774,40 +786,66 @@ public class BatterySaverStateMachine {
     @VisibleForTesting
     void triggerDynamicModeNotification() {
         NotificationManager manager = mContext.getSystemService(NotificationManager.class);
-        ensureNotificationChannelExists(manager);
+        ensureNotificationChannelExists(manager, DYNAMIC_MODE_NOTIF_CHANNEL_ID,
+                R.string.dynamic_mode_notification_channel_name);
 
-        manager.notify(DYNAMIC_MODE_NOTIFICATION_ID, buildNotification());
+        manager.notify(DYNAMIC_MODE_NOTIFICATION_ID,
+                buildNotification(DYNAMIC_MODE_NOTIF_CHANNEL_ID,
+                        R.string.dynamic_mode_notification_title,
+                        R.string.dynamic_mode_notification_summary,
+                        Intent.ACTION_POWER_USAGE_SUMMARY));
     }
 
-    private void ensureNotificationChannelExists(NotificationManager manager) {
+    private void triggerStickyDisabledNotification() {
+        NotificationManager manager = mContext.getSystemService(NotificationManager.class);
+        ensureNotificationChannelExists(manager, BATTERY_SAVER_NOTIF_CHANNEL_ID,
+                R.string.battery_saver_notification_channel_name);
+
+        manager.notify(STICKY_AUTO_DISABLED_NOTIFICATION_ID,
+                buildNotification(BATTERY_SAVER_NOTIF_CHANNEL_ID,
+                        R.string.battery_saver_sticky_disabled_notification_title,
+                        R.string.battery_saver_sticky_disabled_notification_summary,
+                        Settings.ACTION_BATTERY_SAVER_SETTINGS));
+    }
+
+    private void ensureNotificationChannelExists(NotificationManager manager,
+            @NonNull String channelId, @StringRes int nameId) {
         NotificationChannel channel = new NotificationChannel(
-                DYNAMIC_MODE_NOTIF_CHANNEL_ID,
-                mContext.getText(
-                        R.string.dynamic_mode_notification_channel_name),
-                NotificationManager.IMPORTANCE_DEFAULT);
+                channelId, mContext.getText(nameId), NotificationManager.IMPORTANCE_DEFAULT);
         channel.setSound(null, null);
         manager.createNotificationChannel(channel);
     }
 
-    private Notification buildNotification() {
+    private Notification buildNotification(@NonNull String channelId, @StringRes int titleId,
+            @StringRes int summaryId, @NonNull String intentAction) {
         Resources res = mContext.getResources();
-        Intent intent = new Intent(Intent.ACTION_POWER_USAGE_SUMMARY);
+        Intent intent = new Intent(intentAction);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         PendingIntent batterySaverIntent = PendingIntent.getActivity(
                 mContext, 0 /* requestCode */, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        final String summary = res.getString(summaryId);
 
-        return new Notification.Builder(mContext, DYNAMIC_MODE_NOTIF_CHANNEL_ID)
+        return new Notification.Builder(mContext, channelId)
                 .setSmallIcon(R.drawable.ic_battery)
-                .setContentTitle(res.getString(R.string.dynamic_mode_notification_title))
-                .setContentText(res.getString(R.string.dynamic_mode_notification_summary))
+                .setContentTitle(res.getString(titleId))
+                .setContentText(summary)
                 .setContentIntent(batterySaverIntent)
+                .setStyle(new Notification.BigTextStyle().bigText(summary))
                 .setOnlyAlertOnce(true)
                 .build();
     }
 
     private void hideDynamicModeNotification() {
+        hideNotification(DYNAMIC_MODE_NOTIFICATION_ID);
+    }
+
+    private void hideStickyDisabledNotification() {
+        hideNotification(STICKY_AUTO_DISABLED_NOTIFICATION_ID);
+    }
+
+    private void hideNotification(int notificationId) {
         NotificationManager manager = mContext.getSystemService(NotificationManager.class);
-        manager.cancel(DYNAMIC_MODE_NOTIFICATION_ID);
+        manager.cancel(notificationId);
     }
 
     private void setStickyActive(boolean active) {
