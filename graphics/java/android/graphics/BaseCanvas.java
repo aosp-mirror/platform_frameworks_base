@@ -425,8 +425,8 @@ public abstract class BaseCanvas {
      * Make lint happy.
      * See {@link Canvas#drawDoubleRoundRect(RectF, float[], RectF, float[], Paint)}
      */
-    public void drawDoubleRoundRect(@NonNull RectF outer, float[] outerRadii,
-            @NonNull RectF inner, float[] innerRadii, @NonNull Paint paint) {
+    public void drawDoubleRoundRect(@NonNull RectF outer, @NonNull float[] outerRadii,
+            @NonNull RectF inner, @NonNull float[] innerRadii, @NonNull Paint paint) {
         throwIfHasHwBitmapInSwMode(paint);
         if (innerRadii == null || outerRadii == null
                 || innerRadii.length != 8 || outerRadii.length != 8) {
