@@ -5858,6 +5858,7 @@ package android.provider {
     method @RequiresPermission(android.Manifest.permission.WRITE_DEVICE_CONFIG) public static boolean setProperty(String, String, String, boolean);
     field public static final String NAMESPACE_ACTIVITY_MANAGER = "activity_manager";
     field public static final String NAMESPACE_ACTIVITY_MANAGER_NATIVE_BOOT = "activity_manager_native_boot";
+    field public static final String NAMESPACE_ATTENTION_MANAGER_SERVICE = "attention_manager_service";
     field public static final String NAMESPACE_AUTOFILL = "autofill";
     field public static final String NAMESPACE_CONNECTIVITY = "connectivity";
     field public static final String NAMESPACE_CONTENT_CAPTURE = "content_capture";
@@ -5870,12 +5871,6 @@ package android.provider {
     field public static final String NAMESPACE_RUNTIME_NATIVE_BOOT = "runtime_native_boot";
     field public static final String NAMESPACE_SYSTEMUI = "systemui";
     field public static final String NAMESPACE_TEXTCLASSIFIER = "textclassifier";
-  }
-
-  public static interface DeviceConfig.AttentionManagerService {
-    field public static final String COMPONENT_NAME = "component_name";
-    field public static final String NAMESPACE = "attention_manager_service";
-    field public static final String SERVICE_ENABLED = "service_enabled";
   }
 
   public static interface DeviceConfig.OnPropertiesChangedListener {

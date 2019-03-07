@@ -78,6 +78,14 @@ public final class DeviceConfig {
             "activity_manager_native_boot";
 
     /**
+     * Namespace for AttentionManagerService related features.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String NAMESPACE_ATTENTION_MANAGER_SERVICE = "attention_manager_service";
+
+    /**
      * Namespace for autofill feature that provides suggestions across all apps when
      * the user interacts with input fields.
      *
@@ -288,22 +296,6 @@ public final class DeviceConfig {
          * Vibration time in milliseconds before ramping ringer starts.
          */
         String RAMPING_RINGER_VIBRATION_DURATION = "ramping_ringer_vibration_duration";
-    }
-
-    /**
-     * Namespace for {@link AttentionManagerService} related features.
-     *
-     * @hide
-     */
-    @SystemApi
-    public interface AttentionManagerService {
-        String NAMESPACE = "attention_manager_service";
-
-        /** If {@code true}, enables {@link AttentionManagerService} features. */
-        String SERVICE_ENABLED = "service_enabled";
-
-        /** Allows a CTS to inject a fake implementation. */
-        String COMPONENT_NAME = "component_name";
     }
 
     /**
