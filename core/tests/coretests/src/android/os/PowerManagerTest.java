@@ -41,7 +41,9 @@ public class PowerManagerTest extends AndroidTestCase {
     private UiDevice mUiDevice;
     private Executor mExec = Executors.newSingleThreadExecutor();
     @Mock
-    private PowerManager.ThermalStatusCallback mCallback;
+    private PowerManager.OnThermalStatusChangedListener mListener1;
+    @Mock
+    private PowerManager.OnThermalStatusChangedListener mListener2;
     private static final long CALLBACK_TIMEOUT_MILLI_SEC = 5000;
 
     /**
@@ -169,6 +171,11 @@ public class PowerManagerTest extends AndroidTestCase {
         // TODO: Threaded test (needs handler) to make sure timed wakelocks work too
     }
 
+    /**
+     * Confirm that we can get thermal status.
+     *
+     * @throws Exception
+     */
     @Test
     public void testGetThermalStatus() throws Exception {
         int status = 0;
@@ -179,24 +186,57 @@ public class PowerManagerTest extends AndroidTestCase {
         assertEquals(status, mPm.getCurrentThermalStatus());
     }
 
+    /**
+     * Confirm that we can add/remove thermal status listener.
+     *
+     * @throws Exception
+     */
     @Test
     public void testThermalStatusCallback() throws Exception {
-        mPm.registerThermalStatusCallback(mCallback, mExec);
-        verify(mCallback, timeout(CALLBACK_TIMEOUT_MILLI_SEC)
-                .times(1)).onStatusChange(0);
-        reset(mCallback);
-        int status = 3;
+        // Initial override status is THERMAL_STATUS_NONE
+        int status = PowerManager.THERMAL_STATUS_NONE;
+        // Add listener1
+        mPm.addThermalStatusListener(mExec, mListener1);
+        verify(mListener1, timeout(CALLBACK_TIMEOUT_MILLI_SEC)
+                .times(1)).onThermalStatusChanged(status);
+        reset(mListener1);
+        status = PowerManager.THERMAL_STATUS_SEVERE;
         mUiDevice.executeShellCommand("cmd thermalservice override-status "
                 + Integer.toString(status));
-        verify(mCallback, timeout(CALLBACK_TIMEOUT_MILLI_SEC)
-                .times(1)).onStatusChange(status);
-        reset(mCallback);
-        mPm.unregisterThermalStatusCallback(mCallback);
-        status = 2;
+        verify(mListener1, timeout(CALLBACK_TIMEOUT_MILLI_SEC)
+                .times(1)).onThermalStatusChanged(status);
+        reset(mListener1);
+        // Add listener1 again
+        try {
+            mPm.addThermalStatusListener(mListener1);
+            fail("Expected exception not thrown");
+        } catch (IllegalArgumentException expectedException) {
+        }
+        // Add listener2 on main thread.
+        mPm.addThermalStatusListener(mListener2);
+        status = PowerManager.THERMAL_STATUS_MODERATE;
         mUiDevice.executeShellCommand("cmd thermalservice override-status "
                 + Integer.toString(status));
-        verify(mCallback, timeout(CALLBACK_TIMEOUT_MILLI_SEC)
-                .times(0)).onStatusChange(status);
-
+        verify(mListener1, timeout(CALLBACK_TIMEOUT_MILLI_SEC)
+                .times(1)).onThermalStatusChanged(status);
+        verify(mListener2, timeout(CALLBACK_TIMEOUT_MILLI_SEC)
+                .times(1)).onThermalStatusChanged(status);
+        reset(mListener1);
+        reset(mListener2);
+        // Remove listener1
+        mPm.removeThermalStatusListener(mListener1);
+        // Remove listener1 again
+        try {
+            mPm.removeThermalStatusListener(mListener1);
+            fail("Expected exception not thrown");
+        } catch (IllegalArgumentException expectedException) {
+        }
+        status = PowerManager.THERMAL_STATUS_LIGHT;
+        mUiDevice.executeShellCommand("cmd thermalservice override-status "
+                + Integer.toString(status));
+        verify(mListener1, timeout(CALLBACK_TIMEOUT_MILLI_SEC)
+                .times(0)).onThermalStatusChanged(status);
+        verify(mListener2, timeout(CALLBACK_TIMEOUT_MILLI_SEC)
+                .times(1)).onThermalStatusChanged(status);
     }
 }

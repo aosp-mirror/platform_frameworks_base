@@ -809,7 +809,8 @@ public final class PowerManager {
     final Handler mHandler;
 
     IThermalService mThermalService;
-    private ArrayMap<ThermalStatusCallback, IThermalStatusListener> mCallbackMap = new ArrayMap<>();
+    private final ArrayMap<OnThermalStatusChangedListener, IThermalStatusListener>
+            mListenerMap = new ArrayMap<>();
 
     IDeviceIdleController mIDeviceIdleController;
 
@@ -1769,51 +1770,73 @@ public final class PowerManager {
     }
 
     /**
-     * Callback passed to
-     * {@link PowerManager#registerThermalStatusCallback} and
-     * {@link PowerManager#unregisterThermalStatusCallback}
-     * to notify caller of thermal status.
+     * Listener passed to
+     * {@link PowerManager#addThermalStatusListener} and
+     * {@link PowerManager#removeThermalStatusListener}
+     * to notify caller of thermal status has changed.
      */
-    public abstract static class ThermalStatusCallback {
+    public interface OnThermalStatusChangedListener {
 
         /**
          * Called when overall thermal throttling status changed.
          * @param status defined in {@link android.os.Temperature}.
          */
-        public void onStatusChange(@ThermalStatus int status) {}
+        void onThermalStatusChanged(@ThermalStatus int status);
     }
 
+
     /**
-     * This function registers a callback for thermal status change.
+     * This function adds a listener for thermal status change, listen call back will be
+     * enqueued tasks on the main thread
      *
-     * @param callback callback to be registered.
-     * @param executor {@link Executor} to handle the callbacks.
+     * @param listener listener to be added,
      */
-    public void registerThermalStatusCallback(
-            @NonNull ThermalStatusCallback callback, @NonNull @CallbackExecutor Executor executor) {
-        Preconditions.checkNotNull(callback, "callback cannnot be null");
-        Preconditions.checkNotNull(executor, "executor cannnot be null");
+    public void addThermalStatusListener(@NonNull OnThermalStatusChangedListener listener) {
+        Preconditions.checkNotNull(listener, "listener cannot be null");
         synchronized (this) {
             if (mThermalService == null) {
                 mThermalService = IThermalService.Stub.asInterface(
                         ServiceManager.getService(Context.THERMAL_SERVICE));
             }
-            try {
-                if (mCallbackMap.containsKey(callback)) {
-                    throw new IllegalArgumentException("ThermalStatusCallback already registered");
-                }
-                IThermalStatusListener listener = new IThermalStatusListener.Stub() {
-                    @Override
-                    public void onStatusChange(int status) {
+            this.addThermalStatusListener(mContext.getMainExecutor(), listener);
+        }
+    }
+
+    /**
+     * This function adds a listener for thermal status change.
+     *
+     * @param executor {@link Executor} to handle listener callback.
+     * @param listener listener to be added.
+     */
+    public void addThermalStatusListener(@NonNull @CallbackExecutor Executor executor,
+            @NonNull OnThermalStatusChangedListener listener) {
+        Preconditions.checkNotNull(listener, "listener cannot be null");
+        Preconditions.checkNotNull(executor, "executor cannot be null");
+        synchronized (this) {
+            if (mThermalService == null) {
+                mThermalService = IThermalService.Stub.asInterface(
+                        ServiceManager.getService(Context.THERMAL_SERVICE));
+            }
+            Preconditions.checkArgument(!mListenerMap.containsKey(listener),
+                    "Listener already registered: " + listener);
+            IThermalStatusListener internalListener = new IThermalStatusListener.Stub() {
+                @Override
+                public void onStatusChange(int status) {
+                    final long token = Binder.clearCallingIdentity();
+                    try {
                         executor.execute(() -> {
-                            callback.onStatusChange(status);
+                            listener.onThermalStatusChanged(status);
                         });
+                    } finally {
+                        Binder.restoreCallingIdentity(token);
                     }
-                };
-                if (mThermalService.registerThermalStatusListener(listener)) {
-                    mCallbackMap.put(callback, listener);
+                }
+            };
+            try {
+                if (mThermalService.registerThermalStatusListener(internalListener)) {
+                    mListenerMap.put(listener, internalListener);
                 } else {
-                    throw new RuntimeException("ThermalStatusCallback failed to register");
+                    throw new RuntimeException("Listener failed to set");
                 }
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
@@ -1822,28 +1845,24 @@ public final class PowerManager {
     }
 
     /**
-     * This function unregisters a callback for thermal status change.
+     * This function removes a listener for thermal status change
      *
-     * @param callback to be unregistered.
-     *
-     * see {@link #registerThermalStatusCallback}
+     * @param listener listener to be removed
      */
-    public void unregisterThermalStatusCallback(@NonNull ThermalStatusCallback callback) {
-        Preconditions.checkNotNull(callback, "callback cannnot be null");
+    public void removeThermalStatusListener(@NonNull OnThermalStatusChangedListener listener) {
+        Preconditions.checkNotNull(listener, "listener cannot be null");
         synchronized (this) {
             if (mThermalService == null) {
                 mThermalService = IThermalService.Stub.asInterface(
                         ServiceManager.getService(Context.THERMAL_SERVICE));
             }
+            IThermalStatusListener internalListener = mListenerMap.get(listener);
+            Preconditions.checkArgument(internalListener != null, "Listener was not added");
             try {
-                IThermalStatusListener listener = mCallbackMap.get(callback);
-                if (listener == null) {
-                    throw new IllegalArgumentException("ThermalStatusCallback not registered");
-                }
-                if (mThermalService.unregisterThermalStatusListener(listener)) {
-                    mCallbackMap.remove(callback);
+                if (mThermalService.unregisterThermalStatusListener(internalListener)) {
+                    mListenerMap.remove(listener);
                 } else {
-                    throw new RuntimeException("ThermalStatusCallback failed to unregister");
+                    throw new RuntimeException("Listener failed to remove");
                 }
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
