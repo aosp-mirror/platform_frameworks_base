@@ -30,6 +30,7 @@ import android.content.ContentResolver;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.provider.Settings.ResetMode;
+import android.util.ArrayMap;
 import android.util.Pair;
 
 import com.android.internal.annotations.GuardedBy;
@@ -398,8 +399,11 @@ public final class DeviceConfig {
 
     private static final Object sLock = new Object();
     @GuardedBy("sLock")
-    private static Map<OnPropertyChangedListener, Pair<String, Executor>> sListeners =
-            new HashMap<>();
+    private static ArrayMap<OnPropertyChangedListener, Pair<String, Executor>> sSingleListeners =
+            new ArrayMap<>();
+    @GuardedBy("sLock")
+    private static ArrayMap<OnPropertiesChangedListener, Pair<String, Executor>> sListeners =
+            new ArrayMap<>();
     @GuardedBy("sLock")
     private static Map<String, Pair<ContentObserver, Integer>> sNamespaces = new HashMap<>();
 
@@ -597,20 +601,58 @@ public final class DeviceConfig {
             @NonNull String namespace,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull OnPropertyChangedListener onPropertyChangedListener) {
-        // TODO enforce READ_DEVICE_CONFIG permission
         synchronized (sLock) {
-            Pair<String, Executor> oldNamespace = sListeners.get(onPropertyChangedListener);
+            Pair<String, Executor> oldNamespace = sSingleListeners.get(onPropertyChangedListener);
             if (oldNamespace == null) {
                 // Brand new listener, add it to the list.
-                sListeners.put(onPropertyChangedListener, new Pair<>(namespace, executor));
+                sSingleListeners.put(onPropertyChangedListener, new Pair<>(namespace, executor));
                 incrementNamespace(namespace);
             } else if (namespace.equals(oldNamespace.first)) {
                 // Listener is already registered for this namespace, update executor just in case.
-                sListeners.put(onPropertyChangedListener, new Pair<>(namespace, executor));
+                sSingleListeners.put(onPropertyChangedListener, new Pair<>(namespace, executor));
             } else {
                 // Update this listener from an old namespace to the new one.
-                decrementNamespace(sListeners.get(onPropertyChangedListener).first);
-                sListeners.put(onPropertyChangedListener, new Pair<>(namespace, executor));
+                decrementNamespace(sSingleListeners.get(onPropertyChangedListener).first);
+                sSingleListeners.put(onPropertyChangedListener, new Pair<>(namespace, executor));
+                incrementNamespace(namespace);
+            }
+        }
+    }
+
+    /**
+     * Add a listener for property changes.
+     * <p>
+     * This listener will be called whenever properties in the specified namespace change. Callbacks
+     * will be made on the specified executor. Future calls to this method with the same listener
+     * will replace the old namespace and executor. Remove the listener entirely by calling
+     * {@link #removeOnPropertiesChangedListener(OnPropertiesChangedListener)}.
+     *
+     * @param namespace                   The namespace containing properties to monitor.
+     * @param executor                    The executor which will be used to run callbacks.
+     * @param onPropertiesChangedListener The listener to add.
+     * @hide
+     * @see #removeOnPropertiesChangedListener(OnPropertiesChangedListener)
+     */
+    @SystemApi
+    @TestApi
+    @RequiresPermission(READ_DEVICE_CONFIG)
+    public static void addOnPropertiesChangedListener(
+            @NonNull String namespace,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull OnPropertiesChangedListener onPropertiesChangedListener) {
+        synchronized (sLock) {
+            Pair<String, Executor> oldNamespace = sListeners.get(onPropertiesChangedListener);
+            if (oldNamespace == null) {
+                // Brand new listener, add it to the list.
+                sListeners.put(onPropertiesChangedListener, new Pair<>(namespace, executor));
+                incrementNamespace(namespace);
+            } else if (namespace.equals(oldNamespace.first)) {
+                // Listener is already registered for this namespace, update executor just in case.
+                sListeners.put(onPropertiesChangedListener, new Pair<>(namespace, executor));
+            } else {
+                // Update this listener from an old namespace to the new one.
+                decrementNamespace(sListeners.get(onPropertiesChangedListener).first);
+                sListeners.put(onPropertiesChangedListener, new Pair<>(namespace, executor));
                 incrementNamespace(namespace);
             }
         }
@@ -627,11 +669,33 @@ public final class DeviceConfig {
     @SystemApi
     @TestApi
     public static void removeOnPropertyChangedListener(
-            OnPropertyChangedListener onPropertyChangedListener) {
+            @NonNull OnPropertyChangedListener onPropertyChangedListener) {
+        Preconditions.checkNotNull(onPropertyChangedListener);
         synchronized (sLock) {
-            if (sListeners.containsKey(onPropertyChangedListener)) {
-                decrementNamespace(sListeners.get(onPropertyChangedListener).first);
-                sListeners.remove(onPropertyChangedListener);
+            if (sSingleListeners.containsKey(onPropertyChangedListener)) {
+                decrementNamespace(sSingleListeners.get(onPropertyChangedListener).first);
+                sSingleListeners.remove(onPropertyChangedListener);
+            }
+        }
+    }
+
+    /**
+     * Remove a listener for property changes. The listener will receive no further notification of
+     * property changes.
+     *
+     * @param onPropertiesChangedListener The listener to remove.
+     * @hide
+     * @see #addOnPropertiesChangedListener(String, Executor, OnPropertiesChangedListener)
+     */
+    @SystemApi
+    @TestApi
+    public static void removeOnPropertiesChangedListener(
+            @NonNull OnPropertiesChangedListener onPropertiesChangedListener) {
+        Preconditions.checkNotNull(onPropertiesChangedListener);
+        synchronized (sLock) {
+            if (sListeners.containsKey(onPropertiesChangedListener)) {
+                decrementNamespace(sListeners.get(onPropertiesChangedListener).first);
+                sListeners.remove(onPropertiesChangedListener);
             }
         }
     }
@@ -700,14 +764,30 @@ public final class DeviceConfig {
         final String name = pathSegments.get(2);
         final String value = getProperty(namespace, name);
         synchronized (sLock) {
-            for (final OnPropertyChangedListener listener : sListeners.keySet()) {
-                if (namespace.equals(sListeners.get(listener).first)) {
-                    sListeners.get(listener).second.execute(new Runnable() {
+            // OnPropertiesChangedListeners
+            for (int i = 0; i < sListeners.size(); i++) {
+                if (namespace.equals(sListeners.valueAt(i).first)) {
+                    final int j = i;
+                    sListeners.valueAt(i).second.execute(new Runnable() {
                         @Override
                         public void run() {
                             Map<String, String> propertyMap = new HashMap(1);
                             propertyMap.put(name, value);
-                            listener.onPropertiesChanged(new Properties(namespace, propertyMap));
+                            sListeners.keyAt(j)
+                                    .onPropertiesChanged(new Properties(namespace, propertyMap));
+                        }
+
+                    });
+                }
+            }
+            // OnPropertyChangedListeners
+            for (int i = 0; i < sSingleListeners.size(); i++) {
+                if (namespace.equals(sSingleListeners.valueAt(i).first)) {
+                    final int j = i;
+                    sSingleListeners.valueAt(i).second.execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            sSingleListeners.keyAt(j).onPropertyChanged(namespace, name, value);
                         }
 
                     });
@@ -717,7 +797,7 @@ public final class DeviceConfig {
     }
 
     /**
-     * Interface for monitoring to properties.
+     * Interface for monitoring single property changes.
      * <p>
      * Override {@link #onPropertyChanged(String, String, String)} to handle callbacks for changes.
      *
@@ -734,22 +814,25 @@ public final class DeviceConfig {
          * @param value     The new value of the property which has changed.
          */
         void onPropertyChanged(String namespace, String name, String value);
+    }
 
+    /**
+     * Interface for monitoring changes to properties.
+     * <p>
+     * Override {@link #onPropertiesChanged(Properties)} to handle callbacks for changes.
+     *
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    public interface OnPropertiesChangedListener {
         /**
          * Called when one or more properties have changed.
          *
          * @param properties Contains the complete collection of properties which have changed for a
-         *         single namespace.
+         *                   single namespace.
          */
-        default void onPropertiesChanged(@NonNull Properties properties) {
-            // During the transitional period, this method calls the old one to ensure legacy
-            // callers continue to function as expected. Ignore this if you are implementing it for
-            // yourself.
-            String namespace = properties.getNamespace();
-            for (String name : properties.getKeyset()) {
-                onPropertyChanged(namespace, name, properties.getString(name, null));
-            }
-        }
+        void onPropertiesChanged(@NonNull Properties properties);
     }
 
     /**
