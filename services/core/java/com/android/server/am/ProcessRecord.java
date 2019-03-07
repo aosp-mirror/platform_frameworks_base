@@ -55,6 +55,7 @@ import android.util.StatsLog;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.procstats.ProcessState;
 import com.android.internal.app.procstats.ProcessStats;
 import com.android.internal.os.BatteryStatsImpl;
@@ -73,7 +74,7 @@ import java.util.List;
  * Full information about a particular process that
  * is currently running.
  */
-final class ProcessRecord implements WindowProcessListener {
+class ProcessRecord implements WindowProcessListener {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "ProcessRecord" : TAG_AM;
 
     private final ActivityManagerService mService; // where we came from
@@ -1303,6 +1304,27 @@ final class ProcessRecord implements WindowProcessListener {
             ServerProtoEnums.DATA_APP;
     }
 
+    /**
+     * Unless configured otherwise, swallow ANRs in background processes & kill the process.
+     * Non-private access is for tests only.
+     */
+    @VisibleForTesting
+    boolean isSilentAnr() {
+        return !getShowBackground() && !isInterestingForBackgroundTraces();
+    }
+
+    /** Non-private access is for tests only. */
+    @VisibleForTesting
+    List<ProcessRecord> getLruProcessList() {
+        return mService.mProcessList.mLruProcesses;
+    }
+
+    /** Non-private access is for tests only. */
+    @VisibleForTesting
+    boolean isMonitorCpuUsage() {
+        return mService.MONITOR_CPU_USAGE;
+    }
+
     void appNotResponding(String activityShortComponentName, ApplicationInfo aInfo,
             String parentShortComponentName, WindowProcessController parentProcess,
             boolean aboveSystem, String annotation) {
@@ -1312,15 +1334,9 @@ final class ProcessRecord implements WindowProcessListener {
         mWindowProcessController.appEarlyNotResponding(annotation, () -> kill("anr", true));
 
         long anrTime = SystemClock.uptimeMillis();
-        if (ActivityManagerService.MONITOR_CPU_USAGE) {
+        if (isMonitorCpuUsage()) {
             mService.updateCpuStatsNow();
         }
-
-        // Unless configured otherwise, swallow ANRs in background processes & kill the process.
-        boolean showBackground = Settings.Secure.getInt(mService.mContext.getContentResolver(),
-                Settings.Secure.ANR_SHOW_BACKGROUND, 0) != 0;
-
-        boolean isSilentANR;
 
         synchronized (mService) {
             // PowerManager.reboot() can block for a long time, so ignore ANRs while shutting down.
@@ -1353,8 +1369,7 @@ final class ProcessRecord implements WindowProcessListener {
             firstPids.add(pid);
 
             // Don't dump other PIDs if it's a background ANR
-            isSilentANR = !showBackground && !isInterestingForBackgroundTraces();
-            if (!isSilentANR) {
+            if (!isSilentAnr()) {
                 int parentPid = pid;
                 if (parentProcess != null && parentProcess.getPid() > 0) {
                     parentPid = parentProcess.getPid();
@@ -1363,8 +1378,8 @@ final class ProcessRecord implements WindowProcessListener {
 
                 if (MY_PID != pid && MY_PID != parentPid) firstPids.add(MY_PID);
 
-                for (int i = mService.mProcessList.mLruProcesses.size() - 1; i >= 0; i--) {
-                    ProcessRecord r = mService.mProcessList.mLruProcesses.get(i);
+                for (int i = getLruProcessList().size() - 1; i >= 0; i--) {
+                    ProcessRecord r = getLruProcessList().get(i);
                     if (r != null && r.thread != null) {
                         int myPid = r.pid;
                         if (myPid > 0 && myPid != pid && myPid != parentPid && myPid != MY_PID) {
@@ -1405,7 +1420,7 @@ final class ProcessRecord implements WindowProcessListener {
 
         // don't dump native PIDs for background ANRs unless it is the process of interest
         String[] nativeProcs = null;
-        if (isSilentANR) {
+        if (isSilentAnr()) {
             for (int i = 0; i < NATIVE_STACKS_OF_INTEREST.length; i++) {
                 if (NATIVE_STACKS_OF_INTEREST[i].equals(processName)) {
                     nativeProcs = new String[] { processName };
@@ -1429,11 +1444,11 @@ final class ProcessRecord implements WindowProcessListener {
         // For background ANRs, don't pass the ProcessCpuTracker to
         // avoid spending 1/2 second collecting stats to rank lastPids.
         File tracesFile = ActivityManagerService.dumpStackTraces(firstPids,
-                (isSilentANR) ? null : processCpuTracker, (isSilentANR) ? null : lastPids,
+                (isSilentAnr()) ? null : processCpuTracker, (isSilentAnr()) ? null : lastPids,
                 nativePids);
 
         String cpuInfo = null;
-        if (ActivityManagerService.MONITOR_CPU_USAGE) {
+        if (isMonitorCpuUsage()) {
             mService.updateCpuStatsNow();
             synchronized (mService.mProcessCpuTracker) {
                 cpuInfo = mService.mProcessCpuTracker.printCurrentState(anrTime);
@@ -1477,9 +1492,13 @@ final class ProcessRecord implements WindowProcessListener {
         }
 
         synchronized (mService) {
-            mService.mBatteryStatsService.noteProcessAnr(processName, uid);
+            // mBatteryStatsService can be null if the AMS is constructed with injector only. This
+            // will only happen in tests.
+            if (mService.mBatteryStatsService != null) {
+                mService.mBatteryStatsService.noteProcessAnr(processName, uid);
+            }
 
-            if (isSilentANR) {
+            if (isSilentAnr()) {
                 kill("bg anr", true);
                 return;
             }
@@ -1488,20 +1507,28 @@ final class ProcessRecord implements WindowProcessListener {
             makeAppNotRespondingLocked(activityShortComponentName,
                     annotation != null ? "ANR " + annotation : "ANR", info.toString());
 
-            // Bring up the infamous App Not Responding dialog
-            Message msg = Message.obtain();
-            msg.what = ActivityManagerService.SHOW_NOT_RESPONDING_UI_MSG;
-            msg.obj = new AppNotRespondingDialog.Data(this, aInfo, aboveSystem);
+            // mUiHandler can be null if the AMS is constructed with injector only. This will only
+            // happen in tests.
+            if (mService.mUiHandler != null) {
+                // Bring up the infamous App Not Responding dialog
+                Message msg = Message.obtain();
+                msg.what = ActivityManagerService.SHOW_NOT_RESPONDING_UI_MSG;
+                msg.obj = new AppNotRespondingDialog.Data(this, aInfo, aboveSystem);
 
-            mService.mUiHandler.sendMessage(msg);
+                mService.mUiHandler.sendMessage(msg);
+            }
         }
     }
 
     private void makeAppNotRespondingLocked(String activity, String shortMsg, String longMsg) {
         setNotResponding(true);
-        notRespondingReport = mService.mAppErrors.generateProcessError(this,
-                ActivityManager.ProcessErrorStateInfo.NOT_RESPONDING,
-                activity, shortMsg, longMsg, null);
+        // mAppErrors can be null if the AMS is constructed with injector only. This will only
+        // happen in tests.
+        if (mService.mAppErrors != null) {
+            notRespondingReport = mService.mAppErrors.generateProcessError(this,
+                    ActivityManager.ProcessErrorStateInfo.NOT_RESPONDING,
+                    activity, shortMsg, longMsg, null);
+        }
         startAppProblemLocked();
         getWindowProcessController().stopFreezingActivities();
     }
@@ -1538,5 +1565,10 @@ final class ProcessRecord implements WindowProcessListener {
         return isInterestingToUserLocked() ||
                 (info != null && "com.android.systemui".equals(info.packageName))
                 || (hasTopUi() || hasOverlayUi());
+    }
+
+    private boolean getShowBackground() {
+        return Settings.Secure.getInt(mService.mContext.getContentResolver(),
+                Settings.Secure.ANR_SHOW_BACKGROUND, 0) != 0;
     }
 }
