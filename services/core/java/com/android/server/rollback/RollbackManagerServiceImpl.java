@@ -531,17 +531,10 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
     }
 
     private void updateRollbackLifetimeDurationInMillis() {
-        String strRollbackLifetimeInMillis = DeviceConfig.getProperty(
+        mRollbackLifetimeDurationInMillis = DeviceConfig.getLong(
                 DeviceConfig.Rollback.BOOT_NAMESPACE,
-                DeviceConfig.Rollback.ROLLBACK_LIFETIME_IN_MILLIS);
-
-        try {
-            mRollbackLifetimeDurationInMillis = (strRollbackLifetimeInMillis == null)
-                    ? DEFAULT_ROLLBACK_LIFETIME_DURATION_MILLIS
-                    : Long.parseLong(strRollbackLifetimeInMillis);
-        } catch (NumberFormatException e) {
-            mRollbackLifetimeDurationInMillis = DEFAULT_ROLLBACK_LIFETIME_DURATION_MILLIS;
-        }
+                DeviceConfig.Rollback.ROLLBACK_LIFETIME_IN_MILLIS,
+                DEFAULT_ROLLBACK_LIFETIME_DURATION_MILLIS);
     }
 
     void onBootCompleted() {
