@@ -175,10 +175,8 @@ final class ContentCapturePerUserService
 
     @Override // from ContentCaptureServiceCallbacks
     public void onServiceDied(@NonNull RemoteContentCaptureService service) {
-        if (mMaster.debug) Slog.d(TAG, "remote service died: " + service);
-        synchronized (mLock) {
-            removeSelfFromCacheLocked();
-        }
+        // Don't do anything; eventually the system will bind to it again...
+        Slog.w(TAG, "remote service died: " + service);
     }
 
     // TODO(b/119613670): log metrics
