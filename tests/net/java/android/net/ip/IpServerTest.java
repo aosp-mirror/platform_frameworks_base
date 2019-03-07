@@ -65,9 +65,10 @@ import android.net.util.SharedLog;
 import android.os.INetworkManagementService;
 import android.os.RemoteException;
 import android.os.test.TestLooper;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
 import android.text.TextUtils;
+
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
 import org.junit.Test;

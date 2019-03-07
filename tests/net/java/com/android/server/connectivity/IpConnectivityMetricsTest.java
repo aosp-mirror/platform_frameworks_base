@@ -47,10 +47,11 @@ import android.net.metrics.IpReachabilityEvent;
 import android.net.metrics.RaEvent;
 import android.net.metrics.ValidationProbeEvent;
 import android.os.Parcelable;
-import android.support.test.runner.AndroidJUnit4;
 import android.system.OsConstants;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.util.Base64;
+
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.util.BitUtils;
 import com.android.server.connectivity.metrics.nano.IpConnectivityLogClass;

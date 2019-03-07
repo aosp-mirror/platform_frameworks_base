@@ -20,16 +20,17 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import android.os.Parcel;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
+
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Arrays;
 import java.util.Map.Entry;
 import java.util.Random;
-
-import org.junit.Test;
-import org.junit.runner.RunWith;
 
 /** Unit tests for {@link IpSecAlgorithm}. */
 @SmallTest

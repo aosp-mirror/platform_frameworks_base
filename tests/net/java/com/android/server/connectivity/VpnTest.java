@@ -73,10 +73,11 @@ import android.os.Looper;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.R;
 import com.android.internal.net.VpnConfig;

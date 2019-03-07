@@ -26,20 +26,18 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.UserHandle;
 
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.util.test.BroadcastInterceptingContext;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.runner.RunWith;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest

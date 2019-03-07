@@ -98,10 +98,11 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.test.TestLooper;
 import android.provider.Settings;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
 import android.telephony.CarrierConfigManager;
 import android.test.mock.MockContentResolver;
+
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.StateMachine;
