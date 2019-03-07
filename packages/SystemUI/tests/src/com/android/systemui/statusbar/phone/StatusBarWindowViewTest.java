@@ -34,11 +34,13 @@ import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
+@Ignore
 public class StatusBarWindowViewTest extends SysuiTestCase {
 
     private StatusBarWindowView mView;
@@ -59,6 +61,7 @@ public class StatusBarWindowViewTest extends SysuiTestCase {
     }
 
     @Test
+    @Ignore
     public void testDragDownHelperCalledWhenDraggingDown() throws Exception {
         when(Dependency.get(StatusBarStateController.class).getState())
                 .thenReturn(StatusBarState.SHADE);
