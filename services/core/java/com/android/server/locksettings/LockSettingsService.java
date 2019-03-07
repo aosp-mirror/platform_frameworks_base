@@ -1853,7 +1853,9 @@ public class LockSettingsService extends ILockSettings.Stub {
                                         CHALLENGE_NONE, 0, userId, progressCallback);
         if ((response.getResponseCode() == VerifyCredentialResponse.RESPONSE_OK) &&
                                            (userId == UserHandle.USER_OWNER)) {
-                retainPassword(credential);
+                //TODO(b/127810705): Update to credentials to use byte[]
+                String credentialString = credential == null ? null : new String(credential);
+                retainPassword(credentialString);
         }
         return response;
     }
