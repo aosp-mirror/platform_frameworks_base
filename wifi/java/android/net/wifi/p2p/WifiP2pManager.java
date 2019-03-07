@@ -793,7 +793,7 @@ public class WifiP2pManager {
          * The requested {@link android.net.NetworkInfo} is available
          * @param networkInfo Wi-Fi p2p {@link android.net.NetworkInfo}
          */
-        void onNetworkInfoAvailable(NetworkInfo networkInfo);
+        void onNetworkInfoAvailable(@NonNull NetworkInfo networkInfo);
     }
 
     /**
