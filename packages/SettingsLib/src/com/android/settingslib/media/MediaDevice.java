@@ -34,9 +34,9 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
             MediaDeviceType.TYPE_BLUETOOTH_DEVICE,
             MediaDeviceType.TYPE_PHONE_DEVICE})
     public @interface MediaDeviceType {
-        int TYPE_CAST_DEVICE = 1;
-        int TYPE_BLUETOOTH_DEVICE = 2;
-        int TYPE_PHONE_DEVICE = 3;
+        int TYPE_PHONE_DEVICE = 1;
+        int TYPE_CAST_DEVICE = 2;
+        int TYPE_BLUETOOTH_DEVICE = 3;
     }
 
     private int mConnectedRecord;
@@ -61,6 +61,13 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
      * @return name of MediaDevice.
      */
     public abstract String getName();
+
+    /**
+     * Get summary from MediaDevice.
+     *
+     * @return summary of MediaDevice.
+     */
+    public abstract String getSummary();
 
     /**
      * Get resource id of MediaDevice.
@@ -94,6 +101,13 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
     public abstract void disconnect();
 
     /**
+     * According the MediaDevice type to check whether we are connected to this MediaDevice.
+     *
+     * @return Whether it is connected.
+     */
+    public abstract boolean isConnected();
+
+    /**
      * Rules:
      * 1. If there is one of the connected devices identified as a carkit, this carkit will
      * be always on the top of the device list. Rule 2 and Rule 3 can’t overrule this rule.
@@ -103,9 +117,11 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
      * 3. For devices with usage record.
      * The most recent used one + device group with usage info sorted by how many times the
      * device has been used.
+     * 4. Phone device always in the top and the connected Bluetooth devices, cast devices and
+     * phone device will be always above on the disconnect Bluetooth devices.
      *
-     * So the device list will look like 4 slots ranked as below.
-     * Rule 1 + the most recently used device + Rule 3 + Rule 2
+     * So the device list will look like 5 slots ranked as below.
+     * Rule 4 + Rule 1 + the most recently used device + Rule 3 + Rule 2
      * Any slot could be empty. And available device will belong to one of the slots.
      *
      * @return a negative integer, zero, or a positive integer
@@ -113,6 +129,21 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
      */
     @Override
     public int compareTo(MediaDevice another) {
+        // Check Bluetooth device is have same connection state
+        if (isConnected() ^ another.isConnected()) {
+            if (isConnected()) {
+                return -1;
+            } else {
+                return 1;
+            }
+        }
+
+        // Phone device always in the top.
+        if (mType == MediaDeviceType.TYPE_PHONE_DEVICE) {
+            return -1;
+        } else if (another.mType == MediaDeviceType.TYPE_PHONE_DEVICE) {
+            return 1;
+        }
         // Check carkit
         if (isCarKitDevice()) {
             return -1;
@@ -138,7 +169,7 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
             final String s2 = another.getName();
             return s1.compareToIgnoreCase(s2);
         }
-        // Both devices have never been used, the priority is Cast > Bluetooth > Phone
+        // Both devices have never been used, the priority is Phone > Cast > Bluetooth
         return mType - another.mType;
     }
 
@@ -148,5 +179,14 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
      */
     protected boolean isCarKitDevice() {
         return false;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof MediaDevice)) {
+            return false;
+        }
+        final MediaDevice otherDevice = (MediaDevice) obj;
+        return otherDevice.getId().equals(getId());
     }
 }

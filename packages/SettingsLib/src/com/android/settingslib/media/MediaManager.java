@@ -117,6 +117,14 @@ public abstract class MediaManager {
         }
     }
 
+    protected void dispatchDataChanged() {
+        synchronized (mCallbacks) {
+            for (MediaDeviceCallback callback : mCallbacks) {
+                callback.onDeviceAttributesChanged();
+            }
+        }
+    }
+
     /**
      * Callback for notifying device is added, removed and attributes changed.
      */
@@ -150,15 +158,16 @@ public abstract class MediaManager {
         void onDeviceListRemoved(List<MediaDevice> devices);
 
         /**
-         * Callback for notifying MediaDevice attributes is changed.
-         */
-        void onDeviceAttributesChanged();
-
-        /**
          * Callback for notifying connected MediaDevice is changed.
          *
          * @param id the id of MediaDevice
          */
         void onConnectedDeviceChanged(String id);
+
+        /**
+         * Callback for notifying that MediaDevice attributes
+         * (e.g: device name, connection state, subtitle) is changed.
+         */
+        void onDeviceAttributesChanged();
     }
 }

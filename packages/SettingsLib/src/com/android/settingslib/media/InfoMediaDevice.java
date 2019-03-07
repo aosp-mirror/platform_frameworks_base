@@ -41,6 +41,11 @@ public class InfoMediaDevice extends MediaDevice {
     }
 
     @Override
+    public String getSummary() {
+        return null;
+    }
+
+    @Override
     public int getIcon() {
         //TODO(b/121083246): This is not final icon for cast device, just for demo.
         return com.android.internal.R.drawable.ic_settings_print;
@@ -62,5 +67,10 @@ public class InfoMediaDevice extends MediaDevice {
     @Override
     public void disconnect() {
         //TODO(b/121083246): disconnected last select device
+    }
+
+    @Override
+    public boolean isConnected() {
+        return true;
     }
 }
