@@ -581,13 +581,12 @@ public class KeyguardIndicationController implements StateListener {
             if (!updateMonitor.isUnlockingWithBiometricAllowed()) {
                 return;
             }
-            ColorStateList errorColorState = Utils.getColorError(mContext);
             if (mStatusBarKeyguardViewManager.isBouncerShowing()) {
                 mStatusBarKeyguardViewManager.showBouncerMessage(helpString,
-                        errorColorState);
+                        mInitialTextColorState);
             } else if (updateMonitor.isScreenOn()) {
                 mLockIcon.setTransientBiometricsError(true);
-                showTransientIndication(helpString, errorColorState);
+                showTransientIndication(helpString);
                 hideTransientIndicationDelayed(TRANSIENT_BIOMETRIC_ERROR_TIMEOUT);
                 mHandler.removeMessages(MSG_CLEAR_BIOMETRIC_MSG);
                 mHandler.sendMessageDelayed(mHandler.obtainMessage(MSG_CLEAR_BIOMETRIC_MSG),
@@ -605,7 +604,6 @@ public class KeyguardIndicationController implements StateListener {
             if (shouldSuppressBiometricError(msgId, biometricSourceType, updateMonitor)) {
                 return;
             }
-            ColorStateList errorColorState = Utils.getColorError(mContext);
             if (mStatusBarKeyguardViewManager.isBouncerShowing()) {
                 // When swiping up right after receiving a biometric error, the bouncer calls
                 // authenticate leading to the same message being shown again on the bouncer.
@@ -613,10 +611,10 @@ public class KeyguardIndicationController implements StateListener {
                 // generic.
                 if (mLastSuccessiveErrorMessage != msgId) {
                     mStatusBarKeyguardViewManager.showBouncerMessage(errString,
-                            errorColorState);
+                            mInitialTextColorState);
                 }
             } else if (updateMonitor.isScreenOn()) {
-                showTransientIndication(errString, errorColorState);
+                showTransientIndication(errString);
                 // We want to keep this message around in case the screen was off
                 hideTransientIndicationDelayed(HIDE_DELAY_MS);
             } else {

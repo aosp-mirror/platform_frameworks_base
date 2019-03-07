@@ -85,7 +85,7 @@
         android:layout_marginBottom="@dimen/keyguard_lock_padding"
         android:src="@*android:drawable/ic_lock_24dp"
         android:contentDescription="@string/accessibility_unlock_button"
-        android:scaleType="fitCenter" />
+        android:scaleType="center" />
 
     <FrameLayout
         android:id="@+id/overlay_container"

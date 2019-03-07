@@ -1380,7 +1380,6 @@
   <java-symbol type="drawable" name="ic_print_error" />
   <java-symbol type="drawable" name="ic_lock_24dp" />
   <java-symbol type="drawable" name="ic_lock_open_24dp" />
-  <java-symbol type="drawable" name="ic_auth_error" />
   <java-symbol type="drawable" name="jog_dial_arrow_long_left_green" />
   <java-symbol type="drawable" name="jog_dial_arrow_long_right_red" />
   <java-symbol type="drawable" name="jog_dial_arrow_short_left_and_right" />
@@ -2248,6 +2247,7 @@
   <java-symbol type="anim" name="lock_lock" />
   <java-symbol type="anim" name="lock_unlock" />
   <java-symbol type="anim" name="lock_in" />
+  <java-symbol type="anim" name="lock_scanning" />
 
   <java-symbol type="bool" name="config_alwaysUseCdmaRssi" />
   <java-symbol type="dimen" name="status_bar_icon_size" />
