@@ -291,7 +291,7 @@ public class EntitlementManager {
     }
 
     /** Get the last value of the tethering entitlement check. */
-    public void getLatestTetheringEntitlementValue(int downstream, ResultReceiver receiver,
+    public void getLatestTetheringEntitlementResult(int downstream, ResultReceiver receiver,
             boolean showEntitlementUi) {
         if (!isTetherProvisioningRequired()) {
             receiver.send(TETHER_ERROR_NO_ERROR, null);

@@ -1677,10 +1677,10 @@ public class Tethering extends BaseNetworkObserver {
     }
 
     /** Get the latest value of the tethering entitlement check. */
-    public void getLatestTetheringEntitlementValue(int type, ResultReceiver receiver,
+    public void getLatestTetheringEntitlementResult(int type, ResultReceiver receiver,
             boolean showEntitlementUi) {
         if (receiver != null) {
-            mEntitlementMgr.getLatestTetheringEntitlementValue(type, receiver, showEntitlementUi);
+            mEntitlementMgr.getLatestTetheringEntitlementResult(type, receiver, showEntitlementUi);
         }
     }
 
