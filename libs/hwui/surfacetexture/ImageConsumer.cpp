@@ -23,6 +23,7 @@
 #include "renderthread/RenderThread.h"
 #include "renderthread/VulkanManager.h"
 #include "utils/Color.h"
+#include <GrAHardwareBufferUtils.h>
 
 // Macro for including the SurfaceTexture name in log messages
 #define IMG_LOGE(x, ...) ALOGE("[%s] " x, st.mName.string(), ##__VA_ARGS__)
@@ -30,31 +31,67 @@
 namespace android {
 
 void ImageConsumer::onFreeBufferLocked(int slotIndex) {
-    mImageSlots[slotIndex].mImage.reset();
+    mImageSlots[slotIndex].clear();
 }
 
 void ImageConsumer::onAcquireBufferLocked(BufferItem* item) {
     // If item->mGraphicBuffer is not null, this buffer has not been acquired
     // before, so any prior SkImage is created with a stale buffer. This resets the stale SkImage.
     if (item->mGraphicBuffer != nullptr) {
-        mImageSlots[item->mSlot].mImage.reset();
+        mImageSlots[item->mSlot].clear();
     }
 }
 
 void ImageConsumer::onReleaseBufferLocked(int buf) {
-    mImageSlots[buf].mEglFence = EGL_NO_SYNC_KHR;
+    mImageSlots[buf].eglFence() = EGL_NO_SYNC_KHR;
 }
 
 void ImageConsumer::ImageSlot::createIfNeeded(sp<GraphicBuffer> graphicBuffer,
-                                              android_dataspace dataspace, bool forceCreate) {
+                                              android_dataspace dataspace, bool forceCreate,
+                                              GrContext* context) {
     if (!mImage.get() || dataspace != mDataspace || forceCreate) {
-        mImage = graphicBuffer.get()
-                         ? SkImage::MakeFromAHardwareBuffer(
-                                   reinterpret_cast<AHardwareBuffer*>(graphicBuffer.get()),
-                                   kPremul_SkAlphaType,
-                                   uirenderer::DataSpaceToColorSpace(dataspace))
-                         : nullptr;
+        if (!graphicBuffer.get()) {
+            clear();
+            return;
+        }
+
+        if (!mBackendTexture.isValid()) {
+            clear();
+            bool createProtectedImage =
+                0 != (graphicBuffer->getUsage() & GraphicBuffer::USAGE_PROTECTED);
+            GrBackendFormat backendFormat = GrAHardwareBufferUtils::GetBackendFormat(
+                context,
+                reinterpret_cast<AHardwareBuffer*>(graphicBuffer.get()),
+                graphicBuffer->getPixelFormat(),
+                false);
+            mBackendTexture = GrAHardwareBufferUtils::MakeBackendTexture(
+                context,
+                reinterpret_cast<AHardwareBuffer*>(graphicBuffer.get()),
+                graphicBuffer->getWidth(),
+                graphicBuffer->getHeight(),
+                &mDeleteProc,
+                &mDeleteCtx,
+                createProtectedImage,
+                backendFormat,
+                false);
+        }
         mDataspace = dataspace;
+        SkColorType colorType = GrAHardwareBufferUtils::GetSkColorTypeFromBufferFormat(
+            graphicBuffer->getPixelFormat());
+        mImage = SkImage::MakeFromTexture(context,
+            mBackendTexture,
+            kTopLeft_GrSurfaceOrigin,
+            colorType,
+            kPremul_SkAlphaType,
+            uirenderer::DataSpaceToColorSpace(dataspace));
+    }
+}
+
+void ImageConsumer::ImageSlot::clear() {
+    mImage.reset();
+    if (mBackendTexture.isValid()) {
+        mDeleteProc(mDeleteCtx);
+        mBackendTexture = {};
     }
 }
 
@@ -71,8 +108,8 @@ sk_sp<SkImage> ImageConsumer::dequeueImage(bool* queueEmpty, SurfaceTexture& st,
             if (slot != BufferItem::INVALID_BUFFER_SLOT) {
                 *queueEmpty = true;
                 mImageSlots[slot].createIfNeeded(st.mSlots[slot].mGraphicBuffer,
-                        st.mCurrentDataSpace, false);
-                return mImageSlots[slot].mImage;
+                        st.mCurrentDataSpace, false, renderState.getRenderThread().getGrContext());
+                return mImageSlots[slot].getImage();
             }
         }
         return nullptr;
@@ -104,7 +141,7 @@ sk_sp<SkImage> ImageConsumer::dequeueImage(bool* queueEmpty, SurfaceTexture& st,
             uirenderer::RenderPipelineType::SkiaGL) {
             auto& eglManager = renderState.getRenderThread().eglManager();
             display = eglManager.eglDisplay();
-            err = eglManager.createReleaseFence(st.mUseFenceSync, &mImageSlots[slot].mEglFence,
+            err = eglManager.createReleaseFence(st.mUseFenceSync, &mImageSlots[slot].eglFence(),
                                                 releaseFence);
         } else {
             err = renderState.getRenderThread().vulkanManager().createReleaseFence(releaseFence);
@@ -129,7 +166,7 @@ sk_sp<SkImage> ImageConsumer::dequeueImage(bool* queueEmpty, SurfaceTexture& st,
         // Finally release the old buffer.
         status_t status = st.releaseBufferLocked(
                 st.mCurrentTexture, st.mSlots[st.mCurrentTexture].mGraphicBuffer, display,
-                mImageSlots[st.mCurrentTexture].mEglFence);
+                mImageSlots[st.mCurrentTexture].eglFence());
         if (status < NO_ERROR) {
             IMG_LOGE("dequeueImage: failed to release buffer: %s (%d)", strerror(-status), status);
             err = status;
@@ -150,8 +187,9 @@ sk_sp<SkImage> ImageConsumer::dequeueImage(bool* queueEmpty, SurfaceTexture& st,
     st.computeCurrentTransformMatrixLocked();
 
     *queueEmpty = false;
-    mImageSlots[slot].createIfNeeded(st.mSlots[slot].mGraphicBuffer, item.mDataSpace, true);
-    return mImageSlots[slot].mImage;
+    mImageSlots[slot].createIfNeeded(st.mSlots[slot].mGraphicBuffer, item.mDataSpace, true,
+        renderState.getRenderThread().getGrContext());
+    return mImageSlots[slot].getImage();
 }
 
 } /* namespace android */

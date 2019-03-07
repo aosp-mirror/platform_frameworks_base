@@ -25,6 +25,12 @@
 #include <cutils/compiler.h>
 #include <gui/BufferItem.h>
 #include <system/graphics.h>
+#include <GrBackendSurface.h>
+
+namespace GrAHardwareBufferUtils {
+typedef void* DeleteImageCtx;
+typedef void (*DeleteImageProc)(DeleteImageCtx);
+}
 
 namespace android {
 
@@ -67,9 +73,21 @@ private:
      * ImageSlot contains the information and object references that
      * ImageConsumer maintains about a BufferQueue buffer slot.
      */
-    struct ImageSlot {
+    class ImageSlot {
+    public:
         ImageSlot() : mDataspace(HAL_DATASPACE_UNKNOWN), mEglFence(EGL_NO_SYNC_KHR) {}
 
+        ~ImageSlot() { clear(); }
+
+        void createIfNeeded(sp<GraphicBuffer> graphicBuffer, android_dataspace dataspace,
+                            bool forceCreate, GrContext* context);
+        void clear();
+
+        inline EGLSyncKHR& eglFence() { return mEglFence; }
+
+        inline sk_sp<SkImage> getImage() { return mImage; }
+
+    private:
         // mImage is the SkImage created from mGraphicBuffer.
         sk_sp<SkImage> mImage;
 
@@ -82,8 +100,11 @@ private:
          */
         EGLSyncKHR mEglFence;
 
-        void createIfNeeded(sp<GraphicBuffer> graphicBuffer, android_dataspace dataspace,
-                            bool forceCreate);
+        GrBackendTexture mBackendTexture;
+
+        GrAHardwareBufferUtils::DeleteImageProc mDeleteProc;
+
+        GrAHardwareBufferUtils::DeleteImageCtx mDeleteCtx;
     };
 
     /**
