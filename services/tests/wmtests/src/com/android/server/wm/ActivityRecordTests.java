@@ -175,15 +175,16 @@ public class ActivityRecordTests extends ActivityTestsBase {
     @Test
     public void testRestartProcessIfVisible() {
         doNothing().when(mSupervisor).scheduleRestartTimeout(mActivity);
-        mActivity.getParent().getWindowConfiguration().setAppBounds(0, 0, 500, 1000);
+        mTask.getWindowConfiguration().setAppBounds(0, 0, 500, 1000);
         mActivity.visible = true;
         mActivity.haveState = false;
         mActivity.info.resizeMode = ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
         mActivity.info.maxAspectRatio = 1.5f;
         mActivity.setState(ActivityStack.ActivityState.RESUMED, "testRestart");
-        final Rect originalOverrideBounds = new Rect(0, 0, 400, 600);
-        mActivity.setBounds(originalOverrideBounds);
-
+        ensureActivityConfiguration();
+        final Rect originalOverrideBounds = new Rect(mActivity.getBounds());
+        mTask.getWindowConfiguration().setAppBounds(0, 0, 600, 1200);
+        // The visible activity should recompute configuration according to the last parent bounds.
         mService.restartActivityProcessIfVisible(mActivity.appToken);
 
         assertEquals(ActivityStack.ActivityState.RESTARTING_PROCESS, mActivity.getState());
@@ -426,10 +427,36 @@ public class ActivityRecordTests extends ActivityTestsBase {
     }
 
     @Test
+    public void testSizeCompatMode_FixedAspectRatioBoundsWithDecor() {
+        final int decorHeight = 200; // e.g. The device has cutout.
+        final Rect parentAppBounds = new Rect(0, decorHeight, 600, 1000);
+        mTask.getWindowConfiguration().setAppBounds(parentAppBounds);
+        mTask.getConfiguration().orientation = Configuration.ORIENTATION_PORTRAIT;
+        doReturn(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED)
+                .when(mActivity.mAppWindowToken).getOrientationIgnoreVisibility();
+        mActivity.info.resizeMode = ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
+        mActivity.info.maxAspectRatio = 1;
+        ensureActivityConfiguration();
+
+        final Rect appBounds = mActivity.getWindowConfiguration().getAppBounds();
+        // Ensure the app bounds keep the declared aspect ratio.
+        assertEquals(appBounds.width(), appBounds.height());
+        // The decor height should be a part of the effective bounds.
+        assertEquals(mActivity.getBounds().height(), appBounds.height() + decorHeight);
+
+        mTask.getConfiguration().orientation = Configuration.ORIENTATION_LANDSCAPE;
+        mActivity.onConfigurationChanged(mTask.getConfiguration());
+        // After changing orientation, the aspect ratio should be the same.
+        assertEquals(appBounds.width(), appBounds.height());
+        // The decor height will be included in width.
+        assertEquals(mActivity.getBounds().width(), appBounds.width() + decorHeight);
+    }
+
+    @Test
     public void testSizeCompatMode_FixedScreenConfigurationWhenMovingToDisplay() {
         // Initialize different bounds on a new display.
         final ActivityDisplay newDisplay = addNewActivityDisplayAt(ActivityDisplay.POSITION_TOP);
-        newDisplay.setBounds(0, 0, 1000, 2000);
+        newDisplay.getWindowConfiguration().setAppBounds(new Rect(0, 0, 1000, 2000));
         newDisplay.getConfiguration().densityDpi = 300;
 
         mTask.getWindowConfiguration().setAppBounds(mStack.getDisplay().getBounds());

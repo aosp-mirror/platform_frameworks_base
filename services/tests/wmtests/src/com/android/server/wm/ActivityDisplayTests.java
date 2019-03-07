@@ -350,7 +350,7 @@ public class ActivityDisplayTests extends ActivityTestsBase {
         activity.setState(ActivityStack.ActivityState.RESUMED, "testHandleActivitySizeCompatMode");
         activity.info.resizeMode = ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
         activity.info.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
-        activity.getTaskRecord().getConfiguration().windowConfiguration.getBounds().set(
+        activity.getTaskRecord().getConfiguration().windowConfiguration.setAppBounds(
                 0, 0, 1000, 2000);
 
         final ArrayList<CompletableFuture<IBinder>> resultWrapper = new ArrayList<>();
@@ -363,15 +363,15 @@ public class ActivityDisplayTests extends ActivityTestsBase {
                     }
                 });
 
-        // Expect the exact component name when the activity is in size compatible mode.
-        activity.getResolvedOverrideConfiguration().windowConfiguration.getBounds().set(
+        // Expect the exact token when the activity is in size compatibility mode.
+        activity.getResolvedOverrideConfiguration().windowConfiguration.setAppBounds(
                 0, 0, 800, 1600);
         resultWrapper.add(new CompletableFuture<>());
         display.handleActivitySizeCompatModeIfNeeded(activity);
 
         assertEquals(activity.appToken, resultWrapper.get(0).get(2, TimeUnit.SECONDS));
 
-        // Expect null component name when switching to non-size-compat mode activity.
+        // Expect null token when switching to non-size-compat mode activity.
         activity.info.resizeMode = ActivityInfo.RESIZE_MODE_RESIZEABLE;
         resultWrapper.set(0, new CompletableFuture<>());
         display.handleActivitySizeCompatModeIfNeeded(activity);

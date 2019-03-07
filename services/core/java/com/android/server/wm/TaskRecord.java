@@ -2115,8 +2115,9 @@ class TaskRecord extends ConfigurationContainer {
                 // {@link WindowManagerPolicy#getNonDecorInsetsLw}.
                 calculateInsetFrames(mTmpNonDecorBounds, mTmpStableBounds, bounds, di);
             } else {
-                mTmpNonDecorBounds.set(bounds);
-                mTmpStableBounds.set(bounds);
+                // Set to app bounds because it excludes decor insets.
+                mTmpNonDecorBounds.set(outAppBounds);
+                mTmpStableBounds.set(outAppBounds);
             }
 
             if (inOutConfig.screenWidthDp == Configuration.SCREEN_WIDTH_DP_UNDEFINED) {
