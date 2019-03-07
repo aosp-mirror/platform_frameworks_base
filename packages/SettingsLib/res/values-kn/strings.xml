@@ -377,7 +377,8 @@
     <string name="power_discharging_duration" msgid="8848256785736335185">"(<xliff:g id="LEVEL">%2$s</xliff:g>) ತಲುಪಲು <xliff:g id="TIME_REMAINING">%1$s</xliff:g> ಸಮಯ ಬಾಕಿ ಉಳಿದಿದೆ"</string>
     <string name="power_remaining_duration_only_enhanced" msgid="4189311599812296592">"ನಿಮ್ಮ ಬಳಕೆಯ ಆಧಾರದ ಮೇಲೆ ಸುಮಾರು <xliff:g id="TIME_REMAINING">%1$s</xliff:g> ಸಮಯ ಬಾಕಿ ಉಳಿದಿದೆ"</string>
     <string name="power_discharging_duration_enhanced" msgid="1992003260664804080">"ನಿಮ್ಮ ಬಳಕೆಯ (<xliff:g id="LEVEL">%2$s</xliff:g>) ಆಧಾರದ ಮೇಲೆ ಸುಮಾರು <xliff:g id="TIME_REMAINING">%1$s</xliff:g> ಉಳಿದಿದೆ"</string>
-    <string name="power_remaining_duration_only_short" msgid="3463575350656389957">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> ಉಳಿದಿದೆ"</string>
+    <!-- no translation found for power_remaining_duration_only_short (9183070574408359726) -->
+    <skip />
     <string name="power_discharge_by_enhanced" msgid="2095821536747992464">"ನಿಮ್ಮ ಬಳಕೆ (<xliff:g id="LEVEL">%2$s</xliff:g>) ಆಧರಿಸಿ <xliff:g id="TIME">%1$s</xliff:g> ಸಮಯದವರೆಗೆ ಫೋನ್‌ ರನ್‌ ಆಗಬೇಕು"</string>
     <string name="power_discharge_by_only_enhanced" msgid="2175151772952365149">"ನಿಮ್ಮ ಬಳಕೆ ಆಧರಿಸಿ <xliff:g id="TIME">%1$s</xliff:g> ಸಮಯದವರೆಗೆ ಫೋನ್‌ ರನ್‌ ಆಗಬೇಕು"</string>
     <string name="power_discharge_by" msgid="6453537733650125582">"<xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>) ಸಮಯದವರೆಗೆ ಫೋನ್‌ ರನ್‌ ಆಗಬೇಕು"</string>

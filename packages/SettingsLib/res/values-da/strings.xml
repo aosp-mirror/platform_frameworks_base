@@ -377,7 +377,8 @@
     <string name="power_discharging_duration" msgid="8848256785736335185">"Ca. <xliff:g id="TIME_REMAINING">%1$s</xliff:g> tilbage (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_duration_only_enhanced" msgid="4189311599812296592">"Ca. <xliff:g id="TIME_REMAINING">%1$s</xliff:g> tilbage, alt efter hvordan du bruger enheden"</string>
     <string name="power_discharging_duration_enhanced" msgid="1992003260664804080">"Ca. <xliff:g id="TIME_REMAINING">%1$s</xliff:g> tilbage, alt efter hvordan du bruger enheden (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_only_short" msgid="3463575350656389957">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> tilbage"</string>
+    <!-- no translation found for power_remaining_duration_only_short (9183070574408359726) -->
+    <skip />
     <string name="power_discharge_by_enhanced" msgid="2095821536747992464">"Bør holde indtil ca. <xliff:g id="TIME">%1$s</xliff:g> baseret på dit forbrug (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only_enhanced" msgid="2175151772952365149">"Bør holde indtil ca. <xliff:g id="TIME">%1$s</xliff:g> baseret på dit forbrug"</string>
     <string name="power_discharge_by" msgid="6453537733650125582">"Bør holde indtil ca. <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>

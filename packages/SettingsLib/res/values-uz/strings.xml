@@ -377,7 +377,8 @@
     <string name="power_discharging_duration" msgid="8848256785736335185">"Taxminan <xliff:g id="TIME_REMAINING">%1$s</xliff:g> qoldi (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_duration_only_enhanced" msgid="4189311599812296592">"Joriy holatda taxminan <xliff:g id="TIME_REMAINING">%1$s</xliff:g> qoldi"</string>
     <string name="power_discharging_duration_enhanced" msgid="1992003260664804080">"Joriy holatda taxminan <xliff:g id="TIME_REMAINING">%1$s</xliff:g> qoldi (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_only_short" msgid="3463575350656389957">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> qoldi"</string>
+    <!-- no translation found for power_remaining_duration_only_short (9183070574408359726) -->
+    <skip />
     <string name="power_discharge_by_enhanced" msgid="2095821536747992464">"Joriy holatda taxminan <xliff:g id="TIME">%1$s</xliff:g> gacha davom etadi (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only_enhanced" msgid="2175151772952365149">"Joriy holatda taxminan <xliff:g id="TIME">%1$s</xliff:g> gacha davom etadi"</string>
     <string name="power_discharge_by" msgid="6453537733650125582">"Taxminan <xliff:g id="TIME">%1$s</xliff:g> gacha davom etadi (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>

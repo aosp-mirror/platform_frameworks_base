@@ -377,7 +377,8 @@
     <string name="power_discharging_duration" msgid="8848256785736335185">"Шамамен <xliff:g id="TIME_REMAINING">%1$s</xliff:g> қалды (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_duration_only_enhanced" msgid="4189311599812296592">"Пайдалану деректеріңізге сәйкес енді шамамен <xliff:g id="TIME_REMAINING">%1$s</xliff:g> қалды"</string>
     <string name="power_discharging_duration_enhanced" msgid="1992003260664804080">"Пайдалану деректеріңізге сәйкес енді шамамен <xliff:g id="TIME_REMAINING">%1$s</xliff:g> қалды (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_only_short" msgid="3463575350656389957">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> қалды"</string>
+    <!-- no translation found for power_remaining_duration_only_short (9183070574408359726) -->
+    <skip />
     <string name="power_discharge_by_enhanced" msgid="2095821536747992464">"Пайдалануға байланысты шамамен <xliff:g id="TIME">%1$s</xliff:g> уақытқа жетеді (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only_enhanced" msgid="2175151772952365149">"Пайдалануға байланысты шамамен <xliff:g id="TIME">%1$s</xliff:g> уақытқа жетеді"</string>
     <string name="power_discharge_by" msgid="6453537733650125582">"Шамамен <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>) уақытқа жетеді"</string>
