@@ -20,6 +20,7 @@ import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentat
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verifyZeroInteractions;
 
@@ -124,7 +125,7 @@ public class WindowTracingTest {
     public void trace_dumpsWindowManagerState_whenTracing() throws Exception {
         mWindowTracing.startTrace(mock(PrintWriter.class));
         mWindowTracing.logState("where");
-        verify(mWmMock).writeToProtoLocked(any(), eq(WindowTraceLogLevel.TRIM));
+        verify(mWmMock, times(2)).writeToProtoLocked(any(), eq(WindowTraceLogLevel.TRIM));
     }
 
     @Test
