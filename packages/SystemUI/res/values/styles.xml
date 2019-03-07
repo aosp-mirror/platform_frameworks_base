@@ -227,6 +227,8 @@
         <item name="android:textSize">@dimen/qs_carrier_info_text_size</item>
     </style>
 
+    <style name="TextAppearance.QS.Status" parent="TextAppearance.QS.TileLabel.Secondary" />
+
     <style name="TextAppearance.AppOpsDialog" />
 
     <style name="TextAppearance.AppOpsDialog.Title">

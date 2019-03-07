@@ -65,8 +65,8 @@
         android:layout_gravity="center_vertical">
         <com.android.systemui.statusbar.AnimatedImageView
             android:id="@+id/mobile_signal"
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
+            android:layout_height="@dimen/qs_header_mobile_icon_size"
+            android:layout_width="@dimen/qs_header_mobile_icon_size"
             systemui:hasOverlappingRendering="false"
             />
         <ImageView

@@ -274,7 +274,16 @@
 
     <!-- The height of the quick settings footer that holds the user switcher, settings icon,
          etc. -->
-    <dimen name="qs_footer_height">56dp</dimen>
+    <dimen name="qs_footer_height">48dp</dimen>
+
+    <!-- The size of each of the icon buttons in the QS footer -->
+    <dimen name="qs_footer_action_button_size">@dimen/qs_footer_height</dimen>
+
+    <!-- Margins on each side of QS Footer -->
+    <dimen name="qs_footer_margin">2dp</dimen>
+
+    <!-- Padding on each QS Footer Icon to make the icons 20dpx20dp -->
+    <dimen name="qs_footer_icon_padding">14dp</dimen>
 
     <!-- The padding between the notifications and the quick settings container -->
     <dimen name="qs_notification_padding">@dimen/notification_side_paddings</dimen>
@@ -415,11 +424,16 @@
     <dimen name="qs_detail_item_icon_marginEnd">20dp</dimen>
     <dimen name="qs_header_tooltip_height">18dp</dimen>
     <dimen name="qs_header_alarm_icon_size">18dp</dimen>
+    <dimen name="qs_header_mobile_icon_size">18dp</dimen>
     <dimen name="qs_header_alarm_text_margin_start">6dp</dimen>
+    <dimen name="qs_header_separator_width">8dp</dimen>
+    <dimen name="qs_header_carrier_separator_width">6dp</dimen>
+    <dimen name="qs_status_separator">32dp</dimen>
+    <dimen name="qs_carrier_margin_width">4dp</dimen>
     <dimen name="qs_footer_padding_start">16dp</dimen>
     <dimen name="qs_footer_padding_end">16dp</dimen>
     <dimen name="qs_footer_icon_size">16dp</dimen>
-    <dimen name="qs_paged_tile_layout_padding_bottom">24dp</dimen>
+    <dimen name="qs_paged_tile_layout_padding_bottom">16dp</dimen>
 
     <dimen name="qs_notif_collapsed_space">64dp</dimen>
 
@@ -592,7 +606,7 @@
     <dimen name="multi_user_avatar_keyguard_size">22dp</dimen>
 
     <!-- The width of user avatar when expanded -->
-    <dimen name="multi_user_avatar_expanded_size">18dp</dimen>
+    <dimen name="multi_user_avatar_expanded_size">20dp</dimen>
 
     <!-- The font size of the time when collapsed in QS -->
     <dimen name="qs_time_collapsed_size">14sp</dimen>
