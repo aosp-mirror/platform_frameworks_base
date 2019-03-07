@@ -18,5 +18,6 @@ package android.service.euicc;
 
 /** @hide */
 oneway interface IRetainSubscriptionsForFactoryResetCallback {
+    @UnsupportedAppUsage
     void onComplete(int result);
 }
