@@ -27,6 +27,7 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PackageDeleteObserver;
 import android.app.PackageInstallObserver;
+import android.app.admin.DevicePolicyEventLogger;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.content.Context;
 import android.content.Intent;
@@ -59,6 +60,7 @@ import android.os.RemoteException;
 import android.os.SELinux;
 import android.os.UserManager;
 import android.os.storage.StorageManager;
+import android.stats.devicepolicy.DevicePolicyEnums;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.text.TextUtils;
@@ -810,6 +812,10 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
+            DevicePolicyEventLogger
+                    .createEvent(DevicePolicyEnums.UNINSTALL_PACKAGE)
+                    .setAdmin(callerPackageName)
+                    .write();
         } else {
             ApplicationInfo appInfo = mPm.getApplicationInfo(callerPackageName, 0, userId);
             if (appInfo.targetSdkVersion >= Build.VERSION_CODES.P) {
