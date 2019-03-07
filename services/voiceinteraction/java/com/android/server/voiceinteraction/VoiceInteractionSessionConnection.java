@@ -159,7 +159,8 @@ final class VoiceInteractionSessionConnection implements ServiceConnection,
         mBindIntent.setComponent(mSessionComponentName);
         mBound = mContext.bindServiceAsUser(mBindIntent, this,
                 Context.BIND_AUTO_CREATE | Context.BIND_WAIVE_PRIORITY
-                        | Context.BIND_ALLOW_OOM_MANAGEMENT, new UserHandle(mUser));
+                        | Context.BIND_ALLOW_OOM_MANAGEMENT
+                        | Context.BIND_ALLOW_BACKGROUND_ACTIVITY_STARTS, new UserHandle(mUser));
         if (mBound) {
             try {
                 mIWindowManager.addWindowToken(mToken, TYPE_VOICE_INTERACTION, DEFAULT_DISPLAY);
@@ -191,7 +192,8 @@ final class VoiceInteractionSessionConnection implements ServiceConnection,
             if (!mFullyBound) {
                 mFullyBound = mContext.bindServiceAsUser(mBindIntent, mFullConnection,
                         Context.BIND_AUTO_CREATE | Context.BIND_TREAT_LIKE_ACTIVITY
-                                | Context.BIND_FOREGROUND_SERVICE,
+                                | Context.BIND_FOREGROUND_SERVICE
+                                | Context.BIND_ALLOW_BACKGROUND_ACTIVITY_STARTS,
                         new UserHandle(mUser));
             }
 

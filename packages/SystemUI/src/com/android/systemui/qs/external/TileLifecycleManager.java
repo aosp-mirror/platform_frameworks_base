@@ -159,8 +159,8 @@ public class TileLifecycleManager extends BroadcastReceiver implements
             mBindTryCount++;
             try {
                 mIsBound = mContext.bindServiceAsUser(mIntent, this,
-                        Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE_WHILE_AWAKE,
-                        mUser);
+                        Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE_WHILE_AWAKE
+                        | Context.BIND_ALLOW_BACKGROUND_ACTIVITY_STARTS, mUser);
             } catch (SecurityException e) {
                 Log.e(TAG, "Failed to bind to service", e);
                 mIsBound = false;
