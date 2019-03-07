@@ -24,8 +24,9 @@ import static org.junit.Assert.assertNotEquals;
 
 import android.net.IpPrefix;
 import android.net.LinkAddress;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
+
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
 import org.junit.Test;

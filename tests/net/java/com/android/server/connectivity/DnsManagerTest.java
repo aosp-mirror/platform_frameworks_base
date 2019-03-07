@@ -37,9 +37,10 @@ import android.net.RouteInfo;
 import android.net.shared.PrivateDnsConfig;
 import android.os.INetworkManagementService;
 import android.provider.Settings;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
 import android.test.mock.MockContentResolver;
+
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.util.test.FakeSettingsProvider;
 

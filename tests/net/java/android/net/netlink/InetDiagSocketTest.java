@@ -25,8 +25,6 @@ import static android.system.OsConstants.IPPROTO_TCP;
 import static android.system.OsConstants.IPPROTO_UDP;
 import static android.system.OsConstants.SOCK_DGRAM;
 import static android.system.OsConstants.SOCK_STREAM;
-import static android.system.OsConstants.SOL_SOCKET;
-import static android.system.OsConstants.SO_RCVTIMEO;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -38,29 +36,25 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.netlink.StructNlMsgHdr;
 import android.os.Process;
-import android.support.test.runner.AndroidJUnit4;
-import android.support.test.filters.SmallTest;
-import android.support.test.InstrumentationRegistry;
 import android.system.Os;
-import android.system.StructTimeval;
-import android.util.Log;
-import java.io.FileDescriptor;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.Inet4Address;
-import java.net.Inet6Address;
-import java.net.InetSocketAddress;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.net.SocketAddress;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
+
+import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import libcore.util.HexEncoding;
 
 import org.junit.Before;
-import org.junit.runner.RunWith;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+
+import java.io.FileDescriptor;
+import java.net.Inet4Address;
+import java.net.Inet6Address;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest

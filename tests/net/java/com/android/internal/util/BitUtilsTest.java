@@ -16,14 +16,24 @@
 
 package com.android.internal.util;
 
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
-import java.nio.ByteBuffer;
+import static com.android.internal.util.BitUtils.bytesToBEInt;
+import static com.android.internal.util.BitUtils.bytesToLEInt;
+import static com.android.internal.util.BitUtils.getUint16;
+import static com.android.internal.util.BitUtils.getUint32;
+import static com.android.internal.util.BitUtils.getUint8;
+import static com.android.internal.util.BitUtils.uint16;
+import static com.android.internal.util.BitUtils.uint32;
+import static com.android.internal.util.BitUtils.uint8;
+
+import static org.junit.Assert.assertEquals;
+
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import static org.junit.Assert.assertEquals;
-import static com.android.internal.util.BitUtils.*;
+import java.nio.ByteBuffer;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)

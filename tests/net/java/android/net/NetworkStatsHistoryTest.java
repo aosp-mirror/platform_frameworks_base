@@ -16,14 +16,14 @@
 
 package android.net;
 
+import static android.net.NetworkStatsHistory.DataStreamUtils.readVarLong;
+import static android.net.NetworkStatsHistory.DataStreamUtils.writeVarLong;
+import static android.net.NetworkStatsHistory.Entry.UNKNOWN;
 import static android.net.NetworkStatsHistory.FIELD_ALL;
 import static android.net.NetworkStatsHistory.FIELD_OPERATIONS;
 import static android.net.NetworkStatsHistory.FIELD_RX_BYTES;
 import static android.net.NetworkStatsHistory.FIELD_RX_PACKETS;
 import static android.net.NetworkStatsHistory.FIELD_TX_BYTES;
-import static android.net.NetworkStatsHistory.DataStreamUtils.readVarLong;
-import static android.net.NetworkStatsHistory.DataStreamUtils.writeVarLong;
-import static android.net.NetworkStatsHistory.Entry.UNKNOWN;
 import static android.net.TrafficStats.GB_IN_BYTES;
 import static android.net.TrafficStats.MB_IN_BYTES;
 import static android.text.format.DateUtils.DAY_IN_MILLIS;
@@ -32,28 +32,29 @@ import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
 import static android.text.format.DateUtils.SECOND_IN_MILLIS;
 import static android.text.format.DateUtils.WEEK_IN_MILLIS;
 import static android.text.format.DateUtils.YEAR_IN_MILLIS;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import android.content.Context;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
-import android.test.suitebuilder.annotation.Suppress;
 import android.util.Log;
 
+import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
+
 import com.android.frameworks.tests.net.R;
+
+import org.junit.After;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.util.Random;
-
-import org.junit.After;
-import org.junit.Test;
-import org.junit.runner.RunWith;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
