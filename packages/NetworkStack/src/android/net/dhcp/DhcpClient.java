@@ -317,7 +317,7 @@ public class DhcpClient extends StateMachine {
         try {
             mPacketSock = Os.socket(AF_PACKET, SOCK_RAW, ETH_P_IP);
             SocketAddress addr = makePacketSocketAddress((short) ETH_P_IP, mIface.index);
-            SocketUtils.bindSocket(mPacketSock, addr);
+            Os.bind(mPacketSock, addr);
             SocketUtils.attachDhcpFilter(mPacketSock);
         } catch(SocketException|ErrnoException e) {
             Log.e(TAG, "Error creating packet socket", e);
@@ -412,8 +412,7 @@ public class DhcpClient extends StateMachine {
         try {
             if (encap == DhcpPacket.ENCAP_L2) {
                 if (DBG) Log.d(TAG, "Broadcasting " + description);
-                SocketUtils.sendTo(
-                        mPacketSock, buf.array(), 0, buf.limit(), 0, mInterfaceBroadcastAddr);
+                Os.sendto(mPacketSock, buf.array(), 0, buf.limit(), 0, mInterfaceBroadcastAddr);
             } else if (encap == DhcpPacket.ENCAP_BOOTP && to.equals(INADDR_BROADCAST)) {
                 if (DBG) Log.d(TAG, "Broadcasting " + description);
                 // We only send L3-encapped broadcasts in DhcpRebindingState,
