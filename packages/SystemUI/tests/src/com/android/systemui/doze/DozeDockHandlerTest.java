@@ -202,4 +202,16 @@ public class DozeDockHandlerTest extends SysuiTestCase {
 
         verify(mMachine).requestState(eq(State.DOZE));
     }
+
+    @Test
+    public void testTransitionToPulsing_whenDockedHide_requestPulseOut() {
+        mDockHandler.transitionTo(DozeMachine.State.UNINITIALIZED, DozeMachine.State.INITIALIZED);
+        when(mMachine.getState()).thenReturn(DozeMachine.State.DOZE_PULSING);
+        when(mMachine.getPulseReason()).thenReturn(DozeLog.PULSE_REASON_DOCKING);
+        mDockManagerFake.setDockEvent(DockManager.STATE_DOCKED_HIDE);
+
+        mDockHandler.transitionTo(DozeMachine.State.INITIALIZED, State.DOZE_PULSING);
+
+        verify(mHost).stopPulsing();
+    }
 }
