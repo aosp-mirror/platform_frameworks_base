@@ -1250,6 +1250,14 @@ public class AccessPointTest {
         AccessPoint passpointAp = new AccessPoint(mContext, spyConfig, mScanResults, null);
         assertThat(passpointAp.getKey()).isEqualTo(AccessPoint.getKey(spyConfig));
 
+        PasspointConfiguration passpointConfig = new PasspointConfiguration();
+        HomeSp homeSp = new HomeSp();
+        homeSp.setFqdn("fqdn");
+        homeSp.setFriendlyName("Test Provider");
+        passpointConfig.setHomeSp(homeSp);
+        AccessPoint passpointConfigAp = new AccessPoint(mContext, passpointConfig);
+        assertThat(passpointConfigAp.getKey()).isEqualTo(AccessPoint.getKey("fqdn"));
+
         OsuProvider provider = createOsuProvider();
         AccessPoint osuAp = new AccessPoint(mContext, provider, mScanResults);
         assertThat(osuAp.getKey()).isEqualTo(AccessPoint.getKey(provider));
