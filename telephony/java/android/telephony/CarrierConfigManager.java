@@ -1812,15 +1812,30 @@ public class CarrierConfigManager {
 
     /**
      * Determine whether user can change Wi-Fi Calling preference in roaming.
-     * {@code false} - roaming preference {@link KEY_CARRIER_DEFAULT_WFC_IMS_ROAMING_MODE_INT} is
-     *                 the same as home preference {@link KEY_CARRIER_DEFAULT_WFC_IMS_MODE_INT}
-     *                 and cannot be changed.
-     * {@code true}  - roaming preference can be changed by user independently.
-     *
+     * {@code false} - roaming preference cannot be changed by user independently. If
+     *                 {@link #KEY_USE_WFC_HOME_NETWORK_MODE_IN_ROAMING_NETWORK_BOOL} is false,
+     *                 {@link #KEY_CARRIER_DEFAULT_WFC_IMS_ROAMING_MODE_INT} is used as the default
+     *                 value. If {@link #KEY_USE_WFC_HOME_NETWORK_MODE_IN_ROAMING_NETWORK_BOOL} is
+     *                 true, roaming preference is the same as home preference and
+     *                 {@link #KEY_CARRIER_DEFAULT_WFC_IMS_MODE_INT} is used as the default value.
+     * {@code true}  - roaming preference can be changed by user independently if
+     *                 {@link #KEY_USE_WFC_HOME_NETWORK_MODE_IN_ROAMING_NETWORK_BOOL} is false. If
+     *                 {@link #KEY_USE_WFC_HOME_NETWORK_MODE_IN_ROAMING_NETWORK_BOOL} is true, this
+     *                 configuration is ignored and roaming preference cannot be changed.
      * @hide
      */
     public static final String KEY_EDITABLE_WFC_ROAMING_MODE_BOOL =
             "editable_wfc_roaming_mode_bool";
+
+    /**
+     * Flag specifying whether the carrier will use the WFC home network mode in roaming network.
+     * {@code false} - roaming preference can be selected separately from the home preference.
+     * {@code true}  - roaming preference is the same as home preference and
+     *                 {@link #KEY_CARRIER_DEFAULT_WFC_IMS_MODE_INT} is used as the default value.
+     * @hide
+     */
+    public static final String KEY_USE_WFC_HOME_NETWORK_MODE_IN_ROAMING_NETWORK_BOOL =
+            "use_wfc_home_network_mode_in_roaming_network_bool";
 
     /**
      * Determine whether current lpp_mode used for E-911 needs to be kept persistently.
@@ -2759,6 +2774,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_NOTIFY_VT_HANDOVER_TO_WIFI_FAILURE_BOOL, false);
         sDefaults.putStringArray(KEY_FILTERED_CNAP_NAMES_STRING_ARRAY, null);
         sDefaults.putBoolean(KEY_EDITABLE_WFC_ROAMING_MODE_BOOL, false);
+        sDefaults.putBoolean(KEY_USE_WFC_HOME_NETWORK_MODE_IN_ROAMING_NETWORK_BOOL, false);
         sDefaults.putBoolean(KEY_STK_DISABLE_LAUNCH_BROWSER_BOOL, false);
         sDefaults.putBoolean(KEY_PERSIST_LPP_MODE_BOOL, true);
         sDefaults.putStringArray(KEY_CARRIER_WIFI_STRING_ARRAY, null);
