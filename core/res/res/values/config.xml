@@ -3930,7 +3930,7 @@
         M5,17.5 V12 H3 L7,4.5 V10 h2 L5,17.5 z
     </string>
     <string name="config_batterymeterPowersavePath" translatable="false">
-		M9,10l-2,0l0,-2l-2,0l0,2l-2,0l0,2l2,0l0,2l2,0l0,-2l2,0z
+		M9.75,10l-2.5,0l0,-2.5l-2.5,0l0,2.5l-2.5,0l0,2.5l2.5,0l0,2.5l2.5,0l0,-2.5l2.5,0z
     </string>
 
     <!-- A dual tone battery meter draws the perimeter path twice - once to define the shape
