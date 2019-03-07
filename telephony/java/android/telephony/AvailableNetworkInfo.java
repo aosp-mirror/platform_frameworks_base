@@ -16,6 +16,7 @@
 
 package android.telephony;
 
+import android.annotation.NonNull;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -62,9 +63,20 @@ public final class AvailableNetworkInfo implements Parcelable {
     /**
      * Describes the List of PLMN ids (MCC-MNC) associated with mSubId.
      * If this entry is left empty, then the platform software will not scan the network
-     * to revalidate the input.
+     * to revalidate the input else platform will scan and verify specified PLMNs are available.
      */
     private ArrayList<String> mMccMncs;
+
+    /**
+     * Returns the frequency bands associated with the {@link #getMccMncs() MCC/MNCs}.
+     * Opportunistic network service will use these bands to scan.
+     *
+     * When no specific bands are specified (empty array or null) CBRS band (B48) will be
+     * used for network scan.
+     *
+     * See {@link AccessNetworkConstants} for details.
+     */
+    private ArrayList<Integer> mBands;
 
     /**
      * Return subscription Id of the available network.
@@ -91,8 +103,18 @@ public final class AvailableNetworkInfo implements Parcelable {
      * to revalidate the input.
      * @return list of PLMN ids
      */
-    public List<String> getMccMncs() {
+    public @NonNull List<String> getMccMncs() {
         return (List<String>) mMccMncs.clone();
+    }
+
+    /**
+     * Returns the frequency bands that need to be scanned by opportunistic network service
+     *
+     * The returned value is defined in either of {@link AccessNetworkConstants.GeranBand},
+     * {@link AccessNetworkConstants.UtranBand} and {@link AccessNetworkConstants.EutranBand}
+     */
+    public @NonNull List<Integer> getBands() {
+        return (List<Integer>) mBands.clone();
     }
 
     @Override
@@ -105,6 +127,7 @@ public final class AvailableNetworkInfo implements Parcelable {
         dest.writeInt(mSubId);
         dest.writeInt(mPriority);
         dest.writeStringList(mMccMncs);
+        dest.writeList(mBands);
     }
 
     private AvailableNetworkInfo(Parcel in) {
@@ -112,12 +135,16 @@ public final class AvailableNetworkInfo implements Parcelable {
         mPriority = in.readInt();
         mMccMncs = new ArrayList<>();
         in.readStringList(mMccMncs);
+        mBands = new ArrayList<>();
+        in.readList(mBands, Integer.class.getClassLoader());
     }
 
-    public AvailableNetworkInfo(int subId, int priority, List<String> mccMncs) {
+    public AvailableNetworkInfo(int subId, int priority, @NonNull List<String> mccMncs,
+            @NonNull List<Integer> bands) {
         mSubId = subId;
         mPriority = priority;
         mMccMncs = new ArrayList<String>(mccMncs);
+        mBands = new ArrayList<Integer>(bands);
     }
 
     @Override
@@ -135,14 +162,15 @@ public final class AvailableNetworkInfo implements Parcelable {
         }
 
         return (mSubId == ani.mSubId
-                && mPriority == ani.mPriority
-                && (((mMccMncs != null)
-                && mMccMncs.equals(ani.mMccMncs))));
+            && mPriority == ani.mPriority
+            && (((mMccMncs != null)
+            && mMccMncs.equals(ani.mMccMncs)))
+            && mBands.equals(ani.mBands));
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mSubId, mPriority, mMccMncs);
+        return Objects.hash(mSubId, mPriority, mMccMncs, mBands);
     }
 
     public static final @android.annotation.NonNull Parcelable.Creator<AvailableNetworkInfo> CREATOR =
@@ -161,9 +189,9 @@ public final class AvailableNetworkInfo implements Parcelable {
     @Override
     public String toString() {
         return ("AvailableNetworkInfo:"
-                + " mSubId: " + mSubId
-                + " mPriority: " + mPriority
-                + " mMccMncs: " + Arrays.toString(mMccMncs.toArray()));
+            + " mSubId: " + mSubId
+            + " mPriority: " + mPriority
+            + " mMccMncs: " + Arrays.toString(mMccMncs.toArray())
+            + " mBands: " + Arrays.toString(mBands.toArray()));
     }
 }
-
