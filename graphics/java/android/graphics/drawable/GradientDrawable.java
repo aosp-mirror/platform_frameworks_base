@@ -28,6 +28,8 @@ import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
 import android.content.res.TypedArray;
+import android.graphics.BlendMode;
+import android.graphics.BlendModeColorFilter;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.ColorFilter;
@@ -38,8 +40,6 @@ import android.graphics.Outline;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PixelFormat;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffColorFilter;
 import android.graphics.RadialGradient;
 import android.graphics.Rect;
 import android.graphics.RectF;
@@ -169,7 +169,7 @@ public class GradientDrawable extends Drawable {
     @UnsupportedAppUsage
     private Paint mStrokePaint;   // optional, set by the caller
     private ColorFilter mColorFilter;   // optional, set by the caller
-    private PorterDuffColorFilter mTintFilter;
+    private BlendModeColorFilter mBlendModeColorFilter;
     private int mAlpha = 0xFF;  // modified by the caller
 
     private final Path mPath = new Path();
@@ -731,7 +731,7 @@ public class GradientDrawable extends Drawable {
                 mStrokePaint.getStrokeWidth() > 0;
         final boolean haveFill = currFillAlpha > 0;
         final GradientState st = mGradientState;
-        final ColorFilter colorFilter = mColorFilter != null ? mColorFilter : mTintFilter;
+        final ColorFilter colorFilter = mColorFilter != null ? mColorFilter : mBlendModeColorFilter;
 
         /*  we need a layer iff we're drawing both a fill and stroke, and the
             stroke is non-opaque, and our shapetype actually supports
@@ -1130,8 +1130,9 @@ public class GradientDrawable extends Drawable {
             }
         }
 
-        if (s.mTint != null && s.mTintMode != null) {
-            mTintFilter = updateTintFilter(mTintFilter, s.mTint, s.mTintMode);
+        if (s.mTint != null && s.mBlendMode != null) {
+            mBlendModeColorFilter = updateBlendModeFilter(mBlendModeColorFilter, s.mTint,
+                    s.mBlendMode);
             invalidateSelf = true;
         }
 
@@ -1204,14 +1205,16 @@ public class GradientDrawable extends Drawable {
     @Override
     public void setTintList(@Nullable ColorStateList tint) {
         mGradientState.mTint = tint;
-        mTintFilter = updateTintFilter(mTintFilter, tint, mGradientState.mTintMode);
+        mBlendModeColorFilter =
+                updateBlendModeFilter(mBlendModeColorFilter, tint, mGradientState.mBlendMode);
         invalidateSelf();
     }
 
     @Override
-    public void setTintMode(@Nullable PorterDuff.Mode tintMode) {
-        mGradientState.mTintMode = tintMode;
-        mTintFilter = updateTintFilter(mTintFilter, mGradientState.mTint, tintMode);
+    public void setTintMode(@NonNull BlendMode blendMode) {
+        mGradientState.mBlendMode = blendMode;
+        mBlendModeColorFilter = updateBlendModeFilter(mBlendModeColorFilter, mGradientState.mTint,
+                blendMode);
         invalidateSelf();
     }
 
@@ -1465,7 +1468,7 @@ public class GradientDrawable extends Drawable {
 
         final int tintMode = a.getInt(R.styleable.GradientDrawable_tintMode, -1);
         if (tintMode != -1) {
-            state.mTintMode = Drawable.parseTintMode(tintMode, PorterDuff.Mode.SRC_IN);
+            state.mBlendMode = Drawable.parseBlendMode(tintMode, BlendMode.SRC_IN);
         }
 
         final ColorStateList tint = a.getColorStateList(R.styleable.GradientDrawable_tint);
@@ -2010,7 +2013,7 @@ public class GradientDrawable extends Drawable {
         boolean mOpaqueOverShape;
 
         ColorStateList mTint = null;
-        PorterDuff.Mode mTintMode = DEFAULT_TINT_MODE;
+        BlendMode mBlendMode = DEFAULT_BLEND_MODE;
 
         int mDensity = DisplayMetrics.DENSITY_DEFAULT;
 
@@ -2068,7 +2071,7 @@ public class GradientDrawable extends Drawable {
             mOpaqueOverBounds = orig.mOpaqueOverBounds;
             mOpaqueOverShape = orig.mOpaqueOverShape;
             mTint = orig.mTint;
-            mTintMode = orig.mTintMode;
+            mBlendMode = orig.mBlendMode;
             mThemeAttrs = orig.mThemeAttrs;
             mAttrSize = orig.mAttrSize;
             mAttrGradient = orig.mAttrGradient;
@@ -2355,7 +2358,8 @@ public class GradientDrawable extends Drawable {
             }
         }
 
-        mTintFilter = updateTintFilter(mTintFilter, state.mTint, state.mTintMode);
+        mBlendModeColorFilter = updateBlendModeFilter(mBlendModeColorFilter, state.mTint,
+                state.mBlendMode);
         mGradientIsDirty = true;
 
         state.computeOpacity();

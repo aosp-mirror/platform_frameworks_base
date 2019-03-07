@@ -50,6 +50,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
+import android.graphics.BlendMode;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Insets;
@@ -4506,7 +4507,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     static class TintInfo {
         ColorStateList mTintList;
-        PorterDuff.Mode mTintMode;
+        BlendMode mBlendMode;
         boolean mHasTintMode;
         boolean mHasTintList;
     }
@@ -5687,7 +5688,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     if (mBackgroundTint == null) {
                         mBackgroundTint = new TintInfo();
                     }
-                    mBackgroundTint.mTintMode = Drawable.parseTintMode(a.getInt(
+                    mBackgroundTint.mBlendMode = Drawable.parseBlendMode(a.getInt(
                             R.styleable.View_backgroundTintMode, -1), null);
                     mBackgroundTint.mHasTintMode = true;
                     break;
@@ -5707,7 +5708,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     break;
                 case R.styleable.View_foregroundTintMode:
                     if (targetSdkVersion >= Build.VERSION_CODES.M || this instanceof FrameLayout) {
-                        setForegroundTintMode(Drawable.parseTintMode(a.getInt(attr, -1), null));
+                        setForegroundTintMode(Drawable.parseBlendMode(a.getInt(attr, -1), null));
                     }
                     break;
                 case R.styleable.View_foregroundTint:
@@ -23267,7 +23268,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     /**
      * Applies a tint to the background drawable. Does not modify the current tint
-     * mode, which is {@link PorterDuff.Mode#SRC_IN} by default.
+     * mode, which is {@link BlendMode#SRC_IN} by default.
      * <p>
      * Subsequent calls to {@link #setBackground(Drawable)} will automatically
      * mutate the drawable and apply the specified tint and tint mode using
@@ -23312,12 +23313,36 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @attr ref android.R.styleable#View_backgroundTintMode
      * @see #getBackgroundTintMode()
      * @see Drawable#setTintMode(PorterDuff.Mode)
+     *
+     * @deprecated use @setBackgroundTintMode(BlendMode) instead
      */
+    @Deprecated
     public void setBackgroundTintMode(@Nullable PorterDuff.Mode tintMode) {
+        BlendMode mode = null;
+        if (tintMode != null) {
+            mode = BlendMode.fromValue(tintMode.nativeInt);
+        }
+
+        setBackgroundTintMode(mode);
+    }
+
+    /**
+     * Specifies the blending mode used to apply the tint specified by
+     * {@link #setBackgroundTintList(ColorStateList)}} to the background
+     * drawable. The default mode is {@link BlendMode#SRC_IN}.
+     *
+     * @param blendMode the blending mode used to apply the tint, may be
+     *                 {@code null} to clear tint
+     * @attr ref android.R.styleable#View_backgroundTintMode
+     * @see #getBackgroundTintMode()
+     * @see Drawable#setTintMode(BlendMode)
+     */
+    public void setBackgroundTintMode(@Nullable BlendMode blendMode) {
         if (mBackgroundTint == null) {
             mBackgroundTint = new TintInfo();
         }
-        mBackgroundTint.mTintMode = tintMode;
+
+        mBackgroundTint.mBlendMode = blendMode;
         mBackgroundTint.mHasTintMode = true;
 
         applyBackgroundTint();
@@ -23330,12 +23355,34 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return the blending mode used to apply the tint to the background
      *         drawable
      * @attr ref android.R.styleable#View_backgroundTintMode
-     * @see #setBackgroundTintMode(PorterDuff.Mode)
+     * @see #setBackgroundTintMode(BlendMode)
+     *
+     * @deprecated use #getBackgroundBlendMode() instead
      */
     @Nullable
     @InspectableProperty
+    @Deprecated
     public PorterDuff.Mode getBackgroundTintMode() {
-        return mBackgroundTint != null ? mBackgroundTint.mTintMode : null;
+        PorterDuff.Mode porterDuffMode;
+        if (mBackgroundTint != null && mBackgroundTint.mBlendMode != null) {
+            porterDuffMode = BlendMode.blendModeToPorterDuffMode(mBackgroundTint.mBlendMode);
+        } else {
+            porterDuffMode = null;
+        }
+        return porterDuffMode;
+    }
+
+    /**
+     * Return the blending mode used to apply the tint to the background
+     * drawable, if specified.
+     *
+     * @return the blending mode used to apply the tint to the background
+     *         drawable, null if no blend has previously been configured
+     * @attr ref android.R.styleable#View_backgroundTintMode
+     * @see #setBackgroundTintMode(BlendMode)
+     */
+    public @Nullable BlendMode getBackgroundBlendMode() {
+        return mBackgroundTint != null ? mBackgroundTint.mBlendMode : null;
     }
 
     private void applyBackgroundTint() {
@@ -23349,7 +23396,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 }
 
                 if (tintInfo.mHasTintMode) {
-                    mBackground.setTintMode(tintInfo.mTintMode);
+                    mBackground.setTintMode(tintInfo.mBlendMode);
                 }
 
                 // The drawable (or one of its children) may not have been
@@ -23533,15 +23580,37 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @attr ref android.R.styleable#View_foregroundTintMode
      * @see #getForegroundTintMode()
      * @see Drawable#setTintMode(PorterDuff.Mode)
+     *
+     * @deprecated use #setForegroundTintMode(BlendMode)
      */
+    @Deprecated
     public void setForegroundTintMode(@Nullable PorterDuff.Mode tintMode) {
+        BlendMode mode = null;
+        if (tintMode != null) {
+            mode = BlendMode.fromValue(tintMode.nativeInt);
+        }
+        setForegroundTintMode(mode);
+    }
+
+    /**
+     * Specifies the blending mode used to apply the tint specified by
+     * {@link #setForegroundTintList(ColorStateList)}} to the background
+     * drawable. The default mode is {@link BlendMode#SRC_IN}.
+     *
+     * @param blendMode the blending mode used to apply the tint, may be
+     *                 {@code null} to clear tint
+     * @attr ref android.R.styleable#View_foregroundTintMode
+     * @see #getForegroundTintMode()
+     * @see Drawable#setTintMode(BlendMode)
+     */
+    public void setForegroundTintMode(@Nullable BlendMode blendMode) {
         if (mForegroundInfo == null) {
             mForegroundInfo = new ForegroundInfo();
         }
         if (mForegroundInfo.mTintInfo == null) {
             mForegroundInfo.mTintInfo = new TintInfo();
         }
-        mForegroundInfo.mTintInfo.mTintMode = tintMode;
+        mForegroundInfo.mTintInfo.mBlendMode = blendMode;
         mForegroundInfo.mTintInfo.mHasTintMode = true;
 
         applyForegroundTint();
@@ -23555,12 +23624,35 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *         drawable
      * @attr ref android.R.styleable#View_foregroundTintMode
      * @see #setForegroundTintMode(PorterDuff.Mode)
+     *
+     * @deprecated use #getForegroundBlendMode() instead
      */
     @InspectableProperty
     @Nullable
+    @Deprecated
     public PorterDuff.Mode getForegroundTintMode() {
+        BlendMode blendMode = mForegroundInfo != null && mForegroundInfo.mTintInfo != null
+                ? mForegroundInfo.mTintInfo.mBlendMode : null;
+        if (blendMode != null) {
+            return BlendMode.blendModeToPorterDuffMode(blendMode);
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Return the blending mode used to apply the tint to the foreground
+     * drawable, if specified.
+     *
+     * @return the blending mode used to apply the tint to the foreground
+     *         drawable
+     * @attr ref android.R.styleable#View_foregroundTintMode
+     * @see #setForegroundTintMode(BlendMode)
+     *
+     */
+    public @Nullable BlendMode getForegroundBlendMode() {
         return mForegroundInfo != null && mForegroundInfo.mTintInfo != null
-                ? mForegroundInfo.mTintInfo.mTintMode : null;
+                ? mForegroundInfo.mTintInfo.mBlendMode : null;
     }
 
     private void applyForegroundTint() {
@@ -23575,7 +23667,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 }
 
                 if (tintInfo.mHasTintMode) {
-                    mForegroundInfo.mDrawable.setTintMode(tintInfo.mTintMode);
+                    mForegroundInfo.mDrawable.setTintMode(tintInfo.mBlendMode);
                 }
 
                 // The drawable (or one of its children) may not have been

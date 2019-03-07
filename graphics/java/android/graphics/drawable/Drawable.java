@@ -30,6 +30,8 @@ import android.content.res.Resources.Theme;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.BlendMode;
+import android.graphics.BlendModeColorFilter;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.ColorFilter;
@@ -182,6 +184,7 @@ public abstract class Drawable {
     private static final Rect ZERO_BOUNDS_RECT = new Rect();
 
     static final PorterDuff.Mode DEFAULT_TINT_MODE = PorterDuff.Mode.SRC_IN;
+    static final BlendMode DEFAULT_BLEND_MODE = BlendMode.SRC_IN;
 
     private int[] mStateSet = StateSet.WILD_CARD;
     private int mLevel = 0;
@@ -208,6 +211,24 @@ public abstract class Drawable {
      */
     @UnsupportedAppUsage
     protected int mSrcDensityOverride = 0;
+
+    /**
+     * Flag used to break the recursive loop between setTintMode(PorterDuff.Mode) and
+     * setTintMode(BlendMode) as each default implementation invokes the other in order to
+     * support new use cases that utilize the new blending modes as well as support the legacy
+     * use cases. This flag tracks that {@link #setTintMode(BlendMode)} is only invoked once
+     * per invocation.
+     */
+    private boolean mSetBlendModeInvoked = false;
+
+    /**
+     * Flag used to break the recursive loop between setTintMode(PorterDuff.Mode) and
+     * setTintMode(BlendMode) as each default implementation invokes the other in order to
+     * support new use cases that utilize the new blending modes as well as support the legacy
+     * use cases. This flag tracks that {@link #setTintMode(Mode)} is only invoked once
+     * per invocation;
+     */
+    private boolean mSetTintModeInvoked = false;
 
     /**
      * Draw in its bounds (set via setBounds) respecting optional effects such
@@ -630,6 +651,7 @@ public abstract class Drawable {
      * @param tintColor Color to use for tinting this drawable
      * @see #setTintList(ColorStateList)
      * @see #setTintMode(PorterDuff.Mode)
+     * @see #setTintMode(BlendMode)
      */
     public void setTint(@ColorInt int tintColor) {
         setTintList(ColorStateList.valueOf(tintColor));
@@ -651,6 +673,7 @@ public abstract class Drawable {
      *            {@code null} to clear the tint
      * @see #setTint(int)
      * @see #setTintMode(PorterDuff.Mode)
+     * @see #setTintMode(BlendMode)
      */
     public void setTintList(@Nullable ColorStateList tint) {}
 
@@ -668,8 +691,45 @@ public abstract class Drawable {
      * @param tintMode A Porter-Duff blending mode
      * @see #setTint(int)
      * @see #setTintList(ColorStateList)
+     *
+     * @deprecated use {@link #setTintMode(BlendMode)} instead
      */
-    public void setTintMode(@NonNull PorterDuff.Mode tintMode) {}
+    @Deprecated
+    public void setTintMode(@NonNull PorterDuff.Mode tintMode) {
+        if (!mSetTintModeInvoked) {
+            mSetTintModeInvoked = true;
+            BlendMode mode = BlendMode.fromValue(tintMode.nativeInt);
+            if (mode != null) {
+                setTintMode(mode);
+            }
+            mSetTintModeInvoked = false;
+        }
+    }
+
+    /**
+     * Specifies a tint blending mode for this drawable.
+     * <p>
+     * Defines how this drawable's tint color should be blended into the drawable
+     * before it is drawn to screen. Default tint mode is {@link BlendMode#SRC_IN}.
+     * </p>
+     * <p class="note"><strong>Note:</strong> Setting a color filter via
+     * {@link #setColorFilter(ColorFilter)}
+     * </p>
+     *
+     * @param blendMode
+     * @see #setTint(int)
+     * @see #setTintList(ColorStateList)
+     */
+    public void setTintMode(@NonNull BlendMode blendMode) {
+        if (!mSetBlendModeInvoked) {
+            mSetBlendModeInvoked = true;
+            PorterDuff.Mode mode = BlendMode.blendModeToPorterDuffMode(blendMode);
+            if (mode != null) {
+                setTintMode(mode);
+            }
+            mSetBlendModeInvoked = false;
+        }
+    }
 
     /**
      * Returns the current color filter, or {@code null} if none set.
@@ -1540,6 +1600,20 @@ public abstract class Drawable {
         return tintFilter;
     }
 
+    @Nullable BlendModeColorFilter updateBlendModeFilter(@Nullable BlendModeColorFilter blendFilter,
+            @Nullable ColorStateList tint, @Nullable BlendMode blendMode) {
+        if (tint == null || blendMode == null) {
+            return null;
+        }
+
+        final int color = tint.getColorForState(getState(), Color.TRANSPARENT);
+        if (blendFilter == null || blendFilter.getColor() != color
+                || blendFilter.getMode() != blendMode) {
+            return new BlendModeColorFilter(color, blendMode);
+        }
+        return blendFilter;
+    }
+
     /**
      * Obtains styled attributes from the theme, if available, or unstyled
      * resources if the theme is null.
@@ -1639,6 +1713,27 @@ public abstract class Drawable {
             case 14: return Mode.MULTIPLY;
             case 15: return Mode.SCREEN;
             case 16: return Mode.ADD;
+            default: return defaultMode;
+        }
+    }
+
+    /**
+     * Parses a {@link android.graphics.BlendMode} from a tintMode
+     * attribute's enum value.
+     *
+     * @hide
+     */
+    @UnsupportedAppUsage
+    public static BlendMode parseBlendMode(int value, BlendMode defaultMode) {
+        switch (value) {
+            case 3: return BlendMode.SRC_OVER;
+            case 5: return BlendMode.SRC_IN;
+            case 9: return BlendMode.SRC_ATOP;
+            // b/73224934 PorterDuff Multiply maps to Skia Modulate so actually
+            // return BlendMode.MODULATE here
+            case 14: return BlendMode.MODULATE;
+            case 15: return BlendMode.SCREEN;
+            case 16: return BlendMode.PLUS;
             default: return defaultMode;
         }
     }

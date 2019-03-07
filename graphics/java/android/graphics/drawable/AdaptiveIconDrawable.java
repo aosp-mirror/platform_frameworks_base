@@ -27,6 +27,7 @@ import android.content.res.Resources.Theme;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.BitmapShader;
+import android.graphics.BlendMode;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.ColorFilter;
@@ -35,7 +36,6 @@ import android.graphics.Outline;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PixelFormat;
-import android.graphics.PorterDuff.Mode;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.graphics.Shader;
@@ -701,13 +701,13 @@ public class AdaptiveIconDrawable extends Drawable implements Drawable.Callback 
     }
 
     @Override
-    public void setTintMode(Mode tintMode) {
+    public void setTintMode(@NonNull BlendMode blendMode) {
         final ChildDrawable[] array = mLayerState.mChildren;
         final int N = mLayerState.N_CHILDREN;
         for (int i = 0; i < N; i++) {
             final Drawable dr = array[i].mDrawable;
             if (dr != null) {
-                dr.setTintMode(tintMode);
+                dr.setTintMode(blendMode);
             }
         }
     }
