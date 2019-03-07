@@ -355,13 +355,21 @@ public class BatteryMeterView extends LinearLayout implements
         if (mBatteryPercentView != null) {
             if (mShowPercentMode == MODE_ESTIMATE && !mCharging) {
                 mBatteryController.getEstimatedTimeRemainingString((String estimate) -> {
-                    mBatteryPercentView.setText(estimate);
+                    if (estimate != null) {
+                        mBatteryPercentView.setText(estimate);
+                    } else {
+                        setPercentTextAtCurrentLevel();
+                    }
                 });
             } else {
-                mBatteryPercentView.setText(
-                        NumberFormat.getPercentInstance().format(mLevel / 100f));
+                setPercentTextAtCurrentLevel();
             }
         }
+    }
+
+    private void setPercentTextAtCurrentLevel() {
+        mBatteryPercentView.setText(
+                NumberFormat.getPercentInstance().format(mLevel / 100f));
     }
 
     private void updateShowPercent() {
