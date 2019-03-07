@@ -98,7 +98,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
          * they may be useful for testing purposes and for defining custom camera
          * characteristics.</p>
          */
-        public Key(String name, Class<T> type) {
+        public Key(@NonNull String name, @NonNull Class<T> type) {
             mKey = new CameraMetadataNative.Key<T>(name,  type);
         }
 
