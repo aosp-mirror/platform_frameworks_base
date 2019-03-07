@@ -1275,7 +1275,7 @@ Lcom/android/internal/os/BaseCommand;->mArgs:Landroid/os/ShellCommand;
 Lcom/android/internal/os/BatterySipper$DrainType;->values()[Lcom/android/internal/os/BatterySipper$DrainType;
 Lcom/android/internal/os/BinderInternal;->getContextObject()Landroid/os/IBinder;
 Lcom/android/internal/os/BinderInternal;->handleGc()V
-Lcom/android/internal/os/ClassLoaderFactory;->createClassloaderNamespace(Ljava/lang/ClassLoader;ILjava/lang/String;Ljava/lang/String;ZZ)Ljava/lang/String;
+Lcom/android/internal/os/ClassLoaderFactory;->createClassloaderNamespace(Ljava/lang/ClassLoader;ILjava/lang/String;Ljava/lang/String;ZLjava/lang/String;)Ljava/lang/String;
 Lcom/android/internal/os/IDropBoxManagerService$Stub;->asInterface(Landroid/os/IBinder;)Lcom/android/internal/os/IDropBoxManagerService;
 Lcom/android/internal/os/ProcessCpuTracker$Stats;->name:Ljava/lang/String;
 Lcom/android/internal/os/ProcessCpuTracker$Stats;->rel_stime:I
