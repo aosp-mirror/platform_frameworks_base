@@ -40,8 +40,6 @@ import android.widget.LinearLayout;
 public class ListGridLayout extends LinearLayout {
     private static final String TAG = "ListGridLayout";
     private int mExpectedCount;
-    private int mRows;
-    private int mColumns;
 
     public ListGridLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -63,7 +61,7 @@ public class ListGridLayout extends LinearLayout {
      * Get the parent view associated with the item which should be placed at the given position.
      */
     public ViewGroup getParentView(int index, boolean reverseSublists, boolean swapRowsAndColumns) {
-        if (mRows == 0) {
+        if (getRowCount() == 0) {
             return null;
         }
         int column = getParentViewIndex(index, reverseSublists, swapRowsAndColumns);
@@ -77,10 +75,11 @@ public class ListGridLayout extends LinearLayout {
     private int getParentViewIndex(int index, boolean reverseSublists, boolean swapRowsAndColumns) {
         int sublistIndex;
         ViewGroup row;
+        int rows = getRowCount();
         if (swapRowsAndColumns) {
-            sublistIndex = (int) Math.floor(index / mRows);
+            sublistIndex = (int) Math.floor(index / rows);
         } else {
-            sublistIndex = index % mRows;
+            sublistIndex = index % rows;
         }
         if (reverseSublists) {
             sublistIndex = reverseSublistIndex(sublistIndex);
@@ -93,11 +92,9 @@ public class ListGridLayout extends LinearLayout {
      */
     public void setExpectedCount(int count) {
         mExpectedCount = count;
-        mRows = getRowCount();
-        mColumns = getColumnCount();
 
         for (int i = 0; i < getChildCount(); i++) {
-            if (i <= mColumns) {
+            if (i <= getColumnCount()) {
                 setSublistVisibility(i, true);
             } else {
                 setSublistVisibility(i, false);
@@ -113,10 +110,18 @@ public class ListGridLayout extends LinearLayout {
     }
 
     private int getRowCount() {
+        // special case for 3 to use a single row
+        if (mExpectedCount == 3) {
+            return 1;
+        }
         return (int) Math.ceil(Math.sqrt(mExpectedCount));
     }
 
     private int getColumnCount() {
+        // special case for 3 to use a single row
+        if (mExpectedCount == 3) {
+            return 3;
+        }
         return (int) Math.round(Math.sqrt(mExpectedCount));
     }
 }
