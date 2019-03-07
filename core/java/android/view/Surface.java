@@ -17,6 +17,7 @@
 package android.view;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.UnsupportedAppUsage;
 import android.content.res.CompatibilityInfo.Translator;
 import android.graphics.Canvas;
@@ -193,7 +194,7 @@ public class Surface implements Parcelable {
      *
      * @param from The SurfaceControl to assosciate this Surface with
      */
-    public Surface(SurfaceControl from) {
+    public Surface(@NonNull SurfaceControl from) {
         copyFrom(from);
     }
 
