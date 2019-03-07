@@ -262,6 +262,8 @@ public abstract class RoleControllerService extends Service {
      * Cleanup appop/permissions state in response to sms kill switch toggle
      *
      * @param enabled whether kill switch was turned on
+     *
+     * @hide
      */
     //STOPSHIP: remove this api before shipping a final version
     @WorkerThread
