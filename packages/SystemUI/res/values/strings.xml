@@ -1580,6 +1580,9 @@
     <!-- Notification Inline controls: button to dismiss the blocking helper [CHAR_LIMIT=20] -->
     <string name="inline_done_button">Done</string>
 
+    <!-- Notification Inline controls: button to dismiss the blocking helper [CHAR_LIMIT=20] -->
+    <string name="inline_ok_button">OK</string>
+
     <!-- Notification Inline controls: continue receiving notifications prompt, channel level -->
     <string name="inline_keep_showing">Keep showing these notifications?</string>
 
