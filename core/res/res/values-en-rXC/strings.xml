@@ -2020,4 +2020,6 @@
       <item quantity="other">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‏‏‎‏‎‎‏‏‎‎‏‏‏‏‏‎‎‏‏‏‏‏‏‎‎‎‏‏‎‏‏‎‏‏‎‏‏‏‎‎‏‏‏‎‎‏‏‏‎‎‎‎‏‏‏‏‎‎‏‎‎‏‎‎‏‏‎<xliff:g id="FILE_NAME_2">%s</xliff:g>‎‏‎‎‏‏‏‎ + ‎‏‎‎‏‏‎<xliff:g id="COUNT_3">%d</xliff:g>‎‏‎‎‏‏‏‎ files‎‏‎‎‏‎</item>
       <item quantity="one">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‏‏‎‏‎‎‏‏‎‎‏‏‏‏‏‎‎‏‏‏‏‏‏‎‎‎‏‏‎‏‏‎‏‏‎‏‏‏‎‎‏‏‏‎‎‏‏‏‎‎‎‎‏‏‏‏‎‎‏‎‎‏‎‎‏‏‎<xliff:g id="FILE_NAME_0">%s</xliff:g>‎‏‎‎‏‏‏‎ + ‎‏‎‎‏‏‎<xliff:g id="COUNT_1">%d</xliff:g>‎‏‎‎‏‏‏‎ file‎‏‎‎‏‎</item>
     </plurals>
+    <!-- no translation found for chooser_no_direct_share_targets (997970693708458895) -->
+    <skip />
 </resources>

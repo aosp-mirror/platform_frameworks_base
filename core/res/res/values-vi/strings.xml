@@ -308,18 +308,15 @@
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Điện thoại"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"thực hiện và quản lý cuộc gọi điện thoại"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"Cho phép &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; thực hiện và quản lý cuộc gọi điện thoại?"</string>
-    <!-- no translation found for permgrouplab_sensors (4838614103153567532) -->
-    <skip />
+    <string name="permgrouplab_sensors" msgid="4838614103153567532">"Cảm biến cơ thể"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"truy cập dữ liệu cảm biến về dấu hiệu sinh tồn của bạn"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"Cho phép &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; truy cập vào dữ liệu cảm biến về các dấu hiệu sinh tồn của bạn?"</string>
     <string name="permgrouplab_aural" msgid="965607064083134896">"Nhạc"</string>
     <string name="permgroupdesc_aural" msgid="4870189506255958055">"sử dụng nhạc"</string>
     <string name="permgrouprequest_aural" msgid="6787926123071735620">"Bạn có muốn cho phép &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; sử dụng nhạc không?"</string>
-    <!-- no translation found for permgrouplab_visual (6477382108771145134) -->
-    <skip />
+    <string name="permgrouplab_visual" msgid="6477382108771145134">"Ảnh và video"</string>
     <string name="permgroupdesc_visual" msgid="3415827902566663546">"sử dụng ảnh và video"</string>
-    <!-- no translation found for permgrouprequest_visual (3043752127595243314) -->
-    <skip />
+    <string name="permgrouprequest_visual" msgid="3043752127595243314">"Cho phép &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; truy cập vào ảnh và video của bạn, bao gồm cả vị trí được gắn thẻ?"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Truy xuất nội dung cửa sổ"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Kiểm tra nội dung của cửa sổ bạn đang tương tác."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Bật Khám phá bằng cách chạm"</string>
@@ -2024,4 +2021,6 @@
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> tệp</item>
       <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> + <xliff:g id="COUNT_1">%d</xliff:g> tệp</item>
     </plurals>
+    <!-- no translation found for chooser_no_direct_share_targets (997970693708458895) -->
+    <skip />
 </resources>

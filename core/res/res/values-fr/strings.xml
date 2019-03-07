@@ -308,18 +308,15 @@
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Téléphone"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"effectuer et gérer des appels téléphoniques"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"Permettre à &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; de passer et gérer des appels téléphoniques ?"</string>
-    <!-- no translation found for permgrouplab_sensors (4838614103153567532) -->
-    <skip />
+    <string name="permgrouplab_sensors" msgid="4838614103153567532">"Capteurs corporels"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"accéder aux données des capteurs relatives à vos signes vitaux"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"Permettre à &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; d\'accéder aux données des capteurs relatives à vos signes vitaux ?"</string>
     <string name="permgrouplab_aural" msgid="965607064083134896">"Musique"</string>
     <string name="permgroupdesc_aural" msgid="4870189506255958055">"accéder à votre musique"</string>
     <string name="permgrouprequest_aural" msgid="6787926123071735620">"Autoriser &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; à accéder à votre musique ?"</string>
-    <!-- no translation found for permgrouplab_visual (6477382108771145134) -->
-    <skip />
+    <string name="permgrouplab_visual" msgid="6477382108771145134">"Photos et vidéos"</string>
     <string name="permgroupdesc_visual" msgid="3415827902566663546">"accéder à vos photos et vos vidéos"</string>
-    <!-- no translation found for permgrouprequest_visual (3043752127595243314) -->
-    <skip />
+    <string name="permgrouprequest_visual" msgid="3043752127595243314">"Autoriser &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; à accéder à vos photos et vidéos, y compris aux tags de lieu ?"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Récupérer le contenu d\'une fenêtre"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Inspecte le contenu d\'une fenêtre avec laquelle vous interagissez."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Activer la fonctionnalité Explorer au toucher"</string>
@@ -2023,4 +2020,6 @@
       <item quantity="one"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> fichier</item>
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> fichiers</item>
     </plurals>
+    <!-- no translation found for chooser_no_direct_share_targets (997970693708458895) -->
+    <skip />
 </resources>

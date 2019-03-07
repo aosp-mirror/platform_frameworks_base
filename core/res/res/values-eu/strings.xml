@@ -282,7 +282,7 @@
     <string name="permgroupdesc_location" msgid="1346617465127855033">"atzitu gailuaren kokapena"</string>
     <string name="permgrouprequest_location" msgid="3788275734953323491">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; aplikazioari gailuaren kokapena atzitzea baimendu nahi diozu?"</string>
     <string name="permgrouprequestdetail_location" msgid="1113400215566814664">"Aplikazioa erabiltzen ari zarenean soilik atzituko du aplikazioak kokapena."</string>
-    <string name="permgroupbackgroundrequest_location" msgid="8461841153030844390">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; aplikazioari gailuaren kokapena beti atzitzea baimendu?"</string>
+    <string name="permgroupbackgroundrequest_location" msgid="8461841153030844390">"Gailuaren kokapena beti atzitzeko baimena eman nahi diozu &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; aplikazioari?"</string>
     <string name="permgroupbackgroundrequestdetail_location" msgid="1715668276378108654">"Aplikazioak beti atzituko du kokapena, baita aplikazioa erabiltzen ari ez bazara ere."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Egutegia"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"atzitu egutegia"</string>
@@ -308,18 +308,15 @@
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefonoa"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"egin eta kudeatu telefono-deiak"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; aplikazioari telefono-deiak egitea eta kudeatzea baimendu nahi diozu?"</string>
-    <!-- no translation found for permgrouplab_sensors (4838614103153567532) -->
-    <skip />
+    <string name="permgrouplab_sensors" msgid="4838614103153567532">"Gorputz-sentsoreak"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"atzitu bizi-konstanteei buruzko sentsorearen datuak"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"Bizi-konstanteei buruzko sentsorearen datuak atzitzea baimendu nahi diozu &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; aplikazioari?"</string>
     <string name="permgrouplab_aural" msgid="965607064083134896">"Musika"</string>
     <string name="permgroupdesc_aural" msgid="4870189506255958055">"musika atzitu"</string>
     <string name="permgrouprequest_aural" msgid="6787926123071735620">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; aplikazioari musika atzitzea baimendu nahi diozu?"</string>
-    <!-- no translation found for permgrouplab_visual (6477382108771145134) -->
-    <skip />
+    <string name="permgrouplab_visual" msgid="6477382108771145134">"Argazkiak eta bideoak"</string>
     <string name="permgroupdesc_visual" msgid="3415827902566663546">"argazkiak eta bideoak atzitu"</string>
-    <!-- no translation found for permgrouprequest_visual (3043752127595243314) -->
-    <skip />
+    <string name="permgrouprequest_visual" msgid="3043752127595243314">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; aplikazioari zure argazkiak eta bideoak (etiketatutako kokapenak barne) atzitzeko baimena eman?"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Eskuratu leihoko edukia"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Arakatu irekita daukazun leihoko edukia."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Aktibatu \"Arakatu ukituta\""</string>
@@ -1321,7 +1318,7 @@
     <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"Utzi"</string>
     <string name="sms_short_code_remember_choice" msgid="5289538592272218136">"Gogoratu aukera"</string>
     <string name="sms_short_code_remember_undo_instruction" msgid="4960944133052287484">"Hori geroago alda dezakezu Ezarpenak &gt; Aplikazioak atalean"</string>
-    <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"Onartu beti"</string>
+    <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"Eman baimena beti"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"Ez onartu inoiz"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"SIM txartela kendu da"</string>
     <string name="sim_removed_message" msgid="2333164559970958645">"Sare mugikorra ez da erabilgarri egongo baliozko SIM txartel bat sartuta berrabiarazten ez duzun arte."</string>
@@ -2024,4 +2021,6 @@
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> fitxategi</item>
       <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> + <xliff:g id="COUNT_1">%d</xliff:g> fitxategi</item>
     </plurals>
+    <!-- no translation found for chooser_no_direct_share_targets (997970693708458895) -->
+    <skip />
 </resources>

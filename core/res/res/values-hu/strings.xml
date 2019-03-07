@@ -308,18 +308,15 @@
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefon"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"telefonhívások kezdeményezése és kezelése"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"Engedélyezi a(z) &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; számára, hogy hívásokat indíthasson és kezelhessen?"</string>
-    <!-- no translation found for permgrouplab_sensors (4838614103153567532) -->
-    <skip />
+    <string name="permgrouplab_sensors" msgid="4838614103153567532">"Testérzékelők"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"az érzékelők által mért, életjelekkel kapcsolatos adatok elérése"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"Engedélyezi a(z) &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; számára, hogy hozzáférjen az életjelekkel kapcsolatos szenzoradatokhoz?"</string>
     <string name="permgrouplab_aural" msgid="965607064083134896">"Zene"</string>
     <string name="permgroupdesc_aural" msgid="4870189506255958055">"hozzáférés a zenékhez"</string>
     <string name="permgrouprequest_aural" msgid="6787926123071735620">"Engedélyezi a(z) &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&amp;gt számára, hogy hozzáférjen az Ön zenéihez?"</string>
-    <!-- no translation found for permgrouplab_visual (6477382108771145134) -->
-    <skip />
+    <string name="permgrouplab_visual" msgid="6477382108771145134">"Fotók és videók"</string>
     <string name="permgroupdesc_visual" msgid="3415827902566663546">"hozzáférés a fényképekhez és videókhoz"</string>
-    <!-- no translation found for permgrouprequest_visual (3043752127595243314) -->
-    <skip />
+    <string name="permgrouprequest_visual" msgid="3043752127595243314">"Engedélyezi a(z) &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; számára a fotókhoz és videókhoz (köztük a címkézett helyekhez) való hozzáférést?"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Ablaktartalom lekérdezése"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"A használt ablak tartalmának vizsgálata."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Felfedezés érintéssel bekapcsolása"</string>
@@ -2023,4 +2020,6 @@
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> fájl</item>
       <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> + <xliff:g id="COUNT_1">%d</xliff:g> fájl</item>
     </plurals>
+    <!-- no translation found for chooser_no_direct_share_targets (997970693708458895) -->
+    <skip />
 </resources>

@@ -311,18 +311,15 @@
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefon"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"poziva i upravlja pozivima"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"Dozvoliti aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; uspostavljanje poziva i njihovo upravljanje?"</string>
-    <!-- no translation found for permgrouplab_sensors (4838614103153567532) -->
-    <skip />
+    <string name="permgrouplab_sensors" msgid="4838614103153567532">"Tjelesni senzori"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"pristupa podacima senzora o vašim vitalnim funkcijama"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"Dozvoliti aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; pristup senzornim podacima o vašim vitalnim znacima?"</string>
     <string name="permgrouplab_aural" msgid="965607064083134896">"Muzika"</string>
     <string name="permgroupdesc_aural" msgid="4870189506255958055">"pristup muzici"</string>
     <string name="permgrouprequest_aural" msgid="6787926123071735620">"Dozvoliti aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;da pristupi vašoj muzici?"</string>
-    <!-- no translation found for permgrouplab_visual (6477382108771145134) -->
-    <skip />
+    <string name="permgrouplab_visual" msgid="6477382108771145134">"Fotografije i videozapisi"</string>
     <string name="permgroupdesc_visual" msgid="3415827902566663546">"pristup fotografijama i videozapisima"</string>
-    <!-- no translation found for permgrouprequest_visual (3043752127595243314) -->
-    <skip />
+    <string name="permgrouprequest_visual" msgid="3043752127595243314">"Dozvoliti da &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; pristupa fotografijama i videozapisima, uključujući označene lokacije?"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Preuzima sadržaj prozora"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Pregleda sadržaj prozora koji trenutno koristite."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Uključi opciju Istraživanje dodirom"</string>
@@ -1881,7 +1878,7 @@
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Suzi"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"Ne ometaj"</string>
-    <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"Prestanak rada"</string>
+    <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"Neaktivnost"</string>
     <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"Radni dan uvečer"</string>
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"Vikend"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"Događaj"</string>
@@ -2061,4 +2058,6 @@
       <item quantity="few"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> fajla</item>
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> fajlova</item>
     </plurals>
+    <!-- no translation found for chooser_no_direct_share_targets (997970693708458895) -->
+    <skip />
 </resources>

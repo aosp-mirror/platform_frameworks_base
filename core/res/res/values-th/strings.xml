@@ -308,18 +308,15 @@
     <string name="permgrouplab_phone" msgid="5229115638567440675">"โทรศัพท์"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"โทรและจัดการการโทร"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"อนุญาตให้ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; โทรและจัดการการโทรไหม"</string>
-    <!-- no translation found for permgrouplab_sensors (4838614103153567532) -->
-    <skip />
+    <string name="permgrouplab_sensors" msgid="4838614103153567532">"เซ็นเซอร์ร่างกาย"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"เข้าถึงข้อมูลเซ็นเซอร์เกี่ยวกับสัญญาณชีพของคุณ"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"อนุญาตให้ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; เข้าถึงข้อมูลเซ็นเซอร์เกี่ยวกับสัญญาณชีพไหม"</string>
     <string name="permgrouplab_aural" msgid="965607064083134896">"เพลง"</string>
     <string name="permgroupdesc_aural" msgid="4870189506255958055">"เข้าถึงเพลง"</string>
     <string name="permgrouprequest_aural" msgid="6787926123071735620">"อนุญาตให้ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; เข้าถึงเพลงไหม"</string>
-    <!-- no translation found for permgrouplab_visual (6477382108771145134) -->
-    <skip />
+    <string name="permgrouplab_visual" msgid="6477382108771145134">"รูปภาพและวิดีโอ"</string>
     <string name="permgroupdesc_visual" msgid="3415827902566663546">"เข้าถึงรูปภาพและวิดีโอ"</string>
-    <!-- no translation found for permgrouprequest_visual (3043752127595243314) -->
-    <skip />
+    <string name="permgrouprequest_visual" msgid="3043752127595243314">"อนุญาตให้ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; เข้าถึงรูปภาพและวิดีโอของคุณ รวมถึงตำแหน่งที่ติดแท็กไหม"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"เรียกข้อมูลเนื้อหาของหน้าต่าง"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"ตรวจสอบเนื้อหาของหน้าต่างที่คุณกำลังโต้ตอบอยู่"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"เปิด \"แตะเพื่อสำรวจ\""</string>
@@ -2023,4 +2020,6 @@
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> และอีก <xliff:g id="COUNT_3">%d</xliff:g> ไฟล์</item>
       <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> และอีก <xliff:g id="COUNT_1">%d</xliff:g> ไฟล์</item>
     </plurals>
+    <!-- no translation found for chooser_no_direct_share_targets (997970693708458895) -->
+    <skip />
 </resources>

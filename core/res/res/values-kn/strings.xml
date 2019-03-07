@@ -308,18 +308,15 @@
     <string name="permgrouplab_phone" msgid="5229115638567440675">"ಫೋನ್"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"ಫೋನ್ ಕರೆ ಮಾಡಲು ಹಾಗೂ ನಿರ್ವಹಿಸಲು"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"ಫೋನ್ ಕರೆಗಳನ್ನು ಮಾಡಲು ಮತ್ತು ನಿರ್ವಹಿಸಲು &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ಗೆ ಅನುಮತಿಸಬೇಕೇ?"</string>
-    <!-- no translation found for permgrouplab_sensors (4838614103153567532) -->
-    <skip />
+    <string name="permgrouplab_sensors" msgid="4838614103153567532">"ದೇಹದ ಸೆನ್ಸರ್‌ಗಳು"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"ನಿಮ್ಮ ಮುಖ್ಯ ಲಕ್ಷಣಗಳ ಕುರಿತು ಸೆನ್ಸಾರ್ ಡೇಟಾವನ್ನು ಪ್ರವೇಶಿಸಿ"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"ನಿಮ್ಮ ಮುಖ್ಯ ಲಕ್ಷಣಗಳ ಕುರಿತು ಸೆನ್ಸರ್ ಡೇಟಾವನ್ನು &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ಗೆ ಅನುಮತಿಸಬೇಕೇ?"</string>
     <string name="permgrouplab_aural" msgid="965607064083134896">"ಸಂಗೀತ"</string>
     <string name="permgroupdesc_aural" msgid="4870189506255958055">"ನಿಮ್ಮ ಸಂಗೀತವನ್ನು ಪ್ರವೇಶಿಸಿ"</string>
     <string name="permgrouprequest_aural" msgid="6787926123071735620">"ನಿಮ್ಮ ಸಂಗೀತವನ್ನು ಪ್ರವೇಶಿಸಲು &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ಗೆ ಅನುಮತಿಸಬೇಕೇ?"</string>
-    <!-- no translation found for permgrouplab_visual (6477382108771145134) -->
-    <skip />
+    <string name="permgrouplab_visual" msgid="6477382108771145134">"ಫೋಟೋಗಳು ಮತ್ತು ವೀಡಿಯೊಗಳು"</string>
     <string name="permgroupdesc_visual" msgid="3415827902566663546">"ನಿಮ್ಮ ಫೋಟೋಗಳು &amp; ವೀಡಿಯೊಗಳನ್ನು ಪ್ರವೇಶಿಸಿ"</string>
-    <!-- no translation found for permgrouprequest_visual (3043752127595243314) -->
-    <skip />
+    <string name="permgrouprequest_visual" msgid="3043752127595243314">"ಟ್ಯಾಗ್ ಮಾಡಿದ ಸ್ಥಳಗಳೂ ಸೇರಿದಂತೆ ನಿಮ್ಮ ಫೋಟೋಗಳು ಹಾಗೂ ವೀಡಿಯೊಗಳಿಗೆ ಪ್ರವೇಶ ಪಡೆಯಲು &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ಗೆ ಅನುಮತಿ ನೀಡಬೇಕೇ?"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"ವಿಂಡೋ ವಿಷಯವನ್ನು ಹಿಂಪಡೆಯುತ್ತದೆ"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"ನೀವು ಬಳಸುತ್ತಿರುವ ವಿಂಡೋದ ವಿಷಯ ಪರೀಕ್ಷಿಸುತ್ತದೆ."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"ಸ್ಪರ್ಶ-ಎಕ್ಸ್‌ಪ್ಲೋರ್ ಆನ್ ಮಾಡುತ್ತದೆ"</string>
@@ -2025,4 +2022,6 @@
       <item quantity="one"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> ಫೈಲ್‌ಗಳು</item>
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> ಫೈಲ್‌ಗಳು</item>
     </plurals>
+    <!-- no translation found for chooser_no_direct_share_targets (997970693708458895) -->
+    <skip />
 </resources>

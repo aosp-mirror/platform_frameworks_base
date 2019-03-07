@@ -308,18 +308,15 @@
     <string name="permgrouplab_phone" msgid="5229115638567440675">"ტელეფონი"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"სატელეფონო ზარების განხორციელება და მართვა"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"გსურთ, მიანიჭოთ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>-ს&lt;/b&gt; სატელეფონო ზარების განხორციელების და მართვის ნებართვა?"</string>
-    <!-- no translation found for permgrouplab_sensors (4838614103153567532) -->
-    <skip />
+    <string name="permgrouplab_sensors" msgid="4838614103153567532">"სხეულის სენსორები"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"თქვენი სასიცოცხლო ფუნქციების შესახებ სენსორის მონაცემებზე წვდომა"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"გსურთ, მიანიჭოთ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>-ს&lt;/b&gt; თქვენი სასიცოცხლო ფუნქციების შესახებ სენსორის მონაცემებზე წვდომის ნებართვა?"</string>
     <string name="permgrouplab_aural" msgid="965607064083134896">"მუსიკა"</string>
     <string name="permgroupdesc_aural" msgid="4870189506255958055">"თქვენს მუსიკაზე წვდომა"</string>
     <string name="permgrouprequest_aural" msgid="6787926123071735620">"გსურთ, მიანიჭოთ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;-ს თქვენს მუსიკაზე წვდომა?"</string>
-    <!-- no translation found for permgrouplab_visual (6477382108771145134) -->
-    <skip />
+    <string name="permgrouplab_visual" msgid="6477382108771145134">"ფოტოები და ვიდეოები"</string>
     <string name="permgroupdesc_visual" msgid="3415827902566663546">"თქვენს ფოტოებსა და ვიდეოებზე წვდომა"</string>
-    <!-- no translation found for permgrouprequest_visual (3043752127595243314) -->
-    <skip />
+    <string name="permgrouprequest_visual" msgid="3043752127595243314">"გსურთ, მიანიჭოთ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;-ს წვდომა თქვენს ფოტოებსა და ვიდეოებზე, მათ შორის, თეგებით მონიშნულ მდებარეობებზე?"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"ფანჯრის კონტენტის მოძიება"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"იმ ფანჯრის კონტენტის შემოწმება, რომელშიც მუშაობთ."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"„შეხებით აღმოჩენის“ ჩართვა"</string>
@@ -2024,4 +2021,6 @@
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> ფაილი</item>
       <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> + <xliff:g id="COUNT_1">%d</xliff:g> ფაილი</item>
     </plurals>
+    <!-- no translation found for chooser_no_direct_share_targets (997970693708458895) -->
+    <skip />
 </resources>

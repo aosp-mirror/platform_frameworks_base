@@ -308,18 +308,15 @@
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Ifoni"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"yenza uphinde uphathe amakholi wefoni"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"Vumela i-&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ukuthi yenze iphinde iphathe amakholi efoni?"</string>
-    <!-- no translation found for permgrouplab_sensors (4838614103153567532) -->
-    <skip />
+    <string name="permgrouplab_sensors" msgid="4838614103153567532">"Izinzwa zomzimba"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"finyelela idatha yesizweli mayelana nezimpawu zakho ezibalulekile"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"Vumela i-&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ukuthi ifinyelele kudatha yenzwa emayelana nezimpawu zakho ezibalulekile?"</string>
     <string name="permgrouplab_aural" msgid="965607064083134896">"Umculo"</string>
     <string name="permgroupdesc_aural" msgid="4870189506255958055">"finyelela umculo wakho"</string>
     <string name="permgrouprequest_aural" msgid="6787926123071735620">"Vumela i-&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ukuthi ifinyelele umculo wakho?"</string>
-    <!-- no translation found for permgrouplab_visual (6477382108771145134) -->
-    <skip />
+    <string name="permgrouplab_visual" msgid="6477382108771145134">"Izithombe Namavidiyo"</string>
     <string name="permgroupdesc_visual" msgid="3415827902566663546">"finyelela izithombe zakho namavidiyo"</string>
-    <!-- no translation found for permgrouprequest_visual (3043752127595243314) -->
-    <skip />
+    <string name="permgrouprequest_visual" msgid="3043752127595243314">"Vumela &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ukufinyelela izithombe zakho namavidiyo, kufaka phakathi izindawo ezimakiwe?"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Thola okuqukethwe kwewindi"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Hlola okuqukethwe kwewindi ohlanganyela nalo."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Vula ukuhlola ngokuthinta"</string>
@@ -2023,4 +2020,6 @@
       <item quantity="one"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> amafayela</item>
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> amafayela</item>
     </plurals>
+    <!-- no translation found for chooser_no_direct_share_targets (997970693708458895) -->
+    <skip />
 </resources>

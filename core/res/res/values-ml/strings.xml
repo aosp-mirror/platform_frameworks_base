@@ -308,18 +308,15 @@
     <string name="permgrouplab_phone" msgid="5229115638567440675">"ഫോണ്‍"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"ഫോൺ വിളിക്കുകയും നിയന്ത്രിക്കുകയും ചെയ്യുക"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"ഫോൺ കോളുകൾ ചെയ്യാനും അവ നിയന്ത്രിക്കാനും &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ആപ്പിനെ അനുവദിക്കണോ?"</string>
-    <!-- no translation found for permgrouplab_sensors (4838614103153567532) -->
-    <skip />
+    <string name="permgrouplab_sensors" msgid="4838614103153567532">"ബോഡി സെൻസറുകൾ"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"നിങ്ങളുടെ ജീവാധാര ലക്ഷണങ്ങളെ കുറിച്ചുള്ള സെൻസർ വിവരങ്ങൾ ആക്സസ് ചെയ്യുക"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"നിങ്ങളുടെ ജീവധാരണ ലക്ഷണങ്ങളെ കുറിച്ചുള്ള സെൻസർ ഡാറ്റ ആക്‌സസ് ചെയ്യാൻ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ആപ്പിനെ അനുവദിക്കണോ?"</string>
     <string name="permgrouplab_aural" msgid="965607064083134896">"സംഗീതം"</string>
     <string name="permgroupdesc_aural" msgid="4870189506255958055">"നിങ്ങളുടെ സംഗീതം ആക്‌സസ് ചെയ്യുക"</string>
     <string name="permgrouprequest_aural" msgid="6787926123071735620">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; എന്നതിനെ നിങ്ങളുടെ സംഗീതം ആക്‌സസ് ചെയ്യാൻ അനുവദിക്കണോ?"</string>
-    <!-- no translation found for permgrouplab_visual (6477382108771145134) -->
-    <skip />
+    <string name="permgrouplab_visual" msgid="6477382108771145134">"ഫോട്ടോകളും വീഡിയോകളും"</string>
     <string name="permgroupdesc_visual" msgid="3415827902566663546">"നിങ്ങളുടെ ഫോട്ടോകളും &amp; വീഡിയോകളും"</string>
-    <!-- no translation found for permgrouprequest_visual (3043752127595243314) -->
-    <skip />
+    <string name="permgrouprequest_visual" msgid="3043752127595243314">"ടാഗ് ചെയ്‌ത ലൊക്കേഷനുകൾ ഉൾപ്പെടെ നിങ്ങളുടെ ഫോട്ടോകളും വീഡിയോകളും ആക്‌സസ് ചെയ്യാൻ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;-നെ അനുവദിക്കണോ?"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"വിൻഡോ ഉള്ളടക്കം വീണ്ടെടുക്കുക"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"നിങ്ങൾ സംവദിക്കുന്ന ഒരു വിൻഡോയുടെ ഉള്ളടക്കം പരിശോധിക്കുക."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"സ്‌പർശനം വഴി പര്യവേക്ഷണം ചെയ്യുക, ഓണാക്കുക"</string>
@@ -2024,4 +2021,6 @@
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> ഫയലുകൾ</item>
       <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> + <xliff:g id="COUNT_1">%d</xliff:g> ഫയൽ</item>
     </plurals>
+    <!-- no translation found for chooser_no_direct_share_targets (997970693708458895) -->
+    <skip />
 </resources>
