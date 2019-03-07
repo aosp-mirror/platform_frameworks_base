@@ -24,10 +24,11 @@ import static org.junit.Assert.fail;
 
 import android.net.LinkProperties.CompareResult;
 import android.net.LinkProperties.ProvisioningChange;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
 import android.system.OsConstants;
 import android.util.ArraySet;
+
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.util.TestUtils;
 

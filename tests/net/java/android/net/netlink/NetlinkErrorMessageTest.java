@@ -16,9 +16,10 @@
 
 package android.net.netlink;
 
-import static android.net.netlink.StructNlMsgHdr.NLM_F_REQUEST;
 import static android.net.netlink.StructNlMsgHdr.NLM_F_ACK;
 import static android.net.netlink.StructNlMsgHdr.NLM_F_REPLACE;
+import static android.net.netlink.StructNlMsgHdr.NLM_F_REQUEST;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -27,18 +28,17 @@ import android.net.netlink.NetlinkConstants;
 import android.net.netlink.NetlinkErrorMessage;
 import android.net.netlink.NetlinkMessage;
 import android.net.netlink.StructNlMsgErr;
-import android.support.test.runner.AndroidJUnit4;
-import android.support.test.filters.SmallTest;
-import android.util.Log;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-
-import org.junit.runner.RunWith;
-import org.junit.Test;
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import libcore.util.HexEncoding;
 
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest

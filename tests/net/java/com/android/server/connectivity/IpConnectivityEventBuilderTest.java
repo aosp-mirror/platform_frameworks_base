@@ -16,51 +16,43 @@
 
 package com.android.server.connectivity;
 
-import static android.net.metrics.INetdEventListener.EVENT_GETADDRINFO;
-import static android.net.metrics.INetdEventListener.EVENT_GETHOSTBYNAME;
-import static com.android.server.connectivity.MetricsTestUtil.aBool;
-import static com.android.server.connectivity.MetricsTestUtil.aByteArray;
 import static com.android.server.connectivity.MetricsTestUtil.aLong;
 import static com.android.server.connectivity.MetricsTestUtil.aString;
 import static com.android.server.connectivity.MetricsTestUtil.aType;
 import static com.android.server.connectivity.MetricsTestUtil.anInt;
-import static com.android.server.connectivity.MetricsTestUtil.anIntArray;
-import static com.android.server.connectivity.MetricsTestUtil.b;
 import static com.android.server.connectivity.MetricsTestUtil.describeIpEvent;
-import static com.android.server.connectivity.metrics.nano.IpConnectivityLogClass.IpConnectivityLog;
 import static com.android.server.connectivity.metrics.nano.IpConnectivityLogClass.BLUETOOTH;
 import static com.android.server.connectivity.metrics.nano.IpConnectivityLogClass.CELLULAR;
-import static com.android.server.connectivity.metrics.nano.IpConnectivityLogClass.ETHERNET;
+import static com.android.server.connectivity.metrics.nano.IpConnectivityLogClass.IpConnectivityLog;
 import static com.android.server.connectivity.metrics.nano.IpConnectivityLogClass.MULTIPLE;
 import static com.android.server.connectivity.metrics.nano.IpConnectivityLogClass.WIFI;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import android.net.ConnectivityMetricsEvent;
 import android.net.metrics.ApfProgramEvent;
 import android.net.metrics.ApfStats;
-import android.net.metrics.ConnectStats;
 import android.net.metrics.DefaultNetworkEvent;
 import android.net.metrics.DhcpClientEvent;
 import android.net.metrics.DhcpErrorEvent;
-import android.net.metrics.DnsEvent;
-import android.net.metrics.DnsEvent;
 import android.net.metrics.IpManagerEvent;
 import android.net.metrics.IpReachabilityEvent;
 import android.net.metrics.NetworkEvent;
 import android.net.metrics.RaEvent;
 import android.net.metrics.ValidationProbeEvent;
 import android.net.metrics.WakeupStats;
-import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
+
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.connectivity.metrics.nano.IpConnectivityLogClass.IpConnectivityEvent;
 
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
 import java.util.Arrays;
 import java.util.List;
-
-import org.junit.runner.RunWith;
-import org.junit.Test;
 
 // TODO: instead of comparing textpb to textpb, parse textpb and compare proto to proto.
 @RunWith(AndroidJUnit4.class)
