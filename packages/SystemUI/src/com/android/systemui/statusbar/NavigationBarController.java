@@ -23,7 +23,6 @@ import static com.android.systemui.SysUiServiceProvider.getComponent;
 
 import android.content.Context;
 import android.hardware.display.DisplayManager;
-import android.hardware.display.DisplayManager.DisplayListener;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.util.Log;
@@ -50,7 +49,7 @@ import javax.inject.Singleton;
 
 /** A controller to handle navigation bars. */
 @Singleton
-public class NavigationBarController implements DisplayListener, Callbacks {
+public class NavigationBarController implements Callbacks {
 
     private static final String TAG = NavigationBarController.class.getName();
 
@@ -66,20 +65,13 @@ public class NavigationBarController implements DisplayListener, Callbacks {
         mContext = context;
         mHandler = handler;
         mDisplayManager = (DisplayManager) mContext.getSystemService(Context.DISPLAY_SERVICE);
-        mDisplayManager.registerDisplayListener(this, mHandler);
         getComponent(mContext, CommandQueue.class).addCallback(this);
     }
-
-    @Override
-    public void onDisplayAdded(int displayId) { }
 
     @Override
     public void onDisplayRemoved(int displayId) {
         removeNavigationBar(displayId);
     }
-
-    @Override
-    public void onDisplayChanged(int displayId) { }
 
     @Override
     public void onDisplayReady(int displayId) {

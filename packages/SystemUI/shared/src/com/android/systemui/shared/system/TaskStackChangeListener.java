@@ -18,6 +18,7 @@ package com.android.systemui.shared.system;
 
 import android.app.ActivityManager.RunningTaskInfo;
 import android.content.ComponentName;
+import android.os.IBinder;
 import android.os.UserHandle;
 import android.util.Log;
 
@@ -73,6 +74,7 @@ public abstract class TaskStackChangeListener {
     }
 
     public void onActivityRequestedOrientationChanged(int taskId, int requestedOrientation) { }
+    public void onSizeCompatModeActivityChanged(int displayId, IBinder activityToken) { }
 
     /**
      * Checks that the current user matches the process. Since
