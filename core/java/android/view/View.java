@@ -5969,20 +5969,28 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * this {@link View}.
      */
     @NonNull
-    public List<Integer> getAttributeResolutionStack(@AttrRes int attribute) {
-        ArrayList<Integer> stack = new ArrayList<>();
-        if (!sDebugViewAttributes || mAttributeResolutionStacks == null) {
-            return stack;
-        }
-        if (mSourceLayoutId != ID_NULL) {
-            stack.add(mSourceLayoutId);
+    public int[] getAttributeResolutionStack(@AttrRes int attribute) {
+        if (!sDebugViewAttributes
+                || mAttributeResolutionStacks == null
+                || mAttributeResolutionStacks.get(attribute) == null) {
+            return new int[0];
         }
         int[] attributeResolutionStack = mAttributeResolutionStacks.get(attribute);
-        if (attributeResolutionStack == null) {
-            return stack;
+        int stackSize = attributeResolutionStack.length;
+        if (mSourceLayoutId != ID_NULL) {
+            stackSize++;
+        }
+
+        int currentIndex = 0;
+        int[] stack = new int[stackSize];
+
+        if (mSourceLayoutId != ID_NULL) {
+            stack[currentIndex] = mSourceLayoutId;
+            currentIndex++;
         }
         for (int i = 0; i < attributeResolutionStack.length; i++) {
-            stack.add(attributeResolutionStack[i]);
+            stack[currentIndex] = attributeResolutionStack[i];
+            currentIndex++;
         }
         return stack;
     }
@@ -6133,7 +6141,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     /**
      * Stores debugging information about attributes. This should be called in a constructor by
-     * every custom {@link View} that uses a custom styleable.
+     * every custom {@link View} that uses a custom styleable. If the custom view does not call it,
+     * then the custom attributes used by this view will not be visible in layout inspection tools.
+     *
      *  @param context Context under which this view is created.
      * @param styleable A reference to styleable array R.styleable.Foo
      * @param attrs AttributeSet used to construct this view.
