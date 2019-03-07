@@ -25,6 +25,7 @@
 #include "link/ReferenceLinker.h"
 #include "process/IResourceTableConsumer.h"
 #include "process/SymbolTable.h"
+#include "trace/TraceBuffer.h"
 #include "util/Util.h"
 #include "xml/XmlDom.h"
 
@@ -151,6 +152,7 @@ class XmlVisitor : public xml::PackageAwareVisitor {
 }  // namespace
 
 bool XmlReferenceLinker::Consume(IAaptContext* context, xml::XmlResource* resource) {
+  TRACE_NAME("XmlReferenceLinker::Consume");
   CallSite callsite{resource->file.name.package};
 
   std::string out_name = resource->file.name.entry;

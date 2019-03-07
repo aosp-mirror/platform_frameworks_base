@@ -23,6 +23,7 @@
 #include "ResourceTable.h"
 #include "SdkConstants.h"
 #include "ValueVisitor.h"
+#include "trace/TraceBuffer.h"
 
 using android::ConfigDescription;
 
@@ -70,6 +71,7 @@ ApiVersion FindNextApiVersionForConfig(const ResourceEntry* entry,
 }
 
 bool AutoVersioner::Consume(IAaptContext* context, ResourceTable* table) {
+  TRACE_NAME("AutoVersioner::Consume");
   for (auto& package : table->packages) {
     for (auto& type : package->types) {
       if (type->type != ResourceType::kStyle) {

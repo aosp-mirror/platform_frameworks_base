@@ -25,6 +25,7 @@
 #include "android-base/utf8.h"
 #include "androidfw/StringPiece.h"
 
+#include "trace/TraceBuffer.h"
 #include "util/Util.h"
 
 using android::base::StringPrintf;
@@ -178,6 +179,7 @@ void Command::Usage(std::ostream* out) {
 }
 
 int Command::Execute(const std::vector<StringPiece>& args, std::ostream* out_error) {
+  TRACE_NAME_ARGS("Command::Execute", args);
   std::vector<std::string> file_args;
 
   for (size_t i = 0; i < args.size(); i++) {

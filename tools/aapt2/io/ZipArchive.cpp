@@ -20,6 +20,7 @@
 #include "ziparchive/zip_archive.h"
 
 #include "Source.h"
+#include "trace/TraceBuffer.h"
 #include "util/Files.h"
 #include "util/Util.h"
 
@@ -93,6 +94,7 @@ ZipFileCollection::ZipFileCollection() : handle_(nullptr) {}
 
 std::unique_ptr<ZipFileCollection> ZipFileCollection::Create(
     const StringPiece& path, std::string* out_error) {
+  TRACE_CALL();
   constexpr static const int32_t kEmptyArchive = -6;
 
   std::unique_ptr<ZipFileCollection> collection =
