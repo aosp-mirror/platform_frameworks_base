@@ -718,6 +718,36 @@ public class BinderCallsStatsTest {
         assertEquals(2, callStats.recordedCallCount);
     }
 
+    @Test
+    public void testTrackScreenInteractiveDisabled_sampling() {
+        TestBinderCallsStats bcs = new TestBinderCallsStats();
+        bcs.setSamplingInterval(2);
+        bcs.setTrackScreenInteractive(false);
+        Binder binder = new Binder();
+
+        mDeviceState.setScreenInteractive(false);
+        CallSession callSession = bcs.callStarted(binder, 1, WORKSOURCE_UID);
+        bcs.time += 10;
+        bcs.callEnded(callSession, REQUEST_SIZE, REPLY_SIZE, WORKSOURCE_UID);
+
+        mDeviceState.setScreenInteractive(true);
+        callSession = bcs.callStarted(binder, 1, WORKSOURCE_UID);
+        bcs.time += 1000;  // shoud be ignored.
+        bcs.callEnded(callSession, REQUEST_SIZE, REPLY_SIZE, WORKSOURCE_UID);
+
+        SparseArray<BinderCallsStats.UidEntry> uidEntries = bcs.getUidEntries();
+        assertEquals(1, uidEntries.size());
+        BinderCallsStats.UidEntry uidEntry = uidEntries.get(WORKSOURCE_UID);
+        Assert.assertNotNull(uidEntry);
+        assertEquals(2, uidEntry.callCount);
+
+        List<BinderCallsStats.CallStat> callStatsList = new ArrayList(uidEntry.getCallStatsList());
+        assertEquals(1, callStatsList.size());
+        BinderCallsStats.CallStat callStats = callStatsList.get(0);
+        assertEquals(false, callStats.screenInteractive);
+        assertEquals(2, callStats.callCount);
+        assertEquals(1, callStats.recordedCallCount);
+    }
 
     class TestBinderCallsStats extends BinderCallsStats {
         public int callingUid = CALLING_UID;

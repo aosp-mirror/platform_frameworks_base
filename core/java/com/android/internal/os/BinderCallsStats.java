@@ -212,7 +212,7 @@ public class BinderCallsStats implements BinderInternal.Observer {
                 // It helps to keep the memory usage down when sampling is enabled.
                 final CallStat callStat = uidEntry.get(
                         callingUid, s.binderClass, s.transactionCode,
-                        mDeviceState.isScreenInteractive());
+                        screenInteractive);
                 if (callStat != null) {
                     callStat.callCount++;
                 }
