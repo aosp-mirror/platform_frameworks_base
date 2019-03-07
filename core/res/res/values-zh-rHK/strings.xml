@@ -308,18 +308,15 @@
     <string name="permgrouplab_phone" msgid="5229115638567440675">"電話"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"撥打電話及管理通話"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"允許「<xliff:g id="APP_NAME">%1$s</xliff:g>」&lt;b&gt;&lt;/b&gt;撥打電話和管理通話嗎？"</string>
-    <!-- no translation found for permgrouplab_sensors (4838614103153567532) -->
-    <skip />
+    <string name="permgrouplab_sensors" msgid="4838614103153567532">"人體感應器"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"存取與您生命體徵相關的感應器資料"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"允許「<xliff:g id="APP_NAME">%1$s</xliff:g>」&lt;b&gt;&lt;/b&gt;存取與您身體機能相關的感應器資料嗎？"</string>
     <string name="permgrouplab_aural" msgid="965607064083134896">"音樂"</string>
     <string name="permgroupdesc_aural" msgid="4870189506255958055">"存取您的音樂"</string>
     <string name="permgrouprequest_aural" msgid="6787926123071735620">"要允許「&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;」存取您的音樂嗎？"</string>
-    <!-- no translation found for permgrouplab_visual (6477382108771145134) -->
-    <skip />
+    <string name="permgrouplab_visual" msgid="6477382108771145134">"相片和影片"</string>
     <string name="permgroupdesc_visual" msgid="3415827902566663546">"存取您的相片和影片"</string>
-    <!-- no translation found for permgrouprequest_visual (3043752127595243314) -->
-    <skip />
+    <string name="permgrouprequest_visual" msgid="3043752127595243314">"要允許「<xliff:g id="APP_NAME">%1$s</xliff:g>」&lt;b&gt;&lt;/b&gt;存取您的相片和影片 (包括標記的位置資訊) 嗎？"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"擷取視窗內容"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"檢查您使用中的視窗內容。"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"開啟「輕觸探索」功能"</string>
@@ -2023,4 +2020,6 @@
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> 個檔案</item>
       <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> + <xliff:g id="COUNT_1">%d</xliff:g> 個檔案</item>
     </plurals>
+    <!-- no translation found for chooser_no_direct_share_targets (997970693708458895) -->
+    <skip />
 </resources>

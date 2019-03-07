@@ -314,18 +314,15 @@
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefon"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"uskutečňování a spravování telefonních hovorů"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"Povolit aplikaci &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; uskutečňovat a spravovat telefonní hovory?"</string>
-    <!-- no translation found for permgrouplab_sensors (4838614103153567532) -->
-    <skip />
+    <string name="permgrouplab_sensors" msgid="4838614103153567532">"Tělesné senzory"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"přístup k datům ze snímačů vašich životních funkcí"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"Povolit aplikaci &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; přístup k údajům ze snímačů vašich životních funkcí?"</string>
     <string name="permgrouplab_aural" msgid="965607064083134896">"Hudba"</string>
     <string name="permgroupdesc_aural" msgid="4870189506255958055">"přístup k hudbě"</string>
     <string name="permgrouprequest_aural" msgid="6787926123071735620">"Povolit aplikaci &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; přístup k hudbě?"</string>
-    <!-- no translation found for permgrouplab_visual (6477382108771145134) -->
-    <skip />
+    <string name="permgrouplab_visual" msgid="6477382108771145134">"Fotky a videa"</string>
     <string name="permgroupdesc_visual" msgid="3415827902566663546">"přístup k fotkám a videím"</string>
-    <!-- no translation found for permgrouprequest_visual (3043752127595243314) -->
-    <skip />
+    <string name="permgrouprequest_visual" msgid="3043752127595243314">"Povolit aplikaci &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; přístup k fotkám a videím včetně označených míst?"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Načítat obsah oken"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Může prozkoumávat obsah oken, se kterými pracujete."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Zapnout funkci Prozkoumání dotykem"</string>
@@ -2095,4 +2092,6 @@
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> souborů</item>
       <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> + <xliff:g id="COUNT_1">%d</xliff:g> soubor</item>
     </plurals>
+    <!-- no translation found for chooser_no_direct_share_targets (997970693708458895) -->
+    <skip />
 </resources>

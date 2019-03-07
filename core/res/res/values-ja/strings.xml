@@ -308,18 +308,15 @@
     <string name="permgrouplab_phone" msgid="5229115638567440675">"電話"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"電話の発信と管理"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"電話の発信と管理を &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; に許可しますか？"</string>
-    <!-- no translation found for permgrouplab_sensors (4838614103153567532) -->
-    <skip />
+    <string name="permgrouplab_sensors" msgid="4838614103153567532">"ボディセンサー"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"バイタルサインに関するセンサーデータへのアクセス"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"バイタルサインに関するセンサーデータへのアクセスを &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; に許可しますか？"</string>
     <string name="permgrouplab_aural" msgid="965607064083134896">"音楽"</string>
     <string name="permgroupdesc_aural" msgid="4870189506255958055">"音楽へのアクセス"</string>
     <string name="permgrouprequest_aural" msgid="6787926123071735620">"音楽へのアクセスを &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; に許可しますか？"</string>
-    <!-- no translation found for permgrouplab_visual (6477382108771145134) -->
-    <skip />
+    <string name="permgrouplab_visual" msgid="6477382108771145134">"写真と動画"</string>
     <string name="permgroupdesc_visual" msgid="3415827902566663546">"写真と動画へのアクセス"</string>
-    <!-- no translation found for permgrouprequest_visual (3043752127595243314) -->
-    <skip />
+    <string name="permgrouprequest_visual" msgid="3043752127595243314">"タグ付けされた場所を含め、写真と動画へのアクセスを &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; に許可しますか？"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"ウィンドウコンテンツの取得"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"ユーザーがアクセスしているウィンドウのコンテンツを検査します。"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"タッチガイドの有効化"</string>
@@ -2023,4 +2020,6 @@
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g>、他 <xliff:g id="COUNT_3">%d</xliff:g> ファイル</item>
       <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g>、他 <xliff:g id="COUNT_1">%d</xliff:g> ファイル</item>
     </plurals>
+    <!-- no translation found for chooser_no_direct_share_targets (997970693708458895) -->
+    <skip />
 </resources>

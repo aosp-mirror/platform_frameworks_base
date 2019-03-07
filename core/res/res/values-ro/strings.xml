@@ -311,18 +311,15 @@
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefon"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"inițieze și să gestioneze apeluri telefonice"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"Permiteți &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; să inițieze și să gestioneze apeluri telefonice?"</string>
-    <!-- no translation found for permgrouplab_sensors (4838614103153567532) -->
-    <skip />
+    <string name="permgrouplab_sensors" msgid="4838614103153567532">"Senzori corporali"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"acceseze datele de la senzori despre semnele vitale"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"Permiteți &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; să acceseze datele de la senzori despre semnele dvs. vitale?"</string>
     <string name="permgrouplab_aural" msgid="965607064083134896">"Muzică"</string>
     <string name="permgroupdesc_aural" msgid="4870189506255958055">"accesați muzica"</string>
     <string name="permgrouprequest_aural" msgid="6787926123071735620">"Permiteți &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; să vă acceseze muzica?"</string>
-    <!-- no translation found for permgrouplab_visual (6477382108771145134) -->
-    <skip />
+    <string name="permgrouplab_visual" msgid="6477382108771145134">"Fotografii și videoclipuri"</string>
     <string name="permgroupdesc_visual" msgid="3415827902566663546">"accesați fotografiile și videoclipurile"</string>
-    <!-- no translation found for permgrouprequest_visual (3043752127595243314) -->
-    <skip />
+    <string name="permgrouprequest_visual" msgid="3043752127595243314">"Permiteți aplicației &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; să acceseze fotografiile și videoclipurile, inclusiv locațiile etichetate?"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Analizează conținutul ferestrei"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Inspectează conținutul unei ferestre cu care interacționați."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Activează funcția Explorați prin atingere"</string>
@@ -2059,4 +2056,6 @@
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> de fișiere</item>
       <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> + <xliff:g id="COUNT_1">%d</xliff:g> fișier</item>
     </plurals>
+    <!-- no translation found for chooser_no_direct_share_targets (997970693708458895) -->
+    <skip />
 </resources>

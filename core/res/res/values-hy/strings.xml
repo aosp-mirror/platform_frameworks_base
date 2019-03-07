@@ -308,18 +308,15 @@
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Հեռախոս"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"կատարել զանգեր և կառավարել զանգերը"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"Թույլ տա՞լ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; հավելվածին կատարել հեռախոսազանգեր և կառավարել դրանք:"</string>
-    <!-- no translation found for permgrouplab_sensors (4838614103153567532) -->
-    <skip />
+    <string name="permgrouplab_sensors" msgid="4838614103153567532">"Մարմնի տվիչներ"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"օգտագործել սենսորների տվյալները ձեր օրգանիզմի վիճակի մասին"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"Թույլ տա՞լ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; հավելվածին սենսորից ստանալ ձեր կենսագործունեության հիմնական տվյալները:"</string>
     <string name="permgrouplab_aural" msgid="965607064083134896">"Երաժշտություն"</string>
     <string name="permgroupdesc_aural" msgid="4870189506255958055">"երաժշտության հասանելիություն"</string>
     <string name="permgrouprequest_aural" msgid="6787926123071735620">"Հասանելի դարձնե՞լ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; հավելվածին ձեր երաժշտությունը:"</string>
-    <!-- no translation found for permgrouplab_visual (6477382108771145134) -->
-    <skip />
+    <string name="permgrouplab_visual" msgid="6477382108771145134">"Լուսանկարներ և տեսանյութեր"</string>
     <string name="permgroupdesc_visual" msgid="3415827902566663546">"լուսանկարների և տեսանյութերի հասանելիություն"</string>
-    <!-- no translation found for permgrouprequest_visual (3043752127595243314) -->
-    <skip />
+    <string name="permgrouprequest_visual" msgid="3043752127595243314">"Հասանելի դարձնե՞լ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; հավելվածին ձեր լուսանկարները, տեսանյութերը և տեղանշված վայրերը:"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Առբերել պատուհանի բովանդակությունը"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Վերլուծել գործող պատուհանի բովանդակությունը"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Միացնել Հպման միջոցով հետազոտումը"</string>
@@ -2024,4 +2021,6 @@
       <item quantity="one"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> ֆայլ</item>
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> ֆայլ</item>
     </plurals>
+    <!-- no translation found for chooser_no_direct_share_targets (997970693708458895) -->
+    <skip />
 </resources>

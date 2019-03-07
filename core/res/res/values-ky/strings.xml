@@ -308,18 +308,15 @@
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Телефон"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"телефон чалуу жана аларды башкаруу"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; колдонмосуна телефон чалууга жана чалууларды башкарууга уруксат берилсинби?"</string>
-    <!-- no translation found for permgrouplab_sensors (4838614103153567532) -->
-    <skip />
+    <string name="permgrouplab_sensors" msgid="4838614103153567532">"Дене сенсорлору"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"организмдин абалына көз салган сенсордун дайындарына мүмкүнчүлүк алуу"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; колдонмосуна организмдин абалына көз салган сенсордун дайындарын пайдаланууга уруксат берилсинби?"</string>
     <string name="permgrouplab_aural" msgid="965607064083134896">"Музыка"</string>
     <string name="permgroupdesc_aural" msgid="4870189506255958055">"музыкага кирүү мүмкүнчүлүгү"</string>
     <string name="permgrouprequest_aural" msgid="6787926123071735620">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; колдонмосуна музыканы пайдаланууга уруксат берилсинби?"</string>
-    <!-- no translation found for permgrouplab_visual (6477382108771145134) -->
-    <skip />
+    <string name="permgrouplab_visual" msgid="6477382108771145134">"Сүрөттөр жана видеолор"</string>
     <string name="permgroupdesc_visual" msgid="3415827902566663546">"сүрөттөр менен видеолорго кирүү мүмкүнчүлүгү"</string>
-    <!-- no translation found for permgrouprequest_visual (3043752127595243314) -->
-    <skip />
+    <string name="permgrouprequest_visual" msgid="3043752127595243314">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; колдонмосуна сүрөттөрүңүздү, видеолоруңузду, анын ичинде тегделген жайгашкан жерлериңизди көрүүгө уруксат бересизби?"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Терезедеги мазмунду алып турат"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Учурда ачылып турган терезедеги маалыматты талдайт."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"\"Сыйпалап изилдөө\" мүмкүнчүлүгүн иштетет"</string>
@@ -2025,4 +2022,6 @@
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> файл</item>
       <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> + <xliff:g id="COUNT_1">%d</xliff:g> файл</item>
     </plurals>
+    <!-- no translation found for chooser_no_direct_share_targets (997970693708458895) -->
+    <skip />
 </resources>
