@@ -232,7 +232,7 @@ public final class OverlayManagerService extends SystemService {
                     new File(Environment.getDataSystemDirectory(), "overlays.xml"), "overlays");
             mPackageManager = new PackageManagerHelper();
             mUserManager = UserManagerService.getInstance();
-            IdmapManager im = new IdmapManager(installer);
+            IdmapManager im = new IdmapManager(installer, mPackageManager);
             mSettings = new OverlayManagerSettings();
             mImpl = new OverlayManagerServiceImpl(mPackageManager, im, mSettings,
                     getDefaultOverlayPackages(), new OverlayChangeListener());

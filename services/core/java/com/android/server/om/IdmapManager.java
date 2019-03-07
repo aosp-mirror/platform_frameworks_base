@@ -36,6 +36,7 @@ import android.os.UserHandle;
 import android.util.Slog;
 
 import com.android.internal.os.BackgroundThread;
+import com.android.server.om.OverlayManagerServiceImpl.PackageManagerHelper;
 import com.android.server.pm.Installer;
 
 import java.io.File;
@@ -52,6 +53,7 @@ class IdmapManager {
     private static final boolean FEATURE_FLAG_IDMAP2 = true;
 
     private final Installer mInstaller;
+    private final PackageManagerHelper mPackageManager;
     private IIdmap2 mIdmap2Service;
 
     private static final boolean VENDOR_IS_Q_OR_LATER;
@@ -61,8 +63,9 @@ class IdmapManager {
         VENDOR_IS_Q_OR_LATER = value.equals("Q") || value.equals("q");
     }
 
-    IdmapManager(final Installer installer) {
+    IdmapManager(final Installer installer, final PackageManagerHelper packageManager) {
         mInstaller = installer;
+        mPackageManager = packageManager;
         if (FEATURE_FLAG_IDMAP2) {
             connectToIdmap2d();
         }
@@ -79,7 +82,7 @@ class IdmapManager {
         final String overlayPath = overlayPackage.applicationInfo.getBaseCodePath();
         try {
             if (FEATURE_FLAG_IDMAP2) {
-                int policies = determineFulfilledPolicies(overlayPackage);
+                int policies = determineFulfilledPolicies(targetPackage, overlayPackage, userId);
                 boolean enforce = enforceOverlayable(overlayPackage);
                 if (mIdmap2Service.verifyIdmap(overlayPath, policies, enforce, userId)) {
                     return true;
@@ -197,14 +200,18 @@ class IdmapManager {
      * Retrieves a bitmask for idmap2 that represents the policies the specified overlay fulfills.
      * @throws SecurityException if the overlay is not allowed to overlay any resource
      */
-    private int determineFulfilledPolicies(@NonNull final PackageInfo overlayPackage)
-            throws SecurityException {
+    private int determineFulfilledPolicies(@NonNull final PackageInfo targetPackage,
+            @NonNull final PackageInfo overlayPackage, int userId) throws SecurityException {
         final ApplicationInfo ai = overlayPackage.applicationInfo;
         final boolean overlayIsQOrLater = ai.targetSdkVersion >= VERSION_CODES.Q;
 
         int fulfilledPolicies = 0;
 
-        // TODO(b/119402606) : Add signature policy
+        // Overlay matches target signature
+        if (mPackageManager.signaturesMatching(targetPackage.packageName,
+                overlayPackage.packageName, userId)) {
+            fulfilledPolicies |= IIdmap2.POLICY_SIGNATURE;
+        }
 
         // Vendor partition (/vendor)
         if (ai.isVendor()) {
