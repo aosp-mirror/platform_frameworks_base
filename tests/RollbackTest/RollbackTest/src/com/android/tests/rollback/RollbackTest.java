@@ -40,6 +40,7 @@ import android.util.Log;
 
 import androidx.test.InstrumentationRegistry;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -455,6 +456,7 @@ public class RollbackTest {
     /**
      * Test rollback of apks involving splits.
      */
+    @Ignore("b/127520966 build issues with splits need to be sorted out")
     @Test
     public void testRollbackWithSplits() throws Exception {
         try {
