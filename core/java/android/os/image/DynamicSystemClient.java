@@ -13,12 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.content;
+package android.os.image;
 
+import android.annotation.BytesLong;
 import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -34,12 +40,28 @@ import java.lang.ref.WeakReference;
 import java.util.concurrent.Executor;
 
 /**
- * This class contains methods and constants used to start DynamicAndroid
- * installation, and a listener for progress update.
+ * <p>This class contains methods and constants used to start a {@code DynamicSystem} installation,
+ * and a listener for status updates.</p>
+ *
+ * <p>{@code DynamicSystem} allows user to run certified system images in a non destructive manner
+ * without needing to prior OEM unlock. While running in {@code DynamicSystem}, persitent storage
+ * for factory reset protection (FRP) remains unchanged. The new system is installed in a
+ * temporarily allocated partition. After the installation is completed, the device will be running
+ * in the new system on next reboot. Then, when the user reboots the device again, it will leave
+ * {@code DynamicSystem} and go back into the original system. Since the userdata for
+ * {@code DynamicSystem} is also newly created during the installation, running in
+ * {@code DynamicSystem} doesn't change user's app data.</p>
+ *
+ * <p>With {@link #setOnStatusChangedListener}, API users can register an
+ * {@link #OnStatusChangedListener} and get status updates and cause when the installation is
+ * started, stopped, or cancelled. It also sends progress updates during the installation. With
+ * {@link #start}, API users can start an installation with the {@link Uri} to a gzipped system
+ * image. The {@link Uri} can be a web URL or a content Uri to a local path.</p>
+ *
  * @hide
  */
 @SystemApi
-public class DynamicAndroidClient {
+public class DynamicSystemClient {
     /** @hide */
     @IntDef(prefix = { "STATUS_" }, value = {
             STATUS_UNKNOWN,
@@ -64,23 +86,23 @@ public class DynamicAndroidClient {
     @Retention(RetentionPolicy.SOURCE)
     public @interface StatusChangedCause {}
 
-    private static final String TAG = "DynAndroidClient";
+    private static final String TAG = "DynSystemClient";
 
     private static final long DEFAULT_USERDATA_SIZE = (10L << 30);
 
 
-    /** Listener for installation status update. */
+    /** Listener for installation status updates. */
     public interface OnStatusChangedListener {
         /**
          * This callback is called when installation status is changed, and when the
-         * client is {@link #bind} to DynamicAndroid installation service.
+         * client is {@link #bind} to {@code DynamicSystem} installation service.
          *
-         * @param status status code, also defined in {@code DynamicAndroidClient}.
-         * @param cause cause code, also defined in {@code DynamicAndroidClient}.
+         * @param status status code, also defined in {@code DynamicSystemClient}.
+         * @param cause cause code, also defined in {@code DynamicSystemClient}.
          * @param progress number of bytes installed.
          */
         void onStatusChanged(@InstallationStatus int status, @StatusChangedCause int cause,
-                long progress);
+                @BytesLong long progress);
     }
 
     /*
@@ -98,7 +120,7 @@ public class DynamicAndroidClient {
     /** Installation is finished but the user has not launched it. */
     public static final int STATUS_READY = 3;
 
-    /** Device is running in Dynamic Android. */
+    /** Device is running in {@code DynamicSystem}. */
     public static final int STATUS_IN_USE = 4;
 
     /*
@@ -113,7 +135,7 @@ public class DynamicAndroidClient {
     /** Status changed because installation is cancelled. */
     public static final int CAUSE_INSTALL_CANCELLED = 2;
 
-    /** Installation failed due to IOException. */
+    /** Installation failed due to {@code IOException}. */
     public static final int CAUSE_ERROR_IO = 3;
 
     /** Installation failed because the image URL source is not supported. */
@@ -141,7 +163,7 @@ public class DynamicAndroidClient {
     public static final int MSG_UNREGISTER_LISTENER = 2;
 
     /**
-     * Message for status update.
+     * Message for status updates.
      * @hide
      */
     public static final int MSG_POST_STATUS = 3;
@@ -150,7 +172,7 @@ public class DynamicAndroidClient {
      * Messages keys
      */
     /**
-     * Message key, for progress update.
+     * Message key, for progress updates.
      * @hide
      */
     public static final String KEY_INSTALLED_SIZE = "KEY_INSTALLED_SIZE";
@@ -163,14 +185,14 @@ public class DynamicAndroidClient {
      * @hide
      */
     public static final String ACTION_START_INSTALL =
-            "android.content.action.START_INSTALL";
+            "android.os.image.action.START_INSTALL";
 
     /**
-     * Intent action: notify user if we are currently running in Dynamic Android.
+     * Intent action: notify user if we are currently running in {@code DynamicSystem}.
      * @hide
      */
     public static final String ACTION_NOTIFY_IF_IN_USE =
-            "android.content.action.NOTIFY_IF_IN_USE";
+            "android.os.image.action.NOTIFY_IF_IN_USE";
 
     /*
      * Intent Keys
@@ -195,16 +217,16 @@ public class DynamicAndroidClient {
 
 
     private static class IncomingHandler extends Handler {
-        private final WeakReference<DynamicAndroidClient> mWeakClient;
+        private final WeakReference<DynamicSystemClient> mWeakClient;
 
-        IncomingHandler(DynamicAndroidClient service) {
+        IncomingHandler(DynamicSystemClient service) {
             super(Looper.getMainLooper());
             mWeakClient = new WeakReference<>(service);
         }
 
         @Override
         public void handleMessage(Message msg) {
-            DynamicAndroidClient service = mWeakClient.get();
+            DynamicSystemClient service = mWeakClient.get();
 
             if (service != null) {
                 service.handleMessage(msg);
@@ -212,9 +234,9 @@ public class DynamicAndroidClient {
         }
     }
 
-    private class DynAndroidServiceConnection implements ServiceConnection {
+    private class DynSystemServiceConnection implements ServiceConnection {
         public void onServiceConnected(ComponentName className, IBinder service) {
-            Slog.v(TAG, "DynAndroidService connected");
+            Slog.v(TAG, "DynSystemService connected");
 
             mService = new Messenger(service);
 
@@ -232,13 +254,13 @@ public class DynamicAndroidClient {
         }
 
         public void onServiceDisconnected(ComponentName className) {
-            Slog.v(TAG, "DynAndroidService disconnected");
+            Slog.v(TAG, "DynSystemService disconnected");
             mService = null;
         }
     }
 
     private final Context mContext;
-    private final DynAndroidServiceConnection mConnection;
+    private final DynSystemServiceConnection mConnection;
     private final Messenger mMessenger;
 
     private boolean mBound;
@@ -247,12 +269,16 @@ public class DynamicAndroidClient {
     private Messenger mService;
 
     /**
+     * Create a new {@code DynamicSystem} client.
+     *
+     * @param context a {@link Context} will be used to bind the installation service.
+     *
      * @hide
      */
     @SystemApi
-    public DynamicAndroidClient(@NonNull Context context) {
+    public DynamicSystemClient(@NonNull Context context) {
         mContext = context;
-        mConnection = new DynAndroidServiceConnection();
+        mConnection = new DynSystemServiceConnection();
         mMessenger = new Messenger(new IncomingHandler(this));
     }
 
@@ -261,8 +287,8 @@ public class DynamicAndroidClient {
      * the executor.
      */
     public void setOnStatusChangedListener(
-            @NonNull OnStatusChangedListener listener,
-            @NonNull @CallbackExecutor Executor executor) {
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull OnStatusChangedListener listener) {
         mListener = listener;
         mExecutor = executor;
     }
@@ -278,12 +304,15 @@ public class DynamicAndroidClient {
     }
 
     /**
-     * Bind to DynamicAndroidInstallationService.
+     * Bind to {@code DynamicSystem} installation service. Binding to the installation service
+     * allows it to send status updates to {@link #OnStatusChangedListener}. It is recommanded
+     * to bind before calling {@link #start} and get status updates.
      */
+    @RequiresPermission(android.Manifest.permission.MANAGE_DYNAMIC_SYSTEM)
     public void bind() {
         Intent intent = new Intent();
-        intent.setClassName("com.android.dynandroid",
-                "com.android.dynandroid.DynamicAndroidInstallationService");
+        intent.setClassName("com.android.dynsystem",
+                "com.android.dynsystem.DynamicSystemInstallationService");
 
         mContext.bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
 
@@ -291,8 +320,10 @@ public class DynamicAndroidClient {
     }
 
     /**
-     * Unbind from DynamicAndroidInstallationService.
+     * Unbind from {@code DynamicSystem} installation service. Unbinding from the installation
+     * service stops it from sending following status updates.
      */
+    @RequiresPermission(android.Manifest.permission.MANAGE_DYNAMIC_SYSTEM)
     public void unbind() {
         if (!mBound) {
             return;
@@ -315,27 +346,40 @@ public class DynamicAndroidClient {
     }
 
     /**
-     * Start installing DynamicAndroid from URL with default userdata size.
+     * Start installing {@code DynamicSystem} from URL with default userdata size.
+     *
+     * Calling this function will first start an Activity to confirm device credential, using
+     * {@link KeyguardManager}. If it's confirmed, the installation service will be started.
+     *
+     * This function doesn't require prior calling {@link #bind}.
      *
      * @param systemUrl A network URL or a file URL to system image.
      * @param systemSize size of system image.
      */
-    public void start(String systemUrl, long systemSize) {
+    @RequiresPermission(android.Manifest.permission.MANAGE_DYNAMIC_SYSTEM)
+    public void start(@NonNull String systemUrl, @BytesLong long systemSize) {
         start(systemUrl, systemSize, DEFAULT_USERDATA_SIZE);
     }
 
     /**
-     * Start installing DynamicAndroid from URL.
+     * Start installing {@code DynamicSystem} from URL.
+     *
+     * Calling this function will first start an Activity to confirm device credential, using
+     * {@link KeyguardManager}. If it's confirmed, the installation service will be started.
+     *
+     * This function doesn't require prior calling {@link #bind}.
      *
      * @param systemUrl A network URL or a file URL to system image.
      * @param systemSize size of system image.
      * @param userdataSize bytes reserved for userdata.
      */
-    public void start(String systemUrl, long systemSize, long userdataSize) {
+    @RequiresPermission(android.Manifest.permission.MANAGE_DYNAMIC_SYSTEM)
+    public void start(@NonNull String systemUrl, @BytesLong long systemSize,
+            @BytesLong long userdataSize) {
         Intent intent = new Intent();
 
-        intent.setClassName("com.android.dynandroid",
-                "com.android.dynandroid.VerificationActivity");
+        intent.setClassName("com.android.dynsystem",
+                "com.android.dynsystem.VerificationActivity");
 
         intent.setAction(ACTION_START_INSTALL);
 

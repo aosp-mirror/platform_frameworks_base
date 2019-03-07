@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-package com.android.dynandroid;
+package com.android.dynsystem;
 
-import static android.content.DynamicAndroidClient.KEY_SYSTEM_SIZE;
-import static android.content.DynamicAndroidClient.KEY_SYSTEM_URL;
-import static android.content.DynamicAndroidClient.KEY_USERDATA_SIZE;
+import static android.os.image.DynamicSystemClient.KEY_SYSTEM_SIZE;
+import static android.os.image.DynamicSystemClient.KEY_SYSTEM_URL;
+import static android.os.image.DynamicSystemClient.KEY_USERDATA_SIZE;
 
 import android.app.Activity;
 import android.app.KeyguardManager;
 import android.content.Context;
-import android.content.DynamicAndroidClient;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.UserHandle;
+import android.os.image.DynamicSystemClient;
 import android.util.Log;
 
 
@@ -88,8 +88,8 @@ public class VerificationActivity extends Activity {
         sVerifiedUrl = url;
 
         // start service
-        Intent intent = new Intent(this, DynamicAndroidInstallationService.class);
-        intent.setAction(DynamicAndroidClient.ACTION_START_INSTALL);
+        Intent intent = new Intent(this, DynamicSystemInstallationService.class);
+        intent.setAction(DynamicSystemClient.ACTION_START_INSTALL);
         intent.putExtra(KEY_SYSTEM_URL, url);
         intent.putExtra(KEY_SYSTEM_SIZE, systemSize);
         intent.putExtra(KEY_USERDATA_SIZE, userdataSize);

@@ -1849,8 +1849,8 @@
     <permission android:name="android.permission.HARDWARE_TEST"
         android:protectionLevel="signature" />
 
-    <!-- @hide Allows an application to manage DynamicAndroid image -->
-    <permission android:name="android.permission.MANAGE_DYNAMIC_ANDROID"
+    <!-- @hide Allows an application to manage DynamicSystem image -->
+    <permission android:name="android.permission.MANAGE_DYNAMIC_SYSTEM"
         android:protectionLevel="signature" />
 
     <!-- @SystemApi Allows access to Broadcast Radio

@@ -16,28 +16,28 @@
 
 package com.android.server;
 
-import android.os.IDynamicAndroidService;
 import android.os.ServiceManager;
+import android.os.image.IDynamicSystemService;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.LargeTest;
 
-public class DynamicAndroidServiceTest extends AndroidTestCase {
-    private static final String TAG = "DynamicAndroidServiceTests";
-    private IDynamicAndroidService mService;
+public class DynamicSystemServiceTest extends AndroidTestCase {
+    private static final String TAG = "DynamicSystemServiceTests";
+    private IDynamicSystemService mService;
 
     @Override
     protected void setUp() throws Exception {
         mService =
-                IDynamicAndroidService.Stub.asInterface(
-                        ServiceManager.getService("dynamic_android"));
+                IDynamicSystemService.Stub.asInterface(
+                        ServiceManager.getService("dynamic_system"));
     }
 
     @LargeTest
     public void test1() {
-        assertTrue("dynamic_android service available", mService != null);
+        assertTrue("dynamic_system service available", mService != null);
         try {
             mService.startInstallation(1 << 20, 8 << 30);
-            fail("DynamicAndroidService did not throw SecurityException as expected");
+            fail("DynamicSystemService did not throw SecurityException as expected");
         } catch (SecurityException e) {
             // expected
         } catch (Exception e) {

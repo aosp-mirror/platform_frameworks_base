@@ -12,14 +12,14 @@
     <!-- password page description [CHAR LIMIT=128] -->
     <string name="keyguard_description">Please enter your password and continue to AndroidOnTap installation</string>
 
-    <!-- Displayed on notification: DynAndroid installation is completed [CHAR LIMIT=128] -->
+    <!-- Displayed on notification: AndroidOnTap installation is completed [CHAR LIMIT=128] -->
     <string name="notification_install_completed">New system is ready, you can reboot into it or discard it.</string>
-    <!-- Displayed on notification: DynAndroid installation is in progress [CHAR LIMIT=128] -->
+    <!-- Displayed on notification: AndroidOnTap installation is in progress [CHAR LIMIT=128] -->
     <string name="notification_install_inprogress">Installation is in progress.</string>
-    <!-- Displayed on notification: DynAndroid installation is in progress [CHAR LIMIT=128] -->
+    <!-- Displayed on notification: AndroidOnTap installation is in progress [CHAR LIMIT=128] -->
     <string name="notification_install_failed">Installation Failed.</string>
     <!-- Displayed on notification: We are running in AndroidOnTap [CHAR LIMIT=128] -->
-    <string name="notification_dynandroid_in_use">We are running in AndroidOnTap.</string>
+    <string name="notification_dynsystem_in_use">We are running in AndroidOnTap.</string>
 
     <!-- Action on notification: Cancel installation [CHAR LIMIT=16] -->
     <string name="notification_action_cancel">Cancel</string>
@@ -28,11 +28,11 @@
     <!-- Action on notification: Uninstall AndroidOnTap [CHAR LIMIT=16] -->
     <string name="notification_action_uninstall">Uninstall</string>
     <!-- Action on notification: Reboot to AndroidOnTap [CHAR LIMIT=16] -->
-    <string name="notification_action_reboot_to_dynandroid">Reboot</string>
+    <string name="notification_action_reboot_to_dynsystem">Reboot</string>
 
-    <!-- Toast when installed DynamicAndroid is discarded [CHAR LIMIT=64] -->
-    <string name="toast_dynandroid_discarded">Installed AndroidOnTap is discarded.</string>
-    <!-- Toast when we fail to launch into DynamicAndroid [CHAR LIMIT=64] -->
-    <string name="toast_failed_to_reboot_to_dynandroid">Failed to reboot into AndroidOnTap.</string>
+    <!-- Toast when installed AndroidOnTap is discarded [CHAR LIMIT=64] -->
+    <string name="toast_dynsystem_discarded">Installed AndroidOnTap is discarded.</string>
+    <!-- Toast when we fail to launch into AndroidOnTap [CHAR LIMIT=64] -->
+    <string name="toast_failed_to_reboot_to_dynsystem">Failed to reboot into AndroidOnTap.</string>
 
 </resources>

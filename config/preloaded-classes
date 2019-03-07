@@ -2724,7 +2724,6 @@ android.os.DeviceIdleManager
 android.os.DropBoxManager$Entry$1
 android.os.DropBoxManager$Entry
 android.os.DropBoxManager
-android.os.DynamicAndroidManager
 android.os.Environment$UserEnvironment
 android.os.Environment
 android.os.EventLogTags
@@ -2909,6 +2908,8 @@ android.os.health.HealthStatsParceler
 android.os.health.SystemHealthManager
 android.os.health.TimerStat$1
 android.os.health.TimerStat
+android.os.image.DynamicSystemClient
+android.os.image.DynamicSystemManager
 android.os.storage.IObbActionListener$Stub
 android.os.storage.IObbActionListener
 android.os.storage.IStorageManager$Stub$Proxy

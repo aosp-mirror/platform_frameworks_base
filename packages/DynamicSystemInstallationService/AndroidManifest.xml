@@ -1,10 +1,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-        package="com.android.dynandroid"
+        package="com.android.dynsystem"
         android:sharedUserId="android.uid.system">
 
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.MANAGE_DYNAMIC_ANDROID" />
+    <uses-permission android:name="android.permission.MANAGE_DYNAMIC_SYSTEM" />
     <uses-permission android:name="android.permission.REBOOT" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
@@ -13,24 +13,24 @@
         android:label="@string/app_name">
 
         <service
-            android:name=".DynamicAndroidInstallationService"
+            android:name=".DynamicSystemInstallationService"
             android:enabled="true"
             android:exported="true"
-            android:permission="android.permission.MANAGE_DYNAMIC_ANDROID"
-            android:process=":dynandroid">
+            android:permission="android.permission.MANAGE_DYNAMIC_SYSTEM"
+            android:process=":dynsystem">
             <intent-filter>
-                <action android:name="android.content.action.NOTIFY_IF_IN_USE" />
+                <action android:name="android.os.image.action.NOTIFY_IF_IN_USE" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </service>
 
         <activity android:name=".VerificationActivity"
             android:exported="true"
-            android:permission="android.permission.MANAGE_DYNAMIC_ANDROID"
+            android:permission="android.permission.MANAGE_DYNAMIC_SYSTEM"
             android:theme="@android:style/Theme.Material.Light.Dialog.NoActionBar"
-            android:process=":dynandroid">
+            android:process=":dynsystem">
             <intent-filter>
-                <action android:name="android.content.action.START_INSTALL" />
+                <action android:name="android.os.image.action.START_INSTALL" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>

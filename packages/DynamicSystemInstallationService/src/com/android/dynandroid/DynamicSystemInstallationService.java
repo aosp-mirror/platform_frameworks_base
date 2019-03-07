@@ -14,28 +14,28 @@
  * limitations under the License.
  */
 
-package com.android.dynandroid;
+package com.android.dynsystem;
 
-import static android.content.DynamicAndroidClient.ACTION_NOTIFY_IF_IN_USE;
-import static android.content.DynamicAndroidClient.ACTION_START_INSTALL;
-import static android.content.DynamicAndroidClient.CAUSE_ERROR_EXCEPTION;
-import static android.content.DynamicAndroidClient.CAUSE_ERROR_INVALID_URL;
-import static android.content.DynamicAndroidClient.CAUSE_ERROR_IO;
-import static android.content.DynamicAndroidClient.CAUSE_INSTALL_CANCELLED;
-import static android.content.DynamicAndroidClient.CAUSE_INSTALL_COMPLETED;
-import static android.content.DynamicAndroidClient.CAUSE_NOT_SPECIFIED;
-import static android.content.DynamicAndroidClient.STATUS_IN_PROGRESS;
-import static android.content.DynamicAndroidClient.STATUS_IN_USE;
-import static android.content.DynamicAndroidClient.STATUS_NOT_STARTED;
-import static android.content.DynamicAndroidClient.STATUS_READY;
 import static android.os.AsyncTask.Status.FINISHED;
 import static android.os.AsyncTask.Status.PENDING;
 import static android.os.AsyncTask.Status.RUNNING;
+import static android.os.image.DynamicSystemClient.ACTION_NOTIFY_IF_IN_USE;
+import static android.os.image.DynamicSystemClient.ACTION_START_INSTALL;
+import static android.os.image.DynamicSystemClient.CAUSE_ERROR_EXCEPTION;
+import static android.os.image.DynamicSystemClient.CAUSE_ERROR_INVALID_URL;
+import static android.os.image.DynamicSystemClient.CAUSE_ERROR_IO;
+import static android.os.image.DynamicSystemClient.CAUSE_INSTALL_CANCELLED;
+import static android.os.image.DynamicSystemClient.CAUSE_INSTALL_COMPLETED;
+import static android.os.image.DynamicSystemClient.CAUSE_NOT_SPECIFIED;
+import static android.os.image.DynamicSystemClient.STATUS_IN_PROGRESS;
+import static android.os.image.DynamicSystemClient.STATUS_IN_USE;
+import static android.os.image.DynamicSystemClient.STATUS_NOT_STARTED;
+import static android.os.image.DynamicSystemClient.STATUS_READY;
 
-import static com.android.dynandroid.InstallationAsyncTask.RESULT_ERROR_EXCEPTION;
-import static com.android.dynandroid.InstallationAsyncTask.RESULT_ERROR_INVALID_URL;
-import static com.android.dynandroid.InstallationAsyncTask.RESULT_ERROR_IO;
-import static com.android.dynandroid.InstallationAsyncTask.RESULT_OK;
+import static com.android.dynsystem.InstallationAsyncTask.RESULT_ERROR_EXCEPTION;
+import static com.android.dynsystem.InstallationAsyncTask.RESULT_ERROR_INVALID_URL;
+import static com.android.dynsystem.InstallationAsyncTask.RESULT_ERROR_IO;
+import static com.android.dynsystem.InstallationAsyncTask.RESULT_OK;
 
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -43,16 +43,16 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
-import android.content.DynamicAndroidClient;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.DynamicAndroidManager;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.PowerManager;
 import android.os.RemoteException;
+import android.os.image.DynamicSystemClient;
+import android.os.image.DynamicSystemManager;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -60,31 +60,31 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
 /**
- * This class is the service in charge of DynamicAndroid installation.
+ * This class is the service in charge of DynamicSystem installation.
  * It also posts status to notification bar and wait for user's
  * cancel and confirm commnands.
  */
-public class DynamicAndroidInstallationService extends Service
+public class DynamicSystemInstallationService extends Service
         implements InstallationAsyncTask.InstallStatusListener {
 
-    private static final String TAG = "DynAndroidInstallationService";
+    private static final String TAG = "DynSystemInstallationService";
 
     /*
      * Intent actions
      */
     private static final String ACTION_CANCEL_INSTALL =
-            "com.android.dynandroid.ACTION_CANCEL_INSTALL";
+            "com.android.dynsystem.ACTION_CANCEL_INSTALL";
     private static final String ACTION_DISCARD_INSTALL =
-            "com.android.dynandroid.ACTION_DISCARD_INSTALL";
-    private static final String ACTION_REBOOT_TO_DYN_ANDROID =
-            "com.android.dynandroid.ACTION_REBOOT_TO_DYN_ANDROID";
+            "com.android.dynsystem.ACTION_DISCARD_INSTALL";
+    private static final String ACTION_REBOOT_TO_DYN_SYSTEM =
+            "com.android.dynsystem.ACTION_REBOOT_TO_DYN_SYSTEM";
     private static final String ACTION_REBOOT_TO_NORMAL =
-            "com.android.dynandroid.ACTION_REBOOT_TO_NORMAL";
+            "com.android.dynsystem.ACTION_REBOOT_TO_NORMAL";
 
     /*
      * For notification
      */
-    private static final String NOTIFICATION_CHANNEL_ID = "com.android.dynandroid";
+    private static final String NOTIFICATION_CHANNEL_ID = "com.android.dynsystem";
     private static final int NOTIFICATION_ID = 1;
 
     /*
@@ -97,15 +97,15 @@ public class DynamicAndroidInstallationService extends Service
     final Messenger mMessenger = new Messenger(new IncomingHandler(this));
 
     static class IncomingHandler extends Handler {
-        private final WeakReference<DynamicAndroidInstallationService> mWeakService;
+        private final WeakReference<DynamicSystemInstallationService> mWeakService;
 
-        IncomingHandler(DynamicAndroidInstallationService service) {
+        IncomingHandler(DynamicSystemInstallationService service) {
             mWeakService = new WeakReference<>(service);
         }
 
         @Override
         public void handleMessage(Message msg) {
-            DynamicAndroidInstallationService service = mWeakService.get();
+            DynamicSystemInstallationService service = mWeakService.get();
 
             if (service != null) {
                 service.handleMessage(msg);
@@ -113,7 +113,7 @@ public class DynamicAndroidInstallationService extends Service
         }
     }
 
-    private DynamicAndroidManager mDynAndroid;
+    private DynamicSystemManager mDynSystem;
     private NotificationManager mNM;
 
     private long mSystemSize;
@@ -130,7 +130,7 @@ public class DynamicAndroidInstallationService extends Service
 
         prepareNotification();
 
-        mDynAndroid = (DynamicAndroidManager) getSystemService(Context.DYNAMIC_ANDROID_SERVICE);
+        mDynSystem = (DynamicSystemManager) getSystemService(Context.DYNAMIC_SYSTEM_SERVICE);
     }
 
     @Override
@@ -156,8 +156,8 @@ public class DynamicAndroidInstallationService extends Service
             executeCancelCommand();
         } else if (ACTION_DISCARD_INSTALL.equals(action)) {
             executeDiscardCommand();
-        } else if (ACTION_REBOOT_TO_DYN_ANDROID.equals(action)) {
-            executeRebootToDynAndroidCommand();
+        } else if (ACTION_REBOOT_TO_DYN_SYSTEM.equals(action)) {
+            executeRebootToDynSystemCommand();
         } else if (ACTION_REBOOT_TO_NORMAL.equals(action)) {
             executeRebootToNormalCommand();
         } else if (ACTION_NOTIFY_IF_IN_USE.equals(action)) {
@@ -215,17 +215,17 @@ public class DynamicAndroidInstallationService extends Service
             return;
         }
 
-        if (isInDynamicAndroid()) {
-            Log.e(TAG, "We are already running in DynamicAndroid");
+        if (isInDynamicSystem()) {
+            Log.e(TAG, "We are already running in DynamicSystem");
             return;
         }
 
-        String url = intent.getStringExtra(DynamicAndroidClient.KEY_SYSTEM_URL);
-        mSystemSize = intent.getLongExtra(DynamicAndroidClient.KEY_SYSTEM_SIZE, 0);
-        mUserdataSize = intent.getLongExtra(DynamicAndroidClient.KEY_USERDATA_SIZE, 0);
+        String url = intent.getStringExtra(DynamicSystemClient.KEY_SYSTEM_URL);
+        mSystemSize = intent.getLongExtra(DynamicSystemClient.KEY_SYSTEM_SIZE, 0);
+        mUserdataSize = intent.getLongExtra(DynamicSystemClient.KEY_USERDATA_SIZE, 0);
 
         mInstallTask = new InstallationAsyncTask(
-                url, mSystemSize, mUserdataSize, mDynAndroid, this);
+                url, mSystemSize, mUserdataSize, mDynSystem, this);
 
         mInstallTask.execute();
 
@@ -251,7 +251,7 @@ public class DynamicAndroidInstallationService extends Service
     }
 
     private void executeDiscardCommand() {
-        if (isInDynamicAndroid()) {
+        if (isInDynamicSystem()) {
             Log.e(TAG, "We are now running in AOT, please reboot to normal system first");
             return;
         }
@@ -262,16 +262,16 @@ public class DynamicAndroidInstallationService extends Service
         }
 
         Toast.makeText(this,
-                getString(R.string.toast_dynandroid_discarded),
+                getString(R.string.toast_dynsystem_discarded),
                 Toast.LENGTH_LONG).show();
 
         resetTaskAndStop();
         postStatus(STATUS_NOT_STARTED, CAUSE_INSTALL_CANCELLED);
 
-        mDynAndroid.remove();
+        mDynSystem.remove();
     }
 
-    private void executeRebootToDynAndroidCommand() {
+    private void executeRebootToDynSystemCommand() {
         if (mInstallTask == null || mInstallTask.getStatus() != FINISHED) {
             Log.e(TAG, "Trying to reboot to AOT while there is no complete installation");
             return;
@@ -282,10 +282,10 @@ public class DynamicAndroidInstallationService extends Service
             mNM.cancel(NOTIFICATION_ID);
 
             Toast.makeText(this,
-                    getString(R.string.toast_failed_to_reboot_to_dynandroid),
+                    getString(R.string.toast_failed_to_reboot_to_dynsystem),
                     Toast.LENGTH_LONG).show();
 
-            mDynAndroid.remove();
+            mDynSystem.remove();
 
             return;
         }
@@ -293,12 +293,12 @@ public class DynamicAndroidInstallationService extends Service
         PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
 
         if (powerManager != null) {
-            powerManager.reboot("dynandroid");
+            powerManager.reboot("dynsystem");
         }
     }
 
     private void executeRebootToNormalCommand() {
-        if (!isInDynamicAndroid()) {
+        if (!isInDynamicSystem()) {
             Log.e(TAG, "It's already running in normal system.");
             return;
         }
@@ -346,7 +346,7 @@ public class DynamicAndroidInstallationService extends Service
     }
 
     private PendingIntent createPendingIntent(String action) {
-        Intent intent = new Intent(this, DynamicAndroidInstallationService.class);
+        Intent intent = new Intent(this, DynamicSystemInstallationService.class);
         intent.setAction(action);
         return PendingIntent.getService(this, 0, intent, 0);
     }
@@ -375,8 +375,8 @@ public class DynamicAndroidInstallationService extends Service
                 builder.setContentText(getString(R.string.notification_install_completed));
 
                 builder.addAction(new Notification.Action.Builder(
-                        null, getString(R.string.notification_action_reboot_to_dynandroid),
-                        createPendingIntent(ACTION_REBOOT_TO_DYN_ANDROID)).build());
+                        null, getString(R.string.notification_action_reboot_to_dynsystem),
+                        createPendingIntent(ACTION_REBOOT_TO_DYN_SYSTEM)).build());
 
                 builder.addAction(new Notification.Action.Builder(
                         null, getString(R.string.notification_action_discard),
@@ -385,7 +385,7 @@ public class DynamicAndroidInstallationService extends Service
                 break;
 
             case STATUS_IN_USE:
-                builder.setContentText(getString(R.string.notification_dynandroid_in_use));
+                builder.setContentText(getString(R.string.notification_dynsystem_in_use));
 
                 builder.addAction(new Notification.Action.Builder(
                         null, getString(R.string.notification_action_uninstall),
@@ -409,7 +409,7 @@ public class DynamicAndroidInstallationService extends Service
     }
 
     private boolean verifyRequest(Intent intent) {
-        String url = intent.getStringExtra(DynamicAndroidClient.KEY_SYSTEM_URL);
+        String url = intent.getStringExtra(DynamicSystemClient.KEY_SYSTEM_URL);
 
         return VerificationActivity.isVerified(url);
     }
@@ -443,16 +443,16 @@ public class DynamicAndroidInstallationService extends Service
     private void notifyOneClient(Messenger client, int status, int cause) throws RemoteException {
         Bundle bundle = new Bundle();
 
-        bundle.putLong(DynamicAndroidClient.KEY_INSTALLED_SIZE, mInstalledSize);
+        bundle.putLong(DynamicSystemClient.KEY_INSTALLED_SIZE, mInstalledSize);
 
         client.send(Message.obtain(null,
-                  DynamicAndroidClient.MSG_POST_STATUS, status, cause, bundle));
+                  DynamicSystemClient.MSG_POST_STATUS, status, cause, bundle));
     }
 
     private int getStatus() {
-        if (isInDynamicAndroid()) {
+        if (isInDynamicSystem()) {
             return STATUS_IN_USE;
-        } else if (isDynamicAndroidInstalled()) {
+        } else if (isDynamicSystemInstalled()) {
             return STATUS_READY;
         } else if (mInstallTask == null) {
             return STATUS_NOT_STARTED;
@@ -479,17 +479,17 @@ public class DynamicAndroidInstallationService extends Service
         }
     }
 
-    private boolean isInDynamicAndroid() {
-        return mDynAndroid.isInUse();
+    private boolean isInDynamicSystem() {
+        return mDynSystem.isInUse();
     }
 
-    private boolean isDynamicAndroidInstalled() {
-        return mDynAndroid.isInstalled();
+    private boolean isDynamicSystemInstalled() {
+        return mDynSystem.isInstalled();
     }
 
     void handleMessage(Message msg) {
         switch (msg.what) {
-            case DynamicAndroidClient.MSG_REGISTER_LISTENER:
+            case DynamicSystemClient.MSG_REGISTER_LISTENER:
                 try {
                     Messenger client = msg.replyTo;
 
@@ -505,7 +505,7 @@ public class DynamicAndroidInstallationService extends Service
                 }
 
                 break;
-            case DynamicAndroidClient.MSG_UNREGISTER_LISTENER:
+            case DynamicSystemClient.MSG_UNREGISTER_LISTENER:
                 mClients.remove(msg.replyTo);
                 break;
             default:

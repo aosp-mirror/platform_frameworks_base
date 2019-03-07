@@ -13,15 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.os;
+package android.os.image;
 
 import android.gsi.GsiProgress;
 
 /** {@hide} */
-interface IDynamicAndroidService
+interface IDynamicSystemService
 {
     /**
-     * Start DynamicAndroid installation. This call may take 60~90 seconds. The caller
+     * Start DynamicSystem installation. This call may take 60~90 seconds. The caller
      * may use another thread to call the getStartProgress() to get the progress.
      *
      * @param systemSize system size in bytes
@@ -53,26 +53,26 @@ interface IDynamicAndroidService
     boolean isInUse();
 
     /**
-     * @return true if the device has an DynamicAndroid image installed
+     * @return true if the device has an DynamicSystem image installed
      */
     boolean isInstalled();
 
     /**
-     * Remove DynamicAndroid installation if present
+     * Remove DynamicSystem installation if present
      *
      * @return true if the call succeeds
      */
     boolean remove();
 
     /**
-     * Enable DynamicAndroid when it's not enabled, otherwise, disable it.
+     * Enable DynamicSystem when it's not enabled, otherwise, disable it.
      *
      * @return true if the call succeeds
      */
     boolean toggle();
 
     /**
-     * Write a chunk of the DynamicAndroid system image
+     * Write a chunk of the DynamicSystem system image
      *
      * @return true if the call succeeds
      */
