@@ -121,11 +121,11 @@ public abstract class ContentCaptureSession implements AutoCloseable {
     public static final int STATE_INTERNAL_ERROR = 0x100;
 
     /**
-     * Session is disabled because service didn't whitelist package.
+     * Session is disabled because service didn't whitelist package or activity.
      *
      * @hide
      */
-    public static final int STATE_PACKAGE_NOT_WHITELISTED = 0x200;
+    public static final int STATE_NOT_WHITELISTED = 0x200;
 
     private static final int INITIAL_CHILDREN_CAPACITY = 5;
 

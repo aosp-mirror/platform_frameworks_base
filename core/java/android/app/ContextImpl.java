@@ -102,6 +102,7 @@ import java.util.Objects;
 import java.util.concurrent.Executor;
 
 class ReceiverRestrictedContext extends ContextWrapper {
+    @UnsupportedAppUsage
     ReceiverRestrictedContext(Context base) {
         super(base);
     }

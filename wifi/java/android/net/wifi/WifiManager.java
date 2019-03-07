@@ -4346,7 +4346,9 @@ public class WifiManager {
 
     /**
      * Start subscription provisioning flow
+     *
      * @param provider {@link OsuProvider} to provision with
+     * @param executor the Executor on which to run the callback.
      * @param callback {@link ProvisioningCallback} for updates regarding provisioning flow
      * @hide
      */
@@ -4355,45 +4357,48 @@ public class WifiManager {
             android.Manifest.permission.NETWORK_SETTINGS,
             android.Manifest.permission.NETWORK_SETUP_WIZARD
     })
-    public void startSubscriptionProvisioning(OsuProvider provider, ProvisioningCallback callback,
-            @Nullable Handler handler) {
-        Looper looper = (handler == null) ? Looper.getMainLooper() : handler.getLooper();
+    public void startSubscriptionProvisioning(@NonNull OsuProvider provider,
+            @NonNull @CallbackExecutor Executor executor, @NonNull ProvisioningCallback callback) {
+        // Verify arguments
+        if (executor == null) {
+            throw new IllegalArgumentException("executor must not be null");
+        }
+        if (callback == null) {
+            throw new IllegalArgumentException("callback must not be null");
+        }
         try {
             mService.startSubscriptionProvisioning(provider,
-                    new ProvisioningCallbackProxy(looper, callback));
+                    new ProvisioningCallbackProxy(executor, callback));
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
 
+    /**
+     * Helper class to support OSU Provisioning callbacks
+     */
     private static class ProvisioningCallbackProxy extends IProvisioningCallback.Stub {
-        private final Handler mHandler;
+        private final Executor mExecutor;
         private final ProvisioningCallback mCallback;
 
-        ProvisioningCallbackProxy(Looper looper, ProvisioningCallback callback) {
-            mHandler = new Handler(looper);
+        ProvisioningCallbackProxy(Executor executor, ProvisioningCallback callback) {
+            mExecutor = executor;
             mCallback = callback;
         }
 
         @Override
         public void onProvisioningStatus(int status) {
-            mHandler.post(() -> {
-                mCallback.onProvisioningStatus(status);
-            });
+            mExecutor.execute(() -> mCallback.onProvisioningStatus(status));
         }
 
         @Override
         public void onProvisioningFailure(int status) {
-            mHandler.post(() -> {
-                mCallback.onProvisioningFailure(status);
-            });
+            mExecutor.execute(() -> mCallback.onProvisioningFailure(status));
         }
 
         @Override
         public void onProvisioningComplete() {
-            mHandler.post(() -> {
-                mCallback.onProvisioningComplete();
-            });
+            mExecutor.execute(() -> mCallback.onProvisioningComplete());
         }
     }
 

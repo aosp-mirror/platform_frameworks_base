@@ -264,7 +264,8 @@ class PrivacyItemControllerTest : SysuiTestCase() {
         val list = listOf(PrivacyItem(PrivacyType.TYPE_CAMERA,
                 PrivacyApplication("", TEST_UID, mContext)))
         privacyItemController.privacyList = list
-        assertEquals(list, privacyItemController.privacyList)
-        assertTrue(list !== privacyItemController.privacyList)
+        val privacyList = privacyItemController.privacyList
+        assertEquals(list, privacyList)
+        assertTrue(list !== privacyList)
     }
 }

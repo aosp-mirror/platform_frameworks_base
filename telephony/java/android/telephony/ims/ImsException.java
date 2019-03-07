@@ -86,7 +86,8 @@ public class ImsException extends Exception {
      * @param message an optional message to detail the error condition more specifically.
      * @param cause the {@link Throwable} that caused this {@link ImsException} to be created.
      */
-    public ImsException(@Nullable String message, @ImsErrorCode  int code, Throwable cause) {
+    public ImsException(@Nullable String message, @ImsErrorCode  int code,
+            @Nullable Throwable cause) {
         super(getMessage(message, code), cause);
         mCode = code;
     }

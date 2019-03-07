@@ -443,6 +443,9 @@ public class FrameLayout extends ViewGroup {
          * @see android.view.Gravity
          * @attr ref android.R.styleable#FrameLayout_Layout_layout_gravity
          */
+        @InspectableProperty(
+                name = "layout_gravity",
+                valueType = InspectableProperty.ValueType.GRAVITY)
         public int gravity = UNSPECIFIED_GRAVITY;
 
         public LayoutParams(@NonNull Context c, @Nullable AttributeSet attrs) {

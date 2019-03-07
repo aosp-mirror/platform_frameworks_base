@@ -293,4 +293,59 @@ public class WifiConfigurationTest {
         assertEquals(config.apChannel, restoredConfig.apChannel);
         assertEquals(config.hiddenSSID, restoredConfig.hiddenSSID);
     }
+
+
+    /**
+     * Verifies that getKeyIdForCredentials returns the expected string for Enterprise networks
+     * @throws Exception
+     */
+    @Test
+    public void testGetKeyIdForCredentials() throws Exception {
+        WifiConfiguration config = new WifiConfiguration();
+        final String mSsid = "TestAP";
+        config.SSID = mSsid;
+
+        // Test various combinations
+        // EAP with TLS
+        config.allowedKeyManagement.set(KeyMgmt.WPA_EAP);
+        config.enterpriseConfig.setEapMethod(WifiEnterpriseConfig.Eap.TLS);
+        config.enterpriseConfig.setPhase2Method(WifiEnterpriseConfig.Phase2.NONE);
+        String keyId = config.getKeyIdForCredentials(config);
+        assertEquals(keyId, mSsid + "_WPA_EAP_TLS_NULL");
+
+        // EAP with TTLS & MSCHAPv2
+        config.allowedKeyManagement.set(KeyMgmt.WPA_EAP);
+        config.enterpriseConfig.setEapMethod(WifiEnterpriseConfig.Eap.TTLS);
+        config.enterpriseConfig.setPhase2Method(WifiEnterpriseConfig.Phase2.MSCHAPV2);
+        keyId = config.getKeyIdForCredentials(config);
+        assertEquals(keyId, mSsid + "_WPA_EAP_TTLS_MSCHAPV2");
+
+        // Suite-B 192 with PWD & GTC
+        config.allowedKeyManagement.clear();
+        config.allowedKeyManagement.set(KeyMgmt.SUITE_B_192);
+        config.enterpriseConfig.setEapMethod(WifiEnterpriseConfig.Eap.PWD);
+        config.enterpriseConfig.setPhase2Method(WifiEnterpriseConfig.Phase2.GTC);
+        keyId = config.getKeyIdForCredentials(config);
+        assertEquals(keyId, mSsid + "_SUITE_B_192_PWD_GTC");
+
+        // IEEE8021X with SIM
+        config.allowedKeyManagement.clear();
+        config.allowedKeyManagement.set(KeyMgmt.IEEE8021X);
+        config.enterpriseConfig.setEapMethod(WifiEnterpriseConfig.Eap.SIM);
+        config.enterpriseConfig.setPhase2Method(WifiEnterpriseConfig.Phase2.NONE);
+        keyId = config.getKeyIdForCredentials(config);
+        assertEquals(keyId, mSsid + "_IEEE8021X_SIM_NULL");
+
+        // Try calling this method with non-Enterprise network, expect an exception
+        boolean exceptionThrown = false;
+        try {
+            config.allowedKeyManagement.clear();
+            config.allowedKeyManagement.set(KeyMgmt.WPA2_PSK);
+            config.preSharedKey = "TestPsk";
+            keyId = config.getKeyIdForCredentials(config);
+        } catch (IllegalStateException e) {
+            exceptionThrown = true;
+        }
+        assertTrue(exceptionThrown);
+    }
 }

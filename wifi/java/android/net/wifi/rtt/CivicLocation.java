@@ -155,6 +155,16 @@ public final class CivicLocation implements Parcelable {
     }
 
     /**
+     * Converts a CivicLocation object to a SparseArray.
+     *
+     * @return the SparseArray<string> representation of the CivicLocation
+     */
+    @Nullable
+    public SparseArray<String> toSparseArray() {
+        return mCivicAddressElements;
+    }
+
+    /**
      * Generates a comma separated string of all the defined elements.
      *
      * @return a compiled string representing all elements

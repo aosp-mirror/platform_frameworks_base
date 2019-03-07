@@ -60,6 +60,17 @@ package android.content {
 
 }
 
+package android.location {
+
+  public class LocationManager {
+    method @Deprecated public boolean addGpsMeasurementListener(android.location.GpsMeasurementsEvent.Listener);
+    method @Deprecated public boolean addGpsNavigationMessageListener(android.location.GpsNavigationMessageEvent.Listener);
+    method @Deprecated public void removeGpsMeasurementListener(android.location.GpsMeasurementsEvent.Listener);
+    method @Deprecated public void removeGpsNavigationMessageListener(android.location.GpsNavigationMessageEvent.Listener);
+  }
+
+}
+
 package android.media.tv {
 
   public final class TvInputManager {

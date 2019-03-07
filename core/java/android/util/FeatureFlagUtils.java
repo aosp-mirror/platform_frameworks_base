@@ -39,6 +39,8 @@ public class FeatureFlagUtils {
     public static final String SAFETY_HUB = "settings_safety_hub";
     public static final String SCREENRECORD_LONG_PRESS = "settings_screenrecord_long_press";
     public static final String GLOBAL_ACTIONS_GRID_ENABLED = "settings_global_actions_grid_enabled";
+    public static final String GLOBAL_ACTIONS_PANEL_ENABLED =
+            "settings_global_actions_panel_enabled";
 
     private static final Map<String, String> DEFAULT_FLAGS;
 
@@ -46,7 +48,7 @@ public class FeatureFlagUtils {
         DEFAULT_FLAGS = new HashMap<>();
         DEFAULT_FLAGS.put("settings_audio_switcher", "true");
         DEFAULT_FLAGS.put("settings_mobile_network_v2", "true");
-        DEFAULT_FLAGS.put("settings_network_and_internet_v2", "true");
+        DEFAULT_FLAGS.put("settings_network_and_internet_v2", "false");
         DEFAULT_FLAGS.put("settings_slice_injection", "true");
         DEFAULT_FLAGS.put("settings_systemui_theme", "true");
         DEFAULT_FLAGS.put("settings_wifi_mac_randomization", "true");
@@ -56,7 +58,8 @@ public class FeatureFlagUtils {
         DEFAULT_FLAGS.put(HEARING_AID_SETTINGS, "false");
         DEFAULT_FLAGS.put(SAFETY_HUB, "false");
         DEFAULT_FLAGS.put(SCREENRECORD_LONG_PRESS, "false");
-        DEFAULT_FLAGS.put(GLOBAL_ACTIONS_GRID_ENABLED, "false");
+        DEFAULT_FLAGS.put(GLOBAL_ACTIONS_GRID_ENABLED, "true");
+        DEFAULT_FLAGS.put(GLOBAL_ACTIONS_PANEL_ENABLED, "true");
     }
 
     /**

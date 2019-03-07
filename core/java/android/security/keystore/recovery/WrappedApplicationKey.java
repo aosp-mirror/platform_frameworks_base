@@ -72,7 +72,7 @@ public final class WrappedApplicationKey implements Parcelable {
          * @param alias The alias.
          * @return This builder.
          */
-        public Builder setAlias(@NonNull String alias) {
+        public @NonNull Builder setAlias(@NonNull String alias) {
             mInstance.mAlias = alias;
             return this;
         }
@@ -83,7 +83,7 @@ public final class WrappedApplicationKey implements Parcelable {
          * @param encryptedKeyMaterial The key material
          * @return This builder
          */
-        public Builder setEncryptedKeyMaterial(@NonNull byte[] encryptedKeyMaterial) {
+        public @NonNull Builder setEncryptedKeyMaterial(@NonNull byte[] encryptedKeyMaterial) {
             mInstance.mEncryptedKeyMaterial = encryptedKeyMaterial;
             return this;
         }
@@ -94,7 +94,7 @@ public final class WrappedApplicationKey implements Parcelable {
          * @param metadata The metadata
          * @return This builder
          */
-        public Builder setMetadata(@Nullable byte[] metadata) {
+        public @NonNull Builder setMetadata(@Nullable byte[] metadata) {
             mInstance.mMetadata = metadata;
             return this;
         }
@@ -105,7 +105,7 @@ public final class WrappedApplicationKey implements Parcelable {
          * @return new instance
          * @throws NullPointerException if some required fields were not set.
          */
-        @NonNull public WrappedApplicationKey build() {
+        public @NonNull WrappedApplicationKey build() {
             Preconditions.checkNotNull(mInstance.mAlias);
             Preconditions.checkNotNull(mInstance.mEncryptedKeyMaterial);
             return mInstance;
@@ -143,7 +143,7 @@ public final class WrappedApplicationKey implements Parcelable {
         return mMetadata;
     }
 
-    public static final @android.annotation.NonNull Parcelable.Creator<WrappedApplicationKey> CREATOR =
+    public static final @NonNull Parcelable.Creator<WrappedApplicationKey> CREATOR =
             new Parcelable.Creator<WrappedApplicationKey>() {
                 public WrappedApplicationKey createFromParcel(Parcel in) {
                     return new WrappedApplicationKey(in);

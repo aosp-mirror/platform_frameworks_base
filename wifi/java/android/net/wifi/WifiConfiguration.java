@@ -2080,7 +2080,7 @@ public class WifiConfiguration implements Parcelable {
      * @hide
      */
     public String getKeyIdForCredentials(WifiConfiguration current) {
-        String keyMgmt = null;
+        String keyMgmt = "";
 
         try {
             // Get current config details for fields that are not initialized
@@ -2089,13 +2089,16 @@ public class WifiConfiguration implements Parcelable {
                 allowedKeyManagement = current.allowedKeyManagement;
             }
             if (allowedKeyManagement.get(KeyMgmt.WPA_EAP)) {
-                keyMgmt = KeyMgmt.strings[KeyMgmt.WPA_EAP];
+                keyMgmt += KeyMgmt.strings[KeyMgmt.WPA_EAP];
             }
             if (allowedKeyManagement.get(KeyMgmt.OSEN)) {
-                keyMgmt = KeyMgmt.strings[KeyMgmt.OSEN];
+                keyMgmt += KeyMgmt.strings[KeyMgmt.OSEN];
             }
             if (allowedKeyManagement.get(KeyMgmt.IEEE8021X)) {
                 keyMgmt += KeyMgmt.strings[KeyMgmt.IEEE8021X];
+            }
+            if (allowedKeyManagement.get(KeyMgmt.SUITE_B_192)) {
+                keyMgmt += KeyMgmt.strings[KeyMgmt.SUITE_B_192];
             }
 
             if (TextUtils.isEmpty(keyMgmt)) {

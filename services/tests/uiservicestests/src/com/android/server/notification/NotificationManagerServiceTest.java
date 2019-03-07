@@ -98,7 +98,9 @@ import android.os.IBinder;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.provider.DeviceConfig;
 import android.provider.MediaStore;
+import android.provider.Settings;
 import android.service.notification.Adjustment;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationStats;
@@ -111,9 +113,13 @@ import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 import android.text.Html;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.AtomicFile;
 
+import androidx.annotation.Nullable;
+
 import com.android.internal.R;
+import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
@@ -142,6 +148,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -153,6 +160,13 @@ import java.util.function.Consumer;
 @RunWithLooper
 public class NotificationManagerServiceTest extends UiServiceTestCase {
     private static final String TEST_CHANNEL_ID = "NotificationManagerServiceTestChannelId";
+    private static final String CLEAR_DEVICE_CONFIG_KEY_CMD =
+            "device_config delete " + DeviceConfig.NAMESPACE_SYSTEMUI + " "
+                    + SystemUiDeviceConfigFlags.NAS_DEFAULT_SERVICE;
+    private static final String SET_DEFAULT_ASSISTANT_DEVICE_CONFIG_CMD =
+            "device_config put " + DeviceConfig.NAMESPACE_SYSTEMUI + " "
+                    + SystemUiDeviceConfigFlags.NAS_DEFAULT_SERVICE;
+
     private final int mUid = Binder.getCallingUid();
     private TestableNotificationManagerService mService;
     private INotificationManager mBinderService;
@@ -208,6 +222,9 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     AppOpsManager mAppOpsManager;
     @Mock
     private UserManagerService mUserMangerService;
+    @Mock
+    private TestableNotificationManagerService.NotificationAssistantAccessGrantedCallback
+            mNotificationAssistantAccessGrantedCallback;
 
     // Use a Testable subclass so we can simulate calls from the system without failing.
     private static class TestableNotificationManagerService extends NotificationManagerService {
@@ -215,6 +232,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         boolean isSystemUid = true;
         int countLogSmartSuggestionsVisible = 0;
         UserManagerService mUserManagerService;
+        @Nullable
+        NotificationAssistantAccessGrantedCallback mNotificationAssistantAccessGrantedCallback;
 
         TestableNotificationManagerService(Context context, UserManagerService userManagerService) {
             super(context);
@@ -258,6 +277,26 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         UserManagerService getUserManagerService() {
             return mUserManagerService;
         }
+
+        @Override
+        protected void setNotificationAssistantAccessGrantedForUserInternal(
+                ComponentName assistant, int userId, boolean granted) {
+            if (mNotificationAssistantAccessGrantedCallback != null) {
+                mNotificationAssistantAccessGrantedCallback.onGranted(assistant, userId, granted);
+                return;
+            }
+            super.setNotificationAssistantAccessGrantedForUserInternal(assistant, userId, granted);
+        }
+
+        private void setNotificationAssistantAccessGrantedCallback(
+                @Nullable NotificationAssistantAccessGrantedCallback callback) {
+            this.mNotificationAssistantAccessGrantedCallback = callback;
+        }
+
+        interface NotificationAssistantAccessGrantedCallback {
+            void onGranted(ComponentName assistant, int userId, boolean granted);
+        }
+
     }
 
     private class TestableToastCallback extends ITransientNotification.Stub {
@@ -352,6 +391,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @After
     public void tearDown() throws Exception {
         mFile.delete();
+        clearDeviceConfig();
     }
 
     public void waitForIdle() {
@@ -2029,6 +2069,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         verify(mContext, times(1)).sendBroadcastAsUser(any(), eq(user), any());
         verify(mAssistants, times(1)).setPackageOrComponentEnabled(
                 c.flattenToString(), user.getIdentifier(), true, true);
+        verify(mAssistants).setUserSet(10, true);
         verify(mConditionProviders, times(1)).setPackageOrComponentEnabled(
                 c.flattenToString(), user.getIdentifier(), false, true);
         verify(mListeners, never()).setPackageOrComponentEnabled(
@@ -2518,7 +2559,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         verify(mListeners, times(1)).migrateToXml();
         verify(mConditionProviders, times(1)).migrateToXml();
         verify(mAssistants, times(1)).migrateToXml();
-        verify(mAssistants, never()).ensureAssistant();
+        verify(mAssistants, times(2)).resetDefaultAssistantsIfNecessary();
     }
 
     @Test
@@ -2538,7 +2579,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         verify(mListeners, times(2)).migrateToXml();
         verify(mConditionProviders, times(2)).migrateToXml();
         verify(mAssistants, times(2)).migrateToXml();
-        verify(mAssistants, never()).ensureAssistant();
+        verify(mAssistants, times(2)).resetDefaultAssistantsIfNecessary();
     }
 
     @Test
@@ -3619,7 +3660,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 .thenReturn(new String[] {"a", "b", "c"});
         when(mContext.getResources()).thenReturn(mResources);
 
-        assertEquals(false, mService.canUseManagedServices(null));
+        assertEquals(false, mService.canUseManagedServices(null, 0, null));
     }
 
     @Test
@@ -3630,7 +3671,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 .thenReturn(new String[] {"a", "b", "c"});
         when(mContext.getResources()).thenReturn(mResources);
 
-        assertEquals(true, mService.canUseManagedServices("b"));
+        assertEquals(true, mService.canUseManagedServices("b", 0, null));
     }
 
     @Test
@@ -3641,7 +3682,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 .thenReturn(new String[] {"a", "b", "c"});
         when(mContext.getResources()).thenReturn(mResources);
 
-        assertEquals(false, mService.canUseManagedServices("d"));
+        assertEquals(false, mService.canUseManagedServices("d", 0, null));
     }
 
     @Test
@@ -3652,7 +3693,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 .thenReturn(new String[] {"a", "b", "c"});
         when(mContext.getResources()).thenReturn(mResources);
 
-        assertEquals(true, mService.canUseManagedServices("d"));
+        assertEquals(true, mService.canUseManagedServices("d", 0, null));
     }
 
     @Test
@@ -3663,7 +3704,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 .thenReturn(new String[] {"a", "b", "c"});
         when(mContext.getResources()).thenReturn(mResources);
 
-        assertEquals(true, mService.canUseManagedServices("d"));
+        assertEquals(true, mService.canUseManagedServices("d", 0 , null));
     }
 
     @Test
@@ -3674,7 +3715,28 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 .thenReturn(new String[] {"a", "b", "c"});
         when(mContext.getResources()).thenReturn(mResources);
 
-        assertEquals(true, mService.canUseManagedServices("d"));
+        assertEquals(true, mService.canUseManagedServices("d", 0, null));
+    }
+
+    @Test
+    public void testCanUseManagedServices_hasPermission() throws Exception {
+        when(mPackageManager.checkPermission("perm", "pkg", 0))
+                .thenReturn(PackageManager.PERMISSION_GRANTED);
+
+        assertEquals(true, mService.canUseManagedServices("pkg", 0, "perm"));
+    }
+
+    @Test
+    public void testCanUseManagedServices_noPermission() throws Exception {
+        when(mPackageManager.checkPermission("perm", "pkg", 0))
+                .thenReturn(PackageManager.PERMISSION_DENIED);
+
+        assertEquals(false, mService.canUseManagedServices("pkg", 0, "perm"));
+    }
+
+    @Test
+    public void testCanUseManagedServices_permDoesNotMatter() {
+        assertEquals(true, mService.canUseManagedServices("pkg", 0, null));
     }
 
     @Test
@@ -4100,5 +4162,79 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         ArgumentCaptor<NotificationStats> captor = ArgumentCaptor.forClass(NotificationStats.class);
         verify(mListeners).notifyRemovedLocked(any(), anyInt(), captor.capture());
         assertNotNull(captor.getValue());
+    }
+
+    @Test
+    public void setDefaultAssistantForUser_fromConfigXml() {
+        clearDeviceConfig();
+        ComponentName xmlConfig = new ComponentName("config", "xml");
+        when(mResources
+                .getString(
+                        com.android.internal.R.string.config_defaultAssistantAccessComponent))
+                .thenReturn(xmlConfig.flattenToString());
+        when(mContext.getResources()).thenReturn(mResources);
+        when(mAssistants.queryPackageForServices(eq(null), anyInt(), eq(0)))
+                .thenReturn(Collections.singleton(xmlConfig));
+        mService.setNotificationAssistantAccessGrantedCallback(
+                mNotificationAssistantAccessGrantedCallback);
+
+        mService.setDefaultAssistantForUser(0);
+
+        verify(mNotificationAssistantAccessGrantedCallback)
+                .onGranted(eq(xmlConfig), eq(0), eq(true));
+    }
+
+    @Test
+    public void setDefaultAssistantForUser_fromDeviceConfig() {
+        ComponentName xmlConfig = new ComponentName("xml", "config");
+        ComponentName deviceConfig = new ComponentName("device", "config");
+        setDefaultAssistantInDeviceConfig(deviceConfig.flattenToString());
+        when(mResources
+                .getString(com.android.internal.R.string.config_defaultAssistantAccessComponent))
+                .thenReturn(xmlConfig.flattenToString());
+        when(mContext.getResources()).thenReturn(mResources);
+        when(mAssistants.queryPackageForServices(eq(null), anyInt(), eq(0)))
+                .thenReturn(new ArraySet<>(Arrays.asList(xmlConfig, deviceConfig)));
+        mService.setNotificationAssistantAccessGrantedCallback(
+                mNotificationAssistantAccessGrantedCallback);
+
+        mService.setDefaultAssistantForUser(0);
+
+        verify(mNotificationAssistantAccessGrantedCallback)
+                .onGranted(eq(deviceConfig), eq(0), eq(true));
+    }
+
+    @Test
+    public void setDefaultAssistantForUser_deviceConfigInvalid() {
+        ComponentName xmlConfig = new ComponentName("xml", "config");
+        ComponentName deviceConfig = new ComponentName("device", "config");
+        setDefaultAssistantInDeviceConfig(deviceConfig.flattenToString());
+        when(mResources
+                .getString(com.android.internal.R.string.config_defaultAssistantAccessComponent))
+                .thenReturn(xmlConfig.flattenToString());
+        when(mContext.getResources()).thenReturn(mResources);
+        // Only xmlConfig is valid, deviceConfig is not.
+        when(mAssistants.queryPackageForServices(eq(null), anyInt(), eq(0)))
+                .thenReturn(Collections.singleton(xmlConfig));
+        mService.setNotificationAssistantAccessGrantedCallback(
+                mNotificationAssistantAccessGrantedCallback);
+
+        mService.setDefaultAssistantForUser(0);
+
+        verify(mNotificationAssistantAccessGrantedCallback)
+                .onGranted(eq(xmlConfig), eq(0), eq(true));
+    }
+
+    private void clearDeviceConfig() {
+        DeviceConfig.resetToDefaults(
+                Settings.RESET_MODE_PACKAGE_DEFAULTS, DeviceConfig.NAMESPACE_SYSTEMUI);
+    }
+
+    private void setDefaultAssistantInDeviceConfig(String componentName) {
+        DeviceConfig.setProperty(
+                DeviceConfig.NAMESPACE_SYSTEMUI,
+                SystemUiDeviceConfigFlags.NAS_DEFAULT_SERVICE,
+                componentName,
+                false);
     }
 }

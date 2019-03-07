@@ -1228,5 +1228,10 @@ public class ManagedServicesTest extends UiServiceTestCase {
         protected void onServiceAdded(ManagedServiceInfo info) {
 
         }
+
+        @Override
+        protected String getRequiredPermission() {
+            return null;
+        }
     }
 }

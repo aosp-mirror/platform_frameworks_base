@@ -824,7 +824,7 @@ public class WifiAwareManager {
      * {@link NetworkSpecifierBuilder#setPeerHandle(PeerHandle)} to specify the peer to which the
      * connection is created.
      */
-    public static class NetworkSpecifierBuilder {
+    public static final class NetworkSpecifierBuilder {
         private DiscoverySession mDiscoverySession;
         private PeerHandle mPeerHandle;
         private String mPskPassphrase;

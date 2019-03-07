@@ -21,6 +21,7 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.content.pm.VersionedPackage;
 import android.os.Environment;
 import android.os.Handler;
@@ -76,6 +77,7 @@ public class PackageWatchdog {
     private static final String ATTR_VERSION = "version";
     private static final String ATTR_NAME = "name";
     private static final String ATTR_DURATION = "duration";
+    private static final String ATTR_PASSED_HEALTH_CHECK = "passed-health-check";
 
     private static PackageWatchdog sPackageWatchdog;
 
@@ -102,7 +104,7 @@ public class PackageWatchdog {
     // 0 if mPackageCleanup not running.
     private long mDurationAtLastReschedule;
 
-    // TODO(zezeozue): Remove redundant context param
+    // TODO(b/120598832): Remove redundant context param
     private PackageWatchdog(Context context) {
         mContext = context;
         mPolicyFile = new AtomicFile(new File(new File(Environment.getDataDirectory(), "system"),
@@ -161,21 +163,29 @@ public class PackageWatchdog {
      * Starts observing the health of the {@code packages} for {@code observer} and notifies
      * {@code observer} of any package failures within the monitoring duration.
      *
+     * <p>If monitoring a package with {@code withExplicitHealthCheck}, at the end of the monitoring
+     * duration if {@link #onExplicitHealthCheckPassed} was never called,
+     * {@link PackageHealthObserver#execute} will be called as if the package failed.
+     *
      * <p>If {@code observer} is already monitoring a package in {@code packageNames},
-     * the monitoring window of that package will be reset to {@code durationMs}.
+     * the monitoring window of that package will be reset to {@code durationMs} and the health
+     * check state will be reset to a default depending on {@code withExplictHealthCheck}.
      *
      * @throws IllegalArgumentException if {@code packageNames} is empty
      * or {@code durationMs} is less than 1
      */
     public void startObservingHealth(PackageHealthObserver observer, List<String> packageNames,
-            long durationMs) {
+            long durationMs, boolean withExplicitHealthCheck) {
         if (packageNames.isEmpty() || durationMs < 1) {
             throw new IllegalArgumentException("Observation not started, no packages specified"
                     + "or invalid duration");
         }
         List<MonitoredPackage> packages = new ArrayList<>();
         for (int i = 0; i < packageNames.size(); i++) {
-            packages.add(new MonitoredPackage(packageNames.get(i), durationMs));
+            // When observing packages withExplicitHealthCheck,
+            // MonitoredPackage#mHasExplicitHealthCheckPassed will be false initially.
+            packages.add(new MonitoredPackage(packageNames.get(i), durationMs,
+                            !withExplicitHealthCheck));
         }
         synchronized (mLock) {
             ObserverInternal oldObserver = mAllObservers.get(observer.getName());
@@ -276,7 +286,38 @@ public class PackageWatchdog {
         });
     }
 
-    // TODO(zezeozue): Optimize write? Maybe only write a separate smaller file?
+    /**
+     * Updates the observers monitoring {@code packageName} that explicit health check has passed.
+     *
+     * <p> This update is strictly for registered observers at the time of the call
+     * Observers that register after this signal will have no knowledge of prior signals and will
+     * effectively behave as if the explicit health check hasn't passed for {@code packageName}.
+     *
+     * <p> {@code packageName} can still be considered failed if reported by
+     * {@link #onPackageFailure} before the package expires.
+     *
+     * <p> Triggered by components outside the system server when they are fully functional after an
+     * update.
+     */
+    public void onExplicitHealthCheckPassed(String packageName) {
+        Slog.i(TAG, "Health check passed for package: " + packageName);
+        boolean shouldUpdateFile = false;
+        synchronized (mLock) {
+            for (int observerIdx = 0; observerIdx < mAllObservers.size(); observerIdx++) {
+                ObserverInternal observer = mAllObservers.valueAt(observerIdx);
+                MonitoredPackage monitoredPackage = observer.mPackages.get(packageName);
+                if (monitoredPackage != null && !monitoredPackage.mHasPassedHealthCheck) {
+                    monitoredPackage.mHasPassedHealthCheck = true;
+                    shouldUpdateFile = true;
+                }
+            }
+        }
+        if (shouldUpdateFile) {
+            saveToFileAsync();
+        }
+    }
+
+    // TODO(b/120598832): Optimize write? Maybe only write a separate smaller file?
     // This currently adds about 7ms extra to shutdown thread
     /** Writes the package information to file during shutdown. */
     public void writeNow() {
@@ -322,7 +363,7 @@ public class PackageWatchdog {
          */
         boolean execute(VersionedPackage versionedPackage);
 
-        // TODO(zezeozue): Ensure uniqueness?
+        // TODO(b/120598832): Ensure uniqueness?
         /**
          * Identifier for the observer, should not change across device updates otherwise the
          * watchdog may drop observing packages with the old name.
@@ -393,13 +434,44 @@ public class PackageWatchdog {
             Iterator<ObserverInternal> it = mAllObservers.values().iterator();
             while (it.hasNext()) {
                 ObserverInternal observer = it.next();
-                if (!observer.updateMonitoringDurations(elapsedMs)) {
+                List<MonitoredPackage> failedPackages =
+                        observer.updateMonitoringDurations(elapsedMs);
+                if (!failedPackages.isEmpty()) {
+                    onExplicitHealthCheckFailed(observer, failedPackages);
+                }
+                if (observer.mPackages.isEmpty()) {
                     Slog.i(TAG, "Discarding observer " + observer.mName + ". All packages expired");
                     it.remove();
                 }
             }
         }
         saveToFileAsync();
+    }
+
+    private void onExplicitHealthCheckFailed(ObserverInternal observer,
+            List<MonitoredPackage> failedPackages) {
+        mWorkerHandler.post(() -> {
+            synchronized (mLock) {
+                PackageHealthObserver registeredObserver = observer.mRegisteredObserver;
+                if (registeredObserver != null) {
+                    PackageManager pm = mContext.getPackageManager();
+                    for (int i = 0; i < failedPackages.size(); i++) {
+                        String packageName = failedPackages.get(i).mName;
+                        long versionCode = 0;
+                        try {
+                            versionCode = pm.getPackageInfo(
+                                    packageName, 0 /* flags */).getLongVersionCode();
+                        } catch (PackageManager.NameNotFoundException e) {
+                            Slog.w(TAG, "Explicit health check failed but could not find package "
+                                    + packageName);
+                            // TODO(b/120598832): Skip. We only continue to pass tests for now since
+                            // the tests don't install any packages
+                        }
+                        registeredObserver.execute(new VersionedPackage(packageName, versionCode));
+                    }
+                }
+            }
+        });
     }
 
     /**
@@ -480,6 +552,7 @@ public class PackageWatchdog {
      */
     static class ObserverInternal {
         public final String mName;
+        //TODO(b/120598832): Add getter for mPackages
         public final ArrayMap<String, MonitoredPackage> mPackages;
         @Nullable
         public PackageHealthObserver mRegisteredObserver;
@@ -505,6 +578,8 @@ public class PackageWatchdog {
                     out.startTag(null, TAG_PACKAGE);
                     out.attribute(null, ATTR_NAME, p.mName);
                     out.attribute(null, ATTR_DURATION, String.valueOf(p.mDurationMs));
+                    out.attribute(null, ATTR_PASSED_HEALTH_CHECK,
+                            String.valueOf(p.mHasPassedHealthCheck));
                     out.endTag(null, TAG_PACKAGE);
                 }
                 out.endTag(null, TAG_OBSERVER);
@@ -529,10 +604,12 @@ public class PackageWatchdog {
          *  {@code elapsedMs}. If any duration is less than 0, the package is removed from
          * observation.
          *
-         * @returns {@code true} if there are still packages to be observed, {@code false} otherwise
+         * @returns a {@link List} of packages that were removed from the observer without explicit
+         * health check passing, or an empty list if no package expired for which an explicit health
+         * check was still pending
          */
-        public boolean updateMonitoringDurations(long elapsedMs) {
-            List<MonitoredPackage> packages = new ArrayList<>();
+        public List<MonitoredPackage> updateMonitoringDurations(long elapsedMs) {
+            List<MonitoredPackage> removedPackages = new ArrayList<>();
             synchronized (mName) {
                 Iterator<MonitoredPackage> it = mPackages.values().iterator();
                 while (it.hasNext()) {
@@ -541,10 +618,13 @@ public class PackageWatchdog {
                     if (newDuration > 0) {
                         p.mDurationMs = newDuration;
                     } else {
+                        if (!p.mHasPassedHealthCheck) {
+                            removedPackages.add(p);
+                        }
                         it.remove();
                     }
                 }
-                return !mPackages.isEmpty();
+                return removedPackages;
             }
         }
 
@@ -574,6 +654,7 @@ public class PackageWatchdog {
             if (TAG_OBSERVER.equals(parser.getName())) {
                 observerName = parser.getAttributeValue(null, ATTR_NAME);
                 if (TextUtils.isEmpty(observerName)) {
+                    Slog.wtf(TAG, "Unable to read observer name");
                     return null;
                 }
             }
@@ -582,17 +663,24 @@ public class PackageWatchdog {
             try {
                 while (XmlUtils.nextElementWithin(parser, innerDepth)) {
                     if (TAG_PACKAGE.equals(parser.getName())) {
-                        String packageName = parser.getAttributeValue(null, ATTR_NAME);
-                        long duration = Long.parseLong(
-                                parser.getAttributeValue(null, ATTR_DURATION));
-                        if (!TextUtils.isEmpty(packageName)) {
-                            packages.add(new MonitoredPackage(packageName, duration));
+                        try {
+                            String packageName = parser.getAttributeValue(null, ATTR_NAME);
+                            long duration = Long.parseLong(
+                                    parser.getAttributeValue(null, ATTR_DURATION));
+                            boolean hasPassedHealthCheck = Boolean.parseBoolean(
+                                    parser.getAttributeValue(null, ATTR_PASSED_HEALTH_CHECK));
+                            if (!TextUtils.isEmpty(packageName)) {
+                                packages.add(new MonitoredPackage(packageName, duration,
+                                        hasPassedHealthCheck));
+                            }
+                        } catch (NumberFormatException e) {
+                            Slog.wtf(TAG, "Skipping package for observer " + observerName, e);
+                            continue;
                         }
                     }
                 }
-            } catch (IOException e) {
-                return null;
-            } catch (XmlPullParserException e) {
+            } catch (XmlPullParserException | IOException e) {
+                Slog.wtf(TAG, "Unable to read observer " + observerName, e);
                 return null;
             }
             if (packages.isEmpty()) {
@@ -605,6 +693,8 @@ public class PackageWatchdog {
     /** Represents a package along with the time it should be monitored for. */
     static class MonitoredPackage {
         public final String mName;
+        // Whether an explicit health check has passed
+        public boolean mHasPassedHealthCheck;
         // System uptime duration to monitor package
         public long mDurationMs;
         // System uptime of first package failure
@@ -612,9 +702,10 @@ public class PackageWatchdog {
         // Number of failures since mUptimeStartMs
         private int mFailures;
 
-        MonitoredPackage(String name, long durationMs) {
+        MonitoredPackage(String name, long durationMs, boolean hasPassedHealthCheck) {
             mName = name;
             mDurationMs = durationMs;
+            mHasPassedHealthCheck = hasPassedHealthCheck;
         }
 
         /**
@@ -626,7 +717,7 @@ public class PackageWatchdog {
             final long now = SystemClock.uptimeMillis();
             final long duration = now - mUptimeStartMs;
             if (duration > TRIGGER_DURATION_MS) {
-                // TODO(zezeozue): Reseting to 1 is not correct
+                // TODO(b/120598832): Reseting to 1 is not correct
                 // because there may be more than 1 failure in the last trigger window from now
                 // This is the RescueParty impl, will leave for now
                 mFailures = 1;

@@ -153,6 +153,7 @@ import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
+import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.service.notification.Adjustment;
 import android.service.notification.Condition;
@@ -190,6 +191,7 @@ import android.widget.Toast;
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
@@ -203,6 +205,7 @@ import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
+import com.android.internal.util.function.TriPredicate;
 import com.android.server.DeviceIdleController;
 import com.android.server.EventLogTags;
 import com.android.server.IoThread;
@@ -430,7 +433,7 @@ public class NotificationManagerService extends SystemService {
     private boolean mIsAutomotive;
 
     private MetricsLogger mMetricsLogger;
-    private Predicate<String> mAllowedManagedServicePackages;
+    private TriPredicate<String, Integer, String> mAllowedManagedServicePackages;
 
     private static class Archive {
         final int mBufferSize;
@@ -515,26 +518,32 @@ public class NotificationManagerService extends SystemService {
             }
         }
 
-        readDefaultAssistant(userId);
+        setDefaultAssistantForUser(userId);
     }
 
-    protected void readDefaultAssistant(int userId) {
-        String defaultAssistantAccess = getContext().getResources().getString(
-                com.android.internal.R.string.config_defaultAssistantAccessPackage);
-        if (defaultAssistantAccess != null) {
-            // Gather all notification assistant components for candidate pkg. There should
-            // only be one
-            Set<ComponentName> approvedAssistants =
-                    mAssistants.queryPackageForServices(defaultAssistantAccess,
-                            MATCH_DIRECT_BOOT_AWARE
-                                    | MATCH_DIRECT_BOOT_UNAWARE, userId);
-            for (ComponentName cn : approvedAssistants) {
-                try {
-                    getBinderService().setNotificationAssistantAccessGrantedForUser(
-                            cn, userId, true);
-                } catch (RemoteException e) {
-                    e.printStackTrace();
-                }
+    protected void setDefaultAssistantForUser(int userId) {
+        List<ComponentName> validAssistants = new ArrayList<>(
+                mAssistants.queryPackageForServices(
+                        null, MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE, userId));
+
+        List<String> candidateStrs = new ArrayList<>();
+        candidateStrs.add(DeviceConfig.getProperty(
+                DeviceConfig.NAMESPACE_SYSTEMUI,
+                SystemUiDeviceConfigFlags.NAS_DEFAULT_SERVICE));
+        candidateStrs.add(getContext().getResources().getString(
+                com.android.internal.R.string.config_defaultAssistantAccessComponent));
+
+        for (String candidateStr : candidateStrs) {
+            if (TextUtils.isEmpty(candidateStr)) {
+                continue;
+            }
+            ComponentName candidate = ComponentName.unflattenFromString(candidateStr);
+            if (candidate != null && validAssistants.contains(candidate)) {
+                setNotificationAssistantAccessGrantedForUserInternal(candidate, userId, true);
+                Slog.d(TAG, String.format("Set default NAS to be %s in %d", candidateStr, userId));
+                return;
+            } else {
+                Slog.w(TAG, "Invalid default NAS config is found: " + candidateStr);
             }
         }
     }
@@ -594,6 +603,8 @@ public class NotificationManagerService extends SystemService {
             mConditionProviders.migrateToXml();
             handleSavePolicyFile();
         }
+
+        mAssistants.resetDefaultAssistantsIfNecessary();
     }
 
     private void loadPolicyFile() {
@@ -1740,6 +1751,21 @@ public class NotificationManagerService extends SystemService {
         publishLocalService(NotificationManagerInternal.class, mInternalService);
     }
 
+    private void registerDeviceConfigChange() {
+        DeviceConfig.addOnPropertyChangedListener(
+                DeviceConfig.NAMESPACE_SYSTEMUI,
+                getContext().getMainExecutor(),
+                (namespace, name, value) -> {
+                    if (!DeviceConfig.NAMESPACE_SYSTEMUI.equals(namespace)) {
+                        return;
+                    }
+                    if (SystemUiDeviceConfigFlags.NAS_DEFAULT_SERVICE.equals(name)) {
+                        mAssistants.resetDefaultAssistantsIfNecessary();
+                    }
+                });
+    }
+
+
     private GroupHelper getGroupHelper() {
         mAutoGroupAtCount =
                 getContext().getResources().getInteger(R.integer.config_autoGroupAtCount);
@@ -1803,6 +1829,7 @@ public class NotificationManagerService extends SystemService {
             mListeners.onBootPhaseAppsCanStart();
             mAssistants.onBootPhaseAppsCanStart();
             mConditionProviders.onBootPhaseAppsCanStart();
+            registerDeviceConfigChange();
         }
     }
 
@@ -3588,7 +3615,8 @@ public class NotificationManagerService extends SystemService {
             checkCallerIsSystemOrShell();
             final long identity = Binder.clearCallingIdentity();
             try {
-                if (mAllowedManagedServicePackages.test(pkg)) {
+                if (mAllowedManagedServicePackages.test(
+                        pkg, userId, mConditionProviders.getRequiredPermission())) {
                     mConditionProviders.setPackageOrComponentEnabled(
                             pkg, userId, true, granted);
 
@@ -3733,19 +3761,20 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public void setNotificationAssistantAccessGranted(ComponentName assistant,
-                boolean granted) throws RemoteException {
+                boolean granted) {
             setNotificationAssistantAccessGrantedForUser(
                     assistant, getCallingUserHandle().getIdentifier(), granted);
         }
 
         @Override
         public void setNotificationListenerAccessGrantedForUser(ComponentName listener, int userId,
-                boolean granted) throws RemoteException {
+                boolean granted) {
             Preconditions.checkNotNull(listener);
             checkCallerIsSystemOrShell();
             final long identity = Binder.clearCallingIdentity();
             try {
-                if (mAllowedManagedServicePackages.test(listener.getPackageName())) {
+                if (mAllowedManagedServicePackages.test(
+                        listener.getPackageName(), userId, mListeners.getRequiredPermission())) {
                     mConditionProviders.setPackageOrComponentEnabled(listener.flattenToString(),
                             userId, false, granted);
                     mListeners.setPackageOrComponentEnabled(listener.flattenToString(),
@@ -3766,32 +3795,12 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public void setNotificationAssistantAccessGrantedForUser(ComponentName assistant,
-                int userId, boolean granted) throws RemoteException {
+                int userId, boolean granted) {
             checkCallerIsSystemOrShell();
-            if (assistant == null) {
-                ComponentName allowedAssistant = CollectionUtils.firstOrNull(
-                        mAssistants.getAllowedComponents(userId));
-                if (allowedAssistant != null) {
-                    setNotificationAssistantAccessGrantedForUser(allowedAssistant, userId, false);
-                }
-                return;
-            }
+            mAssistants.setUserSet(userId, true);
             final long identity = Binder.clearCallingIdentity();
             try {
-                if (mAllowedManagedServicePackages.test(assistant.getPackageName())) {
-                    mConditionProviders.setPackageOrComponentEnabled(assistant.flattenToString(),
-                            userId, false, granted);
-                    mAssistants.setPackageOrComponentEnabled(assistant.flattenToString(),
-                            userId, true, granted);
-
-                    getContext().sendBroadcastAsUser(new Intent(
-                            NotificationManager.ACTION_NOTIFICATION_POLICY_ACCESS_GRANTED_CHANGED)
-                                    .setPackage(assistant.getPackageName())
-                                    .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY),
-                            UserHandle.of(userId), null);
-
-                    handleSavePolicyFile();
-                }
+                setNotificationAssistantAccessGrantedForUserInternal(assistant, userId, granted);
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
@@ -4003,6 +4012,35 @@ public class NotificationManagerService extends SystemService {
                     .exec(this, in, out, err, args, callback, resultReceiver);
         }
     };
+
+    @VisibleForTesting
+    protected void setNotificationAssistantAccessGrantedForUserInternal(
+            ComponentName assistant, int userId, boolean granted) {
+        if (assistant == null) {
+            ComponentName allowedAssistant = CollectionUtils.firstOrNull(
+                    mAssistants.getAllowedComponents(userId));
+            if (allowedAssistant != null) {
+                setNotificationAssistantAccessGrantedForUserInternal(
+                        allowedAssistant, userId, false);
+            }
+            return;
+        }
+        if (mAllowedManagedServicePackages.test(assistant.getPackageName(), userId,
+                mAssistants.getRequiredPermission())) {
+            mConditionProviders.setPackageOrComponentEnabled(assistant.flattenToString(),
+                    userId, false, granted);
+            mAssistants.setPackageOrComponentEnabled(assistant.flattenToString(),
+                    userId, true, granted);
+
+            getContext().sendBroadcastAsUser(new Intent(
+                            NotificationManager.ACTION_NOTIFICATION_POLICY_ACCESS_GRANTED_CHANGED)
+                            .setPackage(assistant.getPackageName())
+                            .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY),
+                    UserHandle.of(userId), null);
+
+            handleSavePolicyFile();
+        }
+    }
 
     private void applyAdjustment(NotificationRecord r, Adjustment adjustment) {
         if (r == null) {
@@ -7050,7 +7088,7 @@ public class NotificationManagerService extends SystemService {
     }
 
     @VisibleForTesting
-    boolean canUseManagedServices(String pkg) {
+    boolean canUseManagedServices(String pkg, Integer userId, String requiredPermission) {
         boolean canUseManagedServices = !mActivityManager.isLowRamDevice()
                 || mPackageManagerClient.hasSystemFeature(PackageManager.FEATURE_WATCH);
 
@@ -7058,6 +7096,17 @@ public class NotificationManagerService extends SystemService {
                 R.array.config_allowedManagedServicesOnLowRamDevices)) {
             if (whitelisted.equals(pkg)) {
                 canUseManagedServices = true;
+            }
+        }
+
+        if (requiredPermission != null) {
+            try {
+                if (mPackageManager.checkPermission(requiredPermission, pkg, userId)
+                    != PackageManager.PERMISSION_GRANTED) {
+                    canUseManagedServices = false;
+                }
+            } catch (RemoteException e) {
+                Log.e(TAG, "can't talk to pm", e);
             }
         }
 
@@ -7090,6 +7139,13 @@ public class NotificationManagerService extends SystemService {
 
     public class NotificationAssistants extends ManagedServices {
         static final String TAG_ENABLED_NOTIFICATION_ASSISTANTS = "enabled_assistants";
+
+        private static final String ATT_USER_SET = "user_set";
+
+        private final Object mLock = new Object();
+
+        @GuardedBy("mLock")
+        private ArrayMap<Integer, Boolean> mUserSetMap = new ArrayMap<>();
 
         public NotificationAssistants(Context context, Object lock, UserProfiles up,
                 IPackageManager pm) {
@@ -7138,6 +7194,12 @@ public class NotificationManagerService extends SystemService {
             rebindServices(true, user);
         }
 
+        @Override
+        protected String getRequiredPermission() {
+            // only signature/privileged apps can be bound
+            return android.Manifest.permission.REQUEST_NOTIFICATION_ASSISTANT_SERVICE;
+        }
+
         protected void onNotificationsSeenLocked(ArrayList<NotificationRecord> records) {
             // There should be only one, but it's a list, so while we enforce
             // singularity elsewhere, we keep it general here, to avoid surprises.
@@ -7155,6 +7217,30 @@ public class NotificationManagerService extends SystemService {
                     mHandler.post(() -> notifySeen(info, keys));
                 }
             }
+        }
+
+        boolean hasUserSet(int userId) {
+            synchronized (mLock) {
+                return mUserSetMap.getOrDefault(userId, false);
+            }
+        }
+
+        void setUserSet(int userId, boolean set) {
+            synchronized (mLock) {
+                mUserSetMap.put(userId, set);
+            }
+        }
+
+        @Override
+        protected void writeExtraAttributes(XmlSerializer out, int userId) throws IOException {
+            out.attribute(null, ATT_USER_SET, Boolean.toString(hasUserSet(userId)));
+        }
+
+        @Override
+        protected void readExtraAttributes(String tag, XmlPullParser parser, int userId)
+                throws IOException {
+            boolean userSet = XmlUtils.readBooleanAttribute(parser, ATT_USER_SET, false);
+            setUserSet(userId, userSet);
         }
 
         private void notifySeen(final ManagedServiceInfo info,
@@ -7314,13 +7400,13 @@ public class NotificationManagerService extends SystemService {
             return !getServices().isEmpty();
         }
 
-        protected void ensureAssistant() {
+        protected void resetDefaultAssistantsIfNecessary() {
             final List<UserInfo> activeUsers = mUm.getUsers(true);
             for (UserInfo userInfo : activeUsers) {
                 int userId = userInfo.getUserHandle().getIdentifier();
-                if (getAllowedPackages(userId).isEmpty()) {
+                if (!hasUserSet(userId)) {
                     Slog.d(TAG, "Approving default notification assistant for user " + userId);
-                    readDefaultAssistant(userId);
+                    setDefaultAssistantForUser(userId);
                 }
             }
         }
@@ -7334,15 +7420,23 @@ public class NotificationManagerService extends SystemService {
                 if (!allowedComponents.isEmpty()) {
                     ComponentName currentComponent = CollectionUtils.firstOrNull(allowedComponents);
                     if (currentComponent.flattenToString().equals(pkgOrComponent)) return;
-                    try {
-                        getBinderService().setNotificationAssistantAccessGrantedForUser(
-                                currentComponent, userId, false);
-                    } catch (RemoteException e) {
-                        e.rethrowFromSystemServer();
-                    }
+                    setNotificationAssistantAccessGrantedForUserInternal(
+                            currentComponent, userId, false);
                 }
             }
             super.setPackageOrComponentEnabled(pkgOrComponent, userId, isPrimary, enabled);
+        }
+
+        @Override
+        public void dump(PrintWriter pw, DumpFilter filter) {
+            super.dump(pw, filter);
+            pw.println("    Has user set:");
+            synchronized (mLock) {
+                Set<Integer> userIds = mUserSetMap.keySet();
+                for (int userId : userIds) {
+                    pw.println("      userId=" + userId + " value=" + mUserSetMap.get(userId));
+                }
+            }
         }
     }
 
@@ -7411,6 +7505,11 @@ public class NotificationManagerService extends SystemService {
                 updateEffectsSuppressorLocked();
             }
             mLightTrimListeners.remove(removed);
+        }
+
+        @Override
+        protected String getRequiredPermission() {
+            return null;
         }
 
         @GuardedBy("mNotificationLock")
@@ -7893,6 +7992,19 @@ public class NotificationManagerService extends SystemService {
         public String toString() {
             return stats ? "stats" : zen ? "zen" : ('\'' + pkgFilter + '\'');
         }
+    }
+
+    @VisibleForTesting
+    void resetAssistantUserSet(int userId) {
+        mAssistants.setUserSet(userId, false);
+        handleSavePolicyFile();
+    }
+
+    @VisibleForTesting
+    @Nullable
+    ComponentName getApprovedAssistant(int userId) {
+        List<ComponentName> allowedComponents = mAssistants.getAllowedComponents(userId);
+        return CollectionUtils.firstOrNull(allowedComponents);
     }
 
     @VisibleForTesting

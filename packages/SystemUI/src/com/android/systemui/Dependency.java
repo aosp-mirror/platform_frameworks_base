@@ -191,7 +191,7 @@ public class Dependency extends SystemUI {
             new DependencyKey<>(LEAK_REPORT_EMAIL_NAME);
 
     private final ArrayMap<Object, Object> mDependencies = new ArrayMap<>();
-    private final ArrayMap<Object, DependencyProvider> mProviders = new ArrayMap<>();
+    private final ArrayMap<Object, LazyDependencyCreator> mProviders = new ArrayMap<>();
 
     @Inject Lazy<ActivityStarter> mActivityStarter;
     @Inject Lazy<ActivityStarterDelegate> mActivityStarterDelegate;
@@ -510,7 +510,7 @@ public class Dependency extends SystemUI {
         Preconditions.checkArgument(cls instanceof DependencyKey<?> || cls instanceof Class<?>);
 
         @SuppressWarnings("unchecked")
-        DependencyProvider<T> provider = mProviders.get(cls);
+        LazyDependencyCreator<T> provider = mProviders.get(cls);
         if (provider == null) {
             throw new IllegalArgumentException("Unsupported dependency " + cls
                     + ". " + mProviders.size() + " providers known.");
@@ -520,7 +520,11 @@ public class Dependency extends SystemUI {
 
     private static Dependency sDependency;
 
-    public interface DependencyProvider<T> {
+    /**
+     * Interface for a class that can create a dependency. Used to implement laziness
+     * @param <T> The type of the dependency being created
+     */
+    private interface LazyDependencyCreator<T> {
         T createDependency();
     }
 

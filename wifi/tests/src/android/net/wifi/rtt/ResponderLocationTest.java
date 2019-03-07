@@ -17,8 +17,10 @@
 package android.net.wifi.rtt;
 
 import android.location.Address;
+import android.location.Location;
 import android.net.MacAddress;
 import android.os.Parcel;
+import android.webkit.MimeTypeMap;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
@@ -35,7 +37,7 @@ import java.util.List;
  */
 @RunWith(JUnit4.class)
 public class ResponderLocationTest {
-    private static final double LATLNG_TOLERANCE_DEGREES = 0.001;
+    private static final double LATLNG_TOLERANCE_DEGREES = 0.00001;
     private static final double ALT_TOLERANCE_METERS = 0.01;
     private static final double HEIGHT_TOLERANCE_METERS = 0.01;
     private static final int INDEX_ELEMENT_TYPE = 2;
@@ -170,7 +172,7 @@ public class ResponderLocationTest {
     private static final byte[] sTestMapUrlSE = {
             (byte) 5, // Map URL Subelement
             (byte) 25,
-            (byte) ResponderLocation.MAP_TYPE_URL_DEFINED,
+            (byte) 0, // MAP_TYPE_URL_DEFINED
             (byte) 'h',
             (byte) 't',
             (byte) 't',
@@ -206,7 +208,7 @@ public class ResponderLocationTest {
 
         boolean valid = responderLocation.isValid();
         boolean lciValid = responderLocation.isLciSubelementValid();
-        boolean zValid = responderLocation.isZsubelementValid();
+        boolean zValid = responderLocation.isZaxisSubelementValid();
 
         assertFalse(valid);
         assertFalse(lciValid);
@@ -222,7 +224,7 @@ public class ResponderLocationTest {
 
         boolean valid = responderLocation.isValid();
         boolean lciValid = responderLocation.isLciSubelementValid();
-        boolean zValid = responderLocation.isZsubelementValid();
+        boolean zValid = responderLocation.isZaxisSubelementValid();
 
         assertFalse(valid);
         assertFalse(lciValid);
@@ -240,7 +242,7 @@ public class ResponderLocationTest {
 
         boolean valid = responderLocation.isValid();
         boolean lciValid = responderLocation.isLciSubelementValid();
-        boolean zValid = responderLocation.isZsubelementValid();
+        boolean zValid = responderLocation.isZaxisSubelementValid();
 
         assertFalse(valid);
         assertFalse(lciValid);
@@ -258,7 +260,8 @@ public class ResponderLocationTest {
 
         boolean valid = responderLocation.isValid();
         boolean lciValid = responderLocation.isLciSubelementValid();
-        boolean zValid = responderLocation.isZsubelementValid();
+        boolean zValid = responderLocation.isZaxisSubelementValid();
+        Location location = responderLocation.toLocation();
 
         assertTrue(valid);
         assertTrue(lciValid);
@@ -273,11 +276,20 @@ public class ResponderLocationTest {
         assertEquals(64.0, responderLocation.getAltitudeUncertainty());
         assertEquals(11.2, responderLocation.getAltitude(), ALT_TOLERANCE_METERS);
         assertEquals(1, responderLocation.getDatum()); // WGS84
-        int lciFlags = responderLocation.getLciFlags();
-        assertEquals(0, lciFlags & ResponderLocation.LCI_FLAGS_MASK_REGLOC_AGREEMENT);
-        assertEquals(0, lciFlags & ResponderLocation.LCI_FLAGS_MASK_REGLOC_DSE);
-        assertEquals(0, lciFlags & ResponderLocation.LCI_FLAGS_MASK_DEPENDENT_STA);
-        assertEquals(1, lciFlags & ResponderLocation.LCI_FLAGS_MASK_VERSION);
+        assertEquals(false, responderLocation.getRegisteredLocationAgreementIndication());
+        assertEquals(false, responderLocation.getRegisteredLocationDseIndication());
+        assertEquals(false, responderLocation.getDependentStationIndication());
+        assertEquals(1, responderLocation.getLciVersion());
+
+        // Testing Location Object
+        assertEquals(-33.857009, location.getLatitude(),
+                LATLNG_TOLERANCE_DEGREES);
+        assertEquals(151.215200, location.getLongitude(),
+                LATLNG_TOLERANCE_DEGREES);
+        assertEquals((0.0009765625 + 0.0009765625) / 2, location.getAccuracy(),
+                LATLNG_TOLERANCE_DEGREES);
+        assertEquals(11.2, location.getAltitude(), ALT_TOLERANCE_METERS);
+        assertEquals(64.0, location.getVerticalAccuracyMeters(), ALT_TOLERANCE_METERS);
     }
 
     /**
@@ -292,7 +304,7 @@ public class ResponderLocationTest {
 
         boolean valid = responderLocation.isValid();
         boolean lciValid = responderLocation.isLciSubelementValid();
-        boolean zValid = responderLocation.isZsubelementValid();
+        boolean zValid = responderLocation.isZaxisSubelementValid();
 
         assertFalse(valid);
         assertFalse(lciValid);
@@ -312,7 +324,7 @@ public class ResponderLocationTest {
 
         boolean valid = responderLocation.isValid();
         boolean lciValid = responderLocation.isLciSubelementValid();
-        boolean zValid = responderLocation.isZsubelementValid();
+        boolean zValid = responderLocation.isZaxisSubelementValid();
 
         assertFalse(valid);
         assertFalse(lciValid);
@@ -332,7 +344,7 @@ public class ResponderLocationTest {
 
         boolean valid = responderLocation.isValid();
         boolean lciValid = responderLocation.isLciSubelementValid();
-        boolean zValid = responderLocation.isZsubelementValid();
+        boolean zValid = responderLocation.isZaxisSubelementValid();
 
         assertFalse(valid);
         assertFalse(lciValid);
@@ -352,7 +364,7 @@ public class ResponderLocationTest {
 
         boolean valid = responderLocation.isValid();
         boolean lciValid = responderLocation.isLciSubelementValid();
-        boolean zValid = responderLocation.isZsubelementValid();
+        boolean zValid = responderLocation.isZaxisSubelementValid();
 
         assertFalse(valid);
         assertFalse(lciValid);
@@ -370,12 +382,12 @@ public class ResponderLocationTest {
                 new ResponderLocation(testBuffer, sTestLcrBufferHeader);
 
         boolean isValid = responderLocation.isValid();
-        boolean isZValid = responderLocation.isZsubelementValid();
+        boolean isZValid = responderLocation.isZaxisSubelementValid();
         boolean isLciValid = responderLocation.isLciSubelementValid();
-        double staFloorNumber = responderLocation.getStaFloorNumber();
-        double staHeightAboveFloorMeters = responderLocation.getStaHeightAboveFloorMeters();
+        double staFloorNumber = responderLocation.getFloorNumber();
+        double staHeightAboveFloorMeters = responderLocation.getHeightAboveFloorMeters();
         double staHeightAboveFloorUncertaintyMeters =
-                responderLocation.getStaHeightAboveFloorUncertaintyMeters();
+                responderLocation.getHeightAboveFloorUncertaintyMeters();
 
         assertTrue(isValid);
         assertTrue(isZValid);
@@ -496,20 +508,21 @@ public class ResponderLocationTest {
      * Test that a URL can be extracted from a valid lcr buffer with a map image subelement.
      */
     @Test
-    public void testLcrCheckMapUrlIsValid() {
+    public void testLcrCheckMapUriIsValid() {
         byte[] testLciBuffer = concatenateArrays(sTestLciIeHeader, sTestLciSE);
         byte[] testLcrBuffer = concatenateArrays(sTestLcrBufferHeader, sTestMapUrlSE);
         ResponderLocation responderLocation = new ResponderLocation(testLciBuffer, testLcrBuffer);
 
         boolean valid = responderLocation.isValid();
-        int mapImageType = responderLocation.getMapImageType();
+        String mapImageMimeType = responderLocation.getMapImageMimeType();
         String urlString = "";
-        if (responderLocation.getMapImageUrl() != null) {
-            urlString = responderLocation.getMapImageUrl().toString();
+        if (responderLocation.getMapImageUri() != null) {
+            urlString = responderLocation.getMapImageUri().toString();
         }
 
         assertTrue(valid);
-        assertEquals(ResponderLocation.MAP_TYPE_URL_DEFINED, mapImageType);
+        MimeTypeMap mimeTypeMap = MimeTypeMap.getSingleton();
+        assertEquals(mimeTypeMap.getMimeTypeFromExtension("jpg"), mapImageMimeType);
         assertEquals("https://map.com/mall.jpg", urlString);
     }
 

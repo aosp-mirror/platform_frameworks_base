@@ -468,6 +468,7 @@ public class SettingsBackupTest {
                     Settings.Global.TETHER_SUPPORTED,
                     Settings.Global.TETHER_ENABLE_LEGACY_DHCP_SERVER,
                     Settings.Global.TEXT_CLASSIFIER_CONSTANTS,
+                    Settings.Global.TEXT_CLASSIFIER_ACTION_MODEL_PARAMS,
                     Settings.Global.THEATER_MODE_ON,
                     Settings.Global.TIME_ONLY_MODE_CONSTANTS,
                     Settings.Global.TRANSITION_ANIMATION_SCALE,

@@ -196,6 +196,9 @@ public abstract class ActivityManagerInternal {
     /** Kill the processes in the list due to their tasks been removed. */
     public abstract void killProcessesForRemovedTask(ArrayList<Object> procsToKill);
 
+    /** Kill the process immediately. */
+    public abstract void killProcess(String processName, int uid, String reason);
+
     /**
      * Returns {@code true} if {@code uid} is running an activity from {@code packageName}.
      */

@@ -21,6 +21,7 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyInt;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.eq;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
@@ -38,6 +39,7 @@ import static com.android.server.wm.ActivityStack.STACK_VISIBILITY_VISIBLE_BEHIN
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -168,6 +170,24 @@ public class ActivityRecordTests extends ActivityTestsBase {
         assertTrue(activity.canBeLaunchedOnDisplay(DEFAULT_DISPLAY));
         // An activity cannot be launched on a non-existent display.
         assertFalse(activity.canBeLaunchedOnDisplay(DEFAULT_DISPLAY + 1));
+    }
+
+    @Test
+    public void testRestartProcessIfVisible() {
+        doNothing().when(mSupervisor).scheduleRestartTimeout(mActivity);
+        mActivity.getParent().getWindowConfiguration().setAppBounds(0, 0, 500, 1000);
+        mActivity.visible = true;
+        mActivity.haveState = false;
+        mActivity.info.resizeMode = ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
+        mActivity.info.maxAspectRatio = 1.5f;
+        mActivity.setState(ActivityStack.ActivityState.RESUMED, "testRestart");
+        final Rect originalOverrideBounds = new Rect(0, 0, 400, 600);
+        mActivity.setBounds(originalOverrideBounds);
+
+        mService.restartActivityProcessIfVisible(mActivity.appToken);
+
+        assertEquals(ActivityStack.ActivityState.RESTARTING_PROCESS, mActivity.getState());
+        assertNotEquals(originalOverrideBounds, mActivity.getBounds());
     }
 
     @Test

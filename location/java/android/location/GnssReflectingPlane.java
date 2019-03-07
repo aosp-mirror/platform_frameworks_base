@@ -16,6 +16,8 @@
 
 package android.location;
 
+import android.annotation.FloatRange;
+import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -29,17 +31,21 @@ import android.os.Parcelable;
 public final class GnssReflectingPlane implements Parcelable {
 
     /** Represents latitude in degrees of the reflecting plane */
-    private double mLatitudeDegrees;
+    @FloatRange(from = -90.0f, to = 90.0f)
+    private final double mLatitudeDegrees;
     /** Represents longitude in degrees of the reflecting plane. */
-    private double mLongitudeDegrees;
+    @FloatRange(from = -180.0f, to = 180.0f)
+    private final double mLongitudeDegrees;
     /**
      * Represents altitude in meters above the WGS 84 reference ellipsoid of the reflection point in
      * the plane
      */
-    private double mAltitudeMeters;
+    @FloatRange(from = -1000.0f, to = 10000.0f)
+    private final double mAltitudeMeters;
 
     /** Represents azimuth clockwise from north of the reflecting plane in degrees. */
-    private double mAzimuthDegrees;
+    @FloatRange(from = 0.0f, to = 360.0f)
+    private final double mAzimuthDegrees;
 
     private GnssReflectingPlane(Builder builder) {
         mLatitudeDegrees = builder.mLatitudeDegrees;
@@ -49,11 +55,13 @@ public final class GnssReflectingPlane implements Parcelable {
     }
 
     /** Gets the latitude in degrees of the reflecting plane. */
+    @FloatRange(from = -90.0f, to = 90.0f)
     public double getLatitudeDegrees() {
         return mLatitudeDegrees;
     }
 
     /** Gets the longitude in degrees of the reflecting plane. */
+    @FloatRange(from = -180.0f, to = 180.0f)
     public double getLongitudeDegrees() {
         return mLongitudeDegrees;
     }
@@ -62,11 +70,13 @@ public final class GnssReflectingPlane implements Parcelable {
      * Gets the altitude in meters above the WGS 84 reference ellipsoid of the reflecting point
      * within the plane
      */
+    @FloatRange(from = -1000.0f, to = 10000.0f)
     public double getAltitudeMeters() {
         return mAltitudeMeters;
     }
 
     /** Gets the azimuth clockwise from north of the reflecting plane in degrees. */
+    @FloatRange(from = 0.0f, to = 360.0f)
     public double getAzimuthDegrees() {
         return mAzimuthDegrees;
     }
@@ -76,10 +86,11 @@ public final class GnssReflectingPlane implements Parcelable {
         return 0;
     }
 
-    public static final @android.annotation.NonNull Creator<GnssReflectingPlane> CREATOR =
+    public static final Creator<GnssReflectingPlane> CREATOR =
             new Creator<GnssReflectingPlane>() {
                 @Override
-                public GnssReflectingPlane createFromParcel(Parcel parcel) {
+                @NonNull
+                public GnssReflectingPlane createFromParcel(@NonNull Parcel parcel) {
                     GnssReflectingPlane reflectingPlane =
                             new Builder()
                                     .setLatitudeDegrees(parcel.readDouble())
@@ -108,7 +119,7 @@ public final class GnssReflectingPlane implements Parcelable {
     }
 
     @Override
-    public void writeToParcel(Parcel parcel, int flags) {
+    public void writeToParcel(@NonNull Parcel parcel, int flags) {
         parcel.writeDouble(mLatitudeDegrees);
         parcel.writeDouble(mLongitudeDegrees);
         parcel.writeDouble(mAltitudeMeters);
@@ -119,19 +130,20 @@ public final class GnssReflectingPlane implements Parcelable {
     public static final class Builder {
         /** For documentation, see corresponding fields in {@link GnssReflectingPlane}. */
         private double mLatitudeDegrees;
-
         private double mLongitudeDegrees;
         private double mAltitudeMeters;
         private double mAzimuthDegrees;
 
         /** Sets the latitude in degrees of the reflecting plane. */
-        public Builder setLatitudeDegrees(double latitudeDegrees) {
+        @NonNull public Builder setLatitudeDegrees(
+                @FloatRange(from = -90.0f, to = 90.0f) double latitudeDegrees) {
             mLatitudeDegrees = latitudeDegrees;
             return this;
         }
 
         /** Sets the longitude in degrees of the reflecting plane. */
-        public Builder setLongitudeDegrees(double longitudeDegrees) {
+        @NonNull public Builder setLongitudeDegrees(
+                @FloatRange(from = -180.0f, to = 180.0f) double longitudeDegrees) {
             mLongitudeDegrees = longitudeDegrees;
             return this;
         }
@@ -140,19 +152,21 @@ public final class GnssReflectingPlane implements Parcelable {
          * Sets the altitude in meters above the WGS 84 reference ellipsoid of the reflecting point
          * within the plane
          */
-        public Builder setAltitudeMeters(double altitudeMeters) {
+        @NonNull public Builder setAltitudeMeters(
+                @FloatRange(from = -1000.0f, to = 10000.0f) double altitudeMeters) {
             mAltitudeMeters = altitudeMeters;
             return this;
         }
 
         /** Sets the azimuth clockwise from north of the reflecting plane in degrees. */
-        public Builder setAzimuthDegrees(double azimuthDegrees) {
+        @NonNull public Builder setAzimuthDegrees(
+                @FloatRange(from = 0.0f, to = 360.0f) double azimuthDegrees) {
             mAzimuthDegrees = azimuthDegrees;
             return this;
         }
 
         /** Builds a {@link GnssReflectingPlane} object as specified by this builder. */
-        public GnssReflectingPlane build() {
+        @NonNull public GnssReflectingPlane build() {
             return new GnssReflectingPlane(this);
         }
     }

@@ -80,7 +80,7 @@ class RecoverableKeyStoreDbHelper extends SQLiteOpenHelper {
                     + RootOfTrustEntry._ID + " INTEGER PRIMARY KEY,"
                     + RootOfTrustEntry.COLUMN_NAME_USER_ID + " INTEGER,"
                     + RootOfTrustEntry.COLUMN_NAME_UID + " INTEGER,"
-                    + RootOfTrustEntry.COLUMN_NAME_ROOT_ALIAS + " TEST,"
+                    + RootOfTrustEntry.COLUMN_NAME_ROOT_ALIAS + " TEXT,"
                     + RootOfTrustEntry.COLUMN_NAME_CERT_PATH + " BLOB,"
                     + RootOfTrustEntry.COLUMN_NAME_CERT_SERIAL + " INTEGER,"
                     + "UNIQUE("

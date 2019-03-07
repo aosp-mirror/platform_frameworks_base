@@ -266,29 +266,6 @@ TEST(ResourceUtilsTest, StringBuilderUnicodeCodes) {
 TEST(ResourceUtilsTest, StringBuilderPreserveSpaces) {
   EXPECT_THAT(ResourceUtils::StringBuilder(true /*preserve_spaces*/).AppendText("\"").to_string(),
               Eq("\""));
-
-  // Single quotes should be able to be used without escaping them when preserving spaces and the
-  // spaces should not be trimmed
-  EXPECT_THAT(ResourceUtils::StringBuilder()
-                  .AppendText("    hey guys ")
-                  .AppendText(" 'this is so cool' ", /* preserve_spaces */ true)
-                  .AppendText(" wow    ")
-                  .to_string(),
-              Eq(" hey guys  'this is so cool'  wow "));
-
-  // Reading a double quote while preserving spaces should not change the quote state
-  EXPECT_THAT(ResourceUtils::StringBuilder()
-                  .AppendText("    hey guys ")
-                  .AppendText(" \"this is so cool' ", /* preserve_spaces */ true)
-                  .AppendText(" wow    ")
-                  .to_string(),
-              Eq(" hey guys  \"this is so cool'  wow "));
-  EXPECT_THAT(ResourceUtils::StringBuilder()
-                  .AppendText("    hey guys\"  ")
-                  .AppendText(" \"this is so cool' ", /* preserve_spaces */ true)
-                  .AppendText(" wow  \"  ")
-                  .to_string(),
-              Eq(" hey guys   \"this is so cool'  wow   "));
 }
 
 }  // namespace aapt

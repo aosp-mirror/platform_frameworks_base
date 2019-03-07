@@ -283,6 +283,7 @@ public class RecoveryController {
      */
     @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
     @NonNull public static RecoveryController getInstance(@NonNull Context context) {
+        // lockSettings may be null.
         ILockSettings lockSettings =
                 ILockSettings.Stub.asInterface(ServiceManager.getService("lock_settings"));
         return new RecoveryController(lockSettings, KeyStore.getInstance());

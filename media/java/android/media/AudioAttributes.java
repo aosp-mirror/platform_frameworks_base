@@ -374,9 +374,15 @@ public final class AudioAttributes implements Parcelable {
      */
     public static final int FLAG_NO_CAPTURE = 0x1 << 10;
 
+    /**
+     * @hide
+     * Flag indicating force muting haptic channels.
+     */
+    public static final int FLAG_MUTE_HAPTIC = 0x1 << 11;
+
     private final static int FLAG_ALL = FLAG_AUDIBILITY_ENFORCED | FLAG_SECURE | FLAG_SCO |
             FLAG_BEACON | FLAG_HW_AV_SYNC | FLAG_HW_HOTWORD | FLAG_BYPASS_INTERRUPTION_POLICY |
-            FLAG_BYPASS_MUTE | FLAG_LOW_LATENCY | FLAG_DEEP_BUFFER;
+            FLAG_BYPASS_MUTE | FLAG_LOW_LATENCY | FLAG_DEEP_BUFFER | FLAG_MUTE_HAPTIC;
     private final static int FLAG_ALL_PUBLIC = FLAG_AUDIBILITY_ENFORCED |
             FLAG_HW_AV_SYNC | FLAG_LOW_LATENCY;
 
@@ -467,6 +473,14 @@ public final class AudioAttributes implements Parcelable {
     }
 
     /**
+     * Return if haptic channels are muted.
+     * @return {@code true} if haptic channels are muted, {@code false} otherwise.
+     */
+    public boolean areHapticChannelsMuted() {
+        return (mFlags & FLAG_MUTE_HAPTIC) != 0;
+    }
+
+    /**
      * Builder class for {@link AudioAttributes} objects.
      * <p> Here is an example where <code>Builder</code> is used to define the
      * {@link AudioAttributes} to be used by a new <code>AudioTrack</code> instance:
@@ -490,6 +504,7 @@ public final class AudioAttributes implements Parcelable {
         private int mContentType = CONTENT_TYPE_UNKNOWN;
         private int mSource = MediaRecorder.AudioSource.AUDIO_SOURCE_INVALID;
         private int mFlags = 0x0;
+        private boolean mMuteHapticChannels = false;
         private HashSet<String> mTags = new HashSet<String>();
         private Bundle mBundle;
 
@@ -528,6 +543,9 @@ public final class AudioAttributes implements Parcelable {
             aa.mUsage = mUsage;
             aa.mSource = mSource;
             aa.mFlags = mFlags;
+            if (mMuteHapticChannels) {
+                aa.mFlags |= FLAG_MUTE_HAPTIC;
+            }
             aa.mTags = (HashSet<String>) mTags.clone();
             aa.mFormattedTags = TextUtils.join(";", mTags);
             if (mBundle != null) {
@@ -801,6 +819,17 @@ public final class AudioAttributes implements Parcelable {
             } else {
                 setCapturePreset(preset);
             }
+            return this;
+        }
+
+        /**
+         * Specifying if haptic should be muted or not when playing audio-haptic coupled data.
+         * By default, haptic channels are enabled.
+         * @param muted true to force muting haptic channels.
+         * @return the same Builder instance.
+         */
+        public Builder setMuteHapticChannels(boolean muted) {
+            mMuteHapticChannels = muted;
             return this;
         }
     };

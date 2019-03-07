@@ -118,7 +118,7 @@ TEST_F(XmlFlattenerTest, FlattenXmlWithNoCompiledAttributes) {
   ASSERT_THAT(tree.getAttributeCount(), Eq(0u));
 
   ASSERT_THAT(tree.next(), Eq(android::ResXMLTree::TEXT));
-  EXPECT_THAT(tree.getText(&len), StrEq(u"Some text\\"));
+  EXPECT_THAT(tree.getText(&len), StrEq(u"Some text\\\\"));
 
   ASSERT_THAT(tree.next(), Eq(android::ResXMLTree::END_TAG));
   EXPECT_THAT(tree.getElementNamespace(&len), IsNull());
@@ -283,7 +283,7 @@ TEST_F(XmlFlattenerTest, ProcessEscapedStrings) {
   EXPECT_THAT(tree.getAttributeStringValue(idx, &len), StrEq(u"\""));
 
   ASSERT_THAT(tree.next(), Eq(android::ResXMLTree::TEXT));
-  EXPECT_THAT(tree.getText(&len), StrEq(u"\\d{5}"));
+  EXPECT_THAT(tree.getText(&len), StrEq(u"\\\\d{5}"));
 }
 
 TEST_F(XmlFlattenerTest, ProcessQuotes) {
@@ -360,6 +360,7 @@ I
    J
 
 </item>
+          <item>\t K \n </item>
           <item>
           </item>
       </root>)");
@@ -435,6 +436,12 @@ I
   EXPECT_THAT(tree.getElementName(&len), StrEq(u"item"));
   ASSERT_THAT(tree.next(), Eq(android::ResXMLTree::TEXT));
   EXPECT_THAT(tree.getText(&len), StrEq(u" J "));
+  ASSERT_THAT(tree.next(), Eq(android::ResXMLTree::END_TAG));
+
+  ASSERT_THAT(tree.next(), Eq(android::ResXMLTree::START_TAG));
+  EXPECT_THAT(tree.getElementName(&len), StrEq(u"item"));
+  ASSERT_THAT(tree.next(), Eq(android::ResXMLTree::TEXT));
+  EXPECT_THAT(tree.getText(&len), StrEq(u"\\t K \\n "));
   ASSERT_THAT(tree.next(), Eq(android::ResXMLTree::END_TAG));
 
   ASSERT_THAT(tree.next(), Eq(android::ResXMLTree::START_TAG));

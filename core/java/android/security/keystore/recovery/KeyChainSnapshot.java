@@ -147,7 +147,7 @@ public final class KeyChainSnapshot implements Parcelable {
         return mEncryptedRecoveryKeyBlob;
     }
 
-    public static final @android.annotation.NonNull Creator<KeyChainSnapshot> CREATOR =
+    public static final @NonNull Creator<KeyChainSnapshot> CREATOR =
             new Creator<KeyChainSnapshot>() {
         public KeyChainSnapshot createFromParcel(Parcel in) {
             return new KeyChainSnapshot(in);
@@ -171,7 +171,7 @@ public final class KeyChainSnapshot implements Parcelable {
          * @param snapshotVersion The snapshot version
          * @return This builder.
          */
-        public Builder setSnapshotVersion(int snapshotVersion) {
+        public @NonNull Builder setSnapshotVersion(int snapshotVersion) {
             mInstance.mSnapshotVersion = snapshotVersion;
             return this;
         }
@@ -182,7 +182,7 @@ public final class KeyChainSnapshot implements Parcelable {
          * @param maxAttempts The maximum number of guesses.
          * @return This builder.
          */
-        public Builder setMaxAttempts(int maxAttempts) {
+        public @NonNull Builder setMaxAttempts(int maxAttempts) {
             mInstance.mMaxAttempts = maxAttempts;
             return this;
         }
@@ -193,7 +193,7 @@ public final class KeyChainSnapshot implements Parcelable {
          * @param counterId The counter id.
          * @return This builder.
          */
-        public Builder setCounterId(long counterId) {
+        public @NonNull Builder setCounterId(long counterId) {
             mInstance.mCounterId = counterId;
             return this;
         }
@@ -204,7 +204,7 @@ public final class KeyChainSnapshot implements Parcelable {
          * @param serverParams The server parameters
          * @return This builder.
          */
-        public Builder setServerParams(byte[] serverParams) {
+        public @NonNull Builder setServerParams(byte[] serverParams) {
             mInstance.mServerParams = serverParams;
             return this;
         }
@@ -218,7 +218,7 @@ public final class KeyChainSnapshot implements Parcelable {
          * @throws CertificateException if the given certificate path cannot be encoded properly
          * @return This builder.
          */
-        public Builder setTrustedHardwareCertPath(@NonNull CertPath certPath)
+        public @NonNull Builder setTrustedHardwareCertPath(@NonNull CertPath certPath)
                 throws CertificateException {
             mInstance.mCertPath = RecoveryCertPath.createRecoveryCertPath(certPath);
             return this;
@@ -230,7 +230,7 @@ public final class KeyChainSnapshot implements Parcelable {
          * @param keyChainProtectionParams The UI and key derivation parameters
          * @return This builder.
          */
-        public Builder setKeyChainProtectionParams(
+        public @NonNull Builder setKeyChainProtectionParams(
                 @NonNull List<KeyChainProtectionParams> keyChainProtectionParams) {
             mInstance.mKeyChainProtectionParams = keyChainProtectionParams;
             return this;
@@ -242,7 +242,8 @@ public final class KeyChainSnapshot implements Parcelable {
          * @param entryRecoveryData List of application keys
          * @return This builder.
          */
-        public Builder setWrappedApplicationKeys(List<WrappedApplicationKey> entryRecoveryData) {
+        public @NonNull Builder setWrappedApplicationKeys(
+                @NonNull List<WrappedApplicationKey> entryRecoveryData) {
             mInstance.mEntryRecoveryData = entryRecoveryData;
             return this;
         }
@@ -253,7 +254,8 @@ public final class KeyChainSnapshot implements Parcelable {
          * @param encryptedRecoveryKeyBlob The recovery key blob.
          * @return This builder.
          */
-        public Builder setEncryptedRecoveryKeyBlob(@NonNull byte[] encryptedRecoveryKeyBlob) {
+        public @NonNull Builder setEncryptedRecoveryKeyBlob(
+                @NonNull byte[] encryptedRecoveryKeyBlob) {
             mInstance.mEncryptedRecoveryKeyBlob = encryptedRecoveryKeyBlob;
             return this;
         }
@@ -265,7 +267,7 @@ public final class KeyChainSnapshot implements Parcelable {
          * @return new instance
          * @throws NullPointerException if some of the required fields were not set.
          */
-        @NonNull public KeyChainSnapshot build() {
+        public @NonNull KeyChainSnapshot build() {
             Preconditions.checkCollectionElementsNotNull(mInstance.mKeyChainProtectionParams,
                     "keyChainProtectionParams");
             Preconditions.checkCollectionElementsNotNull(mInstance.mEntryRecoveryData,

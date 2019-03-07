@@ -623,7 +623,7 @@ public abstract class ContentResolver implements ContentInterface {
     }
 
     /** {@hide} */
-    public static ContentResolver wrap(@NonNull ContentInterface wrapped) {
+    public static @NonNull ContentResolver wrap(@NonNull ContentInterface wrapped) {
         Preconditions.checkNotNull(wrapped);
 
         return new ContentResolver(null, wrapped) {
@@ -654,7 +654,7 @@ public abstract class ContentResolver implements ContentInterface {
      * Create a {@link ContentResolver} instance that redirects all its methods
      * to the given {@link ContentProvider}.
      */
-    public static ContentResolver wrap(@NonNull ContentProvider wrapped) {
+    public static @NonNull ContentResolver wrap(@NonNull ContentProvider wrapped) {
         return wrap((ContentInterface) wrapped);
     }
 
@@ -662,7 +662,7 @@ public abstract class ContentResolver implements ContentInterface {
      * Create a {@link ContentResolver} instance that redirects all its methods
      * to the given {@link ContentProviderClient}.
      */
-    public static ContentResolver wrap(@NonNull ContentProviderClient wrapped) {
+    public static @NonNull ContentResolver wrap(@NonNull ContentProviderClient wrapped) {
         return wrap((ContentInterface) wrapped);
     }
 

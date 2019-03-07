@@ -95,6 +95,9 @@ public class BubbleController implements BubbleExpandedView.OnBubbleBlockedListe
     /** Flag to position the header below the activity view */
     private static final String ENABLE_BUBBLE_FOOTER = "experiment_enable_bubble_footer";
 
+    private static final String BUBBLE_STIFFNESS = "experiment_bubble_stiffness";
+    private static final String BUBBLE_BOUNCINESS = "experiment_bubble_bounciness";
+
     private final Context mContext;
     private final NotificationEntryManager mNotificationEntryManager;
     private final IActivityTaskManager mActivityTaskManager;
@@ -567,6 +570,20 @@ public class BubbleController implements BubbleExpandedView.OnBubbleBlockedListe
     public static boolean useFooter(Context context) {
         return Settings.Secure.getInt(context.getContentResolver(),
                 ENABLE_BUBBLE_FOOTER, 0) != 0;
+    }
+
+    /** Default stiffness to use for bubble physics animations. */
+    public static int getBubbleStiffness(Context context, int defaultStiffness) {
+        return Settings.Secure.getInt(
+                context.getContentResolver(), BUBBLE_STIFFNESS, defaultStiffness);
+    }
+
+    /** Default bounciness/damping ratio to use for bubble physics animations. */
+    public static float getBubbleBounciness(Context context, float defaultBounciness) {
+        return Settings.Secure.getInt(
+                context.getContentResolver(),
+                BUBBLE_BOUNCINESS,
+                (int) (defaultBounciness * 100)) / 100f;
     }
 
     /** PinnedStackListener that dispatches IME visibility updates to the stack. */

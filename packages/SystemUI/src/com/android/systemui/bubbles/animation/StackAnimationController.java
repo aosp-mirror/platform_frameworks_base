@@ -30,6 +30,7 @@ import androidx.dynamicanimation.animation.SpringAnimation;
 import androidx.dynamicanimation.animation.SpringForce;
 
 import com.android.systemui.R;
+import com.android.systemui.bubbles.BubbleController;
 
 import com.google.android.collect.Sets;
 
@@ -131,6 +132,18 @@ public class StackAnimationController extends
      */
     public PointF getStackPosition() {
         return mStackPosition;
+    }
+
+    /**
+     * Where the stack would be if it were snapped to the nearest horizontal edge (left or right).
+     */
+    public PointF getStackPositionAlongNearestHorizontalEdge() {
+        final PointF stackPos = getStackPosition();
+        final boolean onLeft = mLayout.isFirstChildXLeftOfCenter(stackPos.x);
+        final RectF bounds = getAllowableStackPositionRegion();
+
+        stackPos.x = onLeft ? bounds.left : bounds.right;
+        return stackPos;
     }
 
     /**
@@ -325,8 +338,10 @@ public class StackAnimationController extends
     @Override
     SpringForce getSpringForce(DynamicAnimation.ViewProperty property, View view) {
         return new SpringForce()
-                .setDampingRatio(DEFAULT_BOUNCINESS)
-                .setStiffness(DEFAULT_STIFFNESS);
+                .setDampingRatio(BubbleController.getBubbleBounciness(
+                        mLayout.getContext(), DEFAULT_BOUNCINESS))
+                .setStiffness(BubbleController.getBubbleStiffness(
+                        mLayout.getContext(), (int) (DEFAULT_STIFFNESS * 100f)));
     }
 
     @Override

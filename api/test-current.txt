@@ -41,7 +41,6 @@ package android.app {
 
   public class Activity extends android.view.ContextThemeWrapper implements android.content.ComponentCallbacks2 android.view.KeyEvent.Callback android.view.LayoutInflater.Factory2 android.view.View.OnCreateContextMenuListener android.view.Window.Callback {
     method public void onMovedToDisplay(int, android.content.res.Configuration);
-    method public void setInheritShowWhenLocked(boolean);
   }
 
   public class ActivityManager {
@@ -564,11 +563,13 @@ package android.content {
     ctor public AutofillOptions(int, boolean);
     method public int describeContents();
     method public static android.content.AutofillOptions forWhitelistingItself();
+    method public boolean isAugmentedAutofillEnabled(@NonNull android.content.Context);
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.content.AutofillOptions> CREATOR;
-    field public boolean augmentedEnabled;
+    field public boolean augmentedAutofillEnabled;
     field public final boolean compatModeEnabled;
     field public final int loggingLevel;
+    field @Nullable public android.util.ArraySet<android.content.ComponentName> whitelistedActivitiesForAugmentedAutofill;
   }
 
   public final class ContentCaptureOptions implements android.os.Parcelable {
@@ -668,7 +669,7 @@ package android.content.pm {
     field public static final int PROTECTION_FLAG_SYSTEM_TEXT_CLASSIFIER = 65536; // 0x10000
     field public static final int PROTECTION_FLAG_VENDOR_PRIVILEGED = 32768; // 0x8000
     field public static final int PROTECTION_FLAG_WELLBEING = 131072; // 0x20000
-    field public String backgroundPermission;
+    field @Nullable public final String backgroundPermission;
   }
 
   public final class ShortcutInfo implements android.os.Parcelable {
@@ -937,16 +938,16 @@ package android.location {
   }
 
   public class LocationManager {
-    method public String[] getBackgroundThrottlingWhitelist();
-    method public String[] getIgnoreSettingsWhitelist();
+    method @NonNull public String[] getBackgroundThrottlingWhitelist();
+    method @NonNull public String[] getIgnoreSettingsWhitelist();
     method @NonNull public java.util.List<android.location.LocationRequest> getTestProviderCurrentRequests(String);
-    method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void requestLocationUpdates(android.location.LocationRequest, android.location.LocationListener, android.os.Looper);
-    method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void requestLocationUpdates(android.location.LocationRequest, android.app.PendingIntent);
-    method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void setLocationEnabledForUser(boolean, android.os.UserHandle);
+    method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void requestLocationUpdates(@NonNull android.location.LocationRequest, @NonNull android.location.LocationListener, @Nullable android.os.Looper);
+    method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void requestLocationUpdates(@NonNull android.location.LocationRequest, @NonNull android.app.PendingIntent);
+    method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void setLocationEnabledForUser(boolean, @NonNull android.os.UserHandle);
   }
 
   public final class LocationRequest implements android.os.Parcelable {
-    method public static android.location.LocationRequest create();
+    method @NonNull public static android.location.LocationRequest create();
     method public int describeContents();
     method public long getExpireAt();
     method public long getFastestInterval();
@@ -954,14 +955,14 @@ package android.location {
     method public int getNumUpdates();
     method public int getQuality();
     method public boolean isLocationSettingsIgnored();
-    method public android.location.LocationRequest setExpireAt(long);
-    method public android.location.LocationRequest setExpireIn(long);
-    method public android.location.LocationRequest setFastestInterval(long);
-    method public android.location.LocationRequest setInterval(long);
-    method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public android.location.LocationRequest setLocationSettingsIgnored(boolean);
-    method public android.location.LocationRequest setNumUpdates(int);
-    method public android.location.LocationRequest setProvider(String);
-    method public android.location.LocationRequest setQuality(int);
+    method @NonNull public android.location.LocationRequest setExpireAt(long);
+    method @NonNull public android.location.LocationRequest setExpireIn(long);
+    method @NonNull public android.location.LocationRequest setFastestInterval(long);
+    method @NonNull public android.location.LocationRequest setInterval(long);
+    method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) @NonNull public android.location.LocationRequest setLocationSettingsIgnored(boolean);
+    method @NonNull public android.location.LocationRequest setNumUpdates(int);
+    method @NonNull public android.location.LocationRequest setProvider(@NonNull String);
+    method @NonNull public android.location.LocationRequest setQuality(int);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final int ACCURACY_BLOCK = 102; // 0x66
     field public static final int ACCURACY_CITY = 104; // 0x68
@@ -1521,7 +1522,7 @@ package android.os {
     method public final void putInt64Array(long, long[]);
     method public final void putInt8(long, byte);
     method public final void putInt8Array(long, byte[]);
-    method public final void putNativeHandle(long, android.os.NativeHandle);
+    method public final void putNativeHandle(long, @Nullable android.os.NativeHandle);
     method public final void putString(long, String);
     method public static Boolean[] wrapArray(@NonNull boolean[]);
     method public static Long[] wrapArray(@NonNull long[]);
@@ -1541,7 +1542,7 @@ package android.os {
     method public final double readDouble();
     method public final java.util.ArrayList<java.lang.Double> readDoubleVector();
     method public final android.os.HwBlob readEmbeddedBuffer(long, long, long, boolean);
-    method public final android.os.NativeHandle readEmbeddedNativeHandle(long, long);
+    method @Nullable public final android.os.NativeHandle readEmbeddedNativeHandle(long, long);
     method public final float readFloat();
     method public final java.util.ArrayList<java.lang.Float> readFloatVector();
     method public final short readInt16();
@@ -1552,8 +1553,8 @@ package android.os {
     method public final java.util.ArrayList<java.lang.Long> readInt64Vector();
     method public final byte readInt8();
     method public final java.util.ArrayList<java.lang.Byte> readInt8Vector();
-    method public final android.os.NativeHandle readNativeHandle();
-    method public final java.util.ArrayList<android.os.NativeHandle> readNativeHandleVector();
+    method @Nullable public final android.os.NativeHandle readNativeHandle();
+    method @NonNull public final java.util.ArrayList<android.os.NativeHandle> readNativeHandleVector();
     method public final String readString();
     method public final java.util.ArrayList<java.lang.String> readStringVector();
     method public final android.os.IHwBinder readStrongBinder();
@@ -1577,8 +1578,8 @@ package android.os {
     method public final void writeInt8(byte);
     method public final void writeInt8Vector(java.util.ArrayList<java.lang.Byte>);
     method public final void writeInterfaceToken(String);
-    method public final void writeNativeHandle(android.os.NativeHandle);
-    method public final void writeNativeHandleVector(java.util.ArrayList<android.os.NativeHandle>);
+    method public final void writeNativeHandle(@Nullable android.os.NativeHandle);
+    method public final void writeNativeHandleVector(@NonNull java.util.ArrayList<android.os.NativeHandle>);
     method public final void writeStatus(int);
     method public final void writeString(String);
     method public final void writeStringVector(java.util.ArrayList<java.lang.String>);
@@ -1671,10 +1672,10 @@ package android.os {
     ctor public NativeHandle(@NonNull java.io.FileDescriptor, boolean);
     ctor public NativeHandle(@NonNull java.io.FileDescriptor[], @NonNull int[], boolean);
     method public void close() throws java.io.IOException;
-    method public android.os.NativeHandle dup() throws java.io.IOException;
-    method public java.io.FileDescriptor getFileDescriptor();
-    method public java.io.FileDescriptor[] getFileDescriptors();
-    method public int[] getInts();
+    method @NonNull public android.os.NativeHandle dup() throws java.io.IOException;
+    method @NonNull public java.io.FileDescriptor getFileDescriptor();
+    method @NonNull public java.io.FileDescriptor[] getFileDescriptors();
+    method @NonNull public int[] getInts();
     method public boolean hasSingleFileDescriptor();
   }
 
@@ -1753,9 +1754,9 @@ package android.os {
     method public static int getAppId(int);
     method public int getIdentifier();
     method public static boolean isApp(int);
-    field public static final android.os.UserHandle ALL;
-    field public static final android.os.UserHandle CURRENT;
-    field public static final android.os.UserHandle SYSTEM;
+    field @NonNull public static final android.os.UserHandle ALL;
+    field @NonNull public static final android.os.UserHandle CURRENT;
+    field @NonNull public static final android.os.UserHandle SYSTEM;
   }
 
   public class UserManager {
@@ -1991,12 +1992,23 @@ package android.provider {
   }
 
   public static interface DeviceConfig.OnPropertyChangedListener {
+    method public default void onPropertiesChanged(@NonNull android.provider.DeviceConfig.Properties);
     method public void onPropertyChanged(String, String, String);
   }
 
   public static interface DeviceConfig.Privacy {
     field public static final String NAMESPACE = "privacy";
     field public static final String PROPERTY_LOCATION_ACCESS_CHECK_ENABLED = "location_access_check_enabled";
+  }
+
+  public static class DeviceConfig.Properties {
+    method public boolean getBoolean(@NonNull String, boolean);
+    method public float getFloat(@NonNull String, float);
+    method public int getInt(@NonNull String, int);
+    method @NonNull public java.util.Set<java.lang.String> getKeyset();
+    method public long getLong(@NonNull String, long);
+    method @NonNull public String getNamespace();
+    method @Nullable public String getString(@NonNull String, @Nullable String);
   }
 
   public final class MediaStore {
@@ -2032,6 +2044,7 @@ package android.provider {
     field public static final String CAPTIVE_PORTAL_USE_HTTPS = "captive_portal_use_https";
     field public static final String DATA_STALL_CONSECUTIVE_DNS_TIMEOUT_THRESHOLD = "data_stall_consecutive_dns_timeout_threshold";
     field public static final String DATA_STALL_EVALUATION_TYPE = "data_stall_evaluation_type";
+    field public static final int DATA_STALL_EVALUATION_TYPE_DNS = 1; // 0x1
     field public static final String DATA_STALL_MIN_EVALUATE_INTERVAL = "data_stall_min_evaluate_interval";
     field public static final String DATA_STALL_VALID_DNS_TIME_THRESHOLD = "data_stall_valid_dns_time_threshold";
     field public static final String DYNAMIC_POWER_SAVINGS_DISABLE_THRESHOLD = "dynamic_power_savings_disable_threshold";
@@ -2100,8 +2113,8 @@ package android.security.keystore {
   }
 
   public class DeviceIdAttestationException extends java.lang.Exception {
-    ctor public DeviceIdAttestationException(String);
-    ctor public DeviceIdAttestationException(String, Throwable);
+    ctor public DeviceIdAttestationException(@Nullable String);
+    ctor public DeviceIdAttestationException(@Nullable String, @Nullable Throwable);
   }
 
   public static final class KeyGenParameterSpec.Builder {
@@ -2320,7 +2333,38 @@ package android.service.notification {
   }
 
   public abstract class NotificationListenerService extends android.app.Service {
-    method public void onNotificationRemoved(android.service.notification.StatusBarNotification, android.service.notification.NotificationListenerService.RankingMap, android.service.notification.NotificationStats, int);
+    method public void onNotificationRemoved(@NonNull android.service.notification.StatusBarNotification, @NonNull android.service.notification.NotificationListenerService.RankingMap, @NonNull android.service.notification.NotificationStats, int);
+  }
+
+  public final class NotificationStats implements android.os.Parcelable {
+    ctor public NotificationStats();
+    method public int describeContents();
+    method public int getDismissalSentiment();
+    method public int getDismissalSurface();
+    method public boolean hasDirectReplied();
+    method public boolean hasExpanded();
+    method public boolean hasInteracted();
+    method public boolean hasSeen();
+    method public boolean hasSnoozed();
+    method public boolean hasViewedSettings();
+    method public void setDirectReplied();
+    method public void setDismissalSentiment(int);
+    method public void setDismissalSurface(int);
+    method public void setExpanded();
+    method public void setSeen();
+    method public void setSnoozed();
+    method public void setViewedSettings();
+    method public void writeToParcel(android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.service.notification.NotificationStats> CREATOR;
+    field public static final int DISMISSAL_AOD = 2; // 0x2
+    field public static final int DISMISSAL_NOT_DISMISSED = -1; // 0xffffffff
+    field public static final int DISMISSAL_OTHER = 0; // 0x0
+    field public static final int DISMISSAL_PEEK = 1; // 0x1
+    field public static final int DISMISSAL_SHADE = 3; // 0x3
+    field public static final int DISMISS_SENTIMENT_NEGATIVE = 0; // 0x0
+    field public static final int DISMISS_SENTIMENT_NEUTRAL = 1; // 0x1
+    field public static final int DISMISS_SENTIMENT_POSITIVE = 2; // 0x2
+    field public static final int DISMISS_SENTIMENT_UNKNOWN = -1000; // 0xfffffc18
   }
 
   public final class SnoozeCriterion implements android.os.Parcelable {

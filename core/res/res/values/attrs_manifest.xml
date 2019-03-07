@@ -965,7 +965,7 @@
          <p>The default value of this attribute is <code>false</code>. -->
     <attr name="allowEmbedded" format="boolean" />
 
-    <!-- @hide @SystemApi Specifies whether this {@link android.app.Activity} should be shown on
+    <!-- Specifies whether this {@link android.app.Activity} should be shown on
          top of the lock screen whenever the lockscreen is up and this activity has another
          activity behind it with the {@link android.R.attr#showWhenLocked} attribute set. That
          is, this activity is only visible on the lock screen if there is another activity with

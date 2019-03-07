@@ -120,7 +120,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
          * {@link CaptureRequest}, and not need to construct their own Key objects. However, they
          * may be useful for testing purposes and for defining custom capture request fields.</p>
          */
-        public Key(String name, Class<T> type) {
+        public Key(@NonNull String name, @NonNull Class<T> type) {
             mKey = new CameraMetadataNative.Key<T>(name, type);
         }
 

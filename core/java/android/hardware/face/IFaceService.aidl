@@ -98,7 +98,7 @@ interface IFaceService {
     // Enumerate all faces
     void enumerate(IBinder token, int userId, IFaceServiceReceiver receiver);
 
-    int setFeature(int feature, boolean enabled, in byte [] token);
+    boolean setFeature(int feature, boolean enabled, in byte [] token);
 
     boolean getFeature(int feature);
 

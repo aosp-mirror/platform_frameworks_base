@@ -1286,6 +1286,7 @@ public class RelativeLayout extends ViewGroup {
          * the anchor's visibility is GONE.
          */
         @ViewDebug.ExportedProperty(category = "layout")
+        @InspectableProperty(name = "layout_alignWithParentIfMissing")
         public boolean alignWithParent;
 
         public LayoutParams(Context c, AttributeSet attrs) {

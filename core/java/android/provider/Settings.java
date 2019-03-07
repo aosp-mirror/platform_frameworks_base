@@ -10684,7 +10684,7 @@ public final class Settings {
 
         /**
          * Setting to enable the Wi-Fi link probing.
-         * Disabled by default, and setting it to 1 will enable it.
+         * Enabled by default, and setting it to 0 will disable it.
          * The value is boolean (0 or 1).
          * @hide
          */
@@ -11137,8 +11137,9 @@ public final class Settings {
 
         /**
          * The threshold value for the number of consecutive dns timeout events received to be a
-         * signal of data stall. Set the value to 0 or less than 0 to disable. Note that the value
-         * should be larger than 0 if the DNS data stall detection is enabled.
+         * signal of data stall. The number of consecutive timeouts needs to be {@code >=} this
+         * threshold to be considered a data stall. Set the value to {@code <= 0} to disable. Note
+         * that the value should be {@code > 0} if the DNS data stall detection is enabled.
          *
          * @hide
          */
@@ -11169,14 +11170,26 @@ public final class Settings {
                 "data_stall_valid_dns_time_threshold";
 
         /**
-         * Which data stall detection signal to use. Possible values are a union of the powers of 2
-         * of DATA_STALL_EVALUATION_TYPE_*.
+         * Which data stall detection signal to use. This is a bitmask constructed by bitwise-or-ing
+         * (i.e. {@code |}) the DATA_STALL_EVALUATION_TYPE_* values.
          *
+         * Type: int
+         * Valid values:
+         *   {@link #DATA_STALL_EVALUATION_TYPE_DNS} : Use dns as a signal.
          * @hide
          */
         @SystemApi
         @TestApi
         public static final String DATA_STALL_EVALUATION_TYPE = "data_stall_evaluation_type";
+
+        /**
+         * Use dns timeout counts to detect data stall.
+         *
+         * @hide
+         */
+        @SystemApi
+        @TestApi
+        public static final int DATA_STALL_EVALUATION_TYPE_DNS = 1;
 
         /**
          * Whether to try cellular data recovery when a bad network is reported.
@@ -11904,22 +11917,24 @@ public final class Settings {
          * entity_list_default use ":" as delimiter for values. Ex:
          *
          * <pre>
-         * smart_linkify_enabled                    (boolean)
-         * system_textclassifier_enabled            (boolean)
-         * model_dark_launch_enabled                (boolean)
-         * smart_selection_enabled                  (boolean)
-         * smart_text_share_enabled                 (boolean)
-         * smart_linkify_enabled                    (boolean)
-         * smart_select_animation_enabled           (boolean)
-         * suggest_selection_max_range_length       (int)
-         * classify_text_max_range_length           (int)
-         * generate_links_max_text_length           (int)
-         * generate_links_log_sample_rate           (int)
-         * entity_list_default                      (String[])
-         * entity_list_not_editable                 (String[])
-         * entity_list_editable                     (String[])
-         * lang_id_threshold_override               (float)
-         * template_intent_factory_enabled          (boolean)
+         * smart_linkify_enabled                            (boolean)
+         * system_textclassifier_enabled                    (boolean)
+         * model_dark_launch_enabled                        (boolean)
+         * smart_selection_enabled                          (boolean)
+         * smart_text_share_enabled                         (boolean)
+         * smart_linkify_enabled                            (boolean)
+         * smart_select_animation_enabled                   (boolean)
+         * suggest_selection_max_range_length               (int)
+         * classify_text_max_range_length                   (int)
+         * generate_links_max_text_length                   (int)
+         * generate_links_log_sample_rate                   (int)
+         * entity_list_default                              (String[])
+         * entity_list_not_editable                         (String[])
+         * entity_list_editable                             (String[])
+         * in_app_conversation_action_types_default         (String[])
+         * notification_conversation_action_types_default   (String[])
+         * lang_id_threshold_override                       (float)
+         * template_intent_factory_enabled                  (boolean)
          * </pre>
          *
          * <p>
@@ -14574,6 +14589,14 @@ public final class Settings {
          */
         public static final String BATTERY_CHARGING_STATE_UPDATE_DELAY =
                 "battery_charging_state_update_delay";
+
+        /**
+         * A serialized string of params that will be loaded into a text classifier action model.
+         *
+         * @hide
+         */
+        public static final String TEXT_CLASSIFIER_ACTION_MODEL_PARAMS =
+                "text_classifier_action_model_params";
     }
 
     /**

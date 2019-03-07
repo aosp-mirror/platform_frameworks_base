@@ -28,6 +28,7 @@ import android.app.ActivityThread;
 import android.app.VoiceInteractor.PickOptionRequest;
 import android.app.VoiceInteractor.PickOptionRequest.Option;
 import android.app.VoiceInteractor.Prompt;
+import android.app.role.RoleManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -194,7 +195,7 @@ public class ResolverActivity extends Activity {
                 com.android.internal.R.string.whichHomeApplicationNamed,
                 com.android.internal.R.string.whichHomeApplicationLabel);
 
-        // SpR.id.buttonecial titles for BROWSABLE components
+        // titles for layout that deals with http(s) intents
         public static final int BROWSABLE_TITLE_RES =
                 com.android.internal.R.string.whichGiveAccessToApplication;
         public static final int BROWSABLE_NAMED_TITLE_RES =
@@ -302,7 +303,7 @@ public class ResolverActivity extends Activity {
 
         mUseLayoutForBrowsables = getTargetIntent() == null
                 ? false
-                : getTargetIntent().hasCategory(Intent.CATEGORY_BROWSABLE);
+                : isHttpSchemeAndViewAction(getTargetIntent());
 
         // We don't want to support Always Use if browsable layout is being used,
         // as to mitigate Intent Capturing vulnerability
@@ -473,8 +474,8 @@ public class ResolverActivity extends Activity {
         final boolean named = mAdapter.getFilteredPosition() >= 0;
         if (title == ActionTitle.DEFAULT && defaultTitleRes != 0) {
             return getString(defaultTitleRes);
-        } else if (intent.hasCategory(Intent.CATEGORY_BROWSABLE)) {
-            // If the Intent is BROWSABLE then we need to warn the user that
+        } else if (isHttpSchemeAndViewAction(intent)) {
+            // If the Intent's scheme is http(s) then we need to warn the user that
             // they're giving access for the activity to open URLs from this specific host
             return named
                     ? getString(ActionTitle.BROWSABLE_NAMED_TITLE_RES, intent.getData().getHost(),
@@ -583,6 +584,12 @@ public class ResolverActivity extends Activity {
         resetButtonBar();
     }
 
+    private boolean isHttpSchemeAndViewAction(Intent intent) {
+        return (IntentFilter.SCHEME_HTTP.equals(intent.getScheme())
+                || IntentFilter.SCHEME_HTTPS.equals(intent.getScheme()))
+                && Intent.ACTION_VIEW.equals(intent.getAction());
+    }
+
     private boolean hasManagedProfile() {
         UserManager userManager = (UserManager) getSystemService(Context.USER_SERVICE);
         if (userManager == null) {
@@ -645,10 +652,18 @@ public class ResolverActivity extends Activity {
 
     private void showSettingsForSelected(int which, boolean hasIndexBeenFiltered) {
         ResolveInfo ri = mAdapter.resolveInfoForPosition(which, hasIndexBeenFiltered);
-        Intent in = new Intent().setAction(Settings.ACTION_APP_OPEN_BY_DEFAULT_SETTINGS)
-                .setData(Uri.fromParts("package", ri.activityInfo.packageName, null))
-                .addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT);
-        startActivity(in);
+        Intent intent = new Intent();
+        // For browsers, we open the Default Browser page
+        // For regular apps, we open the Open by Default page
+        if (ri.handleAllWebDataURI) {
+            intent.setAction(Intent.ACTION_MANAGE_DEFAULT_APP)
+                    .putExtra(Intent.EXTRA_ROLE_NAME, RoleManager.ROLE_BROWSER);
+        } else {
+            intent.setAction(Settings.ACTION_APP_OPEN_BY_DEFAULT_SETTINGS)
+                    .setData(Uri.fromParts("package", ri.activityInfo.packageName, null))
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT);
+        }
+        startActivity(intent);
     }
 
     public void startSelected(int which, boolean always, boolean hasIndexBeenFiltered) {

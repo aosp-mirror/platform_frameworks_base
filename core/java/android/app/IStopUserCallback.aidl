@@ -22,6 +22,7 @@ package android.app;
  */
 interface IStopUserCallback
 {
+    @UnsupportedAppUsage
     void userStopped(int userId);
     void userStopAborted(int userId);
 }

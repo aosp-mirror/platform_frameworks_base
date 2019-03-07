@@ -16,7 +16,7 @@
 
 package com.android.systemui.recents;
 
-import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
+import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
 import static android.view.MotionEvent.ACTION_CANCEL;
 import static android.view.MotionEvent.ACTION_DOWN;
 import static android.view.MotionEvent.ACTION_UP;
@@ -629,7 +629,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
 
     private void updateEnabledState() {
         mIsEnabled = mContext.getPackageManager().resolveServiceAsUser(mQuickStepIntent,
-                MATCH_DIRECT_BOOT_UNAWARE,
+                MATCH_SYSTEM_ONLY,
                 ActivityManagerWrapper.getInstance().getCurrentUserId()) != null;
     }
 

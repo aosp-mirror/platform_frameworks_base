@@ -1891,7 +1891,7 @@ public class ExifInterface {
      *
      * @param tag the name of the tag.
      */
-    public boolean hasAttribute(String tag) {
+    public boolean hasAttribute(@NonNull String tag) {
         return (getExifAttribute(tag) != null);
     }
 

@@ -61,7 +61,7 @@ public class BroadcastOptions {
             "android:broadcast.dontSendToRestrictedApps";
 
     /**
-     * Corresponds to {@link #setAllowBackgroundActivityStarts}.
+     * Corresponds to {@link #setBackgroundActivityStartsAllowed}.
      */
     static final String KEY_ALLOW_BACKGROUND_ACTIVITY_STARTS =
             "android:broadcast.allowBackgroundActivityStarts";
@@ -161,7 +161,7 @@ public class BroadcastOptions {
      * the broadcast dispatch. Default value is {@code false}
      */
     @RequiresPermission(android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND)
-    public void setAllowBackgroundActivityStarts(boolean allowBackgroundActivityStarts) {
+    public void setBackgroundActivityStartsAllowed(boolean allowBackgroundActivityStarts) {
         mAllowBackgroundActivityStarts = allowBackgroundActivityStarts;
     }
 

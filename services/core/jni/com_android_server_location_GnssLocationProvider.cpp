@@ -160,6 +160,8 @@ using IAGnssCallback_V2_0 = android::hardware::gnss::V2_0::IAGnssCallback;
 
 using IMeasurementCorrections =
     android::hardware::gnss::measurement_corrections::V1_0::IMeasurementCorrections;
+using GnssSingleSatCorrectionFlags =
+    android::hardware::gnss::measurement_corrections::V1_0::GnssSingleSatCorrectionFlags;
 
 using android::hardware::gnss::visibility_control::V1_0::IGnssVisibilityControl;
 using android::hardware::gnss::visibility_control::V1_0::IGnssVisibilityControlCallback;
@@ -199,9 +201,7 @@ sp<IGnssMeasurement_V1_1> gnssMeasurementIface_V1_1 = nullptr;
 sp<IGnssMeasurement_V2_0> gnssMeasurementIface_V2_0 = nullptr;
 sp<IGnssNavigationMessage> gnssNavigationMessageIface = nullptr;
 sp<IMeasurementCorrections> gnssCorrectionsIface = nullptr;
-// This boolean is needed to ensure that Gnsss Measurement Corrections related method are only
-// initalized when needed which will be few devices initially
-bool firstGnssMeasurementCorrectionInjected = false;
+
 sp<IGnssVisibilityControl> gnssVisibilityControlIface = nullptr;
 
 #define WAKE_LOCK_NAME  "GPS"
@@ -1471,6 +1471,51 @@ static void android_location_GnssLocationProvider_init_once(JNIEnv* env, jclass 
             "(Ljava/lang/String;BLjava/lang/String;BLjava/lang/String;BZZ)V");
     method_isInEmergencySession = env->GetMethodID(clazz, "isInEmergencySession", "()Z");
 
+    jclass measCorrClass = env->FindClass("android/location/GnssMeasurementCorrections");
+    method_correctionsGetLatitudeDegrees = env->GetMethodID(
+            measCorrClass,"getLatitudeDegrees", "()D");
+    method_correctionsGetLongitudeDegrees = env->GetMethodID(
+            measCorrClass, "getLongitudeDegrees", "()D");
+    method_correctionsGetAltitudeMeters = env->GetMethodID(
+            measCorrClass, "getAltitudeMeters", "()D");
+    method_correctionsGetHorPosUncMeters = env->GetMethodID(
+            measCorrClass, "getHorizontalPositionUncertaintyMeters", "()D");
+    method_correctionsGetVerPosUncMeters = env->GetMethodID(
+            measCorrClass, "getVerticalPositionUncertaintyMeters", "()D");
+    method_correctionsGetToaGpsNanosecondsOfWeek = env->GetMethodID(
+            measCorrClass, "getToaGpsNanosecondsOfWeek", "()J");
+
+    method_correctionsGetSingleSatCorrectionList = env->GetMethodID(
+            measCorrClass, "getSingleSatelliteCorrectionList", "()Ljava/util/List;");
+
+    jclass corrListClass = env->FindClass("java/util/List");
+    method_listSize = env->GetMethodID(corrListClass, "size", "()I");
+    method_correctionListGet = env->GetMethodID(corrListClass, "get", "(I)Ljava/lang/Object;");
+
+    jclass singleSatCorrClass = env->FindClass("android/location/GnssSingleSatCorrection");
+    method_correctionSatFlags = env->GetMethodID(
+            singleSatCorrClass, "getSingleSatelliteCorrectionFlags", "()I");
+    method_correctionSatConstType = env->GetMethodID(
+            singleSatCorrClass, "getConstellationType", "()I");
+    method_correctionSatId= env->GetMethodID(
+            singleSatCorrClass, "getSatelliteId", "()I");
+    method_correctionSatCarrierFreq = env->GetMethodID(
+            singleSatCorrClass, "getCarrierFrequencyHz", "()F");
+    method_correctionSatIsLosProb = env->GetMethodID(
+            singleSatCorrClass,"getProbabilityLineOfSight", "()F");
+    method_correctionSatEpl = env->GetMethodID(
+            singleSatCorrClass, "getExcessPathLengthMeters", "()F");
+    method_correctionSatEplUnc = env->GetMethodID(
+            singleSatCorrClass, "getExcessPathLengthUncertaintyMeters", "()F");
+    method_correctionSatRefPlane = env->GetMethodID(
+            singleSatCorrClass, "getReflectingPlane", "()Landroid/location/GnssReflectingPlane;");
+
+    jclass refPlaneClass = env->FindClass("android/location/GnssReflectingPlane");
+    method_correctionPlaneLatDeg = env->GetMethodID(refPlaneClass, "getLatitudeDegrees", "()D");
+    method_correctionPlaneLngDeg = env->GetMethodID(refPlaneClass, "getLongitudeDegrees", "()D");
+    method_correctionPlaneAltDeg = env->GetMethodID(refPlaneClass, "getAltitudeMeters", "()D");
+    method_correctionPlaneAzimDeg = env->GetMethodID(refPlaneClass, "getAzimuthDegrees", "()D");
+
     /*
      * Save a pointer to JVM.
      */
@@ -2341,29 +2386,6 @@ static jboolean android_location_GnssMeasurementsProvider_inject_gnss_measuremen
         ALOGW("Trying to inject GNSS corrections on a chipset that does not support them.");
         return JNI_FALSE;
     }
-    if (firstGnssMeasurementCorrectionInjected == false) {
-        jclass measCorrClass = env->GetObjectClass(correctionsObj);
-        method_correctionsGetLatitudeDegrees = env->GetMethodID(
-            measCorrClass,"getLatitudeDegrees", "()D");
-
-        method_correctionsGetLongitudeDegrees = env->GetMethodID(
-            measCorrClass, "getLongitudeDegrees", "()D");
-
-        method_correctionsGetAltitudeMeters = env->GetMethodID(
-            measCorrClass, "getAltitudeMeters", "()D");
-
-        method_correctionsGetHorPosUncMeters = env->GetMethodID(
-            measCorrClass, "getHorizontalPositionUncertaintyMeters", "()D");
-
-        method_correctionsGetVerPosUncMeters = env->GetMethodID(
-            measCorrClass, "getVerticalPositionUncertaintyMeters", "()D");
-
-        method_correctionsGetToaGpsNanosecondsOfWeek = env->GetMethodID(
-            measCorrClass, "getToaGpsNanosecondsOfWeek", "()J");
-
-        method_correctionsGetSingleSatCorrectionList = env->GetMethodID(
-            measCorrClass, "getSingleSatelliteCorrectionList", "()Ljava.util.List;");
-    }
 
     jdouble latitudeDegreesCorr = env->CallDoubleMethod(
         correctionsObj, method_correctionsGetLatitudeDegrees);
@@ -2380,42 +2402,18 @@ static jboolean android_location_GnssMeasurementsProvider_inject_gnss_measuremen
     jobject singleSatCorrectionList = env->CallObjectMethod(correctionsObj,
         method_correctionsGetSingleSatCorrectionList);
 
-    if (firstGnssMeasurementCorrectionInjected == false) {
-        jclass corrListClass = env->GetObjectClass(singleSatCorrectionList);
-        method_listSize = env->GetMethodID(corrListClass, "size", "()I");
-        method_correctionListGet = env->GetMethodID(
-            corrListClass, "get", "(I)Landroid/location/GnssSingleSatCorrection;");
-    }
-
     auto len = (singleSatCorrectionList == nullptr)
         ? 0
         : env->CallIntMethod(singleSatCorrectionList, method_listSize);
+    if (len == 0) {
+        ALOGI("Empty correction list injected....Returning with no HAL injection");
+        return JNI_TRUE;
+    }
     hidl_vec<SingleSatCorrection> list(len);
 
     for (uint16_t i = 0; i < len; ++i) {
         jobject singleSatCorrectionObj = env->CallObjectMethod(
-        singleSatCorrectionList, method_correctionListGet, i);
-
-        if (firstGnssMeasurementCorrectionInjected == false) {
-            jclass singleSatCorrClass = env->GetObjectClass(singleSatCorrectionObj);
-            method_correctionSatFlags = env->GetMethodID(
-                singleSatCorrClass, "getSingleSatelliteCorrectionFlags", "()I");
-            method_correctionSatConstType = env->GetMethodID(
-                singleSatCorrClass, "getConstellationType", "()I");
-            method_correctionSatId= env->GetMethodID(
-                singleSatCorrClass, "getSatelliteId", "()I");
-            method_correctionSatCarrierFreq = env->GetMethodID(
-                singleSatCorrClass, "getCarrierFrequencyHz", "()F");
-            method_correctionSatIsLosProb = env->GetMethodID(
-                singleSatCorrClass,"getProbabilityLineOfSight", "()F");
-            method_correctionSatEpl = env->GetMethodID(
-                singleSatCorrClass, "getExcessPathLengthMeters", "()F");
-            method_correctionSatEplUnc = env->GetMethodID(
-                singleSatCorrClass, "getExcessPathLengthUncertaintyMeters", "()F");
-            method_correctionSatRefPlane = env->GetMethodID(
-                singleSatCorrClass, "getReflectingPlane",
-                "()Landroid/location/GnssReflectingPlane;");
-        }
+            singleSatCorrectionList, method_correctionListGet, i);
 
         jint correctionFlags =
             env->CallIntMethod(singleSatCorrectionObj, method_correctionSatFlags);
@@ -2431,38 +2429,34 @@ static jboolean android_location_GnssMeasurementsProvider_inject_gnss_measuremen
             env->CallFloatMethod(singleSatCorrectionObj, method_correctionSatEpl);
         jfloat eplUncMeters = env->CallFloatMethod(singleSatCorrectionObj,
             method_correctionSatEplUnc);
-        jobject reflectingPlaneObj = env->CallObjectMethod(
-            singleSatCorrectionObj, method_correctionSatRefPlane);
-
-        if (firstGnssMeasurementCorrectionInjected == false) {
-            jclass refPlaneClass = env->GetObjectClass(reflectingPlaneObj);
-            method_correctionPlaneLatDeg = env->GetMethodID(
-                refPlaneClass, "getLatitudeDegrees", "()D");
-            method_correctionPlaneLngDeg = env->GetMethodID(
-                refPlaneClass, "getLongitudeDegrees", "()D");
-            method_correctionPlaneAltDeg = env->GetMethodID(
-                refPlaneClass, "getAltitudeMeters", "()D");
-            method_correctionPlaneAzimDeg = env->GetMethodID(
-                refPlaneClass, "getAzimuthDegrees", "()D");
+        uint16_t corrFlags = static_cast<uint16_t>(correctionFlags);
+        jobject reflectingPlaneObj;
+        bool has_ref_plane = (corrFlags & GnssSingleSatCorrectionFlags::HAS_REFLECTING_PLANE) != 0;
+        if (has_ref_plane) {
+            reflectingPlaneObj = env->CallObjectMethod(
+                singleSatCorrectionObj, method_correctionSatRefPlane);
         }
 
-        jdouble latitudeDegreesRefPlane = env->CallDoubleMethod(
-            reflectingPlaneObj, method_correctionPlaneLatDeg);
-        jdouble longitudeDegreesRefPlane = env->CallDoubleMethod(
-            reflectingPlaneObj, method_correctionPlaneLngDeg);
-        jdouble altitudeDegreesRefPlane = env->CallDoubleMethod(
-            reflectingPlaneObj, method_correctionPlaneAltDeg);
-        jdouble azimuthDegreeRefPlane = env->CallDoubleMethod(
-            reflectingPlaneObj, method_correctionPlaneAzimDeg);
-        ReflectingPlane reflectingPlane = {
-            .latitudeDegrees = latitudeDegreesRefPlane,
-            .longitudeDegrees = longitudeDegreesRefPlane,
-            .altitudeMeters = altitudeDegreesRefPlane,
-            .azimuthDegrees = azimuthDegreeRefPlane,
-        };
+        ReflectingPlane reflectingPlane;
+        if (has_ref_plane) {
+            jdouble latitudeDegreesRefPlane = env->CallDoubleMethod(
+                reflectingPlaneObj, method_correctionPlaneLatDeg);
+            jdouble longitudeDegreesRefPlane = env->CallDoubleMethod(
+                reflectingPlaneObj, method_correctionPlaneLngDeg);
+            jdouble altitudeDegreesRefPlane = env->CallDoubleMethod(
+                reflectingPlaneObj, method_correctionPlaneAltDeg);
+            jdouble azimuthDegreeRefPlane = env->CallDoubleMethod(
+                reflectingPlaneObj, method_correctionPlaneAzimDeg);
+            reflectingPlane = {
+                .latitudeDegrees = latitudeDegreesRefPlane,
+                .longitudeDegrees = longitudeDegreesRefPlane,
+                .altitudeMeters = altitudeDegreesRefPlane,
+                .azimuthDegrees = azimuthDegreeRefPlane,
+            };
+        }
 
         SingleSatCorrection singleSatCorrection = {
-            .singleSatCorrectionFlags = static_cast<uint16_t>(correctionFlags),
+            .singleSatCorrectionFlags = corrFlags,
             .constellation = static_cast<GnssConstellationType>(constType),
             .svid = static_cast<uint16_t>(satId),
             .carrierFrequencyHz = carrierFreqHz,
@@ -2484,7 +2478,6 @@ static jboolean android_location_GnssMeasurementsProvider_inject_gnss_measuremen
     };
 
     gnssCorrectionsIface->setCorrections(measurementCorrections);
-    firstGnssMeasurementCorrectionInjected = true;
     return JNI_TRUE;
 }
 

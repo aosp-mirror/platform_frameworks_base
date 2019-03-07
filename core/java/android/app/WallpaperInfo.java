@@ -16,6 +16,7 @@
 
 package android.app;
 
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.app.slice.Slice;
 import android.content.ComponentName;
@@ -354,12 +355,17 @@ public final class WallpaperInfo implements Parcelable {
     
     /**
      * Returns an URI that provides a settings {@link Slice} for this wallpaper.
+     * The wallpaper should implement a SliceProvider associated with this URI.
+     * The system will display the Slice in the customization section while previewing the live
+     * wallpaper. Because this URI is accessible to other apps, it is recommended to protect it
+     * with the android.permission.BIND_WALLPAPER permission.
      *
      * <p>{@code null} will be returned if there is no settings Slice URI associated
      * with the wallpaper.
      *
      * @return The URI.
      */
+    @Nullable
     public Uri getSettingsSliceUri() {
         if (mSettingsSliceUri == null) {
             return null;

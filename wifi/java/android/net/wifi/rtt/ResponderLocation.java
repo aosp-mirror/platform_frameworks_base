@@ -19,19 +19,25 @@ package android.net.wifi.rtt;
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.location.Address;
+import android.location.Location;
 import android.net.MacAddress;
+import android.net.Uri;
 import android.net.wifi.rtt.CivicLocationKeys.CivicLocationKeysType;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.TextUtils;
+import android.util.SparseArray;
+import android.webkit.MimeTypeMap;
 
 import java.lang.annotation.Retention;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -151,24 +157,8 @@ public final class ResponderLocation implements Parcelable {
     /** Version of the LCI protocol is 1.0, the only defined protocol at this time. */
     public static final int LCI_VERSION_1 = 1;
 
-    /**
-     * Enumerates the flags contained in getLciFlags()
-     *
-     * @hide
-     */
-    @Retention(SOURCE)
-    @IntDef(flag = true, value = {LCI_FLAGS_MASK_REGLOC_AGREEMENT, LCI_FLAGS_MASK_REGLOC_DSE,
-        LCI_FLAGS_MASK_DEPENDENT_STA, LCI_FLAGS_MASK_VERSION})
-    public @interface LciFlagMasks {
-    }
-    /** Location agreement flag is obtained by ANDing this mask with the getLciFlags() value.*/
-    public static final int LCI_FLAGS_MASK_REGLOC_AGREEMENT = 0x10;
-    /** Location DSE flag is obtained by ANDing this mask with the getLciFlags() value.*/
-    public static final int LCI_FLAGS_MASK_REGLOC_DSE = 0x08;
-    /** Dependent station flag is obtained by ANDing this mask with the getLciFlags() value. */
-    public static final int LCI_FLAGS_MASK_DEPENDENT_STA = 0x04;
-    /** Version bits are obtained by ANDing this mask with the getLciFlags() value.*/
-    public static final int LCI_FLAGS_MASK_VERSION = 0x03;
+    /** Provider/Source of the location */
+    private static final String LOCATION_PROVIDER = "WiFi Access Point";
 
     // LCI Subelement Z constants
     private static final int[] SUBELEMENT_Z_BIT_FIELD_LENGTHS = {2, 14, 24, 8};
@@ -178,9 +168,9 @@ public final class ResponderLocation implements Parcelable {
 
     // LCI Subelement Z fields indices
     private static final int SUBELEMENT_Z_LAT_EXPECTED_TO_MOVE_INDEX = 0;
-    private static final int SUBELEMENT_Z_STA_FLOOR_NUMBER_INDEX = 1;
-    private static final int SUBELEMENT_Z_STA_HEIGHT_ABOVE_FLOOR_INDEX = 2;
-    private static final int SUBELEMENT_Z_STA_HEIGHT_ABOVE_FLOOR_UNCERTAINTY_INDEX = 3;
+    private static final int SUBELEMENT_Z_FLOOR_NUMBER_INDEX = 1;
+    private static final int SUBELEMENT_Z_HEIGHT_ABOVE_FLOOR_INDEX = 2;
+    private static final int SUBELEMENT_Z_HEIGHT_ABOVE_FLOOR_UNCERTAINTY_INDEX = 3;
 
     // LCI Subelement Usage Rules constants
     private static final int SUBELEMENT_USAGE_MASK_RETRANSMIT = 0x01;
@@ -233,72 +223,27 @@ public final class ResponderLocation implements Parcelable {
 
     // LCR Map Image Subelement field indexes.
     private static final int SUBELEMENT_IMAGE_MAP_TYPE_INDEX = 0;
-
-    /**
-     * The Map Type value specifies the image format type.
-     *
-     * @hide
-     */
-    @Retention(SOURCE)
-    @IntDef({
-            MAP_TYPE_URL_DEFINED,
-            MAP_TYPE_PNG,
-            MAP_TYPE_GIF,
-            MAP_TYPE_JPG,
-            MAP_TYPE_SVG,
-            MAP_TYPE_DXF,
-            MAP_TYPE_DWG,
-            MAP_TYPE_DWF,
-            MAP_TYPE_CAD,
-            MAP_TYPE_TIFF,
-            MAP_TYPE_GML,
-            MAP_TYPE_KML,
-            MAP_TYPE_BMP,
-            MAP_TYPE_PGM,
-            MAP_TYPE_PPM,
-            MAP_TYPE_XBM,
-            MAP_TYPE_XPM,
-            MAP_TYPE_ICO
-    })
-    public @interface MapImageType {
-    }
-
-    /** File type defined by the file suffix itself. */
-    public static final int MAP_TYPE_URL_DEFINED = 0;
-    /** File type is in PNG format. */
-    public static final int MAP_TYPE_PNG = 1;
-    /** File type is in GIF format. */
-    public static final int MAP_TYPE_GIF = 2;
-    /** File type is in JPG format. */
-    public static final int MAP_TYPE_JPG = 3;
-    /** File type is in SVG format. */
-    public static final int MAP_TYPE_SVG = 4;
-    /** File type is in DXF format. */
-    public static final int MAP_TYPE_DXF = 5;
-    /** File type is in DWG format. */
-    public static final int MAP_TYPE_DWG = 6;
-    /** File type is in DWF format. */
-    public static final int MAP_TYPE_DWF = 7;
-    /** File type is in CAD format. */
-    public static final int MAP_TYPE_CAD = 8;
-    /** File type is in TIFF format. */
-    public static final int MAP_TYPE_TIFF = 9;
-    /** File type is in GML format. */
-    public static final int MAP_TYPE_GML = 10;
-    /** File type is in KML format. */
-    public static final int MAP_TYPE_KML = 11;
-    /** File type is in BMP format. */
-    public static final int MAP_TYPE_BMP = 12;
-    /** File type is in PGM format. */
-    public static final int MAP_TYPE_PGM = 13;
-    /** File type is in PPM format. */
-    public static final int MAP_TYPE_PPM = 14;
-    /** File type is in XBM format. */
-    public static final int MAP_TYPE_XBM = 15;
-    /** File type is in XPM format. */
-    public static final int MAP_TYPE_XPM = 16;
-    /** File type is in ICO format. */
-    public static final int MAP_TYPE_ICO = 17;
+    private static final int MAP_TYPE_URL_DEFINED = 0;
+    private static final String[] SUPPORTED_IMAGE_FILE_EXTENSIONS = {
+            "",
+            "png",
+            "gif",
+            "jpg",
+            "svg",
+            "dxf",
+            "dwg",
+            "dwf",
+            "cad",
+            "tif",
+            "gml",
+            "kml",
+            "bmp",
+            "pgm",
+            "ppm",
+            "xbm",
+            "xpm",
+            "ico"
+    };
 
     // General LCI and LCR state
     private final boolean mIsValid;
@@ -323,13 +268,16 @@ public final class ResponderLocation implements Parcelable {
     private double mAltitudeUncertainty;
     private double mAltitude;
     private int mDatum;
-    private int mLciFlags;
+    private boolean mLciRegisteredLocationAgreement;
+    private boolean mLciRegisteredLocationDse;
+    private boolean mLciDependentStation;
+    private int mLciVersion;
 
     // LCI Subelement Z state
     private int mExpectedToMove;
-    private double mStaFloorNumber;
-    private double mStaHeightAboveFloorMeters;
-    private double mStaHeightAboveFloorUncertaintyMeters;
+    private double mFloorNumber;
+    private double mHeightAboveFloorMeters;
+    private double mHeightAboveFloorUncertaintyMeters;
 
     // LCI Subelement Usage Rights state
     private boolean mUsageRetransmit;
@@ -346,7 +294,7 @@ public final class ResponderLocation implements Parcelable {
 
     // LCR Subelement Map Image state
     private int mMapImageType;
-    private URL mMapImageUrl;
+    private Uri mMapImageUri;
 
     /**
      * Constructor
@@ -360,7 +308,7 @@ public final class ResponderLocation implements Parcelable {
         boolean isLciIeValid = false;
         boolean isLcrIeValid = false;
         setLciSubelementDefaults();
-        setZSubelementDefaults();
+        setZaxisSubelementDefaults();
         setUsageSubelementDefaults();
         setBssidListSubelementDefaults();
         setCivicLocationSubelementDefaults();
@@ -384,7 +332,7 @@ public final class ResponderLocation implements Parcelable {
 
         if (!mIsValid) {
             setLciSubelementDefaults();
-            setZSubelementDefaults();
+            setZaxisSubelementDefaults();
             setCivicLocationSubelementDefaults();
             setMapImageSubelementDefaults();
         }
@@ -409,13 +357,16 @@ public final class ResponderLocation implements Parcelable {
         mAltitudeUncertainty = in.readDouble();
         mAltitude = in.readDouble();
         mDatum = in.readInt();
-        mLciFlags = in.readInt();
+        mLciRegisteredLocationAgreement = in.readByte() != 0;
+        mLciRegisteredLocationDse = in.readByte() != 0;
+        mLciDependentStation = in.readByte() != 0;
+        mLciVersion = in.readInt();
 
         // LCI Subelement Z state
         mExpectedToMove = in.readInt();
-        mStaFloorNumber = in.readDouble();
-        mStaHeightAboveFloorMeters = in.readDouble();
-        mStaHeightAboveFloorUncertaintyMeters = in.readDouble();
+        mFloorNumber = in.readDouble();
+        mHeightAboveFloorMeters = in.readDouble();
+        mHeightAboveFloorUncertaintyMeters = in.readDouble();
 
         // LCI Usage Rights
         mUsageRetransmit = in.readByte() != 0;
@@ -432,10 +383,11 @@ public final class ResponderLocation implements Parcelable {
 
         // LCR Subelement Map Image
         mMapImageType = in.readInt();
-        try {
-            mMapImageUrl = new URL(in.readString());
-        } catch (MalformedURLException e) {
-            mMapImageUrl = null;
+        String urlString = in.readString();
+        if (TextUtils.isEmpty(urlString)) {
+            mMapImageUri = null;
+        } else {
+            mMapImageUri = Uri.parse(urlString);
         }
     }
 
@@ -476,13 +428,16 @@ public final class ResponderLocation implements Parcelable {
         parcel.writeDouble(mAltitudeUncertainty);
         parcel.writeDouble(mAltitude);
         parcel.writeInt(mDatum);
-        parcel.writeInt(mLciFlags);
+        parcel.writeByte((byte) (mLciRegisteredLocationAgreement ? 1 : 0));
+        parcel.writeByte((byte) (mLciRegisteredLocationDse ? 1 : 0));
+        parcel.writeByte((byte) (mLciDependentStation ? 1 : 0));
+        parcel.writeInt(mLciVersion);
 
         // LCI Subelement Z state
         parcel.writeInt(mExpectedToMove);
-        parcel.writeDouble(mStaFloorNumber);
-        parcel.writeDouble(mStaHeightAboveFloorMeters);
-        parcel.writeDouble(mStaHeightAboveFloorUncertaintyMeters);
+        parcel.writeDouble(mFloorNumber);
+        parcel.writeDouble(mHeightAboveFloorMeters);
+        parcel.writeDouble(mHeightAboveFloorUncertaintyMeters);
 
         // LCI Usage Rights
         parcel.writeByte((byte) (mUsageRetransmit ? 1 : 0));
@@ -499,8 +454,8 @@ public final class ResponderLocation implements Parcelable {
 
         // LCR Subelement Map Image
         parcel.writeInt(mMapImageType);
-        if (mMapImageUrl != null) {
-            parcel.writeString(mMapImageUrl.toString());
+        if (mMapImageUri != null) {
+            parcel.writeString(mMapImageUri.toString());
         } else {
             parcel.writeString("");
         }
@@ -546,14 +501,14 @@ public final class ResponderLocation implements Parcelable {
                 switch (subelement) {
                     case SUBELEMENT_LCI:
                         mIsLciValid = parseSubelementLci(subelementData);
-                        if (!mIsLciValid || (mLciFlags & LCI_FLAGS_MASK_VERSION) != LCI_VERSION_1) {
+                        if (!mIsLciValid || mLciVersion != LCI_VERSION_1) {
                             setLciSubelementDefaults();
                         }
                         break;
                     case SUBELEMENT_Z:
                         mIsZValid = parseSubelementZ(subelementData);
                         if (!mIsZValid) {
-                            setZSubelementDefaults();
+                            setZaxisSubelementDefaults();
                         }
                         break;
                     case SUBELEMENT_USAGE:
@@ -625,14 +580,13 @@ public final class ResponderLocation implements Parcelable {
         mAltitude =
                 Math.scalb(subelementLciFields[SUBELEMENT_LCI_ALT_INDEX], -ALTITUDE_FRACTION_BITS);
         mDatum = (int) subelementLciFields[SUBELEMENT_LCI_DATUM_INDEX] & BYTE_MASK;
-        mLciFlags =
-                (int) subelementLciFields[SUBELEMENT_LCI_REGLOC_AGREEMENT_INDEX]
-                        * LCI_FLAGS_MASK_REGLOC_AGREEMENT
-                        | (int) subelementLciFields[SUBELEMENT_LCI_REGLOC_DSE_INDEX]
-                        * LCI_FLAGS_MASK_REGLOC_DSE
-                        | (int) subelementLciFields[SUBELEMENT_LCI_DEPENDENT_STA_INDEX]
-                        * LCI_FLAGS_MASK_DEPENDENT_STA
-                        | (int) subelementLciFields[SUBELEMENT_LCI_VERSION_INDEX];
+        mLciRegisteredLocationAgreement =
+                (subelementLciFields[SUBELEMENT_LCI_REGLOC_AGREEMENT_INDEX] == 1);
+        mLciRegisteredLocationDse =
+                (subelementLciFields[SUBELEMENT_LCI_REGLOC_DSE_INDEX] == 1);
+        mLciDependentStation =
+                (subelementLciFields[SUBELEMENT_LCI_DEPENDENT_STA_INDEX] == 1);
+        mLciVersion = (int) subelementLciFields[SUBELEMENT_LCI_VERSION_INDEX];
         return true;
     }
 
@@ -703,19 +657,18 @@ public final class ResponderLocation implements Parcelable {
 
         mExpectedToMove =
                 (int) subelementZFields[SUBELEMENT_Z_LAT_EXPECTED_TO_MOVE_INDEX] & BYTE_MASK;
-
-        mStaFloorNumber = decodeZUnsignedToSignedValue(subelementZFields,
-                SUBELEMENT_Z_BIT_FIELD_LENGTHS, SUBELEMENT_Z_STA_FLOOR_NUMBER_INDEX,
+        mFloorNumber = decodeZUnsignedToSignedValue(subelementZFields,
+                SUBELEMENT_Z_BIT_FIELD_LENGTHS, SUBELEMENT_Z_FLOOR_NUMBER_INDEX,
                 Z_FLOOR_NUMBER_FRACTION_BITS);
 
-        mStaHeightAboveFloorMeters = decodeZUnsignedToSignedValue(subelementZFields,
-                SUBELEMENT_Z_BIT_FIELD_LENGTHS, SUBELEMENT_Z_STA_HEIGHT_ABOVE_FLOOR_INDEX,
+        mHeightAboveFloorMeters = decodeZUnsignedToSignedValue(subelementZFields,
+                SUBELEMENT_Z_BIT_FIELD_LENGTHS, SUBELEMENT_Z_HEIGHT_ABOVE_FLOOR_INDEX,
                 Z_FLOOR_HEIGHT_FRACTION_BITS);
 
         long zHeightUncertainty =
-                subelementZFields[SUBELEMENT_Z_STA_HEIGHT_ABOVE_FLOOR_UNCERTAINTY_INDEX];
+                subelementZFields[SUBELEMENT_Z_HEIGHT_ABOVE_FLOOR_UNCERTAINTY_INDEX];
         if (zHeightUncertainty > 0 && zHeightUncertainty < Z_MAX_HEIGHT_UNCERTAINTY_FACTOR) {
-            mStaHeightAboveFloorUncertaintyMeters =
+            mHeightAboveFloorUncertaintyMeters =
                     Math.pow(2, Z_FLOOR_HEIGHT_FRACTION_BITS - zHeightUncertainty - 1);
         } else {
             return false;
@@ -831,18 +784,35 @@ public final class ResponderLocation implements Parcelable {
             return false;
         }
         int mapImageType = buffer[SUBELEMENT_IMAGE_MAP_TYPE_INDEX];
-        if (mapImageType < MAP_TYPE_URL_DEFINED || mapImageType > MAP_TYPE_DWG) {
+        int supportedTypesMax = SUPPORTED_IMAGE_FILE_EXTENSIONS.length - 1;
+        if (mapImageType < MAP_TYPE_URL_DEFINED || mapImageType > supportedTypesMax) {
             return false;
         }
         this.mMapImageType = mapImageType;
         byte[] urlBytes = Arrays.copyOfRange(buffer, 1, buffer.length);
-        try {
-            mMapImageUrl = new URL(new String(urlBytes));
-        } catch (MalformedURLException e) {
-            mMapImageUrl = null;
-            return false;
-        }
+        mMapImageUri = Uri.parse(new String(urlBytes, StandardCharsets.UTF_8));
         return true;
+    }
+
+    /**
+     * Convert an image type code to a Mime type
+     *
+     * @param imageTypeCode encoded as an integer
+     * @return the mime type of the image file
+     */
+    private String imageTypeToMime(int imageTypeCode, String imageUrl) {
+        int supportedExtensionsMax = SUPPORTED_IMAGE_FILE_EXTENSIONS.length - 1;
+        if ((imageTypeCode == 0 && imageUrl == null) || imageTypeCode > supportedExtensionsMax) {
+            return null;
+        }
+        MimeTypeMap mimeTypeMap = MimeTypeMap.getSingleton();
+        if (imageTypeCode == 0) {
+            return mimeTypeMap.getMimeTypeFromExtension(
+                    MimeTypeMap.getFileExtensionFromUrl(imageUrl));
+        } else {
+            return mimeTypeMap.getMimeTypeFromExtension(
+                    SUPPORTED_IMAGE_FILE_EXTENSIONS[imageTypeCode]);
+        }
     }
 
     /**
@@ -927,18 +897,21 @@ public final class ResponderLocation implements Parcelable {
         mAltitudeUncertainty = UNCERTAINTY_UNDEFINED;
         mAltitude = 0;
         mDatum = DATUM_UNDEFINED;
-        mLciFlags = 0;
+        mLciRegisteredLocationAgreement = false;
+        mLciRegisteredLocationDse = false;
+        mLciDependentStation = false;
+        mLciVersion = 0;
     }
 
     /**
      * Sets the Z subelement fields to the default values when undefined.
      */
-    private void setZSubelementDefaults() {
+    private void setZaxisSubelementDefaults() {
         mIsZValid = false;
         mExpectedToMove = 0;
-        mStaFloorNumber = 0;
-        mStaHeightAboveFloorMeters = 0;
-        mStaHeightAboveFloorUncertaintyMeters = 0;
+        mFloorNumber = 0;
+        mHeightAboveFloorMeters = 0;
+        mHeightAboveFloorUncertaintyMeters = 0;
     }
 
     /**
@@ -976,7 +949,7 @@ public final class ResponderLocation implements Parcelable {
     private void setMapImageSubelementDefaults() {
         mIsMapImageValid = false;
         mMapImageType = MAP_TYPE_URL_DEFINED;
-        mMapImageUrl = null;
+        mMapImageUri = null;
     }
 
     @Override
@@ -1003,12 +976,15 @@ public final class ResponderLocation implements Parcelable {
                 && mAltitudeUncertainty == other.mAltitudeUncertainty
                 && mAltitude == other.mAltitude
                 && mDatum == other.mDatum
-                && mLciFlags == other.mLciFlags
+                && mLciRegisteredLocationAgreement == other.mLciRegisteredLocationAgreement
+                && mLciRegisteredLocationDse == other.mLciRegisteredLocationDse
+                && mLciDependentStation == other.mLciDependentStation
+                && mLciVersion == other.mLciVersion
                 && mExpectedToMove == other.mExpectedToMove
-                && mStaFloorNumber == other.mStaFloorNumber
-                && mStaHeightAboveFloorMeters == other.mStaHeightAboveFloorMeters
-                && mStaHeightAboveFloorUncertaintyMeters
-                        == other.mStaHeightAboveFloorUncertaintyMeters
+                && mFloorNumber == other.mFloorNumber
+                && mHeightAboveFloorMeters == other.mHeightAboveFloorMeters
+                && mHeightAboveFloorUncertaintyMeters
+                        == other.mHeightAboveFloorUncertaintyMeters
                 && mUsageRetransmit == other.mUsageRetransmit
                 && mUsageRetentionExpires == other.mUsageRetentionExpires
                 && mUsageExtraInfoOnAssociation == other.mUsageExtraInfoOnAssociation
@@ -1017,7 +993,7 @@ public final class ResponderLocation implements Parcelable {
                 && mCivicLocationString.equals(other.mCivicLocationString)
                 && Objects.equals(mCivicLocation, other.mCivicLocation)
                 && mMapImageType == other.mMapImageType
-                && Objects.equals(mMapImageUrl, other.mMapImageUrl);
+                && Objects.equals(mMapImageUri, other.mMapImageUri);
     }
 
     @Override
@@ -1025,10 +1001,12 @@ public final class ResponderLocation implements Parcelable {
         return Objects.hash(mIsValid, mIsLciValid, mIsZValid, mIsUsageValid, mIsBssidListValid,
                 mIsLocationCivicValid, mIsMapImageValid, mLatitudeUncertainty, mLatitude,
                 mLongitudeUncertainty, mLongitude, mAltitudeType, mAltitudeUncertainty, mAltitude,
-                mDatum, mLciFlags, mExpectedToMove, mStaFloorNumber, mStaHeightAboveFloorMeters,
-                mStaHeightAboveFloorUncertaintyMeters, mUsageRetransmit, mUsageRetentionExpires,
+                mDatum, mLciRegisteredLocationAgreement,
+                mLciRegisteredLocationDse, mLciDependentStation, mLciVersion,
+                mExpectedToMove, mFloorNumber, mHeightAboveFloorMeters,
+                mHeightAboveFloorUncertaintyMeters, mUsageRetransmit, mUsageRetentionExpires,
                 mUsageExtraInfoOnAssociation, mBssidList, mCivicLocationCountryCode,
-                mCivicLocationString, mCivicLocation, mMapImageType, mMapImageUrl);
+                mCivicLocationString, mCivicLocation, mMapImageType, mMapImageUri);
     }
 
     /**
@@ -1059,198 +1037,267 @@ public final class ResponderLocation implements Parcelable {
 
     /**
      * @return the latitude uncertainty in degrees.
-     *
+     * <p>
      * Only valid if {@link #isLciSubelementValid()} returns true, or will throw an exception.
-     *
+     * </p>
      * <p> An unknown uncertainty is indicated by 0.</p>
      */
     public double getLatitudeUncertainty() {
         if (!mIsLciValid) {
             throw new IllegalStateException(
-                "getLatitudeUncertainty(): invoked on an invalid result: mIsLciValid = false)");
+                "getLatitudeUncertainty(): invoked on an invalid result: mIsLciValid = false.");
         }
         return mLatitudeUncertainty;
     }
 
     /**
      * @return the latitude in degrees
-     *
+     * <p>
      * Only valid if {@link #isLciSubelementValid()} returns true, or will throw an exception.
      */
     public double getLatitude() {
         if (!mIsLciValid) {
             throw new IllegalStateException(
-                "getLatitude(): invoked on an invalid result: mIsLciValid = false)");
+                "getLatitude(): invoked on an invalid result: mIsLciValid = false.");
         }
         return mLatitude;
     }
 
     /**
      * @return the Longitude uncertainty in degrees.
-     *
+     * <p>
      * Only valid if {@link #isLciSubelementValid()} returns true, or will throw an exception.
-     *
+     * </p>
      * <p> An unknown uncertainty is indicated by 0.</p>
      */
     public double getLongitudeUncertainty() {
         if (!mIsLciValid) {
             throw new IllegalStateException(
-                "getLongitudeUncertainty(): invoked on an invalid result: mIsLciValid = false)");
+                "getLongitudeUncertainty(): invoked on an invalid result: mIsLciValid = false.");
         }
         return mLongitudeUncertainty;
     }
 
     /**
      * @return the Longitude in degrees..
-     *
+     * <p>
      * Only valid if {@link #isLciSubelementValid()} returns true, or will throw an exception.
      */
     public double getLongitude() {
         if (!mIsLciValid) {
             throw new IllegalStateException(
-                "getLatitudeUncertainty(): invoked on an invalid result: mIsLciValid = false)");
+                "getLatitudeUncertainty(): invoked on an invalid result: mIsLciValid = false.");
         }
         return mLongitude;
     }
 
     /**
      * @return the Altitude type.
-     *
+     * <p>
      * Only valid if {@link #isLciSubelementValid()} returns true, or will throw an exception.
      */
     @AltitudeType
     public int getAltitudeType() {
         if (!mIsLciValid) {
             throw new IllegalStateException(
-                "getLatitudeUncertainty(): invoked on an invalid result: mIsLciValid = false)");
+                "getLatitudeUncertainty(): invoked on an invalid result: mIsLciValid = false.");
         }
         return mAltitudeType;
     }
 
     /**
      * @return the Altitude uncertainty in meters.
-     *
+     * <p>
      * Only valid if {@link #isLciSubelementValid()} returns true, or will throw an exception.
-     *
+     * </p>
      * <p>An unknown uncertainty is indicated by 0.</p>
      */
     public double getAltitudeUncertainty() {
         if (!mIsLciValid) {
             throw new IllegalStateException(
-                "getLatitudeUncertainty(): invoked on an invalid result: mIsLciValid = false)");
+                "getLatitudeUncertainty(): invoked on an invalid result: mIsLciValid = false.");
         }
         return mAltitudeUncertainty;
     }
 
     /**
      * @return the Altitude in units defined by the altitude type.
-     *
+     * <p>
      * Only valid if {@link #isLciSubelementValid()} returns true, or will throw an exception.
      */
     public double getAltitude() {
         if (!mIsLciValid) {
             throw new IllegalStateException(
-                "getAltitude(): invoked on an invalid result: mIsLciValid = false)");
+                "getAltitude(): invoked on an invalid result: mIsLciValid = false.");
         }
         return mAltitude;
     }
 
     /**
      * @return the Datum used for the LCI positioning information.
-     *
+     * <p>
      * Only valid if {@link #isLciSubelementValid()} returns true, or will throw an exception.
      */
     @DatumType
     public int getDatum() {
         if (!mIsLciValid) {
             throw new IllegalStateException(
-                "getDatum(): invoked on an invalid result: mIsLciValid = false)");
+                "getDatum(): invoked on an invalid result: mIsLciValid = false.");
         }
         return mDatum;
     }
 
     /**
-     * @return the LCI sub-element flags (5-bits).
-     *
+     * @return true if the station is operating within a national policy area or an international
+     * agreement area near a national border, otherwise false
+     * (see 802.11REVmc Section 11.12.3 - Registered STA Operation).
+     * <p>
      * Only valid if {@link #isLciSubelementValid()} returns true, or will throw an exception.
-     *
-     * <p>Note: The flags/version can be extracted by bitwise ANDing this value with the
-     * corresponding LCI_FLAGS_MASK_* .</p>
      */
-    public int getLciFlags() {
+    public boolean getRegisteredLocationAgreementIndication() {
         if (!mIsLciValid) {
             throw new IllegalStateException(
-                "getLciFlags(): invoked on an invalid result: mIsLciValid = false)");
+                "getRegisteredLocationAgreementIndication(): "
+                        + "invoked on an invalid result: mIsLciValid = false.");
         }
-        return mLciFlags;
+        return mLciRegisteredLocationAgreement;
+    }
+
+    /**
+     * @return true indicating this is an enabling station, enabling the operation of nearby STAs
+     * with Dynamic Station Enablement (DSE), otherwise false.
+     * (see 802.11REVmc Section 11.12.3 - Registered STA Operation).
+     * <p>
+     * Only valid if {@link #isLciSubelementValid()} returns true, or will throw an exception.
+     */
+    public boolean getRegisteredLocationDseIndication() {
+        if (!mIsLciValid) {
+            throw new IllegalStateException(
+                "getRegisteredLocationDseIndication(): "
+                    + "invoked on an invalid result: mIsLciValid = false.");
+        }
+        return mLciRegisteredLocationDse;
+    }
+
+    /**
+     * @return true indicating this is a dependent station that is operating with the enablement of
+     * an enabling station whose LCI is being reported, otherwise false.
+     * (see 802.11REVmc Section 11.12.3 - Registered STA Operation).
+     * <p>
+     * Only valid if {@link #isLciSubelementValid()} returns true, or will throw an exception.
+     */
+    public boolean getDependentStationIndication() {
+        if (!mIsLciValid) {
+            throw new IllegalStateException(
+                "getDependentStationIndication(): "
+                    + "invoked on an invalid result: mIsLciValid = false.");
+        }
+        return mLciDependentStation;
+    }
+
+    /**
+     * @return a value greater or equal to 1, indicating the current version number
+     * of the LCI protocol.
+     * <p>
+     * Only valid if {@link #isLciSubelementValid()} returns true, or will throw an exception.
+     */
+    public int getLciVersion() {
+        if (!mIsLciValid) {
+            throw new IllegalStateException(
+                "getLciVersion(): "
+                    + "invoked on an invalid result: mIsLciValid = false.");
+        }
+        return mLciVersion;
+    }
+
+    /**
+     * @return the LCI location represented as a {@link Location} object (best effort).
+     * <p>
+     * Only valid if {@link #isLciSubelementValid()} returns true, or will throw an exception.
+     */
+    @NonNull
+    public Location toLocation() {
+        if (!mIsLciValid) {
+            throw new IllegalStateException(
+                "toLocation(): "
+                    + "invoked on an invalid result: mIsLciValid = false.");
+        }
+        Location location = new Location(LOCATION_PROVIDER);
+        location.setLatitude(mLatitude);
+        location.setLongitude(mLongitude);
+        location.setAccuracy((float) (mLatitudeUncertainty + mLongitudeUncertainty) / 2);
+        location.setAltitude(mAltitude);
+        location.setVerticalAccuracyMeters((float) mAltitudeUncertainty);
+        location.setTime(System.currentTimeMillis());
+        return location;
     }
 
     /**
      * @return if the Z subelement (containing mobility, Floor, Height above floor) is valid.
      */
-    public boolean isZsubelementValid() {
+    public boolean isZaxisSubelementValid() {
         return mIsZValid;
     }
 
     /**
      * @return an integer representing the mobility of the responder.
-     *
-     * Only valid if {@link #isZsubelementValid()} returns true, or will throw an exception.
+     * <p>
+     * Only valid if {@link #isZaxisSubelementValid()} returns true, or will throw an exception.
      */
     @ExpectedToMoveType
     public int getExpectedToMove() {
         if (!mIsZValid) {
             throw new IllegalStateException(
-                "getExpectedToMove(): invoked on an invalid result: mIsZValid = false)");
+                "getExpectedToMove(): invoked on an invalid result: mIsZValid = false.");
         }
         return mExpectedToMove;
     }
 
     /**
-     * @return the Z sub element STA Floor Number.
-     *
-     * Only valid if {@link #isZsubelementValid()} returns true, or will throw an exception.
-     *
+     * @return the Z sub element Floor Number.
+     * <p>
+     * Only valid if {@link #isZaxisSubelementValid()} returns true, or will throw an exception.
+     * </p>
      * <p>Note: this number can be positive or negative, with value increments of +/- 1/16 of a
      * floor.</p>.
      */
-    public double getStaFloorNumber() {
+    public double getFloorNumber() {
         if (!mIsZValid) {
             throw new IllegalStateException(
-                "getStaFloorNumber(): invoked on an invalid result: mIsZValid = false)");
+                "getFloorNumber(): invoked on an invalid result: mIsZValid = false)");
         }
-        return mStaFloorNumber;
+        return mFloorNumber;
     }
 
     /**
-     * @return the Z subelement STA Height above the floor in meters.
-     *
-     * Only valid if {@link #isZsubelementValid()} returns true, or will throw an exception.
-     *
+     * @return the Z subelement Height above the floor in meters.
+     * <p>
+     * Only valid if {@link #isZaxisSubelementValid()} returns true, or will throw an exception.
+     * </p>
      * <p>This value can be positive or negative. </p>
      */
-    public double getStaHeightAboveFloorMeters() {
+    public double getHeightAboveFloorMeters() {
         if (!mIsZValid) {
             throw new IllegalStateException(
-                "getStaHeightAboveFloorMeters(): invoked on an invalid result: mIsZValid = false)");
+                "getHeightAboveFloorMeters(): invoked on an invalid result: mIsZValid = false)");
         }
-        return mStaHeightAboveFloorMeters;
+        return mHeightAboveFloorMeters;
     }
 
     /**
-     * @return the Z subelement STA Height above the floor uncertainty in meters.
-     *
-     * Only valid if {@link #isZsubelementValid()} returns true, or will throw an exception.
-     *
+     * @return the Z subelement Height above the floor uncertainty in meters.
+     * <p>
+     * Only valid if {@link #isZaxisSubelementValid()} returns true, or will throw an exception.
+     * </p>
      * <p>An unknown uncertainty is indicated by 0.</p>
      */
-    public double getStaHeightAboveFloorUncertaintyMeters() {
+    public double getHeightAboveFloorUncertaintyMeters() {
         if (!mIsZValid) {
             throw new IllegalStateException(
-                "getStaHeightAboveFloorUncertaintyMeters():"
+                "getHeightAboveFloorUncertaintyMeters():"
                     + "invoked on an invalid result: mIsZValid = false)");
         }
-        return mStaHeightAboveFloorUncertaintyMeters;
+        return mHeightAboveFloorUncertaintyMeters;
     }
 
     /**
@@ -1266,7 +1313,6 @@ public final class ResponderLocation implements Parcelable {
     /**
      * @return true if location-data received should expire (and be deleted)
      * by the time provided in the getRelativeExpirationTimeHours() method.
-     *
      *
      * @hide
      */
@@ -1285,20 +1331,18 @@ public final class ResponderLocation implements Parcelable {
     }
 
     /**
-     * @return the list of colocated BSSIDs at the responder.
+     * @return the Immutable list of colocated BSSIDs at the responder.
      *
      * <p> Will return an empty list when there are no bssids listed.
      */
     public List<MacAddress> getColocatedBssids() {
-        return mBssidList;
+        return Collections.unmodifiableList(mBssidList);
     }
 
     /**
      * @return the civic location represented as an {@link Address} object (best effort).
      *
-     * <p> Will return a {@code null} when there is no Civic Location define defined.
-     *
-     * @hide
+     * <p> Will return a {@code null} when there is no Civic Location defined.
      */
     @Nullable
     public Address toCivicLocationAddress() {
@@ -1309,6 +1353,22 @@ public final class ResponderLocation implements Parcelable {
         }
     }
 
+    /**
+     * @return the civic location represented as a {@link SparseArray}
+     * <p>
+     * Valid keys to access the SparseArray can be found in {@code CivicLocationKeys}.
+     * </p>
+     * <p> Will return a {@code null} when there is no Civic Location defined.
+     *
+     */
+    @Nullable
+    public SparseArray toCivicLocationSparseArray() {
+        if (mCivicLocation != null && mCivicLocation.isValid()) {
+            return mCivicLocation.toSparseArray();
+        } else {
+            return null;
+        }
+    }
 
     /**
      * @return the civic location two upper-case ASCII character country code defined in ISO 3166.
@@ -1337,20 +1397,24 @@ public final class ResponderLocation implements Parcelable {
     }
 
     /**
-     * @return the Map Image file type, referred to by getMapImageUrl(), encoded as an integer.
+     * @return the Map Image file Mime type, referred to by getMapImageUrl().
      */
-    @MapImageType
-    public int getMapImageType() {
-        return mMapImageType;
+    @Nullable
+    public String getMapImageMimeType() {
+        if (mMapImageUri == null) {
+            return null;
+        } else {
+            return imageTypeToMime(mMapImageType, mMapImageUri.toString());
+        }
     }
 
     /**
-     * @return a Url referencing a map-file showing the local floor plan.
+     * @return a URI referencing a map-file showing the local floor plan.
      *
-     * <p> Will return a {@code null} when there is no URL defined.
+     * <p> Will return a {@code null} when there is no URI defined.
      */
     @Nullable
-    public URL getMapImageUrl() {
-        return mMapImageUrl;
+    public Uri getMapImageUri() {
+        return mMapImageUri;
     }
 }

@@ -53,7 +53,6 @@ import androidx.annotation.GuardedBy;
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 
-import com.android.internal.util.CollectionUtils;
 import com.android.settingslib.R;
 import com.android.settingslib.core.lifecycle.Lifecycle;
 import com.android.settingslib.core.lifecycle.LifecycleObserver;
@@ -646,30 +645,14 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
                 Map<Integer, List<ScanResult>>> pairing : passpointConfigsAndScans) {
             WifiConfiguration config = pairing.first;
             if (seenFQDNs.add(config.FQDN)) {
-                List<ScanResult> apScanResults = new ArrayList<>();
-
                 List<ScanResult> homeScans =
                         pairing.second.get(WifiManager.PASSPOINT_HOME_NETWORK);
                 List<ScanResult> roamingScans =
                         pairing.second.get(WifiManager.PASSPOINT_ROAMING_NETWORK);
 
-                // TODO(b/118705403): Differentiate home network vs roaming network for summary info
-                if (!CollectionUtils.isEmpty(homeScans)) {
-                    apScanResults.addAll(homeScans);
-                } else if (!CollectionUtils.isEmpty(roamingScans)) {
-                    apScanResults.addAll(roamingScans);
-                }
-
-                int bestRssi = Integer.MIN_VALUE;
-                for (ScanResult result : apScanResults) {
-                    if (result.level >= bestRssi) {
-                        bestRssi = result.level;
-                        config.SSID = AccessPoint.convertToQuotedString(result.SSID);
-                    }
-                }
-
                 AccessPoint accessPoint =
-                        getCachedOrCreatePasspoint(apScanResults, accessPointCache, config);
+                        getCachedOrCreatePasspoint(config, homeScans, roamingScans,
+                                accessPointCache);
                 accessPoints.add(accessPoint);
             }
         }
@@ -688,8 +671,8 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
         for (OsuProvider provider : providersAndScans.keySet()) {
             if (!alreadyProvisioned.contains(provider)) {
                 AccessPoint accessPointOsu =
-                        getCachedOrCreateOsu(providersAndScans.get(provider),
-                                accessPointCache, provider);
+                        getCachedOrCreateOsu(provider, providersAndScans.get(provider),
+                                accessPointCache);
                 accessPoints.add(accessPointOsu);
             }
         }
@@ -709,26 +692,29 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
     }
 
     private AccessPoint getCachedOrCreatePasspoint(
-            List<ScanResult> scanResults,
-            List<AccessPoint> cache,
-            WifiConfiguration config) {
+            WifiConfiguration config,
+            List<ScanResult> homeScans,
+            List<ScanResult> roamingScans,
+            List<AccessPoint> cache) {
         AccessPoint accessPoint = getCachedByKey(cache, AccessPoint.getKey(config));
         if (accessPoint == null) {
-            accessPoint = new AccessPoint(mContext, config);
+            accessPoint = new AccessPoint(mContext, config, homeScans, roamingScans);
+        } else {
+            accessPoint.setScanResultsPasspoint(homeScans, roamingScans);
         }
-        accessPoint.setScanResults(scanResults);
         return accessPoint;
     }
 
     private AccessPoint getCachedOrCreateOsu(
+            OsuProvider provider,
             List<ScanResult> scanResults,
-            List<AccessPoint> cache,
-            OsuProvider provider) {
+            List<AccessPoint> cache) {
         AccessPoint accessPoint = getCachedByKey(cache, AccessPoint.getKey(provider));
         if (accessPoint == null) {
-            accessPoint = new AccessPoint(mContext, provider);
+            accessPoint = new AccessPoint(mContext, provider, scanResults);
+        } else {
+            accessPoint.setScanResults(scanResults);
         }
-        accessPoint.setScanResults(scanResults);
         return accessPoint;
     }
 

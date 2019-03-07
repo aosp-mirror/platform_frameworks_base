@@ -40,12 +40,18 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 
+import android.app.TaskStackListener;
+import android.content.pm.ActivityInfo;
+import android.os.IBinder;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
 
-import org.junit.Before;
 import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Tests for the {@link ActivityDisplay} class.
@@ -330,5 +336,46 @@ public class ActivityDisplayTests extends ActivityTestsBase {
                 any());
         verify(mSupervisor).removeTaskByIdLocked(eq(task1.taskId), anyBoolean(), anyBoolean(),
                 any());
+    }
+
+    /**
+     * Ensures that {@link TaskStackListener} can receive callback about the activity in size
+     * compatibility mode.
+     */
+    @Test
+    public void testHandleActivitySizeCompatMode() throws Exception {
+        final ActivityDisplay display = mRootActivityContainer.getDefaultDisplay();
+        final ActivityRecord activity = createFullscreenStackWithSimpleActivityAt(
+                display).topRunningActivityLocked();
+        activity.setState(ActivityStack.ActivityState.RESUMED, "testHandleActivitySizeCompatMode");
+        activity.info.resizeMode = ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
+        activity.info.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
+        activity.getTaskRecord().getConfiguration().windowConfiguration.getBounds().set(
+                0, 0, 1000, 2000);
+
+        final ArrayList<CompletableFuture<IBinder>> resultWrapper = new ArrayList<>();
+        mService.getTaskChangeNotificationController().registerTaskStackListener(
+                new TaskStackListener() {
+                    @Override
+                    public void onSizeCompatModeActivityChanged(int displayId,
+                            IBinder activityToken) {
+                        resultWrapper.get(0).complete(activityToken);
+                    }
+                });
+
+        // Expect the exact component name when the activity is in size compatible mode.
+        activity.getResolvedOverrideConfiguration().windowConfiguration.getBounds().set(
+                0, 0, 800, 1600);
+        resultWrapper.add(new CompletableFuture<>());
+        display.handleActivitySizeCompatModeIfNeeded(activity);
+
+        assertEquals(activity.appToken, resultWrapper.get(0).get(2, TimeUnit.SECONDS));
+
+        // Expect null component name when switching to non-size-compat mode activity.
+        activity.info.resizeMode = ActivityInfo.RESIZE_MODE_RESIZEABLE;
+        resultWrapper.set(0, new CompletableFuture<>());
+        display.handleActivitySizeCompatModeIfNeeded(activity);
+
+        assertNull(resultWrapper.get(0).get(2, TimeUnit.SECONDS));
     }
 }

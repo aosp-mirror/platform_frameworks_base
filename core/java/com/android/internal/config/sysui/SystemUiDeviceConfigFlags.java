@@ -81,6 +81,12 @@ public final class SystemUiDeviceConfigFlags {
      */
     public static final String SSIN_MAX_NUM_ACTIONS = "ssin_max_num_actions";
 
+    /**
+     * The default component of
+     * {@link android.service.notification.NotificationAssistantService}.
+     */
+    public static final String NAS_DEFAULT_SERVICE = "nas_default_service";
+
     // Flags related to media notifications
 
     /**

@@ -1868,6 +1868,7 @@ public class ApnSetting implements Parcelable {
          *
          * @param carrierId the carrier id to set for this APN
          */
+        @NonNull
         public Builder setCarrierId(int carrierId) {
             this.mCarrierId = carrierId;
             return this;

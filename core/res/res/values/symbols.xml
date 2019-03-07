@@ -1939,6 +1939,7 @@
   <java-symbol type="bool" name="config_wifi_convert_apband_5ghz_to_any" />
   <java-symbol type="bool" name="config_wifi_local_only_hotspot_5ghz" />
   <java-symbol type="bool" name="config_wifi_connected_mac_randomization_supported" />
+  <java-symbol type="bool" name="config_wifi_p2p_mac_randomization_supported" />
   <java-symbol type="bool" name="config_wifi_link_probing_supported" />
   <java-symbol type="bool" name="config_wifi_fast_bss_transition_enabled" />
   <java-symbol type="bool" name="config_wimaxEnabled" />
@@ -2751,12 +2752,16 @@
   <java-symbol type="id" name="month_view" />
   <java-symbol type="integer" name="config_zen_repeat_callers_threshold" />
   <java-symbol type="dimen" name="chooser_corner_radius" />
+  <java-symbol type="string" name="chooser_no_direct_share_targets" />
+  <java-symbol type="drawable" name="chooser_row_layer_list" />
   <java-symbol type="dimen" name="chooser_view_spacing" />
   <java-symbol type="dimen" name="chooser_edge_margin_thin" />
   <java-symbol type="dimen" name="chooser_edge_margin_normal" />
   <java-symbol type="dimen" name="chooser_preview_image_font_size"/>
   <java-symbol type="dimen" name="chooser_preview_width" />
   <java-symbol type="layout" name="chooser_grid" />
+  <java-symbol type="id" name="chooser_row_text_option" />
+  <java-symbol type="dimen" name="chooser_row_text_option_translate" />
   <java-symbol type="layout" name="resolve_grid_item" />
   <java-symbol type="id" name="day_picker_view_pager" />
   <java-symbol type="layout" name="day_picker_content_material" />
@@ -3532,7 +3537,7 @@
   <java-symbol type="string" name="harmful_app_warning_title" />
   <java-symbol type="layout" name="harmful_app_warning_dialog" />
 
-  <java-symbol type="string" name="config_defaultAssistantAccessPackage" />
+  <java-symbol type="string" name="config_defaultAssistantAccessComponent" />
 
   <java-symbol type="bool" name="config_supportBluetoothPersistedState" />
 

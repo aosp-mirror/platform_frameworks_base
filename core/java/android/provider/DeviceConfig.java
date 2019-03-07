@@ -33,10 +33,12 @@ import android.provider.Settings.ResetMode;
 import android.util.Pair;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.Preconditions;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Executor;
 
 /**
@@ -142,6 +144,14 @@ public final class DeviceConfig {
      */
     @SystemApi
     public static final String NAMESPACE_SYSTEMUI = "systemui";
+
+    /**
+     * Namespace for TextClassifier related features.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String NAMESPACE_TEXTCLASSIFIER = "textclassifier";
 
     /**
      * Namespace for all runtime related features.
@@ -656,16 +666,18 @@ public final class DeviceConfig {
     private static void handleChange(Uri uri) {
         List<String> pathSegments = uri.getPathSegments();
         // pathSegments(0) is "config"
-        String namespace = pathSegments.get(1);
-        String name = pathSegments.get(2);
-        String value = getProperty(namespace, name);
+        final String namespace = pathSegments.get(1);
+        final String name = pathSegments.get(2);
+        final String value = getProperty(namespace, name);
         synchronized (sLock) {
-            for (OnPropertyChangedListener listener : sListeners.keySet()) {
+            for (final OnPropertyChangedListener listener : sListeners.keySet()) {
                 if (namespace.equals(sListeners.get(listener).first)) {
                     sListeners.get(listener).second.execute(new Runnable() {
                         @Override
                         public void run() {
-                            listener.onPropertyChanged(namespace, name, value);
+                            Map<String, String> propertyMap = new HashMap(1);
+                            propertyMap.put(name, value);
+                            listener.onPropertiesChanged(new Properties(namespace, propertyMap));
                         }
 
                     });
@@ -692,5 +704,147 @@ public final class DeviceConfig {
          * @param value     The new value of the property which has changed.
          */
         void onPropertyChanged(String namespace, String name, String value);
+
+        /**
+         * Called when one or more properties have changed.
+         *
+         * @param properties Contains the complete collection of properties which have changed for a
+         *         single namespace.
+         */
+        default void onPropertiesChanged(@NonNull Properties properties) {
+            // During the transitional period, this method calls the old one to ensure legacy
+            // callers continue to function as expected. Ignore this if you are implementing it for
+            // yourself.
+            String namespace = properties.getNamespace();
+            for (String name : properties.getKeyset()) {
+                onPropertyChanged(namespace, name, properties.getString(name, null));
+            }
+        }
+    }
+
+    /**
+     * A mapping of properties to values, as well as a single namespace which they all belong to.
+     *
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    public static class Properties {
+        private final String mNamespace;
+        private final HashMap<String, String> mMap;
+
+        /**
+         * Create a mapping of properties to values and the namespace they belong to.
+         *
+         * @param namespace The namespace these properties belong to.
+         * @param keyValueMap A map between property names and property values.
+         */
+        Properties(@NonNull String namespace, @Nullable Map<String, String> keyValueMap) {
+            Preconditions.checkNotNull(namespace);
+            mNamespace = namespace;
+            mMap = new HashMap();
+            if (keyValueMap != null) {
+                mMap.putAll(keyValueMap);
+            }
+        }
+
+        /**
+         * @return the namespace all properties within this instance belong to.
+         */
+        @NonNull
+        public String getNamespace() {
+            return mNamespace;
+        }
+
+        /**
+         * @return the non-null set of property names.
+         */
+        @NonNull
+        public Set<String> getKeyset() {
+            return mMap.keySet();
+        }
+
+        /**
+         * Look up the String value of a property.
+         *
+         * @param name         The name of the property to look up.
+         * @param defaultValue The value to return if the property has not been defined.
+         * @return the corresponding value, or defaultValue if none exists.
+         */
+        @Nullable
+        public String getString(@NonNull String name, @Nullable String defaultValue) {
+            Preconditions.checkNotNull(name);
+            String value = mMap.get(name);
+            return value != null ? value : defaultValue;
+        }
+
+        /**
+         * Look up the boolean value of a property.
+         *
+         * @param name         The name of the property to look up.
+         * @param defaultValue The value to return if the property has not been defined.
+         * @return the corresponding value, or defaultValue if none exists.
+         */
+        public boolean getBoolean(@NonNull String name, boolean defaultValue) {
+            Preconditions.checkNotNull(name);
+            String value = mMap.get(name);
+            return value != null ? Boolean.parseBoolean(value) : defaultValue;
+        }
+
+        /**
+         * Look up the int value of a property.
+         *
+         * @param name         The name of the property to look up.
+         * @param defaultValue The value to return if the property has not been defined or fails to
+         *                     parse into an int.
+         * @return the corresponding value, or defaultValue if no valid int is available.
+         */
+        public int getInt(@NonNull String name, int defaultValue) {
+            Preconditions.checkNotNull(name);
+            String value = mMap.get(name);
+            try {
+                return Integer.parseInt(value);
+            } catch (NumberFormatException e) {
+                return defaultValue;
+            }
+        }
+
+        /**
+         * Look up the long value of a property.
+         *
+         * @param name         The name of the property to look up.
+         * @param defaultValue The value to return if the property has not been defined. or fails to
+         *                     parse into a long.
+         * @return the corresponding value, or defaultValue if no valid long is available.
+         */
+        public long getLong(@NonNull String name, long defaultValue) {
+            Preconditions.checkNotNull(name);
+            String value = mMap.get(name);
+            try {
+                return Long.parseLong(value);
+            } catch (NumberFormatException e) {
+                return defaultValue;
+            }
+        }
+
+        /**
+         * Look up the int value of a property.
+         *
+         * @param name         The name of the property to look up.
+         * @param defaultValue The value to return if the property has not been defined. or fails to
+         *                     parse into a float.
+         * @return the corresponding value, or defaultValue if no valid float is available.
+         */
+        public float getFloat(@NonNull String name, float defaultValue) {
+            Preconditions.checkNotNull(name);
+            String value = mMap.get(name);
+            try {
+                return Float.parseFloat(value);
+            } catch (NumberFormatException e) {
+                return defaultValue;
+            } catch (NullPointerException e) {
+                return defaultValue;
+            }
+        }
     }
 }

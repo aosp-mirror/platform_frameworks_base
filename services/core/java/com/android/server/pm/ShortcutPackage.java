@@ -22,6 +22,7 @@ import android.app.Person;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.LocusId;
 import android.content.pm.PackageInfo;
 import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutManager;
@@ -1702,15 +1703,17 @@ class ShortcutPackage extends ShortcutPackageItem {
             flags |= ShortcutInfo.FLAG_SHADOW;
         }
 
+        LocusId locusId = null; // LocusId is not  set on XML.
+
         return new ShortcutInfo(
-                userId, id, packageName, activityComponent, /* icon =*/ null,
+                userId, id, packageName, activityComponent, /* icon= */ null,
                 title, titleResId, titleResName, text, textResId, textResName,
                 disabledMessage, disabledMessageResId, disabledMessageResName,
                 categories,
                 intents.toArray(new Intent[intents.size()]),
                 rank, extras, lastChangedTimestamp, flags,
                 iconResId, iconResName, bitmapPath, disabledReason,
-                persons.toArray(new Person[persons.size()]));
+                persons.toArray(new Person[persons.size()]), locusId);
     }
 
     private static Intent parseIntent(XmlPullParser parser)
