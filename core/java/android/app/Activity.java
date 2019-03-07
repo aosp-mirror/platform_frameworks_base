@@ -131,6 +131,8 @@ import com.android.internal.app.ToolbarActionBar;
 import com.android.internal.app.WindowDecorActionBar;
 import com.android.internal.policy.PhoneWindow;
 
+import dalvik.system.VMRuntime;
+
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
@@ -2052,6 +2054,7 @@ public class Activity extends ContextThemeWrapper
             mDoReportFullyDrawn = false;
             try {
                 ActivityManager.getService().reportActivityFullyDrawn(mToken, mRestoredFromBundle);
+                VMRuntime.getRuntime().notifyStartupCompleted();
             } catch (RemoteException e) {
             }
         }
