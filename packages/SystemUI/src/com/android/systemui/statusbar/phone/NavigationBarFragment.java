@@ -991,7 +991,7 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
                     }
                 } else {
                     // Screen off disable it
-                    mNavigationBarView.getColorAdaptionController().end();
+                    mNavigationBarView.getColorAdaptionController().stop();
                 }
             }
             if (Intent.ACTION_USER_SWITCHED.equals(action)) {
