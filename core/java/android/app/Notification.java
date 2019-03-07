@@ -3177,6 +3177,7 @@ public class Notification implements Parcelable
      * Returns the bubble metadata that will be used to display app content in a floating window
      * over the existing foreground activity.
      */
+    @Nullable
     public BubbleMetadata getBubbleMetadata() {
         return mBubbleMetadata;
     }
@@ -3568,7 +3569,7 @@ public class Notification implements Parcelable
          * collapsed state, the bubble intent will be invoked and displayed.</b>
          */
         @NonNull
-        public Builder setBubbleMetadata(BubbleMetadata data) {
+        public Builder setBubbleMetadata(@Nullable BubbleMetadata data) {
             mN.mBubbleMetadata = data;
             return this;
         }
@@ -8562,6 +8563,7 @@ public class Notification implements Parcelable
         /**
          * @return the pending intent used to populate the floating window for this bubble.
          */
+        @NonNull
         public PendingIntent getIntent() {
             return mPendingIntent;
         }
@@ -8569,6 +8571,7 @@ public class Notification implements Parcelable
         /**
          * @return the pending intent to send when the bubble is dismissed by a user, if one exists.
          */
+        @Nullable
         public PendingIntent getDeleteIntent() {
             return mDeleteIntent;
         }
@@ -8583,9 +8586,11 @@ public class Notification implements Parcelable
         public CharSequence getTitle() {
             return "";
         }
+
         /**
          * @return the icon that will be displayed for this bubble when it is collapsed.
          */
+        @NonNull
         public Icon getIcon() {
             return mIcon;
         }
@@ -8654,7 +8659,7 @@ public class Notification implements Parcelable
         /**
          * Builder to construct a {@link BubbleMetadata} object.
          */
-        public static class Builder {
+        public static final class Builder {
 
             private PendingIntent mPendingIntent;
             private Icon mIcon;
@@ -8672,7 +8677,8 @@ public class Notification implements Parcelable
              * Sets the intent that will be used when the bubble is expanded. This will display the
              * app content in a floating window over the existing foreground activity.
              */
-            public BubbleMetadata.Builder setIntent(PendingIntent intent) {
+            @NonNull
+            public BubbleMetadata.Builder setIntent(@NonNull PendingIntent intent) {
                 if (intent == null) {
                     throw new IllegalArgumentException("Bubble requires non-null pending intent");
                 }
@@ -8700,7 +8706,8 @@ public class Notification implements Parcelable
              * If your app produces multiple bubbles, the image should be unique for each of them.
              * </p>
              */
-            public BubbleMetadata.Builder setIcon(Icon icon) {
+            @NonNull
+            public BubbleMetadata.Builder setIcon(@NonNull Icon icon) {
                 if (icon == null) {
                     throw new IllegalArgumentException("Bubbles require non-null icon");
                 }
@@ -8713,6 +8720,7 @@ public class Notification implements Parcelable
              * {@link #setIntent(PendingIntent)}, this height may not be respected if there is not
              * enough space on the screen or if the provided height is too small to be useful.
              */
+            @NonNull
             public BubbleMetadata.Builder setDesiredHeight(int height) {
                 mDesiredHeight = Math.max(height, 0);
                 return this;
@@ -8729,6 +8737,7 @@ public class Notification implements Parcelable
              * <p>Generally this flag should only be set if the user has performed an action to
              * request or create a bubble.</p>
              */
+            @NonNull
             public BubbleMetadata.Builder setAutoExpandBubble(boolean shouldExpand) {
                 setFlag(FLAG_AUTO_EXPAND_BUBBLE, shouldExpand);
                 return this;
@@ -8745,6 +8754,7 @@ public class Notification implements Parcelable
              * <p>Generally this flag should only be set if the user has performed an action to
              * request or create a bubble.</p>
              */
+            @NonNull
             public BubbleMetadata.Builder setSuppressInitialNotification(
                     boolean shouldSupressNotif) {
                 setFlag(FLAG_SUPPRESS_INITIAL_NOTIFICATION, shouldSupressNotif);
@@ -8754,7 +8764,8 @@ public class Notification implements Parcelable
             /**
              * Sets an optional intent to send when this bubble is explicitly removed by the user.
              */
-            public BubbleMetadata.Builder setDeleteIntent(PendingIntent deleteIntent) {
+            @NonNull
+            public BubbleMetadata.Builder setDeleteIntent(@Nullable PendingIntent deleteIntent) {
                 mDeleteIntent = deleteIntent;
                 return this;
             }
@@ -8764,6 +8775,7 @@ public class Notification implements Parcelable
              * <p>Will throw {@link IllegalStateException} if required fields have not been set
              * on this builder.</p>
              */
+            @NonNull
             public BubbleMetadata build() {
                 if (mPendingIntent == null) {
                     throw new IllegalStateException("Must supply pending intent to bubble");
