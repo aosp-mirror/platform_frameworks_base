@@ -17,6 +17,8 @@
 package android.net.wifi.p2p;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
 import android.net.MacAddress;
 import android.net.wifi.WpsInfo;
@@ -76,7 +78,7 @@ public class WifiP2pConfig implements Parcelable {
         GROUP_OWNER_BAND_5GHZ
     })
     @Retention(RetentionPolicy.SOURCE)
-    public @interface GroupOwnerBandType {}
+    public @interface GroupOperatingBandType {}
 
     /**
      * Recognized Group Owner required band.
@@ -240,7 +242,7 @@ public class WifiP2pConfig implements Parcelable {
          * @return The builder to facilitate chaining
          *         {@code builder.setXXX(..).setXXX(..)}.
          */
-        public Builder setDeviceAddress(MacAddress deviceAddress) {
+        public @NonNull Builder setDeviceAddress(@Nullable MacAddress deviceAddress) {
             if (deviceAddress == null) {
                 mDeviceAddress = MAC_ANY_ADDRESS;
             } else {
@@ -255,7 +257,9 @@ public class WifiP2pConfig implements Parcelable {
          * <p>
          * A network name shall begin with "DIRECT-xy". x and y are selected
          * from the following character set: upper case letters, lower case
-         * letters and numbers.
+         * letters and numbers. Any byte values allowed for an SSID according to
+         * IEEE802.11-2012 [1] may be included after the string "DIRECT-xy"
+         * (including none).
          * <p>
          *     Must be called - an empty network name or an network name
          *     not conforming to the P2P Group ID naming rule is not valid.
@@ -264,7 +268,7 @@ public class WifiP2pConfig implements Parcelable {
          * @return The builder to facilitate chaining
          *         {@code builder.setXXX(..).setXXX(..)}.
          */
-        public Builder setNetworkName(String networkName) {
+        public @NonNull Builder setNetworkName(@NonNull String networkName) {
             if (TextUtils.isEmpty(networkName)) {
                 throw new IllegalArgumentException(
                         "network name must be non-empty.");
@@ -284,16 +288,23 @@ public class WifiP2pConfig implements Parcelable {
         /**
          * Specify the passphrase for creating or joining a group.
          * <p>
+         * The passphrase must be an ASCII string whose length is between 8
+         * and 63.
+         * <p>
          *     Must be called - an empty passphrase is not valid.
          *
          * @param passphrase the passphrase of a group.
          * @return The builder to facilitate chaining
          *         {@code builder.setXXX(..).setXXX(..)}.
          */
-        public Builder setPassphrase(String passphrase) {
+        public @NonNull Builder setPassphrase(@NonNull String passphrase) {
             if (TextUtils.isEmpty(passphrase)) {
                 throw new IllegalArgumentException(
                         "passphrase must be non-empty.");
+            }
+            if (passphrase.length() < 8 || passphrase.length() > 63) {
+                throw new IllegalArgumentException(
+                        "The length of a passphrase must be between 8 and 63.");
             }
             mPassphrase = passphrase;
             return this;
@@ -331,7 +342,7 @@ public class WifiP2pConfig implements Parcelable {
          * @return The builder to facilitate chaining
          *         {@code builder.setXXX(..).setXXX(..)}.
          */
-        public Builder setGroupOperatingBand(@GroupOwnerBandType int band) {
+        public @NonNull Builder setGroupOperatingBand(@GroupOperatingBandType int band) {
             switch (band) {
                 case GROUP_OWNER_BAND_AUTO:
                 case GROUP_OWNER_BAND_2GHZ:
@@ -372,7 +383,7 @@ public class WifiP2pConfig implements Parcelable {
          * @return The builder to facilitate chaining
          *         {@code builder.setXXX(..).setXXX(..)}.
          */
-        public Builder setGroupOperatingFrequency(int frequency) {
+        public @NonNull Builder setGroupOperatingFrequency(int frequency) {
             if (frequency < 0) {
                 throw new IllegalArgumentException(
                     "Invalid group operating frequency!");
@@ -391,7 +402,7 @@ public class WifiP2pConfig implements Parcelable {
          * @return The builder to facilitate chaining
          *         {@code builder.setXXX(..).setXXX(..)}.
          */
-        public Builder enablePersistentMode(boolean persistent) {
+        public @NonNull Builder enablePersistentMode(boolean persistent) {
             if (persistent) {
                 mNetId = WifiP2pGroup.PERSISTENT_NET_ID;
             } else {
@@ -404,7 +415,7 @@ public class WifiP2pConfig implements Parcelable {
          * Build {@link WifiP2pConfig} given the current requests made on the builder.
          * @return {@link WifiP2pConfig} constructed based on builder method calls.
          */
-        public WifiP2pConfig build() {
+        public @NonNull WifiP2pConfig build() {
             if (TextUtils.isEmpty(mNetworkName)) {
                 throw new IllegalStateException(
                         "network name must be non-empty.");
