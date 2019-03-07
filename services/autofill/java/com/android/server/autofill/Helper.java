@@ -22,11 +22,9 @@ import android.app.assist.AssistStructure;
 import android.app.assist.AssistStructure.ViewNode;
 import android.content.ComponentName;
 import android.metrics.LogMaker;
-import android.provider.DeviceConfig;
 import android.service.autofill.Dataset;
 import android.util.ArrayMap;
 import android.util.ArraySet;
-import android.util.Log;
 import android.util.Slog;
 import android.view.WindowManager;
 import android.view.autofill.AutofillId;
@@ -204,21 +202,6 @@ public final class Helper {
             return 0;
         } else {
             return ((Number) value).intValue();
-        }
-    }
-
-    /**
-     * Gets the value of a device config property from the Autofill namespace.
-     */
-    static int getIntDeviceConfigProperty(@NonNull String key, int defaultValue) {
-        final String value = DeviceConfig.getProperty(DeviceConfig.NAMESPACE_AUTOFILL, key);
-        if (value == null) return defaultValue;
-
-        try {
-            return Integer.parseInt(value);
-        } catch (Exception e) {
-            Log.w(TAG, "error parsing value (" + value + ") of property " + key + ": " + e);
-            return defaultValue;
         }
     }
 
