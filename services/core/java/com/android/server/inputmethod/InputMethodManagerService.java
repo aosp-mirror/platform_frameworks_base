@@ -575,6 +575,12 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
      */
     int mCurTokenDisplayId = INVALID_DISPLAY;
 
+    /**
+     * The display ID of the input method indicates the fallback display which returned by
+     * {@link #computeImeDisplayIdForTarget}.
+     */
+    private static final int FALLBACK_DISPLAY_ID = DEFAULT_DISPLAY;
+
     final ImeDisplayValidator mImeDisplayValidator;
 
     /**
@@ -625,7 +631,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
      *    currently invisible.
      * </dd>
      * </dl>
-     * <em>Do not update this value outside of setImeWindowStatus.</em>
+     * <em>Do not update this value outside of {@link #setImeWindowStatus(IBinder, int, int)} and
+     * {@link #unbindCurrentMethodLocked()}.</em>
      */
     int mImeWindowVis;
 
@@ -2124,12 +2131,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
      */
     static int computeImeDisplayIdForTarget(int displayId, @NonNull ImeDisplayValidator checker) {
         if (displayId == DEFAULT_DISPLAY || displayId == INVALID_DISPLAY) {
-            // We always assume that the default display id suitable to show the IME window.
-            return DEFAULT_DISPLAY;
+            return FALLBACK_DISPLAY_ID;
         }
-        // Show IME in default display when the display with IME target doesn't support system
-        // decorations.
-        return checker.displayCanShowIme(displayId) ? displayId : DEFAULT_DISPLAY;
+        // Show IME window on fallback display when the display is not allowed.
+        return checker.displayCanShowIme(displayId) ? displayId : FALLBACK_DISPLAY_ID;
     }
 
     @Override
@@ -2198,6 +2203,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 mIWindowManager.removeWindowToken(mCurToken, mCurTokenDisplayId);
             } catch (RemoteException e) {
             }
+            // Set IME window status as invisible when unbind current method.
+            mImeWindowVis = 0;
+            mBackDisposition = InputMethodService.BACK_DISPOSITION_DEFAULT;
+            updateSystemUiLocked(mImeWindowVis, mBackDisposition);
             mCurToken = null;
             mCurTokenDisplayId = INVALID_DISPLAY;
         }
@@ -2399,8 +2408,18 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     @BinderThread
     @SuppressWarnings("deprecation")
     private void setImeWindowStatus(@NonNull IBinder token, int vis, int backDisposition) {
+        final int topFocusedDisplayId = mWindowManagerInternal.getTopFocusedDisplayId();
+
         synchronized (mMethodMap) {
             if (!calledWithValidTokenLocked(token)) {
+                return;
+            }
+            // Skip update IME status when current token display is not same as focused display.
+            // Note that we still need to update IME status when focusing external display
+            // that does not support system decoration and fallback to show IME on default
+            // display since it is intentional behavior.
+            if (mCurTokenDisplayId != topFocusedDisplayId
+                    && mCurTokenDisplayId != FALLBACK_DISPLAY_ID) {
                 return;
             }
             mImeWindowVis = vis;
@@ -2447,7 +2466,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         if (DEBUG) {
             Slog.d(TAG, "IME window vis: " + vis
                     + " active: " + (vis & InputMethodService.IME_ACTIVE)
-                    + " inv: " + (vis & InputMethodService.IME_INVISIBLE));
+                    + " inv: " + (vis & InputMethodService.IME_INVISIBLE)
+                    + " displayId: " + mCurTokenDisplayId);
         }
 
         // TODO: Move this clearing calling identity block to setImeWindowStatus after making sure
@@ -2461,7 +2481,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             // mImeWindowVis should be updated before calling shouldShowImeSwitcherLocked().
             final boolean needsToShowImeSwitcher = shouldShowImeSwitcherLocked(vis);
             if (mStatusBar != null) {
-                mStatusBar.setImeWindowStatus(mCurToken, vis, backDisposition,
+                mStatusBar.setImeWindowStatus(mCurTokenDisplayId, mCurToken, vis, backDisposition,
                         needsToShowImeSwitcher);
             }
             final InputMethodInfo imi = mMethodMap.get(mCurMethodId);

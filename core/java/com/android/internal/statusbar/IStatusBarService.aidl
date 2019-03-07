@@ -48,8 +48,7 @@ interface IStatusBarService
     void setIconVisibility(String slot, boolean visible);
     @UnsupportedAppUsage
     void removeIcon(String slot);
-    // TODO(b/117478341): support back button change when IME is showing on a external display.
-    void setImeWindowStatus(in IBinder token, int vis, int backDisposition,
+    void setImeWindowStatus(int displayId, in IBinder token, int vis, int backDisposition,
             boolean showImeSwitcher);
     void expandSettingsPanel(String subPanel);
 
