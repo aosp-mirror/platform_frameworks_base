@@ -135,7 +135,8 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
         public void onTaskRemovalStarted(int taskId) {
             if (mEntry != null) {
                 // Must post because this is called from a binder thread.
-                post(() -> mBubbleController.removeBubble(mEntry.key));
+                post(() -> mBubbleController.removeBubble(mEntry.key,
+                        BubbleController.DISMISS_TASK_FINISHED));
             }
         }
     };
