@@ -1791,13 +1791,14 @@ public class AudioRecord implements AudioRouting, MicrophoneDirection,
     // MicrophoneDirection
     //--------------------
     /**
-     * Specifies the logical microphone (for processing).
+     * Specifies the logical microphone (for processing). Applications can use this to specify
+     * which side of the device to optimize capture from. Typically used in conjunction with
+     * the camera capturing video.
      *
-     * @param direction Direction constant.
      * @return true if sucessful.
      */
-    public boolean setMicrophoneDirection(int direction) {
-        return native_set_microphone_direction(direction) == 0;
+    public boolean setMicrophoneDirection(@DirectionMode int direction) {
+        return native_set_microphone_direction(direction) == AudioSystem.SUCCESS;
     }
 
     /**
@@ -1809,7 +1810,9 @@ public class AudioRecord implements AudioRouting, MicrophoneDirection,
      * @return true if sucessful.
      */
     public boolean setMicrophoneFieldDimension(@FloatRange(from = -1.0, to = 1.0) float zoom) {
-        return native_set_microphone_field_dimension(zoom) == 0;
+        Preconditions.checkArgument(
+                zoom >= -1 && zoom <= 1, "Argument must fall between -1 & 1 (inclusive)");
+        return native_set_microphone_field_dimension(zoom) == AudioSystem.SUCCESS;
     }
 
     //---------------------------------------------------------
