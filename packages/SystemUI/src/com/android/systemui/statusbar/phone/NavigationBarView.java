@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static android.content.Intent.ACTION_OVERLAY_CHANGED;
 import static android.view.MotionEvent.ACTION_DOWN;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_INVALID;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_LEFT;
@@ -41,7 +42,10 @@ import android.annotation.DrawableRes;
 import android.annotation.IntDef;
 import android.annotation.SuppressLint;
 import android.app.StatusBarManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ParceledListSlice;
 import android.content.res.Configuration;
 import android.graphics.Canvas;
@@ -88,6 +92,7 @@ import com.android.systemui.recents.RecentsOnboarding;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.NavigationBarCompat;
+import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.shared.system.WindowManagerWrapper;
 import com.android.systemui.statusbar.phone.NavigationPrototypeController.GestureAction;
 import com.android.systemui.statusbar.phone.NavigationPrototypeController.OnPrototypeChangedListener;
@@ -280,6 +285,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         }
     };
 
+    // TODO(b/112934365): To be removed
     private OnPrototypeChangedListener mPrototypeListener = new OnPrototypeChangedListener() {
         @Override
         public void onGestureRemap(int[] actions) {
@@ -289,13 +295,15 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         @Override
         public void onBackButtonVisibilityChanged(boolean visible) {
             if (!inScreenPinning()) {
-                getBackButton().setVisibility(visible ? VISIBLE : GONE);
+                getBackButton().setVisibility(QuickStepController.shouldHideBackButton(getContext())
+                        ? GONE : VISIBLE);
             }
         }
 
         @Override
         public void onHomeButtonVisibilityChanged(boolean visible) {
-            getHomeButton().setVisibility(visible ? VISIBLE : GONE);
+            getHomeButton().setVisibility(QuickStepController.shouldHideHomeButton(getContext())
+                    ? GONE : VISIBLE);
         }
 
         @Override
@@ -319,7 +327,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
 
         @Override
         public void onHomeHandleVisiblilityChanged(boolean visible) {
-            showHomeHandle(visible);
+            showHomeHandle(QuickStepController.showHomeHandle(getContext()));
         }
 
         @Override
@@ -365,6 +373,13 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
 
         @Override
         public void onActionsChanged(ParceledListSlice actions) {
+        }
+    };
+
+    private BroadcastReceiver mOverlaysChangedReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            showHomeHandle(QuickStepController.showHomeHandle(getContext()));
         }
     };
 
@@ -421,10 +436,14 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
                 mQuickScrubAction, null /* swipeLeftEdgeAction */, null /* swipeRightEdgeAction */
         };
 
-        mPrototypeController = new NavigationPrototypeController(mContext);
+        mPrototypeController = new NavigationPrototypeController(context);
         mPrototypeController.register();
         mPrototypeController.setOnPrototypeChangedListener(mPrototypeListener);
         mColorAdaptionController = new NavBarTintController(this, getLightTransitionsController());
+
+        IntentFilter filter = new IntentFilter(ACTION_OVERLAY_CHANGED);
+        filter.addDataScheme("package");
+        context.registerReceiver(mOverlaysChangedReceiver, filter);
     }
 
     public NavBarTintController getColorAdaptionController() {
@@ -459,7 +478,12 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
 
     private void updateNavigationGestures() {
         if (mGestureHelper instanceof QuickStepController) {
-            final int[] assignedMap = mPrototypeController.getGestureActionMap();
+            // TODO: Clarify this when we remove the prototype controller
+            final int[] gesturalMap = {0, 7, 1, 1, 3, 3};
+            final int[] normalMap = {0, 0, 0, 0, 0, 0};
+            final int[] assignedMap = QuickStepContract.isGesturalMode(getContext())
+                    ? gesturalMap
+                    : normalMap;
             ((QuickStepController) mGestureHelper).setGestureActions(
                     getNavigationActionFromType(assignedMap[0], mDefaultGestureMap[0]),
                     getNavigationActionFromType(assignedMap[1], mDefaultGestureMap[1]),
@@ -616,6 +640,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     }
 
     public boolean isQuickScrubEnabled() {
+        // TODO(b/112934365): Remove this sys prop flag
         return SystemProperties.getBoolean("persist.quickstep.scrub.enabled", true)
                 && mOverviewProxyService.isEnabled() && isOverviewEnabled()
                 && ((mOverviewProxyService.getInteractionFlags() & FLAG_DISABLE_QUICK_SCRUB) == 0);
@@ -762,17 +787,17 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
 
         mBarTransitions.reapplyDarkIntensity();
 
-        boolean disableHome = ((mDisabledFlags & View.STATUS_BAR_DISABLE_HOME) != 0);
+        boolean disableHome = QuickStepController.shouldHideHomeButton(getContext())
+                || ((mDisabledFlags & View.STATUS_BAR_DISABLE_HOME) != 0);
 
         // TODO(b/113914868): investigation log for disappearing home button
         Log.i(TAG, "updateNavButtonIcons (b/113914868): home disabled=" + disableHome
                 + " mDisabledFlags=" + mDisabledFlags);
-        disableHome |= mPrototypeController.hideHomeButton();
 
         // Always disable recents when alternate car mode UI is active and for secondary displays.
         boolean disableRecent = isRecentsButtonDisabled();
 
-        boolean disableBack = QuickStepController.shouldhideBackButton(getContext())
+        boolean disableBack = QuickStepController.shouldHideBackButton(getContext())
                 || (((mDisabledFlags & View.STATUS_BAR_DISABLE_BACK) != 0) && !useAltBack);
 
         // When screen pinning, don't hide back and home when connected service or back and
@@ -791,7 +816,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
             disableBack = disableRecent = false;
         }
 
-        ViewGroup navButtons = (ViewGroup) getCurrentView().findViewById(R.id.nav_buttons);
+        ViewGroup navButtons = getCurrentView().findViewById(R.id.nav_buttons);
         if (navButtons != null) {
             LayoutTransition lt = navButtons.getLayoutTransition();
             if (lt != null) {
@@ -946,8 +971,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     }
 
     private void showHomeHandle(boolean visible) {
-        mNavigationInflaterView.onTuningChanged(NAV_BAR_VIEWS,
-                visible ? getContext().getString(R.string.config_navBarLayoutHandle) : null);
+        mNavigationInflaterView.onTuningChanged(NAV_BAR_VIEWS, null);
 
         // Color adaption is tied with showing home handle, only avaliable if visible
         if (visible) {
@@ -964,7 +988,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
 
     // TODO(b/112934365): move this back to NavigationBarFragment when prototype is removed
     private void updateAssistantAvailability() {
-        boolean available = mAssistantAvailable && mPrototypeController.isAssistantGestureEnabled();
+        boolean available = mAssistantAvailable && QuickStepContract.isGesturalMode(getContext());
         if (mOverviewProxyService.getProxy() != null) {
             try {
                 mOverviewProxyService.getProxy().onAssistantAvailable(available);
@@ -1267,7 +1291,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
                 NavGesture.class, false /* Only one */);
         setUpSwipeUpOnboarding(isQuickStepSwipeUpEnabled());
 
-        if (mPrototypeController.isEnabled()) {
+        if (QuickStepContract.isGesturalMode(getContext())) {
             WindowManager wm = (WindowManager) getContext()
                     .getSystemService(Context.WINDOW_SERVICE);
             int width = mPrototypeController.getEdgeSensitivityWidth();
@@ -1298,6 +1322,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
             mGestureHelper.destroy();
         }
         mPrototypeController.unregister();
+        getContext().unregisterReceiver(mOverlaysChangedReceiver);
         setUpSwipeUpOnboarding(false);
         for (int i = 0; i < mButtonDispatchers.size(); ++i) {
             mButtonDispatchers.valueAt(i).onDestroy();

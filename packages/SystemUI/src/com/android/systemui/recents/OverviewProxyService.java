@@ -20,7 +20,6 @@ import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
 import static android.view.MotionEvent.ACTION_CANCEL;
 import static android.view.MotionEvent.ACTION_DOWN;
 import static android.view.MotionEvent.ACTION_UP;
-import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON;
 
 import static com.android.systemui.shared.system.NavigationBarCompat.FLAG_DISABLE_SWIPE_UP;
 import static com.android.systemui.shared.system.NavigationBarCompat.FLAG_SHOW_OVERVIEW_BUTTON;
@@ -37,7 +36,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
-import android.content.res.Resources;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.Binder;
@@ -61,6 +59,7 @@ import com.android.systemui.shared.recents.IOverviewProxy;
 import com.android.systemui.shared.recents.ISystemUiProxy;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.InputChannelCompat.InputEventDispatcher;
+import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.CallbackController;
@@ -590,9 +589,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
 
     private int getDefaultInteractionFlags() {
         // If there is no settings available use device default or get it from settings
-        int navBarMode = Resources.getSystem().getInteger(
-                com.android.internal.R.integer.config_navBarInteractionMode);
-        return navBarMode == NAV_BAR_MODE_3BUTTON
+        return QuickStepContract.isLegacyMode(mContext)
                 ? DEFAULT_DISABLE_SWIPE_UP_STATE
                 : 0;
     }
@@ -651,10 +648,8 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
 
         pw.print("  quickStepIntent="); pw.println(mQuickStepIntent);
         pw.print("  quickStepIntentResolved="); pw.println(isEnabled());
-
-        int navBarMode = Resources.getSystem().getInteger(
-                com.android.internal.R.integer.config_navBarInteractionMode);
-        pw.print("  navBarMode="); pw.println(navBarMode);
+        pw.print("  navBarMode=");
+        pw.println(QuickStepContract.getCurrentInteractionMode(mContext));
     }
 
     public interface OverviewProxyListener {
