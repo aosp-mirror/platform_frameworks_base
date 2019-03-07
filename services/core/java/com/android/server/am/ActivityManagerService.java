@@ -7569,7 +7569,25 @@ public class ActivityManagerService extends IActivityManager.Stub
             holder = getContentProviderExternalUnchecked(name, null, callingUid,
                     "*getmimetype*", userId);
             if (holder != null) {
-                return holder.provider.getType(uri);
+                final IBinder providerConnection = holder.connection;
+                final ComponentName providerName = holder.info.getComponentName();
+                // Note: creating a new Runnable instead of using a lambda here since lambdas in
+                // java provide no guarantee that there will be a new instance returned every call.
+                // Hence, it's possible that a cached copy is returned and the ANR is executed on
+                // the incorrect provider.
+                final Runnable providerNotResponding = new Runnable() {
+                    @Override
+                    public void run() {
+                        Log.w(TAG, "Provider " + providerName + " didn't return from getType().");
+                        appNotRespondingViaProvider(providerConnection);
+                    }
+                };
+                mHandler.postDelayed(providerNotResponding, 1000);
+                try {
+                    return holder.provider.getType(uri);
+                } finally {
+                    mHandler.removeCallbacks(providerNotResponding);
+                }
             }
         } catch (RemoteException e) {
             Log.w(TAG, "Content provider dead retrieving " + uri, e);
