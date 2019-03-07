@@ -9748,8 +9748,8 @@ package android.webkit {
     method public int getVisibleTitleHeight();
     method public android.webkit.WebChromeClient getWebChromeClient();
     method public android.webkit.WebViewClient getWebViewClient();
-    method public android.webkit.WebViewRenderer getWebViewRenderer();
-    method public android.webkit.WebViewRendererClient getWebViewRendererClient();
+    method @Nullable public android.webkit.WebViewRenderProcess getWebViewRenderProcess();
+    method @Nullable public android.webkit.WebViewRenderProcessClient getWebViewRenderProcessClient();
     method public android.view.View getZoomControls();
     method public void goBack();
     method public void goBackOrForward(int);
@@ -9799,7 +9799,7 @@ package android.webkit {
     method public void setVerticalScrollbarOverlay(boolean);
     method public void setWebChromeClient(android.webkit.WebChromeClient);
     method public void setWebViewClient(android.webkit.WebViewClient);
-    method public void setWebViewRendererClient(@Nullable java.util.concurrent.Executor, @Nullable android.webkit.WebViewRendererClient);
+    method public void setWebViewRenderProcessClient(@Nullable java.util.concurrent.Executor, @Nullable android.webkit.WebViewRenderProcessClient);
     method public boolean showFindDialog(String, boolean);
     method public void stopLoading();
     method public boolean zoomBy(float);
@@ -9879,10 +9879,6 @@ package android.webkit {
     field public final boolean isFallback;
     field public final String packageName;
     field public final android.content.pm.Signature[] signatures;
-  }
-
-  public abstract class WebViewRenderer {
-    ctor public WebViewRenderer();
   }
 
   public final class WebViewUpdateService {
