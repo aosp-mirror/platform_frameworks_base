@@ -56,7 +56,7 @@
     <string name="always_use_accessory" msgid="3257892669444535154">"Ireki <xliff:g id="APPLICATION">%1$s</xliff:g> <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> konektatzen den guztietan"</string>
     <string name="usb_debugging_title" msgid="4513918393387141949">"USB arazketa onartu?"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"Ordenagailuaren RSA gakoaren erreferentzia-gako digitala hau da:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
-    <string name="usb_debugging_always" msgid="303335496705863070">"Onartu beti ordenagailu honetatik"</string>
+    <string name="usb_debugging_always" msgid="303335496705863070">"Eman beti ordenagailu honetatik arazteko baimena"</string>
     <string name="usb_debugging_allow" msgid="2272145052073254852">"Eman baimena"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"Ez da onartzen USB arazketa"</string>
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"Gailu honetan saioa hasita duen erabiltzaileak ezin du aktibatu USB arazketa. Eginbide hori erabiltzeko, aldatu erabiltzaile nagusira."</string>
@@ -325,8 +325,7 @@
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"Aktibatuta dago Wi-Fi konexioa"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Ez dago Wi-Fi sarerik erabilgarri"</string>
     <string name="quick_settings_wifi_secondary_label_transient" msgid="7748206246119760554">"Aktibatzen…"</string>
-    <!-- no translation found for quick_settings_cast_title (6954684227605751758) -->
-    <skip />
+    <string name="quick_settings_cast_title" msgid="6954684227605751758">"Pantaila igortzeko aukera"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"Igortzen"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Izenik gabeko gailua"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"Igortzeko prest"</string>

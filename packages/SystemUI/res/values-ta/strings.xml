@@ -325,8 +325,7 @@
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"வைஃபை இயக்கத்தில்"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"வைஃபை நெட்வொர்க்குகள் இல்லை"</string>
     <string name="quick_settings_wifi_secondary_label_transient" msgid="7748206246119760554">"ஆன் செய்கிறது…"</string>
-    <!-- no translation found for quick_settings_cast_title (6954684227605751758) -->
-    <skip />
+    <string name="quick_settings_cast_title" msgid="6954684227605751758">"திரை அலைபரப்பல்"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"அனுப்புகிறது"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"பெயரிடப்படாத சாதனம்"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"திரையிடத் தயார்"</string>
@@ -399,7 +398,7 @@
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"அறிவிப்புகள்\nவேண்டாம்"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"முன்னுரிமைகள்\nமட்டும்"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"அலாரங்கள்\nமட்டும்"</string>
-    <string name="keyguard_indication_charging_time_wireless" msgid="5376059837186496558">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • வயர்லெஸ் முறையில் சார்ஜாகிறது (முழு சார்ஜ் ஆக <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> ஆகும்)"</string>
+    <string name="keyguard_indication_charging_time_wireless" msgid="5376059837186496558">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • வயர்லெஸ் முறையில் சார்ஜாகிறது (முடிய <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> ஆகும்)"</string>
     <string name="keyguard_indication_charging_time" msgid="2056340799276374421">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • சார்ஜாகிறது (முழு சார்ஜ்: <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>)"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="7767562163577492332">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • வேகமாகச் சார்ஜாகிறது (முழு சார்ஜ்: <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>)"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="3769655133567307069">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • மெதுவாகச் சார்ஜாகிறது (முழு சார்ஜ்: <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>)"</string>
@@ -438,10 +437,8 @@
     <string name="battery_saver_notification_title" msgid="8614079794522291840">"பேட்டரி சேமிப்பான் ஆன் செய்யப்பட்டுள்ளது"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"செயல்திறனையும் பின்புல டேட்டா உபயோகத்தையும் குறைக்கிறது"</string>
     <string name="battery_saver_notification_action_text" msgid="132118784269455533">"பேட்டரி சேமிப்பானை ஆஃப் செய்"</string>
-    <!-- no translation found for media_projection_dialog_text (1443042478990422751) -->
-    <skip />
-    <!-- no translation found for media_projection_dialog_title (7574971526813630219) -->
-    <skip />
+    <string name="media_projection_dialog_text" msgid="1443042478990422751">"உங்கள் திரையில் தோன்றும் அறிவிப்புகள், கடவுச்சொற்கள், படங்கள், மெசேஜ்கள் மற்றும் கட்டணத் தகவல் போன்ற அனைத்தையும் <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> காட்டத் தொடங்கும்."</string>
+    <string name="media_projection_dialog_title" msgid="7574971526813630219">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> உங்கள் திரையை ரெக்கார்டு செய்யவோ அலைபரப்பவோ அனுமதிக்கவா?"</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"மீண்டும் காட்டாதே"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"எல்லாவற்றையும் அழி"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"அறிவிப்புகளை நிர்வகி"</string>
@@ -819,8 +816,7 @@
     <string name="high_temp_notif_message" msgid="5642466103153429279">"மொபைலின் வெப்ப அளவு குறையும் போது, சில அம்சங்களைப் பயன்படுத்த முடியாது"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"உங்கள் மொபைலின் வெப்ப அளவு தானாகவே குறையும். தொடர்ந்து நீங்கள் மொபைலைப் பயன்படுத்தலாம், ஆனால் அதன் வேகம் குறைவாக இருக்கக்கூடும்.\n\nமொபைலின் வெப்ப அளவு குறைந்தவுடன், அது இயல்பு நிலையில் இயங்கும்."</string>
     <string name="high_temp_alarm_title" msgid="442812040762745210">"சார்ஜரைத் துண்டிக்கவும்"</string>
-    <!-- no translation found for high_temp_alarm_notify_message (1802871059489414932) -->
-    <skip />
+    <string name="high_temp_alarm_notify_message" msgid="1802871059489414932">"இந்தச் சாதனத்தைச் சார்ஜ் செய்வதில் சிக்கல் உள்ளது. பவர் அடாப்டரைத் துண்டிக்கவும், கேபிள் சூடாக இருக்கக்கூடும் என்பதால் கவனமாகக் கையாளவும்."</string>
     <string name="high_temp_alarm_help_care_steps" msgid="3631075329318070726">"மேலும் விவரங்களுக்கு இதைப் பார்க்கவும்"</string>
     <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"இடப்புற ஷார்ட்கட்"</string>
     <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"வலப்புற ஷார்ட்கட்"</string>
