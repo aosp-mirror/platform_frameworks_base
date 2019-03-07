@@ -51,13 +51,6 @@ public class NotificationChildrenContainerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testGetMaxAllowedVisibleChildren_ambient() {
-        mGroup.setOnAmbient(true);
-        Assert.assertEquals(mChildrenContainer.getMaxAllowedVisibleChildren(),
-            NotificationChildrenContainer.NUMBER_OF_CHILDREN_WHEN_AMBIENT);
-    }
-
-    @Test
     public void testGetMaxAllowedVisibleChildren_lowPriority() {
         mChildrenContainer.setIsLowPriority(true);
         Assert.assertEquals(mChildrenContainer.getMaxAllowedVisibleChildren(),

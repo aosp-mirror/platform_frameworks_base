@@ -334,7 +334,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private boolean mUseIncreasedHeadsUpHeight;
     private float mTranslationWhenRemoved;
     private boolean mWasChildInGroupWhenRemoved;
-    private int mNotificationColorAmbient;
     private NotificationInlineImageResolver mImageResolver;
     private NotificationMediaManager mMediaManager;
 
@@ -1284,16 +1283,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         mNotificationColor = ContrastColorUtil.resolveContrastColor(mContext,
                 getStatusBarNotification().getNotification().color,
                 getBackgroundColorWithoutTint(), nightMode);
-        mNotificationColorAmbient = ContrastColorUtil.resolveAmbientColor(mContext,
-                getStatusBarNotification().getNotification().color);
     }
 
     public HybridNotificationView getSingleLineView() {
         return mPrivateLayout.getSingleLineView();
-    }
-
-    public HybridNotificationView getAmbientSingleLineView() {
-        return getShowingLayout().getAmbientSingleLineChild();
     }
 
     public boolean isOnKeyguard() {
@@ -1626,10 +1619,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     @VisibleForTesting
     public NotificationContentInflater getNotificationInflater() {
         return mNotificationInflater;
-    }
-
-    public int getNotificationColorAmbient() {
-        return mNotificationColorAmbient;
     }
 
     public interface ExpansionLogger {
@@ -2316,7 +2305,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             return mPrivateLayout.getMinHeight();
         } else if (mSensitive && mHideSensitiveForIntrinsicHeight) {
             return getMinHeight();
-        } else if (mIsSummaryWithChildren && (!mOnKeyguard || mOnAmbient)) {
+        } else if (mIsSummaryWithChildren && !mOnKeyguard) {
             return mChildrenContainer.getIntrinsicHeight();
         } else if (isHeadsUpAllowed() && (mIsHeadsUp || mHeadsupDisappearRunning)) {
             if (isPinned() || mHeadsupDisappearRunning) {
@@ -3018,9 +3007,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     public void setOnAmbient(boolean onAmbient) {
         if (onAmbient != mOnAmbient) {
             mOnAmbient = onAmbient;
-            if (mChildrenContainer != null) {
-                mChildrenContainer.notifyDozingStateChanged();
-            }
             notifyHeightChanged(false /* needsAnimation */);
         }
     }
