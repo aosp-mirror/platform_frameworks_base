@@ -14698,14 +14698,10 @@ public class PackageManagerService extends IPackageManager.Stub
                                 @Override
                                 public void onReceive(Context context, Intent intent) {
                                     // the duration to wait for rollback to be enabled, in millis
-                                    long rollbackTimeout = DEFAULT_ENABLE_ROLLBACK_TIMEOUT;
-                                    try {
-                                        rollbackTimeout = Long.valueOf(
-                                            DeviceConfig.getProperty(
-                                                DeviceConfig.Rollback.NAMESPACE,
-                                                DeviceConfig.Rollback.ENABLE_ROLLBACK_TIMEOUT));
-                                    } catch (NumberFormatException ignore) {
-                                    }
+                                    long rollbackTimeout = DeviceConfig.getLong(
+                                            DeviceConfig.Rollback.NAMESPACE,
+                                            DeviceConfig.Rollback.ENABLE_ROLLBACK_TIMEOUT,
+                                            DEFAULT_ENABLE_ROLLBACK_TIMEOUT);
                                     final Message msg = mHandler.obtainMessage(
                                             ENABLE_ROLLBACK_TIMEOUT);
                                     msg.arg1 = enableRollbackToken;
