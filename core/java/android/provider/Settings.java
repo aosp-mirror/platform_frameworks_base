@@ -8563,6 +8563,19 @@ public final class Settings {
         public static final String LOCATION_ACCESS_CHECK_DELAY_MILLIS =
                 "location_access_check_delay_millis";
 
+        /**
+         * What should happen to the location permissions when upgraded to Android Q.
+         *
+         * <ul>
+         *     <li>0/unset == revoke permissions</li>
+         *     <li>anything else == Don't do anything</li>
+         * </ul>
+         *
+         * @hide
+         */
+        @SystemApi
+        public static final String LOCATION_PERMISSIONS_UPGRADE_TO_Q_MODE =
+                "location_permissions_upgrade_to_q_mode";
 
         /**
          * Comma separated list of enabled overlay packages for all android.theme.customization.*

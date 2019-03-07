@@ -16,14 +16,11 @@
 
 package com.android.server.pm.permission;
 
-import static android.Manifest.permission.ACCESS_BACKGROUND_LOCATION;
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 import static android.app.AppOpsManager.MODE_ALLOWED;
-import static android.app.AppOpsManager.MODE_DEFAULT;
 import static android.app.AppOpsManager.MODE_ERRORED;
 import static android.app.AppOpsManager.MODE_FOREGROUND;
-import static android.app.AppOpsManager.MODE_IGNORED;
 import static android.app.AppOpsManager.OP_NONE;
 import static android.app.AppOpsManager.permissionToOp;
 import static android.app.AppOpsManager.permissionToOpCode;
@@ -77,6 +74,7 @@ import android.os.storage.StorageManagerInternal;
 import android.permission.PermissionControllerManager;
 import android.permission.PermissionManager;
 import android.permission.PermissionManagerInternal;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -139,6 +137,18 @@ public class PermissionManagerService {
     private static final int MAX_PERMISSION_TREE_FOOTPRINT = 32768;
     /** Empty array to avoid allocations */
     private static final int[] EMPTY_INT_ARRAY = new int[0];
+
+    /**
+     * When these flags are set, the system should not automatically modify the permission grant
+     * state.
+     */
+    private static final int BLOCKING_PERMISSION_FLAGS = FLAG_PERMISSION_SYSTEM_FIXED
+            | FLAG_PERMISSION_POLICY_FIXED
+            | FLAG_PERMISSION_GRANTED_BY_DEFAULT;
+
+    /** Permission flags set by the user */
+    private static final int USER_PERMISSION_FLAGS = FLAG_PERMISSION_USER_SET
+            | FLAG_PERMISSION_USER_FIXED;
 
     /** If the permission of the value is granted, so is the key */
     private static final Map<String, String> FULLER_PERMISSION_MAP = new HashMap<>();
@@ -1203,9 +1213,8 @@ public class PermissionManagerService {
 
                             int flagsToRemove = FLAG_PERMISSION_REVOKE_WHEN_REQUESTED;
 
-                            if ((flags & (FLAG_PERMISSION_GRANTED_BY_DEFAULT
-                                    | FLAG_PERMISSION_POLICY_FIXED | FLAG_PERMISSION_SYSTEM_FIXED))
-                                    == 0 && supportsRuntimePermissions) {
+                            if ((flags & BLOCKING_PERMISSION_FLAGS) == 0
+                                    && supportsRuntimePermissions) {
                                 int revokeResult = ps.revokeRuntimePermission(bp, userId);
                                 if (revokeResult != PERMISSION_OPERATION_FAILURE) {
                                     if (DEBUG_PERMISSIONS) {
@@ -1215,8 +1224,7 @@ public class PermissionManagerService {
                                     }
                                 }
 
-                                flagsToRemove |=
-                                        FLAG_PERMISSION_USER_FIXED | FLAG_PERMISSION_USER_SET;
+                                flagsToRemove |= USER_PERMISSION_FLAGS;
 
                                 List<String> fgPerms = mBackgroundPermissions.get(permission);
                                 if (fgPerms != null) {
@@ -1271,6 +1279,7 @@ public class PermissionManagerService {
         if (pkg.applicationInfo.targetSdkVersion < Build.VERSION_CODES.M) {
             if (permissionToOp(newPerm) != null) {
                 int mostLenientSourceMode = MODE_ERRORED;
+                int flags = 0;
 
                 // Find most lenient source permission state.
                 int numSourcePerms = sourcePerms.size();
@@ -1284,20 +1293,19 @@ public class PermissionManagerService {
                             int mode = appOpsManager.unsafeCheckOpRaw(sourceOp,
                                     getUid(userId, getAppId(pkg.applicationInfo.uid)), pkgName);
 
-                            if (mode == MODE_FOREGROUND) {
-                                throw new IllegalArgumentException("split permission" + sourcePerm
-                                        + " has app-op state " + AppOpsManager.MODE_NAMES[mode]);
+                            if (mode == MODE_FOREGROUND || mode == MODE_ERRORED) {
+                                Log.wtf(TAG, "split permission" + sourcePerm + " has app-op state "
+                                        + AppOpsManager.MODE_NAMES[mode]);
+
+                                continue;
                             }
 
-                            // Leniency order: allowed > ignored > default
-                            if (mode == MODE_ALLOWED) {
-                                mostLenientSourceMode = MODE_ALLOWED;
-                                break;
-                            } else if (mode == MODE_IGNORED) {
-                                mostLenientSourceMode = MODE_IGNORED;
-                            } else if (mode == MODE_DEFAULT
-                                    && mostLenientSourceMode != MODE_IGNORED) {
-                                mostLenientSourceMode = MODE_DEFAULT;
+                            // Leniency order: allowed < ignored < default
+                            if (mode < mostLenientSourceMode) {
+                                mostLenientSourceMode = mode;
+                                flags = ps.getPermissionFlags(sourcePerm, userId);
+                            } else if (mode == mostLenientSourceMode) {
+                                flags |= ps.getPermissionFlags(sourcePerm, userId);
                             }
                         }
                     }
@@ -1310,21 +1318,31 @@ public class PermissionManagerService {
                     }
 
                     setAppOpMode(newPerm, pkg, userId, mostLenientSourceMode);
+
+                    // Add permission flags
+                    ps.updatePermissionFlags(mSettings.getPermission(newPerm), userId, flags,
+                            flags);
                 }
             }
         } else {
             boolean isGranted = false;
+            int flags = 0;
 
             int numSourcePerm = sourcePerms.size();
             for (int i = 0; i < numSourcePerm; i++) {
                 String sourcePerm = sourcePerms.valueAt(i);
-                if (ps.hasRuntimePermission(sourcePerm, userId)
-                        && ps.getRuntimePermissionState(sourcePerm, userId).isGranted()) {
+                if ((ps.hasRuntimePermission(sourcePerm, userId))
+                        || ps.hasInstallPermission(sourcePerm)) {
+                    if (!isGranted) {
+                        flags = 0;
+                    }
+
                     isGranted = true;
-                    break;
-                } else if (ps.hasInstallPermission(sourcePerm)) {
-                    isGranted = true;
-                    break;
+                    flags |= ps.getPermissionFlags(sourcePerm, userId);
+                } else {
+                    if (!isGranted) {
+                        flags |= ps.getPermissionFlags(sourcePerm, userId);
+                    }
                 }
             }
 
@@ -1336,6 +1354,9 @@ public class PermissionManagerService {
 
                 ps.grantRuntimePermission(mSettings.getPermissionLocked(newPerm), userId);
             }
+
+            // Add permission flags
+            ps.updatePermissionFlags(mSettings.getPermission(newPerm), userId, flags, flags);
         }
     }
 
@@ -1353,8 +1374,6 @@ public class PermissionManagerService {
             @NonNull PermissionsState origPs,
             @NonNull PermissionsState ps, @NonNull PackageParser.Package pkg,
             @NonNull int[] updatedUserIds) {
-        AppOpsManager appOpsManager = mContext.getSystemService(AppOpsManager.class);
-
         String pkgName = pkg.packageName;
         ArraySet<String> newImplicitPermissions = new ArraySet<>();
 
@@ -1417,48 +1436,28 @@ public class PermissionManagerService {
                                 FLAG_PERMISSION_REVOKE_WHEN_REQUESTED);
                         updatedUserIds = ArrayUtils.appendInt(updatedUserIds, userId);
 
-                        // SPECIAL BEHAVIOR for background location. Foreground only by default.
-                        if (newPerm.equals(ACCESS_BACKGROUND_LOCATION)) {
-                            int numSourcePerms = sourcePerms.size();
-                            for (int sourcePermNum = 0; sourcePermNum < numSourcePerms;
-                                    sourcePermNum++) {
-                                String sourcePerm = sourcePerms.valueAt(sourcePermNum);
-
-                                if (ps.hasRuntimePermission(sourcePerm, userId)
-                                        && ps.getRuntimePermissionState(sourcePerm, userId)
-                                        .isGranted()
-                                        && appOpsManager.unsafeCheckOpNoThrow(
-                                                permissionToOp(sourcePerm), getUid(userId,
-                                                getAppId(pkg.applicationInfo.uid)), pkgName)
-                                        == MODE_ALLOWED) {
-                                    setAppOpMode(sourcePerm, pkg, userId, MODE_FOREGROUND);
-                                }
-                            }
-                        } else {
-                            boolean inheritsFromInstallPerm = false;
-                            for (int sourcePermNum = 0; sourcePermNum < sourcePerms.size();
-                                    sourcePermNum++) {
-                                if (ps.hasInstallPermission(sourcePerms.valueAt(sourcePermNum))) {
-                                    inheritsFromInstallPerm = true;
-                                    break;
-                                }
-                            }
-
-                            if (!origPs.hasRequestedPermission(sourcePerms)
-                                    && !inheritsFromInstallPerm) {
-                                // Both permissions are new so nothing to inherit.
-                                if (DEBUG_PERMISSIONS) {
-                                    Slog.i(TAG, newPerm + " does not inherit from " + sourcePerms
-                                            + " for " + pkgName
-                                            + " as split permission is also new");
-                                }
-
+                        boolean inheritsFromInstallPerm = false;
+                        for (int sourcePermNum = 0; sourcePermNum < sourcePerms.size();
+                                sourcePermNum++) {
+                            if (ps.hasInstallPermission(sourcePerms.valueAt(sourcePermNum))) {
+                                inheritsFromInstallPerm = true;
                                 break;
-                            } else {
-                                // Inherit from new install or existing runtime permissions
-                                inheritPermissionStateToNewImplicitPermissionLocked(sourcePerms,
-                                        newPerm, ps, pkg, userId);
                             }
+                        }
+
+                        if (!origPs.hasRequestedPermission(sourcePerms)
+                                && !inheritsFromInstallPerm) {
+                            // Both permissions are new so nothing to inherit.
+                            if (DEBUG_PERMISSIONS) {
+                                Slog.i(TAG, newPerm + " does not inherit from " + sourcePerms
+                                        + " for " + pkgName + " as split permission is also new");
+                            }
+
+                            break;
+                        } else {
+                            // Inherit from new install or existing runtime permissions
+                            inheritPermissionStateToNewImplicitPermissionLocked(sourcePerms,
+                                    newPerm, ps, pkg, userId);
                         }
                     }
                 }
@@ -2275,12 +2274,62 @@ public class PermissionManagerService {
     }
 
     private void updateAllPermissions(String volumeUuid, boolean sdkUpdated,
-            Collection<PackageParser.Package> allPackages, PermissionCallback callback) {
+            boolean updatePermissionsOnPreQUpdate, Collection<PackageParser.Package> allPackages,
+            PermissionCallback callback) {
         final int flags = UPDATE_PERMISSIONS_ALL |
                 (sdkUpdated
                         ? UPDATE_PERMISSIONS_REPLACE_PKG | UPDATE_PERMISSIONS_REPLACE_ALL
                         : 0);
         updatePermissions(null, null, volumeUuid, flags, allPackages, callback);
+
+        if (updatePermissionsOnPreQUpdate) {
+            final int[] userIds = UserManagerService.getInstance().getUserIds();
+
+            for (PackageParser.Package pkg : allPackages) {
+                final PackageSetting ps = (PackageSetting) pkg.mExtras;
+                if (ps == null) {
+                    return;
+                }
+
+                final boolean appSupportsRuntimePermissions =
+                        pkg.applicationInfo.targetSdkVersion >= Build.VERSION_CODES.M;
+                final PermissionsState permsState = ps.getPermissionsState();
+
+                for (String permName : new String[]{Manifest.permission.ACCESS_FINE_LOCATION,
+                        Manifest.permission.ACCESS_COARSE_LOCATION,
+                        Manifest.permission.ACCESS_BACKGROUND_LOCATION}) {
+                    final BasePermission bp = mSettings.getPermissionLocked(permName);
+
+                    for (int userId : userIds) {
+                        if (Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                                Settings.Secure.LOCATION_PERMISSIONS_UPGRADE_TO_Q_MODE, 0, userId)
+                                != 0) {
+                            continue;
+                        }
+
+                        final PermissionState permState = permsState.getRuntimePermissionState(
+                                permName, userId);
+
+                        if (permState != null
+                                && (permState.getFlags() & BLOCKING_PERMISSION_FLAGS) == 0) {
+                            if (permState.isGranted()) {
+                                permsState.updatePermissionFlags(bp, userId,
+                                        USER_PERMISSION_FLAGS, 0);
+                            }
+
+                            if (appSupportsRuntimePermissions) {
+                                permsState.revokeRuntimePermission(bp, userId);
+                            } else {
+                                // Force a review even for apps that were already installed
+                                permsState.updatePermissionFlags(bp, userId,
+                                        FLAG_PERMISSION_REVIEW_REQUIRED,
+                                        FLAG_PERMISSION_REVIEW_REQUIRED);
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private void updatePermissions(String changingPkgName, PackageParser.Package changingPkg,
@@ -2735,9 +2784,10 @@ public class PermissionManagerService {
         }
         @Override
         public void updateAllPermissions(String volumeUuid, boolean sdkUpdated,
-                Collection<PackageParser.Package> allPackages, PermissionCallback callback) {
+                boolean updatePermissionsOnPreQUpdate, Collection<PackageParser.Package> allPackages,
+                PermissionCallback callback) {
             PermissionManagerService.this.updateAllPermissions(
-                    volumeUuid, sdkUpdated, allPackages, callback);
+                    volumeUuid, sdkUpdated, updatePermissionsOnPreQUpdate, allPackages, callback);
         }
         @Override
         public String[] getAppOpPermissionPackages(String permName) {
