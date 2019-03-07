@@ -287,11 +287,20 @@ std::unique_ptr<const Idmap> Idmap::FromBinaryStream(std::istream& stream,
 bool CheckOverlayable(const LoadedPackage& target_package,
                       const utils::OverlayManifestInfo& overlay_info,
                       const PolicyBitmask& fulfilled_policies, const ResourceId& resid) {
+  static constexpr const PolicyBitmask sDefaultPolicies =
+      PolicyFlags::POLICY_SYSTEM_PARTITION | PolicyFlags::POLICY_VENDOR_PARTITION |
+      PolicyFlags::POLICY_PRODUCT_PARTITION | PolicyFlags::POLICY_SIGNATURE;
+
+  // If the resource does not have an overlayable definition, allow the resource to be overlaid if
+  // the overlay is preinstalled or signed with the same signature as the target.
+  if (!target_package.DefinesOverlayable()) {
+    return (sDefaultPolicies & fulfilled_policies) != 0;
+  }
+
   const OverlayableInfo* overlayable_info = target_package.GetOverlayableInfo(resid);
   if (overlayable_info == nullptr) {
-    // If the resource does not have an overlayable definition, allow the resource to be overlaid.
-    // Once overlayable enforcement is turned on, this check will return false.
-    return !target_package.DefinesOverlayable();
+    // Do not allow non-overlayable resources to be overlaid.
+    return false;
   }
 
   if (overlay_info.target_name != overlayable_info->name) {
@@ -425,6 +434,12 @@ std::unique_ptr<const Idmap> Idmap::FromApkAssets(
     }
 
     matching_resources.Add(target_resid, overlay_resid);
+  }
+
+  if (matching_resources.Map().empty()) {
+    out_error << "overlay \"" << overlay_apk_path << "\" does not successfully overlay any resource"
+              << std::endl;
+    return nullptr;
   }
 
   // encode idmap data
