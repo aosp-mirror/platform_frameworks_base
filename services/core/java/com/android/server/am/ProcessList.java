@@ -1161,11 +1161,11 @@ public final class ProcessList {
      *
      * @param pid The process identifier to set.
      * @param uid The uid of the app
-     * @param amt Adjustment value -- lmkd allows -16 to +15.
+     * @param amt Adjustment value -- lmkd allows -1000 to +1000
      *
      * {@hide}
      */
-    public static final void setOomAdj(int pid, int uid, int amt) {
+    public static void setOomAdj(int pid, int uid, int amt) {
         // This indicates that the process is not started yet and so no need to proceed further.
         if (pid <= 0) {
             return;
