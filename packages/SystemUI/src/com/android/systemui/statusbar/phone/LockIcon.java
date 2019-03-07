@@ -203,10 +203,10 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
             case STATE_SCANNING_FACE:
             // Error animation also starts and ands on the padlock.
             case STATE_BIOMETRICS_ERROR:
-                iconRes = com.android.internal.R.drawable.ic_lock_24dp;
+                iconRes = com.android.internal.R.drawable.ic_lock;
                 break;
             case STATE_LOCK_OPEN:
-                iconRes = com.android.internal.R.drawable.ic_lock_open_24dp;
+                iconRes = com.android.internal.R.drawable.ic_lock_open;
                 break;
             default:
                 throw new IllegalArgumentException();
