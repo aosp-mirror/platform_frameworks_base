@@ -49,6 +49,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.util.StatsLog;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowInsets;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
@@ -316,8 +317,25 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
     /**
      * Lets activity view know it should be shown / populated.
      */
-    public void populateActivityView() {
-        mActivityView.setCallback(mStateCallback);
+    public void populateExpandedView() {
+        if (usingActivityView()) {
+            mActivityView.setCallback(mStateCallback);
+        } else {
+            // We're using notification template
+            ViewGroup parent = (ViewGroup) mNotifRow.getParent();
+            if (parent == this) {
+                // Already added
+                return;
+            } else if (parent != null) {
+                // Still in the shade... remove it
+                parent.removeView(mNotifRow);
+            }
+            if (mShowOnTop) {
+                addView(mNotifRow);
+            } else {
+                addView(mNotifRow, mUseFooter ? 0 : 1);
+            }
+        }
     }
 
     /**
@@ -376,14 +394,8 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
         } else {
             // Hide activity view if we had it previously
             mActivityView.setVisibility(GONE);
-
-            // Use notification view
             mNotifRow = mEntry.getRow();
-            if (mShowOnTop) {
-                addView(mNotifRow);
-            } else {
-                addView(mNotifRow, mUseFooter ? 0 : 1);
-            }
+
         }
         updateView();
     }

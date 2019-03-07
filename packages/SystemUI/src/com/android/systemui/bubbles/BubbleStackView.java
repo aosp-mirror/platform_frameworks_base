@@ -807,7 +807,7 @@ public class BubbleStackView extends FrameLayout {
         mExpandedViewContainer.removeAllViews();
         if (mExpandedBubble != null && mIsExpanded) {
             mExpandedViewContainer.addView(mExpandedBubble.expandedView);
-            mExpandedBubble.expandedView.populateActivityView();
+            mExpandedBubble.expandedView.populateExpandedView();
             mExpandedViewContainer.setVisibility(mIsExpanded ? VISIBLE : GONE);
         }
     }
@@ -817,8 +817,12 @@ public class BubbleStackView extends FrameLayout {
 
         mExpandedViewContainer.setVisibility(mIsExpanded ? VISIBLE : GONE);
         if (mIsExpanded) {
+            // First update the view so that it calculates a new height (ensuring the y position
+            // calculation is correct)
+            mExpandedBubble.expandedView.updateView();
             final float y = getYPositionForExpandedView();
             mExpandedViewContainer.setTranslationY(y);
+            // Then update the view so that ActivityView knows we translated
             mExpandedBubble.expandedView.updateView();
         }
 
