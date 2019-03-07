@@ -43,6 +43,7 @@ import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.ShapeDrawable;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
 import android.util.AttributeSet;
@@ -455,30 +456,38 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
     void updateHeight() {
         if (usingActivityView()) {
             Notification.BubbleMetadata data = mEntry.getBubbleMetadata();
-            int desiredHeight;
+            float desiredHeight;
             if (data == null) {
                 // This is a contentIntent based bubble, lets allow it to be the max height
                 // as it was forced into this mode and not prepared to be small
                 desiredHeight = mStackView.getMaxExpandedHeight();
             } else {
-                desiredHeight = data.getDesiredHeight() > 0
-                        ? data.getDesiredHeight()
-                        : mMinHeight;
+                boolean useRes = data.getDesiredHeightResId() != 0;
+                float desiredPx;
+                if (useRes) {
+                    desiredPx = getDimenForPackageUser(data.getDesiredHeightResId(),
+                            mEntry.notification.getPackageName(),
+                            mEntry.notification.getUser().getIdentifier());
+                } else {
+                    desiredPx = data.getDesiredHeight()
+                            * getContext().getResources().getDisplayMetrics().density;
+                }
+                desiredHeight = desiredPx > 0 ? desiredPx : mMinHeight;
             }
             int chromeHeight = mPermissionView.getVisibility() != View.VISIBLE
                     ? mHeaderHeight
                     : mPermissionHeight;
             int max = mStackView.getMaxExpandedHeight() - chromeHeight - mPointerView.getHeight()
                     - mPointerMargin;
-            int height = Math.min(desiredHeight, max);
+            float height = Math.min(desiredHeight, max);
             height = Math.max(height, mMinHeight);
             LayoutParams lp = (LayoutParams) mActivityView.getLayoutParams();
             mNeedsNewHeight =  lp.height != height;
             if (!mKeyboardVisible) {
                 // If the keyboard is visible... don't adjust the height because that will cause
                 // a configuration change and the keyboard will be lost.
-                lp.height = height;
-                mBubbleHeight = height;
+                lp.height = (int) height;
+                mBubbleHeight = (int) height;
                 mActivityView.setLayoutParams(lp);
                 mNeedsNewHeight = false;
             }
@@ -709,5 +718,24 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
                 action,
                 mStackView.getNormalizedXPosition(),
                 mStackView.getNormalizedYPosition());
+    }
+
+    private int getDimenForPackageUser(int resId, String pkg, int userId) {
+        Resources r;
+        if (pkg != null) {
+            try {
+                if (userId == UserHandle.USER_ALL) {
+                    userId = UserHandle.USER_SYSTEM;
+                }
+                r = mPm.getResourcesForApplicationAsUser(pkg, userId);
+                return r.getDimensionPixelSize(resId);
+            } catch (PackageManager.NameNotFoundException ex) {
+                // Uninstalled, don't care
+            } catch (Resources.NotFoundException e) {
+                // Invalid res id, return 0 and user our default
+                Log.e(TAG, "Couldn't find desired height res id", e);
+            }
+        }
+        return 0;
     }
 }
