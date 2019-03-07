@@ -88,6 +88,7 @@ public class BaseLockSettingsServiceTests extends AndroidTestCase {
     IAuthSecret mAuthSecretService;
     WindowManagerInternal mMockWindowManager;
     FakeGsiService mGsiService;
+    PasswordSlotManagerTestable mPasswordSlotManager;
     protected boolean mHasSecureLockScreen;
 
     @Override
@@ -103,6 +104,7 @@ public class BaseLockSettingsServiceTests extends AndroidTestCase {
         mDevicePolicyManagerInternal = mock(DevicePolicyManagerInternal.class);
         mMockWindowManager = mock(WindowManagerInternal.class);
         mGsiService = new FakeGsiService();
+        mPasswordSlotManager = new PasswordSlotManagerTestable();
 
         LocalServices.removeServiceForTest(LockSettingsInternal.class);
         LocalServices.removeServiceForTest(DevicePolicyManagerInternal.class);
@@ -135,7 +137,7 @@ public class BaseLockSettingsServiceTests extends AndroidTestCase {
             }
         };
         mSpManager = new MockSyntheticPasswordManager(mContext, mStorage, mGateKeeperService,
-                mUserManager);
+                mUserManager, mPasswordSlotManager);
         mAuthSecretService = mock(IAuthSecret.class);
         mService = new LockSettingsServiceTestable(mContext, mLockPatternUtils, mStorage,
                 mGateKeeperService, mKeyStore, setUpStorageManagerMock(), mActivityManager,
@@ -223,6 +225,8 @@ public class BaseLockSettingsServiceTests extends AndroidTestCase {
 
         File storageDir = mStorage.mStorageDir;
         assertTrue(FileUtils.deleteContents(storageDir));
+
+        mPasswordSlotManager.cleanup();
     }
 
     protected void assertNotEquals(long expected, long actual) {
