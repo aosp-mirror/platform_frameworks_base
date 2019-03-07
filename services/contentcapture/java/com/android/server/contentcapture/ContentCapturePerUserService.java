@@ -47,6 +47,8 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.service.contentcapture.ActivityEvent;
+import android.service.contentcapture.ActivityEvent.ActivityEventType;
 import android.service.contentcapture.ContentCaptureService;
 import android.service.contentcapture.IContentCaptureServiceCallback;
 import android.service.contentcapture.SnapshotData;
@@ -430,6 +432,19 @@ final class ContentCapturePerUserService
             Slog.v(mTag, "getOptionsForPackage(" + packageName + "): " + options);
         }
         return options;
+    }
+
+    @GuardedBy("mLock")
+    void onActivityEventLocked(@NonNull ComponentName componentName, @ActivityEventType int type) {
+        if (mRemoteService == null) {
+            if (mMaster.debug) Slog.d(mTag, "onActivityEvent(): no remote service");
+            return;
+        }
+        final ActivityEvent event = new ActivityEvent(componentName, type);
+
+        if (mMaster.verbose) Slog.v(mTag, "onActivityEvent(): " + event);
+
+        mRemoteService.onActivityLifecycleEvent(event);
     }
 
     @Override

@@ -87,6 +87,7 @@ import com.android.server.broadcastradio.BroadcastRadioService;
 import com.android.server.camera.CameraServiceProxy;
 import com.android.server.clipboard.ClipboardService;
 import com.android.server.connectivity.IpConnectivityMetrics;
+import com.android.server.contentcapture.ContentCaptureManagerInternal;
 import com.android.server.coverage.CoverageService;
 import com.android.server.devicepolicy.DevicePolicyManagerService;
 import com.android.server.display.DisplayManagerService;
@@ -2250,6 +2251,13 @@ public final class SystemServer {
 
         traceBeginAndSlog("StartContentCaptureService");
         mSystemServiceManager.startService(CONTENT_CAPTURE_MANAGER_SERVICE_CLASS);
+
+        ContentCaptureManagerInternal ccmi =
+                LocalServices.getService(ContentCaptureManagerInternal.class);
+        if (ccmi != null && mActivityManagerService != null) {
+            mActivityManagerService.setContentCaptureManager(ccmi);
+        }
+
         traceEnd();
     }
 

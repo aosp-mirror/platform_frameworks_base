@@ -126,6 +126,13 @@ public abstract class ContentCaptureService extends Service {
                     obtainMessage(ContentCaptureService::handleOnUserDataRemovalRequest,
                             ContentCaptureService.this, request));
         }
+
+        @Override
+        public void onActivityEvent(ActivityEvent event) {
+            mHandler.sendMessage(obtainMessage(ContentCaptureService::handleOnActivityEvent,
+                    ContentCaptureService.this, event));
+
+        }
     };
 
     /**
@@ -247,7 +254,21 @@ public abstract class ContentCaptureService extends Service {
      * @param snapshotData the data
      */
     public void onActivitySnapshot(@NonNull ContentCaptureSessionId sessionId,
-            @NonNull SnapshotData snapshotData) {}
+            @NonNull SnapshotData snapshotData) {
+        if (sVerbose) Log.v(TAG, "onActivitySnapshot(id=" + sessionId + ")");
+    }
+
+    /**
+     * Notifies the service of an activity-level event that is not associated with a session.
+     *
+     * <p>This method can be used to track some high-level events for all activities, even those
+     * that are not whitelisted for Content Capture.
+     *
+     * @param event high-level activity event
+     */
+    public void onActivityEvent(@NonNull ActivityEvent event) {
+        if (sVerbose) Log.v(TAG, "onActivityEvent(): " + event);
+    }
 
     /**
      * Destroys the content capture session.
@@ -381,6 +402,10 @@ public abstract class ContentCaptureService extends Service {
 
     private void handleOnUserDataRemovalRequest(@NonNull UserDataRemovalRequest request) {
         onUserDataRemovalRequest(request);
+    }
+
+    private void handleOnActivityEvent(@NonNull ActivityEvent event) {
+        onActivityEvent(event);
     }
 
     /**

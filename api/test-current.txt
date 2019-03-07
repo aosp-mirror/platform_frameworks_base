@@ -2297,9 +2297,20 @@ package android.service.autofill.augmented {
 
 package android.service.contentcapture {
 
+  public final class ActivityEvent implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public android.content.ComponentName getComponentName();
+    method public int getEventType();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.service.contentcapture.ActivityEvent> CREATOR;
+    field public static final int TYPE_ACTIVITY_PAUSED = 2; // 0x2
+    field public static final int TYPE_ACTIVITY_RESUMED = 1; // 0x1
+  }
+
   public abstract class ContentCaptureService extends android.app.Service {
     ctor public ContentCaptureService();
     method public final void disableContentCaptureServices();
+    method public void onActivityEvent(@NonNull android.service.contentcapture.ActivityEvent);
     method public void onActivitySnapshot(@NonNull android.view.contentcapture.ContentCaptureSessionId, @NonNull android.service.contentcapture.SnapshotData);
     method public void onConnected();
     method public void onContentCaptureEvent(@NonNull android.view.contentcapture.ContentCaptureSessionId, @NonNull android.view.contentcapture.ContentCaptureEvent);
