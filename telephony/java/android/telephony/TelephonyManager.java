@@ -9748,7 +9748,7 @@ public class TelephonyManager {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
                 return telephony.getNumberOfModemsWithSimultaneousDataConnections(
-                        getSubId(), mContext.getOpPackageName());
+                        getSubId(), getOpPackageName());
             }
         } catch (RemoteException ex) {
             // This could happen if binder process crashes.
