@@ -26,11 +26,15 @@ import android.os.Bundle;
 oneway interface IWallpaperEngine {
     void setDesiredSize(int width, int height);
     void setDisplayPadding(in Rect padding);
+    @UnsupportedAppUsage
     void setVisibility(boolean visible);
     void setInAmbientMode(boolean inAmbientDisplay, boolean animated);
+    @UnsupportedAppUsage
     void dispatchPointer(in MotionEvent event);
+    @UnsupportedAppUsage
     void dispatchWallpaperCommand(String action, int x, int y,
             int z, in Bundle extras);
     void requestWallpaperColors();
+    @UnsupportedAppUsage
     void destroy();
 }

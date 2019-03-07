@@ -20,5 +20,6 @@ import android.service.euicc.GetDownloadableSubscriptionMetadataResult;
 
 /** @hide */
 oneway interface IGetDownloadableSubscriptionMetadataCallback {
+    @UnsupportedAppUsage
     void onComplete(in GetDownloadableSubscriptionMetadataResult result);
 }
