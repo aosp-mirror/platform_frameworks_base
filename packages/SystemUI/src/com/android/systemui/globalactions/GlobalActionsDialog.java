@@ -456,7 +456,9 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         @Override
         public void onPress() {
             Intent intent = new Intent(EmergencyDialerConstants.ACTION_DIAL);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                    | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS
+                    | Intent.FLAG_ACTIVITY_CLEAR_TOP);
             intent.putExtra(EmergencyDialerConstants.EXTRA_ENTRY_TYPE,
                     EmergencyDialerConstants.ENTRY_TYPE_POWER_MENU);
             mContext.startActivityAsUser(intent, UserHandle.CURRENT);
