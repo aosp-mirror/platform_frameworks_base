@@ -450,8 +450,15 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
     }
 
     void onSystemReady() {
-        mPersisterQueue.startPersisting();
         mLaunchParamsPersister.onSystemReady();
+    }
+
+    void onUserUnlocked(int userId) {
+        // Only start persisting when the first user is unlocked. The method call is
+        // idempotent so there is no side effect to call it again when the second user is
+        // unlocked.
+        mPersisterQueue.startPersisting();
+        mLaunchParamsPersister.onUnlockUser(userId);
     }
 
     public ActivityMetricsLogger getActivityMetricsLogger() {
