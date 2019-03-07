@@ -329,8 +329,7 @@
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"WLAN an"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Keine WLANs verfügbar"</string>
     <string name="quick_settings_wifi_secondary_label_transient" msgid="7748206246119760554">"Wird aktiviert…"</string>
-    <!-- no translation found for quick_settings_cast_title (6954684227605751758) -->
-    <skip />
+    <string name="quick_settings_cast_title" msgid="6954684227605751758">"Bildschirm übertragen"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"Wird übertragen"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Unbenanntes Gerät"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"Startklar"</string>
@@ -806,7 +805,7 @@
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Minimieren"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Schließen"</string>
     <string name="pip_phone_settings" msgid="8080777499521528521">"Einstellungen"</string>
-    <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Zum Schließen nach unten ziehen"</string>
+    <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Zum Verwerfen nach unten ziehen"</string>
     <string name="pip_menu_title" msgid="4707292089961887657">"Menü"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> ist in Bild im Bild"</string>
     <string name="pip_notification_message" msgid="5619512781514343311">"Wenn du nicht möchtest, dass <xliff:g id="NAME">%s</xliff:g> diese Funktion verwendet, tippe, um die Einstellungen zu öffnen und die Funktion zu deaktivieren."</string>
