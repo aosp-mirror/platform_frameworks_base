@@ -245,8 +245,10 @@ public final class RangingResult implements Parcelable {
     }
 
     /**
-     * @return The responder location represented as {@link ResponderLocation} which captures
-     * location information the responder is programmed to broadcast.
+     * @return The unverified responder location represented as {@link ResponderLocation} which
+     * captures location information the responder is programmed to broadcast. The responder
+     * location is referred to as unverified, because we are relying on the device/site
+     * administrator to correctly configure its location data.
      * <p>
      * Will return a {@code null} when the location information cannot be parsed.
      * <p>
@@ -254,10 +256,11 @@ public final class RangingResult implements Parcelable {
      * exception.
      */
     @Nullable
-    public ResponderLocation getResponderLocation() {
+    public ResponderLocation getUnverifiedResponderLocation() {
         if (mStatus != STATUS_SUCCESS) {
             throw new IllegalStateException(
-                    "getResponderLocation(): invoked on an invalid result: getStatus()=" + mStatus);
+                    "getUnverifiedResponderLocation(): invoked on an invalid result: getStatus()="
+                            + mStatus);
         }
         return mResponderLocation;
     }

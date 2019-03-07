@@ -25,9 +25,8 @@ import java.lang.annotation.Retention;
 /**
  * Civic Address key types used to define address elements.
  *
- * <p>These keys can be used in ResponderLocation look-up the corresponding string values.</p>
- *
- * @hide
+ * <p>These keys can be used with {@code ResponderLocation.toCivicLocationSparseArray()}
+ * to look-up the corresponding string values.</p>
  */
 public class CivicLocationKeys {
 
@@ -69,7 +68,7 @@ public class CivicLocationKeys {
     public static final int HNO = 19;
     /** House number suffix key e.g. A, 1/2. */
     public static final int HNS = 20;
-    /** Landmark or vanity address key e.g. Columbia Univ. */
+    /** Landmark or vanity address key e.g. Golden Gate Bridge. */
     public static final int LMK = 21;
     /** Additional Location info key e.g. South Wing. */
     public static final int LOC = 22;
@@ -77,7 +76,7 @@ public class CivicLocationKeys {
     public static final int NAM = 23;
     /** Postal or ZIP code key e.g. 10027-1234. */
     public static final int POSTAL_CODE = 24;
-    /** Building key e.g. Low Library. */
+    /** Building key e.g. Lincoln Library. */
     public static final int BUILDING = 25;
     /** Apartment or suite key e.g. Apt 42. */
     public static final int APT = 26;
