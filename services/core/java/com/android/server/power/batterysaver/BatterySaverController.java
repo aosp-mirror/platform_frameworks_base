@@ -115,9 +115,41 @@ public class BatterySaverController implements BatterySaverPolicyListener {
     public static final int REASON_SETTING_CHANGED = 8;
     public static final int REASON_DYNAMIC_POWER_SAVINGS_AUTOMATIC_ON = 9;
     public static final int REASON_DYNAMIC_POWER_SAVINGS_AUTOMATIC_OFF = 10;
-    public static final int REASON_STICKY_RESTORE_OFF = 11;
-    public static final int REASON_ADAPTIVE_DYNAMIC_POWER_SAVINGS_CHANGED = 12;
-    public static final int REASON_TIMEOUT = 13;
+    public static final int REASON_ADAPTIVE_DYNAMIC_POWER_SAVINGS_CHANGED = 11;
+    public static final int REASON_TIMEOUT = 12;
+
+    static String reasonToString(int reason) {
+        switch (reason) {
+            case BatterySaverController.REASON_PERCENTAGE_AUTOMATIC_ON:
+                return "Percentage Auto ON";
+            case BatterySaverController.REASON_PERCENTAGE_AUTOMATIC_OFF:
+                return "Percentage Auto OFF";
+            case BatterySaverController.REASON_MANUAL_ON:
+                return "Manual ON";
+            case BatterySaverController.REASON_MANUAL_OFF:
+                return "Manual OFF";
+            case BatterySaverController.REASON_STICKY_RESTORE:
+                return "Sticky restore";
+            case BatterySaverController.REASON_INTERACTIVE_CHANGED:
+                return "Interactivity changed";
+            case BatterySaverController.REASON_POLICY_CHANGED:
+                return "Policy changed";
+            case BatterySaverController.REASON_PLUGGED_IN:
+                return "Plugged in";
+            case BatterySaverController.REASON_SETTING_CHANGED:
+                return "Setting changed";
+            case BatterySaverController.REASON_DYNAMIC_POWER_SAVINGS_AUTOMATIC_ON:
+                return "Dynamic Warning Auto ON";
+            case BatterySaverController.REASON_DYNAMIC_POWER_SAVINGS_AUTOMATIC_OFF:
+                return "Dynamic Warning Auto OFF";
+            case BatterySaverController.REASON_ADAPTIVE_DYNAMIC_POWER_SAVINGS_CHANGED:
+                return "Adaptive Power Savings changed";
+            case BatterySaverController.REASON_TIMEOUT:
+                return "timeout";
+            default:
+                return "Unknown reason: " + reason;
+        }
+    }
 
     /**
      * Plugin interface. All methods are guaranteed to be called on the same (handler) thread.
