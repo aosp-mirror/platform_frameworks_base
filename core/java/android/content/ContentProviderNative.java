@@ -795,5 +795,6 @@ final class ContentProviderProxy implements IContentProvider
         }
     }
 
+    @UnsupportedAppUsage
     private IBinder mRemote;
 }

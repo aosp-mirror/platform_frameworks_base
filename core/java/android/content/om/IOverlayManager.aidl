@@ -37,6 +37,7 @@ interface IOverlayManager {
      *         mapped to lists of overlays; if no overlays exist for the
      *         requested user, an empty map is returned.
      */
+    @UnsupportedAppUsage
     Map getAllOverlays(in int userId);
 
     /**
@@ -60,6 +61,7 @@ interface IOverlayManager {
      * @return The OverlayInfo for the overlay package; or null if no such
      *         overlay package exists.
      */
+    @UnsupportedAppUsage
     OverlayInfo getOverlayInfo(in String packageName, in int userId);
 
     /**

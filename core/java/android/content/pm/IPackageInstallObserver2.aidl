@@ -25,6 +25,7 @@ import android.os.Bundle;
  * @hide
  */
 oneway interface IPackageInstallObserver2 {
+    @UnsupportedAppUsage
     void onUserActionRequired(in Intent intent);
 
     /**
@@ -42,5 +43,6 @@ oneway interface IPackageInstallObserver2 {
      * </tr>
      * </table>
      */
+    @UnsupportedAppUsage
     void onPackageInstalled(String basePackageName, int returnCode, String msg, in Bundle extras);
 }
