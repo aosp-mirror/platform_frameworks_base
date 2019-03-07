@@ -56,7 +56,6 @@ public class Tonal implements ExtractionType {
 
     private final TonalPalette mGreyPalette;
     private final ArrayList<TonalPalette> mTonalPalettes;
-    private final ArrayList<ColorRange> mBlacklistedColors;
 
     // Temporary variable to avoid allocations
     private float[] mTmpHSL = new float[3];
@@ -65,7 +64,6 @@ public class Tonal implements ExtractionType {
 
         ConfigParser parser = new ConfigParser(context);
         mTonalPalettes = parser.getTonalPalettes();
-        mBlacklistedColors = parser.getBlacklistedColors();
 
         mGreyPalette = mTonalPalettes.get(0);
         mTonalPalettes.remove(0);
@@ -131,7 +129,7 @@ public class Tonal implements ExtractionType {
                     Color.blue(colorValue), hsl);
 
             // Stop when we find a color that meets our criteria
-            if (!generatedFromBitmap || !isBlacklisted(hsl)) {
+            if (!generatedFromBitmap) {
                 bestColor = color;
                 break;
             }
@@ -300,22 +298,6 @@ public class Tonal implements ExtractionType {
         return getColorPalette(palette.h, palette.s, palette.l);
     }
 
-
-    /**
-     * Checks if a given color exists in the blacklist
-     * @param hsl float array with 3 components (H 0..360, S 0..1 and L 0..1)
-     * @return true if color should be avoided
-     */
-    private boolean isBlacklisted(float[] hsl) {
-        for (int i = mBlacklistedColors.size() - 1; i >= 0; i--) {
-            ColorRange badRange = mBlacklistedColors.get(i);
-            if (badRange.containsColor(hsl[0], hsl[1], hsl[2])) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     /**
      * Offsets all colors by a delta, clamping values that go beyond what's
      * supported on the color space.
@@ -362,11 +344,6 @@ public class Tonal implements ExtractionType {
         }
 
         return minErrorIndex;
-    }
-
-    @VisibleForTesting
-    public List<ColorRange> getBlacklistedColors() {
-        return mBlacklistedColors;
     }
 
     @Nullable
@@ -502,11 +479,9 @@ public class Tonal implements ExtractionType {
     @VisibleForTesting
     public static class ConfigParser {
         private final ArrayList<TonalPalette> mTonalPalettes;
-        private final ArrayList<ColorRange> mBlacklistedColors;
 
         public ConfigParser(Context context) {
             mTonalPalettes = new ArrayList<>();
-            mBlacklistedColors = new ArrayList<>();
 
             // Load all palettes and the blacklist from an XML.
             try {
@@ -520,8 +495,6 @@ public class Tonal implements ExtractionType {
                         String tagName = parser.getName();
                         if (tagName.equals("palettes")) {
                             parsePalettes(parser);
-                        } else if (tagName.equals("blacklist")) {
-                            parseBlacklist(parser);
                         }
                     } else {
                         throw new XmlPullParserException("Invalid XML event " + eventType + " - "
@@ -536,28 +509,6 @@ public class Tonal implements ExtractionType {
 
         public ArrayList<TonalPalette> getTonalPalettes() {
             return mTonalPalettes;
-        }
-
-        public ArrayList<ColorRange> getBlacklistedColors() {
-            return mBlacklistedColors;
-        }
-
-        private void parseBlacklist(XmlPullParser parser)
-                throws XmlPullParserException, IOException {
-            parser.require(XmlPullParser.START_TAG, null, "blacklist");
-            while (parser.next() != XmlPullParser.END_TAG) {
-                if (parser.getEventType() != XmlPullParser.START_TAG) {
-                    continue;
-                }
-                String name = parser.getName();
-                // Starts by looking for the entry tag
-                if (name.equals("range")) {
-                    mBlacklistedColors.add(readRange(parser));
-                    parser.next();
-                } else {
-                    throw new XmlPullParserException("Invalid tag: " + name, parser, null);
-                }
-            }
         }
 
         private ColorRange readRange(XmlPullParser parser)
