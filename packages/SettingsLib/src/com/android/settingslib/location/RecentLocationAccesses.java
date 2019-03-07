@@ -18,11 +18,11 @@ package com.android.settingslib.location;
 
 import android.app.AppOpsManager;
 import android.content.Context;
+import android.content.PermissionChecker;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.drawable.Drawable;
-import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.text.format.DateUtils;
@@ -82,6 +82,7 @@ public class RecentLocationAccesses {
      */
     public List<Access> getAppList() {
         // Retrieve a location usage list from AppOps
+        PackageManager pm = mContext.getPackageManager();
         AppOpsManager aoManager =
                 (AppOpsManager) mContext.getSystemService(Context.APP_OPS_SERVICE);
         List<AppOpsManager.PackageOps> appOps = aoManager.getPackagesForOps(LOCATION_OPS);
@@ -96,19 +97,40 @@ public class RecentLocationAccesses {
 
         for (int i = 0; i < appOpsCount; ++i) {
             AppOpsManager.PackageOps ops = appOps.get(i);
-            // Don't show the Android System in the list - it's not actionable for the user.
-            // Also don't show apps belonging to background users except managed users.
             String packageName = ops.getPackageName();
             int uid = ops.getUid();
-            int userId = UserHandle.getUserId(uid);
-            boolean isAndroidOs =
-                    (uid == Process.SYSTEM_UID) && ANDROID_SYSTEM_PACKAGE_NAME.equals(packageName);
-            if (isAndroidOs || !profiles.contains(new UserHandle(userId))) {
+            UserHandle user = UserHandle.getUserHandleForUid(uid);
+
+            // Don't show apps belonging to background users except managed users.
+            if (!profiles.contains(user)) {
                 continue;
             }
-            Access access = getAccessFromOps(now, ops);
-            if (access != null) {
-                accesses.add(access);
+
+            // Don't show apps that do not have user sensitive location permissions
+            boolean showApp = true;
+            for (int op : LOCATION_OPS) {
+                final String permission = AppOpsManager.opToPermission(op);
+                final int permissionFlags = pm.getPermissionFlags(permission, packageName, user);
+                if (PermissionChecker.checkPermission(mContext, permission, -1, uid, packageName)
+                        == PermissionChecker.PERMISSION_GRANTED) {
+                    if ((permissionFlags
+                            & PackageManager.FLAG_PERMISSION_USER_SENSITIVE_WHEN_GRANTED) == 0) {
+                        showApp = false;
+                        break;
+                    }
+                } else {
+                    if ((permissionFlags
+                            & PackageManager.FLAG_PERMISSION_USER_SENSITIVE_WHEN_DENIED) == 0) {
+                        showApp = false;
+                        break;
+                    }
+                }
+            }
+            if (showApp) {
+                Access access = getAccessFromOps(now, ops);
+                if (access != null) {
+                    accesses.add(access);
+                }
             }
         }
         return accesses;
