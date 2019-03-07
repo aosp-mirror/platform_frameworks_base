@@ -250,18 +250,23 @@ public final class ContentCaptureManagerService extends
 
     private void setFineTuneParamsFromDeviceConfig() {
         synchronized (mLock) {
-            mDevCfgMaxBufferSize = ContentCaptureHelper.getIntDeviceConfigProperty(
+            mDevCfgMaxBufferSize = DeviceConfig.getInt(
+                    DeviceConfig.NAMESPACE_CONTENT_CAPTURE,
                     ContentCaptureManager.DEVICE_CONFIG_PROPERTY_MAX_BUFFER_SIZE,
                     ContentCaptureManager.DEFAULT_MAX_BUFFER_SIZE);
-            mDevCfgIdleFlushingFrequencyMs = ContentCaptureHelper.getIntDeviceConfigProperty(
+            mDevCfgIdleFlushingFrequencyMs = DeviceConfig.getInt(
+                    DeviceConfig.NAMESPACE_CONTENT_CAPTURE,
                     ContentCaptureManager.DEVICE_CONFIG_PROPERTY_IDLE_FLUSH_FREQUENCY,
                     ContentCaptureManager.DEFAULT_IDLE_FLUSHING_FREQUENCY_MS);
-            mDevCfgTextChangeFlushingFrequencyMs = ContentCaptureHelper.getIntDeviceConfigProperty(
+            mDevCfgTextChangeFlushingFrequencyMs = DeviceConfig.getInt(
+                    DeviceConfig.NAMESPACE_CONTENT_CAPTURE,
                     ContentCaptureManager.DEVICE_CONFIG_PROPERTY_TEXT_CHANGE_FLUSH_FREQUENCY,
                     ContentCaptureManager.DEFAULT_TEXT_CHANGE_FLUSHING_FREQUENCY_MS);
-            mDevCfgLogHistorySize = ContentCaptureHelper.getIntDeviceConfigProperty(
+            mDevCfgLogHistorySize = DeviceConfig.getInt(
+                    DeviceConfig.NAMESPACE_CONTENT_CAPTURE,
                     ContentCaptureManager.DEVICE_CONFIG_PROPERTY_LOG_HISTORY_SIZE, 20);
-            mDevCfgIdleUnbindTimeoutMs = ContentCaptureHelper.getIntDeviceConfigProperty(
+            mDevCfgIdleUnbindTimeoutMs = DeviceConfig.getInt(
+                    DeviceConfig.NAMESPACE_CONTENT_CAPTURE,
                     ContentCaptureManager.DEVICE_CONFIG_PROPERTY_IDLE_UNBIND_TIMEOUT,
                     (int) AbstractRemoteService.PERMANENT_BOUND_TIMEOUT_MS);
             if (verbose) {
@@ -276,7 +281,8 @@ public final class ContentCaptureManagerService extends
     }
 
     private void setLoggingLevelFromDeviceConfig() {
-        mDevCfgLoggingLevel = ContentCaptureHelper.getIntDeviceConfigProperty(
+        mDevCfgLoggingLevel = DeviceConfig.getInt(
+                DeviceConfig.NAMESPACE_CONTENT_CAPTURE,
                 ContentCaptureManager.DEVICE_CONFIG_PROPERTY_LOGGING_LEVEL,
                 ContentCaptureHelper.getDefaultLoggingLevel());
         ContentCaptureHelper.setLoggingLevel(mDevCfgLoggingLevel);
