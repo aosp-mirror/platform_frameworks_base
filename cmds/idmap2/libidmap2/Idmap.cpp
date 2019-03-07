@@ -55,7 +55,8 @@ class MatchingResources {
     map_[target_typeid].insert(std::make_pair(target_resid, overlay_resid));
   }
 
-  inline const std::map<TypeId, std::set<std::pair<ResourceId, ResourceId>>>& Map() const {
+  inline const std::map<TypeId, std::set<std::pair<ResourceId, ResourceId>>>& WARN_UNUSED
+      Map() const {
     return map_;
   }
 
