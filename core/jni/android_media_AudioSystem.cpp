@@ -144,6 +144,7 @@ static struct {
 static jclass gAudioMixingRuleClass;
 static struct {
     jfieldID    mCriteria;
+    jfieldID    mAllowPrivilegedPlaybackCapture;
     // other fields unused by JNI
 } gAudioMixingRuleFields;
 
@@ -1868,6 +1869,8 @@ static jint convertAudioMixToNative(JNIEnv *env,
 
     jobject jRule = env->GetObjectField(jAudioMix, gAudioMixFields.mRule);
     jobject jRuleCriteria = env->GetObjectField(jRule, gAudioMixingRuleFields.mCriteria);
+    nAudioMix->mAllowPrivilegedPlaybackCapture =
+            env->GetBooleanField(jRule, gAudioMixingRuleFields.mAllowPrivilegedPlaybackCapture);
     env->DeleteLocalRef(jRule);
     jobjectArray jCriteria = (jobjectArray)env->CallObjectMethod(jRuleCriteria,
                                                                  gArrayListMethods.toArray);
@@ -2456,6 +2459,8 @@ int register_android_media_AudioSystem(JNIEnv *env)
     gAudioMixingRuleClass = MakeGlobalRefOrDie(env, audioMixingRuleClass);
     gAudioMixingRuleFields.mCriteria = GetFieldIDOrDie(env, audioMixingRuleClass, "mCriteria",
                                                        "Ljava/util/ArrayList;");
+    gAudioMixingRuleFields.mAllowPrivilegedPlaybackCapture =
+            GetFieldIDOrDie(env, audioMixingRuleClass, "mAllowPrivilegedPlaybackCapture", "Z");
 
     jclass audioMixMatchCriterionClass =
                 FindClassOrDie(env, "android/media/audiopolicy/AudioMixingRule$AudioMixMatchCriterion");

@@ -3555,8 +3555,28 @@
         android:protectionLevel="signature" />
 
     <!-- Allows an application to capture audio output.
+         Use the {@code CAPTURE_MEDIA_OUTPUT} permission if only the {@code USAGE_UNKNOWN}),
+         {@code USAGE_MEDIA}) or {@code USAGE_GAME}) usages are intended to be captured.
          <p>Not for use by third-party applications.</p> -->
     <permission android:name="android.permission.CAPTURE_AUDIO_OUTPUT"
+        android:protectionLevel="signature|privileged" />
+
+    <!-- @SystemApi Allows an application to capture the audio played by other apps
+         that have set an allow capture policy of
+         {@link android.media.AudioAttributes#ALLOW_CAPTURE_BY_SYSTEM}.
+
+         Without this permission, only audio with an allow capture policy of
+         {@link android.media.AudioAttributes#ALLOW_CAPTURE_BY_ALL} can be used.
+
+         There are strong restriction listed at
+         {@link android.media.AudioAttributes#ALLOW_CAPTURE_BY_SYSTEM}
+         on what an app can do with the captured audio.
+
+         See {@code CAPTURE_AUDIO_OUTPUT} for capturing audio use cases other than media playback.
+
+         <p>Not for use by third-party applications.</p>
+         @hide -->
+    <permission android:name="android.permission.CAPTURE_MEDIA_OUTPUT"
         android:protectionLevel="signature|privileged" />
 
     <!-- @SystemApi Allows an application to capture audio for hotword detection.

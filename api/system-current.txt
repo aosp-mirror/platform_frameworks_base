@@ -49,6 +49,7 @@ package android {
     field @Deprecated public static final String BROADCAST_NETWORK_PRIVILEGED = "android.permission.BROADCAST_NETWORK_PRIVILEGED";
     field public static final String CAMERA_DISABLE_TRANSMIT_LED = "android.permission.CAMERA_DISABLE_TRANSMIT_LED";
     field public static final String CAPTURE_AUDIO_HOTWORD = "android.permission.CAPTURE_AUDIO_HOTWORD";
+    field public static final String CAPTURE_MEDIA_OUTPUT = "android.permission.CAPTURE_MEDIA_OUTPUT";
     field public static final String CAPTURE_TV_INPUT = "android.permission.CAPTURE_TV_INPUT";
     field public static final String CHANGE_APP_IDLE_STATE = "android.permission.CHANGE_APP_IDLE_STATE";
     field public static final String CHANGE_DEVICE_IDLE_TEMP_WHITELIST = "android.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST";
@@ -3600,6 +3601,7 @@ package android.media.audiopolicy {
     ctor public AudioMixingRule.Builder();
     method public android.media.audiopolicy.AudioMixingRule.Builder addMixRule(int, Object) throws java.lang.IllegalArgumentException;
     method public android.media.audiopolicy.AudioMixingRule.Builder addRule(android.media.AudioAttributes, int) throws java.lang.IllegalArgumentException;
+    method @NonNull public android.media.audiopolicy.AudioMixingRule.Builder allowPrivilegedPlaybackCapture(boolean);
     method public android.media.audiopolicy.AudioMixingRule build();
     method public android.media.audiopolicy.AudioMixingRule.Builder excludeMixRule(int, Object) throws java.lang.IllegalArgumentException;
     method public android.media.audiopolicy.AudioMixingRule.Builder excludeRule(android.media.AudioAttributes, int) throws java.lang.IllegalArgumentException;
