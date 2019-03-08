@@ -158,20 +158,6 @@ public class StackAnimationController extends
     }
 
     /**
-     * Minimum velocity, in pixels/second, required to get from x to destX while being slowed by a
-     * given frictional force.
-     *
-     * This is not derived using real math, I just made it up because the math in FlingAnimation
-     * looks hard and this seems to work. It doesn't actually matter because if it doesn't make it
-     * to the edge via Fling, it'll get Spring'd there anyway.
-     *
-     * TODO(tsuji, or someone who likes math): Figure out math.
-     */
-    private float getMinXVelocity(float x, float destX, float friction) {
-        return (destX - x) * (friction * 5) + ESCAPE_VELOCITY;
-    }
-
-    /**
      * Flings the stack starting with the given velocities, springing it to the nearest edge
      * afterward.
      */
@@ -188,17 +174,19 @@ public class StackAnimationController extends
         final float destinationRelativeX = stackShouldFlingLeft
                 ? stackBounds.left : stackBounds.right;
 
-        // Minimum velocity required for the stack to make it to the side of the screen.
-        final float escapeVelocity = getMinXVelocity(
-                x,
-                destinationRelativeX,
-                FLING_FRICTION_X);
+        // Minimum velocity required for the stack to make it to the targeted side of the screen,
+        // taking friction into account (4.2f is the number that friction scalars are multiplied by
+        // in DynamicAnimation.DragForce). This is an estimate - it could possibly be slightly off,
+        // but the SpringAnimation at the end will ensure that it reaches the destination X
+        // regardless.
+        final float minimumVelocityToReachEdge =
+                (destinationRelativeX - x) * (FLING_FRICTION_X * 4.2f);
 
         // Use the touch event's velocity if it's sufficient, otherwise use the minimum velocity so
         // that it'll make it all the way to the side of the screen.
         final float startXVelocity = stackShouldFlingLeft
-                ? Math.min(escapeVelocity, velX)
-                : Math.max(escapeVelocity, velX);
+                ? Math.min(minimumVelocityToReachEdge, velX)
+                : Math.max(minimumVelocityToReachEdge, velX);
 
         flingThenSpringFirstBubbleWithStackFollowing(
                 DynamicAnimation.TRANSLATION_X,
