@@ -1686,14 +1686,7 @@ public final class Settings {
      * Input: Nothing.
      *
      * <p>
-     * Output: {@link android.app.Activity#RESULT_OK} if user enabled Content Capture,
-     * {@link android.app.Activity#RESULT_CANCELED} if user disabled it, cancelled, or if the caller
-     * is not the Content Capture service associated with the user.
-     *
-     * <p>
-     * <b>NOTE: </b> Caller should call
-     * {@link android.view.contentcapture.ContentCaptureManager#isContentCaptureFeatureEnabled()}
-     * first to check whether the feature is already enabled.
+     * Output: Nothing
      *
      * @hide
      */
