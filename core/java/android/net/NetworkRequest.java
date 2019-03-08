@@ -347,7 +347,7 @@ public class NetworkRequest implements Parcelable {
          * @hide
          */
         @SystemApi
-        public Builder setSignalStrength(int signalStrength) {
+        public @NonNull Builder setSignalStrength(int signalStrength) {
             mNetworkCapabilities.setSignalStrength(signalStrength);
             return this;
         }
