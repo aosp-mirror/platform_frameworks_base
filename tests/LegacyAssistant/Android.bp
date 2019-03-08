@@ -1,0 +1,6 @@
+android_test {
+    name: "LegacyAssistant",
+    srcs: ["**/*.java"],
+    sdk_version: "current",
+    certificate: "platform",
+}
