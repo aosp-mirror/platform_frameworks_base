@@ -2477,26 +2477,24 @@ public class NotificationManagerService extends SystemService {
             checkCallerIsSameApp(callingPkg);
             final int callingUid = Binder.getCallingUid();
             UserHandle user = UserHandle.getUserHandleForUid(callingUid);
-            try {
-                ApplicationInfo info =
-                        mPackageManager.getApplicationInfo(delegate,
-                                MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE,
-                                user.getIdentifier());
-                if (info != null) {
-                    mPreferencesHelper.setNotificationDelegate(
-                            callingPkg, callingUid, delegate, info.uid);
-                    handleSavePolicyFile();
+            if (delegate == null) {
+                mPreferencesHelper.revokeNotificationDelegate(callingPkg, Binder.getCallingUid());
+                handleSavePolicyFile();
+            } else {
+                try {
+                    ApplicationInfo info =
+                            mPackageManager.getApplicationInfo(delegate,
+                                    MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE,
+                                    user.getIdentifier());
+                    if (info != null) {
+                        mPreferencesHelper.setNotificationDelegate(
+                                callingPkg, callingUid, delegate, info.uid);
+                        handleSavePolicyFile();
+                    }
+                } catch (RemoteException e) {
+                    e.rethrowFromSystemServer();
                 }
-            } catch (RemoteException e) {
-                // :(
             }
-        }
-
-        @Override
-        public void revokeNotificationDelegate(String callingPkg) {
-            checkCallerIsSameApp(callingPkg);
-            mPreferencesHelper.revokeNotificationDelegate(callingPkg, Binder.getCallingUid());
-            handleSavePolicyFile();
         }
 
         @Override
@@ -7196,7 +7194,7 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         protected String getRequiredPermission() {
-            // only signature/privileged apps can be bound
+            // only signature/privileged apps can be bound.
             return android.Manifest.permission.REQUEST_NOTIFICATION_ASSISTANT_SERVICE;
         }
 

@@ -16,6 +16,7 @@
 
 package android.service.notification;
 
+import android.annotation.NonNull;
 import android.annotation.UnsupportedAppUsage;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -299,7 +300,7 @@ public class StatusBarNotification implements Parcelable {
      * Might be different from {@link #getPackageName()} if the app owning the notification has
      * a {@link NotificationManager#setNotificationDelegate(String) notification delegate}.
      */
-    public String getOpPkg() {
+    public @NonNull String getOpPkg() {
         return opPkg;
     }
 
