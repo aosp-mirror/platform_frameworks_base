@@ -20,10 +20,13 @@ import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.annotation.UserIdInt;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.util.Log;
+
+import com.android.internal.util.SyncResultReceiver;
 
 import java.util.List;
 import java.util.concurrent.Executor;
@@ -44,12 +47,22 @@ import java.util.concurrent.Executor;
 public final class ContentSuggestionsManager {
     private static final String TAG = ContentSuggestionsManager.class.getSimpleName();
 
+    /**
+     * Timeout for calls to system_server.
+     */
+    private static final int SYNC_CALLS_TIMEOUT_MS = 5000;
+
     @Nullable
     private final IContentSuggestionsManager mService;
 
+    @NonNull
+    private final int mUser;
+
     /** @hide */
-    public ContentSuggestionsManager(@Nullable IContentSuggestionsManager service) {
+    public ContentSuggestionsManager(
+            @UserIdInt int userId, @Nullable IContentSuggestionsManager service) {
         mService = service;
+        mUser = userId;
     }
 
     /**
@@ -60,14 +73,15 @@ public final class ContentSuggestionsManager {
      * @param imageContextRequestExtras sent with with request to provide implementation specific
      *                                  extra information.
      */
-    public void provideContextImage(int taskId, @NonNull Bundle imageContextRequestExtras) {
+    public void provideContextImage(
+            int taskId, @NonNull Bundle imageContextRequestExtras) {
         if (mService == null) {
             Log.e(TAG, "provideContextImage called, but no ContentSuggestionsManager configured");
             return;
         }
 
         try {
-            mService.provideContextImage(taskId, imageContextRequestExtras);
+            mService.provideContextImage(mUser, taskId, imageContextRequestExtras);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
@@ -96,7 +110,7 @@ public final class ContentSuggestionsManager {
 
         try {
             mService.suggestContentSelections(
-                    request, new SelectionsCallbackWrapper(callback, callbackExecutor));
+                    mUser, request, new SelectionsCallbackWrapper(callback, callbackExecutor));
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
@@ -123,7 +137,7 @@ public final class ContentSuggestionsManager {
 
         try {
             mService.classifyContentSelections(
-                    request, new ClassificationsCallbackWrapper(callback, callbackExecutor));
+                    mUser, request, new ClassificationsCallbackWrapper(callback, callbackExecutor));
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
@@ -135,17 +149,39 @@ public final class ContentSuggestionsManager {
      * @param requestId the id for the associated interaction
      * @param interaction to report back to the system content suggestions service.
      */
-    public void notifyInteraction(@NonNull String requestId, @NonNull Bundle interaction) {
+    public void notifyInteraction(
+            @NonNull String requestId, @NonNull Bundle interaction) {
         if (mService == null) {
             Log.e(TAG, "notifyInteraction called, but no ContentSuggestionsManager configured");
             return;
         }
 
         try {
-            mService.notifyInteraction(requestId, interaction);
+            mService.notifyInteraction(mUser, requestId, interaction);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Indicates that Content Suggestions is available and enabled for the provided user. That is,
+     * has an implementation and not disabled through device management.
+     *
+     * @return {@code true} if Content Suggestions is enabled and available for the provided user.
+     */
+    public boolean isEnabled() {
+        if (mService == null) {
+            return false;
+        }
+
+        SyncResultReceiver receiver = new SyncResultReceiver(SYNC_CALLS_TIMEOUT_MS);
+        try {
+            mService.isEnabled(mUser, receiver);
+            return receiver.getIntResult() != 0;
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+        return false;
     }
 
     /**

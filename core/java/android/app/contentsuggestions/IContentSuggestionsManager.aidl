@@ -21,17 +21,23 @@ import android.app.contentsuggestions.ISelectionsCallback;
 import android.app.contentsuggestions.ClassificationsRequest;
 import android.app.contentsuggestions.SelectionsRequest;
 import android.os.Bundle;
+import android.os.UserHandle;
+import com.android.internal.os.IResultReceiver;
 
 /** @hide */
 oneway interface IContentSuggestionsManager {
     void provideContextImage(
+            int userId,
             int taskId,
             in Bundle imageContextRequestExtras);
     void suggestContentSelections(
+            int userId,
             in SelectionsRequest request,
             in ISelectionsCallback callback);
     void classifyContentSelections(
+            int userId,
             in ClassificationsRequest request,
             in IClassificationsCallback callback);
-    void notifyInteraction(in String requestId, in Bundle interaction);
+    void notifyInteraction(int userId, in String requestId, in Bundle interaction);
+    void isEnabled(int userId, in IResultReceiver receiver);
 }
