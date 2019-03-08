@@ -526,7 +526,7 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
                                 + result.getPrivate().getAlgorithm() + " vs " + mJcaKeyAlgorithm);
             }
             return result;
-        } catch (UnrecoverableKeyException e) {
+        } catch (UnrecoverableKeyException | KeyPermanentlyInvalidatedException e) {
             throw new ProviderException("Failed to load generated key pair from keystore", e);
         }
     }
