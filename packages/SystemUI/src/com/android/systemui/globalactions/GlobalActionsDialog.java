@@ -1558,8 +1558,6 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                             new FrameLayout.LayoutParams(
                                     FrameLayout.LayoutParams.MATCH_PARENT,
                                     FrameLayout.LayoutParams.WRAP_CONTENT);
-                    panelParams.topMargin = mContext.getResources().getDimensionPixelSize(
-                            com.android.systemui.R.dimen.global_actions_panel_top_margin);
                     panelContainer.addView(panelView, panelParams);
                     return panelContainer;
                 }
