@@ -71,8 +71,8 @@ public final class CellInfoLte extends CellInfo implements Parcelable {
     }
 
     /** @hide */
-    public CellInfoLte(android.hardware.radio.V1_4.CellInfo ci) {
-        super(ci);
+    public CellInfoLte(android.hardware.radio.V1_4.CellInfo ci, long timeStamp) {
+        super(ci, timeStamp);
         final android.hardware.radio.V1_4.CellInfoLte cil = ci.info.lte();
         mCellIdentityLte = new CellIdentityLte(cil.base.cellIdentityLte);
         mCellSignalStrengthLte = new CellSignalStrengthLte(cil.base.signalStrengthLte);
