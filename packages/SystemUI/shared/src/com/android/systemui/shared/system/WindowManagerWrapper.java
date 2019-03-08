@@ -217,4 +217,11 @@ public class WindowManagerWrapper {
         WindowManagerGlobal.getWindowManagerService().registerPinnedStackListener(
                 DEFAULT_DISPLAY, mPinnedStackListenerForwarder);
     }
+
+    /**
+     * Removes a pinned stack listener.
+     */
+    public void removePinnedStackListener(IPinnedStackListener listener) {
+        mPinnedStackListenerForwarder.removeListener(listener);
+    }
 }
