@@ -377,7 +377,8 @@
     <string name="power_discharging_duration" msgid="8848256785736335185">"Preostalo je još oko <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_duration_only_enhanced" msgid="4189311599812296592">"Preostalo je još oko <xliff:g id="TIME_REMAINING">%1$s</xliff:g> na osnovu vaše potrošnje"</string>
     <string name="power_discharging_duration_enhanced" msgid="1992003260664804080">"Preostalo je još oko <xliff:g id="TIME_REMAINING">%1$s</xliff:g> na osnovu vaše potrošnje (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_only_short" msgid="3463575350656389957">"Još <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
+    <!-- no translation found for power_remaining_duration_only_short (9183070574408359726) -->
+    <skip />
     <string name="power_discharge_by_enhanced" msgid="2095821536747992464">"Trebala bi trajati otprilike do <xliff:g id="TIME">%1$s</xliff:g> na osnovu vaše upotrebe (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only_enhanced" msgid="2175151772952365149">"Trebala bi trajati otprilike do <xliff:g id="TIME">%1$s</xliff:g> na osnovu vaše upotrebe"</string>
     <string name="power_discharge_by" msgid="6453537733650125582">"Trebala bi trajati do otprilike <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>

@@ -377,7 +377,8 @@
     <string name="power_discharging_duration" msgid="8848256785736335185">"Απομένει/ουν περίπου <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_duration_only_enhanced" msgid="4189311599812296592">"Απομένει/ουν περίπου <xliff:g id="TIME_REMAINING">%1$s</xliff:g>, βάσει της χρήσης σας"</string>
     <string name="power_discharging_duration_enhanced" msgid="1992003260664804080">"Απομένει/ουν περίπου <xliff:g id="TIME_REMAINING">%1$s</xliff:g>, βάσει της χρήσης σας (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_only_short" msgid="3463575350656389957">"Απομένει/ουν <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
+    <!-- no translation found for power_remaining_duration_only_short (9183070574408359726) -->
+    <skip />
     <string name="power_discharge_by_enhanced" msgid="2095821536747992464">"Θα διαρκέσει μέχρι τις <xliff:g id="TIME">%1$s</xliff:g> περίπου, ανάλογα με τη χρήση σας (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only_enhanced" msgid="2175151772952365149">"Θα διαρκέσει μέχρι τις <xliff:g id="TIME">%1$s</xliff:g> περίπου, ανάλογα με τη χρήση σας"</string>
     <string name="power_discharge_by" msgid="6453537733650125582">"Θα διαρκέσει μέχρι τις <xliff:g id="TIME">%1$s</xliff:g> περίπου (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
