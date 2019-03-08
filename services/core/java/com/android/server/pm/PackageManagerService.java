@@ -14702,6 +14702,9 @@ public class PackageManagerService extends IPackageManager.Stub
                                             DeviceConfig.Rollback.NAMESPACE,
                                             DeviceConfig.Rollback.ENABLE_ROLLBACK_TIMEOUT,
                                             DEFAULT_ENABLE_ROLLBACK_TIMEOUT);
+                                    if (rollbackTimeout < 0) {
+                                        rollbackTimeout = DEFAULT_ENABLE_ROLLBACK_TIMEOUT;
+                                    }
                                     final Message msg = mHandler.obtainMessage(
                                             ENABLE_ROLLBACK_TIMEOUT);
                                     msg.arg1 = enableRollbackToken;
