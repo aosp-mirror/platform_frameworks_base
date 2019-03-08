@@ -41,6 +41,7 @@ import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiEnterpriseConfig;
 import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.net.wifi.WifiNetworkScoreCache;
 import android.net.wifi.WifiSsid;
 import android.net.wifi.hotspot2.OsuProvider;
@@ -53,6 +54,7 @@ import android.os.SystemClock;
 import android.text.SpannableString;
 import android.text.format.DateUtils;
 import android.util.ArraySet;
+import android.util.Pair;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
@@ -72,6 +74,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
@@ -95,9 +98,12 @@ public class AccessPointTest {
 
     private Context mContext;
     private WifiInfo mWifiInfo;
+    @Mock private Context mMockContext;
+    @Mock private WifiManager mMockWifiManager;
     @Mock private RssiCurve mockBadgeCurve;
     @Mock private WifiNetworkScoreCache mockWifiNetworkScoreCache;
     @Mock private AccessPoint.AccessPointListener mMockAccessPointListener;
+    @Mock private WifiManager.ActionListener mMockConnectListener;
     private static final int NETWORK_ID = 123;
     private static final int DEFAULT_RSSI = -55;
 
@@ -1360,6 +1366,9 @@ public class AccessPointTest {
                 .isEqualTo(mContext.getString(R.string.tap_to_sign_up));
     }
 
+    /**
+     * Verifies that the summary of an OSU entry updates based on provisioning status.
+     */
     @Test
     public void testOsuAccessPointSummary_showsProvisioningUpdates() {
         AccessPoint osuAccessPoint = new AccessPoint(mContext, createOsuProvider(),
@@ -1410,5 +1419,83 @@ public class AccessPointTest {
         provisioningCallback.onProvisioningComplete();
         assertThat(osuAccessPoint.getSummary())
                 .isEqualTo(mContext.getString(R.string.osu_sign_up_complete));
+    }
+
+    /**
+     * Verifies that after provisioning through an OSU provider, we connect to the freshly
+     * provisioned network.
+     */
+    @Test
+    public void testOsuAccessPoint_connectsAfterProvisioning() {
+        // Set up mock for WifiManager.getAllMatchingWifiConfigs
+        WifiConfiguration config = new WifiConfiguration();
+        config.FQDN = "fqdn";
+        Map<Integer, List<ScanResult>> scanMapping = new HashMap<>();
+        scanMapping.put(WifiManager.PASSPOINT_HOME_NETWORK, mScanResults);
+        Pair<WifiConfiguration, Map<Integer, List<ScanResult>>> configMapPair =
+                new Pair<>(config, scanMapping);
+        List<Pair<WifiConfiguration, Map<Integer, List<ScanResult>>>> matchingWifiConfig =
+                new ArrayList<>();
+        matchingWifiConfig.add(configMapPair);
+        when(mMockWifiManager.getAllMatchingWifiConfigs(any())).thenReturn(matchingWifiConfig);
+
+        // Set up mock for WifiManager.getMatchingPasspointConfigsForOsuProviders
+        OsuProvider provider = createOsuProvider();
+        PasspointConfiguration passpointConfig = new PasspointConfiguration();
+        HomeSp homeSp = new HomeSp();
+        homeSp.setFqdn("fqdn");
+        homeSp.setFriendlyName("Test Provider");
+        passpointConfig.setHomeSp(homeSp);
+        Map<OsuProvider, PasspointConfiguration> osuProviderConfigMap = new HashMap<>();
+        osuProviderConfigMap.put(provider, passpointConfig);
+        when(mMockWifiManager
+                .getMatchingPasspointConfigsForOsuProviders(Collections.singleton(provider)))
+                .thenReturn(osuProviderConfigMap);
+
+        when(mMockContext.getSystemService(Context.WIFI_SERVICE)).thenReturn(mMockWifiManager);
+
+        AccessPoint osuAccessPoint = new AccessPoint(mMockContext, provider, mScanResults);
+        osuAccessPoint.setListener(mMockAccessPointListener);
+
+        AccessPoint.AccessPointProvisioningCallback provisioningCallback =
+                osuAccessPoint.new AccessPointProvisioningCallback();
+        provisioningCallback.onProvisioningComplete();
+
+        verify(mMockWifiManager).connect(any(), any());
+    }
+
+    /**
+     * Verifies that after provisioning through an OSU provider, we call the connect listener's
+     * onFailure() method if we cannot find the network we just provisioned.
+     */
+    @Test
+    public void testOsuAccessPoint_noMatchingConfigsAfterProvisioning_callsOnFailure() {
+        // Set up mock for WifiManager.getAllMatchingWifiConfigs
+        when(mMockWifiManager.getAllMatchingWifiConfigs(any())).thenReturn(new ArrayList<>());
+
+        // Set up mock for WifiManager.getMatchingPasspointConfigsForOsuProviders
+        OsuProvider provider = createOsuProvider();
+        PasspointConfiguration passpointConfig = new PasspointConfiguration();
+        HomeSp homeSp = new HomeSp();
+        homeSp.setFqdn("fqdn");
+        homeSp.setFriendlyName("Test Provider");
+        passpointConfig.setHomeSp(homeSp);
+        Map<OsuProvider, PasspointConfiguration> osuProviderConfigMap = new HashMap<>();
+        osuProviderConfigMap.put(provider, passpointConfig);
+        when(mMockWifiManager
+                .getMatchingPasspointConfigsForOsuProviders(Collections.singleton(provider)))
+                .thenReturn(osuProviderConfigMap);
+
+        when(mMockContext.getSystemService(Context.WIFI_SERVICE)).thenReturn(mMockWifiManager);
+
+        AccessPoint osuAccessPoint = new AccessPoint(mMockContext, provider, mScanResults);
+        osuAccessPoint.setListener(mMockAccessPointListener);
+        osuAccessPoint.startOsuProvisioning(mMockConnectListener);
+
+        AccessPoint.AccessPointProvisioningCallback provisioningCallback =
+                osuAccessPoint.new AccessPointProvisioningCallback();
+        provisioningCallback.onProvisioningComplete();
+
+        verify(mMockConnectListener).onFailure(anyInt());
     }
 }
