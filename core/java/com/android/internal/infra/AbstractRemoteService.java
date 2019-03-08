@@ -610,6 +610,7 @@ public abstract class AbstractRemoteService<S extends AbstractRemoteService<S, I
                 if (remoteService != null) {
                     // TODO(b/117779333): we should probably ignore it if service is destroyed.
                     Slog.w(mTag, "timed out after " + service.getRemoteRequestMillis() + " ms");
+                    remoteService.finishRequest(this);
                     onTimeout(remoteService);
                 } else {
                     Slog.w(mTag, "timed out (no service)");
