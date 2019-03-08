@@ -261,7 +261,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 PhoneStateListener.LISTEN_CALL_FORWARDING_INDICATOR
                         | PhoneStateListener.LISTEN_MESSAGE_WAITING_INDICATOR
                         | PhoneStateListener.LISTEN_EMERGENCY_NUMBER_LIST
-                        | PhoneStateListener.LISTEN_ACTIVE_DATA_SUBID_CHANGE;
+                        | PhoneStateListener.LISTEN_ACTIVE_DATA_SUBSCRIPTION_ID_CHANGE;
 
     static final int PRECISE_PHONE_STATE_PERMISSION_MASK =
                 PhoneStateListener.LISTEN_PRECISE_CALL_STATE |
@@ -821,7 +821,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                             remove(r.binder);
                         }
                     }
-                    if ((events & PhoneStateListener.LISTEN_ACTIVE_DATA_SUBID_CHANGE) != 0) {
+                    if ((events & PhoneStateListener
+                            .LISTEN_ACTIVE_DATA_SUBSCRIPTION_ID_CHANGE) != 0) {
                         try {
                             r.callback.onActiveDataSubIdChanged(mActiveDataSubId);
                         } catch (RemoteException ex) {
@@ -1757,7 +1758,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
             for (Record r : mRecords) {
                 if (r.matchPhoneStateListenerEvent(
-                        PhoneStateListener.LISTEN_ACTIVE_DATA_SUBID_CHANGE)) {
+                        PhoneStateListener.LISTEN_ACTIVE_DATA_SUBSCRIPTION_ID_CHANGE)) {
                     try {
                         r.callback.onActiveDataSubIdChanged(activeDataSubId);
                     } catch (RemoteException ex) {
