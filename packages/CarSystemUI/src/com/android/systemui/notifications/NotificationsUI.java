@@ -130,7 +130,6 @@ public class NotificationsUI extends SystemUI
                 R.layout.navigation_bar_window, null);
         mCarNotificationWindow
                 .setBackgroundColor(mContext.getColor(R.color.notification_shade_background_color));
-
         inflateNotificationContent();
 
         WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams(
@@ -246,6 +245,12 @@ public class NotificationsUI extends SystemUI
         public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
             return distanceY > 0;
         }
+
+        @Override
+        public boolean onSingleTapUp(MotionEvent motionEvent) {
+            closeCarNotifications(DEFAULT_FLING_VELOCITY);
+            return false;
+        }
     }
 
     private class NotificationListTouchListener implements View.OnTouchListener {
@@ -324,6 +329,14 @@ public class NotificationsUI extends SystemUI
         @Override
         public boolean onScroll(MotionEvent event1, MotionEvent event2, float distanceX,
                 float distanceY) {
+            boolean isDown = event1.getY() - event2.getY() < 0;
+            // CarStatusBar and NavigationBar are identical so avoid the touch if it
+            // starts from NavigationBar to open.
+            if (event1.getRawY() > mCarNotificationWindow.getHeight() && isDown
+                    && mCarNotificationWindow.getVisibility() == View.GONE) {
+                mIsTracking = false;
+                return true;
+            }
             mIsTracking = true;
             mCarNotificationWindow.setVisibility(View.VISIBLE);
 
@@ -345,14 +358,15 @@ public class NotificationsUI extends SystemUI
 
             boolean isUp = velocityY < 0;
             float distanceDelta = Math.abs(event1.getY() - event2.getY());
-
             if (isUp && distanceDelta > SWIPE_UP_MIN_DISTANCE) {
                 // fling up
                 mIsTracking = false;
                 closeCarNotifications(Math.abs(velocityY));
                 return true;
 
-            } else if (!isUp && distanceDelta > SWIPE_DOWN_MIN_DISTANCE) {
+            } else if (!isUp && distanceDelta > SWIPE_DOWN_MIN_DISTANCE
+                    && (event1.getRawY() < mCarNotificationWindow.getHeight()
+                    || mCarNotificationWindow.getVisibility() == View.VISIBLE)) {
                 // fling down
                 mIsTracking = false;
                 openCarNotifications(velocityY);
