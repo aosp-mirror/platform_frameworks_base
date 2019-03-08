@@ -50,7 +50,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_marginStart="@dimen/notification_content_margin_start"
-            android:gravity="left"
+            android:gravity="start"
         />
 
         <TextView android:id="@+id/notification_media_total_time"
@@ -59,7 +59,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_marginEnd="@dimen/notification_content_margin_end"
-            android:gravity="right"
+            android:gravity="end"
         />
     </FrameLayout>
 </LinearLayout>
