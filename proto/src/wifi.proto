@@ -1954,7 +1954,7 @@ message WifiUsabilityStatsEntry {
   optional LinkProbeStatus probe_status_since_last_update = 24;
 
   // The elapsed time of the most recent link probe since last stats update;
-  optional int32 probe_elapsed_time_ms_since_last_update = 25;
+  optional int32 probe_elapsed_time_since_last_update_ms = 25;
 
   // The MCS rate of the most recent link probe since last stats update
   optional int32 probe_mcs_rate_since_last_update = 26;

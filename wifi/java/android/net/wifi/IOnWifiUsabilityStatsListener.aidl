@@ -23,7 +23,7 @@ import android.net.wifi.WifiUsabilityStatsEntry;
  *
  * @hide
  */
-oneway interface IWifiUsabilityStatsListener
+oneway interface IOnWifiUsabilityStatsListener
 {
     /**
      * Service to manager callback providing current Wi-Fi usability stats.
@@ -36,6 +36,6 @@ oneway interface IWifiUsabilityStatsListener
      *                           Wi-Fi usability stats.
      * @param stats The updated Wi-Fi usability statistics.
      */
-    void onStatsUpdated(int seqNum, boolean isSameBssidAndFreq,
+    void onWifiUsabilityStats(int seqNum, boolean isSameBssidAndFreq,
             in WifiUsabilityStatsEntry stats);
 }

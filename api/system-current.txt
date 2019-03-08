@@ -4746,7 +4746,7 @@ package android.net.wifi {
   }
 
   public class WifiManager {
-    method @RequiresPermission("android.permission.WIFI_UPDATE_USABILITY_STATS_SCORE") public void addWifiUsabilityStatsListener(@NonNull java.util.concurrent.Executor, @NonNull android.net.wifi.WifiManager.WifiUsabilityStatsListener);
+    method @RequiresPermission("android.permission.WIFI_UPDATE_USABILITY_STATS_SCORE") public void addOnWifiUsabilityStatsListener(@NonNull java.util.concurrent.Executor, @NonNull android.net.wifi.WifiManager.OnWifiUsabilityStatsListener);
     method @RequiresPermission(anyOf={"android.permission.NETWORK_SETTINGS", android.Manifest.permission.NETWORK_SETUP_WIZARD, "android.permission.NETWORK_STACK"}) public void connect(@NonNull android.net.wifi.WifiConfiguration, @Nullable android.net.wifi.WifiManager.ActionListener);
     method @RequiresPermission(anyOf={"android.permission.NETWORK_SETTINGS", android.Manifest.permission.NETWORK_SETUP_WIZARD, "android.permission.NETWORK_STACK"}) public void connect(int, @Nullable android.net.wifi.WifiManager.ActionListener);
     method @RequiresPermission(anyOf={"android.permission.NETWORK_SETTINGS", android.Manifest.permission.NETWORK_SETUP_WIZARD, "android.permission.NETWORK_STACK"}) public void disable(int, @Nullable android.net.wifi.WifiManager.ActionListener);
@@ -4761,7 +4761,7 @@ package android.net.wifi {
     method public boolean isPortableHotspotSupported();
     method @RequiresPermission(android.Manifest.permission.ACCESS_WIFI_STATE) public boolean isWifiApEnabled();
     method public boolean isWifiScannerSupported();
-    method @RequiresPermission("android.permission.WIFI_UPDATE_USABILITY_STATS_SCORE") public void removeWifiUsabilityStatsListener(@NonNull android.net.wifi.WifiManager.WifiUsabilityStatsListener);
+    method @RequiresPermission("android.permission.WIFI_UPDATE_USABILITY_STATS_SCORE") public void removeOnWifiUsabilityStatsListener(@NonNull android.net.wifi.WifiManager.OnWifiUsabilityStatsListener);
     method @RequiresPermission(anyOf={"android.permission.NETWORK_SETTINGS", android.Manifest.permission.NETWORK_SETUP_WIZARD, "android.permission.NETWORK_STACK"}) public void save(@NonNull android.net.wifi.WifiConfiguration, @Nullable android.net.wifi.WifiManager.ActionListener);
     method @RequiresPermission("android.permission.WIFI_SET_DEVICE_MOBILITY_STATE") public void setDeviceMobilityState(int);
     method @RequiresPermission(android.Manifest.permission.CHANGE_WIFI_STATE) public boolean setWifiApConfiguration(android.net.wifi.WifiConfiguration);
@@ -4806,8 +4806,8 @@ package android.net.wifi {
     method public void onSuccess();
   }
 
-  public static interface WifiManager.WifiUsabilityStatsListener {
-    method public void onStatsUpdated(int, boolean, android.net.wifi.WifiUsabilityStatsEntry);
+  public static interface WifiManager.OnWifiUsabilityStatsListener {
+    method public void onWifiUsabilityStats(int, boolean, @NonNull android.net.wifi.WifiUsabilityStatsEntry);
   }
 
   public class WifiNetworkConnectionStatistics implements android.os.Parcelable {
@@ -4942,35 +4942,35 @@ package android.net.wifi {
 
   public final class WifiUsabilityStatsEntry implements android.os.Parcelable {
     method public int describeContents();
+    method public int getLinkSpeedMbps();
+    method public int getProbeElapsedTimeSinceLastUpdateMillis();
+    method public int getProbeMcsRateSinceLastUpdate();
+    method public int getProbeStatusSinceLastUpdate();
+    method public int getRssi();
+    method public int getRxLinkSpeedMbps();
+    method public long getTimeStampMillis();
+    method public long getTotalBackgroundScanTimeMillis();
+    method public long getTotalBeaconRx();
+    method public long getTotalCcaBusyFreqTimeMillis();
+    method public long getTotalHotspot2ScanTimeMillis();
+    method public long getTotalNanScanTimeMillis();
+    method public long getTotalPnoScanTimeMillis();
+    method public long getTotalRadioOnFreqTimeMillis();
+    method public long getTotalRadioOnTimeMillis();
+    method public long getTotalRadioRxTimeMillis();
+    method public long getTotalRadioTxTimeMillis();
+    method public long getTotalRoamScanTimeMillis();
+    method public long getTotalRxSuccess();
+    method public long getTotalScanTimeMillis();
+    method public long getTotalTxBad();
+    method public long getTotalTxRetries();
+    method public long getTotalTxSuccess();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.WifiUsabilityStatsEntry> CREATOR;
     field public static final int PROBE_STATUS_FAILURE = 3; // 0x3
     field public static final int PROBE_STATUS_NO_PROBE = 1; // 0x1
     field public static final int PROBE_STATUS_SUCCESS = 2; // 0x2
     field public static final int PROBE_STATUS_UNKNOWN = 0; // 0x0
-    field public final int linkSpeedMbps;
-    field public final int probeElapsedTimeMsSinceLastUpdate;
-    field public final int probeMcsRateSinceLastUpdate;
-    field public final int probeStatusSinceLastUpdate;
-    field public final int rssi;
-    field public final int rxLinkSpeedMbps;
-    field public final long timeStampMs;
-    field public final long totalBackgroundScanTimeMs;
-    field public final long totalBeaconRx;
-    field public final long totalCcaBusyFreqTimeMs;
-    field public final long totalHotspot2ScanTimeMs;
-    field public final long totalNanScanTimeMs;
-    field public final long totalPnoScanTimeMs;
-    field public final long totalRadioOnFreqTimeMs;
-    field public final long totalRadioOnTimeMs;
-    field public final long totalRadioRxTimeMs;
-    field public final long totalRadioTxTimeMs;
-    field public final long totalRoamScanTimeMs;
-    field public final long totalRxSuccess;
-    field public final long totalScanTimeMs;
-    field public final long totalTxBad;
-    field public final long totalTxRetries;
-    field public final long totalTxSuccess;
   }
 
 }

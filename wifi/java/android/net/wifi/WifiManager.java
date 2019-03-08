@@ -4785,13 +4785,13 @@ public class WifiManager {
 
     /**
      * Interface for Wi-Fi usability statistics listener. Should be implemented by applications and
-     * set when calling {@link WifiManager#addWifiUsabilityStatsListener(Executor,
-     * WifiUsabilityStatsListener)}.
+     * set when calling {@link WifiManager#addOnWifiUsabilityStatsListener(Executor,
+     * OnWifiUsabilityStatsListener)}.
      *
      * @hide
      */
     @SystemApi
-    public interface WifiUsabilityStatsListener {
+    public interface OnWifiUsabilityStatsListener {
         /**
          * Called when Wi-Fi usability statistics is updated.
          *
@@ -4803,15 +4803,15 @@ public class WifiManager {
          *                           Wi-Fi usability stats.
          * @param stats The updated Wi-Fi usability statistics.
          */
-        void onStatsUpdated(int seqNum, boolean isSameBssidAndFreq,
-                WifiUsabilityStatsEntry stats);
+        void onWifiUsabilityStats(int seqNum, boolean isSameBssidAndFreq,
+                @NonNull WifiUsabilityStatsEntry stats);
     }
 
     /**
-     * Adds a listener for Wi-Fi usability statistics. See {@link WifiUsabilityStatsListener}.
+     * Adds a listener for Wi-Fi usability statistics. See {@link OnWifiUsabilityStatsListener}.
      * Multiple listeners can be added. Callers will be invoked periodically by framework to
      * inform clients about the current Wi-Fi usability statistics. Callers can remove a previously
-     * added listener using {@link removeWifiUsabilityStatsListener}.
+     * added listener using {@link removeOnWifiUsabilityStatsListener}.
      *
      * @param executor The executor on which callback will be invoked.
      * @param listener Listener for Wifi usability statistics.
@@ -4820,25 +4820,25 @@ public class WifiManager {
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.WIFI_UPDATE_USABILITY_STATS_SCORE)
-    public void addWifiUsabilityStatsListener(@NonNull @CallbackExecutor Executor executor,
-            @NonNull WifiUsabilityStatsListener listener) {
+    public void addOnWifiUsabilityStatsListener(@NonNull @CallbackExecutor Executor executor,
+            @NonNull OnWifiUsabilityStatsListener listener) {
         if (executor == null) throw new IllegalArgumentException("executor cannot be null");
         if (listener == null) throw new IllegalArgumentException("listener cannot be null");
         if (mVerboseLoggingEnabled) {
-            Log.v(TAG, "addWifiUsabilityStatsListener: listener=" + listener);
+            Log.v(TAG, "addOnWifiUsabilityStatsListener: listener=" + listener);
         }
         try {
-            mService.addWifiUsabilityStatsListener(new Binder(),
-                    new IWifiUsabilityStatsListener.Stub() {
+            mService.addOnWifiUsabilityStatsListener(new Binder(),
+                    new IOnWifiUsabilityStatsListener.Stub() {
                         @Override
-                        public void onStatsUpdated(int seqNum, boolean isSameBssidAndFreq,
+                        public void onWifiUsabilityStats(int seqNum, boolean isSameBssidAndFreq,
                                 WifiUsabilityStatsEntry stats) {
                             if (mVerboseLoggingEnabled) {
-                                Log.v(TAG, "WifiUsabilityStatsListener: onStatsUpdated: seqNum="
-                                        + seqNum);
+                                Log.v(TAG, "OnWifiUsabilityStatsListener: "
+                                        + "onWifiUsabilityStats: seqNum=" + seqNum);
                             }
                             Binder.withCleanCallingIdentity(() ->
-                                    executor.execute(() -> listener.onStatsUpdated(seqNum,
+                                    executor.execute(() -> listener.onWifiUsabilityStats(seqNum,
                                             isSameBssidAndFreq, stats)));
                         }
                     },
@@ -4859,13 +4859,13 @@ public class WifiManager {
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.WIFI_UPDATE_USABILITY_STATS_SCORE)
-    public void removeWifiUsabilityStatsListener(@NonNull WifiUsabilityStatsListener listener) {
+    public void removeOnWifiUsabilityStatsListener(@NonNull OnWifiUsabilityStatsListener listener) {
         if (listener == null) throw new IllegalArgumentException("listener cannot be null");
         if (mVerboseLoggingEnabled) {
-            Log.v(TAG, "removeWifiUsabilityStatsListener: listener=" + listener);
+            Log.v(TAG, "removeOnWifiUsabilityStatsListener: listener=" + listener);
         }
         try {
-            mService.removeWifiUsabilityStatsListener(listener.hashCode());
+            mService.removeOnWifiUsabilityStatsListener(listener.hashCode());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -4879,7 +4879,8 @@ public class WifiManager {
      *
      * @param seqNum Sequence number of the Wi-Fi usability score.
      * @param score The Wi-Fi usability score.
-     * @param predictionHorizonSec Prediction horizon of the Wi-Fi usability score.
+     * @param predictionHorizonSec Prediction horizon of the Wi-Fi usability score in second,
+     *                             expected range: [0, 100].
      *
      * @hide
      */
