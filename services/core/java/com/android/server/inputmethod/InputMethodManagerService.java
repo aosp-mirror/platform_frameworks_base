@@ -953,11 +953,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         @Override
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
-            if (Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(action)) {
-                hideInputMethodMenu();
-                // No need to update mIsInteractive
-                return;
-            } else if (Intent.ACTION_USER_ADDED.equals(action)
+            if (Intent.ACTION_USER_ADDED.equals(action)
                     || Intent.ACTION_USER_REMOVED.equals(action)) {
                 updateCurrentProfileIds();
                 return;
@@ -1549,12 +1545,35 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 mSettingsObserver.registerContentObserverLocked(currentUserId);
 
                 final IntentFilter broadcastFilter = new IntentFilter();
-                broadcastFilter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
                 broadcastFilter.addAction(Intent.ACTION_USER_ADDED);
                 broadcastFilter.addAction(Intent.ACTION_USER_REMOVED);
                 broadcastFilter.addAction(Intent.ACTION_LOCALE_CHANGED);
                 broadcastFilter.addAction(ACTION_SHOW_INPUT_METHOD_PICKER);
                 mContext.registerReceiver(new ImmsBroadcastReceiver(), broadcastFilter);
+                mContext.registerReceiverAsUser(
+                        new BroadcastReceiver() {
+                            @Override
+                            public void onReceive(Context context, Intent intent) {
+                                // Intent is guaranteed to be ACTION_CLOSE_SYSTEM_DIALOGS here.
+                                final PendingResult pendingResult = getPendingResult();
+                                if (pendingResult == null) {
+                                    return;
+                                }
+                                // sender userId can be a real user ID or USER_ALL.
+                                final int senderUserId = pendingResult.getSendingUserId();
+                                if (senderUserId != UserHandle.USER_ALL) {
+                                    final int resolvedUserId = PER_PROFILE_IME_ENABLED
+                                            ? senderUserId
+                                            : mUserManagerInternal.getProfileParentId(senderUserId);
+                                    if (resolvedUserId != mSettings.getCurrentUserId()) {
+                                        // A background user is trying to hide the dialog. Ignore.
+                                        return;
+                                    }
+                                }
+                                hideInputMethodMenu();
+                            }
+                        }, UserHandle.ALL, new IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS),
+                        null, null);
 
                 final String defaultImiId = mSettings.getSelectedInputMethod();
                 final boolean imeSelectedOnBoot = !TextUtils.isEmpty(defaultImiId);
