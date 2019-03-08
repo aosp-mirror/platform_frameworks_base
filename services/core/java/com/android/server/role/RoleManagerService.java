@@ -255,7 +255,7 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
                         }
                     });
             try {
-                result.get(5, TimeUnit.SECONDS);
+                result.get(30, TimeUnit.SECONDS);
                 userState.setPackagesHash(packagesHash);
             } catch (InterruptedException | ExecutionException | TimeoutException e) {
                 Slog.e(LOG_TAG, "Failed to grant defaults for user " + userId, e);

@@ -32,7 +32,7 @@ import static android.content.pm.PackageManager.FLAG_PERMISSION_REVOKE_WHEN_REQU
 import static android.content.pm.PackageManager.FLAG_PERMISSION_SYSTEM_FIXED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_FIXED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_SET;
-import static android.content.pm.PackageManager.MASK_PERMISSION_FLAGS;
+import static android.content.pm.PackageManager.MASK_PERMISSION_FLAGS_ALL;
 import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 import static android.os.UserHandle.getAppId;
 import static android.os.UserHandle.getUid;
@@ -980,7 +980,7 @@ public class PermissionManagerService {
                                     // Revoke the runtime permission and clear the flags.
                                     origPermissions.revokeRuntimePermission(bp, userId);
                                     origPermissions.updatePermissionFlags(bp, userId,
-                                          PackageManager.MASK_PERMISSION_FLAGS, 0);
+                                            PackageManager.MASK_PERMISSION_FLAGS_ALL, 0);
                                     // If we revoked a permission permission, we have to write.
                                     updatedUserIds = ArrayUtils.appendInt(
                                             updatedUserIds, userId);
@@ -1043,7 +1043,7 @@ public class PermissionManagerService {
                                 }
 
                                 permissionsState.updatePermissionFlags(bp, userId,
-                                        MASK_PERMISSION_FLAGS, flags);
+                                        MASK_PERMISSION_FLAGS_ALL, flags);
                             }
                         } break;
 
@@ -1058,7 +1058,7 @@ public class PermissionManagerService {
                             if (origPermissions.revokeInstallPermission(bp)
                                     != PERMISSION_OPERATION_FAILURE) {
                                 origPermissions.updatePermissionFlags(bp, UserHandle.USER_ALL,
-                                        PackageManager.MASK_PERMISSION_FLAGS, 0);
+                                        MASK_PERMISSION_FLAGS_ALL, 0);
                                 changedInstallPermission = true;
                             }
 
@@ -1094,7 +1094,7 @@ public class PermissionManagerService {
                                 }
 
                                 permissionsState.updatePermissionFlags(bp, userId,
-                                        MASK_PERMISSION_FLAGS, flags);
+                                        MASK_PERMISSION_FLAGS_ALL, flags);
                             }
                         } break;
 
@@ -1114,7 +1114,7 @@ public class PermissionManagerService {
                             PERMISSION_OPERATION_FAILURE) {
                         // Also drop the permission flags.
                         permissionsState.updatePermissionFlags(bp, UserHandle.USER_ALL,
-                                PackageManager.MASK_PERMISSION_FLAGS, 0);
+                                MASK_PERMISSION_FLAGS_ALL, 0);
                         changedInstallPermission = true;
                         Slog.i(TAG, "Un-granting permission " + perm
                                 + " from package " + pkg.packageName
@@ -2180,7 +2180,7 @@ public class PermissionManagerService {
                 if (bp != null) {
                     permissionsState.revokeInstallPermission(bp);
                     permissionsState.updatePermissionFlags(bp, UserHandle.USER_ALL,
-                            PackageManager.MASK_PERMISSION_FLAGS, 0);
+                            MASK_PERMISSION_FLAGS_ALL, 0);
                 }
             }
         }
@@ -2199,7 +2199,7 @@ public class PermissionManagerService {
                     if (bp != null) {
                         permissionsState.revokeRuntimePermission(bp, userId);
                         permissionsState.updatePermissionFlags(bp, userId,
-                                PackageManager.MASK_PERMISSION_FLAGS, 0);
+                                MASK_PERMISSION_FLAGS_ALL, 0);
                         runtimePermissionChangedUserIds = ArrayUtils.appendInt(
                                 runtimePermissionChangedUserIds, userId);
                     }

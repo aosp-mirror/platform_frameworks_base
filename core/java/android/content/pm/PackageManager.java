@@ -3047,12 +3047,42 @@ public abstract class PackageManager {
     public static final int FLAG_PERMISSION_REVOKE_WHEN_REQUESTED =  1 << 7;
 
     /**
-     * Mask for all permission flags.
+     * Permission flag: The permission's usage should be made highly visible to the user
+     * when granted.
      *
      * @hide
      */
     @SystemApi
+    public static final int FLAG_PERMISSION_USER_SENSITIVE_WHEN_GRANTED =  1 << 8;
+
+    /**
+     * Permission flag: The permission's usage should be made highly visible to the user
+     * when denied.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int FLAG_PERMISSION_USER_SENSITIVE_WHEN_DENIED =  1 << 9;
+
+    /**
+     * Mask for all permission flags present in Android P
+     *
+     * @deprecated This constant does not contain useful information and should never have been
+     * exposed. When checking permission flags always flag each flag explicitly and ignore all
+     * flags that do not matter for this particular code.
+     *
+     * @hide
+     */
+    @Deprecated
+    @SystemApi
     public static final int MASK_PERMISSION_FLAGS = 0xFF;
+
+    /**
+     * Mask for all permission flags.
+     *
+     * @hide
+     */
+    public static final int MASK_PERMISSION_FLAGS_ALL = 0x3FF;
 
     /**
      * Injected activity in app that forwards user to setting activity of that app.
@@ -3761,6 +3791,8 @@ public abstract class PackageManager {
             FLAG_PERMISSION_REVOKE_ON_UPGRADE,
             FLAG_PERMISSION_SYSTEM_FIXED,
             FLAG_PERMISSION_GRANTED_BY_DEFAULT,
+            FLAG_PERMISSION_USER_SENSITIVE_WHEN_GRANTED,
+            FLAG_PERMISSION_USER_SENSITIVE_WHEN_DENIED,
             /*
             FLAG_PERMISSION_REVOKE_WHEN_REQUESED
             */
@@ -6548,6 +6580,8 @@ public abstract class PackageManager {
             case FLAG_PERMISSION_USER_FIXED: return "USER_FIXED";
             case FLAG_PERMISSION_REVIEW_REQUIRED: return "REVIEW_REQUIRED";
             case FLAG_PERMISSION_REVOKE_WHEN_REQUESTED: return "REVOKE_WHEN_REQUESTED";
+            case FLAG_PERMISSION_USER_SENSITIVE_WHEN_GRANTED: return "USER_SENSITIVE_WHEN_GRANTED";
+            case FLAG_PERMISSION_USER_SENSITIVE_WHEN_DENIED: return "USER_SENSITIVE_WHEN_DENIED";
             default: return Integer.toString(flag);
         }
     }
