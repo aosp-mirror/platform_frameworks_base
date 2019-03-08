@@ -389,6 +389,9 @@ final class ContentCapturePerUserService
     @GuardedBy("mLock")
     public void destroyLocked() {
         if (mMaster.debug) Slog.d(TAG, "destroyLocked()");
+        if (mRemoteService != null) {
+            mRemoteService.destroy();
+        }
         destroySessionsLocked();
     }
 

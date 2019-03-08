@@ -280,9 +280,6 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
                 oldService.removeSelfFromCacheLocked();
             }
             mServiceNameResolver.setTemporaryService(userId, componentName, durationMs);
-
-            // Must update the service on cache so its initialization code is triggered
-            updateCachedServiceLocked(userId);
         }
     }
 
