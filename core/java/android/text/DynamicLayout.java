@@ -674,7 +674,8 @@ public class DynamicLayout extends Layout {
             objects[0] = reflowed.getLineDirections(i);
 
             final int end = (i == n - 1) ? where + after : reflowed.getLineStart(i + 1);
-            ints[HYPHEN] = reflowed.getHyphen(i) & HYPHEN_MASK;
+            ints[HYPHEN] = StaticLayout.packHyphenEdit(
+                    reflowed.getStartHyphenEdit(i), reflowed.getEndHyphenEdit(i));
             ints[MAY_PROTRUDE_FROM_TOP_OR_BOTTOM] |=
                     contentMayProtrudeFromLineTopOrBottom(text, start, end) ?
                             MAY_PROTRUDE_FROM_TOP_OR_BOTTOM_MASK : 0;
@@ -1056,8 +1057,16 @@ public class DynamicLayout extends Layout {
      * @hide
      */
     @Override
-    public int getHyphen(int line) {
-        return mInts.getValue(line, HYPHEN) & HYPHEN_MASK;
+    public @Paint.StartHyphenEdit int getStartHyphenEdit(int line) {
+        return StaticLayout.unpackStartHyphenEdit(mInts.getValue(line, HYPHEN) & HYPHEN_MASK);
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public @Paint.EndHyphenEdit int getEndHyphenEdit(int line) {
+        return StaticLayout.unpackEndHyphenEdit(mInts.getValue(line, HYPHEN) & HYPHEN_MASK);
     }
 
     private boolean getContentMayProtrudeFromTopOrBottom(int line) {

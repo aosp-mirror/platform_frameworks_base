@@ -437,7 +437,8 @@ public abstract class Layout {
             previousLineEnd = getLineStart(lineNum + 1);
             final boolean justify = isJustificationRequired(lineNum);
             int end = getLineVisibleEnd(lineNum, start, previousLineEnd);
-            paint.setHyphenEdit(getHyphen(lineNum));
+            paint.setStartHyphenEdit(getStartHyphenEdit(lineNum));
+            paint.setEndHyphenEdit(getEndHyphenEdit(lineNum));
 
             int ltop = previousLineBottom;
             int lbottom = getLineTop(lineNum + 1);
@@ -910,12 +911,21 @@ public abstract class Layout {
     public abstract int getBottomPadding();
 
     /**
-     * Returns the hyphen edit for a line.
+     * Returns the start hyphen edit for a line.
      *
      * @hide
      */
-    public int getHyphen(int line) {
-        return 0;
+    public @Paint.StartHyphenEdit int getStartHyphenEdit(int line) {
+        return Paint.START_HYPHEN_EDIT_NO_EDIT;
+    }
+
+    /**
+     * Returns the end hyphen edit for a line.
+     *
+     * @hide
+     */
+    public @Paint.EndHyphenEdit int getEndHyphenEdit(int line) {
+        return Paint.END_HYPHEN_EDIT_NO_EDIT;
     }
 
     /**
@@ -1418,7 +1428,8 @@ public abstract class Layout {
         final TextLine tl = TextLine.obtain();
         final TextPaint paint = mWorkPaint;
         paint.set(mPaint);
-        paint.setHyphenEdit(getHyphen(line));
+        paint.setStartHyphenEdit(getStartHyphenEdit(line));
+        paint.setEndHyphenEdit(getEndHyphenEdit(line));
         tl.set(paint, mText, start, end, dir, directions, hasTabs, tabStops,
                 getEllipsisStart(line), getEllipsisStart(line) + getEllipsisCount(line));
         if (isJustificationRequired(line)) {
@@ -1447,7 +1458,8 @@ public abstract class Layout {
         final TextLine tl = TextLine.obtain();
         final TextPaint paint = mWorkPaint;
         paint.set(mPaint);
-        paint.setHyphenEdit(getHyphen(line));
+        paint.setStartHyphenEdit(getStartHyphenEdit(line));
+        paint.setEndHyphenEdit(getEndHyphenEdit(line));
         tl.set(paint, mText, start, end, dir, directions, hasTabs, tabStops,
                 getEllipsisStart(line), getEllipsisStart(line) + getEllipsisCount(line));
         if (isJustificationRequired(line)) {

@@ -342,8 +342,12 @@ public class LineBreaker {
      */
     public static class Result {
         // Following two contstant must be synced with minikin's line breaker.
+        // TODO(nona): Remove these constatns by introducing native methods.
         private static final int TAB_MASK = 0x20000000;
         private static final int HYPHEN_MASK = 0xFF;
+        private static final int START_HYPHEN_MASK = 0x18;  // 0b11000
+        private static final int END_HYPHEN_MASK = 0x7;  // 0b00111
+        private static final int START_HYPHEN_BITS_SHIFT = 3;
 
         private static final NativeAllocationRegistry sRegistry = new NativeAllocationRegistry(
                 Result.class.getClassLoader(), nGetReleaseResultFunc(), 32);
@@ -414,17 +418,29 @@ public class LineBreaker {
         }
 
         /**
-         * Returns a packed hyphen edit for the line.
+         * Returns a start hyphen edit for the line.
          *
          * @param lineIndex an index of the line.
-         * @return a packed hyphen edit for the line.
+         * @return a start hyphen edit for the line.
          *
-         * @see android.text.Hyphenator#unpackStartHyphenEdit(int)
-         * @see android.text.Hyphenator#unpackEndHyphenEdit(int)
-         * @see android.text.Hyphenator#packHyphenEdit(int,int)
+         * @see android.graphics.Paint#setStartHyphenEdit
+         * @see android.graphics.Paint#getStartHyphenEdit
          */
-        public int getLineHyphenEdit(int lineIndex) {
-            return (nGetLineFlag(mPtr, lineIndex) & HYPHEN_MASK);
+        public int getStartLineHyphenEdit(int lineIndex) {
+            return (nGetLineFlag(mPtr, lineIndex) & START_HYPHEN_MASK) >> START_HYPHEN_BITS_SHIFT;
+        }
+
+        /**
+         * Returns an end hyphen edit for the line.
+         *
+         * @param lineIndex an index of the line.
+         * @return an end hyphen edit for the line.
+         *
+         * @see android.graphics.Paint#setEndHyphenEdit
+         * @see android.graphics.Paint#getEndHyphenEdit
+         */
+        public int getEndLineHyphenEdit(int lineIndex) {
+            return nGetLineFlag(mPtr, lineIndex) & END_HYPHEN_MASK;
         }
     }
 

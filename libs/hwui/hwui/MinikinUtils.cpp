@@ -58,9 +58,8 @@ minikin::Layout MinikinUtils::doLayout(const Paint* paint, minikin::Bidi bidiFla
     const minikin::U16StringPiece textBuf(buf, bufSize);
     const minikin::Range range(start, start + count);
     const minikin::Range contextRange(contextStart, contextStart + contextCount);
-    const minikin::HyphenEdit hyphenEdit = static_cast<minikin::HyphenEdit>(paint->getHyphenEdit());
-    const minikin::StartHyphenEdit startHyphen = minikin::startHyphenEdit(hyphenEdit);
-    const minikin::EndHyphenEdit endHyphen = minikin::endHyphenEdit(hyphenEdit);
+    const minikin::StartHyphenEdit startHyphen = paint->getStartHyphenEdit();
+    const minikin::EndHyphenEdit endHyphen = paint->getEndHyphenEdit();
 
     if (mt == nullptr) {
         return minikin::Layout(textBuf.substr(contextRange), range - contextStart, bidiFlags,
@@ -76,9 +75,8 @@ float MinikinUtils::measureText(const Paint* paint, minikin::Bidi bidiFlags,
     minikin::MinikinPaint minikinPaint = prepareMinikinPaint(paint, typeface);
     const minikin::U16StringPiece textBuf(buf, bufSize);
     const minikin::Range range(start, start + count);
-    const minikin::HyphenEdit hyphenEdit = static_cast<minikin::HyphenEdit>(paint->getHyphenEdit());
-    const minikin::StartHyphenEdit startHyphen = minikin::startHyphenEdit(hyphenEdit);
-    const minikin::EndHyphenEdit endHyphen = minikin::endHyphenEdit(hyphenEdit);
+    const minikin::StartHyphenEdit startHyphen = paint->getStartHyphenEdit();
+    const minikin::EndHyphenEdit endHyphen = paint->getEndHyphenEdit();
 
     return minikin::Layout::measureText(textBuf, range, bidiFlags, minikinPaint, startHyphen,
                                         endHyphen, advances);

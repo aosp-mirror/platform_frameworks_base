@@ -27,6 +27,7 @@
 
 #include <minikin/FontFamily.h>
 #include <minikin/FamilyVariant.h>
+#include <minikin/Hyphenator.h>
 
 namespace android {
 
@@ -89,9 +90,25 @@ public:
 
     minikin::FamilyVariant getFamilyVariant() const { return mFamilyVariant; }
 
-    void setHyphenEdit(uint32_t hyphen) { mHyphenEdit = hyphen; }
+    void setStartHyphenEdit(uint32_t startHyphen) {
+        mHyphenEdit = minikin::packHyphenEdit(
+            static_cast<minikin::StartHyphenEdit>(startHyphen),
+            minikin::endHyphenEdit(mHyphenEdit));
+    }
 
-    uint32_t getHyphenEdit() const { return mHyphenEdit; }
+    void setEndHyphenEdit(uint32_t endHyphen) {
+        mHyphenEdit = minikin::packHyphenEdit(
+            minikin::startHyphenEdit(mHyphenEdit),
+            static_cast<minikin::EndHyphenEdit>(endHyphen));
+    }
+
+    minikin::StartHyphenEdit getStartHyphenEdit() const {
+        return minikin::startHyphenEdit(mHyphenEdit);
+    }
+
+    minikin::EndHyphenEdit getEndHyphenEdit() const {
+        return minikin::endHyphenEdit(mHyphenEdit);
+    }
 
     void setAndroidTypeface(Typeface* typeface) { mTypeface = typeface; }
 
