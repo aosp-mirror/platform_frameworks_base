@@ -20,15 +20,15 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 
 /**
- * An inspection companion provider that loads pre-generated inspection companions
+ * An inspection companion provider that finds companions as inner classes or generated code.
  *
  * @see android.processor.view.inspector.PlatformInspectableProcessor
  */
-public class GeneratedInspectionCompanionProvider implements InspectionCompanionProvider {
+public class StaticInspectionCompanionProvider implements InspectionCompanionProvider {
     /**
-     * The suffix used for the generated class
+     * The suffix used for the generated classes and inner classes
      */
-    private static final String COMPANION_SUFFIX = "$$InspectionCompanion";
+    private static final String COMPANION_SUFFIX = "$InspectionCompanion";
 
     @Override
     @Nullable
@@ -39,7 +39,12 @@ public class GeneratedInspectionCompanionProvider implements InspectionCompanion
         try {
             final Class<InspectionCompanion<T>> companionClass =
                     (Class<InspectionCompanion<T>>) cls.getClassLoader().loadClass(companionName);
-            return companionClass.newInstance();
+
+            if (InspectionCompanion.class.isAssignableFrom(companionClass)) {
+                return companionClass.newInstance();
+            } else {
+                return null;
+            }
         } catch (ClassNotFoundException e) {
             return null;
         } catch (IllegalAccessException e) {
