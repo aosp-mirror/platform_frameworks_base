@@ -1132,7 +1132,7 @@ public class DeviceIdleController extends SystemService
                         KEY_SMS_TEMP_APP_WHITELIST_DURATION, 20 * 1000L);
                 NOTIFICATION_WHITELIST_DURATION = mParser.getDurationMillis(
                         KEY_NOTIFICATION_WHITELIST_DURATION, 30 * 1000L);
-                WAIT_FOR_UNLOCK = mParser.getBoolean(KEY_WAIT_FOR_UNLOCK, false);
+                WAIT_FOR_UNLOCK = mParser.getBoolean(KEY_WAIT_FOR_UNLOCK, true);
                 PRE_IDLE_FACTOR_LONG = mParser.getFloat(KEY_PRE_IDLE_FACTOR_LONG, 1.67f);
                 PRE_IDLE_FACTOR_SHORT = mParser.getFloat(KEY_PRE_IDLE_FACTOR_SHORT, 0.33f);
             }
