@@ -238,6 +238,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
     private PhoneCapability mPhoneCapability = null;
 
+    private int mActiveDataSubId = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
+
     @TelephonyManager.RadioPowerState
     private int mRadioPowerState = TelephonyManager.RADIO_POWER_UNAVAILABLE;
 
@@ -258,7 +260,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
     static final int ENFORCE_PHONE_STATE_PERMISSION_MASK =
                 PhoneStateListener.LISTEN_CALL_FORWARDING_INDICATOR
                         | PhoneStateListener.LISTEN_MESSAGE_WAITING_INDICATOR
-                        | PhoneStateListener.LISTEN_EMERGENCY_NUMBER_LIST;
+                        | PhoneStateListener.LISTEN_EMERGENCY_NUMBER_LIST
+                        | PhoneStateListener.LISTEN_ACTIVE_DATA_SUBID_CHANGE;
 
     static final int PRECISE_PHONE_STATE_PERMISSION_MASK =
                 PhoneStateListener.LISTEN_PRECISE_CALL_STATE |
@@ -818,9 +821,9 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                             remove(r.binder);
                         }
                     }
-                    if ((events & PhoneStateListener.LISTEN_PREFERRED_DATA_SUBID_CHANGE) != 0) {
+                    if ((events & PhoneStateListener.LISTEN_ACTIVE_DATA_SUBID_CHANGE) != 0) {
                         try {
-                            r.callback.onPreferredDataSubIdChanged(mPreferredDataSubId);
+                            r.callback.onActiveDataSubIdChanged(mActiveDataSubId);
                         } catch (RemoteException ex) {
                             remove(r.binder);
                         }
@@ -1740,23 +1743,23 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         }
     }
 
-    public void notifyPreferredDataSubIdChanged(int preferredSubId) {
-        if (!checkNotifyPermission("notifyPreferredDataSubIdChanged()")) {
+    public void notifyActiveDataSubIdChanged(int activeDataSubId) {
+        if (!checkNotifyPermission("notifyActiveDataSubIdChanged()")) {
             return;
         }
 
         if (VDBG) {
-            log("notifyPreferredDataSubIdChanged: preferredSubId=" + preferredSubId);
+            log("notifyActiveDataSubIdChanged: activeDataSubId=" + activeDataSubId);
         }
 
         synchronized (mRecords) {
-            mPreferredDataSubId = preferredSubId;
+            mActiveDataSubId = activeDataSubId;
 
             for (Record r : mRecords) {
                 if (r.matchPhoneStateListenerEvent(
-                        PhoneStateListener.LISTEN_PREFERRED_DATA_SUBID_CHANGE)) {
+                        PhoneStateListener.LISTEN_ACTIVE_DATA_SUBID_CHANGE)) {
                     try {
-                        r.callback.onPreferredDataSubIdChanged(preferredSubId);
+                        r.callback.onActiveDataSubIdChanged(activeDataSubId);
                     } catch (RemoteException ex) {
                         mRemoveList.add(r.binder);
                     }
@@ -1893,7 +1896,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             pw.println("mBackgroundCallState=" + mBackgroundCallState);
             pw.println("mSrvccState=" + mSrvccState);
             pw.println("mPhoneCapability=" + mPhoneCapability);
-            pw.println("mPreferredDataSubId=" + mPreferredDataSubId);
+            pw.println("mActiveDataSubId=" + mActiveDataSubId);
             pw.println("mRadioPowerState=" + mRadioPowerState);
             pw.println("mEmergencyNumberList=" + mEmergencyNumberList);
             pw.println("mCallQuality=" + mCallQuality);
@@ -2163,14 +2166,6 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         if ((events & PhoneStateListener.LISTEN_SRVCC_STATE_CHANGED) != 0) {
             mContext.enforceCallingOrSelfPermission(
                     android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, null);
-        }
-
-        if ((events & PhoneStateListener.LISTEN_PREFERRED_DATA_SUBID_CHANGE) != 0) {
-            // It can have either READ_PHONE_STATE or READ_PRIVILEGED_PHONE_STATE.
-            TelephonyPermissions.checkReadPhoneState(mContext,
-                    SubscriptionManager.INVALID_SUBSCRIPTION_ID, Binder.getCallingPid(),
-                    Binder.getCallingUid(), callingPackage, "listen to "
-                            + "LISTEN_PREFERRED_DATA_SUBID_CHANGE");
         }
 
         if ((events & PhoneStateListener.LISTEN_CALL_DISCONNECT_CAUSES) != 0) {
