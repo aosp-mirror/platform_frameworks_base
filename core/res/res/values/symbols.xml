@@ -3693,5 +3693,9 @@
   <java-symbol type="string" name="mime_type_presentation" />
   <java-symbol type="string" name="mime_type_presentation_ext" />
 
+  <!-- For high refresh rate displays -->
   <java-symbol type="integer" name="config_defaultPeakRefreshRate" />
+
+  <!-- For Auto-Brightness -->
+  <java-symbol type="string" name="config_displayLightSensorType" />
 </resources>
