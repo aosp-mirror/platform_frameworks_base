@@ -191,6 +191,21 @@ message SecureSettingsProto {
 
     optional SettingProto emergency_assistance_application = 22 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto enhanced_voice_privacy_enabled = 23 [ (android.privacy).dest = DEST_AUTOMATIC ];
+
+    message Gesture {
+        optional SettingProto aware_enabled = 1 [ (android.privacy).dest = DEST_AUTOMATIC ];
+
+        optional SettingProto silence_alarms_count = 2 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto silence_calls_count = 3 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto silence_enabled = 4 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto silence_notification_count = 5 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto silence_timer_count = 6 [ (android.privacy).dest = DEST_AUTOMATIC ];
+
+        optional SettingProto skip_count = 7 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto skip_enabled = 8 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    }
+    optional Gesture gesture = 74;
+
     optional SettingProto immersive_mode_confirmations = 24 [ (android.privacy).dest = DEST_AUTOMATIC ];
 
     message Incall {
@@ -443,6 +458,7 @@ message SecureSettingsProto {
     // parent profile.
     optional SettingProto sync_parent_sounds = 55 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto system_navigation_keys_enabled = 56 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto theme_customization_overlay_packages = 75 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto trust_agents_initialized = 57 [ (android.privacy).dest = DEST_AUTOMATIC ];
 
     message Tts {
@@ -534,13 +550,7 @@ message SecureSettingsProto {
     }
     optional Zen zen = 71;
 
-    optional SettingProto skip_gesture_enabled = 74 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto silence_gesture_enabled = 75 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto theme_customization_overlay_packages = 76 [ (android.privacy).dest = DEST_AUTOMATIC ];
-
-    optional SettingProto aware_enabled = 77 [ (android.privacy).dest = DEST_AUTOMATIC ];
-
     // Please insert fields in alphabetical order and group them into messages
     // if possible (to avoid reaching the method limit).
-    // Next tag = 78;
+    // Next tag = 76;
 }
