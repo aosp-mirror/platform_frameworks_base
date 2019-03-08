@@ -9530,6 +9530,7 @@ package android.view.contentcapture {
     method public int getTaskId();
     field public static final int FLAG_DISABLED_BY_APP = 1; // 0x1
     field public static final int FLAG_DISABLED_BY_FLAG_SECURE = 2; // 0x2
+    field public static final int FLAG_RECONNECTED = 4; // 0x4
   }
 
   public final class ContentCaptureEvent implements android.os.Parcelable {

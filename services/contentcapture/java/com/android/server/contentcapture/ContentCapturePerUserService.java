@@ -100,6 +100,13 @@ final class ContentCapturePerUserService
     @GuardedBy("mLock")
     private final WhitelistHelper mWhitelistHelper = new WhitelistHelper();
 
+    /**
+     * When {@code true}, remote service died but service state is kept so it's restored after
+     * the system re-binds to it.
+     */
+    @GuardedBy("mLock")
+    private boolean mZombie;
+
     // TODO(b/111276913): add mechanism to prune stale sessions, similar to Autofill's
 
     ContentCapturePerUserService(@NonNull ContentCaptureManagerService master,
@@ -179,6 +186,37 @@ final class ContentCapturePerUserService
     public void onServiceDied(@NonNull RemoteContentCaptureService service) {
         // Don't do anything; eventually the system will bind to it again...
         Slog.w(TAG, "remote service died: " + service);
+        synchronized (mLock) {
+            mZombie = true;
+        }
+    }
+
+    /**
+     * Called after the remote service connected, it's used to restore state from a 'zombie'
+     * service (i.e., after it died).
+     */
+    void onConnected() {
+        synchronized (mLock) {
+            if (mZombie) {
+                // Sanity check - shouldn't happen
+                if (mRemoteService == null) {
+                    Slog.w(TAG, "Cannot ressurect sessions because remote service is null");
+                    return;
+                }
+
+                mZombie = false;
+                final int numSessions = mSessions.size();
+                if (mMaster.debug) {
+                    Slog.d(TAG, "Ressurrecting remote service (" + mRemoteService + ") on "
+                            + numSessions + " sessions");
+                }
+
+                for (int i = 0; i < numSessions; i++) {
+                    final ContentCaptureServerSession session = mSessions.valueAt(i);
+                    session.resurrectLocked();
+                }
+            }
+        }
     }
 
     // TODO(b/119613670): log metrics
@@ -260,7 +298,7 @@ final class ContentCapturePerUserService
         }
 
         final ContentCaptureServerSession newSession = new ContentCaptureServerSession(
-                activityToken, this, mRemoteService, componentName, taskId,
+                activityToken, this, mRemoteService, componentName, clientReceiver, taskId,
                 displayId, sessionId, uid, flags);
         if (mMaster.verbose) {
             Slog.v(TAG, "startSession(): new session for "
@@ -448,6 +486,8 @@ final class ContentCapturePerUserService
     @Override
     protected void dumpLocked(String prefix, PrintWriter pw) {
         super.dumpLocked(prefix, pw);
+
+        pw.print(prefix); pw.print("Zombie: "); pw.println(mZombie);
 
         final String prefix2 = prefix + "  ";
         if (mRemoteService != null) {

@@ -128,6 +128,12 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
     @Nullable
     private final LocalLog mFlushHistory;
 
+    /**
+     * Binder object used to update the session state.
+     */
+    @NonNull
+    private final IResultReceiver.Stub mSessionStateReceiver;
+
     protected MainContentCaptureSession(@NonNull Context context,
             @NonNull ContentCaptureManager manager, @NonNull Handler handler,
             @NonNull IContentCaptureManager systemServerInterface) {
@@ -138,6 +144,26 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
 
         final int logHistorySize = mManager.mOptions.logHistorySize;
         mFlushHistory = logHistorySize > 0 ? new LocalLog(logHistorySize) : null;
+
+        mSessionStateReceiver = new IResultReceiver.Stub() {
+            @Override
+            public void send(int resultCode, Bundle resultData) {
+                final IBinder binder;
+                if (resultData != null) {
+                    binder = resultData.getBinder(EXTRA_BINDER);
+                    if (binder == null) {
+                        Log.wtf(TAG, "No " + EXTRA_BINDER + " extra result");
+                        mHandler.post(() -> resetSession(
+                                STATE_DISABLED | STATE_INTERNAL_ERROR));
+                        return;
+                    }
+                } else {
+                    binder = null;
+                }
+                mHandler.post(() -> onSessionStarted(resultCode, binder));
+            }
+        };
+
     }
 
     @Override
@@ -185,24 +211,7 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
 
         try {
             mSystemServerInterface.startSession(mApplicationToken, component, mId, flags,
-                    new IResultReceiver.Stub() {
-                        @Override
-                        public void send(int resultCode, Bundle resultData) {
-                            final IBinder binder;
-                            if (resultData != null) {
-                                binder = resultData.getBinder(EXTRA_BINDER);
-                                if (binder == null) {
-                                    Log.wtf(TAG, "No " + EXTRA_BINDER + " extra result");
-                                    mHandler.post(() -> resetSession(
-                                            STATE_DISABLED | STATE_INTERNAL_ERROR));
-                                    return;
-                                }
-                            } else {
-                                binder = null;
-                            }
-                            mHandler.post(() -> onSessionStarted(resultCode, binder));
-                        }
-                    });
+                    mSessionStateReceiver);
         } catch (RemoteException e) {
             Log.w(TAG, "Error starting session for " + component.flattenToShortString() + ": " + e);
         }
@@ -216,8 +225,7 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
 
     /**
      * Callback from {@code system_server} after call to
-     * {@link IContentCaptureManager#startSession(IBinder, ComponentName, String, int,
-     * IResultReceiver)}
+     * {@link IContentCaptureManager#startSession(IBinder, ComponentName, String, int, IBinder)}
      *
      * @param resultCode session state
      * @param binder handle to {@code IContentCaptureDirectManager}
@@ -227,8 +235,9 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
         if (binder != null) {
             mDirectServiceInterface = IContentCaptureDirectManager.Stub.asInterface(binder);
             mDirectServiceVulture = () -> {
-                Log.w(TAG, "Destroying session " + mId + " because service died");
-                destroy();
+                Log.w(TAG, "Keeping session " + mId + " when service died");
+                mState = STATE_SERVICE_DIED;
+                mDisabled.set(true);
             };
             try {
                 binder.linkToDeath(mDirectServiceVulture, 0);
