@@ -988,9 +988,27 @@ package android.media {
     method public static boolean isEncodingLinearPcm(int);
   }
 
+  public static final class AudioRecord.MetricsConstants {
+    field public static final String ATTRIBUTES = "android.media.audiorecord.attributes";
+    field public static final String CHANNEL_MASK = "android.media.audiorecord.channelMask";
+    field public static final String DURATION_MS = "android.media.audiorecord.durationMs";
+    field public static final String FRAME_COUNT = "android.media.audiorecord.frameCount";
+    field public static final String PORT_ID = "android.media.audiorecord.portId";
+    field public static final String START_COUNT = "android.media.audiorecord.startCount";
+  }
+
   public final class AudioRecordingConfiguration implements android.os.Parcelable {
     ctor public AudioRecordingConfiguration(int, int, int, android.media.AudioFormat, android.media.AudioFormat, int, String, int, boolean, int, android.media.audiofx.AudioEffect.Descriptor[], android.media.audiofx.AudioEffect.Descriptor[]);
     ctor public AudioRecordingConfiguration(int, int, int, android.media.AudioFormat, android.media.AudioFormat, int, String);
+  }
+
+  public static final class AudioTrack.MetricsConstants {
+    field public static final String ATTRIBUTES = "android.media.audiotrack.attributes";
+    field public static final String CHANNEL_MASK = "android.media.audiotrack.channelMask";
+    field public static final String ENCODING = "android.media.audiotrack.encoding";
+    field public static final String FRAME_COUNT = "android.media.audiotrack.frameCount";
+    field public static final String PORT_ID = "android.media.audiotrack.portId";
+    field public static final String SAMPLE_RATE = "android.media.audiotrack.sampleRate";
   }
 
   public final class BufferingParams implements android.os.Parcelable {

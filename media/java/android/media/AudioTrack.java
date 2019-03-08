@@ -22,6 +22,7 @@ import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.os.Binder;
 import android.os.Build;
@@ -3624,5 +3625,59 @@ public class AudioTrack extends PlayerBase
          */
         @Deprecated
         public static final String CHANNELMASK = "android.media.audiorecord.channelmask";
+
+        /**
+         * Use for testing only. Do not expose.
+         * The current sample rate.
+         * The value is an {@code int}.
+         * @hide
+         */
+        @TestApi
+        public static final String SAMPLE_RATE = MM_PREFIX + "sampleRate";
+
+        /**
+         * Use for testing only. Do not expose.
+         * The native channel mask.
+         * The value is a {@code long}.
+         * @hide
+         */
+        @TestApi
+        public static final String CHANNEL_MASK = MM_PREFIX + "channelMask";
+
+        /**
+         * Use for testing only. Do not expose.
+         * The output audio data encoding.
+         * The value is a {@code String}.
+         * @hide
+         */
+        @TestApi
+        public static final String ENCODING = MM_PREFIX + "encoding";
+
+        /**
+         * Use for testing only. Do not expose.
+         * The port id of this track port in audioserver.
+         * The value is an {@code int}.
+         * @hide
+         */
+        @TestApi
+        public static final String PORT_ID = MM_PREFIX + "portId";
+
+        /**
+         * Use for testing only. Do not expose.
+         * The buffer frameCount.
+         * The value is an {@code int}.
+         * @hide
+         */
+        @TestApi
+        public static final String FRAME_COUNT = MM_PREFIX + "frameCount";
+
+        /**
+         * Use for testing only. Do not expose.
+         * The actual track attributes used.
+         * The value is a {@code String}.
+         * @hide
+         */
+        @TestApi
+        public static final String ATTRIBUTES = MM_PREFIX + "attributes";
     }
 }

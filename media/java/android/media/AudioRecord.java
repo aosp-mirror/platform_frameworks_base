@@ -22,6 +22,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityThread;
 import android.media.audiopolicy.AudioMix;
@@ -2027,5 +2028,60 @@ public class AudioRecord implements AudioRouting, MicrophoneDirection,
          * The value is an {@code int}.
          */
         public static final String CHANNELS = MM_PREFIX + "channels";
+
+        /**
+         * Use for testing only. Do not expose.
+         * The native channel mask.
+         * The value is a {@code long}.
+         * @hide
+         */
+        @TestApi
+        public static final String CHANNEL_MASK = MM_PREFIX + "channelMask";
+
+
+        /**
+         * Use for testing only. Do not expose.
+         * The port id of this input port in audioserver.
+         * The value is an {@code int}.
+         * @hide
+         */
+        @TestApi
+        public static final String PORT_ID = MM_PREFIX + "portId";
+
+        /**
+         * Use for testing only. Do not expose.
+         * The buffer frameCount.
+         * The value is an {@code int}.
+         * @hide
+         */
+        @TestApi
+        public static final String FRAME_COUNT = MM_PREFIX + "frameCount";
+
+        /**
+         * Use for testing only. Do not expose.
+         * The actual record track attributes used.
+         * The value is a {@code String}.
+         * @hide
+         */
+        @TestApi
+        public static final String ATTRIBUTES = MM_PREFIX + "attributes";
+
+        /**
+         * Use for testing only. Do not expose.
+         * The buffer frameCount
+         * The value is a {@code double}.
+         * @hide
+         */
+        @TestApi
+        public static final String DURATION_MS = MM_PREFIX + "durationMs";
+
+        /**
+         * Use for testing only. Do not expose.
+         * The number of times the record track has started
+         * The value is a {@code long}.
+         * @hide
+         */
+        @TestApi
+        public static final String START_COUNT = MM_PREFIX + "startCount";
     }
 }
