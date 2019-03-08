@@ -51,7 +51,7 @@ public class TypeClockController implements ClockPlugin {
     /**
      * Small clock shown on lock screen above stack scroller.
      */
-    private View mLockClockContainer;
+    private TypographicClock mLockClock;
 
     /**
      * Controller for transition into dark state.
@@ -69,13 +69,15 @@ public class TypeClockController implements ClockPlugin {
     }
 
     private void createViews() {
-        mView = mLayoutInflater.inflate(R.layout.type_clock, null);
+        mView = mLayoutInflater.inflate(R.layout.type_aod_clock, null);
         mTypeClock = mView.findViewById(R.id.type_clock);
 
         // For now, this view is used to hide the default digital clock.
         // Need better transition to lock screen.
-        mLockClockContainer = mLayoutInflater.inflate(R.layout.digital_clock, null);
-        mLockClockContainer.setVisibility(View.GONE);
+        mLockClock = (TypographicClock) mLayoutInflater.inflate(R.layout.typographic_clock, null);
+        mLockClock.setVisibility(View.GONE);
+
+        mDarkController = new CrossFadeDarkController(mView, mLockClock);
     }
 
     @Override
@@ -95,10 +97,10 @@ public class TypeClockController implements ClockPlugin {
 
     @Override
     public View getView() {
-        if (mLockClockContainer == null) {
+        if (mLockClock == null) {
             createViews();
         }
-        return mLockClockContainer;
+        return mLockClock;
     }
 
     @Override
@@ -115,6 +117,7 @@ public class TypeClockController implements ClockPlugin {
     @Override
     public void setTextColor(int color) {
         mTypeClock.setTextColor(color);
+        mLockClock.setTextColor(color);
     }
 
     @Override
@@ -122,21 +125,28 @@ public class TypeClockController implements ClockPlugin {
         if (colorPalette == null || colorPalette.length == 0) {
             return;
         }
-        final int length = colorPalette.length;
-        mTypeClock.setClockColor(colorPalette[Math.max(0, length - 5)]);
+        final int color = colorPalette[Math.max(0, colorPalette.length - 5)];
+        mTypeClock.setClockColor(color);
+        mLockClock.setClockColor(color);
     }
 
     @Override
     public void onTimeTick() {
         mTypeClock.onTimeChanged();
+        mLockClock.onTimeChanged();
     }
 
     @Override
-    public void setDarkAmount(float darkAmount) {}
+    public void setDarkAmount(float darkAmount) {
+        if (mDarkController != null) {
+            mDarkController.setDarkAmount(darkAmount);
+        }
+    }
 
     @Override
     public void onTimeZoneChanged(TimeZone timeZone) {
         mTypeClock.onTimeZoneChanged(timeZone);
+        mLockClock.onTimeZoneChanged(timeZone);
     }
 
     @Override

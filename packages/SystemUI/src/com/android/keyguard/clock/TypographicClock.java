@@ -119,4 +119,12 @@ public class TypographicClock extends TextView {
         mTime.setTimeZone(mTimeZone != null ? mTimeZone : TimeZone.getDefault());
         onTimeChanged();
     }
+
+    /**
+     * Overriding hasOverlappingRendering as false to improve performance of crossfading.
+     */
+    @Override
+    public boolean hasOverlappingRendering() {
+        return false;
+    }
 }
