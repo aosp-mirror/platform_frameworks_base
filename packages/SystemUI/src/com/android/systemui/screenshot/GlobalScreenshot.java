@@ -42,9 +42,11 @@ import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Matrix;
@@ -743,6 +745,15 @@ class GlobalScreenshot {
                 return (x - flashDurationPct) / (1f - flashDurationPct);
             }
         };
+
+        Resources r = mContext.getResources();
+        if ((r.getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK)
+                == Configuration.UI_MODE_NIGHT_YES) {
+            mScreenshotView.getBackground().setTint(Color.BLACK);
+        } else {
+            mScreenshotView.getBackground().setTintList(null);
+        }
+
         ValueAnimator anim = ValueAnimator.ofFloat(0f, 1f);
         anim.setDuration(SCREENSHOT_DROP_IN_DURATION);
         anim.addListener(new AnimatorListenerAdapter() {
