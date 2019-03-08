@@ -3273,6 +3273,11 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     }
 
     @Override
+    public boolean containsView(View v) {
+        return v.getParent() == this;
+    }
+
+    @Override
     @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     public void applyExpandAnimationParams(ExpandAnimationParameters params) {
         mAmbientState.setExpandAnimationTopChange(params == null ? 0 : params.getTopChange());
