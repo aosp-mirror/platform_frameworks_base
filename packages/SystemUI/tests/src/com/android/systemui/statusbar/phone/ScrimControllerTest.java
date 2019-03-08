@@ -114,7 +114,7 @@ public class ScrimControllerTest extends SysuiTestCase {
         // Front scrim should be transparent
         // Back scrim should be visible without tint
         assertScrimVisibility(VISIBILITY_FULLY_TRANSPARENT, VISIBILITY_SEMI_TRANSPARENT);
-        assertScrimTint(mScrimBehind, false /* tinted */);
+        assertScrimTint(mScrimBehind, true /* tinted */);
     }
 
     @Test
