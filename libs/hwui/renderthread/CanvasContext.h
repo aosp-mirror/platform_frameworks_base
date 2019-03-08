@@ -217,6 +217,7 @@ private:
     void freePrefetchedLayers();
 
     bool isSwapChainStuffed();
+    bool surfaceRequiresRedraw();
 
     SkRect computeDirtyRect(const Frame& frame, SkRect* dirty);
 
