@@ -24,7 +24,6 @@ import static com.android.systemui.statusbar.StatusBarState.SHADE;
 import static com.android.systemui.statusbar.notification.NotificationAlertingManager.alertAgain;
 
 import android.annotation.Nullable;
-import android.app.ActivityManager;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityTaskManager;
 import android.app.IActivityTaskManager;
@@ -59,8 +58,6 @@ import com.android.systemui.statusbar.notification.NotificationInterruptionState
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.NotificationContentInflater.InflationFlag;
 import com.android.systemui.statusbar.phone.StatusBarWindowController;
-
-import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -491,24 +488,6 @@ public class BubbleController implements BubbleExpandedView.OnBubbleBlockedListe
     @MainThread
     private class BubbleTaskStackListener extends TaskStackChangeListener {
 
-        @Nullable
-        private ActivityManager.StackInfo findStackInfo(int taskId) throws RemoteException {
-            final List<ActivityManager.StackInfo> stackInfoList =
-                    mActivityTaskManager.getAllStackInfos();
-            // Iterate through stacks from top to bottom.
-            final int stackCount = stackInfoList.size();
-            for (int stackIndex = 0; stackIndex < stackCount; stackIndex++) {
-                final ActivityManager.StackInfo stackInfo = stackInfoList.get(stackIndex);
-                // Iterate through tasks from top to bottom.
-                for (int taskIndex = stackInfo.taskIds.length - 1; taskIndex >= 0; taskIndex--) {
-                    if (stackInfo.taskIds[taskIndex] == taskId) {
-                        return stackInfo;
-                    }
-                }
-            }
-            return null;
-        }
-
         @Override
         public void onTaskMovedToFront(RunningTaskInfo taskInfo) {
             if (mStackView != null && taskInfo.displayId == Display.DEFAULT_DISPLAY) {
@@ -516,15 +495,8 @@ public class BubbleController implements BubbleExpandedView.OnBubbleBlockedListe
             }
         }
 
-        /**
-         * This is a workaround for the case when the activity had to be created in a new task.
-         * Existing code in ActivityStackSupervisor checks the display where the activity
-         * ultimately ended up, displays an error message toast, and calls this method instead of
-         * onTaskMovedToFront.
-         */
         @Override
-        public void onActivityLaunchOnSecondaryDisplayFailed(RunningTaskInfo taskInfo) {
-            // TODO(b/124058588): move to ActivityView.StateCallback, filter on virtualDisplay ID
+        public void onActivityLaunchOnSecondaryDisplayRerouted() {
             if (mStackView != null) {
                 mStackView.collapseStack();
             }
