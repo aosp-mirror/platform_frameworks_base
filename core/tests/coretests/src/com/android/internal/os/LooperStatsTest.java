@@ -452,6 +452,7 @@ public final class LooperStatsTest {
     public void testAddsDebugEntries() {
         TestableLooperStats looperStats = new TestableLooperStats(1, 100);
         looperStats.setAddDebugEntries(true);
+        looperStats.setSamplingInterval(10);
 
         Message message = mHandlerFirst.obtainMessage(1000);
         message.when = looperStats.getSystemUptimeMillis();
@@ -459,7 +460,7 @@ public final class LooperStatsTest {
         looperStats.messageDispatched(token, message);
 
         List<LooperStats.ExportedEntry> entries = looperStats.getEntries();
-        assertThat(entries).hasSize(4);
+        assertThat(entries).hasSize(5);
         LooperStats.ExportedEntry debugEntry1 = entries.get(1);
         assertThat(debugEntry1.handlerClassName).isEqualTo("");
         assertThat(debugEntry1.messageName).isEqualTo("__DEBUG_start_time_millis");
@@ -474,6 +475,9 @@ public final class LooperStatsTest {
         assertThat(debugEntry3.handlerClassName).isEqualTo("");
         assertThat(debugEntry3.messageName).isEqualTo("__DEBUG_battery_time_millis");
         assertThat(debugEntry3.totalLatencyMicros).isAtLeast(0L);
+        LooperStats.ExportedEntry debugEntry4 = entries.get(4);
+        assertThat(debugEntry4.messageName).isEqualTo("__DEBUG_sampling_interval");
+        assertThat(debugEntry4.totalLatencyMicros).isEqualTo(10L);
     }
 
     @Test

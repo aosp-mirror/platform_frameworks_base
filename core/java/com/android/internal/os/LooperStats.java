@@ -165,6 +165,7 @@ public class LooperStats implements Looper.Observer {
             exportedEntries.add(createDebugEntry("end_time_millis", SystemClock.elapsedRealtime()));
             exportedEntries.add(
                     createDebugEntry("battery_time_millis", mBatteryStopwatch.getMillis()));
+            exportedEntries.add(createDebugEntry("sampling_interval", mSamplingInterval));
         }
         return exportedEntries;
     }

@@ -642,8 +642,9 @@ public class BinderCallsStatsTest {
         long startTime = SystemClock.elapsedRealtime();
         TestBinderCallsStats bcs = new TestBinderCallsStats();
         bcs.setAddDebugEntries(true);
+        bcs.setSamplingInterval(10);
         ArrayList<BinderCallsStats.ExportedCallStat> callStats = bcs.getExportedCallStats();
-        assertEquals(3, callStats.size());
+        assertEquals(4, callStats.size());
         BinderCallsStats.ExportedCallStat debugEntry1 = callStats.get(0);
         assertEquals("", debugEntry1.className);
         assertEquals("__DEBUG_start_time_millis", debugEntry1.methodName);
@@ -656,6 +657,9 @@ public class BinderCallsStatsTest {
         assertEquals("", debugEntry3.className);
         assertEquals("__DEBUG_battery_time_millis", debugEntry3.methodName);
         assertTrue(debugEntry3.latencyMicros >= 0);
+        BinderCallsStats.ExportedCallStat debugEntry4 = callStats.get(3);
+        assertEquals("__DEBUG_sampling_interval", debugEntry4.methodName);
+        assertEquals(10, debugEntry4.latencyMicros);
     }
 
     @Test
