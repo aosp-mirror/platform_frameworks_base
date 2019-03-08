@@ -14,12 +14,11 @@
 // limitations under the License.
 //
 
-// Library including the network stack, used to compile the network stack app, or linked into the
-// system server on devices that run the stack there
-java_library {
-    name: "NetworkStackLib",
+// Library including the network stack, used to compile both variants of the network stack
+android_library {
+    name: "NetworkStackBase",
     sdk_version: "system_current",
-    installable: true,
+    min_sdk_version: "28",
     srcs: [
         "src/**/*.java",
         ":framework-networkstack-shared-srcs",
@@ -29,7 +28,24 @@ java_library {
         "netd_aidl_interface-java",
         "networkstack-aidl-interfaces-java",
         "datastallprotosnano",
-    ]
+    ],
+    manifest: "AndroidManifestBase.xml",
+}
+
+// Non-updatable in-process network stack for devices not using the module
+android_app {
+    name: "InProcessNetworkStack",
+    sdk_version: "system_current",
+    min_sdk_version: "28",
+    certificate: "platform",
+    privileged: true,
+    static_libs: [
+        "NetworkStackBase",
+    ],
+    jarjar_rules: "jarjar-rules-shared.txt",
+    // The permission configuration *must* be included to ensure security of the device
+    required: ["NetworkStackPermissionStub"],
+    manifest: "AndroidManifest_InProcess.xml",
 }
 
 // Updatable network stack packaged as an application
@@ -40,9 +56,10 @@ android_app {
     certificate: "networkstack",
     privileged: true,
     static_libs: [
-        "NetworkStackLib"
+        "NetworkStackBase"
     ],
     jarjar_rules: "jarjar-rules-shared.txt",
-    manifest: "AndroidManifest.xml",
+    // The permission configuration *must* be included to ensure security of the device
     required: ["NetworkStackPermissionStub"],
+    manifest: "AndroidManifest.xml",
 }
