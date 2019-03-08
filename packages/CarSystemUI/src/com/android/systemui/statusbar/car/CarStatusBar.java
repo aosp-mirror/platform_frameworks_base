@@ -606,4 +606,8 @@ public class CarStatusBar extends StatusBar implements
         getComponent(NotificationsUI.class).toggleShowingCarNotifications();
     }
 
+    @Override
+    public void maybeEscalateHeadsUp() {
+        // Never send full screen intent in car.
+    }
 }
