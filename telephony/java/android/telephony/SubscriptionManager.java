@@ -2938,7 +2938,7 @@ public class SubscriptionManager {
     }
 
     /**
-     * Enabled or disable a subscription. This is currently used in the settings page.
+     * Enables or disables a subscription. This is currently used in the settings page.
      *
      * <p>
      * Permissions android.Manifest.permission.MODIFY_PHONE_STATE is required
