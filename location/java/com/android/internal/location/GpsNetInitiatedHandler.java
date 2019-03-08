@@ -17,6 +17,7 @@
 package com.android.internal.location;
 
 import java.io.UnsupportedEncodingException;
+import java.util.concurrent.TimeUnit;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -27,19 +28,17 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.location.LocationManager;
 import android.location.INetInitiatedListener;
+import android.os.SystemClock;
 import android.telephony.TelephonyManager;
 import android.telephony.PhoneNumberUtils;
 import android.telephony.PhoneStateListener;
-import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import android.os.SystemProperties;
 import android.util.Log;
 
 import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.R;
 import com.android.internal.telephony.GsmAlphabet;
-import com.android.internal.telephony.TelephonyProperties;
 
 /**
  * A GPS Network-initiated Handler class used by LocationManager.
@@ -50,8 +49,7 @@ public class GpsNetInitiatedHandler {
 
     private static final String TAG = "GpsNetInitiatedHandler";
 
-    private static final boolean DEBUG = true;
-    private static final boolean VERBOSE = false;
+    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     // NI verify activity for bringing up UI (not used yet)
     public static final String ACTION_NI_VERIFY = "android.intent.action.NETWORK_INITIATED_VERIFY";
@@ -94,6 +92,9 @@ public class GpsNetInitiatedHandler {
     public static final int GPS_ENC_SUPL_UCS2 = 3;
     public static final int GPS_ENC_UNKNOWN = -1;
 
+    // Limit on SUPL NI emergency mode time extension after emergency sessions ends
+    private static final int MAX_EMERGENCY_MODE_EXTENSION_SECONDS = 300;  // 5 minute maximum
+
     private final Context mContext;
     private final TelephonyManager mTelephonyManager;
     private final PhoneStateListener mPhoneStateListener;
@@ -109,7 +110,7 @@ public class GpsNetInitiatedHandler {
     private volatile boolean mIsSuplEsEnabled;
 
     // Set to true if the phone is having emergency call.
-    private volatile boolean mIsInEmergency;
+    private volatile boolean mIsInEmergencyCall;
 
     // If Location function is enabled.
     private volatile boolean mIsLocationEnabled = false;
@@ -118,6 +119,10 @@ public class GpsNetInitiatedHandler {
 
     // Set to true if string from HAL is encoded as Hex, e.g., "3F0039"
     static private boolean mIsHexInput = true;
+
+    // End time of emergency call, and extension, if set
+    private long mCallEndElapsedRealtimeMillis = 0;
+    private long mEmergencyExtensionMillis = 0;
 
     public static class GpsNiNotification
     {
@@ -146,16 +151,12 @@ public class GpsNetInitiatedHandler {
             if (action.equals(Intent.ACTION_NEW_OUTGOING_CALL)) {
                 String phoneNumber = intent.getStringExtra(Intent.EXTRA_PHONE_NUMBER);
                 /*
-                   Emergency Mode is when during emergency call or in emergency call back mode.
-                   For checking if it is during emergency call:
-                       mIsInEmergency records if the phone is in emergency call or not. It will
+                   Tracks the emergency call:
+                       mIsInEmergencyCall records if the phone is in emergency call or not. It will
                        be set to true when the phone is having emergency call, and then will
                        be set to false by mPhoneStateListener when the emergency call ends.
-                   For checking if it is in emergency call back mode:
-                       Emergency call back mode will be checked by reading system properties
-                       when necessary: SystemProperties.get(TelephonyProperties.PROPERTY_INECM_MODE)
                 */
-                setInEmergency(PhoneNumberUtils.isEmergencyNumber(phoneNumber));
+                mIsInEmergencyCall = PhoneNumberUtils.isEmergencyNumber(phoneNumber);
                 if (DEBUG) Log.v(TAG, "ACTION_NEW_OUTGOING_CALL - " + getInEmergency());
             } else if (action.equals(LocationManager.MODE_CHANGED_ACTION)) {
                 updateLocationMode();
@@ -195,7 +196,10 @@ public class GpsNetInitiatedHandler {
                 if (DEBUG) Log.d(TAG, "onCallStateChanged(): state is "+ state);
                 // listening for emergency call ends
                 if (state == TelephonyManager.CALL_STATE_IDLE) {
-                    setInEmergency(false);
+                    if (mIsInEmergencyCall) {
+                        mCallEndElapsedRealtimeMillis = SystemClock.elapsedRealtime();
+                        mIsInEmergencyCall = false;
+                    }
                 }
             }
         };
@@ -229,22 +233,35 @@ public class GpsNetInitiatedHandler {
         return mIsLocationEnabled;
     }
 
-    // Note: Currently, there are two mechanisms involved to determine if a
-    // phone is in emergency mode:
-    // 1. If the user is making an emergency call, this is provided by activly
-    //    monitoring the outgoing phone number;
-    // 2. If the device is in a emergency callback state, this is provided by
-    //    system properties.
-    // If either one of above exists, the phone is considered in an emergency
-    // mode. Because of this complexity, we need to be careful about how to set
-    // and clear the emergency state.
-    public void setInEmergency(boolean isInEmergency) {
-        mIsInEmergency = isInEmergency;
+    /**
+     * Determines whether device is in user-initiated emergency session based on the following
+     * 1. If the user is making an emergency call, this is provided by actively
+     *    monitoring the outgoing phone number;
+     * 2. If the user has recently ended an emergency call, and the device is in a configured time
+     *    window after the end of that call.
+     * 3. If the device is in a emergency callback state, this is provided by querying
+     *    TelephonyManager.
+     * @return true if is considered in user initiated emergency mode for NI purposes
+     */
+    public boolean getInEmergency() {
+        boolean isInEmergencyExtension =
+                (SystemClock.elapsedRealtime() - mCallEndElapsedRealtimeMillis) <
+                        mEmergencyExtensionMillis;
+        boolean isInEmergencyCallback = mTelephonyManager.getEmergencyCallbackMode();
+        return mIsInEmergencyCall || isInEmergencyCallback || isInEmergencyExtension;
     }
 
-    public boolean getInEmergency() {
-        boolean isInEmergencyCallback = mTelephonyManager.getEmergencyCallbackMode();
-        return mIsInEmergency || isInEmergencyCallback;
+    public void setEmergencyExtensionSeconds(int emergencyExtensionSeconds) {
+        if (emergencyExtensionSeconds > MAX_EMERGENCY_MODE_EXTENSION_SECONDS) {
+            Log.w(TAG, "emergencyExtensionSeconds " + emergencyExtensionSeconds
+                    + " too high, reset to " + MAX_EMERGENCY_MODE_EXTENSION_SECONDS);
+            emergencyExtensionSeconds = MAX_EMERGENCY_MODE_EXTENSION_SECONDS;
+        } else if (emergencyExtensionSeconds < 0) {
+            Log.w(TAG, "emergencyExtensionSeconds " + emergencyExtensionSeconds
+                    + " is negative, reset to zero.");
+            emergencyExtensionSeconds = 0;
+        }
+        mEmergencyExtensionMillis = TimeUnit.SECONDS.toMillis(emergencyExtensionSeconds);
     }
 
 
