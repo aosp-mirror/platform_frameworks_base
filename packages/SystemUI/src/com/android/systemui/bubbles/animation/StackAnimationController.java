@@ -341,7 +341,7 @@ public class StackAnimationController extends
                 .setDampingRatio(BubbleController.getBubbleBounciness(
                         mLayout.getContext(), DEFAULT_BOUNCINESS))
                 .setStiffness(BubbleController.getBubbleStiffness(
-                        mLayout.getContext(), (int) (DEFAULT_STIFFNESS * 100f)));
+                        mLayout.getContext(), (int) DEFAULT_STIFFNESS));
     }
 
     @Override
