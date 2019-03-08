@@ -14965,6 +14965,17 @@ public final class Settings {
                 "android.settings.panel.action.NFC";
 
         /**
+         * Activity Action: Show a settings dialog containing controls for Wifi.
+         * <p>
+         * Input: Nothing.
+         * <p>
+         * Output: Nothing.
+         */
+        @SdkConstant(SdkConstant.SdkConstantType.ACTIVITY_INTENT_ACTION)
+        public static final String ACTION_WIFI =
+                "android.settings.panel.action.WIFI";
+
+        /**
          * Activity Action: Show a settings dialog containing all volume streams.
          * <p>
          * Input: Nothing.
