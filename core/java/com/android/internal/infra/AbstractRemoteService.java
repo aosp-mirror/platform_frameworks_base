@@ -480,6 +480,11 @@ public abstract class AbstractRemoteService<S extends AbstractRemoteService<S, I
         return mDestroyed;
     }
 
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "[" + mComponentName + "]";
+    }
+
     /**
      * Base class for the requests serviced by the remote service.
      *
