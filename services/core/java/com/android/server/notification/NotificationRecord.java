@@ -149,7 +149,10 @@ public final class NotificationRecord {
     private int mImportance = IMPORTANCE_UNSPECIFIED;
     // Field used in global sort key to bypass normal notifications
     private int mCriticality = CriticalNotificationExtractor.NORMAL;
-    private CharSequence mImportanceExplanation = null;
+    // A MetricsEvent.NotificationImportanceExplanation, tracking source of mImportance.
+    private int mImportanceExplanationCode = MetricsEvent.IMPORTANCE_EXPLANATION_UNKNOWN;
+    // A MetricsEvent.NotificationImportanceExplanation for initial importance.
+    private int mInitialImportanceExplanationCode = MetricsEvent.IMPORTANCE_EXPLANATION_UNKNOWN;
 
     private int mSuppressedVisualEffects = 0;
     private String mUserExplanation;
@@ -332,14 +335,18 @@ public final class NotificationRecord {
 
     private int calculateInitialImportance() {
         final Notification n = sbn.getNotification();
-        int importance = getChannel().getImportance();
-        int requestedImportance = IMPORTANCE_DEFAULT;
+        int importance = getChannel().getImportance();  // Post-channels notifications use this
+        mInitialImportanceExplanationCode = getChannel().hasUserSetImportance()
+                ? MetricsEvent.IMPORTANCE_EXPLANATION_USER
+                : MetricsEvent.IMPORTANCE_EXPLANATION_APP;
 
-        // Migrate notification flags to scores
+        // Migrate notification priority flag to a priority value.
         if (0 != (n.flags & Notification.FLAG_HIGH_PRIORITY)) {
             n.priority = Notification.PRIORITY_MAX;
         }
 
+        // Convert priority value to an importance value, used only for pre-channels notifications.
+        int requestedImportance = IMPORTANCE_DEFAULT;
         n.priority = NotificationManagerService.clamp(n.priority, Notification.PRIORITY_MIN,
                 Notification.PRIORITY_MAX);
         switch (n.priority) {
@@ -360,10 +367,11 @@ public final class NotificationRecord {
         stats.requestedImportance = requestedImportance;
         stats.isNoisy = mSound != null || mVibration != null;
 
+        // For pre-channels notifications, apply system overrides and then use requestedImportance
+        // as importance.
         if (mPreChannelsNotification
                 && (importance == IMPORTANCE_UNSPECIFIED
-                || (getChannel().getUserLockedFields()
-                & USER_LOCKED_IMPORTANCE) == 0)) {
+                || (!getChannel().hasUserSetImportance()))) {
             if (!stats.isNoisy && requestedImportance > IMPORTANCE_LOW) {
                 requestedImportance = IMPORTANCE_LOW;
             }
@@ -378,6 +386,8 @@ public final class NotificationRecord {
                 requestedImportance = IMPORTANCE_HIGH;
             }
             importance = requestedImportance;
+            mInitialImportanceExplanationCode =
+                    MetricsEvent.IMPORTANCE_EXPLANATION_APP_PRE_CHANNELS;
         }
 
         stats.naturalImportance = importance;
@@ -540,7 +550,7 @@ public final class NotificationRecord {
                 + NotificationListenerService.Ranking.importanceToString(mAssistantImportance));
         pw.println(prefix + "mImportance="
                 + NotificationListenerService.Ranking.importanceToString(mImportance));
-        pw.println(prefix + "mImportanceExplanation=" + mImportanceExplanation);
+        pw.println(prefix + "mImportanceExplanation=" + getImportanceExplanation());
         pw.println(prefix + "mIsAppImportanceLocked=" + mIsAppImportanceLocked);
         pw.println(prefix + "mIntercept=" + mIntercept);
         pw.println(prefix + "mHidden==" + mHidden);
@@ -760,23 +770,23 @@ public final class NotificationRecord {
     }
 
     /**
-     * Recalculates the importance of the record after fields affecting importance have changed
+     * Recalculates the importance of the record after fields affecting importance have changed,
+     * and records an explanation.
      */
     protected void calculateImportance() {
         mImportance = calculateInitialImportance();
-        mImportanceExplanation = "app";
-        if (getChannel().hasUserSetImportance()) {
-            mImportanceExplanation = "user";
-        }
+        mImportanceExplanationCode = mInitialImportanceExplanationCode;
+
+        // Consider Notification Assistant and system overrides to importance. If both, system wins.
         if (!getChannel().hasUserSetImportance()
                 && mAssistantImportance != IMPORTANCE_UNSPECIFIED
                 && !getChannel().isImportanceLockedByOEM()) {
             mImportance = mAssistantImportance;
-            mImportanceExplanation = "asst";
+            mImportanceExplanationCode = MetricsEvent.IMPORTANCE_EXPLANATION_ASST;
         }
         if (mSystemImportance != IMPORTANCE_UNSPECIFIED) {
             mImportance = mSystemImportance;
-            mImportanceExplanation = "system";
+            mImportanceExplanationCode = MetricsEvent.IMPORTANCE_EXPLANATION_SYSTEM;
         }
     }
 
@@ -785,7 +795,20 @@ public final class NotificationRecord {
     }
 
     public CharSequence getImportanceExplanation() {
-        return mImportanceExplanation;
+        switch (mImportanceExplanationCode) {
+            case MetricsEvent.IMPORTANCE_EXPLANATION_UNKNOWN:
+                return null;
+            case MetricsEvent.IMPORTANCE_EXPLANATION_APP:
+            case MetricsEvent.IMPORTANCE_EXPLANATION_APP_PRE_CHANNELS:
+                return "app";
+            case MetricsEvent.IMPORTANCE_EXPLANATION_USER:
+                return "user";
+            case MetricsEvent.IMPORTANCE_EXPLANATION_ASST:
+                return "asst";
+            case MetricsEvent.IMPORTANCE_EXPLANATION_SYSTEM:
+                return "system";
+        }
+        return null;
     }
 
     public boolean setIntercepted(boolean intercept) {
@@ -1242,14 +1265,37 @@ public final class NotificationRecord {
     }
 
     public LogMaker getLogMaker(long now) {
-        return sbn.getLogMaker()
-                .clearTaggedData(MetricsEvent.NOTIFICATION_SHADE_INDEX)
+        LogMaker lm = sbn.getLogMaker()
                 .addTaggedData(MetricsEvent.FIELD_NOTIFICATION_CHANNEL_IMPORTANCE, mImportance)
                 .addTaggedData(MetricsEvent.NOTIFICATION_SINCE_CREATE_MILLIS, getLifespanMs(now))
                 .addTaggedData(MetricsEvent.NOTIFICATION_SINCE_UPDATE_MILLIS, getFreshnessMs(now))
                 .addTaggedData(MetricsEvent.NOTIFICATION_SINCE_VISIBLE_MILLIS, getExposureMs(now))
                 .addTaggedData(MetricsEvent.NOTIFICATION_SINCE_INTERRUPTION_MILLIS,
                         getInterruptionMs(now));
+        // Record results of the calculateImportance() calculation if available.
+        if (mImportanceExplanationCode != MetricsEvent.IMPORTANCE_EXPLANATION_UNKNOWN) {
+            lm.addTaggedData(MetricsEvent.FIELD_NOTIFICATION_IMPORTANCE_EXPLANATION,
+                    mImportanceExplanationCode);
+            // To avoid redundancy, we log the initial importance information only if it was
+            // overridden.
+            if (((mImportanceExplanationCode == MetricsEvent.IMPORTANCE_EXPLANATION_ASST)
+                    || (mImportanceExplanationCode == MetricsEvent.IMPORTANCE_EXPLANATION_SYSTEM))
+                    && (stats.naturalImportance != IMPORTANCE_UNSPECIFIED)) {
+                // stats.naturalImportance is due to one of the 3 sources of initial importance.
+                lm.addTaggedData(MetricsEvent.FIELD_NOTIFICATION_IMPORTANCE_INITIAL_EXPLANATION,
+                        mInitialImportanceExplanationCode);
+                lm.addTaggedData(MetricsEvent.FIELD_NOTIFICATION_IMPORTANCE_INITIAL,
+                        stats.naturalImportance);
+            }
+            // Log Assistant override if it was itself overridden by System. Since System can't be
+            // overridden, it never needs logging.
+            if (mImportanceExplanationCode == MetricsEvent.IMPORTANCE_EXPLANATION_SYSTEM
+                    && mAssistantImportance != IMPORTANCE_UNSPECIFIED) {
+                lm.addTaggedData(MetricsEvent.FIELD_NOTIFICATION_IMPORTANCE_ASST,
+                        mAssistantImportance);
+            }
+        }
+        return lm;
     }
 
     public LogMaker getLogMaker() {
