@@ -64,6 +64,7 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.Process;
+import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ServiceManager;
@@ -138,9 +139,9 @@ public class MediaSessionServiceImpl extends MediaSessionService.ServiceImpl {
     private MediaSessionRecord mGlobalPrioritySession;
     private AudioPlayerStateMonitor mAudioPlayerStateMonitor;
 
-    // Used to notify system UI when remote volume was changed. TODO find a
-    // better way to handle this.
-    private IRemoteVolumeController mRvc;
+    // Used to notify System UI and Settings when remote volume was changed.
+    final RemoteCallbackList<IRemoteVolumeController> mRemoteVolumeControllers =
+            new RemoteCallbackList<>();
 
     public MediaSessionServiceImpl(Context context) {
         mContext = context;
@@ -281,20 +282,23 @@ public class MediaSessionServiceImpl extends MediaSessionService.ServiceImpl {
     }
 
     /**
-     * Tells the system UI that volume has changed on an active remote session.
+     * Tells the System UI and Settings app that volume has changed on an active remote session.
      */
     public void notifyRemoteVolumeChanged(int flags, MediaSessionRecord session) {
-        synchronized (mLock) {
-            if (mRvc == null || !session.isActive()) {
-                return;
-            }
+        if (!session.isActive()) {
+            return;
+        }
+        int size = mRemoteVolumeControllers.beginBroadcast();
+        MediaSession.Token token = session.getSessionToken();
+        for (int i = size - 1; i >= 0; i--) {
             try {
-                mRvc.remoteVolumeChanged(session.getSessionToken(), flags);
+                IRemoteVolumeController cb = mRemoteVolumeControllers.getBroadcastItem(i);
+                cb.remoteVolumeChanged(token, flags);
             } catch (Exception e) {
-                Log.w(TAG, "Error sending volume change to system UI.", e);
-                mRvc = null;
+                Log.w(TAG, "Error sending volume change.", e);
             }
         }
+        mRemoteVolumeControllers.finishBroadcast();
     }
 
     @Override
@@ -497,7 +501,7 @@ public class MediaSessionServiceImpl extends MediaSessionService.ServiceImpl {
      */
     private void enforceMediaPermissions(ComponentName compName, int pid, int uid,
             int resolvedUserId) {
-        if (isCurrentVolumeController(pid, uid)) return;
+        if (hasStatusBarServicePermission(pid, uid)) return;
         if (mContext
                 .checkPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL, pid, uid)
                 != PackageManager.PERMISSION_GRANTED
@@ -507,14 +511,14 @@ public class MediaSessionServiceImpl extends MediaSessionService.ServiceImpl {
         }
     }
 
-    private boolean isCurrentVolumeController(int pid, int uid) {
+    private boolean hasStatusBarServicePermission(int pid, int uid) {
         return mContext.checkPermission(android.Manifest.permission.STATUS_BAR_SERVICE,
                 pid, uid) == PackageManager.PERMISSION_GRANTED;
     }
 
-    private void enforceSystemUiPermission(String action, int pid, int uid) {
-        if (!isCurrentVolumeController(pid, uid)) {
-            throw new SecurityException("Only system ui may " + action);
+    private void enforceStatusBarServicePermission(String action, int pid, int uid) {
+        if (!hasStatusBarServicePermission(pid, uid)) {
+            throw new SecurityException("Only System UI and Settings may " + action);
         }
     }
 
@@ -638,20 +642,25 @@ public class MediaSessionServiceImpl extends MediaSessionService.ServiceImpl {
     }
 
     private void pushRemoteVolumeUpdateLocked(int userId) {
-        if (mRvc != null) {
+        FullUserRecord user = getFullUserRecordLocked(userId);
+        if (user == null) {
+            Log.w(TAG, "pushRemoteVolumeUpdateLocked failed. No user with id=" + userId);
+            return;
+        }
+
+        int size = mRemoteVolumeControllers.beginBroadcast();
+        MediaSessionRecord record = user.mPriorityStack.getDefaultRemoteSession(userId);
+        MediaSession.Token token = record == null ? null : record.getSessionToken();
+
+        for (int i = size - 1; i >= 0; i--) {
             try {
-                FullUserRecord user = getFullUserRecordLocked(userId);
-                if (user == null) {
-                    Log.w(TAG, "pushRemoteVolumeUpdateLocked failed. No user with id=" + userId);
-                    return;
-                }
-                MediaSessionRecord record = user.mPriorityStack.getDefaultRemoteSession(userId);
-                mRvc.updateRemoteController(record == null ? null : record.getSessionToken());
-            } catch (RemoteException e) {
-                Log.w(TAG, "Error sending default remote volume to sys ui.", e);
-                mRvc = null;
+                IRemoteVolumeController cb = mRemoteVolumeControllers.getBroadcastItem(i);
+                cb.updateRemoteController(token);
+            } catch (Exception e) {
+                Log.w(TAG, "Error sending default remote volume.", e);
             }
         }
+        mRemoteVolumeControllers.finishBroadcast();
     }
 
     void pushSession2TokensChangedLocked(int userId) {
@@ -1661,15 +1670,26 @@ public class MediaSessionServiceImpl extends MediaSessionService.ServiceImpl {
         }
 
         @Override
-        public void setRemoteVolumeController(IRemoteVolumeController rvc) {
+        public void registerRemoteVolumeController(IRemoteVolumeController rvc) {
             final int pid = Binder.getCallingPid();
             final int uid = Binder.getCallingUid();
             final long token = Binder.clearCallingIdentity();
             try {
-                enforceSystemUiPermission("listen for volume changes", pid, uid);
-                synchronized (mLock) {
-                    mRvc = rvc;
-                }
+                enforceStatusBarServicePermission("listen for volume changes", pid, uid);
+                mRemoteVolumeControllers.register(rvc);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override
+        public void unregisterRemoteVolumeController(IRemoteVolumeController rvc) {
+            final int pid = Binder.getCallingPid();
+            final int uid = Binder.getCallingUid();
+            final long token = Binder.clearCallingIdentity();
+            try {
+                enforceStatusBarServicePermission("listen for volume changes", pid, uid);
+                mRemoteVolumeControllers.unregister(rvc);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -1755,8 +1775,8 @@ public class MediaSessionServiceImpl extends MediaSessionService.ServiceImpl {
 
         private boolean hasMediaControlPermission(int resolvedUserId, String packageName,
                 int pid, int uid) throws RemoteException {
-            // Allow API calls from the System UI
-            if (isCurrentVolumeController(pid, uid)) {
+            // Allow API calls from the System UI and Settings
+            if (hasStatusBarServicePermission(pid, uid)) {
                 return true;
             }
 

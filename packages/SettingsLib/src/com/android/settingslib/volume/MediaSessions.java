@@ -95,7 +95,7 @@ public class MediaSessions {
         mMgr.addOnActiveSessionsChangedListener(mSessionsListener, null, mHandler);
         mInit = true;
         postUpdateSessions();
-        mMgr.setRemoteVolumeController(mRvc);
+        mMgr.registerRemoteVolumeController(mRvc);
     }
 
     protected void postUpdateSessions() {
@@ -110,6 +110,7 @@ public class MediaSessions {
         if (D.BUG) Log.d(TAG, "destroy");
         mInit = false;
         mMgr.removeOnActiveSessionsChangedListener(mSessionsListener);
+        mMgr.unregisterRemoteVolumeController(mRvc);
     }
 
     /**

@@ -424,17 +424,33 @@ public final class MediaSessionManager {
     }
 
     /**
-     * Set the remote volume controller to receive volume updates on. Only for
-     * use by system UI.
+     * Set the remote volume controller to receive volume updates on.
+     * Only for use by System UI and Settings application.
      *
      * @param rvc The volume controller to receive updates on.
      * @hide
      */
-    public void setRemoteVolumeController(IRemoteVolumeController rvc) {
+    public void registerRemoteVolumeController(IRemoteVolumeController rvc) {
         try {
-            mService.setRemoteVolumeController(rvc);
+            mService.registerRemoteVolumeController(rvc);
         } catch (RemoteException e) {
-            Log.e(TAG, "Error in setRemoteVolumeController.", e);
+            Log.e(TAG, "Error in registerRemoteVolumeController.", e);
+        }
+    }
+
+    /**
+     * Unregisters the remote volume controller which was previously registered with
+     * {@link #registerRemoteVolumeController(IRemoteVolumeController)}.
+     * Only for use by System UI and Settings application.
+     *
+     * @param rvc The volume controller which was registered.
+     * @hide
+     */
+    public void unregisterRemoteVolumeController(IRemoteVolumeController rvc) {
+        try {
+            mService.unregisterRemoteVolumeController(rvc);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error in unregisterRemoteVolumeController.", e);
         }
     }
 
