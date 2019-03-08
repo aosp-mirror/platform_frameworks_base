@@ -174,26 +174,6 @@ public abstract class PermissionControllerService extends Service {
             boolean countSystem, long numMillis);
 
     /**
-     * Check whether an application is qualified for a role.
-     *
-     * @param roleName name of the role to check for
-     * @param packageName package name of the application to check for
-     *
-     * @return whether the application is qualified for the role
-     */
-    public abstract boolean onIsApplicationQualifiedForRole(@NonNull String roleName,
-            @NonNull String packageName);
-
-    /**
-     * Check whether a role should be visible to user.
-     *
-     * @param roleName name of the role to check for
-     *
-     * @return whether the role should be visible to user
-     */
-    public abstract boolean onIsRoleVisible(@NonNull String roleName);
-
-    /**
      * Set the runtime permission state from a device admin.
      *
      * @param callerPackageName The package name of the admin requesting the change
@@ -339,32 +319,6 @@ public abstract class PermissionControllerService extends Service {
             }
 
             @Override
-            public void isApplicationQualifiedForRole(String roleName, String packageName,
-                    RemoteCallback callback) {
-                checkStringNotEmpty(roleName);
-                checkStringNotEmpty(packageName);
-                checkNotNull(callback, "callback");
-
-                enforceCallingPermission(Manifest.permission.MANAGE_ROLE_HOLDERS, null);
-
-                mHandler.sendMessage(obtainMessage(
-                        PermissionControllerService::isApplicationQualifiedForRole,
-                        PermissionControllerService.this, roleName, packageName, callback));
-            }
-
-            @Override
-            public void isRoleVisible(String roleName, RemoteCallback callback) {
-                checkStringNotEmpty(roleName);
-                checkNotNull(callback, "callback");
-
-                enforceCallingPermission(Manifest.permission.MANAGE_ROLE_HOLDERS, null);
-
-                mHandler.sendMessage(obtainMessage(
-                        PermissionControllerService::isRoleVisible,
-                        PermissionControllerService.this, roleName, callback));
-            }
-
-            @Override
             public void setRuntimePermissionGrantStateByDeviceAdmin(String callerPackageName,
                     String packageName, String permission, int grantState,
                     RemoteCallback callback) {
@@ -456,21 +410,6 @@ public abstract class PermissionControllerService extends Service {
         } else {
             callback.sendResult(null);
         }
-    }
-
-    private void isApplicationQualifiedForRole(@NonNull String roleName,
-            @NonNull String packageName, @NonNull RemoteCallback callback) {
-        boolean qualified = onIsApplicationQualifiedForRole(roleName, packageName);
-        Bundle result = new Bundle();
-        result.putBoolean(PermissionControllerManager.KEY_RESULT, qualified);
-        callback.sendResult(result);
-    }
-
-    private void isRoleVisible(@NonNull String roleName, @NonNull RemoteCallback callback) {
-        boolean visible = onIsRoleVisible(roleName);
-        Bundle result = new Bundle();
-        result.putBoolean(PermissionControllerManager.KEY_RESULT, visible);
-        callback.sendResult(result);
     }
 
     private void setRuntimePermissionGrantStateByDeviceAdmin(@NonNull String callerPackageName,

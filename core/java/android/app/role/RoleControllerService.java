@@ -16,12 +16,15 @@
 
 package android.app.role;
 
+import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.app.Service;
 import android.content.Intent;
+import android.os.Bundle;
 import android.os.IBinder;
+import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.Log;
@@ -96,6 +99,35 @@ public abstract class RoleControllerService extends Service {
             public void onSmsKillSwitchToggled(boolean smsRestrictionEnabled) {
                 RoleControllerService.this.onSmsKillSwitchToggled(smsRestrictionEnabled);
             }
+
+            @Override
+            public void isApplicationQualifiedForRole(String roleName, String packageName,
+                    RemoteCallback callback) {
+                enforceCallingPermission(Manifest.permission.MANAGE_ROLE_HOLDERS, null);
+
+                Preconditions.checkStringNotEmpty(roleName, "roleName cannot be null or empty");
+                Preconditions.checkStringNotEmpty(packageName,
+                        "packageName cannot be null or empty");
+                Preconditions.checkNotNull(callback, "callback cannot be null");
+
+                boolean qualified = onIsApplicationQualifiedForRole(roleName, packageName);
+                Bundle result = new Bundle();
+                result.putBoolean(RoleControllerManager.KEY_RESULT, qualified);
+                callback.sendResult(result);
+            }
+
+            @Override
+            public void isRoleVisible(String roleName, RemoteCallback callback) {
+                enforceCallingPermission(Manifest.permission.MANAGE_ROLE_HOLDERS, null);
+
+                Preconditions.checkStringNotEmpty(roleName, "roleName cannot be null or empty");
+                Preconditions.checkNotNull(callback, "callback cannot be null");
+
+                boolean visible = onIsRoleVisible(roleName);
+                Bundle result = new Bundle();
+                result.putBoolean(RoleControllerManager.KEY_RESULT, visible);
+                callback.sendResult(result);
+            }
         };
     }
 
@@ -161,6 +193,26 @@ public abstract class RoleControllerService extends Service {
      */
     //STOPSHIP: remove this api before shipping a final version
     public abstract void onSmsKillSwitchToggled(boolean enabled);
+
+    /**
+     * Check whether an application is qualified for a role.
+     *
+     * @param roleName name of the role to check for
+     * @param packageName package name of the application to check for
+     *
+     * @return whether the application is qualified for the role
+     */
+    public abstract boolean onIsApplicationQualifiedForRole(@NonNull String roleName,
+            @NonNull String packageName);
+
+    /**
+     * Check whether a role should be visible to user.
+     *
+     * @param roleName name of the role to check for
+     *
+     * @return whether the role should be visible to user
+     */
+    public abstract boolean onIsRoleVisible(@NonNull String roleName);
 
     private static class RoleManagerCallbackDelegate implements RoleManagerCallback {
 

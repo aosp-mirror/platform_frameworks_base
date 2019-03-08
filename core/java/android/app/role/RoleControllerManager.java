@@ -16,7 +16,10 @@
 
 package android.app.role;
 
+import android.Manifest;
+import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
+import android.annotation.RequiresPermission;
 import android.annotation.SystemService;
 import android.annotation.UserIdInt;
 import android.content.ComponentName;
@@ -27,6 +30,7 @@ import android.content.pm.ResolveInfo;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.util.Log;
 import android.util.SparseArray;
@@ -34,6 +38,9 @@ import android.util.SparseArray;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.infra.AbstractMultiplePendingRequestsRemoteService;
 import com.android.internal.infra.AbstractRemoteService;
+
+import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 
 /**
  * Interface for communicating with the role controller.
@@ -44,6 +51,11 @@ import com.android.internal.infra.AbstractRemoteService;
 public class RoleControllerManager {
 
     private static final String LOG_TAG = RoleControllerManager.class.getSimpleName();
+
+    /**
+     * The key for retrieving the result from a bundle.
+     */
+    public static final String KEY_RESULT = "android.app.role.RoleControllerManager.key.RESULT";
 
     private static final Object sRemoteServicesLock = new Object();
     /**
@@ -116,6 +128,26 @@ public class RoleControllerManager {
      */
     public void onSmsKillSwitchToggled(boolean enabled) {
         mRemoteService.scheduleAsyncRequest(new OnSmsKillSwitchToggledRequest(enabled));
+    }
+
+    /**
+     * @see RoleControllerService#onIsApplicationQualifiedForRole(String, String)
+     */
+    @RequiresPermission(Manifest.permission.MANAGE_ROLE_HOLDERS)
+    public void isApplicationQualifiedForRole(@NonNull String roleName, @NonNull String packageName,
+            @NonNull @CallbackExecutor Executor executor, @NonNull Consumer<Boolean> callback) {
+        mRemoteService.scheduleRequest(new IsApplicationQualifiedForRoleRequest(mRemoteService,
+                roleName, packageName, executor, callback));
+    }
+
+    /**
+     * @see RoleControllerService#onIsRoleVisible(String)
+     */
+    @RequiresPermission(Manifest.permission.MANAGE_ROLE_HOLDERS)
+    public void isRoleVisible(@NonNull String roleName,
+            @NonNull @CallbackExecutor Executor executor, @NonNull Consumer<Boolean> callback) {
+        mRemoteService.scheduleRequest(new IsRoleVisibleRequest(mRemoteService, roleName, executor,
+                callback));
     }
 
     /**
@@ -468,6 +500,113 @@ public class RoleControllerManager {
                 service.onSmsKillSwitchToggled(mEnabled);
             } catch (RemoteException e) {
                 Log.e(LOG_TAG, "Error calling onSmsKillSwitchToggled()", e);
+            }
+        }
+    }
+
+    /**
+     * Request for {@link #isApplicationQualifiedForRole(String, String, Executor, Consumer)}
+     */
+    private static final class IsApplicationQualifiedForRoleRequest extends
+            AbstractRemoteService.PendingRequest<RemoteService, IRoleController> {
+
+        @NonNull
+        private final String mRoleName;
+        @NonNull
+        private final String mPackageName;
+        @NonNull
+        private final Executor mExecutor;
+        @NonNull
+        private final Consumer<Boolean> mCallback;
+
+        @NonNull
+        private final RemoteCallback mRemoteCallback;
+
+        private IsApplicationQualifiedForRoleRequest(@NonNull RemoteService service,
+                @NonNull String roleName, @NonNull String packageName,
+                @CallbackExecutor @NonNull Executor executor, @NonNull Consumer<Boolean> callback) {
+            super(service);
+
+            mRoleName = roleName;
+            mPackageName = packageName;
+            mExecutor = executor;
+            mCallback = callback;
+
+            mRemoteCallback = new RemoteCallback(result -> mExecutor.execute(() -> {
+                long token = Binder.clearCallingIdentity();
+                try {
+                    boolean qualified = result != null && result.getBoolean(KEY_RESULT);
+                    mCallback.accept(qualified);
+                } finally {
+                    Binder.restoreCallingIdentity(token);
+                    finish();
+                }
+            }));
+        }
+
+        @Override
+        protected void onTimeout(RemoteService remoteService) {
+            mExecutor.execute(() -> mCallback.accept(false));
+        }
+
+        @Override
+        public void run() {
+            try {
+                getService().getServiceInterface().isApplicationQualifiedForRole(mRoleName,
+                        mPackageName, mRemoteCallback);
+            } catch (RemoteException e) {
+                Log.e(LOG_TAG, "Error calling isApplicationQualifiedForRole()", e);
+            }
+        }
+    }
+
+    /**
+     * Request for {@link #isRoleVisible(String, Executor, Consumer)}
+     */
+    private static final class IsRoleVisibleRequest
+            extends AbstractRemoteService.PendingRequest<RemoteService, IRoleController> {
+
+        @NonNull
+        private final String mRoleName;
+        @NonNull
+        private final Executor mExecutor;
+        @NonNull
+        private final Consumer<Boolean> mCallback;
+
+        @NonNull
+        private final RemoteCallback mRemoteCallback;
+
+        private IsRoleVisibleRequest(@NonNull RemoteService service, @NonNull String roleName,
+                @CallbackExecutor @NonNull Executor executor, @NonNull Consumer<Boolean> callback) {
+            super(service);
+
+            mRoleName = roleName;
+            mExecutor = executor;
+            mCallback = callback;
+
+            mRemoteCallback = new RemoteCallback(result -> mExecutor.execute(() -> {
+                long token = Binder.clearCallingIdentity();
+                try {
+                    boolean visible = result != null && result.getBoolean(KEY_RESULT);
+                    mCallback.accept(visible);
+                } finally {
+                    Binder.restoreCallingIdentity(token);
+                    finish();
+                }
+            }));
+        }
+
+        @Override
+        protected void onTimeout(RemoteService remoteService) {
+            mExecutor.execute(() -> mCallback.accept(false));
+        }
+
+        @Override
+        public void run() {
+            try {
+                getService().getServiceInterface().isRoleVisible(mRoleName, mRemoteCallback);
+            } catch (RemoteException e) {
+                Log.e(LOG_TAG, "Error calling isRoleVisible()", e);
             }
         }
     }

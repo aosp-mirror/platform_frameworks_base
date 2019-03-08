@@ -1122,6 +1122,8 @@ package android.app.role {
     method @Nullable public final android.os.IBinder onBind(@Nullable android.content.Intent);
     method public abstract void onClearRoleHolders(@NonNull String, int, @NonNull android.app.role.RoleManagerCallback);
     method public abstract void onGrantDefaultRoles(@NonNull android.app.role.RoleManagerCallback);
+    method public abstract boolean onIsApplicationQualifiedForRole(@NonNull String, @NonNull String);
+    method public abstract boolean onIsRoleVisible(@NonNull String);
     method public abstract void onRemoveRoleHolder(@NonNull String, @NonNull String, int, @NonNull android.app.role.RoleManagerCallback);
     method public abstract void onSmsKillSwitchToggled(boolean);
     field public static final String SERVICE_INTERFACE = "android.app.role.RoleControllerService";
@@ -5699,8 +5701,6 @@ package android.permission {
     method @NonNull public abstract java.util.List<android.permission.RuntimePermissionPresentationInfo> onGetAppPermissions(@NonNull String);
     method @NonNull public abstract java.util.List<android.permission.RuntimePermissionUsageInfo> onGetPermissionUsages(boolean, long);
     method public abstract void onGetRuntimePermissionsBackup(@NonNull android.os.UserHandle, @NonNull java.io.OutputStream);
-    method public abstract boolean onIsApplicationQualifiedForRole(@NonNull String, @NonNull String);
-    method public abstract boolean onIsRoleVisible(@NonNull String);
     method @BinderThread public abstract boolean onRestoreDelayedRuntimePermissionsBackup(@NonNull String, @NonNull android.os.UserHandle);
     method @BinderThread public abstract void onRestoreRuntimePermissionsBackup(@NonNull android.os.UserHandle, @NonNull java.io.InputStream);
     method public abstract void onRevokeRuntimePermission(@NonNull String, @NonNull String);
