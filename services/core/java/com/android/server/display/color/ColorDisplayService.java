@@ -1276,11 +1276,17 @@ public final class ColorDisplayService extends SystemService {
         }
 
         boolean isActivatedSetting() {
+            if (mCurrentUser == UserHandle.USER_NULL) {
+                return false;
+            }
             return Secure.getIntForUser(getContext().getContentResolver(),
                     Secure.NIGHT_DISPLAY_ACTIVATED, 0, mCurrentUser) == 1;
         }
 
         int getColorTemperatureSetting() {
+            if (mCurrentUser == UserHandle.USER_NULL) {
+                return NOT_SET;
+            }
             return clampNightDisplayColorTemperature(Secure.getIntForUser(
                     getContext().getContentResolver(), Secure.NIGHT_DISPLAY_COLOR_TEMPERATURE,
                     NOT_SET,
