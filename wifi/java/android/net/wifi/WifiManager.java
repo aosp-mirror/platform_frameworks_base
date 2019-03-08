@@ -3604,7 +3604,7 @@ public class WifiManager {
             android.Manifest.permission.NETWORK_SETUP_WIZARD,
             android.Manifest.permission.NETWORK_STACK
     })
-    public void connect(WifiConfiguration config, ActionListener listener) {
+    public void connect(@NonNull WifiConfiguration config, @Nullable ActionListener listener) {
         if (config == null) throw new IllegalArgumentException("config cannot be null");
         // Use INVALID_NETWORK_ID for arg1 when passing a config object
         // arg1 is used to pass network id when the network already exists
@@ -3630,7 +3630,7 @@ public class WifiManager {
             android.Manifest.permission.NETWORK_SETUP_WIZARD,
             android.Manifest.permission.NETWORK_STACK
     })
-    public void connect(int networkId, ActionListener listener) {
+    public void connect(int networkId, @Nullable ActionListener listener) {
         if (networkId < 0) throw new IllegalArgumentException("Network id cannot be negative");
         getChannel().sendMessage(CONNECT_NETWORK, networkId, putListener(listener));
     }
@@ -3661,7 +3661,7 @@ public class WifiManager {
             android.Manifest.permission.NETWORK_SETUP_WIZARD,
             android.Manifest.permission.NETWORK_STACK
     })
-    public void save(WifiConfiguration config, ActionListener listener) {
+    public void save(@NonNull WifiConfiguration config, @Nullable ActionListener listener) {
         if (config == null) throw new IllegalArgumentException("config cannot be null");
         getChannel().sendMessage(SAVE_NETWORK, 0, putListener(listener), config);
     }
@@ -3685,7 +3685,7 @@ public class WifiManager {
             android.Manifest.permission.NETWORK_SETUP_WIZARD,
             android.Manifest.permission.NETWORK_STACK
     })
-    public void forget(int netId, ActionListener listener) {
+    public void forget(int netId, @Nullable ActionListener listener) {
         if (netId < 0) throw new IllegalArgumentException("Network id cannot be negative");
         getChannel().sendMessage(FORGET_NETWORK, netId, putListener(listener));
     }
@@ -3705,7 +3705,7 @@ public class WifiManager {
             android.Manifest.permission.NETWORK_SETUP_WIZARD,
             android.Manifest.permission.NETWORK_STACK
     })
-    public void disable(int netId, ActionListener listener) {
+    public void disable(int netId, @Nullable ActionListener listener) {
         if (netId < 0) throw new IllegalArgumentException("Network id cannot be negative");
         getChannel().sendMessage(DISABLE_NETWORK, netId, putListener(listener));
     }
