@@ -373,7 +373,10 @@ public abstract class NotificationAssistantService extends NotificationListenerS
                     args.recycle();
                     Adjustment adjustment = onNotificationEnqueued(sbn, channel);
                     if (adjustment != null) {
-                        if (!isBound()) return;
+                        if (!isBound()) {
+                            Log.w(TAG, "MSG_ON_NOTIFICATION_ENQUEUED: service not bound, skip.");
+                            return;
+                        }
                         try {
                             getNotificationInterface().applyEnqueuedAdjustmentFromAssistant(
                                     mWrapper, adjustment);
