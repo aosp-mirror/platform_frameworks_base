@@ -1378,8 +1378,8 @@
   <java-symbol type="drawable" name="ic_text_dot" />
   <java-symbol type="drawable" name="ic_print" />
   <java-symbol type="drawable" name="ic_print_error" />
-  <java-symbol type="drawable" name="ic_lock_24dp" />
-  <java-symbol type="drawable" name="ic_lock_open_24dp" />
+  <java-symbol type="drawable" name="ic_lock" />
+  <java-symbol type="drawable" name="ic_lock_open" />
   <java-symbol type="drawable" name="jog_dial_arrow_long_left_green" />
   <java-symbol type="drawable" name="jog_dial_arrow_long_right_red" />
   <java-symbol type="drawable" name="jog_dial_arrow_short_left_and_right" />
