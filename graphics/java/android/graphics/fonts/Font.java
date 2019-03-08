@@ -22,6 +22,7 @@ import android.annotation.Nullable;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.os.LocaleList;
+import android.os.ParcelFileDescriptor;
 import android.util.TypedValue;
 
 import com.android.internal.util.Preconditions;
@@ -31,7 +32,6 @@ import dalvik.annotation.optimization.CriticalNative;
 import libcore.util.NativeAllocationRegistry;
 
 import java.io.File;
-import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -53,7 +53,7 @@ public final class Font {
     /**
      * A builder class for creating new Font.
      */
-    public static class Builder {
+    public static final class Builder {
         private static final NativeAllocationRegistry sAssetByteBufferRegistroy =
                 new NativeAllocationRegistry(ByteBuffer.class.getClassLoader(),
                     nGetReleaseNativeAssetFunc(), 64);
@@ -122,7 +122,7 @@ public final class Font {
          *
          * @param fd a file descriptor
          */
-        public Builder(@NonNull FileDescriptor fd) {
+        public Builder(@NonNull ParcelFileDescriptor fd) {
             this(fd, 0, -1);
         }
 
@@ -133,9 +133,9 @@ public final class Font {
          * @param offset an offset to of the font data in the file
          * @param size a size of the font data. If -1 is passed, use until end of the file.
          */
-        public Builder(@NonNull FileDescriptor fd, @IntRange(from = 0) long offset,
+        public Builder(@NonNull ParcelFileDescriptor fd, @IntRange(from = 0) long offset,
                 @IntRange(from = -1) long size) {
-            try (FileInputStream fis = new FileInputStream(fd)) {
+            try (FileInputStream fis = new FileInputStream(fd.getFileDescriptor())) {
                 final FileChannel fc = fis.getChannel();
                 size = (size == -1) ? fc.size() - offset : size;
                 mBuffer = fc.map(FileChannel.MapMode.READ_ONLY, offset, size);
@@ -467,7 +467,7 @@ public final class Font {
      * @see Builder#setSlant(int)
      * @return a font style
      */
-    public FontStyle getStyle() {
+    public @NonNull FontStyle getStyle() {
         return mFontStyle;
     }
 
