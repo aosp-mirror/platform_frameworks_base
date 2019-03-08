@@ -79,7 +79,9 @@ void VulkanManager::destroy() {
     mDevice = VK_NULL_HANDLE;
     mPhysicalDevice = VK_NULL_HANDLE;
     mInstance = VK_NULL_HANDLE;
+    mInstanceExtensionsOwner.clear();
     mInstanceExtensions.clear();
+    mDeviceExtensionsOwner.clear();
     mDeviceExtensions.clear();
     free_features_extensions_structs(mPhysicalDeviceFeatures2);
     mPhysicalDeviceFeatures2 = {};
@@ -104,18 +106,18 @@ void VulkanManager::setupDevice(GrVkExtensions& grExtensions, VkPhysicalDeviceFe
         uint32_t extensionCount = 0;
         err = mEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);
         LOG_ALWAYS_FATAL_IF(VK_SUCCESS != err);
-        std::unique_ptr<VkExtensionProperties[]> extensions(
-                new VkExtensionProperties[extensionCount]);
-        err = mEnumerateInstanceExtensionProperties(nullptr, &extensionCount, extensions.get());
+        mInstanceExtensionsOwner.resize(extensionCount);
+        err = mEnumerateInstanceExtensionProperties(nullptr, &extensionCount,
+                                                    mInstanceExtensionsOwner.data());
         LOG_ALWAYS_FATAL_IF(VK_SUCCESS != err);
         bool hasKHRSurfaceExtension = false;
         bool hasKHRAndroidSurfaceExtension = false;
-        for (uint32_t i = 0; i < extensionCount; ++i) {
-            mInstanceExtensions.push_back(extensions[i].extensionName);
-            if (!strcmp(extensions[i].extensionName, VK_KHR_SURFACE_EXTENSION_NAME)) {
+        for (const VkExtensionProperties& extension : mInstanceExtensionsOwner) {
+            mInstanceExtensions.push_back(extension.extensionName);
+            if (!strcmp(extension.extensionName, VK_KHR_SURFACE_EXTENSION_NAME)) {
                 hasKHRSurfaceExtension = true;
             }
-            if (!strcmp(extensions[i].extensionName,VK_KHR_ANDROID_SURFACE_EXTENSION_NAME)) {
+            if (!strcmp(extension.extensionName, VK_KHR_ANDROID_SURFACE_EXTENSION_NAME)) {
                 hasKHRAndroidSurfaceExtension = true;
             }
         }
@@ -193,15 +195,14 @@ void VulkanManager::setupDevice(GrVkExtensions& grExtensions, VkPhysicalDeviceFe
         err = mEnumerateDeviceExtensionProperties(mPhysicalDevice, nullptr, &extensionCount,
                 nullptr);
         LOG_ALWAYS_FATAL_IF(VK_SUCCESS != err);
-        std::unique_ptr<VkExtensionProperties[]> extensions(
-                new VkExtensionProperties[extensionCount]);
+        mDeviceExtensionsOwner.resize(extensionCount);
         err = mEnumerateDeviceExtensionProperties(mPhysicalDevice, nullptr, &extensionCount,
-                extensions.get());
+                mDeviceExtensionsOwner.data());
         LOG_ALWAYS_FATAL_IF(VK_SUCCESS != err);
         bool hasKHRSwapchainExtension = false;
-        for (uint32_t i = 0; i < extensionCount; ++i) {
-            mDeviceExtensions.push_back(extensions[i].extensionName);
-            if (!strcmp(extensions[i].extensionName, VK_KHR_SWAPCHAIN_EXTENSION_NAME)) {
+        for (const VkExtensionProperties& extension : mDeviceExtensionsOwner) {
+            mDeviceExtensions.push_back(extension.extensionName);
+            if (!strcmp(extension.extensionName, VK_KHR_SWAPCHAIN_EXTENSION_NAME)) {
                 hasKHRSwapchainExtension = true;
             }
         }
@@ -214,6 +215,7 @@ void VulkanManager::setupDevice(GrVkExtensions& grExtensions, VkPhysicalDeviceFe
         }
         return vkGetInstanceProcAddr(instance, proc_name);
     };
+
     grExtensions.init(getProc, mInstance, mPhysicalDevice, mInstanceExtensions.size(),
             mInstanceExtensions.data(), mDeviceExtensions.size(), mDeviceExtensions.data());
 
