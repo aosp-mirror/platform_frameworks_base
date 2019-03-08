@@ -1,4 +1,3 @@
-//
 // Copyright (C) 2017 The Android Open Source Project
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,15 +11,31 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-//
 
-java_library {
-    name: "testables",
-    srcs: ["src/**/*.java"],
+android_test {
+    name: "TestablesTests",
+    platform_apis: true,
+    srcs: [
+        "src/**/*.java",
+        "src/**/I*.aidl",
+    ],
+    resource_dirs: ["res"],
+    static_libs: [
+        "androidx.test.rules",
+        "hamcrest-library",
+        "mockito-target-inline-minus-junit4",
+        "testables",
+    ],
+    compile_multilib: "both",
+    jni_libs: [
+        "libdexmakerjvmtiagent",
+        "libmultiplejvmtiagentsinterferenceagent",
+    ],
     libs: [
         "android.test.runner",
+        "android.test.base",
         "android.test.mock",
-        "androidx.test.rules",
-        "mockito-target-inline-minus-junit4",
     ],
+    certificate: "platform",
+    test_suites: ["device-tests"],
 }

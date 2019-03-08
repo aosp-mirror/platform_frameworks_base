@@ -1,4 +1,5 @@
-// Copyright (C) 2013 The Android Open Source Project
+//
+// Copyright (C) 2011 The Android Open Source Project
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,25 +14,13 @@
 // limitations under the License.
 //
 
-cc_test_library {
-    name: "libsmartcamera_jni",
-    sdk_version: "14",
-    srcs: [
-        "contrast.cpp",
-        "brightness.cpp",
-        "exposure.cpp",
-        "colorspace.cpp",
-        "histogram.cpp",
-        "frametovalues.cpp",
-        "pixelutils.cpp",
-        "sobeloperator.cpp",
-        "stats_scorer.cpp",
+android_test {
+    name: "TtsTests",
+    srcs: ["**/*.java"],
+    static_libs: ["mockito-target"],
+    libs: [
+        "android.test.runner",
+        "android.test.base",
     ],
-    cflags: [
-        "-Wall",
-        "-Wextra",
-        "-Werror",
-        "-Wno-unused-parameter",
-    ],
-    stl: "c++_static",
+    platform_apis: true,
 }
