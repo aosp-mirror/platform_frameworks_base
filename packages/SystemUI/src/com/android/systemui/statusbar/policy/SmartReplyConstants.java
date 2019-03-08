@@ -118,7 +118,8 @@ public final class SmartReplyConstants {
             mRequiresTargetingP = readDeviceConfigBooleanOrDefaultIfEmpty(
                     SystemUiDeviceConfigFlags.SSIN_REQUIRES_TARGETING_P,
                     mDefaultRequiresP);
-            mMaxSqueezeRemeasureAttempts = readDeviceConfigIntegerOrDefaultIfEmpty(
+            mMaxSqueezeRemeasureAttempts = DeviceConfig.getInt(
+                    DeviceConfig.NAMESPACE_SYSTEMUI,
                     SystemUiDeviceConfigFlags.SSIN_MAX_SQUEEZE_REMEASURE_ATTEMPTS,
                     mDefaultMaxSqueezeRemeasureAttempts);
             mEditChoicesBeforeSending = readDeviceConfigBooleanOrDefaultIfEmpty(
@@ -127,10 +128,12 @@ public final class SmartReplyConstants {
             mShowInHeadsUp = readDeviceConfigBooleanOrDefaultIfEmpty(
                     SystemUiDeviceConfigFlags.SSIN_SHOW_IN_HEADS_UP,
                     mDefaultShowInHeadsUp);
-            mMinNumSystemGeneratedReplies = readDeviceConfigIntegerOrDefaultIfEmpty(
+            mMinNumSystemGeneratedReplies = DeviceConfig.getInt(
+                    DeviceConfig.NAMESPACE_SYSTEMUI,
                     SystemUiDeviceConfigFlags.SSIN_MIN_NUM_SYSTEM_GENERATED_REPLIES,
                     mDefaultMinNumSystemGeneratedReplies);
-            mMaxNumActions = readDeviceConfigIntegerOrDefaultIfEmpty(
+            mMaxNumActions = DeviceConfig.getInt(
+                    DeviceConfig.NAMESPACE_SYSTEMUI,
                     SystemUiDeviceConfigFlags.SSIN_MAX_NUM_ACTIONS,
                     mDefaultMaxNumActions);
         }
@@ -150,21 +153,6 @@ public final class SmartReplyConstants {
         }
         // For invalid configs we return the default value.
         return defaultValue;
-    }
-
-    private static int readDeviceConfigIntegerOrDefaultIfEmpty(String propertyName,
-            int defaultValue) {
-        String value = DeviceConfig.getProperty(DeviceConfig.NAMESPACE_SYSTEMUI, propertyName);
-        if (TextUtils.isEmpty(value)) {
-            return defaultValue;
-        }
-        try {
-            return Integer.parseInt(value);
-        } catch (NumberFormatException e) {
-            Log.e(TAG, "Tried to read an integer flag, property name="
-                    + propertyName + ", value=" + value);
-            return defaultValue;
-        }
     }
 
     /** Returns whether smart replies in notifications are enabled. */
