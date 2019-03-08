@@ -63,26 +63,6 @@ import java.math.RoundingMode;
 public class BubbleStackView extends FrameLayout {
     private static final String TAG = "BubbleStackView";
 
-    /**
-     * Friction applied to fling animations. Since the stack must land on one of the sides of the
-     * screen, we want less friction horizontally so that the stack has a better chance of making it
-     * to the side without needing a spring.
-     */
-    private static final float FLING_FRICTION_X = 1.15f;
-    private static final float FLING_FRICTION_Y = 1.5f;
-
-    /**
-     * Damping ratio to use for the stack spring animation used to spring the stack to its final
-     * position after a fling.
-     */
-    private static final float SPRING_DAMPING_RATIO = 0.85f;
-
-    /**
-     * Minimum fling velocity required to trigger moving the stack from one side of the screen to
-     * the other.
-     */
-    private static final float ESCAPE_VELOCITY = 750f;
-
     private Point mDisplaySize;
 
     private final SpringAnimation mExpandedViewXAnim;
@@ -653,50 +633,7 @@ public class BubbleStackView extends FrameLayout {
             return;
         }
 
-        final boolean stackOnLeftSide = x
-                - mBubbleContainer.getChildAt(0).getWidth() / 2
-                < mDisplaySize.x / 2;
-
-        final boolean stackShouldFlingLeft = stackOnLeftSide
-                ? velX < ESCAPE_VELOCITY
-                : velX < -ESCAPE_VELOCITY;
-
-        final RectF stackBounds = mStackAnimationController.getAllowableStackPositionRegion();
-
-        // Target X translation (either the left or right side of the screen).
-        final float destinationRelativeX = stackShouldFlingLeft
-                ? stackBounds.left : stackBounds.right;
-
-        // Minimum velocity required for the stack to make it to the side of the screen.
-        final float escapeVelocity = getMinXVelocity(
-                x,
-                destinationRelativeX,
-                FLING_FRICTION_X);
-
-        // Use the touch event's velocity if it's sufficient, otherwise use the minimum velocity so
-        // that it'll make it all the way to the side of the screen.
-        final float startXVelocity = stackShouldFlingLeft
-                ? Math.min(escapeVelocity, velX)
-                : Math.max(escapeVelocity, velX);
-
-        mStackAnimationController.flingThenSpringFirstBubbleWithStackFollowing(
-                DynamicAnimation.TRANSLATION_X,
-                startXVelocity,
-                FLING_FRICTION_X,
-                new SpringForce()
-                        .setStiffness(SpringForce.STIFFNESS_LOW)
-                        .setDampingRatio(SPRING_DAMPING_RATIO),
-                destinationRelativeX);
-
-        mStackAnimationController.flingThenSpringFirstBubbleWithStackFollowing(
-                DynamicAnimation.TRANSLATION_Y,
-                velY,
-                FLING_FRICTION_Y,
-                new SpringForce()
-                        .setStiffness(SpringForce.STIFFNESS_LOW)
-                        .setDampingRatio(SPRING_DAMPING_RATIO),
-                /* destination */ null);
-
+        mStackAnimationController.flingStackThenSpringToEdge(x, velX, velY);
         logBubbleEvent(null /* no bubble associated with bubble stack move */,
                 StatsLog.BUBBLE_UICHANGED__ACTION__STACK_MOVED);
     }
@@ -739,20 +676,6 @@ public class BubbleStackView extends FrameLayout {
         if (mIsExpanded) {
             requestUpdate();
         }
-    }
-
-    /**
-     * Minimum velocity, in pixels/second, required to get from x to destX while being slowed by a
-     * given frictional force.
-     *
-     * This is not derived using real math, I just made it up because the math in FlingAnimation
-     * looks hard and this seems to work. It doesn't actually matter because if it doesn't make it
-     * to the edge via Fling, it'll get Spring'd there anyway.
-     *
-     * TODO(tsuji, or someone who likes math): Figure out math.
-     */
-    private float getMinXVelocity(float x, float destX, float friction) {
-        return (destX - x) * (friction * 5) + ESCAPE_VELOCITY;
     }
 
     @Override
