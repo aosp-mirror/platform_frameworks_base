@@ -20,7 +20,6 @@ import static android.view.contentcapture.ContentCaptureManager.LOGGING_LEVEL_DE
 import static android.view.contentcapture.ContentCaptureManager.LOGGING_LEVEL_OFF;
 import static android.view.contentcapture.ContentCaptureManager.LOGGING_LEVEL_VERBOSE;
 
-import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Build;
 import android.provider.DeviceConfig;
@@ -48,21 +47,6 @@ public final class ContentCaptureHelper {
     }
 
     /**
-     * Gets the value of a device config property from the Content Capture namespace.
-     */
-    public static int getIntDeviceConfigProperty(@NonNull String key, int defaultValue) {
-        final String value = DeviceConfig.getProperty(DeviceConfig.NAMESPACE_CONTENT_CAPTURE, key);
-        if (value == null) return defaultValue;
-
-        try {
-            return Integer.parseInt(value);
-        } catch (Exception e) {
-            Log.w(TAG, "error parsing value (" + value + ") of property " + key + ": " + e);
-            return defaultValue;
-        }
-    }
-
-    /**
      * Gets the default logging level for the device.
      */
     @LoggingLevel
@@ -75,8 +59,8 @@ public final class ContentCaptureHelper {
      */
     public static void setLoggingLevel() {
         final int defaultLevel = getDefaultLoggingLevel();
-        final int level = getIntDeviceConfigProperty(DEVICE_CONFIG_PROPERTY_LOGGING_LEVEL,
-                defaultLevel);
+        final int level = DeviceConfig.getInt(DeviceConfig.NAMESPACE_CONTENT_CAPTURE,
+                DEVICE_CONFIG_PROPERTY_LOGGING_LEVEL, defaultLevel);
         setLoggingLevel(level);
     }
 
