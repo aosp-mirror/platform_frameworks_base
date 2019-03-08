@@ -2441,7 +2441,7 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @hide
      */
-    @SystemApi
+    @SystemApi @TestApi
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_ROLLBACK_COMMITTED =
             "android.intent.action.ROLLBACK_COMMITTED";

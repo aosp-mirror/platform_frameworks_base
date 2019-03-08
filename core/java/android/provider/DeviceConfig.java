@@ -322,7 +322,7 @@ public final class DeviceConfig {
      *
      * @hide
      */
-    @SystemApi
+    @SystemApi @TestApi
     public interface Rollback {
 
         /**

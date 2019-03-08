@@ -11,8 +11,10 @@ package android {
     field public static final String CONFIGURE_DISPLAY_BRIGHTNESS = "android.permission.CONFIGURE_DISPLAY_BRIGHTNESS";
     field public static final String FORCE_STOP_PACKAGES = "android.permission.FORCE_STOP_PACKAGES";
     field public static final String MANAGE_ACTIVITY_STACKS = "android.permission.MANAGE_ACTIVITY_STACKS";
+    field public static final String MANAGE_ROLLBACKS = "android.permission.MANAGE_ROLLBACKS";
     field public static final String READ_CELL_BROADCASTS = "android.permission.READ_CELL_BROADCASTS";
     field public static final String REMOVE_TASKS = "android.permission.REMOVE_TASKS";
+    field public static final String WRITE_DEVICE_CONFIG = "android.permission.WRITE_DEVICE_CONFIG";
     field public static final String WRITE_MEDIA_STORAGE = "android.permission.WRITE_MEDIA_STORAGE";
     field public static final String WRITE_OBB = "android.permission.WRITE_OBB";
   }
@@ -596,6 +598,7 @@ package android.content {
     method public int getUserId();
     method public void setAutofillOptions(@Nullable android.content.AutofillOptions);
     method public void setContentCaptureOptions(@Nullable android.content.ContentCaptureOptions);
+    field public static final String ROLLBACK_SERVICE = "rollback";
   }
 
   public class ContextWrapper extends android.content.Context {
@@ -603,6 +606,7 @@ package android.content {
   }
 
   public class Intent implements java.lang.Cloneable android.os.Parcelable {
+    field public static final String ACTION_ROLLBACK_COMMITTED = "android.intent.action.ROLLBACK_COMMITTED";
     field public static final String EXTRA_ROLE_NAME = "android.intent.extra.ROLE_NAME";
   }
 
@@ -624,6 +628,12 @@ package android.content.pm {
 
   public class LauncherApps {
     ctor public LauncherApps(android.content.Context);
+  }
+
+  public static class PackageInstaller.SessionParams implements android.os.Parcelable {
+    method public void setEnableRollback(boolean);
+    method @RequiresPermission(android.Manifest.permission.INSTALL_PACKAGES) public void setInstallAsApex();
+    method @RequiresPermission(android.Manifest.permission.INSTALL_PACKAGES) public void setStaged();
   }
 
   public abstract class PackageManager {
@@ -682,6 +692,44 @@ package android.content.res {
   public final class Configuration implements java.lang.Comparable<android.content.res.Configuration> android.os.Parcelable {
     field public int assetsSeq;
     field public final android.app.WindowConfiguration windowConfiguration;
+  }
+
+}
+
+package android.content.rollback {
+
+  public final class PackageRollbackInfo implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public String getPackageName();
+    method @NonNull public android.content.pm.VersionedPackage getVersionRolledBackFrom();
+    method @NonNull public android.content.pm.VersionedPackage getVersionRolledBackTo();
+    method public void writeToParcel(android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.content.rollback.PackageRollbackInfo> CREATOR;
+  }
+
+  public final class RollbackInfo implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public java.util.List<android.content.pm.VersionedPackage> getCausePackages();
+    method public int getCommittedSessionId();
+    method @NonNull public java.util.List<android.content.rollback.PackageRollbackInfo> getPackages();
+    method public int getRollbackId();
+    method public boolean isStaged();
+    method public void writeToParcel(android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.content.rollback.RollbackInfo> CREATOR;
+  }
+
+  public final class RollbackManager {
+    method @RequiresPermission(android.Manifest.permission.MANAGE_ROLLBACKS) public void commitRollback(int, @NonNull java.util.List<android.content.pm.VersionedPackage>, @NonNull android.content.IntentSender);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_ROLLBACKS) public void expireRollbackForPackage(@NonNull String);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_ROLLBACKS) @NonNull public java.util.List<android.content.rollback.RollbackInfo> getAvailableRollbacks();
+    method @RequiresPermission(android.Manifest.permission.MANAGE_ROLLBACKS) @NonNull public java.util.List<android.content.rollback.RollbackInfo> getRecentlyCommittedRollbacks();
+    method @RequiresPermission(android.Manifest.permission.MANAGE_ROLLBACKS) public void reloadPersistedData();
+    field public static final String EXTRA_STATUS = "android.content.rollback.extra.STATUS";
+    field public static final String EXTRA_STATUS_MESSAGE = "android.content.rollback.extra.STATUS_MESSAGE";
+    field public static final int STATUS_FAILURE = 1; // 0x1
+    field public static final int STATUS_FAILURE_INSTALL = 3; // 0x3
+    field public static final int STATUS_FAILURE_ROLLBACK_UNAVAILABLE = 2; // 0x2
+    field public static final int STATUS_SUCCESS = 0; // 0x0
   }
 
 }
@@ -2015,8 +2063,8 @@ package android.provider {
     method @RequiresPermission("android.permission.READ_DEVICE_CONFIG") public static String getString(String, String, String);
     method public static void removeOnPropertiesChangedListener(@NonNull android.provider.DeviceConfig.OnPropertiesChangedListener);
     method public static void removeOnPropertyChangedListener(@NonNull android.provider.DeviceConfig.OnPropertyChangedListener);
-    method @RequiresPermission("android.permission.WRITE_DEVICE_CONFIG") public static void resetToDefaults(int, @Nullable String);
-    method @RequiresPermission("android.permission.WRITE_DEVICE_CONFIG") public static boolean setProperty(String, String, String, boolean);
+    method @RequiresPermission(android.Manifest.permission.WRITE_DEVICE_CONFIG) public static void resetToDefaults(int, @Nullable String);
+    method @RequiresPermission(android.Manifest.permission.WRITE_DEVICE_CONFIG) public static boolean setProperty(String, String, String, boolean);
     field public static final String NAMESPACE_AUTOFILL = "autofill";
     field public static final String NAMESPACE_CONTENT_CAPTURE = "content_capture";
   }
@@ -2042,6 +2090,13 @@ package android.provider {
     method public long getLong(@NonNull String, long);
     method @NonNull public String getNamespace();
     method @Nullable public String getString(@NonNull String, @Nullable String);
+  }
+
+  public static interface DeviceConfig.Rollback {
+    field public static final String BOOT_NAMESPACE = "rollback_boot";
+    field public static final String ENABLE_ROLLBACK_TIMEOUT = "enable_rollback_timeout";
+    field public static final String NAMESPACE = "rollback";
+    field public static final String ROLLBACK_LIFETIME_IN_MILLIS = "rollback_lifetime_in_millis";
   }
 
   public final class MediaStore {

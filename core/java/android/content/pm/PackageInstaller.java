@@ -24,6 +24,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityManager;
 import android.app.AppGlobals;
@@ -1465,7 +1466,7 @@ public class PackageInstaller {
          * @param enable set to {@code true} to enable, {@code false} to disable
          * @hide
          */
-        @SystemApi
+        @SystemApi @TestApi
         public void setEnableRollback(boolean enable) {
             if (enable) {
                 installFlags |= PackageManager.INSTALL_ENABLE_ROLLBACK;
@@ -1591,7 +1592,7 @@ public class PackageInstaller {
          *
          * {@hide}
          */
-        @SystemApi
+        @SystemApi @TestApi
         @RequiresPermission(Manifest.permission.INSTALL_PACKAGES)
         public void setStaged() {
             this.isStaged = true;
@@ -1602,7 +1603,7 @@ public class PackageInstaller {
          *
          * {@hide}
          */
-        @SystemApi
+        @SystemApi @TestApi
         @RequiresPermission(Manifest.permission.INSTALL_PACKAGES)
         public void setInstallAsApex() {
             installFlags |= PackageManager.INSTALL_APEX;
