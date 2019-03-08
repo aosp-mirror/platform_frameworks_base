@@ -87,7 +87,6 @@ public class IpServer extends StateMachine {
         return "UNKNOWN: " + state;
     }
 
-    private static final IpPrefix LINK_LOCAL_PREFIX = new IpPrefix("fe80::/64");
     private static final byte DOUG_ADAMS = (byte) 42;
 
     private static final String USB_NEAR_IFACE_ADDR = "192.168.42.129";
@@ -555,16 +554,6 @@ public class IpServer extends StateMachine {
             HashSet<IpPrefix> addedPrefixes = (HashSet) newPrefixes.clone();
             if (mLastRaParams != null) {
                 addedPrefixes.removeAll(mLastRaParams.prefixes);
-            }
-
-            if (mLastRaParams == null || mLastRaParams.prefixes.isEmpty()) {
-                // We need to be able to send unicast RAs, and clients might
-                // like to ping the default router's link-local address.  Note
-                // that we never remove the link-local route from the network
-                // until Tethering disables tethering on the interface. We
-                // only need to add the link-local prefix once, but in the
-                // event we add it more than once netd silently ignores EEXIST.
-                addedPrefixes.add(LINK_LOCAL_PREFIX);
             }
 
             if (!addedPrefixes.isEmpty()) {
