@@ -344,6 +344,7 @@ public class BinderCallsStats implements BinderInternal.Observer {
             resultCallStats.add(createDebugEntry("end_time_millis", SystemClock.elapsedRealtime()));
             resultCallStats.add(
                     createDebugEntry("battery_time_millis", mBatteryStopwatch.getMillis()));
+            resultCallStats.add(createDebugEntry("sampling_interval", mPeriodicSamplingInterval));
         }
 
         return resultCallStats;
