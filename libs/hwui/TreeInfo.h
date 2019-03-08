@@ -87,6 +87,7 @@ public:
 
     // Must not be null during actual usage
     DamageAccumulator* damageAccumulator = nullptr;
+    int64_t damageGenerationId = 0;
 
     LayerUpdateQueue* layerUpdateQueue = nullptr;
     ErrorHandler* errorHandler = nullptr;

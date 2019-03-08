@@ -134,6 +134,7 @@ void RenderNode::removeAnimator(const sp<BaseRenderNodeAnimator>& animator) {
 
 void RenderNode::damageSelf(TreeInfo& info) {
     if (isRenderable()) {
+        mDamageGenerationId = info.damageGenerationId;
         if (properties().getClipDamageToBounds()) {
             info.damageAccumulator->dirty(0, 0, properties().getWidth(), properties().getHeight());
         } else {
@@ -199,6 +200,12 @@ void RenderNode::pushLayerUpdate(TreeInfo& info) {
  * stencil buffer may be needed. Views that use a functor to draw will be forced onto a layer.
  */
 void RenderNode::prepareTreeImpl(TreeObserver& observer, TreeInfo& info, bool functorsNeedLayer) {
+    if (mDamageGenerationId == info.damageGenerationId) {
+        // We hit the same node a second time in the same tree. We don't know the minimal
+        // damage rect anymore, so just push the biggest we can onto our parent's transform
+        // We push directly onto parent in case we are clipped to bounds but have moved position.
+        info.damageAccumulator->dirty(DIRTY_MIN, DIRTY_MIN, DIRTY_MAX, DIRTY_MAX);
+    }
     info.damageAccumulator->pushTransform(this);
 
     if (info.mode == TreeInfo::MODE_FULL) {
