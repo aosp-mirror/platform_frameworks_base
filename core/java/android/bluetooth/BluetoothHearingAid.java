@@ -17,6 +17,7 @@
 package android.bluetooth;
 
 import android.Manifest;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
@@ -303,7 +304,7 @@ public final class BluetoothHearingAid implements BluetoothProfile {
      * {@inheritDoc}
      */
     @Override
-    public List<BluetoothDevice> getConnectedDevices() {
+    public @NonNull List<BluetoothDevice> getConnectedDevices() {
         if (VDBG) log("getConnectedDevices()");
         try {
             mServiceLock.readLock().lock();
@@ -323,8 +324,8 @@ public final class BluetoothHearingAid implements BluetoothProfile {
     /**
      * {@inheritDoc}
      */
-    @Override
-    public List<BluetoothDevice> getDevicesMatchingConnectionStates(int[] states) {
+    @Override public @NonNull List<BluetoothDevice> getDevicesMatchingConnectionStates(
+    @NonNull int[] states) {
         if (VDBG) log("getDevicesMatchingStates()");
         try {
             mServiceLock.readLock().lock();
@@ -345,7 +346,7 @@ public final class BluetoothHearingAid implements BluetoothProfile {
      * {@inheritDoc}
      */
     @Override
-    public int getConnectionState(BluetoothDevice device) {
+    public int getConnectionState(@NonNull BluetoothDevice device) {
         if (VDBG) log("getState(" + device + ")");
         try {
             mServiceLock.readLock().lock();
