@@ -52,6 +52,10 @@ public abstract class PlayerBase {
 
     // parameters of the player that affect AppOps
     protected AudioAttributes mAttributes;
+
+    // volumes of the subclass "player volumes", as seen by the client of the subclass
+    //   (e.g. what was passed in AudioTrack.setVolume(float)). The actual volume applied is
+    //   the combination of the player volume, and the PlayerBase pan and volume multipliers
     protected float mLeftVolume = 1.0f;
     protected float mRightVolume = 1.0f;
     protected float mAuxEffectSendLevel = 0.0f;
@@ -79,6 +83,8 @@ public abstract class PlayerBase {
     private float mPanMultiplierL = 1.0f;
     @GuardedBy("mLock")
     private float mPanMultiplierR = 1.0f;
+    @GuardedBy("mLock")
+    private float mVolMultiplier = 1.0f;
 
     /**
      * Constructor. Must be given audio attributes, as they are required for AppOps.
@@ -199,18 +205,33 @@ public abstract class PlayerBase {
                 mPanMultiplierR = 1.0f + p;
             }
         }
-        baseSetVolume(mLeftVolume, mRightVolume);
+        updatePlayerVolume();
+    }
+
+    private void updatePlayerVolume() {
+        final float finalLeftVol, finalRightVol;
+        final boolean isRestricted;
+        synchronized (mLock) {
+            finalLeftVol = mVolMultiplier * mLeftVolume * mPanMultiplierL;
+            finalRightVol = mVolMultiplier * mRightVolume * mPanMultiplierR;
+            isRestricted = isRestricted_sync();
+        }
+        playerSetVolume(isRestricted /*muting*/, finalLeftVol, finalRightVol);
+    }
+
+    void setVolumeMultiplier(float vol) {
+        synchronized (mLock) {
+            this.mVolMultiplier = vol;
+        }
+        updatePlayerVolume();
     }
 
     void baseSetVolume(float leftVolume, float rightVolume) {
-        final boolean isRestricted;
         synchronized (mLock) {
             mLeftVolume = leftVolume;
             mRightVolume = rightVolume;
-            isRestricted = isRestricted_sync();
         }
-        playerSetVolume(isRestricted/*muting*/,
-                leftVolume * mPanMultiplierL, rightVolume * mPanMultiplierR);
+        updatePlayerVolume();
     }
 
     int baseSetAuxEffectSendLevel(float level) {
@@ -466,7 +487,7 @@ public abstract class PlayerBase {
         public void setVolume(float vol) {
             final PlayerBase pb = mWeakPB.get();
             if (pb != null) {
-                pb.baseSetVolume(vol, vol);
+                pb.setVolumeMultiplier(vol);
             }
         }
 
