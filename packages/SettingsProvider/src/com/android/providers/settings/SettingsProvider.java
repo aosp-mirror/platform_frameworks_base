@@ -1074,8 +1074,7 @@ public class SettingsProvider extends ContentProvider {
             Slog.v(LOG_TAG, "getConfigSetting(" + name + ")");
         }
 
-        // TODO(b/117663715): Ensure the caller can access the setting.
-        // enforceReadPermission(READ_DEVICE_CONFIG);
+        DeviceConfig.enforceReadPermission(getContext(), /*namespace=*/name.split("/")[0]);
 
         // Get the value.
         synchronized (mLock) {
