@@ -172,6 +172,12 @@ public class NetworkUtils {
     public static native byte[] resNetworkResult(FileDescriptor fd) throws ErrnoException;
 
     /**
+     * DNS resolver series jni method.
+     * Attempts to cancel the in-progress query associated with the {@code fd}.
+     */
+    public static native void resNetworkCancel(FileDescriptor fd);
+
+    /**
      * Add an entry into the ARP cache.
      */
     public static void addArpEntry(Inet4Address ipv4Addr, MacAddress ethAddr, String ifname,
