@@ -2506,6 +2506,10 @@ public class NetworkManagementService extends INetworkManagementService.Stub
                 modifyRoute(MODIFY_OPERATION_ADD, INetd.LOCAL_NET_ID, route);
             }
         }
+
+        // IPv6 link local should be activated always.
+        modifyRoute(MODIFY_OPERATION_ADD, INetd.LOCAL_NET_ID,
+                new RouteInfo(new IpPrefix("fe80::/64"), null, iface));
     }
 
     @Override
