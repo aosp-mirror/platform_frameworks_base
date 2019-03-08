@@ -74,7 +74,7 @@ public class ZOrderingTests extends WindowTestsBase {
         public SurfaceControl.Transaction setLayer(SurfaceControl sc, int layer) {
             mRelativeLayersForControl.remove(sc);
             mLayersForControl.put(sc, layer);
-            return super.setLayer(sc, layer);
+            return this;
         }
 
         @Override
@@ -83,7 +83,7 @@ public class ZOrderingTests extends WindowTestsBase {
                 int layer) {
             mRelativeLayersForControl.put(sc, relativeTo);
             mLayersForControl.put(sc, layer);
-            return super.setRelativeLayer(sc, relativeTo, layer);
+            return this;
         }
 
         private int getLayer(SurfaceControl sc) {
