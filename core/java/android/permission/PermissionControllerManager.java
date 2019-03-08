@@ -513,7 +513,8 @@ public final class PermissionControllerManager {
         RemoteService(@NonNull Context context, @NonNull ComponentName componentName,
                 @NonNull UserHandle user) {
             super(context, SERVICE_INTERFACE, componentName, user.getIdentifier(),
-                    service -> Log.e(TAG, "RemoteService " + service + " died"), false, false, 1);
+                    service -> Log.e(TAG, "RemoteService " + service + " died"),
+                    context.getMainThreadHandler(), false, false, 1);
         }
 
         /**
