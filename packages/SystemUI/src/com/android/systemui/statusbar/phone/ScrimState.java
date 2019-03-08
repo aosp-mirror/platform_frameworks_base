@@ -54,6 +54,8 @@ public enum ScrimState {
             } else {
                 mAnimationDuration = ScrimController.ANIMATION_DURATION;
             }
+            mCurrentInFrontTint = Color.BLACK;
+            mCurrentBehindTint = Color.BLACK;
             mCurrentBehindAlpha = mScrimBehindAlphaKeyguard;
             mCurrentInFrontAlpha = 0;
         }
