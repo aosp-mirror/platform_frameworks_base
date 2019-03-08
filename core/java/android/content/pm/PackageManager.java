@@ -3867,7 +3867,8 @@ public abstract class PackageManager {
     @TestApi
     @RequiresPermission(anyOf = {
             android.Manifest.permission.GRANT_RUNTIME_PERMISSIONS,
-            android.Manifest.permission.REVOKE_RUNTIME_PERMISSIONS
+            android.Manifest.permission.REVOKE_RUNTIME_PERMISSIONS,
+            android.Manifest.permission.GET_RUNTIME_PERMISSIONS
     })
     public abstract @PermissionFlags int getPermissionFlags(String permissionName,
             String packageName, @NonNull UserHandle user);

@@ -2229,7 +2229,7 @@ public class PermissionManagerService {
             return 0;
         }
 
-        enforceGrantRevokeRuntimePermissionPermissions("getPermissionFlags");
+        enforceGrantRevokeGetRuntimePermissionPermissions("getPermissionFlags");
 
         enforceCrossUserPermission(callingUid, userId,
                 true,  // requireFullPermission
@@ -2593,6 +2593,20 @@ public class PermissionManagerService {
             throw new SecurityException(message + " requires "
                     + Manifest.permission.GRANT_RUNTIME_PERMISSIONS + " or "
                     + Manifest.permission.REVOKE_RUNTIME_PERMISSIONS);
+        }
+    }
+
+    private void enforceGrantRevokeGetRuntimePermissionPermissions(@NonNull String message) {
+        if (mContext.checkCallingOrSelfPermission(Manifest.permission.GET_RUNTIME_PERMISSIONS)
+                != PackageManager.PERMISSION_GRANTED
+            && mContext.checkCallingOrSelfPermission(Manifest.permission.GRANT_RUNTIME_PERMISSIONS)
+                != PackageManager.PERMISSION_GRANTED
+            && mContext.checkCallingOrSelfPermission(Manifest.permission.REVOKE_RUNTIME_PERMISSIONS)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException(message + " requires "
+                    + Manifest.permission.GRANT_RUNTIME_PERMISSIONS + " or "
+                    + Manifest.permission.REVOKE_RUNTIME_PERMISSIONS + " or "
+                    + Manifest.permission.GET_RUNTIME_PERMISSIONS);
         }
     }
 
