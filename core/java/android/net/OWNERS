@@ -1,12 +1,11 @@
 set noparent
 
 codewiz@google.com
-ek@google.com
-jsharkey@android.com
 jchalard@google.com
+jsharkey@android.com
+junyulai@google.com
 lorenzo@google.com
 reminv@google.com
 satk@google.com
-silberst@google.com
 
 per-file SSL*, Uri*, Url* = flooey@google.com, narayan@google.com, tobiast@google.com
