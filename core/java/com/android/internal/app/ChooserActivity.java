@@ -420,6 +420,10 @@ public class ChooserActivity extends ResolverActivity {
                 if (isFinishing() || isDestroyed()) {
                     return;
                 }
+                // May be null if there are no apps to perform share/open action.
+                if (mChooserListAdapter == null) {
+                    return;
+                }
                 final List<DisplayResolveInfo> driList =
                         getDisplayResolveInfos(mChooserListAdapter);
                 final List<ShortcutManager.ShareShortcutInfo> shareShortcutInfos =
