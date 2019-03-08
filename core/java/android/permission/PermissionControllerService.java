@@ -112,6 +112,9 @@ public abstract class PermissionControllerService extends Service {
     /**
      * Restore a backup of the runtime permissions.
      *
+     * <p>If an app mentioned in the backup is not installed the state should be saved to later
+     * be restored via {@link #onRestoreDelayedRuntimePermissionsBackup}.
+     *
      * @param user The user to restore
      * @param backup The stream to read the backup from
      */
@@ -120,7 +123,8 @@ public abstract class PermissionControllerService extends Service {
             @NonNull InputStream backup);
 
     /**
-     * Restore a delayed backup of the runtime permissions.
+     * Restore the permission state of an app that was provided in
+     * {@link #onRestoreRuntimePermissionsBackup} but could not be restored back then.
      *
      * @param packageName The app to restore
      * @param user The user to restore
