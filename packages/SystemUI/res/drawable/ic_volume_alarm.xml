@@ -14,14 +14,12 @@
      limitations under the License.
 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:height="24.0dp"
-    android:viewportHeight="24.0"
-    android:viewportWidth="24.0"
-    android:width="24.0dp"
-    android:tint="?android:attr/colorControlNormal">
-
+    android:height="24dp"
+    android:width="24dp"
+    android:viewportHeight="24"
+    android:viewportWidth="24">
     <path
         android:fillColor="#FFFFFF"
-        android:pathData="M2.7,6.5c-0.4,-0.4 -0.3,-1 0.1,-1.4l3,-2.6c0.4,-0.4 1,-0.3 1.4,0.1C7.6,3 7.5,3.7 7.1,4l-3,2.6C3.6,7 3,6.9 2.7,6.5zM21.3,5.1l-3.1,-2.6c-0.4,-0.4 -0.99,-0.31 -1.4,0.1c-0.4,0.4 -0.3,1 0.1,1.4L20,6.6c0.41,0.37 1,0.3 1.4,-0.1C21.73,6.12 21.7,5.4 21.3,5.1zM21,13c0,5 -4,9 -9,9s-9,-4 -9,-9s4,-9 9,-9S21,8 21,13zM19.1,13c0,-3.9 -3.2,-7.1 -7.1,-7.1S4.9,9.1 4.9,13s3.2,7.1 7.1,7.1S19.1,16.9 19.1,13zM11.75,8C11.34,8 11,8.34 11,8.75V14l4.14,2.48c0.34,0.21 0.77,0.1 0.98,-0.24s0.09,-0.79 -0.25,-0.99l-3.37,-2v-4.5C12.5,8.34 12.16,8 11.75,8z"/>
+        android:pathData="M13,8h-2v5.41l3.79,3.8 1.42,-1.42 -3.21,-3.2zM12,4c-4.97,0 -9,4.03 -9,9s4.03,9 9,9 9,-4.03 9,-9 -4.03,-9 -9,-9zM12,20c-3.86,0 -7,-3.14 -7,-7s3.14,-7 7,-7 7,3.14 7,7 -3.14,7 -7,7zM16.056,3.346l1.282,-1.535 4.607,3.85 -1.28,1.54zM2.056,5.654L6.663,1.81l1.28,1.536L3.338,7.19z"/>
 
 </vector>

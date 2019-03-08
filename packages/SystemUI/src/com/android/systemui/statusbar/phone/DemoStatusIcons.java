@@ -110,14 +110,13 @@ public class DemoStatusIcons extends StatusIconContainer implements DemoMode, Da
             if (zen != null) {
                 int iconId = zen.equals("important") ? R.drawable.stat_sys_zen_important
                         : zen.equals("none") ? R.drawable.stat_sys_zen_none
-                        : 0;
+                        : zen.equals("dnd") ? R.drawable.stat_sys_dnd : 0;
                 updateSlot("zen", null, iconId);
             }
             String bt = args.getString("bluetooth");
             if (bt != null) {
-                int iconId = bt.equals("disconnected") ? R.drawable.stat_sys_data_bluetooth
-                        : bt.equals("connected") ? R.drawable.stat_sys_data_bluetooth_connected
-                        : 0;
+                int iconId = bt.equals("connected")
+                        ? R.drawable.stat_sys_data_bluetooth_connected : 0;
                 updateSlot("bluetooth", null, iconId);
             }
             String location = args.getString("location");
