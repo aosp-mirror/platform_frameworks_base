@@ -1814,7 +1814,7 @@ public class PackageInstaller {
         /**
          * Return the user associated with this session.
          */
-        public UserHandle getUser() {
+        public @NonNull UserHandle getUser() {
             return new UserHandle(userId);
         }
 
