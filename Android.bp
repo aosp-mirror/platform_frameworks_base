@@ -551,6 +551,7 @@ java_defaults {
         "telephony/java/com/android/internal/telephony/IOnSubscriptionsChangedListener.aidl",
         "telephony/java/com/android/internal/telephony/IPhoneStateListener.aidl",
         "telephony/java/com/android/internal/telephony/IPhoneSubInfo.aidl",
+        "telephony/java/com/android/internal/telephony/ISetOpportunisticDataCallback.aidl",
         "telephony/java/com/android/internal/telephony/ISms.aidl",
         "telephony/java/com/android/internal/telephony/ISub.aidl",
         "telephony/java/com/android/internal/telephony/IOns.aidl",
