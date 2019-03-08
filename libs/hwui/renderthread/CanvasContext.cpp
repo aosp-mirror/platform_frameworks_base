@@ -401,11 +401,11 @@ void CanvasContext::draw() {
     SkRect dirty;
     mDamageAccumulator.finish(&dirty);
 
-    // TODO: Re-enable after figuring out cause of b/22592975
-    //    if (dirty.isEmpty() && Properties::skipEmptyFrames) {
-    //        mCurrentFrameInfo->addFlag(FrameInfoFlags::SkippedFrame);
-    //        return;
-    //    }
+    if (dirty.isEmpty() && Properties::skipEmptyFrames
+            && !surfaceRequiresRedraw()) {
+        mCurrentFrameInfo->addFlag(FrameInfoFlags::SkippedFrame);
+        return;
+    }
 
     mCurrentFrameInfo->markIssueDrawCommandsStart();
 
@@ -636,6 +636,19 @@ int64_t CanvasContext::getFrameNumber() {
         mFrameNumber = static_cast<int64_t>(mNativeSurface->getNextFrameNumber());
     }
     return mFrameNumber;
+}
+
+bool CanvasContext::surfaceRequiresRedraw() {
+    if (!mNativeSurface) return false;
+    if (mHaveNewSurface) return true;
+
+    int width = -1;
+    int height = -1;
+    ReliableSurface* surface = mNativeSurface.get();
+    surface->query(NATIVE_WINDOW_WIDTH, &width);
+    surface->query(NATIVE_WINDOW_HEIGHT, &height);
+
+    return width == mLastFrameWidth && height == mLastFrameHeight;
 }
 
 SkRect CanvasContext::computeDirtyRect(const Frame& frame, SkRect* dirty) {
