@@ -41,6 +41,7 @@ import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Slog;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
 import com.android.server.backup.BackupAgentTimeoutParameters;
@@ -120,6 +121,7 @@ public class FullRestoreEngine extends RestoreEngine {
 
     // Pipes for moving data
     private ParcelFileDescriptor[] mPipes = null;
+    private final Object mPipesLock = new Object();
 
     // Widget blob to be restored out-of-band
     private byte[] mWidgetData = null;
@@ -129,6 +131,8 @@ public class FullRestoreEngine extends RestoreEngine {
 
     private final BackupAgentTimeoutParameters mAgentTimeoutParameters;
     final boolean mIsAdbRestore;
+    @GuardedBy("mPipesLock")
+    private boolean mPipesClosed;
 
     public FullRestoreEngine(UserBackupManagerService backupManagerService,
             BackupRestoreTask monitorTask, IFullBackupRestoreObserver observer,
@@ -578,24 +582,26 @@ public class FullRestoreEngine extends RestoreEngine {
     }
 
     private void setUpPipes() throws IOException {
-        mPipes = ParcelFileDescriptor.createPipe();
+        synchronized (mPipesLock) {
+            mPipes = ParcelFileDescriptor.createPipe();
+            mPipesClosed = false;
+        }
     }
 
     private void tearDownPipes() {
         // Teardown might arise from the inline restore processing or from the asynchronous
         // timeout mechanism, and these might race.  Make sure we don't try to close and
         // null out the pipes twice.
-        synchronized (this) {
-            if (mPipes != null) {
+        synchronized (mPipesLock) {
+            if (!mPipesClosed && mPipes != null) {
                 try {
                     mPipes[0].close();
-                    mPipes[0] = null;
                     mPipes[1].close();
-                    mPipes[1] = null;
+
+                    mPipesClosed = true;
                 } catch (IOException e) {
                     Slog.w(TAG, "Couldn't close agent pipes", e);
                 }
-                mPipes = null;
             }
         }
     }
