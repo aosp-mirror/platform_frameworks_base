@@ -24,6 +24,7 @@ import android.security.KeyStoreParameter;
 import android.security.keymaster.KeyCharacteristics;
 import android.security.keymaster.KeymasterArguments;
 import android.security.keymaster.KeymasterDefs;
+import android.security.keystore.KeyPermanentlyInvalidatedException;
 import android.security.keystore.KeyProperties;
 import android.security.keystore.KeyProtection;
 import android.security.keystore.SecureKeyImportUnavailableException;
@@ -93,13 +94,20 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
     public Key engineGetKey(String alias, char[] password) throws NoSuchAlgorithmException,
             UnrecoverableKeyException {
         String userKeyAlias = Credentials.USER_PRIVATE_KEY + alias;
+        AndroidKeyStoreKey key;
         if (!mKeyStore.contains(userKeyAlias, mUid)) {
             // try legacy prefix for backward compatibility
             userKeyAlias = Credentials.USER_SECRET_KEY + alias;
             if (!mKeyStore.contains(userKeyAlias, mUid)) return null;
         }
-        return AndroidKeyStoreProvider.loadAndroidKeyStoreKeyFromKeystore(mKeyStore, userKeyAlias,
-                mUid);
+        try {
+            key = AndroidKeyStoreProvider.loadAndroidKeyStoreKeyFromKeystore(mKeyStore,
+                                                                             userKeyAlias,
+                                                                             mUid);
+        } catch (KeyPermanentlyInvalidatedException e) {
+            throw new UnrecoverableKeyException(e.getMessage());
+        }
+        return key;
     }
 
     @Override
