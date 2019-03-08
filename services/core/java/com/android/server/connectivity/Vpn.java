@@ -1840,6 +1840,7 @@ public class Vpn {
         config.interfaze = iface;
         config.session = profile.name;
         config.isMetered = false;
+        config.proxyInfo = profile.proxy;
 
         config.addLegacyRoutes(profile.routes);
         if (!profile.dnsServers.isEmpty()) {
