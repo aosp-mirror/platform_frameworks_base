@@ -1576,6 +1576,7 @@ package android.content.pm {
     method public boolean getAllocateAggressive();
     method @Deprecated public boolean getAllowDowngrade();
     method public boolean getDontKillApp();
+    method public boolean getEnableRollback();
     method @Nullable public String[] getGrantedRuntimePermissions();
     method public boolean getInstallAsFullApp(boolean);
     method public boolean getInstallAsInstantApp(boolean);
@@ -1587,7 +1588,7 @@ package android.content.pm {
     method @RequiresPermission(android.Manifest.permission.ALLOCATE_AGGRESSIVE) public void setAllocateAggressive(boolean);
     method @Deprecated public void setAllowDowngrade(boolean);
     method public void setDontKillApp(boolean);
-    method public void setEnableRollback();
+    method public void setEnableRollback(boolean);
     method @RequiresPermission(android.Manifest.permission.INSTALL_GRANT_RUNTIME_PERMISSIONS) public void setGrantedRuntimePermissions(String[]);
     method @RequiresPermission(android.Manifest.permission.INSTALL_PACKAGES) public void setInstallAsApex();
     method public void setInstallAsInstantApp(boolean);
