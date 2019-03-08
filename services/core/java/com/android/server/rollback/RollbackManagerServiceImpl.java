@@ -356,7 +356,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             PackageInstaller packageInstaller = pm.getPackageInstaller();
             PackageInstaller.SessionParams parentParams = new PackageInstaller.SessionParams(
                     PackageInstaller.SessionParams.MODE_FULL_INSTALL);
-            parentParams.setAllowDowngrade(true);
+            parentParams.setRequestDowngrade(true);
             parentParams.setMultiPackage();
             if (data.isStaged()) {
                 parentParams.setStaged();
@@ -377,7 +377,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                         params.setInstallerPackageName(installerPackageName);
                     }
                 }
-                params.setAllowDowngrade(true);
+                params.setRequestDowngrade(true);
                 if (data.isStaged()) {
                     params.setStaged();
                 }
