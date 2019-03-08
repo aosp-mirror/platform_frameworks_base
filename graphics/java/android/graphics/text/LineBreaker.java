@@ -177,10 +177,10 @@ public class LineBreaker {
     /**
      * Helper class for creating a {@link LineBreaker}.
      */
-    public static class Builder {
+    public static final class Builder {
         private @BreakStrategy int mBreakStrategy = BREAK_STRATEGY_SIMPLE;
         private @HyphenationFrequency int mHyphenationFrequency = HYPHENATION_FREQUENCY_NONE;
-        private @JustificationMode int mJustified = JUSTIFICATION_MODE_NONE;
+        private @JustificationMode int mJustificationMode = JUSTIFICATION_MODE_NONE;
         private @Nullable int[] mIndents = null;
 
         /**
@@ -189,7 +189,7 @@ public class LineBreaker {
          * You can change the line breaking behavior by setting break strategy. The default value is
          * {@link #BREAK_STRATEGY_SIMPLE}.
          */
-        public Builder setBreakStrategy(@BreakStrategy int breakStrategy) {
+        public @NonNull Builder setBreakStrategy(@BreakStrategy int breakStrategy) {
             mBreakStrategy = breakStrategy;
             return this;
         }
@@ -200,7 +200,8 @@ public class LineBreaker {
          * You can change the amount of automatic hyphenation used. The default value is
          * {@link #HYPHENATION_FREQUENCY_NONE}.
          */
-        public Builder setHyphenationFrequency(@HyphenationFrequency int hyphenationFrequency) {
+        public @NonNull Builder setHyphenationFrequency(
+                @HyphenationFrequency int hyphenationFrequency) {
             mHyphenationFrequency = hyphenationFrequency;
             return this;
         }
@@ -212,8 +213,8 @@ public class LineBreaker {
          * internal parameters for justification.
          * The default value is {@link #JUSTIFICATION_MODE_NONE}
          */
-        public Builder setJustified(@JustificationMode int justified) {
-            mJustified = justified;
+        public @NonNull Builder setJustificationMode(@JustificationMode int justificationMode) {
+            mJustificationMode = justificationMode;
             return this;
         }
 
@@ -224,7 +225,7 @@ public class LineBreaker {
          * amount is the sum of both left and right indentations. For lines past the last element in
          * the array, the indentation amount of the last element is used.
          */
-        public Builder setIndents(@Nullable int[] indents) {
+        public @NonNull Builder setIndents(@Nullable int[] indents) {
             mIndents = indents;
             return this;
         }
@@ -234,8 +235,9 @@ public class LineBreaker {
          *
          * You can reuse the Builder instance even after calling this method.
          */
-        public LineBreaker build() {
-            return new LineBreaker(mBreakStrategy, mHyphenationFrequency, mJustified, mIndents);
+        public @NonNull LineBreaker build() {
+            return new LineBreaker(mBreakStrategy, mHyphenationFrequency, mJustificationMode,
+                    mIndents);
         }
     }
 
@@ -412,7 +414,7 @@ public class LineBreaker {
         }
 
         /**
-         * Returns a packed packed hyphen edit for the line.
+         * Returns a packed hyphen edit for the line.
          *
          * @param lineIndex an index of the line.
          * @return a packed hyphen edit for the line.
@@ -451,7 +453,7 @@ public class LineBreaker {
      * @param constraints for a single paragraph
      * @param lineNumber a line number of this paragraph
      */
-    public Result computeLineBreaks(
+    public @NonNull Result computeLineBreaks(
             @NonNull MeasuredText measuredPara,
             @NonNull ParagraphConstraints constraints,
             @IntRange(from = 0) int lineNumber) {

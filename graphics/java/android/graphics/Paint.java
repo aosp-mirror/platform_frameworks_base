@@ -1733,7 +1733,7 @@ public class Paint {
      * @return the paint's extra word-spacing for drawing text in pixels.
      * @see #setWordSpacing(float)
      */
-    public float getWordSpacing() {
+    public @Px float getWordSpacing() {
         return nGetWordSpacing(mNativePaint);
     }
 
@@ -1746,7 +1746,7 @@ public class Paint {
      * @param wordSpacing set the paint's extra word-spacing for drawing text in pixels.
      * @see #getWordSpacing()
      */
-    public void setWordSpacing(float wordSpacing) {
+    public void setWordSpacing(@Px float wordSpacing) {
         nSetWordSpacing(mNativePaint, wordSpacing);
     }
 
@@ -2706,6 +2706,8 @@ public class Paint {
     }
 
     /**
+     * Retrieve the text boundary box and store to bounds.
+     *
      * Return in bounds (allocated by the caller) the smallest rectangle that
      * encloses all of the characters, with an implied origin at (0,0).
      *
@@ -2725,6 +2727,8 @@ public class Paint {
     }
 
     /**
+     * Retrieve the text boundary box and store to bounds.
+     *
      * Return in bounds (allocated by the caller) the smallest rectangle that
      * encloses all of the characters, with an implied origin at (0,0).
      *
@@ -2736,7 +2740,8 @@ public class Paint {
      * @param end 1 past the last char in the text to measure
      * @param bounds returns the unioned bounds of all the text. Must be allocated by the caller
      */
-    public void getTextBounds(CharSequence text, int start, int end, Rect bounds) {
+    public void getTextBounds(@NonNull CharSequence text, int start, int end,
+            @NonNull Rect bounds) {
         if ((start | end | (end - start) | (text.length() - end)) < 0) {
             throw new IndexOutOfBoundsException();
         }

@@ -61,7 +61,7 @@ public final class FontFamily {
     /**
      * A builder class for creating new FontFamily.
      */
-    public static class Builder {
+    public static final class Builder {
         private static final NativeAllocationRegistry sFamilyRegistory =
                 new NativeAllocationRegistry(FontFamily.class.getClassLoader(),
                     nGetReleaseNativeFamily(), 64);
@@ -152,7 +152,7 @@ public final class FontFamily {
      * @param index an index of the font
      * @return a registered font
      */
-    public Font getFont(@IntRange(from = 0) int index) {
+    public @NonNull Font getFont(@IntRange(from = 0) int index) {
         return mFonts.get(index);
     }
 
@@ -161,7 +161,7 @@ public final class FontFamily {
      *
      * @return the number of fonts registered in this family.
      */
-    public int getSize() {
+    public @IntRange(from = 1) int getSize() {
         return mFonts.size();
     }
 

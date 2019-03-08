@@ -34,6 +34,7 @@ import android.graphics.fonts.FontVariationAxis;
 import android.graphics.fonts.SystemFonts;
 import android.os.Build;
 import android.os.Build.VERSION_CODES;
+import android.os.ParcelFileDescriptor;
 import android.provider.FontRequest;
 import android.provider.FontsContract;
 import android.text.FontConfig;
@@ -368,7 +369,7 @@ public class Typeface {
         private final AssetManager mAssetManager;
         private final String mPath;
 
-        private final Font.Builder mFontBuilder;
+        private final @Nullable Font.Builder mFontBuilder;
 
         private String mFallbackFamilyName;
 
@@ -395,7 +396,16 @@ public class Typeface {
          * @param fd The file descriptor. The passed fd must be mmap-able.
          */
         public Builder(@NonNull FileDescriptor fd) {
-            mFontBuilder = new Font.Builder(fd);
+            Font.Builder builder;
+            try {
+                builder = new Font.Builder(ParcelFileDescriptor.dup(fd));
+            } catch (IOException e) {
+                // We cannot tell the error to developer at this moment since we cannot change the
+                // public API signature. Instead, silently fallbacks to system fallback in the build
+                // method as the same as other error cases.
+                builder = null;
+            }
+            mFontBuilder = builder;
             mAssetManager = null;
             mPath = null;
         }
@@ -585,6 +595,9 @@ public class Typeface {
          * @return Newly created Typeface. May return null if some parameters are invalid.
          */
         public Typeface build() {
+            if (mFontBuilder == null) {
+                return resolveFallbackTypeface();
+            }
             try {
                 final Font font = mFontBuilder.build();
                 final String key = mAssetManager == null ? null : createAssetUid(
@@ -687,7 +700,7 @@ public class Typeface {
      * </pre>
      * </p>
      */
-    public static class CustomFallbackBuilder {
+    public static final class CustomFallbackBuilder {
         private static final int MAX_CUSTOM_FALLBACK = 64;
         private final ArrayList<FontFamily> mFamilies = new ArrayList<>();
         private String mFallbackName = null;
@@ -728,7 +741,7 @@ public class Typeface {
          * @param familyName a family name to be used for fallback if the provided fonts can not be
          *                   used
          */
-        public CustomFallbackBuilder setSystemFallback(@NonNull String familyName) {
+        public @NonNull CustomFallbackBuilder setSystemFallback(@NonNull String familyName) {
             Preconditions.checkNotNull(familyName);
             mFallbackName = familyName;
             return this;
@@ -743,7 +756,7 @@ public class Typeface {
          *
          * @param style a font style
          */
-        public CustomFallbackBuilder setStyle(@NonNull FontStyle style) {
+        public @NonNull CustomFallbackBuilder setStyle(@NonNull FontStyle style) {
             mStyle = style;
             return this;
         }
@@ -758,7 +771,7 @@ public class Typeface {
          * @param family a fallback family
          * @throws IllegalArgumentException if you give more than 64 custom fallback families
          */
-        public CustomFallbackBuilder addCustomFallback(@NonNull FontFamily family) {
+        public @NonNull CustomFallbackBuilder addCustomFallback(@NonNull FontFamily family) {
             Preconditions.checkNotNull(family);
             Preconditions.checkArgument(mFamilies.size() < getMaxCustomFallbackCount(),
                     "Custom fallback limit exceeded(" + getMaxCustomFallbackCount() + ")");
@@ -771,7 +784,7 @@ public class Typeface {
          *
          * @return the Typeface object
          */
-        public Typeface build() {
+        public @NonNull Typeface build() {
             final int userFallbackSize = mFamilies.size();
             final FontFamily[] fallback = SystemFonts.getSystemFallback(mFallbackName);
             final long[] ptrArray = new long[fallback.length + userFallbackSize];
