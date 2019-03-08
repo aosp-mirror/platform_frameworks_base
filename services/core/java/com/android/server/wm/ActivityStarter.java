@@ -27,6 +27,8 @@ import static android.app.ActivityManager.START_RETURN_INTENT_TO_CALLER;
 import static android.app.ActivityManager.START_RETURN_LOCK_TASK_MODE_VIOLATION;
 import static android.app.ActivityManager.START_SUCCESS;
 import static android.app.ActivityManager.START_TASK_TO_FRONT;
+import static android.app.WaitResult.LAUNCH_STATE_COLD;
+import static android.app.WaitResult.LAUNCH_STATE_HOT;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
@@ -1311,6 +1313,8 @@ class ActivityStarter {
                         break;
                     }
                     case START_TASK_TO_FRONT: {
+                        outResult.launchState =
+                                r.attachedToProcess() ? LAUNCH_STATE_HOT : LAUNCH_STATE_COLD;
                         // ActivityRecord may represent a different activity, but it should not be
                         // in the resumed state.
                         if (r.nowVisible && r.isState(RESUMED)) {
