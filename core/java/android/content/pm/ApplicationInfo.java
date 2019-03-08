@@ -43,6 +43,7 @@ import com.android.server.SystemConfig;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.text.Collator;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
@@ -2026,6 +2027,27 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      */
     @Override protected ApplicationInfo getApplicationInfo() {
         return this;
+    }
+
+    /**
+     * Return all the APK paths that may be required to load this application, including all
+     * splits, shared libraries, and resource overlays.
+     * @hide
+     */
+    public String[] getAllApkPaths() {
+        final String[][] inputLists = { splitSourceDirs, sharedLibraryFiles, resourceDirs };
+        final List<String> output = new ArrayList<>(10);
+        if (sourceDir != null) {
+            output.add(sourceDir);
+        }
+        for (String[] inputList : inputLists) {
+            if (inputList != null) {
+                for (String input : inputList) {
+                    output.add(input);
+                }
+            }
+        }
+        return output.toArray(new String[output.size()]);
     }
 
     /** {@hide} */ public void setCodePath(String codePath) { scanSourceDir = codePath; }
