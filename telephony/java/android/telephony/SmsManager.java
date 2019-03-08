@@ -322,6 +322,7 @@ public final class SmsManager {
      *  <code>RESULT_ERROR_GENERIC_FAILURE</code><br>
      *  <code>RESULT_ERROR_RADIO_OFF</code><br>
      *  <code>RESULT_ERROR_NULL_PDU</code><br>
+     *  <code>RESULT_ERROR_NO_SERVICE</code><br>
      *  For <code>RESULT_ERROR_GENERIC_FAILURE</code> the sentIntent may include
      *  the extra "errorCode" containing a radio technology specific value,
      *  generally only useful for troubleshooting.<br>
@@ -371,19 +372,12 @@ public final class SmsManager {
         if (DBG) {
             Log.d(TAG, "for subId: " + subId + ", subscription-info: " + info);
         }
-        if (info == null) {
-            // There is no subscription for the given subId. That can only mean one thing:
-            // the caller is using a SmsManager instance with an obsolete subscription id.
-            // That is most probably because caller didn't invalidate SmsManager instance
-            // for an already deleted subscription id.
-            Log.e(TAG, "subId: " + subId + " for this SmsManager instance is obsolete.");
-            sendErrorInPendingIntent(sentIntent, SmsManager.RESULT_ERROR_NO_SERVICE);
-        }
 
         /* If the Subscription associated with this SmsManager instance belongs to a remote-sim,
          * then send the message thru the remote-sim subscription.
          */
-        if (info.getSubscriptionType() == SubscriptionManager.SUBSCRIPTION_TYPE_REMOTE_SIM) {
+        if (info != null
+                && info.getSubscriptionType() == SubscriptionManager.SUBSCRIPTION_TYPE_REMOTE_SIM) {
             if (DBG) Log.d(TAG, "sending message thru bluetooth");
             sendTextMessageBluetooth(destinationAddress, scAddress, text, sentIntent,
                     deliveryIntent, info);
@@ -391,8 +385,10 @@ public final class SmsManager {
         }
 
         try {
+            // If the subscription is invalid or default, we will use the default phone to send the
+            // SMS and possibly fail later in the SMS sending process.
             ISms iccISms = getISmsServiceOrThrow();
-            iccISms.sendTextForSubscriber(getSubscriptionId(), ActivityThread.currentPackageName(),
+            iccISms.sendTextForSubscriber(subId, ActivityThread.currentPackageName(),
                     destinationAddress,
                     scAddress, text, sentIntent, deliveryIntent,
                     persistMessage);
@@ -465,6 +461,9 @@ public final class SmsManager {
     }
 
     private void sendErrorInPendingIntent(PendingIntent intent, int errorCode) {
+        if (intent == null) {
+            return;
+        }
         try {
             intent.send(errorCode);
         } catch (PendingIntent.CanceledException e) {
