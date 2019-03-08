@@ -2018,7 +2018,8 @@ public class ActivityManager {
      * @return {@code true} if a call to start an activity on the target display is allowed for the
      * provided context and no {@link SecurityException} will be thrown, {@code false} otherwise.
      */
-    public boolean isActivityStartAllowedOnDisplay(Context context, int displayId, Intent intent) {
+    public boolean isActivityStartAllowedOnDisplay(@NonNull Context context, int displayId,
+            @NonNull Intent intent) {
         try {
             return getTaskService().isActivityStartAllowedOnDisplay(displayId, intent,
                     intent.resolveTypeIfNeeded(context.getContentResolver()), context.getUserId());
