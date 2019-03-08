@@ -284,9 +284,23 @@ std::unique_ptr<const Idmap> Idmap::FromBinaryStream(std::istream& stream,
   return std::move(idmap);
 }
 
-bool CheckOverlayable(const LoadedPackage& target_package,
-                      const utils::OverlayManifestInfo& overlay_info,
-                      const PolicyBitmask& fulfilled_policies, const ResourceId& resid) {
+std::string ConcatPolicies(const std::vector<std::string>& policies) {
+  std::string message;
+  for (const std::string& policy : policies) {
+    if (message.empty()) {
+      message.append(policy);
+    } else {
+      message.append(policy);
+      message.append("|");
+    }
+  }
+
+  return message;
+}
+
+Result<Unit> CheckOverlayable(const LoadedPackage& target_package,
+                              const utils::OverlayManifestInfo& overlay_info,
+                              const PolicyBitmask& fulfilled_policies, const ResourceId& resid) {
   static constexpr const PolicyBitmask sDefaultPolicies =
       PolicyFlags::POLICY_SYSTEM_PARTITION | PolicyFlags::POLICY_VENDOR_PARTITION |
       PolicyFlags::POLICY_PRODUCT_PARTITION | PolicyFlags::POLICY_SIGNATURE;
@@ -294,23 +308,34 @@ bool CheckOverlayable(const LoadedPackage& target_package,
   // If the resource does not have an overlayable definition, allow the resource to be overlaid if
   // the overlay is preinstalled or signed with the same signature as the target.
   if (!target_package.DefinesOverlayable()) {
-    return (sDefaultPolicies & fulfilled_policies) != 0;
+    return (sDefaultPolicies & fulfilled_policies) != 0
+               ? Result<Unit>({})
+               : Error(
+                     "overlay must be preinstalled or signed with the same signature as the "
+                     "target");
   }
 
   const OverlayableInfo* overlayable_info = target_package.GetOverlayableInfo(resid);
   if (overlayable_info == nullptr) {
     // Do not allow non-overlayable resources to be overlaid.
-    return false;
+    return Error("resource has no overlayable declaration");
   }
 
   if (overlay_info.target_name != overlayable_info->name) {
     // If the overlay supplies a target overlayable name, the resource must belong to the
     // overlayable defined with the specified name to be overlaid.
-    return false;
+    return Error("<overlay> android:targetName '%s' does not match overlayable name '%s'",
+                 overlay_info.target_name.c_str(), overlayable_info->name.c_str());
   }
 
   // Enforce policy restrictions if the resource is declared as overlayable.
-  return (overlayable_info->policy_flags & fulfilled_policies) != 0;
+  if ((overlayable_info->policy_flags & fulfilled_policies) == 0) {
+    return Error("overlay with policies '%s' does not fulfill any overlayable policies '%s'",
+                 ConcatPolicies(BitmaskToPolicies(fulfilled_policies)).c_str(),
+                 ConcatPolicies(BitmaskToPolicies(overlayable_info->policy_flags)).c_str());
+  }
+
+  return Result<Unit>({});
 }
 
 std::unique_ptr<const Idmap> Idmap::FromApkAssets(
@@ -426,11 +451,15 @@ std::unique_ptr<const Idmap> Idmap::FromApkAssets(
       continue;
     }
 
-    if (enforce_overlayable &&
-        !CheckOverlayable(*target_pkg, *overlay_info, fulfilled_policies, target_resid)) {
-      LOG(WARNING) << "overlay \"" << overlay_apk_path << "\" is not allowed to overlay resource \""
-                   << full_name << "\"" << std::endl;
-      continue;
+    if (!enforce_overlayable) {
+      Result<Unit> success =
+          CheckOverlayable(*target_pkg, *overlay_info, fulfilled_policies, target_resid);
+      if (!success) {
+        LOG(WARNING) << "overlay \"" << overlay_apk_path
+                     << "\" is not allowed to overlay resource \"" << full_name
+                     << "\": " << success.GetErrorMessage();
+        continue;
+      }
     }
 
     matching_resources.Add(target_resid, overlay_resid);
