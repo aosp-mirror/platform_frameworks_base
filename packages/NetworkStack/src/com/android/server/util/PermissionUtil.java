@@ -33,7 +33,9 @@ public final class PermissionUtil {
     public static void checkNetworkStackCallingPermission() {
         // TODO: check that the calling PID is the system server.
         final int caller = getCallingUid();
-        if (caller != Process.SYSTEM_UID && UserHandle.getAppId(caller) != Process.BLUETOOTH_UID) {
+        if (caller != Process.SYSTEM_UID
+                && UserHandle.getAppId(caller) != Process.BLUETOOTH_UID
+                && UserHandle.getAppId(caller) != Process.PHONE_UID) {
             throw new SecurityException("Invalid caller: " + caller);
         }
     }
