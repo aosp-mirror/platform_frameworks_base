@@ -20,5 +20,6 @@ package android.content;
  * @hide
  */
 oneway interface ISyncStatusObserver {
+    @UnsupportedAppUsage
     void onStatusChanged(int which);
 }

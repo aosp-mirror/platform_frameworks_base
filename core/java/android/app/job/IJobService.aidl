@@ -26,7 +26,9 @@ import android.app.job.JobParameters;
  */
 oneway interface IJobService {
     /** Begin execution of application's job. */
+    @UnsupportedAppUsage
     void startJob(in JobParameters jobParams);
     /** Stop execution of application's job. */
+    @UnsupportedAppUsage
     void stopJob(in JobParameters jobParams);
 }

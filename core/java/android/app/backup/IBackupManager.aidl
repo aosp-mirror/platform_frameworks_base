@@ -44,6 +44,7 @@ interface IBackupManager {
      * only callers who hold the android.permission.BACKUP permission
      * may invoke it for arbitrary packages.
      */
+    @UnsupportedAppUsage
     void dataChanged(String packageName);
 
     /**
@@ -54,6 +55,7 @@ interface IBackupManager {
      * only callers who hold the android.permission.BACKUP permission
      * may invoke it for arbitrary packages.
      */
+    @UnsupportedAppUsage
     void clearBackupData(String transportName, String packageName);
 
     /**
@@ -92,6 +94,7 @@ interface IBackupManager {
      *
      * <p>Callers must hold the android.permission.BACKUP permission to use this method.
      */
+    @UnsupportedAppUsage
     void setBackupEnabled(boolean isEnabled);
 
     /**
@@ -107,6 +110,7 @@ interface IBackupManager {
      * @param doAutoRestore When true, enables the automatic app-data restore facility.  When
      *   false, this facility will be disabled.
      */
+    @UnsupportedAppUsage
     void setAutoRestore(boolean doAutoRestore);
 
     /**
@@ -121,6 +125,7 @@ interface IBackupManager {
      *
      * <p>Callers must hold the android.permission.BACKUP permission to use this method.
      */
+    @UnsupportedAppUsage
     boolean isBackupEnabled();
 
     /**
@@ -217,6 +222,7 @@ interface IBackupManager {
      *
      * <p>Callers must hold the android.permission.BACKUP permission to use this method.
      */
+    @UnsupportedAppUsage
     void acknowledgeFullBackupOrRestore(int token, boolean allow,
             in String curPassword, in String encryptionPassword,
             IFullBackupRestoreObserver observer);
@@ -255,12 +261,14 @@ interface IBackupManager {
      * Identify the currently selected transport.  Callers must hold the
      * android.permission.BACKUP permission to use this method.
      */
+    @UnsupportedAppUsage
     String getCurrentTransport();
 
     /**
      * Request a list of all available backup transports' names.  Callers must
      * hold the android.permission.BACKUP permission to use this method.
      */
+    @UnsupportedAppUsage
     String[] listAllTransports();
 
     ComponentName[] listAllTransportComponents();
@@ -283,6 +291,7 @@ interface IBackupManager {
      *   name is not one of the currently available transports, no change is made to
      *   the current transport setting and the method returns null.
      */
+    @UnsupportedAppUsage
     String selectBackupTransport(String transport);
 
     /**
@@ -385,6 +394,7 @@ interface IBackupManager {
      * @param whichUser User handle of the defined user whose backup active state
      *     is being queried.
      */
+    @UnsupportedAppUsage
     boolean isBackupServiceActive(int whichUser);
 
     /**
