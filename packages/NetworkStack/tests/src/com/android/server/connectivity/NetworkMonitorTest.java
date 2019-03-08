@@ -525,7 +525,7 @@ public class NetworkMonitorTest {
         wrappedMonitor.setLastProbeTime(SystemClock.elapsedRealtime() - 1000);
         makeDnsTimeoutEvent(wrappedMonitor, 5);
         assertTrue(wrappedMonitor.isDataStall());
-        verify(mDataStallStatsUtils, times(1)).write(any(), any());
+        verify(mDataStallStatsUtils, times(1)).write(makeEmptyDataStallDetectionStats(), any());
     }
 
     @Test
@@ -534,7 +534,7 @@ public class NetworkMonitorTest {
         wrappedMonitor.setLastProbeTime(SystemClock.elapsedRealtime() - 1000);
         makeDnsTimeoutEvent(wrappedMonitor, 3);
         assertFalse(wrappedMonitor.isDataStall());
-        verify(mDataStallStatsUtils, never()).write(any(), any());
+        verify(mDataStallStatsUtils, never()).write(makeEmptyDataStallDetectionStats(), any());
     }
 
     @Test
@@ -584,6 +584,10 @@ public class NetworkMonitorTest {
             wrappedMonitor.getDnsStallDetector().accumulateConsecutiveDnsTimeoutCount(
                     RETURN_CODE_DNS_SUCCESS);
         }
+    }
+
+    private DataStallDetectionStats makeEmptyDataStallDetectionStats() {
+        return new DataStallDetectionStats.Builder().build();
     }
 
     private void setDataStallEvaluationType(int type) {
