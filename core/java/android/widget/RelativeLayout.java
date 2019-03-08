@@ -35,6 +35,9 @@ import android.view.ViewGroup;
 import android.view.ViewHierarchyEncoder;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.inspector.InspectableProperty;
+import android.view.inspector.InspectionCompanion;
+import android.view.inspector.PropertyMapper;
+import android.view.inspector.PropertyReader;
 import android.widget.RemoteViews.RemoteView;
 
 import com.android.internal.R;
@@ -1286,7 +1289,6 @@ public class RelativeLayout extends ViewGroup {
          * the anchor's visibility is GONE.
          */
         @ViewDebug.ExportedProperty(category = "layout")
-        @InspectableProperty(name = "layout_alignWithParentIfMissing")
         public boolean alignWithParent;
 
         public LayoutParams(Context c, AttributeSet attrs) {
@@ -1722,6 +1724,146 @@ public class RelativeLayout extends ViewGroup {
         protected void encodeProperties(@NonNull ViewHierarchyEncoder encoder) {
             super.encodeProperties(encoder);
             encoder.addProperty("layout:alignWithParent", alignWithParent);
+        }
+
+        /** @hide */
+        public static final class InspectionCompanion
+                implements android.view.inspector.InspectionCompanion<LayoutParams> {
+            private boolean mPropertiesMapped;
+
+            private int mAboveId;
+            private int mAlignBaselineId;
+            private int mAlignBottomId;
+            private int mAlignEndId;
+            private int mAlignLeftId;
+            private int mAlignParentBottomId;
+            private int mAlignParentEndId;
+            private int mAlignParentLeftId;
+            private int mAlignParentRightId;
+            private int mAlignParentStartId;
+            private int mAlignParentTopId;
+            private int mAlignRightId;
+            private int mAlignStartId;
+            private int mAlignTopId;
+            private int mAlignWithParentIfMissingId;
+            private int mBelowId;
+            private int mCenterHorizontalId;
+            private int mCenterInParentId;
+            private int mCenterVerticalId;
+            private int mToEndOfId;
+            private int mToLeftOfId;
+            private int mToRightOfId;
+            private int mToStartOfId;
+
+            @Override
+            public void mapProperties(@NonNull PropertyMapper propertyMapper) {
+                mPropertiesMapped = true;
+
+                mAboveId = propertyMapper.mapResourceId("layout_above", R.attr.layout_above);
+
+                mAlignBaselineId = propertyMapper.mapResourceId(
+                        "layout_alignBaseline", R.attr.layout_alignBaseline);
+
+                mAlignBottomId = propertyMapper.mapResourceId(
+                        "layout_alignBottom", R.attr.layout_alignBottom);
+
+                mAlignEndId = propertyMapper.mapResourceId(
+                        "layout_alignEnd", R.attr.layout_alignEnd);
+
+                mAlignLeftId = propertyMapper.mapResourceId(
+                        "layout_alignLeft", R.attr.layout_alignLeft);
+
+                mAlignParentBottomId = propertyMapper.mapBoolean(
+                        "layout_alignParentBottom", R.attr.layout_alignParentBottom);
+
+                mAlignParentEndId = propertyMapper.mapBoolean(
+                        "layout_alignParentEnd", R.attr.layout_alignParentEnd);
+
+                mAlignParentLeftId = propertyMapper.mapBoolean(
+                        "layout_alignParentLeft", R.attr.layout_alignParentLeft);
+
+                mAlignParentRightId = propertyMapper.mapBoolean(
+                        "layout_alignParentRight", R.attr.layout_alignParentRight);
+
+                mAlignParentStartId = propertyMapper.mapBoolean(
+                        "layout_alignParentStart", R.attr.layout_alignParentStart);
+
+                mAlignParentTopId = propertyMapper.mapBoolean(
+                        "layout_alignParentTop", R.attr.layout_alignParentTop);
+
+                mAlignRightId = propertyMapper.mapResourceId(
+                        "layout_alignRight", R.attr.layout_alignRight);
+
+                mAlignStartId = propertyMapper.mapResourceId(
+                        "layout_alignStart", R.attr.layout_alignStart);
+
+                mAlignTopId = propertyMapper.mapResourceId(
+                        "layout_alignTop", R.attr.layout_alignTop);
+
+                mAlignWithParentIfMissingId = propertyMapper.mapBoolean(
+                        "layout_alignWithParentIfMissing",
+                        R.attr.layout_alignWithParentIfMissing);
+
+                mBelowId = propertyMapper.mapResourceId("layout_below", R.attr.layout_below);
+
+                mCenterHorizontalId = propertyMapper.mapBoolean(
+                        "layout_centerHorizontal", R.attr.layout_centerHorizontal);
+
+                mCenterInParentId = propertyMapper.mapBoolean(
+                        "layout_centerInParent", R.attr.layout_centerInParent);
+
+                mCenterVerticalId = propertyMapper.mapBoolean(
+                        "layout_centerVertical", R.attr.layout_centerVertical);
+
+                mToEndOfId = propertyMapper.mapResourceId(
+                        "layout_toEndOf", R.attr.layout_toEndOf);
+
+                mToLeftOfId = propertyMapper.mapResourceId(
+                        "layout_toLeftOf", R.attr.layout_toLeftOf);
+
+                mToRightOfId = propertyMapper.mapResourceId(
+                        "layout_toRightOf", R.attr.layout_toRightOf);
+
+                mToStartOfId = propertyMapper.mapResourceId(
+                        "layout_toStartOf", R.attr.layout_toStartOf);
+            }
+
+            @Override
+            public void readProperties(
+                    @NonNull LayoutParams node,
+                    @NonNull PropertyReader propertyReader
+            ) {
+                if (!mPropertiesMapped) {
+                    throw new UninitializedPropertyMapException();
+                }
+
+                final int[] rules = node.getRules();
+
+                propertyReader.readResourceId(mAboveId, rules[ABOVE]);
+                propertyReader.readResourceId(mAlignBaselineId, rules[ALIGN_BASELINE]);
+                propertyReader.readResourceId(mAlignBottomId, rules[ALIGN_BOTTOM]);
+                propertyReader.readResourceId(mAlignEndId, rules[ALIGN_END]);
+                propertyReader.readResourceId(mAlignLeftId, rules[ALIGN_LEFT]);
+                propertyReader.readBoolean(
+                        mAlignParentBottomId, rules[ALIGN_PARENT_BOTTOM] == TRUE);
+                propertyReader.readBoolean(mAlignParentEndId, rules[ALIGN_PARENT_END] == TRUE);
+                propertyReader.readBoolean(mAlignParentLeftId, rules[ALIGN_PARENT_LEFT] == TRUE);
+                propertyReader.readBoolean(mAlignParentRightId, rules[ALIGN_PARENT_RIGHT] == TRUE);
+                propertyReader.readBoolean(mAlignParentStartId, rules[ALIGN_PARENT_START] == TRUE);
+                propertyReader.readBoolean(mAlignParentTopId, rules[ALIGN_PARENT_TOP] == TRUE);
+                propertyReader.readResourceId(mAlignRightId, rules[ALIGN_RIGHT]);
+                propertyReader.readResourceId(mAlignStartId, rules[ALIGN_START]);
+                propertyReader.readResourceId(mAlignTopId, rules[ALIGN_TOP]);
+                propertyReader.readBoolean(mAlignWithParentIfMissingId, node.alignWithParent);
+                propertyReader.readResourceId(mBelowId, rules[BELOW]);
+                propertyReader.readBoolean(mCenterHorizontalId, rules[CENTER_HORIZONTAL] == TRUE);
+                propertyReader.readBoolean(mCenterInParentId, rules[CENTER_IN_PARENT] == TRUE);
+                propertyReader.readBoolean(mCenterVerticalId, rules[CENTER_VERTICAL] == TRUE);
+                propertyReader.readResourceId(mToEndOfId, rules[END_OF]);
+                propertyReader.readResourceId(mToLeftOfId, rules[LEFT_OF]);
+                propertyReader.readResourceId(mToRightOfId, rules[RIGHT_OF]);
+                propertyReader.readResourceId(mToStartOfId, rules[START_OF]);
+            }
         }
     }
 
