@@ -125,6 +125,11 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
     // Used just for debugging purposes (on dump)
     private long mNextFlush;
 
+    /**
+     * Whether the next buffer flush is queued by a text changed event.
+     */
+    private boolean mNextFlushForTextChanged = false;
+
     @Nullable
     private final LocalLog mFlushHistory;
 
@@ -323,7 +328,21 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
         final boolean bufferEvent = numberEvents < maxBufferSize;
 
         if (bufferEvent && !forceFlush) {
-            scheduleFlush(FLUSH_REASON_IDLE_TIMEOUT, /* checkExisting= */ true);
+            final int flushReason;
+            if (eventType == TYPE_VIEW_TEXT_CHANGED) {
+                mNextFlushForTextChanged = true;
+                flushReason = FLUSH_REASON_TEXT_CHANGE_TIMEOUT;
+            } else {
+                if (mNextFlushForTextChanged) {
+                    if (sVerbose) {
+                        Log.i(TAG, "Not scheduling flush because next flush is for text changed");
+                    }
+                    return;
+                }
+
+                flushReason = FLUSH_REASON_IDLE_TIMEOUT;
+            }
+            scheduleFlush(flushReason, /* checkExisting= */ true);
             return;
         }
 
@@ -408,14 +427,25 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
             // "Renew" the flush message by removing the previous one
             mHandler.removeMessages(MSG_FLUSH);
         }
-        final int idleFlushingFrequencyMs = mManager.mOptions.idleFlushingFrequencyMs;
-        mNextFlush = System.currentTimeMillis() + idleFlushingFrequencyMs;
+
+        final int flushFrequencyMs;
+        if (reason == FLUSH_REASON_IDLE_TIMEOUT) {
+            flushFrequencyMs = mManager.mOptions.idleFlushingFrequencyMs;
+        } else if (reason == FLUSH_REASON_TEXT_CHANGE_TIMEOUT) {
+            flushFrequencyMs = mManager.mOptions.textChangeFlushingFrequencyMs;
+        } else {
+            Log.e(TAG, "handleScheduleFlush(" + getDebugState(reason) + "): not called with a "
+                    + "timeout reason.");
+            return;
+        }
+
+        mNextFlush = System.currentTimeMillis() + flushFrequencyMs;
         if (sVerbose) {
             Log.v(TAG, "handleScheduleFlush(): scheduled to flush in "
-                    + idleFlushingFrequencyMs + "ms: " + TimeUtils.logTimeOfDay(mNextFlush));
+                    + flushFrequencyMs + "ms: " + TimeUtils.logTimeOfDay(mNextFlush));
         }
         // Post using a Runnable directly to trim a few μs from PooledLambda.obtainMessage()
-        mHandler.postDelayed(() -> flushIfNeeded(reason), MSG_FLUSH, idleFlushingFrequencyMs);
+        mHandler.postDelayed(() -> flushIfNeeded(reason), MSG_FLUSH, flushFrequencyMs);
     }
 
     @UiThread
@@ -463,6 +493,10 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
         }
         try {
             mHandler.removeMessages(MSG_FLUSH);
+
+            if (reason == FLUSH_REASON_TEXT_CHANGE_TIMEOUT) {
+                mNextFlushForTextChanged = false;
+            }
 
             final ParceledListSlice<ContentCaptureEvent> events = clearEvents();
             mDirectServiceInterface.sendEvents(events);
@@ -641,8 +675,14 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
                     pw.println();
                 }
             }
+            pw.print(prefix); pw.print("mNextFlushForTextChanged: ");
+            pw.println(mNextFlushForTextChanged);
             pw.print(prefix); pw.print("flush frequency: ");
-            pw.println(mManager.mOptions.idleFlushingFrequencyMs);
+            if (mNextFlushForTextChanged) {
+                pw.println(mManager.mOptions.textChangeFlushingFrequencyMs);
+            } else {
+                pw.println(mManager.mOptions.idleFlushingFrequencyMs);
+            }
             pw.print(prefix); pw.print("next flush: ");
             TimeUtils.formatDuration(mNextFlush - System.currentTimeMillis(), pw);
             pw.print(" ("); pw.print(TimeUtils.logTimeOfDay(mNextFlush)); pw.println(")");

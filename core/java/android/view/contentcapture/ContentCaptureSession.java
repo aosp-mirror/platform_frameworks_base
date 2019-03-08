@@ -139,6 +139,8 @@ public abstract class ContentCaptureSession implements AutoCloseable {
     public static final int FLUSH_REASON_SESSION_FINISHED = 4;
     /** @hide */
     public static final int FLUSH_REASON_IDLE_TIMEOUT = 5;
+    /** @hide */
+    public static final int FLUSH_REASON_TEXT_CHANGE_TIMEOUT = 6;
 
     /** @hide */
     @IntDef(prefix = { "FLUSH_REASON_" }, value = {
@@ -146,7 +148,8 @@ public abstract class ContentCaptureSession implements AutoCloseable {
             FLUSH_REASON_VIEW_ROOT_ENTERED,
             FLUSH_REASON_SESSION_STARTED,
             FLUSH_REASON_SESSION_FINISHED,
-            FLUSH_REASON_IDLE_TIMEOUT
+            FLUSH_REASON_IDLE_TIMEOUT,
+            FLUSH_REASON_TEXT_CHANGE_TIMEOUT
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface FlushReason{}
@@ -510,6 +513,8 @@ public abstract class ContentCaptureSession implements AutoCloseable {
                 return "FINISHED";
             case FLUSH_REASON_IDLE_TIMEOUT:
                 return "IDLE";
+            case FLUSH_REASON_TEXT_CHANGE_TIMEOUT:
+                return "TEXT_CHANGE";
             default:
                 return "UNKOWN-" + reason;
         }
