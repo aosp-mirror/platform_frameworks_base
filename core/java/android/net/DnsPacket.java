@@ -28,7 +28,6 @@ import java.text.DecimalFormat;
 import java.text.FieldPosition;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.StringJoiner;
 
 /**
  * Defines basic data for DNS protocol based on RFC 1035.
@@ -42,7 +41,7 @@ public abstract class DnsPacket {
         public final int id;
         public final int flags;
         public final int rcode;
-        private final int[] mSectionCount;
+        private final int[] mRecordCount;
 
         /**
          * Create a new DnsHeader from a positioned ByteBuffer.
@@ -52,27 +51,32 @@ public abstract class DnsPacket {
          * When this constructor returns, the reading position of the ByteBuffer has been
          * advanced to the end of the DNS header record.
          * This is meant to chain with other methods reading a DNS response in sequence.
-         *
          */
         DnsHeader(@NonNull ByteBuffer buf) throws BufferUnderflowException {
             id = BitUtils.uint16(buf.getShort());
             flags = BitUtils.uint16(buf.getShort());
             rcode = flags & 0xF;
-            mSectionCount = new int[NUM_SECTIONS];
+            mRecordCount = new int[NUM_SECTIONS];
             for (int i = 0; i < NUM_SECTIONS; ++i) {
-                mSectionCount[i] = BitUtils.uint16(buf.getShort());
+                mRecordCount[i] = BitUtils.uint16(buf.getShort());
             }
         }
 
         /**
-         * Get section count by section type.
+         * Get record count by type.
          */
-        public int getSectionCount(int sectionType) {
-            return mSectionCount[sectionType];
+        public int getRecordCount(int type) {
+            return mRecordCount[type];
         }
     }
 
-    public class DnsSection {
+    /**
+     * It's used both for DNS questions and DNS resource records.
+     *
+     * DNS questions (No TTL/RDATA)
+     * DNS resource records (With TTL/RDATA)
+     */
+    public class DnsRecord {
         private static final int MAXNAMESIZE = 255;
         private static final int MAXLABELSIZE = 63;
         private static final int MAXLABELCOUNT = 128;
@@ -81,57 +85,57 @@ public abstract class DnsPacket {
         private final DecimalFormat byteFormat = new DecimalFormat();
         private final FieldPosition pos = new FieldPosition(0);
 
-        private static final String TAG = "DnsSection";
+        private static final String TAG = "DnsRecord";
 
         public final String dName;
         public final int nsType;
         public final int nsClass;
         public final long ttl;
-        private final byte[] mRR;
+        private final byte[] mRdata;
 
         /**
-         * Create a new DnsSection from a positioned ByteBuffer.
+         * Create a new DnsRecord from a positioned ByteBuffer.
          *
-         * The ByteBuffer must be in network byte order (which is the default).
-         * Reads the passed ByteBuffer from its current position and decodes a DNS section.
+         * @param ByteBuffer input of record, must be in network byte order
+         *         (which is the default).
+         * Reads the passed ByteBuffer from its current position and decodes a DNS record.
          * When this constructor returns, the reading position of the ByteBuffer has been
          * advanced to the end of the DNS header record.
          * This is meant to chain with other methods reading a DNS response in sequence.
-         *
          */
-        DnsSection(int sectionType, @NonNull ByteBuffer buf)
+        DnsRecord(int recordType, @NonNull ByteBuffer buf)
                 throws BufferUnderflowException, ParseException {
             dName = parseName(buf, 0 /* Parse depth */);
             if (dName.length() > MAXNAMESIZE) {
-                throw new ParseException("Parse name fail, name size is too long");
+                throw new ParseException(
+                        "Parse name fail, name size is too long: " + dName.length());
             }
             nsType = BitUtils.uint16(buf.getShort());
             nsClass = BitUtils.uint16(buf.getShort());
 
-            if (sectionType != QDSECTION) {
+            if (recordType != QDSECTION) {
                 ttl = BitUtils.uint32(buf.getInt());
                 final int length = BitUtils.uint16(buf.getShort());
-                mRR = new byte[length];
-                buf.get(mRR);
+                mRdata = new byte[length];
+                buf.get(mRdata);
             } else {
                 ttl = 0;
-                mRR = null;
+                mRdata = null;
             }
         }
 
         /**
-         * Get a copy of rr.
+         * Get a copy of rdata.
          */
-        @Nullable public byte[] getRR() {
-            return (mRR == null) ? null : mRR.clone();
+        @Nullable
+        public byte[] getRR() {
+            return (mRdata == null) ? null : mRdata.clone();
         }
 
         /**
          * Convert label from {@code byte[]} to {@code String}
          *
-         * It follows the same converting rule as native layer.
-         * (See ns_name.c in libc)
-         *
+         * Follows the same conversion rules of the native code (ns_name.c in libc)
          */
         private String labelToString(@NonNull byte[] label) {
             final StringBuffer sb = new StringBuffer();
@@ -139,13 +143,16 @@ public abstract class DnsPacket {
                 int b = BitUtils.uint8(label[i]);
                 // Control characters and non-ASCII characters.
                 if (b <= 0x20 || b >= 0x7f) {
+                    // Append the byte as an escaped decimal number, e.g., "\19" for 0x13.
                     sb.append('\\');
                     byteFormat.format(b, sb, pos);
                 } else if (b == '"' || b == '.' || b == ';' || b == '\\'
                         || b == '(' || b == ')' || b == '@' || b == '$') {
+                    // Append the byte as an escaped character, e.g., "\:" for 0x3a.
                     sb.append('\\');
                     sb.append((char) b);
                 } else {
+                    // Append the byte as a character, e.g., "a" for 0x61.
                     sb.append((char) b);
                 }
             }
@@ -154,7 +161,9 @@ public abstract class DnsPacket {
 
         private String parseName(@NonNull ByteBuffer buf, int depth) throws
                 BufferUnderflowException, ParseException {
-            if (depth > MAXLABELCOUNT) throw new ParseException("Parse name fails, too many labels");
+            if (depth > MAXLABELCOUNT) {
+                throw new ParseException("Failed to parse name, too many labels");
+            }
             final int len = BitUtils.uint8(buf.get());
             final int mask = len & NAME_COMPRESSION;
             if (0 == len) {
@@ -194,7 +203,7 @@ public abstract class DnsPacket {
     private static final String TAG = DnsPacket.class.getSimpleName();
 
     protected final DnsHeader mHeader;
-    protected final List<DnsSection>[] mSections;
+    protected final List<DnsRecord>[] mRecords;
 
     public static class ParseException extends Exception {
         public ParseException(String msg) {
@@ -216,18 +225,18 @@ public abstract class DnsPacket {
             throw new ParseException("Parse Header fail, bad input data", e);
         }
 
-        mSections = new ArrayList[NUM_SECTIONS];
+        mRecords = new ArrayList[NUM_SECTIONS];
 
         for (int i = 0; i < NUM_SECTIONS; ++i) {
-            final int count = mHeader.getSectionCount(i);
+            final int count = mHeader.getRecordCount(i);
             if (count > 0) {
-                mSections[i] = new ArrayList(count);
+                mRecords[i] = new ArrayList(count);
             }
             for (int j = 0; j < count; ++j) {
                 try {
-                    mSections[i].add(new DnsSection(i, buffer));
+                    mRecords[i].add(new DnsRecord(i, buffer));
                 } catch (BufferUnderflowException e) {
-                    throw new ParseException("Parse section fail", e);
+                    throw new ParseException("Parse record fail", e);
                 }
             }
         }
