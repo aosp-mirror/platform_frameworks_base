@@ -535,6 +535,9 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                 DeviceConfig.Rollback.BOOT_NAMESPACE,
                 DeviceConfig.Rollback.ROLLBACK_LIFETIME_IN_MILLIS,
                 DEFAULT_ROLLBACK_LIFETIME_DURATION_MILLIS);
+        if (mRollbackLifetimeDurationInMillis < 0) {
+            mRollbackLifetimeDurationInMillis = DEFAULT_ROLLBACK_LIFETIME_DURATION_MILLIS;
+        }
     }
 
     void onBootCompleted() {
