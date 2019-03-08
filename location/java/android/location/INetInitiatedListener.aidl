@@ -22,5 +22,6 @@ package android.location;
  */
 interface INetInitiatedListener
 {
+    @UnsupportedAppUsage
     boolean sendNiResponse(int notifId, int userResponse);
 }

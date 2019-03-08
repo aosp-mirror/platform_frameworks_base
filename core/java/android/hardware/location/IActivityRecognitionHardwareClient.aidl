@@ -32,5 +32,6 @@ oneway interface IActivityRecognitionHardwareClient {
      * @param isSupported whether the platform has hardware support for the feature
      * @param instance the available instance to provide access to the feature
      */
+    @UnsupportedAppUsage
     void onAvailabilityChanged(in boolean isSupported, in IActivityRecognitionHardware instance);
 }

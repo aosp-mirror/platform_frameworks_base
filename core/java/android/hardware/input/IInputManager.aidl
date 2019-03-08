@@ -46,6 +46,7 @@ interface IInputManager {
 
     // Injects an input event into the system.  To inject into windows owned by other
     // applications, the caller must have the INJECT_EVENTS permission.
+    @UnsupportedAppUsage
     boolean injectInputEvent(in InputEvent ev, int mode);
 
     // Calibrate input device position

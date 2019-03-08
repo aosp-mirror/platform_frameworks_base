@@ -25,8 +25,12 @@ import android.os.Bundle;
  */
 oneway interface ILocationListener
 {
+    @UnsupportedAppUsage
     void onLocationChanged(in Location location);
+    @UnsupportedAppUsage
     void onStatusChanged(String provider, int status, in Bundle extras);
+    @UnsupportedAppUsage
     void onProviderEnabled(String provider);
+    @UnsupportedAppUsage
     void onProviderDisabled(String provider);
 }

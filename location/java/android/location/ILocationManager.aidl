@@ -82,11 +82,13 @@ interface ILocationManager
     boolean injectLocation(in Location location);
 
     // --- deprecated ---
+    @UnsupportedAppUsage
     List<String> getAllProviders();
     List<String> getProviders(in Criteria criteria, boolean enabledOnly);
     String getBestProvider(in Criteria criteria, boolean enabledOnly);
     boolean providerMeetsCriteria(String provider, in Criteria criteria);
     ProviderProperties getProviderProperties(String provider);
+    @UnsupportedAppUsage
     String getNetworkProviderPackage();
 
     boolean isProviderEnabledForUser(String provider, int userId);
@@ -110,6 +112,7 @@ interface ILocationManager
     // Used by location providers to tell the location manager when it has a new location.
     // Passive is true if the location is coming from the passive provider, in which case
     // it need not be shared with other providers.
+    @UnsupportedAppUsage
     void reportLocation(in Location location, boolean passive);
 
     // Used when a (initially Gnss) Location batch arrives
