@@ -19,8 +19,10 @@ package com.android.systemui.statusbar.phone;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 
+import android.content.Context;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.View;
@@ -31,6 +33,7 @@ import com.android.systemui.statusbar.AlertingNotificationManager;
 import com.android.systemui.statusbar.AlertingNotificationManagerTest;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -53,15 +56,29 @@ public class HeadsUpManagerPhoneTest extends AlertingNotificationManagerTest {
     @Mock private VisualStabilityManager mVSManager;
     @Mock private StatusBar mBar;
 
+    private final class TestableHeadsUpManagerPhone extends HeadsUpManagerPhone {
+        TestableHeadsUpManagerPhone(Context context, View statusBarWindowView,
+                NotificationGroupManager groupManager, StatusBar bar,
+                VisualStabilityManager vsManager) {
+            super(context, statusBarWindowView, groupManager, bar, vsManager);
+            mMinimumDisplayTime = TEST_MINIMUM_DISPLAY_TIME;
+            mAutoDismissNotificationDecay = TEST_AUTO_DISMISS_TIME;
+        }
+    }
+
     protected AlertingNotificationManager createAlertingNotificationManager() {
         return mHeadsUpManager;
     }
 
     @Before
     public void setUp() {
+        AccessibilityManagerWrapper mAccessibilityMgr =
+                mDependency.injectMockDependency(AccessibilityManagerWrapper.class);
+        when(mAccessibilityMgr.getRecommendedTimeoutMillis(anyInt(), anyInt()))
+                .thenReturn(TEST_AUTO_DISMISS_TIME);
         when(mVSManager.isReorderingAllowed()).thenReturn(true);
-        mHeadsUpManager = new HeadsUpManagerPhone(mContext, mStatusBarWindowView, mGroupManager,
-                mBar, mVSManager);
+        mHeadsUpManager = new TestableHeadsUpManagerPhone(mContext, mStatusBarWindowView,
+                mGroupManager, mBar, mVSManager);
         super.setUp();
         mHeadsUpManager.mHandler = mTestHandler;
     }
