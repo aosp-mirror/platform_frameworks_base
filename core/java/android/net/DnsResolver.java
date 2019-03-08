@@ -43,6 +43,9 @@ import java.util.function.Consumer;
 /**
  * Dns resolver class for asynchronous dns querying
  *
+ * Note that if a client sends a query with more than 1 record in the question section but
+ * the remote dns server does not support this, it may not respond at all, leading to a timeout.
+ *
  */
 public final class DnsResolver {
     private static final String TAG = "DnsResolver";
@@ -226,19 +229,19 @@ public final class DnsResolver {
             if (mHeader.rcode != 0) {
                 throw new ParseException("Response error, rcode:" + mHeader.rcode);
             }
-            if (mHeader.getSectionCount(ANSECTION) == 0) {
+            if (mHeader.getRecordCount(ANSECTION) == 0) {
                 throw new ParseException("No available answer");
             }
-            if (mHeader.getSectionCount(QDSECTION) == 0) {
+            if (mHeader.getRecordCount(QDSECTION) == 0) {
                 throw new ParseException("No question found");
             }
-            // Assume only one question per answer packet. (RFC1035)
-            mQueryType = mSections[QDSECTION].get(0).nsType;
+            // Expect only one question in question section.
+            mQueryType = mRecords[QDSECTION].get(0).nsType;
         }
 
         public @NonNull List<InetAddress> getAddresses() {
             final List<InetAddress> results = new ArrayList<InetAddress>();
-            for (final DnsSection ansSec : mSections[ANSECTION]) {
+            for (final DnsRecord ansSec : mRecords[ANSECTION]) {
                 // Only support A and AAAA, also ignore answers if query type != answer type.
                 int nsType = ansSec.nsType;
                 if (nsType != mQueryType || (nsType != TYPE_A && nsType != TYPE_AAAA)) {
