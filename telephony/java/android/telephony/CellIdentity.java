@@ -86,7 +86,7 @@ public abstract class CellIdentity implements Parcelable {
         }
 
         if ((mMccStr != null && mMncStr == null) || (mMccStr == null && mMncStr != null)) {
-            DebugEventReporter.sendEvent(
+            AnomalyReporter.reportAnomaly(
                     UUID.fromString("a3ab0b9d-f2aa-4baf-911d-7096c0d4645a"),
                     "CellIdentity Missing Half of PLMN ID");
         }
