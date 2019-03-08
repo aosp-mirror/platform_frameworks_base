@@ -292,14 +292,17 @@ public class PhoneStateListener {
     public static final int LISTEN_PHONE_CAPABILITY_CHANGE                 = 0x00200000;
 
     /**
-     *  Listen for changes to preferred data subId.
-     *  See {@link SubscriptionManager#setPreferredDataSubId(int)}
-     *  for more details.
+     *  Listen for changes to active data subId. Active data subscription
+     *  is whichever is being used for Internet data. For most of the case, it's
+     *  default data subscription but it could be others. For example, when data is
+     *  switched to opportunistic subscription, that becomes the active data sub.
      *
-     *  @see #onPreferredDataSubIdChanged
+     *  Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE
+     *  READ_PHONE_STATE}
+     *  @see #onActiveDataSubIdChanged
      *  @hide
      */
-    public static final int LISTEN_PREFERRED_DATA_SUBID_CHANGE              = 0x00400000;
+    public static final int LISTEN_ACTIVE_DATA_SUBID_CHANGE               = 0x00400000;
 
     /**
      *  Listen for changes to the radio power state.
@@ -704,14 +707,14 @@ public class PhoneStateListener {
     }
 
     /**
-     * Callback invoked when preferred data subId changes. Requires
-     * the READ_PRIVILEGED_PHONE_STATE permission.
-     * @param subId the new preferred data subId. If it's INVALID_SUBSCRIPTION_ID,
-     *              it means it's unset and defaultDataSub is used to determine which
-     *              modem is preferred.
+     * Callback invoked when active data subId changes. Requires
+     * the READ_PHONE_STATE permission.
+     * @param subId current data subId used for Internet data. It will be default data subscription
+     *              most cases. And it could be other subscriptions for example opportunistic
+     *              subscription if data is switched onto it.
      * @hide
      */
-    public void onPreferredDataSubIdChanged(int subId) {
+    public void onActiveDataSubIdChanged(int subId) {
         // default implementation empty
     }
 
@@ -995,12 +998,12 @@ public class PhoneStateListener {
                     () -> mExecutor.execute(() -> psl.onCallAttributesChanged(callAttributes)));
         }
 
-        public void onPreferredDataSubIdChanged(int subId) {
+        public void onActiveDataSubIdChanged(int subId) {
             PhoneStateListener psl = mPhoneStateListenerWeakRef.get();
             if (psl == null) return;
 
             Binder.withCleanCallingIdentity(
-                    () -> mExecutor.execute(() -> psl.onPreferredDataSubIdChanged(subId)));
+                    () -> mExecutor.execute(() -> psl.onActiveDataSubIdChanged(subId)));
         }
 
         public void onImsCallDisconnectCauseChanged(ImsReasonInfo disconnectCause) {
