@@ -29,6 +29,7 @@ import android.os.ServiceManager;
 import android.os.ServiceSpecificException;
 import android.security.KeyStore;
 import android.security.keystore.AndroidKeyStoreProvider;
+import android.security.keystore.KeyPermanentlyInvalidatedException;
 
 import com.android.internal.widget.ILockSettings;
 
@@ -635,7 +636,7 @@ public class RecoveryController {
             return getKeyFromGrant(grantAlias);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
-        } catch (UnrecoverableKeyException e) {
+        } catch (KeyPermanentlyInvalidatedException | UnrecoverableKeyException e) {
             throw new InternalRecoveryServiceException("Failed to get key from keystore", e);
         } catch (ServiceSpecificException e) {
             if (e.errorCode == ERROR_INSECURE_USER) {
@@ -666,7 +667,7 @@ public class RecoveryController {
             return getKeyFromGrant(grantAlias);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
-        } catch (UnrecoverableKeyException e) {
+        } catch (KeyPermanentlyInvalidatedException | UnrecoverableKeyException e) {
             throw new InternalRecoveryServiceException("Failed to get key from keystore", e);
         } catch (ServiceSpecificException e) {
             if (e.errorCode == ERROR_INSECURE_USER) {
@@ -696,6 +697,8 @@ public class RecoveryController {
             return getKeyFromGrant(grantAlias);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        } catch (KeyPermanentlyInvalidatedException | UnrecoverableKeyException e) {
+            throw new UnrecoverableKeyException("Failed to get key from keystore");
         } catch (ServiceSpecificException e) {
             throw wrapUnexpectedServiceSpecificException(e);
         }
@@ -704,7 +707,8 @@ public class RecoveryController {
     /**
      * Returns the key with the given {@code grantAlias}.
      */
-    @NonNull Key getKeyFromGrant(@NonNull String grantAlias) throws UnrecoverableKeyException {
+    @NonNull Key getKeyFromGrant(@NonNull String grantAlias)
+            throws UnrecoverableKeyException, KeyPermanentlyInvalidatedException {
         return AndroidKeyStoreProvider.loadAndroidKeyStoreKeyFromKeystore(
                 mKeyStore,
                 grantAlias,

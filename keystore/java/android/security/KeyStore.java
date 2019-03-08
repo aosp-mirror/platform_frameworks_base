@@ -97,6 +97,9 @@ public class KeyStore {
      */
     public static final int OP_AUTH_NEEDED = 15;
 
+    // Used when a user changes their pin, invalidating old auth bound keys.
+    public static final int KEY_PERMANENTLY_INVALIDATED = 17;
+
     // Used for UID field to indicate the calling UID.
     public static final int UID_SELF = -1;
 
@@ -1188,6 +1191,8 @@ public class KeyStore {
                     return new KeyStoreException(errorCode, "Key blob corrupted");
                 case OP_AUTH_NEEDED:
                     return new KeyStoreException(errorCode, "Operation requires authorization");
+                case KEY_PERMANENTLY_INVALIDATED:
+                    return new KeyStoreException(errorCode, "Key permanently invalidated");
                 default:
                     return new KeyStoreException(errorCode, String.valueOf(errorCode));
             }
