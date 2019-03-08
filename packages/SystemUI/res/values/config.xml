@@ -40,6 +40,9 @@
     <!-- Whether or not we show the number in the bar. -->
     <bool name="config_statusBarShowNumber">false</bool>
 
+    <!-- If the lock screen should be dismissed after biometric auth. -->
+    <bool name="config_faceAuthDismissesKeyguard">false</bool>
+
     <!-- Vibrator pattern for camera gesture launch. -->
     <integer-array translatable="false" name="config_cameraLaunchGestureVibePattern">
         <item>0</item>
