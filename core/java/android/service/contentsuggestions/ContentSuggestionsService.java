@@ -185,7 +185,7 @@ public abstract class ContentSuggestionsService extends Service {
 
     /**
      * For temporary compat reason, remove with b/127532182
-     * @deprecated
+     * @deprecated use {@link #onProcessContextImage(int, Bitmap, Bundle)} instead.
      */
     @Deprecated
     public void processContextImage(
@@ -194,7 +194,8 @@ public abstract class ContentSuggestionsService extends Service {
 
     /**
      * For temporary compat reason, remove with b/127532182
-     * @deprecated
+     * @deprecated use {@link #onSuggestContentSelections(SelectionsRequest,
+     * ContentSuggestionsManager.SelectionsCallback)} instead.
      */
     @Deprecated
     public void suggestContentSelections(@NonNull SelectionsRequest request,
@@ -203,7 +204,8 @@ public abstract class ContentSuggestionsService extends Service {
 
     /**
      * For temporary compat reason, remove with b/127532182
-     * @deprecated
+     * @deprecated use {@link #onClassifyContentSelections(ClassificationsRequest,
+     * ContentSuggestionsManager.ClassificationsCallback)} instead.
      */
     @Deprecated
     public void classifyContentSelections(@NonNull ClassificationsRequest request,
@@ -212,7 +214,7 @@ public abstract class ContentSuggestionsService extends Service {
 
     /**
      * For temporary compat reason, remove with b/127532182
-     * @deprecated
+     * @deprecated use {@link #onNotifyInteraction(String, Bundle)} instead.
      */
     @Deprecated
     public void notifyInteraction(@NonNull String requestId, @NonNull Bundle interaction) {
