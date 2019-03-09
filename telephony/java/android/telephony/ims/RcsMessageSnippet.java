@@ -71,7 +71,7 @@ public final class RcsMessageSnippet implements Parcelable {
         mTimestamp = in.readLong();
     }
 
-    public static final Creator<RcsMessageSnippet> CREATOR =
+    public static final @android.annotation.NonNull Creator<RcsMessageSnippet> CREATOR =
             new Creator<RcsMessageSnippet>() {
                 @Override
                 public RcsMessageSnippet createFromParcel(Parcel in) {

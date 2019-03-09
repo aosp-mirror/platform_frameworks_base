@@ -91,7 +91,7 @@ public final class RcsThreadQueryResult implements Parcelable {
         in.readList(mRcsThreadIds, Integer.class.getClassLoader());
     }
 
-    public static final Creator<RcsThreadQueryResult> CREATOR =
+    public static final @android.annotation.NonNull Creator<RcsThreadQueryResult> CREATOR =
             new Creator<RcsThreadQueryResult>() {
                 @Override
                 public RcsThreadQueryResult createFromParcel(Parcel in) {

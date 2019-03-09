@@ -17,6 +17,7 @@ package android.telephony.ims;
 
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PROTECTED;
 
+import android.annotation.NonNull;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -44,6 +45,7 @@ public class RcsGroupThreadParticipantLeftEventDescriptor extends RcsGroupThread
                 new RcsParticipant(mLeavingParticipantId));
     }
 
+    @NonNull
     public static final Parcelable.Creator<RcsGroupThreadParticipantLeftEventDescriptor> CREATOR =
             new Creator<RcsGroupThreadParticipantLeftEventDescriptor>() {
                 @Override

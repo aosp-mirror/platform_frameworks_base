@@ -325,7 +325,7 @@ public final class RcsFileTransferCreationParams implements Parcelable {
         mFileTransferStatus = in.readInt();
     }
 
-    public static final Creator<RcsFileTransferCreationParams> CREATOR =
+    public static final @android.annotation.NonNull Creator<RcsFileTransferCreationParams> CREATOR =
             new Creator<RcsFileTransferCreationParams>() {
                 @Override
                 public RcsFileTransferCreationParams createFromParcel(Parcel in) {

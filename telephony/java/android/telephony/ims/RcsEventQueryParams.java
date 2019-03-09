@@ -292,7 +292,7 @@ public final class RcsEventQueryParams implements Parcelable {
         mLimit = in.readInt();
     }
 
-    public static final Creator<RcsEventQueryParams> CREATOR =
+    public static final @android.annotation.NonNull Creator<RcsEventQueryParams> CREATOR =
             new Creator<RcsEventQueryParams>() {
                 @Override
                 public RcsEventQueryParams createFromParcel(Parcel in) {
