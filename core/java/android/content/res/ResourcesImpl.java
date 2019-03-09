@@ -1303,7 +1303,7 @@ public class ResourcesImpl {
 
     @AnyRes
     static int getAttributeSetSourceResId(@Nullable AttributeSet set) {
-        if (set == null) {
+        if (set == null || !(set instanceof XmlBlock.Parser)) {
             return ID_NULL;
         }
         return ((XmlBlock.Parser) set).getSourceResId();
