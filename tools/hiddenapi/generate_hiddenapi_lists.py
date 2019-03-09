@@ -29,6 +29,9 @@ FLAG_BLACKLIST = "blacklist"
 FLAG_GREYLIST_MAX_O = "greylist-max-o"
 FLAG_GREYLIST_MAX_P = "greylist-max-p"
 FLAG_CORE_PLATFORM_API = "core-platform-api"
+FLAG_PUBLIC_API = "public-api"
+FLAG_SYSTEM_API = "system-api"
+FLAG_TEST_API = "test-api"
 
 # List of all known flags.
 FLAGS_API_LIST = [
@@ -38,7 +41,12 @@ FLAGS_API_LIST = [
     FLAG_GREYLIST_MAX_O,
     FLAG_GREYLIST_MAX_P,
 ]
-ALL_FLAGS = FLAGS_API_LIST + [ FLAG_CORE_PLATFORM_API ]
+ALL_FLAGS = FLAGS_API_LIST + [
+    FLAG_CORE_PLATFORM_API,
+    FLAG_PUBLIC_API,
+    FLAG_SYSTEM_API,
+    FLAG_TEST_API,
+    ]
 
 FLAGS_API_LIST_SET = set(FLAGS_API_LIST)
 ALL_FLAGS_SET = set(ALL_FLAGS)
@@ -203,14 +211,19 @@ class FlagsDict:
 
         # Iterate over all CSV lines, find entry in dict and append flags to it.
         for csv in csv_values:
-            self._dict[csv[0]].update(csv[1:])
+            flags = csv[1:]
+            if (FLAG_PUBLIC_API in flags) or (FLAG_SYSTEM_API in flags):
+                flags.append(FLAG_WHITELIST)
+            elif FLAG_TEST_API in flags:
+                flags.append(FLAG_GREYLIST)
+            self._dict[csv[0]].update(flags)
 
     def assign_flag(self, flag, apis, source="<unknown>"):
         """Assigns a flag to given subset of entries.
 
         Args:
             flag (string): One of ALL_FLAGS.
-            apis (set): Subset of APIs to recieve the flag.
+            apis (set): Subset of APIs to receive the flag.
             source (string): Origin of `entries_subset`. Will be printed in error messages.
 
         Throws:
