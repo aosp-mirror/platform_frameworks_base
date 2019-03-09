@@ -2180,26 +2180,26 @@ public abstract class Layout {
      */
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
     public static class TabStops {
-        private int[] mStops;
+        private float[] mStops;
         private int mNumStops;
-        private int mIncrement;
+        private float mIncrement;
 
-        public TabStops(int increment, Object[] spans) {
+        public TabStops(float increment, Object[] spans) {
             reset(increment, spans);
         }
 
-        void reset(int increment, Object[] spans) {
+        void reset(float increment, Object[] spans) {
             this.mIncrement = increment;
 
             int ns = 0;
             if (spans != null) {
-                int[] stops = this.mStops;
+                float[] stops = this.mStops;
                 for (Object o : spans) {
                     if (o instanceof TabStopSpan) {
                         if (stops == null) {
-                            stops = new int[10];
+                            stops = new float[10];
                         } else if (ns == stops.length) {
-                            int[] nstops = new int[ns * 2];
+                            float[] nstops = new float[ns * 2];
                             for (int i = 0; i < ns; ++i) {
                                 nstops[i] = stops[i];
                             }
@@ -2221,9 +2221,9 @@ public abstract class Layout {
         float nextTab(float h) {
             int ns = this.mNumStops;
             if (ns > 0) {
-                int[] stops = this.mStops;
+                float[] stops = this.mStops;
                 for (int i = 0; i < ns; ++i) {
-                    int stop = stops[i];
+                    float stop = stops[i];
                     if (stop > h) {
                         return stop;
                     }
@@ -2232,7 +2232,10 @@ public abstract class Layout {
             return nextDefaultStop(h, mIncrement);
         }
 
-        public static float nextDefaultStop(float h, int inc) {
+        /**
+         * Returns the position of next tab stop.
+         */
+        public static float nextDefaultStop(float h, float inc) {
             return ((int) ((h + inc) / inc)) * inc;
         }
     }
@@ -2570,7 +2573,7 @@ public abstract class Layout {
         ALIGN_RIGHT,
     }
 
-    private static final int TAB_INCREMENT = 20;
+    private static final float TAB_INCREMENT = 20;
 
     /** @hide */
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
