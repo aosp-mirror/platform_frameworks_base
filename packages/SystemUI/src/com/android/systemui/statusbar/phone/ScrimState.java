@@ -133,11 +133,10 @@ public enum ScrimState {
                     || mPulseReason == DozeLog.PULSE_REASON_DOCKING
                     || mPulseReason == DozeLog.PULSE_REASON_INTENT) {
                 mCurrentBehindAlpha = previousState.getBehindAlpha();
-                mCurrentBehindTint = Color.BLACK;
             } else {
-                mCurrentBehindAlpha = mScrimBehindAlphaKeyguard;
-                mCurrentBehindTint = Color.TRANSPARENT;
+                mCurrentBehindAlpha = ScrimController.AOD2_SCRIM_ALPHA;
             }
+            mCurrentBehindTint = Color.BLACK;
             mBlankScreen = mDisplayRequiresBlanking;
         }
     },
