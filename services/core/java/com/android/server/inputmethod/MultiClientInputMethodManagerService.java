@@ -29,6 +29,8 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.annotation.WorkerThread;
 import android.app.AppOpsManager;
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -44,6 +46,7 @@ import android.inputmethodservice.MultiClientInputMethodServiceDelegate;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Debug;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -66,6 +69,7 @@ import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodSubtype;
 import android.view.inputmethod.InputMethodSystemProperty;
 
+import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.inputmethod.IMultiClientInputMethod;
 import com.android.internal.inputmethod.IMultiClientInputMethodPrivilegedOperations;
@@ -73,6 +77,8 @@ import com.android.internal.inputmethod.IMultiClientInputMethodSession;
 import com.android.internal.inputmethod.StartInputFlags;
 import com.android.internal.inputmethod.StartInputReason;
 import com.android.internal.inputmethod.UnbindReason;
+import com.android.internal.messages.nano.SystemMessageProto;
+import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.internal.view.IInputContext;
 import com.android.internal.view.IInputMethodClient;
@@ -96,8 +102,15 @@ import java.util.WeakHashMap;
  * we can switch the implementation at the boot time.</p>
  */
 public final class MultiClientInputMethodManagerService {
-    static final String TAG = "MultiClientInputMethodManagerService";
-    static final boolean DEBUG = false;
+    private static final String TAG = "MultiClientInputMethodManagerService";
+    private static final boolean DEBUG = false;
+
+    private static final String PER_DISPLAY_FOCUS_DISABLED_WARNING_TITLE =
+            "config_perDisplayFocusEnabled is not true.";
+
+    private static final String PER_DISPLAY_FOCUS_DISABLED_WARNING_MSG =
+            "Consider rebuilding the system image after enabling config_perDisplayFocusEnabled to "
+                    + "make IME focus compatible with multi-client IME mode.";
 
     private static final long RECONNECT_DELAY_MSEC = 1000;
 
@@ -465,8 +478,33 @@ public final class MultiClientInputMethodManagerService {
                             onPackageAdded(intent);
                         }
                     }, filter, null, mHandler);
+                    break;
                 }
-                break;
+                case SystemService.PHASE_BOOT_COMPLETED: {
+                    final boolean perDisplayFocusEnabled = mContext.getResources().getBoolean(
+                            com.android.internal.R.bool.config_perDisplayFocusEnabled);
+                    if (!perDisplayFocusEnabled) {
+                        final Bundle extras = new Bundle();
+                        extras.putBoolean(Notification.EXTRA_ALLOW_DURING_SETUP, true);
+                        mContext.getSystemService(NotificationManager.class).notifyAsUser(TAG,
+                                SystemMessageProto.SystemMessage.NOTE_SELECT_INPUT_METHOD,
+                                new Notification.Builder(mContext,
+                                        SystemNotificationChannels.VIRTUAL_KEYBOARD)
+                                        .setContentTitle(PER_DISPLAY_FOCUS_DISABLED_WARNING_TITLE)
+                                        .setStyle(new Notification.BigTextStyle()
+                                                .bigText(PER_DISPLAY_FOCUS_DISABLED_WARNING_MSG))
+                                        .setSmallIcon(R.drawable.ic_notification_ime_default)
+                                        .setWhen(0)
+                                        .setOngoing(true)
+                                        .setLocalOnly(true)
+                                        .addExtras(extras)
+                                        .setCategory(Notification.CATEGORY_SYSTEM)
+                                        .setColor(mContext.getColor(
+                                                R.color.system_notification_accent_color))
+                                        .build(), UserHandle.ALL);
+                    }
+                    break;
+                }
             }
         }
 

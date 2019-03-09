@@ -39,7 +39,9 @@ Thus the first decision we made was that to support such special multi-display e
 
 ## How to test
 
-On AOSP-based development devices (e.g. phones) where `android.os.Build.IS_DEBUGGABLE` returns `true` and you can have root access, you can enable multi-client IME feature by setting a valid component name that supports multi-client IME protocol to the system property `persist.debug.multi_client_ime`. Reboot is required for this to take effect.
+For multi-client IME to properly work, an internal boolean resource `com.android.internal.R.bool.config_perDisplayFocusEnabled` needs to be `true`. Since this value cannot be overridden at the run time, you may need to rebuild the system image to enable per-display focus mode.
+
+As for multi-client IME mode itself, you can enable multi-client IME mode just by setting a valid component name that supports multi-client IME protocol to the system property `persist.debug.multi_client_ime`, as long as `android.os.Build.IS_DEBUGGABLE` returns `true` and you can have root access. Reboot is required for this to take effect.
 
 ```shell
 # Build and install a sample multi-client IME
