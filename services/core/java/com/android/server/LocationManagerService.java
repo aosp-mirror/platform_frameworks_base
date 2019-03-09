@@ -3210,18 +3210,6 @@ public class LocationManagerService extends ILocationManager.Stub {
                 continue;
             }
 
-            if (!reportLocationAccessNoThrow(
-                    receiver.mCallerIdentity.mPid,
-                    receiver.mCallerIdentity.mUid,
-                    receiver.mCallerIdentity.mPackageName,
-                    receiver.mAllowedResolutionLevel)) {
-                if (D) {
-                    Log.d(TAG, "skipping loc update for no op app: " +
-                            receiver.mCallerIdentity.mPackageName);
-                }
-                continue;
-            }
-
             Location notifyLocation;
             if (receiver.mAllowedResolutionLevel < RESOLUTION_LEVEL_FINE) {
                 notifyLocation = coarseLocation;  // use coarse location
@@ -3237,6 +3225,20 @@ public class LocationManagerService extends ILocationManager.Stub {
                         r.mLastFixBroadcast = lastLoc;
                     } else {
                         lastLoc.set(notifyLocation);
+                    }
+                    // Report location access before delivering location to the client. This will
+                    // note location delivery to appOps, so it should be called only when a
+                    // location is really being delivered to the client.
+                    if (!reportLocationAccessNoThrow(
+                            receiver.mCallerIdentity.mPid,
+                            receiver.mCallerIdentity.mUid,
+                            receiver.mCallerIdentity.mPackageName,
+                            receiver.mAllowedResolutionLevel)) {
+                        if (D) {
+                            Log.d(TAG, "skipping loc update for no op app: "
+                                    + receiver.mCallerIdentity.mPackageName);
+                        }
+                        continue;
                     }
                     if (!receiver.callLocationChangedLocked(notifyLocation)) {
                         Slog.w(TAG, "RemoteException calling onLocationChanged on "
