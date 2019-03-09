@@ -17,6 +17,7 @@
 package android.telephony.ims;
 
 import android.annotation.CheckResult;
+import android.annotation.NonNull;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -152,7 +153,7 @@ public final class RcsIncomingMessageCreationParams extends RcsMessageCreationPa
         return mSenderParticipantId;
     }
 
-    public static final @android.annotation.NonNull Creator<RcsIncomingMessageCreationParams> CREATOR =
+    public static final @NonNull Creator<RcsIncomingMessageCreationParams> CREATOR =
             new Creator<RcsIncomingMessageCreationParams>() {
                 @Override
                 public RcsIncomingMessageCreationParams createFromParcel(Parcel in) {
