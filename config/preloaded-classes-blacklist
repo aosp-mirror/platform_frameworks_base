@@ -3,3 +3,8 @@ android.os.AsyncTask
 android.os.FileObserver
 android.widget.Magnifier
 sun.nio.fs.UnixChannelFactory
+com.android.server.SystemConfig$PermissionEntry
+com.android.server.SystemConfig$SharedLibraryEntry
+com.android.server.SystemConfig
+android.permission.PermissionManager$SplitPermissionInfo
+android.permission.PermissionManager
