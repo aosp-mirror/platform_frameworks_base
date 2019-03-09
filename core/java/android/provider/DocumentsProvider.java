@@ -471,10 +471,12 @@ public abstract class DocumentsProvider extends ContentProvider {
      * the most recently modified documents.
      * <p>
      * If this method is overriden by the concrete DocumentsProvider and
-     * QUERY_ARGS_LIMIT is specified with a nonnegative int under queryArgs, the
-     * result will be limited by that number and QUERY_ARG_LIMIT will be
-     * specified under EXTRA_HONORED_ARGS. Otherwise, a default 64 limit will
-     * be used and no QUERY_ARG* will be specified under EXTRA_HONORED_ARGS.
+     * {@link ContentResolver#QUERY_ARG_LIMIT} is specified with a nonnegative
+     * int under queryArgs, the result will be limited by that number and
+     * {@link ContentResolver#QUERY_ARG_LIMIT} will be specified under
+     * {@link ContentResolver#EXTRA_HONORED_ARGS}. Otherwise, a default 64 limit
+     * will be used and no QUERY_ARG* will be specified under
+     * {@link ContentResolver#EXTRA_HONORED_ARGS}.
      * <p>
      * Recent documents do not support change notifications.
      *
