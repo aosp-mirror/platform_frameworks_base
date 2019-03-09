@@ -118,7 +118,9 @@ public class DynamicAndroidService extends IDynamicAndroidService.Stub implement
         if (gsiService.isGsiRunning()) {
             return gsiService.disableGsiInstall();
         } else {
-            return gsiService.setGsiBootable() == 0;
+            final int status = gsiService.getGsiBootStatus();
+            final boolean singleBoot = (status == IGsiService.BOOT_STATUS_SINGLE_BOOT);
+            return gsiService.setGsiBootable(singleBoot) == 0;
         }
     }
 
@@ -129,6 +131,6 @@ public class DynamicAndroidService extends IDynamicAndroidService.Stub implement
 
     @Override
     public boolean commit() throws RemoteException {
-        return getGsiService().setGsiBootable() == 0;
+        return getGsiService().setGsiBootable(true) == 0;
     }
 }
