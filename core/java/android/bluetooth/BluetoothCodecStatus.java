@@ -75,8 +75,8 @@ public final class BluetoothCodecStatus implements Parcelable {
      * @param c2 the second array of capabilities to compare
      * @return true if both arrays contain same capabilities
      */
-    private static boolean sameCapabilities(BluetoothCodecConfig[] c1,
-                                            BluetoothCodecConfig[] c2) {
+    public static boolean sameCapabilities(BluetoothCodecConfig[] c1,
+                                           BluetoothCodecConfig[] c2) {
         if (c1 == null) {
             return (c2 == null);
         }
