@@ -739,23 +739,6 @@ public final class UsageStatsManager {
     }
 
     /**
-     * @deprecated use
-     * {@link #registerAppUsageLimitObserver(int, String[], Duration, Duration, PendingIntent)}.
-     *
-     * @removed
-     * @hide
-     */
-    @Deprecated
-    @UnsupportedAppUsage
-    // STOPSHIP b/126917290: remove this method once b/126926550 is fixed.
-    public void registerAppUsageLimitObserver(int observerId, @NonNull String[] observedEntities,
-            long timeLimit, @NonNull TimeUnit timeUnit, @Nullable PendingIntent callbackIntent) {
-        final Duration timeLimitDuration = Duration.ofMillis(timeUnit.toMillis(timeLimit));
-        registerAppUsageLimitObserver(observerId, observedEntities,
-                timeLimitDuration, timeLimitDuration, callbackIntent);
-    }
-
-    /**
      * Register a usage limit observer that receives a callback on the provided intent when the
      * sum of usages of apps and tokens in the provided {@code observedEntities} array exceeds the
      * {@code timeLimit} specified. The structure of a token is a {@link String} with the reporting
