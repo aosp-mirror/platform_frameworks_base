@@ -65,8 +65,8 @@ public final class CellInfoTdscdma extends CellInfo implements Parcelable {
     }
 
     /** @hide */
-    public CellInfoTdscdma(android.hardware.radio.V1_4.CellInfo ci) {
-        super(ci);
+    public CellInfoTdscdma(android.hardware.radio.V1_4.CellInfo ci, long timeStamp) {
+        super(ci, timeStamp);
         final android.hardware.radio.V1_2.CellInfoTdscdma cit = ci.info.tdscdma();
         mCellIdentityTdscdma = new CellIdentityTdscdma(cit.cellIdentityTdscdma);
         mCellSignalStrengthTdscdma = new CellSignalStrengthTdscdma(cit.signalStrengthTdscdma);
