@@ -36,19 +36,19 @@ public class DnsPacketTest {
             int qCount, int aCount, int nsCount, int arCount) {
         assertEquals(header.id, id);
         assertEquals(header.flags, flag);
-        assertEquals(header.getSectionCount(DnsPacket.QDSECTION), qCount);
-        assertEquals(header.getSectionCount(DnsPacket.ANSECTION), aCount);
-        assertEquals(header.getSectionCount(DnsPacket.NSSECTION), nsCount);
-        assertEquals(header.getSectionCount(DnsPacket.ARSECTION), arCount);
+        assertEquals(header.getRecordCount(DnsPacket.QDSECTION), qCount);
+        assertEquals(header.getRecordCount(DnsPacket.ANSECTION), aCount);
+        assertEquals(header.getRecordCount(DnsPacket.NSSECTION), nsCount);
+        assertEquals(header.getRecordCount(DnsPacket.ARSECTION), arCount);
     }
 
-    private void assertSectionParses(DnsPacket.DnsSection section, String dname,
+    private void assertRecordParses(DnsPacket.DnsRecord record, String dname,
             int dtype, int dclass, int ttl, byte[] rr) {
-        assertEquals(section.dName, dname);
-        assertEquals(section.nsType, dtype);
-        assertEquals(section.nsClass, dclass);
-        assertEquals(section.ttl, ttl);
-        assertTrue(Arrays.equals(section.getRR(), rr));
+        assertEquals(record.dName, dname);
+        assertEquals(record.nsType, dtype);
+        assertEquals(record.nsClass, dclass);
+        assertEquals(record.ttl, ttl);
+        assertTrue(Arrays.equals(record.getRR(), rr));
     }
 
     class TestDnsPacket extends DnsPacket {
@@ -59,8 +59,8 @@ public class DnsPacketTest {
         public DnsHeader getHeader() {
             return mHeader;
         }
-        public List<DnsSection> getSectionList(int secType) {
-            return mSections[secType];
+        public List<DnsRecord> getRecordList(int secType) {
+            return mRecords[secType];
         }
     }
 
@@ -101,16 +101,16 @@ public class DnsPacketTest {
         // Header part
         assertHeaderParses(packet.getHeader(), 0x5566, 0x8180, 1, 1, 0, 0);
 
-        // Section part
-        List<DnsPacket.DnsSection> qdSectionList =
-                packet.getSectionList(DnsPacket.QDSECTION);
-        assertEquals(qdSectionList.size(), 1);
-        assertSectionParses(qdSectionList.get(0), "www.google.com", 1, 1, 0, null);
+        // Record part
+        List<DnsPacket.DnsRecord> qdRecordList =
+                packet.getRecordList(DnsPacket.QDSECTION);
+        assertEquals(qdRecordList.size(), 1);
+        assertRecordParses(qdRecordList.get(0), "www.google.com", 1, 1, 0, null);
 
-        List<DnsPacket.DnsSection> anSectionList =
-                packet.getSectionList(DnsPacket.ANSECTION);
-        assertEquals(anSectionList.size(), 1);
-        assertSectionParses(anSectionList.get(0), "www.google.com", 1, 1, 0x12b,
+        List<DnsPacket.DnsRecord> anRecordList =
+                packet.getRecordList(DnsPacket.ANSECTION);
+        assertEquals(anRecordList.size(), 1);
+        assertRecordParses(anRecordList.get(0), "www.google.com", 1, 1, 0x12b,
                 new byte[]{ (byte) 0xac, (byte) 0xd9, (byte) 0xa1, (byte) 0x84 });
     }
 
@@ -143,16 +143,16 @@ public class DnsPacketTest {
         // Header part
         assertHeaderParses(packet.getHeader(), 0x7722, 0x8180, 1, 1, 0, 0);
 
-        // Section part
-        List<DnsPacket.DnsSection> qdSectionList =
-                packet.getSectionList(DnsPacket.QDSECTION);
-        assertEquals(qdSectionList.size(), 1);
-        assertSectionParses(qdSectionList.get(0), "www.google.com", 28, 1, 0, null);
+        // Record part
+        List<DnsPacket.DnsRecord> qdRecordList =
+                packet.getRecordList(DnsPacket.QDSECTION);
+        assertEquals(qdRecordList.size(), 1);
+        assertRecordParses(qdRecordList.get(0), "www.google.com", 28, 1, 0, null);
 
-        List<DnsPacket.DnsSection> anSectionList =
-                packet.getSectionList(DnsPacket.ANSECTION);
-        assertEquals(anSectionList.size(), 1);
-        assertSectionParses(anSectionList.get(0), "www.google.com", 28, 1, 0x37,
+        List<DnsPacket.DnsRecord> anRecordList =
+                packet.getRecordList(DnsPacket.ANSECTION);
+        assertEquals(anRecordList.size(), 1);
+        assertRecordParses(anRecordList.get(0), "www.google.com", 28, 1, 0x37,
                 new byte[]{ 0x24, 0x04, 0x68, 0x00, 0x40, 0x05, 0x08, 0x0d,
                     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x20, 0x04 });
     }
