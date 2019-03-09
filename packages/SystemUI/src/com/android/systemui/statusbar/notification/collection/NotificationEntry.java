@@ -543,14 +543,6 @@ public final class NotificationEntry {
         return row == null || row.isRemoved();
     }
 
-    /**
-     * @return {@code true} if the row is null or dismissed
-     */
-    public boolean isDismissed() {
-        //TODO: recycling
-        return row == null || row.isDismissed();
-    }
-
     public boolean isRowPinned() {
         return row != null && row.isPinned();
     }
