@@ -23,6 +23,8 @@ import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static com.android.systemui.statusbar.StatusBarState.SHADE;
 import static com.android.systemui.statusbar.notification.NotificationAlertingManager.alertAgain;
 
+import static java.lang.annotation.RetentionPolicy.SOURCE;
+
 import android.annotation.Nullable;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityTaskManager;
@@ -42,6 +44,7 @@ import android.view.IPinnedStackListener;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
+import androidx.annotation.IntDef;
 import androidx.annotation.MainThread;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -59,6 +62,8 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.NotificationContentInflater.InflationFlag;
 import com.android.systemui.statusbar.phone.StatusBarWindowController;
 
+import java.lang.annotation.Retention;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -70,9 +75,21 @@ import javax.inject.Singleton;
  */
 @Singleton
 public class BubbleController implements BubbleExpandedView.OnBubbleBlockedListener {
-    private static final int MAX_BUBBLES = 5; // TODO: actually enforce this
 
     private static final String TAG = "BubbleController";
+
+    private static final int MAX_BUBBLES = 5; // TODO: actually enforce this
+
+    @Retention(SOURCE)
+    @IntDef({DISMISS_USER_GESTURE, DISMISS_AGED, DISMISS_TASK_FINISHED, DISMISS_BLOCKED,
+            DISMISS_NOTIF_CANCEL, DISMISS_ACCESSIBILITY_ACTION})
+    @interface DismissReason {}
+    static final int DISMISS_USER_GESTURE = 1;
+    static final int DISMISS_AGED = 2;
+    static final int DISMISS_TASK_FINISHED = 3;
+    static final int DISMISS_BLOCKED = 4;
+    static final int DISMISS_NOTIF_CANCEL = 5;
+    static final int DISMISS_ACCESSIBILITY_ACTION = 6;
 
     // Enables some subset of notifs to automatically become bubbles
     private static final boolean DEBUG_ENABLE_AUTO_BUBBLE = false;
@@ -248,11 +265,11 @@ public class BubbleController implements BubbleExpandedView.OnBubbleBlockedListe
     /**
      * Tell the stack of bubbles to be dismissed, this will remove all of the bubbles in the stack.
      */
-    void dismissStack() {
+    void dismissStack(@DismissReason int reason) {
         if (mStackView == null) {
             return;
         }
-        mStackView.stackDismissed();
+        mStackView.stackDismissed(reason);
 
         updateVisibility();
         mNotificationEntryManager.updateNotifications();
@@ -304,9 +321,9 @@ public class BubbleController implements BubbleExpandedView.OnBubbleBlockedListe
      * Must be called from the main thread.
      */
     @MainThread
-    void removeBubble(String key) {
+    void removeBubble(String key, int reason) {
         if (mStackView != null) {
-            mStackView.removeBubble(key);
+            mStackView.removeBubble(key, reason);
         }
         mNotificationEntryManager.updateNotifications();
         updateVisibility();
@@ -320,7 +337,7 @@ public class BubbleController implements BubbleExpandedView.OnBubbleBlockedListe
             boolean samePackage = entry.notification.getPackageName().equals(
                     e.notification.getPackageName());
             if (samePackage) {
-                removeBubble(entry.key);
+                removeBubble(entry.key, DISMISS_BLOCKED);
             }
         }
     }
@@ -377,7 +394,7 @@ public class BubbleController implements BubbleExpandedView.OnBubbleBlockedListe
             }
             if (!removedByUser) {
                 // This was a cancel so we should remove the bubble
-                removeBubble(entry.key);
+                removeBubble(entry.key, DISMISS_NOTIF_CANCEL);
             }
         }
     };

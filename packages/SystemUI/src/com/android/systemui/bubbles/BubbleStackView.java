@@ -19,6 +19,8 @@ package com.android.systemui.bubbles;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
+import android.app.Notification;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Outline;
@@ -49,6 +51,7 @@ import androidx.dynamicanimation.animation.SpringForce;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.widget.ViewClippingUtil;
 import com.android.systemui.R;
+import com.android.systemui.bubbles.BubbleController.DismissReason;
 import com.android.systemui.bubbles.animation.ExpandedAnimationController;
 import com.android.systemui.bubbles.animation.PhysicsAnimationLayout;
 import com.android.systemui.bubbles.animation.StackAnimationController;
@@ -62,6 +65,7 @@ import java.math.RoundingMode;
  */
 public class BubbleStackView extends FrameLayout {
     private static final String TAG = "BubbleStackView";
+    private static final boolean DEBUG = false;
 
     private Point mDisplaySize;
 
@@ -232,7 +236,7 @@ public class BubbleStackView extends FrameLayout {
         }
         switch (action) {
             case AccessibilityNodeInfo.ACTION_DISMISS:
-                stackDismissed();
+                stackDismissed(BubbleController.DISMISS_ACCESSIBILITY_ACTION);
                 return true;
             case AccessibilityNodeInfo.ACTION_COLLAPSE:
                 collapseStack();
@@ -356,18 +360,12 @@ public class BubbleStackView extends FrameLayout {
     /**
      * Remove a bubble from the stack.
      */
-    public void removeBubble(String key) {
+    public void removeBubble(String key, int reason) {
         Bubble b = mBubbleData.removeBubble(key);
         if (b == null) {
             return;
         }
-        b.entry.setBubbleDismissed(true);
-
-        // Remove it from the views
-        int removedIndex = mBubbleContainer.indexOfChild(b.iconView);
-        b.expandedView.cleanUpExpandedState();
-        mBubbleContainer.removeView(b.iconView);
-
+        int removedIndex = dismissBubble(b, reason);
         int bubbleCount = mBubbleContainer.getChildCount();
         if (bubbleCount == 0) {
             // If no bubbles remain, collapse the entire stack.
@@ -385,23 +383,60 @@ public class BubbleStackView extends FrameLayout {
                 mExpandedBubble = null;
             }
         }
+        // TODO: consider logging reason code
         logBubbleEvent(b, StatsLog.BUBBLE_UICHANGED__ACTION__DISMISSED);
     }
 
     /**
      * Dismiss the stack of bubbles.
      */
-    public void stackDismissed() {
+    public void stackDismissed(int reason) {
         for (Bubble bubble : mBubbleData.getBubbles()) {
-            bubble.entry.setBubbleDismissed(true);
-            bubble.expandedView.cleanUpExpandedState();
+            dismissBubble(bubble, reason);
         }
         mBubbleData.clear();
         collapseStack();
         mBubbleContainer.removeAllViews();
         mExpandedViewContainer.removeAllViews();
+        // TODO: consider logging reason code
         logBubbleEvent(null /* no bubble associated with bubble stack dismiss */,
                 StatsLog.BUBBLE_UICHANGED__ACTION__STACK_DISMISSED);
+    }
+
+    /**
+     * Marks the notification entry as dismissed, cleans up Bubble icon and expanded view UI
+     * elements and calls deleteIntent if necessary.
+     *
+     * <p>Note: This does not remove the Bubble from BubbleData.
+     *
+     * @param bubble the Bubble being dismissed
+     * @param reason code for the reason the dismiss was triggered
+     * @see BubbleController.DismissReason
+     */
+    private int dismissBubble(Bubble bubble, @DismissReason int reason) {
+        if (DEBUG) {
+            Log.d(TAG, "dismissBubble: " + bubble + " reason=" + reason);
+        }
+        bubble.entry.setBubbleDismissed(true);
+        bubble.expandedView.cleanUpExpandedState();
+
+        // Remove it from the views
+        int removedIndex = mBubbleContainer.indexOfChild(bubble.iconView);
+        mBubbleContainer.removeViewAt(removedIndex);
+
+        if (reason == BubbleController.DISMISS_USER_GESTURE) {
+            Notification.BubbleMetadata bubbleMetadata = bubble.entry.getBubbleMetadata();
+            PendingIntent deleteIntent = bubbleMetadata.getDeleteIntent();
+            if (deleteIntent != null) {
+                try {
+                    deleteIntent.send();
+                } catch (PendingIntent.CanceledException e) {
+                    Log.w(TAG, "Failed to send delete intent for bubble with key: "
+                            + (bubble.entry != null ? bubble.entry.key : " null entry"));
+                }
+            }
+        }
+        return removedIndex;
     }
 
     /**

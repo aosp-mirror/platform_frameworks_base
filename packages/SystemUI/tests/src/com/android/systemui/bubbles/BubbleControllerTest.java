@@ -20,10 +20,13 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.IActivityManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -83,6 +86,9 @@ public class BubbleControllerTest extends SysuiTestCase {
     @Mock
     private BubbleController.BubbleExpandListener mBubbleExpandListener;
 
+    @Mock
+    private PendingIntent mDeleteIntent;
+
     private BubbleData mBubbleData;
 
     @Before
@@ -98,9 +104,9 @@ public class BubbleControllerTest extends SysuiTestCase {
 
         // Need notifications for bubbles
         mNotificationTestHelper = new NotificationTestHelper(mContext);
-        mRow = mNotificationTestHelper.createBubble();
-        mRow2 = mNotificationTestHelper.createBubble();
-        mNoChannelRow = mNotificationTestHelper.createBubble();
+        mRow = mNotificationTestHelper.createBubble(mDeleteIntent);
+        mRow2 = mNotificationTestHelper.createBubble(mDeleteIntent);
+        mNoChannelRow = mNotificationTestHelper.createBubble(mDeleteIntent);
 
         // Return non-null notification data from the NEM
         when(mNotificationEntryManager.getNotificationData()).thenReturn(mNotificationData);
@@ -141,11 +147,10 @@ public class BubbleControllerTest extends SysuiTestCase {
 
         verify(mBubbleStateChangeListener).onHasBubblesChanged(true);
 
-        mBubbleController.removeBubble(mRow.getEntry().key);
+        mBubbleController.removeBubble(mRow.getEntry().key, BubbleController.DISMISS_USER_GESTURE);
         assertFalse(mStatusBarWindowController.getBubblesShowing());
         assertTrue(mRow.getEntry().isBubbleDismissed());
         verify(mNotificationEntryManager).updateNotifications();
-
         verify(mBubbleStateChangeListener).onHasBubblesChanged(false);
     }
 
@@ -155,7 +160,7 @@ public class BubbleControllerTest extends SysuiTestCase {
         mBubbleController.updateBubble(mRow2.getEntry(), true /* updatePosition */);
         assertTrue(mBubbleController.hasBubbles());
 
-        mBubbleController.dismissStack();
+        mBubbleController.dismissStack(BubbleController.DISMISS_USER_GESTURE);
         assertFalse(mStatusBarWindowController.getBubblesShowing());
         verify(mNotificationEntryManager).updateNotifications();
         assertTrue(mRow.getEntry().isBubbleDismissed());
@@ -271,7 +276,8 @@ public class BubbleControllerTest extends SysuiTestCase {
         assertFalse(mRow2.getEntry().showInShadeWhenBubble());
 
         // Dismiss currently expanded
-        mBubbleController.removeBubble(stackView.getExpandedBubbleView().getKey());
+        mBubbleController.removeBubble(stackView.getExpandedBubbleView().getKey(),
+                BubbleController.DISMISS_USER_GESTURE);
         verify(mBubbleExpandListener).onBubbleExpandChanged(false, mRow2.getEntry().key);
 
         // Make sure next bubble is selected
@@ -279,7 +285,8 @@ public class BubbleControllerTest extends SysuiTestCase {
         verify(mBubbleExpandListener).onBubbleExpandChanged(true, mRow.getEntry().key);
 
         // Dismiss that one
-        mBubbleController.removeBubble(stackView.getExpandedBubbleView().getKey());
+        mBubbleController.removeBubble(stackView.getExpandedBubbleView().getKey(),
+                BubbleController.DISMISS_USER_GESTURE);
 
         // Make sure state changes and collapse happens
         verify(mBubbleExpandListener).onBubbleExpandChanged(false, mRow.getEntry().key);
@@ -297,6 +304,28 @@ public class BubbleControllerTest extends SysuiTestCase {
     public void testMarkNewNotificationAsShowInShade() {
         mEntryListener.onPendingEntryAdded(mRow.getEntry());
         assertTrue(mRow.getEntry().showInShadeWhenBubble());
+    }
+
+    @Test
+    public void testDeleteIntent_removeBubble_aged() throws PendingIntent.CanceledException {
+        mBubbleController.updateBubble(mRow.getEntry(), true /* updatePosition */);
+        mBubbleController.removeBubble(mRow.getEntry().key, BubbleController.DISMISS_AGED);
+        verify(mDeleteIntent, never()).send();
+    }
+
+    @Test
+    public void testDeleteIntent_removeBubble_user() throws PendingIntent.CanceledException {
+        mBubbleController.updateBubble(mRow.getEntry(), true /* updatePosition */);
+        mBubbleController.removeBubble(mRow.getEntry().key, BubbleController.DISMISS_USER_GESTURE);
+        verify(mDeleteIntent, times(1)).send();
+    }
+
+    @Test
+    public void testDeleteIntent_dismissStack() throws PendingIntent.CanceledException {
+        mBubbleController.updateBubble(mRow.getEntry(), true /* updatePosition */);
+        mBubbleController.updateBubble(mRow2.getEntry(), true /* updatePosition */);
+        mBubbleController.dismissStack(BubbleController.DISMISS_USER_GESTURE);
+        verify(mDeleteIntent, times(2)).send();
     }
 
     static class TestableBubbleController extends BubbleController {
