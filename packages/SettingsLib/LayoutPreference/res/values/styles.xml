@@ -31,12 +31,10 @@
     </style>
 
     <style name="TextAppearance.EntityHeaderSummary"
-           parent="@android:style/TextAppearance.Material.Body1">
+           parent="@*android:style/TextAppearance.DeviceDefault.Body1">
         <item name="android:textAlignment">viewStart</item>
         <item name="android:textColor">?android:attr/textColorSecondary</item>
-        <item name="android:gravity">start</item>
         <item name="android:singleLine">true</item>
         <item name="android:ellipsize">marquee</item>
-        <item name="android:textSize">14sp</item>
     </style>
 </resources>
