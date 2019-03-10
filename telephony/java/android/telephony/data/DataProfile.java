@@ -243,7 +243,6 @@ public final class DataProfile implements Parcelable {
      */
     public boolean isPreferred() { return  mPreferred; }
 
-    /** @hide */
     @Override
     public int describeContents() {
         return 0;
@@ -266,7 +265,6 @@ public final class DataProfile implements Parcelable {
         return (o == this || toString().equals(o.toString()));
     }
 
-    /** @hide */
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(mProfileId);
@@ -288,8 +286,7 @@ public final class DataProfile implements Parcelable {
         dest.writeBoolean(mPreferred);
     }
 
-    /** @hide */
-    public static final Parcelable.Creator<DataProfile> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<DataProfile> CREATOR =
             new Parcelable.Creator<DataProfile>() {
         @Override
         public DataProfile createFromParcel(Parcel source) {
