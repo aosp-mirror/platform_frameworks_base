@@ -227,7 +227,7 @@ public class WifiP2pConfig implements Parcelable {
     public static final class Builder {
 
         private static final MacAddress MAC_ANY_ADDRESS =
-                MacAddress.fromString("00:00:00:00:00:00");
+                MacAddress.fromString("02:00:00:00:00:00");
 
         private MacAddress mDeviceAddress = MAC_ANY_ADDRESS;
         private String mNetworkName = "";
@@ -240,9 +240,9 @@ public class WifiP2pConfig implements Parcelable {
          * Specify the peer's MAC address. If not set, the device will
          * try to find a peer whose SSID matches the network name as
          * specified by {@link #setNetworkName(String)}. Specifying null will
-         * reset the peer's MAC address to "00:00:00:00:00:00".
+         * reset the peer's MAC address to "02:00:00:00:00:00".
          * <p>
-         *     Optional. "00:00:00:00:00:00" by default.
+         *     Optional. "02:00:00:00:00:00" by default.
          *
          * @param deviceAddress the peer's MAC address.
          * @return The builder to facilitate chaining
