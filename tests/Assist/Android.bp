@@ -1,0 +1,5 @@
+android_test {
+    name: "Assist",
+    srcs: ["**/*.java"],
+    platform_apis: true,
+}

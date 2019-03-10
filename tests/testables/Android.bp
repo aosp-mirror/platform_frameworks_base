@@ -15,18 +15,12 @@
 //
 
 java_library {
-
     name: "testables",
-    // ANDROIDMK TRANSLATION ERROR: unsupported assignment to LOCAL_MODULE_TAG
-    // LOCAL_MODULE_TAG := tests
-
     srcs: ["src/**/*.java"],
-
     libs: [
         "android.test.runner",
         "android.test.mock",
         "androidx.test.rules",
         "mockito-target-inline-minus-junit4",
     ],
-
 }
