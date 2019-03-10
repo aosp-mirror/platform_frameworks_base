@@ -27,6 +27,7 @@
 #include "androidfw/ConfigDescription.h"
 
 #include "ResourceTable.h"
+#include "trace/TraceBuffer.h"
 #include "util/Util.h"
 
 using ::android::ConfigDescription;
@@ -154,6 +155,7 @@ static void MarkNonPreferredDensitiesAsClaimed(
   }
 }
 bool TableSplitter::VerifySplitConstraints(IAaptContext* context) {
+  TRACE_CALL();
   bool error = false;
   for (size_t i = 0; i < split_constraints_.size(); i++) {
     if (split_constraints_[i].configs.size() == 0) {

@@ -68,6 +68,7 @@ import android.hardware.usb.UsbManager;
 import android.net.INetd;
 import android.net.INetworkPolicyManager;
 import android.net.INetworkStatsService;
+import android.net.ITetheringEventCallback;
 import android.net.InterfaceConfiguration;
 import android.net.IpPrefix;
 import android.net.LinkAddress;
@@ -98,10 +99,11 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.test.TestLooper;
 import android.provider.Settings;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
 import android.telephony.CarrierConfigManager;
 import android.test.mock.MockContentResolver;
+
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.StateMachine;
@@ -122,6 +124,7 @@ import org.mockito.MockitoAnnotations;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Vector;
 
 @RunWith(AndroidJUnit4.class)
@@ -917,6 +920,67 @@ public class TetheringTest {
                 expectedInteractionsWithShowNotification);
     }
 
+    private class TestTetheringEventCallback extends ITetheringEventCallback.Stub {
+        private final ArrayList<Network> mActualUpstreams = new ArrayList<>();
+
+        public void expectUpstreamChanged(Network... networks) {
+            final ArrayList<Network> expectedUpstreams =
+                    new ArrayList<Network>(Arrays.asList(networks));
+            for (Network upstream : expectedUpstreams) {
+                // throws OOB if no expectations
+                assertEquals(mActualUpstreams.remove(0), upstream);
+            }
+            assertNoCallback();
+        }
+
+        @Override
+        public void onUpstreamChanged(Network network) {
+            mActualUpstreams.add(network);
+        }
+
+        public void assertNoCallback() {
+            assertTrue(mActualUpstreams.isEmpty());
+        }
+    }
+
+    @Test
+    public void testRegisterTetheringEventCallback() throws Exception {
+        TestTetheringEventCallback callback1 = new TestTetheringEventCallback();
+        TestTetheringEventCallback callback2 = new TestTetheringEventCallback();
+
+        // 1. Register one callback and run usb tethering.
+        mTethering.registerTetheringEventCallback(callback1);
+        mLooper.dispatchAll();
+        callback1.expectUpstreamChanged(new Network[] {null});
+        NetworkState upstreamState = buildMobileDualStackUpstreamState();
+        runUsbTethering(upstreamState);
+        callback1.expectUpstreamChanged(upstreamState.network);
+        // 2. Register second callback.
+        mTethering.registerTetheringEventCallback(callback2);
+        mLooper.dispatchAll();
+        callback2.expectUpstreamChanged(upstreamState.network);
+        // 3. Disable usb tethering.
+        mTethering.stopTethering(TETHERING_USB);
+        mLooper.dispatchAll();
+        sendUsbBroadcast(false, false, false);
+        mLooper.dispatchAll();
+        callback1.expectUpstreamChanged(new Network[] {null});
+        callback2.expectUpstreamChanged(new Network[] {null});
+        // 4. Unregister first callback and run hotspot.
+        mTethering.unregisterTetheringEventCallback(callback1);
+        mLooper.dispatchAll();
+        when(mUpstreamNetworkMonitor.getCurrentPreferredUpstream()).thenReturn(upstreamState);
+        when(mUpstreamNetworkMonitor.selectPreferredUpstreamType(any()))
+                .thenReturn(upstreamState);
+        when(mWifiManager.startSoftAp(any(WifiConfiguration.class))).thenReturn(true);
+        mTethering.startTethering(TETHERING_WIFI, null, false);
+        mLooper.dispatchAll();
+        mTethering.interfaceStatusChanged(TEST_WLAN_IFNAME, true);
+        sendWifiApStateChanged(WIFI_AP_STATE_ENABLED, TEST_WLAN_IFNAME, IFACE_IP_MODE_TETHERED);
+        mLooper.dispatchAll();
+        callback1.assertNoCallback();
+        callback2.expectUpstreamChanged(upstreamState.network);
+    }
 
     // TODO: Test that a request for hotspot mode doesn't interfere with an
     // already operating tethering mode interface.

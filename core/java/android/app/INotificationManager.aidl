@@ -192,7 +192,6 @@ interface INotificationManager
     ParceledListSlice getAppActiveNotifications(String callingPkg, int userId);
 
     void setNotificationDelegate(String callingPkg, String delegate);
-    void revokeNotificationDelegate(String callingPkg);
     String getNotificationDelegate(String callingPkg);
     boolean canNotifyAsPackage(String callingPkg, String targetPkg);
 

@@ -40,6 +40,9 @@
     <!-- Whether or not we show the number in the bar. -->
     <bool name="config_statusBarShowNumber">false</bool>
 
+    <!-- If the lock screen should be dismissed after biometric auth. -->
+    <bool name="config_faceAuthDismissesKeyguard">false</bool>
+
     <!-- Vibrator pattern for camera gesture launch. -->
     <integer-array translatable="false" name="config_cameraLaunchGestureVibePattern">
         <item>0</item>
@@ -311,6 +314,7 @@
         <item>com.android.systemui.ScreenDecorations</item>
         <item>com.android.systemui.biometrics.BiometricDialogImpl</item>
         <item>com.android.systemui.SliceBroadcastRelayHandler</item>
+        <item>com.android.systemui.SizeCompatModeActivityController</item>
     </string-array>
 
     <!-- SystemUI vender service, used in config_systemUIServiceComponents. -->
@@ -325,7 +329,7 @@
     <!-- Nav bar button default ordering/layout -->
     <string name="config_navBarLayout" translatable="false">left[.5W],back[1WC];home;recent[1WC],right[.5W]</string>
     <string name="config_navBarLayoutQuickstep" translatable="false">back[1.7WC];home;contextual[1.7WC]</string>
-    <string name="config_navBarLayoutHandle" translatable="false">";home_handle;"</string>
+    <string name="config_navBarLayoutHandle" translatable="false">";home_handle;assistant_handle[.18WC]"</string>
 
     <bool name="quick_settings_show_full_alarm">false</bool>
 

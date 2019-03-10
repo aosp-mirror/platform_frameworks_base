@@ -954,7 +954,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         @Override
         public void onUnlockUser(int userId) {
             synchronized (mService.getGlobalLock()) {
-                mService.mStackSupervisor.mLaunchParamsPersister.onUnlockUser(userId);
+                mService.mStackSupervisor.onUserUnlocked(userId);
             }
         }
 

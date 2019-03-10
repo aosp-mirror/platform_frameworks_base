@@ -713,7 +713,7 @@ public class AccessPointTest {
                 .setProviderFriendlyName(providerFriendlyName).build();
         assertThat(ap.isPasspointConfig()).isTrue();
         assertThat(ap.getPasspointFqdn()).isEqualTo(fqdn);
-        assertThat(ap.getConfigName()).isEqualTo(providerFriendlyName);
+        assertThat(ap.getTitle()).isEqualTo(providerFriendlyName);
     }
 
     @Test

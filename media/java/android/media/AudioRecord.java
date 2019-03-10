@@ -22,6 +22,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityThread;
 import android.media.audiopolicy.AudioMix;
@@ -1791,13 +1792,14 @@ public class AudioRecord implements AudioRouting, MicrophoneDirection,
     // MicrophoneDirection
     //--------------------
     /**
-     * Specifies the logical microphone (for processing).
+     * Specifies the logical microphone (for processing). Applications can use this to specify
+     * which side of the device to optimize capture from. Typically used in conjunction with
+     * the camera capturing video.
      *
-     * @param direction Direction constant.
      * @return true if sucessful.
      */
-    public boolean setMicrophoneDirection(int direction) {
-        return native_set_microphone_direction(direction) == 0;
+    public boolean setMicrophoneDirection(@DirectionMode int direction) {
+        return native_set_microphone_direction(direction) == AudioSystem.SUCCESS;
     }
 
     /**
@@ -1809,7 +1811,9 @@ public class AudioRecord implements AudioRouting, MicrophoneDirection,
      * @return true if sucessful.
      */
     public boolean setMicrophoneFieldDimension(@FloatRange(from = -1.0, to = 1.0) float zoom) {
-        return native_set_microphone_field_dimension(zoom) == 0;
+        Preconditions.checkArgument(
+                zoom >= -1 && zoom <= 1, "Argument must fall between -1 & 1 (inclusive)");
+        return native_set_microphone_field_dimension(zoom) == AudioSystem.SUCCESS;
     }
 
     //---------------------------------------------------------
@@ -1984,41 +1988,100 @@ public class AudioRecord implements AudioRouting, MicrophoneDirection,
     {
         private MetricsConstants() {}
 
-        /**
-         * Key to extract the output format being recorded
-         * from the {@link AudioRecord#getMetrics} return value.
-         * The value is a String.
-         */
-        public static final String ENCODING = "android.media.audiorecord.encoding";
+        // MM_PREFIX is slightly different than TAG, used to avoid cut-n-paste errors.
+        private static final String MM_PREFIX = "android.media.audiorecord.";
 
         /**
-         * Key to extract the Source Type for this track
+         * Key to extract the audio data encoding for this track
          * from the {@link AudioRecord#getMetrics} return value.
-         * The value is a String.
+         * The value is a {@code String}.
          */
-        public static final String SOURCE = "android.media.audiorecord.source";
+        public static final String ENCODING = MM_PREFIX + "encoding";
+
+        /**
+         * Key to extract the source type for this track
+         * from the {@link AudioRecord#getMetrics} return value.
+         * The value is a {@code String}.
+         */
+        public static final String SOURCE = MM_PREFIX + "source";
 
         /**
          * Key to extract the estimated latency through the recording pipeline
          * from the {@link AudioRecord#getMetrics} return value.
          * This is in units of milliseconds.
-         * The value is an integer.
+         * The value is an {@code int}.
+         * @deprecated Not properly supported in the past.
          */
-        public static final String LATENCY = "android.media.audiorecord.latency";
+        @Deprecated
+        public static final String LATENCY = MM_PREFIX + "latency";
 
         /**
          * Key to extract the sink sample rate for this record track in Hz
          * from the {@link AudioRecord#getMetrics} return value.
-         * The value is an integer.
+         * The value is an {@code int}.
          */
-        public static final String SAMPLERATE = "android.media.audiorecord.samplerate";
+        public static final String SAMPLERATE = MM_PREFIX + "samplerate";
 
         /**
          * Key to extract the number of channels being recorded in this record track
          * from the {@link AudioRecord#getMetrics} return value.
-         * The value is an integer.
+         * The value is an {@code int}.
          */
-        public static final String CHANNELS = "android.media.audiorecord.channels";
+        public static final String CHANNELS = MM_PREFIX + "channels";
 
+        /**
+         * Use for testing only. Do not expose.
+         * The native channel mask.
+         * The value is a {@code long}.
+         * @hide
+         */
+        @TestApi
+        public static final String CHANNEL_MASK = MM_PREFIX + "channelMask";
+
+
+        /**
+         * Use for testing only. Do not expose.
+         * The port id of this input port in audioserver.
+         * The value is an {@code int}.
+         * @hide
+         */
+        @TestApi
+        public static final String PORT_ID = MM_PREFIX + "portId";
+
+        /**
+         * Use for testing only. Do not expose.
+         * The buffer frameCount.
+         * The value is an {@code int}.
+         * @hide
+         */
+        @TestApi
+        public static final String FRAME_COUNT = MM_PREFIX + "frameCount";
+
+        /**
+         * Use for testing only. Do not expose.
+         * The actual record track attributes used.
+         * The value is a {@code String}.
+         * @hide
+         */
+        @TestApi
+        public static final String ATTRIBUTES = MM_PREFIX + "attributes";
+
+        /**
+         * Use for testing only. Do not expose.
+         * The buffer frameCount
+         * The value is a {@code double}.
+         * @hide
+         */
+        @TestApi
+        public static final String DURATION_MS = MM_PREFIX + "durationMs";
+
+        /**
+         * Use for testing only. Do not expose.
+         * The number of times the record track has started
+         * The value is a {@code long}.
+         * @hide
+         */
+        @TestApi
+        public static final String START_COUNT = MM_PREFIX + "startCount";
     }
 }

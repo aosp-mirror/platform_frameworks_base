@@ -561,41 +561,48 @@ public class WifiConfiguration implements Parcelable {
      * See {@link KeyMgmt} for descriptions of the values.
      * Defaults to WPA-PSK WPA-EAP.
      */
+    @NonNull
     public BitSet allowedKeyManagement;
     /**
      * The set of security protocols supported by this configuration.
      * See {@link Protocol} for descriptions of the values.
      * Defaults to WPA RSN.
      */
+    @NonNull
     public BitSet allowedProtocols;
     /**
      * The set of authentication protocols supported by this configuration.
      * See {@link AuthAlgorithm} for descriptions of the values.
      * Defaults to automatic selection.
      */
+    @NonNull
     public BitSet allowedAuthAlgorithms;
     /**
      * The set of pairwise ciphers for WPA supported by this configuration.
      * See {@link PairwiseCipher} for descriptions of the values.
      * Defaults to CCMP TKIP.
      */
+    @NonNull
     public BitSet allowedPairwiseCiphers;
     /**
      * The set of group ciphers supported by this configuration.
      * See {@link GroupCipher} for descriptions of the values.
      * Defaults to CCMP TKIP WEP104 WEP40.
      */
+    @NonNull
     public BitSet allowedGroupCiphers;
     /**
      * The set of group management ciphers supported by this configuration.
      * See {@link GroupMgmtCipher} for descriptions of the values.
      */
+    @NonNull
     public BitSet allowedGroupManagementCiphers;
     /**
      * The set of SuiteB ciphers supported by this configuration.
      * To be used for WPA3-Enterprise mode.
      * See {@link SuiteBCipher} for descriptions of the values.
      */
+    @NonNull
     public BitSet allowedSuiteBCiphers;
     /**
      * The enterprise configuration details specifying the EAP method,

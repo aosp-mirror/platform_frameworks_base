@@ -16,6 +16,8 @@
 
 package android.os;
 
+import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -65,6 +67,9 @@ public class GraphicsEnvironment {
     private static final String ANGLE_RULES_FILE = "a4a_rules.json";
     private static final String ANGLE_TEMP_RULES = "debug.angle.rules";
     private static final String ACTION_ANGLE_FOR_ANDROID = "android.app.action.ANGLE_FOR_ANDROID";
+    private static final String ACTION_ANGLE_FOR_ANDROID_TOAST_MESSAGE =
+            "android.app.action.ANGLE_FOR_ANDROID_TOAST_MESSAGE";
+    private static final String INTENT_KEY_A4A_TOAST_MESSAGE = "A4A Toast Message";
     private static final String GAME_DRIVER_WHITELIST_ALL = "*";
 
     private ClassLoader mClassLoader;
@@ -557,9 +562,20 @@ public class GraphicsEnvironment {
         final String packageName = context.getPackageName();
 
         if (shouldShowAngleInUseDialogBox(context) && shouldUseAngle(context, packageName)) {
-            final String toastMsg = packageName + " is using ANGLE";
-            final Toast toast = Toast.makeText(context, toastMsg, Toast.LENGTH_LONG);
-            toast.show();
+            final Intent intent = new Intent(ACTION_ANGLE_FOR_ANDROID_TOAST_MESSAGE);
+            String anglePkg = getAnglePackageName(context.getPackageManager());
+            intent.setPackage(anglePkg);
+
+            context.sendOrderedBroadcast(intent, null, new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    Bundle results = getResultExtras(true);
+
+                    String toastMsg = results.getString(INTENT_KEY_A4A_TOAST_MESSAGE);
+                    final Toast toast = Toast.makeText(context, toastMsg, Toast.LENGTH_LONG);
+                    toast.show();
+                }
+            }, null, Activity.RESULT_OK, null, null);
         }
     }
 

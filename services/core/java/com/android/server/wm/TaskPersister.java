@@ -492,16 +492,8 @@ public class TaskPersister implements PersisterQueue.Listener {
         return new File(userTaskIdsDir, PERSISTED_TASK_IDS_FILENAME);
     }
 
-    static File getUserTasksDir(int userId) {
-        File userTasksDir = new File(Environment.getDataSystemCeDirectory(userId), TASKS_DIRNAME);
-
-        if (!userTasksDir.exists()) {
-            if (!userTasksDir.mkdir()) {
-                Slog.e(TAG, "Failure creating tasks directory for user " + userId + ": "
-                        + userTasksDir);
-            }
-        }
-        return userTasksDir;
+    private static File getUserTasksDir(int userId) {
+        return new File(Environment.getDataSystemCeDirectory(userId), TASKS_DIRNAME);
     }
 
     static File getUserImagesDir(int userId) {
@@ -568,8 +560,13 @@ public class TaskPersister implements PersisterQueue.Listener {
                 FileOutputStream file = null;
                 AtomicFile atomicFile = null;
                 try {
-                    atomicFile = new AtomicFile(new File(
-                            getUserTasksDir(task.userId),
+                    File userTasksDir = getUserTasksDir(task.userId);
+                    if (!userTasksDir.isDirectory() && !userTasksDir.mkdirs()) {
+                        Slog.e(TAG, "Failure creating tasks directory for user " + task.userId
+                                + ": " + userTasksDir + " Dropping persistence for task " + task);
+                        return;
+                    }
+                    atomicFile = new AtomicFile(new File(userTasksDir,
                             String.valueOf(task.taskId) + TASK_FILENAME_SUFFIX));
                     file = atomicFile.startWrite();
                     file.write(stringWriter.toString().getBytes());

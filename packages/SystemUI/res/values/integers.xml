@@ -19,8 +19,8 @@
 
     <!-- Action footer width used for layout_width to indicate WRAP_CONTENT (along with a weight of
          0) as we can allow the carrier text to stretch as far as needed in the QS footer. -->
-    <integer name="qs_footer_actions_width">-2</integer>
-    <integer name="qs_footer_actions_weight">0</integer>
+    <integer name="qs_footer_actions_width">0</integer>
+    <integer name="qs_footer_actions_weight">1</integer>
 
     <!-- Maximum number of bubbles to render and animate at one time. While the animations used are
          lightweight translation animations, this number can be reduced on lower end devices if any

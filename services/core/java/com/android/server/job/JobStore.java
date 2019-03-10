@@ -174,6 +174,7 @@ public final class JobStore {
     public void getRtcCorrectedJobsLocked(final ArrayList<JobStatus> toAdd,
             final ArrayList<JobStatus> toRemove) {
         final long elapsedNow = sElapsedRealtimeClock.millis();
+        final IActivityManager am = ActivityManager.getService();
 
         // Find the jobs that need to be fixed up, collecting them for post-iteration
         // replacement with their new versions
@@ -182,9 +183,11 @@ public final class JobStore {
             if (utcTimes != null) {
                 Pair<Long, Long> elapsedRuntimes =
                         convertRtcBoundsToElapsed(utcTimes, elapsedNow);
-                toAdd.add(new JobStatus(job, job.getBaseHeartbeat(),
+                JobStatus newJob = new JobStatus(job, job.getBaseHeartbeat(),
                         elapsedRuntimes.first, elapsedRuntimes.second,
-                        0, job.getLastSuccessfulRunTime(), job.getLastFailedRunTime()));
+                        0, job.getLastSuccessfulRunTime(), job.getLastFailedRunTime());
+                newJob.prepareLocked(am);
+                toAdd.add(newJob);
                 toRemove.add(job);
             }
         });

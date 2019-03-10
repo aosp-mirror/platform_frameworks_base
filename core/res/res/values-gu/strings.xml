@@ -308,18 +308,15 @@
     <string name="permgrouplab_phone" msgid="5229115638567440675">"ફોન"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"ફોન કૉલ કરો અને સંચાલિત કરો"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ને ફોન કૉલ કરવાની અને તેને મેનેજ કરવાની મંજૂરી આપીએ?"</string>
-    <!-- no translation found for permgrouplab_sensors (4838614103153567532) -->
-    <skip />
+    <string name="permgrouplab_sensors" msgid="4838614103153567532">"બૉડી સેન્સર"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"તમારા મહત્વપૂર્ણ ચિહ્નો વિશે સેન્સર ડેટા ઍક્સેસ કરો"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ને તમારી મહત્વપૂર્ણ સહી વિશેના સેન્સર ડેટાને ઍક્સેસ કરવાની મંજૂરી આપીએ?"</string>
     <string name="permgrouplab_aural" msgid="965607064083134896">"સંગીત"</string>
     <string name="permgroupdesc_aural" msgid="4870189506255958055">"તમારા સંગીતને ઍક્સેસ કરો"</string>
     <string name="permgrouprequest_aural" msgid="6787926123071735620">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ને તમારા સંગીતમાં ઍક્સેસ કરવાની મંજૂરી આપવી છે?"</string>
-    <!-- no translation found for permgrouplab_visual (6477382108771145134) -->
-    <skip />
+    <string name="permgrouplab_visual" msgid="6477382108771145134">"ફોટા અને વીડિયો"</string>
     <string name="permgroupdesc_visual" msgid="3415827902566663546">"તમારા ફોટો &amp; વિડિઓ ઍક્સેસ કરો"</string>
-    <!-- no translation found for permgrouprequest_visual (3043752127595243314) -->
-    <skip />
+    <string name="permgrouprequest_visual" msgid="3043752127595243314">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ને તમારા ટૅગ કરેલાં સ્થાનો સહિત ફોટા અને વીડિયો ઍક્સેસ કરવાની મંજૂરી આપવી છે?"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"વિંડો કન્ટેન્ટ પુનઃપ્રાપ્ત કરો"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"તમે જેની સાથે ક્રિયા-પ્રતિક્રિયા કરી રહ્યાં છો તે વિંડોનું કન્ટેન્ટ તપાસો."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"સ્પર્શ કરીને શોધખોળ કરવું ચાલુ કરો"</string>
@@ -2024,4 +2021,6 @@
       <item quantity="one"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> ફાઇલ</item>
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> ફાઇલ</item>
     </plurals>
+    <!-- no translation found for chooser_no_direct_share_targets (997970693708458895) -->
+    <skip />
 </resources>

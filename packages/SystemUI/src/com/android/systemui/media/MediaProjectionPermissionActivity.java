@@ -135,7 +135,7 @@ public class MediaProjectionPermissionActivity extends Activity
 
         mDialog = new AlertDialog.Builder(this)
                 .setTitle(dialogTitle)
-                .setIcon(aInfo.loadIcon(packageManager))
+                .setIcon(R.drawable.ic_media_projection_permission)
                 .setMessage(message)
                 .setPositiveButton(R.string.media_projection_action_text, this)
                 .setNegativeButton(android.R.string.cancel, this)

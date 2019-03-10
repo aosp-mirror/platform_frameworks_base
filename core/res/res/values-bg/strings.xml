@@ -308,18 +308,15 @@
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Телефон"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"да извършва телефонни обаждания и да ги управлява"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"Да се разреши ли на &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; да извършва и управлява телефонни обаждания?"</string>
-    <!-- no translation found for permgrouplab_sensors (4838614103153567532) -->
-    <skip />
+    <string name="permgrouplab_sensors" msgid="4838614103153567532">"Сензори за тяло"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"достъп до сензорните данни за жизнените ви показатели"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"Да се разреши ли на &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; да осъществява достъп до данните от сензорите за жизнените ви показатели?"</string>
     <string name="permgrouplab_aural" msgid="965607064083134896">"Музика"</string>
     <string name="permgroupdesc_aural" msgid="4870189506255958055">"достъп до музиката ви"</string>
     <string name="permgrouprequest_aural" msgid="6787926123071735620">"Да се разреши ли на &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; да осъществява достъп до музиката ви?"</string>
-    <!-- no translation found for permgrouplab_visual (6477382108771145134) -->
-    <skip />
+    <string name="permgrouplab_visual" msgid="6477382108771145134">"Снимки и видеоклипове"</string>
     <string name="permgroupdesc_visual" msgid="3415827902566663546">"достъп до снимките и видеоклиповете ви"</string>
-    <!-- no translation found for permgrouprequest_visual (3043752127595243314) -->
-    <skip />
+    <string name="permgrouprequest_visual" msgid="3043752127595243314">"Да се разреши ли на &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; достъп до снимките и видеоклиповете ви, включително маркерите за местоположение?"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Извличане на съдържанието от прозореца"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Инспектиране на съдържанието на прозорец, с който взаимодействате."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Включване на изследването чрез докосване"</string>
@@ -2023,4 +2020,6 @@
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> файла</item>
       <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> + <xliff:g id="COUNT_1">%d</xliff:g> файл</item>
     </plurals>
+    <!-- no translation found for chooser_no_direct_share_targets (997970693708458895) -->
+    <skip />
 </resources>

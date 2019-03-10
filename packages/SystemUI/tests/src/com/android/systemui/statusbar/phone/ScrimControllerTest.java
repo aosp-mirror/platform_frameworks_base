@@ -51,6 +51,7 @@ import com.android.systemui.statusbar.ScrimView;
 import com.android.systemui.util.wakelock.WakeLock;
 import com.android.systemui.utils.os.FakeHandler;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -99,12 +100,13 @@ public class ScrimControllerTest extends SysuiTestCase {
                 visible -> mScrimVisibility = visible, mDozeParamenters, mAlarmManager);
         mScrimController.setHasBackdrop(false);
         mScrimController.setWallpaperSupportsAmbientMode(false);
+        mScrimController.transitionTo(ScrimState.KEYGUARD);
+        mScrimController.finishAnimationsImmediately();
     }
 
-    @Test
-    public void initialState() {
-        Assert.assertEquals("ScrimController should start initialized",
-                mScrimController.getState(), ScrimState.UNINITIALIZED);
+    @After
+    public void tearDown() {
+        mScrimController.finishAnimationsImmediately();
     }
 
     @Test
@@ -114,7 +116,7 @@ public class ScrimControllerTest extends SysuiTestCase {
         // Front scrim should be transparent
         // Back scrim should be visible without tint
         assertScrimVisibility(VISIBILITY_FULLY_TRANSPARENT, VISIBILITY_SEMI_TRANSPARENT);
-        assertScrimTint(mScrimBehind, false /* tinted */);
+        assertScrimTint(mScrimBehind, true /* tinted */);
     }
 
     @Test
@@ -307,13 +309,13 @@ public class ScrimControllerTest extends SysuiTestCase {
         reset(mScrimBehind);
         mScrimController.setPanelExpansion(0f);
         mScrimController.setPanelExpansion(1.0f);
-        mScrimController.onPreDraw();
+        mScrimController.finishAnimationsImmediately();
 
         Assert.assertEquals("Scrim alpha should change after setPanelExpansion",
                 mScrimBehindAlpha, mScrimBehind.getViewAlpha(), 0.01f);
 
         mScrimController.setPanelExpansion(0f);
-        mScrimController.onPreDraw();
+        mScrimController.finishAnimationsImmediately();
 
         Assert.assertEquals("Scrim alpha should change after setPanelExpansion",
                 mScrimBehindAlpha, mScrimBehind.getViewAlpha(), 0.01f);
@@ -336,6 +338,7 @@ public class ScrimControllerTest extends SysuiTestCase {
 
         mScrimController.setExpansionAffectsAlpha(true);
         mScrimController.setPanelExpansion(0.1f);
+        mScrimController.finishAnimationsImmediately();
         Assert.assertNotEquals("Scrim opacity should change when setExpansionAffectsAlpha "
                 + "is true", scrimAlpha, mScrimBehind.getViewAlpha(), 0.01f);
     }

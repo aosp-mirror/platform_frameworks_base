@@ -84,6 +84,7 @@ import com.android.internal.telephony.IPhoneSubInfo;
 import com.android.internal.telephony.ISetOpportunisticDataCallback;
 import com.android.internal.telephony.ITelephony;
 import com.android.internal.telephony.ITelephonyRegistry;
+import com.android.internal.telephony.IUpdateAvailableNetworksCallback;
 import com.android.internal.telephony.OperatorInfo;
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.RILConstants;
@@ -1248,30 +1249,34 @@ public class TelephonyManager {
     public static final String EXTRA_CARRIER_NAME = "android.telephony.extra.CARRIER_NAME";
 
     /**
-     * Broadcast Action: The subscription precise carrier identity has changed.
-     * The precise carrier id can be used to further differentiate a carrier by different
-     * networks, by prepaid v.s.postpaid or even by 4G v.s.3G plan. Each carrier has a unique
-     * carrier id returned by {@link #getSimCarrierId()} but could have multiple precise carrier id.
-     * e.g, {@link #getSimCarrierId()} will always return Tracfone (id 2022) for a Tracfone SIM,
-     * while {@link #getSimPreciseCarrierId()} can return Tracfone AT&T or Tracfone T-Mobile based
-     * on the current subscription IMSI. For carriers without any fine-grained ids, precise carrier
-     * id is same as carrier id.
+     * Broadcast Action: The subscription specific carrier identity has changed.
+     *
+     * A specific carrier ID returns the fine-grained carrier ID of the current subscription.
+     * It can represent the fact that a carrier may be in effect an aggregation of other carriers
+     * (ie in an MVNO type scenario) where each of these specific carriers which are used to make
+     * up the actual carrier service may have different carrier configurations.
+     * A specific carrier ID could also be used, for example, in a scenario where a carrier requires
+     * different carrier configuration for different service offering such as a prepaid plan.
+     *
+     * the specific carrier ID would be used for configuration purposes, but apps wishing to know
+     * about the carrier itself should use the regular carrier ID returned by
+     * {@link #getSimCarrierId()}.
      *
      * <p>Similar like {@link #ACTION_SUBSCRIPTION_CARRIER_IDENTITY_CHANGED}, this intent will be
      * sent on the event of {@link #ACTION_SUBSCRIPTION_CARRIER_IDENTITY_CHANGED} while its also
      * possible to be sent without {@link #ACTION_SUBSCRIPTION_CARRIER_IDENTITY_CHANGED} when
-     * precise carrier id changes with the same carrier id.
+     * specific carrier ID changes while carrier ID remains the same.
      * e.g, the same subscription switches to different IMSI could potentially change its
-     * precise carrier id while carrier id remains the same.
-     * @see #getSimPreciseCarrierId()
+     * specific carrier ID while carrier id remains the same.
+     * @see #getSimSpecificCarrierId()
      * @see #getSimCarrierId()
      *
      * The intent will have the following extra values:
      * <ul>
-     *   <li>{@link #EXTRA_PRECISE_CARRIER_ID} The up-to-date precise carrier id of the
+     *   <li>{@link #EXTRA_SPECIFIC_CARRIER_ID} The up-to-date specific carrier id of the
      *   current subscription.
      *   </li>
-     *   <li>{@link #EXTRA_PRECISE_CARRIER_NAME} The up-to-date name of the precise carrier id.
+     *   <li>{@link #EXTRA_SPECIFIC_CARRIER_NAME} The up-to-date name of the specific carrier id.
      *   </li>
      *   <li>{@link #EXTRA_SUBSCRIPTION_ID} The subscription id associated with the changed carrier
      *   identity.
@@ -1280,30 +1285,30 @@ public class TelephonyManager {
      * <p class="note">This is a protected intent that can only be sent by the system.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String ACTION_SUBSCRIPTION_PRECISE_CARRIER_IDENTITY_CHANGED =
-            "android.telephony.action.SUBSCRIPTION_PRECISE_CARRIER_IDENTITY_CHANGED";
+    public static final String ACTION_SUBSCRIPTION_SPECIFIC_CARRIER_IDENTITY_CHANGED =
+            "android.telephony.action.SUBSCRIPTION_SPECIFIC_CARRIER_IDENTITY_CHANGED";
 
     /**
-     * An int extra used with {@link #ACTION_SUBSCRIPTION_PRECISE_CARRIER_IDENTITY_CHANGED} which
-     * indicates the updated precise carrier id returned by
-     * {@link TelephonyManager#getSimPreciseCarrierId()}. Note, its possible precise carrier id
+     * An int extra used with {@link #ACTION_SUBSCRIPTION_SPECIFIC_CARRIER_IDENTITY_CHANGED} which
+     * indicates the updated specific carrier id returned by
+     * {@link TelephonyManager#getSimSpecificCarrierId()}. Note, its possible specific carrier id
      * changes while {@link #ACTION_SUBSCRIPTION_CARRIER_IDENTITY_CHANGED} remains the same
      * e.g, when subscription switch to different IMSIs.
      * <p>Will be {@link TelephonyManager#UNKNOWN_CARRIER_ID} if the subscription is unavailable or
      * the carrier cannot be identified.
      */
-    public static final String EXTRA_PRECISE_CARRIER_ID =
-            "android.telephony.extra.PRECISE_CARRIER_ID";
+    public static final String EXTRA_SPECIFIC_CARRIER_ID =
+            "android.telephony.extra.SPECIFIC_CARRIER_ID";
 
     /**
-     * An string extra used with {@link #ACTION_SUBSCRIPTION_PRECISE_CARRIER_IDENTITY_CHANGED} which
-     * indicates the updated precise carrier name returned by
-     * {@link TelephonyManager#getSimPreciseCarrierIdName()}.
-     * <p>it's a user-facing name of the precise carrier id {@link #EXTRA_PRECISE_CARRIER_ID}, e.g,
-     * Tracfone-AT&T.
+     * An string extra used with {@link #ACTION_SUBSCRIPTION_SPECIFIC_CARRIER_IDENTITY_CHANGED}
+     * which indicates the updated specific carrier name returned by
+     * {@link TelephonyManager#getSimSpecificCarrierIdName()}.
+     * <p>it's a user-facing name of the specific carrier id {@link #EXTRA_SPECIFIC_CARRIER_ID}
+     * e.g, Tracfone-AT&T
      */
-    public static final String EXTRA_PRECISE_CARRIER_NAME =
-            "android.telephony.extra.PRECISE_CARRIER_NAME";
+    public static final String EXTRA_SPECIFIC_CARRIER_NAME =
+            "android.telephony.extra.SPECIFIC_CARRIER_NAME";
 
     /**
      * An int extra used with {@link #ACTION_SUBSCRIPTION_CARRIER_IDENTITY_CHANGED} to indicate the
@@ -8940,17 +8945,23 @@ public class TelephonyManager {
     }
 
     /**
-     * Returns fine-grained carrier id of the current subscription.
+     * Returns fine-grained carrier ID of the current subscription.
      *
-     * <p>The precise carrier id can be used to further differentiate a carrier by different
-     * networks, by prepaid v.s.postpaid or even by 4G v.s.3G plan. Each carrier has a unique
-     * carrier id returned by {@link #getSimCarrierId()} but could have multiple precise carrier id.
-     * e.g, {@link #getSimCarrierId()} will always return Tracfone (id 2022) for a Tracfone SIM,
-     * while {@link #getSimPreciseCarrierId()} can return Tracfone AT&T or Tracfone T-Mobile based
-     * on the current subscription IMSI.
+     * A specific carrier ID can represent the fact that a carrier may be in effect an aggregation
+     * of other carriers (ie in an MVNO type scenario) where each of these specific carriers which
+     * are used to make up the actual carrier service may have different carrier configurations.
+     * A specific carrier ID could also be used, for example, in a scenario where a carrier requires
+     * different carrier configuration for different service offering such as a prepaid plan.
      *
-     * <p>For carriers without any fine-grained carrier ids, return {@link #getSimCarrierId()}
-     * <p>Precise carrier ids are defined in the same way as carrier id
+     * the specific carrier ID would be used for configuration purposes, but apps wishing to know
+     * about the carrier itself should use the regular carrier ID returned by
+     * {@link #getSimCarrierId()}.
+     *
+     * e.g, Tracfone SIMs could return different specific carrier ID based on IMSI from current
+     * subscription while carrier ID remains the same.
+     *
+     * <p>For carriers without fine-grained specific carrier ids, return {@link #getSimCarrierId()}
+     * <p>Specific carrier ids are defined in the same way as carrier id
      * <a href="https://android.googlesource.com/platform/packages/providers/TelephonyProvider/+/master/assets/carrier_list.textpb">here</a>
      * except each with a "parent" id linking to its top-level carrier id.
      *
@@ -8958,11 +8969,11 @@ public class TelephonyManager {
      * Return {@link #UNKNOWN_CARRIER_ID} if the subscription is unavailable or the carrier cannot
      * be identified.
      */
-    public int getSimPreciseCarrierId() {
+    public int getSimSpecificCarrierId() {
         try {
             ITelephony service = getITelephony();
             if (service != null) {
-                return service.getSubscriptionPreciseCarrierId(getSubId());
+                return service.getSubscriptionSpecificCarrierId(getSubId());
             }
         } catch (RemoteException ex) {
             // This could happen if binder process crashes.
@@ -8972,18 +8983,22 @@ public class TelephonyManager {
 
     /**
      * Similar like {@link #getSimCarrierIdName()}, returns user-facing name of the
-     * precise carrier id returned by {@link #getSimPreciseCarrierId()}.
+     * specific carrier id returned by {@link #getSimSpecificCarrierId()}.
+     *
+     * The specific carrier ID would be used for configuration purposes, but apps wishing to know
+     * about the carrier itself should use the regular carrier ID returned by
+     * {@link #getSimCarrierIdName()}.
      *
      * <p>The returned name is unlocalized.
      *
-     * @return user-facing name of the subscription precise carrier id. Return {@code null} if the
+     * @return user-facing name of the subscription specific carrier id. Return {@code null} if the
      * subscription is unavailable or the carrier cannot be identified.
      */
-    public @Nullable CharSequence getSimPreciseCarrierIdName() {
+    public @Nullable CharSequence getSimSpecificCarrierIdName() {
         try {
             ITelephony service = getITelephony();
             if (service != null) {
-                return service.getSubscriptionPreciseCarrierName(getSubId());
+                return service.getSubscriptionSpecificCarrierName(getSubId());
             }
         } catch (RemoteException ex) {
             // This could happen if binder process crashes.
@@ -9748,7 +9763,7 @@ public class TelephonyManager {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
                 return telephony.getNumberOfModemsWithSimultaneousDataConnections(
-                        getSubId(), mContext.getOpPackageName());
+                        getSubId(), getOpPackageName());
             }
         } catch (RemoteException ex) {
             // This could happen if binder process crashes.
@@ -10176,6 +10191,41 @@ public class TelephonyManager {
      */
     public static final int SET_OPPORTUNISTIC_SUB_INVALID_PARAMETER = 2;
 
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"UPDATE_AVAILABLE_NETWORKS"}, value = {
+            UPDATE_AVAILABLE_NETWORKS_SUCCESS,
+            UPDATE_AVAILABLE_NETWORKS_UNKNOWN_FAILURE,
+            UPDATE_AVAILABLE_NETWORKS_ABORTED,
+            UPDATE_AVAILABLE_NETWORKS_INVALID_ARGUMENTS,
+            UPDATE_AVAILABLE_NETWORKS_NO_CARRIER_PRIVILEGE})
+    public @interface UpdateAvailableNetworksResult {}
+
+    /**
+     * No error. Operation succeeded.
+     */
+    public static final int UPDATE_AVAILABLE_NETWORKS_SUCCESS = 0;
+
+    /**
+     * There is a unknown failure happened.
+     */
+    public static final int UPDATE_AVAILABLE_NETWORKS_UNKNOWN_FAILURE = 1;
+
+    /**
+     * The request is aborted.
+     */
+    public static final int UPDATE_AVAILABLE_NETWORKS_ABORTED = 2;
+
+    /**
+     * The parameter passed in is invalid.
+     */
+    public static final int UPDATE_AVAILABLE_NETWORKS_INVALID_ARGUMENTS = 3;
+
+    /**
+     * No carrier privilege.
+     */
+    public static final int UPDATE_AVAILABLE_NETWORKS_NO_CARRIER_PRIVILEGE = 4;
+
     /**
      * Set preferred opportunistic data subscription id.
      *
@@ -10255,31 +10305,49 @@ public class TelephonyManager {
     /**
      * Update availability of a list of networks in the current location.
      *
-     * This api should be called to inform OpportunisticNetwork Service about the availability
-     * of a network at the current location. This information will be used by OpportunisticNetwork
-     * service to decide to attach to the network opportunistically. If an empty list is passed,
-     * it is assumed that no network is available.
+     * This api should be called by opportunistic network selection app to inform
+     * OpportunisticNetwork Service about the availability of a network at the current location.
+     * This information will be used by OpportunisticNetwork service to decide to attach to the
+     * network opportunistically.
+     * If an empty list is passed, it is assumed that no network is available.
      * Requires that the calling app has carrier privileges on both primary and
      * secondary subscriptions (see {@link #hasCarrierPrivileges}), or has permission
      * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}.
      * @param availableNetworks is a list of available network information.
-     * @return true if request is accepted
+     * @param executor The executor of where the callback will execute.
+     * @param callback Callback will be triggered once it succeeds or failed.
      *
      */
     @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
-    public boolean updateAvailableNetworks(List<AvailableNetworkInfo> availableNetworks) {
+    public void updateAvailableNetworks(@NonNull List<AvailableNetworkInfo> availableNetworks,
+            @Nullable @CallbackExecutor Executor executor,
+            @UpdateAvailableNetworksResult @Nullable Consumer<Integer> callback) {
         String pkgForDebug = mContext != null ? mContext.getOpPackageName() : "<unknown>";
-        boolean ret = false;
         try {
             IOns iOpportunisticNetworkService = getIOns();
-            if (iOpportunisticNetworkService != null && availableNetworks != null) {
-                ret = iOpportunisticNetworkService.updateAvailableNetworks(availableNetworks,
-                        pkgForDebug);
+            if (iOpportunisticNetworkService == null || availableNetworks == null) {
+                Binder.withCleanCallingIdentity(() -> executor.execute(() -> {
+                    callback.accept(UPDATE_AVAILABLE_NETWORKS_INVALID_ARGUMENTS);
+                }));
+                return;
             }
+            IUpdateAvailableNetworksCallback callbackStub =
+                    new IUpdateAvailableNetworksCallback.Stub() {
+                        @Override
+                        public void onComplete(int result) {
+                            if (executor == null || callback == null) {
+                                return;
+                            }
+                            Binder.withCleanCallingIdentity(() -> executor.execute(() -> {
+                                callback.accept(result);
+                            }));
+                        }
+                    };
+            iOpportunisticNetworkService.updateAvailableNetworks(availableNetworks, callbackStub,
+                    pkgForDebug);
         } catch (RemoteException ex) {
             Rlog.e(TAG, "updateAvailableNetworks RemoteException", ex);
         }
-        return ret;
     }
 
     /**

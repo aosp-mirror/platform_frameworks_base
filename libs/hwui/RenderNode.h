@@ -255,6 +255,8 @@ private:
     DisplayList* mDisplayList;
     DisplayList* mStagingDisplayList;
 
+    int64_t mDamageGenerationId;
+
     friend class AnimatorManager;
     AnimatorManager mAnimatorManager;
 

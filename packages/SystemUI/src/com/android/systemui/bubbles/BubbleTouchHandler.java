@@ -140,7 +140,7 @@ class BubbleTouchHandler implements View.OnTouchListener {
             case MotionEvent.ACTION_UP:
                 trackMovement(event);
                 if (mInDismissTarget && isStack) {
-                    mController.dismissStack();
+                    mController.dismissStack(BubbleController.DISMISS_USER_GESTURE);
                 } else if (mMovedEnough) {
                     mVelocityTracker.computeCurrentVelocity(/* maxVelocity */ 1000);
                     final float velX = mVelocityTracker.getXVelocity();
@@ -152,7 +152,8 @@ class BubbleTouchHandler implements View.OnTouchListener {
                         mStack.onBubbleDragFinish(
                                 mTouchedView, viewX, viewY, velX, velY, /* dismissed */ dismissed);
                         if (dismissed) {
-                            mController.removeBubble(((BubbleView) mTouchedView).getKey());
+                            mController.removeBubble(((BubbleView) mTouchedView).getKey(),
+                                    BubbleController.DISMISS_USER_GESTURE);
                         }
                     }
                 } else if (mTouchedView == mStack.getExpandedBubbleView()) {

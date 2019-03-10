@@ -23,6 +23,7 @@ import android.app.IActivityManager;
 import android.app.TaskStackListener;
 import android.content.ComponentName;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
@@ -180,6 +181,12 @@ public class TaskStackChangeListeners extends TaskStackListener {
                 requestedOrientation).sendToTarget();
     }
 
+    @Override
+    public void onSizeCompatModeActivityChanged(int displayId, IBinder activityToken) {
+        mHandler.obtainMessage(H.ON_SIZE_COMPAT_MODE_ACTIVITY_CHANGED, displayId, 0 /* unused */,
+                activityToken).sendToTarget();
+    }
+
     private final class H extends Handler {
         private static final int ON_TASK_STACK_CHANGED = 1;
         private static final int ON_TASK_SNAPSHOT_CHANGED = 2;
@@ -197,6 +204,7 @@ public class TaskStackChangeListeners extends TaskStackListener {
         private static final int ON_TASK_MOVED_TO_FRONT = 14;
         private static final int ON_ACTIVITY_REQUESTED_ORIENTATION_CHANGE = 15;
         private static final int ON_ACTIVITY_LAUNCH_ON_SECONDARY_DISPLAY_REROUTED = 16;
+        private static final int ON_SIZE_COMPAT_MODE_ACTIVITY_CHANGED = 17;
 
 
         public H(Looper looper) {
@@ -316,6 +324,13 @@ public class TaskStackChangeListeners extends TaskStackListener {
                         for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
                             mTaskStackListeners.get(i)
                                     .onActivityRequestedOrientationChanged(msg.arg1, msg.arg2);
+                        }
+                        break;
+                    }
+                    case ON_SIZE_COMPAT_MODE_ACTIVITY_CHANGED: {
+                        for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
+                            mTaskStackListeners.get(i).onSizeCompatModeActivityChanged(
+                                    msg.arg1, (IBinder) msg.obj);
                         }
                         break;
                     }

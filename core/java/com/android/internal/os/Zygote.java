@@ -369,17 +369,8 @@ public final class Zygote {
      * @param appInfo ApplicationInfo of the application
      */
     protected static void allowAppFilesAcrossFork(ApplicationInfo appInfo) {
-        Zygote.nativeAllowFileAcrossFork(appInfo.sourceDir);
-        if (appInfo.splitSourceDirs != null) {
-            for (String path : appInfo.splitSourceDirs) {
-                Zygote.nativeAllowFileAcrossFork(path);
-            }
-        }
-        // As well as its shared libs
-        if (appInfo.sharedLibraryFiles != null) {
-            for (String path : appInfo.sharedLibraryFiles) {
-                Zygote.nativeAllowFileAcrossFork(path);
-            }
+        for (String path : appInfo.getAllApkPaths()) {
+            Zygote.nativeAllowFileAcrossFork(path);
         }
     }
 

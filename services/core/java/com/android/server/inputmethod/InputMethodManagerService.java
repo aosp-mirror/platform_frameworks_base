@@ -949,15 +949,15 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
-    class ImmsBroadcastReceiver extends BroadcastReceiver {
+    /**
+     * {@link BroadcastReceiver} that is intended to listen to broadcasts sent to the system user
+     * only.
+     */
+    private final class ImmsBroadcastReceiverForSystemUser extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
-            if (Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(action)) {
-                hideInputMethodMenu();
-                // No need to update mIsInteractive
-                return;
-            } else if (Intent.ACTION_USER_ADDED.equals(action)
+            if (Intent.ACTION_USER_ADDED.equals(action)
                     || Intent.ACTION_USER_REMOVED.equals(action)) {
                 updateCurrentProfileIds();
                 return;
@@ -974,6 +974,35 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         // navbar configuration.
                         InputMethodManager.SHOW_IM_PICKER_MODE_INCLUDE_AUXILIARY_SUBTYPES,
                         DEFAULT_DISPLAY).sendToTarget();
+            } else {
+                Slog.w(TAG, "Unexpected intent " + intent);
+            }
+        }
+    }
+
+    /**
+     * {@link BroadcastReceiver} that is intended to listen to broadcasts sent to all the users.
+     */
+    private final class ImmsBroadcastReceiverForAllUsers extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final String action = intent.getAction();
+            if (Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(action)) {
+                final PendingResult pendingResult = getPendingResult();
+                if (pendingResult == null) {
+                    return;
+                }
+                // sender userId can be a real user ID or USER_ALL.
+                final int senderUserId = pendingResult.getSendingUserId();
+                if (senderUserId != UserHandle.USER_ALL) {
+                    final int resolvedUserId = PER_PROFILE_IME_ENABLED
+                            ? senderUserId : mUserManagerInternal.getProfileParentId(senderUserId);
+                    if (resolvedUserId != mSettings.getCurrentUserId()) {
+                        // A background user is trying to hide the dialog. Ignore.
+                        return;
+                    }
+                }
+                hideInputMethodMenu();
             } else {
                 Slog.w(TAG, "Unexpected intent " + intent);
             }
@@ -1548,13 +1577,18 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 mMyPackageMonitor.register(mContext, null, UserHandle.ALL, true);
                 mSettingsObserver.registerContentObserverLocked(currentUserId);
 
-                final IntentFilter broadcastFilter = new IntentFilter();
-                broadcastFilter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
-                broadcastFilter.addAction(Intent.ACTION_USER_ADDED);
-                broadcastFilter.addAction(Intent.ACTION_USER_REMOVED);
-                broadcastFilter.addAction(Intent.ACTION_LOCALE_CHANGED);
-                broadcastFilter.addAction(ACTION_SHOW_INPUT_METHOD_PICKER);
-                mContext.registerReceiver(new ImmsBroadcastReceiver(), broadcastFilter);
+                final IntentFilter broadcastFilterForSystemUser = new IntentFilter();
+                broadcastFilterForSystemUser.addAction(Intent.ACTION_USER_ADDED);
+                broadcastFilterForSystemUser.addAction(Intent.ACTION_USER_REMOVED);
+                broadcastFilterForSystemUser.addAction(Intent.ACTION_LOCALE_CHANGED);
+                broadcastFilterForSystemUser.addAction(ACTION_SHOW_INPUT_METHOD_PICKER);
+                mContext.registerReceiver(new ImmsBroadcastReceiverForSystemUser(),
+                        broadcastFilterForSystemUser);
+
+                final IntentFilter broadcastFilterForAllUsers = new IntentFilter();
+                broadcastFilterForAllUsers.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
+                mContext.registerReceiverAsUser(new ImmsBroadcastReceiverForAllUsers(),
+                        UserHandle.ALL, broadcastFilterForAllUsers, null, null);
 
                 final String defaultImiId = mSettings.getSelectedInputMethod();
                 final boolean imeSelectedOnBoot = !TextUtils.isEmpty(defaultImiId);

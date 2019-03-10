@@ -22,6 +22,10 @@ import android.annotation.IntDef;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
+/**
+ * Interface defining mechanism for controlling the directionality and field width of
+ * audio capture.
+ */
 public interface MicrophoneDirection {
     /**
      * Don't do any directionality processing of the activated microphone(s).
@@ -41,21 +45,23 @@ public interface MicrophoneDirection {
     int MIC_DIRECTION_EXTERNAL = 3;
 
     /** @hide */
-    @IntDef({
+    /*public*/ @IntDef({
             MIC_DIRECTION_UNSPECIFIED,
             MIC_DIRECTION_FRONT,
             MIC_DIRECTION_BACK,
             MIC_DIRECTION_EXTERNAL
     })
     @Retention(RetentionPolicy.SOURCE)
-    public @interface Directionmode{};
+    @interface DirectionMode{};
     /**
-     * Specifies the logical microphone (for processing).
+     * Specifies the logical microphone (for processing). Applications can use this to specify
+     * which side of the device to optimize capture from. Typically used in conjunction with
+     * the camera capturing video.
      *
      * @param direction Direction constant.
      * @return true if sucessful.
      */
-    boolean setMicrophoneDirection(@Directionmode int direction);
+    boolean setMicrophoneDirection(@DirectionMode int direction);
 
     /**
      * Specifies the zoom factor (i.e. the field dimension) for the selected microphone

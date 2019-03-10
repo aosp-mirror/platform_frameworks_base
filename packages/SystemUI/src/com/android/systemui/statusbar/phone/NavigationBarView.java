@@ -42,6 +42,7 @@ import android.annotation.IntDef;
 import android.annotation.SuppressLint;
 import android.app.StatusBarManager;
 import android.content.Context;
+import android.content.pm.ParceledListSlice;
 import android.content.res.Configuration;
 import android.graphics.Canvas;
 import android.graphics.Point;
@@ -59,6 +60,8 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.Gravity;
+import android.view.IPinnedStackController;
+import android.view.IPinnedStackListener;
 import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.View;
@@ -171,6 +174,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     private NotificationPanelView mPanelView;
 
     private NavBarTintController mColorAdaptionController;
+    private boolean mAssistantAvailable;
     private NavigationPrototypeController mPrototypeController;
     private NavigationGestureAction[] mDefaultGestureMap;
     private QuickScrubAction mQuickScrubAction;
@@ -347,6 +351,51 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         public void onHomeHandleVisiblilityChanged(boolean visible) {
             showHomeHandle(visible);
         }
+
+        @Override
+        public void onAssistantGestureEnabled(boolean enabled) {
+            updateAssistantAvailability();
+        }
+    };
+
+    private final IPinnedStackListener.Stub mImeChangedListener = new IPinnedStackListener.Stub() {
+        @Override
+        public void onListenerRegistered(IPinnedStackController controller) {
+        }
+
+        @Override
+        public void onImeVisibilityChanged(boolean imeVisible, int imeHeight) {
+            post(() -> {
+                // When the ime changes visibility, resize the edge panels to not cover the ime
+                final int width = mPrototypeController.getEdgeSensitivityWidth();
+                final int height = mContext.getDisplay().getHeight() - imeHeight
+                        - getResources().getDimensionPixelOffset(R.dimen.status_bar_height);
+                if (mLeftEdgePanel != null) {
+                    mLeftEdgePanel.setDimensions(width, height);
+                }
+                if (mRightEdgePanel != null) {
+                    mRightEdgePanel.setDimensions(width, height);
+                }
+            });
+        }
+
+        @Override
+        public void onShelfVisibilityChanged(boolean shelfVisible, int shelfHeight) {
+        }
+
+        @Override
+        public void onMinimizedStateChanged(boolean isMinimized) {
+        }
+
+        @Override
+        public void onMovementBoundsChanged(Rect insetBounds, Rect normalBounds,
+                Rect animatingBounds, boolean fromImeAdjustment, boolean fromShelfAdjustment,
+                int displayRotation) {
+        }
+
+        @Override
+        public void onActionsChanged(ParceledListSlice actions) {
+        }
     };
 
     public NavigationBarView(Context context, AttributeSet attrs) {
@@ -385,6 +434,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         mButtonDispatchers.put(R.id.back, new ButtonDispatcher(R.id.back));
         mButtonDispatchers.put(R.id.home, new ButtonDispatcher(R.id.home));
         mButtonDispatchers.put(R.id.home_handle, new ButtonDispatcher(R.id.home_handle));
+        mButtonDispatchers.put(R.id.assistant_handle, new ButtonDispatcher(R.id.assistant_handle));
         mButtonDispatchers.put(R.id.recent_apps, new ButtonDispatcher(R.id.recent_apps));
         mButtonDispatchers.put(R.id.menu, menuButton);
         mButtonDispatchers.put(R.id.ime_switcher, imeSwitcherButton);
@@ -580,6 +630,10 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
 
     public ButtonDispatcher getHomeHandle() {
         return mButtonDispatchers.get(R.id.home_handle);
+    }
+
+    public ButtonDispatcher getAssistantHandle() {
+        return mButtonDispatchers.get(R.id.assistant_handle);
     }
 
     public SparseArray<ButtonDispatcher> getButtonDispatchers() {
@@ -940,6 +994,24 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         }
     }
 
+    public void setAssistantAvailable(boolean available) {
+        mAssistantAvailable = available;
+        updateAssistantAvailability();
+    }
+
+    // TODO(b/112934365): move this back to NavigationBarFragment when prototype is removed
+    private void updateAssistantAvailability() {
+        boolean available = mAssistantAvailable && mPrototypeController.isAssistantGestureEnabled();
+        getAssistantHandle().setVisibility(available ? View.VISIBLE : View.GONE);
+        if (mOverviewProxyService.getProxy() != null) {
+            try {
+                mOverviewProxyService.getProxy().onAssistantAvailable(available);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Unable to send assistant availability data to launcher");
+            }
+        }
+    }
+
     public void setMenuVisibility(final boolean show) {
         mContextualButtonGroup.setButtonVisiblity(R.id.menu, show);
     }
@@ -1267,13 +1339,19 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
             int height = mPrototypeController.getEdgeSensitivityHeight();
             // Explicitly left and right, not start and end as this is device relative.
             mLeftEdgePanel = NavigationBarEdgePanel.create(getContext(), width, height,
-                    Gravity.LEFT | Gravity.BOTTOM);
+                    Gravity.LEFT | Gravity.TOP);
             mRightEdgePanel = NavigationBarEdgePanel.create(getContext(), width, height,
-                    Gravity.RIGHT | Gravity.BOTTOM);
+                    Gravity.RIGHT | Gravity.TOP);
             mLeftEdgePanel.setOnTouchListener(mEdgePanelTouchListener);
             mRightEdgePanel.setOnTouchListener(mEdgePanelTouchListener);
             wm.addView(mLeftEdgePanel, mLeftEdgePanel.getLayoutParams());
             wm.addView(mRightEdgePanel, mRightEdgePanel.getLayoutParams());
+
+            try {
+                WindowManagerWrapper.getInstance().addPinnedStackListener(mImeChangedListener);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Failed to register pinned stack listener", e);
+            }
         }
     }
 
@@ -1298,6 +1376,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         if (mRightEdgePanel != null) {
             wm.removeView(mRightEdgePanel);
         }
+        WindowManagerWrapper.getInstance().removePinnedStackListener(mImeChangedListener);
     }
 
     private void setUpSwipeUpOnboarding(boolean connectedToOverviewProxy) {

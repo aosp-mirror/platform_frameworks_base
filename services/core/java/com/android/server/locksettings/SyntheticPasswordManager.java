@@ -287,14 +287,16 @@ public class SyntheticPasswordManager {
     private LockSettingsStorage mStorage;
     private IWeaver mWeaver;
     private WeaverConfig mWeaverConfig;
+    private PasswordSlotManager mPasswordSlotManager;
 
     private final UserManager mUserManager;
 
     public SyntheticPasswordManager(Context context, LockSettingsStorage storage,
-            UserManager userManager) {
+            UserManager userManager, PasswordSlotManager passwordSlotManager) {
         mContext = context;
         mStorage = storage;
         mUserManager = userManager;
+        mPasswordSlotManager = passwordSlotManager;
     }
 
     @VisibleForTesting
@@ -324,6 +326,7 @@ public class SyntheticPasswordManager {
                         mWeaver = null;
                     }
                 });
+                mPasswordSlotManager.refreshActiveSlots(getUsedWeaverSlots());
             }
         } catch (RemoteException e) {
             Slog.e(TAG, "Failed to get weaver service", e);
@@ -561,6 +564,7 @@ public class SyntheticPasswordManager {
                 Log.i(TAG, "Destroy weaver slot " + slot + " for user " + userId);
                 try {
                     weaverEnroll(slot, null, null);
+                    mPasswordSlotManager.markSlotDeleted(slot);
                 } catch (RemoteException e) {
                     Log.w(TAG, "Failed to destroy slot", e);
                 }
@@ -595,6 +599,7 @@ public class SyntheticPasswordManager {
 
     private int getNextAvailableWeaverSlot() {
         Set<Integer> usedSlots = getUsedWeaverSlots();
+        usedSlots.addAll(mPasswordSlotManager.getUsedSlots());
         for (int i = 0; i < mWeaverConfig.slots; i++) {
             if (!usedSlots.contains(i)) {
                 return i;
@@ -640,6 +645,7 @@ public class SyntheticPasswordManager {
                 return DEFAULT_HANDLE;
             }
             saveWeaverSlot(weaverSlot, handle, userId);
+            mPasswordSlotManager.markSlotInUse(weaverSlot);
             synchronizeWeaverFrpPassword(pwd, requestedQuality, userId, weaverSlot);
 
             pwd.passwordHandle = null;
@@ -798,6 +804,7 @@ public class SyntheticPasswordManager {
                 return false;
             }
             saveWeaverSlot(slot, handle, userId);
+            mPasswordSlotManager.markSlotInUse(slot);
         }
         saveSecdiscardable(handle, tokenData.secdiscardableOnDisk, userId);
         createSyntheticPasswordBlob(handle, SYNTHETIC_PASSWORD_TOKEN_BASED, authToken,

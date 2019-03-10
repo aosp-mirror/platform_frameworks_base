@@ -65,8 +65,6 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityEvent;
-import android.widget.AdapterView.OnItemLongClickListener;
-import android.widget.BaseAdapter;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
@@ -87,9 +85,11 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.MultiListLayout;
+import com.android.systemui.MultiListLayout.MultiListAdapter;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.plugins.GlobalActions.GlobalActionsManager;
 import com.android.systemui.plugins.GlobalActionsPanelPlugin;
+import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ExtensionController;
 import com.android.systemui.statusbar.policy.ExtensionController.Extension;
@@ -99,16 +99,14 @@ import com.android.systemui.volume.SystemUIInterpolators.LogAccelerateInterpolat
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 /**
  * Helper to show the global actions dialog.  Each item is an {@link Action} that
  * may show depending on whether the keyguard is showing, and whether the device
  * is provisioned.
  */
-class GlobalActionsDialog implements DialogInterface.OnDismissListener,
-        DialogInterface.OnClickListener, DialogInterface.OnShowListener,
-        ConfigurationController.ConfigurationListener {
+public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
+        DialogInterface.OnShowListener, ConfigurationController.ConfigurationListener {
 
     static public final String SYSTEM_DIALOG_REASON_KEY = "reason";
     static public final String SYSTEM_DIALOG_REASON_GLOBAL_ACTIONS = "globalactions";
@@ -158,7 +156,7 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     private boolean mHasVibrator;
     private boolean mHasLogoutButton;
     private boolean mHasLockdownButton;
-    private boolean mSeparatedEmergencyButtonEnabled;
+    private boolean mUseSeparatedList;
     private final boolean mShowSilentToggle;
     private final EmergencyAffordanceManager mEmergencyAffordanceManager;
     private final ScreenshotHelper mScreenshotHelper;
@@ -336,7 +334,7 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         ArraySet<String> addedKeys = new ArraySet<String>();
         mHasLogoutButton = false;
         mHasLockdownButton = false;
-        mSeparatedEmergencyButtonEnabled = true;
+        mUseSeparatedList = true;
         for (int i = 0; i < defaultActions.length; i++) {
             String actionKey = defaultActions[i];
             if (addedKeys.contains(actionKey)) {
@@ -384,7 +382,7 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                     mHasLogoutButton = true;
                 }
             } else if (GLOBAL_ACTION_KEY_EMERGENCY.equals(actionKey)) {
-                if (mSeparatedEmergencyButtonEnabled
+                if (mUseSeparatedList
                         && !mEmergencyAffordanceManager.needsEmergencyAffordance()) {
                     mItems.add(new EmergencyDialerAction());
                 }
@@ -401,14 +399,6 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
 
         mAdapter = new MyAdapter();
 
-        OnItemLongClickListener onItemLongClickListener = (parent, view, position, id) -> {
-            final Action action = mAdapter.getItem(position);
-            if (action instanceof LongPressAction) {
-                mDialog.dismiss();
-                return ((LongPressAction) action).onLongPress();
-            }
-            return false;
-        };
         GlobalActionsPanelPlugin.PanelViewController panelViewController =
                 mPanelExtension.get() != null
                         ? mPanelExtension.get().onPanelShown(() -> {
@@ -417,8 +407,8 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                             }
                         })
                         : null;
-        ActionsDialog dialog = new ActionsDialog(mContext, this, mAdapter, onItemLongClickListener,
-                mSeparatedEmergencyButtonEnabled, panelViewController);
+        ActionsDialog dialog = new ActionsDialog(mContext, mAdapter, mUseSeparatedList,
+                panelViewController);
         dialog.setCanceledOnTouchOutside(false); // Handled by the custom class.
         dialog.setKeyguardShowing(mKeyguardShowing);
 
@@ -493,7 +483,9 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         public void onPress() {
             MetricsLogger.action(mContext, MetricsEvent.ACTION_EMERGENCY_DIALER_FROM_POWER_MENU);
             Intent intent = new Intent(EmergencyDialerConstants.ACTION_DIAL);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                    | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS
+                    | Intent.FLAG_ACTIVITY_CLEAR_TOP);
             intent.putExtra(EmergencyDialerConstants.EXTRA_ENTRY_TYPE,
                     EmergencyDialerConstants.ENTRY_TYPE_POWER_MENU);
             mContext.startActivityAsUser(intent, UserHandle.CURRENT);
@@ -545,7 +537,6 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             mWindowManagerFuncs.reboot(false);
         }
     }
-
 
     private class ScreenshotAction extends SinglePressAction implements LongPressAction {
         public ScreenshotAction() {
@@ -711,7 +702,7 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
 
     private Action getEmergencyAction() {
         Drawable emergencyIcon = mContext.getDrawable(R.drawable.emergency_icon);
-        if(!mSeparatedEmergencyButtonEnabled) {
+        if (!mUseSeparatedList) {
             // use un-colored legacy treatment
             emergencyIcon.setTintList(null);
         }
@@ -905,15 +896,6 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     }
 
     /** {@inheritDoc} */
-    public void onClick(DialogInterface dialog, int which) {
-        Action item = mAdapter.getItem(which);
-        if (!(item instanceof SilentModeTriStateAction)) {
-            dialog.dismiss();
-        }
-        item.onPress();
-    }
-
-    /** {@inheritDoc} */
     public void onShow(DialogInterface dialog) {
         MetricsLogger.visible(mContext, MetricsEvent.POWER_MENU);
     }
@@ -925,11 +907,10 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
      * the device is provisioned
      * via {@link com.android.systemui.globalactions.GlobalActionsDialog#mDeviceProvisioned}.
      */
-    private class MyAdapter extends BaseAdapter {
-
+    public class MyAdapter extends MultiListAdapter {
+        @Override
         public int getCount() {
             int count = 0;
-
             for (int i = 0; i < mItems.size(); i++) {
                 final Action action = mItems.get(i);
 
@@ -949,7 +930,8 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             return getItem(position).isEnabled();
         }
 
-        public ArrayList<Action> getSeparatedActions(boolean shouldUseSeparatedView) {
+        @Override
+        public ArrayList<Action> getSeparatedItems(boolean shouldUseSeparatedView) {
             ArrayList<Action> separatedActions = new ArrayList<Action>();
             if (!shouldUseSeparatedView) {
                 return separatedActions;
@@ -963,7 +945,8 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             return separatedActions;
         }
 
-        public ArrayList<Action> getListActions(boolean shouldUseSeparatedView) {
+        @Override
+        public ArrayList<Action> getListItems(boolean shouldUseSeparatedView) {
             if (!shouldUseSeparatedView) {
                 return new ArrayList<Action>(mItems);
             }
@@ -982,6 +965,7 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             return false;
         }
 
+        @Override
         public Action getItem(int position) {
 
             int filteredPos = 0;
@@ -1011,6 +995,7 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             return position;
         }
 
+        @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             Action action = getItem(position);
             View view = action.create(mContext, convertView, parent, LayoutInflater.from(mContext));
@@ -1019,6 +1004,25 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                 MultiListLayout.get(parent).setDivisionView(view);
             }
             return view;
+        }
+
+        @Override
+        public boolean onLongClickItem(int position) {
+            final Action action = mAdapter.getItem(position);
+            if (action instanceof LongPressAction) {
+                mDialog.dismiss();
+                return ((LongPressAction) action).onLongPress();
+            }
+            return false;
+        }
+
+        @Override
+        public void onClickItem(int position) {
+            Action item = mAdapter.getItem(position);
+            if (!(item instanceof SilentModeTriStateAction)) {
+                mDialog.dismiss();
+            }
+            item.onPress();
         }
     }
 
@@ -1031,7 +1035,7 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     /**
      * What each item in the global actions dialog must be able to support.
      */
-    private interface Action {
+    public interface Action {
         /**
          * @return Text that will be announced when dialog is created.  null
          * for none.
@@ -1050,7 +1054,8 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
 
         /**
          * @return whether this action should appear in the dialog before the
-         * device is provisioned.
+         * device is provisioned.onlongpress
+         *
          */
         boolean showBeforeProvisioning();
 
@@ -1486,26 +1491,21 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         private final Context mContext;
         private final MyAdapter mAdapter;
         private MultiListLayout mGlobalActionsLayout;
-        private final OnClickListener mClickListener;
-        private final OnItemLongClickListener mLongClickListener;
         private final Drawable mBackgroundDrawable;
         private final ColorExtractor mColorExtractor;
         private final GlobalActionsPanelPlugin.PanelViewController mPanelController;
         private boolean mKeyguardShowing;
-        private boolean mShouldDisplaySeparatedButton;
+        private boolean mUseSeparatedList;
         private boolean mShowing;
         private final float mScrimAlpha;
 
-        public ActionsDialog(Context context, OnClickListener clickListener, MyAdapter adapter,
-                OnItemLongClickListener longClickListener, boolean shouldDisplaySeparatedButton,
+        ActionsDialog(Context context, MyAdapter adapter, boolean separated,
                 GlobalActionsPanelPlugin.PanelViewController plugin) {
             super(context, com.android.systemui.R.style.Theme_SystemUI_Dialog_GlobalActions);
             mContext = context;
             mAdapter = adapter;
-            mClickListener = clickListener;
-            mLongClickListener = longClickListener;
             mColorExtractor = Dependency.get(SysuiColorExtractor.class);
-            mShouldDisplaySeparatedButton = shouldDisplaySeparatedButton;
+            mUseSeparatedList = separated;
 
             // Window initialization
             Window window = getWindow();
@@ -1534,7 +1534,7 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             View panelView = initializePanel();
             if (panelView == null) {
                 mBackgroundDrawable = new GradientDrawable(context);
-                mScrimAlpha = 0.7f;
+                mScrimAlpha = ScrimController.GRADIENT_SCRIM_ALPHA;
             } else {
                 mBackgroundDrawable = context.getDrawable(
                         com.android.systemui.R.drawable.global_action_panel_scrim);
@@ -1571,7 +1571,7 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             mGlobalActionsLayout = (MultiListLayout)
                     findViewById(com.android.systemui.R.id.global_actions_view);
             mGlobalActionsLayout.setOutsideTouchListener(view -> dismiss());
-            mGlobalActionsLayout.setHasSeparatedView(mShouldDisplaySeparatedButton);
+            mGlobalActionsLayout.setSeparated(mUseSeparatedList);
             mGlobalActionsLayout.setListViewAccessibilityDelegate(new View.AccessibilityDelegate() {
                 @Override
                 public boolean dispatchPopulateAccessibilityEvent(
@@ -1582,6 +1582,7 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                 }
             });
             mGlobalActionsLayout.setRotationListener(this::onRotate);
+            mGlobalActionsLayout.setAdapter(mAdapter);
         }
 
         private boolean isPanelEnabled(Context context) {
@@ -1599,55 +1600,11 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             return com.android.systemui.R.layout.global_actions_wrapped;
         }
 
-        private void updateList() {
-            mGlobalActionsLayout.removeAllItems();
-            ArrayList<Action> separatedActions =
-                    mAdapter.getSeparatedActions(mShouldDisplaySeparatedButton);
-            ArrayList<Action> listActions = mAdapter.getListActions(mShouldDisplaySeparatedButton);
-            mGlobalActionsLayout.setExpectedListItemCount(listActions.size());
-            mGlobalActionsLayout.setExpectedSeparatedItemCount(separatedActions.size());
-            int rotation = RotationUtils.getRotation(mContext);
-
-            boolean reverse = false; // should we add items to parents in the reverse order?
-            if (isGridEnabled(mContext)) {
-                if (rotation == RotationUtils.ROTATION_NONE
-                        || rotation == RotationUtils.ROTATION_SEASCAPE) {
-                    reverse = !reverse; // if we're in portrait or seascape, reverse items
-                }
-                if (TextUtils.getLayoutDirectionFromLocale(Locale.getDefault())
-                        == View.LAYOUT_DIRECTION_RTL) {
-                    reverse = !reverse; // if we're in an RTL language, reverse items (again)
-                }
-            }
-
-            for (int i = 0; i < mAdapter.getCount(); i++) {
-                Action action = mAdapter.getItem(i);
-                int separatedIndex = separatedActions.indexOf(action);
-                ViewGroup parent;
-                if (separatedIndex != -1) {
-                    parent = mGlobalActionsLayout.getParentView(true, separatedIndex, rotation);
-                } else {
-                    int listIndex = listActions.indexOf(action);
-                    parent = mGlobalActionsLayout.getParentView(false, listIndex, rotation);
-                }
-                View v = mAdapter.getView(i, null, parent);
-                final int pos = i;
-                v.setOnClickListener(view -> mClickListener.onClick(this, pos));
-                v.setOnLongClickListener(view ->
-                        mLongClickListener.onItemLongClick(null, v, pos, 0));
-                if (reverse) {
-                    parent.addView(v, 0); // reverse order of items
-                } else {
-                    parent.addView(v);
-                }
-            }
-        }
-
         @Override
         protected void onStart() {
             super.setCanceledOnTouchOutside(true);
             super.onStart();
-            updateList();
+            mGlobalActionsLayout.updateList();
 
             if (mBackgroundDrawable instanceof GradientDrawable) {
                 Point displaySize = new Point();
@@ -1765,7 +1722,7 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         public void onRotate(int from, int to) {
             if (mShowing && isGridEnabled(mContext)) {
                 initializeLayout();
-                updateList();
+                mGlobalActionsLayout.updateList();
             }
         }
     }

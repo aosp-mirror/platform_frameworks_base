@@ -20,6 +20,7 @@ import static com.android.systemui.Dependency.BG_LOOPER_NAME;
 
 import android.app.AppOpsManager;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.UserHandle;
@@ -203,26 +204,37 @@ public class AppOpsControllerImpl implements AppOpsController,
     }
 
     /**
+     * Does the app-op item refer to a user sensitive permission. Only user sensitive permission
+     * should be shown to the user by default.
+     *
+     * @param item The item
+     *
+     * @return {@code true} iff the app-op item is user sensitive
+     */
+    private boolean isUserSensitive(AppOpItem item) {
+        String permission = AppOpsManager.opToPermission(item.getCode());
+        if (permission == null) {
+            return false;
+        }
+        int permFlags = mContext.getPackageManager().getPermissionFlags(permission,
+                item.getPackageName(), UserHandle.getUserHandleForUid(item.getUid()));
+        return (permFlags & PackageManager.FLAG_PERMISSION_USER_SENSITIVE_WHEN_GRANTED) != 0;
+    }
+
+    /**
      * Returns a copy of the list containing all the active AppOps that the controller tracks.
      *
      * @return List of active AppOps information
      */
     public List<AppOpItem> getActiveAppOps() {
-        ArrayList<AppOpItem> active;
-        synchronized (mActiveItems) {
-            active = new ArrayList<>(mActiveItems);
-        }
-        synchronized (mNotedItems) {
-            active.addAll(mNotedItems);
-        }
-        return active;
+        return getActiveAppOpsForUser(UserHandle.USER_ALL);
     }
 
     /**
      * Returns a copy of the list containing all the active AppOps that the controller tracks, for
      * a given user id.
      *
-     * @param userId User id to track
+     * @param userId User id to track, can be {@link UserHandle#USER_ALL}
      *
      * @return List of active AppOps information for that user id
      */
@@ -232,7 +244,8 @@ public class AppOpsControllerImpl implements AppOpsController,
             final int numActiveItems = mActiveItems.size();
             for (int i = 0; i < numActiveItems; i++) {
                 AppOpItem item = mActiveItems.get(i);
-                if (UserHandle.getUserId(item.getUid()) == userId) {
+                if ((userId == UserHandle.USER_ALL || UserHandle.getUserId(item.getUid()) == userId)
+                        && isUserSensitive(item)) {
                     list.add(item);
                 }
             }
@@ -241,7 +254,8 @@ public class AppOpsControllerImpl implements AppOpsController,
             final int numNotedItems = mNotedItems.size();
             for (int i = 0; i < numNotedItems; i++) {
                 AppOpItem item = mNotedItems.get(i);
-                if (UserHandle.getUserId(item.getUid()) == userId) {
+                if ((userId == UserHandle.USER_ALL || UserHandle.getUserId(item.getUid()) == userId)
+                        && isUserSensitive(item)) {
                     list.add(item);
                 }
             }

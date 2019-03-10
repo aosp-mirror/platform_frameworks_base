@@ -325,8 +325,7 @@
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"ୱାଇ-ଫାଇ ଅନ୍‍ ଅଛି"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"କୌଣସି ୱାଇ-ଫାଇ ନେଟ୍‌ୱର୍କ ଉପଲବ୍ଧ ନାହିଁ"</string>
     <string name="quick_settings_wifi_secondary_label_transient" msgid="7748206246119760554">"ଅନ୍ ହେଉଛି…"</string>
-    <!-- no translation found for quick_settings_cast_title (6954684227605751758) -->
-    <skip />
+    <string name="quick_settings_cast_title" msgid="6954684227605751758">"ସ୍କ୍ରିନ୍ କାଷ୍ଟ"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"କାଷ୍ଟିଙ୍ଗ"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"ନାମହୀନ ଡିଭାଇସ୍‍"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"କାଷ୍ଟ୍ ପାଇଁ ପ୍ରସ୍ତୁତ"</string>
@@ -438,10 +437,8 @@
     <string name="battery_saver_notification_title" msgid="8614079794522291840">"ବ୍ୟାଟେରୀ ସେଭର୍‌ ଅନ୍‌ ଅଛି"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"କାର୍ଯ୍ୟ ସମ୍ପାଦନ ଓ ବ୍ୟାକ୍‌ଗ୍ରାଉଣ୍ଡ ଡାଟା କମ୍ କରନ୍ତୁ"</string>
     <string name="battery_saver_notification_action_text" msgid="132118784269455533">"ବ୍ୟାଟେରୀ ସେଭର୍‌ ଅଫ୍‍ କରନ୍ତୁ"</string>
-    <!-- no translation found for media_projection_dialog_text (1443042478990422751) -->
-    <skip />
-    <!-- no translation found for media_projection_dialog_title (7574971526813630219) -->
-    <skip />
+    <string name="media_projection_dialog_text" msgid="1443042478990422751">"ବିଜ୍ଞପ୍ତି, ପାସ୍‍ୱର୍ଡ, ଫଟୋ, ମେସେଜ୍ ଏବଂ ପେମେଣ୍ଟ ସୂଚନା ସହ ଆପଣଙ୍କ ସ୍କ୍ରିନ୍‍‍ରେ ସବୁକିଛି କ୍ୟାପ୍‍ଚର୍ କରିବା <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ଆରମ୍ଭ କରିବ।"</string>
+    <string name="media_projection_dialog_title" msgid="7574971526813630219">"ଆପଣଙ୍କର ସ୍କ୍ରିନ୍ କାଷ୍ଟ ବା ରେକର୍ଡ କରିବାକୁ <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ଅନୁୁୁମତି ଦେବେ?"</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"ପୁଣି ଦେଖାନ୍ତୁ ନାହିଁ"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"ସମସ୍ତ ଖାଲି କରନ୍ତୁ"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"ପରିଚାଳନା କରନ୍ତୁ"</string>
@@ -819,8 +816,7 @@
     <string name="high_temp_notif_message" msgid="5642466103153429279">"ଫୋନ୍‍ ଥଣ୍ଡା ହେବା ସମୟରେ କିଛି ଫିଚର୍ ସୀମିତ ଭାବେ କାମ କରିଥାଏ"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"ଆପଣଙ୍କ ଫୋନ୍‍ ସ୍ୱଚାଳିତ ଭାବେ ଥଣ୍ଡା ହେବାକୁ ଚେଷ୍ଟା କରିବ। ଆପଣ ତଥାପି ନିଜ ଫୋନ୍‍ ବ୍ୟବହାର କରିପାରିବେ, କିନ୍ତୁ ଏହା ଧୀରେ ଚାଲିପାରେ।\n\nଆପଣଙ୍କ ଫୋନ୍‍ ଥଣ୍ଡା ହୋଇଯିବାପରେ, ଏହା ସାମାନ୍ୟ ଭାବେ ଚାଲିବ।"</string>
     <string name="high_temp_alarm_title" msgid="442812040762745210">"ଚାର୍ଜର୍‍ ଅନ୍‍ପ୍ଲଗ୍‌ କରନ୍ତୁ"</string>
-    <!-- no translation found for high_temp_alarm_notify_message (1802871059489414932) -->
-    <skip />
+    <string name="high_temp_alarm_notify_message" msgid="1802871059489414932">"ଏହି ଡିଭାଇସ୍ ଚାର୍ଜ କରିବାରେ ଗୋଟିଏ ସମସ୍ୟା ଅଛି। ଯେହେତୁ କେବଳ ଗରମ ହୋଇଯାଇପାରେ, ତେଣୁ ପାୱାର୍ ଆଡପ୍ଟର୍ ଅନ୍‌ପ୍ଲଗ୍‌ କରନ୍ତୁ ଏବଂ ଯତ୍ନ ନିଅନ୍ତୁ।"</string>
     <string name="high_temp_alarm_help_care_steps" msgid="3631075329318070726">"ସେବା ସମ୍ବନ୍ଧିତ ଷ୍ଟେପ୍‌ଗୁଡ଼ିକ ଦେଖନ୍ତୁ"</string>
     <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"ବାମ ଶର୍ଟକଟ୍‍"</string>
     <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"ଡାହାଣ ଶର୍ଟକଟ୍‍"</string>

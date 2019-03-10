@@ -42,10 +42,11 @@ import android.os.PersistableBundle;
 import android.os.ResultReceiver;
 import android.os.test.TestLooper;
 import android.provider.Settings;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
 import android.telephony.CarrierConfigManager;
 import android.test.mock.MockContentResolver;
+
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.R;
 import com.android.internal.util.State;
@@ -225,7 +226,7 @@ public final class EntitlementManagerTest {
                 mCallbacklatch.countDown();
             }
         };
-        mEnMgr.getLatestTetheringEntitlementValue(TETHERING_WIFI, receiver, true);
+        mEnMgr.getLatestTetheringEntitlementResult(TETHERING_WIFI, receiver, true);
         callbackTimeoutHelper(mCallbacklatch);
         assertFalse(mEnMgr.everRunUiEntitlement);
 
@@ -241,7 +242,7 @@ public final class EntitlementManagerTest {
                 mCallbacklatch.countDown();
             }
         };
-        mEnMgr.getLatestTetheringEntitlementValue(TETHERING_WIFI, receiver, false);
+        mEnMgr.getLatestTetheringEntitlementResult(TETHERING_WIFI, receiver, false);
         callbackTimeoutHelper(mCallbacklatch);
         assertFalse(mEnMgr.everRunUiEntitlement);
         // 3. No cache value and ui entitlement check is needed.
@@ -254,7 +255,7 @@ public final class EntitlementManagerTest {
                 mCallbacklatch.countDown();
             }
         };
-        mEnMgr.getLatestTetheringEntitlementValue(TETHERING_WIFI, receiver, true);
+        mEnMgr.getLatestTetheringEntitlementResult(TETHERING_WIFI, receiver, true);
         mLooper.dispatchAll();
         callbackTimeoutHelper(mCallbacklatch);
         assertTrue(mEnMgr.everRunUiEntitlement);
@@ -268,7 +269,7 @@ public final class EntitlementManagerTest {
                 mCallbacklatch.countDown();
             }
         };
-        mEnMgr.getLatestTetheringEntitlementValue(TETHERING_WIFI, receiver, false);
+        mEnMgr.getLatestTetheringEntitlementResult(TETHERING_WIFI, receiver, false);
         callbackTimeoutHelper(mCallbacklatch);
         assertFalse(mEnMgr.everRunUiEntitlement);
         // 5. Cache value is TETHER_ERROR_PROVISION_FAILED and ui entitlement check is needed.
@@ -281,7 +282,7 @@ public final class EntitlementManagerTest {
                 mCallbacklatch.countDown();
             }
         };
-        mEnMgr.getLatestTetheringEntitlementValue(TETHERING_WIFI, receiver, true);
+        mEnMgr.getLatestTetheringEntitlementResult(TETHERING_WIFI, receiver, true);
         mLooper.dispatchAll();
         callbackTimeoutHelper(mCallbacklatch);
         assertTrue(mEnMgr.everRunUiEntitlement);
@@ -295,7 +296,7 @@ public final class EntitlementManagerTest {
                 mCallbacklatch.countDown();
             }
         };
-        mEnMgr.getLatestTetheringEntitlementValue(TETHERING_WIFI, receiver, true);
+        mEnMgr.getLatestTetheringEntitlementResult(TETHERING_WIFI, receiver, true);
         callbackTimeoutHelper(mCallbacklatch);
         assertFalse(mEnMgr.everRunUiEntitlement);
         // 7. Test get value for other downstream type.
@@ -307,7 +308,7 @@ public final class EntitlementManagerTest {
                 mCallbacklatch.countDown();
             }
         };
-        mEnMgr.getLatestTetheringEntitlementValue(TETHERING_USB, receiver, false);
+        mEnMgr.getLatestTetheringEntitlementResult(TETHERING_USB, receiver, false);
         callbackTimeoutHelper(mCallbacklatch);
         assertFalse(mEnMgr.everRunUiEntitlement);
     }

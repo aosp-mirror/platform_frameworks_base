@@ -225,6 +225,7 @@ import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.statusbar.policy.UserInfoControllerImpl;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.statusbar.policy.ZenModeController;
+import com.android.systemui.tuner.TunerService;
 import com.android.systemui.util.InjectionInflationController;
 import com.android.systemui.volume.VolumeComponent;
 
@@ -1208,8 +1209,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mBiometricUnlockController = new BiometricUnlockController(mContext,
                 mDozeScrimController, keyguardViewMediator,
                 mScrimController, this, UnlockMethodCache.getInstance(mContext),
-                new Handler(), mKeyguardUpdateMonitor, mContext.getResources().getInteger(
-                com.android.internal.R.integer.config_wakeUpDelayDoze));
+                new Handler(), mKeyguardUpdateMonitor, Dependency.get(TunerService.class));
         mStatusBarKeyguardViewManager = keyguardViewMediator.registerStatusBar(this,
                 getBouncerContainer(), mNotificationPanel, mBiometricUnlockController);
         mKeyguardIndicationController
@@ -3208,7 +3208,9 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         boolean sleepingFromKeyguard =
                 mStatusBarKeyguardViewManager.isGoingToSleepVisibleNotOccluded();
-        boolean animate = (!mDozing && mDozeServiceHost.shouldAnimateWakeup())
+        boolean wakeAndUnlock = mBiometricUnlockController.getMode()
+                == BiometricUnlockController.MODE_WAKE_AND_UNLOCK;
+        boolean animate = (!mDozing && mDozeServiceHost.shouldAnimateWakeup() && !wakeAndUnlock)
                 || (mDozing && mDozeServiceHost.shouldAnimateScreenOff() && sleepingFromKeyguard);
 
         mNotificationPanel.setDozing(mDozing, animate, mWakeUpTouchLocation);

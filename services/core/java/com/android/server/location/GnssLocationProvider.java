@@ -1319,10 +1319,6 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
                 mAlarmManager.cancel(mTimeoutIntent);
             }
 
-            // send an intent to notify that the GPS is receiving fixes.
-            Intent intent = new Intent(LocationManager.GPS_FIX_CHANGE_ACTION);
-            intent.putExtra(LocationManager.EXTRA_GPS_ENABLED, true);
-            mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
             updateStatus(LocationProvider.AVAILABLE);
         }
 
@@ -1354,11 +1350,6 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
 
         if (wasNavigating != mNavigating) {
             mGnssStatusListenerHelper.onStatusChanged(mNavigating);
-
-            // send an intent to notify that the GPS has been enabled or disabled
-            Intent intent = new Intent(LocationManager.GPS_ENABLED_CHANGE_ACTION);
-            intent.putExtra(LocationManager.EXTRA_GPS_ENABLED, mNavigating);
-            mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
         }
     }
 
@@ -1438,10 +1429,6 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
 
         if (mNavigating && mStatus == LocationProvider.AVAILABLE && mLastFixTime > 0 &&
                 SystemClock.elapsedRealtime() - mLastFixTime > RECENT_FIX_TIMEOUT) {
-            // send an intent to notify that the GPS is no longer receiving fixes.
-            Intent intent = new Intent(LocationManager.GPS_FIX_CHANGE_ACTION);
-            intent.putExtra(LocationManager.EXTRA_GPS_ENABLED, false);
-            mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
             updateStatus(LocationProvider.TEMPORARILY_UNAVAILABLE);
         }
     }

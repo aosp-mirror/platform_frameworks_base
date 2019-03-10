@@ -289,7 +289,8 @@ public class NetworkStackClient {
     private void requestConnector(@NonNull NetworkStackCallback request) {
         // TODO: PID check.
         final int caller = Binder.getCallingUid();
-        if (caller != Process.SYSTEM_UID && !UserHandle.isSameApp(caller, Process.BLUETOOTH_UID)) {
+        if (caller != Process.SYSTEM_UID && !UserHandle.isSameApp(caller, Process.BLUETOOTH_UID)
+                && !UserHandle.isSameApp(caller, Process.PHONE_UID)) {
             // Don't even attempt to obtain the connector and give a nice error message
             throw new SecurityException(
                     "Only the system server should try to bind to the network stack.");

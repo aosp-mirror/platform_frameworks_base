@@ -185,6 +185,7 @@ import android.app.WindowConfiguration.ActivityType;
 import android.app.WindowConfiguration.WindowingMode;
 import android.app.backup.IBackupManager;
 import android.app.usage.UsageEvents;
+import android.app.usage.UsageEvents.Event;
 import android.app.usage.UsageStatsManagerInternal;
 import android.appwidget.AppWidgetManager;
 import android.content.AutofillOptions;
@@ -1489,6 +1490,11 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     private ParcelFileDescriptor[] mLifeMonitorFds;
 
+    /**
+     * Used to notify activity lifecycle events.
+     */
+    @Nullable ContentCaptureManagerInternal mContentCaptureService;
+
     final class UiHandler extends Handler {
         public UiHandler() {
             super(com.android.server.UiThread.get().getLooper(), null, true);
@@ -1981,6 +1987,16 @@ public class ActivityManagerService extends IActivityManager.Stub
     public void setUsageStatsManager(UsageStatsManagerInternal usageStatsManager) {
         mUsageStatsService = usageStatsManager;
         mActivityTaskManager.setUsageStatsManager(usageStatsManager);
+    }
+
+    /**
+     * Sets the internal content capture manager service.
+     *
+     * <p>It's called when {@code SystemServer} starts, so we don't really need to acquire the lock.
+     */
+    public void setContentCaptureManager(
+            @Nullable ContentCaptureManagerInternal contentCaptureManager) {
+        mContentCaptureService = contentCaptureManager;
     }
 
     public void startObservingNativeCrashes() {
@@ -2914,6 +2930,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                 mUsageStatsService.reportEvent(activity, userId, event, appToken.hashCode(),
                         taskRoot);
             }
+        }
+        if (mContentCaptureService != null
+                && (event == Event.ACTIVITY_PAUSED || event == Event.ACTIVITY_RESUMED)) {
+            mContentCaptureService.notifyActivityEvent(userId, activity, event);
         }
     }
 
@@ -3949,11 +3969,12 @@ public class ActivityManagerService extends IActivityManager.Stub
         final long callingId = Binder.clearCallingIdentity();
         try {
             synchronized (this) {
-                mProcessList.killAllBackgroundProcessesLocked();
-
+                // Allow memory level to go down (the flag needs to be set before updating oom adj)
+                // because this method is also used to simulate low memory.
                 mAllowLowerMemLevel = true;
+                mProcessList.killPackageProcessesLocked(null /* packageName */, -1 /* appId */,
+                        UserHandle.USER_ALL, ProcessList.CACHED_APP_MIN_ADJ, "kill all background");
 
-                updateOomAdjLocked();
                 doLowMemReportIfNeededLocked(null);
             }
         } finally {

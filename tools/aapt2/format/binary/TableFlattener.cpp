@@ -32,6 +32,7 @@
 #include "ValueVisitor.h"
 #include "format/binary/ChunkWriter.h"
 #include "format/binary/ResourceTypeExtensions.h"
+#include "trace/TraceBuffer.h"
 #include "util/BigBuffer.h"
 
 using namespace android;
@@ -238,6 +239,7 @@ class PackageFlattener {
   }
 
   bool FlattenPackage(BigBuffer* buffer) {
+    TRACE_CALL();
     ChunkWriter pkg_writer(buffer);
     ResTable_package* pkg_header = pkg_writer.StartChunk<ResTable_package>(RES_TABLE_PACKAGE_TYPE);
     pkg_header->id = util::HostToDevice32(package_->id.value());
@@ -710,6 +712,7 @@ class PackageFlattener {
 }  // namespace
 
 bool TableFlattener::Consume(IAaptContext* context, ResourceTable* table) {
+  TRACE_CALL();
   // We must do this before writing the resources, since the string pool IDs may change.
   table->string_pool.Prune();
   table->string_pool.Sort([](const StringPool::Context& a, const StringPool::Context& b) -> int {

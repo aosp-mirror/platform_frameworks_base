@@ -22,6 +22,7 @@
 #include "ResourceUtils.h"
 #include "ResourceValues.h"
 #include "text/Unicode.h"
+#include "trace/TraceBuffer.h"
 #include "xml/XmlDom.h"
 
 namespace aapt {
@@ -72,6 +73,7 @@ struct IdCollector : public xml::Visitor {
 }  // namespace
 
 bool XmlIdCollector::Consume(IAaptContext* context, xml::XmlResource* xmlRes) {
+  TRACE_CALL();
   xmlRes->file.exported_symbols.clear();
   SourcePathDiagnostics source_diag(xmlRes->file.source, context->GetDiagnostics());
   IdCollector collector(&xmlRes->file.exported_symbols, &source_diag);

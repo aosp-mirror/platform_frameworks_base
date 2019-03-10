@@ -408,7 +408,7 @@ public final class WifiNetworkSpecifier extends NetworkSpecifier implements Parc
          * @return Instance of {@link NetworkSpecifier}.
          * @throws IllegalStateException on invalid params set.
          */
-        public @NonNull NetworkSpecifier build() {
+        public @NonNull WifiNetworkSpecifier build() {
             if (!hasSetAnyPattern()) {
                 throw new IllegalStateException("one of setSsidPattern/setSsid/setBssidPattern/"
                         + "setBssid should be invoked for specifier");

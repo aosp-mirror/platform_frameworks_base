@@ -23,6 +23,7 @@ import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
 import android.os.IBinder;
+import android.service.contentcapture.ActivityEvent;
 import android.service.contentcapture.IContentCaptureService;
 import android.service.contentcapture.IContentCaptureServiceCallback;
 import android.service.contentcapture.SnapshotData;
@@ -45,7 +46,8 @@ final class RemoteContentCaptureService
             ContentCaptureServiceCallbacks callbacks, boolean bindInstantServiceAllowed,
             boolean verbose, int idleUnbindTimeoutMs) {
         super(context, serviceInterface, serviceComponentName, userId, callbacks,
-                bindInstantServiceAllowed, verbose, /* initialCapacity= */ 2);
+                context.getMainThreadHandler(), bindInstantServiceAllowed, verbose,
+                /* initialCapacity= */ 2);
         mServerCallback = callback.asBinder();
         mIdleUnbindTimeoutMs = idleUnbindTimeoutMs;
 
@@ -109,6 +111,13 @@ final class RemoteContentCaptureService
      */
     public void onUserDataRemovalRequest(@NonNull UserDataRemovalRequest request) {
         scheduleAsyncRequest((s) -> s.onUserDataRemovalRequest(request));
+    }
+
+    /**
+     * Called by {@link ContentCaptureServerSession} to notify a high-level activity event.
+     */
+    public void onActivityLifecycleEvent(@NonNull ActivityEvent event) {
+        scheduleAsyncRequest((s) -> s.onActivityEvent(event));
     }
 
     public interface ContentCaptureServiceCallbacks

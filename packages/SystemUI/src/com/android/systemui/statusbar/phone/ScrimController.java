@@ -421,6 +421,8 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
                         interpolatedFract);
                 mCurrentInFrontAlpha = 0;
             }
+            mCurrentBehindTint = ColorUtils.blendARGB(ScrimState.BOUNCER.getBehindTint(),
+                    mState.getBehindTint(), interpolatedFract);
         }
     }
 

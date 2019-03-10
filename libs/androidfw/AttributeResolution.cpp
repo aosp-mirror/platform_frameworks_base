@@ -388,7 +388,7 @@ void ApplyStyle(Theme* theme, ResXMLParser* xml_parser, uint32_t def_style_attr,
     out_values[STYLE_RESOURCE_ID] = resid;
     out_values[STYLE_CHANGING_CONFIGURATIONS] = type_set_flags;
     out_values[STYLE_DENSITY] = config.density;
-    out_values[SYTLE_SOURCE_RESOURCE_ID] = value_source_resid;
+    out_values[STYLE_SOURCE_RESOURCE_ID] = value_source_resid;
 
     if (value.dataType != Res_value::TYPE_NULL || value.data == Res_value::DATA_NULL_EMPTY) {
       indices_idx++;

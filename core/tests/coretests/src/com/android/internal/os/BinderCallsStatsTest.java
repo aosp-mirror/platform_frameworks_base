@@ -642,8 +642,9 @@ public class BinderCallsStatsTest {
         long startTime = SystemClock.elapsedRealtime();
         TestBinderCallsStats bcs = new TestBinderCallsStats();
         bcs.setAddDebugEntries(true);
+        bcs.setSamplingInterval(10);
         ArrayList<BinderCallsStats.ExportedCallStat> callStats = bcs.getExportedCallStats();
-        assertEquals(3, callStats.size());
+        assertEquals(4, callStats.size());
         BinderCallsStats.ExportedCallStat debugEntry1 = callStats.get(0);
         assertEquals("", debugEntry1.className);
         assertEquals("__DEBUG_start_time_millis", debugEntry1.methodName);
@@ -656,6 +657,9 @@ public class BinderCallsStatsTest {
         assertEquals("", debugEntry3.className);
         assertEquals("__DEBUG_battery_time_millis", debugEntry3.methodName);
         assertTrue(debugEntry3.latencyMicros >= 0);
+        BinderCallsStats.ExportedCallStat debugEntry4 = callStats.get(3);
+        assertEquals("__DEBUG_sampling_interval", debugEntry4.methodName);
+        assertEquals(10, debugEntry4.latencyMicros);
     }
 
     @Test
@@ -718,6 +722,36 @@ public class BinderCallsStatsTest {
         assertEquals(2, callStats.recordedCallCount);
     }
 
+    @Test
+    public void testTrackScreenInteractiveDisabled_sampling() {
+        TestBinderCallsStats bcs = new TestBinderCallsStats();
+        bcs.setSamplingInterval(2);
+        bcs.setTrackScreenInteractive(false);
+        Binder binder = new Binder();
+
+        mDeviceState.setScreenInteractive(false);
+        CallSession callSession = bcs.callStarted(binder, 1, WORKSOURCE_UID);
+        bcs.time += 10;
+        bcs.callEnded(callSession, REQUEST_SIZE, REPLY_SIZE, WORKSOURCE_UID);
+
+        mDeviceState.setScreenInteractive(true);
+        callSession = bcs.callStarted(binder, 1, WORKSOURCE_UID);
+        bcs.time += 1000;  // shoud be ignored.
+        bcs.callEnded(callSession, REQUEST_SIZE, REPLY_SIZE, WORKSOURCE_UID);
+
+        SparseArray<BinderCallsStats.UidEntry> uidEntries = bcs.getUidEntries();
+        assertEquals(1, uidEntries.size());
+        BinderCallsStats.UidEntry uidEntry = uidEntries.get(WORKSOURCE_UID);
+        Assert.assertNotNull(uidEntry);
+        assertEquals(2, uidEntry.callCount);
+
+        List<BinderCallsStats.CallStat> callStatsList = new ArrayList(uidEntry.getCallStatsList());
+        assertEquals(1, callStatsList.size());
+        BinderCallsStats.CallStat callStats = callStatsList.get(0);
+        assertEquals(false, callStats.screenInteractive);
+        assertEquals(2, callStats.callCount);
+        assertEquals(1, callStats.recordedCallCount);
+    }
 
     class TestBinderCallsStats extends BinderCallsStats {
         public int callingUid = CALLING_UID;

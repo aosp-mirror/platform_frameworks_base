@@ -49,6 +49,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.util.StatsLog;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowInsets;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
@@ -134,7 +135,8 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
         public void onTaskRemovalStarted(int taskId) {
             if (mEntry != null) {
                 // Must post because this is called from a binder thread.
-                post(() -> mBubbleController.removeBubble(mEntry.key));
+                post(() -> mBubbleController.removeBubble(mEntry.key,
+                        BubbleController.DISMISS_TASK_FINISHED));
             }
         }
     };
@@ -316,8 +318,25 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
     /**
      * Lets activity view know it should be shown / populated.
      */
-    public void populateActivityView() {
-        mActivityView.setCallback(mStateCallback);
+    public void populateExpandedView() {
+        if (usingActivityView()) {
+            mActivityView.setCallback(mStateCallback);
+        } else {
+            // We're using notification template
+            ViewGroup parent = (ViewGroup) mNotifRow.getParent();
+            if (parent == this) {
+                // Already added
+                return;
+            } else if (parent != null) {
+                // Still in the shade... remove it
+                parent.removeView(mNotifRow);
+            }
+            if (mShowOnTop) {
+                addView(mNotifRow);
+            } else {
+                addView(mNotifRow, mUseFooter ? 0 : 1);
+            }
+        }
     }
 
     /**
@@ -376,14 +395,8 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
         } else {
             // Hide activity view if we had it previously
             mActivityView.setVisibility(GONE);
-
-            // Use notification view
             mNotifRow = mEntry.getRow();
-            if (mShowOnTop) {
-                addView(mNotifRow);
-            } else {
-                addView(mNotifRow, mUseFooter ? 0 : 1);
-            }
+
         }
         updateView();
     }
@@ -516,7 +529,9 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
     /**
      * Removes and releases an ActivityView if one was previously created for this bubble.
      */
-    public void destroyActivityView() {
+    public void cleanUpExpandedState() {
+        removeView(mNotifRow);
+
         if (mActivityView == null) {
             return;
         }

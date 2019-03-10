@@ -93,14 +93,28 @@ public class HotspotControllerImpl implements HotspotController, WifiManager.Sof
         return null;
     }
 
+    /**
+     * Adds {@code callback} to the controller. The controller will update the callback on state
+     * changes. It will immediately trigger the callback added to notify current state.
+     * @param callback
+     */
     @Override
     public void addCallback(Callback callback) {
         synchronized (mCallbacks) {
             if (callback == null || mCallbacks.contains(callback)) return;
             if (DEBUG) Log.d(TAG, "addCallback " + callback);
             mCallbacks.add(callback);
-
-            updateWifiStateListeners(!mCallbacks.isEmpty());
+            if (mWifiManager != null) {
+                if (mCallbacks.size() == 1) {
+                    mWifiManager.registerSoftApCallback(this, mMainHandler);
+                } else {
+                    // mWifiManager#registerSoftApCallback triggers a call to onNumClientsChanged
+                    // on the Main Handler. In order to always update the callback on added, we
+                    // make this call when adding callbacks after the first.
+                    mMainHandler.post(() ->
+                            callback.onHotspotChanged(isHotspotEnabled(), mNumConnectedDevices));
+                }
+            }
         }
     }
 
@@ -110,27 +124,9 @@ public class HotspotControllerImpl implements HotspotController, WifiManager.Sof
         if (DEBUG) Log.d(TAG, "removeCallback " + callback);
         synchronized (mCallbacks) {
             mCallbacks.remove(callback);
-            updateWifiStateListeners(!mCallbacks.isEmpty());
-        }
-    }
-
-    /**
-     * Updates the wifi state receiver to either start or stop listening to get updates to the
-     * hotspot status. Additionally starts listening to wifi manager state to track the number of
-     * connected devices.
-     *
-     * @param shouldListen whether we should start listening to various wifi statuses
-     */
-    private void updateWifiStateListeners(boolean shouldListen) {
-        if (mWifiManager == null) {
-            return;
-        }
-        if (shouldListen) {
-            mWifiManager.registerSoftApCallback(
-                    this,
-                    mMainHandler);
-        } else {
-            mWifiManager.unregisterSoftApCallback(this);
+            if (mCallbacks.isEmpty() && mWifiManager != null) {
+                mWifiManager.unregisterSoftApCallback(this);
+            }
         }
     }
 

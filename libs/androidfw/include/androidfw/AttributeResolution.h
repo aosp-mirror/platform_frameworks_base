@@ -33,7 +33,7 @@ enum {
   STYLE_RESOURCE_ID = 3,
   STYLE_CHANGING_CONFIGURATIONS = 4,
   STYLE_DENSITY = 5,
-  SYTLE_SOURCE_RESOURCE_ID = 6
+  STYLE_SOURCE_RESOURCE_ID = 6
 };
 
 // These are all variations of the same method. They each perform the exact same operation,

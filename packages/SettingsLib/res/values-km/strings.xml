@@ -377,7 +377,8 @@
     <string name="power_discharging_duration" msgid="8848256785736335185">"នៅសល់​ប្រហែល <xliff:g id="TIME_REMAINING">%1$s</xliff:g> ទៀត (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_duration_only_enhanced" msgid="4189311599812296592">"នៅសល់​ប្រហែល <xliff:g id="TIME_REMAINING">%1$s</xliff:g> ទៀត ផ្អែក​លើការ​ប្រើប្រាស់​របស់អ្នក"</string>
     <string name="power_discharging_duration_enhanced" msgid="1992003260664804080">"នៅសល់​ប្រហែល <xliff:g id="TIME_REMAINING">%1$s</xliff:g> ទៀត ផ្អែក​លើការ​ប្រើប្រាស់​របស់អ្នក (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_remaining_duration_only_short" msgid="3463575350656389957">"នៅសល់ <xliff:g id="TIME_REMAINING">%1$s</xliff:g> ទៀត"</string>
+    <!-- no translation found for power_remaining_duration_only_short (9183070574408359726) -->
+    <skip />
     <string name="power_discharge_by_enhanced" msgid="2095821536747992464">"គួរ​តែ​អាច​ប្រើបាន​រហូតដល់​ម៉ោងប្រហែល <xliff:g id="TIME">%1$s</xliff:g> ដោយផ្អែក​លើការ​ប្រើប្រាស់​របស់អ្នក (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only_enhanced" msgid="2175151772952365149">"គួរ​តែ​អាច​ប្រើបាន​រហូតដល់​ម៉ោងប្រហែល <xliff:g id="TIME">%1$s</xliff:g> ដោយផ្អែក​លើការ​ប្រើប្រាស់​របស់អ្នក"</string>
     <string name="power_discharge_by" msgid="6453537733650125582">"គួរ​តែ​អាច​ប្រើបាន​រហូតដល់​ម៉ោងប្រហែល <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>

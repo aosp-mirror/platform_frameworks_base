@@ -710,7 +710,7 @@ public abstract class PackageManager {
             INSTALL_INTERNAL,
             INSTALL_FROM_ADB,
             INSTALL_ALL_USERS,
-            INSTALL_ALLOW_DOWNGRADE,
+            INSTALL_REQUEST_DOWNGRADE,
             INSTALL_GRANT_RUNTIME_PERMISSIONS,
             INSTALL_FORCE_VOLUME_UUID,
             INSTALL_FORCE_PERMISSION_PROMPT,
@@ -721,7 +721,7 @@ public abstract class PackageManager {
             INSTALL_VIRTUAL_PRELOAD,
             INSTALL_APEX,
             INSTALL_ENABLE_ROLLBACK,
-            INSTALL_RESPECT_ALLOW_DOWNGRADE,
+            INSTALL_ALLOW_DOWNGRADE,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface InstallFlags {}
@@ -768,14 +768,21 @@ public abstract class PackageManager {
     public static final int INSTALL_ALL_USERS = 0x00000040;
 
     /**
-     * Flag parameter for {@link #installPackage} to indicate that it is okay
-     * to install an update to an app where the newly installed app has a lower
-     * version code than the currently installed app. This is permitted only if
-     * the currently installed app is marked debuggable.
+     * Flag parameter for {@link #installPackage} to indicate that an upgrade to a lower version
+     * of a package than currently installed has been requested.
+     *
+     * <p>Note that this flag doesn't guarantee that downgrade will be performed. That decision
+     * depends
+     * on whenever:
+     * <ul>
+     * <li>An app is debuggable.
+     * <li>Or a build is debuggable.
+     * <li>Or {@link #INSTALL_ALLOW_DOWNGRADE} is set.
+     * </ul>
      *
      * @hide
      */
-    public static final int INSTALL_ALLOW_DOWNGRADE = 0x00000080;
+    public static final int INSTALL_REQUEST_DOWNGRADE = 0x00000080;
 
     /**
      * Flag parameter for {@link #installPackage} to indicate that all runtime
@@ -868,12 +875,11 @@ public abstract class PackageManager {
 
     /**
      * Flag parameter for {@link #installPackage} to indicate that
-     * {@link #INSTALL_ALLOW_DOWNGRADE} should be respected.
+     * {@link #INSTALL_REQUEST_DOWNGRADE} should be allowed.
      *
      * @hide
      */
-    // TODO(b/127322579): rename
-    public static final int INSTALL_RESPECT_ALLOW_DOWNGRADE = 0x00100000;
+    public static final int INSTALL_ALLOW_DOWNGRADE = 0x00100000;
 
     /** @hide */
     @IntDef(flag = true, prefix = { "DONT_KILL_APP" }, value = {
@@ -3041,12 +3047,42 @@ public abstract class PackageManager {
     public static final int FLAG_PERMISSION_REVOKE_WHEN_REQUESTED =  1 << 7;
 
     /**
-     * Mask for all permission flags.
+     * Permission flag: The permission's usage should be made highly visible to the user
+     * when granted.
      *
      * @hide
      */
     @SystemApi
+    public static final int FLAG_PERMISSION_USER_SENSITIVE_WHEN_GRANTED =  1 << 8;
+
+    /**
+     * Permission flag: The permission's usage should be made highly visible to the user
+     * when denied.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int FLAG_PERMISSION_USER_SENSITIVE_WHEN_DENIED =  1 << 9;
+
+    /**
+     * Mask for all permission flags present in Android P
+     *
+     * @deprecated This constant does not contain useful information and should never have been
+     * exposed. When checking permission flags always flag each flag explicitly and ignore all
+     * flags that do not matter for this particular code.
+     *
+     * @hide
+     */
+    @Deprecated
+    @SystemApi
     public static final int MASK_PERMISSION_FLAGS = 0xFF;
+
+    /**
+     * Mask for all permission flags.
+     *
+     * @hide
+     */
+    public static final int MASK_PERMISSION_FLAGS_ALL = 0x3FF;
 
     /**
      * Injected activity in app that forwards user to setting activity of that app.
@@ -3755,6 +3791,8 @@ public abstract class PackageManager {
             FLAG_PERMISSION_REVOKE_ON_UPGRADE,
             FLAG_PERMISSION_SYSTEM_FIXED,
             FLAG_PERMISSION_GRANTED_BY_DEFAULT,
+            FLAG_PERMISSION_USER_SENSITIVE_WHEN_GRANTED,
+            FLAG_PERMISSION_USER_SENSITIVE_WHEN_DENIED,
             /*
             FLAG_PERMISSION_REVOKE_WHEN_REQUESED
             */
@@ -3829,7 +3867,8 @@ public abstract class PackageManager {
     @TestApi
     @RequiresPermission(anyOf = {
             android.Manifest.permission.GRANT_RUNTIME_PERMISSIONS,
-            android.Manifest.permission.REVOKE_RUNTIME_PERMISSIONS
+            android.Manifest.permission.REVOKE_RUNTIME_PERMISSIONS,
+            android.Manifest.permission.GET_RUNTIME_PERMISSIONS
     })
     public abstract @PermissionFlags int getPermissionFlags(String permissionName,
             String packageName, @NonNull UserHandle user);
@@ -6542,6 +6581,8 @@ public abstract class PackageManager {
             case FLAG_PERMISSION_USER_FIXED: return "USER_FIXED";
             case FLAG_PERMISSION_REVIEW_REQUIRED: return "REVIEW_REQUIRED";
             case FLAG_PERMISSION_REVOKE_WHEN_REQUESTED: return "REVOKE_WHEN_REQUESTED";
+            case FLAG_PERMISSION_USER_SENSITIVE_WHEN_GRANTED: return "USER_SENSITIVE_WHEN_GRANTED";
+            case FLAG_PERMISSION_USER_SENSITIVE_WHEN_DENIED: return "USER_SENSITIVE_WHEN_DENIED";
             default: return Integer.toString(flag);
         }
     }

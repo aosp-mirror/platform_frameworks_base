@@ -60,6 +60,8 @@ class CompileCommand : public Command {
         "Sets the visibility of the compiled resources to the specified\n"
             "level. Accepted levels: public, private, default", &visibility_);
     AddOptionalSwitch("-v", "Enables verbose logging", &options_.verbose);
+    AddOptionalFlag("--trace-folder", "Generate systrace json trace fragment to specified folder.",
+                    &trace_folder_);
   }
 
   int Action(const std::vector<std::string>& args) override;
@@ -68,6 +70,7 @@ class CompileCommand : public Command {
   IDiagnostics* diagnostic_;
   CompileOptions options_;
   Maybe<std::string> visibility_;
+  Maybe<std::string> trace_folder_;
 };
 
 int Compile(IAaptContext* context, io::IFileCollection* inputs, IArchiveWriter* output_writer,

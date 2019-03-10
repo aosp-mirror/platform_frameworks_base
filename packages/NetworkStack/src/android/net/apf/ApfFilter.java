@@ -475,7 +475,7 @@ public class ApfFilter {
             socket = Os.socket(AF_PACKET, SOCK_RAW, ETH_P_IPV6);
             SocketAddress addr = makePacketSocketAddress(
                     (short) ETH_P_IPV6, mInterfaceParams.index);
-            SocketUtils.bindSocket(socket, addr);
+            Os.bind(socket, addr);
             SocketUtils.attachRaFilter(socket, mApfCapabilities.apfPacketFormat);
         } catch(SocketException|ErrnoException e) {
             Log.e(TAG, "Error starting filter", e);

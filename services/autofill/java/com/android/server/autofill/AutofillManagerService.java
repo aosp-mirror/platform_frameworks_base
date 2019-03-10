@@ -479,13 +479,16 @@ public final class AutofillManagerService
 
     private void setDeviceConfigProperties() {
         synchronized (mLock) {
-            mAugmentedServiceIdleUnbindTimeoutMs = Helper.getIntDeviceConfigProperty(
+            mAugmentedServiceIdleUnbindTimeoutMs = DeviceConfig.getInt(
+                    DeviceConfig.NAMESPACE_AUTOFILL,
                     AutofillManager.DEVICE_CONFIG_AUGMENTED_SERVICE_IDLE_UNBIND_TIMEOUT,
                     (int) AbstractRemoteService.PERMANENT_BOUND_TIMEOUT_MS);
-            mAugmentedServiceRequestTimeoutMs = Helper.getIntDeviceConfigProperty(
+            mAugmentedServiceRequestTimeoutMs = DeviceConfig.getInt(
+                    DeviceConfig.NAMESPACE_AUTOFILL,
                     AutofillManager.DEVICE_CONFIG_AUGMENTED_SERVICE_REQUEST_TIMEOUT,
                     DEFAULT_AUGMENTED_AUTOFILL_REQUEST_TIMEOUT_MILLIS);
-            mSupportedSmartSuggestionModes = Helper.getIntDeviceConfigProperty(
+            mSupportedSmartSuggestionModes = DeviceConfig.getInt(
+                    DeviceConfig.NAMESPACE_AUTOFILL,
                     AutofillManager.DEVICE_CONFIG_AUTOFILL_SMART_SUGGESTION_SUPPORTED_MODES,
                     AutofillManager.FLAG_SMART_SUGGESTION_SYSTEM);
             if (verbose) {

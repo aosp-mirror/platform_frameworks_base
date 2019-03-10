@@ -159,14 +159,17 @@ public class NotificationEntryManager implements
     }
 
     public void performRemoveNotification(StatusBarNotification n) {
-        final int rank = mNotificationData.getRank(n.getKey());
-        final int count = mNotificationData.getActiveNotifications().size();
-        NotificationVisibility.NotificationLocation location =
-                NotificationLogger.getNotificationLocation(getNotificationData().get(n.getKey()));
-        final NotificationVisibility nv = NotificationVisibility.obtain(n.getKey(), rank, count,
-                true, location);
+        final NotificationVisibility nv = obtainVisibility(n.getKey());
         removeNotificationInternal(
                 n.getKey(), null, nv, false /* forceRemove */, true /* removedByUser */);
+    }
+
+    private NotificationVisibility obtainVisibility(String key) {
+        final int rank = mNotificationData.getRank(key);
+        final int count = mNotificationData.getActiveNotifications().size();
+        NotificationVisibility.NotificationLocation location =
+                NotificationLogger.getNotificationLocation(getNotificationData().get(key));
+        return NotificationVisibility.obtain(key, rank, count, true, location);
     }
 
     private void abortExistingInflation(String key) {
@@ -226,8 +229,8 @@ public class NotificationEntryManager implements
 
     @Override
     public void removeNotification(String key, NotificationListenerService.RankingMap ranking) {
-        removeNotificationInternal(
-                key, ranking, null, false /* forceRemove */, false /* removedByUser */);
+        removeNotificationInternal(key, ranking, obtainVisibility(key), false /* forceRemove */,
+                false /* removedByUser */);
     }
 
     private void removeNotificationInternal(
@@ -245,7 +248,8 @@ public class NotificationEntryManager implements
         if (entry != null) {
             // If a manager needs to keep the notification around for whatever reason, we
             // keep the notification
-            if (!forceRemove) {
+            boolean entryDismissed = entry.isRowDismissed();
+            if (!forceRemove && !entryDismissed) {
                 for (NotificationLifetimeExtender extender : mNotificationLifetimeExtenders) {
                     if (extender.shouldExtendLifetime(entry)) {
                         mLatestRankingMap = ranking;
@@ -272,6 +276,7 @@ public class NotificationEntryManager implements
                 mNotificationData.remove(key, ranking);
                 updateNotifications();
                 Dependency.get(LeakDetector.class).trackGarbage(entry);
+                removedByUser |= entryDismissed;
 
                 for (NotificationEntryListener listener : mNotificationEntryListeners) {
                     listener.onEntryRemoved(entry, visibility, removedByUser);

@@ -21,6 +21,8 @@ LIBANDROID {
     AChoreographer_getInstance; # introduced=24
     AChoreographer_postFrameCallback; # introduced=24
     AChoreographer_postFrameCallbackDelayed; # introduced=24
+    AChoreographer_postFrameCallback64; # introduced=29
+    AChoreographer_postFrameCallbackDelayed64; # introduced=29
     AConfiguration_copy;
     AConfiguration_delete;
     AConfiguration_diff;

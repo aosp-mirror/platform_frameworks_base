@@ -117,7 +117,6 @@ public class SettingsBackupTest {
                     Settings.Global.ANOMALY_CONFIG_VERSION,
                     Settings.Global.APN_DB_UPDATE_CONTENT_URL,
                     Settings.Global.APN_DB_UPDATE_METADATA_URL,
-                    Settings.Global.APPLY_RAMPING_RINGER,
                     Settings.Global.APP_BINDING_CONSTANTS,
                     Settings.Global.APP_IDLE_CONSTANTS,
                     Settings.Global.APP_OPS_CONSTANTS,
@@ -644,6 +643,7 @@ public class SettingsBackupTest {
                  Settings.Secure.LAST_SETUP_SHOWN,
                  Settings.Secure.LOCATION_CHANGER,
                  Settings.Secure.LOCATION_MODE,
+                 Settings.Secure.LOCATION_PERMISSIONS_UPGRADE_TO_Q_MODE,
                  Settings.Secure.LOCK_SCREEN_ALLOW_REMOTE_INPUT, // Candidate?
                  Settings.Secure.LOCK_SCREEN_LOCK_AFTER_TIMEOUT,
                  Settings.Secure.LOCK_TO_APP_EXIT_LOCKED,

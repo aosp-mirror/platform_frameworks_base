@@ -28,6 +28,7 @@ import android.app.AppOpsManager;
 import android.app.role.IOnRoleHoldersChangedListener;
 import android.app.role.IRoleManager;
 import android.app.role.IRoleManagerCallback;
+import android.app.role.RoleControllerManager;
 import android.app.role.RoleManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -97,6 +98,8 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
 
     private static final String LOG_TAG = RoleManagerService.class.getSimpleName();
 
+    private static final boolean DEBUG = false;
+
     @NonNull
     private final UserManagerInternal mUserManagerInternal;
     @NonNull
@@ -123,12 +126,11 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
     private final SparseArray<RoleUserState> mUserStates = new SparseArray<>();
 
     /**
-     * Maps user id to its controller service.
+     * Maps user id to its controller.
      */
     @GuardedBy("mLock")
     @NonNull
-    private final SparseArray<RemoteRoleControllerService> mControllerServices =
-            new SparseArray<>();
+    private final SparseArray<RoleControllerManager> mControllers = new SparseArray<>();
 
     /**
      * Maps user id to its list of listeners.
@@ -190,9 +192,9 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
             @Override
             public void onReceive(Context context, Intent intent) {
                 int userId = UserHandle.getUserId(intent.getIntExtra(Intent.EXTRA_UID, -1));
-                if (RemoteRoleControllerService.DEBUG) {
-                    Slog.i(LOG_TAG,
-                            "Packages changed - re-running initial grants for user " + userId);
+                if (DEBUG) {
+                    Slog.i(LOG_TAG, "Packages changed - re-running initial grants for user "
+                            + userId);
                 }
                 performInitialGrantsIfNecessary(userId);
             }
@@ -255,12 +257,12 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
                         }
                     });
             try {
-                result.get(5, TimeUnit.SECONDS);
+                result.get(30, TimeUnit.SECONDS);
                 userState.setPackagesHash(packagesHash);
             } catch (InterruptedException | ExecutionException | TimeoutException e) {
                 Slog.e(LOG_TAG, "Failed to grant defaults for user " + userId, e);
             }
-        } else if (RemoteRoleControllerService.DEBUG) {
+        } else if (DEBUG) {
             Slog.i(LOG_TAG, "Already ran grants for package state " + packagesHash);
         }
     }
@@ -326,14 +328,22 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
     }
 
     @NonNull
-    private RemoteRoleControllerService getOrCreateControllerService(@UserIdInt int userId) {
+    private RoleControllerManager getOrCreateControllerService(@UserIdInt int userId) {
         synchronized (mLock) {
-            RemoteRoleControllerService controllerService = mControllerServices.get(userId);
-            if (controllerService == null) {
-                controllerService = new RemoteRoleControllerService(userId, getContext());
-                mControllerServices.put(userId, controllerService);
+            RoleControllerManager controller = mControllers.get(userId);
+            if (controller == null) {
+                Context systemContext = getContext();
+                Context context;
+                try {
+                    context = systemContext.createPackageContextAsUser(
+                            systemContext.getPackageName(), 0, UserHandle.of(userId));
+                } catch (NameNotFoundException e) {
+                    throw new RuntimeException(e);
+                }
+                controller = new RoleControllerManager(context, FgThread.getHandler());
+                mControllers.put(userId, controller);
             }
-            return controllerService;
+            return controller;
         }
     }
 
@@ -362,7 +372,7 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
         RoleUserState userState;
         synchronized (mLock) {
             listeners = mListeners.removeReturnOld(userId);
-            mControllerServices.remove(userId);
+            mControllers.remove(userId);
             userState = mUserStates.removeReturnOld(userId);
         }
         if (listeners != null) {

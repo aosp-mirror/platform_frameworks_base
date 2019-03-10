@@ -1985,7 +1985,7 @@ public class MediaPlayer2 implements AutoCloseable
          * When the language is unknown or could not be determined,
          * ISO-639-2 language code, "und", is returned.
          */
-        public @Nullable String getLanguage() {
+        public @NonNull String getLanguage() {
             String language = mFormat.getString(MediaFormat.KEY_LANGUAGE);
             return language == null ? "und" : language;
         }

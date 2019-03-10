@@ -212,7 +212,7 @@ public class BinderCallsStats implements BinderInternal.Observer {
                 // It helps to keep the memory usage down when sampling is enabled.
                 final CallStat callStat = uidEntry.get(
                         callingUid, s.binderClass, s.transactionCode,
-                        mDeviceState.isScreenInteractive());
+                        screenInteractive);
                 if (callStat != null) {
                     callStat.callCount++;
                 }
@@ -344,6 +344,7 @@ public class BinderCallsStats implements BinderInternal.Observer {
             resultCallStats.add(createDebugEntry("end_time_millis", SystemClock.elapsedRealtime()));
             resultCallStats.add(
                     createDebugEntry("battery_time_millis", mBatteryStopwatch.getMillis()));
+            resultCallStats.add(createDebugEntry("sampling_interval", mPeriodicSamplingInterval));
         }
 
         return resultCallStats;

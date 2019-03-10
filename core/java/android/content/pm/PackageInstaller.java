@@ -1342,8 +1342,8 @@ public class PackageInstaller {
          * @hide
          */
         public boolean areHiddenOptionsSet() {
-            return (installFlags & (PackageManager.INSTALL_ALLOW_DOWNGRADE
-                    | PackageManager.INSTALL_RESPECT_ALLOW_DOWNGRADE
+            return (installFlags & (PackageManager.INSTALL_REQUEST_DOWNGRADE
+                    | PackageManager.INSTALL_ALLOW_DOWNGRADE
                     | PackageManager.INSTALL_DONT_KILL_APP
                     | PackageManager.INSTALL_INSTANT_APP
                     | PackageManager.INSTALL_FULL_APP
@@ -1455,13 +1455,23 @@ public class PackageInstaller {
             installFlags |= PackageManager.INSTALL_ENABLE_ROLLBACK;
         }
 
+        /**
+         * @deprecated use {@link #setRequestDowngrade(boolean)}.
+         * {@hide}
+         */
+        @SystemApi
+        @Deprecated
+        public void setAllowDowngrade(boolean allowDowngrade) {
+            setRequestDowngrade(allowDowngrade);
+        }
+
         /** {@hide} */
         @SystemApi
-        public void setAllowDowngrade(boolean allowDowngrade) {
-            if (allowDowngrade) {
-                installFlags |= PackageManager.INSTALL_ALLOW_DOWNGRADE;
+        public void setRequestDowngrade(boolean requestDowngrade) {
+            if (requestDowngrade) {
+                installFlags |= PackageManager.INSTALL_REQUEST_DOWNGRADE;
             } else {
-                installFlags &= ~PackageManager.INSTALL_ALLOW_DOWNGRADE;
+                installFlags &= ~PackageManager.INSTALL_REQUEST_DOWNGRADE;
             }
         }
 
@@ -1982,11 +1992,23 @@ public class PackageInstaller {
         /**
          * Get the value set in {@link SessionParams#setAllowDowngrade(boolean)}.
          *
+         * @deprecated use {@link #getRequestDowngrade()}.
          * @hide
          */
         @SystemApi
+        @Deprecated
         public boolean getAllowDowngrade() {
-            return (installFlags & PackageManager.INSTALL_ALLOW_DOWNGRADE) != 0;
+            return getRequestDowngrade();
+        }
+
+        /**
+         * Get the value set in {@link SessionParams#setRequestDowngrade(boolean)}.
+         *
+         * @hide
+         */
+        @SystemApi
+        public boolean getRequestDowngrade() {
+            return (installFlags & PackageManager.INSTALL_REQUEST_DOWNGRADE) != 0;
         }
 
         /**
@@ -2130,7 +2152,7 @@ public class PackageInstaller {
          * Text description of the error code returned by {@code getStagedSessionErrorCode}, or
          * empty string if no error was encountered.
          */
-        public String getStagedSessionErrorMessage() {
+        public @NonNull String getStagedSessionErrorMessage() {
             checkSessionIsStaged();
             return mStagedSessionErrorMessage;
         }

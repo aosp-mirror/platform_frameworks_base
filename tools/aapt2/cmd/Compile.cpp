@@ -45,6 +45,7 @@
 #include "io/StringStream.h"
 #include "io/Util.h"
 #include "io/ZipArchive.h"
+#include "trace/TraceBuffer.h"
 #include "util/Files.h"
 #include "util/Maybe.h"
 #include "util/Util.h"
@@ -141,6 +142,7 @@ static std::string BuildIntermediateContainerFilename(const ResourcePathData& da
 static bool CompileTable(IAaptContext* context, const CompileOptions& options,
                          const ResourcePathData& path_data, io::IFile* file, IArchiveWriter* writer,
                          const std::string& output_path) {
+  TRACE_CALL();
   ResourceTable table;
   {
     auto fin = file->OpenInputStream();
@@ -286,6 +288,7 @@ static bool CompileTable(IAaptContext* context, const CompileOptions& options,
 static bool WriteHeaderAndDataToWriter(const StringPiece& output_path, const ResourceFile& file,
                                        io::KnownSizeInputStream* in, IArchiveWriter* writer,
                                        IDiagnostics* diag) {
+  TRACE_CALL();
   // Start the entry so we can write the header.
   if (!writer->StartEntry(output_path, 0)) {
     diag->Error(DiagMessage(output_path) << "failed to open file");
@@ -352,6 +355,7 @@ static bool IsValidFile(IAaptContext* context, const std::string& input_path) {
 static bool CompileXml(IAaptContext* context, const CompileOptions& options,
                        const ResourcePathData& path_data, io::IFile* file, IArchiveWriter* writer,
                        const std::string& output_path) {
+  TRACE_CALL();
   if (context->IsVerbose()) {
     context->GetDiagnostics()->Note(DiagMessage(path_data.source) << "compiling XML");
   }
@@ -451,6 +455,7 @@ static bool CompileXml(IAaptContext* context, const CompileOptions& options,
 static bool CompilePng(IAaptContext* context, const CompileOptions& options,
                        const ResourcePathData& path_data, io::IFile* file, IArchiveWriter* writer,
                        const std::string& output_path) {
+  TRACE_CALL();
   if (context->IsVerbose()) {
     context->GetDiagnostics()->Note(DiagMessage(path_data.source) << "compiling PNG");
   }
@@ -558,6 +563,7 @@ static bool CompilePng(IAaptContext* context, const CompileOptions& options,
 static bool CompileFile(IAaptContext* context, const CompileOptions& options,
                         const ResourcePathData& path_data, io::IFile* file, IArchiveWriter* writer,
                         const std::string& output_path) {
+  TRACE_CALL();
   if (context->IsVerbose()) {
     context->GetDiagnostics()->Note(DiagMessage(path_data.source) << "compiling file");
   }
@@ -632,6 +638,7 @@ class CompileContext : public IAaptContext {
 
 int Compile(IAaptContext* context, io::IFileCollection* inputs, IArchiveWriter* output_writer,
              CompileOptions& options) {
+  TRACE_CALL();
   bool error = false;
 
   // Iterate over the input files in a stable, platform-independent manner
@@ -707,6 +714,7 @@ int Compile(IAaptContext* context, io::IFileCollection* inputs, IArchiveWriter* 
 }
 
 int CompileCommand::Action(const std::vector<std::string>& args) {
+  TRACE_FLUSH(trace_folder_? trace_folder_.value() : "", "CompileCommand::Action");
   CompileContext context(diagnostic_);
   context.SetVerbose(options_.verbose);
 

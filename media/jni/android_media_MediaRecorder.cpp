@@ -760,6 +760,44 @@ android_media_MediaRecord_getActiveMicrophones(JNIEnv *env,
     return jStatus;
 }
 
+static jint android_media_MediaRecord_setMicrophoneDirection(
+        JNIEnv *env, jobject thiz, jint direction) {
+    ALOGV("setMicrophoneDirection(%d)", direction);
+    sp<MediaRecorder> mr = getMediaRecorder(env, thiz);
+    if (mr == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return (jint)AUDIO_JAVA_NO_INIT;
+    }
+
+    jint jStatus = AUDIO_JAVA_SUCCESS;
+    status_t status =
+        mr->setMicrophoneDirection(static_cast<audio_microphone_direction_t>(direction));
+    if (status != NO_ERROR) {
+        jStatus = nativeToJavaStatus(status);
+    }
+
+    return jStatus;
+}
+
+static jint  android_media_MediaRecord_setMicrophoneFieldDimension(
+        JNIEnv *env, jobject thiz, jfloat zoom) {
+    ALOGV("setMicrophoneFieldDimension(%f)", zoom);
+    sp<MediaRecorder> mr = getMediaRecorder(env, thiz);
+    if (mr == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return (jint)AUDIO_JAVA_NO_INIT;
+    }
+
+    jint jStatus = AUDIO_JAVA_SUCCESS;
+    status_t status = mr->setMicrophoneFieldDimension(zoom);
+    if (status != NO_ERROR) {
+        jStatus = nativeToJavaStatus(status);
+    }
+
+    return jStatus;
+
+}
+
 static jint android_media_MediaRecord_getPortId(JNIEnv *env,  jobject thiz) {
     sp<MediaRecorder> mr = getMediaRecorder(env, thiz);
     if (mr == NULL) {
@@ -812,6 +850,8 @@ static const JNINativeMethod gMethods[] = {
 
     {"native_getActiveMicrophones", "(Ljava/util/ArrayList;)I", (void *)android_media_MediaRecord_getActiveMicrophones},
     {"native_getPortId", "()I", (void *)android_media_MediaRecord_getPortId},
+    {"native_setMicrophoneDirection", "(I)I", (void *)android_media_MediaRecord_setMicrophoneDirection},
+    {"native_setMicrophoneFieldDimension", "(F)I", (void *)android_media_MediaRecord_setMicrophoneFieldDimension},
 };
 
 // This function only registers the native methods, and is called from

@@ -71,11 +71,11 @@
 
     <style name="hybrid_notification_title">
         <item name="android:paddingEnd">4dp</item>
-        <item name="android:textAppearance">@*android:style/TextAppearance.Material.Notification.Title</item>
+        <item name="android:textAppearance">@*android:style/TextAppearance.DeviceDefault.Notification.Title</item>
     </style>
 
     <style name="hybrid_notification_text"
-           parent="@*android:style/Widget.Material.Notification.Text">
+           parent="@*android:style/Widget.DeviceDefault.Notification.Text">
         <item name="android:paddingEnd">4dp</item>
     </style>
 
@@ -227,6 +227,8 @@
         <item name="android:textSize">@dimen/qs_carrier_info_text_size</item>
     </style>
 
+    <style name="TextAppearance.QS.Status" parent="TextAppearance.QS.TileLabel.Secondary" />
+
     <style name="TextAppearance.AppOpsDialog" />
 
     <style name="TextAppearance.AppOpsDialog.Title">
@@ -334,10 +336,6 @@
         <item name="android:padding">12dp</item>
         <item name="android:background">@drawable/qs_btn_borderless_rect</item>
         <item name="android:gravity">center</item>
-    </style>
-
-    <style name="TextAppearance.Material.Notification.HeaderTitle"
-        parent="@*android:style/TextAppearance.Material.Notification.Info">
     </style>
 
     <style name="SearchPanelCircle">
@@ -469,7 +467,7 @@
     </style>
 
     <style name="TextAppearance.HeadsUpStatusBarText"
-           parent="@*android:style/TextAppearance.Material.Notification.Info">
+           parent="@*android:style/TextAppearance.DeviceDefault.Notification.Info">
     </style>
 
     <style name="TextAppearance.QSEdit.Headers"

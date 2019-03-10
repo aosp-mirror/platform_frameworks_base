@@ -353,6 +353,7 @@ public interface TextClassifier {
      * Suggests and returns a list of actions according to the given conversation.
      */
     @WorkerThread
+    @NonNull
     default ConversationActions suggestConversationActions(
             @NonNull ConversationActions.Request request) {
         Preconditions.checkNotNull(request);
@@ -609,7 +610,8 @@ public interface TextClassifier {
              * These hints will only be used if {@link #includeTypesFromTextClassifier} is
              * set to be true.
              */
-            public Builder setHints(Collection<String> hints) {
+            @NonNull
+            public Builder setHints(@Nullable Collection<String> hints) {
                 mHints = hints;
                 return this;
             }

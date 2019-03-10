@@ -36,10 +36,11 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.net.util.SharedLog;
 import android.provider.Settings;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
 import android.telephony.TelephonyManager;
 import android.test.mock.MockContentResolver;
+
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.util.test.BroadcastInterceptingContext;
 import com.android.internal.util.test.FakeSettingsProvider;

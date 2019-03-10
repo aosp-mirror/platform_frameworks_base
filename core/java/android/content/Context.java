@@ -17,6 +17,7 @@
 package android.content;
 
 import android.annotation.AttrRes;
+import android.annotation.CallbackExecutor;
 import android.annotation.CheckResult;
 import android.annotation.ColorInt;
 import android.annotation.ColorRes;
@@ -2967,26 +2968,40 @@ public abstract class Context {
             @NonNull ServiceConnection conn, @BindServiceFlags int flags);
 
     /**
+     * Same as {@link #bindService(Intent, ServiceConnection, int)} with executor to control
+     * ServiceConnection callbacks.
+     * @param executor Callbacks on ServiceConnection will be called on executor. Must use same
+     *      instance for the same instance of ServiceConnection.
+     */
+    public boolean bindService(@RequiresPermission @NonNull Intent service,
+            @BindServiceFlags int flags, @NonNull @CallbackExecutor Executor executor,
+            @NonNull ServiceConnection conn) {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
+
+    /**
      * Variation of {@link #bindService} that, in the specific case of isolated
      * services, allows the caller to generate multiple instances of a service
      * from a single component declaration.
      *
      * @param service Identifies the service to connect to.  The Intent must
      *      specify an explicit component name.
-     * @param conn Receives information as the service is started and stopped.
-     *      This must be a valid ServiceConnection object; it must not be null.
      * @param flags Operation options for the binding as per {@link #bindService}.
      * @param instanceName Unique identifier for the service instance.  Each unique
      *      name here will result in a different service instance being created.
      * @return Returns success of binding as per {@link #bindService}.
+     * @param executor Callbacks on ServiceConnection will be called on executor.
+     *      Must use same instance for the same instance of ServiceConnection.
+     * @param conn Receives information as the service is started and stopped.
+     *      This must be a valid ServiceConnection object; it must not be null.
      *
      * @throws SecurityException If the caller does not have permission to access the service
      *
      * @see #bindService
      */
     public boolean bindIsolatedService(@RequiresPermission @NonNull Intent service,
-            @NonNull ServiceConnection conn, @BindServiceFlags int flags,
-            @NonNull String instanceName) {
+            @BindServiceFlags int flags, @NonNull String instanceName,
+            @NonNull @CallbackExecutor Executor executor, @NonNull ServiceConnection conn) {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
     }
 
@@ -3161,6 +3176,7 @@ public abstract class Context {
             RESTRICTIONS_SERVICE,
             APP_OPS_SERVICE,
             ROLE_SERVICE,
+            //@hide ROLE_CONTROLLER_SERVICE,
             CAMERA_SERVICE,
             PRINT_SERVICE,
             CONSUMER_IR_SERVICE,
@@ -4268,6 +4284,16 @@ public abstract class Context {
      * @see android.app.role.RoleManager
      */
     public static final String ROLE_SERVICE = "role";
+
+    /**
+     * Official published name of the (internal) role controller service.
+     *
+     * @see #getSystemService(String)
+     * @see android.app.role.RoleControllerService
+     *
+     * @hide
+     */
+    public static final String ROLE_CONTROLLER_SERVICE = "role_controller";
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a

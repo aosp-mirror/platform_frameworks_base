@@ -16,6 +16,7 @@
 
 package com.android.test.hwui;
 
+import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.graphics.Color;
 import android.graphics.HardwareRenderer;
@@ -23,17 +24,78 @@ import android.graphics.Paint;
 import android.graphics.RecordingCanvas;
 import android.graphics.RenderNode;
 import android.os.Bundle;
-import android.util.Log;
+import android.os.Handler;
 import android.view.SurfaceHolder;
 
 public class CustomRenderer extends Activity {
-    private RenderNode mContent = new RenderNode("CustomRenderer");
+    private RenderNode mRootNode = new RenderNode("CustomRenderer");
+    private RenderNode mChildNode = new RenderNode("RedBox");
     private HardwareRenderer mRenderer = new HardwareRenderer();
+    private ObjectAnimator mAnimator;
+    private Handler mRedrawHandler = new Handler(true);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getWindow().takeSurface(mSurfaceCallbacks);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        mAnimator = ObjectAnimator.ofFloat(mChildNode, "translationY", 0, 300);
+        mAnimator.setRepeatMode(ObjectAnimator.REVERSE);
+        mAnimator.setRepeatCount(ObjectAnimator.INFINITE);
+        final Runnable redraw = this::draw;
+        mAnimator.addUpdateListener(animation -> {
+            mRedrawHandler.post(redraw);
+        });
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        mAnimator.end();
+        mAnimator = null;
+    }
+
+    private void setupRoot(int width, int height) {
+        mRootNode.setPosition(0, 0, width, height);
+
+        RecordingCanvas canvas = mRootNode.beginRecording();
+        canvas.drawColor(Color.WHITE);
+        Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        paint.setColor(Color.BLACK);
+        paint.setTextAlign(Paint.Align.CENTER);
+        float textSize = Math.min(width, height) * .05f;
+        paint.setTextSize(textSize);
+        canvas.drawText("Hello custom renderer!", width / 2, textSize * 2, paint);
+
+        canvas.translate(0, height / 4);
+        canvas.drawRenderNode(mChildNode);
+        canvas.translate(width / 2, 0);
+        canvas.drawRenderNode(mChildNode);
+        mRootNode.endRecording();
+
+        setupChild(width / 2, height / 2);
+    }
+
+    private void setupChild(int width, int height) {
+        mChildNode.setPosition(0, 0, width, height);
+        mChildNode.setScaleX(.5f);
+        mChildNode.setScaleY(.5f);
+
+        RecordingCanvas canvas = mChildNode.beginRecording();
+        canvas.drawColor(Color.RED);
+        mChildNode.endRecording();
+    }
+
+    private void draw() {
+        // Since we are constantly pumping frames between onStart & onStop we don't really
+        // care about any errors that may happen. They will self-correct.
+        mRenderer.createRenderRequest()
+                .setVsyncTime(System.nanoTime())
+                .syncAndDraw();
     }
 
     private SurfaceHolder.Callback2 mSurfaceCallbacks = new SurfaceHolder.Callback2() {
@@ -48,24 +110,14 @@ public class CustomRenderer extends Activity {
 
         @Override
         public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-            mContent.setLeftTopRightBottom(0, 0, width, height);
-            RecordingCanvas canvas = mContent.beginRecording();
-            canvas.drawColor(Color.WHITE);
-            Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-            paint.setColor(Color.BLACK);
-            paint.setTextAlign(Paint.Align.CENTER);
-            paint.setTextSize(Math.min(width, height) * .05f);
-            canvas.drawText("Hello custom renderer!", width / 2, height / 2, paint);
-            mContent.endRecording();
+            setupRoot(width, height);
 
-            mRenderer.setContentRoot(mContent);
+            mRenderer.setContentRoot(mRootNode);
             mRenderer.setSurface(holder.getSurface());
-            mRenderer.createRenderRequest()
-                    .setVsyncTime(System.nanoTime())
-                    .setFrameCommitCallback(Runnable::run, () -> {
-                        Log.d("CustomRenderer", "Frame committed!");
-                    })
-                    .syncAndDraw();
+            draw();
+            if (!mAnimator.isStarted()) {
+                mAnimator.start();
+            }
         }
 
         @Override

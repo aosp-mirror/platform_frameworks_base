@@ -308,18 +308,15 @@
     <string name="permgrouplab_phone" msgid="5229115638567440675">"전화"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"전화 걸기 및 관리"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;에서 전화를 걸고 관리하도록 허용하시겠습니까?"</string>
-    <!-- no translation found for permgrouplab_sensors (4838614103153567532) -->
-    <skip />
+    <string name="permgrouplab_sensors" msgid="4838614103153567532">"신체 센서"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"생체 신호에 관한 센서 데이터에 액세스"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;에서 생체 신호에 관한 센서 데이터에 액세스하도록 허용하시겠습니까?"</string>
     <string name="permgrouplab_aural" msgid="965607064083134896">"음악"</string>
     <string name="permgroupdesc_aural" msgid="4870189506255958055">"음악에 액세스"</string>
     <string name="permgrouprequest_aural" msgid="6787926123071735620">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;에서 내 음악에 액세스하도록 허용하시겠습니까?"</string>
-    <!-- no translation found for permgrouplab_visual (6477382108771145134) -->
-    <skip />
+    <string name="permgrouplab_visual" msgid="6477382108771145134">"사진 및 동영상"</string>
     <string name="permgroupdesc_visual" msgid="3415827902566663546">"사진 및 동영상에 액세스"</string>
-    <!-- no translation found for permgrouprequest_visual (3043752127595243314) -->
-    <skip />
+    <string name="permgrouprequest_visual" msgid="3043752127595243314">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;에서 태그가 지정된 위치를 포함한 내 사진과 동영상에 액세스하도록 허용하시겠습니까?"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"창 콘텐츠 가져오기"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"상호작용 중인 창의 콘텐츠를 검사합니다."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"터치하여 탐색 사용"</string>
@@ -2024,4 +2021,6 @@
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> 및 파일 <xliff:g id="COUNT_3">%d</xliff:g>개</item>
       <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> 및 파일 <xliff:g id="COUNT_1">%d</xliff:g>개</item>
     </plurals>
+    <!-- no translation found for chooser_no_direct_share_targets (997970693708458895) -->
+    <skip />
 </resources>

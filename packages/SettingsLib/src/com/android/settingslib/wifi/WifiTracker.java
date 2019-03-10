@@ -608,23 +608,23 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
 
             // Log accesspoints that are being removed
             if (DBG()) {
-                Log.d(TAG, "------ Dumping SSIDs that were not seen on this scan ------");
+                Log.d(TAG,
+                        "------ Dumping AccessPoints that were not seen on this scan ------");
                 for (AccessPoint prevAccessPoint : mInternalAccessPoints) {
-                    if (prevAccessPoint.getSsid() == null)
-                        continue;
-                    String prevSsid = prevAccessPoint.getSsidStr();
+                    String prevTitle = prevAccessPoint.getTitle();
                     boolean found = false;
                     for (AccessPoint newAccessPoint : accessPoints) {
-                        if (newAccessPoint.getSsidStr() != null && newAccessPoint.getSsidStr()
-                                .equals(prevSsid)) {
+                        if (newAccessPoint.getTitle() != null && newAccessPoint.getTitle()
+                                .equals(prevTitle)) {
                             found = true;
                             break;
                         }
                     }
                     if (!found)
-                        Log.d(TAG, "Did not find " + prevSsid + " in this scan");
+                        Log.d(TAG, "Did not find " + prevTitle + " in this scan");
                 }
-                Log.d(TAG, "---- Done dumping SSIDs that were not seen on this scan ----");
+                Log.d(TAG,
+                        "---- Done dumping AccessPoints that were not seen on this scan ----");
             }
 
             mInternalAccessPoints.clear();

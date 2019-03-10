@@ -2941,6 +2941,7 @@
         <!-- @hide @SystemApi -->
         <public name="allowClearUserDataOnFailedRestore"/>
         <public name="allowAudioPlaybackCapture"/>
+        <public name="secureElementName" />
     </public-group>
 
     <public-group type="drawable" first-id="0x010800b4">

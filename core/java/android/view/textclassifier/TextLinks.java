@@ -692,6 +692,7 @@ public final class TextLinks implements Parcelable {
          *
          * @return this builder
          */
+        @NonNull
         public Builder setExtras(@Nullable Bundle extras) {
             mExtras = extras;
             return this;

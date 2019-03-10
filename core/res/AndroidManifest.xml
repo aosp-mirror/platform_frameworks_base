@@ -398,10 +398,8 @@
 
     <protected-broadcast android:name="android.intent.action.SUB_DEFAULT_CHANGED" />
 
-    <protected-broadcast android:name="android.location.GPS_ENABLED_CHANGE" />
     <protected-broadcast android:name="android.location.PROVIDERS_CHANGED" />
     <protected-broadcast android:name="android.location.MODE_CHANGED" />
-    <protected-broadcast android:name="android.location.GPS_FIX_CHANGE" />
     <protected-broadcast android:name="android.net.proxy.PAC_REFRESH" />
 
     <protected-broadcast android:name="android.telecom.action.DEFAULT_DIALER_CHANGED" />
@@ -3049,12 +3047,6 @@
     <!-- Must be required by the CompanionDeviceManager to ensure that only the system can bind to it.
          @hide -->
     <permission android:name="android.permission.BIND_COMPANION_DEVICE_MANAGER_SERVICE"
-        android:protectionLevel="signature" />
-
-    <!-- Must be required by the RoleControllerService to ensure that only the system can bind to
-         it.
-         @hide -->
-    <permission android:name="android.permission.BIND_ROLE_CONTROLLER_SERVICE"
         android:protectionLevel="signature" />
 
     <!-- @SystemApi Must be required by the RuntimePermissionPresenterService to ensure

@@ -308,18 +308,15 @@
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefon"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"ringa och hantera telefonsamtal"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"Vill du ge &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; behörighet att ringa och hantera telefonsamtal?"</string>
-    <!-- no translation found for permgrouplab_sensors (4838614103153567532) -->
-    <skip />
+    <string name="permgrouplab_sensors" msgid="4838614103153567532">"Kroppssensorer"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"få åtkomst till sensordata om dina vitalparametrar"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"Vill du ge &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; åtkomst till sensordata om vitalparametrar?"</string>
     <string name="permgrouplab_aural" msgid="965607064083134896">"Musik"</string>
     <string name="permgroupdesc_aural" msgid="4870189506255958055">"åtkomstbehörighet till din musik"</string>
     <string name="permgrouprequest_aural" msgid="6787926123071735620">"Vill du ge &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; åtkomstbehörighet till din musik?"</string>
-    <!-- no translation found for permgrouplab_visual (6477382108771145134) -->
-    <skip />
+    <string name="permgrouplab_visual" msgid="6477382108771145134">"Foton och videor"</string>
     <string name="permgroupdesc_visual" msgid="3415827902566663546">"åtkomstbehörighet till dina foton &amp; videor"</string>
-    <!-- no translation found for permgrouprequest_visual (3043752127595243314) -->
-    <skip />
+    <string name="permgrouprequest_visual" msgid="3043752127595243314">"Vill du tillåta att &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; får åtkomst till dina foton och videor, inklusive taggade platser?"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Hämta fönsterinnehåll"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Granska innehållet i ett fönster som du interagerar med."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Aktivera Explore by touch"</string>
@@ -2023,4 +2020,6 @@
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> filer</item>
       <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> + <xliff:g id="COUNT_1">%d</xliff:g> fil</item>
     </plurals>
+    <!-- no translation found for chooser_no_direct_share_targets (997970693708458895) -->
+    <skip />
 </resources>

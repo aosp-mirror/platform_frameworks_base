@@ -73,4 +73,44 @@ public class WifiP2pConfigTest {
             fail("expected IllegalArgumentException");
         } catch (IllegalArgumentException e) { }
     }
+
+    /**
+     * Check passphrase setter
+     */
+    @Test
+    public void testBuilderInvalidPassphrase() throws Exception {
+        WifiP2pConfig.Builder b = new WifiP2pConfig.Builder();
+
+        // sunny case
+        try {
+            b.setPassphrase("abcd1234");
+        } catch (IllegalArgumentException e) {
+            fail("Unexpected IllegalArgumentException");
+        }
+
+        // null string.
+        try {
+            b.setPassphrase(null);
+            fail("should throw IllegalArgumentException");
+        } catch (IllegalArgumentException e) {
+            // expected exception.
+        }
+
+        // less than 8 characters.
+        try {
+            b.setPassphrase("12abcde");
+            fail("should throw IllegalArgumentException");
+        } catch (IllegalArgumentException e) {
+            // expected exception.
+        }
+
+        // more than 63 characters.
+        try {
+            b.setPassphrase(
+                    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890+/");
+            fail("should throw IllegalArgumentException");
+        } catch (IllegalArgumentException e) {
+            // expected exception.
+        }
+    }
 }

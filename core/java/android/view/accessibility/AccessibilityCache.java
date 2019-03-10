@@ -360,7 +360,7 @@ public class AccessibilityCache {
             }
             clearWindowCache();
             final int nodesForWindowCount = mNodeCache.size();
-            for (int i = 0; i < nodesForWindowCount; i++) {
+            for (int i = nodesForWindowCount - 1; i >= 0; i--) {
                 final int windowId = mNodeCache.keyAt(i);
                 clearNodesForWindowLocked(windowId);
             }

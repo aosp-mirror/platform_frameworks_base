@@ -461,9 +461,6 @@ public class NotificationRemoteInputManager implements Dumpable {
     }
 
     public boolean shouldKeepForRemoteInputHistory(NotificationEntry entry) {
-        if (entry.isDismissed()) {
-            return false;
-        }
         if (!FORCE_REMOTE_INPUT_HISTORY) {
             return false;
         }
@@ -471,9 +468,6 @@ public class NotificationRemoteInputManager implements Dumpable {
     }
 
     public boolean shouldKeepForSmartReplyHistory(NotificationEntry entry) {
-        if (entry.isDismissed()) {
-            return false;
-        }
         if (!FORCE_REMOTE_INPUT_HISTORY) {
             return false;
         }
@@ -661,9 +655,6 @@ public class NotificationRemoteInputManager implements Dumpable {
     protected class RemoteInputActiveExtender extends RemoteInputExtender {
         @Override
         public boolean shouldExtendLifetime(@NonNull NotificationEntry entry) {
-            if (entry.isDismissed()) {
-                return false;
-            }
             return mRemoteInputController.isRemoteInputActive(entry);
         }
 

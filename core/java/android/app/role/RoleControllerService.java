@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 The Android Open Source Project
+ * Copyright (C) 2019 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-package android.rolecontrollerservice;
+package android.app.role;
 
+import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.app.Service;
-import android.app.role.IRoleManagerCallback;
-import android.app.role.RoleManager;
-import android.app.role.RoleManagerCallback;
 import android.content.Intent;
+import android.os.Bundle;
 import android.os.IBinder;
+import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.Log;
@@ -48,17 +48,21 @@ public abstract class RoleControllerService extends Service {
     private static final String LOG_TAG = RoleControllerService.class.getSimpleName();
 
     /**
-     * The {@link Intent} that must be declared as handled by the service. The service should also
-     * require the {@link android.Manifest.permission#BIND_ROLE_CONTROLLER_SERVICE} permission so
-     * that other applications can not abuse it.
+     * The {@link Intent} that must be declared as handled by the service.
      */
-    public static final String SERVICE_INTERFACE =
-            "android.rolecontrollerservice.RoleControllerService";
+    public static final String SERVICE_INTERFACE = "android.app.role.RoleControllerService";
 
     @Nullable
     @Override
     public final IBinder onBind(@Nullable Intent intent) {
-        return new IRoleControllerService.Stub() {
+        return new IRoleController.Stub() {
+
+            @Override
+            public void onGrantDefaultRoles(IRoleManagerCallback callback) {
+                Preconditions.checkNotNull(callback, "callback cannot be null");
+                RoleControllerService.this.onGrantDefaultRoles(new RoleManagerCallbackDelegate(
+                        callback));
+            }
 
             @Override
             public void onAddRoleHolder(String roleName, String packageName, int flags,
@@ -92,18 +96,50 @@ public abstract class RoleControllerService extends Service {
             }
 
             @Override
-            public void onGrantDefaultRoles(IRoleManagerCallback callback) {
-                Preconditions.checkNotNull(callback, "callback cannot be null");
-                RoleControllerService.this.onGrantDefaultRoles(new RoleManagerCallbackDelegate(
-                        callback));
-            }
-
-            @Override
             public void onSmsKillSwitchToggled(boolean smsRestrictionEnabled) {
                 RoleControllerService.this.onSmsKillSwitchToggled(smsRestrictionEnabled);
             }
+
+            @Override
+            public void isApplicationQualifiedForRole(String roleName, String packageName,
+                    RemoteCallback callback) {
+                enforceCallingPermission(Manifest.permission.MANAGE_ROLE_HOLDERS, null);
+
+                Preconditions.checkStringNotEmpty(roleName, "roleName cannot be null or empty");
+                Preconditions.checkStringNotEmpty(packageName,
+                        "packageName cannot be null or empty");
+                Preconditions.checkNotNull(callback, "callback cannot be null");
+
+                boolean qualified = onIsApplicationQualifiedForRole(roleName, packageName);
+                Bundle result = new Bundle();
+                result.putBoolean(RoleControllerManager.KEY_RESULT, qualified);
+                callback.sendResult(result);
+            }
+
+            @Override
+            public void isRoleVisible(String roleName, RemoteCallback callback) {
+                enforceCallingPermission(Manifest.permission.MANAGE_ROLE_HOLDERS, null);
+
+                Preconditions.checkStringNotEmpty(roleName, "roleName cannot be null or empty");
+                Preconditions.checkNotNull(callback, "callback cannot be null");
+
+                boolean visible = onIsRoleVisible(roleName);
+                Bundle result = new Bundle();
+                result.putBoolean(RoleControllerManager.KEY_RESULT, visible);
+                callback.sendResult(result);
+            }
         };
     }
+
+    /**
+     * Called by system to grant default permissions and roles.
+     * <p>
+     * This is typically when creating a new user or upgrading either system or
+     * permission controller package
+     *
+     * @param callback the callback for whether this call is successful
+     */
+    public abstract void onGrantDefaultRoles(@NonNull RoleManagerCallback callback);
 
     /**
      * Add a specific application to the holders of a role. If the role is exclusive, the previous
@@ -153,20 +189,30 @@ public abstract class RoleControllerService extends Service {
     /**
      * Cleanup appop/permissions state in response to sms kill switch toggle
      *
-     * @param smsRestrictionEnabled whether kill switch was turned on
+     * @param enabled whether kill switch was turned on
      */
     //STOPSHIP: remove this api before shipping a final version
-    public abstract void onSmsKillSwitchToggled(boolean smsRestrictionEnabled);
+    public abstract void onSmsKillSwitchToggled(boolean enabled);
 
     /**
-     * Called by system to grant default permissions and roles.
-     * <p>
-     * This is typically when creating a new user or upgrading either system or
-     * permission controller package
+     * Check whether an application is qualified for a role.
      *
-     * @param callback the callback for whether this call is successful
+     * @param roleName name of the role to check for
+     * @param packageName package name of the application to check for
+     *
+     * @return whether the application is qualified for the role
      */
-    public abstract void onGrantDefaultRoles(@NonNull RoleManagerCallback callback);
+    public abstract boolean onIsApplicationQualifiedForRole(@NonNull String roleName,
+            @NonNull String packageName);
+
+    /**
+     * Check whether a role should be visible to user.
+     *
+     * @param roleName name of the role to check for
+     *
+     * @return whether the role should be visible to user
+     */
+    public abstract boolean onIsRoleVisible(@NonNull String roleName);
 
     private static class RoleManagerCallbackDelegate implements RoleManagerCallback {
 

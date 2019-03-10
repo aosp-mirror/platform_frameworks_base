@@ -314,18 +314,15 @@
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Телефон"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"осуществлять вызовы и управлять ими"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"Разрешить приложению &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; совершать звонки и управлять ими?"</string>
-    <!-- no translation found for permgrouplab_sensors (4838614103153567532) -->
-    <skip />
+    <string name="permgrouplab_sensors" msgid="4838614103153567532">"Датчики на теле"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"доступ к данным датчиков о состоянии организма"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"Разрешить приложению &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; доступ к данным датчиков о состоянии организма?"</string>
     <string name="permgrouplab_aural" msgid="965607064083134896">"Музыка"</string>
     <string name="permgroupdesc_aural" msgid="4870189506255958055">"доступ к музыке"</string>
     <string name="permgrouprequest_aural" msgid="6787926123071735620">"Разрешить приложению &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; доступ к музыке?"</string>
-    <!-- no translation found for permgrouplab_visual (6477382108771145134) -->
-    <skip />
+    <string name="permgrouplab_visual" msgid="6477382108771145134">"Фото и видео"</string>
     <string name="permgroupdesc_visual" msgid="3415827902566663546">"доступ к фото и видео"</string>
-    <!-- no translation found for permgrouprequest_visual (3043752127595243314) -->
-    <skip />
+    <string name="permgrouprequest_visual" msgid="3043752127595243314">"Открыть приложению &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; доступ к вашим фото и видео, а также к данным о местах съемки?"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Получать содержимое окна"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Анализировать содержимое активного окна."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Включать Изучение касанием"</string>
@@ -2096,4 +2093,6 @@
       <item quantity="many">\"<xliff:g id="FILE_NAME_2">%s</xliff:g>\" и ещё <xliff:g id="COUNT_3">%d</xliff:g> файлов</item>
       <item quantity="other">\"<xliff:g id="FILE_NAME_2">%s</xliff:g>\" и ещё <xliff:g id="COUNT_3">%d</xliff:g> файла</item>
     </plurals>
+    <!-- no translation found for chooser_no_direct_share_targets (997970693708458895) -->
+    <skip />
 </resources>

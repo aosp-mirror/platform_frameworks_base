@@ -19,7 +19,6 @@ package android.content.res;
 import android.annotation.AnyRes;
 import android.annotation.ColorInt;
 import android.annotation.Nullable;
-import android.annotation.StyleRes;
 import android.annotation.StyleableRes;
 import android.annotation.UnsupportedAppUsage;
 import android.content.pm.ActivityInfo;
@@ -72,7 +71,7 @@ public class TypedArray {
     static final int STYLE_RESOURCE_ID = 3;
     static final int STYLE_CHANGING_CONFIGURATIONS = 4;
     static final int STYLE_DENSITY = 5;
-    static final int SYTLE_SOURCE_RESOURCE_ID = 6;
+    static final int STYLE_SOURCE_RESOURCE_ID = 6;
 
     @UnsupportedAppUsage
     private final Resources mResources;
@@ -1134,14 +1133,14 @@ public class TypedArray {
      * resolved in a style or layout.
      * @throws RuntimeException if the TypedArray has already been recycled.
      */
-    @StyleRes
-    public int getSourceResourceId(@StyleableRes int index, @StyleRes int defaultValue) {
+    @AnyRes
+    public int getSourceResourceId(@StyleableRes int index, @AnyRes int defaultValue) {
         if (mRecycled) {
             throw new RuntimeException("Cannot make calls to a recycled instance!");
         }
 
         index *= STYLE_NUM_ENTRIES;
-        final int resid = mData[index + SYTLE_SOURCE_RESOURCE_ID];
+        final int resid = mData[index + STYLE_SOURCE_RESOURCE_ID];
         if (resid != 0) {
             return resid;
         }
@@ -1360,7 +1359,7 @@ public class TypedArray {
                 data[index + STYLE_CHANGING_CONFIGURATIONS]);
         outValue.density = data[index + STYLE_DENSITY];
         outValue.string = (type == TypedValue.TYPE_STRING) ? loadStringValueAt(index) : null;
-        outValue.sourceResourceId = data[index + SYTLE_SOURCE_RESOURCE_ID];
+        outValue.sourceResourceId = data[index + STYLE_SOURCE_RESOURCE_ID];
         return true;
     }
 

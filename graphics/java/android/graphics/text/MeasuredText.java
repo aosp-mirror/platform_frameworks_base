@@ -168,7 +168,7 @@ public class MeasuredText {
      *
      * Note: The appendStyle and appendReplacementRun should be called to cover the text length.
      */
-    public static class Builder {
+    public static final class Builder {
         private static final NativeAllocationRegistry sRegistry = new NativeAllocationRegistry(
                 MeasuredText.class.getClassLoader(), nGetReleaseFunc(), 1024);
 
@@ -227,7 +227,7 @@ public class MeasuredText {
          *               text
          * @param isRtl true if the text is in RTL context, otherwise false.
          */
-        public Builder appendStyleRun(@NonNull Paint paint, @IntRange(from = 0) int length,
+        public @NonNull Builder appendStyleRun(@NonNull Paint paint, @IntRange(from = 0) int length,
                 boolean isRtl) {
             Preconditions.checkNotNull(paint);
             Preconditions.checkArgument(length > 0, "length can not be negative");
@@ -253,8 +253,8 @@ public class MeasuredText {
          *               text
          * @param width a replacement width of the range
          */
-        public Builder appendReplacementRun(@NonNull Paint paint,
-                @IntRange(from = 0) int length, @FloatRange(from = 0) float width) {
+        public @NonNull Builder appendReplacementRun(@NonNull Paint paint,
+                @IntRange(from = 0) int length, @Px @FloatRange(from = 0) float width) {
             Preconditions.checkArgument(length > 0, "length can not be negative");
             final int end = mCurrentOffset + length;
             Preconditions.checkArgument(end <= mText.length, "Replacement exceeds the text length");
@@ -275,7 +275,7 @@ public class MeasuredText {
          *
          * @param computeHyphenation true if you want to use automatic hyphenations.
          */
-        public Builder setComputeHyphenation(boolean computeHyphenation) {
+        public @NonNull Builder setComputeHyphenation(boolean computeHyphenation) {
             mComputeHyphenation = computeHyphenation;
             return this;
         }
@@ -292,7 +292,7 @@ public class MeasuredText {
          *
          * @param computeLayout true if you want to retrieve full layout info, e.g. bbox.
          */
-        public Builder setComputeLayout(boolean computeLayout) {
+        public @NonNull Builder setComputeLayout(boolean computeLayout) {
             mComputeLayout = computeLayout;
             return this;
         }
@@ -305,7 +305,7 @@ public class MeasuredText {
          * @throws IllegalStateException if the whole text is not covered by one or more runs (style
          *                               or replacement)
          */
-        public MeasuredText build() {
+        public @NonNull MeasuredText build() {
             ensureNativePtrNoReuse();
             if (mCurrentOffset != mText.length) {
                 throw new IllegalStateException("Style info has not been provided for all text.");

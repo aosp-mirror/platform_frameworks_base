@@ -1161,11 +1161,11 @@ public final class ProcessList {
      *
      * @param pid The process identifier to set.
      * @param uid The uid of the app
-     * @param amt Adjustment value -- lmkd allows -16 to +15.
+     * @param amt Adjustment value -- lmkd allows -1000 to +1000
      *
      * {@hide}
      */
-    public static final void setOomAdj(int pid, int uid, int amt) {
+    public static void setOomAdj(int pid, int uid, int amt) {
         // This indicates that the process is not started yet and so no need to proceed further.
         if (pid <= 0) {
             return;
@@ -2085,25 +2085,6 @@ public final class ProcessList {
         }
     }
 
-    void killAllBackgroundProcessesLocked() {
-        final ArrayList<ProcessRecord> procs = new ArrayList<>();
-        final int NP = mProcessNames.getMap().size();
-        for (int ip = 0; ip < NP; ip++) {
-            final SparseArray<ProcessRecord> apps = mProcessNames.getMap().valueAt(ip);
-            final int NA = apps.size();
-            for (int ia = 0; ia < NA; ia++) {
-                final ProcessRecord app = apps.valueAt(ia);
-                if (app.isPersistent()) {
-                    // We don't kill persistent processes.
-                    continue;
-                }
-                if (app.removed || app.setAdj >= ProcessList.CACHED_APP_MIN_ADJ) {
-                    procs.add(app);
-                }
-            }
-        }
-    }
-
     @GuardedBy("mService")
     boolean killPackageProcessesLocked(String packageName, int appId, int userId, int minOomAdj,
             String reason) {
@@ -2140,6 +2121,11 @@ public final class ProcessList {
 
                 // Skip process if it doesn't meet our oom adj requirement.
                 if (app.setAdj < minOomAdj) {
+                    // Note it is still possible to have a process with oom adj 0 in the killed
+                    // processes, but it does not mean misjudgment. E.g. a bound service process
+                    // and its client activity process are both in the background, so they are
+                    // collected to be killed. If the client activity is killed first, the service
+                    // may be scheduled to unbind and become an executing service (oom adj 0).
                     continue;
                 }
 

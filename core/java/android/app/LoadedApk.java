@@ -76,6 +76,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.Executor;
 
 final class IntentReceiverLeaked extends AndroidRuntimeException {
     @UnsupportedAppUsage
@@ -1651,6 +1652,16 @@ public final class LoadedApk {
     @UnsupportedAppUsage
     public final IServiceConnection getServiceDispatcher(ServiceConnection c,
             Context context, Handler handler, int flags) {
+        return getServiceDispatcherCommon(c, context, handler, null, flags);
+    }
+
+    public final IServiceConnection getServiceDispatcher(ServiceConnection c,
+            Context context, Executor executor, int flags) {
+        return getServiceDispatcherCommon(c, context, null, executor, flags);
+    }
+
+    private IServiceConnection getServiceDispatcherCommon(ServiceConnection c,
+            Context context, Handler handler, Executor executor, int flags) {
         synchronized (mServices) {
             LoadedApk.ServiceDispatcher sd = null;
             ArrayMap<ServiceConnection, LoadedApk.ServiceDispatcher> map = mServices.get(context);
@@ -1659,7 +1670,11 @@ public final class LoadedApk {
                 sd = map.get(c);
             }
             if (sd == null) {
-                sd = new ServiceDispatcher(c, context, handler, flags);
+                if (executor != null) {
+                    sd = new ServiceDispatcher(c, context, executor, flags);
+                } else {
+                    sd = new ServiceDispatcher(c, context, handler, flags);
+                }
                 if (DEBUG) Slog.d(TAG, "Creating new dispatcher " + sd + " for conn " + c);
                 if (map == null) {
                     map = new ArrayMap<>();
@@ -1667,7 +1682,7 @@ public final class LoadedApk {
                 }
                 map.put(c, sd);
             } else {
-                sd.validate(context, handler);
+                sd.validate(context, handler, executor);
             }
             return sd.getIServiceConnection();
         }
@@ -1744,6 +1759,7 @@ public final class LoadedApk {
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
         private final Context mContext;
         private final Handler mActivityThread;
+        private final Executor mActivityExecutor;
         private final ServiceConnectionLeaked mLocation;
         private final int mFlags;
 
@@ -1783,12 +1799,25 @@ public final class LoadedApk {
             mConnection = conn;
             mContext = context;
             mActivityThread = activityThread;
+            mActivityExecutor = null;
             mLocation = new ServiceConnectionLeaked(null);
             mLocation.fillInStackTrace();
             mFlags = flags;
         }
 
-        void validate(Context context, Handler activityThread) {
+        ServiceDispatcher(ServiceConnection conn,
+                Context context, Executor activityExecutor, int flags) {
+            mIServiceConnection = new InnerConnection(this);
+            mConnection = conn;
+            mContext = context;
+            mActivityThread = null;
+            mActivityExecutor = activityExecutor;
+            mLocation = new ServiceConnectionLeaked(null);
+            mLocation.fillInStackTrace();
+            mFlags = flags;
+        }
+
+        void validate(Context context, Handler activityThread, Executor activityExecutor) {
             if (mContext != context) {
                 throw new RuntimeException(
                     "ServiceConnection " + mConnection +
@@ -1800,6 +1829,12 @@ public final class LoadedApk {
                     "ServiceConnection " + mConnection +
                     " registered with differing handler (was " +
                     mActivityThread + " now " + activityThread + ")");
+            }
+            if (mActivityExecutor != activityExecutor) {
+                throw new RuntimeException(
+                    "ServiceConnection " + mConnection +
+                    " registered with differing executor (was " +
+                    mActivityExecutor + " now " + activityExecutor + ")");
             }
         }
 
@@ -1840,7 +1875,9 @@ public final class LoadedApk {
         }
 
         public void connected(ComponentName name, IBinder service, boolean dead) {
-            if (mActivityThread != null) {
+            if (mActivityExecutor != null) {
+                mActivityExecutor.execute(new RunConnection(name, service, 0, dead));
+            } else if (mActivityThread != null) {
                 mActivityThread.post(new RunConnection(name, service, 0, dead));
             } else {
                 doConnected(name, service, dead);
@@ -1848,7 +1885,9 @@ public final class LoadedApk {
         }
 
         public void death(ComponentName name, IBinder service) {
-            if (mActivityThread != null) {
+            if (mActivityExecutor != null) {
+                mActivityExecutor.execute(new RunConnection(name, service, 1, false));
+            } else if (mActivityThread != null) {
                 mActivityThread.post(new RunConnection(name, service, 1, false));
             } else {
                 doDeath(name, service);

@@ -15,7 +15,6 @@
 package com.android.systemui.qs;
 
 import static android.app.StatusBarManager.DISABLE2_QUICK_SETTINGS;
-import static android.provider.Settings.System.SHOW_BATTERY_PERCENT;
 
 import static com.android.systemui.util.InjectionInflationController.VIEW_CONTEXT;
 
@@ -31,15 +30,12 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.database.ContentObserver;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.media.AudioManager;
-import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.AlarmClock;
-import android.provider.Settings;
 import android.service.notification.ZenModeConfig;
 import android.text.format.DateUtils;
 import android.util.AttributeSet;
@@ -75,7 +71,6 @@ import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusBarIconController.TintedIconManager;
 import com.android.systemui.statusbar.phone.StatusIconContainer;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
-import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.Clock;
 import com.android.systemui.statusbar.policy.DateView;
 import com.android.systemui.statusbar.policy.NextAlarmController;
@@ -107,7 +102,6 @@ public class QuickStatusBarHeader extends RelativeLayout implements
     public static final int MAX_TOOLTIP_SHOWN_COUNT = 2;
 
     private final Handler mHandler = new Handler();
-    private final BatteryController mBatteryController;
     private final NextAlarmController mAlarmController;
     private final ZenModeController mZenController;
     private final StatusBarIconController mStatusBarIconController;
@@ -119,6 +113,7 @@ public class QuickStatusBarHeader extends RelativeLayout implements
     private boolean mListening;
     private boolean mQsDisabled;
 
+    private QSCarrierGroup mCarrierGroup;
     protected QuickQSPanel mHeaderQsPanel;
     protected QSTileHost mHost;
     private TintedIconManager mIconManager;
@@ -162,9 +157,6 @@ public class QuickStatusBarHeader extends RelativeLayout implements
     };
     private boolean mHasTopCutout = false;
 
-    private final PercentSettingObserver mPercentSettingObserver =
-            new PercentSettingObserver(new Handler(mContext.getMainLooper()));
-
     /**
      * Runnable for automatically fading out the long press tooltip (as if it were animating away).
      */
@@ -181,12 +173,11 @@ public class QuickStatusBarHeader extends RelativeLayout implements
     @Inject
     public QuickStatusBarHeader(@Named(VIEW_CONTEXT) Context context, AttributeSet attrs,
             NextAlarmController nextAlarmController, ZenModeController zenModeController,
-            BatteryController batteryController, StatusBarIconController statusBarIconController,
+            StatusBarIconController statusBarIconController,
             ActivityStarter activityStarter, PrivacyItemController privacyItemController) {
         super(context, attrs);
         mAlarmController = nextAlarmController;
         mZenController = zenModeController;
-        mBatteryController = batteryController;
         mStatusBarIconController = statusBarIconController;
         mActivityStarter = activityStarter;
         mPrivacyItemController = privacyItemController;
@@ -217,6 +208,7 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         mRingerModeTextView = findViewById(R.id.ringer_mode_text);
         mPrivacyChip = findViewById(R.id.privacy_chip);
         mPrivacyChip.setOnClickListener(this);
+        mCarrierGroup = findViewById(R.id.carrier_group);
 
         updateResources();
 
@@ -241,7 +233,9 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         mBatteryRemainingIcon = findViewById(R.id.batteryRemainingIcon);
         // Don't need to worry about tuner settings for this icon
         mBatteryRemainingIcon.setIgnoreTunerUpdates(true);
-        updateShowPercent();
+        // QS will always show the estimate, and BatteryMeterView handles the case where
+        // it's unavailable or charging
+        mBatteryRemainingIcon.setPercentShowMode(BatteryMeterView.MODE_ESTIMATE);
     }
 
     private List<String> getIgnoredIconSlots() {
@@ -480,9 +474,6 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         super.onAttachedToWindow();
         mStatusBarIconController.addIconGroup(mIconManager);
         requestApplyInsets();
-        mContext.getContentResolver().registerContentObserver(
-                Settings.System.getUriFor(SHOW_BATTERY_PERCENT), false, mPercentSettingObserver,
-                ActivityManager.getCurrentUser());
     }
 
     @Override
@@ -521,7 +512,6 @@ public class QuickStatusBarHeader extends RelativeLayout implements
     public void onDetachedFromWindow() {
         setListening(false);
         mStatusBarIconController.removeIconGroup(mIconManager);
-        mContext.getContentResolver().unregisterContentObserver(mPercentSettingObserver);
         super.onDetachedFromWindow();
     }
 
@@ -531,6 +521,7 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         }
         mHeaderQsPanel.setListening(listening);
         mListening = listening;
+        mCarrierGroup.setListening(mListening);
 
         if (listening) {
             mZenController.addCallback(this);
@@ -741,27 +732,6 @@ public class QuickStatusBarHeader extends RelativeLayout implements
             RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams) v.getLayoutParams();
             lp.leftMargin = sideMargins;
             lp.rightMargin = sideMargins;
-        }
-    }
-
-    private void updateShowPercent() {
-        final boolean systemSetting = 0 != Settings.System
-                .getIntForUser(getContext().getContentResolver(),
-                        SHOW_BATTERY_PERCENT, 0, ActivityManager.getCurrentUser());
-
-        mBatteryRemainingIcon.setPercentShowMode(systemSetting
-                ? BatteryMeterView.MODE_ESTIMATE : BatteryMeterView.MODE_ON);
-    }
-
-    private final class PercentSettingObserver extends ContentObserver {
-        PercentSettingObserver(Handler handler) {
-            super(handler);
-        }
-
-        @Override
-        public void onChange(boolean selfChange, Uri uri) {
-            super.onChange(selfChange, uri);
-            updateShowPercent();
         }
     }
 }

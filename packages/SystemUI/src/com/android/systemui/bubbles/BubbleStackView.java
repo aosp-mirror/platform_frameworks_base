@@ -19,6 +19,8 @@ package com.android.systemui.bubbles;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
+import android.app.Notification;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Outline;
@@ -49,6 +51,7 @@ import androidx.dynamicanimation.animation.SpringForce;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.widget.ViewClippingUtil;
 import com.android.systemui.R;
+import com.android.systemui.bubbles.BubbleController.DismissReason;
 import com.android.systemui.bubbles.animation.ExpandedAnimationController;
 import com.android.systemui.bubbles.animation.PhysicsAnimationLayout;
 import com.android.systemui.bubbles.animation.StackAnimationController;
@@ -62,26 +65,7 @@ import java.math.RoundingMode;
  */
 public class BubbleStackView extends FrameLayout {
     private static final String TAG = "BubbleStackView";
-
-    /**
-     * Friction applied to fling animations. Since the stack must land on one of the sides of the
-     * screen, we want less friction horizontally so that the stack has a better chance of making it
-     * to the side without needing a spring.
-     */
-    private static final float FLING_FRICTION_X = 1.15f;
-    private static final float FLING_FRICTION_Y = 1.5f;
-
-    /**
-     * Damping ratio to use for the stack spring animation used to spring the stack to its final
-     * position after a fling.
-     */
-    private static final float SPRING_DAMPING_RATIO = 0.85f;
-
-    /**
-     * Minimum fling velocity required to trigger moving the stack from one side of the screen to
-     * the other.
-     */
-    private static final float ESCAPE_VELOCITY = 750f;
+    private static final boolean DEBUG = false;
 
     private Point mDisplaySize;
 
@@ -252,7 +236,7 @@ public class BubbleStackView extends FrameLayout {
         }
         switch (action) {
             case AccessibilityNodeInfo.ACTION_DISMISS:
-                stackDismissed();
+                stackDismissed(BubbleController.DISMISS_ACCESSIBILITY_ACTION);
                 return true;
             case AccessibilityNodeInfo.ACTION_COLLAPSE:
                 collapseStack();
@@ -376,18 +360,12 @@ public class BubbleStackView extends FrameLayout {
     /**
      * Remove a bubble from the stack.
      */
-    public void removeBubble(String key) {
+    public void removeBubble(String key, int reason) {
         Bubble b = mBubbleData.removeBubble(key);
         if (b == null) {
             return;
         }
-        b.entry.setBubbleDismissed(true);
-
-        // Remove it from the views
-        int removedIndex = mBubbleContainer.indexOfChild(b.iconView);
-        b.expandedView.destroyActivityView();
-        mBubbleContainer.removeView(b.iconView);
-
+        int removedIndex = dismissBubble(b, reason);
         int bubbleCount = mBubbleContainer.getChildCount();
         if (bubbleCount == 0) {
             // If no bubbles remain, collapse the entire stack.
@@ -405,23 +383,60 @@ public class BubbleStackView extends FrameLayout {
                 mExpandedBubble = null;
             }
         }
+        // TODO: consider logging reason code
         logBubbleEvent(b, StatsLog.BUBBLE_UICHANGED__ACTION__DISMISSED);
     }
 
     /**
      * Dismiss the stack of bubbles.
      */
-    public void stackDismissed() {
+    public void stackDismissed(int reason) {
         for (Bubble bubble : mBubbleData.getBubbles()) {
-            bubble.entry.setBubbleDismissed(true);
-            bubble.expandedView.destroyActivityView();
+            dismissBubble(bubble, reason);
         }
         mBubbleData.clear();
         collapseStack();
         mBubbleContainer.removeAllViews();
         mExpandedViewContainer.removeAllViews();
+        // TODO: consider logging reason code
         logBubbleEvent(null /* no bubble associated with bubble stack dismiss */,
                 StatsLog.BUBBLE_UICHANGED__ACTION__STACK_DISMISSED);
+    }
+
+    /**
+     * Marks the notification entry as dismissed, cleans up Bubble icon and expanded view UI
+     * elements and calls deleteIntent if necessary.
+     *
+     * <p>Note: This does not remove the Bubble from BubbleData.
+     *
+     * @param bubble the Bubble being dismissed
+     * @param reason code for the reason the dismiss was triggered
+     * @see BubbleController.DismissReason
+     */
+    private int dismissBubble(Bubble bubble, @DismissReason int reason) {
+        if (DEBUG) {
+            Log.d(TAG, "dismissBubble: " + bubble + " reason=" + reason);
+        }
+        bubble.entry.setBubbleDismissed(true);
+        bubble.expandedView.cleanUpExpandedState();
+
+        // Remove it from the views
+        int removedIndex = mBubbleContainer.indexOfChild(bubble.iconView);
+        mBubbleContainer.removeViewAt(removedIndex);
+
+        if (reason == BubbleController.DISMISS_USER_GESTURE) {
+            Notification.BubbleMetadata bubbleMetadata = bubble.entry.getBubbleMetadata();
+            PendingIntent deleteIntent = bubbleMetadata.getDeleteIntent();
+            if (deleteIntent != null) {
+                try {
+                    deleteIntent.send();
+                } catch (PendingIntent.CanceledException e) {
+                    Log.w(TAG, "Failed to send delete intent for bubble with key: "
+                            + (bubble.entry != null ? bubble.entry.key : " null entry"));
+                }
+            }
+        }
+        return removedIndex;
     }
 
     /**
@@ -495,7 +510,7 @@ public class BubbleStackView extends FrameLayout {
     }
 
     /**
-     * Expands the stack fo bubbles.
+     * Expands the stack of bubbles.
      * <p>
      * Must be called from the main thread.
      */
@@ -653,50 +668,7 @@ public class BubbleStackView extends FrameLayout {
             return;
         }
 
-        final boolean stackOnLeftSide = x
-                - mBubbleContainer.getChildAt(0).getWidth() / 2
-                < mDisplaySize.x / 2;
-
-        final boolean stackShouldFlingLeft = stackOnLeftSide
-                ? velX < ESCAPE_VELOCITY
-                : velX < -ESCAPE_VELOCITY;
-
-        final RectF stackBounds = mStackAnimationController.getAllowableStackPositionRegion();
-
-        // Target X translation (either the left or right side of the screen).
-        final float destinationRelativeX = stackShouldFlingLeft
-                ? stackBounds.left : stackBounds.right;
-
-        // Minimum velocity required for the stack to make it to the side of the screen.
-        final float escapeVelocity = getMinXVelocity(
-                x,
-                destinationRelativeX,
-                FLING_FRICTION_X);
-
-        // Use the touch event's velocity if it's sufficient, otherwise use the minimum velocity so
-        // that it'll make it all the way to the side of the screen.
-        final float startXVelocity = stackShouldFlingLeft
-                ? Math.min(escapeVelocity, velX)
-                : Math.max(escapeVelocity, velX);
-
-        mStackAnimationController.flingThenSpringFirstBubbleWithStackFollowing(
-                DynamicAnimation.TRANSLATION_X,
-                startXVelocity,
-                FLING_FRICTION_X,
-                new SpringForce()
-                        .setStiffness(SpringForce.STIFFNESS_LOW)
-                        .setDampingRatio(SPRING_DAMPING_RATIO),
-                destinationRelativeX);
-
-        mStackAnimationController.flingThenSpringFirstBubbleWithStackFollowing(
-                DynamicAnimation.TRANSLATION_Y,
-                velY,
-                FLING_FRICTION_Y,
-                new SpringForce()
-                        .setStiffness(SpringForce.STIFFNESS_LOW)
-                        .setDampingRatio(SPRING_DAMPING_RATIO),
-                /* destination */ null);
-
+        mStackAnimationController.flingStackThenSpringToEdge(x, velX, velY);
         logBubbleEvent(null /* no bubble associated with bubble stack move */,
                 StatsLog.BUBBLE_UICHANGED__ACTION__STACK_MOVED);
     }
@@ -739,20 +711,6 @@ public class BubbleStackView extends FrameLayout {
         if (mIsExpanded) {
             requestUpdate();
         }
-    }
-
-    /**
-     * Minimum velocity, in pixels/second, required to get from x to destX while being slowed by a
-     * given frictional force.
-     *
-     * This is not derived using real math, I just made it up because the math in FlingAnimation
-     * looks hard and this seems to work. It doesn't actually matter because if it doesn't make it
-     * to the edge via Fling, it'll get Spring'd there anyway.
-     *
-     * TODO(tsuji, or someone who likes math): Figure out math.
-     */
-    private float getMinXVelocity(float x, float destX, float friction) {
-        return (destX - x) * (friction * 5) + ESCAPE_VELOCITY;
     }
 
     @Override
@@ -807,7 +765,7 @@ public class BubbleStackView extends FrameLayout {
         mExpandedViewContainer.removeAllViews();
         if (mExpandedBubble != null && mIsExpanded) {
             mExpandedViewContainer.addView(mExpandedBubble.expandedView);
-            mExpandedBubble.expandedView.populateActivityView();
+            mExpandedBubble.expandedView.populateExpandedView();
             mExpandedViewContainer.setVisibility(mIsExpanded ? VISIBLE : GONE);
         }
     }
@@ -817,8 +775,12 @@ public class BubbleStackView extends FrameLayout {
 
         mExpandedViewContainer.setVisibility(mIsExpanded ? VISIBLE : GONE);
         if (mIsExpanded) {
+            // First update the view so that it calculates a new height (ensuring the y position
+            // calculation is correct)
+            mExpandedBubble.expandedView.updateView();
             final float y = getYPositionForExpandedView();
             mExpandedViewContainer.setTranslationY(y);
+            // Then update the view so that ActivityView knows we translated
             mExpandedBubble.expandedView.updateView();
         }
 

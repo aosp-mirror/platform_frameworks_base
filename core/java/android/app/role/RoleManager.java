@@ -545,7 +545,7 @@ public final class RoleManager {
 
     /**
      * Set the names of all the available roles. Should only be called from
-     * {@link android.rolecontrollerservice.RoleControllerService}.
+     * {@link android.app.role.RoleControllerService}.
      * <p>
      * <strong>Note:</strong> Using this API requires holding
      * {@link #PERMISSION_MANAGE_ROLES_FROM_CONTROLLER}.
@@ -569,7 +569,7 @@ public final class RoleManager {
     /**
      * Add a specific application to the holders of a role, only modifying records inside
      * {@link RoleManager}. Should only be called from
-     * {@link android.rolecontrollerservice.RoleControllerService}.
+     * {@link android.app.role.RoleControllerService}.
      * <p>
      * <strong>Note:</strong> Using this API requires holding
      * {@link #PERMISSION_MANAGE_ROLES_FROM_CONTROLLER}.
@@ -602,7 +602,7 @@ public final class RoleManager {
     /**
      * Remove a specific application from the holders of a role, only modifying records inside
      * {@link RoleManager}. Should only be called from
-     * {@link android.rolecontrollerservice.RoleControllerService}.
+     * {@link android.app.role.RoleControllerService}.
      * <p>
      * <strong>Note:</strong> Using this API requires holding
      * {@link #PERMISSION_MANAGE_ROLES_FROM_CONTROLLER}.

@@ -589,30 +589,16 @@ public class NotificationManager {
      * received on your behalf from the cloud, without your process having to wake up.
      *
      * You can check if you have an allowed delegate with {@link #getNotificationDelegate()} and
-     * revoke your delegate with {@link #revokeNotificationDelegate()}.
+     * revoke your delegate by passing null to this method.
      *
      * @param delegate Package name of the app which can send notifications on your behalf.
      */
-    public void setNotificationDelegate(@NonNull String delegate) {
+    public void setNotificationDelegate(@Nullable String delegate) {
         INotificationManager service = getService();
         String pkg = mContext.getPackageName();
         if (localLOGV) Log.v(TAG, pkg + ": cancelAll()");
         try {
             service.setNotificationDelegate(pkg, delegate);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Revokes permission for your {@link #setNotificationDelegate(String) notification delegate}
-     * to post notifications on your behalf.
-     */
-    public void revokeNotificationDelegate() {
-        INotificationManager service = getService();
-        String pkg = mContext.getPackageName();
-        try {
-            service.revokeNotificationDelegate(pkg);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

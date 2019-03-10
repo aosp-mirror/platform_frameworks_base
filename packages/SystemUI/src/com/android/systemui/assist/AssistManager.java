@@ -315,8 +315,13 @@ public class AssistManager implements ConfigurationChangedReceiver {
     }
 
     @Nullable
+    public ComponentName getAssistInfoForUser(int userId) {
+        return mAssistUtils.getAssistComponentForUser(userId);
+    }
+
+    @Nullable
     private ComponentName getAssistInfo() {
-        return mAssistUtils.getAssistComponentForUser(KeyguardUpdateMonitor.getCurrentUser());
+        return getAssistInfoForUser(KeyguardUpdateMonitor.getCurrentUser());
     }
 
     public void showDisclosure() {

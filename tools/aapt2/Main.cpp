@@ -37,6 +37,7 @@
 #include "cmd/Link.h"
 #include "cmd/Optimize.h"
 #include "io/FileStream.h"
+#include "trace/TraceBuffer.h"
 #include "util/Files.h"
 #include "util/Util.h"
 
@@ -107,9 +108,12 @@ class DaemonCommand : public Command {
       : Command("daemon", "m"), out_(out), diagnostics_(diagnostics) {
     SetDescription("Runs aapt in daemon mode. Each subsequent line is a single parameter to the\n"
         "command. The end of an invocation is signaled by providing an empty line.");
+    AddOptionalFlag("--trace_folder", "Generate systrace json trace fragment to specified folder.",
+                    &trace_folder_);
   }
 
-  int Action(const std::vector<std::string>& /* args */) override {
+  int Action(const std::vector<std::string>& arguments) override {
+    TRACE_FLUSH_ARGS(trace_folder_ ? trace_folder_.value() : "", "daemon", arguments);
     text::Printer printer(out_);
     std::cout << "Ready" << std::endl;
 
@@ -150,6 +154,7 @@ class DaemonCommand : public Command {
  private:
   io::FileOutputStream* out_;
   IDiagnostics* diagnostics_;
+  Maybe<std::string> trace_folder_;
 };
 
 }  // namespace aapt

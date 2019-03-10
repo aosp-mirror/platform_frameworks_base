@@ -521,7 +521,7 @@ message ProcessMemoryStatReported {
         ADD_PSS_EXTERNAL_SLOW = 4;
     }
     optional Type type = 7;
-    optional int64 duration = 8;
+    optional int64 duration_millis = 8;
 }
 
 /**

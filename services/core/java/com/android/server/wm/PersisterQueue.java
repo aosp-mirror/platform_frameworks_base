@@ -131,10 +131,8 @@ class PersisterQueue {
     }
 
     /**
-     *
-     * @param item
-     * @param flush
-     * @param <T>
+     * Updates the last item found in the queue that matches the given item, or adds it to the end
+     * of the queue if no such item is found.
      */
     synchronized <T extends WriteQueueItem> void updateLastOrAddItem(T item, boolean flush) {
         final T itemToUpdate = findLastItem(item::matches, (Class<T>) item.getClass());
@@ -149,10 +147,6 @@ class PersisterQueue {
 
     /**
      * Removes all items with which given predicate returns {@code true}.
-     *
-     * @param predicate the predicate
-     * @param clazz
-     * @param <T>
      */
     synchronized <T extends WriteQueueItem> void removeItems(Predicate<T> predicate,
             Class<T> clazz) {

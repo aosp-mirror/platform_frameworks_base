@@ -18,7 +18,7 @@
 <com.android.systemui.statusbar.phone.NavigationHandle
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/home_handle"
-    android:layout_width="@dimen/navigation_handle_width"
+    android:layout_width="@dimen/navigation_home_handle_width"
     android:layout_height="match_parent"
     android:layout_weight="0"
     />

@@ -17,6 +17,7 @@
 #include "link/Linkers.h"
 
 #include "ResourceTable.h"
+#include "trace/TraceBuffer.h"
 
 namespace aapt {
 
@@ -81,6 +82,7 @@ ProductFilter::ResourceConfigValueIter ProductFilter::SelectProductToKeep(
 }
 
 bool ProductFilter::Consume(IAaptContext* context, ResourceTable* table) {
+  TRACE_NAME("ProductFilter::Consume");
   bool error = false;
   for (auto& pkg : table->packages) {
     for (auto& type : pkg->types) {

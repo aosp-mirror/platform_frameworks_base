@@ -327,8 +327,7 @@
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"Wi-Fi включен"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Не удалось найти доступные сети Wi-Fi"</string>
     <string name="quick_settings_wifi_secondary_label_transient" msgid="7748206246119760554">"Включение…"</string>
-    <!-- no translation found for quick_settings_cast_title (6954684227605751758) -->
-    <skip />
+    <string name="quick_settings_cast_title" msgid="6954684227605751758">"Трансляция экрана"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"Передача изображения"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Безымянное устройство"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"Готово к передаче"</string>
@@ -444,7 +443,7 @@
     <string name="battery_saver_notification_title" msgid="8614079794522291840">"Режим энергосбережения включен"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Откл. фоновой передачи данных"</string>
     <string name="battery_saver_notification_action_text" msgid="132118784269455533">"Отключить режим энергосбережения"</string>
-    <string name="media_projection_dialog_text" msgid="1443042478990422751">"Приложение \"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>\" будет транслировать всю информацию на экране, в том числе уведомления, пароли, фотографии, сообщения и платежные данные."</string>
+    <string name="media_projection_dialog_text" msgid="1443042478990422751">"Приложение \"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>\" будет записывать всю информацию на экране, в том числе уведомления, пароли, фотографии, сообщения и платежные данные."</string>
     <string name="media_projection_dialog_title" msgid="7574971526813630219">"Разрешить приложению \"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>\" записывать или транслировать экран устройства?"</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Больше не показывать"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Очистить все"</string>

@@ -356,7 +356,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             PackageInstaller packageInstaller = pm.getPackageInstaller();
             PackageInstaller.SessionParams parentParams = new PackageInstaller.SessionParams(
                     PackageInstaller.SessionParams.MODE_FULL_INSTALL);
-            parentParams.setAllowDowngrade(true);
+            parentParams.setRequestDowngrade(true);
             parentParams.setMultiPackage();
             if (data.isStaged()) {
                 parentParams.setStaged();
@@ -377,7 +377,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                         params.setInstallerPackageName(installerPackageName);
                     }
                 }
-                params.setAllowDowngrade(true);
+                params.setRequestDowngrade(true);
                 if (data.isStaged()) {
                     params.setStaged();
                 }
@@ -531,15 +531,11 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
     }
 
     private void updateRollbackLifetimeDurationInMillis() {
-        String strRollbackLifetimeInMillis = DeviceConfig.getProperty(
+        mRollbackLifetimeDurationInMillis = DeviceConfig.getLong(
                 DeviceConfig.Rollback.BOOT_NAMESPACE,
-                DeviceConfig.Rollback.ROLLBACK_LIFETIME_IN_MILLIS);
-
-        try {
-            mRollbackLifetimeDurationInMillis = (strRollbackLifetimeInMillis == null)
-                    ? DEFAULT_ROLLBACK_LIFETIME_DURATION_MILLIS
-                    : Long.parseLong(strRollbackLifetimeInMillis);
-        } catch (NumberFormatException e) {
+                DeviceConfig.Rollback.ROLLBACK_LIFETIME_IN_MILLIS,
+                DEFAULT_ROLLBACK_LIFETIME_DURATION_MILLIS);
+        if (mRollbackLifetimeDurationInMillis < 0) {
             mRollbackLifetimeDurationInMillis = DEFAULT_ROLLBACK_LIFETIME_DURATION_MILLIS;
         }
     }

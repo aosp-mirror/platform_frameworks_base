@@ -62,6 +62,7 @@ import android.content.res.Resources;
 import android.hardware.usb.UsbManager;
 import android.net.INetworkPolicyManager;
 import android.net.INetworkStatsService;
+import android.net.ITetheringEventCallback;
 import android.net.IpPrefix;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
@@ -82,6 +83,7 @@ import android.os.INetworkManagementService;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Parcel;
+import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.UserHandle;
@@ -184,6 +186,9 @@ public class Tethering extends BaseNetworkObserver {
     private final VersionedBroadcastListener mDefaultSubscriptionChange;
     private final TetheringDependencies mDeps;
     private final EntitlementManager mEntitlementMgr;
+    private final Handler mHandler;
+    private final RemoteCallbackList<ITetheringEventCallback> mTetheringEventCallbacks =
+            new RemoteCallbackList<>();
 
     private volatile TetheringConfiguration mConfig;
     private InterfaceSet mCurrentUpstreamIfaceSet;
@@ -193,6 +198,7 @@ public class Tethering extends BaseNetworkObserver {
     private boolean mRndisEnabled;       // track the RNDIS function enabled state
     // True iff. WiFi tethering should be started when soft AP is ready.
     private boolean mWifiTetherRequested;
+    private Network mTetherUpstream;
 
     public Tethering(Context context, INetworkManagementService nmService,
             INetworkStatsService statsService, INetworkPolicyManager policyManager,
@@ -213,9 +219,9 @@ public class Tethering extends BaseNetworkObserver {
         mTetherMasterSM = new TetherMasterSM("TetherMaster", mLooper, deps);
         mTetherMasterSM.start();
 
-        final Handler smHandler = mTetherMasterSM.getHandler();
-        mOffloadController = new OffloadController(smHandler,
-                mDeps.getOffloadHardwareInterface(smHandler, mLog),
+        mHandler = mTetherMasterSM.getHandler();
+        mOffloadController = new OffloadController(mHandler,
+                mDeps.getOffloadHardwareInterface(mHandler, mLog),
                 mContext.getContentResolver(), mNMService,
                 mLog);
         mUpstreamNetworkMonitor = deps.getUpstreamNetworkMonitor(mContext, mTetherMasterSM, mLog,
@@ -227,7 +233,7 @@ public class Tethering extends BaseNetworkObserver {
         mEntitlementMgr = mDeps.getEntitlementManager(mContext, mTetherMasterSM,
                 mLog, systemProperties);
         mCarrierConfigChange = new VersionedBroadcastListener(
-                "CarrierConfigChangeListener", mContext, smHandler, filter,
+                "CarrierConfigChangeListener", mContext, mHandler, filter,
                 (Intent ignored) -> {
                     mLog.log("OBSERVED carrier config change");
                     updateConfiguration();
@@ -237,7 +243,7 @@ public class Tethering extends BaseNetworkObserver {
         filter = new IntentFilter();
         filter.addAction(TelephonyIntents.ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED);
         mDefaultSubscriptionChange = new VersionedBroadcastListener(
-                "DefaultSubscriptionChangeListener", mContext, smHandler, filter,
+                "DefaultSubscriptionChangeListener", mContext, mHandler, filter,
                 (Intent ignored) -> {
                     mLog.log("OBSERVED default data subscription change");
                     updateConfiguration();
@@ -248,14 +254,13 @@ public class Tethering extends BaseNetworkObserver {
         // Load tethering configuration.
         updateConfiguration();
 
-        startStateMachineUpdaters();
+        startStateMachineUpdaters(mHandler);
     }
 
-    private void startStateMachineUpdaters() {
+    private void startStateMachineUpdaters(Handler handler) {
         mCarrierConfigChange.startListening();
         mDefaultSubscriptionChange.startListening();
 
-        final Handler handler = mTetherMasterSM.getHandler();
         IntentFilter filter = new IntentFilter();
         filter.addAction(UsbManager.ACTION_USB_STATE);
         filter.addAction(CONNECTIVITY_ACTION);
@@ -1229,8 +1234,13 @@ public class Tethering extends BaseNetworkObserver {
                     sendMessageDelayed(CMD_RETRY_UPSTREAM, UPSTREAM_SETTLE_TIME_MS);
                 }
             }
-            mUpstreamNetworkMonitor.setCurrentUpstream((ns != null) ? ns.network : null);
             setUpstreamNetwork(ns);
+            final Network newUpstream = (ns != null) ? ns.network : null;
+            if (mTetherUpstream != newUpstream) {
+                mTetherUpstream = newUpstream;
+                mUpstreamNetworkMonitor.setCurrentUpstream(mTetherUpstream);
+                reportUpstreamChanged(mTetherUpstream);
+            }
         }
 
         protected void setUpstreamNetwork(NetworkState ns) {
@@ -1413,6 +1423,10 @@ public class Tethering extends BaseNetworkObserver {
                 mUpstreamNetworkMonitor.stop();
                 notifyDownstreamsOfNewUpstreamIface(null);
                 handleNewUpstreamNetworkState(null);
+                if (mTetherUpstream != null) {
+                    mTetherUpstream = null;
+                    reportUpstreamChanged(null);
+                }
             }
 
             private boolean updateUpstreamWanted() {
@@ -1677,10 +1691,44 @@ public class Tethering extends BaseNetworkObserver {
     }
 
     /** Get the latest value of the tethering entitlement check. */
-    public void getLatestTetheringEntitlementValue(int type, ResultReceiver receiver,
+    public void getLatestTetheringEntitlementResult(int type, ResultReceiver receiver,
             boolean showEntitlementUi) {
         if (receiver != null) {
-            mEntitlementMgr.getLatestTetheringEntitlementValue(type, receiver, showEntitlementUi);
+            mEntitlementMgr.getLatestTetheringEntitlementResult(type, receiver, showEntitlementUi);
+        }
+    }
+
+    /** Register tethering event callback */
+    public void registerTetheringEventCallback(ITetheringEventCallback callback) {
+        mHandler.post(() -> {
+            try {
+                callback.onUpstreamChanged(mTetherUpstream);
+            } catch (RemoteException e) {
+                // Not really very much to do here.
+            }
+            mTetheringEventCallbacks.register(callback);
+        });
+    }
+
+    /** Unregister tethering event callback */
+    public void unregisterTetheringEventCallback(ITetheringEventCallback callback) {
+        mHandler.post(() -> {
+            mTetheringEventCallbacks.unregister(callback);
+        });
+    }
+
+    private void reportUpstreamChanged(Network network) {
+        final int length = mTetheringEventCallbacks.beginBroadcast();
+        try {
+            for (int i = 0; i < length; i++) {
+                try {
+                    mTetheringEventCallbacks.getBroadcastItem(i).onUpstreamChanged(network);
+                } catch (RemoteException e) {
+                    // Not really very much to do here.
+                }
+            }
+        } finally {
+            mTetheringEventCallbacks.finishBroadcast();
         }
     }
 

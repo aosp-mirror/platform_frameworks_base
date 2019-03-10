@@ -5758,7 +5758,11 @@ public final class Settings {
                 "autofill_user_data_min_value_length";
 
         /**
-         * Defines whether Content Capture is enabled  for the user.
+         * Defines whether Content Capture is enabled for the user.
+         *
+         * <p>Type: {@code int} ({@code 0} for disabled, {@code 1} for enabled).
+         * <p>Default: enabled
+         *
          * @hide
          */
         @TestApi
@@ -7553,12 +7557,49 @@ public final class Settings {
         private static final Validator SKIP_GESTURE_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
+         * Count of successful gestures.
+         * @hide
+         */
+        public static final String SKIP_GESTURE_COUNT = "skip_gesture_count";
+
+        private static final Validator SKIP_GESTURE_COUNT_VALIDATOR =
+                NON_NEGATIVE_INTEGER_VALIDATOR;
+
+        /**
          * Gesture that silences sound (alarms, notification, calls).
          * @hide
          */
         public static final String SILENCE_GESTURE = "silence_gesture";
 
         private static final Validator SILENCE_GESTURE_VALIDATOR = BOOLEAN_VALIDATOR;
+
+        /**
+         * Count of successful silence alarms gestures.
+         * @hide
+         */
+        public static final String SILENCE_ALARMS_GESTURE_COUNT = "silence_alarms_gesture_count";
+
+        /**
+         * Count of successful silence timer gestures.
+         * @hide
+         */
+        public static final String SILENCE_TIMER_GESTURE_COUNT = "silence_timer_gesture_count";
+
+        /**
+         * Count of successful silence call gestures.
+         * @hide
+         */
+        public static final String SILENCE_CALL_GESTURE_COUNT = "silence_call_gesture_count";
+
+        /**
+         * Count of successful silence notification gestures.
+         * @hide
+         */
+        public static final String SILENCE_NOTIFICATION_GESTURE_COUNT =
+                "silence_notification_gesture_count";
+
+        private static final Validator SILENCE_GESTURE_COUNT_VALIDATOR =
+                NON_NEGATIVE_INTEGER_VALIDATOR;
 
         /**
          * The current night mode that has been selected by the user.  Owned
@@ -8004,6 +8045,16 @@ public final class Settings {
         public static final String FACE_UNLOCK_KEYGUARD_ENABLED = "face_unlock_keyguard_enabled";
 
         private static final Validator FACE_UNLOCK_KEYGUARD_ENABLED_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
+        /**
+         * Whether or not face unlock dismisses the keyguard.
+         * @hide
+         */
+        public static final String FACE_UNLOCK_DISMISSES_KEYGUARD =
+                "face_unlock_dismisses_keyguard";
+
+        private static final Validator FACE_UNLOCK_DISMISSES_KEYGUARD_VALIDATOR =
                 BOOLEAN_VALIDATOR;
 
         /**
@@ -8559,6 +8610,19 @@ public final class Settings {
         public static final String LOCATION_ACCESS_CHECK_DELAY_MILLIS =
                 "location_access_check_delay_millis";
 
+        /**
+         * What should happen to the location permissions when upgraded to Android Q.
+         *
+         * <ul>
+         *     <li>0/unset == revoke permissions</li>
+         *     <li>anything else == Don't do anything</li>
+         * </ul>
+         *
+         * @hide
+         */
+        @SystemApi
+        public static final String LOCATION_PERMISSIONS_UPGRADE_TO_Q_MODE =
+                "location_permissions_upgrade_to_q_mode";
 
         /**
          * Comma separated list of enabled overlay packages for all android.theme.customization.*
@@ -8667,6 +8731,7 @@ public final class Settings {
             NFC_PAYMENT_DEFAULT_COMPONENT,
             AUTOMATIC_STORAGE_MANAGER_DAYS_TO_RETAIN,
             FACE_UNLOCK_KEYGUARD_ENABLED,
+            FACE_UNLOCK_DISMISSES_KEYGUARD,
             FACE_UNLOCK_APP_ENABLED,
             FACE_UNLOCK_ALWAYS_REQUIRE_CONFIRMATION,
             ASSIST_GESTURE_ENABLED,
@@ -8706,6 +8771,11 @@ public final class Settings {
             SILENCE_GESTURE,
             THEME_CUSTOMIZATION_OVERLAY_PACKAGES,
             AWARE_ENABLED,
+            SKIP_GESTURE_COUNT,
+            SILENCE_ALARMS_GESTURE_COUNT,
+            SILENCE_NOTIFICATION_GESTURE_COUNT,
+            SILENCE_CALL_GESTURE_COUNT,
+            SILENCE_TIMER_GESTURE_COUNT,
         };
 
         /**
@@ -8828,6 +8898,8 @@ public final class Settings {
             VALIDATORS.put(AUTOMATIC_STORAGE_MANAGER_DAYS_TO_RETAIN,
                     AUTOMATIC_STORAGE_MANAGER_DAYS_TO_RETAIN_VALIDATOR);
             VALIDATORS.put(FACE_UNLOCK_KEYGUARD_ENABLED, FACE_UNLOCK_KEYGUARD_ENABLED_VALIDATOR);
+            VALIDATORS.put(FACE_UNLOCK_DISMISSES_KEYGUARD,
+                    FACE_UNLOCK_DISMISSES_KEYGUARD_VALIDATOR);
             VALIDATORS.put(FACE_UNLOCK_APP_ENABLED, FACE_UNLOCK_APP_ENABLED_VALIDATOR);
             VALIDATORS.put(FACE_UNLOCK_ALWAYS_REQUIRE_CONFIRMATION,
                     FACE_UNLOCK_ALWAYS_REQUIRE_CONFIRMATION_VALIDATOR);
@@ -8880,6 +8952,11 @@ public final class Settings {
             VALIDATORS.put(THEME_CUSTOMIZATION_OVERLAY_PACKAGES,
                     THEME_CUSTOMIZATION_OVERLAY_PACKAGES_VALIDATOR);
             VALIDATORS.put(AWARE_ENABLED, AWARE_ENABLED_VALIDATOR);
+            VALIDATORS.put(SKIP_GESTURE_COUNT, SKIP_GESTURE_COUNT_VALIDATOR);
+            VALIDATORS.put(SILENCE_ALARMS_GESTURE_COUNT, SILENCE_GESTURE_COUNT_VALIDATOR);
+            VALIDATORS.put(SILENCE_TIMER_GESTURE_COUNT, SILENCE_GESTURE_COUNT_VALIDATOR);
+            VALIDATORS.put(SILENCE_CALL_GESTURE_COUNT, SILENCE_GESTURE_COUNT_VALIDATOR);
+            VALIDATORS.put(SILENCE_NOTIFICATION_GESTURE_COUNT, SILENCE_GESTURE_COUNT_VALIDATOR);
         }
 
         /**
@@ -9065,6 +9142,8 @@ public final class Settings {
          * <p>0 = do not apply ramping ringer
          */
         public static final String APPLY_RAMPING_RINGER = "apply_ramping_ringer";
+
+        private static final Validator APPLY_RAMPING_RINGER_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * Setting whether the global gesture for enabling accessibility is enabled.
@@ -13501,6 +13580,7 @@ public final class Settings {
          * @hide
          */
         public static final String[] SETTINGS_TO_BACKUP = {
+            APPLY_RAMPING_RINGER,
             BUGREPORT_IN_POWER_MENU,
             STAY_ON_WHILE_PLUGGED_IN,
             APP_AUTO_RESTRICTION_ENABLED,
@@ -13541,6 +13621,7 @@ public final class Settings {
          */
         public static final Map<String, Validator> VALIDATORS = new ArrayMap<>();
         static {
+            VALIDATORS.put(APPLY_RAMPING_RINGER, APPLY_RAMPING_RINGER_VALIDATOR);
             VALIDATORS.put(BUGREPORT_IN_POWER_MENU, BUGREPORT_IN_POWER_MENU_VALIDATOR);
             VALIDATORS.put(STAY_ON_WHILE_PLUGGED_IN, STAY_ON_WHILE_PLUGGED_IN_VALIDATOR);
             VALIDATORS.put(AUTO_TIME, AUTO_TIME_VALIDATOR);
@@ -14929,6 +15010,17 @@ public final class Settings {
         @SdkConstant(SdkConstant.SdkConstantType.ACTIVITY_INTENT_ACTION)
         public static final String ACTION_NFC =
                 "android.settings.panel.action.NFC";
+
+        /**
+         * Activity Action: Show a settings dialog containing controls for Wifi.
+         * <p>
+         * Input: Nothing.
+         * <p>
+         * Output: Nothing.
+         */
+        @SdkConstant(SdkConstant.SdkConstantType.ACTIVITY_INTENT_ACTION)
+        public static final String ACTION_WIFI =
+                "android.settings.panel.action.WIFI";
 
         /**
          * Activity Action: Show a settings dialog containing all volume streams.

@@ -135,6 +135,36 @@ import java.lang.annotation.RetentionPolicy;
  *     }
  * </pre>
  *
+ * <p>A few of the properties may at first appear redundant, such as {@link #setElevation(float)}
+ * and {@link #setTranslationZ(float)}. The reason for these duplicates are to allow for a
+ * separation between static & transient usages. For example consider a button that raises from 2dp
+ * to 8dp when pressed. To achieve that an application may decide to setElevation(2dip), and then
+ * on press to animate setTranslationZ to 6dip. Combined this achieves the final desired 8dip
+ * value, but the animation need only concern itself with animating the lift from press without
+ * needing to know the initial starting value. {@link #setTranslationX(float)} and
+ * {@link #setTranslationY(float)} are similarly provided for animation uses despite the functional
+ * overlap with {@link #setPosition(Rect)}.
+ *
+ * <p>The RenderNode's transform matrix is computed at render time as follows:
+ * First a setTranslate(getTranslationX(), getTranslationY()) is applied to a {@link Matrix}.
+ * Second a preRotate(getRotationZ(), getPivotX(), getPivotY()) is applied to the matrix. And
+ * finally a preScale(getScaleX(), getScaleY(), getPivotX(), getPivotY()) is applied. The current
+ * canvas transform matrix, which is translated to the RenderNode's position,
+ * is then multiplied by the RenderNode's transform matrix. Therefore there is no implicit
+ * ordering in setting various RenderNode properties. That is to say that:
+ *
+ * <pre class="prettyprint">
+ *     renderNode.setTranslationX(100);
+ *     renderNode.setScaleX(100);
+ * </pre>
+ *
+ * is equivalent to
+ *
+ * <pre class="prettyprint">
+ *     renderNode.setScaleX(100);
+ *     renderNode.setTranslationX(100);
+ * </pre>
+ *
  * <h3>Threading</h3>
  * <p>RenderNode may be created and used on any thread but they are not thread-safe. Only
  * a single thread may interact with a RenderNode at any given time. It is critical

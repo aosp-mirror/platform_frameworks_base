@@ -56,6 +56,7 @@ import android.util.ArrayMap;
 import android.util.Log;
 import android.util.SparseIntArray;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.telephony.ITelephony;
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.util.Preconditions;
@@ -2542,6 +2543,94 @@ public class ConnectivityManager {
     }
 
     /**
+     * Callback for use with {@link registerTetheringEventCallback} to find out tethering
+     * upstream status.
+     *
+     *@hide
+     */
+    @SystemApi
+    public abstract static class OnTetheringEventCallback {
+
+        /**
+         * Called when tethering upstream changed. This can be called multiple times and can be
+         * called any time.
+         *
+         * @param network the {@link Network} of tethering upstream. Null means tethering doesn't
+         * have any upstream.
+         */
+        public void onUpstreamChanged(@Nullable Network network) {}
+    }
+
+    @GuardedBy("mTetheringEventCallbacks")
+    private final ArrayMap<OnTetheringEventCallback, ITetheringEventCallback>
+            mTetheringEventCallbacks = new ArrayMap<>();
+
+    /**
+     * Start listening to tethering change events. Any new added callback will receive the last
+     * tethering status right away. If callback is registered when tethering loses its upstream or
+     * disabled, {@link OnTetheringEventCallback#onUpstreamChanged} will immediately be called
+     * with a null argument. The same callback object cannot be registered twice.
+     *
+     * @param executor the executor on which callback will be invoked.
+     * @param callback the callback to be called when tethering has change events.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.TETHER_PRIVILEGED)
+    public void registerTetheringEventCallback(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull final OnTetheringEventCallback callback) {
+        Preconditions.checkNotNull(callback, "OnTetheringEventCallback cannot be null.");
+
+        synchronized (mTetheringEventCallbacks) {
+            Preconditions.checkArgument(!mTetheringEventCallbacks.containsKey(callback),
+                    "callback was already registered.");
+            ITetheringEventCallback remoteCallback = new ITetheringEventCallback.Stub() {
+                @Override
+                public void onUpstreamChanged(Network network) throws RemoteException {
+                    Binder.withCleanCallingIdentity(() ->
+                            executor.execute(() -> {
+                                callback.onUpstreamChanged(network);
+                            }));
+                }
+            };
+            try {
+                String pkgName = mContext.getOpPackageName();
+                Log.i(TAG, "registerTetheringUpstreamCallback:" + pkgName);
+                mService.registerTetheringEventCallback(remoteCallback, pkgName);
+                mTetheringEventCallbacks.put(callback, remoteCallback);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Remove tethering event callback previously registered with
+     * {@link #registerTetheringEventCallback}.
+     *
+     * @param callback previously registered callback.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.TETHER_PRIVILEGED)
+    public void unregisterTetheringEventCallback(
+            @NonNull final OnTetheringEventCallback callback) {
+        synchronized (mTetheringEventCallbacks) {
+            ITetheringEventCallback remoteCallback = mTetheringEventCallbacks.remove(callback);
+            Preconditions.checkNotNull(remoteCallback, "callback was not registered.");
+            try {
+                String pkgName = mContext.getOpPackageName();
+                Log.i(TAG, "unregisterTetheringEventCallback:" + pkgName);
+                mService.unregisterTetheringEventCallback(remoteCallback, pkgName);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+
+    /**
      * Get the list of regular expressions that define any tetherable
      * USB network interfaces.  If USB tethering is not supported by the
      * device, this list should be empty.
@@ -2681,12 +2770,39 @@ public class ConnectivityManager {
         }
     }
 
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(value = {
+            TETHER_ERROR_NO_ERROR,
+            TETHER_ERROR_PROVISION_FAILED,
+            TETHER_ERROR_ENTITLEMENT_UNKONWN,
+    })
+    public @interface EntitlementResultCode {
+    }
+
     /**
-     * Callback for use with {@link #getLatestTetheringEntitlementValue} to find out whether
+     * Callback for use with {@link #getLatestTetheringEntitlementResult} to find out whether
      * entitlement succeeded.
      * @hide
      */
     @SystemApi
+    public interface OnTetheringEntitlementResultListener  {
+        /**
+         * Called to notify entitlement result.
+         *
+         * @param resultCode an int value of entitlement result. It may be one of
+         *         {@link #TETHER_ERROR_NO_ERROR},
+         *         {@link #TETHER_ERROR_PROVISION_FAILED}, or
+         *         {@link #TETHER_ERROR_ENTITLEMENT_UNKONWN}.
+         */
+        void onEntitlementResult(@EntitlementResultCode int resultCode);
+    }
+
+    /**
+     * @removed
+     * @deprecated This API would be removed when all of caller has been updated.
+     * */
+    @Deprecated
     public abstract static class TetheringEntitlementValueListener  {
         /**
          * Called to notify entitlement result.
@@ -2712,14 +2828,43 @@ public class ConnectivityManager {
      *         {@link #TETHERING_USB}, or
      *         {@link #TETHERING_BLUETOOTH}.
      * @param showEntitlementUi a boolean indicating whether to run UI-based entitlement check.
-     * @param listener an {@link TetheringEntitlementValueListener} which will be called to notify
-     *         the caller of the result of entitlement check. The listener may be called zero or
-     *         one time.
-     * @param handler {@link Handler} to specify the thread upon which the listener will be invoked.
+     * @param executor the executor on which callback will be invoked.
+     * @param listener an {@link OnTetheringEntitlementResultListener} which will be called to
+     *         notify the caller of the result of entitlement check. The listener may be called zero
+     *         or one time.
      * {@hide}
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.TETHER_PRIVILEGED)
+    public void getLatestTetheringEntitlementResult(int type, boolean showEntitlementUi,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull final OnTetheringEntitlementResultListener listener) {
+        Preconditions.checkNotNull(listener, "TetheringEntitlementResultListener cannot be null.");
+        ResultReceiver wrappedListener = new ResultReceiver(null) {
+            @Override
+            protected void onReceiveResult(int resultCode, Bundle resultData) {
+                Binder.withCleanCallingIdentity(() ->
+                            executor.execute(() -> {
+                                listener.onEntitlementResult(resultCode);
+                            }));
+            }
+        };
+
+        try {
+            String pkgName = mContext.getOpPackageName();
+            Log.i(TAG, "getLatestTetheringEntitlementResult:" + pkgName);
+            mService.getLatestTetheringEntitlementResult(type, wrappedListener,
+                    showEntitlementUi, pkgName);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @removed
+     * @deprecated This API would be removed when all of caller has been updated.
+     * */
+    @Deprecated
     public void getLatestTetheringEntitlementValue(int type, boolean showEntitlementUi,
             @NonNull final TetheringEntitlementValueListener listener, @Nullable Handler handler) {
         Preconditions.checkNotNull(listener, "TetheringEntitlementValueListener cannot be null.");
@@ -2733,7 +2878,7 @@ public class ConnectivityManager {
         try {
             String pkgName = mContext.getOpPackageName();
             Log.i(TAG, "getLatestTetheringEntitlementValue:" + pkgName);
-            mService.getLatestTetheringEntitlementValue(type, wrappedListener,
+            mService.getLatestTetheringEntitlementResult(type, wrappedListener,
                     showEntitlementUi, pkgName);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();

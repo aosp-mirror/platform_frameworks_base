@@ -35,7 +35,7 @@
         android:layout_marginBottom="@dimen/global_actions_grid_item_icon_bottom_margin"
         android:layout_marginLeft="@dimen/global_actions_grid_item_icon_side_margin"
         android:layout_marginRight="@dimen/global_actions_grid_item_icon_side_margin"
-        android:scaleType="center"
+        android:scaleType="centerInside"
         android:alpha="?android:attr/primaryContentAlpha"
     />
 

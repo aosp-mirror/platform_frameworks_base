@@ -643,7 +643,7 @@ public class StaticLayout extends Layout {
                 .setBreakStrategy(b.mBreakStrategy)
                 .setHyphenationFrequency(b.mHyphenationFrequency)
                 // TODO: Support more justification mode, e.g. letter spacing, stretching.
-                .setJustified(b.mJustificationMode)
+                .setJustificationMode(b.mJustificationMode)
                 .setIndents(indents)
                 .build();
 

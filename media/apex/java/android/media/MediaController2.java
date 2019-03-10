@@ -181,6 +181,7 @@ public class MediaController2 implements AutoCloseable {
      *
      * @return Session2Token of the connected session, or {@code null} if not connected
      */
+    @Nullable
     public Session2Token getConnectedSessionToken() {
         synchronized (mLock) {
             return mConnectedToken;

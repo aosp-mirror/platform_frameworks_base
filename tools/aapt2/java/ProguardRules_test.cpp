@@ -42,6 +42,7 @@ TEST(ProguardRulesTest, ManifestRuleDefaultConstructorOnly) {
             android:appComponentFactory="com.foo.BarAppComponentFactory"
             android:backupAgent="com.foo.BarBackupAgent"
             android:name="com.foo.BarApplication"
+            android:zygotePreloadName="com.foo.BarZygotePreload"
             >
           <activity android:name="com.foo.BarActivity"/>
           <service android:name="com.foo.BarService"/>
@@ -63,6 +64,7 @@ TEST(ProguardRulesTest, ManifestRuleDefaultConstructorOnly) {
   EXPECT_THAT(actual, HasSubstr("-keep class com.foo.BarReceiver { <init>(); }"));
   EXPECT_THAT(actual, HasSubstr("-keep class com.foo.BarProvider { <init>(); }"));
   EXPECT_THAT(actual, HasSubstr("-keep class com.foo.BarInstrumentation { <init>(); }"));
+  EXPECT_THAT(actual, HasSubstr("-keep class com.foo.BarZygotePreload { <init>(); }"));
 
   actual = GetKeepSetString(set, /** minimal_rules */ true);
   EXPECT_THAT(actual, HasSubstr("-keep class com.foo.BarAppComponentFactory { <init>(); }"));
@@ -73,6 +75,7 @@ TEST(ProguardRulesTest, ManifestRuleDefaultConstructorOnly) {
   EXPECT_THAT(actual, HasSubstr("-keep class com.foo.BarReceiver { <init>(); }"));
   EXPECT_THAT(actual, HasSubstr("-keep class com.foo.BarProvider { <init>(); }"));
   EXPECT_THAT(actual, HasSubstr("-keep class com.foo.BarInstrumentation { <init>(); }"));
+  EXPECT_THAT(actual, HasSubstr("-keep class com.foo.BarZygotePreload { <init>(); }"));
 }
 
 TEST(ProguardRulesTest, FragmentNameRuleIsEmitted) {

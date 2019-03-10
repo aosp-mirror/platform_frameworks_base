@@ -325,8 +325,7 @@
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"Naka-on Ang Wi-Fi"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Walang available na mga Wi-Fi network"</string>
     <string name="quick_settings_wifi_secondary_label_transient" msgid="7748206246119760554">"Ino-on…"</string>
-    <!-- no translation found for quick_settings_cast_title (6954684227605751758) -->
-    <skip />
+    <string name="quick_settings_cast_title" msgid="6954684227605751758">"Screen Cast"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"Nagka-cast"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Walang pangalang device"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"Handang mag-cast"</string>

@@ -33,6 +33,8 @@ LOCAL_PROGUARD_FLAG_FILES := proguard.proguard
 
 LOCAL_PRIVILEGED_MODULE := true
 
+LOCAL_MIN_SDK_VERSION := 28
+
 include $(BUILD_PACKAGE)
 
 # Use the following include to make our test apk.

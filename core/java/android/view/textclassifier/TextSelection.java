@@ -184,6 +184,7 @@ public final class TextSelection implements Parcelable {
          *
          * @return this builder
          */
+        @NonNull
         public Builder setExtras(@Nullable Bundle extras) {
             mExtras = extras;
             return this;
@@ -368,6 +369,7 @@ public final class TextSelection implements Parcelable {
              *
              * @return this builder
              */
+            @NonNull
             public Builder setExtras(@Nullable Bundle extras) {
                 mExtras = extras;
                 return this;

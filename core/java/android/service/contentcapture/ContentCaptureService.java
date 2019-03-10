@@ -37,7 +37,6 @@ import android.os.Looper;
 import android.os.RemoteException;
 import android.service.autofill.AutofillService;
 import android.util.ArrayMap;
-import android.util.ArraySet;
 import android.util.Log;
 import android.util.Slog;
 import android.view.contentcapture.ContentCaptureContext;
@@ -127,6 +126,13 @@ public abstract class ContentCaptureService extends Service {
                     obtainMessage(ContentCaptureService::handleOnUserDataRemovalRequest,
                             ContentCaptureService.this, request));
         }
+
+        @Override
+        public void onActivityEvent(ActivityEvent event) {
+            mHandler.sendMessage(obtainMessage(ContentCaptureService::handleOnActivityEvent,
+                    ContentCaptureService.this, event));
+
+        }
     };
 
     /**
@@ -165,19 +171,6 @@ public abstract class ContentCaptureService extends Service {
         }
         Log.w(TAG, "Tried to bind to wrong intent (should be " + SERVICE_INTERFACE + ": " + intent);
         return null;
-    }
-
-    /**
-     * @deprecated use {@link #setContentCaptureWhitelist(Set, Set)} instead
-     */
-    @Deprecated
-    public final void setContentCaptureWhitelist(@Nullable List<String> packages,
-            @Nullable List<ComponentName> activities) {
-        setContentCaptureWhitelist(toSet(packages), toSet(activities));
-    }
-
-    private <T> ArraySet<T> toSet(@Nullable List<T> set) {
-        return set == null ? null : new ArraySet<T>(set);
     }
 
     /**
@@ -261,7 +254,21 @@ public abstract class ContentCaptureService extends Service {
      * @param snapshotData the data
      */
     public void onActivitySnapshot(@NonNull ContentCaptureSessionId sessionId,
-            @NonNull SnapshotData snapshotData) {}
+            @NonNull SnapshotData snapshotData) {
+        if (sVerbose) Log.v(TAG, "onActivitySnapshot(id=" + sessionId + ")");
+    }
+
+    /**
+     * Notifies the service of an activity-level event that is not associated with a session.
+     *
+     * <p>This method can be used to track some high-level events for all activities, even those
+     * that are not whitelisted for Content Capture.
+     *
+     * @param event high-level activity event
+     */
+    public void onActivityEvent(@NonNull ActivityEvent event) {
+        if (sVerbose) Log.v(TAG, "onActivityEvent(): " + event);
+    }
 
     /**
      * Destroys the content capture session.
@@ -395,6 +402,10 @@ public abstract class ContentCaptureService extends Service {
 
     private void handleOnUserDataRemovalRequest(@NonNull UserDataRemovalRequest request) {
         onUserDataRemovalRequest(request);
+    }
+
+    private void handleOnActivityEvent(@NonNull ActivityEvent event) {
+        onActivityEvent(event);
     }
 
     /**

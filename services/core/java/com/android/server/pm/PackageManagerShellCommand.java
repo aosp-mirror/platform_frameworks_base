@@ -2337,7 +2337,7 @@ class PackageManagerShellCommand extends ShellCommand {
                     sessionParams.installFlags |= PackageManager.INSTALL_INTERNAL;
                     break;
                 case "-d":
-                    sessionParams.installFlags |= PackageManager.INSTALL_ALLOW_DOWNGRADE;
+                    sessionParams.installFlags |= PackageManager.INSTALL_REQUEST_DOWNGRADE;
                     break;
                 case "-g":
                     sessionParams.installFlags |= PackageManager.INSTALL_GRANT_RUNTIME_PERMISSIONS;

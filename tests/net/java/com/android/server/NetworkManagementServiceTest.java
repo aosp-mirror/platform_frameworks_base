@@ -26,20 +26,18 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import android.content.Context;
 import android.net.INetd;
 import android.net.LinkAddress;
-import android.net.LocalSocket;
 import android.net.LocalServerSocket;
+import android.net.LocalSocket;
 import android.os.BatteryStats;
 import android.os.Binder;
 import android.os.IBinder;
-import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
+
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.app.IBatteryStats;
 import com.android.server.NetworkManagementService.SystemServices;
 import com.android.server.net.BaseNetworkObserver;
-
-import java.io.IOException;
-import java.io.OutputStream;
 
 import org.junit.After;
 import org.junit.Before;
@@ -47,6 +45,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.io.IOException;
+import java.io.OutputStream;
 
 /**
  * Tests for {@link NetworkManagementService}.

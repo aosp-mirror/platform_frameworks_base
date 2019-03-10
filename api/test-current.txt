@@ -640,7 +640,7 @@ package android.content.pm {
     method @RequiresPermission("android.permission.INTERACT_ACROSS_USERS_FULL") public abstract java.util.List<android.content.pm.PackageInfo> getInstalledPackagesAsUser(int, int);
     method @Nullable public abstract String[] getNamesForUids(int[]);
     method public abstract String getPermissionControllerPackageName();
-    method @RequiresPermission(anyOf={"android.permission.GRANT_RUNTIME_PERMISSIONS", "android.permission.REVOKE_RUNTIME_PERMISSIONS"}) public abstract int getPermissionFlags(String, String, @NonNull android.os.UserHandle);
+    method @RequiresPermission(anyOf={"android.permission.GRANT_RUNTIME_PERMISSIONS", "android.permission.REVOKE_RUNTIME_PERMISSIONS", "android.permission.GET_RUNTIME_PERMISSIONS"}) public abstract int getPermissionFlags(String, String, @NonNull android.os.UserHandle);
     method @NonNull public abstract String getServicesSystemSharedLibraryPackageName();
     method @NonNull public abstract String getSharedSystemSharedLibraryPackageName();
     method public String getWellbeingPackageName();
@@ -988,9 +988,27 @@ package android.media {
     method public static boolean isEncodingLinearPcm(int);
   }
 
+  public static final class AudioRecord.MetricsConstants {
+    field public static final String ATTRIBUTES = "android.media.audiorecord.attributes";
+    field public static final String CHANNEL_MASK = "android.media.audiorecord.channelMask";
+    field public static final String DURATION_MS = "android.media.audiorecord.durationMs";
+    field public static final String FRAME_COUNT = "android.media.audiorecord.frameCount";
+    field public static final String PORT_ID = "android.media.audiorecord.portId";
+    field public static final String START_COUNT = "android.media.audiorecord.startCount";
+  }
+
   public final class AudioRecordingConfiguration implements android.os.Parcelable {
     ctor public AudioRecordingConfiguration(int, int, int, android.media.AudioFormat, android.media.AudioFormat, int, String, int, boolean, int, android.media.audiofx.AudioEffect.Descriptor[], android.media.audiofx.AudioEffect.Descriptor[]);
     ctor public AudioRecordingConfiguration(int, int, int, android.media.AudioFormat, android.media.AudioFormat, int, String);
+  }
+
+  public static final class AudioTrack.MetricsConstants {
+    field public static final String ATTRIBUTES = "android.media.audiotrack.attributes";
+    field public static final String CHANNEL_MASK = "android.media.audiotrack.channelMask";
+    field public static final String ENCODING = "android.media.audiotrack.encoding";
+    field public static final String FRAME_COUNT = "android.media.audiotrack.frameCount";
+    field public static final String PORT_ID = "android.media.audiotrack.portId";
+    field public static final String SAMPLE_RATE = "android.media.audiotrack.sampleRate";
   }
 
   public final class BufferingParams implements android.os.Parcelable {
@@ -1215,6 +1233,21 @@ package android.net {
     field @NonNull public static final android.os.Parcelable.Creator<android.net.StaticIpConfiguration> CREATOR;
   }
 
+  public final class TestNetworkInterface implements android.os.Parcelable {
+    ctor public TestNetworkInterface(android.os.ParcelFileDescriptor, String);
+    method public int describeContents();
+    method public android.os.ParcelFileDescriptor getFileDescriptor();
+    method public String getInterfaceName();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.net.TestNetworkInterface> CREATOR;
+  }
+
+  public class TestNetworkManager {
+    method public android.net.TestNetworkInterface createTunInterface(@NonNull android.net.LinkAddress[]);
+    method public void setupTestNetwork(@NonNull String, @NonNull android.os.IBinder);
+    method public void teardownTestNetwork(@NonNull android.net.Network);
+  }
+
   public class TrafficStats {
     method public static long getLoopbackRxBytes();
     method public static long getLoopbackRxPackets();
@@ -1429,19 +1462,16 @@ package android.net.metrics {
 package android.net.util {
 
   public class SocketUtils {
-    method public static void addArpEntry(java.net.Inet4Address, android.net.MacAddress, String, java.io.FileDescriptor) throws java.io.IOException;
-    method public static void attachControlPacketFilter(java.io.FileDescriptor, int) throws java.net.SocketException;
-    method public static void attachDhcpFilter(java.io.FileDescriptor) throws java.net.SocketException;
-    method public static void attachRaFilter(java.io.FileDescriptor, int) throws java.net.SocketException;
-    method public static void bindSocket(java.io.FileDescriptor, java.net.SocketAddress) throws android.system.ErrnoException, java.net.SocketException;
-    method public static void bindSocketToInterface(java.io.FileDescriptor, String) throws android.system.ErrnoException;
-    method public static void closeSocket(java.io.FileDescriptor) throws java.io.IOException;
-    method public static void connectSocket(java.io.FileDescriptor, java.net.SocketAddress) throws android.system.ErrnoException, java.net.SocketException;
+    method public static void addArpEntry(@NonNull java.net.Inet4Address, @NonNull android.net.MacAddress, @NonNull String, @NonNull java.io.FileDescriptor) throws java.io.IOException;
+    method public static void attachControlPacketFilter(@NonNull java.io.FileDescriptor, int) throws java.net.SocketException;
+    method public static void attachDhcpFilter(@NonNull java.io.FileDescriptor) throws java.net.SocketException;
+    method public static void attachRaFilter(@NonNull java.io.FileDescriptor, int) throws java.net.SocketException;
+    method public static void bindSocketToInterface(@NonNull java.io.FileDescriptor, @NonNull String) throws android.system.ErrnoException;
+    method public static void closeSocket(@Nullable java.io.FileDescriptor) throws java.io.IOException;
     method public static java.net.SocketAddress makeNetlinkSocketAddress(int, int);
     method public static java.net.SocketAddress makePacketSocketAddress(short, int);
-    method public static java.net.SocketAddress makePacketSocketAddress(int, byte[]);
-    method public static void sendTo(java.io.FileDescriptor, byte[], int, int, int, java.net.SocketAddress) throws android.system.ErrnoException, java.net.SocketException;
-    method public static void setSocketTimeValueOption(java.io.FileDescriptor, int, int, long) throws android.system.ErrnoException;
+    method public static java.net.SocketAddress makePacketSocketAddress(int, @NonNull byte[]);
+    method public static void setSocketTimeValueOption(@NonNull java.io.FileDescriptor, int, int, long) throws android.system.ErrnoException;
   }
 
 }
@@ -2300,9 +2330,20 @@ package android.service.autofill.augmented {
 
 package android.service.contentcapture {
 
+  public final class ActivityEvent implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public android.content.ComponentName getComponentName();
+    method public int getEventType();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.service.contentcapture.ActivityEvent> CREATOR;
+    field public static final int TYPE_ACTIVITY_PAUSED = 2; // 0x2
+    field public static final int TYPE_ACTIVITY_RESUMED = 1; // 0x1
+  }
+
   public abstract class ContentCaptureService extends android.app.Service {
     ctor public ContentCaptureService();
     method public final void disableContentCaptureServices();
+    method public void onActivityEvent(@NonNull android.service.contentcapture.ActivityEvent);
     method public void onActivitySnapshot(@NonNull android.view.contentcapture.ContentCaptureSessionId, @NonNull android.service.contentcapture.SnapshotData);
     method public void onConnected();
     method public void onContentCaptureEvent(@NonNull android.view.contentcapture.ContentCaptureSessionId, @NonNull android.view.contentcapture.ContentCaptureEvent);
@@ -2310,7 +2351,6 @@ package android.service.contentcapture {
     method public void onDestroyContentCaptureSession(@NonNull android.view.contentcapture.ContentCaptureSessionId);
     method public void onDisconnected();
     method public void onUserDataRemovalRequest(@NonNull android.view.contentcapture.UserDataRemovalRequest);
-    method @Deprecated public final void setContentCaptureWhitelist(@Nullable java.util.List<java.lang.String>, @Nullable java.util.List<android.content.ComponentName>);
     method public final void setContentCaptureWhitelist(@Nullable java.util.Set<java.lang.String>, @Nullable java.util.Set<android.content.ComponentName>);
     field public static final String SERVICE_INTERFACE = "android.service.contentcapture.ContentCaptureService";
   }
@@ -2938,7 +2978,6 @@ package android.view.autofill {
   }
 
   public final class AutofillManager {
-    method @Deprecated public void setAugmentedAutofillWhitelist(@Nullable java.util.List<java.lang.String>, @Nullable java.util.List<android.content.ComponentName>);
     method public void setAugmentedAutofillWhitelist(@Nullable java.util.Set<java.lang.String>, @Nullable java.util.Set<android.content.ComponentName>);
     field public static final String DEVICE_CONFIG_AUTOFILL_SMART_SUGGESTION_SUPPORTED_MODES = "smart_suggestion_supported_modes";
     field public static final int FLAG_SMART_SUGGESTION_OFF = 0; // 0x0

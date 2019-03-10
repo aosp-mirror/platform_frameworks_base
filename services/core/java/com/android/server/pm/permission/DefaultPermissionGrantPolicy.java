@@ -657,13 +657,13 @@ public final class DefaultPermissionGrantPolicy {
                         PHONE_PERMISSIONS, SMS_PERMISSIONS, CAMERA_PERMISSIONS,
                         SENSORS_PERMISSIONS, STORAGE_PERMISSIONS, MEDIA_AURAL_PERMISSIONS);
                 grantSystemFixedPermissionsToSystemPackage(packageName, userId,
-                        LOCATION_PERMISSIONS, ACTIVITY_RECOGNITION_PERMISSIONS);
+                        ALWAYS_LOCATION_PERMISSIONS, ACTIVITY_RECOGNITION_PERMISSIONS);
             }
         }
         if (locationExtraPackageNames != null) {
             // Also grant location permission to location extra packages.
             for (String packageName : locationExtraPackageNames) {
-                grantPermissionsToSystemPackage(packageName, userId, LOCATION_PERMISSIONS);
+                grantPermissionsToSystemPackage(packageName, userId, ALWAYS_LOCATION_PERMISSIONS);
             }
         }
 

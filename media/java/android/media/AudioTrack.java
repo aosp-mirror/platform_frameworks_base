@@ -22,6 +22,7 @@ import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.os.Binder;
 import android.os.Build;
@@ -3580,41 +3581,103 @@ public class AudioTrack extends PlayerBase
     {
         private MetricsConstants() {}
 
-        /**
-         * Key to extract the Stream Type for this track
-         * from the {@link AudioTrack#getMetrics} return value.
-         * The value is a String.
-         */
-        public static final String STREAMTYPE = "android.media.audiotrack.streamtype";
+        // MM_PREFIX is slightly different than TAG, used to avoid cut-n-paste errors.
+        private static final String MM_PREFIX = "android.media.audiotrack.";
 
         /**
-         * Key to extract the Content Type for this track
+         * Key to extract the stream type for this track
          * from the {@link AudioTrack#getMetrics} return value.
-         * The value is a String.
+         * This value may not exist in API level {@link android.os.Build.VERSION_CODES#P}.
+         * The value is a {@code String}.
          */
-        public static final String CONTENTTYPE = "android.media.audiotrack.type";
+        public static final String STREAMTYPE = MM_PREFIX + "streamtype";
 
         /**
-         * Key to extract the Content Type for this track
+         * Key to extract the attribute content type for this track
          * from the {@link AudioTrack#getMetrics} return value.
-         * The value is a String.
+         * The value is a {@code String}.
          */
-        public static final String USAGE = "android.media.audiotrack.usage";
+        public static final String CONTENTTYPE = MM_PREFIX + "type";
+
+        /**
+         * Key to extract the attribute usage for this track
+         * from the {@link AudioTrack#getMetrics} return value.
+         * The value is a {@code String}.
+         */
+        public static final String USAGE = MM_PREFIX + "usage";
 
         /**
          * Key to extract the sample rate for this track in Hz
          * from the {@link AudioTrack#getMetrics} return value.
-         * The value is an integer.
+         * The value is an {@code int}.
+         * @deprecated This does not work. Use {@link AudioTrack#getSampleRate()} instead.
          */
+        @Deprecated
         public static final String SAMPLERATE = "android.media.audiorecord.samplerate";
 
         /**
-         * Key to extract the channel mask information for this track
+         * Key to extract the native channel mask information for this track
          * from the {@link AudioTrack#getMetrics} return value.
          *
-         * The value is a Long integer.
+         * The value is a {@code long}.
+         * @deprecated This does not work. Use {@link AudioTrack#getFormat()} and read from
+         * the returned format instead.
          */
+        @Deprecated
         public static final String CHANNELMASK = "android.media.audiorecord.channelmask";
 
+        /**
+         * Use for testing only. Do not expose.
+         * The current sample rate.
+         * The value is an {@code int}.
+         * @hide
+         */
+        @TestApi
+        public static final String SAMPLE_RATE = MM_PREFIX + "sampleRate";
+
+        /**
+         * Use for testing only. Do not expose.
+         * The native channel mask.
+         * The value is a {@code long}.
+         * @hide
+         */
+        @TestApi
+        public static final String CHANNEL_MASK = MM_PREFIX + "channelMask";
+
+        /**
+         * Use for testing only. Do not expose.
+         * The output audio data encoding.
+         * The value is a {@code String}.
+         * @hide
+         */
+        @TestApi
+        public static final String ENCODING = MM_PREFIX + "encoding";
+
+        /**
+         * Use for testing only. Do not expose.
+         * The port id of this track port in audioserver.
+         * The value is an {@code int}.
+         * @hide
+         */
+        @TestApi
+        public static final String PORT_ID = MM_PREFIX + "portId";
+
+        /**
+         * Use for testing only. Do not expose.
+         * The buffer frameCount.
+         * The value is an {@code int}.
+         * @hide
+         */
+        @TestApi
+        public static final String FRAME_COUNT = MM_PREFIX + "frameCount";
+
+        /**
+         * Use for testing only. Do not expose.
+         * The actual track attributes used.
+         * The value is a {@code String}.
+         * @hide
+         */
+        @TestApi
+        public static final String ATTRIBUTES = MM_PREFIX + "attributes";
     }
 }
