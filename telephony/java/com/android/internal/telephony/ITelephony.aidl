@@ -1369,7 +1369,7 @@ interface ITelephony {
     /**
      * Returns fine-grained carrier id of the current subscription.
      *
-     * <p>The precise carrier id can be used to further differentiate a carrier by different
+     * <p>The specific carrier id can be used to further differentiate a carrier by different
      * networks, by prepaid v.s.postpaid or even by 4G v.s.3G plan. Each carrier has a unique
      * carrier id {@link #getSimCarrierId()} but can have multiple precise carrier id. e.g,
      * {@link #getSimCarrierId()} will always return Tracfone (id 2022) for a Tracfone SIM, while
@@ -1383,19 +1383,19 @@ interface ITelephony {
      * be identified.
      * @hide
      */
-    int getSubscriptionPreciseCarrierId(int subId);
+    int getSubscriptionSpecificCarrierId(int subId);
 
     /**
      * Similar like {@link #getSimCarrierIdName()}, returns user-facing name of the
-     * precise carrier id {@link #getSimPreciseCarrierId()}
+     * specific carrier id {@link #getSimSpecificCarrierId()}
      *
      * <p>The returned name is unlocalized.
      *
-     * @return user-facing name of the subscription precise carrier id. Return {@code null} if the
+     * @return user-facing name of the subscription specific carrier id. Return {@code null} if the
      * subscription is unavailable or the carrier cannot be identified.
      * @hide
      */
-    String getSubscriptionPreciseCarrierName(int subId);
+    String getSubscriptionSpecificCarrierName(int subId);
 
     /**
      * Returns carrier id based on MCCMNC only. This will return a MNO carrier id used for fallback
