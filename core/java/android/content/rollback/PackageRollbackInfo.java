@@ -89,6 +89,7 @@ public final class PackageRollbackInfo implements Parcelable {
     /**
      * Returns the name of the package to roll back from.
      */
+    @NonNull
     public String getPackageName() {
         return mVersionRolledBackFrom.getPackageName();
     }
@@ -96,6 +97,7 @@ public final class PackageRollbackInfo implements Parcelable {
     /**
      * Returns the version of the package rolled back from.
      */
+    @NonNull
     public VersionedPackage getVersionRolledBackFrom() {
         return mVersionRolledBackFrom;
     }
@@ -103,6 +105,7 @@ public final class PackageRollbackInfo implements Parcelable {
     /**
      * Returns the version of the package rolled back to.
      */
+    @NonNull
     public VersionedPackage getVersionRolledBackTo() {
         return mVersionRolledBackTo;
     }

@@ -1823,18 +1823,18 @@ package android.content.rollback {
 
   public final class PackageRollbackInfo implements android.os.Parcelable {
     method public int describeContents();
-    method public String getPackageName();
-    method public android.content.pm.VersionedPackage getVersionRolledBackFrom();
-    method public android.content.pm.VersionedPackage getVersionRolledBackTo();
+    method @NonNull public String getPackageName();
+    method @NonNull public android.content.pm.VersionedPackage getVersionRolledBackFrom();
+    method @NonNull public android.content.pm.VersionedPackage getVersionRolledBackTo();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.content.rollback.PackageRollbackInfo> CREATOR;
   }
 
   public final class RollbackInfo implements android.os.Parcelable {
     method public int describeContents();
-    method public java.util.List<android.content.pm.VersionedPackage> getCausePackages();
+    method @NonNull public java.util.List<android.content.pm.VersionedPackage> getCausePackages();
     method public int getCommittedSessionId();
-    method public java.util.List<android.content.rollback.PackageRollbackInfo> getPackages();
+    method @NonNull public java.util.List<android.content.rollback.PackageRollbackInfo> getPackages();
     method public int getRollbackId();
     method public boolean isStaged();
     method public void writeToParcel(android.os.Parcel, int);
@@ -1844,7 +1844,7 @@ package android.content.rollback {
   public final class RollbackManager {
     method @RequiresPermission(android.Manifest.permission.MANAGE_ROLLBACKS) public void commitRollback(int, @NonNull java.util.List<android.content.pm.VersionedPackage>, @NonNull android.content.IntentSender);
     method @RequiresPermission(android.Manifest.permission.MANAGE_ROLLBACKS) public void expireRollbackForPackage(@NonNull String);
-    method @RequiresPermission(android.Manifest.permission.MANAGE_ROLLBACKS) public java.util.List<android.content.rollback.RollbackInfo> getAvailableRollbacks();
+    method @RequiresPermission(android.Manifest.permission.MANAGE_ROLLBACKS) @NonNull public java.util.List<android.content.rollback.RollbackInfo> getAvailableRollbacks();
     method @RequiresPermission(android.Manifest.permission.MANAGE_ROLLBACKS) @NonNull public java.util.List<android.content.rollback.RollbackInfo> getRecentlyCommittedRollbacks();
     method @RequiresPermission(android.Manifest.permission.MANAGE_ROLLBACKS) public void reloadPersistedData();
     field public static final String EXTRA_STATUS = "android.content.rollback.extra.STATUS";
