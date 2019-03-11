@@ -16,6 +16,7 @@
 
 package android.content.rollback;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
@@ -27,6 +28,8 @@ import android.content.pm.ParceledListSlice;
 import android.content.pm.VersionedPackage;
 import android.os.RemoteException;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.List;
 
 /**
@@ -111,6 +114,20 @@ public final class RollbackManager {
      */
     public static final String EXTRA_STATUS_MESSAGE =
             "android.content.rollback.extra.STATUS_MESSAGE";
+
+    /**
+     * Status result of committing a rollback.
+     *
+     * @hide
+     */
+    @IntDef(prefix = "STATUS_", value = {
+            STATUS_SUCCESS,
+            STATUS_FAILURE,
+            STATUS_FAILURE_ROLLBACK_UNAVAILABLE,
+            STATUS_FAILURE_INSTALL,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Status {};
 
     /**
      * The rollback was successfully committed.
