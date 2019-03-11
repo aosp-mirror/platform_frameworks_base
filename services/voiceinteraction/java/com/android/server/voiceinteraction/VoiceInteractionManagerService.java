@@ -1389,6 +1389,16 @@ public class VoiceInteractionManagerService extends SystemService {
                         resetCurAssistant(userHandle);
                         initForUser(userHandle);
                         switchImplementationIfNeededLocked(true);
+
+                        Context context = getContext();
+                        context.getSystemService(RoleManager.class).clearRoleHoldersAsUser(
+                                RoleManager.ROLE_ASSISTANT, 0, UserHandle.of(userHandle),
+                                context.getMainExecutor(), successful -> {
+                                    if (!successful) {
+                                        Slog.e(TAG,
+                                                "Failed to clear default assistant for force stop");
+                                    }
+                                });
                     }
                 } else if (hitRec && doit) {
                     // We are just force-stopping the current recognizer, which is not
