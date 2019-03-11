@@ -8205,6 +8205,7 @@ package android.telephony.data {
   }
 
   public final class DataProfile implements android.os.Parcelable {
+    method public int describeContents();
     method @NonNull public String getApn();
     method public int getAuthType();
     method public int getBearerBitmap();
@@ -8222,6 +8223,8 @@ package android.telephony.data {
     method public boolean isEnabled();
     method public boolean isPersistent();
     method public boolean isPreferred();
+    method public void writeToParcel(android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.data.DataProfile> CREATOR;
     field public static final int TYPE_3GPP = 1; // 0x1
     field public static final int TYPE_3GPP2 = 2; // 0x2
     field public static final int TYPE_COMMON = 0; // 0x0
