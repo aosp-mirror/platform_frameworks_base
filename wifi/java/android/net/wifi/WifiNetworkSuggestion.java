@@ -18,6 +18,7 @@ package android.net.wifi;
 
 import static com.android.internal.util.Preconditions.checkNotNull;
 
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityThread;
@@ -159,10 +160,12 @@ public final class WifiNetworkSuggestion implements Parcelable {
         /**
          * Specifies whether this represents an Enhanced Open (OWE) network.
          *
+         * @param isEnhancedOpen {@code true} to indicate that the network used enhanced open,
+         *                       {@code false} otherwise.
          * @return Instance of {@link Builder} to enable chaining of the builder method.
          */
-        public @NonNull Builder setIsEnhancedOpen() {
-            mIsEnhancedOpen = true;
+        public @NonNull Builder setIsEnhancedOpen(boolean isEnhancedOpen) {
+            mIsEnhancedOpen = isEnhancedOpen;
             return this;
         }
 
@@ -235,10 +238,12 @@ public final class WifiNetworkSuggestion implements Parcelable {
          * <p>
          * <li>If not set, defaults to false (i.e not a hidden network).</li>
          *
+         * @param isHiddenSsid {@code true} to indicate that the network is hidden, {@code false}
+         *                     otherwise.
          * @return Instance of {@link Builder} to enable chaining of the builder method.
          */
-        public @NonNull Builder setIsHiddenSsid() {
-            mIsHiddenSSID = true;
+        public @NonNull Builder setIsHiddenSsid(boolean isHiddenSsid) {
+            mIsHiddenSSID = isHiddenSsid;
             return this;
         }
 
@@ -253,10 +258,12 @@ public final class WifiNetworkSuggestion implements Parcelable {
          * <p>
          * <li>If not set, defaults to false (i.e no app interaction required).</li>
          *
+         * @param isAppInteractionRequired {@code true} to indicate that app interaction is
+         *                                 required, {@code false} otherwise.
          * @return Instance of {@link Builder} to enable chaining of the builder method.
          */
-        public @NonNull Builder setIsAppInteractionRequired() {
-            mIsAppInteractionRequired = true;
+        public @NonNull Builder setIsAppInteractionRequired(boolean isAppInteractionRequired) {
+            mIsAppInteractionRequired = isAppInteractionRequired;
             return this;
         }
 
@@ -265,10 +272,12 @@ public final class WifiNetworkSuggestion implements Parcelable {
          * <p>
          * <li>If not set, defaults to false (i.e no user interaction required).</li>
          *
+         * @param isUserInteractionRequired {@code true} to indicate that user interaction is
+         *                                  required, {@code false} otherwise.
          * @return Instance of {@link Builder} to enable chaining of the builder method.
          */
-        public @NonNull Builder setIsUserInteractionRequired() {
-            mIsUserInteractionRequired = true;
+        public @NonNull Builder setIsUserInteractionRequired(boolean isUserInteractionRequired) {
+            mIsUserInteractionRequired = isUserInteractionRequired;
             return this;
         }
 
@@ -283,7 +292,7 @@ public final class WifiNetworkSuggestion implements Parcelable {
          * @return Instance of {@link Builder} to enable chaining of the builder method.
          * @throws IllegalArgumentException if the priority value is negative.
          */
-        public @NonNull Builder setPriority(int priority) {
+        public @NonNull Builder setPriority(@IntRange(from = 0) int priority) {
             if (priority < 0) {
                 throw new IllegalArgumentException("Invalid priority value " + priority);
             }
@@ -296,10 +305,12 @@ public final class WifiNetworkSuggestion implements Parcelable {
          * <p>
          * <li>If not set, defaults to false (i.e not metered).</li>
          *
+         * @param isMetered {@code true} to indicate that the network is metered, {@code false}
+         *                  otherwise.
          * @return Instance of {@link Builder} to enable chaining of the builder method.
          */
-        public @NonNull Builder setIsMetered() {
-            mIsMetered = true;
+        public @NonNull Builder setIsMetered(boolean isMetered) {
+            mIsMetered = isMetered;
             return this;
         }
 

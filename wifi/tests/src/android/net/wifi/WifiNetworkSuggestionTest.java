@@ -49,7 +49,7 @@ public class WifiNetworkSuggestionTest {
     public void testWifiNetworkSuggestionBuilderForOpenNetworkWithReqAppInteraction() {
         WifiNetworkSuggestion suggestion = new WifiNetworkSuggestion.Builder()
                 .setSsid(TEST_SSID)
-                .setIsAppInteractionRequired()
+                .setIsAppInteractionRequired(true)
                 .build();
 
         assertEquals(Process.myUid(), suggestion.suggestorUid);
@@ -74,7 +74,7 @@ public class WifiNetworkSuggestionTest {
         WifiNetworkSuggestion suggestion = new WifiNetworkSuggestion.Builder()
                 .setSsid(TEST_SSID)
                 .setWpa2Passphrase(TEST_PRESHARED_KEY)
-                .setIsAppInteractionRequired()
+                .setIsAppInteractionRequired(true)
                 .setPriority(0)
                 .build();
 
@@ -101,8 +101,8 @@ public class WifiNetworkSuggestionTest {
         WifiNetworkSuggestion suggestion = new WifiNetworkSuggestion.Builder()
                 .setSsid(TEST_SSID)
                 .setWpa2Passphrase(TEST_PRESHARED_KEY)
-                .setIsUserInteractionRequired()
-                .setIsMetered()
+                .setIsUserInteractionRequired(true)
+                .setIsMetered(true)
                 .build();
 
         assertEquals("\"" + TEST_SSID + "\"", suggestion.wifiConfiguration.SSID);
@@ -126,7 +126,7 @@ public class WifiNetworkSuggestionTest {
         WifiNetworkSuggestion suggestion = new WifiNetworkSuggestion.Builder()
                 .setSsid(TEST_SSID)
                 .setBssid(MacAddress.fromString(TEST_BSSID))
-                .setIsEnhancedOpen()
+                .setIsEnhancedOpen(true)
                 .build();
 
         assertEquals("\"" + TEST_SSID + "\"", suggestion.wifiConfiguration.SSID);
@@ -265,7 +265,7 @@ public class WifiNetworkSuggestionTest {
     public void testWifiNetworkSuggestionBuilderWithInvalidPriority() {
         new WifiNetworkSuggestion.Builder()
                 .setSsid(TEST_SSID)
-                .setPriority(-1)
+                .setPriority(-2)
                 .build();
     }
 
@@ -301,14 +301,14 @@ public class WifiNetworkSuggestionTest {
     /**
      * Ensure {@link WifiNetworkSuggestion.Builder#build()} throws an exception
      * when both {@link WifiNetworkSuggestion.Builder#setWpa3Passphrase(String)} and
-     * {@link WifiNetworkSuggestion.Builder#setIsEnhancedOpen()} are invoked.
+     * {@link WifiNetworkSuggestion.Builder#setIsEnhancedOpen(boolean)} are invoked.
      */
     @Test(expected = IllegalStateException.class)
     public void testWifiNetworkSuggestionBuilderWithBothWpa3PasphraseAndEnhancedOpen() {
         new WifiNetworkSuggestion.Builder()
                 .setSsid(TEST_SSID)
                 .setWpa3Passphrase(TEST_PRESHARED_KEY)
-                .setIsEnhancedOpen()
+                .setIsEnhancedOpen(true)
                 .build();
     }
 
