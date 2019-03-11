@@ -318,19 +318,15 @@ public final class ConversationActions implements Parcelable {
         private final List<String> mHints;
         @Nullable
         private String mCallingPackageName;
-        @Nullable
-        private final String mConversationId;
 
         private Request(
                 @NonNull List<Message> conversation,
                 @NonNull TextClassifier.EntityConfig typeConfig,
                 int maxSuggestions,
-                String conversationId,
                 @Nullable @Hint List<String> hints) {
             mConversation = Preconditions.checkNotNull(conversation);
             mTypeConfig = Preconditions.checkNotNull(typeConfig);
             mMaxSuggestions = maxSuggestions;
-            mConversationId = conversationId;
             mHints = hints;
         }
 
@@ -339,7 +335,6 @@ public final class ConversationActions implements Parcelable {
             in.readParcelableList(conversation, null);
             TextClassifier.EntityConfig typeConfig = in.readParcelable(null);
             int maxSuggestions = in.readInt();
-            String conversationId = in.readString();
             List<String> hints = new ArrayList<>();
             in.readStringList(hints);
             String callingPackageName = in.readString();
@@ -348,7 +343,6 @@ public final class ConversationActions implements Parcelable {
                     conversation,
                     typeConfig,
                     maxSuggestions,
-                    conversationId,
                     hints);
             request.setCallingPackageName(callingPackageName);
             return request;
@@ -359,7 +353,6 @@ public final class ConversationActions implements Parcelable {
             parcel.writeParcelableList(mConversation, flags);
             parcel.writeParcelable(mTypeConfig, flags);
             parcel.writeInt(mMaxSuggestions);
-            parcel.writeString(mConversationId);
             parcel.writeStringList(mHints);
             parcel.writeString(mCallingPackageName);
         }
@@ -403,16 +396,6 @@ public final class ConversationActions implements Parcelable {
             return mMaxSuggestions;
         }
 
-        /**
-         * Return an unique identifier of the conversation that is generating actions for. This
-         * identifier is unique within the calling package only, so use it with
-         * {@link #getCallingPackageName()}.
-         */
-        @Nullable
-        public String getConversationId() {
-            return mConversationId;
-        }
-
         /** Returns an immutable list of hints */
         @Nullable
         @Hint
@@ -447,8 +430,6 @@ public final class ConversationActions implements Parcelable {
             @Nullable
             private TextClassifier.EntityConfig mTypeConfig;
             private int mMaxSuggestions = -1;
-            @Nullable
-            private String mConversationId;
             @Nullable
             @Hint
             private List<String> mHints;
@@ -490,15 +471,6 @@ public final class ConversationActions implements Parcelable {
                 return this;
             }
 
-            /**
-             * Sets an unique identifier of the conversation that is generating actions for.
-             */
-            @NonNull
-            public Builder setConversationId(@Nullable String conversationId) {
-                mConversationId = conversationId;
-                return this;
-            }
-
             /** Builds the {@link Request} object. */
             @NonNull
             public Request build() {
@@ -508,7 +480,6 @@ public final class ConversationActions implements Parcelable {
                                 ? new TextClassifier.EntityConfig.Builder().build()
                                 : mTypeConfig,
                         mMaxSuggestions,
-                        mConversationId,
                         mHints == null
                                 ? Collections.emptyList()
                                 : Collections.unmodifiableList(mHints));
