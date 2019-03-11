@@ -1323,7 +1323,7 @@ public class ExifInterface {
     private int mMimeType;
     @UnsupportedAppUsage
     private final HashMap[] mAttributes = new HashMap[EXIF_TAGS.length];
-    private Set<Integer> mAttributesOffsets = new HashSet<>(EXIF_TAGS.length);
+    private Set<Integer> mHandledIfdOffsets = new HashSet<>(EXIF_TAGS.length);
     private ByteOrder mExifByteOrder = ByteOrder.BIG_ENDIAN;
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private boolean mHasThumbnail;
@@ -3085,6 +3085,9 @@ public class ExifInterface {
     // Reads image file directory, which is a tag group in EXIF.
     private void readImageFileDirectory(ByteOrderedDataInputStream dataInputStream,
             @IfdType int ifdType) throws IOException {
+        // Save offset of current IFD to prevent reading an IFD that is already read.
+        mHandledIfdOffsets.add(dataInputStream.mPosition);
+
         if (dataInputStream.mPosition + 2 > dataInputStream.mLength) {
             // Return if there is no data from the offset.
             return;
@@ -3223,9 +3226,7 @@ public class ExifInterface {
                 // 1. Exists within the boundaries of the input stream
                 // 2. Does not point to a previously read IFD.
                 if (offset > 0L && offset < dataInputStream.mLength) {
-                    if (!mAttributesOffsets.contains((int) offset)) {
-                        // Save offset of current IFD to prevent reading an IFD that is already read
-                        mAttributesOffsets.add(dataInputStream.mPosition);
+                    if (!mHandledIfdOffsets.contains((int) offset)) {
                         dataInputStream.seek(offset);
                         readImageFileDirectory(dataInputStream, nextIfdType);
                     } else {
@@ -3279,9 +3280,7 @@ public class ExifInterface {
             // 1. Exists within the boundaries of the input stream
             // 2. Does not point to a previously read IFD.
             if (nextIfdOffset > 0L && nextIfdOffset < dataInputStream.mLength) {
-                if (!mAttributesOffsets.contains(nextIfdOffset)) {
-                    // Save offset of current IFD to prevent reading an IFD that is already read.
-                    mAttributesOffsets.add(dataInputStream.mPosition);
+                if (!mHandledIfdOffsets.contains(nextIfdOffset)) {
                     dataInputStream.seek(nextIfdOffset);
                     // Do not overwrite thumbnail IFD data if it alreay exists.
                     if (mAttributes[IFD_TYPE_THUMBNAIL].isEmpty()) {
