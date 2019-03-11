@@ -678,7 +678,7 @@ int Compile(IAaptContext* context, io::IFileCollection* inputs, IArchiveWriter* 
 
     } else if (const ResourceType* type = ParseResourceType(path_data.resource_dir)) {
       if (*type != ResourceType::kRaw) {
-        if (path_data.extension == "xml") {
+        if (*type == ResourceType::kXml || path_data.extension == "xml") {
           compile_func = &CompileXml;
         } else if ((!options.no_png_crunch && path_data.extension == "png")
                    || path_data.extension == "9.png") {
