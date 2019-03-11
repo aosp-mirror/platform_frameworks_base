@@ -335,6 +335,11 @@ public class DisplayPolicy {
     private int mForcingShowNavBarLayer;
     private boolean mForceShowSystemBars;
 
+    /**
+     * Force the display of system bars regardless of other settings.
+     */
+    private boolean mForceShowSystemBarsFromExternal;
+
     private boolean mShowingDream;
     private boolean mLastShowingDream;
     private boolean mDreamingLockscreen;
@@ -410,6 +415,7 @@ public class DisplayPolicy {
         mCarDockEnablesAccelerometer = r.getBoolean(R.bool.config_carDockEnablesAccelerometer);
         mDeskDockEnablesAccelerometer = r.getBoolean(R.bool.config_deskDockEnablesAccelerometer);
         mTranslucentDecorEnabled = r.getBoolean(R.bool.config_enableTranslucentDecor);
+        mForceShowSystemBarsFromExternal = r.getBoolean(R.bool.config_forceShowSystemBars);
         updateConfigurationDependentBehaviors();
 
         mAccessibilityManager = (AccessibilityManager) mContext.getSystemService(
@@ -612,6 +618,13 @@ public class DisplayPolicy {
 
     public int getDockMode() {
         return mDockMode;
+    }
+
+    /**
+     * @see WindowManagerService.setForceShowSystemBars
+     */
+    void setForceShowSystemBars(boolean forceShowSystemBars) {
+        mForceShowSystemBarsFromExternal = forceShowSystemBars;
     }
 
     public boolean hasNavigationBar() {
@@ -1120,9 +1133,9 @@ public class DisplayPolicy {
     }
 
     /**
-     * @return true if the navigation bar is forced to stay visible
+     * @return true if the system bars are forced to stay visible
      */
-    public boolean isNavBarForcedShownLw(WindowState windowState) {
+    public boolean areSystemBarsForcedShownLw(WindowState windowState) {
         return mForceShowSystemBars;
     }
 
@@ -1142,8 +1155,8 @@ public class DisplayPolicy {
      *                        current visibility. Expressed as positive insets.
      * @param outOutsets The areas that are not real display, but we would like to treat as such.
      * @param outDisplayCutout The area that has been cut away from the display.
-     * @return Whether to always consume the navigation bar.
-     *         See {@link #isNavBarForcedShownLw(WindowState)}.
+     * @return Whether to always consume the system bars.
+     *         See {@link #areSystemBarsForcedShownLw(WindowState)}.
      */
     public boolean getLayoutHintLw(LayoutParams attrs, Rect taskBounds,
             DisplayFrames displayFrames, boolean floatingStack, Rect outFrame,
@@ -3050,7 +3063,8 @@ public class DisplayPolicy {
         // We need to force system bars when the docked stack is visible, when the freeform stack
         // is visible but also when we are resizing for the transitions when docked stack
         // visibility changes.
-        mForceShowSystemBars = dockedStackVisible || freeformStackVisible || resizing;
+        mForceShowSystemBars = dockedStackVisible || freeformStackVisible || resizing
+                || mForceShowSystemBarsFromExternal;
         final boolean forceOpaqueStatusBar = mForceShowSystemBars && !mForceStatusBarFromKeyguard;
 
         // apply translucent bar vis flags
@@ -3422,6 +3436,8 @@ public class DisplayPolicy {
         pw.print(prefix); pw.print("mTopIsFullscreen="); pw.print(mTopIsFullscreen);
         pw.print(prefix); pw.print("mForceStatusBar="); pw.print(mForceStatusBar);
         pw.print(" mForceStatusBarFromKeyguard="); pw.println(mForceStatusBarFromKeyguard);
+        pw.print(" mForceShowSystemBarsFromExternal=");
+        pw.println(mForceShowSystemBarsFromExternal);
         pw.print(prefix); pw.print("mAllowLockscreenWhenOn="); pw.println(mAllowLockscreenWhenOn);
         mStatusBarController.dump(pw, prefix);
         mNavigationBarController.dump(pw, prefix);

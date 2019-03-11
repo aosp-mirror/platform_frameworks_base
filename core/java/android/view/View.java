@@ -28249,11 +28249,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         final Rect mOutsets = new Rect();
 
         /**
-         * In multi-window we force show the navigation bar. Because we don't want that the surface
-         * size changes in this mode, we instead have a flag whether the navigation bar size should
-         * always be consumed, so the app is treated like there is no virtual navigation bar at all.
+         * In multi-window we force show the system bars. Because we don't want that the surface
+         * size changes in this mode, we instead have a flag whether the system bars sizes should
+         * always be consumed, so the app is treated like there are no virtual system bars at all.
          */
-        boolean mAlwaysConsumeNavBar;
+        boolean mAlwaysConsumeSystemBars;
 
         /**
          * The internal insets given by this window.  This value is
