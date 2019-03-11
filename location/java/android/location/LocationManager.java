@@ -1360,10 +1360,10 @@ public class LocationManager {
             @NonNull String provider, boolean enabled, @NonNull UserHandle userHandle) {
         checkProvider(provider);
 
-        return Settings.Secure.setLocationProviderEnabledForUser(
+        return Settings.Secure.putStringForUser(
                 mContext.getContentResolver(),
-                provider,
-                enabled,
+                Settings.Secure.LOCATION_PROVIDERS_ALLOWED,
+                (enabled ? "+" : "-") + provider,
                 userHandle.getIdentifier());
     }
 

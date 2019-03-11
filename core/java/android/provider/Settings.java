@@ -9038,27 +9038,12 @@ public final class Settings {
          * @return true if the provider is enabled
          *
          * @deprecated use {@link LocationManager#isProviderEnabled(String)}
+         * @removed no longer supported
          */
         @Deprecated
-        public static final boolean isLocationProviderEnabled(ContentResolver cr, String provider) {
-            return isLocationProviderEnabledForUser(cr, provider, cr.getUserId());
-        }
-
-        /**
-         * Helper method for determining if a location provider is enabled.
-         * @param cr the content resolver to use
-         * @param provider the location provider to query
-         * @param userId the userId to query
-         * @return true if the provider is enabled
-         *
-         * @deprecated use {@link LocationManager#isProviderEnabled(String)}
-         * @hide
-         */
-        @Deprecated
-        public static final boolean isLocationProviderEnabledForUser(
-                ContentResolver cr, String provider, int userId) {
+        public static boolean isLocationProviderEnabled(ContentResolver cr, String provider) {
             String allowedProviders = Settings.Secure.getStringForUser(cr,
-                    LOCATION_PROVIDERS_ALLOWED, userId);
+                    LOCATION_PROVIDERS_ALLOWED, cr.getUserId());
             return TextUtils.delimitedStringContains(allowedProviders, ',', provider);
         }
 
@@ -9067,42 +9052,12 @@ public final class Settings {
          * @param cr the content resolver to use
          * @param provider the location provider to enable or disable
          * @param enabled true if the provider should be enabled
-         * @deprecated This API is deprecated. It requires WRITE_SECURE_SETTINGS permission to
-         *             change location settings.
+         * @deprecated This API is deprecated
+         * @removed no longer supported
          */
         @Deprecated
-        public static final void setLocationProviderEnabled(ContentResolver cr,
+        public static void setLocationProviderEnabled(ContentResolver cr,
                 String provider, boolean enabled) {
-            setLocationProviderEnabledForUser(cr, provider, enabled, cr.getUserId());
-        }
-
-        /**
-         * Thread-safe method for enabling or disabling a single location provider.
-         *
-         * @param cr the content resolver to use
-         * @param provider the location provider to enable or disable
-         * @param enabled true if the provider should be enabled
-         * @param userId the userId for which to enable/disable providers
-         * @return true if the value was set, false on database errors
-         *
-         * @deprecated use {@link LocationManager#setProviderEnabledForUser(String, boolean, int)}
-         * @hide
-         */
-        @Deprecated
-        public static final boolean setLocationProviderEnabledForUser(ContentResolver cr,
-                String provider, boolean enabled, int userId) {
-            synchronized (mLocationSettingsLock) {
-                // to ensure thread safety, we write the provider name with a '+' or '-'
-                // and let the SettingsProvider handle it rather than reading and modifying
-                // the list of enabled providers.
-                if (enabled) {
-                    provider = "+" + provider;
-                } else {
-                    provider = "-" + provider;
-                }
-                return putStringForUser(cr, Settings.Secure.LOCATION_PROVIDERS_ALLOWED, provider,
-                        userId);
-            }
         }
     }
 
