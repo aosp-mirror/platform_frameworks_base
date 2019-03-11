@@ -18,7 +18,6 @@ android_test {
         "services.usage",
         "guava",
         "androidx.test.rules", "hamcrest-library",
-        "compatibility-device-util-axt",
         "mockito-target-inline-minus-junit4",
         "platform-test-annotations",
         "hamcrest-library",
