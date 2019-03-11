@@ -231,7 +231,6 @@ package android {
   }
 
   public static final class R.dimen {
-    field public static final int config_mediaMetadataBitmapMaxSize = 17104904; // 0x1050008
     field public static final int config_restrictedIconSize = 17104903; // 0x1050007
   }
 
@@ -3483,7 +3482,6 @@ package android.media {
     field public static final int AUDIOFOCUS_FLAG_DELAY_OK = 1; // 0x1
     field public static final int AUDIOFOCUS_FLAG_LOCK = 4; // 0x4
     field public static final int AUDIOFOCUS_FLAG_PAUSES_ON_DUCKABLE_LOSS = 2; // 0x2
-    field public static final int FLAG_FROM_KEY = 65536; // 0x10000
     field public static final int SUCCESS = 0; // 0x0
   }
 
