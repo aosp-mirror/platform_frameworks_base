@@ -2322,9 +2322,6 @@
     <!-- Content description for ongoing privacy chip. Use with multiple apps [CHAR LIMIT=NONE]-->
     <string name="ongoing_privacy_chip_content_multiple_apps">Applications are using your <xliff:g id="types_list" example="camera, location">%s</xliff:g>.</string>
 
-    <!-- Ongoing Privacy "Chip" in use text [CHAR LIMIT=10]-->
-    <string name="ongoing_privacy_chip_in_use">In use:</string>
-
     <!-- Content description for ongoing privacy chip. Use with multiple apps using same app op[CHAR LIMIT=NONE]-->
     <plurals name="ongoing_privacy_chip_content_multiple_apps_single_op">
         <item quantity="one"><xliff:g id="num_apps" example="1">%1$d</xliff:g> application is using your <xliff:g id="type" example="camera">%2$s</xliff:g>.</item>
@@ -2358,12 +2355,6 @@
 
     <!-- Text for microphone app op [CHAR LIMIT=20]-->
     <string name="privacy_type_microphone">microphone</string>
-
-    <!-- Text for indicating extra apps using app ops [CHAR LIMIT=NONE] -->
-    <plurals name="ongoing_privacy_dialog_overflow_text">
-        <item quantity="one"><xliff:g id="num_apps" example="1">%d</xliff:g> other app</item>
-        <item quantity="other"><xliff:g id="num_apps" example="3">%d</xliff:g> other apps</item>
-    </plurals>
 
     <!-- Text for the quick setting tile for sensor privacy [CHAR LIMIT=30] -->
     <string name="sensor_privacy_mode">Sensors off</string>
