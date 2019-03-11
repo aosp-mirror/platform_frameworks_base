@@ -22,6 +22,7 @@ import static com.android.server.backup.internal.BackupHandler.MSG_RESTORE_SESSI
 import static com.android.server.backup.internal.BackupHandler.MSG_RUN_GET_RESTORE_SETS;
 import static com.android.server.backup.internal.BackupHandler.MSG_RUN_RESTORE;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.backup.IBackupManagerMonitor;
 import android.app.backup.IRestoreObserver;
@@ -192,18 +193,22 @@ public class ActiveRestoreSession extends IRestoreSession.Stub {
     }
 
     // Restores of more than a single package are treated as 'system' restores
-    public synchronized int restoreSome(long token, IRestoreObserver observer,
-            IBackupManagerMonitor monitor, String[] packages) {
+    public synchronized int restorePackages(long token, @Nullable IRestoreObserver observer,
+            @NonNull String[] packages, @Nullable IBackupManagerMonitor monitor) {
         mBackupManagerService.getContext().enforceCallingOrSelfPermission(
                 android.Manifest.permission.BACKUP,
                 "performRestore");
 
         if (DEBUG) {
             StringBuilder b = new StringBuilder(128);
-            b.append("restoreSome token=");
+            b.append("restorePackages token=");
             b.append(Long.toHexString(token));
             b.append(" observer=");
-            b.append(observer.toString());
+            if (observer == null) {
+                b.append("null");
+            } else {
+                b.append(observer.toString());
+            }
             b.append(" monitor=");
             if (monitor == null) {
                 b.append("null");
@@ -260,7 +265,7 @@ public class ActiveRestoreSession extends IRestoreSession.Stub {
                     try {
                         return sendRestoreToHandlerLocked(
                                 (transportClient, listener) ->
-                                        RestoreParams.createForRestoreSome(
+                                        RestoreParams.createForRestorePackages(
                                                 transportClient,
                                                 observer,
                                                 monitor,
@@ -268,7 +273,7 @@ public class ActiveRestoreSession extends IRestoreSession.Stub {
                                                 packages,
                                                 /* isSystemRestore */ packages.length > 1,
                                                 listener),
-                                "RestoreSession.restoreSome(" + packages.length + " packages)");
+                                "RestoreSession.restorePackages(" + packages.length + " packages)");
                     } finally {
                         Binder.restoreCallingIdentity(oldId);
                     }

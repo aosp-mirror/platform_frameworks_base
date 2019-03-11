@@ -163,8 +163,8 @@ public class RestoreSession {
                 ? null
                 : new BackupManagerMonitorWrapper(monitor);
         try {
-            err = mBinder.restoreSome(token, mObserver, monitorWrapper,
-                    packages.toArray(new String[] {}));
+            err = mBinder.restorePackages(token, mObserver, packages.toArray(new String[] {}),
+                    monitorWrapper);
         } catch (RemoteException e) {
             Log.d(TAG, "Can't contact server to restore packages");
         }
