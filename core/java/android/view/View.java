@@ -24116,7 +24116,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @param matrix input matrix to modify
      */
-    public void transformMatrixToGlobal(Matrix matrix) {
+    public void transformMatrixToGlobal(@NonNull Matrix matrix) {
         final ViewParent parent = mParent;
         if (parent instanceof View) {
             final View vp = (View) parent;
@@ -24141,7 +24141,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @param matrix input matrix to modify
      */
-    public void transformMatrixToLocal(Matrix matrix) {
+    public void transformMatrixToLocal(@NonNull Matrix matrix) {
         final ViewParent parent = mParent;
         if (parent instanceof View) {
             final View vp = (View) parent;
