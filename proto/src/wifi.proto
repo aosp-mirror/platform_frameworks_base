@@ -1798,6 +1798,9 @@ message WifiIsUnusableEvent {
   // Prediction horizon (in second) of Wifi usability score provided by external
   // system app
   optional int32 last_prediction_horizon_sec = 12 [default = -1];
+
+  // Whether screen status is on when WifiIsUnusableEvent happens.
+  optional bool screen_on = 13 [default = false];
 }
 
 message PasspointProfileTypeCount {
