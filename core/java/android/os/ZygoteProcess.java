@@ -678,12 +678,15 @@ public class ZygoteProcess {
         return origVal != mUsapPoolEnabled;
     }
 
+    private boolean mIsFirstPropCheck = true;
     private long mLastPropCheckTimestamp = 0;
 
     private boolean fetchUsapPoolEnabledPropWithMinInterval() {
         final long currentTimestamp = SystemClock.elapsedRealtime();
 
-        if (currentTimestamp - mLastPropCheckTimestamp >= Zygote.PROPERTY_CHECK_INTERVAL) {
+        if (mIsFirstPropCheck
+                || (currentTimestamp - mLastPropCheckTimestamp >= Zygote.PROPERTY_CHECK_INTERVAL)) {
+            mIsFirstPropCheck = false;
             mLastPropCheckTimestamp = currentTimestamp;
             return fetchUsapPoolEnabledProp();
         }

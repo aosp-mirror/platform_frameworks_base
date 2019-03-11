@@ -277,17 +277,31 @@ class ZygoteServer {
                                 Integer.parseInt(usapPoolRefillThresholdPropString),
                                 mUsapPoolSizeMax);
             }
+
+            // Sanity check
+
+            if (mUsapPoolSizeMin >= mUsapPoolSizeMax) {
+                Log.w(TAG, "The max size of the USAP pool must be greater than the minimum size."
+                        + "  Restoring default values.");
+
+                mUsapPoolSizeMax = Integer.parseInt(USAP_POOL_SIZE_MAX_DEFAULT);
+                mUsapPoolSizeMin = Integer.parseInt(USAP_POOL_SIZE_MIN_DEFAULT);
+                mUsapPoolRefillThreshold = mUsapPoolSizeMax / 2;
+            }
         }
     }
 
+    private boolean mIsFirstPropertyCheck = true;
     private long mLastPropCheckTimestamp = 0;
 
     private void fetchUsapPoolPolicyPropsWithMinInterval() {
         final long currentTimestamp = SystemClock.elapsedRealtime();
 
-        if (currentTimestamp - mLastPropCheckTimestamp >= Zygote.PROPERTY_CHECK_INTERVAL) {
-            fetchUsapPoolPolicyProps();
+        if (mIsFirstPropertyCheck
+                || (currentTimestamp - mLastPropCheckTimestamp >= Zygote.PROPERTY_CHECK_INTERVAL)) {
+            mIsFirstPropertyCheck = false;
             mLastPropCheckTimestamp = currentTimestamp;
+            fetchUsapPoolPolicyProps();
         }
     }
 
@@ -303,6 +317,9 @@ class ZygoteServer {
 
     Runnable fillUsapPool(int[] sessionSocketRawFDs) {
         Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "Zygote:FillUsapPool");
+
+        // Ensure that the pool properties have been fetched.
+        fetchUsapPoolPolicyPropsWithMinInterval();
 
         int usapPoolCount = Zygote.getUsapPoolCount();
         int numUsapsToSpawn = mUsapPoolSizeMax - usapPoolCount;
