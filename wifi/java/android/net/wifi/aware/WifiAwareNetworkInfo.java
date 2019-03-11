@@ -75,7 +75,7 @@ public final class WifiAwareNetworkInfo implements TransportInfo, Parcelable {
     /**
      * Get the port number to be used to create a network connection to the Wi-Fi Aware peer.
      * The port information is provided by the app running on the peer which requested the
-     * connection, using the {@link WifiAwareManager.NetworkSpecifierBuilder#setPort(int)}.
+     * connection, using the {@link WifiAwareNetworkSpecifier.Builder#setPort(int)}.
      *
      * @return A port number on the peer. A value of 0 indicates that no port was specified by the
      *         peer.
@@ -88,7 +88,7 @@ public final class WifiAwareNetworkInfo implements TransportInfo, Parcelable {
      * Get the transport protocol to be used to communicate over a network connection to the Wi-Fi
      * Aware peer. The transport protocol is provided by the app running on the peer which requested
      * the connection, using the
-     * {@link WifiAwareManager.NetworkSpecifierBuilder#setTransportProtocol(int)}.
+     * {@link WifiAwareNetworkSpecifier.Builder#setTransportProtocol(int)}.
      * <p>
      * The transport protocol number is assigned by the Internet Assigned Numbers Authority
      * (IANA) https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml.
