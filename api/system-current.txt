@@ -3100,11 +3100,13 @@ package android.net {
     method @RequiresPermission(android.Manifest.permission.LOCAL_MAC_ADDRESS) public String getCaptivePortalServerUrl();
     method @RequiresPermission(android.Manifest.permission.TETHER_PRIVILEGED) public void getLatestTetheringEntitlementResult(int, boolean, @NonNull java.util.concurrent.Executor, @NonNull android.net.ConnectivityManager.OnTetheringEntitlementResultListener);
     method @RequiresPermission(anyOf={android.Manifest.permission.TETHER_PRIVILEGED, android.Manifest.permission.WRITE_SETTINGS}) public boolean isTetheringSupported();
+    method @RequiresPermission(android.Manifest.permission.TETHER_PRIVILEGED) public void registerTetheringEventCallback(@NonNull java.util.concurrent.Executor, @NonNull android.net.ConnectivityManager.OnTetheringEventCallback);
     method @RequiresPermission(anyOf={"android.permission.NETWORK_SETTINGS", android.Manifest.permission.NETWORK_SETUP_WIZARD, "android.permission.NETWORK_STACK"}) public void setAirplaneMode(boolean);
     method @RequiresPermission(android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK) public void startCaptivePortalApp(android.net.Network, android.os.Bundle);
     method @RequiresPermission(android.Manifest.permission.TETHER_PRIVILEGED) public void startTethering(int, boolean, android.net.ConnectivityManager.OnStartTetheringCallback);
     method @RequiresPermission(android.Manifest.permission.TETHER_PRIVILEGED) public void startTethering(int, boolean, android.net.ConnectivityManager.OnStartTetheringCallback, android.os.Handler);
     method @RequiresPermission(android.Manifest.permission.TETHER_PRIVILEGED) public void stopTethering(int);
+    method @RequiresPermission(android.Manifest.permission.TETHER_PRIVILEGED) public void unregisterTetheringEventCallback(@NonNull android.net.ConnectivityManager.OnTetheringEventCallback);
     field public static final String EXTRA_CAPTIVE_PORTAL_PROBE_SPEC = "android.net.extra.CAPTIVE_PORTAL_PROBE_SPEC";
     field public static final String EXTRA_CAPTIVE_PORTAL_USER_AGENT = "android.net.extra.CAPTIVE_PORTAL_USER_AGENT";
     field public static final int TETHERING_BLUETOOTH = 2; // 0x2
@@ -3123,6 +3125,11 @@ package android.net {
 
   public static interface ConnectivityManager.OnTetheringEntitlementResultListener {
     method public void onEntitlementResult(int);
+  }
+
+  public abstract static class ConnectivityManager.OnTetheringEventCallback {
+    ctor public ConnectivityManager.OnTetheringEventCallback();
+    method public void onUpstreamChanged(@Nullable android.net.Network);
   }
 
   public final class IpPrefix implements android.os.Parcelable {
