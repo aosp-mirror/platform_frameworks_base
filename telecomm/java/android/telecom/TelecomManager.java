@@ -478,12 +478,6 @@ public class TelecomManager {
             "android.telecom.extra.START_CALL_WITH_RTT";
 
     /**
-     * A boolean extra set to indicate whether an app is eligible to be bound to when there are
-     * ongoing calls on the device.
-     */
-    public static final String EXTRA_IS_ENABLED = "android.telecom.extra.IS_ENABLED";
-
-    /**
      * A boolean meta-data value indicating whether an {@link InCallService} implements an
      * in-call user interface. Dialer implementations (see {@link #getDefaultDialerPackage()}) which
      * would also like to replace the in-call interface should set this meta-data to {@code true} in
