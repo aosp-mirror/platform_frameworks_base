@@ -22,10 +22,12 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.database.ContentObserver;
+import android.hardware.display.AmbientDisplayConfiguration;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.dreams.DreamService;
 import android.service.dreams.IDreamManager;
@@ -54,6 +56,7 @@ public class NotificationInterruptionStateProvider {
     private final StatusBarStateController mStatusBarStateController =
             Dependency.get(StatusBarStateController.class);
     private final NotificationFilter mNotificationFilter = Dependency.get(NotificationFilter.class);
+    private final AmbientDisplayConfiguration mAmbientDisplayConfiguration;
 
     private final Context mContext;
     private final PowerManager mPowerManager;
@@ -73,17 +76,20 @@ public class NotificationInterruptionStateProvider {
         this(context,
                 (PowerManager) context.getSystemService(Context.POWER_SERVICE),
                 IDreamManager.Stub.asInterface(
-                        ServiceManager.checkService(DreamService.DREAM_SERVICE)));
+                        ServiceManager.checkService(DreamService.DREAM_SERVICE)),
+                new AmbientDisplayConfiguration(context));
     }
 
     @VisibleForTesting
     protected NotificationInterruptionStateProvider(
             Context context,
             PowerManager powerManager,
-            IDreamManager dreamManager) {
+            IDreamManager dreamManager,
+            AmbientDisplayConfiguration ambientDisplayConfiguration) {
         mContext = context;
         mPowerManager = powerManager;
         mDreamManager = dreamManager;
+        mAmbientDisplayConfiguration = ambientDisplayConfiguration;
     }
 
     /** Sets up late-binding dependencies for this component. */
@@ -231,6 +237,13 @@ public class NotificationInterruptionStateProvider {
      */
     public boolean shouldPulse(NotificationEntry entry) {
         StatusBarNotification sbn = entry.notification;
+
+        if (!mAmbientDisplayConfiguration.pulseOnNotificationEnabled(UserHandle.USER_CURRENT)) {
+            if (DEBUG) {
+                Log.d(TAG, "No pulsing: disabled by setting: " + sbn.getKey());
+            }
+            return false;
+        }
 
         if (!getShadeController().isDozing()) {
             if (DEBUG) {
