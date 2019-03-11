@@ -19,8 +19,6 @@
 #include "renderstate/RenderState.h"
 #include "utils/Color.h"
 
-#include <SkToSRGBColorFilter.h>
-
 namespace android {
 namespace uirenderer {
 
