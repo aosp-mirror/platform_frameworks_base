@@ -29,8 +29,10 @@ import static android.view.WindowManager.LayoutParams.FLAG_SCALED;
 import static android.view.WindowManager.LayoutParams.FLAG_SECURE;
 import static android.view.WindowManager.LayoutParams.FLAG_SLIPPERY;
 import static android.view.WindowManager.LayoutParams.FLAG_SPLIT_TOUCH;
+import static android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION;
+import static android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS;
 import static android.view.WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DRAW_STATUS_BAR_BACKGROUND;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 
 import static com.android.internal.policy.DecorView.NAVIGATION_BAR_COLOR_VIEW_ATTRIBUTES;
@@ -104,7 +106,7 @@ class TaskSnapshotSurface implements StartingSurface {
             | FLAG_SCALED
             | FLAG_SECURE;
 
-    private static final int PRIVATE_FLAG_INHERITS = PRIVATE_FLAG_FORCE_DRAW_STATUS_BAR_BACKGROUND;
+    private static final int PRIVATE_FLAG_INHERITS = PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS;
 
     private static final String TAG = TAG_WITH_CLASS_NAME ? "SnapshotStartingWindow" : TAG_WM;
     private static final int MSG_REPORT_DRAW = 0;
@@ -493,10 +495,12 @@ class TaskSnapshotSurface implements StartingSurface {
             mWindowPrivateFlags = windowPrivateFlags;
             mSysUiVis = sysUiVis;
             final Context context = ActivityThread.currentActivityThread().getSystemUiContext();
-            mStatusBarColor = DecorView.calculateStatusBarColor(windowFlags,
-                    context.getColor(R.color.system_bar_background_semi_transparent),
-                    statusBarColor);
-            mNavigationBarColor = navigationBarColor;
+            final int semiTransparent = context.getColor(
+                    R.color.system_bar_background_semi_transparent);
+            mStatusBarColor = DecorView.calculateBarColor(windowFlags, FLAG_TRANSLUCENT_STATUS,
+                    semiTransparent, statusBarColor);
+            mNavigationBarColor = DecorView.calculateBarColor(windowFlags,
+                    FLAG_TRANSLUCENT_NAVIGATION, semiTransparent, navigationBarColor);
             mStatusBarPaint.setColor(mStatusBarColor);
             mNavigationBarPaint.setColor(navigationBarColor);
         }
@@ -507,10 +511,10 @@ class TaskSnapshotSurface implements StartingSurface {
         }
 
         int getStatusBarColorViewHeight() {
-            final boolean forceStatusBarBackground =
-                    (mWindowPrivateFlags & PRIVATE_FLAG_FORCE_DRAW_STATUS_BAR_BACKGROUND) != 0;
+            final boolean forceBarBackground =
+                    (mWindowPrivateFlags & PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS) != 0;
             if (STATUS_BAR_COLOR_VIEW_ATTRIBUTES.isVisible(
-                    mSysUiVis, mStatusBarColor, mWindowFlags, forceStatusBarBackground)) {
+                    mSysUiVis, mStatusBarColor, mWindowFlags, forceBarBackground)) {
                 return getColorViewTopInset(mStableInsets.top, mContentInsets.top);
             } else {
                 return 0;
@@ -518,8 +522,10 @@ class TaskSnapshotSurface implements StartingSurface {
         }
 
         private boolean isNavigationBarColorViewVisible() {
+            final boolean forceBarBackground =
+                    (mWindowPrivateFlags & PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS) != 0;
             return NAVIGATION_BAR_COLOR_VIEW_ATTRIBUTES.isVisible(
-                    mSysUiVis, mNavigationBarColor, mWindowFlags, false /* force */);
+                    mSysUiVis, mNavigationBarColor, mWindowFlags, forceBarBackground);
         }
 
         void drawDecors(Canvas c, @Nullable Rect alreadyDrawnFrame) {
