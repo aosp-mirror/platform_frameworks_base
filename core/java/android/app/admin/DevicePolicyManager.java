@@ -3373,9 +3373,6 @@ public class DevicePolicyManager {
      * explicitly querying the parent profile screen lock complexity via {@link
      * #getParentProfileInstance}.
      *
-     * <p>On devices not supporting {@link PackageManager#FEATURE_SECURE_LOCK_SCREEN} feature, the
-     * password is always empty and this method returns {@link #PASSWORD_COMPLEXITY_NONE}.
-     *
      * @throws IllegalStateException if the user is not unlocked.
      * @throws SecurityException if the calling application does not have the permission
      *                           {@link permission#REQUEST_SCREEN_LOCK_COMPLEXITY}
