@@ -38,6 +38,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.content.pm.UserInfo;
 import android.database.ContentObserver;
 import android.graphics.Rect;
 import android.os.Binder;
@@ -189,6 +190,16 @@ public final class AutofillManagerService
         final IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
         context.registerReceiver(mBroadcastReceiver, filter, null, FgThread.getHandler());
+
+        if (mSupportedSmartSuggestionModes != AutofillManager.FLAG_SMART_SUGGESTION_OFF) {
+            // Must eager load the services so they bind to the augmented autofill service
+            final UserManager um = getContext().getSystemService(UserManager.class);
+            final List<UserInfo> users = um.getUsers();
+            for (int i = 0; i < users.size(); i++) {
+                final int userId = users.get(i).id;
+                getServiceForUserLocked(userId);
+            }
+        }
     }
 
     @Override // from AbstractMasterSystemService
