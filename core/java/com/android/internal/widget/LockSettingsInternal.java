@@ -29,15 +29,18 @@ public abstract class LockSettingsInternal {
      * or change user password.
      *
      * After adding, if the user currently has lockscreen password, he will need to perform a
-     * confirm credential operation in order to activate the token for future use. If the user
+     * confirm credential operation in order to activate the token for future use.
+     * Once the token is activated, the callback that is passed here is called.   If the user
      * has no secure lockscreen, then the token is activated immediately.
      *
      * @return a unique 64-bit token handle which is needed to refer to this token later.
      */
-    public abstract long addEscrowToken(byte[] token, int userId);
+    public abstract long addEscrowToken(byte[] token, int userId,
+            LockPatternUtils.EscrowTokenStateChangeCallback callback);
 
     /**
      * Remove an escrow token.
+     *
      * @return true if the given handle refers to a valid token previously returned from
      * {@link #addEscrowToken}, whether it's active or not. return false otherwise.
      */
@@ -51,6 +54,7 @@ public abstract class LockSettingsInternal {
 
     /**
      * Set the lock credential.
+     *
      * @return true if password is set.
      */
     public abstract boolean setLockCredentialWithToken(byte[] credential, int type,
