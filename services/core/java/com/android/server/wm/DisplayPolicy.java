@@ -2541,6 +2541,7 @@ public class DisplayPolicy {
      */
     public void onOverlayChangedLw() {
         onConfigurationChanged();
+        mSystemGestures.onConfigurationChanged();
     }
 
     /**
