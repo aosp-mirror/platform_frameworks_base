@@ -105,6 +105,14 @@ public final class DeviceConfig {
     public static final String NAMESPACE_CONTENT_CAPTURE = "content_capture";
 
     /**
+     * Namespace for how dex runs. The feature requires a reboot to reach a clean state.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String NAMESPACE_DEX_BOOT = "dex_boot";
+
+    /**
      * Namespace for all Game Driver features.
      *
      * @hide
@@ -287,18 +295,6 @@ public final class DeviceConfig {
          * Vibration time in milliseconds before ramping ringer starts.
          */
         String RAMPING_RINGER_VIBRATION_DURATION = "ramping_ringer_vibration_duration";
-    }
-
-    /**
-     * Namespace for how dex runs.  The feature may requires reboot to a clean state.
-     *
-     * @hide
-     */
-    @SystemApi
-    public interface DexBoot {
-        String NAMESPACE = "dex_boot";
-        String PRIV_APPS_OOB_ENABLED = "priv_apps_oob_enabled";
-        String PRIV_APPS_OOB_WHITELIST = "priv_apps_oob_whitelist";
     }
 
     /**

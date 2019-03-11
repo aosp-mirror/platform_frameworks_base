@@ -5862,6 +5862,7 @@ package android.provider {
     field public static final String NAMESPACE_AUTOFILL = "autofill";
     field public static final String NAMESPACE_CONNECTIVITY = "connectivity";
     field public static final String NAMESPACE_CONTENT_CAPTURE = "content_capture";
+    field public static final String NAMESPACE_DEX_BOOT = "dex_boot";
     field public static final String NAMESPACE_GAME_DRIVER = "game_driver";
     field public static final String NAMESPACE_INPUT_NATIVE_BOOT = "input_native_boot";
     field public static final String NAMESPACE_MEDIA_NATIVE = "media_native";
@@ -5875,12 +5876,6 @@ package android.provider {
     field public static final String COMPONENT_NAME = "component_name";
     field public static final String NAMESPACE = "attention_manager_service";
     field public static final String SERVICE_ENABLED = "service_enabled";
-  }
-
-  public static interface DeviceConfig.DexBoot {
-    field public static final String NAMESPACE = "dex_boot";
-    field public static final String PRIV_APPS_OOB_ENABLED = "priv_apps_oob_enabled";
-    field public static final String PRIV_APPS_OOB_WHITELIST = "priv_apps_oob_whitelist";
   }
 
   public static interface DeviceConfig.IntelligenceAttention {
