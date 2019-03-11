@@ -49,7 +49,7 @@ import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.LAST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DRAW_STATUS_BAR_BACKGROUND;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_STATUS_BAR_VISIBLE_TRANSPARENT;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_INHERIT_TRANSLUCENT_DECOR;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_IS_SCREEN_DECOR;
@@ -211,7 +211,6 @@ public class DisplayPolicy {
 
     private final boolean mCarDockEnablesAccelerometer;
     private final boolean mDeskDockEnablesAccelerometer;
-    private final boolean mTranslucentDecorEnabled;
     private final AccessibilityManager mAccessibilityManager;
     private final ImmersiveModeConfirmation mImmersiveModeConfirmation;
     private final ScreenshotHelper mScreenshotHelper;
@@ -434,7 +433,6 @@ public class DisplayPolicy {
         final Resources r = mContext.getResources();
         mCarDockEnablesAccelerometer = r.getBoolean(R.bool.config_carDockEnablesAccelerometer);
         mDeskDockEnablesAccelerometer = r.getBoolean(R.bool.config_deskDockEnablesAccelerometer);
-        mTranslucentDecorEnabled = r.getBoolean(R.bool.config_enableTranslucentDecor);
         mForceShowSystemBarsFromExternal = r.getBoolean(R.bool.config_forceShowSystemBars);
 
         mAccessibilityManager = (AccessibilityManager) mContext.getSystemService(
@@ -1287,14 +1285,12 @@ public class DisplayPolicy {
 
     private static int getImpliedSysUiFlagsForLayout(LayoutParams attrs) {
         int impliedFlags = 0;
-        if ((attrs.flags & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) != 0) {
-            impliedFlags |= View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
-        }
-        final boolean forceWindowDrawsStatusBarBackground =
-                (attrs.privateFlags & PRIVATE_FLAG_FORCE_DRAW_STATUS_BAR_BACKGROUND) != 0;
+        final boolean forceWindowDrawsBarBackgrounds =
+                (attrs.privateFlags & PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS) != 0
+                && attrs.height == MATCH_PARENT && attrs.width == MATCH_PARENT;
         if ((attrs.flags & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) != 0
-                || forceWindowDrawsStatusBarBackground
-                && attrs.height == MATCH_PARENT && attrs.width == MATCH_PARENT) {
+                || forceWindowDrawsBarBackgrounds) {
+            impliedFlags |= View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
             impliedFlags |= View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
         }
         return impliedFlags;
@@ -1396,9 +1392,6 @@ public class DisplayPolicy {
         navTranslucent &= !immersiveSticky;  // transient trumps translucent
         boolean isKeyguardShowing = isStatusBarKeyguard()
                 && !mService.mPolicy.isKeyguardOccluded();
-        if (!isKeyguardShowing) {
-            navTranslucent &= areTranslucentBarsAllowed();
-        }
         boolean statusBarForcesShowingNavigation = !isKeyguardShowing && mStatusBar != null
                 && (mStatusBar.getAttrs().privateFlags
                 & PRIVATE_FLAG_STATUS_FORCE_SHOW_NAVIGATION) != 0;
@@ -1560,9 +1553,6 @@ public class DisplayPolicy {
         boolean statusBarTransient = (sysui & View.STATUS_BAR_TRANSIENT) != 0;
         boolean statusBarTranslucent = (sysui
                 & (View.STATUS_BAR_TRANSLUCENT | View.STATUS_BAR_TRANSPARENT)) != 0;
-        if (!isKeyguardShowing) {
-            statusBarTranslucent &= areTranslucentBarsAllowed();
-        }
 
         // If the status bar is hidden, we don't want to cause windows behind it to scroll.
         if (mStatusBar.isVisibleLw() && !statusBarTransient) {
@@ -1915,13 +1905,14 @@ public class DisplayPolicy {
                         && (fl & FLAG_FULLSCREEN) == 0
                         && (fl & FLAG_TRANSLUCENT_STATUS) == 0
                         && (fl & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) == 0
-                        && (pfl & PRIVATE_FLAG_FORCE_DRAW_STATUS_BAR_BACKGROUND) == 0) {
+                        && (pfl & PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS) == 0) {
                     // Ensure policy decor includes status bar
                     dcf.top = displayFrames.mStable.top;
                 }
                 if ((fl & FLAG_TRANSLUCENT_NAVIGATION) == 0
                         && (sysUiFl & View.SYSTEM_UI_FLAG_HIDE_NAVIGATION) == 0
-                        && (fl & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) == 0) {
+                        && (fl & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) == 0
+                        && (pfl & PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS) == 0) {
                     // Ensure policy decor includes navigation bar
                     dcf.bottom = displayFrames.mStable.bottom;
                     dcf.right = displayFrames.mStable.right;
@@ -3148,6 +3139,8 @@ public class DisplayPolicy {
                 drawsStatusBarBackground(vis, mTopFullscreenOpaqueWindowState);
         final boolean dockedDrawsStatusBarBackground =
                 drawsStatusBarBackground(dockedVis, mTopDockedOpaqueWindowState);
+        final boolean fullscreenDrawsNavBarBackground =
+                drawsNavigationBarBackground(vis, mTopFullscreenOpaqueWindowState);
 
         // prevent status bar interaction from clearing certain flags
         int type = win.getAttrs().type;
@@ -3167,12 +3160,12 @@ public class DisplayPolicy {
         if (fullscreenDrawsStatusBarBackground && dockedDrawsStatusBarBackground) {
             vis |= View.STATUS_BAR_TRANSPARENT;
             vis &= ~View.STATUS_BAR_TRANSLUCENT;
-        } else if ((!areTranslucentBarsAllowed() && fullscreenTransWin != mStatusBar)
-                || forceOpaqueStatusBar) {
+        } else if (forceOpaqueStatusBar) {
             vis &= ~(View.STATUS_BAR_TRANSLUCENT | View.STATUS_BAR_TRANSPARENT);
         }
 
-        vis = configureNavBarOpacity(vis, dockedStackVisible, freeformStackVisible, resizing);
+        vis = configureNavBarOpacity(vis, dockedStackVisible, freeformStackVisible, resizing,
+                fullscreenDrawsNavBarBackground);
 
         // update status bar
         boolean immersiveSticky =
@@ -3256,8 +3249,9 @@ public class DisplayPolicy {
         return vis;
     }
 
-    private boolean drawsStatusBarBackground(int vis, WindowState win) {
-        if (!mStatusBarController.isTransparentAllowed(win)) {
+    private boolean drawsBarBackground(int vis, WindowState win, BarController controller,
+            int translucentFlag) {
+        if (!controller.isTransparentAllowed(win)) {
             return false;
         }
         if (win == null) {
@@ -3267,9 +3261,17 @@ public class DisplayPolicy {
         final boolean drawsSystemBars =
                 (win.getAttrs().flags & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) != 0;
         final boolean forceDrawsSystemBars =
-                (win.getAttrs().privateFlags & PRIVATE_FLAG_FORCE_DRAW_STATUS_BAR_BACKGROUND) != 0;
+                (win.getAttrs().privateFlags & PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS) != 0;
 
-        return forceDrawsSystemBars || drawsSystemBars && (vis & View.STATUS_BAR_TRANSLUCENT) == 0;
+        return forceDrawsSystemBars || drawsSystemBars && (vis & translucentFlag) == 0;
+    }
+
+    private boolean drawsStatusBarBackground(int vis, WindowState win) {
+        return drawsBarBackground(vis, win, mStatusBarController, FLAG_TRANSLUCENT_STATUS);
+    }
+
+    private boolean drawsNavigationBarBackground(int vis, WindowState win) {
+        return drawsBarBackground(vis, win, mNavigationBarController, FLAG_TRANSLUCENT_NAVIGATION);
     }
 
     /**
@@ -3277,10 +3279,13 @@ public class DisplayPolicy {
      *         on the nav bar opacity rules chosen by {@link #mNavBarOpacityMode}.
      */
     private int configureNavBarOpacity(int visibility, boolean dockedStackVisible,
-            boolean freeformStackVisible, boolean isDockedDividerResizing) {
+            boolean freeformStackVisible, boolean isDockedDividerResizing,
+            boolean fullscreenDrawsBackground) {
         if (mNavBarOpacityMode == NAV_BAR_OPAQUE_WHEN_FREEFORM_OR_DOCKED) {
             if (dockedStackVisible || freeformStackVisible || isDockedDividerResizing) {
                 visibility = setNavBarOpaqueFlag(visibility);
+            } else if (fullscreenDrawsBackground) {
+                visibility = setNavBarTransparentFlag(visibility);
             }
         } else if (mNavBarOpacityMode == NAV_BAR_TRANSLUCENT_WHEN_FREEFORM_OPAQUE_OTHERWISE) {
             if (isDockedDividerResizing) {
@@ -3292,9 +3297,6 @@ public class DisplayPolicy {
             }
         }
 
-        if (!areTranslucentBarsAllowed()) {
-            visibility &= ~View.NAVIGATION_BAR_TRANSLUCENT;
-        }
         return visibility;
     }
 
@@ -3305,6 +3307,11 @@ public class DisplayPolicy {
     private int setNavBarTranslucentFlag(int visibility) {
         visibility &= ~View.NAVIGATION_BAR_TRANSPARENT;
         return visibility | View.NAVIGATION_BAR_TRANSLUCENT;
+    }
+
+    private int setNavBarTransparentFlag(int visibility) {
+        visibility &= ~View.NAVIGATION_BAR_TRANSLUCENT;
+        return visibility | View.NAVIGATION_BAR_TRANSPARENT;
     }
 
     private void clearClearableFlagsLw() {
@@ -3336,16 +3343,6 @@ public class DisplayPolicy {
                 | View.STATUS_BAR_DISABLE_RECENT);
 
         return (systemUiFlags & disableNavigationBar) == disableNavigationBar;
-    }
-
-    /**
-     * @return whether the navigation or status bar can be made translucent
-     *
-     * This should return true unless touch exploration is not enabled or
-     * R.boolean.config_enableTranslucentDecor is false.
-     */
-    private boolean areTranslucentBarsAllowed() {
-        return mTranslucentDecorEnabled;
     }
 
     boolean shouldRotateSeamlessly(DisplayRotation displayRotation, int oldRotation,
