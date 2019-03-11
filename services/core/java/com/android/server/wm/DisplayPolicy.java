@@ -221,7 +221,6 @@ public class DisplayPolicy {
         }
     }
 
-    @VisibleForTesting
     private final SystemGesturesPointerEventListener mSystemGestures;
 
     private volatile int mLidState = LID_ABSENT;
@@ -546,10 +545,6 @@ public class DisplayPolicy {
 
     private int getDisplayId() {
         return mDisplayContent.getDisplayId();
-    }
-
-    void onDisplayRemoved() {
-        mDisplayContent.unregisterPointerEventListener(mSystemGestures);
     }
 
     void configure(int width, int height, int shortSizeDp) {
