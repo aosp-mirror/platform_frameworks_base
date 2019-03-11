@@ -937,7 +937,7 @@
     <string name="power_remaining_duration_only_enhanced">About <xliff:g id="time_remaining">%1$s</xliff:g> left based on your usage</string>
     <!-- [CHAR_LIMIT=60] Label for battery level chart when discharging with duration and using enhanced estimate -->
     <string name="power_discharging_duration_enhanced">About <xliff:g id="time_remaining">%1$s</xliff:g> left based on your usage (<xliff:g id="level">%2$s</xliff:g>)</string>
-    <!-- [CHAR_LIMIT=40] Short label for estimated remaining duration of battery charging/discharging -->
+    <!-- [CHAR_LIMIT=20] Short label for estimated remaining duration of battery charging/discharging -->
     <string name="power_remaining_duration_only_short"><xliff:g id="time_remaining">%1$s</xliff:g></string>
 
     <!-- [CHAR_LIMIT=100] Label for enhanced estimated time that phone will run out of battery -->
@@ -948,7 +948,7 @@
     <string name="power_discharge_by">Should last until about <xliff:g id="time">%1$s</xliff:g> (<xliff:g id="level">%2$s</xliff:g>)</string>
     <!-- [CHAR_LIMIT=100] Label for estimated time that phone will run out of battery -->
     <string name="power_discharge_by_only">Should last until about <xliff:g id="time">%1$s</xliff:g></string>
-    <!-- [CHAR_LIMIT=100] Label for estimated time that phone will run out of battery -->
+    <!-- [CHAR_LIMIT=20] Label for estimated time that phone will run out of battery -->
     <string name="power_discharge_by_only_short">Until <xliff:g id="time" example="12 PM">%1$s</xliff:g></string>
     <!-- [CHAR_LIMIT=100] Extend the battery life past a certain time -->
     <string name="power_suggestion_extend_battery">Extend battery life past <xliff:g id="time" example="12 PM">%1$s</xliff:g></string>
