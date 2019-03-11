@@ -44,6 +44,7 @@ import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.text.TextUtils;
 import android.util.MathUtils;
 import android.util.Slog;
 import android.util.TimeUtils;
@@ -58,6 +59,7 @@ import com.android.server.display.whitebalance.DisplayWhiteBalanceSettings;
 import com.android.server.policy.WindowManagerPolicy;
 
 import java.io.PrintWriter;
+import java.util.List;
 
 /**
  * Controls the power state of the display.
@@ -474,10 +476,14 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             int shortTermModelTimeout = resources.getInteger(
                     com.android.internal.R.integer.config_autoBrightnessShortTermModelTimeout);
 
+            String lightSensorType = resources.getString(
+                    com.android.internal.R.string.config_displayLightSensorType);
+            Sensor lightSensor = findDisplayLightSensor(lightSensorType);
+
             mBrightnessMapper = BrightnessMappingStrategy.create(resources);
             if (mBrightnessMapper != null) {
                 mAutomaticBrightnessController = new AutomaticBrightnessController(this,
-                        handler.getLooper(), sensorManager, mBrightnessMapper,
+                        handler.getLooper(), sensorManager, lightSensor, mBrightnessMapper,
                         lightSensorWarmUpTimeConfig, mScreenBrightnessRangeMinimum,
                         mScreenBrightnessRangeMaximum, dozeScaleFactor, lightSensorRate,
                         initialLightSensorRate, brighteningLightDebounce, darkeningLightDebounce,
@@ -528,6 +534,19 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         }
         mDisplayWhiteBalanceSettings = displayWhiteBalanceSettings;
         mDisplayWhiteBalanceController = displayWhiteBalanceController;
+    }
+
+    private Sensor findDisplayLightSensor(String sensorType) {
+        if (!TextUtils.isEmpty(sensorType)) {
+            List<Sensor> sensors = mSensorManager.getSensorList(Sensor.TYPE_ALL);
+            for (int i = 0; i < sensors.size(); i++) {
+                Sensor sensor = sensors.get(i);
+                if (sensorType.equals(sensor.getStringType())) {
+                    return sensor;
+                }
+            }
+        }
+        return mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
     }
 
     /**

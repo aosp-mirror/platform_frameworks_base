@@ -216,7 +216,7 @@ class AutomaticBrightnessController {
     private PackageManager mPackageManager;
 
     public AutomaticBrightnessController(Callbacks callbacks, Looper looper,
-            SensorManager sensorManager, BrightnessMappingStrategy mapper,
+            SensorManager sensorManager, Sensor lightSensor, BrightnessMappingStrategy mapper,
             int lightSensorWarmUpTime, int brightnessMin, int brightnessMax, float dozeScaleFactor,
             int lightSensorRate, int initialLightSensorRate, long brighteningLightDebounceConfig,
             long darkeningLightDebounceConfig, boolean resetAmbientLuxAfterWarmUpConfig,
@@ -249,7 +249,7 @@ class AutomaticBrightnessController {
             new AmbientLightRingBuffer(mNormalLightSensorRate, mAmbientLightHorizon);
 
         if (!DEBUG_PRETEND_LIGHT_SENSOR_ABSENT) {
-            mLightSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
+            mLightSensor = lightSensor;
         }
 
         mActivityTaskManager = ActivityTaskManager.getService();
