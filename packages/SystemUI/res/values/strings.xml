@@ -445,6 +445,9 @@
     <!-- Content description of the cell data being disabled. [CHAR LIMIT=NONE] -->
     <string name="cell_data_off_content_description">Mobile data off</string>
 
+    <!-- Content description of the cell data for not default subscription. [CHAR LIMIT=NONE] -->
+    <string name="not_default_data_content_description">Not set to use data</string>
+
     <!-- Content description of the cell data being disabled but shortened. [CHAR LIMIT=20] -->
     <string name="cell_data_off">Off</string>
 

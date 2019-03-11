@@ -34,7 +34,8 @@
         android:id="@+id/qs_carrier_divider1"
         android:layout_width="@dimen/qs_header_carrier_separator_width"
         android:layout_height="match_parent"
-        android:visibility="gone" />
+        android:visibility="gone"
+        android:importantForAccessibility="no"/>
 
     <include
         layout="@layout/qs_carrier"
@@ -47,7 +48,8 @@
         android:layout_width="@dimen/qs_header_carrier_separator_width"
         android:layout_height="match_parent"
         android:layout_weight="1"
-        android:visibility="gone" />
+        android:visibility="gone"
+        android:importantForAccessibility="no"/>
 
     <include
         layout="@layout/qs_carrier"
