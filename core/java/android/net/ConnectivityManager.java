@@ -2809,23 +2809,6 @@ public class ConnectivityManager {
     }
 
     /**
-     * @removed
-     * @deprecated This API would be removed when all of caller has been updated.
-     * */
-    @Deprecated
-    public abstract static class TetheringEntitlementValueListener  {
-        /**
-         * Called to notify entitlement result.
-         *
-         * @param resultCode a int value of entitlement result. It may be one of
-         *         {@link #TETHER_ERROR_NO_ERROR},
-         *         {@link #TETHER_ERROR_PROVISION_FAILED}, or
-         *         {@link #TETHER_ERROR_ENTITLEMENT_UNKONWN}.
-         */
-        public void onEntitlementResult(int resultCode) {}
-    }
-
-    /**
      * Get the last value of the entitlement check on this downstream. If the cached value is
      * {@link #TETHER_ERROR_NO_ERROR} or showEntitlementUi argument is false, it just return the
      * cached value. Otherwise, a UI-based entitlement check would be performed. It is not
@@ -2863,31 +2846,6 @@ public class ConnectivityManager {
         try {
             String pkgName = mContext.getOpPackageName();
             Log.i(TAG, "getLatestTetheringEntitlementResult:" + pkgName);
-            mService.getLatestTetheringEntitlementResult(type, wrappedListener,
-                    showEntitlementUi, pkgName);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * @removed
-     * @deprecated This API would be removed when all of caller has been updated.
-     * */
-    @Deprecated
-    public void getLatestTetheringEntitlementValue(int type, boolean showEntitlementUi,
-            @NonNull final TetheringEntitlementValueListener listener, @Nullable Handler handler) {
-        Preconditions.checkNotNull(listener, "TetheringEntitlementValueListener cannot be null.");
-        ResultReceiver wrappedListener = new ResultReceiver(handler) {
-            @Override
-            protected void onReceiveResult(int resultCode, Bundle resultData) {
-                listener.onEntitlementResult(resultCode);
-            }
-        };
-
-        try {
-            String pkgName = mContext.getOpPackageName();
-            Log.i(TAG, "getLatestTetheringEntitlementValue:" + pkgName);
             mService.getLatestTetheringEntitlementResult(type, wrappedListener,
                     showEntitlementUi, pkgName);
         } catch (RemoteException e) {
