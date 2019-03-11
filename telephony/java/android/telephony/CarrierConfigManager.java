@@ -72,10 +72,10 @@ public class CarrierConfigManager {
      * one is available for the slot index. An optional int extra
      * {@link TelephonyManager#EXTRA_CARRIER_ID} is included to indicate the carrier id for the
      * changed carrier configuration. An optional int extra
-     * {@link TelephonyManager#EXTRA_PRECISE_CARRIER_ID} is included to indicate the precise
+     * {@link TelephonyManager#EXTRA_SPECIFIC_CARRIER_ID} is included to indicate the precise
      * carrier id for the changed carrier configuration.
      * @see TelephonyManager#getSimCarrierId()
-     * @see TelephonyManager#getSimPreciseCarrierId()
+     * @see TelephonyManager#getSimSpecificCarrierId()
      */
     public static final String
             ACTION_CARRIER_CONFIG_CHANGED = "android.telephony.action.CARRIER_CONFIG_CHANGED";
