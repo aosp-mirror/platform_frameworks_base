@@ -1950,7 +1950,7 @@
     <!-- The name of the package that will hold the browser role by default. -->
     <string name="config_defaultBrowser" translatable="false">@string/default_browser</string>
     <!-- The name of the package that will hold the dialer role by default. -->
-    <string name="config_defaultDialer" translatable="false">com.android.phone</string>
+    <string name="config_defaultDialer" translatable="false">com.android.dialer</string>
     <!-- The name of the package that will hold the SMS role by default. -->
     <string name="config_defaultSms" translatable="false">@string/default_sms_application</string>
     <!-- Whether the default emergency settings should be shown. -->
