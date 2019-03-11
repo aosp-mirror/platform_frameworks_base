@@ -5845,6 +5845,7 @@ package android.provider {
   }
 
   public final class DeviceConfig {
+    method @RequiresPermission(android.Manifest.permission.READ_DEVICE_CONFIG) public static void addOnPropertiesChangedListener(@NonNull String, @NonNull java.util.concurrent.Executor, @NonNull android.provider.DeviceConfig.OnPropertiesChangedListener);
     method @RequiresPermission(android.Manifest.permission.READ_DEVICE_CONFIG) public static void addOnPropertyChangedListener(@NonNull String, @NonNull java.util.concurrent.Executor, @NonNull android.provider.DeviceConfig.OnPropertyChangedListener);
     method @RequiresPermission(android.Manifest.permission.READ_DEVICE_CONFIG) public static boolean getBoolean(String, String, boolean);
     method @RequiresPermission(android.Manifest.permission.READ_DEVICE_CONFIG) public static float getFloat(String, String, float);
@@ -5852,7 +5853,8 @@ package android.provider {
     method @RequiresPermission(android.Manifest.permission.READ_DEVICE_CONFIG) public static long getLong(String, String, long);
     method @RequiresPermission(android.Manifest.permission.READ_DEVICE_CONFIG) public static String getProperty(String, String);
     method @RequiresPermission(android.Manifest.permission.READ_DEVICE_CONFIG) public static String getString(String, String, String);
-    method public static void removeOnPropertyChangedListener(android.provider.DeviceConfig.OnPropertyChangedListener);
+    method public static void removeOnPropertiesChangedListener(@NonNull android.provider.DeviceConfig.OnPropertiesChangedListener);
+    method public static void removeOnPropertyChangedListener(@NonNull android.provider.DeviceConfig.OnPropertyChangedListener);
     method @RequiresPermission(android.Manifest.permission.WRITE_DEVICE_CONFIG) public static void resetToDefaults(int, @Nullable String);
     method @RequiresPermission(android.Manifest.permission.WRITE_DEVICE_CONFIG) public static boolean setProperty(String, String, String, boolean);
     field public static final String NAMESPACE_ACTIVITY_MANAGER = "activity_manager";
@@ -5887,8 +5889,11 @@ package android.provider {
     field public static final String NAMESPACE = "intelligence_attention";
   }
 
+  public static interface DeviceConfig.OnPropertiesChangedListener {
+    method public void onPropertiesChanged(@NonNull android.provider.DeviceConfig.Properties);
+  }
+
   public static interface DeviceConfig.OnPropertyChangedListener {
-    method public default void onPropertiesChanged(@NonNull android.provider.DeviceConfig.Properties);
     method public void onPropertyChanged(String, String, String);
   }
 
