@@ -476,10 +476,6 @@ public final class BatterySaverPolicyConfig implements Parcelable {
          */
         @NonNull
         public BatterySaverPolicyConfig build() {
-            if (!mEnableAdjustBrightness && Float.compare(1f, mAdjustBrightnessFactor) != 0) {
-                throw new IllegalArgumentException("Brightness adjustment factor changed without "
-                        + "enabling brightness adjustment");
-            }
             return new BatterySaverPolicyConfig(this);
         }
     }
