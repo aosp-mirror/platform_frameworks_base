@@ -106,12 +106,43 @@ public class HearingAidProfile implements LocalBluetoothProfile {
         return true;
     }
 
+    /**
+     * Get Hearing Aid devices matching connection states{
+     * @code BluetoothProfile.STATE_CONNECTED,
+     * @code BluetoothProfile.STATE_CONNECTING,
+     * @code BluetoothProfile.STATE_DISCONNECTING}
+     *
+     * @return Matching device list
+     */
     public List<BluetoothDevice> getConnectedDevices() {
-        if (mService == null) return new ArrayList<BluetoothDevice>(0);
-        return mService.getDevicesMatchingConnectionStates(
-              new int[] {BluetoothProfile.STATE_CONNECTED,
-                         BluetoothProfile.STATE_CONNECTING,
-                         BluetoothProfile.STATE_DISCONNECTING});
+        return getDevicesByStates(new int[] {
+                BluetoothProfile.STATE_CONNECTED,
+                BluetoothProfile.STATE_CONNECTING,
+                BluetoothProfile.STATE_DISCONNECTING});
+    }
+
+    /**
+     * Get Hearing Aid devices matching connection states{
+     * @code BluetoothProfile.STATE_DISCONNECTED,
+     * @code BluetoothProfile.STATE_CONNECTED,
+     * @code BluetoothProfile.STATE_CONNECTING,
+     * @code BluetoothProfile.STATE_DISCONNECTING}
+     *
+     * @return Matching device list
+     */
+    public List<BluetoothDevice> getConnectableDevices() {
+        return getDevicesByStates(new int[] {
+                BluetoothProfile.STATE_DISCONNECTED,
+                BluetoothProfile.STATE_CONNECTED,
+                BluetoothProfile.STATE_CONNECTING,
+                BluetoothProfile.STATE_DISCONNECTING});
+    }
+
+    private List<BluetoothDevice> getDevicesByStates(int[] states) {
+        if (mService == null) {
+            return new ArrayList<BluetoothDevice>(0);
+        }
+        return mService.getDevicesMatchingConnectionStates(states);
     }
 
     public boolean connect(BluetoothDevice device) {
