@@ -165,9 +165,7 @@ class RollbackTestUtils {
         PackageInstaller packageInstaller = context.getPackageManager().getPackageInstaller();
         PackageInstaller.SessionParams params = new PackageInstaller.SessionParams(
                 PackageInstaller.SessionParams.MODE_FULL_INSTALL);
-        if (enableRollback) {
-            params.setEnableRollback();
-        }
+        params.setEnableRollback(enableRollback);
         int sessionId = packageInstaller.createSession(params);
         session = packageInstaller.openSession(sessionId);
 
@@ -224,11 +222,9 @@ class RollbackTestUtils {
         if (staged) {
             multiPackageParams.setStaged();
         }
-        if (enableRollback) {
-            // TODO: Do we set this on the parent params, the child params, or
-            // both?
-            multiPackageParams.setEnableRollback();
-        }
+        // TODO: Do we set this on the parent params, the child params, or
+        // both?
+        multiPackageParams.setEnableRollback(enableRollback);
         int multiPackageId = packageInstaller.createSession(multiPackageParams);
         PackageInstaller.Session multiPackage = packageInstaller.openSession(multiPackageId);
 
@@ -242,9 +238,7 @@ class RollbackTestUtils {
             if (resourceName.endsWith(".apex")) {
                 params.setInstallAsApex();
             }
-            if (enableRollback) {
-                params.setEnableRollback();
-            }
+            params.setEnableRollback(enableRollback);
             int sessionId = packageInstaller.createSession(params);
             session = packageInstaller.openSession(sessionId);
 

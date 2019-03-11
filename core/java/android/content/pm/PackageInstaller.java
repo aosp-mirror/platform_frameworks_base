@@ -1448,11 +1448,30 @@ public class PackageInstaller {
 
         /**
          * Request that rollbacks be enabled for the given upgrade.
+         *
+         * @removed
+         * @deprecated use {@link #setEnableRollback(boolean)} instead.
          * @hide
          */
+        @Deprecated
         @SystemApi
         public void setEnableRollback() {
             installFlags |= PackageManager.INSTALL_ENABLE_ROLLBACK;
+        }
+
+        /**
+         * Request that rollbacks be enabled or disabled for the given upgrade.
+         *
+         * @param enable set to {@code true} to enable, {@code false} to disable
+         * @hide
+         */
+        @SystemApi
+        public void setEnableRollback(boolean enable) {
+            if (enable) {
+                installFlags |= PackageManager.INSTALL_ENABLE_ROLLBACK;
+            } else {
+                installFlags &= ~PackageManager.INSTALL_ENABLE_ROLLBACK;
+            }
         }
 
         /**
@@ -2055,6 +2074,16 @@ public class PackageInstaller {
         @SystemApi
         public boolean getInstallAsVirtualPreload() {
             return (installFlags & PackageManager.INSTALL_VIRTUAL_PRELOAD) != 0;
+        }
+
+        /**
+         * Return whether rollback is enabled or disabled for the given upgrade.
+         *
+         * @hide
+         */
+        @SystemApi
+        public boolean getEnableRollback() {
+            return (installFlags & PackageManager.INSTALL_ENABLE_ROLLBACK) != 0;
         }
 
         /**
