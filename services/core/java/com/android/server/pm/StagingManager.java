@@ -498,19 +498,21 @@ public class StagingManager {
             Slog.w(TAG, "Cannot abort applied session!");
             return;
         }
-        if (isStagedSessionFinalized(session.sessionId)) {
-            Slog.w(TAG, "Cannot abort session because it is not active or APEXD is not reachable");
-            return;
-        }
-
-        mApexManager.abortActiveSession();
-
         abortSession(session);
+
+        boolean hasApex = sessionContainsApex(session);
+        if (hasApex) {
+            ApexSessionInfo apexSession = mApexManager.getStagedSessionInfo(session.sessionId);
+            if (apexSession == null || isApexSessionFinalized(apexSession)) {
+                Slog.w(TAG,
+                        "Cannot abort session because it is not active or APEXD is not reachable");
+                return;
+            }
+            mApexManager.abortActiveSession();
+        }
     }
 
-    private boolean isStagedSessionFinalized(int sessionId) {
-        ApexSessionInfo session = mApexManager.getStagedSessionInfo(sessionId);
-
+    private boolean isApexSessionFinalized(ApexSessionInfo session) {
         /* checking if the session is in a final state, i.e., not active anymore */
         return session.isUnknown || session.isActivationFailed || session.isSuccess
                 || session.isRolledBack;
