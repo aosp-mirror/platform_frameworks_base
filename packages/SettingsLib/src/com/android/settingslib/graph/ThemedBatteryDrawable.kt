@@ -411,8 +411,8 @@ open class ThemedBatteryDrawable(private val context: Context, frameColor: Int) 
         private const val CRITICAL_LEVEL = 15
         // On a 12x20 grid, how wide to make the fill protection stroke.
         // Scales when our size changes
-        private const val PROTECTION_STROKE_WIDTH = 1.4f
+        private const val PROTECTION_STROKE_WIDTH = 3f
         // Arbitrarily chosen for visibility at small sizes
-        private const val PROTECTION_MIN_STROKE_WIDTH = 5f
+        private const val PROTECTION_MIN_STROKE_WIDTH = 6f
     }
 }
