@@ -4309,24 +4309,24 @@ public final class Telephony {
         }
 
         /**
-         * Generates a content {@link Uri} used to receive updates on precise carrier identity
+         * Generates a content {@link Uri} used to receive updates on specific carrier identity
          * change on the given subscriptionId returned by
-         * {@link TelephonyManager#getSimPreciseCarrierId()}.
-         * @see TelephonyManager#ACTION_SUBSCRIPTION_PRECISE_CARRIER_IDENTITY_CHANGED
+         * {@link TelephonyManager#getSimSpecificCarrierId()}.
+         * @see TelephonyManager#ACTION_SUBSCRIPTION_SPECIFIC_CARRIER_IDENTITY_CHANGED
          * <p>
          * Use this {@link Uri} with a {@link ContentObserver} to be notified of changes to the
-         * precise carrier identity {@link TelephonyManager#getSimPreciseCarrierId()}
+         * specific carrier identity {@link TelephonyManager#getSimSpecificCarrierId()}
          * while your app is running. You can also use a {@link JobService} to ensure your app
          * is notified of changes to the {@link Uri} even when it is not running.
          * Note, however, that using a {@link JobService} does not guarantee timely delivery of
          * updates to the {@link Uri}.
          *
          * @param subscriptionId the subscriptionId to receive updates on
-         * @return the Uri used to observe precise carrier identity changes
+         * @return the Uri used to observe specific carrier identity changes
          */
         @NonNull
-        public static Uri getPreciseCarrierIdUriForSubscriptionId(int subscriptionId) {
-            return Uri.withAppendedPath(Uri.withAppendedPath(CONTENT_URI, "precise"),
+        public static Uri getSpecificCarrierIdUriForSubscriptionId(int subscriptionId) {
+            return Uri.withAppendedPath(Uri.withAppendedPath(CONTENT_URI, "specific"),
                     String.valueOf(subscriptionId));
         }
 
@@ -4346,26 +4346,30 @@ public final class Telephony {
 
         /**
          * A fine-grained carrier id.
-         * @see TelephonyManager#getSimPreciseCarrierId()
+         * The specific carrier ID would be used for configuration purposes, but apps wishing to
+         * know about the carrier itself should use the regular carrier ID returned by
+         * {@link TelephonyManager#getSimCarrierId()}.
+         *
+         * @see TelephonyManager#getSimSpecificCarrierId()
          * This is not a database column, only used to notify content observers for
-         * {@link #getPreciseCarrierIdUriForSubscriptionId(int)}
+         * {@link #getSpecificCarrierIdUriForSubscriptionId(int)}
          */
-        public static final String PRECISE_CARRIER_ID = "precise_carrier_id";
+        public static final String SPECIFIC_CARRIER_ID = "specific_carrier_id";
 
         /**
-         * A user facing carrier name for precise carrier id {@link #PRECISE_CARRIER_ID}.
-         * @see TelephonyManager#getSimPreciseCarrierIdName()
+         * A user facing carrier name for specific carrier id {@link #SPECIFIC_CARRIER_ID}.
+         * @see TelephonyManager#getSimSpecificCarrierIdName()
          * This is not a database column, only used to notify content observers for
-         * {@link #getPreciseCarrierIdUriForSubscriptionId(int)}
+         * {@link #getSpecificCarrierIdUriForSubscriptionId(int)}
          */
-        public static final String PRECISE_CARRIER_ID_NAME = "precise_carrier_id_name";
+        public static final String SPECIFIC_CARRIER_ID_NAME = "specific_carrier_id_name";
 
         /**
          * A unique parent carrier id. The parent-child
          * relationship can be used to further differentiate a single carrier by different networks,
-         * by prepaid v.s. postpaid or even by 4G v.s. 3G plan. It's an optional field.
-         * A carrier id with a valid parent_carrier_id is considered fine-grained carrier id, will
-         * not be returned as {@link #CARRIER_ID} but {@link #PRECISE_CARRIER_ID}.
+         * by prepaid v.s. postpaid. It's an optional field.
+         * A carrier id with a valid parent_carrier_id is considered fine-grained specific carrier
+         * ID, will not be returned as {@link #CARRIER_ID} but {@link #SPECIFIC_CARRIER_ID}.
          * <P>Type: INTEGER </P>
          * @hide
          */
