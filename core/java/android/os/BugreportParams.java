@@ -41,6 +41,7 @@ public final class BugreportParams {
 
     /**
      * Defines acceptable types of bugreports.
+     * @hide
      */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = { "BUGREPORT_MODE_" }, value = {
