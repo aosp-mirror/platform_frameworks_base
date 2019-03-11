@@ -1593,6 +1593,7 @@ public class ApnSetting implements Parcelable {
          *
          * @param entryName the entry name to set for the APN
          */
+        @NonNull
         public Builder setEntryName(String entryName) {
             this.mEntryName = entryName;
             return this;
@@ -1603,6 +1604,7 @@ public class ApnSetting implements Parcelable {
          *
          * @param apnName the name to set for the APN
          */
+        @NonNull
         public Builder setApnName(String apnName) {
             this.mApnName = apnName;
             return this;
@@ -1633,6 +1635,7 @@ public class ApnSetting implements Parcelable {
          *
          * @param proxy the proxy address to set for the APN
          */
+        @NonNull
         public Builder setProxyAddress(String proxy) {
             this.mProxyAddress = proxy;
             return this;
@@ -1643,6 +1646,7 @@ public class ApnSetting implements Parcelable {
          *
          * @param port the proxy port to set for the APN
          */
+        @NonNull
         public Builder setProxyPort(int port) {
             this.mProxyPort = port;
             return this;
@@ -1653,6 +1657,7 @@ public class ApnSetting implements Parcelable {
          *
          * @param mmsc the MMSC Uri to set for the APN
          */
+        @NonNull
         public Builder setMmsc(Uri mmsc) {
             this.mMmsc = mmsc;
             return this;
@@ -1684,6 +1689,7 @@ public class ApnSetting implements Parcelable {
          *
          * @param mmsProxy the MMS proxy address to set for the APN
          */
+        @NonNull
         public Builder setMmsProxyAddress(String mmsProxy) {
             this.mMmsProxyAddress = mmsProxy;
             return this;
@@ -1694,6 +1700,7 @@ public class ApnSetting implements Parcelable {
          *
          * @param mmsPort the MMS proxy port to set for the APN
          */
+        @NonNull
         public Builder setMmsProxyPort(int mmsPort) {
             this.mMmsProxyPort = mmsPort;
             return this;
@@ -1704,6 +1711,7 @@ public class ApnSetting implements Parcelable {
          *
          * @param user the APN username to set for the APN
          */
+        @NonNull
         public Builder setUser(String user) {
             this.mUser = user;
             return this;
@@ -1715,6 +1723,7 @@ public class ApnSetting implements Parcelable {
          * @see android.provider.Telephony.Carriers#PASSWORD
          * @param password the APN password to set for the APN
          */
+        @NonNull
         public Builder setPassword(String password) {
             this.mPassword = password;
             return this;
@@ -1725,6 +1734,7 @@ public class ApnSetting implements Parcelable {
          *
          * @param authType the authentication type to set for the APN
          */
+        @NonNull
         public Builder setAuthType(@AuthType int authType) {
             this.mAuthType = authType;
             return this;
@@ -1741,6 +1751,7 @@ public class ApnSetting implements Parcelable {
          *
          * @param apnTypeBitmask a bitmask describing the types of the APN
          */
+        @NonNull
         public Builder setApnTypeBitmask(@ApnType int apnTypeBitmask) {
             this.mApnTypeBitmask = apnTypeBitmask;
             return this;
@@ -1753,6 +1764,7 @@ public class ApnSetting implements Parcelable {
          *
          * @param operatorNumeric the numeric operator ID to set for this entry
          */
+        @NonNull
         public Builder setOperatorNumeric(String operatorNumeric) {
             this.mOperatorNumeric = operatorNumeric;
             return this;
@@ -1765,6 +1777,7 @@ public class ApnSetting implements Parcelable {
          *
          * @param protocol the protocol to set to use to connect to this APN
          */
+        @NonNull
         public Builder setProtocol(@ProtocolType int protocol) {
             this.mProtocol = protocol;
             return this;
@@ -1777,6 +1790,7 @@ public class ApnSetting implements Parcelable {
          *
          * @param roamingProtocol the protocol to set to use to connect to this APN when roaming
          */
+        @NonNull
         public Builder setRoamingProtocol(@ProtocolType  int roamingProtocol) {
             this.mRoamingProtocol = roamingProtocol;
             return this;
@@ -1787,6 +1801,7 @@ public class ApnSetting implements Parcelable {
          *
          * @param carrierEnabled the current status to set for this APN
          */
+        @NonNull
         public Builder setCarrierEnabled(boolean carrierEnabled) {
             this.mCarrierEnabled = carrierEnabled;
             return this;
@@ -1797,6 +1812,7 @@ public class ApnSetting implements Parcelable {
          *
          * @param networkTypeBitmask the Radio Technology (Network Type) info
          */
+        @NonNull
         public Builder setNetworkTypeBitmask(int networkTypeBitmask) {
             this.mNetworkTypeBitmask = networkTypeBitmask;
             return this;
@@ -1807,6 +1823,7 @@ public class ApnSetting implements Parcelable {
          *
          * @param mvnoType the MVNO match type to set for this APN
          */
+        @NonNull
         public Builder setMvnoType(@MvnoType int mvnoType) {
             this.mMvnoType = mvnoType;
             return this;
