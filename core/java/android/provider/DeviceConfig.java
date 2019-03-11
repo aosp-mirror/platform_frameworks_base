@@ -412,7 +412,7 @@ public final class DeviceConfig {
     @SystemApi
     @TestApi
     @RequiresPermission(READ_DEVICE_CONFIG)
-    public static String getProperty(String namespace, String name) {
+    public static String getProperty(@NonNull String namespace, @NonNull String name) {
         ContentResolver contentResolver = ActivityThread.currentApplication().getContentResolver();
         String compositeName = createCompositeName(namespace, name);
         return Settings.Config.getString(contentResolver, compositeName);
@@ -431,7 +431,8 @@ public final class DeviceConfig {
     @SystemApi
     @TestApi
     @RequiresPermission(READ_DEVICE_CONFIG)
-    public static String getString(String namespace, String name, String defaultValue) {
+    public static String getString(@NonNull String namespace, @NonNull String name,
+            @Nullable String defaultValue) {
         String value = getProperty(namespace, name);
         return value != null ? value : defaultValue;
     }
@@ -449,7 +450,8 @@ public final class DeviceConfig {
     @SystemApi
     @TestApi
     @RequiresPermission(READ_DEVICE_CONFIG)
-    public static boolean getBoolean(String namespace, String name, boolean defaultValue) {
+    public static boolean getBoolean(@NonNull String namespace, @NonNull String name,
+            boolean defaultValue) {
         String value = getProperty(namespace, name);
         return value != null ? Boolean.parseBoolean(value) : defaultValue;
     }
@@ -467,7 +469,7 @@ public final class DeviceConfig {
     @SystemApi
     @TestApi
     @RequiresPermission(READ_DEVICE_CONFIG)
-    public static int getInt(String namespace, String name, int defaultValue) {
+    public static int getInt(@NonNull String namespace, @NonNull String name, int defaultValue) {
         String value = getProperty(namespace, name);
         if (value == null) {
             return defaultValue;
@@ -493,7 +495,7 @@ public final class DeviceConfig {
     @SystemApi
     @TestApi
     @RequiresPermission(READ_DEVICE_CONFIG)
-    public static long getLong(String namespace, String name, long defaultValue) {
+    public static long getLong(@NonNull String namespace, @NonNull String name, long defaultValue) {
         String value = getProperty(namespace, name);
         if (value == null) {
             return defaultValue;
@@ -519,7 +521,8 @@ public final class DeviceConfig {
     @SystemApi
     @TestApi
     @RequiresPermission(READ_DEVICE_CONFIG)
-    public static float getFloat(String namespace, String name, float defaultValue) {
+    public static float getFloat(@NonNull String namespace, @NonNull String name,
+            float defaultValue) {
         String value = getProperty(namespace, name);
         if (value == null) {
             return defaultValue;
@@ -554,10 +557,10 @@ public final class DeviceConfig {
     @SystemApi
     @TestApi
     @RequiresPermission(WRITE_DEVICE_CONFIG)
-    public static boolean setProperty(
-            String namespace, String name, String value, boolean makeDefault) {
-        ContentResolver contentResolver = ActivityThread.currentApplication().getContentResolver();
+    public static boolean setProperty(@NonNull String namespace, @NonNull String name,
+            @Nullable String value, boolean makeDefault) {
         String compositeName = createCompositeName(namespace, name);
+        ContentResolver contentResolver = ActivityThread.currentApplication().getContentResolver();
         return Settings.Config.putString(contentResolver, compositeName, value, makeDefault);
     }
 
@@ -700,11 +703,14 @@ public final class DeviceConfig {
         }
     }
 
-    private static String createCompositeName(String namespace, String name) {
+    private static String createCompositeName(@NonNull String namespace, @NonNull String name) {
+        Preconditions.checkNotNull(namespace);
+        Preconditions.checkNotNull(name);
         return namespace + "/" + name;
     }
 
-    private static Uri createNamespaceUri(String namespace) {
+    private static Uri createNamespaceUri(@NonNull String namespace) {
+        Preconditions.checkNotNull(namespace);
         return CONTENT_URI.buildUpon().appendPath(namespace).build();
     }
 
@@ -716,7 +722,8 @@ public final class DeviceConfig {
      * @param namespace The namespace to increment the count for.
      */
     @GuardedBy("sLock")
-    private static void incrementNamespace(String namespace) {
+    private static void incrementNamespace(@NonNull String namespace) {
+        Preconditions.checkNotNull(namespace);
         Pair<ContentObserver, Integer> namespaceCount = sNamespaces.get(namespace);
         if (namespaceCount != null) {
             sNamespaces.put(namespace, new Pair<>(namespaceCount.first, namespaceCount.second + 1));
@@ -725,7 +732,9 @@ public final class DeviceConfig {
             ContentObserver contentObserver = new ContentObserver(null) {
                 @Override
                 public void onChange(boolean selfChange, Uri uri) {
-                    handleChange(uri);
+                    if (uri != null) {
+                        handleChange(uri);
+                    }
                 }
             };
             ActivityThread.currentApplication().getContentResolver()
@@ -742,7 +751,8 @@ public final class DeviceConfig {
      * @param namespace The namespace to decrement the count for.
      */
     @GuardedBy("sLock")
-    private static void decrementNamespace(String namespace) {
+    private static void decrementNamespace(@NonNull String namespace) {
+        Preconditions.checkNotNull(namespace);
         Pair<ContentObserver, Integer> namespaceCount = sNamespaces.get(namespace);
         if (namespaceCount == null) {
             // This namespace is not registered and does not need to be decremented
@@ -757,7 +767,8 @@ public final class DeviceConfig {
         }
     }
 
-    private static void handleChange(Uri uri) {
+    private static void handleChange(@NonNull Uri uri) {
+        Preconditions.checkNotNull(uri);
         List<String> pathSegments = uri.getPathSegments();
         // pathSegments(0) is "config"
         final String namespace = pathSegments.get(1);
@@ -813,7 +824,8 @@ public final class DeviceConfig {
          * @param name      The name of the property which has changed.
          * @param value     The new value of the property which has changed.
          */
-        void onPropertyChanged(String namespace, String name, String value);
+        void onPropertyChanged(@NonNull String namespace, @NonNull String name,
+                @Nullable String value);
     }
 
     /**
