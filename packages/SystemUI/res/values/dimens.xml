@@ -872,9 +872,6 @@
     <!-- Global actions grid layout -->
     <dimen name="global_actions_grid_side_margin">4dp</dimen>
 
-    <!-- Global actions panel -->
-    <dimen name="global_actions_panel_top_margin">85dp</dimen>
-
     <!-- The maximum offset in either direction that elements are moved horizontally to prevent
          burn-in on AOD. -->
     <dimen name="burn_in_prevention_offset_x">8dp</dimen>
