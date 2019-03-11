@@ -67,6 +67,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.util.StatsLog;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.location.GpsNetInitiatedHandler;
 import com.android.internal.location.GpsNetInitiatedHandler.GpsNiNotification;
@@ -890,12 +891,14 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         return GPS_POSITION_MODE_STANDALONE;
     }
 
-    private boolean handleEnable() {
-        if (DEBUG) Log.d(TAG, "handleEnable");
+    @GuardedBy("mLock")
+    private void handleEnableLocked() {
+        if (DEBUG) Log.d(TAG, "handleEnableLocked");
 
         boolean inited = native_init();
 
         if (inited) {
+            mEnabled = true;
             mSupportsXtra = native_supports_xtra();
 
             // TODO: remove the following native calls if we can make sure they are redundant.
@@ -912,15 +915,16 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
             mGnssNavigationMessageProvider.onGpsEnabledChanged();
             mGnssBatchingProvider.enable();
         } else {
+            mEnabled = false;
             Log.w(TAG, "Failed to enable location provider");
         }
-
-        return inited;
     }
 
-    private void handleDisable() {
-        if (DEBUG) Log.d(TAG, "handleDisable");
+    @GuardedBy("mLock")
+    private void handleDisableLocked() {
+        if (DEBUG) Log.d(TAG, "handleDisableLocked");
 
+        mEnabled = false;
         updateClientUids(new WorkSource());
         stopNavigating();
         mAlarmManager.cancel(mWakeupIntent);
@@ -946,10 +950,9 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
             }
 
             if (enabled) {
-                mEnabled = handleEnable();
+                handleEnableLocked();
             } else {
-                mEnabled = false;
-                handleDisable();
+                handleDisableLocked();
             }
         }
     }
