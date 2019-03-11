@@ -547,10 +547,10 @@ package android.app {
 
   public class NotificationManager {
     method @Nullable public android.content.ComponentName getAllowedNotificationAssistant();
-    method @Nullable public android.content.ComponentName getAllowedNotificationAssistantForUser(android.os.UserHandle);
+    method @Nullable public android.content.ComponentName getAllowedNotificationAssistantForUser(@NonNull android.os.UserHandle);
     method public boolean isNotificationAssistantAccessGranted(@NonNull android.content.ComponentName);
-    method public void setNotificationAssistantAccessGranted(android.content.ComponentName, boolean);
-    method public void setNotificationAssistantAccessGrantedForUser(android.content.ComponentName, android.os.UserHandle, boolean);
+    method public void setNotificationAssistantAccessGranted(@Nullable android.content.ComponentName, boolean);
+    method public void setNotificationAssistantAccessGrantedForUser(@Nullable android.content.ComponentName, @NonNull android.os.UserHandle, boolean);
   }
 
   public final class StatsManager {
