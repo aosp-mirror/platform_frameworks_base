@@ -34,6 +34,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.AlarmManager;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Resources;
 import android.net.ConnectivityManager;
@@ -46,14 +47,11 @@ import android.net.RouteInfo;
 import android.net.shared.InitialConfiguration;
 import android.net.shared.ProvisioningConfiguration;
 import android.net.util.InterfaceParams;
-import android.provider.Settings;
-import android.test.mock.MockContentResolver;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.R;
-import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.server.NetworkObserver;
 import com.android.server.NetworkObserverRegistry;
 
@@ -94,7 +92,7 @@ public class IpClientTest {
     @Mock private IIpClientCallbacks mCb;
     @Mock private AlarmManager mAlarm;
     @Mock private IpClient.Dependencies mDependencies;
-    private MockContentResolver mContentResolver;
+    @Mock private ContentResolver mContentResolver;
 
     private NetworkObserver mObserver;
     private InterfaceParams mIfParams;
@@ -109,9 +107,6 @@ public class IpClientTest {
         when(mDependencies.getNetd(any())).thenReturn(mNetd);
         when(mResources.getInteger(R.integer.config_networkAvoidBadWifi))
                 .thenReturn(DEFAULT_AVOIDBADWIFI_CONFIG_VALUE);
-
-        mContentResolver = new MockContentResolver();
-        mContentResolver.addProvider(Settings.AUTHORITY, new FakeSettingsProvider());
         when(mContext.getContentResolver()).thenReturn(mContentResolver);
 
         mIfParams = null;
