@@ -440,7 +440,7 @@ public class KeyguardManager {
      */
     public boolean isKeyguardSecure() {
         try {
-            return mWM.isKeyguardSecure();
+            return mWM.isKeyguardSecure(mContext.getUserId());
         } catch (RemoteException ex) {
             return false;
         }
