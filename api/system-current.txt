@@ -1125,7 +1125,6 @@ package android.app.role {
     method public abstract boolean onIsApplicationQualifiedForRole(@NonNull String, @NonNull String);
     method public abstract boolean onIsRoleVisible(@NonNull String);
     method @WorkerThread public abstract boolean onRemoveRoleHolder(@NonNull String, @NonNull String, int);
-    method @WorkerThread public abstract void onSmsKillSwitchToggled(boolean);
     field public static final String SERVICE_INTERFACE = "android.app.role.RoleControllerService";
   }
 
