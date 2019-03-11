@@ -2653,6 +2653,18 @@ public class CarrierConfigManager {
      */
     public static final String KEY_USE_USIM_BOOL = "use_usim_bool";
 
+    /**
+     * Determines whether the carrier wants to cancel the cs reject notification automatically
+     * when the voice registration state changes.
+     * If true, the notification will be automatically removed
+     *          when the voice registration state changes.
+     * If false, the notification will persist until the user dismisses it,
+     *           the SIM is removed, or the device is rebooted.
+     * @hide
+     */
+    public static final String KEY_AUTO_CANCEL_CS_REJECT_NOTIFICATION =
+            "carrier_auto_cancel_cs_notification";
+
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
 
@@ -3039,6 +3051,7 @@ public class CarrierConfigManager {
                 });
         sDefaults.putStringArray(KEY_EMERGENCY_NUMBER_PREFIX_STRING_ARRAY, new String[0]);
         sDefaults.putBoolean(KEY_USE_USIM_BOOL, false);
+        sDefaults.putBoolean(KEY_AUTO_CANCEL_CS_REJECT_NOTIFICATION, false);
     }
 
     /**
