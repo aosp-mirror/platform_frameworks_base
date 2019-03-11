@@ -111,6 +111,8 @@ public class VibratorService extends IVibratorService.Stub
     // intensity level. It's important that we apply the scaling on the delta between the two so
     // that the default intensity level applies no scaling to application provided effects.
     private final SparseArray<ScaleLevel> mScaleLevels;
+    private final LinkedList<VibrationInfo> mPreviousRingVibrations;
+    private final LinkedList<VibrationInfo> mPreviousNotificationVibrations;
     private final LinkedList<VibrationInfo> mPreviousVibrations;
     private final int mPreviousVibrationsLimit;
     private final boolean mAllowPriorityVibrationsInLowPowerMode;
@@ -354,6 +356,8 @@ public class VibratorService extends IVibratorService.Stub
         mAllowPriorityVibrationsInLowPowerMode = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_allowPriorityVibrationsInLowPowerMode);
 
+        mPreviousRingVibrations = new LinkedList<>();
+        mPreviousNotificationVibrations = new LinkedList<>();
         mPreviousVibrations = new LinkedList<>();
 
         IntentFilter filter = new IntentFilter();
@@ -620,10 +624,19 @@ public class VibratorService extends IVibratorService.Stub
     }
 
     private void addToPreviousVibrationsLocked(Vibration vib) {
-        if (mPreviousVibrations.size() > mPreviousVibrationsLimit) {
-            mPreviousVibrations.removeFirst();
+        final LinkedList<VibrationInfo> previousVibrations;
+        if (vib.isRingtone()) {
+            previousVibrations = mPreviousRingVibrations;
+        } else if (vib.isNotification()) {
+            previousVibrations = mPreviousNotificationVibrations;
+        } else {
+            previousVibrations = mPreviousVibrations;
         }
-        mPreviousVibrations.addLast(vib.toInfo());
+
+        if (previousVibrations.size() > mPreviousVibrationsLimit) {
+            previousVibrations.removeFirst();
+        }
+        previousVibrations.addLast(vib.toInfo());
     }
 
     @Override // Binder call
@@ -1355,6 +1368,18 @@ public class VibratorService extends IVibratorService.Stub
             pw.println("  mNotificationIntensity=" + mNotificationIntensity);
             pw.println("  mRingIntensity=" + mRingIntensity);
             pw.println("");
+            pw.println("  Previous ring vibrations:");
+            for (VibrationInfo info : mPreviousRingVibrations) {
+                pw.print("    ");
+                pw.println(info.toString());
+            }
+
+            pw.println("  Previous notification vibrations:");
+            for (VibrationInfo info : mPreviousNotificationVibrations) {
+                pw.print("    ");
+                pw.println(info.toString());
+            }
+
             pw.println("  Previous vibrations:");
             for (VibrationInfo info : mPreviousVibrations) {
                 pw.print("    ");
