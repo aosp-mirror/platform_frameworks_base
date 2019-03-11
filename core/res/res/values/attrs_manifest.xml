@@ -1993,7 +1993,9 @@
          {@link #AndroidManifestApplication application} tag. -->
     <declare-styleable name="AndroidManifestUsesPackage" parent="AndroidManifestApplication">
         <!-- Required type of association with the package, for example "android.package.ad_service"
-             if it provides an advertising service. -->
+             if it provides an advertising service.  This should use the standard scoped naming
+             convention as used for other things such as package names, based on the Java naming
+             convention. -->
         <attr name="packageType" format="string" />
         <!-- Required name of the package you use. -->
         <attr name="name" />
