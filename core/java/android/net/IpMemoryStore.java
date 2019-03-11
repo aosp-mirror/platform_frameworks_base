@@ -171,4 +171,9 @@ public class IpMemoryStore {
             throw e.rethrowFromSystemServer();
         }
     }
+
+    /** Gets an instance of the memory store */
+    public static IpMemoryStore getMemoryStore(final Context context) {
+        return (IpMemoryStore) context.getSystemService(Context.IP_MEMORY_STORE_SERVICE);
+    }
 }
