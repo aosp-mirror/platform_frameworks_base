@@ -110,7 +110,6 @@ java_defaults {
         "core/java/android/app/role/IOnRoleHoldersChangedListener.aidl",
         "core/java/android/app/role/IRoleController.aidl",
         "core/java/android/app/role/IRoleManager.aidl",
-        "core/java/android/app/role/IRoleManagerCallback.aidl",
         "core/java/android/app/slice/ISliceManager.aidl",
         "core/java/android/app/slice/ISliceListener.aidl",
         "core/java/android/app/timedetector/ITimeDetectorService.aidl",

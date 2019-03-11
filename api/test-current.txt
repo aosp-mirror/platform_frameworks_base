@@ -512,22 +512,17 @@ package android.app.role {
 
   public final class RoleManager {
     method @RequiresPermission("android.permission.OBSERVE_ROLE_HOLDERS") public void addOnRoleHoldersChangedListenerAsUser(@NonNull java.util.concurrent.Executor, @NonNull android.app.role.OnRoleHoldersChangedListener, @NonNull android.os.UserHandle);
-    method @RequiresPermission("android.permission.MANAGE_ROLE_HOLDERS") public void addRoleHolderAsUser(@NonNull String, @NonNull String, int, @NonNull android.os.UserHandle, @NonNull java.util.concurrent.Executor, @NonNull android.app.role.RoleManagerCallback);
+    method @RequiresPermission("android.permission.MANAGE_ROLE_HOLDERS") public void addRoleHolderAsUser(@NonNull String, @NonNull String, int, @NonNull android.os.UserHandle, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Boolean>);
     method @RequiresPermission("com.android.permissioncontroller.permission.MANAGE_ROLES_FROM_CONTROLLER") public boolean addRoleHolderFromController(@NonNull String, @NonNull String);
-    method @RequiresPermission("android.permission.MANAGE_ROLE_HOLDERS") public void clearRoleHoldersAsUser(@NonNull String, int, @NonNull android.os.UserHandle, @NonNull java.util.concurrent.Executor, @NonNull android.app.role.RoleManagerCallback);
+    method @RequiresPermission("android.permission.MANAGE_ROLE_HOLDERS") public void clearRoleHoldersAsUser(@NonNull String, int, @NonNull android.os.UserHandle, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Boolean>);
     method @NonNull @RequiresPermission("com.android.permissioncontroller.permission.MANAGE_ROLES_FROM_CONTROLLER") public java.util.List<java.lang.String> getHeldRolesFromController(@NonNull String);
     method @NonNull @RequiresPermission("android.permission.MANAGE_ROLE_HOLDERS") public java.util.List<java.lang.String> getRoleHolders(@NonNull String);
     method @NonNull @RequiresPermission("android.permission.MANAGE_ROLE_HOLDERS") public java.util.List<java.lang.String> getRoleHoldersAsUser(@NonNull String, @NonNull android.os.UserHandle);
     method @RequiresPermission("android.permission.OBSERVE_ROLE_HOLDERS") public void removeOnRoleHoldersChangedListenerAsUser(@NonNull android.app.role.OnRoleHoldersChangedListener, @NonNull android.os.UserHandle);
-    method @RequiresPermission("android.permission.MANAGE_ROLE_HOLDERS") public void removeRoleHolderAsUser(@NonNull String, @NonNull String, int, @NonNull android.os.UserHandle, @NonNull java.util.concurrent.Executor, @NonNull android.app.role.RoleManagerCallback);
+    method @RequiresPermission("android.permission.MANAGE_ROLE_HOLDERS") public void removeRoleHolderAsUser(@NonNull String, @NonNull String, int, @NonNull android.os.UserHandle, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Boolean>);
     method @RequiresPermission("com.android.permissioncontroller.permission.MANAGE_ROLES_FROM_CONTROLLER") public boolean removeRoleHolderFromController(@NonNull String, @NonNull String);
     method @RequiresPermission("com.android.permissioncontroller.permission.MANAGE_ROLES_FROM_CONTROLLER") public void setRoleNamesFromController(@NonNull java.util.List<java.lang.String>);
     field public static final int MANAGE_HOLDERS_FLAG_DONT_KILL_APP = 1; // 0x1
-  }
-
-  public interface RoleManagerCallback {
-    method public void onFailure();
-    method public void onSuccess();
   }
 
 }

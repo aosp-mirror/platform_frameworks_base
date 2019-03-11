@@ -16,7 +16,6 @@
 
 package android.app.role;
 
-import android.app.role.IRoleManagerCallback;
 import android.os.RemoteCallback;
 
 /**
@@ -24,20 +23,20 @@ import android.os.RemoteCallback;
  */
 oneway interface IRoleController {
 
-    void onGrantDefaultRoles(in IRoleManagerCallback callback);
+    void grantDefaultRoles(in RemoteCallback callback);
 
     void onAddRoleHolder(in String roleName, in String packageName, int flags,
-                         in IRoleManagerCallback callback);
+            in RemoteCallback callback);
 
     void onRemoveRoleHolder(in String roleName, in String packageName, int flags,
-                            in IRoleManagerCallback callback);
+            in RemoteCallback callback);
 
-    void onClearRoleHolders(in String roleName, int flags, in IRoleManagerCallback callback);
+    void onClearRoleHolders(in String roleName, int flags, in RemoteCallback callback);
 
     void onSmsKillSwitchToggled(boolean enabled);
 
     void isApplicationQualifiedForRole(in String roleName, in String packageName,
-                                       in RemoteCallback callback);
+            in RemoteCallback callback);
 
     void isRoleVisible(in String roleName, in RemoteCallback callback);
 }
