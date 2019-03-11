@@ -114,7 +114,7 @@ public class ListGridLayout extends LinearLayout {
         if (mExpectedCount == 3) {
             return 1;
         }
-        return (int) Math.ceil(Math.sqrt(mExpectedCount));
+        return (int) Math.round(Math.sqrt(mExpectedCount));
     }
 
     private int getColumnCount() {
@@ -122,6 +122,6 @@ public class ListGridLayout extends LinearLayout {
         if (mExpectedCount == 3) {
             return 3;
         }
-        return (int) Math.round(Math.sqrt(mExpectedCount));
+        return (int) Math.ceil(Math.sqrt(mExpectedCount));
     }
 }

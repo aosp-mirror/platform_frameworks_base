@@ -154,7 +154,6 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     private boolean mHasVibrator;
     private boolean mHasLogoutButton;
     private boolean mHasLockdownButton;
-    private boolean mUseSeparatedList;
     private final boolean mShowSilentToggle;
     private final EmergencyAffordanceManager mEmergencyAffordanceManager;
     private final ScreenshotHelper mScreenshotHelper;
@@ -332,7 +331,6 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         ArraySet<String> addedKeys = new ArraySet<String>();
         mHasLogoutButton = false;
         mHasLockdownButton = false;
-        mUseSeparatedList = true;
         for (int i = 0; i < defaultActions.length; i++) {
             String actionKey = defaultActions[i];
             if (addedKeys.contains(actionKey)) {
@@ -380,7 +378,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                     mHasLogoutButton = true;
                 }
             } else if (GLOBAL_ACTION_KEY_EMERGENCY.equals(actionKey)) {
-                if (mUseSeparatedList
+                if (shouldUseSeparatedView()
                         && !mEmergencyAffordanceManager.needsEmergencyAffordance()) {
                     mItems.add(new EmergencyDialerAction());
                 }
@@ -405,8 +403,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                             }
                         })
                         : null;
-        ActionsDialog dialog = new ActionsDialog(mContext, mAdapter, mUseSeparatedList,
-                panelViewController);
+        ActionsDialog dialog = new ActionsDialog(mContext, mAdapter, panelViewController);
         dialog.setCanceledOnTouchOutside(false); // Handled by the custom class.
         dialog.setKeyguardShowing(mKeyguardShowing);
 
@@ -692,7 +689,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
 
     private Action getEmergencyAction() {
         Drawable emergencyIcon = mContext.getDrawable(R.drawable.emergency_icon);
-        if (!mUseSeparatedList) {
+        if (!shouldUseSeparatedView()) {
             // use un-colored legacy treatment
             emergencyIcon.setTintList(null);
         }
@@ -921,9 +918,9 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         }
 
         @Override
-        public ArrayList<Action> getSeparatedItems(boolean shouldUseSeparatedView) {
+        public ArrayList<Action> getSeparatedItems() {
             ArrayList<Action> separatedActions = new ArrayList<Action>();
-            if (!shouldUseSeparatedView) {
+            if (!shouldUseSeparatedView()) {
                 return separatedActions;
             }
             for (int i = 0; i < mItems.size(); i++) {
@@ -936,8 +933,8 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         }
 
         @Override
-        public ArrayList<Action> getListItems(boolean shouldUseSeparatedView) {
-            if (!shouldUseSeparatedView) {
+        public ArrayList<Action> getListItems() {
+            if (!shouldUseSeparatedView()) {
                 return new ArrayList<Action>(mItems);
             }
             ArrayList<Action> listActions = new ArrayList<Action>();
@@ -1485,17 +1482,15 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         private final ColorExtractor mColorExtractor;
         private final GlobalActionsPanelPlugin.PanelViewController mPanelController;
         private boolean mKeyguardShowing;
-        private boolean mUseSeparatedList;
         private boolean mShowing;
         private final float mScrimAlpha;
 
-        ActionsDialog(Context context, MyAdapter adapter, boolean separated,
+        ActionsDialog(Context context, MyAdapter adapter,
                 GlobalActionsPanelPlugin.PanelViewController plugin) {
             super(context, com.android.systemui.R.style.Theme_SystemUI_Dialog_GlobalActions);
             mContext = context;
             mAdapter = adapter;
             mColorExtractor = Dependency.get(SysuiColorExtractor.class);
-            mUseSeparatedList = separated;
 
             // Window initialization
             Window window = getWindow();
@@ -1561,7 +1556,6 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             mGlobalActionsLayout = (MultiListLayout)
                     findViewById(com.android.systemui.R.id.global_actions_view);
             mGlobalActionsLayout.setOutsideTouchListener(view -> dismiss());
-            mGlobalActionsLayout.setSeparated(mUseSeparatedList);
             mGlobalActionsLayout.setListViewAccessibilityDelegate(new View.AccessibilityDelegate() {
                 @Override
                 public boolean dispatchPopulateAccessibilityEvent(
@@ -1573,11 +1567,8 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             });
             mGlobalActionsLayout.setRotationListener(this::onRotate);
             mGlobalActionsLayout.setAdapter(mAdapter);
-        }
-
-        private boolean isPanelEnabled(Context context) {
-            return FeatureFlagUtils.isEnabled(
-                    context, FeatureFlagUtils.GLOBAL_ACTIONS_PANEL_ENABLED);
+            mGlobalActionsLayout.setSnapToEdge(isPanelEnabled(mContext)
+                    && mPanelController != null);
         }
 
         private int getGlobalActionsLayoutId(Context context) {
@@ -1718,9 +1709,24 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     }
 
     /**
-     * Determines whether or not the Global Actions Dialog should use the newer grid-style layout.
+     * Determines whether or not the Global Actions menu should use the newer grid-style layout.
      */
-    public static boolean isGridEnabled(Context context) {
+    private static boolean isGridEnabled(Context context) {
         return FeatureFlagUtils.isEnabled(context, FeatureFlagUtils.GLOBAL_ACTIONS_GRID_ENABLED);
+    }
+
+    /**
+     * Determines whether or not the Global Actions Panel should appear when the power button
+     * is held.
+     */
+    private static boolean isPanelEnabled(Context context) {
+        return FeatureFlagUtils.isEnabled(
+                context, FeatureFlagUtils.GLOBAL_ACTIONS_PANEL_ENABLED);    }
+
+    /**
+     * Determines whether the Global Actions menu should use a separated view for emergency actions.
+     */
+    private static boolean shouldUseSeparatedView() {
+        return true;
     }
 }

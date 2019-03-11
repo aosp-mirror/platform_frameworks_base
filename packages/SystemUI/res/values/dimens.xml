@@ -865,9 +865,11 @@
 
     <!-- Global actions power menu -->
     <dimen name="global_actions_panel_width">120dp</dimen>
-    <dimen name="global_actions_top_padding">120dp</dimen>
     <dimen name="global_actions_padding">12dp</dimen>
     <dimen name="global_actions_translate">9dp</dimen>
+
+    <!-- Distance from the top of screen in pixels, to position the power menu near the button. -->
+    <dimen name="global_actions_top_padding">330px</dimen>
 
     <!-- Global actions grid layout -->
     <dimen name="global_actions_grid_side_margin">4dp</dimen>
