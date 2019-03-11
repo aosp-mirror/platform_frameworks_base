@@ -2152,9 +2152,9 @@
      screen lock to a certain complexity level.
      <p>Protection level: normal
     -->
-    <permission android:name="android.permission.REQUEST_SCREEN_LOCK_COMPLEXITY"
-                android:label="@string/permlab_requestScreenLockComplexity"
-                android:description="@string/permdesc_requestScreenLockComplexity"
+    <permission android:name="android.permission.REQUEST_PASSWORD_COMPLEXITY"
+                android:label="@string/permlab_requestPasswordComplexity"
+                android:description="@string/permdesc_requestPasswordComplexity"
                 android:protectionLevel="normal" />
 
     <!-- ================================== -->

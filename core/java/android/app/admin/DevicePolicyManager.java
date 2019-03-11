@@ -1378,7 +1378,7 @@ public class DevicePolicyManager {
      * complexity, and use this activity with extra {@link #EXTRA_PASSWORD_COMPLEXITY} to suggest
      * to users how complex the app wants the new screen lock to be. Note that both {@link
      * #getPasswordComplexity()} and the extra {@link #EXTRA_PASSWORD_COMPLEXITY} require the
-     * calling app to have the permission {@link permission#REQUEST_SCREEN_LOCK_COMPLEXITY}.
+     * calling app to have the permission {@link permission#REQUEST_PASSWORD_COMPLEXITY}.
      *
      * <p>If the intent is launched from within a managed profile with a profile
      * owner built against {@link android.os.Build.VERSION_CODES#M} or before,
@@ -1406,7 +1406,7 @@ public class DevicePolicyManager {
      *
      * <p>If an invalid value is used, it will be treated as {@link #PASSWORD_COMPLEXITY_NONE}.
      */
-    @RequiresPermission(android.Manifest.permission.REQUEST_SCREEN_LOCK_COMPLEXITY)
+    @RequiresPermission(android.Manifest.permission.REQUEST_PASSWORD_COMPLEXITY)
     public static final String EXTRA_PASSWORD_COMPLEXITY =
             "android.app.extra.PASSWORD_COMPLEXITY";
 
@@ -3378,10 +3378,10 @@ public class DevicePolicyManager {
      *
      * @throws IllegalStateException if the user is not unlocked.
      * @throws SecurityException if the calling application does not have the permission
-     *                           {@link permission#REQUEST_SCREEN_LOCK_COMPLEXITY}
+     *                           {@link permission#REQUEST_PASSWORD_COMPLEXITY}
      */
     @PasswordComplexity
-    @RequiresPermission(android.Manifest.permission.REQUEST_SCREEN_LOCK_COMPLEXITY)
+    @RequiresPermission(android.Manifest.permission.REQUEST_PASSWORD_COMPLEXITY)
     public int getPasswordComplexity() {
         throwIfParentInstance("getPasswordComplexity");
         if (mService == null) {
