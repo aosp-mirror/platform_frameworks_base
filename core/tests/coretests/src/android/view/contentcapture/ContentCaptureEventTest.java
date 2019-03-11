@@ -19,6 +19,7 @@ import static android.view.contentcapture.ContentCaptureEvent.TYPE_CONTEXT_UPDAT
 import static android.view.contentcapture.ContentCaptureEvent.TYPE_SESSION_FINISHED;
 import static android.view.contentcapture.ContentCaptureEvent.TYPE_SESSION_STARTED;
 import static android.view.contentcapture.ContentCaptureEvent.TYPE_VIEW_DISAPPEARED;
+import static android.view.contentcapture.ContentCaptureEvent.TYPE_VIEW_TEXT_CHANGED;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -228,6 +229,68 @@ public class ContentCaptureEventTest {
         assertThat(event).isNotNull();
         final ContentCaptureEvent clone = cloneThroughParcel(event);
         assertContextUpdatedEvent(clone);
+    }
+
+    @Test
+    public void testMergeEvent_typeViewTextChanged() {
+        final ContentCaptureEvent event = new ContentCaptureEvent("42", TYPE_VIEW_TEXT_CHANGED)
+                .setText("test");
+        final ContentCaptureEvent event2 = new ContentCaptureEvent("43", TYPE_VIEW_TEXT_CHANGED)
+                .setText("empty");
+
+        event.mergeEvent(event2);
+        assertThat(event.getText()).isEqualTo(event2.getText());
+    }
+
+    @Test
+    public void testMergeEvent_typeViewDisappeared() {
+        final ContentCaptureEvent event = new ContentCaptureEvent("42", TYPE_VIEW_DISAPPEARED)
+                .setAutofillId(new AutofillId(1));
+        final ContentCaptureEvent event2 = new ContentCaptureEvent("43", TYPE_VIEW_DISAPPEARED)
+                .setAutofillId(new AutofillId(2));
+        final ArrayList<AutofillId> autofillIds = new ArrayList<>();
+        autofillIds.add(new AutofillId(3));
+        autofillIds.add(new AutofillId(4));
+        final ContentCaptureEvent event3 = new ContentCaptureEvent("17", TYPE_VIEW_DISAPPEARED)
+                .setAutofillIds(autofillIds);
+
+        event.mergeEvent(event2);
+        assertThat(event.getIds()).containsExactly(new AutofillId(1), new AutofillId(2));
+
+        event2.mergeEvent(event3);
+        assertThat(event2.getIds()).containsExactly(new AutofillId(2), new AutofillId(3),
+                new AutofillId(4));
+    }
+
+    @Test
+    public void testMergeEvent_typeViewDisappeared_noIds() {
+        final ContentCaptureEvent event = new ContentCaptureEvent("42", TYPE_VIEW_DISAPPEARED)
+                .setAutofillId(new AutofillId(1));
+        final ContentCaptureEvent event2 = new ContentCaptureEvent("43", TYPE_VIEW_DISAPPEARED);
+
+        assertThrows(IllegalArgumentException.class, () -> event.mergeEvent(event2));
+    }
+
+    @Test
+    public void testMergeEvent_nullArgument() {
+        final ContentCaptureEvent event = new ContentCaptureEvent("42", TYPE_VIEW_DISAPPEARED);
+        assertThrows(NullPointerException.class, () -> event.mergeEvent(null));
+    }
+
+    @Test
+    public void testMergeEvent_differentEventTypes() {
+        final ContentCaptureEvent event = new ContentCaptureEvent("42", TYPE_VIEW_DISAPPEARED)
+                .setText("test").setAutofillId(new AutofillId(1));
+        final ContentCaptureEvent event2 = new ContentCaptureEvent("17", TYPE_VIEW_TEXT_CHANGED)
+                .setText("empty").setAutofillId(new AutofillId(2));
+
+        event.mergeEvent(event2);
+        assertThat(event.getText()).isEqualTo("test");
+        assertThat(event.getId()).isEqualTo(new AutofillId(1));
+
+        event2.mergeEvent(event);
+        assertThat(event2.getText()).isEqualTo("empty");
+        assertThat(event2.getId()).isEqualTo(new AutofillId(2));
     }
 
     private void assertContextUpdatedEvent(ContentCaptureEvent event) {
