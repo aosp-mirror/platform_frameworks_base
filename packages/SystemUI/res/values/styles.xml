@@ -287,7 +287,6 @@
         <item name="*android:lockPatternStyle">@style/LockPatternStyle</item>
         <item name="passwordStyle">@style/PasswordTheme</item>
         <item name="backgroundProtectedStyle">@style/BackgroundProtectedStyle</item>
-        <item name="android:forceDarkAllowed">false</item>
 
         <!-- Needed for MediaRoute chooser dialog -->
         <item name="*android:isLightTheme">false</item>
