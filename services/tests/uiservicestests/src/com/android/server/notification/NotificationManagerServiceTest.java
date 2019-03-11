@@ -42,8 +42,6 @@ import static android.os.Build.VERSION_CODES.P;
 import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_NEGATIVE;
 import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_NEUTRAL;
 
-import static com.android.compatibility.common.util.SystemUtil.runWithShellPermissionIdentity;
-
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
@@ -4180,7 +4178,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mService.setNotificationAssistantAccessGrantedCallback(
                 mNotificationAssistantAccessGrantedCallback);
 
-        runWithShellPermissionIdentity(() -> mService.setDefaultAssistantForUser(0));
+        mService.setDefaultAssistantForUser(0);
 
         verify(mNotificationAssistantAccessGrantedCallback)
                 .onGranted(eq(xmlConfig), eq(0), eq(true));
@@ -4200,7 +4198,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mService.setNotificationAssistantAccessGrantedCallback(
                 mNotificationAssistantAccessGrantedCallback);
 
-        runWithShellPermissionIdentity(() -> mService.setDefaultAssistantForUser(0));
+        mService.setDefaultAssistantForUser(0);
 
         verify(mNotificationAssistantAccessGrantedCallback)
                 .onGranted(eq(deviceConfig), eq(0), eq(true));
@@ -4221,22 +4219,22 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mService.setNotificationAssistantAccessGrantedCallback(
                 mNotificationAssistantAccessGrantedCallback);
 
-        runWithShellPermissionIdentity(() -> mService.setDefaultAssistantForUser(0));
+        mService.setDefaultAssistantForUser(0);
 
         verify(mNotificationAssistantAccessGrantedCallback)
                 .onGranted(eq(xmlConfig), eq(0), eq(true));
     }
 
     private void clearDeviceConfig() {
-        runWithShellPermissionIdentity(() -> DeviceConfig.resetToDefaults(
-                Settings.RESET_MODE_PACKAGE_DEFAULTS, DeviceConfig.NAMESPACE_SYSTEMUI));
+        DeviceConfig.resetToDefaults(
+                Settings.RESET_MODE_PACKAGE_DEFAULTS, DeviceConfig.NAMESPACE_SYSTEMUI);
     }
 
     private void setDefaultAssistantInDeviceConfig(String componentName) {
-        runWithShellPermissionIdentity(() -> DeviceConfig.setProperty(
+        DeviceConfig.setProperty(
                 DeviceConfig.NAMESPACE_SYSTEMUI,
                 SystemUiDeviceConfigFlags.NAS_DEFAULT_SERVICE,
                 componentName,
-                false));
+                false);
     }
 }
