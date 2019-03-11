@@ -599,7 +599,7 @@ public final class SystemServer {
                         Slog.e(TAG, "Error reading uncrypt package file", e);
                     }
 
-                    if (filename != null && filename.startsWith("/data")) {
+                    if (filename != null && filename.startsWith("/data") && SystemProperties.get("sys.ota.disable_uncrypt", "0").equals("0")) {
                         if (!new File(BLOCK_MAP_FILE).exists()) {
                             Slog.e(TAG, "Can't find block map file, uncrypt failed or " +
                                     "unexpected runtime restart?");
