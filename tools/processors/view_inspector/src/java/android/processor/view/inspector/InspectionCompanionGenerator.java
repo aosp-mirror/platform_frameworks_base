@@ -97,7 +97,7 @@ public final class InspectionCompanionGenerator {
     /**
      * The suffix of the generated class name after the class's binary name.
      */
-    private static final String GENERATED_CLASS_SUFFIX = "$$InspectionCompanion";
+    private static final String GENERATED_CLASS_SUFFIX = "$InspectionCompanion";
 
     /**
      * The null resource ID, copied to avoid a host dependency on platform code.

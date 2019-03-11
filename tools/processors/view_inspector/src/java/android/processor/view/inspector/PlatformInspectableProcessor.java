@@ -34,6 +34,7 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.util.ElementFilter;
 
 
 /**
@@ -127,10 +128,35 @@ public final class PlatformInspectableProcessor extends AbstractProcessor {
 
             final InspectableClassModel model = modelMap.computeIfAbsent(
                     classElement.get().getQualifiedName().toString(),
-                    k -> new InspectableClassModel(ClassName.get(classElement.get())));
+                    k -> {
+                        if (hasNestedInspectionCompanion(classElement.get())) {
+                            fail(
+                                    String.format(
+                                            "Class %s already has an inspection companion.",
+                                            classElement.get().getQualifiedName().toString()),
+                                    element);
+                        }
+                        return new InspectableClassModel(ClassName.get(classElement.get()));
+                    });
 
             processor.process(element, model);
         }
+    }
+
+    /**
+     * Determine if a class has a nested class named {@code InspectionCompanion}.
+     *
+     * @param typeElement A type element representing the class to check
+     * @return f the class contains a class named {@code InspectionCompanion}
+     */
+    private static boolean hasNestedInspectionCompanion(TypeElement typeElement) {
+        for (TypeElement nestedClass : ElementFilter.typesIn(typeElement.getEnclosedElements())) {
+            if (nestedClass.getSimpleName().toString().equals("InspectionCompanion")) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
