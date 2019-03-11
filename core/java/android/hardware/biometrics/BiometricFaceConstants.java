@@ -313,12 +313,17 @@ public interface BiometricFaceConstants {
     public static final int FACE_ACQUIRED_START = 20;
 
     /**
+     * The sensor is dirty. The user should be informed to clean the sensor.
+     */
+    public static final int SENSOR_DIRTY = 21;
+
+    /**
      * Hardware vendors may extend this list if there are conditions that do not fall under one of
      * the above categories. Vendors are responsible for providing error strings for these errors.
      *
      * @hide
      */
-    public static final int FACE_ACQUIRED_VENDOR = 21;
+    public static final int FACE_ACQUIRED_VENDOR = 22;
 
     /**
      * @hide
