@@ -1112,7 +1112,7 @@ abstract public class ManagedServices {
                             binder.linkToDeath(info, 0);
                             added = mServices.add(info);
                         } catch (RemoteException e) {
-                            // already dead
+                            Slog.e(TAG, "Failed to linkToDeath, already dead", e);
                         }
                     }
                     if (added) {
@@ -1143,6 +1143,11 @@ abstract public class ManagedServices {
                                     + " as a previous rebind attempt was made: " + name);
                         }
                     }
+                }
+
+                @Override
+                public void onNullBinding(ComponentName name) {
+                    Slog.v(TAG, "onNullBinding() called with: name = [" + name + "]");
                 }
             };
             if (!mContext.bindServiceAsUser(intent,
