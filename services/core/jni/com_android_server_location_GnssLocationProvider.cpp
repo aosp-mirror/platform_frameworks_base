@@ -335,6 +335,8 @@ template<>
 const char *const JavaMethodHelper<double>::signature_ = "(D)V";
 template<>
 const char *const JavaMethodHelper<bool>::signature_ = "(Z)V";
+template<>
+const char *const JavaMethodHelper<jstring>::signature_ = "(Ljava/lang/String)V";
 
 #define SET(setter, value) object.callSetter("set" # setter, (value))
 
@@ -1056,9 +1058,10 @@ void GnssMeasurementCallback::translateSingleGnssMeasurement
         <IGnssMeasurementCallback_V2_0::GnssMeasurement>(
         const IGnssMeasurementCallback_V2_0::GnssMeasurement* measurement_V2_0,
         JavaObject& object) {
+    JNIEnv* env = getJniEnv();
     translateSingleGnssMeasurement(&(measurement_V2_0->v1_1), object);
 
-    SET(CodeType, static_cast<int32_t>(measurement_V2_0->codeType));
+    SET(CodeType, env->NewStringUTF(measurement_V2_0->codeType.c_str()));
 
     // Overwrite with v2_0.state since v2_0->v1_1->v1_0.state is deprecated.
     SET(State, static_cast<int32_t>(measurement_V2_0->state));

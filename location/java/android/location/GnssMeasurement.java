@@ -49,8 +49,7 @@ public final class GnssMeasurement implements Parcelable {
     private int mMultipathIndicator;
     private double mSnrInDb;
     private double mAutomaticGainControlLevelInDb;
-    private int mCodeType;
-    private String mOtherCodeTypeName;
+    @NonNull private String mCodeType;
 
     // The following enumerations must be in sync with the values declared in gps.h
 
@@ -209,113 +208,6 @@ public final class GnssMeasurement implements Parcelable {
     public static final int ADR_STATE_HALF_CYCLE_REPORTED = (1<<4);
 
     /**
-     * GNSS measurement code type.
-     * @hide
-     */
-    @IntDef(prefix = { "CODE_TYPE_" }, value = {
-            CODE_TYPE_UNKNOWN, CODE_TYPE_A, CODE_TYPE_B, CODE_TYPE_C, CODE_TYPE_I, CODE_TYPE_L,
-            CODE_TYPE_M, CODE_TYPE_N, CODE_TYPE_P, CODE_TYPE_Q, CODE_TYPE_S, CODE_TYPE_W,
-            CODE_TYPE_X, CODE_TYPE_Y, CODE_TYPE_Z, CODE_TYPE_OTHER
-    })
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface CodeType {}
-
-    /** The GNSS Measurement's code type is unknown. */
-    public static final int CODE_TYPE_UNKNOWN = -1;
-
-    /**
-     * The GNSS Measurement's code type is one of the following: GALILEO E1A, GALILEO E6A, IRNSS
-     * L5A, IRNSS SA.
-     */
-    public static final int CODE_TYPE_A = 0;
-
-    /**
-     * The GNSS Measurement's code type is one of the following: GALILEO E1B, GALILEO E6B, IRNSS
-     * L5B, IRNSS SB.
-     */
-    public static final int CODE_TYPE_B = 1;
-
-    /**
-     * The GNSS Measurement's code type is one of the following: GPS L1 C/A,  GPS L2 C/A, GLONASS G1
-     * C/A, GLONASS G2 C/A, GALILEO E1C, GALILEO E6C, SBAS L1 C/A, QZSS L1 C/A, IRNSS L5C.
-     */
-    public static final int CODE_TYPE_C = 2;
-
-    /**
-     * The GNSS Measurement's code type is one of the following: GPS L5 I, GLONASS G3 I, GALILEO E5a
-     * I, GALILEO E5b I, GALILEO E5a+b I, SBAS L5 I, QZSS L5 I, BDS B1 I, BDS B2 I, BDS B3 I.
-     */
-    public static final int CODE_TYPE_I = 3;
-
-    /**
-     * The GNSS Measurement's code type is one of the following: GPS L1C (P), GPS L2C (L), QZSS L1C
-     * (P), QZSS L2C (L), LEX(6) L.
-     */
-    public static final int CODE_TYPE_L = 4;
-
-    /**
-     * The GNSS Measurement's code type is one of the following: GPS L1M, GPS L2M.
-     */
-    public static final int CODE_TYPE_M = 5;
-
-    /**
-     * The GNSS Measurement's code type is one of the following: GPS L1P, GPS L2P, GLONASS G1P,
-     * GLONASS G2P.
-     */
-    public static final int CODE_TYPE_P = 6;
-
-    /**
-     * The GNSS Measurement's code type is one of the following: GPS L5 Q, GLONASS G3 Q, GALILEO E5a
-     * Q, GALILEO E5b Q, GALILEO E5a+b Q, SBAS L5 Q, QZSS L5 Q, BDS B1 Q, BDS B2 Q, BDS B3 Q.
-     */
-    public static final int CODE_TYPE_Q = 7;
-
-    /**
-     * The GNSS Measurement's code type is one of the following: GPS L1C (D), GPS L2C (M), QZSS L1C
-     * (D), QZSS L2C (M), LEX(6) S.
-     */
-    public static final int CODE_TYPE_S = 8;
-
-    /**
-     * The GNSS Measurement's code type is one of the following: GPS L1 Z-tracking, GPS L2
-     * Z-tracking.
-     */
-    public static final int CODE_TYPE_W = 9;
-
-    /**
-     * The GNSS Measurement's code type is one of the following: GPS L1C (D+P), GPS L2C (M+L), GPS
-     * L5 (I+Q), GLONASS G3 (I+Q), GALILEO E1 (B+C), GALILEO E5a (I+Q), GALILEO E5b (I+Q), GALILEO
-     * E5a+b(I+Q), GALILEO E6 (B+C), SBAS L5 (I+Q), QZSS L1C (D+P), QZSS L2C (M+L), QZSS L5 (I+Q),
-     * LEX(6) (S+L), BDS B1 (I+Q), BDS B2 (I+Q), BDS B3 (I+Q), IRNSS L5 (B+C).
-     */
-    public static final int CODE_TYPE_X = 10;
-
-    /**
-     * The GNSS Measurement's code type is one of the following: GPS L1Y, GPS L2Y.
-     */
-    public static final int CODE_TYPE_Y = 11;
-
-    /**
-     * The GNSS Measurement's code type is one of the following: GALILEO E1 (A+B+C), GALILEO E6
-     * (A+B+C), QZSS L1-SAIF.
-     */
-    public static final int CODE_TYPE_Z = 12;
-
-    /**
-     * The GNSS Measurement's code type is one of the following: GPS L1 codeless, GPS L2 codeless.
-     */
-    public static final int CODE_TYPE_N = 13;
-
-    /**
-     * Other code type that does not belong to any of the above code types.
-     *
-     * This code type is used in the case that the code type being tracked in this measurement, as
-     * classified by RINEX standards, does not fit into one of the existing enumerated values. When
-     * this code type is set, the field otherCodeTypeName must specify the new code type.
-     */
-    public static final int CODE_TYPE_OTHER = 255;
-
-    /**
      * All the 'Accumulated Delta Range' flags.
      * @hide
      */
@@ -363,7 +255,6 @@ public final class GnssMeasurement implements Parcelable {
         mSnrInDb = measurement.mSnrInDb;
         mAutomaticGainControlLevelInDb = measurement.mAutomaticGainControlLevelInDb;
         mCodeType = measurement.mCodeType;
-        mOtherCodeTypeName = measurement.mOtherCodeTypeName;
     }
 
     /**
@@ -1414,9 +1305,50 @@ public final class GnssMeasurement implements Parcelable {
      *
      * <p>Similar to the Attribute field described in RINEX 3.03, e.g., in Tables 4-10, and Table
      * A2 at the RINEX 3.03 Update 1 Document.
+     *
+     * <p>Returns "A" for GALILEO E1A, GALILEO E6A, IRNSS L5A, IRNSS SA.
+     *
+     * <p>Returns "B" for GALILEO E1B, GALILEO E6B, IRNSS L5B, IRNSS SB.
+     *
+     * <p>Returns "C" for GPS L1 C/A,  GPS L2 C/A, GLONASS G1 C/A, GLONASS G2 C/A, GALILEO E1C,
+     * GALILEO E6C, SBAS L1 C/A, QZSS L1 C/A, IRNSS L5C.
+     *
+     * <p>Returns "I" for GPS L5 I, GLONASS G3 I, GALILEO E5a I, GALILEO E5b I, GALILEO E5a+b I,
+     * SBAS L5 I, QZSS L5 I, BDS B1 I, BDS B2 I, BDS B3 I.
+     *
+     * <p>Returns "L" for GPS L1C (P), GPS L2C (L), QZSS L1C (P), QZSS L2C (L), LEX(6) L.
+     *
+     * <p>Returns "M" for GPS L1M, GPS L2M.
+     *
+     * <p>Returns "N" for GPS L1 codeless, GPS L2 codeless.
+     *
+     * <p>Returns "P" for GPS L1P, GPS L2P, GLONASS G1P, GLONASS G2P.
+     *
+     * <p>Returns "Q" for GPS L5 Q, GLONASS G3 Q, GALILEO E5a Q, GALILEO E5b Q, GALILEO E5a+b Q,
+     * SBAS L5 Q, QZSS L5 Q, BDS B1 Q, BDS B2 Q, BDS B3 Q.
+     *
+     * <p>Returns "S" for GPS L1C (D), GPS L2C (M), QZSS L1C (D), QZSS L2C (M), LEX(6) S.
+     *
+     * <p>Returns "W" for GPS L1 Z-tracking, GPS L2 Z-tracking.
+     *
+     * <p>Returns "X" for GPS L1C (D+P), GPS L2C (M+L), GPS L5 (I+Q), GLONASS G3 (I+Q), GALILEO
+     * E1 (B+C), GALILEO E5a (I+Q), GALILEO E5b (I+Q), GALILEO E5a+b(I+Q), GALILEO E6 (B+C), SBAS
+     * L5 (I+Q), QZSS L1C (D+P), QZSS L2C (M+L), QZSS L5 (I+Q), LEX(6) (S+L), BDS B1 (I+Q), BDS
+     * B2 (I+Q), BDS B3 (I+Q), IRNSS L5 (B+C).
+     *
+     * <p>Returns "Y" for GPS L1Y, GPS L2Y.
+     *
+     * <p>Returns "Z" for GALILEO E1 (A+B+C), GALILEO E6 (A+B+C), QZSS L1-SAIF.
+     *
+     * <p>Returns "UNKNOWN" if the GNSS Measurement's code type is unknown.
+     *
+     * <p>This is used to specify the observation descriptor defined in GNSS Observation Data File
+     * Header Section Description in the RINEX standard (Version 3.XX), in cases where the code type
+     * does not align with the above listed values. For example, if a code type "G" is added, this
+     * string shall be set to "G".
      */
-    @CodeType
-    public int getCodeType() {
+    @NonNull
+    public String getCodeType() {
         return mCodeType;
     }
 
@@ -1426,7 +1358,7 @@ public final class GnssMeasurement implements Parcelable {
      * @hide
      */
     @TestApi
-    public void setCodeType(@CodeType int codeType) {
+    public void setCodeType(@NonNull String codeType) {
         setFlag(HAS_CODE_TYPE);
         mCodeType = codeType;
     }
@@ -1439,74 +1371,7 @@ public final class GnssMeasurement implements Parcelable {
     @TestApi
     public void resetCodeType() {
         resetFlag(HAS_CODE_TYPE);
-        mCodeType = CODE_TYPE_UNKNOWN;
-    }
-
-    /**
-     * Gets the GNSS measurement's code type name when the code type is {@link #CODE_TYPE_OTHER}.
-     *
-     * <p>This is used to specify the observation descriptor defined in GNSS Observation Data File
-     * Header Section Description in the RINEX standard (Version 3.XX), in cases where the code type
-     * does not align with an existing Android enumerated value. For example, if a code type "G" is
-     * added, this string shall be set to "G".
-     */
-    @NonNull
-    public String getOtherCodeTypeName() {
-        return mOtherCodeTypeName;
-    }
-
-    /**
-     * Sets the GNSS measurement's code type name when the code type is {@link #CODE_TYPE_OTHER}.
-     *
-     * @hide
-     */
-    @TestApi
-    public void setOtherCodeTypeName(@NonNull String otherCodeTypeName) {
-        mOtherCodeTypeName = otherCodeTypeName;
-    }
-
-    /**
-     * Gets a string representation of the 'code type'.
-     *
-     * <p>For internal and logging use only.
-     */
-    private String getCodeTypeString() {
-        switch (mCodeType) {
-            case CODE_TYPE_UNKNOWN:
-                return "CODE_TYPE_UNKNOWN";
-            case CODE_TYPE_A:
-                return "CODE_TYPE_A";
-            case CODE_TYPE_B:
-                return "CODE_TYPE_B";
-            case CODE_TYPE_C:
-                return "CODE_TYPE_C";
-            case CODE_TYPE_I:
-                return "CODE_TYPE_I";
-            case CODE_TYPE_L:
-                return "CODE_TYPE_L";
-            case CODE_TYPE_M:
-                return "CODE_TYPE_M";
-            case CODE_TYPE_N:
-                return "CODE_TYPE_N";
-            case CODE_TYPE_P:
-                return "CODE_TYPE_P";
-            case CODE_TYPE_Q:
-                return "CODE_TYPE_Q";
-            case CODE_TYPE_S:
-                return "CODE_TYPE_S";
-            case CODE_TYPE_W:
-                return "CODE_TYPE_W";
-            case CODE_TYPE_X:
-                return "CODE_TYPE_X";
-            case CODE_TYPE_Y:
-                return "CODE_TYPE_Y";
-            case CODE_TYPE_Z:
-                return "CODE_TYPE_Z";
-            case CODE_TYPE_OTHER:
-                return "CODE_TYPE_OTHER";
-            default:
-                return "<Invalid: " + mCodeType + ">";
-        }
+        mCodeType = "UNKNOWN";
     }
 
     public static final @android.annotation.NonNull Creator<GnssMeasurement> CREATOR = new Creator<GnssMeasurement>() {
@@ -1534,8 +1399,7 @@ public final class GnssMeasurement implements Parcelable {
             gnssMeasurement.mMultipathIndicator = parcel.readInt();
             gnssMeasurement.mSnrInDb = parcel.readDouble();
             gnssMeasurement.mAutomaticGainControlLevelInDb = parcel.readDouble();
-            gnssMeasurement.mCodeType = parcel.readInt();
-            gnssMeasurement.mOtherCodeTypeName = parcel.readString();
+            gnssMeasurement.mCodeType = parcel.readString();
 
             return gnssMeasurement;
         }
@@ -1568,8 +1432,7 @@ public final class GnssMeasurement implements Parcelable {
         parcel.writeInt(mMultipathIndicator);
         parcel.writeDouble(mSnrInDb);
         parcel.writeDouble(mAutomaticGainControlLevelInDb);
-        parcel.writeInt(mCodeType);
-        parcel.writeString(mOtherCodeTypeName);
+        parcel.writeString(mCodeType);
     }
 
     @Override
@@ -1647,10 +1510,7 @@ public final class GnssMeasurement implements Parcelable {
         builder.append(String.format(
                 format,
                 "CodeType",
-                hasCodeType() ? getCodeTypeString() : null));
-        builder.append(String.format(
-                format,
-                "OtherCodeTypeName", mOtherCodeTypeName));
+                hasCodeType() ? mCodeType : null));
 
         return builder.toString();
     }
@@ -1676,7 +1536,6 @@ public final class GnssMeasurement implements Parcelable {
         resetSnrInDb();
         resetAutomaticGainControlLevel();
         resetCodeType();
-        setOtherCodeTypeName("");
     }
 
     private void setFlag(int flag) {
