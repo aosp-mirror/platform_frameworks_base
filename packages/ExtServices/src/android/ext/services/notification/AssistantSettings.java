@@ -22,7 +22,6 @@ import android.net.Uri;
 import android.os.Handler;
 import android.provider.DeviceConfig;
 import android.provider.Settings;
-import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -128,17 +127,17 @@ final class AssistantSettings extends ContentObserver {
     }
 
     private void updateFromDeviceConfigFlags() {
-        mGenerateReplies = DeviceConfigHelper.getBoolean(
+        mGenerateReplies = DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_SYSTEMUI,
                 SystemUiDeviceConfigFlags.NAS_GENERATE_REPLIES, DEFAULT_GENERATE_REPLIES);
 
-        mGenerateActions = DeviceConfigHelper.getBoolean(
+        mGenerateActions = DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_SYSTEMUI,
                 SystemUiDeviceConfigFlags.NAS_GENERATE_ACTIONS, DEFAULT_GENERATE_ACTIONS);
 
-        mMaxMessagesToExtract = DeviceConfigHelper.getInteger(
+        mMaxMessagesToExtract = DeviceConfig.getInt(DeviceConfig.NAMESPACE_SYSTEMUI,
                 SystemUiDeviceConfigFlags.NAS_MAX_MESSAGES_TO_EXTRACT,
                 DEFAULT_MAX_MESSAGES_TO_EXTRACT);
 
-        mMaxSuggestions = DeviceConfigHelper.getInteger(
+        mMaxSuggestions = DeviceConfig.getInt(DeviceConfig.NAMESPACE_SYSTEMUI,
                 SystemUiDeviceConfigFlags.NAS_MAX_SUGGESTIONS, DEFAULT_MAX_SUGGESTIONS);
 
         mOnUpdateRunnable.run();
@@ -168,34 +167,6 @@ final class AssistantSettings extends ContentObserver {
         }
 
         mOnUpdateRunnable.run();
-    }
-
-    static class DeviceConfigHelper {
-
-        static int getInteger(String key, int defaultValue) {
-            String value = getValue(key);
-            if (TextUtils.isEmpty(value)) {
-                return defaultValue;
-            }
-            try {
-                return Integer.parseInt(value);
-            } catch (NumberFormatException ex) {
-                return defaultValue;
-            }
-        }
-
-        static boolean getBoolean(String key, boolean defaultValue) {
-            String value = getValue(key);
-            if (TextUtils.isEmpty(value)) {
-                return defaultValue;
-            }
-            return Boolean.parseBoolean(value);
-        }
-
-        private static String getValue(String key) {
-            return DeviceConfig.getProperty(
-                    DeviceConfig.NAMESPACE_SYSTEMUI, key);
-        }
     }
 
     public interface Factory {
