@@ -73,6 +73,12 @@ import java.util.regex.Pattern;
  * Supported formats are: JPEG, DNG, CR2, NEF, NRW, ARW, RW2, ORF, PEF, SRW, RAF and HEIF.
  * <p>
  * Attribute mutation is supported for JPEG image files.
+ * <p>
+ * Note: It is recommended to use the <a href="{@docRoot}jetpack/androidx.html">AndroidX</a>
+ * <a href="{@docRoot}reference/androidx/exifinterface/media/ExifInterface.html">ExifInterface
+ * Library</a> since it is a superset of this class. In addition to the functionalities of this
+ * class, it supports parsing extra metadata such as exposure and data compression information
+ * as well as setting extra metadata such as GPS and datetime information.
  */
 public class ExifInterface {
     private static final String TAG = "ExifInterface";
