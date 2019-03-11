@@ -1762,7 +1762,7 @@ package android.os {
   public final class PowerManager {
     method @RequiresPermission("android.permission.POWER_SAVER") public int getPowerSaveMode();
     method @RequiresPermission("android.permission.POWER_SAVER") public boolean setDynamicPowerSavings(boolean, int);
-    method @RequiresPermission(anyOf={"android.permission.DEVICE_POWER", "android.permission.POWER_SAVER"}) public boolean setPowerSaveMode(boolean);
+    method @RequiresPermission(anyOf={"android.permission.DEVICE_POWER", "android.permission.POWER_SAVER"}) public boolean setPowerSaveModeEnabled(boolean);
     field public static final int POWER_SAVER_MODE_DYNAMIC = 1; // 0x1
     field public static final int POWER_SAVER_MODE_PERCENTAGE = 0; // 0x0
   }

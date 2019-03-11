@@ -1419,9 +1419,9 @@ public final class PowerManager {
             android.Manifest.permission.DEVICE_POWER,
             android.Manifest.permission.POWER_SAVER
     })
-    public boolean setPowerSaveMode(boolean mode) {
+    public boolean setPowerSaveModeEnabled(boolean mode) {
         try {
-            return mService.setPowerSaveMode(mode);
+            return mService.setPowerSaveModeEnabled(mode);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
