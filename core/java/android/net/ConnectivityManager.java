@@ -2805,7 +2805,7 @@ public class ConnectivityManager {
          *         {@link #TETHER_ERROR_PROVISION_FAILED}, or
          *         {@link #TETHER_ERROR_ENTITLEMENT_UNKONWN}.
          */
-        void onEntitlementResult(@EntitlementResultCode int resultCode);
+        void onTetheringEntitlementResult(@EntitlementResultCode int resultCode);
     }
 
     /**
@@ -2855,7 +2855,7 @@ public class ConnectivityManager {
             protected void onReceiveResult(int resultCode, Bundle resultData) {
                 Binder.withCleanCallingIdentity(() ->
                             executor.execute(() -> {
-                                listener.onEntitlementResult(resultCode);
+                                listener.onTetheringEntitlementResult(resultCode);
                             }));
             }
         };
