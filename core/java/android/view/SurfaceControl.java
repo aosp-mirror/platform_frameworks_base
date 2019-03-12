@@ -459,6 +459,7 @@ public final class SurfaceControl implements Parcelable {
          * Construct a new {@link SurfaceControl} with the set parameters. The builder
          * remains valid.
          */
+        @NonNull
         public SurfaceControl build() {
             if (mWidth < 0 || mHeight < 0) {
                 throw new IllegalArgumentException(
@@ -477,7 +478,8 @@ public final class SurfaceControl implements Parcelable {
          *
          * @param name A name to identify the Surface in debugging.
          */
-        public Builder setName(String name) {
+        @NonNull
+        public Builder setName(@NonNull String name) {
             mName = name;
             return this;
         }
@@ -488,6 +490,7 @@ public final class SurfaceControl implements Parcelable {
          * @param width The buffer width in pixels.
          * @param height The buffer height in pixels.
          */
+        @NonNull
         public Builder setBufferSize(@IntRange(from = 0) int width,
                 @IntRange(from = 0) int height) {
             if (width < 0 || height < 0) {
