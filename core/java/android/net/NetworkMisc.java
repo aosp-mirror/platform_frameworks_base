@@ -52,6 +52,12 @@ public class NetworkMisc implements Parcelable {
     public boolean acceptUnvalidated;
 
     /**
+     * Whether the user explicitly set that this network should be validated even if presence of
+     * only partial internet connectivity.
+     */
+    public boolean acceptPartialConnectivity;
+
+    /**
      * Set to avoid surfacing the "Sign in to network" notification.
      * if carrier receivers/apps are registered to handle the carrier-specific provisioning
      * procedure, a carrier specific provisioning notification will be placed.

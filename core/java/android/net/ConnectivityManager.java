@@ -427,6 +427,16 @@ public class ConnectivityManager {
             "android.net.conn.PROMPT_LOST_VALIDATION";
 
     /**
+     * Action used to display a dialog that asks the user whether to stay connected to a network
+     * that has not validated. This intent is used to start the dialog in settings via
+     * startActivity.
+     *
+     * @hide
+     */
+    public static final String ACTION_PROMPT_PARTIAL_CONNECTIVITY =
+            "android.net.conn.PROMPT_PARTIAL_CONNECTIVITY";
+
+    /**
      * Invalid tethering type.
      * @see #startTethering(int, boolean, OnStartTetheringCallback)
      * @hide
@@ -4018,10 +4028,33 @@ public class ConnectivityManager {
      *
      * @hide
      */
-    @RequiresPermission(android.Manifest.permission.CONNECTIVITY_INTERNAL)
+    @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
     public void setAcceptUnvalidated(Network network, boolean accept, boolean always) {
         try {
             mService.setAcceptUnvalidated(network, accept, always);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Informs the system whether it should consider the network as validated even if it only has
+     * partial connectivity. If {@code accept} is true, then the network will be considered as
+     * validated even if connectivity is only partial. If {@code always} is true, then the choice
+     * is remembered, so that the next time the user connects to this network, the system will
+     * switch to it.
+     *
+     * @param network The network to accept.
+     * @param accept Whether to consider the network as validated even if it has partial
+     *               connectivity.
+     * @param always Whether to remember this choice in the future.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.NETWORK_STACK)
+    public void setAcceptPartialConnectivity(Network network, boolean accept, boolean always) {
+        try {
+            mService.setAcceptPartialConnectivity(network, accept, always);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -4037,7 +4070,7 @@ public class ConnectivityManager {
      *
      * @hide
      */
-    @RequiresPermission(android.Manifest.permission.CONNECTIVITY_INTERNAL)
+    @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
     public void setAvoidUnvalidated(Network network) {
         try {
             mService.setAvoidUnvalidated(network);
