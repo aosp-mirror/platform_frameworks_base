@@ -24,6 +24,8 @@ import static com.android.systemui.util.SysuiLifecycle.viewAttachLifecycle;
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 import android.animation.ArgbEvaluator;
+import android.animation.LayoutTransition;
+import android.animation.ObjectAnimator;
 import android.annotation.IntDef;
 import android.app.ActivityManager;
 import android.content.Context;
@@ -141,6 +143,8 @@ public class BatteryMeterView extends LinearLayout implements
         addOnAttachStateChangeListener(
                 new DisableStateTracker(DISABLE_NONE, DISABLE2_SYSTEM_ICONS));
 
+        setupLayoutTransition();
+
         mSlotBattery = context.getString(
                 com.android.internal.R.string.status_bar_battery);
         mBatteryIconView = new ImageView(context);
@@ -176,6 +180,21 @@ public class BatteryMeterView extends LinearLayout implements
         // Needed for PorderDuff.Mode.CLEAR operations to work properly, but redraws don't happen
         // enough to justify a hardware layer.
         setLayerType(LAYER_TYPE_SOFTWARE, null);
+    }
+
+    private void setupLayoutTransition() {
+        LayoutTransition transition = new LayoutTransition();
+        transition.setDuration(200);
+
+        ObjectAnimator appearAnimator = ObjectAnimator.ofFloat(null, "alpha", 0f, 1f);
+        transition.setAnimator(LayoutTransition.APPEARING, appearAnimator);
+        transition.setInterpolator(LayoutTransition.APPEARING, Interpolators.ALPHA_IN);
+
+        ObjectAnimator disappearAnimator = ObjectAnimator.ofFloat(null, "alpha", 1f, 0f);
+        transition.setInterpolator(LayoutTransition.DISAPPEARING, Interpolators.ALPHA_OUT);
+        transition.setAnimator(LayoutTransition.DISAPPEARING, disappearAnimator);
+
+        setLayoutTransition(transition);
     }
 
     public void setForceShowPercent(boolean show) {
