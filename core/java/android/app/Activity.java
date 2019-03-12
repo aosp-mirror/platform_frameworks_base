@@ -8341,7 +8341,7 @@ public class Activity extends ContextThemeWrapper
         try {
             ActivityTaskManager.getService().setDisablePreviewScreenshots(mToken, disable);
         } catch (RemoteException e) {
-            Log.e(TAG, "Failed to call setDisablePreviewScreenshots", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -8362,7 +8362,7 @@ public class Activity extends ContextThemeWrapper
         try {
             ActivityTaskManager.getService().setShowWhenLocked(mToken, showWhenLocked);
         } catch (RemoteException e) {
-            Log.e(TAG, "Failed to call setShowWhenLocked", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -8386,7 +8386,7 @@ public class Activity extends ContextThemeWrapper
             ActivityTaskManager.getService().setInheritShowWhenLocked(
                     mToken, inheritShowWhenLocked);
         } catch (RemoteException e) {
-            Log.e(TAG, "Failed to call setInheritShowWhenLocked", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -8412,7 +8412,7 @@ public class Activity extends ContextThemeWrapper
         try {
             ActivityTaskManager.getService().setTurnScreenOn(mToken, turnScreenOn);
         } catch (RemoteException e) {
-            Log.e(TAG, "Failed to call setTurnScreenOn", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -8429,7 +8429,7 @@ public class Activity extends ContextThemeWrapper
         try {
             ActivityTaskManager.getService().registerRemoteAnimations(mToken, definition);
         } catch (RemoteException e) {
-            Log.e(TAG, "Failed to call registerRemoteAnimations", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
