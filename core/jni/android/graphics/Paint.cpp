@@ -923,14 +923,24 @@ namespace PaintGlue {
         paint->setWordSpacing(wordSpacing);
     }
 
-    static jint getHyphenEdit(jlong paintHandle, jint hyphen) {
+    static jint getStartHyphenEdit(jlong paintHandle, jint hyphen) {
         Paint* paint = reinterpret_cast<Paint*>(paintHandle);
-        return paint->getHyphenEdit();
+        return static_cast<jint>(paint->getStartHyphenEdit());
     }
 
-    static void setHyphenEdit(jlong paintHandle, jint hyphen) {
+    static jint getEndHyphenEdit(jlong paintHandle, jint hyphen) {
         Paint* paint = reinterpret_cast<Paint*>(paintHandle);
-        paint->setHyphenEdit((uint32_t)hyphen);
+        return static_cast<jint>(paint->getEndHyphenEdit());
+    }
+
+    static void setStartHyphenEdit(jlong paintHandle, jint hyphen) {
+        Paint* paint = reinterpret_cast<Paint*>(paintHandle);
+        paint->setStartHyphenEdit((uint32_t)hyphen);
+    }
+
+    static void setEndHyphenEdit(jlong paintHandle, jint hyphen) {
+        Paint* paint = reinterpret_cast<Paint*>(paintHandle);
+        paint->setEndHyphenEdit((uint32_t)hyphen);
     }
 
     static jfloat ascent(jlong paintHandle) {
@@ -1105,8 +1115,10 @@ static const JNINativeMethod methods[] = {
     {"nSetLetterSpacing","(JF)V", (void*) PaintGlue::setLetterSpacing},
     {"nGetWordSpacing","(J)F", (void*) PaintGlue::getWordSpacing},
     {"nSetWordSpacing","(JF)V", (void*) PaintGlue::setWordSpacing},
-    {"nGetHyphenEdit", "(J)I", (void*) PaintGlue::getHyphenEdit},
-    {"nSetHyphenEdit", "(JI)V", (void*) PaintGlue::setHyphenEdit},
+    {"nGetStartHyphenEdit", "(J)I", (void*) PaintGlue::getStartHyphenEdit},
+    {"nGetEndHyphenEdit", "(J)I", (void*) PaintGlue::getEndHyphenEdit},
+    {"nSetStartHyphenEdit", "(JI)V", (void*) PaintGlue::setStartHyphenEdit},
+    {"nSetEndHyphenEdit", "(JI)V", (void*) PaintGlue::setEndHyphenEdit},
     {"nAscent","(J)F", (void*) PaintGlue::ascent},
     {"nDescent","(J)F", (void*) PaintGlue::descent},
     {"nGetUnderlinePosition","(J)F", (void*) PaintGlue::getUnderlinePosition},

@@ -209,7 +209,8 @@ public class TextViewTest {
         int lineCount = layout.getLineCount();
         boolean hyphenationHappend = false;
         for (int i = 0; i < lineCount; ++i) {
-            if (layout.getHyphen(i) == 0) {
+            if (layout.getStartHyphenEdit(i) == Paint.START_HYPHEN_EDIT_NO_EDIT
+                    && layout.getEndHyphenEdit(i) == Paint.END_HYPHEN_EDIT_NO_EDIT) {
                 continue;  // Hyphantion does not happen.
             }
             hyphenationHappend = true;
