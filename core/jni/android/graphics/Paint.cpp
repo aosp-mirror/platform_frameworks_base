@@ -723,11 +723,15 @@ namespace PaintGlue {
         obj->setStyle(style);
     }
 
-    static void setColor(jlong paintHandle, jlong colorSpaceHandle,
+    static void setColorLong(jlong paintHandle, jlong colorSpaceHandle,
             jfloat r, jfloat g, jfloat b, jfloat a) {
         sk_sp<SkColorSpace> cs = GraphicsJNI::getNativeColorSpace(colorSpaceHandle);
         SkColor4f color = SkColor4f{r, g, b, a};
         reinterpret_cast<Paint*>(paintHandle)->setColor4f(color, cs.get());
+    }
+
+    static void setColor(jlong paintHandle, jint color) {
+        reinterpret_cast<Paint*>(paintHandle)->setColor(color);
     }
 
     static void setAlpha(jlong paintHandle, jint a) {
@@ -1082,7 +1086,8 @@ static const JNINativeMethod methods[] = {
     {"nSetDither","(JZ)V", (void*) PaintGlue::setDither},
     {"nGetStyle","(J)I", (void*) PaintGlue::getStyle},
     {"nSetStyle","(JI)V", (void*) PaintGlue::setStyle},
-    {"nSetColor","(JJFFFF)V", (void*) PaintGlue::setColor},
+    {"nSetColor","(JI)V", (void*) PaintGlue::setColor},
+    {"nSetColor","(JJFFFF)V", (void*) PaintGlue::setColorLong},
     {"nSetAlpha","(JI)V", (void*) PaintGlue::setAlpha},
     {"nGetStrokeWidth","(J)F", (void*) PaintGlue::getStrokeWidth},
     {"nSetStrokeWidth","(JF)V", (void*) PaintGlue::setStrokeWidth},

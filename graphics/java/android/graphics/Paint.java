@@ -1048,7 +1048,8 @@ public class Paint {
      * @param color The new color (including alpha) to set in the paint.
      */
     public void setColor(@ColorInt int color) {
-        setColor(Color.pack(color));
+        nSetColor(mNativePaint, color);
+        mColor = Color.pack(color);
     }
 
     /**
@@ -3191,6 +3192,8 @@ public class Paint {
     @CriticalNative
     private static native void nSetColor(long paintPtr, long colorSpaceHandle,
             float r, float g, float b, float a);
+    @CriticalNative
+    private static native void nSetColor(long paintPtr, @ColorInt int color);
     @CriticalNative
     private static native void nSetStrikeThruText(long paintPtr, boolean strikeThruText);
     @CriticalNative
