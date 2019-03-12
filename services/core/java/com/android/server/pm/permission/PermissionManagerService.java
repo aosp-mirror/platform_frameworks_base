@@ -1273,7 +1273,7 @@ public class PermissionManagerService {
             @NonNull ArraySet<String> sourcePerms, @NonNull String newPerm,
             @NonNull PermissionsState ps, @NonNull PackageParser.Package pkg,
             @UserIdInt int userId) {
-        AppOpsManager appOpsManager = mContext.getSystemService(AppOpsManager.class);
+        AppOpsManagerInternal appOpsManager = LocalServices.getService(AppOpsManagerInternal.class);
         String pkgName = pkg.packageName;
 
         if (pkg.applicationInfo.targetSdkVersion < Build.VERSION_CODES.M) {
@@ -1287,10 +1287,10 @@ public class PermissionManagerService {
                     String sourcePerm = sourcePerms.valueAt(i);
 
                     if (ps.hasRuntimePermission(sourcePerm, userId)) {
-                        String sourceOp = permissionToOp(sourcePerm);
+                        int sourceOp = permissionToOpCode(sourcePerm);
 
-                        if (sourceOp != null) {
-                            int mode = appOpsManager.unsafeCheckOpRaw(sourceOp,
+                        if (sourceOp != OP_NONE) {
+                            int mode = appOpsManager.checkOperationUnchecked(sourceOp,
                                     getUid(userId, getAppId(pkg.applicationInfo.uid)), pkgName);
 
                             if (mode == MODE_FOREGROUND || mode == MODE_ERRORED) {

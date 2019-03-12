@@ -1742,10 +1742,31 @@ public class AppOpsService extends IAppOpsService.Stub {
         return checkOperationUnchecked(code, uid, resolvedPackageName, raw);
     }
 
-    private int checkOperationUnchecked(int code, int uid, String packageName,
-                boolean raw) {
+    /**
+     * @see #checkOperationUnchecked(int, int, String, boolean, boolean)
+     */
+    private @Mode int checkOperationUnchecked(int code, int uid, @NonNull String packageName,
+            boolean raw) {
+        return checkOperationUnchecked(code, uid, packageName, raw, true);
+    }
+
+    /**
+     * Get the mode of an app-op.
+     *
+     * @param code The code of the op
+     * @param uid The uid of the package the op belongs to
+     * @param packageName The package the op belongs to
+     * @param raw If the raw state of eval-ed state should be checked.
+     * @param verify If the code should check the package belongs to the uid
+     *
+     * @return The mode of the op
+     */
+    private @Mode int checkOperationUnchecked(int code, int uid, @NonNull String packageName,
+                boolean raw, boolean verify) {
         synchronized (this) {
-            checkPackage(uid, packageName);
+            if (verify) {
+                checkPackage(uid, packageName);
+            }
             if (isOpRestrictedLocked(uid, code, packageName)) {
                 return AppOpsManager.MODE_IGNORED;
             }
@@ -1756,7 +1777,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                 final int rawMode = uidState.opModes.get(code);
                 return raw ? rawMode : uidState.evalMode(code, rawMode);
             }
-            Op op = getOpLocked(code, uid, packageName, false, true, false);
+            Op op = getOpLocked(code, uid, packageName, false, verify, false);
             if (op == null) {
                 return AppOpsManager.opToDefaultMode(code);
             }
@@ -2359,7 +2380,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         throw new IllegalArgumentException("Bad operation #" + op);
     }
 
-    private @NonNull UidState getUidStateLocked(int uid, boolean edit) {
+    private @Nullable UidState getUidStateLocked(int uid, boolean edit) {
         UidState uidState = mUidStates.get(uid);
         if (uidState == null) {
             if (!edit) {
@@ -4534,6 +4555,11 @@ public class AppOpsService extends IAppOpsService.Stub {
         @Override
         public void setAllPkgModesToDefault(int code, int uid) {
             AppOpsService.this.setAllPkgModesToDefault(code, uid);
+        }
+
+        @Override
+        public @Mode int checkOperationUnchecked(int code, int uid, @NonNull String packageName) {
+            return AppOpsService.this.checkOperationUnchecked(code, uid, packageName, true, false);
         }
     }
 }
