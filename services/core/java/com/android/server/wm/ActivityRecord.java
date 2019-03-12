@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import static android.app.ActivityManager.LOCK_TASK_MODE_NONE;
+import static android.app.ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND;
 import static android.app.ActivityManager.TaskDescription.ATTR_TASKDESCRIPTION_PREFIX;
 import static android.app.ActivityOptions.ANIM_CLIP_REVEAL;
 import static android.app.ActivityOptions.ANIM_CUSTOM;
@@ -2726,10 +2727,25 @@ final class ActivityRecord extends ConfigurationContainer {
         }
 
         final Rect parentAppBounds = parentConfig.windowConfiguration.getAppBounds();
-        if (parentAppBounds.width() < resolvedAppBounds.width()
-                || parentAppBounds.height() < resolvedAppBounds.height()) {
+        final int appWidth = resolvedAppBounds.width();
+        final int appHeight = resolvedAppBounds.height();
+        final int parentAppWidth = parentAppBounds.width();
+        final int parentAppHeight = parentAppBounds.height();
+        if (parentAppWidth < appWidth || parentAppHeight < appHeight) {
             // One side is larger than the parent.
             return true;
+        }
+
+        if (info.hasFixedAspectRatio()) {
+            final float aspectRatio = (0.5f + Math.max(appWidth, appHeight))
+                    / Math.min(appWidth, appHeight);
+            final float parentAspectRatio = (0.5f + Math.max(parentAppWidth, parentAppHeight))
+                    / Math.min(parentAppWidth, parentAppHeight);
+            // Check if the parent still has available space in long side.
+            if (aspectRatio < parentAspectRatio
+                    && (aspectRatio < info.maxAspectRatio || info.minAspectRatio > 0)) {
+                return true;
+            }
         }
 
         final Rect resolvedBounds = resolvedConfig.windowConfiguration.getBounds();
@@ -2930,8 +2946,27 @@ final class ActivityRecord extends ConfigurationContainer {
         }
 
         final ActivityDisplay display = getDisplay();
-        if (display != null) {
+        if (display == null) {
+            return;
+        }
+        if (visible) {
+            // It may toggle the UI for user to restart the size compatibility mode activity.
             display.handleActivitySizeCompatModeIfNeeded(this);
+        } else if (shouldUseSizeCompatMode()) {
+            // The override changes can only be obtained from display, because we don't have the
+            // difference of full configuration in each hierarchy.
+            final int displayChanges = display.getLastOverrideConfigurationChanges();
+            final int orientationChanges = CONFIG_WINDOW_CONFIGURATION
+                    | CONFIG_SCREEN_SIZE | CONFIG_ORIENTATION;
+            final boolean hasNonOrienSizeChanged = hasResizeChange(displayChanges)
+                    // Filter out the case of simple orientation change.
+                    && (displayChanges & orientationChanges) != orientationChanges;
+            // For background activity that uses size compatibility mode, if the size or density of
+            // the display is changed, then reset the override configuration and kill the activity's
+            // process if its process state is not important to user.
+            if (hasNonOrienSizeChanged || (displayChanges & ActivityInfo.CONFIG_DENSITY) != 0) {
+                restartProcessIfVisible();
+            }
         }
     }
 
@@ -3398,7 +3433,8 @@ final class ActivityRecord extends ConfigurationContainer {
     void restartProcessIfVisible() {
         Slog.i(TAG, "Request to restart process of " + this);
 
-        // Reset the existing override configuration to the latest configuration.
+        // Reset the existing override configuration so it can be updated according to the latest
+        // configuration.
         getRequestedOverrideConfiguration().setToDefaults();
         getResolvedOverrideConfiguration().setToDefaults();
         if (visible) {
@@ -3418,8 +3454,17 @@ final class ActivityRecord extends ConfigurationContainer {
             // Kill its process immediately because the activity should be in background.
             // The activity state will be update to {@link #DESTROYED} in
             // {@link ActivityStack#cleanUpActivityLocked} when handling process died.
-            mAtmService.mH.post(() -> mAtmService.mAmInternal.killProcess(
-                    app.mName, app.mUid, "restartActivityProcess"));
+            mAtmService.mH.post(() -> {
+                final WindowProcessController wpc;
+                synchronized (mAtmService.mGlobalLock) {
+                    if (!hasProcess()
+                            || app.getReportedProcState() <= PROCESS_STATE_IMPORTANT_FOREGROUND) {
+                        return;
+                    }
+                    wpc = app;
+                }
+                mAtmService.mAmInternal.killProcess(wpc.mName, wpc.mUid, "resetConfig");
+            });
             return;
         }
 
