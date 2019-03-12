@@ -680,7 +680,7 @@ public final class CameraManager {
         }
 
         /**
-         * Notify registered clients about a change in the camera access priorities.
+         * Called whenever camera access priorities change.
          *
          * <p>Notification that camera access priorities have changed and the camera may
          * now be openable. An application that was previously denied camera access due to
