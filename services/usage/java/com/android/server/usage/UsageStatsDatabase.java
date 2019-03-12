@@ -1166,7 +1166,8 @@ public class UsageStatsDatabase {
         if (beingRestored == null) return null;
         beingRestored.activeConfiguration = onDevice.activeConfiguration;
         beingRestored.configurations.putAll(onDevice.configurations);
-        beingRestored.events = onDevice.events;
+        beingRestored.events.clear();
+        beingRestored.events.merge(onDevice.events);
         return beingRestored;
     }
 

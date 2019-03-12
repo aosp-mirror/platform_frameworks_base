@@ -66,7 +66,7 @@ public class IntervalStats {
     public final ArrayMap<String, UsageStats> packageStats = new ArrayMap<>();
     public final ArrayMap<Configuration, ConfigurationStats> configurations = new ArrayMap<>();
     public Configuration activeConfiguration;
-    public EventList events = new EventList();
+    public final EventList events = new EventList();
 
     // A string cache. This is important as when we're parsing XML files, we don't want to
     // keep hundreds of strings that have the same contents. We will read the string
@@ -82,7 +82,7 @@ public class IntervalStats {
 
         public void commitTime(long timeStamp) {
             if (curStartTime != 0) {
-                duration += timeStamp - duration;
+                duration += timeStamp - curStartTime;
                 curStartTime = 0;
             }
         }
@@ -305,7 +305,9 @@ public class IntervalStats {
             UsageStats usageStats = getOrCreateUsageStats(packageName);
             usageStats.update(className, timeStamp, eventType, instanceId);
         }
-        endTime = timeStamp;
+        if (timeStamp > endTime) {
+            endTime = timeStamp;
+        }
     }
 
     /**
@@ -328,6 +330,9 @@ public class IntervalStats {
             event.mNotificationChannelId = getCachedStringRef(event.mNotificationChannelId);
         }
         events.insert(event);
+        if (event.mTimeStamp > endTime) {
+            endTime = event.mTimeStamp;
+        }
     }
 
     void updateChooserCounts(String packageName, String category, String action) {
@@ -360,8 +365,9 @@ public class IntervalStats {
             configStats.mActivationCount += 1;
             activeConfiguration = configStats.mConfiguration;
         }
-
-        endTime = timeStamp;
+        if (timeStamp > endTime) {
+            endTime = timeStamp;
+        }
     }
 
     void incrementAppLaunchCount(String packageName) {

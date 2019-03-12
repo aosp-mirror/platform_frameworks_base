@@ -334,7 +334,7 @@ class UserUsageStatsService {
                 final IntervalStats diskStats = mDatabase.getLatestUsageStats(
                         INTERVAL_DAILY);
                 StringBuilder sb = new StringBuilder(256);
-                sb.append("Last 24 hours of UsageStats missing! timeRange : ");
+                sb.append("Recent UsageStats missing! timeRange : ");
                 sb.append(beginTime);
                 sb.append(", ");
                 sb.append(endTime);
