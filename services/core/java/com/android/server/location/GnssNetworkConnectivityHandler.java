@@ -373,8 +373,8 @@ class GnssNetworkConnectivityHandler {
         networkAttributes = new NetworkAttributes();
         networkAttributes.mCapabilities = capabilities;
 
-        // TODO(b/119278134): The synchronous method ConnectivityManager.getNetworkInfo() must
-        // not be called inside the asynchronous ConnectivityManager.NetworkCallback methods.
+        // TODO: The synchronous method ConnectivityManager.getNetworkInfo() should not be called
+        //       inside the asynchronous ConnectivityManager.NetworkCallback methods.
         NetworkInfo info = mConnMgr.getNetworkInfo(network);
         if (info != null) {
             networkAttributes.mApn = info.getExtraInfo();
@@ -387,8 +387,8 @@ class GnssNetworkConnectivityHandler {
     }
 
     private void handleSuplConnectionAvailable(Network network) {
-        // TODO(b/119278134): The synchronous method ConnectivityManager.getNetworkInfo() must
-        // not be called inside the asynchronous ConnectivityManager.NetworkCallback methods.
+        // TODO: The synchronous method ConnectivityManager.getNetworkInfo() should not be called
+        //       inside the asynchronous ConnectivityManager.NetworkCallback methods.
         NetworkInfo info = mConnMgr.getNetworkInfo(network);
         String apn = null;
         if (info != null) {
@@ -509,8 +509,8 @@ class GnssNetworkConnectivityHandler {
         }
     }
 
-    // TODO(25876485): Delete this method when all devices upgrade to HAL @2.0::IAGnssCallback
-    //                 interface which does not require setting route to host.
+    // TODO: Delete this method when all devices upgrade to HAL @2.0::IAGnssCallback
+    //       interface which does not require setting route to host.
     private void setRouting() {
         boolean result = mConnMgr.requestRouteToHostAddress(
                 ConnectivityManager.TYPE_MOBILE_SUPL,
