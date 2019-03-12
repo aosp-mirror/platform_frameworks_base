@@ -28,6 +28,14 @@ package android.app.admin {
 
 }
 
+package android.app.usage {
+
+  public final class UsageStatsManager {
+    method @Deprecated @RequiresPermission(android.Manifest.permission.OBSERVE_APP_USAGE) public void registerUsageSessionObserver(int, @NonNull String[], long, @NonNull java.util.concurrent.TimeUnit, long, @NonNull java.util.concurrent.TimeUnit, @NonNull android.app.PendingIntent, @Nullable android.app.PendingIntent);
+  }
+
+}
+
 package android.content {
 
   public class Intent implements java.lang.Cloneable android.os.Parcelable {

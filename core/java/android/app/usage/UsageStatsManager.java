@@ -660,6 +660,30 @@ public final class UsageStatsManager {
         }
     }
 
+
+    /**
+     * @deprecated use {@link #registerUsageSessionObserver(int, String[], Duration, Duration,
+     *                                                      PendingIntent, PendingIntent)}.
+     *
+     * @removed
+     * @hide
+     */
+    @Deprecated
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.OBSERVE_APP_USAGE)
+    // STOPSHIP b/128455269: remove this method
+    public void registerUsageSessionObserver(int sessionObserverId,
+            @NonNull String[] observedEntities, long timeLimit, @NonNull TimeUnit timeUnit,
+            long sessionThresholdTime,  @NonNull TimeUnit sessionThresholdTimeUnit,
+            @NonNull PendingIntent limitReachedCallbackIntent,
+            @Nullable PendingIntent sessionEndCallbackIntent) {
+        final Duration timeLimitDuration = Duration.ofMillis(timeUnit.toMillis(timeLimit));
+        final Duration sessionThresholdDuration =
+                Duration.ofMillis(sessionThresholdTimeUnit.toMillis(sessionThresholdTime));
+        registerUsageSessionObserver(sessionObserverId, observedEntities, timeLimitDuration,
+                sessionThresholdDuration, limitReachedCallbackIntent, sessionEndCallbackIntent);
+    }
+
     /**
      * Register a usage session observer that receives a callback on the provided {@code
      * limitReachedCallbackIntent} when the sum of usages of apps and tokens in the {@code
@@ -679,11 +703,8 @@ public final class UsageStatsManager {
      *                         null and must include at least one package or token.
      * @param timeLimit The total time the set of apps can be used continuously before the {@code
      *                  limitReachedCallbackIntent} is delivered. Must be at least one minute.
-     * @param timeUnit The unit for time specified in {@code timeLimit}. Cannot be null.
      * @param sessionThresholdTime The time that can take place between usage sessions before the
      *                             next session is considered a new session. Must be non-negative.
-     * @param sessionThresholdTimeUnit The unit for time specified in {@code sessionThreshold}.
-     *                                 Cannot be null.
      * @param limitReachedCallbackIntent The {@link PendingIntent} that will be dispatched when the
      *                                   usage limit is exceeded by the group of apps. The
      *                                   delivered Intent will also contain the extras {@link
@@ -703,14 +724,13 @@ public final class UsageStatsManager {
     @SystemApi
     @RequiresPermission(android.Manifest.permission.OBSERVE_APP_USAGE)
     public void registerUsageSessionObserver(int sessionObserverId,
-            @NonNull String[] observedEntities, long timeLimit, @NonNull TimeUnit timeUnit,
-            long sessionThresholdTime,  @NonNull TimeUnit sessionThresholdTimeUnit,
+            @NonNull String[] observedEntities, @NonNull Duration timeLimit,
+            @NonNull Duration sessionThresholdTime,
             @NonNull PendingIntent limitReachedCallbackIntent,
             @Nullable PendingIntent sessionEndCallbackIntent) {
         try {
             mService.registerUsageSessionObserver(sessionObserverId, observedEntities,
-                    timeUnit.toMillis(timeLimit),
-                    sessionThresholdTimeUnit.toMillis(sessionThresholdTime),
+                    timeLimit.toMillis(), sessionThresholdTime.toMillis(),
                     limitReachedCallbackIntent, sessionEndCallbackIntent,
                     mContext.getOpPackageName());
         } catch (RemoteException e) {
