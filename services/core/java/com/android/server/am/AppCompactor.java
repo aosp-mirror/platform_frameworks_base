@@ -425,9 +425,10 @@ public final class AppCompactor {
                         long zramFreeKbAfter = Debug.getZramFreeKb();
                         EventLog.writeEvent(EventLogTags.AM_COMPACT, pid, name, action,
                                 rssBefore[0], rssBefore[1], rssBefore[2], rssBefore[3],
-                                rssAfter[0], rssAfter[1], rssAfter[2], rssAfter[3], time,
+                                rssAfter[0] - rssBefore[0], rssAfter[1] - rssBefore[1],
+                                rssAfter[2] - rssBefore[2], rssAfter[3] - rssBefore[3], time,
                                 lastCompactAction, lastCompactTime, msg.arg1, msg.arg2,
-                                zramFreeKbBefore, zramFreeKbAfter);
+                                zramFreeKbBefore, zramFreeKbAfter - zramFreeKbBefore);
                         // Note that as above not taking mPhenoTypeFlagLock here to avoid locking
                         // on every single compaction for a flag that will seldom change and the
                         // impact of reading the wrong value here is low.
