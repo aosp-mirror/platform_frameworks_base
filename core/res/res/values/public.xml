@@ -3006,8 +3006,6 @@
     <public-group type="dimen" first-id="0x01050007">
         <!-- @hide @SystemApi -->
         <public name="config_restrictedIconSize" />
-        <!-- @hide @SystemApi -->
-        <public name="config_mediaMetadataBitmapMaxSize" />
     </public-group>
 
     <public-group type="color" first-id="0x0106001c">

@@ -166,7 +166,7 @@ public final class MediaSession {
             SessionLink sessionLink = manager.createSession(cbLink, tag, sessionInfo);
             mImpl = new MediaSessionEngine(context, sessionLink, cbLink);
             mMaxBitmapSize = context.getResources().getDimensionPixelSize(
-                    android.R.dimen.config_mediaMetadataBitmapMaxSize);
+                    com.android.internal.R.dimen.config_mediaMetadataBitmapMaxSize);
         } catch (RuntimeException e) {
             throw new RuntimeException("Remote error creating session.", e);
         }

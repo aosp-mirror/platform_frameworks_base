@@ -553,8 +553,7 @@ public class AudioManager {
      * request is from a hardware key press. (e.g. {@link MediaController}).
      * @hide
      */
-    @SystemApi
-    public static final int FLAG_FROM_KEY = 1 << 16;
+    public static final int FLAG_FROM_KEY = 1 << 12;
 
     // The iterator of TreeMap#entrySet() returns the entries in ascending key order.
     private static final TreeMap<Integer, String> FLAG_NAMES = new TreeMap<>();
