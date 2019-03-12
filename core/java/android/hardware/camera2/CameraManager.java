@@ -314,12 +314,10 @@ public final class CameraManager {
                 } else {
                     // Normal path: Get the camera characteristics directly from the camera service
                     CameraMetadataNative info = cameraService.getCameraCharacteristics(cameraId);
-                    if (!isHiddenPhysicalCamera(cameraId)) {
-                        try {
-                            info.setCameraId(Integer.parseInt(cameraId));
-                        } catch (NumberFormatException e) {
-                            Log.e(TAG, "Failed to parse camera Id " + cameraId + " to integer");
-                        }
+                    try {
+                        info.setCameraId(Integer.parseInt(cameraId));
+                    } catch (NumberFormatException e) {
+                        Log.e(TAG, "Failed to parse camera Id " + cameraId + " to integer");
                     }
                     info.setDisplaySize(displaySize);
 
