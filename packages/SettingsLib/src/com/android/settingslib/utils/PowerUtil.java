@@ -223,12 +223,19 @@ public class PowerUtil {
     }
 
     private static String getRegularTimeRemainingShortString(Context context, long drainTimeMs) {
-        // Get the time remaining rounded to the nearest 15 min
-        final long roundedTimeMs = roundTimeToNearestThreshold(drainTimeMs, FIFTEEN_MINUTES_MILLIS);
-        CharSequence timeString = StringUtil.formatElapsedTime(context, roundedTimeMs,
-                false /* withSeconds */);
+        // Get the time of day we think device will die rounded to the nearest 15 min.
+        final long roundedTimeOfDayMs =
+                roundTimeToNearestThreshold(
+                        System.currentTimeMillis() + drainTimeMs,
+                        FIFTEEN_MINUTES_MILLIS);
 
-        return context.getString(R.string.power_remaining_duration_only_short, timeString);
+        // convert the time to a properly formatted string.
+        String skeleton = android.text.format.DateFormat.getTimeFormatString(context);
+        DateFormat fmt = DateFormat.getInstanceForSkeleton(skeleton);
+        Date date = Date.from(Instant.ofEpochMilli(roundedTimeOfDayMs));
+        CharSequence timeString = fmt.format(date);
+
+        return context.getString(R.string.power_discharge_by_only_short, timeString);
     }
 
     public static long convertUsToMs(long timeUs) {
