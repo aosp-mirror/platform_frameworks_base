@@ -5577,6 +5577,7 @@ package android.telephony {
     field public static final int ACCESS_BLOCK_ALL = 2088; // 0x828
     field public static final int ACCESS_CLASS_DSAC_REJECTION = 2108; // 0x83c
     field public static final int ACCESS_CONTROL_LIST_CHECK_FAILURE = 2128; // 0x850
+    field public static final int ACCESS_PROBE_LIMIT_REACHED = 2079; // 0x81f
     field public static final int ACTIVATION_REJECTED_BCM_VIOLATION = 48; // 0x30
     field public static final int ACTIVATION_REJECT_GGSN = 30; // 0x1e
     field public static final int ACTIVATION_REJECT_UNSPECIFIED = 31; // 0x1f
@@ -5691,7 +5692,9 @@ package android.telephony {
     field public static final int INVALID_PRIMARY_NSAPI = 2158; // 0x86e
     field public static final int INVALID_SIM_STATE = 2224; // 0x8b0
     field public static final int INVALID_TRANSACTION_ID = 81; // 0x51
+    field public static final int IPV4_CONNECTIONS_LIMIT_REACHED = 2052; // 0x804
     field public static final int IPV6_ADDRESS_TRANSFER_FAILED = 2047; // 0x7ff
+    field public static final int IPV6_CONNECTIONS_LIMIT_REACHED = 2053; // 0x805
     field public static final int IPV6_PREFIX_UNAVAILABLE = 2250; // 0x8ca
     field public static final int IP_ADDRESS_MISMATCH = 119; // 0x77
     field public static final int IP_VERSION_MISMATCH = 2055; // 0x807
@@ -5710,10 +5713,6 @@ package android.telephony {
     field public static final int MAC_FAILURE = 2183; // 0x887
     field public static final int MAXIMIUM_NSAPIS_EXCEEDED = 2157; // 0x86d
     field public static final int MAXINUM_SIZE_OF_L2_MESSAGE_EXCEEDED = 2166; // 0x876
-    field public static final int MAX_ACCESS_PROBE = 2079; // 0x81f
-    field public static final int MAX_IPV4_CONNECTIONS = 2052; // 0x804
-    field public static final int MAX_IPV6_CONNECTIONS = 2053; // 0x805
-    field public static final int MAX_PPP_INACTIVITY_TIMER_EXPIRED = 2046; // 0x7fe
     field public static final int MESSAGE_INCORRECT_SEMANTIC = 95; // 0x5f
     field public static final int MESSAGE_TYPE_UNSUPPORTED = 97; // 0x61
     field public static final int MIP_CONFIG_FAILURE = 2050; // 0x802
@@ -5822,6 +5821,7 @@ package android.telephony {
     field public static final int PPP_AUTH_FAILURE = 2229; // 0x8b5
     field public static final int PPP_CHAP_FAILURE = 2232; // 0x8b8
     field public static final int PPP_CLOSE_IN_PROGRESS = 2233; // 0x8b9
+    field public static final int PPP_INACTIVITY_TIMER_EXPIRED = 2046; // 0x7fe
     field public static final int PPP_OPTION_MISMATCH = 2230; // 0x8b6
     field public static final int PPP_PAP_FAILURE = 2231; // 0x8b7
     field public static final int PPP_TIMEOUT = 2228; // 0x8b4
