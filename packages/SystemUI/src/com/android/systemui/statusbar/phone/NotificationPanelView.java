@@ -192,7 +192,6 @@ public class NotificationPanelView extends PanelView implements
     protected int mQsMinExpansionHeight;
     protected int mQsMaxExpansionHeight;
     private int mQsPeekHeight;
-    private int mBouncerTop;
     private boolean mStackScrollerOverscrolling;
     private boolean mQsExpansionFromOverscroll;
     private float mLastOverscroll;
@@ -325,6 +324,7 @@ public class NotificationPanelView extends PanelView implements
     private final ShadeController mShadeController =
             Dependency.get(ShadeController.class);
     private int mDisplayId;
+    private KeyguardBouncer mBouncer;
 
     @Inject
     public NotificationPanelView(@Named(VIEW_CONTEXT) Context context, AttributeSet attrs,
@@ -670,11 +670,6 @@ public class NotificationPanelView extends PanelView implements
             }
         }
         return count;
-    }
-
-    public void setBouncerTop(int bouncerTop) {
-        mBouncerTop = bouncerTop;
-        positionClockAndNotifications();
     }
 
     private void updateClock() {
@@ -1717,7 +1712,6 @@ public class NotificationPanelView extends PanelView implements
         }
         updateExpandedHeight(expandedHeight);
         updateHeader();
-        updateUnlockIcon();
         updateNotificationTranslucency();
         updatePanelExpanded();
         if (DEBUG) {
@@ -1810,19 +1804,6 @@ public class NotificationPanelView extends PanelView implements
         return mNotificationStackScroller.getCurrentOverScrolledPixels(true /* top */);
     }
 
-    private void updateUnlockIcon() {
-        if (mBarState == StatusBarState.KEYGUARD
-                || mBarState == StatusBarState.SHADE_LOCKED) {
-            boolean active = getMaxPanelHeight() - getExpandedHeight() > mUnlockMoveDistance;
-            KeyguardAffordanceView lockIcon = mKeyguardBottomArea.getLockIcon();
-            if (active != mUnlockIconActive && mTracking) {
-                lockIcon.setImageAlpha(lockIcon.getRestingAlpha(), true, 150,
-                        Interpolators.FAST_OUT_LINEAR_IN, null);
-            }
-            mUnlockIconActive = active;
-        }
-    }
-
     /**
      * Hides the header when notifications are colliding with it.
      */
@@ -1889,7 +1870,7 @@ public class NotificationPanelView extends PanelView implements
                         ? 0 : KeyguardBouncer.ALPHA_EXPANSION_THRESHOLD, 1f,
                 0f, 1f, getExpandedFraction());
         float alpha = Math.min(expansionAlpha, 1 - getQsExpansionFraction());
-        mKeyguardBottomArea.setAlpha(alpha);
+        mKeyguardBottomArea.setAffordanceAlpha(alpha);
         mKeyguardBottomArea.setImportantForAccessibility(alpha == 0f
                 ? IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
                 : IMPORTANT_FOR_ACCESSIBILITY_AUTO);
@@ -2036,11 +2017,6 @@ public class NotificationPanelView extends PanelView implements
             if (!mHintAnimationRunning) {
                 mAffordanceHelper.reset(true);
             }
-        }
-        if (!expand && (mBarState == StatusBarState.KEYGUARD
-                || mBarState == StatusBarState.SHADE_LOCKED)) {
-            KeyguardAffordanceView lockIcon = mKeyguardBottomArea.getLockIcon();
-            lockIcon.setImageAlpha(0.0f, true, 100, Interpolators.FAST_OUT_LINEAR_IN, null);
         }
     }
 
@@ -2191,22 +2167,6 @@ public class NotificationPanelView extends PanelView implements
             return;
         }
         super.startUnlockHintAnimation();
-        startHighlightIconAnimation(getCenterIcon());
-    }
-
-    /**
-     * Starts the highlight (making it fully opaque) animation on an icon.
-     */
-    private void startHighlightIconAnimation(final KeyguardAffordanceView icon) {
-        icon.setImageAlpha(1.0f, true, KeyguardAffordanceHelper.HINT_PHASE1_DURATION,
-                Interpolators.FAST_OUT_SLOW_IN, new Runnable() {
-                    @Override
-                    public void run() {
-                        icon.setImageAlpha(icon.getRestingAlpha(),
-                                true /* animate */, KeyguardAffordanceHelper.HINT_PHASE1_DURATION,
-                                Interpolators.FAST_OUT_SLOW_IN, null);
-                    }
-                });
     }
 
     @Override
@@ -2945,6 +2905,7 @@ public class NotificationPanelView extends PanelView implements
     public void onBouncerPreHideAnimation() {
         setKeyguardStatusViewVisibility(mBarState, true /* keyguardFadingAway */,
                 false /* goingToFullShade */);
+        updateLockIcon();
     }
 
     @Override
@@ -3033,5 +2994,55 @@ public class NotificationPanelView extends PanelView implements
 
     public void showTransientIndication(int id) {
         mKeyguardBottomArea.showTransientIndication(id);
+    }
+
+    /**
+     * Sets the reference to the {@link KeyguardBouncer}.
+     */
+    public void setBouncer(KeyguardBouncer bouncer) {
+        mBouncer = bouncer;
+        updateLockIcon();
+    }
+
+    public void updateLockIcon() {
+        if (mBouncer == null) {
+            return;
+        }
+
+        ViewGroup bouncerContainer = mBouncer.getLockIconContainer();
+        LockIcon lockIcon = mKeyguardBottomArea.getLockIcon();
+
+        if (mBouncer.isAnimatingAway()) {
+            if (!lockIcon.isAnimatingAlpha() && lockIcon.getAlpha() != 0) {
+                lockIcon.setImageAlpha(0, true /* animate */);
+            }
+            // Let's not re-apply the translation if the bouncer is animating, its
+            // animation also includes translation and transition would be jarring.
+            return;
+        }
+
+        float translation = 0;
+        if (bouncerContainer != null) {
+            float bottomAreaContainerY = getCommonTop(lockIcon);
+            float bouncerLockY = getCommonTop(bouncerContainer);
+            if (bouncerLockY < bottomAreaContainerY) {
+                translation = bouncerLockY - bottomAreaContainerY;
+            }
+        }
+        lockIcon.setTranslationY(translation);
+
+        if (lockIcon.getAlpha() != 1) {
+            lockIcon.setImageAlpha(1, false /* animate */);
+        }
+    }
+
+    private static float getCommonTop(View view) {
+        float y = view.getTop();
+        ViewGroup parent = (ViewGroup) view.getParent();
+        while (!(parent instanceof StatusBarWindowView)) {
+            y += parent.getY();
+            parent = (ViewGroup) parent.getParent();
+        }
+        return y;
     }
 }

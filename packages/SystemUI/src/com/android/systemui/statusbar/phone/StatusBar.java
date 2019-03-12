@@ -882,7 +882,6 @@ public class StatusBar extends SystemUI implements DemoMode,
                         mNotificationPanel.getLockIcon());
         mNotificationPanel.setKeyguardIndicationController(mKeyguardIndicationController);
 
-
         mAmbientIndicationContainer = mStatusBarWindow.findViewById(
                 R.id.ambient_indication_container);
 
@@ -1220,6 +1219,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mKeyguardViewMediatorCallback = keyguardViewMediator.getViewMediatorCallback();
         mLightBarController.setBiometricUnlockController(mBiometricUnlockController);
         mMediaManager.setBiometricUnlockController(mBiometricUnlockController);
+        mNotificationPanel.setBouncer(mStatusBarKeyguardViewManager.getBouncer());
         Dependency.get(KeyguardDismissUtil.class).setDismissHandler(this::executeWhenUnlocked);
         Trace.endSection();
     }

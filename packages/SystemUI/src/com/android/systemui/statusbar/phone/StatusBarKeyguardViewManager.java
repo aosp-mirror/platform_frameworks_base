@@ -166,14 +166,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         mBouncer = SystemUIFactory.getInstance().createKeyguardBouncer(mContext,
                 mViewMediatorCallback, mLockPatternUtils, container, dismissCallbackRegistry,
                 mExpansionCallback);
-        mContainer.addOnLayoutChangeListener(this::onContainerLayout);
         mNotificationPanelView = notificationPanelView;
         notificationPanelView.setExpansionListener(this::onPanelExpansionChanged);
-    }
-
-    private void onContainerLayout(View v, int left, int top, int right, int bottom,
-            int oldLeft, int oldTop, int oldRight, int oldBottom) {
-        mNotificationPanelView.setBouncerTop(mBouncer.getTop());
     }
 
     @VisibleForTesting
@@ -198,6 +192,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
                 mBouncer.show(false /* resetSecuritySelection */, false /* scrimmed */);
             }
         }
+        mNotificationPanelView.updateLockIcon();
     }
 
     /**
@@ -793,6 +788,10 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     @Override
     public void onDozingChanged(boolean isDozing) {
         setDozing(isDozing);
+    }
+
+    public KeyguardBouncer getBouncer() {
+        return mBouncer;
     }
 
     private static class DismissWithActionRequest {

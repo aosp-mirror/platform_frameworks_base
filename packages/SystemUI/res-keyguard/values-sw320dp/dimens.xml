@@ -21,6 +21,6 @@
 
     <!-- Height of the sliding KeyguardSecurityContainer
          (includes 2x keyguard_security_view_top_margin) -->
-    <dimen name="keyguard_security_height">345dp</dimen>
+    <dimen name="keyguard_security_height">395dp</dimen>
 
 </resources>

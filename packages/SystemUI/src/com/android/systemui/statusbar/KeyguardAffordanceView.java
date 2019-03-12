@@ -492,13 +492,10 @@ public class KeyguardAffordanceView extends ImageView {
             int currentAlpha = getImageAlpha();
             ValueAnimator animator = ValueAnimator.ofInt(currentAlpha, endAlpha);
             mAlphaAnimator = animator;
-            animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-                @Override
-                public void onAnimationUpdate(ValueAnimator animation) {
-                    int alpha = (int) animation.getAnimatedValue();
-                    if (background != null) background.mutate().setAlpha(alpha);
-                    setImageAlpha(alpha);
-                }
+            animator.addUpdateListener(animation -> {
+                int alpha1 = (int) animation.getAnimatedValue();
+                if (background != null) background.mutate().setAlpha(alpha1);
+                setImageAlpha(alpha1);
             });
             animator.addListener(mAlphaEndListener);
             if (interpolator == null) {
@@ -518,6 +515,10 @@ public class KeyguardAffordanceView extends ImageView {
             }
             animator.start();
         }
+    }
+
+    public boolean isAnimatingAlpha() {
+        return mAlphaAnimator != null;
     }
 
     private Animator.AnimatorListener getEndListener(final Runnable runnable) {

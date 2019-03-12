@@ -831,6 +831,15 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         }
     }
 
+    /**
+     * Sets the alpha of the indication areas and affordances, excluding the lock icon.
+     */
+    public void setAffordanceAlpha(float alpha) {
+        mLeftAffordanceView.setAlpha(alpha);
+        mRightAffordanceView.setAlpha(alpha);
+        mIndicationArea.setAlpha(alpha);
+    }
+
     private class DefaultLeftButton implements IntentButton {
 
         private IconState mIconState = new IconState();
