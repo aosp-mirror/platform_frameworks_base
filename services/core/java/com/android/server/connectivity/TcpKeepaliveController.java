@@ -215,18 +215,20 @@ public class TcpKeepaliveController {
      * Start monitoring incoming packets.
      *
      * @param fd socket fd to monitor.
-     * @param messenger a callback to notify socket status.
+     * @param ki a {@link KeepaliveInfo} that tracks information about a socket keepalive.
      * @param slot keepalive slot.
      */
     public void startSocketMonitor(@NonNull final FileDescriptor fd,
-            @NonNull final KeepaliveInfo ki, final int slot) {
+            @NonNull final KeepaliveInfo ki, final int slot)
+            throws IllegalArgumentException, InvalidSocketException {
         synchronized (mListeners) {
             if (null != mListeners.get(slot)) {
                 throw new IllegalArgumentException("This slot is already taken");
             }
             for (int i = 0; i < mListeners.size(); ++i) {
                 if (fd.equals(mListeners.valueAt(i))) {
-                    throw new IllegalArgumentException("This fd is already registered");
+                    Log.e(TAG, "This fd is already registered.");
+                    throw new InvalidSocketException(ERROR_INVALID_SOCKET);
                 }
             }
             mFdHandlerQueue.addOnFileDescriptorEventListener(fd, FD_EVENTS, (readyFd, events) -> {

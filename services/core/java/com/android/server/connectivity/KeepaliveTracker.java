@@ -239,7 +239,12 @@ public class KeepaliveTracker {
                                 .sendMessage(CMD_START_SOCKET_KEEPALIVE, slot, mInterval, mPacket);
                         break;
                     case TYPE_TCP:
-                        mTcpController.startSocketMonitor(mFd, this, mSlot);
+                        try {
+                            mTcpController.startSocketMonitor(mFd, this, mSlot);
+                        } catch (InvalidSocketException e) {
+                            handleStopKeepalive(mNai, mSlot, ERROR_INVALID_SOCKET);
+                            return;
+                        }
                         mNai.asyncChannel
                                 .sendMessage(CMD_ADD_KEEPALIVE_PACKET_FILTER, slot, 0 /* Unused */,
                                         mPacket);
