@@ -29,7 +29,6 @@ import com.android.internal.util.IndentingPrintWriter;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.List;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -37,7 +36,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * A Simple Surface for Telephony to notify a loosely-coupled debugger of particular issues.
  *
- * DebugEventReporter allows an optional external logging component to receive events detected by
+ * AnomalyReporter allows an optional external logging component to receive events detected by
  * the framework and take action. This log surface is designed to provide maximium flexibility
  * to the receiver of these events. Envisioned use cases of this include notifying a vendor
  * component of: an event that necessitates (timely) log collection on non-AOSP components;
@@ -49,8 +48,8 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @hide
  */
-public final class DebugEventReporter {
-    private static final String TAG = "DebugEventReporter";
+public final class AnomalyReporter {
+    private static final String TAG = "AnomalyReporter";
 
     private static Context sContext = null;
 
@@ -63,12 +62,12 @@ public final class DebugEventReporter {
      */
     private static String sDebugPackageName = null;
 
-    private DebugEventReporter() {};
+    private AnomalyReporter() {};
 
     /**
      * If enabled, build and send an intent to a Debug Service for logging.
      *
-     * This method sends the {@link TelephonyManager#DEBUG_EVENT DEBUG_EVENT} broadcast, which is
+     * This method sends the {@link TelephonyManager#ACTION_ANOMALY_REPORTED} broadcast, which is
      * system protected. Invoking this method unless you are the system will result in an error.
      *
      * @param eventId a fixed event ID that will be sent for each instance of the same event. This
@@ -77,9 +76,9 @@ public final class DebugEventReporter {
      *        identification and discussion of this event. This description should ideally be
      *        static and must not contain any sensitive information (especially PII).
      */
-    public static void sendEvent(@NonNull UUID eventId, String description) {
+    public static void reportAnomaly(@NonNull UUID eventId, String description) {
         if (sContext == null) {
-            Rlog.w(TAG, "DebugEventReporter not yet initialized, dropping event=" + eventId);
+            Rlog.w(TAG, "AnomalyReporter not yet initialized, dropping event=" + eventId);
             return;
         }
 
@@ -94,28 +93,28 @@ public final class DebugEventReporter {
         // so drop these events silently.
         if (sDebugPackageName == null) return;
 
-        Intent dbgIntent = new Intent(TelephonyManager.ACTION_DEBUG_EVENT);
-        dbgIntent.putExtra(TelephonyManager.EXTRA_DEBUG_EVENT_ID, new ParcelUuid(eventId));
+        Intent dbgIntent = new Intent(TelephonyManager.ACTION_ANOMALY_REPORTED);
+        dbgIntent.putExtra(TelephonyManager.EXTRA_ANOMALY_ID, new ParcelUuid(eventId));
         if (description != null) {
-            dbgIntent.putExtra(TelephonyManager.EXTRA_DEBUG_EVENT_DESCRIPTION, description);
+            dbgIntent.putExtra(TelephonyManager.EXTRA_ANOMALY_DESCRIPTION, description);
         }
         dbgIntent.setPackage(sDebugPackageName);
         sContext.sendBroadcast(dbgIntent, android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE);
     }
 
     /**
-     * Initialize the DebugEventReporter with the current context.
+     * Initialize the AnomalyReporter with the current context.
      *
-     * This method must be invoked before any calls to sendEvent() will succeed. This method should
-     * only be invoked at most once.
+     * This method must be invoked before any calls to reportAnomaly() will succeed. This method
+     * should only be invoked at most once.
      *
-     * @param context a Context object used to initialize this singleton DebugEventReporter in
+     * @param context a Context object used to initialize this singleton AnomalyReporter in
      *        the current process.
      */
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public static void initialize(@NonNull Context context) {
         if (context == null) {
-            throw new IllegalArgumentException("DebugEventReporter needs a non-null context.");
+            throw new IllegalArgumentException("AnomalyReporter needs a non-null context.");
         }
 
         // Ensure that this context has sufficient permissions to send debug events.
@@ -129,13 +128,13 @@ public final class DebugEventReporter {
         PackageManager pm = sContext.getPackageManager();
         if (pm == null) return;
         List<ResolveInfo> packages = pm.queryBroadcastReceivers(
-                new Intent(TelephonyManager.ACTION_DEBUG_EVENT),
+                new Intent(TelephonyManager.ACTION_ANOMALY_REPORTED),
                 PackageManager.MATCH_SYSTEM_ONLY
                         | PackageManager.MATCH_DIRECT_BOOT_AWARE
                         | PackageManager.MATCH_DIRECT_BOOT_UNAWARE);
         if (packages == null || packages.isEmpty()) return;
         if (packages.size() > 1) {
-            Rlog.e(TAG, "Multiple DebugEvent Receivers installed.");
+            Rlog.e(TAG, "Multiple Anomaly Receivers installed.");
         }
 
         for (ResolveInfo r : packages) {
@@ -156,14 +155,14 @@ public final class DebugEventReporter {
         // Initialization may only be performed once.
     }
 
-    /** Dump the contents of the DebugEventReporter */
+    /** Dump the contents of the AnomalyReporter */
     public static void dump(FileDescriptor fd, PrintWriter printWriter, String[] args) {
         if (sContext == null) return;
         IndentingPrintWriter pw = new IndentingPrintWriter(printWriter, "  ");
         sContext.enforceCallingOrSelfPermission(android.Manifest.permission.DUMP, "Requires DUMP");
         pw.println("Initialized=" + (sContext != null ? "Yes" : "No"));
         pw.println("Debug Package=" + sDebugPackageName);
-        pw.println("Event Counts:");
+        pw.println("Anomaly Counts:");
         pw.increaseIndent();
         for (UUID event : sEvents.keySet()) {
             pw.println(event + ": " + sEvents.get(event));
