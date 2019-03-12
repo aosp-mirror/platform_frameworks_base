@@ -1301,8 +1301,7 @@ public class ApplicationPackageManager extends PackageManager {
     }
 
     @Override public Drawable getDefaultActivityIcon() {
-        return Resources.getSystem().getDrawable(
-            com.android.internal.R.drawable.sym_def_app_icon);
+        return mContext.getDrawable(com.android.internal.R.drawable.sym_def_app_icon);
     }
 
     @Override public Drawable getApplicationIcon(ApplicationInfo info) {
@@ -1440,7 +1439,7 @@ public class ApplicationPackageManager extends PackageManager {
         if (density <= 0) {
             density = mContext.getResources().getDisplayMetrics().densityDpi;
         }
-        return Resources.getSystem().getDrawableForDensity(drawableId, density);
+        return mContext.getResources().getDrawableForDensity(drawableId, density);
     }
 
     private Drawable getManagedProfileIconForDensity(UserHandle user, int drawableId, int density) {
