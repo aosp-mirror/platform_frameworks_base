@@ -17,6 +17,7 @@
 package com.android.internal.telephony;
 
 import android.telephony.AvailableNetworkInfo;
+import com.android.internal.telephony.IUpdateAvailableNetworksCallback;
 
 interface IOns {
 
@@ -93,9 +94,9 @@ interface IOns {
      * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}.
      *  @param availableNetworks is a list of available network information.
      *  @param callingPackage caller's package name
-     *  @return true if request is accepted
+     *  @param callback callback upon request completion.
      *
      */
-    boolean updateAvailableNetworks(in List<AvailableNetworkInfo> availableNetworks,
-            String callingPackage);
+    void updateAvailableNetworks(in List<AvailableNetworkInfo> availableNetworks,
+            IUpdateAvailableNetworksCallback callbackStub, String callingPackage);
 }
