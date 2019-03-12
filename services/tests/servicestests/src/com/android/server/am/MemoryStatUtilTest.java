@@ -21,6 +21,7 @@ import static com.android.server.am.MemoryStatUtil.JIFFY_NANOS;
 import static com.android.server.am.MemoryStatUtil.MemoryStat;
 import static com.android.server.am.MemoryStatUtil.PAGE_SIZE;
 import static com.android.server.am.MemoryStatUtil.parseCmdlineFromProcfs;
+import static com.android.server.am.MemoryStatUtil.parseIonHeapSizeFromDebugfs;
 import static com.android.server.am.MemoryStatUtil.parseMemoryStatFromMemcg;
 import static com.android.server.am.MemoryStatUtil.parseMemoryStatFromProcfs;
 import static com.android.server.am.MemoryStatUtil.parseVmHWMFromProcfs;
@@ -178,6 +179,33 @@ public class MemoryStatUtilTest {
             + "voluntary_ctxt_switches:\t903\n"
             + "nonvoluntary_ctxt_switches:\t104\n";
 
+    private static final String DEBUG_SYSTEM_ION_HEAP_CONTENTS = String.join(
+            "          client              pid             size\n",
+            "----------------------------------------------------\n",
+            " audio@2.0-servi              765             4096\n",
+            " audio@2.0-servi              765            61440\n",
+            " audio@2.0-servi              765             4096\n",
+            "     voip_client               96             8192\n",
+            "     voip_client               96             4096\n",
+            "   system_server             1232         16728064\n",
+            "  surfaceflinger              611         50642944\n",
+            "----------------------------------------------------\n",
+            "orphaned allocations (info is from last known client):\n",
+            "----------------------------------------------------\n",
+            "  total orphaned                0\n",
+            "          total          55193600\n",
+            "   deferred free                0\n",
+            "----------------------------------------------------\n",
+            "0 order 4 highmem pages in uncached pool = 0 total\n",
+            "0 order 4 lowmem pages in uncached pool = 0 total\n",
+            "1251 order 4 lowmem pages in cached pool = 81985536 total\n",
+            "VMID 8: 0 order 4 highmem pages in secure pool = 0 total\n",
+            "VMID  8: 0 order 4 lowmem pages in secure pool = 0 total\n",
+            "--------------------------------------------\n",
+            "uncached pool = 4096 cached pool = 83566592 secure pool = 0\n",
+            "pool total (uncached + cached + secure) = 83570688\n",
+            "--------------------------------------------\n");
+
     @Test
     public void testParseMemoryStatFromMemcg_parsesCorrectValues() {
         MemoryStat stat = parseMemoryStatFromMemcg(MEMORY_STAT_CONTENTS);
@@ -270,5 +298,22 @@ public class MemoryStatUtilTest {
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         output.write(bytes, 0, bytes.length);
         return output.toString();
+    }
+
+    @Test
+    public void testParseIonHeapSizeFromDebugfs_emptyContents() {
+        assertEquals(0, parseIonHeapSizeFromDebugfs(""));
+
+        assertEquals(0, parseIonHeapSizeFromDebugfs(null));
+    }
+
+    @Test
+    public void testParseIonHeapSizeFromDebugfs_invalidValue() {
+        assertEquals(0, parseIonHeapSizeFromDebugfs("<<no-value>>"));
+    }
+
+    @Test
+    public void testParseIonHeapSizeFromDebugfs_correctValue() {
+        assertEquals(55193600, parseIonHeapSizeFromDebugfs(DEBUG_SYSTEM_ION_HEAP_CONTENTS));
     }
 }
