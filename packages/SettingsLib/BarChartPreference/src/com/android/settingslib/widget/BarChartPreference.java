@@ -158,15 +158,17 @@ public class BarChartPreference extends Preference {
         holder.setDividerAllowedAbove(true);
         holder.setDividerAllowedBelow(true);
 
+        // We bind title and details early so that we can preserve the correct height for chart
+        // view.
+        bindChartTitleView(holder);
+        bindChartDetailsView(holder);
+
         // If the state is loading, we just show a blank view.
         if (mIsLoading) {
             holder.itemView.setVisibility(View.INVISIBLE);
             return;
         }
         holder.itemView.setVisibility(View.VISIBLE);
-
-        // We must show title of bar chart.
-        bindChartTitleView(holder);
 
         final BarViewInfo[] barViewInfos = mBarChartInfo.getBarViewInfos();
         // If there is no any bar view, we just show an empty text.
@@ -175,8 +177,6 @@ public class BarChartPreference extends Preference {
             return;
         }
         setEmptyViewVisible(holder, false /* visible */);
-
-        bindChartDetailsView(holder);
         updateBarChart(holder);
     }
 
