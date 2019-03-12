@@ -47,8 +47,9 @@ public class NetworkNotificationManager {
         LOST_INTERNET(SystemMessage.NOTE_NETWORK_LOST_INTERNET),
         NETWORK_SWITCH(SystemMessage.NOTE_NETWORK_SWITCH),
         NO_INTERNET(SystemMessage.NOTE_NETWORK_NO_INTERNET),
-        SIGN_IN(SystemMessage.NOTE_NETWORK_SIGN_IN),
-        LOGGED_IN(SystemMessage.NOTE_NETWORK_LOGGED_IN);
+        LOGGED_IN(SystemMessage.NOTE_NETWORK_LOGGED_IN),
+        PARTIAL_CONNECTIVITY(SystemMessage.NOTE_NETWORK_PARTIAL_CONNECTIVITY),
+        SIGN_IN(SystemMessage.NOTE_NETWORK_SIGN_IN);
 
         public final int eventId;
 
@@ -169,11 +170,18 @@ public class NetworkNotificationManager {
         CharSequence details;
         int icon = getIcon(transportType);
         if (notifyType == NotificationType.NO_INTERNET && transportType == TRANSPORT_WIFI) {
-            title = r.getString(R.string.wifi_no_internet, 0);
+            title = r.getString(R.string.wifi_no_internet,
+                    WifiInfo.removeDoubleQuotes(nai.networkCapabilities.getSSID()));
             details = r.getString(R.string.wifi_no_internet_detailed);
+        } else if (notifyType == NotificationType.PARTIAL_CONNECTIVITY
+                && transportType == TRANSPORT_WIFI) {
+            title = r.getString(R.string.network_partial_connectivity,
+                    WifiInfo.removeDoubleQuotes(nai.networkCapabilities.getSSID()));
+            details = r.getString(R.string.network_partial_connectivity_detailed);
         } else if (notifyType == NotificationType.LOST_INTERNET &&
                 transportType == TRANSPORT_WIFI) {
-            title = r.getString(R.string.wifi_no_internet, 0);
+            title = r.getString(R.string.wifi_no_internet,
+                    WifiInfo.removeDoubleQuotes(nai.networkCapabilities.getSSID()));
             details = r.getString(R.string.wifi_no_internet_detailed);
         } else if (notifyType == NotificationType.SIGN_IN) {
             switch (transportType) {
@@ -316,6 +324,8 @@ public class NetworkNotificationManager {
         }
         switch (t) {
             case SIGN_IN:
+                return 5;
+            case PARTIAL_CONNECTIVITY:
                 return 4;
             case NO_INTERNET:
                 return 3;

@@ -50,6 +50,8 @@ public final class NetworkEvent implements IpConnectivityLog.Event {
 
     public static final int NETWORK_CONSECUTIVE_DNS_TIMEOUT_FOUND = 12;
 
+    public static final int NETWORK_PARTIAL_CONNECTIVITY = 13;
+
     /** @hide */
     @IntDef(value = {
             NETWORK_CONNECTED,
@@ -64,6 +66,7 @@ public final class NetworkEvent implements IpConnectivityLog.Event {
             NETWORK_FIRST_VALIDATION_PORTAL_FOUND,
             NETWORK_REVALIDATION_PORTAL_FOUND,
             NETWORK_CONSECUTIVE_DNS_TIMEOUT_FOUND,
+            NETWORK_PARTIAL_CONNECTIVITY,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface EventType {}

@@ -3401,13 +3401,18 @@
     <string name="network_available_sign_in_detailed"><xliff:g id="network_ssid">%1$s</xliff:g></string>
 
     <!-- A notification is shown when the user connects to a Wi-Fi network and the system detects that that network has no Internet access. This is the notification's title. -->
-    <string name="wifi_no_internet">Wi-Fi has no internet access</string>
+    <string name="wifi_no_internet"><xliff:g id="network_ssid" example="GoogleGuest">%1$s</xliff:g> has no internet access</string>
 
     <!-- A notification is shown when the user connects to a Wi-Fi network and the system detects that that network has no Internet access. This is the notification's message. -->
     <string name="wifi_no_internet_detailed">Tap for options</string>
 
     <!-- A notification is shown after the user logs in to a captive portal network, to indicate that the network should now have internet connectivity. This is the message of notification. [CHAR LIMIT=50] -->
     <string name="captive_portal_logged_in_detailed">Connected</string>
+    <!-- A notification is shown when the user connects to a network that doesn't have access to some services (e.g. Push notifications may not work). This is the notification's title. [CHAR LIMIT=50] -->
+    <string name="network_partial_connectivity"><xliff:g id="network_ssid" example="GoogleGuest">%1$s</xliff:g> has limited connectivity</string>
+
+    <!-- A notification is shown when the user connects to a network that doesn't have access to some services (e.g. Push notifications may not work). This is the notification's message. [CHAR LIMIT=50] -->
+    <string name="network_partial_connectivity_detailed">Tap to connect anyway</string>
 
     <!-- A notification is shown when the user's softap config has been changed due to underlying
          hardware restrictions. This is the notifications's title.

@@ -4155,6 +4155,7 @@ package android.net {
     method public int[] getTransportTypes();
     method public boolean satisfiedByNetworkCapabilities(android.net.NetworkCapabilities);
     field public static final int NET_CAPABILITY_OEM_PAID = 22; // 0x16
+    field public static final int NET_CAPABILITY_PARTIAL_CONNECTIVITY = 24; // 0x18
   }
 
   public class NetworkKey implements android.os.Parcelable {
@@ -4303,10 +4304,12 @@ package android.net.captiveportal {
     ctor public CaptivePortalProbeResult(int, String, String);
     ctor public CaptivePortalProbeResult(int, String, String, android.net.captiveportal.CaptivePortalProbeSpec);
     method public boolean isFailed();
+    method public boolean isPartialConnectivity();
     method public boolean isPortal();
     method public boolean isSuccessful();
     field public static final android.net.captiveportal.CaptivePortalProbeResult FAILED;
     field public static final int FAILED_CODE = 599; // 0x257
+    field public static final android.net.captiveportal.CaptivePortalProbeResult PARTIAL;
     field public static final int PORTAL_CODE = 302; // 0x12e
     field public static final android.net.captiveportal.CaptivePortalProbeResult SUCCESS;
     field public static final int SUCCESS_CODE = 204; // 0xcc
@@ -4438,6 +4441,7 @@ package android.net.metrics {
     field public static final int NETWORK_FIRST_VALIDATION_PORTAL_FOUND = 10; // 0xa
     field public static final int NETWORK_FIRST_VALIDATION_SUCCESS = 8; // 0x8
     field public static final int NETWORK_LINGER = 5; // 0x5
+    field public static final int NETWORK_PARTIAL_CONNECTIVITY = 13; // 0xd
     field public static final int NETWORK_REVALIDATION_PORTAL_FOUND = 11; // 0xb
     field public static final int NETWORK_REVALIDATION_SUCCESS = 9; // 0x9
     field public static final int NETWORK_UNLINGER = 6; // 0x6
