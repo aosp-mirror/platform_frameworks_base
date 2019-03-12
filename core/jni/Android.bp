@@ -134,7 +134,6 @@ cc_library_shared {
         "android/graphics/GIFMovie.cpp",
         "android/graphics/GraphicBuffer.cpp",
         "android/graphics/Graphics.cpp",
-        "android/graphics/HarfBuzzNGFaceSkia.cpp",
         "android/graphics/ImageDecoder.cpp",
         "android/graphics/Interpolator.cpp",
         "android/graphics/MaskFilter.cpp",
