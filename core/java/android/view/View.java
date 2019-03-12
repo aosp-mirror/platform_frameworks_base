@@ -17197,6 +17197,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * and {@link #setTranslationY(float)} (float)}} instead.
      *
      * @param matrix The matrix, null indicates that the matrix should be cleared.
+     * @see #getAnimationMatrix()
      */
     public void setAnimationMatrix(@Nullable Matrix matrix) {
         invalidateViewProperty(true, false);
@@ -17204,6 +17205,22 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         invalidateViewProperty(false, true);
 
         invalidateParentIfNeededAndWasQuickRejected();
+    }
+
+    /**
+     * Return the current transformation matrix of the view. This is used in animation frameworks,
+     * such as {@link android.transition.Transition}. Returns <code>null</code> when there is no
+     * transformation provided by {@link #setAnimationMatrix(Matrix)}.
+     * Application developers should use transformation methods like {@link #setRotation(float)},
+     * {@link #setScaleX(float)}, {@link #setScaleX(float)}, {@link #setTranslationX(float)}}
+     * and {@link #setTranslationY(float)} (float)}} instead.
+     *
+     * @return the Matrix, null indicates there is no transformation
+     * @see #setAnimationMatrix(Matrix)
+     */
+    @Nullable
+    public Matrix getAnimationMatrix() {
+        return mRenderNode.getAnimationMatrix();
     }
 
     /**

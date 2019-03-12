@@ -808,11 +808,34 @@ public final class RenderNode {
      * for the matrix parameter.
      *
      * @param matrix The matrix, null indicates that the matrix should be cleared.
+     * @see #getAnimationMatrix()
+     *
      * @hide TODO Do we want this?
      */
-    public boolean setAnimationMatrix(Matrix matrix) {
+    public boolean setAnimationMatrix(@Nullable Matrix matrix) {
         return nSetAnimationMatrix(mNativeRenderNode,
                 (matrix != null) ? matrix.native_instance : 0);
+    }
+
+    /**
+     * Returns the previously set Animation matrix. This matrix exists if an Animation is
+     * currently playing on a View, and is set on the display list during at draw() time.
+     * Returns <code>null</code> when there is no transformation provided by
+     * {@link #setAnimationMatrix(Matrix)}.
+     *
+     * @return the current Animation matrix.
+     * @see #setAnimationMatrix(Matrix)
+     *
+     * @hide
+     */
+    @Nullable
+    public Matrix getAnimationMatrix() {
+        Matrix output = new Matrix();
+        if (nGetAnimationMatrix(mNativeRenderNode, output.native_instance)) {
+            return output;
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -1658,6 +1681,9 @@ public final class RenderNode {
 
     @CriticalNative
     private static native boolean nHasOverlappingRendering(long renderNode);
+
+    @CriticalNative
+    private static native boolean nGetAnimationMatrix(long renderNode, long animationMatrix);
 
     @CriticalNative
     private static native boolean nGetClipToOutline(long renderNode);
