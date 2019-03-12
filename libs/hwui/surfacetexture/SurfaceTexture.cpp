@@ -23,6 +23,7 @@
 
 #include "Matrix.h"
 #include "SurfaceTexture.h"
+#include "ImageConsumer.h"
 
 namespace android {
 
@@ -150,7 +151,7 @@ status_t SurfaceTexture::releaseBufferLocked(int buf, sp<GraphicBuffer> graphicB
     // buffer has reallocated the original buffer slot after this buffer
     // was acquired.
     status_t err = ConsumerBase::releaseBufferLocked(buf, graphicBuffer, display, eglFence);
-    // We could be releasing an EGL buffer, even if not currently attached to a GL context.
+    // We could be releasing an EGL/Vulkan buffer, even if not currently attached to a GL context.
     mImageConsumer.onReleaseBufferLocked(buf);
     mEGLConsumer.onReleaseBufferLocked(buf);
     return err;
@@ -235,6 +236,10 @@ void SurfaceTexture::detachFromView() {
 
     if (mOpMode == OpMode::attachedToView) {
         mOpMode = OpMode::detached;
+        // Free all EglImage and VkImage before the context is destroyed.
+        for (int i=0; i < BufferQueueDefs::NUM_BUFFER_SLOTS; i++) {
+            mImageConsumer.onFreeBufferLocked(i);
+        }
     } else {
         SFT_LOGE("detachFromView: not attached to View");
     }
