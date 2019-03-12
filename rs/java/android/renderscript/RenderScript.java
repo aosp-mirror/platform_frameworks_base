@@ -16,12 +16,6 @@
 
 package android.renderscript;
 
-import java.io.File;
-import java.lang.reflect.Method;
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
-
 import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.AssetManager;
@@ -31,6 +25,12 @@ import android.os.SystemProperties;
 import android.os.Trace;
 import android.util.Log;
 import android.view.Surface;
+
+import java.io.File;
+import java.lang.reflect.Method;
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 // TODO: Clean up the whitespace that separates methods in this class.
 
@@ -114,8 +114,9 @@ public class RenderScript {
                 Class<?> vm_runtime = Class.forName("dalvik.system.VMRuntime");
                 Method get_runtime = vm_runtime.getDeclaredMethod("getRuntime");
                 sRuntime = get_runtime.invoke(null);
-                registerNativeAllocation = vm_runtime.getDeclaredMethod("registerNativeAllocation", Integer.TYPE);
-                registerNativeFree = vm_runtime.getDeclaredMethod("registerNativeFree", Integer.TYPE);
+                registerNativeAllocation =
+                        vm_runtime.getDeclaredMethod("registerNativeAllocation", Long.TYPE);
+                registerNativeFree = vm_runtime.getDeclaredMethod("registerNativeFree", Long.TYPE);
             } catch (Exception e) {
                 Log.e(LOG_TAG, "Error loading GC methods: " + e);
                 throw new RSRuntimeException("Error loading GC methods: " + e);
