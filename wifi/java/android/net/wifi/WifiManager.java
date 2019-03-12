@@ -65,6 +65,7 @@ import java.lang.ref.WeakReference;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -1272,7 +1273,10 @@ public class WifiManager {
     })
     @NonNull
     public Map<OsuProvider, List<ScanResult>> getMatchingOsuProviders(
-            List<ScanResult> scanResults) {
+            @Nullable List<ScanResult> scanResults) {
+        if (scanResults == null) {
+            return new HashMap<>();
+        }
         try {
             return mService.getMatchingOsuProviders(scanResults);
         } catch (RemoteException e) {
