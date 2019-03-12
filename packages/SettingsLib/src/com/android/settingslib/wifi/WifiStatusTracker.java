@@ -11,6 +11,7 @@
 package com.android.settingslib.wifi;
 
 import static android.net.NetworkCapabilities.NET_CAPABILITY_CAPTIVE_PORTAL;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_PARTIAL_CONNECTIVITY;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED;
 
 import android.content.Context;
@@ -157,6 +158,9 @@ public class WifiStatusTracker extends ConnectivityManager.NetworkCallback {
         if (networkCapabilities != null) {
             if (networkCapabilities.hasCapability(NET_CAPABILITY_CAPTIVE_PORTAL)) {
                 statusLabel = mContext.getString(R.string.wifi_status_sign_in_required);
+                return;
+            } else if (networkCapabilities.hasCapability(NET_CAPABILITY_PARTIAL_CONNECTIVITY)) {
+                statusLabel = mContext.getString(R.string.wifi_limited_connection);
                 return;
             } else if (!networkCapabilities.hasCapability(NET_CAPABILITY_VALIDATED)) {
                 statusLabel = mContext.getString(R.string.wifi_status_no_internet);
