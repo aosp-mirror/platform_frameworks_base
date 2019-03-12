@@ -702,7 +702,7 @@ public class ListPopupWindow implements ShowableListMenu {
 
             mPopup.setWidth(widthSpec);
             mPopup.setHeight(heightSpec);
-            mPopup.setClipToScreenEnabled(true);
+            mPopup.setIsClippedToScreen(true);
 
             // use outside touchable to dismiss drop down when touching outside of it, so
             // only set this if the dropdown is not always visible
