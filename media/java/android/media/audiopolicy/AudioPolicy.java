@@ -43,8 +43,11 @@ import android.os.ServiceManager;
 import android.util.Log;
 import android.util.Slog;
 
+import com.android.internal.annotations.GuardedBy;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -72,6 +75,19 @@ public class AudioPolicy {
     private String mRegistrationId;
     private AudioPolicyStatusListener mStatusListener;
     private boolean mIsFocusPolicy;
+
+    /**
+     * The list of AudioTrack instances created to inject audio into the associated mixes
+     * Lazy initialization in {@link #createAudioTrackSource(AudioMix)}
+     */
+    @GuardedBy("mLock")
+    @Nullable private ArrayList<WeakReference<AudioTrack>> mInjectors;
+    /**
+     * The list AudioRecord instances created to capture audio from the associated mixes
+     * Lazy initialization in {@link #createAudioRecordSink(AudioMix)}
+     */
+    @GuardedBy("mLock")
+    @Nullable private ArrayList<WeakReference<AudioRecord>> mCaptors;
 
     /**
      * The behavior of a policy with regards to audio focus where it relies on the application
@@ -606,6 +622,12 @@ public class AudioPolicy {
                         AudioFormat.CHANNEL_IN_STEREO, mix.getFormat().getEncoding()),
                 AudioManager.AUDIO_SESSION_ID_GENERATE
                 );
+        synchronized (mLock) {
+            if (mCaptors == null) {
+                mCaptors = new ArrayList<>(1);
+            }
+            mCaptors.add(new WeakReference<AudioRecord>(ar));
+        }
         return ar;
     }
 
@@ -638,7 +660,45 @@ public class AudioPolicy {
                 AudioTrack.MODE_STREAM,
                 AudioManager.AUDIO_SESSION_ID_GENERATE
                 );
+        synchronized (mLock) {
+            if (mInjectors == null) {
+                mInjectors = new ArrayList<>(1);
+            }
+            mInjectors.add(new WeakReference<AudioTrack>(at));
+        }
         return at;
+    }
+
+    /**
+     * @hide
+     */
+    public void invalidateCaptorsAndInjectors() {
+        if (!policyReadyToUse()) {
+            return;
+        }
+        synchronized (mLock) {
+            if (mInjectors != null) {
+                for (final WeakReference<AudioTrack> weakTrack : mInjectors) {
+                    final AudioTrack track = weakTrack.get();
+                    if (track == null) {
+                        break;
+                    }
+                    // TODO: add synchronous versions
+                    track.stop();
+                    track.flush();
+                }
+            }
+            if (mCaptors != null) {
+                for (final WeakReference<AudioRecord> weakRecord : mCaptors) {
+                    final AudioRecord record = weakRecord.get();
+                    if (record == null) {
+                        break;
+                    }
+                    // TODO: if needed: implement an invalidate method
+                    record.stop();
+                }
+            }
+        }
     }
 
     public int getStatus() {

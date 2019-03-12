@@ -3487,6 +3487,7 @@ package android.media {
     method public void setAudioServerStateCallback(@NonNull java.util.concurrent.Executor, @NonNull android.media.AudioManager.AudioServerStateCallback);
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public void setFocusRequestResult(@NonNull android.media.AudioFocusInfo, int, @NonNull android.media.audiopolicy.AudioPolicy);
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public void setVolumeIndexForAttributes(@NonNull android.media.AudioAttributes, int, int);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public void unregisterAudioPolicy(@NonNull android.media.audiopolicy.AudioPolicy);
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public void unregisterAudioPolicyAsync(@NonNull android.media.audiopolicy.AudioPolicy);
     method public void unregisterVolumeGroupCallback(@NonNull android.media.AudioManager.VolumeGroupCallback);
     field public static final int AUDIOFOCUS_FLAG_DELAY_OK = 1; // 0x1
