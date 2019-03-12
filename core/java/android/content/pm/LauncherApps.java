@@ -585,8 +585,8 @@ public class LauncherApps {
      * @param sourceBounds The Rect containing the source bounds of the clicked icon
      * @param opts Options to pass to startActivity
      */
-    public void startPackageInstallerSessionDetailsActivity(SessionInfo sessionInfo,
-            Rect sourceBounds, Bundle opts) {
+    public void startPackageInstallerSessionDetailsActivity(@NonNull SessionInfo sessionInfo,
+            @Nullable Rect sourceBounds, @Nullable Bundle opts) {
         try {
             mService.startSessionDetailsActivityAsUser(mContext.getIApplicationThread(),
                     mContext.getPackageName(), sessionInfo, sourceBounds, opts,
@@ -1503,7 +1503,7 @@ public class LauncherApps {
      * @param callback The callback to unregister.
      * @see #registerPackageInstallerSessionCallback(Executor, SessionCallback)
      */
-    public void unregisterPackageInstallerSessionCallback(SessionCallback callback) {
+    public void unregisterPackageInstallerSessionCallback(@NonNull SessionCallback callback) {
         synchronized (mDelegates) {
             for (Iterator<SessionCallbackDelegate> i = mDelegates.iterator(); i.hasNext();) {
                 final SessionCallbackDelegate delegate = i.next();
