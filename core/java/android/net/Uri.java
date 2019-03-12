@@ -16,6 +16,7 @@
 
 package android.net;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
 import android.content.Intent;
@@ -380,6 +381,7 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
      * returned as {@code http://example.com/...}.
      * @return the common forms PII redacted string of this URI
      */
+    @NonNull
     public String toSafeString() {
         String scheme = getScheme();
         String ssp = getSchemeSpecificPart();
