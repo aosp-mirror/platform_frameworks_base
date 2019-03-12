@@ -954,6 +954,21 @@ public class UserManager {
     public static final String DISALLOW_CONTENT_CAPTURE = "no_content_capture";
 
     /**
+     * Specifies if the current user is able to receive content suggestions for selections based on
+     * the contents of their screen.
+     *
+     * <p>Device owner and profile owner can set this restriction. When it is set by device owner,
+     * only the target user will be affected.
+     *
+     * <p>The default value is <code>false</code>.
+     *
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
+     * @see #getUserRestrictions()
+     */
+    public static final String DISALLOW_CONTENT_SUGGESTIONS = "no_content_suggestions";
+
+    /**
      * Specifies if user switching is blocked on the current user.
      *
      * <p> This restriction can only be set by the device owner, it will be applied to all users.

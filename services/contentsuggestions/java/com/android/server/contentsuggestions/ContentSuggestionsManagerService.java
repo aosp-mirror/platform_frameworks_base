@@ -32,6 +32,7 @@ import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ShellCallback;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.util.Slog;
 
 import com.android.server.LocalServices;
@@ -63,7 +64,8 @@ public class ContentSuggestionsManagerService extends
 
     public ContentSuggestionsManagerService(Context context) {
         super(context, new FrameworkResourcesServiceNameResolver(context,
-                com.android.internal.R.string.config_defaultContentSuggestionsService), null);
+                com.android.internal.R.string.config_defaultContentSuggestionsService),
+                UserManager.DISALLOW_CONTENT_SUGGESTIONS);
         mActivityTaskManagerInternal = LocalServices.getService(ActivityTaskManagerInternal.class);
     }
 
