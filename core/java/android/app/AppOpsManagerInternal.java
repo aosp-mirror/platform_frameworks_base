@@ -16,6 +16,7 @@
 
 package android.app;
 
+import android.annotation.NonNull;
 import android.util.SparseIntArray;
 
 import com.android.internal.util.function.QuadFunction;
@@ -96,4 +97,18 @@ public abstract class AppOpsManagerInternal {
      * @param uid The uid
      */
     public abstract void setAllPkgModesToDefault(int code, int uid);
+
+    /**
+     * Get the (raw) mode of an app-op.
+     *
+     * <p>Does <u>not</u> verify that package belongs to uid. The caller needs to do that.
+     *
+     * @param code The code of the op
+     * @param uid The uid of the package the op belongs to
+     * @param packageName The package the op belongs to
+     *
+     * @return The mode of the op
+     */
+    public abstract @AppOpsManager.Mode int checkOperationUnchecked(int code, int uid,
+            @NonNull String packageName);
 }
