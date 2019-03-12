@@ -21,7 +21,9 @@ import static android.net.wifi.WifiManager.TrafficStateCallback.DATA_ACTIVITY_IN
 import static android.net.wifi.WifiManager.TrafficStateCallback.DATA_ACTIVITY_INOUT;
 import static android.net.wifi.WifiManager.TrafficStateCallback.DATA_ACTIVITY_NONE;
 import static android.net.wifi.WifiManager.TrafficStateCallback.DATA_ACTIVITY_OUT;
+import static android.telephony.PhoneStateListener.LISTEN_ACTIVE_DATA_SUBSCRIPTION_ID_CHANGE;
 
+import static com.android.internal.telephony.PhoneConstants.MAX_PHONE_COUNT_DUAL_SIM;
 import static com.android.systemui.Dependency.BG_LOOPER_NAME;
 
 import android.content.BroadcastReceiver;
@@ -41,6 +43,7 @@ import android.os.Looper;
 import android.os.PersistableBundle;
 import android.provider.Settings;
 import android.telephony.CarrierConfigManager;
+import android.telephony.PhoneStateListener;
 import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
 import android.telephony.SubscriptionInfo;
@@ -106,6 +109,16 @@ public class NetworkControllerImpl extends BroadcastReceiver
     private final DataSaverController mDataSaverController;
     private final CurrentUserTracker mUserTracker;
     private Config mConfig;
+
+    private PhoneStateListener mPhoneStateListener = new PhoneStateListener() {
+        @Override
+        public void onActiveDataSubscriptionIdChanged(int subId) {
+            mActiveMobileDataSubscription = subId;
+            doUpdateMobileControllers();
+        }
+    };
+
+    private int mActiveMobileDataSubscription = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
 
     // Subcontrollers.
     @VisibleForTesting
@@ -281,6 +294,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
             mSubscriptionListener = new SubListener();
         }
         mSubscriptionManager.addOnSubscriptionsChangedListener(mSubscriptionListener);
+        mPhone.listen(mPhoneStateListener, LISTEN_ACTIVE_DATA_SUBSCRIPTION_ID_CHANGE);
 
         // broadcasts
         IntentFilter filter = new IntentFilter();
@@ -525,6 +539,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
 
     @VisibleForTesting
     void handleConfigurationChanged() {
+        updateMobileControllers();
         for (int i = 0; i < mMobileSignalControllers.size(); i++) {
             MobileSignalController controller = mMobileSignalControllers.valueAt(i);
             controller.setConfiguration(mConfig);
@@ -539,13 +554,39 @@ public class NetworkControllerImpl extends BroadcastReceiver
         doUpdateMobileControllers();
     }
 
+    private void filterMobileSubscriptionInSameGroup(List<SubscriptionInfo> subscriptions) {
+        if (subscriptions.size() == MAX_PHONE_COUNT_DUAL_SIM) {
+            SubscriptionInfo info1 = subscriptions.get(0);
+            SubscriptionInfo info2 = subscriptions.get(1);
+            if (info1.getGroupUuid() != null && info1.getGroupUuid().equals(info2.getGroupUuid())) {
+                // If both subscriptions are primary, show both.
+                if (!info1.isOpportunistic() && !info2.isOpportunistic()) return;
+
+                // If carrier required, always show signal bar of primary subscription.
+                // Otherwise, show whichever subscription is currently active for Internet.
+                boolean alwaysShowPrimary = CarrierConfigManager.getDefaultConfig()
+                        .getBoolean(CarrierConfigManager
+                        .KEY_ALWAYS_SHOW_PRIMARY_SIGNAL_BAR_IN_OPPORTUNISTIC_NETWORK_BOOLEAN);
+                if (alwaysShowPrimary) {
+                    subscriptions.remove(info1.isOpportunistic() ? info1 : info2);
+                } else {
+                    subscriptions.remove(info1.getSubscriptionId() == mActiveMobileDataSubscription
+                            ? info2 : info1);
+                }
+            }
+        }
+    }
+
     @VisibleForTesting
     void doUpdateMobileControllers() {
         List<SubscriptionInfo> subscriptions = mSubscriptionManager
-                .getActiveSubscriptionInfoList(true);
+                .getActiveSubscriptionInfoList(false);
         if (subscriptions == null) {
             subscriptions = Collections.emptyList();
         }
+
+        filterMobileSubscriptionInSameGroup(subscriptions);
+
         // If there have been no relevant changes to any of the subscriptions, we can leave as is.
         if (hasCorrectMobileControllers(subscriptions)) {
             // Even if the controllers are correct, make sure we have the right no sims state.
