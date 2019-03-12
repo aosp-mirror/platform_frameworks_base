@@ -23,7 +23,7 @@ android_test {
     static_libs: [
         "androidx.test.rules",
         "mockito-target-extended-minus-junit4",
-        "NetworkStackLib",
+        "NetworkStackBase",
         "testables",
     ],
     libs: [
