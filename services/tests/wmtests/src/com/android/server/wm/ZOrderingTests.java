@@ -43,6 +43,7 @@ import android.platform.test.annotations.Presubmit;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 
+import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
 import org.junit.After;
@@ -211,6 +212,7 @@ public class ZOrderingTests extends WindowTestsBase {
         return createWindow(null, TYPE_BASE_APPLICATION, mDisplayContent, name);
     }
 
+    @FlakyTest(bugId = 124088319)
     @Test
     public void testAssignWindowLayers_ForImeWithNoTarget() {
         mDisplayContent.mInputMethodTarget = null;
@@ -228,6 +230,7 @@ public class ZOrderingTests extends WindowTestsBase {
         assertWindowHigher(mImeDialogWindow, mImeWindow);
     }
 
+    @FlakyTest(bugId = 124088319)
     @Test
     public void testAssignWindowLayers_ForImeWithAppTarget() {
         final WindowState imeAppTarget = createWindow("imeAppTarget");
@@ -247,6 +250,7 @@ public class ZOrderingTests extends WindowTestsBase {
         assertWindowHigher(mImeDialogWindow, mImeWindow);
     }
 
+    @FlakyTest(bugId = 124088319)
     @Test
     public void testAssignWindowLayers_ForImeWithAppTargetWithChildWindows() {
         final WindowState imeAppTarget = createWindow("imeAppTarget");
@@ -273,6 +277,7 @@ public class ZOrderingTests extends WindowTestsBase {
         assertWindowHigher(mImeDialogWindow, mImeWindow);
     }
 
+    @FlakyTest(bugId = 124088319)
     @Test
     public void testAssignWindowLayers_ForImeWithAppTargetAndAppAbove() {
         final WindowState appBelowImeTarget = createWindow("appBelowImeTarget");
@@ -296,6 +301,7 @@ public class ZOrderingTests extends WindowTestsBase {
         assertWindowHigher(mImeDialogWindow, mImeWindow);
     }
 
+    @FlakyTest(bugId = 124088319)
     @Test
     public void testAssignWindowLayers_ForImeNonAppImeTarget() {
         final WindowState imeSystemOverlayTarget = createWindow(null, TYPE_SYSTEM_OVERLAY,
@@ -323,6 +329,7 @@ public class ZOrderingTests extends WindowTestsBase {
         assertWindowHigher(mImeDialogWindow, mImeWindow);
     }
 
+    @FlakyTest(bugId = 124088319)
     @Test
     public void testAssignWindowLayers_ForStatusBarImeTarget() {
         mDisplayContent.mInputMethodTarget = mStatusBarWindow;
@@ -337,6 +344,7 @@ public class ZOrderingTests extends WindowTestsBase {
         assertWindowHigher(mImeDialogWindow, mImeWindow);
     }
 
+    @FlakyTest(bugId = 124088319)
     @Test
     public void testStackLayers() {
         final WindowState anyWindow1 = createWindow("anyWindow");
@@ -424,6 +432,7 @@ public class ZOrderingTests extends WindowTestsBase {
         }
     }
 
+    @FlakyTest(bugId = 124088319)
     @Test
     public void testDockedDividerPosition() {
         final WindowState pinnedStackWindow = createWindowOnStack(null, WINDOWING_MODE_PINNED,

@@ -81,7 +81,8 @@ public class AppWindowTokenTests extends WindowTestsBase {
     public void setUp() throws Exception {
         mStack = createTaskStackOnDisplay(mDisplayContent);
         mTask = createTaskInStack(mStack, 0 /* userId */);
-        mToken = WindowTestUtils.createTestAppWindowToken(mDisplayContent);
+        mToken = WindowTestUtils.createTestAppWindowToken(mDisplayContent,
+                false /* skipOnParentChanged */);
 
         mTask.addChild(mToken, 0);
     }
@@ -218,6 +219,9 @@ public class AppWindowTokenTests extends WindowTestsBase {
 
     @Test
     public void testSizeCompatBounds() {
+        // The real surface transaction is unnecessary.
+        mToken.setSkipPrepareSurfaces(true);
+
         final Rect fixedBounds = mToken.getRequestedOverrideConfiguration().windowConfiguration
                 .getBounds();
         fixedBounds.set(0, 0, 1200, 1600);

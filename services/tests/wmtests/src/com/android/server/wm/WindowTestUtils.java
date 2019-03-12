@@ -56,15 +56,24 @@ class WindowTestUtils {
 
     static TestAppWindowToken createTestAppWindowToken(DisplayContent dc) {
         synchronized (dc.mWmService.mGlobalLock) {
-            return new TestAppWindowToken(dc);
+            return new TestAppWindowToken(dc, true /* skipOnParentChanged */);
+        }
+    }
+
+    static TestAppWindowToken createTestAppWindowToken(DisplayContent dc,
+            boolean skipOnParentChanged) {
+        synchronized (dc.mWmService.mGlobalLock) {
+            return new TestAppWindowToken(dc, skipOnParentChanged);
         }
     }
 
     /** Used so we can gain access to some protected members of the {@link AppWindowToken} class. */
     static class TestAppWindowToken extends AppWindowToken {
         boolean mOnTop = false;
+        private boolean mSkipPrepareSurfaces;
+        boolean mSkipOnParentChanged = true;
 
-        private TestAppWindowToken(DisplayContent dc) {
+        private TestAppWindowToken(DisplayContent dc, boolean skipOnParentChanged) {
             super(dc.mWmService, new IApplicationToken.Stub() {
                 @Override
                 public String getName() {
@@ -72,6 +81,7 @@ class WindowTestUtils {
                 }
             }, new ComponentName("", ""), false, dc, true /* fillsParent */);
             mTargetSdk = Build.VERSION_CODES.CUR_DEVELOPMENT;
+            mSkipOnParentChanged = skipOnParentChanged;
             mActivityRecord = mock(ActivityRecord.class);
             mActivityRecord.app = mock(WindowProcessController.class);
         }
@@ -93,10 +103,44 @@ class WindowTestUtils {
         }
 
         @Override
+        void onParentChanged() {
+            if (!mSkipOnParentChanged) {
+                super.onParentChanged();
+            } else {
+                updateConfigurationFromParent(this);
+            }
+        }
+
+        @Override
         boolean isOnTop() {
             return mOnTop;
         }
 
+        @Override
+        void prepareSurfaces() {
+            if (!mSkipPrepareSurfaces) {
+                super.prepareSurfaces();
+            }
+        }
+
+        void setSkipPrepareSurfaces(boolean ignore) {
+            mSkipPrepareSurfaces = ignore;
+        }
+    }
+
+    /**
+     * Used when we don't want to perform surface related operation in
+     * {@link WindowContainer#onParentChanged} or the overridden method, but the configuration
+     * still needs to propagate from parent.
+     *
+     * @see ConfigurationContainer#onParentChanged
+     */
+    static void updateConfigurationFromParent(WindowContainer container) {
+        final WindowContainer parent = container.getParent();
+        if (parent != null) {
+            container.onConfigurationChanged(parent.getConfiguration());
+            container.onMergedOverrideConfigurationChanged();
+        }
     }
 
     static TestWindowToken createTestWindowToken(int type, DisplayContent dc) {
@@ -201,6 +245,11 @@ class WindowTestUtils {
             super.updateResizingWindowIfNeeded();
 
             mHasSurface = hadSurface;
+        }
+
+        @Override
+        void onParentChanged() {
+            updateConfigurationFromParent(this);
         }
     }
 }
