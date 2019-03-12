@@ -93,8 +93,8 @@ class WindowTraceBuffer {
     void writeTraceToFile(File traceFile) throws IOException {
         synchronized (mBufferLock) {
             traceFile.delete();
-            traceFile.setReadable(true, false);
             try (OutputStream os = new FileOutputStream(traceFile)) {
+                traceFile.setReadable(true /* readable */, false /* ownerOnly */);
                 ProtoOutputStream proto = new ProtoOutputStream();
                 proto.write(MAGIC_NUMBER, MAGIC_NUMBER_VALUE);
                 os.write(proto.getBytes());
