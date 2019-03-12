@@ -76,6 +76,8 @@ public:
     status_t createReleaseFence(sp<Fence>& nativeFence);
 
     // Returned pointers are owned by VulkanManager.
+    // An instance of VkFunctorInitParams returned from getVkFunctorInitParams refers to
+    // the internal state of VulkanManager: VulkanManager must be alive to use the returned value.
     VkFunctorInitParams getVkFunctorInitParams() const;
 
     sk_sp<GrContext> createContext(const GrContextOptions& options);
@@ -164,7 +166,9 @@ private:
 
     // Variables saved to populate VkFunctorInitParams.
     static const uint32_t mAPIVersion = VK_MAKE_VERSION(1, 1, 0);
+    std::vector<VkExtensionProperties> mInstanceExtensionsOwner;
     std::vector<const char*> mInstanceExtensions;
+    std::vector<VkExtensionProperties> mDeviceExtensionsOwner;
     std::vector<const char*> mDeviceExtensions;
     VkPhysicalDeviceFeatures2 mPhysicalDeviceFeatures2{};
 
