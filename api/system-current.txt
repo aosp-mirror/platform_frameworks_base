@@ -5214,7 +5214,7 @@ package android.os {
   }
 
   public static class Build.VERSION {
-    field public static final String PREVIEW_SDK_FINGERPRINT;
+    field @NonNull public static final String PREVIEW_SDK_FINGERPRINT;
   }
 
   public final class ConfigUpdate {
