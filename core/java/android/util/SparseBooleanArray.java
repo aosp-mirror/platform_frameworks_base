@@ -16,11 +16,10 @@
 
 package android.util;
 
-import android.annotation.UnsupportedAppUsage;
-
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.GrowingArrayUtils;
 
+import android.annotation.UnsupportedAppUsage;
 import libcore.util.EmptyArray;
 
 /**
@@ -168,10 +167,6 @@ public class SparseBooleanArray implements Cloneable {
      * key.</p>
      */
     public int keyAt(int index) {
-        if (index >= mSize) {
-            // The array might be slightly bigger than mSize, in which case, indexing won't fail.
-            throw new ArrayIndexOutOfBoundsException(index);
-        }
         return mKeys[index];
     }
 
@@ -187,10 +182,6 @@ public class SparseBooleanArray implements Cloneable {
      * associated with the largest key.</p>
      */
     public boolean valueAt(int index) {
-        if (index >= mSize) {
-            // The array might be slightly bigger than mSize, in which case, indexing won't fail.
-            throw new ArrayIndexOutOfBoundsException(index);
-        }
         return mValues[index];
     }
 
@@ -198,19 +189,11 @@ public class SparseBooleanArray implements Cloneable {
      * Directly set the value at a particular index.
      */
     public void setValueAt(int index, boolean value) {
-        if (index >= mSize) {
-            // The array might be slightly bigger than mSize, in which case, indexing won't fail.
-            throw new ArrayIndexOutOfBoundsException(index);
-        }
         mValues[index] = value;
     }
 
     /** @hide */
     public void setKeyAt(int index, int key) {
-        if (index >= mSize) {
-            // The array might be slightly bigger than mSize, in which case, indexing won't fail.
-            throw new ArrayIndexOutOfBoundsException(index);
-        }
         mKeys[index] = key;
     }
 
