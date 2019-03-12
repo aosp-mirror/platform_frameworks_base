@@ -18,7 +18,6 @@ package android.media.session;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.SystemApi;
 import android.annotation.UnsupportedAppUsage;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -954,7 +953,6 @@ public final class MediaController {
         /**
          * @hide
          */
-        @SystemApi
         public PlaybackInfo(int type, int control, int max, int current, AudioAttributes attrs) {
             mVolumeType = type;
             mVolumeControl = control;
