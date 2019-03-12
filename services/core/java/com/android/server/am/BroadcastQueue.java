@@ -477,14 +477,22 @@ public final class BroadcastQueue {
         // when processNextBroadcastLocked() next finds this uid as a receiver identity.
         if (!r.timeoutExempt) {
             if (mConstants.SLOW_TIME > 0 && elapsed > mConstants.SLOW_TIME) {
-                if (DEBUG_BROADCAST_DEFERRAL) {
-                    Slog.i(TAG_BROADCAST, "Broadcast receiver " + (r.nextReceiver - 1)
-                            + " was slow: " + receiver + " br=" + r);
-                }
-                if (r.curApp != null) {
-                    mDispatcher.startDeferring(r.curApp.uid);
+                // Core system packages are exempt from deferral policy
+                if (!UserHandle.isCore(r.curApp.uid)) {
+                    if (DEBUG_BROADCAST_DEFERRAL) {
+                        Slog.i(TAG_BROADCAST, "Broadcast receiver " + (r.nextReceiver - 1)
+                                + " was slow: " + receiver + " br=" + r);
+                    }
+                    if (r.curApp != null) {
+                        mDispatcher.startDeferring(r.curApp.uid);
+                    } else {
+                        Slog.d(TAG_BROADCAST, "finish receiver curApp is null? " + r);
+                    }
                 } else {
-                    Slog.d(TAG_BROADCAST, "finish receiver curApp is null? " + r);
+                    if (DEBUG_BROADCAST_DEFERRAL) {
+                        Slog.i(TAG_BROADCAST, "Core uid " + r.curApp.uid
+                                + " receiver was slow but not deferring: " + receiver + " br=" + r);
+                    }
                 }
             }
         } else {
