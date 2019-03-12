@@ -120,10 +120,6 @@ public class ZygoteProcess {
         mUsapPoolSecondarySocketAddress =
                 new LocalSocketAddress(Zygote.USAP_POOL_SECONDARY_SOCKET_NAME,
                                        LocalSocketAddress.Namespace.RESERVED);
-
-        if (fetchUsapPoolEnabledProp()) {
-            informZygotesOfUsapPoolStatus();
-        }
     }
 
     public ZygoteProcess(LocalSocketAddress primarySocketAddress,
@@ -179,13 +175,17 @@ public class ZygoteProcess {
          * address
          * @throws IOException
          */
-        public static ZygoteState connect(LocalSocketAddress zygoteSocketAddress,
-                                          LocalSocketAddress usapSocketAddress)
+        public static ZygoteState connect(@NonNull LocalSocketAddress zygoteSocketAddress,
+                                          @Nullable LocalSocketAddress usapSocketAddress)
                 throws IOException {
 
             DataInputStream zygoteInputStream = null;
             BufferedWriter zygoteOutputWriter = null;
             final LocalSocket zygoteSessionSocket = new LocalSocket();
+
+            if (zygoteSocketAddress == null) {
+                throw new IllegalArgumentException("zygoteSocketAddress can't be null");
+            }
 
             try {
                 zygoteSessionSocket.connect(zygoteSocketAddress);
@@ -678,12 +678,15 @@ public class ZygoteProcess {
         return origVal != mUsapPoolEnabled;
     }
 
+    private boolean mIsFirstPropCheck = true;
     private long mLastPropCheckTimestamp = 0;
 
     private boolean fetchUsapPoolEnabledPropWithMinInterval() {
         final long currentTimestamp = SystemClock.elapsedRealtime();
 
-        if (currentTimestamp - mLastPropCheckTimestamp >= Zygote.PROPERTY_CHECK_INTERVAL) {
+        if (mIsFirstPropCheck
+                || (currentTimestamp - mLastPropCheckTimestamp >= Zygote.PROPERTY_CHECK_INTERVAL)) {
+            mIsFirstPropCheck = false;
             mLastPropCheckTimestamp = currentTimestamp;
             return fetchUsapPoolEnabledProp();
         }
@@ -919,11 +922,13 @@ public class ZygoteProcess {
                 return primaryZygoteState;
             }
 
-            // The primary zygote didn't match. Try the secondary.
-            attemptConnectionToSecondaryZygote();
+            if (mZygoteSecondarySocketAddress != null) {
+                // The primary zygote didn't match. Try the secondary.
+                attemptConnectionToSecondaryZygote();
 
-            if (secondaryZygoteState.matches(abi)) {
-                return secondaryZygoteState;
+                if (secondaryZygoteState.matches(abi)) {
+                    return secondaryZygoteState;
+                }
             }
         } catch (IOException ioe) {
             throw new ZygoteStartFailedEx("Error connecting to zygote", ioe);
@@ -1071,22 +1076,24 @@ public class ZygoteProcess {
                 return;
             }
 
-            try {
-                attemptConnectionToSecondaryZygote();
-
+            if (mZygoteSecondarySocketAddress != null) {
                 try {
-                    secondaryZygoteState.mZygoteOutputWriter.write(command);
-                    secondaryZygoteState.mZygoteOutputWriter.flush();
+                    attemptConnectionToSecondaryZygote();
 
-                    // Wait for the secondary Zygote to finish its work.
-                    secondaryZygoteState.mZygoteInputStream.readInt();
+                    try {
+                        secondaryZygoteState.mZygoteOutputWriter.write(command);
+                        secondaryZygoteState.mZygoteOutputWriter.flush();
+
+                        // Wait for the secondary Zygote to finish its work.
+                        secondaryZygoteState.mZygoteInputStream.readInt();
+                    } catch (IOException ioe) {
+                        throw new IllegalStateException(
+                                "USAP pool state change cause an irrecoverable error",
+                                ioe);
+                    }
                 } catch (IOException ioe) {
-                    throw new IllegalStateException(
-                            "USAP pool state change cause an irrecoverable error",
-                            ioe);
+                    // No secondary zygote present.  This is expected on some devices.
                 }
-            } catch (IOException ioe) {
-                // No secondary zygote present.  This is expected on some devices.
             }
 
             // Wait for the response from the primary zygote here so the primary/secondary zygotes
