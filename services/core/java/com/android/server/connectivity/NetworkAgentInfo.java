@@ -156,6 +156,9 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
     // last detected.
     public boolean captivePortalLoginNotified;
 
+    // Set to true when partial connectivity was detected.
+    public boolean partialConnectivity;
+
     // Networks are lingered when they become unneeded as a result of their NetworkRequests being
     // satisfied by a higher-scoring network. so as to allow communication to wrap up before the
     // network is taken down.  This usually only happens to the default network. Lingering ends with
@@ -592,6 +595,8 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
         for (LingerTimer timer : mLingerTimers) { pw.println(timer); }
     }
 
+    // TODO: Print shorter members first and only print the boolean variable which value is true
+    // to improve readability.
     public String toString() {
         return "NetworkAgentInfo{ ni{" + networkInfo + "}  "
                 + "network{" + network + "}  nethandle{" + network.getNetworkHandle() + "}  "
@@ -604,6 +609,8 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
                 + "everCaptivePortalDetected{" + everCaptivePortalDetected + "} "
                 + "lastCaptivePortalDetected{" + lastCaptivePortalDetected + "} "
                 + "captivePortalLoginNotified{" + captivePortalLoginNotified + "} "
+                + "partialConnectivity{" + partialConnectivity + "} "
+                + "acceptPartialConnectivity{" + networkMisc.acceptPartialConnectivity + "} "
                 + "clat{" + clatd + "} "
                 + "}";
     }
