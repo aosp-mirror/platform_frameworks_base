@@ -42,7 +42,6 @@ import android.util.Slog;
 import com.android.internal.annotations.GuardedBy;
 
 import java.io.PrintWriter;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 
 /**
@@ -53,6 +52,7 @@ public class NetworkStackClient {
     private static final String TAG = NetworkStackClient.class.getSimpleName();
 
     private static final int NETWORKSTACK_TIMEOUT_MS = 10_000;
+    private static final String IN_PROCESS_SUFFIX = ".InProcess";
 
     private static NetworkStackClient sInstance;
 
@@ -175,42 +175,50 @@ public class NetworkStackClient {
     public void start(Context context) {
         log("Starting network stack");
         mNetworkStackStartRequested = true;
-        // Try to bind in-process if the library is available
-        IBinder connector = null;
-        try {
-            final Class service = Class.forName(
-                    "com.android.server.NetworkStackService",
-                    true /* initialize */,
-                    context.getClassLoader());
-            connector = (IBinder) service.getMethod("makeConnector", Context.class)
-                    .invoke(null, context);
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-            logWtf("Could not create network stack connector from NetworkStackService", e);
-            // TODO: crash/reboot system here ?
-            return;
-        } catch (ClassNotFoundException e) {
-            // Normal behavior if stack is provided by the app: fall through
+
+        final PackageManager pm = context.getPackageManager();
+
+        // Try to bind in-process if the device was shipped with an in-process version
+        Intent intent = getNetworkStackIntent(pm, true /* inSystemProcess */);
+
+        // Otherwise use the updatable module version
+        if (intent == null) {
+            intent = getNetworkStackIntent(pm, false /* inSystemProcess */);
+            log("Starting network stack process");
+        } else {
+            log("Starting network stack in-process");
         }
 
-        // In-process network stack. Add the service to the service manager here.
-        if (connector != null) {
-            log("Registering in-process network stack connector");
-            registerNetworkStackService(connector);
-            return;
-        }
-        // Start the network stack process. The service will be added to the service manager in
-        // NetworkStackConnection.onServiceConnected().
-        log("Starting network stack process");
-        final Intent intent = new Intent(INetworkStackConnector.class.getName());
-        final ComponentName comp = intent.resolveSystemService(context.getPackageManager(), 0);
-        intent.setComponent(comp);
-
-        if (comp == null) {
-            logWtf("Could not resolve the network stack with " + intent, null);
+        if (intent == null) {
+            logWtf("Could not resolve the network stack", null);
             // TODO: crash/reboot system server ?
             return;
         }
-        final PackageManager pm = context.getPackageManager();
+
+        // Start the network stack. The service will be added to the service manager in
+        // NetworkStackConnection.onServiceConnected().
+        if (!context.bindServiceAsUser(intent, new NetworkStackConnection(),
+                Context.BIND_AUTO_CREATE | Context.BIND_IMPORTANT, UserHandle.SYSTEM)) {
+            logWtf("Could not bind to network stack with " + intent, null);
+            return;
+            // TODO: crash/reboot system server if no network stack after a timeout ?
+        }
+
+        log("Network stack service start requested");
+    }
+
+    @Nullable
+    private Intent getNetworkStackIntent(@NonNull PackageManager pm, boolean inSystemProcess) {
+        final String baseAction = INetworkStackConnector.class.getName();
+        final Intent intent =
+                new Intent(inSystemProcess ? baseAction + IN_PROCESS_SUFFIX : baseAction);
+        final ComponentName comp = intent.resolveSystemService(pm, 0);
+
+        if (comp == null) {
+            return null;
+        }
+        intent.setComponent(comp);
+
         int uid = -1;
         try {
             uid = pm.getPackageUidAsUser(comp.getPackageName(), UserHandle.USER_SYSTEM);
@@ -218,25 +226,27 @@ public class NetworkStackClient {
             logWtf("Network stack package not found", e);
             // Fall through
         }
-        if (uid != Process.NETWORK_STACK_UID) {
+
+        final int expectedUid = inSystemProcess ? Process.SYSTEM_UID : Process.NETWORK_STACK_UID;
+        if (uid != expectedUid) {
             throw new SecurityException("Invalid network stack UID: " + uid);
         }
 
+        if (!inSystemProcess) {
+            checkNetworkStackPermission(pm, comp);
+        }
+
+        return intent;
+    }
+
+    private void checkNetworkStackPermission(
+            @NonNull PackageManager pm, @NonNull ComponentName comp) {
         final int hasPermission =
                 pm.checkPermission(PERMISSION_MAINLINE_NETWORK_STACK, comp.getPackageName());
         if (hasPermission != PERMISSION_GRANTED) {
             throw new SecurityException(
                     "Network stack does not have permission " + PERMISSION_MAINLINE_NETWORK_STACK);
         }
-
-        if (!context.bindServiceAsUser(intent, new NetworkStackConnection(),
-                Context.BIND_AUTO_CREATE | Context.BIND_IMPORTANT, UserHandle.SYSTEM)) {
-            logWtf("Could not bind to network stack in-process, or in app with " + intent, null);
-            return;
-            // TODO: crash/reboot system server if no network stack after a timeout ?
-        }
-
-        log("Network stack service start requested");
     }
 
     private void log(@NonNull String message) {
