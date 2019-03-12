@@ -511,7 +511,7 @@ public class WifiManager {
     /**
      * The look up key for an int that indicates why softAP started failed
      * currently support general and no_channel
-     * @see #SAP_START_FAILURE_GENERIC
+     * @see #SAP_START_FAILURE_GENERAL
      * @see #SAP_START_FAILURE_NO_CHANNEL
      *
      * @hide
@@ -615,15 +615,15 @@ public class WifiManager {
     public @interface SapStartFailure {}
 
     /**
-     *  If WIFI AP start failed, this reason code means there is no legal channel exists on
-     *  user selected band by regulatory
+     *  All other reasons for AP start failure besides {@link #SAP_START_FAILURE_NO_CHANNEL}.
      *
      *  @hide
      */
     public static final int SAP_START_FAILURE_GENERAL= 0;
 
     /**
-     *  All other reason for AP start failed besides SAP_START_FAILURE_GENERAL
+     *  If Wi-Fi AP start failed, this reason code means that no legal channel exists on user
+     *  selected band due to regulatory constraints.
      *
      *  @hide
      */
