@@ -500,18 +500,30 @@ public class PackageParserTest {
         File apexFile = copyRawResourceToFile("com.android.tzdata.apex",
                 R.raw.com_android_tzdata);
         PackageInfo pi = PackageParser.generatePackageInfoFromApex(apexFile, false);
-        assertEquals("com.google.android.tzdata", pi.packageName);
         assertEquals("com.google.android.tzdata", pi.applicationInfo.packageName);
-        assertEquals(1, pi.getLongVersionCode());
+        assertTrue(pi.applicationInfo.enabled);
+        assertEquals(28, pi.applicationInfo.targetSdkVersion);
         assertEquals(1, pi.applicationInfo.longVersionCode);
+
+        assertEquals("com.google.android.tzdata", pi.packageName);
+        assertTrue(pi.splitNames.length > 0);
+        assertEquals(1, pi.getLongVersionCode());
         assertNull(pi.signingInfo);
+        assertNull(pi.signatures);
+        assertTrue(pi.isApex);
 
         pi = PackageParser.generatePackageInfoFromApex(apexFile, true);
-        assertEquals("com.google.android.tzdata", pi.packageName);
         assertEquals("com.google.android.tzdata", pi.applicationInfo.packageName);
-        assertEquals(1, pi.getLongVersionCode());
+        assertTrue(pi.applicationInfo.enabled);
+        assertEquals(28, pi.applicationInfo.targetSdkVersion);
         assertEquals(1, pi.applicationInfo.longVersionCode);
+
+        assertEquals("com.google.android.tzdata", pi.packageName);
+        assertTrue(pi.splitNames.length > 0);
+        assertEquals(1, pi.getLongVersionCode());
         assertNotNull(pi.signingInfo);
+        assertNotNull(pi.signatures);
         assertTrue(pi.signingInfo.getApkContentsSigners().length > 0);
+        assertTrue(pi.isApex);
     }
 }

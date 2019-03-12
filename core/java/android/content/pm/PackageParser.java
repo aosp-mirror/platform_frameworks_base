@@ -166,6 +166,9 @@ public class PackageParser {
     private static final float DEFAULT_PRE_Q_MIN_ASPECT_RATIO = 1.333f;
     private static final float DEFAULT_PRE_Q_MIN_ASPECT_RATIO_WATCH = 1f;
 
+    private static final int DEFAULT_MIN_SDK_VERSION = 1;
+    private static final int DEFAULT_TARGET_SDK_VERSION = 0;
+
     // TODO: switch outError users to PackageParserException
     // TODO: refactor "codePath" to "apkPath"
 
@@ -466,6 +469,8 @@ public class PackageParser {
         public final int versionCodeMajor;
         public final int revisionCode;
         public final int installLocation;
+        public final int minSdkVersion;
+        public final int targetSdkVersion;
         public final VerifierInfo[] verifiers;
         public final SigningDetails signingDetails;
         public final boolean coreApp;
@@ -484,7 +489,8 @@ public class PackageParser {
                 int revisionCode, int installLocation, List<VerifierInfo> verifiers,
                 SigningDetails signingDetails, boolean coreApp,
                 boolean debuggable, boolean multiArch, boolean use32bitAbi,
-                boolean useEmbeddedDex, boolean extractNativeLibs, boolean isolatedSplits) {
+                boolean useEmbeddedDex, boolean extractNativeLibs, boolean isolatedSplits,
+                int minSdkVersion, int targetSdkVersion) {
             this.codePath = codePath;
             this.packageName = packageName;
             this.splitName = splitName;
@@ -505,6 +511,8 @@ public class PackageParser {
             this.extractNativeLibs = extractNativeLibs;
             this.isolatedSplits = isolatedSplits;
             this.isSplitRequired = isSplitRequired;
+            this.minSdkVersion = minSdkVersion;
+            this.targetSdkVersion = targetSdkVersion;
         }
 
         public long getLongVersionCode() {
@@ -1712,6 +1720,8 @@ public class PackageParser {
         int installLocation = PARSE_DEFAULT_INSTALL_LOCATION;
         int versionCode = 0;
         int versionCodeMajor = 0;
+        int targetSdkVersion = DEFAULT_TARGET_SDK_VERSION;
+        int minSdkVersion = DEFAULT_MIN_SDK_VERSION;
         int revisionCode = 0;
         boolean coreApp = false;
         boolean debuggable = false;
@@ -1749,7 +1759,7 @@ public class PackageParser {
             }
         }
 
-        // Only search the tree when the tag is directly below <manifest>
+        // Only search the tree when the tag is the direct child of <manifest> tag
         int type;
         final int searchDepth = parser.getDepth() + 1;
 
@@ -1800,13 +1810,25 @@ public class PackageParser {
                             PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED,
                             "<uses-split> tag requires 'android:name' attribute");
                 }
+            } else if (TAG_USES_SDK.equals(parser.getName())) {
+                for (int i = 0; i < attrs.getAttributeCount(); ++i) {
+                    final String attr = attrs.getAttributeName(i);
+                    if ("targetSdkVersion".equals(attr)) {
+                        targetSdkVersion = attrs.getAttributeIntValue(i,
+                                DEFAULT_TARGET_SDK_VERSION);
+                    }
+                    if ("minSdkVersion".equals(attr)) {
+                        minSdkVersion = attrs.getAttributeIntValue(i, DEFAULT_MIN_SDK_VERSION);
+                    }
+                }
             }
         }
 
         return new ApkLite(codePath, packageSplit.first, packageSplit.second, isFeatureSplit,
                 configForSplit, usesSplitName, isSplitRequired, versionCode, versionCodeMajor,
                 revisionCode, installLocation, verifiers, signingDetails, coreApp, debuggable,
-                multiArch, use32bitAbi, useEmbeddedDex, extractNativeLibs, isolatedSplits);
+                multiArch, use32bitAbi, useEmbeddedDex, extractNativeLibs, isolatedSplits,
+                minSdkVersion, targetSdkVersion);
     }
 
     /**
@@ -8350,6 +8372,7 @@ public class PackageParser {
         }
     }
 
+    // TODO(b/129261524): Clean up API
     public static PackageInfo generatePackageInfoFromApex(File apexFile, boolean collectCerts)
             throws PackageParserException {
         PackageInfo pi = new PackageInfo();
@@ -8369,25 +8392,27 @@ public class PackageParser {
             }
         }
 
-        // TODO(b/123086053) properly fill in the ApplicationInfo with data from AndroidManifest
+        PackageParser.ApkLite apk = PackageParser.parseApkLite(apexFile, parseFlags);
+
+        // Properly fill in the ApplicationInfo with data from AndroidManifest
         // Add ApplicationInfo to the PackageInfo.
+        // TODO(b/129267599)
         ApplicationInfo ai = new ApplicationInfo();
+        ai.packageName = apk.packageName;
         ai.sourceDir = apexFile.getPath();
         ai.flags = ApplicationInfo.FLAG_SYSTEM | ApplicationInfo.FLAG_INSTALLED;
         ai.enabled = true;
-        ai.targetSdkVersion = 28;
-        ai.targetSandboxVersion = 0;
-        pi.applicationInfo = ai;
-
-
-        // TODO(b/123052859): We should avoid these repeated calls to parseApkLite each time
-        // we want to generate information for APEX modules.
-        PackageParser.ApkLite apk = PackageParser.parseApkLite(apexFile, parseFlags);
+        ai.minSdkVersion = apk.minSdkVersion;
+        ai.targetSdkVersion = apk.targetSdkVersion;
+        ai.targetSandboxVersion = PARSE_DEFAULT_TARGET_SANDBOX;
+        ai.setVersionCode(apk.getLongVersionCode());
 
         pi.packageName = apk.packageName;
-        ai.packageName = apk.packageName;
+        pi.splitNames = new String[]{apk.splitName};
         pi.setLongVersionCode(apk.getLongVersionCode());
-        ai.setVersionCode(apk.getLongVersionCode());
+        pi.applicationInfo = ai;
+        pi.coreApp = apk.coreApp;
+
 
         if (collectCerts) {
             if (apk.signingDetails.hasPastSigningCertificates()) {
