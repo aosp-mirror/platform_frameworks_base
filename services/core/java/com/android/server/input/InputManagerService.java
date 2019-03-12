@@ -1452,6 +1452,11 @@ public class InputManagerService extends IInputManager.Stub
         nativeSetFocusedDisplay(mPtr, displayId);
     }
 
+    /** Clean up input window handles of the given display. */
+    public void onDisplayRemoved(int displayId) {
+        nativeSetInputWindows(mPtr, null /* windowHandles */, displayId);
+    }
+
     @Override
     public void requestPointerCapture(IBinder windowToken, boolean enabled) {
         if (mFocusedWindow == null || mFocusedWindow.asBinder() != windowToken) {
