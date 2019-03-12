@@ -539,9 +539,10 @@ public class WifiInfo implements Parcelable {
         mFqdn = fqdn;
     }
 
-    /** {@hide} */
-    @SystemApi
-    public @Nullable String getFqdn() {
+    /**
+     * Returns the Fully Qualified Domain Name of the network if it is a Passpoint network.
+     */
+    public @Nullable String getPasspointFqdn() {
         return mFqdn;
     }
 
@@ -550,9 +551,10 @@ public class WifiInfo implements Parcelable {
         mProviderFriendlyName = providerFriendlyName;
     }
 
-    /** {@hide} */
-    @SystemApi
-    public @Nullable String getProviderFriendlyName() {
+    /**
+     * Returns the Provider Friendly Name of the network if it is a Passpoint network.
+     */
+    public @Nullable String getPasspointProviderFriendlyName() {
         return mProviderFriendlyName;
     }
 

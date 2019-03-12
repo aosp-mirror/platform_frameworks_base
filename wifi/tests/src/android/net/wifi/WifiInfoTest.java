@@ -70,7 +70,7 @@ public class WifiInfoTest {
         assertTrue(readWifiInfo.isOsuAp());
         assertTrue(readWifiInfo.isPasspointAp());
         assertEquals(TEST_PACKAGE_NAME, readWifiInfo.getNetworkSuggestionOrSpecifierPackageName());
-        assertEquals(TEST_FQDN, readWifiInfo.getFqdn());
-        assertEquals(TEST_PROVIDER_NAME, readWifiInfo.getProviderFriendlyName());
+        assertEquals(TEST_FQDN, readWifiInfo.getPasspointFqdn());
+        assertEquals(TEST_PROVIDER_NAME, readWifiInfo.getPasspointProviderFriendlyName());
     }
 }

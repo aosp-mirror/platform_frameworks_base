@@ -1076,7 +1076,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
             return (info.isOsuAp() && mOsuStatus != null);
         } else if (info.isPasspointAp() || isPasspoint()) {
             return (info.isPasspointAp() && isPasspoint()
-                    && TextUtils.equals(info.getFqdn(), mConfig.FQDN));
+                    && TextUtils.equals(info.getPasspointFqdn(), mConfig.FQDN));
         }
 
         if (networkId != WifiConfiguration.INVALID_NETWORK_ID) {
