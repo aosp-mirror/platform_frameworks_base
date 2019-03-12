@@ -83,6 +83,7 @@ import com.android.internal.telephony.IOns;
 import com.android.internal.telephony.IPhoneSubInfo;
 import com.android.internal.telephony.ITelephony;
 import com.android.internal.telephony.ITelephonyRegistry;
+import com.android.internal.telephony.IUpdateAvailableNetworksCallback;
 import com.android.internal.telephony.OperatorInfo;
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.RILConstants;
@@ -98,6 +99,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -10163,6 +10165,41 @@ public class TelephonyManager {
      */
     public static final int SET_OPPORTUNISTIC_SUB_INVALID_PARAMETER = 2;
 
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"UPDATE_AVAILABLE_NETWORKS"}, value = {
+            UPDATE_AVAILABLE_NETWORKS_SUCCESS,
+            UPDATE_AVAILABLE_NETWORKS_UNKNOWN_FAILURE,
+            UPDATE_AVAILABLE_NETWORKS_ABORTED,
+            UPDATE_AVAILABLE_NETWORKS_INVALID_ARGUMENTS,
+            UPDATE_AVAILABLE_NETWORKS_NO_CARRIER_PRIVILEGE})
+    public @interface UpdateAvailableNetworksResult {}
+
+    /**
+     * No error. Operation succeeded.
+     */
+    public static final int UPDATE_AVAILABLE_NETWORKS_SUCCESS = 0;
+
+    /**
+     * There is a unknown failure happened.
+     */
+    public static final int UPDATE_AVAILABLE_NETWORKS_UNKNOWN_FAILURE = 1;
+
+    /**
+     * The request is aborted.
+     */
+    public static final int UPDATE_AVAILABLE_NETWORKS_ABORTED = 2;
+
+    /**
+     * The parameter passed in is invalid.
+     */
+    public static final int UPDATE_AVAILABLE_NETWORKS_INVALID_ARGUMENTS = 3;
+
+    /**
+     * No carrier privilege.
+     */
+    public static final int UPDATE_AVAILABLE_NETWORKS_NO_CARRIER_PRIVILEGE = 4;
+
     /**
      * Set preferred opportunistic data subscription id.
      *
@@ -10223,31 +10260,49 @@ public class TelephonyManager {
     /**
      * Update availability of a list of networks in the current location.
      *
-     * This api should be called to inform OpportunisticNetwork Service about the availability
-     * of a network at the current location. This information will be used by OpportunisticNetwork
-     * service to decide to attach to the network opportunistically. If an empty list is passed,
-     * it is assumed that no network is available.
+     * This api should be called by opportunistic network selection app to inform
+     * OpportunisticNetwork Service about the availability of a network at the current location.
+     * This information will be used by OpportunisticNetwork service to decide to attach to the
+     * network opportunistically.
+     * If an empty list is passed, it is assumed that no network is available.
      * Requires that the calling app has carrier privileges on both primary and
      * secondary subscriptions (see {@link #hasCarrierPrivileges}), or has permission
      * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}.
      * @param availableNetworks is a list of available network information.
-     * @return true if request is accepted
+     * @param executor The executor of where the callback will execute.
+     * @param callback Callback will be triggered once it succeeds or failed.
      *
      */
     @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
-    public boolean updateAvailableNetworks(List<AvailableNetworkInfo> availableNetworks) {
+    public void updateAvailableNetworks(@NonNull List<AvailableNetworkInfo> availableNetworks,
+            @Nullable @CallbackExecutor Executor executor,
+            @UpdateAvailableNetworksResult @Nullable Consumer<Integer> callback) {
         String pkgForDebug = mContext != null ? mContext.getOpPackageName() : "<unknown>";
-        boolean ret = false;
         try {
             IOns iOpportunisticNetworkService = getIOns();
-            if (iOpportunisticNetworkService != null && availableNetworks != null) {
-                ret = iOpportunisticNetworkService.updateAvailableNetworks(availableNetworks,
-                        pkgForDebug);
+            if (iOpportunisticNetworkService == null || availableNetworks == null) {
+                Binder.withCleanCallingIdentity(() -> executor.execute(() -> {
+                    callback.accept(UPDATE_AVAILABLE_NETWORKS_INVALID_ARGUMENTS);
+                }));
+                return;
             }
+            IUpdateAvailableNetworksCallback callbackStub =
+                    new IUpdateAvailableNetworksCallback.Stub() {
+                        @Override
+                        public void onComplete(int result) {
+                            if (executor == null || callback == null) {
+                                return;
+                            }
+                            Binder.withCleanCallingIdentity(() -> executor.execute(() -> {
+                                callback.accept(result);
+                            }));
+                        }
+                    };
+            iOpportunisticNetworkService.updateAvailableNetworks(availableNetworks, callbackStub,
+                    pkgForDebug);
         } catch (RemoteException ex) {
             Rlog.e(TAG, "updateAvailableNetworks RemoteException", ex);
         }
-        return ret;
     }
 
     /**
