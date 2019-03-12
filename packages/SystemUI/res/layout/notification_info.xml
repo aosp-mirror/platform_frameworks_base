@@ -220,48 +220,142 @@ asked for it -->
                     android:layout_marginStart="@dimen/notification_guts_button_horizontal_spacing"
                     style="@style/TextAppearance.NotificationInfo.Button"/>
             </LinearLayout>
-
-
         </RelativeLayout>
         <LinearLayout
             android:id="@+id/interruptiveness_settings"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/notification_guts_button_spacing"
-            android:layout_marginStart="@dimen/notification_guts_button_side_margin"
-            android:layout_marginEnd="@dimen/notification_guts_button_side_margin"
-            android:gravity="center"
-            android:orientation="horizontal"
+            android:orientation="vertical"
             android:visibility="gone">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:layout_marginStart="@dimen/notification_guts_button_side_margin"
+                android:layout_marginEnd="@dimen/notification_guts_button_side_margin"
+                android:gravity="center"
+                android:orientation="horizontal">
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:gravity="center_horizontal"
+                    android:orientation="vertical">
+                    <FrameLayout
+                        android:id="@+id/int_block_wrapper"
+                        android:padding="4dp"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:gravity="center">
+                        <ImageButton
+                            android:id="@+id/int_block"
+                            android:background="@drawable/circle_white_40dp"
+                            android:src="@drawable/ic_notification_block"
+                            android:layout_gravity="center"
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:clickable="false"
+                            android:tint="@color/GM2_grey_400"
+                            style="@style/TextAppearance.NotificationInfo.Button"/>
+                    </FrameLayout>
+                    <TextView
+                        android:id="@+id/int_block_label"
+                        android:text="@string/inline_block_button"
+                        android:layout_gravity="center_horizontal"
+                        android:gravity="center"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:ellipsize="end"
+                        android:maxLines="1"
+                        style="@style/TextAppearance.NotificationInfo.ButtonLabel"/>
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:gravity="center_horizontal"
+                    android:orientation="vertical">
+                    <FrameLayout
+                        android:id="@+id/int_silent_wrapper"
+                        android:padding="4dp"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:gravity="center">
+                        <ImageButton
+                            android:id="@+id/int_silent"
+                            android:background="@drawable/circle_white_40dp"
+                            android:src="@drawable/ic_notifications_silence"
+                            android:layout_gravity="center"
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:clickable="false"
+                            android:tint="@color/GM2_grey_400"
+                            style="@style/TextAppearance.NotificationInfo.Button"/>
+                    </FrameLayout>
+                    <TextView
+                        android:id="@+id/int_silent_label"
+                        android:text="@string/inline_silent_button_silent"
+                        android:layout_gravity="center_horizontal"
+                        android:gravity="center"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:ellipsize="end"
+                        android:maxLines="1"
+                        style="@style/TextAppearance.NotificationInfo.ButtonLabel"/>
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:gravity="center_horizontal"
+                    android:orientation="vertical">
+                    <FrameLayout
+                        android:id="@+id/int_alert_wrapper"
+                        android:padding="4dp"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:gravity="center">
+                        <ImageButton
+                            android:id="@+id/int_alert"
+                            android:background="@drawable/circle_white_40dp"
+                            android:src="@drawable/ic_notifications_alert"
+                            android:layout_gravity="center"
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:clickable="false"
+                            android:tint="@color/GM2_grey_400"
+                            style="@style/TextAppearance.NotificationInfo.Button"/>
+                    </FrameLayout>
+                    <TextView
+                        android:id="@+id/int_alert_label"
+                        android:text="@string/inline_silent_button_alert"
+                        android:layout_gravity="center_horizontal"
+                        android:gravity="center"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:ellipsize="end"
+                        android:maxLines="1"
+                        style="@style/TextAppearance.NotificationInfo.ButtonLabel"/>
+                </LinearLayout>
+            </LinearLayout>
             <TextView
-                android:id="@+id/int_block"
-                android:text="@string/inline_block_button"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:drawableTop="@drawable/ic_notification_block"
-                android:drawableTint="?android:attr/colorAccent"
-                android:layout_weight="1"
-                style="@style/TextAppearance.NotificationInfo.Button"/>
+                android:id="@+id/hint_text"
+                android:layout_marginStart="@*android:dimen/notification_content_margin_start"
+                android:layout_marginEnd="@*android:dimen/notification_content_margin_start"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/TextAppearance.NotificationInfo.HintText" />
             <TextView
-                android:id="@+id/int_silent"
-                android:text="@string/inline_minimize_button"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:drawableTop="@drawable/ic_notifications_silence"
-                android:drawableTint="?android:attr/colorAccent"
-                android:layout_weight="1"
-                style="@style/TextAppearance.NotificationInfo.Button"/>
-            <TextView
-                android:id="@+id/int_alert"
-                android:text="@string/inline_keep_button"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:drawableTop="@drawable/ic_notifications_alert"
-                android:drawableTint="?android:attr/colorAccent"
-                android:layout_weight="1"
-                style="@style/TextAppearance.NotificationInfo.Button"/>
+                android:id="@+id/done_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="right"
+                android:paddingRight="24dp"
+                android:text="@string/inline_done_button"
+                style="@style/TextAppearance.NotificationInfo.Button" />
         </LinearLayout>
     </LinearLayout>
+
     <com.android.systemui.statusbar.notification.row.NotificationUndoLayout
         android:id="@+id/confirmation"
         android:layout_width="match_parent"
