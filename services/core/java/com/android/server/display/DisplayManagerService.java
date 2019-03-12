@@ -37,7 +37,6 @@ import android.content.pm.ParceledListSlice;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.ColorSpace;
-import android.graphics.GraphicBuffer;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.SensorManager;
@@ -1275,11 +1274,12 @@ public final class DisplayManagerService extends SystemService {
         if (token == null) {
             return false;
         }
-        final GraphicBuffer gb = SurfaceControl.screenshotToBufferWithSecureLayersUnsafe(
-                token, new Rect(), 0 /* width */, 0 /* height */, false /* useIdentityTransform */,
-                0 /* rotation */);
+        final SurfaceControl.ScreenshotGraphicBuffer gb =
+                SurfaceControl.screenshotToBufferWithSecureLayersUnsafe(
+                        token, new Rect(), 0 /* width */, 0 /* height */,
+                        false /* useIdentityTransform */, 0 /* rotation */);
         try {
-            outSurface.attachAndQueueBuffer(gb);
+            outSurface.attachAndQueueBuffer(gb.getGraphicBuffer());
         } catch (RuntimeException e) {
             Slog.w(TAG, "Failed to take screenshot - " + e.getMessage());
         }
