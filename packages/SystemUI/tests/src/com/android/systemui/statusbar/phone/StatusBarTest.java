@@ -41,6 +41,7 @@ import android.app.Notification;
 import android.app.StatusBarManager;
 import android.app.trust.TrustManager;
 import android.content.Context;
+import android.hardware.display.AmbientDisplayConfiguration;
 import android.hardware.fingerprint.FingerprintManager;
 import android.metrics.LogMaker;
 import android.os.Binder;
@@ -169,6 +170,8 @@ public class StatusBarTest extends SysuiTestCase {
     private NotificationLogger.ExpansionStateLogger mExpansionStateLogger;
     @Mock
     private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
+    @Mock
+    private AmbientDisplayConfiguration mAmbientDisplayConfiguration;
 
     private TestableStatusBar mStatusBar;
     private FakeMetricsLogger mMetricsLogger;
@@ -205,7 +208,7 @@ public class StatusBarTest extends SysuiTestCase {
 
         mNotificationInterruptionStateProvider =
                 new TestableNotificationInterruptionStateProvider(mContext, mPowerManager,
-                        mDreamManager);
+                        mDreamManager, mAmbientDisplayConfiguration);
         mDependency.injectTestDependency(NotificationInterruptionStateProvider.class,
                 mNotificationInterruptionStateProvider);
         mDependency.injectMockDependency(NavigationBarController.class);
@@ -832,8 +835,9 @@ public class StatusBarTest extends SysuiTestCase {
         public TestableNotificationInterruptionStateProvider(
                 Context context,
                 PowerManager powerManager,
-                IDreamManager dreamManager) {
-            super(context, powerManager, dreamManager);
+                IDreamManager dreamManager,
+                AmbientDisplayConfiguration ambientDisplayConfiguration) {
+            super(context, powerManager, dreamManager, ambientDisplayConfiguration);
             mUseHeadsUp = true;
         }
     }
