@@ -36,7 +36,7 @@ import java.lang.ref.WeakReference;
  * <ul>
  *      <li>Sending messages: {@link #sendMessage(PeerHandle, int, byte[])} method.
  *      <li>Creating a network-specifier when requesting a Aware connection using
- *      {@link WifiAwareManager.NetworkSpecifierBuilder}.
+ *      {@link WifiAwareNetworkSpecifier.Builder}.
  * </ul>
  * <p>
  * The {@link #close()} method must be called to destroy discovery sessions once they are
@@ -270,7 +270,7 @@ public class DiscoverySession implements AutoCloseable {
      * <p>
      * To set up an encrypted link use the
      * {@link #createNetworkSpecifierPassphrase(PeerHandle, String)} API.
-     * @deprecated Use the replacement {@link WifiAwareManager.NetworkSpecifierBuilder}.
+     * @deprecated Use the replacement {@link WifiAwareNetworkSpecifier.Builder}.
      *
      * @param peerHandle The peer's handle obtained through
      * {@link DiscoverySessionCallback#onServiceDiscovered(PeerHandle, byte[], java.util.List)}
@@ -320,7 +320,7 @@ public class DiscoverySession implements AutoCloseable {
      * <p>
      * Note: per the Wi-Fi Aware specification the roles are fixed - a Subscriber is an INITIATOR
      * and a Publisher is a RESPONDER.
-     * @deprecated Use the replacement {@link WifiAwareManager.NetworkSpecifierBuilder}.
+     * @deprecated Use the replacement {@link WifiAwareNetworkSpecifier.Builder}.
      *
      * @param peerHandle The peer's handle obtained through
      * {@link DiscoverySessionCallback#onServiceDiscovered(PeerHandle,
@@ -380,7 +380,7 @@ public class DiscoverySession implements AutoCloseable {
      * <p>
      * Note: per the Wi-Fi Aware specification the roles are fixed - a Subscriber is an INITIATOR
      * and a Publisher is a RESPONDER.
-     * @deprecated Use the replacement {@link WifiAwareManager.NetworkSpecifierBuilder}.
+     * @deprecated Use the replacement {@link WifiAwareNetworkSpecifier.Builder}.
      *
      * @param peerHandle The peer's handle obtained through
      * {@link DiscoverySessionCallback#onServiceDiscovered(PeerHandle,

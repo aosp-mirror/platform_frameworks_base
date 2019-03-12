@@ -270,7 +270,7 @@ class WindowTestsBase {
     WindowTestUtils.TestAppWindowToken createTestAppWindowToken(DisplayContent dc, int
             windowingMode, int activityType) {
         return createTestAppWindowToken(dc, windowingMode, activityType,
-                true /*skipOnParentChanged */);
+                false /*skipOnParentChanged */);
     }
 
     WindowTestUtils.TestAppWindowToken createTestAppWindowToken(DisplayContent dc, int

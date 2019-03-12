@@ -409,7 +409,10 @@ public class TrustManagerService extends SystemService {
     }
 
     public long addEscrowToken(byte[] token, int userId) {
-        return mLockPatternUtils.addEscrowToken(token, userId);
+        return mLockPatternUtils.addEscrowToken(token, userId,
+                (long handle, int userid) -> {
+                    dispatchEscrowTokenActivatedLocked(handle, userid);
+                });
     }
 
     public boolean removeEscrowToken(long handle, int userId) {
@@ -658,6 +661,15 @@ public class TrustManagerService extends SystemService {
                 } else{
                     agent.agent.onDeviceUnlocked();
                 }
+            }
+        }
+    }
+
+    private void dispatchEscrowTokenActivatedLocked(long handle, int userId) {
+        for (int i = 0; i < mActiveAgents.size(); i++) {
+            AgentInfo agent = mActiveAgents.valueAt(i);
+            if (agent.userId == userId) {
+                agent.agent.onEscrowTokenActivated(handle, userId);
             }
         }
     }

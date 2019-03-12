@@ -38,7 +38,10 @@
 
 using android::idmap2::CommandLineOptions;
 using android::idmap2::Idmap;
-using android::idmap2::PoliciesToBitmask;
+using android::idmap2::kPolicyProduct;
+using android::idmap2::kPolicyPublic;
+using android::idmap2::kPolicySystem;
+using android::idmap2::kPolicyVendor;
 using android::idmap2::PolicyBitmask;
 using android::idmap2::PolicyFlags;
 using android::idmap2::Result;
@@ -87,20 +90,22 @@ std::unique_ptr<std::vector<std::string>> FindApkFiles(const std::vector<std::st
   return std::make_unique<std::vector<std::string>>(paths.cbegin(), paths.cend());
 }
 
-PolicyBitmask PolicyForPath(const std::string& apk_path) {
-  static const std::vector<std::pair<std::string, PolicyBitmask>> values = {
-      {"/product/", PolicyFlags::POLICY_PRODUCT_PARTITION},
-      {"/system/", PolicyFlags::POLICY_SYSTEM_PARTITION},
-      {"/vendor/", PolicyFlags::POLICY_VENDOR_PARTITION},
+std::vector<std::string> PoliciesForPath(const std::string& apk_path) {
+  static const std::vector<std::pair<std::string, std::string>> values = {
+      {"/product/", kPolicyProduct},
+      {"/system/", kPolicySystem},
+      {"/vendor/", kPolicyVendor},
   };
 
+  std::vector<std::string> fulfilled_policies = {kPolicyPublic};
   for (auto const& pair : values) {
     if (apk_path.compare(0, pair.first.size(), pair.first) == 0) {
-      return pair.second | PolicyFlags::POLICY_PUBLIC;
+      fulfilled_policies.emplace_back(pair.second);
+      break;
     }
   }
 
-  return PolicyFlags::POLICY_PUBLIC;
+  return fulfilled_policies;
 }
 
 }  // namespace
@@ -161,21 +166,17 @@ bool Scan(const std::vector<std::string>& args, std::ostream& out_error) {
       continue;
     }
 
-    PolicyBitmask fulfilled_policies;
+    std::vector<std::string> fulfilled_policies;
     if (!override_policies.empty()) {
-      auto conv_result = PoliciesToBitmask(override_policies);
-      if (conv_result) {
-        fulfilled_policies = *conv_result;
-      } else {
-        out_error << "error: " << conv_result.GetErrorMessage() << std::endl;
-        return false;
-      }
+      fulfilled_policies = override_policies;
     } else {
-      fulfilled_policies = PolicyForPath(path);
+      fulfilled_policies = PoliciesForPath(path);
     }
 
     bool ignore_overlayable = false;
-    if ((fulfilled_policies & PolicyFlags::POLICY_VENDOR_PARTITION) != 0 && !VendorIsQOrLater()) {
+    if (std::find(fulfilled_policies.begin(), fulfilled_policies.end(), kPolicyVendor) !=
+            fulfilled_policies.end() &&
+        !VendorIsQOrLater()) {
       // If the overlay is on a pre-Q vendor partition, do not enforce overlayable
       // restrictions on this overlay because the pre-Q platform has no understanding of
       // overlayable.
@@ -185,7 +186,7 @@ bool Scan(const std::vector<std::string>& args, std::ostream& out_error) {
     std::string idmap_path = Idmap::CanonicalIdmapPathFor(output_directory, path);
 
     // Sort the static overlays in ascending priority order
-    InputOverlay input{path, idmap_path, overlay_info->priority, override_policies,
+    InputOverlay input{path, idmap_path, overlay_info->priority, fulfilled_policies,
                        ignore_overlayable};
     interesting_apks.insert(
         std::lower_bound(interesting_apks.begin(), interesting_apks.end(), input), input);
@@ -211,8 +212,8 @@ bool Scan(const std::vector<std::string>& args, std::ostream& out_error) {
       }
 
       for (const std::string& policy : overlay.policies) {
-        verify_args.emplace_back("--policy");
-        verify_args.emplace_back(policy);
+        create_args.emplace_back("--policy");
+        create_args.emplace_back(policy);
       }
 
       if (!Create(create_args, out_error)) {

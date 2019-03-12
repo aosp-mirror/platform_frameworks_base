@@ -16,6 +16,7 @@
 
 #include "VulkanManager.h"
 
+#include <android/sync.h>
 #include <gui/Surface.h>
 
 #include "Properties.h"
@@ -23,6 +24,7 @@
 #include "renderstate/RenderState.h"
 #include "utils/FatVector.h"
 
+#include <GrBackendSemaphore.h>
 #include <GrBackendSurface.h>
 #include <GrContext.h>
 #include <GrTypes.h>
@@ -142,6 +144,7 @@ void VulkanManager::setupDevice(GrVkExtensions& grExtensions, VkPhysicalDeviceFe
     GET_INST_PROC(GetPhysicalDeviceProperties);
     GET_INST_PROC(GetPhysicalDeviceQueueFamilyProperties);
     GET_INST_PROC(GetPhysicalDeviceFeatures2);
+    GET_INST_PROC(GetPhysicalDeviceImageFormatProperties2);
     GET_INST_PROC(CreateDevice);
     GET_INST_PROC(EnumerateDeviceExtensionProperties);
     GET_INST_PROC(CreateAndroidSurfaceKHR);
@@ -318,11 +321,6 @@ void VulkanManager::setupDevice(GrVkExtensions& grExtensions, VkPhysicalDeviceFe
     GET_DEV_PROC(GetDeviceQueue);
     GET_DEV_PROC(DeviceWaitIdle);
     GET_DEV_PROC(DestroyDevice);
-    GET_DEV_PROC(CreateSwapchainKHR);
-    GET_DEV_PROC(DestroySwapchainKHR);
-    GET_DEV_PROC(GetSwapchainImagesKHR);
-    GET_DEV_PROC(AcquireNextImageKHR);
-    GET_DEV_PROC(QueuePresentKHR);
     GET_DEV_PROC(CreateCommandPool);
     GET_DEV_PROC(DestroyCommandPool);
     GET_DEV_PROC(AllocateCommandBuffers);
@@ -426,201 +424,102 @@ VkFunctorInitParams VulkanManager::getVkFunctorInitParams() const {
     };
 }
 
-// Returns the next BackbufferInfo to use for the next draw. The function will make sure all
-// previous uses have finished before returning.
-VulkanSurface::BackbufferInfo* VulkanManager::getAvailableBackbuffer(VulkanSurface* surface) {
-    SkASSERT(surface->mBackbuffers);
+Frame VulkanManager::dequeueNextBuffer(VulkanSurface* surface) {
 
-    ++surface->mCurrentBackbufferIndex;
-    if (surface->mCurrentBackbufferIndex > surface->mImageCount) {
-        surface->mCurrentBackbufferIndex = 0;
+    VulkanSurface::NativeBufferInfo* bufferInfo = surface->dequeueNativeBuffer();
+
+    if (bufferInfo == nullptr) {
+        ALOGE("VulkanSurface::dequeueNativeBuffer called with an invalid surface!");
+        return Frame(-1, -1, 0);
     }
 
-    VulkanSurface::BackbufferInfo* backbuffer =
-            surface->mBackbuffers + surface->mCurrentBackbufferIndex;
+    LOG_ALWAYS_FATAL_IF(!bufferInfo->dequeued);
 
-    // Before we reuse a backbuffer, make sure its fences have all signaled so that we can safely
-    // reuse its commands buffers.
-    VkResult res = mWaitForFences(mDevice, 2, backbuffer->mUsageFences, true, UINT64_MAX);
-    if (res != VK_SUCCESS) {
-        return nullptr;
+    if (bufferInfo->dequeue_fence != -1) {
+        int fence_clone = dup(bufferInfo->dequeue_fence);
+        if (fence_clone == -1) {
+            ALOGE("dup(fence) failed, stalling until signalled: %s (%d)", strerror(errno), errno);
+            sync_wait(bufferInfo->dequeue_fence, -1 /* forever */);
+        } else {
+            VkSemaphoreCreateInfo semaphoreInfo;
+            semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+            semaphoreInfo.pNext = nullptr;
+            semaphoreInfo.flags = 0;
+            VkSemaphore semaphore;
+            VkResult err = mCreateSemaphore(mDevice, &semaphoreInfo, nullptr, &semaphore);
+            LOG_ALWAYS_FATAL_IF(VK_SUCCESS != err, "Failed to create import semaphore, err: %d",
+                                err);
+
+            VkImportSemaphoreFdInfoKHR importInfo;
+            importInfo.sType = VK_STRUCTURE_TYPE_IMPORT_SEMAPHORE_FD_INFO_KHR;
+            importInfo.pNext = nullptr;
+            importInfo.semaphore = semaphore;
+            importInfo.flags = VK_SEMAPHORE_IMPORT_TEMPORARY_BIT;
+            importInfo.handleType = VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_SYNC_FD_BIT;
+            importInfo.fd = fence_clone;
+
+            err = mImportSemaphoreFdKHR(mDevice, &importInfo);
+            LOG_ALWAYS_FATAL_IF(VK_SUCCESS != err, "Failed to import semaphore, err: %d", err);
+
+            GrBackendSemaphore backendSemaphore;
+            backendSemaphore.initVulkan(semaphore);
+            bufferInfo->skSurface->wait(1, &backendSemaphore);
+        }
     }
 
-    return backbuffer;
+    int bufferAge = (mSwapBehavior == SwapBehavior::Discard) ? 0 : surface->getCurrentBuffersAge();
+    return Frame(surface->logicalWidth(), surface->logicalHeight(), bufferAge);
 }
 
-static SkMatrix getPreTransformMatrix(int width, int height,
-                                      VkSurfaceTransformFlagBitsKHR transform) {
-    switch (transform) {
-        case VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR:
-            return SkMatrix::I();
-        case VK_SURFACE_TRANSFORM_ROTATE_90_BIT_KHR:
-            return SkMatrix::MakeAll(0, -1, height, 1, 0, 0, 0, 0, 1);
-        case VK_SURFACE_TRANSFORM_ROTATE_180_BIT_KHR:
-            return SkMatrix::MakeAll(-1, 0, width, 0, -1, height, 0, 0, 1);
-        case VK_SURFACE_TRANSFORM_ROTATE_270_BIT_KHR:
-            return SkMatrix::MakeAll(0, 1, 0, -1, 0, width, 0, 0, 1);
-        case VK_SURFACE_TRANSFORM_HORIZONTAL_MIRROR_BIT_KHR:
-            return SkMatrix::MakeAll(-1, 0, width, 0, 1, 0, 0, 0, 1);
-        case VK_SURFACE_TRANSFORM_HORIZONTAL_MIRROR_ROTATE_90_BIT_KHR:
-            return SkMatrix::MakeAll(0, -1, height, -1, 0, width, 0, 0, 1);
-        case VK_SURFACE_TRANSFORM_HORIZONTAL_MIRROR_ROTATE_180_BIT_KHR:
-            return SkMatrix::MakeAll(1, 0, 0, 0, -1, height, 0, 0, 1);
-        case VK_SURFACE_TRANSFORM_HORIZONTAL_MIRROR_ROTATE_270_BIT_KHR:
-            return SkMatrix::MakeAll(0, 1, 0, 1, 0, 0, 0, 0, 1);
-        default:
-            LOG_ALWAYS_FATAL("Unsupported pre transform of swapchain.");
-    }
-    return SkMatrix::I();
-}
-
-
-SkSurface* VulkanManager::getBackbufferSurface(VulkanSurface** surfaceOut) {
-    // Recreate VulkanSurface, if ANativeWindow has been resized.
-    VulkanSurface* surface = *surfaceOut;
-    int windowWidth = 0, windowHeight = 0;
-    ANativeWindow* window = surface->mNativeWindow;
-    window->query(window, NATIVE_WINDOW_WIDTH, &windowWidth);
-    window->query(window, NATIVE_WINDOW_HEIGHT, &windowHeight);
-    if (windowWidth != surface->mWindowWidth || windowHeight != surface->mWindowHeight) {
-        ColorMode colorMode = surface->mColorMode;
-        sk_sp<SkColorSpace> colorSpace = surface->mColorSpace;
-        SkColorType colorType = surface->mColorType;
-        GrContext* grContext = surface->mGrContext;
-        destroySurface(surface);
-        *surfaceOut = createSurface(window, colorMode, colorSpace, colorType, grContext);
-        surface = *surfaceOut;
-        if (!surface) {
-            return nullptr;
-        }
+void VulkanManager::swapBuffers(VulkanSurface* surface, const SkRect& dirtyRect) {
+    if (CC_UNLIKELY(Properties::waitForGpuCompletion)) {
+        ATRACE_NAME("Finishing GPU work");
+        mDeviceWaitIdle(mDevice);
     }
 
-    VulkanSurface::BackbufferInfo* backbuffer = getAvailableBackbuffer(surface);
-    SkASSERT(backbuffer);
+    VkExportSemaphoreCreateInfo exportInfo;
+    exportInfo.sType = VK_STRUCTURE_TYPE_EXPORT_SEMAPHORE_CREATE_INFO;
+    exportInfo.pNext = nullptr;
+    exportInfo.handleTypes = VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_SYNC_FD_BIT;
 
-    VkResult res;
+    VkSemaphoreCreateInfo semaphoreInfo;
+    semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+    semaphoreInfo.pNext = &exportInfo;
+    semaphoreInfo.flags = 0;
+    VkSemaphore semaphore;
+    VkResult err = mCreateSemaphore(mDevice, &semaphoreInfo, nullptr, &semaphore);
+    ALOGE_IF(VK_SUCCESS != err, "VulkanManager::swapBuffers(): Failed to create semaphore");
 
-    res = mResetFences(mDevice, 2, backbuffer->mUsageFences);
-    SkASSERT(VK_SUCCESS == res);
+    GrBackendSemaphore backendSemaphore;
+    backendSemaphore.initVulkan(semaphore);
 
-    // The acquire will signal the attached mAcquireSemaphore. We use this to know the image has
-    // finished presenting and that it is safe to begin sending new commands to the returned image.
-    res = mAcquireNextImageKHR(mDevice, surface->mSwapchain, UINT64_MAX,
-                               backbuffer->mAcquireSemaphore, VK_NULL_HANDLE,
-                               &backbuffer->mImageIndex);
+    VulkanSurface::NativeBufferInfo* bufferInfo = surface->getCurrentBufferInfo();
 
-    if (VK_ERROR_SURFACE_LOST_KHR == res) {
-        // need to figure out how to create a new vkSurface without the platformData*
-        // maybe use attach somehow? but need a Window
-        return nullptr;
-    }
-    if (VK_ERROR_OUT_OF_DATE_KHR == res || VK_SUBOPTIMAL_KHR == res) {
-        // tear swapchain down and try again
-        if (!createSwapchain(surface)) {
-            return nullptr;
-        }
-        backbuffer = getAvailableBackbuffer(surface);
-        res = mResetFences(mDevice, 2, backbuffer->mUsageFences);
-        SkASSERT(VK_SUCCESS == res);
+    int fenceFd = -1;
+    GrSemaphoresSubmitted submitted =
+            bufferInfo->skSurface->flush(SkSurface::BackendSurfaceAccess::kPresent,
+                                         SkSurface::kNone_FlushFlags, 1, &backendSemaphore);
+    if (submitted == GrSemaphoresSubmitted::kYes) {
+        VkSemaphoreGetFdInfoKHR getFdInfo;
+        getFdInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_GET_FD_INFO_KHR;
+        getFdInfo.pNext = nullptr;
+        getFdInfo.semaphore = semaphore;
+        getFdInfo.handleType = VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_SYNC_FD_BIT;
 
-        // acquire the image
-        res = mAcquireNextImageKHR(mDevice, surface->mSwapchain, UINT64_MAX,
-                                   backbuffer->mAcquireSemaphore, VK_NULL_HANDLE,
-                                   &backbuffer->mImageIndex);
-
-        if (VK_SUCCESS != res) {
-            return nullptr;
-        }
+        err = mGetSemaphoreFdKHR(mDevice, &getFdInfo, &fenceFd);
+        ALOGE_IF(VK_SUCCESS != err, "VulkanManager::swapBuffers(): Failed to get semaphore Fd");
+    } else {
+        ALOGE("VulkanManager::swapBuffers(): Semaphore submission failed");
+        mQueueWaitIdle(mGraphicsQueue);
     }
 
-    // set up layout transfer from initial to color attachment
-    VkImageLayout layout = surface->mImageInfos[backbuffer->mImageIndex].mImageLayout;
-    SkASSERT(VK_IMAGE_LAYOUT_UNDEFINED == layout || VK_IMAGE_LAYOUT_PRESENT_SRC_KHR == layout);
-    VkPipelineStageFlags srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-    VkPipelineStageFlags dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-    VkAccessFlags srcAccessMask = 0;
-    VkAccessFlags dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT |
-                                  VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+    surface->presentCurrentBuffer(dirtyRect, fenceFd);
 
-    VkImageMemoryBarrier imageMemoryBarrier = {
-            VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,     // sType
-            NULL,                                       // pNext
-            srcAccessMask,                              // outputMask
-            dstAccessMask,                              // inputMask
-            layout,                                     // oldLayout
-            VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,   // newLayout
-            mPresentQueueIndex,                         // srcQueueFamilyIndex
-            mGraphicsQueueIndex,       // dstQueueFamilyIndex
-            surface->mImages[backbuffer->mImageIndex],  // image
-            {VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1}     // subresourceRange
-    };
-    mResetCommandBuffer(backbuffer->mTransitionCmdBuffers[0], 0);
-
-    VkCommandBufferBeginInfo info;
-    memset(&info, 0, sizeof(VkCommandBufferBeginInfo));
-    info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-    info.flags = 0;
-    mBeginCommandBuffer(backbuffer->mTransitionCmdBuffers[0], &info);
-
-    mCmdPipelineBarrier(backbuffer->mTransitionCmdBuffers[0], srcStageMask, dstStageMask, 0, 0,
-                        nullptr, 0, nullptr, 1, &imageMemoryBarrier);
-
-    mEndCommandBuffer(backbuffer->mTransitionCmdBuffers[0]);
-
-    VkPipelineStageFlags waitDstStageFlags = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-    // insert the layout transfer into the queue and wait on the acquire
-    VkSubmitInfo submitInfo;
-    memset(&submitInfo, 0, sizeof(VkSubmitInfo));
-    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-    submitInfo.waitSemaphoreCount = 1;
-    // Wait to make sure aquire semaphore set above has signaled.
-    submitInfo.pWaitSemaphores = &backbuffer->mAcquireSemaphore;
-    submitInfo.pWaitDstStageMask = &waitDstStageFlags;
-    submitInfo.commandBufferCount = 1;
-    submitInfo.pCommandBuffers = &backbuffer->mTransitionCmdBuffers[0];
-    submitInfo.signalSemaphoreCount = 0;
-
-    // Attach first fence to submission here so we can track when the command buffer finishes.
-    mQueueSubmit(mGraphicsQueue, 1, &submitInfo, backbuffer->mUsageFences[0]);
-
-    // We need to notify Skia that we changed the layout of the wrapped VkImage
-    sk_sp<SkSurface> skSurface = surface->mImageInfos[backbuffer->mImageIndex].mSurface;
-    GrBackendRenderTarget backendRT = skSurface->getBackendRenderTarget(
-            SkSurface::kFlushRead_BackendHandleAccess);
-    if (!backendRT.isValid()) {
-        SkASSERT(backendRT.isValid());
-        return nullptr;
-    }
-    backendRT.setVkImageLayout(VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
-
-    surface->mPreTransform = getPreTransformMatrix(surface->windowWidth(),
-                                                   surface->windowHeight(),
-                                                   surface->mTransform);
-
-    surface->mBackbuffer = std::move(skSurface);
-    return surface->mBackbuffer.get();
-}
-
-void VulkanManager::destroyBuffers(VulkanSurface* surface) {
-    if (surface->mBackbuffers) {
-        for (uint32_t i = 0; i < surface->mImageCount + 1; ++i) {
-            mWaitForFences(mDevice, 2, surface->mBackbuffers[i].mUsageFences, true, UINT64_MAX);
-            surface->mBackbuffers[i].mImageIndex = -1;
-            mDestroySemaphore(mDevice, surface->mBackbuffers[i].mAcquireSemaphore, nullptr);
-            mDestroySemaphore(mDevice, surface->mBackbuffers[i].mRenderSemaphore, nullptr);
-            mFreeCommandBuffers(mDevice, mCommandPool, 2,
-                    surface->mBackbuffers[i].mTransitionCmdBuffers);
-            mDestroyFence(mDevice, surface->mBackbuffers[i].mUsageFences[0], 0);
-            mDestroyFence(mDevice, surface->mBackbuffers[i].mUsageFences[1], 0);
-        }
-    }
-
-    delete[] surface->mBackbuffers;
-    surface->mBackbuffers = nullptr;
-    delete[] surface->mImageInfos;
-    surface->mImageInfos = nullptr;
-    delete[] surface->mImages;
-    surface->mImages = nullptr;
+    // Exporting a semaphore with copy transference via vkGetSemaphoreFdKHR, has the same effect of
+    // destroying the semaphore and creating a new one with the same handle, and the payloads
+    // ownership is move to the Fd we created. Thus the semaphore is in a state that we can delete
+    // it and we don't need to wait on the command buffer we submitted to finish.
+    mDestroySemaphore(mDevice, semaphore, nullptr);
 }
 
 void VulkanManager::destroySurface(VulkanSurface* surface) {
@@ -630,269 +529,7 @@ void VulkanManager::destroySurface(VulkanSurface* surface) {
     }
     mDeviceWaitIdle(mDevice);
 
-    destroyBuffers(surface);
-
-    if (VK_NULL_HANDLE != surface->mSwapchain) {
-        mDestroySwapchainKHR(mDevice, surface->mSwapchain, nullptr);
-        surface->mSwapchain = VK_NULL_HANDLE;
-    }
-
-    if (VK_NULL_HANDLE != surface->mVkSurface) {
-        mDestroySurfaceKHR(mInstance, surface->mVkSurface, nullptr);
-        surface->mVkSurface = VK_NULL_HANDLE;
-    }
     delete surface;
-}
-
-void VulkanManager::createBuffers(VulkanSurface* surface, VkFormat format, VkExtent2D extent) {
-    mGetSwapchainImagesKHR(mDevice, surface->mSwapchain, &surface->mImageCount, nullptr);
-    SkASSERT(surface->mImageCount);
-    surface->mImages = new VkImage[surface->mImageCount];
-    mGetSwapchainImagesKHR(mDevice, surface->mSwapchain, &surface->mImageCount, surface->mImages);
-
-    SkSurfaceProps props(0, kUnknown_SkPixelGeometry);
-
-    // set up initial image layouts and create surfaces
-    surface->mImageInfos = new VulkanSurface::ImageInfo[surface->mImageCount];
-    for (uint32_t i = 0; i < surface->mImageCount; ++i) {
-        GrVkImageInfo info;
-        info.fImage = surface->mImages[i];
-        info.fAlloc = GrVkAlloc();
-        info.fImageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-        info.fImageTiling = VK_IMAGE_TILING_OPTIMAL;
-        info.fFormat = format;
-        info.fLevelCount = 1;
-
-        GrBackendRenderTarget backendRT(extent.width, extent.height, 0, 0, info);
-
-        VulkanSurface::ImageInfo& imageInfo = surface->mImageInfos[i];
-        imageInfo.mSurface = SkSurface::MakeFromBackendRenderTarget(
-                surface->mGrContext, backendRT, kTopLeft_GrSurfaceOrigin,
-                surface->mColorType, surface->mColorSpace, &props);
-    }
-
-    SkASSERT(mCommandPool != VK_NULL_HANDLE);
-
-    // set up the backbuffers
-    VkSemaphoreCreateInfo semaphoreInfo;
-    memset(&semaphoreInfo, 0, sizeof(VkSemaphoreCreateInfo));
-    semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-    semaphoreInfo.pNext = nullptr;
-    semaphoreInfo.flags = 0;
-    VkCommandBufferAllocateInfo commandBuffersInfo;
-    memset(&commandBuffersInfo, 0, sizeof(VkCommandBufferAllocateInfo));
-    commandBuffersInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-    commandBuffersInfo.pNext = nullptr;
-    commandBuffersInfo.commandPool = mCommandPool;
-    commandBuffersInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-    commandBuffersInfo.commandBufferCount = 2;
-    VkFenceCreateInfo fenceInfo;
-    memset(&fenceInfo, 0, sizeof(VkFenceCreateInfo));
-    fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
-    fenceInfo.pNext = nullptr;
-    fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
-
-    // we create one additional backbuffer structure here, because we want to
-    // give the command buffers they contain a chance to finish before we cycle back
-    surface->mBackbuffers = new VulkanSurface::BackbufferInfo[surface->mImageCount + 1];
-    for (uint32_t i = 0; i < surface->mImageCount + 1; ++i) {
-        SkDEBUGCODE(VkResult res);
-        surface->mBackbuffers[i].mImageIndex = -1;
-        SkDEBUGCODE(res =) mCreateSemaphore(mDevice, &semaphoreInfo, nullptr,
-                                            &surface->mBackbuffers[i].mAcquireSemaphore);
-        SkDEBUGCODE(res =) mCreateSemaphore(mDevice, &semaphoreInfo, nullptr,
-                                            &surface->mBackbuffers[i].mRenderSemaphore);
-        SkDEBUGCODE(res =) mAllocateCommandBuffers(mDevice, &commandBuffersInfo,
-                                                   surface->mBackbuffers[i].mTransitionCmdBuffers);
-        SkDEBUGCODE(res =) mCreateFence(mDevice, &fenceInfo, nullptr,
-                                        &surface->mBackbuffers[i].mUsageFences[0]);
-        SkDEBUGCODE(res =) mCreateFence(mDevice, &fenceInfo, nullptr,
-                                        &surface->mBackbuffers[i].mUsageFences[1]);
-        SkASSERT(VK_SUCCESS == res);
-    }
-    surface->mCurrentBackbufferIndex = surface->mImageCount;
-}
-
-bool VulkanManager::createSwapchain(VulkanSurface* surface) {
-    // check for capabilities
-    VkSurfaceCapabilitiesKHR caps;
-    VkResult res = mGetPhysicalDeviceSurfaceCapabilitiesKHR(mPhysicalDevice,
-                                                            surface->mVkSurface, &caps);
-    if (VK_SUCCESS != res) {
-        return false;
-    }
-
-    uint32_t surfaceFormatCount;
-    res = mGetPhysicalDeviceSurfaceFormatsKHR(mPhysicalDevice, surface->mVkSurface,
-                                              &surfaceFormatCount, nullptr);
-    if (VK_SUCCESS != res) {
-        return false;
-    }
-
-    FatVector<VkSurfaceFormatKHR, 4> surfaceFormats(surfaceFormatCount);
-    res = mGetPhysicalDeviceSurfaceFormatsKHR(mPhysicalDevice, surface->mVkSurface,
-                                              &surfaceFormatCount, surfaceFormats.data());
-    if (VK_SUCCESS != res) {
-        return false;
-    }
-
-    uint32_t presentModeCount;
-    res = mGetPhysicalDeviceSurfacePresentModesKHR(mPhysicalDevice,
-                                                   surface->mVkSurface, &presentModeCount, nullptr);
-    if (VK_SUCCESS != res) {
-        return false;
-    }
-
-    FatVector<VkPresentModeKHR, VK_PRESENT_MODE_RANGE_SIZE_KHR> presentModes(presentModeCount);
-    res = mGetPhysicalDeviceSurfacePresentModesKHR(mPhysicalDevice,
-                                                   surface->mVkSurface, &presentModeCount,
-                                                   presentModes.data());
-    if (VK_SUCCESS != res) {
-        return false;
-    }
-
-    if (!SkToBool(caps.supportedTransforms & VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR)) {
-        return false;
-    }
-    VkSurfaceTransformFlagBitsKHR transform;
-    if (SkToBool(caps.supportedTransforms & caps.currentTransform) &&
-        !SkToBool(caps.currentTransform & VK_SURFACE_TRANSFORM_INHERIT_BIT_KHR)) {
-        transform = caps.currentTransform;
-    } else {
-        transform = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
-    }
-
-    VkExtent2D extent = caps.currentExtent;
-    // clamp width; to handle currentExtent of -1 and  protect us from broken hints
-    if (extent.width < caps.minImageExtent.width) {
-        extent.width = caps.minImageExtent.width;
-    }
-    SkASSERT(extent.width <= caps.maxImageExtent.width);
-    // clamp height
-    if (extent.height < caps.minImageExtent.height) {
-        extent.height = caps.minImageExtent.height;
-    }
-    SkASSERT(extent.height <= caps.maxImageExtent.height);
-
-    VkExtent2D swapExtent = extent;
-    if (transform == VK_SURFACE_TRANSFORM_ROTATE_90_BIT_KHR ||
-        transform == VK_SURFACE_TRANSFORM_ROTATE_270_BIT_KHR ||
-        transform == VK_SURFACE_TRANSFORM_HORIZONTAL_MIRROR_ROTATE_90_BIT_KHR ||
-        transform == VK_SURFACE_TRANSFORM_HORIZONTAL_MIRROR_ROTATE_270_BIT_KHR) {
-        swapExtent.width = extent.height;
-        swapExtent.height = extent.width;
-    }
-
-    surface->mWindowWidth = extent.width;
-    surface->mWindowHeight = extent.height;
-
-    uint32_t imageCount = std::max<uint32_t>(3, caps.minImageCount);
-    if (caps.maxImageCount > 0 && imageCount > caps.maxImageCount) {
-        // Application must settle for fewer images than desired:
-        imageCount = caps.maxImageCount;
-    }
-
-    // Currently Skia requires the images to be color attchments and support all transfer
-    // operations.
-    VkImageUsageFlags usageFlags = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT |
-                                   VK_IMAGE_USAGE_TRANSFER_SRC_BIT |
-                                   VK_IMAGE_USAGE_TRANSFER_DST_BIT;
-    SkASSERT((caps.supportedUsageFlags & usageFlags) == usageFlags);
-
-    SkASSERT(caps.supportedCompositeAlpha &
-             (VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR | VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR));
-    VkCompositeAlphaFlagBitsKHR composite_alpha =
-            (caps.supportedCompositeAlpha & VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR)
-                    ? VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR
-                    : VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
-
-    VkFormat surfaceFormat = VK_FORMAT_R8G8B8A8_UNORM;
-    VkColorSpaceKHR colorSpace = VK_COLORSPACE_SRGB_NONLINEAR_KHR;
-    if (surface->mColorType == SkColorType::kRGBA_F16_SkColorType) {
-        surfaceFormat = VK_FORMAT_R16G16B16A16_SFLOAT;
-    }
-
-    if (surface->mColorMode == ColorMode::WideColorGamut) {
-        skcms_Matrix3x3 surfaceGamut;
-        LOG_ALWAYS_FATAL_IF(!surface->mColorSpace->toXYZD50(&surfaceGamut),
-                            "Could not get gamut matrix from color space");
-        if (memcmp(&surfaceGamut, &SkNamedGamut::kSRGB, sizeof(surfaceGamut)) == 0) {
-            colorSpace = VK_COLOR_SPACE_EXTENDED_SRGB_NONLINEAR_EXT;
-        } else if (memcmp(&surfaceGamut, &SkNamedGamut::kDCIP3, sizeof(surfaceGamut)) == 0) {
-            colorSpace = VK_COLOR_SPACE_DISPLAY_P3_NONLINEAR_EXT;
-        } else {
-            LOG_ALWAYS_FATAL("Unreachable: unsupported wide color space.");
-        }
-    }
-
-    bool foundSurfaceFormat = false;
-    for (uint32_t i = 0; i < surfaceFormatCount; ++i) {
-        if (surfaceFormat == surfaceFormats[i].format
-                && colorSpace == surfaceFormats[i].colorSpace) {
-            foundSurfaceFormat = true;
-            break;
-        }
-    }
-
-    if (!foundSurfaceFormat) {
-        return false;
-    }
-
-    // FIFO is always available and will match what we do on GL so just pick that here.
-    VkPresentModeKHR mode = VK_PRESENT_MODE_FIFO_KHR;
-
-    VkSwapchainCreateInfoKHR swapchainCreateInfo;
-    memset(&swapchainCreateInfo, 0, sizeof(VkSwapchainCreateInfoKHR));
-    swapchainCreateInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-    swapchainCreateInfo.surface = surface->mVkSurface;
-    swapchainCreateInfo.minImageCount = imageCount;
-    swapchainCreateInfo.imageFormat = surfaceFormat;
-    swapchainCreateInfo.imageColorSpace = colorSpace;
-    swapchainCreateInfo.imageExtent = swapExtent;
-    swapchainCreateInfo.imageArrayLayers = 1;
-    swapchainCreateInfo.imageUsage = usageFlags;
-
-    uint32_t queueFamilies[] = {mGraphicsQueueIndex, mPresentQueueIndex};
-    if (mGraphicsQueueIndex != mPresentQueueIndex) {
-        swapchainCreateInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
-        swapchainCreateInfo.queueFamilyIndexCount = 2;
-        swapchainCreateInfo.pQueueFamilyIndices = queueFamilies;
-    } else {
-        swapchainCreateInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
-        swapchainCreateInfo.queueFamilyIndexCount = 0;
-        swapchainCreateInfo.pQueueFamilyIndices = nullptr;
-    }
-
-    swapchainCreateInfo.preTransform = transform;
-    swapchainCreateInfo.compositeAlpha = composite_alpha;
-    swapchainCreateInfo.presentMode = mode;
-    swapchainCreateInfo.clipped = true;
-    swapchainCreateInfo.oldSwapchain = surface->mSwapchain;
-
-    res = mCreateSwapchainKHR(mDevice, &swapchainCreateInfo, nullptr, &surface->mSwapchain);
-    if (VK_SUCCESS != res) {
-        return false;
-    }
-
-    surface->mTransform = transform;
-
-    // destroy the old swapchain
-    if (swapchainCreateInfo.oldSwapchain != VK_NULL_HANDLE) {
-        mDeviceWaitIdle(mDevice);
-
-        destroyBuffers(surface);
-
-        mDestroySwapchainKHR(mDevice, swapchainCreateInfo.oldSwapchain, nullptr);
-    }
-
-    createBuffers(surface, surfaceFormat, swapExtent);
-
-    // The window content is not updated (frozen) until a buffer of the window size is received.
-    // This prevents temporary stretching of the window after it is resized, but before the first
-    // buffer with new size is enqueued.
-    native_window_set_scaling_mode(surface->mNativeWindow, NATIVE_WINDOW_SCALING_MODE_FREEZE);
-
-    return true;
 }
 
 VulkanSurface* VulkanManager::createSurface(ANativeWindow* window, ColorMode colorMode,
@@ -904,185 +541,8 @@ VulkanSurface* VulkanManager::createSurface(ANativeWindow* window, ColorMode col
         return nullptr;
     }
 
-    VulkanSurface* surface = new VulkanSurface(colorMode, window, surfaceColorSpace,
-                                               surfaceColorType, grContext);
-
-    VkAndroidSurfaceCreateInfoKHR surfaceCreateInfo;
-    memset(&surfaceCreateInfo, 0, sizeof(VkAndroidSurfaceCreateInfoKHR));
-    surfaceCreateInfo.sType = VK_STRUCTURE_TYPE_ANDROID_SURFACE_CREATE_INFO_KHR;
-    surfaceCreateInfo.pNext = nullptr;
-    surfaceCreateInfo.flags = 0;
-    surfaceCreateInfo.window = window;
-
-    VkResult res = mCreateAndroidSurfaceKHR(mInstance, &surfaceCreateInfo, nullptr,
-            &surface->mVkSurface);
-    if (VK_SUCCESS != res) {
-        delete surface;
-        return nullptr;
-    }
-
-    SkDEBUGCODE(VkBool32 supported; res = mGetPhysicalDeviceSurfaceSupportKHR(
-            mPhysicalDevice, mPresentQueueIndex, surface->mVkSurface, &supported);
-    // All physical devices and queue families on Android must be capable of
-    // presentation with any native window.
-    SkASSERT(VK_SUCCESS == res && supported););
-
-    if (!createSwapchain(surface)) {
-        destroySurface(surface);
-        return nullptr;
-    }
-
-    return surface;
-}
-
-// Helper to know which src stage flags we need to set when transitioning to the present layout
-static VkPipelineStageFlags layoutToPipelineSrcStageFlags(const VkImageLayout layout) {
-    if (VK_IMAGE_LAYOUT_GENERAL == layout) {
-        return VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
-    } else if (VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL == layout ||
-               VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL == layout) {
-        return VK_PIPELINE_STAGE_TRANSFER_BIT;
-    } else if (VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL == layout) {
-        return VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-    } else if (VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL == layout ||
-               VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL == layout) {
-        return VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
-    } else if (VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL == layout) {
-        return VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
-    } else if (VK_IMAGE_LAYOUT_PREINITIALIZED == layout) {
-        return VK_PIPELINE_STAGE_HOST_BIT;
-    }
-
-    SkASSERT(VK_IMAGE_LAYOUT_UNDEFINED == layout);
-    return VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
-}
-
-// Helper to know which src access mask we need to set when transitioning to the present layout
-static VkAccessFlags layoutToSrcAccessMask(const VkImageLayout layout) {
-    VkAccessFlags flags = 0;
-    if (VK_IMAGE_LAYOUT_GENERAL == layout) {
-        flags = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT |
-                VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT | VK_ACCESS_TRANSFER_WRITE_BIT |
-                VK_ACCESS_TRANSFER_READ_BIT | VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_HOST_WRITE_BIT |
-                VK_ACCESS_HOST_READ_BIT;
-    } else if (VK_IMAGE_LAYOUT_PREINITIALIZED == layout) {
-        flags = VK_ACCESS_HOST_WRITE_BIT;
-    } else if (VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL == layout) {
-        flags = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-    } else if (VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL == layout) {
-        flags = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
-    } else if (VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL == layout) {
-        flags = VK_ACCESS_TRANSFER_WRITE_BIT;
-    } else if (VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL == layout) {
-        flags = VK_ACCESS_TRANSFER_READ_BIT;
-    } else if (VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL == layout) {
-        flags = VK_ACCESS_SHADER_READ_BIT;
-    }
-    return flags;
-}
-
-void VulkanManager::swapBuffers(VulkanSurface* surface) {
-    if (CC_UNLIKELY(Properties::waitForGpuCompletion)) {
-        ATRACE_NAME("Finishing GPU work");
-        mDeviceWaitIdle(mDevice);
-    }
-
-    SkASSERT(surface->mBackbuffers);
-    VulkanSurface::BackbufferInfo* backbuffer =
-            surface->mBackbuffers + surface->mCurrentBackbufferIndex;
-
-    SkSurface* skSurface = surface->mImageInfos[backbuffer->mImageIndex].mSurface.get();
-    GrBackendRenderTarget backendRT = skSurface->getBackendRenderTarget(
-            SkSurface::kFlushRead_BackendHandleAccess);
-    SkASSERT(backendRT.isValid());
-
-    GrVkImageInfo imageInfo;
-    SkAssertResult(backendRT.getVkImageInfo(&imageInfo));
-
-    // Check to make sure we never change the actually wrapped image
-    SkASSERT(imageInfo.fImage == surface->mImages[backbuffer->mImageIndex]);
-
-    // We need to transition the image to VK_IMAGE_LAYOUT_PRESENT_SRC_KHR and make sure that all
-    // previous work is complete for before presenting. So we first add the necessary barrier here.
-    VkImageLayout layout = imageInfo.fImageLayout;
-    VkPipelineStageFlags srcStageMask = layoutToPipelineSrcStageFlags(layout);
-    VkPipelineStageFlags dstStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
-    VkAccessFlags srcAccessMask = layoutToSrcAccessMask(layout);
-    VkAccessFlags dstAccessMask = 0;
-
-    VkImageMemoryBarrier imageMemoryBarrier = {
-            VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,     // sType
-            NULL,                                       // pNext
-            srcAccessMask,                              // outputMask
-            dstAccessMask,                              // inputMask
-            layout,                                     // oldLayout
-            VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,            // newLayout
-            mGraphicsQueueIndex,                        // srcQueueFamilyIndex
-            mPresentQueueIndex,                         // dstQueueFamilyIndex
-            surface->mImages[backbuffer->mImageIndex],  // image
-            {VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1}     // subresourceRange
-    };
-
-    mResetCommandBuffer(backbuffer->mTransitionCmdBuffers[1], 0);
-    VkCommandBufferBeginInfo info;
-    memset(&info, 0, sizeof(VkCommandBufferBeginInfo));
-    info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-    info.flags = 0;
-    mBeginCommandBuffer(backbuffer->mTransitionCmdBuffers[1], &info);
-    mCmdPipelineBarrier(backbuffer->mTransitionCmdBuffers[1], srcStageMask, dstStageMask, 0, 0,
-                        nullptr, 0, nullptr, 1, &imageMemoryBarrier);
-    mEndCommandBuffer(backbuffer->mTransitionCmdBuffers[1]);
-
-    surface->mImageInfos[backbuffer->mImageIndex].mImageLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-
-    // insert the layout transfer into the queue and wait on the acquire
-    VkSubmitInfo submitInfo;
-    memset(&submitInfo, 0, sizeof(VkSubmitInfo));
-    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-    submitInfo.waitSemaphoreCount = 0;
-    submitInfo.pWaitDstStageMask = 0;
-    submitInfo.commandBufferCount = 1;
-    submitInfo.pCommandBuffers = &backbuffer->mTransitionCmdBuffers[1];
-    submitInfo.signalSemaphoreCount = 1;
-    // When this command buffer finishes we will signal this semaphore so that we know it is now
-    // safe to present the image to the screen.
-    submitInfo.pSignalSemaphores = &backbuffer->mRenderSemaphore;
-
-    // Attach second fence to submission here so we can track when the command buffer finishes.
-    mQueueSubmit(mGraphicsQueue, 1, &submitInfo, backbuffer->mUsageFences[1]);
-
-    // Submit present operation to present queue. We use a semaphore here to make sure all rendering
-    // to the image is complete and that the layout has been change to present on the graphics
-    // queue.
-    const VkPresentInfoKHR presentInfo = {
-            VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,  // sType
-            NULL,                                // pNext
-            1,                                   // waitSemaphoreCount
-            &backbuffer->mRenderSemaphore,       // pWaitSemaphores
-            1,                                   // swapchainCount
-            &surface->mSwapchain,                // pSwapchains
-            &backbuffer->mImageIndex,            // pImageIndices
-            NULL                                 // pResults
-    };
-
-    mQueuePresentKHR(mPresentQueue, &presentInfo);
-
-    surface->mBackbuffer.reset();
-    surface->mImageInfos[backbuffer->mImageIndex].mLastUsed = surface->mCurrentTime;
-    surface->mImageInfos[backbuffer->mImageIndex].mInvalid = false;
-    surface->mCurrentTime++;
-}
-
-int VulkanManager::getAge(VulkanSurface* surface) {
-    SkASSERT(surface->mBackbuffers);
-    VulkanSurface::BackbufferInfo* backbuffer =
-            surface->mBackbuffers + surface->mCurrentBackbufferIndex;
-    if (mSwapBehavior == SwapBehavior::Discard ||
-        surface->mImageInfos[backbuffer->mImageIndex].mInvalid) {
-        return 0;
-    }
-    uint16_t lastUsed = surface->mImageInfos[backbuffer->mImageIndex].mLastUsed;
-    return surface->mCurrentTime - lastUsed;
+    return VulkanSurface::Create(window, colorMode, surfaceColorType, surfaceColorSpace, grContext,
+                                  *this);
 }
 
 bool VulkanManager::setupDummyCommandBuffer() {

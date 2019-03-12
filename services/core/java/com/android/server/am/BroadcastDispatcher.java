@@ -450,6 +450,8 @@ public class BroadcastDispatcher {
             return mCurrentBroadcast;
         }
 
+        final boolean someQueued = !mOrderedBroadcasts.isEmpty();
+
         BroadcastRecord next = null;
         if (!mAlarmBroadcasts.isEmpty()) {
             next = popLocked(mAlarmBroadcasts);
@@ -459,10 +461,18 @@ public class BroadcastDispatcher {
         }
 
         if (next == null && !mDeferredBroadcasts.isEmpty()) {
+            // We're going to deliver either:
+            // 1. the next "overdue" deferral; or
+            // 2. the next ordinary ordered broadcast; *or*
+            // 3. the next not-yet-overdue deferral.
+
             for (int i = 0; i < mDeferredBroadcasts.size(); i++) {
                 Deferrals d = mDeferredBroadcasts.get(i);
-                if (now < d.deferUntil) {
-                    // No more deferrals due
+                if (now < d.deferUntil && someQueued) {
+                    // stop looking when we haven't hit the next time-out boundary
+                    // but only if we have un-deferred broadcasts waiting,
+                    // otherwise we can deliver whatever deferred broadcast
+                    // is next available.
                     break;
                 }
 
@@ -483,7 +493,7 @@ public class BroadcastDispatcher {
             }
         }
 
-        if (next == null && !mOrderedBroadcasts.isEmpty()) {
+        if (next == null && someQueued) {
             next = mOrderedBroadcasts.remove(0);
             if (DEBUG_BROADCAST_DEFERRAL) {
                 Slog.i(TAG, "Next broadcast from main queue: " + next);

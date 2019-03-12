@@ -17,6 +17,7 @@
 package com.android.server.usage;
 
 import static android.app.usage.UsageEvents.Event.DEVICE_SHUTDOWN;
+import static android.app.usage.UsageEvents.Event.DEVICE_STARTUP;
 import static android.app.usage.UsageStatsManager.INTERVAL_BEST;
 import static android.app.usage.UsageStatsManager.INTERVAL_COUNT;
 import static android.app.usage.UsageStatsManager.INTERVAL_DAILY;
@@ -137,15 +138,18 @@ class UserUsageStatsService {
 
         // During system reboot, add a DEVICE_SHUTDOWN event to the end of event list, the timestamp
         // is last time UsageStatsDatabase is persisted to disk.
+        // Also add a DEVICE_STARTUP event with current system timestamp.
         final IntervalStats currentDailyStats = mCurrentStats[INTERVAL_DAILY];
         if (currentDailyStats != null) {
-            final int size = currentDailyStats.events.size();
-            if (size == 0 || currentDailyStats.events.get(size - 1).mEventType != DEVICE_SHUTDOWN) {
-                // The last event in event list is not DEVICE_SHUTDOWN, then we insert one.
-                final Event event = new Event(DEVICE_SHUTDOWN, currentDailyStats.lastTimeSaved);
-                event.mPackage = Event.DEVICE_EVENT_PACKAGE_NAME;
-                currentDailyStats.addEvent(event);
-            }
+            // File system timestamp only has precision of 1 second, add 1000ms to make up
+            // for the loss of round up.
+            final Event shutdownEvent =
+                    new Event(DEVICE_SHUTDOWN, currentDailyStats.lastTimeSaved + 1000);
+            shutdownEvent.mPackage = Event.DEVICE_EVENT_PACKAGE_NAME;
+            currentDailyStats.addEvent(shutdownEvent);
+            final Event startupEvent = new Event(DEVICE_STARTUP, currentTimeMillis);
+            startupEvent.mPackage = Event.DEVICE_EVENT_PACKAGE_NAME;
+            currentDailyStats.addEvent(startupEvent);
         }
 
         if (mDatabase.isNewUpdate()) {
@@ -956,6 +960,8 @@ class UserUsageStatsService {
                 return "KEYGUARD_HIDDEN";
             case Event.DEVICE_SHUTDOWN:
                 return "DEVICE_SHUTDOWN";
+            case Event.DEVICE_STARTUP:
+                return "DEVICE_STARTUP";
             default:
                 return "UNKNOWN_TYPE_" + eventType;
         }

@@ -30,7 +30,7 @@ import android.os.Parcelable;
  *
  */
 public final class Insets implements Parcelable {
-    public static final Insets NONE = new Insets(0, 0, 0, 0);
+    public static final @NonNull Insets NONE = new Insets(0, 0, 0, 0);
 
     public final int left;
     public final int top;

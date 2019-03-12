@@ -40,8 +40,6 @@ using ::android::base::StringPrintf;
 namespace aapt {
 namespace ResourceUtils {
 
-constexpr int32_t kNonBreakingSpace = 0xa0;
-
 Maybe<ResourceName> ToResourceName(
     const android::ResTable::resource_name& name_in) {
   // TODO: Remove this when ResTable and AssetManager(1) are removed from AAPT2
@@ -854,7 +852,8 @@ StringBuilder& StringBuilder::AppendText(const std::string& text) {
   Utf8Iterator iter(text);
   while (iter.HasNext()) {
     char32_t codepoint = iter.Next();
-    if (!preserve_spaces_ && !quote_ && codepoint != kNonBreakingSpace && iswspace(codepoint)) {
+    if (!preserve_spaces_ && !quote_ && (codepoint <= std::numeric_limits<char>::max())
+                                         && isspace(static_cast<char>(codepoint))) {
       if (!last_codepoint_was_space_) {
         // Emit a space if it's the first.
         xml_string_.text += ' ';

@@ -126,6 +126,9 @@ public class MediaNotificationView extends FrameLayout {
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
         if (mImagePushIn > 0) {
+            if (this.getLayoutDirection() == View.LAYOUT_DIRECTION_RTL) {
+                mImagePushIn *= -1;
+            }
             mRightIcon.layout(mRightIcon.getLeft() + mImagePushIn, mRightIcon.getTop(),
                     mRightIcon.getRight()  + mImagePushIn, mRightIcon.getBottom());
         }

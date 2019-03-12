@@ -22,6 +22,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.os.SystemClock;
+import android.testing.TestableLooper;
 import android.view.MotionEvent;
 
 import androidx.test.filters.SmallTest;
@@ -35,13 +36,12 @@ import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @RunWith(AndroidJUnit4.class)
+@TestableLooper.RunWithLooper
 @SmallTest
-@Ignore
 public class StatusBarWindowViewTest extends SysuiTestCase {
 
     private StatusBarWindowView mView;
@@ -62,7 +62,6 @@ public class StatusBarWindowViewTest extends SysuiTestCase {
     }
 
     @Test
-    @Ignore
     public void testDragDownHelperCalledWhenDraggingDown() throws Exception {
         when(Dependency.get(StatusBarStateController.class).getState())
                 .thenReturn(StatusBarState.SHADE);

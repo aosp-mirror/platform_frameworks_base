@@ -302,7 +302,7 @@ public final class EmergencyNumber implements Parcelable, Comparable<EmergencyNu
      *
      * @return the dialing number.
      */
-    public String getNumber() {
+    public @NonNull String getNumber() {
         return mNumber;
     }
 
@@ -311,7 +311,7 @@ public final class EmergencyNumber implements Parcelable, Comparable<EmergencyNu
      *
      * @return the country code string (lowercase character) in ISO 3166 format.
      */
-    public String getCountryIso() {
+    public @NonNull String getCountryIso() {
         return mCountryIso;
     }
 
@@ -320,7 +320,7 @@ public final class EmergencyNumber implements Parcelable, Comparable<EmergencyNu
      *
      * @return the Mobile Network Code of the emergency number.
      */
-    public String getMnc() {
+    public @NonNull String getMnc() {
         return mMnc;
     }
 
@@ -328,6 +328,8 @@ public final class EmergencyNumber implements Parcelable, Comparable<EmergencyNu
      * Returns the bitmask of emergency service categories of the emergency number.
      *
      * @return bitmask of the emergency service categories
+     *
+     * @hide
      */
     public @EmergencyServiceCategories int getEmergencyServiceCategoryBitmask() {
         return mEmergencyServiceCategoryBitmask;
@@ -357,7 +359,7 @@ public final class EmergencyNumber implements Parcelable, Comparable<EmergencyNu
      *
      * @return a list of the emergency service categories
      */
-    public List<Integer> getEmergencyServiceCategories() {
+    public @NonNull List<Integer> getEmergencyServiceCategories() {
         List<Integer> categories = new ArrayList<>();
         if (serviceUnspecified()) {
             categories.add(EMERGENCY_SERVICE_CATEGORY_UNSPECIFIED);
@@ -384,7 +386,7 @@ public final class EmergencyNumber implements Parcelable, Comparable<EmergencyNu
      *         number does not have a specified emergency Uniform Resource Name.
      */
     public @NonNull List<String> getEmergencyUrns() {
-        return mEmergencyUrns;
+        return Collections.unmodifiableList(mEmergencyUrns);
     }
 
     /**
@@ -421,6 +423,8 @@ public final class EmergencyNumber implements Parcelable, Comparable<EmergencyNu
      * Returns the bitmask of the sources of the emergency number.
      *
      * @return bitmask of the emergency number sources
+     *
+     * @hide
      */
     public @EmergencyNumberSources int getEmergencyNumberSourceBitmask() {
         return mEmergencyNumberSourceBitmask;
@@ -431,7 +435,7 @@ public final class EmergencyNumber implements Parcelable, Comparable<EmergencyNu
      *
      * @return a list of emergency number sources
      */
-    public List<Integer> getEmergencyNumberSources() {
+    public @NonNull List<Integer> getEmergencyNumberSources() {
         List<Integer> sources = new ArrayList<>();
         for (Integer source : EMERGENCY_NUMBER_SOURCE_SET) {
             if ((mEmergencyNumberSourceBitmask & source) == source) {

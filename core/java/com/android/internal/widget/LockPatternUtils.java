@@ -1687,8 +1687,21 @@ public class LockPatternUtils {
      *
      * @return a unique 64-bit token handle which is needed to refer to this token later.
      */
-    public long addEscrowToken(byte[] token, int userId) {
-        return getLockSettingsInternal().addEscrowToken(token, userId);
+    public long addEscrowToken(byte[] token, int userId,
+            @Nullable EscrowTokenStateChangeCallback callback) {
+        return getLockSettingsInternal().addEscrowToken(token, userId, callback);
+    }
+
+    /**
+     * Callback interface to notify when an added escrow token has been activated.
+     */
+    public interface EscrowTokenStateChangeCallback {
+        /**
+         * The method to be called when the token is activated.
+         * @param handle 64 bit handle corresponding to the escrow token
+         * @param userid user for whom the escrow token has been added
+         */
+        void onEscrowTokenActivated(long handle, int userid);
     }
 
     /**

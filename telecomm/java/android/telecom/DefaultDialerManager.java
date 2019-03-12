@@ -16,7 +16,6 @@ package android.telecom;
 
 import android.app.ActivityManager;
 import android.app.role.RoleManager;
-import android.app.role.RoleManagerCallback;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -34,9 +33,11 @@ import com.android.internal.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.function.Consumer;
 
 /**
  * Class for managing the default dialer application that will receive incoming calls, and be
@@ -75,11 +76,18 @@ public class DefaultDialerManager {
             int user) {
         long identity = Binder.clearCallingIdentity();
         try {
-            RoleManagerCallback.Future cb = new RoleManagerCallback.Future();
+            CompletableFuture<Void> future = new CompletableFuture<>();
+            Consumer<Boolean> callback = successful -> {
+                if (successful) {
+                    future.complete(null);
+                } else {
+                    future.completeExceptionally(new RuntimeException());
+                }
+            };
             context.getSystemService(RoleManager.class).addRoleHolderAsUser(
                     RoleManager.ROLE_DIALER, packageName, 0, UserHandle.of(user),
-                    AsyncTask.THREAD_POOL_EXECUTOR, cb);
-            cb.get(5, TimeUnit.SECONDS);
+                    AsyncTask.THREAD_POOL_EXECUTOR, callback);
+            future.get(5, TimeUnit.SECONDS);
             return true;
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             Slog.e(TAG, "Failed to set default dialer to " + packageName + " for user " + user, e);

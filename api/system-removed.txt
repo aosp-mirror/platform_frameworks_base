@@ -60,6 +60,14 @@ package android.content {
 
 }
 
+package android.content.pm {
+
+  public static class PackageInstaller.SessionParams implements android.os.Parcelable {
+    method @Deprecated public void setEnableRollback();
+  }
+
+}
+
 package android.location {
 
   public class LocationManager {

@@ -89,9 +89,6 @@ public class ThermalManagerService extends SystemService {
     @GuardedBy("mLock")
     private ArrayMap<String, Temperature> mTemperatureMap = new ArrayMap<>();
 
-    /** Local PMS handle. */
-    private final PowerManager mPowerManager;
-
     /** HAL wrapper. */
     private ThermalHalWrapper mHalWrapper;
 
@@ -109,7 +106,6 @@ public class ThermalManagerService extends SystemService {
     @VisibleForTesting
     ThermalManagerService(Context context, @Nullable ThermalHalWrapper halWrapper) {
         super(context);
-        mPowerManager = context.getSystemService(PowerManager.class);
         mHalWrapper = halWrapper;
         // Initialize to invalid to send status onActivityManagerReady
         mStatus = INVALID_THROTTLING;
@@ -254,10 +250,11 @@ public class ThermalManagerService extends SystemService {
         }
     }
 
-    private void shutdownIfNeededLocked(Temperature temperature) {
+    private void shutdownIfNeeded(Temperature temperature) {
         if (temperature.getStatus() != Temperature.THROTTLING_SHUTDOWN) {
             return;
         }
+        final PowerManager powerManager = getContext().getSystemService(PowerManager.class);
         switch (temperature.getType()) {
             case Temperature.TYPE_CPU:
                 // Fall through
@@ -266,17 +263,17 @@ public class ThermalManagerService extends SystemService {
             case Temperature.TYPE_NPU:
                 // Fall through
             case Temperature.TYPE_SKIN:
-                mPowerManager.shutdown(false, PowerManager.SHUTDOWN_THERMAL_STATE, false);
+                powerManager.shutdown(false, PowerManager.SHUTDOWN_THERMAL_STATE, false);
                 break;
             case Temperature.TYPE_BATTERY:
-                mPowerManager.shutdown(false, PowerManager.SHUTDOWN_BATTERY_THERMAL_STATE, false);
+                powerManager.shutdown(false, PowerManager.SHUTDOWN_BATTERY_THERMAL_STATE, false);
                 break;
         }
     }
 
     private void onTemperatureChanged(Temperature temperature, boolean sendStatus) {
+        shutdownIfNeeded(temperature);
         synchronized (mLock) {
-            shutdownIfNeededLocked(temperature);
             Temperature old = mTemperatureMap.put(temperature.getName(), temperature);
             if (old != null) {
                 if (old.getStatus() != temperature.getStatus()) {

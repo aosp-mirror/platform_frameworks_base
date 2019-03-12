@@ -29,6 +29,7 @@ import android.graphics.Rect;
 import android.opengl.GLSurfaceView;
 import android.os.Build;
 import android.util.Log;
+import android.util.MathUtils;
 
 import com.android.systemui.ImageWallpaper;
 import com.android.systemui.ImageWallpaper.ImageGLView;
@@ -43,6 +44,8 @@ import javax.microedition.khronos.opengles.GL10;
 public class ImageWallpaperRenderer implements GLSurfaceView.Renderer,
         ImageWallpaper.WallpaperStatusListener, ImageRevealHelper.RevealStateListener {
     private static final String TAG = ImageWallpaperRenderer.class.getSimpleName();
+    private static final float SCALE_VIEWPORT_MIN = 0.98f;
+    private static final float SCALE_VIEWPORT_MAX = 1f;
 
     private final WallpaperManager mWallpaperManager;
     private final ImageGLProgram mProgram;
@@ -52,6 +55,8 @@ public class ImageWallpaperRenderer implements GLSurfaceView.Renderer,
     private final ImageGLView mGLView;
     private float mXOffset = 0f;
     private float mYOffset = 0f;
+    private int mWidth = 0;
+    private int mHeight = 0;
 
     public ImageWallpaperRenderer(Context context, ImageGLView glView) {
         mWallpaperManager = context.getSystemService(WallpaperManager.class);
@@ -87,6 +92,8 @@ public class ImageWallpaperRenderer implements GLSurfaceView.Renderer,
             Log.d(TAG, "onSurfaceChanged: width=" + width + ", height=" + height
                     + ", xOffset=" + mXOffset + ", yOffset=" + mYOffset);
         }
+        mWidth = width;
+        mHeight = height;
         mWallpaper.adjustTextureCoordinates(mWallpaperManager.getBitmap(),
                 width, height, mXOffset, mYOffset);
     }
@@ -102,8 +109,19 @@ public class ImageWallpaperRenderer implements GLSurfaceView.Renderer,
         glUniform1f(mWallpaper.getHandle(ImageGLWallpaper.U_PER85), per85);
         glUniform1f(mWallpaper.getHandle(ImageGLWallpaper.U_REVEAL), reveal);
 
+        scaleViewport(reveal);
         mWallpaper.useTexture();
         mWallpaper.draw();
+    }
+
+    private void scaleViewport(float reveal) {
+        // Interpolation between SCALE_VIEWPORT_MAX and SCALE_VIEWPORT_MIN by reveal.
+        float vpScaled = MathUtils.lerp(SCALE_VIEWPORT_MAX, SCALE_VIEWPORT_MIN, reveal);
+        // Calculate the offset amount from the lower left corner.
+        float offset = (SCALE_VIEWPORT_MAX - vpScaled) / 2;
+        // Change the viewport.
+        glViewport((int) (mWidth * offset), (int) (mHeight * offset),
+                (int) (mWidth * vpScaled), (int) (mHeight * vpScaled));
     }
 
     @Override

@@ -1843,7 +1843,8 @@ public class PackageParser {
             }
         }
 
-        final boolean extractNativeLibsDefault = targetSdkVersion < Build.VERSION_CODES.Q;
+        // TODO: flip the default based on targetSdkVersion when possible.  See b/128335904.
+        final boolean extractNativeLibsDefault = true;
         final boolean extractNativeLibs = (extractNativeLibsProvided != null)
                 ? extractNativeLibsProvided : extractNativeLibsDefault;
 
@@ -3718,11 +3719,10 @@ public class PackageParser {
             ai.flags |= ApplicationInfo.FLAG_MULTIARCH;
         }
 
-        final boolean extractNativeLibsDefault =
-                owner.applicationInfo.targetSdkVersion < Build.VERSION_CODES.Q;
+        // TODO: flip the default based on targetSdkVersion when possible.  See b/128335904.
         if (sa.getBoolean(
                 com.android.internal.R.styleable.AndroidManifestApplication_extractNativeLibs,
-                extractNativeLibsDefault)) {
+                true)) {
             ai.flags |= ApplicationInfo.FLAG_EXTRACT_NATIVE_LIBS;
         }
 

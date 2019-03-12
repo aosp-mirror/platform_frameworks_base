@@ -57,6 +57,7 @@ public final class RollbackManager {
      *            MANAGE_ROLLBACKS permission.
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_ROLLBACKS)
+    @NonNull
     public List<RollbackInfo> getAvailableRollbacks() {
         try {
             return mBinder.getAvailableRollbacks().getList();

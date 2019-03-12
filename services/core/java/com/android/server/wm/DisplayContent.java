@@ -392,7 +392,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     final ArrayList<WindowToken> mExitingTokens = new ArrayList<>();
 
     /** Detect user tapping outside of current focused task bounds .*/
-    TaskTapPointerEventListener mTapDetector;
+    @VisibleForTesting
+    final TaskTapPointerEventListener mTapDetector;
 
     /** Detect user tapping outside of current focused stack bounds .*/
     private Region mTouchExcludeRegion = new Region();
@@ -876,14 +877,17 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         mBoundsAnimationController = new BoundsAnimationController(service.mContext,
                 mAppTransition, AnimationThread.getHandler(), animationHandler);
 
-        if (mWmService.mInputManager != null) {
-            final InputChannel inputChannel = mWmService.mInputManager.monitorInput("Display "
-                    + mDisplayId, mDisplayId);
-            mPointerEventDispatcher = inputChannel != null
-                    ? new PointerEventDispatcher(inputChannel) : null;
-        } else {
-            mPointerEventDispatcher = null;
-        }
+        final InputChannel inputChannel = mWmService.mInputManager.monitorInput(
+                "PointerEventDispatcher" + mDisplayId, mDisplayId);
+        mPointerEventDispatcher = new PointerEventDispatcher(inputChannel);
+
+        // Tap Listeners are supported for:
+        // 1. All physical displays (multi-display).
+        // 2. VirtualDisplays on VR, AA (and everything else).
+        mTapDetector = new TaskTapPointerEventListener(mWmService, this);
+        registerPointerEventListener(mTapDetector);
+        registerPointerEventListener(mWmService.mMousePositionTracker);
+
         mDisplayPolicy = new DisplayPolicy(service, this);
         mDisplayRotation = new DisplayRotation(service, this);
         if (isDefaultDisplay) {
@@ -1511,19 +1515,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         mDisplayFrames.onDisplayInfoUpdated(mDisplayInfo,
                 calculateDisplayCutoutForRotation(mDisplayInfo.rotation));
-
-        // Tap Listeners are supported for:
-        // 1. All physical displays (multi-display).
-        // 2. VirtualDisplays on VR, AA (and everything else).
-        if (mPointerEventDispatcher != null && mTapDetector == null) {
-            if (DEBUG_DISPLAY) {
-                Slog.d(TAG,
-                        "Registering PointerEventListener for DisplayId: " + mDisplayId);
-            }
-            mTapDetector = new TaskTapPointerEventListener(mWmService, this);
-            registerPointerEventListener(mTapDetector);
-            registerPointerEventListener(mWmService.mMousePositionTracker);
-        }
     }
 
     /**
@@ -2450,9 +2441,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             mTmpRegion.set(mTmpRect);
             mTouchExcludeRegion.op(mTmpRegion, Op.UNION);
         }
-        if (mTapDetector != null) {
-            mTapDetector.setTouchExcludeRegion(mTouchExcludeRegion);
-        }
+        mTapDetector.setTouchExcludeRegion(mTouchExcludeRegion);
     }
 
     /**
@@ -2502,11 +2491,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             mWmService.stopFreezingDisplayLocked();
             super.removeImmediately();
             if (DEBUG_DISPLAY) Slog.v(TAG_WM, "Removing display=" + this);
-            if (mPointerEventDispatcher != null && mTapDetector != null) {
-                unregisterPointerEventListener(mTapDetector);
-                unregisterPointerEventListener(mWmService.mMousePositionTracker);
-                mTapDetector = null;
-            }
+            mPointerEventDispatcher.dispose();
             mWmService.mAnimator.removeDisplayLocked(mDisplayId);
             mWindowingLayer.release();
             mOverlayLayer.release();
@@ -2516,7 +2501,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             mRemovingDisplay = false;
         }
 
-        mDisplayPolicy.onDisplayRemoved();
         mWmService.mWindowPlacerLocked.requestTraversal();
     }
 
@@ -4825,15 +4809,11 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     }
 
     void registerPointerEventListener(@NonNull PointerEventListener listener) {
-        if (mPointerEventDispatcher != null) {
-            mPointerEventDispatcher.registerInputEventListener(listener);
-        }
+        mPointerEventDispatcher.registerInputEventListener(listener);
     }
 
     void unregisterPointerEventListener(@NonNull PointerEventListener listener) {
-        if (mPointerEventDispatcher != null) {
-            mPointerEventDispatcher.unregisterInputEventListener(listener);
-        }
+        mPointerEventDispatcher.unregisterInputEventListener(listener);
     }
 
     void prepareAppTransition(@WindowManager.TransitionType int transit,

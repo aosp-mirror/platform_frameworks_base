@@ -17,8 +17,8 @@
 package android.app.role;
 
 import android.app.role.IOnRoleHoldersChangedListener;
-import android.app.role.IRoleManagerCallback;
 import android.os.Bundle;
+import android.os.RemoteCallback;
 import android.telephony.IFinancialSmsCallback;
 
 /**
@@ -33,13 +33,13 @@ interface IRoleManager {
     List<String> getRoleHoldersAsUser(in String roleName, int userId);
 
     void addRoleHolderAsUser(in String roleName, in String packageName, int flags, int userId,
-            in IRoleManagerCallback callback);
+            in RemoteCallback callback);
 
     void removeRoleHolderAsUser(in String roleName, in String packageName, int flags, int userId,
-            in IRoleManagerCallback callback);
+            in RemoteCallback callback);
 
     void clearRoleHoldersAsUser(in String roleName, int flags, int userId,
-            in IRoleManagerCallback callback);
+            in RemoteCallback callback);
 
     void addOnRoleHoldersChangedListenerAsUser(IOnRoleHoldersChangedListener listener, int userId);
 
@@ -55,6 +55,7 @@ interface IRoleManager {
     List<String> getHeldRolesFromController(in String packageName);
 
     String getDefaultSmsPackage(int userId);
+
     /**
      * Get filtered SMS messages for financial app.
      */

@@ -16,6 +16,7 @@
 
 package android.net.wifi.aware;
 
+import android.annotation.NonNull;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -29,7 +30,7 @@ public final class ParcelablePeerHandle extends PeerHandle implements Parcelable
      *
      * @param peerHandle The {@link PeerHandle} to be made parcelable.
      */
-    public ParcelablePeerHandle(PeerHandle peerHandle) {
+    public ParcelablePeerHandle(@NonNull PeerHandle peerHandle) {
         super(peerHandle.peerId);
     }
 

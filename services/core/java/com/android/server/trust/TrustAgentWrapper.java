@@ -43,8 +43,6 @@ import android.service.trust.TrustAgentService;
 import android.util.Log;
 import android.util.Slog;
 
-import com.android.internal.policy.IKeyguardDismissCallback;
-
 import java.util.Collections;
 import java.util.List;
 
@@ -495,6 +493,21 @@ public class TrustAgentWrapper {
         }
     }
 
+    /**
+     * @see android.service.trust.TrustAgentService#onTokenStateReceived()
+     *
+     */
+    public void onEscrowTokenActivated(long handle, int userId) {
+        if (DEBUG) Slog.d(TAG, "onEscrowTokenActivated: " + handle + " user: " + userId);
+        if (mTrustAgentService != null) {
+            try {
+                mTrustAgentService.onTokenStateReceived(handle,
+                        TrustAgentService.TOKEN_STATE_ACTIVE);
+            } catch (RemoteException e) {
+                onError(e);
+            }
+        }
+    }
     private void setCallback(ITrustAgentServiceCallback callback) {
         try {
             if (mTrustAgentService != null) {

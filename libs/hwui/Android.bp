@@ -69,6 +69,7 @@ cc_defaults {
         "libminikin",
         "libandroidfw",
         "libcrypto",
+        "libsync",
     ],
     static_libs: [
         "libEGL_blobCache",
@@ -180,6 +181,7 @@ cc_defaults {
         "renderthread/EglManager.cpp",
         "renderthread/ReliableSurface.cpp",
         "renderthread/VulkanManager.cpp",
+        "renderthread/VulkanSurface.cpp",
         "renderthread/RenderProxy.cpp",
         "renderthread/RenderTask.cpp",
         "renderthread/RenderThread.cpp",

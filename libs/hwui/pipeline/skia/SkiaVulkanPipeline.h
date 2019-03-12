@@ -18,6 +18,7 @@
 
 #include "SkiaPipeline.h"
 #include "renderthread/VulkanManager.h"
+#include "renderthread/VulkanSurface.h"
 
 #include "renderstate/RenderState.h"
 

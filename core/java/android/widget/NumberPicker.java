@@ -1587,6 +1587,7 @@ public class NumberPicker extends LinearLayout {
      * others.
      * @return The height of the divider
      */
+    @Px
     public int getSelectionDividerHeight() {
         return mSelectionDividerHeight;
     }

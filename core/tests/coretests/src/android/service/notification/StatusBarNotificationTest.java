@@ -89,6 +89,17 @@ public class StatusBarNotificationTest {
         assertNull(logMaker.getTaggedData(MetricsEvent.FIELD_NOTIFICATION_CATEGORY));
     }
 
+    /** Verify that modifying the returned logMaker won't leave stale data behind for
+     * the next caller.*/
+    @Test
+    public void testLogMakerNoStaleData() {
+        StatusBarNotification sbn = getNotification(PKG, GROUP_ID_1, CHANNEL_ID);
+        final LogMaker logMaker = sbn.getLogMaker();
+        int extraTag = MetricsEvent.FIELD_NOTIFICATION_CHANNEL_GROUP_ID;  // An arbitrary new tag
+        logMaker.addTaggedData(extraTag, 1);
+        assertNull(sbn.getLogMaker().getTaggedData(extraTag));
+    }
+
     @Test
     public void testLogMakerWithCategory() {
         Notification.Builder builder = getNotificationBuilder(GROUP_ID_1, CHANNEL_ID)

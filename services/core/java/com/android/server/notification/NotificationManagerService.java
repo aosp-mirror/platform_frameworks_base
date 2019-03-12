@@ -251,7 +251,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
-import java.util.function.Predicate;
 
 /** {@hide} */
 public class NotificationManagerService extends SystemService {
@@ -759,7 +758,7 @@ public class NotificationManagerService extends SystemService {
             synchronized (mNotificationLock) {
                 NotificationRecord r = mNotificationsByKey.get(key);
                 if (r == null) {
-                    Log.w(TAG, "No notification with key: " + key);
+                    Slog.w(TAG, "No notification with key: " + key);
                     return;
                 }
                 final long now = System.currentTimeMillis();
@@ -789,7 +788,7 @@ public class NotificationManagerService extends SystemService {
             synchronized (mNotificationLock) {
                 NotificationRecord r = mNotificationsByKey.get(key);
                 if (r == null) {
-                    Log.w(TAG, "No notification with key: " + key);
+                    Slog.w(TAG, "No notification with key: " + key);
                     return;
                 }
                 final long now = System.currentTimeMillis();
@@ -3133,7 +3132,7 @@ public class NotificationManagerService extends SystemService {
                 synchronized (mNotificationLock) {
                     final ManagedServiceInfo info = mListeners.checkServiceTokenLocked(token);
                     if (info.supportsProfiles()) {
-                        Log.e(TAG, "Ignoring deprecated cancelNotification(pkg, tag, id) "
+                        Slog.e(TAG, "Ignoring deprecated cancelNotification(pkg, tag, id) "
                                 + "from " + info.component
                                 + " use cancelNotification(key) instead.");
                     } else {
@@ -4553,7 +4552,7 @@ public class NotificationManagerService extends SystemService {
                     + ", incomingUserId=" + incomingUserId
                     + ", notificationUid=" + notificationUid
                     + ", notification=" + notification;
-            Log.e(TAG, noChannelStr);
+            Slog.e(TAG, noChannelStr);
             boolean appNotificationsOff = mPreferencesHelper.getImportance(pkg, notificationUid)
                     == NotificationManager.IMPORTANCE_NONE;
 
@@ -4650,7 +4649,7 @@ public class NotificationManagerService extends SystemService {
                     android.Manifest.permission.USE_FULL_SCREEN_INTENT, pkg);
             if (fullscreenIntentPermission != PERMISSION_GRANTED) {
                 notification.fullScreenIntent = null;
-                Log.w(TAG, "Package " + pkg +
+                Slog.w(TAG, "Package " + pkg +
                         ": Use of fullScreenIntent requires the USE_FULL_SCREEN_INTENT permission");
             }
         }
@@ -5179,7 +5178,7 @@ public class NotificationManagerService extends SystemService {
         // Ignore summary updates because we don't display most of the information.
         if (r.sbn.isGroup() && r.sbn.getNotification().isGroupSummary()) {
             if (DEBUG_INTERRUPTIVENESS) {
-                Log.v(TAG, "INTERRUPTIVENESS: "
+                Slog.v(TAG, "INTERRUPTIVENESS: "
                         +  r.getKey() + " is not interruptive: summary");
             }
             return false;
@@ -5187,7 +5186,7 @@ public class NotificationManagerService extends SystemService {
 
         if (old == null) {
             if (DEBUG_INTERRUPTIVENESS) {
-                Log.v(TAG, "INTERRUPTIVENESS: "
+                Slog.v(TAG, "INTERRUPTIVENESS: "
                         +  r.getKey() + " is interruptive: new notification");
             }
             return true;
@@ -5195,7 +5194,7 @@ public class NotificationManagerService extends SystemService {
 
         if (r == null) {
             if (DEBUG_INTERRUPTIVENESS) {
-                Log.v(TAG, "INTERRUPTIVENESS: "
+                Slog.v(TAG, "INTERRUPTIVENESS: "
                         +  r.getKey() + " is not interruptive: null");
             }
             return false;
@@ -5206,7 +5205,7 @@ public class NotificationManagerService extends SystemService {
 
         if (oldN.extras == null || newN.extras == null) {
             if (DEBUG_INTERRUPTIVENESS) {
-                Log.v(TAG, "INTERRUPTIVENESS: "
+                Slog.v(TAG, "INTERRUPTIVENESS: "
                         +  r.getKey() + " is not interruptive: no extras");
             }
             return false;
@@ -5216,7 +5215,7 @@ public class NotificationManagerService extends SystemService {
         // consider them one 'session'. Count them for everything else.
         if ((r.sbn.getNotification().flags & FLAG_FOREGROUND_SERVICE) != 0) {
             if (DEBUG_INTERRUPTIVENESS) {
-                Log.v(TAG, "INTERRUPTIVENESS: "
+                Slog.v(TAG, "INTERRUPTIVENESS: "
                         +  r.getKey() + " is not interruptive: foreground service");
             }
             return false;
@@ -5226,11 +5225,11 @@ public class NotificationManagerService extends SystemService {
         final String newTitle = String.valueOf(newN.extras.get(Notification.EXTRA_TITLE));
         if (!Objects.equals(oldTitle, newTitle)) {
             if (DEBUG_INTERRUPTIVENESS) {
-                Log.v(TAG, "INTERRUPTIVENESS: "
+                Slog.v(TAG, "INTERRUPTIVENESS: "
                         +  r.getKey() + " is interruptive: changed title");
-                Log.v(TAG, "INTERRUPTIVENESS: " + String.format("   old title: %s (%s@0x%08x)",
+                Slog.v(TAG, "INTERRUPTIVENESS: " + String.format("   old title: %s (%s@0x%08x)",
                         oldTitle, oldTitle.getClass(), oldTitle.hashCode()));
-                Log.v(TAG, "INTERRUPTIVENESS: " + String.format("   new title: %s (%s@0x%08x)",
+                Slog.v(TAG, "INTERRUPTIVENESS: " + String.format("   new title: %s (%s@0x%08x)",
                         newTitle, newTitle.getClass(), newTitle.hashCode()));
             }
             return true;
@@ -5240,18 +5239,18 @@ public class NotificationManagerService extends SystemService {
         final String newText = String.valueOf(newN.extras.get(Notification.EXTRA_TEXT));
         if (!Objects.equals(oldText, newText)) {
             if (DEBUG_INTERRUPTIVENESS) {
-                Log.v(TAG, "INTERRUPTIVENESS: "
+                Slog.v(TAG, "INTERRUPTIVENESS: "
                         + r.getKey() + " is interruptive: changed text");
-                Log.v(TAG, "INTERRUPTIVENESS: " + String.format("   old text: %s (%s@0x%08x)",
+                Slog.v(TAG, "INTERRUPTIVENESS: " + String.format("   old text: %s (%s@0x%08x)",
                         oldText, oldText.getClass(), oldText.hashCode()));
-                Log.v(TAG, "INTERRUPTIVENESS: " + String.format("   new text: %s (%s@0x%08x)",
+                Slog.v(TAG, "INTERRUPTIVENESS: " + String.format("   new text: %s (%s@0x%08x)",
                         newText, newText.getClass(), newText.hashCode()));
             }
             return true;
         }
         if (oldN.hasCompletedProgress() != newN.hasCompletedProgress()) {
             if (DEBUG_INTERRUPTIVENESS) {
-                Log.v(TAG, "INTERRUPTIVENESS: "
+                Slog.v(TAG, "INTERRUPTIVENESS: "
                     +  r.getKey() + " is interruptive: completed progress");
             }
             return true;
@@ -5259,7 +5258,7 @@ public class NotificationManagerService extends SystemService {
         // Actions
         if (Notification.areActionsVisiblyDifferent(oldN, newN)) {
             if (DEBUG_INTERRUPTIVENESS) {
-                Log.v(TAG, "INTERRUPTIVENESS: "
+                Slog.v(TAG, "INTERRUPTIVENESS: "
                         +  r.getKey() + " is interruptive: changed actions");
             }
             return true;
@@ -5272,7 +5271,7 @@ public class NotificationManagerService extends SystemService {
             // Style based comparisons
             if (Notification.areStyledNotificationsVisiblyDifferent(oldB, newB)) {
                 if (DEBUG_INTERRUPTIVENESS) {
-                    Log.v(TAG, "INTERRUPTIVENESS: "
+                    Slog.v(TAG, "INTERRUPTIVENESS: "
                             +  r.getKey() + " is interruptive: styles differ");
                 }
                 return true;
@@ -5281,7 +5280,7 @@ public class NotificationManagerService extends SystemService {
             // Remote views
             if (Notification.areRemoteViewsChanged(oldB, newB)) {
                 if (DEBUG_INTERRUPTIVENESS) {
-                    Log.v(TAG, "INTERRUPTIVENESS: "
+                    Slog.v(TAG, "INTERRUPTIVENESS: "
                             +  r.getKey() + " is interruptive: remoteviews differ");
                 }
                 return true;
@@ -5510,12 +5509,12 @@ public class NotificationManagerService extends SystemService {
             // Ignore summary updates because we don't display most of the information.
             if (record.sbn.isGroup() && record.sbn.getNotification().isGroupSummary()) {
                 if (DEBUG_INTERRUPTIVENESS) {
-                    Log.v(TAG, "INTERRUPTIVENESS: "
+                    Slog.v(TAG, "INTERRUPTIVENESS: "
                             + record.getKey() + " is not interruptive: summary");
                 }
             } else {
                 if (DEBUG_INTERRUPTIVENESS) {
-                    Log.v(TAG, "INTERRUPTIVENESS: "
+                    Slog.v(TAG, "INTERRUPTIVENESS: "
                             + record.getKey() + " is interruptive: alerted");
                 }
                 record.setInterruptive(true);
@@ -6603,7 +6602,7 @@ public class NotificationManagerService extends SystemService {
         String pkg = r.sbn.getPackageName();
 
         if (pkg == null) {
-            if (DBG) Log.e(TAG, "No package for group summary: " + r.getKey());
+            if (DBG) Slog.e(TAG, "No package for group summary: " + r.getKey());
             return;
         }
 
@@ -6862,7 +6861,7 @@ public class NotificationManagerService extends SystemService {
                 return;
             }
         } catch (RemoteException re) {
-            if (DBG) Log.e(TAG, "Unable to confirm if it's safe to skip category "
+            if (DBG) Slog.e(TAG, "Unable to confirm if it's safe to skip category "
                     + "restrictions check thus the check will be done anyway");
         }
         if (Notification.CATEGORY_CAR_EMERGENCY.equals(notification.category)
@@ -7104,7 +7103,7 @@ public class NotificationManagerService extends SystemService {
                     canUseManagedServices = false;
                 }
             } catch (RemoteException e) {
-                Log.e(TAG, "can't talk to pm", e);
+                Slog.e(TAG, "can't talk to pm", e);
             }
         }
 
@@ -7247,21 +7246,29 @@ public class NotificationManagerService extends SystemService {
             try {
                 assistant.onNotificationsSeen(keys);
             } catch (RemoteException ex) {
-                Log.e(TAG, "unable to notify assistant (seen): " + assistant, ex);
+                Slog.e(TAG, "unable to notify assistant (seen): " + assistant, ex);
             }
         }
 
         @GuardedBy("mNotificationLock")
         private void onNotificationEnqueuedLocked(final NotificationRecord r) {
+            final boolean debug = isVerboseLogEnabled();
+            if (debug) {
+                Slog.v(TAG, "onNotificationEnqueuedLocked() called with: r = [" + r + "]");
+            }
             final StatusBarNotification sbn = r.sbn;
             notifyAssistantLocked(
                     sbn,
                     true /* sameUserOnly */,
                     (assistant, sbnHolder) -> {
                         try {
+                            if (debug) {
+                                Slog.v(TAG,
+                                        "calling onNotificationEnqueuedWithChannel " + sbnHolder);
+                            }
                             assistant.onNotificationEnqueuedWithChannel(sbnHolder, r.getChannel());
                         } catch (RemoteException ex) {
-                            Log.e(TAG, "unable to notify assistant (enqueued): " + assistant, ex);
+                            Slog.e(TAG, "unable to notify assistant (enqueued): " + assistant, ex);
                         }
                     });
         }
@@ -7279,7 +7286,7 @@ public class NotificationManagerService extends SystemService {
                         try {
                             assistant.onNotificationExpansionChanged(key, isUserAction, isExpanded);
                         } catch (RemoteException ex) {
-                            Log.e(TAG, "unable to notify assistant (expanded): " + assistant, ex);
+                            Slog.e(TAG, "unable to notify assistant (expanded): " + assistant, ex);
                         }
                     });
         }
@@ -7295,7 +7302,7 @@ public class NotificationManagerService extends SystemService {
                         try {
                             assistant.onNotificationDirectReply(key);
                         } catch (RemoteException ex) {
-                            Log.e(TAG, "unable to notify assistant (expanded): " + assistant, ex);
+                            Slog.e(TAG, "unable to notify assistant (expanded): " + assistant, ex);
                         }
                     });
         }
@@ -7316,7 +7323,7 @@ public class NotificationManagerService extends SystemService {
                                             ? NotificationAssistantService.SOURCE_FROM_ASSISTANT
                                             : NotificationAssistantService.SOURCE_FROM_APP);
                         } catch (RemoteException ex) {
-                            Log.e(TAG, "unable to notify assistant (snoozed): " + assistant, ex);
+                            Slog.e(TAG, "unable to notify assistant (snoozed): " + assistant, ex);
                         }
                     });
         }
@@ -7338,7 +7345,7 @@ public class NotificationManagerService extends SystemService {
                                             ? NotificationAssistantService.SOURCE_FROM_ASSISTANT
                                             : NotificationAssistantService.SOURCE_FROM_APP);
                         } catch (RemoteException ex) {
-                            Log.e(TAG, "unable to notify assistant (snoozed): " + assistant, ex);
+                            Slog.e(TAG, "unable to notify assistant (snoozed): " + assistant, ex);
                         }
                     });
         }
@@ -7358,7 +7365,7 @@ public class NotificationManagerService extends SystemService {
                             assistant.onNotificationSnoozedUntilContext(
                                     sbnHolder, snoozeCriterionId);
                         } catch (RemoteException ex) {
-                            Log.e(TAG, "unable to notify assistant (snoozed): " + assistant, ex);
+                            Slog.e(TAG, "unable to notify assistant (snoozed): " + assistant, ex);
                         }
                     });
         }
@@ -7380,9 +7387,19 @@ public class NotificationManagerService extends SystemService {
             TrimCache trimCache = new TrimCache(sbn);
             // There should be only one, but it's a list, so while we enforce
             // singularity elsewhere, we keep it general here, to avoid surprises.
+
+            final boolean debug = isVerboseLogEnabled();
+            if (debug) {
+                Slog.v(TAG,
+                        "notifyAssistantLocked() called with: sbn = [" + sbn + "], sameUserOnly = ["
+                                + sameUserOnly + "], callback = [" + callback + "]");
+            }
             for (final ManagedServiceInfo info : NotificationAssistants.this.getServices()) {
                 boolean sbnVisible = isVisibleToListener(sbn, info)
                         && (!sameUserOnly || info.isSameUser(sbn.getUserId()));
+                if (debug) {
+                    Slog.v(TAG, "notifyAssistantLocked info=" + info + " snbVisible=" + sbnVisible);
+                }
                 if (!sbnVisible) {
                     continue;
                 }
@@ -7435,6 +7452,10 @@ public class NotificationManagerService extends SystemService {
                     pw.println("      userId=" + userId + " value=" + mUserSetMap.get(userId));
                 }
             }
+        }
+
+        private boolean isVerboseLogEnabled() {
+            return Log.isLoggable("notification_assistant", Log.VERBOSE);
         }
     }
 
@@ -7530,7 +7551,7 @@ public class NotificationManagerService extends SystemService {
                      try {
                         listener.onStatusBarIconsBehaviorChanged(hideSilentStatusIcons);
                     } catch (RemoteException ex) {
-                        Log.e(TAG, "unable to notify listener "
+                        Slog.e(TAG, "unable to notify listener "
                                 + "(hideSilentStatusIcons): " + listener, ex);
                     }
                 });
@@ -7824,7 +7845,7 @@ public class NotificationManagerService extends SystemService {
             try {
                 listener.onNotificationPosted(sbnHolder, rankingUpdate);
             } catch (RemoteException ex) {
-                Log.e(TAG, "unable to notify listener (posted): " + listener, ex);
+                Slog.e(TAG, "unable to notify listener (posted): " + listener, ex);
             }
         }
 
@@ -7838,7 +7859,7 @@ public class NotificationManagerService extends SystemService {
             try {
                 listener.onNotificationRemoved(sbnHolder, rankingUpdate, stats, reason);
             } catch (RemoteException ex) {
-                Log.e(TAG, "unable to notify listener (removed): " + listener, ex);
+                Slog.e(TAG, "unable to notify listener (removed): " + listener, ex);
             }
         }
 
@@ -7848,7 +7869,7 @@ public class NotificationManagerService extends SystemService {
             try {
                 listener.onNotificationRankingUpdate(rankingUpdate);
             } catch (RemoteException ex) {
-                Log.e(TAG, "unable to notify listener (ranking update): " + listener, ex);
+                Slog.e(TAG, "unable to notify listener (ranking update): " + listener, ex);
             }
         }
 
@@ -7857,7 +7878,7 @@ public class NotificationManagerService extends SystemService {
             try {
                 listener.onListenerHintsChanged(hints);
             } catch (RemoteException ex) {
-                Log.e(TAG, "unable to notify listener (listener hints): " + listener, ex);
+                Slog.e(TAG, "unable to notify listener (listener hints): " + listener, ex);
             }
         }
 
@@ -7867,7 +7888,7 @@ public class NotificationManagerService extends SystemService {
             try {
                 listener.onInterruptionFilterChanged(interruptionFilter);
             } catch (RemoteException ex) {
-                Log.e(TAG, "unable to notify listener (interruption filter): " + listener, ex);
+                Slog.e(TAG, "unable to notify listener (interruption filter): " + listener, ex);
             }
         }
 
@@ -7878,7 +7899,7 @@ public class NotificationManagerService extends SystemService {
             try {
                 listener.onNotificationChannelModification(pkg, user, channel, modificationType);
             } catch (RemoteException ex) {
-                Log.e(TAG, "unable to notify listener (channel changed): " + listener, ex);
+                Slog.e(TAG, "unable to notify listener (channel changed): " + listener, ex);
             }
         }
 
@@ -7889,7 +7910,7 @@ public class NotificationManagerService extends SystemService {
             try {
                 listener.onNotificationChannelGroupModification(pkg, user, group, modificationType);
             } catch (RemoteException ex) {
-                Log.e(TAG, "unable to notify listener (channel group changed): " + listener, ex);
+                Slog.e(TAG, "unable to notify listener (channel group changed): " + listener, ex);
             }
         }
 

@@ -35,6 +35,7 @@ import android.content.pm.PackageParser.SigningDetails.SignatureSchemeVersion;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.Signature;
 import android.content.rollback.IRollbackManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -117,9 +118,11 @@ public class StagingManager {
         final PackageInfo packageInfo = mApexManager.getActivePackage(packageName);
 
         if (packageInfo == null) {
-            // TODO: What is the right thing to do here ? This implies there's no active package
-            // with the given name. This should never be the case in production (where we only
-            // accept updates to existing APEXes) but may be required for testing.
+            // Only allow installing new apexes if on a debuggable build.
+            if (!Build.IS_DEBUGGABLE) {
+                Slog.w(TAG, "Attempted to install new apex " + packageName + " on user build");
+                return false;
+            }
             return true;
         }
 
@@ -498,19 +501,21 @@ public class StagingManager {
             Slog.w(TAG, "Cannot abort applied session!");
             return;
         }
-        if (isStagedSessionFinalized(session.sessionId)) {
-            Slog.w(TAG, "Cannot abort session because it is not active or APEXD is not reachable");
-            return;
-        }
-
-        mApexManager.abortActiveSession();
-
         abortSession(session);
+
+        boolean hasApex = sessionContainsApex(session);
+        if (hasApex) {
+            ApexSessionInfo apexSession = mApexManager.getStagedSessionInfo(session.sessionId);
+            if (apexSession == null || isApexSessionFinalized(apexSession)) {
+                Slog.w(TAG,
+                        "Cannot abort session because it is not active or APEXD is not reachable");
+                return;
+            }
+            mApexManager.abortActiveSession();
+        }
     }
 
-    private boolean isStagedSessionFinalized(int sessionId) {
-        ApexSessionInfo session = mApexManager.getStagedSessionInfo(sessionId);
-
+    private boolean isApexSessionFinalized(ApexSessionInfo session) {
         /* checking if the session is in a final state, i.e., not active anymore */
         return session.isUnknown || session.isActivationFailed || session.isSuccess
                 || session.isRolledBack;

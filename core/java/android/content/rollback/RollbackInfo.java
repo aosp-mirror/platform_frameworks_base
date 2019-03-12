@@ -16,6 +16,7 @@
 
 package android.content.rollback;
 
+import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.content.pm.VersionedPackage;
 import android.os.Parcel;
@@ -72,6 +73,7 @@ public final class RollbackInfo implements Parcelable {
     /**
      * Returns the list of package that are rolled back.
      */
+    @NonNull
     public List<PackageRollbackInfo> getPackages() {
         return mPackages;
     }
@@ -105,6 +107,7 @@ public final class RollbackInfo implements Parcelable {
      * As provided to {@link #commitRollback} when the rollback was committed.
      * This is only applicable for rollbacks that have been committed.
      */
+    @NonNull
     public List<VersionedPackage> getCausePackages() {
         return mCausePackages;
     }

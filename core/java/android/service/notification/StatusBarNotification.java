@@ -63,9 +63,6 @@ public class StatusBarNotification implements Parcelable {
 
     private Context mContext; // used for inflation & icon expansion
 
-    // Contains the basic logging data of the notification.
-    private LogMaker mLogMaker;
-
     /** @hide */
     public StatusBarNotification(String pkg, String opPkg, int id,
             String tag, int uid, int initialPid, Notification notification, UserHandle user,
@@ -404,24 +401,15 @@ public class StatusBarNotification implements Parcelable {
      * @hide
      */
     public LogMaker getLogMaker() {
-        if (mLogMaker == null) {
-            // Initialize fields that only change on update (so a new record).
-            mLogMaker = new LogMaker(MetricsEvent.VIEW_UNKNOWN)
-                .setPackageName(getPackageName())
+        return new LogMaker(MetricsEvent.VIEW_UNKNOWN).setPackageName(getPackageName())
                 .addTaggedData(MetricsEvent.NOTIFICATION_ID, getId())
                 .addTaggedData(MetricsEvent.NOTIFICATION_TAG, getTag())
-                .addTaggedData(MetricsEvent.FIELD_NOTIFICATION_CHANNEL_ID, getChannelIdLogTag());
-        }
-        // Reset fields that can change between updates, or are used by multiple logs.
-        return mLogMaker
-            .clearCategory()
-            .clearType()
-            .clearSubtype()
-            .addTaggedData(MetricsEvent.FIELD_NOTIFICATION_GROUP_ID, getGroupLogTag())
-            .addTaggedData(MetricsEvent.FIELD_NOTIFICATION_GROUP_SUMMARY,
-                getNotification().isGroupSummary() ? 1 : 0)
-            .addTaggedData(MetricsProto.MetricsEvent.FIELD_NOTIFICATION_CATEGORY,
-                    getNotification().category);
+                .addTaggedData(MetricsEvent.FIELD_NOTIFICATION_CHANNEL_ID, getChannelIdLogTag())
+                .addTaggedData(MetricsEvent.FIELD_NOTIFICATION_GROUP_ID, getGroupLogTag())
+                .addTaggedData(MetricsEvent.FIELD_NOTIFICATION_GROUP_SUMMARY,
+                        getNotification().isGroupSummary() ? 1 : 0)
+                .addTaggedData(MetricsProto.MetricsEvent.FIELD_NOTIFICATION_CATEGORY,
+                        getNotification().category);
     }
 
     private String getGroupLogTag() {

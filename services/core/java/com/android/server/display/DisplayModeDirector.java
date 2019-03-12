@@ -664,6 +664,12 @@ public class DisplayModeDirector {
 
         private void updateDisplayModes(int displayId) {
             Display d = mContext.getSystemService(DisplayManager.class).getDisplay(displayId);
+            if (d == null) {
+                // We can occasionally get a display added or changed event for a display that was
+                // subsequently removed, which means this returns null. Check this case and bail
+                // out early; if it gets re-attached we'll eventually get another call back for it.
+                return;
+            }
             DisplayInfo info = new DisplayInfo();
             d.getDisplayInfo(info);
             boolean changed = false;

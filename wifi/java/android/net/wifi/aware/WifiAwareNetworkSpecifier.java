@@ -16,9 +16,15 @@
 
 package android.net.wifi.aware;
 
+import static android.net.wifi.aware.WifiAwareManager.WIFI_AWARE_DATA_PATH_ROLE_INITIATOR;
+
+import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.net.NetworkSpecifier;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.Process;
+import android.text.TextUtils;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -29,8 +35,6 @@ import java.util.Objects;
  * {@link WifiAwareSession#createNetworkSpecifierOpen(int, byte[])} or
  * {@link DiscoverySession#createNetworkSpecifierOpen(PeerHandle)} or their secure (Passphrase)
  * versions.
- *
- * @hide
  */
 public final class WifiAwareNetworkSpecifier extends NetworkSpecifier implements Parcelable {
     /**
@@ -138,6 +142,8 @@ public final class WifiAwareNetworkSpecifier extends NetworkSpecifier implements
      * device they all get the same link. However, the link is only set up on the first request -
      * hence only the first can transmit the port information. But we don't want to expose that
      * information to other apps. Limiting to secure links would (usually) imply single app usage.
+     *
+     * @hide
      */
     public final int transportProtocol;
 
@@ -290,6 +296,199 @@ public final class WifiAwareNetworkSpecifier extends NetworkSpecifier implements
     public void assertValidFromUid(int requestorUid) {
         if (this.requestorUid != requestorUid) {
             throw new SecurityException("mismatched UIDs");
+        }
+    }
+
+    /**
+     * A builder class for a Wi-Fi Aware network specifier to set up an Aware connection with a
+     * peer.
+     * <p>
+     * Note that all Wi-Fi Aware connection specifier objects must call the
+     * {@link Builder#setDiscoverySession(DiscoverySession)} to specify the context
+     * within which the connection is created, and
+     * {@link Builder#setPeerHandle(PeerHandle)} to specify the peer to which the
+     * connection is created.
+     */
+    public static final class Builder {
+        private DiscoverySession mDiscoverySession;
+        private PeerHandle mPeerHandle;
+        private String mPskPassphrase;
+        private byte[] mPmk;
+        private int mPort = 0; // invalid value
+        private int mTransportProtocol = -1; // invalid value
+
+        /**
+         * Configure the {@link PublishDiscoverySession} or {@link SubscribeDiscoverySession}
+         * discovery session in whose context the connection is created.
+         * <p>
+         * Note: this method must be called for any connection request!
+         *
+         * @param discoverySession A Wi-Fi Aware discovery session.
+         * @return the current {@link Builder} builder, enabling chaining of builder
+         *         methods.
+         */
+        public @NonNull Builder setDiscoverySession(@NonNull DiscoverySession discoverySession) {
+            if (discoverySession == null) {
+                throw new IllegalArgumentException("Non-null discoverySession required");
+            }
+            mDiscoverySession = discoverySession;
+            return this;
+        }
+
+        /**
+         * Configure the {@link PeerHandle} of the peer to which the Wi-Fi Aware connection is
+         * requested. The peer is discovered through Wi-Fi Aware discovery,
+         * <p>
+         * Note: this method must be called for any connection request!
+         *
+         * @param peerHandle The peer's handle obtained through
+         * {@link DiscoverySessionCallback#onServiceDiscovered(PeerHandle, byte[], java.util.List)}
+         *                   or
+         *                   {@link DiscoverySessionCallback#onMessageReceived(PeerHandle, byte[])}.
+         * @return the current {@link Builder} builder, enabling chaining of builder
+         *         methods.
+         */
+        public @NonNull Builder setPeerHandle(@NonNull PeerHandle peerHandle) {
+            if (peerHandle == null) {
+                throw new IllegalArgumentException("Non-null peerHandle required");
+            }
+            mPeerHandle = peerHandle;
+            return this;
+        }
+
+        /**
+         * Configure the PSK Passphrase for the Wi-Fi Aware connection being requested. This method
+         * is optional - if not called, then an Open (unencrypted) connection will be created.
+         *
+         * @param pskPassphrase The (optional) passphrase to be used to encrypt the link.
+         * @return the current {@link Builder} builder, enabling chaining of builder
+         *         methods.
+         */
+        public @NonNull Builder setPskPassphrase(@NonNull String pskPassphrase) {
+            if (!WifiAwareUtils.validatePassphrase(pskPassphrase)) {
+                throw new IllegalArgumentException("Passphrase must meet length requirements");
+            }
+            mPskPassphrase = pskPassphrase;
+            return this;
+        }
+
+        /**
+         * Configure the PMK for the Wi-Fi Aware connection being requested. This method
+         * is optional - if not called, then an Open (unencrypted) connection will be created.
+         *
+         * @param pmk A PMK (pairwise master key, see IEEE 802.11i) specifying the key to use for
+         *            encrypting the data-path. Use the {@link #setPskPassphrase(String)} to
+         *            specify a Passphrase.
+         * @return the current {@link Builder} builder, enabling chaining of builder
+         *         methods.
+         * @hide
+         */
+        @SystemApi
+        public @NonNull Builder setPmk(@NonNull byte[] pmk) {
+            if (!WifiAwareUtils.validatePmk(pmk)) {
+                throw new IllegalArgumentException("PMK must 32 bytes");
+            }
+            mPmk = pmk;
+            return this;
+        }
+
+        /**
+         * Configure the port number which will be used to create a connection over this link. This
+         * configuration should only be done on the server device, e.g. the device creating the
+         * {@link java.net.ServerSocket}.
+         * <p>Notes:
+         * <ul>
+         *     <li>The server device must be the Publisher device!
+         *     <li>The port information can only be specified on secure links, specified using
+         *     {@link #setPskPassphrase(String)}.
+         * </ul>
+         *
+         * @param port A positive integer indicating the port to be used for communication.
+         * @return the current {@link Builder} builder, enabling chaining of builder
+         *         methods.
+         */
+        public @NonNull Builder setPort(int port) {
+            if (port <= 0 || port > 65535) {
+                throw new IllegalArgumentException("The port must be a positive value (0, 65535]");
+            }
+            mPort = port;
+            return this;
+        }
+
+        /**
+         * Configure the transport protocol which will be used to create a connection over this
+         * link. This configuration should only be done on the server device, e.g. the device
+         * creating the {@link java.net.ServerSocket} for TCP.
+         * <p>Notes:
+         * <ul>
+         *     <li>The server device must be the Publisher device!
+         *     <li>The transport protocol information can only be specified on secure links,
+         *     specified using {@link #setPskPassphrase(String)}.
+         * </ul>
+         * The transport protocol number is assigned by the Internet Assigned Numbers Authority
+         * (IANA) https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml.
+         *
+         * @param transportProtocol The transport protocol to be used for communication.
+         * @return the current {@link Builder} builder, enabling chaining of builder
+         *         methods.
+         */
+        public @NonNull Builder setTransportProtocol(int transportProtocol) {
+            if (transportProtocol < 0 || transportProtocol > 255) {
+                throw new IllegalArgumentException(
+                        "The transport protocol must be in range [0, 255]");
+            }
+            mTransportProtocol = transportProtocol;
+            return this;
+        }
+
+        /**
+         * Create a {@link android.net.NetworkRequest.Builder#setNetworkSpecifier(NetworkSpecifier)}
+         * for a WiFi Aware connection (link) to the specified peer. The
+         * {@link android.net.NetworkRequest.Builder#addTransportType(int)} should be set to
+         * {@link android.net.NetworkCapabilities#TRANSPORT_WIFI_AWARE}.
+         * <p> The default builder constructor will initialize a NetworkSpecifier which requests an
+         * open (non-encrypted) link. To request an encrypted link use the
+         * {@link #setPskPassphrase(String)} builder method.
+         *
+         * @return A {@link NetworkSpecifier} to be used to construct
+         * {@link android.net.NetworkRequest.Builder#setNetworkSpecifier(NetworkSpecifier)} to pass
+         * to {@link android.net.ConnectivityManager#requestNetwork(android.net.NetworkRequest,
+         * android.net.ConnectivityManager.NetworkCallback)}
+         * [or other varieties of that API].
+         */
+        public @NonNull WifiAwareNetworkSpecifier build() {
+            if (mDiscoverySession == null) {
+                throw new IllegalStateException("Null discovery session!?");
+            }
+            if (mPskPassphrase != null & mPmk != null) {
+                throw new IllegalStateException(
+                        "Can only specify a Passphrase or a PMK - not both!");
+            }
+
+            int role = mDiscoverySession instanceof SubscribeDiscoverySession
+                    ? WIFI_AWARE_DATA_PATH_ROLE_INITIATOR
+                    : WifiAwareManager.WIFI_AWARE_DATA_PATH_ROLE_RESPONDER;
+
+            if (mPort != 0 || mTransportProtocol != -1) {
+                if (role != WifiAwareManager.WIFI_AWARE_DATA_PATH_ROLE_RESPONDER) {
+                    throw new IllegalStateException(
+                            "Port and transport protocol information can only "
+                                    + "be specified on the Publisher device (which is the server");
+                }
+                if (TextUtils.isEmpty(mPskPassphrase) && mPmk == null) {
+                    throw new IllegalStateException("Port and transport protocol information can "
+                            + "only be specified on a secure link");
+                }
+            }
+
+            if (role == WIFI_AWARE_DATA_PATH_ROLE_INITIATOR && mPeerHandle == null) {
+                throw new IllegalStateException("Null peerHandle!?");
+            }
+
+            return new WifiAwareNetworkSpecifier(
+                    WifiAwareNetworkSpecifier.NETWORK_SPECIFIER_TYPE_IB, role,
+                    mDiscoverySession.mClientId, mDiscoverySession.mSessionId, mPeerHandle.peerId,
+                    null, mPmk, mPskPassphrase, mPort, mTransportProtocol, Process.myUid());
         }
     }
 }

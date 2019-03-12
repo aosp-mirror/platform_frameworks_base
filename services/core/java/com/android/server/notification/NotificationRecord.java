@@ -637,25 +637,17 @@ public final class NotificationRecord {
                     final ArrayList<String> people =
                             adjustment.getSignals().getStringArrayList(Adjustment.KEY_PEOPLE);
                     setPeopleOverride(people);
-                    MetricsLogger.action(getAdjustmentLogMaker()
-                            .addTaggedData(MetricsEvent.ADJUSTMENT_KEY_PEOPLE, people.size()));
                 }
                 if (signals.containsKey(Adjustment.KEY_SNOOZE_CRITERIA)) {
                     final ArrayList<SnoozeCriterion> snoozeCriterionList =
                             adjustment.getSignals().getParcelableArrayList(
                                     Adjustment.KEY_SNOOZE_CRITERIA);
                     setSnoozeCriteria(snoozeCriterionList);
-                    MetricsLogger.action(getAdjustmentLogMaker()
-                            .addTaggedData(MetricsEvent.ADJUSTMENT_KEY_SNOOZE_CRITERIA,
-                                    snoozeCriterionList.size()));
                 }
                 if (signals.containsKey(Adjustment.KEY_GROUP_KEY)) {
                     final String groupOverrideKey =
                             adjustment.getSignals().getString(Adjustment.KEY_GROUP_KEY);
                     setOverrideGroupKey(groupOverrideKey);
-                    MetricsLogger.action(getAdjustmentLogMaker()
-                            .addTaggedData(MetricsEvent.ADJUSTMENT_KEY_GROUP_KEY,
-                                    groupOverrideKey));
                 }
                 if (signals.containsKey(Adjustment.KEY_USER_SENTIMENT)) {
                     // Only allow user sentiment update from assistant if user hasn't already
@@ -664,32 +656,20 @@ public final class NotificationRecord {
                             && (getChannel().getUserLockedFields() & USER_LOCKED_IMPORTANCE) == 0) {
                         setUserSentiment(adjustment.getSignals().getInt(
                                 Adjustment.KEY_USER_SENTIMENT, USER_SENTIMENT_NEUTRAL));
-                        MetricsLogger.action(getAdjustmentLogMaker()
-                                .addTaggedData(MetricsEvent.ADJUSTMENT_KEY_USER_SENTIMENT,
-                                        getUserSentiment()));
                     }
                 }
                 if (signals.containsKey(Adjustment.KEY_CONTEXTUAL_ACTIONS)) {
                     setSystemGeneratedSmartActions(
                             signals.getParcelableArrayList(Adjustment.KEY_CONTEXTUAL_ACTIONS));
-                    MetricsLogger.action(getAdjustmentLogMaker()
-                            .addTaggedData(MetricsEvent.ADJUSTMENT_KEY_SMART_ACTIONS,
-                                    getSystemGeneratedSmartActions().size()));
                 }
                 if (signals.containsKey(Adjustment.KEY_TEXT_REPLIES)) {
                     setSmartReplies(signals.getCharSequenceArrayList(Adjustment.KEY_TEXT_REPLIES));
-                    MetricsLogger.action(getAdjustmentLogMaker()
-                            .addTaggedData(MetricsEvent.ADJUSTMENT_KEY_SMART_REPLIES,
-                                    getSmartReplies().size()));
                 }
                 if (signals.containsKey(Adjustment.KEY_IMPORTANCE)) {
                     int importance = signals.getInt(Adjustment.KEY_IMPORTANCE);
                     importance = Math.max(IMPORTANCE_UNSPECIFIED, importance);
                     importance = Math.min(IMPORTANCE_HIGH, importance);
                     setAssistantImportance(importance);
-                    MetricsLogger.action(getAdjustmentLogMaker()
-                            .addTaggedData(MetricsEvent.ADJUSTMENT_KEY_IMPORTANCE,
-                                    importance));
                 }
             }
             // We have now gotten all the information out of the adjustments and can forget them.
@@ -1278,12 +1258,6 @@ public final class NotificationRecord {
 
     public LogMaker getItemLogMaker() {
         return getLogMaker().setCategory(MetricsEvent.NOTIFICATION_ITEM);
-    }
-
-    public LogMaker getAdjustmentLogMaker() {
-        return getLogMaker()
-                .setCategory(MetricsEvent.NOTIFICATION_ITEM)
-                .setType(MetricsEvent.TYPE_NOTIFICATION_ASSISTANT_ADJUSTMENT);
     }
 
     @VisibleForTesting

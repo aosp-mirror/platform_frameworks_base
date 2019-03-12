@@ -73,6 +73,12 @@ import java.util.regex.Pattern;
  * Supported formats are: JPEG, DNG, CR2, NEF, NRW, ARW, RW2, ORF, PEF, SRW, RAF and HEIF.
  * <p>
  * Attribute mutation is supported for JPEG image files.
+ * <p>
+ * Note: It is recommended to use the <a href="{@docRoot}jetpack/androidx.html">AndroidX</a>
+ * <a href="{@docRoot}reference/androidx/exifinterface/media/ExifInterface.html">ExifInterface
+ * Library</a> since it is a superset of this class. In addition to the functionalities of this
+ * class, it supports parsing extra metadata such as exposure and data compression information
+ * as well as setting extra metadata such as GPS and datetime information.
  */
 public class ExifInterface {
     private static final String TAG = "ExifInterface";
@@ -1316,14 +1322,14 @@ public class ExifInterface {
     }
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
-    private final String mFilename;
-    private final FileDescriptor mSeekableFileDescriptor;
-    private final AssetManager.AssetInputStream mAssetInputStream;
-    private final boolean mIsInputStream;
+    private String mFilename;
+    private FileDescriptor mSeekableFileDescriptor;
+    private AssetManager.AssetInputStream mAssetInputStream;
+    private boolean mIsInputStream;
     private int mMimeType;
     @UnsupportedAppUsage
     private final HashMap[] mAttributes = new HashMap[EXIF_TAGS.length];
-    private Set<Integer> mAttributesOffsets = new HashSet<>(EXIF_TAGS.length);
+    private Set<Integer> mHandledIfdOffsets = new HashSet<>(EXIF_TAGS.length);
     private ByteOrder mExifByteOrder = ByteOrder.BIG_ENDIAN;
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private boolean mHasThumbnail;
@@ -1350,7 +1356,10 @@ public class ExifInterface {
      * Reads Exif tags from the specified image file.
      */
     public ExifInterface(@NonNull File file) throws IOException {
-        this(file.getAbsolutePath());
+        if (file == null) {
+            throw new NullPointerException("file cannot be null");
+        }
+        initForFilename(file.getName());
     }
 
     /**
@@ -1358,23 +1367,9 @@ public class ExifInterface {
      */
     public ExifInterface(@NonNull String filename) throws IOException {
         if (filename == null) {
-            throw new IllegalArgumentException("filename cannot be null");
+            throw new NullPointerException("filename cannot be null");
         }
-        FileInputStream in = null;
-        mAssetInputStream = null;
-        mFilename = filename;
-        mIsInputStream = false;
-        try {
-            in = new FileInputStream(filename);
-            if (isSeekableFD(in.getFD())) {
-                mSeekableFileDescriptor = in.getFD();
-            } else {
-                mSeekableFileDescriptor = null;
-            }
-            loadAttributes(in);
-        } finally {
-            IoUtils.closeQuietly(in);
-        }
+        initForFilename(filename);
     }
 
     /**
@@ -1384,7 +1379,7 @@ public class ExifInterface {
      */
     public ExifInterface(@NonNull FileDescriptor fileDescriptor) throws IOException {
         if (fileDescriptor == null) {
-            throw new IllegalArgumentException("fileDescriptor cannot be null");
+            throw new NullPointerException("fileDescriptor cannot be null");
         }
         mAssetInputStream = null;
         mFilename = null;
@@ -1418,7 +1413,7 @@ public class ExifInterface {
      */
     public ExifInterface(@NonNull InputStream inputStream) throws IOException {
         if (inputStream == null) {
-            throw new IllegalArgumentException("inputStream cannot be null");
+            throw new NullPointerException("inputStream cannot be null");
         }
         mFilename = null;
         if (inputStream instanceof AssetManager.AssetInputStream) {
@@ -1443,6 +1438,9 @@ public class ExifInterface {
      * @param tag the name of the tag.
      */
     private @Nullable ExifAttribute getExifAttribute(@NonNull String tag) {
+        if (tag == null) {
+            throw new NullPointerException("tag shouldn't be null");
+        }
         // Retrieves all tag groups. The value from primary image tag group has a higher priority
         // than the value from the thumbnail tag group if there are more than one candidates.
         for (int i = 0; i < EXIF_TAGS.length; ++i) {
@@ -1461,6 +1459,9 @@ public class ExifInterface {
      * @param tag the name of the tag.
      */
     public @Nullable String getAttribute(@NonNull String tag) {
+        if (tag == null) {
+            throw new NullPointerException("tag shouldn't be null");
+        }
         ExifAttribute attribute = getExifAttribute(tag);
         if (attribute != null) {
             if (!sTagSetForCompatibility.contains(tag)) {
@@ -1499,6 +1500,9 @@ public class ExifInterface {
      * @param defaultValue the value to return if the tag is not available.
      */
     public int getAttributeInt(@NonNull String tag, int defaultValue) {
+        if (tag == null) {
+            throw new NullPointerException("tag shouldn't be null");
+        }
         ExifAttribute exifAttribute = getExifAttribute(tag);
         if (exifAttribute == null) {
             return defaultValue;
@@ -1520,6 +1524,9 @@ public class ExifInterface {
      * @param defaultValue the value to return if the tag is not available.
      */
     public double getAttributeDouble(@NonNull String tag, double defaultValue) {
+        if (tag == null) {
+            throw new NullPointerException("tag shouldn't be null");
+        }
         ExifAttribute exifAttribute = getExifAttribute(tag);
         if (exifAttribute == null) {
             return defaultValue;
@@ -1539,6 +1546,9 @@ public class ExifInterface {
      * @param value the value of the tag.
      */
     public void setAttribute(@NonNull String tag, @Nullable String value) {
+        if (tag == null) {
+            throw new NullPointerException("tag shouldn't be null");
+        }
         // Convert the given value to rational values for backwards compatibility.
         if (value != null && sTagSetForCompatibility.contains(tag)) {
             if (tag.equals(TAG_GPS_TIMESTAMP)) {
@@ -1708,6 +1718,9 @@ public class ExifInterface {
      * determine whether the image data format is JPEG or not.
      */
     private void loadAttributes(@NonNull InputStream in) throws IOException {
+        if (in == null) {
+            throw new NullPointerException("inputstream shouldn't be null");
+        }
         try {
             // Initialize mAttributes.
             for (int i = 0; i < EXIF_TAGS.length; ++i) {
@@ -2043,6 +2056,9 @@ public class ExifInterface {
      *             that means offsets may have changed.
      */
     public @Nullable long[] getAttributeRange(@NonNull String tag) {
+        if (tag == null) {
+            throw new NullPointerException("tag shouldn't be null");
+        }
         if (mModified) {
             throw new IllegalStateException(
                     "The underlying file has been modified since being parsed");
@@ -2064,6 +2080,9 @@ public class ExifInterface {
      *         no tag was found.
      */
     public @Nullable byte[] getAttributeBytes(@NonNull String tag) {
+        if (tag == null) {
+            throw new NullPointerException("tag shouldn't be null");
+        }
         final ExifAttribute attribute = getExifAttribute(tag);
         if (attribute != null) {
             return attribute.bytes;
@@ -2231,6 +2250,24 @@ public class ExifInterface {
         } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
             // Not valid
             throw new IllegalArgumentException();
+        }
+    }
+
+    private void initForFilename(String filename) throws IOException {
+        FileInputStream in = null;
+        mAssetInputStream = null;
+        mFilename = filename;
+        mIsInputStream = false;
+        try {
+            in = new FileInputStream(filename);
+            if (isSeekableFD(in.getFD())) {
+                mSeekableFileDescriptor = in.getFD();
+            } else {
+                mSeekableFileDescriptor = null;
+            }
+            loadAttributes(in);
+        } finally {
+            IoUtils.closeQuietly(in);
         }
     }
 
@@ -3085,6 +3122,9 @@ public class ExifInterface {
     // Reads image file directory, which is a tag group in EXIF.
     private void readImageFileDirectory(ByteOrderedDataInputStream dataInputStream,
             @IfdType int ifdType) throws IOException {
+        // Save offset of current IFD to prevent reading an IFD that is already read.
+        mHandledIfdOffsets.add(dataInputStream.mPosition);
+
         if (dataInputStream.mPosition + 2 > dataInputStream.mLength) {
             // Return if there is no data from the offset.
             return;
@@ -3223,9 +3263,7 @@ public class ExifInterface {
                 // 1. Exists within the boundaries of the input stream
                 // 2. Does not point to a previously read IFD.
                 if (offset > 0L && offset < dataInputStream.mLength) {
-                    if (!mAttributesOffsets.contains((int) offset)) {
-                        // Save offset of current IFD to prevent reading an IFD that is already read
-                        mAttributesOffsets.add(dataInputStream.mPosition);
+                    if (!mHandledIfdOffsets.contains((int) offset)) {
                         dataInputStream.seek(offset);
                         readImageFileDirectory(dataInputStream, nextIfdType);
                     } else {
@@ -3279,9 +3317,7 @@ public class ExifInterface {
             // 1. Exists within the boundaries of the input stream
             // 2. Does not point to a previously read IFD.
             if (nextIfdOffset > 0L && nextIfdOffset < dataInputStream.mLength) {
-                if (!mAttributesOffsets.contains(nextIfdOffset)) {
-                    // Save offset of current IFD to prevent reading an IFD that is already read.
-                    mAttributesOffsets.add(dataInputStream.mPosition);
+                if (!mHandledIfdOffsets.contains(nextIfdOffset)) {
                     dataInputStream.seek(nextIfdOffset);
                     // Do not overwrite thumbnail IFD data if it alreay exists.
                     if (mAttributes[IFD_TYPE_THUMBNAIL].isEmpty()) {

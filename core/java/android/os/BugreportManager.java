@@ -17,6 +17,7 @@
 package android.os;
 
 import android.annotation.CallbackExecutor;
+import android.annotation.FloatRange;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -39,7 +40,7 @@ import java.util.concurrent.Executor;
  */
 @SystemApi
 @SystemService(Context.BUGREPORT_SERVICE)
-public class BugreportManager {
+public final class BugreportManager {
     private final Context mContext;
     private final IDumpstate mBinder;
 
@@ -90,7 +91,7 @@ public class BugreportManager {
          * Called when there is a progress update.
          * @param progress the progress in [0.0, 100.0]
          */
-        public void onProgress(float progress) {}
+        public void onProgress(@FloatRange(from = 0f, to = 100f) float progress) {}
 
         /**
          * Called when taking bugreport resulted in an error.

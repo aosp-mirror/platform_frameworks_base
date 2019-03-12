@@ -183,11 +183,11 @@ TEST_F(ResourceParserTest, ParseStringTruncateASCII) {
   EXPECT_THAT(str->untranslatable_sections, IsEmpty());
 
   // Preserve non-ASCII whitespace including extended ASCII characters
-  EXPECT_TRUE(TestParse(R"(<string name="foo3">&#160;Hello&#160;</string>)"));
+  EXPECT_TRUE(TestParse(R"(<string name="foo3">&#160;Hello&#x202F;World&#160;</string>)"));
 
   str = test::GetValue<String>(&table_, "string/foo3");
   ASSERT_THAT(str, NotNull());
-  EXPECT_THAT(*str->value, StrEq("\xC2\xA0Hello\xC2\xA0"));
+  EXPECT_THAT(*str->value, StrEq("\xC2\xA0Hello\xE2\x80\xAFWorld\xC2\xA0"));
   EXPECT_THAT(str->untranslatable_sections, IsEmpty());
 
   EXPECT_TRUE(TestParse(R"(<string name="foo4">2005年6月1日</string>)"));

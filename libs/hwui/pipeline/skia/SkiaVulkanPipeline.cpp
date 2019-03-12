@@ -55,20 +55,8 @@ MakeCurrentResult SkiaVulkanPipeline::makeCurrent() {
 }
 
 Frame SkiaVulkanPipeline::getFrame() {
-    LOG_ALWAYS_FATAL_IF(mVkSurface == nullptr,
-                        "drawRenderNode called on a context with no surface!");
-
-    SkSurface* backBuffer = mVkManager.getBackbufferSurface(&mVkSurface);
-    LOG_ALWAYS_FATAL_IF(mVkSurface == nullptr,
-                        "drawRenderNode called on a context with an invalid surface");
-    if (backBuffer == nullptr) {
-        SkDebugf("failed to get backbuffer");
-        return Frame(-1, -1, 0);
-    }
-
-    Frame frame(mVkSurface->windowWidth(), mVkSurface->windowHeight(),
-                mVkManager.getAge(mVkSurface));
-    return frame;
+    LOG_ALWAYS_FATAL_IF(mVkSurface == nullptr, "getFrame() called on a context with no surface!");
+    return mVkManager.dequeueNextBuffer(mVkSurface);
 }
 
 bool SkiaVulkanPipeline::draw(const Frame& frame, const SkRect& screenDirty, const SkRect& dirty,
@@ -77,13 +65,13 @@ bool SkiaVulkanPipeline::draw(const Frame& frame, const SkRect& screenDirty, con
                               bool opaque, const LightInfo& lightInfo,
                               const std::vector<sp<RenderNode>>& renderNodes,
                               FrameInfoVisualizer* profiler) {
-    sk_sp<SkSurface> backBuffer = mVkSurface->getBackBufferSurface();
+    sk_sp<SkSurface> backBuffer = mVkSurface->getCurrentSkSurface();
     if (backBuffer.get() == nullptr) {
         return false;
     }
     SkiaPipeline::updateLighting(lightGeometry, lightInfo);
     renderFrame(*layerUpdateQueue, dirty, renderNodes, opaque, contentDrawBounds,
-            backBuffer, mVkSurface->preTransform());
+            backBuffer, mVkSurface->getCurrentPreTransform());
     ShaderCache::get().onVkFrameFlushed(mRenderThread.getGrContext());
     layerUpdateQueue->clear();
 
@@ -113,7 +101,7 @@ bool SkiaVulkanPipeline::swapBuffers(const Frame& frame, bool drew, const SkRect
     currentFrameInfo->markSwapBuffers();
 
     if (*requireSwap) {
-        mVkManager.swapBuffers(mVkSurface);
+        mVkManager.swapBuffers(mVkSurface, screenDirty);
     }
 
     return *requireSwap;

@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FRAMEWORK_RES_APK="${ANDROID_BUILD_TOP}/out/target/common/obj/APPS/framework-res_intermediates/package-export.apk"
+FRAMEWORK_RES_APK=${ANDROID_BUILD_TOP}/prebuilts/sdk/current/public/android.jar
 
 aapt2 compile --dir res -o compiled.flata
 

@@ -1773,12 +1773,12 @@ interface ITelephony {
     /**
      * Return the emergency number list from all the active subscriptions.
      */
-    Map getCurrentEmergencyNumberList(String callingPackage);
+    Map getEmergencyNumberList(String callingPackage);
 
     /**
      * Identify if the number is emergency number, based on all the active subscriptions.
      */
-    boolean isCurrentEmergencyNumber(String number, boolean exactMatch);
+    boolean isEmergencyNumber(String number, boolean exactMatch);
 
     /**
      * Return a list of certs in hex string from loaded carrier privileges access rules.

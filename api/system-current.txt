@@ -1118,35 +1118,29 @@ package android.app.role {
 
   public abstract class RoleControllerService extends android.app.Service {
     ctor public RoleControllerService();
-    method public abstract void onAddRoleHolder(@NonNull String, @NonNull String, int, @NonNull android.app.role.RoleManagerCallback);
+    method @WorkerThread public abstract boolean onAddRoleHolder(@NonNull String, @NonNull String, int);
     method @Nullable public final android.os.IBinder onBind(@Nullable android.content.Intent);
-    method public abstract void onClearRoleHolders(@NonNull String, int, @NonNull android.app.role.RoleManagerCallback);
-    method public abstract void onGrantDefaultRoles(@NonNull android.app.role.RoleManagerCallback);
+    method @WorkerThread public abstract boolean onClearRoleHolders(@NonNull String, int);
+    method @WorkerThread public abstract boolean onGrantDefaultRoles();
     method public abstract boolean onIsApplicationQualifiedForRole(@NonNull String, @NonNull String);
     method public abstract boolean onIsRoleVisible(@NonNull String);
-    method public abstract void onRemoveRoleHolder(@NonNull String, @NonNull String, int, @NonNull android.app.role.RoleManagerCallback);
-    method public abstract void onSmsKillSwitchToggled(boolean);
+    method @WorkerThread public abstract boolean onRemoveRoleHolder(@NonNull String, @NonNull String, int);
     field public static final String SERVICE_INTERFACE = "android.app.role.RoleControllerService";
   }
 
   public final class RoleManager {
     method @RequiresPermission(android.Manifest.permission.OBSERVE_ROLE_HOLDERS) public void addOnRoleHoldersChangedListenerAsUser(@NonNull java.util.concurrent.Executor, @NonNull android.app.role.OnRoleHoldersChangedListener, @NonNull android.os.UserHandle);
-    method @RequiresPermission(android.Manifest.permission.MANAGE_ROLE_HOLDERS) public void addRoleHolderAsUser(@NonNull String, @NonNull String, int, @NonNull android.os.UserHandle, @NonNull java.util.concurrent.Executor, @NonNull android.app.role.RoleManagerCallback);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_ROLE_HOLDERS) public void addRoleHolderAsUser(@NonNull String, @NonNull String, int, @NonNull android.os.UserHandle, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Boolean>);
     method @RequiresPermission("com.android.permissioncontroller.permission.MANAGE_ROLES_FROM_CONTROLLER") public boolean addRoleHolderFromController(@NonNull String, @NonNull String);
-    method @RequiresPermission(android.Manifest.permission.MANAGE_ROLE_HOLDERS) public void clearRoleHoldersAsUser(@NonNull String, int, @NonNull android.os.UserHandle, @NonNull java.util.concurrent.Executor, @NonNull android.app.role.RoleManagerCallback);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_ROLE_HOLDERS) public void clearRoleHoldersAsUser(@NonNull String, int, @NonNull android.os.UserHandle, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Boolean>);
     method @NonNull @RequiresPermission("com.android.permissioncontroller.permission.MANAGE_ROLES_FROM_CONTROLLER") public java.util.List<java.lang.String> getHeldRolesFromController(@NonNull String);
     method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_ROLE_HOLDERS) public java.util.List<java.lang.String> getRoleHolders(@NonNull String);
     method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_ROLE_HOLDERS) public java.util.List<java.lang.String> getRoleHoldersAsUser(@NonNull String, @NonNull android.os.UserHandle);
     method @RequiresPermission(android.Manifest.permission.OBSERVE_ROLE_HOLDERS) public void removeOnRoleHoldersChangedListenerAsUser(@NonNull android.app.role.OnRoleHoldersChangedListener, @NonNull android.os.UserHandle);
-    method @RequiresPermission(android.Manifest.permission.MANAGE_ROLE_HOLDERS) public void removeRoleHolderAsUser(@NonNull String, @NonNull String, int, @NonNull android.os.UserHandle, @NonNull java.util.concurrent.Executor, @NonNull android.app.role.RoleManagerCallback);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_ROLE_HOLDERS) public void removeRoleHolderAsUser(@NonNull String, @NonNull String, int, @NonNull android.os.UserHandle, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Boolean>);
     method @RequiresPermission("com.android.permissioncontroller.permission.MANAGE_ROLES_FROM_CONTROLLER") public boolean removeRoleHolderFromController(@NonNull String, @NonNull String);
     method @RequiresPermission("com.android.permissioncontroller.permission.MANAGE_ROLES_FROM_CONTROLLER") public void setRoleNamesFromController(@NonNull java.util.List<java.lang.String>);
     field public static final int MANAGE_HOLDERS_FLAG_DONT_KILL_APP = 1; // 0x1
-  }
-
-  public interface RoleManagerCallback {
-    method public void onFailure();
-    method public void onSuccess();
   }
 
 }
@@ -1576,6 +1570,7 @@ package android.content.pm {
     method public boolean getAllocateAggressive();
     method @Deprecated public boolean getAllowDowngrade();
     method public boolean getDontKillApp();
+    method public boolean getEnableRollback();
     method @Nullable public String[] getGrantedRuntimePermissions();
     method public boolean getInstallAsFullApp(boolean);
     method public boolean getInstallAsInstantApp(boolean);
@@ -1587,7 +1582,7 @@ package android.content.pm {
     method @RequiresPermission(android.Manifest.permission.ALLOCATE_AGGRESSIVE) public void setAllocateAggressive(boolean);
     method @Deprecated public void setAllowDowngrade(boolean);
     method public void setDontKillApp(boolean);
-    method public void setEnableRollback();
+    method public void setEnableRollback(boolean);
     method @RequiresPermission(android.Manifest.permission.INSTALL_GRANT_RUNTIME_PERMISSIONS) public void setGrantedRuntimePermissions(String[]);
     method @RequiresPermission(android.Manifest.permission.INSTALL_PACKAGES) public void setInstallAsApex();
     method public void setInstallAsInstantApp(boolean);
@@ -1822,18 +1817,18 @@ package android.content.rollback {
 
   public final class PackageRollbackInfo implements android.os.Parcelable {
     method public int describeContents();
-    method public String getPackageName();
-    method public android.content.pm.VersionedPackage getVersionRolledBackFrom();
-    method public android.content.pm.VersionedPackage getVersionRolledBackTo();
+    method @NonNull public String getPackageName();
+    method @NonNull public android.content.pm.VersionedPackage getVersionRolledBackFrom();
+    method @NonNull public android.content.pm.VersionedPackage getVersionRolledBackTo();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.content.rollback.PackageRollbackInfo> CREATOR;
   }
 
   public final class RollbackInfo implements android.os.Parcelable {
     method public int describeContents();
-    method public java.util.List<android.content.pm.VersionedPackage> getCausePackages();
+    method @NonNull public java.util.List<android.content.pm.VersionedPackage> getCausePackages();
     method public int getCommittedSessionId();
-    method public java.util.List<android.content.rollback.PackageRollbackInfo> getPackages();
+    method @NonNull public java.util.List<android.content.rollback.PackageRollbackInfo> getPackages();
     method public int getRollbackId();
     method public boolean isStaged();
     method public void writeToParcel(android.os.Parcel, int);
@@ -1843,7 +1838,7 @@ package android.content.rollback {
   public final class RollbackManager {
     method @RequiresPermission(android.Manifest.permission.MANAGE_ROLLBACKS) public void commitRollback(int, @NonNull java.util.List<android.content.pm.VersionedPackage>, @NonNull android.content.IntentSender);
     method @RequiresPermission(android.Manifest.permission.MANAGE_ROLLBACKS) public void expireRollbackForPackage(@NonNull String);
-    method @RequiresPermission(android.Manifest.permission.MANAGE_ROLLBACKS) public java.util.List<android.content.rollback.RollbackInfo> getAvailableRollbacks();
+    method @RequiresPermission(android.Manifest.permission.MANAGE_ROLLBACKS) @NonNull public java.util.List<android.content.rollback.RollbackInfo> getAvailableRollbacks();
     method @RequiresPermission(android.Manifest.permission.MANAGE_ROLLBACKS) @NonNull public java.util.List<android.content.rollback.RollbackInfo> getRecentlyCommittedRollbacks();
     method @RequiresPermission(android.Manifest.permission.MANAGE_ROLLBACKS) public void reloadPersistedData();
     field public static final String EXTRA_STATUS = "android.content.rollback.extra.STATUS";
@@ -4981,8 +4976,8 @@ package android.net.wifi.aware {
     method @Deprecated public android.net.NetworkSpecifier createNetworkSpecifierPmk(@NonNull android.net.wifi.aware.PeerHandle, @NonNull byte[]);
   }
 
-  public static final class WifiAwareManager.NetworkSpecifierBuilder {
-    method @NonNull public android.net.wifi.aware.WifiAwareManager.NetworkSpecifierBuilder setPmk(@NonNull byte[]);
+  public static final class WifiAwareNetworkSpecifier.Builder {
+    method @NonNull public android.net.wifi.aware.WifiAwareNetworkSpecifier.Builder setPmk(@NonNull byte[]);
   }
 
   public class WifiAwareSession implements java.lang.AutoCloseable {
@@ -5187,10 +5182,10 @@ package android.os {
 
   public static interface Binder.ProxyTransactListener {
     method public void onTransactEnded(@Nullable Object);
-    method public Object onTransactStarted(android.os.IBinder, int);
+    method @Nullable public Object onTransactStarted(@NonNull android.os.IBinder, int);
   }
 
-  public class BugreportManager {
+  public final class BugreportManager {
     method @RequiresPermission(android.Manifest.permission.DUMP) public void cancelBugreport();
     method @RequiresPermission(android.Manifest.permission.DUMP) public void startBugreport(@NonNull android.os.ParcelFileDescriptor, @Nullable android.os.ParcelFileDescriptor, @NonNull android.os.BugreportParams, @NonNull java.util.concurrent.Executor, @NonNull android.os.BugreportManager.BugreportCallback);
   }
@@ -5199,7 +5194,7 @@ package android.os {
     ctor public BugreportManager.BugreportCallback();
     method public void onError(int);
     method public void onFinished();
-    method public void onProgress(float);
+    method public void onProgress(@FloatRange(from=0.0f, to=100.0f) float);
     field public static final int BUGREPORT_ERROR_ANOTHER_REPORT_IN_PROGRESS = 5; // 0x5
     field public static final int BUGREPORT_ERROR_INVALID_INPUT = 1; // 0x1
     field public static final int BUGREPORT_ERROR_RUNTIME = 2; // 0x2
@@ -5208,7 +5203,7 @@ package android.os {
   }
 
   public final class BugreportParams {
-    ctor public BugreportParams(@android.os.BugreportParams.BugreportMode int);
+    ctor public BugreportParams(int);
     method public int getMode();
     field public static final int BUGREPORT_MODE_FULL = 0; // 0x0
     field public static final int BUGREPORT_MODE_INTERACTIVE = 1; // 0x1
@@ -5216,9 +5211,6 @@ package android.os {
     field public static final int BUGREPORT_MODE_TELEPHONY = 4; // 0x4
     field public static final int BUGREPORT_MODE_WEAR = 3; // 0x3
     field public static final int BUGREPORT_MODE_WIFI = 5; // 0x5
-  }
-
-  @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) @IntDef(prefix={"BUGREPORT_MODE_"}, value={android.os.BugreportParams.BUGREPORT_MODE_FULL, android.os.BugreportParams.BUGREPORT_MODE_INTERACTIVE, android.os.BugreportParams.BUGREPORT_MODE_REMOTE, android.os.BugreportParams.BUGREPORT_MODE_WEAR, android.os.BugreportParams.BUGREPORT_MODE_TELEPHONY, android.os.BugreportParams.BUGREPORT_MODE_WIFI}) public static @interface BugreportParams.BugreportMode {
   }
 
   public static class Build.VERSION {
@@ -5853,6 +5845,7 @@ package android.provider {
   }
 
   public final class DeviceConfig {
+    method @RequiresPermission(android.Manifest.permission.READ_DEVICE_CONFIG) public static void addOnPropertiesChangedListener(@NonNull String, @NonNull java.util.concurrent.Executor, @NonNull android.provider.DeviceConfig.OnPropertiesChangedListener);
     method @RequiresPermission(android.Manifest.permission.READ_DEVICE_CONFIG) public static void addOnPropertyChangedListener(@NonNull String, @NonNull java.util.concurrent.Executor, @NonNull android.provider.DeviceConfig.OnPropertyChangedListener);
     method @RequiresPermission(android.Manifest.permission.READ_DEVICE_CONFIG) public static boolean getBoolean(String, String, boolean);
     method @RequiresPermission(android.Manifest.permission.READ_DEVICE_CONFIG) public static float getFloat(String, String, float);
@@ -5860,7 +5853,8 @@ package android.provider {
     method @RequiresPermission(android.Manifest.permission.READ_DEVICE_CONFIG) public static long getLong(String, String, long);
     method @RequiresPermission(android.Manifest.permission.READ_DEVICE_CONFIG) public static String getProperty(String, String);
     method @RequiresPermission(android.Manifest.permission.READ_DEVICE_CONFIG) public static String getString(String, String, String);
-    method public static void removeOnPropertyChangedListener(android.provider.DeviceConfig.OnPropertyChangedListener);
+    method public static void removeOnPropertiesChangedListener(@NonNull android.provider.DeviceConfig.OnPropertiesChangedListener);
+    method public static void removeOnPropertyChangedListener(@NonNull android.provider.DeviceConfig.OnPropertyChangedListener);
     method @RequiresPermission(android.Manifest.permission.WRITE_DEVICE_CONFIG) public static void resetToDefaults(int, @Nullable String);
     method @RequiresPermission(android.Manifest.permission.WRITE_DEVICE_CONFIG) public static boolean setProperty(String, String, String, boolean);
     field public static final String NAMESPACE_ACTIVITY_MANAGER = "activity_manager";
@@ -5895,8 +5889,11 @@ package android.provider {
     field public static final String NAMESPACE = "intelligence_attention";
   }
 
+  public static interface DeviceConfig.OnPropertiesChangedListener {
+    method public void onPropertiesChanged(@NonNull android.provider.DeviceConfig.Properties);
+  }
+
   public static interface DeviceConfig.OnPropertyChangedListener {
-    method public default void onPropertiesChanged(@NonNull android.provider.DeviceConfig.Properties);
     method public void onPropertyChanged(String, String, String);
   }
 
@@ -8067,10 +8064,10 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public int getVoiceActivationState();
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean handlePinMmi(String);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean handlePinMmiForSubscriber(int, String);
-    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isCurrentPotentialEmergencyNumber(@NonNull String);
     method public boolean isDataConnectivityPossible();
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, android.Manifest.permission.READ_PHONE_STATE}) public boolean isIdle();
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, android.Manifest.permission.READ_PHONE_STATE}) public boolean isOffhook();
+    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isPotentialEmergencyNumber(@NonNull String);
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, android.Manifest.permission.READ_PHONE_STATE}) public boolean isRadioOn();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isRebootRequiredForModemConfigChange();
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, android.Manifest.permission.READ_PHONE_STATE}) public boolean isRinging();
@@ -8212,6 +8209,7 @@ package android.telephony.data {
   }
 
   public final class DataProfile implements android.os.Parcelable {
+    method public int describeContents();
     method @NonNull public String getApn();
     method public int getAuthType();
     method public int getBearerBitmap();
@@ -8229,6 +8227,8 @@ package android.telephony.data {
     method public boolean isEnabled();
     method public boolean isPersistent();
     method public boolean isPreferred();
+    method public void writeToParcel(android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.data.DataProfile> CREATOR;
     field public static final int TYPE_3GPP = 1; // 0x1
     field public static final int TYPE_3GPP2 = 2; // 0x2
     field public static final int TYPE_COMMON = 0; // 0x0
@@ -8460,7 +8460,7 @@ package android.telephony.ims {
     method public static int getCallTypeFromVideoState(int);
     method public int getEmergencyCallRouting();
     method public int getEmergencyServiceCategories();
-    method public java.util.List<java.lang.String> getEmergencyUrns();
+    method @NonNull public java.util.List<java.lang.String> getEmergencyUrns();
     method public android.telephony.ims.ImsStreamMediaProfile getMediaProfile();
     method public int getRestrictCause();
     method public int getServiceType();
@@ -8478,7 +8478,7 @@ package android.telephony.ims {
     method public void setEmergencyCallRouting(int);
     method public void setEmergencyCallTesting(boolean);
     method public void setEmergencyServiceCategories(int);
-    method public void setEmergencyUrns(java.util.List<java.lang.String>);
+    method public void setEmergencyUrns(@NonNull java.util.List<java.lang.String>);
     method public void setHasKnownUserIntentEmergency(boolean);
     method public void updateCallExtras(android.telephony.ims.ImsCallProfile);
     method public void updateCallType(android.telephony.ims.ImsCallProfile);
