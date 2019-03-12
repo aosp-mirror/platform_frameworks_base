@@ -87,15 +87,16 @@ public class BluetoothMediaManagerTest {
     }
 
     @Test
-    public void startScan_haveA2dpProfileConnectedBluetoothDevice_shouldAddDevice() {
+    public void startScan_haveA2dpProfileDeviceIsPreferredAndBonded_shouldAddDevice() {
         final List<BluetoothDevice> devices = new ArrayList<>();
         final CachedBluetoothDevice cachedDevice = mock(CachedBluetoothDevice.class);
         final BluetoothDevice bluetoothDevice = mock(BluetoothDevice.class);
         devices.add(bluetoothDevice);
 
-        when(mA2dpProfile.getConnectedDevices()).thenReturn(devices);
+        when(mA2dpProfile.getConnectableDevices()).thenReturn(devices);
         when(mCachedDeviceManager.findDevice(bluetoothDevice)).thenReturn(cachedDevice);
-        when(cachedDevice.isConnected()).thenReturn(true);
+        when(cachedDevice.getBondState()).thenReturn(BluetoothDevice.BOND_BONDED);
+        when(mA2dpProfile.isPreferred(bluetoothDevice)).thenReturn(true);
 
         assertThat(mMediaManager.mMediaDevices).isEmpty();
         mMediaManager.startScan();
@@ -103,15 +104,16 @@ public class BluetoothMediaManagerTest {
     }
 
     @Test
-    public void startScan_haveA2dpProfileDisconnectedBluetoothDevice_shouldNotAddDevice() {
+    public void startScan_haveA2dpProfileDeviceIsPreferredAndBondNone_shouldNotAddDevice() {
         final List<BluetoothDevice> devices = new ArrayList<>();
         final CachedBluetoothDevice cachedDevice = mock(CachedBluetoothDevice.class);
         final BluetoothDevice bluetoothDevice = mock(BluetoothDevice.class);
         devices.add(bluetoothDevice);
 
-        when(mA2dpProfile.getConnectedDevices()).thenReturn(devices);
+        when(mA2dpProfile.getConnectableDevices()).thenReturn(devices);
         when(mCachedDeviceManager.findDevice(bluetoothDevice)).thenReturn(cachedDevice);
-        when(cachedDevice.isConnected()).thenReturn(false);
+        when(cachedDevice.getBondState()).thenReturn(BluetoothDevice.BOND_NONE);
+        when(mA2dpProfile.isPreferred(bluetoothDevice)).thenReturn(true);
 
         assertThat(mMediaManager.mMediaDevices).isEmpty();
         mMediaManager.startScan();
@@ -122,7 +124,7 @@ public class BluetoothMediaManagerTest {
     public void startScan_noA2dpProfileBluetoothDevice_shouldNotAddDevice() {
         final List<BluetoothDevice> devices = new ArrayList<>();
 
-        when(mA2dpProfile.getConnectedDevices()).thenReturn(devices);
+        when(mA2dpProfile.getConnectableDevices()).thenReturn(devices);
 
         assertThat(mMediaManager.mMediaDevices).isEmpty();
         mMediaManager.startScan();
@@ -130,15 +132,16 @@ public class BluetoothMediaManagerTest {
     }
 
     @Test
-    public void startScan_haveHapProfileConnectedBluetoothDevice_shouldAddDevice() {
+    public void startScan_haveHapProfileDeviceIsPreferredAndBonded_shouldAddDevice() {
         final List<BluetoothDevice> devices = new ArrayList<>();
         final CachedBluetoothDevice cachedDevice = mock(CachedBluetoothDevice.class);
         final BluetoothDevice bluetoothDevice = mock(BluetoothDevice.class);
         devices.add(bluetoothDevice);
 
-        when(mHapProfile.getConnectedDevices()).thenReturn(devices);
+        when(mHapProfile.getConnectableDevices()).thenReturn(devices);
         when(mCachedDeviceManager.findDevice(bluetoothDevice)).thenReturn(cachedDevice);
-        when(cachedDevice.isConnected()).thenReturn(true);
+        when(cachedDevice.getBondState()).thenReturn(BluetoothDevice.BOND_BONDED);
+        when(mHapProfile.isPreferred(bluetoothDevice)).thenReturn(true);
 
         assertThat(mMediaManager.mMediaDevices).isEmpty();
         mMediaManager.startScan();
@@ -149,7 +152,7 @@ public class BluetoothMediaManagerTest {
     public void startScan_noHapProfileBluetoothDevice_shouldNotAddDevice() {
         final List<BluetoothDevice> devices = new ArrayList<>();
 
-        when(mHapProfile.getConnectedDevices()).thenReturn(devices);
+        when(mHapProfile.getConnectableDevices()).thenReturn(devices);
 
         assertThat(mMediaManager.mMediaDevices).isEmpty();
         mMediaManager.startScan();
@@ -230,8 +233,13 @@ public class BluetoothMediaManagerTest {
     public void onBluetoothStateChanged_bluetoothStateIsOff_callOnDeviceListRemoved() {
         final BluetoothMediaDevice device1 = mock(BluetoothMediaDevice.class);
         final BluetoothMediaDevice device2 = mock(BluetoothMediaDevice.class);
+        final CachedBluetoothDevice cachedDevice1 = mock(CachedBluetoothDevice.class);
+        final CachedBluetoothDevice cachedDevice2 = mock(CachedBluetoothDevice.class);
         mMediaManager.mMediaDevices.add(device1);
         mMediaManager.mMediaDevices.add(device2);
+
+        when(device1.getCachedDevice()).thenReturn(cachedDevice1);
+        when(device2.getCachedDevice()).thenReturn(cachedDevice2);
 
         mMediaManager.registerCallback(mCallback);
         mMediaManager.onBluetoothStateChanged(BluetoothAdapter.STATE_OFF);
@@ -311,28 +319,30 @@ public class BluetoothMediaManagerTest {
     }
 
     @Test
-    public void onProfileConnectionStateChanged_cachedDeviceIsConnect_callOnDeviceAdded() {
-        final CachedBluetoothDevice device = mock(CachedBluetoothDevice.class);
-
-        when(device.isConnectedHearingAidDevice()).thenReturn(true);
-        when(device.isConnectedA2dpDevice()).thenReturn(true);
-
-        assertThat(mMediaManager.mMediaDevices).isEmpty();
-        mMediaManager.registerCallback(mCallback);
-        mMediaManager.onProfileConnectionStateChanged(device, 0, 0);
-
-        assertThat(mMediaManager.mMediaDevices).hasSize(1);
-        verify(mCallback).onDeviceAdded(any());
-    }
-
-    @Test
-    public void onProfileConnectionStateChanged_cachedDeviceIsDisconnect_callOnDeviceRemoved() {
+    public void onProfileConnectionStateChanged_cachedDeviceIsBonded_callDeviceAttributesChanged() {
         final CachedBluetoothDevice device = mock(CachedBluetoothDevice.class);
         final BluetoothMediaDevice bluetoothMediaDevice = mock(BluetoothMediaDevice.class);
         mMediaManager.mMediaDevices.add(bluetoothMediaDevice);
 
-        when(device.isConnectedHearingAidDevice()).thenReturn(false);
-        when(device.isConnectedA2dpDevice()).thenReturn(false);
+        when(device.getBondState()).thenReturn(BluetoothDevice.BOND_BONDED);
+        when(device.getAddress()).thenReturn(TEST_ADDRESS);
+        when(bluetoothMediaDevice.getId()).thenReturn(TEST_ADDRESS);
+
+        assertThat(mMediaManager.mMediaDevices).hasSize(1);
+        mMediaManager.registerCallback(mCallback);
+        mMediaManager.onProfileConnectionStateChanged(device, 0, 0);
+
+        assertThat(mMediaManager.mMediaDevices).hasSize(1);
+        verify(mCallback).onDeviceAttributesChanged();
+    }
+
+    @Test
+    public void onProfileConnectionStateChanged_cachedDeviceIsBondNone_callOnDeviceRemoved() {
+        final CachedBluetoothDevice device = mock(CachedBluetoothDevice.class);
+        final BluetoothMediaDevice bluetoothMediaDevice = mock(BluetoothMediaDevice.class);
+        mMediaManager.mMediaDevices.add(bluetoothMediaDevice);
+
+        when(device.getBondState()).thenReturn(BluetoothDevice.BOND_NONE);
         when(device.getAddress()).thenReturn(TEST_ADDRESS);
         when(bluetoothMediaDevice.getId()).thenReturn(TEST_ADDRESS);
 
@@ -345,28 +355,30 @@ public class BluetoothMediaManagerTest {
     }
 
     @Test
-    public void onAclConnectionStateChanged_cachedDeviceIsConnect_callOnDeviceAdded() {
-        final CachedBluetoothDevice device = mock(CachedBluetoothDevice.class);
-
-        when(device.isConnectedHearingAidDevice()).thenReturn(true);
-        when(device.isConnectedA2dpDevice()).thenReturn(true);
-
-        assertThat(mMediaManager.mMediaDevices).isEmpty();
-        mMediaManager.registerCallback(mCallback);
-        mMediaManager.onAclConnectionStateChanged(device, 0);
-
-        assertThat(mMediaManager.mMediaDevices).hasSize(1);
-        verify(mCallback).onDeviceAdded(any());
-    }
-
-    @Test
-    public void onAclConnectionStateChanged_cachedDeviceIsDisconnect_callOnDeviceRemoved() {
+    public void onAclConnectionStateChanged_cachedDeviceIsBonded_callDeviceAttributesChanged() {
         final CachedBluetoothDevice device = mock(CachedBluetoothDevice.class);
         final BluetoothMediaDevice bluetoothMediaDevice = mock(BluetoothMediaDevice.class);
         mMediaManager.mMediaDevices.add(bluetoothMediaDevice);
 
-        when(device.isConnectedHearingAidDevice()).thenReturn(false);
-        when(device.isConnectedA2dpDevice()).thenReturn(false);
+        when(device.getBondState()).thenReturn(BluetoothDevice.BOND_BONDED);
+        when(device.getAddress()).thenReturn(TEST_ADDRESS);
+        when(bluetoothMediaDevice.getId()).thenReturn(TEST_ADDRESS);
+
+        assertThat(mMediaManager.mMediaDevices).hasSize(1);
+        mMediaManager.registerCallback(mCallback);
+        mMediaManager.onAclConnectionStateChanged(device, 0);
+
+        assertThat(mMediaManager.mMediaDevices).hasSize(1);
+        verify(mCallback).onDeviceAttributesChanged();
+    }
+
+    @Test
+    public void onAclConnectionStateChanged_cachedDeviceIsBondNone_callOnDeviceRemoved() {
+        final CachedBluetoothDevice device = mock(CachedBluetoothDevice.class);
+        final BluetoothMediaDevice bluetoothMediaDevice = mock(BluetoothMediaDevice.class);
+        mMediaManager.mMediaDevices.add(bluetoothMediaDevice);
+
+        when(device.getBondState()).thenReturn(BluetoothDevice.BOND_NONE);
         when(device.getAddress()).thenReturn(TEST_ADDRESS);
         when(bluetoothMediaDevice.getId()).thenReturn(TEST_ADDRESS);
 

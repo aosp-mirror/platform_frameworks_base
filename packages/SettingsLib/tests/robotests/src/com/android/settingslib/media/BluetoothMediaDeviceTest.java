@@ -20,6 +20,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.Mockito.when;
 
+import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 
@@ -65,5 +66,21 @@ public class BluetoothMediaDeviceTest {
         when(mDevice.setActive()).thenReturn(false);
 
         assertThat(mBluetoothMediaDevice.connect()).isFalse();
+    }
+
+    @Test
+    public void isCachedBluetoothDeviceConnected_deviceConnected_returnTrue() {
+        when(mDevice.getBondState()).thenReturn(BluetoothDevice.BOND_BONDED);
+        when(mDevice.isConnected()).thenReturn(true);
+
+        assertThat(mBluetoothMediaDevice.isConnected()).isTrue();
+    }
+
+    @Test
+    public void isCachedBluetoothDeviceConnected_deviceNotConnected_returnFalse() {
+        when(mDevice.getBondState()).thenReturn(BluetoothDevice.BOND_BONDED);
+        when(mDevice.isConnected()).thenReturn(false);
+
+        assertThat(mBluetoothMediaDevice.isConnected()).isFalse();
     }
 }

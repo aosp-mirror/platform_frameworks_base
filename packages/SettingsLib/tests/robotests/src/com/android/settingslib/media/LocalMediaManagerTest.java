@@ -28,6 +28,7 @@ import static org.mockito.Mockito.when;
 import android.content.Context;
 
 import com.android.settingslib.bluetooth.A2dpProfile;
+import com.android.settingslib.bluetooth.CachedBluetoothDevice;
 import com.android.settingslib.bluetooth.HearingAidProfile;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.settingslib.bluetooth.LocalBluetoothProfileManager;
@@ -110,6 +111,23 @@ public class LocalMediaManagerTest {
         verify(device).connect();
         verify(mCallback).onSelectedDeviceStateChanged(any(),
                 eq(LocalMediaManager.MediaDeviceState.STATE_DISCONNECTED));
+    }
+
+    @Test
+    public void connectDevice_bluetoothDeviceNotConnected_connectBluetoothDevice() {
+        final MediaDevice device = mock(BluetoothMediaDevice.class);
+        final CachedBluetoothDevice cachedDevice = mock(CachedBluetoothDevice.class);
+        mLocalMediaManager.mMediaDevices.add(device);
+
+        when(device.getId()).thenReturn(TEST_DEVICE_ID_1);
+        when(((BluetoothMediaDevice) device).getCachedDevice()).thenReturn(cachedDevice);
+        when(cachedDevice.isConnected()).thenReturn(false);
+        when(cachedDevice.isBusy()).thenReturn(false);
+
+        mLocalMediaManager.registerCallback(mCallback);
+        mLocalMediaManager.connectDevice(device);
+
+        verify(cachedDevice).connect(true);
     }
 
     @Test
@@ -322,15 +340,6 @@ public class LocalMediaManagerTest {
     }
 
     @Test
-    public void onDeviceAttributesChanged_shouldDispatchDeviceListUpdate() {
-        mLocalMediaManager.registerCallback(mCallback);
-
-        mLocalMediaManager.mMediaDeviceCallback.onDeviceAttributesChanged();
-
-        verify(mCallback).onDeviceListUpdate(any());
-    }
-
-    @Test
     public void onConnectedDeviceChanged_connectedAndCurrentDeviceAreDifferent_notifyThemChanged() {
         final MediaDevice device1 = mock(MediaDevice.class);
         final MediaDevice device2 = mock(MediaDevice.class);
@@ -365,5 +374,14 @@ public class LocalMediaManagerTest {
         mLocalMediaManager.mMediaDeviceCallback.onConnectedDeviceChanged(TEST_DEVICE_ID_1);
 
         verify(mCallback, never()).onDeviceListUpdate(any());
+    }
+
+    @Test
+    public void onDeviceAttributesChanged_shouldDispatchDeviceListUpdate() {
+        mLocalMediaManager.registerCallback(mCallback);
+
+        mLocalMediaManager.mMediaDeviceCallback.onDeviceAttributesChanged();
+
+        verify(mCallback).onDeviceListUpdate(any());
     }
 }

@@ -23,6 +23,7 @@ import static org.mockito.Mockito.when;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 
+import com.android.settingslib.R;
 import com.android.settingslib.bluetooth.A2dpProfile;
 import com.android.settingslib.bluetooth.HearingAidProfile;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
@@ -96,5 +97,20 @@ public class PhoneMediaDeviceTest {
         when(mHapProfile.setActiveDevice(null)).thenReturn(false);
 
         assertThat(mPhoneMediaDevice.connect()).isFalse();
+    }
+
+    @Test
+    public void updateSummary_isActiveIsTrue_returnActiveString() {
+        mPhoneMediaDevice.updateSummary(true);
+
+        assertThat(mPhoneMediaDevice.getSummary())
+                .isEqualTo(mContext.getString(R.string.bluetooth_active_no_battery_level));
+    }
+
+    @Test
+    public void updateSummary_notActive_returnEmpty() {
+        mPhoneMediaDevice.updateSummary(false);
+
+        assertThat(mPhoneMediaDevice.getSummary()).isEmpty();
     }
 }

@@ -1153,6 +1153,6 @@
     <!-- The notice header of Third-party licenses. not translatable -->
     <string name="notice_header" translatable="false"></string>
 
-    <!-- Name of the phone device [CHAR LIMIT=NONE] -->
-    <string name="media_transfer_phone_device_name">Phone speaker</string>
+    <!-- Name of the this device. [CHAR LIMIT=30] -->
+    <string name="media_transfer_this_device_name">This device</string>
 </resources>

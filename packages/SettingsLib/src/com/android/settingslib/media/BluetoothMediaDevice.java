@@ -16,6 +16,7 @@
 package com.android.settingslib.media;
 
 import android.bluetooth.BluetoothClass;
+import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.util.Log;
 
@@ -39,6 +40,11 @@ public class BluetoothMediaDevice extends MediaDevice {
     @Override
     public String getName() {
         return mCachedDevice.getName();
+    }
+
+    @Override
+    public String getSummary() {
+        return mCachedDevice.getConnectionSummary();
     }
 
     @Override
@@ -85,5 +91,11 @@ public class BluetoothMediaDevice extends MediaDevice {
             }
         }
         return false;
+    }
+
+    @Override
+    public boolean isConnected() {
+        return mCachedDevice.getBondState() == BluetoothDevice.BOND_BONDED
+                && mCachedDevice.isConnected();
     }
 }
