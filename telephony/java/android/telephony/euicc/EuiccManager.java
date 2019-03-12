@@ -258,7 +258,10 @@ public class EuiccManager {
 
     /**
      * Key for an extra set on the {@link #ACTION_PROVISION_EMBEDDED_SUBSCRIPTION} intent for
-     * whether the user choses to use eUICC to set up network in SUW.
+     * whether eSIM provisioning flow is forced to be started or not. If this extra hasn't been
+     * set, eSIM provisioning flow may be skipped and the corresponding carrier's app will be
+     * notified. Otherwise, eSIM provisioning flow will be started when
+     * {@link #ACTION_PROVISION_EMBEDDED_SUBSCRIPTION} has been received.
      * @hide
      */
     @SystemApi
