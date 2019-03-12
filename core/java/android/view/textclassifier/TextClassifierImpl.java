@@ -403,6 +403,12 @@ public final class TextClassifierImpl implements TextClassifier {
         return mFallback.suggestConversationActions(request);
     }
 
+    /**
+     * Returns the {@link ConversationAction} result, with a non-null extras.
+     * <p>
+     * Whenever the RemoteAction is non-null, you can expect its corresponding intent
+     * with a non-null component name is in the extras.
+     */
     private ConversationActions createConversationActionResult(
             ConversationActions.Request request,
             ActionsSuggestionsModel.ActionSuggestion[] nativeSuggestions) {
@@ -419,6 +425,7 @@ public final class TextClassifierImpl implements TextClassifier {
             }
             List<LabeledIntent> labeledIntents =
                     mTemplateIntentFactory.create(nativeSuggestion.getRemoteActionTemplates());
+            Bundle extras = new Bundle();
             RemoteAction remoteAction = null;
             // Given that we only support implicit intent here, we should expect there is just one
             // intent for each action type.
@@ -428,6 +435,7 @@ public final class TextClassifierImpl implements TextClassifier {
                 LabeledIntent.Result result = labeledIntents.get(0).resolve(mContext, titleChooser);
                 if (result != null) {
                     remoteAction = result.remoteAction;
+                    ExtrasUtils.putActionIntent(extras, result.resolvedIntent);
                 }
             }
             conversationActions.add(
@@ -435,8 +443,11 @@ public final class TextClassifierImpl implements TextClassifier {
                             .setConfidenceScore(nativeSuggestion.getScore())
                             .setTextReply(nativeSuggestion.getResponseText())
                             .setAction(remoteAction)
+                            .setExtras(extras)
                             .build());
         }
+        conversationActions =
+                ActionsSuggestionsHelper.removeActionsWithDuplicates(conversationActions);
         String resultId = ActionsSuggestionsHelper.createResultId(
                 mContext,
                 request.getConversation(),

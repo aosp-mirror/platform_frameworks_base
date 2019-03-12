@@ -18,9 +18,11 @@ package android.view.textclassifier;
 
 import android.annotation.Nullable;
 import android.app.Person;
+import android.app.RemoteAction;
 import android.content.Context;
 import android.text.TextUtils;
 import android.util.ArrayMap;
+import android.util.Pair;
 
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -118,10 +120,58 @@ public final class ActionsSuggestionsHelper {
     @Nullable
     public static LabeledIntent.TitleChooser createTitleChooser(String actionType) {
         if (ConversationAction.TYPE_OPEN_URL.equals(actionType)) {
-            return (labeledIntent, resolveInfo) -> resolveInfo.handleAllWebDataURI
-                    ? labeledIntent.titleWithEntity : labeledIntent.titleWithoutEntity;
+            return (labeledIntent, resolveInfo) -> {
+                if (resolveInfo.handleAllWebDataURI) {
+                    return labeledIntent.titleWithEntity;
+                }
+                if ("android".equals(resolveInfo.activityInfo.packageName)) {
+                    return labeledIntent.titleWithEntity;
+                }
+                return labeledIntent.titleWithoutEntity;
+            };
         }
         return null;
+    }
+
+    /**
+     * Returns a list of {@link ConversationAction}s that have 0 duplicates. Two actions are
+     * duplicates if they may look the same to users. This function assumes every
+     * ConversationActions with a non-null RemoteAction also have a non-null intent in the extras.
+     */
+    public static List<ConversationAction> removeActionsWithDuplicates(
+            List<ConversationAction> conversationActions) {
+        // Ideally, we should compare title and icon here, but comparing icon is expensive and thus
+        // we use the component name of the target handler as the heuristic.
+        Map<Pair<String, String>, Integer> counter = new ArrayMap<>();
+        for (ConversationAction conversationAction : conversationActions) {
+            Pair<String, String> representation = getRepresentation(conversationAction);
+            if (representation == null) {
+                continue;
+            }
+            Integer existingCount = counter.getOrDefault(representation, 0);
+            counter.put(representation, existingCount + 1);
+        }
+        List<ConversationAction> result = new ArrayList<>();
+        for (ConversationAction conversationAction : conversationActions) {
+            Pair<String, String> representation = getRepresentation(conversationAction);
+            if (representation == null || counter.getOrDefault(representation, 0) == 1) {
+                result.add(conversationAction);
+            }
+        }
+        return result;
+    }
+
+    @Nullable
+    private static Pair<String, String> getRepresentation(
+            ConversationAction conversationAction) {
+        RemoteAction remoteAction = conversationAction.getAction();
+        if (remoteAction == null) {
+            return null;
+        }
+        return new Pair<>(
+                conversationAction.getAction().getTitle().toString(),
+                ExtrasUtils.getActionIntent(
+                        conversationAction.getExtras()).getComponent().getPackageName());
     }
 
     private static final class PersonEncoder {

@@ -24,6 +24,7 @@ import static org.junit.Assert.assertTrue;
 import android.app.RemoteAction;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.LocaleList;
 import android.text.Spannable;
@@ -31,6 +32,8 @@ import android.text.SpannableString;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
+
+import com.google.common.truth.Truth;
 
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
@@ -403,7 +406,6 @@ public class TextClassifierTest {
 
         ConversationActions conversationActions = mClassifier.suggestConversationActions(request);
         assertTrue(conversationActions.getConversationActions().size() > 0);
-        assertTrue(conversationActions.getConversationActions().size() == 1);
         for (ConversationAction conversationAction :
                 conversationActions.getConversationActions()) {
             assertThat(conversationAction,
@@ -436,6 +438,34 @@ public class TextClassifierTest {
             assertThat(conversationAction,
                     isConversationAction(ConversationAction.TYPE_TEXT_REPLY));
         }
+    }
+
+    @Test
+    public void testSuggestConversationActions_openUrl() {
+        if (isTextClassifierDisabled()) return;
+        ConversationActions.Message message =
+                new ConversationActions.Message.Builder(
+                        ConversationActions.Message.PERSON_USER_OTHERS)
+                        .setText("Check this out: https://www.android.com")
+                        .build();
+        TextClassifier.EntityConfig typeConfig =
+                new TextClassifier.EntityConfig.Builder().includeTypesFromTextClassifier(false)
+                        .setIncludedTypes(
+                                Collections.singletonList(ConversationAction.TYPE_OPEN_URL))
+                        .build();
+        ConversationActions.Request request =
+                new ConversationActions.Request.Builder(Collections.singletonList(message))
+                        .setMaxSuggestions(1)
+                        .setTypeConfig(typeConfig)
+                        .build();
+
+        ConversationActions conversationActions = mClassifier.suggestConversationActions(request);
+        Truth.assertThat(conversationActions.getConversationActions()).hasSize(1);
+        ConversationAction conversationAction = conversationActions.getConversationActions().get(0);
+        Truth.assertThat(conversationAction.getType()).isEqualTo(ConversationAction.TYPE_OPEN_URL);
+        Intent actionIntent = ExtrasUtils.getActionIntent(conversationAction.getExtras());
+        Truth.assertThat(actionIntent.getAction()).isEqualTo(Intent.ACTION_VIEW);
+        Truth.assertThat(actionIntent.getData()).isEqualTo(Uri.parse("https://www.android.com"));
     }
 
 
