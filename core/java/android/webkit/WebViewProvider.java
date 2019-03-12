@@ -238,13 +238,15 @@ public interface WebViewProvider {
 
     public WebViewClient getWebViewClient();
 
-    public WebViewRenderer getWebViewRenderer();
+    @Nullable
+    public WebViewRenderProcess getWebViewRenderProcess();
 
-    public void setWebViewRendererClient(
+    public void setWebViewRenderProcessClient(
             @Nullable Executor executor,
-            @Nullable WebViewRendererClient client);
+            @Nullable WebViewRenderProcessClient client);
 
-    public WebViewRendererClient getWebViewRendererClient();
+    @Nullable
+    public WebViewRenderProcessClient getWebViewRenderProcessClient();
 
     public void setDownloadListener(DownloadListener listener);
 
