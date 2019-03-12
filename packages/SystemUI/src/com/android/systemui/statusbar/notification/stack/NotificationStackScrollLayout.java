@@ -2482,7 +2482,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             int minBottomPosition = minTopPosition;
             if (section == lastSection) {
                 // We need to make sure the section goes all the way to the shelf
-                minBottomPosition = (int) (mShelf.getTranslationY() + mShelf.getIntrinsicHeight());
+                minBottomPosition = (int) (ViewState.getFinalTranslationY(mShelf)
+                        + mShelf.getIntrinsicHeight());
             }
             minTopPosition = section.updateBounds(minTopPosition, minBottomPosition,
                     shiftPulsingWithFirst);
