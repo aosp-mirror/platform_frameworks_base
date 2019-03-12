@@ -209,19 +209,17 @@ public final class WebViewDelegate {
      * Adds the WebView asset path to {@link android.content.res.AssetManager}.
      */
     public void addWebViewAssetPath(Context context) {
-        final String newAssetPath = WebViewFactory.getLoadedPackageInfo().applicationInfo.sourceDir;
-
+        final String[] newAssetPaths =
+                WebViewFactory.getLoadedPackageInfo().applicationInfo.getAllApkPaths();
         final ApplicationInfo appInfo = context.getApplicationInfo();
-        final String[] libs = appInfo.sharedLibraryFiles;
-        if (!ArrayUtils.contains(libs, newAssetPath)) {
-            // Build the new library asset path list.
-            final int newLibAssetsCount = 1 + (libs != null ? libs.length : 0);
-            final String[] newLibAssets = new String[newLibAssetsCount];
-            if (libs != null) {
-                System.arraycopy(libs, 0, newLibAssets, 0, libs.length);
-            }
-            newLibAssets[newLibAssetsCount - 1] = newAssetPath;
 
+        // Build the new library asset path list.
+        String[] newLibAssets = appInfo.sharedLibraryFiles;
+        for (String newAssetPath : newAssetPaths) {
+            newLibAssets = ArrayUtils.appendElement(String.class, newLibAssets, newAssetPath);
+        }
+
+        if (newLibAssets != appInfo.sharedLibraryFiles) {
             // Update the ApplicationInfo object with the new list.
             // We know this will persist and future Resources created via ResourcesManager
             // will include the shared library because this ApplicationInfo comes from the
@@ -230,8 +228,8 @@ public final class WebViewDelegate {
             appInfo.sharedLibraryFiles = newLibAssets;
 
             // Update existing Resources with the WebView library.
-            ResourcesManager.getInstance().appendLibAssetForMainAssetPath(
-                    appInfo.getBaseResourcePath(), newAssetPath);
+            ResourcesManager.getInstance().appendLibAssetsForMainAssetPath(
+                    appInfo.getBaseResourcePath(), newAssetPaths);
         }
     }
 
