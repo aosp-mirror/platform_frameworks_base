@@ -280,9 +280,9 @@
     <!-- WFC, summary for Disabled -->
     <string name="wifi_calling_off_summary">Off</string>
     <!-- WFC, summary for Wi-Fi Preferred -->
-    <string name="wfc_mode_wifi_preferred_summary">Wi-Fi preferred</string>
+    <string name="wfc_mode_wifi_preferred_summary">Call over Wi-Fi</string>
     <!-- WFC, summary for Mobile data Preferred -->
-    <string name="wfc_mode_cellular_preferred_summary">Mobile preferred</string>
+    <string name="wfc_mode_cellular_preferred_summary">Call over mobile network</string>
     <!-- WFC, summary for Wi-Fi Only -->
     <string name="wfc_mode_wifi_only_summary">Wi-Fi only</string>
 
