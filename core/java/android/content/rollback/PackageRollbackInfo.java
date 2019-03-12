@@ -211,7 +211,7 @@ public final class PackageRollbackInfo implements Parcelable {
         out.writeBoolean(mIsApex);
     }
 
-    public static final @android.annotation.NonNull Parcelable.Creator<PackageRollbackInfo> CREATOR =
+    public static final @NonNull Parcelable.Creator<PackageRollbackInfo> CREATOR =
             new Parcelable.Creator<PackageRollbackInfo>() {
         public PackageRollbackInfo createFromParcel(Parcel in) {
             return new PackageRollbackInfo(in);
