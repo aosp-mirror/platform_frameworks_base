@@ -766,15 +766,13 @@ public final class CalendarContract {
         public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/calendars");
 
         /**
-         * The content:// style URL for querying Calendars table in the managed profile. Appending a
-         * calendar id using {@link ContentUris#withAppendedId(Uri, long)} will
-         * specify a single calendar.
+         * The content:// style URL for querying Calendars table in the managed profile. Appending
+         * a calendar id using {@link ContentUris#withAppendedId(Uri, long)} specifies
+         * a single calendar.
          *
          * <p>The following columns are allowed to be queried via this uri:
          * <ul>
          * <li>{@link #_ID}</li>
-         * <li>{@link #NAME}</li>
-         * <li>{@link #CALENDAR_DISPLAY_NAME}</li>
          * <li>{@link #CALENDAR_COLOR}</li>
          * <li>{@link #VISIBLE}</li>
          * <li>{@link #CALENDAR_LOCATION}</li>
@@ -782,18 +780,22 @@ public final class CalendarContract {
          * <li>{@link #IS_PRIMARY}</li>
          * </ul>
          *
-         * <p>{@link IllegalArgumentException} will be thrown if there exist columns in the
+         * <p>{@link IllegalArgumentException} is thrown if there exists columns in the
          * projection of the query to this uri that are not contained in the above list.
          *
-         * <p>This uri will return an empty cursor if the calling user is not a parent profile
-         * of a managed profile, or cross-profile calendar is disabled in Settings, or this uri is
-         * queried from a package that is not whitelisted by profile owner of the managed profile
-         * via
+         * <p>This uri returns an empty cursor if the calling user is not a parent profile
+         * of a managed profile, or the managed profile is disabled, or cross-profile calendar is
+         * disabled in Settings, or this uri is queried from a package that is not allowed by
+         * the profile owner of the managed profile via
          * {@link DevicePolicyManager#setCrossProfileCalendarPackages(ComponentName, Set)}.
+         *
+         * <p>Apps can register a {@link android.database.ContentObserver} for this URI to listen
+         * to changes.
          *
          * @see DevicePolicyManager#getCrossProfileCalendarPackages(ComponentName)
          * @see Settings.Secure#CROSS_PROFILE_CALENDAR_ENABLED
          */
+        @NonNull
         public static final Uri ENTERPRISE_CONTENT_URI =
                 Uri.parse("content://" + AUTHORITY + "/enterprise/calendars");
 
@@ -1747,8 +1749,7 @@ public final class CalendarContract {
 
         /**
          * The content:// style URL for querying Events table in the managed profile. Appending an
-         * event id using {@link ContentUris#withAppendedId(Uri, long)} will
-         * specify a single event.
+         * event id using {@link ContentUris#withAppendedId(Uri, long)} specifies a single event.
          *
          * <p>The following columns are allowed to be queried via this uri:
          * <ul>
@@ -1767,26 +1768,33 @@ public final class CalendarContract {
          * <li>{@link #AVAILABILITY}</li>
          * <li>{@link #RRULE}</li>
          * <li>{@link #RDATE}</li>
+         * <li>{@link #LAST_DATE}</li>
          * <li>{@link #EXRULE}</li>
          * <li>{@link #EXDATE}</li>
-         * <li>{@link #CALENDAR_DISPLAY_NAME}</li>
+         * <li>{@link #SELF_ATTENDEE_STATUS}</li>
+         * <li>{@link #DISPLAY_COLOR}</li>
          * <li>{@link #CALENDAR_COLOR}</li>
          * <li>{@link #VISIBLE}</li>
          * <li>{@link #CALENDAR_TIME_ZONE}</li>
+         * <li>{@link #IS_PRIMARY}</li>
          * </ul>
          *
-         * <p>{@link IllegalArgumentException} will be thrown if there exist columns in the
+         * <p>{@link IllegalArgumentException} is thrown if there exists columns in the
          * projection of the query to this uri that are not contained in the above list.
          *
-         * <p>This uri will return an empty cursor if the calling user is not a parent profile
-         * of a managed profile, or cross-profile calendar is disabled in Settings, or this uri is
-         * queried from a package that is not whitelisted by profile owner of the managed profile
-         * via
+         * <p>This uri returns an empty cursor if the calling user is not a parent profile
+         * of a managed profile, or the managed profile is disabled, or cross-profile calendar is
+         * disabled in Settings, or this uri is queried from a package that is not allowed by
+         * the profile owner of the managed profile via
          * {@link DevicePolicyManager#setCrossProfileCalendarPackages(ComponentName, Set)}.
+         *
+         * <p>Apps can register a {@link android.database.ContentObserver} for this URI to listen
+         * to changes.
          *
          * @see DevicePolicyManager#getCrossProfileCalendarPackages(ComponentName)
          * @see Settings.Secure#CROSS_PROFILE_CALENDAR_ENABLED
          */
+        @NonNull
         public static final Uri ENTERPRISE_CONTENT_URI =
                 Uri.parse("content://" + AUTHORITY + "/enterprise/events");
 
@@ -1974,7 +1982,7 @@ public final class CalendarContract {
          * The content:// style URL for querying an instance range in the managed profile.
          * It supports similar semantics as {@link #CONTENT_URI}.
          *
-         * <p>The following columns plus the columns that are whitelisted by
+         * <p>The following columns plus the columns that are allowed by
          * {@link Events#ENTERPRISE_CONTENT_URI} are allowed to be queried via this uri:
          * <ul>
          * <li>{@link #_ID}</li>
@@ -1987,18 +1995,19 @@ public final class CalendarContract {
          * <li>{@link #END_MINUTE}</li>
          * </ul>
          *
-         * <p>{@link IllegalArgumentException} will be thrown if there exist columns in the
+         * <p>{@link IllegalArgumentException} is thrown if there exists columns in the
          * projection of the query to this uri that are not contained in the above list.
          *
-         * <p>This uri will return an empty cursor if the calling user is not a parent profile
-         * of a managed profile, or cross-profile calendar for the managed profile is disabled in
-         * Settings, or this uri is queried from a package that is not whitelisted by
-         * profile owner of the managed profile via
+         * <p>This uri returns an empty cursor if the calling user is not a parent profile
+         * of a managed profile, or the managed profile is disabled, or cross-profile calendar is
+         * disabled in Settings, or this uri is queried from a package that is not allowed by
+         * the profile owner of the managed profile via
          * {@link DevicePolicyManager#setCrossProfileCalendarPackages(ComponentName, Set)}.
          *
          * @see DevicePolicyManager#getCrossProfileCalendarPackages(ComponentName)
          * @see Settings.Secure#CROSS_PROFILE_CALENDAR_ENABLED
          */
+        @NonNull
         public static final Uri ENTERPRISE_CONTENT_URI =
                 Uri.parse("content://" + AUTHORITY + "/enterprise/instances/when");
 
@@ -2007,6 +2016,7 @@ public final class CalendarContract {
          * Day in the managed profile. It supports similar semantics as {@link #CONTENT_BY_DAY_URI}
          * and performs similar checks as {@link #ENTERPRISE_CONTENT_URI}.
          */
+        @NonNull
         public static final Uri ENTERPRISE_CONTENT_BY_DAY_URI =
                 Uri.parse("content://" + AUTHORITY + "/enterprise/instances/whenbyday");
 
@@ -2015,6 +2025,7 @@ public final class CalendarContract {
          * term in the managed profile. It supports similar semantics as {@link #CONTENT_SEARCH_URI}
          * and performs similar checks as {@link #ENTERPRISE_CONTENT_URI}.
          */
+        @NonNull
         public static final Uri ENTERPRISE_CONTENT_SEARCH_URI =
                 Uri.parse("content://" + AUTHORITY + "/enterprise/instances/search");
 
@@ -2024,6 +2035,7 @@ public final class CalendarContract {
          * {@link #CONTENT_SEARCH_BY_DAY_URI} and performs similar checks as
          * {@link #ENTERPRISE_CONTENT_URI}.
          */
+        @NonNull
         public static final Uri ENTERPRISE_CONTENT_SEARCH_BY_DAY_URI =
                 Uri.parse("content://" + AUTHORITY + "/enterprise/instances/searchbyday");
 
