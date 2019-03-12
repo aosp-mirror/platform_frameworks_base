@@ -1277,7 +1277,8 @@ public class NotificationManager {
      * @hide
      */
     @SystemApi
-    public void setNotificationAssistantAccessGranted(ComponentName assistant, boolean granted) {
+    public void setNotificationAssistantAccessGranted(@Nullable ComponentName assistant,
+            boolean granted) {
         INotificationManager service = getService();
         try {
             service.setNotificationAssistantAccessGranted(assistant, granted);
@@ -1296,8 +1297,8 @@ public class NotificationManager {
      * @hide
      */
     @SystemApi
-    public void setNotificationAssistantAccessGrantedForUser(ComponentName assistant,
-            UserHandle user, boolean granted) {
+    public void setNotificationAssistantAccessGrantedForUser(@Nullable ComponentName assistant,
+            @NonNull UserHandle user, boolean granted) {
         INotificationManager service = getService();
         try {
             service.setNotificationAssistantAccessGrantedForUser(assistant, user.getIdentifier(),
@@ -1319,7 +1320,8 @@ public class NotificationManager {
 
     /** @hide */
     @SystemApi
-    public @Nullable ComponentName getAllowedNotificationAssistantForUser(UserHandle user) {
+    public @Nullable ComponentName getAllowedNotificationAssistantForUser(
+            @NonNull UserHandle user) {
         INotificationManager service = getService();
         try {
             return service.getAllowedNotificationAssistantForUser(user.getIdentifier());
