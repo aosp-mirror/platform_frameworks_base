@@ -130,6 +130,14 @@ public final class DeviceConfig {
     public static final String NAMESPACE_INPUT_NATIVE_BOOT = "input_native_boot";
 
     /**
+     * Namespace for attention-based features provided by on-device machine intelligence.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String NAMESPACE_INTELLIGENCE_ATTENTION = "intelligence_attention";
+
+    /**
      * Namespace for all media native related features.
      *
      * @hide
@@ -225,22 +233,6 @@ public final class DeviceConfig {
          * @hide for internal use only
          */
         String USAP_POOL_REFILL_THRESHOLD = "usap_refill_threshold";
-    }
-
-    /**
-     * Namespace for attention-based features provided by on-device machine intelligence.
-     *
-     * @hide
-     */
-    @SystemApi
-    public interface IntelligenceAttention {
-        String NAMESPACE = "intelligence_attention";
-
-        /** If {@code true}, enables the attention features. */
-        String ATTENTION_ENABLED = "attention_enabled";
-
-        /** Settings for the attention features. */
-        String ATTENTION_SETTINGS = "attention_settings";
     }
 
     /**

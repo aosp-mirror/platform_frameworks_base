@@ -5868,6 +5868,7 @@ package android.provider {
     field public static final String NAMESPACE_DEX_BOOT = "dex_boot";
     field public static final String NAMESPACE_GAME_DRIVER = "game_driver";
     field public static final String NAMESPACE_INPUT_NATIVE_BOOT = "input_native_boot";
+    field public static final String NAMESPACE_INTELLIGENCE_ATTENTION = "intelligence_attention";
     field public static final String NAMESPACE_MEDIA_NATIVE = "media_native";
     field public static final String NAMESPACE_NETD_NATIVE = "netd_native";
     field public static final String NAMESPACE_RUNTIME_NATIVE_BOOT = "runtime_native_boot";
@@ -5879,12 +5880,6 @@ package android.provider {
     field public static final String COMPONENT_NAME = "component_name";
     field public static final String NAMESPACE = "attention_manager_service";
     field public static final String SERVICE_ENABLED = "service_enabled";
-  }
-
-  public static interface DeviceConfig.IntelligenceAttention {
-    field public static final String ATTENTION_ENABLED = "attention_enabled";
-    field public static final String ATTENTION_SETTINGS = "attention_settings";
-    field public static final String NAMESPACE = "intelligence_attention";
   }
 
   public static interface DeviceConfig.OnPropertiesChangedListener {
