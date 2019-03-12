@@ -28,7 +28,7 @@ import android.net.wifi.IDppCallback;
 import android.net.wifi.INetworkRequestMatchCallback;
 import android.net.wifi.ISoftApCallback;
 import android.net.wifi.ITrafficStateCallback;
-import android.net.wifi.IWifiUsabilityStatsListener;
+import android.net.wifi.IOnWifiUsabilityStatsListener;
 import android.net.wifi.PasspointManagementObjectDefinition;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiActivityEnergyInfo;
@@ -190,9 +190,9 @@ interface IWifiManager
 
     void unregisterSoftApCallback(int callbackIdentifier);
 
-    void addWifiUsabilityStatsListener(in IBinder binder, in IWifiUsabilityStatsListener listener, int listenerIdentifier);
+    void addOnWifiUsabilityStatsListener(in IBinder binder, in IOnWifiUsabilityStatsListener listener, int listenerIdentifier);
 
-    void removeWifiUsabilityStatsListener(int listenerIdentifier);
+    void removeOnWifiUsabilityStatsListener(int listenerIdentifier);
 
     void registerTrafficStateCallback(in IBinder binder, in ITrafficStateCallback callback, int callbackIdentifier);
 

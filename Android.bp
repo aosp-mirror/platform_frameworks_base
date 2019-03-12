@@ -636,7 +636,7 @@ java_defaults {
         "wifi/java/android/net/wifi/ISoftApCallback.aidl",
         "wifi/java/android/net/wifi/ITrafficStateCallback.aidl",
         "wifi/java/android/net/wifi/IWifiManager.aidl",
-        "wifi/java/android/net/wifi/IWifiUsabilityStatsListener.aidl",
+        "wifi/java/android/net/wifi/IOnWifiUsabilityStatsListener.aidl",
         "wifi/java/android/net/wifi/aware/IWifiAwareDiscoverySessionCallback.aidl",
         "wifi/java/android/net/wifi/aware/IWifiAwareEventCallback.aidl",
         "wifi/java/android/net/wifi/aware/IWifiAwareMacAddressProvider.aidl",
