@@ -1674,8 +1674,9 @@ final class ActivityManagerShellCommand extends ShellCommand {
 
     int runSwitchUser(PrintWriter pw) throws RemoteException {
         UserManager userManager = mInternal.mContext.getSystemService(UserManager.class);
-        if (!userManager.canSwitchUsers()) {
-            getErrPrintWriter().println("Error: disallowed switching user");
+        final int userSwitchable = userManager.getUserSwitchability();
+        if (userSwitchable != UserManager.SWITCHABILITY_STATUS_OK) {
+            getErrPrintWriter().println("Error: " + userSwitchable);
             return -1;
         }
         String user = getNextArgRequired();

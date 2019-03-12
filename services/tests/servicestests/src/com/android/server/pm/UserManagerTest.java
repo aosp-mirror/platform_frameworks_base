@@ -532,6 +532,12 @@ public class UserManagerTest extends AndroidTestCase {
         }
     }
 
+    public void testGetUserSwitchability() {
+        int userSwitchable = mUserManager.getUserSwitchability();
+        assertEquals("Expected users to be switchable", UserManager.SWITCHABILITY_STATUS_OK,
+                userSwitchable);
+    }
+
     @LargeTest
     public void testSwitchUser() {
         ActivityManager am = getContext().getSystemService(ActivityManager.class);
