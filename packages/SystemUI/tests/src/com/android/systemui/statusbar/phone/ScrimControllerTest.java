@@ -232,7 +232,7 @@ public class ScrimControllerTest extends SysuiTestCase {
         // Back scrim should be semi-transparent so the user can see the wallpaper
         // Pulse callback should have been invoked
         assertScrimVisibility(VISIBILITY_FULLY_TRANSPARENT, VISIBILITY_SEMI_TRANSPARENT);
-        assertScrimTint(mScrimBehind, false /* tinted */);
+        assertScrimTint(mScrimBehind, true /* tinted */);
     }
 
     @Test
