@@ -1473,6 +1473,9 @@
         <flag name="location" value="0x08" />
         <!-- Auto, bluetooth, TV or other devices connection, monitoring and interaction. -->
         <flag name="connectedDevice" value="0x10" />
+        <!-- Managing a media projection session, e.g, for screen recording or taking
+             screenshots.-->
+        <flag name="mediaProjection" value="0x20" />
     </attr>
 
 

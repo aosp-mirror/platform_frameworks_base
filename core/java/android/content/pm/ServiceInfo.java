@@ -140,6 +140,13 @@ public class ServiceInfo extends ComponentInfo
     public static final int FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE = 1 << 4;
 
     /**
+     * Constant corresponding to {@code mediaProjection} in
+     * the {@link android.R.attr#foregroundServiceType} attribute.
+     * Managing a media projection session, e.g for screen recording or taking screenshots.
+     */
+    public static final int FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION = 1 << 5;
+
+    /**
      * A special value indicates to use all types set in manifest file.
      */
     public static final int FOREGROUND_SERVICE_TYPE_MANIFEST = -1;
@@ -158,6 +165,7 @@ public class ServiceInfo extends ComponentInfo
             FOREGROUND_SERVICE_TYPE_PHONE_CALL,
             FOREGROUND_SERVICE_TYPE_LOCATION,
             FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE,
+            FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ForegroundServiceType {}
