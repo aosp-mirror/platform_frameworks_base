@@ -27,6 +27,7 @@ import static android.view.WindowInsets.Type.TOP_BAR;
 import static android.view.WindowInsets.Type.all;
 import static android.view.WindowInsets.Type.compatSystemInsets;
 import static android.view.WindowInsets.Type.indexOf;
+import static android.view.WindowInsets.Type.systemGestures;
 
 import android.annotation.IntDef;
 import android.annotation.IntRange;
@@ -220,6 +221,8 @@ public final class WindowInsets {
         }
         Insets[] typeInsetMap = new Insets[SIZE];
         assignCompatInsets(typeInsetMap, insets);
+        // TODO: set system gesture insets based on actual system gesture area.
+        typeInsetMap[indexOf(systemGestures())] = Insets.of(insets);
         return typeInsetMap;
     }
 
@@ -229,7 +232,6 @@ public final class WindowInsets {
     static void assignCompatInsets(Insets[] typeInsetMap, Rect insets) {
         typeInsetMap[indexOf(TOP_BAR)] = Insets.of(0, insets.top, 0, 0);
         typeInsetMap[indexOf(SIDE_BARS)] = Insets.of(insets.left, 0, insets.right, insets.bottom);
-        typeInsetMap[indexOf(SYSTEM_GESTURES)] = Insets.of(insets);
     }
 
     private static boolean[] createCompatVisibilityMap(@Nullable Insets[] typeInsetMap) {
@@ -675,6 +677,7 @@ public final class WindowInsets {
     public String toString() {
         return "WindowInsets{systemWindowInsets=" + getSystemWindowInsets()
                 + " stableInsets=" + getStableInsets()
+                + " sysGestureInsets=" + getSystemGestureInsets()
                 + (mDisplayCutout != null ? " cutout=" + mDisplayCutout : "")
                 + (isRound() ? " round" : "")
                 + "}";

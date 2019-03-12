@@ -142,6 +142,10 @@ public class InsetsState implements Parcelable {
                 && legacyContentInsets != null && legacyStableInsets != null) {
             WindowInsets.assignCompatInsets(typeInsetsMap, legacyContentInsets);
             WindowInsets.assignCompatInsets(typeMaxInsetsMap, legacyStableInsets);
+
+            // TODO: set system gesture insets based on actual system gesture area.
+            typeInsetsMap[Type.indexOf(Type.systemGestures())] = Insets.of(legacyContentInsets);
+            typeMaxInsetsMap[Type.indexOf(Type.systemGestures())] = Insets.of(legacyContentInsets);
         }
         for (int type = FIRST_TYPE; type <= LAST_TYPE; type++) {
             InsetsSource source = mSources.get(type);
