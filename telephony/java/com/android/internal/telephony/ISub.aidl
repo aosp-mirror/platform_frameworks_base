@@ -279,7 +279,7 @@ interface ISub {
     void clearDefaultsForInactiveSubIds();
 
     @UnsupportedAppUsage
-    int[] getActiveSubIdList();
+    int[] getActiveSubIdList(boolean visibleOnly);
 
     int setSubscriptionProperty(int subId, String propKey, String propValue);
 
