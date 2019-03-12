@@ -664,6 +664,9 @@ public class KeyguardIndicationController implements StateListener {
         public void onBiometricRunningStateChanged(boolean running,
                 BiometricSourceType biometricSourceType) {
             if (running) {
+                // Let's hide any previous messages when authentication starts, otherwise
+                // multiple auth attempts would overlap.
+                hideTransientIndication();
                 mMessageToShowOnScreenOn = null;
             }
         }
