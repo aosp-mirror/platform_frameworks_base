@@ -39,6 +39,8 @@ import android.service.textclassifier.TextClassifierService;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
+import android.text.Spannable;
+import android.text.SpannableString;
 
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
@@ -304,6 +306,16 @@ public class TextClassificationManagerTest {
         Arrays.fill(manySpaces, ' ');
         TextLinks.Request request = new TextLinks.Request.Builder(new String(manySpaces)).build();
         mClassifier.generateLinks(request);
+    }
+
+    @Test
+    public void testApplyLinks_unsupportedCharacter() {
+        if (isTextClassifierDisabled()) return;
+        Spannable url = new SpannableString("\u202Emoc.diordna.com");
+        TextLinks.Request request = new TextLinks.Request.Builder(url).build();
+        assertEquals(
+                TextLinks.STATUS_NO_LINKS_APPLIED,
+                mClassifier.generateLinks(request).apply(url, 0, null));
     }
 
     @Test
