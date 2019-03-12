@@ -372,6 +372,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         public void onChanged(BiometricSourceType type, boolean enabled) throws RemoteException {
             if (type == BiometricSourceType.FACE) {
                 mFaceSettingEnabledForUser = enabled;
+                updateFaceListeningState();
             }
         }
     };
