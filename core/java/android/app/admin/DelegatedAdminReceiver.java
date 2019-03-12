@@ -24,6 +24,9 @@ import static android.app.admin.DeviceAdminReceiver.EXTRA_CHOOSE_PRIVATE_KEY_URI
 import static android.app.admin.DeviceAdminReceiver.EXTRA_NETWORK_LOGS_COUNT;
 import static android.app.admin.DeviceAdminReceiver.EXTRA_NETWORK_LOGS_TOKEN;
 
+import android.annotation.IntRange;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -63,20 +66,21 @@ public class DelegatedAdminReceiver extends BroadcastReceiver {
      *
      * <p> This callback is only applicable if the delegated app has
      * {@link DevicePolicyManager#DELEGATION_CERT_SELECTION} capability. Additionally, it must
-     * declare an intent fitler for {@link DeviceAdminReceiver#ACTION_CHOOSE_PRIVATE_KEY_ALIAS}
-     * in the receiver's manifest in order to receive this callback.
+     * declare an intent filter for {@link DeviceAdminReceiver#ACTION_CHOOSE_PRIVATE_KEY_ALIAS}
+     * in the receiver's manifest in order to receive this callback. The default implementation
+     * simply throws {@link UnsupportedOperationException}.
      *
      * @param context The running context as per {@link #onReceive}.
      * @param intent The received intent as per {@link #onReceive}.
-     * @param uid The uid asking for the private key and certificate pair.
+     * @param uid The uid of the app asking for the private key and certificate pair.
      * @param uri The URI to authenticate, may be null.
      * @param alias The alias preselected by the client, or null.
      * @return The private key alias to return and grant access to.
      * @see KeyChain#choosePrivateKeyAlias
      */
-    public String onChoosePrivateKeyAlias(Context context, Intent intent, int uid, Uri uri,
-            String alias) {
-        return null;
+    public @Nullable String onChoosePrivateKeyAlias(@NonNull Context context,
+            @NonNull Intent intent, int uid, @Nullable Uri uri, @Nullable String alias) {
+        throw new UnsupportedOperationException("onChoosePrivateKeyAlias should be implemented");
     }
 
     /**
@@ -91,8 +95,9 @@ public class DelegatedAdminReceiver extends BroadcastReceiver {
      *
      * <p> This callback is only applicable if the delegated app has
      * {@link DevicePolicyManager#DELEGATION_NETWORK_LOGGING} capability. Additionally, it must
-     * declare an intent fitler for {@link DeviceAdminReceiver#ACTION_NETWORK_LOGS_AVAILABLE} in the
-     * receiver's manifest in order to receive this callback.
+     * declare an intent filter for {@link DeviceAdminReceiver#ACTION_NETWORK_LOGS_AVAILABLE} in the
+     * receiver's manifest in order to receive this callback. The default implementation
+     * simply throws {@link UnsupportedOperationException}.
      *
      * @param context The running context as per {@link #onReceive}.
      * @param intent The received intent as per {@link #onReceive}.
@@ -100,8 +105,9 @@ public class DelegatedAdminReceiver extends BroadcastReceiver {
      * @param networkLogsCount The total count of events in the current batch of network logs.
      * @see DevicePolicyManager#retrieveNetworkLogs
      */
-    public void onNetworkLogsAvailable(Context context, Intent intent, long batchToken,
-            int networkLogsCount) {
+    public void onNetworkLogsAvailable(@NonNull Context context, @NonNull Intent intent,
+            long batchToken, @IntRange(from = 1) int networkLogsCount) {
+        throw new UnsupportedOperationException("onNetworkLogsAvailable should be implemented");
     }
 
     /**
@@ -109,7 +115,7 @@ public class DelegatedAdminReceiver extends BroadcastReceiver {
      * this method; implement the convenience callbacks for each action instead.
      */
     @Override
-    public void onReceive(Context context, Intent intent) {
+    public final void onReceive(@NonNull Context context, @NonNull Intent intent) {
         String action = intent.getAction();
 
         if (ACTION_CHOOSE_PRIVATE_KEY_ALIAS.equals(action)) {
