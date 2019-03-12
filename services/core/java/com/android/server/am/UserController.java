@@ -1547,8 +1547,8 @@ class UserController implements Handler.Callback {
                     }
                     builder.append(" asks to run as user ");
                     builder.append(userId);
-                    builder.append(" but is calling from user ");
-                    builder.append(UserHandle.getUserId(callingUid));
+                    builder.append(" but is calling from uid ");
+                    UserHandle.formatUid(builder, callingUid);
                     builder.append("; this requires ");
                     builder.append(INTERACT_ACROSS_USERS_FULL);
                     if (allowMode != ALLOW_FULL_ONLY) {
