@@ -7447,13 +7447,26 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public boolean injectInputAfterTransactionsApplied(InputEvent ev, int mode) {
-        waitForAnimationsToComplete();
-
-        synchronized (mGlobalLock) {
-            mWindowPlacerLocked.performSurfacePlacementIfScheduled();
+        boolean shouldWaitForAnimComplete = false;
+        if (ev instanceof KeyEvent) {
+            KeyEvent keyEvent = (KeyEvent) ev;
+            shouldWaitForAnimComplete = keyEvent.getSource() == InputDevice.SOURCE_MOUSE
+                    || keyEvent.getAction() == KeyEvent.ACTION_DOWN;
+        } else if (ev instanceof MotionEvent) {
+            MotionEvent motionEvent = (MotionEvent) ev;
+            shouldWaitForAnimComplete = motionEvent.getSource() == InputDevice.SOURCE_MOUSE
+                    || motionEvent.getAction() == MotionEvent.ACTION_DOWN;
         }
 
-        new SurfaceControl.Transaction().syncInputWindows().apply(true);
+        if (shouldWaitForAnimComplete) {
+            waitForAnimationsToComplete();
+
+            synchronized (mGlobalLock) {
+                mWindowPlacerLocked.performSurfacePlacementIfScheduled();
+            }
+
+            new SurfaceControl.Transaction().syncInputWindows().apply(true);
+        }
 
         return LocalServices.getService(InputManagerInternal.class).injectInputEvent(ev, mode);
     }
