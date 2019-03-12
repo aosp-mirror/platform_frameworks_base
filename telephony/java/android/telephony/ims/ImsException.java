@@ -19,6 +19,7 @@ package android.telephony.ims;
 import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.content.pm.PackageManager;
 import android.text.TextUtils;
 
 import java.lang.annotation.Retention;
@@ -48,7 +49,9 @@ public class ImsException extends Exception {
     /**
      * This device or carrier configuration does not support IMS for this subscription.
      * <p>
-     * This is a permanent configuration error and there should be no retry.
+     * This is a permanent configuration error and there should be no retry. Usually this is
+     * because {@link PackageManager#FEATURE_TELEPHONY_IMS} is not available
+     * or the device has no ImsService implementation to service this request.
      */
     public static final int CODE_ERROR_UNSUPPORTED_OPERATION = 2;
 
