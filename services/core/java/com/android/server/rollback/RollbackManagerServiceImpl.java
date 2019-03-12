@@ -684,7 +684,8 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
      * @param status the RollbackManager.STATUS_* code with the failure.
      * @param message the failure message.
      */
-    private void sendFailure(IntentSender statusReceiver, int status, String message) {
+    private void sendFailure(IntentSender statusReceiver, @RollbackManager.Status int status,
+            String message) {
         Log.e(TAG, message);
         try {
             final Intent fillIn = new Intent();

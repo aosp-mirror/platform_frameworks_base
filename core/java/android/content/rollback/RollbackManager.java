@@ -16,16 +16,20 @@
 
 package android.content.rollback;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.annotation.TestApi;
 import android.content.Context;
 import android.content.IntentSender;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.VersionedPackage;
 import android.os.RemoteException;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.List;
 
 /**
@@ -38,7 +42,7 @@ import java.util.List;
  * @see PackageInstaller.SessionParams#setEnableRollback()
  * @hide
  */
-@SystemApi
+@SystemApi @TestApi
 @SystemService(Context.ROLLBACK_SERVICE)
 public final class RollbackManager {
     private final String mCallerPackageName;
@@ -112,6 +116,20 @@ public final class RollbackManager {
             "android.content.rollback.extra.STATUS_MESSAGE";
 
     /**
+     * Status result of committing a rollback.
+     *
+     * @hide
+     */
+    @IntDef(prefix = "STATUS_", value = {
+            STATUS_SUCCESS,
+            STATUS_FAILURE,
+            STATUS_FAILURE_ROLLBACK_UNAVAILABLE,
+            STATUS_FAILURE_INSTALL,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Status {};
+
+    /**
      * The rollback was successfully committed.
      */
     public static final int STATUS_SUCCESS = 0;
@@ -175,8 +193,11 @@ public final class RollbackManager {
      *
      * @throws SecurityException if the caller does not have the
      *            MANAGE_ROLLBACKS permission.
+     *
+     * @hide
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_ROLLBACKS)
+    @TestApi
     public void reloadPersistedData() {
         try {
             mBinder.reloadPersistedData();
@@ -194,8 +215,11 @@ public final class RollbackManager {
      * @param packageName the name of the package to expire data for.
      * @throws SecurityException if the caller does not have the
      *            MANAGE_ROLLBACKS permission.
+     *
+     * @hide
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_ROLLBACKS)
+    @TestApi
     public void expireRollbackForPackage(@NonNull String packageName) {
         try {
             mBinder.expireRollbackForPackage(packageName);

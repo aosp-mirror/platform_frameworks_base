@@ -118,7 +118,7 @@ android_test {
         ":com.android.tests.rollback.testapex.RollbackTestApexV2",
     ],
     test_config: "RollbackTest.xml",
-    sdk_version: "system_current",
+    sdk_version: "test_current",
 }
 
 java_test_host {
