@@ -16,7 +16,7 @@
 
 package com.android.server.pm.dex;
 
-import static android.provider.DeviceConfig.DexBoot;
+import static android.provider.DeviceConfig.NAMESPACE_DEX_BOOT;
 
 import static com.android.server.pm.InstructionSets.getAppDexInstructionSets;
 import static com.android.server.pm.dex.PackageDexUsage.DexUseInfo;
@@ -71,6 +71,10 @@ public class DexManager {
     private static final String PROPERTY_NAME_PM_DEXOPT_PRIV_APPS_OOB = "pm.dexopt.priv-apps-oob";
     private static final String PROPERTY_NAME_PM_DEXOPT_PRIV_APPS_OOB_LIST =
             "pm.dexopt.priv-apps-oob-list";
+
+    // flags for Device Config API
+    private static final String PRIV_APPS_OOB_ENABLED = "priv_apps_oob_enabled";
+    private static final String PRIV_APPS_OOB_WHITELIST = "priv_apps_oob_whitelist";
 
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
@@ -713,8 +717,8 @@ public class DexManager {
         return isPackageSelectedToRunOobInternal(
                 SystemProperties.getBoolean(PROPERTY_NAME_PM_DEXOPT_PRIV_APPS_OOB, false),
                 SystemProperties.get(PROPERTY_NAME_PM_DEXOPT_PRIV_APPS_OOB_LIST, "ALL"),
-                DeviceConfig.getProperty(DexBoot.NAMESPACE, DexBoot.PRIV_APPS_OOB_ENABLED),
-                DeviceConfig.getProperty(DexBoot.NAMESPACE, DexBoot.PRIV_APPS_OOB_WHITELIST),
+                DeviceConfig.getProperty(NAMESPACE_DEX_BOOT, PRIV_APPS_OOB_ENABLED),
+                DeviceConfig.getProperty(NAMESPACE_DEX_BOOT, PRIV_APPS_OOB_WHITELIST),
                 packageNamesInSameProcess);
     }
 
