@@ -95,13 +95,15 @@ class KeyguardController {
     }
 
     /**
-     * @return {@code true} if 1) Keyguard is showing, not going away, and not being occluded on the
-     *         given display, or 2) AOD is showing, {@code false} otherwise.
+     * @return {@code true} for default display when AOD is showing. Otherwise, same as
+     *         {@link #isKeyguardOrAodShowing(int)}
      * TODO(b/125198167): Replace isKeyguardOrAodShowing() by this logic.
      */
     boolean isKeyguardUnoccludedOrAodShowing(int displayId) {
-        return (mKeyguardShowing && !mKeyguardGoingAway && !isDisplayOccluded(displayId))
-                || mAodShowing;
+        if (displayId == DEFAULT_DISPLAY && mAodShowing) {
+            return true;
+        }
+        return isKeyguardOrAodShowing(displayId);
     }
 
     /**
