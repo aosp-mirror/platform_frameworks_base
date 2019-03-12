@@ -16,11 +16,11 @@
 
 package android.util;
 
+import libcore.util.EmptyArray;
+
 import android.annotation.UnsupportedAppUsage;
 
 import com.android.internal.util.ArrayUtils;
-
-import libcore.util.EmptyArray;
 
 import java.util.Collection;
 import java.util.ConcurrentModificationException;
@@ -453,10 +453,6 @@ public final class ArrayMap<K, V> implements Map<K, V> {
      * @return Returns the key stored at the given index.
      */
     public K keyAt(int index) {
-        if (index >= mSize) {
-            // The array might be slightly bigger than mSize, in which case, indexing won't fail.
-            throw new ArrayIndexOutOfBoundsException(index);
-        }
         return (K)mArray[index << 1];
     }
 
@@ -466,10 +462,6 @@ public final class ArrayMap<K, V> implements Map<K, V> {
      * @return Returns the value stored at the given index.
      */
     public V valueAt(int index) {
-        if (index >= mSize) {
-            // The array might be slightly bigger than mSize, in which case, indexing won't fail.
-            throw new ArrayIndexOutOfBoundsException(index);
-        }
         return (V)mArray[(index << 1) + 1];
     }
 
@@ -480,10 +472,6 @@ public final class ArrayMap<K, V> implements Map<K, V> {
      * @return Returns the previous value at the given index.
      */
     public V setValueAt(int index, V value) {
-        if (index >= mSize) {
-            // The array might be slightly bigger than mSize, in which case, indexing won't fail.
-            throw new ArrayIndexOutOfBoundsException(index);
-        }
         index = (index << 1) + 1;
         V old = (V)mArray[index];
         mArray[index] = value;
@@ -677,11 +665,6 @@ public final class ArrayMap<K, V> implements Map<K, V> {
      * @return Returns the value that was stored at this index.
      */
     public V removeAt(int index) {
-        if (index >= mSize) {
-            // The array might be slightly bigger than mSize, in which case, indexing won't fail.
-            throw new ArrayIndexOutOfBoundsException(index);
-        }
-
         final Object old = mArray[(index << 1) + 1];
         final int osize = mSize;
         final int nsize;
