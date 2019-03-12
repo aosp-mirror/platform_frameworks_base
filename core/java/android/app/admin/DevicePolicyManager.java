@@ -2187,7 +2187,7 @@ public class DevicePolicyManager {
      * {@code PRIVATE_DNS_MODE_PROVIDER_HOSTNAME} then it implies the supplied host is valid
      * and reachable.
      */
-    public static final int PRIVATE_DNS_SET_SUCCESS = 0;
+    public static final int PRIVATE_DNS_SET_NO_ERROR = 0;
 
     /**
      * If the {@code privateDnsHost} provided was of a valid hostname but that host was found
@@ -2204,7 +2204,7 @@ public class DevicePolicyManager {
      * @hide
      */
     @IntDef(prefix = {"PRIVATE_DNS_SET_"}, value = {
-            PRIVATE_DNS_SET_SUCCESS,
+            PRIVATE_DNS_SET_NO_ERROR,
             PRIVATE_DNS_SET_ERROR_HOST_NOT_SERVING,
             PRIVATE_DNS_SET_ERROR_FAILURE_SETTING
     })
@@ -10478,7 +10478,7 @@ public class DevicePolicyManager {
      *
      * @param admin which {@link DeviceAdminReceiver} this request is associated with.
      *
-     * @return {@code PRIVATE_DNS_SET_SUCCESS} if the mode was set successfully, or
+     * @return {@code PRIVATE_DNS_SET_NO_ERROR} if the mode was set successfully, or
      *         {@code PRIVATE_DNS_SET_ERROR_FAILURE_SETTING} if it could not be set.
      *
      * @throws SecurityException if the caller is not the device owner.
@@ -10514,7 +10514,7 @@ public class DevicePolicyManager {
      * @param admin which {@link DeviceAdminReceiver} this request is associated with.
      * @param privateDnsHost The hostname of a server that implements DNS over TLS (RFC7858).
      *
-     * @return {@code PRIVATE_DNS_SET_SUCCESS} if the mode was set successfully,
+     * @return {@code PRIVATE_DNS_SET_NO_ERROR} if the mode was set successfully,
      *         {@code PRIVATE_DNS_SET_ERROR_FAILURE_SETTING} if it could not be set or
      *         {@code PRIVATE_DNS_SET_ERROR_HOST_NOT_SERVING} if the specified host does not
      *         implement RFC7858.
