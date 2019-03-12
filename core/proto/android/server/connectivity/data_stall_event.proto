@@ -25,6 +25,7 @@ enum ProbeResult {
     VALID = 1;
     INVALID = 2;
     PORTAL = 3;
+    PARTIAL = 4;
 }
 
 enum ApBand {

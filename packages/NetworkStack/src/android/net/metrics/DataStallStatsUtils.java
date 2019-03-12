@@ -46,6 +46,8 @@ public class DataStallStatsUtils {
             return DataStallEventProto.VALID;
         } else if (result.isPortal()) {
             return DataStallEventProto.PORTAL;
+        } else if (result.isPartialConnectivity()) {
+            return DataStallEventProto.PARTIAL;
         } else {
             return DataStallEventProto.INVALID;
         }
