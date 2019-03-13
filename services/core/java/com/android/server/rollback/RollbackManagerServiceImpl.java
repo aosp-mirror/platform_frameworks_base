@@ -872,6 +872,11 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             return false;
         }
 
+        if (session.resolvedBaseCodePath == null) {
+            Log.e(TAG, "Session code path has not been resolved.");
+            return false;
+        }
+
         // Get information about the package to be installed.
         PackageParser.PackageLite newPackage = null;
         try {
