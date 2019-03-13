@@ -31,7 +31,6 @@
             android:paddingTop="@dimen/global_actions_grid_vertical_padding"
             android:paddingBottom="@dimen/global_actions_grid_vertical_padding"
             android:orientation="vertical"
-            android:background="?android:attr/colorBackgroundFloating"
             android:gravity="center"
             android:translationZ="@dimen/global_actions_translate"
         />
@@ -48,7 +47,6 @@
             android:paddingRight="@dimen/global_actions_grid_horizontal_padding"
             android:paddingTop="@dimen/global_actions_grid_vertical_padding"
             android:paddingBottom="@dimen/global_actions_grid_vertical_padding"
-            android:background="?android:attr/colorBackgroundFloating"
         >
             <LinearLayout
                 android:layout_width="wrap_content"

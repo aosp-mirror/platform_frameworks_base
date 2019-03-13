@@ -42,11 +42,16 @@ public class GlobalActionsGridLayout extends MultiListLayout {
     }
 
     private void setBackgrounds() {
+        int gridBackgroundColor = getResources().getColor(
+                com.android.systemui.R.color.global_actions_grid_background, null);
+        int separatedBackgroundColor = getResources().getColor(
+                com.android.systemui.R.color.global_actions_separated_background, null);
         HardwareBgDrawable listBackground  = new HardwareBgDrawable(true, true, getContext());
-        HardwareBgDrawable separatedViewBackground = new HardwareBgDrawable(true, true,
-                getContext());
+        HardwareBgDrawable separatedBackground = new HardwareBgDrawable(true, true, getContext());
+        listBackground.setTint(gridBackgroundColor);
+        separatedBackground.setTint(separatedBackgroundColor);
         getListView().setBackground(listBackground);
-        getSeparatedView().setBackground(separatedViewBackground);
+        getSeparatedView().setBackground(separatedBackground);
     }
 
     @Override
