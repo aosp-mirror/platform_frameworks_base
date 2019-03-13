@@ -4012,7 +4012,7 @@ package android.os {
     field public static final String EXTRA_EVENT_TIMESTAMP = "android.os.extra.EVENT_TIMESTAMP";
   }
 
-  public class BugreportManager {
+  public final class BugreportManager {
     method @RequiresPermission(android.Manifest.permission.DUMP) public void cancelBugreport();
     method @RequiresPermission(android.Manifest.permission.DUMP) public void startBugreport(@NonNull android.os.ParcelFileDescriptor, @Nullable android.os.ParcelFileDescriptor, @NonNull android.os.BugreportParams, @NonNull java.util.concurrent.Executor, @NonNull android.os.BugreportManager.BugreportCallback);
   }
@@ -4021,7 +4021,7 @@ package android.os {
     ctor public BugreportManager.BugreportCallback();
     method public void onError(int);
     method public void onFinished();
-    method public void onProgress(float);
+    method public void onProgress(@FloatRange(from=0.0f, to=100.0f) float);
     field public static final int BUGREPORT_ERROR_ANOTHER_REPORT_IN_PROGRESS = 5; // 0x5
     field public static final int BUGREPORT_ERROR_INVALID_INPUT = 1; // 0x1
     field public static final int BUGREPORT_ERROR_RUNTIME = 2; // 0x2
@@ -4030,7 +4030,7 @@ package android.os {
   }
 
   public final class BugreportParams {
-    ctor public BugreportParams(@android.os.BugreportParams.BugreportMode int);
+    ctor public BugreportParams(int);
     method public int getMode();
     field public static final int BUGREPORT_MODE_FULL = 0; // 0x0
     field public static final int BUGREPORT_MODE_INTERACTIVE = 1; // 0x1
@@ -4038,9 +4038,6 @@ package android.os {
     field public static final int BUGREPORT_MODE_TELEPHONY = 4; // 0x4
     field public static final int BUGREPORT_MODE_WEAR = 3; // 0x3
     field public static final int BUGREPORT_MODE_WIFI = 5; // 0x5
-  }
-
-  @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) @IntDef(prefix={"BUGREPORT_MODE_"}, value={android.os.BugreportParams.BUGREPORT_MODE_FULL, android.os.BugreportParams.BUGREPORT_MODE_INTERACTIVE, android.os.BugreportParams.BUGREPORT_MODE_REMOTE, android.os.BugreportParams.BUGREPORT_MODE_WEAR, android.os.BugreportParams.BUGREPORT_MODE_TELEPHONY, android.os.BugreportParams.BUGREPORT_MODE_WIFI}) public static @interface BugreportParams.BugreportMode {
   }
 
   public final class ConfigUpdate {
