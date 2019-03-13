@@ -69,8 +69,10 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -2908,8 +2910,33 @@ public class SubscriptionManager {
         if (availableList == null) {
             return null;
         } else {
-            return availableList.stream().filter(subInfo -> !shouldHideSubscription(subInfo))
-                    .collect(Collectors.toList());
+            // Multiple subscriptions in a group should only have one representative.
+            // It should be the current active primary subscription if any, or any
+            // primary subscription.
+            List<SubscriptionInfo> selectableList = new ArrayList<>();
+            Map<String, SubscriptionInfo> groupMap = new HashMap<>();
+
+            for (SubscriptionInfo info : availableList) {
+                // Opportunistic subscriptions are considered invisible
+                // to users so they should never be returned.
+                if (isInvisibleSubscription(info)) continue;
+
+                String groupUuid = info.getGroupUuid();
+                if (groupUuid == null) {
+                    // Doesn't belong to any group. Add in the list.
+                    selectableList.add(info);
+                } else if (!groupMap.containsKey(groupUuid)
+                        || (groupMap.get(groupUuid).getSimSlotIndex() == INVALID_SIM_SLOT_INDEX
+                        && info.getSimSlotIndex() != INVALID_SIM_SLOT_INDEX)) {
+                    // If it belongs to a group that has never been recorded or it's the current
+                    // active subscription, add it in the list.
+                    selectableList.remove(groupMap.get(groupUuid));
+                    selectableList.add(info);
+                    groupMap.put(groupUuid, info);
+                }
+
+            }
+            return selectableList;
         }
     }
 
