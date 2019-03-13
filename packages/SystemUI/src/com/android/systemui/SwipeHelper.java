@@ -265,7 +265,9 @@ public class SwipeHelper implements Gefingerpoken {
     public boolean onInterceptTouchEvent(final MotionEvent ev) {
         if (mCurrView instanceof ExpandableNotificationRow) {
             NotificationMenuRowPlugin nmr = ((ExpandableNotificationRow) mCurrView).getProvider();
-            mMenuRowIntercepting = nmr.onInterceptTouchEvent(mCurrView, ev);
+            if (nmr != null) {
+                mMenuRowIntercepting = nmr.onInterceptTouchEvent(mCurrView, ev);
+            }
         }
         final int action = ev.getAction();
 
@@ -487,6 +489,7 @@ public class SwipeHelper implements Gefingerpoken {
                 mSnappingChild = false;
                 if (!wasCancelled) {
                     updateSwipeProgressFromOffset(animView, canBeDismissed);
+                    onChildSnappedBack(animView, targetLeft);
                     mCallback.onChildSnappedBack(animView, targetLeft);
                 }
             }
@@ -497,6 +500,13 @@ public class SwipeHelper implements Gefingerpoken {
         mFlingAnimationUtils.apply(anim, getTranslation(animView), targetLeft, velocity,
                 maxDistance);
         anim.start();
+    }
+
+    /**
+     * Give the swipe helper itself a chance to do something on snap back so NSSL doesn't have
+     * to tell us what to do
+     */
+    protected void onChildSnappedBack(View animView, float targetLeft) {
     }
 
     /**

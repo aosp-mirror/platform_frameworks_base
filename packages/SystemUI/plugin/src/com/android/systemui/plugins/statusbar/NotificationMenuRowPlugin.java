@@ -14,7 +14,9 @@
 
 package com.android.systemui.plugins.statusbar;
 
+import android.annotation.Nullable;
 import android.content.Context;
+import android.graphics.Point;
 import android.service.notification.StatusBarNotification;
 import android.view.MotionEvent;
 import android.view.View;
@@ -83,6 +85,38 @@ public interface NotificationMenuRowPlugin extends Plugin {
     public MenuItem getSnoozeMenuItem(Context context);
 
     public void setMenuItems(ArrayList<MenuItem> items);
+
+    /**
+     * If this returns {@code true}, then the menu row will bind and fade in the notification guts
+     * view for the menu item it holds.
+     *
+     * @see #menuItemToExposeOnSnap()
+     * @return whether or not to immediately expose the notification guts
+     */
+    default boolean shouldShowGutsOnSnapOpen() {
+        return false;
+    }
+
+    /**
+     * When #shouldShowGutsOnExpose is true, this method must return the menu item to expose on
+     * #onSnapOpen. Otherwise we will fall back to the default behavior of fading in the menu row
+     *
+     * @return the {@link MenuItem} containing the NotificationGuts that should be exposed
+     */
+    @Nullable
+    default MenuItem menuItemToExposeOnSnap() {
+        return null;
+    }
+
+    /**
+     * Get the origin for the circular reveal animation when expanding the notification guts. Only
+     * used when #shouldShowGutsOnSnapOpen is true
+     * @return the x,y coordinates for the start of the animation
+     */
+    @Nullable
+    default Point getRevealAnimationOrigin() {
+        return new Point(0, 0);
+    }
 
     public void setMenuClickListener(OnMenuEventListener listener);
 
