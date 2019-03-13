@@ -78,6 +78,15 @@ public final class DeviceConfig {
             "activity_manager_native_boot";
 
     /**
+     * Namespace for all app compat related features.  These features will be applied
+     * immediately upon change.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String NAMESPACE_APP_COMPAT = "app_compat";
+
+    /**
      * Namespace for AttentionManagerService related features.
      *
      * @hide
