@@ -3124,7 +3124,7 @@ package android.net {
   }
 
   public static interface ConnectivityManager.OnTetheringEntitlementResultListener {
-    method public void onEntitlementResult(int);
+    method public void onTetheringEntitlementResult(int);
   }
 
   public abstract static class ConnectivityManager.OnTetheringEventCallback {
