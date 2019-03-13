@@ -32,19 +32,14 @@
          android:translationZ="2dp"
         />
 
-    <androidx.car.widget.PagedListView
+    <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/notifications"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:orientation="vertical"
-        android:theme="@style/PagedListTheme"
-        app:gutter="none"
-        app:itemSpacing="@dimen/item_spacing"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:scrollBarEnabled="false"
-        app:showPagedListViewDivider="false"/>
+        app:layout_constraintEnd_toEndOf="parent"/>
 
 </com.android.car.notification.CarNotificationView>

@@ -45,7 +45,7 @@ public class FullscreenUserSwitcher {
         mUserGridView = container.findViewById(R.id.user_grid);
         GridLayoutManager layoutManager = new GridLayoutManager(context,
                 context.getResources().getInteger(R.integer.user_fullscreen_switcher_num_col));
-        mUserGridView.getRecyclerView().setLayoutManager(layoutManager);
+        mUserGridView.setLayoutManager(layoutManager);
         mUserGridView.buildAdapter();
         mUserGridView.setUserSelectionListener(this::onUserSelected);
 
