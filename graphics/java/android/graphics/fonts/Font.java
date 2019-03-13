@@ -360,7 +360,7 @@ public final class Font {
          *
          * @return the Font object
          */
-        public @Nullable Font build() throws IOException {
+        public @NonNull Font build() throws IOException {
             if (mException != null) {
                 throw new IOException("Failed to read font contents", mException);
             }
