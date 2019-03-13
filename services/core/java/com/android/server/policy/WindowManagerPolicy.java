@@ -443,7 +443,7 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
          * Returns true if the window is current in multi-windowing mode. i.e. it shares the
          * screen with other application windows.
          */
-        public boolean isInMultiWindowMode();
+        boolean inMultiWindowMode();
 
         public int getRotationAnimationHint();
 

@@ -513,8 +513,11 @@ public class AppTransitionController {
         // Given no app transition pass it through instead of a wallpaper transition.
         // Never convert the crashing transition.
         // Never update the transition for the wallpaper if we are just docking from recents
+        // Never convert a change transition since the top activity isn't changing and will likely
+        // still be above an opening wallpaper.
         if (transit == TRANSIT_NONE || transit == TRANSIT_CRASHING_ACTIVITY_CLOSE
-                || transit == TRANSIT_DOCK_TASK_FROM_RECENTS) {
+                || transit == TRANSIT_DOCK_TASK_FROM_RECENTS
+                || AppTransition.isChangeTransit(transit)) {
             return transit;
         }
 
@@ -601,6 +604,10 @@ public class AppTransitionController {
      */
     @VisibleForTesting
     int maybeUpdateTransitToTranslucentAnim(int transit) {
+        if (AppTransition.isChangeTransit(transit)) {
+            // There's no special animation to handle change animations with translucent apps
+            return transit;
+        }
         final boolean taskOrActivity = AppTransition.isTaskTransit(transit)
                 || AppTransition.isActivityTransit(transit);
         boolean allOpeningVisible = true;
