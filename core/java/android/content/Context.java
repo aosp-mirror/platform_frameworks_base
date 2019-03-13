@@ -338,6 +338,15 @@ public abstract class Context {
     public static final int BIND_ADJUST_BELOW_PERCEPTIBLE = 0x0100;
 
     /**
+     * Flag for {@link #bindService}: allow background activity starts from the bound service's
+     * process.
+     * This flag is only respected if the caller is holding
+     * {@link android.Manifest.permission#START_ACTIVITIES_FROM_BACKGROUND}.
+     * @hide
+     */
+    public static final int BIND_ALLOW_BACKGROUND_ACTIVITY_STARTS = 0x00100000;
+
+    /**
      * @hide Flag for {@link #bindService}: the service being bound to represents a
      * protected system component, so must have association restrictions applied to it.
      * That is, a system config must have one or more allow-association tags limiting
