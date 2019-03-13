@@ -16,12 +16,12 @@
 
 package android.net;
 
-import android.net.IpPrefixParcelable;
-import android.net.LinkAddressParcelable;
+import android.net.IpPrefix;
+import android.net.LinkAddress;
 
 parcelable InitialConfigurationParcelable {
-    LinkAddressParcelable[] ipAddresses;
-    IpPrefixParcelable[] directlyConnectedRoutes;
+    LinkAddress[] ipAddresses;
+    IpPrefix[] directlyConnectedRoutes;
     String[] dnsServers;
     String gateway;
 }
