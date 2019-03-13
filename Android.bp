@@ -736,7 +736,7 @@ java_defaults {
         "updatable_media_stubs",
     ],
 
-    jarjar_rules: "jarjar_rules_hidl.txt",
+    jarjar_rules: ":framework-jarjar-rules",
 
     static_libs: [
         "apex_aidl_interface-java",
@@ -786,6 +786,11 @@ java_defaults {
     ],
 
     plugins: ["view-inspector-annotation-processor"],
+}
+
+filegroup {
+    name: "framework-jarjar-rules",
+    srcs: ["jarjar_rules_hidl.txt"],
 }
 
 filegroup {
