@@ -340,16 +340,26 @@ class RollbackTestUtils {
     }
 
     /**
-     * Asserts that the given RollbackInfo has a single package with expected
-     * package name and versions.
+     * Asserts that the given RollbackInfo has the given packages with expected
+     * package names and all are rolled to and from the same given versions.
      */
-    static void assertRollbackInfoEquals(String packageName,
+    static void assertRollbackInfoEquals(String[] packageNames,
             long versionRolledBackFrom, long versionRolledBackTo,
             RollbackInfo info, VersionedPackage... causePackages) {
         assertNotNull(info);
-        assertEquals(1, info.getPackages().size());
-        assertPackageRollbackInfoEquals(packageName, versionRolledBackFrom, versionRolledBackTo,
-                info.getPackages().get(0));
+        assertEquals(packageNames.length, info.getPackages().size());
+        int foundPackages = 0;
+        for (String packageName : packageNames) {
+            for (PackageRollbackInfo pkgRollbackInfo : info.getPackages()) {
+                if (packageName.equals(pkgRollbackInfo.getPackageName())) {
+                    foundPackages++;
+                    assertPackageRollbackInfoEquals(packageName, versionRolledBackFrom,
+                            versionRolledBackTo, pkgRollbackInfo);
+                    break;
+                }
+            }
+        }
+        assertEquals(packageNames.length, foundPackages);
         assertEquals(causePackages.length, info.getCausePackages().size());
         for (int i = 0; i < causePackages.length; ++i) {
             assertEquals(causePackages[i].getPackageName(),
@@ -357,6 +367,18 @@ class RollbackTestUtils {
             assertEquals(causePackages[i].getLongVersionCode(),
                     info.getCausePackages().get(i).getLongVersionCode());
         }
+    }
+
+    /**
+     * Asserts that the given RollbackInfo has a single package with expected
+     * package name and versions.
+     */
+    static void assertRollbackInfoEquals(String packageName,
+            long versionRolledBackFrom, long versionRolledBackTo,
+            RollbackInfo info, VersionedPackage... causePackages) {
+        String[] packageNames = {packageName};
+        assertRollbackInfoEquals(packageNames, versionRolledBackFrom, versionRolledBackTo, info,
+                causePackages);
     }
 
     /**
@@ -452,5 +474,18 @@ class RollbackTestUtils {
         if (!"OK".equals(result)) {
             fail(result);
         }
+    }
+
+    /**
+     * Return the rollback info for a recently committed rollback, by matching the rollback id, or
+     * return null if no matching rollback is found.
+     */
+    static RollbackInfo getRecentlyCommittedRollbackInfoById(int getRollbackId) {
+        for (RollbackInfo info : getRollbackManager().getRecentlyCommittedRollbacks()) {
+            if (info.getRollbackId() == getRollbackId) {
+                return info;
+            }
+        }
+        return null;
     }
 }
