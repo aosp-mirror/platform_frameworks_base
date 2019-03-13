@@ -107,6 +107,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     private IOverviewProxy mOverviewProxy;
     private int mConnectionBackoffAttempts;
     private @InteractionType int mInteractionFlags;
+    private boolean mBound;
     private boolean mIsEnabled;
     private int mCurrentBoundedUserId = -1;
     private float mBackButtonAlpha;
@@ -510,16 +511,15 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         mHandler.removeCallbacks(mConnectionRunnable);
         Intent launcherServiceIntent = new Intent(ACTION_QUICKSTEP)
                 .setPackage(mRecentsComponentName.getPackageName());
-        boolean bound = false;
         try {
-            bound = mContext.bindServiceAsUser(launcherServiceIntent,
+            mBound = mContext.bindServiceAsUser(launcherServiceIntent,
                     mOverviewServiceConnection,
                     Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE_WHILE_AWAKE,
                     UserHandle.of(mDeviceProvisionedController.getCurrentUser()));
         } catch (SecurityException e) {
             Log.e(TAG_OPS, "Unable to bind because of security error", e);
         }
-        if (bound) {
+        if (mBound) {
             // Ensure that connection has been established even if it thinks it is bound
             mHandler.postDelayed(mDeferredConnectionCallback, DEFERRED_CALLBACK_MILLIS);
         } else {
@@ -573,9 +573,14 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     }
 
     private void disconnectFromLauncherService() {
+        if (mBound) {
+            // Always unbind the service (ie. if called through onNullBinding or onBindingDied)
+            mContext.unbindService(mOverviewServiceConnection);
+            mBound = false;
+        }
+
         if (mOverviewProxy != null) {
             mOverviewProxy.asBinder().unlinkToDeath(mOverviewServiceDeathRcpt, 0);
-            mContext.unbindService(mOverviewServiceConnection);
             mOverviewProxy = null;
             notifyBackButtonAlphaChanged(1f, false /* animate */);
             notifyConnectionChanged();
