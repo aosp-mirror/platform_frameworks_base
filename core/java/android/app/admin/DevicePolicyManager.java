@@ -10628,10 +10628,10 @@ public class DevicePolicyManager {
      * Returns the system-wide Private DNS host.
      *
      * @param admin which {@link DeviceAdminReceiver} this request is associated with.
-     * @return The hostname used for Private DNS queries.
+     * @return The hostname used for Private DNS queries, null if none is set.
      * @throws SecurityException if the caller is not the device owner.
      */
-    public String getGlobalPrivateDnsHost(@NonNull ComponentName admin) {
+    public @Nullable String getGlobalPrivateDnsHost(@NonNull ComponentName admin) {
         throwIfParentInstance("setGlobalPrivateDns");
         if (mService == null) {
             return null;
