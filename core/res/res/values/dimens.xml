@@ -723,4 +723,6 @@
     <dimen name="chooser_edge_margin_normal">24dp</dimen>
     <dimen name="chooser_preview_image_font_size">20sp</dimen>
     <dimen name="chooser_preview_width">-1px</dimen>
+    <dimen name="resolver_icon_size">42dp</dimen>
+    <dimen name="resolver_badge_size">18dp</dimen>
 </resources>

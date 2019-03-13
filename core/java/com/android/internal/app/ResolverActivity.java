@@ -42,6 +42,8 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -49,6 +51,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.PatternMatcher;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.StrictMode;
 import android.os.UserHandle;
@@ -56,7 +59,6 @@ import android.os.UserManager;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.text.TextUtils;
-import android.util.IconDrawableFactory;
 import android.util.Log;
 import android.util.Slog;
 import android.view.LayoutInflater;
@@ -131,7 +133,7 @@ public class ResolverActivity extends Activity {
     /** See {@link #setRetainInOnStop}. */
     private boolean mRetainInOnStop;
 
-    IconDrawableFactory mIconFactory;
+    SimpleIconFactory mSimpleIconFactory;
 
     private final PackageMonitor mPackageMonitor = new PackageMonitor() {
         @Override public void onSomePackagesChanged() {
@@ -309,7 +311,11 @@ public class ResolverActivity extends Activity {
         // as to mitigate Intent Capturing vulnerability
         mSupportsAlwaysUseOption = supportsAlwaysUseOption && !mUseLayoutForBrowsables;
 
-        mIconFactory = IconDrawableFactory.newInstance(this, true);
+        final int iconSize = getResources().getDimensionPixelSize(R.dimen.resolver_icon_size);
+        final int badgeSize = getResources().getDimensionPixelSize(R.dimen.resolver_badge_size);
+        mSimpleIconFactory = new SimpleIconFactory(this, mIconDpi, iconSize, badgeSize);
+        mSimpleIconFactory.setWrapperBackgroundColor(Color.WHITE);
+
         if (configureContentView(mIntents, initialIntents, rList)) {
             return;
         }
@@ -494,6 +500,7 @@ public class ResolverActivity extends Activity {
         }
     }
 
+    @Nullable
     Drawable getIcon(Resources res, int resId) {
         Drawable result;
         try {
@@ -505,26 +512,52 @@ public class ResolverActivity extends Activity {
         return result;
     }
 
+    /**
+     * Loads the icon for the provided ResolveInfo. Defaults to using the application icon over
+     * any IntentFilter or Activity icon to increase user understanding, with an exception for
+     * applications that hold the right permission. Always attempts to use icon resources over
+     * PackageManager loading mechanisms so badging can be done by iconloader.
+     */
     Drawable loadIconForResolveInfo(ResolveInfo ri) {
-        Drawable dr;
-        try {
-            if (ri.resolvePackageName != null && ri.icon != 0) {
-                dr = getIcon(mPm.getResourcesForApplication(ri.resolvePackageName), ri.icon);
-                if (dr != null) {
-                    return mIconFactory.getShadowedIcon(dr);
+        Drawable dr = null;
+
+        // Allow for app icon override given the right permission
+        if (PackageManager.PERMISSION_GRANTED == mPm.checkPermission(
+                android.Manifest.permission.SUBSTITUTE_SHARE_TARGET_APP_NAME_AND_ICON,
+                ri.activityInfo.applicationInfo.packageName)) {
+            try {
+                if (ri.resolvePackageName != null && ri.icon != 0) {
+                    dr = getIcon(mPm.getResourcesForApplication(ri.resolvePackageName), ri.icon);
                 }
-            }
-            final int iconRes = ri.getIconResource();
-            if (iconRes != 0) {
-                dr = getIcon(mPm.getResourcesForApplication(ri.activityInfo.packageName), iconRes);
-                if (dr != null) {
-                    return mIconFactory.getShadowedIcon(dr);
+                if (dr == null) {
+                    final int iconRes = ri.getIconResource();
+                    if (iconRes != 0) {
+                        dr = getIcon(mPm.getResourcesForApplication(ri.activityInfo.packageName),
+                                iconRes);
+                    }
                 }
+            } catch (NameNotFoundException e) {
+                Log.e(TAG, "SUBSTITUTE_SHARE_TARGET_APP_NAME_AND_ICON permission granted but "
+                        + "couldn't find resources for package", e);
             }
-        } catch (NameNotFoundException e) {
-            Log.e(TAG, "Couldn't find resources for package", e);
         }
-        return mIconFactory.getBadgedIcon(ri.activityInfo.applicationInfo);
+
+        // Use app icons for better user association
+        if (dr == null) {
+            try {
+                dr = getIcon(mPm.getResourcesForApplication(ri.activityInfo.applicationInfo),
+                        ri.activityInfo.applicationInfo.icon);
+            } catch (NameNotFoundException ignore) {
+            }
+        }
+
+        // Fall back to ApplicationInfo#loadIcon if nothing has been loaded
+        if (dr == null) {
+            dr = ri.activityInfo.applicationInfo.loadIcon(mPm);
+        }
+
+        return new BitmapDrawable(this.getResources(),
+                mSimpleIconFactory.createUserBadgedIconBitmap(dr, Process.myUserHandle()));
     }
 
     @Override
