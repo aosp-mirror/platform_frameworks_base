@@ -64,4 +64,12 @@ public class CarStatusBarKeyguardViewManager extends StatusBarKeyguardViewManage
         CarStatusBar statusBar = (CarStatusBar) mStatusBar;
         statusBar.showUserSwitcher();
     }
+
+    /**
+     * Do nothing on this change.
+     * The base class hides the keyguard which for automotive we want to avoid b/c this would happen
+     * on a configuration change due to day/night (headlight state).
+     */
+    @Override
+    public void onDensityOrFontScaleChanged() {  }
 }
