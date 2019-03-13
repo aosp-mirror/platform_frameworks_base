@@ -80,15 +80,23 @@ public final class BrightnessChangeEvent implements Parcelable {
      * Histogram counting how many times a pixel of a given value was displayed onscreen for the
      * Value component of HSV if the device supports color sampling, if the device does not support
      * color sampling the value will be null.
+     *
      * The buckets of the histogram are evenly weighted, the number of buckets is device specific.
-     * For example if we had {10, 6, 4, 1} this means that 10 pixels were in the range
-     * [0x00,0x3f], 6 pixels were in the range [0x40,0x7f] etc.
+     * The units are in pixels * milliseconds, with 1 pixel millisecond being 1 pixel displayed
+     * for 1 millisecond.
+     * For example if we had {100, 50, 30, 20}, value component was onscreen for 100 pixel
+     * milliseconds in range 0x00->0x3F, 30 pixel milliseconds in range 0x40->0x7F, etc.
+     *
+     * {@see #colorSampleDuration}
      */
     @Nullable
     public final long[] colorValueBuckets;
 
     /**
-     * How many milliseconds of data are contained in the colorValueBuckets.
+     * How many milliseconds of data are contained in the colorValueBuckets, if the device does
+     * not support color sampling the value will be 0L.
+     *
+     * {@see #colorValueBuckets}
      */
     public final long colorSampleDuration;
 
@@ -283,7 +291,8 @@ public final class BrightnessChangeEvent implements Parcelable {
             return this;
         }
 
-        /** {@see BrightnessChangeEvent#valueBuckets} */
+        /** {@see BrightnessChangeEvent#colorValueBuckets}
+         *  {@see BrightnessChangeEvent#colorSampleDuration} */
         public Builder setColorValues(@NonNull long[] colorValueBuckets, long colorSampleDuration) {
             Objects.requireNonNull(colorValueBuckets);
             mColorValueBuckets = colorValueBuckets;
