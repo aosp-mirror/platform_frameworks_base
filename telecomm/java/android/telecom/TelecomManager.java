@@ -1589,7 +1589,7 @@ public class TelecomManager {
                                 Build.VERSION_CODES.O_MR1) {
                     Log.e("TAG", "addNewIncomingCall failed. Use public api " +
                             "acceptHandover for API > O-MR1");
-                    // TODO add "return" after DUO team adds support for new handover API
+                    return;
                 }
                 getTelecomService().addNewIncomingCall(
                         phoneAccount, extras == null ? new Bundle() : extras);
