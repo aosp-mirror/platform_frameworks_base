@@ -355,37 +355,6 @@ bool ResourceTable::AddResourceWithId(const ResourceNameRef& name, const Resourc
                          (validate_resources_ ? ResolveValueCollision : IgnoreCollision), diag);
 }
 
-bool ResourceTable::AddFileReference(const ResourceNameRef& name,
-                                     const ConfigDescription& config,
-                                     const Source& source,
-                                     const StringPiece& path,
-                                     IDiagnostics* diag) {
-  return AddFileReferenceImpl(name, config, source, path, nullptr,
-                              (validate_resources_ ? ResourceNameValidator : SkipNameValidator),
-                              diag);
-}
-
-bool ResourceTable::AddFileReferenceMangled(const ResourceNameRef& name,
-                                            const ConfigDescription& config, const Source& source,
-                                            const StringPiece& path, io::IFile* file,
-                                            IDiagnostics* diag) {
-  return AddFileReferenceImpl(name, config, source, path, file,
-                              (validate_resources_ ? ResourceNameValidator : SkipNameValidator),
-                              diag);
-}
-
-bool ResourceTable::AddFileReferenceImpl(const ResourceNameRef& name,
-                                         const ConfigDescription& config, const Source& source,
-                                         const StringPiece& path, io::IFile* file,
-                                         NameValidator name_validator, IDiagnostics* diag) {
-  std::unique_ptr<FileReference> fileRef =
-      util::make_unique<FileReference>(string_pool.MakeRef(path));
-  fileRef->SetSource(source);
-  fileRef->file = file;
-  return AddResourceImpl(name, ResourceId{}, config, StringPiece{}, std::move(fileRef),
-                         name_validator, ResolveValueCollision, diag);
-}
-
 bool ResourceTable::AddResourceMangled(const ResourceNameRef& name, const ConfigDescription& config,
                                        const StringPiece& product, std::unique_ptr<Value> value,
                                        IDiagnostics* diag) {
@@ -510,11 +479,6 @@ bool ResourceTable::SetVisibility(const ResourceNameRef& name, const Visibility&
   return SetVisibilityImpl(name, visibility, {}, ResourceNameValidator, diag);
 }
 
-bool ResourceTable::SetVisibilityMangled(const ResourceNameRef& name, const Visibility& visibility,
-                                         IDiagnostics* diag) {
-  return SetVisibilityImpl(name, visibility, {}, SkipNameValidator, diag);
-}
-
 bool ResourceTable::SetVisibilityWithId(const ResourceNameRef& name, const Visibility& visibility,
                                         const ResourceId& res_id, IDiagnostics* diag) {
   return SetVisibilityImpl(name, visibility, res_id, ResourceNameValidator, diag);
@@ -630,11 +594,6 @@ bool ResourceTable::SetAllowNewImpl(const ResourceNameRef& name, const AllowNew&
 bool ResourceTable::SetOverlayable(const ResourceNameRef& name, const OverlayableItem& overlayable,
                                    IDiagnostics* diag) {
   return SetOverlayableImpl(name, overlayable, ResourceNameValidator, diag);
-}
-
-bool ResourceTable::SetOverlayableMangled(const ResourceNameRef& name,
-                                          const OverlayableItem& overlayable, IDiagnostics* diag) {
-  return SetOverlayableImpl(name, overlayable, SkipNameValidator, diag);
 }
 
 bool ResourceTable::SetOverlayableImpl(const ResourceNameRef& name,

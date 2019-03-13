@@ -239,13 +239,6 @@ class ResourceTable {
                          const android::StringPiece& product, std::unique_ptr<Value> value,
                          IDiagnostics* diag);
 
-  bool AddFileReference(const ResourceNameRef& name, const android::ConfigDescription& config,
-                        const Source& source, const android::StringPiece& path, IDiagnostics* diag);
-
-  bool AddFileReferenceMangled(const ResourceNameRef& name, const android::ConfigDescription& config,
-                               const Source& source, const android::StringPiece& path,
-                               io::IFile* file, IDiagnostics* diag);
-
   // Same as AddResource, but doesn't verify the validity of the name. This is used
   // when loading resources from an existing binary resource table that may have mangled names.
   bool AddResourceMangled(const ResourceNameRef& name, const android::ConfigDescription& config,
@@ -260,8 +253,6 @@ class ResourceTable {
   bool GetValidateResources();
 
   bool SetVisibility(const ResourceNameRef& name, const Visibility& visibility, IDiagnostics* diag);
-  bool SetVisibilityMangled(const ResourceNameRef& name, const Visibility& visibility,
-                            IDiagnostics* diag);
   bool SetVisibilityWithId(const ResourceNameRef& name, const Visibility& visibility,
                            const ResourceId& res_id, IDiagnostics* diag);
   bool SetVisibilityWithIdMangled(const ResourceNameRef& name, const Visibility& visibility,
@@ -269,8 +260,6 @@ class ResourceTable {
 
   bool SetOverlayable(const ResourceNameRef& name, const OverlayableItem& overlayable,
                       IDiagnostics *diag);
-  bool SetOverlayableMangled(const ResourceNameRef& name, const OverlayableItem& overlayable,
-                             IDiagnostics* diag);
 
   bool SetAllowNew(const ResourceNameRef& name, const AllowNew& allow_new, IDiagnostics* diag);
   bool SetAllowNewMangled(const ResourceNameRef& name, const AllowNew& allow_new,
@@ -333,10 +322,6 @@ class ResourceTable {
                        NameValidator name_validator, const CollisionResolverFunc& conflict_resolver,
                        IDiagnostics* diag);
 
-  bool AddFileReferenceImpl(const ResourceNameRef& name, const android::ConfigDescription& config,
-                            const Source& source, const android::StringPiece& path, io::IFile* file,
-                            NameValidator name_validator, IDiagnostics* diag);
-
   bool SetVisibilityImpl(const ResourceNameRef& name, const Visibility& visibility,
                          const ResourceId& res_id, NameValidator name_validator,
                          IDiagnostics* diag);
@@ -346,10 +331,6 @@ class ResourceTable {
 
   bool SetOverlayableImpl(const ResourceNameRef &name, const OverlayableItem& overlayable,
                           NameValidator name_validator, IDiagnostics *diag);
-
-  bool SetSymbolStateImpl(const ResourceNameRef& name, const ResourceId& res_id,
-                          const Visibility& symbol, NameValidator name_validator,
-                          IDiagnostics* diag);
 
   // Controls whether the table validates resource names and prevents duplicate resource names
   bool validate_resources_ = true;
