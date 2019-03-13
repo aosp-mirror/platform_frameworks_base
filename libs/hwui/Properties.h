@@ -167,6 +167,8 @@ enum DebugLevel {
 
 #define PROPERTY_ENABLE_FORCE_DARK "debug.hwui.force_dark_enabled"
 
+#define PROPERTY_RENDERAHEAD "debug.hwui.render_ahead"
+
 ///////////////////////////////////////////////////////////////////////////////
 // Misc
 ///////////////////////////////////////////////////////////////////////////////
@@ -250,6 +252,8 @@ public:
     ANDROID_API static bool isolatedProcess;
 
     ANDROID_API static int contextPriority;
+
+    static int defaultRenderAhead;
 
 private:
     static ProfileType sProfileType;
