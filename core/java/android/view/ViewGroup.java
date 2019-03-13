@@ -4284,35 +4284,38 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     /**
-     * Returns the index of the child to draw for this iteration. Override this
+     * Converts drawing order position to container position. Override this
      * if you want to change the drawing order of children. By default, it
-     * returns i.
+     * returns drawingPosition.
      * <p>
      * NOTE: In order for this method to be called, you must enable child ordering
      * first by calling {@link #setChildrenDrawingOrderEnabled(boolean)}.
      *
-     * @param i The current iteration.
-     * @return The index of the child to draw this iteration.
+     * @param drawingPosition the drawing order position.
+     * @return the container position of a child for this drawing order position.
      *
      * @see #setChildrenDrawingOrderEnabled(boolean)
      * @see #isChildrenDrawingOrderEnabled()
      */
-    protected int getChildDrawingOrder(int childCount, int i) {
-        return i;
+    protected int getChildDrawingOrder(int childCount, int drawingPosition) {
+        return drawingPosition;
     }
 
     /**
-     * The public version of getChildDrawingOrder().
+     * Converts drawing order position to container position.
+     * <p>
+     * Children are not necessarily drawn in the order in which they appear in the container.
+     * ViewGroups can enable a custom ordering via {@link #setChildrenDrawingOrderEnabled(boolean)}.
+     * This method returns the container position of a child that appears in the given position
+     * in the current drawing order.
      *
-     * Returns the index of the child to draw for this iteration.
-     *
-     * @param i The current iteration.
-     * @return The index of the child to draw this iteration.
+     * @param drawingPosition the drawing order position.
+     * @return the container position of a child for this drawing order position.
      *
      * @see #getChildDrawingOrder(int, int)}
      */
-    public final int getChildDrawingOrder(int i) {
-        return getChildDrawingOrder(getChildCount(), i);
+    public final int getChildDrawingOrder(int drawingPosition) {
+        return getChildDrawingOrder(getChildCount(), drawingPosition);
     }
 
     private boolean hasChildWithZ() {
