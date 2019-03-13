@@ -11,7 +11,7 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
 package com.android.server.location;
@@ -51,7 +51,6 @@ public abstract class GnssNavigationMessageProvider
         mNative = aNative;
     }
 
-    // TODO(b/37460011): Use this with death recovery logic.
     void resumeIfStarted() {
         if (DEBUG) {
             Log.d(TAG, "resumeIfStarted");
@@ -92,7 +91,16 @@ public abstract class GnssNavigationMessageProvider
         );
     }
 
-    public void onCapabilitiesUpdated(boolean isGnssNavigationMessageSupported) {
+    /** Handle GNSS capabilities update from the GNSS HAL implementation */
+    public void onCapabilitiesUpdated(int capabilities, boolean hasSubHalCapabilityFlags) {
+        // The IGnssCallback.hal@2.0 removed sub-HAL capability flags from the Capabilities enum
+        // and instead uses the sub-HAL non-null handle returned from IGnss.hal@2.0 to indicate
+        // support. Therefore, the 'hasSubHalCapabilityFlags' parameter is needed to tell if the
+        // 'capabilities' parameter includes the sub-HAL capability flags or not. Old HALs
+        // which explicitly set the sub-HAL capability bits must continue to work.
+        final boolean isGnssNavigationMessageSupported = hasSubHalCapabilityFlags
+                ? (capabilities & GnssLocationProvider.GPS_CAPABILITY_NAV_MESSAGES) != 0
+                : mNative.isNavigationMessageSupported();
         setSupported(isGnssNavigationMessageSupported);
         updateResult();
     }
