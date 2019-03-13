@@ -5866,34 +5866,37 @@ public abstract class PackageManager {
             @NonNull ComponentName componentName);
 
     /**
-     * Set the enabled setting for a package app settings activity.
+     * Set whether a synthetic app details activity will be generated if the app has no enabled
+     * launcher activity. Disabling this allows the app to have no launcher icon.
      *
      * @param packageName The package name of the app
-     * @param enabled The new enabled state for app details activity
+     * @param enabled The new enabled state for the synthetic app details activity.
      *
      * @hide
      */
     @RequiresPermission(value = android.Manifest.permission.CHANGE_COMPONENT_ENABLED_STATE,
             conditional = true)
     @SystemApi
-    public void setAppDetailsActivityEnabled(@NonNull String packageName, boolean enabled) {
+    public void setSyntheticAppDetailsActivityEnabled(@NonNull String packageName,
+            boolean enabled) {
         throw new UnsupportedOperationException(
-                "setAppDetailsActivityEnabled not implemented");
+                "setSyntheticAppDetailsActivityEnabled not implemented");
     }
 
 
     /**
-     * Return the enabled setting for a package app settings activity.
+     * Return whether a synthetic app details activity will be generated if the app has no enabled
+     * launcher activity.
      *
      * @param packageName The package name of the app
-     * @return Returns the current enabled state for app settings activity.
+     * @return Returns the enabled state for the synthetic app details activity.
      *
      * @hide
      */
     @SystemApi
-    public boolean getAppDetailsActivityEnabled(@NonNull String packageName) {
+    public boolean getSyntheticAppDetailsActivityEnabled(@NonNull String packageName) {
         throw new UnsupportedOperationException(
-                "getAppDetailsActivityEnabled not implemented");
+                "getSyntheticAppDetailsActivityEnabled not implemented");
     }
 
     /**

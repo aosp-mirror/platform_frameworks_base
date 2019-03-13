@@ -2469,7 +2469,7 @@ public class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
-    public void setAppDetailsActivityEnabled(String packageName, boolean enabled) {
+    public void setSyntheticAppDetailsActivityEnabled(String packageName, boolean enabled) {
         try {
             ComponentName componentName = new ComponentName(packageName,
                     PackageManager.APP_DETAILS_ACTIVITY_CLASS_NAME);
@@ -2483,7 +2483,7 @@ public class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
-    public boolean getAppDetailsActivityEnabled(String packageName) {
+    public boolean getSyntheticAppDetailsActivityEnabled(String packageName) {
         try {
             ComponentName componentName = new ComponentName(packageName,
                     PackageManager.APP_DETAILS_ACTIVITY_CLASS_NAME);

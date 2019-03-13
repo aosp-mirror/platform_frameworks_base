@@ -432,7 +432,7 @@ public class LauncherAppsService extends SystemService {
                     }
                     ApplicationInfo appInfo = pmInt.getApplicationInfo(packageName, /*flags*/ 0,
                             callingUid, user.getIdentifier());
-                    if (shouldShowHiddenApp(user, appInfo)) {
+                    if (shouldShowSyntheticActivity(user, appInfo)) {
                         ResolveInfo info = getHiddenAppActivityInfo(packageName, callingUid, user);
                         if (info != null) {
                             result.add(info);
@@ -448,7 +448,7 @@ public class LauncherAppsService extends SystemService {
                         user.getIdentifier(), callingUid);
                 for (ApplicationInfo applicationInfo : installedPackages) {
                     if (!visiblePackages.contains(applicationInfo.packageName)) {
-                        if (!shouldShowHiddenApp(user, applicationInfo)) {
+                        if (!shouldShowSyntheticActivity(user, applicationInfo)) {
                             continue;
                         }
                         ResolveInfo info = getHiddenAppActivityInfo(applicationInfo.packageName,
@@ -464,7 +464,7 @@ public class LauncherAppsService extends SystemService {
             }
         }
 
-        private boolean shouldShowHiddenApp(UserHandle user, ApplicationInfo appInfo) {
+        private boolean shouldShowSyntheticActivity(UserHandle user, ApplicationInfo appInfo) {
             if (appInfo == null || appInfo.isSystemApp() || appInfo.isUpdatedSystemApp()) {
                 return false;
             }
