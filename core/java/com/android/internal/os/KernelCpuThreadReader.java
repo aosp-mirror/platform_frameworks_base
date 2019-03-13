@@ -198,8 +198,8 @@ public class KernelCpuThreadReader {
      *
      * <p>This function will crawl through all process {@code proc} directories found by the pattern
      * {@code /proc/[0-9]*}, and then check the UID using {@code /proc/$PID/status}. This takes
-     * approximately 500ms on a Pixel 2. Therefore, this method can be computationally expensive,
-     * and should not be called more than once an hour.
+     * approximately 500ms on a 2017 device. Therefore, this method can be computationally
+     * expensive, and should not be called more than once an hour.
      *
      * <p>Data is only collected for UIDs passing the predicate supplied in {@link
      * #setUidPredicate}.
@@ -283,7 +283,7 @@ public class KernelCpuThreadReader {
                 if (threadCpuUsage == null) {
                     continue;
                 }
-                if (mMinimumTotalCpuUsageMillis < totalCpuUsage(threadCpuUsage.usageTimesMillis)) {
+                if (mMinimumTotalCpuUsageMillis > totalCpuUsage(threadCpuUsage.usageTimesMillis)) {
                     if (filteredThreadsCpuUsage == null) {
                         filteredThreadsCpuUsage = new int[mFrequenciesKhz.length];
                     }
