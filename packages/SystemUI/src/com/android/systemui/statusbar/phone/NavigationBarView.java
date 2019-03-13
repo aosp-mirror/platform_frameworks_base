@@ -333,7 +333,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
             if (enabled) {
                 mColorAdaptionController.start();
             } else {
-                mColorAdaptionController.end();
+                mColorAdaptionController.stop();
             }
         }
 
@@ -484,6 +484,12 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
             ((QuickStepController) mGestureHelper).setComponents(this);
             updateNavigationGestures();
         }
+    }
+
+    @Override
+    protected void dispatchDraw(Canvas canvas) {
+        super.dispatchDraw(canvas);
+        mColorAdaptionController.onDraw();
     }
 
     private void updateNavigationGestures() {
@@ -990,7 +996,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         if (visible) {
             mColorAdaptionController.start();
         } else {
-            mColorAdaptionController.end();
+            mColorAdaptionController.stop();
         }
     }
 
@@ -1244,7 +1250,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
             mColorAdaptionController.start();
         } else {
-            mColorAdaptionController.end();
+            mColorAdaptionController.stop();
         }
     }
 
@@ -1330,7 +1336,6 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         Dependency.get(PluginManager.class).addPluginListener(this,
                 NavGesture.class, false /* Only one */);
         setUpSwipeUpOnboarding(isQuickStepSwipeUpEnabled());
-        mColorAdaptionController.start();
 
         if (mPrototypeController.isEnabled()) {
             WindowManager wm = (WindowManager) getContext()
@@ -1363,7 +1368,6 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
             mGestureHelper.destroy();
         }
         mPrototypeController.unregister();
-        mColorAdaptionController.stop();
         setUpSwipeUpOnboarding(false);
         for (int i = 0; i < mButtonDispatchers.size(); ++i) {
             mButtonDispatchers.valueAt(i).onDestroy();
@@ -1454,6 +1458,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
             mGestureHelper.dump(pw);
         }
         mRecentsOnboarding.dump(pw);
+        mColorAdaptionController.dump(pw);
     }
 
     @Override
