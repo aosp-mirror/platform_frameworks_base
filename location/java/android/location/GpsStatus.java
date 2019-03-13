@@ -30,7 +30,6 @@ import java.util.NoSuchElementException;
  * <p>This class is used in conjunction with the {@link Listener} interface.
  *
  * @deprecated use {@link GnssStatus} and {@link GnssStatus.Callback}.
- * @removed
  */
 @Deprecated
 public final class GpsStatus {
@@ -113,7 +112,6 @@ public final class GpsStatus {
     /**
      * Used for receiving notifications when GPS status has changed.
      * @deprecated use {@link GnssStatus.Callback} instead.
-     * @removed
      */
     @Deprecated
     public interface Listener {
@@ -144,7 +142,6 @@ public final class GpsStatus {
      * You can implement this interface and call {@link LocationManager#addNmeaListener}
      * to receive NMEA data from the GPS engine.
      * @deprecated use {@link OnNmeaMessageListener} instead.
-     * @removed
      */
     @Deprecated
     public interface NmeaListener {
