@@ -28,6 +28,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.hardware.display.AmbientDisplayConfiguration;
+import android.metrics.LogMaker;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.os.UserHandle;
@@ -35,7 +36,10 @@ import android.text.format.Formatter;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.util.Preconditions;
+import com.android.systemui.Dependency;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.util.Assert;
@@ -79,6 +83,7 @@ public class DozeTriggers implements DozeMachine.Part {
     private long mNotificationPulseTime;
     private boolean mPulsePending;
 
+    private final MetricsLogger mMetricsLogger = Dependency.get(MetricsLogger.class);
 
     public DozeTriggers(Context context, DozeMachine machine, DozeHost dozeHost,
             AlarmManager alarmManager, AmbientDisplayConfiguration config,
@@ -159,8 +164,15 @@ public class DozeTriggers implements DozeMachine.Part {
                     if (screenX != -1 && screenY != -1) {
                         mDozeHost.onSlpiTap(screenX, screenY);
                     }
+                    // Logs screen wake up reason of either single or double tap.
+                    mMetricsLogger.write(new LogMaker(MetricsEvent.DOZING)
+                            .setType(MetricsEvent.TYPE_UPDATE).setSubtype(pulseReason));
                     mMachine.wakeUp();
                 } else if (isPickup) {
+                    // Logs screen wake up reason of lift.
+                    mMetricsLogger.write(new LogMaker(MetricsEvent.DOZING)
+                            .setType(MetricsEvent.TYPE_UPDATE)
+                            .setSubtype(DozeLog.REASON_SENSOR_PICKUP));
                     mMachine.wakeUp();
                 } else {
                     mDozeHost.extendPulse();
@@ -298,6 +310,10 @@ public class DozeTriggers implements DozeMachine.Part {
                 continuePulseRequest(reason);
             }
         }, !mDozeParameters.getProxCheckBeforePulse() || performedProxCheck, reason);
+
+        // Logs request pulse reason on AOD screen.
+        mMetricsLogger.write(new LogMaker(MetricsEvent.DOZING)
+                .setType(MetricsEvent.TYPE_UPDATE).setSubtype(reason));
     }
 
     private boolean canPulse() {
