@@ -352,7 +352,7 @@ static void SigChldHandler(int /*signal_number*/) {
   }
 
   if (usaps_removed > 0) {
-    if (write(gUsapPoolEventFD, &usaps_removed, sizeof(usaps_removed)) == -1) {
+    if (TEMP_FAILURE_RETRY(write(gUsapPoolEventFD, &usaps_removed, sizeof(usaps_removed))) == -1) {
       // If this write fails something went terribly wrong.  We will now kill
       // the zygote and let the system bring it back up.
       async_safe_format_log(ANDROID_LOG_ERROR, LOG_TAG,

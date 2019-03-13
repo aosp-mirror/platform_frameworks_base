@@ -243,7 +243,7 @@ class ZygoteServer {
     private void fetchUsapPoolPolicyProps() {
         if (mUsapPoolSupported) {
             final String usapPoolSizeMaxPropString =
-                    Zygote.getSystemProperty(
+                    Zygote.getConfigurationProperty(
                             DeviceConfig.RuntimeNative.USAP_POOL_SIZE_MAX,
                             USAP_POOL_SIZE_MAX_DEFAULT);
 
@@ -255,7 +255,7 @@ class ZygoteServer {
             }
 
             final String usapPoolSizeMinPropString =
-                    Zygote.getSystemProperty(
+                    Zygote.getConfigurationProperty(
                             DeviceConfig.RuntimeNative.USAP_POOL_SIZE_MIN,
                             USAP_POOL_SIZE_MIN_DEFAULT);
 
@@ -267,7 +267,7 @@ class ZygoteServer {
             }
 
             final String usapPoolRefillThresholdPropString =
-                    Zygote.getSystemProperty(
+                    Zygote.getConfigurationProperty(
                             DeviceConfig.RuntimeNative.USAP_POOL_REFILL_THRESHOLD,
                             Integer.toString(mUsapPoolSizeMax / 2));
 
