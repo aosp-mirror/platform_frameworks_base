@@ -13,6 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * @addtogroup Midi
+ * @{
+ */
+
+/**
+ * @file AMidi.h
+ */
 
 #ifndef ANDROID_MEDIA_AMIDI_H_
 #define ANDROID_MEDIA_AMIDI_H_
@@ -244,3 +252,6 @@ void AMIDI_API AMidiInputPort_close(const AMidiInputPort *inputPort) __INTRODUCE
 #endif
 
 #endif /* ANDROID_MEDIA_AMIDI_H_ */
+/**
+@}
+*/
