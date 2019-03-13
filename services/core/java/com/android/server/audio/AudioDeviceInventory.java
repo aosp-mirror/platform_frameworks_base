@@ -858,11 +858,20 @@ public final class AudioDeviceInventory {
         if (musicDevice == AudioSystem.DEVICE_NONE) {
             musicDevice = mDeviceBroker.getDeviceForStream(AudioSystem.STREAM_MUSIC);
         }
-        // ignore condition on device being actually used for music when in communication
+
+        // always ignore condition on device being actually used for music when in communication
         // because music routing is altered in this case.
-        // also checks whether media routing if affected by a dynamic policy
+        // also checks whether media routing if affected by a dynamic policy or mirroring
         if (((device == musicDevice) || mDeviceBroker.isInCommunication())
-                && (device == devices) && !mDeviceBroker.hasMediaDynamicPolicy()) {
+                && (device == devices) && !mDeviceBroker.hasMediaDynamicPolicy()
+                        && ((musicDevice & AudioSystem.DEVICE_OUT_REMOTE_SUBMIX) == 0)) {
+            if (!AudioSystem.isStreamActive(AudioSystem.STREAM_MUSIC, 0 /*not looking in past*/)) {
+                // no media playback, not a "becoming noisy" situation, otherwise it could cause
+                // the pausing of some apps that are playing remotely
+                AudioService.sDeviceLogger.log((new AudioEventLogger.StringEvent(
+                        "dropping ACTION_AUDIO_BECOMING_NOISY, no media playback")).printLog(TAG));
+                return 0;
+            }
             mDeviceBroker.postBroadcastBecomingNoisy();
             delay = 1000;
         }
