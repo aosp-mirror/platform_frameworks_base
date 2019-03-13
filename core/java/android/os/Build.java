@@ -306,7 +306,7 @@ public class Build {
          * @hide
          */
         @SystemApi
-        public static final String PREVIEW_SDK_FINGERPRINT = SystemProperties.get(
+        @NonNull public static final String PREVIEW_SDK_FINGERPRINT = SystemProperties.get(
                 "ro.build.version.preview_sdk_fingerprint", "REL");
 
         /**

@@ -1377,7 +1377,7 @@ public class DevicePolicyManager {
      * complexity, and use this activity with extra {@link #EXTRA_PASSWORD_COMPLEXITY} to suggest
      * to users how complex the app wants the new screen lock to be. Note that both {@link
      * #getPasswordComplexity()} and the extra {@link #EXTRA_PASSWORD_COMPLEXITY} require the
-     * calling app to have the permission {@link permission#REQUEST_SCREEN_LOCK_COMPLEXITY}.
+     * calling app to have the permission {@link permission#REQUEST_PASSWORD_COMPLEXITY}.
      *
      * <p>If the intent is launched from within a managed profile with a profile
      * owner built against {@link android.os.Build.VERSION_CODES#M} or before,
@@ -1405,7 +1405,7 @@ public class DevicePolicyManager {
      *
      * <p>If an invalid value is used, it will be treated as {@link #PASSWORD_COMPLEXITY_NONE}.
      */
-    @RequiresPermission(android.Manifest.permission.REQUEST_SCREEN_LOCK_COMPLEXITY)
+    @RequiresPermission(android.Manifest.permission.REQUEST_PASSWORD_COMPLEXITY)
     public static final String EXTRA_PASSWORD_COMPLEXITY =
             "android.app.extra.PASSWORD_COMPLEXITY";
 
@@ -2187,7 +2187,7 @@ public class DevicePolicyManager {
      * {@code PRIVATE_DNS_MODE_PROVIDER_HOSTNAME} then it implies the supplied host is valid
      * and reachable.
      */
-    public static final int PRIVATE_DNS_SET_SUCCESS = 0;
+    public static final int PRIVATE_DNS_SET_NO_ERROR = 0;
 
     /**
      * If the {@code privateDnsHost} provided was of a valid hostname but that host was found
@@ -2204,7 +2204,7 @@ public class DevicePolicyManager {
      * @hide
      */
     @IntDef(prefix = {"PRIVATE_DNS_SET_"}, value = {
-            PRIVATE_DNS_SET_SUCCESS,
+            PRIVATE_DNS_SET_NO_ERROR,
             PRIVATE_DNS_SET_ERROR_HOST_NOT_SERVING,
             PRIVATE_DNS_SET_ERROR_FAILURE_SETTING
     })
@@ -3331,27 +3331,48 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Determine whether the current password the user has set is sufficient to meet the policy
-     * requirements (e.g. quality, minimum length) that have been requested by the admins of this
-     * user and its participating profiles. Restrictions on profiles that have a separate challenge
-     * are not taken into account. The user must be unlocked in order to perform the check.
-     * <p>
-     * On devices not supporting {@link PackageManager#FEATURE_SECURE_LOCK_SCREEN} feature, the
-     * password is always treated as empty - i.e. this method will always return false on such
-     * devices, provided any password requirements were set.
-     * <p>
-     * The calling device admin must have requested
-     * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to be able to call this method; if it has
-     * not, a security exception will be thrown.
-     * <p>
-     * This method can be called on the {@link DevicePolicyManager} instance returned by
+     * Determines whether the calling user's current password meets policy requirements
+     * (e.g. quality, minimum length). The user must be unlocked to perform this check.
+     *
+     * <p>Policy requirements which affect this check can be set by admins of the user, but also
+     * by the admin of a managed profile associated with the calling user (when the managed profile
+     * doesn't have a separate work challenge). When a managed profile has a separate work
+     * challenge, its policy requirements only affect the managed profile.
+     *
+     * <p>Depending on the user, this method checks the policy requirement against one of the
+     * following passwords:
+     * <ul>
+     * <li>For the primary user or secondary users: the personal keyguard password.
+     * <li>For managed profiles: a work challenge if set, otherwise the parent user's personal
+     *     keyguard password.
+     * <ul/>
+     * In other words, it's always checking the requirement against the password that is protecting
+     * the calling user.
+     *
+     * <p>Note that this method considers all policy requirements targeting the password in
+     * question. For example a profile owner might set a requirement on the parent profile i.e.
+     * personal keyguard but not on the profile itself. When the device has a weak personal keyguard
+     * password and no separate work challenge, calling this method will return {@code false}
+     * despite the profile owner not setting a policy on the profile itself. This is because the
+     * profile's current password is the personal keyguard password, and it does not meet all policy
+     * requirements.
+     *
+     * <p>Device admins must request {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} before
+     * calling this method. Note, this policy type is deprecated for device admins in Android 9.0
+     * (API level 28) or higher.
+     *
+     * <p>This method can be called on the {@link DevicePolicyManager} instance returned by
      * {@link #getParentProfileInstance(ComponentName)} in order to determine if the password set on
      * the parent profile is sufficient.
      *
-     * @return Returns true if the password meets the current requirements, else false.
-     * @throws SecurityException if the calling application does not own an active administrator
-     *             that uses {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD}
-     * @throws IllegalStateException if the user is not unlocked.
+     * <p>On devices not supporting {@link PackageManager#FEATURE_SECURE_LOCK_SCREEN} feature, the
+     * password is always treated as empty - i.e. this method will always return false on such
+     * devices, provided any password requirements were set.
+     *
+     * @return {@code true} if the password meets the policy requirements, {@code false} otherwise
+     * @throws SecurityException if the calling application isn't an active admin that uses
+     *     {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD}
+     * @throws IllegalStateException if the user isn't unlocked
      */
     public boolean isActivePasswordSufficient() {
         if (mService != null) {
@@ -3377,10 +3398,10 @@ public class DevicePolicyManager {
      *
      * @throws IllegalStateException if the user is not unlocked.
      * @throws SecurityException if the calling application does not have the permission
-     *                           {@link permission#REQUEST_SCREEN_LOCK_COMPLEXITY}
+     *                           {@link permission#REQUEST_PASSWORD_COMPLEXITY}
      */
     @PasswordComplexity
-    @RequiresPermission(android.Manifest.permission.REQUEST_SCREEN_LOCK_COMPLEXITY)
+    @RequiresPermission(android.Manifest.permission.REQUEST_PASSWORD_COMPLEXITY)
     public int getPasswordComplexity() {
         throwIfParentInstance("getPasswordComplexity");
         if (mService == null) {
@@ -10457,7 +10478,7 @@ public class DevicePolicyManager {
      *
      * @param admin which {@link DeviceAdminReceiver} this request is associated with.
      *
-     * @return {@code PRIVATE_DNS_SET_SUCCESS} if the mode was set successfully, or
+     * @return {@code PRIVATE_DNS_SET_NO_ERROR} if the mode was set successfully, or
      *         {@code PRIVATE_DNS_SET_ERROR_FAILURE_SETTING} if it could not be set.
      *
      * @throws SecurityException if the caller is not the device owner.
@@ -10493,7 +10514,7 @@ public class DevicePolicyManager {
      * @param admin which {@link DeviceAdminReceiver} this request is associated with.
      * @param privateDnsHost The hostname of a server that implements DNS over TLS (RFC7858).
      *
-     * @return {@code PRIVATE_DNS_SET_SUCCESS} if the mode was set successfully,
+     * @return {@code PRIVATE_DNS_SET_NO_ERROR} if the mode was set successfully,
      *         {@code PRIVATE_DNS_SET_ERROR_FAILURE_SETTING} if it could not be set or
      *         {@code PRIVATE_DNS_SET_ERROR_HOST_NOT_SERVING} if the specified host does not
      *         implement RFC7858.

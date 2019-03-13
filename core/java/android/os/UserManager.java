@@ -25,6 +25,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
+import android.annotation.UnsupportedAppUsage;
 import android.annotation.UserIdInt;
 import android.annotation.WorkerThread;
 import android.app.Activity;
@@ -954,6 +955,21 @@ public class UserManager {
     public static final String DISALLOW_CONTENT_CAPTURE = "no_content_capture";
 
     /**
+     * Specifies if the current user is able to receive content suggestions for selections based on
+     * the contents of their screen.
+     *
+     * <p>Device owner and profile owner can set this restriction. When it is set by device owner,
+     * only the target user will be affected.
+     *
+     * <p>The default value is <code>false</code>.
+     *
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
+     * @see #getUserRestrictions()
+     */
+    public static final String DISALLOW_CONTENT_SUGGESTIONS = "no_content_suggestions";
+
+    /**
      * Specifies if user switching is blocked on the current user.
      *
      * <p> This restriction can only be set by the device owner, it will be applied to all users.
@@ -1102,6 +1118,47 @@ public class UserManager {
     public static final int USER_CREATION_FAILED_NO_MORE_USERS = Activity.RESULT_FIRST_USER + 1;
 
     /**
+     * Indicates that users are switchable.
+     * @hide
+     */
+    @SystemApi
+    public static final int SWITCHABILITY_STATUS_OK = 0;
+
+    /**
+     * Indicated that the user is in a phone call.
+     * @hide
+     */
+    @SystemApi
+    public static final int SWITCHABILITY_STATUS_USER_IN_CALL = 1 << 0;
+
+    /**
+     * Indicates that user switching is disallowed ({@link #DISALLOW_USER_SWITCH} is set).
+     * @hide
+     */
+    @SystemApi
+    public static final int SWITCHABILITY_STATUS_USER_SWITCH_DISALLOWED = 1 << 1;
+
+    /**
+     * Indicates that the system user is locked and user switching is not allowed.
+     * @hide
+     */
+    @SystemApi
+    public static final int SWITCHABILITY_STATUS_SYSTEM_USER_LOCKED = 1 << 2;
+
+    /**
+     * Result returned in {@link #getUserSwitchability()} indicating user swichability.
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(flag = true, prefix = { "SWITCHABILITY_STATUS_" }, value = {
+            SWITCHABILITY_STATUS_OK,
+            SWITCHABILITY_STATUS_USER_IN_CALL,
+            SWITCHABILITY_STATUS_USER_SWITCH_DISALLOWED,
+            SWITCHABILITY_STATUS_SYSTEM_USER_LOCKED
+    })
+    public @interface UserSwitchabilityResult {}
+
+    /**
      * Indicates user operation is successful.
      */
     public static final int USER_OPERATION_SUCCESS = 0;
@@ -1223,14 +1280,13 @@ public class UserManager {
     }
 
     /**
-     * Returns whether switching users is currently allowed.
-     * <p>For instance switching users is not allowed if the current user is in a phone call,
-     * system user hasn't been unlocked yet, or {@link #DISALLOW_USER_SWITCH} is set.
+     * @deprecated use {@link #getUserSwitchability()} instead.
+     *
+     * @removed
      * @hide
      */
-    @SystemApi
-    @RequiresPermission(anyOf = {android.Manifest.permission.MANAGE_USERS,
-            android.Manifest.permission.INTERACT_ACROSS_USERS}, conditional = true)
+    @Deprecated
+    @UnsupportedAppUsage
     public boolean canSwitchUsers() {
         boolean allowUserSwitchingWhenSystemUserLocked = Settings.Global.getInt(
                 mContext.getContentResolver(),
@@ -1241,6 +1297,42 @@ public class UserManager {
         boolean isUserSwitchDisallowed = hasUserRestriction(DISALLOW_USER_SWITCH);
         return (allowUserSwitchingWhenSystemUserLocked || isSystemUserUnlocked) && !inCall
                 && !isUserSwitchDisallowed;
+    }
+
+    /**
+     * Returns whether switching users is currently allowed.
+     * <p>
+     * Switching users is not allowed in the following cases:
+     * <li>the user is in a phone call</li>
+     * <li>{@link #DISALLOW_USER_SWITCH} is set</li>
+     * <li>system user hasn't been unlocked yet</li>
+     *
+     * @return A {@link UserSwitchabilityResult} flag indicating if the user is switchable.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(allOf = {Manifest.permission.READ_PHONE_STATE,
+            android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.INTERACT_ACROSS_USERS}, conditional = true)
+    public @UserSwitchabilityResult int getUserSwitchability() {
+        final boolean allowUserSwitchingWhenSystemUserLocked = Settings.Global.getInt(
+                mContext.getContentResolver(),
+                Settings.Global.ALLOW_USER_SWITCHING_WHEN_SYSTEM_USER_LOCKED, 0) != 0;
+        final boolean systemUserUnlocked = isUserUnlocked(UserHandle.SYSTEM);
+        final TelephonyManager tm =
+                (TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE);
+
+        int flags = SWITCHABILITY_STATUS_OK;
+        if (tm.getCallState() != TelephonyManager.CALL_STATE_IDLE) {
+            flags |= SWITCHABILITY_STATUS_USER_IN_CALL;
+        }
+        if (hasUserRestriction(DISALLOW_USER_SWITCH)) {
+            flags |= SWITCHABILITY_STATUS_USER_SWITCH_DISALLOWED;
+        }
+        if (!allowUserSwitchingWhenSystemUserLocked && !systemUserUnlocked) {
+            flags |= SWITCHABILITY_STATUS_SYSTEM_USER_LOCKED;
+        }
+        return flags;
     }
 
     /**
@@ -2655,11 +2747,16 @@ public class UserManager {
      * Removes a user and all associated data.
      *
      * @param user the user that needs to be removed.
+     * @return {@code true} if the user was successfully removed, {@code false} otherwise.
+     * @throws IllegalArgumentException if {@code user} is {@code null}
      * @hide
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
-    public boolean removeUser(UserHandle user) {
+    public boolean removeUser(@NonNull UserHandle user) {
+        if (user == null) {
+            throw new IllegalArgumentException("user cannot be null");
+        }
         return removeUser(user.getIdentifier());
     }
 

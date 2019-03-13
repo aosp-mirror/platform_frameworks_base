@@ -1957,7 +1957,7 @@ message WifiUsabilityStatsEntry {
   optional LinkProbeStatus probe_status_since_last_update = 24;
 
   // The elapsed time of the most recent link probe since last stats update;
-  optional int32 probe_elapsed_time_ms_since_last_update = 25;
+  optional int32 probe_elapsed_time_since_last_update_ms = 25;
 
   // The MCS rate of the most recent link probe since last stats update
   optional int32 probe_mcs_rate_since_last_update = 26;
@@ -2291,13 +2291,13 @@ message HistogramBucketInt32 {
   optional int32 count = 3;
 }
 
-// Single entry in a map from int32 => int32
-message MapEntryInt32Int32 {
+// Counts occurrences of a int32 key
+message Int32Count {
   // the key
   optional int32 key = 1;
 
-  // the value
-  optional int32 value = 2;
+  // the count
+  optional int32 count = 2;
 }
 
 message LinkProbeStats {
@@ -2328,16 +2328,16 @@ message LinkProbeStats {
   }
 
   // Counts the occurrences of RSSI values when a link probe succeeds.
-  repeated MapEntryInt32Int32 success_rssi_counts = 1;
+  repeated Int32Count success_rssi_counts = 1;
 
   // Counts the occurrences of RSSI values when a link probe fails.
-  repeated MapEntryInt32Int32 failure_rssi_counts = 2;
+  repeated Int32Count failure_rssi_counts = 2;
 
   // Counts the occurrences of Link Speed values when a link probe succeeds.
-  repeated MapEntryInt32Int32 success_link_speed_counts = 3;
+  repeated Int32Count success_link_speed_counts = 3;
 
   // Counts the occurrences of Link Speed values when a link probe fails.
-  repeated MapEntryInt32Int32 failure_link_speed_counts = 4;
+  repeated Int32Count failure_link_speed_counts = 4;
 
   // Histogram for the number of seconds since the last TX success when a link probe succeeds.
   repeated HistogramBucketInt32 success_seconds_since_last_tx_success_histogram = 5;
@@ -2364,7 +2364,7 @@ message NetworkSelectionExperimentDecisions {
   // same network selection as experiment2.
   // The keys are the number of network choices, and the values are the number of occurrences of
   // this number of network choices when exp1 and exp2 make the same network selection.
-  repeated MapEntryInt32Int32 same_selection_num_choices_counter = 3;
+  repeated Int32Count same_selection_num_choices_counter = 3;
 
   // Counts occurrences of the number of network choices there were when experiment1 makes the
   // same network selection as experiment2.
@@ -2372,7 +2372,7 @@ message NetworkSelectionExperimentDecisions {
   // this number of network choices when exp1 and exp2 make different network selections.
   // Note that it is possible for the network selection to be different even when there only exists
   // a single network choice, since choosing not to connect to that network is a valid choice.
-  repeated MapEntryInt32Int32 different_selection_num_choices_counter = 4;
+  repeated Int32Count different_selection_num_choices_counter = 4;
 }
 
 // NetworkRequest API metrics.

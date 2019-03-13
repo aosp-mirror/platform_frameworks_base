@@ -1012,19 +1012,14 @@ public class TextLine {
         return runIsRtl ? -ret : ret;
     }
 
-    private int adjustHyphenEdit(int start, int limit, int packedHyphenEdit) {
-        int result = packedHyphenEdit;
-        // Only draw hyphens on first or last run in line. Disable them otherwise.
-        if (start > 0) { // not the first run
-            result = Hyphenator.packHyphenEdit(Hyphenator.START_HYPHEN_EDIT_NO_EDIT,
-                    Hyphenator.unpackEndHyphenEdit(packedHyphenEdit));
-        }
-        if (limit < mLen) { // not the last run
-            result = Hyphenator.packHyphenEdit(Hyphenator.unpackStartHyphenEdit(packedHyphenEdit),
-                    Hyphenator.END_HYPHEN_EDIT_NO_EDIT);
-            result &= ~Paint.HYPHENEDIT_MASK_END_OF_LINE;
-        }
-        return result;
+    private int adjustStartHyphenEdit(int start, @Paint.StartHyphenEdit int startHyphenEdit) {
+        // Only draw hyphens on first in line. Disable them otherwise.
+        return start > 0 ? Paint.START_HYPHEN_EDIT_NO_EDIT : startHyphenEdit;
+    }
+
+    private int adjustEndHyphenEdit(int limit, @Paint.EndHyphenEdit int endHyphenEdit) {
+        // Only draw hyphens on last run in line. Disable them otherwise.
+        return limit < mLen ? Paint.END_HYPHEN_EDIT_NO_EDIT : endHyphenEdit;
     }
 
     private static final class DecorationInfo {
@@ -1115,7 +1110,8 @@ public class TextLine {
         if (!needsSpanMeasurement) {
             final TextPaint wp = mWorkPaint;
             wp.set(mPaint);
-            wp.setHyphenEdit(adjustHyphenEdit(start, limit, wp.getHyphenEdit()));
+            wp.setStartHyphenEdit(adjustStartHyphenEdit(start, wp.getStartHyphenEdit()));
+            wp.setEndHyphenEdit(adjustEndHyphenEdit(limit, wp.getEndHyphenEdit()));
             return handleText(wp, start, limit, start, limit, runIsRtl, c, x, top,
                     y, bottom, fmi, needWidth, measureLimit, null);
         }
@@ -1193,8 +1189,10 @@ public class TextLine {
                     // The style of the present chunk of text is substantially different from the
                     // style of the previous chunk. We need to handle the active piece of text
                     // and restart with the present chunk.
-                    activePaint.setHyphenEdit(adjustHyphenEdit(
-                            activeStart, activeEnd, mPaint.getHyphenEdit()));
+                    activePaint.setStartHyphenEdit(
+                            adjustStartHyphenEdit(activeStart, mPaint.getStartHyphenEdit()));
+                    activePaint.setEndHyphenEdit(
+                            adjustEndHyphenEdit(activeEnd, mPaint.getEndHyphenEdit()));
                     x += handleText(activePaint, activeStart, activeEnd, i, inext, runIsRtl, c, x,
                             top, y, bottom, fmi, needWidth || activeEnd < measureLimit,
                             Math.min(activeEnd, mlimit), mDecorations);
@@ -1218,8 +1216,10 @@ public class TextLine {
                 }
             }
             // Handle the final piece of text.
-            activePaint.setHyphenEdit(adjustHyphenEdit(
-                    activeStart, activeEnd, mPaint.getHyphenEdit()));
+            activePaint.setStartHyphenEdit(
+                    adjustStartHyphenEdit(activeStart, mPaint.getStartHyphenEdit()));
+            activePaint.setEndHyphenEdit(
+                    adjustEndHyphenEdit(activeEnd, mPaint.getEndHyphenEdit()));
             x += handleText(activePaint, activeStart, activeEnd, i, inext, runIsRtl, c, x,
                     top, y, bottom, fmi, needWidth || activeEnd < measureLimit,
                     Math.min(activeEnd, mlimit), mDecorations);
@@ -1323,7 +1323,8 @@ public class TextLine {
                 && lp.getTextSkewX() == rp.getTextSkewX()
                 && lp.getLetterSpacing() == rp.getLetterSpacing()
                 && lp.getWordSpacing() == rp.getWordSpacing()
-                && lp.getHyphenEdit() == rp.getHyphenEdit()
+                && lp.getStartHyphenEdit() == rp.getStartHyphenEdit()
+                && lp.getEndHyphenEdit() == rp.getEndHyphenEdit()
                 && lp.bgColor == rp.bgColor
                 && lp.baselineShift == rp.baselineShift
                 && lp.linkColor == rp.linkColor

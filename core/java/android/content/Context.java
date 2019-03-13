@@ -4089,7 +4089,7 @@ public abstract class Context {
      * @see #getSystemService(String)
      * @hide
      */
-    @SystemApi
+    @SystemApi @TestApi
     public static final String ROLLBACK_SERVICE = "rollback";
 
     /**

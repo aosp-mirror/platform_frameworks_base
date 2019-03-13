@@ -84,12 +84,17 @@ public final class TextClassifierImpl implements TextClassifier {
     private final GenerateLinksLogger mGenerateLinksLogger;
 
     private final Object mLock = new Object();
+
     @GuardedBy("mLock") // Do not access outside this lock.
     private ModelFileManager.ModelFile mAnnotatorModelInUse;
     @GuardedBy("mLock") // Do not access outside this lock.
     private AnnotatorModel mAnnotatorImpl;
+
+    @GuardedBy("mLock") // Do not access outside this lock.
+    private ModelFileManager.ModelFile mLangIdModelInUse;
     @GuardedBy("mLock") // Do not access outside this lock.
     private LangIdModel mLangIdImpl;
+
     @GuardedBy("mLock") // Do not access outside this lock.
     private ModelFileManager.ModelFile mActionModelInUse;
     @GuardedBy("mLock") // Do not access outside this lock.
@@ -403,6 +408,12 @@ public final class TextClassifierImpl implements TextClassifier {
         return mFallback.suggestConversationActions(request);
     }
 
+    /**
+     * Returns the {@link ConversationAction} result, with a non-null extras.
+     * <p>
+     * Whenever the RemoteAction is non-null, you can expect its corresponding intent
+     * with a non-null component name is in the extras.
+     */
     private ConversationActions createConversationActionResult(
             ConversationActions.Request request,
             ActionsSuggestionsModel.ActionSuggestion[] nativeSuggestions) {
@@ -419,6 +430,7 @@ public final class TextClassifierImpl implements TextClassifier {
             }
             List<LabeledIntent> labeledIntents =
                     mTemplateIntentFactory.create(nativeSuggestion.getRemoteActionTemplates());
+            Bundle extras = new Bundle();
             RemoteAction remoteAction = null;
             // Given that we only support implicit intent here, we should expect there is just one
             // intent for each action type.
@@ -428,6 +440,7 @@ public final class TextClassifierImpl implements TextClassifier {
                 LabeledIntent.Result result = labeledIntents.get(0).resolve(mContext, titleChooser);
                 if (result != null) {
                     remoteAction = result.remoteAction;
+                    ExtrasUtils.putActionIntent(extras, result.resolvedIntent);
                 }
             }
             conversationActions.add(
@@ -435,8 +448,11 @@ public final class TextClassifierImpl implements TextClassifier {
                             .setConfidenceScore(nativeSuggestion.getScore())
                             .setTextReply(nativeSuggestion.getResponseText())
                             .setAction(remoteAction)
+                            .setExtras(extras)
                             .build());
         }
+        conversationActions =
+                ActionsSuggestionsHelper.removeActionsWithDuplicates(conversationActions);
         String resultId = ActionsSuggestionsHelper.createResultId(
                 mContext,
                 request.getConversation(),
@@ -504,17 +520,19 @@ public final class TextClassifierImpl implements TextClassifier {
 
     private LangIdModel getLangIdImpl() throws FileNotFoundException {
         synchronized (mLock) {
-            if (mLangIdImpl == null) {
-                final ModelFileManager.ModelFile bestModel =
-                        mLangIdModelFileManager.findBestModelFile(null);
-                if (bestModel == null) {
-                    throw new FileNotFoundException("No LangID model is found");
-                }
+            final ModelFileManager.ModelFile bestModel =
+                    mLangIdModelFileManager.findBestModelFile(null);
+            if (bestModel == null) {
+                throw new FileNotFoundException("No LangID model is found");
+            }
+            if (mLangIdImpl == null || !Objects.equals(mLangIdModelInUse, bestModel)) {
+                Log.d(DEFAULT_LOG_TAG, "Loading " + bestModel);
                 final ParcelFileDescriptor pfd = ParcelFileDescriptor.open(
                         new File(bestModel.getPath()), ParcelFileDescriptor.MODE_READ_ONLY);
                 try {
                     if (pfd != null) {
                         mLangIdImpl = new LangIdModel(pfd.getFd());
+                        mLangIdModelInUse = bestModel;
                     }
                 } finally {
                     maybeCloseAndLogError(pfd);
@@ -527,13 +545,14 @@ public final class TextClassifierImpl implements TextClassifier {
     @Nullable
     private ActionsSuggestionsModel getActionsImpl() throws FileNotFoundException {
         synchronized (mLock) {
-            if (mActionsImpl == null) {
-                // TODO: Use LangID to determine the locale we should use here?
-                final ModelFileManager.ModelFile bestModel =
-                        mActionsModelFileManager.findBestModelFile(LocaleList.getDefault());
-                if (bestModel == null) {
-                    return null;
-                }
+            // TODO: Use LangID to determine the locale we should use here?
+            final ModelFileManager.ModelFile bestModel =
+                    mActionsModelFileManager.findBestModelFile(LocaleList.getDefault());
+            if (bestModel == null) {
+                return null;
+            }
+            if (mActionsImpl == null || !Objects.equals(mActionModelInUse, bestModel)) {
+                Log.d(DEFAULT_LOG_TAG, "Loading " + bestModel);
                 final ParcelFileDescriptor pfd = ParcelFileDescriptor.open(
                         new File(bestModel.getPath()), ParcelFileDescriptor.MODE_READ_ONLY);
                 try {

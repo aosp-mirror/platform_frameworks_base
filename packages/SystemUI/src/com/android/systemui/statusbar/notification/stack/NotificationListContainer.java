@@ -176,4 +176,12 @@ public interface NotificationListContainer extends ExpandableView.OnHeightChange
      * @param row The notification to bind.
      */
     default void bindRow(ExpandableNotificationRow row) {}
+
+    /**
+     * Does this list contain a given view. True by default is fine, since we only ask this if the
+     * view has a parent.
+     */
+    default boolean containsView(View v) {
+        return true;
+    }
 }

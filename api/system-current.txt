@@ -231,7 +231,6 @@ package android {
   }
 
   public static final class R.dimen {
-    field public static final int config_mediaMetadataBitmapMaxSize = 17104904; // 0x1050008
     field public static final int config_restrictedIconSize = 17104903; // 0x1050007
   }
 
@@ -547,10 +546,10 @@ package android.app {
 
   public class NotificationManager {
     method @Nullable public android.content.ComponentName getAllowedNotificationAssistant();
-    method @Nullable public android.content.ComponentName getAllowedNotificationAssistantForUser(android.os.UserHandle);
+    method @Nullable public android.content.ComponentName getAllowedNotificationAssistantForUser(@NonNull android.os.UserHandle);
     method public boolean isNotificationAssistantAccessGranted(@NonNull android.content.ComponentName);
-    method public void setNotificationAssistantAccessGranted(android.content.ComponentName, boolean);
-    method public void setNotificationAssistantAccessGrantedForUser(android.content.ComponentName, android.os.UserHandle, boolean);
+    method public void setNotificationAssistantAccessGranted(@Nullable android.content.ComponentName, boolean);
+    method public void setNotificationAssistantAccessGrantedForUser(@Nullable android.content.ComponentName, @NonNull android.os.UserHandle, boolean);
   }
 
   public final class StatsManager {
@@ -1837,10 +1836,8 @@ package android.content.rollback {
 
   public final class RollbackManager {
     method @RequiresPermission(android.Manifest.permission.MANAGE_ROLLBACKS) public void commitRollback(int, @NonNull java.util.List<android.content.pm.VersionedPackage>, @NonNull android.content.IntentSender);
-    method @RequiresPermission(android.Manifest.permission.MANAGE_ROLLBACKS) public void expireRollbackForPackage(@NonNull String);
     method @RequiresPermission(android.Manifest.permission.MANAGE_ROLLBACKS) @NonNull public java.util.List<android.content.rollback.RollbackInfo> getAvailableRollbacks();
     method @RequiresPermission(android.Manifest.permission.MANAGE_ROLLBACKS) @NonNull public java.util.List<android.content.rollback.RollbackInfo> getRecentlyCommittedRollbacks();
-    method @RequiresPermission(android.Manifest.permission.MANAGE_ROLLBACKS) public void reloadPersistedData();
     field public static final String EXTRA_STATUS = "android.content.rollback.extra.STATUS";
     field public static final String EXTRA_STATUS_MESSAGE = "android.content.rollback.extra.STATUS_MESSAGE";
     field public static final int STATUS_FAILURE = 1; // 0x1
@@ -3490,12 +3487,12 @@ package android.media {
     method public void setAudioServerStateCallback(@NonNull java.util.concurrent.Executor, @NonNull android.media.AudioManager.AudioServerStateCallback);
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public void setFocusRequestResult(@NonNull android.media.AudioFocusInfo, int, @NonNull android.media.audiopolicy.AudioPolicy);
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public void setVolumeIndexForAttributes(@NonNull android.media.AudioAttributes, int, int);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public void unregisterAudioPolicy(@NonNull android.media.audiopolicy.AudioPolicy);
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public void unregisterAudioPolicyAsync(@NonNull android.media.audiopolicy.AudioPolicy);
     method public void unregisterVolumeGroupCallback(@NonNull android.media.AudioManager.VolumeGroupCallback);
     field public static final int AUDIOFOCUS_FLAG_DELAY_OK = 1; // 0x1
     field public static final int AUDIOFOCUS_FLAG_LOCK = 4; // 0x4
     field public static final int AUDIOFOCUS_FLAG_PAUSES_ON_DUCKABLE_LOSS = 2; // 0x2
-    field public static final int FLAG_FROM_KEY = 65536; // 0x10000
     field public static final int SUCCESS = 0; // 0x0
   }
 
@@ -4157,6 +4154,7 @@ package android.net {
     method public int[] getTransportTypes();
     method public boolean satisfiedByNetworkCapabilities(android.net.NetworkCapabilities);
     field public static final int NET_CAPABILITY_OEM_PAID = 22; // 0x16
+    field public static final int NET_CAPABILITY_PARTIAL_CONNECTIVITY = 24; // 0x18
   }
 
   public class NetworkKey implements android.os.Parcelable {
@@ -4305,10 +4303,12 @@ package android.net.captiveportal {
     ctor public CaptivePortalProbeResult(int, String, String);
     ctor public CaptivePortalProbeResult(int, String, String, android.net.captiveportal.CaptivePortalProbeSpec);
     method public boolean isFailed();
+    method public boolean isPartialConnectivity();
     method public boolean isPortal();
     method public boolean isSuccessful();
     field public static final android.net.captiveportal.CaptivePortalProbeResult FAILED;
     field public static final int FAILED_CODE = 599; // 0x257
+    field public static final android.net.captiveportal.CaptivePortalProbeResult PARTIAL;
     field public static final int PORTAL_CODE = 302; // 0x12e
     field public static final android.net.captiveportal.CaptivePortalProbeResult SUCCESS;
     field public static final int SUCCESS_CODE = 204; // 0xcc
@@ -4440,6 +4440,7 @@ package android.net.metrics {
     field public static final int NETWORK_FIRST_VALIDATION_PORTAL_FOUND = 10; // 0xa
     field public static final int NETWORK_FIRST_VALIDATION_SUCCESS = 8; // 0x8
     field public static final int NETWORK_LINGER = 5; // 0x5
+    field public static final int NETWORK_PARTIAL_CONNECTIVITY = 13; // 0xd
     field public static final int NETWORK_REVALIDATION_PORTAL_FOUND = 11; // 0xb
     field public static final int NETWORK_REVALIDATION_SUCCESS = 9; // 0x9
     field public static final int NETWORK_UNLINGER = 6; // 0x6
@@ -4734,14 +4735,12 @@ package android.net.wifi {
   }
 
   public class WifiInfo implements android.os.Parcelable {
-    method @Nullable public String getFqdn();
-    method @Nullable public String getProviderFriendlyName();
     method public boolean isOsuAp();
     method public boolean isPasspointAp();
   }
 
   public class WifiManager {
-    method @RequiresPermission("android.permission.WIFI_UPDATE_USABILITY_STATS_SCORE") public void addWifiUsabilityStatsListener(@NonNull java.util.concurrent.Executor, @NonNull android.net.wifi.WifiManager.WifiUsabilityStatsListener);
+    method @RequiresPermission("android.permission.WIFI_UPDATE_USABILITY_STATS_SCORE") public void addOnWifiUsabilityStatsListener(@NonNull java.util.concurrent.Executor, @NonNull android.net.wifi.WifiManager.OnWifiUsabilityStatsListener);
     method @RequiresPermission(anyOf={"android.permission.NETWORK_SETTINGS", android.Manifest.permission.NETWORK_SETUP_WIZARD, "android.permission.NETWORK_STACK"}) public void connect(@NonNull android.net.wifi.WifiConfiguration, @Nullable android.net.wifi.WifiManager.ActionListener);
     method @RequiresPermission(anyOf={"android.permission.NETWORK_SETTINGS", android.Manifest.permission.NETWORK_SETUP_WIZARD, "android.permission.NETWORK_STACK"}) public void connect(int, @Nullable android.net.wifi.WifiManager.ActionListener);
     method @RequiresPermission(anyOf={"android.permission.NETWORK_SETTINGS", android.Manifest.permission.NETWORK_SETUP_WIZARD, "android.permission.NETWORK_STACK"}) public void disable(int, @Nullable android.net.wifi.WifiManager.ActionListener);
@@ -4756,7 +4755,7 @@ package android.net.wifi {
     method public boolean isPortableHotspotSupported();
     method @RequiresPermission(android.Manifest.permission.ACCESS_WIFI_STATE) public boolean isWifiApEnabled();
     method public boolean isWifiScannerSupported();
-    method @RequiresPermission("android.permission.WIFI_UPDATE_USABILITY_STATS_SCORE") public void removeWifiUsabilityStatsListener(@NonNull android.net.wifi.WifiManager.WifiUsabilityStatsListener);
+    method @RequiresPermission("android.permission.WIFI_UPDATE_USABILITY_STATS_SCORE") public void removeOnWifiUsabilityStatsListener(@NonNull android.net.wifi.WifiManager.OnWifiUsabilityStatsListener);
     method @RequiresPermission(anyOf={"android.permission.NETWORK_SETTINGS", android.Manifest.permission.NETWORK_SETUP_WIZARD, "android.permission.NETWORK_STACK"}) public void save(@NonNull android.net.wifi.WifiConfiguration, @Nullable android.net.wifi.WifiManager.ActionListener);
     method @RequiresPermission("android.permission.WIFI_SET_DEVICE_MOBILITY_STATE") public void setDeviceMobilityState(int);
     method @RequiresPermission(android.Manifest.permission.CHANGE_WIFI_STATE) public boolean setWifiApConfiguration(android.net.wifi.WifiConfiguration);
@@ -4801,8 +4800,8 @@ package android.net.wifi {
     method public void onSuccess();
   }
 
-  public static interface WifiManager.WifiUsabilityStatsListener {
-    method public void onStatsUpdated(int, boolean, android.net.wifi.WifiUsabilityStatsEntry);
+  public static interface WifiManager.OnWifiUsabilityStatsListener {
+    method public void onWifiUsabilityStats(int, boolean, @NonNull android.net.wifi.WifiUsabilityStatsEntry);
   }
 
   public class WifiNetworkConnectionStatistics implements android.os.Parcelable {
@@ -4937,35 +4936,35 @@ package android.net.wifi {
 
   public final class WifiUsabilityStatsEntry implements android.os.Parcelable {
     method public int describeContents();
+    method public int getLinkSpeedMbps();
+    method public int getProbeElapsedTimeSinceLastUpdateMillis();
+    method public int getProbeMcsRateSinceLastUpdate();
+    method public int getProbeStatusSinceLastUpdate();
+    method public int getRssi();
+    method public int getRxLinkSpeedMbps();
+    method public long getTimeStampMillis();
+    method public long getTotalBackgroundScanTimeMillis();
+    method public long getTotalBeaconRx();
+    method public long getTotalCcaBusyFreqTimeMillis();
+    method public long getTotalHotspot2ScanTimeMillis();
+    method public long getTotalNanScanTimeMillis();
+    method public long getTotalPnoScanTimeMillis();
+    method public long getTotalRadioOnFreqTimeMillis();
+    method public long getTotalRadioOnTimeMillis();
+    method public long getTotalRadioRxTimeMillis();
+    method public long getTotalRadioTxTimeMillis();
+    method public long getTotalRoamScanTimeMillis();
+    method public long getTotalRxSuccess();
+    method public long getTotalScanTimeMillis();
+    method public long getTotalTxBad();
+    method public long getTotalTxRetries();
+    method public long getTotalTxSuccess();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.WifiUsabilityStatsEntry> CREATOR;
     field public static final int PROBE_STATUS_FAILURE = 3; // 0x3
     field public static final int PROBE_STATUS_NO_PROBE = 1; // 0x1
     field public static final int PROBE_STATUS_SUCCESS = 2; // 0x2
     field public static final int PROBE_STATUS_UNKNOWN = 0; // 0x0
-    field public final int linkSpeedMbps;
-    field public final int probeElapsedTimeMsSinceLastUpdate;
-    field public final int probeMcsRateSinceLastUpdate;
-    field public final int probeStatusSinceLastUpdate;
-    field public final int rssi;
-    field public final int rxLinkSpeedMbps;
-    field public final long timeStampMs;
-    field public final long totalBackgroundScanTimeMs;
-    field public final long totalBeaconRx;
-    field public final long totalCcaBusyFreqTimeMs;
-    field public final long totalHotspot2ScanTimeMs;
-    field public final long totalNanScanTimeMs;
-    field public final long totalPnoScanTimeMs;
-    field public final long totalRadioOnFreqTimeMs;
-    field public final long totalRadioOnTimeMs;
-    field public final long totalRadioRxTimeMs;
-    field public final long totalRadioTxTimeMs;
-    field public final long totalRoamScanTimeMs;
-    field public final long totalRxSuccess;
-    field public final long totalScanTimeMs;
-    field public final long totalTxBad;
-    field public final long totalTxRetries;
-    field public final long totalTxSuccess;
   }
 
 }
@@ -5214,7 +5213,7 @@ package android.os {
   }
 
   public static class Build.VERSION {
-    field public static final String PREVIEW_SDK_FINGERPRINT;
+    field @NonNull public static final String PREVIEW_SDK_FINGERPRINT;
   }
 
   public final class ConfigUpdate {
@@ -5602,7 +5601,6 @@ package android.os {
   }
 
   public class UserManager {
-    method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.INTERACT_ACROSS_USERS}, conditional=true) public boolean canSwitchUsers();
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public void clearSeedAccountData();
     method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public android.os.UserHandle getProfileParent(@NonNull android.os.UserHandle);
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public String getSeedAccountName();
@@ -5612,6 +5610,7 @@ package android.os {
     method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public android.graphics.Bitmap getUserIcon();
     method @Deprecated @android.os.UserManager.UserRestrictionSource @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public int getUserRestrictionSource(String, android.os.UserHandle);
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public java.util.List<android.os.UserManager.EnforcingUser> getUserRestrictionSources(String, android.os.UserHandle);
+    method @RequiresPermission(allOf={android.Manifest.permission.READ_PHONE_STATE, android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.INTERACT_ACROSS_USERS}, conditional=true) public int getUserSwitchability();
     method public boolean hasRestrictedProfiles();
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public boolean isAdminUser();
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public boolean isGuestUser();
@@ -5619,7 +5618,7 @@ package android.os {
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public boolean isManagedProfile(int);
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public boolean isPrimaryUser();
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public boolean isRestrictedProfile();
-    method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public boolean removeUser(android.os.UserHandle);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public boolean removeUser(@NonNull android.os.UserHandle);
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public void setUserIcon(@NonNull android.graphics.Bitmap);
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public void setUserName(@Nullable String);
     field public static final String ACTION_USER_RESTRICTIONS_CHANGED = "android.os.action.USER_RESTRICTIONS_CHANGED";
@@ -5629,6 +5628,10 @@ package android.os {
     field public static final int RESTRICTION_SOURCE_DEVICE_OWNER = 2; // 0x2
     field public static final int RESTRICTION_SOURCE_PROFILE_OWNER = 4; // 0x4
     field public static final int RESTRICTION_SOURCE_SYSTEM = 1; // 0x1
+    field public static final int SWITCHABILITY_STATUS_OK = 0; // 0x0
+    field public static final int SWITCHABILITY_STATUS_SYSTEM_USER_LOCKED = 4; // 0x4
+    field public static final int SWITCHABILITY_STATUS_USER_IN_CALL = 1; // 0x1
+    field public static final int SWITCHABILITY_STATUS_USER_SWITCH_DISALLOWED = 2; // 0x2
   }
 
   public static final class UserManager.EnforcingUser implements android.os.Parcelable {
@@ -5862,6 +5865,7 @@ package android.provider {
     field public static final String NAMESPACE_AUTOFILL = "autofill";
     field public static final String NAMESPACE_CONNECTIVITY = "connectivity";
     field public static final String NAMESPACE_CONTENT_CAPTURE = "content_capture";
+    field public static final String NAMESPACE_DEX_BOOT = "dex_boot";
     field public static final String NAMESPACE_GAME_DRIVER = "game_driver";
     field public static final String NAMESPACE_INPUT_NATIVE_BOOT = "input_native_boot";
     field public static final String NAMESPACE_MEDIA_NATIVE = "media_native";
@@ -5875,12 +5879,6 @@ package android.provider {
     field public static final String COMPONENT_NAME = "component_name";
     field public static final String NAMESPACE = "attention_manager_service";
     field public static final String SERVICE_ENABLED = "service_enabled";
-  }
-
-  public static interface DeviceConfig.DexBoot {
-    field public static final String NAMESPACE = "dex_boot";
-    field public static final String PRIV_APPS_OOB_ENABLED = "priv_apps_oob_enabled";
-    field public static final String PRIV_APPS_OOB_WHITELIST = "priv_apps_oob_whitelist";
   }
 
   public static interface DeviceConfig.IntelligenceAttention {
@@ -8099,7 +8097,7 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean switchSlots(int[]);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void toggleRadioOnOff();
     method public void updateServiceLocation();
-    field @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public static final String ACTION_DEBUG_EVENT = "android.telephony.action.DEBUG_EVENT";
+    field @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public static final String ACTION_ANOMALY_REPORTED = "android.telephony.action.ANOMALY_REPORTED";
     field public static final String ACTION_SIM_APPLICATION_STATE_CHANGED = "android.telephony.action.SIM_APPLICATION_STATE_CHANGED";
     field public static final String ACTION_SIM_CARD_STATE_CHANGED = "android.telephony.action.SIM_CARD_STATE_CHANGED";
     field public static final String ACTION_SIM_SLOT_STATUS_CHANGED = "android.telephony.action.SIM_SLOT_STATUS_CHANGED";
@@ -8107,8 +8105,8 @@ package android.telephony {
     field public static final int CARRIER_PRIVILEGE_STATUS_HAS_ACCESS = 1; // 0x1
     field public static final int CARRIER_PRIVILEGE_STATUS_NO_ACCESS = 0; // 0x0
     field public static final int CARRIER_PRIVILEGE_STATUS_RULES_NOT_LOADED = -1; // 0xffffffff
-    field public static final String EXTRA_DEBUG_EVENT_DESCRIPTION = "android.telephony.extra.DEBUG_EVENT_DESCRIPTION";
-    field public static final String EXTRA_DEBUG_EVENT_ID = "android.telephony.extra.DEBUG_EVENT_ID";
+    field public static final String EXTRA_ANOMALY_DESCRIPTION = "android.telephony.extra.ANOMALY_DESCRIPTION";
+    field public static final String EXTRA_ANOMALY_ID = "android.telephony.extra.ANOMALY_ID";
     field public static final String EXTRA_SIM_STATE = "android.telephony.extra.SIM_STATE";
     field public static final String EXTRA_VISUAL_VOICEMAIL_ENABLED_BY_USER_BOOL = "android.telephony.extra.VISUAL_VOICEMAIL_ENABLED_BY_USER_BOOL";
     field public static final String EXTRA_VOICEMAIL_SCRAMBLED_PIN_STRING = "android.telephony.extra.VOICEMAIL_SCRAMBLED_PIN_STRING";
@@ -9846,8 +9844,8 @@ package android.webkit {
     method public int getVisibleTitleHeight();
     method public android.webkit.WebChromeClient getWebChromeClient();
     method public android.webkit.WebViewClient getWebViewClient();
-    method public android.webkit.WebViewRenderer getWebViewRenderer();
-    method public android.webkit.WebViewRendererClient getWebViewRendererClient();
+    method @Nullable public android.webkit.WebViewRenderProcess getWebViewRenderProcess();
+    method @Nullable public android.webkit.WebViewRenderProcessClient getWebViewRenderProcessClient();
     method public android.view.View getZoomControls();
     method public void goBack();
     method public void goBackOrForward(int);
@@ -9897,7 +9895,7 @@ package android.webkit {
     method public void setVerticalScrollbarOverlay(boolean);
     method public void setWebChromeClient(android.webkit.WebChromeClient);
     method public void setWebViewClient(android.webkit.WebViewClient);
-    method public void setWebViewRendererClient(@Nullable java.util.concurrent.Executor, @Nullable android.webkit.WebViewRendererClient);
+    method public void setWebViewRenderProcessClient(@Nullable java.util.concurrent.Executor, @Nullable android.webkit.WebViewRenderProcessClient);
     method public boolean showFindDialog(String, boolean);
     method public void stopLoading();
     method public boolean zoomBy(float);
@@ -9977,10 +9975,6 @@ package android.webkit {
     field public final boolean isFallback;
     field public final String packageName;
     field public final android.content.pm.Signature[] signatures;
-  }
-
-  public abstract class WebViewRenderer {
-    ctor public WebViewRenderer();
   }
 
   public final class WebViewUpdateService {

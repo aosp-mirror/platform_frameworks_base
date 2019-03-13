@@ -444,6 +444,19 @@
         <item name="android:alpha">0.54</item>
     </style>
 
+    <style name="TextAppearance.NotificationInfo.ButtonLabel">
+        <item name="android:fontFamily">@*android:string/config_bodyFontFamilyMedium</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:alpha">0.54</item>
+        <item name="android:paddingTop">4dp</item>
+        <item name="android:paddingBottom">16dp</item>
+    </style>
+
+    <style name="TextAppearance.NotificationInfo.HintText">
+        <item name="android:textSize">12sp</item>
+        <item name="android:alpha">0.54</item>
+    </style>
+
     <style name="TextAppearance.NotificationInfo.Secondary.Warning">
         <item name="android:textColor">?android:attr/colorError</item>
     </style>

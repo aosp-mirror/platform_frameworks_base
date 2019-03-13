@@ -45,13 +45,14 @@ final class TcpSocketKeepalive extends SocketKeepalive {
      * - The application must not write to or read from the socket after calling this method, until
      *   onDataReceived, onStopped, or onError are called. If it does, the keepalive will fail
      *   with {@link #ERROR_SOCKET_NOT_IDLE}, or {@code #ERROR_INVALID_SOCKET} if the socket
-     *   experienced an error (as in poll(2) returned POLLERR); if this happens, the data received
-     *   from the socket may be invalid, and the socket can't be recovered.
+     *   experienced an error (as in poll(2) returned POLLERR or POLLHUP); if this happens, the data
+     *   received from the socket may be invalid, and the socket can't be recovered.
      * - If the socket has data in the send or receive buffer, then this call will fail with
      *   {@link #ERROR_SOCKET_NOT_IDLE} and can be retried after the data has been processed.
-     *   An app could ensure this by using an application-layer protocol where it can receive
-     *   acknowledgement that it will go into keepalive mode. It could then go into keepalive
-     *   mode after having read the acknowledgement, draining the socket.
+     *   An app could ensure this by using an application-layer protocol to receive acknowledgement
+     *   that indicates all data has been delivered to server, e.g. HTTP 200 OK.
+     *   Then the app could go into keepalive mode after reading all remaining data within the
+     *   acknowledgement.
      */
     @Override
     void startImpl(int intervalSec) {

@@ -19,6 +19,7 @@ import static android.app.NotificationChannel.USER_LOCKED_IMPORTANCE;
 import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 import static android.app.NotificationManager.IMPORTANCE_HIGH;
 import static android.app.NotificationManager.IMPORTANCE_LOW;
+import static android.service.notification.Adjustment.KEY_IMPORTANCE;
 import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_NEGATIVE;
 import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_NEUTRAL;
 import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_POSITIVE;
@@ -423,6 +424,138 @@ public class NotificationRecordTest extends UiServiceTestCase {
                 (int) logMaker.getTaggedData(MetricsEvent.NOTIFICATION_SINCE_VISIBLE_MILLIS));
         assertEquals(record.getInterruptionMs(timestamp),
                 (int) logMaker.getTaggedData(MetricsEvent.NOTIFICATION_SINCE_INTERRUPTION_MILLIS));
+        // If no importance calculation has been run, no explanation is available.
+        assertNull(logMaker.getTaggedData(MetricsEvent.FIELD_NOTIFICATION_IMPORTANCE_EXPLANATION));
+        assertNull(logMaker.getTaggedData(MetricsEvent.FIELD_NOTIFICATION_IMPORTANCE_INITIAL));
+        assertNull(logMaker.getTaggedData(
+                MetricsEvent.FIELD_NOTIFICATION_IMPORTANCE_INITIAL_EXPLANATION));
+        assertNull(logMaker.getTaggedData(MetricsEvent.FIELD_NOTIFICATION_IMPORTANCE_ASST));
+    }
+
+    @Test
+    public void testLogMakerImportanceApp() {
+        long timestamp = 1000L;
+        StatusBarNotification sbn = getNotification(PKG_O, true /* noisy */,
+                true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
+                false /* lights */, false /* defaultLights */, null /* group */);
+        NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
+
+        record.calculateImportance();  // This importance calculation will yield 'app'
+        final LogMaker logMaker = record.getLogMaker(timestamp);
+        assertEquals(MetricsEvent.IMPORTANCE_EXPLANATION_APP,
+                logMaker.getTaggedData(MetricsEvent.FIELD_NOTIFICATION_IMPORTANCE_EXPLANATION));
+        assertEquals(channel.getImportance(),
+                logMaker.getTaggedData(MetricsEvent.FIELD_NOTIFICATION_CHANNEL_IMPORTANCE));
+        // The additional information is only populated if the initial importance is overridden.
+        assertNull(logMaker.getTaggedData(MetricsEvent.FIELD_NOTIFICATION_IMPORTANCE_INITIAL));
+        assertNull(logMaker.getTaggedData(
+                MetricsEvent.FIELD_NOTIFICATION_IMPORTANCE_INITIAL_EXPLANATION));
+        assertNull(logMaker.getTaggedData(MetricsEvent.FIELD_NOTIFICATION_IMPORTANCE_ASST));
+    }
+
+    @Test
+    public void testLogMakerImportanceAsst() {
+        long timestamp = 1000L;
+        StatusBarNotification sbn = getNotification(PKG_O, true /* noisy */,
+                true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
+                false /* lights */, false /* defaultLights */, null /* group */);
+        NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
+        Bundle signals = new Bundle();
+        signals.putInt(KEY_IMPORTANCE, IMPORTANCE_LOW);
+        record.addAdjustment(new Adjustment(PKG_O, KEY_IMPORTANCE, signals, "", uid));
+        record.applyAdjustments();
+        record.calculateImportance();  // This importance calculation will yield 'asst'
+        final LogMaker logMaker = record.getLogMaker(timestamp);
+        assertEquals(MetricsEvent.IMPORTANCE_EXPLANATION_ASST,
+                logMaker.getTaggedData(MetricsEvent.FIELD_NOTIFICATION_IMPORTANCE_EXPLANATION));
+        // Therefore this is the assistant-set importance
+        assertEquals(IMPORTANCE_LOW,
+                logMaker.getTaggedData(MetricsEvent.FIELD_NOTIFICATION_CHANNEL_IMPORTANCE));
+        // Initial importance is populated so we know what it was, since it didn't get used.
+        assertEquals(channel.getImportance(),
+                logMaker.getTaggedData(MetricsEvent.FIELD_NOTIFICATION_IMPORTANCE_INITIAL));
+        assertEquals(MetricsEvent.IMPORTANCE_EXPLANATION_APP,
+                logMaker.getTaggedData(
+                        MetricsEvent.FIELD_NOTIFICATION_IMPORTANCE_INITIAL_EXPLANATION));
+        // This field is only populated if the assistant was itself overridden by the system.
+        assertNull(logMaker.getTaggedData(MetricsEvent.FIELD_NOTIFICATION_IMPORTANCE_ASST));
+    }
+
+    @Test
+    public void testLogMakerImportanceSystem() {
+        long timestamp = 1000L;
+        StatusBarNotification sbn = getNotification(PKG_O, true /* noisy */,
+                true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
+                false /* lights */, false /* defaultLights */, null /* group */);
+        NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
+        record.setSystemImportance(IMPORTANCE_HIGH);
+        record.calculateImportance();  // This importance calculation will yield 'system'
+        final LogMaker logMaker = record.getLogMaker(timestamp);
+        assertEquals(MetricsEvent.IMPORTANCE_EXPLANATION_SYSTEM,
+                logMaker.getTaggedData(MetricsEvent.FIELD_NOTIFICATION_IMPORTANCE_EXPLANATION));
+        // Therefore this is the system-set importance
+        assertEquals(IMPORTANCE_HIGH,
+                logMaker.getTaggedData(MetricsEvent.FIELD_NOTIFICATION_CHANNEL_IMPORTANCE));
+        // Initial importance is populated so we know what it was, since it didn't get used.
+        assertEquals(channel.getImportance(),
+                logMaker.getTaggedData(MetricsEvent.FIELD_NOTIFICATION_IMPORTANCE_INITIAL));
+        assertEquals(MetricsEvent.IMPORTANCE_EXPLANATION_APP,
+                logMaker.getTaggedData(
+                        MetricsEvent.FIELD_NOTIFICATION_IMPORTANCE_INITIAL_EXPLANATION));
+        assertNull(logMaker.getTaggedData(MetricsEvent.FIELD_NOTIFICATION_IMPORTANCE_ASST));
+    }
+
+    @Test
+    public void testLogMakerImportanceUser() {
+        long timestamp = 1000L;
+        channel.lockFields(channel.USER_LOCKED_IMPORTANCE);
+        StatusBarNotification sbn = getNotification(PKG_O, true /* noisy */,
+                true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
+                false /* lights */, false /* defaultLights */, null /* group */);
+        NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
+        record.calculateImportance();  // This importance calculation will yield 'user'
+        final LogMaker logMaker = record.getLogMaker(timestamp);
+        assertEquals(MetricsEvent.IMPORTANCE_EXPLANATION_USER,
+                logMaker.getTaggedData(MetricsEvent.FIELD_NOTIFICATION_IMPORTANCE_EXPLANATION));
+        // Therefore this is the user-set importance
+        assertEquals(channel.getImportance(),
+                logMaker.getTaggedData(MetricsEvent.FIELD_NOTIFICATION_CHANNEL_IMPORTANCE));
+        // The additional information is only populated if the initial importance is overridden.
+        assertNull(logMaker.getTaggedData(MetricsEvent.FIELD_NOTIFICATION_IMPORTANCE_INITIAL));
+        assertNull(logMaker.getTaggedData(
+                MetricsEvent.FIELD_NOTIFICATION_IMPORTANCE_INITIAL_EXPLANATION));
+        assertNull(logMaker.getTaggedData(MetricsEvent.FIELD_NOTIFICATION_IMPORTANCE_ASST));
+    }
+
+    @Test
+    public void testLogMakerImportanceMulti() {
+        long timestamp = 1000L;
+        channel.lockFields(channel.USER_LOCKED_IMPORTANCE);
+        StatusBarNotification sbn = getNotification(PKG_O, true /* noisy */,
+                true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
+                false /* lights */, false /* defaultLights */, null /* group */);
+        NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
+        // Add all 3 ways of overriding the app-set importance of the notification
+        Bundle signals = new Bundle();
+        signals.putInt(KEY_IMPORTANCE, IMPORTANCE_LOW);
+        record.addAdjustment(new Adjustment(PKG_O, KEY_IMPORTANCE, signals, "", uid));
+        record.applyAdjustments();
+        record.setSystemImportance(IMPORTANCE_HIGH);
+        record.calculateImportance();  // This importance calculation will yield 'system'
+        final LogMaker logMaker = record.getLogMaker(timestamp);
+        assertEquals(MetricsEvent.IMPORTANCE_EXPLANATION_SYSTEM,
+                logMaker.getTaggedData(MetricsEvent.FIELD_NOTIFICATION_IMPORTANCE_EXPLANATION));
+        // Therefore this is the system-set importance
+        assertEquals(IMPORTANCE_HIGH,
+                logMaker.getTaggedData(MetricsEvent.FIELD_NOTIFICATION_CHANNEL_IMPORTANCE));
+        // Initial importance is populated so we know what it was, since it didn't get used.
+        assertEquals(channel.getImportance(),
+                logMaker.getTaggedData(MetricsEvent.FIELD_NOTIFICATION_IMPORTANCE_INITIAL));
+        assertEquals(MetricsEvent.IMPORTANCE_EXPLANATION_USER, logMaker.getTaggedData(
+                MetricsEvent.FIELD_NOTIFICATION_IMPORTANCE_INITIAL_EXPLANATION));
+        // Assistant importance is populated so we know what it was, since it didn't get used.
+        assertEquals(IMPORTANCE_LOW, logMaker.getTaggedData(
+                MetricsEvent.FIELD_NOTIFICATION_IMPORTANCE_ASST));
     }
 
     @Test
@@ -807,7 +940,7 @@ public class NotificationRecordTest extends UiServiceTestCase {
         assertEquals(IMPORTANCE_DEFAULT, record.getImportance());
 
         Bundle bundle = new Bundle();
-        bundle.putInt(Adjustment.KEY_IMPORTANCE, IMPORTANCE_LOW);
+        bundle.putInt(KEY_IMPORTANCE, IMPORTANCE_LOW);
         Adjustment adjustment = new Adjustment(
                 PKG_O, record.getKey(), bundle, "", record.getUserId());
 
@@ -831,7 +964,7 @@ public class NotificationRecordTest extends UiServiceTestCase {
         assertEquals(IMPORTANCE_DEFAULT, record.getImportance());
 
         Bundle bundle = new Bundle();
-        bundle.putInt(Adjustment.KEY_IMPORTANCE, IMPORTANCE_LOW);
+        bundle.putInt(KEY_IMPORTANCE, IMPORTANCE_LOW);
         Adjustment adjustment = new Adjustment(
                 PKG_O, record.getKey(), bundle, "", record.getUserId());
 

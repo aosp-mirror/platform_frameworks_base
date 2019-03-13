@@ -51,7 +51,6 @@ public class FeatureFlagUtils {
         DEFAULT_FLAGS.put("settings_network_and_internet_v2", "true");
         DEFAULT_FLAGS.put("settings_slice_injection", "true");
         DEFAULT_FLAGS.put("settings_systemui_theme", "true");
-        DEFAULT_FLAGS.put("settings_wifi_mac_randomization", "true");
         DEFAULT_FLAGS.put("settings_mainline_module", "false");
         DEFAULT_FLAGS.put("settings_dynamic_android", "false");
         DEFAULT_FLAGS.put(SEAMLESS_TRANSFER, "false");
@@ -60,6 +59,7 @@ public class FeatureFlagUtils {
         DEFAULT_FLAGS.put(SCREENRECORD_LONG_PRESS, "false");
         DEFAULT_FLAGS.put(GLOBAL_ACTIONS_GRID_ENABLED, "true");
         DEFAULT_FLAGS.put(GLOBAL_ACTIONS_PANEL_ENABLED, "true");
+        DEFAULT_FLAGS.put("settings_wifi_details_saved_screen", "false");
     }
 
     /**

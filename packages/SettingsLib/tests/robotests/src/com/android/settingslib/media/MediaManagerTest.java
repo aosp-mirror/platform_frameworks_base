@@ -111,6 +111,15 @@ public class MediaManagerTest {
     }
 
     @Test
+    public void dispatchDataChanged_registerCallback_shouldDispatchCallback() {
+        mMediaManager.registerCallback(mCallback);
+
+        mMediaManager.dispatchDataChanged();
+
+        verify(mCallback).onDeviceAttributesChanged();
+    }
+
+    @Test
     public void findMediaDevice_idExist_shouldReturnMediaDevice() {
         mMediaManager.mMediaDevices.add(mDevice);
 

@@ -90,6 +90,10 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
      */
     public static final float GRADIENT_SCRIM_ALPHA = 0.2f;
     /**
+     * Scrim opacity when the phone is about to wake-up.
+     */
+    public static final float AOD2_SCRIM_ALPHA = 0.6f;
+    /**
      * A scrim varies its opacity based on a busyness factor, for example
      * how many notifications are currently visible.
      */

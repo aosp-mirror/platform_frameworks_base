@@ -247,27 +247,6 @@ public interface QSTile {
         }
     }
 
-
-    @ProvidesInterface(version = AirplaneBooleanState.VERSION)
-    public static class AirplaneBooleanState extends BooleanState {
-        public static final int VERSION = 1;
-        public boolean isAirplaneMode;
-
-        @Override
-        public boolean copyTo(State other) {
-            final AirplaneBooleanState o = (AirplaneBooleanState) other;
-            final boolean changed = super.copyTo(other) || o.isAirplaneMode != isAirplaneMode;
-            o.isAirplaneMode = isAirplaneMode;
-            return changed;
-        }
-
-        public State copy() {
-            AirplaneBooleanState state = new AirplaneBooleanState();
-            copyTo(state);
-            return state;
-        }
-    }
-
     @ProvidesInterface(version = SlashState.VERSION)
     public static class SlashState {
         public static final int VERSION = 2;

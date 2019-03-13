@@ -280,9 +280,9 @@
     <!-- WFC, summary for Disabled -->
     <string name="wifi_calling_off_summary">Off</string>
     <!-- WFC, summary for Wi-Fi Preferred -->
-    <string name="wfc_mode_wifi_preferred_summary">Wi-Fi preferred</string>
+    <string name="wfc_mode_wifi_preferred_summary">Call over Wi-Fi</string>
     <!-- WFC, summary for Mobile data Preferred -->
-    <string name="wfc_mode_cellular_preferred_summary">Mobile preferred</string>
+    <string name="wfc_mode_cellular_preferred_summary">Call over mobile network</string>
     <!-- WFC, summary for Wi-Fi Only -->
     <string name="wfc_mode_wifi_only_summary">Wi-Fi only</string>
 
@@ -1406,9 +1406,9 @@
       re-enables the keylock when the call is finished.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR_LIMIT=NONE] -->
-    <string name="permlab_requestScreenLockComplexity">request screen lock complexity</string>
+    <string name="permlab_requestPasswordComplexity">request screen lock complexity</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR_LIMIT=NONE] -->
-    <string name="permdesc_requestScreenLockComplexity">Allows the app to learn the screen
+    <string name="permdesc_requestPasswordComplexity">Allows the app to learn the screen
         lock complexity level (high, medium, low or none), which indicates the possible range of
         length and type of the screen lock. The app can also suggest to users that they update the
         screen lock to a certain level but users can freely ignore and navigate away. Note that the
@@ -3401,13 +3401,18 @@
     <string name="network_available_sign_in_detailed"><xliff:g id="network_ssid">%1$s</xliff:g></string>
 
     <!-- A notification is shown when the user connects to a Wi-Fi network and the system detects that that network has no Internet access. This is the notification's title. -->
-    <string name="wifi_no_internet">Wi-Fi has no internet access</string>
+    <string name="wifi_no_internet"><xliff:g id="network_ssid" example="GoogleGuest">%1$s</xliff:g> has no internet access</string>
 
     <!-- A notification is shown when the user connects to a Wi-Fi network and the system detects that that network has no Internet access. This is the notification's message. -->
     <string name="wifi_no_internet_detailed">Tap for options</string>
 
     <!-- A notification is shown after the user logs in to a captive portal network, to indicate that the network should now have internet connectivity. This is the message of notification. [CHAR LIMIT=50] -->
     <string name="captive_portal_logged_in_detailed">Connected</string>
+    <!-- A notification is shown when the user connects to a network that doesn't have access to some services (e.g. Push notifications may not work). This is the notification's title. [CHAR LIMIT=50] -->
+    <string name="network_partial_connectivity"><xliff:g id="network_ssid" example="GoogleGuest">%1$s</xliff:g> has limited connectivity</string>
+
+    <!-- A notification is shown when the user connects to a network that doesn't have access to some services (e.g. Push notifications may not work). This is the notification's message. [CHAR LIMIT=50] -->
+    <string name="network_partial_connectivity_detailed">Tap to connect anyway</string>
 
     <!-- A notification is shown when the user's softap config has been changed due to underlying
          hardware restrictions. This is the notifications's title.

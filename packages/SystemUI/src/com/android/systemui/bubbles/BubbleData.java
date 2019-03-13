@@ -17,6 +17,7 @@ package com.android.systemui.bubbles;
 
 import androidx.annotation.Nullable;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
 import java.util.Collection;
@@ -29,12 +30,13 @@ import javax.inject.Singleton;
  * Keeps track of active bubbles.
  */
 @Singleton
-class BubbleData {
+public class BubbleData {
 
     private HashMap<String, Bubble> mBubbles = new HashMap<>();
 
+    @VisibleForTesting
     @Inject
-    BubbleData() {}
+    public BubbleData() {}
 
     /**
      * The set of bubbles.

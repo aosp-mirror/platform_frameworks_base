@@ -16,6 +16,7 @@
 
 package android.telephony.ims;
 
+import android.annotation.NonNull;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -64,7 +65,7 @@ public final class RcsOutgoingMessageCreationParams extends RcsMessageCreationPa
         super(in);
     }
 
-    public static final @android.annotation.NonNull Creator<RcsOutgoingMessageCreationParams> CREATOR =
+    public static final @NonNull Creator<RcsOutgoingMessageCreationParams> CREATOR =
             new Creator<RcsOutgoingMessageCreationParams>() {
                 @Override
                 public RcsOutgoingMessageCreationParams createFromParcel(Parcel in) {

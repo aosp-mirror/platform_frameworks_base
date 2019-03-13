@@ -779,7 +779,8 @@ public class StaticLayout extends Layout {
                 ascents[i] = res.getLineAscent(i);
                 descents[i] = res.getLineDescent(i);
                 hasTabs[i] = res.hasLineTab(i);
-                hyphenEdits[i] = res.getLineHyphenEdit(i);
+                hyphenEdits[i] =
+                    packHyphenEdit(res.getStartLineHyphenEdit(i), res.getEndLineHyphenEdit(i));
             }
 
             final int remainingLineCount = mMaximumVisibleLineCount - mLineCount;
@@ -1258,20 +1259,42 @@ public class StaticLayout extends Layout {
         return mBottomPadding;
     }
 
+    // To store into single int field, pack the pair of start and end hyphen edit.
+    static int packHyphenEdit(
+            @Paint.StartHyphenEdit int start, @Paint.EndHyphenEdit int end) {
+        return start << START_HYPHEN_BITS_SHIFT | end;
+    }
+
+    static int unpackStartHyphenEdit(int packedHyphenEdit) {
+        return (packedHyphenEdit & START_HYPHEN_MASK) >> START_HYPHEN_BITS_SHIFT;
+    }
+
+    static int unpackEndHyphenEdit(int packedHyphenEdit) {
+        return packedHyphenEdit & END_HYPHEN_MASK;
+    }
+
     /**
-     * Returns the packed hyphen edit value for this line.
-     *
-     * You can extract start hyphen edit and end hyphen edit by using
-     * {@link Hyphenator#unpackStartHyphenEdit(int)} and
-     * {@link Hyphenator#unpackEndHyphenEdit(int)}.
+     * Returns the start hyphen edit value for this line.
      *
      * @param lineNumber a line number
-     * @return A packed hyphen edit value.
+     * @return A start hyphen edit value.
      * @hide
      */
     @Override
-    public int getHyphen(int lineNumber) {
-        return mLines[mColumns * lineNumber + HYPHEN] & HYPHEN_MASK;
+    public @Paint.StartHyphenEdit int getStartHyphenEdit(int lineNumber) {
+        return unpackStartHyphenEdit(mLines[mColumns * lineNumber + HYPHEN] & HYPHEN_MASK);
+    }
+
+    /**
+     * Returns the packed hyphen edit value for this line.
+     *
+     * @param lineNumber a line number
+     * @return An end hyphen edit value.
+     * @hide
+     */
+    @Override
+    public @Paint.EndHyphenEdit int getEndHyphenEdit(int lineNumber) {
+        return unpackEndHyphenEdit(mLines[mColumns * lineNumber + HYPHEN] & HYPHEN_MASK);
     }
 
     /**
@@ -1395,6 +1418,9 @@ public class StaticLayout extends Layout {
     private static final int DIR_SHIFT  = 30;
     private static final int TAB_MASK   = 0x20000000;
     private static final int HYPHEN_MASK = 0xFF;
+    private static final int START_HYPHEN_BITS_SHIFT = 3;
+    private static final int START_HYPHEN_MASK = 0x18; // 0b11000
+    private static final int END_HYPHEN_MASK = 0x7;  // 0b00111
 
     private static final int TAB_INCREMENT = 20; // same as Layout, but that's private
 

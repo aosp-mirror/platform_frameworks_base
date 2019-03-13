@@ -88,7 +88,9 @@ public class CastTile extends QSTileImpl<BooleanState> {
 
     @Override
     public BooleanState newTileState() {
-        return new BooleanState();
+        BooleanState state = new BooleanState();
+        state.handlesLongClick = false;
+        return state;
     }
 
     @Override
@@ -116,20 +118,25 @@ public class CastTile extends QSTileImpl<BooleanState> {
     }
 
     @Override
+    protected void handleLongClick() {
+        handleClick();
+    }
+
+    @Override
     protected void handleClick() {
         if (getState().state == Tile.STATE_UNAVAILABLE) {
-            return;
-        }
-        if (mKeyguard.isSecure() && !mKeyguard.canSkipBouncer()) {
-            mActivityStarter.postQSRunnableDismissingKeyguard(() -> {
-                showDetail(true);
-            });
             return;
         }
 
         CastDevice activeProjection = getActiveDeviceMediaProjection();
         if (activeProjection == null) {
-            showDetail(true);
+            if (mKeyguard.isSecure() && !mKeyguard.canSkipBouncer()) {
+                mActivityStarter.postQSRunnableDismissingKeyguard(() -> {
+                    showDetail(true);
+                });
+            } else {
+                showDetail(true);
+            }
         } else {
             mController.stopCasting(activeProjection);
         }

@@ -17,6 +17,7 @@ package android.telephony.ims;
 
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PROTECTED;
 
+import android.annotation.NonNull;
 import android.os.Parcel;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -43,7 +44,7 @@ public class RcsGroupThreadParticipantJoinedEventDescriptor extends RcsGroupThre
                 new RcsParticipant(mJoinedParticipantId));
     }
 
-    public static final @android.annotation.NonNull Creator<RcsGroupThreadParticipantJoinedEventDescriptor> CREATOR =
+    public static final @NonNull Creator<RcsGroupThreadParticipantJoinedEventDescriptor> CREATOR =
             new Creator<RcsGroupThreadParticipantJoinedEventDescriptor>() {
                 @Override
                 public RcsGroupThreadParticipantJoinedEventDescriptor createFromParcel(Parcel in) {

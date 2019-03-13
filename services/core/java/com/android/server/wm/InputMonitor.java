@@ -168,6 +168,7 @@ final class InputMonitor {
 
     void onDisplayRemoved() {
         mHandler.removeCallbacks(mUpdateInputWindows);
+        mService.mInputManager.onDisplayRemoved(mDisplayId);
         mDisplayRemoved = true;
     }
 

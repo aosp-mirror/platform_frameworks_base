@@ -2213,11 +2213,14 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     public void resetUserExpansion() {
-        boolean changed = mUserExpanded;
+        boolean wasExpanded = isExpanded();
         mHasUserChangedExpansion = false;
         mUserExpanded = false;
-        if (changed && mIsSummaryWithChildren) {
-            mChildrenContainer.onExpansionChanged();
+        if (wasExpanded != isExpanded()) {
+            if (mIsSummaryWithChildren) {
+                mChildrenContainer.onExpansionChanged();
+            }
+            notifyHeightChanged(false /* needsAnimation */);
         }
         updateShelfIconColor();
     }

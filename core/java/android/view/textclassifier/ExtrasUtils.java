@@ -29,6 +29,7 @@ import java.util.ArrayList;
  */
 public final class ExtrasUtils {
 
+    private static final String ACTION_INTENT = "action-intent";
     private static final String ACTIONS_INTENTS = "actions-intents";
     private static final String FOREIGN_LANGUAGE = "foreign-language";
     private static final String ENTITY_TYPE = "entity-type";
@@ -74,6 +75,22 @@ public final class ExtrasUtils {
      */
     static void putActionsIntents(Bundle container, ArrayList<Intent> actionsIntents) {
         container.putParcelableArrayList(ACTIONS_INTENTS, actionsIntents);
+    }
+
+    /**
+     * Stores {@code actionIntents} information in TextClassifier response object's extras
+     * {@code container}.
+     */
+    public static void putActionIntent(Bundle container, @Nullable Intent actionIntent) {
+        container.putParcelable(ACTION_INTENT, actionIntent);
+    }
+
+    /**
+     * Returns {@code actionIntent} information contained in a TextClassifier response object.
+     */
+    @Nullable
+    public static Intent getActionIntent(Bundle container) {
+        return container.getParcelable(ACTION_INTENT);
     }
 
     /**

@@ -20,6 +20,7 @@ import static android.net.NetworkCapabilities.LINK_BANDWIDTH_UNSPECIFIED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_CAPTIVE_PORTAL;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_CBS;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_EIMS;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_FOREGROUND;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_MMS;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_METERED;
@@ -27,6 +28,7 @@ import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_VPN;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_OEM_PAID;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_PARTIAL_CONNECTIVITY;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_WIFI_P2P;
 import static android.net.NetworkCapabilities.RESTRICTED_CAPABILITIES;
@@ -332,6 +334,24 @@ public class NetworkCapabilitiesTest {
         assertFalse(request.satisfiedByNetworkCapabilities(network));
         network.addCapability(NET_CAPABILITY_NOT_RESTRICTED);
         assertTrue(request.satisfiedByNetworkCapabilities(network));
+    }
+
+    @Test
+    public void testConnectivityManagedCapabilities() {
+        NetworkCapabilities nc = new NetworkCapabilities();
+        assertFalse(nc.hasConnectivityManagedCapability());
+        // Check every single system managed capability.
+        nc.addCapability(NET_CAPABILITY_CAPTIVE_PORTAL);
+        assertTrue(nc.hasConnectivityManagedCapability());
+        nc.removeCapability(NET_CAPABILITY_CAPTIVE_PORTAL);
+        nc.addCapability(NET_CAPABILITY_FOREGROUND);
+        assertTrue(nc.hasConnectivityManagedCapability());
+        nc.removeCapability(NET_CAPABILITY_FOREGROUND);
+        nc.addCapability(NET_CAPABILITY_PARTIAL_CONNECTIVITY);
+        assertTrue(nc.hasConnectivityManagedCapability());
+        nc.removeCapability(NET_CAPABILITY_PARTIAL_CONNECTIVITY);
+        nc.addCapability(NET_CAPABILITY_VALIDATED);
+        assertTrue(nc.hasConnectivityManagedCapability());
     }
 
     @Test

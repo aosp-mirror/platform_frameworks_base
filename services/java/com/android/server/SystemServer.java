@@ -1373,14 +1373,6 @@ public final class SystemServer {
             }
             traceEnd();
 
-            traceBeginAndSlog("StartNetworkStack");
-            try {
-                NetworkStackClient.getInstance().start(context);
-            } catch (Throwable e) {
-                reportWtf("starting Network Stack", e);
-            }
-            traceEnd();
-
             traceBeginAndSlog("StartNsdService");
             try {
                 serviceDiscovery = NsdService.create(context);
@@ -2141,6 +2133,14 @@ public final class SystemServer {
             }
             mSystemServiceManager.startBootPhase(
                     SystemService.PHASE_THIRD_PARTY_APPS_CAN_START);
+            traceEnd();
+
+            traceBeginAndSlog("StartNetworkStack");
+            try {
+                NetworkStackClient.getInstance().start(context);
+            } catch (Throwable e) {
+                reportWtf("starting Network Stack", e);
+            }
             traceEnd();
 
             traceBeginAndSlog("MakeLocationServiceReady");

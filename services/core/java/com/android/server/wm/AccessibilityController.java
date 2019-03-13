@@ -607,6 +607,13 @@ final class AccessibilityController {
                         availableBounds.op(windowBounds, Region.Op.DIFFERENCE);
                     }
 
+                    // Count letterbox into nonMagnifiedBounds
+                    if (windowState.isLetterboxedForDisplayCutoutLw()) {
+                        Region letterboxBounds = getLetterboxBounds(windowState);
+                        nonMagnifiedBounds.op(letterboxBounds, Region.Op.UNION);
+                        availableBounds.op(letterboxBounds, Region.Op.DIFFERENCE);
+                    }
+
                     // Update accounted bounds
                     Region accountedBounds = mTempRegion2;
                     accountedBounds.set(mMagnificationRegion);
@@ -656,6 +663,25 @@ final class AccessibilityController {
                             MyHandler.MESSAGE_NOTIFY_MAGNIFICATION_REGION_CHANGED, args)
                             .sendToTarget();
                 }
+            }
+
+            private Region getLetterboxBounds(WindowState windowState) {
+                final AppWindowToken appToken = windowState.mAppToken;
+                if (appToken == null) {
+                    return new Region();
+                }
+
+                mDisplay.getRealSize(mTempPoint);
+                final Rect letterboxInsets = appToken.getLetterboxInsets();
+                final int screenWidth = mTempPoint.x;
+                final int screenHeight = mTempPoint.y;
+                final Rect nonLetterboxRect = mTempRect1;
+                final Region letterboxBounds = mTempRegion3;
+                nonLetterboxRect.set(0, 0, screenWidth, screenHeight);
+                nonLetterboxRect.inset(letterboxInsets);
+                letterboxBounds.set(0, 0, screenWidth, screenHeight);
+                letterboxBounds.op(nonLetterboxRect, Region.Op.DIFFERENCE);
+                return letterboxBounds;
             }
 
             public void onRotationChangedLocked() {
@@ -881,7 +907,7 @@ final class AccessibilityController {
                 }
 
                 public void releaseSurface() {
-                    mSurfaceControl.release();
+                    mSurfaceControl.remove();
                     mSurface.release();
                 }
 

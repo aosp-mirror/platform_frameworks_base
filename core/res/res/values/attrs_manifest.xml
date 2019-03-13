@@ -1473,6 +1473,9 @@
         <flag name="location" value="0x08" />
         <!-- Auto, bluetooth, TV or other devices connection, monitoring and interaction. -->
         <flag name="connectedDevice" value="0x10" />
+        <!-- Managing a media projection session, e.g, for screen recording or taking
+             screenshots.-->
+        <flag name="mediaProjection" value="0x20" />
     </attr>
 
 
@@ -1993,7 +1996,9 @@
          {@link #AndroidManifestApplication application} tag. -->
     <declare-styleable name="AndroidManifestUsesPackage" parent="AndroidManifestApplication">
         <!-- Required type of association with the package, for example "android.package.ad_service"
-             if it provides an advertising service. -->
+             if it provides an advertising service.  This should use the standard scoped naming
+             convention as used for other things such as package names, based on the Java naming
+             convention. -->
         <attr name="packageType" format="string" />
         <!-- Required name of the package you use. -->
         <attr name="name" />

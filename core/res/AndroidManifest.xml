@@ -2152,9 +2152,9 @@
      screen lock to a certain complexity level.
      <p>Protection level: normal
     -->
-    <permission android:name="android.permission.REQUEST_SCREEN_LOCK_COMPLEXITY"
-                android:label="@string/permlab_requestScreenLockComplexity"
-                android:description="@string/permdesc_requestScreenLockComplexity"
+    <permission android:name="android.permission.REQUEST_PASSWORD_COMPLEXITY"
+                android:label="@string/permlab_requestPasswordComplexity"
+                android:description="@string/permdesc_requestPasswordComplexity"
                 android:protectionLevel="normal" />
 
     <!-- ================================== -->
@@ -2524,7 +2524,7 @@
     <permission android:name="android.permission.WRITE_GSERVICES"
         android:protectionLevel="signature|privileged" />
 
-    <!-- @SystemApi @hide Allows an application to modify config settings.
+    <!-- @SystemApi @TestApi @hide Allows an application to modify config settings.
     <p>Not for use by third-party applications. -->
     <permission android:name="android.permission.WRITE_DEVICE_CONFIG"
         android:protectionLevel="signature|configurator"/>
@@ -3917,7 +3917,7 @@
     <permission android:name="android.permission.PACKAGE_ROLLBACK_AGENT"
         android:protectionLevel="signature" />
 
-    <!-- @SystemApi @hide Allows managing apk level rollbacks. -->
+    <!-- @SystemApi @TestApi @hide Allows managing apk level rollbacks. -->
     <permission android:name="android.permission.MANAGE_ROLLBACKS"
         android:protectionLevel="signature|verifier" />
 

@@ -1396,9 +1396,11 @@ public class Resources {
 
 
     /**
+     * Returns the resource ID of the resource that was used to create this AttributeSet.
+     *
      * @param set AttributeSet for which we want to find the source.
-     * @return The resource id for the source that is backing the given AttributeSet
-     * @hide
+     * @return The resource ID for the source that is backing the given AttributeSet or
+     * {@link Resources#ID_NULL} if the AttributeSet is {@code null}.
      */
     @AnyRes
     public static int getAttributeSetSourceResId(@Nullable AttributeSet set) {

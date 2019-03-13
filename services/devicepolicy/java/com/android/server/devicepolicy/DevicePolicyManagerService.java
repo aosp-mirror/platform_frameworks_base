@@ -18,7 +18,7 @@ package com.android.server.devicepolicy;
 
 import static android.Manifest.permission.BIND_DEVICE_ADMIN;
 import static android.Manifest.permission.MANAGE_CA_CERTIFICATES;
-import static android.Manifest.permission.REQUEST_SCREEN_LOCK_COMPLEXITY;
+import static android.Manifest.permission.REQUEST_PASSWORD_COMPLEXITY;
 import static android.app.ActivityManager.LOCK_TASK_MODE_NONE;
 import static android.app.admin.DeviceAdminReceiver.EXTRA_TRANSFER_OWNERSHIP_ADMIN_EXTRAS_BUNDLE;
 import static android.app.admin.DevicePolicyManager.ACTION_PROVISION_MANAGED_USER;
@@ -65,7 +65,7 @@ import static android.app.admin.DevicePolicyManager.PRIVATE_DNS_MODE_OPPORTUNIST
 import static android.app.admin.DevicePolicyManager.PRIVATE_DNS_MODE_PROVIDER_HOSTNAME;
 import static android.app.admin.DevicePolicyManager.PRIVATE_DNS_MODE_UNKNOWN;
 import static android.app.admin.DevicePolicyManager.PRIVATE_DNS_SET_ERROR_FAILURE_SETTING;
-import static android.app.admin.DevicePolicyManager.PRIVATE_DNS_SET_SUCCESS;
+import static android.app.admin.DevicePolicyManager.PRIVATE_DNS_SET_NO_ERROR;
 import static android.app.admin.DevicePolicyManager.PROFILE_KEYGUARD_FEATURES_AFFECT_OWNER;
 import static android.app.admin.DevicePolicyManager.WIPE_EUICC;
 import static android.app.admin.DevicePolicyManager.WIPE_EXTERNAL_STORAGE;
@@ -4795,8 +4795,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         final int callingUserId = mInjector.userHandleGetCallingUserId();
         enforceUserUnlocked(callingUserId);
         mContext.enforceCallingOrSelfPermission(
-                REQUEST_SCREEN_LOCK_COMPLEXITY,
-                "Must have " + REQUEST_SCREEN_LOCK_COMPLEXITY + " permission.");
+                REQUEST_PASSWORD_COMPLEXITY,
+                "Must have " + REQUEST_PASSWORD_COMPLEXITY + " permission.");
 
         synchronized (getLockObject()) {
             int targetUserId = getCredentialOwner(callingUserId, /* parent= */ false);
@@ -14010,7 +14010,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                             "Host provided for opportunistic mode, but is not needed.");
                 }
                 putPrivateDnsSettings(ConnectivityManager.PRIVATE_DNS_MODE_OPPORTUNISTIC, null);
-                return PRIVATE_DNS_SET_SUCCESS;
+                return PRIVATE_DNS_SET_NO_ERROR;
             case PRIVATE_DNS_MODE_PROVIDER_HOSTNAME:
                 if (TextUtils.isEmpty(privateDnsHost)
                         || !NetworkUtils.isWeaklyValidatedHostname(privateDnsHost)) {
@@ -14023,7 +14023,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 putPrivateDnsSettings(
                         ConnectivityManager.PRIVATE_DNS_MODE_PROVIDER_HOSTNAME,
                         privateDnsHost);
-                return PRIVATE_DNS_SET_SUCCESS;
+                return PRIVATE_DNS_SET_NO_ERROR;
             default:
                 throw new IllegalArgumentException(
                         String.format("Provided mode, %d, is not a valid mode.", mode));

@@ -18,6 +18,7 @@ package com.android.settingslib.media;
 import android.content.Context;
 import android.util.Log;
 
+import com.android.settingslib.R;
 import com.android.settingslib.bluetooth.A2dpProfile;
 import com.android.settingslib.bluetooth.HearingAidProfile;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
@@ -34,6 +35,7 @@ public class PhoneMediaDevice extends MediaDevice {
 
     private LocalBluetoothProfileManager mProfileManager;
     private LocalBluetoothManager mLocalBluetoothManager;
+    private String mSummary = "";
 
     PhoneMediaDevice(Context context, LocalBluetoothManager localBluetoothManager) {
         super(context, MediaDeviceType.TYPE_PHONE_DEVICE);
@@ -45,14 +47,17 @@ public class PhoneMediaDevice extends MediaDevice {
 
     @Override
     public String getName() {
-        return mContext
-                .getString(com.android.settingslib.R.string.media_transfer_phone_device_name);
+        return mContext.getString(R.string.media_transfer_this_device_name);
+    }
+
+    @Override
+    public String getSummary() {
+        return mSummary;
     }
 
     @Override
     public int getIcon() {
-        //TODO(b/117129183): This is not final icon for phone device, just for demo.
-        return com.android.internal.R.drawable.ic_phone;
+        return R.drawable.ic_smartphone;
     }
 
     @Override
@@ -69,6 +74,7 @@ public class PhoneMediaDevice extends MediaDevice {
 
         if (hapProfile != null && a2dpProfile != null) {
             isConnected = hapProfile.setActiveDevice(null) && a2dpProfile.setActiveDevice(null);
+            updateSummary(true);
             setConnectedRecord();
         }
         Log.d(TAG, "connect() device : " + getName() + ", is selected : " + isConnected);
@@ -77,6 +83,20 @@ public class PhoneMediaDevice extends MediaDevice {
 
     @Override
     public void disconnect() {
-        //TODO(b/117129183): disconnected last select device
+        updateSummary(false);
+    }
+
+    @Override
+    public boolean isConnected() {
+        return true;
+    }
+
+    /**
+     * According current active device is {@link PhoneMediaDevice} or not to update summary.
+     */
+    public void updateSummary(boolean isActive) {
+        mSummary = isActive
+                ? mContext.getString(R.string.bluetooth_active_no_battery_level)
+                : "";
     }
 }

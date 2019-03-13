@@ -23,10 +23,10 @@ import android.net.DhcpInfo;
 import android.net.Network;
 import android.net.wifi.IDppCallback;
 import android.net.wifi.INetworkRequestMatchCallback;
+import android.net.wifi.IOnWifiUsabilityStatsListener;
 import android.net.wifi.ISoftApCallback;
 import android.net.wifi.ITrafficStateCallback;
 import android.net.wifi.IWifiManager;
-import android.net.wifi.IWifiUsabilityStatsListener;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiActivityEnergyInfo;
 import android.net.wifi.WifiConfiguration;
@@ -467,13 +467,13 @@ public class BaseWifiService extends IWifiManager.Stub {
     }
 
     @Override
-    public void addWifiUsabilityStatsListener(
-            IBinder binder, IWifiUsabilityStatsListener listener, int listenerIdentifier) {
+    public void addOnWifiUsabilityStatsListener(
+            IBinder binder, IOnWifiUsabilityStatsListener listener, int listenerIdentifier) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void removeWifiUsabilityStatsListener(int listenerIdentifier) {
+    public void removeOnWifiUsabilityStatsListener(int listenerIdentifier) {
         throw new UnsupportedOperationException();
     }
 

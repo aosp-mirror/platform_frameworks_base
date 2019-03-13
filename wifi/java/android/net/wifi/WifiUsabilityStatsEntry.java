@@ -51,87 +51,88 @@ public final class WifiUsabilityStatsEntry implements Parcelable {
     public static final int PROBE_STATUS_FAILURE = 3;
 
     /** Absolute milliseconds from device boot when these stats were sampled */
-    public final long timeStampMs;
+    private final long mTimeStampMillis;
     /** The RSSI (in dBm) at the sample time */
-    public final int rssi;
+    private final int mRssi;
     /** Link speed at the sample time in Mbps */
-    public final int linkSpeedMbps;
+    private final int mLinkSpeedMbps;
     /** The total number of tx success counted from the last radio chip reset */
-    public final long totalTxSuccess;
+    private final long mTotalTxSuccess;
     /** The total number of MPDU data packet retries counted from the last radio chip reset */
-    public final long totalTxRetries;
+    private final long mTotalTxRetries;
     /** The total number of tx bad counted from the last radio chip reset */
-    public final long totalTxBad;
+    private final long mTotalTxBad;
     /** The total number of rx success counted from the last radio chip reset */
-    public final long totalRxSuccess;
+    private final long mTotalRxSuccess;
     /** The total time the wifi radio is on in ms counted from the last radio chip reset */
-    public final long totalRadioOnTimeMs;
+    private final long mTotalRadioOnTimeMillis;
     /** The total time the wifi radio is doing tx in ms counted from the last radio chip reset */
-    public final long totalRadioTxTimeMs;
+    private final long mTotalRadioTxTimeMillis;
     /** The total time the wifi radio is doing rx in ms counted from the last radio chip reset */
-    public final long totalRadioRxTimeMs;
+    private final long mTotalRadioRxTimeMillis;
     /** The total time spent on all types of scans in ms counted from the last radio chip reset */
-    public final long totalScanTimeMs;
+    private final long mTotalScanTimeMillis;
     /** The total time spent on nan scans in ms counted from the last radio chip reset */
-    public final long totalNanScanTimeMs;
+    private final long mTotalNanScanTimeMillis;
     /** The total time spent on background scans in ms counted from the last radio chip reset */
-    public final long totalBackgroundScanTimeMs;
+    private final long mTotalBackgroundScanTimeMillis;
     /** The total time spent on roam scans in ms counted from the last radio chip reset */
-    public final long totalRoamScanTimeMs;
+    private final long mTotalRoamScanTimeMillis;
     /** The total time spent on pno scans in ms counted from the last radio chip reset */
-    public final long totalPnoScanTimeMs;
+    private final long mTotalPnoScanTimeMillis;
     /** The total time spent on hotspot2.0 scans and GAS exchange in ms counted from the last radio
      * chip reset */
-    public final long totalHotspot2ScanTimeMs;
+    private final long mTotalHotspot2ScanTimeMillis;
     /** The total time CCA is on busy status on the current frequency in ms counted from the last
      * radio chip reset */
-    public final long totalCcaBusyFreqTimeMs;
-    /** The total radio on time of the current frequency from the last radio chip reset */
-    public final long totalRadioOnFreqTimeMs;
+    private final long mTotalCcaBusyFreqTimeMillis;
+    /** The total radio on time on the current frequency from the last radio chip reset */
+    private final long mTotalRadioOnFreqTimeMillis;
     /** The total number of beacons received from the last radio chip reset */
-    public final long totalBeaconRx;
+    private final long mTotalBeaconRx;
     /** The status of link probe since last stats update */
-    public final int probeStatusSinceLastUpdate;
+    @ProbeStatus private final int mProbeStatusSinceLastUpdate;
     /** The elapsed time of the most recent link probe since last stats update */
-    public final int probeElapsedTimeMsSinceLastUpdate;
+    private final int mProbeElapsedTimeSinceLastUpdateMillis;
     /** The MCS rate of the most recent link probe since last stats update */
-    public final int probeMcsRateSinceLastUpdate;
+    private final int mProbeMcsRateSinceLastUpdate;
     /** Rx link speed at the sample time in Mbps */
-    public final int rxLinkSpeedMbps;
+    private final int mRxLinkSpeedMbps;
 
     /** Constructor function {@hide} */
-    public WifiUsabilityStatsEntry(long timeStampMs, int rssi,
-            int linkSpeedMbps, long totalTxSuccess, long totalTxRetries,
-            long totalTxBad, long totalRxSuccess, long totalRadioOnTimeMs,
-            long totalRadioTxTimeMs, long totalRadioRxTimeMs, long totalScanTimeMs,
-            long totalNanScanTimeMs, long totalBackgroundScanTimeMs, long totalRoamScanTimeMs,
-            long totalPnoScanTimeMs, long totalHotspot2ScanTimeMs, long totalCcaBusyFreqTimeMs,
-            long totalRadioOnFreqTimeMs, long totalBeaconRx,
-            @ProbeStatus int probeStatusSinceLastUpdate, int probeElapsedTimeMsSinceLastUpdate,
+    public WifiUsabilityStatsEntry(long timeStampMillis, int rssi, int linkSpeedMbps,
+            long totalTxSuccess, long totalTxRetries, long totalTxBad, long totalRxSuccess,
+            long totalRadioOnTimeMillis, long totalRadioTxTimeMillis, long totalRadioRxTimeMillis,
+            long totalScanTimeMillis, long totalNanScanTimeMillis,
+            long totalBackgroundScanTimeMillis,
+            long totalRoamScanTimeMillis, long totalPnoScanTimeMillis,
+            long totalHotspot2ScanTimeMillis,
+            long totalCcaBusyFreqTimeMillis, long totalRadioOnFreqTimeMillis, long totalBeaconRx,
+            @ProbeStatus int probeStatusSinceLastUpdate, int probeElapsedTimeSinceLastUpdateMillis,
             int probeMcsRateSinceLastUpdate, int rxLinkSpeedMbps) {
-        this.timeStampMs = timeStampMs;
-        this.rssi = rssi;
-        this.linkSpeedMbps = linkSpeedMbps;
-        this.totalTxSuccess = totalTxSuccess;
-        this.totalTxRetries = totalTxRetries;
-        this.totalTxBad = totalTxBad;
-        this.totalRxSuccess = totalRxSuccess;
-        this.totalRadioOnTimeMs = totalRadioOnTimeMs;
-        this.totalRadioTxTimeMs = totalRadioTxTimeMs;
-        this.totalRadioRxTimeMs = totalRadioRxTimeMs;
-        this.totalScanTimeMs = totalScanTimeMs;
-        this.totalNanScanTimeMs = totalNanScanTimeMs;
-        this.totalBackgroundScanTimeMs = totalBackgroundScanTimeMs;
-        this.totalRoamScanTimeMs = totalRoamScanTimeMs;
-        this.totalPnoScanTimeMs = totalPnoScanTimeMs;
-        this.totalHotspot2ScanTimeMs = totalHotspot2ScanTimeMs;
-        this.totalCcaBusyFreqTimeMs = totalCcaBusyFreqTimeMs;
-        this.totalRadioOnFreqTimeMs = totalRadioOnFreqTimeMs;
-        this.totalBeaconRx = totalBeaconRx;
-        this.probeStatusSinceLastUpdate = probeStatusSinceLastUpdate;
-        this.probeElapsedTimeMsSinceLastUpdate = probeElapsedTimeMsSinceLastUpdate;
-        this.probeMcsRateSinceLastUpdate = probeMcsRateSinceLastUpdate;
-        this.rxLinkSpeedMbps = rxLinkSpeedMbps;
+        mTimeStampMillis = timeStampMillis;
+        mRssi = rssi;
+        mLinkSpeedMbps = linkSpeedMbps;
+        mTotalTxSuccess = totalTxSuccess;
+        mTotalTxRetries = totalTxRetries;
+        mTotalTxBad = totalTxBad;
+        mTotalRxSuccess = totalRxSuccess;
+        mTotalRadioOnTimeMillis = totalRadioOnTimeMillis;
+        mTotalRadioTxTimeMillis = totalRadioTxTimeMillis;
+        mTotalRadioRxTimeMillis = totalRadioRxTimeMillis;
+        mTotalScanTimeMillis = totalScanTimeMillis;
+        mTotalNanScanTimeMillis = totalNanScanTimeMillis;
+        mTotalBackgroundScanTimeMillis = totalBackgroundScanTimeMillis;
+        mTotalRoamScanTimeMillis = totalRoamScanTimeMillis;
+        mTotalPnoScanTimeMillis = totalPnoScanTimeMillis;
+        mTotalHotspot2ScanTimeMillis = totalHotspot2ScanTimeMillis;
+        mTotalCcaBusyFreqTimeMillis = totalCcaBusyFreqTimeMillis;
+        mTotalRadioOnFreqTimeMillis = totalRadioOnFreqTimeMillis;
+        mTotalBeaconRx = totalBeaconRx;
+        mProbeStatusSinceLastUpdate = probeStatusSinceLastUpdate;
+        mProbeElapsedTimeSinceLastUpdateMillis = probeElapsedTimeSinceLastUpdateMillis;
+        mProbeMcsRateSinceLastUpdate = probeMcsRateSinceLastUpdate;
+        mRxLinkSpeedMbps = rxLinkSpeedMbps;
     }
 
     /** Implement the Parcelable interface */
@@ -141,29 +142,29 @@ public final class WifiUsabilityStatsEntry implements Parcelable {
 
     /** Implement the Parcelable interface */
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeLong(timeStampMs);
-        dest.writeInt(rssi);
-        dest.writeInt(linkSpeedMbps);
-        dest.writeLong(totalTxSuccess);
-        dest.writeLong(totalTxRetries);
-        dest.writeLong(totalTxBad);
-        dest.writeLong(totalRxSuccess);
-        dest.writeLong(totalRadioOnTimeMs);
-        dest.writeLong(totalRadioTxTimeMs);
-        dest.writeLong(totalRadioRxTimeMs);
-        dest.writeLong(totalScanTimeMs);
-        dest.writeLong(totalNanScanTimeMs);
-        dest.writeLong(totalBackgroundScanTimeMs);
-        dest.writeLong(totalRoamScanTimeMs);
-        dest.writeLong(totalPnoScanTimeMs);
-        dest.writeLong(totalHotspot2ScanTimeMs);
-        dest.writeLong(totalCcaBusyFreqTimeMs);
-        dest.writeLong(totalRadioOnFreqTimeMs);
-        dest.writeLong(totalBeaconRx);
-        dest.writeInt(probeStatusSinceLastUpdate);
-        dest.writeInt(probeElapsedTimeMsSinceLastUpdate);
-        dest.writeInt(probeMcsRateSinceLastUpdate);
-        dest.writeInt(rxLinkSpeedMbps);
+        dest.writeLong(mTimeStampMillis);
+        dest.writeInt(mRssi);
+        dest.writeInt(mLinkSpeedMbps);
+        dest.writeLong(mTotalTxSuccess);
+        dest.writeLong(mTotalTxRetries);
+        dest.writeLong(mTotalTxBad);
+        dest.writeLong(mTotalRxSuccess);
+        dest.writeLong(mTotalRadioOnTimeMillis);
+        dest.writeLong(mTotalRadioTxTimeMillis);
+        dest.writeLong(mTotalRadioRxTimeMillis);
+        dest.writeLong(mTotalScanTimeMillis);
+        dest.writeLong(mTotalNanScanTimeMillis);
+        dest.writeLong(mTotalBackgroundScanTimeMillis);
+        dest.writeLong(mTotalRoamScanTimeMillis);
+        dest.writeLong(mTotalPnoScanTimeMillis);
+        dest.writeLong(mTotalHotspot2ScanTimeMillis);
+        dest.writeLong(mTotalCcaBusyFreqTimeMillis);
+        dest.writeLong(mTotalRadioOnFreqTimeMillis);
+        dest.writeLong(mTotalBeaconRx);
+        dest.writeInt(mProbeStatusSinceLastUpdate);
+        dest.writeInt(mProbeElapsedTimeSinceLastUpdateMillis);
+        dest.writeInt(mProbeMcsRateSinceLastUpdate);
+        dest.writeInt(mRxLinkSpeedMbps);
     }
 
     /** Implement the Parcelable interface */
@@ -186,4 +187,121 @@ public final class WifiUsabilityStatsEntry implements Parcelable {
             return new WifiUsabilityStatsEntry[size];
         }
     };
+
+    /** Absolute milliseconds from device boot when these stats were sampled */
+    public long getTimeStampMillis() {
+        return mTimeStampMillis;
+    }
+
+    /** The RSSI (in dBm) at the sample time */
+    public int getRssi() {
+        return mRssi;
+    }
+
+    /** Link speed at the sample time in Mbps */
+    public int getLinkSpeedMbps() {
+        return mLinkSpeedMbps;
+    }
+
+    /** The total number of tx success counted from the last radio chip reset */
+    public long getTotalTxSuccess() {
+        return mTotalTxSuccess;
+    }
+
+    /** The total number of MPDU data packet retries counted from the last radio chip reset */
+    public long getTotalTxRetries() {
+        return mTotalTxRetries;
+    }
+
+    /** The total number of tx bad counted from the last radio chip reset */
+    public long getTotalTxBad() {
+        return mTotalTxBad;
+    }
+
+    /** The total number of rx success counted from the last radio chip reset */
+    public long getTotalRxSuccess() {
+        return mTotalRxSuccess;
+    }
+
+    /** The total time the wifi radio is on in ms counted from the last radio chip reset */
+    public long getTotalRadioOnTimeMillis() {
+        return mTotalRadioOnTimeMillis;
+    }
+
+    /** The total time the wifi radio is doing tx in ms counted from the last radio chip reset */
+    public long getTotalRadioTxTimeMillis() {
+        return mTotalRadioTxTimeMillis;
+    }
+
+    /** The total time the wifi radio is doing rx in ms counted from the last radio chip reset */
+    public long getTotalRadioRxTimeMillis() {
+        return mTotalRadioRxTimeMillis;
+    }
+
+    /** The total time spent on all types of scans in ms counted from the last radio chip reset */
+    public long getTotalScanTimeMillis() {
+        return mTotalScanTimeMillis;
+    }
+
+    /** The total time spent on nan scans in ms counted from the last radio chip reset */
+    public long getTotalNanScanTimeMillis() {
+        return mTotalNanScanTimeMillis;
+    }
+
+    /** The total time spent on background scans in ms counted from the last radio chip reset */
+    public long getTotalBackgroundScanTimeMillis() {
+        return mTotalBackgroundScanTimeMillis;
+    }
+
+    /** The total time spent on roam scans in ms counted from the last radio chip reset */
+    public long getTotalRoamScanTimeMillis() {
+        return mTotalRoamScanTimeMillis;
+    }
+
+    /** The total time spent on pno scans in ms counted from the last radio chip reset */
+    public long getTotalPnoScanTimeMillis() {
+        return mTotalPnoScanTimeMillis;
+    }
+
+    /** The total time spent on hotspot2.0 scans and GAS exchange in ms counted from the last radio
+     * chip reset */
+    public long getTotalHotspot2ScanTimeMillis() {
+        return mTotalHotspot2ScanTimeMillis;
+    }
+
+    /** The total time CCA is on busy status on the current frequency in ms counted from the last
+     * radio chip reset */
+    public long getTotalCcaBusyFreqTimeMillis() {
+        return mTotalCcaBusyFreqTimeMillis;
+    }
+
+    /** The total radio on time on the current frequency from the last radio chip reset */
+    public long getTotalRadioOnFreqTimeMillis() {
+        return mTotalRadioOnFreqTimeMillis;
+    }
+
+    /** The total number of beacons received from the last radio chip reset */
+    public long getTotalBeaconRx() {
+        return mTotalBeaconRx;
+    }
+
+    /** The status of link probe since last stats update */
+    @ProbeStatus public int getProbeStatusSinceLastUpdate() {
+        return mProbeStatusSinceLastUpdate;
+    }
+
+    /** The elapsed time of the most recent link probe since last stats update */
+    public int getProbeElapsedTimeSinceLastUpdateMillis() {
+        return mProbeElapsedTimeSinceLastUpdateMillis;
+    }
+
+    /** The MCS rate of the most recent link probe since last stats update */
+    public int getProbeMcsRateSinceLastUpdate() {
+        return mProbeMcsRateSinceLastUpdate;
+    }
+
+    /** Rx link speed at the sample time in Mbps */
+    public int getRxLinkSpeedMbps() {
+        return mRxLinkSpeedMbps;
+    }
 }

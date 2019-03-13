@@ -91,15 +91,22 @@ public final class LabeledIntent {
             Context context, @Nullable TitleChooser titleChooser) {
         final PackageManager pm = context.getPackageManager();
         final ResolveInfo resolveInfo = pm.resolveActivity(intent, 0);
-        final String packageName = resolveInfo != null && resolveInfo.activityInfo != null
-                ? resolveInfo.activityInfo.packageName : null;
-        Icon icon = null;
+
+        if (resolveInfo == null || resolveInfo.activityInfo == null) {
+            Log.w(TAG, "resolveInfo or activityInfo is null");
+            return null;
+        }
+        final String packageName = resolveInfo.activityInfo.packageName;
+        final String className = resolveInfo.activityInfo.name;
+        if (packageName == null || className == null) {
+            Log.w(TAG, "packageName or className is null");
+            return null;
+        }
         Intent resolvedIntent = new Intent(intent);
+        resolvedIntent.setComponent(new ComponentName(packageName, className));
         boolean shouldShowIcon = false;
-        if (packageName != null && !"android".equals(packageName)) {
-            // There is a default activity handling the intent.
-            resolvedIntent.setComponent(
-                    new ComponentName(packageName, resolveInfo.activityInfo.name));
+        Icon icon = null;
+        if (!"android".equals(packageName)) {
             if (resolveInfo.activityInfo.getIconResource() != 0) {
                 icon = Icon.createWithResource(
                         packageName, resolveInfo.activityInfo.getIconResource());
@@ -113,9 +120,6 @@ public final class LabeledIntent {
         }
         final PendingIntent pendingIntent =
                 TextClassification.createPendingIntent(context, resolvedIntent, requestCode);
-        if (pendingIntent == null) {
-            return null;
-        }
         if (titleChooser == null) {
             titleChooser = DEFAULT_TITLE_CHOOSER;
         }
@@ -150,6 +154,7 @@ public final class LabeledIntent {
     public interface TitleChooser {
         /**
          * Picks a title from a {@link LabeledIntent} by looking into resolved info.
+         * {@code resolveInfo} is guaranteed to have a non-null {@code activityInfo}.
          */
         @Nullable
         CharSequence chooseTitle(LabeledIntent labeledIntent, ResolveInfo resolveInfo);

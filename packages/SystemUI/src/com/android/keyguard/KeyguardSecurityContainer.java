@@ -20,6 +20,7 @@ import android.app.AlertDialog;
 import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.content.res.ColorStateList;
+import android.metrics.LogMaker;
 import android.os.UserHandle;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -32,8 +33,11 @@ import android.widget.FrameLayout;
 
 import androidx.annotation.VisibleForTesting;
 
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
+import com.android.systemui.Dependency;
 
 public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSecurityView {
     private static final boolean DEBUG = KeyguardConstants.DEBUG;
@@ -53,6 +57,8 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
     private AlertDialog mAlertDialog;
 
     private final KeyguardUpdateMonitor mUpdateMonitor;
+
+    private final MetricsLogger mMetricsLogger = Dependency.get(MetricsLogger.class);
 
     // Used to notify the container when something interesting happens.
     public interface SecurityCallback {
@@ -439,6 +445,8 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
                     StatsLog.KEYGUARD_BOUNCER_PASSWORD_ENTERED__RESULT__FAILURE);
                 KeyguardSecurityContainer.this.reportFailedUnlockAttempt(userId, timeoutMs);
             }
+            mMetricsLogger.write(new LogMaker(MetricsEvent.BOUNCER)
+                    .setType(success ? MetricsEvent.TYPE_SUCCESS : MetricsEvent.TYPE_FAILURE));
         }
 
         public void reset() {

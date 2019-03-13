@@ -32,9 +32,16 @@ oneway interface INetworkMonitor {
     // 3. a broken network (e.g. DNS failed, connect failed, HTTP request failed).
     const int NETWORK_TEST_RESULT_INVALID = 1;
 
+    // After a network has been tested, this result can be sent with EVENT_NETWORK_TESTED.
+    // The network may be used as a default internet connection, but it was found to be a partial
+    // connectivity network which can get the pass result for http probe but get the failed result
+    // for https probe.
+    const int NETWORK_TEST_RESULT_PARTIAL_CONNECTIVITY = 2;
+
     void start();
     void launchCaptivePortalApp();
     void notifyCaptivePortalAppFinished(int response);
+    void notifyAcceptPartialConnectivity();
     void forceReevaluation(int uid);
     void notifyPrivateDnsChanged(in PrivateDnsConfigParcel config);
     void notifyDnsResponse(int returnCode);

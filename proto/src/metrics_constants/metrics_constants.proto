@@ -260,6 +260,18 @@ message MetricsEvent {
     PREVIOUSLY_VISIBLE = 2;
   }
 
+  // Explanations for notification importance, derived from
+  // NotificationRecord.mImportanceExplanation.
+  enum NotificationImportanceExplanation {
+    IMPORTANCE_EXPLANATION_UNKNOWN = 0;
+    IMPORTANCE_EXPLANATION_APP = 1;     // App-specified channel importance.
+    IMPORTANCE_EXPLANATION_USER = 2;    // User-specified channel importance.
+    IMPORTANCE_EXPLANATION_ASST = 3;    // Notification Assistant override.
+    IMPORTANCE_EXPLANATION_SYSTEM = 4;  // System override.
+    // Like _APP, but based on pre-channels priority signal.
+    IMPORTANCE_EXPLANATION_APP_PRE_CHANNELS = 5;
+  }
+
   // Known visual elements: views or controls.
   enum View {
     // Unknown view
@@ -7089,6 +7101,21 @@ message MetricsEvent {
 
     // Panel for Wifi
     PANEL_WIFI = 1687;
+
+    // Custom tag for NotificationItem. A NotificationImportanceExplanation.
+    FIELD_NOTIFICATION_IMPORTANCE_EXPLANATION = 1688;
+
+    // Custom tag for NotificationItem. The initial "natural" importance.
+    FIELD_NOTIFICATION_IMPORTANCE_INITIAL = 1689;
+
+    // Custom tag for NotificationItem.  A NotificationImportanceExplanation.
+    // The source of the "natural" importance, if it was overridden.
+    FIELD_NOTIFICATION_IMPORTANCE_INITIAL_EXPLANATION = 1690;
+
+    // Custom tag for NotificationItem. The Notification Assistant's
+    // override of importance. Logged separately only if it was
+    // overridden by the system.
+    FIELD_NOTIFICATION_IMPORTANCE_ASST = 1691;
 
     // ---- End Q Constants, all Q constants go above this line ----
     // Add new aosp constants above this line.

@@ -364,19 +364,79 @@ public class Paint {
      */
     private static final int CURSOR_OPT_MAX_VALUE = CURSOR_AT;
 
-    /**
-     * Mask for hyphen edits that happen at the end of a line. Keep in sync with the definition in
-     * Minikin's Hyphenator.h.
-     * @hide
-     */
-    public static final int HYPHENEDIT_MASK_END_OF_LINE = 0x07;
+    /** @hide */
+    @IntDef(prefix = { "START_HYPHEN_EDIT_" }, value = {
+        START_HYPHEN_EDIT_NO_EDIT,
+        START_HYPHEN_EDIT_INSERT_HYPHEN,
+        START_HYPHEN_EDIT_INSERT_ZWJ
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface StartHyphenEdit {}
 
     /**
-     * Mask for hyphen edits that happen at the start of a line. Keep in sync with the definition in
-     * Minikin's Hyphenator.h.
-     * @hide
+     * An integer representing the starting of the line has no modification for hyphenation.
      */
-    public static final int HYPHENEDIT_MASK_START_OF_LINE = 0x03 << 3;
+    public static final int START_HYPHEN_EDIT_NO_EDIT = 0x00;
+
+    /**
+     * An integer representing the starting of the line has normal hyphen character (U+002D).
+     */
+    public static final int START_HYPHEN_EDIT_INSERT_HYPHEN = 0x01;
+
+    /**
+     * An integer representing the starting of the line has Zero-Width-Joiner (U+200D).
+     */
+    public static final int START_HYPHEN_EDIT_INSERT_ZWJ = 0x02;
+
+    /** @hide */
+    @IntDef(prefix = { "END_HYPHEN_EDIT_" }, value = {
+        END_HYPHEN_EDIT_NO_EDIT,
+        END_HYPHEN_EDIT_REPLACE_WITH_HYPHEN,
+        END_HYPHEN_EDIT_INSERT_HYPHEN,
+        END_HYPHEN_EDIT_INSERT_ARMENIAN_HYPHEN,
+        END_HYPHEN_EDIT_INSERT_MAQAF,
+        END_HYPHEN_EDIT_INSERT_UCAS_HYPHEN,
+        END_HYPHEN_EDIT_INSERT_ZWJ_AND_HYPHEN
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface EndHyphenEdit {}
+
+    /**
+     * An integer representing the end of the line has no modification for hyphenation.
+     */
+    public static final int END_HYPHEN_EDIT_NO_EDIT = 0x00;
+
+    /**
+     * An integer representing the character at the end of the line is replaced with hyphen
+     * character (U+002D).
+     */
+    public static final int END_HYPHEN_EDIT_REPLACE_WITH_HYPHEN = 0x01;
+
+    /**
+     * An integer representing the end of the line has normal hyphen character (U+002D).
+     */
+    public static final int END_HYPHEN_EDIT_INSERT_HYPHEN = 0x02;
+
+    /**
+     * An integer representing the end of the line has Armentian hyphen (U+058A).
+     */
+    public static final int END_HYPHEN_EDIT_INSERT_ARMENIAN_HYPHEN = 0x03;
+
+    /**
+     * An integer representing the end of the line has maqaf (Hebrew hyphen, U+05BE).
+     */
+    public static final int END_HYPHEN_EDIT_INSERT_MAQAF = 0x04;
+
+    /**
+     * An integer representing the end of the line has Canadian Syllabics hyphen (U+1400).
+     */
+    public static final int END_HYPHEN_EDIT_INSERT_UCAS_HYPHEN = 0x05;
+
+    /**
+     * An integer representing the end of the line has Zero-Width-Joiner (U+200D) followed by normal
+     * hyphen character (U+002D).
+     */
+    public static final int END_HYPHEN_EDIT_INSERT_ZWJ_AND_HYPHEN = 0x06;
 
     /**
      * The Style specifies if the primitive being drawn is filled, stroked, or
@@ -1873,54 +1933,80 @@ public class Paint {
     }
 
     /**
-     * Get the current value of packed hyphen edit.
+     * Get the current value of start hyphen edit.
      *
-     * You can extract start hyphen edit and end hyphen edit by using
-     * {@link android.text.Hyphenator#unpackStartHyphenEdit(int)} and
-     * {@link android.text.Hyphenator#unpackEndHyphenEdit(int)}.
+     * The default value is 0 which is equivalent to {@link #START_HYPHEN_EDIT_NO_EDIT}.
      *
-     * The default value is 0 which is equivalent to packed value of
-     * {@link android.text.Hyphenator#START_HYPHEN_EDIT_NO_EDIT} and
-     * {@link android.text.Hyphenator#END_HYPHEN_EDIT_NO_EDIT}.
-     *
-     * @return the current hyphen edit value
-     * @see #setHyphenEdit(int)
+     * @return the current starting hyphen edit value
+     * @see #setStartHyphenEdit(int)
      */
-    public int getHyphenEdit() {
-        return nGetHyphenEdit(mNativePaint);
+    public @StartHyphenEdit int getStartHyphenEdit() {
+        return nGetStartHyphenEdit(mNativePaint);
     }
 
     /**
-     * Set a packed hyphen edit on the paint.
+     * Get the current value of end hyphen edit.
      *
-     * By setting hyphen edit, the measurement and drawing is performed with modifying hyphenation
-     * at the start of line and end of line. For example, by passing
-     * {@link android.text.Hyphenator#END_HYPHEN_EDIT_INSERT_HYPHEN} like as follows, HYPHEN(U+2010)
+     * The default value is 0 which is equivalent to {@link #END_HYPHEN_EDIT_NO_EDIT}.
+     *
+     * @return the current starting hyphen edit value
+     * @see #setStartHyphenEdit(int)
+     */
+    public @EndHyphenEdit int getEndHyphenEdit() {
+        return nGetEndHyphenEdit(mNativePaint);
+    }
+
+    /**
+     * Set a start hyphen edit on the paint.
+     *
+     * By setting start hyphen edit, the measurement and drawing is performed with modifying
+     * hyphenation at the start of line. For example, by passing
+     * {@link #START_HYPHEN_EDIT_INSERT_HYPHEN} like as follows, HYPHEN(U+2010)
+     * character is appended at the start of line.
+     *
+     * <pre>
+     * <code>
+     *   Paint paint = new Paint();
+     *   paint.setStartHyphenEdit(Paint.START_HYPHEN_EDIT_INSERT_HYPHEN);
+     *   paint.measureText("abc", 0, 3);  // Returns the width of "‐abc"
+     *   Canvas.drawText("abc", 0, 3, 0f, 0f, paint);  // Draws "‐abc"
+     * </code>
+     * </pre>
+     *
+     * The default value is 0 which is equivalent to
+     * {@link #START_HYPHEN_EDIT_NO_EDIT}.
+     *
+     * @param startHyphen a start hyphen edit value.
+     * @see #getStartHyphenEdit()
+     */
+    public void setStartHyphenEdit(@StartHyphenEdit int startHyphen) {
+        nSetStartHyphenEdit(mNativePaint, startHyphen);
+    }
+
+    /**
+     * Set a end hyphen edit on the paint.
+     *
+     * By setting end hyphen edit, the measurement and drawing is performed with modifying
+     * hyphenation at the end of line. For example, by passing
+     * {@link #END_HYPHEN_EDIT_INSERT_HYPHEN} like as follows, HYPHEN(U+2010)
      * character is appended at the end of line.
      *
      * <pre>
      * <code>
      *   Paint paint = new Paint();
-     *   paint.setHyphenEdit(Hyphenator.packHyphenEdit(
-     *       Hyphenator.START_HYPHEN_EDIT_NO_EDIT,
-     *       Hyphenator.END_HYPHEN_EDIT_INSERT_HYPHEN));
+     *   paint.setEndHyphenEdit(Paint.END_HYPHEN_EDIT_INSERT_HYPHEN);
      *   paint.measureText("abc", 0, 3);  // Returns the width of "abc‐"
      *   Canvas.drawText("abc", 0, 3, 0f, 0f, paint);  // Draws "abc‐"
      * </code>
      * </pre>
      *
-     * You can pack start hyphen edit and end hyphen edit by
-     * {@link android.text.Hyphenator#packHyphenEdit(int,int)}
+     * The default value is 0 which is equivalent to {@link #END_HYPHEN_EDIT_NO_EDIT}.
      *
-     * The default value is 0 which is equivalent to packed value of
-     * {@link android.text.Hyphenator#START_HYPHEN_EDIT_NO_EDIT} and
-     * {@link android.text.Hyphenator#END_HYPHEN_EDIT_NO_EDIT}.
-     *
-     * @param hyphen a packed hyphen edit value.
-     * @see #getHyphenEdit()
+     * @param endHyphen a end hyphen edit value.
+     * @see #getEndHyphenEdit()
      */
-    public void setHyphenEdit(int hyphen) {
-        nSetHyphenEdit(mNativePaint, hyphen);
+    public void setEndHyphenEdit(@EndHyphenEdit int endHyphen) {
+        nSetEndHyphenEdit(mNativePaint, endHyphen);
     }
 
     /**
@@ -3063,9 +3149,13 @@ public class Paint {
     @CriticalNative
     private static native void nSetWordSpacing(long paintPtr, float wordSpacing);
     @CriticalNative
-    private static native int nGetHyphenEdit(long paintPtr);
+    private static native int nGetStartHyphenEdit(long paintPtr);
     @CriticalNative
-    private static native void nSetHyphenEdit(long paintPtr, int hyphen);
+    private static native int nGetEndHyphenEdit(long paintPtr);
+    @CriticalNative
+    private static native void nSetStartHyphenEdit(long paintPtr, int hyphen);
+    @CriticalNative
+    private static native void nSetEndHyphenEdit(long paintPtr, int hyphen);
     @CriticalNative
     private static native void nSetStrokeMiter(long paintPtr, float miter);
     @CriticalNative

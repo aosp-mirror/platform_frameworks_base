@@ -41,6 +41,9 @@ public class BluetoothMediaManager extends MediaManager implements BluetoothCall
 
     private static final String TAG = "BluetoothMediaManager";
 
+    private final DeviceAttributeChangeCallback mDeviceAttributeChangeCallback =
+            new DeviceAttributeChangeCallback();
+
     private LocalBluetoothManager mLocalBluetoothManager;
     private LocalBluetoothProfileManager mProfileManager;
     private CachedBluetoothDeviceManager mCachedBluetoothDeviceManager;
@@ -65,7 +68,10 @@ public class BluetoothMediaManager extends MediaManager implements BluetoothCall
         mLocalBluetoothManager.getEventManager().registerCallback(this);
         buildBluetoothDeviceList();
         dispatchDeviceListAdded();
+        addServiceListenerIfNecessary();
+    }
 
+    private void addServiceListenerIfNecessary() {
         // The profile may not ready when calling startScan().
         // Device status are all disconnected since profiles are not ready to connected.
         // In this case, we observe onServiceConnected() in LocalBluetoothProfileManager.
@@ -78,18 +84,18 @@ public class BluetoothMediaManager extends MediaManager implements BluetoothCall
 
     private void buildBluetoothDeviceList() {
         mMediaDevices.clear();
-        addConnectedA2dpDevices();
-        addConnectedHearingAidDevices();
+        addConnectableA2dpDevices();
+        addConnectableHearingAidDevices();
     }
 
-    private void addConnectedA2dpDevices() {
+    private void addConnectableA2dpDevices() {
         final A2dpProfile a2dpProfile = mProfileManager.getA2dpProfile();
         if (a2dpProfile == null) {
-            Log.w(TAG, "addConnectedA2dpDevices() a2dp profile is null!");
+            Log.w(TAG, "addConnectableA2dpDevices() a2dp profile is null!");
             return;
         }
 
-        final List<BluetoothDevice> devices = a2dpProfile.getConnectedDevices();
+        final List<BluetoothDevice> devices = a2dpProfile.getConnectableDevices();
 
         for (BluetoothDevice device : devices) {
             final CachedBluetoothDevice cachedDevice =
@@ -100,10 +106,12 @@ public class BluetoothMediaManager extends MediaManager implements BluetoothCall
                 continue;
             }
 
-            Log.d(TAG, "addConnectedA2dpDevices() device : " + cachedDevice.getName()
-                    + ", is connected : " + cachedDevice.isConnected());
+            Log.d(TAG, "addConnectableA2dpDevices() device : " + cachedDevice.getName()
+                    + ", is connected : " + cachedDevice.isConnected()
+                    + ", is preferred : " + a2dpProfile.isPreferred(device));
 
-            if (cachedDevice.isConnected()) {
+            if (a2dpProfile.isPreferred(device)
+                    && BluetoothDevice.BOND_BONDED == cachedDevice.getBondState()) {
                 addMediaDevice(cachedDevice);
             }
         }
@@ -111,15 +119,15 @@ public class BluetoothMediaManager extends MediaManager implements BluetoothCall
         mIsA2dpProfileReady = a2dpProfile.isProfileReady();
     }
 
-    private void addConnectedHearingAidDevices() {
+    private void addConnectableHearingAidDevices() {
         final HearingAidProfile hapProfile = mProfileManager.getHearingAidProfile();
         if (hapProfile == null) {
-            Log.w(TAG, "addConnectedA2dpDevices() hap profile is null!");
+            Log.w(TAG, "addConnectableHearingAidDevices() hap profile is null!");
             return;
         }
 
         final List<Long> devicesHiSyncIds = new ArrayList<>();
-        final List<BluetoothDevice> devices = hapProfile.getConnectedDevices();
+        final List<BluetoothDevice> devices = hapProfile.getConnectableDevices();
 
         for (BluetoothDevice device : devices) {
             final CachedBluetoothDevice cachedDevice =
@@ -130,13 +138,16 @@ public class BluetoothMediaManager extends MediaManager implements BluetoothCall
                 continue;
             }
 
-            Log.d(TAG, "addConnectedHearingAidDevices() device : " + cachedDevice.getName()
-                    + ", is connected : " + cachedDevice.isConnected());
+            Log.d(TAG, "addConnectableHearingAidDevices() device : " + cachedDevice.getName()
+                    + ", is connected : " + cachedDevice.isConnected()
+                    + ", is preferred : " + hapProfile.isPreferred(device));
+
             final long hiSyncId = hapProfile.getHiSyncId(device);
 
             // device with same hiSyncId should not be shown in the UI.
             // So do not add it into connectedDevices.
-            if (!devicesHiSyncIds.contains(hiSyncId) && cachedDevice.isConnected()) {
+            if (!devicesHiSyncIds.contains(hiSyncId) && hapProfile.isPreferred(device)
+                    && BluetoothDevice.BOND_BONDED == cachedDevice.getBondState()) {
                 devicesHiSyncIds.add(hiSyncId);
                 addMediaDevice(cachedDevice);
             }
@@ -149,6 +160,7 @@ public class BluetoothMediaManager extends MediaManager implements BluetoothCall
         MediaDevice mediaDevice = findMediaDevice(MediaDeviceUtils.getId(cachedDevice));
         if (mediaDevice == null) {
             mediaDevice = new BluetoothMediaDevice(mContext, cachedDevice);
+            cachedDevice.registerCallback(mDeviceAttributeChangeCallback);
             mLastAddedDevice = mediaDevice;
             mMediaDevices.add(mediaDevice);
         }
@@ -157,6 +169,14 @@ public class BluetoothMediaManager extends MediaManager implements BluetoothCall
     @Override
     public void stopScan() {
         mLocalBluetoothManager.getEventManager().unregisterCallback(this);
+        unregisterDeviceAttributeChangeCallback();
+    }
+
+    private void unregisterDeviceAttributeChangeCallback() {
+        for (MediaDevice device : mMediaDevices) {
+            ((BluetoothMediaDevice) device).getCachedDevice()
+                    .unregisterCallback(mDeviceAttributeChangeCallback);
+        }
     }
 
     @Override
@@ -164,12 +184,13 @@ public class BluetoothMediaManager extends MediaManager implements BluetoothCall
         if (BluetoothAdapter.STATE_ON == bluetoothState) {
             buildBluetoothDeviceList();
             dispatchDeviceListAdded();
+            addServiceListenerIfNecessary();
         } else if (BluetoothAdapter.STATE_OFF == bluetoothState) {
             final List<MediaDevice> removeDevicesList = new ArrayList<>();
             for (MediaDevice device : mMediaDevices) {
-                if (device instanceof BluetoothMediaDevice) {
-                    removeDevicesList.add(device);
-                }
+                ((BluetoothMediaDevice) device).getCachedDevice()
+                        .unregisterCallback(mDeviceAttributeChangeCallback);
+                removeDevicesList.add(device);
             }
             mMediaDevices.removeAll(removeDevicesList);
             dispatchDeviceListRemoved(removeDevicesList);
@@ -212,6 +233,7 @@ public class BluetoothMediaManager extends MediaManager implements BluetoothCall
     private void removeMediaDevice(CachedBluetoothDevice cachedDevice) {
         final MediaDevice mediaDevice = findMediaDevice(MediaDeviceUtils.getId(cachedDevice));
         if (mediaDevice != null) {
+            cachedDevice.unregisterCallback(mDeviceAttributeChangeCallback);
             mLastRemovedDevice = mediaDevice;
             mMediaDevices.remove(mediaDevice);
         }
@@ -230,12 +252,17 @@ public class BluetoothMediaManager extends MediaManager implements BluetoothCall
         Log.d(TAG, "onProfileConnectionStateChanged() device: " + cachedDevice
                 + ", state: " + state + ", bluetoothProfile: " + bluetoothProfile);
 
-        if (isCachedDeviceConnected(cachedDevice)) {
-            addMediaDevice(cachedDevice);
-            dispatchDeviceAdded(cachedDevice);
-        } else {
+        updateMediaDeviceListIfNecessary(cachedDevice);
+    }
+
+    private void updateMediaDeviceListIfNecessary(CachedBluetoothDevice cachedDevice) {
+        if (BluetoothDevice.BOND_NONE == cachedDevice.getBondState()) {
             removeMediaDevice(cachedDevice);
             dispatchDeviceRemoved(cachedDevice);
+        } else {
+            if (findMediaDevice(MediaDeviceUtils.getId(cachedDevice)) != null) {
+                dispatchDataChanged();
+            }
         }
     }
 
@@ -243,13 +270,7 @@ public class BluetoothMediaManager extends MediaManager implements BluetoothCall
     public void onAclConnectionStateChanged(CachedBluetoothDevice cachedDevice, int state) {
         Log.d(TAG, "onAclConnectionStateChanged() device: " + cachedDevice + ", state: " + state);
 
-        if (isCachedDeviceConnected(cachedDevice)) {
-            addMediaDevice(cachedDevice);
-            dispatchDeviceAdded(cachedDevice);
-        } else {
-            removeMediaDevice(cachedDevice);
-            dispatchDeviceRemoved(cachedDevice);
-        }
+        updateMediaDeviceListIfNecessary(cachedDevice);
     }
 
     @Override
@@ -280,5 +301,17 @@ public class BluetoothMediaManager extends MediaManager implements BluetoothCall
     @Override
     public void onServiceDisconnected() {
 
+    }
+
+    /**
+     * This callback is for update {@link BluetoothMediaDevice} summary when
+     * {@link CachedBluetoothDevice} connection state is changed.
+     */
+    private class DeviceAttributeChangeCallback implements CachedBluetoothDevice.Callback {
+
+        @Override
+        public void onDeviceAttributesChanged() {
+            dispatchDataChanged();
+        }
     }
 }

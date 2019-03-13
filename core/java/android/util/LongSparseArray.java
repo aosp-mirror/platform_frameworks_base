@@ -21,6 +21,9 @@ import com.android.internal.util.GrowingArrayUtils;
 
 import libcore.util.EmptyArray;
 
+import java.util.Arrays;
+import java.util.Objects;
+
 /**
  * SparseArray mapping longs to Objects.  Unlike a normal array of Objects,
  * there can be gaps in the indices.  It is intended to be more memory efficient
@@ -144,10 +147,6 @@ public class LongSparseArray<E> implements Cloneable {
      * Removes the mapping at the specified index.
      */
     public void removeAt(int index) {
-        if (index >= mSize) {
-            // The array might be slightly bigger than mSize, in which case, indexing won't fail.
-            throw new ArrayIndexOutOfBoundsException(index);
-        }
         if (mValues[index] != DELETED) {
             mValues[index] = DELETED;
             mGarbage = true;
@@ -237,10 +236,6 @@ public class LongSparseArray<E> implements Cloneable {
      * key.</p>
      */
     public long keyAt(int index) {
-        if (index >= mSize) {
-            // The array might be slightly bigger than mSize, in which case, indexing won't fail.
-            throw new ArrayIndexOutOfBoundsException(index);
-        }
         if (mGarbage) {
             gc();
         }
@@ -261,10 +256,6 @@ public class LongSparseArray<E> implements Cloneable {
      */
     @SuppressWarnings("unchecked")
     public E valueAt(int index) {
-        if (index >= mSize) {
-            // The array might be slightly bigger than mSize, in which case, indexing won't fail.
-            throw new ArrayIndexOutOfBoundsException(index);
-        }
         if (mGarbage) {
             gc();
         }
@@ -278,10 +269,6 @@ public class LongSparseArray<E> implements Cloneable {
      * LongSparseArray stores.
      */
     public void setValueAt(int index, E value) {
-        if (index >= mSize) {
-            // The array might be slightly bigger than mSize, in which case, indexing won't fail.
-            throw new ArrayIndexOutOfBoundsException(index);
-        }
         if (mGarbage) {
             gc();
         }

@@ -1383,41 +1383,42 @@ public class TelephonyManager {
      * in the application manifest. For performance reasons, if no application to receive these
      * events is detected at boot, then these events will not be sent.
      *
-     * <p>Each event will include an {@link EXTRA_DEBUG_EVENT_ID} that will uniquely identify the
+     * <p>Each event will include an {@link EXTRA_ANOMALY_ID} that will uniquely identify the
      * event that has occurred. Each event will be sent to the diagnostic monitor only once per
      * boot cycle (as another optimization).
      *
-     * @see #EXTRA_DEBUG_EVENT_ID
-     * @see #EXTRA_DEBUG_EVENT_DESCRIPTION
+     * @see #EXTRA_ANOMALY_ID
+     * @see #EXTRA_ANOMALY_DESCRIPTION
      * @hide
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
-    public static final String ACTION_DEBUG_EVENT = "android.telephony.action.DEBUG_EVENT";
+    public static final String ACTION_ANOMALY_REPORTED =
+            "android.telephony.action.ANOMALY_REPORTED";
 
     /**
      * An arbitrary ParcelUuid which should be consistent for each occurrence of a DebugEvent.
      *
-     * This field must be included in all {@link ACTION_DEBUG_EVENT} events.
+     * This field must be included in all {@link ACTION_ANOMALY_REPORTED} events.
      *
-     * @see #ACTION_DEBUG_EVENT
+     * @see #ACTION_ANOMALY_REPORTED
      * @hide
      */
     @SystemApi
-    public static final String EXTRA_DEBUG_EVENT_ID = "android.telephony.extra.DEBUG_EVENT_ID";
+    public static final String EXTRA_ANOMALY_ID = "android.telephony.extra.ANOMALY_ID";
 
     /**
-     * A freeform string description of the DebugEvent.
+     * A freeform string description of the Anomaly.
      *
-     * This field is optional for all {@link ACTION_DEBUG_EVENT}s, as a guideline should not
+     * This field is optional for all {@link ACTION_ANOMALY_REPORTED}s, as a guideline should not
      * exceed 80 characters, and should be as short as possible to convey the essence of the event.
      *
-     * @see #ACTION_DEBUG_EVENT
+     * @see #ACTION_ANOMALY_REPORTED
      * @hide
      */
     @SystemApi
-    public static final String EXTRA_DEBUG_EVENT_DESCRIPTION =
-            "android.telephony.extra.DEBUG_EVENT_DESCRIPTION";
+    public static final String EXTRA_ANOMALY_DESCRIPTION =
+            "android.telephony.extra.ANOMALY_DESCRIPTION";
 
     //
     //

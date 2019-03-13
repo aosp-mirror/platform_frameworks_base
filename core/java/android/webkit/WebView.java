@@ -1704,7 +1704,7 @@ public class WebView extends AbsoluteLayout
 
 
     /**
-     * Gets the WebView renderer associated with this WebView.
+     * Gets a handle to the WebView renderer process associated with this WebView.
      *
      * <p>In {@link android.os.Build.VERSION_CODES#O} and above, WebView may
      * run in "multiprocess" mode. In multiprocess mode, rendering of web
@@ -1717,67 +1717,70 @@ public class WebView extends AbsoluteLayout
      * handle to the renderer process associated with the WebView, which can
      * be used to control the renderer process.
      *
-     * @return the {@link WebViewRenderer} renderer handle associated
+     * @return the {@link WebViewRenderProcess} renderer handle associated
      *         with this {@link WebView}, or {@code null} if
      *         WebView is not runing in multiprocess mode.
      */
     @Nullable
-    public WebViewRenderer getWebViewRenderer() {
+    public WebViewRenderProcess getWebViewRenderProcess() {
         checkThread();
-        return mProvider.getWebViewRenderer();
+        return mProvider.getWebViewRenderProcess();
     }
 
     /**
      * Sets the renderer client object associated with this WebView.
      *
      * <p>The renderer client encapsulates callbacks relevant to WebView renderer
-     * state. See {@link WebViewRendererClient} for details.
+     * state. See {@link WebViewRenderProcessClient} for details.
      *
      * <p>Although many WebView instances may share a single underlying
      * renderer, and renderers may live either in the application
      * process, or in a sandboxed process that is isolated from the
-     * application process, instances of {@link WebViewRendererClient}
+     * application process, instances of {@link WebViewRenderProcessClient}
      * are set per-WebView.  Callbacks represent renderer events from
      * the perspective of this WebView, and may or may not be correlated
      * with renderer events affecting other WebViews.
      *
-     * @param executor the Executor on which {@link WebViewRendererClient} callbacks will execute.
-     * @param webViewRendererClient the {@link WebViewRendererClient} object.
+     * @param executor the Executor on which {@link WebViewRenderProcessClient}
+     *                 callbacks will execute.
+     * @param webViewRenderProcessClient the {@link WebViewRenderProcessClient}
+     *                                   object.
      */
-    public void setWebViewRendererClient(
+    public void setWebViewRenderProcessClient(
             @NonNull @CallbackExecutor Executor executor,
-            @NonNull WebViewRendererClient webViewRendererClient) {
+            @NonNull WebViewRenderProcessClient webViewRenderProcessClient) {
         checkThread();
-        mProvider.setWebViewRendererClient(executor, webViewRendererClient);
+        mProvider.setWebViewRenderProcessClient(
+                executor, webViewRenderProcessClient);
     }
 
     /**
      * Sets the renderer client object associated with this WebView.
      *
-     * See {@link #setWebViewRendererClient(Executor,WebViewRendererClient)} for details.
+     * See {@link #setWebViewRenderProcessClient(Executor,WebViewRenderProcessClient)} for details.
      *
-     * <p> {@link WebViewRendererClient} callbacks will run on the thread that this WebView was
+     * <p> {@link WebViewRenderProcessClient} callbacks will run on the thread that this WebView was
      * initialized on.
      *
-     * @param webViewRendererClient the {@link WebViewRendererClient} object.
+     * @param webViewRenderProcessClient the {@link WebViewRenderProcessClient} object.
      */
-    public void setWebViewRendererClient(
-            @Nullable WebViewRendererClient webViewRendererClient) {
+    public void setWebViewRenderProcessClient(
+            @Nullable WebViewRenderProcessClient webViewRenderProcessClient) {
         checkThread();
-        mProvider.setWebViewRendererClient(null, webViewRendererClient);
+        mProvider.setWebViewRenderProcessClient(null, webViewRenderProcessClient);
     }
 
     /**
      * Gets the renderer client object associated with this WebView.
      *
-     * @return the {@link WebViewRendererClient} object associated with this WebView, if one has
-     * been set via {@link #setWebViewRendererClient(WebViewRendererClient)} or {@code null}
-     * otherwise.
+     * @return the {@link WebViewRenderProcessClient} object associated with this WebView, if one
+     *         has been set via {@link #setWebViewRenderProcessClient(WebViewRenderProcessClient)}
+     *         or {@code null} otherwise.
      */
     @Nullable
-    public WebViewRendererClient getWebViewRendererClient() {
+    public WebViewRenderProcessClient getWebViewRenderProcessClient() {
         checkThread();
-        return mProvider.getWebViewRendererClient();
+        return mProvider.getWebViewRenderProcessClient();
     }
 
     /**

@@ -59,9 +59,9 @@ import android.net.wifi.WifiManager.LocalOnlyHotspotReservation;
 import android.net.wifi.WifiManager.LocalOnlyHotspotSubscription;
 import android.net.wifi.WifiManager.NetworkRequestMatchCallback;
 import android.net.wifi.WifiManager.NetworkRequestUserSelectionCallback;
+import android.net.wifi.WifiManager.OnWifiUsabilityStatsListener;
 import android.net.wifi.WifiManager.SoftApCallback;
 import android.net.wifi.WifiManager.TrafficStateCallback;
-import android.net.wifi.WifiManager.WifiUsabilityStatsListener;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -105,7 +105,7 @@ public class WifiManagerTest {
     @Mock SoftApCallback mSoftApCallback;
     @Mock TrafficStateCallback mTrafficStateCallback;
     @Mock NetworkRequestMatchCallback mNetworkRequestMatchCallback;
-    @Mock WifiUsabilityStatsListener mWifiUsabilityStatsListener;
+    @Mock OnWifiUsabilityStatsListener mOnWifiUsabilityStatsListener;
 
     private Executor mExecutor;
     private Handler mHandler;
@@ -1348,29 +1348,29 @@ i     * Verify that a call to cancel WPS immediately returns a failure.
     }
 
     /**
-     * Verify the call to addWifiUsabilityStatsListener goes to WifiServiceImpl.
+     * Verify the call to addOnWifiUsabilityStatsListener goes to WifiServiceImpl.
      */
     @Test
-    public void addWifiUsabilityStatsListeneroesToWifiServiceImpl() throws Exception {
+    public void addOnWifiUsabilityStatsListeneroesToWifiServiceImpl() throws Exception {
         mExecutor = new SynchronousExecutor();
-        mWifiManager.addWifiUsabilityStatsListener(mExecutor, mWifiUsabilityStatsListener);
-        verify(mWifiService).addWifiUsabilityStatsListener(any(IBinder.class),
-                any(IWifiUsabilityStatsListener.Stub.class), anyInt());
+        mWifiManager.addOnWifiUsabilityStatsListener(mExecutor, mOnWifiUsabilityStatsListener);
+        verify(mWifiService).addOnWifiUsabilityStatsListener(any(IBinder.class),
+                any(IOnWifiUsabilityStatsListener.Stub.class), anyInt());
     }
 
     /**
-     * Verify the call to removeWifiUsabilityStatsListener goes to WifiServiceImpl.
+     * Verify the call to removeOnWifiUsabilityStatsListener goes to WifiServiceImpl.
      */
     @Test
-    public void removeWifiUsabilityListenerGoesToWifiServiceImpl() throws Exception {
+    public void removeOnWifiUsabilityListenerGoesToWifiServiceImpl() throws Exception {
         ArgumentCaptor<Integer> listenerIdentifier = ArgumentCaptor.forClass(Integer.class);
         mExecutor = new SynchronousExecutor();
-        mWifiManager.addWifiUsabilityStatsListener(mExecutor, mWifiUsabilityStatsListener);
-        verify(mWifiService).addWifiUsabilityStatsListener(any(IBinder.class),
-                any(IWifiUsabilityStatsListener.Stub.class), listenerIdentifier.capture());
+        mWifiManager.addOnWifiUsabilityStatsListener(mExecutor, mOnWifiUsabilityStatsListener);
+        verify(mWifiService).addOnWifiUsabilityStatsListener(any(IBinder.class),
+                any(IOnWifiUsabilityStatsListener.Stub.class), listenerIdentifier.capture());
 
-        mWifiManager.removeWifiUsabilityStatsListener(mWifiUsabilityStatsListener);
-        verify(mWifiService).removeWifiUsabilityStatsListener(
+        mWifiManager.removeOnWifiUsabilityStatsListener(mOnWifiUsabilityStatsListener);
+        verify(mWifiService).removeOnWifiUsabilityStatsListener(
                 eq((int) listenerIdentifier.getValue()));
     }
 

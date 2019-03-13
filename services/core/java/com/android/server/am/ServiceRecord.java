@@ -519,10 +519,10 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
 
     public void setProcess(ProcessRecord _proc) {
         app = _proc;
-        if (pendingConnectionGroup > 0) {
-            app.connectionService = this;
-            app.connectionGroup = pendingConnectionGroup;
-            app.connectionImportance = pendingConnectionImportance;
+        if (pendingConnectionGroup > 0 && _proc != null) {
+            _proc.connectionService = this;
+            _proc.connectionGroup = pendingConnectionGroup;
+            _proc.connectionImportance = pendingConnectionImportance;
             pendingConnectionGroup = pendingConnectionImportance = 0;
         }
         if (ActivityManagerService.TRACK_PROCSTATS_ASSOCIATIONS) {

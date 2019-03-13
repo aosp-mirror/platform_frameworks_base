@@ -58,7 +58,6 @@ public class LocalMediaManager implements BluetoothCallback {
 
     private Context mContext;
     private BluetoothMediaManager mBluetoothMediaManager;
-    private InfoMediaManager mInfoMediaManager;
     private LocalBluetoothManager mLocalBluetoothManager;
 
     @VisibleForTesting
@@ -97,7 +96,6 @@ public class LocalMediaManager implements BluetoothCallback {
 
         mBluetoothMediaManager =
                 new BluetoothMediaManager(context, mLocalBluetoothManager, notification);
-        mInfoMediaManager = new InfoMediaManager(context, packageName, notification);
     }
 
     @VisibleForTesting
@@ -106,7 +104,6 @@ public class LocalMediaManager implements BluetoothCallback {
         mContext = context;
         mLocalBluetoothManager = localBluetoothManager;
         mBluetoothMediaManager = bluetoothMediaManager;
-        mInfoMediaManager = infoMediaManager;
     }
 
     /**
@@ -115,6 +112,15 @@ public class LocalMediaManager implements BluetoothCallback {
      */
     public void connectDevice(MediaDevice connectDevice) {
         final MediaDevice device = getMediaDeviceById(mMediaDevices, connectDevice.getId());
+        if (device instanceof BluetoothMediaDevice) {
+            final CachedBluetoothDevice cachedDevice =
+                    ((BluetoothMediaDevice) device).getCachedDevice();
+            if (!cachedDevice.isConnected() && !cachedDevice.isBusy()) {
+                cachedDevice.connect(true);
+                return;
+            }
+        }
+
         if (device == mCurrentConnectedDevice) {
             Log.d(TAG, "connectDevice() this device all ready connected! : " + device.getName());
             return;
@@ -150,9 +156,7 @@ public class LocalMediaManager implements BluetoothCallback {
     public void startScan() {
         mMediaDevices.clear();
         mBluetoothMediaManager.registerCallback(mMediaDeviceCallback);
-        mInfoMediaManager.registerCallback(mMediaDeviceCallback);
         mBluetoothMediaManager.startScan();
-        mInfoMediaManager.startScan();
     }
 
     private void addPhoneDeviceIfNecessary() {
@@ -186,9 +190,7 @@ public class LocalMediaManager implements BluetoothCallback {
      */
     public void stopScan() {
         mBluetoothMediaManager.unregisterCallback(mMediaDeviceCallback);
-        mInfoMediaManager.unregisterCallback(mMediaDeviceCallback);
         mBluetoothMediaManager.stopScan();
-        mInfoMediaManager.stopScan();
     }
 
     /**
@@ -252,7 +254,15 @@ public class LocalMediaManager implements BluetoothCallback {
             }
             addPhoneDeviceIfNecessary();
             mCurrentConnectedDevice = updateCurrentConnectedDevice();
+            updatePhoneMediaDeviceSummary();
             dispatchDeviceListUpdate();
+        }
+
+        private void updatePhoneMediaDeviceSummary() {
+            if (mPhoneDevice != null) {
+                ((PhoneMediaDevice) mPhoneDevice)
+                        .updateSummary(mCurrentConnectedDevice == mPhoneDevice);
+            }
         }
 
         @Override
@@ -272,21 +282,22 @@ public class LocalMediaManager implements BluetoothCallback {
         }
 
         @Override
-        public void onDeviceAttributesChanged() {
-            dispatchDeviceListUpdate();
-        }
-
-        @Override
         public void onConnectedDeviceChanged(String id) {
             final MediaDevice connectDevice = getMediaDeviceById(mMediaDevices, id);
 
             if (connectDevice == mCurrentConnectedDevice) {
-                Log.d(TAG, "onConnectedDeviceChanged() this device all ready connected! : "
-                        + connectDevice.getName());
+                Log.d(TAG, "onConnectedDeviceChanged() this device all ready connected!");
                 return;
             }
             mCurrentConnectedDevice = connectDevice;
+            updatePhoneMediaDeviceSummary();
+            dispatchDeviceListUpdate();
+        }
 
+        @Override
+        public void onDeviceAttributesChanged() {
+            addPhoneDeviceIfNecessary();
+            removePhoneMediaDeviceIfNecessary();
             dispatchDeviceListUpdate();
         }
     }

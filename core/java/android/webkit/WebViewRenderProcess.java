@@ -16,12 +16,10 @@
 
 package android.webkit;
 
-import android.annotation.SystemApi;
-
 /**
- * WebViewRenderer provides an opaque handle to a {@link WebView} renderer.
+ * WebViewRenderProcess provides an opaque handle to a {@link WebView} renderer.
  */
-public abstract class WebViewRenderer {
+public abstract class WebViewRenderProcess {
     /**
      * Cause this renderer to terminate.
      *
@@ -38,11 +36,6 @@ public abstract class WebViewRenderer {
      */
     public abstract boolean terminate();
 
-    /**
-     * This class cannot be created by applications.
-     * @hide
-     */
-    @SystemApi
-    public WebViewRenderer() {
+    public WebViewRenderProcess() {
     }
 }

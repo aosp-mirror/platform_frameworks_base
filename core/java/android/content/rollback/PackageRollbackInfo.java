@@ -18,6 +18,7 @@ package android.content.rollback;
 
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.content.pm.VersionedPackage;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -31,7 +32,7 @@ import java.util.ArrayList;
  *
  * @hide
  */
-@SystemApi
+@SystemApi @TestApi
 public final class PackageRollbackInfo implements Parcelable {
 
     private final VersionedPackage mVersionRolledBackFrom;
@@ -211,7 +212,7 @@ public final class PackageRollbackInfo implements Parcelable {
         out.writeBoolean(mIsApex);
     }
 
-    public static final @android.annotation.NonNull Parcelable.Creator<PackageRollbackInfo> CREATOR =
+    public static final @NonNull Parcelable.Creator<PackageRollbackInfo> CREATOR =
             new Parcelable.Creator<PackageRollbackInfo>() {
         public PackageRollbackInfo createFromParcel(Parcel in) {
             return new PackageRollbackInfo(in);

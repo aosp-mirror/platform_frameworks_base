@@ -681,17 +681,18 @@ void StatsdStats::dumpStats(int out) const {
     dprintf(out, "********Pulled Atom stats***********\n");
     for (const auto& pair : mPulledAtomStats) {
         dprintf(out,
-                "Atom %d->(total pull)%ld, (pull from cache)%ld, (min pull interval)%ld \n"
+                "Atom %d->(total pull)%ld, (pull from cache)%ld, "
+                "(pull failed)%ld, (min pull interval)%ld \n"
                 "  (average pull time nanos)%lld, (max pull time nanos)%lld, (average pull delay "
                 "nanos)%lld, "
                 "  (max pull delay nanos)%lld, (data error)%ld\n"
                 "  (pull timeout)%ld, (pull exceed max delay)%ld\n"
                 "  (registered count) %ld, (unregistered count) %ld\n",
                 (int)pair.first, (long)pair.second.totalPull, (long)pair.second.totalPullFromCache,
-                (long)pair.second.minPullIntervalSec, (long long)pair.second.avgPullTimeNs,
-                (long long)pair.second.maxPullTimeNs, (long long)pair.second.avgPullDelayNs,
-                (long long)pair.second.maxPullDelayNs, pair.second.dataError,
-                pair.second.pullTimeout, pair.second.pullExceedMaxDelay,
+                (long)pair.second.pullFailed, (long)pair.second.minPullIntervalSec,
+                (long long)pair.second.avgPullTimeNs, (long long)pair.second.maxPullTimeNs,
+                (long long)pair.second.avgPullDelayNs, (long long)pair.second.maxPullDelayNs,
+                pair.second.dataError, pair.second.pullTimeout, pair.second.pullExceedMaxDelay,
                 pair.second.registeredCount, pair.second.unregisteredCount);
     }
 
