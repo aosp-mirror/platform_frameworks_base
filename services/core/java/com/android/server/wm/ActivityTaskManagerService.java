@@ -6490,6 +6490,13 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
 
         @Override
+        public boolean startHomeOnDisplay(int userId, String reason, int displayId,
+                boolean fromHomeKey) {
+            return mRootActivityContainer.startHomeOnDisplay(userId, reason, displayId,
+                    fromHomeKey);
+        }
+
+        @Override
         public boolean startHomeOnAllDisplays(int userId, String reason) {
             synchronized (mGlobalLock) {
                 return mRootActivityContainer.startHomeOnAllDisplays(userId, reason);
