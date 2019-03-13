@@ -6128,7 +6128,6 @@ package android.provider {
     field public static final String LOCATION_PERMISSIONS_UPGRADE_TO_Q_MODE = "location_permissions_upgrade_to_q_mode";
     field public static final String LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS = "lock_screen_allow_private_notifications";
     field public static final String LOCK_SCREEN_SHOW_NOTIFICATIONS = "lock_screen_show_notifications";
-    field public static final String MANUAL_RINGER_TOGGLE_COUNT = "manual_ringer_toggle_count";
     field public static final String THEME_CUSTOMIZATION_OVERLAY_PACKAGES = "theme_customization_overlay_packages";
     field public static final String USER_SETUP_COMPLETE = "user_setup_complete";
     field public static final int USER_SETUP_PERSONALIZATION_COMPLETE = 10; // 0xa
@@ -6137,6 +6136,9 @@ package android.provider {
     field public static final int USER_SETUP_PERSONALIZATION_STARTED = 1; // 0x1
     field public static final String USER_SETUP_PERSONALIZATION_STATE = "user_setup_personalization_state";
     field public static final String VOLUME_HUSH_GESTURE = "volume_hush_gesture";
+    field public static final int VOLUME_HUSH_MUTE = 2; // 0x2
+    field public static final int VOLUME_HUSH_OFF = 0; // 0x0
+    field public static final int VOLUME_HUSH_VIBRATE = 1; // 0x1
   }
 
   public static final class Telephony.Carriers implements android.provider.BaseColumns {
