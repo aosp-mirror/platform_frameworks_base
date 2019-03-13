@@ -78,8 +78,7 @@ public final class NotificationClicker implements View.OnClickListener {
         row.setJustClicked(true);
         DejankUtils.postAfterTraversal(() -> row.setJustClicked(false));
 
-        // If it was a bubble we should close it
-        if (row.getEntry().isBubble()) {
+        if (!row.getEntry().isBubble()) {
             mBubbleController.collapseStack();
         }
 
@@ -95,7 +94,8 @@ public final class NotificationClicker implements View.OnClickListener {
      */
     public void register(ExpandableNotificationRow row, StatusBarNotification sbn) {
         Notification notification = sbn.getNotification();
-        if (notification.contentIntent != null || notification.fullScreenIntent != null) {
+        if (notification.contentIntent != null || notification.fullScreenIntent != null
+                || row.getEntry().isBubble()) {
             row.setOnClickListener(this);
         } else {
             row.setOnClickListener(null);

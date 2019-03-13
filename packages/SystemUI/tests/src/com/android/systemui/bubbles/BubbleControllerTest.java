@@ -438,6 +438,22 @@ public class BubbleControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void testExpandStackAndSelectBubble_removedFirst() {
+        final String key = mRow.getEntry().key;
+
+        mEntryListener.onPendingEntryAdded(mRow.getEntry());
+        mBubbleController.updateBubble(mRow.getEntry(), true /* updatePosition */);
+
+        assertTrue(mRow.getEntry().isBubble());
+
+        // Simulate notification cancellation.
+        mEntryListener.onEntryRemoved(mRow.getEntry(), null /* notificationVisibility (unused) */,
+                false /* removedbyUser */);
+
+        mBubbleController.expandStackAndSelectBubble(key);
+    }
+
+    @Test
     public void testMarkNewNotificationAsBubble() {
         mEntryListener.onPendingEntryAdded(mRow.getEntry());
         assertTrue(mRow.getEntry().isBubble());

@@ -25,6 +25,7 @@ import static android.app.StatusBarManager.WindowVisibleState;
 import static android.app.StatusBarManager.windowStateToString;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY;
 
+import static com.android.systemui.Dependency.BG_HANDLER;
 import static com.android.systemui.Dependency.MAIN_HANDLER;
 import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_ASLEEP;
 import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_AWAKE;
@@ -1076,7 +1077,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 mLockscreenUserManager, shadeController, mKeyguardMonitor,
                 mNotificationInterruptionStateProvider, mMetricsLogger,
                 new LockPatternUtils(mContext), Dependency.get(MAIN_HANDLER),
-                mActivityIntentHelper);
+                Dependency.get(BG_HANDLER), mActivityIntentHelper, mBubbleController);
 
         mGutsManager.setNotificationActivityStarter(mNotificationActivityStarter);
 

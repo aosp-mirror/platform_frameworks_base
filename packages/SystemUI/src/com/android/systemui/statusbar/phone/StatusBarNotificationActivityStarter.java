@@ -48,6 +48,7 @@ import com.android.systemui.Dependency;
 import com.android.systemui.EventLogTags;
 import com.android.systemui.UiOffloadThread;
 import com.android.systemui.assist.AssistManager;
+import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.CommandQueue;
@@ -98,7 +99,9 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
     private final CommandQueue mCommandQueue;
     private final IDreamManager mDreamManager;
     private final Handler mMainThreadHandler;
+    private final Handler mBackgroundHandler;
     private final ActivityIntentHelper mActivityIntentHelper;
+    private final BubbleController mBubbleController;
 
     private boolean mIsCollapsingToShowActivityOverLockscreen;
 
@@ -125,7 +128,9 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
             MetricsLogger metricsLogger,
             LockPatternUtils lockPatternUtils,
             Handler mainThreadHandler,
-            ActivityIntentHelper activityIntentHelper) {
+            Handler backgroundHandler,
+            ActivityIntentHelper activityIntentHelper,
+            BubbleController bubbleController) {
         mContext = context;
         mNotificationPanel = panel;
         mPresenter = presenter;
@@ -147,6 +152,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
         mAssistManager = assistManager;
         mGroupManager = groupManager;
         mLockPatternUtils = lockPatternUtils;
+        mBackgroundHandler = backgroundHandler;
         mEntryManager.addNotificationEntryListener(new NotificationEntryListener() {
             @Override
             public void onPendingEntryAdded(NotificationEntry entry) {
@@ -156,6 +162,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
         mStatusBarRemoteInputCallback = remoteInputCallback;
         mMainThreadHandler = mainThreadHandler;
         mActivityIntentHelper = activityIntentHelper;
+        mBubbleController = bubbleController;
     }
 
     /**
@@ -178,14 +185,24 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
         final PendingIntent intent = notification.contentIntent != null
                 ? notification.contentIntent
                 : notification.fullScreenIntent;
+        final boolean isBubble = row.getEntry().isBubble();
+
+        // This code path is now executed for notification without a contentIntent.
+        // The only valid case is Bubble notifications. Guard against other cases
+        // entering here.
+        if (intent == null && !isBubble) {
+            Log.e(TAG, "onNotificationClicked called for non-clickable notification!");
+            return;
+        }
+
         final String notificationKey = sbn.getKey();
 
-        boolean isActivityIntent = intent.isActivity();
+        boolean isActivityIntent = intent != null && intent.isActivity() && !isBubble;
         final boolean afterKeyguardGone = isActivityIntent
                 && mActivityIntentHelper.wouldLaunchResolverActivity(intent.getIntent(),
                 mLockscreenUserManager.getCurrentUserId());
         final boolean wasOccluded = mShadeController.isOccluded();
-        boolean showOverLockscreen = mKeyguardMonitor.isShowing()
+        boolean showOverLockscreen = mKeyguardMonitor.isShowing() && intent != null
                 && mActivityIntentHelper.wouldShowOverLockscreen(intent.getIntent(),
                 mLockscreenUserManager.getCurrentUserId());
         ActivityStarter.OnDismissAction postKeyguardAction =
@@ -244,9 +261,8 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
             mShadeController.addAfterKeyguardGoneRunnable(runnable);
             mShadeController.collapsePanel();
         } else {
-            new Thread(runnable).start();
+            mBackgroundHandler.postAtFrontOfQueue(runnable);
         }
-
         return !mNotificationPanel.isFullyCollapsed();
     }
 
@@ -287,6 +303,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
         }
         Intent fillInIntent = null;
         NotificationEntry entry = row.getEntry();
+        final boolean isBubble = entry.isBubble();
         CharSequence remoteInputText = null;
         if (!TextUtils.isEmpty(entry.remoteInputText)) {
             remoteInputText = entry.remoteInputText;
@@ -295,8 +312,12 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
             fillInIntent = new Intent().putExtra(Notification.EXTRA_REMOTE_INPUT_DRAFT,
                     remoteInputText.toString());
         }
-        startNotificationIntent(intent, fillInIntent, row, wasOccluded, isActivityIntent);
-        if (isActivityIntent) {
+        if (isBubble) {
+            expandBubbleStackOnMainThread(notificationKey);
+        } else {
+            startNotificationIntent(intent, fillInIntent, row, wasOccluded, isActivityIntent);
+        }
+        if (isActivityIntent || isBubble) {
             mAssistManager.hideAssist();
         }
         if (shouldCollapse()) {
@@ -316,16 +337,27 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
         } catch (RemoteException ex) {
             // system process is dead if we're here.
         }
-        if (parentToCancelFinal != null) {
-            removeNotification(parentToCancelFinal);
-        }
-        if (shouldAutoCancel(sbn)
-                || mRemoteInputManager.isNotificationKeptForRemoteInputHistory(
-                notificationKey)) {
-            // Automatically remove all notifications that we may have kept around longer
-            removeNotification(sbn);
+        if (!isBubble) {
+            if (parentToCancelFinal != null) {
+                removeNotification(parentToCancelFinal);
+            }
+            if (shouldAutoCancel(sbn)
+                    || mRemoteInputManager.isNotificationKeptForRemoteInputHistory(
+                    notificationKey)) {
+                // Automatically remove all notifications that we may have kept around longer
+                removeNotification(sbn);
+            }
         }
         mIsCollapsingToShowActivityOverLockscreen = false;
+    }
+
+    private void expandBubbleStackOnMainThread(String notificationKey) {
+        if (Looper.getMainLooper().isCurrentThread()) {
+            mBubbleController.expandStackAndSelectBubble(notificationKey);
+        } else {
+            mMainThreadHandler.post(
+                    () -> mBubbleController.expandStackAndSelectBubble(notificationKey));
+        }
     }
 
     private void startNotificationIntent(PendingIntent intent, Intent fillInIntent,

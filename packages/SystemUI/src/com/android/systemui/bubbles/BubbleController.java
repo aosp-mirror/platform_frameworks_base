@@ -293,6 +293,17 @@ public class BubbleController implements BubbleExpandedView.OnBubbleBlockedListe
     }
 
     /**
+     * Request the stack expand if needed, then select the specified Bubble as current.
+     *
+     * @param notificationKey the notification key for the bubble to be selected
+     */
+    public void expandStackAndSelectBubble(String notificationKey) {
+        if (mStackView != null && mBubbleData.getBubble(notificationKey) != null) {
+            mStackView.setExpandedBubble(notificationKey);
+        }
+    }
+
+    /**
      * Tell the stack of bubbles to be dismissed, this will remove all of the bubbles in the stack.
      */
     void dismissStack(@DismissReason int reason) {
