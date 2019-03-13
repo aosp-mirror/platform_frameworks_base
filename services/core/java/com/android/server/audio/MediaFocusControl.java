@@ -543,16 +543,17 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
     }
 
     /**
-     * Called synchronized on mAudioFocusLock
+     * Called synchronized on mAudioFocusLock.
+     * Can only be called with an external focus policy installed (mFocusPolicy != null)
      * @param afi
-     * @param requestResult
-     * @return true if the external audio focus policy (if any) is handling the focus request
+     * @param fd
+     * @param cb binder of the focus requester
+     * @return true if the external audio focus policy (if any) can handle the focus request,
+     *     and false if there was any error handling the request (e.g. error talking to policy,
+     *     focus requester is already dead)
      */
     boolean notifyExtFocusPolicyFocusRequest_syncAf(AudioFocusInfo afi,
-            IAudioFocusDispatcher fd, IBinder cb) {
-        if (mFocusPolicy == null) {
-            return false;
-        }
+            IAudioFocusDispatcher fd, @NonNull IBinder cb) {
         if (DEBUG) {
             Log.v(TAG, "notifyExtFocusPolicyFocusRequest client="+afi.getClientId()
             + " dispatcher=" + fd);
@@ -561,19 +562,28 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
             afi.setGen(mExtFocusChangeCounter++);
         }
         final FocusRequester existingFr = mFocusOwnersForFocusPolicy.get(afi.getClientId());
+        boolean keepTrack = false;
         if (existingFr != null) {
             if (!existingFr.hasSameDispatcher(fd)) {
                 existingFr.release();
-                final AudioFocusDeathHandler hdlr = new AudioFocusDeathHandler(cb);
-                mFocusOwnersForFocusPolicy.put(afi.getClientId(),
-                        new FocusRequester(afi, fd, cb, hdlr, this));
+                keepTrack = true;
             }
         } else {
-            // new focus (future) focus owner to keep track of
+            keepTrack = true;
+        }
+        if (keepTrack) {
             final AudioFocusDeathHandler hdlr = new AudioFocusDeathHandler(cb);
+            try {
+                cb.linkToDeath(hdlr, 0);
+            } catch (RemoteException e) {
+                // client has already died!
+                return false;
+            }
+            // new focus (future) focus owner to keep track of
             mFocusOwnersForFocusPolicy.put(afi.getClientId(),
                     new FocusRequester(afi, fd, cb, hdlr, this));
         }
+
         try {
             //oneway
             mFocusPolicy.notifyAudioFocusRequest(afi, AudioManager.AUDIOFOCUS_REQUEST_GRANTED);
@@ -600,7 +610,6 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
     /**
      * Called synchronized on mAudioFocusLock
      * @param afi
-     * @param requestResult
      * @return true if the external audio focus policy (if any) is handling the focus request
      */
     boolean notifyExtFocusPolicyFocusAbandon_syncAf(AudioFocusInfo afi) {
@@ -767,10 +776,15 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
             }
 
             // external focus policy?
-            if (notifyExtFocusPolicyFocusRequest_syncAf(
-                    afiForExtPolicy, fd, cb)) {
-                // stop handling focus request here as it is handled by external audio focus policy
-                return AudioManager.AUDIOFOCUS_REQUEST_WAITING_FOR_EXT_POLICY;
+            if (mFocusPolicy != null) {
+                if (notifyExtFocusPolicyFocusRequest_syncAf(afiForExtPolicy, fd, cb)) {
+                    // stop handling focus request here as it is handled by external audio
+                    // focus policy (return code will be handled in AudioManager)
+                    return AudioManager.AUDIOFOCUS_REQUEST_WAITING_FOR_EXT_POLICY;
+                } else {
+                    // an error occured, client already dead, bail early
+                    return AudioManager.AUDIOFOCUS_REQUEST_FAILED;
+                }
             }
 
             // handle the potential premature death of the new holder of the focus
