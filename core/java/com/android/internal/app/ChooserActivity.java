@@ -318,9 +318,7 @@ public class ChooserActivity extends ResolverActivity {
         // Do not allow the title to be changed when sharing content
         CharSequence title = null;
         if (target != null) {
-            String targetAction = target.getAction();
-            if (!(Intent.ACTION_SEND.equals(targetAction) || Intent.ACTION_SEND_MULTIPLE.equals(
-                    targetAction))) {
+            if (!isSendAction(target)) {
                 title = intent.getCharSequenceExtra(Intent.EXTRA_TITLE);
             } else {
                 Log.w(TAG, "Ignoring intent's EXTRA_TITLE, deprecated in P. You may wish to set a"
@@ -444,7 +442,7 @@ public class ChooserActivity extends ResolverActivity {
                                         .getDimensionPixelSize(R.dimen.chooser_service_spacing);
 
         // expand/shrink direct share 4 -> 8 viewgroup
-        if (mResolverDrawerLayout != null) {
+        if (mResolverDrawerLayout != null && isSendAction(target)) {
             mResolverDrawerLayout.setOnScrollChangeListener(this::handleScroll);
         }
 
@@ -470,13 +468,8 @@ public class ChooserActivity extends ResolverActivity {
     public void setHeader() {
         super.setHeader();
 
-        Intent targetIntent = getTargetIntent();
-        if (targetIntent == null) {
-            return;
-        }
-
-        String action = targetIntent.getAction();
-        if (!(Intent.ACTION_SEND.equals(action) || Intent.ACTION_SEND_MULTIPLE.equals(action))) {
+        final Intent targetIntent = getTargetIntent();
+        if (!isSendAction(targetIntent)) {
             return;
         }
 
@@ -943,9 +936,7 @@ public class ChooserActivity extends ResolverActivity {
     }
 
     private void modifyTargetIntent(Intent in) {
-        final String action = in.getAction();
-        if (Intent.ACTION_SEND.equals(action) ||
-                Intent.ACTION_SEND_MULTIPLE.equals(action)) {
+        if (isSendAction(in)) {
             in.addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT |
                     Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
         }
@@ -1939,7 +1930,11 @@ public class ChooserActivity extends ResolverActivity {
         }
 
         public int getServiceTargetCount() {
-            return Math.min(mServiceTargets.size(), MAX_SERVICE_TARGETS);
+            if (isSendAction(getTargetIntent())) {
+                return Math.min(mServiceTargets.size(), MAX_SERVICE_TARGETS);
+            }
+
+            return 0;
         }
 
         public int getStandardTargetCount() {
@@ -2088,6 +2083,23 @@ public class ChooserActivity extends ResolverActivity {
         }
     }
 
+    private boolean isSendAction(Intent targetIntent) {
+        if (targetIntent == null) {
+            return false;
+        }
+
+        String action = targetIntent.getAction();
+        if (action == null) {
+            return false;
+        }
+
+        if (Intent.ACTION_SEND.equals(action) || Intent.ACTION_SEND_MULTIPLE.equals(action)) {
+            return true;
+        }
+
+        return false;
+    }
+
     class ChooserRowAdapter extends BaseAdapter {
         private ChooserListAdapter mChooserListAdapter;
         private final LayoutInflater mLayoutInflater;
@@ -2141,7 +2153,10 @@ public class ChooserActivity extends ResolverActivity {
         // There can be at most one row in the listview, that is internally
         // a ViewGroup with 2 rows
         public int getServiceTargetRowCount() {
-            return 1;
+            if (isSendAction(getTargetIntent())) {
+                return 1;
+            }
+            return 0;
         }
 
         @Override
