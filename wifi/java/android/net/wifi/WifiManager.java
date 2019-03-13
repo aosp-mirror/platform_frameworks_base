@@ -948,7 +948,8 @@ public class WifiManager {
     /**
      * Directed broadcast intent action indicating that the device has connected to one of the
      * network suggestions provided by the app. This will be sent post connection to a network
-     * which was created with {@link WifiNetworkSuggestion.Builder#setIsAppInteractionRequired()}
+     * which was created with {@link WifiNetworkSuggestion.Builder#setIsAppInteractionRequired(
+     * boolean)}
      * flag set.
      * <p>
      * Note: The broadcast is sent to the app only if it holds
