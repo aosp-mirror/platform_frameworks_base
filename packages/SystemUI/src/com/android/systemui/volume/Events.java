@@ -55,6 +55,7 @@ public class Events {
     public static final int EVENT_RINGER_TOGGLE = 18; // (ringer_mode)
     public static final int EVENT_SHOW_USB_OVERHEAT_ALARM = 19; // (reason|int) (keyguard|bool)
     public static final int EVENT_DISMISS_USB_OVERHEAT_ALARM = 20; // (reason|int) (keyguard|bool)
+    public static final int EVENT_ODI_CAPTIONS_CLICK = 21;
 
     private static final String[] EVENT_TAGS = {
             "show_dialog",
@@ -77,7 +78,8 @@ public class Events {
             "zen_mode_config_changed",
             "ringer_toggle",
             "show_usb_overheat_alarm",
-            "dismiss_usb_overheat_alarm"
+            "dismiss_usb_overheat_alarm",
+            "odi_captions_click"
     };
 
     public static final int DISMISS_REASON_UNKNOWN = 0;
@@ -90,6 +92,7 @@ public class Events {
     public static final int DISMISS_STREAM_GONE = 7;
     public static final int DISMISS_REASON_OUTPUT_CHOOSER = 8;
     public static final int DISMISS_REASON_USB_OVERHEAD_ALARM_CHANGED = 9;
+    public static final int DISMISS_REASON_ODI_CAPTIONS_CLICKED = 10;
     public static final String[] DISMISS_REASONS = {
             "unknown",
             "touch_outside",
@@ -100,7 +103,8 @@ public class Events {
             "done_clicked",
             "a11y_stream_changed",
             "output_chooser",
-            "usb_temperature_below_threshold"
+            "usb_temperature_below_threshold",
+            "odi_captions_clicked"
     };
 
     public static final int SHOW_REASON_UNKNOWN = 0;

@@ -29,6 +29,7 @@ import static android.view.View.ACCESSIBILITY_LIVE_REGION_POLITE;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 
+import static com.android.systemui.volume.Events.DISMISS_REASON_ODI_CAPTIONS_CLICKED;
 import static com.android.systemui.volume.Events.DISMISS_REASON_SETTINGS_CLICKED;
 
 import android.animation.ObjectAnimator;
@@ -125,6 +126,8 @@ public class VolumeDialogImpl implements VolumeDialog {
     private ViewGroup mDialogRowsView;
     private ViewGroup mRinger;
     private ImageButton mRingerIcon;
+    private ViewGroup mODICaptionsView;
+    private ImageButton mODICaptionsIcon;
     private View mSettingsView;
     private ImageButton mSettingsIcon;
     private FrameLayout mZenIcon;
@@ -240,6 +243,10 @@ public class VolumeDialogImpl implements VolumeDialog {
             mRingerIcon = mRinger.findViewById(R.id.ringer_icon);
             mZenIcon = mRinger.findViewById(R.id.dnd_icon);
         }
+        mODICaptionsView = mDialog.findViewById(R.id.odi_captions);
+        if (mODICaptionsView != null) {
+            mODICaptionsIcon = mODICaptionsView.findViewById(R.id.odi_captions_icon);
+        }
         mSettingsView = mDialog.findViewById(R.id.settings_container);
         mSettingsIcon = mDialog.findViewById(R.id.settings);
 
@@ -270,6 +277,7 @@ public class VolumeDialogImpl implements VolumeDialog {
         updateRowsH(getActiveRow());
         initRingerH();
         initSettingsH();
+        initODICaptionsH();
     }
 
     protected ViewGroup getDialogView() {
@@ -478,6 +486,42 @@ public class VolumeDialogImpl implements VolumeDialog {
         updateRingerH();
     }
 
+    private void initODICaptionsH() {
+        if (mODICaptionsIcon != null) {
+            mODICaptionsIcon.setOnClickListener(v -> {
+                onCaptionIconClicked();
+                Events.writeEvent(mContext, Events.EVENT_ODI_CAPTIONS_CLICK);
+                dismissH(DISMISS_REASON_ODI_CAPTIONS_CLICKED);
+            });
+        }
+
+        mController.getCaptionsComponentState();
+    }
+
+    private void updateODICaptionsH(boolean isServiceComponentEnabled) {
+        if (mODICaptionsView != null) {
+            mODICaptionsView.setVisibility(isServiceComponentEnabled ? VISIBLE : GONE);
+        }
+
+        if (!isServiceComponentEnabled) return;
+
+        updateCaptionsIcon();
+    }
+
+    private void updateCaptionsIcon() {
+        mHandler.post(
+                mODICaptionsIcon.setImageResourceAsync(
+                        mController.areCaptionsEnabled()
+                                ? R.drawable.ic_volume_odi_captions
+                                : R.drawable.ic_volume_odi_captions_disabled));
+    }
+
+    private void onCaptionIconClicked() {
+        boolean isEnabled = mController.areCaptionsEnabled();
+        mController.setCaptionsEnabled(!isEnabled);
+        updateCaptionsIcon();
+    }
+
     private void incrementManualToggleCount() {
         ContentResolver cr = mContext.getContentResolver();
         int ringerCount = Settings.Secure.getInt(cr, Settings.Secure.MANUAL_RINGER_TOGGLE_COUNT, 0);
@@ -558,6 +602,7 @@ public class VolumeDialogImpl implements VolumeDialog {
         mDialog.show();
         Events.writeEvent(mContext, Events.EVENT_SHOW_DIALOG, reason, mKeyguard.isKeyguardLocked());
         mController.notifyVisible(true);
+        mController.getCaptionsComponentState();
     }
 
     protected void rescheduleTimeoutH() {
@@ -1150,6 +1195,11 @@ public class VolumeDialogImpl implements VolumeDialog {
                 updateRowsH(activeRow);
             }
 
+        }
+
+        @Override
+        public void onCaptionComponentStateChanged(Boolean isComponentEnabled) {
+            updateODICaptionsH(isComponentEnabled);
         }
     };
 

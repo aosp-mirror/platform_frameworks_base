@@ -336,6 +336,8 @@
 
     <dimen name="volume_dialog_ringer_size">64dp</dimen>
 
+    <dimen name="volume_dialog_caption_size">64dp</dimen>
+
     <dimen name="volume_dialog_tap_target_size">48dp</dimen>
 
     <dimen name="volume_dialog_spacer">4dp</dimen>
