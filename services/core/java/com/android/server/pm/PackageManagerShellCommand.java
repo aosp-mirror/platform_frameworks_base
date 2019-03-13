@@ -1619,30 +1619,36 @@ class PackageManagerShellCommand extends ShellCommand {
         }
 
         userId = translateUserId(userId, true /*allowAll*/, "runUninstall");
-        if (userId == UserHandle.USER_ALL) {
-            userId = UserHandle.USER_SYSTEM;
-            flags |= PackageManager.DELETE_ALL_USERS;
-        } else {
-            final PackageInfo info = mInterface.getPackageInfo(packageName,
-                    PackageManager.MATCH_STATIC_SHARED_LIBRARIES, userId);
-            if (info == null) {
-                pw.println("Failure [not installed for " + userId + "]");
-                return 1;
-            }
-            final boolean isSystem =
-                    (info.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
-            // If we are being asked to delete a system app for just one
-            // user set flag so it disables rather than reverting to system
-            // version of the app.
-            if (isSystem) {
-                flags |= PackageManager.DELETE_SYSTEM_APP;
-            }
-        }
-
         final LocalIntentReceiver receiver = new LocalIntentReceiver();
-        mInterface.getPackageInstaller().uninstall(new VersionedPackage(packageName,
-                versionCode), null /*callerPackageName*/, flags,
-                receiver.getIntentSender(), userId);
+        PackageManagerInternal internal = LocalServices.getService(PackageManagerInternal.class);
+
+        if (internal.isApexPackage(packageName)) {
+            internal.uninstallApex(packageName, versionCode, userId, receiver.getIntentSender());
+        } else {
+            if (userId == UserHandle.USER_ALL) {
+                userId = UserHandle.USER_SYSTEM;
+                flags |= PackageManager.DELETE_ALL_USERS;
+            } else {
+                final PackageInfo info = mInterface.getPackageInfo(packageName,
+                        PackageManager.MATCH_STATIC_SHARED_LIBRARIES, userId);
+                if (info == null) {
+                    pw.println("Failure [not installed for " + userId + "]");
+                    return 1;
+                }
+                final boolean isSystem =
+                        (info.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
+                // If we are being asked to delete a system app for just one
+                // user set flag so it disables rather than reverting to system
+                // version of the app.
+                if (isSystem) {
+                    flags |= PackageManager.DELETE_SYSTEM_APP;
+                }
+            }
+
+            mInterface.getPackageInstaller().uninstall(new VersionedPackage(packageName,
+                            versionCode), null /*callerPackageName*/, flags,
+                    receiver.getIntentSender(), userId);
+        }
 
         final Intent result = receiver.getResult();
         final int status = result.getIntExtra(PackageInstaller.EXTRA_STATUS,
