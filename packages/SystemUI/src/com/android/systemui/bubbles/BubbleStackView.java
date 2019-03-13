@@ -426,7 +426,9 @@ public class BubbleStackView extends FrameLayout {
 
         if (reason == BubbleController.DISMISS_USER_GESTURE) {
             Notification.BubbleMetadata bubbleMetadata = bubble.entry.getBubbleMetadata();
-            PendingIntent deleteIntent = bubbleMetadata.getDeleteIntent();
+            PendingIntent deleteIntent = bubbleMetadata != null
+                    ? bubbleMetadata.getDeleteIntent()
+                    : null;
             if (deleteIntent != null) {
                 try {
                     deleteIntent.send();
