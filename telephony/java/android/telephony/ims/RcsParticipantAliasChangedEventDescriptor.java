@@ -17,6 +17,7 @@ package android.telephony.ims;
 
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PROTECTED;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Parcel;
 
@@ -45,7 +46,7 @@ public class RcsParticipantAliasChangedEventDescriptor extends RcsEventDescripto
                 mTimestamp, new RcsParticipant(mParticipantId), mNewAlias);
     }
 
-    public static final Creator<RcsParticipantAliasChangedEventDescriptor> CREATOR =
+    public static final @NonNull Creator<RcsParticipantAliasChangedEventDescriptor> CREATOR =
             new Creator<RcsParticipantAliasChangedEventDescriptor>() {
                 @Override
                 public RcsParticipantAliasChangedEventDescriptor createFromParcel(Parcel in) {

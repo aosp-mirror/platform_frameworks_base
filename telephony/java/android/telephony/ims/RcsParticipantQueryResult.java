@@ -80,7 +80,7 @@ public final class RcsParticipantQueryResult implements Parcelable {
                 RcsQueryContinuationToken.class.getClassLoader());
     }
 
-    public static final Creator<RcsParticipantQueryResult> CREATOR =
+    public static final @android.annotation.NonNull Creator<RcsParticipantQueryResult> CREATOR =
             new Creator<RcsParticipantQueryResult>() {
                 @Override
                 public RcsParticipantQueryResult createFromParcel(Parcel in) {

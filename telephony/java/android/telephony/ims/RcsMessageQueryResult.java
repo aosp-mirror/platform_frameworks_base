@@ -89,7 +89,7 @@ public final class RcsMessageQueryResult implements Parcelable {
         in.readTypedList(mMessageTypeIdPairs, RcsTypeIdPair.CREATOR);
     }
 
-    public static final Creator<RcsMessageQueryResult> CREATOR =
+    public static final @android.annotation.NonNull Creator<RcsMessageQueryResult> CREATOR =
             new Creator<RcsMessageQueryResult>() {
                 @Override
                 public RcsMessageQueryResult createFromParcel(Parcel in) {
