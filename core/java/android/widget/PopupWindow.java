@@ -887,9 +887,9 @@ public class PopupWindow {
      *
      * @return true if popup will be clipped to the screen instead of the window, false otherwise
      *
-     * @see #setClipToScreenEnabled(boolean)
+     * @see #setIsClippedToScreen(boolean)
      */
-    public boolean isClipToScreenEnabled() {
+    public boolean isClippedToScreen() {
         return mClipToScreen;
     }
 
@@ -902,9 +902,9 @@ public class PopupWindow {
      *
      * @param enabled true to clip to the screen.
      *
-     * @see #isClipToScreenEnabled()
+     * @see #isClippedToScreen()
      */
-    public void setClipToScreenEnabled(boolean enabled) {
+    public void setIsClippedToScreen(boolean enabled) {
         mClipToScreen = enabled;
     }
 
@@ -961,9 +961,9 @@ public class PopupWindow {
      *
      * @return true if the window will always be positioned in screen coordinates.
      *
-     * @see #setLayoutInScreenEnabled(boolean)
+     * @see #setIsLaidOutInScreen(boolean)
      */
-    public boolean isLayoutInScreenEnabled() {
+    public boolean isLaidOutInScreen() {
         return mLayoutInScreen;
     }
 
@@ -974,9 +974,9 @@ public class PopupWindow {
      *
      * @param enabled true if the popup should always be positioned in screen coordinates
      *
-     * @see #isLayoutInScreenEnabled()
+     * @see #isLaidOutInScreen()
      */
-    public void setLayoutInScreenEnabled(boolean enabled) {
+    public void setIsLaidOutInScreen(boolean enabled) {
         mLayoutInScreen = enabled;
     }
 
@@ -1016,7 +1016,7 @@ public class PopupWindow {
      * This will cause the popup to inset its content to account for system windows overlaying
      * the screen, such as the status bar.
      *
-     * <p>This will often be combined with {@link #setLayoutInScreenEnabled(boolean)}.
+     * <p>This will often be combined with {@link #setIsLaidOutInScreen(boolean)}.
      *
      * @param enabled true if the popup's views should inset content to account for system windows,
      *                the way that decor views behave for full-screen windows.
@@ -2114,7 +2114,7 @@ public class PopupWindow {
      *     <li>{@link #setTouchable(boolean)}</li>
      *     <li>{@link #setAnimationStyle(int)}</li>
      *     <li>{@link #setTouchModal(boolean)} (boolean)}</li>
-     *     <li>{@link #setClipToScreenEnabled(boolean)}</li>
+     *     <li>{@link #setIsClippedToScreen(boolean)}</li>
      * </ul>
      */
     public void update() {
