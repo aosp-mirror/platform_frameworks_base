@@ -26,8 +26,10 @@ import android.database.ContentObserver;
 import android.provider.Settings;
 import android.util.ArrayMap;
 import android.util.Log;
+import android.view.accessibility.AccessibilityManager;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.AlertingNotificationManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -55,9 +57,11 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
     protected int mUser;
 
     private final ArrayMap<String, Long> mSnoozedPackages;
+    private final AccessibilityManagerWrapper mAccessibilityMgr;
 
     public HeadsUpManager(@NonNull final Context context) {
         mContext = context;
+        mAccessibilityMgr = Dependency.get(AccessibilityManagerWrapper.class);
         Resources resources = context.getResources();
         mMinimumDisplayTime = resources.getInteger(R.integer.heads_up_notification_minimum_time);
         mAutoDismissNotificationDecay = resources.getInteger(R.integer.heads_up_notification_decay);
@@ -408,6 +412,23 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
         protected long calculatePostTime() {
             // The actual post time will be just after the heads-up really slided in
             return super.calculatePostTime() + mTouchAcceptanceDelay;
+        }
+
+        @Override
+        protected long calculateFinishTime() {
+            return mPostTime + getRecommendedTimeoutMillis();
+        }
+
+        /**
+         * Get user-preferred or default timeout duration. The larger one will be returned.
+         * @return milliseconds before auto-dismiss
+         */
+        private int getRecommendedTimeoutMillis() {
+            return mAccessibilityMgr.getRecommendedTimeoutMillis(
+                    mAutoDismissNotificationDecay,
+                    AccessibilityManager.FLAG_CONTENT_CONTROLS
+                            | AccessibilityManager.FLAG_CONTENT_ICONS
+                            | AccessibilityManager.FLAG_CONTENT_TEXT);
         }
     }
 }
