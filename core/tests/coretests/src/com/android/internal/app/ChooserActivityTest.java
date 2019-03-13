@@ -599,7 +599,7 @@ public class ChooserActivityTest {
 
         mActivityRule.launchActivity(Intent.createChooser(sendIntent, null));
         waitForIdle();
-        verify(mockLogger, Mockito.times(3)).write(logMakerCaptor.capture());
+        verify(mockLogger, Mockito.times(2)).write(logMakerCaptor.capture());
         // First invocation is from onCreate
         assertThat(logMakerCaptor.getAllValues().get(1).getCategory(),
                 is(MetricsEvent.ACTION_SHARE_WITH_PREVIEW));
@@ -629,15 +629,11 @@ public class ChooserActivityTest {
         ArgumentCaptor<LogMaker> logMakerCaptor = ArgumentCaptor.forClass(LogMaker.class);
         mActivityRule.launchActivity(Intent.createChooser(sendIntent, null));
         waitForIdle();
-        verify(mockLogger, Mockito.times(3)).write(logMakerCaptor.capture());
+        verify(mockLogger, Mockito.times(2)).write(logMakerCaptor.capture());
         // First invocation is from onCreate
         assertThat(logMakerCaptor.getAllValues().get(1).getCategory(),
                 is(MetricsEvent.ACTION_SHARE_WITH_PREVIEW));
         assertThat(logMakerCaptor.getAllValues().get(1).getSubtype(),
-                is(CONTENT_PREVIEW_IMAGE));
-        assertThat(logMakerCaptor.getAllValues().get(2).getCategory(),
-                is(MetricsEvent.ACTION_SHARE_WITH_PREVIEW));
-        assertThat(logMakerCaptor.getAllValues().get(2).getSubtype(),
                 is(CONTENT_PREVIEW_IMAGE));
     }
 
