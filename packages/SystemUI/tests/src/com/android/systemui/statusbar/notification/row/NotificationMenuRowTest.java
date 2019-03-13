@@ -14,6 +14,8 @@
 
 package com.android.systemui.statusbar.notification.row;
 
+import static android.provider.Settings.Secure.NOTIFICATION_NEW_INTERRUPTION_MODEL;
+
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
@@ -26,6 +28,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.NotificationChannel;
+import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -39,6 +42,7 @@ import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.utils.leaks.LeakCheckedTest;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -60,6 +64,13 @@ public class NotificationMenuRowTest extends LeakCheckedTest {
         entry.channel = mock(NotificationChannel.class);
         when(mRow.getEntry()).thenReturn(entry);
     }
+
+    @After
+    public void tearDown() {
+        Settings.Secure.putInt(mContext.getContentResolver(),
+                NOTIFICATION_NEW_INTERRUPTION_MODEL, 0);
+    }
+
 
     @Test
     public void testAttachDetach() {
@@ -89,12 +100,28 @@ public class NotificationMenuRowTest extends LeakCheckedTest {
 
     @Test
     public void testNoAppOpsInSlowSwipe() {
+        Settings.Secure.putInt(mContext.getContentResolver(),
+                NOTIFICATION_NEW_INTERRUPTION_MODEL, 0);
+
         NotificationMenuRow row = new NotificationMenuRow(mContext);
         row.createMenu(mRow, null);
 
         ViewGroup container = (ViewGroup) row.getMenuView();
         // one for snooze and one for noti blocking
         assertEquals(2, container.getChildCount());
+    }
+
+    @Test
+    public void testNoAppOpsInSlowSwipe_newInterruptionModel() {
+        Settings.Secure.putInt(mContext.getContentResolver(),
+                NOTIFICATION_NEW_INTERRUPTION_MODEL, 1);
+
+        NotificationMenuRow row = new NotificationMenuRow(mContext);
+        row.createMenu(mRow, null);
+
+        ViewGroup container = (ViewGroup) row.getMenuView();
+        // in the new interruption model there is only the blocking item
+        assertEquals(1, container.getChildCount());
     }
 
     @Test

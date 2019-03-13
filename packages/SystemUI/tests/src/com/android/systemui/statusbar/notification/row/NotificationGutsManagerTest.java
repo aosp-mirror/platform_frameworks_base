@@ -186,7 +186,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
 
         when(row.getWindowToken()).thenReturn(new Binder());
         when(row.getGuts()).thenReturn(guts);
-        doNothing().when(row).inflateGuts();
+        doNothing().when(row).ensureGutsInflated();
 
         NotificationEntry realEntry = realRow.getEntry();
         NotificationEntry entry = spy(realEntry);
