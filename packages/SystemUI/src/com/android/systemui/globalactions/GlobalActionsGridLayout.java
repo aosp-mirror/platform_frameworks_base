@@ -19,6 +19,7 @@ package com.android.systemui.globalactions;
 import android.content.Context;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -71,10 +72,10 @@ public class GlobalActionsGridLayout extends MultiListLayout {
 
     @Override
     public void onUpdateList() {
-        removeAllItems();
+        super.onUpdateList();
         ArrayList<GlobalActionsDialog.Action> separatedActions =
-                mAdapter.getSeparatedItems(mSeparated);
-        ArrayList<GlobalActionsDialog.Action> listActions = mAdapter.getListItems(mSeparated);
+                mAdapter.getSeparatedItems();
+        ArrayList<GlobalActionsDialog.Action> listActions = mAdapter.getListItems();
         setExpectedListItemCount(listActions.size());
         int rotation = RotationUtils.getRotation(mContext);
 
@@ -108,11 +109,25 @@ public class GlobalActionsGridLayout extends MultiListLayout {
                 parent.addView(v);
             }
         }
+        updateSnapPosition();
     }
 
     @Override
     protected ViewGroup getSeparatedView() {
         return findViewById(com.android.systemui.R.id.separated_button);
+    }
+
+    private void updateSnapPosition() {
+        if (mSnapToEdge) {
+            setPadding(0, 0, 0, 0);
+            if (mRotation == RotationUtils.ROTATION_LANDSCAPE) {
+                setGravity(Gravity.RIGHT);
+            } else if (mRotation == RotationUtils.ROTATION_SEASCAPE) {
+                setGravity(Gravity.LEFT);
+            } else {
+                setGravity(Gravity.BOTTOM);
+            }
+        }
     }
 
     @Override
@@ -148,7 +163,7 @@ public class GlobalActionsGridLayout extends MultiListLayout {
     }
 
     /**
-     * Not used in this implementation of the Global Actions Menu, but necessary for some others.
+     * Not ued in this implementation of the Global Actions Menu, but necessary for some others.
      */
     @Override
     public void setDivisionView(View v) {
