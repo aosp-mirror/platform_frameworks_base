@@ -2524,7 +2524,8 @@ public class ConnectivityServiceTest {
         verifyActiveNetwork(TRANSPORT_CELLULAR);
     }
 
-    @Test
+    // TODO: deflake and re-enable
+    // @Test
     public void testPartialConnectivity() {
         // Register network callback.
         NetworkRequest request = new NetworkRequest.Builder()
