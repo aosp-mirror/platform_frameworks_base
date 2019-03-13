@@ -60,7 +60,7 @@ public class AppWindowTokenAnimationTests extends WindowTestsBase {
         MockitoAnnotations.initMocks(this);
 
         mToken = createTestAppWindowToken(mDisplayContent, WINDOWING_MODE_FULLSCREEN,
-                ACTIVITY_TYPE_STANDARD, false /* skipOnParentChanged */);
+                ACTIVITY_TYPE_STANDARD);
     }
 
     @Test
