@@ -219,6 +219,7 @@ cc_test {
         "tests/anomaly/AnomalyTracker_test.cpp",
         "tests/ConfigManager_test.cpp",
         "tests/external/puller_util_test.cpp",
+        "tests/external/GpuStatsPuller_test.cpp",
         "tests/external/IncidentReportArgs_test.cpp",
         "tests/external/StatsPuller_test.cpp",
         "tests/indexed_priority_queue_test.cpp",
