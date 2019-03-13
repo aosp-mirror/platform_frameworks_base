@@ -248,8 +248,8 @@ public class LineBreaker {
         private @FloatRange(from = 0.0f) float mWidth = 0;
         private @FloatRange(from = 0.0f) float mFirstWidth = 0;
         private @IntRange(from = 0) int mFirstWidthLineCount = 0;
-        private @Nullable int[] mVariableTabStops = null;
-        private @IntRange(from = 0) int mDefaultTabStop = 0;
+        private @Nullable float[] mVariableTabStops = null;
+        private @FloatRange(from = 0) float mDefaultTabStop = 0;
 
         public ParagraphConstraints() {}
 
@@ -284,8 +284,8 @@ public class LineBreaker {
          * @see #getTabStops()
          * @see #getDefaultTabStop()
          */
-        public void setTabStops(@Nullable int[] tabStops,
-                @Px @IntRange(from = 0) int defaultTabStop) {
+        public void setTabStops(@Nullable float[] tabStops,
+                @Px @FloatRange(from = 0) float defaultTabStop) {
             mVariableTabStops = tabStops;
             mDefaultTabStop = defaultTabStop;
         }
@@ -320,18 +320,18 @@ public class LineBreaker {
         /**
          * Returns the array of tab stops in pixels.
          *
-         * @see #setTabStops(int[], int)
+         * @see #setTabStops(float[], int)
          */
-        public @Nullable int[] getTabStops() {
+        public @Nullable float[] getTabStops() {
             return mVariableTabStops;
         }
 
         /**
          * Returns the default tab stops in pixels.
          *
-         * @see #setTabStop(int[], int)
+         * @see #setTabStop(float[], int)
          */
-        public @Px @IntRange(from = 0) int getDefaultTabStop() {
+        public @Px @FloatRange(from = 0) float getDefaultTabStop() {
             return mDefaultTabStop;
         }
     }
@@ -513,8 +513,8 @@ public class LineBreaker {
             @FloatRange(from = 0.0f) float firstWidth,
             @IntRange(from = 0) int firstWidthLineCount,
             @FloatRange(from = 0.0f) float restWidth,
-            @Nullable int[] variableTabStops,
-            int defaultTabStop,
+            @Nullable float[] variableTabStops,
+            float defaultTabStop,
             @IntRange(from = 0) int indentsOffset);
 
     // Result accessors
