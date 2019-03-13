@@ -55,8 +55,8 @@ interface ISessionManager {
     void addSession2TokensListener(in ISession2TokensListener listener, int userId);
     void removeSession2TokensListener(in ISession2TokensListener listener);
 
-    // This is for the system volume UI only
-    void setRemoteVolumeController(in IRemoteVolumeController rvc);
+    void registerRemoteVolumeController(in IRemoteVolumeController rvc);
+    void unregisterRemoteVolumeController(in IRemoteVolumeController rvc);
 
     // For PhoneWindowManager to precheck media keys
     boolean isGlobalPriorityActive();
