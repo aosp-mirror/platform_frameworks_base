@@ -329,7 +329,7 @@
     <!-- Nav bar button default ordering/layout -->
     <string name="config_navBarLayout" translatable="false">left[.5W],back[1WC];home;recent[1WC],right[.5W]</string>
     <string name="config_navBarLayoutQuickstep" translatable="false">back[1.7WC];home;contextual[1.7WC]</string>
-    <string name="config_navBarLayoutHandle" translatable="false">";home_handle;assistant_handle[.18WC]"</string>
+    <string name="config_navBarLayoutHandle" translatable="false">";home_handle;"</string>
 
     <bool name="quick_settings_show_full_alarm">false</bool>
 

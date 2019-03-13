@@ -434,7 +434,6 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         mButtonDispatchers.put(R.id.back, new ButtonDispatcher(R.id.back));
         mButtonDispatchers.put(R.id.home, new ButtonDispatcher(R.id.home));
         mButtonDispatchers.put(R.id.home_handle, new ButtonDispatcher(R.id.home_handle));
-        mButtonDispatchers.put(R.id.assistant_handle, new ButtonDispatcher(R.id.assistant_handle));
         mButtonDispatchers.put(R.id.recent_apps, new ButtonDispatcher(R.id.recent_apps));
         mButtonDispatchers.put(R.id.menu, menuButton);
         mButtonDispatchers.put(R.id.ime_switcher, imeSwitcherButton);
@@ -630,10 +629,6 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
 
     public ButtonDispatcher getHomeHandle() {
         return mButtonDispatchers.get(R.id.home_handle);
-    }
-
-    public ButtonDispatcher getAssistantHandle() {
-        return mButtonDispatchers.get(R.id.assistant_handle);
     }
 
     public SparseArray<ButtonDispatcher> getButtonDispatchers() {
@@ -1002,7 +997,6 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     // TODO(b/112934365): move this back to NavigationBarFragment when prototype is removed
     private void updateAssistantAvailability() {
         boolean available = mAssistantAvailable && mPrototypeController.isAssistantGestureEnabled();
-        getAssistantHandle().setVisibility(available ? View.VISIBLE : View.GONE);
         if (mOverviewProxyService.getProxy() != null) {
             try {
                 mOverviewProxyService.getProxy().onAssistantAvailable(available);
