@@ -50,11 +50,14 @@ import android.util.SparseLongArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.LocalServices;
 import com.android.server.pm.Installer;
 
 import java.io.File;
+import java.io.FileDescriptor;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.security.SecureRandom;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -1271,6 +1274,41 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         } catch (IOException ioe) {
             Log.e(TAG, "Unable to save rollback info for: "
                     + rollbackData.info.getRollbackId(), ioe);
+        }
+    }
+
+    @Override
+    protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ");
+        synchronized (mLock) {
+            for (RollbackData data : mRollbacks) {
+                RollbackInfo info = data.info;
+                ipw.println(info.getRollbackId() + ":");
+                ipw.increaseIndent();
+                ipw.println("-state: " + data.getStateAsString());
+                ipw.println("-timestamp: " + data.timestamp);
+                if (data.stagedSessionId != -1) {
+                    ipw.println("-stagedSessionId: " + data.stagedSessionId);
+                }
+                ipw.println("-packages:");
+                ipw.increaseIndent();
+                for (PackageRollbackInfo pkg : info.getPackages()) {
+                    ipw.println(pkg.getPackageName()
+                            + " " + pkg.getVersionRolledBackFrom().getLongVersionCode()
+                            + " -> " + pkg.getVersionRolledBackTo().getLongVersionCode());
+                }
+                ipw.decreaseIndent();
+                if (data.state == RollbackData.ROLLBACK_STATE_COMMITTED) {
+                    ipw.println("-causePackages:");
+                    ipw.increaseIndent();
+                    for (VersionedPackage cPkg : info.getCausePackages()) {
+                        ipw.println(cPkg.getPackageName() + " " + cPkg.getLongVersionCode());
+                    }
+                    ipw.decreaseIndent();
+                    ipw.println("-committedSessionId: " + info.getCommittedSessionId());
+                }
+                ipw.decreaseIndent();
+            }
         }
     }
 }
