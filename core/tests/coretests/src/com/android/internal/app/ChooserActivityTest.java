@@ -97,9 +97,12 @@ public class ChooserActivityTest {
         when(sOverrides.resolverListController.getResolversForIntent(Mockito.anyBoolean(),
                 Mockito.anyBoolean(),
                 Mockito.isA(List.class))).thenReturn(resolvedComponentInfos);
-        mActivityRule.launchActivity(Intent.createChooser(viewIntent, "chooser test"));
+        final ChooserWrapperActivity activity = mActivityRule.launchActivity(
+                Intent.createChooser(viewIntent, "chooser test"));
 
         waitForIdle();
+        assertThat(activity.getAdapter().getCount(), is(2));
+        assertThat(activity.getAdapter().getServiceTargetCount(), is(0));
         onView(withId(R.id.title)).check(matches(withText("chooser test")));
     }
 

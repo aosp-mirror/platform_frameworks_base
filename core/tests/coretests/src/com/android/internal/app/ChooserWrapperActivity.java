@@ -39,8 +39,8 @@ public class ChooserWrapperActivity extends ChooserActivity {
     static final OverrideData sOverrides = new OverrideData();
     private UsageStatsManager mUsm;
 
-    ResolveListAdapter getAdapter() {
-        return mAdapter;
+    ChooserListAdapter getAdapter() {
+        return (ChooserListAdapter) mAdapter;
     }
 
     boolean getIsSelected() { return mIsSuccessfullySelected; }
