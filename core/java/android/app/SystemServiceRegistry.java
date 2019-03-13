@@ -367,7 +367,7 @@ final class SystemServiceRegistry {
                             throw new ServiceNotFoundException(Context.TEST_NETWORK_SERVICE);
                         }
                         ITestNetworkManager tnMgr = ITestNetworkManager.Stub.asInterface(tnBinder);
-                        return new TestNetworkManager(context, tnMgr);
+                        return new TestNetworkManager(tnMgr);
                     }
                 });
 
