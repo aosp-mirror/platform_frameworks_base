@@ -6152,7 +6152,7 @@ public class TelephonyManager {
         // FIXME Need to get it from Telephony Dev Controller when that gets implemented!
         // and then this method shouldn't be used at all!
         if(isMultiSimEnabled()) {
-            return 2;
+            return getPhoneCount();
         } else {
             return 1;
         }
