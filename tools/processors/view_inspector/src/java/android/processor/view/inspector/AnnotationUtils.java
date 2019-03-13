@@ -16,6 +16,8 @@
 
 package android.processor.view.inspector;
 
+import androidx.annotation.NonNull;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -40,7 +42,7 @@ final class AnnotationUtils {
     private final Elements mElementUtils;
     private final Types mTypeUtils;
 
-    AnnotationUtils(ProcessingEnvironment processingEnv) {
+    AnnotationUtils(@NonNull ProcessingEnvironment processingEnv) {
         mElementUtils = processingEnv.getElementUtils();
         mTypeUtils = processingEnv.getTypeUtils();
     }
@@ -53,7 +55,8 @@ final class AnnotationUtils {
      * @return The mirror of the requested annotation
      * @throws ProcessingException If there is not exactly one of the requested annotation.
      */
-    AnnotationMirror exactlyOneMirror(String qualifiedName, Element element) {
+    @NonNull
+    AnnotationMirror exactlyOneMirror(@NonNull String qualifiedName, @NonNull Element element) {
         final Element targetTypeElment = mElementUtils.getTypeElement(qualifiedName);
         final TypeMirror targetType = targetTypeElment.asType();
         AnnotationMirror result = null;
@@ -89,7 +92,7 @@ final class AnnotationUtils {
      * @param annotationQualifiedName The name of the annotation to check for
      * @return True if the annotation is present, false otherwise
      */
-    boolean hasAnnotation(Element element, String annotationQualifiedName) {
+    boolean hasAnnotation(@NonNull Element element, @NonNull String annotationQualifiedName) {
         final TypeElement namedElement = mElementUtils.getTypeElement(annotationQualifiedName);
 
         if (namedElement != null) {
@@ -118,10 +121,10 @@ final class AnnotationUtils {
      * @return A list containing the requested types
      */
     <T> List<T> typedArrayValuesByName(
-            String propertyName,
-            Class<T> valueClass,
-            Element element,
-            AnnotationMirror annotationMirror) {
+            @NonNull String propertyName,
+            @NonNull Class<T> valueClass,
+            @NonNull Element element,
+            @NonNull AnnotationMirror annotationMirror) {
         return untypedArrayValuesByName(propertyName, element, annotationMirror)
                 .stream()
                 .map(annotationValue -> {
@@ -159,10 +162,11 @@ final class AnnotationUtils {
      * @param annotationMirror An annotation mirror to search for the property
      * @return A list of annotation values, empty list if none found
      */
+    @NonNull
     List<AnnotationValue> untypedArrayValuesByName(
-            String propertyName,
-            Element element,
-            AnnotationMirror annotationMirror) {
+            @NonNull String propertyName,
+            @NonNull Element element,
+            @NonNull AnnotationMirror annotationMirror) {
         return typedValueByName(propertyName, List.class, element, annotationMirror)
                 .map(untypedValues -> {
                     List<AnnotationValue> typedValues = new ArrayList<>(untypedValues.size());
@@ -195,6 +199,7 @@ final class AnnotationUtils {
      * @param <T> The type of the value
      * @return An optional containing the typed value of the named property
      */
+    @NonNull
     <T> Optional<T> typedValueByName(
             String propertyName,
             Class<T> valueClass,
@@ -241,10 +246,11 @@ final class AnnotationUtils {
      * @return An optional containing the untyped value of the named property
      * @see AnnotationValue#getValue()
      */
+    @NonNull
     Optional<Object> untypedValueByName(
-            String propertyName,
-            Element element,
-            AnnotationMirror annotationMirror) {
+            @NonNull String propertyName,
+            @NonNull Element element,
+            @NonNull AnnotationMirror annotationMirror) {
         return valueByName(propertyName, annotationMirror).map(annotationValue -> {
             final Object value = annotationValue.getValue();
 
@@ -269,7 +275,10 @@ final class AnnotationUtils {
      * @param annotationMirror The mirror to search for the property
      * @return The value of the property
      */
-    Optional<AnnotationValue> valueByName(String propertyName, AnnotationMirror annotationMirror) {
+    @NonNull
+    Optional<AnnotationValue> valueByName(
+            @NonNull String propertyName,
+            @NonNull AnnotationMirror annotationMirror) {
         final Map<? extends ExecutableElement, ? extends AnnotationValue> valueMap =
                 annotationMirror.getElementValues();
 

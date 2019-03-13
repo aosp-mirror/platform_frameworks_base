@@ -16,6 +16,9 @@
 
 package android.processor.view.inspector;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import com.squareup.javapoet.ClassName;
 
 import java.util.Collection;
@@ -34,27 +37,29 @@ import java.util.Optional;
  * testing {@link InspectionCompanionGenerator}.
  */
 public final class InspectableClassModel {
-    private final ClassName mClassName;
-    private final Map<String, Property> mPropertyMap;
-    private Optional<String> mNodeName = Optional.empty();
+    private final @NonNull ClassName mClassName;
+    private final @NonNull Map<String, Property> mPropertyMap;
+    private @NonNull Optional<String> mNodeName = Optional.empty();
 
     /**
      * @param className The name of the modeled class
      */
-    public InspectableClassModel(ClassName className) {
+    public InspectableClassModel(@NonNull ClassName className) {
         mClassName = className;
         mPropertyMap = new HashMap<>();
     }
 
+    @NonNull
     public ClassName getClassName() {
         return mClassName;
     }
 
+    @NonNull
     public Optional<String> getNodeName() {
         return mNodeName;
     }
 
-    public void setNodeName(Optional<String> nodeName) {
+    public void setNodeName(@NonNull Optional<String> nodeName) {
         mNodeName = nodeName;
     }
 
@@ -63,7 +68,7 @@ public final class InspectableClassModel {
      *
      * @param property The property to add or replace
      */
-    public void putProperty(Property property) {
+    public void putProperty(@NonNull Property property) {
         mPropertyMap.put(property.getName(), property);
     }
 
@@ -73,7 +78,8 @@ public final class InspectableClassModel {
      * @param name The name of the property
      * @return The property or an empty optional
      */
-    public Optional<Property> getProperty(String name) {
+    @NonNull
+    public Optional<Property> getProperty(@NonNull String name) {
         return Optional.ofNullable(mPropertyMap.get(name));
     }
 
@@ -82,6 +88,7 @@ public final class InspectableClassModel {
      *
      * @return An un-ordered collection of properties
      */
+    @NonNull
     public Collection<Property> getAllProperties() {
         return mPropertyMap.values();
     }
@@ -90,8 +97,8 @@ public final class InspectableClassModel {
      * Represents a way to access a property, either a getter or a field.
      */
     public static final class Accessor {
-        private final String mName;
-        private final Type mType;
+        private final @NonNull String mName;
+        private final @NonNull Type mType;
 
         /**
          * Construct an accessor for a field.
@@ -100,7 +107,8 @@ public final class InspectableClassModel {
          * @return The new accessor
          * @see Type#FIELD
          */
-        static Accessor ofField(String name) {
+        @NonNull
+        static Accessor ofField(@NonNull String name) {
             return new Accessor(name, Type.FIELD);
         }
 
@@ -111,19 +119,22 @@ public final class InspectableClassModel {
          * @return The new accessor
          * @see Type#GETTER
          */
-        static Accessor ofGetter(String name) {
+        @NonNull
+        static Accessor ofGetter(@NonNull String name) {
             return new Accessor(name, Type.GETTER);
         }
 
-        public Accessor(String name, Type type) {
+        public Accessor(@NonNull String name, @NonNull Type type) {
             mName = Objects.requireNonNull(name, "Accessor name must not be null");
             mType = Objects.requireNonNull(type, "Accessor type must not be null");
         }
 
+        @NonNull
         public String getName() {
             return mName;
         }
 
+        @NonNull
         public Type getType() {
             return mType;
         }
@@ -135,6 +146,7 @@ public final class InspectableClassModel {
          *
          * @return A string representing the invocation of this accessor
          */
+        @NonNull
         public String invocation() {
             switch (mType) {
                 case FIELD:
@@ -168,15 +180,15 @@ public final class InspectableClassModel {
      * Model an inspectable property
      */
     public static final class Property {
-        private final String mName;
-        private final Accessor mAccessor;
-        private final Type mType;
+        private final @NonNull String mName;
+        private final @NonNull Accessor mAccessor;
+        private final @NonNull Type mType;
         private boolean mAttributeIdInferrableFromR = true;
         private int mAttributeId = 0;
-        private List<IntEnumEntry> mIntEnumEntries;
-        private List<IntFlagEntry> mIntFlagEntries;
+        private @Nullable List<IntEnumEntry> mIntEnumEntries;
+        private @Nullable List<IntFlagEntry> mIntFlagEntries;
 
-        public Property(String name, Accessor accessor, Type type) {
+        public Property(@NonNull String name, @NonNull Accessor accessor, @NonNull Type type) {
             mName = Objects.requireNonNull(name, "Name must not be null");
             mAccessor = Objects.requireNonNull(accessor, "Accessor must not be null");
             mType = Objects.requireNonNull(type, "Type must not be null");
@@ -204,14 +216,17 @@ public final class InspectableClassModel {
             mAttributeIdInferrableFromR = attributeIdInferrableFromR;
         }
 
+        @NonNull
         public String getName() {
             return mName;
         }
 
+        @NonNull
         public Accessor getAccessor() {
             return mAccessor;
         }
 
+        @NonNull
         public Type getType() {
             return mType;
         }
@@ -221,6 +236,7 @@ public final class InspectableClassModel {
          *
          * @return A list of mapping entries, empty if absent
          */
+        @NonNull
         public List<IntEnumEntry> getIntEnumEntries() {
             if (mIntEnumEntries != null) {
                 return mIntEnumEntries;
@@ -229,7 +245,7 @@ public final class InspectableClassModel {
             }
         }
 
-        public void setIntEnumEntries(List<IntEnumEntry> intEnumEntries) {
+        public void setIntEnumEntries(@NonNull List<IntEnumEntry> intEnumEntries) {
             mIntEnumEntries = intEnumEntries;
         }
 
@@ -238,6 +254,7 @@ public final class InspectableClassModel {
          *
          * @return A list of mapping entries, empty if absent
          */
+        @NonNull
         public List<IntFlagEntry> getIntFlagEntries() {
             if (mIntFlagEntries != null) {
                 return mIntFlagEntries;
@@ -246,7 +263,7 @@ public final class InspectableClassModel {
             }
         }
 
-        public void setIntFlagEntries(List<IntFlagEntry> intFlagEntries) {
+        public void setIntFlagEntries(@NonNull List<IntFlagEntry> intFlagEntries) {
             mIntFlagEntries = intFlagEntries;
         }
 
@@ -321,14 +338,15 @@ public final class InspectableClassModel {
      * @see android.view.inspector.IntEnumMapping
      */
     public static final class IntEnumEntry {
-        private final String mName;
+        private final @NonNull String mName;
         private final int mValue;
 
-        public IntEnumEntry(String name, int value) {
+        public IntEnumEntry(int value, @NonNull String name) {
             mName = Objects.requireNonNull(name, "Name must not be null");
             mValue = value;
         }
 
+        @NonNull
         public String getName() {
             return mName;
         }
@@ -344,29 +362,21 @@ public final class InspectableClassModel {
      * @see android.view.inspector.IntFlagMapping
      */
     public static final class IntFlagEntry {
-        private final String mName;
+        private final @NonNull String mName;
         private final int mTarget;
         private final int mMask;
 
-        public IntFlagEntry(String name, int target, int mask) {
+        public IntFlagEntry(int mask, int target, @NonNull String name) {
             mName = Objects.requireNonNull(name, "Name must not be null");
             mTarget = target;
             mMask = mask;
         }
 
-        public IntFlagEntry(String name, int target) {
-            this(name, target, target);
+        public IntFlagEntry(int target, String name) {
+            this(target, target, name);
         }
 
-        /**
-         * Determine if this entry has a bitmask.
-         *
-         * @return True if the bitmask and target are different, false otherwise
-         */
-        public boolean hasMask() {
-            return mTarget != mMask;
-        }
-
+        @NonNull
         public String getName() {
             return mName;
         }
