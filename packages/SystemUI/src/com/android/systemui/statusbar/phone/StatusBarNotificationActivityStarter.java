@@ -248,7 +248,6 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
             ActivityManager.getService().resumeAppSwitches();
         } catch (RemoteException e) {
         }
-        int launchResult;
         // If we are launching a work activity and require to launch
         // separate work challenge, we defer the activity action and cancel
         // notification until work challenge is unlocked.
@@ -277,24 +276,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
             fillInIntent = new Intent().putExtra(Notification.EXTRA_REMOTE_INPUT_DRAFT,
                     remoteInputText.toString());
         }
-        RemoteAnimationAdapter adapter = mActivityLaunchAnimator.getLaunchAnimation(
-                row, wasOccluded);
-        try {
-            if (adapter != null) {
-                ActivityTaskManager.getService()
-                        .registerRemoteAnimationForNextActivityStart(
-                                intent.getCreatorPackage(), adapter);
-            }
-            launchResult = intent.sendAndReturnResult(mContext, 0, fillInIntent, null,
-                    null, null, getActivityOptions(adapter));
-            mActivityLaunchAnimator.setLaunchResult(launchResult, isActivityIntent);
-        } catch (RemoteException | PendingIntent.CanceledException e) {
-            // the stack trace isn't very helpful here.
-            // Just log the exception message.
-            Log.w(TAG, "Sending contentIntent failed: " + e);
-
-            // TODO: Dismiss Keyguard.
-        }
+        startNotificationIntent(intent, fillInIntent, row, wasOccluded, isActivityIntent);
         if (isActivityIntent) {
             mAssistManager.hideAssist();
         }
@@ -325,6 +307,27 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
             removeNotification(sbn);
         }
         mIsCollapsingToShowActivityOverLockscreen = false;
+    }
+
+    private void startNotificationIntent(PendingIntent intent, Intent fillInIntent,
+            ExpandableNotificationRow row, boolean wasOccluded, boolean isActivityIntent) {
+        RemoteAnimationAdapter adapter = mActivityLaunchAnimator.getLaunchAnimation(row,
+                wasOccluded);
+        try {
+            if (adapter != null) {
+                ActivityTaskManager.getService()
+                        .registerRemoteAnimationForNextActivityStart(
+                                intent.getCreatorPackage(), adapter);
+            }
+            int launchResult = intent.sendAndReturnResult(mContext, 0, fillInIntent, null,
+                    null, null, getActivityOptions(adapter));
+            mActivityLaunchAnimator.setLaunchResult(launchResult, isActivityIntent);
+        } catch (RemoteException | PendingIntent.CanceledException e) {
+            // the stack trace isn't very helpful here.
+            // Just log the exception message.
+            Log.w(TAG, "Sending contentIntent failed: " + e);
+            // TODO: Dismiss Keyguard.
+        }
     }
 
     @Override
