@@ -42,8 +42,17 @@ public class AndroidHidlUpdaterTest extends PackageSharedLibraryUpdaterTest {
         PackageBuilder before = builder()
                 .targetSdkVersion(Build.VERSION_CODES.P);
 
+        // no change, not system
+        checkBackwardsCompatibility(before, before);
+    }
+
+    @Test
+    public void targeted_at_P_system() {
+        PackageBuilder before = builder().asSystemApp()
+                .targetSdkVersion(Build.VERSION_CODES.P);
+
         // Should add both HIDL libraries
-        PackageBuilder after = builder()
+        PackageBuilder after = builder().asSystemApp()
                 .targetSdkVersion(Build.VERSION_CODES.P)
                 .requiredLibraries(ANDROID_HIDL_MANAGER, ANDROID_HIDL_BASE);
 
@@ -56,9 +65,19 @@ public class AndroidHidlUpdaterTest extends PackageSharedLibraryUpdaterTest {
                 .targetSdkVersion(Build.VERSION_CODES.P)
                 .requiredLibraries(OTHER_LIBRARY);
 
+        // no change, not system
+        checkBackwardsCompatibility(before, before);
+    }
+
+    @Test
+    public void targeted_at_P_not_empty_usesLibraries_system() {
+        PackageBuilder before = builder().asSystemApp()
+                .targetSdkVersion(Build.VERSION_CODES.P)
+                .requiredLibraries(OTHER_LIBRARY);
+
         // The hidl jars should be added at the start of the list because it
         // is not on the bootclasspath and the package targets pre-P.
-        PackageBuilder after = builder()
+        PackageBuilder after = builder().asSystemApp()
                 .targetSdkVersion(Build.VERSION_CODES.P)
                 .requiredLibraries(ANDROID_HIDL_MANAGER, ANDROID_HIDL_BASE, OTHER_LIBRARY);
 
@@ -71,8 +90,21 @@ public class AndroidHidlUpdaterTest extends PackageSharedLibraryUpdaterTest {
                 .targetSdkVersion(Build.VERSION_CODES.P)
                 .requiredLibraries(ANDROID_HIDL_MANAGER, ANDROID_HIDL_BASE);
 
-        // No change is required because although the HIDL libraries has been removed from
-        // the bootclasspath the package explicitly requests it.
+        PackageBuilder after = builder()
+                .targetSdkVersion(Build.VERSION_CODES.P);
+
+        // Libraries are removed because they are not available for non-system apps
+        checkBackwardsCompatibility(before, after);
+    }
+
+    @Test
+    public void targeted_at_P_in_usesLibraries_system() {
+        PackageBuilder before = builder().asSystemApp()
+                .targetSdkVersion(Build.VERSION_CODES.P)
+                .requiredLibraries(ANDROID_HIDL_MANAGER, ANDROID_HIDL_BASE);
+
+        // No change is required because the package explicitly requests the HIDL libraries
+        // and is targeted at the current version so does not need backwards compatibility.
         checkBackwardsCompatibility(before, before);
     }
 
@@ -83,8 +115,7 @@ public class AndroidHidlUpdaterTest extends PackageSharedLibraryUpdaterTest {
         // Dependency is removed, it is not available.
         PackageBuilder after = builder();
 
-        // No change is required because the package explicitly requests the HIDL libraries
-        // and is targeted at the current version so does not need backwards compatibility.
+        // Libraries are removed because they are not available for apps targetting Q+
         checkBackwardsCompatibility(before, after);
     }
 
@@ -95,8 +126,7 @@ public class AndroidHidlUpdaterTest extends PackageSharedLibraryUpdaterTest {
         // Dependency is removed, it is not available.
         PackageBuilder after = builder();
 
-        // No change is required because the package explicitly requests the HIDL libraries
-        // and is targeted at the current version so does not need backwards compatibility.
+        // Libraries are removed because they are not available for apps targetting Q+
         checkBackwardsCompatibility(before, after);
     }
 

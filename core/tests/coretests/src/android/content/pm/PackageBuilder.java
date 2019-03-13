@@ -31,6 +31,8 @@ class PackageBuilder {
 
     private int mTargetSdkVersion = Build.VERSION_CODES.CUR_DEVELOPMENT;
 
+    private int mFlags = 0;
+
     private ArrayList<String> mRequiredLibraries;
 
     private ArrayList<String> mOptionalLibraries;
@@ -42,6 +44,7 @@ class PackageBuilder {
     public PackageParser.Package build() {
         PackageParser.Package pkg = new PackageParser.Package("org.package.name");
         pkg.applicationInfo.targetSdkVersion = mTargetSdkVersion;
+        pkg.applicationInfo.flags = mFlags;
         pkg.usesLibraries = mRequiredLibraries;
         pkg.usesOptionalLibraries = mOptionalLibraries;
         return pkg;
@@ -49,6 +52,11 @@ class PackageBuilder {
 
     PackageBuilder targetSdkVersion(int version) {
         this.mTargetSdkVersion = version;
+        return this;
+    }
+
+    PackageBuilder asSystemApp() {
+        this.mFlags |= ApplicationInfo.FLAG_SYSTEM;
         return this;
     }
 

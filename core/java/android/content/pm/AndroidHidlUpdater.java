@@ -34,8 +34,14 @@ public class AndroidHidlUpdater extends PackageSharedLibraryUpdater {
 
     @Override
     public void updatePackage(Package pkg) {
+        ApplicationInfo info = pkg.applicationInfo;
+
         // This was the default <= P and is maintained for backwards compatibility.
-        if (pkg.applicationInfo.targetSdkVersion <= Build.VERSION_CODES.P) {
+        boolean isLegacy = info.targetSdkVersion <= Build.VERSION_CODES.P;
+        // Only system apps use these libraries
+        boolean isSystem = info.isSystemApp() || info.isUpdatedSystemApp();
+
+        if (isLegacy && isSystem) {
             prefixRequiredLibrary(pkg, ANDROID_HIDL_BASE);
             prefixRequiredLibrary(pkg, ANDROID_HIDL_MANAGER);
         } else {
