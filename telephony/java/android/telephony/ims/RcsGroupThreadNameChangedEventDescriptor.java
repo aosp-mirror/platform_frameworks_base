@@ -17,6 +17,7 @@ package android.telephony.ims;
 
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PROTECTED;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Parcel;
 
@@ -44,7 +45,7 @@ public class RcsGroupThreadNameChangedEventDescriptor extends RcsGroupThreadEven
                 mNewName);
     }
 
-    public static final Creator<RcsGroupThreadNameChangedEventDescriptor> CREATOR =
+    public static final @NonNull Creator<RcsGroupThreadNameChangedEventDescriptor> CREATOR =
             new Creator<RcsGroupThreadNameChangedEventDescriptor>() {
                 @Override
                 public RcsGroupThreadNameChangedEventDescriptor createFromParcel(Parcel in) {

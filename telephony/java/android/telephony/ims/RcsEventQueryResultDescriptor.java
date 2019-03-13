@@ -53,7 +53,7 @@ public class RcsEventQueryResultDescriptor implements Parcelable {
         in.readList(mEvents, null);
     }
 
-    public static final Creator<RcsEventQueryResultDescriptor> CREATOR =
+    public static final @android.annotation.NonNull Creator<RcsEventQueryResultDescriptor> CREATOR =
             new Creator<RcsEventQueryResultDescriptor>() {
         @Override
         public RcsEventQueryResultDescriptor createFromParcel(Parcel in) {
