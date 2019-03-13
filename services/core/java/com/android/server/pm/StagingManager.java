@@ -69,7 +69,6 @@ public class StagingManager {
     private static final String TAG = "StagingManager";
 
     private final PackageInstallerService mPi;
-    private final PackageManagerService mPm;
     private final ApexManager mApexManager;
     private final PowerManager mPowerManager;
     private final Handler mBgHandler;
@@ -77,9 +76,7 @@ public class StagingManager {
     @GuardedBy("mStagedSessions")
     private final SparseArray<PackageInstallerSession> mStagedSessions = new SparseArray<>();
 
-    StagingManager(PackageManagerService pm, PackageInstallerService pi, ApexManager am,
-            Context context) {
-        mPm = pm;
+    StagingManager(PackageInstallerService pi, ApexManager am, Context context) {
         mPi = pi;
         mApexManager = am;
         mPowerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);

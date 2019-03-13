@@ -205,7 +205,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
 
         mApexManager = am;
 
-        mStagingManager = new StagingManager(pm, this, am, context);
+        mStagingManager = new StagingManager(this, am, context);
     }
 
     boolean okToSendBroadcasts()  {
