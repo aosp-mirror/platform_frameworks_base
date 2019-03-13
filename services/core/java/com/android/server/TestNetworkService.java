@@ -310,7 +310,7 @@ class TestNetworkService extends ITestNetworkManager.Stub {
     public void teardownTestNetwork(int netId) {
         enforceTestNetworkPermissions(mContext);
 
-        TestNetworkAgent agent;
+        final TestNetworkAgent agent;
         synchronized (mTestNetworkTracker) {
             agent = mTestNetworkTracker.get(netId);
         }
