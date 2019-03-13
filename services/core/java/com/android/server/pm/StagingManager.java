@@ -603,6 +603,10 @@ public class StagingManager {
     }
 
     private void checkStateAndResume(@NonNull PackageInstallerSession session) {
+        if (!session.isCommitted()) {
+            // Session hasn't been committed yet, ignore.
+            return;
+        }
         // Check the state of the session and decide what to do next.
         if (session.isStagedSessionFailed() || session.isStagedSessionApplied()) {
             // Final states, nothing to do.

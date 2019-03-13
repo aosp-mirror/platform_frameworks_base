@@ -167,6 +167,7 @@ public class PackageInstallerSessionTest {
                 /* stageDir */ mTmpDir,
                 /* stageCid */ null,
                 /* prepared */ true,
+                /* committed */ true,
                 /* sealed */ false,  // Setting to true would trigger some PM logic.
                 /* childSessionIds */ childSessionIds != null ? childSessionIds : new int[0],
                 /* parentSessionId */ parentSessionId,
@@ -300,6 +301,7 @@ public class PackageInstallerSessionTest {
         assertEquals(expected.getStagedSessionErrorMessage(),
                 actual.getStagedSessionErrorMessage());
         assertEquals(expected.isPrepared(), actual.isPrepared());
+        assertEquals(expected.isCommitted(), actual.isCommitted());
         assertEquals(expected.isSealed(), actual.isSealed());
         assertEquals(expected.isMultiPackage(), actual.isMultiPackage());
         assertEquals(expected.hasParentSessionId(), actual.hasParentSessionId());
