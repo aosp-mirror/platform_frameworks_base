@@ -732,11 +732,14 @@ package android.net {
 
 package android.net.apf {
 
-  public class ApfCapabilities {
+  public final class ApfCapabilities implements android.os.Parcelable {
     ctor public ApfCapabilities(int, int, int);
+    method public int describeContents();
     method public static boolean getApfDrop8023Frames(android.content.Context);
     method public static int[] getApfEthTypeBlackList(android.content.Context);
     method public boolean hasDataAccess();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.net.apf.ApfCapabilities> CREATOR;
     field public final int apfPacketFormat;
     field public final int apfVersionSupported;
     field public final int maximumApfProgramSize;
