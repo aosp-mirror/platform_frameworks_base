@@ -99,7 +99,7 @@ public class ResolverActivity extends Activity {
 
     protected ResolveListAdapter mAdapter;
     private boolean mSafeForwardingMode;
-    private AbsListView mAdapterView;
+    protected AbsListView mAdapterView;
     private Button mAlwaysButton;
     private Button mOnceButton;
     private Button mSettingsButton;
