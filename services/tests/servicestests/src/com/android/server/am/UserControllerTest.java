@@ -68,12 +68,15 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManagerInternal;
+import android.os.storage.IStorageManager;
 import android.platform.test.annotations.Presubmit;
 import android.util.Log;
+
 
 import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
+import com.android.server.FgThread;
 import com.android.server.pm.UserManagerService;
 import com.android.server.wm.WindowManagerService;
 
@@ -82,7 +85,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -95,12 +100,20 @@ import java.util.Set;
  */
 @SmallTest
 @Presubmit
+
 public class UserControllerTest {
-    private static final int TEST_USER_ID = 10;
+    // Use big enough user id to avoid picking up already active user id.
+    private static final int TEST_USER_ID = 100;
+    private static final int TEST_USER_ID1 = 101;
+    private static final int TEST_USER_ID2 = 102;
     private static final int NONEXIST_USER_ID = 2;
     private static final String TAG = UserControllerTest.class.getSimpleName();
+
+    private static final long HANDLER_WAIT_TIME_MS = 100;
+
     private UserController mUserController;
     private TestInjector mInjector;
+    private final HashMap<Integer, UserState> mUserStates = new HashMap<>();
 
     private static final List<String> START_FOREGROUND_USER_ACTIONS = newArrayList(
             Intent.ACTION_USER_STARTED,
@@ -130,6 +143,11 @@ public class UserControllerTest {
             doNothing().when(mInjector).startHomeActivity(anyInt(), anyString());
             doReturn(false).when(mInjector).stackSupervisorSwitchUser(anyInt(), any());
             doNothing().when(mInjector).stackSupervisorResumeFocusedStackTopActivity();
+            doNothing().when(mInjector).systemServiceManagerCleanupUser(anyInt());
+            doNothing().when(mInjector).activityManagerForceStopPackage(anyInt(), anyString());
+            doNothing().when(mInjector).activityManagerOnUserStopped(anyInt());
+            doNothing().when(mInjector).clearBroadcastQueueForUser(anyInt());
+            doNothing().when(mInjector).stackSupervisorRemoveUser(anyInt());
             mUserController = new UserController(mInjector);
             setUpUser(TEST_USER_ID, 0);
         });
@@ -261,7 +279,7 @@ public class UserControllerTest {
     }
 
     @Test
-    public void testContinueUserSwitch() {
+    public void testContinueUserSwitch() throws RemoteException {
         // Start user -- this will update state of mUserController
         mUserController.startUser(TEST_USER_ID, true);
         Message reportMsg = mInjector.mHandler.getMessageForCode(REPORT_USER_SWITCH_MSG);
@@ -273,11 +291,11 @@ public class UserControllerTest {
         // Verify that continueUserSwitch worked as expected
         mUserController.continueUserSwitch(userState, oldUserId, newUserId);
         verify(mInjector.getWindowManager(), times(1)).stopFreezingScreen();
-        continueUserSwitchAssertions();
+        continueUserSwitchAssertions(TEST_USER_ID, false);
     }
 
     @Test
-    public void testContinueUserSwitchUIDisabled() {
+    public void testContinueUserSwitchUIDisabled() throws RemoteException {
         mUserController.mUserSwitchUiEnabled = false;
         // Start user -- this will update state of mUserController
         mUserController.startUser(TEST_USER_ID, true);
@@ -290,16 +308,21 @@ public class UserControllerTest {
         // Verify that continueUserSwitch worked as expected
         mUserController.continueUserSwitch(userState, oldUserId, newUserId);
         verify(mInjector.getWindowManager(), never()).stopFreezingScreen();
-        continueUserSwitchAssertions();
+        continueUserSwitchAssertions(TEST_USER_ID, false);
     }
 
-    private void continueUserSwitchAssertions() {
-        Set<Integer> expectedCodes = Collections.singleton(REPORT_USER_SWITCH_COMPLETE_MSG);
+    private void continueUserSwitchAssertions(int expectedUserId, boolean backgroundUserStopping)
+            throws RemoteException {
+        Set<Integer> expectedCodes = new LinkedHashSet<>();
+        expectedCodes.add(REPORT_USER_SWITCH_COMPLETE_MSG);
+        if (backgroundUserStopping) {
+            expectedCodes.add(0); // this is for directly posting in stopping.
+        }
         Set<Integer> actualCodes = mInjector.mHandler.getMessageCodes();
         assertEquals("Unexpected message sent", expectedCodes, actualCodes);
         Message msg = mInjector.mHandler.getMessageForCode(REPORT_USER_SWITCH_COMPLETE_MSG);
         assertNotNull(msg);
-        assertEquals("Unexpected userId", TEST_USER_ID, msg.arg1);
+        assertEquals("Unexpected userId", expectedUserId, msg.arg1);
     }
 
     @Test
@@ -332,6 +355,120 @@ public class UserControllerTest {
         assertTrue(mUserController.isSystemUserStarted());
     }
 
+    /**
+     * Test stopping of user from max running users limit.
+     */
+    @Test
+    public void testUserStoppingForMultipleUsersNormalMode()
+            throws InterruptedException, RemoteException {
+        setUpUser(TEST_USER_ID1, 0);
+        setUpUser(TEST_USER_ID2, 0);
+        mUserController.mMaxRunningUsers = 3;
+        int numerOfUserSwitches = 1;
+        addForegroundUserAndContinueUserSwitch(TEST_USER_ID, UserHandle.USER_SYSTEM,
+                numerOfUserSwitches, false);
+        // running: user 0, USER_ID
+        assertTrue(mUserController.canStartMoreUsers());
+        assertEquals(Arrays.asList(new Integer[] {0, TEST_USER_ID}),
+                mUserController.getRunningUsersLU());
+
+        numerOfUserSwitches++;
+        addForegroundUserAndContinueUserSwitch(TEST_USER_ID1, TEST_USER_ID,
+                numerOfUserSwitches, false);
+        // running: user 0, USER_ID, USER_ID1
+        assertFalse(mUserController.canStartMoreUsers());
+        assertEquals(Arrays.asList(new Integer[] {0, TEST_USER_ID, TEST_USER_ID1}),
+                mUserController.getRunningUsersLU());
+
+        numerOfUserSwitches++;
+        addForegroundUserAndContinueUserSwitch(TEST_USER_ID2, TEST_USER_ID1,
+                numerOfUserSwitches, false);
+        UserState ussUser2 = mUserStates.get(TEST_USER_ID2);
+        // skip middle step and call this directly.
+        mUserController.finishUserSwitch(ussUser2);
+        waitForHandlerToComplete(mInjector.mHandler, HANDLER_WAIT_TIME_MS);
+        // running: user 0, USER_ID1, USER_ID2
+        // USER_ID should be stopped as it is least recently used non user0.
+        assertFalse(mUserController.canStartMoreUsers());
+        assertEquals(Arrays.asList(new Integer[] {0, TEST_USER_ID1, TEST_USER_ID2}),
+                mUserController.getRunningUsersLU());
+    }
+
+    /**
+     * This test tests delayed locking mode using 4 users. As core logic of delayed locking is
+     * happening in finishUserStopped call, the test also calls finishUserStopped while skipping
+     * all middle steps which takes too much work to mock.
+     */
+    @Test
+    public void testUserStoppingForMultipleUsersDelayedLockingMode()
+            throws InterruptedException, RemoteException {
+        setUpUser(TEST_USER_ID1, 0);
+        setUpUser(TEST_USER_ID2, 0);
+        mUserController.mMaxRunningUsers = 3;
+        mUserController.mDelayUserDataLocking = true;
+        int numerOfUserSwitches = 1;
+        addForegroundUserAndContinueUserSwitch(TEST_USER_ID, UserHandle.USER_SYSTEM,
+                numerOfUserSwitches, false);
+        // running: user 0, USER_ID
+        assertTrue(mUserController.canStartMoreUsers());
+        assertEquals(Arrays.asList(new Integer[] {0, TEST_USER_ID}),
+                mUserController.getRunningUsersLU());
+        numerOfUserSwitches++;
+
+        addForegroundUserAndContinueUserSwitch(TEST_USER_ID1, TEST_USER_ID,
+                numerOfUserSwitches, true);
+        // running: user 0, USER_ID1
+        // stopped + unlocked: USER_ID
+        numerOfUserSwitches++;
+        assertTrue(mUserController.canStartMoreUsers());
+        assertEquals(Arrays.asList(new Integer[] {0, TEST_USER_ID1}),
+                mUserController.getRunningUsersLU());
+        // Skip all other steps and test unlock delaying only
+        UserState uss = mUserStates.get(TEST_USER_ID);
+        uss.setState(UserState.STATE_SHUTDOWN); // necessary state change from skipped part
+        mUserController.finishUserStopped(uss);
+        // Cannot mock FgThread handler, so confirm that there is no posted message left before
+        // checking.
+        waitForHandlerToComplete(FgThread.getHandler(), HANDLER_WAIT_TIME_MS);
+        verify(mInjector.mStorageManagerMock, times(0))
+                .lockUserKey(anyInt());
+
+        addForegroundUserAndContinueUserSwitch(TEST_USER_ID2, TEST_USER_ID1,
+                numerOfUserSwitches, true);
+        // running: user 0, USER_ID2
+        // stopped + unlocked: USER_ID1
+        // stopped + locked: USER_ID
+        assertTrue(mUserController.canStartMoreUsers());
+        assertEquals(Arrays.asList(new Integer[] {0, TEST_USER_ID2}),
+                mUserController.getRunningUsersLU());
+        UserState ussUser1 = mUserStates.get(TEST_USER_ID1);
+        ussUser1.setState(UserState.STATE_SHUTDOWN);
+        mUserController.finishUserStopped(ussUser1);
+        waitForHandlerToComplete(FgThread.getHandler(), HANDLER_WAIT_TIME_MS);
+        verify(mInjector.mStorageManagerMock, times(1))
+                .lockUserKey(TEST_USER_ID);
+    }
+
+    private void addForegroundUserAndContinueUserSwitch(int newUserId, int expectedOldUserId,
+            int expectedNumberOfCalls, boolean expectOldUserStopping)
+            throws RemoteException {
+        // Start user -- this will update state of mUserController
+        mUserController.startUser(newUserId, true);
+        Message reportMsg = mInjector.mHandler.getMessageForCode(REPORT_USER_SWITCH_MSG);
+        assertNotNull(reportMsg);
+        UserState userState = (UserState) reportMsg.obj;
+        int oldUserId = reportMsg.arg1;
+        assertEquals(expectedOldUserId, oldUserId);
+        assertEquals(newUserId, reportMsg.arg2);
+        mUserStates.put(newUserId, userState);
+        mInjector.mHandler.clearAllRecordedMessages();
+        // Verify that continueUserSwitch worked as expected
+        mUserController.continueUserSwitch(userState, oldUserId, newUserId);
+        verify(mInjector.getWindowManager(), times(expectedNumberOfCalls))
+                .stopFreezingScreen();
+        continueUserSwitchAssertions(newUserId, expectOldUserStopping);
+    }
+
     private void setUpUser(int userId, int flags) {
         UserInfo userInfo = new UserInfo(userId, "User" + userId, flags);
         when(mInjector.mUserManagerMock.getUserInfo(eq(userId))).thenReturn(userInfo);
@@ -345,6 +482,22 @@ public class UserControllerTest {
         return result;
     }
 
+    private void waitForHandlerToComplete(Handler handler, long waitTimeMs)
+            throws InterruptedException {
+        if (!handler.hasMessagesOrCallbacks()) { // if nothing queued, do not wait.
+            return;
+        }
+        final Object lock = new Object();
+        synchronized (lock) {
+            handler.post(() -> {
+                synchronized (lock) {
+                    lock.notify();
+                }
+            });
+            lock.wait(waitTimeMs);
+        }
+    }
+
     // Should be public to allow mocking
     private static class TestInjector extends UserController.Injector {
         public final TestHandler mHandler;
@@ -353,8 +506,11 @@ public class UserControllerTest {
         public final List<Intent> mSentIntents = new ArrayList<>();
 
         private final TestHandler mUiHandler;
+
+        private final IStorageManager mStorageManagerMock;
         private final UserManagerInternal mUserManagerInternalMock;
         private final WindowManagerService mWindowManagerMock;
+
         private final Context mCtx;
 
         TestInjector(Context ctx) {
@@ -367,6 +523,7 @@ public class UserControllerTest {
             mUserManagerMock = mock(UserManagerService.class);
             mUserManagerInternalMock = mock(UserManagerInternal.class);
             mWindowManagerMock = mock(WindowManagerService.class);
+            mStorageManagerMock = mock(IStorageManager.class);
         }
 
         @Override
@@ -433,6 +590,11 @@ public class UserControllerTest {
         boolean isRuntimeRestarted() {
             // to pass all metrics related calls
             return true;
+        }
+
+        @Override
+        protected IStorageManager getStorageManager() {
+            return mStorageManagerMock;
         }
     }
 
