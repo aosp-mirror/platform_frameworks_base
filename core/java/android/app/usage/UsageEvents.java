@@ -428,7 +428,6 @@ public final class UsageEvents implements Parcelable {
 
         /**
          * Indicates whether it is an instant app.
-         * STOPSHIP b/111407095: Add GTS tests for the newly added API method.
          * @hide
          */
         @SystemApi
