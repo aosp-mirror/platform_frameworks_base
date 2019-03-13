@@ -19,6 +19,7 @@ package android.preference;
 
 import android.annotation.CallSuper;
 import android.annotation.DrawableRes;
+import android.annotation.Nullable;
 import android.annotation.StringRes;
 import android.annotation.UnsupportedAppUsage;
 import android.app.AlertDialog;
@@ -347,6 +348,7 @@ public abstract class DialogPreference extends Preference implements
      * @return the DecorView for the current dialog window, if it exists.
      * If the window does not exist, null is returned.
      */
+    @Nullable
     private View getDecorView() {
         if (mDialog != null && mDialog.getWindow() != null) {
             return mDialog.getWindow().getDecorView();
