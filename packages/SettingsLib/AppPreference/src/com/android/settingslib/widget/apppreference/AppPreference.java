@@ -25,6 +25,8 @@ import android.widget.ProgressBar;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceViewHolder;
 
+import com.android.settingslib.widget.R;
+
 public class AppPreference extends Preference {
 
     private int mProgress;
