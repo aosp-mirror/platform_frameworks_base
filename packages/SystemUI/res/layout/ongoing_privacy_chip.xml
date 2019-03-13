@@ -28,7 +28,7 @@
     android:orientation="horizontal"
     android:focusable="true">
 
-        <LinearLayout
+        <FrameLayout
             android:id="@+id/background"
             android:layout_height="@dimen/ongoing_appops_chip_height"
             android:layout_width="wrap_content"
@@ -37,25 +37,8 @@
                     android:id="@+id/icons_container"
                     android:layout_height="match_parent"
                     android:layout_width="wrap_content"
-                    android:layout_marginStart="@dimen/ongoing_appops_chip_items_margin"
-                    android:layout_gravity="center_vertical"
+                    android:layout_gravity="center"
                     android:gravity="center_vertical"
                     />
-
-                <TextView
-                    android:id="@+id/text_container"
-                    android:layout_height="match_parent"
-                    android:layout_width="wrap_content"
-                    android:layout_gravity="center_vertical|end"
-                    android:paddingStart="@dimen/ongoing_appops_chip_text_padding"
-                    android:paddingEnd="@dimen/ongoing_appops_chip_text_padding"
-                    android:gravity="center_vertical"
-                    android:singleLine="true"
-                    android:ellipsize="end"
-                    android:lines="1"
-                    android:textAppearance="@style/TextAppearance.StatusBar.Clock"
-                    android:textSize="@dimen/ongoing_appops_chip_text_size"
-                    android:textColor="@color/status_bar_clock_color"
-                />
-          </LinearLayout>
+          </FrameLayout>
 </com.android.systemui.privacy.OngoingPrivacyChip>

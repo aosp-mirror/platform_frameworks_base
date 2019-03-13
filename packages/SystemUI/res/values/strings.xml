@@ -2318,25 +2318,11 @@
          app for debugging. Will not be seen by users. [CHAR LIMIT=20] -->
     <string name="heap_dump_tile_name">Dump SysUI Heap</string>
 
-    <!-- Text on chip for multiple apps using a single app op [CHAR LIMIT=12] -->
-    <plurals name="ongoing_privacy_chip_multiple_apps">
-        <item quantity="one"><xliff:g id="num_apps" example="1">%d</xliff:g> app</item>
-        <item quantity="few"><xliff:g id="num_apps" example="3">%d</xliff:g> apps</item>
-        <item quantity="other"><xliff:g id="num_apps" example="3">%d</xliff:g> apps</item>
-    </plurals>
-
     <!-- Content description for ongoing privacy chip. Use with a single app [CHAR LIMIT=NONE]-->
     <string name="ongoing_privacy_chip_content_single_app"><xliff:g id="app" example="Example App">%1$s</xliff:g> is using your <xliff:g id="types_list" example="camera, location">%2$s</xliff:g>.</string>
 
     <!-- Content description for ongoing privacy chip. Use with multiple apps [CHAR LIMIT=NONE]-->
     <string name="ongoing_privacy_chip_content_multiple_apps">Applications are using your <xliff:g id="types_list" example="camera, location">%s</xliff:g>.</string>
-
-    <!-- Content description for ongoing privacy chip. Use with multiple apps using same app op[CHAR LIMIT=NONE]-->
-    <plurals name="ongoing_privacy_chip_content_multiple_apps_single_op">
-        <item quantity="one"><xliff:g id="num_apps" example="1">%1$d</xliff:g> application is using your <xliff:g id="type" example="camera">%2$s</xliff:g>.</item>
-        <item quantity="few"><xliff:g id="num_apps" example="3">%1$d</xliff:g> applications are using your <xliff:g id="type" example="camera">%2$s</xliff:g>.</item>
-        <item quantity="other"><xliff:g id="num_apps" example="3">%1$d</xliff:g> applications are using your <xliff:g id="type" example="camera">%2$s</xliff:g>.</item>
-    </plurals>
 
     <!-- Action for accepting the Ongoing privacy dialog [CHAR LIMIT=10]-->
     <string name="ongoing_privacy_dialog_ok">Got it</string>
