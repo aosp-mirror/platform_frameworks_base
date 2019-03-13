@@ -3374,9 +3374,9 @@
     <string name="wifi_available_action_all_networks">All networks</string>
 
     <!-- Notification title for a connection to a app suggested wireless network.-->
-    <string name="wifi_suggestion_title">A Wi\u2011Fi network proposed by <xliff:g id="name" example="App123">%s</xliff:g> is available</string>
+    <string name="wifi_suggestion_title">Connect to Wi\u2011Fi networks?</string>
     <!-- Notification content for a connection to a app suggested wireless network.-->
-    <string name="wifi_suggestion_content">Do you want to connect to networks proposed by <xliff:g id="name" example="App123">%s</xliff:g>?</string>
+    <string name="wifi_suggestion_content">Suggested by <xliff:g id="name" example="App123">%s</xliff:g></string>
     <!-- Notification action for allowing app specified in the notification body.-->
     <string name="wifi_suggestion_action_allow_app">Yes</string>
     <!-- Notification action for disallowing app specified in the notification body.-->
