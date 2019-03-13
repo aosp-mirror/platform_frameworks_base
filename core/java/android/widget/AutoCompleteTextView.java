@@ -17,6 +17,7 @@
 package android.widget;
 
 import android.annotation.DrawableRes;
+import android.annotation.IntDef;
 import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.Resources.Theme;
@@ -44,6 +45,8 @@ import android.view.inspector.InspectableProperty;
 
 import com.android.internal.R;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
 
 /**
@@ -1259,9 +1262,20 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
     }
 
     /**
+     * The valid input method modes for the {@link AutoCompleteTextView}:
+     *
+     * {@hide}
+     */
+    @IntDef({ListPopupWindow.INPUT_METHOD_FROM_FOCUSABLE,
+            ListPopupWindow.INPUT_METHOD_NEEDED,
+            ListPopupWindow.INPUT_METHOD_NOT_NEEDED})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface InputMethodMode {}
+
+    /**
      * Returns the input method mode used by the auto complete dropdown.
      */
-    public int getInputMethodMode() {
+    public @InputMethodMode int getInputMethodMode() {
         return mPopup.getInputMethodMode();
     }
 
@@ -1277,7 +1291,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
      * {@link ListPopupWindow#INPUT_METHOD_NOT_NEEDED}. The auto-complete suggestions are always
      * displayed, even if the suggestions cover/hide the input method.
      */
-    public void setInputMethodMode(int mode) {
+    public void setInputMethodMode(@InputMethodMode int mode) {
         mPopup.setInputMethodMode(mode);
     }
 
