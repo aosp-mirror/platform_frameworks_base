@@ -158,4 +158,18 @@ public final class BitUtils {
     public static byte[] toBytes(long l) {
         return ByteBuffer.allocate(8).putLong(l).array();
     }
+
+    /**
+     * 0b01000 -> 0b01111
+     */
+    public static int flagsUpTo(int lastFlag) {
+        return lastFlag <= 0 ? 0 : lastFlag | flagsUpTo(lastFlag >> 1);
+    }
+
+    /**
+     * 0b00010, 0b01000 -> 0b01110
+     */
+    public static int flagsWithin(int firstFlag, int lastFlag) {
+        return (flagsUpTo(lastFlag) & ~flagsUpTo(firstFlag)) | firstFlag;
+    }
 }

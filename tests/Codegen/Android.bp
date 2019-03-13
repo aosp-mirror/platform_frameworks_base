@@ -1,0 +1,25 @@
+android_test {
+    name: "CodegenTests",
+    srcs: [
+        "**/*.java",
+    ],
+
+    platform_apis: true,
+    test_suites: ["device-tests"],
+    certificate: "platform",
+
+    optimize: {
+        enabled: false,
+    },
+
+    plugins: [
+        "staledataclass-annotation-processor",
+    ],
+    static_libs: [
+        "junit",
+        "hamcrest",
+        "hamcrest-library",
+        "androidx.test.runner",
+        "androidx.test.rules",
+    ],
+}
