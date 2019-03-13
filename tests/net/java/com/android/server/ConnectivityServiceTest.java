@@ -190,6 +190,8 @@ import org.mockito.stubbing.Answer;
 
 import java.net.Inet4Address;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -206,6 +208,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 /**
@@ -3992,17 +3995,24 @@ public class ConnectivityServiceTest {
         callback3.expectStopped();
     }
 
-    @Test
-    public void testNattSocketKeepalives_SingleThreadExecutor() throws Exception {
+    // Helper method to prepare the executor and run test
+    private void runTestWithSerialExecutors(Consumer<Executor> functor) {
         final ExecutorService executorSingleThread = Executors.newSingleThreadExecutor();
-        doTestNattSocketKeepalivesWithExecutor(executorSingleThread);
+        final Executor executorInline = (Runnable r) -> r.run();
+        functor.accept(executorSingleThread);
         executorSingleThread.shutdown();
+        functor.accept(executorInline);
     }
 
     @Test
-    public void testNattSocketKeepalives_InlineExecutor() throws Exception {
-        final Executor executorInline = (Runnable r) -> r.run();
-        doTestNattSocketKeepalivesWithExecutor(executorInline);
+    public void testNattSocketKeepalives() {
+        runTestWithSerialExecutors(executor -> {
+            try {
+                doTestNattSocketKeepalivesWithExecutor(executor);
+            } catch (Exception e) {
+                fail(e.getMessage());
+            }
+        });
     }
 
     private void doTestNattSocketKeepalivesWithExecutor(Executor executor) throws Exception {
@@ -4143,6 +4153,81 @@ public class ConnectivityServiceTest {
 
         mWiFiNetworkAgent.disconnect();
         waitFor(mWiFiNetworkAgent.getDisconnectedCV());
+        mWiFiNetworkAgent = null;
+    }
+
+    @Test
+    public void testTcpSocketKeepalives() {
+        runTestWithSerialExecutors(executor -> {
+            try {
+                doTestTcpSocketKeepalivesWithExecutor(executor);
+            } catch (Exception e) {
+                fail(e.getMessage());
+            }
+        });
+    }
+
+    private void doTestTcpSocketKeepalivesWithExecutor(Executor executor) throws Exception {
+        final int srcPortV4 = 12345;
+        final int srcPortV6 = 23456;
+        final InetAddress myIPv4 = InetAddress.getByName("127.0.0.1");
+        final InetAddress myIPv6 = InetAddress.getByName("::1");
+
+        final int validKaInterval = 15;
+        final int invalidKaInterval = 9;
+
+        final LinkProperties lp = new LinkProperties();
+        lp.setInterfaceName("wlan12");
+        lp.addLinkAddress(new LinkAddress(myIPv6, 64));
+        lp.addLinkAddress(new LinkAddress(myIPv4, 25));
+        lp.addRoute(new RouteInfo(InetAddress.getByName("fe80::1234")));
+        lp.addRoute(new RouteInfo(InetAddress.getByName("127.0.0.254")));
+
+        final Network notMyNet = new Network(61234);
+        final Network myNet = connectKeepaliveNetwork(lp);
+
+        final Socket testSocketV4 = new Socket();
+        final Socket testSocketV6 = new Socket();
+
+        TestSocketKeepaliveCallback callback = new TestSocketKeepaliveCallback();
+        SocketKeepalive ka;
+
+        // Attempt to start Tcp keepalives with invalid parameters and check for errors.
+        // Invalid network.
+        ka = mCm.createSocketKeepalive(notMyNet, testSocketV4, executor, callback);
+        ka.start(validKaInterval);
+        callback.expectError(SocketKeepalive.ERROR_INVALID_NETWORK);
+
+        // Invalid Socket (socket is not bound with IPv4 address).
+        ka = mCm.createSocketKeepalive(myNet, testSocketV4, executor, callback);
+        ka.start(validKaInterval);
+        callback.expectError(SocketKeepalive.ERROR_INVALID_SOCKET);
+
+        // Invalid Socket (socket is not bound with IPv6 address).
+        ka = mCm.createSocketKeepalive(myNet, testSocketV6, executor, callback);
+        ka.start(validKaInterval);
+        callback.expectError(SocketKeepalive.ERROR_INVALID_SOCKET);
+
+        // Bind the socket address
+        testSocketV4.bind(new InetSocketAddress(myIPv4, srcPortV4));
+        testSocketV6.bind(new InetSocketAddress(myIPv6, srcPortV6));
+
+        // Invalid Socket (socket is bound with IPv4 address).
+        ka = mCm.createSocketKeepalive(myNet, testSocketV4, executor, callback);
+        ka.start(validKaInterval);
+        callback.expectError(SocketKeepalive.ERROR_INVALID_SOCKET);
+
+        // Invalid Socket (socket is bound with IPv6 address).
+        ka = mCm.createSocketKeepalive(myNet, testSocketV6, executor, callback);
+        ka.start(validKaInterval);
+        callback.expectError(SocketKeepalive.ERROR_INVALID_SOCKET);
+
+        testSocketV4.close();
+        testSocketV6.close();
+
+        mWiFiNetworkAgent.disconnect();
+        waitFor(mWiFiNetworkAgent.getDisconnectedCV());
+        mWiFiNetworkAgent = null;
     }
 
     @Test
