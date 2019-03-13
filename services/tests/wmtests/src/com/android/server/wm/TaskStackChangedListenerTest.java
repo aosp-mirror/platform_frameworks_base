@@ -100,6 +100,7 @@ public class TaskStackChangedListenerTest {
     }
 
     @Test
+    @Presubmit
     public void testTaskDescriptionChanged() throws Exception {
         final Object[] params = new Object[2];
         final CountDownLatch latch = new CountDownLatch(1);
@@ -132,6 +133,7 @@ public class TaskStackChangedListenerTest {
     }
 
     @Test
+    @Presubmit
     public void testActivityRequestedOrientationChanged() throws Exception {
         final int[] params = new int[2];
         final CountDownLatch latch = new CountDownLatch(1);
