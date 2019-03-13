@@ -1389,6 +1389,14 @@ public abstract class PackageManager {
      */
     public static final int INSTALL_FAILED_BAD_SIGNATURE = -118;
 
+    /**
+     * Installation failed return code: a new staged session was attempted to be committed while
+     * there is already one in-progress.
+     *
+     * @hide
+     */
+    public static final int INSTALL_FAILED_OTHER_STAGED_SESSION_IN_PROGRESS = -119;
+
     /** @hide */
     @IntDef(flag = true, prefix = { "DELETE_" }, value = {
             DELETE_KEEP_DATA,
