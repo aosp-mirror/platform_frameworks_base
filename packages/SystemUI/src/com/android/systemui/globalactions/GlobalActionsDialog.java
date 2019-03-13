@@ -38,7 +38,6 @@ import android.graphics.Point;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.net.ConnectivityManager;
-import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 import android.os.RemoteException;
@@ -635,14 +634,6 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         @Override
         public boolean showBeforeProvisioning() {
             return false;
-        }
-
-        @Override
-        public String getStatus() {
-            return mContext.getString(
-                    R.string.bugreport_status,
-                    Build.VERSION.RELEASE,
-                    Build.ID);
         }
     }
 
