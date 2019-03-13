@@ -3299,11 +3299,16 @@ public abstract class Context {
      * {@link #USB_SERVICE}, {@link #WALLPAPER_SERVICE}, {@link #WIFI_P2P_SERVICE},
      * {@link #WIFI_SERVICE}, {@link #WIFI_AWARE_SERVICE}. For these services this method will
      * return <code>null</code>.  Generally, if you are running as an instant app you should always
-     * check whether the result of this method is null.
+     * check whether the result of this method is {@code null}.
+     *
+     * <p>Note: When implementing this method, keep in mind that new services can be added on newer
+     * Android releases, so if you're looking for just the explicit names mentioned above, make sure
+     * to return {@code null} when you don't recognize the name &mdash; if you throw a
+     * {@link RuntimeException} exception instead, you're app might break on new Android releases.
      *
      * @param name The name of the desired service.
      *
-     * @return The service or null if the name does not exist.
+     * @return The service or {@code null} if the name does not exist.
      *
      * @see #WINDOW_SERVICE
      * @see android.view.WindowManager
@@ -3377,7 +3382,9 @@ public abstract class Context {
      * {@link android.app.UiModeManager}, {@link android.app.DownloadManager},
      * {@link android.os.BatteryManager}, {@link android.app.job.JobScheduler},
      * {@link android.app.usage.NetworkStatsManager}.
-     * </p><p>
+     * </p>
+     *
+     * <p>
      * Note: System services obtained via this API may be closely associated with
      * the Context in which they are obtained from.  In general, do not share the
      * service objects between various different contexts (Activities, Applications,
@@ -3389,11 +3396,13 @@ public abstract class Context {
      * {@link #FINGERPRINT_SERVICE}, {@link #KEYGUARD_SERVICE}, {@link #SHORTCUT_SERVICE},
      * {@link #USB_SERVICE}, {@link #WALLPAPER_SERVICE}, {@link #WIFI_P2P_SERVICE},
      * {@link #WIFI_SERVICE}, {@link #WIFI_AWARE_SERVICE}. For these services this method will
-     * return <code>null</code>.  Generally, if you are running as an instant app you should always
-     * check whether the result of this method is null.
+     * return {@code null}. Generally, if you are running as an instant app you should always
+     * check whether the result of this method is {@code null}.
+     * </p>
      *
      * @param serviceClass The class of the desired service.
-     * @return The service or null if the class is not a supported system service.
+     * @return The service or {@code null} if the class is not a supported system service. Note:
+     * <b>never</b> throw a {@link RuntimeException} if the name is not supported.
      */
     @SuppressWarnings("unchecked")
     public final @Nullable <T> T getSystemService(@NonNull Class<T> serviceClass) {
