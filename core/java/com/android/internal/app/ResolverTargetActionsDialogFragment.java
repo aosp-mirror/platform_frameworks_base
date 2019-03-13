@@ -23,7 +23,6 @@ import android.app.DialogFragment;
 import android.content.ComponentName;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -36,34 +35,27 @@ import com.android.internal.R;
 public class ResolverTargetActionsDialogFragment extends DialogFragment
         implements DialogInterface.OnClickListener {
     private static final String NAME_KEY = "componentName";
-    private static final String PINNED_KEY = "pinned";
     private static final String TITLE_KEY = "title";
 
     // Sync with R.array.resolver_target_actions_* resources
-    private static final int TOGGLE_PIN_INDEX = 0;
-    private static final int APP_INFO_INDEX = 1;
+    private static final int APP_INFO_INDEX = 0;
 
     public ResolverTargetActionsDialogFragment() {
     }
 
-    public ResolverTargetActionsDialogFragment(CharSequence title, ComponentName name,
-            boolean pinned) {
+    public ResolverTargetActionsDialogFragment(CharSequence title, ComponentName name) {
         Bundle args = new Bundle();
         args.putCharSequence(TITLE_KEY, title);
         args.putParcelable(NAME_KEY, name);
-        args.putBoolean(PINNED_KEY, pinned);
         setArguments(args);
     }
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         final Bundle args = getArguments();
-        final int itemRes = args.getBoolean(PINNED_KEY, false)
-                ? R.array.resolver_target_actions_unpin
-                : R.array.resolver_target_actions_pin;
         return new Builder(getContext())
                 .setCancelable(true)
-                .setItems(itemRes, this)
+                .setItems(R.array.resolver_target_actions, this)
                 .setTitle(args.getCharSequence(TITLE_KEY))
                 .create();
     }
@@ -73,19 +65,6 @@ public class ResolverTargetActionsDialogFragment extends DialogFragment
         final Bundle args = getArguments();
         ComponentName name = args.getParcelable(NAME_KEY);
         switch (which) {
-            case TOGGLE_PIN_INDEX:
-                SharedPreferences sp = ChooserActivity.getPinnedSharedPrefs(getContext());
-                final String key = name.flattenToString();
-                boolean currentVal = sp.getBoolean(name.flattenToString(), false);
-                if (currentVal) {
-                    sp.edit().remove(key).apply();
-                } else {
-                    sp.edit().putBoolean(key, true).apply();
-                }
-
-                // Force the chooser to requery and resort things
-                getActivity().recreate();
-                break;
             case APP_INFO_INDEX:
                 Intent in = new Intent().setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
                         .setData(Uri.fromParts("package", name.getPackageName(), null))

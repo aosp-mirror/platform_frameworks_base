@@ -2990,8 +2990,7 @@
   <java-symbol type="color" name="notification_material_background_color" />
 
   <!-- Resolver target actions -->
-  <java-symbol type="array" name="resolver_target_actions_pin" />
-  <java-symbol type="array" name="resolver_target_actions_unpin" />
+  <java-symbol type="array" name="resolver_target_actions" />
 
   <java-symbol type="array" name="non_removable_euicc_slots" />
 
