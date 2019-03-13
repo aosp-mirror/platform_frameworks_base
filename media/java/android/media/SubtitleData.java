@@ -91,7 +91,7 @@ public final class SubtitleData
     }
 
     /**
-     * Returns the index of the MediaPlayer track which contains this subtitle data.
+     * Returns the index of the media player track which contains this subtitle data.
      * @return an index in the array returned by {@link MediaPlayer#getTrackInfo()}.
      */
     public int getTrackIndex() {
@@ -198,7 +198,7 @@ public final class SubtitleData
         /**
          * Sets the info of subtitle data.
          *
-         * @param trackIndex the ParcelFileDescriptor for the file to play
+         * @param trackIndex the index of the media player track which contains this subtitle data.
          * @param startTimeUs the start time in microsecond for the subtile data
          * @param durationUs the duration in microsecond for the subtile data
          * @param data the data array for the subtile data. It should not be null.
