@@ -511,7 +511,8 @@ public class MediaSession2 implements AutoCloseable {
         }
 
         /**
-         * Set extras for the session token.
+         * Set extras for the session token. If null or not set, {@link Session2Token#getExtras()}
+         * will return {@link Bundle#EMPTY}.
          *
          * @return The Builder to allow chaining
          * @see Session2Token#getExtras()

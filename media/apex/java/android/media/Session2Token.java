@@ -216,10 +216,11 @@ public final class Session2Token implements Parcelable {
 
     /**
      * @return extras of the token
+     * @see MediaSession2.Builder#setExtras(Bundle)
      */
-    @Nullable
+    @NonNull
     public Bundle getExtras() {
-        return mExtras;
+        return mExtras == null ? Bundle.EMPTY : mExtras;
     }
 
     Session2Link getSessionLink() {
