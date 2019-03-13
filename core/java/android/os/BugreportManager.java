@@ -208,8 +208,6 @@ public class BugreportManager {
                 });
             } finally {
                 Binder.restoreCallingIdentity(identity);
-                // The bugreport has finished. Let's shutdown the service to minimize its footprint.
-                cancelBugreport();
             }
         }
 
