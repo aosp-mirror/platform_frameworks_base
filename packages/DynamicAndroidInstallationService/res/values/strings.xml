@@ -30,6 +30,9 @@
     <!-- Action on notification: Reboot to AndroidOnTap [CHAR LIMIT=16] -->
     <string name="notification_action_reboot_to_dynandroid">Reboot</string>
 
-    <!-- Toast when installed AndroidOnTap is discarded [CHAR LIMIT=64] -->
+    <!-- Toast when installed DynamicAndroid is discarded [CHAR LIMIT=64] -->
     <string name="toast_dynandroid_discarded">Installed AndroidOnTap is discarded.</string>
+    <!-- Toast when we fail to launch into DynamicAndroid [CHAR LIMIT=64] -->
+    <string name="toast_failed_to_reboot_to_dynandroid">Failed to reboot into AndroidOnTap.</string>
+
 </resources>
