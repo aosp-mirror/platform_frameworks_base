@@ -238,6 +238,13 @@ public class BubbleStackView extends FrameLayout {
         mBubbleContainer.bringToFront();
     }
 
+    /**
+     * Handle config changes.
+     */
+    public void onConfigChanged() {
+        mExpandedBubble.expandedView.updateHeaderColor();
+    }
+
     @Override
     public void getBoundsOnScreen(Rect outRect, boolean clipToParent) {
         getBoundsOnScreen(outRect);

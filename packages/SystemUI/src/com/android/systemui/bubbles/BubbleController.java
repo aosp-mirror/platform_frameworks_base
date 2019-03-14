@@ -61,6 +61,7 @@ import com.android.systemui.statusbar.notification.NotificationInterruptionState
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.NotificationContentInflater.InflationFlag;
 import com.android.systemui.statusbar.phone.StatusBarWindowController;
+import com.android.systemui.statusbar.policy.ConfigurationController;
 
 import java.lang.annotation.Retention;
 
@@ -74,7 +75,8 @@ import javax.inject.Singleton;
  * The controller manages addition, removal, and visible state of bubbles on screen.
  */
 @Singleton
-public class BubbleController implements BubbleExpandedView.OnBubbleBlockedListener {
+public class BubbleController implements BubbleExpandedView.OnBubbleBlockedListener,
+        ConfigurationController.ConfigurationListener {
 
     private static final String TAG = "BubbleController";
 
@@ -84,6 +86,7 @@ public class BubbleController implements BubbleExpandedView.OnBubbleBlockedListe
     @IntDef({DISMISS_USER_GESTURE, DISMISS_AGED, DISMISS_TASK_FINISHED, DISMISS_BLOCKED,
             DISMISS_NOTIF_CANCEL, DISMISS_ACCESSIBILITY_ACTION})
     @interface DismissReason {}
+
     static final int DISMISS_USER_GESTURE = 1;
     static final int DISMISS_AGED = 2;
     static final int DISMISS_TASK_FINISHED = 3;
@@ -151,6 +154,7 @@ public class BubbleController implements BubbleExpandedView.OnBubbleBlockedListe
     public interface BubbleExpandListener {
         /**
          * Called when the expansion state of the bubble stack changes.
+         *
          * @param isExpanding whether it's expanding or collapsing
          * @param key the notification key associated with bubble being expanded
          */
@@ -179,13 +183,16 @@ public class BubbleController implements BubbleExpandedView.OnBubbleBlockedListe
 
     @Inject
     public BubbleController(Context context, StatusBarWindowController statusBarWindowController,
-                            BubbleData data) {
-        this(context, statusBarWindowController, data, null /* synchronizer */);
+            BubbleData data, ConfigurationController configurationController) {
+        this(context, statusBarWindowController, data, null /* synchronizer */,
+                configurationController);
     }
 
     public BubbleController(Context context, StatusBarWindowController statusBarWindowController,
-            BubbleData data, @Nullable BubbleStackView.SurfaceSynchronizer synchronizer) {
+            BubbleData data, @Nullable BubbleStackView.SurfaceSynchronizer synchronizer,
+            ConfigurationController configurationController) {
         mContext = context;
+        configurationController.addCallback(this /* configurationListener */);
 
         mNotificationEntryManager = Dependency.get(NotificationEntryManager.class);
         mNotificationEntryManager.addNotificationEntryListener(mEntryListener);
@@ -213,6 +220,20 @@ public class BubbleController implements BubbleExpandedView.OnBubbleBlockedListe
 
         mBubbleData = data;
         mSurfaceSynchronizer = synchronizer;
+    }
+
+    @Override
+    public void onUiModeChanged() {
+        if (mStackView != null) {
+            mStackView.onConfigChanged();
+        }
+    }
+
+    @Override
+    public void onOverlayChanged() {
+        if (mStackView != null) {
+            mStackView.onConfigChanged();
+        }
     }
 
     /**
@@ -295,7 +316,7 @@ public class BubbleController implements BubbleExpandedView.OnBubbleBlockedListe
     /**
      * Adds or updates a bubble associated with the provided notification entry.
      *
-     * @param notif the notification associated with this bubble.
+     * @param notif          the notification associated with this bubble.
      * @param updatePosition whether this update should promote the bubble to the top of the stack.
      */
     public void updateBubble(NotificationEntry notif, boolean updatePosition) {
