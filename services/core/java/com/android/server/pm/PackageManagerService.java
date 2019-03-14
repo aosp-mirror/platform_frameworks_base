@@ -160,9 +160,9 @@ import android.content.pm.InstantAppInfo;
 import android.content.pm.InstantAppRequest;
 import android.content.pm.InstrumentationInfo;
 import android.content.pm.IntentFilterVerificationInfo;
-import android.content.pm.PackageBackwardCompatibility;
 import android.content.pm.KeySet;
 import android.content.pm.ModuleInfo;
+import android.content.pm.PackageBackwardCompatibility;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInfoLite;
 import android.content.pm.PackageInstaller;
@@ -549,10 +549,21 @@ public class PackageManagerService extends IPackageManager.Stub
     private static final long DEFAULT_VERIFICATION_TIMEOUT = 10 * 1000;
 
     /**
+     * Timeout duration in milliseconds for enabling package rollback. If we fail to enable
+     * rollback within that period, the install will proceed without rollback enabled.
+     *
+     * <p>If flag value is negative, the default value will be assigned.
+     *
+     * Flag type: {@code long}
+     * Namespace: NAMESPACE_ROLLBACK
+     */
+    private static final String PROPERTY_ENABLE_ROLLBACK_TIMEOUT_MILLIS = "enable_rollback_timeout";
+
+    /**
      * The default duration to wait for rollback to be enabled in
      * milliseconds.
      */
-    private static final long DEFAULT_ENABLE_ROLLBACK_TIMEOUT = 10 * 1000;
+    private static final long DEFAULT_ENABLE_ROLLBACK_TIMEOUT_MILLIS = 10 * 1000;
 
     /**
      * The default response for package verification timeout.
@@ -14716,11 +14727,11 @@ public class PackageManagerService extends IPackageManager.Stub
                                 public void onReceive(Context context, Intent intent) {
                                     // the duration to wait for rollback to be enabled, in millis
                                     long rollbackTimeout = DeviceConfig.getLong(
-                                            DeviceConfig.Rollback.NAMESPACE,
-                                            DeviceConfig.Rollback.ENABLE_ROLLBACK_TIMEOUT,
-                                            DEFAULT_ENABLE_ROLLBACK_TIMEOUT);
+                                            DeviceConfig.NAMESPACE_ROLLBACK,
+                                            PROPERTY_ENABLE_ROLLBACK_TIMEOUT_MILLIS,
+                                            DEFAULT_ENABLE_ROLLBACK_TIMEOUT_MILLIS);
                                     if (rollbackTimeout < 0) {
-                                        rollbackTimeout = DEFAULT_ENABLE_ROLLBACK_TIMEOUT;
+                                        rollbackTimeout = DEFAULT_ENABLE_ROLLBACK_TIMEOUT_MILLIS;
                                     }
                                     final Message msg = mHandler.obtainMessage(
                                             ENABLE_ROLLBACK_TIMEOUT);

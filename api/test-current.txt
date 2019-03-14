@@ -727,6 +727,7 @@ package android.content.rollback {
     method @RequiresPermission(android.Manifest.permission.MANAGE_ROLLBACKS) public void reloadPersistedData();
     field public static final String EXTRA_STATUS = "android.content.rollback.extra.STATUS";
     field public static final String EXTRA_STATUS_MESSAGE = "android.content.rollback.extra.STATUS_MESSAGE";
+    field public static final String PROPERTY_ROLLBACK_LIFETIME_MILLIS = "rollback_lifetime_in_millis";
     field public static final int STATUS_FAILURE = 1; // 0x1
     field public static final int STATUS_FAILURE_INSTALL = 3; // 0x3
     field public static final int STATUS_FAILURE_ROLLBACK_UNAVAILABLE = 2; // 0x2
@@ -2067,6 +2068,8 @@ package android.provider {
     method @RequiresPermission(android.Manifest.permission.WRITE_DEVICE_CONFIG) public static boolean setProperty(@NonNull String, @NonNull String, @Nullable String, boolean);
     field public static final String NAMESPACE_AUTOFILL = "autofill";
     field public static final String NAMESPACE_CONTENT_CAPTURE = "content_capture";
+    field public static final String NAMESPACE_ROLLBACK = "rollback";
+    field public static final String NAMESPACE_ROLLBACK_BOOT = "rollback_boot";
   }
 
   public static interface DeviceConfig.OnPropertiesChangedListener {
@@ -2090,13 +2093,6 @@ package android.provider {
     method public long getLong(@NonNull String, long);
     method @NonNull public String getNamespace();
     method @Nullable public String getString(@NonNull String, @Nullable String);
-  }
-
-  public static interface DeviceConfig.Rollback {
-    field public static final String BOOT_NAMESPACE = "rollback_boot";
-    field public static final String ENABLE_ROLLBACK_TIMEOUT = "enable_rollback_timeout";
-    field public static final String NAMESPACE = "rollback";
-    field public static final String ROLLBACK_LIFETIME_IN_MILLIS = "rollback_lifetime_in_millis";
   }
 
   public final class MediaStore {
