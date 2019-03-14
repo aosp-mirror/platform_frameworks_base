@@ -329,10 +329,10 @@ public class BubbleControllerTest extends SysuiTestCase {
     }
 
     static class TestableBubbleController extends BubbleController {
-
+        // Let's assume surfaces can be synchronized immediately.
         TestableBubbleController(Context context,
                 StatusBarWindowController statusBarWindowController, BubbleData data) {
-            super(context, statusBarWindowController, data);
+            super(context, statusBarWindowController, data, Runnable::run);
         }
 
         @Override
