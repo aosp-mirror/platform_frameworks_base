@@ -211,8 +211,8 @@ public final class Helper {
      * Gets the {@link AutofillId} of the autofillable nodes in the {@code structure}.
      */
     @NonNull
-    static ArrayList<AutofillId> getAutofillableIds(@NonNull AssistStructure structure) {
-        final ArrayList<AutofillId> ids = new ArrayList<>();
+    static ArraySet<AutofillId> getAutofillableIds(@NonNull AssistStructure structure) {
+        final ArraySet<AutofillId> ids = new ArraySet<>();
         final int size = structure.getWindowNodeCount();
         for (int i = 0; i < size; i++) {
             final WindowNode node = structure.getWindowNodeAt(i);
@@ -222,7 +222,7 @@ public final class Helper {
     }
 
     private static void addAutofillableIds(@NonNull ViewNode node,
-            @NonNull ArrayList<AutofillId> ids) {
+            @NonNull ArraySet<AutofillId> ids) {
         if (node.getAutofillType() != View.AUTOFILL_TYPE_NONE) {
             ids.add(node.getAutofillId());
         }
