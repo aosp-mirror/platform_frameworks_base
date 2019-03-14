@@ -60,7 +60,6 @@ import static android.net.NetworkPolicyManager.RULE_ALLOW_METERED;
 import static android.net.NetworkPolicyManager.RULE_NONE;
 import static android.net.NetworkPolicyManager.RULE_REJECT_ALL;
 import static android.net.NetworkPolicyManager.RULE_REJECT_METERED;
-import static android.net.shared.NetworkParcelableUtil.fromStableParcelable;
 
 import static com.android.internal.util.TestUtils.waitForIdleHandler;
 import static com.android.internal.util.TestUtils.waitForIdleLooper;
@@ -123,7 +122,6 @@ import android.net.NetworkFactory;
 import android.net.NetworkInfo;
 import android.net.NetworkInfo.DetailedState;
 import android.net.NetworkMisc;
-import android.net.NetworkParcelable;
 import android.net.NetworkRequest;
 import android.net.NetworkSpecifier;
 import android.net.NetworkStackClient;
@@ -500,8 +498,7 @@ public class ConnectivityServiceTest {
                 fail(e.getMessage());
             }
 
-            final ArgumentCaptor<NetworkParcelable> nmNetworkCaptor =
-                    ArgumentCaptor.forClass(NetworkParcelable.class);
+            final ArgumentCaptor<Network> nmNetworkCaptor = ArgumentCaptor.forClass(Network.class);
             final ArgumentCaptor<INetworkMonitorCallbacks> nmCbCaptor =
                     ArgumentCaptor.forClass(INetworkMonitorCallbacks.class);
             doNothing().when(mNetworkStack).makeNetworkMonitor(
@@ -541,8 +538,7 @@ public class ConnectivityServiceTest {
                 }
             };
 
-            assertEquals(
-                    mNetworkAgent.netId, fromStableParcelable(nmNetworkCaptor.getValue()).netId);
+            assertEquals(mNetworkAgent.netId, nmNetworkCaptor.getValue().netId);
             mNmCallbacks = nmCbCaptor.getValue();
 
             try {

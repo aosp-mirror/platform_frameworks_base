@@ -19,7 +19,6 @@ package com.android.server;
 import static android.net.dhcp.IDhcpServer.STATUS_INVALID_ARGUMENT;
 import static android.net.dhcp.IDhcpServer.STATUS_SUCCESS;
 import static android.net.dhcp.IDhcpServer.STATUS_UNKNOWN_ERROR;
-import static android.net.shared.NetworkParcelableUtil.fromStableParcelable;
 
 import static com.android.server.util.PermissionUtil.checkDumpPermission;
 import static com.android.server.util.PermissionUtil.checkNetworkStackCallingPermission;
@@ -35,7 +34,6 @@ import android.net.INetworkMonitor;
 import android.net.INetworkMonitorCallbacks;
 import android.net.INetworkStackConnector;
 import android.net.Network;
-import android.net.NetworkParcelable;
 import android.net.PrivateDnsConfigParcel;
 import android.net.dhcp.DhcpServer;
 import android.net.dhcp.DhcpServingParams;
@@ -152,12 +150,10 @@ public class NetworkStackService extends Service {
         }
 
         @Override
-        public void makeNetworkMonitor(
-                NetworkParcelable network, String name, INetworkMonitorCallbacks cb)
+        public void makeNetworkMonitor(Network network, String name, INetworkMonitorCallbacks cb)
                 throws RemoteException {
-            final Network parsedNetwork = fromStableParcelable(network);
-            final SharedLog log = addValidationLogs(parsedNetwork, name);
-            final NetworkMonitor nm = new NetworkMonitor(mContext, cb, parsedNetwork, log);
+            final SharedLog log = addValidationLogs(network, name);
+            final NetworkMonitor nm = new NetworkMonitor(mContext, cb, network, log);
             cb.onNetworkMonitorCreated(new NetworkMonitorImpl(nm));
         }
 

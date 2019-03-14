@@ -19,7 +19,7 @@ package android.net;
 
 import android.net.ApfCapabilitiesParcelable;
 import android.net.InitialConfigurationParcelable;
-import android.net.NetworkParcelable;
+import android.net.Network;
 import android.net.StaticIpConfigurationParcelable;
 
 parcelable ProvisioningConfigurationParcelable {
@@ -33,6 +33,6 @@ parcelable ProvisioningConfigurationParcelable {
     ApfCapabilitiesParcelable apfCapabilities;
     int provisioningTimeoutMs;
     int ipv6AddrGenMode;
-    NetworkParcelable network;
+    Network network;
     String displayName;
 }
