@@ -16,6 +16,7 @@
 
 package android.location;
 
+import android.annotation.NonNull;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -58,17 +59,17 @@ import android.util.Log;
  * </pre>
  * Here:
  * <ul>
- *     <li>title: The {@link android.preference.Preference#getTitle()} value. The title should make
- *     it clear which apps are affected by the setting, typically by including the name of the
- *     developer. For example, "Acme Corp. ads preferences." </li>
+ * <li>title: The {@link android.preference.Preference#getTitle()} value. The title should make
+ * it clear which apps are affected by the setting, typically by including the name of the
+ * developer. For example, "Acme Corp. ads preferences." </li>
  *
- *     <li>icon: The {@link android.preference.Preference#getIcon()} value. Typically this will be a
- *     generic icon for the developer rather than the icon for an individual app.</li>
+ * <li>icon: The {@link android.preference.Preference#getIcon()} value. Typically this will be a
+ * generic icon for the developer rather than the icon for an individual app.</li>
  *
- *     <li>settingsActivity: the activity which is launched to allow the user to modify the setting
- *     value.  The activity must be in the same package as the subclass of
- *     {@link SettingInjectorService}. The activity should use your own branding to help emphasize
- *     to the user that it is not part of the system settings.</li>
+ * <li>settingsActivity: the activity which is launched to allow the user to modify the setting
+ * value.  The activity must be in the same package as the subclass of
+ * {@link SettingInjectorService}. The activity should use your own branding to help emphasize
+ * to the user that it is not part of the system settings.</li>
  * </ul>
  *
  * To ensure a good user experience, your {@link android.app.Application#onCreate()},
@@ -206,6 +207,8 @@ public abstract class SettingInjectorService extends Service {
      * Returns the {@link android.preference.Preference#getSummary()} value (allowed to be null or
      * empty). Should not perform unpredictably-long operations such as network access--see the
      * running-time comments in the class-level javadoc.
+     * <p/>
+     * This method is called on KitKat, and Q+ devices.
      *
      * @return the {@link android.preference.Preference#getSummary()} value
      */
@@ -234,7 +237,7 @@ public abstract class SettingInjectorService extends Service {
     /**
      * Sends a broadcast to refresh the injected settings on location settings page.
      */
-    public static final void refreshSettings(Context context) {
+    public static final void refreshSettings(@NonNull Context context) {
         Intent intent = new Intent(ACTION_INJECTED_SETTING_CHANGED);
         context.sendBroadcast(intent);
     }
