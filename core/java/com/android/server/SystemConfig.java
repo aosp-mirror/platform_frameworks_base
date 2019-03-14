@@ -175,6 +175,8 @@ public class SystemConfig {
 
     final ArrayMap<String, ArrayMap<String, Boolean>> mOemPermissions = new ArrayMap<>();
 
+    private final ArraySet<String> mBugreportWhitelistedPackages = new ArraySet<>();
+
     public static SystemConfig getInstance() {
         synchronized (SystemConfig.class) {
             if (sInstance == null) {
@@ -286,6 +288,10 @@ public class SystemConfig {
             return oemPermissions;
         }
         return Collections.emptyMap();
+    }
+
+    public ArraySet<String> getBugreportWhitelistedPackages() {
+        return mBugreportWhitelistedPackages;
     }
 
     SystemConfig() {
@@ -705,6 +711,15 @@ public class SystemConfig {
                                 + " at " + parser.getPositionDescription());
                     } else {
                         mHiddenApiPackageWhitelist.add(pkgname);
+                    }
+                    XmlUtils.skipCurrentTag(parser);
+                } else if ("bugreport-whitelisted".equals(name)) {
+                    String pkgname = parser.getAttributeValue(null, "package");
+                    if (pkgname == null) {
+                        Slog.w(TAG, "<" + name + "> without package in " + permFile
+                                + " at " + parser.getPositionDescription());
+                    } else {
+                        mBugreportWhitelistedPackages.add(pkgname);
                     }
                     XmlUtils.skipCurrentTag(parser);
                 } else {
