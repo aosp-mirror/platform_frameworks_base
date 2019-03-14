@@ -121,8 +121,10 @@ public class BluetoothPbap implements BluetoothProfile {
                         log("Unbinding service...");
                         synchronized (mConnection) {
                             try {
-                                mService = null;
-                                mContext.unbindService(mConnection);
+                                if (mService != null) {
+                                    mService = null;
+                                    mContext.unbindService(mConnection);
+                                }
                             } catch (Exception re) {
                                 Log.e(TAG, "", re);
                             }

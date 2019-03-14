@@ -233,8 +233,10 @@ public final class BluetoothHidHost implements BluetoothProfile {
                         if (VDBG) Log.d(TAG, "Unbinding service...");
                         synchronized (mConnection) {
                             try {
-                                mService = null;
-                                mContext.unbindService(mConnection);
+                                if (mService != null) {
+                                    mService = null;
+                                    mContext.unbindService(mConnection);
+                                }
                             } catch (Exception re) {
                                 Log.e(TAG, "", re);
                             }
