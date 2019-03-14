@@ -165,16 +165,27 @@ public class BluetoothUtils {
             }
         }
 
+        return new Pair<>(buildBtRainbowDrawable(context,
+                pair.first, cachedDevice.getAddress().hashCode()), pair.second);
+    }
+
+    /**
+     * Build Bluetooth device icon with rainbow
+     */
+    public static Drawable buildBtRainbowDrawable(Context context, Drawable drawable,
+            int hashCode) {
+        final Resources resources = context.getResources();
+
         // Deal with normal headset
         final int[] iconFgColors = resources.getIntArray(R.array.bt_icon_fg_colors);
         final int[] iconBgColors = resources.getIntArray(R.array.bt_icon_bg_colors);
 
         // get color index based on mac address
-        final int index =  Math.abs(cachedDevice.getAddress().hashCode()) % iconBgColors.length;
-        pair.first.setColorFilter(iconFgColors[index], PorterDuff.Mode.SRC_ATOP);
-        final Drawable adaptiveIcon = new AdaptiveIcon(context, pair.first);
+        final int index =  Math.abs(hashCode % iconBgColors.length);
+        drawable.setColorFilter(iconFgColors[index], PorterDuff.Mode.SRC_ATOP);
+        final Drawable adaptiveIcon = new AdaptiveIcon(context, drawable);
         ((AdaptiveIcon) adaptiveIcon).setBackgroundColor(iconBgColors[index]);
 
-        return new Pair<>(adaptiveIcon, pair.second);
+        return adaptiveIcon;
     }
 }
