@@ -443,6 +443,12 @@ public final class DefaultPermissionGrantPolicy {
                 getDefaultSystemHandlerActivityPackage(MediaStore.ACTION_IMAGE_CAPTURE, userId),
                 userId, CAMERA_PERMISSIONS, MICROPHONE_PERMISSIONS, STORAGE_PERMISSIONS);
 
+        // Sound recorder
+        grantPermissionsToSystemPackage(
+                getDefaultSystemHandlerActivityPackage(
+                        MediaStore.Audio.Media.RECORD_SOUND_ACTION, userId),
+                userId, MICROPHONE_PERMISSIONS);
+
         // Media provider
         grantSystemFixedPermissionsToSystemPackage(
                 getDefaultProviderAuthorityPackage(MediaStore.AUTHORITY, userId), userId,
