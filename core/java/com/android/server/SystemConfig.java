@@ -938,6 +938,7 @@ public class SystemConfig {
                         } else {
                             mBugreportWhitelistedPackages.add(pkgname);
                         }
+                        XmlUtils.skipCurrentTag(parser);
                     } break;
                     default: {
                         Slog.w(TAG, "Tag " + name + " is unknown in "
