@@ -79,6 +79,8 @@ public class FooterView extends StackScrollerDecorView {
         mDismissButton.setContentDescription(
                 mContext.getString(R.string.accessibility_clear_all));
         mManageButton.setText(R.string.manage_notifications_text);
+        mManageButton.setContentDescription(
+                mContext.getString(R.string.accessibility_manage_notification));
     }
 
     public boolean isButtonVisible() {
