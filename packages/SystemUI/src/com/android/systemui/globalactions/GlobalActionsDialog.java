@@ -1706,6 +1706,9 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         void dismissImmediately() {
             super.dismiss();
             mShowing = false;
+            if (mPanelController != null) {
+                mPanelController.onDismissed();
+            }
         }
 
         private float getAnimTranslation() {
