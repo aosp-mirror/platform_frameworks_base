@@ -19,7 +19,7 @@ set -x # print commands
 adb root
 adb wait-for-device
 
-adb install -r -g "$OUT/data/app/FrameworksWifiApiTests/FrameworksWifiApiTests.apk"
+adb install -r -g "$OUT/testcases/FrameworksWifiApiTests/arm64/FrameworksWifiApiTests.apk"
 
 adb shell am instrument --no-hidden-api-checks -w "$@" \
   'android.net.wifi.test/androidx.test.runner.AndroidJUnitRunner'
