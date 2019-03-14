@@ -526,8 +526,8 @@ public class StagingManager {
     }
 
     void abortCommittedSession(@NonNull PackageInstallerSession session) {
-        if (session.isStagedSessionApplied() || session.isStagedSessionFailed()) {
-            Slog.w(TAG, "Cannot abort already finalized session : " + session.sessionId);
+        if (session.isStagedSessionApplied()) {
+            Slog.w(TAG, "Cannot abort applied session : " + session.sessionId);
             return;
         }
         abortSession(session);
