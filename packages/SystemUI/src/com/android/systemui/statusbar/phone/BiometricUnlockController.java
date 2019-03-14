@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.phone;
 
 import android.content.Context;
 import android.hardware.biometrics.BiometricSourceType;
+import android.metrics.LogMaker;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.os.SystemClock;
@@ -26,6 +27,8 @@ import android.provider.Settings;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.util.LatencyTracker;
 import com.android.keyguard.KeyguardConstants;
 import com.android.keyguard.KeyguardUpdateMonitor;
@@ -140,6 +143,8 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback {
         }
     };
 
+    private final MetricsLogger mMetricsLogger = Dependency.get(MetricsLogger.class);
+
     public BiometricUnlockController(Context context,
             DozeScrimController dozeScrimController,
             KeyguardViewMediator keyguardViewMediator,
@@ -253,6 +258,8 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback {
             Trace.endSection();
             return;
         }
+        mMetricsLogger.write(new LogMaker(MetricsEvent.BIOMETRIC_AUTH)
+                .setType(MetricsEvent.TYPE_SUCCESS).setSubtype(toSubtype(biometricSourceType)));
         startWakeAndUnlock(calculateMode(biometricSourceType));
     }
 
@@ -420,12 +427,16 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback {
 
     @Override
     public void onBiometricAuthFailed(BiometricSourceType biometricSourceType) {
+        mMetricsLogger.write(new LogMaker(MetricsEvent.BIOMETRIC_AUTH)
+                .setType(MetricsEvent.TYPE_FAILURE).setSubtype(toSubtype(biometricSourceType)));
         cleanup();
     }
 
     @Override
     public void onBiometricError(int msgId, String errString,
             BiometricSourceType biometricSourceType) {
+        mMetricsLogger.write(new LogMaker(MetricsEvent.BIOMETRIC_AUTH)
+                .setType(MetricsEvent.TYPE_ERROR).setSubtype(toSubtype(biometricSourceType)));
         cleanup();
     }
 
@@ -500,5 +511,21 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback {
      */
     public boolean isBiometricUnlock() {
         return isWakeAndUnlock() || mMode == MODE_UNLOCK;
+    }
+
+    /**
+     * Translates biometric source type for logging purpose.
+     */
+    private int toSubtype(BiometricSourceType biometricSourceType) {
+        switch (biometricSourceType) {
+            case FINGERPRINT:
+                return 0;
+            case FACE:
+                return 1;
+            case IRIS:
+                return 2;
+            default:
+                return 3;
+        }
     }
 }

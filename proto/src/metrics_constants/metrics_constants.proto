@@ -74,6 +74,9 @@ message MetricsEvent {
     // The view switched to summary mode (most relevant for notifications)
     TYPE_COLLAPSE = 14;
 
+    // The action results an error.
+    TYPE_ERROR = 15;
+
     // The notification was adjusted by the assistant. Enum value is
     // out of sequence due to b/122737498.
     TYPE_NOTIFICATION_ASSISTANT_ADJUSTMENT = 1573;
@@ -7137,6 +7140,12 @@ message MetricsEvent {
     //   DisplayManagerInternal.
     // OS: Q
     DISPLAY_POLICY = 1696;
+
+    // Biometric authentication.
+    //    TYPE: SUCCESS, FAILURE or ERROR
+    //    SUBTYPE: 0 is fingerprint, 1 is face, 2 is iris and 3 is unknown.
+    // OS: Q
+    BIOMETRIC_AUTH = 1697;
 
     // ---- End Q Constants, all Q constants go above this line ----
     // Add new aosp constants above this line.
