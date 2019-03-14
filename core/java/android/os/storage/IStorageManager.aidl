@@ -191,4 +191,6 @@ interface IStorageManager {
     String translateAppToSystem(String path, int pid, int uid) = 81;
     String translateSystemToApp(String path, int pid, int uid) = 82;
     void commitChanges() = 83;
+    boolean supportsCheckpoint() = 84;
+    void startCheckpoint(int numTries) = 85;
 }
