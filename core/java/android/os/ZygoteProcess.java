@@ -147,7 +147,7 @@ public class ZygoteProcess {
         final DataInputStream mZygoteInputStream;
         final BufferedWriter mZygoteOutputWriter;
 
-        private final List<String> mABIList;
+        private final List<String> mAbiList;
 
         private boolean mClosed;
 
@@ -162,7 +162,7 @@ public class ZygoteProcess {
             this.mZygoteSessionSocket = zygoteSessionSocket;
             this.mZygoteInputStream = zygoteInputStream;
             this.mZygoteOutputWriter = zygoteOutputWriter;
-            this.mABIList = abiList;
+            this.mAbiList = abiList;
         }
 
         /**
@@ -215,7 +215,7 @@ public class ZygoteProcess {
         }
 
         boolean matches(String abi) {
-            return mABIList.contains(abi);
+            return mAbiList.contains(abi);
         }
 
         public void close() {
@@ -338,7 +338,7 @@ public class ZygoteProcess {
         try {
             return startViaZygote(processClass, niceName, uid, gid, gids,
                     runtimeFlags, mountExternal, targetSdkVersion, seInfo,
-                    abi, instructionSet, appDataDir, invokeWith, /*startChildZygote=*/false,
+                    abi, instructionSet, appDataDir, invokeWith, /*startChildZygote=*/ false,
                     packageName, packagesForUid, sandboxId,
                     useUsapPool, zygoteArgs);
         } catch (ZygoteStartFailedEx ex) {
@@ -374,7 +374,7 @@ public class ZygoteProcess {
         byte[] bytes = new byte[numBytes];
         inputStream.readFully(bytes);
 
-        String rawList = new String(bytes, StandardCharsets.US_ASCII);
+        final String rawList = new String(bytes, StandardCharsets.US_ASCII);
 
         return Arrays.asList(rawList.split(","));
     }
@@ -660,13 +660,13 @@ public class ZygoteProcess {
         boolean origVal = mUsapPoolEnabled;
 
         final String propertyString =
-                Zygote.getSystemProperty(
+                Zygote.getConfigurationProperty(
                         DeviceConfig.RuntimeNative.USAP_POOL_ENABLED,
                         USAP_POOL_ENABLED_DEFAULT);
 
         if (!propertyString.isEmpty()) {
             mUsapPoolEnabled =
-                    Zygote.getSystemPropertyBoolean(
+                    Zygote.getConfigurationPropertyBoolean(
                             DeviceConfig.RuntimeNative.USAP_POOL_ENABLED,
                             Boolean.parseBoolean(USAP_POOL_ENABLED_DEFAULT));
         }
