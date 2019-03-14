@@ -2211,12 +2211,17 @@ public final class AutofillManager {
      *  when the service failed to fullfil the request, or {@link #STATE_DISABLED_BY_SERVICE}
      *  (because the autofill service or {@link #STATE_DISABLED_BY_SERVICE} (because the autofill
      *  service disabled further autofill requests for the activity).
+     * @param autofillableIds list of ids that could trigger autofill, use to not handle a new
+     *  session when they're entered.
      */
-    private void setSessionFinished(int newState) {
+    private void setSessionFinished(int newState, @Nullable List<AutofillId> autofillableIds) {
         synchronized (mLock) {
             if (sVerbose) {
                 Log.v(TAG, "setSessionFinished(): from " + getStateAsStringLocked() + " to "
-                        + getStateAsString(newState));
+                        + getStateAsString(newState) + "; autofillableIds=" + autofillableIds);
+            }
+            if (autofillableIds != null) {
+                mEnteredIds = new ArraySet<>(autofillableIds);
             }
             if (newState == STATE_UNKNOWN_COMPAT_MODE || newState == STATE_UNKNOWN_FAILED) {
                 resetSessionLocked(/* resetEnteredIds= */ true);
@@ -2328,7 +2333,7 @@ public final class AutofillManager {
 
         if (sessionFinishedState != 0) {
             // Callback call was "hijacked" to also update the session state.
-            setSessionFinished(sessionFinishedState);
+            setSessionFinished(sessionFinishedState, /* autofillableIds= */ null);
         }
     }
 
@@ -3114,10 +3119,10 @@ public final class AutofillManager {
         }
 
         @Override
-        public void setSessionFinished(int newState) {
+        public void setSessionFinished(int newState, List<AutofillId> autofillableIds) {
             final AutofillManager afm = mAfm.get();
             if (afm != null) {
-                afm.post(() -> afm.setSessionFinished(newState));
+                afm.post(() -> afm.setSessionFinished(newState, autofillableIds));
             }
         }
 

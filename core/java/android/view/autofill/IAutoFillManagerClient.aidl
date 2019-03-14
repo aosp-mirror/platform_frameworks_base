@@ -98,8 +98,10 @@ oneway interface IAutoFillManagerClient {
      *
      * @param newState STATE_FINISHED (because the autofill service returned a null
      * FillResponse) or STATE_UNKNOWN (because the session was removed).
+     * @param autofillableIds list of ids that could trigger autofill, use to not handle a new
+     * session when they're entered.
      */
-   void setSessionFinished(int newState);
+   void setSessionFinished(int newState, in List<AutofillId> autofillableIds);
 
    /**
     * Gets a reference to the binder object that can be used by the Augmented Autofill service.

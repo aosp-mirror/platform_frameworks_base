@@ -298,7 +298,8 @@ final class AutofillManagerServiceImpl
             final IAutoFillManagerClient client = IAutoFillManagerClient.Stub
                     .asInterface(appCallbackToken);
             try {
-                client.setSessionFinished(AutofillManager.STATE_DISABLED_BY_SERVICE);
+                client.setSessionFinished(AutofillManager.STATE_DISABLED_BY_SERVICE,
+                        /* autofillableIds= */ null);
             } catch (RemoteException e) {
                 Slog.w(TAG, "Could not notify " + shortComponentName + " that it's disabled: " + e);
             }
