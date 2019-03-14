@@ -102,4 +102,7 @@
     <!-- Progress Bar -->
     <dimen name="car_progress_bar_height">@dimen/car_seekbar_height</dimen>
 
+    <!-- TextView -->
+    <dimen name="car_textview_fading_edge_length">40dp</dimen>
+
 </resources>
