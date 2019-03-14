@@ -17,9 +17,9 @@
 package com.android.settingslib.widget.settingsspinner;
 
 import android.content.Context;
-import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+
+import com.android.settingslib.widget.R;
 
 /**
  * An ArrayAdapter which was used by {@link SettingsSpinner} with settings style.
