@@ -17,6 +17,7 @@
 package android.telecom;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SdkConstant;
 import android.app.Service;
 import android.content.Intent;
@@ -196,12 +197,12 @@ public abstract class CallRedirectionService extends Service {
     }
 
     @Override
-    public final IBinder onBind(Intent intent) {
+    public final @Nullable IBinder onBind(@NonNull Intent intent) {
         return new CallRedirectionBinder();
     }
 
     @Override
-    public final boolean onUnbind(Intent intent) {
+    public final boolean onUnbind(@NonNull Intent intent) {
         return false;
     }
 }
