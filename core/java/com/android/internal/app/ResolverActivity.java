@@ -1177,7 +1177,6 @@ public class ResolverActivity extends Activity {
         private final CharSequence mExtendedInfo;
         private final Intent mResolvedIntent;
         private final List<Intent> mSourceIntents = new ArrayList<>();
-        private boolean mPinned;
 
         public DisplayResolveInfo(Intent originalIntent, ResolveInfo pri, CharSequence pLabel,
                 CharSequence pInfo, Intent pOrigIntent) {
@@ -1204,7 +1203,6 @@ public class ResolverActivity extends Activity {
             mExtendedInfo = other.mExtendedInfo;
             mResolvedIntent = new Intent(other.mResolvedIntent);
             mResolvedIntent.fillIn(fillInIntent, flags);
-            mPinned = other.mPinned;
         }
 
         public ResolveInfo getResolveInfo() {
@@ -1303,15 +1301,6 @@ public class ResolverActivity extends Activity {
         public boolean startAsUser(Activity activity, Bundle options, UserHandle user) {
             activity.startActivityAsUser(mResolvedIntent, options, user);
             return false;
-        }
-
-        @Override
-        public boolean isPinned() {
-            return mPinned;
-        }
-
-        public void setPinned(boolean pinned) {
-            mPinned = pinned;
         }
     }
 
@@ -1414,11 +1403,6 @@ public class ResolverActivity extends Activity {
          * @return the list of supported source intents deduped against this single target
          */
         List<Intent> getAllSourceIntents();
-
-        /**
-         * @return true if this target should be pinned to the front by the request of the user
-         */
-        boolean isPinned();
     }
 
     public class ResolveListAdapter extends BaseAdapter {
@@ -1776,7 +1760,6 @@ public class ResolverActivity extends Activity {
             final Intent replaceIntent = getReplacementIntent(add.activityInfo, intent);
             final DisplayResolveInfo dri = new DisplayResolveInfo(intent, add, roLabel,
                     extraInfo, replaceIntent);
-            dri.setPinned(rci.isPinned());
             addResolveInfo(dri);
             if (replaceIntent == intent) {
                 // Only add alternates if we didn't get a specific replacement from
@@ -1921,10 +1904,6 @@ public class ResolverActivity extends Activity {
             return !TextUtils.isEmpty(info.getExtendedInfo());
         }
 
-        public boolean isComponentPinned(ComponentName name) {
-            return false;
-        }
-
         public final void bindView(int position, View view) {
             onBindView(view, getItem(position));
         }
@@ -1967,7 +1946,6 @@ public class ResolverActivity extends Activity {
     @VisibleForTesting
     public static final class ResolvedComponentInfo {
         public final ComponentName name;
-        private boolean mPinned;
         private final List<Intent> mIntents = new ArrayList<>();
         private final List<ResolveInfo> mResolveInfos = new ArrayList<>();
 
@@ -2009,14 +1987,6 @@ public class ResolverActivity extends Activity {
                 }
             }
             return -1;
-        }
-
-        public boolean isPinned() {
-            return mPinned;
-        }
-
-        public void setPinned(boolean pinned) {
-            mPinned = pinned;
         }
     }
 

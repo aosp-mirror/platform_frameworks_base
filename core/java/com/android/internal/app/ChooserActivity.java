@@ -42,7 +42,6 @@ import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.IntentSender.SendIntentException;
 import android.content.ServiceConnection;
-import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.pm.LabeledIntent;
 import android.content.pm.LauncherApps;
@@ -65,7 +64,6 @@ import android.metrics.LogMaker;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -75,7 +73,6 @@ import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.os.storage.StorageManager;
 import android.provider.DocumentsContract;
 import android.provider.Downloads;
 import android.provider.OpenableColumns;
@@ -114,7 +111,6 @@ import com.android.internal.util.ImageUtils;
 
 import com.google.android.collect.Lists;
 
-import java.io.File;
 import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.util.ArrayList;
@@ -188,10 +184,7 @@ public class ChooserActivity extends ResolverActivity {
     private Drawable mChooserRowLayer;
     private int mChooserRowServiceSpacing;
 
-    private SharedPreferences mPinnedSharedPrefs;
-    private static final float PINNED_TARGET_SCORE_BOOST = 1000.f;
     private static final float CALLER_TARGET_SCORE_BOOST = 900.f;
-    private static final String PINNED_SHARED_PREFS_NAME = "chooser_pin_settings";
     private static final String TARGET_DETAILS_FRAGMENT_TAG = "targetDetailsFragment";
 
     private final List<ChooserTargetServiceConnection> mServiceConnections = new ArrayList<>();
@@ -385,7 +378,6 @@ public class ChooserActivity extends ResolverActivity {
             mCallerChooserTargets = targets;
         }
 
-        mPinnedSharedPrefs = getPinnedSharedPrefs(this);
         setRetainInOnStop(intent.getBooleanExtra(EXTRA_PRIVATE_RETAIN_IN_ON_STOP, false));
         super.onCreate(savedInstanceState, target, title, defaultTitleRes, initialIntents,
                 null, false);
@@ -817,22 +809,6 @@ public class ChooserActivity extends ResolverActivity {
         return CONTENT_PREVIEW_TEXT;
     }
 
-    static SharedPreferences getPinnedSharedPrefs(Context context) {
-        // The code below is because in the android:ui process, no one can hear you scream.
-        // The package info in the context isn't initialized in the way it is for normal apps,
-        // so the standard, name-based context.getSharedPreferences doesn't work. Instead, we
-        // build the path manually below using the same policy that appears in ContextImpl.
-        // This fails silently under the hood if there's a problem, so if we find ourselves in
-        // the case where we don't have access to credential encrypted storage we just won't
-        // have our pinned target info.
-        final File prefsFile = new File(new File(
-                Environment.getDataUserCePackageDirectory(StorageManager.UUID_PRIVATE_INTERNAL,
-                        context.getUserId(), context.getPackageName()),
-                "shared_prefs"),
-                PINNED_SHARED_PREFS_NAME + ".xml");
-        return context.getSharedPreferences(prefsFile, MODE_PRIVATE);
-    }
-
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -928,10 +904,9 @@ public class ChooserActivity extends ResolverActivity {
         }
 
         ComponentName name = ri.activityInfo.getComponentName();
-        boolean pinned = mPinnedSharedPrefs.getBoolean(name.flattenToString(), false);
         ResolverTargetActionsDialogFragment f =
                 new ResolverTargetActionsDialogFragment(ri.loadLabel(getPackageManager()),
-                        name, pinned);
+                        name);
         f.show(getFragmentManager(), TARGET_DETAILS_FRAGMENT_TAG);
     }
 
@@ -1385,11 +1360,6 @@ public class ChooserActivity extends ResolverActivity {
         }
 
         @Override
-        boolean isComponentPinned(ComponentName name) {
-            return mPinnedSharedPrefs.getBoolean(name.flattenToString(), false);
-        }
-
-        @Override
         boolean isComponentFiltered(ComponentName name) {
             if (mFilteredComponentNames == null) {
                 return false;
@@ -1407,11 +1377,8 @@ public class ChooserActivity extends ResolverActivity {
             if (target == null) {
                 return CALLER_TARGET_SCORE_BOOST;
             }
-            float score = super.getScore(target);
-            if (target.isPinned()) {
-                score += PINNED_TARGET_SCORE_BOOST;
-            }
-            return score;
+
+            return super.getScore(target);
         }
     }
 
@@ -1506,10 +1473,6 @@ public class ChooserActivity extends ResolverActivity {
 
         public List<Intent> getAllSourceIntents() {
             return null;
-        }
-
-        public boolean isPinned() {
-            return false;
         }
 
         public float getModifiedScore() {
@@ -1742,11 +1705,6 @@ public class ChooserActivity extends ResolverActivity {
             }
             return results;
         }
-
-        @Override
-        public boolean isPinned() {
-            return mSourceInfo != null ? mSourceInfo.isPinned() : false;
-        }
     }
 
     private void handleScroll(View view, int x, int y, int oldx, int oldy) {
@@ -1852,11 +1810,6 @@ public class ChooserActivity extends ResolverActivity {
         public boolean showsExtendedInfo(TargetInfo info) {
             // We have badges so we don't need this text shown.
             return false;
-        }
-
-        @Override
-        public boolean isComponentPinned(ComponentName name) {
-            return mPinnedSharedPrefs.getBoolean(name.flattenToString(), false);
         }
 
         @Override
