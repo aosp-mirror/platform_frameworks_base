@@ -10661,13 +10661,12 @@ public class DevicePolicyManager {
     @SystemApi
     @RequiresPermission(value = android.Manifest.permission.GRANT_PROFILE_OWNER_DEVICE_IDS_ACCESS,
             conditional = true)
-    public void setProfileOwnerCanAccessDeviceIdsForUser(
-            @NonNull ComponentName who, @NonNull UserHandle userHandle) {
+    public void setProfileOwnerCanAccessDeviceIds(@NonNull ComponentName who) {
         if (mService == null) {
             return;
         }
         try {
-            mService.grantDeviceIdsAccessToProfileOwner(who, userHandle.getIdentifier());
+            mService.grantDeviceIdsAccessToProfileOwner(who, myUserId());
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
