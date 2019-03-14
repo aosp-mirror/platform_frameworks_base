@@ -1749,7 +1749,6 @@ public class LocationManager {
      *
      * @throws SecurityException if the ACCESS_FINE_LOCATION permission is not present
      * @deprecated use {@link #registerGnssStatusCallback(GnssStatus.Callback)} instead.
-     * @removed
      */
     @Deprecated
     @RequiresPermission(ACCESS_FINE_LOCATION)
@@ -1762,7 +1761,6 @@ public class LocationManager {
      *
      * @param listener GPS status listener object to remove
      * @deprecated use {@link #unregisterGnssStatusCallback(GnssStatus.Callback)} instead.
-     * @removed
      */
     @Deprecated
     public void removeGpsStatusListener(GpsStatus.Listener listener) {}
@@ -2088,7 +2086,6 @@ public class LocationManager {
      *
      * @param status object containing GPS status details, or null.
      * @return status object containing updated GPS status.
-     * @removed
      */
     @Deprecated
     @RequiresPermission(ACCESS_FINE_LOCATION)
