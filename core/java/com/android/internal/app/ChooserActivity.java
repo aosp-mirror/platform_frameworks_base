@@ -453,29 +453,6 @@ public class ChooserActivity extends ResolverActivity {
                 .getUserInfo(UserHandle.myUserId()).isManagedProfile();
     }
 
-    /**
-     * Override method to add content preview area, specific to the chooser activity.
-     */
-    @Override
-    public void setHeader() {
-        super.setHeader();
-
-        final Intent targetIntent = getTargetIntent();
-        if (!isSendAction(targetIntent)) {
-            return;
-        }
-
-        if (mChooserListAdapter == null || mChooserListAdapter.getCount() == 0) {
-            return;
-        }
-
-        int previewType = findPreferredContentPreview(targetIntent, getContentResolver());
-
-        getMetricsLogger().write(new LogMaker(MetricsEvent.ACTION_SHARE_WITH_PREVIEW)
-                .setSubtype(previewType));
-        displayContentPreview(previewType, targetIntent);
-    }
-
     private void onCopyButtonClicked(View v) {
         Intent targetIntent = getTargetIntent();
         if (targetIntent == null) {
@@ -535,46 +512,56 @@ public class ChooserActivity extends ResolverActivity {
 
     private void updateLayoutWidth(int layoutResourceId, int width) {
         View view = findViewById(layoutResourceId);
-        LayoutParams params = view.getLayoutParams();
-        params.width = width;
-        view.setLayoutParams(params);
-    }
-
-    private void displayContentPreview(@ContentPreviewType int previewType, Intent targetIntent) {
-        switch (previewType) {
-            case CONTENT_PREVIEW_TEXT:
-                displayTextContentPreview(targetIntent);
-                break;
-            case CONTENT_PREVIEW_IMAGE:
-                displayImageContentPreview(targetIntent);
-                break;
-            case CONTENT_PREVIEW_FILE:
-                displayFileContentPreview(targetIntent);
-                break;
-            default:
-                Log.e(TAG, "Unexpected content preview type: " + previewType);
+        if (view != null && view.getLayoutParams() != null) {
+            LayoutParams params = view.getLayoutParams();
+            params.width = width;
+            view.setLayoutParams(params);
         }
     }
 
-    private void displayTextContentPreview(Intent targetIntent) {
-        ViewGroup contentPreviewLayout = findViewById(R.id.content_preview_text_area);
-        contentPreviewLayout.setVisibility(View.VISIBLE);
+    private ViewGroup displayContentPreview(@ContentPreviewType int previewType,
+            Intent targetIntent, LayoutInflater layoutInflater, ViewGroup convertView,
+            ViewGroup parent) {
+        switch (previewType) {
+            case CONTENT_PREVIEW_TEXT:
+                return displayTextContentPreview(targetIntent, layoutInflater, convertView, parent);
+            case CONTENT_PREVIEW_IMAGE:
+                return displayImageContentPreview(targetIntent, layoutInflater, convertView,
+                        parent);
+            case CONTENT_PREVIEW_FILE:
+                return displayFileContentPreview(targetIntent, layoutInflater, convertView, parent);
+            default:
+                Log.e(TAG, "Unexpected content preview type: " + previewType);
+        }
 
-        findViewById(R.id.copy_button).setOnClickListener(this::onCopyButtonClicked);
+        return null;
+    }
+
+    private ViewGroup displayTextContentPreview(Intent targetIntent, LayoutInflater layoutInflater,
+            ViewGroup convertView, ViewGroup parent) {
+        ViewGroup contentPreviewLayout =
+                convertView != null ? convertView : (ViewGroup) layoutInflater.inflate(
+                        R.layout.chooser_grid_preview_text, parent, false);
+
+        contentPreviewLayout.findViewById(R.id.copy_button).setOnClickListener(
+                this::onCopyButtonClicked);
 
         CharSequence sharingText = targetIntent.getCharSequenceExtra(Intent.EXTRA_TEXT);
         if (sharingText == null) {
-            findViewById(R.id.content_preview_text_layout).setVisibility(View.GONE);
+            contentPreviewLayout.findViewById(R.id.content_preview_text_layout).setVisibility(
+                    View.GONE);
         } else {
-            TextView textView = findViewById(R.id.content_preview_text);
+            TextView textView = contentPreviewLayout.findViewById(R.id.content_preview_text);
             textView.setText(sharingText);
         }
 
         String previewTitle = targetIntent.getStringExtra(Intent.EXTRA_TITLE);
         if (TextUtils.isEmpty(previewTitle)) {
-            findViewById(R.id.content_preview_title_layout).setVisibility(View.GONE);
+            contentPreviewLayout.findViewById(R.id.content_preview_title_layout).setVisibility(
+                    View.GONE);
         } else {
-            TextView previewTitleView = findViewById(R.id.content_preview_title);
+            TextView previewTitleView = contentPreviewLayout.findViewById(
+                    R.id.content_preview_title);
             previewTitleView.setText(previewTitle);
 
             ClipData previewData = targetIntent.getClipData();
@@ -586,7 +573,8 @@ public class ChooserActivity extends ResolverActivity {
                 }
             }
 
-            ImageView previewThumbnailView = findViewById(R.id.content_preview_thumbnail);
+            ImageView previewThumbnailView = contentPreviewLayout.findViewById(
+                    R.id.content_preview_thumbnail);
             if (previewThumbnail == null) {
                 previewThumbnailView.setVisibility(View.GONE);
             } else {
@@ -598,16 +586,20 @@ public class ChooserActivity extends ResolverActivity {
                 }
             }
         }
+
+        return contentPreviewLayout;
     }
 
-    private void displayImageContentPreview(Intent targetIntent) {
-        ViewGroup contentPreviewLayout = findViewById(R.id.content_preview_image_area);
-        contentPreviewLayout.setVisibility(View.VISIBLE);
+    private ViewGroup displayImageContentPreview(Intent targetIntent, LayoutInflater layoutInflater,
+            ViewGroup convertView, ViewGroup parent) {
+        ViewGroup contentPreviewLayout =
+                convertView != null ? convertView : (ViewGroup) layoutInflater.inflate(
+                        R.layout.chooser_grid_preview_image, parent, false);
 
         String action = targetIntent.getAction();
         if (Intent.ACTION_SEND.equals(action)) {
             Uri uri = targetIntent.getParcelableExtra(Intent.EXTRA_STREAM);
-            loadUriIntoView(R.id.content_preview_image_1_large, uri);
+            loadUriIntoView(R.id.content_preview_image_1_large, uri, contentPreviewLayout);
         } else {
             ContentResolver resolver = getContentResolver();
 
@@ -623,23 +615,28 @@ public class ChooserActivity extends ResolverActivity {
                 Log.i(TAG, "Attempted to display image preview area with zero"
                         + " available images detected in EXTRA_STREAM list");
                 contentPreviewLayout.setVisibility(View.GONE);
-                return;
+                return contentPreviewLayout;
             }
 
-            loadUriIntoView(R.id.content_preview_image_1_large, imageUris.get(0));
+            loadUriIntoView(R.id.content_preview_image_1_large, imageUris.get(0),
+                    contentPreviewLayout);
 
             if (imageUris.size() == 2) {
-                loadUriIntoView(R.id.content_preview_image_2_large, imageUris.get(1));
+                loadUriIntoView(R.id.content_preview_image_2_large, imageUris.get(1),
+                        contentPreviewLayout);
             } else if (imageUris.size() > 2) {
-                loadUriIntoView(R.id.content_preview_image_2_small, imageUris.get(1));
+                loadUriIntoView(R.id.content_preview_image_2_small, imageUris.get(1),
+                        contentPreviewLayout);
                 RoundedRectImageView imageView = loadUriIntoView(
-                        R.id.content_preview_image_3_small, imageUris.get(2));
+                        R.id.content_preview_image_3_small, imageUris.get(2), contentPreviewLayout);
 
                 if (imageUris.size() > 3) {
                     imageView.setExtraImageCount(imageUris.size() - 3);
                 }
             }
         }
+
+        return contentPreviewLayout;
     }
 
     private static class FileInfo {
@@ -698,18 +695,21 @@ public class ChooserActivity extends ResolverActivity {
         return new FileInfo(fileName, hasThumbnail);
     }
 
-    private void displayFileContentPreview(Intent targetIntent) {
-        ViewGroup contentPreviewLayout = findViewById(R.id.content_preview_file_area);
-        contentPreviewLayout.setVisibility(View.VISIBLE);
+    private ViewGroup displayFileContentPreview(Intent targetIntent, LayoutInflater layoutInflater,
+            ViewGroup convertView, ViewGroup parent) {
+
+        ViewGroup contentPreviewLayout =
+                convertView != null ? convertView : (ViewGroup) layoutInflater.inflate(
+                        R.layout.chooser_grid_preview_file, parent, false);
 
         // TODO(b/120417119): Disable file copy until after moving to sysui,
         // due to permissions issues
-        findViewById(R.id.file_copy_button).setVisibility(View.GONE);
+        contentPreviewLayout.findViewById(R.id.file_copy_button).setVisibility(View.GONE);
 
         String action = targetIntent.getAction();
         if (Intent.ACTION_SEND.equals(action)) {
             Uri uri = targetIntent.getParcelableExtra(Intent.EXTRA_STREAM);
-            loadFileUriIntoView(uri);
+            loadFileUriIntoView(uri, contentPreviewLayout);
         } else {
             List<Uri> uris = targetIntent.getParcelableArrayListExtra(Intent.EXTRA_STREAM);
             int uriCount = uris.size();
@@ -719,42 +719,46 @@ public class ChooserActivity extends ResolverActivity {
                 Log.i(TAG,
                         "Appears to be no uris available in EXTRA_STREAM, removing "
                                 + "preview area");
-                return;
+                return contentPreviewLayout;
             } else if (uriCount == 1) {
-                loadFileUriIntoView(uris.get(0));
+                loadFileUriIntoView(uris.get(0), contentPreviewLayout);
             } else {
                 FileInfo fileInfo = extractFileInfo(uris.get(0), getContentResolver());
                 int remUriCount = uriCount - 1;
                 String fileName = getResources().getQuantityString(R.plurals.file_count,
                         remUriCount, fileInfo.name, remUriCount);
 
-                TextView fileNameView = findViewById(R.id.content_preview_filename);
+                TextView fileNameView = contentPreviewLayout.findViewById(
+                        R.id.content_preview_filename);
                 fileNameView.setText(fileName);
 
-                ImageView fileIconView = findViewById(R.id.content_preview_file_icon);
+                ImageView fileIconView = contentPreviewLayout.findViewById(
+                        R.id.content_preview_file_icon);
                 fileIconView.setVisibility(View.VISIBLE);
                 fileIconView.setImageResource(R.drawable.ic_file_copy);
             }
         }
+
+        return contentPreviewLayout;
     }
 
-    private void loadFileUriIntoView(Uri uri) {
+    private void loadFileUriIntoView(Uri uri, View parent) {
         FileInfo fileInfo = extractFileInfo(uri, getContentResolver());
 
-        TextView fileNameView = findViewById(R.id.content_preview_filename);
+        TextView fileNameView = parent.findViewById(R.id.content_preview_filename);
         fileNameView.setText(fileInfo.name);
 
         if (fileInfo.hasThumbnail) {
-            loadUriIntoView(R.id.content_preview_file_thumbnail, uri);
+            loadUriIntoView(R.id.content_preview_file_thumbnail, uri, parent);
         } else {
-            ImageView fileIconView = findViewById(R.id.content_preview_file_icon);
+            ImageView fileIconView = parent.findViewById(R.id.content_preview_file_icon);
             fileIconView.setVisibility(View.VISIBLE);
             fileIconView.setImageResource(R.drawable.ic_doc_generic);
         }
     }
 
-    private RoundedRectImageView loadUriIntoView(int imageResourceId, Uri uri) {
-        RoundedRectImageView imageView = findViewById(imageResourceId);
+    private RoundedRectImageView loadUriIntoView(int imageResourceId, Uri uri, View parent) {
+        RoundedRectImageView imageView = parent.findViewById(imageResourceId);
         Bitmap bmp = loadThumbnail(uri, new Size(200, 200));
         if (bmp != null) {
             imageView.setVisibility(View.VISIBLE);
@@ -966,15 +970,15 @@ public class ChooserActivity extends ResolverActivity {
             switch (mChooserListAdapter.getPositionTargetType(which)) {
                 case ChooserListAdapter.TARGET_CALLER:
                     cat = MetricsEvent.ACTION_ACTIVITY_CHOOSER_PICKED_APP_TARGET;
+                    value -= mChooserListAdapter.getSelectableServiceTargetCount();
                     break;
                 case ChooserListAdapter.TARGET_SERVICE:
                     cat = MetricsEvent.ACTION_ACTIVITY_CHOOSER_PICKED_SERVICE_TARGET;
-                    value -= mChooserListAdapter.getCallerTargetCount();
                     break;
                 case ChooserListAdapter.TARGET_STANDARD:
                     cat = MetricsEvent.ACTION_ACTIVITY_CHOOSER_PICKED_STANDARD_TARGET;
                     value -= mChooserListAdapter.getCallerTargetCount()
-                            + mChooserListAdapter.getServiceTargetCount();
+                            + mChooserListAdapter.getSelectableServiceTargetCount();
                     break;
             }
 
@@ -2062,6 +2066,7 @@ public class ChooserActivity extends ResolverActivity {
 
         private static final int VIEW_TYPE_DIRECT_SHARE = 0;
         private static final int VIEW_TYPE_NORMAL = 1;
+        private static final int VIEW_TYPE_CONTENT_PREVIEW = 2;
 
         public ChooserRowAdapter(ChooserListAdapter wrappedAdapter) {
             mChooserListAdapter = wrappedAdapter;
@@ -2090,12 +2095,25 @@ public class ChooserActivity extends ResolverActivity {
         @Override
         public int getCount() {
             return (int) (
-                    getCallerTargetRowCount()
+                    getContentPreviewRowCount()
+                            + getCallerTargetRowCount()
                             + getServiceTargetRowCount()
                             + Math.ceil(
                             (float) mChooserListAdapter.getStandardTargetCount()
                                     / getMaxTargetsPerRow())
             );
+        }
+
+        public int getContentPreviewRowCount() {
+            if (!isSendAction(getTargetIntent())) {
+                return 0;
+            }
+
+            if (mChooserListAdapter == null || mChooserListAdapter.getCount() == 0) {
+                return 0;
+            }
+
+            return 1;
         }
 
         public int getCallerTargetRowCount() {
@@ -2128,20 +2146,29 @@ public class ChooserActivity extends ResolverActivity {
             final RowViewHolder holder;
             int viewType = getItemViewType(position);
 
+            if (viewType == VIEW_TYPE_CONTENT_PREVIEW) {
+                return createContentPreviewView(convertView, parent);
+            }
+
             if (convertView == null) {
                 holder = createViewHolder(viewType, parent);
             } else {
                 holder = (RowViewHolder) convertView.getTag();
             }
 
-            bindViewHolder(position, holder, viewType == VIEW_TYPE_DIRECT_SHARE
-                    ? ChooserListAdapter.MAX_SERVICE_TARGETS : getMaxTargetsPerRow());
+            bindViewHolder(position, holder,
+                    viewType == VIEW_TYPE_DIRECT_SHARE
+                            ? ChooserListAdapter.MAX_SERVICE_TARGETS : getMaxTargetsPerRow());
 
             return holder.getViewGroup();
         }
 
         @Override
         public int getItemViewType(int position) {
+            if (position == 0 && getContentPreviewRowCount() == 1) {
+                return VIEW_TYPE_CONTENT_PREVIEW;
+            }
+
             final int start = getFirstRowPosition(position);
             final int startType = mChooserListAdapter.getPositionTargetType(start);
 
@@ -2154,7 +2181,20 @@ public class ChooserActivity extends ResolverActivity {
 
         @Override
         public int getViewTypeCount() {
-            return 2;
+            return 3;
+        }
+
+        private ViewGroup createContentPreviewView(View convertView, ViewGroup parent) {
+            Intent targetIntent = getTargetIntent();
+            int previewType = findPreferredContentPreview(targetIntent, getContentResolver());
+
+            if (convertView == null) {
+                getMetricsLogger().write(new LogMaker(MetricsEvent.ACTION_SHARE_WITH_PREVIEW)
+                        .setSubtype(previewType));
+            }
+
+            return displayContentPreview(previewType, targetIntent, mLayoutInflater,
+                    (ViewGroup) convertView, parent);
         }
 
         private RowViewHolder loadViewsIntoRow(RowViewHolder holder) {
@@ -2244,7 +2284,7 @@ public class ChooserActivity extends ResolverActivity {
 
             final ViewGroup row = holder.getViewGroup();
 
-            if (startType != lastStartType || rowPosition == 0) {
+            if (startType != lastStartType || rowPosition == getContentPreviewRowCount()) {
                 row.setBackground(mChooserRowLayer);
                 setVertPadding(row, mChooserRowServiceSpacing, 0);
             } else {
@@ -2321,6 +2361,8 @@ public class ChooserActivity extends ResolverActivity {
         }
 
         int getFirstRowPosition(int row) {
+            row -= getContentPreviewRowCount();
+
             final int serviceCount = mChooserListAdapter.getServiceTargetCount();
             final int serviceRows = (int) Math.ceil((float) serviceCount
                     / ChooserListAdapter.MAX_SERVICE_TARGETS);
@@ -2512,7 +2554,9 @@ public class ChooserActivity extends ResolverActivity {
                 return;
             }
 
-            ViewGroup expansionGroup = (ViewGroup) view.getChildAt(0);
+            int index = mChooserRowAdapter.getContentPreviewRowCount();
+
+            ViewGroup expansionGroup = (ViewGroup) view.getChildAt(index);
             int widthSpec = MeasureSpec.makeMeasureSpec(expansionGroup.getWidth(),
                     MeasureSpec.EXACTLY);
             int heightSpec = MeasureSpec.makeMeasureSpec(mDirectShareCurrHeight,
@@ -2525,7 +2569,7 @@ public class ChooserActivity extends ResolverActivity {
 
             // reposition list items
             int items = view.getChildCount();
-            for (int i = 1; i < items; i++) {
+            for (int i = index + 1; i < items; i++) {
                 view.getChildAt(i).offsetTopAndBottom(yDiff);
             }
         }
@@ -2702,7 +2746,7 @@ public class ChooserActivity extends ResolverActivity {
             final int chooserTargetRows = mChooserRowAdapter.getServiceTargetRowCount();
             int offset = 0;
             for (int i = 0; i < chooserTargetRows; i++) {
-                final int pos = mChooserRowAdapter.getCallerTargetRowCount() + i;
+                final int pos = mChooserRowAdapter.getContentPreviewRowCount() + i;
                 final int vt = mChooserRowAdapter.getItemViewType(pos);
                 if (vt != mCachedViewType) {
                     mCachedView = null;

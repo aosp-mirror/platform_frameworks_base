@@ -2762,6 +2762,9 @@
   <java-symbol type="dimen" name="chooser_preview_image_font_size"/>
   <java-symbol type="dimen" name="chooser_preview_width" />
   <java-symbol type="layout" name="chooser_grid" />
+  <java-symbol type="layout" name="chooser_grid_preview_text" />
+  <java-symbol type="layout" name="chooser_grid_preview_image" />
+  <java-symbol type="layout" name="chooser_grid_preview_file" />
   <java-symbol type="id" name="chooser_row_text_option" />
   <java-symbol type="dimen" name="chooser_row_text_option_translate" />
   <java-symbol type="layout" name="resolve_grid_item" />
