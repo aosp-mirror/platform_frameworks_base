@@ -16,10 +16,6 @@
 
 package com.android.providers.settings;
 
-import android.os.Process;
-import com.android.internal.app.LocalePicker;
-import com.android.internal.annotations.VisibleForTesting;
-
 import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.IActivityManager;
@@ -30,7 +26,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.icu.util.ULocale;
-import android.location.LocationManager;
 import android.media.AudioManager;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -38,13 +33,14 @@ import android.os.LocaleList;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
-import android.os.UserManager;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.ArraySet;
 
-import java.lang.IllegalArgumentException;
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.app.LocalePicker;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
@@ -145,9 +141,6 @@ public class SettingsHelper {
             if (Settings.System.SOUND_EFFECTS_ENABLED.equals(name)) {
                 setSoundEffects(Integer.parseInt(value) == 1);
                 // fall through to the ordinary write to settings
-            } else if (Settings.Secure.LOCATION_PROVIDERS_ALLOWED.equals(name)) {
-                setGpsLocation(value);
-                return;
             } else if (Settings.Secure.BACKUP_AUTO_RESTORE.equals(name)) {
                 setAutoRestore(Integer.parseInt(value) == 1);
             } else if (isAlreadyConfiguredCriticalAccessibilitySetting(name)) {
@@ -295,21 +288,6 @@ public class SettingsHelper {
                 bm.setAutoRestore(enabled);
             }
         } catch (RemoteException e) {}
-    }
-
-    private void setGpsLocation(String value) {
-        UserManager um = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
-        if (um.hasUserRestriction(UserManager.DISALLOW_SHARE_LOCATION)) {
-            return;
-        }
-        final String GPS = LocationManager.GPS_PROVIDER;
-        boolean enabled =
-            GPS.equals(value) ||
-                value.startsWith(GPS + ",") ||
-                value.endsWith("," + GPS) ||
-                value.contains("," + GPS + ",");
-        LocationManager lm = (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
-        lm.setProviderEnabledForUser(GPS, enabled, Process.myUserHandle());
     }
 
     private void setSoundEffects(boolean enable) {

@@ -553,6 +553,11 @@ package android.provider {
     field @Deprecated public static final String CONTACT_METADATA_SYNC = "contact_metadata_sync";
   }
 
+  public static final class Settings.Secure extends android.provider.Settings.NameValueTable {
+    method @Deprecated public static boolean isLocationProviderEnabled(android.content.ContentResolver, String);
+    method @Deprecated public static void setLocationProviderEnabled(android.content.ContentResolver, String, boolean);
+  }
+
   public static final class Settings.System extends android.provider.Settings.NameValueTable {
     field public static final String APPEND_FOR_LAST_AUDIBLE = "_last_audible";
     field public static final String VOLUME_ALARM = "volume_alarm";
