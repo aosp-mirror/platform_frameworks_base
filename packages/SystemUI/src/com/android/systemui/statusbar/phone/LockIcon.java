@@ -236,7 +236,7 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
             return com.android.internal.R.anim.lock_lock;
         } else if (newState == STATE_SCANNING_FACE) {
             return com.android.internal.R.anim.lock_scanning;
-        } else if (!wasPulsing && pulsing) {
+        } else if (!wasPulsing && pulsing && newState != STATE_LOCK_OPEN) {
             return com.android.internal.R.anim.lock_in;
         }
         return -1;
