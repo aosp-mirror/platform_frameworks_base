@@ -89,8 +89,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
          *
          * @hide
          */
-        @UnsupportedAppUsage
-        public Key(@NonNull String name, @NonNull String fallbackName, @NonNull Class<T> type) {
+        public Key(String name, String fallbackName, Class<T> type) {
             mKey = new CameraMetadataNative.Key<T>(name, fallbackName, type);
         }
 
@@ -4252,7 +4251,6 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * @see CaptureResult#SENSOR_TIMESTAMP
      * @hide
      */
-    @UnsupportedAppUsage
     public static final Key<long[]> STATISTICS_OIS_TIMESTAMPS =
             new Key<long[]>("android.statistics.oisTimestamps", long[].class);
 
@@ -4272,7 +4270,6 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      * @hide
      */
-    @UnsupportedAppUsage
     public static final Key<float[]> STATISTICS_OIS_X_SHIFTS =
             new Key<float[]>("android.statistics.oisXShifts", float[].class);
 
@@ -4292,7 +4289,6 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      * @hide
      */
-    @UnsupportedAppUsage
     public static final Key<float[]> STATISTICS_OIS_Y_SHIFTS =
             new Key<float[]>("android.statistics.oisYShifts", float[].class);
 

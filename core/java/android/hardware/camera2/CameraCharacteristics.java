@@ -85,8 +85,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
          *
          * @hide
          */
-        @UnsupportedAppUsage
-        public Key(@NonNull String name, @NonNull String fallbackName, @NonNull Class<T> type) {
+        public Key(String name, String fallbackName, Class<T> type) {
             mKey = new CameraMetadataNative.Key<T>(name,  fallbackName, type);
         }
 
