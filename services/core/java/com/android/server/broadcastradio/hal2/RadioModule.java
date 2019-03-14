@@ -20,8 +20,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.hardware.radio.ITuner;
-import android.hardware.radio.RadioManager;
 import android.hardware.broadcastradio.V2_0.AmFmRegionConfig;
 import android.hardware.broadcastradio.V2_0.Announcement;
 import android.hardware.broadcastradio.V2_0.DabTableEntry;
@@ -30,13 +28,12 @@ import android.hardware.broadcastradio.V2_0.IBroadcastRadio;
 import android.hardware.broadcastradio.V2_0.ICloseHandle;
 import android.hardware.broadcastradio.V2_0.ITunerSession;
 import android.hardware.broadcastradio.V2_0.Result;
-import android.os.ParcelableException;
+import android.hardware.radio.RadioManager;
 import android.os.RemoteException;
 import android.util.MutableInt;
 import android.util.Slog;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -76,6 +73,10 @@ class RadioModule {
             Slog.e(TAG, "failed to load module " + fqName, ex);
             return null;
         }
+    }
+
+    public @NonNull IBroadcastRadio getService() {
+        return mService;
     }
 
     public @NonNull TunerSession openSession(@NonNull android.hardware.radio.ITunerCallback userCb)
