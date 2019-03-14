@@ -16,12 +16,58 @@
 
 package android.telephony;
 
+import android.annotation.IntDef;
 import android.annotation.SystemApi;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * Contains access network related constants.
  */
 public final class AccessNetworkConstants {
+
+    /**
+     * Wireless transportation type
+     *
+     * @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"TRANSPORT_TYPE_"},
+            value = {
+                    TRANSPORT_TYPE_INVALID,
+                    TRANSPORT_TYPE_WWAN,
+                    TRANSPORT_TYPE_WLAN})
+    public @interface TransportType {}
+
+    /**
+     * Invalid transport type
+     * @hide
+     */
+    @SystemApi
+    public static final int TRANSPORT_TYPE_INVALID = -1;
+
+    /**
+     * Transport type for Wireless Wide Area Networks (i.e. Cellular)
+     * @hide
+     */
+    @SystemApi
+    public static final int TRANSPORT_TYPE_WWAN = 1;
+
+    /**
+     * Transport type for Wireless Local Area Networks (i.e. Wifi)
+     * @hide
+     */
+    @SystemApi
+    public static final int TRANSPORT_TYPE_WLAN = 2;
+
+    /** @hide */
+    public static String transportTypeToString(@TransportType int transportType) {
+        switch (transportType) {
+            case TRANSPORT_TYPE_WWAN: return "WWAN";
+            case TRANSPORT_TYPE_WLAN: return "WLAN";
+            default: return Integer.toString(transportType);
+        }
+    }
 
     public static final class AccessNetworkType {
         public static final int UNKNOWN = 0;
@@ -49,39 +95,7 @@ public final class AccessNetworkConstants {
     }
 
     /**
-     * Wireless transportation type
-     * @hide
-     */
-    @SystemApi
-    public static final class TransportType {
-        /**
-         * Invalid transport type.
-         * @hide
-         */
-        public static final int INVALID = -1;
-
-        /** Wireless Wide Area Networks (i.e. Cellular) */
-        public static final int WWAN = 1;
-
-        /** Wireless Local Area Networks (i.e. Wifi) */
-        public static final int WLAN = 2;
-
-        /** @hide */
-        private TransportType() {}
-
-        /** @hide */
-        public static String toString(int type) {
-            switch (type) {
-                case INVALID: return "INVALID";
-                case WWAN: return "WWAN";
-                case WLAN: return "WLAN";
-                default: return Integer.toString(type);
-            }
-        }
-    }
-
-    /**
-     * Frenquency bands for GERAN.
+     * Frequency bands for GERAN.
      * http://www.etsi.org/deliver/etsi_ts/145000_145099/145005/14.00.00_60/ts_145005v140000p.pdf
      */
     public static final class GeranBand {
