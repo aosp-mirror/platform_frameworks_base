@@ -1235,6 +1235,12 @@ public class NotificationPanelView extends PanelView implements
         setQsExpansion(height);
         requestPanelHeightUpdate();
         mNotificationStackScroller.checkSnoozeLeavebehind();
+
+        // When expanding QS, let's authenticate the user if possible,
+        // this will speed up notification actions.
+        if (height == 0) {
+            mStatusBar.requestFaceAuth();
+        }
     }
 
     private void setQsExpanded(boolean expanded) {

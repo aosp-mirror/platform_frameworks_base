@@ -105,11 +105,6 @@ import java.util.function.Consumer;
  * Watches for updates that may be interesting to the keyguard, and provides
  * the up to date information as well as a registration for callbacks that care
  * to be updated.
- *
- * Note: under time crunch, this has been extended to include some stuff that
- * doesn't really belong here.  see {@link #handleBatteryUpdate} where it shutdowns
- * the device, and {@link #getFailedUnlockAttempts()}, {@link #reportFailedAttempt()}
- * and {@link #clearFailedUnlockAttempts()}.  Maybe we should rename this 'KeyguardContext'...
  */
 public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
 
@@ -1568,6 +1563,15 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         updateFaceListeningState();
     }
 
+    /**
+     * Requests face authentication if we're on a state where it's allowed.
+     * This will re-trigger auth in case it fails.
+     */
+    public void requestFaceAuth() {
+        if (DEBUG) Log.d(TAG, "requestFaceAuth()");
+        updateFaceListeningState();
+    }
+
     private void updateFaceListeningState() {
         // If this message exists, we should not authenticate again until this message is
         // consumed by the handler
@@ -1629,7 +1633,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
             return;
         }
         if (DEBUG) Log.v(TAG, "startListeningForFingerprint()");
-        int userId = ActivityManager.getCurrentUser();
+        int userId = getCurrentUser();
         if (isUnlockWithFingerprintPossible(userId)) {
             if (mFingerprintCancelSignal != null) {
                 mFingerprintCancelSignal.cancel();
@@ -1647,7 +1651,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
             return;
         }
         if (DEBUG) Log.v(TAG, "startListeningForFace()");
-        int userId = ActivityManager.getCurrentUser();
+        int userId = getCurrentUser();
         if (isUnlockWithFacePossible(userId)) {
             if (mFaceCancelSignal != null) {
                 mFaceCancelSignal.cancel();
