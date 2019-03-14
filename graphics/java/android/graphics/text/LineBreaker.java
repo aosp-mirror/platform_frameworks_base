@@ -69,7 +69,7 @@ import java.lang.annotation.RetentionPolicy;
  * }
  *
  * // Draw text to the canvas
- * Bitmap bmp = new Bitmap.createBitmap(240, totalHeight, Bitmap.Config.ARGB_8888);
+ * Bitmap bmp = Bitmap.createBitmap(240, totalHeight, Bitmap.Config.ARGB_8888);
  * Canvas c = new Canvas(bmp);
  * float yOffset = 0f;
  * int prevOffset = 0;
@@ -349,8 +349,9 @@ public class LineBreaker {
         private static final int END_HYPHEN_MASK = 0x7;  // 0b00111
         private static final int START_HYPHEN_BITS_SHIFT = 3;
 
-        private static final NativeAllocationRegistry sRegistry = new NativeAllocationRegistry(
-                Result.class.getClassLoader(), nGetReleaseResultFunc(), 32);
+        private static final NativeAllocationRegistry sRegistry =
+                NativeAllocationRegistry.createMalloced(
+                Result.class.getClassLoader(), nGetReleaseResultFunc());
         private final long mPtr;
 
         private Result(long ptr) {
@@ -444,8 +445,9 @@ public class LineBreaker {
         }
     }
 
-    private static final NativeAllocationRegistry sRegistry = new NativeAllocationRegistry(
-            LineBreaker.class.getClassLoader(), nGetReleaseFunc(), 64);
+    private static final NativeAllocationRegistry sRegistry =
+            NativeAllocationRegistry.createMalloced(
+            LineBreaker.class.getClassLoader(), nGetReleaseFunc());
 
     private final long mNativePtr;
 

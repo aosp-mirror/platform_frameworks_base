@@ -287,6 +287,8 @@ size_t Bitmap::getAllocationByteCount() const {
     switch (mPixelStorageType) {
         case PixelStorageType::Heap:
             return mPixelStorage.heap.size;
+        case PixelStorageType::Ashmem:
+            return mPixelStorage.ashmem.size;
         default:
             return rowBytes() * height();
     }
