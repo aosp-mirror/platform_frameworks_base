@@ -116,14 +116,16 @@ bool StorageManager::writeTrainInfo(int64_t trainVersionCode, const std::string&
     const size_t trainNameSizeByteCount = sizeof(trainNameSize);
     result = write(fd, (uint8_t*)&trainNameSize, trainNameSizeByteCount);
     if (result != trainNameSizeByteCount) {
-        VLOG("Failed to write %s", file_name.c_str());
+        VLOG("Failed to write train name size for %s", file_name.c_str());
+        close(fd);
         return false;
     }
 
     // Write trainName to file
     result = write(fd, trainName.c_str(), trainNameSize);
     if (result != trainNameSize) {
-        VLOG("Failed to write %s", file_name.c_str());
+        VLOG("Failed to write train name for%s", file_name.c_str());
+        close(fd);
         return false;
     }
 
@@ -131,7 +133,18 @@ bool StorageManager::writeTrainInfo(int64_t trainVersionCode, const std::string&
     const size_t statusByteCount = sizeof(status);
     result = write(fd, (uint8_t*)&status, statusByteCount);
     if (result != statusByteCount) {
-        VLOG("Failed to write %s", file_name.c_str());
+        VLOG("Failed to write status for %s", file_name.c_str());
+        close(fd);
+        return false;
+    }
+
+    // Write experiment id size to file.
+    const size_t experimentIdSize = experimentIds.size();
+    const size_t experimentIdsSizeByteCount = sizeof(experimentIdSize);
+    result = write(fd, (uint8_t*) &experimentIdSize, experimentIdsSizeByteCount);
+    if (result != experimentIdsSizeByteCount) {
+        VLOG("Failed to write experiment id size for %s", file_name.c_str());
+        close(fd);
         return false;
     }
 
@@ -140,13 +153,15 @@ bool StorageManager::writeTrainInfo(int64_t trainVersionCode, const std::string&
     if (result == experimentIds.size()) {
         VLOG("Successfully wrote %s", file_name.c_str());
     } else {
-        VLOG("Failed to write %s", file_name.c_str());
+        VLOG("Failed to write experiment ids for %s", file_name.c_str());
+        close(fd);
         return false;
     }
 
     result = fchown(fd, AID_STATSD, AID_STATSD);
     if (result) {
         VLOG("Failed to chown %s to statsd", file_name.c_str());
+        close(fd);
         return false;
     }
 
@@ -170,39 +185,73 @@ bool StorageManager::readTrainInfo(InstallTrainInfo& trainInfo) {
         if (name[0] == '.') {
             continue;
         }
+
+        size_t result;
+
         trainInfo.trainVersionCode = StrToInt64(name);
         string fullPath = StringPrintf("%s/%s", TRAIN_INFO_DIR, name);
         int fd = open(fullPath.c_str(), O_RDONLY | O_CLOEXEC);
-        if (fd != -1) {
-            string str;
-            if (android::base::ReadFdToString(fd, &str)) {
-                close(fd);
-
-                auto it = str.begin();
-
-                // Read # of bytes taken by trainName in the file
-                size_t trainNameSize;
-                const size_t trainNameSizeByteCount = sizeof(trainNameSize);
-                std::copy_n(it, trainNameSizeByteCount, &trainNameSize);
-                it += trainNameSizeByteCount;
-
-                // Read trainName
-                std::copy_n(it, trainNameSize, std::back_inserter(trainInfo.trainName));
-                it += trainNameSize;
-
-                // Read status
-                const size_t statusByteCount = sizeof(trainInfo.status);
-                std::copy_n(it, statusByteCount, &trainInfo.status);
-                it += statusByteCount;
-
-                // Read experimentIds
-                std::copy(it, str.end(), std::back_inserter(trainInfo.experimentIds));
-
-                VLOG("Read train info file successful: %s", fullPath.c_str());
-                return true;
-            }
+        if (fd == -1) {
+            return false;
         }
+
+        // Read # of bytes taken by trainName in the file.
+        size_t trainNameSize;
+        result = read(fd, &trainNameSize, sizeof(size_t));
+        if (result != sizeof(size_t)) {
+            VLOG("Failed to read train name size from file %s", fullPath.c_str());
+            close(fd);
+            return false;
+        }
+
+        // Read trainName
+        trainInfo.trainName.resize(trainNameSize);
+        result = read(fd, trainInfo.trainName.data(), trainNameSize);
+        if (result != trainNameSize) {
+            VLOG("Failed to read train name from file %s", fullPath.c_str());
+            close(fd);
+            return false;
+        }
+
+        // Read status
+        const size_t statusByteCount = sizeof(trainInfo.status);
+        result = read(fd, &trainInfo.status, statusByteCount);
+        if (result != statusByteCount) {
+            VLOG("Failed to read train status from file %s", fullPath.c_str());
+            close(fd);
+            return false;
+        }
+
+        // Read experiment ids size.
+        size_t experimentIdSize;
+        result = read(fd, &experimentIdSize, sizeof(size_t));
+        if (result != sizeof(size_t)) {
+            VLOG("Failed to read train experiment id size from file %s", fullPath.c_str());
+            close(fd);
+            return false;
+        }
+
+        // Read experimentIds
+        trainInfo.experimentIds.resize(experimentIdSize);
+        result = read(fd, trainInfo.experimentIds.data(), experimentIdSize);
+        if (result != experimentIdSize) {
+            VLOG("Failed to read train experiment ids from file %s", fullPath.c_str());
+            close(fd);
+            return false;
+        }
+
+        // Expect to be at EOF.
+        char c;
+        result = read(fd, &c, 1);
+        if (result != 0) {
+            VLOG("Failed to read train info from file %s. Did not get expected EOF.", fullPath.c_str());
+            close(fd);
+            return false;
+        }
+
+        VLOG("Read train info file successful: %s", fullPath.c_str());
         close(fd);
+        return true;
     }
     return false;
 }
