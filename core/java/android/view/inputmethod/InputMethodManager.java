@@ -2559,6 +2559,12 @@ public final class InputMethodManager {
         mPendingEventPool.release(p);
     }
 
+    /**
+     * Show IME picker popup window.
+     *
+     * <p>Requires the {@link PackageManager#FEATURE_INPUT_METHODS} feature which can be detected
+     * using {@link PackageManager#hasSystemFeature(String)}.
+     */
     public void showInputMethodPicker() {
         synchronized (mH) {
             showInputMethodPickerLocked();
