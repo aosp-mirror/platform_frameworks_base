@@ -191,7 +191,7 @@ cc_defaults {
         "surfacetexture/EGLConsumer.cpp",
         "surfacetexture/ImageConsumer.cpp",
         "surfacetexture/SurfaceTexture.cpp",
-        "thread/TaskManager.cpp",
+        "thread/CommonPool.cpp",
         "utils/Blur.cpp",
         "utils/Color.cpp",
         "utils/GLUtils.cpp",
@@ -308,6 +308,7 @@ cc_test {
         "tests/unit/main.cpp",
         "tests/unit/CacheManagerTests.cpp",
         "tests/unit/CanvasContextTests.cpp",
+        "tests/unit/CommonPoolTests.cpp",
         "tests/unit/DamageAccumulatorTests.cpp",
         "tests/unit/DeferredLayerUpdaterTests.cpp",
         "tests/unit/FatVectorTests.cpp",
@@ -381,7 +382,6 @@ cc_benchmark {
         "tests/microbench/LinearAllocatorBench.cpp",
         "tests/microbench/PathParserBench.cpp",
         "tests/microbench/RenderNodeBench.cpp",
-        "tests/microbench/TaskManagerBench.cpp",
     ],
 }
 

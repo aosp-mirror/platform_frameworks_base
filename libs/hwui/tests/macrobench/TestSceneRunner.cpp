@@ -21,6 +21,7 @@
 #include "tests/common/TestContext.h"
 #include "tests/common/TestScene.h"
 #include "tests/common/scenes/TestSceneBase.h"
+#include "utils/TraceUtils.h"
 
 #include <benchmark/benchmark.h>
 #include <gui/Surface.h>

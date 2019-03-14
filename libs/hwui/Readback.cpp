@@ -29,6 +29,7 @@
 #include "hwui/Bitmap.h"
 #include "utils/Color.h"
 #include "utils/MathUtils.h"
+#include "utils/TraceUtils.h"
 
 using namespace android::uirenderer::renderthread;
 

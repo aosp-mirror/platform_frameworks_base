@@ -23,6 +23,7 @@
 #include "pipeline/skia/SkiaMemoryTracer.h"
 #include "Properties.h"
 #include "renderstate/RenderState.h"
+#include "thread/CommonPool.h"
 
 #include <GrContextOptions.h>
 #include <SkExecutor.h>
@@ -76,28 +77,14 @@ void CacheManager::updateContextCacheSizes() {
     mGrContext->setResourceCacheLimits(mMaxResources, mMaxResourceBytes);
 }
 
-class CacheManager::SkiaTaskProcessor : public TaskProcessor<bool>, public SkExecutor {
+class CommonPoolExecutor : public SkExecutor {
 public:
-    explicit SkiaTaskProcessor(TaskManager* taskManager) : TaskProcessor<bool>(taskManager) {}
-
-    // This is really a Task<void> but that doesn't really work when Future<>
-    // expects to be able to get/set a value
-    struct SkiaTask : public Task<bool> {
-        std::function<void()> func;
-    };
-
     virtual void add(std::function<void(void)> func) override {
-        sp<SkiaTask> task(new SkiaTask());
-        task->func = func;
-        TaskProcessor<bool>::add(task);
-    }
-
-    virtual void onProcess(const sp<Task<bool> >& task) override {
-        SkiaTask* t = static_cast<SkiaTask*>(task.get());
-        t->func();
-        task->setResult(true);
+        CommonPool::post(std::move(func));
     }
 };
+
+static CommonPoolExecutor sDefaultExecutor;
 
 void CacheManager::configureContext(GrContextOptions* contextOptions, const void* identity, ssize_t size) {
     contextOptions->fAllowPathMaskCaching = true;
@@ -107,12 +94,7 @@ void CacheManager::configureContext(GrContextOptions* contextOptions, const void
     // provided to Skia.
     contextOptions->fGlyphCacheTextureMaximumBytes = GrNextSizePow2(mMaxSurfaceArea);
 
-    if (mTaskManager.canRunTasks()) {
-        if (!mTaskProcessor.get()) {
-            mTaskProcessor = new SkiaTaskProcessor(&mTaskManager);
-        }
-        contextOptions->fExecutor = mTaskProcessor.get();
-    }
+    contextOptions->fExecutor = &sDefaultExecutor;
 
     auto& cache = skiapipeline::ShaderCache::get();
     cache.initShaderDiskCache(identity, size);

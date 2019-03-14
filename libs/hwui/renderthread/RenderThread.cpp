@@ -28,6 +28,7 @@
 #include "renderstate/RenderState.h"
 #include "utils/FatVector.h"
 #include "utils/TimeUtils.h"
+#include "utils/TraceUtils.h"
 
 #ifdef HWUI_GLES_WRAP_ENABLED
 #include "debug/GlesDriver.h"

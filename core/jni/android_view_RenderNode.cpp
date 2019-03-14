@@ -31,6 +31,7 @@
 #include <renderthread/CanvasContext.h>
 #include <TreeInfo.h>
 #include <hwui/Paint.h>
+#include <utils/TraceUtils.h>
 
 #include "core_jni_helpers.h"
 

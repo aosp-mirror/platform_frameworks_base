@@ -75,7 +75,6 @@ public:
     virtual void renderLayers(const LightGeometry& lightGeometry,
                               LayerUpdateQueue* layerUpdateQueue, bool opaque,
                               const LightInfo& lightInfo) = 0;
-    virtual TaskManager* getTaskManager() = 0;
     virtual bool createOrUpdateLayer(RenderNode* node, const DamageAccumulator& damageAccumulator,
                                      ErrorHandler* errorHandler) = 0;
     virtual bool pinImages(std::vector<SkImage*>& mutableImages) = 0;

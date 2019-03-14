@@ -27,8 +27,10 @@
 #include "pipeline/skia/SkiaOpenGLPipeline.h"
 #include "pipeline/skia/SkiaPipeline.h"
 #include "pipeline/skia/SkiaVulkanPipeline.h"
+#include "thread/CommonPool.h"
 #include "utils/GLUtils.h"
 #include "utils/TimeUtils.h"
+#include "utils/TraceUtils.h"
 #include "../Properties.h"
 
 #include <cutils/properties.h>
@@ -603,31 +605,14 @@ void CanvasContext::waitOnFences() {
     if (mFrameFences.size()) {
         ATRACE_CALL();
         for (auto& fence : mFrameFences) {
-            fence->getResult();
+            fence.get();
         }
         mFrameFences.clear();
     }
 }
 
-class CanvasContext::FuncTaskProcessor : public TaskProcessor<bool> {
-public:
-    explicit FuncTaskProcessor(TaskManager* taskManager) : TaskProcessor<bool>(taskManager) {}
-
-    virtual void onProcess(const sp<Task<bool> >& task) override {
-        FuncTask* t = static_cast<FuncTask*>(task.get());
-        t->func();
-        task->setResult(true);
-    }
-};
-
 void CanvasContext::enqueueFrameWork(std::function<void()>&& func) {
-    if (!mFrameWorkProcessor.get()) {
-        mFrameWorkProcessor = new FuncTaskProcessor(mRenderPipeline->getTaskManager());
-    }
-    sp<FuncTask> task(new FuncTask());
-    task->func = func;
-    mFrameFences.push_back(task);
-    mFrameWorkProcessor->add(task);
+    mFrameFences.push_back(CommonPool::async(std::move(func)));
 }
 
 int64_t CanvasContext::getFrameNumber() {

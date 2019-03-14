@@ -33,8 +33,6 @@ public:
     explicit SkiaPipeline(renderthread::RenderThread& thread);
     virtual ~SkiaPipeline();
 
-    TaskManager* getTaskManager() override;
-
     void onDestroyHardwareResources() override;
 
     bool pinImages(std::vector<SkImage*>& mutableImages) override;
@@ -157,11 +155,7 @@ private:
      *  mCaptureSequence counts how many frames are left to take in the sequence.
      */
     int mCaptureSequence = 0;
-    /**
-     *  mSavePictureProcessor is used to run the file saving code in a separate thread.
-     */
-    class SavePictureProcessor;
-    sp<SavePictureProcessor> mSavePictureProcessor;
+
     /**
      *  mRecorder holds the current picture recorder. We could store it on the stack to support
      *  parallel tryCapture calls (not really needed).
