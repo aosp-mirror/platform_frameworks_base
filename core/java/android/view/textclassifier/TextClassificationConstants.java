@@ -48,6 +48,8 @@ import java.util.StringJoiner;
  * notification_conversation_action_types_default   (String[])
  * lang_id_threshold_override                       (float)
  * template_intent_factory_enabled                  (boolean)
+ * translate_in_classification_enabled              (boolean)
+ * detect_languages_from_text_enabled               (boolean)
  * </pre>
  *
  * <p>
@@ -139,13 +141,25 @@ public final class TextClassificationConstants {
     private static final String NOTIFICATION_CONVERSATION_ACTION_TYPES_DEFAULT =
             "notification_conversation_action_types_default";
     /**
-     * Threshold in classifyText to consider a text is in a foreign language.
+     * Threshold to accept a suggested language from LangID model.
      */
     private static final String LANG_ID_THRESHOLD_OVERRIDE = "lang_id_threshold_override";
     /**
      * Whether to enable {@link android.view.textclassifier.TemplateIntentFactory}.
      */
     private static final String TEMPLATE_INTENT_FACTORY_ENABLED = "template_intent_factory_enabled";
+
+    /**
+     * Whether to enable "translate" action in classifyText.
+     */
+    private static final String TRANSLATE_IN_CLASSIFICATION_ENABLED =
+            "translate_in_classification_enabled";
+    /**
+     * Whether to detect the languages of the text in request by using langId for the native
+     * model.
+     */
+    private static final String DETECT_LANGUAGES_FROM_TEXT_ENABLED =
+            "detect_languages_from_text_enabled";
 
     private static final boolean LOCAL_TEXT_CLASSIFIER_ENABLED_DEFAULT = true;
     private static final boolean SYSTEM_TEXT_CLASSIFIER_ENABLED_DEFAULT = true;
@@ -183,11 +197,13 @@ public final class TextClassificationConstants {
     /**
      * < 0  : Not set. Use value from LangId model.
      * 0 - 1: Override value in LangId model.
-     * > 1  : Effectively turns off the foreign language detection. Scores should never be > 1.
+     *
      * @see EntityConfidence
      */
     private static final float LANG_ID_THRESHOLD_OVERRIDE_DEFAULT = -1f;
     private static final boolean TEMPLATE_INTENT_FACTORY_ENABLED_DEFAULT = true;
+    private static final boolean TRANSLATE_IN_CLASSIFICATION_ENABLED_DEFAULT = true;
+    private static final boolean DETECT_LANGUAGES_FROM_TEXT_ENABLED_DEFAULT = true;
 
     private final boolean mSystemTextClassifierEnabled;
     private final boolean mLocalTextClassifierEnabled;
@@ -207,6 +223,8 @@ public final class TextClassificationConstants {
     private final List<String> mNotificationConversationActionTypesDefault;
     private final float mLangIdThresholdOverride;
     private final boolean mTemplateIntentFactoryEnabled;
+    private final boolean mTranslateInClassificationEnabled;
+    private final boolean mDetectLanguagesFromTextEnabled;
 
     private TextClassificationConstants(@Nullable String settings) {
         ConfigParser configParser = new ConfigParser(settings);
@@ -280,6 +298,10 @@ public final class TextClassificationConstants {
         mTemplateIntentFactoryEnabled = configParser.getBoolean(
                 TEMPLATE_INTENT_FACTORY_ENABLED,
                 TEMPLATE_INTENT_FACTORY_ENABLED_DEFAULT);
+        mTranslateInClassificationEnabled = configParser.getBoolean(
+                TRANSLATE_IN_CLASSIFICATION_ENABLED, TRANSLATE_IN_CLASSIFICATION_ENABLED_DEFAULT);
+        mDetectLanguagesFromTextEnabled = configParser.getBoolean(
+                DETECT_LANGUAGES_FROM_TEXT_ENABLED, DETECT_LANGUAGES_FROM_TEXT_ENABLED_DEFAULT);
     }
 
     /** Load from a settings string. */
@@ -359,6 +381,14 @@ public final class TextClassificationConstants {
         return mTemplateIntentFactoryEnabled;
     }
 
+    public boolean isTranslateInClassificationEnabled() {
+        return mTranslateInClassificationEnabled;
+    }
+
+    public boolean isDetectLanguagesFromTextEnabled() {
+        return mDetectLanguagesFromTextEnabled;
+    }
+
     private static List<String> parseStringList(String listStr) {
         return Collections.unmodifiableList(Arrays.asList(listStr.split(STRING_LIST_DELIMITER)));
     }
@@ -385,6 +415,8 @@ public final class TextClassificationConstants {
                 mNotificationConversationActionTypesDefault);
         pw.printPair("getLangIdThresholdOverride", mLangIdThresholdOverride);
         pw.printPair("isTemplateIntentFactoryEnabled", mTemplateIntentFactoryEnabled);
+        pw.printPair("isTranslateInClassificationEnabled", mTranslateInClassificationEnabled);
+        pw.printPair("isDetectLanguageFromTextEnabled", mDetectLanguagesFromTextEnabled);
         pw.decreaseIndent();
         pw.println();
     }

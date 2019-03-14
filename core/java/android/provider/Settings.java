@@ -12023,6 +12023,8 @@ public final class Settings {
          * notification_conversation_action_types_default   (String[])
          * lang_id_threshold_override                       (float)
          * template_intent_factory_enabled                  (boolean)
+         * translate_in_classification_enabled              (boolean)
+         * detect_language_from_text_enabled                (boolean)
          * </pre>
          *
          * <p>

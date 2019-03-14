@@ -82,9 +82,12 @@ public final class ActionsSuggestionsHelper {
             long referenceTime = message.getReferenceTime() == null
                     ? 0
                     : message.getReferenceTime().toInstant().toEpochMilli();
+            String timeZone = message.getReferenceTime() == null
+                    ? null
+                    : message.getReferenceTime().getZone().getId();
             nativeMessages.push(new ActionsSuggestionsModel.ConversationMessage(
                     personEncoder.encode(message.getAuthor()),
-                    message.getText().toString(), referenceTime,
+                    message.getText().toString(), referenceTime, timeZone,
                     languageDetector.apply(message.getText())));
         }
         return nativeMessages.toArray(
