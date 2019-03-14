@@ -67,7 +67,6 @@ import android.os.IRemoteCallback;
 import android.os.IUserManager;
 import android.os.Looper;
 import android.os.Message;
-import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
@@ -334,14 +333,6 @@ class UserController implements Handler.Callback {
             if (mStartedUsers.get(userId) != uss) {
                 return;
             }
-        }
-        // Inform checkpointing systems of success
-        try {
-            getStorageManager().commitChanges();
-        } catch (Exception e) {
-            PowerManager pm = (PowerManager)
-                     mInjector.getContext().getSystemService(Context.POWER_SERVICE);
-            pm.reboot("Checkpoint commit failed");
         }
 
         // We always walk through all the user lifecycle states to send
