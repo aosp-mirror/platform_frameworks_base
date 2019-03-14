@@ -1397,6 +1397,14 @@ public abstract class PackageManager {
      */
     public static final int INSTALL_FAILED_OTHER_STAGED_SESSION_IN_PROGRESS = -119;
 
+    /**
+     * Installation failed return code: one of the child sessions does not match the parent session
+     * in respect to staged or rollback enabled parameters.
+     *
+     * @hide
+     */
+    public static final int INSTALL_FAILED_MULTIPACKAGE_INCONSISTENCY = -120;
+
     /** @hide */
     @IntDef(flag = true, prefix = { "DELETE_" }, value = {
             DELETE_KEEP_DATA,
