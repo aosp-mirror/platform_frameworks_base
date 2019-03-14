@@ -965,6 +965,7 @@ public class UsbPortManager {
 
     private void handlePortLocked(PortInfo portInfo, IndentingPrintWriter pw) {
         sendPortChangedBroadcastLocked(portInfo);
+        enableContaminantDetectionIfNeeded(portInfo, pw);
         logToStatsd(portInfo, pw);
         updateContaminantNotification();
     }
@@ -1016,6 +1017,22 @@ public class UsbPortManager {
                 Manifest.permission.MANAGE_USB));
     }
 
+    private void enableContaminantDetectionIfNeeded(PortInfo portInfo, IndentingPrintWriter pw) {
+        if (!mConnected.containsKey(portInfo.mUsbPort.getId())) {
+            return;
+        }
+
+        if (mConnected.get(portInfo.mUsbPort.getId())
+                && !portInfo.mUsbPortStatus.isConnected()
+                && portInfo.mUsbPortStatus.getContaminantDetectionStatus()
+                == UsbPortStatus.CONTAMINANT_DETECTION_DISABLED) {
+            // Contaminant detection might have been temporarily disabled by the user
+            // through SystemUI.
+            // Re-enable contaminant detection when the accessory is unplugged.
+            enableContaminantDetection(portInfo.mUsbPort.getId(), true, pw);
+        }
+    }
+
     private void logToStatsd(PortInfo portInfo, IndentingPrintWriter pw) {
         // Port is removed
         if (portInfo.mUsbPortStatus == null) {
@@ -1052,12 +1069,6 @@ public class UsbPortManager {
                     ? StatsLog.USB_CONNECTOR_STATE_CHANGED__STATE__STATE_CONNECTED :
                     StatsLog.USB_CONNECTOR_STATE_CHANGED__STATE__STATE_DISCONNECTED,
                     portInfo.mUsbPort.getId(), portInfo.mLastConnectDurationMillis);
-            // Contaminant detection might have been temporarily disabled by the user
-            // through SystemUI.
-            // Re-enable contaminant detection when the accessory is unplugged.
-            if (!portInfo.mUsbPortStatus.isConnected()) {
-                enableContaminantDetection(portInfo.mUsbPort.getId(), true, pw);
-            }
         }
 
         if (!mContaminantStatus.containsKey(portInfo.mUsbPort.getId())
