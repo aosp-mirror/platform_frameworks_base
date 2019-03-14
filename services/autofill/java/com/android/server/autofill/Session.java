@@ -699,14 +699,14 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 if (requestLog != null) {
                     requestLog.addTaggedData(MetricsEvent.FIELD_AUTOFILL_NUM_DATASETS, -1);
                 }
-                processNullResponseLocked(requestFlags);
+                processNullResponseLocked(requestId, requestFlags);
                 return;
             }
 
             fieldClassificationIds = response.getFieldClassificationIds();
             if (fieldClassificationIds != null && !mService.isFieldClassificationEnabledLocked()) {
                 Slog.w(TAG, "Ignoring " + response + " because field detection is disabled");
-                processNullResponseLocked(requestFlags);
+                processNullResponseLocked(requestId, requestFlags);
                 return;
             }
         }
@@ -739,7 +739,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                         && response.getAuthentication() == null)
                 || disableDuration > 0) {
             // Response is "empty" from an UI point of view, need to notify client.
-            notifyUnavailableToClient(sessionFinishedState);
+            notifyUnavailableToClient(sessionFinishedState, /* autofillableIds= */ null);
         }
 
         if (requestLog != null) {
@@ -802,7 +802,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 }
             }
         }
-        notifyUnavailableToClient(AutofillManager.STATE_UNKNOWN_FAILED);
+        notifyUnavailableToClient(AutofillManager.STATE_UNKNOWN_FAILED,
+                /* autofillableIds= */ null);
         if (showMessage) {
             getUiForShowing().showError(message, this);
         }
@@ -1131,7 +1132,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             }
             logAuthenticationStatusLocked(requestId,
                     MetricsEvent.AUTOFILL_INVALID_AUTHENTICATION);
-            processNullResponseLocked(0);
+            processNullResponseLocked(requestId, 0);
         }
     }
 
@@ -2428,14 +2429,15 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         }
     }
 
-    private void notifyUnavailableToClient(int sessionFinishedState) {
+    private void notifyUnavailableToClient(int sessionFinishedState,
+            @Nullable ArrayList<AutofillId> autofillableIds) {
         synchronized (mLock) {
             if (mCurrentViewId == null) return;
             try {
                 if (mHasCallback) {
                     mClient.notifyNoFillUi(id, mCurrentViewId, sessionFinishedState);
                 } else if (sessionFinishedState != 0) {
-                    mClient.setSessionFinished(sessionFinishedState);
+                    mClient.setSessionFinished(sessionFinishedState, autofillableIds);
                 }
             } catch (RemoteException e) {
                 Slog.e(TAG, "Error notifying client no fill UI: id=" + mCurrentViewId, e);
@@ -2551,10 +2553,22 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     }
 
     @GuardedBy("mLock")
-    private void processNullResponseLocked(int flags) {
+    private void processNullResponseLocked(int requestId, int flags) {
         if ((flags & FLAG_MANUAL_REQUEST) != 0) {
             getUiForShowing().showError(R.string.autofill_error_cannot_autofill, this);
         }
+
+        final FillContext context = getFillContextByRequestIdLocked(requestId);
+
+        final ArrayList<AutofillId> autofillableIds;
+        if (context != null) {
+            final AssistStructure structure = context.getStructure();
+            autofillableIds = Helper.getAutofillableIds(structure);
+        } else {
+            Slog.w(TAG, "processNullResponseLocked(): no context for req " + requestId);
+            autofillableIds = null;
+        }
+
         mService.resetLastResponse();
 
         // The default autofill service cannot fullfill the request, let's check if the augmented
@@ -2563,18 +2577,21 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         if (mAugmentedAutofillDestroyer == null) {
             if (sVerbose) {
                 Slog.v(TAG, "canceling session " + id + " when server returned null and there is no"
-                        + " AugmentedAutofill for user");
+                        + " AugmentedAutofill for user. AutofillableIds: " + autofillableIds);
             }
             // Nothing to be done, but need to notify client.
-            notifyUnavailableToClient(AutofillManager.STATE_FINISHED);
+            notifyUnavailableToClient(AutofillManager.STATE_FINISHED, autofillableIds);
             removeSelf();
         } else {
             // TODO(b/123099468, b/119638958): must set internal state so when user focus other
             // fields it does not generate a new call to the standard autofill service (right now
-            // it does). Must also add CTS tests to exercise this scenario.
+            // it does). In other words, must also pass the autofillableIds - we'll be handled in
+            // a separate change (with new CTS tests to exercise this scenario).
+
             if (sVerbose) {
                 Slog.v(TAG, "keeping session " + id + " when server returned null but "
-                        + "there is an AugmentedAutofill for user");
+                        + "there is an AugmentedAutofill for user. AutofillableIds: "
+                        + autofillableIds);
             }
         }
     }
@@ -3134,7 +3151,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         mUi.destroyAll(mPendingSaveUi, this, false);
         if (!isPendingSaveUi) {
             try {
-                mClient.setSessionFinished(clientState);
+                mClient.setSessionFinished(clientState, /* autofillableIds= */ null);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Error notifying client to finish session", e);
             }
