@@ -31,10 +31,12 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserManager;
+import android.util.ArraySet;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.Preconditions;
+import com.android.server.SystemConfig;
 
 import java.io.FileDescriptor;
 
@@ -55,10 +57,13 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
     private final Object mLock = new Object();
     private final Context mContext;
     private final AppOpsManager mAppOps;
+    private final ArraySet<String> mBugreportWhitelistedPackages;
 
     BugreportManagerServiceImpl(Context context) {
         mContext = context;
         mAppOps = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
+        mBugreportWhitelistedPackages =
+                SystemConfig.getInstance().getBugreportWhitelistedPackages();
     }
 
     @Override
@@ -83,6 +88,10 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
         int callingUid = Binder.getCallingUid();
         mAppOps.checkPackage(callingUid, callingPackage);
 
+        if (!mBugreportWhitelistedPackages.contains(callingPackage)) {
+            throw new SecurityException(
+                    callingPackage + " is not whitelisted to use Bugreport API");
+        }
         synchronized (mLock) {
             startBugreportLocked(callingUid, callingPackage, bugreportFd, screenshotFd,
                     bugreportMode, listener);
