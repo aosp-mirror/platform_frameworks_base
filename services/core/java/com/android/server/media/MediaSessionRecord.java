@@ -24,10 +24,11 @@ import android.media.AudioManager;
 import android.media.AudioManagerInternal;
 import android.media.AudioSystem;
 import android.media.MediaMetadata;
+import android.media.MediaParceledListSlice;
 import android.media.Rating;
 import android.media.VolumeProvider;
 import android.media.session.ControllerCallbackLink;
-import android.media.session.ControllerLink;
+import android.media.session.ISessionController;
 import android.media.session.MediaController;
 import android.media.session.MediaController.PlaybackInfo;
 import android.media.session.MediaSession;
@@ -78,7 +79,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
     private final String mPackageName;
     private final String mTag;
     private final Bundle mSessionInfo;
-    private final ControllerLink mController;
+    private final ControllerStub mController;
     private final MediaSession.Token mSessionToken;
     private final SessionLink mSession;
     private final SessionCb mSessionCb;
@@ -130,7 +131,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         mPackageName = ownerPackageName;
         mTag = tag;
         mSessionInfo = sessionInfo;
-        mController = new ControllerLink(new ControllerStub());
+        mController = new ControllerStub();
         mSessionToken = new MediaSession.Token(mController);
         mSession = new SessionLink(new SessionStub());
         mSessionCb = new SessionCb(cb);
@@ -152,11 +153,11 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
     }
 
     /**
-     * Get the controller link for the {@link MediaController}.
+     * Get the controller binder for the {@link MediaController}.
      *
-     * @return The controller link apps talk to.
+     * @return The controller binder apps talk to.
      */
-    public ControllerLink getControllerLink() {
+    public ISessionController getControllerBinder() {
         return mController;
     }
 
@@ -835,7 +836,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         }
 
         @Override
-        public ControllerLink getController() {
+        public ISessionController getController() {
             return mController;
         }
 
@@ -1248,7 +1249,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         }
     }
 
-    class ControllerStub extends ControllerLink.ControllerStub {
+    class ControllerStub extends ISessionController.Stub {
         @Override
         public void sendCommand(String packageName, ControllerCallbackLink caller,
                 String command, Bundle args, ResultReceiver cb) {
@@ -1488,9 +1489,9 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         }
 
         @Override
-        public List<QueueItem> getQueue() {
+        public MediaParceledListSlice getQueue() {
             synchronized (mLock) {
-                return mQueue;
+                return mQueue == null ? null : new MediaParceledListSlice<>(mQueue);
             }
         }
 

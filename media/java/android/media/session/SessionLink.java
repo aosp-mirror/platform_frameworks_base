@@ -83,10 +83,10 @@ public final class SessionLink implements Parcelable {
     }
 
     /**
-     * Gets the controller link from the system.
+     * Gets the controller binder from the system.
      */
     @NonNull
-    ControllerLink getController() {
+    ISessionController getController() {
         try {
             return mISession.getController();
         } catch (RemoteException e) {
@@ -304,7 +304,7 @@ public final class SessionLink implements Parcelable {
 
         /** Stub method for ISession.getController */
         @NonNull
-        public ControllerLink getController() {
+        public ISessionController getController() {
             return null;
         }
 
@@ -373,7 +373,7 @@ public final class SessionLink implements Parcelable {
         }
 
         @Override
-        public ControllerLink getController() {
+        public ISessionController getController() {
             return mSessionStub.getController();
         }
 
