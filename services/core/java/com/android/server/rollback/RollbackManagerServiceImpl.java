@@ -44,6 +44,7 @@ import android.os.HandlerThread;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.SystemClock;
+import android.os.UserHandle;
 import android.provider.DeviceConfig;
 import android.util.IntArray;
 import android.util.Log;
@@ -455,11 +456,8 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
 
                             Intent broadcast = new Intent(Intent.ACTION_ROLLBACK_COMMITTED);
 
-                            // TODO: This call emits the warning "Calling a method in the
-                            // system process without a qualified user". Fix that.
-                            // TODO: Limit this to receivers holding the
-                            // MANAGE_ROLLBACKS or TEST_MANAGE_ROLLBACKS permissions?
-                            mContext.sendBroadcast(broadcast);
+                            mContext.sendBroadcastAsUser(broadcast, UserHandle.SYSTEM,
+                                    Manifest.permission.MANAGE_ROLLBACKS);
                         });
                     }
             );
