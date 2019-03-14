@@ -255,6 +255,7 @@ asked for it -->
                             android:layout_width="40dp"
                             android:layout_height="40dp"
                             android:clickable="false"
+                            android:contentDescription="@string/inline_block_button"
                             android:tint="@color/GM2_grey_400"
                             style="@style/TextAppearance.NotificationInfo.Button"/>
                     </FrameLayout>
@@ -289,6 +290,7 @@ asked for it -->
                             android:layout_width="40dp"
                             android:layout_height="40dp"
                             android:clickable="false"
+                            android:contentDescription="@string/inline_silent_button_silent"
                             android:tint="@color/GM2_grey_400"
                             style="@style/TextAppearance.NotificationInfo.Button"/>
                     </FrameLayout>
@@ -322,6 +324,7 @@ asked for it -->
                             android:layout_gravity="center"
                             android:layout_width="40dp"
                             android:layout_height="40dp"
+                            android:contentDescription="@string/inline_silent_button_alert"
                             android:clickable="false"
                             android:tint="@color/GM2_grey_400"
                             style="@style/TextAppearance.NotificationInfo.Button"/>
