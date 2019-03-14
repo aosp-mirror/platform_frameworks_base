@@ -2770,6 +2770,7 @@
   <java-symbol type="drawable" name="scroll_indicator_material" />
 
   <java-symbol type="layout" name="chooser_row" />
+  <java-symbol type="layout" name="chooser_row_direct_share" />
   <java-symbol type="id" name="target_badge" />
   <java-symbol type="bool" name="config_supportDoubleTapWake" />
   <java-symbol type="drawable" name="ic_perm_device_info" />
@@ -3382,6 +3383,7 @@
   <java-symbol type="string" name="config_defaultAppPredictionService" />
   <java-symbol type="string" name="config_defaultContentSuggestionsService" />
   <java-symbol type="string" name="config_defaultAttentionService" />
+  <java-symbol type="string" name="config_defaultSystemCaptionsService" />
 
   <java-symbol type="string" name="notification_channel_foreground_service" />
   <java-symbol type="string" name="foreground_service_app_in_background" />

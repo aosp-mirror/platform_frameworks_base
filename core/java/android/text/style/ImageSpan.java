@@ -46,10 +46,10 @@ import java.io.InputStream;
  * <p>
  * For example, an <code>ImagedSpan</code> can be used like this:
  * <pre>
- * SpannableString string = SpannableString("Bottom: span.\nBaseline: span.");
+ * SpannableString string = new SpannableString("Bottom: span.\nBaseline: span.");
  * // using the default alignment: ALIGN_BOTTOM
- * string.setSpan(ImageSpan(this, R.mipmap.ic_launcher), 7, 8, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
- * string.setSpan(ImageSpan(this, R.mipmap.ic_launcher, DynamicDrawableSpan.ALIGN_BASELINE),
+ * string.setSpan(new ImageSpan(this, R.mipmap.ic_launcher), 7, 8, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+ * string.setSpan(new ImageSpan(this, R.mipmap.ic_launcher, DynamicDrawableSpan.ALIGN_BASELINE),
  * 22, 23, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
  * </pre>
  * <img src="{@docRoot}reference/android/images/text/style/imagespan.png" />

@@ -307,6 +307,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
     public AccessPoint(Context context, WifiConfiguration config) {
         mContext = context;
         loadConfig(config);
+        updateKey();
     }
 
     /**
@@ -317,6 +318,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
         mContext = context;
         mFqdn = config.getHomeSp().getFqdn();
         mProviderFriendlyName = config.getHomeSp().getFriendlyName();
+        updateKey();
     }
 
     /**
@@ -355,7 +357,6 @@ public class AccessPoint implements Comparable<AccessPoint> {
         security = getSecurity(config);
         networkId = config.networkId;
         mConfig = config;
-        updateKey();
     }
 
     /** Updates {@link #mKey} and should only called upon object creation/initialization. */
@@ -363,6 +364,8 @@ public class AccessPoint implements Comparable<AccessPoint> {
         // TODO(sghuman): Consolidate Key logic on ScanResultMatchInfo
         if (isPasspoint()) {
             mKey = getKey(mConfig);
+        } else if (isPasspointConfig()) {
+            mKey = getKey(mFqdn);
         } else if (isOsuProvider()) {
             mKey = getKey(mOsuProvider);
         } else { // Non-Passpoint AP
@@ -618,12 +621,19 @@ public class AccessPoint implements Comparable<AccessPoint> {
      */
     public static String getKey(WifiConfiguration config) {
         if (config.isPasspoint()) {
-            return new StringBuilder()
-                    .append(KEY_PREFIX_FQDN)
-                    .append(config.FQDN).toString();
+            return getKey(config.FQDN);
         } else {
             return getKey(removeDoubleQuotes(config.SSID), config.BSSID, getSecurity(config));
         }
+    }
+
+    /**
+     * Returns the AccessPoint key corresponding to a Passpoint network by its FQDN.
+     */
+    public static String getKey(String fqdn) {
+        return new StringBuilder()
+                .append(KEY_PREFIX_FQDN)
+                .append(fqdn).toString();
     }
 
     /**

@@ -5590,6 +5590,15 @@ public final class Settings {
         private static final Validator ALLOW_MOCK_LOCATION_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
+         * Setting to indicate that on device captions are enabled.
+         *
+         * @hide
+         */
+        public static final String ODI_CAPTIONS_ENABLED = "odi_captions_enabled";
+
+        private static final Validator ODI_CAPTIONS_ENABLED_VALIDATOR = BOOLEAN_VALIDATOR;
+
+        /**
          * On Android 8.0 (API level 26) and higher versions of the platform,
          * a 64-bit number (expressed as a hexadecimal string), unique to
          * each combination of app-signing key, user, and device.
@@ -6335,7 +6344,6 @@ public final class Settings {
          * Number of times the user has manually clicked the ringer toggle
          * @hide
          */
-        @SystemApi
         public static final String MANUAL_RINGER_TOGGLE_COUNT = "manual_ringer_toggle_count";
 
         private static final Validator MANUAL_RINGER_TOGGLE_COUNT_VALIDATOR =
@@ -8508,9 +8516,15 @@ public final class Settings {
         @SystemApi
         public static final String VOLUME_HUSH_GESTURE = "volume_hush_gesture";
 
-        /** @hide */ public static final int VOLUME_HUSH_OFF = 0;
-        /** @hide */ public static final int VOLUME_HUSH_VIBRATE = 1;
-        /** @hide */ public static final int VOLUME_HUSH_MUTE = 2;
+        /** @hide */
+        @SystemApi
+        public static final int VOLUME_HUSH_OFF = 0;
+        /** @hide */
+        @SystemApi
+        public static final int VOLUME_HUSH_VIBRATE = 1;
+        /** @hide */
+        @SystemApi
+        public static final int VOLUME_HUSH_MUTE = 2;
 
         private static final Validator VOLUME_HUSH_GESTURE_VALIDATOR =
                 NON_NEGATIVE_INTEGER_VALIDATOR;
@@ -8950,6 +8964,7 @@ public final class Settings {
             VALIDATORS.put(SILENCE_TIMER_GESTURE_COUNT, SILENCE_GESTURE_COUNT_VALIDATOR);
             VALIDATORS.put(SILENCE_CALL_GESTURE_COUNT, SILENCE_GESTURE_COUNT_VALIDATOR);
             VALIDATORS.put(SILENCE_NOTIFICATION_GESTURE_COUNT, SILENCE_GESTURE_COUNT_VALIDATOR);
+            VALIDATORS.put(ODI_CAPTIONS_ENABLED, ODI_CAPTIONS_ENABLED_VALIDATOR);
         }
 
         /**
@@ -11508,6 +11523,7 @@ public final class Settings {
          * service_min_restart_time_between     (long)
          * service_max_inactivity               (long)
          * service_bg_start_timeout             (long)
+         * service_bg_activity_start_timeout    (long)
          * process_start_async                  (boolean)
          * </pre>
          *

@@ -117,6 +117,7 @@ import android.util.ArraySet;
 import android.util.AtomicFile;
 
 import androidx.annotation.Nullable;
+import androidx.test.InstrumentationRegistry;
 
 import com.android.internal.R;
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
@@ -311,6 +312,9 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Before
     public void setUp() throws Exception {
+        InstrumentationRegistry.getInstrumentation().getUiAutomation().adoptShellPermissionIdentity(
+                "android.permission.WRITE_DEVICE_CONFIG", "android.permission.READ_DEVICE_CONFIG");
+
         MockitoAnnotations.initMocks(this);
 
         LocalServices.removeServiceForTest(UriGrantsManagerInternal.class);
@@ -392,6 +396,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     public void tearDown() throws Exception {
         mFile.delete();
         clearDeviceConfig();
+        InstrumentationRegistry.getInstrumentation()
+                .getUiAutomation().dropShellPermissionIdentity();
     }
 
     public void waitForIdle() {

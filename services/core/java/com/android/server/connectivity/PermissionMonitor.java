@@ -46,13 +46,11 @@ import android.util.Log;
 import android.util.Slog;
 import android.util.SparseIntArray;
 
-import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.LocalServices;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -84,20 +82,14 @@ public class PermissionMonitor {
     // Keys are App IDs. Values are true for SYSTEM permission and false for NETWORK permission.
     private final Map<Integer, Boolean> mApps = new HashMap<>();
 
-    // Keys are App packageNames, Values are app uids. . We need to keep track of this information
-    // because PackageListObserver#onPackageRemoved does not pass the UID.
-    @GuardedBy("mPackageNameUidMap")
-    private final Map<String, Integer> mPackageNameUidMap = new HashMap<>();
-
     private class PackageListObserver implements PackageManagerInternal.PackageListObserver {
         @Override
-        public void onPackageAdded(String packageName) {
+        public void onPackageAdded(String packageName, int uid) {
             final PackageInfo app = getPackageInfo(packageName);
             if (app == null) {
                 Slog.wtf(TAG, "Failed to get information of installed package: " + packageName);
                 return;
             }
-            int uid = (app.applicationInfo != null) ? app.applicationInfo.uid : INVALID_UID;
             if (uid == INVALID_UID) {
                 Slog.wtf(TAG, "Failed to get the uid of installed package: " + packageName
                         + "uid: " + uid);
@@ -107,29 +99,21 @@ public class PermissionMonitor {
                 return;
             }
             sendPackagePermissionsForUid(uid,
-                    filterPermission(Arrays.asList(app.requestedPermissions)));
-            synchronized (mPackageNameUidMap) {
-                mPackageNameUidMap.put(packageName, uid);
-            }
+                    getNetdPermissionMask(app.requestedPermissions));
         }
 
         @Override
-        public void onPackageRemoved(String packageName) {
-            int uid;
-            synchronized (mPackageNameUidMap) {
-                if (!mPackageNameUidMap.containsKey(packageName)) {
-                    return;
-                }
-                uid = mPackageNameUidMap.get(packageName);
-                mPackageNameUidMap.remove(packageName);
-            }
+        public void onPackageRemoved(String packageName, int uid) {
             int permission = 0;
+            // If there are still packages remain under the same uid, check the permission of the
+            // remaining packages. We only remove the permission for a given uid when all packages
+            // for that uid no longer have that permission.
             String[] packages = mPackageManager.getPackagesForUid(uid);
             if (packages != null && packages.length > 0) {
                 for (String name : packages) {
                     final PackageInfo app = getPackageInfo(name);
                     if (app != null && app.requestedPermissions != null) {
-                        permission |= filterPermission(Arrays.asList(app.requestedPermissions));
+                        permission |= getNetdPermissionMask(app.requestedPermissions);
                     }
                 }
             }
@@ -184,12 +168,9 @@ public class PermissionMonitor {
 
             //TODO: unify the management of the permissions into one codepath.
             if (app.requestedPermissions != null) {
-                int otherNetdPerms = filterPermission(Arrays.asList(app.requestedPermissions));
+                int otherNetdPerms = getNetdPermissionMask(app.requestedPermissions);
                 if (otherNetdPerms != 0) {
                     netdPermsUids.put(uid, netdPermsUids.get(uid) | otherNetdPerms);
-                    synchronized (mPackageNameUidMap) {
-                        mPackageNameUidMap.put(app.applicationInfo.packageName, uid);
-                    }
                 }
             }
         }
@@ -422,13 +403,15 @@ public class PermissionMonitor {
         }
     }
 
-    private static int filterPermission(List<String> requestedPermissions) {
+    private static int getNetdPermissionMask(String[] requestedPermissions) {
         int permissions = 0;
-        if (requestedPermissions.contains(INTERNET)) {
-            permissions |= INetd.PERMISSION_INTERNET;
-        }
-        if (requestedPermissions.contains(UPDATE_DEVICE_STATS)) {
-            permissions |= INetd.PERMISSION_UPDATE_DEVICE_STATS;
+        for (String permissionName : requestedPermissions) {
+            if (permissionName.equals(INTERNET)) {
+                permissions |= INetd.PERMISSION_INTERNET;
+            }
+            if (permissionName.equals(UPDATE_DEVICE_STATS)) {
+                permissions |= INetd.PERMISSION_UPDATE_DEVICE_STATS;
+            }
         }
         return permissions;
     }
@@ -439,8 +422,6 @@ public class PermissionMonitor {
                     | MATCH_ANY_USER);
             return app;
         } catch (NameNotFoundException e) {
-            // App not found.
-            loge("NameNotFoundException " + packageName);
             return null;
         }
     }

@@ -65,6 +65,7 @@ import java.lang.ref.WeakReference;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -1000,8 +1001,9 @@ public class WifiManager {
     /**
      * In this Wi-Fi lock mode, Wi-Fi will not go to power save.
      * This results in operating with low packet latency.
-     * The lock is active  even when the device screen is off or
-     * the acquiring application is running in the background.
+     * The lock is only active when the device is connected to an access point.
+     * The lock is active even when the device screen is off or the acquiring application is
+     * running in the background.
      * This mode will consume more power and hence should be used only
      * when there is a need for this tradeoff.
      * <p>
@@ -1019,6 +1021,7 @@ public class WifiManager {
      * In this Wi-Fi lock mode, Wi-Fi will operate with a priority to achieve low latency.
      * {@link #WIFI_MODE_FULL_LOW_LATENCY} lock has the following limitations:
      * <ol>
+     * <li>The lock is only active when the device is connected to an access point.</li>
      * <li>The lock is only active when the screen is on.</li>
      * <li>The lock is only active when the acquiring app is running in the foreground.</li>
      * </ol>
@@ -1272,7 +1275,10 @@ public class WifiManager {
     })
     @NonNull
     public Map<OsuProvider, List<ScanResult>> getMatchingOsuProviders(
-            List<ScanResult> scanResults) {
+            @Nullable List<ScanResult> scanResults) {
+        if (scanResults == null) {
+            return new HashMap<>();
+        }
         try {
             return mService.getMatchingOsuProviders(scanResults);
         } catch (RemoteException e) {

@@ -31,6 +31,12 @@ public:
     bool PullInternal(std::vector<std::shared_ptr<LogEvent>>* data) override;
 };
 
+// convert a int64_t vector into a byte string for proto message like:
+// message RepeatedInt64Wrapper {
+//   repeated int64 value = 1;
+// }
+std::string int64VectorToProtoByteString(const std::vector<int64_t>& value);
+
 }  // namespace statsd
 }  // namespace os
 }  // namespace android

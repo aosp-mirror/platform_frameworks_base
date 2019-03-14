@@ -338,6 +338,15 @@ public abstract class Context {
     public static final int BIND_ADJUST_BELOW_PERCEPTIBLE = 0x0100;
 
     /**
+     * Flag for {@link #bindService}: allow background activity starts from the bound service's
+     * process.
+     * This flag is only respected if the caller is holding
+     * {@link android.Manifest.permission#START_ACTIVITIES_FROM_BACKGROUND}.
+     * @hide
+     */
+    public static final int BIND_ALLOW_BACKGROUND_ACTIVITY_STARTS = 0x00100000;
+
+    /**
      * @hide Flag for {@link #bindService}: the service being bound to represents a
      * protected system component, so must have association restrictions applied to it.
      * That is, a system config must have one or more allow-association tags limiting
@@ -3127,6 +3136,7 @@ public abstract class Context {
             CONNECTIVITY_SERVICE,
             //@hide: IP_MEMORY_STORE_SERVICE,
             IPSEC_SERVICE,
+            TEST_NETWORK_SERVICE,
             //@hide: UPDATE_LOCK_SERVICE,
             //@hide: NETWORKMANAGEMENT_SERVICE,
             NETWORK_STATS_SERVICE,
@@ -3289,11 +3299,16 @@ public abstract class Context {
      * {@link #USB_SERVICE}, {@link #WALLPAPER_SERVICE}, {@link #WIFI_P2P_SERVICE},
      * {@link #WIFI_SERVICE}, {@link #WIFI_AWARE_SERVICE}. For these services this method will
      * return <code>null</code>.  Generally, if you are running as an instant app you should always
-     * check whether the result of this method is null.
+     * check whether the result of this method is {@code null}.
+     *
+     * <p>Note: When implementing this method, keep in mind that new services can be added on newer
+     * Android releases, so if you're looking for just the explicit names mentioned above, make sure
+     * to return {@code null} when you don't recognize the name &mdash; if you throw a
+     * {@link RuntimeException} exception instead, you're app might break on new Android releases.
      *
      * @param name The name of the desired service.
      *
-     * @return The service or null if the name does not exist.
+     * @return The service or {@code null} if the name does not exist.
      *
      * @see #WINDOW_SERVICE
      * @see android.view.WindowManager
@@ -3367,7 +3382,9 @@ public abstract class Context {
      * {@link android.app.UiModeManager}, {@link android.app.DownloadManager},
      * {@link android.os.BatteryManager}, {@link android.app.job.JobScheduler},
      * {@link android.app.usage.NetworkStatsManager}.
-     * </p><p>
+     * </p>
+     *
+     * <p>
      * Note: System services obtained via this API may be closely associated with
      * the Context in which they are obtained from.  In general, do not share the
      * service objects between various different contexts (Activities, Applications,
@@ -3379,11 +3396,13 @@ public abstract class Context {
      * {@link #FINGERPRINT_SERVICE}, {@link #KEYGUARD_SERVICE}, {@link #SHORTCUT_SERVICE},
      * {@link #USB_SERVICE}, {@link #WALLPAPER_SERVICE}, {@link #WIFI_P2P_SERVICE},
      * {@link #WIFI_SERVICE}, {@link #WIFI_AWARE_SERVICE}. For these services this method will
-     * return <code>null</code>.  Generally, if you are running as an instant app you should always
-     * check whether the result of this method is null.
+     * return {@code null}. Generally, if you are running as an instant app you should always
+     * check whether the result of this method is {@code null}.
+     * </p>
      *
      * @param serviceClass The class of the desired service.
-     * @return The service or null if the class is not a supported system service.
+     * @return The service or {@code null} if the class is not a supported system service. Note:
+     * <b>never</b> throw a {@link RuntimeException} if the name is not supported.
      */
     @SuppressWarnings("unchecked")
     public final @Nullable <T> T getSystemService(@NonNull Class<T> serviceClass) {
@@ -3688,6 +3707,15 @@ public abstract class Context {
      * @see #getSystemService(String)
      */
     public static final String IPSEC_SERVICE = "ipsec";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a {@link
+     * android.net.TestNetworkManager} for building TUNs and limited-use Networks
+     *
+     * @see #getSystemService(String)
+     * @hide
+     */
+    @TestApi public static final String TEST_NETWORK_SERVICE = "test_network";
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a {@link

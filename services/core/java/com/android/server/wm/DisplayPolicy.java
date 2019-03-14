@@ -2146,7 +2146,7 @@ public class DisplayPolicy {
         // TYPE_SYSTEM_ERROR is above the NavigationBar so it can't be allowed to extend over it.
         // Also, we don't allow windows in multi-window mode to extend out of the screen.
         if ((fl & FLAG_LAYOUT_NO_LIMITS) != 0 && type != TYPE_SYSTEM_ERROR
-                && !win.isInMultiWindowMode()) {
+                && !win.inMultiWindowMode()) {
             df.left = df.top = -10000;
             df.right = df.bottom = 10000;
             if (type != TYPE_WALLPAPER) {

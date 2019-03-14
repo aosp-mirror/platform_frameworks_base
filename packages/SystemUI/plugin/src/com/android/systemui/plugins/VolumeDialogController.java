@@ -58,6 +58,10 @@ public interface VolumeDialogController {
     void userActivity();
     void getState();
 
+    boolean areCaptionsEnabled();
+    void setCaptionsEnabled(boolean isEnabled);
+    void getCaptionsComponentState();
+
     @ProvidesInterface(version = StreamState.VERSION)
     public static final class StreamState {
         public static final int VERSION = 1;
@@ -186,5 +190,6 @@ public interface VolumeDialogController {
         void onScreenOff();
         void onShowSafetyWarning(int flags);
         void onAccessibilityModeChanged(Boolean showA11yStream);
+        void onCaptionComponentStateChanged(Boolean isComponentEnabled);
     }
 }

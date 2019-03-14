@@ -17,6 +17,7 @@
 package com.android.server.pm;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.apex.ApexInfo;
 import android.apex.ApexInfoList;
 import android.apex.ApexSessionInfo;
@@ -68,7 +69,6 @@ public class StagingManager {
     private static final String TAG = "StagingManager";
 
     private final PackageInstallerService mPi;
-    private final PackageManagerService mPm;
     private final ApexManager mApexManager;
     private final PowerManager mPowerManager;
     private final Handler mBgHandler;
@@ -76,9 +76,7 @@ public class StagingManager {
     @GuardedBy("mStagedSessions")
     private final SparseArray<PackageInstallerSession> mStagedSessions = new SparseArray<>();
 
-    StagingManager(PackageManagerService pm, PackageInstallerService pi, ApexManager am,
-            Context context) {
-        mPm = pm;
+    StagingManager(PackageInstallerService pi, ApexManager am, Context context) {
         mPi = pi;
         mApexManager = am;
         mPowerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
@@ -479,9 +477,40 @@ public class StagingManager {
         return true;
     }
 
-    void commitSession(@NonNull PackageInstallerSession session) {
+    void commitSession(@NonNull PackageInstallerSession session)
+            throws AlreadyInProgressStagedSessionException {
+        PackageInstallerSession activeSession = getActiveSession();
+        boolean anotherSessionAlreadyInProgress =
+                activeSession != null && session.sessionId != activeSession.sessionId;
         updateStoredSession(session);
+        if (anotherSessionAlreadyInProgress) {
+            session.setStagedSessionFailed(SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
+                    "There is already in-progress committed staged session "
+                            + activeSession.sessionId);
+            throw new AlreadyInProgressStagedSessionException(activeSession.sessionId);
+        }
         mBgHandler.post(() -> preRebootVerification(session));
+    }
+
+    @Nullable
+    private PackageInstallerSession getActiveSession() {
+        synchronized (mStagedSessions) {
+            for (int i = 0; i < mStagedSessions.size(); i++) {
+                final PackageInstallerSession session = mStagedSessions.valueAt(i);
+                if (!session.isCommitted()) {
+                    continue;
+                }
+                if (session.hasParentSessionId()) {
+                    // Staging manager will finalize only parent session. Ignore child sessions
+                    // picking the active.
+                    continue;
+                }
+                if (!session.isStagedSessionApplied() && !session.isStagedSessionFailed()) {
+                    return session;
+                }
+            }
+        }
+        return null;
     }
 
     void createSession(@NonNull PackageInstallerSession sessionInfo) {
@@ -497,8 +526,8 @@ public class StagingManager {
     }
 
     void abortCommittedSession(@NonNull PackageInstallerSession session) {
-        if (session.isStagedSessionApplied()) {
-            Slog.w(TAG, "Cannot abort applied session!");
+        if (session.isStagedSessionApplied() || session.isStagedSessionFailed()) {
+            Slog.w(TAG, "Cannot abort already finalized session : " + session.sessionId);
             return;
         }
         abortSession(session);
@@ -574,6 +603,10 @@ public class StagingManager {
     }
 
     private void checkStateAndResume(@NonNull PackageInstallerSession session) {
+        if (!session.isCommitted()) {
+            // Session hasn't been committed yet, ignore.
+            return;
+        }
         // Check the state of the session and decide what to do next.
         if (session.isStagedSessionFailed() || session.isStagedSessionApplied()) {
             // Final states, nothing to do.
@@ -616,6 +649,14 @@ public class StagingManager {
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
+        }
+    }
+
+    static final class AlreadyInProgressStagedSessionException extends Exception {
+
+        AlreadyInProgressStagedSessionException(int sessionId) {
+            super("There is already in-progress committed staged session "
+                    + sessionId);
         }
     }
 }

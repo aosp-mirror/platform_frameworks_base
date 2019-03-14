@@ -826,7 +826,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mHaveFrame = true;
 
         final Task task = getTask();
-        final boolean inFullscreenContainer = inFullscreenContainer();
+        final boolean isFullscreenAndFillsDisplay = !inMultiWindowMode() && matchesDisplayBounds();
         final boolean windowsAreFloating = task != null && task.isFloating();
         final DisplayContent dc = getDisplayContent();
 
@@ -845,7 +845,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         final WindowState imeWin = mWmService.mRoot.getCurrentInputMethodWindow();
         final boolean isImeTarget =
                 imeWin != null && imeWin.isVisibleNow() && isInputMethodTarget();
-        if (inFullscreenContainer || layoutInParentFrame()) {
+        if (isFullscreenAndFillsDisplay || layoutInParentFrame()) {
             // We use the parent frame as the containing frame for fullscreen and child windows
             mWindowFrames.mContainingFrame.set(mWindowFrames.mParentFrame);
             layoutDisplayFrame = mWindowFrames.mDisplayFrame;
@@ -983,7 +983,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                     Math.min(mWindowFrames.mStableFrame.bottom, mWindowFrames.mFrame.bottom));
         }
 
-        if (inFullscreenContainer && !windowsAreFloating) {
+        if (isFullscreenAndFillsDisplay && !windowsAreFloating) {
             // Windows that are not fullscreen can be positioned outside of the display frame,
             // but that is not a reason to provide them with overscan insets.
             InsetUtils.insetsBetweenFrames(layoutContainingFrame, mWindowFrames.mOverscanFrame,
@@ -996,7 +996,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             mWindowFrames.calculateDockedDividerInsets(c.getDisplayCutout().getSafeInsets());
         } else {
             getDisplayContent().getBounds(mTmpRect);
-            mWindowFrames.calculateInsets(windowsAreFloating, inFullscreenContainer, mTmpRect);
+            mWindowFrames.calculateInsets(
+                    windowsAreFloating, isFullscreenAndFillsDisplay, mTmpRect);
         }
 
         mWindowFrames.setDisplayCutout(
@@ -1038,9 +1039,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     // TODO: Look into whether this override is still necessary.
     @Override
     public Rect getBounds() {
-        if (isInMultiWindowMode()) {
-            return getTask().getBounds();
-        } else if (mAppToken != null){
+        if (mAppToken != null) {
             return mAppToken.getBounds();
         } else {
             return super.getBounds();
@@ -1749,6 +1748,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return mWindowFrames.mFrame.left <= 0 && mWindowFrames.mFrame.top <= 0
                 && mWindowFrames.mFrame.right >= displayInfo.appWidth
                 && mWindowFrames.mFrame.bottom >= displayInfo.appHeight;
+    }
+
+    private boolean matchesDisplayBounds() {
+        return getDisplayContent().getBounds().equals(getBounds());
     }
 
     /** Returns true if last applied config was not yet requested by client. */
@@ -3114,20 +3117,16 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return getDisplayContent().mCurrentFocus == this;
     }
 
-    @Override
-    public boolean isInMultiWindowMode() {
-        final Task task = getTask();
-        return task != null && !task.isFullscreen();
-    }
 
     /** Is this window in a container that takes up the entire screen space? */
-    private boolean inFullscreenContainer() {
-        return mAppToken == null || (mAppToken.matchParentBounds() && !isInMultiWindowMode());
+    private boolean inAppWindowThatMatchesParentBounds() {
+        return mAppToken == null || (mAppToken.matchParentBounds() && !inMultiWindowMode());
     }
 
-    /** @return true when the window is in fullscreen task, but has non-fullscreen bounds set. */
+    /** @return true when the window is in fullscreen mode, but has non-fullscreen bounds set, or
+     *          is transitioning into/out-of fullscreen. */
     boolean isLetterboxedAppWindow() {
-        return !isInMultiWindowMode() && mAppToken != null && !mAppToken.matchParentBounds()
+        return !inMultiWindowMode() && !matchesDisplayBounds()
                 || isLetterboxedForDisplayCutoutLw();
     }
 
@@ -3494,7 +3493,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         final int pw = containingFrame.width();
         final int ph = containingFrame.height();
         final Task task = getTask();
-        final boolean inNonFullscreenContainer = !inFullscreenContainer();
+        final boolean inNonFullscreenContainer = !inAppWindowThatMatchesParentBounds();
         final boolean noLimits = (mAttrs.flags & FLAG_LAYOUT_NO_LIMITS) != 0;
 
         // We need to fit it to the display if either

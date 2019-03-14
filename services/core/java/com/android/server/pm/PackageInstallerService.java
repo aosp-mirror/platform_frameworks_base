@@ -205,7 +205,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
 
         mApexManager = am;
 
-        mStagingManager = new StagingManager(pm, this, am, context);
+        mStagingManager = new StagingManager(this, am, context);
     }
 
     boolean okToSendBroadcasts()  {
@@ -589,7 +589,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         session = new PackageInstallerSession(mInternalCallback, mContext, mPm, this,
                 mInstallThread.getLooper(), mStagingManager, sessionId, userId,
                 installerPackageName, callingUid, params, createdMillis, stageDir, stageCid, false,
-                false, null, SessionInfo.INVALID_ID, false, false, false,
+                false, false, null, SessionInfo.INVALID_ID, false, false, false,
                 SessionInfo.STAGED_SESSION_NO_ERROR, "");
 
         synchronized (mSessions) {

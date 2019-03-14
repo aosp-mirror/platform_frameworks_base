@@ -70,6 +70,30 @@ static bool pullGpuStatsGlobalInfo(const sp<IGpuService>& gpuService,
     return true;
 }
 
+static bool pullGpuStatsAppInfo(const sp<IGpuService>& gpuService,
+                                std::vector<std::shared_ptr<LogEvent>>* data) {
+    std::vector<GpuStatsAppInfo> stats;
+    status_t status = gpuService->getGpuStatsAppInfo(&stats);
+    if (status != OK) {
+        return false;
+    }
+
+    data->clear();
+    data->reserve(stats.size());
+    for (const auto& info : stats) {
+        std::shared_ptr<LogEvent> event = make_shared<LogEvent>(
+                android::util::GPU_STATS_APP_INFO, getWallClockNs(), getElapsedRealtimeNs());
+        if (!event->write(info.appPackageName)) return false;
+        if (!event->write((int64_t)info.driverVersionCode)) return false;
+        if (!event->write(int64VectorToProtoByteString(info.glDriverLoadingTime))) return false;
+        if (!event->write(int64VectorToProtoByteString(info.vkDriverLoadingTime))) return false;
+        event->init();
+        data->emplace_back(event);
+    }
+
+    return true;
+}
+
 bool GpuStatsPuller::PullInternal(std::vector<std::shared_ptr<LogEvent>>* data) {
     const sp<IGpuService> gpuService = getGpuService();
     if (!gpuService) {
@@ -79,11 +103,42 @@ bool GpuStatsPuller::PullInternal(std::vector<std::shared_ptr<LogEvent>>* data) 
     switch (mTagId) {
         case android::util::GPU_STATS_GLOBAL_INFO:
             return pullGpuStatsGlobalInfo(gpuService, data);
+        case android::util::GPU_STATS_APP_INFO:
+            return pullGpuStatsAppInfo(gpuService, data);
         default:
             break;
     }
 
     return false;
+}
+
+static std::string protoOutputStreamToByteString(ProtoOutputStream& proto) {
+    if (!proto.size()) return "";
+
+    std::string byteString;
+    auto iter = proto.data();
+    while (iter.readBuffer() != nullptr) {
+        const size_t toRead = iter.currentToRead();
+        byteString.append((char*)iter.readBuffer(), toRead);
+        iter.rp()->move(toRead);
+    }
+
+    if (byteString.size() != proto.size()) return "";
+
+    return byteString;
+}
+
+std::string int64VectorToProtoByteString(const std::vector<int64_t>& value) {
+    if (value.empty()) return "";
+
+    ProtoOutputStream proto;
+    for (const auto& ele : value) {
+        proto.write(android::util::FIELD_TYPE_INT64 | android::util::FIELD_COUNT_REPEATED |
+                            1 /* field id */,
+                    (long long)ele);
+    }
+
+    return protoOutputStreamToByteString(proto);
 }
 
 }  // namespace statsd

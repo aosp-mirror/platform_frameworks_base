@@ -18,6 +18,7 @@ package com.android.server.wm;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.view.WindowManager.TRANSIT_TASK_CHANGE_WINDOWING_MODE;
 import static android.view.WindowManager.TRANSIT_TASK_CLOSE;
 import static android.view.WindowManager.TRANSIT_TASK_OPEN;
 
@@ -75,6 +76,23 @@ public class AppTransitionControllerTest extends WindowTestsBase {
             assertEquals(WindowManager.TRANSIT_TRANSLUCENT_ACTIVITY_CLOSE,
                     mAppTransitionController.maybeUpdateTransitToTranslucentAnim(
                             TRANSIT_TASK_CLOSE));
+        }
+    }
+
+    @Test
+    public void testChangeIsNotOverwritten() {
+        synchronized (mWm.mGlobalLock) {
+            final AppWindowToken behind = createAppWindowToken(mDisplayContent,
+                    WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
+            final AppWindowToken translucentOpening = createAppWindowToken(mDisplayContent,
+                    WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
+            translucentOpening.setFillsParent(false);
+            translucentOpening.setHidden(true);
+            mDisplayContent.mOpeningApps.add(behind);
+            mDisplayContent.mOpeningApps.add(translucentOpening);
+            assertEquals(TRANSIT_TASK_CHANGE_WINDOWING_MODE,
+                    mAppTransitionController.maybeUpdateTransitToTranslucentAnim(
+                            TRANSIT_TASK_CHANGE_WINDOWING_MODE));
         }
     }
 }

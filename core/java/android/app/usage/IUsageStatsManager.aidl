@@ -60,7 +60,7 @@ interface IUsageStatsManager {
             in PendingIntent sessionEndCallbackIntent, String callingPackage);
     void unregisterUsageSessionObserver(int sessionObserverId, String callingPackage);
     void registerAppUsageLimitObserver(int observerId, in String[] packages, long timeLimitMs,
-            long timeRemainingMs, in PendingIntent callback, String callingPackage);
+            long timeUsedMs, in PendingIntent callback, String callingPackage);
     void unregisterAppUsageLimitObserver(int observerId, String callingPackage);
     void reportUsageStart(in IBinder activity, String token, String callingPackage);
     void reportPastUsageStart(in IBinder activity, String token, long timeAgoMs,

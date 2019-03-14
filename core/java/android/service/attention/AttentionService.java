@@ -18,6 +18,7 @@ package android.service.attention;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.app.Service;
 import android.content.Intent;
@@ -111,8 +112,9 @@ public abstract class AttentionService extends Service {
         }
     };
 
+    @Nullable
     @Override
-    public final IBinder onBind(Intent intent) {
+    public final IBinder onBind(@NonNull Intent intent) {
         if (SERVICE_INTERFACE.equals(intent.getAction())) {
             return mBinder;
         }

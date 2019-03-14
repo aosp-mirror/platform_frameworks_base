@@ -1198,7 +1198,7 @@ package android.app.usage {
     method public int getUsageSource();
     method @RequiresPermission(allOf={android.Manifest.permission.SUSPEND_APPS, android.Manifest.permission.OBSERVE_APP_USAGE}) public void registerAppUsageLimitObserver(int, @NonNull String[], @NonNull java.time.Duration, @NonNull java.time.Duration, @Nullable android.app.PendingIntent);
     method @RequiresPermission(android.Manifest.permission.OBSERVE_APP_USAGE) public void registerAppUsageObserver(int, @NonNull String[], long, @NonNull java.util.concurrent.TimeUnit, @NonNull android.app.PendingIntent);
-    method @RequiresPermission(android.Manifest.permission.OBSERVE_APP_USAGE) public void registerUsageSessionObserver(int, @NonNull String[], long, @NonNull java.util.concurrent.TimeUnit, long, @NonNull java.util.concurrent.TimeUnit, @NonNull android.app.PendingIntent, @Nullable android.app.PendingIntent);
+    method @RequiresPermission(android.Manifest.permission.OBSERVE_APP_USAGE) public void registerUsageSessionObserver(int, @NonNull String[], @NonNull java.time.Duration, @NonNull java.time.Duration, @NonNull android.app.PendingIntent, @Nullable android.app.PendingIntent);
     method public void reportUsageStart(@NonNull android.app.Activity, @NonNull String);
     method public void reportUsageStart(@NonNull android.app.Activity, @NonNull String, long);
     method public void reportUsageStop(@NonNull android.app.Activity, @NonNull String);
@@ -3721,10 +3721,6 @@ package android.media.audiopolicy {
 
 package android.media.session {
 
-  public static final class MediaController.PlaybackInfo implements android.os.Parcelable {
-    ctor public MediaController.PlaybackInfo(int, int, int, int, android.media.AudioAttributes);
-  }
-
   public final class MediaSessionManager {
     method @RequiresPermission(android.Manifest.permission.SET_MEDIA_KEY_LISTENER) public void setOnMediaKeyListener(android.media.session.MediaSessionManager.OnMediaKeyListener, @Nullable android.os.Handler);
     method @RequiresPermission(android.Manifest.permission.SET_VOLUME_KEY_LONG_PRESS_LISTENER) public void setOnVolumeKeyLongPressListener(android.media.session.MediaSessionManager.OnVolumeKeyLongPressListener, @Nullable android.os.Handler);
@@ -4069,7 +4065,7 @@ package android.net {
   }
 
   public static interface ConnectivityManager.OnTetheringEntitlementResultListener {
-    method public void onEntitlementResult(int);
+    method public void onTetheringEntitlementResult(int);
   }
 
   public abstract static class ConnectivityManager.OnTetheringEventCallback {
@@ -4746,7 +4742,7 @@ package android.net.wifi {
     method @RequiresPermission(anyOf={"android.permission.NETWORK_SETTINGS", android.Manifest.permission.NETWORK_SETUP_WIZARD, "android.permission.NETWORK_STACK"}) public void disable(int, @Nullable android.net.wifi.WifiManager.ActionListener);
     method @RequiresPermission(anyOf={"android.permission.NETWORK_SETTINGS", android.Manifest.permission.NETWORK_SETUP_WIZARD, "android.permission.NETWORK_STACK"}) public void forget(int, @Nullable android.net.wifi.WifiManager.ActionListener);
     method @NonNull @RequiresPermission(anyOf={"android.permission.NETWORK_SETTINGS", android.Manifest.permission.NETWORK_SETUP_WIZARD}) public java.util.List<android.util.Pair<android.net.wifi.WifiConfiguration,java.util.Map<java.lang.Integer,java.util.List<android.net.wifi.ScanResult>>>> getAllMatchingWifiConfigs(@NonNull java.util.List<android.net.wifi.ScanResult>);
-    method @NonNull @RequiresPermission(anyOf={"android.permission.NETWORK_SETTINGS", android.Manifest.permission.NETWORK_SETUP_WIZARD}) public java.util.Map<android.net.wifi.hotspot2.OsuProvider,java.util.List<android.net.wifi.ScanResult>> getMatchingOsuProviders(java.util.List<android.net.wifi.ScanResult>);
+    method @NonNull @RequiresPermission(anyOf={"android.permission.NETWORK_SETTINGS", android.Manifest.permission.NETWORK_SETUP_WIZARD}) public java.util.Map<android.net.wifi.hotspot2.OsuProvider,java.util.List<android.net.wifi.ScanResult>> getMatchingOsuProviders(@Nullable java.util.List<android.net.wifi.ScanResult>);
     method @NonNull @RequiresPermission(anyOf={"android.permission.NETWORK_SETTINGS", android.Manifest.permission.NETWORK_SETUP_WIZARD}) public java.util.Map<android.net.wifi.hotspot2.OsuProvider,android.net.wifi.hotspot2.PasspointConfiguration> getMatchingPasspointConfigsForOsuProviders(@NonNull java.util.Set<android.net.wifi.hotspot2.OsuProvider>);
     method @RequiresPermission(allOf={android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.ACCESS_WIFI_STATE, android.Manifest.permission.READ_WIFI_CREDENTIAL}) public java.util.List<android.net.wifi.WifiConfiguration> getPrivilegedConfiguredNetworks();
     method @RequiresPermission(android.Manifest.permission.ACCESS_WIFI_STATE) public android.net.wifi.WifiConfiguration getWifiApConfiguration();
@@ -5868,6 +5864,7 @@ package android.provider {
     field public static final String NAMESPACE_DEX_BOOT = "dex_boot";
     field public static final String NAMESPACE_GAME_DRIVER = "game_driver";
     field public static final String NAMESPACE_INPUT_NATIVE_BOOT = "input_native_boot";
+    field public static final String NAMESPACE_INTELLIGENCE_ATTENTION = "intelligence_attention";
     field public static final String NAMESPACE_MEDIA_NATIVE = "media_native";
     field public static final String NAMESPACE_NETD_NATIVE = "netd_native";
     field public static final String NAMESPACE_RUNTIME_NATIVE_BOOT = "runtime_native_boot";
@@ -5879,12 +5876,6 @@ package android.provider {
     field public static final String COMPONENT_NAME = "component_name";
     field public static final String NAMESPACE = "attention_manager_service";
     field public static final String SERVICE_ENABLED = "service_enabled";
-  }
-
-  public static interface DeviceConfig.IntelligenceAttention {
-    field public static final String ATTENTION_ENABLED = "attention_enabled";
-    field public static final String ATTENTION_SETTINGS = "attention_settings";
-    field public static final String NAMESPACE = "intelligence_attention";
   }
 
   public static interface DeviceConfig.OnPropertiesChangedListener {
@@ -6137,7 +6128,6 @@ package android.provider {
     field public static final String LOCATION_PERMISSIONS_UPGRADE_TO_Q_MODE = "location_permissions_upgrade_to_q_mode";
     field public static final String LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS = "lock_screen_allow_private_notifications";
     field public static final String LOCK_SCREEN_SHOW_NOTIFICATIONS = "lock_screen_show_notifications";
-    field public static final String MANUAL_RINGER_TOGGLE_COUNT = "manual_ringer_toggle_count";
     field public static final String THEME_CUSTOMIZATION_OVERLAY_PACKAGES = "theme_customization_overlay_packages";
     field public static final String USER_SETUP_COMPLETE = "user_setup_complete";
     field public static final int USER_SETUP_PERSONALIZATION_COMPLETE = 10; // 0xa
@@ -6146,6 +6136,9 @@ package android.provider {
     field public static final int USER_SETUP_PERSONALIZATION_STARTED = 1; // 0x1
     field public static final String USER_SETUP_PERSONALIZATION_STATE = "user_setup_personalization_state";
     field public static final String VOLUME_HUSH_GESTURE = "volume_hush_gesture";
+    field public static final int VOLUME_HUSH_MUTE = 2; // 0x2
+    field public static final int VOLUME_HUSH_OFF = 0; // 0x0
+    field public static final int VOLUME_HUSH_VIBRATE = 1; // 0x1
   }
 
   public static final class Telephony.Carriers implements android.provider.BaseColumns {
@@ -6341,7 +6334,7 @@ package android.service.attention {
 
   public abstract class AttentionService extends android.app.Service {
     ctor public AttentionService();
-    method public final android.os.IBinder onBind(android.content.Intent);
+    method @Nullable public final android.os.IBinder onBind(@NonNull android.content.Intent);
     method public abstract void onCancelAttentionCheck(int);
     method public abstract void onCheckAttention(int, @NonNull android.service.attention.AttentionService.AttentionCallback);
     field public static final int ATTENTION_FAILURE_PREEMPTED = 2; // 0x2
@@ -8062,6 +8055,10 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public int getVoiceActivationState();
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean handlePinMmi(String);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean handlePinMmiForSubscriber(int, String);
+    method @Nullable @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean iccCloseLogicalChannelBySlot(int, int);
+    method @Nullable @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public android.telephony.IccOpenLogicalChannelResponse iccOpenLogicalChannelBySlot(int, @Nullable String, int);
+    method @NonNull @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public String iccTransmitApduBasicChannelBySlot(int, int, int, int, int, int, @Nullable String);
+    method @Nullable @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public String iccTransmitApduLogicalChannelBySlot(int, int, int, int, int, int, int, @Nullable String);
     method public boolean isDataConnectivityPossible();
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, android.Manifest.permission.READ_PHONE_STATE}) public boolean isIdle();
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, android.Manifest.permission.READ_PHONE_STATE}) public boolean isOffhook();

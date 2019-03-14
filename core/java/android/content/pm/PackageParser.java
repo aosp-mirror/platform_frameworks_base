@@ -3993,8 +3993,6 @@ public class PackageParser {
         setMaxAspectRatio(owner);
         setMinAspectRatio(owner);
 
-        PackageBackwardCompatibility.modifySharedLibraries(owner);
-
         if (hasDomainURLs(owner)) {
             owner.applicationInfo.privateFlags |= ApplicationInfo.PRIVATE_FLAG_HAS_DOMAIN_URLS;
         } else {

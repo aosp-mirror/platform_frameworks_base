@@ -5189,6 +5189,40 @@ public class TelephonyManager {
     }
 
     /**
+     * Opens a logical channel to the ICC card using the physical slot index.
+     *
+     * Use this method when no subscriptions are available on the SIM and the operation must be
+     * performed using the physical slot index.
+     *
+     * Input parameters equivalent to TS 27.007 AT+CCHO command.
+     *
+     * <p>Requires Permission:
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}.
+     *
+     * @param slotIndex the physical slot index of the ICC card
+     * @param aid Application id. See ETSI 102.221 and 101.220.
+     * @param p2 P2 parameter (described in ISO 7816-4).
+     * @return an IccOpenLogicalChannelResponse object.
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
+    @SystemApi
+    @Nullable
+    public IccOpenLogicalChannelResponse iccOpenLogicalChannelBySlot(int slotIndex,
+            @Nullable String aid, int p2) {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.iccOpenLogicalChannelBySlot(slotIndex, getOpPackageName(), aid,
+                        p2);
+            }
+        } catch (RemoteException ex) {
+        } catch (NullPointerException ex) {
+        }
+        return null;
+    }
+
+    /**
      * Opens a logical channel to the ICC card.
      *
      * Input parameters equivalent to TS 27.007 AT+CCHO command.
@@ -5232,6 +5266,38 @@ public class TelephonyManager {
     }
 
     /**
+     * Closes a previously opened logical channel to the ICC card using the physical slot index.
+     *
+     * Use this method when no subscriptions are available on the SIM and the operation must be
+     * performed using the physical slot index.
+     *
+     * Input parameters equivalent to TS 27.007 AT+CCHC command.
+     *
+     * <p>Requires Permission:
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}.
+     *
+     * @param slotIndex the physical slot index of the ICC card
+     * @param channel is the channel id to be closed as returned by a successful
+     *            iccOpenLogicalChannel.
+     * @return true if the channel was closed successfully.
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
+    @SystemApi
+    @Nullable
+    public boolean iccCloseLogicalChannelBySlot(int slotIndex, int channel) {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.iccCloseLogicalChannelBySlot(slotIndex, channel);
+            }
+        } catch (RemoteException ex) {
+        } catch (NullPointerException ex) {
+        }
+        return false;
+    }
+
+    /**
      * Closes a previously opened logical channel to the ICC card.
      *
      * Input parameters equivalent to TS 27.007 AT+CCHC command.
@@ -5240,7 +5306,7 @@ public class TelephonyManager {
      * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE} or that the calling
      * app has carrier privileges (see {@link #hasCarrierPrivileges}).
      *
-     * @param channel is the channel id to be closed as retruned by a successful
+     * @param channel is the channel id to be closed as returned by a successful
      *            iccOpenLogicalChannel.
      * @return true if the channel was closed successfully.
      */
@@ -5258,7 +5324,7 @@ public class TelephonyManager {
      * app has carrier privileges (see {@link #hasCarrierPrivileges}).
      *
      * @param subId The subscription to use.
-     * @param channel is the channel id to be closed as retruned by a successful
+     * @param channel is the channel id to be closed as returned by a successful
      *            iccOpenLogicalChannel.
      * @return true if the channel was closed successfully.
      * @hide
@@ -5272,6 +5338,48 @@ public class TelephonyManager {
         } catch (NullPointerException ex) {
         }
         return false;
+    }
+
+    /**
+     * Transmit an APDU to the ICC card over a logical channel using the physical slot index.
+     *
+     * Use this method when no subscriptions are available on the SIM and the operation must be
+     * performed using the physical slot index.
+     *
+     * Input parameters equivalent to TS 27.007 AT+CGLA command.
+     *
+     * <p>Requires Permission:
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}.
+     *
+     * @param slotIndex the physical slot index of the ICC card
+     * @param channel is the channel id to be closed as returned by a successful
+     *            iccOpenLogicalChannel.
+     * @param cla Class of the APDU command.
+     * @param instruction Instruction of the APDU command.
+     * @param p1 P1 value of the APDU command.
+     * @param p2 P2 value of the APDU command.
+     * @param p3 P3 value of the APDU command. If p3 is negative a 4 byte APDU
+     *            is sent to the SIM.
+     * @param data Data to be sent with the APDU.
+     * @return The APDU response from the ICC card with the status appended at
+     *            the end.
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
+    @SystemApi
+    @Nullable
+    public String iccTransmitApduLogicalChannelBySlot(int slotIndex, int channel, int cla,
+            int instruction, int p1, int p2, int p3, @Nullable String data) {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.iccTransmitApduLogicalChannelBySlot(slotIndex, channel, cla,
+                        instruction, p1, p2, p3, data);
+            }
+        } catch (RemoteException ex) {
+        } catch (NullPointerException ex) {
+        }
+        return null;
     }
 
     /**
@@ -5335,6 +5443,46 @@ public class TelephonyManager {
         } catch (NullPointerException ex) {
         }
         return "";
+    }
+
+    /**
+     * Transmit an APDU to the ICC card over the basic channel using the physical slot index.
+     *
+     * Use this method when no subscriptions are available on the SIM and the operation must be
+     * performed using the physical slot index.
+     *
+     * Input parameters equivalent to TS 27.007 AT+CSIM command.
+     *
+     * <p>Requires Permission:
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}.
+     *
+     * @param slotIndex the physical slot index of the ICC card to target
+     * @param cla Class of the APDU command.
+     * @param instruction Instruction of the APDU command.
+     * @param p1 P1 value of the APDU command.
+     * @param p2 P2 value of the APDU command.
+     * @param p3 P3 value of the APDU command. If p3 is negative a 4 byte APDU
+     *            is sent to the SIM.
+     * @param data Data to be sent with the APDU.
+     * @return The APDU response from the ICC card with the status appended at
+     *            the end.
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
+    @SystemApi
+    @NonNull
+    public String iccTransmitApduBasicChannelBySlot(int slotIndex, int cla, int instruction, int p1,
+            int p2, int p3, @Nullable String data) {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.iccTransmitApduBasicChannelBySlot(slotIndex, getOpPackageName(),
+                        cla, instruction, p1, p2, p3, data);
+            }
+        } catch (RemoteException ex) {
+        } catch (NullPointerException ex) {
+        }
+        return null;
     }
 
     /**
@@ -6004,7 +6152,7 @@ public class TelephonyManager {
         // FIXME Need to get it from Telephony Dev Controller when that gets implemented!
         // and then this method shouldn't be used at all!
         if(isMultiSimEnabled()) {
-            return 2;
+            return getPhoneCount();
         } else {
             return 1;
         }

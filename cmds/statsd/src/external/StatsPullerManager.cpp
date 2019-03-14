@@ -244,6 +244,9 @@ std::map<int, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
         // GpuStatsGlobalInfo
         {android::util::GPU_STATS_GLOBAL_INFO,
          {.puller = new GpuStatsPuller(android::util::GPU_STATS_GLOBAL_INFO)}},
+        // GpuStatsAppInfo
+        {android::util::GPU_STATS_APP_INFO,
+         {.puller = new GpuStatsPuller(android::util::GPU_STATS_APP_INFO)}},
 };
 
 StatsPullerManager::StatsPullerManager() : mNextPullTimeNs(NO_ALARM_UPDATE) {

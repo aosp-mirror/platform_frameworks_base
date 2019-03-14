@@ -295,8 +295,7 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
                     Log.v(TAG, "Buffering VIEW_TEXT_CHANGED event, updated text="
                             + getSanitizedString(event.getText()));
                 }
-                // TODO(b/124107816): should call lastEvent.merge(event) instead
-                lastEvent.setText(event.getText());
+                lastEvent.mergeEvent(event);
                 addEvent = false;
             }
         }
@@ -309,7 +308,7 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
                     Log.v(TAG, "Buffering TYPE_VIEW_DISAPPEARED events for session "
                             + lastEvent.getSessionId());
                 }
-                mergeViewsDisappearedEvent(lastEvent, event);
+                lastEvent.mergeEvent(event);
                 addEvent = false;
             }
         }
@@ -355,30 +354,6 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
         }
 
         flush(flushReason);
-    }
-
-    // TODO(b/124107816): should be ContentCaptureEvent Event.merge(event) instead (which would
-    // replace the addAutofillId() method - we would also need unit tests on ContentCaptureEventTest
-    // to check these scenarios)
-    private void mergeViewsDisappearedEvent(@NonNull ContentCaptureEvent lastEvent,
-            @NonNull ContentCaptureEvent event) {
-        final List<AutofillId> ids = event.getIds();
-        final AutofillId id = event.getId();
-        if (ids != null) {
-            if (id != null) {
-                Log.w(TAG, "got TYPE_VIEW_DISAPPEARED event with both id and ids: " + event);
-            }
-            for (int i = 0; i < ids.size(); i++) {
-                lastEvent.addAutofillId(ids.get(i));
-            }
-            return;
-        }
-        if (id != null) {
-            lastEvent.addAutofillId(id);
-            return;
-        }
-        throw new IllegalArgumentException(
-                "got TYPE_VIEW_DISAPPEARED event with neither id or ids: " + event);
     }
 
     @UiThread

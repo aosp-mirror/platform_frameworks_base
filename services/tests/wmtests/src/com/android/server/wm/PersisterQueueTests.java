@@ -28,6 +28,7 @@ import static org.junit.Assert.assertTrue;
 import android.os.SystemClock;
 import android.platform.test.annotations.Presubmit;
 
+import androidx.test.filters.FlakyTest;
 import androidx.test.filters.MediumTest;
 
 import org.junit.After;
@@ -157,6 +158,7 @@ public class PersisterQueueTests implements PersisterQueue.Listener {
     }
 
     @Test
+    @FlakyTest(bugId = 128526085)
     public void testProcessTwoItems_OneAfterAnother() throws Exception {
         // First item
         mLatch = new CountDownLatch(1);

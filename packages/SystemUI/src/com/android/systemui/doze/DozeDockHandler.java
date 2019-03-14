@@ -121,11 +121,17 @@ public class DozeDockHandler implements DozeMachine.Part {
                     if (dozeState == State.DOZE
                             && mConfig.alwaysOnEnabled(UserHandle.USER_CURRENT)) {
                         mMachine.requestState(State.DOZE_AOD);
-                        break;
                     }
-                    // continue below
+                    else {
+                        requestPulseOutNow(dozeState);
+                    }
+                    break;
                 case DockManager.STATE_DOCKED_HIDE:
-                    requestPulseOutNow(dozeState);
+                    if (dozeState == State.DOZE_AOD) {
+                        mMachine.requestState(State.DOZE);
+                    } else {
+                        requestPulseOutNow(dozeState);
+                    }
                     break;
                 default:
                     // no-op

@@ -938,6 +938,7 @@ class UserController implements Handler.Callback {
      *
      * @param userId ID of the user to start
      * @param foreground true if user should be brought to the foreground
+     * @param unlockListener Listener to be informed when the user has started and unlocked.
      * @return true if the user has been successfully started
      */
     boolean startUser(
@@ -962,6 +963,15 @@ class UserController implements Handler.Callback {
         try {
             final int oldUserId = getCurrentUserId();
             if (oldUserId == userId) {
+                final UserState state = getStartedUserState(userId);
+                if (state != null && state.state == STATE_RUNNING_UNLOCKED) {
+                    // We'll skip all later code, so we must tell listener it's already unlocked.
+                    try {
+                        unlockListener.onFinished(userId, null);
+                    } catch (RemoteException ignore) {
+                        // Ignore.
+                    }
+                }
                 return true;
             }
 
@@ -1547,8 +1557,8 @@ class UserController implements Handler.Callback {
                     }
                     builder.append(" asks to run as user ");
                     builder.append(userId);
-                    builder.append(" but is calling from user ");
-                    builder.append(UserHandle.getUserId(callingUid));
+                    builder.append(" but is calling from uid ");
+                    UserHandle.formatUid(builder, callingUid);
                     builder.append("; this requires ");
                     builder.append(INTERACT_ACROSS_USERS_FULL);
                     if (allowMode != ALLOW_FULL_ONLY) {

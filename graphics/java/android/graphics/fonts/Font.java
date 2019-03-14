@@ -354,9 +354,13 @@ public final class Font {
 
         /**
          * Creates the font based on the configured values.
+         *
+         * If the font is not supported by the platform, this function will fail with
+         * {@link IllegalArgumentException}.
+         *
          * @return the Font object
          */
-        public @Nullable Font build() throws IOException {
+        public @NonNull Font build() throws IOException {
             if (mException != null) {
                 throw new IOException("Failed to read font contents", mException);
             }

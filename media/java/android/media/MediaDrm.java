@@ -16,6 +16,7 @@
 
 package android.media;
 
+import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -24,6 +25,7 @@ import android.annotation.SystemApi;
 import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityThread;
 import android.os.Handler;
+import android.os.HandlerExecutor;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Parcel;
@@ -36,8 +38,13 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 
 /**
@@ -131,21 +138,6 @@ public final class MediaDrm implements AutoCloseable {
 
     private static final String PERMISSION = android.Manifest.permission.ACCESS_DRM_CERTIFICATES;
 
-    private EventHandler mEventHandler;
-    private EventHandler mKeyStatusChangeHandler;
-    private EventHandler mExpirationUpdateHandler;
-    private EventHandler mSessionLostStateHandler;
-
-    private OnEventListener mOnEventListener;
-    private OnKeyStatusChangeListener mOnKeyStatusChangeListener;
-    private OnExpirationUpdateListener mOnExpirationUpdateListener;
-    private OnSessionLostStateListener mOnSessionLostStateListener;
-
-    private final Object mEventLock = new Object();
-    private final Object mKeyStatusChangeLock = new Object();
-    private final Object mExpirationUpdateLock = new Object();
-    private final Object mSessionLostStateLock = new Object();
-
     private long mNativeContext;
 
     /**
@@ -227,33 +219,17 @@ public final class MediaDrm implements AutoCloseable {
     private static final native boolean isCryptoSchemeSupportedNative(
             @NonNull byte[] uuid, @Nullable String mimeType, @SecurityLevel int securityLevel);
 
-    private EventHandler createHandler() {
+    private Handler createHandler() {
         Looper looper;
-        EventHandler handler;
+        Handler handler;
         if ((looper = Looper.myLooper()) != null) {
-            handler = new EventHandler(this, looper);
+            handler = new Handler(looper);
         } else if ((looper = Looper.getMainLooper()) != null) {
-            handler = new EventHandler(this, looper);
+            handler = new Handler(looper);
         } else {
             handler = null;
         }
         return handler;
-    }
-
-    private EventHandler updateHandler(Handler handler) {
-        Looper looper;
-        EventHandler newHandler = null;
-        if (handler != null) {
-            looper = handler.getLooper();
-        } else {
-            looper = Looper.myLooper();
-        }
-        if (looper != null) {
-            if (handler == null || handler.getLooper() != looper) {
-                newHandler = new EventHandler(this, looper);
-            }
-        }
-        return newHandler;
     }
 
     /**
@@ -265,11 +241,6 @@ public final class MediaDrm implements AutoCloseable {
      * specified scheme UUID
      */
     public MediaDrm(@NonNull UUID uuid) throws UnsupportedSchemeException {
-        mEventHandler = createHandler();
-        mKeyStatusChangeHandler = createHandler();
-        mExpirationUpdateHandler = createHandler();
-        mSessionLostStateHandler = createHandler();
-
         /* Native setup requires a weak reference to our object.
          * It's easier to create it here than in C++.
          */
@@ -368,12 +339,30 @@ public final class MediaDrm implements AutoCloseable {
      */
     public void setOnExpirationUpdateListener(
             @Nullable OnExpirationUpdateListener listener, @Nullable Handler handler) {
-        synchronized(mExpirationUpdateLock) {
-            if (listener != null) {
-                mExpirationUpdateHandler = updateHandler(handler);
-            }
-            mOnExpirationUpdateListener = listener;
-        }
+        setListenerWithHandler(EXPIRATION_UPDATE, handler, listener,
+                this::createOnExpirationUpdateListener);
+    }
+    /**
+     * Register a callback to be invoked when a session expiration update
+     * occurs.
+     *
+     * @see #setOnExpirationUpdateListener(OnExpirationUpdateListener, Handler)
+     *
+     * @param executor the executor through which the listener should be invoked
+     * @param listener the callback that will be run.
+     */
+    public void setOnExpirationUpdateListener(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull OnExpirationUpdateListener listener) {
+        setListenerWithExecutor(EXPIRATION_UPDATE, executor, listener,
+                this::createOnExpirationUpdateListener);
+    }
+
+    /**
+     * Clear the {@link OnExpirationUpdateListener}.
+     */
+    public void clearOnExpirationUpdateListener() {
+        clearGenericListener(EXPIRATION_UPDATE);
     }
 
     /**
@@ -407,12 +396,31 @@ public final class MediaDrm implements AutoCloseable {
      */
     public void setOnKeyStatusChangeListener(
             @Nullable OnKeyStatusChangeListener listener, @Nullable Handler handler) {
-        synchronized(mKeyStatusChangeLock) {
-            if (listener != null) {
-                mKeyStatusChangeHandler = updateHandler(handler);
-            }
-            mOnKeyStatusChangeListener = listener;
-        }
+        setListenerWithHandler(KEY_STATUS_CHANGE, handler, listener,
+                this::createOnKeyStatusChangeListener);
+    }
+
+    /**
+     * Register a callback to be invoked when the state of keys in a session
+     * change.
+     *
+     * @see #setOnKeyStatusChangeListener(OnKeyStatusChangeListener, Handler)
+     *
+     * @param listener the callback that will be run when key status changes.
+     * @param executor the executor on which the listener should be invoked.
+     */
+    public void setOnKeyStatusChangeListener(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull OnKeyStatusChangeListener listener) {
+        setListenerWithExecutor(KEY_STATUS_CHANGE, executor, listener,
+                this::createOnKeyStatusChangeListener);
+    }
+
+    /**
+     * Clear the {@link OnKeyStatusChangeListener}.
+     */
+    public void clearOnKeyStatusChangeListener() {
+        clearGenericListener(KEY_STATUS_CHANGE);
     }
 
     /**
@@ -453,12 +461,31 @@ public final class MediaDrm implements AutoCloseable {
      */
     public void setOnSessionLostStateListener(
             @Nullable OnSessionLostStateListener listener, @Nullable Handler handler) {
-        synchronized(mSessionLostStateLock) {
-            if (listener != null) {
-                mSessionLostStateHandler = updateHandler(handler);
-            }
-            mOnSessionLostStateListener = listener;
-        }
+        setListenerWithHandler(SESSION_LOST_STATE, handler, listener,
+                this::createOnSessionLostStateListener);
+    }
+
+    /**
+     * Register a callback to be invoked when session state has been
+     * lost.
+     *
+     * @see #setOnSessionLostStateListener(OnSessionLostStateListener, Handler)
+     *
+     * @param listener the callback that will be run.
+     * @param executor the executor on which the listener should be invoked.
+     */
+    public void setOnSessionLostStateListener(
+            @NonNull @CallbackExecutor Executor executor,
+            @Nullable OnSessionLostStateListener listener) {
+        setListenerWithExecutor(SESSION_LOST_STATE, executor, listener,
+                this::createOnSessionLostStateListener);
+    }
+
+    /**
+     * Clear the {@link OnSessionLostStateListener}.
+     */
+    public void clearOnSessionLostStateListener() {
+        clearGenericListener(SESSION_LOST_STATE);
     }
 
     /**
@@ -552,14 +579,48 @@ public final class MediaDrm implements AutoCloseable {
     /**
      * Register a callback to be invoked when an event occurs
      *
+     * @see #setOnEventListener(OnEventListener, Handler)
+     *
      * @param listener the callback that will be run.  Use {@code null} to
      *        stop receiving event callbacks.
      */
     public void setOnEventListener(@Nullable OnEventListener listener)
     {
-        synchronized(mEventLock) {
-            mOnEventListener = listener;
-        }
+        setOnEventListener(listener, null);
+    }
+
+    /**
+     * Register a callback to be invoked when an event occurs
+     *
+     * @param listener the callback that will be run.  Use {@code null} to
+     *        stop receiving event callbacks.
+     * @param handler the handler on which the listener should be invoked, or
+     *        null if the listener should be invoked on the calling thread's looper.
+     */
+
+    public void setOnEventListener(@Nullable OnEventListener listener, @Nullable Handler handler)
+    {
+        setListenerWithHandler(DRM_EVENT, handler, listener, this::createOnEventListener);
+    }
+
+    /**
+     * Register a callback to be invoked when an event occurs
+     *
+     * @see #setOnEventListener(OnEventListener)
+     *
+     * @param executor the executor through which the listener should be invoked
+     * @param listener the callback that will be run.
+     */
+    public void setOnEventListener(@NonNull @CallbackExecutor Executor executor,
+            @NonNull OnEventListener listener) {
+        setListenerWithExecutor(DRM_EVENT, executor, listener, this::createOnEventListener);
+    }
+
+    /**
+     * Clear the {@link OnEventListener}.
+     */
+    public void clearOnEventListener() {
+        clearGenericListener(DRM_EVENT);
     }
 
     /**
@@ -637,99 +698,112 @@ public final class MediaDrm implements AutoCloseable {
     private static final int KEY_STATUS_CHANGE = 202;
     private static final int SESSION_LOST_STATE = 203;
 
-    private class EventHandler extends Handler
-    {
-        private MediaDrm mMediaDrm;
+    // Use ConcurrentMap to support concurrent read/write to listener settings.
+    // ListenerWithExecutor is immutable so we shouldn't need further locks.
+    private final Map<Integer, ListenerWithExecutor> mListenerMap = new ConcurrentHashMap<>();
 
-        public EventHandler(@NonNull MediaDrm md, @NonNull Looper looper) {
-            super(looper);
-            mMediaDrm = md;
+    // called by old-style set*Listener APIs using Handlers; listener & handler are Nullable
+    private <T> void setListenerWithHandler(int what, Handler handler, T listener,
+            Function<T, Consumer<ListenerArgs>> converter) {
+        if (listener == null) {
+            clearGenericListener(what);
+        } else {
+            handler = handler == null ? createHandler() : handler;
+            final HandlerExecutor executor = new HandlerExecutor(handler);
+            setGenericListener(what, executor, listener, converter);
         }
+    }
 
-        @Override
-        public void handleMessage(@NonNull Message msg) {
-            if (mMediaDrm.mNativeContext == 0) {
-                Log.w(TAG, "MediaDrm went away with unhandled events");
-                return;
+    // called by new-style set*Listener APIs using Executors; listener & executor must be NonNull
+    private <T> void setListenerWithExecutor(int what, Executor executor, T listener,
+            Function<T, Consumer<ListenerArgs>> converter) {
+        if (executor == null || listener == null) {
+            final String errMsg = String.format("executor %s listener %s", executor, listener);
+            throw new IllegalArgumentException(errMsg);
+        }
+        setGenericListener(what, executor, listener, converter);
+    }
+
+    private <T> void setGenericListener(int what, Executor executor, T listener,
+            Function<T, Consumer<ListenerArgs>> converter) {
+        mListenerMap.put(what, new ListenerWithExecutor(executor, converter.apply(listener)));
+    }
+
+    private void clearGenericListener(int what) {
+        mListenerMap.remove(what);
+    }
+
+    private Consumer<ListenerArgs> createOnEventListener(OnEventListener listener) {
+        return args -> {
+            byte[] sessionId = args.parcel.createByteArray();
+            if (sessionId.length == 0) {
+                sessionId = null;
             }
-            switch(msg.what) {
-
-            case DRM_EVENT:
-                synchronized(mEventLock) {
-                    if (mOnEventListener != null) {
-                        if (msg.obj != null && msg.obj instanceof Parcel) {
-                            Parcel parcel = (Parcel)msg.obj;
-                            byte[] sessionId = parcel.createByteArray();
-                            if (sessionId.length == 0) {
-                                sessionId = null;
-                            }
-                            byte[] data = parcel.createByteArray();
-                            if (data.length == 0) {
-                                data = null;
-                            }
-
-                            Log.i(TAG, "Drm event (" + msg.arg1 + "," + msg.arg2 + ")");
-                            mOnEventListener.onEvent(mMediaDrm, sessionId, msg.arg1, msg.arg2, data);
-                        }
-                    }
-                }
-                return;
-
-            case KEY_STATUS_CHANGE:
-                synchronized(mKeyStatusChangeLock) {
-                    if (mOnKeyStatusChangeListener != null) {
-                        if (msg.obj != null && msg.obj instanceof Parcel) {
-                            Parcel parcel = (Parcel)msg.obj;
-                            byte[] sessionId = parcel.createByteArray();
-                            if (sessionId.length > 0) {
-                                List<KeyStatus> keyStatusList = keyStatusListFromParcel(parcel);
-                                boolean hasNewUsableKey = (parcel.readInt() != 0);
-
-                                Log.i(TAG, "Drm key status changed");
-                                mOnKeyStatusChangeListener.onKeyStatusChange(mMediaDrm, sessionId,
-                                        keyStatusList, hasNewUsableKey);
-                            }
-                        }
-                    }
-                }
-                return;
-
-            case EXPIRATION_UPDATE:
-                synchronized(mExpirationUpdateLock) {
-                    if (mOnExpirationUpdateListener != null) {
-                        if (msg.obj != null && msg.obj instanceof Parcel) {
-                            Parcel parcel = (Parcel)msg.obj;
-                            byte[] sessionId = parcel.createByteArray();
-                            if (sessionId.length > 0) {
-                                long expirationTime = parcel.readLong();
-
-                                Log.i(TAG, "Drm key expiration update: " + expirationTime);
-                                mOnExpirationUpdateListener.onExpirationUpdate(mMediaDrm, sessionId,
-                                        expirationTime);
-                            }
-                        }
-                    }
-                }
-                return;
-
-            case SESSION_LOST_STATE:
-                synchronized(mSessionLostStateLock) {
-                    if (mOnSessionLostStateListener != null) {
-                        if (msg.obj != null && msg.obj instanceof Parcel) {
-                            Parcel parcel = (Parcel)msg.obj;
-                            byte[] sessionId = parcel.createByteArray();
-                            Log.i(TAG, "Drm session lost state event: ");
-                            mOnSessionLostStateListener.onSessionLostState(mMediaDrm,
-                                    sessionId);
-                        }
-                    }
-                }
-                return;
-
-            default:
-                Log.e(TAG, "Unknown message type " + msg.what);
-                return;
+            byte[] data = args.parcel.createByteArray();
+            if (data.length == 0) {
+                data = null;
             }
+
+            Log.i(TAG, "Drm event (" + args.arg1 + "," + args.arg2 + ")");
+            listener.onEvent(this, sessionId, args.arg1, args.arg2, data);
+        };
+    }
+
+    private Consumer<ListenerArgs> createOnKeyStatusChangeListener(
+            OnKeyStatusChangeListener listener) {
+        return args -> {
+            byte[] sessionId = args.parcel.createByteArray();
+            if (sessionId.length > 0) {
+                List<KeyStatus> keyStatusList = keyStatusListFromParcel(args.parcel);
+                boolean hasNewUsableKey = (args.parcel.readInt() != 0);
+
+                Log.i(TAG, "Drm key status changed");
+                listener.onKeyStatusChange(this, sessionId, keyStatusList, hasNewUsableKey);
+            }
+        };
+    }
+
+    private Consumer<ListenerArgs> createOnExpirationUpdateListener(
+            OnExpirationUpdateListener listener) {
+        return args -> {
+            byte[] sessionId = args.parcel.createByteArray();
+            if (sessionId.length > 0) {
+                long expirationTime = args.parcel.readLong();
+
+                Log.i(TAG, "Drm key expiration update: " + expirationTime);
+                listener.onExpirationUpdate(this, sessionId, expirationTime);
+            }
+        };
+    }
+
+    private Consumer<ListenerArgs> createOnSessionLostStateListener(
+            OnSessionLostStateListener listener) {
+        return args -> {
+            byte[] sessionId = args.parcel.createByteArray();
+            Log.i(TAG, "Drm session lost state event: ");
+            listener.onSessionLostState(this, sessionId);
+        };
+    }
+
+    private static class ListenerArgs {
+        private final Parcel parcel;
+        private final int arg1;
+        private final int arg2;
+
+        public ListenerArgs(Parcel parcel, int arg1, int arg2) {
+            this.parcel = parcel;
+            this.arg1 = arg1;
+            this.arg2 = arg2;
+        }
+    }
+
+    private static class ListenerWithExecutor {
+        private final Consumer<ListenerArgs> mConsumer;
+        private final Executor mExecutor;
+
+        public ListenerWithExecutor(Executor executor, Consumer<ListenerArgs> consumer) {
+            this.mExecutor = executor;
+            this.mConsumer = consumer;
         }
     }
 
@@ -764,35 +838,22 @@ public final class MediaDrm implements AutoCloseable {
         }
         switch (what) {
             case DRM_EVENT:
-                synchronized(md.mEventLock) {
-                    if (md.mEventHandler != null) {
-                        Message m = md.mEventHandler.obtainMessage(what, eventType, extra, obj);
-                        md.mEventHandler.sendMessage(m);
-                    }
-                }
-                break;
             case EXPIRATION_UPDATE:
-                synchronized(md.mExpirationUpdateLock) {
-                    if (md.mExpirationUpdateHandler != null) {
-                        Message m = md.mExpirationUpdateHandler.obtainMessage(what, obj);
-                        md.mExpirationUpdateHandler.sendMessage(m);
-                    }
-                }
-                break;
             case KEY_STATUS_CHANGE:
-                synchronized(md.mKeyStatusChangeLock) {
-                    if (md.mKeyStatusChangeHandler != null) {
-                        Message m = md.mKeyStatusChangeHandler.obtainMessage(what, obj);
-                        md.mKeyStatusChangeHandler.sendMessage(m);
-                    }
-                }
-                break;
             case SESSION_LOST_STATE:
-                synchronized(md.mSessionLostStateLock) {
-                    if (md.mSessionLostStateHandler != null) {
-                        Message m = md.mSessionLostStateHandler.obtainMessage(what, obj);
-                        md.mSessionLostStateHandler.sendMessage(m);
-                    }
+                ListenerWithExecutor listener  = md.mListenerMap.get(what);
+                if (listener != null) {
+                    final Runnable command = () -> {
+                        if (md.mNativeContext == 0) {
+                            Log.w(TAG, "MediaDrm went away with unhandled events");
+                            return;
+                        }
+                        if (obj != null && obj instanceof Parcel) {
+                            Parcel p = (Parcel)obj;
+                            listener.mConsumer.accept(new ListenerArgs(p, eventType, extra));
+                        }
+                    };
+                    listener.mExecutor.execute(command);
                 }
                 break;
             default:

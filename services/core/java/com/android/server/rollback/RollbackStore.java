@@ -16,6 +16,9 @@
 
 package com.android.server.rollback;
 
+import static com.android.server.rollback.RollbackData.rollbackStateFromString;
+import static com.android.server.rollback.RollbackData.rollbackStateToString;
+
 import android.annotation.NonNull;
 import android.content.pm.VersionedPackage;
 import android.content.rollback.PackageRollbackInfo;
@@ -400,24 +403,5 @@ class RollbackStore {
         if (file.exists()) {
             file.delete();
         }
-    }
-
-    private static String rollbackStateToString(@RollbackData.RollbackState int state) {
-        switch (state) {
-            case RollbackData.ROLLBACK_STATE_ENABLING: return "enabling";
-            case RollbackData.ROLLBACK_STATE_AVAILABLE: return "available";
-            case RollbackData.ROLLBACK_STATE_COMMITTED: return "committed";
-        }
-        throw new AssertionError("Invalid rollback state: " + state);
-    }
-
-    private static @RollbackData.RollbackState int rollbackStateFromString(String state)
-            throws ParseException {
-        switch (state) {
-            case "enabling": return RollbackData.ROLLBACK_STATE_ENABLING;
-            case "available": return RollbackData.ROLLBACK_STATE_AVAILABLE;
-            case "committed": return RollbackData.ROLLBACK_STATE_COMMITTED;
-        }
-        throw new ParseException("Invalid rollback state: " + state, 0);
     }
 }

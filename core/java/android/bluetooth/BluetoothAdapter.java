@@ -19,6 +19,7 @@ package android.bluetooth;
 
 import android.Manifest;
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
@@ -3057,7 +3058,7 @@ public final class BluetoothAdapter {
      * permissions, or unable to start this CoC
      */
     @RequiresPermission(Manifest.permission.BLUETOOTH)
-    public BluetoothServerSocket listenUsingL2capChannel()
+    public @NonNull BluetoothServerSocket listenUsingL2capChannel()
             throws IOException {
         BluetoothServerSocket socket =
                             new BluetoothServerSocket(BluetoothSocket.TYPE_L2CAP_LE, true, true,
@@ -3115,7 +3116,7 @@ public final class BluetoothAdapter {
      * permissions, or unable to start this CoC
      */
     @RequiresPermission(Manifest.permission.BLUETOOTH)
-    public BluetoothServerSocket listenUsingInsecureL2capChannel()
+    public @NonNull BluetoothServerSocket listenUsingInsecureL2capChannel()
             throws IOException {
         BluetoothServerSocket socket =
                             new BluetoothServerSocket(BluetoothSocket.TYPE_L2CAP_LE, false, false,

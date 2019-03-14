@@ -737,14 +737,14 @@ public class StaticLayout extends Layout {
                 }
             }
             // tab stop locations
-            int[] variableTabStops = null;
+            float[] variableTabStops = null;
             if (spanned != null) {
                 TabStopSpan[] spans = getParagraphSpans(spanned, paraStart,
                         paraEnd, TabStopSpan.class);
                 if (spans.length > 0) {
-                    int[] stops = new int[spans.length];
+                    float[] stops = new float[spans.length];
                     for (int i = 0; i < spans.length; i++) {
-                        stops[i] = spans[i].getTabStop();
+                        stops[i] = (float) spans[i].getTabStop();
                     }
                     Arrays.sort(stops, 0, stops.length);
                     variableTabStops = stops;
@@ -1422,7 +1422,7 @@ public class StaticLayout extends Layout {
     private static final int START_HYPHEN_MASK = 0x18; // 0b11000
     private static final int END_HYPHEN_MASK = 0x7;  // 0b00111
 
-    private static final int TAB_INCREMENT = 20; // same as Layout, but that's private
+    private static final float TAB_INCREMENT = 20; // same as Layout, but that's private
 
     private static final char CHAR_NEW_LINE = '\n';
 

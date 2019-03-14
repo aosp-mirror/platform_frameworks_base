@@ -80,13 +80,13 @@ static jlong nComputeLineBreaks(JNIEnv* env, jclass, jlong nativePtr,
         jfloat firstWidth,
         jint firstWidthLineCount,
         jfloat restWidth,
-        jintArray variableTabStops,
-        jint defaultTabStop,
+        jfloatArray variableTabStops,
+        jfloat defaultTabStop,
         jint indentsOffset) {
     minikin::android::StaticLayoutNative* builder = toNative(nativePtr);
 
     ScopedCharArrayRO text(env, javaText);
-    ScopedNullableIntArrayRO tabStops(env, variableTabStops);
+    ScopedNullableFloatArrayRO tabStops(env, variableTabStops);
 
     minikin::U16StringPiece u16Text(text.get(), length);
     minikin::MeasuredText* measuredText = reinterpret_cast<minikin::MeasuredText*>(measuredTextPtr);
@@ -151,8 +151,8 @@ static const JNINativeMethod gMethods[] = {
         "F"  // firstWidth
         "I"  // firstWidthLineCount
         "F"  // restWidth
-        "[I"  // variableTabStops
-        "I"  // defaultTabStop
+        "[F"  // variableTabStops
+        "F"  // defaultTabStop
         "I"  // indentsOffset
         ")J", (void*) nComputeLineBreaks},
 

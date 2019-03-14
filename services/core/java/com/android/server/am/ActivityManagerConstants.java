@@ -69,6 +69,7 @@ final class ActivityManagerConstants extends ContentObserver {
     static final String KEY_SERVICE_MIN_RESTART_TIME_BETWEEN = "service_min_restart_time_between";
     static final String KEY_MAX_SERVICE_INACTIVITY = "service_max_inactivity";
     static final String KEY_BG_START_TIMEOUT = "service_bg_start_timeout";
+    static final String KEY_SERVICE_BG_ACTIVITY_START_TIMEOUT = "service_bg_activity_start_timeout";
     static final String KEY_BOUND_SERVICE_CRASH_RESTART_DURATION = "service_crash_restart_duration";
     static final String KEY_BOUND_SERVICE_CRASH_MAX_RETRY = "service_crash_max_retry";
     static final String KEY_PROCESS_START_ASYNC = "process_start_async";
@@ -99,6 +100,7 @@ final class ActivityManagerConstants extends ContentObserver {
     private static final long DEFAULT_SERVICE_MIN_RESTART_TIME_BETWEEN = 10*1000;
     private static final long DEFAULT_MAX_SERVICE_INACTIVITY = 30*60*1000;
     private static final long DEFAULT_BG_START_TIMEOUT = 15*1000;
+    private static final long DEFAULT_SERVICE_BG_ACTIVITY_START_TIMEOUT = 10_000;
     private static final long DEFAULT_BOUND_SERVICE_CRASH_RESTART_DURATION = 30*60_000;
     private static final int DEFAULT_BOUND_SERVICE_CRASH_MAX_RETRY = 16;
     private static final boolean DEFAULT_PROCESS_START_ASYNC = true;
@@ -211,6 +213,9 @@ final class ActivityManagerConstants extends ContentObserver {
     // How long we wait for a background started service to stop itself before
     // allowing the next pending start to run.
     public long BG_START_TIMEOUT = DEFAULT_BG_START_TIMEOUT;
+
+    // For how long after a whitelisted service's start its process can start a background activity
+    public long SERVICE_BG_ACTIVITY_START_TIMEOUT = DEFAULT_SERVICE_BG_ACTIVITY_START_TIMEOUT;
 
     // Initial backoff delay for retrying bound foreground services
     public long BOUND_SERVICE_CRASH_RESTART_DURATION = DEFAULT_BOUND_SERVICE_CRASH_RESTART_DURATION;
@@ -398,6 +403,9 @@ final class ActivityManagerConstants extends ContentObserver {
                     DEFAULT_MAX_SERVICE_INACTIVITY);
             BG_START_TIMEOUT = mParser.getLong(KEY_BG_START_TIMEOUT,
                     DEFAULT_BG_START_TIMEOUT);
+            SERVICE_BG_ACTIVITY_START_TIMEOUT = mParser.getLong(
+                    KEY_SERVICE_BG_ACTIVITY_START_TIMEOUT,
+                    DEFAULT_SERVICE_BG_ACTIVITY_START_TIMEOUT);
             BOUND_SERVICE_CRASH_RESTART_DURATION = mParser.getLong(
                 KEY_BOUND_SERVICE_CRASH_RESTART_DURATION,
                 DEFAULT_BOUND_SERVICE_CRASH_RESTART_DURATION);
@@ -518,6 +526,8 @@ final class ActivityManagerConstants extends ContentObserver {
         pw.println(MAX_SERVICE_INACTIVITY);
         pw.print("  "); pw.print(KEY_BG_START_TIMEOUT); pw.print("=");
         pw.println(BG_START_TIMEOUT);
+        pw.print("  "); pw.print(KEY_SERVICE_BG_ACTIVITY_START_TIMEOUT); pw.print("=");
+        pw.println(SERVICE_BG_ACTIVITY_START_TIMEOUT);
         pw.print("  "); pw.print(KEY_BOUND_SERVICE_CRASH_RESTART_DURATION); pw.print("=");
         pw.println(BOUND_SERVICE_CRASH_RESTART_DURATION);
         pw.print("  "); pw.print(KEY_BOUND_SERVICE_CRASH_MAX_RETRY); pw.print("=");

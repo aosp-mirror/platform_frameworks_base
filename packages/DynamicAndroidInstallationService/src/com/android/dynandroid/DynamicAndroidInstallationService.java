@@ -54,6 +54,7 @@ import android.os.Messenger;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -73,6 +74,8 @@ public class DynamicAndroidInstallationService extends Service
      */
     private static final String ACTION_CANCEL_INSTALL =
             "com.android.dynandroid.ACTION_CANCEL_INSTALL";
+    private static final String ACTION_DISCARD_INSTALL =
+            "com.android.dynandroid.ACTION_DISCARD_INSTALL";
     private static final String ACTION_REBOOT_TO_DYN_ANDROID =
             "com.android.dynandroid.ACTION_REBOOT_TO_DYN_ANDROID";
     private static final String ACTION_REBOOT_TO_NORMAL =
@@ -118,10 +121,6 @@ public class DynamicAndroidInstallationService extends Service
     private long mInstalledSize;
     private boolean mJustCancelledByUser;
 
-    private PendingIntent mPiCancel;
-    private PendingIntent mPiRebootToDynamicAndroid;
-    private PendingIntent mPiUninstallAndReboot;
-
     private InstallationAsyncTask mInstallTask;
 
 
@@ -155,6 +154,8 @@ public class DynamicAndroidInstallationService extends Service
             executeInstallCommand(intent);
         } else if (ACTION_CANCEL_INSTALL.equals(action)) {
             executeCancelCommand();
+        } else if (ACTION_DISCARD_INSTALL.equals(action)) {
+            executeDiscardCommand();
         } else if (ACTION_REBOOT_TO_DYN_ANDROID.equals(action)) {
             executeRebootToDynAndroidCommand();
         } else if (ACTION_REBOOT_TO_NORMAL.equals(action)) {
@@ -210,7 +211,7 @@ public class DynamicAndroidInstallationService extends Service
         }
 
         if (mInstallTask != null) {
-            Log.e(TAG, "There is already an install task running");
+            Log.e(TAG, "There is already an installation task running");
             return;
         }
 
@@ -234,10 +235,8 @@ public class DynamicAndroidInstallationService extends Service
     }
 
     private void executeCancelCommand() {
-        if (mInstallTask == null || mInstallTask.getStatus() == PENDING) {
+        if (mInstallTask == null || mInstallTask.getStatus() != RUNNING) {
             Log.e(TAG, "Cancel command triggered, but there is no task running");
-            mNM.cancel(NOTIFICATION_ID);
-
             return;
         }
 
@@ -247,24 +246,46 @@ public class DynamicAndroidInstallationService extends Service
             // Will cleanup and post status in onCancelled()
             Log.d(TAG, "Cancel request filed successfully");
         } else {
-            Log.d(TAG, "Requested cancel, completed task will be discarded");
+            Log.e(TAG, "Trying to cancel installation while it's already completed.");
+        }
+    }
 
-            resetTaskAndStop();
-            postStatus(STATUS_NOT_STARTED, CAUSE_INSTALL_CANCELLED);
+    private void executeDiscardCommand() {
+        if (isInDynamicAndroid()) {
+            Log.e(TAG, "We are now running in AOT, please reboot to normal system first");
+            return;
         }
 
+        if (getStatus() != STATUS_READY) {
+            Log.e(TAG, "Trying to discard AOT while there is no complete installation");
+            return;
+        }
+
+        Toast.makeText(this,
+                getString(R.string.toast_dynandroid_discarded),
+                Toast.LENGTH_LONG).show();
+
+        resetTaskAndStop();
+        postStatus(STATUS_NOT_STARTED, CAUSE_INSTALL_CANCELLED);
+
+        mDynAndroid.remove();
     }
 
     private void executeRebootToDynAndroidCommand() {
         if (mInstallTask == null || mInstallTask.getStatus() != FINISHED) {
-            Log.e(TAG, "Trying to reboot to DynamicAndroid, but there is no complete installation");
+            Log.e(TAG, "Trying to reboot to AOT while there is no complete installation");
             return;
         }
 
         if (!mInstallTask.commit()) {
-            // TODO: b/123673280 better UI response
             Log.e(TAG, "Failed to commit installation because of native runtime error.");
             mNM.cancel(NOTIFICATION_ID);
+
+            Toast.makeText(this,
+                    getString(R.string.toast_failed_to_reboot_to_dynandroid),
+                    Toast.LENGTH_LONG).show();
+
+            mDynAndroid.remove();
 
             return;
         }
@@ -277,8 +298,13 @@ public class DynamicAndroidInstallationService extends Service
     }
 
     private void executeRebootToNormalCommand() {
-        mDynAndroid.remove();
+        if (!isInDynamicAndroid()) {
+            Log.e(TAG, "It's already running in normal system.");
+            return;
+        }
 
+        // Per current design, we don't have disable() API. AOT is disabled on next reboot.
+        // TODO: Use better status query when b/125079548 is done.
         PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
 
         if (powerManager != null) {
@@ -287,9 +313,14 @@ public class DynamicAndroidInstallationService extends Service
     }
 
     private void executeNotifyIfInUseCommand() {
-        if (isInDynamicAndroid()) {
+        int status = getStatus();
+
+        if (status == STATUS_IN_USE) {
             startForeground(NOTIFICATION_ID,
                     buildNotification(STATUS_IN_USE, CAUSE_NOT_SPECIFIED));
+        } else if (status == STATUS_READY) {
+            startForeground(NOTIFICATION_ID,
+                    buildNotification(STATUS_READY, CAUSE_NOT_SPECIFIED));
         }
     }
 
@@ -312,18 +343,12 @@ public class DynamicAndroidInstallationService extends Service
         if (mNM != null) {
             mNM.createNotificationChannel(chan);
         }
+    }
 
-        Intent intentCancel = new Intent(this, DynamicAndroidInstallationService.class);
-        intentCancel.setAction(ACTION_CANCEL_INSTALL);
-        mPiCancel = PendingIntent.getService(this, 0, intentCancel, 0);
-
-        Intent intentRebootToDyn = new Intent(this, DynamicAndroidInstallationService.class);
-        intentRebootToDyn.setAction(ACTION_REBOOT_TO_DYN_ANDROID);
-        mPiRebootToDynamicAndroid = PendingIntent.getService(this, 0, intentRebootToDyn, 0);
-
-        Intent intentUninstallAndReboot = new Intent(this, DynamicAndroidInstallationService.class);
-        intentUninstallAndReboot.setAction(ACTION_REBOOT_TO_NORMAL);
-        mPiUninstallAndReboot = PendingIntent.getService(this, 0, intentUninstallAndReboot, 0);
+    private PendingIntent createPendingIntent(String action) {
+        Intent intent = new Intent(this, DynamicAndroidInstallationService.class);
+        intent.setAction(action);
+        return PendingIntent.getService(this, 0, intent, 0);
     }
 
     private Notification buildNotification(int status, int cause) {
@@ -342,7 +367,7 @@ public class DynamicAndroidInstallationService extends Service
 
                 builder.addAction(new Notification.Action.Builder(
                         null, getString(R.string.notification_action_cancel),
-                        mPiCancel).build());
+                        createPendingIntent(ACTION_CANCEL_INSTALL)).build());
 
                 break;
 
@@ -351,11 +376,11 @@ public class DynamicAndroidInstallationService extends Service
 
                 builder.addAction(new Notification.Action.Builder(
                         null, getString(R.string.notification_action_reboot_to_dynandroid),
-                        mPiRebootToDynamicAndroid).build());
+                        createPendingIntent(ACTION_REBOOT_TO_DYN_ANDROID)).build());
 
                 builder.addAction(new Notification.Action.Builder(
-                        null, getString(R.string.notification_action_cancel),
-                        mPiCancel).build());
+                        null, getString(R.string.notification_action_discard),
+                        createPendingIntent(ACTION_DISCARD_INSTALL)).build());
 
                 break;
 
@@ -364,7 +389,7 @@ public class DynamicAndroidInstallationService extends Service
 
                 builder.addAction(new Notification.Action.Builder(
                         null, getString(R.string.notification_action_uninstall),
-                        mPiUninstallAndReboot).build());
+                        createPendingIntent(ACTION_REBOOT_TO_NORMAL)).build());
 
                 break;
 
@@ -427,10 +452,10 @@ public class DynamicAndroidInstallationService extends Service
     private int getStatus() {
         if (isInDynamicAndroid()) {
             return STATUS_IN_USE;
-
+        } else if (isDynamicAndroidInstalled()) {
+            return STATUS_READY;
         } else if (mInstallTask == null) {
             return STATUS_NOT_STARTED;
-
         }
 
         switch (mInstallTask.getStatus()) {
@@ -456,6 +481,10 @@ public class DynamicAndroidInstallationService extends Service
 
     private boolean isInDynamicAndroid() {
         return mDynAndroid.isInUse();
+    }
+
+    private boolean isDynamicAndroidInstalled() {
+        return mDynAndroid.isInstalled();
     }
 
     void handleMessage(Message msg) {

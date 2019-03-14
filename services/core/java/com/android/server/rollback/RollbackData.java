@@ -23,8 +23,10 @@ import android.content.rollback.RollbackInfo;
 import java.io.File;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.text.ParseException;
 import java.time.Instant;
 import java.util.ArrayList;
+
 
 /**
  * Information about a rollback available for a set of atomically installed
@@ -137,5 +139,28 @@ class RollbackData {
      */
     public boolean isStaged() {
         return info.isStaged();
+    }
+
+    static String rollbackStateToString(@RollbackState int state) {
+        switch (state) {
+            case RollbackData.ROLLBACK_STATE_ENABLING: return "enabling";
+            case RollbackData.ROLLBACK_STATE_AVAILABLE: return "available";
+            case RollbackData.ROLLBACK_STATE_COMMITTED: return "committed";
+        }
+        throw new AssertionError("Invalid rollback state: " + state);
+    }
+
+    static @RollbackState int rollbackStateFromString(String state)
+            throws ParseException {
+        switch (state) {
+            case "enabling": return RollbackData.ROLLBACK_STATE_ENABLING;
+            case "available": return RollbackData.ROLLBACK_STATE_AVAILABLE;
+            case "committed": return RollbackData.ROLLBACK_STATE_COMMITTED;
+        }
+        throw new ParseException("Invalid rollback state: " + state, 0);
+    }
+
+    public String getStateAsString() {
+        return rollbackStateToString(state);
     }
 }

@@ -150,7 +150,7 @@ public class Location implements Parcelable {
     private Bundle mExtras = null;
 
     // A bitmask of fields present in this object (see HAS_* constants defined above).
-    private byte mFieldsMask = 0;
+    private int mFieldsMask = 0;
 
     /**
      * Construct a new Location with a named provider.
@@ -1137,7 +1137,7 @@ public class Location implements Parcelable {
             l.mTime = in.readLong();
             l.mElapsedRealtimeNanos = in.readLong();
             l.mElapsedRealtimeUncertaintyNanos = in.readLong();
-            l.mFieldsMask = in.readByte();
+            l.mFieldsMask = in.readInt();
             l.mLatitude = in.readDouble();
             l.mLongitude = in.readDouble();
             l.mAltitude = in.readDouble();
@@ -1168,7 +1168,7 @@ public class Location implements Parcelable {
         parcel.writeLong(mTime);
         parcel.writeLong(mElapsedRealtimeNanos);
         parcel.writeLong(mElapsedRealtimeUncertaintyNanos);
-        parcel.writeByte(mFieldsMask);
+        parcel.writeInt(mFieldsMask);
         parcel.writeDouble(mLatitude);
         parcel.writeDouble(mLongitude);
         parcel.writeDouble(mAltitude);

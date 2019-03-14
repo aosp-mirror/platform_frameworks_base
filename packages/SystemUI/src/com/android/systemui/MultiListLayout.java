@@ -33,8 +33,8 @@ import java.util.ArrayList;
  */
 public abstract class MultiListLayout extends LinearLayout {
     protected boolean mHasOutsideTouch;
-    protected boolean mSeparated;
     protected MultiListAdapter mAdapter;
+    protected boolean mSnapToEdge;
 
     protected int mRotation;
     protected RotationListener mRotationListener;
@@ -70,12 +70,10 @@ public abstract class MultiListLayout extends LinearLayout {
     }
 
     /**
-     * Sets whether the separated view should be shown, and handles updating visibility on
-     * that view.
+     * Sets whether the GlobalActions view should snap to the edge of the screen.
      */
-    public void setSeparated(boolean separated) {
-        mSeparated = separated;
-        setSeparatedViewVisibility(separated);
+    public void setSnapToEdge(boolean snap) {
+        mSnapToEdge = snap;
     }
 
     /**
@@ -123,7 +121,9 @@ public abstract class MultiListLayout extends LinearLayout {
         onUpdateList();
     }
 
-    protected abstract void onUpdateList();
+    protected void onUpdateList() {
+        setSeparatedViewVisibility(mAdapter.hasSeparatedItems());
+    }
 
     public void setRotationListener(RotationListener listener) {
         mRotationListener = listener;
@@ -156,13 +156,13 @@ public abstract class MultiListLayout extends LinearLayout {
          * Creates an ArrayList of items which should be rendered in the separated view.
          * @param useSeparatedView is true if the separated view will be used, false otherwise.
          */
-        public abstract ArrayList getSeparatedItems(boolean useSeparatedView);
+        public abstract ArrayList getSeparatedItems();
 
         /**
          * Creates an ArrayList of items which should be rendered in the list view.
          * @param useSeparatedView True if the separated view will be used, false otherwise.
          */
-        public abstract ArrayList getListItems(boolean useSeparatedView);
+        public abstract ArrayList getListItems();
 
         /**
          * Callback to run when an individual item is clicked or pressed.
@@ -176,5 +176,13 @@ public abstract class MultiListLayout extends LinearLayout {
          * @return True if the long-click was handled, false otherwise.
          */
         public abstract boolean onLongClickItem(int position);
+
+        /**
+         * Determines whether the mAdapter contains any separated items, used to determine whether
+         * or not to hide the separated list from view.
+         */
+        public boolean hasSeparatedItems() {
+            return getSeparatedItems().size() > 0;
+        }
     }
 }

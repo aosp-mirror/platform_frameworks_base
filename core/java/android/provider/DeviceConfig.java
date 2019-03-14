@@ -31,6 +31,7 @@ import android.database.ContentObserver;
 import android.net.Uri;
 import android.provider.Settings.ResetMode;
 import android.util.ArrayMap;
+import android.util.Log;
 import android.util.Pair;
 
 import com.android.internal.annotations.GuardedBy;
@@ -130,6 +131,14 @@ public final class DeviceConfig {
     public static final String NAMESPACE_INPUT_NATIVE_BOOT = "input_native_boot";
 
     /**
+     * Namespace for attention-based features provided by on-device machine intelligence.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String NAMESPACE_INTELLIGENCE_ATTENTION = "intelligence_attention";
+
+    /**
      * Namespace for all media native related features.
      *
      * @hide
@@ -225,22 +234,6 @@ public final class DeviceConfig {
          * @hide for internal use only
          */
         String USAP_POOL_REFILL_THRESHOLD = "usap_refill_threshold";
-    }
-
-    /**
-     * Namespace for attention-based features provided by on-device machine intelligence.
-     *
-     * @hide
-     */
-    @SystemApi
-    public interface IntelligenceAttention {
-        String NAMESPACE = "intelligence_attention";
-
-        /** If {@code true}, enables the attention features. */
-        String ATTENTION_ENABLED = "attention_enabled";
-
-        /** Settings for the attention features. */
-        String ATTENTION_SETTINGS = "attention_settings";
     }
 
     /**
@@ -402,6 +395,7 @@ public final class DeviceConfig {
             new ArrayMap<>();
     @GuardedBy("sLock")
     private static Map<String, Pair<ContentObserver, Integer>> sNamespaces = new HashMap<>();
+    private static final String TAG = "DeviceConfig";
 
     // Should never be invoked
     private DeviceConfig() {
@@ -475,9 +469,13 @@ public final class DeviceConfig {
     @RequiresPermission(READ_DEVICE_CONFIG)
     public static int getInt(String namespace, String name, int defaultValue) {
         String value = getProperty(namespace, name);
+        if (value == null) {
+            return defaultValue;
+        }
         try {
             return Integer.parseInt(value);
         } catch (NumberFormatException e) {
+            Log.e(TAG, "Parsing integer failed for " + namespace + ":" + name);
             return defaultValue;
         }
     }
@@ -497,9 +495,13 @@ public final class DeviceConfig {
     @RequiresPermission(READ_DEVICE_CONFIG)
     public static long getLong(String namespace, String name, long defaultValue) {
         String value = getProperty(namespace, name);
+        if (value == null) {
+            return defaultValue;
+        }
         try {
             return Long.parseLong(value);
         } catch (NumberFormatException e) {
+            Log.e(TAG, "Parsing long failed for " + namespace + ":" + name);
             return defaultValue;
         }
     }
@@ -519,11 +521,13 @@ public final class DeviceConfig {
     @RequiresPermission(READ_DEVICE_CONFIG)
     public static float getFloat(String namespace, String name, float defaultValue) {
         String value = getProperty(namespace, name);
+        if (value == null) {
+            return defaultValue;
+        }
         try {
             return Float.parseFloat(value);
         } catch (NumberFormatException e) {
-            return defaultValue;
-        } catch (NullPointerException e) {
+            Log.e(TAG, "Parsing float failed for " + namespace + ":" + name);
             return defaultValue;
         }
     }
@@ -911,9 +915,13 @@ public final class DeviceConfig {
         public int getInt(@NonNull String name, int defaultValue) {
             Preconditions.checkNotNull(name);
             String value = mMap.get(name);
+            if (value == null) {
+                return defaultValue;
+            }
             try {
                 return Integer.parseInt(value);
             } catch (NumberFormatException e) {
+                Log.e(TAG, "Parsing int failed for " + name);
                 return defaultValue;
             }
         }
@@ -929,9 +937,13 @@ public final class DeviceConfig {
         public long getLong(@NonNull String name, long defaultValue) {
             Preconditions.checkNotNull(name);
             String value = mMap.get(name);
+            if (value == null) {
+                return defaultValue;
+            }
             try {
                 return Long.parseLong(value);
             } catch (NumberFormatException e) {
+                Log.e(TAG, "Parsing long failed for " + name);
                 return defaultValue;
             }
         }
@@ -947,11 +959,13 @@ public final class DeviceConfig {
         public float getFloat(@NonNull String name, float defaultValue) {
             Preconditions.checkNotNull(name);
             String value = mMap.get(name);
+            if (value == null) {
+                return defaultValue;
+            }
             try {
                 return Float.parseFloat(value);
             } catch (NumberFormatException e) {
-                return defaultValue;
-            } catch (NullPointerException e) {
+                Log.e(TAG, "Parsing float failed for " + name);
                 return defaultValue;
             }
         }

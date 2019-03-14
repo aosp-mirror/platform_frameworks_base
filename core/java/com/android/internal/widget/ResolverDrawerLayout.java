@@ -502,6 +502,7 @@ public class ResolverDrawerLayout extends ViewGroup {
                         new LogMaker(MetricsEvent.ACTION_SHARESHEET_COLLAPSED_CHANGED)
                         .setSubtype(isCollapsedNew ? 1 : 0));
             }
+            onScrollChanged(0, (int) newPos, 0, (int) (newPos - dy));
             postInvalidateOnAnimation();
             return dy;
         }
