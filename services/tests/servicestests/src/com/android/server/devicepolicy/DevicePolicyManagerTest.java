@@ -99,7 +99,6 @@ import com.android.server.pm.UserRestrictionsUtils;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import java.io.File;
@@ -241,29 +240,23 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         final Map<Pair<String, UserHandle>, Bundle> appRestrictions = new HashMap<>();
 
         // UM.setApplicationRestrictions() will save to appRestrictions.
-        doAnswer(new Answer<Void>() {
-            @Override
-            public Void answer(InvocationOnMock invocation) throws Throwable {
-                String pkg = (String) invocation.getArguments()[0];
-                Bundle bundle = (Bundle) invocation.getArguments()[1];
-                UserHandle user = (UserHandle) invocation.getArguments()[2];
+        doAnswer((Answer<Void>) invocation -> {
+            String pkg = (String) invocation.getArguments()[0];
+            Bundle bundle = (Bundle) invocation.getArguments()[1];
+            UserHandle user = (UserHandle) invocation.getArguments()[2];
 
-                appRestrictions.put(Pair.create(pkg, user), bundle);
+            appRestrictions.put(Pair.create(pkg, user), bundle);
 
-                return null;
-            }
+            return null;
         }).when(getServices().userManager).setApplicationRestrictions(
                 anyString(), nullable(Bundle.class), any(UserHandle.class));
 
         // UM.getApplicationRestrictions() will read from appRestrictions.
-        doAnswer(new Answer<Bundle>() {
-            @Override
-            public Bundle answer(InvocationOnMock invocation) throws Throwable {
-                String pkg = (String) invocation.getArguments()[0];
-                UserHandle user = (UserHandle) invocation.getArguments()[1];
+        doAnswer((Answer<Bundle>) invocation -> {
+            String pkg = (String) invocation.getArguments()[0];
+            UserHandle user = (UserHandle) invocation.getArguments()[1];
 
-                return appRestrictions.get(Pair.create(pkg, user));
-            }
+            return appRestrictions.get(Pair.create(pkg, user));
         }).when(getServices().userManager).getApplicationRestrictions(
                 anyString(), any(UserHandle.class));
 
@@ -2242,11 +2235,13 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         intent = dpm.createAdminSupportIntent(UserManager.DISALLOW_ADJUST_VOLUME);
         assertNull(intent);
 
-        // Permission that is set by device owner returns correct intent
-        when(getServices().userManager.getUserRestrictionSource(
+        // UM.getUserRestrictionSources() will return a list of size 1 with the caller resource.
+        doAnswer((Answer<List<UserManager.EnforcingUser>>) invocation -> Collections.singletonList(
+                new UserManager.EnforcingUser(
+                        UserHandle.myUserId(), UserManager.RESTRICTION_SOURCE_DEVICE_OWNER))
+        ).when(getServices().userManager).getUserRestrictionSources(
                 eq(UserManager.DISALLOW_ADJUST_VOLUME),
-                eq(UserHandle.getUserHandleForUid(mContext.binder.callingUid))))
-                .thenReturn(UserManager.RESTRICTION_SOURCE_DEVICE_OWNER);
+                eq(UserHandle.getUserHandleForUid(UserHandle.myUserId())));
         intent = dpm.createAdminSupportIntent(UserManager.DISALLOW_ADJUST_VOLUME);
         assertNotNull(intent);
         assertEquals(Settings.ACTION_SHOW_ADMIN_SUPPORT_DETAILS, intent.getAction());

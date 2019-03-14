@@ -11176,47 +11176,50 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         @Override
         public Intent createUserRestrictionSupportIntent(int userId, String userRestriction) {
-            int source;
-            long ident = mInjector.binderClearCallingIdentity();
+            final long ident = mInjector.binderClearCallingIdentity();
             try {
-                source = mUserManager.getUserRestrictionSource(userRestriction,
-                        UserHandle.of(userId));
+                final List<UserManager.EnforcingUser> sources = mUserManager
+                        .getUserRestrictionSources(userRestriction, UserHandle.of(userId));
+                if (sources == null || sources.isEmpty()) {
+                    // The restriction is not enforced.
+                    return null;
+                } else if (sources.size() > 1) {
+                    // In this case, we'll show an admin support dialog that does not
+                    // specify the admin.
+                    // TODO(b/128928355): if this restriction is enforced by multiple DPCs, return
+                    // the admin for the calling user.
+                    return DevicePolicyManagerService.this.createShowAdminSupportIntent(
+                            null, userId);
+                }
+                final UserManager.EnforcingUser enforcingUser = sources.get(0);
+                final int sourceType = enforcingUser.getUserRestrictionSource();
+                final int enforcingUserId = enforcingUser.getUserHandle().getIdentifier();
+                if (sourceType == UserManager.RESTRICTION_SOURCE_PROFILE_OWNER) {
+                    // Restriction was enforced by PO
+                    final ComponentName profileOwner = mOwners.getProfileOwnerComponent(
+                            enforcingUserId);
+                    if (profileOwner != null) {
+                        return DevicePolicyManagerService.this.createShowAdminSupportIntent(
+                                profileOwner, enforcingUserId);
+                    }
+                } else if (sourceType == UserManager.RESTRICTION_SOURCE_DEVICE_OWNER) {
+                    // Restriction was enforced by DO
+                    final Pair<Integer, ComponentName> deviceOwner =
+                            mOwners.getDeviceOwnerUserIdAndComponent();
+                    if (deviceOwner != null) {
+                        return DevicePolicyManagerService.this.createShowAdminSupportIntent(
+                                deviceOwner.second, deviceOwner.first);
+                    }
+                } else if (sourceType == UserManager.RESTRICTION_SOURCE_SYSTEM) {
+                    /*
+                     * In this case, the user restriction is enforced by the system.
+                     * So we won't show an admin support intent, even if it is also
+                     * enforced by a profile/device owner.
+                     */
+                    return null;
+                }
             } finally {
                 mInjector.binderRestoreCallingIdentity(ident);
-            }
-            if ((source & UserManager.RESTRICTION_SOURCE_SYSTEM) != 0) {
-                /*
-                 * In this case, the user restriction is enforced by the system.
-                 * So we won't show an admin support intent, even if it is also
-                 * enforced by a profile/device owner.
-                 */
-                return null;
-            }
-            boolean enforcedByDo = (source & UserManager.RESTRICTION_SOURCE_DEVICE_OWNER) != 0;
-            boolean enforcedByPo = (source & UserManager.RESTRICTION_SOURCE_PROFILE_OWNER) != 0;
-            if (enforcedByDo && enforcedByPo) {
-                // In this case, we'll show an admin support dialog that does not
-                // specify the admin.
-                return DevicePolicyManagerService.this.createShowAdminSupportIntent(null, userId);
-            } else if (enforcedByPo) {
-                final ComponentName profileOwner = mOwners.getProfileOwnerComponent(userId);
-                if (profileOwner != null) {
-                    return DevicePolicyManagerService.this
-                            .createShowAdminSupportIntent(profileOwner, userId);
-                }
-                // This could happen if another thread has changed the profile owner since we called
-                // getUserRestrictionSource
-                return null;
-            } else if (enforcedByDo) {
-                final Pair<Integer, ComponentName> deviceOwner
-                        = mOwners.getDeviceOwnerUserIdAndComponent();
-                if (deviceOwner != null) {
-                    return DevicePolicyManagerService.this
-                            .createShowAdminSupportIntent(deviceOwner.second, deviceOwner.first);
-                }
-                // This could happen if another thread has changed the device owner since we called
-                // getUserRestrictionSource
-                return null;
             }
             return null;
         }
