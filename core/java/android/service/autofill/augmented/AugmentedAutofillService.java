@@ -30,6 +30,7 @@ import android.graphics.Rect;
 import android.os.CancellationSignal;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.ICancellationSignal;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.os.SystemClock;
@@ -211,10 +212,16 @@ public abstract class AugmentedAutofillService extends Service {
             if (DEBUG) Log.d(TAG, "Reusing proxy for session " + sessionId);
             proxy.update(focusedId, focusedValue, callback);
         }
-        // TODO(b/123101711): set cancellation signal
-        final CancellationSignal cancellationSignal = null;
-        onFillRequest(new FillRequest(proxy), cancellationSignal, new FillController(proxy),
-                new FillCallback(proxy));
+
+        final ICancellationSignal transport = CancellationSignal.createTransport();
+        try {
+            callback.onCancellable(transport);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+
+        onFillRequest(new FillRequest(proxy), CancellationSignal.fromTransport(transport),
+                new FillController(proxy), new FillCallback(proxy));
     }
 
     private void handleOnDestroyAllFillWindowsRequest() {
@@ -408,8 +415,13 @@ public abstract class AugmentedAutofillService extends Service {
                 mFocusedId = focusedId;
                 mFocusedValue = focusedValue;
                 if (mCallback != null) {
-                    // TODO(b/123101711): we need to check whether the previous request was
-                    //  completed or not, and if not, cancel it first.
+                    try {
+                        if (mCallback.isCompleted()) {
+                            mCallback.cancel();
+                        }
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "failed to check current pending request status", e);
+                    }
                     Slog.d(TAG, "mCallback is updated.");
                 }
                 mCallback = callback;

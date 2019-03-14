@@ -577,6 +577,12 @@ public abstract class AbstractRemoteService<S extends AbstractRemoteService<S, I
         protected boolean isFinal() {
             return false;
         }
+
+        protected boolean isRequestCompleted() {
+            synchronized (mLock) {
+                return mCompleted;
+            }
+        }
     }
 
     /**
