@@ -6774,14 +6774,12 @@ public class TelephonyManager {
             }
         } catch (RemoteException ex) {
             Rlog.e(TAG, "getPreferredNetworkType RemoteException", ex);
-        } catch (NullPointerException ex) {
-            Rlog.e(TAG, "getPreferredNetworkType NPE", ex);
         }
         return -1;
     }
 
     /**
-     * Get the preferred network type bitmap.
+     * Get the preferred network type bitmask.
      *
      * <p>If this object has been created with {@link #createForSubscriptionId}, applies to the
      * given subId. Otherwise, applies to {@link SubscriptionManager#getDefaultSubscriptionId()}
@@ -6790,13 +6788,13 @@ public class TelephonyManager {
      * {@link android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE READ_PRIVILEGED_PHONE_STATE}
      * or that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
      *
-     * @return The bitmap of preferred network types.
+     * @return The bitmask of preferred network types.
      *
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     @SystemApi
-    public @NetworkTypeBitMask long getPreferredNetworkTypeBitmap() {
+    public @NetworkTypeBitMask long getPreferredNetworkTypeBitmask() {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
@@ -6804,9 +6802,7 @@ public class TelephonyManager {
                         telephony.getPreferredNetworkType(getSubId()));
             }
         } catch (RemoteException ex) {
-            Rlog.e(TAG, "getPreferredNetworkTypeBitmap RemoteException", ex);
-        } catch (NullPointerException ex) {
-            Rlog.e(TAG, "getPreferredNetworkTypeBitmap NPE", ex);
+            Rlog.e(TAG, "getPreferredNetworkTypeBitmask RemoteException", ex);
         }
         return 0;
     }
@@ -7031,14 +7027,12 @@ public class TelephonyManager {
             }
         } catch (RemoteException ex) {
             Rlog.e(TAG, "setPreferredNetworkType RemoteException", ex);
-        } catch (NullPointerException ex) {
-            Rlog.e(TAG, "setPreferredNetworkType NPE", ex);
         }
         return false;
     }
 
     /**
-     * Set the preferred network type bitmap.
+     * Set the preferred network type bitmask.
      *
      * <p>If this object has been created with {@link #createForSubscriptionId}, applies to the
      * given subId. Otherwise, applies to {@link SubscriptionManager#getDefaultSubscriptionId()}
@@ -7047,24 +7041,22 @@ public class TelephonyManager {
      * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE} or that the calling
      * app has carrier privileges (see {@link #hasCarrierPrivileges}).
      *
-     * @param networkTypeBitmap The bitmap of preferred network types.
+     * @param networkTypeBitmask The bitmask of preferred network types.
      * @return true on success; false on any failure.
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     @SystemApi
-    public boolean setPreferredNetworkTypeBitmap(@NetworkTypeBitMask long networkTypeBitmap) {
+    public boolean setPreferredNetworkTypeBitmask(@NetworkTypeBitMask long networkTypeBitmask) {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
                 return telephony.setPreferredNetworkType(
                         getSubId(), RadioAccessFamily.getNetworkTypeFromRaf(
-                                (int) networkTypeBitmap));
+                                (int) networkTypeBitmask));
             }
         } catch (RemoteException ex) {
-            Rlog.e(TAG, "setPreferredNetworkType RemoteException", ex);
-        } catch (NullPointerException ex) {
-            Rlog.e(TAG, "setPreferredNetworkType NPE", ex);
+            Rlog.e(TAG, "setPreferredNetworkTypeBitmask RemoteException", ex);
         }
         return false;
     }
