@@ -253,7 +253,7 @@ message Atom {
     }
 
     // Pulled events will start at field 10000.
-    // Next: 10056
+    // Next: 10057
     oneof pulled {
         WifiBytesTransfer wifi_bytes_transfer = 10000;
         WifiBytesTransferByFgBg wifi_bytes_transfer_by_fg_bg = 10001;
@@ -311,6 +311,7 @@ message Atom {
         SDCardInfo sdcard_info = 10053;
         GpuStatsGlobalInfo gpu_stats_global_info = 10054;
         GpuStatsAppInfo gpu_stats_app_info = 10055;
+        SystemIonHeapSize system_ion_heap_size = 10056;
     }
 
     // DO NOT USE field numbers above 100,000 in AOSP.
@@ -5821,4 +5822,14 @@ message GpuStatsAppInfo {
     // Vulkan driver loading time info.
     optional GpuDriverLoadingTime vk_driver_loading_time = 4
             [(android.os.statsd.log_mode) = MODE_BYTES];
+}
+
+/*
+ * Logs the size of the system ion heap.
+ *
+ * Pulled from StatsCompanionService.
+ */
+message SystemIonHeapSize {
+    // Size of the system ion heap in bytes.
+    optional int64 size_in_bytes = 1;
 }

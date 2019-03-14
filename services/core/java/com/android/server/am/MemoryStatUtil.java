@@ -57,15 +57,18 @@ public final class MemoryStatUtil {
     private static final String PROC_STATUS_FILE_FMT = "/proc/%d/status";
     /** Path to procfs cmdline file. Used with pid: /proc/pid/cmdline. */
     private static final String PROC_CMDLINE_FILE_FMT = "/proc/%d/cmdline";
+    /** Path to debugfs file for the system ion heap. */
+    private static final String DEBUG_SYSTEM_ION_HEAP_FILE = "/sys/kernel/debug/ion/heaps/system";
 
     private static final Pattern PGFAULT = Pattern.compile("total_pgfault (\\d+)");
     private static final Pattern PGMAJFAULT = Pattern.compile("total_pgmajfault (\\d+)");
     private static final Pattern RSS_IN_BYTES = Pattern.compile("total_rss (\\d+)");
     private static final Pattern CACHE_IN_BYTES = Pattern.compile("total_cache (\\d+)");
     private static final Pattern SWAP_IN_BYTES = Pattern.compile("total_swap (\\d+)");
-
     private static final Pattern RSS_HIGH_WATERMARK_IN_BYTES =
             Pattern.compile("VmHWM:\\s*(\\d+)\\s*kB");
+    private static final Pattern ION_HEAP_SIZE_IN_BYTES =
+            Pattern.compile("\n\\s*total\\s*(\\d+)\\s*\n");
 
     private static final int PGFAULT_INDEX = 9;
     private static final int PGMAJFAULT_INDEX = 11;
@@ -125,6 +128,16 @@ public final class MemoryStatUtil {
     public static String readCmdlineFromProcfs(int pid) {
         final String path = String.format(Locale.US, PROC_CMDLINE_FILE_FMT, pid);
         return parseCmdlineFromProcfs(readFileContents(path));
+    }
+
+    /**
+     * Reads size of the system ion heap from debugfs.
+     *
+     * Returns value of the total size in bytes of the system ion heap from
+     * /sys/kernel/debug/ion/heaps/system.
+     */
+    public static long readSystemIonHeapSizeFromDebugfs() {
+        return parseIonHeapSizeFromDebugfs(readFileContents(DEBUG_SYSTEM_ION_HEAP_FILE));
     }
 
     private static String readFileContents(String path) {
@@ -225,6 +238,19 @@ public final class MemoryStatUtil {
             return cmdline;
         }
         return cmdline.substring(0, firstNullByte);
+    }
+
+    /**
+     * Parses the ion heap size from the contents of a file under /sys/kernel/debug/ion/heaps in
+     * debugfs. The returned value is in bytes.
+     */
+    @VisibleForTesting
+    static long parseIonHeapSizeFromDebugfs(String contents) {
+        if (contents == null || contents.isEmpty()) {
+            return 0;
+        }
+        Matcher m = ION_HEAP_SIZE_IN_BYTES.matcher(contents);
+        return m.find() ? Long.parseLong(m.group(1)) : 0;
     }
 
     /**
