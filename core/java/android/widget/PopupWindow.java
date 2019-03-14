@@ -886,6 +886,32 @@ public class PopupWindow {
      * containing window<p/>
      *
      * @return true if popup will be clipped to the screen instead of the window, false otherwise
+     * @deprecated Use {@link #isClippedToScreen()} instead
+     */
+    @Deprecated
+    public boolean isClipToScreenEnabled() {
+        return mClipToScreen;
+    }
+
+    /**
+     * <p>Clip this popup window to the screen, but not to the containing window.</p>
+     *
+     * <p>If the popup is showing, calling this method will take effect only
+     * the next time the popup is shown or through a manual call to one of
+     * the {@link #update()} methods.</p>
+     *
+     * @deprecated Use {@link #setIsClippedToScreen(boolean)} instead
+     */
+    @Deprecated
+    public void setClipToScreenEnabled(boolean enabled) {
+        mClipToScreen = enabled;
+    }
+
+    /**
+     * <p>Indicates whether this popup will be clipped to the screen and not to the
+     * containing window<p/>
+     *
+     * @return true if popup will be clipped to the screen instead of the window, false otherwise
      *
      * @see #setIsClippedToScreen(boolean)
      */
@@ -953,6 +979,32 @@ public class PopupWindow {
      */
     public void setSplitTouchEnabled(boolean enabled) {
         mSplitTouchEnabled = enabled ? 1 : 0;
+    }
+
+    /**
+     * <p>Indicates whether the popup window will be forced into using absolute screen coordinates
+     * for positioning.</p>
+     *
+     * @return true if the window will always be positioned in screen coordinates.
+     *
+     * @deprecated Use {@link #isLaidOutInScreen()} instead
+     */
+    @Deprecated
+    public boolean isLayoutInScreenEnabled() {
+        return mLayoutInScreen;
+    }
+
+    /**
+     * <p>Allows the popup window to force the flag
+     * {@link WindowManager.LayoutParams#FLAG_LAYOUT_IN_SCREEN}, overriding default behavior.
+     * This will cause the popup to be positioned in absolute screen coordinates.</p>
+     *
+     * @param enabled true if the popup should always be positioned in screen coordinates
+     * @deprecated Use {@link #setIsLaidOutInScreen(boolean)} instead
+     */
+    @Deprecated
+    public void setLayoutInScreenEnabled(boolean enabled) {
+        mLayoutInScreen = enabled;
     }
 
     /**
