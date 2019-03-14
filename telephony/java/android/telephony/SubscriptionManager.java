@@ -2008,21 +2008,27 @@ public class SubscriptionManager {
     }
 
     /**
-     * Checks if the supplied subscription ID is valid.
-     * Note: a valid subscription ID does not necessarily correspond to an active subscription.
+     * Check if the supplied subscription ID is valid.
+     *
+     * <p>A valid subscription ID is not necessarily an active subscription ID
+     * (see {@link #isActiveSubscriptionId(int)}) or an usable subscription ID
+     * (see {@link #isUsableSubscriptionId(int)}). Unless specifically noted, subscription
+     * APIs work with a valid subscription ID.
      *
      * @param subscriptionId The subscription ID.
-     * @return true if the supplied subscriptionId is valid; false otherwise.
+     * @return {@code true} if the supplied subscriptionId is valid; {@code false} otherwise.
      */
     public static boolean isValidSubscriptionId(int subscriptionId) {
         return subscriptionId > INVALID_SUBSCRIPTION_ID;
     }
 
     /**
-     * Check if the subscription ID is usable.
+     * Check if the supplied subscription ID is usable.
      *
-     * A usable subscription ID has a valid value except some special values such as
-     * {@link #DEFAULT_SUBSCRIPTION_ID}. It can be used for subscription functions.
+     * <p>A usable subscription ID is a valid subscription ID, but not necessarily an active
+     * subscription ID (see {@link #isActiveSubscriptionId(int)}). Some subscription APIs
+     * require a usable subscription ID, and this is noted in their documentation; otherwise, a
+     * subscription ID does not need to be usable for subscription functions, only valid.
      *
      * @param subscriptionId the subscription ID
      * @return {@code true} if the subscription ID is usable; {@code false} otherwise.
@@ -2280,7 +2286,8 @@ public class SubscriptionManager {
     }
 
     /**
-     * Checks if the supplied subscription ID corresponds to an active subscription.
+     * Checks if the supplied subscription ID corresponds to a subscription which is actively in
+     * use on the device. An active subscription ID is a valid and usable subscription ID.
      *
      * @param subscriptionId the subscription ID.
      * @return {@code true} if the supplied subscription ID corresponds to an active subscription;
