@@ -1,0 +1,679 @@
+/*
+ * Copyright (C) 2019 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.android.test.protoinputstream;
+
+import android.util.proto.ProtoInputStream;
+import android.util.proto.ProtoStream;
+import android.util.proto.WireTypeMismatchException;
+
+import com.android.test.protoinputstream.nano.Test;
+
+import com.google.protobuf.nano.MessageNano;
+
+import junit.framework.TestCase;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+
+public class ProtoInputStreamFloatTest extends TestCase {
+
+
+    public void testRead() throws IOException {
+        testRead(0);
+        testRead(1);
+        testRead(5);
+    }
+
+    private void testRead(int chunkSize) throws IOException {
+        final long fieldFlags = ProtoStream.FIELD_COUNT_SINGLE | ProtoStream.FIELD_TYPE_FLOAT;
+
+        final long fieldId1 = fieldFlags | ((long) 1 & 0x0ffffffffL);
+        final long fieldId2 = fieldFlags | ((long) 2 & 0x0ffffffffL);
+        final long fieldId3 = fieldFlags | ((long) 3 & 0x0ffffffffL);
+        final long fieldId4 = fieldFlags | ((long) 4 & 0x0ffffffffL);
+        final long fieldId5 = fieldFlags | ((long) 5 & 0x0ffffffffL);
+        final long fieldId6 = fieldFlags | ((long) 6 & 0x0ffffffffL);
+        final long fieldId7 = fieldFlags | ((long) 7 & 0x0ffffffffL);
+        final long fieldId8 = fieldFlags | ((long) 8 & 0x0ffffffffL);
+        final long fieldId9 = fieldFlags | ((long) 9 & 0x0ffffffffL);
+        final long fieldId10 = fieldFlags | ((long) 10 & 0x0ffffffffL);
+
+        final byte[] protobuf = new byte[]{
+                // 1 -> 0 - default value, not written
+                // 2 -> 1
+                (byte) 0x15,
+                (byte) 0x00, (byte) 0x00, (byte) 0x80, (byte) 0x3f,
+                // 10 -> 1
+                (byte) 0x55,
+                (byte) 0x00, (byte) 0x00, (byte) 0x80, (byte) 0x3f,
+                // 3 -> -1234.432
+                (byte) 0x1d,
+                (byte) 0xd3, (byte) 0x4d, (byte) 0x9a, (byte) 0xc4,
+                // 4 -> 42.42
+                (byte) 0x25,
+                (byte) 0x14, (byte) 0xae, (byte) 0x29, (byte) 0x42,
+                // 5 -> Float.MIN_NORMAL
+                (byte) 0x2d,
+                (byte) 0x00, (byte) 0x00, (byte) 0x80, (byte) 0x00,
+                // 6 -> DOUBLE.MIN_VALUE
+                (byte) 0x35,
+                (byte) 0x01, (byte) 0x00, (byte) 0x00, (byte) 0x00,
+                // 7 -> Float.NEGATIVE_INFINITY
+                (byte) 0x3d,
+                (byte) 0x00, (byte) 0x00, (byte) 0x80, (byte) 0xff,
+                // 8 -> Float.NaN
+                (byte) 0x45,
+                (byte) 0x00, (byte) 0x00, (byte) 0xc0, (byte) 0x7f,
+                // 9 -> Float.POSITIVE_INFINITY
+                (byte) 0x4d,
+                (byte) 0x00, (byte) 0x00, (byte) 0x80, (byte) 0x7f,
+        };
+
+        InputStream stream = new ByteArrayInputStream(protobuf);
+        final ProtoInputStream pi = new ProtoInputStream(stream, chunkSize);
+        float[] results = new float[9];
+        while (pi.nextField() != ProtoInputStream.NO_MORE_FIELDS) {
+            switch (pi.getFieldNumber()) {
+                case (int) fieldId1:
+                    fail("Should never reach this");
+                    break;
+                case (int) fieldId2:
+                    results[1] = pi.readFloat(fieldId2);
+                    break;
+                case (int) fieldId3:
+                    results[2] = pi.readFloat(fieldId3);
+                    break;
+                case (int) fieldId4:
+                    results[3] = pi.readFloat(fieldId4);
+                    break;
+                case (int) fieldId5:
+                    results[4] = pi.readFloat(fieldId5);
+                    break;
+                case (int) fieldId6:
+                    results[5] = pi.readFloat(fieldId6);
+                    break;
+                case (int) fieldId7:
+                    results[6] = pi.readFloat(fieldId7);
+                    break;
+                case (int) fieldId8:
+                    results[7] = pi.readFloat(fieldId8);
+                    break;
+                case (int) fieldId9:
+                    results[8] = pi.readFloat(fieldId9);
+                    break;
+                case (int) fieldId10:
+                    // Intentionally don't read the data. Parse should continue normally
+                    break;
+                default:
+                    fail("Unexpected field id " + pi.getFieldNumber());
+            }
+        }
+        stream.close();
+        assertEquals(0.0f, results[0]);
+        assertEquals(1.0f, results[1]);
+        assertEquals(-1234.432f, results[2]);
+        assertEquals(42.42f, results[3]);
+        assertEquals(Float.MIN_NORMAL, results[4]);
+        assertEquals(Float.MIN_VALUE, results[5]);
+        assertEquals(Float.NEGATIVE_INFINITY, results[6]);
+        assertEquals(Float.NaN, results[7]);
+        assertEquals(Float.POSITIVE_INFINITY, results[8]);
+    }
+
+    /**
+     * Test that reading with ProtoInputStream matches, and can read the output of standard proto.
+     */
+    public void testReadCompat() throws Exception {
+        testReadCompat(0);
+        testReadCompat(1);
+        testReadCompat(-1234.432f);
+        testReadCompat(42.42f);
+        testReadCompat(Float.MIN_NORMAL);
+        testReadCompat(Float.MIN_VALUE);
+        testReadCompat(Float.NEGATIVE_INFINITY);
+        testReadCompat(Float.NaN);
+        testReadCompat(Float.POSITIVE_INFINITY);
+    }
+
+    /**
+     * Implementation of testReadCompat with a given value.
+     */
+    private void testReadCompat(float val) throws Exception {
+        final long fieldFlags = ProtoStream.FIELD_COUNT_SINGLE | ProtoStream.FIELD_TYPE_FLOAT;
+        final long fieldId = fieldFlags | ((long) 20 & 0x0ffffffffL);
+
+        final Test.All all = new Test.All();
+        all.floatField = val;
+
+        final byte[] proto = MessageNano.toByteArray(all);
+
+        final ProtoInputStream pi = new ProtoInputStream(proto);
+        final Test.All readback = Test.All.parseFrom(proto);
+
+        float result = 0.0f; // start off with default value
+        while (pi.nextField() != ProtoInputStream.NO_MORE_FIELDS) {
+            switch (pi.getFieldNumber()) {
+                case (int) fieldId:
+                    result = pi.readFloat(fieldId);
+                    break;
+                default:
+                    fail("Unexpected field id " + pi.getFieldNumber());
+            }
+        }
+
+        assertEquals(readback.floatField, result);
+    }
+
+
+    public void testRepeated() throws IOException {
+        testRepeated(0);
+        testRepeated(1);
+        testRepeated(5);
+    }
+
+    private void testRepeated(int chunkSize) throws IOException {
+        final long fieldFlags = ProtoStream.FIELD_COUNT_REPEATED | ProtoStream.FIELD_TYPE_FLOAT;
+
+        final long fieldId1 = fieldFlags | ((long) 1 & 0x0ffffffffL);
+        final long fieldId2 = fieldFlags | ((long) 2 & 0x0ffffffffL);
+        final long fieldId3 = fieldFlags | ((long) 3 & 0x0ffffffffL);
+        final long fieldId4 = fieldFlags | ((long) 4 & 0x0ffffffffL);
+        final long fieldId5 = fieldFlags | ((long) 5 & 0x0ffffffffL);
+        final long fieldId6 = fieldFlags | ((long) 6 & 0x0ffffffffL);
+        final long fieldId7 = fieldFlags | ((long) 7 & 0x0ffffffffL);
+        final long fieldId8 = fieldFlags | ((long) 8 & 0x0ffffffffL);
+        final long fieldId9 = fieldFlags | ((long) 9 & 0x0ffffffffL);
+        final long fieldId10 = fieldFlags | ((long) 10 & 0x0ffffffffL);
+
+        final byte[] protobuf = new byte[]{
+                // 1 -> 0 - default value, written when repeated
+                (byte) 0x0d,
+                (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00,
+                // 2 -> 1
+                (byte) 0x15,
+                (byte) 0x00, (byte) 0x00, (byte) 0x80, (byte) 0x3f,
+                // 3 -> -1234.432
+                (byte) 0x1d,
+                (byte) 0xd3, (byte) 0x4d, (byte) 0x9a, (byte) 0xc4,
+                // 4 -> 42.42
+                (byte) 0x25,
+                (byte) 0x14, (byte) 0xae, (byte) 0x29, (byte) 0x42,
+                // 5 -> Float.MIN_NORMAL
+                (byte) 0x2d,
+                (byte) 0x00, (byte) 0x00, (byte) 0x80, (byte) 0x00,
+                // 6 -> DOUBLE.MIN_VALUE
+                (byte) 0x35,
+                (byte) 0x01, (byte) 0x00, (byte) 0x00, (byte) 0x00,
+                // 7 -> Float.NEGATIVE_INFINITY
+                (byte) 0x3d,
+                (byte) 0x00, (byte) 0x00, (byte) 0x80, (byte) 0xff,
+                // 8 -> Float.NaN
+                (byte) 0x45,
+                (byte) 0x00, (byte) 0x00, (byte) 0xc0, (byte) 0x7f,
+                // 9 -> Float.POSITIVE_INFINITY
+                (byte) 0x4d,
+                (byte) 0x00, (byte) 0x00, (byte) 0x80, (byte) 0x7f,
+
+                // 10 -> 1
+                (byte) 0x55,
+                (byte) 0x00, (byte) 0x00, (byte) 0x80, (byte) 0x3f,
+
+                // 1 -> 0 - default value, written when repeated
+                (byte) 0x0d,
+                (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00,
+                // 2 -> 1
+                (byte) 0x15,
+                (byte) 0x00, (byte) 0x00, (byte) 0x80, (byte) 0x3f,
+                // 3 -> -1234.432
+                (byte) 0x1d,
+                (byte) 0xd3, (byte) 0x4d, (byte) 0x9a, (byte) 0xc4,
+                // 4 -> 42.42
+                (byte) 0x25,
+                (byte) 0x14, (byte) 0xae, (byte) 0x29, (byte) 0x42,
+                // 5 -> Float.MIN_NORMAL
+                (byte) 0x2d,
+                (byte) 0x00, (byte) 0x00, (byte) 0x80, (byte) 0x00,
+                // 6 -> DOUBLE.MIN_VALUE
+                (byte) 0x35,
+                (byte) 0x01, (byte) 0x00, (byte) 0x00, (byte) 0x00,
+                // 7 -> Float.NEGATIVE_INFINITY
+                (byte) 0x3d,
+                (byte) 0x00, (byte) 0x00, (byte) 0x80, (byte) 0xff,
+                // 8 -> Float.NaN
+                (byte) 0x45,
+                (byte) 0x00, (byte) 0x00, (byte) 0xc0, (byte) 0x7f,
+                // 9 -> Float.POSITIVE_INFINITY
+                (byte) 0x4d,
+                (byte) 0x00, (byte) 0x00, (byte) 0x80, (byte) 0x7f,
+        };
+
+        InputStream stream = new ByteArrayInputStream(protobuf);
+        final ProtoInputStream pi = new ProtoInputStream(stream, chunkSize);
+        float[][] results = new float[9][2];
+        int[] indices = new int[9];
+        while (pi.nextField() != ProtoInputStream.NO_MORE_FIELDS) {
+
+            switch (pi.getFieldNumber()) {
+                case (int) fieldId1:
+                    results[0][indices[0]++] = pi.readFloat(fieldId1);
+                    break;
+                case (int) fieldId2:
+                    results[1][indices[1]++] = pi.readFloat(fieldId2);
+                    break;
+                case (int) fieldId3:
+                    results[2][indices[2]++] = pi.readFloat(fieldId3);
+                    break;
+                case (int) fieldId4:
+                    results[3][indices[3]++] = pi.readFloat(fieldId4);
+                    break;
+                case (int) fieldId5:
+                    results[4][indices[4]++] = pi.readFloat(fieldId5);
+                    break;
+                case (int) fieldId6:
+                    results[5][indices[5]++] = pi.readFloat(fieldId6);
+                    break;
+                case (int) fieldId7:
+                    results[6][indices[6]++] = pi.readFloat(fieldId7);
+                    break;
+                case (int) fieldId8:
+                    results[7][indices[7]++] = pi.readFloat(fieldId8);
+                    break;
+                case (int) fieldId9:
+                    results[8][indices[8]++] = pi.readFloat(fieldId9);
+                    break;
+                case (int) fieldId10:
+                    // Intentionally don't read the data. Parse should continue normally
+                    break;
+                default:
+                    fail("Unexpected field id " + pi.getFieldNumber());
+            }
+        }
+        stream.close();
+        assertEquals(0.0f, results[0][0]);
+        assertEquals(0.0f, results[0][1]);
+        assertEquals(1.0f, results[1][0]);
+        assertEquals(1.0f, results[1][1]);
+        assertEquals(-1234.432f, results[2][0]);
+        assertEquals(-1234.432f, results[2][1]);
+        assertEquals(42.42f, results[3][0]);
+        assertEquals(42.42f, results[3][1]);
+        assertEquals(Float.MIN_NORMAL, results[4][0]);
+        assertEquals(Float.MIN_NORMAL, results[4][1]);
+        assertEquals(Float.MIN_VALUE, results[5][0]);
+        assertEquals(Float.MIN_VALUE, results[5][1]);
+        assertEquals(Float.NEGATIVE_INFINITY, results[6][0]);
+        assertEquals(Float.NEGATIVE_INFINITY, results[6][1]);
+        assertEquals(Float.NaN, results[7][0]);
+        assertEquals(Float.NaN, results[7][1]);
+        assertEquals(Float.POSITIVE_INFINITY, results[8][0]);
+        assertEquals(Float.POSITIVE_INFINITY, results[8][1]);
+    }
+
+    /**
+     * Test that reading with ProtoInputStream matches, and can read the output of standard proto.
+     */
+    public void testRepeatedCompat() throws Exception {
+        testRepeatedCompat(new float[0]);
+        testRepeatedCompat(new float[]{0, 1, -1234.432f, 42.42f,
+                Float.MIN_NORMAL, Float.MIN_VALUE, Float.NEGATIVE_INFINITY, Float.NaN,
+                Float.POSITIVE_INFINITY,
+        });
+    }
+
+    /**
+     * Implementation of testRepeatedCompat with a given value.
+     */
+    private void testRepeatedCompat(float[] val) throws Exception {
+        final long fieldFlags = ProtoStream.FIELD_COUNT_REPEATED | ProtoStream.FIELD_TYPE_FLOAT;
+        final long fieldId = fieldFlags | ((long) 21 & 0x0ffffffffL);
+
+        final Test.All all = new Test.All();
+        all.floatFieldRepeated = val;
+
+        final byte[] proto = MessageNano.toByteArray(all);
+
+        final ProtoInputStream pi = new ProtoInputStream(proto);
+        final Test.All readback = Test.All.parseFrom(proto);
+
+        float[] result = new float[val.length];
+        int index = 0;
+        while (pi.nextField() != ProtoInputStream.NO_MORE_FIELDS) {
+            switch (pi.getFieldNumber()) {
+                case (int) fieldId:
+                    result[index++] = pi.readFloat(fieldId);
+                    break;
+                default:
+                    fail("Unexpected field id " + pi.getFieldNumber());
+            }
+        }
+
+        assertEquals(readback.floatFieldRepeated.length, result.length);
+        for (int i = 0; i < result.length; i++) {
+            assertEquals(readback.floatFieldRepeated[i], result[i]);
+        }
+    }
+
+
+    public void testPacked() throws IOException {
+        testPacked(0);
+        testPacked(1);
+        testPacked(5);
+    }
+
+    private void testPacked(int chunkSize) throws IOException {
+        final long fieldFlags = ProtoStream.FIELD_COUNT_PACKED | ProtoStream.FIELD_TYPE_FLOAT;
+
+        final long fieldId1 = fieldFlags | ((long) 1 & 0x0ffffffffL);
+        final long fieldId2 = fieldFlags | ((long) 2 & 0x0ffffffffL);
+        final long fieldId3 = fieldFlags | ((long) 3 & 0x0ffffffffL);
+        final long fieldId4 = fieldFlags | ((long) 4 & 0x0ffffffffL);
+        final long fieldId5 = fieldFlags | ((long) 5 & 0x0ffffffffL);
+        final long fieldId6 = fieldFlags | ((long) 6 & 0x0ffffffffL);
+        final long fieldId7 = fieldFlags | ((long) 7 & 0x0ffffffffL);
+        final long fieldId8 = fieldFlags | ((long) 8 & 0x0ffffffffL);
+        final long fieldId9 = fieldFlags | ((long) 9 & 0x0ffffffffL);
+        final long fieldId10 = fieldFlags | ((long) 10 & 0x0ffffffffL);
+
+        final byte[] protobuf = new byte[]{
+                // 1 -> 0 - default value, written when repeated
+                (byte) 0x0a,
+                (byte) 0x08,
+                (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00,
+                (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00,
+                // 2 -> 1
+                (byte) 0x12,
+                (byte) 0x08,
+                (byte) 0x00, (byte) 0x00, (byte) 0x80, (byte) 0x3f,
+                (byte) 0x00, (byte) 0x00, (byte) 0x80, (byte) 0x3f,
+                // 10 -> 1
+                (byte) 0x52,
+                (byte) 0x08,
+                (byte) 0x00, (byte) 0x00, (byte) 0x80, (byte) 0x3f,
+                (byte) 0x00, (byte) 0x00, (byte) 0x80, (byte) 0x3f,
+                // 3 -> -1234.432
+                (byte) 0x1a,
+                (byte) 0x08,
+                (byte) 0xd3, (byte) 0x4d, (byte) 0x9a, (byte) 0xc4,
+                (byte) 0xd3, (byte) 0x4d, (byte) 0x9a, (byte) 0xc4,
+                // 4 -> 42.42
+                (byte) 0x22,
+                (byte) 0x08,
+                (byte) 0x14, (byte) 0xae, (byte) 0x29, (byte) 0x42,
+                (byte) 0x14, (byte) 0xae, (byte) 0x29, (byte) 0x42,
+                // 5 -> Float.MIN_NORMAL
+                (byte) 0x2a,
+                (byte) 0x08,
+                (byte) 0x00, (byte) 0x00, (byte) 0x80, (byte) 0x00,
+                (byte) 0x00, (byte) 0x00, (byte) 0x80, (byte) 0x00,
+                // 6 -> DOUBLE.MIN_VALUE
+                (byte) 0x32,
+                (byte) 0x08,
+                (byte) 0x01, (byte) 0x00, (byte) 0x00, (byte) 0x00,
+                (byte) 0x01, (byte) 0x00, (byte) 0x00, (byte) 0x00,
+                // 7 -> Float.NEGATIVE_INFINITY
+                (byte) 0x3a,
+                (byte) 0x08,
+                (byte) 0x00, (byte) 0x00, (byte) 0x80, (byte) 0xff,
+                (byte) 0x00, (byte) 0x00, (byte) 0x80, (byte) 0xff,
+                // 8 -> Float.NaN
+                (byte) 0x42,
+                (byte) 0x08,
+                (byte) 0x00, (byte) 0x00, (byte) 0xc0, (byte) 0x7f,
+                (byte) 0x00, (byte) 0x00, (byte) 0xc0, (byte) 0x7f,
+                // 9 -> Float.POSITIVE_INFINITY
+                (byte) 0x4a,
+                (byte) 0x08,
+                (byte) 0x00, (byte) 0x00, (byte) 0x80, (byte) 0x7f,
+                (byte) 0x00, (byte) 0x00, (byte) 0x80, (byte) 0x7f,
+        };
+
+        InputStream stream = new ByteArrayInputStream(protobuf);
+        final ProtoInputStream pi = new ProtoInputStream(stream, chunkSize);
+        float[][] results = new float[9][2];
+        int[] indices = new int[9];
+        while (pi.nextField() != ProtoInputStream.NO_MORE_FIELDS) {
+
+            switch (pi.getFieldNumber()) {
+                case (int) fieldId1:
+                    results[0][indices[0]++] = pi.readFloat(fieldId1);
+                    break;
+                case (int) fieldId2:
+                    results[1][indices[1]++] = pi.readFloat(fieldId2);
+                    break;
+                case (int) fieldId3:
+                    results[2][indices[2]++] = pi.readFloat(fieldId3);
+                    break;
+                case (int) fieldId4:
+                    results[3][indices[3]++] = pi.readFloat(fieldId4);
+                    break;
+                case (int) fieldId5:
+                    results[4][indices[4]++] = pi.readFloat(fieldId5);
+                    break;
+                case (int) fieldId6:
+                    results[5][indices[5]++] = pi.readFloat(fieldId6);
+                    break;
+                case (int) fieldId7:
+                    results[6][indices[6]++] = pi.readFloat(fieldId7);
+                    break;
+                case (int) fieldId8:
+                    results[7][indices[7]++] = pi.readFloat(fieldId8);
+                    break;
+                case (int) fieldId9:
+                    results[8][indices[8]++] = pi.readFloat(fieldId9);
+                    break;
+                case (int) fieldId10:
+                    // Intentionally don't read the data. Parse should continue normally
+                    break;
+                default:
+                    fail("Unexpected field id " + pi.getFieldNumber());
+            }
+        }
+        stream.close();
+        assertEquals(0.0f, results[0][0]);
+        assertEquals(0.0f, results[0][1]);
+        assertEquals(1.0f, results[1][0]);
+        assertEquals(1.0f, results[1][1]);
+        assertEquals(-1234.432f, results[2][0]);
+        assertEquals(-1234.432f, results[2][1]);
+        assertEquals(42.42f, results[3][0]);
+        assertEquals(42.42f, results[3][1]);
+        assertEquals(Float.MIN_NORMAL, results[4][0]);
+        assertEquals(Float.MIN_NORMAL, results[4][1]);
+        assertEquals(Float.MIN_VALUE, results[5][0]);
+        assertEquals(Float.MIN_VALUE, results[5][1]);
+        assertEquals(Float.NEGATIVE_INFINITY, results[6][0]);
+        assertEquals(Float.NEGATIVE_INFINITY, results[6][1]);
+        assertEquals(Float.NaN, results[7][0]);
+        assertEquals(Float.NaN, results[7][1]);
+        assertEquals(Float.POSITIVE_INFINITY, results[8][0]);
+        assertEquals(Float.POSITIVE_INFINITY, results[8][1]);
+    }
+
+    /**
+     * Test that reading with ProtoInputStream matches, and can read the output of standard proto.
+     */
+    public void testPackedCompat() throws Exception {
+        testPackedCompat(new float[0]);
+        testPackedCompat(new float[]{0, 1, -1234.432f, 42.42f,
+                Float.MIN_NORMAL, Float.MIN_VALUE, Float.NEGATIVE_INFINITY, Float.NaN,
+                Float.POSITIVE_INFINITY,
+        });
+    }
+
+    /**
+     * Implementation of testPackedCompat with a given value.
+     */
+    private void testPackedCompat(float[] val) throws Exception {
+        final long fieldFlags = ProtoStream.FIELD_COUNT_PACKED | ProtoStream.FIELD_TYPE_FLOAT;
+        final long fieldId = fieldFlags | ((long) 22 & 0x0ffffffffL);
+
+        final Test.All all = new Test.All();
+        all.floatFieldPacked = val;
+
+        final byte[] proto = MessageNano.toByteArray(all);
+
+        final ProtoInputStream pi = new ProtoInputStream(proto);
+        final Test.All readback = Test.All.parseFrom(proto);
+
+        float[] result = new float[val.length];
+        int index = 0;
+        while (pi.nextField() != ProtoInputStream.NO_MORE_FIELDS) {
+            switch (pi.getFieldNumber()) {
+                case (int) fieldId:
+                    result[index++] = pi.readFloat(fieldId);
+                    break;
+                default:
+                    fail("Unexpected field id " + pi.getFieldNumber());
+            }
+        }
+
+        assertEquals(readback.floatFieldPacked.length, result.length);
+        for (int i = 0; i < result.length; i++) {
+            assertEquals(readback.floatFieldPacked[i], result[i]);
+        }
+    }
+
+    /**
+     * Test that using the wrong read method throws an exception
+     */
+    public void testBadReadType() throws IOException {
+        final long fieldFlags = ProtoStream.FIELD_COUNT_SINGLE | ProtoStream.FIELD_TYPE_FLOAT;
+
+        final long fieldId1 = fieldFlags | ((long) 1 & 0x0ffffffffL);
+
+        final byte[] protobuf = new byte[]{
+                // 1 -> 1
+                (byte) 0x0d,
+                (byte) 0x01, (byte) 0x00, (byte) 0x00, (byte) 0x00,
+        };
+
+        ProtoInputStream pi = new ProtoInputStream(protobuf);
+        pi.isNextField(fieldId1);
+        try {
+            pi.readBoolean(fieldId1);
+            fail("Should have throw IllegalArgumentException");
+        } catch (IllegalArgumentException iae) {
+            // good
+        }
+
+        pi = new ProtoInputStream(protobuf);
+        pi.isNextField(fieldId1);
+        try {
+            pi.readDouble(fieldId1);
+            fail("Should have throw IllegalArgumentException");
+        } catch (IllegalArgumentException iae) {
+            // good
+        }
+
+        pi = new ProtoInputStream(protobuf);
+        pi.isNextField(fieldId1);
+        try {
+            pi.readInt(fieldId1);
+            fail("Should have throw IllegalArgumentException");
+        } catch (IllegalArgumentException iae) {
+            // good
+        }
+
+        pi = new ProtoInputStream(protobuf);
+        pi.isNextField(fieldId1);
+        try {
+            pi.readLong(fieldId1);
+            fail("Should have throw IllegalArgumentException");
+        } catch (IllegalArgumentException iae) {
+            // good
+        }
+
+        pi = new ProtoInputStream(protobuf);
+        pi.isNextField(fieldId1);
+        try {
+            pi.readBytes(fieldId1);
+            fail("Should have throw IllegalArgumentException");
+        } catch (IllegalArgumentException iae) {
+            // good
+        }
+
+        pi = new ProtoInputStream(protobuf);
+        pi.isNextField(fieldId1);
+        try {
+            pi.readString(fieldId1);
+            fail("Should have throw IllegalArgumentException");
+        } catch (IllegalArgumentException iae) {
+            // good
+        }
+    }
+
+    /**
+     * Test that unexpected wrong wire types will throw an exception
+     */
+    public void testBadWireType() throws IOException {
+        final long fieldFlags = ProtoStream.FIELD_COUNT_SINGLE | ProtoStream.FIELD_TYPE_FLOAT;
+
+        final long fieldId1 = fieldFlags | ((long) 1 & 0x0ffffffffL);
+        final long fieldId2 = fieldFlags | ((long) 2 & 0x0ffffffffL);
+        final long fieldId3 = fieldFlags | ((long) 3 & 0x0ffffffffL);
+        final long fieldId6 = fieldFlags | ((long) 6 & 0x0ffffffffL);
+
+        final byte[] protobuf = new byte[]{
+                // 1 : varint -> 1
+                (byte) 0x08,
+                (byte) 0x01,
+                // 2 : fixed64 -> 0x1
+                (byte) 0x11,
+                (byte) 0x01, (byte) 0x00, (byte) 0x00, (byte) 0x00,
+                (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00,
+                // 3 : length delimited -> { 1 }
+                (byte) 0x1a,
+                (byte) 0x04,
+                (byte) 0x01, (byte) 0x00, (byte) 0x00, (byte) 0x00,
+                // 6 : fixed32
+                (byte) 0x35,
+                (byte) 0x01, (byte) 0x00, (byte) 0x00, (byte) 0x00,
+        };
+
+        InputStream stream = new ByteArrayInputStream(protobuf);
+        final ProtoInputStream pi = new ProtoInputStream(stream);
+
+        while (pi.nextField() != ProtoInputStream.NO_MORE_FIELDS) {
+            try {
+                switch (pi.getFieldNumber()) {
+                    case (int) fieldId1:
+                        pi.readFloat(fieldId1);
+                        fail("Should have thrown a WireTypeMismatchException");
+                        break;
+                    case (int) fieldId2:
+                        pi.readFloat(fieldId2);
+                        fail("Should have thrown a WireTypeMismatchException");
+                        break;
+                    case (int) fieldId3:
+                        pi.readFloat(fieldId3);
+                        // don't fail, length delimited is ok (represents packed floats)
+                        break;
+                    case (int) fieldId6:
+                        pi.readFloat(fieldId6);
+                        // don't fail, fixed32 is ok
+                        break;
+                    default:
+                        fail("Unexpected field id " + pi.getFieldNumber());
+                }
+            } catch (WireTypeMismatchException wtme) {
+                // good
+            }
+        }
+        stream.close();
+    }
+}

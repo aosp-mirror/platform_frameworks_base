@@ -2840,31 +2840,6 @@ package android.util.proto {
     method public void writeRawZigZag64(long);
   }
 
-  public final class ProtoInputStream extends android.util.proto.ProtoStream {
-    ctor public ProtoInputStream(java.io.InputStream, int);
-    ctor public ProtoInputStream(java.io.InputStream);
-    ctor public ProtoInputStream(byte[]);
-    method public int decodeZigZag32(int);
-    method public long decodeZigZag64(long);
-    method public String dumpDebugData();
-    method public void end(long);
-    method public int getFieldNumber();
-    method public int getOffset();
-    method public int getWireType();
-    method public boolean isNextField(long) throws java.io.IOException;
-    method public int nextField() throws java.io.IOException;
-    method public boolean readBoolean(long) throws java.io.IOException;
-    method public byte[] readBytes(long) throws java.io.IOException;
-    method public double readDouble(long) throws java.io.IOException;
-    method public float readFloat(long) throws java.io.IOException;
-    method public int readInt(long) throws java.io.IOException;
-    method public long readLong(long) throws java.io.IOException;
-    method public String readString(long) throws java.io.IOException;
-    method public void skip() throws java.io.IOException;
-    method public long start(long) throws java.io.IOException;
-    field public static final int NO_MORE_FIELDS = -1; // 0xffffffff
-  }
-
   public final class ProtoOutputStream extends android.util.proto.ProtoStream {
     ctor public ProtoOutputStream();
     ctor public ProtoOutputStream(int);
