@@ -32,6 +32,7 @@ class DumpApkCommand : public Command {
  public:
   explicit DumpApkCommand(const std::string&& name, text::Printer* printer, IDiagnostics* diag)
       : Command(name), printer_(printer), diag_(diag) {
+        SetDescription("Dump information about an APK or APC.");
   }
 
   text::Printer* GetPrinter() {
