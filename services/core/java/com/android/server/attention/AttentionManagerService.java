@@ -122,7 +122,7 @@ public class AttentionManagerService extends SystemService {
     /**
      * Returns {@code true} if attention service is supported on this device.
      */
-    public boolean isAttentionServiceSupported() {
+    private boolean isAttentionServiceSupported() {
         return isServiceEnabled() && isServiceAvailable();
     }
 
@@ -135,7 +135,7 @@ public class AttentionManagerService extends SystemService {
      *
      * @return {@code true} if the framework was able to send the provided callback to the service
      */
-    public boolean checkAttention(int requestCode, long timeout,
+    private boolean checkAttention(int requestCode, long timeout,
             AttentionCallbackInternal callback) {
         Preconditions.checkNotNull(callback);
 
@@ -213,7 +213,7 @@ public class AttentionManagerService extends SystemService {
     }
 
     /** Cancels the specified attention check. */
-    public void cancelAttentionCheck(int requestCode) {
+    private void cancelAttentionCheck(int requestCode) {
         synchronized (mLock) {
             final UserState userState = peekCurrentUserStateLocked();
             if (userState == null) {
