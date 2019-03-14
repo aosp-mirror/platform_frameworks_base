@@ -993,6 +993,19 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
         mSealed = true;
 
+        if (params.isStaged) {
+            final PackageInstallerSession activeSession = mStagingManager.getActiveSession();
+            final boolean anotherSessionAlreadyInProgress =
+                    activeSession != null && sessionId != activeSession.sessionId
+                            && mParentSessionId != activeSession.sessionId;
+            if (anotherSessionAlreadyInProgress) {
+                throw new PackageManagerException(
+                        PackageManager.INSTALL_FAILED_OTHER_STAGED_SESSION_IN_PROGRESS,
+                        "There is already in-progress committed staged session "
+                                + activeSession.sessionId, null);
+            }
+        }
+
         // Read transfers from the original owner stay open, but as the session's data
         // cannot be modified anymore, there is no leak of information. For staged sessions,
         // further validation is performed by the staging manager.
@@ -1073,13 +1086,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     private void handleCommit() {
         if (params.isStaged) {
-            try {
-                mStagingManager.commitSession(this);
-            } catch (StagingManager.AlreadyInProgressStagedSessionException e) {
-                dispatchSessionFinished(
-                        PackageManager.INSTALL_FAILED_OTHER_STAGED_SESSION_IN_PROGRESS,
-                        e.getMessage(), null);
-            }
+            mStagingManager.commitSession(this);
             destroyInternal();
             dispatchSessionFinished(PackageManager.INSTALL_SUCCEEDED, "Session staged", null);
             return;
