@@ -23,6 +23,7 @@ import android.service.contentcapture.SnapshotData;
 import android.util.LocalLog;
 import android.util.Slog;
 import android.view.contentcapture.ContentCaptureContext;
+import android.view.contentcapture.ContentCaptureSession;
 import android.view.contentcapture.ContentCaptureSessionId;
 
 import com.android.internal.annotations.GuardedBy;
@@ -44,6 +45,12 @@ final class ContentCaptureServerSession {
     private final ContentCaptureContext mContentCaptureContext;
 
     /**
+     * Reference to the binder object help at the client-side process and used to set its state.
+     */
+    @NonNull
+    private final IResultReceiver mSessionStateReceiver;
+
+    /**
      * Canonical session id.
      */
     private final String mId;
@@ -56,7 +63,7 @@ final class ContentCaptureServerSession {
     ContentCaptureServerSession(@NonNull IBinder activityToken,
             @NonNull ContentCapturePerUserService service,
             @NonNull RemoteContentCaptureService remoteService,
-            @NonNull ComponentName appComponentName,
+            @NonNull ComponentName appComponentName, @NonNull IResultReceiver sessionStateReceiver,
             int taskId, int displayId, @NonNull String sessionId, int uid, int flags) {
         mActivityToken = activityToken;
         mService = service;
@@ -65,6 +72,7 @@ final class ContentCaptureServerSession {
         mRemoteService = remoteService;
         mContentCaptureContext = new ContentCaptureContext(/* clientContext= */ null,
                 appComponentName, taskId, displayId, flags);
+        mSessionStateReceiver = sessionStateReceiver;
     }
 
     /**
@@ -79,7 +87,8 @@ final class ContentCaptureServerSession {
      */
     @GuardedBy("mLock")
     public void notifySessionStartedLocked(@NonNull IResultReceiver clientReceiver) {
-        mRemoteService.onSessionStarted(mContentCaptureContext, mId, mUid, clientReceiver);
+        mRemoteService.onSessionStarted(mContentCaptureContext, mId, mUid, clientReceiver,
+                ContentCaptureSession.STATE_ACTIVE);
     }
 
     /**
@@ -127,6 +136,17 @@ final class ContentCaptureServerSession {
         if (notifyRemoteService) {
             mRemoteService.onSessionFinished(mId);
         }
+    }
+
+    /**
+     * Called to restore the active state of a session that was paused while the service died.
+     */
+    @GuardedBy("mLock")
+    public void resurrectLocked() {
+        mRemoteService.onSessionStarted(new ContentCaptureContext(mContentCaptureContext,
+                ContentCaptureContext.FLAG_RECONNECTED), mId, mUid, mSessionStateReceiver,
+                ContentCaptureSession.STATE_ACTIVE
+                        | ContentCaptureSession.STATE_SERVICE_RESURRECTED);
     }
 
     @GuardedBy("mLock")
