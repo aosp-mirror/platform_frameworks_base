@@ -1299,7 +1299,12 @@ public class UserManagerService extends IUserManager.Stub {
             }
         }
         if (changed) {
-            sendUserInfoChangedBroadcast(userId);
+            long ident = Binder.clearCallingIdentity();
+            try {
+                sendUserInfoChangedBroadcast(userId);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
         }
     }
 
