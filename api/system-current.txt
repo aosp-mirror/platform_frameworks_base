@@ -6440,6 +6440,7 @@ package android.service.contentcapture {
     field @NonNull public static final android.os.Parcelable.Creator<android.service.contentcapture.ActivityEvent> CREATOR;
     field public static final int TYPE_ACTIVITY_PAUSED = 2; // 0x2
     field public static final int TYPE_ACTIVITY_RESUMED = 1; // 0x1
+    field public static final int TYPE_ACTIVITY_STOPPED = 23; // 0x17
   }
 
   public abstract class ContentCaptureService extends android.app.Service {
