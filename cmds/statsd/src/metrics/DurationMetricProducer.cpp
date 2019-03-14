@@ -559,26 +559,10 @@ void DurationMetricProducer::flushIfNeededLocked(const int64_t& eventTimeNs) {
         return;
     }
     VLOG("flushing...........");
-    for (auto whatIt = mCurrentSlicedDurationTrackerMap.begin();
-            whatIt != mCurrentSlicedDurationTrackerMap.end();) {
-        for (auto it = whatIt->second.begin(); it != whatIt->second.end();) {
-            if (it->second->flushIfNeeded(eventTimeNs, &mPastBuckets)) {
-                VLOG("erase bucket for key %s %s",
-                     whatIt->first.toString().c_str(), it->first.toString().c_str());
-                it = whatIt->second.erase(it);
-            } else {
-                ++it;
-            }
-        }
-        if (whatIt->second.empty()) {
-            whatIt = mCurrentSlicedDurationTrackerMap.erase(whatIt);
-        } else {
-            whatIt++;
-        }
-    }
-
     int numBucketsForward = 1 + (eventTimeNs - currentBucketEndTimeNs) / mBucketSizeNs;
-    mCurrentBucketStartTimeNs = currentBucketEndTimeNs + (numBucketsForward - 1) * mBucketSizeNs;
+    int64_t nextBucketNs = currentBucketEndTimeNs + (numBucketsForward - 1) * mBucketSizeNs;
+    flushCurrentBucketLocked(eventTimeNs, nextBucketNs);
+
     mCurrentBucketNum += numBucketsForward;
 }
 
@@ -602,6 +586,7 @@ void DurationMetricProducer::flushCurrentBucketLocked(const int64_t& eventTimeNs
         }
     }
     StatsdStats::getInstance().noteBucketCount(mMetricId);
+    mCurrentBucketStartTimeNs = nextBucketStartTimeNs;
 }
 
 void DurationMetricProducer::dumpStatesLocked(FILE* out, bool verbose) const {
