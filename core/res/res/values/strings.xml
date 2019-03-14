@@ -3602,6 +3602,11 @@
     <string name="adb_active_notification_message">Tap to turn off USB debugging</string>
     <string name="adb_active_notification_message" product="tv">Select to disable USB debugging.</string>
 
+    <!-- Title of notification shown when Test Harness Mode is enabled. [CHAR LIMIT=NONE] -->
+    <string name="test_harness_mode_notification_title">Test Harness Mode enabled</string>
+    <!-- Message of notification shown when Test Harness Mode is enabled. [CHAR LIMIT=NONE] -->
+    <string name="test_harness_mode_notification_message">Perform a factory reset to disable Test Harness Mode.</string>
+
     <!-- Title of notification shown when contaminant is detected on the USB port. [CHAR LIMIT=NONE] -->
     <string name="usb_contaminant_detected_title">Liquid or debris in USB port</string>
     <!-- Message of notification shown when contaminant is detected on the USB port. [CHAR LIMIT=NONE] -->

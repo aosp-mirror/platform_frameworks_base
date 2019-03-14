@@ -2060,6 +2060,8 @@
   <java-symbol type="string" name="accessibility_binding_label" />
   <java-symbol type="string" name="adb_active_notification_message" />
   <java-symbol type="string" name="adb_active_notification_title" />
+  <java-symbol type="string" name="test_harness_mode_notification_title" />
+  <java-symbol type="string" name="test_harness_mode_notification_message" />
   <java-symbol type="string" name="taking_remote_bugreport_notification_title" />
   <java-symbol type="string" name="share_remote_bugreport_notification_title" />
   <java-symbol type="string" name="sharing_remote_bugreport_notification_title" />
