@@ -155,6 +155,22 @@ public final class DeviceConfig {
     public static final String NAMESPACE_NETD_NATIVE = "netd_native";
 
     /**
+     * Namespace for all runtime related features.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String NAMESPACE_RUNTIME = "runtime";
+
+    /**
+     * Namespace for all runtime native related features.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String NAMESPACE_RUNTIME_NATIVE = "runtime_native";
+
+    /**
      * Namespace for all runtime native boot related features. Boot in this case refers to the
      * fact that the properties only take affect after rebooting the device.
      *
@@ -178,63 +194,6 @@ public final class DeviceConfig {
      */
     @SystemApi
     public static final String NAMESPACE_TEXTCLASSIFIER = "textclassifier";
-
-    /**
-     * Namespace for all runtime related features.
-     *
-     * @hide
-     */
-    @SystemApi
-    public interface Runtime {
-        String NAMESPACE = "runtime";
-
-        /**
-         * Whether or not we use the precompiled layout.
-         */
-        String USE_PRECOMPILED_LAYOUT = "view.precompiled_layout_enabled";
-    }
-
-    /**
-     * Namespace for all runtime native related features.
-     *
-     * @hide
-     */
-    @SystemApi
-    public interface RuntimeNative {
-        String NAMESPACE = "runtime_native";
-
-        /**
-         * Zygote flags. See {@link com.internal.os.Zygote}.
-         */
-
-        /**
-         * If {@code true}, enables the unspecialized app process (USAP) pool feature.
-         *
-         * @hide for internal use only
-         */
-        String USAP_POOL_ENABLED = "usap_pool_enabled";
-
-        /**
-         * The maximum number of processes to keep in the USAP pool.
-         *
-         * @hide for internal use only
-         */
-        String USAP_POOL_SIZE_MAX = "usap_pool_size_max";
-
-        /**
-         * The minimum number of processes to keep in the USAP pool.
-         *
-         * @hide for internal use only
-         */
-        String USAP_POOL_SIZE_MIN = "usap_pool_size_min";
-
-        /**
-         * The threshold used to determine if the pool should be refilled.
-         *
-         * @hide for internal use only
-         */
-        String USAP_POOL_REFILL_THRESHOLD = "usap_refill_threshold";
-    }
 
     /**
      * Privacy related properties definitions.

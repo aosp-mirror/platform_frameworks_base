@@ -412,7 +412,7 @@ public final class Zygote {
         return SystemProperties.get(
                 String.join(".",
                         "persist.device_config",
-                        DeviceConfig.RuntimeNative.NAMESPACE,
+                        DeviceConfig.NAMESPACE_RUNTIME_NATIVE,
                         propertyName),
                 defaultValue);
     }
@@ -440,7 +440,7 @@ public final class Zygote {
         return SystemProperties.getBoolean(
                 String.join(".",
                         "persist.device_config",
-                        DeviceConfig.RuntimeNative.NAMESPACE,
+                        DeviceConfig.NAMESPACE_RUNTIME_NATIVE,
                         propertyName),
                 defaultValue);
     }
