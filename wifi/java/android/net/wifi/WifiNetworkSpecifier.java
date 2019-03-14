@@ -183,10 +183,12 @@ public final class WifiNetworkSpecifier extends NetworkSpecifier implements Parc
         /**
          * Specifies whether this represents an Enhanced Open (OWE) network.
          *
+         * @param isEnhancedOpen {@code true} to indicate that the network uses enhanced open,
+         *                       {@code false} otherwise.
          * @return Instance of {@link Builder} to enable chaining of the builder method.
          */
-        public @NonNull Builder setIsEnhancedOpen() {
-            mIsEnhancedOpen = true;
+        public @NonNull Builder setIsEnhancedOpen(boolean isEnhancedOpen) {
+            mIsEnhancedOpen = isEnhancedOpen;
             return this;
         }
 
@@ -261,10 +263,12 @@ public final class WifiNetworkSpecifier extends NetworkSpecifier implements Parc
          * hidden networks need to be explicitly probed for.</li>
          * <li>If not set, defaults to false (i.e not a hidden network).</li>
          *
+         * @param isHiddenSsid {@code true} to indicate that the network is hidden, {@code false}
+         *                     otherwise.
          * @return Instance of {@link Builder} to enable chaining of the builder method.
          */
-        public @NonNull Builder setIsHiddenSsid() {
-            mIsHiddenSSID = true;
+        public @NonNull Builder setIsHiddenSsid(boolean isHiddenSsid) {
+            mIsHiddenSSID = isHiddenSsid;
             return this;
         }
 

@@ -1171,39 +1171,49 @@ public class WifiConfiguration implements Parcelable {
          * This network is disabled because EAP-TLS failure
          */
         public static final int DISABLED_TLS_VERSION_MISMATCH = 8;
+        /**
+         * This network is disabled due to WifiManager.disconnect() call.
+         */
+        public static final int DISABLED_BY_WIFI_MANAGER_DISCONNECT = 9;
+
         // Values above are for temporary disablement; values below are for permanent disablement.
+        /**
+         * The starting index for permanent network selection disabled reasons
+         */
+        public static final int NETWORK_SELECTION_DISABLED_PERMANENT_STARTING_INDEX = 10;
         /**
          * This network is disabled due to absence of user credentials
          */
-        public static final int DISABLED_AUTHENTICATION_NO_CREDENTIALS = 9;
+        public static final int DISABLED_AUTHENTICATION_NO_CREDENTIALS = 10;
         /**
          * This network is permanently disabled because it has no Internet access and user does not
          * want to stay connected.
          */
-        public static final int DISABLED_NO_INTERNET_PERMANENT = 10;
+        public static final int DISABLED_NO_INTERNET_PERMANENT = 11;
         /**
-         * This network is disabled due to WifiManager disable it explicitly
+         * This network is disabled due to WifiManager.disable() call.
          */
-        public static final int DISABLED_BY_WIFI_MANAGER = 11;
+        public static final int DISABLED_BY_WIFI_MANAGER = 12;
         /**
          * This network is disabled due to user switching
          */
-        public static final int DISABLED_DUE_TO_USER_SWITCH = 12;
+        public static final int DISABLED_DUE_TO_USER_SWITCH = 13;
         /**
          * This network is disabled due to wrong password
          */
-        public static final int DISABLED_BY_WRONG_PASSWORD = 13;
+        public static final int DISABLED_BY_WRONG_PASSWORD = 14;
         /**
          * This network is disabled because service is not subscribed
          */
-        public static final int DISABLED_AUTHENTICATION_NO_SUBSCRIPTION = 14;
+        public static final int DISABLED_AUTHENTICATION_NO_SUBSCRIPTION = 15;
         /**
          * This Maximum disable reason value
          */
-        public static final int NETWORK_SELECTION_DISABLED_MAX = 15;
+        public static final int NETWORK_SELECTION_DISABLED_MAX = 16;
 
         /**
-         * Quality network selection disable reason String (for debug purpose)
+         * Quality network selection disable reason String (for debug purposes & configuration
+         * storage)
          */
         public static final String[] QUALITY_NETWORK_SELECTION_DISABLE_REASON = {
                 "NETWORK_SELECTION_ENABLE",
@@ -1215,6 +1225,7 @@ public class WifiConfiguration implements Parcelable {
                 "NETWORK_SELECTION_DISABLED_NO_INTERNET_TEMPORARY",
                 "NETWORK_SELECTION_DISABLED_WPS_START",
                 "NETWORK_SELECTION_DISABLED_TLS_VERSION",
+                "NETWORK_SELECTION_DISABLED_BY_WIFI_MANAGER_DISCONNECT",
                 "NETWORK_SELECTION_DISABLED_AUTHENTICATION_NO_CREDENTIALS",
                 "NETWORK_SELECTION_DISABLED_NO_INTERNET_PERMANENT",
                 "NETWORK_SELECTION_DISABLED_BY_WIFI_MANAGER",

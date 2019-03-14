@@ -114,7 +114,7 @@ public class WifiNetworkSpecifierTest {
                 .setSsid(TEST_SSID)
                 .setBssid(MacAddress.fromString(TEST_BSSID))
                 .setWpa2EnterpriseConfig(enterpriseConfig)
-                .setIsHiddenSsid()
+                .setIsHiddenSsid(true)
                 .build();
 
         assertTrue(specifier instanceof WifiNetworkSpecifier);
@@ -278,7 +278,7 @@ public class WifiNetworkSpecifierTest {
         new WifiNetworkSpecifier.Builder()
                 .setBssidPattern(MacAddress.fromString(TEST_BSSID_OUI_BASE_ADDRESS),
                         MacAddress.fromString(TEST_BSSID_OUI_MASK))
-                .setIsHiddenSsid()
+                .setIsHiddenSsid(true)
                 .build();
     }
 
@@ -305,7 +305,7 @@ public class WifiNetworkSpecifierTest {
     public void testWifiNetworkSpecifierBuilderWithSsidMatchPatternForHiddenNetwork() {
         new WifiNetworkSpecifier.Builder()
                 .setSsidPattern(new PatternMatcher(TEST_SSID, PATTERN_PREFIX))
-                .setIsHiddenSsid()
+                .setIsHiddenSsid(true)
                 .build();
     }
 
@@ -341,14 +341,14 @@ public class WifiNetworkSpecifierTest {
     /**
      * Ensure {@link WifiNetworkSpecifier.Builder#build()} throws an exception
      * when both {@link WifiNetworkSpecifier.Builder#setWpa3Passphrase(String)} and
-     * {@link WifiNetworkSpecifier.Builder#setIsEnhancedOpen()} are invoked.
+     * {@link WifiNetworkSpecifier.Builder#setIsEnhancedOpen(boolean)} are invoked.
      */
     @Test(expected = IllegalStateException.class)
     public void testWifiNetworkSpecifierBuilderWithBothWpa3PasphraseAndEnhancedOpen() {
         new WifiNetworkSpecifier.Builder()
                 .setSsidPattern(new PatternMatcher(TEST_SSID, PATTERN_LITERAL))
                 .setWpa3Passphrase(TEST_PRESHARED_KEY)
-                .setIsEnhancedOpen()
+                .setIsEnhancedOpen(true)
                 .build();
     }
 
