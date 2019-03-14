@@ -206,10 +206,10 @@
     <dimen name="status_bar_icon_padding">0dp</dimen>
 
     <!-- the padding on the start of the statusbar -->
-    <dimen name="status_bar_padding_start">6dp</dimen>
+    <dimen name="status_bar_padding_start">8dp</dimen>
 
     <!-- the padding on the end of the statusbar -->
-    <dimen name="status_bar_padding_end">6dp</dimen>
+    <dimen name="status_bar_padding_end">8dp</dimen>
 
     <!-- the radius of the overflow dot in the status bar -->
     <dimen name="overflow_dot_radius">2dp</dimen>
@@ -433,7 +433,7 @@
     <dimen name="qs_detail_item_icon_marginEnd">20dp</dimen>
     <dimen name="qs_header_tooltip_height">18dp</dimen>
     <dimen name="qs_header_alarm_icon_size">18dp</dimen>
-    <dimen name="qs_header_mobile_icon_size">18dp</dimen>
+    <dimen name="qs_header_mobile_icon_size">@dimen/status_bar_icon_drawing_size</dimen>
     <dimen name="qs_header_alarm_text_margin_start">6dp</dimen>
     <dimen name="qs_header_separator_width">8dp</dimen>
     <dimen name="qs_header_carrier_separator_width">6dp</dimen>
@@ -442,7 +442,8 @@
     <dimen name="qs_footer_padding_start">16dp</dimen>
     <dimen name="qs_footer_padding_end">16dp</dimen>
     <dimen name="qs_footer_icon_size">16dp</dimen>
-    <dimen name="qs_paged_tile_layout_padding_bottom">16dp</dimen>
+    <dimen name="qs_paged_tile_layout_padding_bottom">0dp</dimen>
+    <dimen name="qs_header_top_margin">12dp</dimen>
 
     <dimen name="qs_notif_collapsed_space">64dp</dimen>
 
