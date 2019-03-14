@@ -20,9 +20,11 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import android.app.WindowConfiguration;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
@@ -70,6 +72,22 @@ public class RootWindowContainerTests extends WindowTestsBase {
         assertFalse(topBar.isVisible());
         assertFalse(app.isVisible());
         assertFalse(mWm.mRoot.isAnyNonToastWindowVisibleForUid(FAKE_CALLING_UID));
+    }
+
+    @Test
+    public void testUpdateDefaultDisplayWindowingModeOnSettingsRetrieved() {
+        synchronized (mWm.mGlobalLock) {
+            assertEquals(WindowConfiguration.WINDOWING_MODE_FULLSCREEN,
+                    mWm.getDefaultDisplayContentLocked().getWindowingMode());
+
+            mWm.mIsPc = true;
+            mWm.mSupportsFreeformWindowManagement = true;
+
+            mWm.mRoot.onSettingsRetrieved();
+
+            assertEquals(WindowConfiguration.WINDOWING_MODE_FREEFORM,
+                    mWm.getDefaultDisplayContentLocked().getWindowingMode());
+        }
     }
 }
 

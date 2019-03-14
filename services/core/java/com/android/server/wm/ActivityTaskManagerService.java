@@ -748,6 +748,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             mWindowManager.setSupportsPictureInPicture(mSupportsPictureInPicture);
             mWindowManager.setSupportsFreeformWindowManagement(mSupportsFreeformWindowManagement);
             mWindowManager.setIsPc(isPc);
+            mWindowManager.mRoot.onSettingsRetrieved();
             // This happens before any activities are started, so we can change global configuration
             // in-place.
             updateConfigurationLocked(configuration, null, true);
