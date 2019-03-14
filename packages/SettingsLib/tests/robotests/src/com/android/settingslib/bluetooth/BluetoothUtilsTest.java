@@ -15,36 +15,55 @@
  */
 package com.android.settingslib.bluetooth;
 
-import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
-import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothClass;
+import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.util.Pair;
 
-import com.android.settingslib.graph.BluetoothDeviceLayerDrawable;
-
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Answers;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 
 @RunWith(RobolectricTestRunner.class)
 public class BluetoothUtilsTest {
 
-    @Test
-    public void testGetBluetoothDrawable_noBatteryLevel_returnSimpleDrawable() {
-        final Drawable drawable = BluetoothUtils.getBluetoothDrawable(
-                RuntimeEnvironment.application, com.android.internal.R.drawable.ic_bt_laptop,
-                BluetoothDevice.BATTERY_LEVEL_UNKNOWN, 1 /* iconScale */);
+    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
+    private CachedBluetoothDevice mCachedBluetoothDevice;
+    private Context mContext;
 
-        assertThat(drawable).isNotInstanceOf(BluetoothDeviceLayerDrawable.class);
+    @Before
+    public void setUp() {
+        MockitoAnnotations.initMocks(this);
+
+        mContext = spy(RuntimeEnvironment.application);
     }
 
     @Test
-    public void testGetBluetoothDrawable_hasBatteryLevel_returnLayerDrawable() {
-        final Drawable drawable = BluetoothUtils.getBluetoothDrawable(
-                RuntimeEnvironment.application, com.android.internal.R.drawable.ic_bt_laptop,
-                10 /* batteryLevel */, 1 /* iconScale */);
+    public void getBtClassDrawableWithDescription_typePhone_returnPhoneDrawable() {
+        when(mCachedBluetoothDevice.getBtClass().getMajorDeviceClass()).thenReturn(
+                BluetoothClass.Device.Major.PHONE);
+        final Pair<Drawable, String> pair = BluetoothUtils.getBtClassDrawableWithDescription(
+                mContext, mCachedBluetoothDevice);
 
-        assertThat(drawable).isInstanceOf(BluetoothDeviceLayerDrawable.class);
+        verify(mContext).getDrawable(com.android.internal.R.drawable.ic_phone);
+    }
+
+    @Test
+    public void getBtClassDrawableWithDescription_typeComputer_returnComputerDrawable() {
+        when(mCachedBluetoothDevice.getBtClass().getMajorDeviceClass()).thenReturn(
+                BluetoothClass.Device.Major.COMPUTER);
+        final Pair<Drawable, String> pair = BluetoothUtils.getBtClassDrawableWithDescription(
+                mContext, mCachedBluetoothDevice);
+
+        verify(mContext).getDrawable(com.android.internal.R.drawable.ic_bt_laptop);
     }
 }
