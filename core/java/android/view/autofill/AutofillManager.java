@@ -3146,6 +3146,10 @@ public final class AutofillManager {
             if (afm == null) return null;
 
             final View view = afm.getClient().autofillClientFindViewByAutofillIdTraversal(id);
+            if (view == null) {
+                Log.w(TAG, "getViewCoordinates(" + id + "): could not find view");
+                return null;
+            }
             final Rect windowVisibleDisplayFrame = new Rect();
             view.getWindowVisibleDisplayFrame(windowVisibleDisplayFrame);
             final int[] location = new int[2];
