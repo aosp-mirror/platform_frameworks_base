@@ -111,10 +111,15 @@ static pid_t gSystemServerPid = 0;
 
 static const char kIsolatedStorage[] = "persist.sys.isolated_storage";
 static const char kIsolatedStorageSnapshot[] = "sys.isolated_storage_snapshot";
-static const char kZygoteClassName[] = "com/android/internal/os/Zygote";
+
+static constexpr const char* kZygoteClassName = "com/android/internal/os/Zygote";
 static jclass gZygoteClass;
 static jmethodID gCallPostForkSystemServerHooks;
 static jmethodID gCallPostForkChildHooks;
+
+static constexpr const char* kZygoteInitClassName = "com/android/internal/os/ZygoteInit";
+static jclass gZygoteInitClass;
+static jmethodID gCreateSystemServerClassLoader;
 
 static bool g_is_security_enforced = true;
 
@@ -1420,6 +1425,15 @@ static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids,
       fail_fn("Error calling post fork system server hooks.");
     }
 
+    // Prefetch the classloader for the system server. This is done early to
+    // allow a tie-down of the proper system server selinux domain.
+    env->CallStaticVoidMethod(gZygoteInitClass, gCreateSystemServerClassLoader);
+    if (env->ExceptionCheck()) {
+      // Be robust here. The Java code will attempt to create the classloader
+      // at a later point (but may not have rights to use AoT artifacts).
+      env->ExceptionClear();
+    }
+
     // TODO(oth): Remove hardcoded label here (b/117874058).
     static const char* kSystemServerLabel = "u:r:system_server:s0";
     if (selinux_android_setcon(kSystemServerLabel) != 0) {
@@ -1986,6 +2000,13 @@ int register_com_android_internal_os_Zygote(JNIEnv* env) {
   gCallPostForkChildHooks = GetStaticMethodIDOrDie(env, gZygoteClass, "callPostForkChildHooks",
                                                    "(IZZLjava/lang/String;)V");
 
-  return RegisterMethodsOrDie(env, "com/android/internal/os/Zygote", gMethods, NELEM(gMethods));
+  gZygoteInitClass = MakeGlobalRefOrDie(env, FindClassOrDie(env, kZygoteInitClassName));
+  gCreateSystemServerClassLoader = GetStaticMethodIDOrDie(env, gZygoteInitClass,
+                                                          "createSystemServerClassLoader",
+                                                          "()V");
+
+  RegisterMethodsOrDie(env, "com/android/internal/os/Zygote", gMethods, NELEM(gMethods));
+
+  return JNI_OK;
 }
 }  // namespace android
