@@ -1798,8 +1798,8 @@ public class AudioRecord implements AudioRouting, MicrophoneDirection,
      *
      * @return true if sucessful.
      */
-    public boolean setMicrophoneDirection(@DirectionMode int direction) {
-        return native_set_microphone_direction(direction) == AudioSystem.SUCCESS;
+    public boolean setPreferredMicrophoneDirection(@DirectionMode int direction) {
+        return native_set_preferred_microphone_direction(direction) == AudioSystem.SUCCESS;
     }
 
     /**
@@ -1810,10 +1810,11 @@ public class AudioRecord implements AudioRouting, MicrophoneDirection,
      * though 0 (no zoom) to 1 (maximum zoom).
      * @return true if sucessful.
      */
-    public boolean setMicrophoneFieldDimension(@FloatRange(from = -1.0, to = 1.0) float zoom) {
+    public boolean setPreferredMicrophoneFieldDimension(
+                            @FloatRange(from = -1.0, to = 1.0) float zoom) {
         Preconditions.checkArgument(
                 zoom >= -1 && zoom <= 1, "Argument must fall between -1 & 1 (inclusive)");
-        return native_set_microphone_field_dimension(zoom) == AudioSystem.SUCCESS;
+        return native_set_preferred_microphone_field_dimension(zoom) == AudioSystem.SUCCESS;
     }
 
     //---------------------------------------------------------
@@ -1969,8 +1970,8 @@ public class AudioRecord implements AudioRouting, MicrophoneDirection,
 
     private native int native_getPortId();
 
-    private native int native_set_microphone_direction(int direction);
-    private native int native_set_microphone_field_dimension(float zoom);
+    private native int native_set_preferred_microphone_direction(int direction);
+    private native int native_set_preferred_microphone_field_dimension(float zoom);
 
     //---------------------------------------------------------
     // Utility methods
