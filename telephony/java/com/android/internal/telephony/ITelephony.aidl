@@ -1699,6 +1699,11 @@ interface ITelephony {
      */
      int getNetworkSelectionMode(int subId);
 
+     /**
+     * Return true if the device is in emergency sms mode, false otherwise.
+     */
+     boolean isInEmergencySmsMode();
+
     /**
      * Get a list of SMS apps on a user.
      */

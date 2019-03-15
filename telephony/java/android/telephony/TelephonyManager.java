@@ -6999,6 +6999,35 @@ public class TelephonyManager {
     }
 
     /**
+     * Query Telephony to see if there has recently been an emergency SMS sent to the network by the
+     * user and we are still within the time interval after the emergency SMS was sent that we are
+     * considered in Emergency SMS mode.
+     *
+     * <p>This mode is used by other applications to allow them to perform special functionality,
+     * such as allow the GNSS service to provide user location to the carrier network for emergency
+     * when an emergency SMS is sent. This interval is set by
+     * {@link CarrierConfigManager#KEY_EMERGENCY_SMS_MODE_TIMER_MS_INT}. If
+     * the carrier does not support this mode, this function will always return false.
+     *
+     * @return true if this device is in emergency SMS mode, false otherwise.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public boolean isInEmergencySmsMode() {
+
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.isInEmergencySmsMode();
+            }
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "getNetworkSelectionMode RemoteException", ex);
+        }
+        return false;
+    }
+
+    /**
      * Set the preferred network type.
      *
      * <p>Requires Permission:
