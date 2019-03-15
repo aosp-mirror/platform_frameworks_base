@@ -704,6 +704,12 @@ public final class DefaultPermissionGrantPolicy {
                         TelephonyManager.ACTION_EMERGENCY_ASSISTANCE, userId),
                 userId, CONTACTS_PERMISSIONS, PHONE_PERMISSIONS);
 
+        // STOPSHIP(b/128289173): remove once EmergencyInfo app was replaced.
+        grantSystemFixedPermissionsToSystemPackage(
+                getDefaultSystemHandlerActivityPackage(
+                        "com.android.emergency.action.EMERGENCY_ASSISTANCE", userId),
+                userId, CONTACTS_PERMISSIONS, PHONE_PERMISSIONS);
+
         // NFC Tag viewer
         Intent nfcTagIntent = new Intent(Intent.ACTION_VIEW)
                 .setType("vnd.android.cursor.item/ndef_msg");
