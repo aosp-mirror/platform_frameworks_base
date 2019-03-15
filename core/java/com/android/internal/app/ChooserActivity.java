@@ -680,7 +680,7 @@ public class ChooserActivity extends ResolverActivity {
                             & DocumentsContract.Document.FLAG_SUPPORTS_THUMBNAIL) != 0;
                 }
             }
-        } catch (SecurityException e) {
+        } catch (SecurityException | NullPointerException e) {
             Log.w(TAG, "Error loading file preview", e);
         }
 
@@ -918,6 +918,8 @@ public class ChooserActivity extends ResolverActivity {
         if (isSendAction(in)) {
             in.addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT |
                     Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+
+            in.fixUris(getUserId());
         }
     }
 
