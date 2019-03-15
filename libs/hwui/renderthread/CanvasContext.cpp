@@ -103,7 +103,7 @@ CanvasContext::CanvasContext(RenderThread& thread, bool translucent, RenderNode*
         , mOpaque(!translucent)
         , mAnimationContext(contextFactory->createAnimationContext(mRenderThread.timeLord()))
         , mJankTracker(&thread.globalProfileData(), thread.mainDisplayInfo())
-        , mProfiler(mJankTracker.frames())
+        , mProfiler(mJankTracker.frames(), thread.timeLord().frameIntervalNanos())
         , mContentDrawBounds(0, 0, 0, 0)
         , mRenderPipeline(std::move(renderPipeline)) {
     rootRenderNode->makeRoot();
