@@ -10256,15 +10256,20 @@ public class TelephonyManager {
     }
 
     /**
-     * Checks if the supplied number is an emergency number based on current locale, sim, default,
-     * modem and network.
+     * Identifies if the supplied phone number is an emergency number that matches a known
+     * emergency number based on current locale, SIM card(s), Android database, modem, network,
+     * or defaults.
+     *
+     * <p>This method assumes that only dialable phone numbers are passed in; non-dialable
+     * numbers are not considered emergency numbers. A dialable phone number consists only
+     * of characters/digits identified by {@link PhoneNumberUtils#isDialable(char)}.
      *
      * <p>The subscriptions which the identification would be based on, are all the active
      * subscriptions, no matter which subscription could be used to create TelephonyManager.
      *
      * @param number - the number to look up
      * @return {@code true} if the given number is an emergency number based on current locale,
-     * sim, modem and network; {@code false} otherwise.
+     * SIM card(s), Android database, modem, network or defaults; {@code false} otherwise.
      */
     public boolean isEmergencyNumber(@NonNull String number) {
         try {
