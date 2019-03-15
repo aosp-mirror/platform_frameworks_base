@@ -10261,11 +10261,11 @@ public class TelephonyManager {
     /**
      * Update availability of a list of networks in the current location.
      *
-     * This api should be called by opportunistic network selection app to inform
-     * OpportunisticNetwork Service about the availability of a network at the current location.
-     * This information will be used by OpportunisticNetwork service to decide to attach to the
-     * network opportunistically.
-     * If an empty list is passed, it is assumed that no network is available.
+     * This api should be called to inform OpportunisticNetwork Service about the availability
+     * of a network at the current location. This information will be used by OpportunisticNetwork
+     * service to decide to attach to the network opportunistically. If an empty list is passed,
+     * it is assumed that no network is available and will result in disabling the modem stack
+     * to save power.
      * Requires that the calling app has carrier privileges on both primary and
      * secondary subscriptions (see {@link #hasCarrierPrivileges}), or has permission
      * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}.
