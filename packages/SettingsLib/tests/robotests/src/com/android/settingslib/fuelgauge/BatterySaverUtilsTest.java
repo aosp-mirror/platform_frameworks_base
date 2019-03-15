@@ -60,7 +60,7 @@ public class BatterySaverUtilsTest {
 
         when(mMockContext.getContentResolver()).thenReturn(mMockResolver);
         when(mMockContext.getSystemService(eq(PowerManager.class))).thenReturn(mMockPowerManager);
-        when(mMockPowerManager.setPowerSaveMode(anyBoolean())).thenReturn(true);
+        when(mMockPowerManager.setPowerSaveModeEnabled(anyBoolean())).thenReturn(true);
     }
 
     @Test
@@ -71,7 +71,7 @@ public class BatterySaverUtilsTest {
         assertThat(BatterySaverUtils.setPowerSaveMode(mMockContext, true, true)).isFalse();
 
         verify(mMockContext, times(1)).sendBroadcast(any(Intent.class));
-        verify(mMockPowerManager, times(0)).setPowerSaveMode(anyBoolean());
+        verify(mMockPowerManager, times(0)).setPowerSaveModeEnabled(anyBoolean());
 
         // They shouldn't have changed.
         assertEquals(-1,
@@ -88,7 +88,7 @@ public class BatterySaverUtilsTest {
         assertThat(BatterySaverUtils.setPowerSaveMode(mMockContext, true, true)).isTrue();
 
         verify(mMockContext, times(0)).sendBroadcast(any(Intent.class));
-        verify(mMockPowerManager, times(1)).setPowerSaveMode(eq(true));
+        verify(mMockPowerManager, times(1)).setPowerSaveModeEnabled(eq(true));
 
         assertEquals(1, Secure.getInt(mMockResolver, Secure.LOW_POWER_WARNING_ACKNOWLEDGED, -1));
         assertEquals(1, Secure.getInt(mMockResolver, Secure.LOW_POWER_MANUAL_ACTIVATION_COUNT, -2));
@@ -102,7 +102,7 @@ public class BatterySaverUtilsTest {
         assertThat(BatterySaverUtils.setPowerSaveMode(mMockContext, true, true)).isTrue();
 
         verify(mMockContext, times(0)).sendBroadcast(any(Intent.class));
-        verify(mMockPowerManager, times(1)).setPowerSaveMode(eq(true));
+        verify(mMockPowerManager, times(1)).setPowerSaveModeEnabled(eq(true));
 
         assertEquals(1, Secure.getInt(mMockResolver, Secure.LOW_POWER_WARNING_ACKNOWLEDGED, -1));
         assertEquals(2, Secure.getInt(mMockResolver, Secure.LOW_POWER_MANUAL_ACTIVATION_COUNT, -2));
@@ -116,7 +116,7 @@ public class BatterySaverUtilsTest {
         assertThat(BatterySaverUtils.setPowerSaveMode(mMockContext, true, false)).isTrue();
 
         verify(mMockContext, times(0)).sendBroadcast(any(Intent.class));
-        verify(mMockPowerManager, times(1)).setPowerSaveMode(eq(true));
+        verify(mMockPowerManager, times(1)).setPowerSaveModeEnabled(eq(true));
 
         assertEquals(1, Secure.getInt(mMockResolver, Secure.LOW_POWER_WARNING_ACKNOWLEDGED, -1));
         assertEquals(1, Secure.getInt(mMockResolver, Secure.LOW_POWER_MANUAL_ACTIVATION_COUNT, -2));
@@ -131,7 +131,7 @@ public class BatterySaverUtilsTest {
         assertThat(BatterySaverUtils.setPowerSaveMode(mMockContext, false, false)).isTrue();
 
         verify(mMockContext, times(0)).sendBroadcast(any(Intent.class));
-        verify(mMockPowerManager, times(1)).setPowerSaveMode(eq(false));
+        verify(mMockPowerManager, times(1)).setPowerSaveModeEnabled(eq(false));
 
         assertEquals(-1, Secure.getInt(mMockResolver, Secure.LOW_POWER_WARNING_ACKNOWLEDGED, -1));
         assertEquals(-2,
@@ -147,7 +147,7 @@ public class BatterySaverUtilsTest {
         assertThat(BatterySaverUtils.setPowerSaveMode(mMockContext, false, true)).isTrue();
 
         verify(mMockContext, times(0)).sendBroadcast(any(Intent.class));
-        verify(mMockPowerManager, times(1)).setPowerSaveMode(eq(false));
+        verify(mMockPowerManager, times(1)).setPowerSaveModeEnabled(eq(false));
 
         assertEquals(-1, Secure.getInt(mMockResolver, Secure.LOW_POWER_WARNING_ACKNOWLEDGED, -1));
         assertEquals(-2,
