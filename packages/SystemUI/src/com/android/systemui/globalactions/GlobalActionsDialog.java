@@ -24,6 +24,7 @@ import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STR
 import android.app.ActivityManager;
 import android.app.Dialog;
 import android.app.KeyguardManager;
+import android.app.PendingIntent;
 import android.app.WallpaperManager;
 import android.app.admin.DevicePolicyManager;
 import android.app.trust.TrustManager;
@@ -86,6 +87,7 @@ import com.android.systemui.Interpolators;
 import com.android.systemui.MultiListLayout;
 import com.android.systemui.MultiListLayout.MultiListAdapter;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
+import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.GlobalActions.GlobalActionsManager;
 import com.android.systemui.plugins.GlobalActionsPanelPlugin;
 import com.android.systemui.statusbar.phone.ScrimController;
@@ -161,6 +163,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     private final ScreenRecordHelper mScreenRecordHelper;
 
     private final Extension<GlobalActionsPanelPlugin> mPanelExtension;
+    private ActivityStarter mActivityStarter;
 
     /**
      * @param context everything needs a context :(
@@ -210,6 +213,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             .newExtension(GlobalActionsPanelPlugin.class)
             .withPlugin(GlobalActionsPanelPlugin.class)
             .build();
+        mActivityStarter = Dependency.get(ActivityStarter.class);
     }
 
     /**
@@ -398,11 +402,22 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
 
         GlobalActionsPanelPlugin.PanelViewController panelViewController =
                 mPanelExtension.get() != null
-                        ? mPanelExtension.get().onPanelShown(() -> {
-                            if (mDialog != null) {
-                                mDialog.dismiss();
-                            }
-                        })
+                        ? mPanelExtension.get().onPanelShown(
+                                new GlobalActionsPanelPlugin.Callbacks() {
+                                    @Override
+                                    public void dismissGlobalActionsMenu() {
+                                        if (mDialog != null) {
+                                            mDialog.dismiss();
+                                        }
+                                    }
+
+                                    @Override
+                                    public void startPendingIntentDismissingKeyguard(
+                                            PendingIntent intent) {
+                                        mActivityStarter
+                                                .startPendingIntentDismissingKeyguard(intent);
+                                    }
+                                })
                         : null;
         ActionsDialog dialog = new ActionsDialog(mContext, mAdapter, panelViewController);
         dialog.setCanceledOnTouchOutside(false); // Handled by the custom class.
@@ -1673,6 +1688,9 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         void dismissImmediately() {
             super.dismiss();
             mShowing = false;
+            if (mPanelController != null) {
+                mPanelController.onDismissed();
+            }
         }
 
         private float getAnimTranslation() {
