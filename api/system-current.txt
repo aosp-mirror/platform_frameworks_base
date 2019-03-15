@@ -985,6 +985,7 @@ package android.app.contentsuggestions {
 
   public final class ContentSuggestionsManager {
     method public void classifyContentSelections(@NonNull android.app.contentsuggestions.ClassificationsRequest, @NonNull java.util.concurrent.Executor, @NonNull android.app.contentsuggestions.ContentSuggestionsManager.ClassificationsCallback);
+    method public boolean isEnabled();
     method public void notifyInteraction(@NonNull String, @NonNull android.os.Bundle);
     method public void provideContextImage(int, @NonNull android.os.Bundle);
     method public void suggestContentSelections(@NonNull android.app.contentsuggestions.SelectionsRequest, @NonNull java.util.concurrent.Executor, @NonNull android.app.contentsuggestions.ContentSuggestionsManager.SelectionsCallback);

@@ -1188,7 +1188,7 @@ final class SystemServiceRegistry {
                                 Context.CONTENT_SUGGESTIONS_SERVICE);
                         IContentSuggestionsManager service =
                                 IContentSuggestionsManager.Stub.asInterface(b);
-                        return new ContentSuggestionsManager(service);
+                        return new ContentSuggestionsManager(ctx.getUserId(), service);
                     }
                 });
 
