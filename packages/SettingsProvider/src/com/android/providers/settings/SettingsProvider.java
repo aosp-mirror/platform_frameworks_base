@@ -1103,9 +1103,7 @@ public class SettingsProvider extends ContentProvider {
 
     private boolean mutateConfigSetting(String name, String value, String prefix,
             boolean makeDefault, int operation, int mode) {
-
-        // TODO(b/117663715): Ensure the caller can access the setting.
-        // enforceReadPermission(WRITE_DEVICE_CONFIG);
+        enforceWritePermission(Manifest.permission.WRITE_DEVICE_CONFIG);
 
         // Perform the mutation.
         synchronized (mLock) {
