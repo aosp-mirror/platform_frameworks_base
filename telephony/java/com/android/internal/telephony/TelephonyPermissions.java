@@ -317,7 +317,8 @@ public final class TelephonyPermissions {
                 Settings.Global.PRIVILEGED_DEVICE_IDENTIFIER_PRIV_CHECK_RELAXED, 0) == 1;
         ApplicationInfo callingPackageInfo = null;
         try {
-            callingPackageInfo = context.getPackageManager().getApplicationInfo(callingPackage, 0);
+            callingPackageInfo = context.getPackageManager().getApplicationInfoAsUser(
+                    callingPackage, 0, UserHandle.getUserId(uid));
             if (callingPackageInfo.isSystemApp()) {
                 isPreinstalled = true;
                 if (callingPackageInfo.isPrivilegedApp()) {
