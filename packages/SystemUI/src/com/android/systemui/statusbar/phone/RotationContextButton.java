@@ -83,6 +83,10 @@ public class RotationContextButton extends ContextualButton {
     private final Stub mRotationWatcher = new Stub() {
         @Override
         public void onRotationChanged(final int rotation) throws RemoteException {
+            if (getCurrentView() == null) {
+                return;
+            }
+
             // We need this to be scheduled as early as possible to beat the redrawing of
             // window in response to the orientation change.
             Handler h = getCurrentView().getHandler();
@@ -235,7 +239,9 @@ public class RotationContextButton extends ContextualButton {
 
         // If window rotation matches suggested rotation, remove any current suggestions
         if (rotation == windowRotation) {
-            getCurrentView().removeCallbacks(mRemoveRotationProposal);
+            if (getCurrentView() != null) {
+                getCurrentView().removeCallbacks(mRemoveRotationProposal);
+            }
             setRotateSuggestionButtonState(false /* visible */);
             return;
         }
@@ -259,9 +265,11 @@ public class RotationContextButton extends ContextualButton {
             // If the navbar isn't shown, flag the rotate icon to be shown should the navbar become
             // visible given some time limit.
             mPendingRotationSuggestion = true;
-            getCurrentView().removeCallbacks(mCancelPendingRotationProposal);
-            getCurrentView().postDelayed(mCancelPendingRotationProposal,
-                    NAVBAR_HIDDEN_PENDING_ICON_TIMEOUT_MS);
+            if (getCurrentView() != null) {
+                getCurrentView().removeCallbacks(mCancelPendingRotationProposal);
+                getCurrentView().postDelayed(mCancelPendingRotationProposal,
+                        NAVBAR_HIDDEN_PENDING_ICON_TIMEOUT_MS);
+            }
         }
     }
 
@@ -328,7 +336,9 @@ public class RotationContextButton extends ContextualButton {
     private void onRotationSuggestionsDisabled() {
         // Immediately hide the rotate button and clear any planned removal
         setRotateSuggestionButtonState(false /* visible */, true /* force */);
-        getCurrentView().removeCallbacks(mRemoveRotationProposal);
+        if (getCurrentView() != null) {
+            getCurrentView().removeCallbacks(mRemoveRotationProposal);
+        }
     }
 
     private void showAndLogRotationSuggestion() {
@@ -361,6 +371,10 @@ public class RotationContextButton extends ContextualButton {
     }
 
     private void rescheduleRotationTimeout(final boolean reasonHover) {
+        if (getCurrentView() == null) {
+            return;
+        }
+
         // May be called due to a new rotation proposal or a change in hover state
         if (reasonHover) {
             // Don't reschedule if a hide animator is running
