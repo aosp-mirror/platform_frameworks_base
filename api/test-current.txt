@@ -234,6 +234,7 @@ package android.content {
     method public android.os.UserHandle getUser();
     method public int getUserId();
     method public void setAutofillCompatibilityEnabled(boolean);
+    field public static final String TEST_NETWORK_SERVICE = "test_network";
   }
 
 }
