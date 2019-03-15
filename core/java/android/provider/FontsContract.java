@@ -34,6 +34,7 @@ import android.graphics.fonts.FontFamily;
 import android.graphics.fonts.FontStyle;
 import android.graphics.fonts.FontVariationAxis;
 import android.net.Uri;
+import android.os.Build.VERSION_CODES;
 import android.os.CancellationSignal;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -641,35 +642,25 @@ public class FontsContract {
                 continue;
             }
             try {
-                Font font = null;
-                try {
-                    font = new Font.Builder(buffer)
+                final Font font = new Font.Builder(buffer)
                         .setWeight(fontInfo.getWeight())
                         .setSlant(fontInfo.isItalic()
                                 ? FontStyle.FONT_SLANT_ITALIC : FontStyle.FONT_SLANT_UPRIGHT)
                         .setTtcIndex(fontInfo.getTtcIndex())
                         .setFontVariationSettings(fontInfo.getAxes())
                         .build();
-                } catch (IllegalArgumentException e) {
-                    // The exception happens if the unsupported font is passed. We suppress this
-                    // exception and just ignore this font here since there is no way of
-                    // resolving this issue by users during inflating layout.
-                    Log.w(TAG, "Ignoring font file since failed to create font object."
-                            + " The font file is not supported on this platform.");
-                    continue;
-                }
                 if (familyBuilder == null) {
                     familyBuilder = new FontFamily.Builder(font);
                 } else {
                     try {
                         familyBuilder.addFont(font);
                     } catch (IllegalArgumentException e) {
-                        // The exception happens if the same style font is added to the family.
-                        // We suppress this exception and just ignore this font here since there is
-                        // no way of resolving this issue by users during inflating layout.
-                        Log.w(TAG,
-                                "Ignoring font file since the same style font is already added.");
-                        continue;
+                        if (context.getApplicationInfo().targetSdkVersion <= VERSION_CODES.P) {
+                            // Surpress the IllegalArgumentException for keeping the backward
+                            // compatibility.
+                            continue;
+                        }
+                        throw e;
                     }
                 }
             } catch (IOException e) {
