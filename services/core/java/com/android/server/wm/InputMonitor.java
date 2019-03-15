@@ -25,7 +25,6 @@ import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_DISABLE_WALLP
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_DRAG;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_FOCUS_LIGHT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_INPUT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_TASK_POSITIONING;
@@ -129,15 +128,6 @@ final class InputMonitor {
 
                 // If there's a drag in flight, provide a pseudo-window to catch drag input
                 final boolean inDrag = mService.mDragDropController.dragDropActiveLocked();
-                if (inDrag) {
-                    if (DEBUG_DRAG) {
-                        Log.d(TAG_WM, "Inserting drag window");
-                    }
-                    mService.mDragDropController.showInputSurface(mInputTransaction, mDisplayId);
-                } else {
-                    mService.mDragDropController.hideInputSurface(mInputTransaction, mDisplayId);
-                }
-
                 final boolean inPositioning =
                         mService.mTaskPositioningController.isPositioningLocked();
                 if (inPositioning) {
