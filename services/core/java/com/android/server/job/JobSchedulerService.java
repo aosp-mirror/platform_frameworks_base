@@ -2494,24 +2494,33 @@ public class JobSchedulerService extends com.android.server.SystemService
             }
         }
 
-        // The expensive check last: validate that the defined package+service is
+        // The expensive check: validate that the defined package+service is
         // still present & viable.
-        final boolean componentPresent;
+        final ServiceInfo service;
         try {
-            componentPresent = (AppGlobals.getPackageManager().getServiceInfo(
+            service = AppGlobals.getPackageManager().getServiceInfo(
                     job.getServiceComponent(), PackageManager.MATCH_DEBUG_TRIAGED_MISSING,
-                    job.getUserId()) != null);
+                    job.getUserId());
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }
 
-        if (DEBUG) {
-            Slog.v(TAG, "isReadyToBeExecutedLocked: " + job.toShortString()
-                    + " componentPresent=" + componentPresent);
+        if (service == null) {
+            if (DEBUG) {
+                Slog.v(TAG, "isReadyToBeExecutedLocked: " + job.toShortString()
+                        + " component not present");
+            }
+            return false;
         }
 
         // Everything else checked out so far, so this is the final yes/no check
-        return componentPresent;
+        final boolean appIsBad = mActivityManagerInternal.isAppBad(service.applicationInfo);
+        if (DEBUG) {
+            if (appIsBad) {
+                Slog.i(TAG, "App is bad for " + job.toShortString() + " so not runnable");
+            }
+        }
+        return !appIsBad;
     }
 
     private void evaluateControllerStatesLocked(final JobStatus job) {
