@@ -3271,8 +3271,11 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         // Attach it to app if the target is part of an app and such app is covering the entire
         // screen. If it's not covering the entire screen the IME might extend beyond the apps
         // bounds.
-        if (mInputMethodTarget != null && mInputMethodTarget.mAppToken != null &&
-                mInputMethodTarget.getWindowingMode() == WINDOWING_MODE_FULLSCREEN) {
+        if (mInputMethodTarget != null && mInputMethodTarget.mAppToken != null
+                && mInputMethodTarget.getWindowingMode() == WINDOWING_MODE_FULLSCREEN
+                // An activity with override bounds should be letterboxed inside its parent bounds,
+                // so it doesn't fill the screen.
+                && mInputMethodTarget.mAppToken.matchParentBounds()) {
             return mInputMethodTarget.mAppToken.getSurfaceControl();
         }
 

@@ -34,11 +34,12 @@ import static android.view.WindowManager.LayoutParams.TYPE_VOICE_INTERACTION;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyBoolean;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.eq;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.same;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
@@ -660,6 +661,15 @@ public class DisplayContentTests extends WindowTestsBase {
                     WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
             assertEquals(dc.getWindowingLayer(), dc.computeImeParent());
         }
+    }
+
+    @Test
+    public void testComputeImeParent_app_notMatchParentBounds() {
+        spyOn(mAppWindow.mAppToken);
+        doReturn(false).when(mAppWindow.mAppToken).matchParentBounds();
+        mDisplayContent.mInputMethodTarget = mAppWindow;
+        // The surface parent of IME should be the display instead of app window.
+        assertEquals(mDisplayContent.getWindowingLayer(), mDisplayContent.computeImeParent());
     }
 
     @Test
