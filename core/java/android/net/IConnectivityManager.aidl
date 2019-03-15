@@ -220,4 +220,6 @@ interface IConnectivityManager
 
     void registerTetheringEventCallback(ITetheringEventCallback callback, String callerPkg);
     void unregisterTetheringEventCallback(ITetheringEventCallback callback, String callerPkg);
+
+    IBinder startOrGetTestNetworkService();
 }
