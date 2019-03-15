@@ -201,6 +201,7 @@ java_defaults {
         "core/java/android/net/INetworkScoreService.aidl",
         "core/java/android/net/INetworkStatsService.aidl",
         "core/java/android/net/INetworkStatsSession.aidl",
+        "core/java/android/net/ISocketKeepaliveCallback.aidl",
         "core/java/android/net/ITestNetworkManager.aidl",
         "core/java/android/net/ITetheringEventCallback.aidl",
         "core/java/android/net/ITetheringStatsProvider.aidl",
