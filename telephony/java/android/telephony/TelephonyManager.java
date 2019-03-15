@@ -81,6 +81,7 @@ import com.android.internal.telephony.CellNetworkScanResult;
 import com.android.internal.telephony.INumberVerificationCallback;
 import com.android.internal.telephony.IOns;
 import com.android.internal.telephony.IPhoneSubInfo;
+import com.android.internal.telephony.ISetOpportunisticDataCallback;
 import com.android.internal.telephony.ITelephony;
 import com.android.internal.telephony.ITelephonyRegistry;
 import com.android.internal.telephony.IUpdateAvailableNetworksCallback;
@@ -10195,21 +10196,40 @@ public class TelephonyManager {
      * @param subId which opportunistic subscription
      * {@link SubscriptionManager#getOpportunisticSubscriptions} is preferred for cellular data.
      * Pass {@link SubscriptionManager#DEFAULT_SUBSCRIPTION_ID} to unset the preference
-     * @return true if request is accepted, else false.
+     * @param needValidation whether validation is needed before switch happens.
+     * @param executor The executor of where the callback will execute.
+     * @param callback Callback will be triggered once it succeeds or failed.
+     *                 See {@link TelephonyManager.SetOpportunisticSubscriptionResult}
+     *                 for more details. Pass null if don't care about the result.
      *
      */
-    public boolean setPreferredOpportunisticDataSubscription(int subId) {
+    public void setPreferredOpportunisticDataSubscription(int subId, boolean needValidation,
+            @Nullable @CallbackExecutor Executor executor, @Nullable Consumer<Integer> callback) {
         String pkgForDebug = mContext != null ? mContext.getOpPackageName() : "<unknown>";
         try {
             IOns iOpportunisticNetworkService = getIOns();
-            if (iOpportunisticNetworkService != null) {
-                return iOpportunisticNetworkService
-                        .setPreferredDataSubscriptionId(subId, pkgForDebug);
+            if (iOpportunisticNetworkService == null) {
+                return;
             }
+            ISetOpportunisticDataCallback callbackStub = new ISetOpportunisticDataCallback.Stub() {
+                @Override
+                public void onComplete(int result) {
+                    if (executor == null || callback == null) {
+                        return;
+                    }
+                    Binder.withCleanCallingIdentity(() -> executor.execute(() -> {
+                        callback.accept(result);
+                    }));
+                }
+            };
+
+            iOpportunisticNetworkService
+                    .setPreferredDataSubscriptionId(subId, needValidation, callbackStub,
+                            pkgForDebug);
         } catch (RemoteException ex) {
             Rlog.e(TAG, "setPreferredDataSubscriptionId RemoteException", ex);
         }
-        return false;
+        return;
     }
 
     /**
@@ -10244,11 +10264,11 @@ public class TelephonyManager {
     /**
      * Update availability of a list of networks in the current location.
      *
-     * This api should be called by opportunistic network selection app to inform
-     * OpportunisticNetwork Service about the availability of a network at the current location.
-     * This information will be used by OpportunisticNetwork service to decide to attach to the
-     * network opportunistically.
-     * If an empty list is passed, it is assumed that no network is available.
+     * This api should be called to inform OpportunisticNetwork Service about the availability
+     * of a network at the current location. This information will be used by OpportunisticNetwork
+     * service to decide to attach to the network opportunistically. If an empty list is passed,
+     * it is assumed that no network is available and will result in disabling the modem stack
+     * to save power.
      * Requires that the calling app has carrier privileges on both primary and
      * secondary subscriptions (see {@link #hasCarrierPrivileges}), or has permission
      * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}.
