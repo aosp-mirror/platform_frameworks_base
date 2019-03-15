@@ -21,8 +21,8 @@ import static android.net.NetworkAgent.CMD_ADD_KEEPALIVE_PACKET_FILTER;
 import static android.net.NetworkAgent.CMD_REMOVE_KEEPALIVE_PACKET_FILTER;
 import static android.net.NetworkAgent.CMD_START_SOCKET_KEEPALIVE;
 import static android.net.NetworkAgent.CMD_STOP_SOCKET_KEEPALIVE;
-import static android.net.NetworkAgent.EVENT_SOCKET_KEEPALIVE;
 import static android.net.SocketKeepalive.BINDER_DIED;
+import static android.net.SocketKeepalive.DATA_RECEIVED;
 import static android.net.SocketKeepalive.ERROR_INVALID_INTERVAL;
 import static android.net.SocketKeepalive.ERROR_INVALID_IP_ADDRESS;
 import static android.net.SocketKeepalive.ERROR_INVALID_NETWORK;
@@ -34,6 +34,7 @@ import static android.net.SocketKeepalive.SUCCESS;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.net.ISocketKeepaliveCallback;
 import android.net.KeepalivePacketData;
 import android.net.NattKeepalivePacketData;
 import android.net.NetworkAgent;
@@ -47,7 +48,6 @@ import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
-import android.os.Messenger;
 import android.os.Process;
 import android.os.RemoteException;
 import android.system.ErrnoException;
@@ -99,8 +99,7 @@ public class KeepaliveTracker {
      */
     class KeepaliveInfo implements IBinder.DeathRecipient {
         // Bookkeeping data.
-        private final Messenger mMessenger;
-        private final IBinder mBinder;
+        private final ISocketKeepaliveCallback mCallback;
         private final int mUid;
         private final int mPid;
         private final NetworkAgentInfo mNai;
@@ -124,15 +123,13 @@ public class KeepaliveTracker {
         private static final int STARTED = 3;
         private int mStartedState = NOT_STARTED;
 
-        KeepaliveInfo(@NonNull Messenger messenger,
-                @NonNull IBinder binder,
+        KeepaliveInfo(@NonNull ISocketKeepaliveCallback callback,
                 @NonNull NetworkAgentInfo nai,
                 @NonNull KeepalivePacketData packet,
                 int interval,
                 int type,
                 @NonNull FileDescriptor fd) {
-            mMessenger = messenger;
-            mBinder = binder;
+            mCallback = callback;
             mPid = Binder.getCallingPid();
             mUid = Binder.getCallingUid();
 
@@ -143,7 +140,7 @@ public class KeepaliveTracker {
             mFd = fd;
 
             try {
-                mBinder.linkToDeath(this, 0);
+                mCallback.asBinder().linkToDeath(this, 0);
             } catch (RemoteException e) {
                 binderDied();
             }
@@ -176,22 +173,14 @@ public class KeepaliveTracker {
                     + " ]";
         }
 
-        /** Sends a message back to the application via its SocketKeepalive.Callback. */
-        void notifyMessenger(int slot, int err) {
-            if (DBG) {
-                Log.d(TAG, "notify keepalive " + mSlot + " on " + mNai.network + " for " + err);
-            }
-            KeepaliveTracker.this.notifyMessenger(mMessenger, slot, err);
-        }
-
         /** Called when the application process is killed. */
         public void binderDied() {
             stop(BINDER_DIED);
         }
 
         void unlinkDeathRecipient() {
-            if (mBinder != null) {
-                mBinder.unlinkToDeath(this, 0);
+            if (mCallback != null) {
+                mCallback.asBinder().unlinkToDeath(this, 0);
             }
         }
 
@@ -283,9 +272,23 @@ public class KeepaliveTracker {
                     Log.wtf(TAG, "Stopping keepalive with unknown type: " + mType);
                 }
             }
-            // TODO: at the moment we unconditionally return failure here. In cases where the
-            // NetworkAgent is alive, should we ask it to reply, so it can return failure?
-            notifyMessenger(mSlot, reason);
+
+            if (reason == SUCCESS) {
+                try {
+                    mCallback.onStopped();
+                } catch (RemoteException e) {
+                    Log.w(TAG, "Discarded onStop callback: " + reason);
+                }
+            } else if (reason == DATA_RECEIVED) {
+                try {
+                    mCallback.onDataReceived();
+                } catch (RemoteException e) {
+                    Log.w(TAG, "Discarded onDataReceived callback: " + reason);
+                }
+            } else {
+                notifyErrorCallback(mCallback, reason);
+            }
+
             unlinkDeathRecipient();
         }
 
@@ -294,16 +297,12 @@ public class KeepaliveTracker {
         }
     }
 
-    void notifyMessenger(Messenger messenger, int slot, int err) {
-        Message message = Message.obtain();
-        message.what = EVENT_SOCKET_KEEPALIVE;
-        message.arg1 = slot;
-        message.arg2 = err;
-        message.obj = null;
+    void notifyErrorCallback(ISocketKeepaliveCallback cb, int error) {
+        if (DBG) Log.w(TAG, "Sending onError(" + error + ") callback");
         try {
-            messenger.send(message);
+            cb.onError(error);
         } catch (RemoteException e) {
-            // Process died?
+            Log.w(TAG, "Discarded onError(" + error + ") callback");
         }
     }
 
@@ -414,7 +413,11 @@ public class KeepaliveTracker {
             // Keepalive successfully started.
             if (DBG) Log.d(TAG, "Started keepalive " + slot + " on " + nai.name());
             ki.mStartedState = KeepaliveInfo.STARTED;
-            ki.notifyMessenger(slot, reason);
+            try {
+                ki.mCallback.onStarted(slot);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Discarded onStarted(" + slot + ") callback");
+            }
         } else {
             // Keepalive successfully stopped, or error.
             ki.mStartedState = KeepaliveInfo.NOT_STARTED;
@@ -436,14 +439,13 @@ public class KeepaliveTracker {
      **/
     public void startNattKeepalive(@Nullable NetworkAgentInfo nai,
             int intervalSeconds,
-            @NonNull Messenger messenger,
-            @NonNull IBinder binder,
+            @NonNull ISocketKeepaliveCallback cb,
             @NonNull String srcAddrString,
             int srcPort,
             @NonNull String dstAddrString,
             int dstPort) {
         if (nai == null) {
-            notifyMessenger(messenger, NO_KEEPALIVE, ERROR_INVALID_NETWORK);
+            notifyErrorCallback(cb, ERROR_INVALID_NETWORK);
             return;
         }
 
@@ -452,7 +454,7 @@ public class KeepaliveTracker {
             srcAddress = NetworkUtils.numericToInetAddress(srcAddrString);
             dstAddress = NetworkUtils.numericToInetAddress(dstAddrString);
         } catch (IllegalArgumentException e) {
-            notifyMessenger(messenger, NO_KEEPALIVE, ERROR_INVALID_IP_ADDRESS);
+            notifyErrorCallback(cb, ERROR_INVALID_IP_ADDRESS);
             return;
         }
 
@@ -461,11 +463,12 @@ public class KeepaliveTracker {
             packet = NattKeepalivePacketData.nattKeepalivePacket(
                     srcAddress, srcPort, dstAddress, NATT_PORT);
         } catch (InvalidPacketException e) {
-            notifyMessenger(messenger, NO_KEEPALIVE, e.error);
+            notifyErrorCallback(cb, e.error);
             return;
         }
-        KeepaliveInfo ki = new KeepaliveInfo(messenger, binder, nai, packet, intervalSeconds,
+        KeepaliveInfo ki = new KeepaliveInfo(cb, nai, packet, intervalSeconds,
                 KeepaliveInfo.TYPE_NATT, null);
+        Log.d(TAG, "Created keepalive: " + ki.toString());
         mConnectivityServiceHandler.obtainMessage(
                 NetworkAgent.CMD_START_SOCKET_KEEPALIVE, ki).sendToTarget();
     }
@@ -483,10 +486,9 @@ public class KeepaliveTracker {
     public void startTcpKeepalive(@Nullable NetworkAgentInfo nai,
             @NonNull FileDescriptor fd,
             int intervalSeconds,
-            @NonNull Messenger messenger,
-            @NonNull IBinder binder) {
+            @NonNull ISocketKeepaliveCallback cb) {
         if (nai == null) {
-            notifyMessenger(messenger, NO_KEEPALIVE, ERROR_INVALID_NETWORK);
+            notifyErrorCallback(cb, ERROR_INVALID_NETWORK);
             return;
         }
 
@@ -500,10 +502,10 @@ public class KeepaliveTracker {
             } catch (ErrnoException e1) {
                 Log.e(TAG, "Couldn't move fd out of repair mode after failure to start keepalive");
             }
-            notifyMessenger(messenger, NO_KEEPALIVE, e.error);
+            notifyErrorCallback(cb, e.error);
             return;
         }
-        KeepaliveInfo ki = new KeepaliveInfo(messenger, binder, nai, packet, intervalSeconds,
+        KeepaliveInfo ki = new KeepaliveInfo(cb, nai, packet, intervalSeconds,
                 KeepaliveInfo.TYPE_TCP, fd);
         Log.d(TAG, "Created keepalive: " + ki.toString());
         mConnectivityServiceHandler.obtainMessage(CMD_START_SOCKET_KEEPALIVE, ki).sendToTarget();
@@ -520,14 +522,13 @@ public class KeepaliveTracker {
             @Nullable FileDescriptor fd,
             int resourceId,
             int intervalSeconds,
-            @NonNull Messenger messenger,
-            @NonNull IBinder binder,
+            @NonNull ISocketKeepaliveCallback cb,
             @NonNull String srcAddrString,
             @NonNull String dstAddrString,
             int dstPort) {
         // Ensure that the socket is created by IpSecService.
         if (!isNattKeepaliveSocketValid(fd, resourceId)) {
-            notifyMessenger(messenger, NO_KEEPALIVE, ERROR_INVALID_SOCKET);
+            notifyErrorCallback(cb, ERROR_INVALID_SOCKET);
         }
 
         // Get src port to adopt old API.
@@ -536,11 +537,11 @@ public class KeepaliveTracker {
             final SocketAddress srcSockAddr = Os.getsockname(fd);
             srcPort = ((InetSocketAddress) srcSockAddr).getPort();
         } catch (ErrnoException e) {
-            notifyMessenger(messenger, NO_KEEPALIVE, ERROR_INVALID_SOCKET);
+            notifyErrorCallback(cb, ERROR_INVALID_SOCKET);
         }
 
         // Forward request to old API.
-        startNattKeepalive(nai, intervalSeconds, messenger, binder, srcAddrString, srcPort,
+        startNattKeepalive(nai, intervalSeconds, cb, srcAddrString, srcPort,
                 dstAddrString, dstPort);
     }
 

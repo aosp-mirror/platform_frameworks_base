@@ -64,6 +64,7 @@ import static android.net.shared.NetworkParcelableUtil.fromStableParcelable;
 
 import static com.android.internal.util.TestUtils.waitForIdleHandler;
 import static com.android.internal.util.TestUtils.waitForIdleLooper;
+import static com.android.internal.util.TestUtils.waitForIdleSerialExecutor;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -88,6 +89,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import android.annotation.NonNull;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
@@ -3762,7 +3764,7 @@ public class ConnectivityServiceTest {
             }
         }
 
-        private LinkedBlockingQueue<CallbackValue> mCallbacks = new LinkedBlockingQueue<>();
+        private final LinkedBlockingQueue<CallbackValue> mCallbacks = new LinkedBlockingQueue<>();
 
         @Override
         public void onStarted() {
@@ -3837,6 +3839,11 @@ public class ConnectivityServiceTest {
         }
 
         private LinkedBlockingQueue<CallbackValue> mCallbacks = new LinkedBlockingQueue<>();
+        private final Executor mExecutor;
+
+        TestSocketKeepaliveCallback(@NonNull Executor executor) {
+            mExecutor = executor;
+        }
 
         @Override
         public void onStarted() {
@@ -3873,6 +3880,12 @@ public class ConnectivityServiceTest {
 
         public void expectError(int error) {
             expectCallback(new CallbackValue(CallbackType.ON_ERROR, error));
+        }
+
+        public void assertNoCallback() {
+            waitForIdleSerialExecutor(mExecutor, TIMEOUT_MS);
+            CallbackValue cv = mCallbacks.peek();
+            assertNull("Unexpected callback: " + cv, cv);
         }
     }
 
@@ -3980,19 +3993,6 @@ public class ConnectivityServiceTest {
         myNet = connectKeepaliveNetwork(lp);
         mWiFiNetworkAgent.setStartKeepaliveError(PacketKeepalive.SUCCESS);
 
-        // Check things work as expected when the keepalive is stopped and the network disconnects.
-        ka = mCm.startNattKeepalive(myNet, validKaInterval, callback, myIPv4, 12345, dstIPv4);
-        callback.expectStarted();
-        ka.stop();
-        mWiFiNetworkAgent.disconnect();
-        waitFor(mWiFiNetworkAgent.getDisconnectedCV());
-        waitForIdle();
-        callback.expectStopped();
-
-        // Reconnect.
-        myNet = connectKeepaliveNetwork(lp);
-        mWiFiNetworkAgent.setStartKeepaliveError(PacketKeepalive.SUCCESS);
-
         // Check that keepalive slots start from 1 and increment. The first one gets slot 1.
         mWiFiNetworkAgent.setExpectedKeepaliveSlot(1);
         ka = mCm.startNattKeepalive(myNet, validKaInterval, callback, myIPv4, 12345, dstIPv4);
@@ -4068,7 +4068,7 @@ public class ConnectivityServiceTest {
         Network notMyNet = new Network(61234);
         Network myNet = connectKeepaliveNetwork(lp);
 
-        TestSocketKeepaliveCallback callback = new TestSocketKeepaliveCallback();
+        TestSocketKeepaliveCallback callback = new TestSocketKeepaliveCallback(executor);
         SocketKeepalive ka;
 
         // Attempt to start keepalives with invalid parameters and check for errors.
@@ -4111,6 +4111,22 @@ public class ConnectivityServiceTest {
         ka.stop();
         callback.expectStopped();
 
+        // Check that keepalive could be restarted.
+        ka.start(validKaInterval);
+        callback.expectStarted();
+        ka.stop();
+        callback.expectStopped();
+
+        // Check that keepalive can be restarted without waiting for callback.
+        ka.start(validKaInterval);
+        callback.expectStarted();
+        ka.stop();
+        ka.start(validKaInterval);
+        callback.expectStopped();
+        callback.expectStarted();
+        ka.stop();
+        callback.expectStopped();
+
         // Check that deleting the IP address stops the keepalive.
         LinkProperties bogusLp = new LinkProperties(lp);
         ka = mCm.createSocketKeepalive(myNet, testSocket, myIPv4, dstIPv4, executor, callback);
@@ -4135,20 +4151,7 @@ public class ConnectivityServiceTest {
         final Network myNetAlias = myNet;
         assertNull(mCm.getNetworkCapabilities(myNetAlias));
         ka.stop();
-
-        // Reconnect.
-        myNet = connectKeepaliveNetwork(lp);
-        mWiFiNetworkAgent.setStartKeepaliveError(SocketKeepalive.SUCCESS);
-
-        // Check things work as expected when the keepalive is stopped and the network disconnects.
-        ka = mCm.createSocketKeepalive(myNet, testSocket, myIPv4, dstIPv4, executor, callback);
-        ka.start(validKaInterval);
-        callback.expectStarted();
-        ka.stop();
-        mWiFiNetworkAgent.disconnect();
-        waitFor(mWiFiNetworkAgent.getDisconnectedCV());
-        waitForIdle();
-        callback.expectStopped();
+        callback.assertNoCallback();
 
         // Reconnect.
         myNet = connectKeepaliveNetwork(lp);
@@ -4163,7 +4166,7 @@ public class ConnectivityServiceTest {
         // The second one gets slot 2.
         mWiFiNetworkAgent.setExpectedKeepaliveSlot(2);
         final UdpEncapsulationSocket testSocket2 = mIpSec.openUdpEncapsulationSocket(6789);
-        TestSocketKeepaliveCallback callback2 = new TestSocketKeepaliveCallback();
+        TestSocketKeepaliveCallback callback2 = new TestSocketKeepaliveCallback(executor);
         SocketKeepalive ka2 =
                 mCm.createSocketKeepalive(myNet, testSocket2, myIPv4, dstIPv4, executor, callback2);
         ka2.start(validKaInterval);
@@ -4216,7 +4219,7 @@ public class ConnectivityServiceTest {
         final Socket testSocketV4 = new Socket();
         final Socket testSocketV6 = new Socket();
 
-        TestSocketKeepaliveCallback callback = new TestSocketKeepaliveCallback();
+        TestSocketKeepaliveCallback callback = new TestSocketKeepaliveCallback(executor);
         SocketKeepalive ka;
 
         // Attempt to start Tcp keepalives with invalid parameters and check for errors.

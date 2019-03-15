@@ -19,12 +19,15 @@ package com.android.internal.util;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
+import android.annotation.NonNull;
 import android.os.ConditionVariable;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Parcel;
 import android.os.Parcelable;
+
+import java.util.concurrent.Executor;
 
 public final class TestUtils {
     private TestUtils() { }
@@ -51,6 +54,17 @@ public final class TestUtils {
         handler.post(() -> cv.open());
         if (!cv.block(timeoutMs)) {
             fail(handler.toString() + " did not become idle after " + timeoutMs + " ms");
+        }
+    }
+
+    /**
+     * Block until the given Serial Executor becomes idle, or until timeoutMs has passed.
+     */
+    public static void waitForIdleSerialExecutor(@NonNull Executor executor, long timeoutMs) {
+        final ConditionVariable cv = new ConditionVariable();
+        executor.execute(() -> cv.open());
+        if (!cv.block(timeoutMs)) {
+            fail(executor.toString() + " did not become idle after " + timeoutMs + " ms");
         }
     }
 
