@@ -122,6 +122,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.StatusBarIcon;
+import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.keyguard.ViewMediatorCallback;
@@ -215,7 +216,6 @@ import com.android.systemui.statusbar.policy.DeviceProvisionedController.DeviceP
 import com.android.systemui.statusbar.policy.ExtensionController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
-import com.android.systemui.statusbar.policy.KeyguardMonitorImpl;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcher;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
@@ -533,8 +533,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private KeyguardUserSwitcher mKeyguardUserSwitcher;
     protected UserSwitcherController mUserSwitcherController;
     private NetworkController mNetworkController;
-    private KeyguardMonitorImpl mKeyguardMonitor
-            = (KeyguardMonitorImpl) Dependency.get(KeyguardMonitor.class);
+    private KeyguardMonitor mKeyguardMonitor = Dependency.get(KeyguardMonitor.class);
     private BatteryController mBatteryController;
     protected boolean mPanelExpanded;
     private UiModeManager mUiModeManager;
@@ -1058,8 +1057,21 @@ public class StatusBar extends SystemUI implements DemoMode,
         mNotificationShelf.setOnActivatedListener(mPresenter);
         mRemoteInputManager.getController().addCallback(mStatusBarWindowController);
 
-        mNotificationActivityStarter = new StatusBarNotificationActivityStarter(
-                mContext, mNotificationPanel, mPresenter, mHeadsUpManager, mActivityLaunchAnimator);
+        final StatusBarRemoteInputCallback mStatusBarRemoteInputCallback =
+                (StatusBarRemoteInputCallback) Dependency.get(
+                        NotificationRemoteInputManager.Callback.class);
+        final ShadeController shadeController = Dependency.get(ShadeController.class);
+        final ActivityStarter activityStarter = Dependency.get(ActivityStarter.class);
+
+        mNotificationActivityStarter = new StatusBarNotificationActivityStarter(mContext,
+                mCommandQueue, mAssistManager, mNotificationPanel, mPresenter, mEntryManager,
+                mHeadsUpManager, activityStarter, mActivityLaunchAnimator,
+                mBarService, mStatusBarStateController, mKeyguardManager, mDreamManager,
+                mRemoteInputManager, mStatusBarRemoteInputCallback, mGroupManager,
+                mLockscreenUserManager, shadeController, mKeyguardMonitor,
+                mNotificationInterruptionStateProvider, mMetricsLogger,
+                new LockPatternUtils(mContext));
+
         mGutsManager.setNotificationActivityStarter(mNotificationActivityStarter);
 
         mEntryManager.setRowBinder(rowBinder);
