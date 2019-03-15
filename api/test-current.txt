@@ -1502,8 +1502,10 @@ package android.telephony {
     method public void setCdmaSystemAndNetworkId(int, int);
     method public void setCellBandwidths(int[]);
     method public void setChannelNumber(int);
+    method public void setDataRoamingType(int);
     method public void setRilDataRadioTechnology(int);
     method public void setRilVoiceRadioTechnology(int);
+    method public void setVoiceRoamingType(int);
   }
 
   public class TelephonyManager {
