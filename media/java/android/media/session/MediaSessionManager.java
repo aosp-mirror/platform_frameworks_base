@@ -107,7 +107,7 @@ public final class MediaSessionManager {
      * @hide
      */
     @NonNull
-    public SessionLink createSession(@NonNull SessionCallbackLink cbStub, @NonNull String tag,
+    public ISession createSession(@NonNull SessionCallbackLink cbStub, @NonNull String tag,
             @Nullable Bundle sessionInfo) {
         try {
             return mService.createSession(mContext.getPackageName(), cbStub, tag, sessionInfo,

@@ -28,6 +28,7 @@ import android.media.MediaParceledListSlice;
 import android.media.Rating;
 import android.media.VolumeProvider;
 import android.media.session.ControllerCallbackLink;
+import android.media.session.ISession;
 import android.media.session.ISessionController;
 import android.media.session.MediaController;
 import android.media.session.MediaController.PlaybackInfo;
@@ -35,7 +36,6 @@ import android.media.session.MediaSession;
 import android.media.session.MediaSession.QueueItem;
 import android.media.session.PlaybackState;
 import android.media.session.SessionCallbackLink;
-import android.media.session.SessionLink;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
@@ -45,6 +45,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Process;
+import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.SystemClock;
 import android.util.Log;
@@ -81,7 +82,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
     private final Bundle mSessionInfo;
     private final ControllerStub mController;
     private final MediaSession.Token mSessionToken;
-    private final SessionLink mSession;
+    private final SessionStub mSession;
     private final SessionCb mSessionCb;
     private final MediaSessionService.ServiceImpl mService;
     private final Context mContext;
@@ -133,7 +134,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         mSessionInfo = sessionInfo;
         mController = new ControllerStub();
         mSessionToken = new MediaSession.Token(mController);
-        mSession = new SessionLink(new SessionStub());
+        mSession = new SessionStub();
         mSessionCb = new SessionCb(cb);
         mService = service;
         mContext = mService.getContext();
@@ -144,11 +145,11 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
     }
 
     /**
-     * Get the session link for the {@link MediaSession}.
+     * Get the session binder for the {@link MediaSession}.
      *
-     * @return The session link apps talk to.
+     * @return The session binder apps talk to.
      */
-    public SessionLink getSessionBinder() {
+    public ISession getSessionBinder() {
         return mSession;
     }
 
@@ -818,9 +819,9 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         }
     };
 
-    private final class SessionStub extends SessionLink.SessionStub {
+    private final class SessionStub extends ISession.Stub {
         @Override
-        public void destroySession() {
+        public void destroySession() throws RemoteException {
             final long token = Binder.clearCallingIdentity();
             try {
                 mService.destroySession(MediaSessionRecord.this);
@@ -830,18 +831,18 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         }
 
         @Override
-        public void sendEvent(String event, Bundle data) {
+        public void sendEvent(String event, Bundle data) throws RemoteException {
             mHandler.post(MessageHandler.MSG_SEND_EVENT, event,
                     data == null ? null : new Bundle(data));
         }
 
         @Override
-        public ISessionController getController() {
+        public ISessionController getController() throws RemoteException {
             return mController;
         }
 
         @Override
-        public void setActive(boolean active) {
+        public void setActive(boolean active) throws RemoteException {
             mIsActive = active;
             final long token = Binder.clearCallingIdentity();
             try {
@@ -853,7 +854,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         }
 
         @Override
-        public void setFlags(int flags) {
+        public void setFlags(int flags) throws RemoteException {
             if ((flags & MediaSession.FLAG_EXCLUSIVE_GLOBAL_PRIORITY) != 0) {
                 int pid = Binder.getCallingPid();
                 int uid = Binder.getCallingUid();
@@ -872,7 +873,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         }
 
         @Override
-        public void setMediaButtonReceiver(PendingIntent pi) {
+        public void setMediaButtonReceiver(PendingIntent pi) throws RemoteException {
             mMediaButtonReceiver = pi;
             final long token = Binder.clearCallingIdentity();
             try {
@@ -883,12 +884,13 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         }
 
         @Override
-        public void setLaunchPendingIntent(PendingIntent pi) {
+        public void setLaunchPendingIntent(PendingIntent pi) throws RemoteException {
             mLaunchIntent = pi;
         }
 
         @Override
-        public void setMetadata(MediaMetadata metadata, long duration, String metadataDescription) {
+        public void setMetadata(MediaMetadata metadata, long duration, String metadataDescription)
+                throws RemoteException {
             synchronized (mLock) {
                 MediaMetadata temp = metadata == null ? null : new MediaMetadata.Builder(metadata)
                         .build();
@@ -906,7 +908,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         }
 
         @Override
-        public void setPlaybackState(PlaybackState state) {
+        public void setPlaybackState(PlaybackState state) throws RemoteException {
             int oldState = mPlaybackState == null
                     ? PlaybackState.STATE_NONE : mPlaybackState.getState();
             int newState = state == null
@@ -924,21 +926,21 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         }
 
         @Override
-        public void setQueue(List<QueueItem> queue) {
+        public void setQueue(MediaParceledListSlice queue) throws RemoteException {
             synchronized (mLock) {
-                mQueue = queue;
+                mQueue = queue == null ? null : (List<QueueItem>) queue.getList();
             }
             mHandler.post(MessageHandler.MSG_UPDATE_QUEUE);
         }
 
         @Override
-        public void setQueueTitle(CharSequence title) {
+        public void setQueueTitle(CharSequence title) throws RemoteException {
             mQueueTitle = title;
             mHandler.post(MessageHandler.MSG_UPDATE_QUEUE_TITLE);
         }
 
         @Override
-        public void setExtras(Bundle extras) {
+        public void setExtras(Bundle extras) throws RemoteException {
             synchronized (mLock) {
                 mExtras = extras == null ? null : new Bundle(extras);
             }
@@ -946,18 +948,18 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         }
 
         @Override
-        public void setRatingType(int type) {
+        public void setRatingType(int type) throws RemoteException {
             mRatingType = type;
         }
 
         @Override
-        public void setCurrentVolume(int volume) {
+        public void setCurrentVolume(int volume) throws RemoteException {
             mCurrentVolume = volume;
             mHandler.post(MessageHandler.MSG_UPDATE_VOLUME);
         }
 
         @Override
-        public void setPlaybackToLocal(AudioAttributes attributes) {
+        public void setPlaybackToLocal(AudioAttributes attributes) throws RemoteException {
             boolean typeChanged;
             synchronized (mLock) {
                 typeChanged = mVolumeType == PlaybackInfo.PLAYBACK_TYPE_REMOTE;
@@ -980,7 +982,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         }
 
         @Override
-        public void setPlaybackToRemote(int control, int max) {
+        public void setPlaybackToRemote(int control, int max) throws RemoteException {
             boolean typeChanged;
             synchronized (mLock) {
                 typeChanged = mVolumeType == PlaybackInfo.PLAYBACK_TYPE_LOCAL;

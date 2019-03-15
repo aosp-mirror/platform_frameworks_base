@@ -25,6 +25,7 @@ import android.content.Intent;
 import android.media.AudioAttributes;
 import android.media.MediaDescription;
 import android.media.MediaMetadata;
+import android.media.MediaParceledListSlice;
 import android.media.Rating;
 import android.media.VolumeProvider;
 import android.media.session.MediaSessionManager.RemoteUserInfo;
@@ -34,6 +35,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Parcel;
+import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.service.media.MediaBrowserService;
 import android.text.TextUtils;
@@ -55,7 +57,7 @@ public final class MediaSessionEngine implements AutoCloseable {
 
     private final MediaSession.Token mSessionToken;
     private final MediaController mController;
-    private final SessionLink mSessionLink;
+    private final ISession mBinder;
 
     private CallbackMessageHandler mCallbackHandler;
     private VolumeProvider mVolumeProvider;
@@ -70,14 +72,14 @@ public final class MediaSessionEngine implements AutoCloseable {
      * finished with the session.
      *
      * @param context The context to use to create the session.
-     * @param sessionLink A session link for the binder of MediaSessionRecord
+     * @param binder A session binder
      */
-    public MediaSessionEngine(@NonNull Context context, @NonNull SessionLink sessionLink,
-            @NonNull SessionCallbackLink cbLink) {
-        mSessionLink = sessionLink;
+    public MediaSessionEngine(@NonNull Context context, @NonNull ISession binder,
+            @NonNull SessionCallbackLink cbLink) throws RemoteException {
+        mBinder = binder;
 
         cbLink.setSessionEngine(this);
-        mSessionToken = new MediaSession.Token(mSessionLink.getController());
+        mSessionToken = new MediaSession.Token(mBinder.getController());
         mController = new MediaController(context, mSessionToken);
     }
 
@@ -134,8 +136,8 @@ public final class MediaSessionEngine implements AutoCloseable {
      */
     public void setSessionActivity(@Nullable PendingIntent pi) {
         try {
-            mSessionLink.setLaunchPendingIntent(pi);
-        } catch (RuntimeException e) {
+            mBinder.setLaunchPendingIntent(pi);
+        } catch (RemoteException e) {
             Log.wtf(TAG, "Failure in setLaunchPendingIntent.", e);
         }
     }
@@ -150,8 +152,8 @@ public final class MediaSessionEngine implements AutoCloseable {
      */
     public void setMediaButtonReceiver(@Nullable PendingIntent mbr) {
         try {
-            mSessionLink.setMediaButtonReceiver(mbr);
-        } catch (RuntimeException e) {
+            mBinder.setMediaButtonReceiver(mbr);
+        } catch (RemoteException e) {
             Log.wtf(TAG, "Failure in setMediaButtonReceiver.", e);
         }
     }
@@ -163,8 +165,8 @@ public final class MediaSessionEngine implements AutoCloseable {
      */
     public void setFlags(int flags) {
         try {
-            mSessionLink.setFlags(flags);
-        } catch (RuntimeException e) {
+            mBinder.setFlags(flags);
+        } catch (RemoteException e) {
             Log.wtf(TAG, "Failure in setFlags.", e);
         }
     }
@@ -185,8 +187,8 @@ public final class MediaSessionEngine implements AutoCloseable {
             throw new IllegalArgumentException("Attributes cannot be null for local playback.");
         }
         try {
-            mSessionLink.setPlaybackToLocal(attributes);
-        } catch (RuntimeException e) {
+            mBinder.setPlaybackToLocal(attributes);
+        } catch (RemoteException e) {
             Log.wtf(TAG, "Failure in setPlaybackToLocal.", e);
         }
     }
@@ -217,10 +219,10 @@ public final class MediaSessionEngine implements AutoCloseable {
         });
 
         try {
-            mSessionLink.setPlaybackToRemote(volumeProvider.getVolumeControl(),
+            mBinder.setPlaybackToRemote(volumeProvider.getVolumeControl(),
                     volumeProvider.getMaxVolume());
-            mSessionLink.setCurrentVolume(volumeProvider.getCurrentVolume());
-        } catch (RuntimeException e) {
+            mBinder.setCurrentVolume(volumeProvider.getCurrentVolume());
+        } catch (RemoteException e) {
             Log.wtf(TAG, "Failure in setPlaybackToRemote.", e);
         }
     }
@@ -238,9 +240,9 @@ public final class MediaSessionEngine implements AutoCloseable {
             return;
         }
         try {
-            mSessionLink.setActive(active);
+            mBinder.setActive(active);
             mActive = active;
-        } catch (RuntimeException e) {
+        } catch (RemoteException e) {
             Log.wtf(TAG, "Failure in setActive.", e);
         }
     }
@@ -267,8 +269,8 @@ public final class MediaSessionEngine implements AutoCloseable {
             throw new IllegalArgumentException("event cannot be null or empty");
         }
         try {
-            mSessionLink.sendEvent(event, extras);
-        } catch (RuntimeException e) {
+            mBinder.sendEvent(event, extras);
+        } catch (RemoteException e) {
             Log.wtf(TAG, "Error sending event", e);
         }
     }
@@ -280,8 +282,8 @@ public final class MediaSessionEngine implements AutoCloseable {
      */
     public void close() {
         try {
-            mSessionLink.destroySession();
-        } catch (RuntimeException e) {
+            mBinder.destroySession();
+        } catch (RemoteException e) {
             Log.wtf(TAG, "Error releasing session: ", e);
         }
     }
@@ -316,8 +318,8 @@ public final class MediaSessionEngine implements AutoCloseable {
     public void setPlaybackState(@Nullable PlaybackState state) {
         mPlaybackState = state;
         try {
-            mSessionLink.setPlaybackState(state);
-        } catch (RuntimeException e) {
+            mBinder.setPlaybackState(state);
+        } catch (RemoteException e) {
             Log.wtf(TAG, "Dead object in setPlaybackState.", e);
         }
     }
@@ -344,8 +346,8 @@ public final class MediaSessionEngine implements AutoCloseable {
         String metadataDescription = "size=" + fields + ", description=" + description;
 
         try {
-            mSessionLink.setMetadata(metadata, duration, metadataDescription);
-        } catch (RuntimeException e) {
+            mBinder.setMetadata(metadata, duration, metadataDescription);
+        } catch (RemoteException e) {
             Log.wtf(TAG, "Dead object in setPlaybackState.", e);
         }
     }
@@ -363,8 +365,8 @@ public final class MediaSessionEngine implements AutoCloseable {
      */
     public void setQueue(@Nullable List<MediaSession.QueueItem> queue) {
         try {
-            mSessionLink.setQueue(queue);
-        } catch (RuntimeException e) {
+            mBinder.setQueue(queue == null ? null : new MediaParceledListSlice(queue));
+        } catch (RemoteException e) {
             Log.wtf("Dead object in setQueue.", e);
         }
     }
@@ -378,8 +380,8 @@ public final class MediaSessionEngine implements AutoCloseable {
      */
     public void setQueueTitle(@Nullable CharSequence title) {
         try {
-            mSessionLink.setQueueTitle(title);
-        } catch (RuntimeException e) {
+            mBinder.setQueueTitle(title);
+        } catch (RemoteException e) {
             Log.wtf("Dead object in setQueueTitle.", e);
         }
     }
@@ -399,8 +401,8 @@ public final class MediaSessionEngine implements AutoCloseable {
      */
     public void setRatingType(int type) {
         try {
-            mSessionLink.setRatingType(type);
-        } catch (RuntimeException e) {
+            mBinder.setRatingType(type);
+        } catch (RemoteException e) {
             Log.e(TAG, "Error in setRatingType.", e);
         }
     }
@@ -414,8 +416,8 @@ public final class MediaSessionEngine implements AutoCloseable {
      */
     public void setExtras(@Nullable Bundle extras) {
         try {
-            mSessionLink.setExtras(extras);
-        } catch (RuntimeException e) {
+            mBinder.setExtras(extras);
+        } catch (RemoteException e) {
             Log.wtf("Dead object in setExtras.", e);
         }
     }
@@ -464,8 +466,8 @@ public final class MediaSessionEngine implements AutoCloseable {
             }
         }
         try {
-            mSessionLink.setCurrentVolume(provider.getCurrentVolume());
-        } catch (RuntimeException e) {
+            mBinder.setCurrentVolume(provider.getCurrentVolume());
+        } catch (RemoteException e) {
             Log.e(TAG, "Error in notifyVolumeChanged", e);
         }
     }
