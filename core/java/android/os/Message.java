@@ -16,6 +16,7 @@
 
 package android.os;
 
+import android.annotation.UnsupportedAppUsage;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 
@@ -111,6 +112,7 @@ public final class Message implements Parcelable {
     /** Flags to clear in the copyFrom method */
     /*package*/ static final int FLAGS_TO_CLEAR_ON_COPY_FROM = FLAG_IN_USE;
 
+    @UnsupportedAppUsage
     /*package*/ int flags;
 
     /**
@@ -118,16 +120,20 @@ public final class Message implements Parcelable {
      * {@link SystemClock#uptimeMillis}.
      * @hide Only for use within the tests.
      */
+    @UnsupportedAppUsage
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
     public long when;
 
     /*package*/ Bundle data;
 
+    @UnsupportedAppUsage
     /*package*/ Handler target;
 
+    @UnsupportedAppUsage
     /*package*/ Runnable callback;
 
     // sometimes we store linked lists of these things
+    @UnsupportedAppUsage
     /*package*/ Message next;
 
 
@@ -314,6 +320,7 @@ public final class Message implements Parcelable {
      * Recycles a Message that may be in-use.
      * Used internally by the MessageQueue and Looper when disposing of queued Messages.
      */
+    @UnsupportedAppUsage
     void recycleUnchecked() {
         // Mark the message as in use while it remains in the recycled object pool.
         // Clear out all other details.
@@ -397,6 +404,7 @@ public final class Message implements Parcelable {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public Message setCallback(Runnable r) {
         callback = r;
         return this;
@@ -510,6 +518,7 @@ public final class Message implements Parcelable {
         return ((flags & FLAG_IN_USE) == FLAG_IN_USE);
     }
 
+    @UnsupportedAppUsage
     /*package*/ void markInUse() {
         flags |= FLAG_IN_USE;
     }
@@ -524,6 +533,7 @@ public final class Message implements Parcelable {
         return toString(SystemClock.uptimeMillis());
     }
 
+    @UnsupportedAppUsage
     String toString(long now) {
         StringBuilder b = new StringBuilder();
         b.append("{ when=");

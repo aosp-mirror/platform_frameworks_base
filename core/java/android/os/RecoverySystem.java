@@ -22,6 +22,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.annotation.UnsupportedAppUsage;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
@@ -355,6 +356,7 @@ public class RecoverySystem {
      *
      * @return the verification result.
      */
+    @UnsupportedAppUsage
     private static boolean verifyPackageCompatibility(InputStream inputStream) throws IOException {
         ArrayList<String> list = new ArrayList<>();
         ZipInputStream zis = new ZipInputStream(inputStream);

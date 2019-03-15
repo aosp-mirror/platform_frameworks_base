@@ -19,6 +19,7 @@ package android.os;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.TestApi;
+import android.annotation.UnsupportedAppUsage;
 import android.os.MessageQueueProto;
 import android.util.Log;
 import android.util.Printer;
@@ -43,12 +44,16 @@ public final class MessageQueue {
     private static final boolean DEBUG = false;
 
     // True if the message queue can be quit.
+    @UnsupportedAppUsage
     private final boolean mQuitAllowed;
 
+    @UnsupportedAppUsage
     @SuppressWarnings("unused")
     private long mPtr; // used by native code
 
+    @UnsupportedAppUsage
     Message mMessages;
+    @UnsupportedAppUsage
     private final ArrayList<IdleHandler> mIdleHandlers = new ArrayList<IdleHandler>();
     private SparseArray<FileDescriptorRecord> mFileDescriptorRecords;
     private IdleHandler[] mPendingIdleHandlers;
@@ -59,10 +64,12 @@ public final class MessageQueue {
 
     // The next barrier token.
     // Barriers are indicated by messages with a null target whose arg1 field carries the token.
+    @UnsupportedAppUsage
     private int mNextBarrierToken;
 
     private native static long nativeInit();
     private native static void nativeDestroy(long ptr);
+    @UnsupportedAppUsage
     private native void nativePollOnce(long ptr, int timeoutMillis); /*non-static for callbacks*/
     private native static void nativeWake(long ptr);
     private native static boolean nativeIsPolling(long ptr);
@@ -260,6 +267,7 @@ public final class MessageQueue {
     }
 
     // Called from native code.
+    @UnsupportedAppUsage
     private int dispatchEvents(int fd, int events) {
         // Get the file descriptor record and any state that might change.
         final FileDescriptorRecord record;
@@ -308,6 +316,7 @@ public final class MessageQueue {
         return newWatchedEvents;
     }
 
+    @UnsupportedAppUsage
     Message next() {
         // Return here if the message loop has already quit and been disposed.
         // This can happen if the application tries to restart a looper after quit
@@ -607,6 +616,7 @@ public final class MessageQueue {
         }
     }
 
+    @UnsupportedAppUsage
     boolean hasMessages(Handler h, Runnable r, Object object) {
         if (h == null) {
             return false;

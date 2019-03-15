@@ -16,6 +16,7 @@
 
 package android.os;
 
+import android.annotation.UnsupportedAppUsage;
 import android.util.MathUtils;
 
 /**
@@ -26,6 +27,7 @@ public class ParcelableParcel implements Parcelable {
     final Parcel mParcel;
     final ClassLoader mClassLoader;
 
+    @UnsupportedAppUsage
     public ParcelableParcel(ClassLoader loader) {
         mParcel = Parcel.obtain();
         mClassLoader = loader;
@@ -44,11 +46,13 @@ public class ParcelableParcel implements Parcelable {
         mParcel.appendFrom(src, pos, size);
     }
 
+    @UnsupportedAppUsage
     public Parcel getParcel() {
         mParcel.setDataPosition(0);
         return mParcel;
     }
 
+    @UnsupportedAppUsage
     public ClassLoader getClassLoader() {
         return mClassLoader;
     }
@@ -64,6 +68,7 @@ public class ParcelableParcel implements Parcelable {
         dest.appendFrom(mParcel, 0, mParcel.dataSize());
     }
 
+    @UnsupportedAppUsage
     public static final Parcelable.ClassLoaderCreator<ParcelableParcel> CREATOR
             = new Parcelable.ClassLoaderCreator<ParcelableParcel>() {
         public ParcelableParcel createFromParcel(Parcel in) {

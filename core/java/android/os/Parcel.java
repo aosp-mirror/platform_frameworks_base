@@ -18,6 +18,7 @@ package android.os;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -197,6 +198,7 @@ public final class Parcel {
     private static final boolean DEBUG_ARRAY_MAP = false;
     private static final String TAG = "Parcel";
 
+    @UnsupportedAppUsage
     @SuppressWarnings({"UnusedDeclaration"})
     private long mNativePtr; // used by native code
 
@@ -453,9 +455,11 @@ public final class Parcel {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public static native long getGlobalAllocSize();
 
     /** @hide */
+    @UnsupportedAppUsage
     public static native long getGlobalAllocCount();
 
     /**
@@ -679,6 +683,7 @@ public final class Parcel {
      * {@hide}
      * {@SystemApi}
      */
+    @UnsupportedAppUsage
     public final void writeBlob(@Nullable byte[] b) {
         writeBlob(b, 0, (b != null) ? b.length : 0);
     }
@@ -768,6 +773,7 @@ public final class Parcel {
      * growing dataCapacity() if needed.
      * @hide
      */
+    @UnsupportedAppUsage
     public final void writeCharSequence(@Nullable CharSequence val) {
         TextUtils.writeToParcel(val, this, 0);
     }
@@ -929,6 +935,7 @@ public final class Parcel {
     /**
      * @hide For testing only.
      */
+    @UnsupportedAppUsage
     public void writeArrayMap(@Nullable ArrayMap<String, Object> val) {
         writeArrayMapInternal(val);
     }
@@ -967,6 +974,7 @@ public final class Parcel {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public void writeArraySet(@Nullable ArraySet<? extends Object> val) {
         final int size = (val != null) ? val.size() : -1;
         writeInt(size);
@@ -1793,6 +1801,7 @@ public final class Parcel {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public final void writeParcelableCreator(@NonNull Parcelable p) {
         String name = p.getClass().getName();
         writeString(name);
@@ -1991,6 +2000,7 @@ public final class Parcel {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public final int readExceptionCode() {
         int code = readInt();
         if (code == EX_HAS_REPLY_HEADER) {
@@ -2137,6 +2147,7 @@ public final class Parcel {
      * Read a CharSequence value from the parcel at the current dataPosition().
      * @hide
      */
+    @UnsupportedAppUsage
     @Nullable
     public final CharSequence readCharSequence() {
         return TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(this);
@@ -2158,6 +2169,7 @@ public final class Parcel {
     }
 
     /** {@hide} */
+    @UnsupportedAppUsage
     public final FileDescriptor readRawFileDescriptor() {
         return nativeReadFileDescriptor(mNativePtr);
     }
@@ -2349,6 +2361,7 @@ public final class Parcel {
      * {@hide}
      * {@SystemApi}
      */
+    @UnsupportedAppUsage
     @Nullable
     public final byte[] readBlob() {
         return nativeReadBlob(mNativePtr);
@@ -2358,6 +2371,7 @@ public final class Parcel {
      * Read and return a String[] object from the parcel.
      * {@hide}
      */
+    @UnsupportedAppUsage
     @Nullable
     public final String[] readStringArray() {
         String[] array = null;
@@ -2958,6 +2972,7 @@ public final class Parcel {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     @SuppressWarnings("unchecked")
     @Nullable
     public final <T extends Parcelable> T readCreator(@NonNull Parcelable.Creator<?> creator,
@@ -2971,6 +2986,7 @@ public final class Parcel {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     @Nullable
     public final Parcelable.Creator<?> readParcelableCreator(@Nullable ClassLoader loader) {
         String name = readString();
@@ -3253,6 +3269,7 @@ public final class Parcel {
     /**
      * @hide For testing only.
      */
+    @UnsupportedAppUsage
     public void readArrayMap(@NonNull ArrayMap outVal, @Nullable ClassLoader loader) {
         final int N = readInt();
         if (N < 0) {
@@ -3268,6 +3285,7 @@ public final class Parcel {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public @Nullable ArraySet<? extends Object> readArraySet(@Nullable ClassLoader loader) {
         final int size = readInt();
         if (size < 0) {
