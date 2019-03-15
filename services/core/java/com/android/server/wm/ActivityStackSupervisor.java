@@ -2453,46 +2453,43 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                 mService.getTaskChangeNotificationController()
                         .notifyActivityLaunchOnSecondaryDisplayFailed(task.getTaskInfo(),
                                 preferredDisplayId);
-                return;
-            } else if (!forceNonResizable && handleForcedResizableTask(task,
-                    FORCED_RESIZEABLE_REASON_SECONDARY_DISPLAY)) {
-                return;
+            } else if (!forceNonResizable) {
+                handleForcedResizableTaskIfNeeded(task, FORCED_RESIZEABLE_REASON_SECONDARY_DISPLAY);
             }
+            // The information about not support secondary display should already be notified, we
+            // don't want to show another message on default display about split-screen. And it may
+            // be the case that a resizable activity is launched on a non-resizable task.
+            return;
         }
 
         if (!task.supportsSplitScreenWindowingMode() || forceNonResizable) {
-            // Display a warning toast that we tried to put an app that doesn't support split-screen
-            // in split-screen.
-            mService.getTaskChangeNotificationController().notifyActivityDismissingDockedStack();
-
             // Dismiss docked stack. If task appeared to be in docked stack but is not resizable -
             // we need to move it to top of fullscreen stack, otherwise it will be covered.
 
             final ActivityStack dockedStack =
                     task.getStack().getDisplay().getSplitScreenPrimaryStack();
             if (dockedStack != null) {
+                // Display a warning toast that we tried to put an app that doesn't support
+                // split-screen in split-screen.
+                mService.getTaskChangeNotificationController()
+                        .notifyActivityDismissingDockedStack();
                 moveTasksToFullscreenStackLocked(dockedStack, actualStack == dockedStack);
             }
             return;
         }
 
-        handleForcedResizableTask(task, FORCED_RESIZEABLE_REASON_SPLIT_SCREEN);
+        handleForcedResizableTaskIfNeeded(task, FORCED_RESIZEABLE_REASON_SPLIT_SCREEN);
     }
 
-    /**
-     * @return {@code true} if the top activity of the task is forced to be resizable and the user
-     *         was notified about activity being forced resized.
-     */
-    private boolean handleForcedResizableTask(TaskRecord task, int reason) {
+    /** Notifies that the top activity of the task is forced to be resizeable. */
+    private void handleForcedResizableTaskIfNeeded(TaskRecord task, int reason) {
         final ActivityRecord topActivity = task.getTopActivity();
-        if (topActivity != null && topActivity.isNonResizableOrForcedResizable()
-                && !topActivity.noDisplay) {
-            final String packageName = topActivity.appInfo.packageName;
-            mService.getTaskChangeNotificationController().notifyActivityForcedResizable(
-                    task.taskId, reason, packageName);
-            return true;
+        if (topActivity == null || topActivity.noDisplay
+                || !topActivity.isNonResizableOrForcedResizable()) {
+            return;
         }
-        return false;
+        mService.getTaskChangeNotificationController().notifyActivityForcedResizable(
+                task.taskId, reason, topActivity.appInfo.packageName);
     }
 
     void activityRelaunchedLocked(IBinder token) {
