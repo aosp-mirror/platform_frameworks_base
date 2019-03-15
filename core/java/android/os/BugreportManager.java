@@ -28,6 +28,8 @@ import android.content.Context;
 
 import com.android.internal.util.Preconditions;
 
+import libcore.io.IoUtils;
+
 import java.io.FileDescriptor;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -124,6 +126,8 @@ public final class BugreportManager {
      * <p>The bugreport artifacts will be copied over to the given file descriptors only if the
      * user consents to sharing with the calling app.
      *
+     * <p>{@link BugreportManager} takes ownership of {@code bugreportFd} and {@code screenshotFd}.
+     *
      * @param bugreportFd file to write the bugreport. This should be opened in write-only,
      *     append mode.
      * @param screenshotFd file to write the screenshot, if necessary. This should be opened
@@ -137,12 +141,13 @@ public final class BugreportManager {
             @NonNull BugreportParams params,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull BugreportCallback callback) {
-        Preconditions.checkNotNull(bugreportFd);
-        Preconditions.checkNotNull(params);
-        Preconditions.checkNotNull(executor);
-        Preconditions.checkNotNull(callback);
-        DumpstateListener dsListener = new DumpstateListener(executor, callback);
         try {
+            Preconditions.checkNotNull(bugreportFd);
+            Preconditions.checkNotNull(params);
+            Preconditions.checkNotNull(executor);
+            Preconditions.checkNotNull(callback);
+
+            DumpstateListener dsListener = new DumpstateListener(executor, callback);
             // Note: mBinder can get callingUid from the binder transaction.
             mBinder.startBugreport(-1 /* callingUid */,
                     mContext.getOpPackageName(),
@@ -152,6 +157,12 @@ public final class BugreportManager {
                     params.getMode(), dsListener);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        } finally {
+            // We can close the file descriptors here because binder would have duped them.
+            IoUtils.closeQuietly(bugreportFd);
+            if (screenshotFd != null) {
+                IoUtils.closeQuietly(screenshotFd);
+            }
         }
     }
 
@@ -171,7 +182,7 @@ public final class BugreportManager {
         private final Executor mExecutor;
         private final BugreportCallback mCallback;
 
-        DumpstateListener(Executor executor, @Nullable BugreportCallback callback) {
+        DumpstateListener(Executor executor, BugreportCallback callback) {
             mExecutor = executor;
             mCallback = callback;
         }
@@ -209,8 +220,6 @@ public final class BugreportManager {
                 });
             } finally {
                 Binder.restoreCallingIdentity(identity);
-                // The bugreport has finished. Let's shutdown the service to minimize its footprint.
-                cancelBugreport();
             }
         }
 
