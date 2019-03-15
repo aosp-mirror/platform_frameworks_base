@@ -82,7 +82,7 @@ public class TrampolineTest {
     private static final String CURRENT_PASSWORD = "current_password";
     private static final String NEW_PASSWORD = "new_password";
     private static final String ENCRYPTION_PASSWORD = "encryption_password";
-    private static final String DATA_MANAGEMENT_LABEL = "data_management_label";
+    private static final CharSequence DATA_MANAGEMENT_LABEL = "data_management_label";
     private static final String DESTINATION_STRING = "destination_string";
     private static final String[] PACKAGE_NAMES =
             new String[]{"some.package.name._1", "some.package.name._2"};
@@ -1104,8 +1104,8 @@ public class TrampolineTest {
     }
 
     @Test
-    public void getDataManagementLabel_calledBeforeInitialize_ignored() throws Exception {
-        assertNull(mTrampoline.getDataManagementLabel(TRANSPORT_NAME));
+    public void getDataManagementLabelForUser_calledBeforeInitialize_ignored() throws Exception {
+        assertNull(mTrampoline.getDataManagementLabelForUser(mUserId, TRANSPORT_NAME));
         verifyNoMoreInteractions(mBackupManagerServiceMock);
     }
 
@@ -1118,17 +1118,6 @@ public class TrampolineTest {
         assertEquals(
                 DATA_MANAGEMENT_LABEL,
                 mTrampoline.getDataManagementLabelForUser(mUserId, TRANSPORT_NAME));
-        verify(mBackupManagerServiceMock).getDataManagementLabel(mUserId, TRANSPORT_NAME);
-    }
-
-    @Test
-    public void getDataManagementLabel_forwarded() throws Exception {
-        TrampolineTestable.sCallingUserId = mUserId;
-        when(mBackupManagerServiceMock.getDataManagementLabel(mUserId, TRANSPORT_NAME)).thenReturn(
-                DATA_MANAGEMENT_LABEL);
-        mTrampoline.initializeService();
-
-        assertEquals(DATA_MANAGEMENT_LABEL, mTrampoline.getDataManagementLabel(TRANSPORT_NAME));
         verify(mBackupManagerServiceMock).getDataManagementLabel(mUserId, TRANSPORT_NAME);
     }
 

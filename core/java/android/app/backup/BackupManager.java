@@ -16,6 +16,7 @@
 
 package android.app.backup;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
@@ -502,32 +503,76 @@ public class BackupManager {
      * @param transportComponent The identity of the transport being described.
      * @param name A {@link String} with the new name for the transport. This is NOT for
      *     identification. MUST NOT be {@code null}.
-     * @param configurationIntent An {@link Intent} that can be passed to
-     *     {@link Context#startActivity} in order to launch the transport's configuration UI. It may
-     *     be {@code null} if the transport does not offer any user-facing configuration UI.
+     * @param configurationIntent An {@link Intent} that can be passed to {@link
+     *     Context#startActivity} in order to launch the transport's configuration UI. It may be
+     *     {@code null} if the transport does not offer any user-facing configuration UI.
      * @param currentDestinationString A {@link String} describing the destination to which the
      *     transport is currently sending data. MUST NOT be {@code null}.
-     * @param dataManagementIntent An {@link Intent} that can be passed to
-     *     {@link Context#startActivity} in order to launch the transport's data-management UI. It
-     *     may be {@code null} if the transport does not offer any user-facing data
-     *     management UI.
+     * @param dataManagementIntent An {@link Intent} that can be passed to {@link
+     *     Context#startActivity} in order to launch the transport's data-management UI. It may be
+     *     {@code null} if the transport does not offer any user-facing data management UI.
      * @param dataManagementLabel A {@link String} to be used as the label for the transport's data
-     *     management affordance. This MUST be {@code null} when dataManagementIntent is
-     *     {@code null} and MUST NOT be {@code null} when dataManagementIntent is not {@code null}.
+     *     management affordance. This MUST be {@code null} when dataManagementIntent is {@code
+     *     null} and MUST NOT be {@code null} when dataManagementIntent is not {@code null}.
      * @throws SecurityException If the UID of the calling process differs from the package UID of
      *     {@code transportComponent} or if the caller does NOT have BACKUP permission.
+     * @deprecated Since Android Q, please use the variant {@link
+     *     #updateTransportAttributes(ComponentName, String, Intent, String, Intent, CharSequence)}
+     *     instead.
+     * @hide
+     */
+    @Deprecated
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.BACKUP)
+    public void updateTransportAttributes(
+            @NonNull ComponentName transportComponent,
+            @NonNull String name,
+            @Nullable Intent configurationIntent,
+            @NonNull String currentDestinationString,
+            @Nullable Intent dataManagementIntent,
+            @Nullable String dataManagementLabel) {
+        updateTransportAttributes(
+                transportComponent,
+                name,
+                configurationIntent,
+                currentDestinationString,
+                dataManagementIntent,
+                (CharSequence) dataManagementLabel);
+    }
+
+    /**
+     * Update the attributes of the transport identified by {@code transportComponent}. If the
+     * specified transport has not been bound at least once (for registration), this call will be
+     * ignored. Only the host process of the transport can change its description, otherwise a
+     * {@link SecurityException} will be thrown.
      *
+     * @param transportComponent The identity of the transport being described.
+     * @param name A {@link String} with the new name for the transport. This is NOT for
+     *     identification. MUST NOT be {@code null}.
+     * @param configurationIntent An {@link Intent} that can be passed to {@link
+     *     Context#startActivity} in order to launch the transport's configuration UI. It may be
+     *     {@code null} if the transport does not offer any user-facing configuration UI.
+     * @param currentDestinationString A {@link String} describing the destination to which the
+     *     transport is currently sending data. MUST NOT be {@code null}.
+     * @param dataManagementIntent An {@link Intent} that can be passed to {@link
+     *     Context#startActivity} in order to launch the transport's data-management UI. It may be
+     *     {@code null} if the transport does not offer any user-facing data management UI.
+     * @param dataManagementLabel A {@link CharSequence} to be used as the label for the transport's
+     *     data management affordance. This MUST be {@code null} when dataManagementIntent is {@code
+     *     null} and MUST NOT be {@code null} when dataManagementIntent is not {@code null}.
+     * @throws SecurityException If the UID of the calling process differs from the package UID of
+     *     {@code transportComponent} or if the caller does NOT have BACKUP permission.
      * @hide
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.BACKUP)
     public void updateTransportAttributes(
-            ComponentName transportComponent,
-            String name,
+            @NonNull ComponentName transportComponent,
+            @NonNull String name,
             @Nullable Intent configurationIntent,
-            String currentDestinationString,
+            @NonNull String currentDestinationString,
             @Nullable Intent dataManagementIntent,
-            @Nullable String dataManagementLabel) {
+            @Nullable CharSequence dataManagementLabel) {
         checkServiceBinder();
         if (sService != null) {
             try {
@@ -796,7 +841,7 @@ public class BackupManager {
     /**
      * Returns an {@link Intent} for the specified transport's configuration UI.
      * This value is set by {@link #updateTransportAttributes(ComponentName, String, Intent, String,
-     * Intent, String)}.
+     * Intent, CharSequence)}.
      * @param transportName The name of the registered transport.
      * @hide
      */
@@ -818,7 +863,7 @@ public class BackupManager {
     /**
      * Returns a {@link String} describing where the specified transport is sending data.
      * This value is set by {@link #updateTransportAttributes(ComponentName, String, Intent, String,
-     * Intent, String)}.
+     * Intent, CharSequence)}.
      * @param transportName The name of the registered transport.
      * @hide
      */
@@ -840,7 +885,7 @@ public class BackupManager {
     /**
      * Returns an {@link Intent} for the specified transport's data management UI.
      * This value is set by {@link #updateTransportAttributes(ComponentName, String, Intent, String,
-     * Intent, String)}.
+     * Intent, CharSequence)}.
      * @param transportName The name of the registered transport.
      * @hide
      */
@@ -861,9 +906,28 @@ public class BackupManager {
 
     /**
      * Returns a {@link String} describing what the specified transport's data management intent is
-     * used for.
-     * This value is set by {@link #updateTransportAttributes(ComponentName, String, Intent, String,
-     * Intent, String)}.
+     * used for. This value is set by {@link #updateTransportAttributes(ComponentName, String,
+     * Intent, String, Intent, CharSequence)}.
+     *
+     * @param transportName The name of the registered transport.
+     * @deprecated Since Android Q, please use the variant {@link
+     *     #getDataManagementIntentLabel(String)} instead.
+     * @hide
+     */
+    @Deprecated
+    @SystemApi
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.BACKUP)
+    @Nullable
+    public String getDataManagementLabel(@NonNull String transportName) {
+        CharSequence label = getDataManagementIntentLabel(transportName);
+        return label == null ? null : label.toString();
+    }
+
+    /**
+     * Returns a {@link CharSequence} describing what the specified transport's data management
+     * intent is used for. This value is set by {@link #updateTransportAttributes(ComponentName,
+     * String, Intent, String, Intent, CharSequence)}.
      *
      * @param transportName The name of the registered transport.
      * @hide
@@ -871,13 +935,14 @@ public class BackupManager {
     @SystemApi
     @TestApi
     @RequiresPermission(android.Manifest.permission.BACKUP)
-    public String getDataManagementLabel(String transportName) {
+    @Nullable
+    public CharSequence getDataManagementIntentLabel(@NonNull String transportName) {
         checkServiceBinder();
         if (sService != null) {
             try {
                 return sService.getDataManagementLabelForUser(mContext.getUserId(), transportName);
             } catch (RemoteException e) {
-                Log.e(TAG, "getDataManagementLabel() couldn't connect");
+                Log.e(TAG, "getDataManagementIntentLabel() couldn't connect");
             }
         }
         return null;

@@ -353,16 +353,16 @@ interface IBackupManager {
      *     {@link Context#startActivity} in order to launch the transport's data-management UI. It
      *     may be {@code null} if the transport does not offer any user-facing data
      *     management UI.
-     * @param dataManagementLabel A {@link String} to be used as the label for the transport's data
-     *     management affordance. This MUST be {@code null} when dataManagementIntent is
-     *     {@code null} and MUST NOT be {@code null} when dataManagementIntent is not {@code null}.
+     * @param dataManagementLabel A {@link CharSequence} to be used as the label for the transport's
+     *     data management affordance. This MUST be {@code null} when dataManagementIntent is {@code
+     *     null} and MUST NOT be {@code null} when dataManagementIntent is not {@code null}.
      * @throws SecurityException If the UID of the calling process differs from the package UID of
      *     {@code transportComponent} or if the caller does NOT have BACKUP permission.
      */
     void updateTransportAttributesForUser(int userId, in ComponentName transportComponent,
             in String name,
             in Intent configurationIntent, in String currentDestinationString,
-            in Intent dataManagementIntent, in String dataManagementLabel);
+            in Intent dataManagementIntent, in CharSequence dataManagementLabel);
 
     /**
      * Identify the currently selected transport.  Callers must hold the
@@ -525,13 +525,7 @@ interface IBackupManager {
      *
      * @param userId User id for which the manage-data menu label should be reported.
      */
-    String getDataManagementLabelForUser(int userId, String transport);
-
-    /**
-     * {@link android.app.backup.IBackupManager.getDataManagementLabelForUser} for the calling user
-     * id.
-     */
-    String getDataManagementLabel(String transport);
+    CharSequence getDataManagementLabelForUser(int userId, String transport);
 
     /**
      * Begin a restore session.  Either or both of packageName and transportID

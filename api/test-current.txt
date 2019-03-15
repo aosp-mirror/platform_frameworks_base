@@ -416,7 +416,8 @@ package android.app.backup {
   public class BackupManager {
     method @RequiresPermission("android.permission.BACKUP") public android.content.Intent getConfigurationIntent(String);
     method @RequiresPermission("android.permission.BACKUP") public android.content.Intent getDataManagementIntent(String);
-    method @RequiresPermission("android.permission.BACKUP") public String getDataManagementLabel(String);
+    method @Nullable @RequiresPermission("android.permission.BACKUP") public CharSequence getDataManagementIntentLabel(@NonNull String);
+    method @Deprecated @Nullable @RequiresPermission("android.permission.BACKUP") public String getDataManagementLabel(@NonNull String);
     method @RequiresPermission("android.permission.BACKUP") public String getDestinationString(String);
   }
 
