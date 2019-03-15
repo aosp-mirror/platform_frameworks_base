@@ -318,8 +318,8 @@ public final class DataFailCause {
     public static final int LOW_POWER_MODE_OR_POWERING_DOWN = 0x7FC;
     /** APN has been disabled. */
     public static final int APN_DISABLED = 0x7FD;
-    /** Maximum PPP inactivity timer expired. */
-    public static final int MAX_PPP_INACTIVITY_TIMER_EXPIRED = 0x7FE;
+    /** PPP inactivity timer expired. */
+    public static final int PPP_INACTIVITY_TIMER_EXPIRED = 0x7FE;
     /** IPv6 address transfer failed. */
     public static final int IPV6_ADDRESS_TRANSFER_FAILED = 0x7FF;
     /** Target RAT swap failed. */
@@ -339,12 +339,12 @@ public final class DataFailCause {
      * IPv4 data call bring up is rejected because the UE already maintains the allotted maximum
      * number of IPv4 data connections.
      */
-    public static final int MAX_IPV4_CONNECTIONS = 0x804;
+    public static final int IPV4_CONNECTIONS_LIMIT_REACHED = 0x804;
     /**
      * IPv6 data call bring up is rejected because the UE already maintains the allotted maximum
      * number of IPv6 data connections.
      */
-    public static final int MAX_IPV6_CONNECTIONS = 0x805;
+    public static final int IPV6_CONNECTIONS_LIMIT_REACHED = 0x805;
     /**
      * New PDN bring up is rejected during interface selection because the UE has already allotted
      * the available interfaces for other PDNs.
@@ -416,7 +416,7 @@ public final class DataFailCause {
      */
     public static final int CHANNEL_ACQUISITION_FAILURE = 0x81E;
     /** Maximum access probes transmitted. */
-    public static final int MAX_ACCESS_PROBE = 0x81F;
+    public static final int ACCESS_PROBE_LIMIT_REACHED = 0x81F;
     /** Concurrent service is not supported by base station. */
     public static final int CONCURRENT_SERVICE_NOT_SUPPORTED_BY_BASE_STATION = 0x820;
     /** There was no response received from the base station. */
@@ -1079,14 +1079,14 @@ public final class DataFailCause {
             SIM_CARD_CHANGED,
             LOW_POWER_MODE_OR_POWERING_DOWN,
             APN_DISABLED,
-            MAX_PPP_INACTIVITY_TIMER_EXPIRED,
+            PPP_INACTIVITY_TIMER_EXPIRED,
             IPV6_ADDRESS_TRANSFER_FAILED,
             TRAT_SWAP_FAILED,
             EHRPD_TO_HRPD_FALLBACK,
             MIP_CONFIG_FAILURE,
             PDN_INACTIVITY_TIMER_EXPIRED,
-            MAX_IPV4_CONNECTIONS,
-            MAX_IPV6_CONNECTIONS,
+            IPV4_CONNECTIONS_LIMIT_REACHED,
+            IPV6_CONNECTIONS_LIMIT_REACHED,
             APN_MISMATCH,
             IP_VERSION_MISMATCH,
             DUN_CALL_DISALLOWED,
@@ -1112,7 +1112,7 @@ public final class DataFailCause {
             CDMA_INCOMING_CALL,
             CDMA_ALERT_STOP,
             CHANNEL_ACQUISITION_FAILURE,
-            MAX_ACCESS_PROBE,
+            ACCESS_PROBE_LIMIT_REACHED,
             CONCURRENT_SERVICE_NOT_SUPPORTED_BY_BASE_STATION,
             NO_RESPONSE_FROM_BASE_STATION,
             REJECTED_BY_BASE_STATION,
@@ -1447,14 +1447,14 @@ public final class DataFailCause {
         sFailCauseMap.put(SIM_CARD_CHANGED, "SIM_CARD_CHANGED");
         sFailCauseMap.put(LOW_POWER_MODE_OR_POWERING_DOWN, "LOW_POWER_MODE_OR_POWERING_DOWN");
         sFailCauseMap.put(APN_DISABLED, "APN_DISABLED");
-        sFailCauseMap.put(MAX_PPP_INACTIVITY_TIMER_EXPIRED, "MAX_PPP_INACTIVITY_TIMER_EXPIRED");
+        sFailCauseMap.put(PPP_INACTIVITY_TIMER_EXPIRED, "PPP_INACTIVITY_TIMER_EXPIRED");
         sFailCauseMap.put(IPV6_ADDRESS_TRANSFER_FAILED, "IPV6_ADDRESS_TRANSFER_FAILED");
         sFailCauseMap.put(TRAT_SWAP_FAILED, "TRAT_SWAP_FAILED");
         sFailCauseMap.put(EHRPD_TO_HRPD_FALLBACK, "EHRPD_TO_HRPD_FALLBACK");
         sFailCauseMap.put(MIP_CONFIG_FAILURE, "MIP_CONFIG_FAILURE");
         sFailCauseMap.put(PDN_INACTIVITY_TIMER_EXPIRED, "PDN_INACTIVITY_TIMER_EXPIRED");
-        sFailCauseMap.put(MAX_IPV4_CONNECTIONS, "MAX_IPV4_CONNECTIONS");
-        sFailCauseMap.put(MAX_IPV6_CONNECTIONS, "MAX_IPV6_CONNECTIONS");
+        sFailCauseMap.put(IPV4_CONNECTIONS_LIMIT_REACHED, "IPV4_CONNECTIONS_LIMIT_REACHED");
+        sFailCauseMap.put(IPV6_CONNECTIONS_LIMIT_REACHED, "IPV6_CONNECTIONS_LIMIT_REACHED");
         sFailCauseMap.put(APN_MISMATCH, "APN_MISMATCH");
         sFailCauseMap.put(IP_VERSION_MISMATCH, "IP_VERSION_MISMATCH");
         sFailCauseMap.put(DUN_CALL_DISALLOWED, "DUN_CALL_DISALLOWED");
@@ -1480,7 +1480,7 @@ public final class DataFailCause {
         sFailCauseMap.put(CDMA_INCOMING_CALL, "CDMA_INCOMING_CALL");
         sFailCauseMap.put(CDMA_ALERT_STOP, "CDMA_ALERT_STOP");
         sFailCauseMap.put(CHANNEL_ACQUISITION_FAILURE, "CHANNEL_ACQUISITION_FAILURE");
-        sFailCauseMap.put(MAX_ACCESS_PROBE, "MAX_ACCESS_PROBE");
+        sFailCauseMap.put(ACCESS_PROBE_LIMIT_REACHED, "ACCESS_PROBE_LIMIT_REACHED");
         sFailCauseMap.put(CONCURRENT_SERVICE_NOT_SUPPORTED_BY_BASE_STATION,
                 "CONCURRENT_SERVICE_NOT_SUPPORTED_BY_BASE_STATION");
         sFailCauseMap.put(NO_RESPONSE_FROM_BASE_STATION, "NO_RESPONSE_FROM_BASE_STATION");
