@@ -78,19 +78,12 @@ import java.util.StringJoiner;
 public class LockPatternUtils {
 
     private static final String TAG = "LockPatternUtils";
-    private static final boolean DEBUG = false;
     private static final boolean FRP_CREDENTIAL_ENABLED = true;
 
     /**
      * The key to identify when the lock pattern enabled flag is being accessed for legacy reasons.
      */
     public static final String LEGACY_LOCK_PATTERN_ENABLED = "legacy_lock_pattern_enabled";
-
-    /**
-     * The number of incorrect attempts before which we fall back on an alternative
-     * method of verifying the user, and resetting their lock pattern.
-     */
-    public static final int FAILED_ATTEMPTS_BEFORE_RESET = 20;
 
     /**
      * The interval of the countdown for showing progress of the lockout.
@@ -115,17 +108,22 @@ public class LockPatternUtils {
     public static final int MIN_LOCK_PASSWORD_SIZE = 4;
 
     /**
-     * The minimum number of dots the user must include in a wrong pattern
-     * attempt for it to be counted against the counts that affect
-     * {@link #FAILED_ATTEMPTS_BEFORE_TIMEOUT} and {@link #FAILED_ATTEMPTS_BEFORE_RESET}
+     * The minimum number of dots the user must include in a wrong pattern attempt for it to be
+     * counted.
      */
     public static final int MIN_PATTERN_REGISTER_FAIL = MIN_LOCK_PATTERN_SIZE;
 
     public static final int CREDENTIAL_TYPE_NONE = -1;
-
     public static final int CREDENTIAL_TYPE_PATTERN = 1;
-
     public static final int CREDENTIAL_TYPE_PASSWORD = 2;
+
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"CREDENTIAL_TYPE_"}, value = {
+            CREDENTIAL_TYPE_NONE,
+            CREDENTIAL_TYPE_PATTERN,
+            CREDENTIAL_TYPE_PASSWORD, // Either pin or password.
+    })
+    public @interface CredentialType {}
 
     /**
      * Special user id for triggering the FRP verification flow.
@@ -915,9 +913,10 @@ public class LockPatternUtils {
         }
 
         final int currentQuality = getKeyguardStoredPasswordQuality(userHandle);
-        setKeyguardStoredPasswordQuality(
-                computePasswordQuality(CREDENTIAL_TYPE_PASSWORD, password, requestedQuality),
-                userHandle);
+        final int passwordQuality = PasswordMetrics.computeForPassword(password).quality;
+        final int newKeyguardQuality =
+                computeKeyguardQuality(CREDENTIAL_TYPE_PASSWORD, requestedQuality, passwordQuality);
+        setKeyguardStoredPasswordQuality(newKeyguardQuality, userHandle);
         try {
             getLockSettings().setLockCredential(password, CREDENTIAL_TYPE_PASSWORD, savedPassword,
                     requestedQuality, userHandle);
@@ -927,10 +926,22 @@ public class LockPatternUtils {
             return;
         }
 
-        updateEncryptionPasswordIfNeeded(password,
-                PasswordMetrics.computeForPassword(password).quality, userHandle);
+        updateEncryptionPasswordIfNeeded(password, passwordQuality, userHandle);
         updatePasswordHistory(password, userHandle);
         onAfterChangingPassword(userHandle);
+    }
+
+    /**
+     * Compute keyguard credential quality to store in PASSWORD_TYPE_KEY by computing max between
+     * them so that digit-only password is distinguished from PIN.
+     *
+     * TODO: remove this method and make CREDENTIAL_TYPE distinguish between PIN and password, so
+     * that this quality is no longer needs to be persisted.
+     */
+    private int computeKeyguardQuality(
+            @CredentialType int credentialType, int requestedQuality, int passwordQuality) {
+        return credentialType == CREDENTIAL_TYPE_PASSWORD
+                ? Math.max(passwordQuality, requestedQuality) : passwordQuality;
     }
 
     /**
@@ -1030,24 +1041,6 @@ public class LockPatternUtils {
 
     private void setKeyguardStoredPasswordQuality(int quality, int userHandle) {
         setLong(PASSWORD_TYPE_KEY, quality, userHandle);
-    }
-
-    /**
-     * Returns the password quality of the given credential, promoting it to a higher level
-     * if DevicePolicyManager has a stronger quality requirement. This value will be written
-     * to PASSWORD_TYPE_KEY.
-     */
-    private int computePasswordQuality(int type, byte[] credential, int requestedQuality) {
-        final int quality;
-        if (type == CREDENTIAL_TYPE_PASSWORD) {
-            int computedQuality = PasswordMetrics.computeForPassword(credential).quality;
-            quality = Math.max(requestedQuality, computedQuality);
-        } else if (type == CREDENTIAL_TYPE_PATTERN)  {
-            quality = PASSWORD_QUALITY_SOMETHING;
-        } else /* if (type == CREDENTIAL_TYPE_NONE) */ {
-            quality = PASSWORD_QUALITY_UNSPECIFIED;
-        }
-        return quality;
     }
 
     /**
@@ -1752,9 +1745,10 @@ public class LockPatternUtils {
                 throw new IllegalArgumentException("password must not be null and at least "
                         + "of length " + MIN_LOCK_PASSWORD_SIZE);
             }
-            final int quality = computePasswordQuality(type, credential, requestedQuality);
+            final int quality = PasswordMetrics.computeForCredential(type, credential).quality;
+            final int keyguardQuality = computeKeyguardQuality(type, quality, requestedQuality);
             if (!localService.setLockCredentialWithToken(credential, type, tokenHandle, token,
-                    quality, userId)) {
+                    keyguardQuality, userId)) {
                 return false;
             }
             setKeyguardStoredPasswordQuality(quality, userId);

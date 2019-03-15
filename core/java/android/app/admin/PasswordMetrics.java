@@ -24,7 +24,11 @@ import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_ALPHANUMERIC;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_COMPLEX;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_NUMERIC;
+import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_SOMETHING;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
+
+import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PASSWORD;
+import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PATTERN;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -33,13 +37,15 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.Preconditions;
+import com.android.internal.widget.LockPatternUtils.CredentialType;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * A class that represents the metrics of a password that are used to decide whether or not a
- * password meets the requirements.
+ * A class that represents the metrics of a credential that are used to decide whether or not a
+ * credential meets the requirements. If the credential is a pattern, only quality matters.
  *
  * {@hide}
  */
@@ -48,8 +54,6 @@ public class PasswordMetrics implements Parcelable {
     // consider it a complex PIN/password.
     public static final int MAX_ALLOWED_SEQUENCE = 3;
 
-    // TODO(b/120536847): refactor isActivePasswordSufficient logic so that the actual password
-    // quality is not overwritten
     public int quality = DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
     public int length = 0;
     public int letters = 0;
@@ -222,6 +226,25 @@ public class PasswordMetrics implements Parcelable {
     };
 
     /**
+     * Returnsthe {@code PasswordMetrics} for a given credential.
+     *
+     * If the credential is a pin or a password, equivalent to {@link #computeForPassword(byte[])}.
+     * {@code credential} cannot be null when {@code type} is
+     * {@link com.android.internal.widget.LockPatternUtils#CREDENTIAL_TYPE_PASSWORD}.
+     */
+    public static PasswordMetrics computeForCredential(
+            @CredentialType int type, byte[] credential) {
+        if (type == CREDENTIAL_TYPE_PASSWORD) {
+            Preconditions.checkNotNull(credential, "credential cannot be null");
+            return PasswordMetrics.computeForPassword(credential);
+        } else if (type == CREDENTIAL_TYPE_PATTERN)  {
+            return new PasswordMetrics(PASSWORD_QUALITY_SOMETHING);
+        } else /* if (type == CREDENTIAL_TYPE_NONE) */ {
+            return new PasswordMetrics(PASSWORD_QUALITY_UNSPECIFIED);
+        }
+    }
+
+    /**
      * Returns the {@code PasswordMetrics} for a given password
      */
     public static PasswordMetrics computeForPassword(@NonNull byte[] password) {
@@ -233,8 +256,8 @@ public class PasswordMetrics implements Parcelable {
         int symbols = 0;
         int nonLetter = 0;
         final int length = password.length;
-        for (int i = 0; i < length; i++) {
-            switch (categoryChar((char) password[i])) {
+        for (byte b : password) {
+            switch (categoryChar((char) b)) {
                 case CHAR_LOWER_CASE:
                     letters++;
                     lowerCase++;

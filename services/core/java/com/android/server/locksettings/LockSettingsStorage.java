@@ -37,6 +37,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.Preconditions;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.internal.widget.LockPatternUtils.CredentialType;
 import com.android.server.LocalServices;
 import com.android.server.PersistentDataBlockManagerInternal;
 
@@ -96,11 +97,12 @@ class LockSettingsStorage {
         static final int VERSION_LEGACY = 0;
         static final int VERSION_GATEKEEPER = 1;
 
-        private CredentialHash(byte[] hash, int type, int version) {
+        private CredentialHash(byte[] hash, @CredentialType int type, int version) {
             this(hash, type, version, false /* isBaseZeroPattern */);
         }
 
-        private CredentialHash(byte[] hash, int type, int version, boolean isBaseZeroPattern) {
+        private CredentialHash(
+                byte[] hash, @CredentialType int type, int version, boolean isBaseZeroPattern) {
             if (type != LockPatternUtils.CREDENTIAL_TYPE_NONE) {
                 if (hash == null) {
                     throw new RuntimeException("Empty hash for CredentialHash");
@@ -134,7 +136,7 @@ class LockSettingsStorage {
         }
 
         byte[] hash;
-        int type;
+        @CredentialType int type;
         int version;
         boolean isBaseZeroPattern;
 
