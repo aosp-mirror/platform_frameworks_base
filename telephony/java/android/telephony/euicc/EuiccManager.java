@@ -761,7 +761,7 @@ public class EuiccManager {
      */
     @RequiresPermission(Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS)
     public void updateSubscriptionNickname(
-            int subscriptionId, String nickname, PendingIntent callbackIntent) {
+            int subscriptionId, @Nullable String nickname, @NonNull PendingIntent callbackIntent) {
         if (!refreshCardIdIfUninitialized()) {
             sendUnavailableError(callbackIntent);
             return;
