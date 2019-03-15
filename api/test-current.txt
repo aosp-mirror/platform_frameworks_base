@@ -946,10 +946,9 @@ package android.location {
     method @Deprecated public void setCarrierPhase(double);
     method @Deprecated public void setCarrierPhaseUncertainty(double);
     method public void setCn0DbHz(double);
-    method public void setCodeType(int);
+    method public void setCodeType(@NonNull String);
     method public void setConstellationType(int);
     method public void setMultipathIndicator(int);
-    method public void setOtherCodeTypeName(@NonNull String);
     method public void setPseudorangeRateMetersPerSecond(double);
     method public void setPseudorangeRateUncertaintyMetersPerSecond(double);
     method public void setReceivedSvTimeNanos(long);
