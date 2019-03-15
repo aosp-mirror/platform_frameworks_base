@@ -7,7 +7,7 @@ import static org.mockito.Mockito.when;
 
 import android.net.NetworkCapabilities;
 import android.os.Looper;
-import android.telephony.NetworkRegistrationState;
+import android.telephony.NetworkRegistrationInfo;
 import android.telephony.ServiceState;
 import android.telephony.TelephonyManager;
 import android.test.suitebuilder.annotation.SmallTest;
@@ -151,7 +151,7 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
         updateDataConnectionState(TelephonyManager.DATA_CONNECTED,
                 TelephonyManager.NETWORK_TYPE_LTE);
         ServiceState ss = Mockito.mock(ServiceState.class);
-        doReturn(NetworkRegistrationState.NR_STATUS_CONNECTED).when(ss).getNrStatus();
+        doReturn(NetworkRegistrationInfo.NR_STATUS_CONNECTED).when(ss).getNrStatus();
         doReturn(ServiceState.FREQUENCY_RANGE_HIGH).when(ss).getNrFrequencyRange();
         mPhoneStateListener.onServiceStateChanged(ss);
 
@@ -165,7 +165,7 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
         updateDataConnectionState(TelephonyManager.DATA_CONNECTED,
                 TelephonyManager.NETWORK_TYPE_LTE);
         ServiceState ss = Mockito.mock(ServiceState.class);
-        doReturn(NetworkRegistrationState.NR_STATUS_CONNECTED).when(ss).getNrStatus();
+        doReturn(NetworkRegistrationInfo.NR_STATUS_CONNECTED).when(ss).getNrStatus();
         doReturn(ServiceState.FREQUENCY_RANGE_MMWAVE).when(ss).getNrFrequencyRange();
         mPhoneStateListener.onServiceStateChanged(ss);
 
@@ -179,7 +179,7 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
         updateDataConnectionState(TelephonyManager.DATA_CONNECTED,
                 TelephonyManager.NETWORK_TYPE_LTE);
         ServiceState ss = Mockito.mock(ServiceState.class);
-        doReturn(NetworkRegistrationState.NR_STATUS_RESTRICTED).when(ss).getNrStatus();
+        doReturn(NetworkRegistrationInfo.NR_STATUS_RESTRICTED).when(ss).getNrStatus();
         mPhoneStateListener.onServiceStateChanged(mServiceState);
 
         verifyDataIndicators(TelephonyIcons.ICON_LTE);
