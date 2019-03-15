@@ -165,6 +165,15 @@ public class NetworkStackClient {
     }
 
     /**
+     * Initialize the network stack. Should be called only once on device startup, before any
+     * client attempts to use the network stack.
+     */
+    public void init() {
+        log("Network stack init");
+        mNetworkStackStartRequested = true;
+    }
+
+    /**
      * Start the network stack. Should be called only once on device startup.
      *
      * <p>This method will start the network stack either in the network stack process, or inside
@@ -174,8 +183,6 @@ public class NetworkStackClient {
      */
     public void start(Context context) {
         log("Starting network stack");
-        mNetworkStackStartRequested = true;
-
         final PackageManager pm = context.getPackageManager();
 
         // Try to bind in-process if the device was shipped with an in-process version
