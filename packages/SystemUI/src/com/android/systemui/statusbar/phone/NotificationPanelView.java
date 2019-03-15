@@ -92,6 +92,7 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcher;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 import com.android.systemui.statusbar.policy.ZenModeController;
+import com.android.systemui.util.InjectionInflationController;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -141,6 +142,7 @@ public class NotificationPanelView extends PanelView implements
     private static final AnimationProperties CLOCK_ANIMATION_PROPERTIES = new AnimationProperties()
             .setDuration(StackStateAnimator.ANIMATION_DURATION_STANDARD);
 
+    private final InjectionInflationController mInjectionInflationController;
     private final PowerManager mPowerManager;
     private final AccessibilityManager mAccessibilityManager;
     private final NotificationWakeUpCoordinator mWakeUpCoordinator;
@@ -336,10 +338,12 @@ public class NotificationPanelView extends PanelView implements
 
     @Inject
     public NotificationPanelView(@Named(VIEW_CONTEXT) Context context, AttributeSet attrs,
+            InjectionInflationController injectionInflationController,
             NotificationWakeUpCoordinator coordinator,
             PulseExpansionHandler pulseExpansionHandler) {
         super(context, attrs);
         setWillNotDraw(!DEBUG);
+        mInjectionInflationController = injectionInflationController;
         mFalsingManager = FalsingManager.getInstance(context);
         mPowerManager = context.getSystemService(PowerManager.class);
         mWakeUpCoordinator = coordinator;
@@ -475,10 +479,11 @@ public class NotificationPanelView extends PanelView implements
         // Re-inflate the status view group.
         int index = indexOfChild(mKeyguardStatusView);
         removeView(mKeyguardStatusView);
-        mKeyguardStatusView = (KeyguardStatusView) LayoutInflater.from(mContext).inflate(
-                R.layout.keyguard_status_view,
-                this,
-                false);
+        mKeyguardStatusView = (KeyguardStatusView) mInjectionInflationController
+                .injectable(LayoutInflater.from(mContext)).inflate(
+                    R.layout.keyguard_status_view,
+                    this,
+                    false);
         addView(mKeyguardStatusView, index);
 
         // Re-associate the clock container with the keyguard clock switch.
@@ -490,10 +495,11 @@ public class NotificationPanelView extends PanelView implements
         index = indexOfChild(mKeyguardBottomArea);
         removeView(mKeyguardBottomArea);
         KeyguardBottomAreaView oldBottomArea = mKeyguardBottomArea;
-        mKeyguardBottomArea = (KeyguardBottomAreaView) LayoutInflater.from(mContext).inflate(
-                R.layout.keyguard_bottom_area,
-                this,
-                false);
+        mKeyguardBottomArea = (KeyguardBottomAreaView) mInjectionInflationController
+                .injectable(LayoutInflater.from(mContext)).inflate(
+                    R.layout.keyguard_bottom_area,
+                    this,
+                    false);
         mKeyguardBottomArea.initFrom(oldBottomArea);
         addView(mKeyguardBottomArea, index);
         initBottomArea();

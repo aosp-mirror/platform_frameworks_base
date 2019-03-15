@@ -27,6 +27,7 @@ import android.testing.TestableLooper;
 import androidx.test.filters.SmallTest;
 
 import com.android.keyguard.KeyguardStatusView;
+import com.android.systemui.SystemUIFactory;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.AmbientPulseManager;
@@ -38,6 +39,7 @@ import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ZenModeController;
+import com.android.systemui.util.InjectionInflationController;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -104,7 +106,10 @@ public class NotificationPanelViewTest extends SysuiTestCase {
     private class TestableNotificationPanelView extends NotificationPanelView {
         TestableNotificationPanelView(NotificationWakeUpCoordinator coordinator,
                 PulseExpansionHandler expansionHandler) {
-            super(NotificationPanelViewTest.this.mContext, null, coordinator, expansionHandler);
+            super(NotificationPanelViewTest.this.mContext, null,
+                    new InjectionInflationController(
+                            SystemUIFactory.getInstance().getRootComponent()),
+                    coordinator, expansionHandler);
             mNotificationStackScroller = mNotificationStackScrollLayout;
             mKeyguardStatusView = NotificationPanelViewTest.this.mKeyguardStatusView;
             mKeyguardStatusBar = NotificationPanelViewTest.this.mKeyguardStatusBar;

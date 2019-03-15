@@ -23,6 +23,7 @@ import android.view.InflateException;
 import android.view.LayoutInflater;
 import android.view.View;
 
+import com.android.keyguard.KeyguardClockSwitch;
 import com.android.systemui.SystemUIFactory;
 import com.android.systemui.qs.QSCarrierGroup;
 import com.android.systemui.qs.QSFooterImpl;
@@ -130,6 +131,11 @@ public class InjectionInflationController {
          * Creates the QSCarrierGroup
          */
         QSCarrierGroup createQSCarrierGroup();
+
+        /**
+         * Creates the KeyguardClockSwitch.
+         */
+        KeyguardClockSwitch createKeyguardClockSwitch();
     }
 
     /**

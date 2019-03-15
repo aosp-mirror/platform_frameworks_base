@@ -28,8 +28,11 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.DisplayInfo;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
+
+import com.android.systemui.util.InjectionInflationController;
 
 // TODO(multi-display): Support multiple external displays
 public class KeyguardDisplayManager {
@@ -38,6 +41,7 @@ public class KeyguardDisplayManager {
 
     private final MediaRouter mMediaRouter;
     private final DisplayManager mDisplayService;
+    private final InjectionInflationController mInjectableInflater;
     private final Context mContext;
 
     private boolean mShowing;
@@ -75,8 +79,10 @@ public class KeyguardDisplayManager {
         }
     };
 
-    public KeyguardDisplayManager(Context context) {
+    public KeyguardDisplayManager(Context context,
+            InjectionInflationController injectableInflater) {
         mContext = context;
+        mInjectableInflater = injectableInflater;
         mMediaRouter = mContext.getSystemService(MediaRouter.class);
         mDisplayService = mContext.getSystemService(DisplayManager.class);
         mDisplayService.registerDisplayListener(mDisplayListener, null /* handler */);
@@ -110,7 +116,7 @@ public class KeyguardDisplayManager {
         final int displayId = display.getDisplayId();
         Presentation presentation = mPresentations.get(displayId);
         if (presentation == null) {
-            presentation = new KeyguardPresentation(mContext, display);
+            presentation = new KeyguardPresentation(mContext, display, mInjectableInflater);
             presentation.setOnDismissListener(dialog -> {
                 if (null != mPresentations.get(displayId)) {
                     mPresentations.remove(displayId);
@@ -201,6 +207,7 @@ public class KeyguardDisplayManager {
     private final static class KeyguardPresentation extends Presentation {
         private static final int VIDEO_SAFE_REGION = 80; // Percentage of display width & height
         private static final int MOVE_CLOCK_TIMEOUT = 10000; // 10s
+        private final InjectionInflationController mInjectableInflater;
         private View mClock;
         private int mUsableWidth;
         private int mUsableHeight;
@@ -217,8 +224,10 @@ public class KeyguardDisplayManager {
             }
         };
 
-        KeyguardPresentation(Context context, Display display) {
+        KeyguardPresentation(Context context, Display display,
+                InjectionInflationController injectionInflater) {
             super(context, display, R.style.keyguard_presentation_theme);
+            mInjectableInflater = injectionInflater;
             getWindow().setType(WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
             setCancelable(false);
         }
@@ -239,7 +248,9 @@ public class KeyguardDisplayManager {
             mMarginLeft = (100 - VIDEO_SAFE_REGION) * p.x / 200;
             mMarginTop = (100 - VIDEO_SAFE_REGION) * p.y / 200;
 
-            setContentView(R.layout.keyguard_presentation);
+            LayoutInflater inflater = mInjectableInflater.injectable(
+                    LayoutInflater.from(getContext()));
+            setContentView(inflater.inflate(R.layout.keyguard_presentation, null));
             mClock = findViewById(R.id.clock);
 
             // Avoid screen burn in

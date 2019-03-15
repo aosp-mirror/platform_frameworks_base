@@ -1,5 +1,7 @@
 package com.android.keyguard;
 
+import static com.android.systemui.util.InjectionInflationController.VIEW_CONTEXT;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
@@ -24,8 +26,8 @@ import android.widget.TextClock;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.colorextraction.ColorExtractor;
+import com.android.internal.colorextraction.ColorExtractor.OnColorsChangedListener;
 import com.android.keyguard.clock.ClockManager;
-import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.plugins.ClockPlugin;
@@ -37,37 +39,65 @@ import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.TimeZone;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+
 /**
  * Switch to show plugin clock when plugin is connected, otherwise it will show default clock.
  */
 public class KeyguardClockSwitch extends RelativeLayout {
 
+    /**
+     * Controller used to track StatusBar state to know when to show the big_clock_container.
+     */
+    private final StatusBarStateController mStatusBarStateController;
+
+    /**
+     * Color extractor used to apply colors from wallpaper to custom clock faces.
+     */
+    private final SysuiColorExtractor mSysuiColorExtractor;
+
+    /**
+     * Manager used to know when to show a custom clock face.
+     */
+    private final ClockManager mClockManager;
+
+    /**
+     * Layout transition that scales the default clock face.
+     */
     private final Transition mTransition;
+
     /**
      * Optional/alternative clock injected via plugin.
      */
     private ClockPlugin mClockPlugin;
+
     /**
      * Default clock.
      */
     private TextClock mClockView;
+
     /**
      * Frame for default and custom clock.
      */
     private FrameLayout mSmallClockFrame;
+
     /**
      * Container for big custom clock.
      */
     private ViewGroup mBigClockContainer;
+
     /**
      * Status area (date and other stuff) shown below the clock. Plugin can decide whether or not to
      * show it below the alternate clock.
      */
     private View mKeyguardStatusArea;
+
     /**
      * Maintain state so that a newly connected plugin can be initialized.
      */
     private float mDarkAmount;
+
     /**
      * If the Keyguard Slice has a header (big center-aligned text.)
      */
@@ -96,22 +126,20 @@ public class KeyguardClockSwitch extends RelativeLayout {
      *
      * The color palette changes when the wallpaper is changed.
      */
-    private SysuiColorExtractor.OnColorsChangedListener mColorsListener = (extractor, which) -> {
+    private final OnColorsChangedListener mColorsListener = (extractor, which) -> {
         if ((which & WallpaperManager.FLAG_LOCK) != 0) {
-            if (extractor instanceof SysuiColorExtractor) {
-                updateColors((SysuiColorExtractor) extractor);
-            } else {
-                updateColors(Dependency.get(SysuiColorExtractor.class));
-            }
+            updateColors();
         }
     };
 
-    public KeyguardClockSwitch(Context context) {
-        this(context, null);
-    }
-
-    public KeyguardClockSwitch(Context context, AttributeSet attrs) {
+    @Inject
+    public KeyguardClockSwitch(@Named(VIEW_CONTEXT) Context context, AttributeSet attrs,
+            StatusBarStateController statusBarStateController, SysuiColorExtractor colorExtractor,
+            ClockManager clockManager) {
         super(context, attrs);
+        mStatusBarStateController = statusBarStateController;
+        mSysuiColorExtractor = colorExtractor;
+        mClockManager = clockManager;
         mTransition = new ClockBoundsTransition();
     }
 
@@ -133,22 +161,18 @@ public class KeyguardClockSwitch extends RelativeLayout {
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        Dependency.get(ClockManager.class).addOnClockChangedListener(mClockChangedListener);
-        StatusBarStateController stateController = Dependency.get(StatusBarStateController.class);
-        stateController.addCallback(mStateListener);
-        mStateListener.onStateChanged(stateController.getState());
-        SysuiColorExtractor colorExtractor = Dependency.get(SysuiColorExtractor.class);
-        colorExtractor.addOnColorsChangedListener(mColorsListener);
-        updateColors(colorExtractor);
+        mClockManager.addOnClockChangedListener(mClockChangedListener);
+        mStatusBarStateController.addCallback(mStateListener);
+        mSysuiColorExtractor.addOnColorsChangedListener(mColorsListener);
+        updateColors();
     }
 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        Dependency.get(ClockManager.class).removeOnClockChangedListener(mClockChangedListener);
-        Dependency.get(StatusBarStateController.class).removeCallback(mStateListener);
-        Dependency.get(SysuiColorExtractor.class)
-                .removeOnColorsChangedListener(mColorsListener);
+        mClockManager.removeOnClockChangedListener(mClockChangedListener);
+        mStatusBarStateController.removeCallback(mStateListener);
+        mSysuiColorExtractor.removeOnColorsChangedListener(mColorsListener);
         setClockPlugin(null);
     }
 
@@ -293,9 +317,9 @@ public class KeyguardClockSwitch extends RelativeLayout {
         }
     }
 
-    private void updateColors(SysuiColorExtractor colorExtractor) {
-        ColorExtractor.GradientColors colors = colorExtractor.getColors(WallpaperManager.FLAG_LOCK,
-                true);
+    private void updateColors() {
+        ColorExtractor.GradientColors colors = mSysuiColorExtractor.getColors(
+                WallpaperManager.FLAG_LOCK, true);
         mSupportsDarkText = colors.supportsDarkText();
         mColorPalette = colors.getColorPalette();
         if (mClockPlugin != null) {
