@@ -120,6 +120,10 @@ public class EuiccManager {
      * enable or disable a subscription. Must be accompanied with {@link #EXTRA_SUBSCRIPTION_ID} and
      * {@link #EXTRA_ENABLE_SUBSCRIPTION}.
      *
+     * Requires the caller to be a privileged process with the
+     * {@link android.permission#CALL_PRIVILEGED} permission for the intent to reach the Telephony
+     * stack.
+     *
      * <p>Unlike {@link #switchToSubscription(int, PendingIntent)}, using this action allows the
      * underlying eUICC service (i.e. the LPA app) to control the UI experience during this
      * operation. The action is received by the Telephony framework, which in turn selects and
@@ -138,6 +142,10 @@ public class EuiccManager {
     /**
      * Intent action sent by system apps (such as the Settings app) to the Telephony framework to
      * delete a subscription. Must be accompanied with {@link #EXTRA_SUBSCRIPTION_ID}.
+     *
+     * Requires the caller to be a privileged process with the
+     * {@link android.permission#CALL_PRIVILEGED} permission for the intent to reach the Telephony
+     * stack.
      *
      * <p>Unlike {@link #deleteSubscription(int, PendingIntent)}, using this action allows the
      * underlying eUICC service (i.e. the LPA app) to control the UI experience during this
@@ -158,6 +166,10 @@ public class EuiccManager {
      * Intent action sent by system apps (such as the Settings app) to the Telephony framework to
      * rename a subscription. Must be accompanied with {@link #EXTRA_SUBSCRIPTION_ID} and
      * {@link #EXTRA_SUBSCRIPTION_NICKNAME}.
+     *
+     * Requires the caller to be a privileged process with the
+     * {@link android.permission#CALL_PRIVILEGED} permission for the intent to reach the Telephony
+     * stack.
      *
      * <p>Unlike {@link #updateSubscriptionNickname(int, String, PendingIntent)}, using this action
      * allows the the underlying eUICC service (i.e. the LPA app) to control the UI experience
