@@ -1,0 +1,5 @@
+android_test {
+    name: "CameraBrowser",
+    srcs: ["**/*.java"],
+    sdk_version: "current",
+}
