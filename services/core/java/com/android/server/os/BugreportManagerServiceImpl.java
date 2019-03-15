@@ -40,10 +40,6 @@ import com.android.server.SystemConfig;
 
 import java.io.FileDescriptor;
 
-// TODO(b/111441001):
-// Intercept onFinished() & implement death recipient here and shutdown
-// bugreportd service.
-
 /**
  * Implementation of the service that provides a privileged API to capture and consume bugreports.
  *
@@ -166,9 +162,12 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
             reportError(listener, IDumpstateListener.BUGREPORT_ERROR_RUNTIME_ERROR);
             return;
         }
+
+        // Wrap the listener so we can intercept binder events directly.
+        IDumpstateListener myListener = new DumpstateListener(listener, ds);
         try {
             ds.startBugreport(callingUid, callingPackage,
-                    bugreportFd, screenshotFd, bugreportMode, listener);
+                    bugreportFd, screenshotFd, bugreportMode, myListener);
         } catch (RemoteException e) {
             reportError(listener, IDumpstateListener.BUGREPORT_ERROR_RUNTIME_ERROR);
         }
@@ -234,5 +233,74 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
     private void logAndThrow(String message) {
         Slog.w(TAG, message);
         throw new IllegalArgumentException(message);
+    }
+
+
+    private final class DumpstateListener extends IDumpstateListener.Stub
+            implements DeathRecipient {
+        private final IDumpstateListener mListener;
+        private final IDumpstate mDs;
+        private boolean mDone = false;
+
+        DumpstateListener(IDumpstateListener listener, IDumpstate ds) {
+            mListener = listener;
+            mDs = ds;
+            try {
+                mDs.asBinder().linkToDeath(this, 0);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Unable to register Death Recipient for IDumpstate", e);
+            }
+        }
+
+        @Override
+        public void onProgress(int progress) throws RemoteException {
+            mListener.onProgress(progress);
+        }
+
+        @Override
+        public void onError(int errorCode) throws RemoteException {
+            synchronized (mLock) {
+                mDone = true;
+            }
+            mListener.onError(errorCode);
+        }
+
+        @Override
+        public void onFinished() throws RemoteException {
+            synchronized (mLock) {
+                mDone = true;
+            }
+            mListener.onFinished();
+        }
+
+        @Override
+        public void binderDied() {
+            synchronized (mLock) {
+                if (!mDone) {
+                    // If we have not gotten a "done" callback this must be a crash.
+                    Slog.e(TAG, "IDumpstate likely crashed. Notifying listener");
+                    try {
+                        mListener.onError(IDumpstateListener.BUGREPORT_ERROR_RUNTIME_ERROR);
+                    } catch (RemoteException ignored) {
+                        // If listener is not around, there isn't anything to do here.
+                    }
+                }
+            }
+            mDs.asBinder().unlinkToDeath(this, 0);
+        }
+
+        // Old methods; unused in the API flow.
+        @Override
+        public void onProgressUpdated(int progress) throws RemoteException {
+        }
+
+        @Override
+        public void onMaxProgressUpdated(int maxProgress) throws RemoteException {
+        }
+
+        @Override
+        public void onSectionComplete(String title, int status, int size, int durationMs)
+                throws RemoteException {
+        }
     }
 }
