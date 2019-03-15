@@ -1198,30 +1198,48 @@ Status StatsService::sendBinaryPushStateChangedAtom(const android::String16& tra
     }
     // TODO: add verifier permission
 
-    userid_t userId = multiuser_get_user_id(uid);
+    bool readTrainInfoSuccess = false;
+    InstallTrainInfo trainInfo;
+    if (trainVersionCode == -1 || experimentIds.empty() || trainName.size() == 0) {
+        readTrainInfoSuccess = StorageManager::readTrainInfo(trainInfo);
+    }
 
-    bool requiresStaging = options & IStatsManager::FLAG_REQUIRE_STAGING;
-    bool rollbackEnabled = options & IStatsManager::FLAG_ROLLBACK_ENABLED;
-    bool requiresLowLatencyMonitor = options & IStatsManager::FLAG_REQUIRE_LOW_LATENCY_MONITOR;
-
-    ProtoOutputStream proto;
-    for (const auto& expId : experimentIds) {
-        proto.write(FIELD_TYPE_INT64 | FIELD_COUNT_REPEATED | FIELD_ID_EXPERIMENT_ID,
-                    (long long)expId);
+    if (trainVersionCode == -1 && readTrainInfoSuccess) {
+        trainVersionCode = trainInfo.trainVersionCode;
     }
 
     vector<uint8_t> experimentIdsProtoBuffer;
-    experimentIdsProtoBuffer.resize(proto.size());
-    size_t pos = 0;
-    auto iter = proto.data();
-    while (iter.readBuffer() != NULL) {
-        size_t toRead = iter.currentToRead();
-        std::memcpy(&(experimentIdsProtoBuffer[pos]), iter.readBuffer(), toRead);
-        pos += toRead;
-        iter.rp()->move(toRead);
+    if (readTrainInfoSuccess && experimentIds.empty()) {
+        experimentIdsProtoBuffer = trainInfo.experimentIds;
+    } else {
+        ProtoOutputStream proto;
+        for (const auto& expId : experimentIds) {
+            proto.write(FIELD_TYPE_INT64 | FIELD_COUNT_REPEATED | FIELD_ID_EXPERIMENT_ID,
+                        (long long)expId);
+        }
+
+        experimentIdsProtoBuffer.resize(proto.size());
+        size_t pos = 0;
+        auto iter = proto.data();
+        while (iter.readBuffer() != NULL) {
+            size_t toRead = iter.currentToRead();
+            std::memcpy(&(experimentIdsProtoBuffer[pos]), iter.readBuffer(), toRead);
+            pos += toRead;
+            iter.rp()->move(toRead);
+        }
     }
 
-    std::string trainNameUtf8 = std::string(String8(trainName).string());
+    std::string trainNameUtf8;
+    if (readTrainInfoSuccess && trainName.size() == 0) {
+        trainNameUtf8 = trainInfo.trainName;
+    } else {
+        trainNameUtf8 = std::string(String8(trainName).string());
+    }
+
+    userid_t userId = multiuser_get_user_id(uid);
+    bool requiresStaging = options & IStatsManager::FLAG_REQUIRE_STAGING;
+    bool rollbackEnabled = options & IStatsManager::FLAG_ROLLBACK_ENABLED;
+    bool requiresLowLatencyMonitor = options & IStatsManager::FLAG_REQUIRE_LOW_LATENCY_MONITOR;
     LogEvent event(trainNameUtf8, trainVersionCode, requiresStaging, rollbackEnabled,
                    requiresLowLatencyMonitor, state, experimentIdsProtoBuffer, userId);
     mProcessor->OnLogEvent(&event);
