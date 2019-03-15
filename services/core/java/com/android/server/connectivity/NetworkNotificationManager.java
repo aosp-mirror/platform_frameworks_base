@@ -28,6 +28,7 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.net.wifi.WifiInfo;
 import android.os.UserHandle;
+import android.telephony.AccessNetworkConstants.TransportType;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Slog;
@@ -92,7 +93,7 @@ public class NetworkNotificationManager {
         return -1;
     }
 
-    private static String getTransportName(int transportType) {
+    private static String getTransportName(@TransportType int transportType) {
         Resources r = Resources.getSystem();
         String[] networkTypes = r.getStringArray(R.array.network_switch_type_name);
         try {

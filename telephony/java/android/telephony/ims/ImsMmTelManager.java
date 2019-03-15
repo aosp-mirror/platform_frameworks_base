@@ -107,9 +107,9 @@ public class ImsMmTelManager {
                         // case, since it is defined.
                         put(ImsRegistrationImplBase.REGISTRATION_TECH_NONE, -1);
                         put(ImsRegistrationImplBase.REGISTRATION_TECH_LTE,
-                                AccessNetworkConstants.TransportType.WWAN);
+                                AccessNetworkConstants.TRANSPORT_TYPE_WWAN);
                         put(ImsRegistrationImplBase.REGISTRATION_TECH_IWLAN,
-                                AccessNetworkConstants.TransportType.WLAN);
+                                AccessNetworkConstants.TRANSPORT_TYPE_WLAN);
                     }};
 
             private final RegistrationCallback mLocalCallback;

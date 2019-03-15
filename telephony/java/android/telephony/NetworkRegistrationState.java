@@ -129,7 +129,6 @@ public class NetworkRegistrationState implements Parcelable {
     @Domain
     private final int mDomain;
 
-    /** {@link TransportType} */
     private final int mTransportType;
 
     @RegState
@@ -165,14 +164,15 @@ public class NetworkRegistrationState implements Parcelable {
     private DataSpecificRegistrationStates mDataSpecificStates;
 
     /**
-     * @param domain Network domain. Must be a {@link Domain}. For {@link TransportType#WLAN}
-     * transport, this must set to {@link #DOMAIN_PS}.
-     * @param transportType Transport type. Must be one of the{@link TransportType}.
+     * @param domain Network domain. Must be a {@link Domain}. For transport type
+     * {@link AccessNetworkConstants#TRANSPORT_TYPE_WLAN}, this must set to {@link #DOMAIN_PS}.
+     * @param transportType Transport type.
      * @param regState Network registration state. Must be one of the {@link RegState}. For
-     * {@link TransportType#WLAN} transport, only {@link #REG_STATE_HOME} and
-     * {@link #REG_STATE_NOT_REG_NOT_SEARCHING} are valid states.
-     * @param accessNetworkTechnology Access network technology.For {@link TransportType#WLAN}
-     * transport, set to {@link TelephonyManager#NETWORK_TYPE_IWLAN}.
+     * transport type {@link AccessNetworkConstants#TRANSPORT_TYPE_WLAN}, only
+     * {@link #REG_STATE_HOME} and {@link #REG_STATE_NOT_REG_NOT_SEARCHING} are valid states.
+     * @param accessNetworkTechnology Access network technology.For transport type
+     * {@link AccessNetworkConstants#TRANSPORT_TYPE_WLAN}, set to
+     * {@link TelephonyManager#NETWORK_TYPE_IWLAN}.
      * @param rejectCause Reason for denial if the registration state is {@link #REG_STATE_DENIED}.
      * Depending on {@code accessNetworkTechnology}, the values are defined in 3GPP TS 24.008
      * 10.5.3.6 for UMTS, 3GPP TS 24.301 9.9.3.9 for LTE, and 3GPP2 A.S0001 6.2.2.44 for CDMA. If
@@ -184,7 +184,8 @@ public class NetworkRegistrationState implements Parcelable {
      * @param cellIdentity The identity representing a unique cell or wifi AP. Set to null if the
      * information is not available.
      */
-    public NetworkRegistrationState(@Domain int domain, int transportType, @RegState int regState,
+    public NetworkRegistrationState(@Domain int domain, @TransportType int transportType,
+                                    @RegState int regState,
                                     @NetworkType int accessNetworkTechnology, int rejectCause,
                                     boolean emergencyOnly,
                                     @NonNull @ServiceType int[] availableServices,
@@ -206,7 +207,7 @@ public class NetworkRegistrationState implements Parcelable {
      * Constructor for voice network registration states.
      * @hide
      */
-    public NetworkRegistrationState(int domain, int transportType, int regState,
+    public NetworkRegistrationState(int domain, @TransportType int transportType, int regState,
             int accessNetworkTechnology, int rejectCause, boolean emergencyOnly,
             int[] availableServices, @Nullable CellIdentity cellIdentity, boolean cssSupported,
             int roamingIndicator, int systemIsInPrl, int defaultRoamingIndicator) {
@@ -221,7 +222,7 @@ public class NetworkRegistrationState implements Parcelable {
      * Constructor for data network registration states.
      * @hide
      */
-    public NetworkRegistrationState(int domain, int transportType, int regState,
+    public NetworkRegistrationState(int domain, @TransportType int transportType, int regState,
             int accessNetworkTechnology, int rejectCause, boolean emergencyOnly,
             int[] availableServices, @Nullable CellIdentity cellIdentity, int maxDataCalls,
             boolean isDcNrRestricted, boolean isNrAvailable, boolean isEndcAvailable,
@@ -434,7 +435,8 @@ public class NetworkRegistrationState implements Parcelable {
     public String toString() {
         return new StringBuilder("NetworkRegistrationState{")
                 .append(" domain=").append((mDomain == DOMAIN_CS) ? "CS" : "PS")
-                .append(" transportType=").append(TransportType.toString(mTransportType))
+                .append(" transportType=").append(
+                        AccessNetworkConstants.transportTypeToString(mTransportType))
                 .append(" regState=").append(regStateToString(mRegState))
                 .append(" roamingType=").append(ServiceState.roamingTypeToString(mRoamingType))
                 .append(" accessNetworkTechnology=")
@@ -627,7 +629,7 @@ public class NetworkRegistrationState implements Parcelable {
          *
          * @return The same instance of the builder.
          */
-        public @NonNull Builder setTransportType(int transportType) {
+        public @NonNull Builder setTransportType(@TransportType int transportType) {
             mTransportType = transportType;
             return this;
         }
