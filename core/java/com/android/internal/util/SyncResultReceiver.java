@@ -96,6 +96,19 @@ public final class SyncResultReceiver extends IResultReceiver.Stub {
         return mBundle == null ? null : mBundle.getParcelable(EXTRA);
     }
 
+    /**
+     * Gets the optional result from an operation that returns an extra {@code int} (besides the
+     * result code).
+     *
+     * @return value set in the bundle, or {@code defaultValue} when not set.
+     */
+    public int getOptionalExtraIntResult(int defaultValue) throws TimeoutException {
+        waitResult();
+        if (mBundle == null || !mBundle.containsKey(EXTRA)) return defaultValue;
+
+        return mBundle.getInt(EXTRA);
+    }
+
     @Override
     public void send(int resultCode, Bundle resultData) {
         mResult = resultCode;
@@ -133,6 +146,18 @@ public final class SyncResultReceiver extends IResultReceiver.Stub {
     public static Bundle bundleFor(@Nullable Parcelable value) {
         final Bundle bundle = new Bundle();
         bundle.putParcelable(EXTRA, value);
+        return bundle;
+    }
+
+    /**
+     * Creates a bundle for an {@code int} value so it can be retrieved by
+     * {@link #getParcelableResult()} - typically used to return an extra {@code int} (as the 1st
+     * is returned as the result code).
+     */
+    @NonNull
+    public static Bundle bundleFor(int value) {
+        final Bundle bundle = new Bundle();
+        bundle.putInt(EXTRA, value);
         return bundle;
     }
 

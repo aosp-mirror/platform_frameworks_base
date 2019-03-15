@@ -138,7 +138,11 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
     private static AtomicInteger sIdCounter = new AtomicInteger();
 
-    /** ID of the session */
+    /**
+     * ID of the session.
+     *
+     * <p>It's always a positive number, to make it easier to embed it in a long.
+     */
     public final int id;
 
     /** uid the session is for */
@@ -275,6 +279,13 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
      */
     @GuardedBy("mLock")
     private ArraySet<AutofillId> mAugmentedAutofillableIds;
+
+    /**
+     * When {@code true}, the session was created only to handle Augmented Autofill requests (i.e.,
+     * the session would not have existed otherwsie).
+     */
+    @GuardedBy("mLock")
+    private boolean mForAugmentedAutofillOnly;
 
     /**
      * Receiver of assist data from the app's {@link Activity}.
@@ -538,11 +549,12 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
      */
     @GuardedBy("mLock")
     private void requestNewFillResponseLocked(int flags) {
-
-        if ((flags & FLAG_AUGMENTED_AUTOFILL_REQUEST) != 0) {
+        if (mForAugmentedAutofillOnly || (flags & FLAG_AUGMENTED_AUTOFILL_REQUEST) != 0) {
             // TODO(b/122858578): log metrics
             if (sVerbose) {
-                Slog.v(TAG, "requestNewFillResponse(): triggering augmented autofill instead");
+                Slog.v(TAG, "requestNewFillResponse(): triggering augmented autofill instead "
+                        + "(mForAugmentedAutofillOnly=" + mForAugmentedAutofillOnly
+                        + ", flags=" + flags + ")");
             }
             triggerAugmentedAutofillLocked();
             return;
@@ -564,8 +576,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         mRequestLogs.put(requestId, log);
 
         if (sVerbose) {
-            Slog.v(TAG, "Requesting structure for request #" + ordinal + " ,requestId="
-                    + requestId + ", flags=" + flags);
+            Slog.v(TAG, "Requesting structure for request #" + ordinal + " ,requestId=" + requestId
+                    + ", flags=" + flags);
         }
 
         // If the focus changes very quickly before the first request is returned each focus change
@@ -598,7 +610,10 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             @NonNull IBinder client, boolean hasCallback, @NonNull LocalLog uiLatencyHistory,
             @NonNull LocalLog wtfHistory, @NonNull ComponentName serviceComponentName,
             @NonNull ComponentName componentName, boolean compatMode,
-            boolean bindInstantServiceAllowed, int flags) {
+            boolean bindInstantServiceAllowed, boolean forAugmentedAutofillOnly, int flags) {
+        if (sessionId < 0) {
+            wtf(null, "Non-positive sessionId: %s", sessionId);
+        }
         id = sessionId;
         mFlags = flags;
         this.taskId = taskId;
@@ -616,6 +631,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         mWtfHistory = wtfHistory;
         mComponentName = componentName;
         mCompatMode = compatMode;
+        mForAugmentedAutofillOnly = forAugmentedAutofillOnly;
         setClientLocked(client);
 
         mMetricsLogger.write(newLogMaker(MetricsEvent.AUTOFILL_SESSION_STARTED)
@@ -727,20 +743,29 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         final long disableDuration = response.getDisableDuration();
         if (disableDuration > 0) {
             final int flags = response.getFlags();
-            if (sDebug) {
-                final StringBuilder message = new StringBuilder("Service disabled autofill for ")
-                        .append(mComponentName)
-                        .append(": flags=").append(flags)
-                        .append(", duration=");
-                TimeUtils.formatDuration(disableDuration, message);
-                Slog.d(TAG, message.toString());
-            }
             if ((flags & FillResponse.FLAG_DISABLE_ACTIVITY_ONLY) != 0) {
                 mService.disableAutofillForActivity(mComponentName, disableDuration,
                         id, mCompatMode);
             } else {
                 mService.disableAutofillForApp(mComponentName.getPackageName(), disableDuration,
                         id, mCompatMode);
+            }
+            // Although "standard" autofill is disabled, it might still trigger augmented autofill
+            if (triggerAugmentedAutofillLocked() != null) {
+                mForAugmentedAutofillOnly = true;
+                if (sDebug) {
+                    Slog.d(TAG, "Service disabled autofill for " + mComponentName
+                            + ", but session is kept for augmented autofill only");
+                }
+                return;
+            }
+            if (sDebug) {
+                final StringBuilder message = new StringBuilder("Service disabled autofill for ")
+                                .append(mComponentName)
+                                .append(": flags=").append(flags)
+                                .append(", duration=");
+                TimeUtils.formatDuration(disableDuration, message);
+                Slog.d(TAG, message.toString());
             }
             sessionFinishedState = AutofillManager.STATE_DISABLED_BY_SERVICE;
         }
@@ -3005,6 +3030,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         pw.print(prefix); pw.print("mSaveOnAllViewsInvisible: "); pw.println(
                 mSaveOnAllViewsInvisible);
         pw.print(prefix); pw.print("mSelectedDatasetIds: "); pw.println(mSelectedDatasetIds);
+        if (mForAugmentedAutofillOnly) {
+            pw.print(prefix); pw.println("For Augmented Autofill Only");
+        }
         if (mAugmentedAutofillDestroyer != null) {
             pw.print(prefix); pw.println("has mAugmentedAutofillDestroyer");
         }
