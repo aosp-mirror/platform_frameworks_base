@@ -3419,7 +3419,6 @@ message HiddenApiUsed {
  * - When user clicks privacy chip
  * - How does the user exit the Privacy Dialog
  * Logged from:
- *   packages/SystemUI/src/com/android/systemui/privacy/OngoingPrivacyDialog.kt
  *   packages/SystemUI/src/com/android/systemui/qs/QuickStatusBarHeader.java
  */
 message PrivacyIndicatorsInteracted {
