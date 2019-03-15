@@ -336,7 +336,7 @@ const char *const JavaMethodHelper<double>::signature_ = "(D)V";
 template<>
 const char *const JavaMethodHelper<bool>::signature_ = "(Z)V";
 template<>
-const char *const JavaMethodHelper<jstring>::signature_ = "(Ljava/lang/String)V";
+const char *const JavaMethodHelper<jstring>::signature_ = "(Ljava/lang/String;)V";
 
 #define SET(setter, value) object.callSetter("set" # setter, (value))
 
