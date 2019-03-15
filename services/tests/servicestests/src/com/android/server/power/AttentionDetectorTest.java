@@ -21,7 +21,6 @@ import static android.os.BatteryStats.Uid.NUM_USER_ACTIVITY_TYPES;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
@@ -29,6 +28,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.attention.AttentionManagerInternal;
+import android.attention.AttentionManagerInternal.AttentionCallbackInternal;
 import android.os.PowerManager;
 import android.os.PowerManagerInternal;
 import android.os.SystemClock;
@@ -41,14 +41,17 @@ import android.test.suitebuilder.annotation.SmallTest;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 @SmallTest
 public class AttentionDetectorTest extends AndroidTestCase {
 
-    private @Mock AttentionManagerInternal mAttentionManagerInternal;
-    private @Mock Runnable mOnUserAttention;
+    @Mock
+    private AttentionManagerInternal mAttentionManagerInternal;
+    @Mock
+    private Runnable mOnUserAttention;
     private TestableAttentionDetector mAttentionDetector;
     private long mAttentionTimeout;
     private long mNextDimming;
@@ -57,7 +60,7 @@ public class AttentionDetectorTest extends AndroidTestCase {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        when(mAttentionManagerInternal.checkAttention(anyInt(), anyLong(), any()))
+        when(mAttentionManagerInternal.checkAttention(anyLong(), any()))
                 .thenReturn(true);
         mAttentionDetector = new TestableAttentionDetector();
         mAttentionDetector.onWakefulnessChangeStarted(PowerManagerInternal.WAKEFULNESS_AWAKE);
@@ -82,7 +85,7 @@ public class AttentionDetectorTest extends AndroidTestCase {
     @Test
     public void testOnUserActivity_checksAttention() {
         long when = registerAttention();
-        verify(mAttentionManagerInternal).checkAttention(anyInt(), anyLong(), any());
+        verify(mAttentionManagerInternal).checkAttention(anyLong(), any());
         assertThat(when).isLessThan(mNextDimming);
     }
 
@@ -92,7 +95,7 @@ public class AttentionDetectorTest extends AndroidTestCase {
                 Settings.System.ADAPTIVE_SLEEP, 0, UserHandle.USER_CURRENT);
         mAttentionDetector.updateEnabledFromSettings(getContext());
         long when = registerAttention();
-        verify(mAttentionManagerInternal, never()).checkAttention(anyInt(), anyLong(), any());
+        verify(mAttentionManagerInternal, never()).checkAttention(anyLong(), any());
         assertThat(mNextDimming).isEqualTo(when);
     }
 
@@ -100,7 +103,7 @@ public class AttentionDetectorTest extends AndroidTestCase {
     public void testOnUserActivity_doesntCheckIfNotSupported() {
         mAttentionDetector.setAttentionServiceSupported(false);
         long when = registerAttention();
-        verify(mAttentionManagerInternal, never()).checkAttention(anyInt(), anyLong(), any());
+        verify(mAttentionManagerInternal, never()).checkAttention(anyLong(), any());
         assertThat(mNextDimming).isEqualTo(when);
     }
 
@@ -129,7 +132,7 @@ public class AttentionDetectorTest extends AndroidTestCase {
         mNextDimming = now;
         mAttentionDetector.onUserActivity(now, PowerManager.USER_ACTIVITY_EVENT_TOUCH);
         mAttentionDetector.updateUserActivity(mNextDimming + 5000L);
-        verify(mAttentionManagerInternal, never()).checkAttention(anyInt(), anyLong(), any());
+        verify(mAttentionManagerInternal, never()).checkAttention(anyLong(), any());
     }
 
     @Test
@@ -146,7 +149,7 @@ public class AttentionDetectorTest extends AndroidTestCase {
         long now = SystemClock.uptimeMillis();
         mAttentionDetector.onUserActivity(now - 15000L, PowerManager.USER_ACTIVITY_EVENT_TOUCH);
         mAttentionDetector.updateUserActivity(now + 2000L);
-        verify(mAttentionManagerInternal, never()).checkAttention(anyInt(), anyLong(), any());
+        verify(mAttentionManagerInternal, never()).checkAttention(anyLong(), any());
     }
 
     @Test
@@ -154,7 +157,7 @@ public class AttentionDetectorTest extends AndroidTestCase {
         registerAttention();
         reset(mAttentionManagerInternal);
         long when = mAttentionDetector.updateUserActivity(mNextDimming);
-        verify(mAttentionManagerInternal, never()).checkAttention(anyInt(), anyLong(), any());
+        verify(mAttentionManagerInternal, never()).checkAttention(anyLong(), any());
         assertThat(when).isLessThan(mNextDimming);
     }
 
@@ -162,32 +165,35 @@ public class AttentionDetectorTest extends AndroidTestCase {
     public void testOnWakefulnessChangeStarted_cancelsRequestWhenNotAwake() {
         registerAttention();
         mAttentionDetector.onWakefulnessChangeStarted(PowerManagerInternal.WAKEFULNESS_ASLEEP);
-        verify(mAttentionManagerInternal).cancelAttentionCheck(anyInt());
+
+        ArgumentCaptor<AttentionCallbackInternal> callbackCaptor = ArgumentCaptor.forClass(
+                AttentionCallbackInternal.class);
+        verify(mAttentionManagerInternal).cancelAttentionCheck(callbackCaptor.capture());
+        assertEquals(callbackCaptor.getValue(), mAttentionDetector.mCallback);
     }
 
     @Test
     public void testCallbackOnSuccess_ignoresIfNoAttention() {
         registerAttention();
-        mAttentionDetector.mCallback.onSuccess(mAttentionDetector.getRequestCode(),
-                AttentionService.ATTENTION_SUCCESS_ABSENT, SystemClock.uptimeMillis());
+        mAttentionDetector.mCallback.onSuccess(AttentionService.ATTENTION_SUCCESS_ABSENT,
+                SystemClock.uptimeMillis());
         verify(mOnUserAttention, never()).run();
     }
 
     @Test
     public void testCallbackOnSuccess_callsCallback() {
         registerAttention();
-        mAttentionDetector.mCallback.onSuccess(mAttentionDetector.getRequestCode(),
-                AttentionService.ATTENTION_SUCCESS_PRESENT, SystemClock.uptimeMillis());
+        mAttentionDetector.mCallback.onSuccess(AttentionService.ATTENTION_SUCCESS_PRESENT,
+                SystemClock.uptimeMillis());
         verify(mOnUserAttention).run();
     }
 
     @Test
     public void testCallbackOnFailure_unregistersCurrentRequestCode() {
         registerAttention();
-        mAttentionDetector.mCallback.onFailure(mAttentionDetector.getRequestCode(),
-                AttentionService.ATTENTION_FAILURE_UNKNOWN);
-        mAttentionDetector.mCallback.onSuccess(mAttentionDetector.getRequestCode(),
-                AttentionService.ATTENTION_SUCCESS_PRESENT, SystemClock.uptimeMillis());
+        mAttentionDetector.mCallback.onFailure(AttentionService.ATTENTION_FAILURE_UNKNOWN);
+        mAttentionDetector.mCallback.onSuccess(AttentionService.ATTENTION_SUCCESS_PRESENT,
+                SystemClock.uptimeMillis());
         verify(mOnUserAttention, never()).run();
     }
 

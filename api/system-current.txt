@@ -6309,8 +6309,8 @@ package android.service.attention {
     ctor public AttentionService();
     method public final void disableSelf();
     method @Nullable public final android.os.IBinder onBind(@NonNull android.content.Intent);
-    method public abstract void onCancelAttentionCheck(int);
-    method public abstract void onCheckAttention(int, @NonNull android.service.attention.AttentionService.AttentionCallback);
+    method public abstract void onCancelAttentionCheck(@NonNull android.service.attention.AttentionService.AttentionCallback);
+    method public abstract void onCheckAttention(@NonNull android.service.attention.AttentionService.AttentionCallback);
     field public static final int ATTENTION_FAILURE_CAMERA_PERMISSION_ABSENT = 6; // 0x6
     field public static final int ATTENTION_FAILURE_CANCELLED = 3; // 0x3
     field public static final int ATTENTION_FAILURE_PREEMPTED = 4; // 0x4
@@ -6322,8 +6322,8 @@ package android.service.attention {
   }
 
   public static final class AttentionService.AttentionCallback {
-    method public void onFailure(int, int);
-    method public void onSuccess(int, int, long);
+    method public void onFailure(int);
+    method public void onSuccess(int, long);
   }
 
 }

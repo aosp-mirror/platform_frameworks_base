@@ -24,6 +24,6 @@ import android.service.attention.IAttentionCallback;
  * @hide
  */
 oneway interface IAttentionService {
-    void checkAttention(int requestCode, IAttentionCallback callback);
-    void cancelAttentionCheck(int requestCode);
+    void checkAttention(IAttentionCallback callback);
+    void cancelAttentionCheck(IAttentionCallback callback);
 }
