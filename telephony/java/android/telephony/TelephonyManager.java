@@ -96,6 +96,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -3299,26 +3300,25 @@ public class TelephonyManager {
     }
 
     /**
-     * Get the mapping from logical slots to physical slots. The mapping represent by a pair list.
-     * The key of the piar is the logical slot id and the value of the pair is the physical
-     * slots id mapped to this logical slot id.
+     * Get the mapping from logical slots to physical slots. The key of the map is the logical slot
+     * id and the value is the physical slots id mapped to this logical slot id.
      *
-     * @return an pair list indicates the mapping from logical slots to physical slots. The size of
-     * the list should be {@link #getPhoneCount()} if success, otherwise return an empty list.
+     * @return a map indicates the mapping from logical slots to physical slots. The size of the map
+     * should be {@link #getPhoneCount()} if success, otherwise return an empty map.
      *
      * @hide
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     @NonNull
-    public List<Pair<Integer, Integer>> getLogicalToPhysicalSlotMapping() {
-        List<Pair<Integer, Integer>> slotMapping = new ArrayList<>();
+    public Map<Integer, Integer> getLogicalToPhysicalSlotMapping() {
+        Map<Integer, Integer> slotMapping = new HashMap<>();
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
                 int[] slotMappingArray = telephony.getSlotsMapping();
                 for (int i = 0; i < slotMappingArray.length; i++) {
-                    slotMapping.add(new Pair(i, slotMappingArray[i]));
+                    slotMapping.put(i, slotMappingArray[i]);
                 }
             }
         } catch (RemoteException e) {
