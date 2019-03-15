@@ -106,15 +106,27 @@ public abstract class EuiccService extends Service {
     public static final String ACTION_PROVISION_EMBEDDED_SUBSCRIPTION =
             "android.service.euicc.action.PROVISION_EMBEDDED_SUBSCRIPTION";
 
-    /** @see android.telephony.euicc.EuiccManager#ACTION_TOGGLE_SUBSCRIPTION_PRIVILEGED */
+    /**
+     * @see android.telephony.euicc.EuiccManager#ACTION_TOGGLE_SUBSCRIPTION_PRIVILEGED. This is
+     * a protected intent that can only be sent by the system, and requires the
+     * {@link android.Manifest.permission#BIND_EUICC_SERVICE} permission.
+     */
     public static final String ACTION_TOGGLE_SUBSCRIPTION_PRIVILEGED =
             "android.service.euicc.action.TOGGLE_SUBSCRIPTION_PRIVILEGED";
 
-    /** @see android.telephony.euicc.EuiccManager#ACTION_DELETE_SUBSCRIPTION_PRIVILEGED */
+    /**
+     * @see android.telephony.euicc.EuiccManager#ACTION_DELETE_SUBSCRIPTION_PRIVILEGED. This is
+     * a protected intent that can only be sent by the system, and requires the
+     * {@link android.Manifest.permission#BIND_EUICC_SERVICE} permission.
+     */
     public static final String ACTION_DELETE_SUBSCRIPTION_PRIVILEGED =
             "android.service.euicc.action.DELETE_SUBSCRIPTION_PRIVILEGED";
 
-    /** @see android.telephony.euicc.EuiccManager#ACTION_RENAME_SUBSCRIPTION_PRIVILEGED */
+    /**
+     * @see android.telephony.euicc.EuiccManager#ACTION_RENAME_SUBSCRIPTION_PRIVILEGED. This is
+     * a protected intent that can only be sent by the system, and requires the
+     * {@link android.Manifest.permission#BIND_EUICC_SERVICE} permission.
+     */
     public static final String ACTION_RENAME_SUBSCRIPTION_PRIVILEGED =
             "android.service.euicc.action.RENAME_SUBSCRIPTION_PRIVILEGED";
 
