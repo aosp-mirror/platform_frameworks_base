@@ -7156,9 +7156,10 @@ package android.telecom {
 
 package android.telephony {
 
-  public static final class AccessNetworkConstants.TransportType {
-    field public static final int WLAN = 2; // 0x2
-    field public static final int WWAN = 1; // 0x1
+  public final class AccessNetworkConstants {
+    field public static final int TRANSPORT_TYPE_INVALID = -1; // 0xffffffff
+    field public static final int TRANSPORT_TYPE_WLAN = 2; // 0x2
+    field public static final int TRANSPORT_TYPE_WWAN = 1; // 0x1
   }
 
   public final class CallAttributes implements android.os.Parcelable {
