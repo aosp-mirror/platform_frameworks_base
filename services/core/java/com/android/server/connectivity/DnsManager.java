@@ -30,13 +30,15 @@ import static android.provider.Settings.Global.PRIVATE_DNS_SPECIFIER;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.net.IDnsResolver;
 import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkUtils;
 import android.net.Uri;
 import android.net.shared.PrivateDnsConfig;
 import android.os.Binder;
-import android.os.INetworkManagementService;
+import android.os.RemoteException;
+import android.os.ServiceSpecificException;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.TextUtils;
@@ -229,7 +231,7 @@ public class DnsManager {
 
     private final Context mContext;
     private final ContentResolver mContentResolver;
-    private final INetworkManagementService mNMS;
+    private final IDnsResolver mDnsResolver;
     private final MockableSystemProperties mSystemProperties;
     // TODO: Replace these Maps with SparseArrays.
     private final Map<Integer, PrivateDnsConfig> mPrivateDnsMap;
@@ -243,10 +245,10 @@ public class DnsManager {
     private String mPrivateDnsMode;
     private String mPrivateDnsSpecifier;
 
-    public DnsManager(Context ctx, INetworkManagementService nms, MockableSystemProperties sp) {
+    public DnsManager(Context ctx, IDnsResolver dnsResolver, MockableSystemProperties sp) {
         mContext = ctx;
         mContentResolver = mContext.getContentResolver();
-        mNMS = nms;
+        mDnsResolver = dnsResolver;
         mSystemProperties = sp;
         mPrivateDnsMap = new HashMap<>();
         mPrivateDnsValidationMap = new HashMap<>();
@@ -260,6 +262,12 @@ public class DnsManager {
     }
 
     public void removeNetwork(Network network) {
+        try {
+            mDnsResolver.clearResolverConfiguration(network.netId);
+        } catch (RemoteException | ServiceSpecificException e) {
+            Slog.e(TAG, "Error clearing DNS configuration: " + e);
+            return;
+        }
         mPrivateDnsMap.remove(network.netId);
         mPrivateDnsValidationMap.remove(network.netId);
     }
@@ -344,10 +352,12 @@ public class DnsManager {
         Slog.d(TAG, String.format("setDnsConfigurationForNetwork(%d, %s, %s, %s, %s, %s)",
                 netId, Arrays.toString(assignedServers), Arrays.toString(domainStrs),
                 Arrays.toString(params), tlsHostname, Arrays.toString(tlsServers)));
+        final String[] tlsFingerprints = new String[0];
         try {
-            mNMS.setDnsConfigurationForNetwork(
-                    netId, assignedServers, domainStrs, params, tlsHostname, tlsServers);
-        } catch (Exception e) {
+            mDnsResolver.setResolverConfiguration(
+                    netId, assignedServers, domainStrs, params,
+                    tlsHostname, tlsServers, tlsFingerprints);
+        } catch (RemoteException | ServiceSpecificException e) {
             Slog.e(TAG, "Error setting DNS configuration: " + e);
             return;
         }
