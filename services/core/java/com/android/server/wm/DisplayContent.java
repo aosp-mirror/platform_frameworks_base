@@ -4885,12 +4885,11 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      * @see Display#FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS
      */
     boolean supportsSystemDecorations() {
-        return mWmService.mDisplayWindowSettings.shouldShowSystemDecorsLocked(this)
+        return (mWmService.mDisplayWindowSettings.shouldShowSystemDecorsLocked(this)
                 || (mDisplay.getFlags() & FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS) != 0
-                // TODO (b/111363427): Remove this and set the new FLAG_SHOULD_SHOW_LAUNCHER flag
-                // whenever vr 2d display id is set.
-                || mDisplayId == mWmService.mVr2dDisplayId
-                || mWmService.mForceDesktopModeOnExternalDisplays;
+                || mWmService.mForceDesktopModeOnExternalDisplays)
+                // VR virtual display will be used to run and render 2D app within a VR experience.
+                && mDisplayId != mWmService.mVr2dDisplayId;
     }
 
     /**
