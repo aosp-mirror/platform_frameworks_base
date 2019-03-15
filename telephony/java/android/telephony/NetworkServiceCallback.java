@@ -28,8 +28,8 @@ import java.lang.ref.WeakReference;
 
 /**
  * Network service callback. Object of this class is passed to NetworkServiceProvider upon
- * calling getNetworkRegistrationState, to receive asynchronous feedback from NetworkServiceProvider
- * upon onGetNetworkRegistrationStateComplete. It's like a wrapper of INetworkServiceCallback
+ * calling getNetworkRegistrationInfo, to receive asynchronous feedback from NetworkServiceProvider
+ * upon onGetNetworkRegistrationInfoComplete. It's like a wrapper of INetworkServiceCallback
  * because INetworkServiceCallback can't be a parameter type in public APIs.
  *
  * @hide
@@ -70,20 +70,20 @@ public class NetworkServiceCallback {
 
     /**
      * Called to indicate result of
-     * {@link NetworkServiceProvider#getNetworkRegistrationState(int, NetworkServiceCallback)}
+     * {@link NetworkServiceProvider#getNetworkRegistrationInfo(int, NetworkServiceCallback)}
      *
      * @param result Result status like {@link NetworkServiceCallback#RESULT_SUCCESS} or
      *                {@link NetworkServiceCallback#RESULT_ERROR_UNSUPPORTED}
      * @param state The state information to be returned to callback.
      */
-    public void onGetNetworkRegistrationStateComplete(int result,
-                                                      @Nullable NetworkRegistrationState state) {
+    public void onGetNetworkRegistrationInfoComplete(int result,
+                                                      @Nullable NetworkRegistrationInfo state) {
         INetworkServiceCallback callback = mCallback.get();
         if (callback != null) {
             try {
-                callback.onGetNetworkRegistrationStateComplete(result, state);
+                callback.onGetNetworkRegistrationInfoComplete(result, state);
             } catch (RemoteException e) {
-                Rlog.e(mTag, "Failed to onGetNetworkRegistrationStateComplete on the remote");
+                Rlog.e(mTag, "Failed to onGetNetworkRegistrationInfoComplete on the remote");
             }
         } else {
             Rlog.e(mTag, "Weak reference of callback is null.");

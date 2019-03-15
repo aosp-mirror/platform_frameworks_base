@@ -27,7 +27,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
-import android.telephony.NetworkRegistrationState.Domain;
+import android.telephony.NetworkRegistrationInfo.Domain;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -59,10 +59,10 @@ public abstract class NetworkService extends Service {
     private static final int NETWORK_SERVICE_CREATE_NETWORK_SERVICE_PROVIDER                 = 1;
     private static final int NETWORK_SERVICE_REMOVE_NETWORK_SERVICE_PROVIDER                 = 2;
     private static final int NETWORK_SERVICE_REMOVE_ALL_NETWORK_SERVICE_PROVIDERS            = 3;
-    private static final int NETWORK_SERVICE_GET_REGISTRATION_STATE                          = 4;
-    private static final int NETWORK_SERVICE_REGISTER_FOR_STATE_CHANGE                       = 5;
-    private static final int NETWORK_SERVICE_UNREGISTER_FOR_STATE_CHANGE                     = 6;
-    private static final int NETWORK_SERVICE_INDICATION_NETWORK_STATE_CHANGED                = 7;
+    private static final int NETWORK_SERVICE_GET_REGISTRATION_INFO                           = 4;
+    private static final int NETWORK_SERVICE_REGISTER_FOR_INFO_CHANGE                        = 5;
+    private static final int NETWORK_SERVICE_UNREGISTER_FOR_INFO_CHANGE                      = 6;
+    private static final int NETWORK_SERVICE_INDICATION_NETWORK_INFO_CHANGED                 = 7;
 
 
     private final HandlerThread mHandlerThread;
@@ -86,7 +86,7 @@ public abstract class NetworkService extends Service {
         private final int mSlotIndex;
 
         private final List<INetworkServiceCallback>
-                mNetworkRegistrationStateChangedCallbacks = new ArrayList<>();
+                mNetworkRegistrationInfoChangedCallbacks = new ArrayList<>();
 
         /**
          * Constructor
@@ -104,38 +104,38 @@ public abstract class NetworkService extends Service {
         }
 
         /**
-         * API to get network registration state. The result will be passed to the callback.
+         * API to get network registration info. The result will be passed to the callback.
          * @param domain Network domain
-         * @param callback The callback for reporting network registration state
+         * @param callback The callback for reporting network registration info
          */
-        public void getNetworkRegistrationState(@Domain int domain,
-                                                @NonNull NetworkServiceCallback callback) {
-            callback.onGetNetworkRegistrationStateComplete(
+        public void getNetworkRegistrationInfo(@Domain int domain,
+                                               @NonNull NetworkServiceCallback callback) {
+            callback.onGetNetworkRegistrationInfoComplete(
                     NetworkServiceCallback.RESULT_ERROR_UNSUPPORTED, null);
         }
 
         /**
-         * Notify the system that network registration state is changed.
+         * Notify the system that network registration info is changed.
          */
-        public final void notifyNetworkRegistrationStateChanged() {
-            mHandler.obtainMessage(NETWORK_SERVICE_INDICATION_NETWORK_STATE_CHANGED,
+        public final void notifyNetworkRegistrationInfoChanged() {
+            mHandler.obtainMessage(NETWORK_SERVICE_INDICATION_NETWORK_INFO_CHANGED,
                     mSlotIndex, 0, null).sendToTarget();
         }
 
-        private void registerForStateChanged(@NonNull INetworkServiceCallback callback) {
-            synchronized (mNetworkRegistrationStateChangedCallbacks) {
-                mNetworkRegistrationStateChangedCallbacks.add(callback);
+        private void registerForInfoChanged(@NonNull INetworkServiceCallback callback) {
+            synchronized (mNetworkRegistrationInfoChangedCallbacks) {
+                mNetworkRegistrationInfoChangedCallbacks.add(callback);
             }
         }
 
-        private void unregisterForStateChanged(@NonNull INetworkServiceCallback callback) {
-            synchronized (mNetworkRegistrationStateChangedCallbacks) {
-                mNetworkRegistrationStateChangedCallbacks.remove(callback);
+        private void unregisterForInfoChanged(@NonNull INetworkServiceCallback callback) {
+            synchronized (mNetworkRegistrationInfoChangedCallbacks) {
+                mNetworkRegistrationInfoChangedCallbacks.remove(callback);
             }
         }
 
-        private void notifyStateChangedToCallbacks() {
-            for (INetworkServiceCallback callback : mNetworkRegistrationStateChangedCallbacks) {
+        private void notifyInfoChangedToCallbacks() {
+            for (INetworkServiceCallback callback : mNetworkRegistrationInfoChangedCallbacks) {
                 try {
                     callback.onNetworkStateChanged();
                 } catch (RemoteException exception) {
@@ -189,24 +189,24 @@ public abstract class NetworkService extends Service {
                     }
                     mServiceMap.clear();
                     break;
-                case NETWORK_SERVICE_GET_REGISTRATION_STATE:
+                case NETWORK_SERVICE_GET_REGISTRATION_INFO:
                     if (serviceProvider == null) break;
                     int domainId = message.arg2;
-                    serviceProvider.getNetworkRegistrationState(domainId,
+                    serviceProvider.getNetworkRegistrationInfo(domainId,
                             new NetworkServiceCallback(callback));
 
                     break;
-                case NETWORK_SERVICE_REGISTER_FOR_STATE_CHANGE:
+                case NETWORK_SERVICE_REGISTER_FOR_INFO_CHANGE:
                     if (serviceProvider == null) break;
-                    serviceProvider.registerForStateChanged(callback);
+                    serviceProvider.registerForInfoChanged(callback);
                     break;
-                case NETWORK_SERVICE_UNREGISTER_FOR_STATE_CHANGE:
+                case NETWORK_SERVICE_UNREGISTER_FOR_INFO_CHANGE:
                     if (serviceProvider == null) break;
-                    serviceProvider.unregisterForStateChanged(callback);
+                    serviceProvider.unregisterForInfoChanged(callback);
                     break;
-                case NETWORK_SERVICE_INDICATION_NETWORK_STATE_CHANGED:
+                case NETWORK_SERVICE_INDICATION_NETWORK_INFO_CHANGED:
                     if (serviceProvider == null) break;
-                    serviceProvider.notifyStateChangedToCallbacks();
+                    serviceProvider.notifyInfoChangedToCallbacks();
                     break;
                 default:
                     break;
@@ -280,23 +280,23 @@ public abstract class NetworkService extends Service {
         }
 
         @Override
-        public void getNetworkRegistrationState(
+        public void getNetworkRegistrationInfo(
                 int slotIndex, int domain, INetworkServiceCallback callback) {
-            mHandler.obtainMessage(NETWORK_SERVICE_GET_REGISTRATION_STATE, slotIndex,
+            mHandler.obtainMessage(NETWORK_SERVICE_GET_REGISTRATION_INFO, slotIndex,
                     domain, callback).sendToTarget();
         }
 
         @Override
-        public void registerForNetworkRegistrationStateChanged(
+        public void registerForNetworkRegistrationInfoChanged(
                 int slotIndex, INetworkServiceCallback callback) {
-            mHandler.obtainMessage(NETWORK_SERVICE_REGISTER_FOR_STATE_CHANGE, slotIndex,
+            mHandler.obtainMessage(NETWORK_SERVICE_REGISTER_FOR_INFO_CHANGE, slotIndex,
                     0, callback).sendToTarget();
         }
 
         @Override
-        public void unregisterForNetworkRegistrationStateChanged(
+        public void unregisterForNetworkRegistrationInfoChanged(
                 int slotIndex, INetworkServiceCallback callback) {
-            mHandler.obtainMessage(NETWORK_SERVICE_UNREGISTER_FOR_STATE_CHANGE, slotIndex,
+            mHandler.obtainMessage(NETWORK_SERVICE_UNREGISTER_FOR_INFO_CHANGE, slotIndex,
                     0, callback).sendToTarget();
         }
     }

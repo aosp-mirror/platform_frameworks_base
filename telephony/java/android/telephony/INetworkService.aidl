@@ -25,7 +25,7 @@ oneway interface INetworkService
 {
     void createNetworkServiceProvider(int slotId);
     void removeNetworkServiceProvider(int slotId);
-    void getNetworkRegistrationState(int slotId, int domain, INetworkServiceCallback callback);
-    void registerForNetworkRegistrationStateChanged(int slotId, INetworkServiceCallback callback);
-    void unregisterForNetworkRegistrationStateChanged(int slotId, INetworkServiceCallback callback);
+    void getNetworkRegistrationInfo(int slotId, int domain, INetworkServiceCallback callback);
+    void registerForNetworkRegistrationInfoChanged(int slotId, INetworkServiceCallback callback);
+    void unregisterForNetworkRegistrationInfoChanged(int slotId, INetworkServiceCallback callback);
 }

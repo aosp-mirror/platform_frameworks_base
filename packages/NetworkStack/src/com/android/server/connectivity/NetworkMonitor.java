@@ -72,7 +72,7 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.telephony.AccessNetworkConstants;
 import android.telephony.CellSignalStrength;
-import android.telephony.NetworkRegistrationState;
+import android.telephony.NetworkRegistrationInfo;
 import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
 import android.telephony.TelephonyManager;
@@ -1615,8 +1615,8 @@ public class NetworkMonitor extends StateMachine {
                 return;
             }
             // See if the data sub is registered for PS services on cell.
-            final NetworkRegistrationState nrs = dataSs.getNetworkRegistrationState(
-                    NetworkRegistrationState.DOMAIN_PS,
+            final NetworkRegistrationInfo nrs = dataSs.getNetworkRegistrationInfo(
+                    NetworkRegistrationInfo.DOMAIN_PS,
                     AccessNetworkConstants.TRANSPORT_TYPE_WWAN);
             latencyBroadcast.putExtra(
                     NetworkMonitorUtils.EXTRA_CELL_ID,
