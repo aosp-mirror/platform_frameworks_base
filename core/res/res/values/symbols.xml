@@ -390,6 +390,7 @@
   <java-symbol type="bool" name="config_supportsSplitScreenMultiWindow" />
   <java-symbol type="bool" name="config_supportsMultiDisplay" />
   <java-symbol type="bool" name="config_noHomeScreen" />
+  <java-symbol type="bool" name="config_supportsSystemDecorsOnSecondaryDisplays" />
   <java-symbol type="bool" name="config_guestUserEphemeral" />
   <java-symbol type="bool" name="config_localDisplaysMirrorContent" />
   <java-symbol type="bool" name="config_localDisplaysPrivate" />
