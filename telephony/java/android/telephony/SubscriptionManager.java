@@ -1991,24 +1991,6 @@ public class SubscriptionManager {
     }
 
     /**
-     * If a default is set to subscription which is not active, this will reset that default back to
-     * an invalid subscription id, i.e. < 0.
-     * @hide
-     */
-    @UnsupportedAppUsage
-    public void clearDefaultsForInactiveSubIds() {
-        if (VDBG) logd("clearDefaultsForInactiveSubIds");
-        try {
-            ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
-            if (iSub != null) {
-                iSub.clearDefaultsForInactiveSubIds();
-            }
-        } catch (RemoteException ex) {
-            // ignore it
-        }
-    }
-
-    /**
      * Check if the supplied subscription ID is valid.
      *
      * <p>A valid subscription ID is not necessarily an active subscription ID

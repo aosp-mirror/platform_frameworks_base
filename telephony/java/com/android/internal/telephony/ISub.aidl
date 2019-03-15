@@ -264,8 +264,6 @@ interface ISub {
 
     void setDefaultSmsSubId(int subId);
 
-    void clearDefaultsForInactiveSubIds();
-
     int[] getActiveSubIdList(boolean visibleOnly);
 
     int setSubscriptionProperty(int subId, String propKey, String propValue);
