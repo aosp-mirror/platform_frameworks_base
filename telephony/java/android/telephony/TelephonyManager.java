@@ -81,6 +81,7 @@ import com.android.internal.telephony.CellNetworkScanResult;
 import com.android.internal.telephony.INumberVerificationCallback;
 import com.android.internal.telephony.IOns;
 import com.android.internal.telephony.IPhoneSubInfo;
+import com.android.internal.telephony.ISetOpportunisticDataCallback;
 import com.android.internal.telephony.ITelephony;
 import com.android.internal.telephony.ITelephonyRegistry;
 import com.android.internal.telephony.IUpdateAvailableNetworksCallback;
@@ -10212,21 +10213,40 @@ public class TelephonyManager {
      * @param subId which opportunistic subscription
      * {@link SubscriptionManager#getOpportunisticSubscriptions} is preferred for cellular data.
      * Pass {@link SubscriptionManager#DEFAULT_SUBSCRIPTION_ID} to unset the preference
-     * @return true if request is accepted, else false.
+     * @param needValidation whether validation is needed before switch happens.
+     * @param executor The executor of where the callback will execute.
+     * @param callback Callback will be triggered once it succeeds or failed.
+     *                 See {@link TelephonyManager.SetOpportunisticSubscriptionResult}
+     *                 for more details. Pass null if don't care about the result.
      *
      */
-    public boolean setPreferredOpportunisticDataSubscription(int subId) {
+    public void setPreferredOpportunisticDataSubscription(int subId, boolean needValidation,
+            @Nullable @CallbackExecutor Executor executor, @Nullable Consumer<Integer> callback) {
         String pkgForDebug = mContext != null ? mContext.getOpPackageName() : "<unknown>";
         try {
             IOns iOpportunisticNetworkService = getIOns();
-            if (iOpportunisticNetworkService != null) {
-                return iOpportunisticNetworkService
-                        .setPreferredDataSubscriptionId(subId, pkgForDebug);
+            if (iOpportunisticNetworkService == null) {
+                return;
             }
+            ISetOpportunisticDataCallback callbackStub = new ISetOpportunisticDataCallback.Stub() {
+                @Override
+                public void onComplete(int result) {
+                    if (executor == null || callback == null) {
+                        return;
+                    }
+                    Binder.withCleanCallingIdentity(() -> executor.execute(() -> {
+                        callback.accept(result);
+                    }));
+                }
+            };
+
+            iOpportunisticNetworkService
+                    .setPreferredDataSubscriptionId(subId, needValidation, callbackStub,
+                            pkgForDebug);
         } catch (RemoteException ex) {
             Rlog.e(TAG, "setPreferredDataSubscriptionId RemoteException", ex);
         }
-        return false;
+        return;
     }
 
     /**
