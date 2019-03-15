@@ -5953,6 +5953,14 @@ public class AudioService extends IAudioService.Stub
         pw.print("  mVolumePolicy="); pw.println(mVolumePolicy);
         pw.print("  mAvrcpAbsVolSupported=");
         pw.println(mDeviceBroker.isAvrcpAbsoluteVolumeSupported());
+        pw.print("  mIsSingleVolume="); pw.println(mIsSingleVolume);
+        pw.print("  mUseFixedVolume="); pw.println(mUseFixedVolume);
+        pw.print("  mFixedVolumeDevices=0x"); pw.println(Integer.toHexString(mFixedVolumeDevices));
+        pw.print("  mHdmiCecSink="); pw.println(mHdmiCecSink);
+        pw.print("  mHdmiAudioSystemClient="); pw.println(mHdmiAudioSystemClient);
+        pw.print("  mHdmiPlaybackClient="); pw.println(mHdmiPlaybackClient);
+        pw.print("  mHdmiTvClient="); pw.println(mHdmiTvClient);
+        pw.print("  mHdmiSystemAudioSupported="); pw.println(mHdmiSystemAudioSupported);
 
         dumpAudioPolicies(pw);
         mDynPolicyLogger.dump(pw);
