@@ -1617,7 +1617,7 @@ public class NetworkMonitor extends StateMachine {
             // See if the data sub is registered for PS services on cell.
             final NetworkRegistrationState nrs = dataSs.getNetworkRegistrationState(
                     NetworkRegistrationState.DOMAIN_PS,
-                    AccessNetworkConstants.TransportType.WWAN);
+                    AccessNetworkConstants.TRANSPORT_TYPE_WWAN);
             latencyBroadcast.putExtra(
                     NetworkMonitorUtils.EXTRA_CELL_ID,
                     nrs == null ? null : nrs.getCellIdentity());
