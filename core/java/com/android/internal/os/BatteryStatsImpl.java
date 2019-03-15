@@ -1567,13 +1567,11 @@ public class BatteryStatsImpl extends BatteryStats {
     @VisibleForTesting
     public static class LongSamplingCounter extends LongCounter implements TimeBaseObs {
         final TimeBase mTimeBase;
-        public long mCount;
-        public long mCurrentCount;
+        private long mCount;
 
         public LongSamplingCounter(TimeBase timeBase, Parcel in) {
             mTimeBase = timeBase;
             mCount = in.readLong();
-            mCurrentCount = in.readLong();
             timeBase.add(this);
         }
 
@@ -1584,7 +1582,6 @@ public class BatteryStatsImpl extends BatteryStats {
 
         public void writeToParcel(Parcel out) {
             out.writeLong(mCount);
-            out.writeLong(mCurrentCount);
         }
 
         @Override
@@ -1601,29 +1598,17 @@ public class BatteryStatsImpl extends BatteryStats {
 
         @Override
         public void logState(Printer pw, String prefix) {
-            pw.println(prefix + "mCount=" + mCount + " mCurrentCount=" + mCurrentCount);
+            pw.println(prefix + "mCount=" + mCount);
         }
 
         public void addCountLocked(long count) {
-            update(mCurrentCount + count, mTimeBase.isRunning());
+            addCountLocked(count, mTimeBase.isRunning());
         }
 
         public void addCountLocked(long count, boolean isRunning) {
-            update(mCurrentCount + count, isRunning);
-        }
-
-        public void update(long count) {
-            update(count, mTimeBase.isRunning());
-        }
-
-        public void update(long count, boolean isRunning) {
-            if (count < mCurrentCount) {
-                mCurrentCount = 0;
-            }
             if (isRunning) {
-                mCount += count - mCurrentCount;
+                mCount += count;
             }
-            mCurrentCount = count;
         }
 
         /**
