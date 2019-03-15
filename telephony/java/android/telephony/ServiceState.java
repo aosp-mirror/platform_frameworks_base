@@ -837,7 +837,7 @@ public class ServiceState implements Parcelable {
                 mVoiceRegState,
                 mDataRegState,
                 mChannelNumber,
-                mCellBandwidths,
+                Arrays.hashCode(mCellBandwidths),
                 mVoiceOperatorAlphaLong,
                 mVoiceOperatorAlphaShort,
                 mVoiceOperatorNumeric,
