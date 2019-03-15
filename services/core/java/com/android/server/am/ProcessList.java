@@ -57,8 +57,6 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.res.Resources;
 import android.graphics.Point;
-import android.net.LocalSocket;
-import android.net.LocalSocketAddress;
 import android.os.AppZygote;
 import android.os.Binder;
 import android.os.Build;
@@ -103,11 +101,8 @@ import com.android.server.wm.WindowManagerService;
 
 import dalvik.system.VMRuntime;
 
-import libcore.io.IoUtils;
-
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.nio.ByteBuffer;
@@ -118,11 +113,6 @@ import java.util.List;
 
 /**
  * Activity manager code dealing with processes.
- *
- * Method naming convention:
- * <ul>
- * <li> Methods suffixed with "LS" should be called within the {@link #sLmkdSocketLock} lock.
- * </ul>
  */
 public final class ProcessList {
     static final String TAG = TAG_WITH_CLASS_NAME ? "ProcessList" : TAG_AM;
@@ -269,6 +259,9 @@ public final class ProcessList {
     static final byte LMK_PROCPURGE = 3;
     static final byte LMK_GETKILLCNT = 4;
 
+    // lmkd reconnect delay in msecs
+    private static final long LMDK_RECONNECT_DELAY_MS = 1000;
+
     ActivityManagerService mService = null;
 
     // To kill process groups asynchronously
@@ -303,16 +296,9 @@ public final class ProcessList {
 
     private boolean mHaveDisplaySize;
 
-    private static Object sLmkdSocketLock = new Object();
+    private static LmkdConnection sLmkdConnection = null;
 
-    @GuardedBy("sLmkdSocketLock")
-    private static LocalSocket sLmkdSocket;
-
-    @GuardedBy("sLmkdSocketLock")
-    private static OutputStream sLmkdOutputStream;
-
-    @GuardedBy("sLmkdSocketLock")
-    private static InputStream sLmkdInputStream;
+    private boolean mOomLevelsSet = false;
 
     /**
      * Temporary to avoid allocations.  Protected by main lock.
@@ -539,6 +525,7 @@ public final class ProcessList {
 
     final class KillHandler extends Handler {
         static final int KILL_PROCESS_GROUP_MSG = 4000;
+        static final int LMDK_RECONNECT_MSG = 4001;
 
         public KillHandler(Looper looper) {
             super(looper, null, true);
@@ -551,6 +538,15 @@ public final class ProcessList {
                     Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "killProcessGroup");
                     Process.killProcessGroup(msg.arg1 /* uid */, msg.arg2 /* pid */);
                     Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+                    break;
+                case LMDK_RECONNECT_MSG:
+                    if (!sLmkdConnection.connect()) {
+                        Slog.i(TAG, "Failed to connect to lmkd, retry after "
+                                + LMDK_RECONNECT_DELAY_MS + " ms");
+                        // retry after LMDK_RECONNECT_DELAY_MS
+                        sKillHandler.sendMessageDelayed(sKillHandler.obtainMessage(
+                                KillHandler.LMDK_RECONNECT_MSG), LMDK_RECONNECT_DELAY_MS);
+                    }
                     break;
 
                 default:
@@ -579,6 +575,30 @@ public final class ProcessList {
                     THREAD_PRIORITY_BACKGROUND, true /* allowIo */);
             sKillThread.start();
             sKillHandler = new KillHandler(sKillThread.getLooper());
+            sLmkdConnection = new LmkdConnection(sKillThread.getLooper().getQueue(),
+                    new LmkdConnection.LmkdConnectionListener() {
+                        @Override
+                        public boolean onConnect(OutputStream ostream) {
+                            Slog.i(TAG, "Connection with lmkd established");
+                            return onLmkdConnect(ostream);
+                        }
+                        @Override
+                        public void onDisconnect() {
+                            Slog.w(TAG, "Lost connection to lmkd");
+                            // start reconnection after delay to let lmkd restart
+                            sKillHandler.sendMessageDelayed(sKillHandler.obtainMessage(
+                                    KillHandler.LMDK_RECONNECT_MSG), LMDK_RECONNECT_DELAY_MS);
+                        }
+                        @Override
+                        public boolean isReplyExpected(ByteBuffer replyBuf,
+                                ByteBuffer dataReceived, int receivedLen) {
+                            // compare the preambule (currently one integer) to check if
+                            // this is the reply packet we are waiting for
+                            return (receivedLen == replyBuf.array().length
+                                    && dataReceived.getInt(0) == replyBuf.getInt(0));
+                        }
+                    }
+            );
         }
     }
 
@@ -684,6 +704,7 @@ public final class ProcessList {
 
             writeLmkd(buf, null);
             SystemProperties.set("sys.sysctl.extra_free_kbytes", Integer.toString(reserve));
+            mOomLevelsSet = true;
         }
         // GB: 2048,3072,4096,6144,7168,8192
         // HC: 8192,10240,12288,14336,16384,20480
@@ -1223,93 +1244,50 @@ public final class ProcessList {
         buf.putInt(LMK_GETKILLCNT);
         buf.putInt(min_oom_adj);
         buf.putInt(max_oom_adj);
-        if (writeLmkd(buf, repl)) {
-            int i = repl.getInt();
-            if (i != LMK_GETKILLCNT) {
-                Slog.e("ActivityManager", "Failed to get kill count, code mismatch");
-                return null;
-            }
+        // indicate what we are waiting for
+        repl.putInt(LMK_GETKILLCNT);
+        repl.rewind();
+        if (writeLmkd(buf, repl) && repl.getInt() == LMK_GETKILLCNT) {
             return new Integer(repl.getInt());
         }
         return null;
     }
 
-    @GuardedBy("sLmkdSocketLock")
-    private static boolean openLmkdSocketLS() {
+    boolean onLmkdConnect(OutputStream ostream) {
         try {
-            sLmkdSocket = new LocalSocket(LocalSocket.SOCKET_SEQPACKET);
-            sLmkdSocket.connect(
-                new LocalSocketAddress("lmkd",
-                        LocalSocketAddress.Namespace.RESERVED));
-            sLmkdOutputStream = sLmkdSocket.getOutputStream();
-            sLmkdInputStream = sLmkdSocket.getInputStream();
-        } catch (IOException ex) {
-            Slog.w(TAG, "lowmemorykiller daemon socket open failed");
-            sLmkdSocket = null;
-            return false;
-        }
-
-        return true;
-    }
-
-    // Never call directly, use writeLmkd() instead
-    @GuardedBy("sLmkdSocketLock")
-    private static boolean writeLmkdCommandLS(ByteBuffer buf) {
-        try {
-            sLmkdOutputStream.write(buf.array(), 0, buf.position());
-        } catch (IOException ex) {
-            Slog.w(TAG, "Error writing to lowmemorykiller socket");
-            IoUtils.closeQuietly(sLmkdSocket);
-            sLmkdSocket = null;
-            return false;
-        }
-        return true;
-    }
-
-    // Never call directly, use writeLmkd() instead
-    @GuardedBy("sLmkdSocketLock")
-    private static boolean readLmkdReplyLS(ByteBuffer buf) {
-        int len;
-        try {
-            len = sLmkdInputStream.read(buf.array(), 0, buf.array().length);
-            if (len == buf.array().length) {
-                return true;
+            // Purge any previously registered pids
+            ByteBuffer buf = ByteBuffer.allocate(4);
+            buf.putInt(LMK_PROCPURGE);
+            ostream.write(buf.array(), 0, buf.position());
+            if (mOomLevelsSet) {
+                // Reset oom_adj levels
+                buf = ByteBuffer.allocate(4 * (2 * mOomAdj.length + 1));
+                buf.putInt(LMK_TARGET);
+                for (int i = 0; i < mOomAdj.length; i++) {
+                    buf.putInt((mOomMinFree[i] * 1024) / PAGE_SIZE);
+                    buf.putInt(mOomAdj[i]);
+                }
+                ostream.write(buf.array(), 0, buf.position());
             }
         } catch (IOException ex) {
-            Slog.w(TAG, "Error reading from lowmemorykiller socket");
+            return false;
         }
-
-        IoUtils.closeQuietly(sLmkdSocket);
-        sLmkdSocket = null;
-        return false;
+        return true;
     }
 
     private static boolean writeLmkd(ByteBuffer buf, ByteBuffer repl) {
-        synchronized (sLmkdSocketLock) {
-            for (int i = 0; i < 3; i++) {
-                if (sLmkdSocket == null) {
-                    if (openLmkdSocketLS() == false) {
-                        try {
-                            Thread.sleep(1000);
-                        } catch (InterruptedException ie) {
-                        }
-                        continue;
-                    }
+        if (!sLmkdConnection.isConnected()) {
+            // try to connect immediately and then keep retrying
+            sKillHandler.sendMessage(
+                    sKillHandler.obtainMessage(KillHandler.LMDK_RECONNECT_MSG));
 
-                    // Purge any previously registered pids
-                    ByteBuffer purge_buf = ByteBuffer.allocate(4);
-                    purge_buf.putInt(LMK_PROCPURGE);
-                    if (writeLmkdCommandLS(purge_buf) == false) {
-                        // Write failed, skip the rest and retry
-                        continue;
-                    }
-                }
-                if (writeLmkdCommandLS(buf) && (repl == null || readLmkdReplyLS(repl))) {
-                    return true;
-                }
+            // wait for connection retrying 3 times (up to 3 seconds)
+            if (!sLmkdConnection.waitForConnection(3 * LMDK_RECONNECT_DELAY_MS)) {
+                return false;
             }
         }
-        return false;
+
+        return sLmkdConnection.exchange(buf, repl);
     }
 
     static void killProcessGroup(int uid, int pid) {
