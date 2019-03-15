@@ -94,13 +94,9 @@ public class ContentProviderOperation implements Parcelable {
     }
 
     /** @hide */
-    public ContentProviderOperation(ContentProviderOperation cpo, boolean removeUserIdFromUri) {
+    public ContentProviderOperation(ContentProviderOperation cpo, Uri withUri) {
         mType = cpo.mType;
-        if (removeUserIdFromUri) {
-            mUri = ContentProvider.getUriWithoutUserId(cpo.mUri);
-        } else {
-            mUri = cpo.mUri;
-        }
+        mUri = withUri;
         mValues = cpo.mValues;
         mSelection = cpo.mSelection;
         mSelectionArgs = cpo.mSelectionArgs;
@@ -108,14 +104,6 @@ public class ContentProviderOperation implements Parcelable {
         mSelectionArgsBackReferences = cpo.mSelectionArgsBackReferences;
         mValuesBackReferences = cpo.mValuesBackReferences;
         mYieldAllowed = cpo.mYieldAllowed;
-    }
-
-    /** @hide */
-    public ContentProviderOperation getWithoutUserIdInUri() {
-        if (ContentProvider.uriHasUserId(mUri)) {
-            return new ContentProviderOperation(this, true);
-        }
-        return this;
     }
 
     public void writeToParcel(Parcel dest, int flags) {

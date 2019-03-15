@@ -16,6 +16,8 @@
 
 package com.android.systemui.media;
 
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -36,6 +38,7 @@ import android.text.TextPaint;
 import android.text.TextUtils;
 import android.text.style.StyleSpan;
 import android.util.Log;
+import android.view.Window;
 import android.view.WindowManager;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
@@ -146,7 +149,9 @@ public class MediaProjectionPermissionActivity extends Activity
         mDialog.getButton(DialogInterface.BUTTON_POSITIVE).setFilterTouchesWhenObscured(true);
 
         ((CheckBox) mDialog.findViewById(R.id.remember)).setOnCheckedChangeListener(this);
-        mDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+        final Window w = mDialog.getWindow();
+        w.setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+        w.addPrivateFlags(PRIVATE_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS);
 
         mDialog.show();
     }
