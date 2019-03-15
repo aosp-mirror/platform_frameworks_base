@@ -22,6 +22,7 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
+import android.os.SystemClock;
 import android.util.FloatProperty;
 import android.util.MathUtils;
 import android.view.Gravity;
@@ -31,6 +32,7 @@ import android.view.View;
 import android.view.WindowManager;
 
 import com.android.systemui.R;
+import com.android.systemui.shared.system.QuickStepContract;
 
 public class NavigationBarEdgePanel extends View {
     private static final String TAG = "NavigationBarEdgePanel";
@@ -48,6 +50,7 @@ public class NavigationBarEdgePanel extends View {
     private static final float START_POINTING_RATIO = 0.3f;
     private static final float POINTEDNESS_BEFORE_SNAP_RATIO = 0.4f;
     private static final int ANIM_DURATION_MS = 150;
+    private static final long HAPTIC_TIMEOUT_MS = 200;
 
     private final Paint mPaint = new Paint();
     private final Paint mProtectionPaint = new Paint();
@@ -65,6 +68,8 @@ public class NavigationBarEdgePanel extends View {
     private float mStartY;
     private float mStartX;
 
+    private boolean mDragSlopPassed;
+    private long mLastSlopHapticTime;
     private boolean mGestureDetected;
     private boolean mArrowsPointLeft;
     private float mGestureLength;
@@ -169,6 +174,7 @@ public class NavigationBarEdgePanel extends View {
     public boolean onTouchEvent(MotionEvent event) {
         switch (event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN : {
+                mDragSlopPassed = false;
                 show(event.getX(), event.getY());
                 break;
             }
@@ -263,6 +269,13 @@ public class NavigationBarEdgePanel extends View {
     private void handleNewSwipePoint(float x) {
         float dist = MathUtils.abs(x - mStartX);
 
+        // Apply a haptic on drag slop passed
+        if (!mDragSlopPassed && dist > QuickStepContract.getQuickStepDragSlopPx()) {
+            mDragSlopPassed = true;
+            performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK);
+            mLastSlopHapticTime = SystemClock.uptimeMillis();
+        }
+
         setDragProgress(MathUtils.constrainedMap(
                 0, 1.0f,
                 0, mGestureLength * TRACK_LENGTH_MULTIPLIER,
@@ -286,7 +299,10 @@ public class NavigationBarEdgePanel extends View {
             }
         } else {
             if (!mGestureDetected) {
-                performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK);
+                // Prevent another haptic if it was just used
+                if (SystemClock.uptimeMillis() - mLastSlopHapticTime > HAPTIC_TIMEOUT_MS) {
+                    performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK);
+                }
                 mGestureDetected = true;
 
                 mLegAnimator.setFloatValues(1f);
