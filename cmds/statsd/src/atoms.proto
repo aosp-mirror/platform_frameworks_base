@@ -4913,7 +4913,7 @@ message AppCompacted {
   // since boot, not including sleep (see SystemClock.uptimeMillis()).
   optional int64 last_compact_timestamp_ms_since_boot = 14;
 
-  // The oom_score_adj at the time of compaction.
+  // The "setAdj" (i.e. previous) oom_score_adj at the time of compaction.
   optional int32 oom_score_adj = 15;
 
   // The process state at the time of compaction.
