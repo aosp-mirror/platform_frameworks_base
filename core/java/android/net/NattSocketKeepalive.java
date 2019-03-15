@@ -17,7 +17,6 @@
 package android.net;
 
 import android.annotation.NonNull;
-import android.os.Binder;
 import android.os.RemoteException;
 import android.util.Log;
 
@@ -52,24 +51,30 @@ public final class NattSocketKeepalive extends SocketKeepalive {
 
     @Override
     void startImpl(int intervalSec) {
-        try {
-            mService.startNattKeepaliveWithFd(mNetwork, mFd, mResourceId, intervalSec, mMessenger,
-                    new Binder(), mSource.getHostAddress(), mDestination.getHostAddress());
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error starting packet keepalive: ", e);
-            stopLooper();
-        }
+        mExecutor.execute(() -> {
+            try {
+                mService.startNattKeepaliveWithFd(mNetwork, mFd, mResourceId, intervalSec,
+                        mCallback,
+                        mSource.getHostAddress(), mDestination.getHostAddress());
+            } catch (RemoteException e) {
+                Log.e(TAG, "Error starting socket keepalive: ", e);
+                throw e.rethrowFromSystemServer();
+            }
+        });
     }
 
     @Override
     void stopImpl() {
-        try {
-            if (mSlot != null) {
-                mService.stopKeepalive(mNetwork, mSlot);
+        mExecutor.execute(() -> {
+            try {
+                if (mSlot != null) {
+                    mService.stopKeepalive(mNetwork, mSlot);
+                }
+            } catch (RemoteException e) {
+                Log.e(TAG, "Error stopping socket keepalive: ", e);
+                throw e.rethrowFromSystemServer();
             }
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error stopping packet keepalive: ", e);
-            stopLooper();
-        }
+        });
+
     }
 }

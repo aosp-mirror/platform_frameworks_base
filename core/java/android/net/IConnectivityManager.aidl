@@ -27,6 +27,7 @@ import android.net.NetworkMisc;
 import android.net.NetworkQuotaInfo;
 import android.net.NetworkRequest;
 import android.net.NetworkState;
+import android.net.ISocketKeepaliveCallback;
 import android.net.ProxyInfo;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -194,15 +195,15 @@ interface IConnectivityManager
 
     void factoryReset();
 
-    void startNattKeepalive(in Network network, int intervalSeconds, in Messenger messenger,
-            in IBinder binder, String srcAddr, int srcPort, String dstAddr);
+    void startNattKeepalive(in Network network, int intervalSeconds,
+            in ISocketKeepaliveCallback cb, String srcAddr, int srcPort, String dstAddr);
 
     void startNattKeepaliveWithFd(in Network network, in FileDescriptor fd, int resourceId,
-            int intervalSeconds, in Messenger messenger, in IBinder binder, String srcAddr,
+            int intervalSeconds, in ISocketKeepaliveCallback cb, String srcAddr,
             String dstAddr);
 
     void startTcpKeepalive(in Network network, in FileDescriptor fd, int intervalSeconds,
-            in Messenger messenger, in IBinder binder);
+            in ISocketKeepaliveCallback cb);
 
     void stopKeepalive(in Network network, int slot);
 
