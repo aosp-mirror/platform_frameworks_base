@@ -42,6 +42,7 @@ public final class AppPredictionManager {
     /**
      * Creates a new app prediction session.
      */
+    @NonNull
     public AppPredictor createAppPredictionSession(
             @NonNull AppPredictionContext predictionContext) {
         return new AppPredictor(mContext, predictionContext);

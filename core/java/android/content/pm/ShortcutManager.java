@@ -600,15 +600,17 @@ public class ShortcutManager {
             mTargetComponent = targetComponent;
         }
 
-        private ShareShortcutInfo(Parcel in) {
+        private ShareShortcutInfo(@NonNull Parcel in) {
             mShortcutInfo = in.readParcelable(ShortcutInfo.class.getClassLoader());
             mTargetComponent = in.readParcelable(ComponentName.class.getClassLoader());
         }
 
+        @NonNull
         public ShortcutInfo getShortcutInfo() {
             return mShortcutInfo;
         }
 
+        @NonNull
         public ComponentName getTargetComponent() {
             return mTargetComponent;
         }
@@ -619,12 +621,12 @@ public class ShortcutManager {
         }
 
         @Override
-        public void writeToParcel(Parcel dest, int flags) {
+        public void writeToParcel(@NonNull Parcel dest, int flags) {
             dest.writeParcelable(mShortcutInfo, flags);
             dest.writeParcelable(mTargetComponent, flags);
         }
 
-        public static final @android.annotation.NonNull Parcelable.Creator<ShareShortcutInfo> CREATOR =
+        public static final @NonNull Parcelable.Creator<ShareShortcutInfo> CREATOR =
                 new Parcelable.Creator<ShareShortcutInfo>() {
                     public ShareShortcutInfo createFromParcel(Parcel in) {
                         return new ShareShortcutInfo(in);
