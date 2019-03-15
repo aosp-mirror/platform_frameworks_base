@@ -1850,8 +1850,8 @@ public class LinearLayout extends ViewGroup {
      */
     @OrientationMode
     @InspectableProperty(enumMapping = {
-            @InspectableProperty.EnumMap(value = HORIZONTAL, name = "horizontal"),
-            @InspectableProperty.EnumMap(value = VERTICAL, name = "vertical")
+            @InspectableProperty.EnumEntry(value = HORIZONTAL, name = "horizontal"),
+            @InspectableProperty.EnumEntry(value = VERTICAL, name = "vertical")
     })
     public int getOrientation() {
         return mOrientation;

@@ -125,8 +125,8 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
 import android.view.inspector.InspectableProperty;
-import android.view.inspector.InspectableProperty.EnumMap;
-import android.view.inspector.InspectableProperty.FlagMap;
+import android.view.inspector.InspectableProperty.EnumEntry;
+import android.view.inspector.InspectableProperty.FlagEntry;
 import android.widget.Checkable;
 import android.widget.FrameLayout;
 import android.widget.ScrollBarDrawable;
@@ -6897,13 +6897,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return a bitmask representing the enabled scroll indicators
      */
     @InspectableProperty(flagMapping = {
-            @FlagMap(target = SCROLL_INDICATORS_NONE, mask = 0xffff_ffff, name = "none"),
-            @FlagMap(target = SCROLL_INDICATOR_TOP, name = "top"),
-            @FlagMap(target = SCROLL_INDICATOR_BOTTOM, name = "bottom"),
-            @FlagMap(target = SCROLL_INDICATOR_LEFT, name = "left"),
-            @FlagMap(target = SCROLL_INDICATOR_RIGHT, name = "right"),
-            @FlagMap(target = SCROLL_INDICATOR_START, name = "start"),
-            @FlagMap(target = SCROLL_INDICATOR_END, name = "end")
+            @FlagEntry(target = SCROLL_INDICATORS_NONE, mask = 0xffff_ffff, name = "none"),
+            @FlagEntry(target = SCROLL_INDICATOR_TOP, name = "top"),
+            @FlagEntry(target = SCROLL_INDICATOR_BOTTOM, name = "bottom"),
+            @FlagEntry(target = SCROLL_INDICATOR_LEFT, name = "left"),
+            @FlagEntry(target = SCROLL_INDICATOR_RIGHT, name = "right"),
+            @FlagEntry(target = SCROLL_INDICATOR_START, name = "start"),
+            @FlagEntry(target = SCROLL_INDICATOR_END, name = "end")
     })
     @ScrollIndicators
     public int getScrollIndicators() {
@@ -9032,12 +9032,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             @ViewDebug.IntToString(from = IMPORTANT_FOR_AUTOFILL_NO_EXCLUDE_DESCENDANTS,
                 to = "noExcludeDescendants")})
     @InspectableProperty(enumMapping = {
-            @EnumMap(value = IMPORTANT_FOR_AUTOFILL_AUTO, name = "auto"),
-            @EnumMap(value = IMPORTANT_FOR_AUTOFILL_YES, name = "yes"),
-            @EnumMap(value = IMPORTANT_FOR_AUTOFILL_NO, name = "no"),
-            @EnumMap(value = IMPORTANT_FOR_AUTOFILL_YES_EXCLUDE_DESCENDANTS,
+            @EnumEntry(value = IMPORTANT_FOR_AUTOFILL_AUTO, name = "auto"),
+            @EnumEntry(value = IMPORTANT_FOR_AUTOFILL_YES, name = "yes"),
+            @EnumEntry(value = IMPORTANT_FOR_AUTOFILL_NO, name = "no"),
+            @EnumEntry(value = IMPORTANT_FOR_AUTOFILL_YES_EXCLUDE_DESCENDANTS,
                     name = "yesExcludeDescendants"),
-            @EnumMap(value = IMPORTANT_FOR_AUTOFILL_NO_EXCLUDE_DESCENDANTS,
+            @EnumEntry(value = IMPORTANT_FOR_AUTOFILL_NO_EXCLUDE_DESCENDANTS,
                     name = "noExcludeDescendants"),
     })
     public @AutofillImportance int getImportantForAutofill() {
@@ -9225,12 +9225,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             @ViewDebug.IntToString(from = IMPORTANT_FOR_CONTENT_CAPTURE_NO_EXCLUDE_DESCENDANTS,
                 to = "noExcludeDescendants")})
     @InspectableProperty(enumMapping = {
-            @EnumMap(value = IMPORTANT_FOR_CONTENT_CAPTURE_AUTO, name = "auto"),
-            @EnumMap(value = IMPORTANT_FOR_CONTENT_CAPTURE_YES, name = "yes"),
-            @EnumMap(value = IMPORTANT_FOR_CONTENT_CAPTURE_NO, name = "no"),
-            @EnumMap(value = IMPORTANT_FOR_CONTENT_CAPTURE_YES_EXCLUDE_DESCENDANTS,
+            @EnumEntry(value = IMPORTANT_FOR_CONTENT_CAPTURE_AUTO, name = "auto"),
+            @EnumEntry(value = IMPORTANT_FOR_CONTENT_CAPTURE_YES, name = "yes"),
+            @EnumEntry(value = IMPORTANT_FOR_CONTENT_CAPTURE_NO, name = "no"),
+            @EnumEntry(value = IMPORTANT_FOR_CONTENT_CAPTURE_YES_EXCLUDE_DESCENDANTS,
                     name = "yesExcludeDescendants"),
-            @EnumMap(value = IMPORTANT_FOR_CONTENT_CAPTURE_NO_EXCLUDE_DESCENDANTS,
+            @EnumEntry(value = IMPORTANT_FOR_CONTENT_CAPTURE_NO_EXCLUDE_DESCENDANTS,
                     name = "noExcludeDescendants"),
     })
     public @ContentCaptureImportance int getImportantForContentCapture() {
@@ -10534,9 +10534,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     @Deprecated
     @DrawingCacheQuality
     @InspectableProperty(enumMapping = {
-            @EnumMap(value = DRAWING_CACHE_QUALITY_LOW, name = "low"),
-            @EnumMap(value = DRAWING_CACHE_QUALITY_HIGH, name = "high"),
-            @EnumMap(value = DRAWING_CACHE_QUALITY_AUTO, name = "auto")
+            @EnumEntry(value = DRAWING_CACHE_QUALITY_LOW, name = "low"),
+            @EnumEntry(value = DRAWING_CACHE_QUALITY_HIGH, name = "high"),
+            @EnumEntry(value = DRAWING_CACHE_QUALITY_AUTO, name = "auto")
     })
     public int getDrawingCacheQuality() {
         return mViewFlags & DRAWING_CACHE_QUALITY_MASK;
@@ -11276,9 +11276,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         @ViewDebug.IntToString(from = GONE,      to = "GONE")
     })
     @InspectableProperty(enumMapping = {
-            @EnumMap(value = VISIBLE, name = "visible"),
-            @EnumMap(value = INVISIBLE, name = "invisible"),
-            @EnumMap(value = GONE, name = "gone")
+            @EnumEntry(value = VISIBLE, name = "visible"),
+            @EnumEntry(value = INVISIBLE, name = "invisible"),
+            @EnumEntry(value = GONE, name = "gone")
     })
     @Visibility
     public int getVisibility() {
@@ -11527,10 +11527,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         @ViewDebug.IntToString(from = LAYOUT_DIRECTION_LOCALE,  to = "LOCALE")
     })
     @InspectableProperty(hasAttributeId = false, enumMapping = {
-            @EnumMap(value = LAYOUT_DIRECTION_LTR, name = "ltr"),
-            @EnumMap(value = LAYOUT_DIRECTION_RTL, name = "rtl"),
-            @EnumMap(value = LAYOUT_DIRECTION_INHERIT, name = "inherit"),
-            @EnumMap(value = LAYOUT_DIRECTION_LOCALE, name = "locale")
+            @EnumEntry(value = LAYOUT_DIRECTION_LTR, name = "ltr"),
+            @EnumEntry(value = LAYOUT_DIRECTION_RTL, name = "rtl"),
+            @EnumEntry(value = LAYOUT_DIRECTION_INHERIT, name = "inherit"),
+            @EnumEntry(value = LAYOUT_DIRECTION_LOCALE, name = "locale")
     })
     @LayoutDir
     public int getRawLayoutDirection() {
@@ -11586,8 +11586,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         @ViewDebug.IntToString(from = LAYOUT_DIRECTION_RTL, to = "RESOLVED_DIRECTION_RTL")
     })
     @InspectableProperty(enumMapping = {
-            @EnumMap(value = LAYOUT_DIRECTION_LTR, name = "ltr"),
-            @EnumMap(value = LAYOUT_DIRECTION_RTL, name = "rtl")
+            @EnumEntry(value = LAYOUT_DIRECTION_LTR, name = "ltr"),
+            @EnumEntry(value = LAYOUT_DIRECTION_RTL, name = "rtl")
     })
     @ResolvedLayoutDir
     public int getLayoutDirection() {
@@ -12072,9 +12072,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             @ViewDebug.IntToString(from = FOCUSABLE_AUTO, to = "FOCUSABLE_AUTO")
             }, category = "focus")
     @InspectableProperty(enumMapping = {
-            @EnumMap(value = NOT_FOCUSABLE, name = "false"),
-            @EnumMap(value = FOCUSABLE, name = "true"),
-            @EnumMap(value = FOCUSABLE_AUTO, name = "auto")
+            @EnumEntry(value = NOT_FOCUSABLE, name = "false"),
+            @EnumEntry(value = FOCUSABLE, name = "true"),
+            @EnumEntry(value = FOCUSABLE_AUTO, name = "auto")
     })
     @Focusable
     public int getFocusable() {
@@ -12957,10 +12957,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     to = "noHideDescendants")
         })
     @InspectableProperty(enumMapping = {
-            @EnumMap(value = IMPORTANT_FOR_ACCESSIBILITY_AUTO, name = "auto"),
-            @EnumMap(value = IMPORTANT_FOR_ACCESSIBILITY_YES, name = "yes"),
-            @EnumMap(value = IMPORTANT_FOR_ACCESSIBILITY_NO, name = "no"),
-            @EnumMap(value = IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS,
+            @EnumEntry(value = IMPORTANT_FOR_ACCESSIBILITY_AUTO, name = "auto"),
+            @EnumEntry(value = IMPORTANT_FOR_ACCESSIBILITY_YES, name = "yes"),
+            @EnumEntry(value = IMPORTANT_FOR_ACCESSIBILITY_NO, name = "no"),
+            @EnumEntry(value = IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS,
                     name = "noHideDescendants"),
     })
     public int getImportantForAccessibility() {
@@ -13016,9 +13016,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @see #setAccessibilityLiveRegion(int)
      */
     @InspectableProperty(enumMapping = {
-            @EnumMap(value = ACCESSIBILITY_LIVE_REGION_NONE, name = "none"),
-            @EnumMap(value = ACCESSIBILITY_LIVE_REGION_POLITE, name = "polite"),
-            @EnumMap(value = ACCESSIBILITY_LIVE_REGION_ASSERTIVE, name = "assertive")
+            @EnumEntry(value = ACCESSIBILITY_LIVE_REGION_NONE, name = "none"),
+            @EnumEntry(value = ACCESSIBILITY_LIVE_REGION_POLITE, name = "polite"),
+            @EnumEntry(value = ACCESSIBILITY_LIVE_REGION_ASSERTIVE, name = "assertive")
     })
     public int getAccessibilityLiveRegion() {
         return (mPrivateFlags2 & PFLAG2_ACCESSIBILITY_LIVE_REGION_MASK)
@@ -18625,9 +18625,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @hide
      */
     @InspectableProperty(name = "requiresFadingEdge", flagMapping = {
-            @FlagMap(target = FADING_EDGE_NONE, mask = FADING_EDGE_MASK, name = "none"),
-            @FlagMap(target = FADING_EDGE_VERTICAL, name = "vertical"),
-            @FlagMap(target = FADING_EDGE_HORIZONTAL, name = "horizontal")
+            @FlagEntry(target = FADING_EDGE_NONE, mask = FADING_EDGE_MASK, name = "none"),
+            @FlagEntry(target = FADING_EDGE_VERTICAL, name = "vertical"),
+            @FlagEntry(target = FADING_EDGE_HORIZONTAL, name = "horizontal")
     })
     public int getFadingEdge() {
         return mViewFlags & FADING_EDGE_MASK;
@@ -18922,10 +18922,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             @ViewDebug.IntToString(from = SCROLLBARS_OUTSIDE_INSET, to = "OUTSIDE_INSET")
     })
     @InspectableProperty(name = "scrollbarStyle", enumMapping = {
-            @EnumMap(value = SCROLLBARS_INSIDE_OVERLAY, name = "insideOverlay"),
-            @EnumMap(value = SCROLLBARS_INSIDE_INSET, name = "insideInset"),
-            @EnumMap(value = SCROLLBARS_OUTSIDE_OVERLAY, name = "outsideOverlay"),
-            @EnumMap(value = SCROLLBARS_OUTSIDE_INSET, name = "outsideInset")
+            @EnumEntry(value = SCROLLBARS_INSIDE_OVERLAY, name = "insideOverlay"),
+            @EnumEntry(value = SCROLLBARS_INSIDE_INSET, name = "insideInset"),
+            @EnumEntry(value = SCROLLBARS_OUTSIDE_OVERLAY, name = "outsideOverlay"),
+            @EnumEntry(value = SCROLLBARS_OUTSIDE_INSET, name = "outsideInset")
     })
     @ScrollBarStyle
     public int getScrollBarStyle() {
@@ -20478,9 +20478,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @see #LAYER_TYPE_HARDWARE
      */
     @InspectableProperty(enumMapping = {
-            @EnumMap(value = LAYER_TYPE_NONE, name = "none"),
-            @EnumMap(value = LAYER_TYPE_SOFTWARE, name = "software"),
-            @EnumMap(value = LAYER_TYPE_HARDWARE, name = "hardware")
+            @EnumEntry(value = LAYER_TYPE_NONE, name = "none"),
+            @EnumEntry(value = LAYER_TYPE_SOFTWARE, name = "software"),
+            @EnumEntry(value = LAYER_TYPE_HARDWARE, name = "hardware")
     })
     @LayerType
     public int getLayerType() {
@@ -26160,9 +26160,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return This view's over-scroll mode.
      */
     @InspectableProperty(enumMapping = {
-            @EnumMap(value = OVER_SCROLL_ALWAYS, name = "always"),
-            @EnumMap(value = OVER_SCROLL_IF_CONTENT_SCROLLS, name = "ifContentScrolls"),
-            @EnumMap(value = OVER_SCROLL_NEVER, name = "never")
+            @EnumEntry(value = OVER_SCROLL_ALWAYS, name = "always"),
+            @EnumEntry(value = OVER_SCROLL_IF_CONTENT_SCROLLS, name = "ifContentScrolls"),
+            @EnumEntry(value = OVER_SCROLL_NEVER, name = "never")
     })
     public int getOverScrollMode() {
         return mOverScrollMode;
@@ -26553,14 +26553,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             @ViewDebug.IntToString(from = TEXT_DIRECTION_FIRST_STRONG_RTL, to = "FIRST_STRONG_RTL")
     })
     @InspectableProperty(hasAttributeId = false, enumMapping = {
-            @EnumMap(value = TEXT_DIRECTION_INHERIT, name = "inherit"),
-            @EnumMap(value = TEXT_DIRECTION_LOCALE, name = "locale"),
-            @EnumMap(value = TEXT_DIRECTION_ANY_RTL, name = "anyRtl"),
-            @EnumMap(value = TEXT_DIRECTION_LTR, name = "ltr"),
-            @EnumMap(value = TEXT_DIRECTION_RTL, name = "rtl"),
-            @EnumMap(value = TEXT_DIRECTION_FIRST_STRONG, name = "firstStrong"),
-            @EnumMap(value = TEXT_DIRECTION_FIRST_STRONG_LTR, name = "firstStrongLtr"),
-            @EnumMap(value = TEXT_DIRECTION_FIRST_STRONG_RTL, name = "firstStrongRtl"),
+            @EnumEntry(value = TEXT_DIRECTION_INHERIT, name = "inherit"),
+            @EnumEntry(value = TEXT_DIRECTION_LOCALE, name = "locale"),
+            @EnumEntry(value = TEXT_DIRECTION_ANY_RTL, name = "anyRtl"),
+            @EnumEntry(value = TEXT_DIRECTION_LTR, name = "ltr"),
+            @EnumEntry(value = TEXT_DIRECTION_RTL, name = "rtl"),
+            @EnumEntry(value = TEXT_DIRECTION_FIRST_STRONG, name = "firstStrong"),
+            @EnumEntry(value = TEXT_DIRECTION_FIRST_STRONG_LTR, name = "firstStrongLtr"),
+            @EnumEntry(value = TEXT_DIRECTION_FIRST_STRONG_RTL, name = "firstStrongRtl"),
     })
     @UnsupportedAppUsage
     public int getRawTextDirection() {
@@ -26630,13 +26630,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             @ViewDebug.IntToString(from = TEXT_DIRECTION_FIRST_STRONG_RTL, to = "FIRST_STRONG_RTL")
     })
     @InspectableProperty(hasAttributeId = false, enumMapping = {
-            @EnumMap(value = TEXT_DIRECTION_LOCALE, name = "locale"),
-            @EnumMap(value = TEXT_DIRECTION_ANY_RTL, name = "anyRtl"),
-            @EnumMap(value = TEXT_DIRECTION_LTR, name = "ltr"),
-            @EnumMap(value = TEXT_DIRECTION_RTL, name = "rtl"),
-            @EnumMap(value = TEXT_DIRECTION_FIRST_STRONG, name = "firstStrong"),
-            @EnumMap(value = TEXT_DIRECTION_FIRST_STRONG_LTR, name = "firstStrongLtr"),
-            @EnumMap(value = TEXT_DIRECTION_FIRST_STRONG_RTL, name = "firstStrongRtl"),
+            @EnumEntry(value = TEXT_DIRECTION_LOCALE, name = "locale"),
+            @EnumEntry(value = TEXT_DIRECTION_ANY_RTL, name = "anyRtl"),
+            @EnumEntry(value = TEXT_DIRECTION_LTR, name = "ltr"),
+            @EnumEntry(value = TEXT_DIRECTION_RTL, name = "rtl"),
+            @EnumEntry(value = TEXT_DIRECTION_FIRST_STRONG, name = "firstStrong"),
+            @EnumEntry(value = TEXT_DIRECTION_FIRST_STRONG_LTR, name = "firstStrongLtr"),
+            @EnumEntry(value = TEXT_DIRECTION_FIRST_STRONG_RTL, name = "firstStrongRtl"),
     })
     public int getTextDirection() {
         return (mPrivateFlags2 & PFLAG2_TEXT_DIRECTION_RESOLVED_MASK) >> PFLAG2_TEXT_DIRECTION_RESOLVED_MASK_SHIFT;
@@ -26810,13 +26810,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             @ViewDebug.IntToString(from = TEXT_ALIGNMENT_VIEW_END, to = "VIEW_END")
     })
     @InspectableProperty(hasAttributeId = false, enumMapping = {
-            @EnumMap(value = TEXT_ALIGNMENT_INHERIT, name = "inherit"),
-            @EnumMap(value = TEXT_ALIGNMENT_GRAVITY, name = "gravity"),
-            @EnumMap(value = TEXT_ALIGNMENT_TEXT_START, name = "textStart"),
-            @EnumMap(value = TEXT_ALIGNMENT_TEXT_END, name = "textEnd"),
-            @EnumMap(value = TEXT_ALIGNMENT_CENTER, name = "center"),
-            @EnumMap(value = TEXT_ALIGNMENT_VIEW_START, name = "viewStart"),
-            @EnumMap(value = TEXT_ALIGNMENT_VIEW_END, name = "viewEnd")
+            @EnumEntry(value = TEXT_ALIGNMENT_INHERIT, name = "inherit"),
+            @EnumEntry(value = TEXT_ALIGNMENT_GRAVITY, name = "gravity"),
+            @EnumEntry(value = TEXT_ALIGNMENT_TEXT_START, name = "textStart"),
+            @EnumEntry(value = TEXT_ALIGNMENT_TEXT_END, name = "textEnd"),
+            @EnumEntry(value = TEXT_ALIGNMENT_CENTER, name = "center"),
+            @EnumEntry(value = TEXT_ALIGNMENT_VIEW_START, name = "viewStart"),
+            @EnumEntry(value = TEXT_ALIGNMENT_VIEW_END, name = "viewEnd")
     })
     @TextAlignment
     @UnsupportedAppUsage
@@ -26885,12 +26885,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             @ViewDebug.IntToString(from = TEXT_ALIGNMENT_VIEW_END, to = "VIEW_END")
     })
     @InspectableProperty(enumMapping = {
-            @EnumMap(value = TEXT_ALIGNMENT_GRAVITY, name = "gravity"),
-            @EnumMap(value = TEXT_ALIGNMENT_TEXT_START, name = "textStart"),
-            @EnumMap(value = TEXT_ALIGNMENT_TEXT_END, name = "textEnd"),
-            @EnumMap(value = TEXT_ALIGNMENT_CENTER, name = "center"),
-            @EnumMap(value = TEXT_ALIGNMENT_VIEW_START, name = "viewStart"),
-            @EnumMap(value = TEXT_ALIGNMENT_VIEW_END, name = "viewEnd")
+            @EnumEntry(value = TEXT_ALIGNMENT_GRAVITY, name = "gravity"),
+            @EnumEntry(value = TEXT_ALIGNMENT_TEXT_START, name = "textStart"),
+            @EnumEntry(value = TEXT_ALIGNMENT_TEXT_END, name = "textEnd"),
+            @EnumEntry(value = TEXT_ALIGNMENT_CENTER, name = "center"),
+            @EnumEntry(value = TEXT_ALIGNMENT_VIEW_START, name = "viewStart"),
+            @EnumEntry(value = TEXT_ALIGNMENT_VIEW_END, name = "viewEnd")
     })
     @TextAlignment
     public int getTextAlignment() {

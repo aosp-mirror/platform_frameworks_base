@@ -169,8 +169,8 @@ public class TimePicker extends FrameLayout {
     @TimePickerMode
     @TestApi
     @InspectableProperty(name = "timePickerMode", enumMapping = {
-            @InspectableProperty.EnumMap(name = "clock", value = MODE_CLOCK),
-            @InspectableProperty.EnumMap(name = "spinner", value = MODE_SPINNER)
+            @InspectableProperty.EnumEntry(name = "clock", value = MODE_CLOCK),
+            @InspectableProperty.EnumEntry(name = "spinner", value = MODE_SPINNER)
     })
     public int getMode() {
         return mMode;

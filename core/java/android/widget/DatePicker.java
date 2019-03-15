@@ -216,8 +216,8 @@ public class DatePicker extends FrameLayout {
      * @hide Visible for testing only.
      */
     @InspectableProperty(name = "datePickerMode", enumMapping = {
-            @InspectableProperty.EnumMap(value = MODE_SPINNER, name = "spinner"),
-            @InspectableProperty.EnumMap(value = MODE_CALENDAR, name = "calendar")
+            @InspectableProperty.EnumEntry(value = MODE_SPINNER, name = "spinner"),
+            @InspectableProperty.EnumEntry(value = MODE_CALENDAR, name = "calendar")
     })
     @DatePickerMode
     @TestApi
