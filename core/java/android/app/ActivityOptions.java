@@ -222,6 +222,13 @@ public class ActivityOptions {
     private static final String KEY_AVOID_MOVE_TO_FRONT = "android.activity.avoidMoveToFront";
 
     /**
+     * See {@link #setFreezeRecentTasksReordering()}.
+     * @hide
+     */
+    private static final String KEY_FREEZE_RECENT_TASKS_REORDERING =
+            "android.activity.freezeRecentTasksReordering";
+
+    /**
      * Where the split-screen-primary stack should be positioned.
      * @hide
      */
@@ -324,6 +331,7 @@ public class ActivityOptions {
     private boolean mTaskOverlay;
     private boolean mTaskOverlayCanResume;
     private boolean mAvoidMoveToFront;
+    private boolean mFreezeRecentTasksReordering;
     private AppTransitionAnimationSpec mAnimSpecs[];
     private int mRotationAnimationHint = -1;
     private Bundle mAppVerificationBundle;
@@ -946,6 +954,7 @@ public class ActivityOptions {
         mTaskOverlay = opts.getBoolean(KEY_TASK_OVERLAY, false);
         mTaskOverlayCanResume = opts.getBoolean(KEY_TASK_OVERLAY_CAN_RESUME, false);
         mAvoidMoveToFront = opts.getBoolean(KEY_AVOID_MOVE_TO_FRONT, false);
+        mFreezeRecentTasksReordering = opts.getBoolean(KEY_FREEZE_RECENT_TASKS_REORDERING, false);
         mSplitScreenCreateMode = opts.getInt(KEY_SPLIT_SCREEN_CREATE_MODE,
                 SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT);
         mDisallowEnterPictureInPictureWhileLaunching = opts.getBoolean(
@@ -1304,6 +1313,24 @@ public class ActivityOptions {
         return mAvoidMoveToFront;
     }
 
+    /**
+     * Sets whether the launch of this activity should freeze the recent task list reordering until
+     * the next user interaction or timeout. This flag is only applied when starting an activity
+     * in recents.
+     * @hide
+     */
+    public void setFreezeRecentTasksReordering() {
+        mFreezeRecentTasksReordering = true;
+    }
+
+    /**
+     * @return whether the launch of this activity should freeze the recent task list reordering
+     * @hide
+     */
+    public boolean freezeRecentTasksReordering() {
+        return mFreezeRecentTasksReordering;
+    }
+
     /** @hide */
     public int getSplitScreenCreateMode() {
         return mSplitScreenCreateMode;
@@ -1501,6 +1528,9 @@ public class ActivityOptions {
         }
         if (mAvoidMoveToFront) {
             b.putBoolean(KEY_AVOID_MOVE_TO_FRONT, mAvoidMoveToFront);
+        }
+        if (mFreezeRecentTasksReordering) {
+            b.putBoolean(KEY_FREEZE_RECENT_TASKS_REORDERING, mFreezeRecentTasksReordering);
         }
         if (mSplitScreenCreateMode != SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT) {
             b.putInt(KEY_SPLIT_SCREEN_CREATE_MODE, mSplitScreenCreateMode);

@@ -78,4 +78,12 @@ public abstract class ActivityOptionsCompat {
                     }
                 });
     }
+
+    /**
+     * Sets the flag to freeze the recents task list reordering as a part of launching the activity.
+     */
+    public static ActivityOptions setFreezeRecentTasksList(ActivityOptions opts) {
+        opts.setFreezeRecentTasksReordering();
+        return opts;
+    }
 }
