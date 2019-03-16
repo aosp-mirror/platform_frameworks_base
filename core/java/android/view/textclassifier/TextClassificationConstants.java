@@ -50,6 +50,7 @@ import java.util.StringJoiner;
  * template_intent_factory_enabled                  (boolean)
  * translate_in_classification_enabled              (boolean)
  * detect_languages_from_text_enabled               (boolean)
+ * lang_id_context_settings                         (float[])
  * </pre>
  *
  * <p>
@@ -58,12 +59,14 @@ import java.util.StringJoiner;
  *
  * Example of setting the values for testing.
  * adb shell settings put global text_classifier_constants \
- *      model_dark_launch_enabled=true,smart_selection_enabled=true,\
- *      entity_list_default=phone:address
+ *      model_dark_launch_enabled=true,smart_selection_enabled=true, \
+ *      entity_list_default=phone:address, \
+ *      lang_id_context_settings=20:1.0:0.4
  * @hide
  */
 public final class TextClassificationConstants {
-    private static final String LOG_TAG = "TextClassificationConstants";
+
+    private static final String LOG_TAG = TextClassifier.DEFAULT_LOG_TAG;
 
     /**
      * Whether the smart linkify feature is enabled.
@@ -148,7 +151,6 @@ public final class TextClassificationConstants {
      * Whether to enable {@link android.view.textclassifier.TemplateIntentFactory}.
      */
     private static final String TEMPLATE_INTENT_FACTORY_ENABLED = "template_intent_factory_enabled";
-
     /**
      * Whether to enable "translate" action in classifyText.
      */
@@ -160,6 +162,20 @@ public final class TextClassificationConstants {
      */
     private static final String DETECT_LANGUAGES_FROM_TEXT_ENABLED =
             "detect_languages_from_text_enabled";
+    /**
+     * A colon(:) separated string that specifies the configuration to use when including
+     * surrounding context text in language detection queries.
+     * <p>
+     * Format= minimumTextSize<int>:penalizeRatio<float>:textScoreRatio<float>
+     * <p>
+     * e.g. 20:1.0:0.4
+     * <p>
+     * Accept all text lengths with minimumTextSize=0
+     * <p>
+     * Reject all text less than minimumTextSize with penalizeRatio=0
+     * @see {@code TextClassifierImpl#detectLanguages(String, int, int)} for reference.
+     */
+    private static final String LANG_ID_CONTEXT_SETTINGS = "lang_id_context_settings";
 
     private static final boolean LOCAL_TEXT_CLASSIFIER_ENABLED_DEFAULT = true;
     private static final boolean SYSTEM_TEXT_CLASSIFIER_ENABLED_DEFAULT = true;
@@ -205,6 +221,8 @@ public final class TextClassificationConstants {
     private static final boolean TEMPLATE_INTENT_FACTORY_ENABLED_DEFAULT = true;
     private static final boolean TRANSLATE_IN_CLASSIFICATION_ENABLED_DEFAULT = true;
     private static final boolean DETECT_LANGUAGES_FROM_TEXT_ENABLED_DEFAULT = true;
+    private static final String LANG_ID_CONTEXT_SETTINGS_DEFAULT =
+            new StringJoiner(STRING_LIST_DELIMITER).add("20").add("1.0").add("0.4").toString();
 
     private final boolean mSystemTextClassifierEnabled;
     private final boolean mLocalTextClassifierEnabled;
@@ -226,6 +244,7 @@ public final class TextClassificationConstants {
     private final boolean mTemplateIntentFactoryEnabled;
     private final boolean mTranslateInClassificationEnabled;
     private final boolean mDetectLanguagesFromTextEnabled;
+    private final float[] mLangIdContextSettings;
 
     private TextClassificationConstants(@Nullable String settings) {
         ConfigParser configParser = new ConfigParser(settings);
@@ -273,9 +292,10 @@ public final class TextClassificationConstants {
                 configParser.getInt(
                         GENERATE_LINKS_LOG_SAMPLE_RATE,
                         GENERATE_LINKS_LOG_SAMPLE_RATE_DEFAULT);
-        mEntityListDefault = parseStringList(configParser.getString(
-                ENTITY_LIST_DEFAULT,
-                ENTITY_LIST_DEFAULT_VALUE));
+        mEntityListDefault = parseStringList(
+                configParser.getString(
+                        ENTITY_LIST_DEFAULT,
+                        ENTITY_LIST_DEFAULT_VALUE));
         mEntityListNotEditable = parseStringList(
                 configParser.getString(
                         ENTITY_LIST_NOT_EDITABLE,
@@ -296,13 +316,22 @@ public final class TextClassificationConstants {
                 configParser.getFloat(
                         LANG_ID_THRESHOLD_OVERRIDE,
                         LANG_ID_THRESHOLD_OVERRIDE_DEFAULT);
-        mTemplateIntentFactoryEnabled = configParser.getBoolean(
-                TEMPLATE_INTENT_FACTORY_ENABLED,
-                TEMPLATE_INTENT_FACTORY_ENABLED_DEFAULT);
-        mTranslateInClassificationEnabled = configParser.getBoolean(
-                TRANSLATE_IN_CLASSIFICATION_ENABLED, TRANSLATE_IN_CLASSIFICATION_ENABLED_DEFAULT);
-        mDetectLanguagesFromTextEnabled = configParser.getBoolean(
-                DETECT_LANGUAGES_FROM_TEXT_ENABLED, DETECT_LANGUAGES_FROM_TEXT_ENABLED_DEFAULT);
+        mTemplateIntentFactoryEnabled =
+                configParser.getBoolean(
+                        TEMPLATE_INTENT_FACTORY_ENABLED,
+                        TEMPLATE_INTENT_FACTORY_ENABLED_DEFAULT);
+        mTranslateInClassificationEnabled =
+                configParser.getBoolean(
+                        TRANSLATE_IN_CLASSIFICATION_ENABLED,
+                        TRANSLATE_IN_CLASSIFICATION_ENABLED_DEFAULT);
+        mDetectLanguagesFromTextEnabled =
+                configParser.getBoolean(
+                        DETECT_LANGUAGES_FROM_TEXT_ENABLED,
+                        DETECT_LANGUAGES_FROM_TEXT_ENABLED_DEFAULT);
+        mLangIdContextSettings = parseFloatArray(
+                configParser,
+                LANG_ID_CONTEXT_SETTINGS,
+                LANG_ID_CONTEXT_SETTINGS_DEFAULT);
     }
 
     /** Load from a settings string. */
@@ -390,8 +419,33 @@ public final class TextClassificationConstants {
         return mDetectLanguagesFromTextEnabled;
     }
 
+    public float[] getLangIdContextSettings() {
+        return mLangIdContextSettings;
+    }
+
     private static List<String> parseStringList(String listStr) {
         return Collections.unmodifiableList(Arrays.asList(listStr.split(STRING_LIST_DELIMITER)));
+    }
+
+    private static float[] parseFloatArray(
+            ConfigParser configParser, String key, String defaultStr) {
+        final String str = configParser.getString(key, defaultStr);
+        final String[] defaultSplit = defaultStr.split(STRING_LIST_DELIMITER);
+        String[] split = str.split(STRING_LIST_DELIMITER);
+        if (split.length != defaultSplit.length) {
+            Log.v(LOG_TAG, "Error parsing " + key + " flag. Using defaults.");
+            split = defaultSplit;
+        }
+        final float[] result = new float[split.length];
+        for (int i = 0; i < split.length; i++) {
+            try {
+                result[i] = Float.parseFloat(split[i]);
+            } catch (NumberFormatException e) {
+                Log.v(LOG_TAG, "Error parsing part of " + key + " flag. Using defaults.");
+                result[i] = Float.parseFloat(defaultSplit[i]);
+            }
+        }
+        return result;
     }
 
     void dump(IndentingPrintWriter pw) {
@@ -418,6 +472,7 @@ public final class TextClassificationConstants {
         pw.printPair("isTemplateIntentFactoryEnabled", mTemplateIntentFactoryEnabled);
         pw.printPair("isTranslateInClassificationEnabled", mTranslateInClassificationEnabled);
         pw.printPair("isDetectLanguageFromTextEnabled", mDetectLanguagesFromTextEnabled);
+        pw.printPair("getLangIdContextSettings", Arrays.toString(mLangIdContextSettings));
         pw.decreaseIndent();
         pw.println();
     }

@@ -77,8 +77,6 @@ public class LegacyIntentClassificationFactoryTest {
         Intent intent = labeledIntent.intent;
         assertThat(intent.getAction()).isEqualTo(Intent.ACTION_DEFINE);
         assertThat(intent.getStringExtra(Intent.EXTRA_TEXT)).isEqualTo(TEXT);
-        assertThat(
-                intent.getBooleanExtra(TextClassifier.EXTRA_FROM_TEXT_CLASSIFIER, false)).isTrue();
     }
 
     @Test

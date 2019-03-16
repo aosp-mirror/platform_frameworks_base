@@ -23,8 +23,10 @@ import static org.testng.Assert.assertThrows;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Bundle;
+import android.view.textclassifier.FakeContextBuilder;
+import android.view.textclassifier.TextClassifier;
 
-import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
@@ -41,11 +43,15 @@ public final class LabeledIntentTest {
     private static final Intent INTENT =
             new Intent(Intent.ACTION_VIEW).setDataAndNormalize(Uri.parse("http://www.android.com"));
     private static final int REQUEST_CODE = 42;
+    private static final Bundle TEXT_LANGUAGES_BUNDLE = Bundle.EMPTY;
+
     private Context mContext;
 
     @Before
     public void setup() {
-        mContext = InstrumentationRegistry.getTargetContext();
+        mContext = new FakeContextBuilder()
+                .setIntentComponent(Intent.ACTION_VIEW, FakeContextBuilder.DEFAULT_COMPONENT)
+                .build();
     }
 
     @Test
@@ -58,8 +64,8 @@ public final class LabeledIntentTest {
                 REQUEST_CODE
         );
 
-        LabeledIntent.Result result =
-                labeledIntent.resolve(mContext, /*titleChooser*/ null);
+        LabeledIntent.Result result = labeledIntent.resolve(
+                mContext, /*titleChooser*/ null, TEXT_LANGUAGES_BUNDLE);
 
         assertThat(result).isNotNull();
         assertThat(result.remoteAction.getTitle()).isEqualTo(TITLE_WITH_ENTITY);
@@ -67,6 +73,7 @@ public final class LabeledIntentTest {
         Intent intent = result.resolvedIntent;
         assertThat(intent.getAction()).isEqualTo(intent.getAction());
         assertThat(intent.getComponent()).isNotNull();
+        assertThat(intent.hasExtra(TextClassifier.EXTRA_FROM_TEXT_CLASSIFIER)).isTrue();
     }
 
     @Test
@@ -79,8 +86,8 @@ public final class LabeledIntentTest {
                 REQUEST_CODE
         );
 
-        LabeledIntent.Result result =
-                labeledIntent.resolve(mContext, /*titleChooser*/ null);
+        LabeledIntent.Result result = labeledIntent.resolve(
+                mContext, /*titleChooser*/ null, TEXT_LANGUAGES_BUNDLE);
 
         assertThat(result).isNotNull();
         assertThat(result.remoteAction.getTitle()).isEqualTo(TITLE_WITHOUT_ENTITY);
@@ -100,8 +107,8 @@ public final class LabeledIntentTest {
                 REQUEST_CODE
         );
 
-        LabeledIntent.Result result =
-                labeledIntent.resolve(mContext, (labeledIntent1, resolveInfo) -> "chooser");
+        LabeledIntent.Result result = labeledIntent.resolve(
+                mContext, (labeledIntent1, resolveInfo) -> "chooser", TEXT_LANGUAGES_BUNDLE);
 
         assertThat(result).isNotNull();
         assertThat(result.remoteAction.getTitle()).isEqualTo("chooser");
@@ -121,8 +128,8 @@ public final class LabeledIntentTest {
                 REQUEST_CODE
         );
 
-        LabeledIntent.Result result =
-                labeledIntent.resolve(mContext, (labeledIntent1, resolveInfo) -> null);
+        LabeledIntent.Result result = labeledIntent.resolve(
+                mContext, (labeledIntent1, resolveInfo) -> null, TEXT_LANGUAGES_BUNDLE);
 
         assertThat(result).isNotNull();
         assertThat(result.remoteAction.getTitle()).isEqualTo(TITLE_WITHOUT_ENTITY);
@@ -148,15 +155,16 @@ public final class LabeledIntentTest {
 
     @Test
     public void resolve_noIntentHandler() {
-        Intent intent = new Intent("some.thing.does.not.exist");
+        // See setup(). mContext can only resolve Intent.ACTION_VIEW.
+        Intent unresolvableIntent = new Intent(Intent.ACTION_TRANSLATE);
         LabeledIntent labeledIntent = new LabeledIntent(
                 TITLE_WITHOUT_ENTITY,
                 null,
                 DESCRIPTION,
-                intent,
+                unresolvableIntent,
                 REQUEST_CODE);
 
-        LabeledIntent.Result result = labeledIntent.resolve(mContext, null);
+        LabeledIntent.Result result = labeledIntent.resolve(mContext, null, null);
 
         assertThat(result).isNull();
     }

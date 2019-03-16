@@ -24,9 +24,12 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.graphics.drawable.Icon;
+import android.os.Bundle;
 import android.text.TextUtils;
+import android.view.textclassifier.ExtrasUtils;
 import android.view.textclassifier.Log;
 import android.view.textclassifier.TextClassification;
+import android.view.textclassifier.TextClassifier;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
@@ -87,10 +90,16 @@ public final class LabeledIntent {
 
     /**
      * Return the resolved result.
+     *
+     * @param context the context to resolve the result's intent and action
+     * @param titleChooser for choosing an action title
+     * @param textLanguagesBundle containing language detection information
      */
     @Nullable
     public Result resolve(
-            Context context, @Nullable TitleChooser titleChooser) {
+            Context context,
+            @Nullable TitleChooser titleChooser,
+            @Nullable Bundle textLanguagesBundle) {
         final PackageManager pm = context.getPackageManager();
         final ResolveInfo resolveInfo = pm.resolveActivity(intent, 0);
 
@@ -106,6 +115,10 @@ public final class LabeledIntent {
         }
         Intent resolvedIntent = new Intent(intent);
         resolvedIntent.setComponent(new ComponentName(packageName, className));
+        resolvedIntent.putExtra(
+                TextClassifier.EXTRA_FROM_TEXT_CLASSIFIER,
+                getFromTextClassifierExtra(textLanguagesBundle));
+
         boolean shouldShowIcon = false;
         Icon icon = null;
         if (!"android".equals(packageName)) {
@@ -117,23 +130,30 @@ public final class LabeledIntent {
         }
         if (icon == null) {
             // RemoteAction requires that there be an icon.
-            icon = Icon.createWithResource("android",
-                    com.android.internal.R.drawable.ic_more_items);
+            icon = Icon.createWithResource(
+                    "android", com.android.internal.R.drawable.ic_more_items);
         }
         final PendingIntent pendingIntent =
                 TextClassification.createPendingIntent(context, resolvedIntent, requestCode);
-        if (titleChooser == null) {
-            titleChooser = DEFAULT_TITLE_CHOOSER;
-        }
+        titleChooser = titleChooser == null ? DEFAULT_TITLE_CHOOSER : titleChooser;
         CharSequence title = titleChooser.chooseTitle(this, resolveInfo);
         if (TextUtils.isEmpty(title)) {
             Log.w(TAG, "Custom titleChooser return null, fallback to the default titleChooser");
             title = DEFAULT_TITLE_CHOOSER.chooseTitle(this, resolveInfo);
         }
-        final RemoteAction action =
-                new RemoteAction(icon, title, description, pendingIntent);
+        final RemoteAction action = new RemoteAction(icon, title, description, pendingIntent);
         action.setShouldShowIcon(shouldShowIcon);
         return new Result(resolvedIntent, action);
+    }
+
+    private Bundle getFromTextClassifierExtra(@Nullable Bundle textLanguagesBundle) {
+        if (textLanguagesBundle != null) {
+            final Bundle bundle = new Bundle();
+            ExtrasUtils.putTextLanguagesExtra(bundle, textLanguagesBundle);
+            return bundle;
+        } else {
+            return Bundle.EMPTY;
+        }
     }
 
     /**

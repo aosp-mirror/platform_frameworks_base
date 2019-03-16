@@ -32,6 +32,7 @@ import android.text.SpannableString;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.google.common.truth.Truth;
 
@@ -41,7 +42,6 @@ import org.hamcrest.Matcher;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -53,22 +53,10 @@ import java.util.List;
  * Tests are skipped if such a textclassifier does not exist.
  */
 @SmallTest
-@RunWith(Parameterized.class)
+@RunWith(AndroidJUnit4.class)
 public class TextClassifierTest {
-    private static final String LOCAL = "local";
-    private static final String SYSTEM = "system";
 
-    @Parameterized.Parameters(name = "{0}")
-    public static Iterable<Object> textClassifierTypes() {
-        return Arrays.asList(LOCAL);
-
-        // TODO: The following will fail on any device that specifies a no-op TextClassifierService.
-        // Enable when we can set a specified TextClassifierService for testing.
-        // return Arrays.asList(LOCAL, SYSTEM);
-    }
-
-    @Parameterized.Parameter
-    public String mTextClassifierType;
+    // TODO: Implement TextClassifierService testing.
 
     private static final TextClassificationConstants TC_CONSTANTS =
             TextClassificationConstants.loadFromString("");
@@ -83,8 +71,7 @@ public class TextClassifierTest {
     public void setup() {
         mContext = InstrumentationRegistry.getTargetContext();
         mTcm = mContext.getSystemService(TextClassificationManager.class);
-        mClassifier = mTcm.getTextClassifier(
-                mTextClassifierType.equals(LOCAL) ? TextClassifier.LOCAL : TextClassifier.SYSTEM);
+        mClassifier = mTcm.getTextClassifier(TextClassifier.LOCAL);
     }
 
     @Test
@@ -278,6 +265,8 @@ public class TextClassifierTest {
         assertEquals("ja", ExtrasUtils.getEntityType(foreignLanguageInfo));
         assertTrue(ExtrasUtils.getScore(foreignLanguageInfo) >= 0);
         assertTrue(ExtrasUtils.getScore(foreignLanguageInfo) <= 1);
+        assertTrue(intent.hasExtra(TextClassifier.EXTRA_FROM_TEXT_CLASSIFIER));
+        assertEquals("ja", ExtrasUtils.getTopLanguage(intent).getLanguage());
 
         LocaleList.setDefault(originalLocales);
     }

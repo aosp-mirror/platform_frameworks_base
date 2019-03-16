@@ -21,6 +21,7 @@ import static com.google.common.truth.Truth.assertWithMessage;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -48,7 +49,8 @@ public class TextClassificationConstantsTest {
                 + "entity_list_editable=date:datetime,"
                 + "in_app_conversation_action_types_default=text_reply,"
                 + "notification_conversation_action_types_default=send_email:call_phone,"
-                + "lang_id_threshold_override=0.3";
+                + "lang_id_threshold_override=0.3,"
+                + "lang_id_context_settings=10:1:0.5";
         final TextClassificationConstants constants =
                 TextClassificationConstants.loadFromString(s);
 
@@ -91,6 +93,8 @@ public class TextClassificationConstantsTest {
                 .containsExactly("send_email", "call_phone");
         assertWithMessage("lang_id_threshold_override")
                 .that(constants.getLangIdThresholdOverride()).isWithin(EPSILON).of(0.3f);
+        Assert.assertArrayEquals("lang_id_context_settings",
+                constants.getLangIdContextSettings(), new float[]{10, 1, 0.5f}, EPSILON);
     }
 
     @Test
@@ -111,7 +115,8 @@ public class TextClassificationConstantsTest {
                 + "entity_list_editable=flight,"
                 + "in_app_conversation_action_types_default=view_map:track_flight,"
                 + "notification_conversation_action_types_default=share_location,"
-                + "lang_id_threshold_override=2";
+                + "lang_id_threshold_override=2,"
+                + "lang_id_context_settings=30:0.5:0.3";
         final TextClassificationConstants constants =
                 TextClassificationConstants.loadFromString(s);
 
@@ -154,6 +159,8 @@ public class TextClassificationConstantsTest {
                 .containsExactly("share_location");
         assertWithMessage("lang_id_threshold_override")
                 .that(constants.getLangIdThresholdOverride()).isWithin(EPSILON).of(2f);
+        Assert.assertArrayEquals("lang_id_context_settings",
+                constants.getLangIdContextSettings(), new float[]{30, 0.5f, 0.3f}, EPSILON);
     }
 
     @Test
@@ -204,5 +211,7 @@ public class TextClassificationConstantsTest {
                         "add_contact", "copy");
         assertWithMessage("lang_id_threshold_override")
                 .that(constants.getLangIdThresholdOverride()).isWithin(EPSILON).of(-1f);
+        Assert.assertArrayEquals("lang_id_context_settings",
+                constants.getLangIdContextSettings(), new float[]{20, 1, 0.4f}, EPSILON);
     }
 }

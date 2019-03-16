@@ -19,7 +19,6 @@ import static com.google.common.truth.Truth.assertThat;
 
 import android.content.Intent;
 import android.net.Uri;
-import android.view.textclassifier.TextClassifier;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -102,7 +101,6 @@ public class TemplateIntentFactoryTest {
         assertThat(intent.getPackage()).isNull();
         assertThat(intent.getStringExtra(KEY_ONE)).isEqualTo(VALUE_ONE);
         assertThat(intent.getIntExtra(KEY_TWO, 0)).isEqualTo(VALUE_TWO);
-        assertThat(intent.hasExtra(TextClassifier.EXTRA_FROM_TEXT_CLASSIFIER)).isTrue();
     }
 
     @Test
@@ -161,7 +159,6 @@ public class TemplateIntentFactoryTest {
         assertThat(intent.getFlags()).isEqualTo(0);
         assertThat(intent.getCategories()).isNull();
         assertThat(intent.getPackage()).isNull();
-        assertThat(intent.hasExtra(TextClassifier.EXTRA_FROM_TEXT_CLASSIFIER)).isTrue();
     }
 
     @Test

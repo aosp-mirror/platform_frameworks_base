@@ -44,8 +44,7 @@ import java.util.UUID;
 /**
  * A builder used to build a fake context for testing.
  */
-// TODO: Consider making public.
-final class FakeContextBuilder {
+public final class FakeContextBuilder {
 
     /**
      * A component name that can be used for tests.
@@ -57,7 +56,7 @@ final class FakeContextBuilder {
     private final Map<String, ComponentName> mComponents = new HashMap<>();
     private @Nullable ComponentName mAllIntentComponent;
 
-    FakeContextBuilder() {
+    public FakeContextBuilder() {
         mPackageManager = mock(PackageManager.class);
         when(mPackageManager.resolveActivity(any(Intent.class), anyInt())).thenReturn(null);
         mContext = new ContextWrapper(InstrumentationRegistry.getTargetContext()) {
