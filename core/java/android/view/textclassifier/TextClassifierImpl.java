@@ -451,6 +451,9 @@ public final class TextClassifierImpl implements TextClassifier {
                 remoteAction = labeledIntentResult.remoteAction;
                 ExtrasUtils.putActionIntent(extras, labeledIntentResult.resolvedIntent);
             }
+            ExtrasUtils.putEntitiesExtras(
+                    extras,
+                    TemplateIntentFactory.nameVariantsToBundle(nativeSuggestion.getEntityData()));
             conversationActions.add(
                     new ConversationAction.Builder(actionType)
                             .setConfidenceScore(nativeSuggestion.getScore())

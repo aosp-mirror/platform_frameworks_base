@@ -196,12 +196,12 @@ public class TextClassificationConstantsTest {
                 .that(constants.getInAppConversationActionTypes())
                 .containsExactly("text_reply", "create_reminder", "call_phone", "open_url",
                         "send_email", "send_sms", "track_flight", "view_calendar", "view_map",
-                        "add_contact");
+                        "add_contact", "copy");
         assertWithMessage("notification_conversation_action_types_default")
                 .that(constants.getNotificationConversationActionTypes())
                 .containsExactly("text_reply", "create_reminder", "call_phone", "open_url",
                         "send_email", "send_sms", "track_flight", "view_calendar", "view_map",
-                        "add_contact");
+                        "add_contact", "copy");
         assertWithMessage("lang_id_threshold_override")
                 .that(constants.getLangIdThresholdOverride()).isWithin(EPSILON).of(-1f);
     }
