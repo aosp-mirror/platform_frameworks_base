@@ -19,6 +19,7 @@ package android.telecom;
 import android.annotation.SystemApi;
 import android.annotation.UnsupportedAppUsage;
 import android.bluetooth.BluetoothDevice;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.util.ArrayMap;
@@ -328,10 +329,12 @@ public final class Phone {
      * become active, and the touch screen and display will be turned off when the user's face
      * is detected to be in close proximity to the screen. This operation is a no-op on devices
      * that do not have a proximity sensor.
-     *
+     * <p>
+     * This API does not actually turn on the proximity sensor; apps should do this on their own if
+     * required.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 127403196)
     public final void setProximitySensorOn() {
         mInCallAdapter.turnProximitySensorOn();
     }
@@ -344,10 +347,12 @@ public final class Phone {
      * @param screenOnImmediately If true, the screen will be turned on immediately if it was
      * previously off. Otherwise, the screen will only be turned on after the proximity sensor
      * is no longer triggered.
-     *
+     * <p>
+     * This API does not actually turn of the proximity sensor; apps should do this on their own if
+     * required.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 127403196)
     public final void setProximitySensorOff(boolean screenOnImmediately) {
         mInCallAdapter.turnProximitySensorOff(screenOnImmediately);
     }
