@@ -14,7 +14,7 @@ import java.lang.Override;
  */
 public final class TestNode$InspectionCompanion implements InspectionCompanion<TestNode> {
     /**
-     * Set by {@link #mapProperties(PropertyMapper)} once properties have been mapped.
+     * Guards against reading properties before mapping them.
      */
     private boolean mPropertiesMapped = false;
 
@@ -25,11 +25,11 @@ public final class TestNode$InspectionCompanion implements InspectionCompanion<T
 
     @Override
     public void mapProperties(PropertyMapper propertyMapper) {
-        mIntFlagId = propertyMapper.mapIntFlag("intFlag", 0, new IntFlagMapping.Builder()
-                    .addFlag("OVERDRIVE", 0x00000002, 0x00000003)
-                    .addFlag("TURBO", 0x00000001, 0x00000003)
-                    .addFlag("WARP", 0x00000004)
-                    .build());
+        final IntFlagMapping intFlagFlagMapping = new IntFlagMapping();
+        intFlagFlagMapping.add(0x00000003, 0x00000002, "OVERDRIVE");
+        intFlagFlagMapping.add(0x00000003, 0x00000001, "TURBO");
+        intFlagFlagMapping.add(0x00000004, 0x00000004, "WARP");
+        mIntFlagId = propertyMapper.mapIntFlag("intFlag", 0, intFlagFlagMapping::get);
         mPropertiesMapped = true;
     }
 
