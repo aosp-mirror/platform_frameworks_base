@@ -163,7 +163,8 @@ public final class DeviceConfig {
     public static final String NAMESPACE_NETD_NATIVE = "netd_native";
 
     /**
-     * Namespace for all runtime related features.
+     * Namespace for all runtime related features that don't require a reboot to become active.
+     * There are no feature flags using NAMESPACE_RUNTIME.
      *
      * @hide
      */
@@ -171,7 +172,9 @@ public final class DeviceConfig {
     public static final String NAMESPACE_RUNTIME = "runtime";
 
     /**
-     * Namespace for all runtime native related features.
+     * Namespace for all runtime related features that require system properties for accessing
+     * the feature flags from C++ or Java language code. One example is the app image startup
+     * cache feature use_app_image_startup_cache.
      *
      * @hide
      */
