@@ -372,7 +372,11 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
     /**
      * Take ownership of a raw native fd in to a new ParcelFileDescriptor.
      * The returned ParcelFileDescriptor now owns the given fd, and will be
-     * responsible for closing it.  You must not close the fd yourself.
+     * responsible for closing it.
+     * <p>
+     * <strong>WARNING:</strong> You must not close the fd yourself after
+     * this call, and ownership of the file descriptor must have been
+     * released prior to the call to this function.
      *
      * @param fd The native fd that the ParcelFileDescriptor should adopt.
      *
@@ -391,6 +395,16 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
      * ParcelFileDescriptor holds a dup of the original FileDescriptor in
      * the Socket, so you must still close the Socket as well as the new
      * ParcelFileDescriptor.
+     * <p>
+     * <strong>WARNING:</strong> Prior to API level 29, this function would not
+     * actually dup the Socket's FileDescriptor, and would take a
+     * reference to the its internal FileDescriptor instead. If the Socket
+     * gets garbage collected before the ParcelFileDescriptor, this may
+     * lead to the ParcelFileDescriptor being unexpectedly closed. To avoid
+     * this, the following pattern can be used:
+     * <pre>{@code
+     *    ParcelFileDescriptor pfd = ParcelFileDescriptor.fromSocket(socket).dup();
+     * }</pre>
      *
      * @param socket The Socket whose FileDescriptor is used to create
      *               a new ParcelFileDescriptor.
@@ -414,6 +428,16 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
      * new ParcelFileDescriptor holds a dup of the original FileDescriptor in
      * the DatagramSocket, so you must still close the DatagramSocket as well
      * as the new ParcelFileDescriptor.
+     * <p>
+     * <strong>WARNING:</strong> Prior to API level 29, this function would not
+     * actually dup the DatagramSocket's FileDescriptor, and would take a
+     * reference to the its internal FileDescriptor instead. If the DatagramSocket
+     * gets garbage collected before the ParcelFileDescriptor, this may
+     * lead to the ParcelFileDescriptor being unexpectedly closed. To avoid
+     * this, the following pattern can be used:
+     * <pre>{@code
+     *    ParcelFileDescriptor pfd = ParcelFileDescriptor.fromDatagramSocket(socket).dup();
+     * }</pre>
      *
      * @param datagramSocket The DatagramSocket whose FileDescriptor is used
      *               to create a new ParcelFileDescriptor.
@@ -651,6 +675,9 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
      * Return the native fd int for this ParcelFileDescriptor.  The
      * ParcelFileDescriptor still owns the fd, and it still must be closed
      * through this API.
+     * <p>
+     * <strong>WARNING:</strong> Do not call close on the return value of this
+     * function or pass it to a function that assumes ownership of the fd.
      */
     public int getFd() {
         if (mWrapped != null) {
