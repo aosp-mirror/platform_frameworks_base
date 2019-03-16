@@ -312,7 +312,7 @@ package android.app {
   public class AppOpsManager {
     method @RequiresPermission(android.Manifest.permission.GET_APP_OPS_STATS) public void getHistoricalOps(@NonNull android.app.AppOpsManager.HistoricalOpsRequest, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<android.app.AppOpsManager.HistoricalOps>);
     method public static String[] getOpStrs();
-    method @Deprecated @RequiresPermission(android.Manifest.permission.GET_APP_OPS_STATS) public java.util.List<android.app.AppOpsManager.PackageOps> getOpsForPackage(int, String, int[]);
+    method @Deprecated @NonNull @RequiresPermission(android.Manifest.permission.GET_APP_OPS_STATS) public java.util.List<android.app.AppOpsManager.PackageOps> getOpsForPackage(int, @NonNull String, @Nullable int[]);
     method @NonNull @RequiresPermission(android.Manifest.permission.GET_APP_OPS_STATS) public java.util.List<android.app.AppOpsManager.PackageOps> getOpsForPackage(int, @NonNull String, @Nullable java.lang.String...);
     method @NonNull @RequiresPermission(android.Manifest.permission.GET_APP_OPS_STATS) public java.util.List<android.app.AppOpsManager.PackageOps> getPackagesForOps(@Nullable String[]);
     method public static int opToDefaultMode(@NonNull String);
@@ -465,7 +465,7 @@ package android.app {
 
   public static final class AppOpsManager.PackageOps implements android.os.Parcelable {
     method public int describeContents();
-    method public java.util.List<android.app.AppOpsManager.OpEntry> getOps();
+    method @NonNull public java.util.List<android.app.AppOpsManager.OpEntry> getOps();
     method @NonNull public String getPackageName();
     method public int getUid();
     method public void writeToParcel(android.os.Parcel, int);
