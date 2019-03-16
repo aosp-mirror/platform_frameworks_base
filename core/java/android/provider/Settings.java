@@ -5217,6 +5217,16 @@ public final class Settings {
         public static final Validator STATUS_BAR_CLOCK_SECONDS_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
+         * Display cutout
+         * @hide
+         */
+        public static final String DISPLAY_CUTOUT_HIDDEN = "display_cutout_hidden";
+
+        /** @hide */
+        private static final Validator DISPLAY_CUTOUT_HIDDEN_VALIDATOR = new
+                SettingsValidators.InclusiveIntegerRangeValidator(0, 1);
+
+        /**
          * IMPORTANT: If you add a new public settings you also have to add it to
          * PUBLIC_SETTINGS below. If the new setting is hidden you have to add
          * it to PRIVATE_SETTINGS below. Also add a validator that can validate
@@ -5474,6 +5484,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(NETWORK_TRAFFIC_UNITS);
             PRIVATE_SETTINGS.add(NETWORK_TRAFFIC_SHOW_UNITS);
             PRIVATE_SETTINGS.add(STATUS_BAR_CLOCK_SECONDS);
+            PRIVATE_SETTINGS.add(DISPLAY_CUTOUT_HIDDEN);
         }
 
         /**
@@ -5634,6 +5645,7 @@ public final class Settings {
             VALIDATORS.put(NETWORK_TRAFFIC_UNITS, NETWORK_TRAFFIC_UNITS_VALIDATOR);
             VALIDATORS.put(NETWORK_TRAFFIC_SHOW_UNITS, NETWORK_TRAFFIC_SHOW_UNITS_VALIDATOR);
             VALIDATORS.put(STATUS_BAR_CLOCK_SECONDS, STATUS_BAR_CLOCK_SECONDS_VALIDATOR);
+            VALIDATORS.put(DISPLAY_CUTOUT_HIDDEN, DISPLAY_CUTOUT_HIDDEN_VALIDATOR);
         }
 
         /**
