@@ -52,9 +52,6 @@ namespace renderthread {
 // using just a few large reads.
 static const size_t EVENT_BUFFER_SIZE = 100;
 
-// Slight delay to give the UI time to push us a new frame before we replay
-static const nsecs_t DISPATCH_FRAME_CALLBACKS_DELAY = milliseconds_to_nanoseconds(4);
-
 static bool gHasRenderThreadInstance = false;
 
 static JVMAttachHook gOnStartHook = nullptr;
@@ -171,6 +168,7 @@ void RenderThread::initThreadLocals() {
     mDisplayInfo = DeviceInfo::get()->displayInfo();
     nsecs_t frameIntervalNanos = static_cast<nsecs_t>(1000000000 / mDisplayInfo.fps);
     mTimeLord.setFrameInterval(frameIntervalNanos);
+    mDispatchFrameDelay = static_cast<nsecs_t>(frameIntervalNanos * .25f);
     initializeDisplayEventReceiver();
     mEglManager = new EglManager();
     mRenderState = new RenderState(*this);
@@ -311,7 +309,7 @@ void RenderThread::drainDisplayEventQueue() {
         if (mTimeLord.vsyncReceived(vsyncEvent) && !mFrameCallbackTaskPending) {
             ATRACE_NAME("queue mFrameCallbackTask");
             mFrameCallbackTaskPending = true;
-            nsecs_t runAt = (vsyncEvent + DISPATCH_FRAME_CALLBACKS_DELAY);
+            nsecs_t runAt = (vsyncEvent + mDispatchFrameDelay);
             queue().postAt(runAt, [this]() { dispatchFrameCallbacks(); });
         }
     }
