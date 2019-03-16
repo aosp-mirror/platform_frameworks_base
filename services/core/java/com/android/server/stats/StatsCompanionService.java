@@ -24,6 +24,7 @@ import static com.android.internal.util.Preconditions.checkNotNull;
 import static com.android.server.am.MemoryStatUtil.readCmdlineFromProcfs;
 import static com.android.server.am.MemoryStatUtil.readMemoryStatFromProcfs;
 import static com.android.server.am.MemoryStatUtil.readRssHighWaterMarkFromProcfs;
+import static com.android.server.am.MemoryStatUtil.readSystemIonHeapSizeFromDebugfs;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -1182,6 +1183,15 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         SystemProperties.set("sys.rss_hwm_reset.on", "1");
     }
 
+    private void pullSystemIonHeapSize(
+            int tagId, long elapsedNanos, long wallClockNanos,
+            List<StatsLogEventWrapper> pulledData) {
+        final long systemIonHeapSizeInBytes = readSystemIonHeapSizeFromDebugfs();
+        StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
+        e.writeLong(systemIonHeapSizeInBytes);
+        pulledData.add(e);
+    }
+
     private void pullBinderCallsStats(
             int tagId, long elapsedNanos, long wallClockNanos,
             List<StatsLogEventWrapper> pulledData) {
@@ -2066,6 +2076,10 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             }
             case StatsLog.PROCESS_MEMORY_HIGH_WATER_MARK: {
                 pullProcessMemoryHighWaterMark(tagId, elapsedNanos, wallClockNanos, ret);
+                break;
+            }
+            case StatsLog.SYSTEM_ION_HEAP_SIZE: {
+                pullSystemIonHeapSize(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
             case StatsLog.BINDER_CALLS: {

@@ -103,7 +103,8 @@ public class StretchAnalogClock extends View {
         final float centerY = getHeight() / 2f;
 
         final float minutesRotation = mTime.get(Calendar.MINUTE) * 6f;
-        final float hoursRotation = (mTime.get(Calendar.HOUR) * 30);
+        final float hoursRotation = mTime.get(Calendar.HOUR) * 30
+                + mTime.get(Calendar.MINUTE) * 0.5f;
 
         // Compute length of clock hands. Hour hand is 60% the length from center to edge
         // and minute hand is twice the length to make sure it extends past screen edge.

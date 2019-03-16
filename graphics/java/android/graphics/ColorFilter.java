@@ -26,8 +26,9 @@ import libcore.util.NativeAllocationRegistry;
 public class ColorFilter {
 
     private static class NoImagePreloadHolder {
-        public static final NativeAllocationRegistry sRegistry = new NativeAllocationRegistry(
-                ColorFilter.class.getClassLoader(), nativeGetFinalizer(), 50);
+        public static final NativeAllocationRegistry sRegistry =
+                NativeAllocationRegistry.createMalloced(
+                ColorFilter.class.getClassLoader(), nativeGetFinalizer());
     }
 
     /**

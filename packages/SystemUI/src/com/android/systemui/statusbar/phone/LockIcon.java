@@ -21,6 +21,7 @@ import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
+import android.graphics.drawable.Animatable2;
 import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
@@ -134,6 +135,16 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
 
             if (animation != null && isAnim) {
                 animation.forceAnimationOnUI();
+                animation.clearAnimationCallbacks();
+                animation.registerAnimationCallback(new Animatable2.AnimationCallback() {
+                    @Override
+                    public void onAnimationEnd(Drawable drawable) {
+                        if (getDrawable() == animation && state == getState()
+                                && doesAnimationLoop(iconAnimRes)) {
+                            animation.start();
+                        }
+                    }
+                });
                 animation.start();
             }
 
@@ -215,6 +226,10 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
         return mContext.getDrawable(iconRes);
     }
 
+    private boolean doesAnimationLoop(int resourceId) {
+        return resourceId == com.android.internal.R.anim.lock_scanning;
+    }
+
     private static int getAnimationResForTransition(int oldState, int newState,
             boolean wasPulsing, boolean pulsing,
             boolean wasDozing, boolean dozing) {
@@ -236,7 +251,7 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
             return com.android.internal.R.anim.lock_lock;
         } else if (newState == STATE_SCANNING_FACE) {
             return com.android.internal.R.anim.lock_scanning;
-        } else if (!wasPulsing && pulsing) {
+        } else if (!wasPulsing && pulsing && newState != STATE_LOCK_OPEN) {
             return com.android.internal.R.anim.lock_in;
         }
         return -1;

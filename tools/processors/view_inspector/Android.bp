@@ -8,6 +8,7 @@ java_plugin {
 
     static_libs: [
         "javapoet",
+        "stub-annotations",
     ],
 
     use_tools_jar: true,

@@ -325,30 +325,18 @@ class ResolverComparator implements Comparator<ResolvedComponentInfo> {
             }
         }
 
-        final boolean lPinned = lhsp.isPinned();
-        final boolean rPinned = rhsp.isPinned();
+        if (mStats != null) {
+            final ResolverTarget lhsTarget = mTargetsDict.get(new ComponentName(
+                    lhs.activityInfo.packageName, lhs.activityInfo.name));
+            final ResolverTarget rhsTarget = mTargetsDict.get(new ComponentName(
+                    rhs.activityInfo.packageName, rhs.activityInfo.name));
 
-        if (lPinned && !rPinned) {
-            return -1;
-        } else if (!lPinned && rPinned) {
-            return 1;
-        }
-
-        // Pinned items stay stable within a normal lexical sort and ignore scoring.
-        if (!lPinned && !rPinned) {
-            if (mStats != null) {
-                final ResolverTarget lhsTarget = mTargetsDict.get(new ComponentName(
-                        lhs.activityInfo.packageName, lhs.activityInfo.name));
-                final ResolverTarget rhsTarget = mTargetsDict.get(new ComponentName(
-                        rhs.activityInfo.packageName, rhs.activityInfo.name));
-
-                if (lhsTarget != null && rhsTarget != null) {
-                    final int selectProbabilityDiff = Float.compare(
+            if (lhsTarget != null && rhsTarget != null) {
+                final int selectProbabilityDiff = Float.compare(
                         rhsTarget.getSelectProbability(), lhsTarget.getSelectProbability());
 
-                    if (selectProbabilityDiff != 0) {
-                        return selectProbabilityDiff > 0 ? 1 : -1;
-                    }
+                if (selectProbabilityDiff != 0) {
+                    return selectProbabilityDiff > 0 ? 1 : -1;
                 }
             }
         }

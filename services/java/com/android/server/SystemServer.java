@@ -1247,6 +1247,14 @@ public final class SystemServer {
             mSystemServiceManager.startService(ClipboardService.class);
             traceEnd();
 
+            traceBeginAndSlog("InitNetworkStackClient");
+            try {
+                NetworkStackClient.getInstance().init();
+            } catch (Throwable e) {
+                reportWtf("initializing NetworkStackClient", e);
+            }
+            traceEnd();
+
             traceBeginAndSlog("StartNetworkManagementService");
             try {
                 networkManagement = NetworkManagementService.create(context);

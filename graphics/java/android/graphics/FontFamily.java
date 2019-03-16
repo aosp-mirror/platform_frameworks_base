@@ -44,13 +44,15 @@ public class FontFamily {
 
     private static String TAG = "FontFamily";
 
-    private static final NativeAllocationRegistry sBuilderRegistry = new NativeAllocationRegistry(
-            FontFamily.class.getClassLoader(), nGetBuilderReleaseFunc(), 64);
+    private static final NativeAllocationRegistry sBuilderRegistry =
+            NativeAllocationRegistry.createMalloced(
+            FontFamily.class.getClassLoader(), nGetBuilderReleaseFunc());
 
     private @Nullable Runnable mNativeBuilderCleaner;
 
-    private static final NativeAllocationRegistry sFamilyRegistry = new NativeAllocationRegistry(
-            FontFamily.class.getClassLoader(), nGetFamilyReleaseFunc(), 64);
+    private static final NativeAllocationRegistry sFamilyRegistry =
+            NativeAllocationRegistry.createMalloced(
+            FontFamily.class.getClassLoader(), nGetFamilyReleaseFunc());
 
     /**
      * @hide

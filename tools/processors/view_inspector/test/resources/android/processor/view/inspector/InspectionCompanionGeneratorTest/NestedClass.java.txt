@@ -13,7 +13,7 @@ import java.lang.Override;
  */
 public final class Outer$Inner$InspectionCompanion implements InspectionCompanion<Outer.Inner> {
     /**
-     * Set by {@link #mapProperties(PropertyMapper)} once properties have been mapped.
+     * Guards against reading properties before mapping them.
      */
     private boolean mPropertiesMapped = false;
 

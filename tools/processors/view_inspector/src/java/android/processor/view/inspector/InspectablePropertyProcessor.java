@@ -21,6 +21,8 @@ import android.processor.view.inspector.InspectableClassModel.IntEnumEntry;
 import android.processor.view.inspector.InspectableClassModel.IntFlagEntry;
 import android.processor.view.inspector.InspectableClassModel.Property;
 
+import androidx.annotation.NonNull;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -45,9 +47,9 @@ import javax.lang.model.type.TypeMirror;
  * @see android.view.inspector.InspectableProperty
  */
 public final class InspectablePropertyProcessor implements ModelProcessor {
-    private final String mQualifiedName;
-    private final ProcessingEnvironment mProcessingEnv;
-    private final AnnotationUtils mAnnotationUtils;
+    private final @NonNull String mQualifiedName;
+    private final @NonNull ProcessingEnvironment mProcessingEnv;
+    private final @NonNull AnnotationUtils mAnnotationUtils;
 
     /**
      * Regex that matches methods names of the form {@code #getValue()}.
@@ -130,15 +132,15 @@ public final class InspectablePropertyProcessor implements ModelProcessor {
      * @param processingEnv           The processing environment from the parent processor
      */
     public InspectablePropertyProcessor(
-            String annotationQualifiedName,
-            ProcessingEnvironment processingEnv) {
+            @NonNull String annotationQualifiedName,
+            @NonNull ProcessingEnvironment processingEnv) {
         mQualifiedName = annotationQualifiedName;
         mProcessingEnv = processingEnv;
         mAnnotationUtils = new AnnotationUtils(processingEnv);
     }
 
     @Override
-    public void process(Element element, InspectableClassModel model) {
+    public void process(@NonNull Element element, @NonNull InspectableClassModel model) {
         try {
             final AnnotationMirror annotation =
                     mAnnotationUtils.exactlyOneMirror(mQualifiedName, element);
@@ -169,7 +171,10 @@ public final class InspectablePropertyProcessor implements ModelProcessor {
      * @return A property for the getter and annotation
      * @throws ProcessingException If the supplied data is invalid and a property cannot be modeled
      */
-    private Property buildProperty(Element accessor, AnnotationMirror annotation) {
+    @NonNull
+    private Property buildProperty(
+            @NonNull Element accessor,
+            @NonNull AnnotationMirror annotation) {
         final Property property;
         final Optional<String> nameFromAnnotation = mAnnotationUtils
                 .typedValueByName("name", String.class, accessor, annotation);
@@ -227,7 +232,7 @@ public final class InspectablePropertyProcessor implements ModelProcessor {
      * @param element The element to check
      * @throws ProcessingException If the element's modifiers are invalid
      */
-    private void validateModifiers(Element element) {
+    private void validateModifiers(@NonNull Element element) {
         final Set<Modifier> modifiers = element.getModifiers();
 
         if (!modifiers.contains(Modifier.PUBLIC)) {
@@ -256,7 +261,8 @@ public final class InspectablePropertyProcessor implements ModelProcessor {
      * @return An {@link ExecutableElement} that represents a getter method.
      * @throws ProcessingException if the element isn't a getter
      */
-    private ExecutableElement ensureGetter(Element element) {
+    @NonNull
+    private ExecutableElement ensureGetter(@NonNull Element element) {
         if (element.getKind() != ElementKind.METHOD) {
             throw new ProcessingException(
                     String.format("Expected a method, got a %s", element.getKind()),
@@ -300,10 +306,10 @@ public final class InspectablePropertyProcessor implements ModelProcessor {
      * @throws ProcessingException If the property type cannot be resolved or is invalid
      * @see android.view.inspector.InspectableProperty#valueType()
      */
+    @NonNull
     private Property.Type determinePropertyType(
-            Element accessor,
-            AnnotationMirror annotation) {
-
+            @NonNull Element accessor,
+            @NonNull AnnotationMirror annotation) {
         final String valueType = mAnnotationUtils
                 .untypedValueByName("valueType", accessor, annotation)
                 .map(Object::toString)
@@ -437,7 +443,8 @@ public final class InspectablePropertyProcessor implements ModelProcessor {
      * @return The return or field type of the element
      * @throws ProcessingException If the element is not a field or a method
      */
-    private TypeMirror extractReturnOrFieldType(Element element) {
+    @NonNull
+    private TypeMirror extractReturnOrFieldType(@NonNull Element element) {
         switch (element.getKind()) {
             case FIELD:
                 return element.asType();
@@ -460,7 +467,10 @@ public final class InspectablePropertyProcessor implements ModelProcessor {
      * @return The property type returned by the getter
      * @throws ProcessingException If the return type is not a primitive or an object
      */
-    private Property.Type convertTypeMirrorToPropertyType(TypeMirror typeMirror, Element element) {
+    @NonNull
+    private Property.Type convertTypeMirrorToPropertyType(
+            @NonNull TypeMirror typeMirror,
+            @NonNull Element element) {
         switch (unboxType(typeMirror)) {
             case BOOLEAN:
                 return Property.Type.BOOLEAN;
@@ -503,10 +513,10 @@ public final class InspectablePropertyProcessor implements ModelProcessor {
      * @throws ProcessingException If the return type is not an int
      */
     private static void requirePackedIntToBeInt(
-            String typeName,
-            Property.Type returnType,
-            Element accessor,
-            AnnotationMirror annotation) {
+            @NonNull String typeName,
+            @NonNull Property.Type returnType,
+            @NonNull Element accessor,
+            @NonNull AnnotationMirror annotation) {
         if (returnType != Property.Type.INT) {
             throw new ProcessingException(
                     String.format(
@@ -528,7 +538,7 @@ public final class InspectablePropertyProcessor implements ModelProcessor {
      * @param accessor The getter or field to query
      * @return True if the getter has a color annotation, false otherwise
      */
-    private boolean hasColorAnnotation(Element accessor) {
+    private boolean hasColorAnnotation(@NonNull Element accessor) {
         switch (unboxType(extractReturnOrFieldType(accessor))) {
             case INT:
                 for (String name : COLOR_INT_ANNOTATION_NAMES) {
@@ -555,7 +565,7 @@ public final class InspectablePropertyProcessor implements ModelProcessor {
      * @param accessor The getter or field to query
      * @return True if the accessor is an integer and has a resource ID annotation, false otherwise
      */
-    private boolean hasResourceIdAnnotation(Element accessor) {
+    private boolean hasResourceIdAnnotation(@NonNull Element accessor) {
         if (unboxType(extractReturnOrFieldType(accessor)) == TypeKind.INT) {
             for (String name : RESOURCE_ID_ANNOTATION_NAMES) {
                 if (mAnnotationUtils.hasAnnotation(accessor, name)) {
@@ -581,7 +591,8 @@ public final class InspectablePropertyProcessor implements ModelProcessor {
      * @param getter An element representing a getter
      * @return A string property name
      */
-    private String inferPropertyNameFromGetter(ExecutableElement getter) {
+    @NonNull
+    private String inferPropertyNameFromGetter(@NonNull ExecutableElement getter) {
         final String name = getter.getSimpleName().toString();
 
         if (GETTER_GET_PREFIX.matcher(name).find()) {
@@ -600,7 +611,6 @@ public final class InspectablePropertyProcessor implements ModelProcessor {
      * {@link android.view.inspector.InspectableProperty.EnumMap} annotations into
      * {@link IntEnumEntry} objects. Further validation should be handled elsewhere
      *
-     * @see android.view.inspector.IntEnumMapping
      * @see android.view.inspector.InspectableProperty#enumMapping()
      * @param accessor The accessor of the property, used for exceptions
      * @param annotation The {@link android.view.inspector.InspectableProperty} annotation to
@@ -608,9 +618,10 @@ public final class InspectablePropertyProcessor implements ModelProcessor {
      * @return A list of int enum entries, in the order specified in source
      * @throws ProcessingException if mapping doesn't exist or is invalid
      */
+    @NonNull
     private List<IntEnumEntry> processEnumMapping(
-            Element accessor,
-            AnnotationMirror annotation) {
+            @NonNull Element accessor,
+            @NonNull AnnotationMirror annotation) {
         List<AnnotationMirror> enumAnnotations = mAnnotationUtils.typedArrayValuesByName(
                 "enumMapping", AnnotationMirror.class, accessor, annotation);
         List<IntEnumEntry> enumEntries = new ArrayList<>(enumAnnotations.size());
@@ -623,23 +634,19 @@ public final class InspectablePropertyProcessor implements ModelProcessor {
         for (AnnotationMirror enumAnnotation : enumAnnotations) {
             final String name = mAnnotationUtils.typedValueByName(
                     "name", String.class, accessor, enumAnnotation)
-                    .orElseThrow(() -> {
-                        throw new ProcessingException(
-                                "Name is required for @EnumMap",
-                                accessor,
-                                enumAnnotation);
-                    });
+                    .orElseThrow(() -> new ProcessingException(
+                            "Name is required for @EnumMap",
+                            accessor,
+                            enumAnnotation));
 
             final int value = mAnnotationUtils.typedValueByName(
                     "value", Integer.class, accessor, enumAnnotation)
-                    .orElseThrow(() -> {
-                        throw new ProcessingException(
-                                "Value is required for @EnumMap",
-                                accessor,
-                                enumAnnotation);
-                    });
+                    .orElseThrow(() -> new ProcessingException(
+                            "Value is required for @EnumMap",
+                            accessor,
+                            enumAnnotation));
 
-            enumEntries.add(new IntEnumEntry(name, value));
+            enumEntries.add(new IntEnumEntry(value, name));
         }
 
         return enumEntries;
@@ -660,9 +667,10 @@ public final class InspectablePropertyProcessor implements ModelProcessor {
      * @return A list of int flags entries, in the order specified in source
      * @throws ProcessingException if mapping doesn't exist or is invalid
      */
+    @NonNull
     private List<IntFlagEntry> processFlagMapping(
-            Element accessor,
-            AnnotationMirror annotation) {
+            @NonNull Element accessor,
+            @NonNull AnnotationMirror annotation) {
         List<AnnotationMirror> flagAnnotations = mAnnotationUtils.typedArrayValuesByName(
                 "flagMapping", AnnotationMirror.class, accessor, annotation);
         List<IntFlagEntry> flagEntries = new ArrayList<>(flagAnnotations.size());
@@ -675,29 +683,25 @@ public final class InspectablePropertyProcessor implements ModelProcessor {
         for (AnnotationMirror flagAnnotation : flagAnnotations) {
             final String name = mAnnotationUtils.typedValueByName(
                     "name", String.class, accessor, flagAnnotation)
-                    .orElseThrow(() -> {
-                        throw new ProcessingException(
-                                "Name is required for @FlagMap",
-                                accessor,
-                                flagAnnotation);
-                    });
+                    .orElseThrow(() -> new ProcessingException(
+                            "Name is required for @FlagMap",
+                            accessor,
+                            flagAnnotation));
 
             final int target = mAnnotationUtils.typedValueByName(
                     "target", Integer.class, accessor, flagAnnotation)
-                    .orElseThrow(() -> {
-                        throw new ProcessingException(
-                                "Target is required for @FlagMap",
-                                accessor,
-                                flagAnnotation);
-                    });
+                    .orElseThrow(() -> new ProcessingException(
+                            "Target is required for @FlagMap",
+                            accessor,
+                            flagAnnotation));
 
             final Optional<Integer> mask = mAnnotationUtils.typedValueByName(
                     "mask", Integer.class, accessor, flagAnnotation);
 
             if (mask.isPresent()) {
-                flagEntries.add(new IntFlagEntry(name, target, mask.get()));
+                flagEntries.add(new IntFlagEntry(mask.get(), target, name));
             } else {
-                flagEntries.add(new IntFlagEntry(name, target));
+                flagEntries.add(new IntFlagEntry(target, name));
             }
         }
 
@@ -710,7 +714,7 @@ public final class InspectablePropertyProcessor implements ModelProcessor {
      * @param type The type mirror to check
      * @return True if the type is a boolean
      */
-    private boolean isBoolean(TypeMirror type) {
+    private boolean isBoolean(@NonNull TypeMirror type) {
         if (type.getKind() == TypeKind.DECLARED) {
             return mProcessingEnv.getTypeUtils().unboxedType(type).getKind() == TypeKind.BOOLEAN;
         } else {
@@ -724,7 +728,8 @@ public final class InspectablePropertyProcessor implements ModelProcessor {
      * @param typeMirror The type mirror to unbox
      * @return The same type mirror, or an unboxed primitive version
      */
-    private TypeKind unboxType(TypeMirror typeMirror) {
+    @NonNull
+    private TypeKind unboxType(@NonNull TypeMirror typeMirror) {
         final TypeKind typeKind = typeMirror.getKind();
 
         if (typeKind.isPrimitive()) {
@@ -746,7 +751,7 @@ public final class InspectablePropertyProcessor implements ModelProcessor {
      * @param typeMirror The type mirror to test
      * @return True if it represents a subclass of color, false otherwise
      */
-    private boolean isColorType(TypeMirror typeMirror) {
+    private boolean isColorType(@NonNull TypeMirror typeMirror) {
         final TypeElement colorType = mProcessingEnv
                 .getElementUtils()
                 .getTypeElement("android.graphics.Color");

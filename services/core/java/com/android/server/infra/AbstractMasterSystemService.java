@@ -126,7 +126,25 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
     private final SparseArray<S> mServicesCache = new SparseArray<>();
 
     /**
+     * Whether the per-user service should be removed from the cache when its apk is updated.
+     */
+    private final boolean mRefreshServiceOnPackageUpdate;
+
+    /**
+     * Name of the service's package that was active but then was removed because its package
+     * update.
+     *
+     * <p>It's a temporary state set / used by the {@link PackageMonitor} implementation, but
+     * defined here so it can be dumped.
+     */
+    @GuardedBy("mLock")
+    private String mLastActivePackageName;
+
+    /**
      * Default constructor.
+     *
+     * <p>When using this constructor, the {@link AbstractPerUserSystemService} is removed from
+     * the cache (and re-added) when the service package is updated.
      *
      * @param context system context.
      * @param serviceNameResolver resolver for
@@ -139,7 +157,31 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
     protected AbstractMasterSystemService(@NonNull Context context,
             @Nullable ServiceNameResolver serviceNameResolver,
             @Nullable String disallowProperty) {
+        this(context, serviceNameResolver, disallowProperty,
+                /* refreshServiceOnPackageUpdate=*/ true);
+    }
+
+    /**
+     * Full constructor.
+     *
+     * @param context system context.
+     * @param serviceNameResolver resolver for
+     * {@link com.android.internal.infra.AbstractRemoteService} instances, or
+     * {@code null} when the service doesn't bind to remote services.
+     * @param disallowProperty when not {@code null}, defines a {@link UserManager} restriction that
+     *        disables the service. <b>NOTE: </b> you'll also need to add it to
+     *        {@code UserRestrictionsUtils.USER_RESTRICTIONS}.
+     * @param refreshServiceOnPackageUpdate when {@code true}, the
+     *        {@link AbstractPerUserSystemService} is removed from the cache (and re-added) when the
+     *        service package is updated; when {@code false}, the service is untouched during the
+     *        update.
+     */
+    protected AbstractMasterSystemService(@NonNull Context context,
+            @Nullable ServiceNameResolver serviceNameResolver,
+            @Nullable String disallowProperty, boolean refreshServiceOnPackageUpdate) {
         super(context);
+
+        mRefreshServiceOnPackageUpdate = refreshServiceOnPackageUpdate;
 
         mServiceNameResolver = serviceNameResolver;
         if (mServiceNameResolver != null) {
@@ -280,9 +322,6 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
                 oldService.removeSelfFromCacheLocked();
             }
             mServiceNameResolver.setTemporaryService(userId, componentName, durationMs);
-
-            // Must update the service on cache so its initialization code is triggered
-            updateCachedServiceLocked(userId);
         }
     }
 
@@ -553,6 +592,8 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
             final int size = mServicesCache.size();
             pw.print(prefix); pw.print("Debug: "); pw.print(realDebug);
             pw.print(" Verbose: "); pw.println(realVerbose);
+            pw.print(" Refresh on package update: "); pw.println(mRefreshServiceOnPackageUpdate);
+            pw.print(" Last active service on update: "); pw.println(mLastActivePackageName);
             if (mServiceNameResolver != null) {
                 pw.print(prefix); pw.print("Name resolver: ");
                 mServiceNameResolver.dumpShort(pw); pw.println();
@@ -590,21 +631,42 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
     }
 
     private void startTrackingPackageChanges() {
-        PackageMonitor monitor = new PackageMonitor() {
+        final PackageMonitor monitor = new PackageMonitor() {
+
             @Override
-            public void onSomePackagesChanged() {
+            public void onPackageUpdateStarted(String packageName, int uid) {
                 synchronized (mLock) {
-                    updateCachedServiceLocked(getChangingUserId());
+                    final String activePackageName = getActiveServicePackageNameLocked();
+                    if (packageName.equals(activePackageName)) {
+                        final int userId = getChangingUserId();
+                        if (mRefreshServiceOnPackageUpdate) {
+                            if (debug) {
+                                Slog.d(mTag, "Removing service for user " + userId
+                                        + " because package " + activePackageName
+                                        + " is being updated");
+                            }
+                            mLastActivePackageName = activePackageName;
+                            removeCachedServiceLocked(userId);
+                        } else {
+                            if (debug) {
+                                Slog.d(mTag, "Holding service for user " + userId
+                                        + " while package " + activePackageName
+                                        + " is being updated");
+                            }
+                        }
+                    }
                 }
             }
 
             @Override
             public void onPackageUpdateFinished(String packageName, int uid) {
                 synchronized (mLock) {
-                    final String activePackageName = getActiveServicePackageName();
-                    if (packageName.equals(activePackageName)) {
-                        removeCachedServiceLocked(getChangingUserId());
-                    } else {
+                    String activePackageName = getActiveServicePackageNameLocked();
+                    if (activePackageName == null) {
+                        activePackageName = mLastActivePackageName;
+                        mLastActivePackageName = null;
+                    }
+                    if (!packageName.equals(activePackageName)) {
                         handlePackageUpdateLocked(packageName);
                     }
                 }
@@ -630,7 +692,7 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
             public boolean onHandleForceStop(Intent intent, String[] packages,
                     int uid, boolean doit) {
                 synchronized (mLock) {
-                    final String activePackageName = getActiveServicePackageName();
+                    final String activePackageName = getActiveServicePackageNameLocked();
                     for (String pkg : packages) {
                         if (pkg.equals(activePackageName)) {
                             if (!doit) {
@@ -646,7 +708,9 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
             }
 
             private void handleActiveServiceRemoved(@UserIdInt int userId) {
-                removeCachedServiceLocked(userId);
+                synchronized (mLock) {
+                    removeCachedServiceLocked(userId);
+                }
                 final String serviceSettingsProperty = getServiceSettingsProperty();
                 if (serviceSettingsProperty != null) {
                     Settings.Secure.putStringForUser(getContext().getContentResolver(),
@@ -654,7 +718,7 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
                 }
             }
 
-            private String getActiveServicePackageName() {
+            private String getActiveServicePackageNameLocked() {
                 final int userId = getChangingUserId();
                 final S service = peekServiceForUserLocked(userId);
                 if (service == null) {

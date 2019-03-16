@@ -22,7 +22,6 @@ class PrivacyDialogBuilder(private val context: Context, itemsList: List<Privacy
 
     val appsAndTypes: List<Pair<PrivacyApplication, List<PrivacyType>>>
     val types: List<PrivacyType>
-    val app: PrivacyApplication?
     private val separator = context.getString(R.string.ongoing_privacy_dialog_separator)
     private val lastSeparator = context.getString(R.string.ongoing_privacy_dialog_last_separator)
 
@@ -32,8 +31,6 @@ class PrivacyDialogBuilder(private val context: Context, itemsList: List<Privacy
                 .sortedWith(compareBy({ -it.second.size }, // Sort by number of AppOps
                         { it.second.min() })) // Sort by "smallest" AppOpp (Location is largest)
         types = itemsList.map { it.privacyType }.distinct().sorted()
-        val singleApp = appsAndTypes.size == 1
-        app = if (singleApp) appsAndTypes[0].first else null
     }
 
     fun generateIconsForApp(types: List<PrivacyType>): List<Drawable> {
@@ -58,11 +55,7 @@ class PrivacyDialogBuilder(private val context: Context, itemsList: List<Privacy
     }
 
     fun getDialogTitle(): String {
-        if (app != null) {
-            return context.getString(R.string.ongoing_privacy_dialog_single_app_title, joinTypes())
-        } else {
-            return context.getString(R.string.ongoing_privacy_dialog_multiple_apps_title,
+        return context.getString(R.string.ongoing_privacy_dialog_multiple_apps_title,
                     joinTypes())
-        }
     }
 }

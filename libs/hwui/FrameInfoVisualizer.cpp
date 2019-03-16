@@ -17,6 +17,7 @@
 
 #include "IProfileRenderer.h"
 #include "utils/Color.h"
+#include "utils/TimeUtils.h"
 
 #include <cutils/compiler.h>
 #include <array>
@@ -26,22 +27,24 @@
 #define RETURN_IF_DISABLED() \
     if (CC_LIKELY(mType == ProfileType::None && !mShowDirtyRegions)) return
 
-#define PROFILE_DRAW_WIDTH 3
-#define PROFILE_DRAW_THRESHOLD_STROKE_WIDTH 2
-#define PROFILE_DRAW_DP_PER_MS 7
-
 namespace android {
 namespace uirenderer {
 
-// Must be NUM_ELEMENTS in size
-static const SkColor THRESHOLD_COLOR = Color::Green_500;
-static const SkColor BAR_FAST_MASK = 0x8FFFFFFF;
-static const SkColor BAR_JANKY_MASK = 0xDFFFFFFF;
+static constexpr auto PROFILE_DRAW_THRESHOLD_STROKE_WIDTH = 2;
+static constexpr auto PROFILE_DRAW_DP_PER_MS = 7;
 
-// We could get this from TimeLord and use the actual frame interval, but
-// this is good enough
-#define FRAME_THRESHOLD 16
-#define FRAME_THRESHOLD_NS 16000000
+struct Threshold {
+    SkColor color;
+    float percentFrametime;
+};
+
+static constexpr std::array<Threshold, 3> THRESHOLDS{
+        Threshold{.color = Color::Green_500, .percentFrametime = 0.8f},
+        Threshold{.color = Color::Lime_500, .percentFrametime = 1.0f},
+        Threshold{.color = Color::Red_500, .percentFrametime = 1.5f},
+};
+static constexpr SkColor BAR_FAST_MASK = 0x8FFFFFFF;
+static constexpr SkColor BAR_JANKY_MASK = 0xDFFFFFFF;
 
 struct BarSegment {
     FrameInfoIndex start;
@@ -64,7 +67,8 @@ static int dpToPx(int dp, float density) {
     return (int)(dp * density + 0.5f);
 }
 
-FrameInfoVisualizer::FrameInfoVisualizer(FrameInfoSource& source) : mFrameSource(source) {
+FrameInfoVisualizer::FrameInfoVisualizer(FrameInfoSource& source, nsecs_t frameInterval)
+        : mFrameSource(source), mFrameInterval(frameInterval) {
     setDensity(1);
     consumeProperties();
 }
@@ -76,7 +80,10 @@ FrameInfoVisualizer::~FrameInfoVisualizer() {
 void FrameInfoVisualizer::setDensity(float density) {
     if (CC_UNLIKELY(mDensity != density)) {
         mDensity = density;
-        mVerticalUnit = dpToPx(PROFILE_DRAW_DP_PER_MS, density);
+        // We want the vertical units to scale height relative to a baseline 16ms.
+        // This keeps the threshold lines consistent across varying refresh rates
+        mVerticalUnit = static_cast<int>(dpToPx(PROFILE_DRAW_DP_PER_MS, density) * (float)16_ms /
+                                         (float)mFrameInterval);
         mThresholdStroke = dpToPx(PROFILE_DRAW_THRESHOLD_STROKE_WIDTH, density);
     }
 }
@@ -148,7 +155,7 @@ void FrameInfoVisualizer::initializeRects(const int baseline, const int width) {
         float* rect;
         int ri;
         // Rects are LTRB
-        if (mFrameSource[fi].totalDuration() <= FRAME_THRESHOLD_NS) {
+        if (mFrameSource[fi].totalDuration() <= mFrameInterval) {
             rect = mFastRects.get();
             ri = fast_i;
             fast_i += 4;
@@ -181,7 +188,7 @@ void FrameInfoVisualizer::nextBarSegment(FrameInfoIndex start, FrameInfoIndex en
         float* rect;
         int ri;
         // Rects are LTRB
-        if (mFrameSource[fi].totalDuration() <= FRAME_THRESHOLD_NS) {
+        if (mFrameSource[fi].totalDuration() <= mFrameInterval) {
             rect = mFastRects.get();
             ri = fast_i;
             fast_i -= 4;
@@ -211,10 +218,13 @@ void FrameInfoVisualizer::drawGraph(IProfileRenderer& renderer) {
 
 void FrameInfoVisualizer::drawThreshold(IProfileRenderer& renderer) {
     SkPaint paint;
-    paint.setColor(THRESHOLD_COLOR);
-    float yLocation = renderer.getViewportHeight() - (FRAME_THRESHOLD * mVerticalUnit);
-    renderer.drawRect(0.0f, yLocation - mThresholdStroke / 2, renderer.getViewportWidth(),
-                      yLocation + mThresholdStroke / 2, paint);
+    for (auto& t : THRESHOLDS) {
+        paint.setColor(t.color);
+        float yLocation = renderer.getViewportHeight() -
+                          (ns2ms(mFrameInterval) * t.percentFrametime * mVerticalUnit);
+        renderer.drawRect(0.0f, yLocation - mThresholdStroke / 2, renderer.getViewportWidth(),
+                          yLocation + mThresholdStroke / 2, paint);
+    }
 }
 
 bool FrameInfoVisualizer::consumeProperties() {

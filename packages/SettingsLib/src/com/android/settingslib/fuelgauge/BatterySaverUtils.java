@@ -103,7 +103,7 @@ public class BatterySaverUtils {
             setBatterySaverConfirmationAcknowledged(context);
         }
 
-        if (context.getSystemService(PowerManager.class).setPowerSaveMode(enable)) {
+        if (context.getSystemService(PowerManager.class).setPowerSaveModeEnabled(enable)) {
             if (enable) {
                 final int count =
                         Secure.getInt(cr, Secure.LOW_POWER_MANUAL_ACTIVATION_COUNT, 0) + 1;

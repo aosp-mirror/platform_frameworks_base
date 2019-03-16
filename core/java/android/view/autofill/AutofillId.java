@@ -47,20 +47,20 @@ public final class AutofillId implements Parcelable {
 
     /** @hide */
     @TestApi
-    public AutofillId(@NonNull AutofillId parent, int virtualChildId) {
-        this(FLAG_IS_VIRTUAL_INT, parent.mViewId, virtualChildId, NO_SESSION);
+    public AutofillId(@NonNull AutofillId hostId, int virtualChildId) {
+        this(FLAG_IS_VIRTUAL_INT, hostId.mViewId, virtualChildId, NO_SESSION);
     }
 
     /** @hide */
     @TestApi
-    public AutofillId(int parentId, int virtualChildId) {
-        this(FLAG_IS_VIRTUAL_INT, parentId, virtualChildId, NO_SESSION);
+    public AutofillId(int hostId, int virtualChildId) {
+        this(FLAG_IS_VIRTUAL_INT, hostId, virtualChildId, NO_SESSION);
     }
 
     /** @hide */
     @TestApi
-    public AutofillId(@NonNull AutofillId parent, long virtualChildId, int sessionId) {
-        this(FLAG_IS_VIRTUAL_LONG | FLAG_HAS_SESSION, parent.mViewId, virtualChildId, sessionId);
+    public AutofillId(@NonNull AutofillId hostId, long virtualChildId, int sessionId) {
+        this(FLAG_IS_VIRTUAL_LONG | FLAG_HAS_SESSION, hostId.mViewId, virtualChildId, sessionId);
     }
 
     private AutofillId(int flags, int parentId, long virtualChildId, int sessionId) {

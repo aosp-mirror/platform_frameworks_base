@@ -4094,12 +4094,9 @@ public class AudioService extends IAudioService.Stub
      * @see AudioManager#handleBluetoothA2dpActiveDeviceChange(BluetoothDevice, int, int,
      *                                                          boolean, int)
      */
-    public int handleBluetoothA2dpActiveDeviceChange(
+    public void handleBluetoothA2dpActiveDeviceChange(
             BluetoothDevice device, int state, int profile, boolean suppressNoisyIntent,
             int a2dpVolume) {
-        // FIXME method was added by @a8439e2 but never used, and now conflicts with async behavior
-        //   of handleBluetoothA2dpDeviceConfigChange and
-        //   setBluetoothA2dpDeviceConnectionStateSuppressNoisyIntent
         if (device == null) {
             throw new IllegalArgumentException("Illegal null device");
         }
@@ -4110,7 +4107,7 @@ public class AudioService extends IAudioService.Stub
                 && state != BluetoothProfile.STATE_DISCONNECTED) {
             throw new IllegalArgumentException("Invalid state " + state);
         }
-        return mDeviceBroker.handleBluetoothA2dpActiveDeviceChange(device, state, profile,
+        mDeviceBroker.postBluetoothA2dpDeviceConfigChangeExt(device, state, profile,
                 suppressNoisyIntent, a2dpVolume);
     }
 
@@ -5956,6 +5953,14 @@ public class AudioService extends IAudioService.Stub
         pw.print("  mVolumePolicy="); pw.println(mVolumePolicy);
         pw.print("  mAvrcpAbsVolSupported=");
         pw.println(mDeviceBroker.isAvrcpAbsoluteVolumeSupported());
+        pw.print("  mIsSingleVolume="); pw.println(mIsSingleVolume);
+        pw.print("  mUseFixedVolume="); pw.println(mUseFixedVolume);
+        pw.print("  mFixedVolumeDevices=0x"); pw.println(Integer.toHexString(mFixedVolumeDevices));
+        pw.print("  mHdmiCecSink="); pw.println(mHdmiCecSink);
+        pw.print("  mHdmiAudioSystemClient="); pw.println(mHdmiAudioSystemClient);
+        pw.print("  mHdmiPlaybackClient="); pw.println(mHdmiPlaybackClient);
+        pw.print("  mHdmiTvClient="); pw.println(mHdmiTvClient);
+        pw.print("  mHdmiSystemAudioSupported="); pw.println(mHdmiSystemAudioSupported);
 
         dumpAudioPolicies(pw);
         mDynPolicyLogger.dump(pw);

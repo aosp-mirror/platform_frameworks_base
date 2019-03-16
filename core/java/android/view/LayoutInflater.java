@@ -83,6 +83,10 @@ public abstract class LayoutInflater {
     private static final boolean DEBUG = false;
 
     private static final String COMPILED_VIEW_DEX_FILE_NAME = "/compiled_view.dex";
+    /**
+     * Whether or not we use the precompiled layout.
+     */
+    private static final String USE_PRECOMPILED_LAYOUT = "view.precompiled_layout_enabled";
 
     /** Empty stack trace used to avoid log spam in re-throw exceptions. */
     private static final StackTraceElement[] EMPTY_STACK_TRACE = new StackTraceElement[0];
@@ -416,15 +420,15 @@ public abstract class LayoutInflater {
         String usePrecompiledLayout = null;
         try {
             usePrecompiledLayout = DeviceConfig.getProperty(
-                    DeviceConfig.Runtime.NAMESPACE,
-                    DeviceConfig.Runtime.USE_PRECOMPILED_LAYOUT);
+                    DeviceConfig.NAMESPACE_RUNTIME,
+                    USE_PRECOMPILED_LAYOUT);
         } catch (Exception e) {
           // May be caused by permission errors reading the property (i.e. instant apps).
         }
         boolean enabled = false;
         if (TextUtils.isEmpty(usePrecompiledLayout)) {
             enabled = SystemProperties.getBoolean(
-                    DeviceConfig.Runtime.USE_PRECOMPILED_LAYOUT,
+                    USE_PRECOMPILED_LAYOUT,
                     false);
         } else {
             enabled = Boolean.parseBoolean(usePrecompiledLayout);

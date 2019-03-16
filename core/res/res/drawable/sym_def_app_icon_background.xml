@@ -5,7 +5,7 @@
     android:viewportHeight="108.0"
     android:viewportWidth="108.0"
     xmlns:android="http://schemas.android.com/apk/res/android">
-    <path android:fillColor="@android:color/material_deep_teal_500"
+    <path android:fillColor="@android:color/accent_device_default_light"
         android:pathData="M0,0h108v108h-108z"
         android:strokeColor="#66FFFFFF" android:strokeWidth="0.8"/>
     <path android:fillColor="#00000000" android:pathData="M19,0L19,108"

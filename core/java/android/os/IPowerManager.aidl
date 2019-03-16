@@ -48,7 +48,7 @@ interface IPowerManager
     boolean isInteractive();
     boolean isPowerSaveMode();
     PowerSaveState getPowerSaveState(int serviceType);
-    boolean setPowerSaveMode(boolean mode);
+    boolean setPowerSaveModeEnabled(boolean mode);
     boolean setDynamicPowerSavings(boolean dynamicPowerSavingsEnabled, int disableThreshold);
     boolean setAdaptivePowerSavePolicy(in BatterySaverPolicyConfig config);
     boolean setAdaptivePowerSaveEnabled(boolean enabled);

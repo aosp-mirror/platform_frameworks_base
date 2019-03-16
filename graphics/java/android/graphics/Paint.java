@@ -58,13 +58,11 @@ public class Paint {
     private long mNativeShader;
     private long mNativeColorFilter;
 
-    // The approximate size of a native paint object.
-    private static final long NATIVE_PAINT_SIZE = 98;
-
     // Use a Holder to allow static initialization of Paint in the boot image.
     private static class NoImagePreloadHolder {
-        public static final NativeAllocationRegistry sRegistry = new NativeAllocationRegistry(
-                Paint.class.getClassLoader(), nGetNativeFinalizer(), NATIVE_PAINT_SIZE);
+        public static final NativeAllocationRegistry sRegistry =
+                NativeAllocationRegistry.createMalloced(
+                Paint.class.getClassLoader(), nGetNativeFinalizer());
     }
 
     @ColorLong private long mColor;
@@ -1048,7 +1046,8 @@ public class Paint {
      * @param color The new color (including alpha) to set in the paint.
      */
     public void setColor(@ColorInt int color) {
-        setColor(Color.pack(color));
+        nSetColor(mNativePaint, color);
+        mColor = Color.pack(color);
     }
 
     /**
@@ -1065,12 +1064,8 @@ public class Paint {
      */
     public void setColor(@ColorLong long color) {
         ColorSpace cs = Color.colorSpace(color);
-        float r = Color.red(color);
-        float g = Color.green(color);
-        float b = Color.blue(color);
-        float a = Color.alpha(color);
 
-        nSetColor(mNativePaint, cs.getNativeInstance(), r, g, b, a);
+        nSetColor(mNativePaint, cs.getNativeInstance(), color);
         mColor = color;
     }
 
@@ -1500,11 +1495,7 @@ public class Paint {
      */
     public void setShadowLayer(float radius, float dx, float dy, @ColorLong long shadowColor) {
         ColorSpace cs = Color.colorSpace(shadowColor);
-        float r = Color.red(shadowColor);
-        float g = Color.green(shadowColor);
-        float b = Color.blue(shadowColor);
-        float a = Color.alpha(shadowColor);
-        nSetShadowLayer(mNativePaint, radius, dx, dy, cs.getNativeInstance(), r, g, b, a);
+        nSetShadowLayer(mNativePaint, radius, dx, dy, cs.getNativeInstance(), shadowColor);
 
         mShadowLayerRadius = radius;
         mShadowLayerDx = dx;
@@ -1532,6 +1523,7 @@ public class Paint {
     /**
      * Returns the blur radius of the shadow layer.
      * @see #setShadowLayer(float,float,float,int)
+     * @see #setShadowLayer(float,float,float,long)
      */
     public float getShadowLayerRadius() {
         return mShadowLayerRadius;
@@ -1540,6 +1532,7 @@ public class Paint {
     /**
      * Returns the x offset of the shadow layer.
      * @see #setShadowLayer(float,float,float,int)
+     * @see #setShadowLayer(float,float,float,long)
      */
     public float getShadowLayerDx() {
         return mShadowLayerDx;
@@ -1548,6 +1541,7 @@ public class Paint {
     /**
      * Returns the y offset of the shadow layer.
      * @see #setShadowLayer(float,float,float,int)
+     * @see #setShadowLayer(float,float,float,long)
      */
     public float getShadowLayerDy() {
         return mShadowLayerDy;
@@ -3137,7 +3131,7 @@ public class Paint {
     @CriticalNative
     private static native void nSetShadowLayer(long paintPtr,
             float radius, float dx, float dy, long colorSpaceHandle,
-            float r, float g, float b, float a);
+            @ColorLong long shadowColor);
     @CriticalNative
     private static native boolean nHasShadowLayer(long paintPtr);
     @CriticalNative
@@ -3190,7 +3184,9 @@ public class Paint {
     private static native void nSetFilterBitmap(long paintPtr, boolean filter);
     @CriticalNative
     private static native void nSetColor(long paintPtr, long colorSpaceHandle,
-            float r, float g, float b, float a);
+            @ColorLong long color);
+    @CriticalNative
+    private static native void nSetColor(long paintPtr, @ColorInt int color);
     @CriticalNative
     private static native void nSetStrikeThruText(long paintPtr, boolean strikeThruText);
     @CriticalNative

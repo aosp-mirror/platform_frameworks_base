@@ -36,7 +36,7 @@ oneway interface IContentCaptureService {
     void onConnected(IBinder callback, boolean verbose, boolean debug);
     void onDisconnected();
     void onSessionStarted(in ContentCaptureContext context, String sessionId, int uid,
-                          in IResultReceiver clientReceiver);
+                          in IResultReceiver clientReceiver, int initialState);
     void onSessionFinished(String sessionId);
     void onActivitySnapshot(String sessionId, in SnapshotData snapshotData);
     void onUserDataRemovalRequest(in UserDataRemovalRequest request);

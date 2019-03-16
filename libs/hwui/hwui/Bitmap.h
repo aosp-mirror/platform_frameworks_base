@@ -103,6 +103,8 @@ public:
 
     bool isHardware() const { return mPixelStorageType == PixelStorageType::Hardware; }
 
+    PixelStorageType pixelStorageType() const { return mPixelStorageType; }
+
     GraphicBuffer* graphicBuffer();
 
     /**

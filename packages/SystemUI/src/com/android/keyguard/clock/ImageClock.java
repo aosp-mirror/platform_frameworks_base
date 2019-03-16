@@ -59,7 +59,7 @@ public class ImageClock extends FrameLayout {
      */
     public void onTimeChanged() {
         mTime.setTimeInMillis(System.currentTimeMillis());
-        final float hourAngle = mTime.get(Calendar.HOUR) * 30f;
+        final float hourAngle = mTime.get(Calendar.HOUR) * 30f + mTime.get(Calendar.MINUTE) * 0.5f;
         mHourHand.setRotation(hourAngle);
         final float minuteAngle = mTime.get(Calendar.MINUTE) * 6f;
         mMinuteHand.setRotation(minuteAngle);

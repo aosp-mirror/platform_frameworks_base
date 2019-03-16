@@ -78,6 +78,14 @@ public final class DeviceConfig {
             "activity_manager_native_boot";
 
     /**
+     * Namespace for AttentionManagerService related features.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String NAMESPACE_ATTENTION_MANAGER_SERVICE = "attention_manager_service";
+
+    /**
      * Namespace for autofill feature that provides suggestions across all apps when
      * the user interacts with input fields.
      *
@@ -155,6 +163,25 @@ public final class DeviceConfig {
     public static final String NAMESPACE_NETD_NATIVE = "netd_native";
 
     /**
+     * Namespace for all runtime related features that don't require a reboot to become active.
+     * There are no feature flags using NAMESPACE_RUNTIME.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String NAMESPACE_RUNTIME = "runtime";
+
+    /**
+     * Namespace for all runtime related features that require system properties for accessing
+     * the feature flags from C++ or Java language code. One example is the app image startup
+     * cache feature use_app_image_startup_cache.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String NAMESPACE_RUNTIME_NATIVE = "runtime_native";
+
+    /**
      * Namespace for all runtime native boot related features. Boot in this case refers to the
      * fact that the properties only take affect after rebooting the device.
      *
@@ -178,63 +205,6 @@ public final class DeviceConfig {
      */
     @SystemApi
     public static final String NAMESPACE_TEXTCLASSIFIER = "textclassifier";
-
-    /**
-     * Namespace for all runtime related features.
-     *
-     * @hide
-     */
-    @SystemApi
-    public interface Runtime {
-        String NAMESPACE = "runtime";
-
-        /**
-         * Whether or not we use the precompiled layout.
-         */
-        String USE_PRECOMPILED_LAYOUT = "view.precompiled_layout_enabled";
-    }
-
-    /**
-     * Namespace for all runtime native related features.
-     *
-     * @hide
-     */
-    @SystemApi
-    public interface RuntimeNative {
-        String NAMESPACE = "runtime_native";
-
-        /**
-         * Zygote flags. See {@link com.internal.os.Zygote}.
-         */
-
-        /**
-         * If {@code true}, enables the unspecialized app process (USAP) pool feature.
-         *
-         * @hide for internal use only
-         */
-        String USAP_POOL_ENABLED = "usap_pool_enabled";
-
-        /**
-         * The maximum number of processes to keep in the USAP pool.
-         *
-         * @hide for internal use only
-         */
-        String USAP_POOL_SIZE_MAX = "usap_pool_size_max";
-
-        /**
-         * The minimum number of processes to keep in the USAP pool.
-         *
-         * @hide for internal use only
-         */
-        String USAP_POOL_SIZE_MIN = "usap_pool_size_min";
-
-        /**
-         * The threshold used to determine if the pool should be refilled.
-         *
-         * @hide for internal use only
-         */
-        String USAP_POOL_REFILL_THRESHOLD = "usap_refill_threshold";
-    }
 
     /**
      * Privacy related properties definitions.
@@ -288,22 +258,6 @@ public final class DeviceConfig {
          * Vibration time in milliseconds before ramping ringer starts.
          */
         String RAMPING_RINGER_VIBRATION_DURATION = "ramping_ringer_vibration_duration";
-    }
-
-    /**
-     * Namespace for {@link AttentionManagerService} related features.
-     *
-     * @hide
-     */
-    @SystemApi
-    public interface AttentionManagerService {
-        String NAMESPACE = "attention_manager_service";
-
-        /** If {@code true}, enables {@link AttentionManagerService} features. */
-        String SERVICE_ENABLED = "service_enabled";
-
-        /** Allows a CTS to inject a fake implementation. */
-        String COMPONENT_NAME = "component_name";
     }
 
     /**
@@ -412,7 +366,7 @@ public final class DeviceConfig {
     @SystemApi
     @TestApi
     @RequiresPermission(READ_DEVICE_CONFIG)
-    public static String getProperty(String namespace, String name) {
+    public static String getProperty(@NonNull String namespace, @NonNull String name) {
         ContentResolver contentResolver = ActivityThread.currentApplication().getContentResolver();
         String compositeName = createCompositeName(namespace, name);
         return Settings.Config.getString(contentResolver, compositeName);
@@ -431,7 +385,8 @@ public final class DeviceConfig {
     @SystemApi
     @TestApi
     @RequiresPermission(READ_DEVICE_CONFIG)
-    public static String getString(String namespace, String name, String defaultValue) {
+    public static String getString(@NonNull String namespace, @NonNull String name,
+            @Nullable String defaultValue) {
         String value = getProperty(namespace, name);
         return value != null ? value : defaultValue;
     }
@@ -449,7 +404,8 @@ public final class DeviceConfig {
     @SystemApi
     @TestApi
     @RequiresPermission(READ_DEVICE_CONFIG)
-    public static boolean getBoolean(String namespace, String name, boolean defaultValue) {
+    public static boolean getBoolean(@NonNull String namespace, @NonNull String name,
+            boolean defaultValue) {
         String value = getProperty(namespace, name);
         return value != null ? Boolean.parseBoolean(value) : defaultValue;
     }
@@ -467,7 +423,7 @@ public final class DeviceConfig {
     @SystemApi
     @TestApi
     @RequiresPermission(READ_DEVICE_CONFIG)
-    public static int getInt(String namespace, String name, int defaultValue) {
+    public static int getInt(@NonNull String namespace, @NonNull String name, int defaultValue) {
         String value = getProperty(namespace, name);
         if (value == null) {
             return defaultValue;
@@ -493,7 +449,7 @@ public final class DeviceConfig {
     @SystemApi
     @TestApi
     @RequiresPermission(READ_DEVICE_CONFIG)
-    public static long getLong(String namespace, String name, long defaultValue) {
+    public static long getLong(@NonNull String namespace, @NonNull String name, long defaultValue) {
         String value = getProperty(namespace, name);
         if (value == null) {
             return defaultValue;
@@ -519,7 +475,8 @@ public final class DeviceConfig {
     @SystemApi
     @TestApi
     @RequiresPermission(READ_DEVICE_CONFIG)
-    public static float getFloat(String namespace, String name, float defaultValue) {
+    public static float getFloat(@NonNull String namespace, @NonNull String name,
+            float defaultValue) {
         String value = getProperty(namespace, name);
         if (value == null) {
             return defaultValue;
@@ -554,10 +511,10 @@ public final class DeviceConfig {
     @SystemApi
     @TestApi
     @RequiresPermission(WRITE_DEVICE_CONFIG)
-    public static boolean setProperty(
-            String namespace, String name, String value, boolean makeDefault) {
-        ContentResolver contentResolver = ActivityThread.currentApplication().getContentResolver();
+    public static boolean setProperty(@NonNull String namespace, @NonNull String name,
+            @Nullable String value, boolean makeDefault) {
         String compositeName = createCompositeName(namespace, name);
+        ContentResolver contentResolver = ActivityThread.currentApplication().getContentResolver();
         return Settings.Config.putString(contentResolver, compositeName, value, makeDefault);
     }
 
@@ -700,11 +657,14 @@ public final class DeviceConfig {
         }
     }
 
-    private static String createCompositeName(String namespace, String name) {
+    private static String createCompositeName(@NonNull String namespace, @NonNull String name) {
+        Preconditions.checkNotNull(namespace);
+        Preconditions.checkNotNull(name);
         return namespace + "/" + name;
     }
 
-    private static Uri createNamespaceUri(String namespace) {
+    private static Uri createNamespaceUri(@NonNull String namespace) {
+        Preconditions.checkNotNull(namespace);
         return CONTENT_URI.buildUpon().appendPath(namespace).build();
     }
 
@@ -716,7 +676,8 @@ public final class DeviceConfig {
      * @param namespace The namespace to increment the count for.
      */
     @GuardedBy("sLock")
-    private static void incrementNamespace(String namespace) {
+    private static void incrementNamespace(@NonNull String namespace) {
+        Preconditions.checkNotNull(namespace);
         Pair<ContentObserver, Integer> namespaceCount = sNamespaces.get(namespace);
         if (namespaceCount != null) {
             sNamespaces.put(namespace, new Pair<>(namespaceCount.first, namespaceCount.second + 1));
@@ -725,7 +686,9 @@ public final class DeviceConfig {
             ContentObserver contentObserver = new ContentObserver(null) {
                 @Override
                 public void onChange(boolean selfChange, Uri uri) {
-                    handleChange(uri);
+                    if (uri != null) {
+                        handleChange(uri);
+                    }
                 }
             };
             ActivityThread.currentApplication().getContentResolver()
@@ -742,7 +705,8 @@ public final class DeviceConfig {
      * @param namespace The namespace to decrement the count for.
      */
     @GuardedBy("sLock")
-    private static void decrementNamespace(String namespace) {
+    private static void decrementNamespace(@NonNull String namespace) {
+        Preconditions.checkNotNull(namespace);
         Pair<ContentObserver, Integer> namespaceCount = sNamespaces.get(namespace);
         if (namespaceCount == null) {
             // This namespace is not registered and does not need to be decremented
@@ -757,7 +721,8 @@ public final class DeviceConfig {
         }
     }
 
-    private static void handleChange(Uri uri) {
+    private static void handleChange(@NonNull Uri uri) {
+        Preconditions.checkNotNull(uri);
         List<String> pathSegments = uri.getPathSegments();
         // pathSegments(0) is "config"
         final String namespace = pathSegments.get(1);
@@ -813,7 +778,8 @@ public final class DeviceConfig {
          * @param name      The name of the property which has changed.
          * @param value     The new value of the property which has changed.
          */
-        void onPropertyChanged(String namespace, String name, String value);
+        void onPropertyChanged(@NonNull String namespace, @NonNull String name,
+                @Nullable String value);
     }
 
     /**

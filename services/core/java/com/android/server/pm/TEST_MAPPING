@@ -12,7 +12,7 @@
   ],
   "imports": [
     {
-      "path": "system/apex/tests"
+      "path": "frameworks/base/core/java/android/content/pm"
     }
   ]
 }

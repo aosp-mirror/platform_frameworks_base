@@ -16,6 +16,8 @@
 
 package android.processor.view.inspector;
 
+import androidx.annotation.NonNull;
+
 import javax.lang.model.element.Element;
 
 /**
@@ -28,5 +30,5 @@ public interface ModelProcessor {
      * @param element The annotated element to operate on
      * @param model The model this element should be merged into
      */
-    void process(Element element, InspectableClassModel model);
+    void process(@NonNull Element element, @NonNull InspectableClassModel model);
 }

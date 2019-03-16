@@ -122,10 +122,21 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
     }
 
     /**
-     * Sends an intent to open the app settings for a particular package and optional
+     * Sends an intent to open the notification settings for a particular package and optional
      * channel.
      */
     private void startAppNotificationSettingsActivity(String packageName, final int appUid,
+            final NotificationChannel channel, ExpandableNotificationRow row) {
+        final Intent intent = new Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS);
+        intent.putExtra(Settings.EXTRA_APP_PACKAGE, packageName);
+        intent.putExtra(Settings.EXTRA_APP_UID, appUid);
+        if (channel != null) {
+            intent.putExtra(EXTRA_FRAGMENT_ARG_KEY, channel.getId());
+        }
+        mNotificationActivityStarter.startNotificationGutsIntent(intent, appUid, row);
+    }
+
+    private void startAppDetailsSettingsActivity(String packageName, final int appUid,
             final NotificationChannel channel, ExpandableNotificationRow row) {
         final Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
         intent.setData(Uri.fromParts("package", packageName, null));
@@ -141,7 +152,7 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
             ExpandableNotificationRow row) {
         if (ops.contains(OP_SYSTEM_ALERT_WINDOW)) {
             if (ops.contains(OP_CAMERA) || ops.contains(OP_RECORD_AUDIO)) {
-                startAppNotificationSettingsActivity(pkg, uid, null, row);
+                startAppDetailsSettingsActivity(pkg, uid, null, row);
             } else {
                 Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
                 intent.setData(Uri.fromParts("package", pkg, null));

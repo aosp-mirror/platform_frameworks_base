@@ -76,14 +76,11 @@ public class Canvas extends BaseCanvas {
     // (see SkCanvas.cpp, SkDraw.cpp)
     private static final int MAXMIMUM_BITMAP_SIZE = 32766;
 
-    // The approximate size of the native allocation associated with
-    // a Canvas object.
-    private static final long NATIVE_ALLOCATION_SIZE = 525;
-
     // Use a Holder to allow static initialization of Canvas in the boot image.
     private static class NoImagePreloadHolder {
-        public static final NativeAllocationRegistry sRegistry = new NativeAllocationRegistry(
-                Canvas.class.getClassLoader(), nGetNativeFinalizer(), NATIVE_ALLOCATION_SIZE);
+        public static final NativeAllocationRegistry sRegistry =
+                NativeAllocationRegistry.createMalloced(
+                Canvas.class.getClassLoader(), nGetNativeFinalizer());
     }
 
     // This field is used to finalize the native Canvas properly

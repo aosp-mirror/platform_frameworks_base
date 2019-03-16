@@ -118,6 +118,7 @@ public class BubbleController implements BubbleExpandedView.OnBubbleBlockedListe
     private final BubbleTaskStackListener mTaskStackListener;
     private BubbleStateChangeListener mStateChangeListener;
     private BubbleExpandListener mExpandListener;
+    @Nullable private BubbleStackView.SurfaceSynchronizer mSurfaceSynchronizer;
 
     private BubbleData mBubbleData;
     private BubbleStackView mStackView;
@@ -178,7 +179,12 @@ public class BubbleController implements BubbleExpandedView.OnBubbleBlockedListe
 
     @Inject
     public BubbleController(Context context, StatusBarWindowController statusBarWindowController,
-            BubbleData data) {
+                            BubbleData data) {
+        this(context, statusBarWindowController, data, null /* synchronizer */);
+    }
+
+    public BubbleController(Context context, StatusBarWindowController statusBarWindowController,
+            BubbleData data, @Nullable BubbleStackView.SurfaceSynchronizer synchronizer) {
         mContext = context;
 
         mNotificationEntryManager = Dependency.get(NotificationEntryManager.class);
@@ -206,6 +212,7 @@ public class BubbleController implements BubbleExpandedView.OnBubbleBlockedListe
         }
 
         mBubbleData = data;
+        mSurfaceSynchronizer = synchronizer;
     }
 
     /**
@@ -297,7 +304,7 @@ public class BubbleController implements BubbleExpandedView.OnBubbleBlockedListe
             mStackView.updateBubble(notif, updatePosition);
         } else {
             if (mStackView == null) {
-                mStackView = new BubbleStackView(mContext, mBubbleData);
+                mStackView = new BubbleStackView(mContext, mBubbleData, mSurfaceSynchronizer);
                 ViewGroup sbv = mStatusBarWindowController.getStatusBarView();
                 // XXX: Bug when you expand the shade on top of expanded bubble, there is no scrim
                 // between bubble and the shade

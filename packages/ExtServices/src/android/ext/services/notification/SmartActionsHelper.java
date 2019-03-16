@@ -15,11 +15,15 @@
  */
 package android.ext.services.notification;
 
+import android.annotation.Nullable;
 import android.app.Notification;
+import android.app.PendingIntent;
 import android.app.Person;
 import android.app.RemoteAction;
 import android.app.RemoteInput;
 import android.content.Context;
+import android.content.Intent;
+import android.ext.services.R;
 import android.graphics.drawable.Icon;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -48,11 +52,12 @@ import java.util.Deque;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 public class SmartActionsHelper {
-    private static final String KEY_ACTION_TYPE = "action_type";
-    private static final String KEY_ACTION_SCORE = "action_score";
+    static final String ENTITIES_EXTRAS = "entities-extras";
+    static final String KEY_ACTION_TYPE = "action_type";
+    static final String KEY_ACTION_SCORE = "action_score";
+    static final String KEY_TEXT = "text";
     // If a notification has any of these flags set, it's inelgibile for actions being added.
     private static final int FLAG_MASK_INELGIBILE_FOR_ACTIONS =
             Notification.FLAG_ONGOING_EVENT
@@ -109,11 +114,25 @@ public class SmartActionsHelper {
             repliesScore.put(textReply, conversationAction.getConfidenceScore());
         }
 
-        ArrayList<Notification.Action> actions = conversationActions.stream()
-                .filter(conversationAction -> conversationAction.getAction() != null)
-                .map(action -> createNotificationAction(
-                        action.getAction(), action.getType(), action.getConfidenceScore()))
-                .collect(Collectors.toCollection(ArrayList::new));
+        ArrayList<Notification.Action> actions = new ArrayList<>();
+        for (ConversationAction conversationAction : conversationActions) {
+            if (!TextUtils.isEmpty(conversationAction.getTextReply())) {
+                continue;
+            }
+            Notification.Action notificationAction;
+            if (conversationAction.getAction() == null) {
+                notificationAction =
+                        createNotificationActionWithoutRemoteAction(conversationAction);
+            } else {
+                notificationAction = createNotificationActionFromRemoteAction(
+                        conversationAction.getAction(),
+                        conversationAction.getType(),
+                        conversationAction.getConfidenceScore());
+            }
+            if (notificationAction != null) {
+                actions.add(notificationAction);
+            }
+        }
 
         // Start a new session for logging if necessary.
         if (!TextUtils.isEmpty(resultId)
@@ -124,6 +143,55 @@ public class SmartActionsHelper {
         }
 
         return new SmartSuggestions(replies, actions);
+    }
+
+    /**
+     * Creates notification action from ConversationAction that does not come up a RemoteAction.
+     * It could happen because we don't have common intents for some actions, like copying text.
+     */
+    @Nullable
+    private Notification.Action createNotificationActionWithoutRemoteAction(
+            ConversationAction conversationAction) {
+        if (ConversationAction.TYPE_COPY.equals(conversationAction.getType())) {
+            return createCopyCodeAction(conversationAction);
+        }
+        return null;
+    }
+
+    @Nullable
+    private Notification.Action createCopyCodeAction(ConversationAction conversationAction) {
+        Bundle extras = conversationAction.getExtras();
+        if (extras == null) {
+            return null;
+        }
+        Bundle entitiesExtas = extras.getParcelable(ENTITIES_EXTRAS);
+        if (entitiesExtas == null) {
+            return null;
+        }
+        String code = entitiesExtas.getString(KEY_TEXT);
+        if (TextUtils.isEmpty(code)) {
+            return null;
+        }
+        String contentDescription = mContext.getString(R.string.copy_code_desc, code);
+        Intent intent = new Intent(mContext, CopyCodeActivity.class);
+        intent.putExtra(Intent.EXTRA_TEXT, code);
+
+        RemoteAction remoteAction = new RemoteAction(Icon.createWithResource(
+                mContext.getResources(),
+                com.android.internal.R.drawable.ic_menu_copy_material),
+                code,
+                contentDescription,
+                PendingIntent.getActivity(
+                        mContext,
+                        code.hashCode(),
+                        intent,
+                        PendingIntent.FLAG_UPDATE_CURRENT
+                ));
+
+        return createNotificationActionFromRemoteAction(
+                remoteAction,
+                ConversationAction.TYPE_COPY,
+                conversationAction.getConfidenceScore());
     }
 
     /**
@@ -292,7 +360,7 @@ public class SmartActionsHelper {
         mTextClassifier.onTextClassifierEvent(textClassifierEvent);
     }
 
-    private Notification.Action createNotificationAction(
+    private Notification.Action createNotificationActionFromRemoteAction(
             RemoteAction remoteAction, String actionType, float score) {
         Icon icon = remoteAction.shouldShowIcon()
                 ? remoteAction.getIcon()

@@ -251,6 +251,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
+import android.os.PowerManager;
 import android.os.PowerManager.ServiceType;
 import android.os.PowerManagerInternal;
 import android.os.Process;
@@ -268,6 +269,7 @@ import android.os.TransactionTooLargeException;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.WorkSource;
+import android.os.storage.IStorageManager;
 import android.os.storage.StorageManager;
 import android.provider.Settings;
 import android.sysprop.VoldProperties;
@@ -306,6 +308,7 @@ import com.android.internal.app.IAppOpsService;
 import com.android.internal.app.ProcessMap;
 import com.android.internal.app.SystemUserHomeActivity;
 import com.android.internal.app.procstats.ProcessStats;
+import com.android.internal.content.PackageHelper;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.os.BackgroundThread;
@@ -2931,8 +2934,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                         taskRoot);
             }
         }
-        if (mContentCaptureService != null
-                && (event == Event.ACTIVITY_PAUSED || event == Event.ACTIVITY_RESUMED)) {
+        if (mContentCaptureService != null && (event == Event.ACTIVITY_PAUSED
+                || event == Event.ACTIVITY_RESUMED || event == Event.ACTIVITY_STOPPED)) {
             mContentCaptureService.notifyActivityEvent(userId, activity, event);
         }
     }
@@ -5019,6 +5022,16 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
             }
         }, dumpheapFilter);
+
+        // Inform checkpointing systems of success
+        try {
+            IStorageManager storageManager = PackageHelper.getStorageManager();
+            storageManager.commitChanges();
+        } catch (Exception e) {
+            PowerManager pm = (PowerManager)
+                     mInjector.getContext().getSystemService(Context.POWER_SERVICE);
+            pm.reboot("Checkpoint commit failed");
+        }
 
         // Let system services know.
         mSystemServiceManager.startBootPhase(SystemService.PHASE_BOOT_COMPLETED);

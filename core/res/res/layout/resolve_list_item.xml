@@ -29,8 +29,8 @@
     <!-- Activity icon when presenting dialog
          Size will be filled in by ResolverActivity -->
     <ImageView android:id="@+id/icon"
-               android:layout_width="24dp"
-               android:layout_height="24dp"
+               android:layout_width="@dimen/resolver_icon_size"
+               android:layout_height="@dimen/resolver_icon_size"
                android:layout_gravity="start|center_vertical"
                android:layout_marginStart="?attr/listPreferredItemPaddingStart"
                android:layout_marginTop="12dp"

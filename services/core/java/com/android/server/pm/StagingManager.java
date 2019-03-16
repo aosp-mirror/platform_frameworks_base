@@ -477,23 +477,13 @@ public class StagingManager {
         return true;
     }
 
-    void commitSession(@NonNull PackageInstallerSession session)
-            throws AlreadyInProgressStagedSessionException {
-        PackageInstallerSession activeSession = getActiveSession();
-        boolean anotherSessionAlreadyInProgress =
-                activeSession != null && session.sessionId != activeSession.sessionId;
+    void commitSession(@NonNull PackageInstallerSession session) {
         updateStoredSession(session);
-        if (anotherSessionAlreadyInProgress) {
-            session.setStagedSessionFailed(SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
-                    "There is already in-progress committed staged session "
-                            + activeSession.sessionId);
-            throw new AlreadyInProgressStagedSessionException(activeSession.sessionId);
-        }
         mBgHandler.post(() -> preRebootVerification(session));
     }
 
     @Nullable
-    private PackageInstallerSession getActiveSession() {
+    PackageInstallerSession getActiveSession() {
         synchronized (mStagedSessions) {
             for (int i = 0; i < mStagedSessions.size(); i++) {
                 final PackageInstallerSession session = mStagedSessions.valueAt(i);
@@ -526,8 +516,8 @@ public class StagingManager {
     }
 
     void abortCommittedSession(@NonNull PackageInstallerSession session) {
-        if (session.isStagedSessionApplied() || session.isStagedSessionFailed()) {
-            Slog.w(TAG, "Cannot abort already finalized session : " + session.sessionId);
+        if (session.isStagedSessionApplied()) {
+            Slog.w(TAG, "Cannot abort applied session : " + session.sessionId);
             return;
         }
         abortSession(session);
@@ -649,14 +639,6 @@ public class StagingManager {
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
-        }
-    }
-
-    static final class AlreadyInProgressStagedSessionException extends Exception {
-
-        AlreadyInProgressStagedSessionException(int sessionId) {
-            super("There is already in-progress committed staged session "
-                    + sessionId);
         }
     }
 }

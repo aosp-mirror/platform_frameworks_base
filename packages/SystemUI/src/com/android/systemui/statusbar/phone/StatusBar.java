@@ -1315,6 +1315,15 @@ public class StatusBar extends SystemUI implements DemoMode,
         mEntryManager.updateNotifications();
     }
 
+    /**
+     * Asks {@link KeyguardUpdateMonitor} to run face auth.
+     */
+    public void requestFaceAuth() {
+        if (!mUnlockMethodCache.canSkipBouncer()) {
+            mKeyguardUpdateMonitor.requestFaceAuth();
+        }
+    }
+
     public void updateAreThereNotifications() {
         if (SPEW) {
             final boolean clearable = hasActiveNotifications() &&

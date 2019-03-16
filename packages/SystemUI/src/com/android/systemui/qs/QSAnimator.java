@@ -127,12 +127,12 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
     @Override
     public void onTuningChanged(String key, String newValue) {
         if (ALLOW_FANCY_ANIMATION.equals(key)) {
-            mAllowFancy = newValue == null || Integer.parseInt(newValue) != 0;
+            mAllowFancy = TunerService.parseIntegerSwitch(newValue, true);
             if (!mAllowFancy) {
                 clearAnimationState();
             }
         } else if (MOVE_FULL_ROWS.equals(key)) {
-            mFullRows = newValue == null || Integer.parseInt(newValue) != 0;
+            mFullRows = TunerService.parseIntegerSwitch(newValue, true);
         } else if (QuickQSPanel.NUM_QUICK_TILES.equals(key)) {
             mNumQuickTiles = mQuickQsPanel.getNumQuickTiles(mQs.getContext());
             clearAnimationState();

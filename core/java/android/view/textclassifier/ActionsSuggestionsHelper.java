@@ -23,10 +23,13 @@ import android.content.Context;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Pair;
+import android.view.textclassifier.intent.LabeledIntent;
+import android.view.textclassifier.intent.TemplateIntentFactory;
 
 import com.android.internal.annotations.VisibleForTesting;
 
 import com.google.android.textclassifier.ActionsSuggestionsModel;
+import com.google.android.textclassifier.RemoteActionTemplate;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -46,6 +49,7 @@ import java.util.stream.Collectors;
  */
 @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
 public final class ActionsSuggestionsHelper {
+    private static final String TAG = "ActionsSuggestions";
     private static final int USER_LOCAL = 0;
     private static final int FIRST_NON_LOCAL_USER = 1;
 
@@ -82,9 +86,12 @@ public final class ActionsSuggestionsHelper {
             long referenceTime = message.getReferenceTime() == null
                     ? 0
                     : message.getReferenceTime().toInstant().toEpochMilli();
+            String timeZone = message.getReferenceTime() == null
+                    ? null
+                    : message.getReferenceTime().getZone().getId();
             nativeMessages.push(new ActionsSuggestionsModel.ConversationMessage(
                     personEncoder.encode(message.getAuthor()),
-                    message.getText().toString(), referenceTime,
+                    message.getText().toString(), referenceTime, timeZone,
                     languageDetector.apply(message.getText())));
         }
         return nativeMessages.toArray(
@@ -114,8 +121,33 @@ public final class ActionsSuggestionsHelper {
     }
 
     /**
-     * Returns a {@link android.view.textclassifier.LabeledIntent.TitleChooser} for
-     * conversation actions use case.
+     * Generated labeled intent from an action suggestion and return the resolved result.
+     */
+    @Nullable
+    public static LabeledIntent.Result createLabeledIntentResult(
+            Context context,
+            TemplateIntentFactory templateIntentFactory,
+            ActionsSuggestionsModel.ActionSuggestion nativeSuggestion) {
+        RemoteActionTemplate[] remoteActionTemplates =
+                nativeSuggestion.getRemoteActionTemplates();
+        if (remoteActionTemplates == null) {
+            Log.w(TAG, "createRemoteAction: Missing template for type "
+                    + nativeSuggestion.getActionType());
+            return null;
+        }
+        List<LabeledIntent> labeledIntents = templateIntentFactory.create(remoteActionTemplates);
+        if (labeledIntents.isEmpty()) {
+            return null;
+        }
+        // Given that we only support implicit intent here, we should expect there is just one
+        // intent for each action type.
+        LabeledIntent.TitleChooser titleChooser =
+                ActionsSuggestionsHelper.createTitleChooser(nativeSuggestion.getActionType());
+        return labeledIntents.get(0).resolve(context, titleChooser, null);
+    }
+
+    /**
+     * Returns a {@link LabeledIntent.TitleChooser} for conversation actions use case.
      */
     @Nullable
     public static LabeledIntent.TitleChooser createTitleChooser(String actionType) {

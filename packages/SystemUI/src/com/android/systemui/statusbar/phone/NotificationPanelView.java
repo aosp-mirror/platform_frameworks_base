@@ -326,6 +326,14 @@ public class NotificationPanelView extends PanelView implements
             Dependency.get(ShadeController.class);
     private int mDisplayId;
 
+    /**
+     * Cache the resource id of the theme to avoid unnecessary work in onThemeChanged.
+     *
+     * onThemeChanged is forced when the theme might not have changed. So, to avoid unncessary
+     * work, check the current id with the cached id.
+     */
+    private int mThemeResId;
+
     @Inject
     public NotificationPanelView(@Named(VIEW_CONTEXT) Context context, AttributeSet attrs,
             NotificationWakeUpCoordinator coordinator,
@@ -342,6 +350,7 @@ public class NotificationPanelView extends PanelView implements
         mCommandQueue = getComponent(context, CommandQueue.class);
         mDisplayId = context.getDisplayId();
         mPulseExpansionHandler = pulseExpansionHandler;
+        mThemeResId = context.getThemeResId();
     }
 
     /**
@@ -390,6 +399,9 @@ public class NotificationPanelView extends PanelView implements
         Dependency.get(StatusBarStateController.class).addCallback(this);
         Dependency.get(ZenModeController.class).addCallback(this);
         Dependency.get(ConfigurationController.class).addCallback(this);
+        // Theme might have changed between inflating this view and attaching it to the window, so
+        // force a call to onThemeChanged
+        onThemeChanged();
     }
 
     @Override
@@ -452,6 +464,12 @@ public class NotificationPanelView extends PanelView implements
 
     @Override
     public void onThemeChanged() {
+        final int themeResId = getContext().getThemeResId();
+        if (mThemeResId == themeResId) {
+            return;
+        }
+        mThemeResId = themeResId;
+
         updateShowEmptyShadeView();
 
         // Re-inflate the status view group.
@@ -1217,6 +1235,12 @@ public class NotificationPanelView extends PanelView implements
         setQsExpansion(height);
         requestPanelHeightUpdate();
         mNotificationStackScroller.checkSnoozeLeavebehind();
+
+        // When expanding QS, let's authenticate the user if possible,
+        // this will speed up notification actions.
+        if (height == 0) {
+            mStatusBar.requestFaceAuth();
+        }
     }
 
     private void setQsExpanded(boolean expanded) {

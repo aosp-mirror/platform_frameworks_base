@@ -33,12 +33,12 @@ import android.graphics.fonts.FontStyle;
 import android.graphics.fonts.FontVariationAxis;
 import android.graphics.fonts.SystemFonts;
 import android.os.Build;
+import android.os.Build.VERSION_CODES;
 import android.os.ParcelFileDescriptor;
 import android.provider.FontRequest;
 import android.provider.FontsContract;
 import android.text.FontConfig;
 import android.util.Base64;
-import android.util.Log;
 import android.util.LongSparseArray;
 import android.util.LruCache;
 import android.util.SparseArray;
@@ -48,6 +48,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
 
 import dalvik.annotation.optimization.CriticalNative;
+import dalvik.system.VMRuntime;
 
 import libcore.util.NativeAllocationRegistry;
 
@@ -74,8 +75,9 @@ public class Typeface {
 
     private static String TAG = "Typeface";
 
-    private static final NativeAllocationRegistry sRegistry = new NativeAllocationRegistry(
-            Typeface.class.getClassLoader(), nativeGetReleaseFunc(), 64);
+    private static final NativeAllocationRegistry sRegistry =
+            NativeAllocationRegistry.createMalloced(
+            Typeface.class.getClassLoader(), nativeGetReleaseFunc());
 
     /** The default NORMAL typeface object */
     public static final Typeface DEFAULT;
@@ -261,29 +263,18 @@ public class Typeface {
                             ?  FontStyle.FONT_SLANT_ITALIC : FontStyle.FONT_SLANT_UPRIGHT);
                 }
 
-                Font font = null;
-                try {
-                    font = fontBuilder.build();
-                } catch (IllegalArgumentException e) {
-                    // The exception happens if the unsupported font is passed. We suppress this
-                    // exception and just ignore this font here since there is no way of
-                    // resolving this issue by users during inflating layout.
-                    Log.w(TAG, "Ignoring font file since failed to create font object."
-                            + " The font file is not supported on this platform.");
-                    continue;
-                }
                 if (familyBuilder == null) {
-                    familyBuilder = new FontFamily.Builder(font);
+                    familyBuilder = new FontFamily.Builder(fontBuilder.build());
                 } else {
                     try {
-                        familyBuilder.addFont(font);
+                        familyBuilder.addFont(fontBuilder.build());
                     } catch (IllegalArgumentException e) {
-                        // The exception happens if the same style is added to the family.
-                        // We suppress this exception and just ignore this font here since there is
-                        // no way of resolving this issue by users during inflating layout.
-                        Log.w(TAG,
-                                "Ignoring font file since the same style font is already added.");
-                        continue;
+                        if (VMRuntime.getRuntime().getTargetSdkVersion() <= VERSION_CODES.P) {
+                            // Surpress the IllegalArgumentException for keeping the backward
+                            // compatibility.
+                            continue;
+                        }
+                        throw e;
                     }
                 }
             }

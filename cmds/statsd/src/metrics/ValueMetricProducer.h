@@ -244,6 +244,7 @@ private:
     FRIEND_TEST(ValueMetricProducerTest, TestEmptyDataResetsBase_onDataPulled);
     FRIEND_TEST(ValueMetricProducerTest, TestEventsWithNonSlicedCondition);
     FRIEND_TEST(ValueMetricProducerTest, TestFirstBucket);
+    FRIEND_TEST(ValueMetricProducerTest, TestFullBucketResetWhenLastBucketInvalid);
     FRIEND_TEST(ValueMetricProducerTest, TestInvalidBucketWhenGuardRailHit);
     FRIEND_TEST(ValueMetricProducerTest, TestInvalidBucketWhenInitialPullFailed);
     FRIEND_TEST(ValueMetricProducerTest, TestInvalidBucketWhenLastPullFailed);

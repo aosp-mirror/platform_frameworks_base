@@ -689,6 +689,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 Settings.Secure.getUriFor(Settings.Secure.IMMERSIVE_MODE_CONFIRMATIONS);
         private final Uri mPolicyControlUri =
                 Settings.Global.getUriFor(Settings.Global.POLICY_CONTROL);
+        private final Uri mPointerLocationUri =
+                Settings.System.getUriFor(Settings.System.POINTER_LOCATION);
 
         public SettingsObserver() {
             super(new Handler());
@@ -703,8 +705,8 @@ public class WindowManagerService extends IWindowManager.Stub
                     UserHandle.USER_ALL);
             resolver.registerContentObserver(mImmersiveModeConfirmationsUri, false, this,
                     UserHandle.USER_ALL);
-            resolver.registerContentObserver(mPolicyControlUri, false, this,
-                    UserHandle.USER_ALL);
+            resolver.registerContentObserver(mPolicyControlUri, false, this, UserHandle.USER_ALL);
+            resolver.registerContentObserver(mPointerLocationUri, false, this, UserHandle.USER_ALL);
         }
 
         @Override
@@ -720,6 +722,11 @@ public class WindowManagerService extends IWindowManager.Stub
 
             if (mDisplayInversionEnabledUri.equals(uri)) {
                 updateCircularDisplayMaskIfNeeded();
+                return;
+            }
+
+            if (mPointerLocationUri.equals(uri)) {
+                updatePointerLocation();
                 return;
             }
 
@@ -749,6 +756,22 @@ public class WindowManagerService extends IWindowManager.Stub
                 updateRotation(false /* alwaysSendConfiguration */, false /* forceRelayout */);
             }
         }
+
+        void updatePointerLocation() {
+            ContentResolver resolver = mContext.getContentResolver();
+            final boolean enablePointerLocation = Settings.System.getIntForUser(resolver,
+                    Settings.System.POINTER_LOCATION, 0, UserHandle.USER_CURRENT) != 0;
+
+            if (mPointerLocationEnabled == enablePointerLocation) {
+                return;
+            }
+            mPointerLocationEnabled = enablePointerLocation;
+            synchronized (mGlobalLock) {
+                mRoot.forAllDisplayPolicies(PooledLambda.obtainConsumer(
+                        DisplayPolicy::setPointerLocationEnabled, PooledLambda.__(),
+                        mPointerLocationEnabled));
+            }
+        }
     }
 
     PowerManager mPowerManager;
@@ -758,6 +781,7 @@ public class WindowManagerService extends IWindowManager.Stub
     private float mTransitionAnimationScaleSetting = 1.0f;
     private float mAnimatorDurationScaleSetting = 1.0f;
     private boolean mAnimationsDisabled = false;
+    boolean mPointerLocationEnabled = false;
 
     final InputManagerService mInputManager;
     final DisplayManagerInternal mDisplayManagerInternal;
@@ -4363,6 +4387,7 @@ public class WindowManagerService extends IWindowManager.Stub
         mHasWideColorGamutSupport = queryWideColorGamutSupport();
         mHasHdrSupport = queryHdrSupport();
         UiThread.getHandler().post(mSettingsObserver::updateSystemUiSettings);
+        UiThread.getHandler().post(mSettingsObserver::updatePointerLocation);
         IVrManager vrManager = IVrManager.Stub.asInterface(
                 ServiceManager.getService(Context.VR_SERVICE));
         if (vrManager != null) {
@@ -7447,13 +7472,26 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public boolean injectInputAfterTransactionsApplied(InputEvent ev, int mode) {
-        waitForAnimationsToComplete();
-
-        synchronized (mGlobalLock) {
-            mWindowPlacerLocked.performSurfacePlacementIfScheduled();
+        boolean shouldWaitForAnimComplete = false;
+        if (ev instanceof KeyEvent) {
+            KeyEvent keyEvent = (KeyEvent) ev;
+            shouldWaitForAnimComplete = keyEvent.getSource() == InputDevice.SOURCE_MOUSE
+                    || keyEvent.getAction() == KeyEvent.ACTION_DOWN;
+        } else if (ev instanceof MotionEvent) {
+            MotionEvent motionEvent = (MotionEvent) ev;
+            shouldWaitForAnimComplete = motionEvent.getSource() == InputDevice.SOURCE_MOUSE
+                    || motionEvent.getAction() == MotionEvent.ACTION_DOWN;
         }
 
-        new SurfaceControl.Transaction().syncInputWindows().apply(true);
+        if (shouldWaitForAnimComplete) {
+            waitForAnimationsToComplete();
+
+            synchronized (mGlobalLock) {
+                mWindowPlacerLocked.performSurfacePlacementIfScheduled();
+            }
+
+            new SurfaceControl.Transaction().syncInputWindows().apply(true);
+        }
 
         return LocalServices.getService(InputManagerInternal.class).injectInputEvent(ev, mode);
     }

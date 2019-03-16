@@ -18,6 +18,8 @@ package android.processor.view.inspector;
 
 import static javax.tools.Diagnostic.Kind.ERROR;
 
+import androidx.annotation.NonNull;
+
 import com.squareup.javapoet.ClassName;
 
 import java.io.IOException;
@@ -63,7 +65,9 @@ public final class PlatformInspectableProcessor extends AbstractProcessor {
     }
 
     @Override
-    public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
+    public boolean process(
+            @NonNull Set<? extends TypeElement> annotations,
+            @NonNull RoundEnvironment roundEnv) {
         final Map<String, InspectableClassModel> modelMap = new HashMap<>();
 
         for (TypeElement annotation : annotations) {
@@ -109,9 +113,9 @@ public final class PlatformInspectableProcessor extends AbstractProcessor {
      * @param modelMap A map of qualified class names to models
      */
     private void runModelProcessor(
-            Set<? extends Element> elements,
-            ModelProcessor processor,
-            Map<String, InspectableClassModel> modelMap) {
+            @NonNull Set<? extends Element> elements,
+            @NonNull ModelProcessor processor,
+            @NonNull Map<String, InspectableClassModel> modelMap) {
         for (Element element : elements) {
             final Optional<TypeElement> classElement = enclosingClassElement(element);
 
@@ -149,7 +153,7 @@ public final class PlatformInspectableProcessor extends AbstractProcessor {
      * @param typeElement A type element representing the class to check
      * @return f the class contains a class named {@code InspectionCompanion}
      */
-    private static boolean hasNestedInspectionCompanion(TypeElement typeElement) {
+    private static boolean hasNestedInspectionCompanion(@NonNull TypeElement typeElement) {
         for (TypeElement nestedClass : ElementFilter.typesIn(typeElement.getEnclosedElements())) {
             if (nestedClass.getSimpleName().toString().equals("InspectionCompanion")) {
                 return true;
@@ -167,7 +171,8 @@ public final class PlatformInspectableProcessor extends AbstractProcessor {
      * @param element An element to search from
      * @return A TypeElement of the nearest enclosing class or an empty optional
      */
-    private static Optional<TypeElement> enclosingClassElement(Element element) {
+    @NonNull
+    private static Optional<TypeElement> enclosingClassElement(@NonNull Element element) {
         Element cursor = element;
 
         while (cursor != null) {
@@ -186,7 +191,7 @@ public final class PlatformInspectableProcessor extends AbstractProcessor {
      *
      * @param message Message to print
      */
-    private void fail(String message) {
+    private void fail(@NonNull String message) {
         processingEnv.getMessager().printMessage(ERROR, message);
     }
 
@@ -196,7 +201,7 @@ public final class PlatformInspectableProcessor extends AbstractProcessor {
      * @param message Message to print
      * @param element The element that failed
      */
-    private void fail(String message, Element element) {
+    private void fail(@NonNull String message, @NonNull Element element) {
         processingEnv.getMessager().printMessage(ERROR, message, element);
     }
 }

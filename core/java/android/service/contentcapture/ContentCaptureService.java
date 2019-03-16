@@ -102,9 +102,10 @@ public abstract class ContentCaptureService extends Service {
 
         @Override
         public void onSessionStarted(ContentCaptureContext context, String sessionId, int uid,
-                IResultReceiver clientReceiver) {
+                IResultReceiver clientReceiver, int initialState) {
             mHandler.sendMessage(obtainMessage(ContentCaptureService::handleOnCreateSession,
-                    ContentCaptureService.this, context, sessionId, uid, clientReceiver));
+                    ContentCaptureService.this, context, sessionId, uid, clientReceiver,
+                    initialState));
         }
 
         @Override
@@ -335,7 +336,7 @@ public abstract class ContentCaptureService extends Service {
     // so we don't need to create a temporary InteractionSessionId for each event.
 
     private void handleOnCreateSession(@NonNull ContentCaptureContext context,
-            @NonNull String sessionId, int uid, IResultReceiver clientReceiver) {
+            @NonNull String sessionId, int uid, IResultReceiver clientReceiver, int initialState) {
         mSessionUids.put(sessionId, uid);
         onCreateContentCaptureSession(context, new ContentCaptureSessionId(sessionId));
 
@@ -348,7 +349,7 @@ public abstract class ContentCaptureService extends Service {
             stateFlags |= ContentCaptureSession.STATE_BY_APP;
         }
         if (stateFlags == 0) {
-            stateFlags = ContentCaptureSession.STATE_ACTIVE;
+            stateFlags = initialState;
         } else {
             stateFlags |= ContentCaptureSession.STATE_DISABLED;
 

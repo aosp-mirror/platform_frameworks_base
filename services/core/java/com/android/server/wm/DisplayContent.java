@@ -41,12 +41,14 @@ import static android.view.View.GONE;
 import static android.view.WindowManager.DOCKED_BOTTOM;
 import static android.view.WindowManager.DOCKED_INVALID;
 import static android.view.WindowManager.DOCKED_TOP;
+import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
 import static android.view.WindowManager.LayoutParams.FLAG_SECURE;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.FLAG_SPLIT_TOUCH;
+import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.NEEDS_MENU_SET_TRUE;
 import static android.view.WindowManager.LayoutParams.NEEDS_MENU_UNSET;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
@@ -182,6 +184,8 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.util.ToBooleanFunction;
 import com.android.internal.util.function.TriConsumer;
+import com.android.internal.util.function.pooled.PooledConsumer;
+import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.AnimationThread;
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.wm.utils.DisplayRotationUtil;
@@ -887,6 +891,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         mTapDetector = new TaskTapPointerEventListener(mWmService, this);
         registerPointerEventListener(mTapDetector);
         registerPointerEventListener(mWmService.mMousePositionTracker);
+        if (mWmService.mAtmService.getRecentTasks() != null) {
+            registerPointerEventListener(
+                    mWmService.mAtmService.getRecentTasks().getInputListener());
+        }
 
         mDisplayPolicy = new DisplayPolicy(service, this);
         mDisplayRotation = new DisplayRotation(service, this);
@@ -2381,6 +2389,27 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     }
 
     /**
+     * Returns true if the input point is within an app window.
+     */
+    boolean pointWithinAppWindow(int x, int y) {
+        final int[] targetWindowType = {-1};
+        final Consumer fn = PooledLambda.obtainConsumer((w, nonArg) -> {
+            if (targetWindowType[0] != -1) {
+                return;
+            }
+
+            if (w.isOnScreen() && w.isVisibleLw() && w.getFrameLw().contains(x, y)) {
+                targetWindowType[0] = w.mAttrs.type;
+                return;
+            }
+        }, PooledLambda.__(WindowState.class), mTmpRect);
+        forAllWindows(fn, true /* traverseTopToBottom */);
+        ((PooledConsumer) fn).recycle();
+        return FIRST_APPLICATION_WINDOW <= targetWindowType[0]
+                        && targetWindowType[0] <= LAST_APPLICATION_WINDOW;
+    }
+
+    /**
      * Find the task whose outside touch area (for resizing) (x, y) falls within.
      * Returns null if the touch doesn't fall into a resizing area.
      */
@@ -3271,8 +3300,11 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         // Attach it to app if the target is part of an app and such app is covering the entire
         // screen. If it's not covering the entire screen the IME might extend beyond the apps
         // bounds.
-        if (mInputMethodTarget != null && mInputMethodTarget.mAppToken != null &&
-                mInputMethodTarget.getWindowingMode() == WINDOWING_MODE_FULLSCREEN) {
+        if (mInputMethodTarget != null && mInputMethodTarget.mAppToken != null
+                && mInputMethodTarget.getWindowingMode() == WINDOWING_MODE_FULLSCREEN
+                // An activity with override bounds should be letterboxed inside its parent bounds,
+                // so it doesn't fill the screen.
+                && mInputMethodTarget.mAppToken.matchParentBounds()) {
             return mInputMethodTarget.mAppToken.getSurfaceControl();
         }
 
@@ -4885,12 +4917,11 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      * @see Display#FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS
      */
     boolean supportsSystemDecorations() {
-        return mWmService.mDisplayWindowSettings.shouldShowSystemDecorsLocked(this)
+        return (mWmService.mDisplayWindowSettings.shouldShowSystemDecorsLocked(this)
                 || (mDisplay.getFlags() & FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS) != 0
-                // TODO (b/111363427): Remove this and set the new FLAG_SHOULD_SHOW_LAUNCHER flag
-                // whenever vr 2d display id is set.
-                || mDisplayId == mWmService.mVr2dDisplayId
-                || mWmService.mForceDesktopModeOnExternalDisplays;
+                || mWmService.mForceDesktopModeOnExternalDisplays)
+                // VR virtual display will be used to run and render 2D app within a VR experience.
+                && mDisplayId != mWmService.mVr2dDisplayId;
     }
 
     /**

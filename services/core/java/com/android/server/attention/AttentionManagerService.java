@@ -16,9 +16,7 @@
 
 package com.android.server.attention;
 
-import static android.provider.DeviceConfig.AttentionManagerService.COMPONENT_NAME;
-import static android.provider.DeviceConfig.AttentionManagerService.NAMESPACE;
-import static android.provider.DeviceConfig.AttentionManagerService.SERVICE_ENABLED;
+import static android.provider.DeviceConfig.NAMESPACE_ATTENTION_MANAGER_SERVICE;
 
 import android.Manifest;
 import android.annotation.Nullable;
@@ -80,6 +78,12 @@ public class AttentionManagerService extends SystemService {
     /** If the check attention called within that period - cached value will be returned. */
     private static final long STALE_AFTER_MILLIS = 5_000;
 
+    /** DeviceConfig flag name, if {@code true}, enables AttentionManagerService features. */
+    private static final String SERVICE_ENABLED = "service_enabled";
+
+    /** DeviceConfig flag name, allows a CTS to inject a fake implementation. */
+    private static final String COMPONENT_NAME = "component_name";
+
     private final Context mContext;
     private final PowerManager mPowerManager;
     private final Object mLock;
@@ -122,12 +126,13 @@ public class AttentionManagerService extends SystemService {
     /**
      * Returns {@code true} if attention service is supported on this device.
      */
-    public boolean isAttentionServiceSupported() {
+    private boolean isAttentionServiceSupported() {
         return isServiceEnabled() && isServiceAvailable();
     }
 
     private boolean isServiceEnabled() {
-        return DeviceConfig.getBoolean(NAMESPACE, SERVICE_ENABLED, DEFAULT_SERVICE_ENABLED);
+        return DeviceConfig.getBoolean(NAMESPACE_ATTENTION_MANAGER_SERVICE, SERVICE_ENABLED,
+                DEFAULT_SERVICE_ENABLED);
     }
 
     /**
@@ -135,7 +140,7 @@ public class AttentionManagerService extends SystemService {
      *
      * @return {@code true} if the framework was able to send the provided callback to the service
      */
-    public boolean checkAttention(int requestCode, long timeout,
+    private boolean checkAttention(int requestCode, long timeout,
             AttentionCallbackInternal callback) {
         Preconditions.checkNotNull(callback);
 
@@ -213,7 +218,7 @@ public class AttentionManagerService extends SystemService {
     }
 
     /** Cancels the specified attention check. */
-    public void cancelAttentionCheck(int requestCode) {
+    private void cancelAttentionCheck(int requestCode) {
         synchronized (mLock) {
             final UserState userState = peekCurrentUserStateLocked();
             if (userState == null) {
@@ -283,7 +288,8 @@ public class AttentionManagerService extends SystemService {
      * system.
      */
     private static ComponentName resolveAttentionService(Context context) {
-        final String flag = DeviceConfig.getProperty(NAMESPACE, COMPONENT_NAME);
+        final String flag = DeviceConfig.getProperty(NAMESPACE_ATTENTION_MANAGER_SERVICE,
+                COMPONENT_NAME);
 
         final String componentNameString = flag != null ? flag : context.getString(
                 R.string.config_defaultAttentionService);

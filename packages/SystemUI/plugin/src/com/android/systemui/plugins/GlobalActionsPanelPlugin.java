@@ -16,6 +16,7 @@
 
 package com.android.systemui.plugins;
 
+import android.app.PendingIntent;
 import android.view.View;
 
 import com.android.systemui.plugins.annotations.DependsOn;
@@ -62,6 +63,15 @@ public interface GlobalActionsPanelPlugin extends Plugin {
 
         /** Dismisses the Global Actions menu. */
         void dismissGlobalActionsMenu();
+
+        /** Starts a PendingIntent, dismissing the keyguard if necessary. */
+        default void startPendingIntentDismissingKeyguard(PendingIntent pendingIntent) {
+            try {
+                pendingIntent.send();
+            } catch (PendingIntent.CanceledException e) {
+                // no-op
+            }
+        }
     }
 
     /**

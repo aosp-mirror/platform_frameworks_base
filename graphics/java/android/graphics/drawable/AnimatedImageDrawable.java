@@ -313,7 +313,7 @@ public class AnimatedImageDrawable extends Drawable implements Animatable2 {
                     extended, cropRect), inputStream, afd);
 
         final long nativeSize = nNativeByteSize(mState.mNativePtr);
-        NativeAllocationRegistry registry = new NativeAllocationRegistry(
+        NativeAllocationRegistry registry = NativeAllocationRegistry.createMalloced(
                 AnimatedImageDrawable.class.getClassLoader(), nGetNativeFinalizer(), nativeSize);
         registry.registerNativeAllocation(mState, mState.mNativePtr);
     }

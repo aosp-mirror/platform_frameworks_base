@@ -16,6 +16,8 @@
 
 package android.processor.view.inspector;
 
+import androidx.annotation.NonNull;
+
 import java.util.Optional;
 
 import javax.annotation.processing.ProcessingEnvironment;
@@ -28,17 +30,17 @@ import javax.lang.model.element.Element;
  * @see android.view.inspector.InspectableNodeName
  */
 public final class InspectableNodeNameProcessor implements ModelProcessor {
-    private final String mQualifiedName;
-    private final ProcessingEnvironment mProcessingEnv;
-    private final AnnotationUtils mAnnotationUtils;
+    private final @NonNull String mQualifiedName;
+    private final @NonNull ProcessingEnvironment mProcessingEnv;
+    private final @NonNull AnnotationUtils mAnnotationUtils;
 
     /**
      * @param annotationQualifiedName The qualified name of the annotation to process
      * @param processingEnv The processing environment from the parent processor
      */
     public InspectableNodeNameProcessor(
-            String annotationQualifiedName,
-            ProcessingEnvironment processingEnv) {
+            @NonNull String annotationQualifiedName,
+            @NonNull ProcessingEnvironment processingEnv) {
         mQualifiedName = annotationQualifiedName;
         mProcessingEnv = processingEnv;
         mAnnotationUtils = new AnnotationUtils(processingEnv);
@@ -54,7 +56,7 @@ public final class InspectableNodeNameProcessor implements ModelProcessor {
      * @param model The model this element should be merged into
      */
     @Override
-    public void process(Element element, InspectableClassModel model) {
+    public void process(@NonNull Element element, @NonNull InspectableClassModel model) {
         try {
             final AnnotationMirror mirror =
                     mAnnotationUtils.exactlyOneMirror(mQualifiedName, element);

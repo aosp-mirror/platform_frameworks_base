@@ -507,18 +507,9 @@ static jobject doDecode(JNIEnv* env, std::unique_ptr<SkStreamRewindable> stream,
                 ninePatchChunk, ninePatchInsets, -1);
     }
 
-    // Speculative fix for b/112551574. It doesn't seem like |b| can be null. If it is, print some
-    // info that might be helpful to diagnose.
-    Bitmap* b = defaultAllocator.getStorageObjAndReset();
-    if (!b) {
-        ALOGW("defaultAllocator has no storage object!");
-        ALOGW("\tjavaBitmap: %s", (javaBitmap == nullptr ? "null" : "present"));
-        ALOGW("\tisHardware: %s", (isHardware ? "true" : "false"));
-        ALOGW("\twillScale: %s", (willScale ? "true" : "false"));
-        return nullptr;
-    }
     // now create the java bitmap
-    return bitmap::createBitmap(env, b, bitmapCreateFlags, ninePatchChunk, ninePatchInsets, -1);
+    return bitmap::createBitmap(env, defaultAllocator.getStorageObjAndReset(),
+            bitmapCreateFlags, ninePatchChunk, ninePatchInsets, -1);
 }
 
 static jobject nativeDecodeStream(JNIEnv* env, jobject clazz, jobject is, jbyteArray storage,

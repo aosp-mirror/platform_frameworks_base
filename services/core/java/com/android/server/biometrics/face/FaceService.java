@@ -633,11 +633,19 @@ public class FaceService extends BiometricServiceBase {
         }
 
         @Override
-        public void onRemoved(final long deviceId, final int faceId, final int userId,
-                final int remaining) {
+        public void onRemoved(final long deviceId, ArrayList<Integer> faceIds, final int userId) {
             mHandler.post(() -> {
-                final Face face = new Face("", faceId, deviceId);
-                FaceService.super.handleRemoved(face, remaining);
+                if (!faceIds.isEmpty()) {
+                    for (int i = 0; i < faceIds.size(); i++) {
+                        final Face face = new Face("", faceIds.get(i), deviceId);
+                        // Convert to old behavior
+                        FaceService.super.handleRemoved(face, faceIds.size() - i - 1);
+                    }
+                } else {
+                    final Face face = new Face("", 0 /* identifier */, deviceId);
+                    FaceService.super.handleRemoved(face, 0 /* remaining */);
+                }
+
             });
         }
 

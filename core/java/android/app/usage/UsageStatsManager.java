@@ -665,7 +665,6 @@ public final class UsageStatsManager {
      * @deprecated use {@link #registerUsageSessionObserver(int, String[], Duration, Duration,
      *                                                      PendingIntent, PendingIntent)}.
      *
-     * @removed
      * @hide
      */
     @Deprecated

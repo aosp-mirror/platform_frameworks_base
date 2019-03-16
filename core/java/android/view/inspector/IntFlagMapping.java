@@ -21,6 +21,7 @@ import android.annotation.NonNull;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -35,22 +36,20 @@ import java.util.Set;
  * it by bitwise anding it with the mask and comparing the result against the target, that is,
  * {@code (value & mask) == target}.
  *
- * This class is immutable, and must be constructed by a {@link Builder}.
- *
- * @see PropertyMapper#mapIntFlag(String, int, IntFlagMapping)
+ * @see PropertyMapper#mapIntFlag(String, int, java.util.function.IntFunction)
  */
 public final class IntFlagMapping {
-    private final Flag[] mFlags;
+    private final List<Flag> mFlags = new ArrayList<>();
 
     /**
-     * Get an array of the names of enabled flags for a given property value.
+     * Get a set of the names of enabled flags for a given property value.
      *
      * @param value The value of the property
      * @return The names of the enabled flags, empty if no flags enabled
      */
     @NonNull
     public Set<String> get(int value) {
-        final Set<String> enabledFlagNames = new HashSet<>(mFlags.length);
+        final Set<String> enabledFlagNames = new HashSet<>(mFlags.size());
 
         for (Flag flag : mFlags) {
             if (flag.isEnabledFor(value)) {
@@ -62,70 +61,14 @@ public final class IntFlagMapping {
     }
 
     /**
-     * Create a new instance from a builder.
+     * Add a mutually exclusive flag to the map.
      *
-     * This constructor is private, use {@link Builder#build()} instead.
-     *
-     * @param builder A builder to create from
+     * @param mask The bit mask to compare to and with a value
+     * @param target The target value to compare the masked value with
+     * @param name The name of the flag to include if enabled
      */
-    private IntFlagMapping(Builder builder) {
-        mFlags = builder.mFlags.toArray(new Flag[builder.mFlags.size()]);
-    }
-
-    /**
-     * A builder for {@link IntFlagMapping}.
-     */
-    public static final class Builder {
-        private ArrayList<Flag> mFlags;
-
-        public Builder() {
-            mFlags = new ArrayList<>();
-        }
-
-        /**
-         * Add a new flag without a mask.
-         *
-         * The target value will be used as a mask, to handle the common case where flag values
-         * are not mutually exclusive. The flag will be considered enabled for a property value if
-         * the result of bitwise anding the target and the value equals the target, that is:
-         * {@code (value & target) == target}.
-         *
-         * @param name The name of the flag
-         * @param target The value to compare against
-         * @return This builder
-         */
-        @NonNull
-        public Builder addFlag(@NonNull String name, int target) {
-            mFlags.add(new Flag(name, target, target));
-            return this;
-        }
-
-        /**
-         * Add a new flag with a mask.
-         *
-         * The flag will be considered enabled for a property value if the result of bitwise anding
-         * the value and the mask equals the target, that is: {@code (value & mask) == target}.
-         *
-         * @param name The name of the flag
-         * @param target The value to compare against
-         * @param mask A bit mask
-         * @return This builder
-         */
-        @NonNull
-        public Builder addFlag(@NonNull String name, int target, int mask) {
-            mFlags.add(new Flag(name, target, mask));
-            return this;
-        }
-
-        /**
-         * Build a new {@link IntFlagMapping} from this builder.
-         *
-         * @return A new mapping
-         */
-        @NonNull
-        public IntFlagMapping build() {
-            return new IntFlagMapping(this);
-        }
+    public void add(int mask, int target, @NonNull String name) {
+        mFlags.add(new Flag(mask, target, name));
     }
 
     /**
@@ -136,10 +79,10 @@ public final class IntFlagMapping {
         private final int mTarget;
         private final int mMask;
 
-        private Flag(@NonNull String name, int target, int mask) {
-            mName = Objects.requireNonNull(name);
+        private Flag(int mask, int target, @NonNull String name) {
             mTarget = target;
             mMask = mask;
+            mName = Objects.requireNonNull(name);
         }
 
         /**

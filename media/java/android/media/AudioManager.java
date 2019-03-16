@@ -4166,6 +4166,10 @@ public class AudioManager {
      /**
      * Indicate A2DP source or sink active device change and eventually suppress
      * the {@link AudioManager.ACTION_AUDIO_BECOMING_NOISY} intent.
+     * This operation is asynchronous but its execution will still be sequentially scheduled
+     * relative to calls to {@link #setBluetoothHearingAidDeviceConnectionState(BluetoothDevice,
+     * int, boolean, int)} and
+     * {@link #handleBluetoothA2dpDeviceConfigChange(BluetoothDevice)}.
      * @param device Bluetooth device connected/disconnected
      * @param state  new connection state (BluetoothProfile.STATE_xxx)
      * @param profile profile for the A2DP device
@@ -4179,18 +4183,16 @@ public class AudioManager {
      * BluetoothA2dp.ACTION_CONNECTION_STATE_CHANGED intent.
      * {@hide}
      */
-    public int handleBluetoothA2dpActiveDeviceChange(
+    public void handleBluetoothA2dpActiveDeviceChange(
                 BluetoothDevice device, int state, int profile,
                 boolean suppressNoisyIntent, int a2dpVolume) {
         final IAudioService service = getService();
-        int delay = 0;
         try {
-            delay = service.handleBluetoothA2dpActiveDeviceChange(device,
+            service.handleBluetoothA2dpActiveDeviceChange(device,
                 state, profile, suppressNoisyIntent, a2dpVolume);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
-        return delay;
     }
 
     /** {@hide} */

@@ -17,6 +17,7 @@
 package android.telecom;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SdkConstant;
 import android.app.Service;
 import android.content.Intent;
@@ -62,16 +63,20 @@ public abstract class CallRedirectionService extends Service {
     private ICallRedirectionAdapter mCallRedirectionAdapter;
 
     /**
-     * Telecom calls this method to inform the implemented {@link CallRedirectionService} of
-     * a new outgoing call which is being placed. Telecom does not request to redirect emergency
-     * calls and does not request to redirect calls with gateway information.
+     * Telecom calls this method once upon binding to a {@link CallRedirectionService} to inform
+     * it of a new outgoing call which is being placed. Telecom does not request to redirect
+     * emergency calls and does not request to redirect calls with gateway information.
      *
      * <p>Telecom will cancel the call if Telecom does not receive a response in 5 seconds from
      * the implemented {@link CallRedirectionService} set by users.
      *
      * <p>The implemented {@link CallRedirectionService} can call {@link #placeCallUnmodified()},
      * {@link #redirectCall(Uri, PhoneAccountHandle, boolean)}, and {@link #cancelCall()} only
-     * from here.
+     * from here. Calls to these methods are assumed by the Telecom framework to be the response
+     * for the phone call for which {@link #onPlaceCall(Uri, PhoneAccountHandle, boolean)} was
+     * invoked by Telecom. The Telecom framework will only invoke
+     * {@link #onPlaceCall(Uri, PhoneAccountHandle, boolean)} once each time it binds to a
+     * {@link CallRedirectionService}.
      *
      * @param handle the phone number dialed by the user, represented in E.164 format if possible
      * @param initialPhoneAccount the {@link PhoneAccountHandle} on which the call will be placed.
@@ -91,13 +96,15 @@ public abstract class CallRedirectionService extends Service {
      * no changes are required to the outgoing call, and that the call should be placed as-is.
      *
      * <p>This can only be called from implemented
-     * {@link #onPlaceCall(Uri, PhoneAccountHandle, boolean)}.
+     * {@link #onPlaceCall(Uri, PhoneAccountHandle, boolean)}. The response corresponds to the
+     * latest request via {@link #onPlaceCall(Uri, PhoneAccountHandle, boolean)}.
      *
      */
     public final void placeCallUnmodified() {
         try {
             mCallRedirectionAdapter.placeCallUnmodified();
         } catch (RemoteException e) {
+            e.rethrowAsRuntimeException();
         }
     }
 
@@ -109,7 +116,8 @@ public abstract class CallRedirectionService extends Service {
      * replies Telecom a handle for an emergency number.
      *
      * <p>This can only be called from implemented
-     * {@link #onPlaceCall(Uri, PhoneAccountHandle, boolean)}.
+     * {@link #onPlaceCall(Uri, PhoneAccountHandle, boolean)}. The response corresponds to the
+     * latest request via {@link #onPlaceCall(Uri, PhoneAccountHandle, boolean)}.
      *
      * @param handle the new phone number to dial
      * @param targetPhoneAccount the {@link PhoneAccountHandle} to use when placing the call.
@@ -126,6 +134,7 @@ public abstract class CallRedirectionService extends Service {
         try {
             mCallRedirectionAdapter.redirectCall(handle, targetPhoneAccount, confirmFirst);
         } catch (RemoteException e) {
+            e.rethrowAsRuntimeException();
         }
     }
 
@@ -135,13 +144,15 @@ public abstract class CallRedirectionService extends Service {
      * an outgoing call should be canceled entirely.
      *
      * <p>This can only be called from implemented
-     * {@link #onPlaceCall(Uri, PhoneAccountHandle, boolean)}.
+     * {@link #onPlaceCall(Uri, PhoneAccountHandle, boolean)}. The response corresponds to the
+     * latest request via {@link #onPlaceCall(Uri, PhoneAccountHandle, boolean)}.
      *
      */
     public final void cancelCall() {
         try {
             mCallRedirectionAdapter.cancelCall();
         } catch (RemoteException e) {
+            e.rethrowAsRuntimeException();
         }
     }
 
@@ -196,12 +207,12 @@ public abstract class CallRedirectionService extends Service {
     }
 
     @Override
-    public final IBinder onBind(Intent intent) {
+    public final @Nullable IBinder onBind(@NonNull Intent intent) {
         return new CallRedirectionBinder();
     }
 
     @Override
-    public final boolean onUnbind(Intent intent) {
+    public final boolean onUnbind(@NonNull Intent intent) {
         return false;
     }
 }

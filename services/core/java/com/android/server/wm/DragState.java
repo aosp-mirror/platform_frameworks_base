@@ -120,7 +120,7 @@ class DragState {
     // A surface used to catch input events for the drag-and-drop operation.
     SurfaceControl mInputSurface;
 
-    private final SurfaceControl.Transaction mTransaction = new SurfaceControl.Transaction();
+    private final SurfaceControl.Transaction mTransaction;
 
     private final Rect mTmpClipRect = new Rect();
 
@@ -140,31 +140,24 @@ class DragState {
         mFlags = flags;
         mLocalWin = localWin;
         mNotifiedWindows = new ArrayList<WindowState>();
-
+        mTransaction = service.mTransactionFactory.make();
     }
 
     boolean isClosing() {
         return mIsClosing;
     }
 
-    void hideInputSurface(SurfaceControl.Transaction t, int displayId) {
-        if (displayId != mDisplayContent.getDisplayId()) {
-            return;
-        }
-
+    private void hideInputSurface() {
         if (mInputSurface != null) {
-            t.hide(mInputSurface);
+            mTransaction.hide(mInputSurface).apply();
         }
     }
 
-    void showInputSurface(SurfaceControl.Transaction t, int displayId) {
-        if (displayId != mDisplayContent.getDisplayId()) {
-            return;
-        }
-
+    private void showInputSurface() {
         if (mInputSurface == null) {
-            mInputSurface = mService.makeSurfaceBuilder(mService.mRoot.getDisplayContent(displayId)
-                    .getSession()).setContainerLayer()
+            mInputSurface = mService.makeSurfaceBuilder(
+                    mService.mRoot.getDisplayContent(mDisplayContent.getDisplayId()).getSession())
+                    .setContainerLayer()
                     .setName("Drag and Drop Input Consumer").build();
         }
         final InputWindowHandle h = getInputWindowHandle();
@@ -174,14 +167,16 @@ class DragState {
             return;
         }
 
-        t.show(mInputSurface);
-        t.setInputWindowInfo(mInputSurface, h);
-        t.setLayer(mInputSurface, Integer.MAX_VALUE);
+        mTransaction.show(mInputSurface);
+        mTransaction.setInputWindowInfo(mInputSurface, h);
+        mTransaction.setLayer(mInputSurface, Integer.MAX_VALUE);
 
         mTmpClipRect.set(0, 0, mDisplaySize.x, mDisplaySize.y);
-        t.setWindowCrop(mInputSurface, mTmpClipRect);
-        t.transferTouchFocus(mTransferTouchFromToken, h.token);
+        mTransaction.setWindowCrop(mInputSurface, mTmpClipRect);
+        mTransaction.transferTouchFocus(mTransferTouchFromToken, h.token);
         mTransferTouchFromToken = null;
+
+        mTransaction.apply();
     }
 
     /**
@@ -199,8 +194,9 @@ class DragState {
             mDragDropController.sendHandlerMessage(
                     MSG_TEAR_DOWN_DRAG_AND_DROP_INPUT, mInputInterceptor);
             mInputInterceptor = null;
-            mDisplayContent.getInputMonitor().updateInputWindowsLw(true /*force*/);
         }
+
+        hideInputSurface();
 
         // Send drag end broadcast if drag start has been sent.
         if (mDragInProgress) {
@@ -352,7 +348,7 @@ class DragState {
             Slog.e(TAG_WM, "Duplicate register of drag input channel");
         } else {
             mInputInterceptor = new InputInterceptor(display);
-            mDisplayContent.getInputMonitor().updateInputWindowsLw(true /*force*/);
+            showInputSurface();
         }
     }
 

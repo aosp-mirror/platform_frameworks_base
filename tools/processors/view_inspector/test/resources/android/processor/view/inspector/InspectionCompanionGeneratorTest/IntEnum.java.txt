@@ -1,11 +1,12 @@
 package com.android.node;
 
 import android.R;
+import android.util.SparseArray;
 import android.view.inspector.InspectionCompanion;
-import android.view.inspector.IntEnumMapping;
 import android.view.inspector.PropertyMapper;
 import android.view.inspector.PropertyReader;
 import java.lang.Override;
+import java.lang.String;
 
 /**
  * Inspection companion for {@link TestNode}.
@@ -15,7 +16,7 @@ import java.lang.Override;
  */
 public final class TestNode$InspectionCompanion implements InspectionCompanion<TestNode> {
     /**
-     * Set by {@link #mapProperties(PropertyMapper)} once properties have been mapped.
+     * Guards against reading properties before mapping them.
      */
     private boolean mPropertiesMapped = false;
 
@@ -26,12 +27,11 @@ public final class TestNode$InspectionCompanion implements InspectionCompanion<T
 
     @Override
     public void mapProperties(PropertyMapper propertyMapper) {
-        mIntEnumPropertyId = propertyMapper.mapIntEnum("intEnumProperty", R.attr.intEnumProperty,
-                new IntEnumMapping.Builder()
-                    .addValue("ONE", 1)
-                    .addValue("TWO", 2)
-                    .addValue("THREE", 3)
-                    .build());
+        final SparseArray<String> intEnumPropertyEnumMapping = new SparseArray<>();
+        intEnumPropertyEnumMapping.put(1, "ONE");
+        intEnumPropertyEnumMapping.put(2, "TWO");
+        intEnumPropertyEnumMapping.put(3, "THREE");
+        mIntEnumPropertyId = propertyMapper.mapIntEnum("intEnumProperty", R.attr.intEnumProperty, intEnumPropertyEnumMapping::get);
         mPropertiesMapped = true;
     }
 

@@ -19,6 +19,7 @@ package com.android.systemui.bubbles;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
+import android.annotation.NonNull;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -32,6 +33,7 @@ import android.os.Bundle;
 import android.service.notification.StatusBarNotification;
 import android.util.Log;
 import android.util.StatsLog;
+import android.view.Choreographer;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -67,6 +69,43 @@ public class BubbleStackView extends FrameLayout {
     private static final String TAG = "BubbleStackView";
     private static final boolean DEBUG = false;
 
+    /**
+     * Interface to synchronize {@link View} state and the screen.
+     *
+     * {@hide}
+     */
+    interface SurfaceSynchronizer {
+        /**
+         * Wait until requested change on a {@link View} is reflected on the screen.
+         *
+         * @param callback callback to run after the change is reflected on the screen.
+         */
+        void syncSurfaceAndRun(Runnable callback);
+    }
+
+    private static final SurfaceSynchronizer DEFAULT_SURFACE_SYNCHRONIZER =
+            new SurfaceSynchronizer() {
+        @Override
+        public void syncSurfaceAndRun(Runnable callback) {
+            Choreographer.getInstance().postFrameCallback(new Choreographer.FrameCallback() {
+                // Just wait 2 frames. There is no guarantee, but this is usually enough time that
+                // the requested change is reflected on the screen.
+                // TODO: Once SurfaceFlinger provide APIs to sync the state of {@code View} and
+                // surfaces, rewrite this logic with them.
+                private int mFrameWait = 2;
+
+                @Override
+                public void doFrame(long frameTimeNanos) {
+                    if (--mFrameWait > 0) {
+                        Choreographer.getInstance().postFrameCallback(this);
+                    } else {
+                        callback.run();
+                    }
+                }
+            });
+        }
+    };
+
     private Point mDisplaySize;
 
     private final SpringAnimation mExpandedViewXAnim;
@@ -78,7 +117,6 @@ public class BubbleStackView extends FrameLayout {
     private ExpandedAnimationController mExpandedAnimationController;
 
     private FrameLayout mExpandedViewContainer;
-
 
     private int mBubbleSize;
     private int mBubblePadding;
@@ -129,7 +167,11 @@ public class BubbleStackView extends FrameLayout {
         }
     };
 
-    public BubbleStackView(Context context, BubbleData data) {
+    @NonNull private final SurfaceSynchronizer mSurfaceSynchronizer;
+
+
+    public BubbleStackView(Context context, BubbleData data,
+                           @Nullable SurfaceSynchronizer synchronizer) {
         super(context);
 
         mBubbleData = data;
@@ -160,6 +202,7 @@ public class BubbleStackView extends FrameLayout {
 
         mStackAnimationController = new StackAnimationController();
         mExpandedAnimationController = new ExpandedAnimationController(mDisplaySize);
+        mSurfaceSynchronizer = synchronizer != null ? synchronizer : DEFAULT_SURFACE_SYNCHRONIZER;
 
         mBubbleContainer = new PhysicsAnimationLayout(context);
         mBubbleContainer.setMaxRenderedChildren(
@@ -314,17 +357,28 @@ public class BubbleStackView extends FrameLayout {
             // If we weren't previously expanded we should animate open.
             animateExpansion(true /* expand */);
             logBubbleEvent(mExpandedBubble, StatsLog.BUBBLE_UICHANGED__ACTION__EXPANDED);
+            mExpandedBubble.entry.setShowInShadeWhenBubble(false);
+            notifyExpansionChanged(mExpandedBubble.entry, true /* expanded */);
         } else {
-            // Otherwise just update the views
-            // TODO: probably animate / page to expanded one
-            updateExpandedBubble();
-            updatePointerPosition();
-            requestUpdate();
-            logBubbleEvent(prevBubble, StatsLog.BUBBLE_UICHANGED__ACTION__COLLAPSED);
-            logBubbleEvent(mExpandedBubble, StatsLog.BUBBLE_UICHANGED__ACTION__EXPANDED);
+            // Make the container of the expanded view transparent before removing the expanded view
+            // from it. Otherwise a punch hole created by {@link android.view.SurfaceView} in the
+            // expanded view becomes visible on the screen. See b/126856255
+            mExpandedViewContainer.setAlpha(0.0f);
+
+            mSurfaceSynchronizer.syncSurfaceAndRun(new Runnable() {
+                @Override
+                public void run() {
+                    updateExpandedBubble();
+                    updatePointerPosition();
+                    requestUpdate();
+                    logBubbleEvent(prevBubble, StatsLog.BUBBLE_UICHANGED__ACTION__COLLAPSED);
+                    logBubbleEvent(mExpandedBubble,
+                            StatsLog.BUBBLE_UICHANGED__ACTION__EXPANDED);
+                    mExpandedBubble.entry.setShowInShadeWhenBubble(false);
+                    notifyExpansionChanged(mExpandedBubble.entry, true /* expanded */);
+                }
+            });
         }
-        mExpandedBubble.entry.setShowInShadeWhenBubble(false);
-        notifyExpansionChanged(mExpandedBubble.entry, true /* expanded */);
     }
 
     /**
@@ -426,7 +480,9 @@ public class BubbleStackView extends FrameLayout {
 
         if (reason == BubbleController.DISMISS_USER_GESTURE) {
             Notification.BubbleMetadata bubbleMetadata = bubble.entry.getBubbleMetadata();
-            PendingIntent deleteIntent = bubbleMetadata.getDeleteIntent();
+            PendingIntent deleteIntent = bubbleMetadata != null
+                    ? bubbleMetadata.getDeleteIntent()
+                    : null;
             if (deleteIntent != null) {
                 try {
                     deleteIntent.send();
@@ -767,6 +823,7 @@ public class BubbleStackView extends FrameLayout {
             mExpandedViewContainer.addView(mExpandedBubble.expandedView);
             mExpandedBubble.expandedView.populateExpandedView();
             mExpandedViewContainer.setVisibility(mIsExpanded ? VISIBLE : GONE);
+            mExpandedViewContainer.setAlpha(1.0f);
         }
     }
 

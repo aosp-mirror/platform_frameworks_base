@@ -17,6 +17,7 @@
 package com.android.server.autofill;
 
 import static android.service.autofill.FillRequest.FLAG_MANUAL_REQUEST;
+
 import static com.android.server.autofill.Helper.sDebug;
 
 import android.annotation.NonNull;
@@ -47,8 +48,6 @@ final class ViewState {
 
     private static final String TAG = "ViewState";
 
-    // NOTE: state constants must be public because of flagstoString().
-    public static final int STATE_UNKNOWN = 0x000;
     /** Initial state. */
     public static final int STATE_INITIAL = 0x001;
     /** View id is present in a dataset returned by the service. */
@@ -73,6 +72,8 @@ final class ViewState {
     public static final int STATE_AUTOFILL_FAILED = 0x400;
     /** View has been autofilled at least once. */
     public static final int STATE_AUTOFILLED_ONCE = 0x800;
+    /** View triggered the latest augmented autofill request. */
+    public static final int STATE_TRIGGERED_AUGMENTED_AUTOFILL = 0x1000;
 
     public final AutofillId id;
 

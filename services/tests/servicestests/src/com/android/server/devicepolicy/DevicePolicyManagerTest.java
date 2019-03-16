@@ -5021,8 +5021,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         configureContextForAccess(mContext, false);
 
         assertExpectException(SecurityException.class, /* messageRegex= */ null,
-                () -> dpm.setProfileOwnerCanAccessDeviceIdsForUser(admin2,
-                        UserHandle.of(DpmMockContext.CALLER_UID)));
+                () -> dpm.setProfileOwnerCanAccessDeviceIds(admin2));
     }
 
     public void testGrantDeviceIdsAccess_notByAuthorizedCaller() throws Exception {
@@ -5030,8 +5029,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         configureContextForAccess(mContext, false);
 
         assertExpectException(SecurityException.class, /* messageRegex= */ null,
-                () -> dpm.setProfileOwnerCanAccessDeviceIdsForUser(admin1,
-                        UserHandle.of(DpmMockContext.CALLER_UID)));
+                () -> dpm.setProfileOwnerCanAccessDeviceIds(admin1));
     }
 
     public void testGrantDeviceIdsAccess_byAuthorizedSystemCaller() throws Exception {
@@ -5060,8 +5058,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                         DpmMockContext.CALLER_MANAGED_PROVISIONING_UID);
         try {
             runAsCaller(mServiceContext, dpms, dpm -> {
-                dpm.setProfileOwnerCanAccessDeviceIdsForUser(admin1,
-                        UserHandle.of(DpmMockContext.CALLER_USER_HANDLE));
+                dpm.setProfileOwnerCanAccessDeviceIds(admin1);
             });
         } finally {
             mServiceContext.binder.restoreCallingIdentity(ident);
@@ -5314,7 +5311,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         mServiceContext.binder.callingUid =
                 UserHandle.getUid(DpmMockContext.CALLER_USER_HANDLE, DpmMockContext.SYSTEM_UID);
         runAsCaller(mServiceContext, dpms, dpm -> {
-            dpm.setProfileOwnerCanAccessDeviceIdsForUser(who, UserHandle.of(userId));
+            dpm.setProfileOwnerCanAccessDeviceIds(who);
         });
         mServiceContext.binder.restoreCallingIdentity(ident);
     }

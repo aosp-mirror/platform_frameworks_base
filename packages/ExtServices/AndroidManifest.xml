@@ -78,6 +78,10 @@
             </intent-filter>
         </service>
 
+        <activity android:name=".notification.CopyCodeActivity"
+                  android:exported="false"
+                  android:theme="@android:style/Theme.NoDisplay"/>
+
         <library android:name="android.ext.services"/>
     </application>
 

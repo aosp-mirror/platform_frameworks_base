@@ -146,7 +146,7 @@ package android.app {
     method @RequiresPermission("android.permission.MANAGE_APP_OPS_MODES") public void setUidMode(String, int, int);
     method public void startWatchingActive(@NonNull int[], @NonNull android.app.AppOpsManager.OnOpActiveChangedListener);
     method public void stopWatchingActive(@NonNull android.app.AppOpsManager.OnOpActiveChangedListener);
-    method public static int strOpToOp(String);
+    method public static int strOpToOp(@NonNull String);
     field public static final int HISTORICAL_MODE_DISABLED = 0; // 0x0
     field public static final int HISTORICAL_MODE_ENABLED_ACTIVE = 1; // 0x1
     field public static final int HISTORICAL_MODE_ENABLED_PASSIVE = 2; // 0x2
@@ -427,22 +427,22 @@ package android.app.prediction {
     method public int describeContents();
     method @Nullable public android.os.Bundle getExtras();
     method @NonNull public String getPackageName();
-    method public int getPredictedTargetCount();
-    method public String getUiSurface();
-    method public void writeToParcel(android.os.Parcel, int);
+    method @IntRange(from=0) public int getPredictedTargetCount();
+    method @NonNull public String getUiSurface();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.prediction.AppPredictionContext> CREATOR;
   }
 
   public static final class AppPredictionContext.Builder {
     ctor public AppPredictionContext.Builder(@NonNull android.content.Context);
-    method public android.app.prediction.AppPredictionContext build();
-    method public android.app.prediction.AppPredictionContext.Builder setExtras(@Nullable android.os.Bundle);
-    method public android.app.prediction.AppPredictionContext.Builder setPredictedTargetCount(int);
-    method public android.app.prediction.AppPredictionContext.Builder setUiSurface(@Nullable String);
+    method @NonNull public android.app.prediction.AppPredictionContext build();
+    method @NonNull public android.app.prediction.AppPredictionContext.Builder setExtras(@Nullable android.os.Bundle);
+    method @NonNull public android.app.prediction.AppPredictionContext.Builder setPredictedTargetCount(@IntRange(from=0) int);
+    method @NonNull public android.app.prediction.AppPredictionContext.Builder setUiSurface(@NonNull String);
   }
 
   public final class AppPredictionManager {
-    method public android.app.prediction.AppPredictor createAppPredictionSession(@NonNull android.app.prediction.AppPredictionContext);
+    method @NonNull public android.app.prediction.AppPredictor createAppPredictionSession(@NonNull android.app.prediction.AppPredictionContext);
   }
 
   public final class AppPredictionSessionId implements android.os.Parcelable {
@@ -472,7 +472,7 @@ package android.app.prediction {
     method @Nullable public String getClassName();
     method @NonNull public android.app.prediction.AppTargetId getId();
     method @NonNull public String getPackageName();
-    method public int getRank();
+    method @IntRange(from=0) public int getRank();
     method @Nullable public android.content.pm.ShortcutInfo getShortcutInfo();
     method @NonNull public android.os.UserHandle getUser();
     method public void writeToParcel(android.os.Parcel, int);
@@ -481,8 +481,8 @@ package android.app.prediction {
 
   public final class AppTargetEvent implements android.os.Parcelable {
     method public int describeContents();
-    method @NonNull public int getAction();
-    method @NonNull public String getLaunchLocation();
+    method public int getAction();
+    method @Nullable public String getLaunchLocation();
     method @Nullable public android.app.prediction.AppTarget getTarget();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final int ACTION_DISMISS = 2; // 0x2
@@ -493,8 +493,8 @@ package android.app.prediction {
 
   public static final class AppTargetEvent.Builder {
     ctor public AppTargetEvent.Builder(@Nullable android.app.prediction.AppTarget, int);
-    method public android.app.prediction.AppTargetEvent build();
-    method public android.app.prediction.AppTargetEvent.Builder setLaunchLocation(String);
+    method @NonNull public android.app.prediction.AppTargetEvent build();
+    method @NonNull public android.app.prediction.AppTargetEvent.Builder setLaunchLocation(@Nullable String);
   }
 
   public final class AppTargetId implements android.os.Parcelable {
@@ -946,10 +946,9 @@ package android.location {
     method @Deprecated public void setCarrierPhase(double);
     method @Deprecated public void setCarrierPhaseUncertainty(double);
     method public void setCn0DbHz(double);
-    method public void setCodeType(int);
+    method public void setCodeType(@NonNull String);
     method public void setConstellationType(int);
     method public void setMultipathIndicator(int);
-    method public void setOtherCodeTypeName(@NonNull String);
     method public void setPseudorangeRateMetersPerSecond(double);
     method public void setPseudorangeRateUncertaintyMetersPerSecond(double);
     method public void setReceivedSvTimeNanos(long);
@@ -1763,7 +1762,7 @@ package android.os {
   public final class PowerManager {
     method @RequiresPermission("android.permission.POWER_SAVER") public int getPowerSaveMode();
     method @RequiresPermission("android.permission.POWER_SAVER") public boolean setDynamicPowerSavings(boolean, int);
-    method @RequiresPermission(anyOf={"android.permission.DEVICE_POWER", "android.permission.POWER_SAVER"}) public boolean setPowerSaveMode(boolean);
+    method @RequiresPermission(anyOf={"android.permission.DEVICE_POWER", "android.permission.POWER_SAVER"}) public boolean setPowerSaveModeEnabled(boolean);
     field public static final int POWER_SAVER_MODE_DYNAMIC = 1; // 0x1
     field public static final int POWER_SAVER_MODE_PERCENTAGE = 0; // 0x0
   }
@@ -2056,16 +2055,16 @@ package android.provider {
   public final class DeviceConfig {
     method @RequiresPermission("android.permission.READ_DEVICE_CONFIG") public static void addOnPropertiesChangedListener(@NonNull String, @NonNull java.util.concurrent.Executor, @NonNull android.provider.DeviceConfig.OnPropertiesChangedListener);
     method @RequiresPermission("android.permission.READ_DEVICE_CONFIG") public static void addOnPropertyChangedListener(@NonNull String, @NonNull java.util.concurrent.Executor, @NonNull android.provider.DeviceConfig.OnPropertyChangedListener);
-    method @RequiresPermission("android.permission.READ_DEVICE_CONFIG") public static boolean getBoolean(String, String, boolean);
-    method @RequiresPermission("android.permission.READ_DEVICE_CONFIG") public static float getFloat(String, String, float);
-    method @RequiresPermission("android.permission.READ_DEVICE_CONFIG") public static int getInt(String, String, int);
-    method @RequiresPermission("android.permission.READ_DEVICE_CONFIG") public static long getLong(String, String, long);
-    method @RequiresPermission("android.permission.READ_DEVICE_CONFIG") public static String getProperty(String, String);
-    method @RequiresPermission("android.permission.READ_DEVICE_CONFIG") public static String getString(String, String, String);
+    method @RequiresPermission("android.permission.READ_DEVICE_CONFIG") public static boolean getBoolean(@NonNull String, @NonNull String, boolean);
+    method @RequiresPermission("android.permission.READ_DEVICE_CONFIG") public static float getFloat(@NonNull String, @NonNull String, float);
+    method @RequiresPermission("android.permission.READ_DEVICE_CONFIG") public static int getInt(@NonNull String, @NonNull String, int);
+    method @RequiresPermission("android.permission.READ_DEVICE_CONFIG") public static long getLong(@NonNull String, @NonNull String, long);
+    method @RequiresPermission("android.permission.READ_DEVICE_CONFIG") public static String getProperty(@NonNull String, @NonNull String);
+    method @RequiresPermission("android.permission.READ_DEVICE_CONFIG") public static String getString(@NonNull String, @NonNull String, @Nullable String);
     method public static void removeOnPropertiesChangedListener(@NonNull android.provider.DeviceConfig.OnPropertiesChangedListener);
     method public static void removeOnPropertyChangedListener(@NonNull android.provider.DeviceConfig.OnPropertyChangedListener);
     method @RequiresPermission(android.Manifest.permission.WRITE_DEVICE_CONFIG) public static void resetToDefaults(int, @Nullable String);
-    method @RequiresPermission(android.Manifest.permission.WRITE_DEVICE_CONFIG) public static boolean setProperty(String, String, String, boolean);
+    method @RequiresPermission(android.Manifest.permission.WRITE_DEVICE_CONFIG) public static boolean setProperty(@NonNull String, @NonNull String, @Nullable String, boolean);
     field public static final String NAMESPACE_AUTOFILL = "autofill";
     field public static final String NAMESPACE_CONTENT_CAPTURE = "content_capture";
   }
@@ -2075,7 +2074,7 @@ package android.provider {
   }
 
   public static interface DeviceConfig.OnPropertyChangedListener {
-    method public void onPropertyChanged(String, String, String);
+    method public void onPropertyChanged(@NonNull String, @NonNull String, @Nullable String);
   }
 
   public static interface DeviceConfig.Privacy {
@@ -2225,7 +2224,7 @@ package android.service.appprediction {
   public abstract class AppPredictionService extends android.app.Service {
     ctor public AppPredictionService();
     method @MainThread public abstract void onAppTargetEvent(@NonNull android.app.prediction.AppPredictionSessionId, @NonNull android.app.prediction.AppTargetEvent);
-    method public final android.os.IBinder onBind(android.content.Intent);
+    method @NonNull public final android.os.IBinder onBind(@NonNull android.content.Intent);
     method public void onCreatePredictionSession(@NonNull android.app.prediction.AppPredictionContext, @NonNull android.app.prediction.AppPredictionSessionId);
     method @MainThread public void onDestroyPredictionSession(@NonNull android.app.prediction.AppPredictionSessionId);
     method @MainThread public abstract void onLocationShown(@NonNull android.app.prediction.AppPredictionSessionId, @NonNull String, @NonNull java.util.List<android.app.prediction.AppTargetId>);
@@ -2397,6 +2396,7 @@ package android.service.contentcapture {
     field @NonNull public static final android.os.Parcelable.Creator<android.service.contentcapture.ActivityEvent> CREATOR;
     field public static final int TYPE_ACTIVITY_PAUSED = 2; // 0x2
     field public static final int TYPE_ACTIVITY_RESUMED = 1; // 0x1
+    field public static final int TYPE_ACTIVITY_STOPPED = 23; // 0x17
   }
 
   public abstract class ContentCaptureService extends android.app.Service {
@@ -3056,6 +3056,7 @@ package android.view.contentcapture {
     method public int getTaskId();
     field public static final int FLAG_DISABLED_BY_APP = 1; // 0x1
     field public static final int FLAG_DISABLED_BY_FLAG_SECURE = 2; // 0x2
+    field public static final int FLAG_RECONNECTED = 4; // 0x4
   }
 
   public final class ContentCaptureEvent implements android.os.Parcelable {

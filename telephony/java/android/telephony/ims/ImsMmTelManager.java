@@ -25,6 +25,8 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.content.Context;
+import android.content.pm.IPackageManager;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.RemoteException;
@@ -107,9 +109,9 @@ public class ImsMmTelManager {
                         // case, since it is defined.
                         put(ImsRegistrationImplBase.REGISTRATION_TECH_NONE, -1);
                         put(ImsRegistrationImplBase.REGISTRATION_TECH_LTE,
-                                AccessNetworkConstants.TransportType.WWAN);
+                                AccessNetworkConstants.TRANSPORT_TYPE_WWAN);
                         put(ImsRegistrationImplBase.REGISTRATION_TECH_IWLAN,
-                                AccessNetworkConstants.TransportType.WLAN);
+                                AccessNetworkConstants.TRANSPORT_TYPE_WLAN);
                     }};
 
             private final RegistrationCallback mLocalCallback;
@@ -314,7 +316,7 @@ public class ImsMmTelManager {
     private int mSubId;
 
     /**
-     * Create an instance of ImsManager for the subscription id specified.
+     * Create an instance of {@link ImsMmTelManager} for the subscription id specified.
      *
      * @param subId The ID of the subscription that this ImsMmTelManager will use.
      * @see android.telephony.SubscriptionManager#getActiveSubscriptionInfoList()
@@ -366,12 +368,14 @@ public class ImsMmTelManager {
         if (executor == null) {
             throw new IllegalArgumentException("Must include a non-null Executor.");
         }
+        if (!isImsAvailableOnDevice()) {
+            throw new ImsException("IMS not available on device.",
+                    ImsException.CODE_ERROR_UNSUPPORTED_OPERATION);
+        }
         c.setExecutor(executor);
         try {
             getITelephony().registerImsRegistrationCallback(mSubId, c.getBinder());
-        } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
-        } catch (IllegalStateException e) {
+        } catch (RemoteException | IllegalStateException e) {
             throw new ImsException(e.getMessage(), ImsException.CODE_ERROR_SERVICE_UNAVAILABLE);
         }
     }
@@ -433,6 +437,10 @@ public class ImsMmTelManager {
         }
         if (executor == null) {
             throw new IllegalArgumentException("Must include a non-null Executor.");
+        }
+        if (!isImsAvailableOnDevice()) {
+            throw new ImsException("IMS not available on device.",
+                    ImsException.CODE_ERROR_UNSUPPORTED_OPERATION);
         }
         c.setExecutor(executor);
         try {
@@ -798,6 +806,22 @@ public class ImsMmTelManager {
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }
+    }
+
+    private static boolean isImsAvailableOnDevice() {
+        IPackageManager pm = IPackageManager.Stub.asInterface(ServiceManager.getService("package"));
+        if (pm == null) {
+            // For some reason package manger is not available.. This will fail internally anyways,
+            // so do not throw error and allow.
+            return true;
+        }
+        try {
+            return pm.hasSystemFeature(PackageManager.FEATURE_TELEPHONY_IMS, 0);
+        } catch (RemoteException e) {
+            // For some reason package manger is not available.. This will fail internally anyways,
+            // so do not throw error and allow.
+        }
+        return true;
     }
 
     private static ITelephony getITelephony() {

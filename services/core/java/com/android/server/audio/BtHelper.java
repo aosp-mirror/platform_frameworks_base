@@ -139,6 +139,19 @@ public class BtHelper {
         }
     }
 
+    // A2DP device events
+    /*package*/ static final int EVENT_DEVICE_CONFIG_CHANGE = 0;
+    /*package*/ static final int EVENT_ACTIVE_DEVICE_CHANGE = 1;
+
+    /*package*/ static String a2dpDeviceEventToString(int event) {
+        switch (event) {
+            case EVENT_DEVICE_CONFIG_CHANGE: return "DEVICE_CONFIG_CHANGE";
+            case EVENT_ACTIVE_DEVICE_CHANGE: return "ACTIVE_DEVICE_CHANGE";
+            default:
+                return new String("invalid event:" + event);
+        }
+    }
+
     //----------------------------------------------------------------------
     // Interface for AudioDeviceBroker
 

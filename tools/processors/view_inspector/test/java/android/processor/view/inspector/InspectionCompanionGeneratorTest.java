@@ -118,9 +118,9 @@ public class InspectionCompanionGeneratorTest {
                 Property.Type.INT_ENUM);
 
         property.setIntEnumEntries(Arrays.asList(
-                new IntEnumEntry("THREE", 3),
-                new IntEnumEntry("TWO", 2),
-                new IntEnumEntry("ONE", 1)));
+                new IntEnumEntry(3, "THREE"),
+                new IntEnumEntry(2, "TWO"),
+                new IntEnumEntry(1, "ONE")));
 
         mModel.putProperty(property);
 
@@ -136,9 +136,9 @@ public class InspectionCompanionGeneratorTest {
 
         property.setAttributeIdInferrableFromR(false);
         property.setIntFlagEntries(Arrays.asList(
-                new IntFlagEntry("TURBO", 0x1, 0x3),
-                new IntFlagEntry("OVERDRIVE", 0x2, 0x3),
-                new IntFlagEntry("WARP", 0x4)
+                new IntFlagEntry(0x3, 0x1, "TURBO"),
+                new IntFlagEntry(0x3, 0x2, "OVERDRIVE"),
+                new IntFlagEntry(0x4, "WARP")
         ));
 
         assertGeneratedFileEquals("IntFlag");

@@ -2645,7 +2645,7 @@ public class MediaPlayer extends PlayerBase
      */
     private synchronized void setSubtitleAnchor() {
         if ((mSubtitleController == null) && (ActivityThread.currentApplication() != null)) {
-            getMediaTimeProvider();
+            final TimeProvider timeProvider = (TimeProvider) getMediaTimeProvider();
             final HandlerThread thread = new HandlerThread("SetSubtitleAnchorThread");
             thread.start();
             Handler handler = new Handler(thread.getLooper());
@@ -2653,7 +2653,8 @@ public class MediaPlayer extends PlayerBase
                 @Override
                 public void run() {
                     Context context = ActivityThread.currentApplication();
-                    mSubtitleController = new SubtitleController(context, mTimeProvider, MediaPlayer.this);
+                    mSubtitleController =
+                            new SubtitleController(context, timeProvider, MediaPlayer.this);
                     mSubtitleController.setAnchor(new Anchor() {
                         @Override
                         public void setSubtitleWidget(RenderingWidget subtitleWidget) {
@@ -2661,7 +2662,7 @@ public class MediaPlayer extends PlayerBase
 
                         @Override
                         public Looper getSubtitleLooper() {
-                            return mTimeProvider.mEventHandler.getLooper();
+                            return timeProvider.mEventHandler.getLooper();
                         }
                     });
                     thread.getLooper().quitSafely();

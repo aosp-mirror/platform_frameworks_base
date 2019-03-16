@@ -44,7 +44,6 @@ import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
 import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.LAST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.LAST_SYSTEM_WINDOW;
-import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
@@ -127,7 +126,6 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.database.ContentObserver;
-import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.hardware.display.DisplayManager;
@@ -211,7 +209,6 @@ import com.android.internal.policy.PhoneWindow;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.ScreenshotHelper;
-import com.android.internal.widget.PointerLocationView;
 import com.android.server.ExtconStateObserver;
 import com.android.server.ExtconUEventObserver;
 import com.android.server.GestureLauncherService;
@@ -494,9 +491,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     private boolean mHandleVolumeKeysInWM;
 
-    int mPointerLocationMode = 0; // guarded by mLock
-    PointerLocationView mPointerLocationView;
-
     private boolean mPendingKeyguardOccluded;
     private boolean mKeyguardOccludedChanged;
     private boolean mNotifyUserActivity;
@@ -619,8 +613,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private boolean mPerDisplayFocusEnabled = false;
     private volatile int mTopFocusedDisplayId = INVALID_DISPLAY;
 
-    private static final int MSG_ENABLE_POINTER_LOCATION = 1;
-    private static final int MSG_DISABLE_POINTER_LOCATION = 2;
     private static final int MSG_DISPATCH_MEDIA_KEY_WITH_WAKE_LOCK = 3;
     private static final int MSG_DISPATCH_MEDIA_KEY_REPEAT_WITH_WAKE_LOCK = 4;
     private static final int MSG_KEYGUARD_DRAWN_COMPLETE = 5;
@@ -651,12 +643,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case MSG_ENABLE_POINTER_LOCATION:
-                    enablePointerLocation();
-                    break;
-                case MSG_DISABLE_POINTER_LOCATION:
-                    disablePointerLocation();
-                    break;
                 case MSG_DISPATCH_MEDIA_KEY_WITH_WAKE_LOCK:
                     dispatchMediaKeyWithWakeLock((KeyEvent)msg.obj);
                     break;
@@ -778,9 +764,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.SCREEN_OFF_TIMEOUT), false, this,
-                    UserHandle.USER_ALL);
-            resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.POINTER_LOCATION), false, this,
                     UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.Secure.getUriFor(
                     Settings.Secure.DEFAULT_INPUT_METHOD), false, this,
@@ -2007,15 +1990,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 updateWakeGestureListenerLp();
             }
 
-            if (mSystemReady) {
-                int pointerLocation = Settings.System.getIntForUser(resolver,
-                        Settings.System.POINTER_LOCATION, 0, UserHandle.USER_CURRENT);
-                if (mPointerLocationMode != pointerLocation) {
-                    mPointerLocationMode = pointerLocation;
-                    mHandler.sendEmptyMessage(pointerLocation != 0 ?
-                            MSG_ENABLE_POINTER_LOCATION : MSG_DISABLE_POINTER_LOCATION);
-                }
-            }
             // use screen off timeout setting as the timeout for the lockscreen
             mLockScreenTimeout = Settings.System.getIntForUser(resolver,
                     Settings.System.SCREEN_OFF_TIMEOUT, 0, UserHandle.USER_CURRENT);
@@ -2046,46 +2020,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 || mDefaultDisplayPolicy.getLidState() != LID_CLOSED)
                 && mWakeGestureListener.isSupported();
     }
-
-    private void enablePointerLocation() {
-        if (mPointerLocationView == null) {
-            mPointerLocationView = new PointerLocationView(mContext);
-            mPointerLocationView.setPrintCoords(false);
-            WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
-                    WindowManager.LayoutParams.MATCH_PARENT,
-                    WindowManager.LayoutParams.MATCH_PARENT);
-            lp.type = WindowManager.LayoutParams.TYPE_SECURE_SYSTEM_OVERLAY;
-            lp.flags = WindowManager.LayoutParams.FLAG_FULLSCREEN
-                    | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
-                    | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                    | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
-            lp.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
-            if (ActivityManager.isHighEndGfx()) {
-                lp.flags |= WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
-                lp.privateFlags |=
-                        WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_HARDWARE_ACCELERATED;
-            }
-            lp.format = PixelFormat.TRANSLUCENT;
-            lp.setTitle("PointerLocation");
-            WindowManager wm = (WindowManager) mContext.getSystemService(WINDOW_SERVICE);
-            lp.inputFeatures |= WindowManager.LayoutParams.INPUT_FEATURE_NO_INPUT_CHANNEL;
-            wm.addView(mPointerLocationView, lp);
-            //TODO (b/111365687) : make system context per display.
-            mWindowManagerFuncs.registerPointerEventListener(mPointerLocationView, DEFAULT_DISPLAY);
-        }
-    }
-
-    private void disablePointerLocation() {
-        if (mPointerLocationView != null) {
-            //TODO (b/111365687) : make system context per display.
-            mWindowManagerFuncs.unregisterPointerEventListener(mPointerLocationView,
-                    DEFAULT_DISPLAY);
-            WindowManager wm = (WindowManager) mContext.getSystemService(WINDOW_SERVICE);
-            wm.removeView(mPointerLocationView);
-            mPointerLocationView = null;
-        }
-    }
-
 
     /** {@inheritDoc} */
     @Override

@@ -4474,7 +4474,7 @@ public final class PowerManagerService extends SystemService
         }
 
         @Override // Binder call
-        public boolean setPowerSaveMode(boolean enabled) {
+        public boolean setPowerSaveModeEnabled(boolean enabled) {
             if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.POWER_SAVER)
                     != PackageManager.PERMISSION_GRANTED) {
                 mContext.enforceCallingOrSelfPermission(

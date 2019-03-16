@@ -3393,9 +3393,6 @@ public class DevicePolicyManager {
      * explicitly querying the parent profile screen lock complexity via {@link
      * #getParentProfileInstance}.
      *
-     * <p>On devices not supporting {@link PackageManager#FEATURE_SECURE_LOCK_SCREEN} feature, the
-     * password is always empty and this method returns {@link #PASSWORD_COMPLEXITY_NONE}.
-     *
      * @throws IllegalStateException if the user is not unlocked.
      * @throws SecurityException if the calling application does not have the permission
      *                           {@link permission#REQUEST_PASSWORD_COMPLEXITY}
@@ -10628,10 +10625,10 @@ public class DevicePolicyManager {
      * Returns the system-wide Private DNS host.
      *
      * @param admin which {@link DeviceAdminReceiver} this request is associated with.
-     * @return The hostname used for Private DNS queries.
+     * @return The hostname used for Private DNS queries, null if none is set.
      * @throws SecurityException if the caller is not the device owner.
      */
-    public String getGlobalPrivateDnsHost(@NonNull ComponentName admin) {
+    public @Nullable String getGlobalPrivateDnsHost(@NonNull ComponentName admin) {
         throwIfParentInstance("setGlobalPrivateDns");
         if (mService == null) {
             return null;
@@ -10661,13 +10658,12 @@ public class DevicePolicyManager {
     @SystemApi
     @RequiresPermission(value = android.Manifest.permission.GRANT_PROFILE_OWNER_DEVICE_IDS_ACCESS,
             conditional = true)
-    public void setProfileOwnerCanAccessDeviceIdsForUser(
-            @NonNull ComponentName who, @NonNull UserHandle userHandle) {
+    public void setProfileOwnerCanAccessDeviceIds(@NonNull ComponentName who) {
         if (mService == null) {
             return;
         }
         try {
-            mService.grantDeviceIdsAccessToProfileOwner(who, userHandle.getIdentifier());
+            mService.grantDeviceIdsAccessToProfileOwner(who, myUserId());
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }

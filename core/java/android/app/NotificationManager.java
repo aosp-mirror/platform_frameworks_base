@@ -1270,6 +1270,8 @@ public class NotificationManager {
 
     /**
      * Grants/revokes Notification Assistant access to {@code assistant} for current user.
+     * To grant access for a particular user, obtain this service by using the {@link Context}
+     * provided by {@link Context#createPackageContextAsUser}
      *
      * @param assistant Name of component to grant/revoke access or {@code null} to revoke access to
      *                  current assistant
@@ -1287,44 +1289,11 @@ public class NotificationManager {
         }
     }
 
-    /**
-     * Grants/revokes Notification Assistant access to {@code assistant} for given user.
-     *
-     * @param assistant Name of component to grant/revoke access or {@code null} to revoke access to
-     *                  current assistant
-     * @param user handle to associate assistant with
-     * @param granted Grant/revoke access
-     * @hide
-     */
-    @SystemApi
-    public void setNotificationAssistantAccessGrantedForUser(@Nullable ComponentName assistant,
-            @NonNull UserHandle user, boolean granted) {
-        INotificationManager service = getService();
-        try {
-            service.setNotificationAssistantAccessGrantedForUser(assistant, user.getIdentifier(),
-                    granted);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
     /** @hide */
     public List<ComponentName> getEnabledNotificationListeners(int userId) {
         INotificationManager service = getService();
         try {
             return service.getEnabledNotificationListeners(userId);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /** @hide */
-    @SystemApi
-    public @Nullable ComponentName getAllowedNotificationAssistantForUser(
-            @NonNull UserHandle user) {
-        INotificationManager service = getService();
-        try {
-            return service.getAllowedNotificationAssistantForUser(user.getIdentifier());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

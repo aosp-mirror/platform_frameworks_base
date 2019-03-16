@@ -224,8 +224,10 @@ public final class BluetoothA2dp implements BluetoothProfile {
                         if (VDBG) Log.d(TAG, "Unbinding service...");
                         try {
                             mServiceLock.writeLock().lock();
-                            mService = null;
-                            mContext.unbindService(mConnection);
+                            if (mService != null) {
+                                mService = null;
+                                mContext.unbindService(mConnection);
+                            }
                         } catch (Exception re) {
                             Log.e(TAG, "", re);
                         } finally {

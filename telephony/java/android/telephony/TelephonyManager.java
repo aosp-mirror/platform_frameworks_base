@@ -3346,26 +3346,25 @@ public class TelephonyManager {
     }
 
     /**
-     * Get the mapping from logical slots to physical slots. The mapping represent by a pair list.
-     * The key of the piar is the logical slot id and the value of the pair is the physical
-     * slots id mapped to this logical slot id.
+     * Get the mapping from logical slots to physical slots. The key of the map is the logical slot
+     * id and the value is the physical slots id mapped to this logical slot id.
      *
-     * @return an pair list indicates the mapping from logical slots to physical slots. The size of
-     * the list should be {@link #getPhoneCount()} if success, otherwise return an empty list.
+     * @return a map indicates the mapping from logical slots to physical slots. The size of the map
+     * should be {@link #getPhoneCount()} if success, otherwise return an empty map.
      *
      * @hide
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     @NonNull
-    public List<Pair<Integer, Integer>> getLogicalToPhysicalSlotMapping() {
-        List<Pair<Integer, Integer>> slotMapping = new ArrayList<>();
+    public Map<Integer, Integer> getLogicalToPhysicalSlotMapping() {
+        Map<Integer, Integer> slotMapping = new HashMap<>();
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
                 int[] slotMappingArray = telephony.getSlotsMapping();
                 for (int i = 0; i < slotMappingArray.length; i++) {
-                    slotMapping.add(new Pair(i, slotMappingArray[i]));
+                    slotMapping.put(i, slotMappingArray[i]);
                 }
             }
         } catch (RemoteException e) {
@@ -6774,14 +6773,12 @@ public class TelephonyManager {
             }
         } catch (RemoteException ex) {
             Rlog.e(TAG, "getPreferredNetworkType RemoteException", ex);
-        } catch (NullPointerException ex) {
-            Rlog.e(TAG, "getPreferredNetworkType NPE", ex);
         }
         return -1;
     }
 
     /**
-     * Get the preferred network type bitmap.
+     * Get the preferred network type bitmask.
      *
      * <p>If this object has been created with {@link #createForSubscriptionId}, applies to the
      * given subId. Otherwise, applies to {@link SubscriptionManager#getDefaultSubscriptionId()}
@@ -6790,13 +6787,13 @@ public class TelephonyManager {
      * {@link android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE READ_PRIVILEGED_PHONE_STATE}
      * or that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
      *
-     * @return The bitmap of preferred network types.
+     * @return The bitmask of preferred network types.
      *
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     @SystemApi
-    public @NetworkTypeBitMask long getPreferredNetworkTypeBitmap() {
+    public @NetworkTypeBitMask long getPreferredNetworkTypeBitmask() {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
@@ -6804,9 +6801,7 @@ public class TelephonyManager {
                         telephony.getPreferredNetworkType(getSubId()));
             }
         } catch (RemoteException ex) {
-            Rlog.e(TAG, "getPreferredNetworkTypeBitmap RemoteException", ex);
-        } catch (NullPointerException ex) {
-            Rlog.e(TAG, "getPreferredNetworkTypeBitmap NPE", ex);
+            Rlog.e(TAG, "getPreferredNetworkTypeBitmask RemoteException", ex);
         }
         return 0;
     }
@@ -7031,14 +7026,12 @@ public class TelephonyManager {
             }
         } catch (RemoteException ex) {
             Rlog.e(TAG, "setPreferredNetworkType RemoteException", ex);
-        } catch (NullPointerException ex) {
-            Rlog.e(TAG, "setPreferredNetworkType NPE", ex);
         }
         return false;
     }
 
     /**
-     * Set the preferred network type bitmap.
+     * Set the preferred network type bitmask.
      *
      * <p>If this object has been created with {@link #createForSubscriptionId}, applies to the
      * given subId. Otherwise, applies to {@link SubscriptionManager#getDefaultSubscriptionId()}
@@ -7047,24 +7040,22 @@ public class TelephonyManager {
      * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE} or that the calling
      * app has carrier privileges (see {@link #hasCarrierPrivileges}).
      *
-     * @param networkTypeBitmap The bitmap of preferred network types.
+     * @param networkTypeBitmask The bitmask of preferred network types.
      * @return true on success; false on any failure.
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     @SystemApi
-    public boolean setPreferredNetworkTypeBitmap(@NetworkTypeBitMask long networkTypeBitmap) {
+    public boolean setPreferredNetworkTypeBitmask(@NetworkTypeBitMask long networkTypeBitmask) {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
                 return telephony.setPreferredNetworkType(
                         getSubId(), RadioAccessFamily.getNetworkTypeFromRaf(
-                                (int) networkTypeBitmap));
+                                (int) networkTypeBitmask));
             }
         } catch (RemoteException ex) {
-            Rlog.e(TAG, "setPreferredNetworkType RemoteException", ex);
-        } catch (NullPointerException ex) {
-            Rlog.e(TAG, "setPreferredNetworkType NPE", ex);
+            Rlog.e(TAG, "setPreferredNetworkTypeBitmask RemoteException", ex);
         }
         return false;
     }
@@ -10264,15 +10255,20 @@ public class TelephonyManager {
     }
 
     /**
-     * Checks if the supplied number is an emergency number based on current locale, sim, default,
-     * modem and network.
+     * Identifies if the supplied phone number is an emergency number that matches a known
+     * emergency number based on current locale, SIM card(s), Android database, modem, network,
+     * or defaults.
+     *
+     * <p>This method assumes that only dialable phone numbers are passed in; non-dialable
+     * numbers are not considered emergency numbers. A dialable phone number consists only
+     * of characters/digits identified by {@link PhoneNumberUtils#isDialable(char)}.
      *
      * <p>The subscriptions which the identification would be based on, are all the active
      * subscriptions, no matter which subscription could be used to create TelephonyManager.
      *
      * @param number - the number to look up
      * @return {@code true} if the given number is an emergency number based on current locale,
-     * sim, modem and network; {@code false} otherwise.
+     * SIM card(s), Android database, modem, network or defaults; {@code false} otherwise.
      */
     public boolean isEmergencyNumber(@NonNull String number) {
         try {

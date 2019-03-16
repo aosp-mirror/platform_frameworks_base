@@ -127,6 +127,20 @@ public abstract class ContentCaptureSession implements AutoCloseable {
      */
     public static final int STATE_NOT_WHITELISTED = 0x200;
 
+    /**
+     * Session is disabled because the service died.
+     *
+     * @hide
+     */
+    public static final int STATE_SERVICE_DIED = 0x400;
+
+    /**
+     * Session is enabled, after the service died and came back to live.
+     *
+     * @hide
+     */
+    public static final int STATE_SERVICE_RESURRECTED = 0x800;
+
     private static final int INITIAL_CHILDREN_CAPACITY = 5;
 
     /** @hide */
@@ -139,6 +153,8 @@ public abstract class ContentCaptureSession implements AutoCloseable {
     public static final int FLUSH_REASON_SESSION_FINISHED = 4;
     /** @hide */
     public static final int FLUSH_REASON_IDLE_TIMEOUT = 5;
+    /** @hide */
+    public static final int FLUSH_REASON_TEXT_CHANGE_TIMEOUT = 6;
 
     /** @hide */
     @IntDef(prefix = { "FLUSH_REASON_" }, value = {
@@ -146,7 +162,8 @@ public abstract class ContentCaptureSession implements AutoCloseable {
             FLUSH_REASON_VIEW_ROOT_ENTERED,
             FLUSH_REASON_SESSION_STARTED,
             FLUSH_REASON_SESSION_FINISHED,
-            FLUSH_REASON_IDLE_TIMEOUT
+            FLUSH_REASON_IDLE_TIMEOUT,
+            FLUSH_REASON_TEXT_CHANGE_TIMEOUT
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface FlushReason{}
@@ -375,7 +392,8 @@ public abstract class ContentCaptureSession implements AutoCloseable {
      *
      * <p>Should only be called by views that handle their own virtual view hierarchy.
      *
-     * @param hostId id of the view hosting the virtual hierarchy.
+     * @param hostId id of the non-virtual view hosting the virtual view hierarchy (it can be
+     * obtained by calling {@link ViewStructure#getAutofillId()}).
      * @param virtualIds ids of the virtual children.
      *
      * @throws IllegalArgumentException if the {@code hostId} is an autofill id for a virtual view.
@@ -383,7 +401,7 @@ public abstract class ContentCaptureSession implements AutoCloseable {
      */
     public final void notifyViewsDisappeared(@NonNull AutofillId hostId,
             @NonNull long[] virtualIds) {
-        Preconditions.checkArgument(hostId.isNonVirtual(), "parent cannot be virtual");
+        Preconditions.checkArgument(hostId.isNonVirtual(), "hostId cannot be virtual: %s", hostId);
         Preconditions.checkArgument(!ArrayUtils.isEmpty(virtualIds), "virtual ids cannot be empty");
         if (!isContentCaptureEnabled()) return;
 
@@ -428,18 +446,18 @@ public abstract class ContentCaptureSession implements AutoCloseable {
      * Creates a new {@link AutofillId} for a virtual child, so it can be used to uniquely identify
      * the children in the session.
      *
-     * @param parentId id of the virtual view parent (it can be obtained by calling
-     * {@link ViewStructure#getAutofillId()} on the parent).
+     * @param hostId id of the non-virtual view hosting the virtual view hierarchy (it can be
+     * obtained by calling {@link ViewStructure#getAutofillId()}).
      * @param virtualChildId id of the virtual child, relative to the parent.
      *
      * @return if for the virtual child
      *
      * @throws IllegalArgumentException if the {@code parentId} is a virtual child id.
      */
-    public @NonNull AutofillId newAutofillId(@NonNull AutofillId parentId, long virtualChildId) {
-        Preconditions.checkNotNull(parentId);
-        Preconditions.checkArgument(parentId.isNonVirtual(), "virtual ids cannot have children");
-        return new AutofillId(parentId, virtualChildId, getIdAsInt());
+    public @NonNull AutofillId newAutofillId(@NonNull AutofillId hostId, long virtualChildId) {
+        Preconditions.checkNotNull(hostId);
+        Preconditions.checkArgument(hostId.isNonVirtual(), "hostId cannot be virtual: %s", hostId);
+        return new AutofillId(hostId, virtualChildId, getIdAsInt());
     }
 
     /**
@@ -510,6 +528,8 @@ public abstract class ContentCaptureSession implements AutoCloseable {
                 return "FINISHED";
             case FLUSH_REASON_IDLE_TIMEOUT:
                 return "IDLE";
+            case FLUSH_REASON_TEXT_CHANGE_TIMEOUT:
+                return "TEXT_CHANGE";
             default:
                 return "UNKOWN-" + reason;
         }

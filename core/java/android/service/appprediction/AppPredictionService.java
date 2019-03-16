@@ -141,7 +141,8 @@ public abstract class AppPredictionService extends Service {
     }
 
     @Override
-    public final IBinder onBind(Intent intent) {
+    @NonNull
+    public final IBinder onBind(@NonNull Intent intent) {
         // TODO(b/111701043): Verify that the action is valid
         return mInterface.asBinder();
     }

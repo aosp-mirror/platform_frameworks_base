@@ -16,12 +16,13 @@
 
 package android.graphics;
 
+import android.annotation.UnsupportedAppUsage;
+
 import dalvik.annotation.optimization.CriticalNative;
 import dalvik.annotation.optimization.FastNative;
 
 import libcore.util.NativeAllocationRegistry;
 
-import android.annotation.UnsupportedAppUsage;
 import java.io.PrintWriter;
 
 /**
@@ -222,12 +223,10 @@ public class Matrix {
         }
     };
 
-    // sizeof(SkMatrix) is 9 * sizeof(float) + uint32_t
-    private static final long NATIVE_ALLOCATION_SIZE = 40;
-
     private static class NoImagePreloadHolder {
-        public static final NativeAllocationRegistry sRegistry = new NativeAllocationRegistry(
-                Matrix.class.getClassLoader(), nGetNativeFinalizer(), NATIVE_ALLOCATION_SIZE);
+        public static final NativeAllocationRegistry sRegistry =
+                NativeAllocationRegistry.createMalloced(
+                Matrix.class.getClassLoader(), nGetNativeFinalizer());
     }
 
     /**

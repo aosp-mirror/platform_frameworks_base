@@ -948,7 +948,8 @@ public class WifiManager {
     /**
      * Directed broadcast intent action indicating that the device has connected to one of the
      * network suggestions provided by the app. This will be sent post connection to a network
-     * which was created with {@link WifiNetworkSuggestion.Builder#setIsAppInteractionRequired()}
+     * which was created with {@link WifiNetworkSuggestion.Builder#setIsAppInteractionRequired(
+     * boolean)}
      * flag set.
      * <p>
      * Note: The broadcast is sent to the app only if it holds
@@ -4879,14 +4880,14 @@ public class WifiManager {
 
     /**
      * Provide a Wi-Fi usability score information to be recorded (but not acted upon) by the
-     * framework. The Wi-Fi usability score is derived from {@link WifiUsabilityStatsListener}
+     * framework. The Wi-Fi usability score is derived from {@link OnWifiUsabilityStatsListener}
      * where a score is matched to Wi-Fi usability statistics using the sequence number. The score
      * is used to quantify whether Wi-Fi is usable in a future time.
      *
      * @param seqNum Sequence number of the Wi-Fi usability score.
-     * @param score The Wi-Fi usability score.
+     * @param score The Wi-Fi usability score, expected range: [0, 100].
      * @param predictionHorizonSec Prediction horizon of the Wi-Fi usability score in second,
-     *                             expected range: [0, 100].
+     *                             expected range: [0, 30].
      *
      * @hide
      */

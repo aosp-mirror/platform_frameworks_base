@@ -178,7 +178,7 @@ public final class DevicePolicyEventLogger {
     }
 
     /**
-     * Retrieves the package name of the admin application from the {@link ComponentName}.
+     * Sets the package name of the admin application from the {@link ComponentName}.
      */
     public DevicePolicyEventLogger setAdmin(@Nullable ComponentName componentName) {
         mAdminPackageName = (componentName != null ? componentName.getPackageName() : null);

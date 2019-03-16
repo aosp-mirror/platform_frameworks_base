@@ -18,6 +18,9 @@ package android.processor.view.inspector;
 
 import static javax.tools.Diagnostic.Kind.ERROR;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import javax.annotation.processing.Messager;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
@@ -27,27 +30,30 @@ import javax.lang.model.element.Element;
  * Internal exception used to signal an error processing an annotation.
  */
 final class ProcessingException extends RuntimeException {
-    private final Element mElement;
-    private final AnnotationMirror mAnnotationMirror;
-    private final AnnotationValue mAnnotationValue;
+    private final @Nullable Element mElement;
+    private final @Nullable AnnotationMirror mAnnotationMirror;
+    private final @Nullable AnnotationValue mAnnotationValue;
 
-    ProcessingException(String message) {
+    ProcessingException(@NonNull String message) {
         this(message, null, null, null);
     }
 
-    ProcessingException(String message, Element element) {
+    ProcessingException(@NonNull String message, @NonNull Element element) {
         this(message, element, null, null);
     }
 
-    ProcessingException(String message, Element element, AnnotationMirror annotationMirror) {
+    ProcessingException(
+            @NonNull String message,
+            @NonNull Element element,
+            @NonNull AnnotationMirror annotationMirror) {
         this(message, element, annotationMirror, null);
     }
 
     ProcessingException(
-            String message,
-            Element element,
-            AnnotationMirror annotationMirror,
-            AnnotationValue annotationValue) {
+            @NonNull String message,
+            @Nullable Element element,
+            @Nullable AnnotationMirror annotationMirror,
+            @Nullable AnnotationValue annotationValue) {
         super(message);
         mElement = element;
         mAnnotationMirror = annotationMirror;
@@ -59,7 +65,7 @@ final class ProcessingException extends RuntimeException {
      *
      * @param messager A Messager to print to
      */
-    void print(Messager messager) {
+    void print(@NonNull Messager messager) {
         if (mElement != null) {
             if (mAnnotationMirror != null) {
                 if (mAnnotationValue != null) {

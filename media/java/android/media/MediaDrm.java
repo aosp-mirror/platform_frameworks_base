@@ -1363,6 +1363,18 @@ public final class MediaDrm implements AutoCloseable {
         removeAllSecureStops();;
     }
 
+    /**
+     * @deprecated Not of any use for application development;
+     * please note that the related integer constants remain supported:
+     * {@link #HDCP_LEVEL_UNKNOWN},
+     * {@link #HDCP_NONE},
+     * {@link #HDCP_V1},
+     * {@link #HDCP_V2},
+     * {@link #HDCP_V2_1},
+     * {@link #HDCP_V2_2},
+     * {@link #HDCP_V2_3}
+     */
+    @Deprecated
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({HDCP_LEVEL_UNKNOWN, HDCP_NONE, HDCP_V1, HDCP_V2,
                         HDCP_V2_1, HDCP_V2_2, HDCP_V2_3, HDCP_NO_DIGITAL_OUTPUT})
@@ -1455,7 +1467,17 @@ public final class MediaDrm implements AutoCloseable {
     /**
      * Security level indicates the robustness of the device's DRM
      * implementation.
+     *
+     * @deprecated Not of any use for application development;
+     * please note that the related integer constants remain supported:
+     * {@link #SECURITY_LEVEL_UNKNOWN},
+     * {@link #SECURITY_LEVEL_SW_SECURE_CRYPTO},
+     * {@link #SECURITY_LEVEL_SW_SECURE_DECODE},
+     * {@link #SECURITY_LEVEL_HW_SECURE_CRYPTO},
+     * {@link #SECURITY_LEVEL_HW_SECURE_DECODE},
+     * {@link #SECURITY_LEVEL_HW_SECURE_ALL}
      */
+    @Deprecated
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({SECURITY_LEVEL_UNKNOWN, SECURITY_LEVEL_SW_SECURE_CRYPTO,
             SECURITY_LEVEL_SW_SECURE_DECODE, SECURITY_LEVEL_HW_SECURE_CRYPTO,

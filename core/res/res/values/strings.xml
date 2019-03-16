@@ -3374,9 +3374,9 @@
     <string name="wifi_available_action_all_networks">All networks</string>
 
     <!-- Notification title for a connection to a app suggested wireless network.-->
-    <string name="wifi_suggestion_title">A Wi\u2011Fi network proposed by <xliff:g id="name" example="App123">%s</xliff:g> is available</string>
+    <string name="wifi_suggestion_title">Connect to Wi\u2011Fi networks?</string>
     <!-- Notification content for a connection to a app suggested wireless network.-->
-    <string name="wifi_suggestion_content">Do you want to connect to networks proposed by <xliff:g id="name" example="App123">%s</xliff:g>?</string>
+    <string name="wifi_suggestion_content">Suggested by <xliff:g id="name" example="App123">%s</xliff:g></string>
     <!-- Notification action for allowing app specified in the notification body.-->
     <string name="wifi_suggestion_action_allow_app">Yes</string>
     <!-- Notification action for disallowing app specified in the notification body.-->
@@ -3601,6 +3601,11 @@
     <!-- Message of notification shown when ADB is actively connected to the phone. -->
     <string name="adb_active_notification_message">Tap to turn off USB debugging</string>
     <string name="adb_active_notification_message" product="tv">Select to disable USB debugging.</string>
+
+    <!-- Title of notification shown when Test Harness Mode is enabled. [CHAR LIMIT=NONE] -->
+    <string name="test_harness_mode_notification_title">Test Harness Mode enabled</string>
+    <!-- Message of notification shown when Test Harness Mode is enabled. [CHAR LIMIT=NONE] -->
+    <string name="test_harness_mode_notification_message">Perform a factory reset to disable Test Harness Mode.</string>
 
     <!-- Title of notification shown when contaminant is detected on the USB port. [CHAR LIMIT=NONE] -->
     <string name="usb_contaminant_detected_title">Liquid or debris in USB port</string>
@@ -5048,12 +5053,6 @@
     <string name="usb_mtp_launch_notification_description">Tap to view files</string>
 
     <!-- Resolver target actions strings -->
-
-    <!-- Pin (as in to a bulletin board with a pushpin) a resolver
-         target to the front of the list. -->
-    <string name="pin_target">Pin</string>
-    <!-- Unpin a resolver target such that it sorts normally. -->
-    <string name="unpin_target">Unpin</string>
     <!-- View application info for a target. -->
     <string name="app_info">App info</string>
 

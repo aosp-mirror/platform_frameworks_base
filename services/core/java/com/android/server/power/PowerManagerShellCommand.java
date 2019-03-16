@@ -68,7 +68,7 @@ class PowerManagerShellCommand extends ShellCommand {
             pw.println("Error: " + ex.toString());
             return -1;
         }
-        mInterface.setPowerSaveMode(mode == LOW_POWER_MODE_ON);
+        mInterface.setPowerSaveModeEnabled(mode == LOW_POWER_MODE_ON);
         return 0;
     }
 

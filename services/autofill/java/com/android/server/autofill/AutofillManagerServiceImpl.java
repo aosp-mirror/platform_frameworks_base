@@ -194,7 +194,7 @@ final class AutofillManagerServiceImpl
         mAugmentedAutofillResolver = new FrameworkResourcesServiceNameResolver(master.getContext(),
                 com.android.internal.R.string.config_defaultAugmentedAutofillService);
         mAugmentedAutofillResolver.setOnTemporaryServiceNameChangedCallback(
-                (u, s) -> updateRemoteAugmentedAutofillService(s));
+                (u, s) -> updateRemoteAugmentedAutofillService());
 
         updateLocked(disabled);
     }
@@ -223,6 +223,7 @@ final class AutofillManagerServiceImpl
             }
             sendStateToClients(false);
         }
+        updateRemoteAugmentedAutofillService();
         return enabledChanged;
     }
 
@@ -298,7 +299,8 @@ final class AutofillManagerServiceImpl
             final IAutoFillManagerClient client = IAutoFillManagerClient.Stub
                     .asInterface(appCallbackToken);
             try {
-                client.setSessionFinished(AutofillManager.STATE_DISABLED_BY_SERVICE);
+                client.setSessionFinished(AutofillManager.STATE_DISABLED_BY_SERVICE,
+                        /* autofillableIds= */ null);
             } catch (RemoteException e) {
                 Slog.w(TAG, "Could not notify " + shortComponentName + " that it's disabled: " + e);
             }
@@ -1093,7 +1095,7 @@ final class AutofillManagerServiceImpl
     /**
      * Called when the {@link #mAugmentedAutofillResolver} changed (among other places).
      */
-    private void updateRemoteAugmentedAutofillService(@Nullable String serviceName) {
+    void updateRemoteAugmentedAutofillService() {
         synchronized (mLock) {
             if (mRemoteAugmentedAutofillService != null) {
                 if (sVerbose) {
@@ -1105,7 +1107,9 @@ final class AutofillManagerServiceImpl
                 mRemoteAugmentedAutofillServiceInfo = null;
             }
 
-            mRemoteAugmentedAutofillService = getRemoteAugmentedAutofillServiceLocked();
+            if (isEnabledLocked()) {
+                mRemoteAugmentedAutofillService = getRemoteAugmentedAutofillServiceLocked();
+            }
         }
     }
 

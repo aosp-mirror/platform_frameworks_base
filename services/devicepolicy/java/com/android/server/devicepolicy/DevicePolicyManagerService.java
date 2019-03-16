@@ -5912,10 +5912,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         delegateReceiver = resolveDelegateReceiver(DELEGATION_CERT_SELECTION,
                 DeviceAdminReceiver.ACTION_CHOOSE_PRIVATE_KEY_ALIAS, caller.getIdentifier());
 
+        final boolean isDelegate;
         if (delegateReceiver != null) {
             intent.setComponent(delegateReceiver);
+            isDelegate = true;
         } else {
             intent.setComponent(aliasChooser);
+            isDelegate = false;
         }
 
         final long id = mInjector.binderClearCallingIdentity();
@@ -5927,11 +5930,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     sendPrivateKeyAliasResponse(chosenAlias, response);
                 }
             }, null, Activity.RESULT_OK, null, null);
-            final String adminPackageName =
-                    (aliasChooser != null ? aliasChooser.getPackageName() : null);
             DevicePolicyEventLogger
                     .createEvent(DevicePolicyEnums.CHOOSE_PRIVATE_KEY_ALIAS)
-                    .setAdmin(adminPackageName)
+                    .setAdmin(intent.getComponent())
+                    .setBoolean(isDelegate)
                     .write();
         } finally {
             mInjector.binderRestoreCallingIdentity(id);
@@ -13091,6 +13093,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             saveSettingsLocked(mInjector.userHandleGetCallingUserId());
 
             setNetworkLoggingActiveInternal(enabled);
+
+            final boolean isDelegate = (admin == null);
+            DevicePolicyEventLogger
+                    .createEvent(DevicePolicyEnums.SET_NETWORK_LOGGING_ENABLED)
+                    .setAdmin(packageName)
+                    .setBoolean(isDelegate)
+                    .setInt(enabled ? 1 : 0)
+                    .write();
         }
     }
 
@@ -13222,6 +13232,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     || !isNetworkLoggingEnabledInternalLocked()) {
                 return null;
             }
+            final boolean isDelegate = (admin == null);
+            DevicePolicyEventLogger
+                    .createEvent(DevicePolicyEnums.RETRIEVE_NETWORK_LOGS)
+                    .setAdmin(packageName)
+                    .setBoolean(isDelegate)
+                    .write();
 
             final long currentTime = System.currentTimeMillis();
             DevicePolicyData policyData = getUserData(UserHandle.USER_SYSTEM);

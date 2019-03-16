@@ -27,13 +27,17 @@ import android.app.RemoteAction;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.graphics.drawable.Icon;
+import android.net.Uri;
 import android.os.Bundle;
+import android.view.textclassifier.intent.LabeledIntent;
+import android.view.textclassifier.intent.TemplateIntentFactory;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.google.android.textclassifier.ActionsSuggestionsModel;
+import com.google.android.textclassifier.RemoteActionTemplate;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -204,6 +208,77 @@ public class ActionsSuggestionsHelperTest {
         assertThat(conversationActions.get(2).getAction()).isNull();
     }
 
+    public void createLabeledIntentResult_null() {
+        ActionsSuggestionsModel.ActionSuggestion nativeSuggestion =
+                new ActionsSuggestionsModel.ActionSuggestion(
+                        "text",
+                        ConversationAction.TYPE_OPEN_URL,
+                        1.0f,
+                        null,
+                        null
+                );
+
+        LabeledIntent.Result labeledIntentResult =
+                ActionsSuggestionsHelper.createLabeledIntentResult(
+                        InstrumentationRegistry.getTargetContext(),
+                        new TemplateIntentFactory(),
+                        nativeSuggestion);
+
+        assertThat(labeledIntentResult).isNull();
+    }
+
+    @Test
+    public void createLabeledIntentResult_emptyList() {
+        ActionsSuggestionsModel.ActionSuggestion nativeSuggestion =
+                new ActionsSuggestionsModel.ActionSuggestion(
+                        "text",
+                        ConversationAction.TYPE_OPEN_URL,
+                        1.0f,
+                        null,
+                        new RemoteActionTemplate[0]
+                );
+
+        LabeledIntent.Result labeledIntentResult =
+                ActionsSuggestionsHelper.createLabeledIntentResult(
+                        InstrumentationRegistry.getTargetContext(),
+                        new TemplateIntentFactory(),
+                        nativeSuggestion);
+
+        assertThat(labeledIntentResult).isNull();
+    }
+
+    @Test
+    public void createLabeledIntentResult() {
+        ActionsSuggestionsModel.ActionSuggestion nativeSuggestion =
+                new ActionsSuggestionsModel.ActionSuggestion(
+                        "text",
+                        ConversationAction.TYPE_OPEN_URL,
+                        1.0f,
+                        null,
+                        new RemoteActionTemplate[]{
+                                new RemoteActionTemplate(
+                                        "title",
+                                        null,
+                                        "description",
+                                        Intent.ACTION_VIEW,
+                                        Uri.parse("http://www.android.com").toString(),
+                                        null,
+                                        0,
+                                        null,
+                                        null,
+                                        null,
+                                        0)});
+
+        LabeledIntent.Result labeledIntentResult =
+                ActionsSuggestionsHelper.createLabeledIntentResult(
+                        InstrumentationRegistry.getTargetContext(),
+                        new TemplateIntentFactory(),
+                        nativeSuggestion);
+
+        assertThat(labeledIntentResult.remoteAction.getTitle()).isEqualTo("title");
+        assertThat(labeledIntentResult.resolvedIntent.getAction()).isEqualTo(Intent.ACTION_VIEW);
+    }
+
     private ZonedDateTime createZonedDateTimeFromMsUtc(long msUtc) {
         return ZonedDateTime.ofInstant(Instant.ofEpochMilli(msUtc), ZoneId.of("UTC"));
     }
@@ -215,7 +290,7 @@ public class ActionsSuggestionsHelperTest {
             long referenceTimeInMsUtc) {
         assertThat(nativeMessage.getText()).isEqualTo(text.toString());
         assertThat(nativeMessage.getUserId()).isEqualTo(userId);
-        assertThat(nativeMessage.getLocales()).isEqualTo(LOCALE_TAG);
+        assertThat(nativeMessage.getDetectedTextLanguageTags()).isEqualTo(LOCALE_TAG);
         assertThat(nativeMessage.getReferenceTimeMsUtc()).isEqualTo(referenceTimeInMsUtc);
     }
 }

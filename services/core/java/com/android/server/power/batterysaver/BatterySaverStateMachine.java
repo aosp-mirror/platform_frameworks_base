@@ -524,7 +524,7 @@ public class BatterySaverStateMachine {
 
     /**
      * {@link com.android.server.power.PowerManagerService} calls it when
-     * {@link android.os.PowerManager#setPowerSaveMode} is called.
+     * {@link android.os.PowerManager#setPowerSaveModeEnabled} is called.
      *
      * Note this could? be called before {@link #onBootCompleted} too.
      */

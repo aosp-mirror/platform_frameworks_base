@@ -483,7 +483,9 @@ public class KeyguardStatusBarView extends RelativeLayout
                 R.color.light_mode_icon_color_single_tone);
         float intensity = textColor == Color.WHITE ? 0 : 1;
         mCarrierLabel.setTextColor(iconColor);
-        mIconManager.setTint(iconColor);
+        if (mIconManager != null) {
+            mIconManager.setTint(iconColor);
+        }
 
         applyDarkness(R.id.battery, mEmptyRect, intensity * (1f - mDarkAmount), iconColor);
         applyDarkness(R.id.clock, mEmptyRect, intensity, iconColor);

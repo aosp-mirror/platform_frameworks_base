@@ -36,8 +36,9 @@ import libcore.util.NativeAllocationRegistry;
  */
 public class Path {
 
-    private static final NativeAllocationRegistry sRegistry = new NativeAllocationRegistry(
-                Path.class.getClassLoader(), nGetFinalizer(), 48 /* dummy size */);
+    private static final NativeAllocationRegistry sRegistry =
+            NativeAllocationRegistry.createMalloced(
+                Path.class.getClassLoader(), nGetFinalizer());
 
     /**
      * @hide
