@@ -198,6 +198,7 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
         return super.performAccessibilityActionInternal(action, arguments);
     }
 
+    @Override
     public boolean onTouchEvent(MotionEvent ev) {
         final boolean showSwipeUI = mOverviewProxyService.shouldShowSwipeUpUI();
         final int action = ev.getAction();
@@ -300,7 +301,7 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
         sendEvent(action, flags, SystemClock.uptimeMillis());
     }
 
-    void sendEvent(int action, int flags, long when) {
+    private void sendEvent(int action, int flags, long when) {
         mMetricsLogger.write(new LogMaker(MetricsEvent.ACTION_NAV_BUTTON_EVENT)
                 .setType(MetricsEvent.TYPE_ACTION)
                 .setSubtype(mCode)
