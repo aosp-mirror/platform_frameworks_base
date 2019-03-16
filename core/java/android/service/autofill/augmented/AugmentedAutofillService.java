@@ -405,7 +405,6 @@ public abstract class AugmentedAutofillService extends Service {
         private void update(@NonNull AutofillId focusedId, @NonNull AutofillValue focusedValue,
                 @NonNull IFillCallback callback) {
             synchronized (mLock) {
-                // TODO(b/123099468): should we close the popupwindow if the focused id changed?
                 mFocusedId = focusedId;
                 mFocusedValue = focusedValue;
                 if (mCallback != null) {

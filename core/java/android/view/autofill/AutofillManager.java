@@ -20,6 +20,7 @@ import static android.service.autofill.FillRequest.FLAG_AUGMENTED_AUTOFILL_REQUE
 import static android.service.autofill.FillRequest.FLAG_MANUAL_REQUEST;
 import static android.view.autofill.Helper.sDebug;
 import static android.view.autofill.Helper.sVerbose;
+import static android.view.autofill.Helper.toList;
 
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.annotation.IntDef;
@@ -1870,10 +1871,6 @@ public final class AutofillManager {
                 Log.wtf(TAG, "setAugmentedAutofillWhitelist(): received invalid result: "
                         + resultCode);
         }
-    }
-
-    private <T> ArrayList<T> toList(@Nullable Set<T> set) {
-        return set == null ? null : new ArrayList<T>(set);
     }
 
     /**
