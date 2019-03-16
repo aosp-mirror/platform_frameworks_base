@@ -787,7 +787,6 @@ void ValueMetricProducer::flushCurrentBucketLocked(const int64_t& eventTimeNs,
     }
 
     int64_t numBucketsForward = calcBucketsForwardCount(eventTimeNs);
-    mCurrentBucketNum += numBucketsForward;
     if (numBucketsForward > 1) {
         VLOG("Skipping forward %lld buckets", (long long)numBucketsForward);
         StatsdStats::getInstance().noteSkippedForwardBuckets(mMetricId);
@@ -816,10 +815,9 @@ void ValueMetricProducer::flushCurrentBucketLocked(const int64_t& eventTimeNs,
         mSkippedBuckets.emplace_back(mCurrentBucketStartTimeNs, bucketEndTime);
     }
 
-    if (!mCurrentBucketIsInvalid) {
-        appendToFullBucket(eventTimeNs, fullBucketEndTimeNs);
-    }
+    appendToFullBucket(eventTimeNs, fullBucketEndTimeNs);
     initCurrentSlicedBucket(nextBucketStartTimeNs);
+    mCurrentBucketNum += numBucketsForward;
 }
 
 ValueBucket ValueMetricProducer::buildPartialBucket(int64_t bucketEndTime,
@@ -879,7 +877,17 @@ void ValueMetricProducer::initCurrentSlicedBucket(int64_t nextBucketStartTimeNs)
 }
 
 void ValueMetricProducer::appendToFullBucket(int64_t eventTimeNs, int64_t fullBucketEndTimeNs) {
-    if (eventTimeNs > fullBucketEndTimeNs) {  // If full bucket, send to anomaly tracker.
+    bool isFullBucketReached = eventTimeNs > fullBucketEndTimeNs;
+    if (mCurrentBucketIsInvalid) {
+        if (isFullBucketReached) {
+            // If the bucket is invalid, we ignore the full bucket since it contains invalid data.
+            mCurrentFullBucket.clear();
+        }
+        // Current bucket is invalid, we do not add it to the full bucket.
+        return;
+    }
+
+    if (isFullBucketReached) {  // If full bucket, send to anomaly tracker.
         // Accumulate partial buckets with current value and then send to anomaly tracker.
         if (mCurrentFullBucket.size() > 0) {
             for (const auto& slice : mCurrentSlicedBucket) {
@@ -887,7 +895,10 @@ void ValueMetricProducer::appendToFullBucket(int64_t eventTimeNs, int64_t fullBu
                     continue;
                 }
                 // TODO: fix this when anomaly can accept double values
-                mCurrentFullBucket[slice.first] += slice.second[0].value.long_value;
+                auto& interval = slice.second[0];
+                if (interval.hasValue) {
+                    mCurrentFullBucket[slice.first] += interval.value.long_value;
+                }
             }
             for (const auto& slice : mCurrentFullBucket) {
                 for (auto& tracker : mAnomalyTrackers) {
@@ -903,8 +914,11 @@ void ValueMetricProducer::appendToFullBucket(int64_t eventTimeNs, int64_t fullBu
                 for (auto& tracker : mAnomalyTrackers) {
                     if (tracker != nullptr) {
                         // TODO: fix this when anomaly can accept double values
-                        tracker->addPastBucket(slice.first, slice.second[0].value.long_value,
-                                               mCurrentBucketNum);
+                        auto& interval = slice.second[0];
+                        if (interval.hasValue) {
+                            tracker->addPastBucket(slice.first, interval.value.long_value,
+                                                   mCurrentBucketNum);
+                        }
                     }
                 }
             }
@@ -913,7 +927,10 @@ void ValueMetricProducer::appendToFullBucket(int64_t eventTimeNs, int64_t fullBu
         // Accumulate partial bucket.
         for (const auto& slice : mCurrentSlicedBucket) {
             // TODO: fix this when anomaly can accept double values
-            mCurrentFullBucket[slice.first] += slice.second[0].value.long_value;
+            auto& interval = slice.second[0];
+            if (interval.hasValue) {
+                mCurrentFullBucket[slice.first] += interval.value.long_value;
+            }
         }
     }
 }
