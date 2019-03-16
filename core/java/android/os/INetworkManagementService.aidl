@@ -242,27 +242,6 @@ interface INetworkManagementService
     void tetherLimitReached(ITetheringStatsProvider provider);
 
     /**
-     ** PPPD
-     **/
-
-    /**
-     * Returns the list of currently known TTY devices on the system
-     */
-    String[] listTtys();
-
-    /**
-     * Attaches a PPP server daemon to the specified TTY with the specified
-     * local/remote addresses.
-     */
-    void attachPppd(String tty, String localAddr, String remoteAddr, String dns1Addr,
-            String dns2Addr);
-
-    /**
-     * Detaches a PPP server daemon from the specified TTY.
-     */
-    void detachPppd(String tty);
-
-    /**
      ** DATA USAGE RELATED
      **/
 
