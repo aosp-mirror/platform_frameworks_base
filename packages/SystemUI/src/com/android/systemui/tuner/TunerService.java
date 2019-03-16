@@ -107,4 +107,12 @@ public abstract class TunerService {
         });
         dialog.show();
     }
+
+    public static boolean parseIntegerSwitch(String value, boolean defaultValue) {
+        try {
+            return value != null ? Integer.parseInt(value) != 0 : defaultValue;
+        } catch (NumberFormatException e) {
+            return defaultValue;
+        }
+    }
 }
