@@ -39,152 +39,158 @@
             android:layout_height="0dp"
             android:layout_weight="1" />
 
-        <LinearLayout
+        <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <!-- This is not a Space since Spaces cannot be clicked. The width of this changes depending
-             on horizontal/portrait orientation -->
-            <View
-                android:id="@+id/left_space"
-                android:layout_weight="1"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"/>
+            android:layout_height="wrap_content">
 
             <LinearLayout
-                android:id="@+id/dialog"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:background="@drawable/biometric_dialog_bg"
-                android:layout_marginBottom="@dimen/biometric_dialog_border_padding"
-                android:layout_marginLeft="@dimen/biometric_dialog_border_padding"
-                android:layout_marginRight="@dimen/biometric_dialog_border_padding">
+                android:orientation="horizontal">
 
-                <TextView
-                    android:id="@+id/title"
-                    android:fontFamily="@*android:string/config_headlineFontFamilyMedium"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="24dp"
-                    android:layout_marginStart="24dp"
-                    android:layout_marginTop="24dp"
-                    android:gravity="@integer/biometric_dialog_text_gravity"
-                    android:textSize="20sp"
-                    android:maxLines="1"
-                    android:singleLine="true"
-                    android:ellipsize="marquee"
-                    android:marqueeRepeatLimit="marquee_forever"
-                    android:textColor="?android:attr/textColorPrimary"/>
+                <!-- This is not a Space since Spaces cannot be clicked. The width of this changes
+                depending on horizontal/portrait orientation -->
+                <View
+                    android:id="@+id/left_space"
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"/>
 
-                <TextView
-                    android:id="@+id/subtitle"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginStart="24dp"
-                    android:layout_marginEnd="24dp"
-                    android:gravity="@integer/biometric_dialog_text_gravity"
-                    android:textSize="16sp"
-                    android:maxLines="1"
-                    android:singleLine="true"
-                    android:ellipsize="marquee"
-                    android:marqueeRepeatLimit="marquee_forever"
-                    android:textColor="?android:attr/textColorPrimary"/>
+                    <LinearLayout
+                        android:id="@+id/dialog"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:background="@drawable/biometric_dialog_bg"
+                        android:layout_marginBottom="@dimen/biometric_dialog_border_padding"
+                        android:layout_marginLeft="@dimen/biometric_dialog_border_padding"
+                        android:layout_marginRight="@dimen/biometric_dialog_border_padding">
 
-                <TextView
-                    android:id="@+id/description"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="24dp"
-                    android:layout_marginStart="24dp"
-                    android:gravity="@integer/biometric_dialog_text_gravity"
-                    android:paddingTop="8dp"
-                    android:textSize="16sp"
-                    android:maxLines="4"
-                    android:textColor="?android:attr/textColorPrimary"/>
+                        <TextView
+                            android:id="@+id/title"
+                            android:fontFamily="@*android:string/config_headlineFontFamilyMedium"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="24dp"
+                            android:layout_marginStart="24dp"
+                            android:layout_marginTop="24dp"
+                            android:gravity="@integer/biometric_dialog_text_gravity"
+                            android:textSize="20sp"
+                            android:maxLines="1"
+                            android:singleLine="true"
+                            android:ellipsize="marquee"
+                            android:marqueeRepeatLimit="marquee_forever"
+                            android:textColor="?android:attr/textColorPrimary"/>
 
-                <ImageView
-                    android:id="@+id/biometric_icon"
-                    android:layout_width="@dimen/biometric_dialog_biometric_icon_size"
-                    android:layout_height="@dimen/biometric_dialog_biometric_icon_size"
-                    android:layout_gravity="center_horizontal"
-                    android:layout_marginTop="48dp"
-                    android:scaleType="fitXY" />
+                        <TextView
+                            android:id="@+id/subtitle"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:layout_marginStart="24dp"
+                            android:layout_marginEnd="24dp"
+                            android:gravity="@integer/biometric_dialog_text_gravity"
+                            android:textSize="16sp"
+                            android:maxLines="1"
+                            android:singleLine="true"
+                            android:ellipsize="marquee"
+                            android:marqueeRepeatLimit="marquee_forever"
+                            android:textColor="?android:attr/textColorPrimary"/>
 
-                <TextView
-                    android:id="@+id/error"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="24dp"
-                    android:layout_marginStart="24dp"
-                    android:paddingTop="16dp"
-                    android:paddingBottom="24dp"
-                    android:textSize="12sp"
-                    android:gravity="center_horizontal"
-                    android:accessibilityLiveRegion="polite"
-                    android:contentDescription="@string/accessibility_biometric_dialog_help_area"
-                    android:textColor="?android:attr/textColorSecondary"/>
+                        <TextView
+                            android:id="@+id/description"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="24dp"
+                            android:layout_marginStart="24dp"
+                            android:gravity="@integer/biometric_dialog_text_gravity"
+                            android:paddingTop="8dp"
+                            android:textSize="16sp"
+                            android:maxLines="4"
+                            android:textColor="?android:attr/textColorPrimary"/>
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="72dip"
-                    android:paddingTop="24dp"
-                    android:layout_gravity="center_vertical"
-                    style="?android:attr/buttonBarStyle"
-                    android:orientation="horizontal"
-                    android:measureWithLargestChild="true">
-                    <Space android:id="@+id/leftSpacer"
-                        android:layout_width="12dp"
-                        android:layout_height="match_parent"
-                        android:visibility="visible" />
-                    <!-- Negative Button -->
-                    <Button android:id="@+id/button2"
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        style="@*android:style/Widget.DeviceDefault.Button.Borderless.Colored"
-                        android:gravity="center"
-                        android:maxLines="2" />
-                    <Space android:id="@+id/middleSpacer"
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1"
-                        android:visibility="visible" />
-                    <!-- Positive Button -->
-                    <Button android:id="@+id/button1"
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        style="@*android:style/Widget.DeviceDefault.Button.Colored"
-                        android:gravity="center"
-                        android:maxLines="2"
-                        android:text="@string/biometric_dialog_confirm"
-                        android:visibility="gone"/>
-                    <!-- Try Again Button -->
-                    <Button android:id="@+id/button_try_again"
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        style="@*android:style/Widget.DeviceDefault.Button.Colored"
-                        android:gravity="center"
-                        android:maxLines="2"
-                        android:text="@string/biometric_dialog_try_again"
-                        android:visibility="gone"/>
-                    <Space android:id="@+id/rightSpacer"
-                        android:layout_width="12dip"
-                        android:layout_height="match_parent"
-                        android:visibility="visible" />
-                </LinearLayout>
+                        <ImageView
+                            android:id="@+id/biometric_icon"
+                            android:layout_width="@dimen/biometric_dialog_biometric_icon_size"
+                            android:layout_height="@dimen/biometric_dialog_biometric_icon_size"
+                            android:layout_gravity="center_horizontal"
+                            android:layout_marginTop="48dp"
+                            android:scaleType="fitXY" />
+
+                        <TextView
+                            android:id="@+id/error"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="24dp"
+                            android:layout_marginStart="24dp"
+                            android:paddingTop="16dp"
+                            android:paddingBottom="24dp"
+                            android:textSize="12sp"
+                            android:gravity="center_horizontal"
+                            android:accessibilityLiveRegion="polite"
+                            android:contentDescription="@string/accessibility_biometric_dialog_help_area"
+                            android:textColor="?android:attr/textColorSecondary"/>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="72dip"
+                            android:paddingTop="24dp"
+                            android:layout_gravity="center_vertical"
+                            style="?android:attr/buttonBarStyle"
+                            android:orientation="horizontal"
+                            android:measureWithLargestChild="true">
+                            <Space android:id="@+id/leftSpacer"
+                                android:layout_width="12dp"
+                                android:layout_height="match_parent"
+                                android:visibility="visible" />
+                            <!-- Negative Button -->
+                            <Button android:id="@+id/button2"
+                                android:layout_width="wrap_content"
+                                android:layout_height="match_parent"
+                                style="@*android:style/Widget.DeviceDefault.Button.Borderless.Colored"
+                                android:gravity="center"
+                                android:maxLines="2" />
+                            <Space android:id="@+id/middleSpacer"
+                                android:layout_width="0dp"
+                                android:layout_height="match_parent"
+                                android:layout_weight="1"
+                                android:visibility="visible" />
+                            <!-- Positive Button -->
+                            <Button android:id="@+id/button1"
+                                android:layout_width="wrap_content"
+                                android:layout_height="match_parent"
+                                style="@*android:style/Widget.DeviceDefault.Button.Colored"
+                                android:gravity="center"
+                                android:maxLines="2"
+                                android:text="@string/biometric_dialog_confirm"
+                                android:visibility="gone"/>
+                            <!-- Try Again Button -->
+                            <Button android:id="@+id/button_try_again"
+                                android:layout_width="wrap_content"
+                                android:layout_height="match_parent"
+                                style="@*android:style/Widget.DeviceDefault.Button.Colored"
+                                android:gravity="center"
+                                android:maxLines="2"
+                                android:text="@string/biometric_dialog_try_again"
+                                android:visibility="gone"/>
+                            <Space android:id="@+id/rightSpacer"
+                                android:layout_width="12dip"
+                                android:layout_height="match_parent"
+                                android:visibility="visible" />
+                        </LinearLayout>
+                    </LinearLayout>
+
+                <!-- This is not a Space since Spaces cannot be clicked. The width of this changes
+                depending on horizontal/portrait orientation -->
+                <View
+                    android:id="@+id/right_space"
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent" />
+
             </LinearLayout>
 
-            <!-- This is not a Space since Spaces cannot be clicked. The width of this changes depending
-             on horizontal/portrait orientation -->
-            <View
-                android:id="@+id/right_space"
-                android:layout_weight="1"
-                android:layout_width="0dp"
-                android:layout_height="match_parent" />
-
-        </LinearLayout>
+        </ScrollView>
 
     </LinearLayout>
 
