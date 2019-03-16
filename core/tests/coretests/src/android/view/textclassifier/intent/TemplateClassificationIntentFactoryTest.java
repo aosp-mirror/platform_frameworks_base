@@ -14,11 +14,19 @@
  * limitations under the License.
  */
 
-package android.view.textclassifier;
+package android.view.textclassifier.intent;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.same;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+
+import android.content.Context;
 import android.content.Intent;
+import android.view.textclassifier.TextClassifier;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
@@ -31,6 +39,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.util.List;
@@ -45,7 +54,7 @@ public class TemplateClassificationIntentFactoryTest {
     private static final String ACTION = Intent.ACTION_VIEW;
 
     @Mock
-    private IntentFactory mFallback;
+    private ClassificationIntentFactory mFallback;
     private TemplateClassificationIntentFactory mTemplateClassificationIntentFactory;
 
     @Before
@@ -130,6 +139,71 @@ public class TemplateClassificationIntentFactoryTest {
         assertThat(intent.getAction()).isEqualTo(ACTION);
         assertThat(intent.hasExtra(TextClassifier.EXTRA_FROM_TEXT_CLASSIFIER)).isTrue();
     }
+
+    @Test
+    public void create_nullTemplate() {
+        AnnotatorModel.ClassificationResult classificationResult =
+                new AnnotatorModel.ClassificationResult(
+                        TextClassifier.TYPE_ADDRESS,
+                        1.0f,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null);
+
+        mTemplateClassificationIntentFactory.create(
+                InstrumentationRegistry.getContext(),
+                TEXT,
+                /* foreignText */ false,
+                null,
+                classificationResult);
+
+
+        verify(mFallback).create(
+                same(InstrumentationRegistry.getContext()), eq(TEXT), eq(false), eq(null),
+                same(classificationResult));
+    }
+
+    @Test
+    public void create_emptyResult() {
+        AnnotatorModel.ClassificationResult classificationResult =
+                new AnnotatorModel.ClassificationResult(
+                        TextClassifier.TYPE_ADDRESS,
+                        1.0f,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        new RemoteActionTemplate[0]);
+
+        mTemplateClassificationIntentFactory.create(
+                InstrumentationRegistry.getContext(),
+                TEXT,
+                /* foreignText */ false,
+                null,
+                classificationResult);
+
+
+        verify(mFallback, never()).create(
+                any(Context.class), eq(TEXT), eq(false), eq(null),
+                any(AnnotatorModel.ClassificationResult.class));
+    }
+
 
     private static RemoteActionTemplate[] createRemoteActionTemplates() {
         return new RemoteActionTemplate[]{

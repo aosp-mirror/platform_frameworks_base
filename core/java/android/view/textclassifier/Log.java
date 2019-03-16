@@ -22,8 +22,10 @@ package android.view.textclassifier;
  * To enable full log:
  * 1. adb shell setprop log.tag.androidtc VERBOSE
  * 2. adb shell stop && adb shell start
+ *
+ * @hide
  */
-final class Log {
+public final class Log {
 
     /**
      * true: Enables full logging.

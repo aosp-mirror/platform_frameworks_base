@@ -13,14 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.view.textclassifier;
+package android.view.textclassifier.intent;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
+import android.view.textclassifier.Log;
+import android.view.textclassifier.TextClassifier;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.Preconditions;
 
 import com.google.android.textclassifier.AnnotatorModel;
@@ -36,19 +37,19 @@ import java.util.List;
  * @hide
  */
 @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
-public final class TemplateClassificationIntentFactory implements IntentFactory {
+public final class TemplateClassificationIntentFactory implements ClassificationIntentFactory {
     private static final String TAG = TextClassifier.DEFAULT_LOG_TAG;
     private final TemplateIntentFactory mTemplateIntentFactory;
-    private final IntentFactory mFallback;
+    private final ClassificationIntentFactory mFallback;
 
     public TemplateClassificationIntentFactory(TemplateIntentFactory templateIntentFactory,
-            IntentFactory fallback) {
+            ClassificationIntentFactory fallback) {
         mTemplateIntentFactory = Preconditions.checkNotNull(templateIntentFactory);
         mFallback = Preconditions.checkNotNull(fallback);
     }
 
     /**
-     * Returns a list of {@link android.view.textclassifier.LabeledIntent}
+     * Returns a list of {@link LabeledIntent}
      * that are constructed from the classification result.
      */
     @NonNull
@@ -63,15 +64,16 @@ public final class TemplateClassificationIntentFactory implements IntentFactory 
             return Collections.emptyList();
         }
         RemoteActionTemplate[] remoteActionTemplates = classification.getRemoteActionTemplates();
-        if (ArrayUtils.isEmpty(remoteActionTemplates)) {
+        if (remoteActionTemplates == null) {
             // RemoteActionTemplate is missing, fallback.
-            Log.w(TAG, "RemoteActionTemplate is missing, fallback to LegacyIntentFactory.");
+            Log.w(TAG, "RemoteActionTemplate is missing, fallback to"
+                    + " LegacyClassificationIntentFactory.");
             return mFallback.create(context, text, foreignText, referenceTime, classification);
         }
         final List<LabeledIntent> labeledIntents =
                 mTemplateIntentFactory.create(remoteActionTemplates);
         if (foreignText) {
-            IntentFactory.insertTranslateAction(labeledIntents, context, text.trim());
+            ClassificationIntentFactory.insertTranslateAction(labeledIntents, context, text.trim());
         }
         return labeledIntents;
     }

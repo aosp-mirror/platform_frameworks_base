@@ -25,6 +25,11 @@ import android.icu.util.ULocale;
 import android.os.Bundle;
 import android.os.LocaleList;
 import android.os.ParcelFileDescriptor;
+import android.view.textclassifier.intent.ClassificationIntentFactory;
+import android.view.textclassifier.intent.LabeledIntent;
+import android.view.textclassifier.intent.LegacyClassificationIntentFactory;
+import android.view.textclassifier.intent.TemplateClassificationIntentFactory;
+import android.view.textclassifier.intent.TemplateIntentFactory;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.IndentingPrintWriter;
@@ -110,7 +115,7 @@ public final class TextClassifierImpl implements TextClassifier {
     private final ModelFileManager mLangIdModelFileManager;
     private final ModelFileManager mActionsModelFileManager;
 
-    private final IntentFactory mIntentFactory;
+    private final ClassificationIntentFactory mClassificationIntentFactory;
     private final TemplateIntentFactory mTemplateIntentFactory;
 
     public TextClassifierImpl(
@@ -142,10 +147,10 @@ public final class TextClassifierImpl implements TextClassifier {
                         ActionsSuggestionsModel::getLocales));
 
         mTemplateIntentFactory = new TemplateIntentFactory();
-        mIntentFactory = mSettings.isTemplateIntentFactoryEnabled()
+        mClassificationIntentFactory = mSettings.isTemplateIntentFactoryEnabled()
                 ? new TemplateClassificationIntentFactory(
-                mTemplateIntentFactory, new LegacyIntentFactory())
-                : new LegacyIntentFactory();
+                mTemplateIntentFactory, new LegacyClassificationIntentFactory())
+                : new LegacyClassificationIntentFactory();
     }
 
     public TextClassifierImpl(Context context, TextClassificationConstants settings) {
@@ -435,20 +440,16 @@ public final class TextClassifierImpl implements TextClassifier {
             if (!expectedTypes.contains(actionType)) {
                 continue;
             }
-            List<LabeledIntent> labeledIntents =
-                    mTemplateIntentFactory.create(nativeSuggestion.getRemoteActionTemplates());
-            Bundle extras = new Bundle();
+            LabeledIntent.Result labeledIntentResult =
+                    ActionsSuggestionsHelper.createLabeledIntentResult(
+                            mContext,
+                            mTemplateIntentFactory,
+                            nativeSuggestion);
             RemoteAction remoteAction = null;
-            // Given that we only support implicit intent here, we should expect there is just one
-            // intent for each action type.
-            if (!labeledIntents.isEmpty()) {
-                LabeledIntent.TitleChooser titleChooser =
-                        ActionsSuggestionsHelper.createTitleChooser(actionType);
-                LabeledIntent.Result result = labeledIntents.get(0).resolve(mContext, titleChooser);
-                if (result != null) {
-                    remoteAction = result.remoteAction;
-                    ExtrasUtils.putActionIntent(extras, result.resolvedIntent);
-                }
+            Bundle extras = new Bundle();
+            if (labeledIntentResult != null) {
+                remoteAction = labeledIntentResult.remoteAction;
+                ExtrasUtils.putActionIntent(extras, labeledIntentResult.resolvedIntent);
             }
             conversationActions.add(
                     new ConversationAction.Builder(actionType)
@@ -620,7 +621,7 @@ public final class TextClassifierImpl implements TextClassifier {
         builder.setForeignLanguageExtra(foreignLanguageBundle);
 
         boolean isPrimaryAction = true;
-        List<LabeledIntent> labeledIntents = mIntentFactory.create(
+        List<LabeledIntent> labeledIntents = mClassificationIntentFactory.create(
                 mContext,
                 classifiedText,
                 foreignLanguageBundle != null,

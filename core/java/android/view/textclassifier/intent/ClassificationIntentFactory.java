@@ -13,11 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.view.textclassifier;
+package android.view.textclassifier.intent;
 
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.Intent;
+import android.view.textclassifier.TextClassifier;
 
 import com.google.android.textclassifier.AnnotatorModel;
 
@@ -27,7 +28,7 @@ import java.util.List;
 /**
  * @hide
  */
-public interface IntentFactory {
+public interface ClassificationIntentFactory {
 
     /**
      * Return a list of LabeledIntent from the classification result.

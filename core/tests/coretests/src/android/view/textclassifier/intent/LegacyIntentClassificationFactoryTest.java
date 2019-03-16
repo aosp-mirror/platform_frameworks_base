@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 The Android Open Source Project
+ * Copyright (C) 2019 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-package android.view.textclassifier;
+package android.view.textclassifier.intent;
 
 import static com.google.common.truth.Truth.assertThat;
 
 import android.content.Intent;
+import android.view.textclassifier.TextClassifier;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
@@ -34,15 +35,15 @@ import java.util.List;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public class LegacyIntentFactoryTest {
+public class LegacyIntentClassificationFactoryTest {
 
     private static final String TEXT = "text";
 
-    private LegacyIntentFactory mLegacyIntentFactory;
+    private LegacyClassificationIntentFactory mLegacyIntentClassificationFactory;
 
     @Before
     public void setup() {
-        mLegacyIntentFactory = new LegacyIntentFactory();
+        mLegacyIntentClassificationFactory = new LegacyClassificationIntentFactory();
     }
 
     @Test
@@ -64,7 +65,7 @@ public class LegacyIntentFactoryTest {
                         null,
                         null);
 
-        List<LabeledIntent> intents = mLegacyIntentFactory.create(
+        List<LabeledIntent> intents = mLegacyIntentClassificationFactory.create(
                 InstrumentationRegistry.getContext(),
                 TEXT,
                 /* foreignText */ false,
@@ -99,7 +100,7 @@ public class LegacyIntentFactoryTest {
                         null,
                         null);
 
-        List<LabeledIntent> intents = mLegacyIntentFactory.create(
+        List<LabeledIntent> intents = mLegacyIntentClassificationFactory.create(
                 InstrumentationRegistry.getContext(),
                 TEXT,
                 /* foreignText */ true,
