@@ -143,7 +143,7 @@ public final class ActionsSuggestionsHelper {
         // intent for each action type.
         LabeledIntent.TitleChooser titleChooser =
                 ActionsSuggestionsHelper.createTitleChooser(nativeSuggestion.getActionType());
-        return labeledIntents.get(0).resolve(context, titleChooser);
+        return labeledIntents.get(0).resolve(context, titleChooser, null);
     }
 
     /**

@@ -66,8 +66,6 @@ public final class TemplateIntentFactory {
                                     ? LabeledIntent.DEFAULT_REQUEST_CODE
                                     : remoteActionTemplate.requestCode));
         }
-        labeledIntents.forEach(
-                action -> action.intent.putExtra(TextClassifier.EXTRA_FROM_TEXT_CLASSIFIER, true));
         return labeledIntents;
     }
 

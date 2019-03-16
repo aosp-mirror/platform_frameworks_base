@@ -33,11 +33,13 @@ import android.text.util.Linkify;
 import android.text.util.Linkify.LinkifyMask;
 import android.util.ArrayMap;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.text.BreakIterator;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -644,10 +646,13 @@ public interface TextClassifier {
      *  <li>Provides validation of input parameters to TextClassifier methods
      * </ul>
      *
-     * Intended to be used only in this package.
+     * Intended to be used only for TextClassifier purposes.
      * @hide
      */
     final class Utils {
+
+        @GuardedBy("WORD_ITERATOR")
+        private static final BreakIterator WORD_ITERATOR = BreakIterator.getWordInstance();
 
         /**
          * @throws IllegalArgumentException if text is null; startIndex is negative;
@@ -663,6 +668,47 @@ public interface TextClassifier {
 
         static void checkTextLength(CharSequence text, int maxLength) {
             Preconditions.checkArgumentInRange(text.length(), 0, maxLength, "text.length()");
+        }
+
+        /**
+         * Returns the substring of {@code text} that contains at least text from index
+         * {@code start} <i>(inclusive)</i> to index {@code end} <i><(exclusive)/i> with the goal of
+         * returning text that is at least {@code minimumLength}. If {@code text} is not long
+         * enough, this will return {@code text}. This method returns text at word boundaries.
+         *
+         * @param text the source text
+         * @param start the start index of text that must be included
+         * @param end the end index of text that must be included
+         * @param minimumLength minimum length of text to return if {@code text} is long enough
+         */
+        public static String getSubString(
+                String text, int start, int end, int minimumLength) {
+            Preconditions.checkArgument(start >= 0);
+            Preconditions.checkArgument(end <= text.length());
+            Preconditions.checkArgument(start <= end);
+
+            if (text.length() < minimumLength) {
+                return text;
+            }
+
+            final int length = end - start;
+            if (length >= minimumLength) {
+                return text.substring(start, end);
+            }
+
+            final int offset = (minimumLength - length) / 2;
+            int iterStart = Math.max(0, Math.min(start - offset, text.length() - minimumLength));
+            int iterEnd = Math.min(text.length(), iterStart + minimumLength);
+
+            synchronized (WORD_ITERATOR) {
+                WORD_ITERATOR.setText(text);
+                iterStart = WORD_ITERATOR.isBoundary(iterStart)
+                        ? iterStart : Math.max(0, WORD_ITERATOR.preceding(iterStart));
+                iterEnd = WORD_ITERATOR.isBoundary(iterEnd)
+                        ? iterEnd : Math.max(iterEnd, WORD_ITERATOR.following(iterEnd));
+                WORD_ITERATOR.setText("");
+                return text.substring(iterStart, iterEnd);
+            }
         }
 
         /**

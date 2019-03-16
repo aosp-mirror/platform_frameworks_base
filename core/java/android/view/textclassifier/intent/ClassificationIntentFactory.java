@@ -18,7 +18,6 @@ package android.view.textclassifier.intent;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.Intent;
-import android.view.textclassifier.TextClassifier;
 
 import com.google.android.textclassifier.AnnotatorModel;
 
@@ -52,8 +51,7 @@ public interface ClassificationIntentFactory {
                 new Intent(Intent.ACTION_TRANSLATE)
                         // TODO: Probably better to introduce a "translate" scheme instead of
                         // using EXTRA_TEXT.
-                        .putExtra(Intent.EXTRA_TEXT, text)
-                        .putExtra(TextClassifier.EXTRA_FROM_TEXT_CLASSIFIER, true),
+                        .putExtra(Intent.EXTRA_TEXT, text),
                 text.hashCode()));
     }
 }

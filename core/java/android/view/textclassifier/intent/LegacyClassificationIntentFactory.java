@@ -52,8 +52,6 @@ public final class LegacyClassificationIntentFactory implements ClassificationIn
     private static final long MIN_EVENT_FUTURE_MILLIS = TimeUnit.MINUTES.toMillis(5);
     private static final long DEFAULT_EVENT_DURATION = TimeUnit.HOURS.toMillis(1);
 
-    public LegacyClassificationIntentFactory() {}
-
     @NonNull
     @Override
     public List<LabeledIntent> create(Context context, String text, boolean foreignText,
@@ -100,8 +98,6 @@ public final class LegacyClassificationIntentFactory implements ClassificationIn
         if (foreignText) {
             ClassificationIntentFactory.insertTranslateAction(actions, context, text);
         }
-        actions.forEach(
-                action -> action.intent.putExtra(TextClassifier.EXTRA_FROM_TEXT_CLASSIFIER, true));
         return actions;
     }
 

@@ -39,7 +39,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.util.List;
@@ -97,12 +96,10 @@ public class TemplateClassificationIntentFactoryTest {
         assertThat(labeledIntent.titleWithoutEntity).isEqualTo(TITLE_WITHOUT_ENTITY);
         Intent intent = labeledIntent.intent;
         assertThat(intent.getAction()).isEqualTo(ACTION);
-        assertThat(intent.hasExtra(TextClassifier.EXTRA_FROM_TEXT_CLASSIFIER)).isTrue();
 
         labeledIntent = intents.get(1);
         intent = labeledIntent.intent;
         assertThat(intent.getAction()).isEqualTo(Intent.ACTION_TRANSLATE);
-        assertThat(intent.hasExtra(TextClassifier.EXTRA_FROM_TEXT_CLASSIFIER)).isTrue();
     }
 
     @Test
@@ -137,7 +134,6 @@ public class TemplateClassificationIntentFactoryTest {
         assertThat(labeledIntent.titleWithoutEntity).isEqualTo(TITLE_WITHOUT_ENTITY);
         Intent intent = labeledIntent.intent;
         assertThat(intent.getAction()).isEqualTo(ACTION);
-        assertThat(intent.hasExtra(TextClassifier.EXTRA_FROM_TEXT_CLASSIFIER)).isTrue();
     }
 
     @Test
