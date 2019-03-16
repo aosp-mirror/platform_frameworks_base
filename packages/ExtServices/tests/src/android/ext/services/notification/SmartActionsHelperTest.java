@@ -36,6 +36,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.IPackageManager;
 import android.graphics.drawable.Icon;
+import android.os.Bundle;
 import android.os.Process;
 import android.service.notification.NotificationAssistantService;
 import android.service.notification.StatusBarNotification;
@@ -417,6 +418,31 @@ public class SmartActionsHelperTest {
         List<TextClassifierEvent> events = argumentCaptor.getAllValues();
         assertTextClassifierEvent(events.get(0), TextClassifierEvent.TYPE_ACTIONS_GENERATED);
         assertTextClassifierEvent(events.get(1), TextClassifierEvent.TYPE_ACTIONS_SHOWN);
+    }
+
+    @Test
+    public void testCopyAction() {
+        Bundle extras = new Bundle();
+        Bundle entitiesExtras = new Bundle();
+        entitiesExtras.putString(SmartActionsHelper.KEY_TEXT, "12345");
+        extras.putParcelable(SmartActionsHelper.ENTITIES_EXTRAS, entitiesExtras);
+        ConversationAction conversationAction =
+                new ConversationAction.Builder(ConversationAction.TYPE_COPY)
+                        .setExtras(extras)
+                        .build();
+        when(mTextClassifier.suggestConversationActions(any(ConversationActions.Request.class)))
+                .thenReturn(
+                        new ConversationActions(
+                                Collections.singletonList(conversationAction), null));
+
+        Notification notification = createMessageNotification();
+        when(mStatusBarNotification.getNotification()).thenReturn(notification);
+        SmartActionsHelper.SmartSuggestions suggestions =
+                mSmartActionsHelper.suggest(createNotificationEntry());
+
+        assertThat(suggestions.actions).hasSize(1);
+        Notification.Action action = suggestions.actions.get(0);
+        assertThat(action.title).isEqualTo("12345");
     }
 
     private ZonedDateTime createZonedDateTimeFromMsUtc(long msUtc) {

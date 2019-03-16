@@ -3681,6 +3681,7 @@
   <java-symbol type="array" name="config_displayWhiteBalanceAmbientColorTemperatures" />
   <java-symbol type="array" name="config_displayWhiteBalanceDisplayColorTemperatures" />
   <java-symbol type="drawable" name="ic_action_open" />
+  <java-symbol type="drawable" name="ic_menu_copy_material" />
 
   <!-- MIME types -->
   <java-symbol type="string" name="mime_type_folder" />
