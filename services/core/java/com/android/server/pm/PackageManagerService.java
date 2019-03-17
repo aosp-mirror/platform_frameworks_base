@@ -160,9 +160,9 @@ import android.content.pm.InstantAppInfo;
 import android.content.pm.InstantAppRequest;
 import android.content.pm.InstrumentationInfo;
 import android.content.pm.IntentFilterVerificationInfo;
-import android.content.pm.PackageBackwardCompatibility;
 import android.content.pm.KeySet;
 import android.content.pm.ModuleInfo;
+import android.content.pm.PackageBackwardCompatibility;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInfoLite;
 import android.content.pm.PackageInstaller;
@@ -20124,21 +20124,20 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     @Override
-    public String getContentCaptureServicePackageName() {
-        String contentCaptureServiceName =
-                mContext.getString(R.string.config_defaultContentCaptureService);
+    public String getSystemCaptionsServicePackageName() {
+        String flattenedSystemCaptionsServiceComponentName =
+                mContext.getString(R.string.config_defaultSystemCaptionsService);
 
-        if (TextUtils.isEmpty(contentCaptureServiceName)) {
+        if (TextUtils.isEmpty(flattenedSystemCaptionsServiceComponentName)) {
             return null;
         }
 
-        int separatorIndex = contentCaptureServiceName.indexOf("/");
-
-        if (separatorIndex < 0) {
+        ComponentName systemCaptionsServiceComponentName =
+                ComponentName.unflattenFromString(flattenedSystemCaptionsServiceComponentName);
+        if (systemCaptionsServiceComponentName == null) {
             return null;
         }
-
-        return contentCaptureServiceName.substring(0, separatorIndex);
+        return systemCaptionsServiceComponentName.getPackageName();
     }
 
     public String getIncidentReportApproverPackageName() {

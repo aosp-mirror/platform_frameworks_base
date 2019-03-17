@@ -1138,7 +1138,7 @@ public class IPackageManagerStub implements IPackageManager {
     }
 
     @Override
-    public String getContentCaptureServicePackageName() throws RemoteException {
+    public String getSystemCaptionsServicePackageName() throws RemoteException {
         return null;
     }
 

@@ -6860,9 +6860,9 @@ public abstract class PackageManager {
      *
      * @hide
      */
-    public String getContentCaptureServicePackageName() {
+    public String getSystemCaptionsServicePackageName() {
         throw new UnsupportedOperationException(
-                "getContentCaptureServicePackageName not implemented in subclass");
+                "getSystemCaptionsServicePackageName not implemented in subclass");
     }
 
     /**

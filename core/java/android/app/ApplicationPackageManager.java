@@ -3055,9 +3055,9 @@ public class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
-    public String getContentCaptureServicePackageName() {
+    public String getSystemCaptionsServicePackageName() {
         try {
-            return mPM.getContentCaptureServicePackageName();
+            return mPM.getSystemCaptionsServicePackageName();
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }
