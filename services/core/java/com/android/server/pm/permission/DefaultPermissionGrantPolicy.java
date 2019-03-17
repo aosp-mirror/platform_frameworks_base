@@ -682,17 +682,17 @@ public final class DefaultPermissionGrantPolicy {
                 userId, CONTACTS_PERMISSIONS, CALENDAR_PERMISSIONS);
 
         // Browser
-        String browserPackage = ArrayUtils.firstOrNull(getKnownPackages(
-                PackageManagerInternal.PACKAGE_BROWSER, userId));
-        if (browserPackage == null) {
-            browserPackage = getDefaultSystemHandlerActivityPackageForCategory(pm,
-                    Intent.CATEGORY_APP_BROWSER, userId);
-            if (!pm.isSystemPackage(browserPackage)) {
-                browserPackage = null;
-            }
-        }
-        grantPermissionsToPackage(pm, browserPackage, userId, false /* ignoreSystemPackage */,
-                true /*whitelistRestrictedPermissions*/, FOREGROUND_LOCATION_PERMISSIONS);
+        //String browserPackage = ArrayUtils.firstOrNull(getKnownPackages(
+                //PackageManagerInternal.PACKAGE_BROWSER, userId));
+        //if (browserPackage == null) {
+            //browserPackage = getDefaultSystemHandlerActivityPackageForCategory(pm,
+                    //Intent.CATEGORY_APP_BROWSER, userId);
+            //if (!pm.isSystemPackage(browserPackage)) {
+                //browserPackage = null;
+            //}
+        //}
+        //grantPermissionsToPackage(pm, browserPackage, userId, false [> ignoreSystemPackage <],
+                //true [>whitelistRestrictedPermissions<], FOREGROUND_LOCATION_PERMISSIONS);
 
         // Voice interaction
         if (voiceInteractPackageNames != null) {
@@ -992,9 +992,9 @@ public final class DefaultPermissionGrantPolicy {
     }
 
     public void grantDefaultPermissionsToDefaultBrowser(String packageName, int userId) {
-        Log.i(TAG, "Granting permissions to default browser for user:" + userId);
-        grantPermissionsToSystemPackage(NO_PM_CACHE, packageName, userId,
-                FOREGROUND_LOCATION_PERMISSIONS);
+        //Log.i(TAG, "Granting permissions to default browser for user:" + userId);
+        //grantPermissionsToSystemPackage(NO_PM_CACHE, packageName, userId,
+                //FOREGROUND_LOCATION_PERMISSIONS);
     }
 
     private String getDefaultSystemHandlerActivityPackage(PackageManagerWrapper pm,
