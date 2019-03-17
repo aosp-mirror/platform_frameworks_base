@@ -16,6 +16,8 @@
 
 package android.os.storage;
 
+import static android.content.ContentResolver.DEPRECATE_DATA_PREFIX;
+
 import android.annotation.BytesLong;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -30,6 +32,7 @@ import android.annotation.UnsupportedAppUsage;
 import android.annotation.WorkerThread;
 import android.app.Activity;
 import android.app.ActivityThread;
+import android.app.AppGlobals;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -1138,6 +1141,12 @@ public class StorageManager {
     private static @Nullable StorageVolume getStorageVolume(StorageVolume[] volumes, File file) {
         if (file == null) {
             return null;
+        }
+        final String path = file.getAbsolutePath();
+        if (path.startsWith(DEPRECATE_DATA_PREFIX)) {
+            final Uri uri = ContentResolver.translateDeprecatedDataPath(path);
+            return AppGlobals.getInitialApplication().getSystemService(StorageManager.class)
+                    .getStorageVolume(uri);
         }
         try {
             file = file.getCanonicalFile();
