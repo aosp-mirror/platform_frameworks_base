@@ -31,6 +31,11 @@
 
 namespace android {
 
+struct WeakRefHandleField {
+    jfieldID handle;
+    jmethodID get;
+};
+
 static struct {
     jfieldID ptr;
     jfieldID inputApplicationHandle;
@@ -57,6 +62,8 @@ static struct {
     jfieldID inputFeatures;
     jfieldID displayId;
     jfieldID portalToDisplayId;
+    jfieldID replaceTouchableRegionWithCrop;
+    WeakRefHandleField touchableRegionCropHandle;
 } gInputWindowHandleClassInfo;
 
 static Mutex gHandleMutex;
@@ -90,6 +97,7 @@ bool NativeInputWindowHandle::updateInfo() {
     jobject tokenObj = env->GetObjectField(obj, gInputWindowHandleClassInfo.token);
     if (tokenObj) {
         mInfo.token = ibinderForJavaObject(env, tokenObj);
+        env->DeleteLocalRef(tokenObj);
     } else {
         mInfo.token.clear();
     }
@@ -161,6 +169,24 @@ bool NativeInputWindowHandle::updateInfo() {
         env->DeleteLocalRef(inputApplicationHandleObj);
     }
 
+    mInfo.replaceTouchableRegionWithCrop = env->GetBooleanField(obj,
+            gInputWindowHandleClassInfo.replaceTouchableRegionWithCrop);
+
+    jobject handleObj = env->GetObjectField(obj,
+            gInputWindowHandleClassInfo.touchableRegionCropHandle.handle);
+    if (handleObj) {
+        // Promote java weak reference.
+        jobject strongHandleObj = env->CallObjectMethod(handleObj,
+                gInputWindowHandleClassInfo.touchableRegionCropHandle.get);
+        if (strongHandleObj) {
+            mInfo.touchableRegionCropHandle = ibinderForJavaObject(env, strongHandleObj);
+            env->DeleteLocalRef(strongHandleObj);
+        } else {
+            mInfo.touchableRegionCropHandle.clear();
+        }
+        env->DeleteLocalRef(handleObj);
+    }
+
     env->DeleteLocalRef(obj);
     return true;
 }
@@ -219,6 +245,10 @@ static const JNINativeMethod gInputWindowHandleMethods[] = {
 #define GET_FIELD_ID(var, clazz, fieldName, fieldDescriptor) \
         var = env->GetFieldID(clazz, fieldName, fieldDescriptor); \
         LOG_FATAL_IF(! (var), "Unable to find field " fieldName);
+
+#define GET_METHOD_ID(var, clazz, methodName, methodSignature) \
+        var = env->GetMethodID(clazz, methodName, methodSignature); \
+        LOG_FATAL_IF(! (var), "Unable to find method " methodName);
 
 int register_android_view_InputWindowHandle(JNIEnv* env) {
     int res = jniRegisterNativeMethods(env, "android/view/InputWindowHandle",
@@ -303,6 +333,18 @@ int register_android_view_InputWindowHandle(JNIEnv* env) {
 
     GET_FIELD_ID(gInputWindowHandleClassInfo.portalToDisplayId, clazz,
             "portalToDisplayId", "I");
+
+    GET_FIELD_ID(gInputWindowHandleClassInfo.replaceTouchableRegionWithCrop, clazz,
+            "replaceTouchableRegionWithCrop", "Z");
+
+    jclass weakRefClazz;
+    FIND_CLASS(weakRefClazz, "java/lang/ref/Reference");
+
+    GET_METHOD_ID(gInputWindowHandleClassInfo.touchableRegionCropHandle.get, weakRefClazz,
+             "get", "()Ljava/lang/Object;")
+
+    GET_FIELD_ID(gInputWindowHandleClassInfo.touchableRegionCropHandle.handle, clazz,
+            "touchableRegionCropHandle", "Ljava/lang/ref/WeakReference;");
     return 0;
 }
 
