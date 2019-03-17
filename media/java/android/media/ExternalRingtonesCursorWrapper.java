@@ -16,7 +16,6 @@
 
 package android.media;
 
-import android.content.ContentProvider;
 import android.database.Cursor;
 import android.database.CursorWrapper;
 import android.net.Uri;
@@ -28,19 +27,18 @@ import android.net.Uri;
  * @hide
  */
 public class ExternalRingtonesCursorWrapper extends CursorWrapper {
+    private Uri mUri;
 
-    private int mUserId;
-
-    public ExternalRingtonesCursorWrapper(Cursor cursor, int userId) {
+    public ExternalRingtonesCursorWrapper(Cursor cursor, Uri uri) {
         super(cursor);
-        mUserId = userId;
+        mUri = uri;
     }
 
     public String getString(int index) {
-        String result = super.getString(index);
         if (index == RingtoneManager.URI_COLUMN_INDEX) {
-            result = ContentProvider.maybeAddUserId(Uri.parse(result), mUserId).toString();
+            return mUri.toString();
+        } else {
+            return super.getString(index);
         }
-        return result;
     }
 }
