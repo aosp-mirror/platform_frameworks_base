@@ -1584,7 +1584,7 @@
     <permission android:name="android.permission.INTERNET"
         android:description="@string/permdesc_createNetworkSockets"
         android:label="@string/permlab_createNetworkSockets"
-        android:protectionLevel="normal|instant" />
+        android:protectionLevel="dangerous|instant" />
 
     <!-- Allows applications to access information about networks.
          <p>Protection level: normal
