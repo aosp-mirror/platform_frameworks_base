@@ -4771,18 +4771,22 @@ public class TelephonyManager {
      * Registers a listener object to receive notification of changes
      * in specified telephony states.
      * <p>
-     * To register a listener, pass a {@link PhoneStateListener}
-     * and specify at least one telephony state of interest in
-     * the events argument.
+     * To register a listener, pass a {@link PhoneStateListener} and specify at least one telephony
+     * state of interest in the events argument.
      *
-     * At registration, and when a specified telephony state
-     * changes, the telephony manager invokes the appropriate
-     * callback method on the listener object and passes the
-     * current (updated) values.
+     * At registration, and when a specified telephony state changes, the telephony manager invokes
+     * the appropriate callback method on the listener object and passes the current (updated)
+     * values.
      * <p>
-     * To unregister a listener, pass the listener object and set the
-     * events argument to
+     * To un-register a listener, pass the listener object and set the events argument to
      * {@link PhoneStateListener#LISTEN_NONE LISTEN_NONE} (0).
+     *
+     * If this TelephonyManager object has been created with {@link #createForSubscriptionId},
+     * applies to the given subId. Otherwise, applies to
+     * {@link SubscriptionManager#getDefaultSubscriptionId()}. To listen events for multiple subIds,
+     * pass a separate listener object to each TelephonyManager object created with
+     * {@link #createForSubscriptionId}.
+     *
      * Note: if you call this method while in the middle of a binder transaction, you <b>must</b>
      * call {@link android.os.Binder#clearCallingIdentity()} before calling this method. A
      * {@link SecurityException} will be thrown otherwise.
@@ -4797,17 +4801,18 @@ public class TelephonyManager {
         if (mContext == null) return;
         try {
             boolean notifyNow = (getITelephony() != null);
-            // If the listener has not explicitly set the subId (for example, created with the
-            // default constructor), replace the subId so it will listen to the account the
-            // telephony manager is created with.
-            if (listener.mSubId == null) {
-                listener.mSubId = mSubId;
-            }
-
             ITelephonyRegistry registry = getTelephonyRegistry();
             if (registry != null) {
-                registry.listenForSubscriber(listener.mSubId, getOpPackageName(),
+                // listen to the subId the telephony manager is created with. Ignore subId in
+                // PhoneStateListener.
+                registry.listenForSubscriber(mSubId, getOpPackageName(),
                         listener.callback, events, notifyNow);
+                // TODO: remove this once we remove PhoneStateListener constructor with subId.
+                if (events == PhoneStateListener.LISTEN_NONE) {
+                    listener.mSubId = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
+                } else {
+                    listener.mSubId = mSubId;
+                }
             } else {
                 Rlog.w(TAG, "telephony registry not ready.");
             }
