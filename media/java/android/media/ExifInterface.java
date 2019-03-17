@@ -1359,7 +1359,7 @@ public class ExifInterface {
         if (file == null) {
             throw new NullPointerException("file cannot be null");
         }
-        initForFilename(file.getName());
+        initForFilename(file.getAbsolutePath());
     }
 
     /**
