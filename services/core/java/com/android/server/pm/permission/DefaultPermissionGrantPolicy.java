@@ -595,16 +595,16 @@ public final class DefaultPermissionGrantPolicy {
                 userId, CONTACTS_PERMISSIONS, CALENDAR_PERMISSIONS);
 
         // Browser
-        String browserPackage = getKnownPackage(PackageManagerInternal.PACKAGE_BROWSER, userId);
-        if (browserPackage == null) {
-            browserPackage = getDefaultSystemHandlerActivityPackageForCategory(
-                    Intent.CATEGORY_APP_BROWSER, userId);
-            if (!isSystemPackage(browserPackage)) {
-                browserPackage = null;
-            }
-        }
-        grantPermissionsToPackage(browserPackage, userId, false /* ignoreSystemPackage */,
-                true /*whitelistRestrictedPermissions*/, ALWAYS_LOCATION_PERMISSIONS);
+        //String browserPackage = getKnownPackage(PackageManagerInternal.PACKAGE_BROWSER, userId);
+        //if (browserPackage == null) {
+            //browserPackage = getDefaultSystemHandlerActivityPackageForCategory(
+                    //Intent.CATEGORY_APP_BROWSER, userId);
+            //if (!isSystemPackage(browserPackage)) {
+                //browserPackage = null;
+            //}
+        //}
+        //grantPermissionsToPackage(browserPackage, userId, false [> ignoreSystemPackage <],
+                //true [>whitelistRestrictedPermissions<], ALWAYS_LOCATION_PERMISSIONS);
 
         // Voice interaction
         if (voiceInteractPackageNames != null) {
@@ -883,8 +883,8 @@ public final class DefaultPermissionGrantPolicy {
     }
 
     public void grantDefaultPermissionsToDefaultBrowser(String packageName, int userId) {
-        Log.i(TAG, "Granting permissions to default browser for user:" + userId);
-        grantPermissionsToSystemPackage(packageName, userId, ALWAYS_LOCATION_PERMISSIONS);
+        //Log.i(TAG, "Granting permissions to default browser for user:" + userId);
+        //grantPermissionsToSystemPackage(packageName, userId, ALWAYS_LOCATION_PERMISSIONS);
     }
 
     private String getDefaultSystemHandlerActivityPackage(String intentAction, int userId) {
