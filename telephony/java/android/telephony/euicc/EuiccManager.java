@@ -260,6 +260,8 @@ public class EuiccManager {
      * {@link #ACTION_DELETE_SUBSCRIPTION_PRIVILEGED}, and
      * {@link #ACTION_RENAME_SUBSCRIPTION_PRIVILEGED} providing the ID of the targeted subscription.
      *
+     * <p>Expected type of the extra data: int
+     *
      * @hide
      */
     @SystemApi
@@ -270,6 +272,8 @@ public class EuiccManager {
      * Key for an extra set on {@link #ACTION_TOGGLE_SUBSCRIPTION_PRIVILEGED} providing a boolean
      * value of whether to enable or disable the targeted subscription.
      *
+     * <p>Expected type of the extra data: boolean
+     *
      * @hide
      */
     @SystemApi
@@ -279,6 +283,8 @@ public class EuiccManager {
     /**
      * Key for an extra set on {@link #ACTION_RENAME_SUBSCRIPTION_PRIVILEGED} providing a new
      * nickname for the targeted subscription.
+     *
+     * <p>Expected type of the extra data: String
      *
      * @hide
      */
