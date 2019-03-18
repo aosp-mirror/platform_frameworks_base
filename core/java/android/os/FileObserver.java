@@ -17,6 +17,7 @@
 package android.os;
 
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.util.Log;
 
 import java.lang.ref.WeakReference;
@@ -103,6 +104,7 @@ public abstract class FileObserver {
             stopWatching(m_fd, descriptor);
         }
 
+        @UnsupportedAppUsage
         public void onEvent(int wfd, int mask, String path) {
             // look up our observer, fixing up the map if necessary...
             FileObserver observer = null;
@@ -133,6 +135,7 @@ public abstract class FileObserver {
         private native void stopWatching(int fd, int wfd);
     }
 
+    @UnsupportedAppUsage
     private static ObserverThread s_observerThread;
 
     static {

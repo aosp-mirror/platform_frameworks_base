@@ -16,6 +16,7 @@
 
 package android.os;
 
+import android.annotation.UnsupportedAppUsage;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -49,6 +50,7 @@ public abstract class UEventObserver {
     private static native void nativeAddMatch(String match);
     private static native void nativeRemoveMatch(String match);
 
+    @UnsupportedAppUsage
     public UEventObserver() {
     }
 
@@ -93,6 +95,7 @@ public abstract class UEventObserver {
      * are expensive to parse.  For example, some devices may send one netlink message
      * for each vsync period.
      */
+    @UnsupportedAppUsage
     public final void startObserving(String match) {
         if (match == null || match.isEmpty()) {
             throw new IllegalArgumentException("match substring must be non-empty");
@@ -107,6 +110,7 @@ public abstract class UEventObserver {
      * This process's UEvent thread will never call onUEvent() on this
      * UEventObserver after this call. Repeated calls have no effect.
      */
+    @UnsupportedAppUsage
     public final void stopObserving() {
         final UEventThread t = peekThread();
         if (t != null) {
@@ -118,6 +122,7 @@ public abstract class UEventObserver {
      * Subclasses of UEventObserver should override this method to handle
      * UEvents.
      */
+    @UnsupportedAppUsage
     public abstract void onUEvent(UEvent event);
 
     /**
@@ -146,10 +151,12 @@ public abstract class UEventObserver {
             }
         }
 
+        @UnsupportedAppUsage
         public String get(String key) {
             return mMap.get(key);
         }
 
+        @UnsupportedAppUsage
         public String get(String key, String defaultValue) {
             String result = mMap.get(key);
             return (result == null ? defaultValue : result);

@@ -18,6 +18,7 @@ package android.os;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.util.Log;
 import android.util.Printer;
 
@@ -168,6 +169,7 @@ public class Handler {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public Handler(boolean async) {
         this(null, async);
     }
@@ -229,6 +231,7 @@ public class Handler {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public Handler(Looper looper, Callback callback, boolean async) {
         mLooper = looper;
         mQueue = looper.mQueue;
@@ -274,6 +277,7 @@ public class Handler {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     @NonNull
     public static Handler getMain() {
         if (MAIN_THREAD_HANDLER == null) {
@@ -801,6 +805,7 @@ public class Handler {
      * 
      * @hide
      */
+    @UnsupportedAppUsage
     public final boolean hasCallbacks(Runnable r) {
         return mQueue.hasMessages(this, r, null);
     }
@@ -839,6 +844,7 @@ public class Handler {
         + "}";
     }
 
+    @UnsupportedAppUsage
     final IMessenger getIMessenger() {
         synchronized (mQueue) {
             if (mMessenger != null) {
@@ -862,6 +868,7 @@ public class Handler {
         return m;
     }
 
+    @UnsupportedAppUsage
     private static Message getPostMessage(Runnable r, Object token) {
         Message m = Message.obtain();
         m.obj = token;
@@ -873,10 +880,13 @@ public class Handler {
         message.callback.run();
     }
 
+    @UnsupportedAppUsage
     final Looper mLooper;
     final MessageQueue mQueue;
+    @UnsupportedAppUsage
     final Callback mCallback;
     final boolean mAsynchronous;
+    @UnsupportedAppUsage
     IMessenger mMessenger;
 
     private static final class BlockingRunnable implements Runnable {

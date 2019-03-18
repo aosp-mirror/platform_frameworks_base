@@ -16,6 +16,7 @@
 
 package android.os;
 
+import android.annotation.UnsupportedAppUsage;
 import android.util.Slog;
 
 import com.android.internal.util.FastPrintWriter;
@@ -300,6 +301,7 @@ public abstract class ShellCommand {
         }
     }
 
+    @UnsupportedAppUsage
     public String peekNextArg() {
         if (mCurArgData != null) {
             return mCurArgData;

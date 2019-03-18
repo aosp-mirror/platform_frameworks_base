@@ -17,6 +17,7 @@
 package android.os;
 
 import android.annotation.TestApi;
+import android.annotation.UnsupportedAppUsage;
 import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.os.storage.StorageManager;
@@ -66,6 +67,7 @@ public class Environment {
     private static final File DIR_VENDOR_ROOT = getDirectory(ENV_VENDOR_ROOT, "/vendor");
     private static final File DIR_PRODUCT_ROOT = getDirectory(ENV_PRODUCT_ROOT, "/product");
 
+    @UnsupportedAppUsage
     private static UserEnvironment sCurrentUser;
     private static boolean sUserRequired;
 
@@ -74,6 +76,7 @@ public class Environment {
     }
 
     /** {@hide} */
+    @UnsupportedAppUsage
     public static void initForCurrentUser() {
         final int userId = UserHandle.myUserId();
         sCurrentUser = new UserEnvironment(userId);
@@ -83,10 +86,12 @@ public class Environment {
     public static class UserEnvironment {
         private final int mUserId;
 
+        @UnsupportedAppUsage
         public UserEnvironment(int userId) {
             mUserId = userId;
         }
 
+        @UnsupportedAppUsage
         public File[] getExternalDirs() {
             final StorageVolume[] volumes = StorageManager.getVolumeList(mUserId,
                     StorageManager.FLAG_FOR_WRITE);
@@ -97,11 +102,13 @@ public class Environment {
             return files;
         }
 
+        @UnsupportedAppUsage
         @Deprecated
         public File getExternalStorageDirectory() {
             return getExternalDirs()[0];
         }
 
+        @UnsupportedAppUsage
         @Deprecated
         public File getExternalStoragePublicDirectory(String type) {
             return buildExternalStoragePublicDirs(type)[0];
@@ -149,6 +156,7 @@ public class Environment {
     }
 
     /** {@hide} */
+    @UnsupportedAppUsage
     public static File getStorageDirectory() {
         return DIR_ANDROID_STORAGE;
     }
@@ -159,6 +167,7 @@ public class Environment {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public static File getOemDirectory() {
         return DIR_OEM_ROOT;
     }
@@ -178,6 +187,7 @@ public class Environment {
      * software that should persist across simple reflashing of the "system" partition.
      * @hide
      */
+    @UnsupportedAppUsage
     public static File getVendorDirectory() {
         return DIR_VENDOR_ROOT;
     }
@@ -250,6 +260,7 @@ public class Environment {
     }
 
     /** {@hide} */
+    @UnsupportedAppUsage
     public static File getDataSystemDirectory() {
         return new File(getDataDirectory(), "system");
     }
@@ -482,11 +493,13 @@ public class Environment {
     }
 
     /** {@hide} */
+    @UnsupportedAppUsage
     public static File getLegacyExternalStorageDirectory() {
         return new File(System.getenv(ENV_EXTERNAL_STORAGE));
     }
 
     /** {@hide} */
+    @UnsupportedAppUsage
     public static File getLegacyExternalStorageObbDirectory() {
         return buildPath(getLegacyExternalStorageDirectory(), DIR_ANDROID, DIR_OBB);
     }
@@ -742,6 +755,7 @@ public class Environment {
      * Returns the path for android-specific data on the SD card.
      * @hide
      */
+    @UnsupportedAppUsage
     public static File[] buildExternalStorageAndroidDataDirs() {
         throwIfUserRequired();
         return sCurrentUser.buildExternalStorageAndroidDataDirs();
@@ -751,6 +765,7 @@ public class Environment {
      * Generates the raw path to an application's data
      * @hide
      */
+    @UnsupportedAppUsage
     public static File[] buildExternalStorageAppDataDirs(String packageName) {
         throwIfUserRequired();
         return sCurrentUser.buildExternalStorageAppDataDirs(packageName);
@@ -760,6 +775,7 @@ public class Environment {
      * Generates the raw path to an application's media
      * @hide
      */
+    @UnsupportedAppUsage
     public static File[] buildExternalStorageAppMediaDirs(String packageName) {
         throwIfUserRequired();
         return sCurrentUser.buildExternalStorageAppMediaDirs(packageName);
@@ -769,6 +785,7 @@ public class Environment {
      * Generates the raw path to an application's OBB files
      * @hide
      */
+    @UnsupportedAppUsage
     public static File[] buildExternalStorageAppObbDirs(String packageName) {
         throwIfUserRequired();
         return sCurrentUser.buildExternalStorageAppObbDirs(packageName);
@@ -778,6 +795,7 @@ public class Environment {
      * Generates the path to an application's files.
      * @hide
      */
+    @UnsupportedAppUsage
     public static File[] buildExternalStorageAppFilesDirs(String packageName) {
         throwIfUserRequired();
         return sCurrentUser.buildExternalStorageAppFilesDirs(packageName);
@@ -787,6 +805,7 @@ public class Environment {
      * Generates the path to an application's cache.
      * @hide
      */
+    @UnsupportedAppUsage
     public static File[] buildExternalStorageAppCacheDirs(String packageName) {
         throwIfUserRequired();
         return sCurrentUser.buildExternalStorageAppCacheDirs(packageName);
@@ -1021,6 +1040,7 @@ public class Environment {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public static File[] buildPaths(File[] base, String... segments) {
         File[] result = new File[base.length];
         for (int i = 0; i < base.length; i++) {
@@ -1060,6 +1080,7 @@ public class Environment {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public static File maybeTranslateEmulatedPathToInternal(File path) {
         return StorageManager.maybeTranslateEmulatedPathToInternal(path);
     }
