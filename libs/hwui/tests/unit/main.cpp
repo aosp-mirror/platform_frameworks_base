@@ -22,9 +22,6 @@
 #include "debug/NullGlesDriver.h"
 #include "hwui/Typeface.h"
 #include "tests/common/LeakChecker.h"
-#include "thread/Task.h"
-#include "thread/TaskManager.h"
-#include "thread/TaskProcessor.h"
 
 #include <signal.h>
 

@@ -24,8 +24,6 @@
 #include <vector>
 
 #include "pipeline/skia/VectorDrawableAtlas.h"
-#include "thread/TaskManager.h"
-#include "thread/TaskProcessor.h"
 
 namespace android {
 
@@ -54,8 +52,6 @@ public:
     size_t getCacheSize() const { return mMaxResourceBytes; }
     size_t getBackgroundCacheSize() const { return mBackgroundResourceBytes; }
 
-    TaskManager* getTaskManager() { return &mTaskManager; }
-
 private:
     friend class RenderThread;
 
@@ -78,10 +74,6 @@ private:
     };
 
     sp<skiapipeline::VectorDrawableAtlas> mVectorDrawableAtlas;
-
-    class SkiaTaskProcessor;
-    sp<SkiaTaskProcessor> mTaskProcessor;
-    TaskManager mTaskManager;
 };
 
 } /* namespace renderthread */

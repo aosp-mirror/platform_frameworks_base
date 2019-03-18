@@ -23,6 +23,7 @@
 #include "RenderThread.h"
 #include "renderstate/RenderState.h"
 #include "utils/FatVector.h"
+#include "utils/TraceUtils.h"
 
 #include <GrBackendSemaphore.h>
 #include <GrBackendSurface.h>
