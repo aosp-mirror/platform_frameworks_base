@@ -23,13 +23,12 @@ import static android.text.TextUtils.join;
 import android.net.InetAddresses;
 import android.net.InitialConfigurationParcelable;
 import android.net.IpPrefix;
-import android.net.IpPrefixParcelable;
 import android.net.LinkAddress;
-import android.net.LinkAddressParcelable;
 import android.net.RouteInfo;
 
 import java.net.Inet4Address;
 import java.net.InetAddress;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -148,10 +147,8 @@ public class InitialConfiguration {
      */
     public InitialConfigurationParcelable toStableParcelable() {
         final InitialConfigurationParcelable p = new InitialConfigurationParcelable();
-        p.ipAddresses = toParcelableArray(ipAddresses,
-                LinkPropertiesParcelableUtil::toStableParcelable, LinkAddressParcelable.class);
-        p.directlyConnectedRoutes = toParcelableArray(directlyConnectedRoutes,
-                LinkPropertiesParcelableUtil::toStableParcelable, IpPrefixParcelable.class);
+        p.ipAddresses = ipAddresses.toArray(new LinkAddress[0]);
+        p.directlyConnectedRoutes = directlyConnectedRoutes.toArray(new IpPrefix[0]);
         p.dnsServers = toParcelableArray(
                 dnsServers, IpConfigurationParcelableUtil::parcelAddress, String.class);
         return p;
@@ -164,10 +161,8 @@ public class InitialConfiguration {
     public static InitialConfiguration fromStableParcelable(InitialConfigurationParcelable p) {
         if (p == null) return null;
         final InitialConfiguration config = new InitialConfiguration();
-        config.ipAddresses.addAll(fromParcelableArray(
-                p.ipAddresses, LinkPropertiesParcelableUtil::fromStableParcelable));
-        config.directlyConnectedRoutes.addAll(fromParcelableArray(
-                p.directlyConnectedRoutes, LinkPropertiesParcelableUtil::fromStableParcelable));
+        config.ipAddresses.addAll(Arrays.asList(p.ipAddresses));
+        config.directlyConnectedRoutes.addAll(Arrays.asList(p.directlyConnectedRoutes));
         config.dnsServers.addAll(
                 fromParcelableArray(p.dnsServers, IpConfigurationParcelableUtil::unparcelAddress));
         return config;
