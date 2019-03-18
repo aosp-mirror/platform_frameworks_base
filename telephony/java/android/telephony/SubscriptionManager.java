@@ -2853,29 +2853,6 @@ public class SubscriptionManager {
     }
 
     /**
-     * Set if a subscription is metered or not. Similar to Wi-Fi, metered means
-     * user may be charged more if more data is used.
-     *
-     * By default all Cellular networks are considered metered. System or carrier privileged apps
-     * can set a subscription un-metered which will be considered when system switches data between
-     * primary subscription and opportunistic subscription.
-     *
-     * Caller will either have {@link android.Manifest.permission#MODIFY_PHONE_STATE} or carrier
-     * privilege permission of the subscription.
-     *
-     * @param isMetered whether it’s a metered subscription.
-     * @param subId the unique SubscriptionInfo index in database
-     * @return {@code true} if the operation is succeed, {@code false} otherwise.
-     */
-    @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
-    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
-    public boolean setMetered(boolean isMetered, int subId) {
-        if (VDBG) logd("[setIsMetered]+ isMetered:" + isMetered + " subId:" + subId);
-        return setSubscriptionPropertyHelper(subId, "setIsMetered",
-                (iSub)-> iSub.setMetered(isMetered, subId, mContext.getOpPackageName())) == 1;
-    }
-
-    /**
      * Whether a subscription is visible to API caller. If it's a bundled opportunistic
      * subscription, it should be hidden anywhere in Settings, dialer, status bar etc.
      * Exception is if caller owns carrier privilege, in which case they will
