@@ -3564,6 +3564,12 @@
     -->
     <string name="config_defaultSystemCaptionsService" translatable="false"></string>
 
+    <!-- The component name for the system-wide captions manager service.
+         This service must be trusted, as the system binds to it and keeps it running.
+         Example: "com.android.captions/.SystemCaptionsManagerService"
+    -->
+    <string name="config_defaultSystemCaptionsManagerService" translatable="false"></string>
+
     <!-- The package name for the incident report approver app.
         This app is usually PermissionController or an app that replaces it.  When
         a bugreport or incident report with EXPLICT-level sharing flags is going to be
