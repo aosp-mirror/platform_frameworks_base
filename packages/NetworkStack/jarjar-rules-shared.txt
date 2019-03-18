@@ -9,11 +9,5 @@ rule android.net.DhcpResultsParcelable* @0
 rule android.net.DhcpResults* android.net.networkstack.DhcpResults@1
 rule android.net.LocalLog* android.net.networkstack.LocalLog@1
 
-# TODO: remove from framework dependencies, then remove here
-rule android.net.InterfaceConfigurationParcel* android.net.networkstack.InterfaceConfigurationParcel@1
-rule android.net.TetherStatsParcel* android.net.networkstack.TetherStatsParcel@1
-
-# Used by UidRange, which is used by framework classes such as NetworkCapabilities.
-rule android.net.UidRangeParcel* android.net.networkstack.UidRangeParcel@1
 # TODO: move TcpKeepalivePacketData to services.net and delete
 rule android.net.TcpKeepalivePacketDataParcelable* android.net.networkstack.TcpKeepalivePacketDataParcelable@1
