@@ -20,6 +20,7 @@ import static android.provider.DeviceConfig.NAMESPACE_ATTENTION_MANAGER_SERVICE;
 
 import android.Manifest;
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.attention.AttentionManagerInternal;
@@ -69,6 +70,15 @@ import java.io.PrintWriter;
 public class AttentionManagerService extends SystemService {
     private static final String LOG_TAG = "AttentionManagerService";
 
+    /**
+     * DeviceConfig flag name, allows a CTS to inject a fake implementation.
+     *
+     * @hide
+     */
+    @TestApi
+    public static final String COMPONENT_NAME = "component_name";
+
+
     /** Default value in absence of {@link DeviceConfig} override. */
     private static final boolean DEFAULT_SERVICE_ENABLED = true;
 
@@ -80,10 +90,6 @@ public class AttentionManagerService extends SystemService {
 
     /** DeviceConfig flag name, if {@code true}, enables AttentionManagerService features. */
     private static final String SERVICE_ENABLED = "service_enabled";
-
-    /** DeviceConfig flag name, allows a CTS to inject a fake implementation. */
-    private static final String COMPONENT_NAME = "component_name";
-
     private final Context mContext;
     private final PowerManager mPowerManager;
     private final Object mLock;
