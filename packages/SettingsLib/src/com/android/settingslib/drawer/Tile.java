@@ -276,6 +276,12 @@ public class Tile implements Parcelable {
             return null;
         }
         ensureMetadataNotStale(context);
+        final ActivityInfo activityInfo = getActivityInfo(context);
+        if (activityInfo == null) {
+            Log.w(TAG, "Cannot find ActivityInfo for " + getDescription());
+            return null;
+        }
+
         int iconResId = mMetaData.getInt(META_DATA_PREFERENCE_ICON);
         // Set the icon
         if (iconResId == 0) {
@@ -283,11 +289,11 @@ public class Tile implements Parcelable {
             // ICON_URI should be loaded in app UI when need the icon object. Handling IPC at this
             // level is too complex because we don't have a strong threading contract for this class
             if (!mMetaData.containsKey(META_DATA_PREFERENCE_ICON_URI)) {
-                iconResId = getActivityInfo(context).icon;
+                iconResId = activityInfo.icon;
             }
         }
         if (iconResId != 0) {
-            return Icon.createWithResource(getActivityInfo(context).packageName, iconResId);
+            return Icon.createWithResource(activityInfo.packageName, iconResId);
         } else {
             return null;
         }
