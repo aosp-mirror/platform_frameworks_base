@@ -403,7 +403,7 @@ public final class WifiNetworkSuggestion implements Parcelable {
          *      .setWpa3Passphrase("test6789")
          *      .build()
          * final List<WifiNetworkSuggestion> suggestionsList =
-         *      new ArrayList<WifiNetworkSuggestion> {{
+         *      new ArrayList<WifiNetworkSuggestion> &#123;{
          *          add(suggestion1);
          *          add(suggestion2);
          *          add(suggestion3);
