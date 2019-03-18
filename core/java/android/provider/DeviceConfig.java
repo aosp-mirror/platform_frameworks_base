@@ -225,6 +225,14 @@ public final class DeviceConfig {
     public static final String NAMESPACE_SCHEDULER = "scheduler";
 
     /**
+     * Namespace for storage-related features.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String NAMESPACE_STORAGE = "storage";
+
+    /**
      * Namespace for System UI related features.
      *
      * @hide
@@ -292,23 +300,6 @@ public final class DeviceConfig {
          * Vibration time in milliseconds before ramping ringer starts.
          */
         String RAMPING_RINGER_VIBRATION_DURATION = "ramping_ringer_vibration_duration";
-    }
-
-    /**
-     * Namespace for storage-related features.
-     *
-     * @hide
-     */
-    @SystemApi
-    public interface Storage {
-        String NAMESPACE = "storage";
-
-        /**
-         * If {@code 1}, enables the isolated storage feature. If {@code -1},
-         * disables the isolated storage feature. If {@code 0}, uses the default
-         * value from the build system.
-         */
-        String ISOLATED_STORAGE_ENABLED = "isolated_storage_enabled";
     }
 
     private static final Object sLock = new Object();

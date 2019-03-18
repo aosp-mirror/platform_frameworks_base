@@ -208,6 +208,13 @@ class StorageManagerService extends IStorageManager.Stub
     private static final boolean ENABLE_LEGACY_GREYLIST = SystemProperties
             .getBoolean(StorageManager.PROP_LEGACY_GREYLIST, true);
 
+    /**
+     * If {@code 1}, enables the isolated storage feature. If {@code -1},
+     * disables the isolated storage feature. If {@code 0}, uses the default
+     * value from the build system.
+     */
+    private static final String ISOLATED_STORAGE_ENABLED = "isolated_storage_enabled";
+
     public static class Lifecycle extends SystemService {
         private StorageManagerService mStorageManagerService;
 
@@ -797,7 +804,7 @@ class StorageManagerService extends IStorageManager.Stub
                 }
             });
         // For now, simply clone property when it changes
-        DeviceConfig.addOnPropertyChangedListener(DeviceConfig.Storage.NAMESPACE,
+        DeviceConfig.addOnPropertyChangedListener(DeviceConfig.NAMESPACE_STORAGE,
                 mContext.getMainExecutor(), (namespace, name, value) -> {
                     refreshIsolatedStorageSettings();
                 });
@@ -837,8 +844,7 @@ class StorageManagerService extends IStorageManager.Stub
         // Always copy value from newer DeviceConfig location
         Settings.Global.putString(mResolver,
                 Settings.Global.ISOLATED_STORAGE_REMOTE,
-                DeviceConfig.getProperty(DeviceConfig.Storage.NAMESPACE,
-                        DeviceConfig.Storage.ISOLATED_STORAGE_ENABLED));
+                DeviceConfig.getProperty(DeviceConfig.NAMESPACE_STORAGE, ISOLATED_STORAGE_ENABLED));
 
         final int local = Settings.Global.getInt(mContext.getContentResolver(),
                 Settings.Global.ISOLATED_STORAGE_LOCAL, 0);
