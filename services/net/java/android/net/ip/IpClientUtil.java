@@ -17,12 +17,10 @@
 package android.net.ip;
 
 import static android.net.shared.IpConfigurationParcelableUtil.fromStableParcelable;
-import static android.net.shared.LinkPropertiesParcelableUtil.fromStableParcelable;
 
 import android.content.Context;
 import android.net.DhcpResultsParcelable;
 import android.net.LinkProperties;
-import android.net.LinkPropertiesParcelable;
 import android.net.NetworkStackClient;
 import android.os.ConditionVariable;
 
@@ -122,18 +120,18 @@ public class IpClientUtil {
         }
 
         @Override
-        public void onProvisioningSuccess(LinkPropertiesParcelable newLp) {
-            mCb.onProvisioningSuccess(fromStableParcelable(newLp));
+        public void onProvisioningSuccess(LinkProperties newLp) {
+            mCb.onProvisioningSuccess(newLp);
         }
         @Override
-        public void onProvisioningFailure(LinkPropertiesParcelable newLp) {
-            mCb.onProvisioningFailure(fromStableParcelable(newLp));
+        public void onProvisioningFailure(LinkProperties newLp) {
+            mCb.onProvisioningFailure(newLp);
         }
 
         // Invoked on LinkProperties changes.
         @Override
-        public void onLinkPropertiesChange(LinkPropertiesParcelable newLp) {
-            mCb.onLinkPropertiesChange(fromStableParcelable(newLp));
+        public void onLinkPropertiesChange(LinkProperties newLp) {
+            mCb.onLinkPropertiesChange(newLp);
         }
 
         // Called when the internal IpReachabilityMonitor (if enabled) has
