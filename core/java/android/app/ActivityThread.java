@@ -3129,6 +3129,10 @@ public final class ActivityThread extends ClientTransactionHandler {
         if (!r.stopped) {
             throw new IllegalStateException("Can't start activity that is not stopped.");
         }
+        if (r.activity.mFinished) {
+            // TODO(lifecycler): How can this happen?
+            return;
+        }
 
         // Start
         activity.performStart("handleStartActivity");
@@ -3251,8 +3255,6 @@ public final class ActivityThread extends ClientTransactionHandler {
             if (!r.activity.mFinished && pendingActions != null) {
                 pendingActions.setOldState(r.state);
                 pendingActions.setRestoreInstanceState(true);
-            }
-            if (pendingActions != null) {
                 pendingActions.setCallOnPostCreate(true);
             }
         } else {
@@ -3956,7 +3958,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         if (localLOGV) {
             Slog.v(TAG, "Performing resume of " + r + " finished=" + r.activity.mFinished);
         }
-        if (r == null) {
+        if (r == null || r.activity.mFinished) {
             return null;
         }
         if (r.getLifecycleState() == ON_RESUME) {
@@ -4226,6 +4228,12 @@ public final class ActivityThread extends ClientTransactionHandler {
     private Bundle performPauseActivity(ActivityClientRecord r, boolean finished, String reason,
             PendingTransactionActions pendingActions) {
         if (r.paused) {
+            if (r.activity.mFinished) {
+                // If we are finishing, we won't call onResume() in certain cases.
+                // So here we likewise don't want to call onPause() if the activity
+                // isn't resumed.
+                return null;
+            }
             RuntimeException e = new RuntimeException(
                     "Performing pause of activity that is not resumed: "
                     + r.intent.getComponent().toShortString());
@@ -4345,13 +4353,20 @@ public final class ActivityThread extends ClientTransactionHandler {
             boolean saveState, boolean finalStateRequest, String reason) {
         if (localLOGV) Slog.v(TAG, "Performing stop of " + r);
         if (r != null) {
-            if (!keepShown && r.stopped && !finalStateRequest) {
-                // Double stop request is possible if activity receives 'sleep' followed by 'stop'.
-                final RuntimeException e = new RuntimeException(
-                        "Performing stop of activity that is already stopped: "
-                                + r.intent.getComponent().toShortString());
-                Slog.e(TAG, e.getMessage(), e);
-                Slog.e(TAG, r.getStateString());
+            if (!keepShown && r.stopped) {
+                if (r.activity.mFinished) {
+                    // If we are finishing, we won't call onResume() in certain
+                    // cases.  So here we likewise don't want to call onStop()
+                    // if the activity isn't resumed.
+                    return;
+                }
+                if (!finalStateRequest) {
+                    final RuntimeException e = new RuntimeException(
+                            "Performing stop of activity that is already stopped: "
+                                    + r.intent.getComponent().toShortString());
+                    Slog.e(TAG, e.getMessage(), e);
+                    Slog.e(TAG, r.getStateString());
+                }
             }
 
             // One must first be paused before stopped...
