@@ -26,6 +26,8 @@ import static com.android.server.wm.DisplayRotation.FIXED_TO_USER_ROTATION_DEFAU
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
+import android.annotation.IntDef;
+import android.annotation.Nullable;
 import android.app.WindowConfiguration;
 import android.os.Environment;
 import android.provider.Settings;
@@ -33,6 +35,7 @@ import android.util.AtomicFile;
 import android.util.Slog;
 import android.util.Xml;
 import android.view.Display;
+import android.view.DisplayAddress;
 import android.view.DisplayInfo;
 import android.view.Surface;
 
@@ -47,10 +50,11 @@ import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 
@@ -60,9 +64,33 @@ import java.util.HashMap;
 class DisplayWindowSettings {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "DisplayWindowSettings" : TAG_WM;
 
+    private static final int IDENTIFIER_UNIQUE_ID = 0;
+    private static final int IDENTIFIER_PORT = 1;
+    @IntDef(prefix = { "IDENTIFIER_" }, value = {
+            IDENTIFIER_UNIQUE_ID,
+            IDENTIFIER_PORT,
+    })
+    @interface DisplayIdentifierType {}
+
     private final WindowManagerService mService;
-    private final AtomicFile mFile;
-    private final HashMap<String, Entry> mEntries = new HashMap<String, Entry>();
+    private final HashMap<String, Entry> mEntries = new HashMap<>();
+    private final SettingPersister mStorage;
+
+    /**
+     * The preferred type of a display identifier to use when storing and retrieving entries.
+     * {@link #getIdentifier(DisplayInfo)} must be used to get current preferred identifier for each
+     * display. It will fall back to using {@link #IDENTIFIER_UNIQUE_ID} if the currently selected
+     * one is not applicable to a particular display.
+     */
+    @DisplayIdentifierType
+    private int mIdentifier = IDENTIFIER_UNIQUE_ID;
+
+    /** Interface for persisting the display window settings. */
+    interface SettingPersister {
+        InputStream openRead() throws IOException;
+        OutputStream startWrite() throws IOException;
+        void finishWrite(OutputStream os, boolean success);
+    }
 
     private static class Entry {
         private final String mName;
@@ -88,6 +116,26 @@ class DisplayWindowSettings {
             mName = name;
         }
 
+        private Entry(String name, Entry copyFrom) {
+            this(name);
+            mOverscanLeft = copyFrom.mOverscanLeft;
+            mOverscanTop = copyFrom.mOverscanTop;
+            mOverscanRight = copyFrom.mOverscanRight;
+            mOverscanBottom = copyFrom.mOverscanBottom;
+            mWindowingMode = copyFrom.mWindowingMode;
+            mUserRotationMode = copyFrom.mUserRotationMode;
+            mUserRotation = copyFrom.mUserRotation;
+            mForcedWidth = copyFrom.mForcedWidth;
+            mForcedHeight = copyFrom.mForcedHeight;
+            mForcedDensity = copyFrom.mForcedDensity;
+            mForcedScalingMode = copyFrom.mForcedScalingMode;
+            mRemoveContentMode = copyFrom.mRemoveContentMode;
+            mShouldShowWithInsecureKeyguard = copyFrom.mShouldShowWithInsecureKeyguard;
+            mShouldShowSystemDecors = copyFrom.mShouldShowSystemDecors;
+            mShouldShowIme = copyFrom.mShouldShowIme;
+            mFixedToUserRotation = copyFrom.mFixedToUserRotation;
+        }
+
         /** @return {@code true} if all values are default. */
         private boolean isEmpty() {
             return mOverscanLeft == 0 && mOverscanTop == 0 && mOverscanRight == 0
@@ -106,29 +154,46 @@ class DisplayWindowSettings {
     }
 
     DisplayWindowSettings(WindowManagerService service) {
-        this(service, new File(Environment.getDataDirectory(), "system"));
+        this(service, new AtomicFileStorage());
     }
 
     @VisibleForTesting
-    DisplayWindowSettings(WindowManagerService service, File folder) {
+    DisplayWindowSettings(WindowManagerService service, SettingPersister storageImpl) {
         mService = service;
-        mFile = new AtomicFile(new File(folder, "display_settings.xml"), "wm-displays");
+        mStorage = storageImpl;
         readSettings();
     }
 
-    private Entry getEntry(DisplayInfo displayInfo) {
-        // Try to get the entry with the unique if possible.
-        // Else, fall back on the display name.
+    private @Nullable Entry getEntry(DisplayInfo displayInfo) {
+        final String identifier = getIdentifier(displayInfo);
         Entry entry;
-        if (displayInfo.uniqueId == null || (entry = mEntries.get(displayInfo.uniqueId)) == null) {
-            entry = mEntries.get(displayInfo.name);
+        // Try to get corresponding entry using preferred identifier for the current config.
+        if ((entry = mEntries.get(identifier)) != null) {
+            return entry;
         }
-        return entry;
+        // Else, fall back to the display name.
+        if ((entry = mEntries.get(displayInfo.name)) != null) {
+            // Found an entry stored with old identifier - upgrade to the new type now.
+            return updateIdentifierForEntry(entry, displayInfo);
+        }
+        return null;
     }
 
     private Entry getOrCreateEntry(DisplayInfo displayInfo) {
         final Entry entry = getEntry(displayInfo);
-        return entry != null ? entry : new Entry(displayInfo.uniqueId);
+        return entry != null ? entry : new Entry(getIdentifier(displayInfo));
+    }
+
+    /**
+     * Upgrades the identifier of a legacy entry. Does it by copying the data from the old record
+     * and clearing the old key in memory. The entry will be written to storage next time when a
+     * setting changes.
+     */
+    private Entry updateIdentifierForEntry(Entry entry, DisplayInfo displayInfo) {
+        final Entry newEntry = new Entry(getIdentifier(displayInfo), entry);
+        removeEntry(displayInfo);
+        mEntries.put(newEntry.mName, newEntry);
+        return newEntry;
     }
 
     void setOverscanLocked(DisplayInfo displayInfo, int left, int top, int right, int bottom) {
@@ -371,12 +436,11 @@ class DisplayWindowSettings {
     }
 
     private void readSettings() {
-        FileInputStream stream;
+        InputStream stream;
         try {
-            stream = mFile.openRead();
-        } catch (FileNotFoundException e) {
-            Slog.i(TAG, "No existing display settings " + mFile.getBaseFile()
-                    + "; starting empty");
+            stream = mStorage.openRead();
+        } catch (IOException e) {
+            Slog.i(TAG, "No existing display settings, starting empty");
             return;
         }
         boolean success = false;
@@ -403,6 +467,8 @@ class DisplayWindowSettings {
                 String tagName = parser.getName();
                 if (tagName.equals("display")) {
                     readDisplay(parser);
+                } else if (tagName.equals("config")) {
+                    readConfig(parser);
                 } else {
                     Slog.w(TAG, "Unknown element under <display-settings>: "
                             + parser.getName());
@@ -491,22 +557,26 @@ class DisplayWindowSettings {
         XmlUtils.skipCurrentTag(parser);
     }
 
+    private void readConfig(XmlPullParser parser) throws NumberFormatException,
+            XmlPullParserException, IOException {
+        mIdentifier = getIntAttribute(parser, "identifier");
+        XmlUtils.skipCurrentTag(parser);
+    }
+
     private void writeSettingsIfNeeded(Entry changedEntry, DisplayInfo displayInfo) {
-        if (changedEntry.isEmpty()) {
-            boolean removed = mEntries.remove(displayInfo.uniqueId) != null;
-            // Legacy name might have been in used, so we need to clear it.
-            removed |= mEntries.remove(displayInfo.name) != null;
-            if (!removed) {
-                // The entry didn't exist so nothing is changed and no need to update the file.
-                return;
-            }
-        } else {
-            mEntries.put(displayInfo.uniqueId, changedEntry);
+        if (changedEntry.isEmpty() && !removeEntry(displayInfo)) {
+            // The entry didn't exist so nothing is changed and no need to update the file.
+            return;
         }
 
-        FileOutputStream stream;
+        mEntries.put(getIdentifier(displayInfo), changedEntry);
+        writeSettings();
+    }
+
+    private void writeSettings() {
+        OutputStream stream;
         try {
-            stream = mFile.startWrite();
+            stream = mStorage.startWrite();
         } catch (IOException e) {
             Slog.w(TAG, "Failed to write display settings: " + e);
             return;
@@ -516,7 +586,12 @@ class DisplayWindowSettings {
             XmlSerializer out = new FastXmlSerializer();
             out.setOutput(stream, StandardCharsets.UTF_8.name());
             out.startDocument(null, true);
+
             out.startTag(null, "display-settings");
+
+            out.startTag(null, "config");
+            out.attribute(null, "identifier", Integer.toString(mIdentifier));
+            out.endTag(null, "config");
 
             for (Entry entry : mEntries.values()) {
                 out.startTag(null, "display");
@@ -578,10 +653,66 @@ class DisplayWindowSettings {
 
             out.endTag(null, "display-settings");
             out.endDocument();
-            mFile.finishWrite(stream);
+            mStorage.finishWrite(stream, true /* success */);
         } catch (IOException e) {
-            Slog.w(TAG, "Failed to write display settings, restoring backup.", e);
-            mFile.failWrite(stream);
+            Slog.w(TAG, "Failed to write display window settings.", e);
+            mStorage.finishWrite(stream, false /* success */);
+        }
+    }
+
+    /**
+     * Removes an entry from {@link #mEntries} cache. Looks up by new and previously used
+     * identifiers.
+     */
+    private boolean removeEntry(DisplayInfo displayInfo) {
+        // Remove entry based on primary identifier.
+        boolean removed = mEntries.remove(getIdentifier(displayInfo)) != null;
+        // Ensure that legacy entries are cleared as well.
+        removed |= mEntries.remove(displayInfo.uniqueId) != null;
+        removed |= mEntries.remove(displayInfo.name) != null;
+        return removed;
+    }
+
+    /** Gets the identifier of choice for the current config. */
+    private String getIdentifier(DisplayInfo displayInfo) {
+        if (mIdentifier == IDENTIFIER_PORT && displayInfo.address != null) {
+            // Config suggests using port as identifier for physical displays.
+            if (displayInfo.address instanceof DisplayAddress.Physical) {
+                return "port:" + ((DisplayAddress.Physical) displayInfo.address).getPort();
+            }
+        }
+        return displayInfo.uniqueId;
+    }
+
+    private static class AtomicFileStorage implements SettingPersister {
+        private final AtomicFile mAtomicFile;
+
+        AtomicFileStorage() {
+            final File folder = new File(Environment.getDataDirectory(), "system");
+            mAtomicFile = new AtomicFile(new File(folder, "display_settings.xml"), "wm-displays");
+        }
+
+        @Override
+        public InputStream openRead() throws FileNotFoundException {
+            return mAtomicFile.openRead();
+        }
+
+        @Override
+        public OutputStream startWrite() throws IOException {
+            return mAtomicFile.startWrite();
+        }
+
+        @Override
+        public void finishWrite(OutputStream os, boolean success) {
+            if (!(os instanceof FileOutputStream)) {
+                throw new IllegalArgumentException("Unexpected OutputStream as argument: " + os);
+            }
+            FileOutputStream fos = (FileOutputStream) os;
+            if (success) {
+                mAtomicFile.finishWrite(fos);
+            } else {
+                mAtomicFile.failWrite(fos);
+            }
         }
     }
 }
