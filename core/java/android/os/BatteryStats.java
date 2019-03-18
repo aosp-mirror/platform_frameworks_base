@@ -3661,6 +3661,14 @@ public abstract class BatteryStats implements Parcelable {
      */
     public final void dumpCheckinLocked(Context context, PrintWriter pw, int which, int reqUid,
             boolean wifiOnly) {
+
+        if (which != BatteryStats.STATS_SINCE_CHARGED) {
+            dumpLine(pw, 0, STAT_NAMES[which], "err",
+                    "ERROR: BatteryStats.dumpCheckin called for which type " + which
+                    + " but only STATS_SINCE_CHARGED is supported.");
+            return;
+        }
+
         final long rawUptime = SystemClock.uptimeMillis() * 1000;
         final long rawRealtimeMs = SystemClock.elapsedRealtime();
         final long rawRealtime = rawRealtimeMs * 1000;
@@ -4427,6 +4435,13 @@ public abstract class BatteryStats implements Parcelable {
     @SuppressWarnings("unused")
     public final void dumpLocked(Context context, PrintWriter pw, String prefix, final int which,
             int reqUid, boolean wifiOnly) {
+
+        if (which != BatteryStats.STATS_SINCE_CHARGED) {
+            pw.println("ERROR: BatteryStats.dump called for which type " + which
+                    + " but only STATS_SINCE_CHARGED is supported");
+            return;
+        }
+
         final long rawUptime = SystemClock.uptimeMillis() * 1000;
         final long rawRealtime = SystemClock.elapsedRealtime() * 1000;
         final long rawRealtimeMs = (rawRealtime + 500) / 1000;
