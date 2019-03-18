@@ -160,9 +160,9 @@ import android.content.pm.InstantAppInfo;
 import android.content.pm.InstantAppRequest;
 import android.content.pm.InstrumentationInfo;
 import android.content.pm.IntentFilterVerificationInfo;
-import android.content.pm.PackageBackwardCompatibility;
 import android.content.pm.KeySet;
 import android.content.pm.ModuleInfo;
+import android.content.pm.PackageBackwardCompatibility;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInfoLite;
 import android.content.pm.PackageInstaller;
@@ -232,6 +232,7 @@ import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.UserManagerInternal;
+import android.os.storage.DiskInfo;
 import android.os.storage.IStorageManager;
 import android.os.storage.StorageEventListener;
 import android.os.storage.StorageManager;
@@ -245,6 +246,7 @@ import android.provider.Settings.Secure;
 import android.security.KeyStore;
 import android.security.SystemKeyStore;
 import android.service.pm.PackageServiceDumpProto;
+import android.stats.storage.StorageEnums;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.text.TextUtils;
@@ -269,6 +271,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
+import android.util.StatsLog;
 import android.util.TimingsTraceLog;
 import android.util.Xml;
 import android.util.jar.StrictJarFile;
@@ -1912,6 +1915,15 @@ public class PackageManagerService extends IPackageManager.Stub
 
                 // Send broadcast package appeared if external for all users
                 if (isExternal(res.pkg)) {
+                    if (!update) {
+                        int packageExternalStorageType =
+                                getPackageExternalStorageType(res.pkg);
+                        // If the package was installed externally, log it.
+                        if (packageExternalStorageType != StorageEnums.UNKNOWN) {
+                            StatsLog.write(StatsLog.APP_INSTALL_ON_EXTERNAL_STORAGE_REPORTED,
+                                    packageExternalStorageType, res.pkg.packageName);
+                        }
+                    }
                     if (DEBUG_INSTALL) {
                         Slog.i(TAG, "upgrading pkg " + res.pkg + " is external");
                     }
@@ -1998,6 +2010,32 @@ public class PackageManagerService extends IPackageManager.Stub
                 Slog.i(TAG, "Observer no longer exists.");
             }
         }
+    }
+
+    /**
+     * Gets the type of the external storage a package is installed on.
+     * @param pkg The package for which to get the external storage type.
+     * @return {@link StorageEnum#TYPE_UNKNOWN} if it is not stored externally or the corresponding
+     * {@link StorageEnum} storage type value if it is.
+     */
+    private int getPackageExternalStorageType(PackageParser.Package pkg) {
+        final StorageManager storage = mContext.getSystemService(StorageManager.class);
+        VolumeInfo volume = storage.findVolumeByUuid(pkg.applicationInfo.storageUuid.toString());
+        if (volume != null) {
+            DiskInfo disk = volume.getDisk();
+            if (disk != null) {
+                if (disk.isSd()) {
+                    return StorageEnums.SD_CARD;
+                }
+                if (disk.isUsb()) {
+                    return StorageEnums.USB;
+                }
+                if (isExternal(pkg)) {
+                    return StorageEnums.OTHER;
+                }
+            }
+        }
+        return StorageEnums.UNKNOWN;
     }
 
     private StorageEventListener mStorageListener = new StorageEventListener() {
