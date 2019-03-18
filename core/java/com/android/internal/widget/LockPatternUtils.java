@@ -1638,7 +1638,7 @@ public class LockPatternUtils {
     }
 
     /**
-     * @see StrongAuthTracker#isFingerprintAllowedForUser
+     * @see StrongAuthTracker#isBiometricAllowedForUser(int)
      */
     public boolean isBiometricAllowedForUser(int userId) {
         return (getStrongAuthForUser(userId) & ~StrongAuthTracker.ALLOWING_BIOMETRIC) == 0;
@@ -1977,6 +1977,18 @@ public class LockPatternUtils {
 
     public boolean isSyntheticPasswordEnabled() {
         return getLong(SYNTHETIC_PASSWORD_ENABLED_KEY, 0, UserHandle.USER_SYSTEM) != 0;
+    }
+
+    /**
+     * Returns whether the given user has pending escrow tokens
+     */
+    public boolean hasPendingEscrowToken(int userId) {
+        try {
+            return getLockSettings().hasPendingEscrowToken(userId);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+        return false;
     }
 
     /**
