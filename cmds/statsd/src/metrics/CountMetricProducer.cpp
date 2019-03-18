@@ -319,10 +319,11 @@ void CountMetricProducer::flushIfNeededLocked(const int64_t& eventTimeNs) {
         return;
     }
 
-    flushCurrentBucketLocked(eventTimeNs, eventTimeNs);
     // Setup the bucket start time and number.
     int64_t numBucketsForward = 1 + (eventTimeNs - currentBucketEndTimeNs) / mBucketSizeNs;
-    mCurrentBucketStartTimeNs = currentBucketEndTimeNs + (numBucketsForward - 1) * mBucketSizeNs;
+    int64_t nextBucketNs = currentBucketEndTimeNs + (numBucketsForward - 1) * mBucketSizeNs;
+    flushCurrentBucketLocked(eventTimeNs, nextBucketNs);
+
     mCurrentBucketNum += numBucketsForward;
     VLOG("metric %lld: new bucket start time: %lld", (long long)mMetricId,
          (long long)mCurrentBucketStartTimeNs);
@@ -375,6 +376,7 @@ void CountMetricProducer::flushCurrentBucketLocked(const int64_t& eventTimeNs,
     // Only resets the counters, but doesn't setup the times nor numbers.
     // (Do not clear since the old one is still referenced in mAnomalyTrackers).
     mCurrentSlicedCounter = std::make_shared<DimToValMap>();
+    mCurrentBucketStartTimeNs = nextBucketStartTimeNs;
 }
 
 // Rough estimate of CountMetricProducer buffer stored. This number will be
