@@ -2546,6 +2546,7 @@
   <java-symbol type="string" name="face_acquired_tilt_too_extreme" />
   <java-symbol type="string" name="face_acquired_roll_too_extreme" />
   <java-symbol type="string" name="face_acquired_obscured" />
+  <java-symbol type="string" name="face_acquired_sensor_dirty" />
   <java-symbol type="array" name="face_acquired_vendor" />
   <java-symbol type="string" name="face_name_template" />
   <java-symbol type="string" name="face_authenticated_no_confirmation_required" />
