@@ -1809,6 +1809,45 @@ public abstract class ColorSpace {
     }
 
     /**
+     * <p>Computes the chromaticity coordinates of a specified correlated color
+     * temperature (CCT) on the Planckian locus. The specified CCT must be
+     * greater than 0. A meaningful CCT range is [1667, 25000].</p>
+     *
+     * <p>The transform is computed using the methods in Kang et
+     * al., <i>Design of Advanced Color - Temperature Control System for HDTV
+     * Applications</i>, Journal of Korean Physical Society 41, 865-871
+     * (2002).</p>
+     *
+     * @param cct The correlated color temperature, in Kelvin
+     * @return Corresponding XYZ values
+     * @throws IllegalArgumentException If cct is invalid
+     *
+     * @hide
+     */
+    @NonNull
+    @Size(3)
+    public static float[] cctToXyz(@IntRange(from = 1) int cct) {
+        if (cct < 1) {
+            throw new IllegalArgumentException("Temperature must be greater than 0");
+        }
+
+        final float icct = 1e3f / cct;
+        final float icct2 = icct * icct;
+        final float x = cct <= 4000.0f ?
+            0.179910f + 0.8776956f * icct - 0.2343589f * icct2 - 0.2661239f * icct2 * icct :
+            0.240390f + 0.2226347f * icct + 2.1070379f * icct2 - 3.0258469f * icct2 * icct;
+
+        final float x2 = x * x;
+        final float y = cct <= 2222.0f ?
+            -0.20219683f + 2.18555832f * x - 1.34811020f * x2 - 1.1063814f * x2 * x :
+            cct <= 4000.0f ?
+            -0.16748867f + 2.09137015f * x - 1.37418593f * x2 - 0.9549476f * x2 * x :
+            -0.37001483f + 3.75112997f * x - 5.8733867f * x2 + 3.0817580f * x2 * x;
+
+        return xyYToXyz(new float[] {x, y});
+    }
+
+    /**
      * <p>Computes the chromaticity coordinates of a CIE series D illuminant
      * from the specified correlated color temperature (CCT). The specified CCT
      * must be greater than 0. A meaningful CCT range is [4000, 25000].</p>
