@@ -9053,7 +9053,6 @@ public final class Settings {
          * @return true if the provider is enabled
          *
          * @deprecated use {@link LocationManager#isProviderEnabled(String)}
-         * @removed no longer supported
          */
         @Deprecated
         public static boolean isLocationProviderEnabled(ContentResolver cr, String provider) {
@@ -9063,12 +9062,12 @@ public final class Settings {
         }
 
         /**
-         * Thread-safe method for enabling or disabling a single location provider.
+         * Thread-safe method for enabling or disabling a single location provider. This will have
+         * no effect on Android Q and above.
          * @param cr the content resolver to use
          * @param provider the location provider to enable or disable
          * @param enabled true if the provider should be enabled
          * @deprecated This API is deprecated
-         * @removed no longer supported
          */
         @Deprecated
         public static void setLocationProviderEnabled(ContentResolver cr,
