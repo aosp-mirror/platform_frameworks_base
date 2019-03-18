@@ -933,6 +933,11 @@ aidl_interface {
         "core/java/android/net/ipmemorystore/**/*.aidl",
     ],
     api_dir: "aidl/networkstack",
+    backend: {
+        java: {
+            sdk_version: "28",
+        },
+    },
 }
 
 filegroup {
