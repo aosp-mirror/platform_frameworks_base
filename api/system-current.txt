@@ -6397,6 +6397,10 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public int getVoiceActivationState();
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean handlePinMmi(String);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean handlePinMmiForSubscriber(int, String);
+    method @Nullable @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean iccCloseLogicalChannelBySlot(int, int);
+    method @Nullable @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public android.telephony.IccOpenLogicalChannelResponse iccOpenLogicalChannelBySlot(int, @Nullable String, int);
+    method @NonNull @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public String iccTransmitApduBasicChannelBySlot(int, int, int, int, int, int, @Nullable String);
+    method @Nullable @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public String iccTransmitApduLogicalChannelBySlot(int, int, int, int, int, int, int, @Nullable String);
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isCurrentPotentialEmergencyNumber(@NonNull String);
     method public boolean isDataConnectivityPossible();
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, android.Manifest.permission.READ_PHONE_STATE}) public boolean isIdle();
