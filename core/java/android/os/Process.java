@@ -17,6 +17,7 @@
 package android.os;
 
 import android.annotation.TestApi;
+import android.annotation.UnsupportedAppUsage;
 import android.system.Os;
 import android.system.OsConstants;
 import android.webkit.WebViewZygote;
@@ -58,30 +59,35 @@ public class Process {
      * Defines the UID/GID for the log group.
      * @hide
      */
+    @UnsupportedAppUsage
     public static final int LOG_UID = 1007;
 
     /**
      * Defines the UID/GID for the WIFI supplicant process.
      * @hide
      */
+    @UnsupportedAppUsage
     public static final int WIFI_UID = 1010;
 
     /**
      * Defines the UID/GID for the mediaserver process.
      * @hide
      */
+    @UnsupportedAppUsage
     public static final int MEDIA_UID = 1013;
 
     /**
      * Defines the UID/GID for the DRM process.
      * @hide
      */
+    @UnsupportedAppUsage
     public static final int DRM_UID = 1019;
 
     /**
      * Defines the UID/GID for the group that controls VPN services.
      * @hide
      */
+    @UnsupportedAppUsage
     public static final int VPN_UID = 1016;
 
     /**
@@ -94,6 +100,7 @@ public class Process {
      * Defines the UID/GID for the NFC service process.
      * @hide
      */
+    @UnsupportedAppUsage
     public static final int NFC_UID = 1027;
 
     /**
@@ -565,6 +572,7 @@ public class Process {
      * Returns the identifier of this process' parent.
      * @hide
      */
+    @UnsupportedAppUsage
     public static final int myPpid() {
         return Os.getppid();
     }
@@ -623,6 +631,7 @@ public class Process {
     }
 
     /** {@hide} */
+    @UnsupportedAppUsage
     public static final boolean isIsolated(int uid) {
         uid = UserHandle.getAppId(uid);
         return uid >= FIRST_ISOLATED_UID && uid <= LAST_ISOLATED_UID;
@@ -648,6 +657,7 @@ public class Process {
      * @return the uid of the process, or -1 if the process is not running.
      * @hide pending API council review
      */
+    @UnsupportedAppUsage
     public static final int getUidForPid(int pid) {
         String[] procStatusLabels = { "Uid:" };
         long[] procStatusValues = new long[1];
@@ -662,6 +672,7 @@ public class Process {
      * @return the parent process id of the process, or -1 if the process is not running.
      * @hide
      */
+    @UnsupportedAppUsage
     public static final int getParentPid(int pid) {
         String[] procStatusLabels = { "PPid:" };
         long[] procStatusValues = new long[1];
@@ -765,6 +776,7 @@ public class Process {
      *
      * Always sets cpusets.
      */
+    @UnsupportedAppUsage
     public static final native void setProcessGroup(int pid, int group)
             throws IllegalArgumentException, SecurityException;
 
@@ -906,6 +918,7 @@ public class Process {
      * 
      * {@hide}
      */
+    @UnsupportedAppUsage
     public static final native void setArgV0(String text);
 
     /**
@@ -956,50 +969,67 @@ public class Process {
     public static final native void sendSignalQuiet(int pid, int signal);
     
     /** @hide */
+    @UnsupportedAppUsage
     public static final native long getFreeMemory();
     
     /** @hide */
+    @UnsupportedAppUsage
     public static final native long getTotalMemory();
     
     /** @hide */
+    @UnsupportedAppUsage
     public static final native void readProcLines(String path,
             String[] reqFields, long[] outSizes);
     
     /** @hide */
+    @UnsupportedAppUsage
     public static final native int[] getPids(String path, int[] lastArray);
     
     /** @hide */
+    @UnsupportedAppUsage
     public static final int PROC_TERM_MASK = 0xff;
     /** @hide */
+    @UnsupportedAppUsage
     public static final int PROC_ZERO_TERM = 0;
     /** @hide */
+    @UnsupportedAppUsage
     public static final int PROC_SPACE_TERM = (int)' ';
     /** @hide */
+    @UnsupportedAppUsage
     public static final int PROC_TAB_TERM = (int)'\t';
     /** @hide */
+    @UnsupportedAppUsage
     public static final int PROC_COMBINE = 0x100;
     /** @hide */
+    @UnsupportedAppUsage
     public static final int PROC_PARENS = 0x200;
     /** @hide */
+    @UnsupportedAppUsage
     public static final int PROC_QUOTES = 0x400;
     /** @hide */
     public static final int PROC_CHAR = 0x800;
     /** @hide */
+    @UnsupportedAppUsage
     public static final int PROC_OUT_STRING = 0x1000;
     /** @hide */
+    @UnsupportedAppUsage
     public static final int PROC_OUT_LONG = 0x2000;
     /** @hide */
+    @UnsupportedAppUsage
     public static final int PROC_OUT_FLOAT = 0x4000;
     
     /** @hide */
+    @UnsupportedAppUsage
     public static final native boolean readProcFile(String file, int[] format,
             String[] outStrings, long[] outLongs, float[] outFloats);
     
     /** @hide */
+    @UnsupportedAppUsage
     public static final native boolean parseProcLine(byte[] buffer, int startIndex, 
             int endIndex, int[] format, String[] outStrings, long[] outLongs, float[] outFloats);
 
     /** @hide */
+    @UnsupportedAppUsage
     public static final native int[] getPidsForCommands(String[] cmds);
 
     /**
@@ -1010,6 +1040,7 @@ public class Process {
      *  or -1 if the value cannot be determined 
      * @hide
      */
+    @UnsupportedAppUsage
     public static final native long getPss(int pid);
 
     /**

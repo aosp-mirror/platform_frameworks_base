@@ -16,6 +16,7 @@
 
 package android.os;
 
+import android.annotation.UnsupportedAppUsage;
 import android.util.AndroidException;
 
 /**
@@ -54,6 +55,7 @@ public class RemoteException extends AndroidException {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public RuntimeException rethrowFromSystemServer() {
         if (this instanceof DeadObjectException) {
             throw new RuntimeException(new DeadSystemException());

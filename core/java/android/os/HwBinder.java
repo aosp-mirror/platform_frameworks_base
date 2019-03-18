@@ -18,6 +18,7 @@ package android.os;
 
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
+import android.annotation.UnsupportedAppUsage;
 
 import libcore.util.NativeAllocationRegistry;
 
@@ -151,6 +152,7 @@ public abstract class HwBinder implements IHwBinder {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public static void reportSyspropChanged() {
         native_report_sysprop_change();
     }

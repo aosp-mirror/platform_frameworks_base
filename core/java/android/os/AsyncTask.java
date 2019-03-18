@@ -18,6 +18,7 @@ package android.os;
 
 import android.annotation.MainThread;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.annotation.WorkerThread;
 
 import java.util.ArrayDeque;
@@ -259,15 +260,20 @@ public abstract class AsyncTask<Params, Progress, Result> {
     private static final int MESSAGE_POST_RESULT = 0x1;
     private static final int MESSAGE_POST_PROGRESS = 0x2;
 
+    @UnsupportedAppUsage
     private static volatile Executor sDefaultExecutor = SERIAL_EXECUTOR;
     private static InternalHandler sHandler;
 
+    @UnsupportedAppUsage
     private final WorkerRunnable<Params, Result> mWorker;
+    @UnsupportedAppUsage
     private final FutureTask<Result> mFuture;
 
+    @UnsupportedAppUsage
     private volatile Status mStatus = Status.PENDING;
     
     private final AtomicBoolean mCancelled = new AtomicBoolean();
+    @UnsupportedAppUsage
     private final AtomicBoolean mTaskInvoked = new AtomicBoolean();
 
     private final Handler mHandler;
@@ -331,6 +337,7 @@ public abstract class AsyncTask<Params, Progress, Result> {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public static void setDefaultExecutor(Executor exec) {
         sDefaultExecutor = exec;
     }
