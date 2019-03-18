@@ -18,6 +18,7 @@ package android.telephony;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SdkConstant;
 import android.annotation.SystemApi;
 import android.app.Service;
 import android.content.Intent;
@@ -54,7 +55,8 @@ public abstract class NetworkService extends Service {
 
     private final String TAG = NetworkService.class.getSimpleName();
 
-    public static final String NETWORK_SERVICE_INTERFACE = "android.telephony.NetworkService";
+    @SdkConstant(SdkConstant.SdkConstantType.SERVICE_ACTION)
+    public static final String SERVICE_INTERFACE = "android.telephony.NetworkService";
 
     private static final int NETWORK_SERVICE_CREATE_NETWORK_SERVICE_PROVIDER                 = 1;
     private static final int NETWORK_SERVICE_REMOVE_NETWORK_SERVICE_PROVIDER                 = 2;
@@ -104,13 +106,14 @@ public abstract class NetworkService extends Service {
         }
 
         /**
-         * API to get network registration info. The result will be passed to the callback.
+         * Request network registration info. The result will be passed to the callback.
+         *
          * @param domain Network domain
          * @param callback The callback for reporting network registration info
          */
-        public void getNetworkRegistrationInfo(@Domain int domain,
-                                               @NonNull NetworkServiceCallback callback) {
-            callback.onGetNetworkRegistrationInfoComplete(
+        public void requestNetworkRegistrationInfo(@Domain int domain,
+                                                   @NonNull NetworkServiceCallback callback) {
+            callback.onRequestNetworkRegistrationInfoComplete(
                     NetworkServiceCallback.RESULT_ERROR_UNSUPPORTED, null);
         }
 
@@ -192,7 +195,7 @@ public abstract class NetworkService extends Service {
                 case NETWORK_SERVICE_GET_REGISTRATION_INFO:
                     if (serviceProvider == null) break;
                     int domainId = message.arg2;
-                    serviceProvider.getNetworkRegistrationInfo(domainId,
+                    serviceProvider.requestNetworkRegistrationInfo(domainId,
                             new NetworkServiceCallback(callback));
 
                     break;
@@ -231,14 +234,15 @@ public abstract class NetworkService extends Service {
      * will call this method after binding the network service for each active SIM slot id.
      *
      * @param slotIndex SIM slot id the network service associated with.
-     * @return Network service object
+     * @return Network service object. Null if failed to create the provider (e.g. invalid slot
+     * index)
      */
     @Nullable
     public abstract NetworkServiceProvider onCreateNetworkServiceProvider(int slotIndex);
 
     @Override
     public IBinder onBind(Intent intent) {
-        if (intent == null || !NETWORK_SERVICE_INTERFACE.equals(intent.getAction())) {
+        if (intent == null || !SERVICE_INTERFACE.equals(intent.getAction())) {
             loge("Unexpected intent " + intent);
             return null;
         }
@@ -280,8 +284,8 @@ public abstract class NetworkService extends Service {
         }
 
         @Override
-        public void getNetworkRegistrationInfo(
-                int slotIndex, int domain, INetworkServiceCallback callback) {
+        public void requestNetworkRegistrationInfo(int slotIndex, int domain,
+                                                   INetworkServiceCallback callback) {
             mHandler.obtainMessage(NETWORK_SERVICE_GET_REGISTRATION_INFO, slotIndex,
                     domain, callback).sendToTarget();
         }
