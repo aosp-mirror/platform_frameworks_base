@@ -19,6 +19,7 @@ package android.os;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.util.Log;
 
 import java.io.File;
@@ -141,6 +142,7 @@ public abstract class FileObserver {
             stopWatching(m_fd, descriptors);
         }
 
+        @UnsupportedAppUsage
         public void onEvent(int wfd, @NotifyEventType int mask, String path) {
             // look up our observer, fixing up the map if necessary...
             FileObserver observer = null;
@@ -172,6 +174,7 @@ public abstract class FileObserver {
         private native void stopWatching(int fd, int[] wfds);
     }
 
+    @UnsupportedAppUsage
     private static ObserverThread s_observerThread;
 
     static {

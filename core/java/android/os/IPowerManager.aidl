@@ -41,10 +41,13 @@ interface IPowerManager
     void updateWakeLockWorkSource(IBinder lock, in WorkSource ws, String historyTag);
     boolean isWakeLockLevelSupported(int level);
 
+    @UnsupportedAppUsage
     void userActivity(long time, int event, int flags);
     void wakeUp(long time, int reason, String details, String opPackageName);
+    @UnsupportedAppUsage
     void goToSleep(long time, int reason, int flags);
     void nap(long time);
+    @UnsupportedAppUsage
     boolean isInteractive();
     boolean isPowerSaveMode();
     PowerSaveState getPowerSaveState(int serviceType);
@@ -56,6 +59,7 @@ interface IPowerManager
     boolean isDeviceIdleMode();
     boolean isLightDeviceIdleMode();
 
+    @UnsupportedAppUsage
     void reboot(boolean confirm, String reason, boolean wait);
     void rebootSafeMode(boolean confirm, boolean wait);
     void shutdown(boolean confirm, String reason, boolean wait);

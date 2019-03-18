@@ -19,6 +19,7 @@ package android.os;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.annotation.UnsupportedAppUsage;
 import android.util.ExceptionUtils;
 import android.util.Log;
 import android.util.Slog;
@@ -247,6 +248,7 @@ public class Binder implements IBinder {
     /**
      * Raw native pointer to JavaBBinderHolder object. Owned by this Java object. Not null.
      */
+    @UnsupportedAppUsage
     private final long mObject;
 
     private IInterface mOwner;
@@ -990,6 +992,7 @@ public class Binder implements IBinder {
     }
 
     // Entry point from android_util_Binder.cpp's onTransact
+    @UnsupportedAppUsage
     private boolean execTransact(int code, long dataObj, long replyObj,
             int flags) {
         // At that point, the parcel request headers haven't been parsed so we do not know what

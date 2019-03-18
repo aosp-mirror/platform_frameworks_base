@@ -16,6 +16,7 @@
 
 package android.os;
 
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.media.AudioAttributes;
 import android.util.Log;
@@ -31,10 +32,12 @@ public class SystemVibrator extends Vibrator {
     private final IVibratorService mService;
     private final Binder mToken = new Binder();
 
+    @UnsupportedAppUsage
     public SystemVibrator() {
         mService = IVibratorService.Stub.asInterface(ServiceManager.getService("vibrator"));
     }
 
+    @UnsupportedAppUsage
     public SystemVibrator(Context context) {
         super(context);
         mService = IVibratorService.Stub.asInterface(ServiceManager.getService("vibrator"));

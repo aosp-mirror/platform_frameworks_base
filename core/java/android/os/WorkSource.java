@@ -3,6 +3,7 @@ package android.os;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.os.WorkSourceProto;
 import android.provider.Settings;
@@ -24,8 +25,11 @@ public class WorkSource implements Parcelable {
     static final String TAG = "WorkSource";
     static final boolean DEBUG = false;
 
+    @UnsupportedAppUsage
     int mNum;
+    @UnsupportedAppUsage
     int[] mUids;
+    @UnsupportedAppUsage
     String[] mNames;
 
     private ArrayList<WorkChain> mChains;
@@ -103,6 +107,7 @@ public class WorkSource implements Parcelable {
         mChains = null;
     }
 
+    @UnsupportedAppUsage
     WorkSource(Parcel in) {
         mNum = in.readInt();
         mUids = in.createIntArray();

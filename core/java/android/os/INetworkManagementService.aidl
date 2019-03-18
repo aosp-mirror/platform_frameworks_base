@@ -38,11 +38,13 @@ interface INetworkManagementService
     /**
      * Register an observer to receive events.
      */
+    @UnsupportedAppUsage
     void registerObserver(INetworkManagementEventObserver obs);
 
     /**
      * Unregister an observer from receiving events.
      */
+    @UnsupportedAppUsage
     void unregisterObserver(INetworkManagementEventObserver obs);
 
     /**
@@ -54,16 +56,19 @@ interface INetworkManagementService
      * Retrieves the specified interface config
      *
      */
+    @UnsupportedAppUsage
     InterfaceConfiguration getInterfaceConfig(String iface);
 
     /**
      * Sets the configuration of the specified interface
      */
+    @UnsupportedAppUsage
     void setInterfaceConfig(String iface, in InterfaceConfiguration cfg);
 
     /**
      * Clear all IP addresses on the specified interface
      */
+    @UnsupportedAppUsage
     void clearInterfaceAddresses(String iface);
 
     /**
@@ -79,22 +84,26 @@ interface INetworkManagementService
     /**
      * Set interface IPv6 privacy extensions
      */
+    @UnsupportedAppUsage
     void setInterfaceIpv6PrivacyExtensions(String iface, boolean enable);
 
     /**
      * Disable IPv6 on an interface
      */
+    @UnsupportedAppUsage
     void disableIpv6(String iface);
 
     /**
      * Enable IPv6 on an interface
      */
+    @UnsupportedAppUsage
     void enableIpv6(String iface);
 
     /**
      * Set IPv6 autoconf address generation mode.
      * This is a no-op if an unsupported mode is requested.
      */
+    @UnsupportedAppUsage
     void setIPv6AddrGenMode(String iface, int mode);
 
     /**
@@ -124,37 +133,44 @@ interface INetworkManagementService
     /**
      * Returns true if IP forwarding is enabled
      */
+    @UnsupportedAppUsage
     boolean getIpForwardingEnabled();
 
     /**
      * Enables/Disables IP Forwarding
      */
+    @UnsupportedAppUsage
     void setIpForwardingEnabled(boolean enabled);
 
     /**
      * Start tethering services with the specified dhcp server range
      * arg is a set of start end pairs defining the ranges.
      */
+    @UnsupportedAppUsage
     void startTethering(in String[] dhcpRanges);
 
     /**
      * Stop currently running tethering services
      */
+    @UnsupportedAppUsage
     void stopTethering();
 
     /**
      * Returns true if tethering services are started
      */
+    @UnsupportedAppUsage
     boolean isTetheringStarted();
 
     /**
      * Tethers the specified interface
      */
+    @UnsupportedAppUsage
     void tetherInterface(String iface);
 
     /**
      * Untethers the specified interface
      */
+    @UnsupportedAppUsage
     void untetherInterface(String iface);
 
     /**
@@ -189,11 +205,13 @@ interface INetworkManagementService
      *  The address and netmask of the external interface is used for
      *  the NAT'ed network.
      */
+    @UnsupportedAppUsage
     void enableNat(String internalInterface, String externalInterface);
 
     /**
      *  Disables Network Address Translation between two interfaces.
      */
+    @UnsupportedAppUsage
     void disableNat(String internalInterface, String externalInterface);
 
     /**
@@ -311,6 +329,7 @@ interface INetworkManagementService
     /**
      * Return status of bandwidth control module.
      */
+    @UnsupportedAppUsage
     boolean isBandwidthControlEnabled();
 
     /**

@@ -18,6 +18,7 @@ package android.os;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.content.pm.ApplicationInfo;
 import android.net.LocalSocket;
 import android.net.LocalSocketAddress;
@@ -41,10 +42,12 @@ import java.util.List;
 import java.util.UUID;
 
 /*package*/ class ZygoteStartFailedEx extends Exception {
+    @UnsupportedAppUsage
     ZygoteStartFailedEx(String s) {
         super(s);
     }
 
+    @UnsupportedAppUsage
     ZygoteStartFailedEx(Throwable cause) {
         super(cause);
     }
