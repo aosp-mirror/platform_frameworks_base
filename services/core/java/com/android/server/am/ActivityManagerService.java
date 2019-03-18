@@ -5492,6 +5492,12 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
+    private boolean isAppBad(ApplicationInfo info) {
+        synchronized (this) {
+            return mAppErrors.isBadProcessLocked(info);
+        }
+    }
+
     // NOTE: this is an internal method used by the OnShellCommand implementation only and should
     // be guarded by permission checking.
     int getUidState(int uid) {
@@ -18075,6 +18081,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         @Override
         public boolean isAppForeground(int uid) {
             return ActivityManagerService.this.isAppForeground(uid);
+        }
+
+        @Override
+        public boolean isAppBad(ApplicationInfo info) {
+            return ActivityManagerService.this.isAppBad(info);
         }
 
         @Override
