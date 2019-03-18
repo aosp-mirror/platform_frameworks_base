@@ -1144,6 +1144,19 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     @Override
+    public String getUserName() {
+        if (!hasManageUsersOrPermission(android.Manifest.permission.GET_ACCOUNTS_PRIVILEGED)) {
+            throw new SecurityException("You need MANAGE_USERS or GET_ACCOUNTS_PRIVILEGED "
+                    + "permissions to: get user name");
+        }
+        final int userId = UserHandle.getUserId(Binder.getCallingUid());
+        synchronized (mUsersLock) {
+            UserInfo userInfo = userWithName(getUserInfoLU(userId));
+            return userInfo == null ? "" : userInfo.name;
+        }
+    }
+
+    @Override
     public long getUserStartRealtime() {
         final int userId = UserHandle.getUserId(Binder.getCallingUid());
         synchronized (mUsersLock) {
@@ -1329,7 +1342,10 @@ public class UserManagerService extends IUserManager.Stub {
 
     @Override
     public ParcelFileDescriptor getUserIcon(int targetUserId) {
-        checkManageUsersPermission("get user icon");
+        if (!hasManageUsersOrPermission(android.Manifest.permission.GET_ACCOUNTS_PRIVILEGED)) {
+            throw new SecurityException("You need MANAGE_USERS or GET_ACCOUNTS_PRIVILEGED "
+                    + "permissions to: get user icon");
+        }
         String iconPath;
         synchronized (mPackagesLock) {
             UserInfo targetUserInfo = getUserInfoNoChecks(targetUserId);
@@ -1946,15 +1962,23 @@ public class UserManagerService extends IUserManager.Stub {
 
     /**
      * @return whether the calling UID is system UID or root's UID or the calling app has the
-     * {@link android.Manifest.permission#MANAGE_USERS MANAGE_USERS} or
-     * {@link android.Manifest.permission#CREATE_USERS CREATE_USERS}.
+     * {@link android.Manifest.permission#MANAGE_USERS MANAGE_USERS} or the provided permission.
      */
-    private static final boolean hasManageOrCreateUsersPermission() {
+    private static final boolean hasManageUsersOrPermission(String alternativePermission) {
         final int callingUid = Binder.getCallingUid();
         return UserHandle.isSameApp(callingUid, Process.SYSTEM_UID)
                 || callingUid == Process.ROOT_UID
                 || hasPermissionGranted(android.Manifest.permission.MANAGE_USERS, callingUid)
-                || hasPermissionGranted(android.Manifest.permission.CREATE_USERS, callingUid);
+                || hasPermissionGranted(alternativePermission, callingUid);
+    }
+
+    /**
+     * @return whether the calling UID is system UID or root's UID or the calling app has the
+     * {@link android.Manifest.permission#MANAGE_USERS MANAGE_USERS} or
+     * {@link android.Manifest.permission#CREATE_USERS CREATE_USERS}.
+     */
+    private static final boolean hasManageOrCreateUsersPermission() {
+        return hasManageUsersOrPermission(android.Manifest.permission.CREATE_USERS);
     }
 
     /**

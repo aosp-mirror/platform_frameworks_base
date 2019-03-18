@@ -1352,12 +1352,16 @@ public class UserManager {
     /**
      * Returns the user name of the user making this call.  This call is only
      * available to applications on the system image; it requires the
-     * MANAGE_USERS permission.
+     * {@code android.permission.MANAGE_USERS} or {@code android.permission.GET_ACCOUNTS_PRIVILEGED}
+     * permissions.
      * @return the user name
      */
     public String getUserName() {
-        UserInfo user = getUserInfo(getUserHandle());
-        return user == null ? "" : user.name;
+        try {
+            return mService.getUserName();
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -2884,14 +2888,16 @@ public class UserManager {
 
     /**
      * Returns a Bitmap for the calling user's photo.
-     * Requires {@link android.Manifest.permission#MANAGE_USERS} permission.
+     * Requires {@link android.Manifest.permission#MANAGE_USERS}
+     * or {@link android.Manifest.permission#GET_ACCOUNTS_PRIVILEGED} permissions.
      *
      * @return a {@link Bitmap} of the user's photo, or null if there's no photo.
      * @see com.android.internal.util.UserIcons#getDefaultUserIcon for a default.
      * @hide
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
+    @RequiresPermission(anyOf = {android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.GET_ACCOUNTS_PRIVILEGED})
     public @Nullable Bitmap getUserIcon() {
         return getUserIcon(getUserHandle());
     }
