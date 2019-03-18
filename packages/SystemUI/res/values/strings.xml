@@ -1069,10 +1069,10 @@
     <string name="battery_saver_notification_action_text">Turn off Battery Saver</string>
 
     <!-- Media projection permission dialog warning text. [CHAR LIMIT=NONE] -->
-    <string name="media_projection_dialog_text"><xliff:g id="app_seeking_permission" example="Hangouts">%s</xliff:g> will start capturing everything on your screen including notifications, passwords, photos, messages and payment information.</string>
+    <string name="media_projection_dialog_text"><xliff:g id="app_seeking_permission" example="Hangouts">%s</xliff:g> will start capturing the played audio and everything on your screen including notifications, passwords, photos, messages and payment information.</string>
 
     <!-- Media projection permission dialog warning title. [CHAR LIMIT=NONE] -->
-    <string name="media_projection_dialog_title">Allow <xliff:g id="app_seeking_permission" example="Hangouts">%s</xliff:g> to record or cast your screen?</string>
+    <string name="media_projection_dialog_title">Allow <xliff:g id="app_seeking_permission" example="Hangouts">%s</xliff:g> to record or cast your screen and played audio?</string>
 
     <!-- Media projection permission dialog permanent grant check box. [CHAR LIMIT=NONE] -->
     <string name="media_projection_remember_text">Don\'t show again</string>
