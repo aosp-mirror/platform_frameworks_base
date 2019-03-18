@@ -402,6 +402,10 @@ public final class ColorDisplayService extends SystemService {
         cr.registerContentObserver(Secure.getUriFor(Secure.DISPLAY_WHITE_BALANCE_ENABLED),
                 false /* notifyForDescendants */, mContentObserver, mCurrentUser);
 
+        // Apply the accessibility settings first, since they override most other settings.
+        onAccessibilityInversionChanged();
+        onAccessibilityDaltonizerChanged();
+
         // Set the color mode, if valid, and immediately apply the updated tint matrix based on the
         // existing activated state. This ensures consistency of tint across the color mode change.
         onDisplayColorModeChanged(getColorModeInternal());
