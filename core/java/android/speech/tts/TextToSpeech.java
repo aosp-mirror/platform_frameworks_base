@@ -536,7 +536,7 @@ public class TextToSpeech {
          * or playing back a file. The value should be one of the STREAM_ constants
          * defined in {@link AudioManager}.
          *
-         * @see TextToSpeech#speak(String, int, HashMap)
+         * @see TextToSpeech#speak(CharSequence, int, Bundle, String)
          * @see TextToSpeech#playEarcon(String, int, HashMap)
          */
         public static final String KEY_PARAM_STREAM = "streamType";
@@ -546,7 +546,7 @@ public class TextToSpeech {
          * speaking text or playing back a file. The value should be set
          * using {@link TextToSpeech#setAudioAttributes(AudioAttributes)}.
          *
-         * @see TextToSpeech#speak(String, int, HashMap)
+         * @see TextToSpeech#speak(CharSequence, int, Bundle, String)
          * @see TextToSpeech#playEarcon(String, int, HashMap)
          * @hide
          */
@@ -557,7 +557,7 @@ public class TextToSpeech {
          * {@link TextToSpeech.OnUtteranceCompletedListener} after text has been
          * spoken, a file has been played back or a silence duration has elapsed.
          *
-         * @see TextToSpeech#speak(String, int, HashMap)
+         * @see TextToSpeech#speak(CharSequence, int, Bundle, String)
          * @see TextToSpeech#playEarcon(String, int, HashMap)
          * @see TextToSpeech#synthesizeToFile(String, HashMap, String)
          */
@@ -568,7 +568,7 @@ public class TextToSpeech {
          * volume used when speaking text. Volume is specified as a float ranging from 0 to 1
          * where 0 is silence, and 1 is the maximum volume (the default behavior).
          *
-         * @see TextToSpeech#speak(String, int, HashMap)
+         * @see TextToSpeech#speak(CharSequence, int, Bundle, String)
          * @see TextToSpeech#playEarcon(String, int, HashMap)
          */
         public static final String KEY_PARAM_VOLUME = "volume";
@@ -578,7 +578,7 @@ public class TextToSpeech {
          * Pan is specified as a float ranging from -1 to +1 where -1 maps to a hard-left pan,
          * 0 to center (the default behavior), and +1 to hard-right.
          *
-         * @see TextToSpeech#speak(String, int, HashMap)
+         * @see TextToSpeech#speak(CharSequence, int, Bundle, String)
          * @see TextToSpeech#playEarcon(String, int, HashMap)
          */
         public static final String KEY_PARAM_PAN = "pan";
@@ -589,7 +589,7 @@ public class TextToSpeech {
          * as per {@link TextToSpeech#getFeatures(Locale)}, the engine must
          * use network based synthesis.
          *
-         * @see TextToSpeech#speak(String, int, java.util.HashMap)
+         * @see TextToSpeech#speak(CharSequence, int, Bundle, String)
          * @see TextToSpeech#synthesizeToFile(String, java.util.HashMap, String)
          * @see TextToSpeech#getFeatures(java.util.Locale)
          *
@@ -607,7 +607,7 @@ public class TextToSpeech {
          * as per {@link TextToSpeech#getFeatures(Locale)}, the engine must synthesize
          * text on-device (without making network requests).
          *
-         * @see TextToSpeech#speak(String, int, java.util.HashMap)
+         * @see TextToSpeech#speak(CharSequence, int, Bundle, String)
          * @see TextToSpeech#synthesizeToFile(String, java.util.HashMap, String)
          * @see TextToSpeech#getFeatures(java.util.Locale)
 
@@ -625,7 +625,7 @@ public class TextToSpeech {
          * output. It can be used to associate one of the {@link android.media.audiofx.AudioEffect}
          * objects with the synthesis (or earcon) output.
          *
-         * @see TextToSpeech#speak(String, int, HashMap)
+         * @see TextToSpeech#speak(CharSequence, int, Bundle, String)
          * @see TextToSpeech#playEarcon(String, int, HashMap)
          */
         public static final String KEY_PARAM_SESSION_ID = "sessionId";
@@ -881,7 +881,7 @@ public class TextToSpeech {
     /**
      * Adds a mapping between a string of text and a sound resource in a
      * package. After a call to this method, subsequent calls to
-     * {@link #speak(String, int, HashMap)} will play the specified sound resource
+     * {@link #speak(CharSequence, int, Bundle, String)} will play the specified sound resource
      * if it is available, or synthesize the text it is missing.
      *
      * @param text
@@ -915,7 +915,7 @@ public class TextToSpeech {
     /**
      * Adds a mapping between a CharSequence (may be spanned with TtsSpans) of text
      * and a sound resource in a package. After a call to this method, subsequent calls to
-     * {@link #speak(String, int, HashMap)} will play the specified sound resource
+     * {@link #speak(CharSequence, int, Bundle, String)} will play the specified sound resource
      * if it is available, or synthesize the text it is missing.
      *
      * @param text
@@ -947,11 +947,10 @@ public class TextToSpeech {
     }
 
     /**
-     * Adds a mapping between a string of text and a sound file. Using this, it
-     * is possible to add custom pronounciations for a string of text.
-     * After a call to this method, subsequent calls to {@link #speak(String, int, HashMap)}
-     * will play the specified sound resource if it is available, or synthesize the text it is
-     * missing.
+     * Adds a mapping between a string of text and a sound file. Using this, it is possible to
+     * add custom pronounciations for a string of text. After a call to this method, subsequent
+     * calls to {@link #speak(CharSequence, int, Bundle, String)} will play the specified sound
+     * resource if it is available, or synthesize the text it is missing.
      *
      * @param text
      *            The string of text. Example: <code>"south_south_east"</code>
@@ -970,8 +969,8 @@ public class TextToSpeech {
 
     /**
      * Adds a mapping between a CharSequence (may be spanned with TtsSpans and a sound file.
-     * Using this, it is possible to add custom pronounciations for a string of text.
-     * After a call to this method, subsequent calls to {@link #speak(String, int, HashMap)}
+     * Using this, it is possible to add custom pronounciations for a string of text. After a call
+     * to this method, subsequent calls to {@link #speak(CharSequence, int, Bundle, String)}
      * will play the specified sound resource if it is available, or synthesize the text it is
      * missing.
      *
