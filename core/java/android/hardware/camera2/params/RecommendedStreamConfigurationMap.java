@@ -137,6 +137,17 @@ public final class RecommendedStreamConfigurationMap {
     public static final int USECASE_RAW = 0x5;
 
     /**
+     * The recommended stream configuration map for use case low latency snapshot must contain
+     * subset of configurations with end-to-end latency that does not exceed 200 ms. under standard
+     * operating conditions (reasonable light levels, not loaded system). The expected output format
+     * will be primarily {@link android.graphics.ImageFormat#JPEG} however other image formats can
+     * be present as well.  Even if available for the camera device, high speed and input
+     * configurations will be absent. This suggested configuration map may be absent on some devices
+     * that can not support any low latency requests.
+     */
+    public static final int USECASE_LOW_LATENCY_SNAPSHOT = 0x6;
+
+    /**
      * Device specific use cases.
      * @hide
      */
@@ -150,7 +161,8 @@ public final class RecommendedStreamConfigurationMap {
         USECASE_VIDEO_SNAPSHOT,
         USECASE_SNAPSHOT,
         USECASE_ZSL,
-        USECASE_RAW })
+        USECASE_RAW,
+        USECASE_LOW_LATENCY_SNAPSHOT})
      public @interface RecommendedUsecase {};
 
     /**
