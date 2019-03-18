@@ -1063,6 +1063,7 @@ java_library {
         "core/java/android/annotation/Nullable.java",
         "core/java/android/annotation/SystemApi.java",
         "core/java/android/annotation/TestApi.java",
+        "core/java/android/annotation/UnsupportedAppUsage.java",
         "core/java/android/os/HwBinder.java",
         "core/java/android/os/HwBlob.java",
         "core/java/android/os/HwParcel.java",

@@ -42,12 +42,14 @@ public class SELinux {
      * Determine whether SELinux is disabled or enabled.
      * @return a boolean indicating whether SELinux is enabled.
      */
+    @UnsupportedAppUsage
     public static final native boolean isSELinuxEnabled();
 
     /**
      * Determine whether SELinux is permissive or enforcing.
      * @return a boolean indicating whether SELinux is enforcing.
      */
+    @UnsupportedAppUsage
     public static final native boolean isSELinuxEnforced();
 
     /**
@@ -91,6 +93,7 @@ public class SELinux {
      * Gets the security context of the current process.
      * @return a String representing the security context of the current process.
      */
+    @UnsupportedAppUsage
     public static final native String getContext();
 
     /**
@@ -98,6 +101,7 @@ public class SELinux {
      * @param pid an int representing the process id to check.
      * @return a String representing the security context of the given pid.
      */
+    @UnsupportedAppUsage
     public static final native String getPidContext(int pid);
 
     /**
@@ -108,6 +112,7 @@ public class SELinux {
      * @param perm The permission name.
      * @return a boolean indicating whether permission was granted.
      */
+    @UnsupportedAppUsage
     public static final native boolean checkSELinuxAccess(String scon, String tcon, String tclass, String perm);
 
     /**
@@ -167,6 +172,7 @@ public class SELinux {
      *
      * @return a boolean indicating whether the relabeling succeeded.
      */
+    @UnsupportedAppUsage
     public static boolean restoreconRecursive(File file) {
         try {
             return native_restorecon(file.getCanonicalPath(), SELINUX_ANDROID_RESTORECON_RECURSE);

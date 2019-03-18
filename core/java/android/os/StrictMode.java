@@ -19,6 +19,7 @@ import android.animation.ValueAnimator;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
+import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityManager;
 import android.app.ActivityThread;
 import android.app.IActivityManager;
@@ -448,6 +449,7 @@ public final class StrictMode {
         /** The default, lax policy which doesn't catch anything. */
         public static final ThreadPolicy LAX = new ThreadPolicy(0, null, null);
 
+        @UnsupportedAppUsage
         final int mask;
         final OnThreadViolationListener mListener;
         final Executor mCallbackExecutor;
@@ -738,6 +740,7 @@ public final class StrictMode {
         /** The default, lax policy which doesn't catch anything. */
         public static final VmPolicy LAX = new VmPolicy(0, EMPTY_CLASS_LIMIT_MAP, null, null);
 
+        @UnsupportedAppUsage
         final int mask;
         final OnVmViolationListener mListener;
         final Executor mCallbackExecutor;
@@ -783,6 +786,7 @@ public final class StrictMode {
          * </pre>
          */
         public static final class Builder {
+            @UnsupportedAppUsage
             private int mMask;
             private OnVmViolationListener mListener;
             private Executor mExecutor;
@@ -1173,6 +1177,7 @@ public final class StrictMode {
      * @return the bitmask of all the DETECT_* and PENALTY_* bits currently enabled
      * @hide
      */
+    @UnsupportedAppUsage
     public static int getThreadPolicyMask() {
         return BlockGuard.getThreadPolicy().getPolicyMask();
     }
@@ -1372,6 +1377,7 @@ public final class StrictMode {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public static void enableDeathOnFileUriExposure() {
         sVmPolicy =
                 new VmPolicy(
@@ -1389,6 +1395,7 @@ public final class StrictMode {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public static void disableDeathOnFileUriExposure() {
         sVmPolicy =
                 new VmPolicy(
@@ -1426,6 +1433,7 @@ public final class StrictMode {
         }
     }
 
+    @UnsupportedAppUsage
     private static final ThreadLocal<ArrayList<ViolationInfo>> violationsBeingTimed =
             new ThreadLocal<ArrayList<ViolationInfo>>() {
                 @Override
@@ -1840,6 +1848,7 @@ public final class StrictMode {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public static void conditionallyCheckInstanceCounts() {
         VmPolicy policy = getVmPolicy();
         int policySize = policy.classInstanceLimit.size();
@@ -1996,6 +2005,7 @@ public final class StrictMode {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public static void onWebViewMethodCalledOnWrongThread(Throwable originStack) {
         onVmPolicyViolation(new WebViewMethodCalledOnWrongThreadViolation(originStack));
     }
@@ -2063,6 +2073,7 @@ public final class StrictMode {
     }
 
     // Map from VM violation fingerprint to uptime millis.
+    @UnsupportedAppUsage
     private static final HashMap<Integer, Long> sLastVmViolationTime = new HashMap<>();
 
     /** @hide */
@@ -2188,6 +2199,7 @@ public final class StrictMode {
      * Binder for its current (native) thread-local policy value and synchronize it to libcore's
      * (Java) thread-local policy value.
      */
+    @UnsupportedAppUsage
     private static void onBinderStrictModePolicyChange(int newPolicy) {
         setBlockGuardPolicy(newPolicy);
     }
@@ -2224,6 +2236,7 @@ public final class StrictMode {
          *
          * @hide
          */
+        @UnsupportedAppUsage
         public void finish() {
             ThreadSpanState state = mContainerState;
             synchronized (state) {
@@ -2295,6 +2308,7 @@ public final class StrictMode {
                 }
             };
 
+    @UnsupportedAppUsage
     private static Singleton<IWindowManager> sWindowManager =
             new Singleton<IWindowManager>() {
                 protected IWindowManager create() {
@@ -2315,6 +2329,7 @@ public final class StrictMode {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public static Span enterCriticalSpan(String name) {
         if (Build.IS_USER) {
             return NO_OP_SPAN;
@@ -2424,6 +2439,7 @@ public final class StrictMode {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public static void incrementExpectedActivityCount(Class klass) {
         if (klass == null) {
             return;

@@ -33,6 +33,7 @@ import static android.system.OsConstants.S_ISLNK;
 import static android.system.OsConstants.S_ISREG;
 import static android.system.OsConstants.S_IWOTH;
 
+import android.annotation.UnsupportedAppUsage;
 import android.content.BroadcastReceiver;
 import android.content.ContentProvider;
 import android.os.MessageQueue.OnFileDescriptorEventListener;
@@ -178,6 +179,7 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
     }
 
     /** {@hide} */
+    @UnsupportedAppUsage
     public ParcelFileDescriptor(FileDescriptor fd) {
         this(fd, null);
     }
@@ -577,6 +579,7 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
      * @return A ParcelFileDescriptor.
      * @throws IOException if there is an error while creating the shared memory area.
      */
+    @UnsupportedAppUsage
     @Deprecated
     public static ParcelFileDescriptor fromData(byte[] data, String name) throws IOException {
         if (data == null) return null;
@@ -629,6 +632,7 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public static File getFile(FileDescriptor fd) throws IOException {
         try {
             final String path = Os.readlink("/proc/self/fd/" + fd.getInt$());
@@ -682,6 +686,7 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
      * and I really don't think we want it to be public.
      * @hide
      */
+    @UnsupportedAppUsage
     public long seekTo(long pos) throws IOException {
         if (mWrapped != null) {
             return mWrapped.seekTo(pos);

@@ -16,6 +16,8 @@
 
 package android.os;
 
+import android.annotation.UnsupportedAppUsage;
+
 /**
  * Java API for ::android::vintf::RuntimeInfo. Methods return null / 0 on any error.
  *
@@ -32,31 +34,38 @@ public class VintfRuntimeInfo {
     /**
      * @return content of /proc/cpuinfo
      */
+    @UnsupportedAppUsage
     public static native String getCpuInfo();
     /**
      * @return os name extracted from uname() native call
      */
+    @UnsupportedAppUsage
     public static native String getOsName();
     /**
      * @return node name extracted from uname() native call
      */
+    @UnsupportedAppUsage
     public static native String getNodeName();
     /**
      * @return os release extracted from uname() native call
      */
+    @UnsupportedAppUsage
     public static native String getOsRelease();
     /**
      * @return os version extracted from uname() native call
      */
+    @UnsupportedAppUsage
     public static native String getOsVersion();
     /**
      * @return hardware id extracted from uname() native call
      */
+    @UnsupportedAppUsage
     public static native String getHardwareId();
     /**
      * @return kernel version extracted from uname() native call. Format is
      * {@code x.y.z}.
      */
+    @UnsupportedAppUsage
     public static native String getKernelVersion();
     /**
      * @return libavb version in OS. Format is {@code x.y}.

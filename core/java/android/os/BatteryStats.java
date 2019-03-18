@@ -16,6 +16,7 @@
 
 package android.os;
 
+import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityManager;
 import android.app.job.JobParameters;
 import android.content.Context;
@@ -71,6 +72,7 @@ public abstract class BatteryStats implements Parcelable {
     /**
      * A constant indicating a partial wake lock timer.
      */
+    @UnsupportedAppUsage
     public static final int WAKE_TYPE_PARTIAL = 0;
 
     /**
@@ -196,6 +198,7 @@ public abstract class BatteryStats implements Parcelable {
     /**
      * Include only the current run in the stats.
      */
+    @UnsupportedAppUsage
     public static final int STATS_CURRENT = 1;
 
     /**
@@ -390,6 +393,7 @@ public abstract class BatteryStats implements Parcelable {
          *
          * @param which one of STATS_SINCE_CHARGED, STATS_SINCE_UNPLUGGED, or STATS_CURRENT
          */
+        @UnsupportedAppUsage
         public abstract int getCountLocked(int which);
 
         /**
@@ -491,6 +495,7 @@ public abstract class BatteryStats implements Parcelable {
          *
          * @param which one of STATS_SINCE_CHARGED, STATS_SINCE_UNPLUGGED, or STATS_CURRENT
          */
+        @UnsupportedAppUsage
         public abstract int getCountLocked(int which);
 
         /**
@@ -501,6 +506,7 @@ public abstract class BatteryStats implements Parcelable {
          * @param which one of STATS_SINCE_CHARGED, STATS_SINCE_UNPLUGGED, or STATS_CURRENT
          * @return a time in microseconds
          */
+        @UnsupportedAppUsage
         public abstract long getTotalTimeLocked(long elapsedRealtimeUs, int which);
 
         /**
@@ -603,6 +609,7 @@ public abstract class BatteryStats implements Parcelable {
          *
          * @return a Map from Strings to Uid.Wakelock objects.
          */
+        @UnsupportedAppUsage
         public abstract ArrayMap<String, ? extends Wakelock> getWakelockStats();
 
         /**
@@ -637,6 +644,7 @@ public abstract class BatteryStats implements Parcelable {
          * The statistics associated with a particular wake lock.
          */
         public static abstract class Wakelock {
+            @UnsupportedAppUsage
             public abstract Timer getWakeTime(int type);
         }
 
@@ -652,6 +660,7 @@ public abstract class BatteryStats implements Parcelable {
          *
          * @return a Map from Integer sensor ids to Uid.Sensor objects.
          */
+        @UnsupportedAppUsage
         public abstract SparseArray<? extends Sensor> getSensorStats();
 
         /**
@@ -664,6 +673,7 @@ public abstract class BatteryStats implements Parcelable {
          *
          * @return a Map from Strings to Uid.Proc objects.
          */
+        @UnsupportedAppUsage
         public abstract ArrayMap<String, ? extends Proc> getProcessStats();
 
         /**
@@ -671,6 +681,7 @@ public abstract class BatteryStats implements Parcelable {
          *
          * @return a Map from Strings to Uid.Pkg objects.
          */
+        @UnsupportedAppUsage
         public abstract ArrayMap<String, ? extends Pkg> getPackageStats();
 
         public abstract ControllerActivityCounter getWifiControllerActivity();
@@ -680,6 +691,7 @@ public abstract class BatteryStats implements Parcelable {
         /**
          * {@hide}
          */
+        @UnsupportedAppUsage
         public abstract int getUid();
 
         public abstract void noteWifiRunningLocked(long elapsedRealtime);
@@ -694,8 +706,11 @@ public abstract class BatteryStats implements Parcelable {
         public abstract void noteWifiMulticastDisabledLocked(long elapsedRealtime);
         public abstract void noteActivityResumedLocked(long elapsedRealtime);
         public abstract void noteActivityPausedLocked(long elapsedRealtime);
+        @UnsupportedAppUsage
         public abstract long getWifiRunningTime(long elapsedRealtimeUs, int which);
+        @UnsupportedAppUsage
         public abstract long getFullWifiLockTime(long elapsedRealtimeUs, int which);
+        @UnsupportedAppUsage
         public abstract long getWifiScanTime(long elapsedRealtimeUs, int which);
         public abstract int getWifiScanCount(int which);
         /**
@@ -709,10 +724,14 @@ public abstract class BatteryStats implements Parcelable {
          * Returns the timer keeping track of background wifi scans.
          */
         public abstract Timer getWifiScanBackgroundTimer();
+        @UnsupportedAppUsage
         public abstract long getWifiBatchedScanTime(int csphBin, long elapsedRealtimeUs, int which);
         public abstract int getWifiBatchedScanCount(int csphBin, int which);
+        @UnsupportedAppUsage
         public abstract long getWifiMulticastTime(long elapsedRealtimeUs, int which);
+        @UnsupportedAppUsage
         public abstract Timer getAudioTurnedOnTimer();
+        @UnsupportedAppUsage
         public abstract Timer getVideoTurnedOnTimer();
         public abstract Timer getFlashlightTurnedOnTimer();
         public abstract Timer getCameraTurnedOnTimer();
@@ -842,8 +861,10 @@ public abstract class BatteryStats implements Parcelable {
         public abstract int getUserActivityCount(int type, int which);
 
         public abstract boolean hasNetworkActivity();
+        @UnsupportedAppUsage
         public abstract long getNetworkActivityBytes(int type, int which);
         public abstract long getNetworkActivityPackets(int type, int which);
+        @UnsupportedAppUsage
         public abstract long getMobileRadioActiveTime(int which);
         public abstract int getMobileRadioActiveCount(int which);
 
@@ -903,10 +924,13 @@ public abstract class BatteryStats implements Parcelable {
              * the sensor HAL, and therefore out of our control
              */
             // Magic sensor number for the GPS.
+            @UnsupportedAppUsage
             public static final int GPS = -10000;
 
+            @UnsupportedAppUsage
             public abstract int getHandle();
 
+            @UnsupportedAppUsage
             public abstract Timer getSensorTime();
 
             /** Returns a Timer for sensor usage when app is in the background. */
@@ -928,8 +952,11 @@ public abstract class BatteryStats implements Parcelable {
                 public static final int TYPE_WAKE = 1;
                 public static final int TYPE_CPU = 2;
 
+                @UnsupportedAppUsage
                 public int type;
+                @UnsupportedAppUsage
                 public long overTime;
+                @UnsupportedAppUsage
                 public long usedTime;
             }
 
@@ -943,6 +970,7 @@ public abstract class BatteryStats implements Parcelable {
              *
              * @param which one of STATS_SINCE_CHARGED, STATS_SINCE_UNPLUGGED, or STATS_CURRENT.
              */
+            @UnsupportedAppUsage
             public abstract long getUserTime(int which);
 
             /**
@@ -950,6 +978,7 @@ public abstract class BatteryStats implements Parcelable {
              *
              * @param which one of STATS_SINCE_CHARGED, STATS_SINCE_UNPLUGGED, or STATS_CURRENT.
              */
+            @UnsupportedAppUsage
             public abstract long getSystemTime(int which);
 
             /**
@@ -957,6 +986,7 @@ public abstract class BatteryStats implements Parcelable {
              *
              * @param which one of STATS_SINCE_CHARGED, STATS_SINCE_UNPLUGGED, or STATS_CURRENT.
              */
+            @UnsupportedAppUsage
             public abstract int getStarts(int which);
 
             /**
@@ -978,10 +1008,13 @@ public abstract class BatteryStats implements Parcelable {
              * @param which one of STATS_SINCE_CHARGED, STATS_SINCE_UNPLUGGED, or STATS_CURRENT.
              * @return foreground cpu time in microseconds
              */
+            @UnsupportedAppUsage
             public abstract long getForegroundTime(int which);
 
+            @UnsupportedAppUsage
             public abstract int countExcessivePowers();
 
+            @UnsupportedAppUsage
             public abstract ExcessivePower getExcessivePower(int i);
         }
 
@@ -995,11 +1028,13 @@ public abstract class BatteryStats implements Parcelable {
              * package.  The mapping keys are tag names for the alarms, the counter contains
              * the number of times the alarm was triggered while on battery.
              */
+            @UnsupportedAppUsage
             public abstract ArrayMap<String, ? extends Counter> getWakeupAlarmStats();
 
             /**
              * Returns a mapping containing service statistics.
              */
+            @UnsupportedAppUsage
             public abstract ArrayMap<String, ? extends Serv> getServiceStats();
 
             /**
@@ -1014,6 +1049,7 @@ public abstract class BatteryStats implements Parcelable {
                  * @param which one of STATS_SINCE_CHARGED, STATS_SINCE_UNPLUGGED, or STATS_CURRENT.
                  * @return
                  */
+                @UnsupportedAppUsage
                 public abstract long getStartTime(long batteryUptime, int which);
 
                 /**
@@ -1021,6 +1057,7 @@ public abstract class BatteryStats implements Parcelable {
                  *
                  * @param which one of STATS_SINCE_CHARGED, STATS_SINCE_UNPLUGGED, or STATS_CURRENT.
                  */
+                @UnsupportedAppUsage
                 public abstract int getStarts(int which);
 
                 /**
@@ -1028,6 +1065,7 @@ public abstract class BatteryStats implements Parcelable {
                  *
                  * @param which one of STATS_SINCE_CHARGED, STATS_SINCE_UNPLUGGED, or STATS_CURRENT.
                  */
+                @UnsupportedAppUsage
                 public abstract int getLaunches(int which);
             }
         }
@@ -1490,8 +1528,10 @@ public abstract class BatteryStats implements Parcelable {
         public HistoryItem next;
 
         // The time of this event in milliseconds, as per SystemClock.elapsedRealtime().
+        @UnsupportedAppUsage
         public long time;
 
+        @UnsupportedAppUsage
         public static final byte CMD_UPDATE = 0;        // These can be written as deltas
         public static final byte CMD_NULL = -1;
         public static final byte CMD_START = 4;
@@ -1500,6 +1540,7 @@ public abstract class BatteryStats implements Parcelable {
         public static final byte CMD_RESET = 7;
         public static final byte CMD_SHUTDOWN = 8;
 
+        @UnsupportedAppUsage
         public byte cmd = CMD_NULL;
 
         /**
@@ -1509,12 +1550,17 @@ public abstract class BatteryStats implements Parcelable {
             return cmd == CMD_UPDATE;
         }
 
+        @UnsupportedAppUsage
         public byte batteryLevel;
+        @UnsupportedAppUsage
         public byte batteryStatus;
+        @UnsupportedAppUsage
         public byte batteryHealth;
+        @UnsupportedAppUsage
         public byte batteryPlugType;
 
         public short batteryTemperature;
+        @UnsupportedAppUsage
         public char batteryVoltage;
 
         // The charge of the battery in micro-Ampere-hours.
@@ -1561,6 +1607,7 @@ public abstract class BatteryStats implements Parcelable {
 
         public static final int SETTLE_TO_ZERO_STATES = 0xffff0000 & ~MOST_INTERESTING_STATES;
 
+        @UnsupportedAppUsage
         public int states;
 
         // Constants from WIFI_SUPPL_STATE_*
@@ -1596,6 +1643,7 @@ public abstract class BatteryStats implements Parcelable {
 
         public static final int SETTLE_TO_ZERO_STATES2 = 0xffff0000 & ~MOST_INTERESTING_STATES2;
 
+        @UnsupportedAppUsage
         public int states2;
 
         // The wake lock that was acquired at this point.
@@ -1704,6 +1752,7 @@ public abstract class BatteryStats implements Parcelable {
         public final HistoryTag localWakeReasonTag = new HistoryTag();
         public final HistoryTag localEventTag = new HistoryTag();
 
+        @UnsupportedAppUsage
         public HistoryItem() {
         }
 
@@ -1995,6 +2044,7 @@ public abstract class BatteryStats implements Parcelable {
 
     public abstract int getHistoryUsedSize();
 
+    @UnsupportedAppUsage
     public abstract boolean startIteratingHistoryLocked();
 
     public abstract int getHistoryStringPoolSize();
@@ -2005,6 +2055,7 @@ public abstract class BatteryStats implements Parcelable {
 
     public abstract int getHistoryTagPoolUid(int index);
 
+    @UnsupportedAppUsage
     public abstract boolean getNextHistoryLocked(HistoryItem out);
 
     public abstract void finishIteratingHistoryLocked();
@@ -2031,6 +2082,7 @@ public abstract class BatteryStats implements Parcelable {
      *
      * {@hide}
      */
+    @UnsupportedAppUsage
     public abstract long getScreenOnTime(long elapsedRealtimeUs, int which);
 
     /**
@@ -2071,6 +2123,7 @@ public abstract class BatteryStats implements Parcelable {
         "0", "1", "2", "3", "4"
     };
 
+    @UnsupportedAppUsage
     public static final int NUM_SCREEN_BRIGHTNESS_BINS = 5;
 
     /**
@@ -2079,6 +2132,7 @@ public abstract class BatteryStats implements Parcelable {
      *
      * {@hide}
      */
+    @UnsupportedAppUsage
     public abstract long getScreenBrightnessTime(int brightnessBin,
             long elapsedRealtimeUs, int which);
 
@@ -2187,6 +2241,7 @@ public abstract class BatteryStats implements Parcelable {
      *
      * {@hide}
      */
+    @UnsupportedAppUsage
     public abstract long getPhoneOnTime(long elapsedRealtimeUs, int which);
 
     /**
@@ -2202,6 +2257,7 @@ public abstract class BatteryStats implements Parcelable {
      *
      * {@hide}
      */
+    @UnsupportedAppUsage
     public abstract long getPhoneSignalStrengthTime(int strengthBin,
             long elapsedRealtimeUs, int which);
 
@@ -2284,6 +2340,7 @@ public abstract class BatteryStats implements Parcelable {
         "ehrpd", "hspap", "gsm", "td_scdma", "iwlan", "lte_ca", "other"
     };
 
+    @UnsupportedAppUsage
     public static final int NUM_DATA_CONNECTION_TYPES = DATA_CONNECTION_OTHER+1;
 
     /**
@@ -2446,6 +2503,7 @@ public abstract class BatteryStats implements Parcelable {
      *
      * {@hide}
      */
+    @UnsupportedAppUsage
     public abstract long getWifiOnTime(long elapsedRealtimeUs, int which);
 
     /**
@@ -2462,6 +2520,7 @@ public abstract class BatteryStats implements Parcelable {
      *
      * {@hide}
      */
+    @UnsupportedAppUsage
     public abstract long getGlobalWifiRunningTime(long elapsedRealtimeUs, int which);
 
     public static final int WIFI_STATE_OFF = 0;
@@ -2667,6 +2726,7 @@ public abstract class BatteryStats implements Parcelable {
     /**
      * Returns a SparseArray containing the statistics for each uid.
      */
+    @UnsupportedAppUsage
     public abstract SparseArray<? extends Uid> getUidStats();
 
     /**
@@ -2674,6 +2734,7 @@ public abstract class BatteryStats implements Parcelable {
      *
      * @param curTime the amount of elapsed realtime in microseconds.
      */
+    @UnsupportedAppUsage
     public abstract long getBatteryUptime(long curTime);
 
     /**
@@ -2754,6 +2815,7 @@ public abstract class BatteryStats implements Parcelable {
      * @param curTime the elapsed realtime in microseconds.
      * @param which one of STATS_SINCE_CHARGED, STATS_SINCE_UNPLUGGED, or STATS_CURRENT.
      */
+    @UnsupportedAppUsage
     public abstract long computeBatteryUptime(long curTime, int which);
 
     /**
@@ -2762,6 +2824,7 @@ public abstract class BatteryStats implements Parcelable {
      * @param curTime the current elapsed realtime in microseconds.
      * @param which one of STATS_SINCE_CHARGED, STATS_SINCE_UNPLUGGED, or STATS_CURRENT.
      */
+    @UnsupportedAppUsage
     public abstract long computeBatteryRealtime(long curTime, int which);
 
     /**
@@ -2804,6 +2867,7 @@ public abstract class BatteryStats implements Parcelable {
      *
      * @param curTime The current elepsed realtime in microseconds.
      */
+    @UnsupportedAppUsage
     public abstract long computeBatteryTimeRemaining(long curTime);
 
     // The part of a step duration that is the actual time.
@@ -2938,6 +3002,7 @@ public abstract class BatteryStats implements Parcelable {
      *
      * @param curTime The current elepsed realtime in microseconds.
      */
+    @UnsupportedAppUsage
     public abstract long computeChargeTimeRemaining(long curTime);
 
     /**
@@ -3222,6 +3287,7 @@ public abstract class BatteryStats implements Parcelable {
      * @param type type of data (e.g. "wakelock", "sensor", "process", "apk" ,  "process", "network")
      * @param args type-dependent data arguments
      */
+    @UnsupportedAppUsage
     private static final void dumpLine(PrintWriter pw, int uid, String category, String type,
            Object... args ) {
         dumpLineHeader(pw, uid, category, type);

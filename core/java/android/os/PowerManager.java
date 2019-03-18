@@ -22,6 +22,7 @@ import android.annotation.SdkConstant;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.util.Log;
 import android.util.proto.ProtoOutputStream;
@@ -282,6 +283,7 @@ public final class PowerManager {
      * Brightness value for fully on.
      * @hide
      */
+    @UnsupportedAppUsage
     public static final int BRIGHTNESS_ON = 255;
 
     /**
@@ -364,6 +366,7 @@ public final class PowerManager {
      * Go to sleep reason code: Going to sleep due to a screen timeout.
      * @hide
      */
+    @UnsupportedAppUsage
     public static final int GO_TO_SLEEP_REASON_TIMEOUT = 2;
 
     /**
@@ -608,6 +611,7 @@ public final class PowerManager {
     public @interface LocationPowerSaveMode {}
 
     final Context mContext;
+    @UnsupportedAppUsage
     final IPowerManager mService;
     final Handler mHandler;
 
@@ -628,6 +632,7 @@ public final class PowerManager {
      * this is the minimum value that can be set by the user.
      * @hide
      */
+    @UnsupportedAppUsage
     public int getMinimumScreenBrightnessSetting() {
         return mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_screenBrightnessSettingMinimum);
@@ -639,6 +644,7 @@ public final class PowerManager {
      * this is the maximum value that can be set by the user.
      * @hide
      */
+    @UnsupportedAppUsage
     public int getMaximumScreenBrightnessSetting() {
         return mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_screenBrightnessSettingMaximum);
@@ -648,6 +654,7 @@ public final class PowerManager {
      * Gets the default screen brightness setting.
      * @hide
      */
+    @UnsupportedAppUsage
     public int getDefaultScreenBrightnessSetting() {
         return mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_screenBrightnessSettingDefault);
@@ -762,6 +769,7 @@ public final class PowerManager {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public static void validateWakeLockParameters(int levelAndFlags, String tag) {
         switch (levelAndFlags & WAKE_LOCK_LEVEL_MASK) {
             case PARTIAL_WAKE_LOCK:
@@ -894,6 +902,7 @@ public final class PowerManager {
      *
      * @hide Requires signature permission.
      */
+    @UnsupportedAppUsage
     public void goToSleep(long time, int reason, int flags) {
         try {
             mService.goToSleep(time, reason, flags);
@@ -932,6 +941,7 @@ public final class PowerManager {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public void wakeUp(long time, String reason) {
         try {
             mService.wakeUp(time, reason, mContext.getOpPackageName());
@@ -1142,6 +1152,7 @@ public final class PowerManager {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean setPowerSaveMode(boolean mode) {
         try {
             return mService.setPowerSaveMode(mode);
@@ -1217,6 +1228,7 @@ public final class PowerManager {
      * restrictions have been lifted.
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean isLightDeviceIdleMode() {
         try {
             return mService.isLightDeviceIdleMode();
@@ -1339,6 +1351,7 @@ public final class PowerManager {
      * This broadcast is only sent to registered receivers.
      * @hide
      */
+    @UnsupportedAppUsage
     @SdkConstant(SdkConstant.SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_LIGHT_DEVICE_IDLE_MODE_CHANGED
             = "android.os.action.LIGHT_DEVICE_IDLE_MODE_CHANGED";
@@ -1365,11 +1378,13 @@ public final class PowerManager {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     @SdkConstant(SdkConstant.SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_POWER_SAVE_MODE_CHANGING
             = "android.os.action.POWER_SAVE_MODE_CHANGING";
 
     /** @hide */
+    @UnsupportedAppUsage
     public static final String EXTRA_POWER_SAVE_MODE = "mode";
 
     /**
@@ -1401,7 +1416,9 @@ public final class PowerManager {
      * </p>
      */
     public final class WakeLock {
+        @UnsupportedAppUsage
         private int mFlags;
+        @UnsupportedAppUsage
         private String mTag;
         private final String mPackageName;
         private final IBinder mToken;
