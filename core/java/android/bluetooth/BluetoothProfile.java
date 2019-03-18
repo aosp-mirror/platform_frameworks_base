@@ -276,7 +276,7 @@ public interface BluetoothProfile {
      * #STATE_CONNECTING}, {@link #STATE_DISCONNECTED}, {@link #STATE_DISCONNECTING}
      */
     @RequiresPermission(Manifest.permission.BLUETOOTH)
-    public int getConnectionState(BluetoothDevice device);
+    @BtProfileState int getConnectionState(BluetoothDevice device);
 
     /**
      * An interface for notifying BluetoothProfile IPC clients when they have
