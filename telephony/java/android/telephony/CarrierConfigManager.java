@@ -2315,9 +2315,9 @@ public class CarrierConfigManager {
             "undelivered_sms_message_expiration_time";
 
     /**
-     * Specifies a carrier-defined {@link CallRedirectionService} which Telecom will bind
-     * to for outgoing calls.  An empty string indicates that no carrier-defined
-     * {@link CallRedirectionService} is specified.
+     * Specifies a carrier-defined {@link android.telecom.CallRedirectionService} which Telecom
+     * will bind to for outgoing calls.  An empty string indicates that no carrier-defined
+     * {@link android.telecom.CallRedirectionService} is specified.
      * @hide
      */
     public static final String KEY_CALL_REDIRECTION_SERVICE_COMPONENT_NAME_STRING =
@@ -2875,6 +2875,7 @@ public class CarrierConfigManager {
         sDefaults.putString(KEY_CARRIER_NAME_STRING, "");
         sDefaults.putString(KEY_SIM_COUNTRY_ISO_OVERRIDE_STRING, "");
         sDefaults.putString(KEY_CARRIER_CALL_SCREENING_APP_STRING, "");
+        sDefaults.putString(KEY_CALL_REDIRECTION_SERVICE_COMPONENT_NAME_STRING, null);
         sDefaults.putBoolean(KEY_CDMA_HOME_REGISTERED_PLMN_NAME_OVERRIDE_BOOL, false);
         sDefaults.putString(KEY_CDMA_HOME_REGISTERED_PLMN_NAME_STRING, "");
         sDefaults.putBoolean(KEY_SUPPORT_DIRECT_FDN_DIALING_BOOL, false);
