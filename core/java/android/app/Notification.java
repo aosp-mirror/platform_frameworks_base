@@ -1203,7 +1203,7 @@ public class Notification implements Parcelable
 
     /**
      * {@link #extras} key: whether the notification should be colorized as
-     * supplied to {@link Builder#setColorized(boolean)}}.
+     * supplied to {@link Builder#setColorized(boolean)}.
      */
     public static final String EXTRA_COLORIZED = "android.colorized";
 
@@ -1358,7 +1358,7 @@ public class Notification implements Parcelable
          *
          * This is intended for {@link RemoteInput}s that only accept data, meaning
          * {@link RemoteInput#getAllowFreeFormInput} is false, {@link RemoteInput#getChoices}
-         * is null or empty, and {@link RemoteInput#getAllowedDataTypes is non-null and not
+         * is null or empty, and {@link RemoteInput#getAllowedDataTypes} is non-null and not
          * empty. These {@link RemoteInput}s will be ignored by devices that do not
          * support non-text-based {@link RemoteInput}s. See {@link Builder#build}.
          *
