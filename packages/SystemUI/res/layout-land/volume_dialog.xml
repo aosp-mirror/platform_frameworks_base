@@ -1,18 +1,18 @@
 <!--
-     Copyright (C) 2015 The Android Open Source Project
-
-     Licensed under the Apache License, Version 2.0 (the "License");
-     you may not use this file except in compliance with the License.
-     You may obtain a copy of the License at
-
-          http://www.apache.org/licenses/LICENSE-2.0
-
-     Unless required by applicable law or agreed to in writing, software
-     distributed under the License is distributed on an "AS IS" BASIS,
-     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-     See the License for the specific language governing permissions and
-     limitations under the License.
--->
+  ~ Copyright (C) 2019 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License
+  -->
 <FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/volume_dialog_container"
@@ -23,8 +23,7 @@
     android:background="@android:color/transparent"
     android:theme="@style/volume_dialog_theme">
 
-    <!-- right-aligned to be physically near volume button -->
-    <LinearLayout
+    <FrameLayout
         android:id="@+id/volume_dialog"
         android:minWidth="@dimen/volume_dialog_panel_width"
         android:layout_width="wrap_content"
@@ -36,7 +35,6 @@
         android:paddingTop="@dimen/volume_dialog_panel_transparent_padding"
         android:paddingBottom="@dimen/volume_dialog_panel_transparent_padding"
         android:paddingLeft="@dimen/volume_dialog_panel_transparent_padding"
-        android:orientation="vertical"
         android:clipToPadding="false">
 
         <FrameLayout
@@ -68,9 +66,10 @@
 
         <LinearLayout
             android:id="@+id/main"
-            android:minWidth="@dimen/volume_dialog_panel_width"
             android:layout_width="wrap_content"
+            android:minWidth="@dimen/volume_dialog_panel_width"
             android:layout_height="wrap_content"
+            android:layout_marginTop="68dp"
             android:gravity="right"
             android:layout_gravity="right"
             android:orientation="vertical"
@@ -87,7 +86,7 @@
                 android:orientation="horizontal"
                 android:paddingRight="@dimen/volume_dialog_stream_padding"
                 android:paddingLeft="@dimen/volume_dialog_stream_padding">
-                    <!-- volume rows added and removed here! :-) -->
+                <!-- volume rows added and removed here! :-) -->
             </LinearLayout>
             <FrameLayout
                 android:id="@+id/settings_container"
@@ -111,7 +110,7 @@
             android:id="@+id/odi_captions"
             android:layout_width="@dimen/volume_dialog_caption_size"
             android:layout_height="@dimen/volume_dialog_caption_size"
-            android:layout_marginTop="@dimen/volume_dialog_spacer"
+            android:layout_marginRight="68dp"
             android:gravity="right"
             android:layout_gravity="right"
             android:clipToPadding="false"
@@ -129,16 +128,16 @@
                 android:soundEffectsEnabled="false" />
         </FrameLayout>
 
-    </LinearLayout>
+        <ViewStub
+            android:id="@+id/odi_captions_tooltip_stub"
+            android:inflatedId="@+id/odi_captions_tooltip_view"
+            android:layout="@layout/volume_tool_tip_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="@dimen/volume_tool_tip_right_margin"
+            android:layout_marginTop="@dimen/volume_tool_tip_top_margin"
+            android:layout_gravity="right"/>
 
-    <ViewStub
-        android:id="@+id/odi_captions_tooltip_stub"
-        android:inflatedId="@+id/odi_captions_tooltip_view"
-        android:layout="@layout/volume_tool_tip_view"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom | right"
-        android:layout_marginRight="@dimen/volume_tool_tip_right_margin"
-        android:layout_marginBottom="@dimen/volume_tool_tip_bottom_margin"/>
+    </FrameLayout>
 
 </FrameLayout>

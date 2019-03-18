@@ -20,7 +20,7 @@
     android:layout_width="@dimen/volume_dialog_panel_width"
     android:clipChildren="false"
     android:clipToPadding="false"
-    android:theme="@style/qs_theme">
+    android:theme="@style/volume_dialog_theme">
 
     <LinearLayout
         android:layout_height="wrap_content"
