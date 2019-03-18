@@ -84,7 +84,6 @@ public class KernelCpuThreadReaderTest {
         final KernelCpuThreadReader kernelCpuThreadReader = new KernelCpuThreadReader(
                 8,
                 uidPredicate,
-                0,
                 mProcDirectory.toPath(),
                 mProcDirectory.toPath().resolve(uids[0] + "/task/" + uids[0] + "/time_in_state"),
                 processUtils);
@@ -101,90 +100,6 @@ public class KernelCpuThreadReaderTest {
                     uid, uid, new int[]{uid * 10}, "process" + uid, new String[]{"thread" + uid},
                     new int[]{1000}, new int[][]{{uid}});
         }
-    }
-
-    @Test
-    public void testReader_filtersLowUsage() throws IOException {
-        int[] uids = new int[]{0, 1, 2, 3, 4};
-        int[] cpuUsage = new int[]{10, 0, 2, 100, 3};
-        int[] expectedUids = new int[]{0, 3, 4};
-        Predicate<Integer> uidPredicate = uid -> true;
-        KernelCpuThreadReader.Injector processUtils =
-                new KernelCpuThreadReader.Injector() {
-                    @Override
-                    public int getUidForPid(int pid) {
-                        return pid;
-                    }
-                };
-
-        for (int i = 0; i < uids.length; i++) {
-            int uid = uids[i];
-            setupDirectory(
-                    mProcDirectory.toPath().resolve(String.valueOf(uid)),
-                    new int[]{uid * 10},
-                    "process" + uid,
-                    new String[]{"thread" + uid},
-                    new int[]{1000},
-                    new int[][]{{cpuUsage[i]}});
-        }
-        final KernelCpuThreadReader kernelCpuThreadReader = new KernelCpuThreadReader(
-                8,
-                uidPredicate,
-                30,
-                mProcDirectory.toPath(),
-                mProcDirectory.toPath().resolve(uids[0] + "/task/" + uids[0] + "/time_in_state"),
-                processUtils);
-        ArrayList<KernelCpuThreadReader.ProcessCpuUsage> processCpuUsageByUids =
-                kernelCpuThreadReader.getProcessCpuUsage();
-        processCpuUsageByUids.sort(Comparator.comparing(usage -> usage.uid));
-
-        assertEquals(expectedUids.length, processCpuUsageByUids.size());
-        for (int i = 0; i < expectedUids.length; i++) {
-            KernelCpuThreadReader.ProcessCpuUsage processCpuUsage =
-                    processCpuUsageByUids.get(i);
-            assertEquals(expectedUids[i], processCpuUsage.uid);
-        }
-
-    }
-
-    @Test
-    public void testReader_otherThreads() throws IOException {
-        final Path processPath = mProcDirectory.toPath().resolve("1000");
-        setupDirectory(
-                processPath,
-                new int[]{1, 2, 3},
-                "process",
-                new String[]{"thread1", "thread2", "thread3"},
-                new int[]{1000, 2000},
-                new int[][]{{0, 100}, {10, 0}, {0, 300}});
-        KernelCpuThreadReader.Injector injector =
-                new KernelCpuThreadReader.Injector() {
-                    @Override
-                    public int getUidForPid(int pid) {
-                        return 0;
-                    }
-                };
-        final KernelCpuThreadReader kernelCpuThreadReader =
-                new KernelCpuThreadReader(
-                        8,
-                        uid -> true,
-                        2000,
-                        mProcDirectory.toPath(),
-                        processPath.resolve("task/1/time_in_state"),
-                        injector);
-        ArrayList<KernelCpuThreadReader.ProcessCpuUsage> processCpuUsages =
-                kernelCpuThreadReader.getProcessCpuUsage();
-        assertEquals(1, processCpuUsages.size());
-        checkResults(
-                processCpuUsages.get(0),
-                kernelCpuThreadReader.getCpuFrequenciesKhz(),
-                0,
-                1000,
-                new int[] {-1, 3},
-                "process",
-                new String[] {"__OTHER_THREADS", "thread3"},
-                new int[] {1000, 2000},
-                new int[][] {{10, 100}, {0, 300}});
     }
 
     private void setupDirectory(Path processPath, int[] threadIds, String processName,
