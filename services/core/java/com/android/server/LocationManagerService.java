@@ -501,6 +501,8 @@ public class LocationManagerService extends ILocationManager.Stub {
         }
 
         if (broadcast) {
+            // needs to be sent to everyone because we don't know which user may have changed
+            // LOCATION_MODE state.
             mContext.sendBroadcastAsUser(
                     new Intent(LocationManager.MODE_CHANGED_ACTION),
                     UserHandle.ALL);
@@ -1212,6 +1214,13 @@ public class LocationManagerService extends ILocationManager.Stub {
                             "-" + mName,
                             mCurrentUserId);
                 }
+
+                // needs to be sent to all users because whether or not a provider is enabled for
+                // a given user is complicated... we broadcast to everyone and let them figure it
+                // out via isProviderEnabled()
+                Intent intent = new Intent(LocationManager.PROVIDERS_CHANGED_ACTION);
+                intent.putExtra(LocationManager.EXTRA_PROVIDER_NAME, mName);
+                mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
             }
 
             if (useable == mUseable) {
@@ -1232,10 +1241,6 @@ public class LocationManagerService extends ILocationManager.Stub {
             }
 
             updateProviderUseableLocked(this);
-
-            mContext.sendBroadcastAsUser(
-                    new Intent(LocationManager.PROVIDERS_CHANGED_ACTION),
-                    UserHandle.ALL);
         }
 
         @GuardedBy("mLock")
