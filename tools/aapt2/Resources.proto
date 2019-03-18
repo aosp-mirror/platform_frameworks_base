@@ -41,6 +41,12 @@ message Source {
   SourcePosition position = 2;
 }
 
+// The name and version fingerprint of a build tool.
+message ToolFingerprint {
+  string tool = 1;
+  string version = 2;
+}
+
 // Top level message representing a resource table.
 message ResourceTable {
   // The string pool containing source paths referenced throughout the resource table. This does
@@ -52,6 +58,9 @@ message ResourceTable {
 
   // The <overlayable> declarations within the resource table.
   repeated Overlayable overlayable = 3;
+
+  // The version fingerprints of the tools that built the resource table.
+  repeated ToolFingerprint tool_fingerprint = 4;
 }
 
 // A package ID in the range [0x00, 0xff].

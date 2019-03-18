@@ -57,6 +57,7 @@ cc_defaults {
         "libbase",
         "libprotobuf-cpp-lite",
         "libz",
+        "libbuildversion",
     ],
     stl: "libc++_static",
     group_static_libs: true,
