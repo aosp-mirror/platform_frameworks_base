@@ -803,8 +803,8 @@ public class Bmgr {
                             } else {
                                 String[] names = new String[filter.size()];
                                 filter.toArray(names);
-                                didRestore = (mRestore.restoreSome(token, observer,
-                                        null, names) == 0);
+                                didRestore = (mRestore.restorePackages(token, observer, names,
+                                        null) == 0);
                             }
                             break;
                         }

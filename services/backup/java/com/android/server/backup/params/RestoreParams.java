@@ -105,7 +105,7 @@ public class RestoreParams {
     /**
      * Caller specifies whether is considered a system-level restore.
      */
-    public static RestoreParams createForRestoreSome(
+    public static RestoreParams createForRestorePackages(
             TransportClient transportClient,
             IRestoreObserver observer,
             IBackupManagerMonitor monitor,
