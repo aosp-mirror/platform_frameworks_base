@@ -16,6 +16,7 @@
 
 package com.android.server.rollback;
 
+import android.Manifest;
 import android.annotation.NonNull;
 import android.app.AppOpsManager;
 import android.content.BroadcastReceiver;
@@ -24,6 +25,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.ModuleInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
@@ -220,9 +222,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
 
     @Override
     public ParceledListSlice getAvailableRollbacks() {
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.MANAGE_ROLLBACKS,
-                "getAvailableRollbacks");
+        enforceManageRollbacks("getAvailableRollbacks");
 
         synchronized (mLock) {
             ensureRollbackDataLoadedLocked();
@@ -239,9 +239,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
 
     @Override
     public ParceledListSlice<RollbackInfo> getRecentlyExecutedRollbacks() {
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.MANAGE_ROLLBACKS,
-                "getRecentlyExecutedRollbacks");
+        enforceManageRollbacks("getRecentlyCommittedRollbacks");
 
         synchronized (mLock) {
             ensureRollbackDataLoadedLocked();
@@ -259,9 +257,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
     @Override
     public void commitRollback(int rollbackId, ParceledListSlice causePackages,
             String callerPackageName, IntentSender statusReceiver) {
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.MANAGE_ROLLBACKS,
-                "executeRollback");
+        enforceManageRollbacks("executeRollback");
 
         final int callingUid = Binder.getCallingUid();
         AppOpsManager appOps = mContext.getSystemService(AppOpsManager.class);
@@ -462,7 +458,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                             // TODO: This call emits the warning "Calling a method in the
                             // system process without a qualified user". Fix that.
                             // TODO: Limit this to receivers holding the
-                            // MANAGE_ROLLBACKS permission?
+                            // MANAGE_ROLLBACKS or TEST_MANAGE_ROLLBACKS permissions?
                             mContext.sendBroadcast(broadcast);
                         });
                     }
@@ -484,7 +480,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
     @Override
     public void reloadPersistedData() {
         mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.MANAGE_ROLLBACKS,
+                Manifest.permission.TEST_MANAGE_ROLLBACKS,
                 "reloadPersistedData");
 
         synchronized (mLock) {
@@ -499,7 +495,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
     @Override
     public void expireRollbackForPackage(String packageName) {
         mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.MANAGE_ROLLBACKS,
+                Manifest.permission.TEST_MANAGE_ROLLBACKS,
                 "expireRollbackForPackage");
         synchronized (mLock) {
             ensureRollbackDataLoadedLocked();
@@ -894,12 +890,19 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
         Log.i(TAG, "Enabling rollback for install of " + packageName
                 + ", session:" + session.sessionId);
 
+        String installerPackageName = session.getInstallerPackageName();
+        if (!enableRollbackAllowed(installerPackageName, packageName)) {
+            Log.e(TAG, "Installer " + installerPackageName
+                    + " is not allowed to enable rollback on " + packageName);
+            return false;
+        }
+
         VersionedPackage newVersion = new VersionedPackage(packageName, newPackage.versionCode);
         final boolean isApex = ((installFlags & PackageManager.INSTALL_APEX) != 0);
 
         // Get information about the currently installed package.
         PackageManager pm = mContext.getPackageManager();
-        PackageInfo pkgInfo = null;
+        final PackageInfo pkgInfo;
         try {
             pkgInfo = pm.getPackageInfo(packageName, isApex ? PackageManager.MATCH_APEX : 0);
         } catch (PackageManager.NameNotFoundException e) {
@@ -1083,6 +1086,44 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                 saveRollbackData(rd);
             }
         });
+    }
+
+    /**
+     * Returns true if the installer is allowed to enable rollback for the
+     * given named package, false otherwise.
+     */
+    private boolean enableRollbackAllowed(String installerPackageName, String packageName) {
+        if (installerPackageName == null) {
+            return false;
+        }
+
+        PackageManager pm = mContext.getPackageManager();
+        boolean manageRollbacksGranted = pm.checkPermission(
+                Manifest.permission.MANAGE_ROLLBACKS,
+                installerPackageName) == PackageManager.PERMISSION_GRANTED;
+
+        boolean testManageRollbacksGranted = pm.checkPermission(
+                Manifest.permission.TEST_MANAGE_ROLLBACKS,
+                installerPackageName) == PackageManager.PERMISSION_GRANTED;
+
+        // For now only allow rollbacks for modules or for testing.
+        return (isModule(packageName) && manageRollbacksGranted)
+            || testManageRollbacksGranted;
+    }
+
+    /**
+     * Returns true if the package name is the name of a module.
+     */
+    private boolean isModule(String packageName) {
+        PackageManager pm = mContext.getPackageManager();
+        final ModuleInfo moduleInfo;
+        try {
+            moduleInfo = pm.getModuleInfo(packageName, 0);
+        } catch (PackageManager.NameNotFoundException e) {
+            return false;
+        }
+
+        return moduleInfo != null;
     }
 
     /**
@@ -1309,6 +1350,17 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
                 }
                 ipw.decreaseIndent();
             }
+        }
+    }
+
+    private void enforceManageRollbacks(@NonNull String message) {
+        if ((PackageManager.PERMISSION_GRANTED != mContext.checkCallingOrSelfPermission(
+                        Manifest.permission.MANAGE_ROLLBACKS))
+                && (PackageManager.PERMISSION_GRANTED != mContext.checkCallingOrSelfPermission(
+                        Manifest.permission.TEST_MANAGE_ROLLBACKS))) {
+            throw new SecurityException(message + " requires "
+                    + Manifest.permission.MANAGE_ROLLBACKS + " or "
+                    + Manifest.permission.TEST_MANAGE_ROLLBACKS);
         }
     }
 }

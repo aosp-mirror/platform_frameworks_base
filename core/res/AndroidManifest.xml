@@ -3929,6 +3929,10 @@
     <permission android:name="android.permission.MANAGE_ROLLBACKS"
         android:protectionLevel="signature|verifier" />
 
+    <!-- @SystemApi @TestApi @hide Allows testing apk level rollbacks. -->
+    <permission android:name="android.permission.TEST_MANAGE_ROLLBACKS"
+        android:protectionLevel="signature" />
+
     <!-- @SystemApi @hide Allows an application to mark other applications as harmful -->
     <permission android:name="android.permission.SET_HARMFUL_APP_WARNINGS"
         android:protectionLevel="signature|verifier" />
