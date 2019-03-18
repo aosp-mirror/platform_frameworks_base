@@ -1015,6 +1015,11 @@ class ActivityStarter {
         if (mService.isDeviceOwner(callingPackage)) {
             return false;
         }
+        // don't abort if the callingPackage has companion device
+        final int callingUserId = UserHandle.getUserId(callingUid);
+        if (mService.isAssociatedCompanionApp(callingUserId, callingPackage)) {
+            return false;
+        }
         // don't abort if the callingPackage is temporarily whitelisted
         if (mService.isPackageNameWhitelistedForBgActivityStarts(callingPackage)) {
             Slog.w(TAG, "Background activity start for " + callingPackage

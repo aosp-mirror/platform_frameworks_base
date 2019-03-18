@@ -72,7 +72,9 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.FgThread;
+import com.android.server.LocalServices;
 import com.android.server.SystemService;
+import com.android.server.wm.ActivityTaskManagerInternal;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -84,6 +86,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -519,6 +522,11 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
             if (size(old) == size(associations)) return;
 
             Set<Association> finalAssociations = associations;
+            Set<String> companionAppPackages = new HashSet<>();
+            for (Association association : finalAssociations) {
+                companionAppPackages.add(association.companionAppPackage);
+            }
+
             file.write((out) -> {
                 XmlSerializer xml = Xml.newSerializer();
                 try {
@@ -542,6 +550,9 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
                 }
 
             });
+            ActivityTaskManagerInternal atmInternal = LocalServices.getService(
+                    ActivityTaskManagerInternal.class);
+            atmInternal.setCompanionAppPackages(userId, companionAppPackages);
         }
     }
 
