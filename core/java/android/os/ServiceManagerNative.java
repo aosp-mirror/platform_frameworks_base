@@ -16,6 +16,7 @@
 
 package android.os;
 
+import android.annotation.UnsupportedAppUsage;
 import java.util.ArrayList;
 
 
@@ -30,6 +31,7 @@ public abstract class ServiceManagerNative extends Binder implements IServiceMan
      * Cast a Binder object into a service manager interface, generating
      * a proxy if needed.
      */
+    @UnsupportedAppUsage
     static public IServiceManager asInterface(IBinder obj)
     {
         if (obj == null) {
@@ -117,6 +119,7 @@ class ServiceManagerProxy implements IServiceManager {
         return mRemote;
     }
 
+    @UnsupportedAppUsage
     public IBinder getService(String name) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
@@ -196,5 +199,6 @@ class ServiceManagerProxy implements IServiceManager {
         data.recycle();
     }
 
+    @UnsupportedAppUsage
     private IBinder mRemote;
 }

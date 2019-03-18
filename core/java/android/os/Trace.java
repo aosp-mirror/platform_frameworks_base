@@ -18,6 +18,7 @@ package android.os;
 
 import com.android.internal.os.Zygote;
 
+import android.annotation.UnsupportedAppUsage;
 import dalvik.annotation.optimization.FastNative;
 
 /**
@@ -50,6 +51,7 @@ public final class Trace {
     /** @hide */
     public static final long TRACE_TAG_INPUT = 1L << 2;
     /** @hide */
+    @UnsupportedAppUsage
     public static final long TRACE_TAG_VIEW = 1L << 3;
     /** @hide */
     public static final long TRACE_TAG_WEBVIEW = 1L << 4;
@@ -68,6 +70,7 @@ public final class Trace {
     /** @hide */
     public static final long TRACE_TAG_HAL = 1L << 11;
     /** @hide */
+    @UnsupportedAppUsage
     public static final long TRACE_TAG_APP = 1L << 12;
     /** @hide */
     public static final long TRACE_TAG_RESOURCES = 1L << 13;
@@ -100,10 +103,12 @@ public final class Trace {
     private static final int MAX_SECTION_NAME_LEN = 127;
 
     // Must be volatile to avoid word tearing.
+    @UnsupportedAppUsage
     private static volatile long sEnabledTags = TRACE_TAG_NOT_READY;
 
     private static int sZygoteDebugFlags = 0;
 
+    @UnsupportedAppUsage
     private static native long nativeGetEnabledTags();
     private static native void nativeSetAppTracingAllowed(boolean allowed);
     private static native void nativeSetTracingEnabled(boolean allowed);
@@ -167,6 +172,7 @@ public final class Trace {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public static boolean isTagEnabled(long traceTag) {
         long tags = sEnabledTags;
         if (tags == TRACE_TAG_NOT_READY) {
@@ -184,6 +190,7 @@ public final class Trace {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public static void traceCounter(long traceTag, String counterName, int counterValue) {
         if (isTagEnabled(traceTag)) {
             nativeTraceCounter(traceTag, counterName, counterValue);
@@ -196,6 +203,7 @@ public final class Trace {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public static void setAppTracingAllowed(boolean allowed) {
         nativeSetAppTracingAllowed(allowed);
 
@@ -231,6 +239,7 @@ public final class Trace {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public static void traceBegin(long traceTag, String methodName) {
         if (isTagEnabled(traceTag)) {
             nativeTraceBegin(traceTag, methodName);
@@ -245,6 +254,7 @@ public final class Trace {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public static void traceEnd(long traceTag) {
         if (isTagEnabled(traceTag)) {
             nativeTraceEnd(traceTag);
@@ -264,6 +274,7 @@ public final class Trace {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public static void asyncTraceBegin(long traceTag, String methodName, int cookie) {
         if (isTagEnabled(traceTag)) {
             nativeAsyncTraceBegin(traceTag, methodName, cookie);
@@ -281,6 +292,7 @@ public final class Trace {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public static void asyncTraceEnd(long traceTag, String methodName, int cookie) {
         if (isTagEnabled(traceTag)) {
             nativeAsyncTraceEnd(traceTag, methodName, cookie);

@@ -35,6 +35,7 @@ import static android.system.OsConstants.S_ISREG;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.provider.DocumentsContract.Document;
 import android.system.ErrnoException;
 import android.system.Os;
@@ -118,6 +119,7 @@ public class FileUtils {
      * @param gid to apply through {@code chown}, or -1 to leave unchanged
      * @return 0 on success, otherwise errno.
      */
+    @UnsupportedAppUsage
     public static int setPermissions(File path, int mode, int uid, int gid) {
         return setPermissions(path.getAbsolutePath(), mode, uid, gid);
     }
@@ -130,6 +132,7 @@ public class FileUtils {
      * @param gid to apply through {@code chown}, or -1 to leave unchanged
      * @return 0 on success, otherwise errno.
      */
+    @UnsupportedAppUsage
     public static int setPermissions(String path, int mode, int uid, int gid) {
         try {
             Os.chmod(path, mode);
@@ -158,6 +161,7 @@ public class FileUtils {
      * @param gid to apply through {@code chown}, or -1 to leave unchanged
      * @return 0 on success, otherwise errno.
      */
+    @UnsupportedAppUsage
     public static int setPermissions(FileDescriptor fd, int mode, int uid, int gid) {
         try {
             Os.fchmod(fd, mode);
@@ -203,6 +207,7 @@ public class FileUtils {
      * Perform an fsync on the given FileOutputStream.  The stream at this
      * point must be flushed but not yet closed.
      */
+    @UnsupportedAppUsage
     public static boolean sync(FileOutputStream stream) {
         try {
             if (stream != null) {
@@ -217,6 +222,7 @@ public class FileUtils {
     /**
      * @deprecated use {@link #copy(File, File)} instead.
      */
+    @UnsupportedAppUsage
     @Deprecated
     public static boolean copyFile(File srcFile, File destFile) {
         try {
@@ -240,6 +246,7 @@ public class FileUtils {
     /**
      * @deprecated use {@link #copy(InputStream, OutputStream)} instead.
      */
+    @UnsupportedAppUsage
     @Deprecated
     public static boolean copyToFile(InputStream inputStream, File destFile) {
         try {
@@ -507,6 +514,7 @@ public class FileUtils {
      * Check if a filename is "safe" (no metacharacters or spaces).
      * @param file  The file to check
      */
+    @UnsupportedAppUsage
     public static boolean isFilenameSafe(File file) {
         // Note, we check whether it matches what's known to be safe,
         // rather than what's known to be unsafe.  Non-ASCII, control
@@ -522,6 +530,7 @@ public class FileUtils {
      * @return the contents of the file, possibly truncated
      * @throws IOException if something goes wrong reading the file
      */
+    @UnsupportedAppUsage
     public static String readTextFile(File file, int max, String ellipsis) throws IOException {
         InputStream input = new FileInputStream(file);
         // wrapping a BufferedInputStream around it because when reading /proc with unbuffered
@@ -575,6 +584,7 @@ public class FileUtils {
         }
     }
 
+    @UnsupportedAppUsage
     public static void stringToFile(File file, String string) throws IOException {
         stringToFile(file.getAbsolutePath(), string);
     }
@@ -605,6 +615,7 @@ public class FileUtils {
      * @param string
      * @throws IOException
      */
+    @UnsupportedAppUsage
     public static void stringToFile(String filename, String string) throws IOException {
         bytesToFile(filename, string.getBytes(StandardCharsets.UTF_8));
     }
@@ -616,6 +627,7 @@ public class FileUtils {
      * @param file  the file to checksum, must not be null
      * @return the checksum value or an exception is thrown.
      */
+    @UnsupportedAppUsage
     public static long checksumCrc32(File file) throws FileNotFoundException, IOException {
         CRC32 checkSummer = new CRC32();
         CheckedInputStream cis = null;
@@ -645,6 +657,7 @@ public class FileUtils {
      * @param minAgeMs Always keep files younger than this age, in milliseconds.
      * @return if any files were deleted.
      */
+    @UnsupportedAppUsage
     public static boolean deleteOlderFiles(File dir, int minCount, long minAgeMs) {
         if (minCount < 0 || minAgeMs < 0) {
             throw new IllegalArgumentException("Constraints must be positive or 0");
@@ -726,6 +739,7 @@ public class FileUtils {
         }
     }
 
+    @UnsupportedAppUsage
     public static boolean deleteContents(File dir) {
         File[] files = dir.listFiles();
         boolean success = true;

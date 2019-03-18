@@ -16,6 +16,7 @@
 
 package android.os;
 
+import android.annotation.UnsupportedAppUsage;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.StructStatVfs;
@@ -25,6 +26,7 @@ import android.system.StructStatVfs;
  * wrapper for Unix statvfs().
  */
 public class StatFs {
+    @UnsupportedAppUsage
     private StructStatVfs mStat;
 
     /**

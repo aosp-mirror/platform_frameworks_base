@@ -19,6 +19,7 @@ package android.os;
 import android.annotation.IntDef;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemService;
+import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityThread;
 import android.content.Context;
 import android.media.AudioAttributes;
@@ -82,6 +83,7 @@ public abstract class Vibrator {
     /**
      * @hide to prevent subclassing from outside of the framework
      */
+    @UnsupportedAppUsage
     public Vibrator() {
         mPackageName = ActivityThread.currentPackageName();
         final Context ctx = ActivityThread.currentActivityThread().getSystemContext();

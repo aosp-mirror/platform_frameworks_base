@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
+import android.annotation.UnsupportedAppUsage;
 import android.util.Log;
 import android.util.MutableInt;
 
@@ -46,11 +47,13 @@ public class SystemProperties {
      * uses reflection to read this whenever text is selected (http://b/36095274).
      * @hide
      */
+    @UnsupportedAppUsage
     public static final int PROP_NAME_MAX = Integer.MAX_VALUE;
 
     /** @hide */
     public static final int PROP_VALUE_MAX = 91;
 
+    @UnsupportedAppUsage
     @GuardedBy("sChangeCallbacks")
     private static final ArrayList<Runnable> sChangeCallbacks = new ArrayList<Runnable>();
 
@@ -78,9 +81,11 @@ public class SystemProperties {
         }
     }
 
+    @UnsupportedAppUsage
     private static native String native_get(String key);
     private static native String native_get(String key, String def);
     private static native int native_get_int(String key, int def);
+    @UnsupportedAppUsage
     private static native long native_get_long(String key, long def);
     private static native boolean native_get_boolean(String key, boolean def);
     private static native void native_set(String key, String def);
@@ -174,6 +179,7 @@ public class SystemProperties {
      * @throws IllegalArgumentException if the {@code val} exceeds 91 characters
      * @hide
      */
+    @UnsupportedAppUsage
     public static void set(@NonNull String key, @Nullable String val) {
         if (val != null && !val.startsWith("ro.") && val.length() > PROP_VALUE_MAX) {
             throw new IllegalArgumentException("value of system property '" + key
@@ -190,6 +196,7 @@ public class SystemProperties {
      * changes.
      * @hide
      */
+    @UnsupportedAppUsage
     public static void addChangeCallback(@NonNull Runnable callback) {
         synchronized (sChangeCallbacks) {
             if (sChangeCallbacks.size() == 0) {
@@ -222,10 +229,12 @@ public class SystemProperties {
      * Notifies listeners that a system property has changed
      * @hide
      */
+    @UnsupportedAppUsage
     public static void reportSyspropChanged() {
         native_report_sysprop_change();
     }
 
+    @UnsupportedAppUsage
     private SystemProperties() {
     }
 }

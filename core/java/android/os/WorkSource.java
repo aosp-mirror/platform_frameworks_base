@@ -2,6 +2,7 @@ package android.os;
 
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.os.WorkSourceProto;
 import android.provider.Settings;
@@ -23,8 +24,11 @@ public class WorkSource implements Parcelable {
     static final String TAG = "WorkSource";
     static final boolean DEBUG = false;
 
+    @UnsupportedAppUsage
     int mNum;
+    @UnsupportedAppUsage
     int[] mUids;
+    @UnsupportedAppUsage
     String[] mNames;
 
     private ArrayList<WorkChain> mChains;
@@ -83,6 +87,7 @@ public class WorkSource implements Parcelable {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public WorkSource(int uid) {
         mNum = 1;
         mUids = new int[] { uid, 0 };
@@ -101,6 +106,7 @@ public class WorkSource implements Parcelable {
         mChains = null;
     }
 
+    @UnsupportedAppUsage
     WorkSource(Parcel in) {
         mNum = in.readInt();
         mUids = in.createIntArray();
@@ -127,16 +133,19 @@ public class WorkSource implements Parcelable {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public int size() {
         return mNum;
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public int get(int index) {
         return mUids[index];
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public String getName(int index) {
         return mNames != null ? mNames[index] : null;
     }
@@ -327,6 +336,7 @@ public class WorkSource implements Parcelable {
      * @deprecated for internal use only. WorkSources are opaque and no external callers should need
      *     to be aware of internal differences.
      */
+    @UnsupportedAppUsage
     @Deprecated
     public WorkSource[] setReturningDiffs(WorkSource other) {
         synchronized (sTmpWorkSource) {
@@ -378,6 +388,7 @@ public class WorkSource implements Parcelable {
      * @hide
      * @deprecated meant for unit testing use only. Will be removed in a future API revision.
      */
+    @UnsupportedAppUsage
     @Deprecated
     public WorkSource addReturningNewbs(WorkSource other) {
         synchronized (sTmpWorkSource) {
@@ -388,6 +399,7 @@ public class WorkSource implements Parcelable {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public boolean add(int uid) {
         if (mNum <= 0) {
             mNames = null;
@@ -407,6 +419,7 @@ public class WorkSource implements Parcelable {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public boolean add(int uid, String name) {
         if (mNum <= 0) {
             insert(0, uid, name);
