@@ -1588,13 +1588,13 @@ public final class MediaDrm implements AutoCloseable {
      * {@link #PROPERTY_DESCRIPTION}, {@link #PROPERTY_ALGORITHMS}
      */
     @NonNull
-    public native String getPropertyString(@NonNull @StringProperty String propertyName);
+    public native String getPropertyString(@NonNull String propertyName);
 
     /**
      * Set a MediaDrm String property value, given the property name string
      * and new value for the property.
      */
-    public native void setPropertyString(@NonNull @StringProperty String propertyName,
+    public native void setPropertyString(@NonNull String propertyName,
             @NonNull String value);
 
     /**
@@ -1616,14 +1616,14 @@ public final class MediaDrm implements AutoCloseable {
      * Standard fields names are {@link #PROPERTY_DEVICE_UNIQUE_ID}
      */
     @NonNull
-    public native byte[] getPropertyByteArray(@ArrayProperty String propertyName);
+    public native byte[] getPropertyByteArray(String propertyName);
 
     /**
     * Set a MediaDrm byte array property value, given the property name string
     * and new value for the property.
     */
-    public native void setPropertyByteArray(@NonNull @ArrayProperty
-            String propertyName, @NonNull byte[] value);
+    public native void setPropertyByteArray(
+            @NonNull String propertyName, @NonNull byte[] value);
 
     private static final native void setCipherAlgorithmNative(
             @NonNull MediaDrm drm, @NonNull byte[] sessionId, @NonNull String algorithm);
