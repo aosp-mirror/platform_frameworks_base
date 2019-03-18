@@ -192,6 +192,9 @@ final class ConnectionRecord {
         if ((flags&Context.BIND_TREAT_LIKE_ACTIVITY) != 0) {
             sb.append("LACT ");
         }
+        if ((flags & Context.BIND_SCHEDULE_LIKE_TOP_APP) != 0) {
+            sb.append("SLTA ");
+        }
         if ((flags&Context.BIND_VISIBLE) != 0) {
             sb.append("VIS ");
         }

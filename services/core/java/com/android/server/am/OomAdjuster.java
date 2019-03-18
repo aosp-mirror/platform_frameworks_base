@@ -1294,6 +1294,11 @@ public final class OomAdjuster {
                                         ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND;
                             }
                         }
+                        if (schedGroup < ProcessList.SCHED_GROUP_TOP_APP
+                                && (cr.flags & Context.BIND_SCHEDULE_LIKE_TOP_APP) != 0) {
+                            schedGroup = ProcessList.SCHED_GROUP_TOP_APP;
+                        }
+
                         if (!trackedProcState) {
                             cr.trackProcState(clientProcState, mAdjSeq, now);
                         }

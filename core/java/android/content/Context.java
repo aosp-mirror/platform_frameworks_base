@@ -338,6 +338,16 @@ public abstract class Context {
     public static final int BIND_ADJUST_BELOW_PERCEPTIBLE = 0x0100;
 
     /**
+     * Flag for {@link #bindService}: This flag is intended to be used only by the system to adjust
+     * the scheduling policy for IMEs (and any other out-of-process user-visible components that
+     * work closely with the top app) so that UI hosted in such services can have the same
+     * scheduling policy (e.g. SCHED_FIFO when it is enabled and TOP_APP_PRIORITY_BOOST otherwise)
+     * as the actual top-app.
+     * @hide
+     */
+    public static final int BIND_SCHEDULE_LIKE_TOP_APP = 0x00080000;
+
+    /**
      * Flag for {@link #bindService}: allow background activity starts from the bound service's
      * process.
      * This flag is only respected if the caller is holding

@@ -231,7 +231,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             Context.BIND_AUTO_CREATE
             | Context.BIND_TREAT_LIKE_ACTIVITY
             | Context.BIND_FOREGROUND_SERVICE
-            | Context.BIND_SHOWING_UI;
+            | Context.BIND_SHOWING_UI
+            | Context.BIND_SCHEDULE_LIKE_TOP_APP;
 
     @Retention(SOURCE)
     @IntDef({HardKeyboardBehavior.WIRELESS_AFFORDANCE, HardKeyboardBehavior.WIRED_AFFORDANCE})
