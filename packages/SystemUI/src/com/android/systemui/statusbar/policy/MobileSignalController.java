@@ -22,6 +22,7 @@ import android.net.NetworkCapabilities;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.Settings.Global;
+import android.telephony.NetworkRegistrationState;
 import android.telephony.PhoneStateListener;
 import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
@@ -457,7 +458,13 @@ public class MobileSignalController extends SignalController<
                 mCurrentState.level = mSignalStrength.getLevel();
             }
         }
-        if (mNetworkToIconLookup.indexOfKey(mDataNetType) >= 0) {
+
+        // When the device is camped on a 5G Non-Standalone network, the data network type is still
+        // LTE. In this case, we first check which 5G icon should be shown.
+        MobileIconGroup nr5GIconGroup = getNr5GIconGroup();
+        if (nr5GIconGroup != null) {
+            mCurrentState.iconGroup = nr5GIconGroup;
+        } else if (mNetworkToIconLookup.indexOfKey(mDataNetType) >= 0) {
             mCurrentState.iconGroup = mNetworkToIconLookup.get(mDataNetType);
         } else {
             mCurrentState.iconGroup = mDefaultIcons;
@@ -482,6 +489,36 @@ public class MobileSignalController extends SignalController<
         }
 
         notifyListenersIfNecessary();
+    }
+
+    private MobileIconGroup getNr5GIconGroup() {
+        if (mServiceState == null) return null;
+
+        int nrStatus = mServiceState.getNrStatus();
+        if (nrStatus == NetworkRegistrationState.NR_STATUS_CONNECTED) {
+            // Check if the NR 5G is using millimeter wave and the icon is config.
+            if (mServiceState.getNrFrequencyRange() == ServiceState.FREQUENCY_RANGE_MMWAVE) {
+                if (mConfig.nr5GIconMap.containsKey(Config.NR_CONNECTED_MMWAVE)) {
+                    return mConfig.nr5GIconMap.get(Config.NR_CONNECTED_MMWAVE);
+                }
+            }
+
+            // If NR 5G is not using millimeter wave or there is no icon for millimeter wave, we
+            // check the normal 5G icon.
+            if (mConfig.nr5GIconMap.containsKey(Config.NR_CONNECTED)) {
+                return mConfig.nr5GIconMap.get(Config.NR_CONNECTED);
+            }
+        } else if (nrStatus == NetworkRegistrationState.NR_STATUS_NOT_RESTRICTED) {
+            if (mConfig.nr5GIconMap.containsKey(Config.NR_NOT_RESTRICTED)) {
+                return mConfig.nr5GIconMap.get(Config.NR_NOT_RESTRICTED);
+            }
+        } else if (nrStatus == NetworkRegistrationState.NR_STATUS_RESTRICTED) {
+            if (mConfig.nr5GIconMap.containsKey(Config.NR_RESTRICTED)) {
+                return mConfig.nr5GIconMap.get(Config.NR_RESTRICTED);
+            }
+        }
+
+        return null;
     }
 
     private boolean isDataDisabled() {
