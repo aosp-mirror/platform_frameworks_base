@@ -167,8 +167,9 @@ public class TcpKeepalivePacketData extends KeepalivePacketData implements Parce
                 tcpWndScale);
     }
 
-    /* Parcelable Implementation. */
-    /* Note that this object implements parcelable (and needs to keep doing this as it inherits
+    /**
+     * Parcelable Implementation.
+     * Note that this object implements parcelable (and needs to keep doing this as it inherits
      * from a class that does), but should usually be parceled as a stable parcelable using
      * the toStableParcelable() and fromStableParcelable() methods.
      */
@@ -194,7 +195,7 @@ public class TcpKeepalivePacketData extends KeepalivePacketData implements Parce
     }
 
     /** Parcelable Creator. */
-    public static final @android.annotation.NonNull Parcelable.Creator<TcpKeepalivePacketData> CREATOR =
+    public static final @NonNull Parcelable.Creator<TcpKeepalivePacketData> CREATOR =
             new Parcelable.Creator<TcpKeepalivePacketData>() {
                 public TcpKeepalivePacketData createFromParcel(Parcel in) {
                     return new TcpKeepalivePacketData(in);
