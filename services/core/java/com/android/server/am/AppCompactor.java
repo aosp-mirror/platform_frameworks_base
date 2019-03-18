@@ -211,7 +211,7 @@ public final class AppCompactor {
         mPendingCompactionProcesses.add(app);
         mCompactionHandler.sendMessage(
             mCompactionHandler.obtainMessage(
-                COMPACT_PROCESS_MSG, app.curAdj, app.setProcState));
+                COMPACT_PROCESS_MSG, app.setAdj, app.setProcState));
     }
 
     @GuardedBy("mAm")
@@ -220,7 +220,7 @@ public final class AppCompactor {
         mPendingCompactionProcesses.add(app);
         mCompactionHandler.sendMessage(
             mCompactionHandler.obtainMessage(
-                COMPACT_PROCESS_MSG, app.curAdj, app.setProcState));
+                COMPACT_PROCESS_MSG, app.setAdj, app.setProcState));
 
     }
 
