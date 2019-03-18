@@ -58,6 +58,8 @@ import android.os.SystemProperties;
 import android.os.WorkSource;
 import android.provider.Settings.SettingNotFoundException;
 import android.service.carrier.CarrierIdentifier;
+import android.telecom.CallScreeningService;
+import android.telecom.InCallService;
 import android.telecom.PhoneAccount;
 import android.telecom.PhoneAccountHandle;
 import android.telecom.TelecomManager;
@@ -617,7 +619,13 @@ public class TelephonyManager {
      * <p class="note">
      * Retrieve with
      * {@link android.content.Intent#getStringExtra(String)}.
+     * <p>
+     *
+     * @deprecated Companion apps for wearable devices should use the {@link InCallService} API
+     * to retrieve the phone number for calls instead.  Apps performing call screening should use
+     * the {@link CallScreeningService} API instead.
      */
+    @Deprecated
     public static final String EXTRA_INCOMING_NUMBER = "incoming_number";
 
     /**
