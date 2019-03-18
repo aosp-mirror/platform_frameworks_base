@@ -352,6 +352,24 @@ class DisplayWindowSettings {
         dc.mDisplayScalingDisabled = entry.mForcedScalingMode == FORCE_SCALING_MODE_DISABLED;
     }
 
+    /**
+     * Updates settings for the given display after system features are loaded into window manager
+     * service, e.g. if this device is PC and if this device supports freeform.
+     *
+     * @param dc the given display.
+     * @return {@code true} if any settings for this display has changed; {@code false} if nothing
+     * changed.
+     */
+    boolean updateSettingsForDisplay(DisplayContent dc) {
+        if (dc.getWindowingMode() != getWindowingModeLocked(dc)) {
+            // For the time being the only thing that may change is windowing mode, so just update
+            // that.
+            dc.setWindowingMode(getWindowingModeLocked(dc));
+            return true;
+        }
+        return false;
+    }
+
     private void readSettings() {
         FileInputStream stream;
         try {
