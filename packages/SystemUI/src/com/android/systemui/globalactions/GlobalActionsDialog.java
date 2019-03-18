@@ -383,8 +383,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                     mHasLogoutButton = true;
                 }
             } else if (GLOBAL_ACTION_KEY_EMERGENCY.equals(actionKey)) {
-                if (shouldUseSeparatedView()
-                        && !mEmergencyAffordanceManager.needsEmergencyAffordance()) {
+                if (!mEmergencyAffordanceManager.needsEmergencyAffordance()) {
                     mItems.add(new EmergencyDialerAction());
                 }
             } else {
@@ -395,7 +394,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         }
 
         if (mEmergencyAffordanceManager.needsEmergencyAffordance()) {
-            mItems.add(getEmergencyAction());
+            mItems.add(new EmergencyAffordanceAction());
         }
 
         mAdapter = new MyAdapter();
@@ -484,7 +483,59 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         }
     }
 
-    private class EmergencyDialerAction extends SinglePressAction {
+    private abstract class EmergencyAction extends SinglePressAction {
+        EmergencyAction(int iconResId, int messageResId) {
+            super(iconResId, messageResId);
+        }
+
+        @Override
+        public boolean shouldBeSeparated() {
+            return shouldUseSeparatedView();
+        }
+
+        @Override
+        public View create(
+                Context context, View convertView, ViewGroup parent, LayoutInflater inflater) {
+            View v = super.create(context, convertView, parent, inflater);
+            int textColor;
+            if (shouldBeSeparated()) {
+                textColor = v.getResources().getColor(
+                        com.android.systemui.R.color.global_actions_alert_text);
+            } else {
+                textColor = v.getResources().getColor(
+                        com.android.systemui.R.color.global_actions_text);
+            }
+            TextView messageView = v.findViewById(R.id.message);
+            messageView.setTextColor(textColor);
+            ImageView icon = (ImageView) v.findViewById(R.id.icon);
+            icon.getDrawable().setTint(textColor);
+            return v;
+        }
+
+        @Override
+        public boolean showDuringKeyguard() {
+            return true;
+        }
+
+        @Override
+        public boolean showBeforeProvisioning() {
+            return true;
+        }
+    }
+
+    private class EmergencyAffordanceAction extends EmergencyAction {
+        EmergencyAffordanceAction() {
+            super(R.drawable.emergency_icon,
+                    R.string.global_action_emergency);
+        }
+
+        @Override
+        public void onPress() {
+            mEmergencyAffordanceManager.performEmergencyCall();
+        }
+    }
+
+    private class EmergencyDialerAction extends EmergencyAction {
         private EmergencyDialerAction() {
             super(R.drawable.ic_faster_emergency,
                     R.string.global_action_emergency);
@@ -500,21 +551,6 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             intent.putExtra(EmergencyDialerConstants.EXTRA_ENTRY_TYPE,
                     EmergencyDialerConstants.ENTRY_TYPE_POWER_MENU);
             mContext.startActivityAsUser(intent, UserHandle.CURRENT);
-        }
-
-        @Override
-        public boolean showDuringKeyguard() {
-            return true;
-        }
-
-        @Override
-        public boolean showBeforeProvisioning() {
-            return true;
-        }
-
-        @Override
-        public boolean shouldBeSeparated() {
-            return true;
         }
     }
 
@@ -689,32 +725,6 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                 Intent intent = new Intent(Settings.ACTION_SETTINGS);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 mContext.startActivity(intent);
-            }
-
-            @Override
-            public boolean showDuringKeyguard() {
-                return true;
-            }
-
-            @Override
-            public boolean showBeforeProvisioning() {
-                return true;
-            }
-        };
-    }
-
-    private Action getEmergencyAction() {
-        Drawable emergencyIcon = mContext.getDrawable(R.drawable.emergency_icon);
-        if (!shouldUseSeparatedView()) {
-            // use un-colored legacy treatment
-            emergencyIcon.setTintList(null);
-        }
-
-        return new SinglePressAction(R.drawable.emergency_icon,
-                R.string.global_action_emergency) {
-            @Override
-            public void onPress() {
-                mEmergencyAffordanceManager.performEmergencyCall();
             }
 
             @Override

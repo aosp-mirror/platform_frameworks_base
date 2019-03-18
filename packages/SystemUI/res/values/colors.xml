@@ -38,6 +38,18 @@
     <color name="qs_customize_background">@color/GM2_grey_50</color>
     <color name="qs_customize_decoration">@color/GM2_grey_100</color>
 
+    <!-- The color of the background in the separated list of the Global Actions menu -->
+    <color name="global_actions_separated_background">@color/GM2_grey_300</color>
+
+    <!-- The color of the background in the grid of the Global Actions menu -->
+    <color name="global_actions_grid_background">@color/GM2_grey_200</color>
+
+    <!-- The color of the text in the Global Actions menu -->
+    <color name="global_actions_text">@color/GM2_grey_900</color>
+
+    <!-- The color of the text in the Global Actions menu -->
+    <color name="global_actions_alert_text">@color/GM2_red_500</color>
+
     <!-- Tint color for the content on the notification overflow card. -->
     <color name="keyguard_overflow_content_color">#ff686868</color>
 
@@ -149,4 +161,7 @@
     <color name="GM2_grey_700">#5F6368</color>
     <color name="GM2_grey_800">#3C4043</color>
     <color name="GM2_grey_900">#202124</color>
+
+    <color name="GM2_red_300">#F28B82</color>
+    <color name="GM2_red_500">#B71C1C</color>
 </resources>
