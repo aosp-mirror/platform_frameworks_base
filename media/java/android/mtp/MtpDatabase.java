@@ -54,6 +54,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.IntStream;
 
@@ -248,7 +249,7 @@ public class MtpDatabase implements AutoCloseable {
     public MtpDatabase(Context context, String volumeName,
             String[] subDirectories) {
         native_setup();
-        mContext = context;
+        mContext = Objects.requireNonNull(context);
         mMediaProvider = context.getContentResolver()
                 .acquireContentProviderClient(MediaStore.AUTHORITY);
         mVolumeName = volumeName;
@@ -292,6 +293,10 @@ public class MtpDatabase implements AutoCloseable {
             mContext.registerReceiver(mBatteryReceiver,
                     new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
         }
+    }
+
+    public Context getContext() {
+        return mContext;
     }
 
     @Override

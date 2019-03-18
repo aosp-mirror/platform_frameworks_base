@@ -18,7 +18,12 @@ package android.mtp;
 
 import com.android.internal.util.Preconditions;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.util.ByteStringUtils;
+
 import java.io.FileDescriptor;
+import java.util.Random;
 
 /**
  * Java wrapper for MTP/PTP support as USB responder.
@@ -29,6 +34,12 @@ public class MtpServer implements Runnable {
     private long mNativeContext; // accessed by native methods
     private final MtpDatabase mDatabase;
     private final Runnable mOnTerminate;
+    private final Context mContext;
+
+// It requires "exactly 32 characters, including any leading 0s" in MTP spec
+// (5.1.1.14 Serial Number)
+    private static final int sID_LEN_BYTES = 16;
+    private static final int sID_LEN_STR = (sID_LEN_BYTES * 2);
 
     static {
         System.loadLibrary("media_jni");
@@ -41,10 +52,41 @@ public class MtpServer implements Runnable {
             Runnable onTerminate,
             String deviceInfoManufacturer,
             String deviceInfoModel,
-            String deviceInfoDeviceVersion,
-            String deviceInfoSerialNumber) {
+            String deviceInfoDeviceVersion) {
         mDatabase = Preconditions.checkNotNull(database);
         mOnTerminate = Preconditions.checkNotNull(onTerminate);
+        mContext = mDatabase.getContext();
+
+        final String strID_PREFS_NAME = "mtp-cfg";
+        final String strID_PREFS_KEY = "mtp-id";
+        String strRandomId = null;
+        String deviceInfoSerialNumber;
+
+        SharedPreferences sharedPref =
+                mContext.getSharedPreferences(strID_PREFS_NAME, Context.MODE_PRIVATE);
+        if (sharedPref.contains(strID_PREFS_KEY)) {
+            strRandomId = sharedPref.getString(strID_PREFS_KEY, null);
+
+            // Check for format consistence (regenerate upon corruption)
+            if (strRandomId.length() != sID_LEN_STR) {
+                strRandomId = null;
+            } else {
+                // Only accept hex digit
+                for (int ii = 0; ii < strRandomId.length(); ii++)
+                    if (Character.digit(strRandomId.charAt(ii), 16) == -1) {
+                        strRandomId = null;
+                        break;
+                    }
+            }
+        }
+
+        if (strRandomId == null) {
+            strRandomId = getRandId();
+            sharedPref.edit().putString(strID_PREFS_KEY, strRandomId).apply();
+        }
+
+        deviceInfoSerialNumber = strRandomId;
+
         native_setup(
                 database,
                 controlFd,
@@ -54,6 +96,14 @@ public class MtpServer implements Runnable {
                 deviceInfoDeviceVersion,
                 deviceInfoSerialNumber);
         database.setServer(this);
+    }
+
+    private String getRandId() {
+        Random randomVal = new Random();
+        byte[] randomBytes = new byte[sID_LEN_BYTES];
+
+        randomVal.nextBytes(randomBytes);
+        return ByteStringUtils.toHexString(randomBytes);
     }
 
     public void start() {
