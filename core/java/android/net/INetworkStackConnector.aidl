@@ -16,7 +16,7 @@
 package android.net;
 
 import android.net.INetworkMonitorCallbacks;
-import android.net.NetworkParcelable;
+import android.net.Network;
 import android.net.dhcp.DhcpServingParamsParcel;
 import android.net.dhcp.IDhcpServerCallbacks;
 import android.net.ip.IIpClientCallbacks;
@@ -25,7 +25,6 @@ import android.net.ip.IIpClientCallbacks;
 oneway interface INetworkStackConnector {
     void makeDhcpServer(in String ifName, in DhcpServingParamsParcel params,
         in IDhcpServerCallbacks cb);
-    void makeNetworkMonitor(in NetworkParcelable network, String name,
-        in INetworkMonitorCallbacks cb);
+    void makeNetworkMonitor(in Network network, String name, in INetworkMonitorCallbacks cb);
     void makeIpClient(in String ifName, in IIpClientCallbacks callbacks);
 }
