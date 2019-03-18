@@ -16,6 +16,6 @@
 -->
 
 <resources>
-    <color name="button_background">@color/car_dark_blue_grey_600</color>
-    <color name="button_text">@color/car_action1_light</color>
+    <color name="button_background">@*android:color/car_dark_blue_grey_600</color>
+    <color name="button_text">@android:color/white</color>
 </resources>

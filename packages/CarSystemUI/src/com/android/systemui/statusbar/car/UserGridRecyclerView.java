@@ -253,7 +253,8 @@ public class UserGridRecyclerView extends PagedListView implements
         }
 
         private void showMaxUserLimitReachedDialog() {
-            AlertDialog maxUsersDialog = new Builder(mContext, R.style.Theme_Car_Dark_Dialog_Alert)
+            AlertDialog maxUsersDialog = new Builder(mContext,
+                    com.android.internal.R.style.Theme_DeviceDefault_Dialog_Alert)
                     .setTitle(R.string.user_limit_reached_title)
                     .setMessage(getResources().getQuantityString(
                             R.plurals.user_limit_reached_message,
@@ -272,7 +273,8 @@ public class UserGridRecyclerView extends PagedListView implements
                     .concat(System.getProperty("line.separator"))
                     .concat(mRes.getString(R.string.user_add_user_message_update));
 
-            AlertDialog addUserDialog = new Builder(mContext, R.style.Theme_Car_Dark_Dialog_Alert)
+            AlertDialog addUserDialog = new Builder(mContext,
+                    com.android.internal.R.style.Theme_DeviceDefault_Dialog_Alert)
                     .setTitle(R.string.user_add_user_title)
                     .setMessage(message)
                     .setNegativeButton(android.R.string.cancel, this)

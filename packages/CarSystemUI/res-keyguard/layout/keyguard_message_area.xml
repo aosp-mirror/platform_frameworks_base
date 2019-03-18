@@ -27,5 +27,5 @@
     android:singleLine="true"
     android:ellipsize="marquee"
     android:focusable="true"
-    android:layout_marginBottom="@dimen/car_padding_4"
-    android:textSize="@dimen/car_body2_size" />
+    android:layout_marginBottom="@*android:dimen/car_padding_4"
+    android:textSize="@*android:dimen/car_body2_size" />

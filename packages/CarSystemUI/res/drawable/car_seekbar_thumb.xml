@@ -19,19 +19,19 @@
     <item>
         <shape android:shape="oval">
             <padding
-                android:bottom="@dimen/car_padding_1"
-                android:left="@dimen/car_padding_1"
-                android:right="@dimen/car_padding_1"
-                android:top="@dimen/car_padding_1"/>
+                android:bottom="@*android:dimen/car_padding_1"
+                android:left="@*android:dimen/car_padding_1"
+                android:right="@*android:dimen/car_padding_1"
+                android:top="@*android:dimen/car_padding_1"/>
             <solid android:color="@android:color/black"/>
         </shape>
     </item>
     <item>
         <shape android:shape="oval">
-            <solid android:color="@color/car_accent"/>
+            <solid android:color="@*android:color/car_accent"/>
             <size
-                android:width="@dimen/car_seekbar_thumb_size"
-                android:height="@dimen/car_seekbar_thumb_size"/>
+                android:width="@*android:dimen/car_seekbar_thumb_size"
+                android:height="@*android:dimen/car_seekbar_thumb_size"/>
         </shape>
     </item>
 </layer-list>
