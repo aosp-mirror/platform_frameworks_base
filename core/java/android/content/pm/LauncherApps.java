@@ -142,17 +142,6 @@ public class LauncherApps {
     public static final String EXTRA_PIN_ITEM_REQUEST =
             "android.content.pm.extra.PIN_ITEM_REQUEST";
 
-    /**
-     * Metadata key that specifies vouched certs, so any apps signed by a cert in vouched certs
-     * will not show hidden icon in launcher even it does not have a launcher visible activity.
-     *
-     * If an app has this metadata in manifest, it won't be eligible to hide its icon even if its
-     * cert is in vouched certs list.
-     *
-     * @hide
-     */
-    public static final String VOUCHED_CERTS_KEY = "vouched_certs";
-
     private final Context mContext;
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private final ILauncherApps mService;
