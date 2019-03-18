@@ -66,6 +66,15 @@ public final class AudioPlaybackCaptureConfiguration {
     }
 
     /**
+     * @return the {@code MediaProjection} used to build this object.
+     * @see {@code Builder.Builder}
+     */
+    public @NonNull MediaProjection getMediaProjection() {
+        return mProjection;
+    }
+
+
+    /**
      * Returns a mix that routes audio back into the app while still playing it from the speakers.
      *
      * @param audioFormat The format in which to capture the audio.
@@ -75,9 +84,6 @@ public final class AudioPlaybackCaptureConfiguration {
                 .setFormat(audioFormat)
                 .setRouteFlags(AudioMix.ROUTE_FLAG_LOOP_BACK | AudioMix.ROUTE_FLAG_RENDER)
                 .build();
-    }
-    MediaProjection getMediaProjection() {
-        return mProjection;
     }
 
     /** Builder for creating {@link AudioPlaybackCaptureConfiguration} instances. */
