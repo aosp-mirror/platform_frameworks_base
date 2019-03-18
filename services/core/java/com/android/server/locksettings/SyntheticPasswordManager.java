@@ -751,7 +751,7 @@ public class SyntheticPasswordManager {
 
     /**
      * Create a token based Synthetic password for the given user.
-     * @return
+     * @return the handle of the token
      */
     public long createTokenBasedSyntheticPassword(byte[] token, int userId,
             @Nullable EscrowTokenStateChangeCallback changeCallback) {

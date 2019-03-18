@@ -62,6 +62,7 @@ interface ILockSettings {
     void systemReady();
     void userPresent(int userId);
     int getStrongAuthForUser(int userId);
+    boolean hasPendingEscrowToken(int userId);
 
     // Keystore RecoveryController methods.
     // {@code ServiceSpecificException} may be thrown to signal an error, which caller can

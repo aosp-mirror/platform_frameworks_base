@@ -2699,6 +2699,14 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
     }
 
+    @Override
+    public boolean hasPendingEscrowToken(int userId) {
+        checkPasswordReadPermission(userId);
+        synchronized (mSpManager) {
+            return !mSpManager.getPendingTokensForUser(userId).isEmpty();
+        }
+    }
+
     private boolean removeEscrowToken(long handle, int userId) {
         synchronized (mSpManager) {
             if (handle == getSyntheticPasswordHandleLocked(userId)) {
