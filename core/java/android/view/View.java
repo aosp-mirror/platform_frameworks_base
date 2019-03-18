@@ -13899,6 +13899,16 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * Returns whether this view can receive pointer events.
+     *
+     * @return {@code true} if this view can receive pointer events.
+     * @hide
+     */
+    protected boolean canReceivePointerEvents() {
+        return (mViewFlags & VISIBILITY_MASK) == VISIBLE || getAnimation() != null;
+    }
+
+    /**
      * Filter the touch event to apply security policies.
      *
      * @param event The motion event to be filtered.
