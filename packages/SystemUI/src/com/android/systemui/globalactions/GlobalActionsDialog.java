@@ -92,8 +92,6 @@ import com.android.systemui.plugins.GlobalActions.GlobalActionsManager;
 import com.android.systemui.plugins.GlobalActionsPanelPlugin;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
-import com.android.systemui.statusbar.policy.ExtensionController;
-import com.android.systemui.statusbar.policy.ExtensionController.Extension;
 import com.android.systemui.util.EmergencyDialerConstants;
 import com.android.systemui.util.leak.RotationUtils;
 import com.android.systemui.volume.SystemUIInterpolators.LogAccelerateInterpolator;
@@ -161,9 +159,8 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     private final EmergencyAffordanceManager mEmergencyAffordanceManager;
     private final ScreenshotHelper mScreenshotHelper;
     private final ScreenRecordHelper mScreenRecordHelper;
-
-    private final Extension<GlobalActionsPanelPlugin> mPanelExtension;
-    private ActivityStarter mActivityStarter;
+    private final ActivityStarter mActivityStarter;
+    private GlobalActionsPanelPlugin mPanelPlugin;
 
     /**
      * @param context everything needs a context :(
@@ -209,10 +206,6 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
 
         Dependency.get(ConfigurationController.class).addCallback(this);
 
-        mPanelExtension = Dependency.get(ExtensionController.class)
-            .newExtension(GlobalActionsPanelPlugin.class)
-            .withPlugin(GlobalActionsPanelPlugin.class)
-            .build();
         mActivityStarter = Dependency.get(ActivityStarter.class);
     }
 
@@ -221,9 +214,11 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
      *
      * @param keyguardShowing True if keyguard is showing
      */
-    public void showDialog(boolean keyguardShowing, boolean isDeviceProvisioned) {
+    public void showDialog(boolean keyguardShowing, boolean isDeviceProvisioned,
+            GlobalActionsPanelPlugin panelPlugin) {
         mKeyguardShowing = keyguardShowing;
         mDeviceProvisioned = isDeviceProvisioned;
+        mPanelPlugin = panelPlugin;
         if (mDialog != null) {
             mDialog.dismiss();
             mDialog = null;
@@ -400,8 +395,8 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         mAdapter = new MyAdapter();
 
         GlobalActionsPanelPlugin.PanelViewController panelViewController =
-                mPanelExtension.get() != null
-                        ? mPanelExtension.get().onPanelShown(
+                mPanelPlugin != null
+                        ? mPanelPlugin.onPanelShown(
                                 new GlobalActionsPanelPlugin.Callbacks() {
                                     @Override
                                     public void dismissGlobalActionsMenu() {
