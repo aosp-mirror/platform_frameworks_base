@@ -41,7 +41,6 @@ import static android.net.NetworkCapabilities.TRANSPORT_VPN;
 import static android.net.NetworkPolicyManager.RULE_NONE;
 import static android.net.NetworkPolicyManager.uidRulesToString;
 import static android.net.shared.NetworkMonitorUtils.isValidationRequired;
-import static android.net.shared.NetworkParcelableUtil.toStableParcelable;
 import static android.os.Process.INVALID_UID;
 import static android.system.OsConstants.IPPROTO_TCP;
 import static android.system.OsConstants.IPPROTO_UDP;
@@ -5390,7 +5389,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         final long token = Binder.clearCallingIdentity();
         try {
             getNetworkStack().makeNetworkMonitor(
-                    toStableParcelable(nai.network), name, new NetworkMonitorCallbacks(nai));
+                    nai.network, name, new NetworkMonitorCallbacks(nai));
         } finally {
             Binder.restoreCallingIdentity(token);
         }
