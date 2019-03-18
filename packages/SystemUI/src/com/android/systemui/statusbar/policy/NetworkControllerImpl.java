@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.policy;
 
+import static android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -54,18 +56,18 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.settings.CurrentUserTracker;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController.DeviceProvisionedListener;
+import com.android.systemui.statusbar.policy.MobileSignalController.MobileIconGroup;
 
-import com.android.systemui.statusbar.policy.MobileSignalController.MobileState;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-
-import static android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED;
+import java.util.Map;
 
 /** Platform implementation of the network controller. **/
 public class NetworkControllerImpl extends BroadcastReceiver
@@ -1026,6 +1028,13 @@ public class NetworkControllerImpl extends BroadcastReceiver
 
     @VisibleForTesting
     static class Config {
+        static final int NR_CONNECTED_MMWAVE = 1;
+        static final int NR_CONNECTED = 2;
+        static final int NR_NOT_RESTRICTED = 3;
+        static final int NR_RESTRICTED = 4;
+
+        Map<Integer, MobileIconGroup> nr5GIconMap = new HashMap<>();
+
         boolean showAtLeast3G = false;
         boolean alwaysShowCdmaRssi = false;
         boolean show4gForLte = false;
@@ -1033,6 +1042,19 @@ public class NetworkControllerImpl extends BroadcastReceiver
         boolean hspaDataDistinguishable;
         boolean inflateSignalStrengths = false;
         boolean alwaysShowDataRatIcon = false;
+
+        /**
+         * Mapping from NR 5G status string to an integer. The NR 5G status string should match
+         * those in carrier config.
+         */
+        private static final Map<String, Integer> NR_STATUS_STRING_TO_INDEX;
+        static {
+            NR_STATUS_STRING_TO_INDEX = new HashMap<>(4);
+            NR_STATUS_STRING_TO_INDEX.put("connected_mmwave", NR_CONNECTED_MMWAVE);
+            NR_STATUS_STRING_TO_INDEX.put("connected", NR_CONNECTED);
+            NR_STATUS_STRING_TO_INDEX.put("not_restricted", NR_NOT_RESTRICTED);
+            NR_STATUS_STRING_TO_INDEX.put("restricted", NR_RESTRICTED);
+        }
 
         static Config readConfig(Context context) {
             Config config = new Config();
@@ -1058,8 +1080,46 @@ public class NetworkControllerImpl extends BroadcastReceiver
                         CarrierConfigManager.KEY_SHOW_4G_FOR_LTE_DATA_ICON_BOOL);
                 config.hideLtePlus = b.getBoolean(
                         CarrierConfigManager.KEY_HIDE_LTE_PLUS_DATA_ICON_BOOL);
+                String nr5GIconConfiguration =
+                        b.getString(CarrierConfigManager.KEY_5G_ICON_CONFIGURATION_STRING);
+                if (!TextUtils.isEmpty(nr5GIconConfiguration)) {
+                    String[] nr5GIconConfigPairs = nr5GIconConfiguration.trim().split(",");
+                    for (String pair : nr5GIconConfigPairs) {
+                        add5GIconMapping(pair, config);
+                    }
+                }
             }
+
             return config;
+        }
+
+        /**
+         * Add a mapping from NR 5G status to the 5G icon. All the icon resources come from
+         * {@link TelephonyIcons}.
+         *
+         * @param keyValuePair the NR 5G status and icon name separated by a colon.
+         * @param config container that used to store the parsed configs.
+         */
+        @VisibleForTesting
+        static void add5GIconMapping(String keyValuePair, Config config) {
+            String[] kv = (keyValuePair.trim().toLowerCase()).split(":");
+
+            if (kv.length != 2) {
+                if (DEBUG) Log.e(TAG, "Invalid 5G icon configuration, config = " + keyValuePair);
+                return;
+            }
+
+            String key = kv[0], value = kv[1];
+
+            // There is no icon config for the specific 5G status.
+            if (value.equals("none")) return;
+
+            if (NR_STATUS_STRING_TO_INDEX.containsKey(key)
+                    && TelephonyIcons.ICON_NAME_TO_ICON.containsKey(value)) {
+                config.nr5GIconMap.put(
+                        NR_STATUS_STRING_TO_INDEX.get(key),
+                        TelephonyIcons.ICON_NAME_TO_ICON.get(value));
+            }
         }
     }
 }
