@@ -45,8 +45,6 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutServiceInternal;
 import android.content.pm.ShortcutServiceInternal.ShortcutChangeListener;
-import android.content.pm.Signature;
-import android.content.pm.SigningInfo;
 import android.content.pm.UserInfo;
 import android.graphics.Rect;
 import android.net.Uri;
@@ -62,31 +60,21 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.UserManagerInternal;
 import android.provider.Settings;
-import android.util.ByteStringUtils;
 import android.util.Log;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.os.BackgroundThread;
-import com.android.internal.util.DumpUtils;
 import com.android.internal.util.Preconditions;
-import com.android.internal.util.StatLogger;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
-import java.io.FileDescriptor;
-import java.io.PrintWriter;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Service that manages requests and callbacks for launchers that support
@@ -125,16 +113,6 @@ public class LauncherAppsService extends SystemService {
         private static final boolean DEBUG = false;
         private static final String TAG = "LauncherAppsService";
 
-        // Stats
-        @VisibleForTesting
-        interface Stats {
-            int INIT_VOUCHED_SIGNATURES = 0;
-            int COUNT = INIT_VOUCHED_SIGNATURES + 1;
-        }
-        private final StatLogger mStatLogger = new StatLogger(new String[] {
-                "initVouchedSignatures"
-        });
-
         private final Context mContext;
         private final UserManager mUm;
         private final UserManagerInternal mUserManagerInternal;
@@ -145,15 +123,10 @@ public class LauncherAppsService extends SystemService {
         private final PackageCallbackList<IOnAppsChangedListener> mListeners
                 = new PackageCallbackList<IOnAppsChangedListener>();
         private final DevicePolicyManager mDpm;
-        private final ConcurrentHashMap<UserHandle, Set<String>> mVouchedSignaturesByUser;
-        private final Set<String> mVouchProviders;
 
         private final MyPackageMonitor mPackageMonitor = new MyPackageMonitor();
-        private final VouchesChangedMonitor mVouchesChangedMonitor = new VouchesChangedMonitor();
 
         private final Handler mCallbackHandler;
-
-        private final Object mVouchedSignaturesLocked = new Object();
 
         private PackageInstallerService mPackageInstallerService;
 
@@ -173,9 +146,6 @@ public class LauncherAppsService extends SystemService {
             mShortcutServiceInternal.addListener(mPackageMonitor);
             mCallbackHandler = BackgroundThread.getHandler();
             mDpm = (DevicePolicyManager) mContext.getSystemService(Context.DEVICE_POLICY_SERVICE);
-            mVouchedSignaturesByUser = new ConcurrentHashMap<>();
-            mVouchProviders = Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
-            mVouchesChangedMonitor.register(mContext, UserHandle.ALL, true, mCallbackHandler);
         }
 
         @VisibleForTesting
@@ -468,31 +438,8 @@ public class LauncherAppsService extends SystemService {
             if (appInfo == null || appInfo.isSystemApp() || appInfo.isUpdatedSystemApp()) {
                 return false;
             }
-            if (!mVouchedSignaturesByUser.containsKey(user)) {
-                initVouchedSignatures(user);
-            }
             if (isManagedProfileAdmin(user, appInfo.packageName)) {
                 return false;
-            }
-            if (mVouchProviders.contains(appInfo.packageName)) {
-                // If it's a vouching packages then we must show hidden app
-                return true;
-            }
-            // If app's signature is in vouch list, do not show hidden app
-            final Set<String> vouches = mVouchedSignaturesByUser.get(user);
-            try {
-                final PackageInfo pkgInfo = mContext.getPackageManager().getPackageInfo(
-                        appInfo.packageName, PackageManager.GET_SIGNING_CERTIFICATES);
-                final Signature[] signatures = getLatestSignatures(pkgInfo.signingInfo);
-                // If any of the signatures appears in vouches, then we don't show hidden app
-                for (Signature signature : signatures) {
-                    final String certDigest = computePackageCertDigest(signature);
-                    if (vouches.contains(certDigest)) {
-                        return false;
-                    }
-                }
-            } catch (PackageManager.NameNotFoundException e) {
-                // Should not happen
             }
             return true;
         }
@@ -513,100 +460,6 @@ public class LauncherAppsService extends SystemService {
                 }
             }
             return false;
-        }
-
-        @VisibleForTesting
-        static String computePackageCertDigest(Signature signature) {
-            MessageDigest messageDigest;
-            try {
-                messageDigest = MessageDigest.getInstance("SHA1");
-            } catch (NoSuchAlgorithmException e) {
-                // Should not happen
-                return null;
-            }
-            messageDigest.update(signature.toByteArray());
-            final byte[] digest = messageDigest.digest();
-            return ByteStringUtils.toHexString(digest);
-        }
-
-        @VisibleForTesting
-        static Signature[] getLatestSignatures(SigningInfo signingInfo) {
-            if (signingInfo.hasMultipleSigners()) {
-                return signingInfo.getApkContentsSigners();
-            } else {
-                final Signature[] signatures = signingInfo.getSigningCertificateHistory();
-                return new Signature[]{signatures[0]};
-            }
-        }
-
-        private void updateVouches(String packageName, UserHandle user) {
-            final PackageManagerInternal pmInt =
-                    LocalServices.getService(PackageManagerInternal.class);
-            ApplicationInfo appInfo = pmInt.getApplicationInfo(packageName,
-                    PackageManager.GET_META_DATA, Binder.getCallingUid(), user.getIdentifier());
-            if (appInfo == null) {
-                Log.w(TAG, "appInfo " + packageName + " is null");
-                return;
-            }
-            updateVouches(appInfo, user);
-        }
-
-        private void updateVouches(ApplicationInfo appInfo, UserHandle user) {
-            if (appInfo == null || appInfo.metaData == null) {
-                // No meta-data
-                return;
-            }
-            int tokenResourceId = appInfo.metaData.getInt(LauncherApps.VOUCHED_CERTS_KEY);
-            if (tokenResourceId == 0) {
-                // No xml file
-                return;
-            }
-            mVouchProviders.add(appInfo.packageName);
-            Set<String> vouches = mVouchedSignaturesByUser.get(user);
-            try {
-                List<String> signatures = Arrays.asList(
-                        mContext.getPackageManager().getResourcesForApplication(
-                                appInfo.packageName).getStringArray(tokenResourceId));
-                for (String signature : signatures) {
-                    vouches.add(signature.toUpperCase());
-                }
-            } catch (PackageManager.NameNotFoundException e) {
-                // Should not happen
-            }
-        }
-
-        private void initVouchedSignatures(UserHandle user) {
-            synchronized (mVouchedSignaturesLocked) {
-                if (mVouchedSignaturesByUser.contains(user)) {
-                    return;
-                }
-                final long startTime = mStatLogger.getTime();
-
-                Set<String> vouches = Collections.newSetFromMap(
-                        new ConcurrentHashMap<String, Boolean>());
-
-                final int callingUid = injectBinderCallingUid();
-                long ident = Binder.clearCallingIdentity();
-                try {
-                    final PackageManagerInternal pmInt =
-                            LocalServices.getService(PackageManagerInternal.class);
-                    List<ApplicationInfo> installedPackages = pmInt.getInstalledApplications(
-                            PackageManager.GET_META_DATA, user.getIdentifier(), callingUid);
-                    for (ApplicationInfo appInfo : installedPackages) {
-                        updateVouches(appInfo, user);
-                    }
-                } finally {
-                    Binder.restoreCallingIdentity(ident);
-                }
-                mVouchedSignaturesByUser.putIfAbsent(user, vouches);
-                mStatLogger.logDurationStat(Stats.INIT_VOUCHED_SIGNATURES, startTime);
-            }
-        }
-
-        @Override
-        public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-            if (!DumpUtils.checkDumpAndUsageStatsPermission(mContext, TAG, pw)) return;
-            mStatLogger.dump(pw, "  ");
         }
 
         @Override
@@ -1020,18 +873,6 @@ public class LauncherAppsService extends SystemService {
         @VisibleForTesting
         void postToPackageMonitorHandler(Runnable r) {
             mCallbackHandler.post(r);
-        }
-
-        private class VouchesChangedMonitor extends PackageMonitor {
-            @Override
-            public void onPackageAdded(String packageName, int uid) {
-                updateVouches(packageName, new UserHandle(getChangingUserId()));
-            }
-
-            @Override
-            public void onPackageModified(String packageName) {
-                updateVouches(packageName, new UserHandle(getChangingUserId()));
-            }
         }
 
         private class MyPackageMonitor extends PackageMonitor implements ShortcutChangeListener {
