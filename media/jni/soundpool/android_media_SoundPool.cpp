@@ -242,7 +242,7 @@ android_media_SoundPool_release(JNIEnv *env, jobject thiz)
 // ----------------------------------------------------------------------------
 
 // Dalvik VM type signatures
-static JNINativeMethod gMethods[] = {
+static const JNINativeMethod gMethods[] = {
     {   "_load",
         "(Ljava/io/FileDescriptor;JJI)I",
         (void *)android_media_SoundPool_load_FD

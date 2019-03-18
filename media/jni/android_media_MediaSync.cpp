@@ -514,7 +514,7 @@ static void android_media_MediaSync_native_finalize(JNIEnv *env, jobject thiz) {
     android_media_MediaSync_release(env, thiz);
 }
 
-static JNINativeMethod gMethods[] = {
+static const JNINativeMethod gMethods[] = {
     { "native_setSurface",
       "(Landroid/view/Surface;)V",
       (void *)android_media_MediaSync_native_setSurface },

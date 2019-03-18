@@ -350,7 +350,7 @@ static void JHwBinder_report_sysprop_change(JNIEnv * /*env*/, jclass /*clazz*/)
     report_sysprop_change();
 }
 
-static JNINativeMethod gMethods[] = {
+static const JNINativeMethod gMethods[] = {
     { "native_init", "()J", (void *)JHwBinder_native_init },
     { "native_setup", "()V", (void *)JHwBinder_native_setup },
 

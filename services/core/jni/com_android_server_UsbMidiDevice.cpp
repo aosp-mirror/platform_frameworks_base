@@ -135,7 +135,7 @@ android_server_UsbMidiDevice_close(JNIEnv *env, jobject thiz, jobjectArray fds)
     }
 }
 
-static JNINativeMethod method_table[] = {
+static const JNINativeMethod method_table[] = {
     { "nativeGetSubdeviceCount", "(II)I", (void*)android_server_UsbMidiDevice_get_subdevice_count },
     { "nativeOpen", "(III)[Ljava/io/FileDescriptor;", (void*)android_server_UsbMidiDevice_open },
     { "nativeClose", "([Ljava/io/FileDescriptor;)V", (void*)android_server_UsbMidiDevice_close },

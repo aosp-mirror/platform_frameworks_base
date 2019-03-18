@@ -581,7 +581,7 @@ static jlong JHwBlob_native_handle(JNIEnv *env, jobject thiz) {
     return handle;
 }
 
-static JNINativeMethod gMethods[] = {
+static const JNINativeMethod gMethods[] = {
     { "native_init", "()J", (void *)JHwBlob_native_init },
     { "native_setup", "(I)V", (void *)JHwBlob_native_setup },
 

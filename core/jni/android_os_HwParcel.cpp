@@ -960,7 +960,7 @@ static void JHwParcel_native_writeBuffer(
     }
 }
 
-static JNINativeMethod gMethods[] = {
+static const JNINativeMethod gMethods[] = {
     { "native_init", "()J", (void *)JHwParcel_native_init },
     { "native_setup", "(Z)V", (void *)JHwParcel_native_setup },
 

@@ -455,7 +455,7 @@ static jint JHwRemoteBinder_hashCode(JNIEnv* env, jobject thiz) {
     return static_cast<jint>(longHash ^ (longHash >> 32)); // See Long.hashCode()
 }
 
-static JNINativeMethod gMethods[] = {
+static const JNINativeMethod gMethods[] = {
     { "native_init", "()J", (void *)JHwRemoteBinder_native_init },
 
     { "native_setup_empty", "()V",
