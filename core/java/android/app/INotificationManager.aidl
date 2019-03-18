@@ -193,7 +193,7 @@ interface INotificationManager
 
     void setNotificationDelegate(String callingPkg, String delegate);
     String getNotificationDelegate(String callingPkg);
-    boolean canNotifyAsPackage(String callingPkg, String targetPkg);
+    boolean canNotifyAsPackage(String callingPkg, String targetPkg, int userId);
 
     void setPrivateNotificationsAllowed(boolean allow);
     boolean getPrivateNotificationsAllowed();

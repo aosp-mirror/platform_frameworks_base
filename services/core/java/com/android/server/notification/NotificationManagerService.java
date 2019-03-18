@@ -2504,15 +2504,20 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
-        public boolean canNotifyAsPackage(String callingPkg, String targetPkg) {
+        public boolean canNotifyAsPackage(String callingPkg, String targetPkg, int userId) {
             checkCallerIsSameApp(callingPkg);
             final int callingUid = Binder.getCallingUid();
             UserHandle user = UserHandle.getUserHandleForUid(callingUid);
+            if (user.getIdentifier() != userId) {
+                getContext().enforceCallingPermission(
+                        android.Manifest.permission.INTERACT_ACROSS_USERS,
+                        "canNotifyAsPackage for user " + userId);
+            }
             try {
                 ApplicationInfo info =
                         mPackageManager.getApplicationInfo(targetPkg,
                                 MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE,
-                                user.getIdentifier());
+                                userId);
                 if (info != null) {
                     return mPreferencesHelper.isDelegateAllowed(
                             targetPkg, info.uid, callingPkg, callingUid);

@@ -37,6 +37,7 @@ import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_SCREEN_ON
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_STATUS_BAR;
 import static android.content.pm.PackageManager.FEATURE_WATCH;
 import static android.content.pm.PackageManager.PERMISSION_DENIED;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.Build.VERSION_CODES.O_MR1;
 import static android.os.Build.VERSION_CODES.P;
 import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_NEGATIVE;
@@ -111,6 +112,7 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableContext;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
+import android.testing.TestablePermissions;
 import android.text.Html;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -4168,6 +4170,25 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         ArgumentCaptor<NotificationStats> captor = ArgumentCaptor.forClass(NotificationStats.class);
         verify(mListeners).notifyRemovedLocked(any(), anyInt(), captor.capture());
         assertNotNull(captor.getValue());
+    }
+
+    @Test
+    public void testCanNotifyAsUser_crossUser() throws Exception {
+        // same user no problem
+        mBinderService.canNotifyAsPackage("src", "target", mContext.getUserId());
+
+        // cross user, no permission, problem
+        try {
+            mBinderService.canNotifyAsPackage("src", "target", mContext.getUserId() + 1);
+            fail("Should not be callable cross user without cross user permission");
+        } catch (SecurityException e) {
+            // good
+        }
+
+        // cross user, with permission, no problem
+        TestablePermissions perms = mContext.getTestablePermissions();
+        perms.setPermission(android.Manifest.permission.INTERACT_ACROSS_USERS, PERMISSION_GRANTED);
+        mBinderService.canNotifyAsPackage("src", "target", mContext.getUserId() + 1);
     }
 
     @Test
