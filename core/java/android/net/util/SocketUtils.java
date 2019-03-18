@@ -45,7 +45,7 @@ import java.net.SocketException;
  */
 @SystemApi
 @TestApi
-public class SocketUtils {
+public final class SocketUtils {
     /**
      * Create a raw datagram socket that is bound to an interface.
      *
@@ -63,6 +63,7 @@ public class SocketUtils {
     /**
      * Make a socket address to communicate with netlink.
      */
+    @NonNull
     public static SocketAddress makeNetlinkSocketAddress(int portId, int groupsMask) {
         return new NetlinkSocketAddress(portId, groupsMask);
     }
@@ -70,13 +71,15 @@ public class SocketUtils {
     /**
      * Make socket address that packet sockets can bind to.
      */
-    public static SocketAddress makePacketSocketAddress(short protocol, int ifIndex) {
-        return new PacketSocketAddress(protocol, ifIndex);
+    @NonNull
+    public static SocketAddress makePacketSocketAddress(int protocol, int ifIndex) {
+        return new PacketSocketAddress((short) protocol, ifIndex);
     }
 
     /**
      * Make a socket address that packet socket can send packets to.
      */
+    @NonNull
     public static SocketAddress makePacketSocketAddress(int ifIndex, @NonNull byte[] hwAddr) {
         return new PacketSocketAddress(ifIndex, hwAddr);
     }
