@@ -15,7 +15,7 @@
  */
 package android.net.ip;
 
-import android.net.ProxyInfoParcelable;
+import android.net.ProxyInfo;
 import android.net.ProvisioningConfigurationParcelable;
 import android.net.TcpKeepalivePacketDataParcelable;
 
@@ -28,7 +28,7 @@ oneway interface IIpClient {
     void startProvisioning(in ProvisioningConfigurationParcelable req);
     void stop();
     void setTcpBufferSizes(in String tcpBufferSizes);
-    void setHttpProxy(in ProxyInfoParcelable proxyInfo);
+    void setHttpProxy(in ProxyInfo proxyInfo);
     void setMulticastFilter(boolean enabled);
     void addKeepalivePacketFilter(int slot, in TcpKeepalivePacketDataParcelable pkt);
     void removeKeepalivePacketFilter(int slot);
