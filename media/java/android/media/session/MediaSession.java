@@ -445,19 +445,19 @@ public final class MediaSession {
     public static final class Token implements Parcelable {
 
         private final int mUid;
-        private final ControllerLink mControllerLink;
+        private final ISessionController mBinder;
 
         /**
          * @hide
          */
-        public Token(ControllerLink controllerLink) {
+        public Token(ISessionController binder) {
             mUid = Process.myUid();
-            mControllerLink = controllerLink;
+            mBinder = binder;
         }
 
         Token(Parcel in) {
             mUid = in.readInt();
-            mControllerLink = in.readParcelable(null);
+            mBinder = ISessionController.Stub.asInterface(in.readStrongBinder());
         }
 
         @Override
@@ -468,15 +468,14 @@ public final class MediaSession {
         @Override
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeInt(mUid);
-            dest.writeParcelable(mControllerLink, flags);
+            dest.writeStrongBinder(mBinder.asBinder());
         }
 
         @Override
         public int hashCode() {
             final int prime = 31;
             int result = mUid;
-            result = prime * result + ((mControllerLink == null)
-                    ? 0 : mControllerLink.getBinder().hashCode());
+            result = prime * result + (mBinder == null ? 0 : mBinder.asBinder().hashCode());
             return result;
         }
 
@@ -492,7 +491,10 @@ public final class MediaSession {
             if (mUid != other.mUid) {
                 return false;
             }
-            return Objects.equals(mControllerLink, other.mControllerLink);
+            if (mBinder == null || other.mBinder == null) {
+                return mBinder == other.mBinder;
+            }
+            return Objects.equals(mBinder.asBinder(), other.mBinder.asBinder());
         }
 
         /**
@@ -504,11 +506,11 @@ public final class MediaSession {
         }
 
         /**
-         * Gets the controller link in this token.
+         * Gets the controller binder in this token.
          * @hide
          */
-        public ControllerLink getControllerLink() {
-            return mControllerLink;
+        public ISessionController getBinder() {
+            return mBinder;
         }
 
         public static final @android.annotation.NonNull Parcelable.Creator<Token> CREATOR =
