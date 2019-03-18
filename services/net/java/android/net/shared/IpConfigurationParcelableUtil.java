@@ -44,7 +44,7 @@ public final class IpConfigurationParcelableUtil {
             @Nullable StaticIpConfiguration config) {
         if (config == null) return null;
         final StaticIpConfigurationParcelable p = new StaticIpConfigurationParcelable();
-        p.ipAddress = LinkPropertiesParcelableUtil.toStableParcelable(config.getIpAddress());
+        p.ipAddress = config.getIpAddress();
         p.gateway = parcelAddress(config.getGateway());
         p.dnsServers = toParcelableArray(
                 config.getDnsServers(), IpConfigurationParcelableUtil::parcelAddress, String.class);
@@ -59,7 +59,7 @@ public final class IpConfigurationParcelableUtil {
             @Nullable StaticIpConfigurationParcelable p) {
         if (p == null) return null;
         final StaticIpConfiguration config = new StaticIpConfiguration();
-        config.setIpAddress(LinkPropertiesParcelableUtil.fromStableParcelable(p.ipAddress));
+        config.setIpAddress(p.ipAddress);
         config.setGateway(unparcelAddress(p.gateway));
         for (InetAddress addr : fromParcelableArray(
                 p.dnsServers, IpConfigurationParcelableUtil::unparcelAddress)) {
