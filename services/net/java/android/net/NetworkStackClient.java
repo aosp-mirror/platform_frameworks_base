@@ -120,8 +120,7 @@ public class NetworkStackClient {
      *
      * <p>The INetworkMonitor will be returned asynchronously through the provided callbacks.
      */
-    public void makeNetworkMonitor(
-            NetworkParcelable network, String name, INetworkMonitorCallbacks cb) {
+    public void makeNetworkMonitor(Network network, String name, INetworkMonitorCallbacks cb) {
         requestConnector(connector -> {
             try {
                 connector.makeNetworkMonitor(network, name, cb);

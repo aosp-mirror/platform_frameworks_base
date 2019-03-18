@@ -239,7 +239,7 @@ public class ProvisioningConfiguration {
         p.apfCapabilities = IpConfigurationParcelableUtil.toStableParcelable(mApfCapabilities);
         p.provisioningTimeoutMs = mProvisioningTimeoutMs;
         p.ipv6AddrGenMode = mIPv6AddrGenMode;
-        p.network = NetworkParcelableUtil.toStableParcelable(mNetwork);
+        p.network = mNetwork;
         p.displayName = mDisplayName;
         return p;
     }
@@ -263,7 +263,7 @@ public class ProvisioningConfiguration {
                 p.apfCapabilities);
         config.mProvisioningTimeoutMs = p.provisioningTimeoutMs;
         config.mIPv6AddrGenMode = p.ipv6AddrGenMode;
-        config.mNetwork = NetworkParcelableUtil.fromStableParcelable(p.network);
+        config.mNetwork = p.network;
         config.mDisplayName = p.displayName;
         return config;
     }
