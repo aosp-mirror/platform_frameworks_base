@@ -315,7 +315,7 @@ public interface BiometricFaceConstants {
     /**
      * The sensor is dirty. The user should be informed to clean the sensor.
      */
-    public static final int SENSOR_DIRTY = 21;
+    public static final int FACE_ACQUIRED_SENSOR_DIRTY = 21;
 
     /**
      * Hardware vendors may extend this list if there are conditions that do not fall under one of
