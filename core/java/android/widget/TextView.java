@@ -173,8 +173,8 @@ import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
 import android.view.inspector.InspectableProperty;
-import android.view.inspector.InspectableProperty.EnumMap;
-import android.view.inspector.InspectableProperty.FlagMap;
+import android.view.inspector.InspectableProperty.EnumEntry;
+import android.view.inspector.InspectableProperty.FlagEntry;
 import android.view.textclassifier.TextClassification;
 import android.view.textclassifier.TextClassificationContext;
 import android.view.textclassifier.TextClassificationManager;
@@ -1900,8 +1900,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @see #setAutoSizeTextTypeUniformWithPresetSizes(int[], int)
      */
     @InspectableProperty(enumMapping = {
-            @EnumMap(name = "none", value = AUTO_SIZE_TEXT_TYPE_NONE),
-            @EnumMap(name = "uniform", value = AUTO_SIZE_TEXT_TYPE_UNIFORM)
+            @EnumEntry(name = "none", value = AUTO_SIZE_TEXT_TYPE_NONE),
+            @EnumEntry(name = "uniform", value = AUTO_SIZE_TEXT_TYPE_UNIFORM)
     })
     @AutoSizeTextType
     public int getAutoSizeTextType() {
@@ -3527,10 +3527,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @attr ref android.R.styleable#TextView_autoLink
      */
     @InspectableProperty(name = "autoLink", flagMapping = {
-            @FlagMap(name = "web", target = Linkify.WEB_URLS),
-            @FlagMap(name = "email", target = Linkify.EMAIL_ADDRESSES),
-            @FlagMap(name = "phone", target = Linkify.PHONE_NUMBERS),
-            @FlagMap(name = "map", target = Linkify.MAP_ADDRESSES)
+            @FlagEntry(name = "web", target = Linkify.WEB_URLS),
+            @FlagEntry(name = "email", target = Linkify.EMAIL_ADDRESSES),
+            @FlagEntry(name = "phone", target = Linkify.PHONE_NUMBERS),
+            @FlagEntry(name = "map", target = Linkify.MAP_ADDRESSES)
     })
     public final int getAutoLinkMask() {
         return mAutoLinkMask;
@@ -4515,9 +4515,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @see #setBreakStrategy(int)
      */
     @InspectableProperty(enumMapping = {
-            @EnumMap(name = "simple", value = Layout.BREAK_STRATEGY_SIMPLE),
-            @EnumMap(name = "high_quality", value = Layout.BREAK_STRATEGY_HIGH_QUALITY),
-            @EnumMap(name = "balanced", value = Layout.BREAK_STRATEGY_BALANCED)
+            @EnumEntry(name = "simple", value = Layout.BREAK_STRATEGY_SIMPLE),
+            @EnumEntry(name = "high_quality", value = Layout.BREAK_STRATEGY_HIGH_QUALITY),
+            @EnumEntry(name = "balanced", value = Layout.BREAK_STRATEGY_BALANCED)
     })
     @Layout.BreakStrategy
     public int getBreakStrategy() {
@@ -4566,9 +4566,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @see #setHyphenationFrequency(int)
      */
     @InspectableProperty(enumMapping = {
-            @EnumMap(name = "none", value = Layout.HYPHENATION_FREQUENCY_NONE),
-            @EnumMap(name = "normal", value = Layout.HYPHENATION_FREQUENCY_NORMAL),
-            @EnumMap(name = "full", value = Layout.HYPHENATION_FREQUENCY_FULL)
+            @EnumEntry(name = "none", value = Layout.HYPHENATION_FREQUENCY_NONE),
+            @EnumEntry(name = "normal", value = Layout.HYPHENATION_FREQUENCY_NORMAL),
+            @EnumEntry(name = "full", value = Layout.HYPHENATION_FREQUENCY_FULL)
     })
     @Layout.HyphenationFrequency
     public int getHyphenationFrequency() {
@@ -4628,8 +4628,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @see #setJustificationMode(int)
      */
     @InspectableProperty(enumMapping = {
-            @EnumMap(name = "none", value = Layout.JUSTIFICATION_MODE_NONE),
-            @EnumMap(name = "inter_word", value = Layout.JUSTIFICATION_MODE_INTER_WORD)
+            @EnumEntry(name = "none", value = Layout.JUSTIFICATION_MODE_NONE),
+            @EnumEntry(name = "inter_word", value = Layout.JUSTIFICATION_MODE_INTER_WORD)
     })
     public @Layout.JustificationMode int getJustificationMode() {
         return mJustificationMode;
@@ -6667,142 +6667,142 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @see android.text.InputType
      */
     @InspectableProperty(flagMapping = {
-            @FlagMap(name = "none", mask = 0xffffffff, target = InputType.TYPE_NULL),
-            @FlagMap(
+            @FlagEntry(name = "none", mask = 0xffffffff, target = InputType.TYPE_NULL),
+            @FlagEntry(
                     name = "text",
                     mask = InputType.TYPE_MASK_CLASS | InputType.TYPE_MASK_VARIATION,
                     target = InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_NORMAL),
-            @FlagMap(
+            @FlagEntry(
                     name = "textUri",
                     mask = InputType.TYPE_MASK_CLASS | InputType.TYPE_MASK_VARIATION,
                     target = InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_URI),
-            @FlagMap(
+            @FlagEntry(
                     name = "textEmailAddress",
                     mask = InputType.TYPE_MASK_CLASS | InputType.TYPE_MASK_VARIATION,
                     target = InputType.TYPE_CLASS_TEXT
                             | InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS),
-            @FlagMap(
+            @FlagEntry(
                     name = "textEmailSubject",
                     mask = InputType.TYPE_MASK_CLASS | InputType.TYPE_MASK_VARIATION,
                     target = InputType.TYPE_CLASS_TEXT
                             | InputType.TYPE_TEXT_VARIATION_EMAIL_SUBJECT),
-            @FlagMap(
+            @FlagEntry(
                     name = "textShortMessage",
                     mask = InputType.TYPE_MASK_CLASS | InputType.TYPE_MASK_VARIATION,
                     target = InputType.TYPE_CLASS_TEXT
                             | InputType.TYPE_TEXT_VARIATION_SHORT_MESSAGE),
-            @FlagMap(
+            @FlagEntry(
                     name = "textLongMessage",
                     mask = InputType.TYPE_MASK_CLASS | InputType.TYPE_MASK_VARIATION,
                     target = InputType.TYPE_CLASS_TEXT
                             | InputType.TYPE_TEXT_VARIATION_LONG_MESSAGE),
-            @FlagMap(
+            @FlagEntry(
                     name = "textPersonName",
                     mask = InputType.TYPE_MASK_CLASS | InputType.TYPE_MASK_VARIATION,
                     target = InputType.TYPE_CLASS_TEXT
                             | InputType.TYPE_TEXT_VARIATION_PERSON_NAME),
-            @FlagMap(
+            @FlagEntry(
                     name = "textPostalAddress",
                     mask = InputType.TYPE_MASK_CLASS | InputType.TYPE_MASK_VARIATION,
                     target = InputType.TYPE_CLASS_TEXT
                             | InputType.TYPE_TEXT_VARIATION_POSTAL_ADDRESS),
-            @FlagMap(
+            @FlagEntry(
                     name = "textPassword",
                     mask = InputType.TYPE_MASK_CLASS | InputType.TYPE_MASK_VARIATION,
                     target = InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD),
-            @FlagMap(
+            @FlagEntry(
                     name = "textVisiblePassword",
                     mask = InputType.TYPE_MASK_CLASS | InputType.TYPE_MASK_VARIATION,
                     target = InputType.TYPE_CLASS_TEXT
                             | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD),
-            @FlagMap(
+            @FlagEntry(
                     name = "textWebEditText",
                     mask = InputType.TYPE_MASK_CLASS | InputType.TYPE_MASK_VARIATION,
                     target = InputType.TYPE_CLASS_TEXT
                             | InputType.TYPE_TEXT_VARIATION_WEB_EDIT_TEXT),
-            @FlagMap(
+            @FlagEntry(
                     name = "textFilter",
                     mask = InputType.TYPE_MASK_CLASS | InputType.TYPE_MASK_VARIATION,
                     target = InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_FILTER),
-            @FlagMap(
+            @FlagEntry(
                     name = "textPhonetic",
                     mask = InputType.TYPE_MASK_CLASS | InputType.TYPE_MASK_VARIATION,
                     target = InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PHONETIC),
-            @FlagMap(
+            @FlagEntry(
                     name = "textWebEmailAddress",
                     mask = InputType.TYPE_MASK_CLASS | InputType.TYPE_MASK_VARIATION,
                     target = InputType.TYPE_CLASS_TEXT
                             | InputType.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS),
-            @FlagMap(
+            @FlagEntry(
                     name = "textWebPassword",
                     mask = InputType.TYPE_MASK_CLASS | InputType.TYPE_MASK_VARIATION,
                     target = InputType.TYPE_CLASS_TEXT
                             | InputType.TYPE_TEXT_VARIATION_WEB_PASSWORD),
-            @FlagMap(
+            @FlagEntry(
                     name = "number",
                     mask = InputType.TYPE_MASK_CLASS | InputType.TYPE_MASK_VARIATION,
                     target = InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_VARIATION_NORMAL),
-            @FlagMap(
+            @FlagEntry(
                     name = "numberPassword",
                     mask = InputType.TYPE_MASK_CLASS | InputType.TYPE_MASK_VARIATION,
                     target = InputType.TYPE_CLASS_NUMBER
                             | InputType.TYPE_NUMBER_VARIATION_PASSWORD),
-            @FlagMap(
+            @FlagEntry(
                     name = "phone",
                     mask = InputType.TYPE_MASK_CLASS | InputType.TYPE_MASK_VARIATION,
                     target = InputType.TYPE_CLASS_PHONE),
-            @FlagMap(
+            @FlagEntry(
                     name = "datetime",
                     mask = InputType.TYPE_MASK_CLASS | InputType.TYPE_MASK_VARIATION,
                     target = InputType.TYPE_CLASS_DATETIME
                             | InputType.TYPE_DATETIME_VARIATION_NORMAL),
-            @FlagMap(
+            @FlagEntry(
                     name = "date",
                     mask = InputType.TYPE_MASK_CLASS | InputType.TYPE_MASK_VARIATION,
                     target = InputType.TYPE_CLASS_DATETIME
                             | InputType.TYPE_DATETIME_VARIATION_DATE),
-            @FlagMap(
+            @FlagEntry(
                     name = "time",
                     mask = InputType.TYPE_MASK_CLASS | InputType.TYPE_MASK_VARIATION,
                     target = InputType.TYPE_CLASS_DATETIME
                             | InputType.TYPE_DATETIME_VARIATION_TIME),
-            @FlagMap(
+            @FlagEntry(
                     name = "textCapCharacters",
                     mask = InputType.TYPE_MASK_CLASS | InputType.TYPE_MASK_FLAGS,
                     target = InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_CHARACTERS),
-            @FlagMap(
+            @FlagEntry(
                     name = "textCapWords",
                     mask = InputType.TYPE_MASK_CLASS | InputType.TYPE_MASK_FLAGS,
                     target = InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_WORDS),
-            @FlagMap(
+            @FlagEntry(
                     name = "textCapSentences",
                     mask = InputType.TYPE_MASK_CLASS | InputType.TYPE_MASK_FLAGS,
                     target = InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES),
-            @FlagMap(
+            @FlagEntry(
                     name = "textAutoCorrect",
                     mask = InputType.TYPE_MASK_CLASS | InputType.TYPE_MASK_FLAGS,
                     target = InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_AUTO_CORRECT),
-            @FlagMap(
+            @FlagEntry(
                     name = "textAutoComplete",
                     mask = InputType.TYPE_MASK_CLASS | InputType.TYPE_MASK_FLAGS,
                     target = InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_AUTO_COMPLETE),
-            @FlagMap(
+            @FlagEntry(
                     name = "textMultiLine",
                     mask = InputType.TYPE_MASK_CLASS | InputType.TYPE_MASK_FLAGS,
                     target = InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE),
-            @FlagMap(
+            @FlagEntry(
                     name = "textImeMultiLine",
                     mask = InputType.TYPE_MASK_CLASS | InputType.TYPE_MASK_FLAGS,
                     target = InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_IME_MULTI_LINE),
-            @FlagMap(
+            @FlagEntry(
                     name = "textNoSuggestions",
                     mask = InputType.TYPE_MASK_CLASS | InputType.TYPE_MASK_FLAGS,
                     target = InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS),
-            @FlagMap(
+            @FlagEntry(
                     name = "numberSigned",
                     mask = InputType.TYPE_MASK_CLASS | InputType.TYPE_MASK_FLAGS,
                     target = InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_SIGNED),
-            @FlagMap(
+            @FlagEntry(
                     name = "numberDecimal",
                     mask = InputType.TYPE_MASK_CLASS | InputType.TYPE_MASK_FLAGS,
                     target = InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL),
@@ -6832,49 +6832,51 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @see EditorInfo
      */
     @InspectableProperty(flagMapping = {
-            @FlagMap(name = "normal", mask = 0xffffffff, target = EditorInfo.IME_NULL),
-            @FlagMap(
+            @FlagEntry(name = "normal", mask = 0xffffffff, target = EditorInfo.IME_NULL),
+            @FlagEntry(
                     name = "actionUnspecified",
                     mask = EditorInfo.IME_MASK_ACTION,
                     target = EditorInfo.IME_ACTION_UNSPECIFIED),
-            @FlagMap(
+            @FlagEntry(
                     name = "actionNone",
                     mask = EditorInfo.IME_MASK_ACTION,
                     target = EditorInfo.IME_ACTION_NONE),
-            @FlagMap(
+            @FlagEntry(
                     name = "actionGo",
                     mask = EditorInfo.IME_MASK_ACTION,
                     target = EditorInfo.IME_ACTION_GO),
-            @FlagMap(
+            @FlagEntry(
                     name = "actionSearch",
                     mask = EditorInfo.IME_MASK_ACTION,
                     target = EditorInfo.IME_ACTION_SEARCH),
-            @FlagMap(
+            @FlagEntry(
                     name = "actionSend",
                     mask = EditorInfo.IME_MASK_ACTION,
                     target = EditorInfo.IME_ACTION_SEND),
-            @FlagMap(
+            @FlagEntry(
                     name = "actionNext",
                     mask = EditorInfo.IME_MASK_ACTION,
                     target = EditorInfo.IME_ACTION_NEXT),
-            @FlagMap(
+            @FlagEntry(
                     name = "actionDone",
                     mask = EditorInfo.IME_MASK_ACTION,
                     target = EditorInfo.IME_ACTION_DONE),
-            @FlagMap(
+            @FlagEntry(
                     name = "actionPrevious",
                     mask = EditorInfo.IME_MASK_ACTION,
                     target = EditorInfo.IME_ACTION_PREVIOUS),
-            @FlagMap(name = "flagForceAscii", target = EditorInfo.IME_FLAG_FORCE_ASCII),
-            @FlagMap(name = "flagNavigateNext", target = EditorInfo.IME_FLAG_NAVIGATE_NEXT),
-            @FlagMap(name = "flagNavigatePrevious", target = EditorInfo.IME_FLAG_NAVIGATE_PREVIOUS),
-            @FlagMap(
+            @FlagEntry(name = "flagForceAscii", target = EditorInfo.IME_FLAG_FORCE_ASCII),
+            @FlagEntry(name = "flagNavigateNext", target = EditorInfo.IME_FLAG_NAVIGATE_NEXT),
+            @FlagEntry(
+                    name = "flagNavigatePrevious",
+                    target = EditorInfo.IME_FLAG_NAVIGATE_PREVIOUS),
+            @FlagEntry(
                     name = "flagNoAccessoryAction",
                     target = EditorInfo.IME_FLAG_NO_ACCESSORY_ACTION),
-            @FlagMap(name = "flagNoEnterAction", target = EditorInfo.IME_FLAG_NO_ENTER_ACTION),
-            @FlagMap(name = "flagNoExtractUi", target = EditorInfo.IME_FLAG_NO_EXTRACT_UI),
-            @FlagMap(name = "flagNoFullscreen", target = EditorInfo.IME_FLAG_NO_FULLSCREEN),
-            @FlagMap(
+            @FlagEntry(name = "flagNoEnterAction", target = EditorInfo.IME_FLAG_NO_ENTER_ACTION),
+            @FlagEntry(name = "flagNoExtractUi", target = EditorInfo.IME_FLAG_NO_EXTRACT_UI),
+            @FlagEntry(name = "flagNoFullscreen", target = EditorInfo.IME_FLAG_NO_FULLSCREEN),
+            @FlagEntry(
                     name = "flagNoPersonalizedLearning",
                     target = EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING),
     })

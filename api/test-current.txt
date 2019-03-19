@@ -3172,19 +3172,19 @@ package android.view.inspector {
 
   @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) @java.lang.annotation.Target({java.lang.annotation.ElementType.METHOD, java.lang.annotation.ElementType.FIELD}) public @interface InspectableProperty {
     method public abstract int attributeId() default android.content.res.Resources.ID_NULL;
-    method public abstract android.view.inspector.InspectableProperty.EnumMap[] enumMapping() default {};
-    method public abstract android.view.inspector.InspectableProperty.FlagMap[] flagMapping() default {};
+    method public abstract android.view.inspector.InspectableProperty.EnumEntry[] enumMapping() default {};
+    method public abstract android.view.inspector.InspectableProperty.FlagEntry[] flagMapping() default {};
     method public abstract boolean hasAttributeId() default true;
     method public abstract String name() default "";
     method public abstract android.view.inspector.InspectableProperty.ValueType valueType() default android.view.inspector.InspectableProperty.ValueType.INFERRED;
   }
 
-  @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) @java.lang.annotation.Target({java.lang.annotation.ElementType.TYPE}) public static @interface InspectableProperty.EnumMap {
+  @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) @java.lang.annotation.Target({java.lang.annotation.ElementType.TYPE}) public static @interface InspectableProperty.EnumEntry {
     method public abstract String name();
     method public abstract int value();
   }
 
-  @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) @java.lang.annotation.Target({java.lang.annotation.ElementType.TYPE}) public static @interface InspectableProperty.FlagMap {
+  @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) @java.lang.annotation.Target({java.lang.annotation.ElementType.TYPE}) public static @interface InspectableProperty.FlagEntry {
     method public abstract int mask() default 0;
     method public abstract String name();
     method public abstract int target();
@@ -3213,7 +3213,7 @@ package android.widget {
   }
 
   public class DatePicker extends android.widget.FrameLayout {
-    method @android.view.inspector.InspectableProperty(name="datePickerMode", enumMapping={@android.view.inspector.InspectableProperty.EnumMap(value=android.widget.DatePicker.MODE_SPINNER, name="spinner"), @android.view.inspector.InspectableProperty.EnumMap(value=android.widget.DatePicker.MODE_CALENDAR, name="calendar")}) public int getMode();
+    method @android.view.inspector.InspectableProperty(name="datePickerMode", enumMapping={@android.view.inspector.InspectableProperty.EnumEntry(value=android.widget.DatePicker.MODE_SPINNER, name="spinner"), @android.view.inspector.InspectableProperty.EnumEntry(value=android.widget.DatePicker.MODE_CALENDAR, name="calendar")}) public int getMode();
     field public static final int MODE_CALENDAR = 2; // 0x2
     field public static final int MODE_SPINNER = 1; // 0x1
   }
@@ -3249,7 +3249,7 @@ package android.widget {
     method public android.view.View getAmView();
     method public android.view.View getHourView();
     method public android.view.View getMinuteView();
-    method @android.view.inspector.InspectableProperty(name="timePickerMode", enumMapping={@android.view.inspector.InspectableProperty.EnumMap(name="clock", value=android.widget.TimePicker.MODE_CLOCK), @android.view.inspector.InspectableProperty.EnumMap(name="spinner", value=android.widget.TimePicker.MODE_SPINNER)}) public int getMode();
+    method @android.view.inspector.InspectableProperty(name="timePickerMode", enumMapping={@android.view.inspector.InspectableProperty.EnumEntry(name="clock", value=android.widget.TimePicker.MODE_CLOCK), @android.view.inspector.InspectableProperty.EnumEntry(name="spinner", value=android.widget.TimePicker.MODE_SPINNER)}) public int getMode();
     method public android.view.View getPmView();
     field public static final int MODE_CLOCK = 2; // 0x2
     field public static final int MODE_SPINNER = 1; // 0x1
