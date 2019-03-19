@@ -271,6 +271,7 @@ import android.os.UserManager;
 import android.os.WorkSource;
 import android.os.storage.IStorageManager;
 import android.os.storage.StorageManager;
+import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.sysprop.VoldProperties;
 import android.text.TextUtils;
@@ -2141,7 +2142,8 @@ public class ActivityManagerService extends IActivityManager.Stub
      * Encapsulates global settings related to hidden API enforcement behaviour, including tracking
      * the latest value via a content observer.
      */
-    static class HiddenApiSettings extends ContentObserver {
+    static class HiddenApiSettings extends ContentObserver
+            implements DeviceConfig.OnPropertiesChangedListener {
 
         private final Context mContext;
         private boolean mBlacklistDisabled;
@@ -2150,6 +2152,45 @@ public class ActivityManagerService extends IActivityManager.Stub
         private int mLogSampleRate = -1;
         private int mStatslogSampleRate = -1;
         @HiddenApiEnforcementPolicy private int mPolicy = HIDDEN_API_ENFORCEMENT_DEFAULT;
+
+        /**
+         * Sampling rate for hidden API access event logs with libmetricslogger, as an integer in
+         * the range 0 to 0x10000 inclusive.
+         *
+         * @hide
+         */
+        public static final String HIDDEN_API_ACCESS_LOG_SAMPLING_RATE =
+                "hidden_api_access_log_sampling_rate";
+
+        /**
+         * Sampling rate for hidden API access event logging with statslog, as an integer in the
+         * range 0 to 0x10000 inclusive.
+         *
+         * @hide
+         */
+        public static final String HIDDEN_API_ACCESS_STATSLOG_SAMPLING_RATE =
+                "hidden_api_access_statslog_sampling_rate";
+
+        public void onPropertiesChanged(DeviceConfig.Properties properties) {
+            int logSampleRate = properties.getInt(HIDDEN_API_ACCESS_LOG_SAMPLING_RATE, 0x0);
+            if (logSampleRate < 0 || logSampleRate > 0x10000) {
+                logSampleRate = -1;
+            }
+            if (logSampleRate != -1 && logSampleRate != mLogSampleRate) {
+                mLogSampleRate = logSampleRate;
+                ZYGOTE_PROCESS.setHiddenApiAccessLogSampleRate(mLogSampleRate);
+            }
+
+            int statslogSampleRate =
+                    properties.getInt(HIDDEN_API_ACCESS_STATSLOG_SAMPLING_RATE, 0);
+            if (statslogSampleRate < 0 || statslogSampleRate > 0x10000) {
+                statslogSampleRate = -1;
+            }
+            if (statslogSampleRate != -1 && statslogSampleRate != mStatslogSampleRate) {
+                mStatslogSampleRate = statslogSampleRate;
+                ZYGOTE_PROCESS.setHiddenApiAccessStatslogSampleRate(mStatslogSampleRate);
+            }
+        }
 
         public HiddenApiSettings(Handler handler, Context context) {
             super(handler);
@@ -2162,18 +2203,11 @@ public class ActivityManagerService extends IActivityManager.Stub
                     false,
                     this);
             mContext.getContentResolver().registerContentObserver(
-                    Settings.Global.getUriFor(Settings.Global.HIDDEN_API_ACCESS_LOG_SAMPLING_RATE),
-                    false,
-                    this);
-            mContext.getContentResolver().registerContentObserver(
-                    Settings.Global.getUriFor(
-                        Settings.Global.HIDDEN_API_ACCESS_STATSLOG_SAMPLING_RATE),
-                    false,
-                    this);
-            mContext.getContentResolver().registerContentObserver(
                     Settings.Global.getUriFor(Settings.Global.HIDDEN_API_POLICY),
                     false,
                     this);
+            DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_APP_COMPAT,
+                    mContext.getMainExecutor(), this);
             update();
         }
 
@@ -2196,24 +2230,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                   // leave mExemptionsStr as is, so we don't try to send the same list again.
                   mExemptions = Collections.emptyList();
                 }
-            }
-            int logSampleRate = Settings.Global.getInt(mContext.getContentResolver(),
-                    Settings.Global.HIDDEN_API_ACCESS_LOG_SAMPLING_RATE, 0x200);
-            if (logSampleRate < 0 || logSampleRate > 0x10000) {
-                logSampleRate = -1;
-            }
-            if (logSampleRate != -1 && logSampleRate != mLogSampleRate) {
-                mLogSampleRate = logSampleRate;
-                ZYGOTE_PROCESS.setHiddenApiAccessLogSampleRate(mLogSampleRate);
-            }
-            int statslogSampleRate = Settings.Global.getInt(mContext.getContentResolver(),
-                    Settings.Global.HIDDEN_API_ACCESS_STATSLOG_SAMPLING_RATE, 0);
-            if (statslogSampleRate < 0 || statslogSampleRate > 0x10000) {
-                statslogSampleRate = -1;
-            }
-            if (statslogSampleRate != -1 && statslogSampleRate != mStatslogSampleRate) {
-                mStatslogSampleRate = statslogSampleRate;
-                ZYGOTE_PROCESS.setHiddenApiAccessStatslogSampleRate(mStatslogSampleRate);
             }
             mPolicy = getValidEnforcementPolicy(Settings.Global.HIDDEN_API_POLICY);
         }
