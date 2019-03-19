@@ -114,6 +114,7 @@ import com.android.server.LocalServices;
 import com.android.server.am.ActivityManagerService;
 import com.android.server.am.AppTimeTracker;
 import com.android.server.am.UserState;
+import com.android.server.policy.WindowManagerPolicy;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -345,6 +346,10 @@ class RootActivityContainer extends ConfigurationContainer
         }
     }
 
+    boolean startHomeOnDisplay(int userId, String reason, int displayId) {
+        return startHomeOnDisplay(userId, reason, displayId, false /*fromHomeKey*/);
+    }
+
     /**
      * This starts home activity on displays that can have system decorations based on displayId -
      * Default display always use primary home component.
@@ -356,7 +361,12 @@ class RootActivityContainer extends ConfigurationContainer
      *    If there are multiple activities matched, use first one.
      *  - Use the secondary home defined in the config.
      */
-    boolean startHomeOnDisplay(int userId, String reason, int displayId) {
+    boolean startHomeOnDisplay(int userId, String reason, int displayId, boolean fromHomeKey) {
+        // Fallback to top focused display if the displayId is invalid.
+        if (displayId == INVALID_DISPLAY) {
+            displayId = getTopDisplayFocusedStack().mDisplayId;
+        }
+
         Intent homeIntent;
         ActivityInfo aInfo;
         if (displayId == DEFAULT_DISPLAY) {
@@ -380,6 +390,10 @@ class RootActivityContainer extends ConfigurationContainer
         // Updates the home component of the intent.
         homeIntent.setComponent(new ComponentName(aInfo.applicationInfo.packageName, aInfo.name));
         homeIntent.setFlags(homeIntent.getFlags() | FLAG_ACTIVITY_NEW_TASK);
+        // Updates the extra information of the intent.
+        if (fromHomeKey) {
+            homeIntent.putExtra(WindowManagerPolicy.EXTRA_FROM_HOME_KEY, true);
+        }
         // Update the reason for ANR debugging to verify if the user activity is the one that
         // actually launched.
         final String myReason = reason + ":" + userId + ":" + UserHandle.getUserId(
