@@ -161,11 +161,6 @@ public class SubscriptionInfo implements Parcelable {
     private String mGroupUUID;
 
     /**
-     *  A property in opportunistic subscription to indicate whether it is metered or not.
-     */
-    private boolean mIsMetered;
-
-    /**
      * Whether group of the subscription is disabled.
      * This is only useful if it's a grouped opportunistic subscription. In this case, if all
      * primary (non-opportunistic) subscriptions in the group are deactivated (unplugged pSIM
@@ -197,7 +192,7 @@ public class SubscriptionInfo implements Parcelable {
             @Nullable UiccAccessRule[] accessRules, String cardString) {
         this(id, iccId, simSlotIndex, displayName, carrierName, nameSource, iconTint, number,
                 roaming, icon, mcc, mnc, countryIso, isEmbedded, accessRules, cardString,
-                false, null, true, TelephonyManager.UNKNOWN_CARRIER_ID,
+                false, null, TelephonyManager.UNKNOWN_CARRIER_ID,
                 SubscriptionManager.PROFILE_CLASS_DEFAULT);
     }
 
@@ -208,10 +203,10 @@ public class SubscriptionInfo implements Parcelable {
             CharSequence carrierName, int nameSource, int iconTint, String number, int roaming,
             Bitmap icon, String mcc, String mnc, String countryIso, boolean isEmbedded,
             @Nullable UiccAccessRule[] accessRules, String cardString, boolean isOpportunistic,
-            @Nullable String groupUUID, boolean isMetered, int carrierId, int profileClass) {
+            @Nullable String groupUUID, int carrierId, int profileClass) {
         this(id, iccId, simSlotIndex, displayName, carrierName, nameSource, iconTint, number,
                 roaming, icon, mcc, mnc, countryIso, isEmbedded, accessRules, cardString, -1,
-                isOpportunistic, groupUUID, isMetered, false, carrierId, profileClass,
+                isOpportunistic, groupUUID, false, carrierId, profileClass,
                 SubscriptionManager.SUBSCRIPTION_TYPE_LOCAL_SIM);
     }
 
@@ -222,7 +217,7 @@ public class SubscriptionInfo implements Parcelable {
             CharSequence carrierName, int nameSource, int iconTint, String number, int roaming,
             Bitmap icon, String mcc, String mnc, String countryIso, boolean isEmbedded,
             @Nullable UiccAccessRule[] accessRules, String cardString, int cardId,
-            boolean isOpportunistic, @Nullable String groupUUID, boolean isMetered,
+            boolean isOpportunistic, @Nullable String groupUUID,
             boolean isGroupDisabled, int carrierId, int profileClass, int subType) {
         this.mId = id;
         this.mIccId = iccId;
@@ -243,7 +238,6 @@ public class SubscriptionInfo implements Parcelable {
         this.mCardId = cardId;
         this.mIsOpportunistic = isOpportunistic;
         this.mGroupUUID = groupUUID;
-        this.mIsMetered = isMetered;
         this.mIsGroupDisabled = isGroupDisabled;
         this.mCarrierId = carrierId;
         this.mProfileClass = profileClass;
@@ -472,18 +466,6 @@ public class SubscriptionInfo implements Parcelable {
     }
 
     /**
-     * Used in opportunistic subscription ({@link #isOpportunistic()}) to indicate whether it's
-     * metered or not.This is one of the factors when deciding to switch to the subscription.
-     * (a non-metered subscription, for example, would likely be preferred over a metered one).
-     *
-     * @return whether subscription is metered.
-     * @hide
-     */
-    public boolean isMetered() {
-        return mIsMetered;
-    }
-
-    /**
      * @return the profile class of this subscription.
      * @hide
      */
@@ -624,7 +606,6 @@ public class SubscriptionInfo implements Parcelable {
             int cardId = source.readInt();
             boolean isOpportunistic = source.readBoolean();
             String groupUUID = source.readString();
-            boolean isMetered = source.readBoolean();
             boolean isGroupDisabled = source.readBoolean();
             int carrierid = source.readInt();
             int profileClass = source.readInt();
@@ -633,7 +614,7 @@ public class SubscriptionInfo implements Parcelable {
             return new SubscriptionInfo(id, iccId, simSlotIndex, displayName, carrierName,
                     nameSource, iconTint, number, dataRoaming, iconBitmap, mcc, mnc, countryIso,
                     isEmbedded, accessRules, cardString, cardId, isOpportunistic, groupUUID,
-                    isMetered, isGroupDisabled, carrierid, profileClass, subType);
+                    isGroupDisabled, carrierid, profileClass, subType);
         }
 
         @Override
@@ -663,7 +644,6 @@ public class SubscriptionInfo implements Parcelable {
         dest.writeInt(mCardId);
         dest.writeBoolean(mIsOpportunistic);
         dest.writeString(mGroupUUID);
-        dest.writeBoolean(mIsMetered);
         dest.writeBoolean(mIsGroupDisabled);
         dest.writeInt(mCarrierId);
         dest.writeInt(mProfileClass);
@@ -703,7 +683,7 @@ public class SubscriptionInfo implements Parcelable {
                 + " accessRules " + Arrays.toString(mAccessRules)
                 + " cardString=" + cardStringToPrint + " cardId=" + mCardId
                 + " isOpportunistic " + mIsOpportunistic + " mGroupUUID=" + mGroupUUID
-                + " isMetered=" + mIsMetered + " mIsGroupDisabled=" + mIsGroupDisabled
+                + " mIsGroupDisabled=" + mIsGroupDisabled
                 + " profileClass=" + mProfileClass
                 + " subscriptionType=" + mSubscriptionType + "}";
     }
@@ -711,7 +691,7 @@ public class SubscriptionInfo implements Parcelable {
     @Override
     public int hashCode() {
         return Objects.hash(mId, mSimSlotIndex, mNameSource, mIconTint, mDataRoaming, mIsEmbedded,
-                mIsOpportunistic, mGroupUUID, mIsMetered, mIccId, mNumber, mMcc, mMnc,
+                mIsOpportunistic, mGroupUUID, mIccId, mNumber, mMcc, mMnc,
                 mCountryIso, mCardString, mCardId, mDisplayName, mCarrierName, mAccessRules,
                 mIsGroupDisabled, mCarrierId, mProfileClass);
     }
@@ -737,7 +717,6 @@ public class SubscriptionInfo implements Parcelable {
                 && mIsOpportunistic == toCompare.mIsOpportunistic
                 && mIsGroupDisabled == toCompare.mIsGroupDisabled
                 && mCarrierId == toCompare.mCarrierId
-                && mIsMetered == toCompare.mIsMetered
                 && Objects.equals(mGroupUUID, toCompare.mGroupUUID)
                 && Objects.equals(mIccId, toCompare.mIccId)
                 && Objects.equals(mNumber, toCompare.mNumber)
