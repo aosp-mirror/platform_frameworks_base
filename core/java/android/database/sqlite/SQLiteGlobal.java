@@ -176,6 +176,6 @@ public final class SQLiteGlobal {
 
     /** @hide */
     public static boolean checkDbWipe() {
-        return true;
+        return false;
     }
 }
