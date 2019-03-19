@@ -61,7 +61,9 @@ public class DozeService extends DreamService
 
     @Override
     public void onDestroy() {
-        mPluginManager.removePluginListener(this);
+        if (mPluginManager != null) {
+            mPluginManager.removePluginListener(this);
+        }
         super.onDestroy();
         mDozeMachine = null;
     }
