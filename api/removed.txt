@@ -314,15 +314,9 @@ package android.media.tv {
 package android.net {
 
   public class ConnectivityManager {
-    method @Deprecated public void getLatestTetheringEntitlementValue(int, boolean, @NonNull android.net.ConnectivityManager.TetheringEntitlementValueListener, @Nullable android.os.Handler);
     method @Deprecated public boolean requestRouteToHost(int, int);
     method @Deprecated public int startUsingNetworkFeature(int, String);
     method @Deprecated public int stopUsingNetworkFeature(int, String);
-  }
-
-  @Deprecated public abstract static class ConnectivityManager.TetheringEntitlementValueListener {
-    ctor public ConnectivityManager.TetheringEntitlementValueListener();
-    method public void onEntitlementResult(int);
   }
 
   @Deprecated public class NetworkBadging {
