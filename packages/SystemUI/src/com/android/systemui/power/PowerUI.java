@@ -23,11 +23,9 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.os.BatteryManager;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.IThermalEventListener;
 import android.os.IThermalService;
 import android.os.PowerManager;
@@ -94,6 +92,9 @@ public class PowerUI extends SystemUI {
     @VisibleForTesting int mBatteryLevel = 100;
     @VisibleForTesting int mBatteryStatus = BatteryManager.BATTERY_STATUS_UNKNOWN;
 
+    private IThermalEventListener mSkinThermalEventListener;
+    private IThermalEventListener mUsbThermalEventListener;
+
     public void start() {
         mPowerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
         mScreenOffTime = mPowerManager.isScreenOn() ? -1 : SystemClock.elapsedRealtime();
@@ -118,7 +119,29 @@ public class PowerUI extends SystemUI {
         // to the temperature being too high.
         showThermalShutdownDialog();
 
-        initTemperature();
+        // Register an observer to configure mEnableSkinTemperatureWarning and perform the
+        // registration of skin thermal event listener upon Settings change.
+        resolver.registerContentObserver(
+                Settings.Global.getUriFor(Settings.Global.SHOW_TEMPERATURE_WARNING),
+                false /*notifyForDescendants*/,
+                new ContentObserver(mHandler) {
+                    @Override
+                    public void onChange(boolean selfChange) {
+                        doSkinThermalEventListenerRegistration();
+                    }
+                });
+        // Register an observer to configure mEnableUsbTemperatureAlarm and perform the
+        // registration of usb thermal event listener upon Settings change.
+        resolver.registerContentObserver(
+                Settings.Global.getUriFor(Settings.Global.SHOW_USB_TEMPERATURE_ALARM),
+                false /*notifyForDescendants*/,
+                new ContentObserver(mHandler) {
+                    @Override
+                    public void onChange(boolean selfChange) {
+                        doUsbThermalEventListenerRegistration();
+                    }
+                });
+        initThermalEventListeners();
     }
 
     @Override
@@ -127,7 +150,7 @@ public class PowerUI extends SystemUI {
 
         // Safe to modify mLastConfiguration here as it's only updated by the main thread (here).
         if ((mLastConfiguration.updateFrom(newConfig) & mask) != 0) {
-            mHandler.post(this::initTemperature);
+            mHandler.post(this::initThermalEventListeners);
         }
     }
 
@@ -441,45 +464,78 @@ public class PowerUI extends SystemUI {
                         && currentSnapshot.getBucket() > 0);
     }
 
-    private void initTemperature() {
-        ContentResolver resolver = mContext.getContentResolver();
-        Resources resources = mContext.getResources();
+    private void initThermalEventListeners() {
+        doSkinThermalEventListenerRegistration();
+        doUsbThermalEventListenerRegistration();
+    }
 
-        mEnableSkinTemperatureWarning = Settings.Global.getInt(resolver,
-                Settings.Global.SHOW_TEMPERATURE_WARNING,
-                resources.getInteger(R.integer.config_showTemperatureWarning)) != 0;
-        mEnableUsbTemperatureAlarm = Settings.Global.getInt(resolver,
-                Settings.Global.SHOW_USB_TEMPERATURE_ALARM,
-                resources.getInteger(R.integer.config_showUsbPortAlarm)) != 0;
+    @VisibleForTesting
+    synchronized void doSkinThermalEventListenerRegistration() {
+        final boolean oldEnableSkinTemperatureWarning = mEnableSkinTemperatureWarning;
+        boolean ret = false;
 
-        if (mThermalService == null) {
-            // Enable push notifications of throttling from vendor thermal
-            // management subsystem via thermalservice, in addition to our
-            // usual polling, to react to temperature jumps more quickly.
-            IBinder b = ServiceManager.getService(Context.THERMAL_SERVICE);
+        mEnableSkinTemperatureWarning = Settings.Global.getInt(mContext.getContentResolver(),
+            Settings.Global.SHOW_TEMPERATURE_WARNING,
+            mContext.getResources().getInteger(R.integer.config_showTemperatureWarning)) != 0;
 
-            if (b != null) {
-                mThermalService = IThermalService.Stub.asInterface(b);
-                registerThermalEventListener();
-            } else {
-                Slog.w(TAG, "cannot find thermalservice, no throttling push notifications");
+        if (mEnableSkinTemperatureWarning != oldEnableSkinTemperatureWarning) {
+            try {
+                if (mSkinThermalEventListener == null) {
+                    mSkinThermalEventListener = new SkinThermalEventListener();
+                }
+                if (mThermalService == null) {
+                    mThermalService = IThermalService.Stub.asInterface(
+                        ServiceManager.getService(Context.THERMAL_SERVICE));
+                }
+                if (mEnableSkinTemperatureWarning) {
+                    ret = mThermalService.registerThermalEventListenerWithType(
+                            mSkinThermalEventListener, Temperature.TYPE_SKIN);
+                } else {
+                    ret = mThermalService.unregisterThermalEventListener(mSkinThermalEventListener);
+                }
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Exception while (un)registering skin thermal event listener.", e);
+            }
+
+            if (!ret) {
+                mEnableSkinTemperatureWarning = !mEnableSkinTemperatureWarning;
+                Slog.e(TAG, "Failed to register or unregister skin thermal event listener.");
             }
         }
     }
 
     @VisibleForTesting
-    void registerThermalEventListener() {
-        try {
-            if (mEnableSkinTemperatureWarning) {
-                mThermalService.registerThermalEventListenerWithType(
-                        new ThermalEventSkinListener(), Temperature.TYPE_SKIN);
+    synchronized void doUsbThermalEventListenerRegistration() {
+        final boolean oldEnableUsbTemperatureAlarm = mEnableUsbTemperatureAlarm;
+        boolean ret = false;
+
+        mEnableUsbTemperatureAlarm = Settings.Global.getInt(mContext.getContentResolver(),
+            Settings.Global.SHOW_USB_TEMPERATURE_ALARM,
+            mContext.getResources().getInteger(R.integer.config_showUsbPortAlarm)) != 0;
+
+        if (mEnableUsbTemperatureAlarm != oldEnableUsbTemperatureAlarm) {
+            try {
+                if (mUsbThermalEventListener == null) {
+                    mUsbThermalEventListener = new UsbThermalEventListener();
+                }
+                if (mThermalService == null) {
+                    mThermalService = IThermalService.Stub.asInterface(
+                        ServiceManager.getService(Context.THERMAL_SERVICE));
+                }
+                if (mEnableUsbTemperatureAlarm) {
+                    ret = mThermalService.registerThermalEventListenerWithType(
+                            mUsbThermalEventListener, Temperature.TYPE_USB_PORT);
+                } else {
+                    ret = mThermalService.unregisterThermalEventListener(mUsbThermalEventListener);
+                }
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Exception while (un)registering usb thermal event listener.", e);
             }
-            if (mEnableUsbTemperatureAlarm) {
-                mThermalService.registerThermalEventListenerWithType(
-                        new ThermalEventUsbListener(), Temperature.TYPE_USB_PORT);
+
+            if (!ret) {
+                mEnableUsbTemperatureAlarm = !mEnableUsbTemperatureAlarm;
+                Slog.e(TAG, "Failed to register or unregister usb thermal event listener.");
             }
-        } catch (RemoteException e) {
-            Slog.e(TAG, "Failed to register thermal callback.", e);
         }
     }
 
@@ -555,7 +611,7 @@ public class PowerUI extends SystemUI {
         void showHighTemperatureWarning();
 
         /**
-         * Display USB overheat alarm
+         * Display USB port overheat alarm
          */
         void showUsbHighTemperatureAlarm();
 
@@ -572,9 +628,9 @@ public class PowerUI extends SystemUI {
         void updateSnapshot(BatteryStateSnapshot snapshot);
     }
 
-    // Thermal event received from thermal service manager subsystem
+    // Skin thermal event received from thermal service manager subsystem
     @VisibleForTesting
-    final class ThermalEventSkinListener extends IThermalEventListener.Stub {
+    final class SkinThermalEventListener extends IThermalEventListener.Stub {
         @Override public void notifyThrottling(Temperature temp) {
             int status = temp.getStatus();
 
@@ -582,7 +638,7 @@ public class PowerUI extends SystemUI {
                 StatusBar statusBar = getComponent(StatusBar.class);
                 if (statusBar != null && !statusBar.isDeviceInVrMode()) {
                     mWarnings.showHighTemperatureWarning();
-                    Slog.d(TAG, "ThermalEventSkinListener: notifyThrottling was called "
+                    Slog.d(TAG, "SkinThermalEventListener: notifyThrottling was called "
                             + ", current skin status = " + status
                             + ", temperature = " + temp.getValue());
                 }
@@ -592,15 +648,15 @@ public class PowerUI extends SystemUI {
         }
     }
 
-    // Thermal event received from thermal service manager subsystem
+    // Usb thermal event received from thermal service manager subsystem
     @VisibleForTesting
-    final class ThermalEventUsbListener extends IThermalEventListener.Stub {
+    final class UsbThermalEventListener extends IThermalEventListener.Stub {
         @Override public void notifyThrottling(Temperature temp) {
             int status = temp.getStatus();
 
             if (status >= Temperature.THROTTLING_EMERGENCY) {
                 mWarnings.showUsbHighTemperatureAlarm();
-                Slog.d(TAG, "ThermalEventUsbListener: notifyThrottling was called "
+                Slog.d(TAG, "UsbThermalEventListener: notifyThrottling was called "
                         + ", current usb port status = " + status
                         + ", temperature = " + temp.getValue());
             }
