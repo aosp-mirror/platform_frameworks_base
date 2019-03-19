@@ -448,8 +448,9 @@ public final class WebViewFactory {
 
             Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW, "WebViewFactory.getChromiumProviderClass()");
             try {
-                initialApplication.getAssets().addAssetPathAsSharedLibrary(
-                        webViewContext.getApplicationInfo().sourceDir);
+                for (String newAssetPath : webViewContext.getApplicationInfo().getAllApkPaths()) {
+                    initialApplication.getAssets().addAssetPathAsSharedLibrary(newAssetPath);
+                }
                 ClassLoader clazzLoader = webViewContext.getClassLoader();
 
                 Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW, "WebViewFactory.loadNativeLibrary()");
