@@ -29,6 +29,7 @@
 #include "utils/FatVector.h"
 #include "utils/TimeUtils.h"
 #include "utils/TraceUtils.h"
+#include "../HardwareBitmapUploader.h"
 
 #ifdef HWUI_GLES_WRAP_ENABLED
 #include "debug/GlesDriver.h"
@@ -415,6 +416,7 @@ void RenderThread::preload() {
     if (Properties::getRenderPipelineType() == RenderPipelineType::SkiaVulkan) {
         requireVkContext();
     }
+    HardwareBitmapUploader::initialize();
 }
 
 } /* namespace renderthread */
