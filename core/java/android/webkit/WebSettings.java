@@ -245,10 +245,11 @@ public abstract class WebSettings {
     /**
      * Used with {@link #setForceDark}
      *
-     * Enable force dark, dependent on the state of the WebView parent. If the WebView parent view
-     * is being automatically rendered in dark mode, then WebView content will be rendered so as to
-     * emulate a dark theme. WebViews that are not attached to the view hierarchy will not be
-     * inverted.
+     * Enable force dark dependent on the state of the WebView parent view. If the WebView parent
+     * view is being automatically force darkened
+     * (see: {@link android.view.View#setForceDarkAllowed}), then WebView content will be rendered
+     * so as to emulate a dark theme. WebViews that are not attached to the view hierarchy will not
+     * be inverted.
      */
     public static final int FORCE_DARK_AUTO = 1;
 
@@ -1466,6 +1467,8 @@ public abstract class WebSettings {
 
     /**
      * Set the force dark mode for this WebView.
+     *
+     * @param forceDark the force dark mode to set.
      */
     public void setForceDark(@ForceDark int forceDark) {
         // Stub implementation to satisfy Roboelectrc shadows that don't override this yet.
@@ -1473,6 +1476,8 @@ public abstract class WebSettings {
 
     /**
      * Get the force dark mode for this WebView.
+     *
+     * The default force dark mode is {@link #FORCE_DARK_AUTO}
      *
      * @return the currently set force dark mode.
      */
