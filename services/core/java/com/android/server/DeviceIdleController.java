@@ -115,7 +115,8 @@ import java.util.stream.Collectors;
  *
  * Test: atest com.android.server.DeviceIdleControllerTest
  *
- * Current idling state machine (as of Android 9 Pie). This can be visualized using Graphviz:
+ * Current idling state machine (as of Android Q). This can be visualized using Graphviz:
+   <pre>
 
    digraph {
      subgraph deep {
@@ -259,6 +260,7 @@ import java.util.stream.Collectors;
        ]
      }
    }
+   </pre>
  */
 public class DeviceIdleController extends SystemService
         implements AnyMotionDetector.DeviceIdleCallback {
