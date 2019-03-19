@@ -36,6 +36,7 @@ import android.os.Handler;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.Process;
+import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.service.media.MediaBrowserService;
 import android.text.TextUtils;
@@ -163,11 +164,11 @@ public final class MediaSession {
                 .getSystemService(Context.MEDIA_SESSION_SERVICE);
         try {
             SessionCallbackLink cbLink = new SessionCallbackLink(context);
-            SessionLink sessionLink = manager.createSession(cbLink, tag, sessionInfo);
-            mImpl = new MediaSessionEngine(context, sessionLink, cbLink);
+            ISession binder = manager.createSession(cbLink, tag, sessionInfo);
+            mImpl = new MediaSessionEngine(context, binder, cbLink);
             mMaxBitmapSize = context.getResources().getDimensionPixelSize(
                     com.android.internal.R.dimen.config_mediaMetadataBitmapMaxSize);
-        } catch (RuntimeException e) {
+        } catch (RemoteException e) {
             throw new RuntimeException("Remote error creating session.", e);
         }
     }
