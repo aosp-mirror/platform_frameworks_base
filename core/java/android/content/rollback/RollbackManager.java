@@ -24,6 +24,7 @@ import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.content.Context;
 import android.content.IntentSender;
+import android.content.pm.PackageInstaller;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.VersionedPackage;
 import android.os.RemoteException;
@@ -47,6 +48,24 @@ import java.util.List;
 public final class RollbackManager {
     private final String mCallerPackageName;
     private final IRollbackManager mBinder;
+
+    /**
+     * Lifetime duration of rollback packages in millis. A rollback will be available for
+     * at most that duration of time after a package is installed with
+     * {@link PackageInstaller.SessionParams#setEnableRollback()}.
+     *
+     * <p>If flag value is negative, the default value will be assigned.
+     *
+     * @see RollbackManager
+     *
+     * Flag type: {@code long}
+     * Namespace: NAMESPACE_ROLLBACK_BOOT
+     *
+     * @hide
+     */
+    @TestApi
+    public static final String PROPERTY_ROLLBACK_LIFETIME_MILLIS =
+            "rollback_lifetime_in_millis";
 
     /** {@hide} */
     public RollbackManager(Context context, IRollbackManager binder) {

@@ -5871,6 +5871,8 @@ package android.provider {
     field public static final String NAMESPACE_INTELLIGENCE_ATTENTION = "intelligence_attention";
     field public static final String NAMESPACE_MEDIA_NATIVE = "media_native";
     field public static final String NAMESPACE_NETD_NATIVE = "netd_native";
+    field public static final String NAMESPACE_ROLLBACK = "rollback";
+    field public static final String NAMESPACE_ROLLBACK_BOOT = "rollback_boot";
     field public static final String NAMESPACE_RUNTIME = "runtime";
     field public static final String NAMESPACE_RUNTIME_NATIVE = "runtime_native";
     field public static final String NAMESPACE_RUNTIME_NATIVE_BOOT = "runtime_native_boot";
@@ -5900,13 +5902,6 @@ package android.provider {
     method public long getLong(@NonNull String, long);
     method @NonNull public String getNamespace();
     method @Nullable public String getString(@NonNull String, @Nullable String);
-  }
-
-  public static interface DeviceConfig.Rollback {
-    field public static final String BOOT_NAMESPACE = "rollback_boot";
-    field public static final String ENABLE_ROLLBACK_TIMEOUT = "enable_rollback_timeout";
-    field public static final String NAMESPACE = "rollback";
-    field public static final String ROLLBACK_LIFETIME_IN_MILLIS = "rollback_lifetime_in_millis";
   }
 
   public static interface DeviceConfig.Scheduler {

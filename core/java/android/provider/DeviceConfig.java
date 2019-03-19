@@ -172,6 +172,22 @@ public final class DeviceConfig {
     public static final String NAMESPACE_NETD_NATIVE = "netd_native";
 
     /**
+     * Namespace for Rollback flags that are applied immediately.
+     *
+     * @hide
+     */
+    @SystemApi @TestApi
+    public static final String NAMESPACE_ROLLBACK = "rollback";
+
+    /**
+     * Namespace for Rollback flags that are applied after a reboot.
+     *
+     * @hide
+     */
+    @SystemApi @TestApi
+    public static final String NAMESPACE_ROLLBACK_BOOT = "rollback_boot";
+
+    /**
      * Namespace for all runtime related features that don't require a reboot to become active.
      * There are no feature flags using NAMESPACE_RUNTIME.
      *
@@ -267,50 +283,6 @@ public final class DeviceConfig {
          * Vibration time in milliseconds before ramping ringer starts.
          */
         String RAMPING_RINGER_VIBRATION_DURATION = "ramping_ringer_vibration_duration";
-    }
-
-    /**
-     * Namespace for Rollback.
-     *
-     * @hide
-     */
-    @SystemApi @TestApi
-    public interface Rollback {
-
-        /**
-         * Namespace for flags that can be changed immediately after becoming available on device.
-         */
-        String NAMESPACE = "rollback";
-
-        /**
-         * Namespace for flags that can be changed only after reboot.
-         */
-        String BOOT_NAMESPACE = "rollback_boot";
-
-        /**
-         * Timeout duration in milliseconds for enabling package rollback. If we fail to enable
-         * rollback within that period, the install will proceed without rollback enabled.
-         *
-         * <p>If flag value is negative, the default value will be assigned.
-         *
-         * Flag type: {@code long}
-         * Namespace: Rollback.NAMESPACE
-         */
-        String ENABLE_ROLLBACK_TIMEOUT = "enable_rollback_timeout";
-
-        /**
-         * Lifetime duration of rollback packages in millis. A rollback will be available for
-         * at most that duration of time after a package is installed with
-         * {@link PackageInstaller.SessionParams#setEnableRollback()}.
-         *
-         * <p>If flag value is negative, the default value will be assigned.
-         *
-         * @see RollbackManager
-         *
-         * Flag type: {@code long}
-         * Namespace: Rollback.BOOT_NAMESPACE
-         */
-        String ROLLBACK_LIFETIME_IN_MILLIS = "rollback_lifetime_in_millis";
     }
 
     /**
