@@ -457,7 +457,8 @@ public class VpnTest {
 
         final NetworkCapabilities caps = new NetworkCapabilities();
 
-        Vpn.updateCapabilities(mConnectivityManager, new Network[] { }, caps);
+        Vpn.applyUnderlyingCapabilities(
+                mConnectivityManager, new Network[] {}, caps);
         assertTrue(caps.hasTransport(TRANSPORT_VPN));
         assertFalse(caps.hasTransport(TRANSPORT_CELLULAR));
         assertFalse(caps.hasTransport(TRANSPORT_WIFI));
@@ -467,7 +468,8 @@ public class VpnTest {
         assertTrue(caps.hasCapability(NET_CAPABILITY_NOT_ROAMING));
         assertTrue(caps.hasCapability(NET_CAPABILITY_NOT_CONGESTED));
 
-        Vpn.updateCapabilities(mConnectivityManager, new Network[] { mobile }, caps);
+        Vpn.applyUnderlyingCapabilities(
+                mConnectivityManager, new Network[] {mobile}, caps);
         assertTrue(caps.hasTransport(TRANSPORT_VPN));
         assertTrue(caps.hasTransport(TRANSPORT_CELLULAR));
         assertFalse(caps.hasTransport(TRANSPORT_WIFI));
@@ -477,7 +479,8 @@ public class VpnTest {
         assertFalse(caps.hasCapability(NET_CAPABILITY_NOT_ROAMING));
         assertTrue(caps.hasCapability(NET_CAPABILITY_NOT_CONGESTED));
 
-        Vpn.updateCapabilities(mConnectivityManager, new Network[] { wifi }, caps);
+        Vpn.applyUnderlyingCapabilities(
+                mConnectivityManager, new Network[] {wifi}, caps);
         assertTrue(caps.hasTransport(TRANSPORT_VPN));
         assertFalse(caps.hasTransport(TRANSPORT_CELLULAR));
         assertTrue(caps.hasTransport(TRANSPORT_WIFI));
@@ -487,7 +490,8 @@ public class VpnTest {
         assertTrue(caps.hasCapability(NET_CAPABILITY_NOT_ROAMING));
         assertTrue(caps.hasCapability(NET_CAPABILITY_NOT_CONGESTED));
 
-        Vpn.updateCapabilities(mConnectivityManager, new Network[] { mobile, wifi }, caps);
+        Vpn.applyUnderlyingCapabilities(
+                mConnectivityManager, new Network[] {mobile, wifi}, caps);
         assertTrue(caps.hasTransport(TRANSPORT_VPN));
         assertTrue(caps.hasTransport(TRANSPORT_CELLULAR));
         assertTrue(caps.hasTransport(TRANSPORT_WIFI));
