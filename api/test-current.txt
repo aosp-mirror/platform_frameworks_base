@@ -1507,16 +1507,16 @@ package android.net.metrics {
 
 package android.net.util {
 
-  public class SocketUtils {
+  public final class SocketUtils {
     method public static void addArpEntry(@NonNull java.net.Inet4Address, @NonNull android.net.MacAddress, @NonNull String, @NonNull java.io.FileDescriptor) throws java.io.IOException;
     method public static void attachControlPacketFilter(@NonNull java.io.FileDescriptor, int) throws java.net.SocketException;
     method public static void attachDhcpFilter(@NonNull java.io.FileDescriptor) throws java.net.SocketException;
     method public static void attachRaFilter(@NonNull java.io.FileDescriptor, int) throws java.net.SocketException;
     method public static void bindSocketToInterface(@NonNull java.io.FileDescriptor, @NonNull String) throws android.system.ErrnoException;
     method public static void closeSocket(@Nullable java.io.FileDescriptor) throws java.io.IOException;
-    method public static java.net.SocketAddress makeNetlinkSocketAddress(int, int);
-    method public static java.net.SocketAddress makePacketSocketAddress(short, int);
-    method public static java.net.SocketAddress makePacketSocketAddress(int, @NonNull byte[]);
+    method @NonNull public static java.net.SocketAddress makeNetlinkSocketAddress(int, int);
+    method @NonNull public static java.net.SocketAddress makePacketSocketAddress(int, int);
+    method @NonNull public static java.net.SocketAddress makePacketSocketAddress(int, @NonNull byte[]);
     method public static void setSocketTimeValueOption(@NonNull java.io.FileDescriptor, int, int, long) throws android.system.ErrnoException;
   }
 
