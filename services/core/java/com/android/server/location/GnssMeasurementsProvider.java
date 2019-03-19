@@ -11,13 +11,12 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
 package com.android.server.location;
 
 import android.content.Context;
-import android.location.GnssMeasurementCorrections;
 import android.location.GnssMeasurementsEvent;
 import android.location.IGnssMeasurementsListener;
 import android.os.Handler;
@@ -42,7 +41,6 @@ public abstract class GnssMeasurementsProvider
 
     private boolean mIsCollectionStarted;
     private boolean mEnableFullTracking;
-    private int mGnssEngineCapabilities;
 
     protected GnssMeasurementsProvider(Context context, Handler handler) {
         this(context, handler, new GnssMeasurementProviderNative());
@@ -87,21 +85,6 @@ public abstract class GnssMeasurementsProvider
         }
     }
 
-    /**
-     * Injects GNSS measurement corrections into the GNSS chipset.
-     *
-     * @param measurementCorrections a {@link GnssMeasurementCorrections} object with the GNSS
-     *     measurement corrections to be injected into the GNSS chipset.
-     */
-    public void injectGnssMeasurementCorrections(
-            GnssMeasurementCorrections measurementCorrections) {
-        mHandler.post(() -> {
-            if (!mNative.injectGnssMeasurementCorrections(measurementCorrections)) {
-                Log.e(TAG, "Failure in injecting GNSS corrections.");
-            }
-        });
-    }
-
     @Override
     protected void unregisterFromService() {
         boolean stopped = mNative.stopMeasurementCollection();
@@ -121,18 +104,18 @@ public abstract class GnssMeasurementsProvider
         });
     }
 
-    /** Updates the framework about the capabilities of the GNSS chipset */
-    public void onCapabilitiesUpdated(int capabilities) {
-        mGnssEngineCapabilities = capabilities;
-        boolean isGnssMeasurementsSupported =
-                (capabilities & GnssLocationProvider.GPS_CAPABILITY_MEASUREMENTS) != 0;
+    /** Handle GNSS capabilities update from the GNSS HAL implementation. */
+    public void onCapabilitiesUpdated(int capabilities, boolean hasSubHalCapabilityFlags) {
+        // The IGnssCallback.hal@2.0 removed sub-HAL capability flags from the Capabilities enum
+        // and instead uses the sub-HAL non-null handle returned from IGnss.hal@2.0 to indicate
+        // support. Therefore, the 'hasSubHalCapabilityFlags' parameter is needed to tell if the
+        // 'capabilities' parameter includes the sub-HAL capability flags or not. Old HALs
+        // which explicitly set the sub-HAL capability bits must continue to work.
+        final boolean isGnssMeasurementsSupported = hasSubHalCapabilityFlags
+                ? (capabilities & GnssLocationProvider.GPS_CAPABILITY_MEASUREMENTS) != 0
+                : mNative.isMeasurementSupported();
         setSupported(isGnssMeasurementsSupported);
         updateResult();
-    }
-
-    /** Obtains the GNSS engine capabilities. */
-    public int getGnssCapabilities() {
-        return mGnssEngineCapabilities;
     }
 
     public void onGpsEnabledChanged() {
@@ -195,11 +178,6 @@ public abstract class GnssMeasurementsProvider
         public boolean stopMeasurementCollection() {
             return native_stop_measurement_collection();
         }
-
-        public boolean injectGnssMeasurementCorrections(
-                GnssMeasurementCorrections measurementCorrections) {
-            return native_inject_gnss_measurement_corrections(measurementCorrections);
-        }
     }
 
     private static native boolean native_is_measurement_supported();
@@ -207,7 +185,4 @@ public abstract class GnssMeasurementsProvider
     private static native boolean native_start_measurement_collection(boolean enableFullTracking);
 
     private static native boolean native_stop_measurement_collection();
-
-    private static native boolean native_inject_gnss_measurement_corrections(
-            GnssMeasurementCorrections measurementCorrections);
 }

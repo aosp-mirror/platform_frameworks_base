@@ -109,6 +109,7 @@ cc_defaults {
         "android.hardware.gnss@1.0",
         "android.hardware.gnss@1.1",
         "android.hardware.gnss@2.0",
+        "android.hardware.gnss.measurement_corrections@1.0",
         "android.hardware.gnss.visibility_control@1.0",
         "android.hardware.input.classifier@1.0",
         "android.hardware.ir@1.0",
