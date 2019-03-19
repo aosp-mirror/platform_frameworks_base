@@ -389,14 +389,14 @@ class UserController implements Handler.Callback {
      * Step from {@link UserState#STATE_RUNNING_LOCKED} to
      * {@link UserState#STATE_RUNNING_UNLOCKING}.
      */
-    private void finishUserUnlocking(final UserState uss) {
+    private boolean finishUserUnlocking(final UserState uss) {
         final int userId = uss.mHandle.getIdentifier();
         // Only keep marching forward if user is actually unlocked
-        if (!StorageManager.isUserKeyUnlocked(userId)) return;
+        if (!StorageManager.isUserKeyUnlocked(userId)) return false;
         synchronized (mLock) {
             // Do not proceed if unexpected state or a stale user
             if (mStartedUsers.get(userId) != uss || uss.state != STATE_RUNNING_LOCKED) {
-                return;
+                return false;
             }
         }
         uss.mUnlockProgress.start();
@@ -427,6 +427,7 @@ class UserController implements Handler.Callback {
             mHandler.obtainMessage(SYSTEM_USER_UNLOCK_MSG, userId, 0, uss)
                     .sendToTarget();
         });
+        return true;
     }
 
     /**
@@ -1209,7 +1210,10 @@ class UserController implements Handler.Callback {
             return false;
         }
 
-        finishUserUnlocking(uss);
+        if (!finishUserUnlocking(uss)) {
+            notifyFinished(userId, listener);
+            return false;
+        }
 
         // We just unlocked a user, so let's now attempt to unlock any
         // managed profiles under that user.
