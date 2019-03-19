@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.server.net.ipmemorystore;
+package com.android.server.connectivity.ipmemorystore;
 
-import static com.android.server.net.ipmemorystore.RelevanceUtils.CAPPED_RELEVANCE;
+import static com.android.server.connectivity.ipmemorystore.RelevanceUtils.CAPPED_RELEVANCE;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;

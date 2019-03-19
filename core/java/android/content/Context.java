@@ -3523,14 +3523,6 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a
-     * {@link android.net.IpMemoryStore} to store and read information about
-     * known networks.
-     * @hide
-     */
-    public static final String IP_MEMORY_STORE_SERVICE = "ipmemorystore";
-
-    /**
-     * Use with {@link #getSystemService(String)} to retrieve a
      * {@link android.net.IpSecManager} for encrypting Sockets or Networks with
      * IPSec.
      *

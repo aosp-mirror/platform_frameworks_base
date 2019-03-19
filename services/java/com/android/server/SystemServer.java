@@ -98,7 +98,6 @@ import com.android.server.media.MediaUpdateService;
 import com.android.server.media.projection.MediaProjectionManagerService;
 import com.android.server.net.NetworkPolicyManagerService;
 import com.android.server.net.NetworkStatsService;
-import com.android.server.net.ipmemorystore.IpMemoryStoreService;
 import com.android.server.net.watchlist.NetworkWatchlistService;
 import com.android.server.notification.NotificationManagerService;
 import com.android.server.oemlock.OemLockService;
@@ -1135,14 +1134,6 @@ public final class SystemServer {
             }
             traceEnd();
 
-            traceBeginAndSlog("StartIpMemoryStoreService");
-            try {
-                ServiceManager.addService(Context.IP_MEMORY_STORE_SERVICE,
-                        new IpMemoryStoreService(context));
-            } catch (Throwable e) {
-                reportWtf("starting IP Memory Store Service", e);
-            }
-            traceEnd();
 
             traceBeginAndSlog("StartIpSecService");
             try {
