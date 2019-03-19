@@ -1499,12 +1499,12 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         private final Context mContext;
         private final MyAdapter mAdapter;
         private MultiListLayout mGlobalActionsLayout;
-        private final Drawable mBackgroundDrawable;
+        private Drawable mBackgroundDrawable;
         private final ColorExtractor mColorExtractor;
         private final GlobalActionsPanelPlugin.PanelViewController mPanelController;
         private boolean mKeyguardShowing;
         private boolean mShowing;
-        private final float mScrimAlpha;
+        private float mScrimAlpha;
 
         ActionsDialog(Context context, MyAdapter adapter,
                 GlobalActionsPanelPlugin.PanelViewController plugin) {
@@ -1531,49 +1531,37 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                     | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
                     | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED);
             window.setType(WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY);
-
-            initializeLayout();
-
             setTitle(R.string.global_actions);
 
             mPanelController = plugin;
-            View panelView = initializePanel();
-            if (panelView == null) {
-                mBackgroundDrawable = new GradientDrawable(context);
-                mScrimAlpha = ScrimController.GRADIENT_SCRIM_ALPHA;
-            } else {
-                mBackgroundDrawable = context.getDrawable(
-                        com.android.systemui.R.drawable.global_action_panel_scrim);
-                mScrimAlpha = 1f;
-                addContentView(
-                        panelView,
-                        new ViewGroup.LayoutParams(
-                                ViewGroup.LayoutParams.MATCH_PARENT,
-                                ViewGroup.LayoutParams.MATCH_PARENT));
-            }
-            window.setBackgroundDrawable(mBackgroundDrawable);
+            initializeLayout();
         }
 
-        private View initializePanel() {
-            if (isPanelEnabled(mContext) && mPanelController != null) {
-                View panelView = mPanelController.getPanelContent();
-                if (panelView != null) {
-                    FrameLayout panelContainer = new FrameLayout(mContext);
-                    FrameLayout.LayoutParams panelParams =
-                            new FrameLayout.LayoutParams(
-                                    FrameLayout.LayoutParams.MATCH_PARENT,
-                                    FrameLayout.LayoutParams.WRAP_CONTENT);
-                    panelContainer.addView(panelView, panelParams);
-                    return panelContainer;
-                }
+        private boolean initializePanel() {
+            if (!isPanelEnabled(mContext) || mPanelController == null) {
+                return false;
             }
-            return null;
+            View panelView = mPanelController.getPanelContent();
+            if (panelView == null) {
+                return false;
+            }
+            FrameLayout panelContainer = new FrameLayout(mContext);
+            FrameLayout.LayoutParams panelParams =
+                    new FrameLayout.LayoutParams(
+                            FrameLayout.LayoutParams.MATCH_PARENT,
+                            FrameLayout.LayoutParams.WRAP_CONTENT);
+            panelContainer.addView(panelView, panelParams);
+            addContentView(
+                    panelContainer,
+                    new ViewGroup.LayoutParams(
+                            ViewGroup.LayoutParams.MATCH_PARENT,
+                            ViewGroup.LayoutParams.MATCH_PARENT));
+            return true;
         }
 
         private void initializeLayout() {
             setContentView(getGlobalActionsLayoutId(mContext));
-            mGlobalActionsLayout = (MultiListLayout)
-                    findViewById(com.android.systemui.R.id.global_actions_view);
+            mGlobalActionsLayout = findViewById(com.android.systemui.R.id.global_actions_view);
             mGlobalActionsLayout.setOutsideTouchListener(view -> dismiss());
             mGlobalActionsLayout.setListViewAccessibilityDelegate(new View.AccessibilityDelegate() {
                 @Override
@@ -1586,8 +1574,18 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             });
             mGlobalActionsLayout.setRotationListener(this::onRotate);
             mGlobalActionsLayout.setAdapter(mAdapter);
-            mGlobalActionsLayout.setSnapToEdge(isPanelEnabled(mContext)
-                    && mPanelController != null);
+
+            boolean panelEnabled = initializePanel();
+            if (!panelEnabled) {
+                mBackgroundDrawable = new GradientDrawable(mContext);
+                mScrimAlpha = ScrimController.GRADIENT_SCRIM_ALPHA;
+            } else {
+                mBackgroundDrawable = mContext.getDrawable(
+                        com.android.systemui.R.drawable.global_action_panel_scrim);
+                mScrimAlpha = 1f;
+            }
+            mGlobalActionsLayout.setSnapToEdge(panelEnabled);
+            getWindow().setBackgroundDrawable(mBackgroundDrawable);
         }
 
         private int getGlobalActionsLayoutId(Context context) {
@@ -1743,7 +1741,8 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
      */
     private static boolean isPanelEnabled(Context context) {
         return FeatureFlagUtils.isEnabled(
-                context, FeatureFlagUtils.GLOBAL_ACTIONS_PANEL_ENABLED);    }
+                context, FeatureFlagUtils.GLOBAL_ACTIONS_PANEL_ENABLED);
+    }
 
     /**
      * Determines whether the Global Actions menu should use a separated view for emergency actions.
