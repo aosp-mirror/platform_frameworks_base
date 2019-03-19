@@ -178,6 +178,9 @@
     <!-- Permission needed to run network tests in CTS -->
     <uses-permission android:name="android.permission.MANAGE_TEST_NETWORKS" />
 
+    <!-- Permission needed to run keyguard manager tests in CTS -->
+    <uses-permission android:name="android.permission.CONTROL_KEYGUARD_SECURE_NOTIFICATIONS" />
+
     <application android:label="@string/app_label"
                  android:defaultToDeviceProtectedStorage="true"
                  android:directBootAware="true">
