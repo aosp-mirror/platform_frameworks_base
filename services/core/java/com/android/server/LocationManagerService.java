@@ -311,9 +311,13 @@ public class LocationManagerService extends ILocationManager.Stub {
                 AppOpsManager.WATCH_FOREGROUND_CHANGES,
                 new AppOpsManager.OnOpChangedInternalListener() {
                     public void onOpChanged(int op, String packageName) {
-                        synchronized (mLock) {
-                            onAppOpChangedLocked();
-                        }
+                        // onOpChanged invoked on ui thread, move to our thread to reduce risk of
+                        // blocking ui thread
+                        mHandler.post(() -> {
+                            synchronized (mLock) {
+                                onAppOpChangedLocked();
+                            }
+                        });
                     }
                 });
         mPackageManager.addOnPermissionsChangeListener(
