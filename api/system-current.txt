@@ -1486,9 +1486,9 @@ package android.content.om {
 
   public class OverlayManager {
     method @Nullable public android.content.om.OverlayInfo getOverlayInfo(@NonNull String, @NonNull android.os.UserHandle);
-    method public java.util.List<android.content.om.OverlayInfo> getOverlayInfosForTarget(@Nullable String, int);
-    method public boolean setEnabled(@Nullable String, boolean, int);
-    method public boolean setEnabledExclusiveInCategory(@Nullable String, int);
+    method @NonNull @RequiresPermission(anyOf={"android.permission.INTERACT_ACROSS_USERS", "android.permission.INTERACT_ACROSS_USERS_FULL"}) public java.util.List<android.content.om.OverlayInfo> getOverlayInfosForTarget(@NonNull String, @NonNull android.os.UserHandle);
+    method @RequiresPermission(anyOf={"android.permission.INTERACT_ACROSS_USERS", "android.permission.INTERACT_ACROSS_USERS_FULL"}) public void setEnabled(@NonNull String, boolean, @NonNull android.os.UserHandle);
+    method @RequiresPermission(anyOf={"android.permission.INTERACT_ACROSS_USERS", "android.permission.INTERACT_ACROSS_USERS_FULL"}) public void setEnabledExclusiveInCategory(@NonNull String, @NonNull android.os.UserHandle);
   }
 
 }
