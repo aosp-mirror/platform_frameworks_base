@@ -129,7 +129,7 @@ interface IWindowManager
     @UnsupportedAppUsage
     boolean isKeyguardLocked();
     @UnsupportedAppUsage
-    boolean isKeyguardSecure();
+    boolean isKeyguardSecure(int userId);
     void dismissKeyguard(IKeyguardDismissCallback callback, CharSequence message);
 
     // Requires INTERACT_ACROSS_USERS_FULL permission

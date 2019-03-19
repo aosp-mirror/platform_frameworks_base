@@ -762,7 +762,7 @@ public class LockTaskController {
             } else {
                 // If keyguard is not secure and it is locked, dismiss the keyguard before
                 // disabling it, which avoids the platform to think the keyguard is still on.
-                if (mWindowManager.isKeyguardLocked() && !mWindowManager.isKeyguardSecure()) {
+                if (mWindowManager.isKeyguardLocked() && !mWindowManager.isKeyguardSecure(userId)) {
                     mPendingDisableFromDismiss = userId;
                     mWindowManager.dismissKeyguard(new IKeyguardDismissCallback.Stub() {
                         @Override
