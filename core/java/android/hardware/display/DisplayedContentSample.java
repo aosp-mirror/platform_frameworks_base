@@ -30,12 +30,14 @@ public final class DisplayedContentSample {
      * Construct an object representing a color histogram of pixels that were displayed on screen.
      *
      * @param numFrames The number of frames represented by this sample.
-     * @param mSamplesComponent0 is a histogram counting how many times a pixel of a given value
-     * was displayed onscreen for FORMAT_COMPONENT_0. The buckets of the histogram are evenly
-     * weighted, the number of buckets is device specific.
-     * eg, for RGBA_8888, if sampleComponent0 is {10, 6, 4, 1} this means that 10 red pixels were
-     * displayed onscreen in range 0x00->0x3F, 6 red pixels were displayed onscreen in range
-     * 0x40->0x7F, etc.
+     * @param mSamplesComponent0 is a histogram counting how many times and for how long a pixel
+     * of a given value was displayed onscreen for FORMAT_COMPONENT_0. The buckets of the
+     * histogram are evenly weighted, the number of buckets is device specific.
+     * The units are in pixels * milliseconds, with 1 pixel millisecond being 1 pixel displayed
+     * onscreen for 1ms.
+     * eg, for RGBA_8888, if sampleComponent0 is {100, 50, 30, 20},  then red component was
+     * onscreen for 100 pixel milliseconds in range 0x00->0x3F, 30 pixel milliseconds in
+     * range 0x40->0x7F, etc.
      * @param mSamplesComponent1 is the same sample definition as sampleComponent0, but for the
      * second component of format.
      * @param mSamplesComponent2 is the same sample definition as sampleComponent0, but for the
