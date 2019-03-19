@@ -31,7 +31,7 @@ import java.util.Locale;
 import java.util.zip.GZIPInputStream;
 
 
-class InstallationAsyncTask extends AsyncTask<String, Long, Integer> {
+class InstallationAsyncTask extends AsyncTask<String, Long, Throwable> {
 
     private static final String TAG = "InstallationAsyncTask";
 
@@ -43,7 +43,6 @@ class InstallationAsyncTask extends AsyncTask<String, Long, Integer> {
         }
     }
 
-
     /** Not completed, including being cancelled */
     static final int NO_RESULT = 0;
     static final int RESULT_OK = 1;
@@ -53,7 +52,7 @@ class InstallationAsyncTask extends AsyncTask<String, Long, Integer> {
 
     interface InstallStatusListener {
         void onProgressUpdate(long installedSize);
-        void onResult(int resultCode);
+        void onResult(int resultCode, Throwable detail);
         void onCancelled();
     }
 
@@ -84,7 +83,7 @@ class InstallationAsyncTask extends AsyncTask<String, Long, Integer> {
     }
 
     @Override
-    protected Integer doInBackground(String... voids) {
+    protected Throwable doInBackground(String... voids) {
         Log.d(TAG, "Start doInBackground(), URL: " + mUrl);
 
         try {
@@ -108,7 +107,7 @@ class InstallationAsyncTask extends AsyncTask<String, Long, Integer> {
                 if (isCancelled()) {
                     boolean aborted = mDynSystem.abort();
                     Log.d(TAG, "Called DynamicSystemManager.abort(), result = " + aborted);
-                    return RESULT_OK;
+                    return null;
                 }
 
                 GsiProgress progress = mDynSystem.getInstallationProgress();
@@ -124,10 +123,8 @@ class InstallationAsyncTask extends AsyncTask<String, Long, Integer> {
 
 
             if (mInstallationSession == null) {
-                Log.e(TAG, "Failed to start installation with requested size: "
+                throw new IOException("Failed to start installation with requested size: "
                         + (mSystemSize + mUserdataSize));
-
-                return RESULT_ERROR_IO;
             }
 
             installedSize = mUserdataSize;
@@ -157,20 +154,11 @@ class InstallationAsyncTask extends AsyncTask<String, Long, Integer> {
                 }
             }
 
-            return RESULT_OK;
-
-        } catch (IOException e) {
-            e.printStackTrace();
-            return RESULT_ERROR_IO;
-
-        } catch (InvalidImageUrlException e) {
-            e.printStackTrace();
-            return RESULT_ERROR_INVALID_URL;
+            return null;
 
         } catch (Exception e) {
             e.printStackTrace();
-            return RESULT_ERROR_EXCEPTION;
-
+            return e;
         } finally {
             close();
         }
@@ -180,19 +168,24 @@ class InstallationAsyncTask extends AsyncTask<String, Long, Integer> {
     protected void onCancelled() {
         Log.d(TAG, "onCancelled(), URL: " + mUrl);
 
-        close();
-
         mListener.onCancelled();
     }
 
     @Override
-    protected void onPostExecute(Integer result) {
-        Log.d(TAG, "onPostExecute(), URL: " + mUrl + ", result: " + result);
+    protected void onPostExecute(Throwable detail) {
+        if (detail == null) {
+            mResult = RESULT_OK;
+        } else if (detail instanceof IOException) {
+            mResult = RESULT_ERROR_IO;
+        } else if (detail instanceof InvalidImageUrlException) {
+            mResult = RESULT_ERROR_INVALID_URL;
+        } else {
+            mResult = RESULT_ERROR_EXCEPTION;
+        }
 
-        close();
+        Log.d(TAG, "onPostExecute(), URL: " + mUrl + ", result: " + mResult);
 
-        mResult = result;
-        mListener.onResult(mResult);
+        mListener.onResult(mResult, detail);
     }
 
     @Override

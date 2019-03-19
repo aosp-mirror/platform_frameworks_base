@@ -5660,7 +5660,7 @@ package android.os.image {
   }
 
   public static interface DynamicSystemClient.OnStatusChangedListener {
-    method public void onStatusChanged(int, int, long);
+    method public void onStatusChanged(int, int, long, @Nullable Throwable);
   }
 
 }

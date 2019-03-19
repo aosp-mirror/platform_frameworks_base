@@ -19,6 +19,7 @@ import android.annotation.BytesLong;
 import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.content.ComponentName;
@@ -31,6 +32,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Messenger;
+import android.os.ParcelableException;
 import android.os.RemoteException;
 import android.util.Slog;
 
@@ -100,9 +102,10 @@ public class DynamicSystemClient {
          * @param status status code, also defined in {@code DynamicSystemClient}.
          * @param cause cause code, also defined in {@code DynamicSystemClient}.
          * @param progress number of bytes installed.
+         * @param detail additional detail about the error if available, otherwise null.
          */
         void onStatusChanged(@InstallationStatus int status, @StatusChangedCause int cause,
-                @BytesLong long progress);
+                @BytesLong long progress, @Nullable Throwable detail);
     }
 
     /*
@@ -177,6 +180,12 @@ public class DynamicSystemClient {
      */
     public static final String KEY_INSTALLED_SIZE = "KEY_INSTALLED_SIZE";
 
+    /**
+     * Message key, used when the service is sending exception detail to the client.
+     * @hide
+     */
+    public static final String KEY_EXCEPTION_DETAIL = "KEY_EXCEPTION_DETAIL";
+
     /*
      * Intent Actions
      */
@@ -248,7 +257,7 @@ public class DynamicSystemClient {
             } catch (RemoteException e) {
                 Slog.e(TAG, "Unable to get status from installation service");
                 mExecutor.execute(() -> {
-                    mListener.onStatusChanged(STATUS_UNKNOWN, CAUSE_ERROR_IPC, 0);
+                    mListener.onStatusChanged(STATUS_UNKNOWN, CAUSE_ERROR_IPC, 0, e);
                 });
             }
         }
@@ -396,14 +405,19 @@ public class DynamicSystemClient {
                 int status = msg.arg1;
                 int cause = msg.arg2;
                 // obj is non-null
-                long progress = ((Bundle) msg.obj).getLong(KEY_INSTALLED_SIZE);
+                Bundle bundle = (Bundle) msg.obj;
+                long progress = bundle.getLong(KEY_INSTALLED_SIZE);
+                ParcelableException t = (ParcelableException) bundle.getSerializable(
+                        KEY_EXCEPTION_DETAIL);
+
+                Throwable detail = t == null ? null : t.getCause();
 
                 if (mExecutor != null) {
                     mExecutor.execute(() -> {
-                        mListener.onStatusChanged(status, cause, progress);
+                        mListener.onStatusChanged(status, cause, progress, detail);
                     });
                 } else {
-                    mListener.onStatusChanged(status, cause, progress);
+                    mListener.onStatusChanged(status, cause, progress, detail);
                 }
                 break;
             default:
