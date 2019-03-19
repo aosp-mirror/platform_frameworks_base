@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package com.android.server.net.ipmemorystore;
+package com.android.server.connectivity.ipmemorystore;
 
 import static android.net.ipmemorystore.Status.ERROR_DATABASE_CANNOT_BE_OPENED;
 import static android.net.ipmemorystore.Status.ERROR_GENERIC;
 import static android.net.ipmemorystore.Status.ERROR_ILLEGAL_ARGUMENT;
 import static android.net.ipmemorystore.Status.SUCCESS;
 
-import static com.android.server.net.ipmemorystore.IpMemoryStoreDatabase.EXPIRY_ERROR;
+import static com.android.server.connectivity.ipmemorystore.IpMemoryStoreDatabase.EXPIRY_ERROR;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -40,7 +40,6 @@ import android.net.ipmemorystore.NetworkAttributesParcelable;
 import android.net.ipmemorystore.SameL3NetworkResponse;
 import android.net.ipmemorystore.Status;
 import android.net.ipmemorystore.StatusParcelable;
-import android.net.ipmemorystore.Utils;
 import android.os.RemoteException;
 import android.util.Log;
 
