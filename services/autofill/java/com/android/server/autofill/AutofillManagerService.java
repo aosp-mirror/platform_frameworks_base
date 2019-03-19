@@ -942,12 +942,14 @@ public final class AutofillManagerService
 
     final class AutoFillManagerServiceStub extends IAutoFillManager.Stub {
         @Override
-        public void addClient(IAutoFillManagerClient client, int userId,
-                @NonNull IResultReceiver receiver) {
+        public void addClient(IAutoFillManagerClient client, ComponentName componentName,
+                int userId, IResultReceiver receiver) {
             int flags = 0;
             synchronized (mLock) {
-                if (getServiceForUserLocked(userId).addClientLocked(client)) {
-                    flags |= AutofillManager.FLAG_ADD_CLIENT_ENABLED;
+                final int enabledFlags = getServiceForUserLocked(userId).addClientLocked(client,
+                        componentName);
+                if (enabledFlags != 0) {
+                    flags |= enabledFlags;
                 }
                 if (sDebug) {
                     flags |= AutofillManager.FLAG_ADD_CLIENT_DEBUG;

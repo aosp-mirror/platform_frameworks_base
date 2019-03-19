@@ -185,6 +185,12 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     @GuardedBy("mLock")
     private DeathRecipient mClientVulture;
 
+    /**
+     * Reference to the remote service.
+     *
+     * <p>Only {@code null} when the session is for augmented autofill only.
+     */
+    @Nullable
     private final RemoteFillService mRemoteFillService;
 
     @GuardedBy("mLock")
@@ -293,6 +299,11 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     private final IAssistDataReceiver mAssistReceiver = new IAssistDataReceiver.Stub() {
         @Override
         public void onHandleAssistData(Bundle resultData) throws RemoteException {
+            if (mRemoteFillService == null) {
+                wtf(null, "onHandleAssistData() called without a remote service. "
+                        + "mForAugmentedAutofillOnly: %s", mForAugmentedAutofillOnly);
+                return;
+            }
             final AssistStructure structure = resultData.getParcelable(ASSIST_KEY_STRUCTURE);
             if (structure == null) {
                 Slog.e(TAG, "No assist structure - app might have crashed providing it");
@@ -527,6 +538,11 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
      */
     @GuardedBy("mLock")
     private void cancelCurrentRequestLocked() {
+        if (mRemoteFillService == null) {
+            wtf(null, "cancelCurrentRequestLocked() called without a remote service. "
+                    + "mForAugmentedAutofillOnly: %s", mForAugmentedAutofillOnly);
+            return;
+        }
         final int canceledRequest = mRemoteFillService.cancelCurrentRequest();
 
         // Remove the FillContext as there will never be a response for the service
@@ -608,7 +624,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             @NonNull Context context, @NonNull Handler handler, int userId, @NonNull Object lock,
             int sessionId, int taskId, int uid, @NonNull IBinder activityToken,
             @NonNull IBinder client, boolean hasCallback, @NonNull LocalLog uiLatencyHistory,
-            @NonNull LocalLog wtfHistory, @NonNull ComponentName serviceComponentName,
+            @NonNull LocalLog wtfHistory, @Nullable ComponentName serviceComponentName,
             @NonNull ComponentName componentName, boolean compatMode,
             boolean bindInstantServiceAllowed, boolean forAugmentedAutofillOnly, int flags) {
         if (sessionId < 0) {
@@ -623,8 +639,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         mLock = lock;
         mUi = ui;
         mHandler = handler;
-        mRemoteFillService = new RemoteFillService(context, serviceComponentName, userId, this,
-                bindInstantServiceAllowed);
+        mRemoteFillService = serviceComponentName == null ? null
+                : new RemoteFillService(context, serviceComponentName, userId, this,
+                        bindInstantServiceAllowed);
         mActivityToken = activityToken;
         mHasCallback = hasCallback;
         mUiLatencyHistory = uiLatencyHistory;
@@ -2035,6 +2052,11 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     + id + " destroyed");
             return;
         }
+        if (mRemoteFillService == null) {
+            wtf(null, "callSaveLocked() called without a remote service. "
+                    + "mForAugmentedAutofillOnly: %s", mForAugmentedAutofillOnly);
+            return;
+        }
 
         if (sVerbose) Slog.v(TAG, "callSaveLocked(): mViewStates=" + mViewStates);
 
@@ -3045,7 +3067,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             pw.print(prefix); pw.print("mAugmentedAutofillableIds: ");
             pw.println(mAugmentedAutofillableIds);
         }
-        mRemoteFillService.dump(prefix, pw);
+        if (mRemoteFillService != null) {
+            mRemoteFillService.dump(prefix, pw);
+        }
     }
 
     private static void dumpRequestLog(@NonNull PrintWriter pw, @NonNull LogMaker log) {
