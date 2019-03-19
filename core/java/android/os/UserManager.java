@@ -1470,6 +1470,24 @@ public class UserManager {
     }
 
     /**
+     * Check if a user is a restricted profile. Restricted profiles may have a reduced number of
+     * available apps, app restrictions, and account restrictions.
+     *
+     * @param user the user to check
+     * @return whether the user is a restricted profile.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
+    public boolean isRestrictedProfile(@NonNull UserHandle user) {
+        try {
+            return mService.getUserInfo(user.getIdentifier()).isRestricted();
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Checks if specified user can have restricted profile.
      * @hide
      */
