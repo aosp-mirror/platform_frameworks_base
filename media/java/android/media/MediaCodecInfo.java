@@ -3404,14 +3404,29 @@ public final class MediaCodecInfo {
 
         public static final int VP8ProfileMain = 0x01;
 
+        /** VP9 Profile 0 4:2:0 8-bit */
         public static final int VP9Profile0 = 0x01;
+
+        /** VP9 Profile 1 4:2:2 8-bit */
         public static final int VP9Profile1 = 0x02;
+
+        /** VP9 Profile 2 4:2:0 10-bit */
         public static final int VP9Profile2 = 0x04;
+
+        /** VP9 Profile 3 4:2:2 10-bit */
         public static final int VP9Profile3 = 0x08;
+
         // HDR profiles also support passing HDR metadata
+        /** VP9 Profile 2 4:2:0 10-bit HDR */
         public static final int VP9Profile2HDR = 0x1000;
+
+        /** VP9 Profile 3 4:2:2 10-bit HDR */
         public static final int VP9Profile3HDR = 0x2000;
+
+        /** VP9 Profile 2 4:2:0 10-bit HDR10Plus */
         public static final int VP9Profile2HDR10Plus = 0x4000;
+
+        /** VP9 Profile 3 4:2:2 10-bit HDR10Plus */
         public static final int VP9Profile3HDR10Plus = 0x8000;
 
         public static final int VP9Level1  = 0x1;
@@ -3489,35 +3504,34 @@ public final class MediaCodecInfo {
         public static final int DolbyVisionLevelUhd48   = 0x80;
         public static final int DolbyVisionLevelUhd60   = 0x100;
 
-        // Profiles and levels for AV1 Codec, corresponding to the
-        // definitions in
+        // Profiles and levels for AV1 Codec, corresponding to the definitions in
         // "AV1 Bitstream & Decoding Process Specification", Annex A
-        // found at
-        // https://aomedia.org/av1-bitstream-and-decoding-process-specification/
+        // found at https://aomedia.org/av1-bitstream-and-decoding-process-specification/
 
         /**
-         * AV1 Main profile.
+         * AV1 Main profile 4:2:0 8-bit
+         *
          * See definition in
-         * <a href="https://aomedia.org/av1-bitstream-and-decoding-process-specification/"> AV1 Bitstream and Decoding Process Specification</a>
+         * <a href="https://aomedia.org/av1-bitstream-and-decoding-process-specification/">AV1 Specification</a>
          * Annex A.
          */
-        public static final int AV1Profile0     = 0x1;
+        public static final int AV1ProfileMain8   = 0x1;
 
         /**
-         * AV1 High profile.
+         * AV1 Main profile 4:2:0 10-bit
+         *
          * See definition in
-         * <a href="https://aomedia.org/av1-bitstream-and-decoding-process-specification/"> AV1 Bitstream and Decoding Process Specification</a>
+         * <a href="https://aomedia.org/av1-bitstream-and-decoding-process-specification/">AV1 Specification</a>
          * Annex A.
          */
-        public static final int AV1Profile1     = 0x2;
+        public static final int AV1ProfileMain10  = 0x2;
 
-        /**
-         * AV1 Professional profile.
-         * See definition in
-         * <a href="https://aomedia.org/av1-bitstream-and-decoding-process-specification/"> AV1 Bitstream and Decoding Process Specification</a>
-         * Annex A.
-         */
-        public static final int AV1Profile2     = 0x4;
+
+        /** AV1 Main profile 4:2:0 10-bit with HDR10. */
+        public static final int AV1ProfileMain10HDR10 = 0x1000;
+
+        /** AV1 Main profile 4:2:0 10-bit with HDR10Plus. */
+        public static final int AV1ProfileMain10HDR10Plus = 0x2000;
 
         public static final int AV1Level2       = 0x1;
         public static final int AV1Level21      = 0x2;
