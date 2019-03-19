@@ -15,6 +15,7 @@
  */
 package android.net;
 
+import android.net.IIpMemoryStoreCallbacks;
 import android.net.INetworkMonitorCallbacks;
 import android.net.Network;
 import android.net.dhcp.DhcpServingParamsParcel;
@@ -27,4 +28,5 @@ oneway interface INetworkStackConnector {
         in IDhcpServerCallbacks cb);
     void makeNetworkMonitor(in Network network, String name, in INetworkMonitorCallbacks cb);
     void makeIpClient(in String ifName, in IIpClientCallbacks callbacks);
+    void fetchIpMemoryStore(in IIpMemoryStoreCallbacks cb);
 }

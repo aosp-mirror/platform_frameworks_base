@@ -51,6 +51,7 @@ import androidx.test.runner.AndroidJUnit4;
 import com.android.internal.R;
 import com.android.server.NetworkObserver;
 import com.android.server.NetworkObserverRegistry;
+import com.android.server.NetworkStackService;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -90,6 +91,7 @@ public class IpClientTest {
     @Mock private AlarmManager mAlarm;
     @Mock private IpClient.Dependencies mDependencies;
     @Mock private ContentResolver mContentResolver;
+    @Mock private NetworkStackService.NetworkStackServiceManager mNetworkStackServiceManager;
 
     private NetworkObserver mObserver;
     private InterfaceParams mIfParams;
@@ -118,7 +120,8 @@ public class IpClientTest {
 
     private IpClient makeIpClient(String ifname) throws Exception {
         setTestInterfaceParams(ifname);
-        final IpClient ipc = new IpClient(mContext, ifname, mCb, mObserverRegistry, mDependencies);
+        final IpClient ipc = new IpClient(mContext, ifname, mCb, mObserverRegistry,
+                mNetworkStackServiceManager, mDependencies);
         verify(mNetd, timeout(TEST_TIMEOUT_MS).times(1)).interfaceSetEnableIPv6(ifname, false);
         verify(mNetd, timeout(TEST_TIMEOUT_MS).times(1)).interfaceClearAddrs(ifname);
         ArgumentCaptor<NetworkObserver> arg = ArgumentCaptor.forClass(NetworkObserver.class);
@@ -142,8 +145,8 @@ public class IpClientTest {
     public void testNullInterfaceNameMostDefinitelyThrows() throws Exception {
         setTestInterfaceParams(null);
         try {
-            final IpClient ipc = new IpClient(
-                    mContext, null, mCb, mObserverRegistry, mDependencies);
+            final IpClient ipc = new IpClient(mContext, null, mCb, mObserverRegistry,
+                    mNetworkStackServiceManager, mDependencies);
             ipc.shutdown();
             fail();
         } catch (NullPointerException npe) {
@@ -156,8 +159,8 @@ public class IpClientTest {
         final String ifname = "lo";
         setTestInterfaceParams(ifname);
         try {
-            final IpClient ipc = new IpClient(
-                    mContext, ifname, null, mObserverRegistry, mDependencies);
+            final IpClient ipc = new IpClient(mContext, ifname, null, mObserverRegistry,
+                    mNetworkStackServiceManager, mDependencies);
             ipc.shutdown();
             fail();
         } catch (NullPointerException npe) {
@@ -168,16 +171,16 @@ public class IpClientTest {
     @Test
     public void testInvalidInterfaceDoesNotThrow() throws Exception {
         setTestInterfaceParams(TEST_IFNAME);
-        final IpClient ipc = new IpClient(
-                mContext, TEST_IFNAME, mCb, mObserverRegistry, mDependencies);
+        final IpClient ipc = new IpClient(mContext, TEST_IFNAME, mCb, mObserverRegistry,
+                mNetworkStackServiceManager, mDependencies);
         ipc.shutdown();
     }
 
     @Test
     public void testInterfaceNotFoundFailsImmediately() throws Exception {
         setTestInterfaceParams(null);
-        final IpClient ipc = new IpClient(
-                mContext, TEST_IFNAME, mCb, mObserverRegistry, mDependencies);
+        final IpClient ipc = new IpClient(mContext, TEST_IFNAME, mCb, mObserverRegistry,
+                mNetworkStackServiceManager, mDependencies);
         ipc.startProvisioning(new ProvisioningConfiguration());
         verify(mCb, times(1)).onProvisioningFailure(any());
         ipc.shutdown();

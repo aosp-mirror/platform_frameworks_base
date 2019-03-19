@@ -32,6 +32,7 @@ public class Status {
     public static final int ERROR_ILLEGAL_ARGUMENT = -2;
     public static final int ERROR_DATABASE_CANNOT_BE_OPENED = -3;
     public static final int ERROR_STORAGE = -4;
+    public static final int ERROR_UNKNOWN = -5;
 
     public final int resultCode;
 

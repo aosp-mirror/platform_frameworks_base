@@ -29,6 +29,7 @@ import android.net.INetd;
 import android.net.IpPrefix;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
+import android.net.NetworkStackIpMemoryStore;
 import android.net.ProvisioningConfigurationParcelable;
 import android.net.ProxyInfo;
 import android.net.RouteInfo;
@@ -61,6 +62,7 @@ import com.android.internal.util.State;
 import com.android.internal.util.StateMachine;
 import com.android.internal.util.WakeupMessage;
 import com.android.server.NetworkObserverRegistry;
+import com.android.server.NetworkStackService.NetworkStackServiceManager;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -100,6 +102,7 @@ public class IpClient extends StateMachine {
     // One holds StateMachine logs and the other connectivity packet logs.
     private static final ConcurrentHashMap<String, SharedLog> sSmLogs = new ConcurrentHashMap<>();
     private static final ConcurrentHashMap<String, LocalLog> sPktLogs = new ConcurrentHashMap<>();
+    private final NetworkStackIpMemoryStore mIpMemoryStore;
 
     /**
      * Dump all state machine and connectivity packet logs to the specified writer.
@@ -388,13 +391,14 @@ public class IpClient extends StateMachine {
     }
 
     public IpClient(Context context, String ifName, IIpClientCallbacks callback,
-            NetworkObserverRegistry observerRegistry) {
-        this(context, ifName, callback, observerRegistry, new Dependencies());
+            NetworkObserverRegistry observerRegistry, NetworkStackServiceManager nssManager) {
+        this(context, ifName, callback, observerRegistry, nssManager, new Dependencies());
     }
 
     @VisibleForTesting
     IpClient(Context context, String ifName, IIpClientCallbacks callback,
-            NetworkObserverRegistry observerRegistry, Dependencies deps) {
+            NetworkObserverRegistry observerRegistry, NetworkStackServiceManager nssManager,
+            Dependencies deps) {
         super(IpClient.class.getSimpleName() + "." + ifName);
         Preconditions.checkNotNull(ifName);
         Preconditions.checkNotNull(callback);
@@ -408,6 +412,8 @@ public class IpClient extends StateMachine {
         mShutdownLatch = new CountDownLatch(1);
         mCm = mContext.getSystemService(ConnectivityManager.class);
         mObserverRegistry = observerRegistry;
+        mIpMemoryStore =
+                new NetworkStackIpMemoryStore(context, nssManager.getIpMemoryStoreService());
 
         sSmLogs.putIfAbsent(mInterfaceName, new SharedLog(MAX_LOG_RECORDS, mTag));
         mLog = sSmLogs.get(mInterfaceName);

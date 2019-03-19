@@ -130,6 +130,21 @@ public class NetworkStackClient {
         });
     }
 
+    /**
+     * Get an instance of the IpMemoryStore.
+     *
+     * <p>The IpMemoryStore will be returned asynchronously through the provided callbacks.
+     */
+    public void fetchIpMemoryStore(IIpMemoryStoreCallbacks cb) {
+        requestConnector(connector -> {
+            try {
+                connector.fetchIpMemoryStore(cb);
+            } catch (RemoteException e) {
+                e.rethrowFromSystemServer();
+            }
+        });
+    }
+
     private class NetworkStackConnection implements ServiceConnection {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
