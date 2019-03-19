@@ -814,66 +814,6 @@ gensrcs {
     output_extension: "srcjar",
 }
 
-// AIDL interfaces between the core system and the networking mainline module.
-aidl_interface {
-    name: "networkstack-aidl-interfaces",
-    local_include_dir: "core/java",
-    srcs: [
-        "core/java/android/net/ApfCapabilitiesParcelable.aidl",
-        "core/java/android/net/DhcpResultsParcelable.aidl",
-        "core/java/android/net/INetworkMonitor.aidl",
-        "core/java/android/net/INetworkMonitorCallbacks.aidl",
-        "core/java/android/net/INetworkStackConnector.aidl",
-        "core/java/android/net/INetworkStackStatusCallback.aidl",
-        "core/java/android/net/InitialConfigurationParcelable.aidl",
-        "core/java/android/net/PrivateDnsConfigParcel.aidl",
-        "core/java/android/net/ProvisioningConfigurationParcelable.aidl",
-        "core/java/android/net/StaticIpConfigurationParcelable.aidl",
-        "core/java/android/net/TcpKeepalivePacketDataParcelable.aidl",
-        "core/java/android/net/dhcp/DhcpServingParamsParcel.aidl",
-        "core/java/android/net/dhcp/IDhcpServer.aidl",
-        "core/java/android/net/dhcp/IDhcpServerCallbacks.aidl",
-        "core/java/android/net/ip/IIpClient.aidl",
-        "core/java/android/net/ip/IIpClientCallbacks.aidl",
-        "core/java/android/net/IIpMemoryStore.aidl",
-        "core/java/android/net/IIpMemoryStoreCallbacks.aidl",
-        "core/java/android/net/ipmemorystore/**/*.aidl",
-    ],
-    backend: {
-        ndk: {
-            enabled: false,
-        },
-        cpp: {
-            enabled: false,
-        },
-    },
-    api_dir: "aidl/networkstack",
-}
-
-aidl_interface {
-    name: "ipmemorystore-aidl-interfaces",
-    local_include_dir: "core/java",
-    srcs: [
-        "core/java/android/net/IIpMemoryStore.aidl",
-        "core/java/android/net/IIpMemoryStoreCallbacks.aidl",
-        "core/java/android/net/ipmemorystore/**/*.aidl",
-    ],
-}
-
-aidl_interface {
-    name: "networkstack-aidl-framework",
-    local_include_dir: "core/java",
-    srcs: [
-        "core/java/android/net/TcpKeepalivePacketDataParcelable.aidl",
-    ],
-    api_dir: "aidl/networkstack",
-    backend: {
-        java: {
-            sdk_version: "28",
-        },
-    },
-}
-
 filegroup {
     name: "framework-annotations",
     srcs: [
