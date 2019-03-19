@@ -74,7 +74,8 @@ public class WifiUsabilityStatsEntryTest {
 
     private static WifiUsabilityStatsEntry createResult() {
         return new WifiUsabilityStatsEntry(
-                0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22
+                0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13,
+                14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, true
         );
     }
 
@@ -111,5 +112,10 @@ public class WifiUsabilityStatsEntryTest {
         assertEquals(expected.getProbeMcsRateSinceLastUpdate(),
                 actual.getProbeMcsRateSinceLastUpdate());
         assertEquals(expected.getRxLinkSpeedMbps(), actual.getRxLinkSpeedMbps());
+        assertEquals(expected.getCellularDataNetworkType(), actual.getCellularDataNetworkType());
+        assertEquals(expected.getCellularSignalStrengthDbm(),
+                actual.getCellularSignalStrengthDbm());
+        assertEquals(expected.getCellularSignalStrengthDb(), actual.getCellularSignalStrengthDb());
+        assertEquals(expected.getIsSameRegisteredCell(), actual.getIsSameRegisteredCell());
     }
 }
