@@ -27,6 +27,8 @@ import static android.content.ContentResolver.DEPRECATE_DATA_COLUMNS;
 import static android.content.ContentResolver.DEPRECATE_DATA_PREFIX;
 import static android.view.Display.INVALID_DISPLAY;
 
+import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
@@ -4561,7 +4563,7 @@ public final class ActivityThread extends ClientTransactionHandler {
     private void onCoreSettingsChange() {
         if (updateDebugViewAttributeState()) {
             // request all activities to relaunch for the changes to take place
-            relaunchAllActivities();
+            relaunchAllActivities(false /* preserveWindows */);
         }
     }
 
@@ -4578,10 +4580,13 @@ public final class ActivityThread extends ClientTransactionHandler {
         return previousState != View.sDebugViewAttributes;
     }
 
-    private void relaunchAllActivities() {
+    private void relaunchAllActivities(boolean preserveWindows) {
         for (Map.Entry<IBinder, ActivityClientRecord> entry : mActivities.entrySet()) {
-            final Activity activity = entry.getValue().activity;
-            if (!activity.mFinished) {
+            final ActivityClientRecord r = entry.getValue();
+            if (!r.activity.mFinished) {
+                if (preserveWindows && r.window != null) {
+                    r.mPreserveWindow = true;
+                }
                 scheduleRelaunchActivity(entry.getKey());
             }
         }
@@ -5414,7 +5419,8 @@ public final class ActivityThread extends ClientTransactionHandler {
         }
     }
 
-    void handleApplicationInfoChanged(@NonNull final ApplicationInfo ai) {
+    @VisibleForTesting(visibility = PACKAGE)
+    public void handleApplicationInfoChanged(@NonNull final ApplicationInfo ai) {
         // Updates triggered by package installation go through a package update
         // receiver. Here we try to capture ApplicationInfo changes that are
         // caused by other sources, such as overlays. That means we want to be as conservative
@@ -5460,7 +5466,8 @@ public final class ActivityThread extends ClientTransactionHandler {
         newConfig.assetsSeq = (mConfiguration != null ? mConfiguration.assetsSeq : 0) + 1;
         handleConfigurationChanged(newConfig, null);
 
-        relaunchAllActivities();
+        // Preserve windows to avoid black flickers when overlays change.
+        relaunchAllActivities(true /* preserveWindows */);
     }
 
     static void freeTextLayoutCachesIfNeeded(int configDiff) {
