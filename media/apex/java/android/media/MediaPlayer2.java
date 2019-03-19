@@ -3463,7 +3463,7 @@ public class MediaPlayer2 implements AutoCloseable
              * @param uuid of selected crypto scheme
              * @return this
              */
-            public Builder setUuid(@NonNull UUID uuid) {
+            public @NonNull Builder setUuid(@NonNull UUID uuid) {
                 this.mUUID = uuid;
                 return this;
             }
@@ -3480,7 +3480,7 @@ public class MediaPlayer2 implements AutoCloseable
              * @param keySetId identifier of a persisted offline key
              * @return this
              */
-            public Builder setKeySetId(@Nullable byte[] keySetId) {
+            public @NonNull Builder setKeySetId(@Nullable byte[] keySetId) {
                 this.mKeySetId = keySetId;
                 return this;
             }
@@ -3494,7 +3494,7 @@ public class MediaPlayer2 implements AutoCloseable
              * @param initData container-specific DRM initialization data
              * @return this
              */
-            public Builder setInitData(@Nullable byte[] initData) {
+            public @NonNull Builder setInitData(@Nullable byte[] initData) {
                 this.mInitData = initData;
                 return this;
             }
@@ -3505,7 +3505,7 @@ public class MediaPlayer2 implements AutoCloseable
              * @param mimeType mime type to the content
              * @return this
              */
-            public Builder setMimeType(@Nullable String mimeType) {
+            public @NonNull Builder setMimeType(@Nullable String mimeType) {
                 this.mMimeType = mimeType;
                 return this;
             }
@@ -3519,7 +3519,7 @@ public class MediaPlayer2 implements AutoCloseable
              * @param keyType type of the key request
              * @return this
              */
-            public Builder setKeyType(@MediaPlayer2.MediaDrmKeyType int keyType) {
+            public @NonNull Builder setKeyType(@MediaPlayer2.MediaDrmKeyType int keyType) {
                 this.mKeyType = keyType;
                 return this;
             }
@@ -3531,7 +3531,8 @@ public class MediaPlayer2 implements AutoCloseable
              * @param optionalParameters optional parameters to be included in a key request
              * @return this
              */
-            public Builder setOptionalParameters(@Nullable Map<String, String> optionalParameters) {
+            public @NonNull Builder setOptionalParameters(
+                    @Nullable Map<String, String> optionalParameters) {
                 this.mOptionalParameters = optionalParameters;
                 return this;
             }
@@ -3540,7 +3541,7 @@ public class MediaPlayer2 implements AutoCloseable
              * @return an immutable {@link MediaPlayer2.DrmPreparationInfo} representing the
              *         settings of this builder
              */
-            public MediaPlayer2.DrmPreparationInfo build() {
+            public @NonNull MediaPlayer2.DrmPreparationInfo build() {
                 return new MediaPlayer2.DrmPreparationInfo(mUUID, mKeySetId, mInitData, mMimeType,
                         mKeyType, mOptionalParameters);
             }
@@ -3597,7 +3598,8 @@ public class MediaPlayer2 implements AutoCloseable
          * @return a {@link DrmPreparationInfo} object to initialize DRM playback, or null to skip
          *         DRM initialization
          */
-        public DrmPreparationInfo onDrmInfo(MediaPlayer2 mp, DataSourceDesc dsd, DrmInfo drmInfo) {
+        public @Nullable DrmPreparationInfo onDrmInfo(@NonNull MediaPlayer2 mp,
+                @NonNull DataSourceDesc dsd, @NonNull DrmInfo drmInfo) {
             return null;
         }
 
@@ -3630,11 +3632,13 @@ public class MediaPlayer2 implements AutoCloseable
          * @param request a {@link MediaDrm.KeyRequest} prepared using the
          *        {@link DrmPreparationInfo} returned from
          *        {@link #onDrmInfo(MediaPlayer2, DataSourceDesc, DrmInfo)}
-         * @return the response to {@code request} (from license server)
+         * @return the response to {@code request} (from license server); returning {@code null} or
+         *         throwing an {@link RuntimeException} from this callback would trigger an
+         *         {@link EventCallback#onError}.
          */
-        public byte[] onDrmKeyRequest(@NonNull MediaPlayer2 mp, @NonNull DataSourceDesc dsd,
-                @NonNull MediaDrm.KeyRequest request) {
-            return null;
+        public @NonNull byte[] onDrmKeyRequest(@NonNull MediaPlayer2 mp,
+                @NonNull DataSourceDesc dsd, @NonNull MediaDrm.KeyRequest request) {
+            return new byte[0];
         }
 
         /**
@@ -4144,7 +4148,7 @@ public class MediaPlayer2 implements AutoCloseable
         /**
          * Returns the PSSH info of the data source for each supported DRM scheme.
          */
-        public Map<UUID, byte[]> getPssh() {
+        public @NonNull Map<UUID, byte[]> getPssh() {
             return mMapPssh;
         }
 
@@ -4153,7 +4157,7 @@ public class MediaPlayer2 implements AutoCloseable
          * It effectively identifies the subset of the source's DRM schemes which
          * are supported by the device too.
          */
-        public List<UUID> getSupportedSchemes() {
+        public @NonNull List<UUID> getSupportedSchemes() {
             return Arrays.asList(mSupportedSchemes);
         }
 
@@ -4276,7 +4280,7 @@ public class MediaPlayer2 implements AutoCloseable
      * Extends MediaDrm.MediaDrmException
      */
     public static final class NoDrmSchemeException extends MediaDrmException {
-        public NoDrmSchemeException(String detailMessage) {
+        public NoDrmSchemeException(@Nullable String detailMessage) {
             super(detailMessage);
         }
     }
