@@ -310,7 +310,7 @@ message Atom {
         DangerousPermissionState dangerous_permission_state = 10050;
         TrainInfo train_info = 10051;
         TimeZoneDataInfo time_zone_data_info = 10052;
-        SDCardInfo sdcard_info = 10053;
+        ExternalStorageInfo external_storage_info = 10053;
         GpuStatsGlobalInfo gpu_stats_global_info = 10054;
         GpuStatsAppInfo gpu_stats_app_info = 10055;
         SystemIonHeapSize system_ion_heap_size = 10056;
@@ -3311,25 +3311,27 @@ message BatteryCycleCount {
 }
 
 /**
- * Logs that an SD card is mounted and information about it, its type (public or private) and the
- * size in bytes.
+ * Logs that external storage is mounted and information about it, the storage type (sd card/usb/
+ * others), its type (public or private) and the size in bytes.
  * Pulled from:
  *   StatsCompanionService
  */
 
-message SDCardInfo {
+message ExternalStorageInfo {
 
-    enum Type {
+    enum VolumeType {
         UNKNOWN = 0;
-        TYPE_PUBLIC = 1;
-        TYPE_PRIVATE = 2;
-        OTHERS = 3;
+        PUBLIC = 1;
+        PRIVATE = 2;
+        OTHER = 3;
     }
 
-    // Type of the SD card: TYPE_PUBLIC if portable and TYPE_PRIVATE if internal.
-    optional Type type = 1;
+    // The type of external storage.
+    optional android.stats.storage.ExternalStorageType storage_type = 1;
+    // Type of the volume: TYPE_PUBLIC if portable and TYPE_PRIVATE if internal.
+    optional VolumeType volume_type = 2;
     // Total size of the sd card in bytes.
-    optional int64 size_bytes = 2;
+    optional int64 size_bytes = 3;
 }
 
 /*

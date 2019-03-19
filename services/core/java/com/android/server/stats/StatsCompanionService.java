@@ -19,6 +19,8 @@ import static android.content.pm.PackageInfo.REQUESTED_PERMISSION_GRANTED;
 import static android.content.pm.PermissionInfo.PROTECTION_DANGEROUS;
 import static android.os.Process.getPidsForCommands;
 import static android.os.Process.getUidForPid;
+import static android.os.storage.VolumeInfo.TYPE_PRIVATE;
+import static android.os.storage.VolumeInfo.TYPE_PUBLIC;
 
 import static com.android.internal.util.Preconditions.checkNotNull;
 import static com.android.server.am.MemoryStatUtil.readCmdlineFromProcfs;
@@ -89,6 +91,7 @@ import android.os.UserManager;
 import android.os.storage.DiskInfo;
 import android.os.storage.StorageManager;
 import android.os.storage.VolumeInfo;
+import android.stats.storage.StorageEnums;
 import android.telephony.ModemActivityInfo;
 import android.telephony.TelephonyManager;
 import android.util.ArrayMap;
@@ -1968,7 +1971,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         pulledData.add(e);
     }
 
-    private void pullSDCardInfo(int tagId, long elapsedNanos, long wallClockNanos,
+    private void pullExternalStorageInfo(int tagId, long elapsedNanos, long wallClockNanos,
             List<StatsLogEventWrapper> pulledData) {
         StorageManager storageManager = mContext.getSystemService(StorageManager.class);
         if (storageManager != null) {
@@ -1976,11 +1979,29 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             for (VolumeInfo vol : volumes) {
                 final String envState = VolumeInfo.getEnvironmentForState(vol.getState());
                 final DiskInfo diskInfo = vol.getDisk();
-                if (diskInfo != null && diskInfo.isSd()) {
+                if (diskInfo != null) {
                     if (envState.equals(Environment.MEDIA_MOUNTED)) {
+                        // Get the type of the volume, if it is adoptable or portable.
+                        int volumeType = StatsLog.EXTERNAL_STORAGE_INFO__VOLUME_TYPE__OTHER;
+                        if (vol.getType() == TYPE_PUBLIC) {
+                            volumeType = StatsLog.EXTERNAL_STORAGE_INFO__VOLUME_TYPE__PUBLIC;
+                        } else if (vol.getType() == TYPE_PRIVATE) {
+                            volumeType = StatsLog.EXTERNAL_STORAGE_INFO__VOLUME_TYPE__PRIVATE;
+                        }
+                        // Get the type of external storage inserted in the device (sd cards,
+                        // usb, etc)
+                        int externalStorageType;
+                        if (diskInfo.isSd()) {
+                            externalStorageType = StorageEnums.SD_CARD;
+                        } else if (diskInfo.isUsb()) {
+                            externalStorageType = StorageEnums.USB;
+                        } else {
+                            externalStorageType = StorageEnums.OTHER;
+                        }
                         StatsLogEventWrapper e =
                                 new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
-                        e.writeInt(vol.getType() + 1);
+                        e.writeInt(externalStorageType);
+                        e.writeInt(volumeType);
                         e.writeLong(diskInfo.size);
                         pulledData.add(e);
                     }
@@ -2185,8 +2206,8 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                 pullTimeZoneDataInfo(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
-            case StatsLog.SDCARD_INFO: {
-                pullSDCardInfo(tagId, elapsedNanos, wallClockNanos, ret);
+            case StatsLog.EXTERNAL_STORAGE_INFO: {
+                pullExternalStorageInfo(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
             default:
