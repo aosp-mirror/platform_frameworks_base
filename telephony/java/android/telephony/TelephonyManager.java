@@ -10368,7 +10368,7 @@ public class TelephonyManager {
     @IntDef(prefix = {"SET_OPPORTUNISTIC_SUB"}, value = {
             SET_OPPORTUNISTIC_SUB_SUCCESS,
             SET_OPPORTUNISTIC_SUB_VALIDATION_FAILED,
-            SET_OPPORTUNISTIC_SUB_INVALID_PARAMETER})
+            SET_OPPORTUNISTIC_SUB_INACTIVE_SUBSCRIPTION})
     public @interface SetOpportunisticSubscriptionResult {}
 
     /**
@@ -10382,9 +10382,9 @@ public class TelephonyManager {
     public static final int SET_OPPORTUNISTIC_SUB_VALIDATION_FAILED = 1;
 
     /**
-     * The parameter passed in is invalid.
+     * The subscription is not valid. It must be an active opportunistic subscription.
      */
-    public static final int SET_OPPORTUNISTIC_SUB_INVALID_PARAMETER = 2;
+    public static final int SET_OPPORTUNISTIC_SUB_INACTIVE_SUBSCRIPTION = 2;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)

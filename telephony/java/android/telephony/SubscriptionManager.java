@@ -2595,7 +2595,9 @@ public class SubscriptionManager {
      *              {@link SubscriptionManager#DEFAULT_SUBSCRIPTION_ID}, it means
      *              it's unset and {@link SubscriptionManager#getDefaultDataSubscriptionId()}
      *              is used to determine which modem is preferred.
-     * @param needValidation whether validation is needed before switch happens.
+     * @param needValidation whether Telephony will wait until the network is validated by
+     *              connectivity service before switching data to it. More details see
+     *              {@link NetworkCapabilities#NET_CAPABILITY_VALIDATED}.
      * @param executor The executor of where the callback will execute.
      * @param callback Callback will be triggered once it succeeds or failed.
      *                 See {@link TelephonyManager.SetOpportunisticSubscriptionResult}
