@@ -52,11 +52,17 @@ public final class ActivityEvent implements Parcelable {
      */
     public static final int TYPE_ACTIVITY_STOPPED = Event.ACTIVITY_STOPPED;
 
+    /**
+     * The activity was destroyed.
+     */
+    public static final int TYPE_ACTIVITY_DESTROYED = Event.ACTIVITY_DESTROYED;
+
     /** @hide */
     @IntDef(prefix = { "TYPE_" }, value = {
             TYPE_ACTIVITY_RESUMED,
             TYPE_ACTIVITY_PAUSED,
-            TYPE_ACTIVITY_STOPPED
+            TYPE_ACTIVITY_STOPPED,
+            TYPE_ACTIVITY_DESTROYED
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ActivityEventType{}
@@ -81,7 +87,8 @@ public final class ActivityEvent implements Parcelable {
     /**
      * Gets the event type.
      *
-     * @return either {@link #TYPE_ACTIVITY_RESUMED} or {@value #TYPE_ACTIVITY_PAUSED}.
+     * @return either {@link #TYPE_ACTIVITY_RESUMED}, {@value #TYPE_ACTIVITY_PAUSED},
+     * {@value #TYPE_ACTIVITY_STOPPED}, or {@value #TYPE_ACTIVITY_DESTROYED}.
      */
     @ActivityEventType
     public int getEventType() {
@@ -97,6 +104,8 @@ public final class ActivityEvent implements Parcelable {
                 return "ACTIVITY_PAUSED";
             case TYPE_ACTIVITY_STOPPED:
                 return "ACTIVITY_STOPPED";
+            case TYPE_ACTIVITY_DESTROYED:
+                return "ACTIVITY_DESTROYED";
             default:
                 return "UKNOWN_TYPE: " + type;
         }
