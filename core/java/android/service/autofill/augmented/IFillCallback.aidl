@@ -24,7 +24,8 @@ import android.os.ICancellationSignal;
  * @hide
  */
 interface IFillCallback {
-    // TODO(b/123101711): add cancellation (after we have CTS tests, so we can test it)
-//    void onCancellable(in ICancellationSignal cancellation);
+    void onCancellable(in ICancellationSignal cancellation);
     void onSuccess();
+    boolean isCompleted();
+    void cancel();
 }

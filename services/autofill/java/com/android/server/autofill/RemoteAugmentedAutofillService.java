@@ -16,6 +16,8 @@
 
 package com.android.server.autofill;
 
+import static com.android.server.autofill.Helper.sDebug;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
@@ -26,6 +28,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.ICancellationSignal;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.service.autofill.augmented.AugmentedAutofillService;
@@ -142,6 +145,16 @@ final class RemoteAugmentedAutofillService
         scheduleAsyncRequest((s) -> s.onDestroyAllFillWindowsRequest());
     }
 
+    private void dispatchOnFillTimeout(@NonNull ICancellationSignal cancellation) {
+        mHandler.post(() -> {
+            try {
+                cancellation.cancel();
+            } catch (RemoteException e) {
+                Slog.w(mTag, "Error calling cancellation signal: " + e);
+            }
+        });
+    }
+
     // TODO(b/123100811): inline into PendingAutofillRequest if it doesn't have any other subclass
     private abstract static class MyPendingRequest
             extends PendingRequest<RemoteAugmentedAutofillService, IAugmentedAutofillService> {
@@ -161,6 +174,7 @@ final class RemoteAugmentedAutofillService
         private final int mTaskId;
         private final long mRequestTime = SystemClock.elapsedRealtime();
         private final @NonNull IFillCallback mCallback;
+        private ICancellationSignal mCancellation;
 
         protected PendingAutofillRequest(@NonNull RemoteAugmentedAutofillService service,
                 int sessionId, @NonNull IAutoFillManagerClient client, int taskId,
@@ -178,11 +192,55 @@ final class RemoteAugmentedAutofillService
                     if (!finish()) return;
                     // NOTE: so far we don't need notify RemoteAugmentedAutofillServiceCallbacks
                 }
+
+                @Override
+                public void onCancellable(ICancellationSignal cancellation) {
+                    synchronized (mLock) {
+                        final boolean cancelled;
+                        synchronized (mLock) {
+                            mCancellation = cancellation;
+                            cancelled = isCancelledLocked();
+                        }
+                        if (cancelled) {
+                            try {
+                                cancellation.cancel();
+                            } catch (RemoteException e) {
+                                Slog.e(mTag, "Error requesting a cancellation", e);
+                            }
+                        }
+                    }
+                }
+
+                @Override
+                public boolean isCompleted() {
+                    return isRequestCompleted();
+                }
+
+                @Override
+                public void cancel() {
+                    synchronized (mLock) {
+                        final boolean cancelled = isCancelledLocked();
+                        final ICancellationSignal cancellation = mCancellation;
+                        if (!cancelled) {
+                            try {
+                                cancellation.cancel();
+                            } catch (RemoteException e) {
+                                Slog.e(mTag, "Error requesting a cancellation", e);
+                            }
+                        }
+                    }
+                }
             };
         }
 
         @Override
         public void run() {
+            synchronized (mLock) {
+                if (isCancelledLocked()) {
+                    if (sDebug) Slog.d(mTag, "run() called after canceled");
+                    return;
+                }
+            }
             final RemoteAugmentedAutofillService remoteService = getService();
             if (remoteService == null) return;
 
@@ -215,7 +273,32 @@ final class RemoteAugmentedAutofillService
             Slog.w(TAG, "PendingAutofillRequest timed out (" + remoteService.mRequestTimeoutMs
                     + "ms) for " + remoteService);
             // NOTE: so far we don't need notify RemoteAugmentedAutofillServiceCallbacks
+            final ICancellationSignal cancellation;
+            synchronized (mLock) {
+                cancellation = mCancellation;
+            }
+            if (cancellation != null) {
+                remoteService.dispatchOnFillTimeout(cancellation);
+            }
             finish();
+        }
+
+        @Override
+        public boolean cancel() {
+            if (!super.cancel()) return false;
+
+            final ICancellationSignal cancellation;
+            synchronized (mLock) {
+                cancellation = mCancellation;
+            }
+            if (cancellation != null) {
+                try {
+                    cancellation.cancel();
+                } catch (RemoteException e) {
+                    Slog.e(mTag, "Error cancelling a fill request", e);
+                }
+            }
+            return true;
         }
     }
 
