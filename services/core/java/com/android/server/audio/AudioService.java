@@ -6290,8 +6290,8 @@ public class AudioService extends IAudioService.Stub
     // Audio policy management
     //==========================================================================================
     public String registerAudioPolicy(AudioPolicyConfig policyConfig, IAudioPolicyCallback pcb,
-            boolean hasFocusListener, boolean isFocusPolicy, boolean isVolumeController,
-            IMediaProjection projection) {
+            boolean hasFocusListener, boolean isFocusPolicy, boolean isTestFocusPolicy,
+            boolean isVolumeController, IMediaProjection projection) {
         AudioSystem.setDynamicPolicyCallback(mDynPolicyCallback);
 
         if (!isPolicyRegisterAllowed(policyConfig, projection)) {
@@ -6312,7 +6312,7 @@ public class AudioService extends IAudioService.Stub
                     return null;
                 }
                 AudioPolicyProxy app = new AudioPolicyProxy(policyConfig, pcb, hasFocusListener,
-                        isFocusPolicy, isVolumeController);
+                        isFocusPolicy, isTestFocusPolicy, isVolumeController);
                 pcb.asBinder().linkToDeath(app, 0/*flags*/);
                 regId = app.getRegistrationId();
                 mAudioPolicies.put(pcb.asBinder(), app);
@@ -6730,9 +6730,11 @@ public class AudioService extends IAudioService.Stub
          */
         int mFocusDuckBehavior = AudioPolicy.FOCUS_POLICY_DUCKING_DEFAULT;
         boolean mIsFocusPolicy = false;
+        boolean mIsTestFocusPolicy = false;
 
         AudioPolicyProxy(AudioPolicyConfig config, IAudioPolicyCallback token,
-                boolean hasFocusListener, boolean isFocusPolicy, boolean isVolumeController) {
+                boolean hasFocusListener, boolean isFocusPolicy, boolean isTestFocusPolicy,
+                boolean isVolumeController) {
             super(config);
             setRegistration(new String(config.hashCode() + ":ap:" + mAudioPolicyCounter++));
             mPolicyCallback = token;
@@ -6743,7 +6745,8 @@ public class AudioService extends IAudioService.Stub
                 // can only ever be true if there is a focus listener
                 if (isFocusPolicy) {
                     mIsFocusPolicy = true;
-                    mMediaFocusControl.setFocusPolicy(mPolicyCallback);
+                    mIsTestFocusPolicy = isTestFocusPolicy;
+                    mMediaFocusControl.setFocusPolicy(mPolicyCallback, mIsTestFocusPolicy);
                 }
             }
             if (mIsVolumeController) {
@@ -6771,7 +6774,7 @@ public class AudioService extends IAudioService.Stub
 
         void release() {
             if (mIsFocusPolicy) {
-                mMediaFocusControl.unsetFocusPolicy(mPolicyCallback);
+                mMediaFocusControl.unsetFocusPolicy(mPolicyCallback, mIsTestFocusPolicy);
             }
             if (mFocusDuckBehavior == AudioPolicy.FOCUS_POLICY_DUCKING_IN_POLICY) {
                 mMediaFocusControl.setDuckingInExtPolicyAvailable(false);
