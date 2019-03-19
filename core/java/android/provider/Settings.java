@@ -1696,6 +1696,19 @@ public final class Settings {
     public static final String ACTION_REQUEST_ENABLE_CONTENT_CAPTURE =
             "android.settings.REQUEST_ENABLE_CONTENT_CAPTURE";
 
+    /**
+     * Activity Action: Show screen that let user manage how Android handles URL resolution.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing
+     *
+     * @hide
+     */
+    @SystemApi
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_MANAGE_DOMAIN_URLS = "android.settings.MANAGE_DOMAIN_URLS";
+
     // End of Intent actions for Settings
 
     /**
