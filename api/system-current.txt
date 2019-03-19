@@ -6322,12 +6322,15 @@ package android.service.attention {
 
   public abstract class AttentionService extends android.app.Service {
     ctor public AttentionService();
+    method public final void disableSelf();
     method @Nullable public final android.os.IBinder onBind(@NonNull android.content.Intent);
     method public abstract void onCancelAttentionCheck(int);
     method public abstract void onCheckAttention(int, @NonNull android.service.attention.AttentionService.AttentionCallback);
-    field public static final int ATTENTION_FAILURE_PREEMPTED = 2; // 0x2
-    field public static final int ATTENTION_FAILURE_TIMED_OUT = 3; // 0x3
-    field public static final int ATTENTION_FAILURE_UNKNOWN = 4; // 0x4
+    field public static final int ATTENTION_FAILURE_CAMERA_PERMISSION_ABSENT = 6; // 0x6
+    field public static final int ATTENTION_FAILURE_CANCELLED = 3; // 0x3
+    field public static final int ATTENTION_FAILURE_PREEMPTED = 4; // 0x4
+    field public static final int ATTENTION_FAILURE_TIMED_OUT = 5; // 0x5
+    field public static final int ATTENTION_FAILURE_UNKNOWN = 2; // 0x2
     field public static final int ATTENTION_SUCCESS_ABSENT = 0; // 0x0
     field public static final int ATTENTION_SUCCESS_PRESENT = 1; // 0x1
     field public static final String SERVICE_INTERFACE = "android.service.attention.AttentionService";
