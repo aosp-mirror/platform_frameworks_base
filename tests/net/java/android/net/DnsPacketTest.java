@@ -69,7 +69,7 @@ public class DnsPacketTest {
         try {
             new TestDnsPacket(null);
             fail("Exception not thrown for null byte array");
-        } catch (DnsPacket.ParseException e) {
+        } catch (ParseException e) {
         }
     }
 
