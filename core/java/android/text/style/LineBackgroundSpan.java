@@ -53,6 +53,15 @@ public interface LineBackgroundSpan extends ParagraphStyle
     /**
      * Default implementation of the {@link LineBackgroundSpan}, which changes the background
      * color of the lines to which the span is attached.
+     * <p>
+     * For example, an <code>LineBackgroundSpan</code> can be used like this:
+     * <pre>
+     * String text = "This is a multiline text. LineBackgroundSpan is applied here. This is a multiline text.";
+     * SpannableString string = new SpannableString(text);
+     * string.setSpan(new LineBackgroundSpan.Standard(Color.YELLOW), 26, 61, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+     * </pre>
+     * <img src="{@docRoot}reference/android/images/text/style/linebackgroundspan.png" />
+     * <figcaption>Text with <code>LineBackgroundSpan</code></figcaption>
      */
     class Standard implements LineBackgroundSpan, ParcelableSpan {
 
