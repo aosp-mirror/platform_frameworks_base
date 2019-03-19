@@ -82,12 +82,18 @@ public class GraphicsEnvironment {
     public void setup(Context context, Bundle coreSettings) {
         final PackageManager pm = context.getPackageManager();
         final String packageName = context.getPackageName();
+        Trace.traceBegin(Trace.TRACE_TAG_GRAPHICS, "setupGpuLayers");
         setupGpuLayers(context, coreSettings, pm, packageName);
+        Trace.traceEnd(Trace.TRACE_TAG_GRAPHICS);
+        Trace.traceBegin(Trace.TRACE_TAG_GRAPHICS, "setupAngle");
         setupAngle(context, coreSettings, pm, packageName);
+        Trace.traceEnd(Trace.TRACE_TAG_GRAPHICS);
+        Trace.traceBegin(Trace.TRACE_TAG_GRAPHICS, "chooseDriver");
         if (!chooseDriver(context, coreSettings, pm, packageName)) {
             setGpuStats(SYSTEM_DRIVER_NAME, SYSTEM_DRIVER_VERSION_NAME, SYSTEM_DRIVER_VERSION_CODE,
                     SystemProperties.getLong(PROPERTY_GFX_DRIVER_BUILD_TIME, 0), packageName);
         }
+        Trace.traceEnd(Trace.TRACE_TAG_GRAPHICS);
     }
 
     /**
