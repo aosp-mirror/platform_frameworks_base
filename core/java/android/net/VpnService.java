@@ -27,6 +27,8 @@ import android.annotation.UnsupportedAppUsage;
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.app.admin.DevicePolicyManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.IPackageManager;
@@ -48,6 +50,7 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * VpnService is a base class for applications to extend and build their
@@ -138,7 +141,7 @@ public class VpnService extends Service {
      * provides users with the ability to set it as always-on, so that VPN connection is
      * persisted after device reboot and app upgrade. Always-on VPN can also be enabled by device
      * owner and profile owner apps through
-     * {@link android.app.admin.DevicePolicyManager#setAlwaysOnVpnPackage}.
+     * {@link DevicePolicyManager#setAlwaysOnVpnPackage}.
      *
      * <p>VPN apps not supporting this feature should opt out by adding this meta-data field to the
      * {@code VpnService} component of {@code AndroidManifest.xml}. In case there is more than one
@@ -370,7 +373,10 @@ public class VpnService extends Service {
     }
 
     /**
-     * Returns whether the service is running in always-on VPN mode.
+     * Returns whether the service is running in always-on VPN mode. In this mode the system ensures
+     * that the service is always running by restarting it when necessary, e.g. after reboot.
+     *
+     * @see DevicePolicyManager#setAlwaysOnVpnPackage(ComponentName, String, boolean, Set)
      */
     public final boolean isAlwaysOn() {
         try {
@@ -381,8 +387,11 @@ public class VpnService extends Service {
     }
 
     /**
-     * Returns whether the service is running in always-on VPN mode blocking connections without
-     * VPN.
+     * Returns whether the service is running in always-on VPN lockdown mode. In this mode the
+     * system ensures that the service is always running and that the apps aren't allowed to bypass
+     * the VPN.
+     *
+     * @see DevicePolicyManager#setAlwaysOnVpnPackage(ComponentName, String, boolean, Set)
      */
     public final boolean isLockdownEnabled() {
         try {
