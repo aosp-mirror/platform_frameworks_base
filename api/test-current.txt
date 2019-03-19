@@ -461,7 +461,7 @@ package android.app.prediction {
     method public void destroy();
     method public android.app.prediction.AppPredictionSessionId getSessionId();
     method public void notifyAppTargetEvent(@NonNull android.app.prediction.AppTargetEvent);
-    method public void notifyLocationShown(@NonNull String, @NonNull java.util.List<android.app.prediction.AppTargetId>);
+    method public void notifyLaunchLocationShown(@NonNull String, @NonNull java.util.List<android.app.prediction.AppTargetId>);
     method public void registerPredictionUpdates(@NonNull java.util.concurrent.Executor, @NonNull android.app.prediction.AppPredictor.Callback);
     method public void requestPredictionUpdate();
     method @Nullable public void sortTargets(@NonNull java.util.List<android.app.prediction.AppTarget>, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.util.List<android.app.prediction.AppTarget>>);
@@ -2258,7 +2258,7 @@ package android.service.appprediction {
     method @NonNull public final android.os.IBinder onBind(@NonNull android.content.Intent);
     method public void onCreatePredictionSession(@NonNull android.app.prediction.AppPredictionContext, @NonNull android.app.prediction.AppPredictionSessionId);
     method @MainThread public void onDestroyPredictionSession(@NonNull android.app.prediction.AppPredictionSessionId);
-    method @MainThread public abstract void onLocationShown(@NonNull android.app.prediction.AppPredictionSessionId, @NonNull String, @NonNull java.util.List<android.app.prediction.AppTargetId>);
+    method @MainThread public abstract void onLaunchLocationShown(@NonNull android.app.prediction.AppPredictionSessionId, @NonNull String, @NonNull java.util.List<android.app.prediction.AppTargetId>);
     method @MainThread public abstract void onRequestPredictionUpdate(@NonNull android.app.prediction.AppPredictionSessionId);
     method @MainThread public abstract void onSortAppTargets(@NonNull android.app.prediction.AppPredictionSessionId, @NonNull java.util.List<android.app.prediction.AppTarget>, @NonNull android.os.CancellationSignal, @NonNull java.util.function.Consumer<java.util.List<android.app.prediction.AppTarget>>);
     method @MainThread public void onStartPredictionUpdates();
