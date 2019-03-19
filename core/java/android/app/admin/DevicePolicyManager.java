@@ -104,6 +104,7 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Executor;
@@ -4488,7 +4489,8 @@ public class DevicePolicyManager {
      * </ul>
      * The call will fail if called with the package name of an unsupported VPN app.
      * <p> Enabling lockdown via {@code lockdownEnabled} argument carries the risk that any failure
-     * of the VPN provider could break networking for all apps.
+     * of the VPN provider could break networking for all apps. This method clears any lockdown
+     * whitelist set by {@link #setAlwaysOnVpnPackage(ComponentName, String, boolean, Set)}.
      *
      * @param vpnPackage The package name for an installed VPN app on the device, or {@code null} to
      *        remove an existing always-on VPN configuration.
@@ -4498,11 +4500,11 @@ public class DevicePolicyManager {
      * @throws NameNotFoundException if {@code vpnPackage} is not installed.
      * @throws UnsupportedOperationException if {@code vpnPackage} exists but does not support being
      *         set as always-on, or if always-on VPN is not available.
-     * @see #setAlwaysOnVpnPackage(ComponentName, String, boolean, List)
+     * @see #setAlwaysOnVpnPackage(ComponentName, String, boolean, Set)
      */
     public void setAlwaysOnVpnPackage(@NonNull ComponentName admin, @Nullable String vpnPackage,
             boolean lockdownEnabled) throws NameNotFoundException {
-        setAlwaysOnVpnPackage(admin, vpnPackage, lockdownEnabled, Collections.emptyList());
+        setAlwaysOnVpnPackage(admin, vpnPackage, lockdownEnabled, Collections.emptySet());
     }
 
     /**
@@ -4512,6 +4514,11 @@ public class DevicePolicyManager {
      * System apps can always bypass VPN.
      * <p> Note that the system doesn't update the whitelist when packages are installed or
      * uninstalled, the admin app must call this method to keep the list up to date.
+     * <p> When {@code lockdownEnabled} is false {@code lockdownWhitelist} is ignored . When
+     * {@code lockdownEnabled} is {@code true} and {@code lockdownWhitelist} is {@code null} or
+     * empty, only system apps can bypass VPN.
+     * <p> Setting always-on VPN package to {@code null} or using
+     * {@link #setAlwaysOnVpnPackage(ComponentName, String, boolean)} clears lockdown whitelist.
      *
      * @param vpnPackage package name for an installed VPN app on the device, or {@code null}
      *         to remove an existing always-on VPN configuration
@@ -4528,13 +4535,13 @@ public class DevicePolicyManager {
      *         available.
      */
     public void setAlwaysOnVpnPackage(@NonNull ComponentName admin, @Nullable String vpnPackage,
-            boolean lockdownEnabled, @Nullable List<String> lockdownWhitelist)
+            boolean lockdownEnabled, @Nullable Set<String> lockdownWhitelist)
             throws NameNotFoundException {
         throwIfParentInstance("setAlwaysOnVpnPackage");
         if (mService != null) {
             try {
-                mService.setAlwaysOnVpnPackage(
-                        admin, vpnPackage, lockdownEnabled, lockdownWhitelist);
+                mService.setAlwaysOnVpnPackage(admin, vpnPackage, lockdownEnabled,
+                        lockdownWhitelist == null ? null : new ArrayList<>(lockdownWhitelist));
             } catch (ServiceSpecificException e) {
                 switch (e.errorCode) {
                     case ERROR_VPN_PACKAGE_NOT_FOUND:
@@ -4572,7 +4579,7 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by device or profile owner to query the list of packages that are allowed to access
+     * Called by device or profile owner to query the set of packages that are allowed to access
      * the network directly when always-on VPN is in lockdown mode but not connected. Returns
      * {@code null} when always-on VPN is not active or not in lockdown mode.
      *
@@ -4580,13 +4587,15 @@ public class DevicePolicyManager {
      *
      * @throws SecurityException if {@code admin} is not a device or a profile owner.
      *
-     * @see #setAlwaysOnVpnPackage(ComponentName, String, boolean, List)
+     * @see #setAlwaysOnVpnPackage(ComponentName, String, boolean, Set)
      */
-    public @Nullable List<String> getAlwaysOnVpnLockdownWhitelist(@NonNull ComponentName admin) {
+    public @Nullable Set<String> getAlwaysOnVpnLockdownWhitelist(@NonNull ComponentName admin) {
         throwIfParentInstance("getAlwaysOnVpnLockdownWhitelist");
         if (mService != null) {
             try {
-                return mService.getAlwaysOnVpnLockdownWhitelist(admin);
+                final List<String> whitelist =
+                        mService.getAlwaysOnVpnLockdownWhitelist(admin);
+                return whitelist == null ? null : new HashSet<>(whitelist);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
