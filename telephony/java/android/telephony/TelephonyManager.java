@@ -10509,23 +10509,51 @@ public class TelephonyManager {
      * <p>Note: the API does not prevent access to the SIM cards for operations that don't require
      * access to the network.
      *
-     * @param isMultisimCarrierRestricted true if usage of multiple SIMs is restricted, false
+     * @param isMultiSimCarrierRestricted true if usage of multiple SIMs is restricted, false
      * otherwise.
      *
      * @hide
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
-    public void setMultisimCarrierRestriction(boolean isMultisimCarrierRestricted) {
+    public void setMultiSimCarrierRestriction(boolean isMultiSimCarrierRestricted) {
         try {
             ITelephony service = getITelephony();
             if (service != null) {
-                service.setMultisimCarrierRestriction(isMultisimCarrierRestricted);
+                service.setMultiSimCarrierRestriction(isMultiSimCarrierRestricted);
             }
         } catch (RemoteException e) {
-            Log.e(TAG, "setMultisimCarrierRestriction RemoteException", e);
+            Log.e(TAG, "setMultiSimCarrierRestriction RemoteException", e);
         }
     }
+
+    /**
+     * The usage of multiple SIM cards at the same time to register on the network (e.g. Dual
+     * Standby or Dual Active) is supported.
+     */
+    public static final int MULTISIM_ALLOWED = 0;
+
+    /**
+     * The usage of multiple SIM cards at the same time to register on the network (e.g. Dual
+     * Standby or Dual Active) is not supported by the hardware.
+     */
+    public static final int MULTISIM_NOT_SUPPORTED_BY_HARDWARE = 1;
+
+    /**
+     * The usage of multiple SIM cards at the same time to register on the network (e.g. Dual
+     * Standby or Dual Active) is supported by the hardware, but restricted by the carrier.
+     */
+    public static final int MULTISIM_NOT_SUPPORTED_BY_CARRIER = 2;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"MULTISIM_"},
+            value = {
+                    MULTISIM_ALLOWED,
+                    MULTISIM_NOT_SUPPORTED_BY_HARDWARE,
+                    MULTISIM_NOT_SUPPORTED_BY_CARRIER
+            })
+    public @interface IsMultiSimSupportedResult {}
 
     /**
      * Returns if the usage of multiple SIM cards at the same time to register on the network
@@ -10534,20 +10562,24 @@ public class TelephonyManager {
      * <p>Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
      * or that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
      *
-     * @return true if usage of multiple SIMs is supported, false otherwise.
+     * @return {@link #MULTISIM_ALLOWED} if the device supports multiple SIMs.
+     * {@link #MULTISIM_NOT_SUPPORTED_BY_HARDWARE} if the device does not support multiple SIMs.
+     * {@link #MULTISIM_NOT_SUPPORTED_BY_CARRIER} in the device supports multiple SIMs, but the
+     * functionality is restricted by the carrier.
      */
     @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
     @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
-    public boolean isMultisimSupported() {
+    @IsMultiSimSupportedResult
+    public int isMultiSimSupported() {
         try {
             ITelephony service = getITelephony();
             if (service != null) {
-                return service.isMultisimSupported(getOpPackageName());
+                return service.isMultiSimSupported(getOpPackageName());
             }
         } catch (RemoteException e) {
-            Log.e(TAG, "isMultisimSupported RemoteException", e);
+            Log.e(TAG, "isMultiSimSupported RemoteException", e);
         }
-        return false;
+        return MULTISIM_NOT_SUPPORTED_BY_HARDWARE;
     }
 
     /**
