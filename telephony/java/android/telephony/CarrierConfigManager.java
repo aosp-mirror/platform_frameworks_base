@@ -1520,6 +1520,14 @@ public class CarrierConfigManager {
             "carrier_app_no_wake_signal_config";
 
     /**
+     * Determines whether the carrier app needed to be involved when users try to finish setting up
+     * the SIM card to get network service.
+     * @hide
+     */
+    public static final String KEY_CARRIER_APP_REQUIRED_DURING_SIM_SETUP_BOOL =
+            "carrier_app_required_during_setup_bool";
+
+    /**
      * Default value for {@link Settings.Global#DATA_ROAMING}
      * @hide
      */
@@ -2307,9 +2315,9 @@ public class CarrierConfigManager {
             "undelivered_sms_message_expiration_time";
 
     /**
-     * Specifies a carrier-defined {@link CallRedirectionService} which Telecom will bind
-     * to for outgoing calls.  An empty string indicates that no carrier-defined
-     * {@link CallRedirectionService} is specified.
+     * Specifies a carrier-defined {@link android.telecom.CallRedirectionService} which Telecom
+     * will bind to for outgoing calls.  An empty string indicates that no carrier-defined
+     * {@link android.telecom.CallRedirectionService} is specified.
      * @hide
      */
     public static final String KEY_CALL_REDIRECTION_SERVICE_COMPONENT_NAME_STRING =
@@ -2867,6 +2875,7 @@ public class CarrierConfigManager {
         sDefaults.putString(KEY_CARRIER_NAME_STRING, "");
         sDefaults.putString(KEY_SIM_COUNTRY_ISO_OVERRIDE_STRING, "");
         sDefaults.putString(KEY_CARRIER_CALL_SCREENING_APP_STRING, "");
+        sDefaults.putString(KEY_CALL_REDIRECTION_SERVICE_COMPONENT_NAME_STRING, null);
         sDefaults.putBoolean(KEY_CDMA_HOME_REGISTERED_PLMN_NAME_OVERRIDE_BOOL, false);
         sDefaults.putString(KEY_CDMA_HOME_REGISTERED_PLMN_NAME_STRING, "");
         sDefaults.putBoolean(KEY_SUPPORT_DIRECT_FDN_DIALING_BOOL, false);
@@ -2922,6 +2931,7 @@ public class CarrierConfigManager {
                                 + "com.android.internal.telephony.CARRIER_SIGNAL_RESET"
                 });
         sDefaults.putStringArray(KEY_CARRIER_APP_NO_WAKE_SIGNAL_CONFIG_STRING_ARRAY, null);
+        sDefaults.putBoolean(KEY_CARRIER_APP_REQUIRED_DURING_SIM_SETUP_BOOL, false);
 
 
         // Default carrier app configurations

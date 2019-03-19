@@ -3284,7 +3284,11 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     }
 
     private void updateImeParent() {
-        final SurfaceControl newParent = computeImeParent();
+        // Force attaching IME to the display when magnifying, or it would be magnified with
+        // target app together.
+        final boolean shouldAttachToDisplay = (mMagnificationSpec != null);
+        final SurfaceControl newParent =
+                shouldAttachToDisplay ? mWindowingLayer : computeImeParent();
         if (newParent != null) {
             mPendingTransaction.reparent(mImeWindowsContainers.mSurfaceControl, newParent);
             scheduleAnimation();
@@ -4699,6 +4703,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         } else {
             mMagnificationSpec = null;
         }
+        // Re-parent IME's SurfaceControl when MagnificationSpec changed.
+        updateImeParent();
 
         applyMagnificationSpec(getPendingTransaction(), spec);
         getPendingTransaction().apply();

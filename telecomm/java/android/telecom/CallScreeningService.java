@@ -259,12 +259,14 @@ public abstract class CallScreeningService extends Service {
     public static class CallResponse {
         private final boolean mShouldDisallowCall;
         private final boolean mShouldRejectCall;
+        private final boolean mShouldSilenceCall;
         private final boolean mShouldSkipCallLog;
         private final boolean mShouldSkipNotification;
 
         private CallResponse(
                 boolean shouldDisallowCall,
                 boolean shouldRejectCall,
+                boolean shouldSilenceCall,
                 boolean shouldSkipCallLog,
                 boolean shouldSkipNotification) {
             if (!shouldDisallowCall
@@ -276,6 +278,7 @@ public abstract class CallScreeningService extends Service {
             mShouldRejectCall = shouldRejectCall;
             mShouldSkipCallLog = shouldSkipCallLog;
             mShouldSkipNotification = shouldSkipNotification;
+            mShouldSilenceCall = shouldSilenceCall;
         }
 
         /*
@@ -291,6 +294,13 @@ public abstract class CallScreeningService extends Service {
          */
         public boolean getRejectCall() {
             return mShouldRejectCall;
+        }
+
+        /*
+         * @return Whether the ringtone should be silenced for the incoming call.
+         */
+        public boolean getSilenceCall() {
+            return mShouldSilenceCall;
         }
 
         /*
@@ -310,6 +320,7 @@ public abstract class CallScreeningService extends Service {
         public static class Builder {
             private boolean mShouldDisallowCall;
             private boolean mShouldRejectCall;
+            private boolean mShouldSilenceCall;
             private boolean mShouldSkipCallLog;
             private boolean mShouldSkipNotification;
 
@@ -327,6 +338,21 @@ public abstract class CallScreeningService extends Service {
              */
             public Builder setRejectCall(boolean shouldRejectCall) {
                 mShouldRejectCall = shouldRejectCall;
+                return this;
+            }
+
+            /**
+             * Sets whether ringing should be silenced for the incoming call.  When set
+             * to {@code true}, the Telecom framework will not play a ringtone for the call.
+             * The call will, however, still be sent to the default dialer app if it is not blocked.
+             * A {@link CallScreeningService} can use this to ensure a potential nuisance call is
+             * still surfaced to the user, but in a less intrusive manner.
+             *
+             * Setting this to true only makes sense when the call has not been disallowed
+             * using {@link #setDisallowCall(boolean)}.
+             */
+            public @NonNull Builder setSilenceCall(boolean shouldSilenceCall) {
+                mShouldSilenceCall = shouldSilenceCall;
                 return this;
             }
 
@@ -356,6 +382,7 @@ public abstract class CallScreeningService extends Service {
                 return new CallResponse(
                         mShouldDisallowCall,
                         mShouldRejectCall,
+                        mShouldSilenceCall,
                         mShouldSkipCallLog,
                         mShouldSkipNotification);
             }
@@ -411,10 +438,11 @@ public abstract class CallScreeningService extends Service {
     public abstract void onScreenCall(@NonNull Call.Details callDetails);
 
     /**
-     * Responds to the given incoming call, either allowing it or disallowing it.
+     * Responds to the given incoming call, either allowing it, silencing it or disallowing it.
      * <p>
      * The {@link CallScreeningService} calls this method to inform the system whether the call
-     * should be silently blocked or not.
+     * should be silently blocked or not. In the event that it should not be blocked, it may
+     * also be requested to ring silently.
      * <p>
      * Calls to this method are ignored unless the {@link Call.Details#getCallDirection()} is
      * {@link Call.Details#DIRECTION_INCOMING}.
@@ -436,6 +464,8 @@ public abstract class CallScreeningService extends Service {
                         !response.getSkipCallLog(),
                         !response.getSkipNotification(),
                         new ComponentName(getPackageName(), getClass().getName()));
+            } else if (response.getSilenceCall()) {
+                mCallScreeningAdapter.silenceCall(callDetails.getTelecomCallId());
             } else {
                 mCallScreeningAdapter.allowCall(callDetails.getTelecomCallId());
             }

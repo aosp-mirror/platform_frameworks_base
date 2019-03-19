@@ -15,7 +15,7 @@
  */
 package android.net.ip;
 
-import android.net.LinkPropertiesParcelable;
+import android.net.LinkProperties;
 import android.net.ip.IIpClient;
 import android.net.DhcpResultsParcelable;
 
@@ -34,11 +34,11 @@ oneway interface IIpClientCallbacks {
     // null or not.
     void onNewDhcpResults(in DhcpResultsParcelable dhcpResults);
 
-    void onProvisioningSuccess(in LinkPropertiesParcelable newLp);
-    void onProvisioningFailure(in LinkPropertiesParcelable newLp);
+    void onProvisioningSuccess(in LinkProperties newLp);
+    void onProvisioningFailure(in LinkProperties newLp);
 
     // Invoked on LinkProperties changes.
-    void onLinkPropertiesChange(in LinkPropertiesParcelable newLp);
+    void onLinkPropertiesChange(in LinkProperties newLp);
 
     // Called when the internal IpReachabilityMonitor (if enabled) has
     // detected the loss of a critical number of required neighbors.

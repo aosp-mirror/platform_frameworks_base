@@ -148,6 +148,19 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
     }
 
     @Test
+    public void testPrimaryDisplayUpdateToFreeform_HasFreeformSupport_IsPc() {
+        mTarget.applySettingsToDisplayLocked(mPrimaryDisplay);
+
+        mWm.setSupportsFreeformWindowManagement(true);
+        mWm.setIsPc(true);
+
+        mTarget.updateSettingsForDisplay(mPrimaryDisplay);
+
+        assertEquals(WindowConfiguration.WINDOWING_MODE_FREEFORM,
+                mPrimaryDisplay.getWindowingMode());
+    }
+
+    @Test
     public void testSecondaryDisplayDefaultToFullscreen_NoFreeformSupport() {
         mTarget.applySettingsToDisplayLocked(mSecondaryDisplay);
 

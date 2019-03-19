@@ -31,6 +31,7 @@
 #include "renderthread/RenderThread.h"
 #include "utils/Macros.h"
 #include "utils/TimeUtils.h"
+#include "utils/TraceUtils.h"
 
 #include <ui/GraphicBuffer.h>
 

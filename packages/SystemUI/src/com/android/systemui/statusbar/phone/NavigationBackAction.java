@@ -20,7 +20,6 @@ import android.annotation.NonNull;
 import android.hardware.input.InputManager;
 import android.os.Handler;
 import android.os.SystemClock;
-import android.view.HapticFeedbackConstants;
 import android.view.InputDevice;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
@@ -103,7 +102,6 @@ public class NavigationBackAction extends NavigationGestureAction {
     private void performBack() {
         sendEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_BACK);
         sendEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_BACK);
-        mNavigationBarView.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
     }
 
     private boolean shouldExecuteBackOnUp() {

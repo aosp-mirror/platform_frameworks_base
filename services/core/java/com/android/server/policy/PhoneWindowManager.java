@@ -104,7 +104,6 @@ import static com.android.server.wm.WindowManagerPolicyProto.WINDOW_MANAGER_DRAW
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
-import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
 import android.app.AppOpsManager;
 import android.app.IUiModeManager;
@@ -5114,6 +5113,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             awakenDreams();
         }
 
+        // Start dock.
         Intent dock = createHomeDockIntent();
         if (dock != null) {
             try {
@@ -5126,21 +5126,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
         }
 
-        Intent intent;
-
-        if (fromHomeKey) {
-            intent = new Intent(mHomeIntent);
-            intent.putExtra(WindowManagerPolicy.EXTRA_FROM_HOME_KEY, fromHomeKey);
-        } else {
-            intent = mHomeIntent;
-        }
-        final Bundle bundle = getLaunchDisplayIdBundle(displayId);
-        startActivityAsUser(intent, bundle, UserHandle.CURRENT);
-    }
-
-    private @Nullable Bundle getLaunchDisplayIdBundle(int displayId) {
-        return (displayId == INVALID_DISPLAY) ? null
-                : ActivityOptions.makeBasic().setLaunchDisplayId(displayId).toBundle();
+        // Start home.
+        mActivityTaskManagerInternal.startHomeOnDisplay(mCurrentUserId, "startDockOrHome",
+                displayId, fromHomeKey);
     }
 
     /**

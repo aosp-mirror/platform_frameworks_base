@@ -75,7 +75,7 @@ TEST(ValueMetricE2eTest, TestPulledEvents) {
             mAllMetricProducers[0]->getCurrentBucketNum();
     EXPECT_GT(startBucketNum, (int64_t)0);
 
-    // When creating the config, the gauge metric producer should register the alarm at the
+    // When creating the config, the value metric producer should register the alarm at the
     // end of the current bucket.
     EXPECT_EQ((size_t)1, processor->mPullerManager->mReceivers.size());
     EXPECT_EQ(bucketSizeNs,
@@ -140,32 +140,30 @@ TEST(ValueMetricE2eTest, TestPulledEvents) {
     EXPECT_EQ(1 /* subsystem name field */,
               data.dimensions_in_what().value_tuple().dimensions_value(0).field());
     EXPECT_FALSE(data.dimensions_in_what().value_tuple().dimensions_value(0).value_str().empty());
-    EXPECT_EQ(5, data.bucket_info_size());
+    // We have 4 buckets, the first one was incomplete since the condition was unknown.
+    EXPECT_EQ(4, data.bucket_info_size());
 
-    EXPECT_EQ(baseTimeNs + 2 * bucketSizeNs, data.bucket_info(0).start_bucket_elapsed_nanos());
-    EXPECT_EQ(baseTimeNs + 3 * bucketSizeNs, data.bucket_info(0).end_bucket_elapsed_nanos());
+    EXPECT_EQ(baseTimeNs + 3 * bucketSizeNs, data.bucket_info(0).start_bucket_elapsed_nanos());
+    EXPECT_EQ(baseTimeNs + 4 * bucketSizeNs, data.bucket_info(0).end_bucket_elapsed_nanos());
     EXPECT_EQ(1, data.bucket_info(0).values_size());
 
-    EXPECT_EQ(baseTimeNs + 3 * bucketSizeNs, data.bucket_info(1).start_bucket_elapsed_nanos());
-    EXPECT_EQ(baseTimeNs + 4 * bucketSizeNs, data.bucket_info(1).end_bucket_elapsed_nanos());
+    EXPECT_EQ(baseTimeNs + 4 * bucketSizeNs, data.bucket_info(1).start_bucket_elapsed_nanos());
+    EXPECT_EQ(baseTimeNs + 5 * bucketSizeNs, data.bucket_info(1).end_bucket_elapsed_nanos());
     EXPECT_EQ(1, data.bucket_info(1).values_size());
 
-    EXPECT_EQ(baseTimeNs + 4 * bucketSizeNs, data.bucket_info(2).start_bucket_elapsed_nanos());
-    EXPECT_EQ(baseTimeNs + 5 * bucketSizeNs, data.bucket_info(2).end_bucket_elapsed_nanos());
+    EXPECT_EQ(baseTimeNs + 6 * bucketSizeNs, data.bucket_info(2).start_bucket_elapsed_nanos());
+    EXPECT_EQ(baseTimeNs + 7 * bucketSizeNs, data.bucket_info(2).end_bucket_elapsed_nanos());
     EXPECT_EQ(1, data.bucket_info(2).values_size());
 
-    EXPECT_EQ(baseTimeNs + 6 * bucketSizeNs, data.bucket_info(3).start_bucket_elapsed_nanos());
-    EXPECT_EQ(baseTimeNs + 7 * bucketSizeNs, data.bucket_info(3).end_bucket_elapsed_nanos());
+    EXPECT_EQ(baseTimeNs + 7 * bucketSizeNs, data.bucket_info(3).start_bucket_elapsed_nanos());
+    EXPECT_EQ(baseTimeNs + 8 * bucketSizeNs, data.bucket_info(3).end_bucket_elapsed_nanos());
     EXPECT_EQ(1, data.bucket_info(3).values_size());
-
-    EXPECT_EQ(baseTimeNs + 7 * bucketSizeNs, data.bucket_info(4).start_bucket_elapsed_nanos());
-    EXPECT_EQ(baseTimeNs + 8 * bucketSizeNs, data.bucket_info(4).end_bucket_elapsed_nanos());
-    EXPECT_EQ(1, data.bucket_info(4).values_size());
 }
 
 TEST(ValueMetricE2eTest, TestPulledEvents_LateAlarm) {
     auto config = CreateStatsdConfig();
     int64_t baseTimeNs = getElapsedRealtimeNs();
+    // 10 mins == 2 bucket durations.
     int64_t configAddedTimeNs = 10 * 60 * NS_PER_SEC + baseTimeNs;
     int64_t bucketSizeNs =
         TimeUnitToBucketSizeInMillis(config.value_metric(0).bucket()) * 1000000;
@@ -181,7 +179,7 @@ TEST(ValueMetricE2eTest, TestPulledEvents_LateAlarm) {
             mAllMetricProducers[0]->getCurrentBucketNum();
     EXPECT_GT(startBucketNum, (int64_t)0);
 
-    // When creating the config, the gauge metric producer should register the alarm at the
+    // When creating the config, the value metric producer should register the alarm at the
     // end of the current bucket.
     EXPECT_EQ((size_t)1, processor->mPullerManager->mReceivers.size());
     EXPECT_EQ(bucketSizeNs,
@@ -203,15 +201,18 @@ TEST(ValueMetricE2eTest, TestPulledEvents_LateAlarm) {
                                                    configAddedTimeNs + 75);
     processor->OnLogEvent(screenOffEvent.get());
 
-    // Pulling alarm arrives late by 2 buckets and 1 ns.
+    // Pulling alarm arrives late by 2 buckets and 1 ns. 2 buckets late is too far away in the
+    // future, data will be skipped.
     processor->informPullAlarmFired(expectedPullTimeNs + 2 * bucketSizeNs + 1);
     EXPECT_EQ(baseTimeNs + startBucketNum * bucketSizeNs + 4 * bucketSizeNs, expectedPullTimeNs);
 
+    // This screen state change will start a new bucket.
     screenOnEvent = CreateScreenStateChangedEvent(android::view::DISPLAY_STATE_ON,
                                                        configAddedTimeNs + 4 * bucketSizeNs + 65);
     processor->OnLogEvent(screenOnEvent.get());
 
-    // Pulling alarm arrives late by one bucket size + 21ns.
+    // The alarm is delayed but we already created a bucket thanks to the screen state condition.
+    // This bucket does not have to be skipped since the alarm arrives in time for the next bucket.
     processor->informPullAlarmFired(expectedPullTimeNs + bucketSizeNs + 21);
     EXPECT_EQ(baseTimeNs + startBucketNum * bucketSizeNs + 6 * bucketSizeNs, expectedPullTimeNs);
 
@@ -249,8 +250,8 @@ TEST(ValueMetricE2eTest, TestPulledEvents_LateAlarm) {
     EXPECT_FALSE(data.dimensions_in_what().value_tuple().dimensions_value(0).value_str().empty());
     EXPECT_EQ(3, data.bucket_info_size());
 
-    EXPECT_EQ(baseTimeNs + 2 * bucketSizeNs, data.bucket_info(0).start_bucket_elapsed_nanos());
-    EXPECT_EQ(baseTimeNs + 3 * bucketSizeNs, data.bucket_info(0).end_bucket_elapsed_nanos());
+    EXPECT_EQ(baseTimeNs + 5 * bucketSizeNs, data.bucket_info(0).start_bucket_elapsed_nanos());
+    EXPECT_EQ(baseTimeNs + 6 * bucketSizeNs, data.bucket_info(0).end_bucket_elapsed_nanos());
     EXPECT_EQ(1, data.bucket_info(0).values_size());
 
     EXPECT_EQ(baseTimeNs + 8 * bucketSizeNs, data.bucket_info(1).start_bucket_elapsed_nanos());

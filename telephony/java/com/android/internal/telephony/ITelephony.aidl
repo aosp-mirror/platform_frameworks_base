@@ -1683,7 +1683,7 @@ interface ITelephony {
      * (also any country or carrier overlays) to be loaded when using a test SIM with a call box.
      */
     void setCarrierTestOverride(int subId, String mccmnc, String imsi, String iccid, String gid1,
-            String gid2, String plmn, String spn);
+            String gid2, String plmn, String spn, String carrierPrivilegeRules, String apn);
 
     /**
      * A test API to return installed carrier id list version.

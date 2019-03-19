@@ -46,7 +46,7 @@ ConfigMetricsReport GetReports(sp<StatsLogProcessor> processor, int64_t timestam
     IPCThreadState* ipc = IPCThreadState::self();
     ConfigKey configKey(ipc->getCallingUid(), kConfigKey);
     processor->onDumpReport(configKey, timestamp, include_current /* include_current_bucket*/,
-                            true /* erase_data */, ADB_DUMP, FAST, &output);
+                            true /* erase_data */, ADB_DUMP, NO_TIME_CONSTRAINTS, &output);
     ConfigMetricsReportList reports;
     reports.ParseFromArray(output.data(), output.size());
     EXPECT_EQ(1, reports.reports_size());

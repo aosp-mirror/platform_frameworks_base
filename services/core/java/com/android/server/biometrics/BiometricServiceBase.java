@@ -1223,6 +1223,9 @@ public abstract class BiometricServiceBase extends SystemService
                     BiometricsProtoEnums.ISSUE_UNKNOWN_TEMPLATE_ENROLLED_HAL);
         } else {
             clearEnumerateState();
+            if (mPendingClient != null) {
+                startClient(mPendingClient, false /* initiatedByClient */);
+            }
         }
     }
 

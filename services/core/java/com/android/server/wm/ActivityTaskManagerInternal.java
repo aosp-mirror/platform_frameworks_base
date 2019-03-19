@@ -352,6 +352,19 @@ public abstract class ActivityTaskManagerInternal {
     /** @return The intent used to launch the home activity. */
     public abstract Intent getHomeIntent();
     public abstract boolean startHomeActivity(int userId, String reason);
+    /**
+     * This starts home activity on displays that can have system decorations based on displayId -
+     * Default display always use primary home component.
+     * For Secondary displays, the home activity must have category SECONDARY_HOME and then resolves
+     * according to the priorities listed below.
+     *  - If default home is not set, always use the secondary home defined in the config.
+     *  - Use currently selected primary home activity.
+     *  - Use the activity in the same package as currently selected primary home activity.
+     *    If there are multiple activities matched, use first one.
+     *  - Use the secondary home defined in the config.
+     */
+    public abstract boolean startHomeOnDisplay(int userId, String reason, int displayId,
+            boolean fromHomeKey);
     /** Start home activities on all displays that support system decorations. */
     public abstract boolean startHomeOnAllDisplays(int userId, String reason);
     /** @return true if the given process is the factory test process. */

@@ -49,12 +49,12 @@ import android.media.session.IActiveSessionsListener;
 import android.media.session.ICallback;
 import android.media.session.IOnMediaKeyListener;
 import android.media.session.IOnVolumeKeyLongPressListener;
+import android.media.session.ISession;
 import android.media.session.ISession2TokensListener;
 import android.media.session.ISessionManager;
 import android.media.session.MediaSession;
 import android.media.session.MediaSessionManager;
 import android.media.session.SessionCallbackLink;
-import android.media.session.SessionLink;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
@@ -1001,7 +1001,7 @@ public class MediaSessionServiceImpl extends MediaSessionService.ServiceImpl {
         private boolean mVoiceButtonHandled = false;
 
         @Override
-        public SessionLink createSession(String packageName, SessionCallbackLink cb, String tag,
+        public ISession createSession(String packageName, SessionCallbackLink cb, String tag,
                 Bundle sessionInfo, int userId) throws RemoteException {
             final int pid = Binder.getCallingPid();
             final int uid = Binder.getCallingUid();

@@ -60,8 +60,8 @@ public class KeyguardClockSwitch extends RelativeLayout {
      */
     private ViewGroup mBigClockContainer;
     /**
-     * Status area (date and other stuff) shown below the clock. Plugin can decide whether
-     * or not to show it below the alternate clock.
+     * Status area (date and other stuff) shown below the clock. Plugin can decide whether or not to
+     * show it below the alternate clock.
      */
     private View mKeyguardStatusArea;
     /**
@@ -75,24 +75,19 @@ public class KeyguardClockSwitch extends RelativeLayout {
     private boolean mSupportsDarkText;
     private int[] mColorPalette;
 
+    /**
+     * Track the state of the status bar to know when to hide the big_clock_container.
+     */
+    private int mStatusBarState;
+
     private final StatusBarStateController.StateListener mStateListener =
             new StatusBarStateController.StateListener() {
                 @Override
                 public void onStateChanged(int newState) {
-                    if (mBigClockContainer == null) {
-                        return;
-                    }
-                    if (newState == StatusBarState.SHADE) {
-                        if (mBigClockContainer.getVisibility() == View.VISIBLE) {
-                            mBigClockContainer.setVisibility(View.INVISIBLE);
-                        }
-                    } else {
-                        if (mBigClockContainer.getVisibility() == View.INVISIBLE) {
-                            mBigClockContainer.setVisibility(View.VISIBLE);
-                        }
-                    }
+                    mStatusBarState = newState;
+                    updateBigClockVisibility();
                 }
-    };
+            };
 
     private ClockManager.ClockChangedListener mClockChangedListener = this::setClockPlugin;
 
@@ -139,7 +134,9 @@ public class KeyguardClockSwitch extends RelativeLayout {
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         Dependency.get(ClockManager.class).addOnClockChangedListener(mClockChangedListener);
-        Dependency.get(StatusBarStateController.class).addCallback(mStateListener);
+        StatusBarStateController stateController = Dependency.get(StatusBarStateController.class);
+        stateController.addCallback(mStateListener);
+        mStateListener.onStateChanged(stateController.getState());
         SysuiColorExtractor colorExtractor = Dependency.get(SysuiColorExtractor.class);
         colorExtractor.addOnColorsChangedListener(mColorsListener);
         updateColors(colorExtractor);
@@ -151,7 +148,7 @@ public class KeyguardClockSwitch extends RelativeLayout {
         Dependency.get(ClockManager.class).removeOnClockChangedListener(mClockChangedListener);
         Dependency.get(StatusBarStateController.class).removeCallback(mStateListener);
         Dependency.get(SysuiColorExtractor.class)
-            .removeOnColorsChangedListener(mColorsListener);
+                .removeOnColorsChangedListener(mColorsListener);
         setClockPlugin(null);
     }
 
@@ -164,7 +161,7 @@ public class KeyguardClockSwitch extends RelativeLayout {
             }
             if (mBigClockContainer != null) {
                 mBigClockContainer.removeAllViews();
-                mBigClockContainer.setVisibility(View.GONE);
+                updateBigClockVisibility();
             }
             mClockPlugin = null;
         }
@@ -184,7 +181,7 @@ public class KeyguardClockSwitch extends RelativeLayout {
         View bigClockView = plugin.getBigClockView();
         if (bigClockView != null && mBigClockContainer != null) {
             mBigClockContainer.addView(bigClockView);
-            mBigClockContainer.setVisibility(View.VISIBLE);
+            updateBigClockVisibility();
         }
         // Hide default clock.
         if (!plugin.shouldShowStatusArea()) {
@@ -208,12 +205,10 @@ public class KeyguardClockSwitch extends RelativeLayout {
             View bigClockView = mClockPlugin.getBigClockView();
             if (bigClockView != null) {
                 container.addView(bigClockView);
-                if (container.getVisibility() == View.GONE) {
-                    container.setVisibility(View.VISIBLE);
-                }
             }
         }
         mBigClockContainer = container;
+        updateBigClockVisibility();
     }
 
     /**
@@ -254,6 +249,7 @@ public class KeyguardClockSwitch extends RelativeLayout {
 
     /**
      * Set the amount (ratio) that the device has transitioned to doze.
+     *
      * @param darkAmount Amount of transition to doze: 1f for doze and 0f for awake.
      */
     public void setDarkAmount(float darkAmount) {
@@ -307,9 +303,24 @@ public class KeyguardClockSwitch extends RelativeLayout {
         }
     }
 
+    private void updateBigClockVisibility() {
+        if (mBigClockContainer == null) {
+            return;
+        }
+        final boolean inDisplayState = mStatusBarState == StatusBarState.KEYGUARD
+                || mStatusBarState == StatusBarState.SHADE_LOCKED;
+        final int visibility =
+                inDisplayState && mBigClockContainer.getChildCount() != 0 ? View.VISIBLE
+                        : View.GONE;
+        if (mBigClockContainer.getVisibility() != visibility) {
+            mBigClockContainer.setVisibility(visibility);
+        }
+    }
+
     /**
-     * Sets if the keyguard slice is showing a center-aligned header. We need a smaller clock
-     * in these cases.
+     * Sets if the keyguard slice is showing a center-aligned header. We need a smaller clock in
+     * these
+     * cases.
      */
     public void setKeyguardShowingHeader(boolean hasHeader) {
         if (mShowingHeader == hasHeader || hasCustomClock()) {
@@ -327,12 +338,12 @@ public class KeyguardClockSwitch extends RelativeLayout {
                 mClockView.getPaddingRight(), paddingBottom);
     }
 
-    @VisibleForTesting (otherwise = VisibleForTesting.NONE)
+    @VisibleForTesting(otherwise = VisibleForTesting.NONE)
     ClockManager.ClockChangedListener getClockChangedListener() {
         return mClockChangedListener;
     }
 
-    @VisibleForTesting (otherwise = VisibleForTesting.NONE)
+    @VisibleForTesting(otherwise = VisibleForTesting.NONE)
     StatusBarStateController.StateListener getStateListener() {
         return mStateListener;
     }
@@ -352,7 +363,8 @@ public class KeyguardClockSwitch extends RelativeLayout {
 
     /**
      * Special layout transition that scales the clock view as its bounds change, to make it look
-     * like the text is shrinking.
+     * like
+     * the text is shrinking.
      */
     private class ClockBoundsTransition extends ChangeBounds {
 

@@ -82,7 +82,7 @@ class IdmapManager {
         final String overlayPath = overlayPackage.applicationInfo.getBaseCodePath();
         try {
             if (FEATURE_FLAG_IDMAP2) {
-                int policies = determineFulfilledPolicies(targetPackage, overlayPackage, userId);
+                int policies = calculateFulfilledPolicies(targetPackage, overlayPackage, userId);
                 boolean enforce = enforceOverlayable(overlayPackage);
                 if (mIdmap2Service.verifyIdmap(overlayPath, policies, enforce, userId)) {
                     return true;
@@ -184,28 +184,25 @@ class IdmapManager {
             return true;
         }
 
-        if (ai.isVendor() && !VENDOR_IS_Q_OR_LATER) {
+        if (ai.isVendor()) {
             // If the overlay is on a pre-Q vendor partition, do not enforce overlayable
             // restrictions on this overlay because the pre-Q platform has no understanding of
             // overlayable.
-            return false;
+            return VENDOR_IS_Q_OR_LATER;
         }
 
-        // Do not enforce overlayable restrictions on pre-Q overlays signed with the
-        // platform signature.
-        return !ai.isSignedWithPlatformKey();
+        // Do not enforce overlayable restrictions on pre-Q overlays that are signed with the
+        // platform signature or that are preinstalled.
+        return !(ai.isSystemApp() || ai.isSignedWithPlatformKey());
     }
 
     /**
-     * Retrieves a bitmask for idmap2 that represents the policies the specified overlay fulfills.
-     * @throws SecurityException if the overlay is not allowed to overlay any resource
+     * Retrieves a bitmask for idmap2 that represents the policies the overlay fulfills.
      */
-    private int determineFulfilledPolicies(@NonNull final PackageInfo targetPackage,
-            @NonNull final PackageInfo overlayPackage, int userId) throws SecurityException {
+    private int calculateFulfilledPolicies(@NonNull final PackageInfo targetPackage,
+            @NonNull final PackageInfo overlayPackage, int userId)  {
         final ApplicationInfo ai = overlayPackage.applicationInfo;
-        final boolean overlayIsQOrLater = ai.targetSdkVersion >= VERSION_CODES.Q;
-
-        int fulfilledPolicies = 0;
+        int fulfilledPolicies = IIdmap2.POLICY_PUBLIC;
 
         // Overlay matches target signature
         if (mPackageManager.signaturesMatching(targetPackage.packageName,
@@ -215,32 +212,25 @@ class IdmapManager {
 
         // Vendor partition (/vendor)
         if (ai.isVendor()) {
-            if (overlayIsQOrLater) {
-                fulfilledPolicies |= IIdmap2.POLICY_VENDOR_PARTITION;
-            } else if (VENDOR_IS_Q_OR_LATER) {
-                throw new SecurityException("Overlay must target Q sdk or higher");
-            }
+            return fulfilledPolicies | IIdmap2.POLICY_VENDOR_PARTITION;
         }
 
         // Product partition (/product)
         if (ai.isProduct()) {
-            if (overlayIsQOrLater) {
-                fulfilledPolicies |= IIdmap2.POLICY_PRODUCT_PARTITION;
-            } else {
-                throw new SecurityException("Overlay must target Q sdk or higher");
-            }
+            return fulfilledPolicies | IIdmap2.POLICY_PRODUCT_PARTITION;
         }
 
-        // System partition (/system)
+        // Check partitions for which there exists no policy so overlays on these partitions will
+        // not fulfill the system policy.
+        if (ai.isOem() || ai.isProductServices()) {
+            return fulfilledPolicies;
+        }
+
+        // Check this last since every partition except for data is scanned as system in the PMS.
         if (ai.isSystemApp()) {
-            if (overlayIsQOrLater) {
-                fulfilledPolicies |= IIdmap2.POLICY_SYSTEM_PARTITION;
-            } else {
-                throw new SecurityException("Overlay must target Q sdk or higher");
-            }
+            return fulfilledPolicies | IIdmap2.POLICY_SYSTEM_PARTITION;
         }
 
-        // All overlays can overlay resources with the public policy
-        return fulfilledPolicies | IIdmap2.POLICY_PUBLIC;
+        return fulfilledPolicies;
     }
 }

@@ -16,7 +16,7 @@
 
 package android.telephony;
 
-import android.telephony.NetworkRegistrationState;
+import android.telephony.NetworkRegistrationInfo;
 
 /**
  * Network service call back interface
@@ -24,6 +24,6 @@ import android.telephony.NetworkRegistrationState;
  */
 oneway interface INetworkServiceCallback
 {
-    void onGetNetworkRegistrationStateComplete(int result, in NetworkRegistrationState state);
+    void onGetNetworkRegistrationInfoComplete(int result, in NetworkRegistrationInfo state);
     void onNetworkStateChanged();
 }

@@ -338,12 +338,15 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         initializeCredentialUnderSP(password, PRIMARY_USER_ID);
         final byte[] storageKey = mStorageManager.getUserUnlockToken(PRIMARY_USER_ID);
 
+        assertFalse(mService.hasPendingEscrowToken(PRIMARY_USER_ID));
         long handle = mLocalService.addEscrowToken(token, PRIMARY_USER_ID, null);
         assertFalse(mLocalService.isEscrowTokenActive(handle, PRIMARY_USER_ID));
+        assertTrue(mService.hasPendingEscrowToken(PRIMARY_USER_ID));
 
         mService.verifyCredential(password, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, 0,
                 PRIMARY_USER_ID).getResponseCode();
         assertTrue(mLocalService.isEscrowTokenActive(handle, PRIMARY_USER_ID));
+        assertFalse(mService.hasPendingEscrowToken(PRIMARY_USER_ID));
 
         mLocalService.setLockCredentialWithToken(pattern, LockPatternUtils.CREDENTIAL_TYPE_PATTERN,
                 handle, token, PASSWORD_QUALITY_SOMETHING, PRIMARY_USER_ID);

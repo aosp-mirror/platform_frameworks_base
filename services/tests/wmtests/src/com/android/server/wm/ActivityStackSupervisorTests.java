@@ -18,32 +18,26 @@ package com.android.server.wm;
 
 import static android.app.ActivityManager.START_DELIVERED_TO_TOP;
 import static android.app.ActivityManager.START_TASK_TO_FRONT;
+import static android.app.ITaskStackListener.FORCED_RESIZEABLE_REASON_SECONDARY_DISPLAY;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.reset;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.contains;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 
 import android.app.WaitResult;
+import android.content.pm.ActivityInfo;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.MediumTest;
@@ -111,5 +105,45 @@ public class ActivityStackSupervisorTests extends ActivityTestsBase {
             assertEquals(deliverToTopWait.result, START_DELIVERED_TO_TOP);
             assertEquals(deliverToTopWait.who, firstActivity.mActivityComponent);
         }
+    }
+
+    /**
+     * Ensures that {@link TaskChangeNotificationController} notifies only when an activity is
+     * forced to resize on secondary display.
+     */
+    @Test
+    public void testHandleNonResizableTaskOnSecondaryDisplay() {
+        // Create an unresizable task on secondary display.
+        final ActivityDisplay newDisplay = addNewActivityDisplayAt(ActivityDisplay.POSITION_TOP);
+        final ActivityStack stack = new StackBuilder(mRootActivityContainer)
+                .setDisplay(newDisplay).build();
+        final ActivityRecord unresizableActivity = stack.getTopActivity();
+        final TaskRecord task = unresizableActivity.getTaskRecord();
+        unresizableActivity.info.resizeMode = ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
+        task.setResizeMode(unresizableActivity.info.resizeMode);
+
+        final TaskChangeNotificationController taskChangeNotifier =
+                mService.getTaskChangeNotificationController();
+        spyOn(taskChangeNotifier);
+
+        mSupervisor.handleNonResizableTaskIfNeeded(task, newDisplay.getWindowingMode(),
+                newDisplay.mDisplayId, stack);
+        // The top activity is unresizable, so it should notify the activity is forced resizing.
+        verify(taskChangeNotifier).notifyActivityForcedResizable(eq(task.taskId),
+                eq(FORCED_RESIZEABLE_REASON_SECONDARY_DISPLAY),
+                eq(unresizableActivity.packageName));
+        reset(taskChangeNotifier);
+
+        // Put a resizable activity on top of the unresizable task.
+        final ActivityRecord resizableActivity = new ActivityBuilder(mService)
+                .setTask(task).build();
+        resizableActivity.info.resizeMode = ActivityInfo.RESIZE_MODE_RESIZEABLE;
+
+        mSupervisor.handleNonResizableTaskIfNeeded(task, newDisplay.getWindowingMode(),
+                newDisplay.mDisplayId, stack);
+        // For the resizable activity, it is no need to force resizing or dismiss the docked stack.
+        verify(taskChangeNotifier, never()).notifyActivityForcedResizable(anyInt() /* taskId */,
+                anyInt() /* reason */, anyString() /* packageName */);
+        verify(taskChangeNotifier, never()).notifyActivityDismissingDockedStack();
     }
 }

@@ -29,6 +29,8 @@ import android.telecom.CallIdentification;
 oneway interface ICallScreeningAdapter {
     void allowCall(String callId);
 
+    void silenceCall(String callId);
+
     void disallowCall(
             String callId,
             boolean shouldReject,

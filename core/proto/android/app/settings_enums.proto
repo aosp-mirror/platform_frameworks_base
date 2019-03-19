@@ -2302,4 +2302,7 @@ enum PageId {
 
     // Panel for Wifi
     PANEL_WIFI = 1687;
+
+    // Open: Settings > Special App Access > Do not disturb control for app
+    ZEN_ACCESS_DETAIL = 1692;
 }

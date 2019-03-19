@@ -16,13 +16,10 @@
 
 package android.net.ip;
 
-import static android.net.shared.LinkPropertiesParcelableUtil.fromStableParcelable;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.eq;
@@ -207,8 +204,7 @@ public class IpClientTest {
         verify(mNetd, timeout(TEST_TIMEOUT_MS).times(1)).interfaceSetEnableIPv6(iface, false);
         verify(mNetd, timeout(TEST_TIMEOUT_MS).times(1)).interfaceClearAddrs(iface);
         verify(mCb, timeout(TEST_TIMEOUT_MS).times(1))
-                .onLinkPropertiesChange(argThat(
-                        lp -> fromStableParcelable(lp).equals(makeEmptyLinkProperties(iface))));
+                .onLinkPropertiesChange(makeEmptyLinkProperties(iface));
     }
 
     @Test
@@ -253,15 +249,13 @@ public class IpClientTest {
         mObserver.onInterfaceAddressUpdated(new LinkAddress(addresses[lastAddr]), iface);
         LinkProperties want = linkproperties(links(addresses), routes(prefixes));
         want.setInterfaceName(iface);
-        verify(mCb, timeout(TEST_TIMEOUT_MS).times(1)).onProvisioningSuccess(argThat(
-                lp -> fromStableParcelable(lp).equals(want)));
+        verify(mCb, timeout(TEST_TIMEOUT_MS).times(1)).onProvisioningSuccess(want);
 
         ipc.shutdown();
         verify(mNetd, timeout(TEST_TIMEOUT_MS).times(1)).interfaceSetEnableIPv6(iface, false);
         verify(mNetd, timeout(TEST_TIMEOUT_MS).times(1)).interfaceClearAddrs(iface);
         verify(mCb, timeout(TEST_TIMEOUT_MS).times(1))
-                .onLinkPropertiesChange(argThat(
-                        lp -> fromStableParcelable(lp).equals(makeEmptyLinkProperties(iface))));
+                .onLinkPropertiesChange(makeEmptyLinkProperties(iface));
     }
 
     @Test

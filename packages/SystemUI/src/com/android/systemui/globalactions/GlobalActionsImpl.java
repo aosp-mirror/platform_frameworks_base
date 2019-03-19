@@ -37,8 +37,10 @@ import com.android.systemui.Dependency;
 import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.plugins.GlobalActions;
+import com.android.systemui.plugins.GlobalActionsPanelPlugin;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
+import com.android.systemui.statusbar.policy.ExtensionController;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
 
 public class GlobalActionsImpl implements GlobalActions, CommandQueue.Callbacks {
@@ -48,6 +50,7 @@ public class GlobalActionsImpl implements GlobalActions, CommandQueue.Callbacks 
     private final Context mContext;
     private final KeyguardMonitor mKeyguardMonitor;
     private final DeviceProvisionedController mDeviceProvisionedController;
+    private final ExtensionController.Extension<GlobalActionsPanelPlugin> mPanelExtension;
     private GlobalActionsDialog mGlobalActions;
     private boolean mDisabled;
 
@@ -56,6 +59,10 @@ public class GlobalActionsImpl implements GlobalActions, CommandQueue.Callbacks 
         mKeyguardMonitor = Dependency.get(KeyguardMonitor.class);
         mDeviceProvisionedController = Dependency.get(DeviceProvisionedController.class);
         SysUiServiceProvider.getComponent(context, CommandQueue.class).addCallback(this);
+        mPanelExtension = Dependency.get(ExtensionController.class)
+                .newExtension(GlobalActionsPanelPlugin.class)
+                .withPlugin(GlobalActionsPanelPlugin.class)
+                .build();
     }
 
     @Override
@@ -74,7 +81,8 @@ public class GlobalActionsImpl implements GlobalActions, CommandQueue.Callbacks 
             mGlobalActions = new GlobalActionsDialog(mContext, manager);
         }
         mGlobalActions.showDialog(mKeyguardMonitor.isShowing(),
-                mDeviceProvisionedController.isDeviceProvisioned());
+                mDeviceProvisionedController.isDeviceProvisioned(),
+                mPanelExtension.get());
     }
 
     @Override

@@ -65,6 +65,7 @@ public class MeasuredText {
 
     /**
      * Returns the characters in the paragraph used to compute this MeasuredText instance.
+     * @hide
      */
     public @NonNull char[] getChars() {
         return mChars;

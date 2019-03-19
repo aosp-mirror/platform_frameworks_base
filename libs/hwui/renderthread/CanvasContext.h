@@ -28,8 +28,6 @@
 #include "ReliableSurface.h"
 #include "renderthread/RenderTask.h"
 #include "renderthread/RenderThread.h"
-#include "thread/Task.h"
-#include "thread/TaskProcessor.h"
 
 #include <EGL/egl.h>
 #include <SkBitmap.h>
@@ -42,6 +40,7 @@
 #include <set>
 #include <string>
 #include <vector>
+#include <future>
 
 namespace android {
 namespace uirenderer {
@@ -274,15 +273,7 @@ private:
     // Stores the bounds of the main content.
     Rect mContentDrawBounds;
 
-    // TODO: This is really a Task<void> but that doesn't really work
-    // when Future<> expects to be able to get/set a value
-    struct FuncTask : public Task<bool> {
-        std::function<void()> func;
-    };
-    class FuncTaskProcessor;
-
-    std::vector<sp<FuncTask>> mFrameFences;
-    sp<TaskProcessor<bool>> mFrameWorkProcessor;
+    std::vector<std::future<void>> mFrameFences;
     std::unique_ptr<IRenderPipeline> mRenderPipeline;
 
     std::vector<std::function<void(int64_t)>> mFrameCompleteCallbacks;

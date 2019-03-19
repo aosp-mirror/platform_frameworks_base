@@ -627,7 +627,7 @@ public class NotificationManager {
     public boolean canNotifyAsPackage(@NonNull String pkg) {
         INotificationManager service = getService();
         try {
-            return service.canNotifyAsPackage(mContext.getPackageName(), pkg);
+            return service.canNotifyAsPackage(mContext.getPackageName(), pkg, mContext.getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

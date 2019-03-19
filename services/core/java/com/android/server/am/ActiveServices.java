@@ -1600,6 +1600,11 @@ public final class ActiveServices {
                     "BIND_TREAT_LIKE_ACTIVITY");
         }
 
+        if ((flags & Context.BIND_SCHEDULE_LIKE_TOP_APP) != 0 && !isCallerSystem) {
+            throw new SecurityException("Non-system caller (pid=" + Binder.getCallingPid()
+                    + ") set BIND_SCHEDULE_LIKE_TOP_APP when binding service " + service);
+        }
+
         if ((flags & Context.BIND_ALLOW_WHITELIST_MANAGEMENT) != 0 && !isCallerSystem) {
             throw new SecurityException(
                     "Non-system caller " + caller + " (pid=" + Binder.getCallingPid()

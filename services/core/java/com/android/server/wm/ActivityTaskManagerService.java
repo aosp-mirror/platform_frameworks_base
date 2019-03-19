@@ -748,6 +748,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             mWindowManager.setSupportsPictureInPicture(mSupportsPictureInPicture);
             mWindowManager.setSupportsFreeformWindowManagement(mSupportsFreeformWindowManagement);
             mWindowManager.setIsPc(isPc);
+            mWindowManager.mRoot.onSettingsRetrieved();
             // This happens before any activities are started, so we can change global configuration
             // in-place.
             updateConfigurationLocked(configuration, null, true);
@@ -6487,6 +6488,13 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             synchronized (mGlobalLock) {
                 return mRootActivityContainer.startHomeOnDisplay(userId, reason, DEFAULT_DISPLAY);
             }
+        }
+
+        @Override
+        public boolean startHomeOnDisplay(int userId, String reason, int displayId,
+                boolean fromHomeKey) {
+            return mRootActivityContainer.startHomeOnDisplay(userId, reason, displayId,
+                    fromHomeKey);
         }
 
         @Override

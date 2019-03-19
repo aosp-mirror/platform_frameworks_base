@@ -16,6 +16,7 @@
 
 package android.os;
 
+import android.annotation.UnsupportedAppUsage;
 import android.util.ArrayMap;
 import android.util.Slog;
 
@@ -53,6 +54,7 @@ import java.util.function.Consumer;
 public class RemoteCallbackList<E extends IInterface> {
     private static final String TAG = "RemoteCallbackList";
 
+    @UnsupportedAppUsage
     /*package*/ ArrayMap<IBinder, Callback> mCallbacks
             = new ArrayMap<IBinder, Callback>();
     private Object[] mActiveBroadcast;

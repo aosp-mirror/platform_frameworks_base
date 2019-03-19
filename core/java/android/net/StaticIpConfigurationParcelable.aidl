@@ -17,10 +17,10 @@
 
 package android.net;
 
-import android.net.LinkAddressParcelable;
+import android.net.LinkAddress;
 
 parcelable StaticIpConfigurationParcelable {
-    LinkAddressParcelable ipAddress;
+    LinkAddress ipAddress;
     String gateway;
     String[] dnsServers;
     String domains;

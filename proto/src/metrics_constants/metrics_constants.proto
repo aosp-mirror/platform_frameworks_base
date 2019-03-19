@@ -7117,6 +7117,9 @@ message MetricsEvent {
     // overridden by the system.
     FIELD_NOTIFICATION_IMPORTANCE_ASST = 1691;
 
+    // Open: Settings > Special App Access > Do not disturb control for app
+    ZEN_ACCESS_DETAIL = 1692;
+
     // ---- End Q Constants, all Q constants go above this line ----
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS

@@ -1014,9 +1014,9 @@ public class AudioTrack extends PlayerBase
      * frame indicates the number of samples per channel, e.g. 100 frames for a stereo compressed
      * stream corresponds to 200 decoded interleaved PCM samples.
      * @param delayInFrames number of frames to be ignored at the beginning of the stream. A value
-     *     of 0 indicates no padding is to be applied.
-     * @param paddingInFrames number of frames to be ignored at the end of the stream. A value of 0
      *     of 0 indicates no delay is to be applied.
+     * @param paddingInFrames number of frames to be ignored at the end of the stream. A value of 0
+     *     of 0 indicates no padding is to be applied.
      */
     public void setOffloadDelayPadding(@IntRange(from = 0) int delayInFrames,
             @IntRange(from = 0) int paddingInFrames) {

@@ -245,6 +245,34 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         return dc;
     }
 
+    /**
+     * Called when DisplayWindowSettings values may change.
+     */
+    void onSettingsRetrieved() {
+        final int numDisplays = mChildren.size();
+        for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
+            final DisplayContent displayContent = mChildren.get(displayNdx);
+            final boolean changed = mWmService.mDisplayWindowSettings.updateSettingsForDisplay(
+                    displayContent);
+            if (!changed) {
+                continue;
+            }
+
+            displayContent.initializeDisplayOverrideConfiguration();
+            mWmService.reconfigureDisplayLocked(displayContent);
+
+            // We need to update global configuration as well if config of default display has
+            // changed. Do it inline because ATMS#retrieveSettings() will soon update the
+            // configuration inline, which will overwrite the new windowing mode.
+            if (displayContent.isDefaultDisplay) {
+                final Configuration newConfig = mWmService.computeNewConfiguration(
+                        displayContent.getDisplayId());
+                mWmService.mAtmService.updateConfigurationLocked(newConfig, null /* starting */,
+                        false /* initLocale */);
+            }
+        }
+    }
+
     boolean isLayoutNeeded() {
         final int numDisplays = mChildren.size();
         for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {

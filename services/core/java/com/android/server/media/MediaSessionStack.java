@@ -144,7 +144,7 @@ class MediaSessionStack {
      */
     public MediaSessionRecord getMediaSessionRecord(MediaSession.Token sessionToken) {
         for (MediaSessionRecord record : mSessions) {
-            if (Objects.equals(record.getControllerLink(), sessionToken.getControllerLink())) {
+            if (Objects.equals(record.getControllerBinder(), sessionToken.getBinder())) {
                 return record;
             }
         }

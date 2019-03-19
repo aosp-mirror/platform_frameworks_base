@@ -18,8 +18,6 @@ package android.net.ip;
 
 import static android.net.RouteInfo.RTN_UNICAST;
 import static android.net.shared.IpConfigurationParcelableUtil.toStableParcelable;
-import static android.net.shared.LinkPropertiesParcelableUtil.fromStableParcelable;
-import static android.net.shared.LinkPropertiesParcelableUtil.toStableParcelable;
 
 import static com.android.server.util.PermissionUtil.checkNetworkStackCallingPermission;
 
@@ -33,7 +31,6 @@ import android.net.LinkAddress;
 import android.net.LinkProperties;
 import android.net.ProvisioningConfigurationParcelable;
 import android.net.ProxyInfo;
-import android.net.ProxyInfoParcelable;
 import android.net.RouteInfo;
 import android.net.TcpKeepalivePacketDataParcelable;
 import android.net.apf.ApfCapabilities;
@@ -201,7 +198,7 @@ public class IpClient extends StateMachine {
         public void onProvisioningSuccess(LinkProperties newLp) {
             log("onProvisioningSuccess({" + newLp + "})");
             try {
-                mCallback.onProvisioningSuccess(toStableParcelable(newLp));
+                mCallback.onProvisioningSuccess(newLp);
             } catch (RemoteException e) {
                 log("Failed to call onProvisioningSuccess", e);
             }
@@ -210,7 +207,7 @@ public class IpClient extends StateMachine {
         public void onProvisioningFailure(LinkProperties newLp) {
             log("onProvisioningFailure({" + newLp + "})");
             try {
-                mCallback.onProvisioningFailure(toStableParcelable(newLp));
+                mCallback.onProvisioningFailure(newLp);
             } catch (RemoteException e) {
                 log("Failed to call onProvisioningFailure", e);
             }
@@ -219,7 +216,7 @@ public class IpClient extends StateMachine {
         public void onLinkPropertiesChange(LinkProperties newLp) {
             log("onLinkPropertiesChange({" + newLp + "})");
             try {
-                mCallback.onLinkPropertiesChange(toStableParcelable(newLp));
+                mCallback.onLinkPropertiesChange(newLp);
             } catch (RemoteException e) {
                 log("Failed to call onLinkPropertiesChange", e);
             }
@@ -525,9 +522,9 @@ public class IpClient extends StateMachine {
             IpClient.this.setTcpBufferSizes(tcpBufferSizes);
         }
         @Override
-        public void setHttpProxy(ProxyInfoParcelable proxyInfo) {
+        public void setHttpProxy(ProxyInfo proxyInfo) {
             checkNetworkStackCallingPermission();
-            IpClient.this.setHttpProxy(fromStableParcelable(proxyInfo));
+            IpClient.this.setHttpProxy(proxyInfo);
         }
         @Override
         public void setMulticastFilter(boolean enabled) {

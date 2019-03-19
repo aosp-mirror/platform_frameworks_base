@@ -24,6 +24,7 @@
 #endif
 
 #define LOG_TAG "Zygote"
+#define ATRACE_TAG ATRACE_TAG_DALVIK
 
 #include <async_safe/log.h>
 
@@ -73,6 +74,7 @@
 #include <cutils/multiuser.h>
 #include <private/android_filesystem_config.h>
 #include <utils/String8.h>
+#include <utils/Trace.h>
 #include <selinux/android.h>
 #include <seccomp_policy.h>
 #include <stats_event_list.h>
@@ -111,10 +113,15 @@ static pid_t gSystemServerPid = 0;
 
 static const char kIsolatedStorage[] = "persist.sys.isolated_storage";
 static const char kIsolatedStorageSnapshot[] = "sys.isolated_storage_snapshot";
-static const char kZygoteClassName[] = "com/android/internal/os/Zygote";
+
+static constexpr const char* kZygoteClassName = "com/android/internal/os/Zygote";
 static jclass gZygoteClass;
 static jmethodID gCallPostForkSystemServerHooks;
 static jmethodID gCallPostForkChildHooks;
+
+static constexpr const char* kZygoteInitClassName = "com/android/internal/os/ZygoteInit";
+static jclass gZygoteInitClass;
+static jmethodID gCreateSystemServerClassLoader;
 
 static bool g_is_security_enforced = true;
 
@@ -585,6 +592,8 @@ static void SetSchedulerPolicy(fail_fn_t fail_fn) {
 }
 
 static int UnmountTree(const char* path) {
+  ATRACE_CALL();
+
   size_t path_len = strlen(path);
 
   FILE* fp = setmntent("/proc/mounts", "r");
@@ -627,6 +636,8 @@ static void CreateDir(const std::string& dir,
 }
 
 static void CreatePkgSandboxTarget(userid_t user_id, fail_fn_t fail_fn) {
+  ATRACE_CALL();
+
   // Create /mnt/user/0/package
   std::string pkg_sandbox_dir = StringPrintf("/mnt/user/%d", user_id);
   CreateDir(pkg_sandbox_dir, 0751, AID_ROOT, AID_ROOT, fail_fn);
@@ -650,6 +661,8 @@ static void MountPkgSpecificDir(const std::string& mnt_source_root,
                                 uid_t uid,
                                 const char* dir_name,
                                 fail_fn_t fail_fn) {
+  ATRACE_CALL();
+
   std::string mnt_source_dir = StringPrintf("%s/Android/%s/%s",
       mnt_source_root.c_str(), dir_name, package_name.c_str());
 
@@ -662,6 +675,8 @@ static void MountPkgSpecificDir(const std::string& mnt_source_root,
 static void CreateSubDirs(int parent_fd, const std::string& parent_path,
                           const std::vector<std::string>& sub_dirs,
                           fail_fn_t fail_fn) {
+  ATRACE_CALL();
+
   for (auto& dir_name : sub_dirs) {
     struct stat sb;
     if (TEMP_FAILURE_RETRY(fstatat(parent_fd, dir_name.c_str(), &sb, 0)) == 0) {
@@ -686,6 +701,8 @@ static void EnsurePkgSpecificDirs(const std::string& path,
                                   const std::vector<std::string>& package_names,
                                   bool create_sandbox_dir,
                                   fail_fn_t fail_fn) {
+  ATRACE_CALL();
+
   std::string android_dir = StringPrintf("%s/Android", path.c_str());
   android::base::unique_fd android_fd(open(android_dir.c_str(),
                                            O_RDONLY | O_DIRECTORY | O_CLOEXEC));
@@ -729,6 +746,7 @@ static void EnsurePkgSpecificDirs(const std::string& path,
 }
 
 static void CreatePkgSandboxSource(const std::string& sandbox_source, fail_fn_t fail_fn) {
+  ATRACE_CALL();
 
   struct stat sb;
   if (TEMP_FAILURE_RETRY(stat(sandbox_source.c_str(), &sb)) == 0) {
@@ -751,6 +769,8 @@ static void CreatePkgSandboxSource(const std::string& sandbox_source, fail_fn_t 
 static void PreparePkgSpecificDirs(const std::vector<std::string>& package_names,
                                    bool mount_all_obbs, const std::string& sandbox_id,
                                    userid_t user_id, uid_t uid, fail_fn_t fail_fn) {
+  ATRACE_CALL();
+
   std::unique_ptr<DIR, decltype(&closedir)> dirp(opendir("/storage"), closedir);
   if (!dirp) {
     fail_fn(CREATE_ERROR("Failed to opendir /storage: %s", strerror(errno)));
@@ -807,6 +827,8 @@ static void HandleMountModeInstaller(int mount_mode,
                                      userid_t user_id,
                                      const std::string& sandbox_id,
                                      fail_fn_t fail_fn) {
+  ATRACE_CALL();
+
   std::string obb_mount_dir = StringPrintf("/mnt/user/%d/obb_mount", user_id);
   std::string obb_mount_file = StringPrintf("%s/%s", obb_mount_dir.c_str(), sandbox_id.c_str());
   if (mount_mode == MOUNT_EXTERNAL_INSTALLER) {
@@ -844,6 +866,7 @@ static void MountEmulatedStorage(uid_t uid, jint mount_mode,
         const std::string& sandbox_id,
         fail_fn_t fail_fn) {
   // See storage config details at http://source.android.com/tech/storage/
+  ATRACE_CALL();
 
   String8 storage_source;
   if (mount_mode == MOUNT_EXTERNAL_DEFAULT) {
@@ -1420,6 +1443,15 @@ static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids,
       fail_fn("Error calling post fork system server hooks.");
     }
 
+    // Prefetch the classloader for the system server. This is done early to
+    // allow a tie-down of the proper system server selinux domain.
+    env->CallStaticVoidMethod(gZygoteInitClass, gCreateSystemServerClassLoader);
+    if (env->ExceptionCheck()) {
+      // Be robust here. The Java code will attempt to create the classloader
+      // at a later point (but may not have rights to use AoT artifacts).
+      env->ExceptionClear();
+    }
+
     // TODO(oth): Remove hardcoded label here (b/117874058).
     static const char* kSystemServerLabel = "u:r:system_server:s0";
     if (selinux_android_setcon(kSystemServerLabel) != 0) {
@@ -1986,6 +2018,13 @@ int register_com_android_internal_os_Zygote(JNIEnv* env) {
   gCallPostForkChildHooks = GetStaticMethodIDOrDie(env, gZygoteClass, "callPostForkChildHooks",
                                                    "(IZZLjava/lang/String;)V");
 
-  return RegisterMethodsOrDie(env, "com/android/internal/os/Zygote", gMethods, NELEM(gMethods));
+  gZygoteInitClass = MakeGlobalRefOrDie(env, FindClassOrDie(env, kZygoteInitClassName));
+  gCreateSystemServerClassLoader = GetStaticMethodIDOrDie(env, gZygoteInitClass,
+                                                          "createSystemServerClassLoader",
+                                                          "()V");
+
+  RegisterMethodsOrDie(env, "com/android/internal/os/Zygote", gMethods, NELEM(gMethods));
+
+  return JNI_OK;
 }
 }  // namespace android

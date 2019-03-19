@@ -903,14 +903,8 @@ aidl_interface {
         "core/java/android/net/INetworkStackConnector.aidl",
         "core/java/android/net/INetworkStackStatusCallback.aidl",
         "core/java/android/net/InitialConfigurationParcelable.aidl",
-        "core/java/android/net/IpPrefixParcelable.aidl",
-        "core/java/android/net/LinkAddressParcelable.aidl",
-        "core/java/android/net/LinkPropertiesParcelable.aidl",
-        "core/java/android/net/NetworkParcelable.aidl",
         "core/java/android/net/PrivateDnsConfigParcel.aidl",
         "core/java/android/net/ProvisioningConfigurationParcelable.aidl",
-        "core/java/android/net/ProxyInfoParcelable.aidl",
-        "core/java/android/net/RouteInfoParcelable.aidl",
         "core/java/android/net/StaticIpConfigurationParcelable.aidl",
         "core/java/android/net/TcpKeepalivePacketDataParcelable.aidl",
         "core/java/android/net/dhcp/DhcpServingParamsParcel.aidl",
@@ -919,6 +913,14 @@ aidl_interface {
         "core/java/android/net/ip/IIpClient.aidl",
         "core/java/android/net/ip/IIpClientCallbacks.aidl",
     ],
+    backend: {
+        ndk: {
+            enabled: false,
+        },
+        cpp: {
+            enabled: false,
+        },
+    },
     api_dir: "aidl/networkstack",
 }
 
@@ -931,6 +933,11 @@ aidl_interface {
         "core/java/android/net/ipmemorystore/**/*.aidl",
     ],
     api_dir: "aidl/networkstack",
+    backend: {
+        java: {
+            sdk_version: "28",
+        },
+    },
 }
 
 filegroup {
@@ -1132,6 +1139,7 @@ java_library {
         "core/java/android/annotation/Nullable.java",
         "core/java/android/annotation/SystemApi.java",
         "core/java/android/annotation/TestApi.java",
+        "core/java/android/annotation/UnsupportedAppUsage.java",
         "core/java/android/os/HwBinder.java",
         "core/java/android/os/HwBlob.java",
         "core/java/android/os/HwParcel.java",

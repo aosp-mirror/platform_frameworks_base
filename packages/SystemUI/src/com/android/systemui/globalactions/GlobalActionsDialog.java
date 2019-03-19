@@ -92,8 +92,6 @@ import com.android.systemui.plugins.GlobalActions.GlobalActionsManager;
 import com.android.systemui.plugins.GlobalActionsPanelPlugin;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
-import com.android.systemui.statusbar.policy.ExtensionController;
-import com.android.systemui.statusbar.policy.ExtensionController.Extension;
 import com.android.systemui.util.EmergencyDialerConstants;
 import com.android.systemui.util.leak.RotationUtils;
 import com.android.systemui.volume.SystemUIInterpolators.LogAccelerateInterpolator;
@@ -161,9 +159,8 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     private final EmergencyAffordanceManager mEmergencyAffordanceManager;
     private final ScreenshotHelper mScreenshotHelper;
     private final ScreenRecordHelper mScreenRecordHelper;
-
-    private final Extension<GlobalActionsPanelPlugin> mPanelExtension;
-    private ActivityStarter mActivityStarter;
+    private final ActivityStarter mActivityStarter;
+    private GlobalActionsPanelPlugin mPanelPlugin;
 
     /**
      * @param context everything needs a context :(
@@ -209,10 +206,6 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
 
         Dependency.get(ConfigurationController.class).addCallback(this);
 
-        mPanelExtension = Dependency.get(ExtensionController.class)
-            .newExtension(GlobalActionsPanelPlugin.class)
-            .withPlugin(GlobalActionsPanelPlugin.class)
-            .build();
         mActivityStarter = Dependency.get(ActivityStarter.class);
     }
 
@@ -221,9 +214,11 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
      *
      * @param keyguardShowing True if keyguard is showing
      */
-    public void showDialog(boolean keyguardShowing, boolean isDeviceProvisioned) {
+    public void showDialog(boolean keyguardShowing, boolean isDeviceProvisioned,
+            GlobalActionsPanelPlugin panelPlugin) {
         mKeyguardShowing = keyguardShowing;
         mDeviceProvisioned = isDeviceProvisioned;
+        mPanelPlugin = panelPlugin;
         if (mDialog != null) {
             mDialog.dismiss();
             mDialog = null;
@@ -383,8 +378,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                     mHasLogoutButton = true;
                 }
             } else if (GLOBAL_ACTION_KEY_EMERGENCY.equals(actionKey)) {
-                if (shouldUseSeparatedView()
-                        && !mEmergencyAffordanceManager.needsEmergencyAffordance()) {
+                if (!mEmergencyAffordanceManager.needsEmergencyAffordance()) {
                     mItems.add(new EmergencyDialerAction());
                 }
             } else {
@@ -395,14 +389,14 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         }
 
         if (mEmergencyAffordanceManager.needsEmergencyAffordance()) {
-            mItems.add(getEmergencyAction());
+            mItems.add(new EmergencyAffordanceAction());
         }
 
         mAdapter = new MyAdapter();
 
         GlobalActionsPanelPlugin.PanelViewController panelViewController =
-                mPanelExtension.get() != null
-                        ? mPanelExtension.get().onPanelShown(
+                mPanelPlugin != null
+                        ? mPanelPlugin.onPanelShown(
                                 new GlobalActionsPanelPlugin.Callbacks() {
                                     @Override
                                     public void dismissGlobalActionsMenu() {
@@ -484,7 +478,59 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         }
     }
 
-    private class EmergencyDialerAction extends SinglePressAction {
+    private abstract class EmergencyAction extends SinglePressAction {
+        EmergencyAction(int iconResId, int messageResId) {
+            super(iconResId, messageResId);
+        }
+
+        @Override
+        public boolean shouldBeSeparated() {
+            return shouldUseSeparatedView();
+        }
+
+        @Override
+        public View create(
+                Context context, View convertView, ViewGroup parent, LayoutInflater inflater) {
+            View v = super.create(context, convertView, parent, inflater);
+            int textColor;
+            if (shouldBeSeparated()) {
+                textColor = v.getResources().getColor(
+                        com.android.systemui.R.color.global_actions_alert_text);
+            } else {
+                textColor = v.getResources().getColor(
+                        com.android.systemui.R.color.global_actions_text);
+            }
+            TextView messageView = v.findViewById(R.id.message);
+            messageView.setTextColor(textColor);
+            ImageView icon = (ImageView) v.findViewById(R.id.icon);
+            icon.getDrawable().setTint(textColor);
+            return v;
+        }
+
+        @Override
+        public boolean showDuringKeyguard() {
+            return true;
+        }
+
+        @Override
+        public boolean showBeforeProvisioning() {
+            return true;
+        }
+    }
+
+    private class EmergencyAffordanceAction extends EmergencyAction {
+        EmergencyAffordanceAction() {
+            super(R.drawable.emergency_icon,
+                    R.string.global_action_emergency);
+        }
+
+        @Override
+        public void onPress() {
+            mEmergencyAffordanceManager.performEmergencyCall();
+        }
+    }
+
+    private class EmergencyDialerAction extends EmergencyAction {
         private EmergencyDialerAction() {
             super(R.drawable.ic_faster_emergency,
                     R.string.global_action_emergency);
@@ -500,21 +546,6 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             intent.putExtra(EmergencyDialerConstants.EXTRA_ENTRY_TYPE,
                     EmergencyDialerConstants.ENTRY_TYPE_POWER_MENU);
             mContext.startActivityAsUser(intent, UserHandle.CURRENT);
-        }
-
-        @Override
-        public boolean showDuringKeyguard() {
-            return true;
-        }
-
-        @Override
-        public boolean showBeforeProvisioning() {
-            return true;
-        }
-
-        @Override
-        public boolean shouldBeSeparated() {
-            return true;
         }
     }
 
@@ -689,32 +720,6 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                 Intent intent = new Intent(Settings.ACTION_SETTINGS);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 mContext.startActivity(intent);
-            }
-
-            @Override
-            public boolean showDuringKeyguard() {
-                return true;
-            }
-
-            @Override
-            public boolean showBeforeProvisioning() {
-                return true;
-            }
-        };
-    }
-
-    private Action getEmergencyAction() {
-        Drawable emergencyIcon = mContext.getDrawable(R.drawable.emergency_icon);
-        if (!shouldUseSeparatedView()) {
-            // use un-colored legacy treatment
-            emergencyIcon.setTintList(null);
-        }
-
-        return new SinglePressAction(R.drawable.emergency_icon,
-                R.string.global_action_emergency) {
-            @Override
-            public void onPress() {
-                mEmergencyAffordanceManager.performEmergencyCall();
             }
 
             @Override
@@ -1494,12 +1499,12 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         private final Context mContext;
         private final MyAdapter mAdapter;
         private MultiListLayout mGlobalActionsLayout;
-        private final Drawable mBackgroundDrawable;
+        private Drawable mBackgroundDrawable;
         private final ColorExtractor mColorExtractor;
         private final GlobalActionsPanelPlugin.PanelViewController mPanelController;
         private boolean mKeyguardShowing;
         private boolean mShowing;
-        private final float mScrimAlpha;
+        private float mScrimAlpha;
 
         ActionsDialog(Context context, MyAdapter adapter,
                 GlobalActionsPanelPlugin.PanelViewController plugin) {
@@ -1526,49 +1531,37 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                     | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
                     | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED);
             window.setType(WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY);
-
-            initializeLayout();
-
             setTitle(R.string.global_actions);
 
             mPanelController = plugin;
-            View panelView = initializePanel();
-            if (panelView == null) {
-                mBackgroundDrawable = new GradientDrawable(context);
-                mScrimAlpha = ScrimController.GRADIENT_SCRIM_ALPHA;
-            } else {
-                mBackgroundDrawable = context.getDrawable(
-                        com.android.systemui.R.drawable.global_action_panel_scrim);
-                mScrimAlpha = 1f;
-                addContentView(
-                        panelView,
-                        new ViewGroup.LayoutParams(
-                                ViewGroup.LayoutParams.MATCH_PARENT,
-                                ViewGroup.LayoutParams.MATCH_PARENT));
-            }
-            window.setBackgroundDrawable(mBackgroundDrawable);
+            initializeLayout();
         }
 
-        private View initializePanel() {
-            if (isPanelEnabled(mContext) && mPanelController != null) {
-                View panelView = mPanelController.getPanelContent();
-                if (panelView != null) {
-                    FrameLayout panelContainer = new FrameLayout(mContext);
-                    FrameLayout.LayoutParams panelParams =
-                            new FrameLayout.LayoutParams(
-                                    FrameLayout.LayoutParams.MATCH_PARENT,
-                                    FrameLayout.LayoutParams.WRAP_CONTENT);
-                    panelContainer.addView(panelView, panelParams);
-                    return panelContainer;
-                }
+        private boolean initializePanel() {
+            if (!isPanelEnabled(mContext) || mPanelController == null) {
+                return false;
             }
-            return null;
+            View panelView = mPanelController.getPanelContent();
+            if (panelView == null) {
+                return false;
+            }
+            FrameLayout panelContainer = new FrameLayout(mContext);
+            FrameLayout.LayoutParams panelParams =
+                    new FrameLayout.LayoutParams(
+                            FrameLayout.LayoutParams.MATCH_PARENT,
+                            FrameLayout.LayoutParams.WRAP_CONTENT);
+            panelContainer.addView(panelView, panelParams);
+            addContentView(
+                    panelContainer,
+                    new ViewGroup.LayoutParams(
+                            ViewGroup.LayoutParams.MATCH_PARENT,
+                            ViewGroup.LayoutParams.MATCH_PARENT));
+            return true;
         }
 
         private void initializeLayout() {
             setContentView(getGlobalActionsLayoutId(mContext));
-            mGlobalActionsLayout = (MultiListLayout)
-                    findViewById(com.android.systemui.R.id.global_actions_view);
+            mGlobalActionsLayout = findViewById(com.android.systemui.R.id.global_actions_view);
             mGlobalActionsLayout.setOutsideTouchListener(view -> dismiss());
             mGlobalActionsLayout.setListViewAccessibilityDelegate(new View.AccessibilityDelegate() {
                 @Override
@@ -1581,8 +1574,18 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             });
             mGlobalActionsLayout.setRotationListener(this::onRotate);
             mGlobalActionsLayout.setAdapter(mAdapter);
-            mGlobalActionsLayout.setSnapToEdge(isPanelEnabled(mContext)
-                    && mPanelController != null);
+
+            boolean panelEnabled = initializePanel();
+            if (!panelEnabled) {
+                mBackgroundDrawable = new GradientDrawable(mContext);
+                mScrimAlpha = ScrimController.GRADIENT_SCRIM_ALPHA;
+            } else {
+                mBackgroundDrawable = mContext.getDrawable(
+                        com.android.systemui.R.drawable.global_action_panel_scrim);
+                mScrimAlpha = 1f;
+            }
+            mGlobalActionsLayout.setSnapToEdge(panelEnabled);
+            getWindow().setBackgroundDrawable(mBackgroundDrawable);
         }
 
         private int getGlobalActionsLayoutId(Context context) {
@@ -1738,7 +1741,8 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
      */
     private static boolean isPanelEnabled(Context context) {
         return FeatureFlagUtils.isEnabled(
-                context, FeatureFlagUtils.GLOBAL_ACTIONS_PANEL_ENABLED);    }
+                context, FeatureFlagUtils.GLOBAL_ACTIONS_PANEL_ENABLED);
+    }
 
     /**
      * Determines whether the Global Actions menu should use a separated view for emergency actions.

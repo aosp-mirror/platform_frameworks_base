@@ -2548,7 +2548,8 @@ package android.telephony {
     method public int getCarrierIdListVersion();
     method public android.util.Pair<java.lang.Integer,java.lang.Integer> getRadioHalVersion();
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void refreshUiccProfile();
-    method public void setCarrierTestOverride(String, String, String, String, String, String, String);
+    method @Deprecated public void setCarrierTestOverride(String, String, String, String, String, String, String);
+    method public void setCarrierTestOverride(String, String, String, String, String, String, String, String, String);
     field public static final int CARRIER_PRIVILEGE_STATUS_ERROR_LOADING_RULES = -2; // 0xfffffffe
     field public static final int CARRIER_PRIVILEGE_STATUS_HAS_ACCESS = 1; // 0x1
     field public static final int CARRIER_PRIVILEGE_STATUS_NO_ACCESS = 0; // 0x0

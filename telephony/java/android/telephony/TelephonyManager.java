@@ -58,6 +58,8 @@ import android.os.SystemProperties;
 import android.os.WorkSource;
 import android.provider.Settings.SettingNotFoundException;
 import android.service.carrier.CarrierIdentifier;
+import android.telecom.CallScreeningService;
+import android.telecom.InCallService;
 import android.telecom.PhoneAccount;
 import android.telecom.PhoneAccountHandle;
 import android.telecom.TelecomManager;
@@ -617,7 +619,13 @@ public class TelephonyManager {
      * <p class="note">
      * Retrieve with
      * {@link android.content.Intent#getStringExtra(String)}.
+     * <p>
+     *
+     * @deprecated Companion apps for wearable devices should use the {@link InCallService} API
+     * to retrieve the phone number for calls instead.  Apps performing call screening should use
+     * the {@link CallScreeningService} API instead.
      */
+    @Deprecated
     public static final String EXTRA_INCOMING_NUMBER = "incoming_number";
 
     /**
@@ -9857,8 +9865,11 @@ public class TelephonyManager {
      * <p>Requires Permission:
      *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
      *
+     *
+     * @deprecated
      * @hide
      */
+    @Deprecated
     @TestApi
     public void setCarrierTestOverride(String mccmnc, String imsi, String iccid, String gid1,
             String gid2, String plmn, String spn) {
@@ -9866,7 +9877,35 @@ public class TelephonyManager {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
                 telephony.setCarrierTestOverride(
-                        getSubId(), mccmnc, imsi, iccid, gid1, gid2, plmn, spn);
+                        getSubId(), mccmnc, imsi, iccid, gid1, gid2, plmn, spn,
+                        null, null);
+            }
+        } catch (RemoteException ex) {
+            // This could happen if binder process crashes.
+        }
+    }
+
+    /**
+     * A test API to override carrier information including mccmnc, imsi, iccid, gid1, gid2,
+     * plmn, spn, apn and carrier priviledge. This would be handy for, eg, forcing a particular
+     * carrier id, carrier's config (also any country or carrier overlays) to be loaded when using
+     * a test SIM with a call box.
+     *
+     * <p>Requires Permission:
+     *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
+     *
+     * @hide
+     */
+    @TestApi
+    public void setCarrierTestOverride(String mccmnc, String imsi, String iccid, String gid1,
+                                       String gid2, String plmn, String spn,
+                                       String carrierPriviledgeRules, String apn) {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                telephony.setCarrierTestOverride(
+                        getSubId(), mccmnc, imsi, iccid, gid1, gid2, plmn, spn,
+                        carrierPriviledgeRules, apn);
             }
         } catch (RemoteException ex) {
             // This could happen if binder process crashes.

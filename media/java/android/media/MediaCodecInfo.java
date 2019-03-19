@@ -3223,14 +3223,83 @@ public final class MediaCodecInfo {
         // These constants were originally in-line with OMX values, but this
         // correspondence is no longer maintained.
 
+        // Profiles and levels for AVC Codec, corresponding to the definitions in
+        // "SERIES H: AUDIOVISUAL AND MULTIMEDIA SYSTEMS,
+        // Infrastructure of audiovisual services – Coding of moving video
+        // Advanced video coding for generic audiovisual services"
+        // found at
+        // https://www.itu.int/rec/T-REC-H.264-201704-I
+
+        /**
+         * AVC Baseline profile.
+         * See definition in
+         * <a href="https://www.itu.int/rec/T-REC-H.264-201704-I">H.264 recommendation</a>,
+         * Annex A.
+         */
         public static final int AVCProfileBaseline = 0x01;
+
+        /**
+         * AVC Main profile.
+         * See definition in
+         * <a href="https://www.itu.int/rec/T-REC-H.264-201704-I">H.264 recommendation</a>,
+         * Annex A.
+         */
         public static final int AVCProfileMain     = 0x02;
+
+        /**
+         * AVC Extended profile.
+         * See definition in
+         * <a href="https://www.itu.int/rec/T-REC-H.264-201704-I">H.264 recommendation</a>,
+         * Annex A.
+         */
         public static final int AVCProfileExtended = 0x04;
+
+        /**
+         * AVC High profile.
+         * See definition in
+         * <a href="https://www.itu.int/rec/T-REC-H.264-201704-I">H.264 recommendation</a>,
+         * Annex A.
+         */
         public static final int AVCProfileHigh     = 0x08;
+
+        /**
+         * AVC High 10 profile.
+         * See definition in
+         * <a href="https://www.itu.int/rec/T-REC-H.264-201704-I">H.264 recommendation</a>,
+         * Annex A.
+         */
         public static final int AVCProfileHigh10   = 0x10;
+
+        /**
+         * AVC High 4:2:2 profile.
+         * See definition in
+         * <a href="https://www.itu.int/rec/T-REC-H.264-201704-I">H.264 recommendation</a>,
+         * Annex A.
+         */
         public static final int AVCProfileHigh422  = 0x20;
+
+        /**
+         * AVC High 4:4:4 profile.
+         * See definition in
+         * <a href="https://www.itu.int/rec/T-REC-H.264-201704-I">H.264 recommendation</a>,
+         * Annex A.
+         */
         public static final int AVCProfileHigh444  = 0x40;
+
+        /**
+         * AVC Constrained Baseline profile.
+         * See definition in
+         * <a href="https://www.itu.int/rec/T-REC-H.264-201704-I">H.264 recommendation</a>,
+         * Annex A.
+         */
         public static final int AVCProfileConstrainedBaseline = 0x10000;
+
+        /**
+         * AVC Constrained High profile.
+         * See definition in
+         * <a href="https://www.itu.int/rec/T-REC-H.264-201704-I">H.264 recommendation</a>,
+         * Annex A.
+         */
         public static final int AVCProfileConstrainedHigh     = 0x80000;
 
         public static final int AVCLevel1       = 0x01;
@@ -3420,8 +3489,34 @@ public final class MediaCodecInfo {
         public static final int DolbyVisionLevelUhd48   = 0x80;
         public static final int DolbyVisionLevelUhd60   = 0x100;
 
+        // Profiles and levels for AV1 Codec, corresponding to the
+        // definitions in
+        // "AV1 Bitstream & Decoding Process Specification", Annex A
+        // found at
+        // https://aomedia.org/av1-bitstream-and-decoding-process-specification/
+
+        /**
+         * AV1 Main profile.
+         * See definition in
+         * <a href="https://aomedia.org/av1-bitstream-and-decoding-process-specification/"> AV1 Bitstream and Decoding Process Specification</a>
+         * Annex A.
+         */
         public static final int AV1Profile0     = 0x1;
+
+        /**
+         * AV1 High profile.
+         * See definition in
+         * <a href="https://aomedia.org/av1-bitstream-and-decoding-process-specification/"> AV1 Bitstream and Decoding Process Specification</a>
+         * Annex A.
+         */
         public static final int AV1Profile1     = 0x2;
+
+        /**
+         * AV1 Professional profile.
+         * See definition in
+         * <a href="https://aomedia.org/av1-bitstream-and-decoding-process-specification/"> AV1 Bitstream and Decoding Process Specification</a>
+         * Annex A.
+         */
         public static final int AV1Profile2     = 0x4;
 
         public static final int AV1Level2       = 0x1;

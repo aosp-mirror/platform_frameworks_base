@@ -32,7 +32,6 @@ import static org.junit.Assert.assertTrue;
 import android.platform.test.annotations.Presubmit;
 import android.view.InputChannel;
 
-import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
 import org.junit.Before;
@@ -89,7 +88,6 @@ public class TaskPositioningControllerTests extends WindowTestsBase {
         assertNull(mTarget.getDragWindowHandleLocked());
     }
 
-    @FlakyTest(bugId = 69229402)
     @Test
     public void testHandleTapOutsideTask() {
         synchronized (mWm.mGlobalLock) {

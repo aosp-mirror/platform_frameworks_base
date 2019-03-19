@@ -18,8 +18,11 @@ package android.view;
 
 import static android.view.Display.INVALID_DISPLAY;
 
+import android.annotation.Nullable;
 import android.graphics.Region;
 import android.os.IBinder;
+
+import java.lang.ref.WeakReference;
 
 /**
  * Functions as a handle for a window that can receive input.
@@ -38,7 +41,7 @@ public final class InputWindowHandle {
     // The client window.
     public final IWindow clientWindow;
 
-    // The token assosciated with the window.
+    // The token associated with the window.
     public IBinder token;
 
     // The window name.
@@ -98,6 +101,23 @@ public final class InputWindowHandle {
     // transports the touch of this window to the display indicated by portalToDisplayId.
     public int portalToDisplayId = INVALID_DISPLAY;
 
+    /**
+     * Crops the touchable region to the bounds of the surface provided.
+     *
+     * This can be used in cases where the window is not
+     * {@link android.view.WindowManager#FLAG_NOT_TOUCH_MODAL} but should be constrained to the
+     * bounds of a parent window. That is the window should receive touch events outside its
+     * window but be limited to its stack bounds, such as in the case of split screen.
+     */
+    public WeakReference<IBinder> touchableRegionCropHandle = new WeakReference<>(null);
+
+    /**
+     * Replace {@link touchableRegion} with the bounds of {@link touchableRegionCropHandle}. If
+     * the handle is {@code null}, the bounds of the surface associated with this window is used
+     * as the touchable region.
+     */
+    public boolean replaceTouchableRegionWithCrop;
+
     private native void nativeDispose();
 
     public InputWindowHandle(InputApplicationHandle inputApplicationHandle,
@@ -125,6 +145,27 @@ public final class InputWindowHandle {
             nativeDispose();
         } finally {
             super.finalize();
+        }
+    }
+
+    /**
+     * Set the window touchable region to the bounds of {@link touchableRegionBounds} ignoring any
+     * touchable region provided.
+     *
+     * @param bounds surface to set the touchable region to. Set to {@code null} to set the bounds
+     * to the current surface.
+     */
+    public void replaceTouchableRegionWithCrop(@Nullable SurfaceControl bounds) {
+        setTouchableRegionCrop(bounds);
+        replaceTouchableRegionWithCrop = true;
+    }
+
+    /**
+     * Crop the window touchable region to the bounds of the surface provided.
+     */
+    public void setTouchableRegionCrop(@Nullable SurfaceControl bounds) {
+        if (bounds != null) {
+            touchableRegionCropHandle = new WeakReference<>(bounds.getHandle());
         }
     }
 }

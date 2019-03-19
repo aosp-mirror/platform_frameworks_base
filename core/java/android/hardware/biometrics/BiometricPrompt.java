@@ -523,6 +523,11 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
      * cancelled notification through {@link AuthenticationCallback#onAuthenticationError(int,
      * CharSequence)}.
      *
+     * Note: Applications generally should not cancel and start authentication in quick succession.
+     * For example, to properly handle authentication across configuration changes, it's recommended
+     * to use BiometricPrompt in a fragment with setRetainInstance(true). By doing so, the
+     * application will not need to cancel/restart authentication during the configuration change.
+     *
      * @throws IllegalArgumentException If any of the arguments are null
      *
      * @param crypto Object associated with the call
@@ -567,6 +572,11 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
      * an existing authentication attempt is occurring will stop the previous client and start a new
      * authentication. The interrupted client will receive a cancelled notification through {@link
      * AuthenticationCallback#onAuthenticationError(int, CharSequence)}.
+     *
+     * Note: Applications generally should not cancel and start authentication in quick succession.
+     * For example, to properly handle authentication across configuration changes, it's recommended
+     * to use BiometricPrompt in a fragment with setRetainInstance(true). By doing so, the
+     * application will not need to cancel/restart authentication during the configuration change.
      *
      * @throws IllegalArgumentException If any of the arguments are null
      *
