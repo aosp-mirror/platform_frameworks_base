@@ -9865,8 +9865,11 @@ public class TelephonyManager {
      * <p>Requires Permission:
      *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
      *
+     *
+     * @deprecated
      * @hide
      */
+    @Deprecated
     @TestApi
     public void setCarrierTestOverride(String mccmnc, String imsi, String iccid, String gid1,
             String gid2, String plmn, String spn) {
@@ -9874,7 +9877,35 @@ public class TelephonyManager {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
                 telephony.setCarrierTestOverride(
-                        getSubId(), mccmnc, imsi, iccid, gid1, gid2, plmn, spn);
+                        getSubId(), mccmnc, imsi, iccid, gid1, gid2, plmn, spn,
+                        null, null);
+            }
+        } catch (RemoteException ex) {
+            // This could happen if binder process crashes.
+        }
+    }
+
+    /**
+     * A test API to override carrier information including mccmnc, imsi, iccid, gid1, gid2,
+     * plmn, spn, apn and carrier priviledge. This would be handy for, eg, forcing a particular
+     * carrier id, carrier's config (also any country or carrier overlays) to be loaded when using
+     * a test SIM with a call box.
+     *
+     * <p>Requires Permission:
+     *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
+     *
+     * @hide
+     */
+    @TestApi
+    public void setCarrierTestOverride(String mccmnc, String imsi, String iccid, String gid1,
+                                       String gid2, String plmn, String spn,
+                                       String carrierPriviledgeRules, String apn) {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                telephony.setCarrierTestOverride(
+                        getSubId(), mccmnc, imsi, iccid, gid1, gid2, plmn, spn,
+                        carrierPriviledgeRules, apn);
             }
         } catch (RemoteException ex) {
             // This could happen if binder process crashes.
