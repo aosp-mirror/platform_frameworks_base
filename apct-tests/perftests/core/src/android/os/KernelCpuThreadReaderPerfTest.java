@@ -47,7 +47,7 @@ public class KernelCpuThreadReaderPerfTest {
         final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         assertNotNull(mKernelCpuThreadReader);
         while (state.keepRunning()) {
-            this.mKernelCpuThreadReader.getCurrentProcessCpuUsage();
+            this.mKernelCpuThreadReader.getProcessCpuUsage();
         }
     }
 }

@@ -1721,7 +1721,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             throw new IllegalStateException("mKernelCpuThreadReader is null");
         }
         ArrayList<KernelCpuThreadReader.ProcessCpuUsage> processCpuUsages =
-                this.mKernelCpuThreadReader.getProcessCpuUsageByUids();
+                this.mKernelCpuThreadReader.getProcessCpuUsage();
         if (processCpuUsages == null) {
             throw new IllegalStateException("processCpuUsages is null");
         }
