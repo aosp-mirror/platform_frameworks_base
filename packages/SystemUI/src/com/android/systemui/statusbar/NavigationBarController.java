@@ -32,6 +32,7 @@ import android.view.IWindowManager;
 import android.view.View;
 import android.view.WindowManagerGlobal;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.Dependency;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.statusbar.CommandQueue.Callbacks;
@@ -58,7 +59,8 @@ public class NavigationBarController implements Callbacks {
     private final DisplayManager mDisplayManager;
 
     /** A displayId - nav bar maps. */
-    private SparseArray<NavigationBarFragment> mNavigationBars = new SparseArray<>();
+    @VisibleForTesting
+    SparseArray<NavigationBarFragment> mNavigationBars = new SparseArray<>();
 
     @Inject
     public NavigationBarController(Context context, @Named(MAIN_HANDLER_NAME) Handler handler) {
@@ -101,7 +103,8 @@ public class NavigationBarController implements Callbacks {
      *
      * @param display the display to add navigation bar on.
      */
-    private void createNavigationBar(Display display) {
+    @VisibleForTesting
+    void createNavigationBar(Display display) {
         if (display == null) {
             return;
         }

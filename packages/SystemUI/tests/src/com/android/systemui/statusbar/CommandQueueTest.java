@@ -41,6 +41,7 @@ public class CommandQueueTest extends SysuiTestCase {
 
     private CommandQueue mCommandQueue;
     private Callbacks mCallbacks;
+    private static final int SECONDARY_DISPLAY = 1;
 
     @Before
     public void setup() {
@@ -68,7 +69,6 @@ public class CommandQueueTest extends SysuiTestCase {
         verify(mCallbacks).removeIcon(eq(slot));
     }
 
-    // TODO(b/117478341): add test case for multi-display
     @Test
     public void testDisable() {
         int state1 = 14;
@@ -76,6 +76,15 @@ public class CommandQueueTest extends SysuiTestCase {
         mCommandQueue.disable(DEFAULT_DISPLAY, state1, state2);
         waitForIdleSync();
         verify(mCallbacks).disable(eq(DEFAULT_DISPLAY), eq(state1), eq(state2), eq(true));
+    }
+
+    @Test
+    public void testDisableForSecondaryDisplay() {
+        int state1 = 14;
+        int state2 = 42;
+        mCommandQueue.disable(SECONDARY_DISPLAY, state1, state2);
+        waitForIdleSync();
+        verify(mCallbacks).disable(eq(SECONDARY_DISPLAY), eq(state1), eq(state2), eq(true));
     }
 
     @Test
@@ -100,7 +109,6 @@ public class CommandQueueTest extends SysuiTestCase {
         verify(mCallbacks).animateExpandSettingsPanel(eq(panel));
     }
 
-    // TODO(b/117478341): add test case for multi-display
     @Test
     public void testSetSystemUiVisibility() {
         Rect r = new Rect();
@@ -110,7 +118,15 @@ public class CommandQueueTest extends SysuiTestCase {
                 eq(null), eq(r));
     }
 
-    // TODO(b/117478341): add test case for multi-display
+    @Test
+    public void testSetSystemUiVisibilityForSecondaryDisplay() {
+        Rect r = new Rect();
+        mCommandQueue.setSystemUiVisibility(SECONDARY_DISPLAY, 1, 2, 3, 4, null, r);
+        waitForIdleSync();
+        verify(mCallbacks).setSystemUiVisibility(eq(SECONDARY_DISPLAY), eq(1), eq(2), eq(3), eq(4),
+                eq(null), eq(r));
+    }
+
     @Test
     public void testTopAppWindowChanged() {
         mCommandQueue.topAppWindowChanged(DEFAULT_DISPLAY, true);
@@ -118,13 +134,27 @@ public class CommandQueueTest extends SysuiTestCase {
         verify(mCallbacks).topAppWindowChanged(eq(DEFAULT_DISPLAY), eq(true));
     }
 
-    // TODO(b/117478341): add test case for multi-display
+    @Test
+    public void testTopAppWindowChangedForSecondaryDisplay() {
+        mCommandQueue.topAppWindowChanged(SECONDARY_DISPLAY, true);
+        waitForIdleSync();
+        verify(mCallbacks).topAppWindowChanged(eq(SECONDARY_DISPLAY), eq(true));
+    }
+
     @Test
     public void testShowImeButton() {
         mCommandQueue.setImeWindowStatus(DEFAULT_DISPLAY, null, 1, 2, true);
         waitForIdleSync();
         verify(mCallbacks).setImeWindowStatus(
                 eq(DEFAULT_DISPLAY), eq(null), eq(1), eq(2), eq(true));
+    }
+
+    @Test
+    public void testShowImeButtonForSecondaryDisplay() {
+        mCommandQueue.setImeWindowStatus(SECONDARY_DISPLAY, null, 1, 2, true);
+        waitForIdleSync();
+        verify(mCallbacks).setImeWindowStatus(
+                eq(SECONDARY_DISPLAY), eq(null), eq(1), eq(2), eq(true));
     }
 
     @Test
@@ -176,12 +206,18 @@ public class CommandQueueTest extends SysuiTestCase {
         verify(mCallbacks).toggleKeyboardShortcutsMenu(eq(1));
     }
 
-    // TODO(b/117478341): add test case for multi-display
     @Test
     public void testSetWindowState() {
         mCommandQueue.setWindowState(DEFAULT_DISPLAY, 1, 2);
         waitForIdleSync();
         verify(mCallbacks).setWindowState(eq(DEFAULT_DISPLAY), eq(1), eq(2));
+    }
+
+    @Test
+    public void testSetWindowStateForSecondaryDisplay() {
+        mCommandQueue.setWindowState(SECONDARY_DISPLAY, 1, 2);
+        waitForIdleSync();
+        verify(mCallbacks).setWindowState(eq(SECONDARY_DISPLAY), eq(1), eq(2));
     }
 
     @Test
@@ -191,7 +227,6 @@ public class CommandQueueTest extends SysuiTestCase {
         verify(mCallbacks).showScreenPinningRequest(eq(1));
     }
 
-    // TODO(b/117478341): add test case for multi-display
     @Test
     public void testAppTransitionPending() {
         mCommandQueue.appTransitionPending(DEFAULT_DISPLAY);
@@ -199,7 +234,13 @@ public class CommandQueueTest extends SysuiTestCase {
         verify(mCallbacks).appTransitionPending(eq(DEFAULT_DISPLAY), eq(false));
     }
 
-    // TODO(b/117478341): add test case for multi-display
+    @Test
+    public void testAppTransitionPendingForSecondaryDisplay() {
+        mCommandQueue.appTransitionPending(SECONDARY_DISPLAY);
+        waitForIdleSync();
+        verify(mCallbacks).appTransitionPending(eq(SECONDARY_DISPLAY), eq(false));
+    }
+
     @Test
     public void testAppTransitionCancelled() {
         mCommandQueue.appTransitionCancelled(DEFAULT_DISPLAY);
@@ -207,7 +248,13 @@ public class CommandQueueTest extends SysuiTestCase {
         verify(mCallbacks).appTransitionCancelled(eq(DEFAULT_DISPLAY));
     }
 
-    // TODO(b/117478341): add test case for multi-display
+    @Test
+    public void testAppTransitionCancelledForSecondaryDisplay() {
+        mCommandQueue.appTransitionCancelled(SECONDARY_DISPLAY);
+        waitForIdleSync();
+        verify(mCallbacks).appTransitionCancelled(eq(SECONDARY_DISPLAY));
+    }
+
     @Test
     public void testAppTransitionStarting() {
         mCommandQueue.appTransitionStarting(DEFAULT_DISPLAY, 1, 2);
@@ -216,12 +263,26 @@ public class CommandQueueTest extends SysuiTestCase {
                 eq(DEFAULT_DISPLAY), eq(1L), eq(2L), eq(false));
     }
 
-    // TODO(b/117478341): add test case for multi-display
+    @Test
+    public void testAppTransitionStartingForSecondaryDisplay() {
+        mCommandQueue.appTransitionStarting(SECONDARY_DISPLAY, 1, 2);
+        waitForIdleSync();
+        verify(mCallbacks).appTransitionStarting(
+                eq(SECONDARY_DISPLAY), eq(1L), eq(2L), eq(false));
+    }
+
     @Test
     public void testAppTransitionFinished() {
         mCommandQueue.appTransitionFinished(DEFAULT_DISPLAY);
         waitForIdleSync();
         verify(mCallbacks).appTransitionFinished(eq(DEFAULT_DISPLAY));
+    }
+
+    @Test
+    public void testAppTransitionFinishedForSecondaryDisplay() {
+        mCommandQueue.appTransitionFinished(SECONDARY_DISPLAY);
+        waitForIdleSync();
+        verify(mCallbacks).appTransitionFinished(eq(SECONDARY_DISPLAY));
     }
 
     @Test
@@ -289,5 +350,26 @@ public class CommandQueueTest extends SysuiTestCase {
         mCommandQueue.handleSystemKey(1);
         waitForIdleSync();
         verify(mCallbacks).handleSystemKey(eq(1));
+    }
+
+    @Test
+    public void testOnDisplayReady() {
+        mCommandQueue.onDisplayReady(DEFAULT_DISPLAY);
+        waitForIdleSync();
+        verify(mCallbacks).onDisplayReady(eq(DEFAULT_DISPLAY));
+    }
+
+    @Test
+    public void testOnDisplayReadyForSecondaryDisplay() {
+        mCommandQueue.onDisplayReady(SECONDARY_DISPLAY);
+        waitForIdleSync();
+        verify(mCallbacks).onDisplayReady(eq(SECONDARY_DISPLAY));
+    }
+
+    @Test
+    public void testOnDisplayRemoved() {
+        mCommandQueue.onDisplayRemoved(SECONDARY_DISPLAY);
+        waitForIdleSync();
+        verify(mCallbacks).onDisplayRemoved(eq(SECONDARY_DISPLAY));
     }
 }
