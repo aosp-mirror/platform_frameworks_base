@@ -12598,8 +12598,9 @@ public final class Settings {
 
         /**
          * Battery level [1-100] at which low power mode automatically turns on.
-         * Pre-Q If 0, it will not automatically turn on. Q and newer it will only automatically
-         * turn on if the {@link #AUTOMATIC_POWER_SAVER_MODE} setting is also set to
+         * If 0, it will not automatically turn on. For Q and newer, it will only automatically
+         * turn on if the value is greater than 0 and the {@link #AUTOMATIC_POWER_SAVER_MODE}
+         * setting is also set to
          * {@link android.os.PowerManager.AutoPowerSaverMode#POWER_SAVER_MODE_PERCENTAGE}.
          *
          * @see #AUTOMATIC_POWER_SAVER_MODE
