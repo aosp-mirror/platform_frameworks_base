@@ -191,32 +191,41 @@ public class BiometricDialogImpl extends SystemUI implements CommandQueue.Callba
         mCurrentDialogArgs = args;
         final int type = args.argi1;
 
+        // Create a new dialog but do not replace the current one yet.
+        BiometricDialogView newDialog;
         if (type == BiometricAuthenticator.TYPE_FINGERPRINT) {
-            mCurrentDialog = new FingerprintDialogView(mContext, mCallback);
+            newDialog = new FingerprintDialogView(mContext, mCallback);
         } else if (type == BiometricAuthenticator.TYPE_FACE) {
-            mCurrentDialog = new FaceDialogView(mContext, mCallback);
+            newDialog = new FaceDialogView(mContext, mCallback);
         } else {
             Log.e(TAG, "Unsupported type: " + type);
-        }
-
-        if (savedState != null) {
-            mCurrentDialog.restoreState(savedState);
-        }
-
-        if (DEBUG) Log.d(TAG, "handleShowDialog, isAnimatingAway: "
-                + mCurrentDialog.isAnimatingAway() + " type: " + type);
-
-        if (mCurrentDialog.isAnimatingAway()) {
-            mCurrentDialog.forceRemove();
-        } else if (mDialogShowing) {
-            Log.w(TAG, "Dialog already showing");
             return;
         }
+
+        if (DEBUG) Log.d(TAG, "handleShowDialog, "
+                + " savedState: " + savedState
+                + " mCurrentDialog: " + mCurrentDialog
+                + " newDialog: " + newDialog
+                + " type: " + type);
+
+        if (savedState != null) {
+            // SavedState is only non-null if it's from onConfigurationChanged. Restore the state
+            // even though it may be removed / re-created again
+            newDialog.restoreState(savedState);
+        } else if (mCurrentDialog != null && mDialogShowing) {
+            // If somehow we're asked to show a dialog, the old one doesn't need to be animated
+            // away. This can happen if the app cancels and re-starts auth during configuration
+            // change. This is ugly because we also have to do things on onConfigurationChanged
+            // here.
+            mCurrentDialog.forceRemove();
+        }
+
         mReceiver = (IBiometricServiceReceiverInternal) args.arg2;
-        mCurrentDialog.setBundle((Bundle)args.arg1);
-        mCurrentDialog.setRequireConfirmation((boolean) args.arg3);
-        mCurrentDialog.setUserId(args.argi2);
-        mCurrentDialog.setSkipIntro(skipAnimation);
+        newDialog.setBundle((Bundle) args.arg1);
+        newDialog.setRequireConfirmation((boolean) args.arg3);
+        newDialog.setUserId(args.argi2);
+        newDialog.setSkipIntro(skipAnimation);
+        mCurrentDialog = newDialog;
         mWindowManager.addView(mCurrentDialog, mCurrentDialog.getLayoutParams());
         mDialogShowing = true;
     }
