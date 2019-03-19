@@ -88,6 +88,7 @@ public class KeyguardBouncer {
     private int mBouncerPromptReason;
     private boolean mIsAnimatingAway;
     private boolean mIsScrimmed;
+    private ViewGroup mLockIconContainer;
 
     public KeyguardBouncer(Context context, ViewMediatorCallback callback,
             LockPatternUtils lockPatternUtils, ViewGroup container,
@@ -169,6 +170,10 @@ public class KeyguardBouncer {
 
     public boolean isShowingScrimmed() {
         return isShowing() && mIsScrimmed;
+    }
+
+    public ViewGroup getLockIconContainer() {
+        return mRoot == null || mRoot.getVisibility() != View.VISIBLE ? null : mLockIconContainer;
     }
 
     /**
@@ -401,6 +406,7 @@ public class KeyguardBouncer {
         removeView();
         mHandler.removeCallbacks(mRemoveViewRunnable);
         mRoot = (ViewGroup) LayoutInflater.from(mContext).inflate(R.layout.keyguard_bouncer, null);
+        mLockIconContainer = mRoot.findViewById(R.id.lock_icon_container);
         mKeyguardView = mRoot.findViewById(R.id.keyguard_host_view);
         mKeyguardView.setLockPatternUtils(mLockPatternUtils);
         mKeyguardView.setViewMediatorCallback(mCallback);
@@ -420,6 +426,7 @@ public class KeyguardBouncer {
         if (mRoot != null && mRoot.getParent() == mContainer) {
             mContainer.removeView(mRoot);
             mRoot = null;
+            mLockIconContainer = null;
         }
     }
 
