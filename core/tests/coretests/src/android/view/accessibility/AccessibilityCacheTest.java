@@ -45,7 +45,6 @@ import org.mockito.stubbing.Answer;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @LargeTest
 @RunWith(AndroidJUnit4.class)
@@ -61,16 +60,12 @@ public class AccessibilityCacheTest {
 
     AccessibilityCache mAccessibilityCache;
     AccessibilityCache.AccessibilityNodeRefresher mAccessibilityNodeRefresher;
-    AtomicInteger mNumA11yNodeInfosInUse = new AtomicInteger(0);
-    AtomicInteger mNumA11yWinInfosInUse = new AtomicInteger(0);
 
     @Before
     public void setUp() {
         mAccessibilityNodeRefresher = mock(AccessibilityCache.AccessibilityNodeRefresher.class);
         when(mAccessibilityNodeRefresher.refreshNode(anyObject(), anyBoolean())).thenReturn(true);
         mAccessibilityCache = new AccessibilityCache(mAccessibilityNodeRefresher);
-        AccessibilityNodeInfo.setNumInstancesInUseCounter(mNumA11yNodeInfosInUse);
-        AccessibilityWindowInfo.setNumInstancesInUseCounter(mNumA11yWinInfosInUse);
     }
 
     @After
@@ -78,8 +73,6 @@ public class AccessibilityCacheTest {
         // Make sure we're recycling all of our window and node infos
         mAccessibilityCache.clear();
         AccessibilityInteractionClient.getInstance().clearCache();
-        assertEquals(0, mNumA11yWinInfosInUse.get());
-        assertEquals(0, mNumA11yNodeInfosInUse.get());
     }
 
     @Test

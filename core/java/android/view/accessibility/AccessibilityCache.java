@@ -105,11 +105,7 @@ public class AccessibilityCache {
                 Log.i(LOG_TAG, "Caching window: " + window.getId());
             }
             final int windowId = window.getId();
-            AccessibilityWindowInfo oldWindow = mWindowCache.get(windowId);
-            if (oldWindow != null) {
-                oldWindow.recycle();
-            }
-            mWindowCache.put(windowId, AccessibilityWindowInfo.obtain(window));
+            mWindowCache.put(windowId, new AccessibilityWindowInfo(window));
         }
     }
 
@@ -225,7 +221,7 @@ public class AccessibilityCache {
             if (info != null) {
                 // Return a copy since the client calls to AccessibilityNodeInfo#recycle()
                 // will wipe the data of the cached info.
-                info = AccessibilityNodeInfo.obtain(info);
+                info = new AccessibilityNodeInfo(info);
             }
             if (DEBUG) {
                 Log.i(LOG_TAG, "get(" + accessibilityNodeId + ") = " + info);
@@ -257,7 +253,7 @@ public class AccessibilityCache {
                 List<AccessibilityWindowInfo> windows = new ArrayList<>(sortedWindowCount);
                 for (int i = sortedWindowCount - 1; i >= 0; i--) {
                     AccessibilityWindowInfo window = sortedWindows.valueAt(i);
-                    windows.add(AccessibilityWindowInfo.obtain(window));
+                    windows.add(new AccessibilityWindowInfo(window));
                     sortedWindows.removeAt(i);
                 }
 
@@ -271,7 +267,7 @@ public class AccessibilityCache {
         synchronized (mLock) {
             AccessibilityWindowInfo window = mWindowCache.get(windowId);
             if (window != null) {
-               return AccessibilityWindowInfo.obtain(window);
+                return new AccessibilityWindowInfo(window);
             }
             return null;
         }
@@ -326,14 +322,12 @@ public class AccessibilityCache {
                 final long oldParentId = oldInfo.getParentNodeId();
                 if (info.getParentNodeId() != oldParentId) {
                     clearSubTreeLocked(windowId, oldParentId);
-                } else {
-                    oldInfo.recycle();
                 }
            }
 
             // Cache a copy since the client calls to AccessibilityNodeInfo#recycle()
             // will wipe the data of the cached info.
-            AccessibilityNodeInfo clone = AccessibilityNodeInfo.obtain(info);
+            AccessibilityNodeInfo clone = new AccessibilityNodeInfo(info);
             nodes.put(sourceId, clone);
             if (clone.isAccessibilityFocused()) {
                 if (mAccessibilityFocus != AccessibilityNodeInfo.UNDEFINED_ITEM_ID
@@ -371,12 +365,7 @@ public class AccessibilityCache {
     }
 
     private void clearWindowCache() {
-        final int windowCount = mWindowCache.size();
-        for (int i = windowCount - 1; i >= 0; i--) {
-            AccessibilityWindowInfo window = mWindowCache.valueAt(i);
-            window.recycle();
-            mWindowCache.removeAt(i);
-        }
+        mWindowCache.clear();
         mIsAllWindowsCached = false;
     }
 
@@ -390,13 +379,6 @@ public class AccessibilityCache {
         LongSparseArray<AccessibilityNodeInfo> nodes = mNodeCache.get(windowId);
         if (nodes == null) {
             return;
-        }
-        // Recycle the nodes before clearing the cache.
-        final int nodeCount = nodes.size();
-        for (int i = nodeCount - 1; i >= 0; i--) {
-            AccessibilityNodeInfo info = nodes.valueAt(i);
-            nodes.removeAt(i);
-            info.recycle();
         }
         mNodeCache.remove(windowId);
     }
@@ -440,11 +422,9 @@ public class AccessibilityCache {
         for (int i = 0; i < childCount; i++) {
             final long childNodeId = current.getChildId(i);
             if (clearSubTreeRecursiveLocked(nodes, childNodeId)) {
-                current.recycle();
                 return true;
             }
         }
-        current.recycle();
         return false;
     }
 
