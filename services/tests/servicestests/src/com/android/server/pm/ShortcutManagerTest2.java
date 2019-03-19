@@ -35,6 +35,7 @@ import android.app.ActivityManager;
 import android.app.Person;
 import android.content.ComponentName;
 import android.content.Intent;
+import android.content.LocusId;
 import android.content.pm.ShortcutInfo;
 import android.content.res.Resources;
 import android.graphics.BitmapFactory;
@@ -895,6 +896,7 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
                 .setIntent(makeIntent("action", ShortcutActivity.class, "key", "val"))
                 .setRank(123)
                 .setExtras(pb)
+                .setLocusId(new LocusId("1.2.3.4.5"))
                 .build();
         sorig.setTimestamp(mInjectedCurrentTimeMillis);
 
@@ -906,6 +908,7 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
                 .setPersons(list(makePerson("person1", "personKey1", "personUri1"),
                         makePerson("person2", "personKey2", "personUri2")).toArray(new Person[2]))
                 .setRank(456)
+                .setLocusId(new LocusId("6.7.8.9"))
                 .build();
         sorig2.setTimestamp(mInjectedCurrentTimeMillis);
 
@@ -946,6 +949,7 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         assertEquals("personUri", si.getPersons()[0].getUri());
         assertEquals(0, si.getRank());
         assertEquals(1, si.getExtras().getInt("k"));
+        assertEquals("1.2.3.4.5", si.getLocusId().getId());
 
         assertEquals(ShortcutInfo.FLAG_DYNAMIC | ShortcutInfo.FLAG_HAS_ICON_FILE
                 | ShortcutInfo.FLAG_STRINGS_RESOLVED, si.getFlags());
@@ -959,6 +963,7 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         assertEquals(1, si.getRank());
         assertEquals(2, si.getPersons().length);
         assertEquals("personUri2", si.getPersons()[1].getUri());
+        assertEquals("6.7.8.9", si.getLocusId().getId());
 
         dumpUserFile(USER_10);
     }
