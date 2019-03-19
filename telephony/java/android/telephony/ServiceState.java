@@ -30,7 +30,7 @@ import android.os.Parcelable;
 import android.telephony.AccessNetworkConstants.AccessNetworkType;
 import android.telephony.AccessNetworkConstants.TransportType;
 import android.telephony.NetworkRegistrationInfo.Domain;
-import android.telephony.NetworkRegistrationInfo.NRStatus;
+import android.telephony.NetworkRegistrationInfo.NRState;
 import android.text.TextUtils;
 
 import java.lang.annotation.Retention;
@@ -647,7 +647,8 @@ public class ServiceState implements Parcelable {
         final NetworkRegistrationInfo regState = getNetworkRegistrationInfo(
                 NetworkRegistrationInfo.DOMAIN_PS, AccessNetworkConstants.TRANSPORT_TYPE_WWAN);
         if (regState != null) {
-            return (regState.getRegState() == NetworkRegistrationInfo.REG_STATE_ROAMING);
+            return regState.getRegistrationState()
+                    == NetworkRegistrationInfo.REGISTRATION_STATE_ROAMING;
         }
         return false;
     }
@@ -1133,10 +1134,10 @@ public class ServiceState implements Parcelable {
         NetworkRegistrationInfo regState = getNetworkRegistrationInfo(
                 NetworkRegistrationInfo.DOMAIN_CS, AccessNetworkConstants.TRANSPORT_TYPE_WWAN);
         if (regState == null) {
-            regState = new NetworkRegistrationInfo(
-                    NetworkRegistrationInfo.DOMAIN_CS, AccessNetworkConstants.TRANSPORT_TYPE_WWAN,
-                    ServiceState.ROAMING_TYPE_NOT_ROAMING, TelephonyManager.NETWORK_TYPE_UNKNOWN, 0,
-                    false, null, null);
+            regState = new NetworkRegistrationInfo.Builder()
+                    .setDomain(NetworkRegistrationInfo.DOMAIN_CS)
+                    .setTransportType(AccessNetworkConstants.TRANSPORT_TYPE_WWAN)
+                    .build();
             addNetworkRegistrationInfo(regState);
         }
         regState.setRoamingType(type);
@@ -1154,10 +1155,10 @@ public class ServiceState implements Parcelable {
         NetworkRegistrationInfo regState = getNetworkRegistrationInfo(
                 NetworkRegistrationInfo.DOMAIN_PS, AccessNetworkConstants.TRANSPORT_TYPE_WWAN);
         if (regState == null) {
-            regState = new NetworkRegistrationInfo(
-                    NetworkRegistrationInfo.DOMAIN_PS, AccessNetworkConstants.TRANSPORT_TYPE_WWAN,
-                    ServiceState.ROAMING_TYPE_NOT_ROAMING, TelephonyManager.NETWORK_TYPE_UNKNOWN, 0,
-                    false, null, null);
+            regState = new NetworkRegistrationInfo.Builder()
+                    .setDomain(NetworkRegistrationInfo.DOMAIN_PS)
+                    .setTransportType(AccessNetworkConstants.TRANSPORT_TYPE_WWAN)
+                    .build();
             addNetworkRegistrationInfo(regState);
         }
         regState.setRoamingType(type);
@@ -1329,10 +1330,10 @@ public class ServiceState implements Parcelable {
         NetworkRegistrationInfo regState = getNetworkRegistrationInfo(
                 NetworkRegistrationInfo.DOMAIN_CS, AccessNetworkConstants.TRANSPORT_TYPE_WWAN);
         if (regState == null) {
-            regState = new NetworkRegistrationInfo(
-                    NetworkRegistrationInfo.DOMAIN_CS, AccessNetworkConstants.TRANSPORT_TYPE_WWAN,
-                    ServiceState.ROAMING_TYPE_NOT_ROAMING, TelephonyManager.NETWORK_TYPE_UNKNOWN,
-                    0, false, null, null);
+            regState = new NetworkRegistrationInfo.Builder()
+                    .setDomain(NetworkRegistrationInfo.DOMAIN_CS)
+                    .setTransportType(AccessNetworkConstants.TRANSPORT_TYPE_WWAN)
+                    .build();
             addNetworkRegistrationInfo(regState);
         }
         regState.setAccessNetworkTechnology(
@@ -1357,10 +1358,10 @@ public class ServiceState implements Parcelable {
                 NetworkRegistrationInfo.DOMAIN_PS, AccessNetworkConstants.TRANSPORT_TYPE_WWAN);
 
         if (regState == null) {
-            regState = new NetworkRegistrationInfo(
-                    NetworkRegistrationInfo.DOMAIN_PS, AccessNetworkConstants.TRANSPORT_TYPE_WWAN,
-                    ServiceState.ROAMING_TYPE_NOT_ROAMING, TelephonyManager.NETWORK_TYPE_UNKNOWN,
-                    0, false, null, null);
+            regState = new NetworkRegistrationInfo.Builder()
+                    .setDomain(NetworkRegistrationInfo.DOMAIN_PS)
+                    .setTransportType(AccessNetworkConstants.TRANSPORT_TYPE_WWAN)
+                    .build();
             addNetworkRegistrationInfo(regState);
         }
         regState.setAccessNetworkTechnology(
@@ -1386,15 +1387,15 @@ public class ServiceState implements Parcelable {
     }
 
     /**
-     * Get the NR 5G status of the mobile data network.
-     * @return the NR 5G status.
+     * Get the NR 5G state of the mobile data network.
+     * @return the NR 5G state.
      * @hide
      */
-    public @NRStatus int getNrStatus() {
+    public @NRState int getNrState() {
         final NetworkRegistrationInfo regState = getNetworkRegistrationInfo(
                 NetworkRegistrationInfo.DOMAIN_PS, AccessNetworkConstants.TRANSPORT_TYPE_WWAN);
-        if (regState == null) return NetworkRegistrationInfo.NR_STATUS_NONE;
-        return regState.getNrStatus();
+        if (regState == null) return NetworkRegistrationInfo.NR_STATE_NONE;
+        return regState.getNrState();
     }
 
     /**
@@ -1578,8 +1579,8 @@ public class ServiceState implements Parcelable {
     public @TelephonyManager.NetworkType int getDataNetworkType() {
         final NetworkRegistrationInfo iwlanRegState = getNetworkRegistrationInfo(
                 NetworkRegistrationInfo.DOMAIN_PS, AccessNetworkConstants.TRANSPORT_TYPE_WLAN);
-        if (iwlanRegState != null
-                && iwlanRegState.getRegState() == NetworkRegistrationInfo.REG_STATE_HOME) {
+        if (iwlanRegState != null && iwlanRegState.getRegistrationState()
+                == NetworkRegistrationInfo.REGISTRATION_STATE_HOME) {
             // If the device is on IWLAN, return IWLAN as the network type. This is to simulate the
             // behavior of legacy mode device. In the future caller should use
             // getNetworkRegistrationInfo() to retrieve the actual data network type on cellular
