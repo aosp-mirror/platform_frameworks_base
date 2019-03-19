@@ -13,7 +13,6 @@ android_test {
         "mockito-target-minus-junit4",
         "platform-test-annotations",
         "services.core",
-        "services.ipmemorystore",
         "services.net",
     ],
     libs: [

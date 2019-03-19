@@ -841,6 +841,9 @@ aidl_interface {
         "core/java/android/net/dhcp/IDhcpServerCallbacks.aidl",
         "core/java/android/net/ip/IIpClient.aidl",
         "core/java/android/net/ip/IIpClientCallbacks.aidl",
+        "core/java/android/net/IIpMemoryStore.aidl",
+        "core/java/android/net/IIpMemoryStoreCallbacks.aidl",
+        "core/java/android/net/ipmemorystore/**/*.aidl",
     ],
     backend: {
         ndk: {
@@ -854,12 +857,20 @@ aidl_interface {
 }
 
 aidl_interface {
+    name: "ipmemorystore-aidl-interfaces",
+    local_include_dir: "core/java",
+    srcs: [
+        "core/java/android/net/IIpMemoryStore.aidl",
+        "core/java/android/net/IIpMemoryStoreCallbacks.aidl",
+        "core/java/android/net/ipmemorystore/**/*.aidl",
+    ],
+}
+
+aidl_interface {
     name: "networkstack-aidl-framework",
     local_include_dir: "core/java",
     srcs: [
         "core/java/android/net/TcpKeepalivePacketDataParcelable.aidl",
-        "core/java/android/net/IIpMemoryStore.aidl",
-        "core/java/android/net/ipmemorystore/**/*.aidl",
     ],
     api_dir: "aidl/networkstack",
     backend: {
@@ -870,18 +881,25 @@ aidl_interface {
 }
 
 filegroup {
-    name: "framework-networkstack-shared-srcs",
+    name: "framework-annotations",
     srcs: [
-        // TODO: remove these annotations as soon as we can use andoid.support.annotations.*
         "core/java/android/annotation/NonNull.java",
         "core/java/android/annotation/Nullable.java",
         "core/java/android/annotation/IntDef.java",
         "core/java/android/annotation/IntRange.java",
         "core/java/android/annotation/UnsupportedAppUsage.java",
-        "core/java/android/net/DhcpResults.java",
-        "core/java/android/util/LocalLog.java",
         "core/java/com/android/internal/annotations/GuardedBy.java",
         "core/java/com/android/internal/annotations/VisibleForTesting.java",
+    ]
+}
+
+filegroup {
+    name: "framework-networkstack-shared-srcs",
+    srcs: [
+        // TODO: remove these annotations as soon as we can use andoid.support.annotations.*
+        ":framework-annotations",
+        "core/java/android/net/DhcpResults.java",
+        "core/java/android/util/LocalLog.java",
         "core/java/com/android/internal/util/HexDump.java",
         "core/java/com/android/internal/util/IndentingPrintWriter.java",
         "core/java/com/android/internal/util/IState.java",

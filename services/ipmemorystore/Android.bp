@@ -1,4 +1,0 @@
-java_library_static {
-    name: "services.ipmemorystore",
-    srcs: ["java/**/*.java"],
-}
