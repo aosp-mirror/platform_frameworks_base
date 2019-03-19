@@ -4016,6 +4016,16 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a
+     * {@link com.android.server.attention.AttentionManagerService} for attention services.
+     *
+     * @see #getSystemService(String)
+     * @see android.server.attention.AttentionManagerService
+     * @hide
+     */
+    public static final String ATTENTION_SERVICE = "attention";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a
      * {@link android.view.inputmethod.InputMethodManager} for accessing input
      * methods.
      *
