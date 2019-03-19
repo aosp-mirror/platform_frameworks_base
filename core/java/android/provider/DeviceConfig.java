@@ -216,6 +216,15 @@ public final class DeviceConfig {
     public static final String NAMESPACE_RUNTIME_NATIVE_BOOT = "runtime_native_boot";
 
     /**
+     * Namespace for system scheduler related features. These features will be applied
+     * immediately upon change.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String NAMESPACE_SCHEDULER = "scheduler";
+
+    /**
      * Namespace for System UI related features.
      *
      * @hide
@@ -300,25 +309,6 @@ public final class DeviceConfig {
          * value from the build system.
          */
         String ISOLATED_STORAGE_ENABLED = "isolated_storage_enabled";
-    }
-
-    /**
-     * Namespace for system scheduler related features. These features will be applied
-     * immediately upon change.
-     *
-     * @hide
-     */
-    @SystemApi
-    public interface Scheduler {
-        String NAMESPACE = "scheduler";
-
-        /**
-         * Flag for enabling fast metrics collection in system scheduler.
-         * A flag value of '' or '0' means the fast metrics collection is not
-         * enabled. Otherwise fast metrics collection is enabled and flag value
-         * is the order id.
-         */
-        String ENABLE_FAST_METRICS_COLLECTION = "enable_fast_metrics_collection";
     }
 
     private static final Object sLock = new Object();

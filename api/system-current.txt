@@ -5880,6 +5880,7 @@ package android.provider {
     field public static final String NAMESPACE_RUNTIME = "runtime";
     field public static final String NAMESPACE_RUNTIME_NATIVE = "runtime_native";
     field public static final String NAMESPACE_RUNTIME_NATIVE_BOOT = "runtime_native_boot";
+    field public static final String NAMESPACE_SCHEDULER = "scheduler";
     field public static final String NAMESPACE_SYSTEMUI = "systemui";
     field public static final String NAMESPACE_TEXTCLASSIFIER = "textclassifier";
   }
@@ -5906,11 +5907,6 @@ package android.provider {
     method public long getLong(@NonNull String, long);
     method @NonNull public String getNamespace();
     method @Nullable public String getString(@NonNull String, @Nullable String);
-  }
-
-  public static interface DeviceConfig.Scheduler {
-    field public static final String ENABLE_FAST_METRICS_COLLECTION = "enable_fast_metrics_collection";
-    field public static final String NAMESPACE = "scheduler";
   }
 
   public static interface DeviceConfig.Storage {
