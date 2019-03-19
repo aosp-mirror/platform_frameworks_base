@@ -302,6 +302,7 @@ cc_library_shared {
         "libnativewindow",
         "libhwui",
         "libdl",
+        "libdl_android",
         "libstatslog",
         "server_configurable_flags",
     ],
