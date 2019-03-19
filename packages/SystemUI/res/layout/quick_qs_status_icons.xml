@@ -26,7 +26,9 @@
     android:layout_below="@id/quick_status_bar_system_icons"
     android:clipChildren="false"
     android:clipToPadding="false"
-    android:minHeight="20dp" >
+    android:minHeight="20dp"
+    android:clickable="false"
+    android:focusable="true">
 
     <com.android.systemui.statusbar.policy.DateView
         android:id="@+id/date"
