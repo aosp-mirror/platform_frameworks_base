@@ -3741,6 +3741,7 @@ class StorageManagerService extends IStorageManager.Stub
                         case "com.facebook.katana": // b/123996076
                         case "jp.naver.line.android": // b/124767356
                         case "com.mxtech.videoplayer.ad": // b/124531483
+                        case "com.whatsapp": // b/124766614
                             return Zygote.MOUNT_EXTERNAL_LEGACY;
                     }
                 }
