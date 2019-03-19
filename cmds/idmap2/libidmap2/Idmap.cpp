@@ -452,7 +452,7 @@ std::unique_ptr<const Idmap> Idmap::FromApkAssets(
       continue;
     }
 
-    if (!enforce_overlayable) {
+    if (enforce_overlayable) {
       Result<Unit> success =
           CheckOverlayable(*target_pkg, *overlay_info, fulfilled_policies, target_resid);
       if (!success) {
