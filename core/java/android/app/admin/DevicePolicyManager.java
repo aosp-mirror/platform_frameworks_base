@@ -6348,7 +6348,6 @@ public class DevicePolicyManager {
      */
     @RequiresPermission(value = android.Manifest.permission.INTERACT_ACROSS_USERS,
             conditional = true)
-    @SystemApi
     public @Nullable ComponentName getProfileOwnerAsUser(@NonNull UserHandle user) {
         if (mService != null) {
             try {

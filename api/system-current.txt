@@ -665,7 +665,6 @@ package android.app.admin {
     method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public java.util.List<java.lang.String> getPermittedAccessibilityServices(int);
     method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public java.util.List<java.lang.String> getPermittedInputMethodsForCurrentUser();
     method @Nullable public android.content.ComponentName getProfileOwner() throws java.lang.IllegalArgumentException;
-    method @Nullable @RequiresPermission(value=android.Manifest.permission.INTERACT_ACROSS_USERS, conditional=true) public android.content.ComponentName getProfileOwnerAsUser(@NonNull android.os.UserHandle);
     method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public String getProfileOwnerNameAsUser(int) throws java.lang.IllegalArgumentException;
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public int getUserProvisioningState();
     method public boolean isDeviceManaged();
