@@ -889,8 +889,6 @@ final class AutofillManagerServiceImpl
         } else {
             pw.println();
             mInfo.dump(prefix2, pw);
-            pw.print(prefix); pw.print("Service Label: "); pw.println(getServiceLabelLocked());
-            pw.print(prefix); pw.print("Target SDK: "); pw.println(getTargedSdkLocked());
         }
         pw.print(prefix); pw.print("Default component: "); pw.println(getContext()
                 .getString(R.string.config_defaultAutofillService));

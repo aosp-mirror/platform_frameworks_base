@@ -327,6 +327,10 @@ public abstract class AbstractPerUserSystemService<S extends AbstractPerUserSyst
     @GuardedBy("mLock")
     protected void dumpLocked(@NonNull String prefix, @NonNull PrintWriter pw) {
         pw.print(prefix); pw.print("User: "); pw.println(mUserId);
+        if (mServiceInfo != null) {
+            pw.print(prefix); pw.print("Service Label: "); pw.println(getServiceLabelLocked());
+            pw.print(prefix); pw.print("Target SDK: "); pw.println(getTargedSdkLocked());
+        }
         if (mMaster.mServiceNameResolver != null) {
             pw.print(prefix); pw.print("Name resolver: ");
             mMaster.mServiceNameResolver.dumpShort(pw, mUserId); pw.println();
