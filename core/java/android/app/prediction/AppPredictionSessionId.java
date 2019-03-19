@@ -22,7 +22,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
- * TODO (b/111701043) : Add java doc
+ * The id for an app prediction session. See {@link AppPredictor}.
  *
  * @hide
  */
@@ -33,6 +33,8 @@ public final class AppPredictionSessionId implements Parcelable {
     private final String mId;
 
     /**
+     * Creates a new id for a prediction session.
+     *
      * @hide
      */
     public AppPredictionSessionId(@NonNull String id) {
@@ -58,7 +60,6 @@ public final class AppPredictionSessionId implements Parcelable {
 
     @Override
     public int hashCode() {
-        // Ensure that the id has a consistent hash
         return mId.hashCode();
     }
 
@@ -72,9 +73,6 @@ public final class AppPredictionSessionId implements Parcelable {
         dest.writeString(mId);
     }
 
-    /**
-     * @see Parcelable.Creator
-     */
     public static final @android.annotation.NonNull Parcelable.Creator<AppPredictionSessionId> CREATOR =
             new Parcelable.Creator<AppPredictionSessionId>() {
                 public AppPredictionSessionId createFromParcel(Parcel parcel) {

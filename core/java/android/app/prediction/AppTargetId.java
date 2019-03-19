@@ -22,7 +22,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
- * The id for a prediction target.
+ * The id for a prediction target. See {@link AppTarget}.
+ *
  * @hide
  */
 @SystemApi
@@ -33,7 +34,7 @@ public final class AppTargetId implements Parcelable {
     private final String mId;
 
     /**
-     * TODO(b/123591863): Add java docs
+     * Creates a new id for a prediction target.
      *
      * @hide
      */
@@ -49,6 +50,7 @@ public final class AppTargetId implements Parcelable {
 
     /**
      * Returns the id.
+     *
      * @hide
      */
     @NonNull
@@ -66,7 +68,6 @@ public final class AppTargetId implements Parcelable {
 
     @Override
     public int hashCode() {
-        // Ensure that the id has a consistent hash
         return mId.hashCode();
     }
 
@@ -80,9 +81,6 @@ public final class AppTargetId implements Parcelable {
         dest.writeString(mId);
     }
 
-    /**
-     * @see Creator
-     */
     public static final @android.annotation.NonNull Creator<AppTargetId> CREATOR =
             new Creator<AppTargetId>() {
                 public AppTargetId createFromParcel(Parcel parcel) {

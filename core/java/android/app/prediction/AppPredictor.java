@@ -39,7 +39,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
 /**
- * TODO (b/111701043) : Add java doc
+ * Class that represents an App Prediction client.
  *
  * <p>
  * Usage: <pre> {@code
@@ -49,14 +49,20 @@ import java.util.function.Consumer;
  *
  *    void onCreate() {
  *         mClient = new AppPredictor(...)
+ *         mClient.registerPredictionUpdates(...)
  *    }
  *
  *    void onStart() {
- *        mClient.requestPredictionUpdate();
+ *        mClient.requestPredictionUpdate()
+ *    }
+ *
+ *    void onClick(...) {
+ *        mClient.notifyAppTargetEvent(...)
  *    }
  *
  *    void onDestroy() {
- *        mClient.close();
+ *        mClient.unregisterPredictionUpdates()
+ *        mClient.close()
  *    }
  *
  * }</pre>
@@ -83,7 +89,8 @@ public final class AppPredictor {
      * The caller should call {@link AppPredictor#destroy()} to dispose the client once it
      * no longer used.
      *
-     * @param predictionContext The prediction context
+     * @param context The {@link Context} of the user of this {@link AppPredictor}.
+     * @param predictionContext The prediction context.
      */
     AppPredictor(@NonNull Context context, @NonNull AppPredictionContext predictionContext) {
         IBinder b = ServiceManager.getService(Context.APP_PREDICTION_SERVICE);
@@ -102,6 +109,8 @@ public final class AppPredictor {
 
     /**
      * Notifies the prediction service of an app target event.
+     *
+     * @param event The {@link AppTargetEvent} that represents the app target event.
      */
     public void notifyAppTargetEvent(@NonNull AppTargetEvent event) {
         if (mIsClosed.get()) {
@@ -118,6 +127,9 @@ public final class AppPredictor {
 
     /**
      * Notifies the prediction service when the targets in a launch location are shown to the user.
+     *
+     * @param launchLocation The launch location where the targets are shown to the user.
+     * @param targetIds List of {@link AppTargetId}s that are shown to the user.
      */
     public void notifyLocationShown(@NonNull String launchLocation,
             @NonNull List<AppTargetId> targetIds) {
@@ -138,7 +150,10 @@ public final class AppPredictor {
      * Requests the prediction service provide continuous updates of App predictions via the
      * provided callback, until the given callback is unregistered.
      *
-     * @see Callback#onTargetsAvailable(List)
+     * @see Callback#onTargetsAvailable(List).
+     *
+     * @param callbackExecutor The callback executor to use when calling the callback.
+     * @param callback The Callback to be called when updates of App predictions are available.
      */
     public void registerPredictionUpdates(@NonNull @CallbackExecutor Executor callbackExecutor,
             @NonNull AppPredictor.Callback callback) {
@@ -164,6 +179,10 @@ public final class AppPredictor {
     /**
      * Requests the prediction service to stop providing continuous updates to the provided
      * callback until the callback is re-registered.
+     *
+     * @see {@link AppPredictor#registerPredictionUpdates(Executor, Callback)}.
+     *
+     * @param callback The callback to be unregistered.
      */
     public void unregisterPredictionUpdates(@NonNull AppPredictor.Callback callback) {
         if (mIsClosed.get()) {
@@ -187,7 +206,7 @@ public final class AppPredictor {
      * Requests the prediction service to dispatch a new set of App predictions via the provided
      * callback.
      *
-     * @see Callback#onTargetsAvailable(List)
+     * @see Callback#onTargetsAvailable(List).
      */
     public void requestPredictionUpdate() {
         if (mIsClosed.get()) {
@@ -205,6 +224,10 @@ public final class AppPredictor {
     /**
      * Returns a new list of AppTargets sorted based on prediction rank or {@code null} if the
      * ranker is not available.
+     *
+     * @param targets List of app targets to be sorted.
+     * @param callbackExecutor The callback executor to use when calling the callback.
+     * @param callback The callback to return the sorted list of app targets.
      */
     @Nullable
     public void sortTargets(@NonNull List<AppTarget> targets,
@@ -255,7 +278,7 @@ public final class AppPredictor {
     }
 
     /**
-     * TODO(b/123591863): Add java docs
+     * Returns the id of this prediction session.
      *
      * @hide
      */
@@ -271,7 +294,7 @@ public final class AppPredictor {
 
         /**
          * Called when a new set of predicted app targets are available.
-         * @param targets Sorted list of predicted targets
+         * @param targets Sorted list of predicted targets.
          */
         void onTargetsAvailable(@NonNull List<AppTarget> targets);
     }

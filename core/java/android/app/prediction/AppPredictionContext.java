@@ -26,7 +26,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
- * TODO(b/111701043): Add java docs
+ * Class that provides contextual information about the environment in which the app prediction is
+ * used, such as package name, UI in which the app targets are shown, and number of targets.
  *
  * @hide
  */
@@ -57,20 +58,32 @@ public final class AppPredictionContext implements Parcelable {
         mExtras = parcel.readBundle();
     }
 
+    /**
+     * Returns the UI surface of the prediction context.
+     */
     @NonNull
     public String getUiSurface() {
         return mUiSurface;
     }
 
+    /**
+     * Returns the predicted target count
+     */
     public @IntRange(from = 0) int getPredictedTargetCount() {
         return mPredictedTargetCount;
     }
 
+    /**
+     * Returns the package name of the prediction context.
+     */
     @NonNull
     public String getPackageName() {
         return mPackageName;
     }
 
+    /**
+     * Returns the extras of the prediction context.
+     */
     @Nullable
     public Bundle getExtras() {
         return mExtras;
@@ -100,9 +113,6 @@ public final class AppPredictionContext implements Parcelable {
         dest.writeBundle(mExtras);
     }
 
-    /**
-     * @see Parcelable.Creator
-     */
     public static final @android.annotation.NonNull Parcelable.Creator<AppPredictionContext> CREATOR =
             new Parcelable.Creator<AppPredictionContext>() {
                 public AppPredictionContext createFromParcel(Parcel parcel) {
@@ -132,7 +142,7 @@ public final class AppPredictionContext implements Parcelable {
         private Bundle mExtras;
 
         /**
-         * TODO(b/123591863): Add java docs
+         * @param context The {@link Context} of the prediction client.
          *
          * @hide
          */
