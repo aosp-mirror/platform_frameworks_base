@@ -8064,7 +8064,7 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setDataActivationState(int);
     method @Deprecated @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setDataEnabled(int, boolean);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setDataRoamingEnabled(boolean);
-    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setMultisimCarrierRestriction(boolean);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setMultiSimCarrierRestriction(boolean);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean setPreferredNetworkTypeBitmask(long);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean setRadio(boolean);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean setRadioPower(boolean);
