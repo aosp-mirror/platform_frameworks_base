@@ -292,8 +292,10 @@ Asset::Asset(void)
 
     pAsset = new _FileAsset;
     result = pAsset->openChunk(dataMap);
-    if (result != NO_ERROR)
+    if (result != NO_ERROR) {
+        delete pAsset;
         return NULL;
+    }
 
     pAsset->mAccessMode = mode;
     return pAsset;
