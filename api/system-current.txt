@@ -5747,10 +5747,10 @@ package android.permission {
   }
 
   public final class RuntimePermissionUsageInfo implements android.os.Parcelable {
-    ctor public RuntimePermissionUsageInfo(@NonNull CharSequence, int);
+    ctor public RuntimePermissionUsageInfo(@NonNull String, int);
     method public int describeContents();
     method public int getAppAccessCount();
-    method @NonNull public CharSequence getName();
+    method @NonNull public String getName();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.permission.RuntimePermissionUsageInfo> CREATOR;
   }
