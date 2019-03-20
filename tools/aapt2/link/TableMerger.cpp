@@ -58,7 +58,7 @@ bool TableMerger::MergeImpl(const Source& src, ResourceTable* table, bool overla
       // valid. This is because un-mangled references are mangled, then looked up at resolution
       // time. Also, when linking, we convert references with no package name to use the compilation
       // package name.
-      error |= !DoMerge(src, table, package.get(), false /*mangle*/, overlay, allow_new);
+      error |= !DoMerge(src, package.get(), false /*mangle*/, overlay, allow_new);
     }
   }
   return !error;
@@ -78,7 +78,7 @@ bool TableMerger::MergeAndMangle(const Source& src, const StringPiece& package_n
 
     bool mangle = package_name != context_->GetCompilationPackage();
     merged_packages_.insert(package->name);
-    error |= !DoMerge(src, table, package.get(), mangle, false /*overlay*/, true /*allow_new*/);
+    error |= !DoMerge(src, package.get(), mangle, false /*overlay*/, true /*allow_new*/);
   }
   return !error;
 }
@@ -213,9 +213,8 @@ static ResourceTable::CollisionResult MergeConfigValue(IAaptContext* context,
   return collision_result;
 }
 
-bool TableMerger::DoMerge(const Source& src, ResourceTable* src_table,
-                          ResourceTablePackage* src_package, bool mangle_package, bool overlay,
-                          bool allow_new_resources) {
+bool TableMerger::DoMerge(const Source& src, ResourceTablePackage* src_package, bool mangle_package,
+                          bool overlay, bool allow_new_resources) {
   bool error = false;
 
   for (auto& src_type : src_package->types) {
@@ -337,8 +336,7 @@ bool TableMerger::MergeFile(const ResourceFile& file_desc, bool overlay, io::IFi
       ->FindOrCreateValue(file_desc.config, {})
       ->value = std::move(file_ref);
 
-  return DoMerge(file->GetSource(), &table, pkg, false /*mangle*/, overlay /*overlay*/,
-                 true /*allow_new*/);
+  return DoMerge(file->GetSource(), pkg, false /*mangle*/, overlay /*overlay*/, true /*allow_new*/);
 }
 
 }  // namespace aapt
