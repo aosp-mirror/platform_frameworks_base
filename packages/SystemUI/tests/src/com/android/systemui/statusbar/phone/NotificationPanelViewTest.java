@@ -71,7 +71,7 @@ public class NotificationPanelViewTest extends SysuiTestCase {
         mDependency.injectMockDependency(ConfigurationController.class);
         mDependency.injectMockDependency(ZenModeController.class);
         NotificationWakeUpCoordinator coordinator =
-                new NotificationWakeUpCoordinator(
+                new NotificationWakeUpCoordinator(mContext,
                         new AmbientPulseManager(mContext),
                         new StatusBarStateControllerImpl());
         PulseExpansionHandler expansionHandler = new PulseExpansionHandler(mContext, coordinator);
