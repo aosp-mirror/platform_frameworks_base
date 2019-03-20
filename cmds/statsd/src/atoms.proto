@@ -1714,6 +1714,9 @@ message BluetoothClassicPairingEventReported {
     // HCI reason code associated with this event
     // Default: STATUS_UNKNOWN
     optional android.bluetooth.hci.StatusEnum reason_code = 6;
+    // A status value related to this specific event
+    // Default: 0
+    optional int64 event_value = 7;
 }
 
 /**
