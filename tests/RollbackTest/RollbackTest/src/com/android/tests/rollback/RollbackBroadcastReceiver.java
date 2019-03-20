@@ -63,6 +63,13 @@ class RollbackBroadcastReceiver extends BroadcastReceiver {
     }
 
     /**
+     * Waits forever for the next rollback broadcast.
+     */
+    Intent take() throws InterruptedException {
+        return mRollbackBroadcasts.take();
+    }
+
+    /**
      * Unregisters this broadcast receiver.
      */
     void unregister() {

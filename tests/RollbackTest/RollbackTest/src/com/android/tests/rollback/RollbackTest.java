@@ -27,7 +27,6 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
 import android.Manifest;
-import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -46,8 +45,6 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 import java.util.Collections;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -859,34 +856,14 @@ public class RollbackTest {
                     rm.getAvailableRollbacks(), TEST_APP_B);
             assertRollbackInfoEquals(TEST_APP_B, 2, 1, rollbackB);
 
-            BlockingQueue<Integer> crashQueue = new SynchronousQueue<>();
+            // Register rollback committed receiver
+            RollbackBroadcastReceiver rollbackReceiver = new RollbackBroadcastReceiver();
 
-            IntentFilter crashCountFilter = new IntentFilter();
-            crashCountFilter.addAction("com.android.tests.rollback.CRASH");
-            crashCountFilter.addCategory(Intent.CATEGORY_DEFAULT);
+            // Crash TEST_APP_A PackageWatchdog#TRIGGER_FAILURE_COUNT times to trigger rollback
+            crashCountReceiver = RollbackTestUtils.sendCrashBroadcast(context, TEST_APP_A, 5);
 
-            crashCountReceiver = new BroadcastReceiver() {
-                    @Override
-                    public void onReceive(Context context, Intent intent) {
-                        try {
-                            // Sleep long enough for packagewatchdog to be notified of crash
-                            Thread.sleep(1000);
-                            // Kill app and close AppErrorDialog
-                            ActivityManager am = context.getSystemService(ActivityManager.class);
-                            am.killBackgroundProcesses(TEST_APP_A);
-                            // Allow another package launch
-                            crashQueue.put(intent.getIntExtra("count", 0));
-                        } catch (InterruptedException e) {
-                            fail("Failed to communicate with test app");
-                        }
-                    }
-                };
-            context.registerReceiver(crashCountReceiver, crashCountFilter);
-
-            // Start apps PackageWatchdog#TRIGGER_FAILURE_COUNT times so TEST_APP_A crashes
-            do {
-                RollbackTestUtils.launchPackage(TEST_APP_A);
-            } while(crashQueue.take() < 5);
+            // Verify we received a broadcast for the rollback.
+            rollbackReceiver.take();
 
             // TEST_APP_A is automatically rolled back by the RollbackPackageHealthObserver
             assertEquals(1, RollbackTestUtils.getInstalledVersion(TEST_APP_A));

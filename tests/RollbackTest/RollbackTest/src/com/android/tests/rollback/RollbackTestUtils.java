@@ -21,6 +21,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
+import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -47,6 +48,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.SynchronousQueue;
 
 /**
  * Utilities to facilitate testing rollbacks.
@@ -187,7 +189,7 @@ class RollbackTestUtils {
     }
 
     /** Launches {@code packageName} with {@link Intent#ACTION_MAIN}. */
-    static void launchPackage(String packageName)
+    private static void launchPackage(String packageName)
             throws InterruptedException, IOException {
         Context context = InstrumentationRegistry.getContext();
         Intent intent = new Intent(Intent.ACTION_MAIN);
@@ -487,5 +489,40 @@ class RollbackTestUtils {
             }
         }
         return null;
+    }
+
+    /**
+     * Send broadcast to crash {@code packageName} {@code count} times. If {@code count} is at least
+     * {@link PackageWatchdog#TRIGGER_FAILURE_COUNT}, watchdog crash detection will be triggered.
+     */
+    static BroadcastReceiver sendCrashBroadcast(Context context, String packageName, int count)
+            throws InterruptedException, IOException {
+        BlockingQueue<Integer> crashQueue = new SynchronousQueue<>();
+        IntentFilter crashCountFilter = new IntentFilter();
+        crashCountFilter.addAction("com.android.tests.rollback.CRASH");
+        crashCountFilter.addCategory(Intent.CATEGORY_DEFAULT);
+
+        BroadcastReceiver crashCountReceiver = new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    try {
+                        // Sleep long enough for packagewatchdog to be notified of crash
+                        Thread.sleep(1000);
+                        // Kill app and close AppErrorDialog
+                        ActivityManager am = context.getSystemService(ActivityManager.class);
+                        am.killBackgroundProcesses(packageName);
+                        // Allow another package launch
+                        crashQueue.put(intent.getIntExtra("count", 0));
+                    } catch (InterruptedException e) {
+                        fail("Failed to communicate with test app");
+                    }
+                }
+            };
+        context.registerReceiver(crashCountReceiver, crashCountFilter);
+
+        do {
+            launchPackage(packageName);
+        } while(crashQueue.take() < count);
+        return crashCountReceiver;
     }
 }
