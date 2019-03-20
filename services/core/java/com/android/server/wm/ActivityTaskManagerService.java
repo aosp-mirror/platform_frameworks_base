@@ -108,10 +108,12 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_SWITC
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_VISIBILITY;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.wm.ActivityTaskManagerInternal.ASSIST_ACTIVITY_ID;
 import static com.android.server.wm.ActivityTaskManagerInternal.ASSIST_KEY_CONTENT;
 import static com.android.server.wm.ActivityTaskManagerInternal.ASSIST_KEY_DATA;
 import static com.android.server.wm.ActivityTaskManagerInternal.ASSIST_KEY_RECEIVER_EXTRAS;
 import static com.android.server.wm.ActivityTaskManagerInternal.ASSIST_KEY_STRUCTURE;
+import static com.android.server.wm.ActivityTaskManagerInternal.ASSIST_TASK_ID;
 import static com.android.server.wm.ActivityTaskManagerService.H.REPORT_TIME_TRACKER_MSG;
 import static com.android.server.wm.ActivityTaskManagerService.UiHandler.DISMISS_DIALOG_UI_MSG;
 import static com.android.server.wm.RecentsAnimationController.REORDER_KEEP_IN_PLACE;
@@ -214,6 +216,7 @@ import android.text.format.Time;
 import android.util.ArrayMap;
 import android.util.EventLog;
 import android.util.Log;
+import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
@@ -3000,6 +3003,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             if ((sendReceiver = pae.receiver) != null) {
                 // Caller wants result sent back to them.
                 sendBundle = new Bundle();
+                sendBundle.putInt(ActivityTaskManagerInternal.ASSIST_TASK_ID,
+                        pae.activity.getTaskRecord().taskId);
+                sendBundle.putBinder(ActivityTaskManagerInternal.ASSIST_ACTIVITY_ID,
+                        pae.activity.assistToken);
                 sendBundle.putBundle(ASSIST_KEY_DATA, pae.extras);
                 sendBundle.putParcelable(ASSIST_KEY_STRUCTURE, pae.structure);
                 sendBundle.putParcelable(ASSIST_KEY_CONTENT, pae.content);
@@ -6543,6 +6550,31 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 if (r != null && r.pendingResults != null) {
                     r.pendingResults.remove(pir);
                 }
+            }
+        }
+
+        @Override
+        public ActivityTokens getTopActivityForTask(int taskId) {
+            synchronized (mGlobalLock) {
+                final TaskRecord taskRecord = mRootActivityContainer.anyTaskForId(taskId);
+                if (taskRecord == null) {
+                    Slog.w(TAG, "getApplicationThreadForTopActivity failed:"
+                            + " Requested task not found");
+                    return null;
+                }
+                final ActivityRecord activity = taskRecord.getTopActivity();
+                if (activity == null) {
+                    Slog.w(TAG, "getApplicationThreadForTopActivity failed:"
+                            + " Requested activity not found");
+                    return null;
+                }
+                if (!activity.attachedToProcess()) {
+                    Slog.w(TAG, "getApplicationThreadForTopActivity failed: No process for "
+                            + activity);
+                    return null;
+                }
+                return new ActivityTokens(activity.appToken, activity.assistToken,
+                        activity.app.getThread());
             }
         }
 
