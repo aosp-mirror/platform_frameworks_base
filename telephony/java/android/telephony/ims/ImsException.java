@@ -31,7 +31,7 @@ import java.lang.annotation.RetentionPolicy;
  * @hide
  */
 @SystemApi
-public class ImsException extends Exception {
+public final class ImsException extends Exception {
 
     /**
      * The operation has failed due to an unknown or unspecified error.

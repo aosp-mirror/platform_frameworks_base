@@ -6920,7 +6920,7 @@ package android.telephony.ims {
     field public final java.util.HashMap<java.lang.String,android.os.Bundle> mParticipants;
   }
 
-  public class ImsException extends java.lang.Exception {
+  public final class ImsException extends java.lang.Exception {
     ctor public ImsException(@Nullable String);
     ctor public ImsException(@Nullable String, int);
     ctor public ImsException(@Nullable String, int, @Nullable Throwable);
