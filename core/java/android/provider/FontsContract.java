@@ -34,7 +34,6 @@ import android.graphics.fonts.FontFamily;
 import android.graphics.fonts.FontStyle;
 import android.graphics.fonts.FontVariationAxis;
 import android.net.Uri;
-import android.os.Build.VERSION_CODES;
 import android.os.CancellationSignal;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -652,17 +651,12 @@ public class FontsContract {
                 if (familyBuilder == null) {
                     familyBuilder = new FontFamily.Builder(font);
                 } else {
-                    try {
-                        familyBuilder.addFont(font);
-                    } catch (IllegalArgumentException e) {
-                        if (context.getApplicationInfo().targetSdkVersion <= VERSION_CODES.P) {
-                            // Surpress the IllegalArgumentException for keeping the backward
-                            // compatibility.
-                            continue;
-                        }
-                        throw e;
-                    }
+                    familyBuilder.addFont(font);
                 }
+            } catch (IllegalArgumentException e) {
+                // To be a compatible behavior with API28 or before, catch IllegalArgumentExcetpion
+                // thrown by native code and returns null.
+                return null;
             } catch (IOException e) {
                 continue;
             }

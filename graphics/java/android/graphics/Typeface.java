@@ -33,7 +33,6 @@ import android.graphics.fonts.FontStyle;
 import android.graphics.fonts.FontVariationAxis;
 import android.graphics.fonts.SystemFonts;
 import android.os.Build;
-import android.os.Build.VERSION_CODES;
 import android.os.ParcelFileDescriptor;
 import android.provider.FontRequest;
 import android.provider.FontsContract;
@@ -48,7 +47,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
 
 import dalvik.annotation.optimization.CriticalNative;
-import dalvik.system.VMRuntime;
 
 import libcore.util.NativeAllocationRegistry;
 
@@ -266,16 +264,7 @@ public class Typeface {
                 if (familyBuilder == null) {
                     familyBuilder = new FontFamily.Builder(fontBuilder.build());
                 } else {
-                    try {
-                        familyBuilder.addFont(fontBuilder.build());
-                    } catch (IllegalArgumentException e) {
-                        if (VMRuntime.getRuntime().getTargetSdkVersion() <= VERSION_CODES.P) {
-                            // Surpress the IllegalArgumentException for keeping the backward
-                            // compatibility.
-                            continue;
-                        }
-                        throw e;
-                    }
+                    familyBuilder.addFont(fontBuilder.build());
                 }
             }
             if (familyBuilder == null) {
@@ -297,6 +286,10 @@ public class Typeface {
             typeface = new Typeface.CustomFallbackBuilder(family)
                     .setStyle(bestFont.getStyle())
                     .build();
+        } catch (IllegalArgumentException e) {
+            // To be a compatible behavior with API28 or before, catch IllegalArgumentExcetpion
+            // thrown by native code and returns null.
+            return null;
         } catch (IOException e) {
             typeface = Typeface.DEFAULT;
         }
