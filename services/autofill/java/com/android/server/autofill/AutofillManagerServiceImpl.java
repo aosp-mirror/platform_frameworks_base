@@ -156,6 +156,7 @@ final class AutofillManagerServiceImpl
     /** When was {@link PruneTask} last executed? */
     private long mLastPrune = 0;
 
+    // TODO(b/128911469): move to AutofillManagerService
     /**
      * Object used to set the name of the augmented autofill service.
      */

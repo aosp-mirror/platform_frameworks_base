@@ -569,6 +569,42 @@ public final class AutofillManagerService
         }
     }
 
+    // Called by Shell command
+    boolean isDefaultAugmentedServiceEnabled(@UserIdInt int userId) {
+        enforceCallingPermissionForManagement();
+
+        synchronized (mLock) {
+            final AutofillManagerServiceImpl service = getServiceForUserLocked(userId);
+            if (service != null) {
+                return service.mAugmentedAutofillResolver.isDefaultServiceEnabled(userId);
+            }
+        }
+        return false;
+    }
+
+    // Called by Shell command
+    boolean setDefaultAugmentedServiceEnabled(@UserIdInt int userId, boolean enabled) {
+        Slog.i(mTag, "setDefaultAugmentedServiceEnabled() for userId " + userId + ": " + enabled);
+        enforceCallingPermissionForManagement();
+
+        synchronized (mLock) {
+            final AutofillManagerServiceImpl service = getServiceForUserLocked(userId);
+            if (service != null) {
+                final boolean changed = service.mAugmentedAutofillResolver
+                        .setDefaultServiceEnabled(userId, enabled);
+                if (changed) {
+                    service.updateRemoteAugmentedAutofillService();
+                    return true;
+                } else {
+                    if (debug) {
+                        Slog.d(TAG, "setDefaultAugmentedServiceEnabled(): already " + enabled);
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
     private void setLoggingLevelsLocked(boolean debug, boolean verbose) {
         com.android.server.autofill.Helper.sDebug = debug;
         android.view.autofill.Helper.sDebug = debug;

@@ -114,7 +114,7 @@ public final class ContentCaptureManagerServiceShellCommand extends ShellCommand
             case "temporary-service":
                 return setTemporaryService(pw);
             case "default-service-enabled":
-                return setDefaultServiceEnabled();
+                return setDefaultServiceEnabled(pw);
             default:
                 pw.println("Invalid set: " + what);
                 return -1;
@@ -159,10 +159,13 @@ public final class ContentCaptureManagerServiceShellCommand extends ShellCommand
         return 0;
     }
 
-    private int setDefaultServiceEnabled() {
+    private int setDefaultServiceEnabled(PrintWriter pw) {
         final int userId = getNextIntArgRequired();
-        final boolean enabled = Boolean.parseBoolean(getNextArg());
-        mService.setDefaultServiceEnabled(userId, enabled);
+        final boolean enabled = Boolean.parseBoolean(getNextArgRequired());
+        final boolean changed = mService.setDefaultServiceEnabled(userId, enabled);
+        if (!changed) {
+            pw.println("already " + enabled);
+        }
         return 0;
     }
 

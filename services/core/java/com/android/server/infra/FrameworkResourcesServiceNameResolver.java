@@ -174,21 +174,33 @@ public final class FrameworkResourcesServiceNameResolver implements ServiceNameR
     }
 
     @Override
-    public void setDefaultServiceEnabled(int userId, boolean enabled) {
+    public boolean setDefaultServiceEnabled(int userId, boolean enabled) {
         synchronized (mLock) {
+            final boolean currentlyEnabled = isDefaultServiceEnabledLocked(userId);
+            if (currentlyEnabled == enabled) {
+                Slog.i(TAG, "setDefaultServiceEnabled(" + userId + "): already " + enabled);
+                return false;
+            }
             if (enabled) {
+                Slog.i(TAG, "disabling default service for user " + userId);
                 mDefaultServicesDisabled.removeAt(userId);
             } else {
+                Slog.i(TAG, "enabling default service for user " + userId);
                 mDefaultServicesDisabled.put(userId, true);
             }
         }
+        return true;
     }
 
     @Override
     public boolean isDefaultServiceEnabled(int userId) {
         synchronized (mLock) {
-            return !mDefaultServicesDisabled.get(userId);
+            return isDefaultServiceEnabledLocked(userId);
         }
+    }
+
+    private boolean isDefaultServiceEnabledLocked(int userId) {
+        return !mDefaultServicesDisabled.get(userId);
     }
 
     @Override

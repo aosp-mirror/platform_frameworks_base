@@ -109,6 +109,13 @@ public final class AutofillManagerServiceShellCommand extends ShellCommand {
                     + "implementation.");
             pw.println("    To reset, call with just the USER_ID argument.");
             pw.println("");
+            pw.println("  set default-augmented-service-enabled USER_ID [true|false]");
+            pw.println("    Enable / disable the default augmented autofill service for the user.");
+            pw.println("");
+            pw.println("  get default-augmented-service-enabled USER_ID");
+            pw.println("    Checks whether the default augmented autofill service is enabled for "
+                    + "the user.");
+            pw.println("");
             pw.println("  list sessions [--user USER_ID]");
             pw.println("    Lists all pending sessions.");
             pw.println("");
@@ -136,6 +143,8 @@ public final class AutofillManagerServiceShellCommand extends ShellCommand {
                 return getFullScreenMode(pw);
             case "bind-instant-service-allowed":
                 return getBindInstantService(pw);
+            case "default-augmented-service-enabled":
+                return getDefaultAugmentedServiceEnabled(pw);
             default:
                 pw.println("Invalid set: " + what);
                 return -1;
@@ -158,6 +167,8 @@ public final class AutofillManagerServiceShellCommand extends ShellCommand {
                 return setBindInstantService(pw);
             case "temporary-augmented-service":
                 return setTemporaryAugmentedService(pw);
+            case "default-augmented-service-enabled":
+                return setDefaultAugmentedServiceEnabled(pw);
             default:
                 pw.println("Invalid set: " + what);
                 return -1;
@@ -311,6 +322,23 @@ public final class AutofillManagerServiceShellCommand extends ShellCommand {
         mService.setTemporaryAugmentedAutofillService(userId, serviceName, duration);
         pw.println("AugmentedAutofillService temporarily set to " + serviceName + " for "
                 + duration + "ms");
+        return 0;
+    }
+
+    private int getDefaultAugmentedServiceEnabled(PrintWriter pw) {
+        final int userId = getNextIntArgRequired();
+        final boolean enabled = mService.isDefaultAugmentedServiceEnabled(userId);
+        pw.println(enabled);
+        return 0;
+    }
+
+    private int setDefaultAugmentedServiceEnabled(PrintWriter pw) {
+        final int userId = getNextIntArgRequired();
+        final boolean enabled = Boolean.parseBoolean(getNextArgRequired());
+        final boolean changed = mService.setDefaultAugmentedServiceEnabled(userId, enabled);
+        if (!changed) {
+            pw.println("already " + enabled);
+        }
         return 0;
     }
 
