@@ -486,6 +486,8 @@ public class Notifier {
                         log.setType(MetricsEvent.TYPE_OPEN);
                         log.setSubtype(why);
                         log.setLatency(interactiveChangeLatency);
+                        log.addTaggedData(
+                                MetricsEvent.FIELD_SCREEN_WAKE_REASON, mInteractiveChangeReason);
                         MetricsLogger.action(log);
                         EventLogTags.writePowerScreenState(1, 0, 0, 0, interactiveChangeLatency);
                         mPolicy.finishedWakingUp(why);
@@ -513,6 +515,8 @@ public class Notifier {
                         log.setType(MetricsEvent.TYPE_CLOSE);
                         log.setSubtype(why);
                         log.setLatency(interactiveChangeLatency);
+                        log.addTaggedData(
+                                MetricsEvent.FIELD_SCREEN_SLEEP_REASON, mInteractiveChangeReason);
                         MetricsLogger.action(log);
                         EventLogTags.writePowerScreenState(0, why, 0, 0, interactiveChangeLatency);
                         mPolicy.finishedGoingToSleep(why);
