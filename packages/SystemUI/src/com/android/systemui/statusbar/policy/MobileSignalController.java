@@ -494,8 +494,8 @@ public class MobileSignalController extends SignalController<
     private MobileIconGroup getNr5GIconGroup() {
         if (mServiceState == null) return null;
 
-        int nrStatus = mServiceState.getNrStatus();
-        if (nrStatus == NetworkRegistrationInfo.NR_STATUS_CONNECTED) {
+        int nrState = mServiceState.getNrState();
+        if (nrState == NetworkRegistrationInfo.NR_STATE_CONNECTED) {
             // Check if the NR 5G is using millimeter wave and the icon is config.
             if (mServiceState.getNrFrequencyRange() == ServiceState.FREQUENCY_RANGE_MMWAVE) {
                 if (mConfig.nr5GIconMap.containsKey(Config.NR_CONNECTED_MMWAVE)) {
@@ -508,11 +508,11 @@ public class MobileSignalController extends SignalController<
             if (mConfig.nr5GIconMap.containsKey(Config.NR_CONNECTED)) {
                 return mConfig.nr5GIconMap.get(Config.NR_CONNECTED);
             }
-        } else if (nrStatus == NetworkRegistrationInfo.NR_STATUS_NOT_RESTRICTED) {
+        } else if (nrState == NetworkRegistrationInfo.NR_STATE_NOT_RESTRICTED) {
             if (mConfig.nr5GIconMap.containsKey(Config.NR_NOT_RESTRICTED)) {
                 return mConfig.nr5GIconMap.get(Config.NR_NOT_RESTRICTED);
             }
-        } else if (nrStatus == NetworkRegistrationInfo.NR_STATUS_RESTRICTED) {
+        } else if (nrState == NetworkRegistrationInfo.NR_STATE_RESTRICTED) {
             if (mConfig.nr5GIconMap.containsKey(Config.NR_RESTRICTED)) {
                 return mConfig.nr5GIconMap.get(Config.NR_RESTRICTED);
             }
