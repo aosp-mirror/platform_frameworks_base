@@ -123,6 +123,8 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
 
     /** Automatically destroy sessions older than this */
     private static final long MAX_AGE_MILLIS = 3 * DateUtils.DAY_IN_MILLIS;
+    /** Automatically destroy staged sessions that have not changed state in this time */
+    private static final long MAX_TIME_SINCE_UPDATE_MILLIS = 7 * DateUtils.DAY_IN_MILLIS;
     /** Upper bound on number of active sessions for a UID */
     private static final long MAX_ACTIVE_SESSIONS = 1024;
     /** Upper bound on number of historical sessions for a UID */
@@ -357,11 +359,19 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                         }
 
                         final long age = System.currentTimeMillis() - session.createdMillis;
-
+                        final long timeSinceUpdate =
+                                System.currentTimeMillis() - session.updatedMillis;
                         final boolean valid;
-                        if (age >= MAX_AGE_MILLIS) {
-                            Slog.w(TAG, "Abandoning old session first created at "
-                                    + session.createdMillis);
+                        if (session.isStaged()) {
+                            if (timeSinceUpdate >= MAX_TIME_SINCE_UPDATE_MILLIS
+                                    && session.isStagedAndInTerminalState()) {
+                                valid = false;
+                            } else {
+                                valid = true;
+                            }
+                        } else if (age >= MAX_AGE_MILLIS) {
+                            Slog.w(TAG, "Abandoning old session created at "
+                                        + session.createdMillis);
                             valid = false;
                         } else {
                             valid = true;
@@ -1196,6 +1206,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         }
 
         public void onStagedSessionChanged(PackageInstallerSession session) {
+            session.markUpdated();
             writeSessionsAsync();
             if (mOkToSendBroadcasts) {
                 mPm.sendSessionUpdatedBroadcast(session.generateInfo(false),
