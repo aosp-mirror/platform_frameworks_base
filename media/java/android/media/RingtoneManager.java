@@ -1098,6 +1098,28 @@ public class RingtoneManager {
     }
 
     /**
+     * Returns if the {@link Ringtone} at the given position in the
+     * {@link Cursor} contains haptic channels.
+     *
+     * @param position The position (in the {@link Cursor}) of the ringtone.
+     * @return true if the ringtone contains haptic channels.
+     */
+    public boolean hasHapticChannels(int position) {
+        return hasHapticChannels(getRingtoneUri(position));
+    }
+
+    /**
+     * Returns if the {@link Ringtone} from a given sound URI contains
+     * haptic channels or not.
+     *
+     * @param ringtoneUri The {@link Uri} of a sound or ringtone.
+     * @return true if the ringtone contains haptic channels.
+     */
+    public static boolean hasHapticChannels(@NonNull Uri ringtoneUri) {
+        return AudioManager.hasHapticChannels(ringtoneUri);
+    }
+
+    /**
      * Creates a {@link android.media.MediaScannerConnection} to scan a ringtone file and add its
      * information to the internal database.
      *

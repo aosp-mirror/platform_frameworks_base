@@ -37,6 +37,7 @@ import android.media.audiopolicy.AudioProductStrategies;
 import android.media.audiopolicy.AudioVolumeGroups;
 import android.media.audiopolicy.IAudioPolicyCallback;
 import android.media.projection.IMediaProjection;
+import android.net.Uri;
 
 /**
  * {@hide}
@@ -249,6 +250,8 @@ interface IAudioService {
              in String[] deviceAddresses);
 
     int removeUidDeviceAffinity(in IAudioPolicyCallback pcb, in int uid);
+
+    boolean hasHapticChannels(in Uri uri);
 
     // WARNING: read warning at top of file, new methods that need to be used by native
     // code via IAudioManager.h need to be added to the top section.
