@@ -96,6 +96,11 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         public void onFullyHidden() {
             updateStates();
         }
+
+        @Override
+        public void onLayout() {
+            mNotificationPanelView.updateLockIcon();
+        }
     };
 
     protected LockPatternUtils mLockPatternUtils;
