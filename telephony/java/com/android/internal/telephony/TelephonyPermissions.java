@@ -164,6 +164,63 @@ public final class TelephonyPermissions {
         // We have READ_PHONE_STATE permission, so return true as long as the AppOps bit hasn't been
         // revoked.
         AppOpsManager appOps = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
+        return appOps.noteOp(AppOpsManager.OP_READ_PHONE_STATE, uid, callingPackage)
+                == AppOpsManager.MODE_ALLOWED;
+    }
+
+    /**
+     * Check whether the app with the given pid/uid can read phone state, or has carrier
+     * privileges on any active subscription.
+     *
+     * <p>If the app does not have carrier privilege, this method will return {@code false} instead
+     * of throwing a SecurityException. Therefore, the callers cannot tell the difference
+     * between M+ apps which declare the runtime permission but do not have it, and pre-M apps
+     * which declare the static permission but had access revoked via AppOps. Apps in the former
+     * category expect SecurityExceptions; apps in the latter don't. So this method is suitable for
+     * use only if the behavior in both scenarios is meant to be identical.
+     *
+     * @return {@code true} if the app can read phone state or has carrier privilege;
+     *         {@code false} otherwise.
+     */
+    public static boolean checkReadPhoneStateOnAnyActiveSub(
+            Context context, int pid, int uid, String callingPackage, String message) {
+        return checkReadPhoneStateOnAnyActiveSub(context, TELEPHONY_SUPPLIER, pid, uid,
+                    callingPackage, message);
+    }
+
+    @VisibleForTesting
+    public static boolean checkReadPhoneStateOnAnyActiveSub(
+            Context context, Supplier<ITelephony> telephonySupplier, int pid, int uid,
+            String callingPackage, String message) {
+        try {
+            context.enforcePermission(
+                    android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, pid, uid, message);
+
+            // SKIP checking for run-time permission since caller has PRIVILEGED permission
+            return true;
+        } catch (SecurityException privilegedPhoneStateException) {
+            try {
+                context.enforcePermission(
+                        android.Manifest.permission.READ_PHONE_STATE, pid, uid, message);
+            } catch (SecurityException phoneStateException) {
+                SubscriptionManager sm = (SubscriptionManager) context.getSystemService(
+                        Context.TELEPHONY_SUBSCRIPTION_SERVICE);
+                int[] activeSubIds = sm.getActiveSubscriptionIdList();
+                for (int activeSubId : activeSubIds) {
+                    // If we don't have the runtime permission, but do have carrier privileges, that
+                    // suffices for reading phone state.
+                    if (getCarrierPrivilegeStatus(telephonySupplier, activeSubId, uid)
+                            == TelephonyManager.CARRIER_PRIVILEGE_STATUS_HAS_ACCESS) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+        }
+
+        // We have READ_PHONE_STATE permission, so return true as long as the AppOps bit hasn't been
+        // revoked.
+        AppOpsManager appOps = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
         return appOps.noteOp(AppOpsManager.OP_READ_PHONE_STATE, uid, callingPackage) ==
                 AppOpsManager.MODE_ALLOWED;
     }
