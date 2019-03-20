@@ -16,12 +16,14 @@
 
 package android.content.om;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.content.Context;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.UserHandle;
 
 import java.util.List;
 
@@ -90,6 +92,28 @@ public class OverlayManager {
             int userId) {
         try {
             return mService.setEnabled(packageName, enable, userId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns information about the overlay with the given package name for
+     * the specified user.
+     *
+     * @param packageName The name of the package.
+     * @param userHandle The user to get the OverlayInfos for.
+     * @return An OverlayInfo object; if no overlays exist with the
+     *         requested package name, null is returned.
+     *
+     * @hide
+     */
+    @SystemApi
+    @Nullable
+    public OverlayInfo getOverlayInfo(@NonNull final String packageName,
+            @NonNull final UserHandle userHandle) {
+        try {
+            return mService.getOverlayInfo(packageName, userHandle.myUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
