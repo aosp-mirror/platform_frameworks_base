@@ -79,4 +79,6 @@ interface IAppOpsService {
     void stopWatchingNoted(IAppOpsNotedCallback callback);
 
     int checkOperationRaw(int code, int uid, String packageName);
+
+    void reloadNonHistoricalState();
 }

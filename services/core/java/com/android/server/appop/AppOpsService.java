@@ -1132,7 +1132,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                 .build();
         Preconditions.checkNotNull(callback, "callback cannot be null");
 
-        mContext.enforcePermission(android.Manifest.permission.GET_APP_OPS_STATS,
+        mContext.enforcePermission(Manifest.permission.MANAGE_APPOPS,
                 Binder.getCallingPid(), Binder.getCallingUid(), "getHistoricalOps");
 
         final String[] opNamesArray = (opNames != null)
@@ -1141,6 +1141,14 @@ public class AppOpsService extends IAppOpsService.Stub {
         // Must not hold the appops lock
         mHistoricalRegistry.getHistoricalOpsFromDiskRaw(uid, packageName, opNamesArray,
                 beginTimeMillis, endTimeMillis, flags, callback);
+    }
+
+    @Override
+    public void reloadNonHistoricalState() {
+        mContext.enforcePermission(Manifest.permission.MANAGE_APPOPS,
+                Binder.getCallingPid(), Binder.getCallingUid(), "reloadNonHistoricalState");
+        writeState();
+        readState();
     }
 
     @Override
@@ -2998,6 +3006,7 @@ public class AppOpsService extends IAppOpsService.Stub {
 
                             final LongSparseArray keys = op.collectKeys();
                             if (keys == null || keys.size() <= 0) {
+                                out.endTag(null, "op");
                                 continue;
                             }
 
