@@ -41,14 +41,16 @@ import org.robolectric.RuntimeEnvironment;
 
 @RunWith(RobolectricTestRunner.class)
 public class CachedBluetoothDeviceTest {
-    private final static String DEVICE_NAME = "TestName";
-    private final static String DEVICE_ALIAS = "TestAlias";
-    private final static String DEVICE_ADDRESS = "AA:BB:CC:DD:EE:FF";
-    private final static String DEVICE_ALIAS_NEW = "TestAliasNew";
-    private final static short RSSI_1 = 10;
-    private final static short RSSI_2 = 11;
-    private final static boolean JUSTDISCOVERED_1 = true;
-    private final static boolean JUSTDISCOVERED_2 = false;
+    private static final String DEVICE_NAME = "TestName";
+    private static final String DEVICE_ALIAS = "TestAlias";
+    private static final String DEVICE_ADDRESS = "AA:BB:CC:DD:EE:FF";
+    private static final String DEVICE_ALIAS_NEW = "TestAliasNew";
+    private static final String TWS_BATTERY_LEFT = "15";
+    private static final String TWS_BATTERY_RIGHT = "25";
+    private static final short RSSI_1 = 10;
+    private static final short RSSI_2 = 11;
+    private static final boolean JUSTDISCOVERED_1 = true;
+    private static final boolean JUSTDISCOVERED_2 = false;
     @Mock
     private LocalBluetoothProfileManager mProfileManager;
     @Mock
@@ -444,6 +446,41 @@ public class CachedBluetoothDeviceTest {
         // Act & Assert:
         //    Get "Pairing…" result without Battery Level.
         assertThat(mCachedDevice.getConnectionSummary()).isEqualTo("Pairing…");
+    }
+
+    @Test
+    public void getConnectionSummary_trueWirelessActiveDeviceWithBattery_returnActiveWithBattery() {
+        updateProfileStatus(mA2dpProfile, BluetoothProfile.STATE_CONNECTED);
+        updateProfileStatus(mHfpProfile, BluetoothProfile.STATE_CONNECTED);
+        updateProfileStatus(mHearingAidProfile, BluetoothProfile.STATE_CONNECTED);
+        when(mDevice.getBondState()).thenReturn(BluetoothDevice.BOND_BONDED);
+        mCachedDevice.onActiveDeviceChanged(true, BluetoothProfile.HEARING_AID);
+        when(mDevice.getMetadata(BluetoothDevice.METADATA_IS_UNTHETHERED_HEADSET)).thenReturn(
+                "true");
+        when(mDevice.getMetadata(BluetoothDevice.METADATA_UNTHETHERED_LEFT_BATTERY)).thenReturn(
+                TWS_BATTERY_LEFT);
+        when(mDevice.getMetadata(BluetoothDevice.METADATA_UNTHETHERED_RIGHT_BATTERY)).thenReturn(
+                TWS_BATTERY_RIGHT);
+
+        assertThat(mCachedDevice.getConnectionSummary()).isEqualTo(
+                "Active, L: 15% battery, R: 25% battery");
+    }
+
+    @Test
+    public void getConnectionSummary_trueWirelessDeviceWithBattery_returnActiveWithBattery() {
+        updateProfileStatus(mA2dpProfile, BluetoothProfile.STATE_CONNECTED);
+        updateProfileStatus(mHfpProfile, BluetoothProfile.STATE_CONNECTED);
+        updateProfileStatus(mHearingAidProfile, BluetoothProfile.STATE_CONNECTED);
+        when(mDevice.getBondState()).thenReturn(BluetoothDevice.BOND_BONDED);
+        when(mDevice.getMetadata(BluetoothDevice.METADATA_IS_UNTHETHERED_HEADSET)).thenReturn(
+                "true");
+        when(mDevice.getMetadata(BluetoothDevice.METADATA_UNTHETHERED_LEFT_BATTERY)).thenReturn(
+                TWS_BATTERY_LEFT);
+        when(mDevice.getMetadata(BluetoothDevice.METADATA_UNTHETHERED_RIGHT_BATTERY)).thenReturn(
+                TWS_BATTERY_RIGHT);
+
+        assertThat(mCachedDevice.getConnectionSummary()).isEqualTo(
+                "L: 15% battery, R: 25% battery");
     }
 
     @Test

@@ -32,6 +32,7 @@ import android.util.Log;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.settingslib.R;
+import com.android.settingslib.Utils;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -830,6 +831,8 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         boolean a2dpConnected = true;        // A2DP is connected
         boolean hfpConnected = true;         // HFP is connected
         boolean hearingAidConnected = true;  // Hearing Aid is connected
+        int leftBattery = -1;
+        int rightBattery = -1;
 
         synchronized (mProfileLock) {
             for (LocalBluetoothProfile profile : getProfiles()) {
@@ -877,8 +880,23 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         int stringRes = R.string.bluetooth_pairing;
         //when profile is connected, information would be available
         if (profileConnected) {
+            // Update Meta data for connected device
+            if (Boolean.parseBoolean(
+                    mDevice.getMetadata(BluetoothDevice.METADATA_IS_UNTHETHERED_HEADSET))) {
+                try {
+                    leftBattery = Integer.parseInt(
+                            mDevice.getMetadata(BluetoothDevice.METADATA_UNTHETHERED_LEFT_BATTERY));
+                    rightBattery = Integer.parseInt(mDevice.getMetadata(
+                                    BluetoothDevice.METADATA_UNTHETHERED_RIGHT_BATTERY));
+                } catch (NumberFormatException e) {
+                    Log.d(TAG, "Parse error for unthethered battery level.");
+                }
+            }
+
             // Set default string with battery level in device connected situation.
-            if (batteryLevelPercentageString != null) {
+            if (isTwsBatteryAvailable(leftBattery, rightBattery)) {
+                stringRes = R.string.bluetooth_battery_level_untethered;
+            } else if (batteryLevelPercentageString != null) {
                 stringRes = R.string.bluetooth_battery_level;
             }
 
@@ -887,22 +905,36 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
             //    2. Headset device active with in-calling state.
             //    3. A2DP device active without in-calling state.
             if (a2dpConnected || hfpConnected || hearingAidConnected) {
-                final boolean isOnCall =
-                        com.android.settingslib.Utils.isAudioModeOngoingCall(mContext);
+                final boolean isOnCall = Utils.isAudioModeOngoingCall(mContext);
                 if ((mIsActiveDeviceHearingAid)
                         || (mIsActiveDeviceHeadset && isOnCall)
                         || (mIsActiveDeviceA2dp && !isOnCall)) {
-                    stringRes = (batteryLevelPercentageString != null)
-                            ? R.string.bluetooth_active_battery_level
-                            : R.string.bluetooth_active_no_battery_level;
+                    if (isTwsBatteryAvailable(leftBattery, rightBattery)) {
+                        stringRes = R.string.bluetooth_active_battery_level_untethered;
+                    } else if (batteryLevelPercentageString != null) {
+                        stringRes = R.string.bluetooth_active_battery_level;
+                    } else {
+                        stringRes = R.string.bluetooth_active_no_battery_level;
+                    }
                 }
             }
         }
 
-        return (stringRes != R.string.bluetooth_pairing
-                || getBondState() == BluetoothDevice.BOND_BONDING)
-                ? mContext.getString(stringRes, batteryLevelPercentageString)
-                : null;
+        if (stringRes != R.string.bluetooth_pairing
+                || getBondState() == BluetoothDevice.BOND_BONDING) {
+            if (isTwsBatteryAvailable(leftBattery, rightBattery)) {
+                return mContext.getString(stringRes, Utils.formatPercentage(leftBattery),
+                        Utils.formatPercentage(rightBattery));
+            } else {
+                return mContext.getString(stringRes, batteryLevelPercentageString);
+            }
+        } else {
+            return null;
+        }
+    }
+
+    private boolean isTwsBatteryAvailable(int leftBattery, int rightBattery) {
+        return leftBattery >= 0 && rightBattery >= 0;
     }
 
     /**
