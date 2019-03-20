@@ -881,16 +881,12 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         //when profile is connected, information would be available
         if (profileConnected) {
             // Update Meta data for connected device
-            if (Boolean.parseBoolean(
-                    mDevice.getMetadata(BluetoothDevice.METADATA_IS_UNTHETHERED_HEADSET))) {
-                try {
-                    leftBattery = Integer.parseInt(
-                            mDevice.getMetadata(BluetoothDevice.METADATA_UNTHETHERED_LEFT_BATTERY));
-                    rightBattery = Integer.parseInt(mDevice.getMetadata(
-                                    BluetoothDevice.METADATA_UNTHETHERED_RIGHT_BATTERY));
-                } catch (NumberFormatException e) {
-                    Log.d(TAG, "Parse error for unthethered battery level.");
-                }
+            if (BluetoothUtils.getBooleanMetaData(
+                    mDevice, BluetoothDevice.METADATA_IS_UNTETHERED_HEADSET)) {
+                leftBattery = BluetoothUtils.getIntMetaData(mDevice,
+                        BluetoothDevice.METADATA_UNTETHERED_LEFT_BATTERY);
+                rightBattery = BluetoothUtils.getIntMetaData(mDevice,
+                        BluetoothDevice.METADATA_UNTETHERED_RIGHT_BATTERY);
             }
 
             // Set default string with battery level in device connected situation.
