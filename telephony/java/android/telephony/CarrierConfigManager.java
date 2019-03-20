@@ -2454,6 +2454,18 @@ public class CarrierConfigManager {
      */
     public static final String KEY_OPPORTUNISTIC_NETWORK_DATA_SWITCH_HYSTERESIS_TIME_LONG =
             "opportunistic_network_data_switch_hysteresis_time_long";
+
+    /**
+     * Indicates zero or more emergency number prefix(es), because some carrier requires
+     * if users dial an emergency number address with a specific prefix, the combination of the
+     * prefix and the address is also a valid emergency number to dial. For example, an emergency
+     * number prefix is 318, and the emergency number is 911. Both 318911 and 911 can be dialed by
+     * users for emergency call. An empty array of string indicates that current carrier does not
+     * have this requirement.
+     */
+    public static final String KEY_EMERGENCY_NUMBER_PREFIX_STRING_ARRAY =
+            "emergency_number_prefix_string_array";
+
     /**
      * Determines whether the carrier wants to cancel the cs reject notification automatically
      * when the voice registration state changes.
@@ -2888,6 +2900,7 @@ public class CarrierConfigManager {
                 new int[] {
                         1 /* Roaming Indicator Off */
                 });
+        sDefaults.putStringArray(KEY_EMERGENCY_NUMBER_PREFIX_STRING_ARRAY, new String[0]);
         sDefaults.putString(KEY_5G_ICON_CONFIGURATION_STRING,
                 "connected_mmwave:None,connected:5G,not_restricted:None,restricted:None");
         sDefaults.putBoolean(KEY_USE_USIM_BOOL, false);
