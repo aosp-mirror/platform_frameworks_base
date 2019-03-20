@@ -2589,14 +2589,6 @@ public abstract class PackageManager {
     public static final String FEATURE_PC = "android.hardware.type.pc";
 
     /**
-     * Feature for {@link #getSystemAvailableFeatures} and
-     * {@link #hasSystemFeature}: This is a foldable device. Properties such as
-     * the display size may change in response to being folded.
-     */
-    @SdkConstant(SdkConstantType.FEATURE)
-    public static final String FEATURE_FOLDABLE = "android.hardware.type.foldable";
-
-    /**
      * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}:
      * The device supports printing.
      */
