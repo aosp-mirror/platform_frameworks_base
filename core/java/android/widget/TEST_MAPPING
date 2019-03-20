@@ -1,0 +1,12 @@
+{
+  "presubmit": [
+    {
+      "name": "CtsWidgetTestCases",
+      "options": [
+        {
+          "instrumentation-arg": "size:=small"
+        }
+      ]
+    }
+  ]
+}
