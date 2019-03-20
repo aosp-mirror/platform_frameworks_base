@@ -29,15 +29,33 @@ import android.os.RemoteException;
  * {@code ACTION_CAPTIVE_PORTAL_SIGN_IN} activity.
  */
 public class CaptivePortal implements Parcelable {
-    /** @hide */
+    /**
+     * Response code from the captive portal application, indicating that the portal was dismissed
+     * and the network should be re-validated.
+     * @see ICaptivePortal#appResponse(int)
+     * @see android.net.INetworkMonitor#notifyCaptivePortalAppFinished(int)
+     * @hide
+     */
     @SystemApi
     @TestApi
     public static final int APP_RETURN_DISMISSED    = 0;
-    /** @hide */
+    /**
+     * Response code from the captive portal application, indicating that the user did not login and
+     * does not want to use the captive portal network.
+     * @see ICaptivePortal#appResponse(int)
+     * @see android.net.INetworkMonitor#notifyCaptivePortalAppFinished(int)
+     * @hide
+     */
     @SystemApi
     @TestApi
     public static final int APP_RETURN_UNWANTED     = 1;
-    /** @hide */
+    /**
+     * Response code from the captive portal application, indicating that the user does not wish to
+     * login but wants to use the captive portal network as-is.
+     * @see ICaptivePortal#appResponse(int)
+     * @see android.net.INetworkMonitor#notifyCaptivePortalAppFinished(int)
+     * @hide
+     */
     @SystemApi
     @TestApi
     public static final int APP_RETURN_WANTED_AS_IS = 2;
