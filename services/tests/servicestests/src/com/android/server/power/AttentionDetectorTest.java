@@ -105,6 +105,13 @@ public class AttentionDetectorTest extends AndroidTestCase {
     }
 
     @Test
+    public void testOnUserActivity_doesntCrashIfNoAttentionService() {
+        mAttentionManagerInternal = null;
+        registerAttention();
+        // Does not crash.
+    }
+
+    @Test
     public void onUserActivity_ignoresWhiteListedActivityTypes() {
         for (int i = 0; i < NUM_USER_ACTIVITY_TYPES; i++) {
             int result = mAttentionDetector.onUserActivity(SystemClock.uptimeMillis(), i);
