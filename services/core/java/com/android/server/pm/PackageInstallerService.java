@@ -360,7 +360,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
 
                         final long age = System.currentTimeMillis() - session.createdMillis;
                         final long timeSinceUpdate =
-                                System.currentTimeMillis() - session.updatedMillis;
+                                System.currentTimeMillis() - session.getUpdatedMillis();
                         final boolean valid;
                         if (session.isStaged()) {
                             if (timeSinceUpdate >= MAX_TIME_SINCE_UPDATE_MILLIS

@@ -202,7 +202,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     /** Timestamp of the last time this session changed state  */
     @GuardedBy("mLock")
-    long updatedMillis;
+    private long updatedMillis;
 
     /** Uid of the creator of this session. */
     private final int mOriginalInstallerUid;
@@ -1737,6 +1737,15 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     public int getInstallerUid() {
         synchronized (mLock) {
             return mInstallerUid;
+        }
+    }
+
+    /**
+     * @return the timestamp of when this session last changed state
+     */
+    public long getUpdatedMillis() {
+        synchronized (mLock) {
+            return updatedMillis;
         }
     }
 
