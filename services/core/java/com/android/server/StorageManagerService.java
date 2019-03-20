@@ -1674,16 +1674,18 @@ class StorageManagerService extends IStorageManager.Stub
 
         synchronized (mLock) {
             final boolean thisIsolatedStorage = StorageManager.hasIsolatedStorage();
-            if (mLastIsolatedStorage == thisIsolatedStorage) {
-                // Nothing changed since last boot; keep rolling forward
-                return;
-            } else if (thisIsolatedStorage) {
-                // This boot enables isolated storage; apply legacy behavior
-                applyLegacyStorage();
+            if (mLastIsolatedStorage != thisIsolatedStorage) {
+                if (thisIsolatedStorage) {
+                    // This boot enables isolated storage; apply legacy behavior
+                    applyLegacyStorage();
+                }
+
+                // Always remember the new state we just booted with
+                writeSettingsLocked();
             }
 
-            // Always remember the new state we just booted with
-            writeSettingsLocked();
+            // Execute special logic to recover certain devices
+            recoverFrom128872367();
         }
     }
 
@@ -1738,6 +1740,69 @@ class StorageManagerService extends IStorageManager.Stub
             }
         }
         return maxTime;
+    }
+
+    /**
+     * In b/128872367 we lost all app-ops on devices in the wild. This logic
+     * attempts to detect and recover from this by granting
+     * {@link AppOpsManager#OP_LEGACY_STORAGE} to any apps installed before
+     * isolated storage was enabled.
+     */
+    private void recoverFrom128872367() {
+        // We're interested in packages that were installed or updated between
+        // 1/1/2014 and 12/17/2018
+        final long START_TIMESTAMP = 1388534400000L;
+        final long END_TIMESTAMP = 1545004800000L;
+
+        final PackageManager pm = mContext.getPackageManager();
+        final AppOpsManager appOps = mContext.getSystemService(AppOpsManager.class);
+        final UserManagerInternal um = LocalServices.getService(UserManagerInternal.class);
+
+        boolean activeDuringWindow = false;
+        List<PackageInfo> pendingHolders = new ArrayList<>();
+
+        for (int userId : um.getUserIds()) {
+            final List<PackageInfo> pkgs = pm.getInstalledPackagesAsUser(MATCH_UNINSTALLED_PACKAGES
+                    | MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE, userId);
+            for (PackageInfo pkg : pkgs) {
+                // Determine if any apps on this device had been installed or
+                // updated during the period where the feature was disabled
+                activeDuringWindow |= (pkg.firstInstallTime > START_TIMESTAMP
+                        && pkg.firstInstallTime < END_TIMESTAMP);
+                activeDuringWindow |= (pkg.lastUpdateTime > START_TIMESTAMP
+                        && pkg.lastUpdateTime < END_TIMESTAMP);
+
+                // This app should hold legacy op if they were installed before
+                // the cutoff; we only check the end boundary here so that
+                // include system apps, which are always installed on 1/1/2009.
+                final boolean shouldHold = (pkg.firstInstallTime < END_TIMESTAMP);
+                final boolean doesHold = (appOps.checkOpNoThrow(OP_LEGACY_STORAGE,
+                        pkg.applicationInfo.uid,
+                        pkg.applicationInfo.packageName) == MODE_ALLOWED);
+
+                if (doesHold) {
+                    Slog.d(TAG, "Found " + pkg + " holding legacy op; skipping recovery");
+                    return;
+                } else if (shouldHold) {
+                    Slog.d(TAG, "Found " + pkg + " that should hold legacy op");
+                    pendingHolders.add(pkg);
+                }
+            }
+        }
+
+        if (!activeDuringWindow) {
+            Slog.d(TAG, "No packages were active during the time window; skipping grants");
+            return;
+        }
+
+        // If we made it this far, nobody actually holds the legacy op, which
+        // means we probably lost the database, and we should grant the op to
+        // all the apps we identified.
+        for (PackageInfo pkg : pendingHolders) {
+            appOps.setMode(AppOpsManager.OP_LEGACY_STORAGE,
+                    pkg.applicationInfo.uid,
+                    pkg.applicationInfo.packageName, AppOpsManager.MODE_ALLOWED);
+        }
     }
 
     private void systemReady() {
