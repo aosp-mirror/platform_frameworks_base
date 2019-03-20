@@ -42,6 +42,8 @@ public final class GnssStatus {
     public static final int CONSTELLATION_BEIDOU = 5;
     /** Constellation type constant for Galileo. */
     public static final int CONSTELLATION_GALILEO = 6;
+    /** Constellation type constant for IRNSS. */
+    public static final int CONSTELLATION_IRNSS = 7;
 
     /** @hide */
     public static final int GNSS_SV_FLAGS_NONE = 0;
@@ -94,7 +96,7 @@ public final class GnssStatus {
      */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({CONSTELLATION_UNKNOWN, CONSTELLATION_GPS, CONSTELLATION_SBAS, CONSTELLATION_GLONASS,
-            CONSTELLATION_QZSS, CONSTELLATION_BEIDOU, CONSTELLATION_GALILEO})
+            CONSTELLATION_QZSS, CONSTELLATION_BEIDOU, CONSTELLATION_GALILEO, CONSTELLATION_IRNSS})
     public @interface ConstellationType {}
 
     final int[] mSvidWithFlags;
