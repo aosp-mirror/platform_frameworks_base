@@ -3068,6 +3068,19 @@ package android.location {
     method public void onLocationBatch(java.util.List<android.location.Location>);
   }
 
+  public final class GnssCapabilities {
+    method public boolean hasCapability(int);
+    field public static final int GEOFENCING = 2; // 0x2
+    field public static final int LOW_POWER_MODE = 0; // 0x0
+    field public static final int MEASUREMENTS = 3; // 0x3
+    field public static final int MEASUREMENT_CORRECTIONS = 5; // 0x5
+    field public static final int MEASUREMENT_CORRECTIONS_EXCESS_PATH_LENGTH = 7; // 0x7
+    field public static final int MEASUREMENT_CORRECTIONS_LOS_SATS = 6; // 0x6
+    field public static final int MEASUREMENT_CORRECTIONS_REFLECTING_PLANE = 8; // 0x8
+    field public static final int NAV_MESSAGES = 4; // 0x4
+    field public static final int SATELLITE_BLACKLIST = 1; // 0x1
+  }
+
   public final class GnssMeasurementCorrections implements android.os.Parcelable {
     method public int describeContents();
     method @FloatRange(from=-1000.0F, to=10000.0f) public double getAltitudeMeters();
@@ -3375,7 +3388,7 @@ package android.location {
   public class LocationManager {
     method @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public void flushGnssBatch();
     method @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public int getGnssBatchSize();
-    method public int getGnssCapabilities();
+    method @Nullable public android.location.GnssCapabilities getGnssCapabilities();
     method @Nullable public String getLocationControllerExtraPackage();
     method @RequiresPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) public void injectGnssMeasurementCorrections(@NonNull android.location.GnssMeasurementCorrections);
     method public boolean isLocationControllerExtraPackageEnabled();

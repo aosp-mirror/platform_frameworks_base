@@ -1986,15 +1986,19 @@ public class LocationManager {
     }
 
     /**
-     * Returns the integer capability flags of the GNSS chipset as defined in {@code
-     * IGnssCallback.hal}
+     * Returns the supported capabilities of the GNSS chipset or {@code null} if there is an error
+     * in obtaining the capabilities.
      *
      * @hide
      */
     @SystemApi
-    public int getGnssCapabilities() {
+    public @Nullable GnssCapabilities getGnssCapabilities() {
         try {
-            return mGnssMeasurementCallbackTransport.getGnssCapabilities();
+            long gnssCapabilities = mGnssMeasurementCallbackTransport.getGnssCapabilities();
+            if (gnssCapabilities == GnssCapabilities.INVALID_CAPABILITIES) {
+                return null;
+            }
+            return GnssCapabilities.of(gnssCapabilities);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

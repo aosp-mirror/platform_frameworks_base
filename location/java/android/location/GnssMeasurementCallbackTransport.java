@@ -63,7 +63,7 @@ class GnssMeasurementCallbackTransport
                 measurementCorrections, getContext().getPackageName());
     }
 
-    protected int getGnssCapabilities() throws RemoteException {
+    protected long getGnssCapabilities() throws RemoteException {
         return mLocationManager.getGnssCapabilities(getContext().getPackageName());
     }
 
