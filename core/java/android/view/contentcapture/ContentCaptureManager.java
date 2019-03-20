@@ -32,6 +32,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.util.Log;
 import android.view.contentcapture.ContentCaptureSession.FlushReason;
 
@@ -52,11 +53,13 @@ public final class ContentCaptureManager {
     private static final String TAG = ContentCaptureManager.class.getSimpleName();
 
     /** @hide */
+    public static final int RESULT_CODE_OK = 0;
+    /** @hide */
     public static final int RESULT_CODE_TRUE = 1;
     /** @hide */
     public static final int RESULT_CODE_FALSE = 2;
     /** @hide */
-    public static final int RESULT_CODE_NOT_SERVICE = -1;
+    public static final int RESULT_CODE_SECURITY_EXCEPTION = -1;
 
     /**
      * Timeout for calls to system_server.
@@ -297,6 +300,34 @@ public final class ContentCaptureManager {
     }
 
     /**
+     * Gets the (optional) intent used to launch the service-specific settings.
+     *
+     * <p>This method is static because it's called by Settings, which might not be whitelisted
+     * for content capture (in which case the ContentCaptureManager on its context would be null).
+     *
+     * @hide
+     */
+    @Nullable
+    public static ComponentName getServiceSettingsComponentName() {
+        final IBinder binder = ServiceManager
+                .checkService(Context.CONTENT_CAPTURE_MANAGER_SERVICE);
+        if (binder == null) return null;
+
+        final IContentCaptureManager service = IContentCaptureManager.Stub.asInterface(binder);
+        final SyncResultReceiver resultReceiver = new SyncResultReceiver(SYNC_CALLS_TIMEOUT_MS);
+        try {
+            service.getServiceSettingsActivity(resultReceiver);
+            final int resultCode = resultReceiver.getIntResult();
+            if (resultCode == RESULT_CODE_SECURITY_EXCEPTION) {
+                throw new SecurityException(resultReceiver.getStringResult());
+            }
+            return resultReceiver.getParcelableResult();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Checks whether content capture is enabled for this activity.
      *
      * <p>There are many reasons it could be disabled, such as:
@@ -365,7 +396,7 @@ public final class ContentCaptureManager {
                 return true;
             case RESULT_CODE_FALSE:
                 return false;
-            case RESULT_CODE_NOT_SERVICE:
+            case RESULT_CODE_SECURITY_EXCEPTION:
                 throw new SecurityException("caller is not user's ContentCapture service");
             default:
                 Log.wtf(TAG, "received invalid result: " + resultCode);

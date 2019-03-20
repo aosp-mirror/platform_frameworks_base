@@ -332,6 +332,18 @@ final class ContentCapturePerUserService
         mRemoteService.onUserDataRemovalRequest(request);
     }
 
+    @GuardedBy("mLock")
+    @Nullable
+    public ComponentName getServiceSettingsActivityLocked() {
+        if (mInfo == null) return null;
+
+        final String activityName = mInfo.getSettingsActivity();
+        if (activityName == null) return null;
+
+        final String packageName = mInfo.getServiceInfo().packageName;
+        return new ComponentName(packageName, activityName);
+    }
+
     /**
      * Asserts the component is owned by the caller.
      */
