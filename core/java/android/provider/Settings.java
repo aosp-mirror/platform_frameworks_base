@@ -1696,6 +1696,19 @@ public final class Settings {
     public static final String ACTION_REQUEST_ENABLE_CONTENT_CAPTURE =
             "android.settings.REQUEST_ENABLE_CONTENT_CAPTURE";
 
+    /**
+     * Activity Action: Show screen that let user manage how Android handles URL resolution.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing
+     *
+     * @hide
+     */
+    @SystemApi
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_MANAGE_DOMAIN_URLS = "android.settings.MANAGE_DOMAIN_URLS";
+
     // End of Intent actions for Settings
 
     /**
@@ -12585,8 +12598,9 @@ public final class Settings {
 
         /**
          * Battery level [1-100] at which low power mode automatically turns on.
-         * Pre-Q If 0, it will not automatically turn on. Q and newer it will only automatically
-         * turn on if the {@link #AUTOMATIC_POWER_SAVER_MODE} setting is also set to
+         * If 0, it will not automatically turn on. For Q and newer, it will only automatically
+         * turn on if the value is greater than 0 and the {@link #AUTOMATIC_POWER_SAVER_MODE}
+         * setting is also set to
          * {@link android.os.PowerManager.AutoPowerSaverMode#POWER_SAVER_MODE_PERCENTAGE}.
          *
          * @see #AUTOMATIC_POWER_SAVER_MODE

@@ -635,14 +635,14 @@ public final class InspectablePropertyProcessor implements ModelProcessor {
             final String name = mAnnotationUtils.typedValueByName(
                     "name", String.class, accessor, enumAnnotation)
                     .orElseThrow(() -> new ProcessingException(
-                            "Name is required for @EnumMap",
+                            "Name is required for @EnumEntry",
                             accessor,
                             enumAnnotation));
 
             final int value = mAnnotationUtils.typedValueByName(
                     "value", Integer.class, accessor, enumAnnotation)
                     .orElseThrow(() -> new ProcessingException(
-                            "Value is required for @EnumMap",
+                            "Value is required for @EnumEntry",
                             accessor,
                             enumAnnotation));
 
@@ -684,14 +684,14 @@ public final class InspectablePropertyProcessor implements ModelProcessor {
             final String name = mAnnotationUtils.typedValueByName(
                     "name", String.class, accessor, flagAnnotation)
                     .orElseThrow(() -> new ProcessingException(
-                            "Name is required for @FlagMap",
+                            "Name is required for @FlagEntry",
                             accessor,
                             flagAnnotation));
 
             final int target = mAnnotationUtils.typedValueByName(
                     "target", Integer.class, accessor, flagAnnotation)
                     .orElseThrow(() -> new ProcessingException(
-                            "Target is required for @FlagMap",
+                            "Target is required for @FlagEntry",
                             accessor,
                             flagAnnotation));
 

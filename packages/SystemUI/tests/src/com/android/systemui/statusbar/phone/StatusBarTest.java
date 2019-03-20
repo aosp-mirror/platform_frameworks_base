@@ -75,7 +75,6 @@ import com.android.systemui.SystemUIFactory;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.UiOffloadThread;
 import com.android.systemui.appops.AppOpsController;
-import com.android.systemui.appops.AppOpsControllerImpl;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.classifier.FalsingManager;
@@ -112,7 +111,6 @@ import com.android.systemui.statusbar.notification.stack.NotificationListContain
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
-import com.android.systemui.statusbar.policy.KeyguardMonitorImpl;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 
 import org.junit.Before;
@@ -161,7 +159,6 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private NotificationPresenter mNotificationPresenter;
     @Mock
     private NotificationEntryListener mEntryListener;
-    @Mock private BubbleController mBubbleController;
     @Mock
     private NotificationFilter mNotificationFilter;
     @Mock
@@ -192,8 +189,8 @@ public class StatusBarTest extends SysuiTestCase {
                 mViewHierarchyManager);
         mDependency.injectTestDependency(VisualStabilityManager.class, mVisualStabilityManager);
         mDependency.injectTestDependency(NotificationListener.class, mNotificationListener);
-        mDependency.injectTestDependency(KeyguardMonitor.class, mock(KeyguardMonitorImpl.class));
-        mDependency.injectTestDependency(AppOpsController.class, mock(AppOpsControllerImpl.class));
+        mDependency.injectTestDependency(KeyguardMonitor.class, mock(KeyguardMonitor.class));
+        mDependency.injectTestDependency(AppOpsController.class, mock(AppOpsController.class));
         mDependency.injectTestDependency(StatusBarStateController.class, mStatusBarStateController);
         mDependency.injectTestDependency(DeviceProvisionedController.class,
                 mDeviceProvisionedController);

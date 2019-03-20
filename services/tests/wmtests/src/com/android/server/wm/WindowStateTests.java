@@ -87,7 +87,6 @@ import java.util.LinkedList;
  */
 @SmallTest
 @Presubmit
-@FlakyTest(bugId = 124127512)
 public class WindowStateTests extends WindowTestsBase {
     private static int sPreviousNewInsetsMode;
 
@@ -363,7 +362,6 @@ public class WindowStateTests extends WindowTestsBase {
         assertFalse(app.canAffectSystemUiFlags());
     }
 
-    @FlakyTest(detail = "Promote to presubmit when shown to be stable.")
     @Test
     public void testVisibleWithInsetsProvider() throws Exception {
         final WindowState topBar = createWindow(null, TYPE_STATUS_BAR, "topBar");

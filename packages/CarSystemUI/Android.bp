@@ -58,8 +58,8 @@ android_app {
 
     manifest: "AndroidManifest.xml",
 
-    owner: "google",
     platform_apis: true,
+    product_specific: true,
     certificate: "platform",
     privileged: true,
 
@@ -82,4 +82,6 @@ android_app {
     ],
 
     plugins: ["dagger2-compiler-2.19"],
+
+    required: ["privapp_whitelist_com.android.systemui"],
 }

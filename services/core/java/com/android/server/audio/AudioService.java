@@ -3331,7 +3331,11 @@ public class AudioService extends IAudioService.Stub
         final String eventSource = new StringBuilder("setSpeakerphoneOn(").append(on)
                 .append(") from u/pid:").append(Binder.getCallingUid()).append("/")
                 .append(Binder.getCallingPid()).toString();
-        mDeviceBroker.setSpeakerphoneOn(on, eventSource);
+        final boolean stateChanged = mDeviceBroker.setSpeakerphoneOn(on, eventSource);
+        if (stateChanged) {
+            mContext.sendBroadcast(new Intent(AudioManager.ACTION_SPEAKERPHONE_STATE_CHANGED)
+                    .setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY));
+        }
     }
 
     /** @see AudioManager#isSpeakerphoneOn() */

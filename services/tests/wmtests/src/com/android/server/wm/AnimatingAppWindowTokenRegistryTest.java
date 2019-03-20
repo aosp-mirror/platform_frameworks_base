@@ -43,7 +43,6 @@ import org.mockito.MockitoAnnotations;
  */
 @SmallTest
 @Presubmit
-@FlakyTest(detail = "Promote once confirmed non-flaky")
 public class AnimatingAppWindowTokenRegistryTest extends WindowTestsBase {
 
     @Mock

@@ -665,7 +665,6 @@ package android.app.admin {
     method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public java.util.List<java.lang.String> getPermittedAccessibilityServices(int);
     method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public java.util.List<java.lang.String> getPermittedInputMethodsForCurrentUser();
     method @Nullable public android.content.ComponentName getProfileOwner() throws java.lang.IllegalArgumentException;
-    method @Nullable @RequiresPermission(value=android.Manifest.permission.INTERACT_ACROSS_USERS, conditional=true) public android.content.ComponentName getProfileOwnerAsUser(@NonNull android.os.UserHandle);
     method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public String getProfileOwnerNameAsUser(int) throws java.lang.IllegalArgumentException;
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public int getUserProvisioningState();
     method public boolean isDeviceManaged();
@@ -4282,11 +4281,14 @@ package android.net {
 
 package android.net.apf {
 
-  public class ApfCapabilities {
+  public final class ApfCapabilities implements android.os.Parcelable {
     ctor public ApfCapabilities(int, int, int);
+    method public int describeContents();
     method public static boolean getApfDrop8023Frames(android.content.Context);
     method public static int[] getApfEthTypeBlackList(android.content.Context);
     method public boolean hasDataAccess();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.net.apf.ApfCapabilities> CREATOR;
     field public final int apfPacketFormat;
     field public final int apfVersionSupported;
     field public final int maximumApfProgramSize;
@@ -4484,16 +4486,16 @@ package android.net.metrics {
 
 package android.net.util {
 
-  public class SocketUtils {
+  public final class SocketUtils {
     method public static void addArpEntry(@NonNull java.net.Inet4Address, @NonNull android.net.MacAddress, @NonNull String, @NonNull java.io.FileDescriptor) throws java.io.IOException;
     method public static void attachControlPacketFilter(@NonNull java.io.FileDescriptor, int) throws java.net.SocketException;
     method public static void attachDhcpFilter(@NonNull java.io.FileDescriptor) throws java.net.SocketException;
     method public static void attachRaFilter(@NonNull java.io.FileDescriptor, int) throws java.net.SocketException;
     method public static void bindSocketToInterface(@NonNull java.io.FileDescriptor, @NonNull String) throws android.system.ErrnoException;
     method public static void closeSocket(@Nullable java.io.FileDescriptor) throws java.io.IOException;
-    method public static java.net.SocketAddress makeNetlinkSocketAddress(int, int);
-    method public static java.net.SocketAddress makePacketSocketAddress(short, int);
-    method public static java.net.SocketAddress makePacketSocketAddress(int, @NonNull byte[]);
+    method @NonNull public static java.net.SocketAddress makeNetlinkSocketAddress(int, int);
+    method @NonNull public static java.net.SocketAddress makePacketSocketAddress(int, int);
+    method @NonNull public static java.net.SocketAddress makePacketSocketAddress(int, @NonNull byte[]);
     method public static void setSocketTimeValueOption(@NonNull java.io.FileDescriptor, int, int, long) throws android.system.ErrnoException;
   }
 
@@ -4934,6 +4936,10 @@ package android.net.wifi {
 
   public final class WifiUsabilityStatsEntry implements android.os.Parcelable {
     method public int describeContents();
+    method public int getCellularDataNetworkType();
+    method public int getCellularSignalStrengthDb();
+    method public int getCellularSignalStrengthDbm();
+    method public boolean getIsSameRegisteredCell();
     method public int getLinkSpeedMbps();
     method public int getProbeElapsedTimeSinceLastUpdateMillis();
     method public int getProbeMcsRateSinceLastUpdate();
@@ -5616,6 +5622,7 @@ package android.os {
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public boolean isManagedProfile(int);
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public boolean isPrimaryUser();
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public boolean isRestrictedProfile();
+    method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public boolean isRestrictedProfile(@NonNull android.os.UserHandle);
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public boolean removeUser(@NonNull android.os.UserHandle);
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public void setUserIcon(@NonNull android.graphics.Bitmap);
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public void setUserName(@Nullable String);
@@ -5860,6 +5867,7 @@ package android.provider {
     method @RequiresPermission(android.Manifest.permission.WRITE_DEVICE_CONFIG) public static boolean setProperty(@NonNull String, @NonNull String, @Nullable String, boolean);
     field public static final String NAMESPACE_ACTIVITY_MANAGER = "activity_manager";
     field public static final String NAMESPACE_ACTIVITY_MANAGER_NATIVE_BOOT = "activity_manager_native_boot";
+    field public static final String NAMESPACE_APP_COMPAT = "app_compat";
     field public static final String NAMESPACE_ATTENTION_MANAGER_SERVICE = "attention_manager_service";
     field public static final String NAMESPACE_AUTOFILL = "autofill";
     field public static final String NAMESPACE_CONNECTIVITY = "connectivity";
@@ -5870,9 +5878,12 @@ package android.provider {
     field public static final String NAMESPACE_INTELLIGENCE_ATTENTION = "intelligence_attention";
     field public static final String NAMESPACE_MEDIA_NATIVE = "media_native";
     field public static final String NAMESPACE_NETD_NATIVE = "netd_native";
+    field public static final String NAMESPACE_ROLLBACK = "rollback";
+    field public static final String NAMESPACE_ROLLBACK_BOOT = "rollback_boot";
     field public static final String NAMESPACE_RUNTIME = "runtime";
     field public static final String NAMESPACE_RUNTIME_NATIVE = "runtime_native";
     field public static final String NAMESPACE_RUNTIME_NATIVE_BOOT = "runtime_native_boot";
+    field public static final String NAMESPACE_SCHEDULER = "scheduler";
     field public static final String NAMESPACE_SYSTEMUI = "systemui";
     field public static final String NAMESPACE_TEXTCLASSIFIER = "textclassifier";
   }
@@ -5899,18 +5910,6 @@ package android.provider {
     method public long getLong(@NonNull String, long);
     method @NonNull public String getNamespace();
     method @Nullable public String getString(@NonNull String, @Nullable String);
-  }
-
-  public static interface DeviceConfig.Rollback {
-    field public static final String BOOT_NAMESPACE = "rollback_boot";
-    field public static final String ENABLE_ROLLBACK_TIMEOUT = "enable_rollback_timeout";
-    field public static final String NAMESPACE = "rollback";
-    field public static final String ROLLBACK_LIFETIME_IN_MILLIS = "rollback_lifetime_in_millis";
-  }
-
-  public static interface DeviceConfig.Scheduler {
-    field public static final String ENABLE_FAST_METRICS_COLLECTION = "enable_fast_metrics_collection";
-    field public static final String NAMESPACE = "scheduler";
   }
 
   public static interface DeviceConfig.Storage {
@@ -6055,6 +6054,7 @@ package android.provider {
     field public static final String ACTION_ACCESSIBILITY_DETAILS_SETTINGS = "android.settings.ACCESSIBILITY_DETAILS_SETTINGS";
     field public static final String ACTION_ENTERPRISE_PRIVACY_SETTINGS = "android.settings.ENTERPRISE_PRIVACY_SETTINGS";
     field public static final String ACTION_LOCATION_CONTROLLER_EXTRA_PACKAGE_SETTINGS = "android.settings.LOCATION_CONTROLLER_EXTRA_PACKAGE_SETTINGS";
+    field public static final String ACTION_MANAGE_DOMAIN_URLS = "android.settings.MANAGE_DOMAIN_URLS";
     field public static final String ACTION_REQUEST_ENABLE_CONTENT_CAPTURE = "android.settings.REQUEST_ENABLE_CONTENT_CAPTURE";
     field public static final String ACTION_SHOW_ADMIN_SUPPORT_DETAILS = "android.settings.SHOW_ADMIN_SUPPORT_DETAILS";
   }
@@ -7236,7 +7236,6 @@ package android.telephony {
     field public static final int ACCESS_BLOCK_ALL = 2088; // 0x828
     field public static final int ACCESS_CLASS_DSAC_REJECTION = 2108; // 0x83c
     field public static final int ACCESS_CONTROL_LIST_CHECK_FAILURE = 2128; // 0x850
-    field public static final int ACCESS_PROBE_LIMIT_REACHED = 2079; // 0x81f
     field public static final int ACTIVATION_REJECTED_BCM_VIOLATION = 48; // 0x30
     field public static final int ACTIVATION_REJECT_GGSN = 30; // 0x1e
     field public static final int ACTIVATION_REJECT_UNSPECIFIED = 31; // 0x1f
@@ -7351,9 +7350,7 @@ package android.telephony {
     field public static final int INVALID_PRIMARY_NSAPI = 2158; // 0x86e
     field public static final int INVALID_SIM_STATE = 2224; // 0x8b0
     field public static final int INVALID_TRANSACTION_ID = 81; // 0x51
-    field public static final int IPV4_CONNECTIONS_LIMIT_REACHED = 2052; // 0x804
     field public static final int IPV6_ADDRESS_TRANSFER_FAILED = 2047; // 0x7ff
-    field public static final int IPV6_CONNECTIONS_LIMIT_REACHED = 2053; // 0x805
     field public static final int IPV6_PREFIX_UNAVAILABLE = 2250; // 0x8ca
     field public static final int IP_ADDRESS_MISMATCH = 119; // 0x77
     field public static final int IP_VERSION_MISMATCH = 2055; // 0x807
@@ -7372,6 +7369,10 @@ package android.telephony {
     field public static final int MAC_FAILURE = 2183; // 0x887
     field public static final int MAXIMIUM_NSAPIS_EXCEEDED = 2157; // 0x86d
     field public static final int MAXINUM_SIZE_OF_L2_MESSAGE_EXCEEDED = 2166; // 0x876
+    field public static final int MAX_ACCESS_PROBE = 2079; // 0x81f
+    field public static final int MAX_IPV4_CONNECTIONS = 2052; // 0x804
+    field public static final int MAX_IPV6_CONNECTIONS = 2053; // 0x805
+    field public static final int MAX_PPP_INACTIVITY_TIMER_EXPIRED = 2046; // 0x7fe
     field public static final int MESSAGE_INCORRECT_SEMANTIC = 95; // 0x5f
     field public static final int MESSAGE_TYPE_UNSUPPORTED = 97; // 0x61
     field public static final int MIP_CONFIG_FAILURE = 2050; // 0x802
@@ -7480,7 +7481,6 @@ package android.telephony {
     field public static final int PPP_AUTH_FAILURE = 2229; // 0x8b5
     field public static final int PPP_CHAP_FAILURE = 2232; // 0x8b8
     field public static final int PPP_CLOSE_IN_PROGRESS = 2233; // 0x8b9
-    field public static final int PPP_INACTIVITY_TIMER_EXPIRED = 2046; // 0x7fe
     field public static final int PPP_OPTION_MISMATCH = 2230; // 0x8b6
     field public static final int PPP_PAP_FAILURE = 2231; // 0x8b7
     field public static final int PPP_TIMEOUT = 2228; // 0x8b4
@@ -7681,15 +7681,14 @@ package android.telephony {
     field public static final String MBMS_STREAMING_SERVICE_ACTION = "android.telephony.action.EmbmsStreaming";
   }
 
-  public class NetworkRegistrationInfo implements android.os.Parcelable {
-    ctor public NetworkRegistrationInfo(int, int, int, int, int, boolean, @NonNull int[], @Nullable android.telephony.CellIdentity);
+  public final class NetworkRegistrationInfo implements android.os.Parcelable {
     method public int describeContents();
     method public int getAccessNetworkTechnology();
-    method @NonNull public int[] getAvailableServices();
+    method @NonNull public java.util.List<java.lang.Integer> getAvailableServices();
     method @Nullable public android.telephony.CellIdentity getCellIdentity();
     method @Nullable public android.telephony.DataSpecificRegistrationStates getDataSpecificStates();
     method public int getDomain();
-    method public int getRegState();
+    method public int getRegistrationState();
     method public int getRejectCause();
     method public int getRoamingType();
     method public int getTransportType();
@@ -7699,31 +7698,30 @@ package android.telephony {
     field @NonNull public static final android.os.Parcelable.Creator<android.telephony.NetworkRegistrationInfo> CREATOR;
     field public static final int DOMAIN_CS = 1; // 0x1
     field public static final int DOMAIN_PS = 2; // 0x2
-    field public static final int REG_STATE_DENIED = 3; // 0x3
-    field public static final int REG_STATE_HOME = 1; // 0x1
-    field public static final int REG_STATE_NOT_REG_NOT_SEARCHING = 0; // 0x0
-    field public static final int REG_STATE_NOT_REG_SEARCHING = 2; // 0x2
-    field public static final int REG_STATE_ROAMING = 5; // 0x5
-    field public static final int REG_STATE_UNKNOWN = 4; // 0x4
+    field public static final int REGISTRATION_STATE_DENIED = 3; // 0x3
+    field public static final int REGISTRATION_STATE_HOME = 1; // 0x1
+    field public static final int REGISTRATION_STATE_NOT_REGISTERED_OR_SEARCHING = 0; // 0x0
+    field public static final int REGISTRATION_STATE_NOT_REGISTERED_SEARCHING = 2; // 0x2
+    field public static final int REGISTRATION_STATE_ROAMING = 5; // 0x5
+    field public static final int REGISTRATION_STATE_UNKNOWN = 4; // 0x4
     field public static final int SERVICE_TYPE_DATA = 2; // 0x2
     field public static final int SERVICE_TYPE_EMERGENCY = 5; // 0x5
     field public static final int SERVICE_TYPE_SMS = 3; // 0x3
+    field public static final int SERVICE_TYPE_UNKNOWN = 0; // 0x0
     field public static final int SERVICE_TYPE_VIDEO = 4; // 0x4
     field public static final int SERVICE_TYPE_VOICE = 1; // 0x1
   }
 
-  public static class NetworkRegistrationInfo.Builder {
+  public static final class NetworkRegistrationInfo.Builder {
     ctor public NetworkRegistrationInfo.Builder();
     method @NonNull public android.telephony.NetworkRegistrationInfo build();
     method @NonNull public android.telephony.NetworkRegistrationInfo.Builder setAccessNetworkTechnology(int);
-    method @NonNull public android.telephony.NetworkRegistrationInfo.Builder setAvailableServices(@NonNull int[]);
+    method @NonNull public android.telephony.NetworkRegistrationInfo.Builder setAvailableServices(@NonNull java.util.List<java.lang.Integer>);
     method @NonNull public android.telephony.NetworkRegistrationInfo.Builder setCellIdentity(@Nullable android.telephony.CellIdentity);
     method @NonNull public android.telephony.NetworkRegistrationInfo.Builder setDomain(int);
     method @NonNull public android.telephony.NetworkRegistrationInfo.Builder setEmergencyOnly(boolean);
-    method @NonNull public android.telephony.NetworkRegistrationInfo.Builder setNrStatus(int);
-    method @NonNull public android.telephony.NetworkRegistrationInfo.Builder setRegState(int);
+    method @NonNull public android.telephony.NetworkRegistrationInfo.Builder setRegistrationState(int);
     method @NonNull public android.telephony.NetworkRegistrationInfo.Builder setRejectCause(int);
-    method @NonNull public android.telephony.NetworkRegistrationInfo.Builder setRoamingType(int);
     method @NonNull public android.telephony.NetworkRegistrationInfo.Builder setTransportType(int);
   }
 

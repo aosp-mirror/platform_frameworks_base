@@ -66,7 +66,6 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
     private int mTouchDownX;
     private int mTouchDownY;
     private boolean mIsVertical;
-    private boolean mSupportsLongpress = true;
     private AudioManager mAudioManager;
     private boolean mGestureAborted;
     private boolean mLongClicked;
@@ -83,7 +82,7 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
                     // Just an old-fashioned ImageView
                     performLongClick();
                     mLongClicked = true;
-                } else if (mSupportsLongpress) {
+                } else {
                     sendEvent(KeyEvent.ACTION_DOWN, KeyEvent.FLAG_LONG_PRESS);
                     sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_LONG_CLICKED);
                     mLongClicked = true;
@@ -104,7 +103,6 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
 
         mCode = a.getInteger(R.styleable.KeyButtonView_keyCode, KEYCODE_UNKNOWN);
 
-        mSupportsLongpress = a.getBoolean(R.styleable.KeyButtonView_keyRepeat, true);
         mPlaySounds = a.getBoolean(R.styleable.KeyButtonView_playSound, true);
 
         TypedValue value = new TypedValue();
@@ -166,7 +164,7 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
         super.onInitializeAccessibilityNodeInfo(info);
         if (mCode != KEYCODE_UNKNOWN) {
             info.addAction(new AccessibilityNodeInfo.AccessibilityAction(ACTION_CLICK, null));
-            if (mSupportsLongpress || isLongClickable()) {
+            if (isLongClickable()) {
                 info.addAction(
                         new AccessibilityNodeInfo.AccessibilityAction(ACTION_LONG_CLICK, null));
             }

@@ -18,8 +18,6 @@
     <declare-styleable name="KeyButtonView">
         <!-- key code to send when pressed; if absent or 0, no key is sent -->
         <attr name="keyCode" format="integer" />
-        <!-- does this button generate longpress / repeat events? -->
-        <attr name="keyRepeat" format="boolean" />
         <!-- Should this button play sound effects, default true -->
         <attr name="playSound" format="boolean" />
         <attr name="android:contentDescription" />

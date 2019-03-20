@@ -159,7 +159,8 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
 
     private OverviewProxyService mOverviewProxyService;
 
-    private int mDisplayId;
+    @VisibleForTesting
+    public int mDisplayId;
     private boolean mIsOnDefaultDisplay;
     public boolean mHomeBlockedThisTouch;
 

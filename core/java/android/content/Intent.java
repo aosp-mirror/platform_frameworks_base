@@ -1997,7 +1997,8 @@ public class Intent implements Parcelable, Cloneable {
     public static final String EXTRA_LAUNCHER_EXTRAS = "android.intent.extra.LAUNCHER_EXTRAS";
 
     /**
-     * Intent extra: ID of the shortcut used to send the share intent.
+     * Intent extra: ID of the shortcut used to send the share intent. Will be sent with
+     * {@link #ACTION_SEND}.
      *
      * @see ShortcutInfo#getId()
      *

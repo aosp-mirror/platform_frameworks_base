@@ -250,7 +250,7 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
                 .setCategories(set(ShortcutInfo.SHORTCUT_CATEGORY_CONVERSATION, "xyz"))
                 .setRank(123)
                 .setPerson(makePerson("person", "personKey", "personUri"))
-                .setLongLived()
+                .setLongLived(true)
                 .setExtras(pb)
                 .build();
         si.addFlags(ShortcutInfo.FLAG_PINNED);
@@ -352,7 +352,7 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
                 .setIntent(makeIntent("action", ShortcutActivity.class, "key", "val"))
                 .setRank(123)
                 .setPerson(makePerson("person", "personKey", "personUri"))
-                .setLongLived()
+                .setLongLived(true)
                 .setExtras(pb)
                 .build();
         sorig.addFlags(ShortcutInfo.FLAG_PINNED);

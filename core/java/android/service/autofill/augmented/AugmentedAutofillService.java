@@ -30,6 +30,7 @@ import android.graphics.Rect;
 import android.os.CancellationSignal;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.ICancellationSignal;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.os.SystemClock;
@@ -201,18 +202,26 @@ public abstract class AugmentedAutofillService extends Service {
         if (mAutofillProxies == null) {
             mAutofillProxies = new SparseArray<>();
         }
+
+        final ICancellationSignal transport = CancellationSignal.createTransport();
+        final CancellationSignal cancellationSignal = CancellationSignal.fromTransport(transport);
         AutofillProxy proxy = mAutofillProxies.get(sessionId);
         if (proxy == null) {
             proxy = new AutofillProxy(sessionId, client, taskId, componentName, focusedId,
-                    focusedValue, requestTime, callback);
+                    focusedValue, requestTime, callback, cancellationSignal);
             mAutofillProxies.put(sessionId,  proxy);
         } else {
             // TODO(b/123099468): figure out if it's ok to reuse the proxy; add logging
             if (DEBUG) Log.d(TAG, "Reusing proxy for session " + sessionId);
             proxy.update(focusedId, focusedValue, callback);
         }
-        // TODO(b/123101711): set cancellation signal
-        final CancellationSignal cancellationSignal = null;
+
+        try {
+            callback.onCancellable(transport);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+
         onFillRequest(new FillRequest(proxy), cancellationSignal, new FillController(proxy),
                 new FillCallback(proxy));
     }
@@ -329,18 +338,21 @@ public abstract class AugmentedAutofillService extends Service {
         @GuardedBy("mLock")
         private FillWindow mFillWindow;
 
+        private CancellationSignal mCancellationSignal;
+
         private AutofillProxy(int sessionId, @NonNull IBinder client, int taskId,
                 @NonNull ComponentName componentName, @NonNull AutofillId focusedId,
                 @Nullable AutofillValue focusedValue, long requestTime,
-                @NonNull IFillCallback callback) {
+                @NonNull IFillCallback callback, @NonNull CancellationSignal cancellationSignal) {
             mSessionId = sessionId;
             mClient = IAugmentedAutofillManagerClient.Stub.asInterface(client);
             mCallback = callback;
             this.taskId = taskId;
             this.componentName = componentName;
-            this.mFocusedId = focusedId;
-            this.mFocusedValue = focusedValue;
-            this.mFirstRequestTime = requestTime;
+            mFocusedId = focusedId;
+            mFocusedValue = focusedValue;
+            mFirstRequestTime = requestTime;
+            mCancellationSignal = cancellationSignal;
             // TODO(b/123099468): linkToDeath
         }
 
@@ -394,6 +406,12 @@ public abstract class AugmentedAutofillService extends Service {
 
         public void requestShowFillUi(int width, int height, Rect anchorBounds,
                 IAutofillWindowPresenter presenter) throws RemoteException {
+            if (mCancellationSignal.isCanceled()) {
+                if (VERBOSE) {
+                    Log.v(TAG, "requestShowFillUi() not showing because request is cancelled");
+                }
+                return;
+            }
             mClient.requestShowFillUi(mSessionId, mFocusedId, width, height, anchorBounds,
                     presenter);
         }
@@ -408,8 +426,13 @@ public abstract class AugmentedAutofillService extends Service {
                 mFocusedId = focusedId;
                 mFocusedValue = focusedValue;
                 if (mCallback != null) {
-                    // TODO(b/123101711): we need to check whether the previous request was
-                    //  completed or not, and if not, cancel it first.
+                    try {
+                        if (mCallback.isCompleted()) {
+                            mCallback.cancel();
+                        }
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "failed to check current pending request status", e);
+                    }
                     Slog.d(TAG, "mCallback is updated.");
                 }
                 mCallback = callback;

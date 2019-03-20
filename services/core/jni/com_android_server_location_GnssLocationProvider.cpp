@@ -71,6 +71,7 @@ static jmethodID method_reportMeasurementData;
 static jmethodID method_reportNavigationMessages;
 static jmethodID method_reportLocationBatch;
 static jmethodID method_reportGnssServiceDied;
+static jmethodID method_setMeasurementCorrectionsCapabilities;
 static jmethodID method_correctionsGetLatitudeDegrees;
 static jmethodID method_correctionsGetLongitudeDegrees;
 static jmethodID method_correctionsGetAltitudeMeters;
@@ -158,10 +159,9 @@ using IAGnss_V2_0 = android::hardware::gnss::V2_0::IAGnss;
 using IAGnssCallback_V1_0 = android::hardware::gnss::V1_0::IAGnssCallback;
 using IAGnssCallback_V2_0 = android::hardware::gnss::V2_0::IAGnssCallback;
 
-using IMeasurementCorrections =
-    android::hardware::gnss::measurement_corrections::V1_0::IMeasurementCorrections;
-using GnssSingleSatCorrectionFlags =
-    android::hardware::gnss::measurement_corrections::V1_0::GnssSingleSatCorrectionFlags;
+using android::hardware::gnss::measurement_corrections::V1_0::IMeasurementCorrections;
+using android::hardware::gnss::measurement_corrections::V1_0::IMeasurementCorrectionsCallback;
+using android::hardware::gnss::measurement_corrections::V1_0::GnssSingleSatCorrectionFlags;
 
 using android::hardware::gnss::visibility_control::V1_0::IGnssVisibilityControl;
 using android::hardware::gnss::visibility_control::V1_0::IGnssVisibilityControlCallback;
@@ -201,7 +201,6 @@ sp<IGnssMeasurement_V1_1> gnssMeasurementIface_V1_1 = nullptr;
 sp<IGnssMeasurement_V2_0> gnssMeasurementIface_V2_0 = nullptr;
 sp<IGnssNavigationMessage> gnssNavigationMessageIface = nullptr;
 sp<IMeasurementCorrections> gnssCorrectionsIface = nullptr;
-
 sp<IGnssVisibilityControl> gnssVisibilityControlIface = nullptr;
 
 #define WAKE_LOCK_NAME  "GPS"
@@ -572,7 +571,9 @@ struct GnssCallback : public IGnssCallback {
     template <class T>
     Return<void> gnssLocationCbImpl(const T& location);
 
-    // TODO(b/73306084): Reconsider allocation cost vs threadsafety on these statics
+    Return<void> gnssSetCapabilitesCbImpl(uint32_t capabilities, bool hasSubHalCapabilityFlags);
+
+    // TODO: Reconsider allocation cost vs threadsafety on these statics
     static const char* sNmeaString;
     static size_t sNmeaStringLength;
 };
@@ -694,16 +695,29 @@ Return<void> GnssCallback::gnssNmeaCb(
 }
 
 Return<void> GnssCallback::gnssSetCapabilitesCb(uint32_t capabilities) {
-    ALOGD("%s: %du\n", __func__, capabilities);
-
-    JNIEnv* env = getJniEnv();
-    env->CallVoidMethod(mCallbacksObj, method_setEngineCapabilities, capabilities);
-    checkAndClearExceptionFromCallback(env, __FUNCTION__);
-    return Void();
+    return GnssCallback::gnssSetCapabilitesCbImpl(capabilities,
+        /* hasSubHalCapabilityFlags = */ true);
 }
 
 Return<void> GnssCallback::gnssSetCapabilitiesCb_2_0(uint32_t capabilities) {
-    return GnssCallback::gnssSetCapabilitesCb(capabilities);
+    return GnssCallback::gnssSetCapabilitesCbImpl(capabilities,
+        /* hasSubHalCapabilityFlags = */ false);
+}
+
+Return <void> GnssCallback::gnssSetCapabilitesCbImpl(uint32_t capabilities,
+        bool hasSubHalCapabilityFlags) {
+    // The IGnssCallback.hal@2.0 removed sub-HAL capability flags from the Capabilities enum
+    // and instead uses the sub-HAL non-null handle returned from IGnss.hal@2.0 to indicate
+    // support. Therefore, the 'hasSubHalCapabilityFlags' parameter is needed to tell if the
+    // 'capabilities' parameter includes the sub-HAL capability flags or not. Old HALs
+    // which explicitly set the sub-HAL capability bits must continue to work.
+    ALOGD("%s: capabilities=%du, hasSubHalCapabilityFlags=%d\n", __func__, capabilities,
+        hasSubHalCapabilityFlags);
+    JNIEnv* env = getJniEnv();
+    env->CallVoidMethod(mCallbacksObj, method_setEngineCapabilities, capabilities,
+            boolToJbool(hasSubHalCapabilityFlags));
+    checkAndClearExceptionFromCallback(env, __FUNCTION__);
+    return Void();
 }
 
 Return<void> GnssCallback::gnssAcquireWakelockCb() {
@@ -1153,6 +1167,22 @@ void GnssMeasurementCallback::setMeasurementData(JNIEnv* env, jobject clock,
 }
 
 /*
+ * MeasurementCorrectionsCallback implements callback methods of interface
+ * IMeasurementCorrectionsCallback.hal.
+ */
+struct MeasurementCorrectionsCallback : public IMeasurementCorrectionsCallback {
+    Return<void> setCapabilitiesCb(uint32_t capabilities) override;
+};
+
+Return<void> MeasurementCorrectionsCallback::setCapabilitiesCb(uint32_t capabilities) {
+    ALOGD("%s: %du\n", __func__, capabilities);
+    JNIEnv* env = getJniEnv();
+    env->CallVoidMethod(mCallbacksObj, method_setMeasurementCorrectionsCapabilities, capabilities);
+    checkAndClearExceptionFromCallback(env, __FUNCTION__);
+    return Void();
+}
+
+/*
  * GnssNiCallback implements callback methods required by the IGnssNi interface.
  */
 struct GnssNiCallback : public IGnssNiCallback {
@@ -1434,7 +1464,7 @@ static void android_location_GnssLocationProvider_init_once(JNIEnv* env, jclass 
     method_reportSvStatus = env->GetMethodID(clazz, "reportSvStatus", "(I[I[F[F[F[F)V");
     method_reportAGpsStatus = env->GetMethodID(clazz, "reportAGpsStatus", "(II[B)V");
     method_reportNmea = env->GetMethodID(clazz, "reportNmea", "(J)V");
-    method_setEngineCapabilities = env->GetMethodID(clazz, "setEngineCapabilities", "(I)V");
+    method_setEngineCapabilities = env->GetMethodID(clazz, "setEngineCapabilities", "(IZ)V");
     method_setGnssYearOfHardware = env->GetMethodID(clazz, "setGnssYearOfHardware", "(I)V");
     method_setGnssHardwareModelName = env->GetMethodID(clazz, "setGnssHardwareModelName",
             "(Ljava/lang/String;)V");
@@ -1473,6 +1503,9 @@ static void android_location_GnssLocationProvider_init_once(JNIEnv* env, jclass 
     method_reportNfwNotification = env->GetMethodID(clazz, "reportNfwNotification",
             "(Ljava/lang/String;BLjava/lang/String;BLjava/lang/String;BZZ)V");
     method_isInEmergencySession = env->GetMethodID(clazz, "isInEmergencySession", "()Z");
+
+    method_setMeasurementCorrectionsCapabilities = env->GetMethodID(clazz,
+            "setMeasurementCorrectionsCapabilities", "(I)V");
 
     jclass measCorrClass = env->FindClass("android/location/GnssMeasurementCorrections");
     method_correctionsGetLatitudeDegrees = env->GetMethodID(
@@ -1591,7 +1624,7 @@ static void android_location_GnssLocationProvider_init_once(JNIEnv* env, jclass 
     }
 
     if (gnssHal_V2_0 != nullptr) {
-        // TODO(b/119638366): getExtensionGnssMeasurement_1_1 from gnssHal_V2_0
+        // TODO: getExtensionGnssMeasurement_1_1 from gnssHal_V2_0
         auto gnssMeasurement = gnssHal_V2_0->getExtensionGnssMeasurement_2_0();
         if (!gnssMeasurement.isOk()) {
             ALOGD("Unable to get a handle to GnssMeasurement_V2_0");
@@ -1793,6 +1826,12 @@ static jboolean android_location_GnssLocationProvider_init(JNIEnv* env, jobject 
         sp<IGnssVisibilityControlCallback> gnssVisibilityControlCbIface =
                 new GnssVisibilityControlCallback();
         gnssVisibilityControlIface->setCallback(gnssVisibilityControlCbIface);
+    }
+
+    if (gnssCorrectionsIface != nullptr) {
+        sp<IMeasurementCorrectionsCallback> gnssCorrectionsIfaceCbIface =
+                new MeasurementCorrectionsCallback();
+        gnssCorrectionsIface->setCallback(gnssCorrectionsIfaceCbIface);
     }
 
     return JNI_TRUE;
@@ -2154,7 +2193,7 @@ static jstring android_location_GnssLocationProvider_get_internal_state(JNIEnv* 
                                                                        jobject /* obj */) {
     jstring result = nullptr;
     /*
-     * TODO(b/33089503) : Create a jobject to represent GnssDebug.
+     * TODO: Create a jobject to represent GnssDebug.
      */
 
     std::stringstream internalState;
@@ -2380,13 +2419,25 @@ static jboolean android_location_GnssMeasurementsProvider_stop_measurement_colle
     return boolToJbool(result.isOk());
 }
 
-static jboolean android_location_GnssMeasurementsProvider_inject_gnss_measurement_corrections(
+static jboolean
+    android_location_GnssMeasurementCorrectionsProvider_is_measurement_corrections_supported(
+    JNIEnv* env, jclass clazz) {
+    if (gnssCorrectionsIface != nullptr) {
+        return JNI_TRUE;
+    }
+
+    return JNI_FALSE;
+}
+
+static jboolean
+    android_location_GnssMeasurementCorrectionsProvider_inject_gnss_measurement_corrections(
         JNIEnv* env,
         jobject obj /* clazz*/,
         jobject correctionsObj) {
 
     if (gnssCorrectionsIface == nullptr) {
-        ALOGW("Trying to inject GNSS corrections on a chipset that does not support them.");
+        ALOGW("Trying to inject GNSS measurement corrections on a chipset that does not"
+            " support them.");
         return JNI_FALSE;
     }
 
@@ -2882,18 +2933,25 @@ static const JNINativeMethod sGeofenceMethods[] = {
 static const JNINativeMethod sMeasurementMethods[] = {
     /* name, signature, funcPtr */
     {"native_is_measurement_supported", "()Z",
-     reinterpret_cast<void*>(
-         android_location_GnssMeasurementsProvider_is_measurement_supported)},
+            reinterpret_cast<void*>(
+            android_location_GnssMeasurementsProvider_is_measurement_supported)},
     {"native_start_measurement_collection", "(Z)Z",
-     reinterpret_cast<void*>(
-         android_location_GnssMeasurementsProvider_start_measurement_collection)},
+            reinterpret_cast<void*>(
+            android_location_GnssMeasurementsProvider_start_measurement_collection)},
     {"native_stop_measurement_collection", "()Z",
-     reinterpret_cast<void*>(
-         android_location_GnssMeasurementsProvider_stop_measurement_collection)},
+            reinterpret_cast<void*>(
+            android_location_GnssMeasurementsProvider_stop_measurement_collection)},
+};
+
+static const JNINativeMethod sMeasurementCorrectionsMethods[] = {
+    /* name, signature, funcPtr */
+    {"native_is_measurement_corrections_supported", "()Z",
+            reinterpret_cast<void*>(
+            android_location_GnssMeasurementCorrectionsProvider_is_measurement_corrections_supported)},
     {"native_inject_gnss_measurement_corrections",
-     "(Landroid/location/GnssMeasurementCorrections;)Z",
-     reinterpret_cast<void*>(
-         android_location_GnssMeasurementsProvider_inject_gnss_measurement_corrections)},
+            "(Landroid/location/GnssMeasurementCorrections;)Z",
+            reinterpret_cast<void*>(
+            android_location_GnssMeasurementCorrectionsProvider_inject_gnss_measurement_corrections)},
 };
 
 static const JNINativeMethod sNavigationMessageMethods[] = {
@@ -2990,6 +3048,11 @@ int register_android_server_location_GnssLocationProvider(JNIEnv* env) {
             "com/android/server/location/GnssMeasurementsProvider",
             sMeasurementMethods,
             NELEM(sMeasurementMethods));
+    jniRegisterNativeMethods(
+            env,
+            "com/android/server/location/GnssMeasurementCorrectionsProvider",
+            sMeasurementCorrectionsMethods,
+            NELEM(sMeasurementCorrectionsMethods));
     jniRegisterNativeMethods(
             env,
             "com/android/server/location/GnssNavigationMessageProvider",

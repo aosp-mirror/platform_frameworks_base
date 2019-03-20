@@ -100,6 +100,30 @@ public class PhoneMediaDeviceTest {
     }
 
     @Test
+    public void connect_hearingAidProfileIsNullAndA2dpProfileNotNull_isConnectedReturnTrue() {
+        when(mLocalProfileManager.getHearingAidProfile()).thenReturn(null);
+
+        when(mA2dpProfile.setActiveDevice(null)).thenReturn(true);
+        assertThat(mPhoneMediaDevice.connect()).isTrue();
+    }
+
+    @Test
+    public void connect_hearingAidProfileNotNullAndA2dpProfileIsNull_isConnectedReturnTrue() {
+        when(mLocalProfileManager.getA2dpProfile()).thenReturn(null);
+
+        when(mHapProfile.setActiveDevice(null)).thenReturn(true);
+        assertThat(mPhoneMediaDevice.connect()).isTrue();
+    }
+
+    @Test
+    public void connect_hearingAidProfileAndA2dpProfileIsNull_isConnectedReturnFalse() {
+        when(mLocalProfileManager.getA2dpProfile()).thenReturn(null);
+        when(mLocalProfileManager.getHearingAidProfile()).thenReturn(null);
+
+        assertThat(mPhoneMediaDevice.connect()).isFalse();
+    }
+
+    @Test
     public void updateSummary_isActiveIsTrue_returnActiveString() {
         mPhoneMediaDevice.updateSummary(true);
 

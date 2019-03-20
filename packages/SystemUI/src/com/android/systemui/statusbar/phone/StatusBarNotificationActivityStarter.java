@@ -17,7 +17,6 @@
 package com.android.systemui.statusbar.phone;
 
 import static com.android.systemui.Dependency.MAIN_HANDLER;
-import static com.android.systemui.SysUiServiceProvider.getComponent;
 import static com.android.systemui.statusbar.phone.StatusBar.getActivityOptions;
 
 import android.app.ActivityManager;
@@ -32,9 +31,7 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Looper;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.UserHandle;
-import android.service.dreams.DreamService;
 import android.service.dreams.IDreamManager;
 import android.service.notification.StatusBarNotification;
 import android.text.TextUtils;
@@ -78,27 +75,18 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
     private static final String TAG = "NotificationClickHandler";
     protected static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
-    private final AssistManager mAssistManager = Dependency.get(AssistManager.class);
-    private final NotificationGroupManager mGroupManager =
-            Dependency.get(NotificationGroupManager.class);
-    private final StatusBarRemoteInputCallback mStatusBarRemoteInputCallback =
-            (StatusBarRemoteInputCallback) Dependency.get(
-                    NotificationRemoteInputManager.Callback.class);
-    private final NotificationRemoteInputManager mRemoteInputManager =
-            Dependency.get(NotificationRemoteInputManager.class);
-    private final NotificationLockscreenUserManager mLockscreenUserManager =
-            Dependency.get(NotificationLockscreenUserManager.class);
-    private final ShadeController mShadeController = Dependency.get(ShadeController.class);
-    private final KeyguardMonitor mKeyguardMonitor = Dependency.get(KeyguardMonitor.class);
-    private final ActivityStarter mActivityStarter = Dependency.get(ActivityStarter.class);
-    private final NotificationEntryManager mEntryManager =
-            Dependency.get(NotificationEntryManager.class);
-    private final StatusBarStateController mStatusBarStateController =
-            Dependency.get(StatusBarStateController.class);
-    private final NotificationInterruptionStateProvider mNotificationInterruptionStateProvider =
-            Dependency.get(NotificationInterruptionStateProvider.class);
-    private final MetricsLogger mMetricsLogger = Dependency.get(MetricsLogger.class);
-
+    private final AssistManager mAssistManager;
+    private final NotificationGroupManager mGroupManager;
+    private final StatusBarRemoteInputCallback mStatusBarRemoteInputCallback;
+    private final NotificationRemoteInputManager mRemoteInputManager;
+    private final NotificationLockscreenUserManager mLockscreenUserManager;
+    private final ShadeController mShadeController;
+    private final KeyguardMonitor mKeyguardMonitor;
+    private final ActivityStarter mActivityStarter;
+    private final NotificationEntryManager mEntryManager;
+    private final StatusBarStateController mStatusBarStateController;
+    private final NotificationInterruptionStateProvider mNotificationInterruptionStateProvider;
+    private final MetricsLogger mMetricsLogger;
     private final Context mContext;
     private final NotificationPanelView mNotificationPanel;
     private final NotificationPresenter mPresenter;
@@ -113,29 +101,55 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
     private boolean mIsCollapsingToShowActivityOverLockscreen;
 
     public StatusBarNotificationActivityStarter(Context context,
+            CommandQueue commandQueue,
+            AssistManager assistManager,
             NotificationPanelView panel,
             NotificationPresenter presenter,
+            NotificationEntryManager entryManager,
             HeadsUpManagerPhone headsUpManager,
-            ActivityLaunchAnimator activityLaunchAnimator) {
+            ActivityStarter activityStarter,
+            ActivityLaunchAnimator activityLaunchAnimator,
+            IStatusBarService statusBarService,
+            StatusBarStateController statusBarStateController,
+            KeyguardManager keyguardManager,
+            IDreamManager dreamManager,
+            NotificationRemoteInputManager remoteInputManager,
+            StatusBarRemoteInputCallback remoteInputCallback,
+            NotificationGroupManager groupManager,
+            NotificationLockscreenUserManager lockscreenUserManager,
+            ShadeController shadeController,
+            KeyguardMonitor keyguardMonitor,
+            NotificationInterruptionStateProvider notificationInterruptionStateProvider,
+            MetricsLogger metricsLogger,
+            LockPatternUtils lockPatternUtils) {
         mContext = context;
         mNotificationPanel = panel;
         mPresenter = presenter;
-        mLockPatternUtils = new LockPatternUtils(context);
         mHeadsUpManager = headsUpManager;
-        mKeyguardManager = context.getSystemService(KeyguardManager.class);
         mActivityLaunchAnimator = activityLaunchAnimator;
-        mBarService = IStatusBarService.Stub.asInterface(
-                ServiceManager.getService(Context.STATUS_BAR_SERVICE));
-        mCommandQueue = getComponent(context, CommandQueue.class);
-        mDreamManager = IDreamManager.Stub.asInterface(
-                ServiceManager.checkService(DreamService.DREAM_SERVICE));
-
+        mBarService = statusBarService;
+        mCommandQueue = commandQueue;
+        mKeyguardManager = keyguardManager;
+        mDreamManager = dreamManager;
+        mRemoteInputManager = remoteInputManager;
+        mLockscreenUserManager = lockscreenUserManager;
+        mShadeController = shadeController;
+        mKeyguardMonitor = keyguardMonitor;
+        mActivityStarter = activityStarter;
+        mEntryManager = entryManager;
+        mStatusBarStateController = statusBarStateController;
+        mNotificationInterruptionStateProvider = notificationInterruptionStateProvider;
+        mMetricsLogger = metricsLogger;
+        mAssistManager = assistManager;
+        mGroupManager = groupManager;
+        mLockPatternUtils = lockPatternUtils;
         mEntryManager.addNotificationEntryListener(new NotificationEntryListener() {
             @Override
             public void onPendingEntryAdded(NotificationEntry entry) {
                 handleFullScreenIntent(entry);
             }
         });
+        mStatusBarRemoteInputCallback = remoteInputCallback;
     }
 
     /**

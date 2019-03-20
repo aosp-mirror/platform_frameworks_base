@@ -269,7 +269,8 @@ class KeyguardController {
      * @return True if we may show an activity while Keyguard is occluded, false otherwise.
      */
     boolean canShowWhileOccluded(boolean dismissKeyguard, boolean showWhenLocked) {
-        return showWhenLocked || dismissKeyguard && !mWindowManager.isKeyguardSecure();
+        return showWhenLocked || dismissKeyguard
+                && !mWindowManager.isKeyguardSecure(mService.getCurrentUserId());
     }
 
     private void visibilitiesUpdated() {
@@ -317,7 +318,7 @@ class KeyguardController {
         // We only allow dismissing Keyguard via the flag when Keyguard is secure for legacy
         // reasons, because that's how apps used to dismiss Keyguard in the secure case. In the
         // insecure case, we actually show it on top of the lockscreen. See #canShowWhileOccluded.
-        if (!mWindowManager.isKeyguardSecure()) {
+        if (!mWindowManager.isKeyguardSecure(mService.getCurrentUserId())) {
             return;
         }
 
@@ -345,7 +346,8 @@ class KeyguardController {
      * @return true if Keyguard can be currently dismissed without entering credentials.
      */
     boolean canDismissKeyguard() {
-        return mWindowManager.isKeyguardTrusted() || !mWindowManager.isKeyguardSecure();
+        return mWindowManager.isKeyguardTrusted()
+                || !mWindowManager.isKeyguardSecure(mService.getCurrentUserId());
     }
 
     private int resolveOccludeTransit() {
@@ -487,7 +489,8 @@ class KeyguardController {
             }
             if (lastDismissActivity != mDismissingKeyguardActivity && !mOccluded
                     && mDismissingKeyguardActivity != null
-                    && controller.mWindowManager.isKeyguardSecure()) {
+                    && controller.mWindowManager.isKeyguardSecure(
+                            controller.mService.getCurrentUserId())) {
                 mRequestDismissKeyguard = true;
             }
         }

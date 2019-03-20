@@ -331,8 +331,8 @@ public class GridLayout extends ViewGroup {
      */
     @Orientation
     @InspectableProperty(enumMapping = {
-            @InspectableProperty.EnumMap(value = HORIZONTAL, name = "horizontal"),
-            @InspectableProperty.EnumMap(value = VERTICAL, name = "vertical")
+            @InspectableProperty.EnumEntry(value = HORIZONTAL, name = "horizontal"),
+            @InspectableProperty.EnumEntry(value = VERTICAL, name = "vertical")
     })
     public int getOrientation() {
         return mOrientation;
@@ -510,8 +510,8 @@ public class GridLayout extends ViewGroup {
      */
     @AlignmentMode
     @InspectableProperty(enumMapping = {
-            @InspectableProperty.EnumMap(value = ALIGN_BOUNDS, name = "alignBounds"),
-            @InspectableProperty.EnumMap(value = ALIGN_MARGINS, name = "alignMargins"),
+            @InspectableProperty.EnumEntry(value = ALIGN_BOUNDS, name = "alignBounds"),
+            @InspectableProperty.EnumEntry(value = ALIGN_MARGINS, name = "alignMargins"),
     })
     public int getAlignmentMode() {
         return mAlignmentMode;

@@ -242,9 +242,9 @@ std::map<int, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
         // TimeZoneDataInfo.
         {android::util::TIME_ZONE_DATA_INFO,
          {.puller = new StatsCompanionServicePuller(android::util::TIME_ZONE_DATA_INFO)}},
-        // SDCardInfo
-        {android::util::SDCARD_INFO,
-         {.puller = new StatsCompanionServicePuller(android::util::SDCARD_INFO)}},
+        // ExternalStorageInfo
+        {android::util::EXTERNAL_STORAGE_INFO,
+         {.puller = new StatsCompanionServicePuller(android::util::EXTERNAL_STORAGE_INFO)}},
         // GpuStatsGlobalInfo
         {android::util::GPU_STATS_GLOBAL_INFO,
          {.puller = new GpuStatsPuller(android::util::GPU_STATS_GLOBAL_INFO)}},

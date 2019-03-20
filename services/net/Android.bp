@@ -7,6 +7,19 @@ java_library_static {
     ]
 }
 
+java_library_static {
+    name: "ipmemorystore-client",
+    sdk_version: "system_current",
+    srcs: [
+        ":framework-annotations",
+        "java/android/net/IpMemoryStoreClient.java",
+        "java/android/net/ipmemorystore/**.java",
+    ],
+    static_libs: [
+        "ipmemorystore-aidl-interfaces-java",
+    ]
+}
+
 filegroup {
     name: "services-networkstack-shared-srcs",
     srcs: [

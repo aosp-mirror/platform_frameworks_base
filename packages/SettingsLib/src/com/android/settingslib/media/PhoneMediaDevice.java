@@ -70,13 +70,18 @@ public class PhoneMediaDevice extends MediaDevice {
         final HearingAidProfile hapProfile = mProfileManager.getHearingAidProfile();
         final A2dpProfile a2dpProfile = mProfileManager.getA2dpProfile();
 
+        // Some device may not have HearingAidProfile, consider all situation to set active device.
         boolean isConnected = false;
-
         if (hapProfile != null && a2dpProfile != null) {
             isConnected = hapProfile.setActiveDevice(null) && a2dpProfile.setActiveDevice(null);
-            updateSummary(true);
-            setConnectedRecord();
+        } else if (a2dpProfile != null) {
+            isConnected = a2dpProfile.setActiveDevice(null);
+        } else if (hapProfile != null) {
+            isConnected = hapProfile.setActiveDevice(null);
         }
+        updateSummary(isConnected);
+        setConnectedRecord();
+
         Log.d(TAG, "connect() device : " + getName() + ", is selected : " + isConnected);
         return isConnected;
     }

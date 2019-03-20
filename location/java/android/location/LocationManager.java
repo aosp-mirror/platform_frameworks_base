@@ -167,9 +167,9 @@ public class LocationManager {
 
     /**
      * Broadcast intent action when the set of enabled location providers changes. To check the
-     * status of a provider, use {@link #isProviderEnabled(String)}. Depending on API level, may
+     * status of a provider, use {@link #isProviderEnabled(String)}. From Android Q and above, will
      * include a string intent extra, {@link #EXTRA_PROVIDER_NAME}, with the name of the provider
-     * whose state has changed. See {@link #EXTRA_PROVIDER_NAME} for the supported API level.
+     * whose state has changed.
      *
      * @see #EXTRA_PROVIDER_NAME
      */

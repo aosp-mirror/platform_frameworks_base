@@ -170,8 +170,15 @@ import java.util.ArrayList;
         }
     }
 
-    /*package*/ void setSpeakerphoneOn(boolean on, String eventSource) {
+    /**
+     * Turns speakerphone on/off
+     * @param on
+     * @param eventSource for logging purposes
+     * @return true if speakerphone state changed
+     */
+    /*package*/ boolean setSpeakerphoneOn(boolean on, String eventSource) {
         synchronized (mDeviceStateLock) {
+            final boolean wasOn = isSpeakerphoneOn();
             if (on) {
                 if (mForcedUseForComm == AudioSystem.FORCE_BT_SCO) {
                     setForceUse_Async(AudioSystem.FOR_RECORD, AudioSystem.FORCE_NONE, eventSource);
@@ -183,6 +190,7 @@ import java.util.ArrayList;
 
             mForcedUseForCommExt = mForcedUseForComm;
             setForceUse_Async(AudioSystem.FOR_COMMUNICATION, mForcedUseForComm, eventSource);
+            return (wasOn != isSpeakerphoneOn());
         }
     }
 

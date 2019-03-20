@@ -161,7 +161,7 @@ public final class ContentCaptureContext implements Parcelable {
     /**
      * Gets the context id.
      */
-    @NonNull
+    @Nullable
     public LocusId getLocusId() {
         return mId;
     }

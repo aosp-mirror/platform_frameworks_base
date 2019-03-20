@@ -1880,6 +1880,33 @@ message WifiUsabilityStatsEntry {
     PROBE_STATUS_FAILURE = 3;
   }
 
+  // Codes for cellular data network type
+  enum CellularDataNetworkType {
+    // Unknown network
+    NETWORK_TYPE_UNKNOWN = 0;
+
+    // GSM network
+    NETWORK_TYPE_GSM = 1;
+
+    // CDMA network
+    NETWORK_TYPE_CDMA = 2;
+
+    // CDMA EVDO network
+    NETWORK_TYPE_EVDO_0 = 3;
+
+    // WCDMA network
+    NETWORK_TYPE_UMTS = 4;
+
+    // TDSCDMA network
+    NETWORK_TYPE_TD_SCDMA = 5;
+
+    // LTE network
+    NETWORK_TYPE_LTE = 6;
+
+    // NR network
+    NETWORK_TYPE_NR = 7;
+  }
+
   // Absolute milliseconds from device boot when these stats were sampled
   optional int64 time_stamp_ms = 1;
 
@@ -1971,6 +1998,20 @@ message WifiUsabilityStatsEntry {
   // Whether current entry is for the same BSSID on the same frequency compared
   // to last entry
   optional bool is_same_bssid_and_freq = 29;
+
+  // Cellular data network type currently in use on the device for data transmission
+  optional CellularDataNetworkType cellular_data_network_type = 30;
+
+  // Cellular signal strength in dBm, NR: CsiRsrp, LTE: Rsrp, WCDMA/TDSCDMA: Rscp,
+  // CDMA: Rssi, EVDO: Rssi, GSM: Rssi
+  optional int32 cellular_signal_strength_dbm = 31;
+
+  // Cellular signal strength in dB, NR: CsiSinr, LTE: Rsrq, WCDMA: EcNo, TDSCDMA: invalid,
+  // CDMA: Ecio, EVDO: SNR, GSM: invalid */
+  optional int32 cellular_signal_strength_db = 32;
+
+  // Whether the primary registered cell of current entry is same as that of previous entry
+  optional bool is_same_registered_cell = 33;
 }
 
 message WifiUsabilityStats {

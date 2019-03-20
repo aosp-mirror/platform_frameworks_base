@@ -2174,11 +2174,11 @@ public class GridView extends AbsListView {
 
     @StretchMode
     @InspectableProperty(enumMapping = {
-            @InspectableProperty.EnumMap(value = NO_STRETCH, name = "none"),
-            @InspectableProperty.EnumMap(value = STRETCH_SPACING, name = "spacingWidth"),
-            @InspectableProperty.EnumMap(
+            @InspectableProperty.EnumEntry(value = NO_STRETCH, name = "none"),
+            @InspectableProperty.EnumEntry(value = STRETCH_SPACING, name = "spacingWidth"),
+            @InspectableProperty.EnumEntry(
                     value = STRETCH_SPACING_UNIFORM, name = "spacingWidthUniform"),
-            @InspectableProperty.EnumMap(value = STRETCH_COLUMN_WIDTH, name = "columnWidth"),
+            @InspectableProperty.EnumEntry(value = STRETCH_COLUMN_WIDTH, name = "columnWidth"),
     })
     public int getStretchMode() {
         return mStretchMode;

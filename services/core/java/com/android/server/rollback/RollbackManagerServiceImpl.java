@@ -535,8 +535,8 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
 
     private void updateRollbackLifetimeDurationInMillis() {
         mRollbackLifetimeDurationInMillis = DeviceConfig.getLong(
-                DeviceConfig.Rollback.BOOT_NAMESPACE,
-                DeviceConfig.Rollback.ROLLBACK_LIFETIME_IN_MILLIS,
+                DeviceConfig.NAMESPACE_ROLLBACK_BOOT,
+                RollbackManager.PROPERTY_ROLLBACK_LIFETIME_MILLIS,
                 DEFAULT_ROLLBACK_LIFETIME_DURATION_MILLIS);
         if (mRollbackLifetimeDurationInMillis < 0) {
             mRollbackLifetimeDurationInMillis = DEFAULT_ROLLBACK_LIFETIME_DURATION_MILLIS;

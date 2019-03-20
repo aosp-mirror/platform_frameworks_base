@@ -1820,6 +1820,21 @@ public class AudioManager {
             "android.media.action.MICROPHONE_MUTE_CHANGED";
 
     /**
+     * Broadcast Action: speakerphone state changed.
+     *
+     * You <em>cannot</em> receive this through components declared
+     * in manifests, only by explicitly registering for it with
+     * {@link Context#registerReceiver(BroadcastReceiver, IntentFilter)
+     * Context.registerReceiver()}.
+     *
+     * <p>The intent has no extra values, use {@link #isSpeakerphoneOn} to check whether the
+     * speakerphone functionality is enabled or not.
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_SPEAKERPHONE_STATE_CHANGED =
+            "android.media.action.SPEAKERPHONE_STATE_CHANGED";
+
+    /**
      * Sets the audio mode.
      * <p>
      * The audio mode encompasses audio routing AND the behavior of

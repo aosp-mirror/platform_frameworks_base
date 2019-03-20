@@ -23,7 +23,8 @@ import android.content.Context;
 import com.android.internal.util.Preconditions;
 
 /**
- * TODO (b/111701043) : Add java doc
+ * Class that provides methods to create prediction clients.
+ *
  * @hide
  */
 @SystemApi

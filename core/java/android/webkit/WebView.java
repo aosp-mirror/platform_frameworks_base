@@ -2292,9 +2292,9 @@ public class WebView extends AbsoluteLayout
      * @return the requested renderer priority policy.
      */
     @InspectableProperty(hasAttributeId = false, enumMapping = {
-            @InspectableProperty.EnumMap(name = "waived", value = RENDERER_PRIORITY_WAIVED),
-            @InspectableProperty.EnumMap(name = "bound", value = RENDERER_PRIORITY_BOUND),
-            @InspectableProperty.EnumMap(name = "important", value = RENDERER_PRIORITY_IMPORTANT)
+            @InspectableProperty.EnumEntry(name = "waived", value = RENDERER_PRIORITY_WAIVED),
+            @InspectableProperty.EnumEntry(name = "bound", value = RENDERER_PRIORITY_BOUND),
+            @InspectableProperty.EnumEntry(name = "important", value = RENDERER_PRIORITY_IMPORTANT)
     })
     @RendererPriority
     public int getRendererRequestedPriority() {

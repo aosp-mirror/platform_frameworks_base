@@ -28,6 +28,7 @@ import java.lang.annotation.RetentionPolicy;
 
 /**
  * A representation of an app target event.
+ *
  * @hide
  */
 @SystemApi
@@ -118,9 +119,6 @@ public final class AppTargetEvent implements Parcelable {
         dest.writeInt(mAction);
     }
 
-    /**
-     * @see Creator
-     */
     public static final @android.annotation.NonNull Creator<AppTargetEvent> CREATOR =
             new Creator<AppTargetEvent>() {
                 public AppTargetEvent createFromParcel(Parcel parcel) {
@@ -134,6 +132,7 @@ public final class AppTargetEvent implements Parcelable {
 
     /**
      * A builder for app target events.
+     *
      * @hide
      */
     @SystemApi
@@ -143,6 +142,10 @@ public final class AppTargetEvent implements Parcelable {
         private String mLocation;
         private @ActionType int mAction;
 
+        /**
+         * @param target The app target that is associated with this event.
+         * @param actionType The event type, which is one of the values in {@link ActionType}.
+         */
         public Builder(@Nullable AppTarget target, @ActionType int actionType) {
             mTarget = target;
             mAction = actionType;

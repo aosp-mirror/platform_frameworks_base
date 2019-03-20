@@ -596,7 +596,8 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
     @Override
     public void appTransitionCancelled(int displayId) {
         synchronized (mLock) {
-            mHandler.obtainMessage(MSG_APP_TRANSITION_CANCELLED, displayId).sendToTarget();
+            mHandler.obtainMessage(MSG_APP_TRANSITION_CANCELLED, displayId, 0 /* unused */)
+                    .sendToTarget();
         }
     }
 
@@ -624,7 +625,8 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
     @Override
     public void appTransitionFinished(int displayId) {
         synchronized (mLock) {
-            mHandler.obtainMessage(MSG_APP_TRANSITION_FINISHED, displayId).sendToTarget();
+            mHandler.obtainMessage(MSG_APP_TRANSITION_FINISHED, displayId, 0 /* unused */)
+                    .sendToTarget();
         }
     }
 

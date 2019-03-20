@@ -1270,8 +1270,8 @@ public final class ShortcutInfo implements Parcelable {
          * system services even after it has been unpublished as a dynamic shortcut.
          */
         @NonNull
-        public Builder setLongLived() {
-            mIsLongLived = true;
+        public Builder setLongLived(boolean londLived) {
+            mIsLongLived = londLived;
             return this;
         }
 

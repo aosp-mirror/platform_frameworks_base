@@ -20,6 +20,7 @@ import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
@@ -47,7 +48,16 @@ public class RestrictedLockUtils {
         if (dpm == null) {
             return null;
         }
-        ComponentName adminComponent = dpm.getProfileOwnerAsUser(user);
+
+        Context userContext;
+        try {
+            userContext = context.createPackageContextAsUser(context.getPackageName(), 0, user);
+        } catch (PackageManager.NameNotFoundException e) {
+            throw new IllegalStateException(e);
+        }
+
+        ComponentName adminComponent = userContext.getSystemService(
+                DevicePolicyManager.class).getProfileOwner();
         if (adminComponent != null) {
             return new EnforcedAdmin(adminComponent, enforcedRestriction, user);
         }

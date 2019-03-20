@@ -29,6 +29,7 @@ import com.android.internal.util.Preconditions;
 
 /**
  * A representation of a launchable target.
+ *
  * @hide
  */
 @SystemApi
@@ -45,7 +46,12 @@ public final class AppTarget implements Parcelable {
     private int mRank;
 
     /**
-     * TODO(b/123591863): Add java docs
+     * Creates an instance of AppTarget that represent a launchable component.
+     *
+     * @param id A unique id for this launchable target.
+     * @param packageName Package name of the target.
+     * @param className Class name of the target.
+     * @param user The UserHandle of the user which this target belongs to.
      *
      * @hide
      */
@@ -62,7 +68,11 @@ public final class AppTarget implements Parcelable {
     }
 
     /**
-     * TODO(b/123591863): Add java docs
+     * Creates an instance of AppTarget that represent a launchable shortcut.
+     *
+     * @param id A unique id for this launchable target.
+     * @param shortcutInfo The {@link ShortcutInfo} that is represented with this target.
+     * @param className Class name fo the target.
      *
      * @hide
      */
@@ -186,9 +196,6 @@ public final class AppTarget implements Parcelable {
         dest.writeInt(mRank);
     }
 
-    /**
-     * @see Parcelable.Creator
-     */
     public static final @android.annotation.NonNull Parcelable.Creator<AppTarget> CREATOR =
             new Parcelable.Creator<AppTarget>() {
                 public AppTarget createFromParcel(Parcel parcel) {

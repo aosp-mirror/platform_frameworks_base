@@ -2693,6 +2693,7 @@ public final class Settings {
                 // seinfo     - seinfo label for the app (assigned at install time)
                 // gids       - supplementary gids this app launches with
                 // profileableFromShellFlag  - 0 or 1 if the package is profileable from shell.
+                // longVersionCode - integer version of the package.
                 //
                 // NOTE: We prefer not to expose all ApplicationInfo flags for now.
                 //
@@ -2720,6 +2721,8 @@ public final class Settings {
                 }
                 sb.append(" ");
                 sb.append(ai.isProfileableByShell() ? "1" : "0");
+                sb.append(" ");
+                sb.append(String.valueOf(ai.longVersionCode));
                 sb.append("\n");
                 writer.append(sb);
             }

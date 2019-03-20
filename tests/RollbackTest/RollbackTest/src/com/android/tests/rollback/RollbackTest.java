@@ -346,8 +346,8 @@ public class RollbackTest {
                     Manifest.permission.MANAGE_ROLLBACKS,
                     Manifest.permission.WRITE_DEVICE_CONFIG);
 
-            DeviceConfig.setProperty(DeviceConfig.Rollback.BOOT_NAMESPACE,
-                    DeviceConfig.Rollback.ROLLBACK_LIFETIME_IN_MILLIS,
+            DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ROLLBACK_BOOT,
+                    RollbackManager.PROPERTY_ROLLBACK_LIFETIME_MILLIS,
                     Long.toString(expirationTime), false /* makeDefault*/);
 
             // Pull the new expiration time from DeviceConfig
@@ -382,8 +382,8 @@ public class RollbackTest {
             assertNull(getUniqueRollbackInfoForPackage(rm.getAvailableRollbacks(), TEST_APP_A));
 
         } finally {
-            DeviceConfig.setProperty(DeviceConfig.Rollback.BOOT_NAMESPACE,
-                    DeviceConfig.Rollback.ROLLBACK_LIFETIME_IN_MILLIS,
+            DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ROLLBACK_BOOT,
+                    RollbackManager.PROPERTY_ROLLBACK_LIFETIME_MILLIS,
                     Long.toString(defaultExpirationTime), false /* makeDefault*/);
             RollbackTestUtils.dropShellPermissionIdentity();
         }
@@ -407,8 +407,8 @@ public class RollbackTest {
                     Manifest.permission.WRITE_DEVICE_CONFIG,
                     Manifest.permission.SET_TIME);
 
-            DeviceConfig.setProperty(DeviceConfig.Rollback.BOOT_NAMESPACE,
-                    DeviceConfig.Rollback.ROLLBACK_LIFETIME_IN_MILLIS,
+            DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ROLLBACK_BOOT,
+                    RollbackManager.PROPERTY_ROLLBACK_LIFETIME_MILLIS,
                     Long.toString(expirationTime), false /* makeDefault*/);
 
             // Pull the new expiration time from DeviceConfig
@@ -458,8 +458,8 @@ public class RollbackTest {
                 RollbackTestUtils.forwardTimeBy(-expirationTime);
             }
         } finally {
-            DeviceConfig.setProperty(DeviceConfig.Rollback.BOOT_NAMESPACE,
-                    DeviceConfig.Rollback.ROLLBACK_LIFETIME_IN_MILLIS,
+            DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ROLLBACK_BOOT,
+                    RollbackManager.PROPERTY_ROLLBACK_LIFETIME_MILLIS,
                     Long.toString(defaultExpirationTime), false /* makeDefault*/);
             RollbackTestUtils.dropShellPermissionIdentity();
         }

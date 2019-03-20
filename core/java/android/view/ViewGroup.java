@@ -61,7 +61,7 @@ import android.view.animation.LayoutAnimationController;
 import android.view.animation.Transformation;
 import android.view.autofill.Helper;
 import android.view.inspector.InspectableProperty;
-import android.view.inspector.InspectableProperty.EnumMap;
+import android.view.inspector.InspectableProperty.EnumEntry;
 
 import com.android.internal.R;
 
@@ -778,9 +778,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         @ViewDebug.IntToString(from = FOCUS_BLOCK_DESCENDANTS, to = "FOCUS_BLOCK_DESCENDANTS")
     })
     @InspectableProperty(enumMapping = {
-            @EnumMap(value = FOCUS_BEFORE_DESCENDANTS, name = "beforeDescendants"),
-            @EnumMap(value = FOCUS_AFTER_DESCENDANTS, name = "afterDescendants"),
-            @EnumMap(value = FOCUS_BLOCK_DESCENDANTS, name = "blocksDescendants")
+            @EnumEntry(value = FOCUS_BEFORE_DESCENDANTS, name = "beforeDescendants"),
+            @EnumEntry(value = FOCUS_AFTER_DESCENDANTS, name = "afterDescendants"),
+            @EnumEntry(value = FOCUS_BLOCK_DESCENDANTS, name = "blocksDescendants")
     })
     public int getDescendantFocusability() {
         return mGroupFlags & FLAG_MASK_FOCUSABILITY;
@@ -6574,10 +6574,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         @ViewDebug.IntToString(from = PERSISTENT_ALL_CACHES,      to = "ALL")
     })
     @InspectableProperty(enumMapping = {
-            @EnumMap(value = PERSISTENT_NO_CACHE, name = "none"),
-            @EnumMap(value = PERSISTENT_ANIMATION_CACHE, name = "animation"),
-            @EnumMap(value = PERSISTENT_SCROLLING_CACHE, name = "scrolling"),
-            @EnumMap(value = PERSISTENT_ALL_CACHES, name = "all"),
+            @EnumEntry(value = PERSISTENT_NO_CACHE, name = "none"),
+            @EnumEntry(value = PERSISTENT_ANIMATION_CACHE, name = "animation"),
+            @EnumEntry(value = PERSISTENT_SCROLLING_CACHE, name = "scrolling"),
+            @EnumEntry(value = PERSISTENT_ALL_CACHES, name = "all"),
     })
     public int getPersistentDrawingCache() {
         return mPersistentDrawingCache;
@@ -6657,8 +6657,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * @see #setLayoutMode(int)
      */
     @InspectableProperty(enumMapping = {
-            @EnumMap(value = LAYOUT_MODE_CLIP_BOUNDS, name = "clipBounds"),
-            @EnumMap(value = LAYOUT_MODE_OPTICAL_BOUNDS, name = "opticalBounds")
+            @EnumEntry(value = LAYOUT_MODE_CLIP_BOUNDS, name = "clipBounds"),
+            @EnumEntry(value = LAYOUT_MODE_OPTICAL_BOUNDS, name = "opticalBounds")
     })
     public int getLayoutMode() {
         if (mLayoutMode == LAYOUT_MODE_UNDEFINED) {
@@ -7849,8 +7849,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             @ViewDebug.IntToString(from = WRAP_CONTENT, to = "WRAP_CONTENT")
         })
         @InspectableProperty(name = "layout_width", enumMapping = {
-                @InspectableProperty.EnumMap(name = "match_parent", value = MATCH_PARENT),
-                @InspectableProperty.EnumMap(name = "wrap_content", value = WRAP_CONTENT)
+                @EnumEntry(name = "match_parent", value = MATCH_PARENT),
+                @EnumEntry(name = "wrap_content", value = WRAP_CONTENT)
         })
         public int width;
 
@@ -7864,8 +7864,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             @ViewDebug.IntToString(from = WRAP_CONTENT, to = "WRAP_CONTENT")
         })
         @InspectableProperty(name = "layout_height", enumMapping = {
-                @InspectableProperty.EnumMap(name = "match_parent", value = MATCH_PARENT),
-                @InspectableProperty.EnumMap(name = "wrap_content", value = WRAP_CONTENT)
+                @EnumEntry(name = "match_parent", value = MATCH_PARENT),
+                @EnumEntry(name = "wrap_content", value = WRAP_CONTENT)
         })
         public int height;
 

@@ -102,6 +102,7 @@ import com.android.server.location.GeofenceManager;
 import com.android.server.location.GeofenceProxy;
 import com.android.server.location.GnssBatchingProvider;
 import com.android.server.location.GnssLocationProvider;
+import com.android.server.location.GnssMeasurementCorrectionsProvider;
 import com.android.server.location.GnssMeasurementsProvider;
 import com.android.server.location.GnssNavigationMessageProvider;
 import com.android.server.location.GnssStatusListenerHelper;
@@ -195,6 +196,7 @@ public class LocationManagerService extends ILocationManager.Stub {
     private PassiveProvider mPassiveProvider;  // track passive provider for special cases
     private LocationBlacklist mBlacklist;
     private GnssMeasurementsProvider mGnssMeasurementsProvider;
+    private GnssMeasurementCorrectionsProvider mGnssMeasurementCorrectionsProvider;
     private GnssNavigationMessageProvider mGnssNavigationMessageProvider;
     @GuardedBy("mLock")
     private String mLocationControllerExtraPackage;
@@ -309,9 +311,13 @@ public class LocationManagerService extends ILocationManager.Stub {
                 AppOpsManager.WATCH_FOREGROUND_CHANGES,
                 new AppOpsManager.OnOpChangedInternalListener() {
                     public void onOpChanged(int op, String packageName) {
-                        synchronized (mLock) {
-                            onAppOpChangedLocked();
-                        }
+                        // onOpChanged invoked on ui thread, move to our thread to reduce risk of
+                        // blocking ui thread
+                        mHandler.post(() -> {
+                            synchronized (mLock) {
+                                onAppOpChangedLocked();
+                            }
+                        });
                     }
                 });
         mPackageManager.addOnPermissionsChangeListener(
@@ -757,6 +763,8 @@ public class LocationManagerService extends ILocationManager.Stub {
             mGnssStatusProvider = gnssProvider.getGnssStatusProvider();
             mNetInitiatedListener = gnssProvider.getNetInitiatedListener();
             mGnssMeasurementsProvider = gnssProvider.getGnssMeasurementsProvider();
+            mGnssMeasurementCorrectionsProvider =
+                    gnssProvider.getGnssMeasurementCorrectionsProvider();
             mGnssNavigationMessageProvider = gnssProvider.getGnssNavigationMessageProvider();
             mGpsGeofenceProxy = gnssProvider.getGpsGeofenceProxy();
         }
@@ -2921,22 +2929,28 @@ public class LocationManagerService extends ILocationManager.Stub {
         mContext.enforceCallingPermission(
                 android.Manifest.permission.LOCATION_HARDWARE,
                 "Location Hardware permission not granted to inject GNSS measurement corrections.");
-        if (!hasGnssPermissions(packageName) || mGnssMeasurementsProvider == null) {
+        if (!hasGnssPermissions(packageName)) {
             Slog.e(TAG, "Can not inject GNSS corrections due to no permission.");
-        } else {
-            mGnssMeasurementsProvider.injectGnssMeasurementCorrections(measurementCorrections);
+            return;
         }
+        if (mGnssMeasurementCorrectionsProvider == null) {
+            Slog.e(TAG, "Can not inject GNSS corrections. GNSS measurement corrections provider "
+                    + "not available.");
+            return;
+        }
+        mGnssMeasurementCorrectionsProvider.injectGnssMeasurementCorrections(
+                measurementCorrections);
     }
 
     @Override
     public int getGnssCapabilities(String packageName) {
         mContext.enforceCallingPermission(
                 android.Manifest.permission.LOCATION_HARDWARE,
-                "Location Hardware permission not granted to obrain GNSS chipset capabilities.");
-        if (!hasGnssPermissions(packageName) || mGnssMeasurementsProvider == null) {
+                "Location Hardware permission not granted to obtain GNSS chipset capabilities.");
+        if (!hasGnssPermissions(packageName) || mGnssMeasurementCorrectionsProvider == null) {
             return -1;
         }
-        return mGnssMeasurementsProvider.getGnssCapabilities();
+        return mGnssMeasurementCorrectionsProvider.getCapabilities();
     }
 
     @Override

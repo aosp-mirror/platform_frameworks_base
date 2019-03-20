@@ -166,9 +166,15 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     private static final int GPS_CAPABILITY_MSA = 0x0000004;
     private static final int GPS_CAPABILITY_SINGLE_SHOT = 0x0000008;
     private static final int GPS_CAPABILITY_ON_DEMAND_TIME = 0x0000010;
-    private static final int GPS_CAPABILITY_GEOFENCING = 0x0000020;
+
+    // The following three capability flags are removed in IGnssCallback.hal@2.0 and their values
+    // are marked reserved and not reused in 2.0 to avoid confusion with prior versions.
+    public static final int GPS_CAPABILITY_GEOFENCING = 0x0000020;
     public static final int GPS_CAPABILITY_MEASUREMENTS = 0x0000040;
-    private static final int GPS_CAPABILITY_NAV_MESSAGES = 0x0000080;
+    public static final int GPS_CAPABILITY_NAV_MESSAGES = 0x0000080;
+
+    private static final int GPS_CAPABILITY_LOW_POWER_MODE = 0x0000100;
+    private static final int GPS_CAPABILITY_SATELLITE_BLACKLIST = 0x0000200;
 
     // The AGPS SUPL mode
     private static final int AGPS_SUPL_MODE_MSA = 0x02;
@@ -333,7 +339,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     private boolean mStarted;
 
     // capabilities of the GPS engine
-    private int mEngineCapabilities;
+    private volatile int mEngineCapabilities;
 
     // true if XTRA is supported
     private boolean mSupportsXtra;
@@ -372,6 +378,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     private final LocationExtras mLocationExtras = new LocationExtras();
     private final GnssStatusListenerHelper mGnssStatusListenerHelper;
     private final GnssMeasurementsProvider mGnssMeasurementsProvider;
+    private final GnssMeasurementCorrectionsProvider mGnssMeasurementCorrectionsProvider;
     private final GnssNavigationMessageProvider mGnssNavigationMessageProvider;
     private final LocationChangeListener mNetworkLocationListener = new NetworkLocationListener();
     private final LocationChangeListener mFusedLocationListener = new FusedLocationListener();
@@ -435,6 +442,10 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
 
     public GnssMeasurementsProvider getGnssMeasurementsProvider() {
         return mGnssMeasurementsProvider;
+    }
+
+    public GnssMeasurementCorrectionsProvider getGnssMeasurementCorrectionsProvider() {
+        return mGnssMeasurementCorrectionsProvider;
     }
 
     public GnssNavigationMessageProvider getGnssNavigationMessageProvider() {
@@ -626,6 +637,8 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
                 return isEnabled();
             }
         };
+
+        mGnssMeasurementCorrectionsProvider = new GnssMeasurementCorrectionsProvider(mHandler);
 
         mGnssNavigationMessageProvider = new GnssNavigationMessageProvider(mContext, mHandler) {
             @Override
@@ -1258,6 +1271,10 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         mAlarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, now + mFixInterval, mWakeupIntent);
     }
 
+    public int getGnssCapabilities() {
+        return mEngineCapabilities;
+    }
+
     private boolean hasCapability(int capability) {
         return ((mEngineCapabilities & capability) != 0);
     }
@@ -1467,22 +1484,27 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     }
 
     @NativeEntryPoint
-    private void setEngineCapabilities(final int capabilities) {
+    private void setEngineCapabilities(final int capabilities, boolean hasSubHalCapabilityFlags) {
         // send to handler thread for fast native return, and in-order handling
-        mHandler.post(
-                () -> {
-                    mEngineCapabilities = capabilities;
+        mHandler.post(() -> {
+            mEngineCapabilities = capabilities;
 
-                    if (hasCapability(GPS_CAPABILITY_ON_DEMAND_TIME)) {
-                        mNtpTimeHelper.enablePeriodicTimeInjection();
-                        requestUtcTime();
-                    }
+            if (hasCapability(GPS_CAPABILITY_ON_DEMAND_TIME)) {
+                mNtpTimeHelper.enablePeriodicTimeInjection();
+                requestUtcTime();
+            }
 
-                    mGnssMeasurementsProvider.onCapabilitiesUpdated(capabilities);
-                    mGnssNavigationMessageProvider.onCapabilitiesUpdated(
-                            hasCapability(GPS_CAPABILITY_NAV_MESSAGES));
-                    restartRequests();
-                });
+            mGnssMeasurementsProvider.onCapabilitiesUpdated(capabilities, hasSubHalCapabilityFlags);
+            mGnssNavigationMessageProvider.onCapabilitiesUpdated(capabilities,
+                    hasSubHalCapabilityFlags);
+            restartRequests();
+        });
+    }
+
+    @NativeEntryPoint
+    private void setMeasurementCorrectionsCapabilities(final int capabilities) {
+        mHandler.post(() -> mGnssMeasurementCorrectionsProvider.onCapabilitiesUpdated(
+                capabilities));
     }
 
     private void restartRequests() {
@@ -2122,7 +2144,23 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         if (hasCapability(GPS_CAPABILITY_GEOFENCING)) s.append("GEOFENCING ");
         if (hasCapability(GPS_CAPABILITY_MEASUREMENTS)) s.append("MEASUREMENTS ");
         if (hasCapability(GPS_CAPABILITY_NAV_MESSAGES)) s.append("NAV_MESSAGES ");
+        if (hasCapability(GPS_CAPABILITY_LOW_POWER_MODE)) s.append("LOW_POWER_MODE ");
+        if (hasCapability(GPS_CAPABILITY_SATELLITE_BLACKLIST)) s.append("SATELLITE_BLACKLIST ");
         s.append(")\n");
+        if (mGnssGeofenceProvider.isHardwareGeofenceSupported()) {
+            s.append("  hasSubHal=GEOFENCING\n");
+        }
+        if (mGnssMeasurementsProvider.isAvailableInPlatform()) {
+            s.append("  hasSubHal=MEASUREMENTS\n");
+        }
+        if (mGnssNavigationMessageProvider.isAvailableInPlatform()) {
+            s.append("  hasSubHal=NAV_MESSAGES\n");
+        }
+        if (mGnssMeasurementCorrectionsProvider.isAvailableInPlatform()) {
+            s.append("  hasSubHal=MEASUREMENT_CORRECTIONS [");
+            s.append(mGnssMeasurementCorrectionsProvider.toStringCapabilities());
+            s.append("]\n");
+        }
         s.append(mGnssMetrics.dumpGnssMetricsAsText());
         s.append("  native internal state: ").append(native_get_internal_state());
         s.append("\n");

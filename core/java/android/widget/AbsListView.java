@@ -83,7 +83,7 @@ import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputContentInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.view.inspector.InspectableProperty;
-import android.view.inspector.InspectableProperty.EnumMap;
+import android.view.inspector.InspectableProperty.EnumEntry;
 import android.widget.RemoteViews.OnClickHandler;
 
 import com.android.internal.R;
@@ -1221,10 +1221,10 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      * @return The current choice mode
      */
     @InspectableProperty(enumMapping = {
-            @EnumMap(value = CHOICE_MODE_NONE, name = "none"),
-            @EnumMap(value = CHOICE_MODE_SINGLE, name = "singleChoice"),
-            @EnumMap(value = CHOICE_MODE_MULTIPLE, name = "multipleChoice"),
-            @EnumMap(value = CHOICE_MODE_MULTIPLE_MODAL, name = "multipleChoiceModal")
+            @EnumEntry(value = CHOICE_MODE_NONE, name = "none"),
+            @EnumEntry(value = CHOICE_MODE_SINGLE, name = "singleChoice"),
+            @InspectableProperty.EnumEntry(value = CHOICE_MODE_MULTIPLE, name = "multipleChoice"),
+            @EnumEntry(value = CHOICE_MODE_MULTIPLE_MODAL, name = "multipleChoiceModal")
     })
     public int getChoiceMode() {
         return mChoiceMode;
@@ -6293,9 +6293,9 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      *         {@link #TRANSCRIPT_MODE_ALWAYS_SCROLL}
      */
     @InspectableProperty(enumMapping = {
-            @EnumMap(value = TRANSCRIPT_MODE_DISABLED, name = "disabled"),
-            @EnumMap(value = TRANSCRIPT_MODE_NORMAL, name = "normal"),
-            @EnumMap(value = TRANSCRIPT_MODE_ALWAYS_SCROLL, name = "alwaysScroll")
+            @EnumEntry(value = TRANSCRIPT_MODE_DISABLED, name = "disabled"),
+            @EnumEntry(value = TRANSCRIPT_MODE_NORMAL, name = "normal"),
+            @EnumEntry(value = TRANSCRIPT_MODE_ALWAYS_SCROLL, name = "alwaysScroll")
     })
     public int getTranscriptMode() {
         return mTranscriptMode;

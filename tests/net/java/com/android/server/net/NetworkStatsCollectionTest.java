@@ -101,6 +101,7 @@ public class NetworkStatsCollectionTest {
     @After
     public void tearDown() throws Exception {
         RecurrenceRule.sClock = sOriginalClock;
+        NetworkTemplate.resetForceAllNetworkTypes();
     }
 
     private void setClock(Instant instant) {

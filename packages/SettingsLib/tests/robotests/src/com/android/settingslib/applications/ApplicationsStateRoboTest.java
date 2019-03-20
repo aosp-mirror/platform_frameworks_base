@@ -16,11 +16,17 @@
 
 package com.android.settingslib.applications;
 
+import static android.os.UserHandle.MU_ENABLED;
+
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.robolectric.shadow.api.Shadow.extract;
@@ -40,10 +46,13 @@ import android.content.pm.ModuleInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ResolveInfo;
+import android.content.res.Resources;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
+import android.os.RemoteException;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.text.TextUtils;
 import android.util.IconDrawableFactory;
 
@@ -70,6 +79,7 @@ import org.robolectric.shadows.ShadowContextImpl;
 import org.robolectric.shadows.ShadowLooper;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -81,6 +91,19 @@ public class ApplicationsStateRoboTest {
 
     private final static String HOME_PACKAGE_NAME = "com.android.home";
     private final static String LAUNCHABLE_PACKAGE_NAME = "com.android.launchable";
+
+    private static final int PROFILE_USERID = 10;
+
+    private static final String PKG_1 = "PKG1";
+    private static final int OWNER_UID_1 = 1001;
+    private static final int PROFILE_UID_1 = UserHandle.getUid(PROFILE_USERID, OWNER_UID_1);
+
+    private static final String PKG_2 = "PKG2";
+    private static final int OWNER_UID_2 = 1002;
+    private static final int PROFILE_UID_2 = UserHandle.getUid(PROFILE_USERID, OWNER_UID_2);
+
+    private static final String PKG_3 = "PKG3";
+    private static final int OWNER_UID_3 = 1003;
 
     /** Class under test */
     private ApplicationsState mApplicationsState;
@@ -171,7 +194,7 @@ public class ApplicationsStateRoboTest {
         storageStats.dataBytes = 20;
         storageStats.cacheBytes = 30;
         when(mStorageStatsManager.queryStatsForPackage(any(UUID.class),
-                anyString(), any(UserHandle.class))).thenReturn(storageStats);
+            anyString(), any(UserHandle.class))).thenReturn(storageStats);
 
         // Set up 3 installed apps, in which 1 is hidden module
         final List<ApplicationInfo> infos = new ArrayList<>();
@@ -195,11 +218,16 @@ public class ApplicationsStateRoboTest {
     }
 
     private ApplicationInfo createApplicationInfo(String packageName) {
+        return createApplicationInfo(packageName, 0);
+    }
+
+    private ApplicationInfo createApplicationInfo(String packageName, int uid) {
         ApplicationInfo appInfo = new ApplicationInfo();
         appInfo.sourceDir = "foo";
         appInfo.flags |= ApplicationInfo.FLAG_INSTALLED;
         appInfo.storageUuid = UUID.randomUUID();
         appInfo.packageName = packageName;
+        appInfo.uid = uid;
         return appInfo;
     }
 
@@ -211,10 +239,14 @@ public class ApplicationsStateRoboTest {
     }
 
     private void addApp(String packageName, int id) {
-        ApplicationInfo appInfo = createApplicationInfo(packageName);
+        addApp(packageName, id, 0);
+    }
+
+    private void addApp(String packageName, int id, int userId) {
+        ApplicationInfo appInfo = createApplicationInfo(packageName, id);
         AppEntry appEntry = createAppEntry(appInfo, id);
         mApplicationsState.mAppEntries.add(appEntry);
-        mApplicationsState.mEntriesMap.get(0).put(appInfo.packageName, appEntry);
+        mApplicationsState.mEntriesMap.get(userId).put(appInfo.packageName, appEntry);
     }
 
     private void processAllMessages() {
@@ -351,4 +383,328 @@ public class ApplicationsStateRoboTest {
         assertThat(mApplications.get(1).packageName).isEqualTo("test.package.3");
     }
 
+    @Test
+    public void removeAndInstall_noWorkprofile_doResumeIfNeededLocked_shouldClearEntries()
+            throws RemoteException {
+        // scenario: only owner user
+        // (PKG_1, PKG_2) -> (PKG_2, PKG_3)
+        // PKG_1 is removed and PKG_3 is installed before app is resumed.
+        ApplicationsState.sInstance = null;
+        mApplicationsState = spy(
+            ApplicationsState
+                .getInstance(RuntimeEnvironment.application, mock(IPackageManager.class)));
+
+        // Previous Applications:
+        ApplicationInfo appInfo;
+        final ArrayList<ApplicationInfo> prevAppList = new ArrayList<>();
+        appInfo = createApplicationInfo(PKG_1, OWNER_UID_1);
+        prevAppList.add(appInfo);
+        appInfo = createApplicationInfo(PKG_2, OWNER_UID_2);
+        prevAppList.add(appInfo);
+        mApplicationsState.mApplications = prevAppList;
+
+        // Previous Entries:
+        // (PKG_1, PKG_2)
+        addApp(PKG_1, OWNER_UID_1, 0);
+        addApp(PKG_2, OWNER_UID_2, 0);
+
+        // latest Applications:
+        // (PKG_2, PKG_3)
+        final ArrayList<ApplicationInfo> appList = new ArrayList<>();
+        appInfo = createApplicationInfo(PKG_2, OWNER_UID_2);
+        appList.add(appInfo);
+        appInfo = createApplicationInfo(PKG_3, OWNER_UID_3);
+        appList.add(appInfo);
+        setupDoResumeIfNeededLocked(appList, null);
+
+        mApplicationsState.doResumeIfNeededLocked();
+
+        verify(mApplicationsState).clearEntries();
+    }
+
+    @Test
+    public void noAppRemoved_noWorkprofile_doResumeIfNeededLocked_shouldNotClearEntries()
+            throws RemoteException {
+        // scenario: only owner user
+        // (PKG_1, PKG_2)
+        ApplicationsState.sInstance = null;
+        mApplicationsState = spy(
+            ApplicationsState
+                .getInstance(RuntimeEnvironment.application, mock(IPackageManager.class)));
+
+        ApplicationInfo appInfo;
+        // Previous Applications
+        final ArrayList<ApplicationInfo> prevAppList = new ArrayList<>();
+        appInfo = createApplicationInfo(PKG_1, OWNER_UID_1);
+        prevAppList.add(appInfo);
+        appInfo = createApplicationInfo(PKG_2, OWNER_UID_2);
+        prevAppList.add(appInfo);
+        mApplicationsState.mApplications = prevAppList;
+
+        // Previous Entries:
+        // (pk1, PKG_2)
+        addApp(PKG_1, OWNER_UID_1, 0);
+        addApp(PKG_2, OWNER_UID_2, 0);
+
+        // latest Applications:
+        // (PKG_2, PKG_3)
+        final ArrayList<ApplicationInfo> appList = new ArrayList<>();
+        appInfo = createApplicationInfo(PKG_1, OWNER_UID_1);
+        appList.add(appInfo);
+        appInfo = createApplicationInfo(PKG_2, OWNER_UID_2);
+        appList.add(appInfo);
+        setupDoResumeIfNeededLocked(appList, null);
+
+        mApplicationsState.doResumeIfNeededLocked();
+
+        verify(mApplicationsState, never()).clearEntries();
+    }
+
+    @Test
+    public void removeProfileApp_workprofileExists_doResumeIfNeededLocked_shouldClearEntries()
+            throws RemoteException {
+        if (!MU_ENABLED) {
+            return;
+        }
+        // [Preconditions]
+        // 2 apps (PKG_1, PKG_2) for owner, PKG_1 is not in installed state
+        // 2 apps (PKG_1, PKG_2) for non-owner.
+        //
+        // [Actions]
+        // profile user's PKG_2 is removed before resume
+        //
+        // Applications:
+        // owner -  (PKG_1 - uninstalled, PKG_2) -> (PKG_1 - uninstalled, PKG_2)
+        // profile - (PKG_1, PKG_2) -> (PKG_1)
+        //
+        // Previous Entries:
+        // owner - (PKG_2)
+        // profile - (PKG_1, PKG_2)
+
+        ShadowUserManager shadowUserManager = Shadow
+                .extract(RuntimeEnvironment.application.getSystemService(UserManager.class));
+        shadowUserManager.addProfile(PROFILE_USERID, "profile");
+
+        ApplicationsState.sInstance = null;
+        mApplicationsState = spy(
+            ApplicationsState
+                .getInstance(RuntimeEnvironment.application, mock(IPackageManager.class)));
+
+        ApplicationInfo appInfo;
+        // Previous Applications
+        // owner -  (PKG_1 - uninstalled, PKG_2)
+        // profile - (PKG_1, PKG_2)
+        final ArrayList<ApplicationInfo> prevAppList = new ArrayList<>();
+        appInfo = createApplicationInfo(PKG_1, OWNER_UID_1);
+        appInfo.flags ^= ApplicationInfo.FLAG_INSTALLED;
+        prevAppList.add(appInfo);
+        appInfo = createApplicationInfo(PKG_2, OWNER_UID_2);
+        prevAppList.add(appInfo);
+
+        appInfo = createApplicationInfo(PKG_1, PROFILE_UID_1);
+        prevAppList.add(appInfo);
+        appInfo = createApplicationInfo(PKG_2, PROFILE_UID_2);
+        prevAppList.add(appInfo);
+
+        mApplicationsState.mApplications = prevAppList;
+        // Previous Entries:
+        // owner (PKG_2), profile (pk1, PKG_2)
+        // PKG_1 is not installed for owner, hence it's removed from entries
+        addApp(PKG_2, OWNER_UID_2, 0);
+        addApp(PKG_1, PROFILE_UID_1, PROFILE_USERID);
+        addApp(PKG_2, PROFILE_UID_2, PROFILE_USERID);
+
+        // latest Applications:
+        // owner (PKG_1, PKG_2), profile (PKG_1)
+        // owner's PKG_1 is still listed and is in non-installed state
+        // profile user's PKG_2 is removed by a user before resume
+        //owner
+        final ArrayList<ApplicationInfo> ownerAppList = new ArrayList<>();
+        appInfo = createApplicationInfo(PKG_1, OWNER_UID_1);
+        appInfo.flags ^= ApplicationInfo.FLAG_INSTALLED;
+        ownerAppList.add(appInfo);
+        appInfo = createApplicationInfo(PKG_2, OWNER_UID_2);
+        ownerAppList.add(appInfo);
+        //profile
+        appInfo = createApplicationInfo(PKG_1, PROFILE_UID_1);
+        setupDoResumeIfNeededLocked(ownerAppList, new ArrayList<>(Arrays.asList(appInfo)));
+
+        mApplicationsState.doResumeIfNeededLocked();
+
+        verify(mApplicationsState).clearEntries();
+    }
+
+    @Test
+    public void removeOwnerApp_workprofileExists_doResumeIfNeededLocked_shouldClearEntries()
+            throws RemoteException {
+        if (!MU_ENABLED) {
+            return;
+        }
+        // [Preconditions]
+        // 2 apps (PKG_1, PKG_2) for owner, PKG_1 is not in installed state
+        // 2 apps (PKG_1, PKG_2) for non-owner.
+        //
+        // [Actions]
+        // Owner user's PKG_2 is removed before resume
+        //
+        // Applications:
+        // owner -  (PKG_1 - uninstalled, PKG_2) -> (PKG_1 - uninstalled, PKG_2 - uninstalled)
+        // profile - (PKG_1, PKG_2) -> (PKG_1, PKG_2)
+        //
+        // Previous Entries:
+        // owner - (PKG_2)
+        // profile - (PKG_1, PKG_2)
+
+        ShadowUserManager shadowUserManager = Shadow
+                .extract(RuntimeEnvironment.application.getSystemService(UserManager.class));
+        shadowUserManager.addProfile(PROFILE_USERID, "profile");
+
+        ApplicationsState.sInstance = null;
+        mApplicationsState = spy(
+            ApplicationsState
+                .getInstance(RuntimeEnvironment.application, mock(IPackageManager.class)));
+
+        ApplicationInfo appInfo;
+        // Previous Applications:
+        // owner -  (PKG_1 - uninstalled, PKG_2)
+        // profile - (PKG_1, PKG_2)
+        final ArrayList<ApplicationInfo> prevAppList = new ArrayList<>();
+        appInfo = createApplicationInfo(PKG_1, OWNER_UID_1);
+        appInfo.flags ^= ApplicationInfo.FLAG_INSTALLED;
+        prevAppList.add(appInfo);
+        appInfo = createApplicationInfo(PKG_2, OWNER_UID_2);
+        prevAppList.add(appInfo);
+
+        appInfo = createApplicationInfo(PKG_1, PROFILE_UID_1);
+        prevAppList.add(appInfo);
+        appInfo = createApplicationInfo(PKG_2, PROFILE_UID_2);
+        prevAppList.add(appInfo);
+
+        mApplicationsState.mApplications = prevAppList;
+
+        // Previous Entries:
+        // owner (PKG_2), profile (pk1, PKG_2)
+        // PKG_1 is not installed for owner, hence it's removed from entries
+        addApp(PKG_2, OWNER_UID_2, 0);
+        addApp(PKG_1, PROFILE_UID_1, PROFILE_USERID);
+        addApp(PKG_2, PROFILE_UID_2, PROFILE_USERID);
+
+        // latest Applications:
+        // owner (PKG_1 - uninstalled, PKG_2 - uninstalled), profile (PKG_1, PKG_2)
+        // owner's PKG_1, PKG_2 is still listed and is in non-installed state
+        // profile user's PKG_2 is removed before resume
+        //owner
+        final ArrayList<ApplicationInfo> ownerAppList = new ArrayList<>();
+        appInfo = createApplicationInfo(PKG_1, OWNER_UID_1);
+        appInfo.flags ^= ApplicationInfo.FLAG_INSTALLED;
+        ownerAppList.add(appInfo);
+        appInfo = createApplicationInfo(PKG_2, OWNER_UID_2);
+        appInfo.flags ^= ApplicationInfo.FLAG_INSTALLED;
+        ownerAppList.add(appInfo);
+
+        //profile
+        final ArrayList<ApplicationInfo> profileAppList = new ArrayList<>();
+        appInfo = createApplicationInfo(PKG_1, PROFILE_UID_1);
+        profileAppList.add(appInfo);
+        appInfo = createApplicationInfo(PKG_2, PROFILE_UID_2);
+        profileAppList.add(appInfo);
+        setupDoResumeIfNeededLocked(ownerAppList, profileAppList);
+
+        mApplicationsState.doResumeIfNeededLocked();
+
+        verify(mApplicationsState).clearEntries();
+    }
+
+    @Test
+    public void noAppRemoved_workprofileExists_doResumeIfNeededLocked_shouldNotClearEntries()
+            throws RemoteException {
+        if (!MU_ENABLED) {
+            return;
+        }
+        // [Preconditions]
+        // 2 apps (PKG_1, PKG_2) for owner, PKG_1 is not in installed state
+        // 2 apps (PKG_1, PKG_2) for non-owner.
+        //
+        // Applications:
+        // owner -  (PKG_1 - uninstalled, PKG_2)
+        // profile - (PKG_1, PKG_2)
+        //
+        // Previous Entries:
+        // owner - (PKG_2)
+        // profile - (PKG_1, PKG_2)
+
+        ShadowUserManager shadowUserManager = Shadow
+                .extract(RuntimeEnvironment.application.getSystemService(UserManager.class));
+        shadowUserManager.addProfile(PROFILE_USERID, "profile");
+
+        ApplicationsState.sInstance = null;
+        mApplicationsState = spy(
+            ApplicationsState
+                .getInstance(RuntimeEnvironment.application, mock(IPackageManager.class)));
+
+        ApplicationInfo appInfo;
+        // Previous Applications:
+        // owner -  (PKG_1 - uninstalled, PKG_2)
+        // profile - (PKG_1, PKG_2)
+        final ArrayList<ApplicationInfo> prevAppList = new ArrayList<>();
+        appInfo = createApplicationInfo(PKG_1, OWNER_UID_1);
+        appInfo.flags ^= ApplicationInfo.FLAG_INSTALLED;
+        prevAppList.add(appInfo);
+        appInfo = createApplicationInfo(PKG_2, OWNER_UID_2);
+        prevAppList.add(appInfo);
+
+        appInfo = createApplicationInfo(PKG_1, PROFILE_UID_1);
+        prevAppList.add(appInfo);
+        appInfo = createApplicationInfo(PKG_2, PROFILE_UID_2);
+        prevAppList.add(appInfo);
+
+        mApplicationsState.mApplications = prevAppList;
+        // Previous Entries:
+        // owner (PKG_2), profile (pk1, PKG_2)
+        // PKG_1 is not installed for owner, hence it's removed from entries
+        addApp(PKG_2, OWNER_UID_2, 0);
+        addApp(PKG_1, PROFILE_UID_1, PROFILE_USERID);
+        addApp(PKG_2, PROFILE_UID_2, PROFILE_USERID);
+
+        // latest Applications:
+        // owner (PKG_1 - uninstalled, PKG_2), profile (PKG_1, PKG_2)
+        // owner's PKG_1 is still listed and is in non-installed state
+
+        // owner
+        final ArrayList<ApplicationInfo> ownerAppList = new ArrayList<>();
+        appInfo = createApplicationInfo(PKG_1, OWNER_UID_1);
+        appInfo.flags ^= ApplicationInfo.FLAG_INSTALLED;
+        ownerAppList.add(appInfo);
+        appInfo = createApplicationInfo(PKG_2, OWNER_UID_2);
+        ownerAppList.add(appInfo);
+
+        // profile
+        final ArrayList<ApplicationInfo> profileAppList = new ArrayList<>();
+        appInfo = createApplicationInfo(PKG_1, PROFILE_UID_1);
+        profileAppList.add(appInfo);
+        appInfo = createApplicationInfo(PKG_2, PROFILE_UID_2);
+        profileAppList.add(appInfo);
+        setupDoResumeIfNeededLocked(ownerAppList, profileAppList);
+
+        mApplicationsState.doResumeIfNeededLocked();
+
+        verify(mApplicationsState, never()).clearEntries();
+    }
+
+    private void setupDoResumeIfNeededLocked(ArrayList<ApplicationInfo> ownerApps,
+            ArrayList<ApplicationInfo> profileApps)
+            throws RemoteException {
+
+        if (ownerApps != null) {
+            when(mApplicationsState.mIpm.getInstalledApplications(anyInt(), eq(0)))
+                .thenReturn(new ParceledListSlice<>(ownerApps));
+        }
+        if (profileApps != null) {
+            when(mApplicationsState.mIpm.getInstalledApplications(anyInt(), eq(PROFILE_USERID)))
+                .thenReturn(new ParceledListSlice<>(profileApps));
+        }
+        final InterestingConfigChanges configChanges = mock(InterestingConfigChanges.class);
+        when(configChanges.applyNewConfig(any(Resources.class))).thenReturn(false);
+        mApplicationsState.setInterestingConfigChanges(configChanges);
+    }
 }

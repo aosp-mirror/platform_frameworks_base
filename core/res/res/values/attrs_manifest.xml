@@ -118,8 +118,11 @@
     <attr name="manageSpaceActivity" format="string" />
 
     <!-- Option to let applications specify that user data can/cannot be
-         cleared by the user in Settings. This flag is turned on by default.
-         <em>This attribute is usable only by applications
+         cleared. This flag is turned on by default.
+         <p>Starting from API level 29 this flag only controls if the user can
+         clear app data from Settings. To control clearing the data after a
+         failed restore use allowClearUserDataOnFailedRestore flag.
+         <p><em>This attribute is usable only by applications
          included in the system image. Third-party apps cannot use it.</em> -->
     <attr name="allowClearUserData" format="boolean" />
 

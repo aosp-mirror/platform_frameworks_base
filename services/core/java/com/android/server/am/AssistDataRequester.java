@@ -24,6 +24,7 @@ import static com.android.server.wm.ActivityTaskManagerInternal.ASSIST_KEY_RECEI
 
 import android.app.ActivityTaskManager;
 import android.app.AppOpsManager;
+import android.app.IActivityTaskManager;
 import android.app.IAssistDataReceiver;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -33,6 +34,7 @@ import android.os.RemoteException;
 import android.view.IWindowManager;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 
 import java.io.PrintWriter;
@@ -50,6 +52,8 @@ public class AssistDataRequester extends IAssistDataReceiver.Stub {
     public static final String KEY_RECEIVER_EXTRA_INDEX = "index";
 
     private IWindowManager mWindowManager;
+    @VisibleForTesting
+    public IActivityTaskManager mActivityTaskManager;
     private Context mContext;
     private AppOpsManager mAppOpsManager;
 
@@ -128,6 +132,7 @@ public class AssistDataRequester extends IAssistDataReceiver.Stub {
         mCallbacks = callbacks;
         mCallbacksLock = callbacksLock;
         mWindowManager = windowManager;
+        mActivityTaskManager = ActivityTaskManager.getService();
         mContext = context;
         mAppOpsManager = appOpsManager;
         mRequestStructureAppOps = requestStructureAppOps;
@@ -195,8 +200,7 @@ public class AssistDataRequester extends IAssistDataReceiver.Stub {
         // Ensure that the current activity supports assist data
         boolean isAssistDataAllowed = false;
         try {
-            isAssistDataAllowed =
-                    ActivityTaskManager.getService().isAssistDataAllowedOnCurrentActivity();
+            isAssistDataAllowed = mActivityTaskManager.isAssistDataAllowedOnCurrentActivity();
         } catch (RemoteException e) {
             // Should never happen
         }
@@ -222,9 +226,9 @@ public class AssistDataRequester extends IAssistDataReceiver.Stub {
                         receiverExtras.putInt(KEY_RECEIVER_EXTRA_INDEX, i);
                         receiverExtras.putInt(KEY_RECEIVER_EXTRA_COUNT, numActivities);
                         boolean result = requestAutofillData
-                                ? ActivityTaskManager.getService().requestAutofillData(this,
+                                ? mActivityTaskManager.requestAutofillData(this,
                                         receiverExtras, topActivity, 0 /* flags */)
-                                : ActivityTaskManager.getService().requestAssistContextExtras(
+                                : mActivityTaskManager.requestAssistContextExtras(
                                         ASSIST_CONTEXT_FULL, this, receiverExtras, topActivity,
                                         /* focused= */ i == 0, /* newSessionId= */ i == 0);
                         if (result) {

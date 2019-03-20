@@ -30,6 +30,9 @@ import android.net.NetworkInfo;
 import android.net.NetworkPolicyManager;
 import android.net.NetworkRequest;
 import android.net.TrafficStats;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.os.UserHandle;
 import android.text.format.DateUtils;
 import android.util.ArraySet;
@@ -85,8 +88,14 @@ public final class ConnectivityController extends StateController implements
     @GuardedBy("mLock")
     private final ArraySet<Network> mAvailableNetworks = new ArraySet<>();
 
+    private static final int MSG_DATA_SAVER_TOGGLED = 0;
+    private static final int MSG_UID_RULES_CHANGES = 1;
+
+    private final Handler mHandler;
+
     public ConnectivityController(JobSchedulerService service) {
         super(service);
+        mHandler = new CcHandler(mContext.getMainLooper());
 
         mConnManager = mContext.getSystemService(ConnectivityManager.class);
         mNetPolicyManager = mContext.getSystemService(NetworkPolicyManager.class);
@@ -545,11 +554,39 @@ public final class ConnectivityController extends StateController implements
 
     private final INetworkPolicyListener mNetPolicyListener = new NetworkPolicyManager.Listener() {
         @Override
+        public void onRestrictBackgroundChanged(boolean restrictBackground) {
+            if (DEBUG) {
+                Slog.v(TAG, "onRestrictBackgroundChanged: " + restrictBackground);
+            }
+            mHandler.obtainMessage(MSG_DATA_SAVER_TOGGLED).sendToTarget();
+        }
+
+        @Override
         public void onUidRulesChanged(int uid, int uidRules) {
             if (DEBUG) {
                 Slog.v(TAG, "onUidRulesChanged: " + uid);
             }
-            updateTrackedJobs(uid, null);
+            mHandler.obtainMessage(MSG_UID_RULES_CHANGES, uid, 0).sendToTarget();
+        }
+    };
+
+    private class CcHandler extends Handler {
+        CcHandler(Looper looper) {
+            super(looper);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            synchronized (mLock) {
+                switch (msg.what) {
+                    case MSG_DATA_SAVER_TOGGLED:
+                        updateTrackedJobs(-1, null);
+                        break;
+                    case MSG_UID_RULES_CHANGES:
+                        updateTrackedJobs(msg.arg1, null);
+                        break;
+                }
+            }
         }
     };
 
