@@ -590,6 +590,13 @@ enum Action {
     // OS: P
     DIALOG_SWITCH_HFP_DEVICES = 1416;
 
+    // OPEN: QS Sensor Privacy Mode tile shown
+    // ACTION: QS Sensor Privacy Mode tile tapped
+    // SUBTYPE: 0 is off, 1 is on
+    // CATEGORY: QUICK_SETTINGS
+    // OS: Q
+    QS_SENSOR_PRIVACY = 1598;
+
     // ACTION: Tap & Pay -> Default Application Setting -> Use Forground
     ACTION_NFC_PAYMENT_FOREGROUND_SETTING = 1622;
 

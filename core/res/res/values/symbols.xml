@@ -2923,6 +2923,7 @@
   <java-symbol type="string" name="status_bar_vpn" />
   <java-symbol type="string" name="status_bar_microphone" />
   <java-symbol type="string" name="status_bar_camera" />
+  <java-symbol type="string" name="status_bar_sensors_off" />
 
   <!-- Locale picker -->
   <java-symbol type="id" name="locale_search_menu" />
