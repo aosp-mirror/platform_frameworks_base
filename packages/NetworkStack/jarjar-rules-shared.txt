@@ -8,6 +8,3 @@ rule android.net.shared.InetAddressUtils* android.net.networkstack.shared.InetAd
 rule android.net.DhcpResultsParcelable* @0
 rule android.net.DhcpResults* android.net.networkstack.DhcpResults@1
 rule android.net.LocalLog* android.net.networkstack.LocalLog@1
-
-# TODO: move TcpKeepalivePacketData to services.net and delete
-rule android.net.TcpKeepalivePacketDataParcelable* android.net.networkstack.TcpKeepalivePacketDataParcelable@1
