@@ -17,14 +17,20 @@
 package com.android.server.pm.permission;
 
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
+import static android.Manifest.permission.READ_MEDIA_AUDIO;
+import static android.Manifest.permission.READ_MEDIA_IMAGES;
+import static android.Manifest.permission.READ_MEDIA_VIDEO;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.MODE_ERRORED;
 import static android.app.AppOpsManager.MODE_FOREGROUND;
+import static android.app.AppOpsManager.MODE_IGNORED;
+import static android.app.AppOpsManager.OP_LEGACY_STORAGE;
 import static android.app.AppOpsManager.OP_NONE;
 import static android.app.AppOpsManager.permissionToOp;
 import static android.app.AppOpsManager.permissionToOpCode;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_GRANTED_BY_DEFAULT;
+import static android.content.pm.PackageManager.FLAG_PERMISSION_HIDDEN;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_POLICY_FIXED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_REVOKE_ON_UPGRADE;
@@ -1149,6 +1155,8 @@ public class PermissionManagerService {
                     updatedUserIds);
             updatedUserIds = setInitialGrantForNewImplicitPermissionsLocked(origPermissions,
                     permissionsState, pkg, updatedUserIds);
+            updatedUserIds = applyLegacyStoragePermissionModel(origPermissions, permissionsState,
+                    pkg, updatedUserIds);
 
             setAppOpsLocked(permissionsState, pkg);
         }
@@ -1460,6 +1468,179 @@ public class PermissionManagerService {
                                     newPerm, ps, pkg, userId);
                         }
                     }
+                }
+            }
+        }
+
+        return updatedUserIds;
+    }
+
+    /**
+     * Pre-Q apps use READ/WRITE_EXTERNAL_STORAGE, post-Q apps use READ_MEDIA_AUDIO/VIDEO/IMAGES.
+     *
+     * <p>There is the special case of the grandfathered post-Q app that has all legacy and modern
+     * permissions system-fixed granted. The only way to remove these permissions is to uninstall
+     * the app.
+     *
+     * @param origPs The permission state of the package before the update
+     * @param ps The permissions state of the package
+     * @param pkg The package
+     * @param updatedUserIds The userIds we have already been updated before
+     *
+     * @return The userIds that have been updated
+     *
+     * @see com.android.server.StorageManagerService#applyLegacyStorage()
+     */
+    private @NonNull int[] applyLegacyStoragePermissionModel(@NonNull PermissionsState origPs,
+            @NonNull PermissionsState ps, @NonNull PackageParser.Package pkg,
+            @NonNull int[] updatedUserIds) {
+        AppOpsManagerInternal appOpsManager = LocalServices.getService(AppOpsManagerInternal.class);
+        int[] users = UserManagerService.getInstance().getUserIds();
+
+        boolean isQApp = pkg.applicationInfo.targetSdkVersion >= Build.VERSION_CODES.Q;
+        boolean isPreMApp = pkg.applicationInfo.targetSdkVersion < Build.VERSION_CODES.M;
+        int appId = getAppId(pkg.applicationInfo.uid);
+
+        int numRequestedPerms = pkg.requestedPermissions.size();
+        for (int i = 0; i < numRequestedPerms; i++) {
+            String perm = pkg.requestedPermissions.get(i);
+
+            boolean isLegacyStoragePermission = false;
+            boolean isModernStoragePermission = false;
+            switch (perm) {
+                case READ_EXTERNAL_STORAGE:
+                case WRITE_EXTERNAL_STORAGE:
+                    isLegacyStoragePermission = true;
+                    break;
+                case READ_MEDIA_AUDIO:
+                case READ_MEDIA_VIDEO:
+                case READ_MEDIA_IMAGES:
+                    isModernStoragePermission = true;
+                    break;
+                default:
+                    // 'perm' is not a storage permission, skip it
+                    continue;
+            }
+
+            BasePermission bp = mSettings.getPermissionLocked(perm);
+
+            for (int userId : users) {
+                boolean useLegacyStoragePermissionModel;
+                if (isQApp) {
+                    useLegacyStoragePermissionModel = appOpsManager.checkOperationUnchecked(
+                            OP_LEGACY_STORAGE, getUid(userId, appId), pkg.packageName)
+                            == MODE_ALLOWED;
+                } else {
+                    useLegacyStoragePermissionModel = true;
+                }
+
+                int origCombinedLegacyFlags =
+                        origPs.getPermissionFlags(READ_EXTERNAL_STORAGE, userId)
+                        | origPs.getPermissionFlags(WRITE_EXTERNAL_STORAGE, userId);
+
+                int origCombinedModernFlags = origPs.getPermissionFlags(READ_MEDIA_AUDIO, userId)
+                        | origPs.getPermissionFlags(READ_MEDIA_VIDEO, userId)
+                        | origPs.getPermissionFlags(READ_MEDIA_IMAGES, userId);
+
+                boolean oldPermAreLegacyStorageModel =
+                        (origCombinedLegacyFlags & FLAG_PERMISSION_HIDDEN) == 0;
+                boolean oldPermAreModernStorageModel =
+                        (origCombinedModernFlags & FLAG_PERMISSION_HIDDEN) == 0;
+
+                if (oldPermAreLegacyStorageModel && oldPermAreModernStorageModel) {
+                    // This only happens after an platform upgrade from before Q
+                    oldPermAreModernStorageModel = false;
+                }
+
+                boolean shouldBeRestricted;
+                boolean shouldBeFixed;
+                boolean shouldBeGranted = false;
+                boolean shouldBeRevoked = false;
+                int userFlags = -1;
+                if (useLegacyStoragePermissionModel) {
+                    shouldBeRestricted = isModernStoragePermission;
+                    shouldBeFixed = isQApp || isModernStoragePermission;
+
+                    if (shouldBeFixed) {
+                        userFlags = 0;
+                        shouldBeGranted = true;
+                        shouldBeRevoked = false;
+                    } else if (oldPermAreModernStorageModel) {
+                        // Inherit grant state on permission model change
+                        userFlags = origCombinedModernFlags;
+
+                        shouldBeGranted = origPs.hasRuntimePermission(READ_MEDIA_AUDIO, userId)
+                                || origPs.hasRuntimePermission(READ_MEDIA_VIDEO, userId)
+                                || origPs.hasRuntimePermission(READ_MEDIA_IMAGES, userId);
+
+                        shouldBeRevoked = !shouldBeGranted;
+                    }
+                } else {
+                    shouldBeRestricted = isLegacyStoragePermission;
+                    shouldBeFixed = isLegacyStoragePermission;
+
+                    if (shouldBeFixed) {
+                        userFlags = 0;
+                        shouldBeGranted = true;
+                        shouldBeRevoked = false;
+                    } else if (oldPermAreLegacyStorageModel) {
+                        // Inherit grant state on permission model change
+                        userFlags = origCombinedLegacyFlags;
+
+                        shouldBeGranted = origPs.hasRuntimePermission(READ_EXTERNAL_STORAGE, userId)
+                                || origPs.hasRuntimePermission(WRITE_EXTERNAL_STORAGE, userId);
+
+                        if ((origCombinedLegacyFlags & FLAG_PERMISSION_REVOKE_ON_UPGRADE) != 0
+                                && !isPreMApp) {
+                            shouldBeGranted = false;
+                        }
+
+                        shouldBeRevoked = !shouldBeGranted;
+                    }
+                }
+
+                // Granted permissions can never be user fixed
+                if (shouldBeGranted & userFlags != -1) {
+                    userFlags &= ~FLAG_PERMISSION_USER_FIXED;
+                }
+
+                boolean changed = false;
+                synchronized (mLock) {
+                    if (shouldBeGranted) {
+                        if (isPreMApp) {
+                            setAppOpMode(perm, pkg, userId, MODE_ALLOWED);
+                        } else if (!ps.hasRuntimePermission(perm, userId)) {
+                            ps.grantRuntimePermission(bp, userId);
+                            changed = true;
+                        }
+                    }
+
+                    if (shouldBeRevoked) {
+                        if (isPreMApp) {
+                            setAppOpMode(perm, pkg, userId, MODE_IGNORED);
+                        } else if (ps.hasRuntimePermission(perm, userId)) {
+                            ps.revokeRuntimePermission(bp, userId);
+                            changed = true;
+                        }
+                    }
+
+                    if (shouldBeFixed) {
+                        changed |= ps.updatePermissionFlags(mSettings.getPermissionLocked(perm),
+                                userId, FLAG_PERMISSION_SYSTEM_FIXED, FLAG_PERMISSION_SYSTEM_FIXED);
+                    }
+
+                    if (userFlags != -1) {
+                        changed |= ps.updatePermissionFlags(mSettings.getPermissionLocked(perm),
+                                userId, USER_PERMISSION_FLAGS, userFlags);
+                    }
+
+                    changed |= ps.updatePermissionFlags(mSettings.getPermissionLocked(perm), userId,
+                            FLAG_PERMISSION_HIDDEN,
+                            shouldBeRestricted ? FLAG_PERMISSION_HIDDEN : 0);
+                }
+
+                if (changed) {
+                    updatedUserIds = ArrayUtils.appendInt(updatedUserIds, userId);
                 }
             }
         }
