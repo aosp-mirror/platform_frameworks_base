@@ -6429,6 +6429,7 @@ package android.service.contentcapture {
     method public int getEventType();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.service.contentcapture.ActivityEvent> CREATOR;
+    field public static final int TYPE_ACTIVITY_DESTROYED = 24; // 0x18
     field public static final int TYPE_ACTIVITY_PAUSED = 2; // 0x2
     field public static final int TYPE_ACTIVITY_RESUMED = 1; // 0x1
     field public static final int TYPE_ACTIVITY_STOPPED = 23; // 0x17

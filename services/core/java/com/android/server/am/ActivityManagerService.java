@@ -2937,7 +2937,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
         if (mContentCaptureService != null && (event == Event.ACTIVITY_PAUSED
-                || event == Event.ACTIVITY_RESUMED || event == Event.ACTIVITY_STOPPED)) {
+                || event == Event.ACTIVITY_RESUMED || event == Event.ACTIVITY_STOPPED
+                || event == Event.ACTIVITY_DESTROYED)) {
             mContentCaptureService.notifyActivityEvent(userId, activity, event);
         }
     }
