@@ -12,24 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-<<<<<<< HEAD
-cc_library_shared {
-    name: "libnativebench",
-    cflags: [
-        "-Wno-unused-parameter",
-        "-Wno-unused-variable",
+android_test {
+    name: "SurfaceComposition",
+    // Don't include this package in any target
+    // When built, explicitly put it in the data partition.
+    dex_preopt: {
+        enabled: false,
+    },
+    optimize: {
+        enabled: false,
+    },
+    srcs: ["src/**/*.java"],
+    static_libs: ["junit"],
+    libs: [
+        "android.test.runner.stubs",
+        "android.test.base.stubs",
     ],
-=======
-// ANDROIDMK TRANSLATION WARNING: No 'include $(CLEAR_VARS)' detected before first assignment; clearing vars now
-
-cc_library_shared {
-    name: "libnativebench",
-    cflags: ["-Wno-unused-parameter"],
->>>>>>> Convert Android.mk file to Android.bp
-    srcs: [
-        "Bench.cpp",
-        "WorkerPool.cpp",
-        "test.cpp",
-    ],
-    host_ldlibs: ["-llog"],
+    sdk_version: "current",
 }
