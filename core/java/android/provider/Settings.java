@@ -5613,6 +5613,17 @@ public final class Settings {
         private static final Validator ODI_CAPTIONS_ENABLED_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
+         * Setting to indicate that on device captions cannot be shown because the app
+         * which is currently playing media had opted out.
+         *
+         * @hide
+         */
+        @SystemApi
+        public static final String ODI_CAPTIONS_OPTED_OUT = "odi_captions_opted_out";
+
+        private static final Validator ODI_CAPTIONS_OPTED_OUT_VALIDATOR = BOOLEAN_VALIDATOR;
+
+        /**
          * On Android 8.0 (API level 26) and higher versions of the platform,
          * a 64-bit number (expressed as a hexadecimal string), unique to
          * each combination of app-signing key, user, and device.
@@ -8979,6 +8990,7 @@ public final class Settings {
             VALIDATORS.put(SILENCE_CALL_GESTURE_COUNT, SILENCE_GESTURE_COUNT_VALIDATOR);
             VALIDATORS.put(SILENCE_NOTIFICATION_GESTURE_COUNT, SILENCE_GESTURE_COUNT_VALIDATOR);
             VALIDATORS.put(ODI_CAPTIONS_ENABLED, ODI_CAPTIONS_ENABLED_VALIDATOR);
+            VALIDATORS.put(ODI_CAPTIONS_OPTED_OUT, ODI_CAPTIONS_OPTED_OUT_VALIDATOR);
         }
 
         /**
