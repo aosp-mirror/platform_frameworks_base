@@ -1417,7 +1417,7 @@ public final class ColorDisplayService extends SystemService {
                 mCurrentColorTemperature = cct;
 
                 // Adapt the display's nominal white point to match the requested CCT value
-                mCurrentColorTemperatureXYZ = ColorSpace.cctToIlluminantdXyz(cct);
+                mCurrentColorTemperatureXYZ = ColorSpace.cctToXyz(cct);
 
                 mChromaticAdaptationMatrix =
                         ColorSpace.chromaticAdaptation(ColorSpace.Adaptation.BRADFORD,
