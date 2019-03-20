@@ -36,7 +36,6 @@ import org.junit.Test;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Arrays;
-import java.util.Optional;
 
 /**
  * Tests for {@link InspectionCompanionGenerator}
@@ -53,12 +52,6 @@ public class InspectionCompanionGeneratorTest {
     public void setup() {
         mModel = new InspectableClassModel(TEST_CLASS_NAME);
         mGenerator = new InspectionCompanionGenerator(null, getClass());
-    }
-
-    @Test
-    public void testNodeName() {
-        mModel.setNodeName(Optional.of("NodeName"));
-        assertGeneratedFileEquals("NodeName");
     }
 
     @Test
