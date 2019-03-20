@@ -50,8 +50,6 @@ public class UninstallUninstalling extends Activity implements
             "com.android.packageinstaller.ACTION_UNINSTALL_COMMIT";
 
     static final String EXTRA_APP_LABEL = "com.android.packageinstaller.extra.APP_LABEL";
-    static final String EXTRA_CLEAR_CONTRIBUTED_FILES =
-            "com.android.packageinstaller.extra.CLEAR_CONTRIBUTED_FILES";
     static final String EXTRA_KEEP_DATA = "com.android.packageinstaller.extra.KEEP_DATA";
 
     private int mUninstallId;
@@ -75,8 +73,6 @@ public class UninstallUninstalling extends Activity implements
             if (savedInstanceState == null) {
                 boolean allUsers = getIntent().getBooleanExtra(Intent.EXTRA_UNINSTALL_ALL_USERS,
                         false);
-                boolean clearContributedFiles = getIntent().getBooleanExtra(
-                        EXTRA_CLEAR_CONTRIBUTED_FILES, false);
                 boolean keepData = getIntent().getBooleanExtra(EXTRA_KEEP_DATA, false);
                 UserHandle user = getIntent().getParcelableExtra(Intent.EXTRA_USER);
 
@@ -102,7 +98,6 @@ public class UninstallUninstalling extends Activity implements
                         broadcastIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
                 int flags = allUsers ? PackageManager.DELETE_ALL_USERS : 0;
-                flags |= clearContributedFiles ? PackageManager.DELETE_CONTRIBUTED_MEDIA : 0;
                 flags |= keepData ? PackageManager.DELETE_KEEP_DATA : 0;
 
                 try {
