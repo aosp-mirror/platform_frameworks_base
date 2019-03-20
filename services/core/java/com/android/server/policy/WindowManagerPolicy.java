@@ -831,16 +831,16 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
                 // like the ANR / app crashed dialogs
                 return  canAddInternalSystemWindow ? 11 : 10;
             case TYPE_APPLICATION_OVERLAY:
-                return  canAddInternalSystemWindow ? 13 : 12;
+                return  12;
             case TYPE_DREAM:
                 // used for Dreams (screensavers with TYPE_DREAM windows)
-                return  14;
+                return  13;
             case TYPE_INPUT_METHOD:
                 // on-screen keyboards and other such input method user interfaces go here.
-                return  15;
+                return  14;
             case TYPE_INPUT_METHOD_DIALOG:
                 // on-screen keyboards and other such input method user interfaces go here.
-                return  16;
+                return  15;
             case TYPE_STATUS_BAR:
                 return  17;
             case TYPE_STATUS_BAR_PANEL:
