@@ -84,7 +84,8 @@ public class RollbackTest {
             RollbackTestUtils.adoptShellPermissionIdentity(
                     Manifest.permission.INSTALL_PACKAGES,
                     Manifest.permission.DELETE_PACKAGES,
-                    Manifest.permission.TEST_MANAGE_ROLLBACKS);
+                    Manifest.permission.TEST_MANAGE_ROLLBACKS,
+                    Manifest.permission.MANAGE_ROLLBACKS);
 
             // Register a broadcast receiver for notification when the
             // rollback has been committed.
