@@ -25,7 +25,6 @@
 #include <cutils/compiler.h>
 #include <gui/BufferItem.h>
 #include <system/graphics.h>
-#include <GrBackendSurface.h>
 
 namespace GrAHardwareBufferUtils {
 typedef void* DeleteImageCtx;
@@ -38,6 +37,7 @@ namespace uirenderer {
 class RenderState;
 }
 
+class AutoBackendTextureRelease;
 class SurfaceTexture;
 
 /*
@@ -81,16 +81,14 @@ private:
 
         void createIfNeeded(sp<GraphicBuffer> graphicBuffer, android_dataspace dataspace,
                             bool forceCreate, GrContext* context);
+
         void clear();
 
         inline EGLSyncKHR& eglFence() { return mEglFence; }
 
-        inline sk_sp<SkImage> getImage() { return mImage; }
+        sk_sp<SkImage> getImage();
 
     private:
-        // mImage is the SkImage created from mGraphicBuffer.
-        sk_sp<SkImage> mImage;
-
         // the dataspace associated with the current image
         android_dataspace mDataspace;
 
@@ -100,11 +98,11 @@ private:
          */
         EGLSyncKHR mEglFence;
 
-        GrBackendTexture mBackendTexture;
-
-        GrAHardwareBufferUtils::DeleteImageProc mDeleteProc;
-
-        GrAHardwareBufferUtils::DeleteImageCtx mDeleteCtx;
+        /**
+         * mTextureRelease may outlive ImageConsumer, if the last ref is held by an SkImage.
+         * ImageConsumer holds one ref to mTextureRelease, which is decremented by "clear".
+         */
+        AutoBackendTextureRelease* mTextureRelease = nullptr;
     };
 
     /**
