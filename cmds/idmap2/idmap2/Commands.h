@@ -20,10 +20,12 @@
 #include <string>
 #include <vector>
 
-bool Create(const std::vector<std::string>& args, std::ostream& out_error);
-bool Dump(const std::vector<std::string>& args, std::ostream& out_error);
-bool Lookup(const std::vector<std::string>& args, std::ostream& out_error);
-bool Scan(const std::vector<std::string>& args, std::ostream& out_error);
-bool Verify(const std::vector<std::string>& args, std::ostream& out_error);
+#include "idmap2/Result.h"
+
+android::idmap2::Result<android::idmap2::Unit> Create(const std::vector<std::string>& args);
+android::idmap2::Result<android::idmap2::Unit> Dump(const std::vector<std::string>& args);
+android::idmap2::Result<android::idmap2::Unit> Lookup(const std::vector<std::string>& args);
+android::idmap2::Result<android::idmap2::Unit> Scan(const std::vector<std::string>& args);
+android::idmap2::Result<android::idmap2::Unit> Verify(const std::vector<std::string>& args);
 
 #endif  // IDMAP2_IDMAP2_COMMANDS_H_

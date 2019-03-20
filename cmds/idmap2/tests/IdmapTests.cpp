@@ -501,7 +501,7 @@ TEST(IdmapTests, IdmapHeaderIsUpToDate) {
 
   std::unique_ptr<const IdmapHeader> header = IdmapHeader::FromBinaryStream(stream);
   ASSERT_THAT(header, NotNull());
-  ASSERT_TRUE(header->IsUpToDate(error)) << error.str();
+  ASSERT_TRUE(header->IsUpToDate());
 
   // magic: bytes (0x0, 0x03)
   std::string bad_magic_string(stream.str());
@@ -514,7 +514,7 @@ TEST(IdmapTests, IdmapHeaderIsUpToDate) {
       IdmapHeader::FromBinaryStream(bad_magic_stream);
   ASSERT_THAT(bad_magic_header, NotNull());
   ASSERT_NE(header->GetMagic(), bad_magic_header->GetMagic());
-  ASSERT_FALSE(bad_magic_header->IsUpToDate(error));
+  ASSERT_FALSE(bad_magic_header->IsUpToDate());
 
   // version: bytes (0x4, 0x07)
   std::string bad_version_string(stream.str());
@@ -527,7 +527,7 @@ TEST(IdmapTests, IdmapHeaderIsUpToDate) {
       IdmapHeader::FromBinaryStream(bad_version_stream);
   ASSERT_THAT(bad_version_header, NotNull());
   ASSERT_NE(header->GetVersion(), bad_version_header->GetVersion());
-  ASSERT_FALSE(bad_version_header->IsUpToDate(error));
+  ASSERT_FALSE(bad_version_header->IsUpToDate());
 
   // target crc: bytes (0x8, 0xb)
   std::string bad_target_crc_string(stream.str());
@@ -540,7 +540,7 @@ TEST(IdmapTests, IdmapHeaderIsUpToDate) {
       IdmapHeader::FromBinaryStream(bad_target_crc_stream);
   ASSERT_THAT(bad_target_crc_header, NotNull());
   ASSERT_NE(header->GetTargetCrc(), bad_target_crc_header->GetTargetCrc());
-  ASSERT_FALSE(bad_target_crc_header->IsUpToDate(error));
+  ASSERT_FALSE(bad_target_crc_header->IsUpToDate());
 
   // overlay crc: bytes (0xc, 0xf)
   std::string bad_overlay_crc_string(stream.str());
@@ -553,7 +553,7 @@ TEST(IdmapTests, IdmapHeaderIsUpToDate) {
       IdmapHeader::FromBinaryStream(bad_overlay_crc_stream);
   ASSERT_THAT(bad_overlay_crc_header, NotNull());
   ASSERT_NE(header->GetOverlayCrc(), bad_overlay_crc_header->GetOverlayCrc());
-  ASSERT_FALSE(bad_overlay_crc_header->IsUpToDate(error));
+  ASSERT_FALSE(bad_overlay_crc_header->IsUpToDate());
 
   // target path: bytes (0x10, 0x10f)
   std::string bad_target_path_string(stream.str());
@@ -563,7 +563,7 @@ TEST(IdmapTests, IdmapHeaderIsUpToDate) {
       IdmapHeader::FromBinaryStream(bad_target_path_stream);
   ASSERT_THAT(bad_target_path_header, NotNull());
   ASSERT_NE(header->GetTargetPath(), bad_target_path_header->GetTargetPath());
-  ASSERT_FALSE(bad_target_path_header->IsUpToDate(error));
+  ASSERT_FALSE(bad_target_path_header->IsUpToDate());
 
   // overlay path: bytes (0x110, 0x20f)
   std::string bad_overlay_path_string(stream.str());
@@ -573,7 +573,7 @@ TEST(IdmapTests, IdmapHeaderIsUpToDate) {
       IdmapHeader::FromBinaryStream(bad_overlay_path_stream);
   ASSERT_THAT(bad_overlay_path_header, NotNull());
   ASSERT_NE(header->GetOverlayPath(), bad_overlay_path_header->GetOverlayPath());
-  ASSERT_FALSE(bad_overlay_path_header->IsUpToDate(error));
+  ASSERT_FALSE(bad_overlay_path_header->IsUpToDate());
 }
 
 class TestVisitor : public Visitor {

@@ -19,12 +19,14 @@
 #include <iostream>
 #include <memory>
 #include <set>
+#include <sstream>
 #include <string>
 #include <vector>
 
 #include "android-base/macros.h"
 
 #include "idmap2/CommandLineOptions.h"
+#include "idmap2/Result.h"
 
 namespace android::idmap2 {
 
@@ -77,7 +79,7 @@ CommandLineOptions& CommandLineOptions::OptionalOption(const std::string& name,
   return *this;
 }
 
-bool CommandLineOptions::Parse(const std::vector<std::string>& argv, std::ostream& outError) const {
+Result<Unit> CommandLineOptions::Parse(const std::vector<std::string>& argv) const {
   const auto pivot = std::partition(options_.begin(), options_.end(), [](const Option& opt) {
     return opt.count != Option::COUNT_OPTIONAL && opt.count != Option::COUNT_OPTIONAL_ONCE_OR_MORE;
   });
@@ -89,8 +91,9 @@ bool CommandLineOptions::Parse(const std::vector<std::string>& argv, std::ostrea
   for (size_t i = 0; i < argv_size; i++) {
     const std::string arg = argv[i];
     if ("--help" == arg || "-h" == arg) {
-      Usage(outError);
-      return false;
+      std::stringstream stream;
+      Usage(stream);
+      return Error("%s", stream.str().c_str());
     }
     bool match = false;
     for (const Option& opt : options_) {
@@ -100,9 +103,9 @@ bool CommandLineOptions::Parse(const std::vector<std::string>& argv, std::ostrea
         if (opt.argument) {
           i++;
           if (i >= argv_size) {
-            outError << "error: " << opt.name << ": missing argument" << std::endl;
-            Usage(outError);
-            return false;
+            std::stringstream stream;
+            Usage(stream);
+            return Error("%s: missing argument\n%s", opt.name.c_str(), stream.str().c_str());
           }
         }
         opt.action(argv[i]);
@@ -111,20 +114,27 @@ bool CommandLineOptions::Parse(const std::vector<std::string>& argv, std::ostrea
       }
     }
     if (!match) {
-      outError << "error: " << arg << ": unknown option" << std::endl;
-      Usage(outError);
-      return false;
+      std::stringstream stream;
+      Usage(stream);
+      return Error("%s: unknown option\n%s", arg.c_str(), stream.str().c_str());
     }
   }
 
   if (!mandatory_opts.empty()) {
+    std::stringstream stream;
+    bool separator = false;
     for (const auto& opt : mandatory_opts) {
-      outError << "error: " << opt << ": missing mandatory option" << std::endl;
+      if (separator) {
+        stream << ", ";
+      }
+      separator = true;
+      stream << opt << ": missing mandatory option";
     }
-    Usage(outError);
-    return false;
+    stream << std::endl;
+    Usage(stream);
+    return Error("%s", stream.str().c_str());
   }
-  return true;
+  return Unit{};
 }
 
 void CommandLineOptions::Usage(std::ostream& out) const {

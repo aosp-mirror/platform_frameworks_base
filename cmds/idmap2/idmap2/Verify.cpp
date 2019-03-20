@@ -21,29 +21,39 @@
 
 #include "idmap2/CommandLineOptions.h"
 #include "idmap2/Idmap.h"
+#include "idmap2/Result.h"
 #include "idmap2/SysTrace.h"
 
 using android::idmap2::CommandLineOptions;
+using android::idmap2::Error;
 using android::idmap2::IdmapHeader;
+using android::idmap2::Result;
+using android::idmap2::Unit;
 
-bool Verify(const std::vector<std::string>& args, std::ostream& out_error) {
+Result<Unit> Verify(const std::vector<std::string>& args) {
   SYSTRACE << "Verify " << args;
   std::string idmap_path;
 
   const CommandLineOptions opts =
       CommandLineOptions("idmap2 verify")
           .MandatoryOption("--idmap-path", "input: path to idmap file to verify", &idmap_path);
-  if (!opts.Parse(args, out_error)) {
-    return false;
+
+  const auto opts_ok = opts.Parse(args);
+  if (!opts_ok) {
+    return opts_ok.GetError();
   }
 
   std::ifstream fin(idmap_path);
   const std::unique_ptr<const IdmapHeader> header = IdmapHeader::FromBinaryStream(fin);
   fin.close();
   if (!header) {
-    out_error << "error: failed to parse idmap header" << std::endl;
-    return false;
+    return Error("failed to parse idmap header");
   }
 
-  return header->IsUpToDate(out_error);
+  const auto header_ok = header->IsUpToDate();
+  if (!header_ok) {
+    return Error(header_ok.GetError(), "idmap not up to date");
+  }
+
+  return Unit{};
 }

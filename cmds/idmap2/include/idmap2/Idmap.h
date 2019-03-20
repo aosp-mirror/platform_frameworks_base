@@ -115,7 +115,7 @@ class IdmapHeader {
   // Invariant: anytime the idmap data encoding is changed, the idmap version
   // field *must* be incremented. Because of this, we know that if the idmap
   // header is up-to-date the entire file is up-to-date.
-  bool IsUpToDate(std::ostream& out_error) const;
+  Result<Unit> IsUpToDate() const;
 
   void accept(Visitor* v) const;
 
