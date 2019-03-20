@@ -66,6 +66,10 @@ message NotificationRecordProto {
     optional bool can_show_light = 8;
     optional string group_key = 9 [ (.android.privacy).dest = DEST_EXPLICIT ];
     optional sint32 importance = 10;
+    // The package the notification was posted for.
+    optional string package = 11;
+    // The package that posted the notification. It might not be the same as package.
+    optional string delegate_package = 12;
 }
 
 message ListenersDisablingEffectsProto {
