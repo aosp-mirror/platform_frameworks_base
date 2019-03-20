@@ -5888,6 +5888,7 @@ package android.provider {
     field public static final String NAMESPACE_SCHEDULER = "scheduler";
     field public static final String NAMESPACE_STORAGE = "storage";
     field public static final String NAMESPACE_SYSTEMUI = "systemui";
+    field public static final String NAMESPACE_TELEPHONY = "telephony";
     field public static final String NAMESPACE_TEXTCLASSIFIER = "textclassifier";
   }
 
@@ -5913,13 +5914,6 @@ package android.provider {
     method public long getLong(@NonNull String, long);
     method @NonNull public String getNamespace();
     method @Nullable public String getString(@NonNull String, @Nullable String);
-  }
-
-  public static interface DeviceConfig.Telephony {
-    field public static final String NAMESPACE = "telephony";
-    field public static final String RAMPING_RINGER_DURATION = "ramping_ringer_duration";
-    field public static final String RAMPING_RINGER_ENABLED = "ramping_ringer_enabled";
-    field public static final String RAMPING_RINGER_VIBRATION_DURATION = "ramping_ringer_vibration_duration";
   }
 
   public final class DocumentsContract {
