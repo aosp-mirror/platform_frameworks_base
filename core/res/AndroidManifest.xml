@@ -4482,6 +4482,11 @@
     <permission android:name="android.permission.SUBSTITUTE_SHARE_TARGET_APP_NAME_AND_ICON"
                 android:protectionLevel="signature|privileged" />
 
+    <!-- @SystemApi Allows an application to access shared libraries.
+         @hide -->
+    <permission android:name="android.permission.ACCESS_SHARED_LIBRARIES"
+                android:protectionLevel="signature|installer" />
+
     <application android:process="system"
                  android:persistent="true"
                  android:hasCode="false"
