@@ -73,6 +73,7 @@ import android.os.Bundle;
 import android.os.DropBoxManager;
 import android.os.IBinder;
 import android.os.LocaleList;
+import android.os.PowerManager.AutoPowerSaveModeTriggers;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
@@ -12612,12 +12613,11 @@ public final class Settings {
         /**
          * Battery level [1-100] at which low power mode automatically turns on.
          * If 0, it will not automatically turn on. For Q and newer, it will only automatically
-         * turn on if the value is greater than 0 and the {@link #AUTOMATIC_POWER_SAVER_MODE}
+         * turn on if the value is greater than 0 and the {@link #AUTOMATIC_POWER_SAVE_MODE}
          * setting is also set to
-         * {@link android.os.PowerManager.AutoPowerSaverMode#POWER_SAVER_MODE_PERCENTAGE}.
-         *
-         * @see #AUTOMATIC_POWER_SAVER_MODE
-         * @see android.os.PowerManager#getPowerSaveMode()
+         * {@link android.os.PowerManager.AutoPowerSaveMode#POWER_SAVE_MODE_TRIGGER_PERCENTAGE}.
+         * @see #AUTOMATIC_POWER_SAVE_MODE
+         * @see android.os.PowerManager#getPowerSaveModeTrigger()
          * @hide
          */
         public static final String LOW_POWER_MODE_TRIGGER_LEVEL = "low_power_trigger_level";
@@ -12627,22 +12627,22 @@ public final class Settings {
 
         /**
          * Whether battery saver is currently set to trigger based on percentage, dynamic power
-         * savings trigger, or none. See {@link android.os.PowerManager.AutoPowerSaverMode} for
+         * savings trigger, or none. See {@link AutoPowerSaveModeTriggers} for
          * accepted values.
          *
          *  @hide
          */
         @TestApi
-        public static final String AUTOMATIC_POWER_SAVER_MODE = "automatic_power_saver_mode";
+        public static final String AUTOMATIC_POWER_SAVE_MODE = "automatic_power_save_mode";
 
-        private static final Validator AUTOMATIC_POWER_SAVER_MODE_VALIDATOR =
+        private static final Validator AUTOMATIC_POWER_SAVE_MODE_VALIDATOR =
                 new SettingsValidators.DiscreteValueValidator(new String[] {"0", "1"});
 
         /**
          * The setting that backs the disable threshold for the setPowerSavingsWarning api in
          * PowerManager
          *
-         * @see android.os.PowerManager#setDynamicPowerSavings(boolean, int)
+         * @see android.os.PowerManager#setDynamicPowerSaveHint(boolean, int)
          * @hide
          */
         @TestApi
@@ -12652,9 +12652,9 @@ public final class Settings {
                 new SettingsValidators.InclusiveIntegerRangeValidator(0, 100);
 
         /**
-         * The setting which backs the setDynamicPowerSavings api in PowerManager.
+         * The setting which backs the setDynamicPowerSaveHint api in PowerManager.
          *
-         * @see android.os.PowerManager#setDynamicPowerSavings(boolean, int)
+         * @see android.os.PowerManager#setDynamicPowerSaveHint(boolean, int)
          * @hide
          */
         @TestApi
@@ -13643,7 +13643,7 @@ public final class Settings {
             VALIDATORS.put(LOW_POWER_MODE_TRIGGER_LEVEL, LOW_POWER_MODE_TRIGGER_LEVEL_VALIDATOR);
             VALIDATORS.put(LOW_POWER_MODE_TRIGGER_LEVEL_MAX,
                     LOW_POWER_MODE_TRIGGER_LEVEL_VALIDATOR);
-            VALIDATORS.put(AUTOMATIC_POWER_SAVER_MODE, AUTOMATIC_POWER_SAVER_MODE_VALIDATOR);
+            VALIDATORS.put(AUTOMATIC_POWER_SAVE_MODE, AUTOMATIC_POWER_SAVE_MODE_VALIDATOR);
             VALIDATORS.put(DYNAMIC_POWER_SAVINGS_DISABLE_THRESHOLD,
                     DYNAMIC_POWER_SAVINGS_VALIDATOR);
             VALIDATORS.put(BLUETOOTH_ON, BLUETOOTH_ON_VALIDATOR);

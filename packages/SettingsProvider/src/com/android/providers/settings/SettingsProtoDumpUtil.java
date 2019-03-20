@@ -844,7 +844,7 @@ class SettingsProtoDumpUtil {
                 Settings.Global.LOW_POWER_MODE_TRIGGER_LEVEL_MAX,
                 GlobalSettingsProto.LowPowerMode.TRIGGER_LEVEL_MAX);
         dumpSetting(s, p,
-                Settings.Global.AUTOMATIC_POWER_SAVER_MODE,
+                Settings.Global.AUTOMATIC_POWER_SAVE_MODE,
                 GlobalSettingsProto.LowPowerMode.AUTOMATIC_POWER_SAVER_MODE);
         dumpSetting(s, p,
                 Settings.Global.LOW_POWER_MODE_STICKY,

@@ -185,14 +185,14 @@ public class BatterySaverUtils {
      */
     public static void revertScheduleToNoneIfNeeded(Context context) {
         ContentResolver resolver = context.getContentResolver();
-        final int currentMode = Global.getInt(resolver, Global.AUTOMATIC_POWER_SAVER_MODE,
-                PowerManager.POWER_SAVER_MODE_PERCENTAGE);
+        final int currentMode = Global.getInt(resolver, Global.AUTOMATIC_POWER_SAVE_MODE,
+                PowerManager.POWER_SAVE_MODE_TRIGGER_PERCENTAGE);
         boolean providerConfigured = !TextUtils.isEmpty(context.getString(
                 com.android.internal.R.string.config_batterySaverScheduleProvider));
-        if (currentMode == PowerManager.POWER_SAVER_MODE_DYNAMIC && !providerConfigured) {
+        if (currentMode == PowerManager.POWER_SAVE_MODE_TRIGGER_DYNAMIC && !providerConfigured) {
             Global.putInt(resolver, Global.LOW_POWER_MODE_TRIGGER_LEVEL, 0);
-            Global.putInt(resolver, Global.AUTOMATIC_POWER_SAVER_MODE,
-                    PowerManager.POWER_SAVER_MODE_PERCENTAGE);
+            Global.putInt(resolver, Global.AUTOMATIC_POWER_SAVE_MODE,
+                    PowerManager.POWER_SAVE_MODE_TRIGGER_PERCENTAGE);
         }
     }
 }

@@ -184,7 +184,7 @@ public class BatterySaverStateMachine {
     @GuardedBy("mLock")
     private int mSettingBatterySaverTriggerThreshold;
 
-    /** Previously known value of Settings.Global.AUTOMATIC_POWER_SAVER_MODE. */
+    /** Previously known value of Settings.Global.AUTOMATIC_POWER_SAVE_MODE. */
     @GuardedBy("mLock")
     private int mSettingAutomaticBatterySaver;
 
@@ -244,7 +244,7 @@ public class BatterySaverStateMachine {
 
     /** @return true if the automatic percentage based mode should be used */
     private boolean isAutomaticModeActiveLocked() {
-        return mSettingAutomaticBatterySaver == PowerManager.POWER_SAVER_MODE_PERCENTAGE
+        return mSettingAutomaticBatterySaver == PowerManager.POWER_SAVE_MODE_TRIGGER_PERCENTAGE
                 && mSettingBatterySaverTriggerThreshold > 0;
     }
 
@@ -260,7 +260,7 @@ public class BatterySaverStateMachine {
 
     /** @return true if the dynamic mode should be used */
     private boolean isDynamicModeActiveLocked() {
-        return mSettingAutomaticBatterySaver == PowerManager.POWER_SAVER_MODE_DYNAMIC
+        return mSettingAutomaticBatterySaver == PowerManager.POWER_SAVE_MODE_TRIGGER_DYNAMIC
                 && mDynamicPowerSavingsBatterySaver;
     }
 
@@ -300,7 +300,7 @@ public class BatterySaverStateMachine {
                     Settings.Global.LOW_POWER_MODE_TRIGGER_LEVEL),
                     false, mSettingsObserver, UserHandle.USER_SYSTEM);
             cr.registerContentObserver(Settings.Global.getUriFor(
-                    Settings.Global.AUTOMATIC_POWER_SAVER_MODE),
+                    Settings.Global.AUTOMATIC_POWER_SAVE_MODE),
                     false, mSettingsObserver, UserHandle.USER_SYSTEM);
             cr.registerContentObserver(Settings.Global.getUriFor(
                     Settings.Global.DYNAMIC_POWER_SAVINGS_ENABLED),
@@ -363,8 +363,8 @@ public class BatterySaverStateMachine {
         final int lowPowerModeTriggerLevel = getGlobalSetting(
                 Settings.Global.LOW_POWER_MODE_TRIGGER_LEVEL, 0);
         final int automaticBatterySaverMode = getGlobalSetting(
-                Settings.Global.AUTOMATIC_POWER_SAVER_MODE,
-                PowerManager.POWER_SAVER_MODE_PERCENTAGE);
+                Settings.Global.AUTOMATIC_POWER_SAVE_MODE,
+                PowerManager.POWER_SAVE_MODE_TRIGGER_PERCENTAGE);
         final int dynamicPowerSavingsDisableThreshold = getGlobalSetting(
                 Settings.Global.DYNAMIC_POWER_SAVINGS_DISABLE_THRESHOLD,
                 mDynamicPowerSavingsDefaultDisableThreshold);
