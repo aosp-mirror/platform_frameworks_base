@@ -875,7 +875,8 @@ public final class Settings {
 
     /**
      * Activity Action: Show screen for controlling app usage properties for an app.
-     * Input: Intent's extra EXTRA_PACKAGE_NAME must specify the application package name.
+     * Input: Intent's extra {@link android.content.Intent#EXTRA_PACKAGE_NAME} must specify the
+     * application package name.
      * Output: Nothing.
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
