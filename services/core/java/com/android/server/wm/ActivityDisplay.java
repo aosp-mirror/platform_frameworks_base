@@ -1173,7 +1173,17 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
     }
 
     private void releaseSelfIfNeeded() {
-        if (mStacks.isEmpty() && mRemoved) {
+        if (!mRemoved || mDisplayContent == null) {
+            return;
+        }
+
+        final ActivityStack stack = mStacks.size() == 1 ? mStacks.get(0) : null;
+        if (stack != null && stack.isActivityTypeHome() && stack.getAllTasks().isEmpty()) {
+            // Release this display if an empty home stack is the only thing left.
+            // Since it is the last stack, this display will be released along with the stack
+            // removal.
+            stack.remove();
+        } else if (mStacks.isEmpty()) {
             mDisplayContent.removeIfPossible();
             mDisplayContent = null;
             mRootActivityContainer.removeChild(this);

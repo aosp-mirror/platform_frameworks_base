@@ -3053,7 +3053,17 @@ class ActivityStack extends ConfigurationContainer {
         ActivityOptions.abort(options);
         if (DEBUG_STATES) Slog.d(TAG_STATES,
                 "resumeTopActivityInNextFocusableStack: " + reason + ", go home");
-        return mRootActivityContainer.resumeHomeActivity(prev, reason, mDisplayId);
+        if (isActivityTypeHome()) {
+            // resumeTopActivityUncheckedLocked has been prevented to run recursively. Post a
+            // runnable to resume home since we are currently in the process of resuming top
+            // activity in home stack.
+            // See {@link #mInResumeTopActivity}.
+            mService.mH.post(
+                    () -> mRootActivityContainer.resumeHomeActivity(prev, reason, mDisplayId));
+            return true;
+        } else {
+            return mRootActivityContainer.resumeHomeActivity(prev, reason, mDisplayId);
+        }
     }
 
     /** Returns the position the input task should be placed in this stack. */
