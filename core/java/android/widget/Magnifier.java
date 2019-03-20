@@ -471,13 +471,13 @@ public final class Magnifier {
     }
 
     /**
-     * Returns the top left coordinates of the magnifier, relative to the surface of the
-     * main application window. They will be determined by the coordinates of the last
-     * {@link #show(float, float)} or {@link #show(float, float, float, float)} call, adjusted
-     * to take into account any potential clamping behavior. The method can be used immediately
-     * after a #show call to find out where the magnifier will be positioned. However, the
-     * position of the magnifier will not be updated in the same frame due to the async
-     * copying of the content copying and of the magnifier rendering.
+     * Returns the top left coordinates of the magnifier, relative to the main application
+     * window. They will be determined by the coordinates of the last {@link #show(float, float)}
+     * or {@link #show(float, float, float, float)} call, adjusted to take into account any
+     * potential clamping behavior. The method can be used immediately after a #show
+     * call to find out where the magnifier will be positioned. However, the position of the
+     * magnifier will not be updated visually in the same frame, due to the async nature of
+     * the content copying and of the magnifier rendering.
      * The method will return {@code null} if #show has not yet been called, or if the last
      * operation performed was a #dismiss.
      *
@@ -488,15 +488,18 @@ public final class Magnifier {
         if (mWindow == null) {
             return null;
         }
-        return new Point(getCurrentClampedWindowCoordinates());
+        final Point position = getCurrentClampedWindowCoordinates();
+        position.offset(-mParentSurface.mInsets.left, -mParentSurface.mInsets.top);
+        return new Point(position);
     }
 
     /**
      * Returns the top left coordinates of the magnifier source (i.e. the view region going to
-     * be magnified and copied to the magnifier), relative to the surface the content is copied
-     * from. The content will be copied:
+     * be magnified and copied to the magnifier), relative to the window or surface the content
+     * is copied from. The content will be copied:
      * - if the magnified view is a {@link SurfaceView}, from the surface backing it
-     * - otherwise, from the surface of the main application window
+     * - otherwise, from the surface backing the main application window, and the coordinates
+     *   returned will be relative to the main application window
      * The method will return {@code null} if #show has not yet been called, or if the last
      * operation performed was a #dismiss.
      *
@@ -507,7 +510,9 @@ public final class Magnifier {
         if (mWindow == null) {
             return null;
         }
-        return new Point(mPixelCopyRequestRect.left, mPixelCopyRequestRect.top);
+        final Point position = new Point(mPixelCopyRequestRect.left, mPixelCopyRequestRect.top);
+        position.offset(-mContentCopySurface.mInsets.left, -mContentCopySurface.mInsets.top);
+        return new Point(position);
     }
 
     /**
@@ -531,7 +536,7 @@ public final class Magnifier {
                         viewRootImpl.getHeight() + surfaceInsets.top + surfaceInsets.bottom;
                 validMainWindowSurface =
                         new SurfaceInfo(viewRootImpl.getSurfaceControl(), mainWindowSurface,
-                                surfaceWidth, surfaceHeight, true);
+                                surfaceWidth, surfaceHeight, surfaceInsets, true);
             }
         }
         // Get the surface backing the magnified view, if it is a SurfaceView.
@@ -544,7 +549,7 @@ public final class Magnifier {
             if (sc != null && sc.isValid()) {
                 final Rect surfaceFrame = surfaceHolder.getSurfaceFrame();
                 validSurfaceViewSurface = new SurfaceInfo(sc, surfaceViewSurface,
-                        surfaceFrame.right, surfaceFrame.bottom, false);
+                        surfaceFrame.right, surfaceFrame.bottom, new Rect(), false);
             }
         }
 
@@ -708,9 +713,13 @@ public final class Magnifier {
         final Rect windowBounds;
         if (mParentSurface.mIsMainWindowSurface) {
             final Insets systemInsets = mView.getRootWindowInsets().getSystemWindowInsets();
-            windowBounds = new Rect(systemInsets.left, systemInsets.top,
-                    mParentSurface.mWidth - systemInsets.right,
-                    mParentSurface.mHeight - systemInsets.bottom);
+            windowBounds = new Rect(
+                    systemInsets.left + mParentSurface.mInsets.left,
+                    systemInsets.top + mParentSurface.mInsets.top,
+                    mParentSurface.mWidth - systemInsets.right - mParentSurface.mInsets.right,
+                    mParentSurface.mHeight - systemInsets.bottom
+                            - mParentSurface.mInsets.bottom
+            );
         } else {
             windowBounds = new Rect(0, 0, mParentSurface.mWidth, mParentSurface.mHeight);
         }
@@ -725,21 +734,23 @@ public final class Magnifier {
      * Contains a surface and metadata corresponding to it.
      */
     private static class SurfaceInfo {
-        public static final SurfaceInfo NULL = new SurfaceInfo(null, null, 0, 0, false);
+        public static final SurfaceInfo NULL = new SurfaceInfo(null, null, 0, 0, null, false);
 
         private Surface mSurface;
         private SurfaceControl mSurfaceControl;
         private int mWidth;
         private int mHeight;
+        private Rect mInsets;
         private boolean mIsMainWindowSurface;
 
         SurfaceInfo(final SurfaceControl surfaceControl, final Surface surface,
-                final int width, final int height,
+                final int width, final int height, final Rect insets,
                 final boolean isMainWindowSurface) {
             mSurfaceControl = surfaceControl;
             mSurface = surface;
             mWidth = width;
             mHeight = height;
+            mInsets = insets;
             mIsMainWindowSurface = isMainWindowSurface;
         }
     }

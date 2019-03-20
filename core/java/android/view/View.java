@@ -11095,11 +11095,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * <p>Computes the coordinates of this view in its surface. The argument
      * must be an array of two integers. After the method returns, the array
      * contains the x and y location in that order.</p>
-     * @hide
+     *
      * @param location an array of two integers in which to hold the coordinates
      */
-    @UnsupportedAppUsage
-    public void getLocationInSurface(@Size(2) int[] location) {
+    public void getLocationInSurface(@NonNull @Size(2) int[] location) {
         getLocationInWindow(location);
         if (mAttachInfo != null && mAttachInfo.mViewRootImpl != null) {
             location[0] += mAttachInfo.mViewRootImpl.mWindowAttributes.surfaceInsets.left;
