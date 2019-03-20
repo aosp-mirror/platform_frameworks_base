@@ -27,12 +27,10 @@ import static com.android.server.wm.ActivityTaskManagerInternal.ASSIST_KEY_CONTE
 import static com.android.server.wm.ActivityTaskManagerInternal.ASSIST_KEY_DATA;
 import static com.android.server.wm.ActivityTaskManagerInternal.ASSIST_KEY_STRUCTURE;
 
-import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManagerInternal;
-import android.app.AppGlobals;
 import android.app.assist.AssistContent;
 import android.app.assist.AssistStructure;
 import android.content.ComponentName;
@@ -44,12 +42,12 @@ import android.content.pm.ServiceInfo;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.contentcapture.ActivityEvent;
 import android.service.contentcapture.ActivityEvent.ActivityEventType;
 import android.service.contentcapture.ContentCaptureService;
+import android.service.contentcapture.ContentCaptureServiceInfo;
 import android.service.contentcapture.IContentCaptureServiceCallback;
 import android.service.contentcapture.SnapshotData;
 import android.util.ArrayMap;
@@ -107,6 +105,9 @@ final class ContentCapturePerUserService
     @GuardedBy("mLock")
     private boolean mZombie;
 
+    @GuardedBy("mLock")
+    private ContentCaptureServiceInfo mInfo;
+
     // TODO(b/111276913): add mechanism to prune stale sessions, similar to Autofill's
 
     ContentCapturePerUserService(@NonNull ContentCaptureManagerService master,
@@ -144,33 +145,9 @@ final class ContentCapturePerUserService
     @Override // from PerUserSystemService
     protected ServiceInfo newServiceInfoLocked(@NonNull ComponentName serviceComponent)
             throws NameNotFoundException {
-
-        int flags = PackageManager.GET_META_DATA;
-        final boolean isTemp = isTemporaryServiceSetLocked();
-        if (!isTemp) {
-            flags |= PackageManager.MATCH_SYSTEM_ONLY;
-        }
-
-        ServiceInfo si;
-        try {
-            si = AppGlobals.getPackageManager().getServiceInfo(serviceComponent, flags, mUserId);
-        } catch (RemoteException e) {
-            Slog.w(TAG, "Could not get service for " + serviceComponent + ": " + e);
-            return null;
-        }
-        if (si == null) {
-            Slog.w(TAG, "Could not get serviceInfo for " + (isTemp ? " (temp)" : "(default system)")
-                    + " " + serviceComponent.flattenToShortString());
-            return null;
-        }
-        if (!Manifest.permission.BIND_CONTENT_CAPTURE_SERVICE.equals(si.permission)) {
-            Slog.w(TAG, "ContentCaptureService from '" + si.packageName
-                    + "' does not require permission "
-                    + Manifest.permission.BIND_CONTENT_CAPTURE_SERVICE);
-            throw new SecurityException("Service does not require permission "
-                    + Manifest.permission.BIND_CONTENT_CAPTURE_SERVICE);
-        }
-        return si;
+        mInfo = new ContentCaptureServiceInfo(getContext(), serviceComponent,
+                isTemporaryServiceSetLocked(), mUserId);
+        return mInfo.getServiceInfo();
     }
 
     @Override // from PerUserSystemService
@@ -490,9 +467,16 @@ final class ContentCapturePerUserService
     protected void dumpLocked(String prefix, PrintWriter pw) {
         super.dumpLocked(prefix, pw);
 
+        final String prefix2 = prefix + "  ";
+        pw.print(prefix); pw.print("Service Info: ");
+        if (mInfo == null) {
+            pw.println("N/A");
+        } else {
+            pw.println();
+            mInfo.dump(prefix2, pw);
+        }
         pw.print(prefix); pw.print("Zombie: "); pw.println(mZombie);
 
-        final String prefix2 = prefix + "  ";
         if (mRemoteService != null) {
             pw.print(prefix); pw.println("remote service:");
             mRemoteService.dump(prefix2, pw);

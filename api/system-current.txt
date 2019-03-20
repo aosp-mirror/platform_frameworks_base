@@ -6448,6 +6448,7 @@ package android.service.contentcapture {
     method public void onUserDataRemovalRequest(@NonNull android.view.contentcapture.UserDataRemovalRequest);
     method public final void setContentCaptureWhitelist(@Nullable java.util.Set<java.lang.String>, @Nullable java.util.Set<android.content.ComponentName>);
     field public static final String SERVICE_INTERFACE = "android.service.contentcapture.ContentCaptureService";
+    field public static final String SERVICE_META_DATA = "android.content_capture";
   }
 
   public final class SnapshotData implements android.os.Parcelable {
