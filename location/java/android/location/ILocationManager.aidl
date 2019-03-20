@@ -66,7 +66,7 @@ interface ILocationManager
     boolean addGnssMeasurementsListener(in IGnssMeasurementsListener listener, in String packageName);
     void injectGnssMeasurementCorrections(in GnssMeasurementCorrections corrections,
             in String packageName);
-    int getGnssCapabilities(in String packageName);
+    long getGnssCapabilities(in String packageName);
     void removeGnssMeasurementsListener(in IGnssMeasurementsListener listener);
 
     boolean addGnssNavigationMessageListener(
