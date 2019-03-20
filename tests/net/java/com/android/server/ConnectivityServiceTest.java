@@ -495,7 +495,7 @@ public class ConnectivityServiceTest {
             try {
                 doAnswer(validateAnswer).when(mNetworkMonitor).notifyNetworkConnected();
                 doAnswer(validateAnswer).when(mNetworkMonitor).forceReevaluation(anyInt());
-                doAnswer(validateAnswer).when(mNetworkMonitor).notifyAcceptPartialConnectivity();
+                doAnswer(validateAnswer).when(mNetworkMonitor).setAcceptPartialConnectivity();
             } catch (RemoteException e) {
                 fail(e.getMessage());
             }
@@ -2552,8 +2552,7 @@ public class ConnectivityServiceTest {
         verifyActiveNetwork(TRANSPORT_CELLULAR);
     }
 
-    // TODO: deflake and re-enable
-    // @Test
+    @Test
     public void testPartialConnectivity() {
         // Register network callback.
         NetworkRequest request = new NetworkRequest.Builder()
@@ -2587,7 +2586,7 @@ public class ConnectivityServiceTest {
         waitForIdle();
         try {
             verify(mWiFiNetworkAgent.mNetworkMonitor,
-                    timeout(TIMEOUT_MS).times(1)).notifyAcceptPartialConnectivity();
+                    timeout(TIMEOUT_MS).times(1)).setAcceptPartialConnectivity();
         } catch (RemoteException e) {
             fail(e.getMessage());
         }
@@ -2643,7 +2642,7 @@ public class ConnectivityServiceTest {
         waitForIdle();
         try {
             verify(mWiFiNetworkAgent.mNetworkMonitor,
-                    timeout(TIMEOUT_MS).times(1)).notifyAcceptPartialConnectivity();
+                    timeout(TIMEOUT_MS).times(1)).setAcceptPartialConnectivity();
         } catch (RemoteException e) {
             fail(e.getMessage());
         }

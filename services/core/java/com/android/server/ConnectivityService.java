@@ -2552,19 +2552,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
                     final boolean partialConnectivity =
                             (msg.arg1 == NETWORK_TEST_RESULT_PARTIAL_CONNECTIVITY)
-                                    // If user accepts partial connectivity network, NetworkMonitor
-                                    // will skip https probing. It will make partial connectivity
-                                    // network becomes valid. But user still need to know this
-                                    // network is limited. So, it's needed to refer to
-                                    // acceptPartialConnectivity to add
-                                    // NET_CAPABILITY_PARTIAL_CONNECTIVITY into NetworkCapabilities
-                                    // of this network. So that user can see "Limited connection"
-                                    // in the settings.
                                     || (nai.networkMisc.acceptPartialConnectivity
                                             && nai.partialConnectivity);
                     // Once a network is determined to have partial connectivity, it cannot
                     // go back to full connectivity without a disconnect.
-                    final boolean partialConnectivityChange =
+                    final boolean partialConnectivityChanged =
                             (partialConnectivity && !nai.partialConnectivity);
 
                     final boolean valid = (msg.arg1 == NETWORK_TEST_RESULT_VALID);
@@ -2574,17 +2566,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
                             && valid) {
                         nai.captivePortalLoginNotified = true;
                         showNetworkNotification(nai, NotificationType.LOGGED_IN);
-                    }
-                    // If this network has just connected and partial connectivity has just been
-                    // detected, tell NetworkMonitor if the user accepted partial connectivity on a
-                    // previous connect.
-                    if ((msg.arg1 == NETWORK_TEST_RESULT_PARTIAL_CONNECTIVITY)
-                            && nai.networkMisc.acceptPartialConnectivity) {
-                        try {
-                            nai.networkMonitor().notifyAcceptPartialConnectivity();
-                        } catch (RemoteException e) {
-                            e.rethrowFromSystemServer();
-                        }
                     }
 
                     final String redirectUrl = (msg.obj instanceof String) ? (String) msg.obj : "";
@@ -2615,7 +2596,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                             mNotifier.clearNotification(nai.network.netId,
                                     NotificationType.LOST_INTERNET);
                         }
-                    } else if (partialConnectivityChange) {
+                    } else if (partialConnectivityChanged) {
                         nai.partialConnectivity = partialConnectivity;
                         updateCapabilities(nai.getCurrentScore(), nai, nai.networkCapabilities);
                     }
@@ -3369,8 +3350,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
             // Tear down the network.
             teardownUnneededNetwork(nai);
         } else {
+            // Inform NetworkMonitor that partial connectivity is acceptable. This will likely
+            // result in a partial connectivity result which will be processed by
+            // maybeHandleNetworkMonitorMessage.
             try {
-                nai.networkMonitor().notifyAcceptPartialConnectivity();
+                nai.networkMonitor().setAcceptPartialConnectivity();
             } catch (RemoteException e) {
                 e.rethrowFromSystemServer();
             }
@@ -3578,6 +3562,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // because we're already prompting the user to sign in.
         if (nai == null || nai.everValidated || nai.everCaptivePortalDetected
                 || !nai.networkMisc.explicitlySelected || nai.networkMisc.acceptUnvalidated
+                // TODO: Once the value of acceptPartialConnectivity is moved to IpMemoryStore,
+                // we should reevaluate how to handle acceptPartialConnectivity when network just
+                // connected.
                 || nai.networkMisc.acceptPartialConnectivity) {
             return;
         }
@@ -6386,6 +6373,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
             // NetworkMonitor seeing the correct LinkProperties when starting.
             // TODO: pass LinkProperties to the NetworkMonitor in the notifyNetworkConnected call.
             try {
+                if (networkAgent.networkMisc.acceptPartialConnectivity) {
+                    networkAgent.networkMonitor().setAcceptPartialConnectivity();
+                }
                 networkAgent.networkMonitor().notifyNetworkConnected();
             } catch (RemoteException e) {
                 e.rethrowFromSystemServer();
