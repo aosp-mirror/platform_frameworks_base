@@ -5607,6 +5607,7 @@ public final class Settings {
          *
          * @hide
          */
+        @SystemApi
         public static final String ODI_CAPTIONS_ENABLED = "odi_captions_enabled";
 
         private static final Validator ODI_CAPTIONS_ENABLED_VALIDATOR = BOOLEAN_VALIDATOR;
