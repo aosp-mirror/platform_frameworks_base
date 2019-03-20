@@ -32,11 +32,11 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
- * Description of a mobile network registration state
+ * Description of a mobile network registration info
  * @hide
  */
 @SystemApi
-public class NetworkRegistrationState implements Parcelable {
+public class NetworkRegistrationInfo implements Parcelable {
     /**
      * Network domain
      * @hide
@@ -184,12 +184,12 @@ public class NetworkRegistrationState implements Parcelable {
      * @param cellIdentity The identity representing a unique cell or wifi AP. Set to null if the
      * information is not available.
      */
-    public NetworkRegistrationState(@Domain int domain, @TransportType int transportType,
-                                    @RegState int regState,
-                                    @NetworkType int accessNetworkTechnology, int rejectCause,
-                                    boolean emergencyOnly,
-                                    @NonNull @ServiceType int[] availableServices,
-                                    @Nullable CellIdentity cellIdentity) {
+    public NetworkRegistrationInfo(@Domain int domain, @TransportType int transportType,
+                                   @RegState int regState,
+                                   @NetworkType int accessNetworkTechnology, int rejectCause,
+                                   boolean emergencyOnly,
+                                   @NonNull @ServiceType int[] availableServices,
+                                   @Nullable CellIdentity cellIdentity) {
         mDomain = domain;
         mTransportType = transportType;
         mRegState = regState;
@@ -204,13 +204,15 @@ public class NetworkRegistrationState implements Parcelable {
     }
 
     /**
-     * Constructor for voice network registration states.
+     * Constructor for voice network registration info.
      * @hide
      */
-    public NetworkRegistrationState(int domain, @TransportType int transportType, int regState,
-            int accessNetworkTechnology, int rejectCause, boolean emergencyOnly,
-            int[] availableServices, @Nullable CellIdentity cellIdentity, boolean cssSupported,
-            int roamingIndicator, int systemIsInPrl, int defaultRoamingIndicator) {
+    public NetworkRegistrationInfo(int domain, @TransportType int transportType, int regState,
+                                   int accessNetworkTechnology, int rejectCause,
+                                   boolean emergencyOnly, int[] availableServices,
+                                   @Nullable CellIdentity cellIdentity, boolean cssSupported,
+                                   int roamingIndicator, int systemIsInPrl,
+                                   int defaultRoamingIndicator) {
         this(domain, transportType, regState, accessNetworkTechnology, rejectCause, emergencyOnly,
                 availableServices, cellIdentity);
 
@@ -219,14 +221,16 @@ public class NetworkRegistrationState implements Parcelable {
     }
 
     /**
-     * Constructor for data network registration states.
+     * Constructor for data network registration info.
      * @hide
      */
-    public NetworkRegistrationState(int domain, @TransportType int transportType, int regState,
-            int accessNetworkTechnology, int rejectCause, boolean emergencyOnly,
-            int[] availableServices, @Nullable CellIdentity cellIdentity, int maxDataCalls,
-            boolean isDcNrRestricted, boolean isNrAvailable, boolean isEndcAvailable,
-            LteVopsSupportInfo lteVopsSupportInfo) {
+    public NetworkRegistrationInfo(int domain, @TransportType int transportType, int regState,
+                                   int accessNetworkTechnology, int rejectCause,
+                                   boolean emergencyOnly, int[] availableServices,
+                                   @Nullable CellIdentity cellIdentity, int maxDataCalls,
+                                   boolean isDcNrRestricted, boolean isNrAvailable,
+                                   boolean isEndcAvailable,
+                                   LteVopsSupportInfo lteVopsSupportInfo) {
         this(domain, transportType, regState, accessNetworkTechnology, rejectCause, emergencyOnly,
                 availableServices, cellIdentity);
 
@@ -235,7 +239,7 @@ public class NetworkRegistrationState implements Parcelable {
         updateNrStatus(mDataSpecificStates);
     }
 
-    private NetworkRegistrationState(Parcel source) {
+    private NetworkRegistrationInfo(Parcel source) {
         mDomain = source.readInt();
         mTransportType = source.readInt();
         mRegState = source.readInt();
@@ -433,7 +437,7 @@ public class NetworkRegistrationState implements Parcelable {
 
     @Override
     public String toString() {
-        return new StringBuilder("NetworkRegistrationState{")
+        return new StringBuilder("NetworkRegistrationInfo{")
                 .append(" domain=").append((mDomain == DOMAIN_CS) ? "CS" : "PS")
                 .append(" transportType=").append(
                         AccessNetworkConstants.transportTypeToString(mTransportType))
@@ -465,11 +469,11 @@ public class NetworkRegistrationState implements Parcelable {
     public boolean equals(Object o) {
         if (this == o) return true;
 
-        if (!(o instanceof NetworkRegistrationState)) {
+        if (!(o instanceof NetworkRegistrationInfo)) {
             return false;
         }
 
-        NetworkRegistrationState other = (NetworkRegistrationState) o;
+        NetworkRegistrationInfo other = (NetworkRegistrationInfo) o;
         return mDomain == other.mDomain
                 && mTransportType == other.mTransportType
                 && mRegState == other.mRegState
@@ -528,46 +532,46 @@ public class NetworkRegistrationState implements Parcelable {
         }
     }
 
-    public static final Parcelable.Creator<NetworkRegistrationState> CREATOR =
-            new Parcelable.Creator<NetworkRegistrationState>() {
-        @Override
-        public NetworkRegistrationState createFromParcel(Parcel source) {
-            return new NetworkRegistrationState(source);
-        }
+    public static final @NonNull Parcelable.Creator<NetworkRegistrationInfo> CREATOR =
+            new Parcelable.Creator<NetworkRegistrationInfo>() {
+                @Override
+                public NetworkRegistrationInfo createFromParcel(Parcel source) {
+                    return new NetworkRegistrationInfo(source);
+                }
 
-        @Override
-        public NetworkRegistrationState[] newArray(int size) {
-            return new NetworkRegistrationState[size];
-        }
-    };
+                @Override
+                public NetworkRegistrationInfo[] newArray(int size) {
+                    return new NetworkRegistrationInfo[size];
+                }
+            };
 
     /**
      * @hide
      */
-    public NetworkRegistrationState sanitizeLocationInfo() {
-        NetworkRegistrationState result = copy();
+    public NetworkRegistrationInfo sanitizeLocationInfo() {
+        NetworkRegistrationInfo result = copy();
         result.mCellIdentity = null;
         return result;
     }
 
-    private NetworkRegistrationState copy() {
+    private NetworkRegistrationInfo copy() {
         Parcel p = Parcel.obtain();
         this.writeToParcel(p, 0);
         p.setDataPosition(0);
-        NetworkRegistrationState result = new NetworkRegistrationState(p);
+        NetworkRegistrationInfo result = new NetworkRegistrationInfo(p);
         p.recycle();
         return result;
     }
 
     /**
-     * Provides a convenient way to set the fields of a {@link NetworkRegistrationState} when
+     * Provides a convenient way to set the fields of a {@link NetworkRegistrationInfo} when
      * creating a new instance.
      *
-     * <p>The example below shows how you might create a new {@code NetworkRegistrationState}:
+     * <p>The example below shows how you might create a new {@code NetworkRegistrationInfo}:
      *
      * <pre><code>
      *
-     * NetworkRegistrationState nrs = new NetworkRegistrationState.Builder()
+     * NetworkRegistrationInfo nrs = new NetworkRegistrationInfo.Builder()
      *     .setApnTypeBitmask(ApnSetting.TYPE_DEFAULT | ApnSetting.TYPE_MMS)
      *     .setApnName("apn.example.com")
      *     .setEntryName("Example Carrier APN")
@@ -736,12 +740,12 @@ public class NetworkRegistrationState implements Parcelable {
         }
 
         /**
-         * Build the NetworkRegistrationState.
+         * Build the NetworkRegistrationInfo.
          *
-         * @return the NetworkRegistrationState object.
+         * @return the NetworkRegistrationInfo object.
          */
-        public @NonNull NetworkRegistrationState build() {
-            return new NetworkRegistrationState(mDomain, mTransportType, mRegState,
+        public @NonNull NetworkRegistrationInfo build() {
+            return new NetworkRegistrationInfo(mDomain, mTransportType, mRegState,
                     mAccessNetworkTechnology, mRejectCause, mEmergencyOnly, mAvailableServices,
                     mCellIdentity);
         }

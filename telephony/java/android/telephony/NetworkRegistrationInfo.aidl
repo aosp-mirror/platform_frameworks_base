@@ -16,4 +16,4 @@
 
 package android.telephony;
 
-parcelable NetworkRegistrationState;
+parcelable NetworkRegistrationInfo;
