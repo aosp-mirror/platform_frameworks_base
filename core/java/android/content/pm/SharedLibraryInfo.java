@@ -289,9 +289,9 @@ public final class SharedLibraryInfo implements Parcelable {
 
     @Override
     public String toString() {
-        return "SharedLibraryInfo[name:" + mName + ", type:" + typeToString(mType)
+        return "SharedLibraryInfo{name:" + mName + ", type:" + typeToString(mType)
                 + ", version:" + mVersion + (!getDependentPackages().isEmpty()
-                ? " has dependents" : "");
+                ? " has dependents" : "") + "}";
     }
 
     @Override
