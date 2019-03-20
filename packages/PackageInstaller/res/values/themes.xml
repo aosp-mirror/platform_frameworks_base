@@ -24,4 +24,9 @@
     <style name="Theme.AlertDialogActivity"
             parent="@android:style/Theme.DeviceDefault.Light.Dialog.Alert" />
 
+    <style name="Theme.AlertDialogActivity.NoActionBar">
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
+    </style>
+
 </resources>
