@@ -70,7 +70,15 @@ public interface LineHeightSpan extends ParagraphStyle, WrapTogetherSpan {
      * Default implementation of the {@link LineHeightSpan}, which changes the line height of the
      * attached paragraph.
      * <p>
-     * LineHeightSpan will change the line height of the entire paragraph, even though it
+     * For example, a paragraph with its line height equal to 100px can be set like this:
+     * <pre>
+     * SpannableString string = new SpannableString("This is a multiline paragraph. This is a multiline paragraph.");
+     * string.setSpan(new LineHeightSpan.Standard(100), 0, string.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+     * </pre>
+     * <img src="{@docRoot}reference/android/images/text/style/lineheightspan.png" />
+     * <figcaption>Text with line height set to 100 pixels.</figcaption>
+     * <p>
+     * Notice that LineHeightSpan will change the line height of the entire paragraph, even though it
      * covers only part of the paragraph.
      * </p>
      */
