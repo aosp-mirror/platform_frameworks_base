@@ -32,6 +32,8 @@ import android.view.InsetsState;
 import android.view.Surface;
 import android.view.SurfaceControl;
 
+import java.util.List;
+
 /**
  * System private per-application interface to the window manager.
  *
@@ -265,4 +267,10 @@ interface IWindowSession {
      * that new state.
      */
     void insetsModified(IWindow window, in InsetsState state);
+
+
+    /**
+     * Called when the system gesture exclusion has changed.
+     */
+    void reportSystemGestureExclusionChanged(IWindow window, in List<Rect> exclusionRects);
 }

@@ -130,6 +130,7 @@ import static com.android.server.wm.WindowManagerService.logSurface;
 import static com.android.server.wm.WindowState.RESIZE_HANDLE_WIDTH_IN_DP;
 import static com.android.server.wm.WindowStateAnimator.DRAW_PENDING;
 import static com.android.server.wm.WindowStateAnimator.READY_TO_SHOW;
+import static com.android.server.wm.utils.RegionUtils.rectListToRegion;
 
 import android.animation.AnimationHandler;
 import android.annotation.CallSuper;
@@ -153,6 +154,7 @@ import android.os.Debug;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Process;
+import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.Trace;
@@ -165,6 +167,7 @@ import android.view.Display;
 import android.view.DisplayCutout;
 import android.view.DisplayInfo;
 import android.view.Gravity;
+import android.view.ISystemGestureExclusionListener;
 import android.view.InputChannel;
 import android.view.InputDevice;
 import android.view.InputWindowHandle;
@@ -311,6 +314,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     private final DisplayPolicy mDisplayPolicy;
     private DisplayRotation mDisplayRotation;
     DisplayFrames mDisplayFrames;
+
+    private final RemoteCallbackList<ISystemGestureExclusionListener>
+            mSystemGestureExclusionListeners = new RemoteCallbackList<>();
+    private final Region mSystemGestureExclusion = new Region();
 
     /**
      * For default display it contains real metrics, empty for others.
@@ -2818,6 +2825,14 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         mWallpaperController.dump(pw, "  ");
 
         pw.println();
+        pw.print("mSystemGestureExclusion=");
+        if (mSystemGestureExclusionListeners.getRegisteredCallbackCount() > 0) {
+            pw.println(mSystemGestureExclusion);
+        } else {
+            pw.println("<no lstnrs>");
+        }
+
+        pw.println();
         pw.println(prefix + "Application tokens in top down Z order:");
         for (int stackNdx = mTaskStackContainers.getChildCount() - 1; stackNdx >= 0; --stackNdx) {
             final TaskStack stack = mTaskStackContainers.getChildAt(stackNdx);
@@ -4948,6 +4963,100 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     @VisibleForTesting
     SurfaceControl getWindowingLayer() {
         return mWindowingLayer;
+    }
+
+    /**
+     * Updates the display's system gesture exclusion.
+     *
+     * @return true, if the exclusion changed.
+     */
+    boolean updateSystemGestureExclusion() {
+        if (mSystemGestureExclusionListeners.getRegisteredCallbackCount() == 0) {
+            // No one's interested anyways.
+            return false;
+        }
+
+        final Region systemGestureExclusion = calculateSystemGestureExclusion();
+        try {
+            if (mSystemGestureExclusion.equals(systemGestureExclusion)) {
+                return false;
+            }
+            mSystemGestureExclusion.set(systemGestureExclusion);
+            for (int i = mSystemGestureExclusionListeners.beginBroadcast() - 1; i >= 0; --i) {
+                try {
+                    mSystemGestureExclusionListeners.getBroadcastItem(i)
+                            .onSystemGestureExclusionChanged(mDisplayId, systemGestureExclusion);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Failed to notify SystemGestureExclusionListener", e);
+                }
+            }
+            mSystemGestureExclusionListeners.finishBroadcast();
+            return true;
+        } finally {
+            systemGestureExclusion.recycle();
+        }
+    }
+
+    @VisibleForTesting
+    Region calculateSystemGestureExclusion() {
+        final Region global = Region.obtain();
+        final Region touchableRegion = Region.obtain();
+        final Region local = Region.obtain();
+
+        // Traverse all windows bottom up to assemble the gesture exclusion rects.
+        // For each window, we only take the rects that fall within its touchable region.
+        forAllWindows(w -> {
+            if (w.cantReceiveTouchInput() || !w.isVisible()
+                    || (w.getAttrs().flags & FLAG_NOT_TOUCHABLE) != 0) {
+                return;
+            }
+            final boolean modal =
+                    (w.mAttrs.flags & (FLAG_NOT_TOUCH_MODAL | FLAG_NOT_FOCUSABLE)) == 0;
+
+            // Only keep the exclusion zones from the windows behind where the current window
+            // isn't touchable.
+            w.getTouchableRegion(touchableRegion);
+            global.op(touchableRegion, Op.DIFFERENCE);
+
+            rectListToRegion(w.getSystemGestureExclusion(), local);
+
+            // Transform to display coordinates
+            local.scale(w.mGlobalScale);
+            final Rect frame = w.getWindowFrames().mFrame;
+            local.translate(frame.left, frame.top);
+
+            // A window can only exclude system gestures where it is actually touchable
+            local.op(touchableRegion, Op.INTERSECT);
+
+            global.op(local, Op.UNION);
+        }, false /* topToBottom */);
+        local.recycle();
+        touchableRegion.recycle();
+        return global;
+    }
+
+    void registerSystemGestureExclusionListener(ISystemGestureExclusionListener listener) {
+        mSystemGestureExclusionListeners.register(listener);
+        final boolean changed;
+        if (mSystemGestureExclusionListeners.getRegisteredCallbackCount() == 1) {
+            changed = updateSystemGestureExclusion();
+        } else {
+            changed = false;
+        }
+
+        if (!changed) {
+            // If updateSystemGestureExclusion changed the exclusion, it will already have
+            // notified the listener. Otherwise, we'll do it here.
+            try {
+                listener.onSystemGestureExclusionChanged(mDisplayId, mSystemGestureExclusion);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Failed to notify SystemGestureExclusionListener during register", e);
+            }
+        }
+    }
+
+    void unregisterSystemGestureExclusionListener(ISystemGestureExclusionListener listener) {
+        mSystemGestureExclusionListeners.unregister(listener);
     }
 
     /**
