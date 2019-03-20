@@ -683,6 +683,14 @@ public final class AutofillManagerService
         send(receiver, value ? 1 : 0);
     }
 
+    private void send(@NonNull IResultReceiver receiver, int value1, int value2) {
+        try {
+            receiver.send(value1, SyncResultReceiver.bundleFor(value2));
+        } catch (RemoteException e) {
+            Slog.w(TAG, "Error async reporting result to client: " + e);
+        }
+    }
+
     @Nullable
     @VisibleForTesting
     static Map<String, String[]> getWhitelistedCompatModePackages(String setting) {
@@ -1003,14 +1011,20 @@ public final class AutofillManagerService
             // TODO(b/113281366): add a callback method on AM to be notified when a task is finished
             // so we can clean up sessions kept alive
             final int taskId = mAm.getTaskIdForActivity(activityToken, false);
-            final int sessionId;
+            final long result;
             synchronized (mLock) {
                 final AutofillManagerServiceImpl service = getServiceForUserLocked(userId);
-                sessionId = service.startSessionLocked(activityToken, taskId, getCallingUid(),
+                result = service.startSessionLocked(activityToken, taskId, getCallingUid(),
                         appCallback, autofillId, bounds, value, hasCallback, componentName,
                         compatMode, mAllowInstantService, flags);
             }
-            send(receiver, sessionId);
+            final int sessionId = (int) result;
+            final int resultFlags = (int) (result >> 32);
+            if (resultFlags != 0) {
+                send(receiver, sessionId, resultFlags);
+            } else {
+                send(receiver, sessionId);
+            }
         }
 
         @Override

@@ -228,6 +228,9 @@ public final class AutofillManager {
     /** @hide */ public static final int FLAG_ADD_CLIENT_ENABLED = 0x1;
     /** @hide */ public static final int FLAG_ADD_CLIENT_DEBUG = 0x2;
     /** @hide */ public static final int FLAG_ADD_CLIENT_VERBOSE = 0x4;
+
+    /** @hide */ public static final int FLAG_SESSION_FOR_AUGMENTED_AUTOFILL_ONLY = 0x1;
+
     /** @hide */
     public static final int DEFAULT_LOGGING_LEVEL = Build.IS_DEBUGGABLE
             ? AutofillManager.FLAG_ADD_CLIENT_DEBUG
@@ -307,8 +310,8 @@ public final class AutofillManager {
 
     /**
      * Same as {@link #STATE_UNKNOWN}, but used on
-     * {@link AutofillManagerClient#setSessionFinished(int)} when the session was finished because
-     * the URL bar changed on client mode
+     * {@link AutofillManagerClient#setSessionFinished(int, List)} when the session was finished
+     * because the URL bar changed on client mode
      *
      * @hide
      */
@@ -316,8 +319,8 @@ public final class AutofillManager {
 
     /**
      * Same as {@link #STATE_UNKNOWN}, but used on
-     * {@link AutofillManagerClient#setSessionFinished(int)} when the session was finished because
-     * the service failed to fullfil a request.
+     * {@link AutofillManagerClient#setSessionFinished(int, List)} when the session was finished
+     * because the service failed to fullfil a request.
      *
      * @hide
      */
@@ -436,7 +439,7 @@ public final class AutofillManager {
      * There is currently no session running.
      * {@hide}
      */
-    public static final int NO_SESSION = Integer.MIN_VALUE;
+    public static final int NO_SESSION = Integer.MAX_VALUE;
 
     private final IAutoFillManager mService;
 
@@ -512,6 +515,10 @@ public final class AutofillManager {
 
     @Nullable
     private final AutofillOptions mOptions;
+
+    /** When set, session is only used for augmented autofill requests. */
+    @GuardedBy("mLock")
+    private boolean mForAugmentedAutofillOnly;
 
     /** @hide */
     public interface AutofillClient {
@@ -940,9 +947,8 @@ public final class AutofillManager {
         ensureServiceClientAddedIfNeededLocked();
 
         if (!mEnabled) {
-            if (sVerbose) {
-                Log.v(TAG, "ignoring notifyViewEntered(" + id + "): disabled");
-            }
+            if (sVerbose) Log.v(TAG, "ignoring notifyViewEntered(" + id + "): disabled");
+
             if (mCallback != null) {
                 callback = mCallback;
             }
@@ -1025,6 +1031,12 @@ public final class AutofillManager {
     private void notifyViewVisibilityChangedInternal(@NonNull View view, int virtualId,
             boolean isVisible, boolean virtual) {
         synchronized (mLock) {
+            if (mForAugmentedAutofillOnly) {
+                if (sVerbose) {
+                    Log.v(TAG,  "notifyViewVisibilityChanged(): ignoring on augmented only mode");
+                }
+                return;
+            }
             if (mEnabled && isActiveLocked()) {
                 final AutofillId id = virtual ? getAutofillId(view, virtualId)
                         : view.getAutofillId();
@@ -1168,6 +1180,10 @@ public final class AutofillManager {
         AutofillValue value = null;
 
         synchronized (mLock) {
+            if (mForAugmentedAutofillOnly) {
+                if (sVerbose) Log.v(TAG,  "notifyValueChanged(): ignoring on augmented only mode");
+                return;
+            }
             // If the session is gone some fields might still be highlighted, hence we have to
             // remove the isAutofilled property even if no sessions are active.
             if (mLastAutofilledData == null) {
@@ -1221,6 +1237,10 @@ public final class AutofillManager {
             return;
         }
         synchronized (mLock) {
+            if (mForAugmentedAutofillOnly) {
+                if (sVerbose) Log.v(TAG,  "notifyValueChanged(): ignoring on augmented only mode");
+                return;
+            }
             if (!mEnabled || !isActiveLocked()) {
                 if (sVerbose) {
                     Log.v(TAG, "notifyValueChanged(" + view.getAutofillId() + ":" + virtualId
@@ -1676,13 +1696,19 @@ public final class AutofillManager {
             if (client == null) return; // NOTE: getClient() already logged it..
 
             final SyncResultReceiver receiver = new SyncResultReceiver(SYNC_CALLS_TIMEOUT_MS);
+            final ComponentName componentName = client.autofillClientGetComponentName();
             mService.startSession(client.autofillClientGetActivityToken(),
                     mServiceClient.asBinder(), id, bounds, value, mContext.getUserId(),
-                    mCallback != null, flags, client.autofillClientGetComponentName(),
+                    mCallback != null, flags, componentName,
                     isCompatibilityModeEnabledLocked(), receiver);
             mSessionId = receiver.getIntResult();
             if (mSessionId != NO_SESSION) {
                 mState = STATE_ACTIVE;
+            }
+            final int extraFlags = receiver.getOptionalExtraIntResult(0);
+            if ((extraFlags & FLAG_SESSION_FOR_AUGMENTED_AUTOFILL_ONLY) != 0) {
+                if (sDebug) Log.d(TAG, "startSession(" + componentName + "): for augmented only");
+                mForAugmentedAutofillOnly = true;
             }
             client.autofillClientResetableStateAvailable();
         } catch (RemoteException e) {
@@ -2399,6 +2425,9 @@ public final class AutofillManager {
         if (mEnteredForAugmentedAutofillIds != null) {
             pw.print(pfx); pw.print("entered ids for augmented autofill: ");
             pw.println(mEnteredForAugmentedAutofillIds);
+        }
+        if (mForAugmentedAutofillOnly) {
+            pw.print(pfx); pw.println("For Augmented Autofill Only");
         }
         pw.print(pfx); pw.print("save trigger id: "); pw.println(mSaveTriggerId);
         pw.print(pfx); pw.print("save on finish(): "); pw.println(mSaveOnFinish);
