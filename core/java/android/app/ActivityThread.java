@@ -88,6 +88,7 @@ import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.CancellationSignal;
 import android.os.Debug;
 import android.os.Environment;
 import android.os.FileUtils;
@@ -95,6 +96,7 @@ import android.os.GraphicsEnvironment;
 import android.os.Handler;
 import android.os.HandlerExecutor;
 import android.os.IBinder;
+import android.os.ICancellationSignal;
 import android.os.LocaleList;
 import android.os.Looper;
 import android.os.Message;
@@ -121,6 +123,7 @@ import android.provider.Settings;
 import android.renderscript.RenderScriptCacheDir;
 import android.security.NetworkSecurityPolicy;
 import android.security.net.config.NetworkSecurityConfigProvider;
+import android.service.voice.VoiceInteractionSession;
 import android.system.ErrnoException;
 import android.system.OsConstants;
 import android.system.StructStat;
@@ -160,6 +163,7 @@ import com.android.internal.os.RuntimeInit;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastPrintWriter;
+import com.android.internal.util.Preconditions;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.org.conscrypt.OpenSSLSocketImpl;
 import com.android.org.conscrypt.TrustedCertificateStore;
@@ -450,6 +454,7 @@ public final class ActivityThread extends ClientTransactionHandler {
     public static final class ActivityClientRecord {
         @UnsupportedAppUsage
         public IBinder token;
+        public IBinder assistToken;
         int ident;
         @UnsupportedAppUsage
         Intent intent;
@@ -526,8 +531,10 @@ public final class ActivityThread extends ClientTransactionHandler {
                 String referrer, IVoiceInteractor voiceInteractor, Bundle state,
                 PersistableBundle persistentState, List<ResultInfo> pendingResults,
                 List<ReferrerIntent> pendingNewIntents, boolean isForward,
-                ProfilerInfo profilerInfo, ClientTransactionHandler client) {
+                ProfilerInfo profilerInfo, ClientTransactionHandler client,
+                IBinder assistToken) {
             this.token = token;
+            this.assistToken = assistToken;
             this.ident = ident;
             this.intent = intent;
             this.referrer = referrer;
@@ -1644,6 +1651,33 @@ public final class ActivityThread extends ClientTransactionHandler {
         @Override
         public void scheduleTransaction(ClientTransaction transaction) throws RemoteException {
             ActivityThread.this.scheduleTransaction(transaction);
+        }
+
+        @Override
+        public void requestDirectActions(@NonNull IBinder activityToken,
+                @NonNull IVoiceInteractor interactor, @NonNull RemoteCallback callback) {
+            mH.sendMessage(PooledLambda.obtainMessage(ActivityThread::handleRequestDirectActions,
+                    ActivityThread.this, activityToken, interactor, callback));
+        }
+
+        @Override
+        public void performDirectAction(IBinder activityToken, String actionId, Bundle arguments,
+                RemoteCallback cancellationCallback, RemoteCallback resultCallback) {
+            final CancellationSignal cancellationSignal;
+            if (cancellationCallback != null) {
+                final ICancellationSignal transport = CancellationSignal.createTransport();
+                cancellationSignal = CancellationSignal.fromTransport(transport);
+                final Bundle cancellationResult = new Bundle();
+                cancellationResult.putBinder(VoiceInteractor.KEY_CANCELLATION_SIGNAL,
+                        transport.asBinder());
+                cancellationCallback.sendResult(cancellationResult);
+            } else {
+                cancellationSignal = new CancellationSignal();
+            }
+
+            mH.sendMessage(PooledLambda.obtainMessage(ActivityThread::handlePerformDirectAction,
+                    ActivityThread.this, activityToken, actionId, arguments,
+                    cancellationSignal, resultCallback));
         }
     }
 
@@ -2877,9 +2911,10 @@ public final class ActivityThread extends ClientTransactionHandler {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public final Activity startActivityNow(Activity parent, String id,
         Intent intent, ActivityInfo activityInfo, IBinder token, Bundle state,
-        Activity.NonConfigurationInstances lastNonConfigurationInstances) {
+        Activity.NonConfigurationInstances lastNonConfigurationInstances, IBinder assistToken) {
         ActivityClientRecord r = new ActivityClientRecord();
             r.token = token;
+            r.assistToken = assistToken;
             r.ident = 0;
             r.intent = intent;
             r.state = state;
@@ -3120,7 +3155,8 @@ public final class ActivityThread extends ClientTransactionHandler {
                 activity.attach(appContext, this, getInstrumentation(), r.token,
                         r.ident, app, r.intent, r.activityInfo, title, r.parent,
                         r.embeddedID, r.lastNonConfigurationInstances, config,
-                        r.referrer, r.voiceInteractor, window, r.configCallback);
+                        r.referrer, r.voiceInteractor, window, r.configCallback,
+                        r.assistToken);
 
                 if (customIntent != null) {
                     activity.mIntent = customIntent;
@@ -3352,7 +3388,6 @@ public final class ActivityThread extends ClientTransactionHandler {
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }
-
     }
 
     private void deliverNewIntents(ActivityClientRecord r, List<ReferrerIntent> intents) {
@@ -3432,6 +3467,7 @@ public final class ActivityThread extends ClientTransactionHandler {
                     r.activity.onProvideAssistContent(content);
                 }
             }
+
         }
         if (structure == null) {
             structure = new AssistStructure();
@@ -3449,6 +3485,68 @@ public final class ActivityThread extends ClientTransactionHandler {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    /** Fetches the user actions for the corresponding activity */
+    private void handleRequestDirectActions(@NonNull IBinder activityToken,
+            @NonNull IVoiceInteractor interactor, @NonNull RemoteCallback callback) {
+        final ActivityClientRecord r = mActivities.get(activityToken);
+        if (r != null) {
+            final int lifecycleState = r.getLifecycleState();
+            if (lifecycleState < ON_START || lifecycleState >= ON_STOP) {
+                callback.sendResult(null);
+                return;
+            }
+            if (r.activity.mVoiceInteractor == null
+                    || r.activity.mVoiceInteractor.mInteractor.asBinder()
+                    != interactor.asBinder()) {
+                if (r.activity.mVoiceInteractor != null) {
+                    r.activity.mVoiceInteractor.destroy();
+                }
+                r.activity.mVoiceInteractor = new VoiceInteractor(interactor, r.activity,
+                        r.activity, Looper.myLooper());
+            }
+            final List<DirectAction> actions = r.activity.onGetDirectActions();
+            Preconditions.checkNotNull(actions);
+            Preconditions.checkCollectionElementsNotNull(actions, "actions");
+            if (actions != null && !actions.isEmpty()) {
+                final int actionCount = actions.size();
+                for (int i = 0; i < actionCount; i++) {
+                    final DirectAction action = actions.get(i);
+                    action.setSource(r.activity.getTaskId(), r.activity.getAssistToken());
+                }
+                final Bundle result = new Bundle();
+                result.putParcelable(DirectAction.KEY_ACTIONS_LIST,
+                        new ParceledListSlice<>(actions));
+                callback.sendResult(result);
+            }
+        }
+        callback.sendResult(null);
+    }
+
+    /** Performs an actions in the corresponding activity */
+    private void handlePerformDirectAction(@NonNull IBinder activityToken,
+            @NonNull String actionId, @Nullable Bundle arguments,
+            @NonNull CancellationSignal cancellationSignal,
+            @NonNull RemoteCallback resultCallback) {
+        final ActivityClientRecord r = mActivities.get(activityToken);
+        if (r != null) {
+            final int lifecycleState = r.getLifecycleState();
+            if (lifecycleState < ON_START || lifecycleState >= ON_STOP) {
+                resultCallback.sendResult(null);
+                return;
+            }
+            final Bundle nonNullArguments = (arguments != null) ? arguments : Bundle.EMPTY;
+            final WeakReference<RemoteCallback> weakCallback = new WeakReference<>(resultCallback);
+            r.activity.onPerformDirectAction(actionId, nonNullArguments, cancellationSignal,
+                    (b) -> {
+                final RemoteCallback strongCallback = weakCallback.get();
+                if (strongCallback != null) {
+                    strongCallback.sendResult(b);
+                }
+            });
+        }
+        resultCallback.sendResult(null);
     }
 
     public void handleTranslucentConversionComplete(IBinder token, boolean drawComplete) {

@@ -19,6 +19,7 @@ package com.android.internal.app;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.RemoteCallback;
 
 import com.android.internal.app.IVoiceActionCheckCallback;
 import com.android.internal.app.IVoiceInteractionSessionShowCallback;
@@ -157,4 +158,17 @@ interface IVoiceInteractionManagerService {
      * Provide hints for showing UI.
      */
     void setUiHints(in IVoiceInteractionService service, in Bundle hints);
+
+    /**
+     * Requests a list of supported actions from a specific activity.
+     */
+    void requestDirectActions(in IBinder token, int taskId, IBinder assistToken,
+            in RemoteCallback callback);
+
+    /**
+     * Requests performing an action from a specific activity.
+     */
+    void performDirectAction(in IBinder token, String actionId, in Bundle arguments, int taskId,
+            IBinder assistToken, in RemoteCallback cancellationCallback,
+            in RemoteCallback resultCallback);
 }

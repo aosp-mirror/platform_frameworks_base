@@ -1206,7 +1206,7 @@ public class Instrumentation {
     public Activity newActivity(Class<?> clazz, Context context, 
             IBinder token, Application application, Intent intent, ActivityInfo info, 
             CharSequence title, Activity parent, String id,
-            Object lastNonConfigurationInstance) throws InstantiationException, 
+            Object lastNonConfigurationInstance) throws InstantiationException,
             IllegalAccessException {
         Activity activity = (Activity)clazz.newInstance();
         ActivityThread aThread = null;
@@ -1218,7 +1218,7 @@ public class Instrumentation {
                 info, title, parent, id,
                 (Activity.NonConfigurationInstances)lastNonConfigurationInstance,
                 new Configuration(), null /* referrer */, null /* voiceInteractor */,
-                null /* window */, null /* activityConfigCallback */);
+                null /* window */, null /* activityConfigCallback */, null /*assistToken*/);
         return activity;
     }
 
