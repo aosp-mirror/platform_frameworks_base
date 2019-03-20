@@ -716,12 +716,16 @@ public class NotificationManager {
     /**
      * Returns the notification channel settings for a given channel id.
      *
-     * The channel must belong to your package, or it will not be returned.
+     * <p>The channel must belong to your package, or to a package you are an approved notification
+     * delegate for (see {@link #canNotifyAsPackage(String)}), or it will not be returned. To query
+     * a channel as a notification delegate, call this method from a context created for that
+     * package (see {@link Context#createPackageContext(String, int)}).</p>
      */
     public NotificationChannel getNotificationChannel(String channelId) {
         INotificationManager service = getService();
         try {
-            return service.getNotificationChannel(mContext.getPackageName(), channelId);
+            return service.getNotificationChannel(mContext.getOpPackageName(),
+                    mContext.getUserId(), mContext.getPackageName(), channelId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -729,11 +733,17 @@ public class NotificationManager {
 
     /**
      * Returns all notification channels belonging to the calling package.
+     *
+     * <p>Approved notification delegates (see {@link #canNotifyAsPackage(String)}) can query
+     * notification channels belonging to packages they are the delegate for. To do so, call this
+     * method from a context created for that package (see
+     * {@link Context#createPackageContext(String, int)}).</p>
      */
     public List<NotificationChannel> getNotificationChannels() {
         INotificationManager service = getService();
         try {
-            return service.getNotificationChannels(mContext.getPackageName()).getList();
+            return service.getNotificationChannels(mContext.getOpPackageName(),
+                    mContext.getPackageName(), mContext.getUserId()).getList();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

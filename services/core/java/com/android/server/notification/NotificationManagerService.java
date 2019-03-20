@@ -2519,6 +2519,9 @@ public class NotificationManagerService extends SystemService {
                         android.Manifest.permission.INTERACT_ACROSS_USERS,
                         "canNotifyAsPackage for user " + userId);
             }
+            if (callingPkg.equals(targetPkg)) {
+                return true;
+            }
             try {
                 ApplicationInfo info =
                         mPackageManager.getApplicationInfo(targetPkg,
@@ -2588,10 +2591,21 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
-        public NotificationChannel getNotificationChannel(String pkg, String channelId) {
-            checkCallerIsSystemOrSameApp(pkg);
-            return mPreferencesHelper.getNotificationChannel(
-                    pkg, Binder.getCallingUid(), channelId, false /* includeDeleted */);
+        public NotificationChannel getNotificationChannel(String callingPkg, int userId,
+                String targetPkg, String channelId) {
+            if (canNotifyAsPackage(callingPkg, targetPkg, userId)
+                    || isCallingUidSystem()) {
+                int targetUid = -1;
+                try {
+                    targetUid = mPackageManagerClient.getPackageUidAsUser(targetPkg, userId);
+                } catch (NameNotFoundException e) {
+                    /* ignore */
+                }
+                return mPreferencesHelper.getNotificationChannel(
+                        targetPkg, targetUid, channelId, false /* includeDeleted */);
+            }
+            throw new SecurityException("Pkg " + callingPkg
+                    + " cannot read channels for " + targetPkg + " in " + userId);
         }
 
         @Override
@@ -2726,10 +2740,21 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
-        public ParceledListSlice<NotificationChannel> getNotificationChannels(String pkg) {
-            checkCallerIsSystemOrSameApp(pkg);
-            return mPreferencesHelper.getNotificationChannels(
-                    pkg, Binder.getCallingUid(), false /* includeDeleted */);
+        public ParceledListSlice<NotificationChannel> getNotificationChannels(
+                String callingPkg, String targetPkg, int userId) {
+            if (canNotifyAsPackage(callingPkg, targetPkg, userId)
+                || isCallingUidSystem()) {
+                int targetUid = -1;
+                try {
+                    targetUid = mPackageManagerClient.getPackageUidAsUser(targetPkg, userId);
+                } catch (NameNotFoundException e) {
+                    /* ignore */
+                }
+                return mPreferencesHelper.getNotificationChannels(
+                        targetPkg, targetUid, false /* includeDeleted */);
+            }
+            throw new SecurityException("Pkg " + callingPkg
+                    + " cannot read channels for " + targetPkg + " in " + userId);
         }
 
         @Override
