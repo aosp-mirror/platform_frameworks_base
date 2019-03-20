@@ -160,9 +160,9 @@ import android.content.pm.InstantAppInfo;
 import android.content.pm.InstantAppRequest;
 import android.content.pm.InstrumentationInfo;
 import android.content.pm.IntentFilterVerificationInfo;
-import android.content.pm.PackageBackwardCompatibility;
 import android.content.pm.KeySet;
 import android.content.pm.ModuleInfo;
+import android.content.pm.PackageBackwardCompatibility;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInfoLite;
 import android.content.pm.PackageInstaller;
@@ -1127,11 +1127,22 @@ public class PackageManagerService extends IPackageManager.Stub
                     switch (userStatus) {
                         case INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS:
                             if (!verified) {
-                                // updatedStatus is already UNDEFINED
-                                needUpdate = true;
+                                // Don't demote if sysconfig says 'always'
+                                SystemConfig systemConfig = SystemConfig.getInstance();
+                                ArraySet<String> packages = systemConfig.getLinkedApps();
+                                if (!packages.contains(packageName)) {
+                                    // updatedStatus is already UNDEFINED
+                                    needUpdate = true;
 
-                                if (DEBUG_DOMAIN_VERIFICATION) {
-                                    Slog.d(TAG, "Formerly validated but now failing; demoting");
+                                    if (DEBUG_DOMAIN_VERIFICATION) {
+                                        Slog.d(TAG, "Formerly validated but now failing; demoting");
+                                    }
+                                } else {
+                                    if (DEBUG_DOMAIN_VERIFICATION) {
+                                        Slog.d(TAG, "Updating bundled package " + packageName
+                                                + " failed autoVerify, but sysconfig supersedes");
+                                    }
+                                    // leave needUpdate == false here intentionally
                                 }
                             }
                             break;
