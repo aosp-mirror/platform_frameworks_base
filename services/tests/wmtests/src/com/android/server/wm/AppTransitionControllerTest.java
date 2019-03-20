@@ -17,12 +17,16 @@
 package com.android.server.wm;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.view.WindowManager.TRANSIT_ACTIVITY_OPEN;
 import static android.view.WindowManager.TRANSIT_TASK_CHANGE_WINDOWING_MODE;
 import static android.view.WindowManager.TRANSIT_TASK_CLOSE;
 import static android.view.WindowManager.TRANSIT_TASK_OPEN;
 
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertTrue;
 
 import android.platform.test.annotations.Presubmit;
 import android.view.WindowManager;
@@ -93,6 +97,26 @@ public class AppTransitionControllerTest extends WindowTestsBase {
             assertEquals(TRANSIT_TASK_CHANGE_WINDOWING_MODE,
                     mAppTransitionController.maybeUpdateTransitToTranslucentAnim(
                             TRANSIT_TASK_CHANGE_WINDOWING_MODE));
+        }
+    }
+
+    @Test
+    public void testTransitWithinTask() {
+        synchronized (mWm.mGlobalLock) {
+            final AppWindowToken opening = createAppWindowToken(mDisplayContent,
+                    WINDOWING_MODE_FREEFORM, ACTIVITY_TYPE_STANDARD);
+            opening.setFillsParent(false);
+            final AppWindowToken closing = createAppWindowToken(mDisplayContent,
+                    WINDOWING_MODE_FREEFORM, ACTIVITY_TYPE_STANDARD);
+            closing.setFillsParent(false);
+            Task task = opening.getTask();
+            mDisplayContent.mOpeningApps.add(opening);
+            mDisplayContent.mClosingApps.add(closing);
+            assertFalse(mAppTransitionController.isTransitWithinTask(TRANSIT_ACTIVITY_OPEN, task));
+            closing.getTask().removeChild(closing);
+            task.addChild(closing, 0);
+            assertTrue(mAppTransitionController.isTransitWithinTask(TRANSIT_ACTIVITY_OPEN, task));
+            assertFalse(mAppTransitionController.isTransitWithinTask(TRANSIT_TASK_OPEN, task));
         }
     }
 }
