@@ -57,6 +57,7 @@ public class NavigationHandle extends View implements ButtonInterface {
         mLightColor = Utils.getColorAttrDefaultColor(lightContext, R.attr.singleToneColor);
         mDarkColor = Utils.getColorAttrDefaultColor(darkContext, R.attr.singleToneColor);
         mPaint.setAntiAlias(true);
+        setFocusable(false);
     }
 
     @Override
