@@ -274,8 +274,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * successful transition. Any other value will be an error. Call {@link #getState()} to
  * determine the current state. </p>
  */
-public class MediaPlayer2 implements AutoCloseable
-                                            , AudioRouting {
+public class MediaPlayer2 implements AutoCloseable, AudioRouting {
     static {
         System.loadLibrary("media2_jni");
         native_init();
@@ -1810,12 +1809,10 @@ public class MediaPlayer2 implements AutoCloseable
     public MediaTimestamp getTimestamp() {
         try {
             // TODO: get the timestamp from native side
-            return new MediaTimestamp.Builder()
-                    .setMediaTimestamp(
-                        getCurrentPosition() * 1000L,
-                        System.nanoTime(),
-                        getState() == PLAYER_STATE_PLAYING ? getPlaybackParams().getSpeed() : 0.f)
-                    .build();
+            return new MediaTimestamp(
+                    getCurrentPosition() * 1000L,
+                    System.nanoTime(),
+                    getState() == PLAYER_STATE_PLAYING ? getPlaybackParams().getSpeed() : 0.f);
         } catch (IllegalStateException e) {
             return null;
         }
@@ -2643,13 +2640,11 @@ public class MediaPlayer2 implements AutoCloseable
                             return;
                         }
                         Iterator<Value> in = playerMsg.getValuesList().iterator();
-                        SubtitleData data = new SubtitleData.Builder()
-                                .setSubtitleData(
-                                    in.next().getInt32Value(),  // trackIndex
-                                    in.next().getInt64Value(),  // startTimeUs
-                                    in.next().getInt64Value(),  // durationUs
-                                    in.next().getBytesValue().toByteArray())  // data
-                                .build();
+                        SubtitleData data = new SubtitleData(
+                                in.next().getInt32Value(),  // trackIndex
+                                in.next().getInt64Value(),  // startTimeUs
+                                in.next().getInt64Value(),  // durationUs
+                                in.next().getBytesValue().toByteArray());  // data
                         sendEvent(new EventNotifier() {
                             @Override
                             public void notify(EventCallback callback) {
@@ -2673,11 +2668,9 @@ public class MediaPlayer2 implements AutoCloseable
                             return;
                         }
                         Iterator<Value> in = playerMsg.getValuesList().iterator();
-                        data = new TimedMetaData.Builder()
-                                .setTimedMetaData(
-                                    in.next().getInt64Value(),  // timestampUs
-                                    in.next().getBytesValue().toByteArray())  // metaData
-                                .build();
+                        data = new TimedMetaData(
+                                in.next().getInt64Value(),  // timestampUs
+                                in.next().getBytesValue().toByteArray());  // metaData
                     } else {
                         data = null;
                     }

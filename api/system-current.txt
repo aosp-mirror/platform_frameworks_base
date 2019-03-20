@@ -3574,13 +3574,6 @@ package android.media {
     field public static final int RADIO_TUNER = 1998; // 0x7ce
   }
 
-  public static final class MediaTimestamp.Builder {
-    ctor public MediaTimestamp.Builder();
-    ctor public MediaTimestamp.Builder(@NonNull android.media.MediaTimestamp);
-    method @NonNull public android.media.MediaTimestamp build();
-    method @NonNull public android.media.MediaTimestamp.Builder setMediaTimestamp(long, long, float);
-  }
-
   public class PlayerProxy {
     method public void pause();
     method public void setPan(float);
@@ -3588,20 +3581,6 @@ package android.media {
     method public void setVolume(float);
     method public void start();
     method public void stop();
-  }
-
-  public static final class SubtitleData.Builder {
-    ctor public SubtitleData.Builder();
-    ctor public SubtitleData.Builder(@NonNull android.media.SubtitleData);
-    method @NonNull public android.media.SubtitleData build();
-    method @NonNull public android.media.SubtitleData.Builder setSubtitleData(int, long, long, @NonNull byte[]);
-  }
-
-  public static final class TimedMetaData.Builder {
-    ctor public TimedMetaData.Builder();
-    ctor public TimedMetaData.Builder(@NonNull android.media.TimedMetaData);
-    method @NonNull public android.media.TimedMetaData build();
-    method @NonNull public android.media.TimedMetaData.Builder setTimedMetaData(long, @NonNull byte[]);
   }
 
 }
