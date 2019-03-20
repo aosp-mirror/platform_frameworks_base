@@ -177,8 +177,7 @@ public final class TextClassifierImpl implements TextClassifier {
                 final String localesString = concatenateLocales(request.getDefaultLocales());
                 final String detectLanguageTags = detectLanguageTagsFromText(request.getText());
                 final ZonedDateTime refTime = ZonedDateTime.now();
-                final AnnotatorModel annotatorImpl =
-                        getAnnotatorImpl(request.getDefaultLocales());
+                final AnnotatorModel annotatorImpl = getAnnotatorImpl(request.getDefaultLocales());
                 final int start;
                 final int end;
                 if (mSettings.isModelDarkLaunchEnabled() && !request.isDarkLaunchAllowed()) {
@@ -417,7 +416,8 @@ public final class TextClassifierImpl implements TextClassifier {
                             nativeConversation,
                             null,
                             mContext,
-                            getResourceLocalesString());
+                            getResourceLocalesString(),
+                            getAnnotatorImpl(LocaleList.getDefault()));
             return createConversationActionResult(request, nativeSuggestions);
         } catch (Throwable t) {
             // Avoid throwing from this method. Log the error.
@@ -583,8 +583,7 @@ public final class TextClassifierImpl implements TextClassifier {
                         new File(bestModel.getPath()), ParcelFileDescriptor.MODE_READ_ONLY);
                 try {
                     if (pfd != null) {
-                        mActionsImpl = new ActionsSuggestionsModel(
-                                pfd.getFd(), getAnnotatorImpl(LocaleList.getDefault()));
+                        mActionsImpl = new ActionsSuggestionsModel(pfd.getFd());
                         mActionModelInUse = bestModel;
                     }
                 } finally {

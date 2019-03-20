@@ -81,6 +81,7 @@ public class TemplateClassificationIntentFactoryTest {
                         null,
                         null,
                         null,
+                        null,
                         createRemoteActionTemplates());
 
         List<LabeledIntent> intents =
@@ -108,6 +109,7 @@ public class TemplateClassificationIntentFactoryTest {
                 new AnnotatorModel.ClassificationResult(
                         TextClassifier.TYPE_ADDRESS,
                         1.0f,
+                        null,
                         null,
                         null,
                         null,
@@ -153,6 +155,7 @@ public class TemplateClassificationIntentFactoryTest {
                         null,
                         null,
                         null,
+                        null,
                         null);
 
         mTemplateClassificationIntentFactory.create(
@@ -174,6 +177,7 @@ public class TemplateClassificationIntentFactoryTest {
                 new AnnotatorModel.ClassificationResult(
                         TextClassifier.TYPE_ADDRESS,
                         1.0f,
+                        null,
                         null,
                         null,
                         null,
