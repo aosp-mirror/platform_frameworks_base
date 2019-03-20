@@ -1448,19 +1448,6 @@ public class PackageInstaller {
         }
 
         /**
-         * Request that rollbacks be enabled for the given upgrade.
-         *
-         * @removed
-         * @deprecated use {@link #setEnableRollback(boolean)} instead.
-         * @hide
-         */
-        @Deprecated
-        @SystemApi
-        public void setEnableRollback() {
-            installFlags |= PackageManager.INSTALL_ENABLE_ROLLBACK;
-        }
-
-        /**
          * Request that rollbacks be enabled or disabled for the given upgrade.
          *
          * @param enable set to {@code true} to enable, {@code false} to disable
