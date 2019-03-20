@@ -1,4 +1,4 @@
-// Copyright (C) 2015 The Android Open Source Project
+// Copyright (C) 2018 The Android Open Source Project
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,24 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-<<<<<<< HEAD
-cc_library_shared {
-    name: "libnativebench",
-    cflags: [
-        "-Wno-unused-parameter",
-        "-Wno-unused-variable",
-    ],
-=======
-// ANDROIDMK TRANSLATION WARNING: No 'include $(CLEAR_VARS)' detected before first assignment; clearing vars now
-
-cc_library_shared {
-    name: "libnativebench",
-    cflags: ["-Wno-unused-parameter"],
->>>>>>> Convert Android.mk file to Android.bp
+java_test {
+    name: "ActivityManagerPerfTestsUtils",
+    sdk_version: "current",
     srcs: [
-        "Bench.cpp",
-        "WorkerPool.cpp",
-        "test.cpp",
+        "src/**/*.java",
+        "src/com/android/frameworks/perftests/am/util/ITimeReceiverCallback.aidl",
     ],
-    host_ldlibs: ["-llog"],
+    static_libs: [
+        "android-support-test",
+        "junit",
+        "ub-uiautomator",
+    ],
 }

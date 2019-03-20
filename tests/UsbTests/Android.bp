@@ -1,4 +1,5 @@
-// Copyright (C) 2015 The Android Open Source Project
+//
+// Copyright (C) 2018 The Android Open Source Project
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,25 +12,23 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
-<<<<<<< HEAD
-cc_library_shared {
-    name: "libnativebench",
-    cflags: [
-        "-Wno-unused-parameter",
-        "-Wno-unused-variable",
+android_test {
+    name: "UsbTests",
+    srcs: ["**/*.java"],
+    static_libs: [
+        "frameworks-base-testutils",
+        "android-support-test",
+        "mockito-target-inline-minus-junit4",
+        "platform-test-annotations",
+        "services.core",
+        "services.net",
+        "services.usb",
+        "truth-prebuilt",
     ],
-=======
-// ANDROIDMK TRANSLATION WARNING: No 'include $(CLEAR_VARS)' detected before first assignment; clearing vars now
-
-cc_library_shared {
-    name: "libnativebench",
-    cflags: ["-Wno-unused-parameter"],
->>>>>>> Convert Android.mk file to Android.bp
-    srcs: [
-        "Bench.cpp",
-        "WorkerPool.cpp",
-        "test.cpp",
-    ],
-    host_ldlibs: ["-llog"],
+    jni_libs: ["libdexmakerjvmtiagent"],
+    certificate: "platform",
+    platform_apis: true,
+    test_suites: ["device-tests"],
 }
