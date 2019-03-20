@@ -710,7 +710,6 @@ java_defaults {
         "android.hardware.vibrator-V1.2-java",
         "android.hardware.wifi-V1.0-java-constants",
         "networkstack-aidl-framework-java",
-        "netd_aidl_parcelables-java",
     ],
 
     required: [
