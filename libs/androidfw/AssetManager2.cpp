@@ -310,6 +310,9 @@ std::unique_ptr<AssetDir> AssetManager2::OpenDir(const std::string& dirname) con
   // Start from the back.
   for (auto iter = apk_assets_.rbegin(); iter != apk_assets_.rend(); ++iter) {
     const ApkAssets* apk_assets = *iter;
+    if (apk_assets->IsOverlay()) {
+      continue;
+    }
 
     auto func = [&](const StringPiece& name, FileType type) {
       AssetDir::FileInfo info;
@@ -336,6 +339,13 @@ std::unique_ptr<Asset> AssetManager2::OpenNonAsset(const std::string& filename,
                                                    Asset::AccessMode mode,
                                                    ApkAssetsCookie* out_cookie) const {
   for (int32_t i = apk_assets_.size() - 1; i >= 0; i--) {
+    // Prevent RRO from modifying assets and other entries accessed by file
+    // path. Explicitly asking for a path in a given package (denoted by a
+    // cookie) is still OK.
+    if (apk_assets_[i]->IsOverlay()) {
+      continue;
+    }
+
     std::unique_ptr<Asset> asset = apk_assets_[i]->Open(filename, mode);
     if (asset) {
       if (out_cookie != nullptr) {
