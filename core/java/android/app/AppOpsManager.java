@@ -2153,6 +2153,7 @@ public class AppOpsManager {
      *
      * @hide
      */
+    @TestApi
     @SystemApi
     public static int opToDefaultMode(@NonNull String appOp) {
         return opToDefaultMode(strOpToOp(appOp));
@@ -4465,7 +4466,7 @@ public class AppOpsManager {
      * @hide
      */
     @TestApi
-    @RequiresPermission(android.Manifest.permission.GET_APP_OPS_STATS)
+    @RequiresPermission(Manifest.permission.MANAGE_APPOPS)
     public void getHistoricalOpsFromDiskRaw(@NonNull HistoricalOpsRequest request,
             @Nullable Executor executor, @NonNull Consumer<HistoricalOps> callback) {
         Preconditions.checkNotNull(executor, "executor cannot be null");
@@ -4482,6 +4483,21 @@ public class AppOpsManager {
                     Binder.restoreCallingIdentity(identity);
                 }
             }));
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Reloads the non historical state to allow testing the read/write path.
+     *
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(Manifest.permission.MANAGE_APPOPS)
+    public void reloadNonHistoricalState() {
+        try {
+            mService.reloadNonHistoricalState();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -4570,6 +4586,7 @@ public class AppOpsManager {
      * be changed.
      * @hide
      */
+    @TestApi
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MANAGE_APP_OPS_MODES)
     public void setMode(String op, int uid, String packageName, @Mode int mode) {
