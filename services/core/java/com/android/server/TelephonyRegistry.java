@@ -625,6 +625,11 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 r.callingPackage = callingPackage;
                 r.callerUid = Binder.getCallingUid();
                 r.callerPid = Binder.getCallingPid();
+                if (r.subId != SubscriptionManager.INVALID_SUBSCRIPTION_ID && r.subId != subId) {
+                    throw new IllegalArgumentException(
+                            "PhoneStateListener cannot concurrently listen on multiple " +
+                                    "subscriptions. Previously registered on subId: " + r.subId);
+                }
                 // Legacy applications pass SubscriptionManager.DEFAULT_SUB_ID,
                 // force all illegal subId to SubscriptionManager.DEFAULT_SUB_ID
                 if (!SubscriptionManager.isValidSubscriptionId(subId)) {
