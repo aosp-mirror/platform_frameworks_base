@@ -52,6 +52,7 @@ import android.net.NetworkInfo;
 import android.net.NetworkInfo.DetailedState;
 import android.net.NetworkPolicyManager;
 import android.os.Build;
+import android.os.Looper;
 import android.os.SystemClock;
 import android.util.DataUnit;
 
@@ -101,6 +102,8 @@ public class ConnectivityControllerTest {
 
         LocalServices.removeServiceForTest(NetworkPolicyManagerInternal.class);
         LocalServices.addService(NetworkPolicyManagerInternal.class, mNetPolicyManagerInternal);
+
+        when(mContext.getMainLooper()).thenReturn(Looper.getMainLooper());
 
         // Freeze the clocks at this moment in time
         JobSchedulerService.sSystemClock =
