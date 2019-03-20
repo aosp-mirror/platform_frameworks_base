@@ -354,6 +354,13 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
         }
     }
 
+    /**
+     * Update bubble expanded view header when user toggles dark mode.
+     */
+    void updateHeaderColor() {
+        mHeaderView.setBackgroundColor(mContext.getColor(R.attr.colorAccent));
+    }
+
     private void updateHeaderView() {
         mSettingsIcon.setContentDescription(getResources().getString(
                 R.string.bubbles_settings_button_description, mAppName));
