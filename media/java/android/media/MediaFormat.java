@@ -1036,6 +1036,15 @@ public final class MediaFormat {
      */
     public static final String KEY_CA_PRIVATE_DATA = "ca-private-data";
 
+    /**
+     * A key describing the maximum number of B frames between I or P frames,
+     * to be used by a video encoder.
+     * The associated value is an integer. The default value is 0, which means
+     * that no B frames are allowed. Note that non-zero value does not guarantee
+     * B frames; it's up to the encoder to decide.
+     */
+    public static final String KEY_MAX_BFRAMES = "max-bframes";
+
     /* package private */ MediaFormat(@NonNull Map<String, Object> map) {
         mMap = map;
     }
