@@ -22,6 +22,7 @@ import static android.Manifest.permission.PACKAGE_USAGE_STATS;
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
 import android.app.IActivityManager;
 import android.content.Context;
 import android.os.IStatsManager;
@@ -198,6 +199,16 @@ public final class StatsLog extends StatsLogInternal {
                 break;
         }
     }
+
+    /**
+     * Write an event to stats log using the raw format.
+     *
+     * @param buffer    The encoded buffer of data to write..
+     * @param size      The number of bytes from the buffer to write.
+     * @hide
+     */
+    @SystemApi
+    public static native void writeRaw(@NonNull byte[] buffer, int size);
 
     private static void enforceDumpCallingPermission(Context context) {
         context.enforceCallingPermission(android.Manifest.permission.DUMP, "Need DUMP permission.");

@@ -9471,6 +9471,10 @@ package android.util {
     method public int getUid();
   }
 
+  public final class StatsLog {
+    method public static void writeRaw(@NonNull byte[], int);
+  }
+
   public class StatsLogAtoms {
     field public static final int PERMISSION_GRANT_REQUEST_RESULT_REPORTED = 170; // 0xaa
     field public static final int PERMISSION_GRANT_REQUEST_RESULT_REPORTED__RESULT__AUTO_DENIED = 8; // 0x8
