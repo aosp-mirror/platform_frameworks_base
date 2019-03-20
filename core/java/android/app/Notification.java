@@ -8581,17 +8581,6 @@ public class Notification implements Parcelable
         }
 
         /**
-         * @return the title that will appear along with the app content defined by
-         * {@link #getIntent()} for this bubble.
-         *
-         * @deprecated titles are no longer required or shown.
-         */
-        @Deprecated
-        public CharSequence getTitle() {
-            return "";
-        }
-
-        /**
          * @return the icon that will be displayed for this bubble when it is collapsed.
          */
         @NonNull
@@ -8687,19 +8676,6 @@ public class Notification implements Parcelable
                     throw new IllegalArgumentException("Bubble requires non-null pending intent");
                 }
                 mPendingIntent = intent;
-                return this;
-            }
-
-            /**
-             * Sets the title that will appear along with the app content for this bubble.
-             *
-             * <p>A title is required and should expect to fit on a single line and make sense when
-             * shown with the content defined by {@link #setIntent(PendingIntent)}.</p>
-             *
-             * @deprecated titles are no longer required or shown.
-             */
-            @Deprecated
-            public BubbleMetadata.Builder setTitle(CharSequence title) {
                 return this;
             }
 

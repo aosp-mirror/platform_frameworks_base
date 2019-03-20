@@ -312,7 +312,6 @@ public class NotificationTestHelper {
         return new BubbleMetadata.Builder()
                 .setIntent(bubbleIntent)
                 .setDeleteIntent(deleteIntent)
-                .setTitle("bubble title")
                 .setIcon(Icon.createWithResource(mContext, R.drawable.android))
                 .setDesiredHeight(314)
                 .build();
