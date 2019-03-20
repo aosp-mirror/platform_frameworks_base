@@ -6034,15 +6034,14 @@ package android.telephony {
     field public static final String MBMS_STREAMING_SERVICE_ACTION = "android.telephony.action.EmbmsStreaming";
   }
 
-  public class NetworkRegistrationInfo implements android.os.Parcelable {
-    ctor public NetworkRegistrationInfo(int, int, int, int, int, boolean, @NonNull int[], @Nullable android.telephony.CellIdentity);
+  public final class NetworkRegistrationInfo implements android.os.Parcelable {
     method public int describeContents();
     method public int getAccessNetworkTechnology();
-    method @NonNull public int[] getAvailableServices();
+    method @NonNull public java.util.List<java.lang.Integer> getAvailableServices();
     method @Nullable public android.telephony.CellIdentity getCellIdentity();
     method @Nullable public android.telephony.DataSpecificRegistrationStates getDataSpecificStates();
     method public int getDomain();
-    method public int getRegState();
+    method public int getRegistrationState();
     method public int getRejectCause();
     method public int getRoamingType();
     method public int getTransportType();
@@ -6052,31 +6051,30 @@ package android.telephony {
     field @NonNull public static final android.os.Parcelable.Creator<android.telephony.NetworkRegistrationInfo> CREATOR;
     field public static final int DOMAIN_CS = 1; // 0x1
     field public static final int DOMAIN_PS = 2; // 0x2
-    field public static final int REG_STATE_DENIED = 3; // 0x3
-    field public static final int REG_STATE_HOME = 1; // 0x1
-    field public static final int REG_STATE_NOT_REG_NOT_SEARCHING = 0; // 0x0
-    field public static final int REG_STATE_NOT_REG_SEARCHING = 2; // 0x2
-    field public static final int REG_STATE_ROAMING = 5; // 0x5
-    field public static final int REG_STATE_UNKNOWN = 4; // 0x4
+    field public static final int REGISTRATION_STATE_DENIED = 3; // 0x3
+    field public static final int REGISTRATION_STATE_HOME = 1; // 0x1
+    field public static final int REGISTRATION_STATE_NOT_REGISTERED_OR_SEARCHING = 0; // 0x0
+    field public static final int REGISTRATION_STATE_NOT_REGISTERED_SEARCHING = 2; // 0x2
+    field public static final int REGISTRATION_STATE_ROAMING = 5; // 0x5
+    field public static final int REGISTRATION_STATE_UNKNOWN = 4; // 0x4
     field public static final int SERVICE_TYPE_DATA = 2; // 0x2
     field public static final int SERVICE_TYPE_EMERGENCY = 5; // 0x5
     field public static final int SERVICE_TYPE_SMS = 3; // 0x3
+    field public static final int SERVICE_TYPE_UNKNOWN = 0; // 0x0
     field public static final int SERVICE_TYPE_VIDEO = 4; // 0x4
     field public static final int SERVICE_TYPE_VOICE = 1; // 0x1
   }
 
-  public static class NetworkRegistrationInfo.Builder {
+  public static final class NetworkRegistrationInfo.Builder {
     ctor public NetworkRegistrationInfo.Builder();
     method @NonNull public android.telephony.NetworkRegistrationInfo build();
     method @NonNull public android.telephony.NetworkRegistrationInfo.Builder setAccessNetworkTechnology(int);
-    method @NonNull public android.telephony.NetworkRegistrationInfo.Builder setAvailableServices(@NonNull int[]);
+    method @NonNull public android.telephony.NetworkRegistrationInfo.Builder setAvailableServices(@NonNull java.util.List<java.lang.Integer>);
     method @NonNull public android.telephony.NetworkRegistrationInfo.Builder setCellIdentity(@Nullable android.telephony.CellIdentity);
     method @NonNull public android.telephony.NetworkRegistrationInfo.Builder setDomain(int);
     method @NonNull public android.telephony.NetworkRegistrationInfo.Builder setEmergencyOnly(boolean);
-    method @NonNull public android.telephony.NetworkRegistrationInfo.Builder setNrStatus(int);
-    method @NonNull public android.telephony.NetworkRegistrationInfo.Builder setRegState(int);
+    method @NonNull public android.telephony.NetworkRegistrationInfo.Builder setRegistrationState(int);
     method @NonNull public android.telephony.NetworkRegistrationInfo.Builder setRejectCause(int);
-    method @NonNull public android.telephony.NetworkRegistrationInfo.Builder setRoamingType(int);
     method @NonNull public android.telephony.NetworkRegistrationInfo.Builder setTransportType(int);
   }
 
