@@ -27,22 +27,13 @@
               android:focusable="true"
               android:background="?attr/selectableItemBackgroundBorderless">
 
-    <FrameLayout android:layout_width="wrap_content"
-                 android:layout_height="wrap_content">
-        <ImageView android:id="@+id/icon"
-                   android:layout_width="48dp"
-                   android:layout_height="48dp"
-                   android:layout_marginLeft="3dp"
-                   android:layout_marginRight="3dp"
-                   android:layout_marginBottom="3dp"
-                   android:scaleType="fitCenter" />
-        <ImageView android:id="@+id/target_badge"
-                   android:layout_width="16dp"
-                   android:layout_height="16dp"
-                   android:layout_gravity="end|bottom"
-                   android:visibility="gone"
-                   android:scaleType="fitCenter" />
-    </FrameLayout>
+    <ImageView android:id="@+id/icon"
+               android:layout_width="@dimen/resolver_icon_size"
+               android:layout_height="@dimen/resolver_icon_size"
+               android:layout_marginLeft="3dp"
+               android:layout_marginRight="3dp"
+               android:layout_marginBottom="3dp"
+               android:scaleType="fitCenter" />
 
     <!-- Activity name -->
     <TextView android:id="@android:id/text1"

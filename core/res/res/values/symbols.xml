@@ -2774,7 +2774,6 @@
 
   <java-symbol type="layout" name="chooser_row" />
   <java-symbol type="layout" name="chooser_row_direct_share" />
-  <java-symbol type="id" name="target_badge" />
   <java-symbol type="bool" name="config_supportDoubleTapWake" />
   <java-symbol type="drawable" name="ic_perm_device_info" />
   <java-symbol type="string" name="config_radio_access_family" />
