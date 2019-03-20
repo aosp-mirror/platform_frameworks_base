@@ -63,7 +63,7 @@ public class StagedRollbackTest {
         RollbackTestUtils.adoptShellPermissionIdentity(
                 Manifest.permission.INSTALL_PACKAGES,
                 Manifest.permission.DELETE_PACKAGES,
-                Manifest.permission.MANAGE_ROLLBACKS);
+                Manifest.permission.TEST_MANAGE_ROLLBACKS);
     }
 
     /**

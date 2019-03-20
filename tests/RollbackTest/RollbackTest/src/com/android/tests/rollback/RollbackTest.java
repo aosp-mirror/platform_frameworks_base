@@ -87,7 +87,7 @@ public class RollbackTest {
             RollbackTestUtils.adoptShellPermissionIdentity(
                     Manifest.permission.INSTALL_PACKAGES,
                     Manifest.permission.DELETE_PACKAGES,
-                    Manifest.permission.MANAGE_ROLLBACKS);
+                    Manifest.permission.TEST_MANAGE_ROLLBACKS);
 
             // Register a broadcast receiver for notification when the
             // rollback has been committed.
@@ -175,7 +175,7 @@ public class RollbackTest {
             RollbackTestUtils.adoptShellPermissionIdentity(
                     Manifest.permission.INSTALL_PACKAGES,
                     Manifest.permission.DELETE_PACKAGES,
-                    Manifest.permission.MANAGE_ROLLBACKS);
+                    Manifest.permission.TEST_MANAGE_ROLLBACKS);
 
             RollbackManager rm = RollbackTestUtils.getRollbackManager();
 
@@ -233,7 +233,7 @@ public class RollbackTest {
             RollbackTestUtils.adoptShellPermissionIdentity(
                     Manifest.permission.INSTALL_PACKAGES,
                     Manifest.permission.DELETE_PACKAGES,
-                    Manifest.permission.MANAGE_ROLLBACKS);
+                    Manifest.permission.TEST_MANAGE_ROLLBACKS);
 
             RollbackManager rm = RollbackTestUtils.getRollbackManager();
 
@@ -290,7 +290,7 @@ public class RollbackTest {
             RollbackTestUtils.adoptShellPermissionIdentity(
                     Manifest.permission.INSTALL_PACKAGES,
                     Manifest.permission.DELETE_PACKAGES,
-                    Manifest.permission.MANAGE_ROLLBACKS);
+                    Manifest.permission.TEST_MANAGE_ROLLBACKS);
 
             RollbackManager rm = RollbackTestUtils.getRollbackManager();
 
@@ -343,7 +343,7 @@ public class RollbackTest {
             RollbackTestUtils.adoptShellPermissionIdentity(
                     Manifest.permission.INSTALL_PACKAGES,
                     Manifest.permission.DELETE_PACKAGES,
-                    Manifest.permission.MANAGE_ROLLBACKS,
+                    Manifest.permission.TEST_MANAGE_ROLLBACKS,
                     Manifest.permission.WRITE_DEVICE_CONFIG);
 
             DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ROLLBACK_BOOT,
@@ -403,7 +403,7 @@ public class RollbackTest {
             RollbackTestUtils.adoptShellPermissionIdentity(
                     Manifest.permission.INSTALL_PACKAGES,
                     Manifest.permission.DELETE_PACKAGES,
-                    Manifest.permission.MANAGE_ROLLBACKS,
+                    Manifest.permission.TEST_MANAGE_ROLLBACKS,
                     Manifest.permission.WRITE_DEVICE_CONFIG,
                     Manifest.permission.SET_TIME);
 
@@ -475,7 +475,7 @@ public class RollbackTest {
             RollbackTestUtils.adoptShellPermissionIdentity(
                     Manifest.permission.INSTALL_PACKAGES,
                     Manifest.permission.DELETE_PACKAGES,
-                    Manifest.permission.MANAGE_ROLLBACKS);
+                    Manifest.permission.TEST_MANAGE_ROLLBACKS);
 
             RollbackManager rm = RollbackTestUtils.getRollbackManager();
             RollbackTestUtils.uninstall(TEST_APP_A);
@@ -512,7 +512,7 @@ public class RollbackTest {
             RollbackTestUtils.adoptShellPermissionIdentity(
                     Manifest.permission.INSTALL_PACKAGES,
                     Manifest.permission.DELETE_PACKAGES,
-                    Manifest.permission.MANAGE_ROLLBACKS);
+                    Manifest.permission.TEST_MANAGE_ROLLBACKS);
 
             RollbackTestUtils.uninstall(TEST_APP_A);
             RollbackTestUtils.install("RollbackTestAppAv1.apk", false);
@@ -540,7 +540,7 @@ public class RollbackTest {
             RollbackTestUtils.adoptShellPermissionIdentity(
                     Manifest.permission.INSTALL_PACKAGES,
                     Manifest.permission.DELETE_PACKAGES,
-                    Manifest.permission.MANAGE_ROLLBACKS);
+                    Manifest.permission.TEST_MANAGE_ROLLBACKS);
 
             RollbackTestUtils.uninstall(TEST_APP_A);
             RollbackTestUtils.installSplit(false,
@@ -598,7 +598,7 @@ public class RollbackTest {
             RollbackTestUtils.adoptShellPermissionIdentity(
                     Manifest.permission.INSTALL_PACKAGES,
                     Manifest.permission.DELETE_PACKAGES,
-                    Manifest.permission.MANAGE_ROLLBACKS);
+                    Manifest.permission.TEST_MANAGE_ROLLBACKS);
             RollbackManager rm = RollbackTestUtils.getRollbackManager();
 
             // Prep installation of the test apps.
@@ -693,6 +693,75 @@ public class RollbackTest {
     }
 
     /**
+     * Test that you cannot enable rollback for a package without the
+     * MANAGE_ROLLBACKS permission.
+     */
+    @Test
+    public void testEnableRollbackPermission() throws Exception {
+        try {
+            RollbackTestUtils.adoptShellPermissionIdentity(
+                    Manifest.permission.INSTALL_PACKAGES,
+                    Manifest.permission.DELETE_PACKAGES);
+
+            RollbackTestUtils.uninstall(TEST_APP_A);
+            RollbackTestUtils.install("RollbackTestAppAv1.apk", /* enableRollback */ false);
+            assertEquals(1, RollbackTestUtils.getInstalledVersion(TEST_APP_A));
+
+            RollbackTestUtils.install("RollbackTestAppAv2.apk", /* enableRollback */ true);
+
+            // We expect v2 of the app was installed, but rollback has not
+            // been enabled.
+            assertEquals(2, RollbackTestUtils.getInstalledVersion(TEST_APP_A));
+
+            // TODO: See if there is a way to remove this race condition
+            // between when the app is installed and when the rollback
+            // would be made available.
+            Thread.sleep(1000);
+
+            RollbackTestUtils.adoptShellPermissionIdentity(
+                    Manifest.permission.TEST_MANAGE_ROLLBACKS);
+            RollbackManager rm = RollbackTestUtils.getRollbackManager();
+            assertNull(getUniqueRollbackInfoForPackage(rm.getAvailableRollbacks(), TEST_APP_A));
+        } finally {
+            RollbackTestUtils.dropShellPermissionIdentity();
+        }
+    }
+
+    /**
+     * Test that you cannot enable rollback for a non-module package when
+     * holding the MANAGE_ROLLBACKS permission.
+     */
+    @Test
+    public void testNonModuleEnableRollback() throws Exception {
+        try {
+            RollbackTestUtils.adoptShellPermissionIdentity(
+                    Manifest.permission.INSTALL_PACKAGES,
+                    Manifest.permission.DELETE_PACKAGES,
+                    Manifest.permission.MANAGE_ROLLBACKS);
+
+            RollbackTestUtils.uninstall(TEST_APP_A);
+            RollbackTestUtils.install("RollbackTestAppAv1.apk", /* enableRollback */ false);
+            assertEquals(1, RollbackTestUtils.getInstalledVersion(TEST_APP_A));
+
+            RollbackTestUtils.install("RollbackTestAppAv2.apk", /* enableRollback */ true);
+
+            // We expect v2 of the app was installed, but rollback has not
+            // been enabled because the test app is not a module.
+            assertEquals(2, RollbackTestUtils.getInstalledVersion(TEST_APP_A));
+
+            // TODO: See if there is a way to remove this race condition
+            // between when the app is installed and when the rollback
+            // would be made available.
+            Thread.sleep(1000);
+
+            RollbackManager rm = RollbackTestUtils.getRollbackManager();
+            assertNull(getUniqueRollbackInfoForPackage(rm.getAvailableRollbacks(), TEST_APP_A));
+        } finally {
+            RollbackTestUtils.dropShellPermissionIdentity();
+        }
+    }
+
+    /**
      * Test rollback of multi-package installs is implemented.
      */
     @Test
@@ -701,7 +770,7 @@ public class RollbackTest {
             RollbackTestUtils.adoptShellPermissionIdentity(
                     Manifest.permission.INSTALL_PACKAGES,
                     Manifest.permission.DELETE_PACKAGES,
-                    Manifest.permission.MANAGE_ROLLBACKS);
+                    Manifest.permission.TEST_MANAGE_ROLLBACKS);
             RollbackManager rm = RollbackTestUtils.getRollbackManager();
 
             // Prep installation of the test apps.
@@ -760,7 +829,7 @@ public class RollbackTest {
             RollbackTestUtils.adoptShellPermissionIdentity(
                     Manifest.permission.INSTALL_PACKAGES,
                     Manifest.permission.DELETE_PACKAGES,
-                    Manifest.permission.MANAGE_ROLLBACKS,
+                    Manifest.permission.TEST_MANAGE_ROLLBACKS,
                     Manifest.permission.KILL_BACKGROUND_PROCESSES,
                     Manifest.permission.RESTART_PACKAGES);
             RollbackManager rm = RollbackTestUtils.getRollbackManager();
