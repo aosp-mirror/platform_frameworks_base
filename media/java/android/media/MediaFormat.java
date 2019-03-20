@@ -863,6 +863,12 @@ public final class MediaFormat {
      */
     public static final String KEY_IS_FORCED_SUBTITLE = "is-forced-subtitle";
 
+    /**
+     * A key describing the number of haptic channels in an audio format.
+     * The associated value is an integer.
+     */
+    public static final String KEY_HAPTIC_CHANNEL_COUNT = "haptic-channel-count";
+
     /** @hide */
     public static final String KEY_IS_TIMED_TEXT = "is-timed-text";
 
