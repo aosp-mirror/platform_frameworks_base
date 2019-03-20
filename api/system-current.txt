@@ -1070,8 +1070,6 @@ package android.app.prediction {
   }
 
   public final class AppTarget implements android.os.Parcelable {
-    ctor public AppTarget(@NonNull android.app.prediction.AppTargetId, @NonNull String, @Nullable String, @NonNull android.os.UserHandle);
-    ctor public AppTarget(@NonNull android.app.prediction.AppTargetId, @NonNull android.content.pm.ShortcutInfo, @Nullable String);
     method public int describeContents();
     method @Nullable public String getClassName();
     method @NonNull public android.app.prediction.AppTargetId getId();
@@ -1081,6 +1079,15 @@ package android.app.prediction {
     method @NonNull public android.os.UserHandle getUser();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.prediction.AppTarget> CREATOR;
+  }
+
+  public static final class AppTarget.Builder {
+    ctor public AppTarget.Builder(@NonNull android.app.prediction.AppTargetId);
+    method @NonNull public android.app.prediction.AppTarget build();
+    method @NonNull public android.app.prediction.AppTarget.Builder setClassName(@NonNull String);
+    method @NonNull public android.app.prediction.AppTarget.Builder setRank(@IntRange(from=0) int);
+    method @NonNull public android.app.prediction.AppTarget.Builder setTarget(@NonNull String, @NonNull android.os.UserHandle);
+    method @NonNull public android.app.prediction.AppTarget.Builder setTarget(@NonNull android.content.pm.ShortcutInfo);
   }
 
   public final class AppTargetEvent implements android.os.Parcelable {
