@@ -15,6 +15,8 @@
  */
 package com.android.settingslib.media;
 
+import android.bluetooth.BluetoothDevice;
+
 import androidx.mediarouter.media.MediaRouter;
 
 import com.android.settingslib.bluetooth.CachedBluetoothDevice;
@@ -31,6 +33,16 @@ public class MediaDeviceUtils {
      */
     public static String getId(CachedBluetoothDevice cachedDevice) {
         return cachedDevice.getAddress();
+    }
+
+    /**
+     * Use BluetoothDevice address to represent unique id
+     *
+     * @param bluetoothDevice the BluetoothDevice
+     * @return BluetoothDevice address
+     */
+    public static String getId(BluetoothDevice bluetoothDevice) {
+        return bluetoothDevice.getAddress();
     }
 
     /**
