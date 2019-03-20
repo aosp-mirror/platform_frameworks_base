@@ -47,7 +47,7 @@ public class NavigationPrototypeController extends ContentObserver {
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({ACTION_DEFAULT, ACTION_QUICKSTEP, ACTION_QUICKSCRUB, ACTION_BACK,
-            ACTION_QUICKSWITCH, ACTION_NOTHING, ACTION_ASSISTANT, ACTION_EXPAND_NOTIFICATION})
+            ACTION_QUICKSWITCH, ACTION_NOTHING, ACTION_ASSISTANT})
     @interface GestureAction {}
     static final int ACTION_DEFAULT = 0;
     static final int ACTION_QUICKSTEP = 1;
@@ -56,7 +56,6 @@ public class NavigationPrototypeController extends ContentObserver {
     static final int ACTION_QUICKSWITCH = 4;
     static final int ACTION_NOTHING = 5;
     static final int ACTION_ASSISTANT = 6;
-    static final int ACTION_EXPAND_NOTIFICATION = 7;
 
     private OnPrototypeChangedListener mListener;
 
