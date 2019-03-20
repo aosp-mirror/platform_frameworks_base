@@ -930,17 +930,6 @@ public final class SurfaceControl implements Parcelable {
         }
     }
 
-    private static void closeTransaction(boolean sync) {
-        synchronized(SurfaceControl.class) {
-            if (sTransactionNestCount == 0) {
-                Log.e(TAG, "Call to SurfaceControl.closeTransaction without matching openTransaction");
-            } else if (--sTransactionNestCount > 0) {
-                return;
-            }
-            sGlobalTransaction.apply(sync);
-        }
-    }
-
     /**
      * Merge the supplied transaction in to the deprecated "global" transaction.
      * This clears the supplied transaction in an identical fashion to {@link Transaction#merge}.
@@ -955,19 +944,20 @@ public final class SurfaceControl implements Parcelable {
         }
     }
 
-    /** end a transaction 
-     * @hide 
+    /** end a transaction
+     * @hide
      */
     @UnsupportedAppUsage
     public static void closeTransaction() {
-        closeTransaction(false);
-    }
-
-    /**
-     * @hide
-     */
-    public static void closeTransactionSync() {
-        closeTransaction(true);
+        synchronized(SurfaceControl.class) {
+            if (sTransactionNestCount == 0) {
+                Log.e(TAG,
+                        "Call to SurfaceControl.closeTransaction without matching openTransaction");
+            } else if (--sTransactionNestCount > 0) {
+                return;
+            }
+            sGlobalTransaction.apply();
+        }
     }
 
     /**
