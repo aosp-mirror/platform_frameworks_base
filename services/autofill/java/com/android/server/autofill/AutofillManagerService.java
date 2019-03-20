@@ -80,6 +80,7 @@ import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.autofill.ui.AutoFillUI;
 import com.android.server.infra.AbstractMasterSystemService;
+import com.android.server.infra.FrameworkResourcesServiceNameResolver;
 import com.android.server.infra.SecureSettingsServiceNameResolver;
 
 import java.io.FileDescriptor;
@@ -131,6 +132,12 @@ public final class AutofillManagerService
      */
     @GuardedBy("sLock")
     private static int sVisibleDatasetsMaxCount = 0;
+
+    /**
+     * Object used to set the name of the augmented autofill service.
+     */
+    @NonNull
+    final FrameworkResourcesServiceNameResolver mAugmentedAutofillResolver;
 
     private final AutoFillUI mUi;
 
@@ -200,6 +207,11 @@ public final class AutofillManagerService
                 getServiceForUserLocked(userId);
             }
         }
+
+        mAugmentedAutofillResolver = new FrameworkResourcesServiceNameResolver(getContext(),
+                com.android.internal.R.string.config_defaultAugmentedAutofillService);
+        mAugmentedAutofillResolver.setOnTemporaryServiceNameChangedCallback(
+                (u, s) -> getServiceForUserLocked(u).updateRemoteAugmentedAutofillService());
     }
 
     @Override // from AbstractMasterSystemService
@@ -549,37 +561,19 @@ public final class AutofillManagerService
                     + MAX_TEMP_AUGMENTED_SERVICE_DURATION_MS + " (called with " + durationMs + ")");
         }
 
-        synchronized (mLock) {
-            final AutofillManagerServiceImpl service = getServiceForUserLocked(userId);
-            if (service != null) {
-                service.mAugmentedAutofillResolver.setTemporaryService(userId, serviceName,
-                        durationMs);
-            }
-        }
+        mAugmentedAutofillResolver.setTemporaryService(userId, serviceName, durationMs);
     }
 
     // Called by Shell command
     void resetTemporaryAugmentedAutofillService(@UserIdInt int userId) {
         enforceCallingPermissionForManagement();
-        synchronized (mLock) {
-            final AutofillManagerServiceImpl service = getServiceForUserLocked(userId);
-            if (service != null) {
-                service.mAugmentedAutofillResolver.resetTemporaryService(userId);
-            }
-        }
+        mAugmentedAutofillResolver.resetTemporaryService(userId);
     }
 
     // Called by Shell command
     boolean isDefaultAugmentedServiceEnabled(@UserIdInt int userId) {
         enforceCallingPermissionForManagement();
-
-        synchronized (mLock) {
-            final AutofillManagerServiceImpl service = getServiceForUserLocked(userId);
-            if (service != null) {
-                return service.mAugmentedAutofillResolver.isDefaultServiceEnabled(userId);
-            }
-        }
-        return false;
+        return mAugmentedAutofillResolver.isDefaultServiceEnabled(userId);
     }
 
     // Called by Shell command
@@ -590,7 +584,7 @@ public final class AutofillManagerService
         synchronized (mLock) {
             final AutofillManagerServiceImpl service = getServiceForUserLocked(userId);
             if (service != null) {
-                final boolean changed = service.mAugmentedAutofillResolver
+                final boolean changed = mAugmentedAutofillResolver
                         .setDefaultServiceEnabled(userId, enabled);
                 if (changed) {
                     service.updateRemoteAugmentedAutofillService();
@@ -1332,6 +1326,7 @@ public final class AutofillManagerService
                     pw.print(" sVerbose: "); pw.println(realVerbose);
                     // Dump per-user services
                     dumpLocked("", pw);
+                    mAugmentedAutofillResolver.dumpShort(pw); pw.println();
                     pw.print("Max partitions per session: "); pw.println(sPartitionMaxCount);
                     pw.print("Max visible datasets: "); pw.println(sVisibleDatasetsMaxCount);
                     if (sFullScreenMode != null) {
