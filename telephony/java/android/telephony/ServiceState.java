@@ -53,6 +53,9 @@ import java.util.stream.Collectors;
  *   <li>Operator name, short name and numeric id
  *   <li>Network selection mode
  * </ul>
+ *
+ * For historical reasons this class is not declared as final; however,
+ * it should be treated as though it were final.
  */
 public class ServiceState implements Parcelable {
 
