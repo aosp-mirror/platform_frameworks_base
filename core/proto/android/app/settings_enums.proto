@@ -2316,4 +2316,7 @@ enum PageId {
     // OPEN: Settings > Face > Remove face
     // OS: Q
     DIALOG_FACE_REMOVE = 1693;
+
+    // Settings > Display > Theme
+    DARK_UI_SETTINGS = 1698;
 }

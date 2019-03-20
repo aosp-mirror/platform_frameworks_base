@@ -7147,6 +7147,8 @@ message MetricsEvent {
     // OS: Q
     BIOMETRIC_AUTH = 1697;
 
+    // Settings > Display > Theme
+    DARK_UI_SETTINGS = 1698;
     // ---- End Q Constants, all Q constants go above this line ----
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
