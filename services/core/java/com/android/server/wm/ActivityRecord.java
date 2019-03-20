@@ -2159,8 +2159,7 @@ final class ActivityRecord extends ConfigurationContainer {
         }
 
         if (nowVisible) {
-            // We won't get a call to reportActivityVisibleLocked() so dismiss lockscreen now.
-            mStackSupervisor.reportActivityVisibleLocked(this);
+            mStackSupervisor.stopWaitingForActivityVisible(this);
         }
 
         // Schedule an idle timeout in case the app doesn't do it for us.
@@ -2349,7 +2348,7 @@ final class ActivityRecord extends ConfigurationContainer {
             final @LaunchState int launchState = info != null ? info.getLaunchState() : -1;
             mStackSupervisor.reportActivityLaunchedLocked(false /* timeout */, this,
                     windowsDrawnDelayMs, launchState);
-            mStackSupervisor.sendWaitingVisibleReportLocked(this);
+            mStackSupervisor.stopWaitingForActivityVisible(this);
             finishLaunchTickingLocked();
             if (task != null) {
                 task.hasBeenVisible = true;
@@ -2360,7 +2359,7 @@ final class ActivityRecord extends ConfigurationContainer {
     /** Called when the windows associated app window container are visible. */
     public void onWindowsVisible() {
         synchronized (mAtmService.mGlobalLock) {
-            mStackSupervisor.reportActivityVisibleLocked(this);
+            mStackSupervisor.stopWaitingForActivityVisible(this);
             if (DEBUG_SWITCH) Log.v(TAG_SWITCH, "windowsVisibleLocked(): " + this);
             if (!nowVisible) {
                 nowVisible = true;
