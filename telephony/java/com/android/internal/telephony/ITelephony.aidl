@@ -788,12 +788,13 @@ interface ITelephony {
     int getPreferredNetworkType(int subId);
 
     /**
-     * Check whether DUN APN is required for tethering.
+     * Check whether DUN APN is required for tethering with subId.
      *
+     * @param subId the id of the subscription to require tethering.
      * @return {@code true} if DUN APN is required for tethering.
      * @hide
      */
-    boolean getTetherApnRequired();
+    boolean getTetherApnRequiredForSubscriber(int subId);
 
     /**
     * Enables framework IMS and triggers IMS Registration.
