@@ -56,7 +56,7 @@ class MatchingResources {
   }
 
   inline const std::map<TypeId, std::set<std::pair<ResourceId, ResourceId>>>& WARN_UNUSED
-      Map() const {
+  Map() const {
     return map_;
   }
 
