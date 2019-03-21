@@ -186,7 +186,6 @@ package android {
     field public static final String SUBSTITUTE_NOTIFICATION_APP_NAME = "android.permission.SUBSTITUTE_NOTIFICATION_APP_NAME";
     field public static final String SUBSTITUTE_SHARE_TARGET_APP_NAME_AND_ICON = "android.permission.SUBSTITUTE_SHARE_TARGET_APP_NAME_AND_ICON";
     field public static final String SUSPEND_APPS = "android.permission.SUSPEND_APPS";
-    field public static final String TEST_MANAGE_ROLLBACKS = "android.permission.TEST_MANAGE_ROLLBACKS";
     field public static final String TETHER_PRIVILEGED = "android.permission.TETHER_PRIVILEGED";
     field public static final String TV_INPUT_HARDWARE = "android.permission.TV_INPUT_HARDWARE";
     field public static final String TV_VIRTUAL_REMOTE_CONTROLLER = "android.permission.TV_VIRTUAL_REMOTE_CONTROLLER";
@@ -1840,9 +1839,9 @@ package android.content.rollback {
   }
 
   public final class RollbackManager {
-    method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_ROLLBACKS, android.Manifest.permission.TEST_MANAGE_ROLLBACKS}) public void commitRollback(int, @NonNull java.util.List<android.content.pm.VersionedPackage>, @NonNull android.content.IntentSender);
-    method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_ROLLBACKS, android.Manifest.permission.TEST_MANAGE_ROLLBACKS}) @NonNull public java.util.List<android.content.rollback.RollbackInfo> getAvailableRollbacks();
-    method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_ROLLBACKS, android.Manifest.permission.TEST_MANAGE_ROLLBACKS}) @NonNull public java.util.List<android.content.rollback.RollbackInfo> getRecentlyCommittedRollbacks();
+    method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_ROLLBACKS, "android.permission.TEST_MANAGE_ROLLBACKS"}) public void commitRollback(int, @NonNull java.util.List<android.content.pm.VersionedPackage>, @NonNull android.content.IntentSender);
+    method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_ROLLBACKS, "android.permission.TEST_MANAGE_ROLLBACKS"}) @NonNull public java.util.List<android.content.rollback.RollbackInfo> getAvailableRollbacks();
+    method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_ROLLBACKS, "android.permission.TEST_MANAGE_ROLLBACKS"}) @NonNull public java.util.List<android.content.rollback.RollbackInfo> getRecentlyCommittedRollbacks();
     field public static final String EXTRA_STATUS = "android.content.rollback.extra.STATUS";
     field public static final String EXTRA_STATUS_MESSAGE = "android.content.rollback.extra.STATUS_MESSAGE";
     field public static final int STATUS_FAILURE = 1; // 0x1
