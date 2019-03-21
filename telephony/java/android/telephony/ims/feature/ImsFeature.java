@@ -210,6 +210,7 @@ public abstract class ImsFeature {
     /**
      * Contains the capabilities defined and supported by an ImsFeature in the form of a bit mask.
      * @hide
+     * @deprecated
      */
     @SystemApi  // SystemApi only because it was leaked through type usage in a previous release.
     public static class Capabilities {
