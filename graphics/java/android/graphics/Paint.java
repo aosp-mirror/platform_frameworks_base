@@ -1028,9 +1028,8 @@ public class Paint {
      * premultiplied, meaning that alpha can be any value, regardless of the
      * values of r,g,b. See the {@link Color} class for more details.
      *
-     * @see Color for APIs that help manipulate a color long.
-     *
-     * @return the paint's color (and alpha).
+     * @return the paint's color, alpha, and {@code ColorSpace} encoded as a
+     *      {@code ColorLong}
      */
     @ColorLong
     public long getColorLong() {
@@ -1051,7 +1050,7 @@ public class Paint {
     }
 
     /**
-     * Set the paint's color with a {@link ColorLong}. Note that the color is
+     * Set the paint's color with a {@code ColorLong}. Note that the color is
      * a long with an encoded {@link ColorSpace} as well as alpha and r,g,b.
      * These values are not premultiplied, meaning that alpha can be any value,
      * regardless of the values of r,g,b. See the {@link Color} class for more
@@ -1059,8 +1058,8 @@ public class Paint {
      *
      * @param color The new color (including alpha and {@link ColorSpace})
      *      to set in the paint.
-     * @throws IllegalArgumentException if the color space encoded in the long
-     *      is invalid or unknown.
+     * @throws IllegalArgumentException if the color space encoded in the
+     *      {@code ColorLong} is invalid or unknown.
      */
     public void setColor(@ColorLong long color) {
         ColorSpace cs = Color.colorSpace(color);
@@ -1490,8 +1489,8 @@ public class Paint {
      * The alpha of the shadow will be the paint's alpha if the shadow color is
      * opaque, or the alpha from the shadow color if not.
      *
-     * @throws IllegalArgumentException if the color space encoded in the long
-     *      is invalid or unknown.
+     * @throws IllegalArgumentException if the color space encoded in the
+     *      {@code ColorLong} is invalid or unknown.
      */
     public void setShadowLayer(float radius, float dx, float dy, @ColorLong long shadowColor) {
         ColorSpace cs = Color.colorSpace(shadowColor);
@@ -1558,8 +1557,11 @@ public class Paint {
 
     /**
      * Returns the color of the shadow layer.
+     *
+     * @return the shadow layer's color encoded as a {@link ColorLong}.
      * @see #setShadowLayer(float,float,float,int)
      * @see #setShadowLayer(float,float,float,long)
+     * @see Color
      */
     public @ColorLong long getShadowLayerColorLong() {
         return mShadowLayerColor;
