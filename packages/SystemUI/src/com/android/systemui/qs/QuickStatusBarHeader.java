@@ -23,7 +23,6 @@ import android.animation.AnimatorListenerAdapter;
 import android.annotation.ColorInt;
 import android.app.ActivityManager;
 import android.app.AlarmManager;
-import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -62,7 +61,6 @@ import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
 import com.android.systemui.privacy.OngoingPrivacyChip;
-import com.android.systemui.privacy.OngoingPrivacyDialog;
 import com.android.systemui.privacy.PrivacyDialogBuilder;
 import com.android.systemui.privacy.PrivacyItem;
 import com.android.systemui.privacy.PrivacyItemController;
@@ -71,7 +69,6 @@ import com.android.systemui.statusbar.phone.PhoneStatusBarView;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusBarIconController.TintedIconManager;
 import com.android.systemui.statusbar.phone.StatusIconContainer;
-import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.statusbar.policy.Clock;
 import com.android.systemui.statusbar.policy.DateView;
 import com.android.systemui.statusbar.policy.NextAlarmController;
@@ -561,11 +558,8 @@ public class QuickStatusBarHeader extends RelativeLayout implements
             StatsLog.write(StatsLog.PRIVACY_INDICATORS_INTERACTED,
                     StatsLog.PRIVACY_INDICATORS_INTERACTED__TYPE__CHIP_CLICKED);
             mUiHandler.post(() -> {
-                Dialog mDialog = new OngoingPrivacyDialog(mContext, builder).createDialog();
-                SystemUIDialog.setShowForAllUsers(mDialog, false);
-                SystemUIDialog.registerDismissListener(mDialog);
-                SystemUIDialog.setWindowOnTop(mDialog);
-                mActivityStarter.postQSRunnableDismissingKeyguard(() -> mDialog.show());
+                mActivityStarter.postStartActivityDismissingKeyguard(
+                        new Intent(Intent.ACTION_REVIEW_ONGOING_PERMISSION_USAGE), 0);
                 mHost.collapsePanels();
             });
         }
