@@ -16,6 +16,7 @@
 
 package android.telephony;
 
+import android.annotation.NonNull;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -24,7 +25,9 @@ import java.util.Objects;
 /**
  * A {@link CellInfo} representing a TD-SCDMA cell that provides identity and measurement info.
  *
- * @hide
+ * @see android.telephony.CellInfo
+ * @see android.telephony.CellSignalStrengthTdscdma
+ * @see android.telephony.CellIdentityTdscdma
  */
 public final class CellInfoTdscdma extends CellInfo implements Parcelable {
 
@@ -72,18 +75,21 @@ public final class CellInfoTdscdma extends CellInfo implements Parcelable {
         mCellSignalStrengthTdscdma = new CellSignalStrengthTdscdma(cit.signalStrengthTdscdma);
     }
 
-    @Override public CellIdentityTdscdma getCellIdentity() {
+    @Override
+    public @NonNull CellIdentityTdscdma getCellIdentity() {
         return mCellIdentityTdscdma;
     }
+
     /** @hide */
     public void setCellIdentity(CellIdentityTdscdma cid) {
         mCellIdentityTdscdma = cid;
     }
 
     @Override
-    public CellSignalStrengthTdscdma getCellSignalStrength() {
+    public @NonNull CellSignalStrengthTdscdma getCellSignalStrength() {
         return mCellSignalStrengthTdscdma;
     }
+
     /** @hide */
     public void setCellSignalStrength(CellSignalStrengthTdscdma css) {
         mCellSignalStrengthTdscdma = css;
@@ -149,15 +155,16 @@ public final class CellInfoTdscdma extends CellInfo implements Parcelable {
     }
 
     /** Implement the Parcelable interface */
+    @NonNull
     public static final Creator<CellInfoTdscdma> CREATOR = new Creator<CellInfoTdscdma>() {
         @Override
-        public CellInfoTdscdma createFromParcel(Parcel in) {
+        public @NonNull CellInfoTdscdma createFromParcel(Parcel in) {
             in.readInt(); // Skip past token, we know what it is
             return createFromParcelBody(in);
         }
 
         @Override
-        public CellInfoTdscdma[] newArray(int size) {
+        public @NonNull CellInfoTdscdma[] newArray(int size) {
             return new CellInfoTdscdma[size];
         }
     };
