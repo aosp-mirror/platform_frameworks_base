@@ -3622,10 +3622,13 @@ public class StatusBar extends SystemUI implements DemoMode,
             mWakeUpCoordinator.setWakingUp(true);
             mAmbientPulseManager.releaseAllImmediately();
             mVisualStabilityManager.setScreenOn(true);
-            updateNotificationPanelTouchState();
             updateVisibleToUser();
             updateIsKeyguard();
             mDozeServiceHost.stopDozing();
+            // This is intentionally below the stopDozing call above, since it avoids that we're
+            // unnecessarily animating the wakeUp transition. Animations should only be enabled
+            // once we fully woke up.
+            updateNotificationPanelTouchState();
             mPulseExpansionHandler.onStartedWakingUp();
         }
 
