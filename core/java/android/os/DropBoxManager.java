@@ -90,6 +90,13 @@ public class DropBoxManager {
     public static final String EXTRA_TIME = "time";
 
     /**
+     * Extra for {@link android.os.DropBoxManager#ACTION_DROPBOX_ENTRY_ADDED}:
+     * integer value containing number of broadcasts dropped due to rate limiting on
+     * this {@link android.os.DropBoxManager#EXTRA_TAG}
+     */
+    public static final String EXTRA_DROPPED_COUNT = "android.os.extra.DROPPED_COUNT";
+
+    /**
      * A single entry retrieved from the drop box.
      * This may include a reference to a stream, so you must call
      * {@link #close()} when you are done using it.
