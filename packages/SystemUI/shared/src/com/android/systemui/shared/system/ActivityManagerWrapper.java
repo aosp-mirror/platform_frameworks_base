@@ -219,6 +219,7 @@ public class ActivityManagerWrapper {
             IRecentsAnimationRunner runner = null;
             if (animationHandler != null) {
                 runner = new IRecentsAnimationRunner.Stub() {
+                    @Override
                     public void onAnimationStart(IRecentsAnimationController controller,
                             RemoteAnimationTarget[] apps, Rect homeContentInsets,
                             Rect minimizedHomeBounds) {
@@ -230,8 +231,9 @@ public class ActivityManagerWrapper {
                                 homeContentInsets, minimizedHomeBounds);
                     }
 
-                    public void onAnimationCanceled() {
-                        animationHandler.onAnimationCanceled();
+                    @Override
+                    public void onAnimationCanceled(boolean deferredWithScreenshot) {
+                        animationHandler.onAnimationCanceled(deferredWithScreenshot);
                     }
                 };
             }
