@@ -10192,6 +10192,24 @@ public class TelephonyManager {
     }
 
     /**
+     * Determine whether the emergency assistance feature is available on the device.
+     * <p>
+     * Requires permission: {@link android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE}
+     *
+     * @return whether the emergency assistance feature is available on the device
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @SystemApi
+    public boolean isEmergencyAssistanceEnabled() {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
+                "isEmergencyAssistanceEnabled");
+        return EMERGENCY_ASSISTANCE_ENABLED;
+    }
+
+    /**
      * Get the emergency number list based on current locale, sim, default, modem and network.
      *
      * <p>In each returned list, the emergency number {@link EmergencyNumber} coming from higher

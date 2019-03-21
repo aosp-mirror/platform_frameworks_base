@@ -124,6 +124,7 @@ applications that come with the platform
         <permission name="android.permission.UPDATE_APP_OPS_STATS"/>
         <permission name="android.permission.REQUEST_INCIDENT_REPORT_APPROVAL"/>
         <permission name="android.permission.APPROVE_INCIDENT_REPORTS"/>
+        <permission name="android.permission.READ_PRIVILEGED_PHONE_STATE" />
     </privapp-permissions>
 
     <privapp-permissions package="com.android.phone">
