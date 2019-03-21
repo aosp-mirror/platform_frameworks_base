@@ -53,6 +53,7 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
     private KeyguardSecurityViewFlipper mSecurityViewFlipper;
     private boolean mIsVerifyUnlockOnly;
     private SecurityMode mCurrentSecuritySelection = SecurityMode.Invalid;
+    private KeyguardSecurityView mCurrentSecurityView;
     private SecurityCallback mSecurityCallback;
     private AlertDialog mAlertDialog;
 
@@ -405,6 +406,7 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
         }
 
         mCurrentSecuritySelection = securityMode;
+        mCurrentSecurityView = newView;
         mSecurityCallback.onSecurityModeChanged(securityMode,
                 securityMode != SecurityMode.None && newView.needsInput());
     }
@@ -504,6 +506,10 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
 
     public SecurityMode getCurrentSecurityMode() {
         return mCurrentSecuritySelection;
+    }
+
+    public KeyguardSecurityView getCurrentSecurityView() {
+        return mCurrentSecurityView;
     }
 
     public void verifyUnlock() {
