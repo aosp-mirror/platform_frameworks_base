@@ -131,14 +131,10 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
     private final boolean mRefreshServiceOnPackageUpdate;
 
     /**
-     * Name of the service's package that was active but then was removed because its package
-     * update.
-     *
-     * <p>It's a temporary state set / used by the {@link PackageMonitor} implementation, but
-     * defined here so it can be dumped.
+     * Name of the service packages whose APK are being updated, keyed by user id.
      */
     @GuardedBy("mLock")
-    private String mLastActivePackageName;
+    private SparseArray<String> mUpdatingPackageNames;
 
     /**
      * Default constructor.
@@ -565,6 +561,20 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
     }
 
     /**
+     * Called before the package that provides the service for the given user is being updated.
+     */
+    protected void onServicePackageUpdatingLocked(@UserIdInt int userId) {
+        if (verbose) Slog.v(mTag, "onServicePackageUpdatingLocked(" + userId + ")");
+    }
+
+    /**
+     * Called after the package that provides the service for the given user is being updated.
+     */
+    protected void onServicePackageUpdatedLocked(@UserIdInt int userId) {
+        if (verbose) Slog.v(mTag, "onServicePackageUpdated(" + userId + ")");
+    }
+
+    /**
      * Called after the service is removed from the cache.
      */
     @SuppressWarnings("unused")
@@ -602,8 +612,10 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
             final int size = mServicesCache.size();
             pw.print(prefix); pw.print("Debug: "); pw.print(realDebug);
             pw.print(" Verbose: "); pw.println(realVerbose);
-            pw.print(" Refresh on package update: "); pw.println(mRefreshServiceOnPackageUpdate);
-            pw.print(" Last active service on update: "); pw.println(mLastActivePackageName);
+            pw.print("Refresh on package update: "); pw.println(mRefreshServiceOnPackageUpdate);
+            if (mUpdatingPackageNames != null) {
+                pw.print("Packages being updated: "); pw.println(mUpdatingPackageNames);
+            }
             if (mServiceNameResolver != null) {
                 pw.print(prefix); pw.print("Name resolver: ");
                 mServiceNameResolver.dumpShort(pw); pw.println();
@@ -644,39 +656,49 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
         final PackageMonitor monitor = new PackageMonitor() {
 
             @Override
-            public void onPackageUpdateStarted(String packageName, int uid) {
+            public void onPackageUpdateStarted(@NonNull String packageName, int uid) {
+                if (verbose) Slog.v(mTag, "onPackageUpdateStarted(): " + packageName);
+                final String activePackageName = getActiveServicePackageNameLocked();
+                if (!packageName.equals(activePackageName)) return;
+
+                final int userId = getChangingUserId();
                 synchronized (mLock) {
-                    final String activePackageName = getActiveServicePackageNameLocked();
-                    if (packageName.equals(activePackageName)) {
-                        final int userId = getChangingUserId();
-                        if (mRefreshServiceOnPackageUpdate) {
-                            if (debug) {
-                                Slog.d(mTag, "Removing service for user " + userId
-                                        + " because package " + activePackageName
-                                        + " is being updated");
-                            }
-                            mLastActivePackageName = activePackageName;
-                            removeCachedServiceLocked(userId);
-                        } else {
-                            if (debug) {
-                                Slog.d(mTag, "Holding service for user " + userId
-                                        + " while package " + activePackageName
-                                        + " is being updated");
-                            }
+                    if (mUpdatingPackageNames == null) {
+                        mUpdatingPackageNames = new SparseArray<String>(mServicesCache.size());
+                    }
+                    mUpdatingPackageNames.put(userId, packageName);
+                    onServicePackageUpdatingLocked(userId);
+                    if (mRefreshServiceOnPackageUpdate) {
+                        if (debug) {
+                            Slog.d(mTag, "Removing service for user " + userId + " because package "
+                                    + activePackageName + " is being updated");
+                        }
+                        removeCachedServiceLocked(userId);
+                    } else {
+                        if (debug) {
+                            Slog.d(mTag, "Holding service for user " + userId + " while package "
+                                    + activePackageName + " is being updated");
                         }
                     }
                 }
             }
 
             @Override
-            public void onPackageUpdateFinished(String packageName, int uid) {
+            public void onPackageUpdateFinished(@NonNull String packageName, int uid) {
+                if (verbose) Slog.v(mTag, "onPackageUpdateFinished(): " + packageName);
+                final int userId = getChangingUserId();
                 synchronized (mLock) {
-                    String activePackageName = getActiveServicePackageNameLocked();
-                    if (activePackageName == null) {
-                        activePackageName = mLastActivePackageName;
-                        mLastActivePackageName = null;
-                    }
-                    if (!packageName.equals(activePackageName)) {
+                    final String activePackageName = mUpdatingPackageNames == null ? null
+                            : mUpdatingPackageNames.get(userId);
+                    if (packageName.equals(activePackageName)) {
+                        if (mUpdatingPackageNames != null) {
+                            mUpdatingPackageNames.remove(userId);
+                            if (mUpdatingPackageNames.size() == 0) {
+                                mUpdatingPackageNames = null;
+                            }
+                        }
+                        onServicePackageUpdatedLocked(userId);
+                    } else {
                         handlePackageUpdateLocked(packageName);
                     }
                 }

@@ -74,7 +74,7 @@ final class ContentCapturePerUserService
         AbstractPerUserSystemService<ContentCapturePerUserService, ContentCaptureManagerService>
         implements ContentCaptureServiceCallbacks {
 
-    private static final String TAG = ContentCaptureManagerService.class.getSimpleName();
+    private static final String TAG = ContentCapturePerUserService.class.getSimpleName();
 
     @GuardedBy("mLock")
     private final ArrayMap<String, ContentCaptureServerSession> mSessions =
@@ -87,7 +87,8 @@ final class ContentCapturePerUserService
      * master's cache (for example, because a temporary service was set).
      */
     @GuardedBy("mLock")
-    private RemoteContentCaptureService mRemoteService;
+    @Nullable
+    RemoteContentCaptureService mRemoteService;
 
     private final ContentCaptureServiceRemoteCallback mRemoteServiceCallback =
             new ContentCaptureServiceRemoteCallback();
@@ -135,6 +136,10 @@ final class ContentCapturePerUserService
         }
 
         if (!disabled) {
+            if (mMaster.debug) {
+                Slog.d(TAG, "updateRemoteService(): creating new remote service for "
+                        + serviceComponentName);
+            }
             mRemoteService = new RemoteContentCaptureService(mMaster.getContext(),
                     ContentCaptureService.SERVICE_INTERFACE, serviceComponentName,
                     mRemoteServiceCallback, mUserId, this, mMaster.isBindInstantServiceAllowed(),
@@ -182,18 +187,38 @@ final class ContentCapturePerUserService
                 }
 
                 mZombie = false;
-                final int numSessions = mSessions.size();
-                if (mMaster.debug) {
-                    Slog.d(TAG, "Ressurrecting remote service (" + mRemoteService + ") on "
-                            + numSessions + " sessions");
-                }
-
-                for (int i = 0; i < numSessions; i++) {
-                    final ContentCaptureServerSession session = mSessions.valueAt(i);
-                    session.resurrectLocked();
-                }
+                resurrectSessionsLocked();
             }
         }
+    }
+
+    private void resurrectSessionsLocked() {
+        final int numSessions = mSessions.size();
+        if (mMaster.debug) {
+            Slog.d(TAG, "Ressurrecting remote service (" + mRemoteService + ") on "
+                    + numSessions + " sessions");
+        }
+
+        for (int i = 0; i < numSessions; i++) {
+            final ContentCaptureServerSession session = mSessions.valueAt(i);
+            session.resurrectLocked();
+        }
+    }
+
+    void onPackageUpdatingLocked() {
+        final int numSessions = mSessions.size();
+        if (mMaster.debug) {
+            Slog.d(TAG, "Pausing " + numSessions + " sessions while package is updating");
+        }
+        for (int i = 0; i < numSessions; i++) {
+            final ContentCaptureServerSession session = mSessions.valueAt(i);
+            session.pauseLocked();
+        }
+    }
+
+    void onPackageUpdatedLocked() {
+        updateRemoteServiceLocked(!isEnabledLocked());
+        resurrectSessionsLocked();
     }
 
     // TODO(b/119613670): log metrics
@@ -274,9 +299,12 @@ final class ContentCapturePerUserService
             return;
         }
 
+        // Make sure service is bound, just in case the initial connection failed somehow
+        mRemoteService.ensureBoundLocked();
+
         final ContentCaptureServerSession newSession = new ContentCaptureServerSession(
-                activityToken, this, mRemoteService, componentName, clientReceiver, taskId,
-                displayId, sessionId, uid, flags);
+                activityToken, this, componentName, clientReceiver, taskId, displayId, sessionId,
+                uid, flags);
         if (mMaster.verbose) {
             Slog.v(TAG, "startSession(): new session for "
                     + ComponentName.flattenToShortString(componentName) + " and id " + sessionId);
@@ -288,21 +316,6 @@ final class ContentCapturePerUserService
     @GuardedBy("mLock")
     private boolean isWhitelistedLocked(@NonNull ComponentName componentName) {
         return mWhitelistHelper.isWhitelisted(componentName);
-    }
-
-    /**
-     * @throws IllegalArgumentException if packages or components are empty.
-     */
-    private void setWhitelist(@Nullable List<String> packages,
-            @Nullable List<ComponentName> components) {
-        // TODO(b/122595322): add CTS test for when it's null
-        synchronized (mLock) {
-            if (mMaster.verbose) {
-                Slog.v(TAG, "whitelisting packages: " + packages + " and activities: "
-                        + components);
-            }
-            mWhitelistHelper.setWhitelist(packages, components);
-        }
     }
 
     // TODO(b/119613670): log metrics
@@ -518,12 +531,16 @@ final class ContentCapturePerUserService
         @Override
         public void setContentCaptureWhitelist(List<String> packages,
                 List<ComponentName> activities) {
+            // TODO(b/122595322): add CTS test for when it's null
             if (mMaster.verbose) {
-                Slog.v(TAG, "setContentCaptureWhitelist(packages=" + packages + ", activities="
-                        + activities + ")");
+                Slog.v(TAG, "setContentCaptureWhitelist(" + (packages == null
+                        ? "null_packages" : packages.size() + " packages")
+                        + ", " + (activities == null
+                        ? "null_activities" : activities.size() + " activities") + ")");
             }
-            setWhitelist(packages, activities);
-
+            synchronized (mLock) {
+                mWhitelistHelper.setWhitelist(packages, activities);
+            }
             // TODO(b/119613670): log metrics
         }
 

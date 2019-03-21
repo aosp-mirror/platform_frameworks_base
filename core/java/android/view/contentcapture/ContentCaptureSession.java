@@ -135,11 +135,18 @@ public abstract class ContentCaptureSession implements AutoCloseable {
     public static final int STATE_SERVICE_DIED = 0x400;
 
     /**
+     * Session is disabled because the service package is being udpated.
+     *
+     * @hide
+     */
+    public static final int STATE_SERVICE_UPDATING = 0x800;
+
+    /**
      * Session is enabled, after the service died and came back to live.
      *
      * @hide
      */
-    public static final int STATE_SERVICE_RESURRECTED = 0x800;
+    public static final int STATE_SERVICE_RESURRECTED = 0x1000;
 
     private static final int INITIAL_CHILDREN_CAPACITY = 5;
 
