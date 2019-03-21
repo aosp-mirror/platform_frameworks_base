@@ -25,8 +25,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.system.OsConstants;
 
-import java.net.Inet4Address;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Objects;
@@ -56,10 +56,10 @@ public class TcpKeepalivePacketData extends KeepalivePacketData implements Parce
 
     // This should only be constructed via static factory methods, such as
     // tcpKeepalivePacket.
-    private TcpKeepalivePacketData(TcpSocketInfo tcpDetails, byte[] data)
-            throws InvalidPacketException {
-        super(tcpDetails.srcAddress, tcpDetails.srcPort, tcpDetails.dstAddress,
-                tcpDetails.dstPort, data);
+    private TcpKeepalivePacketData(final TcpKeepalivePacketDataParcelable tcpDetails,
+            final byte[] data) throws InvalidPacketException, UnknownHostException {
+        super(InetAddress.getByAddress(tcpDetails.srcAddress), tcpDetails.srcPort,
+                InetAddress.getByAddress(tcpDetails.dstAddress), tcpDetails.dstPort, data);
         tcpSeq = tcpDetails.seq;
         tcpAck = tcpDetails.ack;
         // In the packet, the window is shifted right by the window scale.
@@ -71,17 +71,22 @@ public class TcpKeepalivePacketData extends KeepalivePacketData implements Parce
      * Factory method to create tcp keepalive packet structure.
      */
     public static TcpKeepalivePacketData tcpKeepalivePacket(
-            TcpSocketInfo tcpDetails) throws InvalidPacketException {
+            TcpKeepalivePacketDataParcelable tcpDetails) throws InvalidPacketException {
         final byte[] packet;
-        if ((tcpDetails.srcAddress instanceof Inet4Address)
-                && (tcpDetails.dstAddress instanceof Inet4Address)) {
-            packet = buildV4Packet(tcpDetails);
-        } else {
-            // TODO: support ipv6
+        try {
+            if ((tcpDetails.srcAddress != null) && (tcpDetails.dstAddress != null)
+                    && (tcpDetails.srcAddress.length == 4 /* V4 IP length */)
+                    && (tcpDetails.dstAddress.length == 4 /* V4 IP length */)) {
+                packet = buildV4Packet(tcpDetails);
+            } else {
+                // TODO: support ipv6
+                throw new InvalidPacketException(ERROR_INVALID_IP_ADDRESS);
+            }
+            return new TcpKeepalivePacketData(tcpDetails, packet);
+        } catch (UnknownHostException e) {
             throw new InvalidPacketException(ERROR_INVALID_IP_ADDRESS);
         }
 
-        return new TcpKeepalivePacketData(tcpDetails, packet);
     }
 
     /**
@@ -89,7 +94,7 @@ public class TcpKeepalivePacketData extends KeepalivePacketData implements Parce
      */
     // TODO : if this code is ever moved to the network stack, factorize constants with the ones
     // over there.
-    private static byte[] buildV4Packet(TcpSocketInfo tcpDetails) {
+    private static byte[] buildV4Packet(TcpKeepalivePacketDataParcelable tcpDetails) {
         final int length = IPV4_HEADER_LENGTH + TCP_HEADER_LENGTH;
         ByteBuffer buf = ByteBuffer.allocate(length);
         buf.order(ByteOrder.BIG_ENDIAN);
@@ -102,8 +107,8 @@ public class TcpKeepalivePacketData extends KeepalivePacketData implements Parce
         buf.put((byte) OsConstants.IPPROTO_TCP);
         final int ipChecksumOffset = buf.position();
         buf.putShort((short) 0);                    // IP checksum
-        buf.put(tcpDetails.srcAddress.getAddress());
-        buf.put(tcpDetails.dstAddress.getAddress());
+        buf.put(tcpDetails.srcAddress);
+        buf.put(tcpDetails.dstAddress);
         buf.putShort((short) tcpDetails.srcPort);
         buf.putShort((short) tcpDetails.dstPort);
         buf.putInt(tcpDetails.seq);                 // Sequence Number
@@ -121,31 +126,6 @@ public class TcpKeepalivePacketData extends KeepalivePacketData implements Parce
     }
 
     // TODO: add buildV6Packet.
-
-    /** Represents tcp/ip information. */
-    // TODO: Replace TcpSocketInfo with TcpKeepalivePacketDataParcelable.
-    public static class TcpSocketInfo {
-        public final InetAddress srcAddress;
-        public final InetAddress dstAddress;
-        public final int srcPort;
-        public final int dstPort;
-        public final int seq;
-        public final int ack;
-        public final int rcvWnd;
-        public final int rcvWndScale;
-
-        public TcpSocketInfo(InetAddress sAddr, int sPort, InetAddress dAddr,
-                int dPort, int writeSeq, int readSeq, int rWnd, int rWndScale) {
-            srcAddress = sAddr;
-            dstAddress = dAddr;
-            srcPort = sPort;
-            dstPort = dPort;
-            seq = writeSeq;
-            ack = readSeq;
-            rcvWnd = rWnd;
-            rcvWndScale = rWndScale;
-        }
-    }
 
     @Override
     public boolean equals(@Nullable final Object o) {
@@ -218,6 +198,8 @@ public class TcpKeepalivePacketData extends KeepalivePacketData implements Parce
         parcel.dstPort = dstPort;
         parcel.seq = tcpSeq;
         parcel.ack = tcpAck;
+        parcel.rcvWnd = tcpWnd;
+        parcel.rcvWndScale = tcpWndScale;
         return parcel;
     }
 
