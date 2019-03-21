@@ -5295,6 +5295,14 @@
     <!-- Summary of notification letting users know why battery saver was turned on automatically [CHAR_LIMIT=NONE]-->
     <string name="dynamic_mode_notification_summary">Battery Saver activated to extend battery life</string>
 
+    <!-- Battery saver strings -->
+    <!-- The user visible name of the notification channel for battery saver notifications [CHAR_LIMIT=80] -->
+    <string name="battery_saver_notification_channel_name">Battery Saver</string>
+    <!-- Title of notification letting users know why battery saver didn't turn back on automatically after the device was unplugged [CHAR_LIMIT=NONE] -->
+    <string name="battery_saver_sticky_disabled_notification_title">Battery Saver won\u2019t reactivate until battery low again</string>
+    <!-- Summary of notification letting users know why battery saver didn't turn back on automatically after the device was unplugged [CHAR_LIMIT=NONE] -->
+    <string name="battery_saver_sticky_disabled_notification_summary">Battery has been charged to a sufficient level. Battery Saver won\u2019t reactivate until the battery is low again.</string>
+
     <!-- Description of media type: folder or directory that contains additional files. [CHAR LIMIT=32] -->
     <string name="mime_type_folder">Folder</string>
     <!-- Description of media type: application file, such as APK. [CHAR LIMIT=32] -->
