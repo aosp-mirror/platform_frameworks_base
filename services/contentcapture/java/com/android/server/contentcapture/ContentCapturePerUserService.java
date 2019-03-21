@@ -444,6 +444,10 @@ final class ContentCapturePerUserService
     @GuardedBy("mLock")
     ContentCaptureOptions getOptionsForPackageLocked(@NonNull String packageName) {
         if (!mWhitelistHelper.isWhitelisted(packageName)) {
+            if (packageName.equals(getServicePackageName())) {
+                if (mMaster.verbose) Slog.v(mTag, "getOptionsForPackage() lite for " + packageName);
+                return new ContentCaptureOptions(mMaster.mDevCfgLoggingLevel);
+            }
             if (mMaster.verbose) {
                 Slog.v(mTag, "getOptionsForPackage(" + packageName + "): not whitelisted");
             }

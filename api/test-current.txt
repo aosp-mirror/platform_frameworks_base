@@ -571,12 +571,14 @@ package android.content {
   }
 
   public final class ContentCaptureOptions implements android.os.Parcelable {
+    ctor public ContentCaptureOptions(int);
     ctor public ContentCaptureOptions(int, int, int, int, int, @Nullable android.util.ArraySet<android.content.ComponentName>);
     method public int describeContents();
     method public static android.content.ContentCaptureOptions forWhitelistingItself();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.content.ContentCaptureOptions> CREATOR;
     field public final int idleFlushingFrequencyMs;
+    field public final boolean lite;
     field public final int logHistorySize;
     field public final int loggingLevel;
     field public final int maxBufferSize;
