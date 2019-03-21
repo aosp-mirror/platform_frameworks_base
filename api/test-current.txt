@@ -3186,10 +3186,6 @@ package android.view.inputmethod {
 
 package android.view.inspector {
 
-  @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) @java.lang.annotation.Target({java.lang.annotation.ElementType.TYPE}) public @interface InspectableNodeName {
-    method public abstract String value();
-  }
-
   @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) @java.lang.annotation.Target({java.lang.annotation.ElementType.METHOD, java.lang.annotation.ElementType.FIELD}) public @interface InspectableProperty {
     method public abstract int attributeId() default android.content.res.Resources.ID_NULL;
     method public abstract android.view.inspector.InspectableProperty.EnumEntry[] enumMapping() default {};

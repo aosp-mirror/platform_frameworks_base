@@ -39,7 +39,6 @@ import java.util.Optional;
 public final class InspectableClassModel {
     private final @NonNull ClassName mClassName;
     private final @NonNull Map<String, Property> mPropertyMap;
-    private @NonNull Optional<String> mNodeName = Optional.empty();
 
     /**
      * @param className The name of the modeled class
@@ -52,15 +51,6 @@ public final class InspectableClassModel {
     @NonNull
     public ClassName getClassName() {
         return mClassName;
-    }
-
-    @NonNull
-    public Optional<String> getNodeName() {
-        return mNodeName;
-    }
-
-    public void setNodeName(@NonNull Optional<String> nodeName) {
-        mNodeName = nodeName;
     }
 
     /**

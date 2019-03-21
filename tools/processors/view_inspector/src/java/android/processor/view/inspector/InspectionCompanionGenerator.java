@@ -163,8 +163,6 @@ public final class InspectionCompanionGenerator {
                 .addMethod(generateMapProperties(properties, fields))
                 .addMethod(generateReadProperties(properties, fields, model.getClassName()));
 
-        model.getNodeName().ifPresent(name -> builder.addMethod(generateGetNodeName(name)));
-
         return builder.build();
     }
 
@@ -448,31 +446,6 @@ public final class InspectionCompanionGenerator {
         }
 
         return builder.build();
-    }
-
-    /**
-     * Generate an implementation of
-     * {@link android.view.inspector.InspectionCompanion#getNodeName()}.
-     *
-     * Example:
-     * <pre>
-     *     @Override
-     *     public String getNodeName() {
-     *         return "nodeName";
-     *     }
-     * </pre>
-     *
-     * @param nodeName The name of this node
-     * @return A method definition that returns the node name
-     */
-    @NonNull
-    private MethodSpec generateGetNodeName(@NonNull String nodeName) {
-        return MethodSpec.methodBuilder("getNodeName")
-                .addAnnotation(Override.class)
-                .addModifiers(Modifier.PUBLIC)
-                .returns(String.class)
-                .addStatement("return $S", nodeName)
-                .build();
     }
 
     /**
