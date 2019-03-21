@@ -28,7 +28,9 @@ import static android.system.OsConstants.TIOCOUTQ;
 
 import android.annotation.NonNull;
 import android.net.NetworkUtils;
+import android.net.SocketKeepalive.InvalidPacketException;
 import android.net.SocketKeepalive.InvalidSocketException;
+import android.net.TcpKeepalivePacketData;
 import android.net.TcpKeepalivePacketData.TcpSocketInfo;
 import android.net.TcpRepairWindow;
 import android.os.Handler;
@@ -103,16 +105,25 @@ public class TcpKeepaliveController {
         mFdHandlerQueue = connectivityServiceHandler.getLooper().getQueue();
     }
 
+    /** Build tcp keepalive packet. */
+    public static TcpKeepalivePacketData getTcpKeepalivePacket(@NonNull FileDescriptor fd)
+            throws InvalidPacketException, InvalidSocketException {
+        try {
+            final TcpSocketInfo tsi = switchToRepairMode(fd);
+            return TcpKeepalivePacketData.tcpKeepalivePacket(tsi);
+        } catch (InvalidPacketException | InvalidSocketException e) {
+            switchOutOfRepairMode(fd);
+            throw e;
+        }
+    }
     /**
-     * Switch the tcp socket to repair mode and query tcp socket information.
+     * Switch the tcp socket to repair mode and query detail tcp information.
      *
-     * @param fd the fd of socket on which to use keepalive offload
+     * @param fd the fd of socket on which to use keepalive offload.
      * @return a {@link TcpKeepalivePacketData#TcpSocketInfo} object for current
      * tcp/ip information.
      */
-    // TODO : make this private. It's far too confusing that this gets called from outside
-    // at a time that nobody can understand.
-    public static TcpSocketInfo switchToRepairMode(FileDescriptor fd)
+    private static TcpSocketInfo switchToRepairMode(FileDescriptor fd)
             throws InvalidSocketException {
         if (DBG) Log.i(TAG, "switchToRepairMode to start tcp keepalive : " + fd);
         final SocketAddress srcSockAddr;
@@ -157,10 +168,12 @@ public class TcpKeepaliveController {
         // Query sequence and ack number
         dropAllIncomingPackets(fd, true);
         try {
-            // Enter tcp repair mode.
+            // Switch to tcp repair mode.
             Os.setsockoptInt(fd, IPPROTO_TCP, TCP_REPAIR, TCP_REPAIR_ON);
+
             // Check if socket is idle.
             if (!isSocketIdle(fd)) {
+                Log.e(TAG, "Socket is not idle");
                 throw new InvalidSocketException(ERROR_SOCKET_NOT_IDLE);
             }
             // Query write sequence number from SEND_QUEUE.
@@ -173,8 +186,13 @@ public class TcpKeepaliveController {
             Os.setsockoptInt(fd, IPPROTO_TCP, TCP_REPAIR_QUEUE, TCP_NO_QUEUE);
             // Finally, check if socket is still idle. TODO : this check needs to move to
             // after starting polling to prevent a race.
-            if (!isSocketIdle(fd)) {
+            if (!isReceiveQueueEmpty(fd)) {
+                Log.e(TAG, "Fatal: receive queue of this socket is not empty");
                 throw new InvalidSocketException(ERROR_INVALID_SOCKET);
+            }
+            if (!isSendQueueEmpty(fd)) {
+                Log.e(TAG, "Socket is not idle");
+                throw new InvalidSocketException(ERROR_SOCKET_NOT_IDLE);
             }
 
             // Query tcp window size.
@@ -205,10 +223,13 @@ public class TcpKeepaliveController {
      *
      * @param fd the fd of socket to switch back to normal.
      */
-    // TODO : make this private.
-    public static void switchOutOfRepairMode(@NonNull final FileDescriptor fd)
-            throws ErrnoException {
-        Os.setsockoptInt(fd, IPPROTO_TCP, TCP_REPAIR, TCP_REPAIR_OFF);
+    private static void switchOutOfRepairMode(@NonNull final FileDescriptor fd) {
+        try {
+            Os.setsockoptInt(fd, IPPROTO_TCP, TCP_REPAIR, TCP_REPAIR_OFF);
+        } catch (ErrnoException e) {
+            Log.e(TAG, "Cannot switch socket out of repair mode", e);
+            // Well, there is not much to do here to recover
+        }
     }
 
     /**
@@ -262,13 +283,8 @@ public class TcpKeepaliveController {
             mListeners.remove(slot);
         }
         mFdHandlerQueue.removeOnFileDescriptorEventListener(fd);
-        try {
-            if (DBG) Log.d(TAG, "Moving socket out of repair mode for stop : " + fd);
-            switchOutOfRepairMode(fd);
-        } catch (ErrnoException e) {
-            Log.e(TAG, "Cannot switch socket out of repair mode", e);
-            // Well, there is not much to do here to recover
-        }
+        if (DBG) Log.d(TAG, "Moving socket out of repair mode for stop : " + fd);
+        switchOutOfRepairMode(fd);
     }
 
     private static InetAddress getAddress(InetSocketAddress inetAddr) {
