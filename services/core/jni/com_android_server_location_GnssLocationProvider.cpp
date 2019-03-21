@@ -117,6 +117,8 @@ using android::hardware::hidl_death_recipient;
 using android::hardware::gnss::V1_0::GnssConstellationType;
 using android::hardware::gnss::V1_0::GnssLocationFlags;
 using android::hardware::gnss::V1_0::IAGnssRilCallback;
+using android::hardware::gnss::V1_0::IGnssBatching;
+using android::hardware::gnss::V1_0::IGnssBatchingCallback;
 using android::hardware::gnss::V1_0::IGnssGeofenceCallback;
 using android::hardware::gnss::V1_0::IGnssGeofencing;
 using android::hardware::gnss::V1_0::IGnssNavigationMessage;
@@ -158,10 +160,6 @@ using IAGnss_V1_0 = android::hardware::gnss::V1_0::IAGnss;
 using IAGnss_V2_0 = android::hardware::gnss::V2_0::IAGnss;
 using IAGnssCallback_V1_0 = android::hardware::gnss::V1_0::IAGnssCallback;
 using IAGnssCallback_V2_0 = android::hardware::gnss::V2_0::IAGnssCallback;
-using IGnssBatching_V1_0 = android::hardware::gnss::V1_0::IGnssBatching;
-using IGnssBatching_V2_0 = android::hardware::gnss::V2_0::IGnssBatching;
-using IGnssBatchingCallback_V1_0 = android::hardware::gnss::V1_0::IGnssBatchingCallback;
-using IGnssBatchingCallback_V2_0 = android::hardware::gnss::V2_0::IGnssBatchingCallback;
 
 using android::hardware::gnss::measurement_corrections::V1_0::IMeasurementCorrections;
 using android::hardware::gnss::measurement_corrections::V1_0::IMeasurementCorrectionsCallback;
@@ -194,8 +192,7 @@ sp<IAGnssRil_V2_0> agnssRilIface_V2_0 = nullptr;
 sp<IGnssGeofencing> gnssGeofencingIface = nullptr;
 sp<IAGnss_V1_0> agnssIface = nullptr;
 sp<IAGnss_V2_0> agnssIface_V2_0 = nullptr;
-sp<IGnssBatching_V1_0> gnssBatchingIface = nullptr;
-sp<IGnssBatching_V2_0> gnssBatchingIface_V2_0 = nullptr;
+sp<IGnssBatching> gnssBatchingIface = nullptr;
 sp<IGnssDebug_V1_0> gnssDebugIface = nullptr;
 sp<IGnssDebug_V2_0> gnssDebugIface_V2_0 = nullptr;
 sp<IGnssConfiguration_V1_0> gnssConfigurationIface = nullptr;
@@ -1448,15 +1445,20 @@ Return<void> AGnssRilCallback::requestRefLocCb() {
     return Void();
 }
 
-struct GnssBatchingCallbackUtil {
-    template<class T>
-    static Return<void> gnssLocationBatchCbImpl(const hidl_vec<T>& locations);
-private:
-    GnssBatchingCallbackUtil() = delete;
+/*
+ * GnssBatchingCallback interface implements the callback methods
+ * required by the IGnssBatching interface.
+ */
+struct GnssBatchingCallback : public IGnssBatchingCallback {
+    /*
+    * Methods from ::android::hardware::gps::V1_0::IGnssBatchingCallback
+    * follow.
+    */
+    Return<void> gnssLocationBatchCb(const hidl_vec<GnssLocation_V1_0>& locations) override;
 };
 
-template<class T>
-Return<void> GnssBatchingCallbackUtil::gnssLocationBatchCbImpl(const hidl_vec<T>& locations) {
+Return<void> GnssBatchingCallback::gnssLocationBatchCb(
+    const hidl_vec<GnssLocation_V1_0>& locations) {
     JNIEnv* env = getJniEnv();
 
     jobjectArray jLocations = env->NewObjectArray(locations.size(),
@@ -1475,28 +1477,6 @@ Return<void> GnssBatchingCallbackUtil::gnssLocationBatchCbImpl(const hidl_vec<T>
 
     return Void();
 }
-
-/*
- * GnssBatchingCallback_V1_0 class implements the callback methods required by the
- * IGnssBatching 1.0 interface.
- */
-struct GnssBatchingCallback_V1_0 : public IGnssBatchingCallback_V1_0 {
-    /** Methods from ::android::hardware::gps::V1_0::IGnssBatchingCallback follow. */
-    Return<void> gnssLocationBatchCb(const hidl_vec<GnssLocation_V1_0>& locations) override {
-        return GnssBatchingCallbackUtil::gnssLocationBatchCbImpl(locations);
-    }
-};
-
-/*
- * GnssBatchingCallback_V2_0 class implements the callback methods required by the
- * IGnssBatching 2.0 interface.
- */
-struct GnssBatchingCallback_V2_0 : public IGnssBatchingCallback_V2_0 {
-    /** Methods from ::android::hardware::gps::V2_0::IGnssBatchingCallback follow. */
-    Return<void> gnssLocationBatchCb(const hidl_vec<GnssLocation_V2_0>& locations) override {
-        return GnssBatchingCallbackUtil::gnssLocationBatchCbImpl(locations);
-    }
-};
 
 static void android_location_GnssLocationProvider_class_init_native(JNIEnv* env, jclass clazz) {
     gnssHal_V2_0 = IGnss_V2_0::getService();
@@ -1773,22 +1753,11 @@ static void android_location_GnssLocationProvider_init_once(JNIEnv* env, jclass 
         gnssGeofencingIface = gnssGeofencing;
     }
 
-    // If IGnssBatching.hal@2.0 is not supported, use IGnssBatching.hal@1.0
-    if (gnssHal_V2_0 != nullptr) {
-        auto gnssBatching_V2_0 = gnssHal_V2_0->getExtensionGnssBatching_2_0();
-        if (!gnssBatching_V2_0.isOk()) {
-            ALOGD("Unable to get a handle to GnssBatching_V2_0");
-        } else {
-            gnssBatchingIface_V2_0 = gnssBatching_V2_0;
-        }
-    }
-    if (gnssBatchingIface_V2_0 == nullptr ) {
-        auto gnssBatching_V1_0 = gnssHal->getExtensionGnssBatching();
-        if (!gnssBatching_V1_0.isOk()) {
-            ALOGD("Unable to get a handle to GnssBatching");
-        } else {
-            gnssBatchingIface = gnssBatching_V1_0;
-        }
+    auto gnssBatching = gnssHal->getExtensionGnssBatching();
+    if (!gnssBatching.isOk()) {
+        ALOGD("Unable to get a handle to gnssBatching");
+    } else {
+        gnssBatchingIface = gnssBatching;
     }
 
     if (gnssHal_V2_0 != nullptr) {
@@ -2154,6 +2123,8 @@ struct AGnssDispatcher {
 
 private:
     AGnssDispatcher() = delete;
+    AGnssDispatcher(const AGnssDispatcher&) = delete;
+    AGnssDispatcher& operator=(const AGnssDispatcher&) = delete;
 };
 
 void AGnssDispatcher::dataConnOpen(sp<IAGnss_V1_0> agnssIface, JNIEnv* env, jstring apn,
@@ -2877,15 +2848,12 @@ static jint android_location_GnssBatchingProvider_get_batch_size(JNIEnv*, jclass
 }
 
 static jboolean android_location_GnssBatchingProvider_init_batching(JNIEnv*, jclass) {
-    if (gnssBatchingIface_V2_0 != nullptr) {
-        sp<IGnssBatchingCallback_V2_0> gnssBatchingCbIface_V2_0 = new GnssBatchingCallback_V2_0();
-        return static_cast<jboolean>(gnssBatchingIface_V2_0->init_2_0(gnssBatchingCbIface_V2_0));
-    } else if (gnssBatchingIface != nullptr) {
-        sp<IGnssBatchingCallback_V1_0> gnssBatchingCbIface_V1_0 = new GnssBatchingCallback_V1_0();
-        return static_cast<jboolean>(gnssBatchingIface->init(gnssBatchingCbIface_V1_0));
-    } else {
+    if (gnssBatchingIface == nullptr) {
         return JNI_FALSE; // batching not supported
     }
+    sp<IGnssBatchingCallback> gnssBatchingCbIface = new GnssBatchingCallback();
+
+    return static_cast<jboolean>(gnssBatchingIface->init(gnssBatchingCbIface));
 }
 
 static void android_location_GnssBatchingProvider_cleanup_batching(JNIEnv*, jclass) {
@@ -2901,10 +2869,10 @@ static jboolean android_location_GnssBatchingProvider_start_batch(JNIEnv*, jclas
         return JNI_FALSE; // batching not supported
     }
 
-    IGnssBatching_V1_0::Options options;
+    IGnssBatching::Options options;
     options.periodNanos = periodNanos;
     if (wakeOnFifoFull) {
-        options.flags = static_cast<uint8_t>(IGnssBatching_V1_0::Flag::WAKEUP_ON_FIFO_FULL);
+        options.flags = static_cast<uint8_t>(IGnssBatching::Flag::WAKEUP_ON_FIFO_FULL);
     } else {
         options.flags = 0;
     }
