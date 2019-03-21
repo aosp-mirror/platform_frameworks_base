@@ -1853,6 +1853,16 @@ public class CarrierConfigManager {
     public static final String KEY_CARRIER_WIFI_STRING_ARRAY = "carrier_wifi_string_array";
 
     /**
+     * Base64 Encoding method the carrier will use for encoding encrypted IMSI and SSID.
+     * The value set as below:
+     * 2045 - RFC2045 (default value)
+     * 4648 - RFC4648
+     *
+     * @hide
+     */
+    public static final String KEY_IMSI_ENCODING_METHOD_INT = "imsi_encoding_method_int";
+
+    /**
      * Time delay (in ms) after which we show the notification to switch the preferred
      * network.
      * @hide
@@ -2983,6 +2993,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_USE_WFC_HOME_NETWORK_MODE_IN_ROAMING_NETWORK_BOOL, false);
         sDefaults.putBoolean(KEY_STK_DISABLE_LAUNCH_BROWSER_BOOL, false);
         sDefaults.putStringArray(KEY_CARRIER_WIFI_STRING_ARRAY, null);
+        sDefaults.putInt(KEY_IMSI_ENCODING_METHOD_INT, 2045);
         sDefaults.putInt(KEY_PREF_NETWORK_NOTIFICATION_DELAY_INT, -1);
         sDefaults.putInt(KEY_EMERGENCY_NOTIFICATION_DELAY_INT, -1);
         sDefaults.putBoolean(KEY_ALLOW_USSD_REQUESTS_VIA_TELEPHONY_MANAGER_BOOL, true);
