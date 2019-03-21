@@ -319,7 +319,8 @@ public class NetworkMonitor extends StateMachine {
     private final DnsStallDetector mDnsStallDetector;
     private long mLastProbeTime;
     // Set to true if data stall is suspected and reset to false after metrics are sent to statsd.
-    private boolean mCollectDataStallMetrics = false;
+    private boolean mCollectDataStallMetrics;
+    private boolean mAcceptPartialConnectivity;
 
     public NetworkMonitor(Context context, INetworkMonitorCallbacks cb, Network network,
             SharedLog validationLog) {
@@ -386,10 +387,11 @@ public class NetworkMonitor extends StateMachine {
     }
 
     /**
-     * ConnectivityService notifies NetworkMonitor that the user accepts partial connectivity and
-     * NetworkMonitor should ignore the https probe.
+     * ConnectivityService notifies NetworkMonitor that the user already accepted partial
+     * connectivity previously, so NetworkMonitor can validate the network even if it has partial
+     * connectivity.
      */
-    public void notifyAcceptPartialConnectivity() {
+    public void setAcceptPartialConnectivity() {
         sendMessage(EVENT_ACCEPT_PARTIAL_CONNECTIVITY);
     }
 
@@ -651,9 +653,11 @@ public class NetworkMonitor extends StateMachine {
                 case EVENT_DNS_NOTIFICATION:
                     mDnsStallDetector.accumulateConsecutiveDnsTimeoutCount(message.arg1);
                     break;
+                // Set mAcceptPartialConnectivity to true and if network start evaluating or
+                // re-evaluating and get the result of partial connectivity, ProbingState will
+                // disable HTTPS probe and transition to EvaluatingPrivateDnsState.
                 case EVENT_ACCEPT_PARTIAL_CONNECTIVITY:
-                    mUseHttps = false;
-                    transitionTo(mEvaluatingPrivateDnsState);
+                    mAcceptPartialConnectivity = true;
                     break;
                 default:
                     break;
@@ -849,6 +853,14 @@ public class NetworkMonitor extends StateMachine {
                     // ignore any re-evaluation requests. After, restart the
                     // evaluation process via EvaluatingState#enter.
                     return (mEvaluateAttempts < IGNORE_REEVALUATE_ATTEMPTS) ? HANDLED : NOT_HANDLED;
+                // Disable HTTPS probe and transition to EvaluatingPrivateDnsState because:
+                // 1. Network is connected and finish the network validation.
+                // 2. NetworkMonitor detects network is partial connectivity and user accepts it.
+                case EVENT_ACCEPT_PARTIAL_CONNECTIVITY:
+                    mAcceptPartialConnectivity = true;
+                    mUseHttps = false;
+                    transitionTo(mEvaluatingPrivateDnsState);
+                    return HANDLED;
                 default:
                     return NOT_HANDLED;
             }
@@ -1081,7 +1093,12 @@ public class NetworkMonitor extends StateMachine {
                         logNetworkEvent(NetworkEvent.NETWORK_PARTIAL_CONNECTIVITY);
                         notifyNetworkTested(NETWORK_TEST_RESULT_PARTIAL_CONNECTIVITY,
                                 probeResult.redirectUrl);
-                        transitionTo(mWaitingForNextProbeState);
+                        if (mAcceptPartialConnectivity) {
+                            mUseHttps = false;
+                            transitionTo(mEvaluatingPrivateDnsState);
+                        } else {
+                            transitionTo(mWaitingForNextProbeState);
+                        }
                     } else {
                         logNetworkEvent(NetworkEvent.NETWORK_VALIDATION_FAILED);
                         notifyNetworkTested(NETWORK_TEST_RESULT_INVALID, probeResult.redirectUrl);
