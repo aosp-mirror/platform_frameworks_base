@@ -1386,6 +1386,24 @@ public class CarrierConfigManager {
             "hide_lte_plus_data_icon_bool";
 
     /**
+     * The string is used to filter redundant string from PLMN Network Name that's supplied by
+     * specific carrier.
+     *
+     * @hide
+     */
+    public static final String KEY_OPERATOR_NAME_FILTER_PATTERN_STRING =
+            "operator_name_filter_pattern_string";
+
+    /**
+     * The string is used to compare with operator name. If it matches the pattern then show
+     * specific data icon.
+     *
+     * @hide
+     */
+    public static final String KEY_SHOW_CARRIER_DATA_ICON_PATTERN_STRING =
+            "show_carrier_data_icon_pattern_string";
+
+    /**
      * Boolean to decide whether to show precise call failed cause to user
      * @hide
      */
@@ -3027,6 +3045,8 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_SPN_DISPLAY_RULE_USE_ROAMING_FROM_SERVICE_STATE_BOOL, false);
         sDefaults.putBoolean(KEY_ALWAYS_SHOW_DATA_RAT_ICON_BOOL, false);
         sDefaults.putBoolean(KEY_SHOW_4G_FOR_LTE_DATA_ICON_BOOL, false);
+        sDefaults.putString(KEY_OPERATOR_NAME_FILTER_PATTERN_STRING, "");
+        sDefaults.putString(KEY_SHOW_CARRIER_DATA_ICON_PATTERN_STRING, "");
         sDefaults.putBoolean(KEY_HIDE_LTE_PLUS_DATA_ICON_BOOL, true);
         sDefaults.putBoolean(KEY_LTE_ENABLED_BOOL, true);
         sDefaults.putBoolean(KEY_SUPPORT_TDSCDMA_BOOL, false);

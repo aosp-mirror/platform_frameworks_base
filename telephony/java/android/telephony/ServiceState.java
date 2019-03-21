@@ -339,6 +339,9 @@ public class ServiceState implements Parcelable {
 
     private List<NetworkRegistrationInfo> mNetworkRegistrationInfos = new ArrayList<>();
 
+    private String mOperatorAlphaLongRaw;
+    private String mOperatorAlphaShortRaw;
+
     /**
      * get String description of roaming type
      * @hide
@@ -420,6 +423,8 @@ public class ServiceState implements Parcelable {
         mNetworkRegistrationInfos = s.mNetworkRegistrationInfos == null ? null :
                 s.getNetworkRegistrationInfoList();
         mNrFrequencyRange = s.mNrFrequencyRange;
+        mOperatorAlphaLongRaw = s.mOperatorAlphaLongRaw;
+        mOperatorAlphaShortRaw = s.mOperatorAlphaShortRaw;
     }
 
     /**
@@ -453,6 +458,8 @@ public class ServiceState implements Parcelable {
         mChannelNumber = in.readInt();
         mCellBandwidths = in.createIntArray();
         mNrFrequencyRange = in.readInt();
+        mOperatorAlphaLongRaw = in.readString();
+        mOperatorAlphaShortRaw = in.readString();
     }
 
     public void writeToParcel(Parcel out, int flags) {
@@ -478,6 +485,8 @@ public class ServiceState implements Parcelable {
         out.writeInt(mChannelNumber);
         out.writeIntArray(mCellBandwidths);
         out.writeInt(mNrFrequencyRange);
+        out.writeString(mOperatorAlphaLongRaw);
+        out.writeString(mOperatorAlphaShortRaw);
     }
 
     public int describeContents() {
@@ -836,7 +845,9 @@ public class ServiceState implements Parcelable {
                 mIsEmergencyOnly,
                 mLteEarfcnRsrpBoost,
                 mNetworkRegistrationInfos,
-                mNrFrequencyRange);
+                mNrFrequencyRange,
+                mOperatorAlphaLongRaw,
+                mOperatorAlphaShortRaw);
     }
 
     @Override
@@ -862,6 +873,8 @@ public class ServiceState implements Parcelable {
                 && equalsHandlesNulls(mCdmaDefaultRoamingIndicator,
                         s.mCdmaDefaultRoamingIndicator)
                 && mIsEmergencyOnly == s.mIsEmergencyOnly
+                && equalsHandlesNulls(mOperatorAlphaLongRaw, s.mOperatorAlphaLongRaw)
+                && equalsHandlesNulls(mOperatorAlphaShortRaw, s.mOperatorAlphaShortRaw)
                 && (mNetworkRegistrationInfos == null
                 ? s.mNetworkRegistrationInfos == null : s.mNetworkRegistrationInfos != null
                 && mNetworkRegistrationInfos.containsAll(s.mNetworkRegistrationInfos))
@@ -1019,6 +1032,8 @@ public class ServiceState implements Parcelable {
             .append(", mLteEarfcnRsrpBoost=").append(mLteEarfcnRsrpBoost)
             .append(", mNetworkRegistrationInfos=").append(mNetworkRegistrationInfos)
             .append(", mNrFrequencyRange=").append(mNrFrequencyRange)
+            .append(", mOperatorAlphaLongRaw=").append(mOperatorAlphaLongRaw)
+            .append(", mOperatorAlphaShortRaw=").append(mOperatorAlphaShortRaw)
             .append("}").toString();
     }
 
@@ -1056,6 +1071,8 @@ public class ServiceState implements Parcelable {
                 .setTransportType(AccessNetworkConstants.TRANSPORT_TYPE_WWAN)
                 .setRegistrationState(NetworkRegistrationInfo.REGISTRATION_STATE_UNKNOWN)
                 .build());
+        mOperatorAlphaLongRaw = null;
+        mOperatorAlphaShortRaw = null;
     }
 
     public void setStateOutOfService() {
@@ -1297,6 +1314,8 @@ public class ServiceState implements Parcelable {
         m.putInt("ChannelNumber", mChannelNumber);
         m.putIntArray("CellBandwidths", mCellBandwidths);
         m.putInt("mNrFrequencyRange", mNrFrequencyRange);
+        m.putString("operator-alpha-long-raw", mOperatorAlphaLongRaw);
+        m.putString("operator-alpha-short-raw", mOperatorAlphaShortRaw);
     }
 
     /** @hide */
@@ -1909,5 +1928,37 @@ public class ServiceState implements Parcelable {
         state.mVoiceOperatorNumeric = null;
 
         return state;
+    }
+
+    /**
+     * @hide
+     */
+    public void setOperatorAlphaLongRaw(String operatorAlphaLong) {
+        mOperatorAlphaLongRaw = operatorAlphaLong;
+    }
+
+    /**
+     * The current registered raw data network operator name in long alphanumeric format.
+     *
+     * @hide
+     */
+    public String getOperatorAlphaLongRaw() {
+        return mOperatorAlphaLongRaw;
+    }
+
+    /**
+     * @hide
+     */
+    public void setOperatorAlphaShortRaw(String operatorAlphaShort) {
+        mOperatorAlphaShortRaw = operatorAlphaShort;
+    }
+
+    /**
+     * The current registered raw data network operator name in short alphanumeric format.
+     *
+     * @hide
+     */
+    public String getOperatorAlphaShortRaw() {
+        return mOperatorAlphaShortRaw;
     }
 }
