@@ -5272,7 +5272,6 @@ public class TelephonyManager {
      */
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
     @SystemApi
-    @Nullable
     public boolean iccCloseLogicalChannelBySlot(int slotIndex, int channel) {
         try {
             ITelephony telephony = getITelephony();
@@ -5349,8 +5348,8 @@ public class TelephonyManager {
      * @param p3 P3 value of the APDU command. If p3 is negative a 4 byte APDU
      *            is sent to the SIM.
      * @param data Data to be sent with the APDU.
-     * @return The APDU response from the ICC card with the status appended at
-     *            the end.
+     * @return The APDU response from the ICC card with the status appended at the end, or null if
+     * there is an issue connecting to the Telephony service.
      * @hide
      */
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
