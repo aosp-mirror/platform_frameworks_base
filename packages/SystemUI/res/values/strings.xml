@@ -2370,12 +2370,29 @@
     <string name="bubbles_deep_link_button_description">Open <xliff:g id="app_name" example="YouTube">%1$s</xliff:g></string>
     <!-- Text used for content description of settings button in the header of expanded bubble
          view. [CHAR_LIMIT=NONE] -->
-    <string name="bubbles_settings_button_description">Open notification settings for <xliff:g id="app_name" example="YouTube">%1$s</xliff:g></string>
+    <string name="bubbles_settings_button_description">Settings for <xliff:g id="app_name" example="YouTube">%1$s</xliff:g> bubbles</string>
     <!-- Text for asking the user whether bubbles (floating app content) should be enabled for an
          app. [CHAR LIMIT=NONE] -->
-    <string name="bubbles_prompt">Allow bubbles from this app?</string>
+    <string name="bubbles_prompt">Allow bubbles from <xliff:g id="app_name" example="YouTube">%1$s</xliff:g>?</string>
     <!-- Text used for button allowing user to opt out of bubbles [CHAR LIMIT=20] -->
-    <string name="no_bubbles">Block</string>
+    <string name="no_bubbles">Deny</string>
     <!-- Text used for button allowing user to approve / enable bubbles [CHAR LIMIT=20] -->
     <string name="yes_bubbles">Allow</string>
+    <!-- Text used for the button allowing users to postpone their decision to allow or deny bubbles [CHAR LIMIT=40] -->
+    <string name="ask_me_later_bubbles">Ask me later</string>
+    <!-- Content description when a bubble is focused. [CHAR LIMIT=NONE] -->
+    <string name="bubble_content_description_single"><xliff:g id="notification_title" example="some title">%1$s</xliff:g> from <xliff:g id="app_name" example="YouTube">%2$s</xliff:g></string>
+    <!-- Content description when the stack of bubbles is focused. [CHAR LIMIT=NONE] -->
+    <string name="bubble_content_description_stack"><xliff:g id="notification_title" example="some title">%1$s</xliff:g> from <xliff:g id="app_name" example="YouTube">%2$s</xliff:g> and <xliff:g id="bubble_count" example="4">%3$d</xliff:g> more</string>
+    <!-- Action in accessibility menu to move the stack of bubbles [CHAR LIMIT=20] -->
+    <string name="bubble_accessibility_action_move">Move</string>
+    <!-- Action in accessibility menu to move the stack of bubbles to the top left of the screen. [CHAR LIMIT=30] -->
+    <string name="bubble_accessibility_action_move_top_left">Move top left</string>
+    <!-- Action in accessibility menu to move the stack of bubbles to the top right of the screen. [CHAR LIMIT=30] -->
+    <string name="bubble_accessibility_action_move_top_right">Move top right</string>
+    <!-- Action in accessibility menu to move the stack of bubbles to the bottom left of the screen. [CHAR LIMIT=30]-->
+    <string name="bubble_accessibility_action_move_bottom_left">Move bottom left</string>
+    <!-- Action in accessibility menu to move the stack of bubbles to the bottom right of the screen. [CHAR LIMIT=30]-->
+    <string name="bubble_accessibility_action_move_bottom_right">Move bottom right</string>
+
 </resources>
