@@ -275,14 +275,11 @@ public class KeyguardClockSwitch extends RelativeLayout {
         return mClockView.getTextSize();
     }
 
+    /**
+     * Refresh the time of the clock, due to either time tick broadcast or doze time tick alarm.
+     */
     public void refresh() {
         mClockView.refresh();
-    }
-
-    /**
-     * Notifies that time tick alarm from doze service fired.
-     */
-    public void dozeTimeTick() {
         if (mClockPlugin != null) {
             mClockPlugin.onTimeTick();
         }
