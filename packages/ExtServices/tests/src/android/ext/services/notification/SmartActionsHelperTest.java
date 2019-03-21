@@ -382,7 +382,7 @@ public class SmartActionsHelperTest {
         when(mStatusBarNotification.getNotification()).thenReturn(notification);
 
         mSmartActionsHelper.suggest(createNotificationEntry());
-        mSmartActionsHelper.onNotificationExpansionChanged(createNotificationEntry(), true, true);
+        mSmartActionsHelper.onNotificationExpansionChanged(createNotificationEntry(), true);
 
         ArgumentCaptor<TextClassifierEvent> argumentCaptor =
                 ArgumentCaptor.forClass(TextClassifierEvent.class);
@@ -398,7 +398,7 @@ public class SmartActionsHelperTest {
         when(mStatusBarNotification.getNotification()).thenReturn(notification);
 
         mSmartActionsHelper.suggest(createNotificationEntry());
-        mSmartActionsHelper.onNotificationExpansionChanged(createNotificationEntry(), false, false);
+        mSmartActionsHelper.onNotificationExpansionChanged(createNotificationEntry(), false);
 
         verify(mTextClassifier, never()).onTextClassifierEvent(
                 argThat(new TextClassifierEventMatcher(TextClassifierEvent.TYPE_ACTIONS_SHOWN)));
@@ -410,7 +410,7 @@ public class SmartActionsHelperTest {
         when(mStatusBarNotification.getNotification()).thenReturn(notification);
 
         mSmartActionsHelper.suggest(createNotificationEntry());
-        mSmartActionsHelper.onNotificationExpansionChanged(createNotificationEntry(), false, true);
+        mSmartActionsHelper.onNotificationExpansionChanged(createNotificationEntry(), true);
 
         ArgumentCaptor<TextClassifierEvent> argumentCaptor =
                 ArgumentCaptor.forClass(TextClassifierEvent.class);
