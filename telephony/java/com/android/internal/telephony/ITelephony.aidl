@@ -1919,15 +1919,18 @@ interface ITelephony {
      * Indicate if the enablement of multi SIM functionality is restricted.
      * @hide
      */
-    void setMultisimCarrierRestriction(boolean isMultisimCarrierRestricted);
+    void setMultiSimCarrierRestriction(boolean isMultiSimCarrierRestricted);
 
     /**
      * Returns if the usage of multiple SIM cards at the same time is supported.
      *
      * @param callingPackage The package making the call.
-     * @return true if multisim is supported, false otherwise.
+     * @return {@link #MULTISIM_ALLOWED} if the device supports multiple SIMs.
+     * {@link #MULTISIM_NOT_SUPPORTED_BY_HARDWARE} if the device does not support multiple SIMs.
+     * {@link #MULTISIM_NOT_SUPPORTED_BY_CARRIER} in the device supports multiple SIMs, but the
+     * functionality is restricted by the carrier.
      */
-    boolean isMultisimSupported(String callingPackage);
+    int isMultiSimSupported(String callingPackage);
 
     /**
      * Switch configs to enable multi-sim or switch back to single-sim
