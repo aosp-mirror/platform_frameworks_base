@@ -21,11 +21,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import android.net.SocketKeepalive.InvalidPacketException;
-import android.net.TcpKeepalivePacketData.TcpSocketInfo;
 
 import com.android.internal.util.TestUtils;
-
-import libcore.net.InetAddressUtils;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -37,14 +34,14 @@ import java.nio.ByteBuffer;
 
 @RunWith(JUnit4.class)
 public final class TcpKeepalivePacketDataTest {
+    private static final byte[] IPV4_KEEPALIVE_SRC_ADDR = {10, 0, 0, 1};
+    private static final byte[] IPV4_KEEPALIVE_DST_ADDR = {10, 0, 0, 5};
 
     @Before
     public void setUp() {}
 
     @Test
-    public void testV4TcpKeepalivePacket() {
-        final InetAddress srcAddr = InetAddressUtils.parseNumericAddress("192.168.0.1");
-        final InetAddress dstAddr = InetAddressUtils.parseNumericAddress("192.168.0.10");
+    public void testV4TcpKeepalivePacket() throws Exception {
         final int srcPort = 1234;
         final int dstPort = 4321;
         final int seq = 0x11111111;
@@ -52,20 +49,28 @@ public final class TcpKeepalivePacketDataTest {
         final int wnd = 8000;
         final int wndScale = 2;
         TcpKeepalivePacketData resultData = null;
-        TcpSocketInfo testInfo = new TcpSocketInfo(
-                srcAddr, srcPort, dstAddr, dstPort, seq, ack, wnd, wndScale);
+        final TcpKeepalivePacketDataParcelable testInfo = new TcpKeepalivePacketDataParcelable();
+        testInfo.srcAddress = IPV4_KEEPALIVE_SRC_ADDR;
+        testInfo.srcPort = srcPort;
+        testInfo.dstAddress = IPV4_KEEPALIVE_DST_ADDR;
+        testInfo.dstPort = dstPort;
+        testInfo.seq = seq;
+        testInfo.ack = ack;
+        testInfo.rcvWnd = wnd;
+        testInfo.rcvWndScale = wndScale;
         try {
             resultData = TcpKeepalivePacketData.tcpKeepalivePacket(testInfo);
         } catch (InvalidPacketException e) {
             fail("InvalidPacketException: " + e);
         }
 
-        assertEquals(testInfo.srcAddress, resultData.srcAddress);
-        assertEquals(testInfo.dstAddress, resultData.dstAddress);
+        assertEquals(InetAddress.getByAddress(testInfo.srcAddress), resultData.srcAddress);
+        assertEquals(InetAddress.getByAddress(testInfo.dstAddress), resultData.dstAddress);
         assertEquals(testInfo.srcPort, resultData.srcPort);
         assertEquals(testInfo.dstPort, resultData.dstPort);
         assertEquals(testInfo.seq, resultData.tcpSeq);
         assertEquals(testInfo.ack, resultData.tcpAck);
+        assertEquals(testInfo.rcvWnd, resultData.tcpWnd);
         assertEquals(testInfo.rcvWndScale, resultData.tcpWndScale);
 
         TestUtils.assertParcelingIsLossless(resultData, TcpKeepalivePacketData.CREATOR);
@@ -78,11 +83,11 @@ public final class TcpKeepalivePacketDataTest {
         byte[] ip = new byte[4];
         buf = ByteBuffer.wrap(packet, 12, 4);
         buf.get(ip);
-        assertArrayEquals(ip, srcAddr.getAddress());
+        assertArrayEquals(ip, IPV4_KEEPALIVE_SRC_ADDR);
         // Destination IP address.
         buf = ByteBuffer.wrap(packet, 16, 4);
         buf.get(ip);
-        assertArrayEquals(ip, dstAddr.getAddress());
+        assertArrayEquals(ip, IPV4_KEEPALIVE_DST_ADDR);
 
         buf = ByteBuffer.wrap(packet, 20, 12);
         // Source port.
@@ -102,25 +107,32 @@ public final class TcpKeepalivePacketDataTest {
 
     @Test
     public void testParcel() throws Exception {
-        final InetAddress srcAddr = InetAddresses.parseNumericAddress("192.168.0.1");
-        final InetAddress dstAddr = InetAddresses.parseNumericAddress("192.168.0.10");
         final int srcPort = 1234;
         final int dstPort = 4321;
         final int sequence = 0x11111111;
         final int ack = 0x22222222;
         final int wnd = 48_000;
         final int wndScale = 2;
+        final TcpKeepalivePacketDataParcelable testInfo = new TcpKeepalivePacketDataParcelable();
+        testInfo.srcAddress = IPV4_KEEPALIVE_SRC_ADDR;
+        testInfo.srcPort = srcPort;
+        testInfo.dstAddress = IPV4_KEEPALIVE_DST_ADDR;
+        testInfo.dstPort = dstPort;
+        testInfo.seq = sequence;
+        testInfo.ack = ack;
+        testInfo.rcvWnd = wnd;
+        testInfo.rcvWndScale = wndScale;
         TcpKeepalivePacketData testData = null;
         TcpKeepalivePacketDataParcelable resultData = null;
-        TcpSocketInfo testInfo = new TcpSocketInfo(
-                srcAddr, srcPort, dstAddr, dstPort, sequence, ack, wnd, wndScale);
         testData = TcpKeepalivePacketData.tcpKeepalivePacket(testInfo);
         resultData = testData.toStableParcelable();
-        assertArrayEquals(resultData.srcAddress, srcAddr.getAddress());
-        assertArrayEquals(resultData.dstAddress, dstAddr.getAddress());
+        assertArrayEquals(resultData.srcAddress, IPV4_KEEPALIVE_SRC_ADDR);
+        assertArrayEquals(resultData.dstAddress, IPV4_KEEPALIVE_DST_ADDR);
         assertEquals(resultData.srcPort, srcPort);
         assertEquals(resultData.dstPort, dstPort);
         assertEquals(resultData.seq, sequence);
         assertEquals(resultData.ack, ack);
+        assertEquals(resultData.rcvWnd, wnd);
+        assertEquals(resultData.rcvWndScale, wndScale);
     }
 }
