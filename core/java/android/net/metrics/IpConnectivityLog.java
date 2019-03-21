@@ -16,6 +16,7 @@
 
 package android.net.metrics;
 
+import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.net.ConnectivityMetricsEvent;
@@ -41,7 +42,7 @@ public class IpConnectivityLog {
 
     /** @hide */
     public static final String SERVICE_NAME = "connmetrics";
-
+    @NonNull
     private IIpConnectivityMetrics mService;
 
     /**
@@ -57,7 +58,7 @@ public class IpConnectivityLog {
 
     /** @hide */
     @VisibleForTesting
-    public IpConnectivityLog(IIpConnectivityMetrics service) {
+    public IpConnectivityLog(@NonNull IIpConnectivityMetrics service) {
         mService = service;
     }
 
@@ -83,7 +84,7 @@ public class IpConnectivityLog {
      * @return true if the event was successfully logged.
      * @hide
      */
-    public boolean log(ConnectivityMetricsEvent ev) {
+    public boolean log(@NonNull ConnectivityMetricsEvent ev) {
         if (!checkLoggerService()) {
             if (DBG) {
                 Log.d(TAG, SERVICE_NAME + " service was not ready");
@@ -109,7 +110,7 @@ public class IpConnectivityLog {
      * @param data is a Parcelable instance representing the event.
      * @return true if the event was successfully logged.
      */
-    public boolean log(long timestamp, Event data) {
+    public boolean log(long timestamp, @NonNull Event data) {
         ConnectivityMetricsEvent ev = makeEv(data);
         ev.timestamp = timestamp;
         return log(ev);
@@ -121,7 +122,7 @@ public class IpConnectivityLog {
      * @param data is a Parcelable instance representing the event.
      * @return true if the event was successfully logged.
      */
-    public boolean log(String ifname, Event data) {
+    public boolean log(@NonNull String ifname, @NonNull Event data) {
         ConnectivityMetricsEvent ev = makeEv(data);
         ev.ifname = ifname;
         return log(ev);
@@ -135,7 +136,7 @@ public class IpConnectivityLog {
      * @param data is a Parcelable instance representing the event.
      * @return true if the event was successfully logged.
      */
-    public boolean log(Network network, int[] transports, Event data) {
+    public boolean log(@NonNull Network network, @NonNull int[] transports, @NonNull Event data) {
         return log(network.netId, transports, data);
     }
 
@@ -147,7 +148,7 @@ public class IpConnectivityLog {
      * @param data is a Parcelable instance representing the event.
      * @return true if the event was successfully logged.
      */
-    public boolean log(int netid, int[] transports, Event data) {
+    public boolean log(int netid, @NonNull int[] transports, @NonNull Event data) {
         ConnectivityMetricsEvent ev = makeEv(data);
         ev.netId = netid;
         ev.transports = BitUtils.packBits(transports);
@@ -159,7 +160,7 @@ public class IpConnectivityLog {
      * @param data is a Parcelable instance representing the event.
      * @return true if the event was successfully logged.
      */
-    public boolean log(Event data) {
+    public boolean log(@NonNull Event data) {
         return log(makeEv(data));
     }
 
