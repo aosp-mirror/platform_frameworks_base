@@ -17,6 +17,7 @@
 package android.net.metrics;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.os.Parcel;
@@ -81,7 +82,7 @@ public final class ValidationProbeEvent implements IpConnectivityLog.Event {
     /**
      * Utility to create an instance of {@link ValidationProbeEvent}.
      */
-    public static class Builder {
+    public static final class Builder {
         private long mDurationMs;
         private int mProbeType;
         private int mReturnCode;
@@ -89,6 +90,7 @@ public final class ValidationProbeEvent implements IpConnectivityLog.Event {
         /**
          * Set the duration of the probe in milliseconds.
          */
+        @NonNull
         public Builder setDurationMs(long durationMs) {
             mDurationMs = durationMs;
             return this;
@@ -97,6 +99,7 @@ public final class ValidationProbeEvent implements IpConnectivityLog.Event {
         /**
          * Set the probe type based on whether it was the first validation.
          */
+        @NonNull
         public Builder setProbeType(int probeType, boolean firstValidation) {
             mProbeType = makeProbeType(probeType, firstValidation);
             return this;
@@ -105,6 +108,7 @@ public final class ValidationProbeEvent implements IpConnectivityLog.Event {
         /**
          * Set the return code of the probe.
          */
+        @NonNull
         public Builder setReturnCode(int returnCode) {
             mReturnCode = returnCode;
             return this;
@@ -113,6 +117,7 @@ public final class ValidationProbeEvent implements IpConnectivityLog.Event {
         /**
          * Create a new {@link ValidationProbeEvent}.
          */
+        @NonNull
         public ValidationProbeEvent build() {
             return new ValidationProbeEvent(mDurationMs, mProbeType, mReturnCode);
         }

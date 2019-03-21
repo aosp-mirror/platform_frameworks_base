@@ -19,6 +19,8 @@ package android.net.captiveportal;
 import static android.net.captiveportal.CaptivePortalProbeResult.PORTAL_CODE;
 import static android.net.captiveportal.CaptivePortalProbeResult.SUCCESS_CODE;
 
+import static com.android.internal.util.Preconditions.checkNotNull;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
@@ -48,9 +50,10 @@ public abstract class CaptivePortalProbeSpec {
     private final String mEncodedSpec;
     private final URL mUrl;
 
-    CaptivePortalProbeSpec(String encodedSpec, URL url) {
-        mEncodedSpec = encodedSpec;
-        mUrl = url;
+    CaptivePortalProbeSpec(@NonNull String encodedSpec, @NonNull URL url)
+            throws NullPointerException {
+        mEncodedSpec = checkNotNull(encodedSpec);
+        mUrl = checkNotNull(url);
     }
 
     /**
@@ -64,7 +67,7 @@ public abstract class CaptivePortalProbeSpec {
      */
     @VisibleForTesting
     @NonNull
-    public static CaptivePortalProbeSpec parseSpec(String spec) throws ParseException,
+    public static CaptivePortalProbeSpec parseSpec(@NonNull String spec) throws ParseException,
             MalformedURLException {
         if (TextUtils.isEmpty(spec)) {
             throw new ParseException("Empty probe spec", 0 /* errorOffset */);
@@ -84,7 +87,8 @@ public abstract class CaptivePortalProbeSpec {
     }
 
     @Nullable
-    private static Pattern parsePatternIfNonEmpty(String pattern, int pos) throws ParseException {
+    private static Pattern parsePatternIfNonEmpty(@Nullable String pattern, int pos)
+            throws ParseException {
         if (TextUtils.isEmpty(pattern)) {
             return null;
         }
@@ -120,8 +124,9 @@ public abstract class CaptivePortalProbeSpec {
      * <p>Each spec is separated by @@,@@ and follows the format for {@link #parseSpec(String)}.
      * <p>This method does not throw but ignores any entry that could not be parsed.
      */
+    @NonNull
     public static Collection<CaptivePortalProbeSpec> parseCaptivePortalProbeSpecs(
-            String settingsVal) {
+            @NonNull String settingsVal) {
         List<CaptivePortalProbeSpec> specs = new ArrayList<>();
         if (settingsVal != null) {
             for (String spec : TextUtils.split(settingsVal, SPEC_SEPARATOR)) {
@@ -142,12 +147,15 @@ public abstract class CaptivePortalProbeSpec {
     /**
      * Get the probe result from HTTP status and location header.
      */
+    @NonNull
     public abstract CaptivePortalProbeResult getResult(int status, @Nullable String locationHeader);
 
+    @NonNull
     public String getEncodedSpec() {
         return mEncodedSpec;
     }
 
+    @NonNull
     public URL getUrl() {
         return mUrl;
     }
