@@ -85,6 +85,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         @Override
         public void onFullyShown() {
             updateStates();
+            mStatusBar.wakeUpIfDozing(SystemClock.uptimeMillis(), mContainer, "BOUNCER_VISIBLE");
         }
 
         @Override
@@ -344,14 +345,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
                 launchPendingWakeupAction();
             }
         }
-    }
-
-    public void onScreenTurnedOff() {
-        // TODO: remove
-    }
-
-    public void notifyDeviceWakeUpRequested() {
-        // TODO: remove
     }
 
     public void setNeedsInput(boolean needsInput) {

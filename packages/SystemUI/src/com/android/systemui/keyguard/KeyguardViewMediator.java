@@ -2031,7 +2031,6 @@ public class KeyguardViewMediator extends SystemUI {
     private void handleNotifyScreenTurnedOff() {
         synchronized (this) {
             if (DEBUG) Log.d(TAG, "handleNotifyScreenTurnedOff");
-            mStatusBarKeyguardViewManager.onScreenTurnedOff();
             mDrawnCallback = null;
         }
     }

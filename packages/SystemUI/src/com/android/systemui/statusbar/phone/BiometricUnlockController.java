@@ -303,7 +303,6 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback {
             case MODE_SHOW_BOUNCER:
                 Trace.beginSection("MODE_UNLOCK or MODE_SHOW_BOUNCER");
                 if (!wasDeviceInteractive) {
-                    mStatusBarKeyguardViewManager.notifyDeviceWakeUpRequested();
                     mPendingShowBouncer = true;
                 } else {
                     showBouncer();
