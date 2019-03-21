@@ -45,7 +45,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.Collections;
-import java.util.Set;
+import java.util.List;
 
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
@@ -118,10 +118,10 @@ public class AutoTileManagerTest extends SysuiTestCase {
         verify(mQsTileHost, never()).addTile("night");
     }
 
-    private static Set<CastDevice> buildFakeCastDevice(boolean isCasting) {
+    private static List<CastDevice> buildFakeCastDevice(boolean isCasting) {
         CastDevice cd = new CastDevice();
         cd.state = isCasting ? CastDevice.STATE_CONNECTED : CastDevice.STATE_DISCONNECTED;
-        return Collections.singleton(cd);
+        return Collections.singletonList(cd);
     }
 
     @Test
