@@ -241,6 +241,14 @@ public final class DeviceConfig {
     public static final String NAMESPACE_SYSTEMUI = "systemui";
 
     /**
+     * Telephony related properties.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String NAMESPACE_TELEPHONY = "telephony";
+
+    /**
      * Namespace for TextClassifier related features.
      *
      * @hide
@@ -285,7 +293,6 @@ public final class DeviceConfig {
      *
      * @hide
      */
-    @SystemApi
     public interface Telephony {
         String NAMESPACE = "telephony";
         /**
