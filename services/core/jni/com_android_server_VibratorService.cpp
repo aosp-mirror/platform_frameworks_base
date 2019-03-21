@@ -96,7 +96,7 @@ bool isValidEffect(jlong effect) {
     }
     R val = static_cast<R>(effect);
     auto iter = hardware::hidl_enum_range<R>();
-    return val >= *iter.begin() && val < *std::prev(iter.end());
+    return val >= *iter.begin() && val <= *std::prev(iter.end());
 }
 
 static void vibratorInit(JNIEnv /* env */, jobject /* clazz */)
@@ -169,6 +169,9 @@ static jlong vibratorPerformEffect(JNIEnv*, jobject, jlong effect, jint strength
                            effectStrength, callback);
     } else if (isValidEffect<V1_2::Effect>(effect)) {
         ret = halCall(&V1_2::IVibrator::perform_1_2, static_cast<V1_2::Effect>(effect),
+                           effectStrength, callback);
+    } else if (isValidEffect<V1_3::Effect>(effect)) {
+        ret = halCall(&V1_3::IVibrator::perform_1_3, static_cast<V1_3::Effect>(effect),
                            effectStrength, callback);
     } else {
         ALOGW("Unable to perform haptic effect, invalid effect ID (%" PRId32 ")",
