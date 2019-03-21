@@ -46,10 +46,10 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="@dimen/car_padding_2"
+                android:layout_margin="@*android:dimen/car_padding_2"
                 android:gravity="center"
                 android:textColor="@android:color/white"
-                android:textSize="@dimen/car_body1_size"
+                android:textSize="@*android:dimen/car_body1_size"
                 android:text="@string/keyguard_enter_your_pattern" />
 
             <include layout="@layout/keyguard_message_area" />

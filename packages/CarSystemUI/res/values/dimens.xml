@@ -49,7 +49,7 @@
 
     <dimen name="volume_dialog_elevation">6dp</dimen>
 
-    <dimen name="volume_dialog_row_margin_end">@dimen/car_keyline_3</dimen>
+    <dimen name="volume_dialog_row_margin_end">@*android:dimen/car_keyline_3</dimen>
 
     <dimen name="volume_dialog_row_padding_end">0dp</dimen>
 

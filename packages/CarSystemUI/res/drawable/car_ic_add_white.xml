@@ -13,8 +13,8 @@
      limitations under the License.
 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="@dimen/car_touch_target_size"
-    android:height="@dimen/car_touch_target_size"
+    android:width="@*android:dimen/car_touch_target_size"
+    android:height="@*android:dimen/car_touch_target_size"
     android:viewportWidth="24.0"
     android:viewportHeight="24.0">
   <path

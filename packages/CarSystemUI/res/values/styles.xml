@@ -29,12 +29,12 @@
         parent="@*android:style/TextAppearance.StatusBar.Icon">
         <item name="android:textSize">42sp</item>
         <item name="android:fontFamily">sans-serif-regular</item>
-        <item name="android:textColor">@color/car_grey_50</item>
+        <item name="android:textColor">@*android:color/car_grey_50</item>
     </style>
 
-    <style name="TextAppearance.Car.Status">
-        <item name="android:textSize">@dimen/car_body2_size</item>
-        <item name="android:textColor">@color/car_grey_50</item>
+    <style name="TextAppearance.CarStatus" parent="@android:style/TextAppearance.DeviceDefault">
+        <item name="android:textSize">@*android:dimen/car_body2_size</item>
+        <item name="android:textColor">@*android:color/car_grey_50</item>
     </style>
 
     <style name="CarNavigationBarButtonTheme">

@@ -29,7 +29,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="horizontal"
-    android:paddingHorizontal="@dimen/car_margin">
+    android:paddingHorizontal="@*android:dimen/car_margin">
 
     <FrameLayout
         android:layout_width="0dp"
@@ -72,10 +72,10 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="@dimen/car_padding_2"
+            android:layout_margin="@*android:dimen/car_padding_2"
             android:gravity="center"
             android:textColor="@android:color/white"
-            android:textSize="@dimen/car_body1_size"
+            android:textSize="@*android:dimen/car_body1_size"
             android:text="@string/keyguard_enter_your_pin" />
 
         <include layout="@layout/keyguard_message_area" />
