@@ -3647,6 +3647,9 @@
   <java-symbol type="string" name="battery_saver_notification_channel_name" />
   <java-symbol type="string" name="battery_saver_sticky_disabled_notification_title" />
   <java-symbol type="string" name="battery_saver_sticky_disabled_notification_summary" />
+  <java-symbol type="string" name="battery_saver_charged_notification_title" />
+  <java-symbol type="string" name="battery_saver_off_notification_summary" />
+  <java-symbol type="string" name="battery_saver_off_alternative_notification_summary" />
   <java-symbol type="string" name="dynamic_mode_notification_channel_name" />
   <java-symbol type="string" name="dynamic_mode_notification_title" />
   <java-symbol type="string" name="dynamic_mode_notification_summary" />
