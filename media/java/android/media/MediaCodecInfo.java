@@ -21,6 +21,7 @@ import static android.media.Utils.sortDistinctRanges;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.os.Build;
 import android.util.Log;
@@ -31,6 +32,7 @@ import android.util.Size;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -1332,7 +1334,7 @@ public final class MediaCodecInfo {
         private Range<Rational> mBlockAspectRatioRange;
         private Range<Long> mBlocksPerSecondRange;
         private Map<Size, Range<Long>> mMeasuredFrameRates;
-        private Vector<PerformancePoint> mPerformancePoints;
+        private List<PerformancePoint> mPerformancePoints;
         private Range<Integer> mFrameRateRange;
 
         private int mBlockWidth;
@@ -1620,45 +1622,136 @@ public final class MediaCodecInfo {
          * rate.
          */
         public static final class PerformancePoint {
+            private Size mBlockSize; // codec block size in macroblocks
+            private int mWidth; // width in macroblocks
+            private int mHeight; // height in macroblocks
+            private int mMaxFrameRate; // max frames per second
+            private long mMaxMacroBlockRate; // max macro block rate
+
             /**
-             * (Maximum) number of macroblocks in the frame.
+             * Maximum number of macroblocks in the frame.
              *
              * Video frames are conceptually divided into 16-by-16 pixel blocks called macroblocks.
              * Most coding standards operate on these 16-by-16 pixel blocks; thus, codec performance
              * is characterized using such blocks.
+             *
+             * @hide
              */
-            public final int macroBlocks;
+            @TestApi
+            public int getMaxMacroBlocks() {
+                return saturateLongToInt(mWidth * (long)mHeight);
+            }
 
             /**
-             * (Maximum) frame rate in frames per second.
+             * Maximum frame rate in frames per second.
+             *
+             * @hide
              */
-            public final int frameRate;
+            @TestApi
+            public int getMaxFrameRate() {
+                return mMaxFrameRate;
+            }
 
             /**
-             * (Maximum) number of macroblocks processed per second.
+             * Maximum number of macroblocks processed per second.
+             *
+             * @hide
              */
-            public final long macroBlockRate;
+            @TestApi
+            public long getMaxMacroBlockRate() {
+                return mMaxMacroBlockRate;
+            }
 
-            /* package private */
-            PerformancePoint(int width_, int height_, int frameRate_, int maxFrameRate_) {
-                macroBlocks = saturateLongToInt(
-                        ((Math.max(1, (long)width_) + 15) / 16)
-                                * ((Math.max(1, (long)height_) + 15) / 16));
-                frameRate = Math.max(1, frameRate_);
-                macroBlockRate = Math.max(maxFrameRate_, frameRate) * macroBlocks;
+            /** Convert to a debug string */
+            public String toString() {
+                int blockWidth = 16 * mBlockSize.getWidth();
+                int blockHeight = 16 * mBlockSize.getHeight();
+                int origRate = (int)Utils.divUp(mMaxMacroBlockRate, getMaxMacroBlocks());
+                String info = (mWidth * 16) + "x" + (mHeight * 16) + "@" + origRate;
+                if (origRate < mMaxFrameRate) {
+                    info += ", max " + mMaxFrameRate + "fps";
+                }
+                if (blockWidth > 16 || blockHeight > 16) {
+                    info += ", " + blockWidth + "x" + blockHeight + " blocks";
+                }
+                return "PerformancePoint(" + info + ")";
+            }
+
+            /**
+             * Create a detailed performance point with custom max frame rate and macroblock size.
+             *
+             * @param width  frame width in pixels
+             * @param height frame height in pixels
+             * @param frameRate frames per second for frame width and height
+             * @param maxFrameRate maximum frames per second for any frame size
+             * @param blockSize block size for codec implementation. Must be powers of two in both
+             *        width and height.
+             *
+             * @throws IllegalArgumentException if the blockSize dimensions are not powers of two.
+             *
+             * @hide
+             */
+            @TestApi
+            public PerformancePoint(
+                    int width, int height, int frameRate, int maxFrameRate,
+                    @NonNull Size blockSize) {
+                checkPowerOfTwo(blockSize.getWidth(), "block width");
+                checkPowerOfTwo(blockSize.getHeight(), "block height");
+
+                mBlockSize = new Size(Utils.divUp(blockSize.getWidth(), 16),
+                                      Utils.divUp(blockSize.getHeight(), 16));
+                // these are guaranteed not to overflow as we decimate by 16
+                mWidth = (int)(Utils.divUp(Math.max(1L, width),
+                                           Math.max(blockSize.getWidth(), 16))
+                               * mBlockSize.getWidth());
+                mHeight = (int)(Utils.divUp(Math.max(1L, height),
+                                            Math.max(blockSize.getHeight(), 16))
+                                * mBlockSize.getHeight());
+                mMaxFrameRate = Math.max(1, Math.max(frameRate, maxFrameRate));
+                mMaxMacroBlockRate = Math.max(1, frameRate) * getMaxMacroBlocks();
+                Log.i("PP", "Created " + this);
+            }
+
+            /**
+             * Convert a performance point to a larger blocksize.
+             *
+             * @param pp performance point
+             * @param blockSize block size for codec implementation
+             *
+             * @hide
+             */
+            @TestApi
+            public PerformancePoint(@NonNull PerformancePoint pp, @NonNull Size newBlockSize) {
+                this(
+                        pp.mWidth * 16, pp.mHeight * 16,
+                        // guaranteed not to overflow as these were multiplied at construction
+                        (int)Utils.divUp(pp.mMaxMacroBlockRate, pp.getMaxMacroBlocks()),
+                        pp.mMaxFrameRate,
+                        new Size(Math.max(newBlockSize.getWidth(), pp.mBlockSize.getWidth() * 16),
+                                 Math.max(newBlockSize.getHeight(), pp.mBlockSize.getHeight() * 16))
+                );
+                /*
+                // these are guaranteed not to overflow as size * blockSize is decimated by 16
+                width = align(pp.width * pp.blockSize.getWidth(), blockSize.getWidth());
+                height = align(pp.height * pp.blockSize.getHeight(), blockSize.getHeight());
+                frameRate = pp.frameRate;
+                macroBlockRate = align(pp.macroBlockRate, blockSize.getWidth * blockSize.getHeight());
+                */
+                Log.i("PP", " from " + pp + " and " + newBlockSize);
             }
 
             /**
              * Create a performance point for a given frame size and frame rate.
              *
-             * @param width_ width of the frame in pixels
-             * @param height_ height of the frame in pixels
-             * @param frameRate_ frame rate in frames per second
+             * @param width width of the frame in pixels
+             * @param height height of the frame in pixels
+             * @param frameRate frame rate in frames per second
              */
-            public PerformancePoint(int width_, int height_, int frameRate_) {
-                this(width_, height_, frameRate_, frameRate_ /* maxFrameRate */);
+            public PerformancePoint(int width, int height, int frameRate) {
+                this(width, height, frameRate, frameRate /* maxFrameRate */, new Size(16, 16));
             }
 
+            /** Saturates a long value to int */
             private int saturateLongToInt(long value) {
                 if (value < Integer.MIN_VALUE) {
                     return Integer.MIN_VALUE;
@@ -1666,6 +1759,19 @@ public final class MediaCodecInfo {
                     return Integer.MAX_VALUE;
                 } else {
                     return (int)value;
+                }
+            }
+
+            /* This method may overflow */
+            private int align(int value, int alignment) {
+                return Utils.divUp(value, alignment) * alignment;
+            }
+
+            /** Checks that value is a power of two. */
+            private void checkPowerOfTwo2(int value, @NonNull String description) {
+                if (value == 0 || (value & (value - 1)) != 0) {
+                    throw new IllegalArgumentException(
+                            description + " (" + value + ") must be a power of 2");
                 }
             }
 
@@ -1680,7 +1786,7 @@ public final class MediaCodecInfo {
                 PerformancePoint other = new PerformancePoint(
                         format.getInteger(MediaFormat.KEY_WIDTH, 0),
                         format.getInteger(MediaFormat.KEY_HEIGHT, 0),
-                        // safely convert ceil(double) to int through float case and Math.round
+                        // safely convert ceil(double) to int through float cast and Math.round
                         Math.round((float)(
                                 Math.ceil(format.getNumber(MediaFormat.KEY_FRAME_RATE, 0)
                                         .doubleValue()))));
@@ -1690,7 +1796,7 @@ public final class MediaCodecInfo {
             /**
              * Checks whether the performance point covers another performance point. Use this
              * method to determine if a performance point advertised by a codec covers the
-             * performance point required. This method can also be used for lose ordering as this
+             * performance point required. This method can also be used for loose ordering as this
              * method is transitive.
              *
              * @param other other performance point considered
@@ -1698,91 +1804,139 @@ public final class MediaCodecInfo {
              * @return {@code true} if the performance point covers the other.
              */
             public boolean covers(@NonNull PerformancePoint other) {
-                return (macroBlocks >= other.macroBlocks
-                        && frameRate >= other.frameRate
-                        && macroBlockRate >= other.macroBlockRate);
+                // convert performance points to common block size
+                Size commonSize = getCommonBlockSize(other);
+                PerformancePoint aligned = new PerformancePoint(this, commonSize);
+                PerformancePoint otherAligned = new PerformancePoint(other, commonSize);
+
+                return (aligned.getMaxMacroBlocks() >= otherAligned.getMaxMacroBlocks()
+                        && aligned.mMaxFrameRate >= otherAligned.mMaxFrameRate
+                        && aligned.mMaxMacroBlockRate >= otherAligned.mMaxMacroBlockRate);
             }
 
+            private @NonNull Size getCommonBlockSize(@NonNull PerformancePoint other) {
+                return new Size(
+                        Math.max(mBlockSize.getWidth(), other.mBlockSize.getWidth()) * 16,
+                        Math.max(mBlockSize.getHeight(), other.mBlockSize.getHeight()) * 16);
+            }
 
             @Override
             public boolean equals(Object o) {
                 if (o instanceof PerformancePoint) {
+                    // convert performance points to common block size
                     PerformancePoint other = (PerformancePoint)o;
-                    return (macroBlocks == other.macroBlocks
-                            && frameRate == other.frameRate
-                            && macroBlockRate == other.macroBlockRate);
+                    Size commonSize = getCommonBlockSize(other);
+                    PerformancePoint aligned = new PerformancePoint(this, commonSize);
+                    PerformancePoint otherAligned = new PerformancePoint(other, commonSize);
+
+                    return (aligned.getMaxMacroBlocks() == otherAligned.getMaxMacroBlocks()
+                            && aligned.mMaxFrameRate == otherAligned.mMaxFrameRate
+                            && aligned.mMaxMacroBlockRate == otherAligned.mMaxMacroBlockRate);
                 }
                 return false;
             }
 
             /** 480p 24fps */
+            @NonNull
             public static final PerformancePoint SD_24 = new PerformancePoint(720, 480, 24);
             /** 576p 25fps */
+            @NonNull
             public static final PerformancePoint SD_25 = new PerformancePoint(720, 576, 25);
             /** 480p 30fps */
+            @NonNull
             public static final PerformancePoint SD_30 = new PerformancePoint(720, 480, 30);
             /** 480p 48fps */
+            @NonNull
             public static final PerformancePoint SD_48 = new PerformancePoint(720, 480, 48);
             /** 576p 50fps */
+            @NonNull
             public static final PerformancePoint SD_50 = new PerformancePoint(720, 576, 50);
             /** 480p 60fps */
+            @NonNull
             public static final PerformancePoint SD_60 = new PerformancePoint(720, 480, 60);
 
             /** 720p 24fps */
+            @NonNull
             public static final PerformancePoint HD_24 = new PerformancePoint(1280, 720, 24);
             /** 720p 25fps */
+            @NonNull
             public static final PerformancePoint HD_25 = new PerformancePoint(1280, 720, 25);
             /** 720p 30fps */
+            @NonNull
             public static final PerformancePoint HD_30 = new PerformancePoint(1280, 720, 30);
             /** 720p 50fps */
+            @NonNull
             public static final PerformancePoint HD_50 = new PerformancePoint(1280, 720, 50);
             /** 720p 60fps */
+            @NonNull
             public static final PerformancePoint HD_60 = new PerformancePoint(1280, 720, 60);
             /** 720p 100fps */
+            @NonNull
             public static final PerformancePoint HD_100 = new PerformancePoint(1280, 720, 100);
             /** 720p 120fps */
+            @NonNull
             public static final PerformancePoint HD_120 = new PerformancePoint(1280, 720, 120);
             /** 720p 200fps */
+            @NonNull
             public static final PerformancePoint HD_200 = new PerformancePoint(1280, 720, 200);
             /** 720p 240fps */
+            @NonNull
             public static final PerformancePoint HD_240 = new PerformancePoint(1280, 720, 240);
 
             /** 1080p 24fps */
+            @NonNull
             public static final PerformancePoint FHD_24 = new PerformancePoint(1920, 1080, 24);
             /** 1080p 25fps */
+            @NonNull
             public static final PerformancePoint FHD_25 = new PerformancePoint(1920, 1080, 25);
             /** 1080p 30fps */
+            @NonNull
             public static final PerformancePoint FHD_30 = new PerformancePoint(1920, 1080, 30);
             /** 1080p 50fps */
+            @NonNull
             public static final PerformancePoint FHD_50 = new PerformancePoint(1920, 1080, 50);
             /** 1080p 60fps */
+            @NonNull
             public static final PerformancePoint FHD_60 = new PerformancePoint(1920, 1080, 60);
             /** 1080p 100fps */
+            @NonNull
             public static final PerformancePoint FHD_100 = new PerformancePoint(1920, 1080, 100);
             /** 1080p 120fps */
+            @NonNull
             public static final PerformancePoint FHD_120 = new PerformancePoint(1920, 1080, 120);
             /** 1080p 200fps */
+            @NonNull
             public static final PerformancePoint FHD_200 = new PerformancePoint(1920, 1080, 200);
             /** 1080p 240fps */
+            @NonNull
             public static final PerformancePoint FHD_240 = new PerformancePoint(1920, 1080, 240);
 
             /** 2160p 24fps */
+            @NonNull
             public static final PerformancePoint UHD_24 = new PerformancePoint(3840, 2160, 24);
             /** 2160p 25fps */
+            @NonNull
             public static final PerformancePoint UHD_25 = new PerformancePoint(3840, 2160, 25);
             /** 2160p 30fps */
+            @NonNull
             public static final PerformancePoint UHD_30 = new PerformancePoint(3840, 2160, 30);
             /** 2160p 50fps */
+            @NonNull
             public static final PerformancePoint UHD_50 = new PerformancePoint(3840, 2160, 50);
             /** 2160p 60fps */
+            @NonNull
             public static final PerformancePoint UHD_60 = new PerformancePoint(3840, 2160, 60);
             /** 2160p 100fps */
+            @NonNull
             public static final PerformancePoint UHD_100 = new PerformancePoint(3840, 2160, 100);
             /** 2160p 120fps */
+            @NonNull
             public static final PerformancePoint UHD_120 = new PerformancePoint(3840, 2160, 120);
             /** 2160p 200fps */
+            @NonNull
             public static final PerformancePoint UHD_200 = new PerformancePoint(3840, 2160, 200);
             /** 2160p 240fps */
+            @NonNull
             public static final PerformancePoint UHD_240 = new PerformancePoint(3840, 2160, 240);
         }
 
@@ -1803,10 +1957,7 @@ public final class MediaCodecInfo {
          */
         @Nullable
         public List<PerformancePoint> getSupportedPerformancePoints() {
-            if (mPerformancePoints == null) {
-                return null;
-            }
-            return new ArrayList<PerformancePoint>(mPerformancePoints);
+            return mPerformancePoints;
         }
 
         /**
@@ -1945,7 +2096,7 @@ public final class MediaCodecInfo {
             mSmallerDimensionUpperLimit = SIZE_RANGE.getUpper();
         }
 
-        private @Nullable Vector<PerformancePoint> getPerformancePoints(Map<String, Object> map) {
+        private @Nullable List<PerformancePoint> getPerformancePoints(Map<String, Object> map) {
             Vector<PerformancePoint> ret = new Vector<>();
             final String prefix = "performance-point-";
             Set<String> keys = map.keySet();
@@ -1959,7 +2110,7 @@ public final class MediaCodecInfo {
                     // This means that component knowingly did not publish performance points.
                     // This is different from when the component forgot to publish performance
                     // points.
-                    return ret;
+                    return Collections.unmodifiableList(ret);
                 }
                 String[] temp = key.split("-");
                 if (temp.length != 4) {
@@ -1974,23 +2125,32 @@ public final class MediaCodecInfo {
                 if (range == null || range.getLower() < 0 || range.getUpper() < 0) {
                     continue;
                 }
-                ret.add(new PerformancePoint(
+                PerformancePoint given = new PerformancePoint(
                         size.getWidth(), size.getHeight(), range.getLower().intValue(),
-                        range.getUpper().intValue()));
+                        range.getUpper().intValue(), new Size(mBlockWidth, mBlockHeight));
+                PerformancePoint rotated = new PerformancePoint(
+                        size.getHeight(), size.getWidth(), range.getLower().intValue(),
+                        range.getUpper().intValue(), new Size(mBlockWidth, mBlockHeight));
+                ret.add(given);
+                if (!given.covers(rotated)) {
+                    ret.add(rotated);
+                }
             }
+
             // check if the component specified no performance point indication
             if (ret.size() == 0) {
                 return null;
             }
 
             // sort reversed by area first, then by frame rate
-            ret.sort((a, b) -> -((a.macroBlocks != b.macroBlocks) ?
-                                        (a.macroBlocks < b.macroBlocks ? -1 : 1) :
-                                (a.macroBlockRate != b.macroBlockRate) ?
-                                        (a.macroBlockRate < b.macroBlockRate ? -1 : 1) :
-                                (a.frameRate != b.frameRate) ?
-                                        (a.frameRate < b.frameRate ? -1 : 1) : 0));
-            return ret;
+            ret.sort((a, b) ->
+                     -((a.getMaxMacroBlocks() != b.getMaxMacroBlocks()) ?
+                               (a.getMaxMacroBlocks() < b.getMaxMacroBlocks() ? -1 : 1) :
+                       (a.getMaxMacroBlockRate() != b.getMaxMacroBlockRate()) ?
+                               (a.getMaxMacroBlockRate() < b.getMaxMacroBlockRate() ? -1 : 1) :
+                       (a.getMaxFrameRate() != b.getMaxFrameRate()) ?
+                               (a.getMaxFrameRate() < b.getMaxFrameRate() ? -1 : 1) : 0));
+            return Collections.unmodifiableList(ret);
         }
 
         private Map<Size, Range<Long>> getMeasuredFrameRates(Map<String, Object> map) {
