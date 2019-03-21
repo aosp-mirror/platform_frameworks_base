@@ -1307,6 +1307,12 @@
     <!-- Content description for accessibility (not shown on the screen): volume dialog collapse button. [CHAR LIMIT=NONE] -->
     <string name="accessibility_volume_collapse">Collapse</string>
 
+    <!-- Label for the odi caption initial tool tip. [CHAR LIMIT=28] -->
+    <string name="volume_odi_captions_tip">Automatically caption media</string>
+
+    <!-- Content description for accessibility: Clear the odi caption tool tip. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_volume_close_odi_captions_tip">Close captions tip</string>
+
     <!-- content description for audio output chooser [CHAR LIMIT=NONE]-->
     <string name="accessibility_output_chooser">Switch output device</string>
 

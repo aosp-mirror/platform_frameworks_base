@@ -319,6 +319,10 @@
         <item name="android:windowIsFloating">true</item>
     </style>
 
+    <style name="volume_dialog_theme" parent="qs_theme">
+        <item name="android:windowIsFloating">false</item>
+    </style>
+
     <style name="systemui_theme_remote_input" parent="@android:style/Theme.DeviceDefault.Light">
         <item name="android:colorAccent">@color/remote_input_accent</item>
     </style>

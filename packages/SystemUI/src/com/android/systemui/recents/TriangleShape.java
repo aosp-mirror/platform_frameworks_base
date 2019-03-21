@@ -50,6 +50,24 @@ public class TriangleShape extends PathShape {
         return new TriangleShape(triangularPath, width, height);
     }
 
+    /** Create an arrow TriangleShape that points to the left or the right */
+    public static TriangleShape createHorizontal(
+            float width, float height, boolean isPointingLeft) {
+        Path triangularPath = new Path();
+        if (isPointingLeft) {
+            triangularPath.moveTo(0, height / 2);
+            triangularPath.lineTo(width, height);
+            triangularPath.lineTo(width, 0);
+            triangularPath.close();
+        } else {
+            triangularPath.moveTo(0, height);
+            triangularPath.lineTo(width, height / 2);
+            triangularPath.lineTo(0, 0);
+            triangularPath.close();
+        }
+        return new TriangleShape(triangularPath, width, height);
+    }
+
     @Override
     public void getOutline(@NonNull Outline outline) {
         outline.setConvexPath(mTriangularPath);

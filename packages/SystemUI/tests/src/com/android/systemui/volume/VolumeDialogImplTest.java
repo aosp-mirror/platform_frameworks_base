@@ -118,6 +118,17 @@ public class VolumeDialogImplTest extends SysuiTestCase {
     }
 
     @Test
+    public void testComputeTimeout_tooltip() {
+        Mockito.reset(mAccessibilityMgr);
+        mDialog.showCaptionsTooltip();
+        verify(mAccessibilityMgr).getRecommendedTimeoutMillis(
+                VolumeDialogImpl.DIALOG_ODI_CAPTIONS_TOOLTIP_TIMEOUT_MILLIS,
+                AccessibilityManager.FLAG_CONTENT_CONTROLS
+                | AccessibilityManager.FLAG_CONTENT_TEXT);
+    }
+
+
+    @Test
     public void testComputeTimeout_withHovering() {
         Mockito.reset(mAccessibilityMgr);
         View dialog = mDialog.getDialogView();
@@ -144,6 +155,16 @@ public class VolumeDialogImplTest extends SysuiTestCase {
                 VolumeDialogImpl.DIALOG_SAFETYWARNING_TIMEOUT_MILLIS,
                 AccessibilityManager.FLAG_CONTENT_TEXT
                         | AccessibilityManager.FLAG_CONTENT_CONTROLS);
+    }
+
+    @Test
+    public void testComputeTimeout_standard() {
+        Mockito.reset(mAccessibilityMgr);
+        mDialog.tryToRemoveCaptionsTooltip();
+        mDialog.rescheduleTimeoutH();
+        verify(mAccessibilityMgr).getRecommendedTimeoutMillis(
+                VolumeDialogImpl.DIALOG_TIMEOUT_MILLIS,
+                AccessibilityManager.FLAG_CONTENT_CONTROLS);
     }
 
 /*

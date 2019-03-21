@@ -60,7 +60,8 @@ public interface VolumeDialogController {
 
     boolean areCaptionsEnabled();
     void setCaptionsEnabled(boolean isEnabled);
-    void getCaptionsComponentState();
+
+    void getCaptionsComponentState(boolean fromTooltip);
 
     @ProvidesInterface(version = StreamState.VERSION)
     public static final class StreamState {
@@ -190,6 +191,6 @@ public interface VolumeDialogController {
         void onScreenOff();
         void onShowSafetyWarning(int flags);
         void onAccessibilityModeChanged(Boolean showA11yStream);
-        void onCaptionComponentStateChanged(Boolean isComponentEnabled);
+        void onCaptionComponentStateChanged(Boolean isComponentEnabled, Boolean fromTooltip);
     }
 }
