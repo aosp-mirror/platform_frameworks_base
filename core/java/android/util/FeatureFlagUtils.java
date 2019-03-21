@@ -51,7 +51,7 @@ public class FeatureFlagUtils {
         DEFAULT_FLAGS.put("settings_network_and_internet_v2", "true");
         DEFAULT_FLAGS.put("settings_slice_injection", "true");
         DEFAULT_FLAGS.put("settings_systemui_theme", "true");
-        DEFAULT_FLAGS.put("settings_mainline_module", "false");
+        DEFAULT_FLAGS.put("settings_mainline_module", "true");
         DEFAULT_FLAGS.put("settings_dynamic_android", "false");
         DEFAULT_FLAGS.put(SEAMLESS_TRANSFER, "false");
         DEFAULT_FLAGS.put(HEARING_AID_SETTINGS, "false");
