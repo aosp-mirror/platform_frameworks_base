@@ -873,7 +873,7 @@ public final class MediaStore {
      */
     public interface MediaColumns extends BaseColumns {
         /**
-         * Path to the media item on disk.
+         * Absolute filesystem path to the media item on disk.
          * <p>
          * Note that apps may not have filesystem permissions to directly access
          * this path. Instead of trying to open this path directly, apps should
@@ -920,6 +920,10 @@ public final class MediaStore {
 
         /**
          * The display name of the media item.
+         * <p>
+         * For example, an item stored at
+         * {@code /storage/0000-0000/DCIM/Vacation/IMG1024.JPG} would have a
+         * display name of {@code IMG1024.JPG}.
          */
         @Column(Cursor.FIELD_TYPE_STRING)
         public static final String DISPLAY_NAME = "_display_name";
@@ -985,7 +989,8 @@ public final class MediaStore {
 
         /**
          * Flag indicating if a media item is pending, and still being inserted
-         * by its owner.
+         * by its owner. While this flag is set, only the owner of the item can
+         * open the underlying file; requests from other apps will be rejected.
          *
          * @see MediaStore#setIncludePending(Uri)
          */
@@ -1033,17 +1038,53 @@ public final class MediaStore {
         public static final String OWNER_PACKAGE_NAME = "owner_package_name";
 
         /**
-         * The primary directory name this media exists under. The value may be
-         * {@code NULL} if the media doesn't have a primary directory name.
+         * Relative path of this media item within the storage device where it
+         * is persisted. For example, an item stored at
+         * {@code /storage/0000-0000/DCIM/Vacation/IMG1024.JPG} would have a
+         * path of {@code DCIM/Vacation}.
+         * <p>
+         * This value should only be used for organizational purposes, and you
+         * should not attempt to construct or access a raw filesystem path using
+         * this value. If you need to open a media item, use an API like
+         * {@link ContentResolver#openFileDescriptor(Uri, String)}.
+         * <p>
+         * When this value is set to {@code NULL} during an
+         * {@link ContentResolver#insert} operation, the newly created item will
+         * be placed in a relevant default location based on the type of media
+         * being inserted. For example, a {@code image/jpeg} item will be placed
+         * under {@link Environment#DIRECTORY_PICTURES}.
+         * <p>
+         * You can modify this column during an {@link ContentResolver#update}
+         * call, which will move the underlying file on disk.
+         * <p>
+         * In both cases above, content must be placed under a top-level
+         * directory that is relevant to the media type. For example, attempting
+         * to place a {@code audio/mpeg} file under
+         * {@link Environment#DIRECTORY_PICTURES} will be rejected.
          */
         @Column(Cursor.FIELD_TYPE_STRING)
+        public static final String RELATIVE_PATH = "relative_path";
+
+        /**
+         * The primary directory name this media exists under. The value may be
+         * {@code NULL} if the media doesn't have a primary directory name.
+         *
+         * @removed
+         * @deprecated Replaced by {@link #RELATIVE_PATH}.
+         */
+        @Column(Cursor.FIELD_TYPE_STRING)
+        @Deprecated
         public static final String PRIMARY_DIRECTORY = "primary_directory";
 
         /**
          * The secondary directory name this media exists under. The value may
          * be {@code NULL} if the media doesn't have a secondary directory name.
+         *
+         * @removed
+         * @deprecated Replaced by {@link #RELATIVE_PATH}.
          */
         @Column(Cursor.FIELD_TYPE_STRING)
+        @Deprecated
         public static final String SECONDARY_DIRECTORY = "secondary_directory";
 
         /**
