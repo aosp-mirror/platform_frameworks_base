@@ -106,7 +106,7 @@ interface IBatteryStats {
     void notePhoneOn();
     void notePhoneOff();
     void notePhoneSignalStrength(in SignalStrength signalStrength);
-    void notePhoneDataConnectionState(int dataType, boolean hasData);
+    void notePhoneDataConnectionState(int dataType, boolean hasData, int serviceType);
     void notePhoneState(int phoneState);
     void noteWifiOn();
     void noteWifiOff();
