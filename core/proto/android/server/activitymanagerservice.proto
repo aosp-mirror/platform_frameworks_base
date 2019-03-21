@@ -756,6 +756,7 @@ message ActivityManagerServiceDumpProcessesProto {
             optional string file = 2 [ (.android.privacy).dest = DEST_EXPLICIT ];
             optional int32 pid = 3;
             optional int32 uid = 4;
+            optional bool is_user_initiated = 5;
         }
         optional Dump dump = 2;
     }
