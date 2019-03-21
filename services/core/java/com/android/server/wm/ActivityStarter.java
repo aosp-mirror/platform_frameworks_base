@@ -949,7 +949,8 @@ class ActivityStarter {
         final boolean callingUidHasAnyVisibleWindow =
                 mService.mWindowManager.mRoot.isAnyNonToastWindowVisibleForUid(callingUid);
         final boolean isCallingUidForeground = callingUidHasAnyVisibleWindow
-                || callingUidProcState == ActivityManager.PROCESS_STATE_TOP;
+                || callingUidProcState == ActivityManager.PROCESS_STATE_TOP
+                || callingUidProcState == ActivityManager.PROCESS_STATE_BOUND_TOP;
         final boolean isCallingUidPersistentSystemProcess = (callingUid == Process.SYSTEM_UID)
                 || callingUidProcState <= ActivityManager.PROCESS_STATE_PERSISTENT_UI;
         if (isCallingUidForeground || isCallingUidPersistentSystemProcess) {

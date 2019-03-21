@@ -1317,7 +1317,9 @@ public final class ContentService extends IContentService.Stub {
         final int procState = ami.getUidProcessState(callingUid);
         final boolean isUidActive = ami.isUidActive(callingUid);
 
-        if (procState <= ActivityManager.PROCESS_STATE_TOP) {
+        // Providers bound by a TOP app will get PROCESS_STATE_BOUND_TOP, so include those as well
+        if (procState <= ActivityManager.PROCESS_STATE_TOP
+                || procState == ActivityManager.PROCESS_STATE_BOUND_TOP) {
             return ContentResolver.SYNC_EXEMPTION_PROMOTE_BUCKET_WITH_TEMP;
         }
         if (procState <= ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND || isUidActive) {

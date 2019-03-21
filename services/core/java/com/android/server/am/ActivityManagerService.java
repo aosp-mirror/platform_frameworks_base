@@ -15333,17 +15333,19 @@ public class ActivityManagerService extends IActivityManager.Stub
             final ProcessRecord callerApp = getRecordForAppLocked(caller);
             final int callingPid = Binder.getCallingPid();
             final int callingUid = Binder.getCallingUid();
+
             final long origId = Binder.clearCallingIdentity();
-            int res = broadcastIntentLocked(callerApp,
-                    callerApp != null ? callerApp.info.packageName : null,
-                    intent, resolvedType, resultTo, resultCode, resultData, resultExtras,
-                    requiredPermissions, appOp, bOptions, serialized, sticky,
-                    callingPid, callingUid, callingUid, callingPid, userId);
-            Binder.restoreCallingIdentity(origId);
-            return res;
+            try {
+                return broadcastIntentLocked(callerApp,
+                        callerApp != null ? callerApp.info.packageName : null,
+                        intent, resolvedType, resultTo, resultCode, resultData, resultExtras,
+                        requiredPermissions, appOp, bOptions, serialized, sticky,
+                        callingPid, callingUid, callingUid, callingPid, userId);
+            } finally {
+                Binder.restoreCallingIdentity(origId);
+            }
         }
     }
-
 
     int broadcastIntentInPackage(String packageName, int uid, int realCallingUid,
             int realCallingPid, Intent intent, String resolvedType, IIntentReceiver resultTo,
@@ -15356,13 +15358,15 @@ public class ActivityManagerService extends IActivityManager.Stub
             final long origId = Binder.clearCallingIdentity();
             String[] requiredPermissions = requiredPermission == null ? null
                     : new String[] {requiredPermission};
-            int res = broadcastIntentLocked(null, packageName, intent, resolvedType,
-                    resultTo, resultCode, resultData, resultExtras,
-                    requiredPermissions, OP_NONE, bOptions, serialized,
-                    sticky, -1, uid, realCallingUid, realCallingPid, userId,
-                    allowBackgroundActivityStarts);
-            Binder.restoreCallingIdentity(origId);
-            return res;
+            try {
+                return broadcastIntentLocked(null, packageName, intent, resolvedType,
+                        resultTo, resultCode, resultData, resultExtras,
+                        requiredPermissions, OP_NONE, bOptions, serialized,
+                        sticky, -1, uid, realCallingUid, realCallingPid, userId,
+                        allowBackgroundActivityStarts);
+            } finally {
+                Binder.restoreCallingIdentity(origId);
+            }
         }
     }
 
