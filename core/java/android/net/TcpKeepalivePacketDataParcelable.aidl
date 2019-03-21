@@ -23,4 +23,6 @@ parcelable TcpKeepalivePacketDataParcelable {
     int dstPort;
     int seq;
     int ack;
+    int rcvWnd;
+    int rcvWndScale;
 }
