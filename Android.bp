@@ -1685,6 +1685,7 @@ droidstubs {
     srcs: [
         ":openjdk_java_files",
         ":non_openjdk_java_files",
+        ":opt-telephony-common-srcs",
     ],
     arg_files: [
         "core/res/AndroidManifest.xml",
