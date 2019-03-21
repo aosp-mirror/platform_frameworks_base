@@ -97,6 +97,9 @@
     <!-- Summary for Connected wifi network without internet -->
     <string name="wifi_connected_no_internet">Connected, no internet</string>
 
+    <!-- Summary for connected wifi network with partial internet connectivity [CHAR LIMIT=50] -->
+    <string name="wifi_limited_connection">Limited connection</string>
+
     <!-- Wi-Fi status indicating that the current network is connected, but has no internet access. -->
     <string name="wifi_status_no_internet">No internet</string>
 
