@@ -32,6 +32,7 @@ import "frameworks/base/core/proto/android/net/networkcapabilities.proto";
 import "frameworks/base/core/proto/android/os/enums.proto";
 import "frameworks/base/core/proto/android/server/connectivity/data_stall_event.proto";
 import "frameworks/base/core/proto/android/server/enums.proto";
+import "frameworks/base/core/proto/android/stats/connectivity/network_stack.proto";
 import "frameworks/base/core/proto/android/stats/launcher/launcher.proto";
 import "frameworks/base/core/proto/android/telecomm/enums.proto";
 import "frameworks/base/core/proto/android/telephony/enums.proto";
@@ -164,6 +165,7 @@ message Atom {
         BluetoothSmpPairingEventReported bluetooth_smp_pairing_event_reported = 167;
         ProcessStartTime process_start_time = 169;
         BluetoothSocketConnectionStateChanged bluetooth_socket_connection_state_changed = 171;
+        NetworkStackReported network_stack_reported = 182;
     }
 
     // Pulled events will start at field 10000.
@@ -3050,5 +3052,16 @@ message ProcessStartTime {
     // hostingNameStr field in ProcessRecord. The component class name that runs
     // in this process.
     optional string hosting_name = 9;
+}
+
+/**
+ * Push network stack events.
+ *
+ * Log from:
+ *     frameworks/base/packages/NetworkStack/
+ */
+message NetworkStackReported {
+    optional int32 eventId = 1;
+    optional android.stats.connectivity.NetworkStackEventData network_stack_event = 2 [(log_mode) = MODE_BYTES];
 }
 
