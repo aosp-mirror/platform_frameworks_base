@@ -467,6 +467,10 @@ Frame VulkanManager::dequeueNextBuffer(VulkanSurface* surface) {
             GrBackendSemaphore backendSemaphore;
             backendSemaphore.initVulkan(semaphore);
             bufferInfo->skSurface->wait(1, &backendSemaphore);
+            // The following flush blocks the GPU immediately instead of waiting for other
+            // drawing ops. It seems dequeue_fence is not respected otherwise.
+            //TODO: remove the flush after finding why backendSemaphore is not working.
+            bufferInfo->skSurface->flush();
         }
     }
 
