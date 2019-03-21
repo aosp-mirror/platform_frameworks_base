@@ -29,13 +29,17 @@ import com.android.internal.util.Preconditions;
  * Configuration for capturing audio played by other apps.
  *
  * Only the following audio can be captured:
- *  - usage MUST be UNKNOWN or GAME or MEDIA. All other usages CAN NOT be capturable.
- *  - audio attributes MUST NOT have the FLAG_NO_CAPTURE
+ *  - usage MUST be {@link AudioAttributes#USAGE_UNKNOWN} or {@link AudioAttributes#USAGE_GAME}
+ *    or {@link AudioAttributes#USAGE_MEDIA}. All other usages CAN NOT be captured.
+ *  - audio attributes MUST have its ${@link AudioAttributes.Builder#setAllowedCapturePolicy}
+ *    to {@link AudioAttributes#ALLOW_CAPTURE_BY_ALL}.
  *  - played by apps that MUST be in the same user profile as the capturing app
  *    (eg work profile can not capture user profile apps and vice-versa).
- *  - played by apps that MUST NOT have in their manifest.xml the application
- *    attribute android:allowAudioPlaybackCapture="false"
- *  - played by apps that MUST have a targetSdkVersion higher or equal to 29 (Q).
+ *  - played by apps for which the attribute allowAudioPlaybackCapture in their manifest
+ *    MUST either be:
+ *      * set to "true"
+ *      * not set, and their targetSdkVersion MUST be equal or higher to
+ *        {@link android.os.Build.VERSION_CODES#Q}.
  *
  * <p>An example for creating a capture configuration for capturing all media playback:
  *

@@ -2229,6 +2229,11 @@ android_media_AudioSystem_isHapticPlaybackSupported(JNIEnv *env, jobject thiz)
     return AudioSystem::isHapticPlaybackSupported();
 }
 
+static jint
+android_media_AudioSystem_setAllowedCapturePolicy(JNIEnv *env, jobject thiz, jint uid, jint flags) {
+    return AudioSystem::setAllowedCapturePolicy(uid, flags);
+}
+
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod gMethods[] = {
@@ -2304,6 +2309,7 @@ static const JNINativeMethod gMethods[] = {
     {"isHapticPlaybackSupported", "()Z", (void *)android_media_AudioSystem_isHapticPlaybackSupported},
     {"getHwOffloadEncodingFormatsSupportedForA2DP", "(Ljava/util/ArrayList;)I",
                     (void*)android_media_AudioSystem_getHwOffloadEncodingFormatsSupportedForA2DP},
+    {"setAllowedCapturePolicy", "(II)I", (void *)android_media_AudioSystem_setAllowedCapturePolicy},
 };
 
 static const JNINativeMethod gEventHandlerMethods[] = {

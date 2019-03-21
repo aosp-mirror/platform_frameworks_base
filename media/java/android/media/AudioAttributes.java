@@ -709,20 +709,7 @@ public final class AudioAttributes implements Parcelable {
          * @throws IllegalArgumentException if the argument is not a valid value.
          */
         public @NonNull Builder setAllowedCapturePolicy(@CapturePolicy int capturePolicy) {
-            switch (capturePolicy) {
-                case ALLOW_CAPTURE_BY_NONE:
-                    mFlags |= FLAG_NO_MEDIA_PROJECTION | FLAG_NO_SYSTEM_CAPTURE;
-                    break;
-                case ALLOW_CAPTURE_BY_SYSTEM:
-                    mFlags |= FLAG_NO_MEDIA_PROJECTION;
-                    mFlags &= ~FLAG_NO_SYSTEM_CAPTURE;
-                    break;
-                case ALLOW_CAPTURE_BY_ALL:
-                    mFlags &= ~FLAG_NO_SYSTEM_CAPTURE & ~FLAG_NO_MEDIA_PROJECTION;
-                    break;
-                default:
-                    throw new IllegalArgumentException("Unknown allow playback capture policy");
-            }
+            mFlags = capturePolicyToFlags(capturePolicy, mFlags);
             return this;
         }
 
@@ -1205,6 +1192,24 @@ public final class AudioAttributes implements Parcelable {
                     return AudioSystem.STREAM_MUSIC;
                 }
         }
+    }
+
+    static int capturePolicyToFlags(@CapturePolicy int capturePolicy, int flags) {
+        switch (capturePolicy) {
+            case ALLOW_CAPTURE_BY_NONE:
+                flags |= FLAG_NO_MEDIA_PROJECTION | FLAG_NO_SYSTEM_CAPTURE;
+                break;
+            case ALLOW_CAPTURE_BY_SYSTEM:
+                flags |= FLAG_NO_MEDIA_PROJECTION;
+                flags &= ~FLAG_NO_SYSTEM_CAPTURE;
+                break;
+            case ALLOW_CAPTURE_BY_ALL:
+                flags &= ~FLAG_NO_SYSTEM_CAPTURE & ~FLAG_NO_MEDIA_PROJECTION;
+                break;
+            default:
+                throw new IllegalArgumentException("Unknown allow playback capture policy");
+        }
+        return flags;
     }
 
     /** @hide */
