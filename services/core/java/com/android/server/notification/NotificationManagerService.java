@@ -294,6 +294,12 @@ public class NotificationManagerService extends SystemService {
 
     static final boolean ENABLE_BLOCKED_TOASTS = true;
 
+    static final String[] DEFAULT_ALLOWED_ADJUSTMENTS = new String[] {
+            Adjustment.KEY_IMPORTANCE,
+            Adjustment.KEY_CONTEXTUAL_ACTIONS,
+            Adjustment.KEY_TEXT_REPLIES,
+            Adjustment.KEY_USER_SENTIMENT};
+
     // When #matchesCallFilter is called from the ringer, wait at most
     // 3s to resolve the contacts. This timeout is required since
     // ContactsProvider might take a long time to start up.
@@ -2790,6 +2796,33 @@ public class NotificationManagerService extends SystemService {
             handleSavePolicyFile();
         }
 
+        @Override
+        public List<String> getAllowedAssistantCapabilities(String pkg) {
+            checkCallerIsSystemOrSameApp(pkg);
+
+            if (!isCallerSystemOrPhone()
+                    && !mAssistants.isPackageAllowed(pkg, UserHandle.getCallingUserId())) {
+                    throw new SecurityException("Not currently an assistant");
+            }
+
+            return mAssistants.getAllowedAssistantCapabilities();
+        }
+
+        @Override
+        public void allowAssistantCapability(String adjustmentType) {
+            checkCallerIsSystemOrShell();
+            mAssistants.allowAdjustmentType(adjustmentType);
+
+            handleSavePolicyFile();
+        }
+
+        @Override
+        public void disallowAssistantCapability(String adjustmentType) {
+            checkCallerIsSystemOrShell();
+            mAssistants.disallowAdjustmentType(adjustmentType);
+
+            handleSavePolicyFile();
+        }
 
         /**
          * System-only API for getting a list of current (i.e. not cleared) notifications.
@@ -7143,15 +7176,26 @@ public class NotificationManagerService extends SystemService {
         static final String TAG_ENABLED_NOTIFICATION_ASSISTANTS = "enabled_assistants";
 
         private static final String ATT_USER_SET = "user_set";
+        // TODO: STOPSHIP (b/127994217) switch to final value when onboarding flow is implemented
+        private static final String TAG_ALLOWED_ADJUSTMENT_TYPES = "allowed_adjustments_tmp";
+        private static final String ATT_TYPES = "types";
 
         private final Object mLock = new Object();
 
         @GuardedBy("mLock")
         private ArrayMap<Integer, Boolean> mUserSetMap = new ArrayMap<>();
+        private List<String> mAllowedAdjustments = new ArrayList<>();
 
         public NotificationAssistants(Context context, Object lock, UserProfiles up,
                 IPackageManager pm) {
             super(context, lock, up, pm);
+
+            // TODO: STOPSHIP (b/127994217) remove when the onboarding flow is implemented
+            // Add all default allowed adjustment types. Will be overwritten by values in xml,
+            // if they exist
+            for (int i = 0; i < DEFAULT_ALLOWED_ADJUSTMENTS.length; i++) {
+                mAllowedAdjustments.add(DEFAULT_ALLOWED_ADJUSTMENTS[i]);
+            }
         }
 
         @Override
@@ -7200,6 +7244,48 @@ public class NotificationManagerService extends SystemService {
         protected String getRequiredPermission() {
             // only signature/privileged apps can be bound.
             return android.Manifest.permission.REQUEST_NOTIFICATION_ASSISTANT_SERVICE;
+        }
+
+        @Override
+        protected void writeExtraXmlTags(XmlSerializer out) throws IOException {
+            synchronized (mLock) {
+                out.startTag(null, TAG_ALLOWED_ADJUSTMENT_TYPES);
+                out.attribute(null, ATT_TYPES, TextUtils.join(",", mAllowedAdjustments));
+                out.endTag(null, TAG_ALLOWED_ADJUSTMENT_TYPES);
+            }
+        }
+
+        @Override
+        protected void readExtraTag(String tag, XmlPullParser parser) throws IOException {
+            if (TAG_ALLOWED_ADJUSTMENT_TYPES.equals(tag)) {
+                final String types = XmlUtils.readStringAttribute(parser, ATT_TYPES);
+                if (!TextUtils.isEmpty(types)) {
+                    synchronized (mLock) {
+                        mAllowedAdjustments.clear();
+                        mAllowedAdjustments.addAll(Arrays.asList(types.split(",")));
+                    }
+                }
+            }
+        }
+
+        protected void allowAdjustmentType(String type) {
+            synchronized (mLock) {
+                mAllowedAdjustments.add(type);
+            }
+        }
+
+        protected void disallowAdjustmentType(String type) {
+            synchronized (mLock) {
+                mAllowedAdjustments.remove(type);
+            }
+        }
+
+        protected List<String> getAllowedAssistantCapabilities() {
+            synchronized (mLock) {
+                List<String> types = new ArrayList<>();
+                types.addAll(mAllowedAdjustments);
+                return types;
+            }
         }
 
         protected void onNotificationsSeenLocked(ArrayList<NotificationRecord> records) {

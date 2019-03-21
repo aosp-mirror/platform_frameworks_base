@@ -70,6 +70,10 @@ interface INotificationManager
     boolean areNotificationsEnabled(String pkg);
     int getPackageImportance(String pkg);
 
+    List<String> getAllowedAssistantCapabilities(String pkg);
+    void allowAssistantCapability(String adjustmentType);
+    void disallowAssistantCapability(String adjustmentType);
+
     boolean shouldHideSilentStatusIcons(String callingPkg);
     void setHideSilentStatusIcons(boolean hide);
 

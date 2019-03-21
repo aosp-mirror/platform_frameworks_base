@@ -42,6 +42,7 @@ import android.os.ServiceManager;
 import android.os.StrictMode;
 import android.os.UserHandle;
 import android.provider.Settings.Global;
+import android.service.notification.Adjustment;
 import android.service.notification.Condition;
 import android.service.notification.StatusBarNotification;
 import android.service.notification.ZenModeConfig;
@@ -1177,6 +1178,25 @@ public class NotificationManager {
         INotificationManager service = getService();
         try {
             return service.shouldHideSilentStatusIcons(mContext.getOpPackageName());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the list of {@link android.service.notification.Adjustment adjustment keys} that can
+     * be modified by the current {@link android.service.notification.NotificationAssistantService}.
+     *
+     * <p>Only callable by the current
+     * {@link android.service.notification.NotificationAssistantService}.
+     * See {@link #isNotificationAssistantAccessGranted(ComponentName)}</p>
+     * @hide
+     */
+    @SystemApi
+    public @NonNull @Adjustment.Keys List<String> getAllowedAssistantCapabilities() {
+        INotificationManager service = getService();
+        try {
+            return service.getAllowedAssistantCapabilities(mContext.getOpPackageName());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
