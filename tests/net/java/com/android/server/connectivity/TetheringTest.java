@@ -550,7 +550,7 @@ public class TetheringTest {
                 mTetheringDependencies.ipv6CoordinatorNotifyList) {
             NetworkState ipv6OnlyState = buildMobileUpstreamState(false, true, false);
             ipSrv.sendMessage(IpServer.CMD_IPV6_TETHER_UPDATE, 0, 0,
-                    upstreamState.linkProperties.isIPv6Provisioned()
+                    upstreamState.linkProperties.isIpv6Provisioned()
                             ? ipv6OnlyState.linkProperties
                             : null);
         }

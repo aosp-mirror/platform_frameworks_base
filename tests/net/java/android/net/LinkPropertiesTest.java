@@ -405,8 +405,8 @@ public class LinkPropertiesTest {
         LinkProperties lp = new LinkProperties();
 
         // No addresses.
-        assertFalse(lp.hasIPv4Address());
-        assertFalse(lp.hasGlobalIPv6Address());
+        assertFalse(lp.hasIpv4Address());
+        assertFalse(lp.hasGlobalIpv6Address());
 
         // Addresses on stacked links don't count.
         LinkProperties stacked = new LinkProperties();
@@ -414,53 +414,53 @@ public class LinkPropertiesTest {
         lp.addStackedLink(stacked);
         stacked.addLinkAddress(LINKADDRV4);
         stacked.addLinkAddress(LINKADDRV6);
-        assertTrue(stacked.hasIPv4Address());
-        assertTrue(stacked.hasGlobalIPv6Address());
-        assertFalse(lp.hasIPv4Address());
-        assertFalse(lp.hasGlobalIPv6Address());
+        assertTrue(stacked.hasIpv4Address());
+        assertTrue(stacked.hasGlobalIpv6Address());
+        assertFalse(lp.hasIpv4Address());
+        assertFalse(lp.hasGlobalIpv6Address());
         lp.removeStackedLink("stacked");
-        assertFalse(lp.hasIPv4Address());
-        assertFalse(lp.hasGlobalIPv6Address());
+        assertFalse(lp.hasIpv4Address());
+        assertFalse(lp.hasGlobalIpv6Address());
 
         // Addresses on the base link.
-        // Check the return values of hasIPvXAddress and ensure the add/remove methods return true
+        // Check the return values of hasIpvXAddress and ensure the add/remove methods return true
         // iff something changes.
         assertEquals(0, lp.getLinkAddresses().size());
         assertTrue(lp.addLinkAddress(LINKADDRV6));
         assertEquals(1, lp.getLinkAddresses().size());
-        assertFalse(lp.hasIPv4Address());
-        assertTrue(lp.hasGlobalIPv6Address());
+        assertFalse(lp.hasIpv4Address());
+        assertTrue(lp.hasGlobalIpv6Address());
 
         assertTrue(lp.removeLinkAddress(LINKADDRV6));
         assertEquals(0, lp.getLinkAddresses().size());
 
         assertTrue(lp.addLinkAddress(LINKADDRV6LINKLOCAL));
         assertEquals(1, lp.getLinkAddresses().size());
-        assertFalse(lp.hasGlobalIPv6Address());
+        assertFalse(lp.hasGlobalIpv6Address());
 
         assertTrue(lp.addLinkAddress(LINKADDRV4));
         assertEquals(2, lp.getLinkAddresses().size());
-        assertTrue(lp.hasIPv4Address());
-        assertFalse(lp.hasGlobalIPv6Address());
+        assertTrue(lp.hasIpv4Address());
+        assertFalse(lp.hasGlobalIpv6Address());
 
         assertTrue(lp.addLinkAddress(LINKADDRV6));
         assertEquals(3, lp.getLinkAddresses().size());
-        assertTrue(lp.hasIPv4Address());
-        assertTrue(lp.hasGlobalIPv6Address());
+        assertTrue(lp.hasIpv4Address());
+        assertTrue(lp.hasGlobalIpv6Address());
 
         assertTrue(lp.removeLinkAddress(LINKADDRV6LINKLOCAL));
         assertEquals(2, lp.getLinkAddresses().size());
-        assertTrue(lp.hasIPv4Address());
-        assertTrue(lp.hasGlobalIPv6Address());
+        assertTrue(lp.hasIpv4Address());
+        assertTrue(lp.hasGlobalIpv6Address());
 
         // Adding an address twice has no effect.
         // Removing an address that's not present has no effect.
         assertFalse(lp.addLinkAddress(LINKADDRV4));
         assertEquals(2, lp.getLinkAddresses().size());
-        assertTrue(lp.hasIPv4Address());
+        assertTrue(lp.hasIpv4Address());
         assertTrue(lp.removeLinkAddress(LINKADDRV4));
         assertEquals(1, lp.getLinkAddresses().size());
-        assertFalse(lp.hasIPv4Address());
+        assertFalse(lp.hasIpv4Address());
         assertFalse(lp.removeLinkAddress(LINKADDRV4));
         assertEquals(1, lp.getLinkAddresses().size());
 
@@ -546,8 +546,8 @@ public class LinkPropertiesTest {
         assertFalse("v4only:addr+dns", lp4.isProvisioned());
         lp4.addRoute(new RouteInfo(GATEWAY1));
         assertTrue("v4only:addr+dns+route", lp4.isProvisioned());
-        assertTrue("v4only:addr+dns+route", lp4.isIPv4Provisioned());
-        assertFalse("v4only:addr+dns+route", lp4.isIPv6Provisioned());
+        assertTrue("v4only:addr+dns+route", lp4.isIpv4Provisioned());
+        assertFalse("v4only:addr+dns+route", lp4.isIpv6Provisioned());
 
         LinkProperties lp6 = new LinkProperties();
         assertFalse("v6only:empty", lp6.isProvisioned());
@@ -558,11 +558,11 @@ public class LinkPropertiesTest {
         lp6.addRoute(new RouteInfo(GATEWAY61));
         assertFalse("v6only:fe80+dns+route", lp6.isProvisioned());
         lp6.addLinkAddress(LINKADDRV6);
-        assertTrue("v6only:fe80+global+dns+route", lp6.isIPv6Provisioned());
+        assertTrue("v6only:fe80+global+dns+route", lp6.isIpv6Provisioned());
         assertTrue("v6only:fe80+global+dns+route", lp6.isProvisioned());
         lp6.removeLinkAddress(LINKADDRV6LINKLOCAL);
-        assertFalse("v6only:global+dns+route", lp6.isIPv4Provisioned());
-        assertTrue("v6only:global+dns+route", lp6.isIPv6Provisioned());
+        assertFalse("v6only:global+dns+route", lp6.isIpv4Provisioned());
+        assertTrue("v6only:global+dns+route", lp6.isIpv6Provisioned());
         assertTrue("v6only:global+dns+route", lp6.isProvisioned());
 
         LinkProperties lp46 = new LinkProperties();
@@ -572,12 +572,12 @@ public class LinkPropertiesTest {
         lp46.addDnsServer(DNS6);
         assertFalse("dualstack:missing-routes", lp46.isProvisioned());
         lp46.addRoute(new RouteInfo(GATEWAY1));
-        assertTrue("dualstack:v4-provisioned", lp46.isIPv4Provisioned());
-        assertFalse("dualstack:v4-provisioned", lp46.isIPv6Provisioned());
+        assertTrue("dualstack:v4-provisioned", lp46.isIpv4Provisioned());
+        assertFalse("dualstack:v4-provisioned", lp46.isIpv6Provisioned());
         assertTrue("dualstack:v4-provisioned", lp46.isProvisioned());
         lp46.addRoute(new RouteInfo(GATEWAY61));
-        assertTrue("dualstack:both-provisioned", lp46.isIPv4Provisioned());
-        assertTrue("dualstack:both-provisioned", lp46.isIPv6Provisioned());
+        assertTrue("dualstack:both-provisioned", lp46.isIpv4Provisioned());
+        assertTrue("dualstack:both-provisioned", lp46.isIpv6Provisioned());
         assertTrue("dualstack:both-provisioned", lp46.isProvisioned());
 
         // A link with an IPv6 address and default route, but IPv4 DNS server.
@@ -585,8 +585,8 @@ public class LinkPropertiesTest {
         mixed.addLinkAddress(LINKADDRV6);
         mixed.addDnsServer(DNS1);
         mixed.addRoute(new RouteInfo(GATEWAY61));
-        assertFalse("mixed:addr6+route6+dns4", mixed.isIPv4Provisioned());
-        assertFalse("mixed:addr6+route6+dns4", mixed.isIPv6Provisioned());
+        assertFalse("mixed:addr6+route6+dns4", mixed.isIpv4Provisioned());
+        assertFalse("mixed:addr6+route6+dns4", mixed.isIpv6Provisioned());
         assertFalse("mixed:addr6+route6+dns4", mixed.isProvisioned());
     }
 
@@ -617,16 +617,16 @@ public class LinkPropertiesTest {
         v6lp.addLinkAddress(LINKADDRV6);
         v6lp.addRoute(new RouteInfo(GATEWAY61));
         v6lp.addDnsServer(DNS6);
-        assertFalse(v6lp.isIPv4Provisioned());
-        assertTrue(v6lp.isIPv6Provisioned());
+        assertFalse(v6lp.isIpv4Provisioned());
+        assertTrue(v6lp.isIpv6Provisioned());
         assertTrue(v6lp.isProvisioned());
 
         LinkProperties v46lp = new LinkProperties(v6lp);
         v46lp.addLinkAddress(LINKADDRV4);
         v46lp.addRoute(new RouteInfo(GATEWAY1));
         v46lp.addDnsServer(DNS1);
-        assertTrue(v46lp.isIPv4Provisioned());
-        assertTrue(v46lp.isIPv6Provisioned());
+        assertTrue(v46lp.isIpv4Provisioned());
+        assertTrue(v46lp.isIpv6Provisioned());
         assertTrue(v46lp.isProvisioned());
 
         assertEquals(ProvisioningChange.STILL_PROVISIONED,
