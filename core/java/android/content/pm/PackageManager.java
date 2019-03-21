@@ -5899,9 +5899,8 @@ public abstract class PackageManager {
      * @param packageName The package name of the app
      * @return Returns the enabled state for the synthetic app details activity.
      *
-     * @hide
+     *
      */
-    @SystemApi
     public boolean getSyntheticAppDetailsActivityEnabled(@NonNull String packageName) {
         throw new UnsupportedOperationException(
                 "getSyntheticAppDetailsActivityEnabled not implemented");

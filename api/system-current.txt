@@ -1618,7 +1618,6 @@ package android.content.pm {
     method public abstract java.util.List<android.content.pm.IntentFilterVerificationInfo> getIntentFilterVerifications(String);
     method @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL) public abstract int getIntentVerificationStatusAsUser(String, int);
     method @android.content.pm.PackageManager.PermissionFlags @RequiresPermission(anyOf={android.Manifest.permission.GRANT_RUNTIME_PERMISSIONS, android.Manifest.permission.REVOKE_RUNTIME_PERMISSIONS, android.Manifest.permission.GET_RUNTIME_PERMISSIONS}) public abstract int getPermissionFlags(String, String, @NonNull android.os.UserHandle);
-    method public boolean getSyntheticAppDetailsActivityEnabled(@NonNull String);
     method @NonNull @RequiresPermission(android.Manifest.permission.SUSPEND_APPS) public String[] getUnsuspendablePackages(@NonNull String[]);
     method @RequiresPermission(android.Manifest.permission.GRANT_RUNTIME_PERMISSIONS) public abstract void grantRuntimePermission(@NonNull String, @NonNull String, @NonNull android.os.UserHandle);
     method @Deprecated public abstract int installExistingPackage(String) throws android.content.pm.PackageManager.NameNotFoundException;
