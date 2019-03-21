@@ -611,6 +611,7 @@ class StorageManagerService extends IStorageManager.Stub
     private static final int H_RESET = 10;
     private static final int H_RUN_IDLE_MAINT = 11;
     private static final int H_ABORT_IDLE_MAINT = 12;
+    private static final int H_BOOT_COMPLETED = 13;
 
     class StorageManagerServiceHandler extends Handler {
         public StorageManagerServiceHandler(Looper looper) {
@@ -622,6 +623,10 @@ class StorageManagerService extends IStorageManager.Stub
             switch (msg.what) {
                 case H_SYSTEM_READY: {
                     handleSystemReady();
+                    break;
+                }
+                case H_BOOT_COMPLETED: {
+                    handleBootCompleted();
                     break;
                 }
                 case H_DAEMON_CONNECTED: {
@@ -712,7 +717,7 @@ class StorageManagerService extends IStorageManager.Stub
                     break;
                 }
                 case H_RESET: {
-                    resetIfReadyAndConnected();
+                    resetIfBootedAndConnected();
                     break;
                 }
                 case H_RUN_IDLE_MAINT: {
@@ -785,9 +790,6 @@ class StorageManagerService extends IStorageManager.Stub
     }
 
     private void handleSystemReady() {
-        initIfReadyAndConnected();
-        resetIfReadyAndConnected();
-
         // Start scheduling nominally-daily fstrim operations
         MountServiceIdler.scheduleIdlePass(mContext);
 
@@ -933,10 +935,10 @@ class StorageManagerService extends IStorageManager.Stub
         mVolumes.put(internal.id, internal);
     }
 
-    private void initIfReadyAndConnected() {
-        Slog.d(TAG, "Thinking about init, mSystemReady=" + mSystemReady
+    private void initIfBootedAndConnected() {
+        Slog.d(TAG, "Thinking about init, mBootCompleted=" + mBootCompleted
                 + ", mDaemonConnected=" + mDaemonConnected);
-        if (mSystemReady && mDaemonConnected
+        if (mBootCompleted && mDaemonConnected
                 && !StorageManager.isFileEncryptedNativeOnly()) {
             // When booting a device without native support, make sure that our
             // user directories are locked or unlocked based on the current
@@ -959,10 +961,10 @@ class StorageManagerService extends IStorageManager.Stub
         }
     }
 
-    private void resetIfReadyAndConnected() {
-        Slog.d(TAG, "Thinking about reset, mSystemReady=" + mSystemReady
+    private void resetIfBootedAndConnected() {
+        Slog.d(TAG, "Thinking about reset, mBootCompleted=" + mBootCompleted
                 + ", mDaemonConnected=" + mDaemonConnected);
-        if (mSystemReady && mDaemonConnected) {
+        if (mBootCompleted && mDaemonConnected) {
             final List<UserInfo> users = mContext.getSystemService(UserManager.class).getUsers();
             killMediaProvider(users);
 
@@ -1121,8 +1123,8 @@ class StorageManagerService extends IStorageManager.Stub
     }
 
     private void handleDaemonConnected() {
-        initIfReadyAndConnected();
-        resetIfReadyAndConnected();
+        initIfBootedAndConnected();
+        resetIfBootedAndConnected();
 
         // On an encrypted device we can't see system properties yet, so pull
         // the system locale out of the mount service.
@@ -1856,6 +1858,12 @@ class StorageManagerService extends IStorageManager.Stub
 
     private void bootCompleted() {
         mBootCompleted = true;
+        mHandler.obtainMessage(H_BOOT_COMPLETED).sendToTarget();
+    }
+
+    private void handleBootCompleted() {
+        initIfBootedAndConnected();
+        resetIfBootedAndConnected();
     }
 
     private String getDefaultPrimaryStorageUuid() {
