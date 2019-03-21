@@ -63,6 +63,7 @@ import java.util.Map;
  */
 public final class MediaProjectionManagerService extends SystemService
         implements Watchdog.Monitor {
+    private static final boolean REQUIRE_FG_SERVICE_FOR_PROJECTION = false;
     private static final String TAG = "MediaProjectionManagerService";
 
     private final Object mLock = new Object(); // Protects the list of media projections
@@ -100,21 +101,23 @@ public final class MediaProjectionManagerService extends SystemService
                 false /*allowIsolated*/);
         mMediaRouter.addCallback(MediaRouter.ROUTE_TYPE_REMOTE_DISPLAY, mMediaRouterCallback,
                 MediaRouter.CALLBACK_FLAG_PASSIVE_DISCOVERY);
-        mActivityManagerInternal.registerProcessObserver(new IProcessObserver.Stub() {
-            @Override
-            public void onForegroundActivitiesChanged(int pid, int uid, boolean fg) {
-            }
+        if (REQUIRE_FG_SERVICE_FOR_PROJECTION) {
+            mActivityManagerInternal.registerProcessObserver(new IProcessObserver.Stub() {
+                @Override
+                public void onForegroundActivitiesChanged(int pid, int uid, boolean fg) {
+                }
 
-            @Override
-            public void onForegroundServicesChanged(int pid, int uid, int serviceTypes) {
-                MediaProjectionManagerService.this.handleForegroundServicesChanged(pid, uid,
-                        serviceTypes);
-            }
+                @Override
+                public void onForegroundServicesChanged(int pid, int uid, int serviceTypes) {
+                    MediaProjectionManagerService.this.handleForegroundServicesChanged(pid, uid,
+                            serviceTypes);
+                }
 
-            @Override
-            public void onProcessDied(int pid, int uid) {
-            }
-        });
+                @Override
+                public void onProcessDied(int pid, int uid) {
+                }
+            });
+        }
     }
 
     @Override
@@ -462,7 +465,8 @@ public final class MediaProjectionManagerService extends SystemService
                     return;
                 }
 
-                if (targetSdkVersion >= Build.VERSION_CODES.Q
+                if (REQUIRE_FG_SERVICE_FOR_PROJECTION
+                        && targetSdkVersion >= Build.VERSION_CODES.Q
                         && !mActivityManagerInternal.hasRunningForegroundService(
                                 uid, ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION)) {
                     throw new SecurityException("Media projections require a foreground service"
