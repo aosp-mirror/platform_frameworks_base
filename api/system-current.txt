@@ -1473,6 +1473,7 @@ package android.content.om {
     field @NonNull public static final android.os.Parcelable.Creator<android.content.om.OverlayInfo> CREATOR;
     field public final String category;
     field public final String packageName;
+    field public final String targetOverlayableName;
     field public final String targetPackageName;
     field public final int userId;
   }

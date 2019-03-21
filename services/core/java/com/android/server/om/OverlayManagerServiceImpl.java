@@ -83,6 +83,9 @@ final class OverlayManagerServiceImpl {
         if (!Objects.equals(theTruth.overlayTarget, oldSettings.targetPackageName)) {
             return true;
         }
+        if (!Objects.equals(theTruth.targetOverlayableName, oldSettings.targetOverlayableName)) {
+            return true;
+        }
         if (theTruth.isStaticOverlayPackage() != oldSettings.isStatic) {
             return true;
         }
@@ -149,6 +152,7 @@ final class OverlayManagerServiceImpl {
 
                 mSettings.init(overlayPackage.packageName, newUserId,
                         overlayPackage.overlayTarget,
+                        overlayPackage.targetOverlayableName,
                         overlayPackage.applicationInfo.getBaseCodePath(),
                         overlayPackage.isStaticOverlayPackage(),
                         overlayPackage.overlayPriority,
@@ -331,6 +335,7 @@ final class OverlayManagerServiceImpl {
         }
 
         mSettings.init(packageName, userId, overlayPackage.overlayTarget,
+                overlayPackage.targetOverlayableName,
                 overlayPackage.applicationInfo.getBaseCodePath(),
                 overlayPackage.isStaticOverlayPackage(), overlayPackage.overlayPriority,
                 overlayPackage.overlayCategory);
@@ -395,7 +400,7 @@ final class OverlayManagerServiceImpl {
                 if (oldOi != null && !oldOi.targetPackageName.equals(pkg.overlayTarget)) {
                     mListener.onOverlaysChanged(pkg.overlayTarget, userId);
                 }
-                mSettings.init(packageName, userId, pkg.overlayTarget,
+                mSettings.init(packageName, userId, pkg.overlayTarget, pkg.targetOverlayableName,
                         pkg.applicationInfo.getBaseCodePath(), pkg.isStaticOverlayPackage(),
                         pkg.overlayPriority, pkg.overlayCategory);
             }
