@@ -2761,6 +2761,7 @@
   <java-symbol type="string" name="chooser_no_direct_share_targets" />
   <java-symbol type="drawable" name="chooser_row_layer_list" />
   <java-symbol type="dimen" name="chooser_view_spacing" />
+  <java-symbol type="dimen" name="chooser_target_width" />
   <java-symbol type="dimen" name="chooser_edge_margin_thin" />
   <java-symbol type="dimen" name="chooser_edge_margin_normal" />
   <java-symbol type="dimen" name="chooser_preview_image_font_size"/>
