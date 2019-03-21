@@ -7132,6 +7132,12 @@ message MetricsEvent {
     // OS: Q
     FIELD_SCREEN_SLEEP_REASON = 1695;
 
+    // UPDATE: The screen changed policy
+    //   SUBTYPE: The applied policy. One of the DISPLAY_POLICY_* constants in
+    //   DisplayManagerInternal.
+    // OS: Q
+    DISPLAY_POLICY = 1696;
+
     // ---- End Q Constants, all Q constants go above this line ----
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
