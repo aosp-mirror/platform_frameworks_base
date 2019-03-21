@@ -1552,13 +1552,13 @@ public class PermissionManagerService {
                     oldPermAreModernStorageModel = false;
                 }
 
-                boolean shouldBeRestricted;
+                boolean shouldBeHidden;
                 boolean shouldBeFixed;
                 boolean shouldBeGranted = false;
                 boolean shouldBeRevoked = false;
                 int userFlags = -1;
                 if (useLegacyStoragePermissionModel) {
-                    shouldBeRestricted = isModernStoragePermission;
+                    shouldBeHidden = isModernStoragePermission;
                     shouldBeFixed = isQApp || isModernStoragePermission;
 
                     if (shouldBeFixed) {
@@ -1576,7 +1576,7 @@ public class PermissionManagerService {
                         shouldBeRevoked = !shouldBeGranted;
                     }
                 } else {
-                    shouldBeRestricted = isLegacyStoragePermission;
+                    shouldBeHidden = isLegacyStoragePermission;
                     shouldBeFixed = isLegacyStoragePermission;
 
                     if (shouldBeFixed) {
@@ -1636,7 +1636,12 @@ public class PermissionManagerService {
 
                     changed |= ps.updatePermissionFlags(mSettings.getPermissionLocked(perm), userId,
                             FLAG_PERMISSION_HIDDEN,
-                            shouldBeRestricted ? FLAG_PERMISSION_HIDDEN : 0);
+                            shouldBeHidden ? FLAG_PERMISSION_HIDDEN : 0);
+
+                    if (shouldBeHidden) {
+                        changed |= ps.updatePermissionFlags(mSettings.getPermissionLocked(perm),
+                                userId, FLAG_PERMISSION_REVIEW_REQUIRED, 0);
+                    }
                 }
 
                 if (changed) {
