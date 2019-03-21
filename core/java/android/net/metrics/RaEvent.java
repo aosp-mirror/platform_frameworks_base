@@ -16,6 +16,7 @@
 
 package android.net.metrics;
 
+import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.os.Parcel;
@@ -107,7 +108,7 @@ public final class RaEvent implements IpConnectivityLog.Event {
         }
     };
 
-    public static class Builder {
+    public static final class Builder {
 
         long routerLifetime          = NO_LIFETIME;
         long prefixValidLifetime     = NO_LIFETIME;
@@ -119,37 +120,37 @@ public final class RaEvent implements IpConnectivityLog.Event {
         public Builder() {
         }
 
-        public RaEvent build() {
+        public @NonNull RaEvent build() {
             return new RaEvent(routerLifetime, prefixValidLifetime, prefixPreferredLifetime,
                     routeInfoLifetime, rdnssLifetime, dnsslLifetime);
         }
 
-        public Builder updateRouterLifetime(long lifetime) {
+        public @NonNull Builder updateRouterLifetime(long lifetime) {
             routerLifetime = updateLifetime(routerLifetime, lifetime);
             return this;
         }
 
-        public Builder updatePrefixValidLifetime(long lifetime) {
+        public @NonNull Builder updatePrefixValidLifetime(long lifetime) {
             prefixValidLifetime = updateLifetime(prefixValidLifetime, lifetime);
             return this;
         }
 
-        public Builder updatePrefixPreferredLifetime(long lifetime) {
+        public @NonNull Builder updatePrefixPreferredLifetime(long lifetime) {
             prefixPreferredLifetime = updateLifetime(prefixPreferredLifetime, lifetime);
             return this;
         }
 
-        public Builder updateRouteInfoLifetime(long lifetime) {
+        public @NonNull Builder updateRouteInfoLifetime(long lifetime) {
             routeInfoLifetime = updateLifetime(routeInfoLifetime, lifetime);
             return this;
         }
 
-        public Builder updateRdnssLifetime(long lifetime) {
+        public @NonNull Builder updateRdnssLifetime(long lifetime) {
             rdnssLifetime = updateLifetime(rdnssLifetime, lifetime);
             return this;
         }
 
-        public Builder updateDnsslLifetime(long lifetime) {
+        public @NonNull Builder updateDnsslLifetime(long lifetime) {
             dnsslLifetime = updateLifetime(dnsslLifetime, lifetime);
             return this;
         }
