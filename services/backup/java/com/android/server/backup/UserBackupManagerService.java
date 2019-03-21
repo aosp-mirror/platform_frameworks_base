@@ -2929,8 +2929,8 @@ public class UserBackupManagerService {
      *     {@link Context#startActivity} in order to launch the transport's data-management UI. It
      *     may be {@code null} if the transport does not offer any user-facing data
      *     management UI.
-     * @param dataManagementLabel A {@link String} to be used as the label for the transport's data
-     *     management affordance. This MUST be {@code null} when dataManagementIntent is
+     * @param dataManagementLabel A {@link CharSequence} to be used as the label for the transport's
+     *     data management affordance. This MUST be {@code null} when dataManagementIntent is
      *     {@code null} and MUST NOT be {@code null} when dataManagementIntent is not {@code null}.
      * @throws SecurityException If the UID of the calling process differs from the package UID of
      *     {@code transportComponent} or if the caller does NOT have BACKUP permission.
@@ -2941,7 +2941,7 @@ public class UserBackupManagerService {
             @Nullable Intent configurationIntent,
             String currentDestinationString,
             @Nullable Intent dataManagementIntent,
-            @Nullable String dataManagementLabel) {
+            @Nullable CharSequence dataManagementLabel) {
         updateTransportAttributes(
                 Binder.getCallingUid(),
                 transportComponent,
@@ -2960,7 +2960,7 @@ public class UserBackupManagerService {
             @Nullable Intent configurationIntent,
             String currentDestinationString,
             @Nullable Intent dataManagementIntent,
-            @Nullable String dataManagementLabel) {
+            @Nullable CharSequence dataManagementLabel) {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.BACKUP, "updateTransportAttributes");
 
@@ -3159,12 +3159,12 @@ public class UserBackupManagerService {
      * Supply the menu label for affordances that fire the manage-data intent for the given
      * transport.
      */
-    public String getDataManagementLabel(String transportName) {
+    public CharSequence getDataManagementLabel(String transportName) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
                 "getDataManagementLabel");
 
         try {
-            String label = mTransportManager.getTransportDataManagementLabel(transportName);
+            CharSequence label = mTransportManager.getTransportDataManagementLabel(transportName);
             if (MORE_DEBUG) {
                 Slog.d(TAG, "getDataManagementLabel() returning " + label);
             }

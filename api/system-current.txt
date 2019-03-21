@@ -744,7 +744,8 @@ package android.app.backup {
     method @RequiresPermission(android.Manifest.permission.BACKUP) public String getCurrentTransport();
     method @Nullable @RequiresPermission(android.Manifest.permission.BACKUP) public android.content.ComponentName getCurrentTransportComponent();
     method @RequiresPermission(android.Manifest.permission.BACKUP) public android.content.Intent getDataManagementIntent(String);
-    method @RequiresPermission(android.Manifest.permission.BACKUP) public String getDataManagementLabel(String);
+    method @Nullable @RequiresPermission(android.Manifest.permission.BACKUP) public CharSequence getDataManagementIntentLabel(@NonNull String);
+    method @Deprecated @Nullable @RequiresPermission(android.Manifest.permission.BACKUP) public String getDataManagementLabel(@NonNull String);
     method @RequiresPermission(android.Manifest.permission.BACKUP) public String getDestinationString(String);
     method @RequiresPermission(android.Manifest.permission.BACKUP) public boolean isAppEligibleForBackup(String);
     method @RequiresPermission(android.Manifest.permission.BACKUP) public boolean isBackupEnabled();
@@ -758,7 +759,8 @@ package android.app.backup {
     method @RequiresPermission(android.Manifest.permission.BACKUP) public void setAncestralSerialNumber(long);
     method @RequiresPermission(android.Manifest.permission.BACKUP) public void setAutoRestore(boolean);
     method @RequiresPermission(android.Manifest.permission.BACKUP) public void setBackupEnabled(boolean);
-    method @RequiresPermission(android.Manifest.permission.BACKUP) public void updateTransportAttributes(android.content.ComponentName, String, @Nullable android.content.Intent, String, @Nullable android.content.Intent, @Nullable String);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.BACKUP) public void updateTransportAttributes(@NonNull android.content.ComponentName, @NonNull String, @Nullable android.content.Intent, @NonNull String, @Nullable android.content.Intent, @Nullable String);
+    method @RequiresPermission(android.Manifest.permission.BACKUP) public void updateTransportAttributes(@NonNull android.content.ComponentName, @NonNull String, @Nullable android.content.Intent, @NonNull String, @Nullable android.content.Intent, @Nullable CharSequence);
     field public static final int ERROR_AGENT_FAILURE = -1003; // 0xfffffc15
     field public static final int ERROR_BACKUP_CANCELLED = -2003; // 0xfffff82d
     field public static final int ERROR_BACKUP_NOT_ALLOWED = -2001; // 0xfffff82f
@@ -863,7 +865,8 @@ package android.app.backup {
     method public android.content.Intent configurationIntent();
     method public String currentDestinationString();
     method public android.content.Intent dataManagementIntent();
-    method public String dataManagementLabel();
+    method @Nullable public CharSequence dataManagementIntentLabel();
+    method @Deprecated @Nullable public String dataManagementLabel();
     method public int finishBackup();
     method public void finishRestore();
     method public android.app.backup.RestoreSet[] getAvailableRestoreSets();
