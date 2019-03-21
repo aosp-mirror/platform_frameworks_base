@@ -546,11 +546,11 @@
     <!-- Content description of the do not disturb tile in quick settings when on in alarms only (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_quick_settings_dnd_alarms_on">alarms only</string>
      <!-- Content description of the do not disturb tile in quick settings (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_quick_settings_dnd">Do not disturb.</string>
+    <string name="accessibility_quick_settings_dnd">Do Not Disturb.</string>
     <!-- Announcement made when do not disturb changes to off (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_quick_settings_dnd_changed_off">Do not disturb turned off.</string>
+    <string name="accessibility_quick_settings_dnd_changed_off">Do Not Disturb turned off.</string>
     <!-- Announcement made when do not disturb changes to on (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_quick_settings_dnd_changed_on">Do not disturb turned on.</string>
+    <string name="accessibility_quick_settings_dnd_changed_on">Do Not Disturb turned on.</string>
     <!-- Content description of the bluetooth tile in quick settings (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_quick_settings_bluetooth">Bluetooth.</string>
     <!-- Content description of the bluetooth tile in quick settings when off (not shown on the screen). [CHAR LIMIT=NONE] -->
@@ -696,7 +696,7 @@
     <!-- QuickSettings: Onboarding text that introduces users to long press on an option in order to view the option's menu in Settings [CHAR LIMIT=NONE] -->
     <string name="quick_settings_header_onboarding_text">Touch &amp; hold icons for more options</string>
     <!-- QuickSettings: Do not disturb [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_dnd_label">Do not disturb</string>
+    <string name="quick_settings_dnd_label">Do Not Disturb</string>
     <!-- QuickSettings: Do not disturb - Priority only [CHAR LIMIT=NONE] -->
     <string name="quick_settings_dnd_priority_label">Priority only</string>
     <!-- QuickSettings: Do not disturb - Alarms only [CHAR LIMIT=NONE] -->
@@ -1805,14 +1805,14 @@
     <string name="tuner_full_zen_title">Show with volume controls</string>
 
     <!-- SysUI Tuner: Label for screen about do not disturb settings [CHAR LIMIT=60] -->
-    <string name="volume_and_do_not_disturb">Do not disturb</string>
+    <string name="volume_and_do_not_disturb">Do Not Disturb</string>
 
     <!-- SysUI Tuner: Switch to control whether volume buttons enter/exit do
          not disturb [CHAR LIMIT=60] -->
     <string name="volume_dnd_silent">Volume buttons shortcut</string>
 
     <!-- SysUI Tuner: Switch to control volume up behavior [CHAR LIMIT=60] -->
-    <string name="volume_up_silent">Exit do not disturb on volume up</string>
+    <string name="volume_up_silent">Exit Do Not Disturb on volume up</string>
 
     <!-- Name of the battery icon in status bar [CHAR LIMIT=30] -->
     <string name="battery">Battery</string>
