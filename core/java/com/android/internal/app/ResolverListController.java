@@ -55,7 +55,7 @@ public class ResolverListController {
     private static final String TAG = "ResolverListController";
     private static final boolean DEBUG = false;
 
-    private ResolverComparator mResolverComparator;
+    private AbstractResolverComparator mResolverComparator;
     private boolean isComputed = false;
 
     public ResolverListController(
@@ -70,7 +70,8 @@ public class ResolverListController {
         mTargetIntent = targetIntent;
         mReferrerPackage = referrerPackage;
         mResolverComparator =
-                new ResolverComparator(mContext, mTargetIntent, mReferrerPackage, null);
+                new ResolverRankerServiceResolverComparator(
+                    mContext, mTargetIntent, mReferrerPackage, null);
     }
 
     @VisibleForTesting
@@ -221,7 +222,7 @@ public class ResolverListController {
         return listToReturn;
     }
 
-    private class ComputeCallback implements ResolverComparator.AfterCompute {
+    private class ComputeCallback implements AbstractResolverComparator.AfterCompute {
 
         private CountDownLatch mFinishComputeSignal;
 
