@@ -107,8 +107,8 @@ public class Nat464Xlat extends BaseNetworkObserver {
         // Only run clat on networks that have a global IPv6 address and don't have a native IPv4
         // address.
         LinkProperties lp = nai.linkProperties;
-        final boolean isIpv6OnlyNetwork = (lp != null) && lp.hasGlobalIPv6Address()
-                && !lp.hasIPv4Address();
+        final boolean isIpv6OnlyNetwork = (lp != null) && lp.hasGlobalIpv6Address()
+                && !lp.hasIpv4Address();
 
         // If the network tells us it doesn't use clat, respect that.
         final boolean skip464xlat = (nai.netMisc() != null) && nai.netMisc().skip464xlat;

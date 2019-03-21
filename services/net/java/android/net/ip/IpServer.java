@@ -506,7 +506,7 @@ public class IpServer extends StateMachine {
         if (v6only != null) {
             params = new RaParams();
             params.mtu = v6only.getMtu();
-            params.hasDefaultRoute = v6only.hasIPv6DefaultRoute();
+            params.hasDefaultRoute = v6only.hasIpv6DefaultRoute();
 
             if (params.hasDefaultRoute) params.hopLimit = getHopLimit(v6only.getInterfaceName());
 
