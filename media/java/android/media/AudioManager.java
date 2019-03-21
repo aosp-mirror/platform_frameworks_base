@@ -44,6 +44,7 @@ import android.media.session.MediaController;
 import android.media.session.MediaSession;
 import android.media.session.MediaSessionLegacyHelper;
 import android.media.session.MediaSessionManager;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
@@ -5439,6 +5440,20 @@ public class AudioManager {
             @NonNull VolumeGroupCallback callback) {
         Preconditions.checkNotNull(callback, "volume group change cb must not be null");
         sAudioAudioVolumeGroupChangedHandler.unregisterListener(callback);
+    }
+
+    /**
+     * Return if an asset contains haptic channels or not.
+     * @param uri the {@link Uri} of the asset.
+     * @return true if the assert contains haptic channels.
+     * @hide
+     */
+    public static boolean hasHapticChannels(Uri uri) {
+        try {
+            return getService().hasHapticChannels(uri);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     //---------------------------------------------------------
