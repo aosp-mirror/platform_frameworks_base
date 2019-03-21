@@ -679,16 +679,25 @@ public class NotificationContentInflater {
         if (runningInflations.isEmpty()) {
             if ((reInflateFlags & FLAG_CONTENT_VIEW_CONTRACTED) != 0) {
                 if (result.inflatedContentView != null) {
+                    // New view case
                     privateLayout.setContractedChild(result.inflatedContentView);
+                    cachedContentViews.put(FLAG_CONTENT_VIEW_CONTRACTED, result.newContentView);
+                } else if (cachedContentViews.get(FLAG_CONTENT_VIEW_CONTRACTED) != null) {
+                    // Reinflation case. Only update if it's still cached (i.e. view has not been
+                    // freed while inflating).
+                    cachedContentViews.put(FLAG_CONTENT_VIEW_CONTRACTED, result.newContentView);
                 }
-                cachedContentViews.put(FLAG_CONTENT_VIEW_CONTRACTED, result.newContentView);
             }
 
             if ((reInflateFlags & FLAG_CONTENT_VIEW_EXPANDED) != 0) {
                 if (result.inflatedExpandedView != null) {
                     privateLayout.setExpandedChild(result.inflatedExpandedView);
+                    cachedContentViews.put(FLAG_CONTENT_VIEW_EXPANDED, result.newExpandedView);
                 } else if (result.newExpandedView == null) {
                     privateLayout.setExpandedChild(null);
+                    cachedContentViews.put(FLAG_CONTENT_VIEW_EXPANDED, null);
+                } else if (cachedContentViews.get(FLAG_CONTENT_VIEW_EXPANDED) != null) {
+                    cachedContentViews.put(FLAG_CONTENT_VIEW_EXPANDED, result.newExpandedView);
                 }
                 if (result.newExpandedView != null) {
                     privateLayout.setExpandedInflatedSmartReplies(
@@ -696,15 +705,18 @@ public class NotificationContentInflater {
                 } else {
                     privateLayout.setExpandedInflatedSmartReplies(null);
                 }
-                cachedContentViews.put(FLAG_CONTENT_VIEW_EXPANDED, result.newExpandedView);
                 row.setExpandable(result.newExpandedView != null);
             }
 
             if ((reInflateFlags & FLAG_CONTENT_VIEW_HEADS_UP) != 0) {
                 if (result.inflatedHeadsUpView != null) {
                     privateLayout.setHeadsUpChild(result.inflatedHeadsUpView);
+                    cachedContentViews.put(FLAG_CONTENT_VIEW_HEADS_UP, result.newHeadsUpView);
                 } else if (result.newHeadsUpView == null) {
                     privateLayout.setHeadsUpChild(null);
+                    cachedContentViews.put(FLAG_CONTENT_VIEW_HEADS_UP, null);
+                } else if (cachedContentViews.get(FLAG_CONTENT_VIEW_HEADS_UP) != null) {
+                    cachedContentViews.put(FLAG_CONTENT_VIEW_HEADS_UP, result.newHeadsUpView);
                 }
                 if (result.newHeadsUpView != null) {
                     privateLayout.setHeadsUpInflatedSmartReplies(
@@ -712,14 +724,15 @@ public class NotificationContentInflater {
                 } else {
                     privateLayout.setHeadsUpInflatedSmartReplies(null);
                 }
-                cachedContentViews.put(FLAG_CONTENT_VIEW_HEADS_UP, result.newHeadsUpView);
             }
 
             if ((reInflateFlags & FLAG_CONTENT_VIEW_PUBLIC) != 0) {
                 if (result.inflatedPublicView != null) {
                     publicLayout.setContractedChild(result.inflatedPublicView);
+                    cachedContentViews.put(FLAG_CONTENT_VIEW_PUBLIC, result.newPublicView);
+                } else if (cachedContentViews.get(FLAG_CONTENT_VIEW_PUBLIC) != null) {
+                    cachedContentViews.put(FLAG_CONTENT_VIEW_PUBLIC, result.newPublicView);
                 }
-                cachedContentViews.put(FLAG_CONTENT_VIEW_PUBLIC, result.newPublicView);
             }
 
             if ((reInflateFlags & FLAG_CONTENT_VIEW_AMBIENT) != 0) {
@@ -730,8 +743,10 @@ public class NotificationContentInflater {
                             ? publicLayout : privateLayout;
                     newParent.setAmbientChild(result.inflatedAmbientView);
                     otherParent.setAmbientChild(null);
+                    cachedContentViews.put(FLAG_CONTENT_VIEW_AMBIENT, result.newAmbientView);
+                } else if (cachedContentViews.get(FLAG_CONTENT_VIEW_AMBIENT) != null) {
+                    cachedContentViews.put(FLAG_CONTENT_VIEW_AMBIENT, result.newAmbientView);
                 }
-                cachedContentViews.put(FLAG_CONTENT_VIEW_AMBIENT, result.newAmbientView);
             }
             entry.headsUpStatusBarText = result.headsUpStatusBarText;
             entry.headsUpStatusBarTextPublic = result.headsUpStatusBarTextPublic;
