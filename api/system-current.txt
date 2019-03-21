@@ -4374,27 +4374,27 @@ package android.net.metrics {
   public final class DhcpErrorEvent implements android.net.metrics.IpConnectivityLog.Event {
     ctor public DhcpErrorEvent(int);
     method public static int errorCodeWithOption(int, int);
-    field public static final int BOOTP_TOO_SHORT;
-    field public static final int BUFFER_UNDERFLOW;
-    field public static final int DHCP_BAD_MAGIC_COOKIE;
+    field public static final int BOOTP_TOO_SHORT = 67174400; // 0x4010000
+    field public static final int BUFFER_UNDERFLOW = 83951616; // 0x5010000
+    field public static final int DHCP_BAD_MAGIC_COOKIE = 67239936; // 0x4020000
     field public static final int DHCP_ERROR = 4; // 0x4
-    field public static final int DHCP_INVALID_OPTION_LENGTH;
-    field public static final int DHCP_NO_COOKIE;
-    field public static final int DHCP_NO_MSG_TYPE;
-    field public static final int DHCP_UNKNOWN_MSG_TYPE;
+    field public static final int DHCP_INVALID_OPTION_LENGTH = 67305472; // 0x4030000
+    field public static final int DHCP_NO_COOKIE = 67502080; // 0x4060000
+    field public static final int DHCP_NO_MSG_TYPE = 67371008; // 0x4040000
+    field public static final int DHCP_UNKNOWN_MSG_TYPE = 67436544; // 0x4050000
     field public static final int L2_ERROR = 1; // 0x1
-    field public static final int L2_TOO_SHORT;
-    field public static final int L2_WRONG_ETH_TYPE;
+    field public static final int L2_TOO_SHORT = 16842752; // 0x1010000
+    field public static final int L2_WRONG_ETH_TYPE = 16908288; // 0x1020000
     field public static final int L3_ERROR = 2; // 0x2
-    field public static final int L3_INVALID_IP;
-    field public static final int L3_NOT_IPV4;
-    field public static final int L3_TOO_SHORT;
+    field public static final int L3_INVALID_IP = 33751040; // 0x2030000
+    field public static final int L3_NOT_IPV4 = 33685504; // 0x2020000
+    field public static final int L3_TOO_SHORT = 33619968; // 0x2010000
     field public static final int L4_ERROR = 3; // 0x3
-    field public static final int L4_NOT_UDP;
-    field public static final int L4_WRONG_PORT;
+    field public static final int L4_NOT_UDP = 50397184; // 0x3010000
+    field public static final int L4_WRONG_PORT = 50462720; // 0x3020000
     field public static final int MISC_ERROR = 5; // 0x5
-    field public static final int PARSING_ERROR;
-    field public static final int RECEIVE_ERROR;
+    field public static final int PARSING_ERROR = 84082688; // 0x5030000
+    field public static final int RECEIVE_ERROR = 84017152; // 0x5020000
   }
 
   public class IpConnectivityLog {
