@@ -60,6 +60,7 @@ import android.os.Message;
 import android.os.PatternMatcher;
 import android.os.PersistableBundle;
 import android.os.Process;
+import android.os.SELinux;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -2650,6 +2651,24 @@ public final class Settings {
     }
 
     void writePackageListLPr(int creatingUserId) {
+        String filename = mPackageListFilename.getAbsolutePath();
+        String ctx = SELinux.fileSelabelLookup(filename);
+        if (ctx == null) {
+            Slog.wtf(TAG, "Failed to get SELinux context for " +
+                mPackageListFilename.getAbsolutePath());
+        }
+
+        if (!SELinux.setFSCreateContext(ctx)) {
+            Slog.wtf(TAG, "Failed to set packages.list SELinux context");
+        }
+        try {
+            writePackageListLPrInternal(creatingUserId);
+        } finally {
+            SELinux.setFSCreateContext(null);
+        }
+    }
+
+    private void writePackageListLPrInternal(int creatingUserId) {
         // Only derive GIDs for active users (not dying)
         final List<UserInfo> users = UserManagerService.getInstance().getUsers(true);
         int[] userIds = new int[users.size()];
