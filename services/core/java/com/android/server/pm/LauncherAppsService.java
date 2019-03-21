@@ -40,6 +40,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller.SessionInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
+import android.content.pm.PackageParser;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ShortcutInfo;
@@ -66,6 +67,7 @@ import android.util.Slog;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.os.BackgroundThread;
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
@@ -439,6 +441,44 @@ public class LauncherAppsService extends SystemService {
                 return false;
             }
             if (isManagedProfileAdmin(user, appInfo.packageName)) {
+                return false;
+            }
+            // If app does not have any components or any permissions, the app can legitimately
+            // have no icon so we do not show the synthetic activity.
+            return hasComponentsAndRequestsPermissions(appInfo.packageName);
+        }
+
+        private boolean hasComponentsAndRequestsPermissions(@NonNull String packageName) {
+            final PackageManagerInternal pmInt =
+                    LocalServices.getService(PackageManagerInternal.class);
+            final PackageParser.Package pkg = pmInt.getPackage(packageName);
+            if (pkg == null) {
+                // Should not happen, but we shouldn't be failing if it does
+                return false;
+            }
+            if (ArrayUtils.isEmpty(pkg.requestedPermissions)) {
+                return false;
+            }
+            if (!hasApplicationDeclaredActivities(pkg)
+                    && ArrayUtils.isEmpty(pkg.receivers)
+                    && ArrayUtils.isEmpty(pkg.providers)
+                    && ArrayUtils.isEmpty(pkg.services)) {
+                return false;
+            }
+            return true;
+        }
+
+        private boolean hasApplicationDeclaredActivities(@NonNull PackageParser.Package pkg) {
+            if (pkg.activities == null) {
+                return false;
+            }
+            if (ArrayUtils.isEmpty(pkg.activities)) {
+                return false;
+            }
+            // If it only contains synthetic AppDetailsActivity only, it means application does
+            // not have actual activity declared in manifest.
+            if (pkg.activities.size() == 1 && PackageManager.APP_DETAILS_ACTIVITY_CLASS_NAME.equals(
+                    pkg.activities.get(0).className)) {
                 return false;
             }
             return true;
