@@ -16,8 +16,7 @@
 
 package android.media;
 
-import android.annotation.NonNull;
-import android.annotation.SystemApi;
+import android.annotation.FloatRange;
 
 /**
  * An immutable object that represents the linear correlation between the media time
@@ -76,6 +75,7 @@ public final class MediaTimestamp
      * greater than 1.0 if media clock is faster than the system clock;
      * less than 1.0 if media clock is slower than the system clock.
      */
+    @FloatRange(from = 0.0f, to = Float.MAX_VALUE)
     public float getMediaClockRate() {
         return clockRate;
     }
@@ -87,11 +87,19 @@ public final class MediaTimestamp
     /** @hide - accessor shorthand */
     public final float clockRate;
 
-    /** @hide */
-    MediaTimestamp(long mediaUs, long systemNs, float rate) {
-        mediaTimeUs = mediaUs;
-        nanoTime = systemNs;
-        clockRate = rate;
+    /**
+     * Constructor.
+     *
+     * @param mediaTimeUs the media time of the anchor in microseconds
+     * @param nanoTimeNs the {@link java.lang.System#nanoTime system time} corresponding to the
+     *                  media time in nanoseconds.
+     * @param clockRate the rate of the media clock in relation to the system time.
+     */
+    public MediaTimestamp(long mediaTimeUs, long nanoTimeNs,
+            @FloatRange(from = 0.0f, to = Float.MAX_VALUE) float clockRate) {
+        this.mediaTimeUs = mediaTimeUs;
+        this.nanoTime = nanoTimeNs;
+        this.clockRate = clockRate;
     }
 
     /** @hide */
@@ -119,72 +127,5 @@ public final class MediaTimestamp
                 + " AnchorSystemNanoTime=" + nanoTime
                 + " clockRate=" + clockRate
                 + "}";
-    }
-
-    /**
-     * Builder class for {@link MediaTimestamp} objects.
-     * <p> Here is an example where <code>Builder</code> is used to define the
-     * {@link MediaTimestamp}:
-     *
-     * <pre class="prettyprint">
-     * MediaTimestamp mts = new MediaTimestamp.Builder()
-     *         .setMediaTimestamp(mediaTime, systemTime, rate)
-     *         .build();
-     * </pre>
-     * @hide
-     */
-    @SystemApi
-    public static final class Builder {
-        long mMediaTimeUs;
-        long mNanoTime;
-        float mClockRate = 1.0f;
-
-        /**
-         * Constructs a new Builder with the defaults.
-         */
-        public Builder() {
-        }
-
-        /**
-         * Constructs a new Builder from a given {@link MediaTimestamp} instance
-         * @param mts the {@link MediaTimestamp} object whose data will be reused
-         * in the new Builder.
-         */
-        public Builder(@NonNull MediaTimestamp mts) {
-            if (mts == null) {
-                throw new IllegalArgumentException("null MediaTimestamp is not allowed");
-            }
-            mMediaTimeUs = mts.mediaTimeUs;
-            mNanoTime = mts.nanoTime;
-            mClockRate = mts.clockRate;
-        }
-
-        /**
-         * Combines all of the fields that have been set and return a new
-         * {@link MediaTimestamp} object.
-         *
-         * @return a new {@link MediaTimestamp} object
-         */
-        public @NonNull MediaTimestamp build() {
-            return new MediaTimestamp(mMediaTimeUs, mNanoTime, mClockRate);
-        }
-
-        /**
-         * Sets the info of media timestamp.
-         *
-         * @param mediaTimeUs the media time of the anchor in microseconds
-         * @param nanoTime the {@link java.lang.System#nanoTime system time} corresponding to
-         *     the media time in nanoseconds.
-         * @param clockRate the rate of the media clock in relation to the system time.
-         * @return the same Builder instance.
-         */
-        public @NonNull Builder setMediaTimestamp(
-                long mediaTimeUs, long nanoTime, float clockRate) {
-            mMediaTimeUs = mediaTimeUs;
-            mNanoTime = nanoTime;
-            mClockRate = clockRate;
-
-            return this;
-        }
     }
 }
