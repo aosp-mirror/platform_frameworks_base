@@ -1126,6 +1126,12 @@ void AndroidRuntime::start(const char* className, const Vector<String8>& options
         return;
     }
 
+    const char* tzdataRootDir = getenv("ANDROID_TZDATA_ROOT");
+    if (tzdataRootDir == NULL) {
+        LOG_FATAL("No tz data directory specified with ANDROID_TZDATA_ROOT environment variable.");
+        return;
+    }
+
     //const char* kernelHack = getenv("LD_ASSUME_KERNEL");
     //ALOGD("Found LD_ASSUME_KERNEL='%s'\n", kernelHack);
 
