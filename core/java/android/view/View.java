@@ -17,10 +17,6 @@
 package android.view;
 
 import static android.content.res.Resources.ID_NULL;
-import static android.util.StatsLog.TOUCH_GESTURE_CLASSIFIED__CLASSIFICATION__DEEP_PRESS;
-import static android.util.StatsLog.TOUCH_GESTURE_CLASSIFIED__CLASSIFICATION__LONG_PRESS;
-import static android.util.StatsLog.TOUCH_GESTURE_CLASSIFIED__CLASSIFICATION__SINGLE_TAP;
-import static android.util.StatsLog.TOUCH_GESTURE_CLASSIFIED__CLASSIFICATION__UNKNOWN_CLASSIFICATION;
 import static android.view.ViewRootImpl.NEW_INSETS_MODE_FULL;
 import static android.view.accessibility.AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED;
 
@@ -100,7 +96,6 @@ import android.util.Property;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.util.StateSet;
-import android.util.StatsLog;
 import android.util.SuperNotCalledException;
 import android.util.TypedValue;
 import android.view.AccessibilityIterators.CharacterTextSegmentIterator;
@@ -14546,12 +14541,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     if (clickable) {
                         setPressed(true, x, y);
                     }
-                    checkForLongClick(
-                            ViewConfiguration.getLongPressTimeout(),
-                            x,
-                            y,
-                            // This is not a touch gesture -- do not classify it as one.
-                            TOUCH_GESTURE_CLASSIFIED__CLASSIFICATION__UNKNOWN_CLASSIFICATION);
+                    checkForLongClick(ViewConfiguration.getLongPressTimeout(), x, y);
                     return true;
                 }
             }
@@ -15292,11 +15282,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     mHasPerformedLongPress = false;
 
                     if (!clickable) {
-                        checkForLongClick(
-                                ViewConfiguration.getLongPressTimeout(),
-                                x,
-                                y,
-                                TOUCH_GESTURE_CLASSIFIED__CLASSIFICATION__LONG_PRESS);
+                        checkForLongClick(ViewConfiguration.getLongPressTimeout(), x, y);
                         break;
                     }
 
@@ -15320,11 +15306,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     } else {
                         // Not inside a scrolling container, so show the feedback right away
                         setPressed(true, x, y);
-                        checkForLongClick(
-                                ViewConfiguration.getLongPressTimeout(),
-                                x,
-                                y,
-                                TOUCH_GESTURE_CLASSIFIED__CLASSIFICATION__LONG_PRESS);
+                        checkForLongClick(ViewConfiguration.getLongPressTimeout(), x, y);
                     }
                     break;
 
@@ -15361,11 +15343,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                                     * ambiguousMultiplier);
                             // Subtract the time already spent
                             delay -= event.getEventTime() - event.getDownTime();
-                            checkForLongClick(
-                                    delay,
-                                    x,
-                                    y,
-                                    TOUCH_GESTURE_CLASSIFIED__CLASSIFICATION__LONG_PRESS);
+                            checkForLongClick(delay, x, y);
                         }
                         touchSlop *= ambiguousMultiplier;
                     }
@@ -15387,11 +15365,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     if (deepPress && hasPendingLongPressCallback()) {
                         // process the long click action immediately
                         removeLongPressCallback();
-                        checkForLongClick(
-                                0 /* send immediately */,
-                                x,
-                                y,
-                                TOUCH_GESTURE_CLASSIFIED__CLASSIFICATION__DEEP_PRESS);
+                        checkForLongClick(0 /* send immediately */, x, y);
                     }
 
                     break;
@@ -26056,7 +26030,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
     }
 
-    private void checkForLongClick(long delay, float x, float y, int classification) {
+    private void checkForLongClick(long delay, float x, float y) {
         if ((mViewFlags & LONG_CLICKABLE) == LONG_CLICKABLE || (mViewFlags & TOOLTIP) == TOOLTIP) {
             mHasPerformedLongPress = false;
 
@@ -26066,7 +26040,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             mPendingCheckForLongPress.setAnchor(x, y);
             mPendingCheckForLongPress.rememberWindowAttachCount();
             mPendingCheckForLongPress.rememberPressedState();
-            mPendingCheckForLongPress.setClassification(classification);
             postDelayed(mPendingCheckForLongPress, delay);
         }
     }
@@ -27624,17 +27597,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         private float mX;
         private float mY;
         private boolean mOriginalPressedState;
-        /**
-         * The classification of the long click being checked: one of the
-         * StatsLog.TOUCH_GESTURE_CLASSIFIED__CLASSIFICATION__* constants.
-         */
-        private int mClassification;
 
         @Override
         public void run() {
             if ((mOriginalPressedState == isPressed()) && (mParent != null)
                     && mOriginalWindowAttachCount == mWindowAttachCount) {
-                recordGestureClassification(mClassification);
                 if (performLongClick(mX, mY)) {
                     mHasPerformedLongPress = true;
                 }
@@ -27653,10 +27620,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         public void rememberPressedState() {
             mOriginalPressedState = isPressed();
         }
-
-        public void setClassification(int classification) {
-            mClassification = classification;
-        }
     }
 
     private final class CheckForTap implements Runnable {
@@ -27669,26 +27632,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             setPressed(true, x, y);
             final long delay =
                     ViewConfiguration.getLongPressTimeout() - ViewConfiguration.getTapTimeout();
-            checkForLongClick(delay, x, y, TOUCH_GESTURE_CLASSIFIED__CLASSIFICATION__LONG_PRESS);
+            checkForLongClick(delay, x, y);
         }
     }
 
     private final class PerformClick implements Runnable {
         @Override
         public void run() {
-            recordGestureClassification(TOUCH_GESTURE_CLASSIFIED__CLASSIFICATION__SINGLE_TAP);
             performClickInternal();
         }
-    }
-
-    /** Records a classification for the current event stream. */
-    private void recordGestureClassification(int classification) {
-        if (classification == TOUCH_GESTURE_CLASSIFIED__CLASSIFICATION__UNKNOWN_CLASSIFICATION) {
-            return;
-        }
-        // To avoid negatively impacting View performance, the latency and displacement metrics
-        // are omitted.
-        StatsLog.write(StatsLog.TOUCH_GESTURE_CLASSIFIED, getClass().getName(), classification);
     }
 
     /**
