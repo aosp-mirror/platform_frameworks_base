@@ -1,7 +1,24 @@
+/*
+ * Copyright 2018 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package android.telephony;
 
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -13,7 +30,8 @@ import java.util.Objects;
  * @hide
  */
 @SystemApi
-public final class DataSpecificRegistrationStates implements Parcelable{
+@TestApi
+public final class DataSpecificRegistrationInfo implements Parcelable {
     /**
      * @hide
      * The maximum number of simultaneous Data Calls that
@@ -53,27 +71,27 @@ public final class DataSpecificRegistrationStates implements Parcelable{
     /**
      * Provides network support info for LTE VoPS and LTE Emergency bearer support
      */
-    private final LteVopsSupportInfo lteVopsSupportInfo;
+    private final LteVopsSupportInfo mLteVopsSupportInfo;
 
     /**
      * @hide
      */
-    DataSpecificRegistrationStates(
+    DataSpecificRegistrationInfo(
             int maxDataCalls, boolean isDcNrRestricted, boolean isNrAvailable,
             boolean isEnDcAvailable, LteVopsSupportInfo lteVops) {
         this.maxDataCalls = maxDataCalls;
         this.isDcNrRestricted = isDcNrRestricted;
         this.isNrAvailable = isNrAvailable;
         this.isEnDcAvailable = isEnDcAvailable;
-        this.lteVopsSupportInfo = lteVops;
+        this.mLteVopsSupportInfo = lteVops;
     }
 
-    private DataSpecificRegistrationStates(Parcel source) {
+    private DataSpecificRegistrationInfo(Parcel source) {
         maxDataCalls = source.readInt();
         isDcNrRestricted = source.readBoolean();
         isNrAvailable = source.readBoolean();
         isEnDcAvailable = source.readBoolean();
-        lteVopsSupportInfo = LteVopsSupportInfo.CREATOR.createFromParcel(source);
+        mLteVopsSupportInfo = LteVopsSupportInfo.CREATOR.createFromParcel(source);
     }
 
     @Override
@@ -82,7 +100,7 @@ public final class DataSpecificRegistrationStates implements Parcelable{
         dest.writeBoolean(isDcNrRestricted);
         dest.writeBoolean(isNrAvailable);
         dest.writeBoolean(isEnDcAvailable);
-        lteVopsSupportInfo.writeToParcel(dest, flags);
+        mLteVopsSupportInfo.writeToParcel(dest, flags);
     }
 
     @Override
@@ -98,7 +116,7 @@ public final class DataSpecificRegistrationStates implements Parcelable{
                 .append(" isDcNrRestricted = " + isDcNrRestricted)
                 .append(" isNrAvailable = " + isNrAvailable)
                 .append(" isEnDcAvailable = " + isEnDcAvailable)
-                .append(lteVopsSupportInfo.toString())
+                .append(mLteVopsSupportInfo.toString())
                 .append(" }")
                 .toString();
     }
@@ -106,41 +124,41 @@ public final class DataSpecificRegistrationStates implements Parcelable{
     @Override
     public int hashCode() {
         return Objects.hash(maxDataCalls, isDcNrRestricted, isNrAvailable, isEnDcAvailable,
-            lteVopsSupportInfo);
+                mLteVopsSupportInfo);
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
 
-        if (!(o instanceof DataSpecificRegistrationStates)) return false;
+        if (!(o instanceof DataSpecificRegistrationInfo)) return false;
 
-        DataSpecificRegistrationStates other = (DataSpecificRegistrationStates) o;
+        DataSpecificRegistrationInfo other = (DataSpecificRegistrationInfo) o;
         return this.maxDataCalls == other.maxDataCalls
                 && this.isDcNrRestricted == other.isDcNrRestricted
                 && this.isNrAvailable == other.isNrAvailable
                 && this.isEnDcAvailable == other.isEnDcAvailable
-                && this.lteVopsSupportInfo.equals(other.lteVopsSupportInfo);
+                && this.mLteVopsSupportInfo.equals(other.mLteVopsSupportInfo);
     }
 
-    public static final @android.annotation.NonNull Parcelable.Creator<DataSpecificRegistrationStates> CREATOR =
-            new Parcelable.Creator<DataSpecificRegistrationStates>() {
+    public static final @NonNull Parcelable.Creator<DataSpecificRegistrationInfo> CREATOR =
+            new Parcelable.Creator<DataSpecificRegistrationInfo>() {
                 @Override
-                public DataSpecificRegistrationStates createFromParcel(Parcel source) {
-                    return new DataSpecificRegistrationStates(source);
+                public DataSpecificRegistrationInfo createFromParcel(Parcel source) {
+                    return new DataSpecificRegistrationInfo(source);
                 }
 
                 @Override
-                public DataSpecificRegistrationStates[] newArray(int size) {
-                    return new DataSpecificRegistrationStates[size];
+                public DataSpecificRegistrationInfo[] newArray(int size) {
+                    return new DataSpecificRegistrationInfo[size];
                 }
             };
 
     /**
-     * @return LteVopsSupportInfo
+     * @return The LTE VOPS (Voice over Packet Switched) support information
      */
     @NonNull
     public LteVopsSupportInfo getLteVopsSupportInfo() {
-        return lteVopsSupportInfo;
+        return mLteVopsSupportInfo;
     }
 }
