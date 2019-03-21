@@ -18,6 +18,7 @@ package com.android.systemui.doze;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -136,13 +137,14 @@ public class DozeTriggersTest extends SysuiTestCase {
     @Test
     public void testOnSensor_whenDockedWithNearAndDoubleTapScreen_shouldWakeUp() {
         doReturn(true).when(mDockManagerFake).isDocked();
+        doReturn(true).when(mParameters).getDisplayNeedsBlanking();
         mSensors.getMockProximitySensor().sendProximityResult(false /* far */);
 
         mTriggers.onSensor(DozeLog.REASON_SENSOR_DOUBLE_TAP,
                 false /* sensorPerformedProxCheck */, 50 /* screenX */, 50 /* screenY */,
                 null /* rawValues */);
 
+        verify(mHost).setAodDimmingScrim(eq(255));
         verify(mMachine).wakeUp();
     }
-
 }
