@@ -64,6 +64,7 @@ import android.location.INetInitiatedListener;
 import android.location.Location;
 import android.location.LocationManager;
 import android.location.LocationRequest;
+import android.location.LocationTime;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
@@ -2691,6 +2692,19 @@ public class LocationManagerService extends ILocationManager.Stub {
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
+        }
+    }
+
+    @Override
+    public LocationTime getGnssTimeMillis() {
+        synchronized (mLock) {
+            Location location = mLastLocation.get(LocationManager.GPS_PROVIDER);
+            if (location == null) {
+                return null;
+            }
+            long currentNanos = SystemClock.elapsedRealtimeNanos();
+            long deltaMs = (currentNanos - location.getElapsedRealtimeNanos()) / 1000000L;
+            return new LocationTime(location.getTime() + deltaMs, currentNanos);
         }
     }
 
