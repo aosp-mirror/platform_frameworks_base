@@ -41,7 +41,7 @@ class TaskScreenshotAnimatable implements SurfaceAnimator.Animatable {
         return new TaskScreenshotAnimatable(task, getBufferFromTask(task));
     }
 
-    private static GraphicBuffer getBufferFromTask(Task task) {
+    private static SurfaceControl.ScreenshotGraphicBuffer getBufferFromTask(Task task) {
         if (task == null) {
             return null;
         }
@@ -51,7 +51,10 @@ class TaskScreenshotAnimatable implements SurfaceAnimator.Animatable {
                 task.getSurfaceControl().getHandle(), tmpRect, 1f);
     }
 
-    private TaskScreenshotAnimatable(Task task, GraphicBuffer buffer) {
+    private TaskScreenshotAnimatable(Task task,
+            SurfaceControl.ScreenshotGraphicBuffer screenshotBuffer) {
+        GraphicBuffer buffer = screenshotBuffer == null
+                ? null : screenshotBuffer.getGraphicBuffer();
         mTask = task;
         mWidth = (buffer != null) ? buffer.getWidth() : 1;
         mHeight = (buffer != null) ? buffer.getHeight() : 1;
