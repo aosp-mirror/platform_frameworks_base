@@ -19,6 +19,7 @@ package com.android.server.attention;
 import static android.provider.DeviceConfig.NAMESPACE_ATTENTION_MANAGER_SERVICE;
 
 import android.Manifest;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
@@ -560,8 +561,8 @@ public class AttentionManagerService extends SystemService {
         }
     }
 
-    private void cancel(UserState userState, @AttentionFailureCodes int failureCode) {
-        if (userState != null && userState.mService != null) {
+    private void cancel(@NonNull UserState userState, @AttentionFailureCodes int failureCode) {
+        if (userState.mService != null) {
             try {
                 userState.mService.cancelAttentionCheck(
                         userState.mCurrentAttentionCheckRequestCode);
@@ -578,6 +579,9 @@ public class AttentionManagerService extends SystemService {
     @GuardedBy("mLock")
     private void cancelAndUnbindLocked(UserState userState) {
         synchronized (mLock) {
+            if (userState == null) {
+                return;
+            }
             cancel(userState, AttentionService.ATTENTION_FAILURE_UNKNOWN);
 
             mContext.unbindService(userState.mConnection);
