@@ -16,6 +16,8 @@
 
 package android.app;
 
+import static android.graphics.drawable.Icon.TYPE_BITMAP;
+
 import static com.android.internal.util.ContrastColorUtil.satisfiesTextContrast;
 
 import android.annotation.ColorInt;
@@ -8707,11 +8709,24 @@ public class Notification implements Parcelable
              * <p>An icon is required and should be representative of the content within the bubble.
              * If your app produces multiple bubbles, the image should be unique for each of them.
              * </p>
+             *
+             * <p>The shape of a bubble icon is adaptive and can match the device theme.
+             *
+             * If your icon is bitmap-based, you should create it using
+             * {@link Icon#createWithAdaptiveBitmap(Bitmap)}, otherwise this method will throw.
+             *
+             * If your icon is not bitmap-based, you should expect that the icon will be tinted.
+             * </p>
              */
             @NonNull
             public BubbleMetadata.Builder setIcon(@NonNull Icon icon) {
                 if (icon == null) {
                     throw new IllegalArgumentException("Bubbles require non-null icon");
+                }
+                if (icon.getType() == TYPE_BITMAP) {
+                    throw new IllegalArgumentException("When using bitmap based icons, Bubbles "
+                            + "require TYPE_ADAPTIVE_BITMAP, please use"
+                            + " Icon#createWithAdaptiveBitmap instead");
                 }
                 mIcon = icon;
                 return this;
