@@ -310,6 +310,8 @@ public class MemoryStatUtilTest {
     @Test
     public void testParseIonHeapSizeFromDebugfs_invalidValue() {
         assertEquals(0, parseIonHeapSizeFromDebugfs("<<no-value>>"));
+
+        assertEquals(0, parseIonHeapSizeFromDebugfs("\ntotal 12345678901234567890\n"));
     }
 
     @Test
