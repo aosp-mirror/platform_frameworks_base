@@ -208,7 +208,10 @@ public class RecentsAnimationController implements DeathRecipient {
             try {
                 synchronized (mService.getWindowManagerLock()) {
                     for (int i = mPendingAnimations.size() - 1; i >= 0; i--) {
-                        mPendingAnimations.get(i).mTask.setCanAffectSystemUiFlags(behindSystemBars);
+                        final Task task = mPendingAnimations.get(i).mTask;
+                        if (task.getActivityType() != mTargetActivityType) {
+                            task.setCanAffectSystemUiFlags(behindSystemBars);
+                        }
                     }
                     mService.mWindowPlacerLocked.requestTraversal();
                 }
