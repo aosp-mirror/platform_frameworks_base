@@ -834,7 +834,7 @@ public class IpClient extends StateMachine {
     static boolean isProvisioned(LinkProperties lp, InitialConfiguration config) {
         // For historical reasons, we should connect even if all we have is
         // an IPv4 address and nothing else.
-        if (lp.hasIPv4Address() || lp.isProvisioned()) {
+        if (lp.hasIpv4Address() || lp.isProvisioned()) {
             return true;
         }
         if (config == null) {
@@ -878,9 +878,9 @@ public class IpClient extends StateMachine {
             delta = PROV_CHANGE_LOST_PROVISIONING;
         }
 
-        final boolean lostIPv6 = oldLp.isIPv6Provisioned() && !newLp.isIPv6Provisioned();
-        final boolean lostIPv4Address = oldLp.hasIPv4Address() && !newLp.hasIPv4Address();
-        final boolean lostIPv6Router = oldLp.hasIPv6DefaultRoute() && !newLp.hasIPv6DefaultRoute();
+        final boolean lostIPv6 = oldLp.isIpv6Provisioned() && !newLp.isIpv6Provisioned();
+        final boolean lostIPv4Address = oldLp.hasIpv4Address() && !newLp.hasIpv4Address();
+        final boolean lostIPv6Router = oldLp.hasIpv6DefaultRoute() && !newLp.hasIpv6DefaultRoute();
 
         // If bad wifi avoidance is disabled, then ignore IPv6 loss of
         // provisioning. Otherwise, when a hotspot that loses Internet
@@ -920,7 +920,7 @@ public class IpClient extends StateMachine {
         // If the previous link properties had a global IPv6 address and an
         // IPv6 default route then also consider the loss of that default route
         // to be a loss of provisioning. See b/27962810.
-        if (oldLp.hasGlobalIPv6Address() && (lostIPv6Router && !ignoreIPv6ProvisioningLoss)) {
+        if (oldLp.hasGlobalIpv6Address() && (lostIPv6Router && !ignoreIPv6ProvisioningLoss)) {
             delta = PROV_CHANGE_LOST_PROVISIONING;
         }
 
@@ -1156,7 +1156,7 @@ public class IpClient extends StateMachine {
 
     private boolean applyInitialConfig(InitialConfiguration config) {
         // TODO: also support specifying a static IPv4 configuration in InitialConfiguration.
-        for (LinkAddress addr : findAll(config.ipAddresses, LinkAddress::isIPv6)) {
+        for (LinkAddress addr : findAll(config.ipAddresses, LinkAddress::isIpv6)) {
             if (!mInterfaceCtrl.addAddress(addr)) return false;
         }
 
@@ -1374,7 +1374,7 @@ public class IpClient extends StateMachine {
         }
 
         private boolean readyToProceed() {
-            return (!mLinkProperties.hasIPv4Address() && !mLinkProperties.hasGlobalIPv6Address());
+            return (!mLinkProperties.hasIpv4Address() && !mLinkProperties.hasGlobalIpv6Address());
         }
     }
 
