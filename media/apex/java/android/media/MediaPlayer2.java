@@ -898,7 +898,7 @@ public class MediaPlayer2 implements AutoCloseable, AudioRouting {
             UriDataSourceDesc uriDSD = (UriDataSourceDesc) dsd;
             handleDataSource(isCurrent,
                              srcId,
-                             uriDSD.getContext(),
+                             mContext,
                              uriDSD.getUri(),
                              uriDSD.getHeaders(),
                              uriDSD.getCookies(),

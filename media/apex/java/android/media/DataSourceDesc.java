@@ -18,15 +18,22 @@ package android.media;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.net.Uri;
+import android.os.ParcelFileDescriptor;
+
+import java.net.CookieHandler;
+import java.net.CookieManager;
+import java.net.HttpCookie;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
- * Base class of data source descriptor.
+ * Data source descriptor.
  *
  * Used by {@link MediaPlayer2#setDataSource}, {@link MediaPlayer2#setNextDataSource} and
  * {@link MediaPlayer2#setNextDataSources} to set data source for playback.
- *
- * <p>Users should use subclasses' builder to change {@link DataSourceDesc}.
- *
  */
 public class DataSourceDesc {
     // intentionally less than long.MAX_VALUE
@@ -45,7 +52,10 @@ public class DataSourceDesc {
     private long mStartPositionMs = 0;
     private long mEndPositionMs = POSITION_UNKNOWN;
 
-    DataSourceDesc() {
+    DataSourceDesc(String mediaId, long startPositionMs, long endPositionMs) {
+        mMediaId = mediaId;
+        mStartPositionMs = startPositionMs;
+        mEndPositionMs = endPositionMs;
     }
 
     /**
@@ -97,17 +107,48 @@ public class DataSourceDesc {
     }
 
     /**
-     * Base class for Builders in the subclasses of {@link DataSourceDesc}.
+     * Builder for {@link DataSourceDesc}.
+     * <p>
+     * Here is an example where <code>Builder</code> is used to define the
+     * {@link DataSourceDesc} to be used by a {@link MediaPlayer2} instance:
+     *
+     * <pre class="prettyprint">
+     * DataSourceDesc newDSD = new DataSourceDesc.Builder()
+     *         .setDataSource(context, uri, headers, cookies)
+     *         .setStartPosition(1000)
+     *         .setEndPosition(15000)
+     *         .build();
+     * mediaplayer2.setDataSourceDesc(newDSD);
+     * </pre>
      */
-    protected static class BuilderBase<T extends BuilderBase> {
+    public static final class Builder {
+        private static final int SOURCE_TYPE_UNKNOWN = 0;
+        private static final int SOURCE_TYPE_URI = 1;
+        private static final int SOURCE_TYPE_FILE = 2;
+        private static final int SOURCE_TYPE_CALLBACK = 3;
+
+        private int mSourceType = SOURCE_TYPE_UNKNOWN;
         private String mMediaId;
         private long mStartPositionMs = 0;
         private long mEndPositionMs = POSITION_UNKNOWN;
 
+        // For UriDataSourceDesc
+        private Uri mUri;
+        private Map<String, String> mHeader;
+        private List<HttpCookie> mCookies;
+
+        // For FileDataSourceDesc
+        private ParcelFileDescriptor mPFD;
+        private long mOffset = 0;
+        private long mLength = FileDataSourceDesc.FD_LENGTH_UNKNOWN;
+
+        // For CallbackDataSourceDesc
+        private DataSourceCallback mDataSourceCallback;
+
         /**
          * Constructs a new BuilderBase with the defaults.
          */
-        BuilderBase() {
+        public Builder() {
         }
 
         /**
@@ -115,33 +156,61 @@ public class DataSourceDesc {
          * @param dsd the {@link DataSourceDesc} object whose data will be reused
          * in the new BuilderBase.
          */
-        BuilderBase(DataSourceDesc dsd) {
+        public Builder(@Nullable DataSourceDesc dsd) {
             if (dsd == null) {
                 return;
             }
             mMediaId = dsd.mMediaId;
             mStartPositionMs = dsd.mStartPositionMs;
             mEndPositionMs = dsd.mEndPositionMs;
+            if (dsd instanceof FileDataSourceDesc) {
+                mSourceType = SOURCE_TYPE_FILE;
+                mPFD = ((FileDataSourceDesc) dsd).getParcelFileDescriptor();
+                mOffset = ((FileDataSourceDesc) dsd).getOffset();
+                mLength = ((FileDataSourceDesc) dsd).getLength();
+            } else if (dsd instanceof UriDataSourceDesc) {
+                mSourceType = SOURCE_TYPE_URI;
+                mUri = ((UriDataSourceDesc) dsd).getUri();
+                mHeader = ((UriDataSourceDesc) dsd).getHeaders();
+                mCookies = ((UriDataSourceDesc) dsd).getCookies();
+            } else if (dsd instanceof CallbackDataSourceDesc) {
+                mSourceType = SOURCE_TYPE_CALLBACK;
+                mDataSourceCallback = ((CallbackDataSourceDesc) dsd).getDataSourceCallback();
+            } else {
+                throw new IllegalStateException("Unknown source type:" + mSourceType);
+            }
         }
 
         /**
          * Sets all fields that have been set in the {@link DataSourceDesc} object.
          * <code>IllegalStateException</code> will be thrown if there is conflict between fields.
          *
-         * @param dsd an instance of subclass of {@link DataSourceDesc} whose data will be set
-         * @return the same instance of subclass of {@link DataSourceDesc}
+         * @return {@link DataSourceDesc}
          */
-        void build(@NonNull DataSourceDesc dsd) {
-            Media2Utils.checkArgument(dsd != null,  "dsd cannot be null.");
-
+        @NonNull
+        public DataSourceDesc build() {
+            if (mSourceType == SOURCE_TYPE_UNKNOWN) {
+                throw new IllegalStateException("Source is not set.");
+            }
             if (mStartPositionMs > mEndPositionMs) {
                 throw new IllegalStateException("Illegal start/end position: "
                     + mStartPositionMs + " : " + mEndPositionMs);
             }
 
-            dsd.mMediaId = mMediaId;
-            dsd.mStartPositionMs = mStartPositionMs;
-            dsd.mEndPositionMs = mEndPositionMs;
+            DataSourceDesc desc;
+            if (mSourceType == SOURCE_TYPE_FILE) {
+                desc = new FileDataSourceDesc(
+                        mMediaId, mStartPositionMs, mEndPositionMs, mPFD, mOffset, mLength);
+            } else if (mSourceType == SOURCE_TYPE_URI) {
+                desc = new UriDataSourceDesc(
+                        mMediaId, mStartPositionMs, mEndPositionMs, mUri, mHeader, mCookies);
+            } else if (mSourceType == SOURCE_TYPE_CALLBACK) {
+                desc = new CallbackDataSourceDesc(
+                        mMediaId, mStartPositionMs, mEndPositionMs, mDataSourceCallback);
+            } else {
+                throw new IllegalStateException("Unknown source type:" + mSourceType);
+            }
+            return desc;
         }
 
         /**
@@ -150,9 +219,10 @@ public class DataSourceDesc {
          * @param mediaId the media Id of this data source
          * @return the same Builder instance.
          */
-        public @NonNull T setMediaId(@Nullable String mediaId) {
+        @NonNull
+        public Builder setMediaId(@Nullable String mediaId) {
             mMediaId = mediaId;
-            return (T) this;
+            return this;
         }
 
         /**
@@ -163,12 +233,13 @@ public class DataSourceDesc {
          * @return the same Builder instance.
          *
          */
-        public @NonNull T setStartPosition(long position) {
+        @NonNull
+        public Builder setStartPosition(long position) {
             if (position < 0) {
                 position = 0;
             }
             mStartPositionMs = position;
-            return (T) this;
+            return this;
         }
 
         /**
@@ -179,12 +250,155 @@ public class DataSourceDesc {
          * @param position the end position in milliseconds at which the playback will end
          * @return the same Builder instance.
          */
-        public @NonNull T setEndPosition(long position) {
+        @NonNull
+        public Builder setEndPosition(long position) {
             if (position < 0) {
                 position = LONG_MAX_TIME_MS;
             }
             mEndPositionMs = position;
-            return (T) this;
+            return this;
+        }
+
+        /**
+         * Sets the data source as a content Uri.
+         *
+         * @param uri the Content URI of the data you want to play
+         * @return the same Builder instance.
+         * @throws NullPointerException if context or uri is null.
+         */
+        @NonNull
+        public Builder setDataSource(@NonNull Uri uri) {
+            setSourceType(SOURCE_TYPE_URI);
+            Media2Utils.checkArgument(uri != null, "uri cannot be null");
+            mUri = uri;
+            return this;
+        }
+
+        /**
+         * Sets the data source as a content Uri.
+         *
+         * To provide cookies for the subsequent HTTP requests, you can install your own default
+         * cookie handler and use other variants of setDataSource APIs instead. Alternatively, you
+         * can use this API to pass the cookies as a list of HttpCookie. If the app has not
+         * installed a CookieHandler already, {@link MediaPlayer2} will create a CookieManager
+         * and populates its CookieStore with the provided cookies when this data source is passed
+         * to {@link MediaPlayer2}. If the app has installed its own handler already, the handler
+         * is required to be of CookieManager type such that {@link MediaPlayer2} can update the
+         * manager’s CookieStore.
+         *
+         *  <p><strong>Note</strong> that the cross domain redirection is allowed by default,
+         * but that can be changed with key/value pairs through the headers parameter with
+         * "android-allow-cross-domain-redirect" as the key and "0" or "1" as the value to
+         * disallow or allow cross domain redirection.
+         *
+         * @param uri the Content URI of the data you want to play
+         * @param headers the headers to be sent together with the request for the data
+         *                The headers must not include cookies. Instead, use the cookies param.
+         * @param cookies the cookies to be sent together with the request
+         * @return the same Builder instance.
+         * @throws NullPointerException if context or uri is null.
+         * @throws IllegalArgumentException if the cookie handler is not of CookieManager type
+         *                                  when cookies are provided.
+         */
+        @NonNull
+        public Builder setDataSource(@NonNull Uri uri, @Nullable Map<String, String> headers,
+                @Nullable List<HttpCookie> cookies) {
+            setSourceType(SOURCE_TYPE_URI);
+            Media2Utils.checkArgument(uri != null, "uri cannot be null");
+            if (cookies != null) {
+                CookieHandler cookieHandler = CookieHandler.getDefault();
+                if (cookieHandler != null && !(cookieHandler instanceof CookieManager)) {
+                    throw new IllegalArgumentException(
+                            "The cookie handler has to be of CookieManager type "
+                                    + "when cookies are provided.");
+                }
+            }
+
+            mUri = uri;
+            if (headers != null) {
+                mHeader = new HashMap<String, String>(headers);
+            }
+            if (cookies != null) {
+                mCookies = new ArrayList<HttpCookie>(cookies);
+            }
+            return this;
+        }
+
+        /**
+         * Sets the data source (ParcelFileDescriptor) to use. The ParcelFileDescriptor must be
+         * seekable (N.B. a LocalSocket is not seekable). When the {@link FileDataSourceDesc}
+         * created by this builder is passed to {@link MediaPlayer2} via
+         * {@link MediaPlayer2#setDataSource},
+         * {@link MediaPlayer2#setNextDataSource} or
+         * {@link MediaPlayer2#setNextDataSources}, MediaPlayer2 will
+         * close the ParcelFileDescriptor.
+         *
+         * @param pfd the ParcelFileDescriptor for the file to play
+         * @return the same Builder instance.
+         * @throws NullPointerException if pfd is null.
+         */
+        @NonNull
+        public Builder setDataSource(@NonNull ParcelFileDescriptor pfd) {
+            setSourceType(SOURCE_TYPE_FILE);
+            Media2Utils.checkArgument(pfd != null, "pfd cannot be null.");
+            mPFD = pfd;
+            return this;
+        }
+
+        /**
+         * Sets the data source (ParcelFileDescriptor) to use. The ParcelFileDescriptor must be
+         * seekable (N.B. a LocalSocket is not seekable). When the {@link FileDataSourceDesc}
+         * created by this builder is passed to {@link MediaPlayer2} via
+         * {@link MediaPlayer2#setDataSource},
+         * {@link MediaPlayer2#setNextDataSource} or
+         * {@link MediaPlayer2#setNextDataSources}, MediaPlayer2 will
+         * close the ParcelFileDescriptor.
+         *
+         * Any negative number for offset is treated as 0.
+         * Any negative number for length is treated as maximum length of the data source.
+         *
+         * @param pfd the ParcelFileDescriptor for the file to play
+         * @param offset the offset into the file where the data to be played starts, in bytes
+         * @param length the length in bytes of the data to be played
+         * @return the same Builder instance.
+         * @throws NullPointerException if pfd is null.
+         */
+        @NonNull
+        public Builder setDataSource(
+                @NonNull ParcelFileDescriptor pfd, long offset, long length) {
+            setSourceType(SOURCE_TYPE_FILE);
+            Media2Utils.checkArgument(pfd != null, "pfd cannot be null.");
+            if (offset < 0) {
+                offset = 0;
+            }
+            if (length < 0) {
+                length = FileDataSourceDesc.FD_LENGTH_UNKNOWN;
+            }
+            mPFD = pfd;
+            mOffset = offset;
+            mLength = length;
+            return this;
+        }
+
+        /**
+         * Sets the data source (DataSourceCallback) to use.
+         *
+         * @param dscb the DataSourceCallback for the media to play
+         * @return the same Builder instance.
+         * @throws NullPointerException if dscb is null.
+         */
+        public @NonNull Builder setDataSource(@NonNull DataSourceCallback dscb) {
+            setSourceType(SOURCE_TYPE_CALLBACK);
+            Media2Utils.checkArgument(dscb != null, "data source cannot be null.");
+            mDataSourceCallback = dscb;
+            return this;
+        }
+
+        private void setSourceType(int type) {
+            if (mSourceType != SOURCE_TYPE_UNKNOWN) {
+                throw new IllegalStateException("Source is already set. type=" + mSourceType);
+            }
+            mSourceType = type;
         }
     }
 }

@@ -1078,6 +1078,17 @@ package android.media {
     method public android.media.BufferingParams.Builder setResumePlaybackMarkMs(int);
   }
 
+  public class CallbackDataSourceDesc extends android.media.DataSourceDesc {
+    method @NonNull public android.media.DataSourceCallback getDataSourceCallback();
+  }
+
+  public class FileDataSourceDesc extends android.media.DataSourceDesc {
+    method public long getLength();
+    method public long getOffset();
+    method @NonNull public android.os.ParcelFileDescriptor getParcelFileDescriptor();
+    field public static final long FD_LENGTH_UNKNOWN = 576460752303423487L; // 0x7ffffffffffffffL
+  }
+
   public static final class MediaCodecInfo.VideoCapabilities.PerformancePoint {
     ctor public MediaCodecInfo.VideoCapabilities.PerformancePoint(int, int, int, int, @NonNull android.util.Size);
     ctor public MediaCodecInfo.VideoCapabilities.PerformancePoint(@NonNull android.media.MediaCodecInfo.VideoCapabilities.PerformancePoint, @NonNull android.util.Size);
@@ -1100,6 +1111,12 @@ package android.media {
   public final class PlaybackParams implements android.os.Parcelable {
     method public int getAudioStretchMode();
     method public android.media.PlaybackParams setAudioStretchMode(int);
+  }
+
+  public class UriDataSourceDesc extends android.media.DataSourceDesc {
+    method @Nullable public java.util.List<java.net.HttpCookie> getCookies();
+    method @Nullable public java.util.Map<java.lang.String,java.lang.String> getHeaders();
+    method @NonNull public android.net.Uri getUri();
   }
 
   public static final class VolumeShaper.Configuration.Builder {
