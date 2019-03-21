@@ -2682,6 +2682,11 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 }
                 wallpaper.connection.mReply = null;
             }
+            try {
+                wallpaper.connection.mService.detach();
+            } catch (RemoteException e) {
+                Slog.w(TAG, "Failed detaching wallpaper service ", e);
+            }
             mContext.unbindService(wallpaper.connection);
             wallpaper.connection.forEachDisplayConnector(
                     WallpaperConnection.DisplayConnector::disconnectLocked);
