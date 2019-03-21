@@ -51,10 +51,10 @@ import android.media.session.IOnMediaKeyListener;
 import android.media.session.IOnVolumeKeyLongPressListener;
 import android.media.session.ISession;
 import android.media.session.ISession2TokensListener;
+import android.media.session.ISessionCallback;
 import android.media.session.ISessionManager;
 import android.media.session.MediaSession;
 import android.media.session.MediaSessionManager;
-import android.media.session.SessionCallbackLink;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
@@ -467,7 +467,7 @@ public class MediaSessionServiceImpl extends MediaSessionService.ServiceImpl {
         }
 
         try {
-            session.getCallback().getBinder().unlinkToDeath(session, 0);
+            session.getCallback().asBinder().unlinkToDeath(session, 0);
         } catch (Exception e) {
             // ignore exceptions while destroying a session.
         }
@@ -553,7 +553,7 @@ public class MediaSessionServiceImpl extends MediaSessionService.ServiceImpl {
     }
 
     private MediaSessionRecord createSessionInternal(int callerPid, int callerUid, int userId,
-            String callerPackageName, SessionCallbackLink cb, String tag, Bundle sessionInfo)
+            String callerPackageName, ISessionCallback cb, String tag, Bundle sessionInfo)
             throws RemoteException {
         synchronized (mLock) {
             return createSessionLocked(callerPid, callerUid, userId, callerPackageName, cb,
@@ -569,7 +569,7 @@ public class MediaSessionServiceImpl extends MediaSessionService.ServiceImpl {
      * 4. It needs to be added to the relevant user record.
      */
     private MediaSessionRecord createSessionLocked(int callerPid, int callerUid, int userId,
-            String callerPackageName, SessionCallbackLink cb, String tag, Bundle sessionInfo) {
+            String callerPackageName, ISessionCallback cb, String tag, Bundle sessionInfo) {
         FullUserRecord user = getFullUserRecordLocked(userId);
         if (user == null) {
             Log.w(TAG, "Request from invalid user: " +  userId + ", pkg=" + callerPackageName);
@@ -579,7 +579,7 @@ public class MediaSessionServiceImpl extends MediaSessionService.ServiceImpl {
         final MediaSessionRecord session = new MediaSessionRecord(callerPid, callerUid, userId,
                 callerPackageName, cb, tag, sessionInfo, this, mHandler.getLooper());
         try {
-            cb.getBinder().linkToDeath(session, 0);
+            cb.asBinder().linkToDeath(session, 0);
         } catch (RemoteException e) {
             throw new RuntimeException("Media Session owner died prematurely.", e);
         }
@@ -1001,7 +1001,7 @@ public class MediaSessionServiceImpl extends MediaSessionService.ServiceImpl {
         private boolean mVoiceButtonHandled = false;
 
         @Override
-        public ISession createSession(String packageName, SessionCallbackLink cb, String tag,
+        public ISession createSession(String packageName, ISessionCallback cb, String tag,
                 Bundle sessionInfo, int userId) throws RemoteException {
             final int pid = Binder.getCallingPid();
             final int uid = Binder.getCallingUid();

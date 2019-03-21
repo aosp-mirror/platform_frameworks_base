@@ -29,13 +29,13 @@ import android.media.Rating;
 import android.media.VolumeProvider;
 import android.media.session.ControllerCallbackLink;
 import android.media.session.ISession;
+import android.media.session.ISessionCallback;
 import android.media.session.ISessionController;
 import android.media.session.MediaController;
 import android.media.session.MediaController.PlaybackInfo;
 import android.media.session.MediaSession;
 import android.media.session.MediaSession.QueueItem;
 import android.media.session.PlaybackState;
-import android.media.session.SessionCallbackLink;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
@@ -124,7 +124,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
     private String mMetadataDescription;
 
     public MediaSessionRecord(int ownerPid, int ownerUid, int userId, String ownerPackageName,
-            SessionCallbackLink cb, String tag, Bundle sessionInfo,
+            ISessionCallback cb, String tag, Bundle sessionInfo,
             MediaSessionService.ServiceImpl service, Looper handlerLooper) {
         mOwnerPid = ownerPid;
         mOwnerUid = ownerUid;
@@ -460,7 +460,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         }
     }
 
-    public SessionCallbackLink getCallback() {
+    public ISessionCallback getCallback() {
         return mSessionCb.mCb;
     }
 
@@ -1003,9 +1003,9 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
     }
 
     class SessionCb {
-        private final SessionCallbackLink mCb;
+        private final ISessionCallback mCb;
 
-        SessionCb(SessionCallbackLink cb) {
+        SessionCb(ISessionCallback cb) {
             mCb = cb;
         }
 
@@ -1013,14 +1013,14 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
                 boolean asSystemService, KeyEvent keyEvent, int sequenceId, ResultReceiver cb) {
             try {
                 if (asSystemService) {
-                    mCb.notifyMediaButton(mContext.getPackageName(), Process.myPid(),
+                    mCb.onMediaButton(mContext.getPackageName(), Process.myPid(),
                             Process.SYSTEM_UID, createMediaButtonIntent(keyEvent), sequenceId, cb);
                 } else {
-                    mCb.notifyMediaButton(packageName, pid, uid,
+                    mCb.onMediaButton(packageName, pid, uid,
                             createMediaButtonIntent(keyEvent), sequenceId, cb);
                 }
                 return true;
-            } catch (RuntimeException e) {
+            } catch (RemoteException e) {
                 Slog.e(TAG, "Remote failure in sendMediaRequest.", e);
             }
             return false;
@@ -1031,14 +1031,14 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
                 KeyEvent keyEvent) {
             try {
                 if (asSystemService) {
-                    mCb.notifyMediaButton(mContext.getPackageName(), Process.myPid(),
+                    mCb.onMediaButton(mContext.getPackageName(), Process.myPid(),
                             Process.SYSTEM_UID, createMediaButtonIntent(keyEvent), 0, null);
                 } else {
-                    mCb.notifyMediaButtonFromController(packageName, pid, uid, caller,
+                    mCb.onMediaButtonFromController(packageName, pid, uid, caller,
                             createMediaButtonIntent(keyEvent));
                 }
                 return true;
-            } catch (RuntimeException e) {
+            } catch (RemoteException e) {
                 Slog.e(TAG, "Remote failure in sendMediaRequest.", e);
             }
             return false;
@@ -1047,8 +1047,8 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         public void sendCommand(String packageName, int pid, int uid,
                 ControllerCallbackLink caller, String command, Bundle args, ResultReceiver cb) {
             try {
-                mCb.notifyCommand(packageName, pid, uid, caller, command, args, cb);
-            } catch (RuntimeException e) {
+                mCb.onCommand(packageName, pid, uid, caller, command, args, cb);
+            } catch (RemoteException e) {
                 Slog.e(TAG, "Remote failure in sendCommand.", e);
             }
         }
@@ -1057,8 +1057,8 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
                 ControllerCallbackLink caller, String action,
                 Bundle args) {
             try {
-                mCb.notifyCustomAction(packageName, pid, uid, caller, action, args);
-            } catch (RuntimeException e) {
+                mCb.onCustomAction(packageName, pid, uid, caller, action, args);
+            } catch (RemoteException e) {
                 Slog.e(TAG, "Remote failure in sendCustomAction.", e);
             }
         }
@@ -1066,8 +1066,8 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         public void prepare(String packageName, int pid, int uid,
                 ControllerCallbackLink caller) {
             try {
-                mCb.notifyPrepare(packageName, pid, uid, caller);
-            } catch (RuntimeException e) {
+                mCb.onPrepare(packageName, pid, uid, caller);
+            } catch (RemoteException e) {
                 Slog.e(TAG, "Remote failure in prepare.", e);
             }
         }
@@ -1075,8 +1075,8 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         public void prepareFromMediaId(String packageName, int pid, int uid,
                 ControllerCallbackLink caller, String mediaId, Bundle extras) {
             try {
-                mCb.notifyPrepareFromMediaId(packageName, pid, uid, caller, mediaId, extras);
-            } catch (RuntimeException e) {
+                mCb.onPrepareFromMediaId(packageName, pid, uid, caller, mediaId, extras);
+            } catch (RemoteException e) {
                 Slog.e(TAG, "Remote failure in prepareFromMediaId.", e);
             }
         }
@@ -1084,8 +1084,8 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         public void prepareFromSearch(String packageName, int pid, int uid,
                 ControllerCallbackLink caller, String query, Bundle extras) {
             try {
-                mCb.notifyPrepareFromSearch(packageName, pid, uid, caller, query, extras);
-            } catch (RuntimeException e) {
+                mCb.onPrepareFromSearch(packageName, pid, uid, caller, query, extras);
+            } catch (RemoteException e) {
                 Slog.e(TAG, "Remote failure in prepareFromSearch.", e);
             }
         }
@@ -1093,16 +1093,16 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         public void prepareFromUri(String packageName, int pid, int uid,
                 ControllerCallbackLink caller, Uri uri, Bundle extras) {
             try {
-                mCb.notifyPrepareFromUri(packageName, pid, uid, caller, uri, extras);
-            } catch (RuntimeException e) {
+                mCb.onPrepareFromUri(packageName, pid, uid, caller, uri, extras);
+            } catch (RemoteException e) {
                 Slog.e(TAG, "Remote failure in prepareFromUri.", e);
             }
         }
 
         public void play(String packageName, int pid, int uid, ControllerCallbackLink caller) {
             try {
-                mCb.notifyPlay(packageName, pid, uid, caller);
-            } catch (RuntimeException e) {
+                mCb.onPlay(packageName, pid, uid, caller);
+            } catch (RemoteException e) {
                 Slog.e(TAG, "Remote failure in play.", e);
             }
         }
@@ -1110,8 +1110,8 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         public void playFromMediaId(String packageName, int pid, int uid,
                 ControllerCallbackLink caller, String mediaId, Bundle extras) {
             try {
-                mCb.notifyPlayFromMediaId(packageName, pid, uid, caller, mediaId, extras);
-            } catch (RuntimeException e) {
+                mCb.onPlayFromMediaId(packageName, pid, uid, caller, mediaId, extras);
+            } catch (RemoteException e) {
                 Slog.e(TAG, "Remote failure in playFromMediaId.", e);
             }
         }
@@ -1119,8 +1119,8 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         public void playFromSearch(String packageName, int pid, int uid,
                 ControllerCallbackLink caller, String query, Bundle extras) {
             try {
-                mCb.notifyPlayFromSearch(packageName, pid, uid, caller, query, extras);
-            } catch (RuntimeException e) {
+                mCb.onPlayFromSearch(packageName, pid, uid, caller, query, extras);
+            } catch (RemoteException e) {
                 Slog.e(TAG, "Remote failure in playFromSearch.", e);
             }
         }
@@ -1128,8 +1128,8 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         public void playFromUri(String packageName, int pid, int uid,
                 ControllerCallbackLink caller, Uri uri, Bundle extras) {
             try {
-                mCb.notifyPlayFromUri(packageName, pid, uid, caller, uri, extras);
-            } catch (RuntimeException e) {
+                mCb.onPlayFromUri(packageName, pid, uid, caller, uri, extras);
+            } catch (RemoteException e) {
                 Slog.e(TAG, "Remote failure in playFromUri.", e);
             }
         }
@@ -1137,32 +1137,32 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         public void skipToTrack(String packageName, int pid, int uid,
                 ControllerCallbackLink caller, long id) {
             try {
-                mCb.notifySkipToTrack(packageName, pid, uid, caller, id);
-            } catch (RuntimeException e) {
+                mCb.onSkipToTrack(packageName, pid, uid, caller, id);
+            } catch (RemoteException e) {
                 Slog.e(TAG, "Remote failure in skipToTrack", e);
             }
         }
 
         public void pause(String packageName, int pid, int uid, ControllerCallbackLink caller) {
             try {
-                mCb.notifyPause(packageName, pid, uid, caller);
-            } catch (RuntimeException e) {
+                mCb.onPause(packageName, pid, uid, caller);
+            } catch (RemoteException e) {
                 Slog.e(TAG, "Remote failure in pause.", e);
             }
         }
 
         public void stop(String packageName, int pid, int uid, ControllerCallbackLink caller) {
             try {
-                mCb.notifyStop(packageName, pid, uid, caller);
-            } catch (RuntimeException e) {
+                mCb.onStop(packageName, pid, uid, caller);
+            } catch (RemoteException e) {
                 Slog.e(TAG, "Remote failure in stop.", e);
             }
         }
 
         public void next(String packageName, int pid, int uid, ControllerCallbackLink caller) {
             try {
-                mCb.notifyNext(packageName, pid, uid, caller);
-            } catch (RuntimeException e) {
+                mCb.onNext(packageName, pid, uid, caller);
+            } catch (RemoteException e) {
                 Slog.e(TAG, "Remote failure in next.", e);
             }
         }
@@ -1170,8 +1170,8 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         public void previous(String packageName, int pid, int uid,
                 ControllerCallbackLink caller) {
             try {
-                mCb.notifyPrevious(packageName, pid, uid, caller);
-            } catch (RuntimeException e) {
+                mCb.onPrevious(packageName, pid, uid, caller);
+            } catch (RemoteException e) {
                 Slog.e(TAG, "Remote failure in previous.", e);
             }
         }
@@ -1179,8 +1179,8 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         public void fastForward(String packageName, int pid, int uid,
                 ControllerCallbackLink caller) {
             try {
-                mCb.notifyFastForward(packageName, pid, uid, caller);
-            } catch (RuntimeException e) {
+                mCb.onFastForward(packageName, pid, uid, caller);
+            } catch (RemoteException e) {
                 Slog.e(TAG, "Remote failure in fastForward.", e);
             }
         }
@@ -1188,8 +1188,8 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         public void rewind(String packageName, int pid, int uid,
                 ControllerCallbackLink caller) {
             try {
-                mCb.notifyRewind(packageName, pid, uid, caller);
-            } catch (RuntimeException e) {
+                mCb.onRewind(packageName, pid, uid, caller);
+            } catch (RemoteException e) {
                 Slog.e(TAG, "Remote failure in rewind.", e);
             }
         }
@@ -1197,8 +1197,8 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         public void seekTo(String packageName, int pid, int uid, ControllerCallbackLink caller,
                 long pos) {
             try {
-                mCb.notifySeekTo(packageName, pid, uid, caller, pos);
-            } catch (RuntimeException e) {
+                mCb.onSeekTo(packageName, pid, uid, caller, pos);
+            } catch (RemoteException e) {
                 Slog.e(TAG, "Remote failure in seekTo.", e);
             }
         }
@@ -1206,8 +1206,8 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         public void rate(String packageName, int pid, int uid, ControllerCallbackLink caller,
                 Rating rating) {
             try {
-                mCb.notifyRate(packageName, pid, uid, caller, rating);
-            } catch (RuntimeException e) {
+                mCb.onRate(packageName, pid, uid, caller, rating);
+            } catch (RemoteException e) {
                 Slog.e(TAG, "Remote failure in rate.", e);
             }
         }
@@ -1215,8 +1215,8 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         public void setPlaybackSpeed(String packageName, int pid, int uid,
                 ControllerCallbackLink caller, float speed) {
             try {
-                mCb.notifySetPlaybackSpeed(packageName, pid, uid, caller, speed);
-            } catch (RuntimeException e) {
+                mCb.onSetPlaybackSpeed(packageName, pid, uid, caller, speed);
+            } catch (RemoteException e) {
                 Slog.e(TAG, "Remote failure in setPlaybackSpeed.", e);
             }
         }
@@ -1225,12 +1225,12 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
                 ControllerCallbackLink caller, boolean asSystemService, int direction) {
             try {
                 if (asSystemService) {
-                    mCb.notifyAdjustVolume(mContext.getPackageName(), Process.myPid(),
+                    mCb.onAdjustVolume(mContext.getPackageName(), Process.myPid(),
                             Process.SYSTEM_UID, null, direction);
                 } else {
-                    mCb.notifyAdjustVolume(packageName, pid, uid, caller, direction);
+                    mCb.onAdjustVolume(packageName, pid, uid, caller, direction);
                 }
-            } catch (RuntimeException e) {
+            } catch (RemoteException e) {
                 Slog.e(TAG, "Remote failure in adjustVolume.", e);
             }
         }
@@ -1238,8 +1238,8 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         public void setVolumeTo(String packageName, int pid, int uid,
                 ControllerCallbackLink caller, int value) {
             try {
-                mCb.notifySetVolumeTo(packageName, pid, uid, caller, value);
-            } catch (RuntimeException e) {
+                mCb.onSetVolumeTo(packageName, pid, uid, caller, value);
+            } catch (RemoteException e) {
                 Slog.e(TAG, "Remote failure in setVolumeTo.", e);
             }
         }
