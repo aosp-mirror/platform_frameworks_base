@@ -517,6 +517,9 @@ public class NetworkMonitor extends StateMachine {
         return NetworkMonitorUtils.isValidationRequired(mNetworkCapabilities);
     }
 
+    private boolean isPrivateDnsValidationRequired() {
+        return NetworkMonitorUtils.isPrivateDnsValidationRequired(mNetworkCapabilities);
+    }
 
     private void notifyNetworkTested(int result, @Nullable String redirectUrl) {
         try {
@@ -604,7 +607,7 @@ public class NetworkMonitor extends StateMachine {
                     return HANDLED;
                 case CMD_PRIVATE_DNS_SETTINGS_CHANGED: {
                     final PrivateDnsConfig cfg = (PrivateDnsConfig) message.obj;
-                    if (!isValidationRequired() || cfg == null || !cfg.inStrictMode()) {
+                    if (!isPrivateDnsValidationRequired() || cfg == null || !cfg.inStrictMode()) {
                         // No DNS resolution required.
                         //
                         // We don't force any validation in opportunistic mode
@@ -840,9 +843,20 @@ public class NetworkMonitor extends StateMachine {
                     //    the network so don't bother validating here.  Furthermore sending HTTP
                     //    packets over the network may be undesirable, for example an extremely
                     //    expensive metered network, or unwanted leaking of the User Agent string.
+                    //
+                    // On networks that need to support private DNS in strict mode (e.g., VPNs, but
+                    // not networks that don't provide Internet access), we still need to perform
+                    // private DNS server resolution.
                     if (!isValidationRequired()) {
-                        validationLog("Network would not satisfy default request, not validating");
-                        transitionTo(mValidatedState);
+                        if (isPrivateDnsValidationRequired()) {
+                            validationLog("Network would not satisfy default request, "
+                                    + "resolving private DNS");
+                            transitionTo(mEvaluatingPrivateDnsState);
+                        } else {
+                            validationLog("Network would not satisfy default request, "
+                                    + "not validating");
+                            transitionTo(mValidatedState);
+                        }
                         return HANDLED;
                     }
                     mEvaluateAttempts++;

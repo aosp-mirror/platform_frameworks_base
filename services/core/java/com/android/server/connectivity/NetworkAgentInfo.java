@@ -483,11 +483,11 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
         // down an explicitly selected network before the user gets a chance to prefer it when
         // a higher-scoring network (e.g., Ethernet) is available.
         if (networkMisc.explicitlySelected && (networkMisc.acceptUnvalidated || pretendValidated)) {
-            return ConnectivityConstants.MAXIMUM_NETWORK_SCORE;
+            return ConnectivityConstants.EXPLICITLY_SELECTED_NETWORK_SCORE;
         }
 
         int score = currentScore;
-        if (!lastValidated && !pretendValidated && !ignoreWifiUnvalidationPenalty()) {
+        if (!lastValidated && !pretendValidated && !ignoreWifiUnvalidationPenalty() && !isVPN()) {
             score -= ConnectivityConstants.UNVALIDATED_SCORE_PENALTY;
         }
         if (score < 0) score = 0;
