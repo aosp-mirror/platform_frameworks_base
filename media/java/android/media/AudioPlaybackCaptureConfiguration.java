@@ -17,6 +17,7 @@
 package android.media;
 
 import android.annotation.NonNull;
+import android.media.AudioAttributes.AttributeUsage;
 import android.media.audiopolicy.AudioMix;
 import android.media.audiopolicy.AudioMixingRule;
 import android.media.projection.MediaProjection;
@@ -41,12 +42,9 @@ import com.android.internal.util.Preconditions;
  * <pre>
  *     MediaProjection mediaProjection;
  *     // Retrieve a audio capable projection from the MediaProjectionManager
- *     AudioAttributes mediaAttr = new AudioAttributes.Builder()
- *         .setUsage(AudioAttributes.USAGE_MEDIA)
- *         .build();
  *     AudioPlaybackCaptureConfiguration config =
  *              new AudioPlaybackCaptureConfiguration.Builder(mediaProjection)
- *         .addMatchingUsage(mediaAttr)
+ *         .addMatchingUsage(AudioAttributes.USAGE_MEDIA)
  *         .build();
  *     AudioRecord record = new AudioRecord.Builder()
  *         .setAudioPlaybackCaptureConfig(config)
@@ -121,14 +119,13 @@ public final class AudioPlaybackCaptureConfiguration {
          * attributes.
          *
          * @throws IllegalStateException if called in conjunction with
-         *     {@link #excludeUsage(AudioAttributes)}.
+         *     {@link #excludeUsage(int)}.
          */
-        public @NonNull Builder addMatchingUsage(@NonNull AudioAttributes audioAttributes) {
-            Preconditions.checkNotNull(audioAttributes);
+        public @NonNull Builder addMatchingUsage(@AttributeUsage int usage) {
             Preconditions.checkState(
                     mUsageMatchType != MATCH_TYPE_EXCLUSIVE, ERROR_MESSAGE_MISMATCHED_RULES);
-            mAudioMixingRuleBuilder
-                    .addRule(audioAttributes, AudioMixingRule.RULE_MATCH_ATTRIBUTE_USAGE);
+            mAudioMixingRuleBuilder.addRule(new AudioAttributes.Builder().setUsage(usage).build(),
+                                            AudioMixingRule.RULE_MATCH_ATTRIBUTE_USAGE);
             mUsageMatchType = MATCH_TYPE_INCLUSIVE;
             return this;
         }
@@ -156,14 +153,15 @@ public final class AudioPlaybackCaptureConfiguration {
          * given attributes.
          *
          * @throws IllegalStateException if called in conjunction with
-         *     {@link #addMatchingUsage(AudioAttributes)}.
+         *     {@link #addMatchingUsage(int)}.
          */
-        public @NonNull Builder excludeUsage(@NonNull AudioAttributes audioAttributes) {
-            Preconditions.checkNotNull(audioAttributes);
+        public @NonNull Builder excludeUsage(@AttributeUsage int usage) {
             Preconditions.checkState(
                     mUsageMatchType != MATCH_TYPE_INCLUSIVE, ERROR_MESSAGE_MISMATCHED_RULES);
-            mAudioMixingRuleBuilder.excludeRule(audioAttributes,
-                    AudioMixingRule.RULE_MATCH_ATTRIBUTE_USAGE);
+            mAudioMixingRuleBuilder.excludeRule(new AudioAttributes.Builder()
+                                                    .setUsage(usage)
+                                                    .build(),
+                                                AudioMixingRule.RULE_MATCH_ATTRIBUTE_USAGE);
             mUsageMatchType = MATCH_TYPE_EXCLUSIVE;
             return this;
         }
