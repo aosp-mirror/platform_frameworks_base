@@ -14,15 +14,9 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License
   -->
-<androidx.car.widget.PagedListView
+<androidx.recyclerview.widget.RecyclerView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/volume_list"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:minWidth="@dimen/volume_dialog_panel_width"
-    android:theme="@style/PagedListViewTheme"
-    app:gutter="none"
-    app:scrollBarEnabled="false"
-    app:listDividerColor="@color/list_divider_color"
-    app:showPagedListViewDivider="true"/>
+    android:minWidth="@dimen/volume_dialog_panel_width"/>

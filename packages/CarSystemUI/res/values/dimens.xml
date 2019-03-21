@@ -26,7 +26,7 @@
     <!-- The amount by which to scale up the status bar icons. -->
     <item name="status_bar_icon_scale_factor" format="float" type="dimen">1.75</item>
 
-    <dimen name="car_primary_icon_size">36dp</dimen>
+    <dimen name="car_primary_icon_size">@*android:dimen/car_primary_icon_size</dimen>
 
     <!-- dimensions for the car user switcher -->
     <dimen name="car_user_switcher_name_text_size">@dimen/car_body1_size</dimen>
@@ -59,4 +59,33 @@
     <dimen name="car_keyline_1">24dp</dimen>
     <dimen name="car_keyline_2">96dp</dimen>
     <dimen name="car_keyline_3">128dp</dimen>
+
+    <dimen name="privacy_chip_icon_max_height">100dp</dimen>
+
+    <!-- Height of icons in Ongoing App Ops dialog. Both App Op icon and application icon -->
+    <dimen name="ongoing_appops_dialog_icon_height">48dp</dimen>
+    <!-- Margin between text lines in Ongoing App Ops dialog -->
+    <dimen name="ongoing_appops_dialog_text_margin">15dp</dimen>
+    <!-- Padding around Ongoing App Ops dialog content -->
+    <dimen name="ongoing_appops_dialog_content_padding">24dp</dimen>
+    <!-- Margins around the Ongoing App Ops chip. In landscape, the side margins are 0 -->
+    <dimen name="ongoing_appops_chip_margin">12dp</dimen>
+    <!-- Start and End padding for Ongoing App Ops chip -->
+    <dimen name="ongoing_appops_chip_side_padding">6dp</dimen>
+    <!-- Padding between background of Ongoing App Ops chip and content -->
+    <dimen name="ongoing_appops_chip_bg_padding">4dp</dimen>
+    <!-- Radius of Ongoing App Ops chip corners -->
+    <dimen name="ongoing_appops_chip_bg_corner_radius">12dp</dimen>
+
+    <!-- Car volume dimens. -->
+    <dimen name="car_volume_item_height">@*android:dimen/car_single_line_list_item_height</dimen>
+    <dimen name="car_volume_item_margin_horizontal">@*android:dimen/car_keyline_1</dimen>
+    <dimen name="car_volume_item_seekbar_margin_vertical">@*android:dimen/car_padding_1</dimen>
+    <dimen name="car_volume_item_seekbar_margin_start">@*android:dimen/car_keyline_3</dimen>
+    <dimen name="car_volume_item_seekbar_margin_end">@*android:dimen/car_padding_4</dimen>
+    <dimen name="car_volume_item_seekbar_padding_vertical">@*android:dimen/car_seekbar_padding</dimen>
+    <dimen name="car_volume_item_divider_height">60dp</dimen>
+    <dimen name="car_volume_item_divider_width">1dp</dimen>
+    <dimen name="car_volume_item_divider_margin_end">@*android:dimen/car_padding_4</dimen>
+    <dimen name="car_volume_item_corner_radius">@*android:dimen/car_radius_3</dimen>
 </resources>

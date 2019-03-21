@@ -14,12 +14,12 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:fitsSystemWindows="true"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:visibility="gone">
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    android:visibility="gone">
 
     <LinearLayout
         android:id="@+id/container"
@@ -27,20 +27,21 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <include layout="@layout/car_status_bar_header"
-            android:theme="@android:style/Theme"
-            android:layout_alignParentTop="true"/>
+        <include
+            layout="@layout/car_status_bar_header"
+            android:layout_alignParentTop="true"
+            android:theme="@android:style/Theme"/>
 
-        <com.android.systemui.statusbar.car.UserGridRecyclerView
-            android:id="@+id/user_grid"
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginTop="@dimen/car_user_switcher_margin_top"
-            android:theme="@style/PagedListTheme"
-            app:verticallyCenterListContent="true"
-            app:showPagedListViewDivider="false"
-            app:gutter="both"
-            app:itemSpacing="@dimen/car_user_switcher_vertical_spacing_between_users"/>
+            android:layout_height="match_parent">
+            <com.android.systemui.statusbar.car.UserGridRecyclerView
+                android:id="@+id/user_grid"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginTop="@dimen/car_user_switcher_margin_top"/>
+        </FrameLayout>
 
     </LinearLayout>
 </FrameLayout>
