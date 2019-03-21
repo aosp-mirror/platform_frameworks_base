@@ -31,7 +31,7 @@
     </style>
 
     <style name="AppEntitiesHeader.Text.Summary"
-           parent="@android:style/TextAppearance.Material.Body1">
+           parent="@*android:style/TextAppearance.DeviceDefault.Body1">
         <item name="android:textColor">?android:attr/textColorSecondary</item>
         <item name="android:textSize">14sp</item>
     </style>
