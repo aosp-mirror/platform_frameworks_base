@@ -228,7 +228,7 @@ public:
 
     virtual void getReaderConfiguration(InputReaderConfiguration* outConfig);
     virtual sp<PointerControllerInterface> obtainPointerController(int32_t deviceId);
-    virtual void notifyInputDevicesChanged(const Vector<InputDeviceInfo>& inputDevices);
+    virtual void notifyInputDevicesChanged(const std::vector<InputDeviceInfo>& inputDevices);
     virtual sp<KeyCharacterMap> getKeyboardLayoutOverlay(const InputDeviceIdentifier& identifier);
     virtual std::string getDeviceAlias(const InputDeviceIdentifier& identifier);
     virtual TouchAffineTransformation getTouchAffineTransformation(JNIEnv *env,
@@ -598,7 +598,7 @@ void NativeInputManager::ensureSpriteControllerLocked() REQUIRES(mLock) {
     }
 }
 
-void NativeInputManager::notifyInputDevicesChanged(const Vector<InputDeviceInfo>& inputDevices) {
+void NativeInputManager::notifyInputDevicesChanged(const std::vector<InputDeviceInfo>& inputDevices) {
     ATRACE_CALL();
     JNIEnv* env = jniEnv();
 
@@ -608,7 +608,7 @@ void NativeInputManager::notifyInputDevicesChanged(const Vector<InputDeviceInfo>
     if (inputDevicesObjArray) {
         bool error = false;
         for (size_t i = 0; i < count; i++) {
-            jobject inputDeviceObj = android_view_InputDevice_create(env, inputDevices.itemAt(i));
+            jobject inputDeviceObj = android_view_InputDevice_create(env, inputDevices[i]);
             if (!inputDeviceObj) {
                 error = true;
                 break;
@@ -775,7 +775,7 @@ void NativeInputManager::getDispatcherConfiguration(InputDispatcherConfiguration
 
 void NativeInputManager::setInputWindows(JNIEnv* env, jobjectArray windowHandleObjArray,
          int32_t displayId) {
-    Vector<sp<InputWindowHandle> > windowHandles;
+    std::vector<sp<InputWindowHandle> > windowHandles;
 
     if (windowHandleObjArray) {
         jsize length = env->GetArrayLength(windowHandleObjArray);
@@ -788,7 +788,7 @@ void NativeInputManager::setInputWindows(JNIEnv* env, jobjectArray windowHandleO
             sp<InputWindowHandle> windowHandle =
                     android_view_InputWindowHandle_getHandle(env, windowHandleObj);
             if (windowHandle != nullptr) {
-                windowHandles.push(windowHandle);
+                windowHandles.push_back(windowHandle);
             }
             env->DeleteLocalRef(windowHandleObj);
         }
@@ -800,7 +800,7 @@ void NativeInputManager::setInputWindows(JNIEnv* env, jobjectArray windowHandleO
     bool newPointerGesturesEnabled = true;
     size_t numWindows = windowHandles.size();
     for (size_t i = 0; i < numWindows; i++) {
-        const sp<InputWindowHandle>& windowHandle = windowHandles.itemAt(i);
+        const sp<InputWindowHandle>& windowHandle = windowHandles[i];
         const InputWindowInfo* windowInfo = windowHandle->getInfo();
         if (windowInfo && windowInfo->hasFocus && (windowInfo->inputFeatures
                 & InputWindowInfo::INPUT_FEATURE_DISABLE_TOUCH_PAD_GESTURES)) {
