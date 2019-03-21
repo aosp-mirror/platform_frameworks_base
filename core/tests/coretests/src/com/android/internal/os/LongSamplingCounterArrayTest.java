@@ -16,14 +16,12 @@
 
 package com.android.internal.os;
 
-import static android.os.BatteryStats.STATS_CURRENT;
 import static android.os.BatteryStats.STATS_SINCE_CHARGED;
-import static android.os.BatteryStats.STATS_SINCE_UNPLUGGED;
 
 import static com.android.internal.os.BatteryStatsImpl.LongSamplingCounterArray;
 import static com.android.internal.os.BatteryStatsImpl.TimeBase;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertArrayEquals;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -41,8 +39,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-import java.util.Arrays;
-
 /**
  * Test class for {@link BatteryStatsImpl.LongSamplingCounterArray}.
  *
@@ -57,14 +53,15 @@ import java.util.Arrays;
  *     ${ANDROID_PRODUCT_OUT}/data/app/FrameworksCoreTests/FrameworksCoreTests.apk
  * Run: adb shell am instrument -e class com.android.internal.os.LongSamplingCounterArrayTest -w \
  *     com.android.frameworks.coretests/androidx.test.runner.AndroidJUnitRunner
+ *
+ * or just do
+ * atest frameworks/base/core/tests/coretests/src/com/android/internal/os/LongSamplingCounterArrayTest.java
  */
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class LongSamplingCounterArrayTest {
 
     private static final long[] COUNTS = {1111, 2222, 3333, 4444};
-    private static final long[] LOADED_COUNTS = {5555, 6666, 7777, 8888};
-    private static final long[] UNPLUGGED_COUNTS = {44444, 55555, 66666, 77777};
     private static final long[] ZEROES = {0, 0, 0, 0};
 
     @Mock private TimeBase mTimeBase;
@@ -80,75 +77,54 @@ public class LongSamplingCounterArrayTest {
     @Test
     public void testReadWriteParcel() {
         final Parcel parcel = Parcel.obtain();
-        initializeCounterArrayWithDefaultValues();
+        updateCounts(COUNTS);
         LongSamplingCounterArray.writeToParcel(parcel, mCounterArray);
         parcel.setDataPosition(0);
 
         // Now clear counterArray and verify values are read from parcel correctly.
-        updateCounts(null, null, null);
+        updateCounts(null);
         mCounterArray = LongSamplingCounterArray.readFromParcel(parcel, mTimeBase);
-        assertArrayEquals(COUNTS, mCounterArray.mCounts, "Unexpected counts");
-        assertArrayEquals(LOADED_COUNTS, mCounterArray.mLoadedCounts, "Unexpected loadedCounts");
-        assertArrayEquals(UNPLUGGED_COUNTS, mCounterArray.mUnpluggedCounts,
-                "Unexpected unpluggedCounts");
+        assertArrayEquals(COUNTS, mCounterArray.mCounts);
         parcel.recycle();
     }
 
     @Test
     public void testReadWriteSummaryParcel() {
         final Parcel parcel = Parcel.obtain();
-        initializeCounterArrayWithDefaultValues();
+        updateCounts(COUNTS);
         LongSamplingCounterArray.writeSummaryToParcelLocked(parcel, mCounterArray);
         parcel.setDataPosition(0);
 
         // Now clear counterArray and verify values are read from parcel correctly.
-        updateCounts(null, null, null);
+        updateCounts(null);
         mCounterArray = LongSamplingCounterArray.readSummaryFromParcelLocked(parcel, mTimeBase);
-        assertArrayEquals(COUNTS, mCounterArray.mCounts, "Unexpected counts");
-        assertArrayEquals(COUNTS, mCounterArray.mLoadedCounts, "Unexpected loadedCounts");
-        assertArrayEquals(COUNTS, mCounterArray.mUnpluggedCounts, "Unexpected unpluggedCounts");
+        assertArrayEquals(COUNTS, mCounterArray.mCounts);
         parcel.recycle();
     }
 
     @Test
     public void testOnTimeStarted() {
-        initializeCounterArrayWithDefaultValues();
+        updateCounts(COUNTS);
         mCounterArray.onTimeStarted(0, 0, 0);
-        assertArrayEquals(COUNTS, mCounterArray.mCounts, "Unexpected counts");
-        assertArrayEquals(LOADED_COUNTS, mCounterArray.mLoadedCounts, "Unexpected loadedCounts");
-        assertArrayEquals(COUNTS, mCounterArray.mUnpluggedCounts,
-                "Unexpected unpluggedCounts");
+        assertArrayEquals(COUNTS, mCounterArray.mCounts);
     }
 
     @Test
     public void testOnTimeStopped() {
-        initializeCounterArrayWithDefaultValues();
+        updateCounts(COUNTS);
         mCounterArray.onTimeStopped(0, 0, 0);
-        assertArrayEquals(COUNTS, mCounterArray.mCounts, "Unexpected counts");
-        assertArrayEquals(LOADED_COUNTS, mCounterArray.mLoadedCounts, "Unexpected loadedCounts");
-        assertArrayEquals(UNPLUGGED_COUNTS, mCounterArray.mUnpluggedCounts,
-                "Unexpected unpluggedCounts");
+        assertArrayEquals(COUNTS, mCounterArray.mCounts);
     }
 
     @Test
     public void testGetCountsLocked() {
-        initializeCounterArrayWithDefaultValues();
+        updateCounts(COUNTS);
 
         when(mTimeBase.isRunning()).thenReturn(false);
-        assertArrayEquals(COUNTS, mCounterArray.getCountsLocked(STATS_SINCE_CHARGED),
-                "Unexpected values");
-        assertArrayEquals(subtract(COUNTS, LOADED_COUNTS),
-                mCounterArray.getCountsLocked(STATS_CURRENT), "Unexpected values");
-        assertArrayEquals(subtract(COUNTS, UNPLUGGED_COUNTS),
-                mCounterArray.getCountsLocked(STATS_SINCE_UNPLUGGED), "Unexpected values");
+        assertArrayEquals(COUNTS, mCounterArray.getCountsLocked(STATS_SINCE_CHARGED));
 
         when(mTimeBase.isRunning()).thenReturn(true);
-        assertArrayEquals(COUNTS, mCounterArray.getCountsLocked(STATS_SINCE_CHARGED),
-                "Unexpected values");
-        assertArrayEquals(subtract(COUNTS, LOADED_COUNTS),
-                mCounterArray.getCountsLocked(STATS_CURRENT), "Unexpected values");
-        assertArrayEquals(subtract(COUNTS, UNPLUGGED_COUNTS),
-                mCounterArray.getCountsLocked(STATS_SINCE_UNPLUGGED), "Unexpected values");
+        assertArrayEquals(COUNTS, mCounterArray.getCountsLocked(STATS_SINCE_CHARGED));
     }
 
     private long[] subtract(long[] val, long[] toSubtract) {
@@ -163,64 +139,45 @@ public class LongSamplingCounterArrayTest {
 
     @Test
     public void testAddCountLocked() {
-        updateCounts(null, null, null);
+        updateCounts(null);
         final long[] deltas = {123, 234, 345, 456};
         when(mTimeBase.isRunning()).thenReturn(true);
         mCounterArray.addCountLocked(deltas);
-        assertArrayEquals(deltas, mCounterArray.mCounts, "Unexpected counts");
-        assertArrayEquals(null, mCounterArray.mLoadedCounts, "Unexpected loadedCounts");
-        assertArrayEquals(null, mCounterArray.mUnpluggedCounts, "Unexpected unpluggedCounts");
+        assertArrayEquals(deltas, mCounterArray.mCounts);
 
-        updateCounts(null, null, null);
+        updateCounts(null);
         mCounterArray.addCountLocked(deltas, false);
-        assertArrayEquals(null, mCounterArray.mCounts, "Unexpected counts");
-        assertArrayEquals(null, mCounterArray.mLoadedCounts, "Unexpected loadedCounts");
-        assertArrayEquals(null, mCounterArray.mUnpluggedCounts, "Unexpected unpluggedCounts");
+        assertArrayEquals(null, mCounterArray.mCounts);
         mCounterArray.addCountLocked(deltas, true);
-        assertArrayEquals(deltas, mCounterArray.mCounts, "Unexpected counts");
-        assertArrayEquals(null, mCounterArray.mLoadedCounts, "Unexpected loadedCounts");
-        assertArrayEquals(null, mCounterArray.mUnpluggedCounts, "Unexpected unpluggedCounts");
+        assertArrayEquals(deltas, mCounterArray.mCounts);
 
-        initializeCounterArrayWithDefaultValues();
+        updateCounts(COUNTS);
         final long[] newCounts = new long[deltas.length];
         for (int i = 0; i < deltas.length; ++i) {
             newCounts[i] = COUNTS[i] + deltas[i];
         }
         mCounterArray.addCountLocked(deltas);
-        assertArrayEquals(newCounts, mCounterArray.mCounts, "Unexpected counts");
-        assertArrayEquals(LOADED_COUNTS, mCounterArray.mLoadedCounts, "Unexpected loadedCounts");
-        assertArrayEquals(UNPLUGGED_COUNTS, mCounterArray.mUnpluggedCounts,
-                "Unexpected unpluggedCounts");
+        assertArrayEquals(newCounts, mCounterArray.mCounts);
 
-        initializeCounterArrayWithDefaultValues();
+        updateCounts(COUNTS);
         mCounterArray.addCountLocked(deltas, false);
-        assertArrayEquals(COUNTS, mCounterArray.mCounts, "Unexpected counts");
-        assertArrayEquals(LOADED_COUNTS, mCounterArray.mLoadedCounts, "Unexpected loadedCounts");
-        assertArrayEquals(UNPLUGGED_COUNTS, mCounterArray.mUnpluggedCounts,
-                "Unexpected unpluggedCounts");
+        assertArrayEquals(COUNTS, mCounterArray.mCounts);
         mCounterArray.addCountLocked(deltas, true);
-        assertArrayEquals(newCounts, mCounterArray.mCounts, "Unexpected counts");
-        assertArrayEquals(LOADED_COUNTS, mCounterArray.mLoadedCounts, "Unexpected loadedCounts");
-        assertArrayEquals(UNPLUGGED_COUNTS, mCounterArray.mUnpluggedCounts,
-                "Unexpected unpluggedCounts");
+        assertArrayEquals(newCounts, mCounterArray.mCounts);
     }
 
     @Test
     public void testReset() {
-        initializeCounterArrayWithDefaultValues();
+        updateCounts(COUNTS);
         // Test with detachIfReset=false
         mCounterArray.reset(false /* detachIfReset */);
-        assertArrayEquals(ZEROES, mCounterArray.mCounts, "Unexpected counts");
-        assertArrayEquals(ZEROES, mCounterArray.mLoadedCounts, "Unexpected loadedCounts");
-        assertArrayEquals(ZEROES, mCounterArray.mUnpluggedCounts, "Unexpected unpluggedCounts");
+        assertArrayEquals(ZEROES, mCounterArray.mCounts);
         verifyZeroInteractions(mTimeBase);
 
-        initializeCounterArrayWithDefaultValues();
+        updateCounts(COUNTS);
         // Test with detachIfReset=true
         mCounterArray.reset(true /* detachIfReset */);
-        assertArrayEquals(ZEROES, mCounterArray.mCounts, "Unexpected counts");
-        assertArrayEquals(ZEROES, mCounterArray.mLoadedCounts, "Unexpected loadedCounts");
-        assertArrayEquals(ZEROES, mCounterArray.mUnpluggedCounts, "Unexpected unpluggedCounts");
+        assertArrayEquals(ZEROES, mCounterArray.mCounts);
         verify(mTimeBase).remove(mCounterArray);
         verifyNoMoreInteractions(mTimeBase);
     }
@@ -232,18 +189,7 @@ public class LongSamplingCounterArrayTest {
         verifyNoMoreInteractions(mTimeBase);
     }
 
-    private void initializeCounterArrayWithDefaultValues() {
-        updateCounts(COUNTS, LOADED_COUNTS, UNPLUGGED_COUNTS);
-    }
-
-    private void assertArrayEquals(long[] expected, long[] actual, String msg) {
-        assertTrue(msg + ", expected: " + Arrays.toString(expected)
-                + ", actual: " + Arrays.toString(actual), Arrays.equals(expected, actual));
-    }
-
-    private void updateCounts(long[] counts, long[] loadedCounts, long[] unpluggedCounts) {
+    private void updateCounts(long[] counts) {
         mCounterArray.mCounts = counts == null ? null : counts.clone();
-        mCounterArray.mLoadedCounts = loadedCounts == null ? null : loadedCounts.clone();
-        mCounterArray.mUnpluggedCounts = unpluggedCounts == null ? null : unpluggedCounts.clone();
     }
 }

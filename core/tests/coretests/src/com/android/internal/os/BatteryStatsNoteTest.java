@@ -16,7 +16,6 @@
 
 package com.android.internal.os;
 
-import static android.os.BatteryStats.STATS_CURRENT;
 import static android.os.BatteryStats.STATS_SINCE_CHARGED;
 import static android.os.BatteryStats.WAKE_TYPE_PARTIAL;
 
@@ -388,7 +387,7 @@ public class BatteryStatsNoteTest extends TestCase {
         bi.noteWakupAlarmLocked("com.foo.bar", UID, null, "tag");
 
         Uid.Pkg pkg = bi.getPackageStatsLocked(UID, "com.foo.bar");
-        assertEquals(1, pkg.getWakeupAlarmStats().get("tag").getCountLocked(STATS_CURRENT));
+        assertEquals(1, pkg.getWakeupAlarmStats().get("tag").getCountLocked(STATS_SINCE_CHARGED));
         assertEquals(1, pkg.getWakeupAlarmStats().size());
     }
 

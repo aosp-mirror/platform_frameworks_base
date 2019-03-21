@@ -51,7 +51,6 @@ import org.mockito.MockitoAnnotations;
 public class LongSamplingCounterTest {
 
     private static final long COUNT = 1111;
-    private static final long CURRENT_COUNT = 5555;
 
     @Mock
     private TimeBase mTimeBase;
@@ -67,116 +66,87 @@ public class LongSamplingCounterTest {
     @Test
     public void testReadWriteParcel() {
         final Parcel parcel = Parcel.obtain();
-        updateCounts(COUNT, CURRENT_COUNT);
+        mCounter.addCountLocked(COUNT, true);
+        assertEquals(COUNT, getCount());
         mCounter.writeToParcel(parcel);
         parcel.setDataPosition(0);
 
-        // Now clear counterArray and verify values are read from parcel correctly.
-        updateCounts(0, 0);
+        // Now change count but verify values are read from parcel correctly.
+        mCounter.addCountLocked(7 * COUNT, true);
+        assertEquals(8 * COUNT, getCount());
 
         mCounter = new LongSamplingCounter(mTimeBase, parcel);
-        assertEquals(COUNT, mCounter.mCount);
-        assertEquals(CURRENT_COUNT, mCounter.mCurrentCount);
+        assertEquals(COUNT, getCount());
         parcel.recycle();
     }
 
     @Test
     public void testReadWriteSummaryParcel() {
         final Parcel parcel = Parcel.obtain();
-        updateCounts(COUNT, CURRENT_COUNT);
+        mCounter.addCountLocked(COUNT, true);
+        assertEquals(COUNT, getCount());
         mCounter.writeSummaryFromParcelLocked(parcel);
         parcel.setDataPosition(0);
 
-        // Now clear counterArray and verify values are read from parcel correctly.
-        updateCounts(0, 0);
+        // Now change count but verify values are read from parcel correctly.
+        mCounter.addCountLocked(7 * COUNT, true);
+        assertEquals(8 * COUNT, getCount());
 
         mCounter.readSummaryFromParcelLocked(parcel);
-        assertEquals(COUNT, mCounter.mCount);
+        assertEquals(COUNT, getCount());
         parcel.recycle();
     }
 
     @Test
     public void testOnTimeStarted() {
-        updateCounts(COUNT, CURRENT_COUNT);
+        mCounter.addCountLocked(COUNT, true);
+        assertEquals(COUNT, getCount());
         mCounter.onTimeStarted(0, 0, 0);
-        assertEquals(COUNT, mCounter.mCount);
-        assertEquals(COUNT, mCounter.mUnpluggedCount);
+        assertEquals(COUNT, getCount());
     }
 
     @Test
     public void testOnTimeStopped() {
-        updateCounts(COUNT, CURRENT_COUNT);
+        mCounter.addCountLocked(COUNT, true);
+        assertEquals(COUNT, getCount());
         mCounter.onTimeStopped(0, 0, 0);
-        assertEquals(COUNT, mCounter.mCount);
+        assertEquals(COUNT, getCount());
     }
 
     @Test
     public void testAddCountLocked() {
-        updateCounts(0, 0);
-        assertEquals(0, mCounter.getCountLocked(0));
+        assertEquals(0, getCount());
         when(mTimeBase.isRunning()).thenReturn(true);
         mCounter.addCountLocked(111);
         assertEquals(111, mCounter.getCountLocked(STATS_SINCE_CHARGED));
-        assertEquals(111, mCounter.mCurrentCount);
         mCounter.addCountLocked(222);
         assertEquals(333, mCounter.getCountLocked(STATS_SINCE_CHARGED));
-        assertEquals(333, mCounter.mCurrentCount);
 
         when(mTimeBase.isRunning()).thenReturn(false);
         mCounter.addCountLocked(456);
         assertEquals(333, mCounter.getCountLocked(STATS_SINCE_CHARGED));
-        assertEquals(789, mCounter.mCurrentCount);
 
         mCounter.addCountLocked(444, true);
         assertEquals(777, mCounter.getCountLocked(STATS_SINCE_CHARGED));
-        assertEquals(1233, mCounter.mCurrentCount);
         mCounter.addCountLocked(567, false);
         assertEquals(777, mCounter.getCountLocked(STATS_SINCE_CHARGED));
-        assertEquals(1800, mCounter.mCurrentCount);
     }
 
-    @Test
-    public void testUpdate() {
-        updateCounts(0, 0);
-        assertEquals(0, mCounter.getCountLocked(0));
-        when(mTimeBase.isRunning()).thenReturn(true);
-        mCounter.update(111);
-        assertEquals(111, mCounter.getCountLocked(STATS_SINCE_CHARGED));
-        assertEquals(111, mCounter.mCurrentCount);
-        mCounter.update(333);
-        assertEquals(333, mCounter.getCountLocked(STATS_SINCE_CHARGED));
-        assertEquals(333, mCounter.mCurrentCount);
-
-        when(mTimeBase.isRunning()).thenReturn(false);
-        mCounter.update(789);
-        assertEquals(333, mCounter.getCountLocked(STATS_SINCE_CHARGED));
-        assertEquals(789, mCounter.mCurrentCount);
-        mCounter.update(100);
-        assertEquals(333, mCounter.getCountLocked(STATS_SINCE_CHARGED));
-        assertEquals(100, mCounter.mCurrentCount);
-
-        mCounter.update(544, true);
-        assertEquals(777, mCounter.getCountLocked(STATS_SINCE_CHARGED));
-        assertEquals(544, mCounter.mCurrentCount);
-        mCounter.update(1544, false);
-        assertEquals(777, mCounter.getCountLocked(STATS_SINCE_CHARGED));
-        assertEquals(1544, mCounter.mCurrentCount);
-    }
 
     @Test
     public void testReset() {
-        updateCounts(COUNT, CURRENT_COUNT);
+        mCounter.addCountLocked(COUNT, true);
+        assertEquals(COUNT, getCount());
         // Test with detachIfReset=false
         mCounter.reset(false /* detachIfReset */);
-        assertEquals(0, mCounter.mCount);
-        assertEquals(CURRENT_COUNT, mCounter.mCurrentCount);
+        assertEquals(0, getCount());
         verifyZeroInteractions(mTimeBase);
 
-        updateCounts(COUNT, CURRENT_COUNT);
+        mCounter.addCountLocked(COUNT, true);
+        assertEquals(COUNT, getCount());
         // Test with detachIfReset=true
         mCounter.reset(true /* detachIfReset */);
-        assertEquals(0, mCounter.mCount);
-        assertEquals(CURRENT_COUNT, mCounter.mCurrentCount);
+        assertEquals(0, getCount());
         verify(mTimeBase).remove(mCounter);
         verifyNoMoreInteractions(mTimeBase);
     }
@@ -188,8 +158,7 @@ public class LongSamplingCounterTest {
         verifyNoMoreInteractions(mTimeBase);
     }
 
-    private void updateCounts(long total, long current) {
-        mCounter.mCount = total;
-        mCounter.mCurrentCount = current;
+    private long getCount() {
+        return mCounter.getCountLocked(STATS_SINCE_CHARGED);
     }
 }
