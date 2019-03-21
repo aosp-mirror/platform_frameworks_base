@@ -221,12 +221,12 @@ public class DynamicSystemInstallationService extends Service
             return;
         }
 
-        String url = intent.getStringExtra(DynamicSystemClient.KEY_SYSTEM_URL);
+        String url = intent.getDataString();
         mSystemSize = intent.getLongExtra(DynamicSystemClient.KEY_SYSTEM_SIZE, 0);
         mUserdataSize = intent.getLongExtra(DynamicSystemClient.KEY_USERDATA_SIZE, 0);
 
         mInstallTask = new InstallationAsyncTask(
-                url, mSystemSize, mUserdataSize, mDynSystem, this);
+                url, mSystemSize, mUserdataSize, this, mDynSystem, this);
 
         mInstallTask.execute();
 
@@ -410,7 +410,7 @@ public class DynamicSystemInstallationService extends Service
     }
 
     private boolean verifyRequest(Intent intent) {
-        String url = intent.getStringExtra(DynamicSystemClient.KEY_SYSTEM_URL);
+        String url = intent.getDataString();
 
         return VerificationActivity.isVerified(url);
     }

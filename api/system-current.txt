@@ -5642,8 +5642,8 @@ package android.os.image {
     method @RequiresPermission("android.permission.MANAGE_DYNAMIC_SYSTEM") public void bind();
     method public void setOnStatusChangedListener(@NonNull java.util.concurrent.Executor, @NonNull android.os.image.DynamicSystemClient.OnStatusChangedListener);
     method public void setOnStatusChangedListener(@NonNull android.os.image.DynamicSystemClient.OnStatusChangedListener);
-    method @RequiresPermission("android.permission.MANAGE_DYNAMIC_SYSTEM") public void start(@NonNull String, long);
-    method @RequiresPermission("android.permission.MANAGE_DYNAMIC_SYSTEM") public void start(@NonNull String, long, long);
+    method @RequiresPermission("android.permission.MANAGE_DYNAMIC_SYSTEM") public void start(@NonNull android.net.Uri, long);
+    method @RequiresPermission("android.permission.MANAGE_DYNAMIC_SYSTEM") public void start(@NonNull android.net.Uri, long, long);
     method @RequiresPermission("android.permission.MANAGE_DYNAMIC_SYSTEM") public void unbind();
     field public static final int CAUSE_ERROR_EXCEPTION = 6; // 0x6
     field public static final int CAUSE_ERROR_INVALID_URL = 4; // 0x4
