@@ -1824,12 +1824,7 @@ public class LocationManagerService extends ILocationManager.Stub {
     @GuardedBy("mLock")
     private void removeProviderLocked(LocationProvider provider) {
         if (mProviders.remove(provider)) {
-            long identity = Binder.clearCallingIdentity();
-            try {
-                provider.onUseableChangedLocked(false);
-            } finally {
-                Binder.restoreCallingIdentity(identity);
-            }
+            provider.onUseableChangedLocked(false);
         }
     }
 
@@ -2108,7 +2103,9 @@ public class LocationManagerService extends ILocationManager.Stub {
         WorkSource worksource = new WorkSource();
         ProviderRequest providerRequest = new ProviderRequest();
 
-        if (records != null && !records.isEmpty()) {
+        // if provider is not active, it should not respond to requests
+
+        if (mProviders.contains(provider) && records != null && !records.isEmpty()) {
             long backgroundThrottleInterval;
 
             long identity = Binder.clearCallingIdentity();
