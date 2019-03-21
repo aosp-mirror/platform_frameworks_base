@@ -17,6 +17,7 @@ package android.telephony.data;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.hardware.radio.V1_4.ApnTypes;
@@ -1620,7 +1621,7 @@ public class ApnSetting implements Parcelable {
          * @param mvnoMatchData the MVNO match data for the APN
          * @hide
          */
-        public Builder setMvnoMatchData(String mvnoMatchData) {
+        public Builder setMvnoMatchData(@Nullable String mvnoMatchData) {
             this.mMvnoMatchData = mvnoMatchData;
             return this;
         }
@@ -1642,7 +1643,7 @@ public class ApnSetting implements Parcelable {
          * @param entryName the entry name to set for the APN
          */
         @NonNull
-        public Builder setEntryName(String entryName) {
+        public Builder setEntryName(@Nullable String entryName) {
             this.mEntryName = entryName;
             return this;
         }
@@ -1653,7 +1654,7 @@ public class ApnSetting implements Parcelable {
          * @param apnName the name to set for the APN
          */
         @NonNull
-        public Builder setApnName(String apnName) {
+        public Builder setApnName(@Nullable String apnName) {
             this.mApnName = apnName;
             return this;
         }
@@ -1684,7 +1685,7 @@ public class ApnSetting implements Parcelable {
          * @param proxy the proxy address to set for the APN
          */
         @NonNull
-        public Builder setProxyAddress(String proxy) {
+        public Builder setProxyAddress(@Nullable String proxy) {
             this.mProxyAddress = proxy;
             return this;
         }
@@ -1706,7 +1707,7 @@ public class ApnSetting implements Parcelable {
          * @param mmsc the MMSC Uri to set for the APN
          */
         @NonNull
-        public Builder setMmsc(Uri mmsc) {
+        public Builder setMmsc(@Nullable Uri mmsc) {
             this.mMmsc = mmsc;
             return this;
         }
@@ -1738,7 +1739,7 @@ public class ApnSetting implements Parcelable {
          * @param mmsProxy the MMS proxy address to set for the APN
          */
         @NonNull
-        public Builder setMmsProxyAddress(String mmsProxy) {
+        public Builder setMmsProxyAddress(@Nullable String mmsProxy) {
             this.mMmsProxyAddress = mmsProxy;
             return this;
         }
@@ -1760,7 +1761,7 @@ public class ApnSetting implements Parcelable {
          * @param user the APN username to set for the APN
          */
         @NonNull
-        public Builder setUser(String user) {
+        public Builder setUser(@Nullable String user) {
             this.mUser = user;
             return this;
         }
@@ -1772,7 +1773,7 @@ public class ApnSetting implements Parcelable {
          * @param password the APN password to set for the APN
          */
         @NonNull
-        public Builder setPassword(String password) {
+        public Builder setPassword(@Nullable String password) {
             this.mPassword = password;
             return this;
         }
@@ -1813,7 +1814,7 @@ public class ApnSetting implements Parcelable {
          * @param operatorNumeric the numeric operator ID to set for this entry
          */
         @NonNull
-        public Builder setOperatorNumeric(String operatorNumeric) {
+        public Builder setOperatorNumeric(@Nullable String operatorNumeric) {
             this.mOperatorNumeric = operatorNumeric;
             return this;
         }
