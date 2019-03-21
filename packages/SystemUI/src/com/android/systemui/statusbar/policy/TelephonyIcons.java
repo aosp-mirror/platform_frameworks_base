@@ -245,6 +245,22 @@ class TelephonyIcons {
             0,
             false);
 
+    static final MobileIconGroup NOT_DEFAULT_DATA = new MobileIconGroup(
+            "NotDefaultData",
+            null,
+            null,
+            AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH,
+            0, 0,
+            0,
+            0,
+            AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH[0],
+            R.string.not_default_data_content_description,
+            0,
+            false);
+
+    // When adding a new MobileIconGround, check if the dataContentDescription has to be filtered
+    // in QSCarrier#hasValidTypeContentDescription
+
     /** Mapping icon name(lower case) to the icon object. */
     static final Map<String, MobileIconGroup> ICON_NAME_TO_ICON;
     static {
@@ -265,6 +281,7 @@ class TelephonyIcons {
         ICON_NAME_TO_ICON.put("5g", NR_5G);
         ICON_NAME_TO_ICON.put("5g_plus", NR_5G_PLUS);
         ICON_NAME_TO_ICON.put("datadisable", DATA_DISABLED);
+        ICON_NAME_TO_ICON.put("notdefaultdata", NOT_DEFAULT_DATA);
     }
 }
 

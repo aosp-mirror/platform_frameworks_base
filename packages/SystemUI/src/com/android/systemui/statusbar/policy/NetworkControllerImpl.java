@@ -987,6 +987,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
                             datatype.equals("lte") ? TelephonyIcons.LTE :
                             datatype.equals("lte+") ? TelephonyIcons.LTE_PLUS :
                             datatype.equals("dis") ? TelephonyIcons.DATA_DISABLED :
+                            datatype.equals("not") ? TelephonyIcons.NOT_DEFAULT_DATA :
                             TelephonyIcons.UNKNOWN;
                 }
                 if (args.containsKey("roam")) {
