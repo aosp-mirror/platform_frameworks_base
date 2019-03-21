@@ -1488,13 +1488,18 @@ public class AudioManager {
      * it does not indicate whether the resources necessary for the offloaded playback are
      * available at that instant.
      * @param format the audio format (codec, sample rate, channels) being checked.
+     * @param attributes the {@link AudioAttributes} to be used for playback
      * @return true if the given audio format can be offloaded.
      */
-    public static boolean isOffloadedPlaybackSupported(@NonNull AudioFormat format) {
+    public static boolean isOffloadedPlaybackSupported(@NonNull AudioFormat format,
+            @NonNull AudioAttributes attributes) {
         if (format == null) {
-            throw new IllegalArgumentException("Illegal null AudioFormat");
+            throw new NullPointerException("Illegal null AudioFormat");
         }
-        return AudioSystem.isOffloadSupported(format);
+        if (attributes == null) {
+            throw new NullPointerException("Illegal null AudioAttributes");
+        }
+        return AudioSystem.isOffloadSupported(format, attributes);
     }
 
     //====================================================================
