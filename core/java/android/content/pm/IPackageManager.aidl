@@ -740,6 +740,8 @@ interface IPackageManager {
 
     String getSystemTextClassifierPackageName();
 
+    String getAttentionServicePackageName();
+
     String getWellbeingPackageName();
 
     String getAppPredictionServicePackageName();
