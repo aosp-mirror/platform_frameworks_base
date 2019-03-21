@@ -19,6 +19,7 @@ package com.android.server.job;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER;
 
+import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.app.Activity;
 import android.app.ActivityManager;
@@ -2496,8 +2497,13 @@ public class JobSchedulerService extends com.android.server.SystemService
 
         // The expensive check: validate that the defined package+service is
         // still present & viable.
+        return isComponentUsable(job);
+    }
+
+    private boolean isComponentUsable(@NonNull JobStatus job) {
         final ServiceInfo service;
         try {
+            // TODO: cache result until we're notified that something in the package changed.
             service = AppGlobals.getPackageManager().getServiceInfo(
                     job.getServiceComponent(), PackageManager.MATCH_DEBUG_TRIAGED_MISSING,
                     job.getUserId());
@@ -2507,7 +2513,7 @@ public class JobSchedulerService extends com.android.server.SystemService
 
         if (service == null) {
             if (DEBUG) {
-                Slog.v(TAG, "isReadyToBeExecutedLocked: " + job.toShortString()
+                Slog.v(TAG, "isComponentUsable: " + job.toShortString()
                         + " component not present");
             }
             return false;
@@ -2515,10 +2521,8 @@ public class JobSchedulerService extends com.android.server.SystemService
 
         // Everything else checked out so far, so this is the final yes/no check
         final boolean appIsBad = mActivityManagerInternal.isAppBad(service.applicationInfo);
-        if (DEBUG) {
-            if (appIsBad) {
-                Slog.i(TAG, "App is bad for " + job.toShortString() + " so not runnable");
-            }
+        if (DEBUG && appIsBad) {
+            Slog.i(TAG, "App is bad for " + job.toShortString() + " so not runnable");
         }
         return !appIsBad;
     }
@@ -2552,30 +2556,18 @@ public class JobSchedulerService extends com.android.server.SystemService
             return false;
         }
 
+        if (isJobThermalConstrainedLocked(job)) {
+            return false;
+        }
+
         // Job pending/active doesn't affect the readiness of a job.
 
-        // Skipping the hearbeat check as this will only come into play when using the rolling
+        // Skipping the heartbeat check as this will only come into play when using the rolling
         // window quota management system.
 
-        // The expensive check last: validate that the defined package+service is
+        // The expensive check: validate that the defined package+service is
         // still present & viable.
-        final boolean componentPresent;
-        try {
-            // TODO: cache result until we're notified that something in the package changed.
-            componentPresent = (AppGlobals.getPackageManager().getServiceInfo(
-                    job.getServiceComponent(), PackageManager.MATCH_DEBUG_TRIAGED_MISSING,
-                    job.getUserId()) != null);
-        } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
-        }
-
-        if (DEBUG) {
-            Slog.v(TAG, "areComponentsInPlaceLocked: " + job.toShortString()
-                    + " componentPresent=" + componentPresent);
-        }
-
-        // Everything else checked out so far, so this is the final yes/no check
-        return componentPresent;
+        return isComponentUsable(job);
     }
 
     /**
