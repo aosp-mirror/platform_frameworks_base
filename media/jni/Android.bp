@@ -93,7 +93,7 @@ cc_library_shared {
 
     shared_libs: [
         "liblog",
-        "libmedia_omx",
+        "libgui",
         "libnativewindow",
         "libui",
         "libutils",
