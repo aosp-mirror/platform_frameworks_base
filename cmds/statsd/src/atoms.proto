@@ -40,6 +40,7 @@ import "frameworks/base/core/proto/android/server/job/enums.proto";
 import "frameworks/base/core/proto/android/server/location/enums.proto";
 import "frameworks/base/core/proto/android/service/procstats_enum.proto";
 import "frameworks/base/core/proto/android/service/usb.proto";
+import "frameworks/base/core/proto/android/stats/connectivity/network_stack.proto";
 import "frameworks/base/core/proto/android/stats/enums.proto";
 import "frameworks/base/core/proto/android/stats/docsui/docsui_enums.proto";
 import "frameworks/base/core/proto/android/stats/devicepolicy/device_policy.proto";
@@ -252,6 +253,7 @@ message Atom {
         StyleUIChanged style_ui_changed = 179;
         PrivacyIndicatorsInteracted privacy_indicators_interacted = 180;
         AppInstallOnExternalStorageReported app_install_on_external_storage_reported = 181;
+        NetworkStackReported network_stack_reported = 182;
     }
 
     // Pulled events will start at field 10000.
@@ -5848,4 +5850,15 @@ message GpuStatsAppInfo {
 message SystemIonHeapSize {
     // Size of the system ion heap in bytes.
     optional int64 size_in_bytes = 1;
+}
+
+/**
+ * Push network stack events.
+ *
+ * Log from:
+ *     frameworks/base/packages/NetworkStack/
+ */
+message NetworkStackReported {
+    optional int32 eventId = 1;
+    optional android.stats.connectivity.NetworkStackEventData network_stack_event = 2 [(log_mode) = MODE_BYTES];
 }
