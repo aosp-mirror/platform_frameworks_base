@@ -25,6 +25,7 @@ import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityThread;
+import android.media.MediaRecorder.Source;
 import android.media.audiopolicy.AudioMix;
 import android.media.audiopolicy.AudioPolicy;
 import android.media.projection.MediaProjection;
@@ -539,7 +540,7 @@ public class AudioRecord implements AudioRouting, MicrophoneDirection,
          * @return the same Builder instance.
          * @throws IllegalArgumentException
          */
-        public Builder setAudioSource(int source) throws IllegalArgumentException {
+        public Builder setAudioSource(@Source int source) throws IllegalArgumentException {
             Preconditions.checkState(
                     mAudioPlaybackCaptureConfiguration == null,
                     ERROR_MESSAGE_SOURCE_MISMATCH);
