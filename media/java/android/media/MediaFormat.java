@@ -413,7 +413,18 @@ public final class MediaFormat {
     */
     public static final String KEY_INTRA_REFRESH_PERIOD = "intra-refresh-period";
 
-   /**
+    /**
+     * An optional key describing whether encoders prepend headers to sync frames (e.g.
+     * SPS and PPS to IDR frames for H.264). This is an optional parameter that applies only
+     * to video encoders. A video encoder may not support this feature; check the output
+     * format to verify that this feature was enabled.
+     *
+     * The value is an integer, with 1 indicating to prepend headers to every sync frames,
+     * or 0 otherwise. The default value is 0.
+     */
+    public static final String KEY_PREPEND_HEADER_TO_SYNC_FRAMES = "prepend-sps-pps-to-idr-frames";
+
+    /**
      * A key describing the temporal layering schema.  This is an optional parameter
      * that applies only to video encoders.  Use {@link MediaCodec#getOutputFormat}
      * after {@link MediaCodec#configure configure} to query if the encoder supports
