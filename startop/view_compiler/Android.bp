@@ -22,7 +22,6 @@ cc_defaults {
     ],
     shared_libs: [
         "libbase",
-        "libz",
         "slicer",
     ],
     static_libs: [
