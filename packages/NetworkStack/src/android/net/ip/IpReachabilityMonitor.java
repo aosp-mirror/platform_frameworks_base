@@ -316,8 +316,8 @@ public class IpReachabilityMonitor {
         }
 
         final boolean lostProvisioning =
-                (mLinkProperties.isIPv4Provisioned() && !whatIfLp.isIPv4Provisioned())
-                || (mLinkProperties.isIPv6Provisioned() && !whatIfLp.isIPv6Provisioned());
+                (mLinkProperties.isIpv4Provisioned() && !whatIfLp.isIpv4Provisioned())
+                || (mLinkProperties.isIpv6Provisioned() && !whatIfLp.isIpv6Provisioned());
 
         if (lostProvisioning) {
             final String logMsg = "FAILURE: LOST_PROVISIONING, " + event;

@@ -81,14 +81,14 @@ public class LinkAddressTest {
         assertEquals(25, address.getPrefixLength());
         assertEquals(0, address.getFlags());
         assertEquals(RT_SCOPE_UNIVERSE, address.getScope());
-        assertTrue(address.isIPv4());
+        assertTrue(address.isIpv4());
 
         address = new LinkAddress(V6_ADDRESS, 127);
         assertEquals(V6_ADDRESS, address.getAddress());
         assertEquals(127, address.getPrefixLength());
         assertEquals(0, address.getFlags());
         assertEquals(RT_SCOPE_UNIVERSE, address.getScope());
-        assertTrue(address.isIPv6());
+        assertTrue(address.isIpv6());
 
         // Nonsensical flags/scopes or combinations thereof are acceptable.
         address = new LinkAddress(V6 + "/64", IFA_F_DEPRECATED | IFA_F_PERMANENT, RT_SCOPE_LINK);
@@ -96,14 +96,14 @@ public class LinkAddressTest {
         assertEquals(64, address.getPrefixLength());
         assertEquals(IFA_F_DEPRECATED | IFA_F_PERMANENT, address.getFlags());
         assertEquals(RT_SCOPE_LINK, address.getScope());
-        assertTrue(address.isIPv6());
+        assertTrue(address.isIpv6());
 
         address = new LinkAddress(V4 + "/23", 123, 456);
         assertEquals(V4_ADDRESS, address.getAddress());
         assertEquals(23, address.getPrefixLength());
         assertEquals(123, address.getFlags());
         assertEquals(456, address.getScope());
-        assertTrue(address.isIPv4());
+        assertTrue(address.isIpv4());
 
         // InterfaceAddress doesn't have a constructor. Fetch some from an interface.
         List<InterfaceAddress> addrs = NetworkInterface.getByName("lo").getInterfaceAddresses();

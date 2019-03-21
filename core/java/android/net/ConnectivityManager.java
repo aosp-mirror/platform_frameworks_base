@@ -4088,7 +4088,7 @@ public class ConnectivityManager {
     @SystemApi
     @TestApi
     @RequiresPermission(NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK)
-    public void startCaptivePortalApp(Network network, Bundle appExtras) {
+    public void startCaptivePortalApp(@NonNull Network network, @NonNull Bundle appExtras) {
         try {
             mService.startCaptivePortalAppInternal(network, appExtras);
         } catch (RemoteException e) {
