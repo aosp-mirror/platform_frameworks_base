@@ -5653,7 +5653,9 @@ public abstract class PackageManager {
      * @deprecated This function no longer does anything. It is the platform's
      * responsibility to assign preferred activities and this cannot be modified
      * directly. To determine the activities resolved by the platform, use
-     * {@link #resolveActivity} or {@link #queryIntentActivities}.
+     * {@link #resolveActivity} or {@link #queryIntentActivities}. To configure
+     * an app to be responsible for a particular role and to check current role
+     * holders, see {@link android.app.role.RoleManager}.
      */
     @Deprecated
     public abstract void addPackageToPreferred(String packageName);
@@ -5662,7 +5664,9 @@ public abstract class PackageManager {
      * @deprecated This function no longer does anything. It is the platform's
      * responsibility to assign preferred activities and this cannot be modified
      * directly. To determine the activities resolved by the platform, use
-     * {@link #resolveActivity} or {@link #queryIntentActivities}.
+     * {@link #resolveActivity} or {@link #queryIntentActivities}. To configure
+     * an app to be responsible for a particular role and to check current role
+     * holders, see {@link android.app.role.RoleManager}.
      */
     @Deprecated
     public abstract void removePackageFromPreferred(String packageName);
@@ -5679,7 +5683,9 @@ public abstract class PackageManager {
      * @deprecated This function no longer does anything. It is the platform's
      * responsibility to assign preferred activities and this cannot be modified
      * directly. To determine the activities resolved by the platform, use
-     * {@link #resolveActivity} or {@link #queryIntentActivities}.
+     * {@link #resolveActivity} or {@link #queryIntentActivities}. To configure
+     * an app to be responsible for a particular role and to check current role
+     * holders, see {@link android.app.role.RoleManager}.
      */
     @Deprecated
     public abstract List<PackageInfo> getPreferredPackages(@PackageInfoFlags int flags);
@@ -5702,7 +5708,9 @@ public abstract class PackageManager {
      * @deprecated This function no longer does anything. It is the platform's
      * responsibility to assign preferred activities and this cannot be modified
      * directly. To determine the activities resolved by the platform, use
-     * {@link #resolveActivity} or {@link #queryIntentActivities}.
+     * {@link #resolveActivity} or {@link #queryIntentActivities}. To configure
+     * an app to be responsible for a particular role and to check current role
+     * holders, see {@link android.app.role.RoleManager}.
      */
     @Deprecated
     public abstract void addPreferredActivity(IntentFilter filter, int match,
@@ -5717,7 +5725,9 @@ public abstract class PackageManager {
      * @deprecated This function no longer does anything. It is the platform's
      * responsibility to assign preferred activities and this cannot be modified
      * directly. To determine the activities resolved by the platform, use
-     * {@link #resolveActivity} or {@link #queryIntentActivities}.
+     * {@link #resolveActivity} or {@link #queryIntentActivities}. To configure
+     * an app to be responsible for a particular role and to check current role
+     * holders, see {@link android.app.role.RoleManager}.
      */
     @Deprecated
     @UnsupportedAppUsage
@@ -5747,7 +5757,9 @@ public abstract class PackageManager {
      * @deprecated This function no longer does anything. It is the platform's
      * responsibility to assign preferred activities and this cannot be modified
      * directly. To determine the activities resolved by the platform, use
-     * {@link #resolveActivity} or {@link #queryIntentActivities}.
+     * {@link #resolveActivity} or {@link #queryIntentActivities}. To configure
+     * an app to be responsible for a particular role and to check current role
+     * holders, see {@link android.app.role.RoleManager}.
      */
     @Deprecated
     @UnsupportedAppUsage
@@ -5773,7 +5785,9 @@ public abstract class PackageManager {
      * @deprecated This function no longer does anything. It is the platform's
      * responsibility to assign preferred activities and this cannot be modified
      * directly. To determine the activities resolved by the platform, use
-     * {@link #resolveActivity} or {@link #queryIntentActivities}.
+     * {@link #resolveActivity} or {@link #queryIntentActivities}. To configure
+     * an app to be responsible for a particular role and to check current role
+     * holders, see {@link android.app.role.RoleManager}.
      */
     @Deprecated
     @SystemApi
@@ -5788,7 +5802,9 @@ public abstract class PackageManager {
      * @deprecated This function no longer does anything. It is the platform's
      * responsibility to assign preferred activities and this cannot be modified
      * directly. To determine the activities resolved by the platform, use
-     * {@link #resolveActivity} or {@link #queryIntentActivities}.
+     * {@link #resolveActivity} or {@link #queryIntentActivities}. To configure
+     * an app to be responsible for a particular role and to check current role
+     * holders, see {@link android.app.role.RoleManager}.
      */
     @Deprecated
     @UnsupportedAppUsage
@@ -5809,7 +5825,9 @@ public abstract class PackageManager {
      * @deprecated This function no longer does anything. It is the platform's
      * responsibility to assign preferred activities and this cannot be modified
      * directly. To determine the activities resolved by the platform, use
-     * {@link #resolveActivity} or {@link #queryIntentActivities}.
+     * {@link #resolveActivity} or {@link #queryIntentActivities}. To configure
+     * an app to be responsible for a particular role and to check current role
+     * holders, see {@link android.app.role.RoleManager}.
      */
     @Deprecated
     public abstract void clearPackagePreferredActivities(String packageName);
@@ -5834,7 +5852,9 @@ public abstract class PackageManager {
      * @deprecated This function no longer does anything. It is the platform's
      * responsibility to assign preferred activities and this cannot be modified
      * directly. To determine the activities resolved by the platform, use
-     * {@link #resolveActivity} or {@link #queryIntentActivities}.
+     * {@link #resolveActivity} or {@link #queryIntentActivities}. To configure
+     * an app to be responsible for a particular role and to check current role
+     * holders, see {@link android.app.role.RoleManager}.
      */
     @Deprecated
     public abstract int getPreferredActivities(@NonNull List<IntentFilter> outFilters,
