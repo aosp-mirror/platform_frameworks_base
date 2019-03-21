@@ -1190,8 +1190,8 @@ package android.metrics {
 package android.net {
 
   public class CaptivePortal implements android.os.Parcelable {
-    ctor public CaptivePortal(android.os.IBinder);
-    method public void logEvent(int, String);
+    ctor public CaptivePortal(@NonNull android.os.IBinder);
+    method public void logEvent(int, @NonNull String);
     method public void useNetwork();
     field public static final int APP_RETURN_DISMISSED = 0; // 0x0
     field public static final int APP_RETURN_UNWANTED = 1; // 0x1
@@ -1276,18 +1276,18 @@ package android.net {
 
   public final class StaticIpConfiguration implements android.os.Parcelable {
     ctor public StaticIpConfiguration();
-    ctor public StaticIpConfiguration(android.net.StaticIpConfiguration);
-    method public void addDnsServer(java.net.InetAddress);
+    ctor public StaticIpConfiguration(@Nullable android.net.StaticIpConfiguration);
+    method public void addDnsServer(@NonNull java.net.InetAddress);
     method public void clear();
     method public int describeContents();
-    method public java.util.List<java.net.InetAddress> getDnsServers();
-    method public String getDomains();
-    method public java.net.InetAddress getGateway();
-    method public android.net.LinkAddress getIpAddress();
-    method public java.util.List<android.net.RouteInfo> getRoutes(String);
-    method public void setDomains(String);
-    method public void setGateway(java.net.InetAddress);
-    method public void setIpAddress(android.net.LinkAddress);
+    method @NonNull public java.util.List<java.net.InetAddress> getDnsServers();
+    method @Nullable public String getDomains();
+    method @Nullable public java.net.InetAddress getGateway();
+    method @Nullable public android.net.LinkAddress getIpAddress();
+    method @NonNull public java.util.List<android.net.RouteInfo> getRoutes(String);
+    method public void setDomains(@Nullable String);
+    method public void setGateway(@Nullable java.net.InetAddress);
+    method public void setIpAddress(@Nullable android.net.LinkAddress);
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.net.StaticIpConfiguration> CREATOR;
   }
@@ -1340,28 +1340,28 @@ package android.net.captiveportal {
 
   public final class CaptivePortalProbeResult {
     ctor public CaptivePortalProbeResult(int);
-    ctor public CaptivePortalProbeResult(int, String, String);
-    ctor public CaptivePortalProbeResult(int, String, String, android.net.captiveportal.CaptivePortalProbeSpec);
+    ctor public CaptivePortalProbeResult(int, @Nullable String, @Nullable String);
+    ctor public CaptivePortalProbeResult(int, @Nullable String, @Nullable String, @Nullable android.net.captiveportal.CaptivePortalProbeSpec);
     method public boolean isFailed();
     method public boolean isPartialConnectivity();
     method public boolean isPortal();
     method public boolean isSuccessful();
-    field public static final android.net.captiveportal.CaptivePortalProbeResult FAILED;
+    field @NonNull public static final android.net.captiveportal.CaptivePortalProbeResult FAILED;
     field public static final int FAILED_CODE = 599; // 0x257
     field public static final android.net.captiveportal.CaptivePortalProbeResult PARTIAL;
     field public static final int PORTAL_CODE = 302; // 0x12e
-    field public static final android.net.captiveportal.CaptivePortalProbeResult SUCCESS;
+    field @NonNull public static final android.net.captiveportal.CaptivePortalProbeResult SUCCESS;
     field public static final int SUCCESS_CODE = 204; // 0xcc
-    field public final String detectUrl;
+    field @Nullable public final String detectUrl;
     field @Nullable public final android.net.captiveportal.CaptivePortalProbeSpec probeSpec;
-    field public final String redirectUrl;
+    field @Nullable public final String redirectUrl;
   }
 
   public abstract class CaptivePortalProbeSpec {
-    method public String getEncodedSpec();
-    method public abstract android.net.captiveportal.CaptivePortalProbeResult getResult(int, @Nullable String);
-    method public java.net.URL getUrl();
-    method public static java.util.Collection<android.net.captiveportal.CaptivePortalProbeSpec> parseCaptivePortalProbeSpecs(String);
+    method @NonNull public String getEncodedSpec();
+    method @NonNull public abstract android.net.captiveportal.CaptivePortalProbeResult getResult(int, @Nullable String);
+    method @NonNull public java.net.URL getUrl();
+    method @NonNull public static java.util.Collection<android.net.captiveportal.CaptivePortalProbeSpec> parseCaptivePortalProbeSpecs(@NonNull String);
     method @Nullable public static android.net.captiveportal.CaptivePortalProbeSpec parseSpecOrNull(@Nullable String);
   }
 
@@ -1372,43 +1372,43 @@ package android.net.metrics {
   public final class ApfProgramEvent implements android.net.metrics.IpConnectivityLog.Event {
   }
 
-  public static class ApfProgramEvent.Builder {
+  public static final class ApfProgramEvent.Builder {
     ctor public ApfProgramEvent.Builder();
-    method public android.net.metrics.ApfProgramEvent build();
-    method public android.net.metrics.ApfProgramEvent.Builder setActualLifetime(long);
-    method public android.net.metrics.ApfProgramEvent.Builder setCurrentRas(int);
-    method public android.net.metrics.ApfProgramEvent.Builder setFilteredRas(int);
-    method public android.net.metrics.ApfProgramEvent.Builder setFlags(boolean, boolean);
-    method public android.net.metrics.ApfProgramEvent.Builder setLifetime(long);
-    method public android.net.metrics.ApfProgramEvent.Builder setProgramLength(int);
+    method @NonNull public android.net.metrics.ApfProgramEvent build();
+    method @NonNull public android.net.metrics.ApfProgramEvent.Builder setActualLifetime(long);
+    method @NonNull public android.net.metrics.ApfProgramEvent.Builder setCurrentRas(int);
+    method @NonNull public android.net.metrics.ApfProgramEvent.Builder setFilteredRas(int);
+    method @NonNull public android.net.metrics.ApfProgramEvent.Builder setFlags(boolean, boolean);
+    method @NonNull public android.net.metrics.ApfProgramEvent.Builder setLifetime(long);
+    method @NonNull public android.net.metrics.ApfProgramEvent.Builder setProgramLength(int);
   }
 
   public final class ApfStats implements android.net.metrics.IpConnectivityLog.Event {
   }
 
-  public static class ApfStats.Builder {
+  public static final class ApfStats.Builder {
     ctor public ApfStats.Builder();
-    method public android.net.metrics.ApfStats build();
-    method public android.net.metrics.ApfStats.Builder setDroppedRas(int);
-    method public android.net.metrics.ApfStats.Builder setDurationMs(long);
-    method public android.net.metrics.ApfStats.Builder setMatchingRas(int);
-    method public android.net.metrics.ApfStats.Builder setMaxProgramSize(int);
-    method public android.net.metrics.ApfStats.Builder setParseErrors(int);
-    method public android.net.metrics.ApfStats.Builder setProgramUpdates(int);
-    method public android.net.metrics.ApfStats.Builder setProgramUpdatesAll(int);
-    method public android.net.metrics.ApfStats.Builder setProgramUpdatesAllowingMulticast(int);
-    method public android.net.metrics.ApfStats.Builder setReceivedRas(int);
-    method public android.net.metrics.ApfStats.Builder setZeroLifetimeRas(int);
+    method @NonNull public android.net.metrics.ApfStats build();
+    method @NonNull public android.net.metrics.ApfStats.Builder setDroppedRas(int);
+    method @NonNull public android.net.metrics.ApfStats.Builder setDurationMs(long);
+    method @NonNull public android.net.metrics.ApfStats.Builder setMatchingRas(int);
+    method @NonNull public android.net.metrics.ApfStats.Builder setMaxProgramSize(int);
+    method @NonNull public android.net.metrics.ApfStats.Builder setParseErrors(int);
+    method @NonNull public android.net.metrics.ApfStats.Builder setProgramUpdates(int);
+    method @NonNull public android.net.metrics.ApfStats.Builder setProgramUpdatesAll(int);
+    method @NonNull public android.net.metrics.ApfStats.Builder setProgramUpdatesAllowingMulticast(int);
+    method @NonNull public android.net.metrics.ApfStats.Builder setReceivedRas(int);
+    method @NonNull public android.net.metrics.ApfStats.Builder setZeroLifetimeRas(int);
   }
 
   public final class DhcpClientEvent implements android.net.metrics.IpConnectivityLog.Event {
   }
 
-  public static class DhcpClientEvent.Builder {
+  public static final class DhcpClientEvent.Builder {
     ctor public DhcpClientEvent.Builder();
-    method public android.net.metrics.DhcpClientEvent build();
-    method public android.net.metrics.DhcpClientEvent.Builder setDurationMs(int);
-    method public android.net.metrics.DhcpClientEvent.Builder setMsg(String);
+    method @NonNull public android.net.metrics.DhcpClientEvent build();
+    method @NonNull public android.net.metrics.DhcpClientEvent.Builder setDurationMs(int);
+    method @NonNull public android.net.metrics.DhcpClientEvent.Builder setMsg(String);
   }
 
   public final class DhcpErrorEvent implements android.net.metrics.IpConnectivityLog.Event {
@@ -1439,11 +1439,11 @@ package android.net.metrics {
 
   public class IpConnectivityLog {
     ctor public IpConnectivityLog();
-    method public boolean log(long, android.net.metrics.IpConnectivityLog.Event);
-    method public boolean log(String, android.net.metrics.IpConnectivityLog.Event);
-    method public boolean log(android.net.Network, int[], android.net.metrics.IpConnectivityLog.Event);
-    method public boolean log(int, int[], android.net.metrics.IpConnectivityLog.Event);
-    method public boolean log(android.net.metrics.IpConnectivityLog.Event);
+    method public boolean log(long, @NonNull android.net.metrics.IpConnectivityLog.Event);
+    method public boolean log(@NonNull String, @NonNull android.net.metrics.IpConnectivityLog.Event);
+    method public boolean log(@NonNull android.net.Network, @NonNull int[], @NonNull android.net.metrics.IpConnectivityLog.Event);
+    method public boolean log(int, @NonNull int[], @NonNull android.net.metrics.IpConnectivityLog.Event);
+    method public boolean log(@NonNull android.net.metrics.IpConnectivityLog.Event);
   }
 
   public static interface IpConnectivityLog.Event extends android.os.Parcelable {
@@ -1514,12 +1514,12 @@ package android.net.metrics {
     field public static final int PROBE_PRIVDNS = 5; // 0x5
   }
 
-  public static class ValidationProbeEvent.Builder {
+  public static final class ValidationProbeEvent.Builder {
     ctor public ValidationProbeEvent.Builder();
-    method public android.net.metrics.ValidationProbeEvent build();
-    method public android.net.metrics.ValidationProbeEvent.Builder setDurationMs(long);
-    method public android.net.metrics.ValidationProbeEvent.Builder setProbeType(int, boolean);
-    method public android.net.metrics.ValidationProbeEvent.Builder setReturnCode(int);
+    method @NonNull public android.net.metrics.ValidationProbeEvent build();
+    method @NonNull public android.net.metrics.ValidationProbeEvent.Builder setDurationMs(long);
+    method @NonNull public android.net.metrics.ValidationProbeEvent.Builder setProbeType(int, boolean);
+    method @NonNull public android.net.metrics.ValidationProbeEvent.Builder setReturnCode(int);
   }
 
 }
