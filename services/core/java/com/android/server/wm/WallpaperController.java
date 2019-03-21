@@ -34,6 +34,8 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.H.WALLPAPER_DRAW_PENDING_TIMEOUT;
 
 import android.graphics.Bitmap;
+import android.graphics.ColorSpace;
+import android.graphics.GraphicBuffer;
 import android.graphics.Rect;
 import android.hardware.HardwareBuffer;
 import android.os.Bundle;
@@ -736,16 +738,17 @@ class WallpaperController {
         final Rect bounds = wallpaperWindowState.getBounds();
         bounds.offsetTo(0, 0);
 
-        SurfaceControl.ScreenshotGraphicBuffer wallpaperBuffer = SurfaceControl.captureLayers(
+        GraphicBuffer wallpaperBuffer = SurfaceControl.captureLayers(
                 wallpaperWindowState.getSurfaceControl().getHandle(), bounds, 1 /* frameScale */);
 
         if (wallpaperBuffer == null) {
             Slog.w(TAG_WM, "Failed to screenshot wallpaper");
             return null;
         }
-        return Bitmap.wrapHardwareBuffer(
-                HardwareBuffer.createFromGraphicBuffer(wallpaperBuffer.getGraphicBuffer()),
-                wallpaperBuffer.getColorSpace());
+        // TODO(b/116112787) Now that hardware bitmap creation can take color space, we
+        // should continue to fix screenshot.
+        return Bitmap.wrapHardwareBuffer(HardwareBuffer.createFromGraphicBuffer(wallpaperBuffer),
+                                         ColorSpace.get(ColorSpace.Named.SRGB));
     }
 
     private WindowState getTopVisibleWallpaper() {

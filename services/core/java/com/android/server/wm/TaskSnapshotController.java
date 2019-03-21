@@ -279,11 +279,8 @@ class TaskSnapshotController {
             Slog.w(TAG_WM, "Failed to take screenshot. No main window for " + task);
             return null;
         }
-        final SurfaceControl.ScreenshotGraphicBuffer screenshotBuffer =
-                SurfaceControl.captureLayers(
-                        task.getSurfaceControl().getHandle(), mTmpRect, scaleFraction);
-        final GraphicBuffer buffer = screenshotBuffer != null ? screenshotBuffer.getGraphicBuffer()
-                : null;
+        final GraphicBuffer buffer = SurfaceControl.captureLayers(
+                task.getSurfaceControl().getHandle(), mTmpRect, scaleFraction);
         if (buffer == null || buffer.getWidth() <= 1 || buffer.getHeight() <= 1) {
             if (DEBUG_SCREENSHOT) {
                 Slog.w(TAG_WM, "Failed to take screenshot for " + task);
